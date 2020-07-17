@@ -73,6 +73,7 @@ protected:
 
 private:
   static Napi::FunctionReference constructor;
+  const bool bypass_quotes_;
   yijinjing::data::location_ptr ledger_location_;
   wingchun::broker::SilentAutoClient broker_client_;
   wingchun::book::Bookkeeper bookkeeper_;
@@ -86,6 +87,12 @@ private:
   serialize::JsUpdateState update_ledger;
   serialize::JsPublishState publish;
   serialize::JsResetCache reset_cache;
+
+  static constexpr auto bypass = [](yijinjing::practice::apprentice *app, bool bypass_quotes) {
+    return rx::filter([=](const event_ptr &event) {
+      return not(app->get_location(event->source())->category == longfist::enums::category::MD and bypass_quotes);
+    });
+  };
 
   void RestoreState(const yijinjing::data::location_ptr &config_location, int64_t from, int64_t to);
 

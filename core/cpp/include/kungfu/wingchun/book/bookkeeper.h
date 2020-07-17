@@ -17,7 +17,7 @@ typedef std::unordered_map<longfist::enums::InstrumentType, AccountingMethod_ptr
 
 class Bookkeeper {
 public:
-  explicit Bookkeeper(yijinjing::practice::apprentice &app, broker::Client &broker_client, bool bypass_quotes = false);
+  explicit Bookkeeper(yijinjing::practice::apprentice &app, broker::Client &broker_client);
 
   virtual ~Bookkeeper() = default;
 
@@ -45,7 +45,6 @@ public:
 private:
   yijinjing::practice::apprentice &app_;
   broker::Client &broker_client_;
-  const bool bypass_quotes_;
 
   bool positions_guarded_ = false;
   CommissionMap commissions_ = {};

@@ -40,7 +40,7 @@ inline bool GetBypassQuotes(const Napi::CallbackInfo &info) {
 Watcher::Watcher(const Napi::CallbackInfo &info)
     : ObjectWrap(info), apprentice(GetWatcherLocation(info), true),
       ledger_location_(location::make_shared(mode::LIVE, category::SYSTEM, "service", "ledger", get_locator())),
-      broker_client_(*this), bookkeeper_(*this, broker_client_, GetBypassQuotes(info)),
+      bypass_quotes_(GetBypassQuotes(info)), broker_client_(*this), bookkeeper_(*this, broker_client_),
       history_ref_(Napi::ObjectReference::New(History::NewInstance({info[0]}).ToObject(), 1)),
       config_ref_(Napi::ObjectReference::New(ConfigStore::NewInstance({info[0]}).ToObject(), 1)),
       commission_ref_(Napi::ObjectReference::New(CommissionStore::NewInstance({info[0]}).ToObject(), 1)),
@@ -212,8 +212,8 @@ void Watcher::on_start() {
   bookkeeper_.on_start(events_);
   bookkeeper_.guard_positions();
 
-  events_ | $$(feed_state_data(event, update_ledger));
-  events_ | is(Quote::tag) | $$(UpdateBook(event, event->data<Quote>()));
+  events_ | bypass(this, bypass_quotes_) | $$(feed_state_data(event, update_ledger));
+  events_ | bypass(this, bypass_quotes_) | is(Quote::tag) | $$(UpdateBook(event, event->data<Quote>()));
   events_ | is(OrderInput::tag) | $$(UpdateBook(event, event->data<OrderInput>()));
   events_ | is(Order::tag) | $$(UpdateBook(event, event->data<Order>()));
   events_ | is(Trade::tag) | $$(UpdateBook(event, event->data<Trade>()));

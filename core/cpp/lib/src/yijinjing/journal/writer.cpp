@@ -38,7 +38,7 @@ frame_ptr writer::open_frame(int64_t trigger_time, int32_t msg_type, uint32_t da
   assert(sizeof(frame_header) + data_length + sizeof(frame_header) <= journal_.page_->get_page_size());
   int64_t start_time = time::now_in_nano();
   while (not writer_mtx_.try_lock()) {
-    if (time::now_in_nano() - start_time > time_unit::NANOSECONDS_PER_MILLISECOND) {
+    if (time::now_in_nano() - start_time > 30 * time_unit::NANOSECONDS_PER_SECOND) {
       throw journal_error("Can not lock writer for " + journal_.location_->uname);
     }
   }
