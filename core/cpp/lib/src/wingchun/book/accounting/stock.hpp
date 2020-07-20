@@ -70,7 +70,8 @@ public:
     }
     auto &position = book->get_position_for(order);
     auto status_ok = order.status != OrderStatus::Submitted and order.status != OrderStatus::Pending and
-                     order.status != OrderStatus::PartialFilledActive and order.status != OrderStatus::Lost;
+                     order.status != OrderStatus::PartialFilledActive and order.status != OrderStatus::Lost and
+                     order.status != OrderStatus::Unknown;
     if (status_ok and order.volume_left > 0) {
       if (order.side == Side::Sell) {
         position.frozen_total -= order.volume_left;
