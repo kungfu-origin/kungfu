@@ -295,12 +295,10 @@ void bind(pybind11::module &&m) {
 
   py::class_<strategy::Context, std::shared_ptr<strategy::Context>>(m, "Context")
       .def_property_readonly("trading_day", &strategy::Context::get_trading_day)
-      .def_property_readonly("bookkeeper", &strategy::Context::get_bookkeeper, py::return_value_policy::reference)
       .def("now", &strategy::Context::now)
       .def("add_timer", &strategy::Context::add_timer)
       .def("add_time_interval", &strategy::Context::add_time_interval)
       .def("add_account", &strategy::Context::add_account)
-      .def("list_accounts", &strategy::Context::list_accounts)
       .def("get_account_cash_limit", &strategy::Context::get_account_cash_limit)
       .def("subscribe", &strategy::Context::subscribe)
       .def("subscribe_all", &strategy::Context::subscribe_all)
@@ -312,6 +310,10 @@ void bind(pybind11::module &&m) {
       .def("hold_positions", &strategy::Context::hold_positions)
       .def("is_book_held", &strategy::Context::is_book_held)
       .def("is_positions_mirrored", &strategy::Context::is_positions_mirrored);
+
+  py::class_<strategy::RuntimeContext, strategy::Context, strategy::RuntimeContext_ptr>(m, "RuntimeContext")
+      .def_property_readonly("bookkeeper", &strategy::RuntimeContext::get_bookkeeper,
+                             py::return_value_policy::reference);
 
   py::class_<strategy::Strategy, PyStrategy, strategy::Strategy_ptr>(m, "Strategy")
       .def(py::init())

@@ -18,9 +18,9 @@ Runner::Runner(locator_ptr locator, const std::string &group, const std::string 
       ledger_location_(mode::LIVE, category::SYSTEM, "service", "ledger", get_locator()),
       positions_set_(m == mode::BACKTEST), started_(m == mode::BACKTEST) {}
 
-Context_ptr Runner::get_context() const { return context_; }
+RuntimeContext_ptr Runner::get_context() const { return context_; }
 
-Context_ptr Runner::make_context() { return std::make_shared<Context>(*this, events_); }
+RuntimeContext_ptr Runner::make_context() { return std::make_shared<RuntimeContext>(*this, events_); }
 
 void Runner::add_strategy(const Strategy_ptr &strategy) { strategies_.push_back(strategy); }
 

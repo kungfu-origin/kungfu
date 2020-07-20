@@ -15,7 +15,7 @@
 namespace kungfu::wingchun::strategy {
 class Context : public std::enable_shared_from_this<Context> {
 public:
-  explicit Context(yijinjing::practice::apprentice &app, const rx::connectable_observable<event_ptr> &events);
+  Context() = default;
 
   virtual ~Context() = default;
 
@@ -23,21 +23,21 @@ public:
    * Get current time in nano seconds.
    * @return current time in nano seconds
    */
-  virtual int64_t now() const;
+  virtual int64_t now() const = 0;
 
   /**
    * Add one shot timer callback.
    * @param nanotime when to call in nano seconds
    * @param callback callback function
    */
-  virtual void add_timer(int64_t nanotime, const std::function<void(event_ptr)> &callback);
+  virtual void add_timer(int64_t nanotime, const std::function<void(event_ptr)> &callback) = 0;
 
   /**
    * Add periodically callback.
    * @param duration duration in nano seconds
    * @param callback callback function
    */
-  virtual void add_time_interval(int64_t duration, const std::function<void(event_ptr)> &callback);
+  virtual void add_time_interval(int64_t duration, const std::function<void(event_ptr)> &callback) = 0;
 
   /**
    * Add account for strategy.
@@ -45,7 +45,7 @@ public:
    * @param account TD account ID
    * @param cash_limit cash limit
    */
-  virtual void add_account(const std::string &source, const std::string &account, double cash_limit);
+  virtual void add_account(const std::string &source, const std::string &account, double cash_limit) = 0;
 
   /**
    * Subscribe market data.
@@ -54,13 +54,13 @@ public:
    * @param exchange_ids exchange IDs
    */
   virtual void subscribe(const std::string &source, const std::vector<std::string> &instrument_ids,
-                         const std::string &exchange_ids);
+                         const std::string &exchange_ids) = 0;
 
   /**
    * Subscribe all from given MD
    * @param source MD group
    */
-  virtual void subscribe_all(const std::string &source);
+  virtual void subscribe_all(const std::string &source) = 0;
 
   /**
    * Insert order.
@@ -77,14 +77,27 @@ public:
   virtual uint64_t insert_order(const std::string &instrument_id, const std::string &exchange_id,
                                 const std::string &account, double limit_price, int64_t volume,
                                 longfist::enums::PriceType type, longfist::enums::Side side,
-                                longfist::enums::Offset offset, longfist::enums::HedgeFlag hedge_flag);
+                                longfist::enums::Offset offset, longfist::enums::HedgeFlag hedge_flag) = 0;
 
   /**
    * Cancel order.
    * @param order_id order ID
    * @return order action ID
    */
-  virtual uint64_t cancel_order(uint64_t order_id);
+  virtual uint64_t cancel_order(uint64_t order_id) = 0;
+
+  /**
+   * Get cash limit for given account
+   * @param account account ID
+   * @return cash limit
+   */
+  virtual double get_account_cash_limit(const std::string &account) const = 0;
+
+  /**
+   * Get current trading day.
+   * @return current trading day
+   */
+  virtual int64_t get_trading_day() const = 0;
 
   /**
    * Tells whether the book is held.
@@ -113,65 +126,9 @@ public:
    */
   void hold_positions();
 
-  /**
-   * Get subscribed MD locations.
-   * @return subscribed MD locations
-   */
-  const yijinjing::data::location_map &list_md() const;
-
-  /**
-   * Get enrolled TD locations.
-   * @return enrolled TD locations
-   */
-  const yijinjing::data::location_map &list_accounts() const;
-
-  /**
-   * Get cash limit for given account
-   * @param account account ID
-   * @return cash limit
-   */
-  double get_account_cash_limit(const std::string &account) const;
-
-  /**
-   * Get current trading day.
-   * @return current trading day
-   */
-  int64_t get_trading_day() const;
-
-  /**
-   * Get broker client.
-   * @return broker client reference
-   */
-  broker::Client &get_broker_client();
-
-  /**
-   * Get bookkeeper.
-   * @return bookkeeper reference
-   */
-  book::Bookkeeper &get_bookkeeper();
-
-protected:
-  yijinjing::practice::apprentice &app_;
-  const rx::connectable_observable<event_ptr> &events_;
-
-  virtual void on_start();
-
-  uint32_t lookup_account_location_id(const std::string &account) const;
-
-  const yijinjing::data::location_ptr &find_md_location(const std::string &source);
-
 private:
   bool book_held_ = false;
   bool positions_mirrored_ = true;
-  broker::ManualClient broker_client_;
-  book::Bookkeeper bookkeeper_;
-  yijinjing::data::location_map md_locations_ = {};
-  yijinjing::data::location_map td_locations_ = {};
-  std::unordered_map<uint32_t, uint32_t> account_location_ids_ = {};
-  std::unordered_map<uint32_t, double> account_cash_limits_ = {};
-  std::unordered_map<std::string, yijinjing::data::location_ptr> market_data_ = {};
-
-  friend void enable(Context &context) { context.on_start(); }
 };
 } // namespace kungfu::wingchun::strategy
 

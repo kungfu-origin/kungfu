@@ -5,7 +5,7 @@
 #ifndef WINGCHUN_RUNNER_H
 #define WINGCHUN_RUNNER_H
 
-#include <kungfu/wingchun/strategy/context.h>
+#include <kungfu/wingchun/strategy/runtime.h>
 #include <kungfu/wingchun/strategy/strategy.h>
 #include <kungfu/yijinjing/practice/apprentice.h>
 
@@ -17,7 +17,7 @@ public:
 
   ~Runner() override = default;
 
-  Context_ptr get_context() const;
+  RuntimeContext_ptr get_context() const;
 
   void add_strategy(const Strategy_ptr &strategy);
 
@@ -32,7 +32,7 @@ protected:
 
   void on_active() override;
 
-  virtual Context_ptr make_context();
+  virtual RuntimeContext_ptr make_context();
 
   virtual void pre_start();
 
@@ -49,20 +49,22 @@ private:
   bool positions_set_;
   bool started_;
   std::vector<Strategy_ptr> strategies_ = {};
-  Context_ptr context_;
+  RuntimeContext_ptr context_;
 
   void prepare(const event_ptr &event);
 
   template <typename OnMethod = void (Strategy::*)(Context_ptr &)> void invoke(OnMethod method) {
+    auto context = std::dynamic_pointer_cast<Context>(context_);
     for (const auto &strategy : strategies_) {
-      (*strategy.*method)(context_);
+      (*strategy.*method)(context);
     }
   }
 
   template <typename TradingData, typename OnMethod = void (Strategy::*)(Context_ptr &, const TradingData &)>
   void invoke(OnMethod method, const TradingData &data) {
+    auto context = std::dynamic_pointer_cast<Context>(context_);
     for (const auto &strategy : strategies_) {
-      (*strategy.*method)(context_, data);
+      (*strategy.*method)(context, data);
     }
   }
 };
