@@ -96,7 +96,7 @@ public:
     }
     if (input.offset == Offset::Close or input.offset == Offset::CloseYesterday) {
       position.frozen_total += input.volume;
-      if (position.yesterday_volume - position.frozen_yesterday > input.volume) {
+      if (position.yesterday_volume - position.frozen_yesterday >= input.volume) {
         position.frozen_yesterday += input.volume;
       } else {
         position.frozen_yesterday = position.yesterday_volume;

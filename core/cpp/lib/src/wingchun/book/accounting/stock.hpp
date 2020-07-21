@@ -53,7 +53,7 @@ public:
 
   void apply_order_input(Book_ptr &book, const OrderInput &input) override {
     auto &position = book->get_position_for(input);
-    if (input.side == Side::Sell and position.yesterday_volume - position.frozen_yesterday > input.volume) {
+    if (input.side == Side::Sell and position.yesterday_volume - position.frozen_yesterday >= input.volume) {
       position.frozen_total += input.volume;
       position.frozen_yesterday += input.volume;
     }
