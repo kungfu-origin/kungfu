@@ -129,11 +129,11 @@ public:
         book->asset.frozen_cash -= frozen_margin;
         book->asset.frozen_margin -= frozen_margin;
       }
-      if (order.offset == Offset::Close or order.offset == Offset::CloseYesterday) {
+      if ((order.offset == Offset::Close or order.offset == Offset::CloseYesterday) and position.frozen_total >= order.volume_left) {
         position.frozen_total -= order.volume_left;
         position.frozen_yesterday = std::max(position.frozen_yesterday - order.volume_left, VOLUME_ZERO);
       }
-      if (order.offset == Offset::CloseToday) {
+      if (order.offset == Offset::CloseToday and position.frozen_total >= order.volume_left) {
         position.frozen_total -= order.volume_left;
       }
       update_position(book, position);

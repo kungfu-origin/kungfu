@@ -73,7 +73,7 @@ public:
                      order.status != OrderStatus::PartialFilledActive and order.status != OrderStatus::Lost and
                      order.status != OrderStatus::Unknown;
     if (status_ok and order.volume_left > 0) {
-      if (order.side == Side::Sell) {
+      if (order.side == Side::Sell and position.frozen_total >= order.volume_left) {
         position.frozen_total -= order.volume_left;
         position.frozen_yesterday -= order.volume_left;
       }
