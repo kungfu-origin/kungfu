@@ -4,4 +4,4 @@
 from . import sessions
 from . import show
 from . import trace
-from . import reader
+from . import clean
