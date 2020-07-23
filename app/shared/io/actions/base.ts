@@ -1,4 +1,4 @@
-import { startCustomProcess, deleteProcess, killKfc, startMaster, startLedger } from '__gUtils/processUtils';
+import { startCustomProcess, deleteProcess, killKfc, startMaster, startLedger, startProcessLoopGetStatus } from '__gUtils/processUtils';
 import { delayMiliSeconds } from '__gUtils/busiUtils';
 import { buildCustomProcessConfig } from '__gConfig/systemConfig';
 import { KF_TARADING_CONFIG_PATH, KF_CONFIG_PATH } from '__gConfig/pathConfig';
@@ -14,6 +14,17 @@ export const switchMaster = async (status: boolean): Promise<any> => {
         }
     } 
     try {
+
+        const kfSystemConfig: any = readJsonSync(KF_CONFIG_PATH) || {};
+        const ifCleanBeforeLaunchMaster = ((kfSystemConfig.performance || {}).cleanBeforeLaunchMaster) || false;
+
+        if (ifCleanBeforeLaunchMaster) {
+            await startProcessLoopGetStatus({
+                "name": 'journalClean',
+                "args": "journal clean"
+            }, () => {})
+        }
+
         await startMaster(false)
         await delayMiliSeconds(1000)
         await startLedger(false)

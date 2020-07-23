@@ -474,5 +474,41 @@ export const startGetProcessStatus = (callback: Function) => {
     }, 1000)
 }
 
+interface Pm2Options {
+    name: string;
+    args: string;
+}
+
+export function startProcessLoopGetStatus (options: Pm2Options, cb: Function) {
+    return new Promise(resolve => {
+        startProcess({ ...options })
+            .then(() => {
+                let timer = startGetProcessStatusByName(options.name, (res: any[]) => {
+                    const status = res[0].pm2_env.status;
+                    cb && cb(status);
+                    if (status !== 'online') {
+                        timer.clearLoop();
+                        resolve(status)
+                    }
+                })
+            })
+    })
+}
+
+
+//循环获取processStatus
+export const startGetProcessStatusByName = (name: string, callback: Function) => {
+    const timer = setTimerPromiseTask(() => {
+        return describeProcess(name)
+            .then(res => {
+                callback(res)
+            })
+            .catch(err => console.error(err))
+    }, 1000)
+
+    return timer
+}
+
+
 
 

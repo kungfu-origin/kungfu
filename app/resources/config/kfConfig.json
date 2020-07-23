@@ -1,1 +1,1 @@
-{"performance": {"rocket": false, "bypassQuote": false}, "strategy": {"python": false, "pythonPath": ""}, "log":{"level":"-l info"},"code":{"tabSpaceType":"Tabs","tabSpaceSize":4}}
+{"performance": {"rocket": false, "bypassQuote": false, "cleanBeforeLaunchMaster": false}, "strategy": {"python": false, "pythonPath": ""}, "log":{"level":"-l info"},"code":{"tabSpaceType":"Tabs","tabSpaceSize":4}}

@@ -481,19 +481,28 @@ export const getSourceList = () => getExtensionConfigs()
         return sourceList
     })
 
-
 export const setTimerPromiseTask = (fn: Function, interval = 500) => {
     var taskTimer: NodeJS.Timer | null = null;
+    var clear = false;
     function timerPromiseTask (fn: Function, interval = 500) {
         if(taskTimer) clearTimeout(taskTimer)
         fn()
         .finally(() => {
+            if (clear) {
+                if(taskTimer) clearTimeout(taskTimer);
+                return;
+            } 
             taskTimer = setTimeout(() => {
                 timerPromiseTask(fn, interval)
             }, interval)
         })
     }
     timerPromiseTask(fn, interval)
+    return {
+        clearLoop: function () {
+            clear = true;
+            if(taskTimer) clearTimeout(taskTimer);
+        }
+    }
 } 
-
 
