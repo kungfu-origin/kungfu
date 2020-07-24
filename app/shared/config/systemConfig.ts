@@ -103,7 +103,7 @@ export const getSystemConfig = (): { [propName: string]: SystemConfigItem } => (
                 "key": "archive",
                 "name": isEnglish ? "Archive" : "归档",
                 "cli": true,
-                "tip": isEnglish ? "Clean and Archive Before Launch Master" : "设置是否在启动master前清空历史数据时归档",
+                "tip": isEnglish ? "Clean with Archive" : "设置是否在启动master前清空历史数据时归档",
                 "default": false,
                 "type": SystemConfigChildItemTypeEnum.Bool,
                 "required": true
