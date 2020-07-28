@@ -13,7 +13,9 @@ void shift::ensure_storage(uint32_t dest) {
   if (storage_map_.find(dest) == storage_map_.end()) {
     auto locator = location_->locator;
     auto db_file = locator->layout_file(location_, longfist::enums::layout::SQLITE, fmt::format("{:08x}", dest));
-    storage_map_.emplace(dest, make_storage_ptr(db_file, longfist::StateDataTypes));
+    auto storage = make_storage_ptr(db_file, longfist::StateDataTypes);
+    storage->pragma.journal_mode(sqlite_orm::journal_mode::WAL);
+    storage_map_.emplace(dest, storage);
     storage_map_.at(dest)->sync_schema();
   }
 }
