@@ -14,7 +14,7 @@ class profile {
 public:
   explicit profile(const yijinjing::data::locator_ptr &locator);
 
-  void sync_schema();
+  void setup();
 
   template <typename DataType> void set(const DataType &data) { get_storage()->replace(data); }
 

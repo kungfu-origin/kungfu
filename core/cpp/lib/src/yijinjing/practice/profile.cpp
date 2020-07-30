@@ -19,7 +19,11 @@ profile::profile(const yijinjing::data::locator_ptr &locator) : profile(default_
 
 profile::profile(std::string profile_db_file) : profile_db_file_(std::move(profile_db_file)) {}
 
-void profile::sync_schema() { get_storage()->sync_schema(); }
+void profile::setup() {
+  auto storage = get_storage();
+  storage->pragma.journal_mode(sqlite_orm::journal_mode::WAL);
+  storage->sync_schema();
+}
 
 yijinjing::cache::ProfileStoragePtr &profile::get_storage() {
   static auto storage = yijinjing::cache::make_storage_ptr(profile_db_file_, ProfileDataTypes);
