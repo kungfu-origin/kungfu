@@ -294,7 +294,7 @@ class JsRestoreState {
 public:
   JsRestoreState(Napi::ObjectReference &state, yijinjing::data::location_ptr location);
 
-  void operator()(int64_t from, int64_t to);
+  void operator()(int64_t from, int64_t to, bool sync_schema = false);
 
 private:
   Napi::ObjectReference &state_;

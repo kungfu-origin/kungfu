@@ -330,14 +330,17 @@ inline void from_xtp(const XTPTickByTickStruct &ori, Transaction &des) {
   switch (ori.trade.trade_flag) {
   case 'B': {
     des.bs_flag = BsFlag::Buy;
+    des.exec_type = ExecType::Trade;
     break;
   }
   case 'S': {
     des.bs_flag = BsFlag::Sell;
+    des.exec_type = ExecType::Trade;
     break;
   }
   case 'N': {
     des.bs_flag = BsFlag::Unknown;
+    des.exec_type = ExecType::Trade;
     break;
   }
   case '4': {

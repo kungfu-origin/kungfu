@@ -54,6 +54,7 @@ session_builder::session_builder(const io_device_ptr &io_device) : session_finde
   if (not session_storage_->sync_schema_simulate().empty()) {
     session_storage_->sync_schema();
   }
+  session_storage_->pragma.journal_mode(sqlite_orm::journal_mode::WAL);
 }
 
 int64_t session_builder::find_last_active_time(const data::location_ptr &source_location) {

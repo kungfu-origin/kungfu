@@ -4,3 +4,4 @@
 from . import sessions
 from . import show
 from . import trace
+from . import clean

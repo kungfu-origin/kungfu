@@ -53,7 +53,7 @@ public:
 
   void apply_order_input(Book_ptr &book, const OrderInput &input) override {
     auto &position = book->get_position_for(input);
-    if (input.side == Side::Sell and position.yesterday_volume - position.frozen_yesterday > input.volume) {
+    if (input.side == Side::Sell and position.yesterday_volume - position.frozen_yesterday >= input.volume) {
       position.frozen_total += input.volume;
       position.frozen_yesterday += input.volume;
     }
@@ -70,9 +70,10 @@ public:
     }
     auto &position = book->get_position_for(order);
     auto status_ok = order.status != OrderStatus::Submitted and order.status != OrderStatus::Pending and
-                     order.status != OrderStatus::PartialFilledActive and order.status != OrderStatus::Lost;
+                     order.status != OrderStatus::PartialFilledActive and order.status != OrderStatus::Lost and
+                     order.status != OrderStatus::Unknown;
     if (status_ok and order.volume_left > 0) {
-      if (order.side == Side::Sell) {
+      if (order.side == Side::Sell and position.frozen_total >= order.volume_left) {
         position.frozen_total -= order.volume_left;
         position.frozen_yesterday -= order.volume_left;
       }

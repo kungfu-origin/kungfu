@@ -180,6 +180,7 @@ inline longfist::enums::InstrumentType get_instrument_type(const std::string &ex
              string_equals(exchange_id, EXCHANGE_INE)) {
     return longfist::enums::InstrumentType::Future;
   }
+  SPDLOG_ERROR("invalid instrument type for exchange {} and instrument {}", exchange_id, instrument_id);
   return longfist::enums::InstrumentType::Unknown;
 }
 

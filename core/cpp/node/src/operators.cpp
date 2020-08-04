@@ -16,14 +16,14 @@ namespace kungfu::node::serialize {
 JsRestoreState::JsRestoreState(Napi::ObjectReference &state, location_ptr location)
     : state_(state), location_(std::move(location)) {}
 
-void JsRestoreState::operator()(int64_t from, int64_t to) {
+void JsRestoreState::operator()(int64_t from, int64_t to, bool sync_schema) {
   auto now = time::now_in_nano();
   auto source = location_->uid;
   auto locator = location_->locator;
   for (auto dest : locator->list_location_dest(location_)) {
     auto db_file = locator->layout_file(location_, layout::SQLITE, fmt::format("{:08x}", dest));
     auto storage = cache::make_storage_ptr(db_file, longfist::StateDataTypes);
-    if (not storage->sync_schema_simulate().empty()) {
+    if (sync_schema) {
       storage->sync_schema();
     }
     boost::hana::for_each(StateDataTypes, [&](auto it) {

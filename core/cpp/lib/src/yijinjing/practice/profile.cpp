@@ -17,10 +17,12 @@ std::string default_db_file(const locator_ptr &locator) {
 
 profile::profile(const yijinjing::data::locator_ptr &locator) : profile(default_db_file(locator)) {}
 
-profile::profile(std::string profile_db_file) : profile_db_file_(std::move(profile_db_file)) {
-  if (not get_storage()->sync_schema_simulate().empty()) {
-    get_storage()->sync_schema();
-  }
+profile::profile(std::string profile_db_file) : profile_db_file_(std::move(profile_db_file)) {}
+
+void profile::setup() {
+  auto storage = get_storage();
+  storage->pragma.journal_mode(sqlite_orm::journal_mode::WAL);
+  storage->sync_schema();
 }
 
 yijinjing::cache::ProfileStoragePtr &profile::get_storage() {

@@ -94,7 +94,7 @@ private:
     });
   };
 
-  void RestoreState(const yijinjing::data::location_ptr &config_location, int64_t from, int64_t to);
+  void RestoreState(const yijinjing::data::location_ptr &state_location, int64_t from, int64_t to, bool sync_schema);
 
   yijinjing::data::location_ptr FindLocation(const Napi::CallbackInfo &info);
 

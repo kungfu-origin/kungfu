@@ -14,6 +14,8 @@ class profile {
 public:
   explicit profile(const yijinjing::data::locator_ptr &locator);
 
+  void setup();
+
   template <typename DataType> void set(const DataType &data) { get_storage()->replace(data); }
 
   template <typename DataType> DataType get(const DataType &query) {
