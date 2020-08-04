@@ -55,12 +55,18 @@ Watcher::Watcher(const Napi::CallbackInfo &info)
 
   auto today = time::today_start();
   auto config_store = ConfigStore::Unwrap(config_ref_.Value());
+
+  bool sync_schema = not get_io_device()->is_usable();
+  if (sync_schema) {
+    config_store->profile_.setup();
+  }
+
   for (const auto &item : config_store->profile_.get_all(Location{})) {
     auto saved_location = location::make_shared(item, get_locator());
     add_location(now(), saved_location);
-    RestoreState(saved_location, today, INT64_MAX);
+    RestoreState(saved_location, today, INT64_MAX, sync_schema);
   }
-  RestoreState(ledger_location_, today, INT64_MAX);
+  RestoreState(ledger_location_, today, INT64_MAX, sync_schema);
 
   shift(ledger_location_) >> state_bank_; // Load positions to restore bookkeeper
 
@@ -226,9 +232,9 @@ void Watcher::on_start() {
   events_ | is(CacheReset::tag) | $$(reset_cache(event));
 }
 
-void Watcher::RestoreState(const location_ptr &state_location, int64_t from, int64_t to) {
+void Watcher::RestoreState(const location_ptr &state_location, int64_t from, int64_t to, bool sync_schema) {
   add_location(0, state_location);
-  serialize::JsRestoreState(ledger_ref_, state_location)(from, to);
+  serialize::JsRestoreState(ledger_ref_, state_location)(from, to, sync_schema);
 }
 
 location_ptr Watcher::FindLocation(const Napi::CallbackInfo &info) {
