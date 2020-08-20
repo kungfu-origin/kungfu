@@ -42,15 +42,25 @@ public:
 
   void guard_positions();
 
+  void set_bypass_quotes(bool bypass_quotes){bypass_quotes_ = bypass_quotes;}
+
 private:
   yijinjing::practice::apprentice &app_;
   broker::Client &broker_client_;
+
+  bool bypass_quotes_ = true;
 
   bool positions_guarded_ = false;
   CommissionMap commissions_ = {};
   InstrumentMap instruments_ = {};
   BookMap books_ = {};
   AccountingMethodMap accounting_methods_ = {};
+
+  static constexpr auto bypass = [](yijinjing::practice::apprentice *app, bool bypass_quotes) {
+    return rx::filter([=](const event_ptr &event) {
+      return not(app->get_location(event->source())->category == longfist::enums::category::MD and bypass_quotes);
+    });
+  };
 
   Book_ptr make_book(uint32_t location_uid);
 

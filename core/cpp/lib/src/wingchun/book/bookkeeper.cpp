@@ -54,7 +54,7 @@ void Bookkeeper::on_start(const rx::connectable_observable<event_ptr> &events) {
   on_trading_day(app_.get_trading_day());
 
   events | is(Instrument::tag) | $$(update_instrument(event->data<Instrument>()));
-  events | is_own<Quote>(broker_client_) | $$(update_book(event, event->data<Quote>()));
+  events | is_own<Quote>(broker_client_) | bypass(&app_, bypass_quotes_) | $$(update_book(event, event->data<Quote>()));
   events | is(InstrumentKey::tag) | $$(update_book(event, event->data<InstrumentKey>()));
   events | is(OrderInput::tag) | $$(update_book<OrderInput>(event, &AccountingMethod::apply_order_input));
   events | is(Order::tag) | $$(update_book<Order>(event, &AccountingMethod::apply_order));

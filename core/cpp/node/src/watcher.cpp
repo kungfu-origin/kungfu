@@ -217,6 +217,7 @@ void Watcher::on_start() {
   broker_client_.on_start(events_);
   bookkeeper_.on_start(events_);
   bookkeeper_.guard_positions();
+  bookkeeper_.set_bypass_quotes(bypass_quotes_);
 
   events_ | bypass(this, bypass_quotes_) | $$(feed_state_data(event, update_ledger));
   events_ | bypass(this, bypass_quotes_) | is(Quote::tag) | $$(UpdateBook(event, event->data<Quote>()));
