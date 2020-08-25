@@ -5,7 +5,14 @@
             "name": "xtp",
             "type": "Stock",
             "key": "account_id",
-            "td_config": [{
+            "td_config": [
+              {
+                "key": "account_name",
+                "name": "account_name",
+                "type": "str",
+                "errMsg": "请填写账户",
+                "tip": "请填写账户别名"
+              },{
                     "key": "account_id",
                     "name": "account_id",
                     "type": "str",
