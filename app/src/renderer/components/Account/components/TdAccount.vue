@@ -18,7 +18,7 @@
                 :row-class-name="handleSelectRow"
                 >
                   <el-table-column
-                    prop="account_id"
+                    prop="account_name"
                     label="名称"
                     show-overflow-tooltip
                     min-width="80"

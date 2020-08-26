@@ -48,7 +48,7 @@ private:
   yijinjing::practice::apprentice &app_;
   broker::Client &broker_client_;
 
-  bool bypass_quotes_ = true;
+  bool bypass_quotes_ = false;
 
   bool positions_guarded_ = false;
   CommissionMap commissions_ = {};
