@@ -20,12 +20,12 @@
                         <i class="el-icon-s-order" ></i>
                         <template slot="title">策略</template>
                     </tr-menu-item>
-                    <tr-menu-item
+                    <!-- <tr-menu-item
                     route="/data-management"
                     >
                         <i class="el-icon-s-data" ></i>
                         <template slot="title">数据</template>
-                    </tr-menu-item>
+                    </tr-menu-item> -->
                 </tr-menu>
             </el-aside>
             <el-main class="tr-main">

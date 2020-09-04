@@ -121,6 +121,7 @@ export default {
                     this.watcherLoading = false;
                     clearInterval(timer)
                 }
+
             }, 500)
         },
 
