@@ -125,7 +125,7 @@ void TraderXTP::OnTradeEvent(XTPTradeReport *trade_info, uint64_t session_id) {
     return;
   }
   auto order_id = inbound_orders_.at(trade_info->order_xtp_id);
-  auto order_state = orders_.at(order_id);
+  auto &order_state = orders_.at(order_id);
   auto writer = get_writer(order_state.dest);
   Trade &trade = writer->open_data<Trade>(now());
   from_xtp(*trade_info, trade);

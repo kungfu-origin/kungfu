@@ -17,6 +17,16 @@
                 @row-click="handleRowClick"
                 :row-class-name="handleSelectRow"
                 >
+                  <el-table-column
+                    prop="account_id"
+                    label="名称"
+                    show-overflow-tooltip
+                    min-width="80"
+                >
+                    <template slot-scope="props">
+                        <span>{{JSON.parse(props.row.config).account_name || '-'}}</span> 
+                    </template>
+                </el-table-column>
                 <el-table-column
                     prop="account_id"
                     label="账户"
