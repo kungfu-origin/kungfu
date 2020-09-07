@@ -3,19 +3,27 @@
         <div class="trader-content" v-if="!(monitOrders || monitTrades)">
             <template v-if="monitStrategies">
                 <el-col :span="14">
-                    <el-row style="height: 66.66%">
+                    <el-row style="height: 60%">
                         <el-col>
                             <Strategy
                             v-model="monitStrategies"
                             ></Strategy>
                         </el-col>
                     </el-row>
-                    <el-row style="height: 33.33%">
-                        <el-col :span="14">
+                    <el-row style="height: 40%">
+                        <el-col :span="showMakeOrderDashboard ? 12 : 14">
                             <Log></Log>                         
                         </el-col>
-                        <el-col :span="10">
+                        <el-col :span="showMakeOrderDashboard ? 12 : 10">
+                            <MakeOrderDashboard
+                            v-if="showMakeOrderDashboard"
+                            moduleType="strategy"
+                            :currentId="strategyId"
+                            :makeOrderByPosData="makeOrderByPosData"
+                            @showMakeOrderDashboard="handleShowOrCloseMakeOrderDashboard(false)"
+                            ></MakeOrderDashboard>
                             <Pnl
+                            v-else
                             ref="pnl"
                             :currentId="strategyId" 
                             moduleType="strategy"
@@ -46,7 +54,26 @@
                             ></Pnl>
                         </el-col>
                     </el-row>
-                    <el-row style="height: 66.66%">
+
+                    <el-row style="height: 66.66%" v-if="!showMakeOrderDashboard">
+                        <el-col>
+                            <Log></Log>                         
+                        </el-col>
+                    </el-row>
+                    <el-row style="height: 33.33%" v-if="showMakeOrderDashboard">
+                        <el-col :span="14">
+                            <div></div>
+                        </el-col>
+                        <el-col :span="10">
+                            <MakeOrderDashboard
+                            moduleType="strategy"
+                            :currentId="strategyId"
+                            :makeOrderByPosData="makeOrderByPosData"
+                            @showMakeOrderDashboard="handleShowOrCloseMakeOrderDashboard(false)"
+                            ></MakeOrderDashboard>
+                        </el-col>
+                    </el-row>
+                    <el-row style="height: 33.33%" v-if="showMakeOrderDashboard">
                         <el-col>
                             <Log></Log>                         
                         </el-col>
@@ -57,10 +84,12 @@
             <el-col  :span="10">
                 <el-row style="height: 33.333%">
                         <Pos
-                        :currentId="strategyId"
                         moduleType="strategy"
+                        :currentId="strategyId"
                         :kungfuData="positions"   
-                        :addTime="addTime"                
+                        :addTime="addTime" 
+                        @showMakeOrderDashboard="handleShowOrCloseMakeOrderDashboard(true)"
+                        @makeOrder="handleMakeOrderByPos"
                         ></Pos>
                 </el-row>
                 <el-row  style="height: 33.333%">
@@ -98,19 +127,7 @@
                             ></Strategy>
                         </el-col>
                     </el-row>
-                     <el-row style="height: 33.33%">
-                        <el-col>
-                            <Pnl
-                            ref="pnl"
-                            :currentId="strategyId" 
-                            moduleType="strategy"
-                            :minPnl="pnl"   
-                            :dailyPnl="dailyPnl"
-                            :addTime="addTime"                
-                            ></Pnl>                        
-                        </el-col>
-                    </el-row>
-                    <el-row style="height: 33.33%">
+                    <el-row style="height: 66.66%">
                         <el-col>
                             <Log></Log>                         
                         </el-col>
@@ -118,8 +135,8 @@
                 </el-col>
             </template>
                 
-            <el-col  :span="14">
-                <el-row  style="height: 100%">
+            <el-col :span="14">
+                <el-row :style="{ height: '100%' }">
                         <CurrentOrder
                         v-if="monitOrders"
                         moduleType="strategy"
@@ -155,10 +172,14 @@ import CurrentOrder from '../Base/tradingData/CurrentOrder';
 import TradeRecord from '../Base/tradingData/TradeRecord';
 import Pos from '../Base/tradingData/Pos';
 import Pnl from '../Base/tradingData/pnl/Index';
+import MakeOrderDashboard from '../Base/MakeOrderDashboard';
 
 import { buildTradingDataPipe } from '__io/kungfu/tradingData';
+import accountStrategyMixins from '@/assets/js/mixins/accountStrategyMixins';
 
 export default {
+    mixins: [ accountStrategyMixins ],
+
     data(){
         this.tradingDataPipe = null;
         return {
@@ -228,7 +249,8 @@ export default {
     },
 
     components: {
-        Strategy, CurrentOrder, TradeRecord, Pos, Log, Pnl 
+        Strategy, CurrentOrder, TradeRecord, 
+        Pos, Log, Pnl, MakeOrderDashboard
     },
 
     methods:{

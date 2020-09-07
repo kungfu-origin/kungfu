@@ -8,7 +8,7 @@
             <i class="el-icon-download mouse-over" title="导出" @click="handleExport"></i>
         </tr-dashboard-header-item>
         <tr-dashboard-header-item v-if="!ifBacktest">
-            <el-button size="mini" @click="makeOrderDialogVisiblity = true">下单</el-button>
+            <el-button size="mini" @click="$emit('showMakeOrderDashboard')">下单</el-button>
         </tr-dashboard-header-item>
     </div>
     <tr-table
@@ -16,6 +16,7 @@
         :data="tableData"
         :schema="schema"
         :renderCellClass="renderCellClass"
+        @dbclick="item => $emit('makeOrder', item)"
     ></tr-table>
 
     <make-order-dialog

@@ -4,14 +4,23 @@
             <el-col :span="monitTrades ? 10 : 14">
                 <el-row style="height: 33.333%">
                     <el-col>
-                       <TdAccount/>
+                       <TdAccount></TdAccount>
                     </el-col>
                 </el-row>
                 <el-row style="height: 33.333%" v-if="!monitOrders">
-                    <el-col :span="14">
+                    <el-col :span="monitTrades ? 12 : 14">
                         <MdAccount></MdAccount>
                     </el-col>
-                    <el-col :span="10">
+                    <el-col :span="monitTrades ? 12 : 10" v-if="showMakeOrderDashboard">
+                        <MakeOrderDashboard
+                        moduleType="account"
+                        :currentId="currentId"
+                        :makeOrderByPosData="makeOrderByPosData"
+                        @showMakeOrderDashboard="handleShowOrCloseMakeOrderDashboard(false)"
+                        ></MakeOrderDashboard>
+                    </el-col>
+
+                    <el-col :span="monitTrades ? 12 : 10" v-if="!showMakeOrderDashboard">
                         <Pnl 
                         :currentId="currentId" 
                         moduleType="account"
@@ -42,6 +51,8 @@
                     :currentId="currentId" 
                     :accountType="accountType"
                     :kungfuData="positions"
+                    @showMakeOrderDashboard="handleShowOrCloseMakeOrderDashboard(true)"
+                    @makeOrder="handleMakeOrderByPos"
                     />
                 </el-row>
                 
@@ -67,13 +78,18 @@ import TdAccount from './components/TdAccount';
 import MdAccount from './components/MdAccount';
 import CurrentOrder from '../Base/tradingData/CurrentOrder';
 import TradeRecord from '../Base/tradingData/TradeRecord';
+import MakeOrderDashboard from '../Base/MakeOrderDashboard';
 import Pos from '../Base/tradingData/Pos';
 import Pnl from '../Base/tradingData/pnl/Index';
 
 import { buildTradingDataPipe } from '__io/kungfu/tradingData';
+import accountStrategyMixins from '@/assets/js/mixins/accountStrategyMixins';
 
 export default {
     name: 'account',
+
+    mixins: [ accountStrategyMixins ],
+
     data() {
         const t = this;
         this.tradingDataPipe = null;
@@ -87,13 +103,14 @@ export default {
 
             historyData: {},
             monitOrders: false,
-            monitTrades: false
+            monitTrades: false,
         }
     },
 
     components: {
         TdAccount, MdAccount, Pnl, Pos,
-        CurrentOrder, TradeRecord
+        CurrentOrder, TradeRecord,
+        MakeOrderDashboard
     },
 
     computed:{
