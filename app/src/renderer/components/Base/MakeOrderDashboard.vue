@@ -1,15 +1,15 @@
 <template>
     <tr-dashboard :title="`下单 ${currentId}`">
         <div slot="dashboard-header">
-            <tr-dashboard-header-item>
+            <!-- <tr-dashboard-header-item>
                 <i class="el-icon-s-data mouse-over" title="多档行情"></i>
-            </tr-dashboard-header-item>
+            </tr-dashboard-header-item> -->
             <tr-dashboard-header-item>
                 <el-button size="mini" @click="$emit('showMakeOrderDashboard')">关闭</el-button>
             </tr-dashboard-header-item>
         </div>
         <div class="kf-make-order-dashboard__body">
-            <el-form ref="make-order-form" label-width="50px" :model="makeOrderForm">
+            <el-form ref="make-order-form" label-width="60px" :model="makeOrderForm">
                 <el-form-item
                 label="代码"
                 prop="instrument_id"
@@ -40,7 +40,22 @@
                             <span style="float: right">可用：{{getAvailCash(account.account_id)}}</span>
                         </el-option>
                     </el-select>
-                </el-form-item>          
+                </el-form-item>     
+                <el-form-item
+                label="交易所"
+                prop="exchange_id"
+                :rules="[
+                    { required: true, message: '不能为空！', trigger: 'blur' },
+                ]">
+                    <el-select v-model.trim="makeOrderForm.exchange_id">
+                        <el-option
+                            v-for="exchangeId in Object.keys(exchangeIds)"
+                            :key="exchangeId"
+                            :label="exchangeIds[exchangeId]"
+                            :value="exchangeId">
+                        </el-option>
+                    </el-select>
+                </el-form-item>     
                 <el-form-item
                 v-if="isFuture"
                 label="开平"
@@ -224,6 +239,7 @@ export default {
             this.$set(this.makeOrderForm, 'instrument_id', instrumentId);
             this.$set(this.makeOrderForm, 'limit_price', lastPrice);
             this.$set(this.makeOrderForm, 'volume', totalVolume);
+            this.$set(this.makeOrderForm, 'offset', 1)
         }
     },
 
@@ -425,7 +441,7 @@ $fontSize: 11px;
 
     .make-order-btns {
         padding-left: 10px;
-        width: 50px;
+        width: 52px;
         display: flex;
         flex-direction: column;
         justify-content: flex-start;

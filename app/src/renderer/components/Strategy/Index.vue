@@ -11,10 +11,10 @@
                         </el-col>
                     </el-row>
                     <el-row style="height: 40%">
-                        <el-col :span="showMakeOrderDashboard ? 12 : 14">
+                        <el-col :span="14">
                             <Log></Log>                         
                         </el-col>
-                        <el-col :span="showMakeOrderDashboard ? 12 : 10">
+                        <el-col :span="10">
                             <MakeOrderDashboard
                             v-if="showMakeOrderDashboard"
                             moduleType="strategy"
@@ -37,7 +37,7 @@
             </template>
             <template v-else>
                 <el-col :span="14">
-                    <el-row style="height: 33.33%">
+                    <el-row style="height: 45%">
                         <el-col :span="14">
                             <Strategy
                             v-model="monitStrategies"
@@ -45,6 +45,7 @@
                         </el-col>
                         <el-col :span="10">
                             <Pnl
+                            v-if="!showMakeOrderDashboard"
                             ref="pnl"
                             :currentId="strategyId" 
                             moduleType="strategy"
@@ -52,20 +53,8 @@
                             :dailyPnl="dailyPnl"
                             :addTime="addTime"                
                             ></Pnl>
-                        </el-col>
-                    </el-row>
-
-                    <el-row style="height: 66.66%" v-if="!showMakeOrderDashboard">
-                        <el-col>
-                            <Log></Log>                         
-                        </el-col>
-                    </el-row>
-                    <el-row style="height: 33.33%" v-if="showMakeOrderDashboard">
-                        <el-col :span="14">
-                            <div></div>
-                        </el-col>
-                        <el-col :span="10">
                             <MakeOrderDashboard
+                            v-else
                             moduleType="strategy"
                             :currentId="strategyId"
                             :makeOrderByPosData="makeOrderByPosData"
@@ -73,7 +62,8 @@
                             ></MakeOrderDashboard>
                         </el-col>
                     </el-row>
-                    <el-row style="height: 33.33%" v-if="showMakeOrderDashboard">
+
+                    <el-row style="height: 55%">
                         <el-col>
                             <Log></Log>                         
                         </el-col>
