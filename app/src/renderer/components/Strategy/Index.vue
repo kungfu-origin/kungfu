@@ -37,7 +37,7 @@
             </template>
             <template v-else>
                 <el-col :span="14">
-                    <el-row style="height: 45%">
+                    <el-row style="height: 33.33%">
                         <el-col :span="14">
                             <Strategy
                             v-model="monitStrategies"
@@ -63,7 +63,7 @@
                         </el-col>
                     </el-row>
 
-                    <el-row style="height: 55%">
+                    <el-row style="height: 66.66%">
                         <el-col>
                             <Log></Log>                         
                         </el-col>
