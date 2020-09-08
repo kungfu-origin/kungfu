@@ -355,17 +355,19 @@ export default {
         
         clearData(){
             this.$emit('update:visible', false)
-            this.volumeRate = 0;
             this.currentAccount = '';
             this.makeOrderForm = {
+                category: '',
+                group: '', //source_name
+                name: '', // account_id
                 instrument_id: '',
-                account_id: '',
-                client_id: '',
+                exchange_id: '',
                 limit_price: 0,
                 volume: 0,
                 side: 0,
                 offset: 0,
-                price_type: 3
+                price_type: 0,
+                hedge_flag: 0,
             };
         },
     }
@@ -379,8 +381,7 @@ $size: 25px;
 $fontSize: 11px;
 
 .kf-make-order-dashboard__body {
-    height: 100%;
-    padding: 0 5px 5px 10px;
+    padding: 0 5px 10px 10px;
     box-sizing: border-box;
     display: flex;
     justify-content: space-around;

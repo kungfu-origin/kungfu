@@ -14,7 +14,11 @@ export default {
         },
 
         handleMakeOrderByPos (item) {
-            this.makeOrderByPosData = item
+            this.showMakeOrderDashboard = true;
+            this.$nextTick()
+                .then(() => {
+                    this.makeOrderByPosData = item
+                })
         }
     }
 }
