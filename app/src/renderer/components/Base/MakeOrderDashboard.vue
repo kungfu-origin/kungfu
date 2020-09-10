@@ -9,7 +9,7 @@
             </tr-dashboard-header-item>
         </div>
         <div class="kf-make-order-dashboard__body">
-            <el-form ref="make-order-form" label-width="60px" :model="makeOrderForm">
+            <el-form ref="make-order-form" label-width="50px" :model="makeOrderForm">
                 <el-form-item
                 label="代码"
                 prop="instrument_id"
@@ -90,36 +90,59 @@
                         <el-radio size="mini" v-for="key in Object.keys(priceType || {})" :label="+key" :key="key">{{ priceType[key] }}</el-radio>
                     </el-radio-group>
                 </el-form-item>
-                <el-form-item
-                v-if="makeOrderForm.price_type === 0"
-                label="价格"
-                prop="limit_price"
-                :rules="[
-                    { required: true, message: '不能为空！' },
-                    { validator: biggerThanZeroValidator, trigger: 'blur'}
-                ]">
-                    <el-input-number
-                    :precision="2"
-                    :step="0.01"
-                    :controls="false"
-                    placeholder="请输入价格"
-                    v-model.trim="makeOrderForm.limit_price"></el-input-number>                
-                </el-form-item>
-                <el-form-item
-                label="数量"
-                prop="volume"
-                class="no-margin"
-                :rules="[
-                    { required: true, message: '不能为空！' },
-                    { validator: biggerThanZeroValidator, trigger: 'blur'}
-                ]">
-                    <el-input-number 
-                    :step="100"  
-                    :controls="false"
-                    placeholder="请输入数量"
-                    v-model.trim="makeOrderForm.volume"
-                    ></el-input-number>                
-                </el-form-item>
+
+
+                <el-row class="make-order-line">
+                    <el-col :span="16">
+                        <el-form-item
+                        v-if="makeOrderForm.price_type === 0"
+                        label="价格"
+                        prop="limit_price"
+                        :rules="[
+                            { required: true, message: '不能为空！' },
+                            { validator: biggerThanZeroValidator, trigger: 'blur'}
+                        ]">
+                            <el-input-number
+                            :precision="2"
+                            :step="0.01"
+                            :controls="false"
+                            placeholder="请输入价格"
+                            v-model.trim="makeOrderForm.limit_price"></el-input-number>                
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                        <div class="make-order-line-info">
+                            <span>可用金额</span>
+                            <span>{{ avaliableCash || '-' }}</span>
+                        </div>
+                    </el-col>
+                </el-row>
+
+                <el-row class="make-order-line">
+                    <el-col :span="16">
+                        <el-form-item
+                        label="数量"
+                        prop="volume"
+                        class="no-margin"
+                        :rules="[
+                            { required: true, message: '不能为空！' },
+                            { validator: biggerThanZeroValidator, trigger: 'blur'}
+                        ]">
+                            <el-input-number 
+                            :step="100"  
+                            :controls="false"
+                            placeholder="请输入数量"
+                            v-model.trim="makeOrderForm.volume"
+                            ></el-input-number>                
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                        <div class="make-order-line-info">
+                            <span>可下单手数</span>
+                            <span>{{ avaliableOrderVolume || '-' }}</span>
+                        </div>
+                    </el-col>
+                </el-row>
             </el-form>
             <div class="make-order-btns">
                 <el-button size="medium" @click="handleMakeOrder">下单</el-button>
@@ -212,7 +235,7 @@ export default {
             processStatus: state => state.BASE.processStatus,
         }),
 
-        accountType(){
+        accountType() {
             const sourceName = this.currentSourceName;
             if (!sourceName) return 'stock';
             return (this.tdAccountSource[sourceName] || {}).typeName || ''
@@ -222,7 +245,7 @@ export default {
             return this.accountType.toLowerCase() === 'future'
         },
 
-        currentAccountResolve () {
+        currentAccountResolved () {
             if (this.moduleType === 'account') {
                 return this.currentId
             } else if (this.moduleType === 'strategy') {
@@ -231,7 +254,7 @@ export default {
         }, 
 
         currentAccountId() {
-            return this.currentAccountResolve.toAccountId()
+            return this.currentAccountResolved.toAccountId()
         },
 
         currentSourceName() {
@@ -240,7 +263,27 @@ export default {
             } else if (this.moduleType === 'strategy') {
                 return this.currentAccount.toSourceName();
             }
-        }
+        },
+
+        avaliableCash () {
+            if (!this.currentAccountResolved) return ''
+            const avaliableCash = this.getAvailCash(this.currentAccountResolved);
+            return avaliableCash
+        },        
+
+        avaliableOrderVolume () {
+            if (this.moduleType === 'account') {
+
+                if (this.makeOrderForm.price_type === 0) {
+                    const price = +this.makeOrderForm.limit_price;
+                    if (!+price) return '';
+                    if (!+this.avaliableCash) return ''
+                    return Math.floor(this.avaliableCash / price)
+                }
+            }
+
+            return ''
+        },
     },
 
     watch: {
@@ -269,19 +312,19 @@ export default {
     },
 
     methods: {
-        handleClose(){
+        handleClose () {
             this.clearData();
         },
 
-        handleMakeOrder(){
+        handleMakeOrder () {
             this.submit()
         },
 
-        handleSelectAccount(account) {
+        handleSelectAccount (account) {
             this.currentAccount = account;
         },
 
-        submit(){
+        submit () {
             const t = this;
             t.$refs['make-order-form'].validate(valid => {
                 if(valid) {
@@ -289,12 +332,12 @@ export default {
                     let makeOrderForm = deepClone(t.makeOrderForm);
                     const gatewayName = `td_${t.currentSourceName}_${t.currentAccountId}`;
 
-                    if (!ifProcessRunning(gatewayName, t.processStatus)){
+                    if (!ifProcessRunning(gatewayName, t.processStatus)) {
                         t.$message.warning(`需要先启动 ${makeOrderForm.name} 交易进程！`)
                         return;
                     }
 
-                    const instrumentType = t.getInstrumentType(t.currentAccountResolve);
+                    const instrumentType = t.getInstrumentType(t.currentAccountResolved);
                     makeOrderForm['instrument_type'] = instrumentType;
 
                     //sell
@@ -310,11 +353,11 @@ export default {
                     }
 
                     if (t.moduleType === 'account') {
-                        kungfuMakeOrder(makeOrderForm, t.currentAccountResolve)
+                        kungfuMakeOrder(makeOrderForm, t.currentAccountResolved)
                             .then(() => t.$message.success('下单指令已发送！'))
                             .catch(err => t.$message.error(err))
                     } else if (t.moduleType === 'strategy') {
-                        kungfuMakeOrder(makeOrderForm, t.currentAccountResolve, t.currentId)
+                        kungfuMakeOrder(makeOrderForm, t.currentAccountResolved, t.currentId)
                             .then(() => t.$message.success('下单指令已发送！'))
                             .catch(err => t.$message.error(err))
                     }
@@ -336,7 +379,7 @@ export default {
             return instrumentTypes[typeName] || 0
         },
 
-        querySearch(queryString, cb) {
+        querySearch (queryString, cb) {
             const t = this;
             const instrumentIdsList = ls.get('instrument_ids_list') || {};
             const instrumentIdsListResolve = Object.keys(instrumentIdsList)
@@ -353,24 +396,24 @@ export default {
             cb(results)
         },
 
-        getAvailCash(accountId){
+        getAvailCash (accountId) {
             if(!accountId) return 0;
             const targetAccount = this.accountsAsset[accountId] || null
             if(!targetAccount) return 0
             return targetAccount.avail || 0
         },
 
-        getSourceName(accountId){
+        getSourceName (accountId) {
             const targetAccount = this.tdList.filter(a => a.account_id.includes(accountId))
             if(!targetAccount.length) return ''
             return targetAccount[0].source_name;
         },
 
-        getAccountType(sourceName){
+        getAccountType (sourceName) {
             return this.tdAccountSource[sourceName]
         },
         
-        clearData(){
+        clearData () {
             this.$emit('update:visible', false)
             this.currentAccount = '';
             this.makeOrderForm = {
@@ -395,13 +438,14 @@ export default {
 <style lang="scss">
 @import "@/assets/scss/skin.scss";
 $size: 25px;
-$fontSize: 11px;
+$fontSize: 10px;
 
 .kf-make-order-dashboard__body {
     padding: 0 5px 10px 10px;
     box-sizing: border-box;
     display: flex;
     justify-content: space-around;
+    min-height: 100%;
 
     .el-form {
         flex: 1
@@ -414,6 +458,7 @@ $fontSize: 11px;
             line-height: $size;
             font-size: $fontSize;
             text-align: left;    
+            padding-right: 5px;
         }
 
         &.no-margin {
@@ -484,6 +529,20 @@ $fontSize: 11px;
                 .el-radio__label {
                     color: $red;
                 }
+            }
+        }
+    }
+
+    .make-order-line {
+        margin-bottom: 10px;
+
+        .make-order-line-info {
+            
+            span {
+                display: block;
+                color: $font;
+                font-size: 10px;
+                text-align: right;
             }
         }
     }
