@@ -257,6 +257,7 @@ export const dealPos = (item: PosInputData): PosData => {
         id: item.instrument_id + direction,
         instrumentId: item.instrument_id,
         direction,
+        directionOrigin: item.direction,
         yesterdayVolume: Number(item.yesterday_volume),
         todayVolume: Number(item.volume) - Number(item.yesterday_volume),
         totalVolume: Number(item.volume),

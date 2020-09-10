@@ -33,6 +33,7 @@
                     <el-col>
                         <CurrentOrder
                         moduleType="account" 
+                        :accountType="accountType"
                         v-model="monitOrders"
                         :currentId="currentId"
                         :kungfuData="orders"

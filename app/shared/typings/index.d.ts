@@ -238,6 +238,7 @@ interface PosData {
     id: string;
     instrumentId: string;
     direction: string;
+    directionOrigin: Number;
     yesterdayVolume: Number;
     todayVolume: Number;
     totalVolume: Number;

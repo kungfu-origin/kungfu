@@ -57,6 +57,17 @@
                     </el-select>
                 </el-form-item>     
                 <el-form-item
+                label="买卖"
+                prop="side"
+                class="no-margin"
+                :rules="[
+                    { required: true, message: '不能为空！', trigger: 'blur' },
+                ]">
+                    <el-radio-group size="mini" v-model="makeOrderForm.side">
+                        <el-radio size="mini" :class="{ 'red-radio': +key === 0, 'green-radio': +key === 1 }"  v-for="key in Object.keys(sideName || {}).slice(0, 2)" :key="key" :label="+key">{{ sideName[key] }}</el-radio>
+                    </el-radio-group>
+                </el-form-item>
+                <el-form-item
                 v-if="isFuture"
                 label="开平"
                 prop="offset"
@@ -65,7 +76,7 @@
                     { required: true, message: '不能为空！', trigger: 'blur' },
                 ]">
                     <el-radio-group size="mini" v-model="makeOrderForm.offset">
-                        <el-radio size="mini" v-for="key in Object.keys(offsetName || {})" :key="key" :label="+key">{{ offsetName[key] }}</el-radio>
+                        <el-radio size="mini" :class="{ 'red-radio': +key === 0, 'green-radio': +key !== 0 }" v-for="key in Object.keys(offsetName || {})" :key="key" :label="+key">{{ offsetName[key] }}</el-radio>
                     </el-radio-group>
                 </el-form-item>
                 <el-form-item
@@ -111,8 +122,7 @@
                 </el-form-item>
             </el-form>
             <div class="make-order-btns">
-                <el-button class="buy" size="medium" type="danger" @click="handleBuy">买 入</el-button>
-                <el-button class="sell" size="medium" type="success" @click="handleSell">卖 出</el-button>
+                <el-button size="medium" @click="handleMakeOrder">下单</el-button>
             </div>
         </div>
     </tr-dashboard>
@@ -124,7 +134,7 @@ import { mapState } from 'vuex';
 import { biggerThanZeroValidator } from '__assets/validator';
 import { kungfuMakeOrder } from '__io/kungfu/makeCancelOrder';
 import { deepClone, ifProcessRunning } from '__gUtils/busiUtils';
-import { sourceTypeConfig, offsetName, priceType, hedgeFlag, exchangeIds, instrumentTypes } from '__gConfig/tradingConfig';
+import { sourceTypeConfig, sideName, offsetName, priceType, hedgeFlag, exchangeIds, instrumentTypes } from '__gConfig/tradingConfig';
 import { Autocomplete } from 'element-ui';
 import { from } from 'rxjs';
 
@@ -168,6 +178,7 @@ export default {
     data () {
         this.sourceTypeConfig = sourceTypeConfig;
         this.offsetName = offsetName;
+        this.sideName = sideName;
         this.priceType = filterPriceType(priceType)
         this.hedgeFlag = hedgeFlag;
         this.exchangeIds = exchangeIds;
@@ -208,8 +219,7 @@ export default {
         },
 
         isFuture () {
-            return true;
-            // return this.accountType.toLowerCase() === 'future'
+            return this.accountType.toLowerCase() === 'future'
         },
 
         currentAccountResolve () {
@@ -235,11 +245,26 @@ export default {
 
     watch: {
         makeOrderByPosData (newPosData) {
-            const { instrumentId, lastPrice, totalVolume } = newPosData;
-            this.$set(this.makeOrderForm, 'instrument_id', instrumentId);
-            this.$set(this.makeOrderForm, 'limit_price', lastPrice);
-            this.$set(this.makeOrderForm, 'volume', totalVolume);
-            this.$set(this.makeOrderForm, 'offset', 1)
+            this.clearData();
+
+            this.$nextTick()
+                .then(() => {
+                    const { instrumentId, lastPrice, totalVolume, directionOrigin } = newPosData;
+                    this.$set(this.makeOrderForm, 'instrument_id', instrumentId);
+                    this.$set(this.makeOrderForm, 'limit_price', lastPrice);
+                    this.$set(this.makeOrderForm, 'volume', totalVolume);
+                    
+                    if (this.isFuture) {
+                        this.$set(this.makeOrderForm, 'offset', 1)
+                    }
+                    
+                    if (directionOrigin === 0) {
+                        this.$set(this.makeOrderForm, 'side', 1)
+                    } else if (directionOrigin === 1) {
+                        this.$set(this.makeOrderForm, 'side', 0)
+                    }
+                })
+
         }
     },
 
@@ -248,15 +273,7 @@ export default {
             this.clearData();
         },
 
-        handleBuy(){
-            //买：0
-            this.makeOrderForm.side = 0;
-            this.submit()
-        },
-
-        handleSell(){
-            //卖：1
-            this.makeOrderForm.side = 1;
+        handleMakeOrder(){
             this.submit()
         },
 
@@ -438,6 +455,37 @@ $fontSize: 11px;
         .el-input__icon {
             line-height: $size - 2;
         }
+
+        .el-radio.is-checked {
+
+            &.green-radio {
+                .el-radio__input.is-checked {
+
+                    .el-radio__inner {
+                        background: $green;
+                        border-color: $green;
+                    }
+                }
+                
+                .el-radio__label {
+                    color: $green;
+                }
+            }
+
+            &.red-radio {
+                .el-radio__input.is-checked {
+
+                    .el-radio__inner {
+                        background: $red;
+                        border-color: $red;
+                    }
+                }
+                
+                .el-radio__label {
+                    color: $red;
+                }
+            }
+        }
     }
 
     .make-order-btns {
@@ -449,19 +497,15 @@ $fontSize: 11px;
         box-sizing: border-box;
 
         .el-button {
-            height: 50%;
+            height: 100%;
             width: 100%;
             margin: 0;
-            padding: 10px 5px;
+            padding: 0 5px;
             box-sizing: border-box;
             text-align: center;
             word-break: break-word;
             word-wrap: unset;
             white-space: normal;
-
-            &:first-child {
-                margin-bottom: 10px;
-            }
         }
     }
 }

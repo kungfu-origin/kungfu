@@ -117,7 +117,7 @@ export default {
         },
 
         schema () {
-             if (this.dateForHistory) {
+            if (this.dateForHistory) {
                 return [
                 {
                     type: "text",
@@ -133,13 +133,17 @@ export default {
                     type: "text",
                     label: "",
                     prop: "side",
-                    width: '60px'
-                },{
+                    width: '40px'
+                },
+                
+                this.accountType !== 'Stock' ? {
                     type: "text",
                     label: "",
                     prop: "offset",
                     width: '40px'
-                },{
+                } : null,
+                
+                {
                     type: "number",
                     label: "委托价",
                     prop: "limitPrice",
@@ -160,6 +164,7 @@ export default {
                     label: this.moduleType == 'account' ? '策略' : '账户',
                     prop: this.moduleType == 'account' ? 'clientId' : 'accountId',
                 }]
+                .filter(item => !!item)
             }
 
             return  [
@@ -177,13 +182,17 @@ export default {
                 type: "text",
                 label: "",
                 prop: "side",
-                width: '60px',
-            },{
+                width: '40px',
+            },
+            
+            this.accountType !== 'Stock' ? {
                 type: "text",
                 label: "",
                 prop: "offset",
                 width: '40px'
-            },{
+            } : null,
+            
+            {
                 type: "number",
                 label: "委托价",
                 prop: "limitPrice",
@@ -219,6 +228,7 @@ export default {
                 prop: 'oper',
                 width: '40px'
             }]
+            .filter(item => !!item)
         }
     },
 
