@@ -272,14 +272,12 @@ export default {
         },        
 
         avaliableOrderVolume () {
-            if (this.moduleType === 'account') {
 
-                if (this.makeOrderForm.price_type === 0) {
-                    const price = +this.makeOrderForm.limit_price;
-                    if (!+price) return '';
-                    if (!+this.avaliableCash) return ''
-                    return Math.floor(this.avaliableCash / price)
-                }
+            if (this.makeOrderForm.price_type === 0) {
+                const price = +this.makeOrderForm.limit_price;
+                if (!+price) return '';
+                if (!+this.avaliableCash) return ''
+                return Math.floor(this.avaliableCash / price)
             }
 
             return ''
