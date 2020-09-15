@@ -194,12 +194,18 @@ export const dealOrder = (item: OrderInputData): OrderData => {
         
         instrumentId: item.instrument_id,
         instrumentType: instrumentType[item.instrument_type],
+        instrumentTypeOrigin: item.instrument_type,
         exchangeId: item.exchange_id,
         
         side: sideName[item.side] ? sideName[item.side] : '--',
+        sideOrigin: item.side,
         offset: offsetName[item.offset] ? offsetName[item.offset] : '--',
+        offsetOrigin: item.offset,
         hedgeFlag: hedgeFlag[item.hedge_flag] ? hedgeFlag[item.hedge_flag] : '--',
+        hedgeFlagOrigin: item.hedge_flag,
+
         priceType: priceType[item.price_type],
+        priceTypeOrigin: item.price_type,
         volumeCondition: volumeCondition[item.volume_condition],
         timeCondition: timeCondition[item.time_condition],
 

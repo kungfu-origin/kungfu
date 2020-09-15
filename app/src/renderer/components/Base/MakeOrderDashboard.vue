@@ -92,10 +92,9 @@
                 </el-form-item>
 
 
-                <el-row class="make-order-line">
+                <el-row class="make-order-line" v-if="makeOrderForm.price_type === 0">
                     <el-col :span="16">
                         <el-form-item
-                        v-if="makeOrderForm.price_type === 0"
                         label="价格"
                         prop="limit_price"
                         :rules="[
@@ -155,11 +154,12 @@
 import Vue from 'vue';
 import { mapState } from 'vuex';
 import { biggerThanZeroValidator } from '__assets/validator';
-import { kungfuMakeOrder } from '__io/kungfu/makeCancelOrder';
 import { deepClone, ifProcessRunning } from '__gUtils/busiUtils';
 import { sourceTypeConfig, sideName, offsetName, priceType, hedgeFlag, exchangeIds, instrumentTypes } from '__gConfig/tradingConfig';
 import { Autocomplete } from 'element-ui';
 import { from } from 'rxjs';
+
+import makeOrderMixin from '@/components/Base/tradingData/js/makeOrderMixin';
 
 const ls = require('local-storage');
 
@@ -178,6 +178,8 @@ function filterPriceType (priceType) {
 }
 
 export default {
+
+    mixins: [ makeOrderMixin ],
 
     props: {
         currentId: {
@@ -211,10 +213,9 @@ export default {
         return {
             currentAccount: '', //only strategy
             makeOrderForm: {
-                category: '',
-                group: '', //source_name
-                name: '', // account_id
+                name: '', // account_id in strategy
                 instrument_id: '',
+                instrument_type: '',
                 exchange_id: '',
                 limit_price: 0,
                 volume: 0,
@@ -339,7 +340,7 @@ export default {
                     makeOrderForm['instrument_type'] = instrumentType;
 
                     //sell
-                    if ((t.makeOrderForm.side = 1) && (instrumentType === 'Stock')) {
+                    if ((t.makeOrderForm.side === 1) && (instrumentType === 'Stock')) {
                         const instrumentId = t.makeOrderForm.instrument_id;
                         const targetVolume = t.makeOrderForm.volume;
                         const posItem = t.pos[instrumentId + '多'] || {};
@@ -350,15 +351,7 @@ export default {
                         }
                     }
 
-                    if (t.moduleType === 'account') {
-                        kungfuMakeOrder(makeOrderForm, t.currentAccountResolved)
-                            .then(() => t.$message.success('下单指令已发送！'))
-                            .catch(err => t.$message.error(err))
-                    } else if (t.moduleType === 'strategy') {
-                        kungfuMakeOrder(makeOrderForm, t.currentAccountResolved, t.currentId)
-                            .then(() => t.$message.success('下单指令已发送！'))
-                            .catch(err => t.$message.error(err))
-                    }
+                    this.makeOrder(this.moduleType, makeOrderForm, t.currentAccountResolved, t.currentId)
                     
                     //save instrumentid to ls
                     const instrumentIdsList = ls.get('instrument_ids_list');
@@ -415,10 +408,9 @@ export default {
             this.$emit('update:visible', false)
             this.currentAccount = '';
             this.makeOrderForm = {
-                category: '',
-                group: '', //source_name
                 name: '', // account_id
                 instrument_id: '',
+                instrument_type: '',
                 exchange_id: '',
                 limit_price: 0,
                 volume: 0,

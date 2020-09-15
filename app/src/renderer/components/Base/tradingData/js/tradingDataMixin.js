@@ -1,5 +1,4 @@
 import moment from 'moment';
-import { mapState } from 'vuex';
 import { decodeKungfuLocation } from '__io/kungfu/watcher';
 import { history } from '__gUtils/kungfuUtils';
 import { writeCSV } from '__gUtils/fileUtils';
@@ -58,7 +57,6 @@ export default {
             
 
             tableData: Object.freeze([]),
-
         }
     },
 

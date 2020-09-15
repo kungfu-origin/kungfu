@@ -122,12 +122,17 @@ interface OrderData {
 
     instrumentId: string;
     instrumentType: string;
+    instrumentTypeOrigin: number;
     exchangeId: string;
 
     side: string;
+    sideOrigin: number;
     offset: string;
+    offsetOrigin: number;
     hedgeFlag: string;
+    hedgeFlagOrigin: number;
     priceType: string;
+    priceTypeOrigin: number;
     volumeCondition: string;
     timeCondition: string;
 

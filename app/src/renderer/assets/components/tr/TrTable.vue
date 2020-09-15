@@ -47,7 +47,9 @@
                         :key="`${column.prop}_${item.id}_${item[column.prop]}`"       
                         :style="{                             
                             'max-width': getHeaderWidth(column)
-                        }">
+                        }"
+                        @dblclick="e => handleDoubleClickCell(e, item, column)"
+                        >
                             <template v-if="column.type !== 'operation'">
                                 {{item[column.prop]}}
                             </template>
@@ -201,6 +203,11 @@ export default {
     },
 
     methods: {
+
+        handleDoubleClickCell (e, row, cell) {
+            this.$emit('dbClickCell', e, row, cell)
+        },
+
         handleDoubleClick (item) {
             this.$emit('dbclick', item)
         },

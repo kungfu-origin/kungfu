@@ -36,6 +36,7 @@
     :schema="schema"
     :renderCellClass="renderCellClass"
     @dbclick="handleShowDetail"
+    @dbClickCell="handleShowAdjustOrder"
     >
         <template v-slot:oper="{ oper }">
             <i 
@@ -57,6 +58,40 @@
     :visible.sync="dateRangeDialogVisiblityForHistory"   
     :loading="dateRangeExportLoading" 
     ></date-picker-dialog>
+
+    <div class="kf-ajust-order-in-orders-dashboard__warp">
+        <div class="mask" v-if="adjustOrderInputVisibility" @click="handleHideAdjustOrder"></div>
+        <div 
+        class="kf-ajust-order-in-orders-dashboard__content" 
+        v-if="adjustOrderInputVisibility"
+        :style="{
+            left: adjustOrderInputData.left,
+            top: adjustOrderInputData.top,
+            width: adjustOrderInputData.width,
+            height: adjustOrderInputData.height
+        }"
+        >
+        <el-input-number
+            v-if="adjustOrderProp === 'limitPrice'"
+            :precision="2"
+            :step="0.01"
+            :controls="false"
+            placeholder="价格"
+            v-model.trim="adjustOrderForm.limit_price"
+            @blur="handleBlurAdjustOrderInput()"
+            >
+            </el-input-number>                
+        <el-input-number
+            v-if="adjustOrderProp === 'volumeTraded'"
+            :step="100"  
+            :controls="false"
+            placeholder="数量"
+            v-model.trim="adjustOrderForm.volume"
+            @blur="handleBlurAdjustOrderInput()"                                    
+            ></el-input-number>   
+        </div>
+    </div>
+
   </tr-dashboard>
 </template>
 
@@ -67,16 +102,17 @@ import DatePickerDialog from '../DatePickerDialog';
 import tradingDataMixin from './js/tradingDataMixin';
 
 import { dealOrder } from "__io/kungfu/watcher";
-import { kungfuCancelOrder, kungfuCancelAllOrders } from '__io/kungfu/makeCancelOrder';
+import { kungfuCancelAllOrders } from '__io/kungfu/makeCancelOrder';
 import { decodeKungfuLocation } from '__io/kungfu/watcher';
 import { aliveOrderStatusList } from '__gConfig/tradingConfig';
 import { writeCSV } from '__gUtils/fileUtils';
 
+import makeOrderMixin from '@/components/Base/tradingData/js/makeOrderMixin';
 
 export default {
     name: "current-orders",
    
-   mixins: [ tradingDataMixin ],
+   mixins: [ tradingDataMixin, makeOrderMixin ],
 
     props: {
         gatewayName: {
@@ -272,26 +308,6 @@ export default {
             });
         },
 
-        handleCancelOrder (props) {
-            const kungfuLocation = decodeKungfuLocation(props.source);
-            const accountId = `${kungfuLocation.group}_${kungfuLocation.name}`;
-            const gatewayName = `td_${accountId}`;
-            if(this.processStatus[gatewayName] !== 'online') {
-                this.$message.warning(`需要先启动 TD ${accountId} 交易进程！`)
-                return;
-            }
-            //撤单   
-            if (this.moduleType === 'strategy') {
-                kungfuCancelOrder( props.orderId, accountId, this.currentId)
-                    .then(() => this.$message.success('撤单指令已发送！'))
-                    .catch(err => this.$message.error(err.message || '撤单指令发送失败！'))
-            } else if (this.moduleType === 'account') {
-                kungfuCancelOrder( props.orderId, accountId)
-                    .then(() => this.$message.success('撤单指令已发送！'))
-                    .catch(err => this.$message.error(err.message || '撤单指令发送失败！'))
-            }
-        },
-
         handleCancelAllOrders () {
 
             //先判断对应进程是否启动
@@ -373,9 +389,58 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
+
+@import "@/assets/scss/skin.scss";
+
     .trading-day-header {
         font-size: 10px;
         padding-left: 10px;
+    }
+
+    .kf-ajust-order-in-orders-dashboard__warp {
+
+        .mask {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 99
+        }
+
+        .kf-ajust-order-in-orders-dashboard__content {
+            position: fixed;
+            z-index: 100;
+            background: $bg_card;
+
+            .el-input-number.is-without-controls {
+                line-height: 20px;
+
+                .el-input {
+                    line-height: 20px;
+                }
+
+                input.el-input__inner {
+                    height: 25px;
+                    line-height: 25px;
+                    padding: 5px;
+                    box-sizing: border-box;
+
+                    ::-webkit-input-placeholder { /* WebKit browsers */
+                        font-size: 10px;
+                    }
+
+                    ::-moz-placeholder { /* Mozilla Firefox 19+ */
+                        font-size: 10px;
+                    }
+
+                    :-ms-input-placeholder { /* Internet Explorer 10+ */
+                        font-size: 10px;
+                    }   
+                }
+            }
+        }
     }
 </style>
