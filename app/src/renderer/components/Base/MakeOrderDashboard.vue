@@ -352,6 +352,8 @@ export default {
                     }
 
                     this.makeOrder(this.moduleType, makeOrderForm, t.currentAccountResolved, t.currentId)
+                        .then(() => this.$message.success('下单指令已发送！'))
+                        .catch(err => this.$message.error(err))
                     
                     //save instrumentid to ls
                     const instrumentIdsList = ls.get('instrument_ids_list');

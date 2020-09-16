@@ -16,7 +16,8 @@ interface MakeOrderData {
 export const kungfuMakeOrder = (makeOrderData: MakeOrderData, accountId: string, strategyId?: string) => {
     const accountLocation = encodeKungfuLocation(accountId, 'td');
     if (!watcher.isReadyToInteract(accountLocation)) {
-        return Promise.reject(new Error(`TD ${accountId} 异常，请稍后再试！`))
+        console.log(222, accountLocation)
+        return Promise.reject(new Error(`需要先启动 TD ${accountId} 交易进程！`))
     }
 
     const orderInput = {
@@ -35,7 +36,8 @@ export const kungfuMakeOrder = (makeOrderData: MakeOrderData, accountId: string,
 export const kungfuCancelOrder = (orderId: string, accountId: string, strategyId?: string) => {
     const accountLocation = encodeKungfuLocation(accountId, 'td');
     if (!watcher.isReadyToInteract(accountLocation)) {
-        return Promise.reject(new Error(`TD ${accountId} 异常，请稍后再试！`))
+        console.log(111, accountLocation)
+        return Promise.reject(new Error(`需要先启动 TD ${accountId} 交易进程！`))
     }
 
     const orderAction = {

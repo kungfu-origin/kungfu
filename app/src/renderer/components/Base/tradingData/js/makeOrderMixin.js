@@ -1,5 +1,6 @@
 
 import { kungfuCancelOrder, kungfuMakeOrder } from '__io/kungfu/makeCancelOrder';
+import { decodeKungfuLocation } from '__io/kungfu/watcher';
 
 export default {
 
@@ -8,7 +9,7 @@ export default {
         return {
             //adjustOrder
             adjustOrderInputVisibility: false, 
-            adjustOrderInputData: Object.freeze({}),
+            adjustOrderInputSizeData: Object.freeze({}),
             adjustOrderTargetData: {},
             adjustOrderForm: {
                 name: '', // account_id in strategy
@@ -31,6 +32,10 @@ export default {
 
         handleShowAdjustOrder (event, row, cell) {
 
+            // if (![1, 2, 7].includes(+row.status)) {
+            //     return
+            // }
+
             if ((cell.prop === "volumeTraded") || (cell.prop === "limitPrice")) {
                 event.stopPropagation();
             } else {
@@ -43,7 +48,7 @@ export default {
             const width = targetRectData.width  + 'px';
             const height = targetRectData.height  + 'px';
             
-            this.adjustOrderInputData = Object.freeze({
+            this.adjustOrderInputSizeData = Object.freeze({
                 left,
                 top,
                 width,
@@ -74,6 +79,16 @@ export default {
         handleBlurAdjustOrderInput () {
             const { instrument_id, limit_price, volume, volumeLeft } = this.adjustOrderForm;
 
+            if (!+limit_price) {
+                this.clearAdjustOrderData()
+                return
+            }
+
+            if (!+volume) {
+                this.clearAdjustOrderData()
+                return
+            }
+
             this.$confirm(
                 `确认调整： 商品 ${instrument_id}, 价格 ${limit_price}, 原未交易量 ${volumeLeft}, 新设定交易量 ${volume}`, 
                 '提示', 
@@ -81,48 +96,32 @@ export default {
                     confirmButtonText: '确 定', 
                     cancelButtonText: '取 消'
                 })
-                .then(() => {
-                    return this.handleCancelOrder(this.adjustOrderTargetData)
-                        .then(() => this.makeOrder(
-                                this.moduleType, 
-                                this.adjustOrderForm, 
-                                this.getAdjustOrderAccountResolved(), 
-                                this.currentId
-                        ))
-                        .then(() => this.$message.success('调仓指令发送成功！'))
-                })
+                .then(() => this.cancelOrder(this.adjustOrderTargetData))
+                .then(() => this.makeOrder(
+                    this.moduleType, 
+                    this.adjustOrderForm, 
+                    this.getAdjustOrderAccountResolved(), 
+                    this.currentId
+                ))
+                .then(() => this.$message.success('调仓指令发送成功！'))
                 .catch((err) => {
-                    if(err == 'cancel') return
+                    if(err == 'cancel') return;
                     this.$message.error(err.message || '操作失败！')
+                })
+                .finally(() => {
+                    this.clearAdjustOrderData()
                 })
 
         },
 
         handleHideAdjustOrder () {
-            this.adjustOrderInputVisibility = false;
-            this.adjustOrderInputData = Object.freeze({})
+            this.clearAdjustOrderData();
         },
 
         handleCancelOrder (orderData) {
-            const kungfuLocation = decodeKungfuLocation(orderData.source);
-            const accountId = `${kungfuLocation.group}_${kungfuLocation.name}`;
-            const gatewayName = `td_${accountId}`;
-
-            if(this.processStatus[gatewayName] !== 'online') {
-                this.$message.warning(`需要先启动 TD ${accountId} 交易进程！`)
-                return;
-            }
-            
-            //撤单   
-            if (this.moduleType === 'strategy') {
-                return kungfuCancelOrder( orderData.orderId, accountId, this.currentId)
-                    .then(() => this.$message.success('撤单指令已发送！'))
-                    .catch(err => this.$message.error(err.message || '撤单指令发送失败！'))
-            } else if (this.moduleType === 'account') {
-                return kungfuCancelOrder( orderData.orderId, accountId)
-                    .then(() => this.$message.success('撤单指令已发送！'))
-                    .catch(err => this.$message.error(err.message || '撤单指令发送失败！'))
-            }
+            return this.cancelOrder(orderData)
+                .then(() => this.$message.success('撤单指令已发送！'))
+                .catch(err => this.$message.error(err.message || '撤单指令发送失败！'))
         },
 
         getAdjustOrderAccountResolved () {
@@ -133,16 +132,43 @@ export default {
             }
         }, 
 
+        cancelOrder (orderData) {
+            const kungfuLocation = decodeKungfuLocation(orderData.source);
+            const accountId = `${kungfuLocation.group}_${kungfuLocation.name}`;
+            
+            //撤单   
+            if (this.moduleType === 'strategy') {
+                return kungfuCancelOrder( orderData.orderId, accountId, this.currentId)
+            } else if (this.moduleType === 'account') {
+                return kungfuCancelOrder( orderData.orderId, accountId)
+            }
+        },
+
         makeOrder (moduleType, makeOrderForm, currentAccountResolved, strategyId) {
             if (moduleType === 'account') {
                 return kungfuMakeOrder(makeOrderForm, currentAccountResolved)
-                    .then(() => this.$message.success('下单指令已发送！'))
-                    .catch(err => this.$message.error(err))
             } else if (moduleType === 'strategy') {
                 return kungfuMakeOrder(makeOrderForm, currentAccountResolved, strategyId)
-                    .then(() => this.$message.success('下单指令已发送！'))
-                    .catch(err => this.$message.error(err))
             }
         },
+
+        clearAdjustOrderData () {
+            this.adjustOrderInputVisibility = false;
+            this.adjustOrderInputSizeData = Object.freeze({});
+            this.adjustOrderTargetData = Object({});
+            this.adjustOrderForm = {
+                name: '', // account_id in strategy
+                instrument_id: '',
+                instrument_type: '',
+                exchange_id: '',
+                limit_price: 0,
+                volume: 0,
+                side: 0,
+                offset: 0,
+                price_type: 0,
+                hedge_flag: 0,
+            };
+            this.adjustOrderProp = '';
+        }
     }
 }

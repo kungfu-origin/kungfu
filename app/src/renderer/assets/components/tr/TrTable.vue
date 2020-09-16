@@ -30,7 +30,10 @@
             :buffer="100"
             >
                 <template v-slot="{item}">
-                    <ul class="tr-table-row" @dblclick="handleDoubleClick(item)">
+                    <ul class="tr-table-row" 
+                    @dblclick="$emit('dbclick', item)"
+                    @click="$emit('click', item)"
+                    >
                         <li 
                         :title="item[column.prop] || ''"
                         :class="[
@@ -208,9 +211,6 @@ export default {
             this.$emit('dbClickCell', e, row, cell)
         },
 
-        handleDoubleClick (item) {
-            this.$emit('dbclick', item)
-        },
 
         triggerToBottom() {
             const t = this;

@@ -65,10 +65,10 @@
         class="kf-ajust-order-in-orders-dashboard__content" 
         v-if="adjustOrderInputVisibility"
         :style="{
-            left: adjustOrderInputData.left,
-            top: adjustOrderInputData.top,
-            width: adjustOrderInputData.width,
-            height: adjustOrderInputData.height
+            left: adjustOrderInputSizeData.left,
+            top: adjustOrderInputSizeData.top,
+            width: adjustOrderInputSizeData.width,
+            height: adjustOrderInputSizeData.height
         }"
         >
         <el-input-number
@@ -103,7 +103,6 @@ import tradingDataMixin from './js/tradingDataMixin';
 
 import { dealOrder } from "__io/kungfu/watcher";
 import { kungfuCancelAllOrders } from '__io/kungfu/makeCancelOrder';
-import { decodeKungfuLocation } from '__io/kungfu/watcher';
 import { aliveOrderStatusList } from '__gConfig/tradingConfig';
 import { writeCSV } from '__gUtils/fileUtils';
 
@@ -171,14 +170,12 @@ export default {
                     prop: "side",
                     width: '40px'
                 },
-                
-                this.accountType !== 'Stock' ? {
+                {
                     type: "text",
                     label: "",
                     prop: "offset",
                     width: '40px'
-                } : null,
-                
+                },
                 {
                     type: "number",
                     label: "委托价",
@@ -200,7 +197,6 @@ export default {
                     label: this.moduleType == 'account' ? '策略' : '账户',
                     prop: this.moduleType == 'account' ? 'clientId' : 'accountId',
                 }]
-                .filter(item => !!item)
             }
 
             return  [
@@ -220,14 +216,12 @@ export default {
                 prop: "side",
                 width: '40px',
             },
-            
-            this.accountType !== 'Stock' ? {
+            {
                 type: "text",
                 label: "",
                 prop: "offset",
                 width: '40px'
-            } : null,
-            
+            },
             {
                 type: "number",
                 label: "委托价",
