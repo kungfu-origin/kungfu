@@ -1,6 +1,7 @@
 
 import { kungfuCancelOrder, kungfuMakeOrder } from '__io/kungfu/makeCancelOrder';
 import { decodeKungfuLocation } from '__io/kungfu/watcher';
+import { delayMiliSeconds } from '__gUtils/busiUtils';
 
 export default {
 
@@ -59,12 +60,14 @@ export default {
             this.adjustOrderTargetData = Object.freeze(row);
 
             //build form
-            this.$set(this.adjustOrderForm, 'name', row.accountId)
+            this.$set(this.adjustOrderForm, 'name', row.accountId.trim())
             this.$set(this.adjustOrderForm, 'instrument_id', row.instrumentId)
+            this.$set(this.adjustOrderForm, 'instrument_type', row.instrumentTypeOrigin)
             this.$set(this.adjustOrderForm, 'exchange_id', row.exchangeId)
-            this.$set(this.adjustOrderForm, 'limit_price', row.limitPrice)
-            this.$set(this.adjustOrderForm, 'volume', row.volumeLeft)
-            this.$set(this.adjustOrderForm, 'volumeLeft', row.volumeLeft)
+            this.$set(this.adjustOrderForm, 'limit_price', +row.limitPrice)
+            this.$set(this.adjustOrderForm, 'limitPriceOld', +row.limitPrice)
+            this.$set(this.adjustOrderForm, 'volume', +row.volumeLeft)
+            this.$set(this.adjustOrderForm, 'volumeOld', +row.volumeLeft)
             this.$set(this.adjustOrderForm, 'side', row.sideOrigin)
             this.$set(this.adjustOrderForm, 'offset', row.offsetOrigin)
             this.$set(this.adjustOrderForm, 'price_type', row.priceTypeOrigin)
@@ -76,8 +79,8 @@ export default {
                 })
         },
 
-        handleBlurAdjustOrderInput () {
-            const { instrument_id, limit_price, volume, volumeLeft } = this.adjustOrderForm;
+        handleBlurAdjustOrderInput (type) {
+            const { instrument_id, limit_price, limitPriceOld, volume, volumeOld } = this.adjustOrderForm;
 
             if (!+limit_price) {
                 this.clearAdjustOrderData()
@@ -90,23 +93,26 @@ export default {
             }
 
             this.$confirm(
-                `确认调整： 商品 ${instrument_id}, 价格 ${limit_price}, 原未交易量 ${volumeLeft}, 新设定交易量 ${volume}`, 
+                this.getAdjustOrderTips(type, instrument_id, limit_price, limitPriceOld, volume, volumeOld),
                 '提示', 
                 {
                     confirmButtonText: '确 定', 
                     cancelButtonText: '取 消'
                 })
+                .then(() => this.adjustOrderInputVisibility = false)
                 .then(() => this.cancelOrder(this.adjustOrderTargetData))
+                .then(() => this.$message.success('撤单指令已发送！'))
+                .then(() => delayMiliSeconds(1000))
                 .then(() => this.makeOrder(
                     this.moduleType, 
                     this.adjustOrderForm, 
                     this.getAdjustOrderAccountResolved(), 
                     this.currentId
                 ))
-                .then(() => this.$message.success('调仓指令发送成功！'))
+                .then(() => this.$message.success('下单指令已发送！'))
                 .catch((err) => {
                     if(err == 'cancel') return;
-                    this.$message.error(err.message || '操作失败！')
+                    this.$message.error(err.message || '调整订单失败！')
                 })
                 .finally(() => {
                     this.clearAdjustOrderData()
@@ -122,6 +128,14 @@ export default {
             return this.cancelOrder(orderData)
                 .then(() => this.$message.success('撤单指令已发送！'))
                 .catch(err => this.$message.error(err.message || '撤单指令发送失败！'))
+        },
+
+        getAdjustOrderTips (type, instrument_id, limit_price, limitPriceOld, volume, volumeOld) {
+            if (type === 'volume') {
+                return `确认调整： 商品 ${instrument_id}, 价格 ${limit_price}, 原未成交量 ${volumeOld}, 新设定交易量 ${volume}`
+            } else {
+                return `确认调整： 商品 ${instrument_id}, 原价格 ${limitPriceOld}, 新设定价格 ${limit_price}, 交易量 ${volume}`
+            }
         },
 
         getAdjustOrderAccountResolved () {

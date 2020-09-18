@@ -78,7 +78,7 @@
             :controls="false"
             placeholder="价格"
             v-model.trim="adjustOrderForm.limit_price"
-            @blur="handleBlurAdjustOrderInput()"
+            @blur="handleBlurAdjustOrderInput('price')"
             >
             </el-input-number>                
         <el-input-number
@@ -87,7 +87,7 @@
             :controls="false"
             placeholder="数量"
             v-model.trim="adjustOrderForm.volume"
-            @blur="handleBlurAdjustOrderInput()"                                    
+            @blur="handleBlurAdjustOrderInput('volume')"                                    
             ></el-input-number>   
         </div>
     </div>
