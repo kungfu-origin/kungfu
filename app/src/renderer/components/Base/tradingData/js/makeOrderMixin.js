@@ -32,9 +32,9 @@ export default {
 
         handleShowAdjustOrder (event, row, cell) {
 
-            // if (![1, 2, 7].includes(+row.status)) {
-            //     return
-            // }
+            if (![1, 2, 7].includes(+row.status)) {
+                return
+            }
 
             if ((cell.prop === "volumeTraded") || (cell.prop === "limitPrice")) {
                 event.stopPropagation();
