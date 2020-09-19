@@ -123,10 +123,6 @@ export default {
             this.dataByKey = positionsResolve.dataByKey || {};
         }
     },
-
-    destroyed(){
-        this.saveInstrumentIdsToLS();
-    },
     
     methods:{
         handleExport () {
@@ -180,28 +176,6 @@ export default {
         getKey(data) {
             return (data.instrumentId + data.direction)
         },
-
-        saveInstrumentIdsToLS () {
-            if(!this.tableData.length) return;
-            const instrumentIdsList = ls.get('instrument_ids_list')
-            const instrumentIds = this.tableData
-                .map(item => item.instrumentId)
-                .reduce((result, item) => {
-                    if (typeof result !== "object") {
-                        return {
-                            [result]: 1,
-                            [item]: 1
-                        }
-                    }
-                    result[item] = 1;
-                    return result;
-                })
-            
-            ls.set('instrument_ids_list', {
-                ...instrumentIdsList,
-                ...instrumentIds
-            })
-        }
     }
 }
 </script>

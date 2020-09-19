@@ -96,6 +96,27 @@ export const NMSG_REP_FILE = path.join(SYSTEM_DIR, 'service', 'ledger', 'nn', 'l
 
 //================== others end ===================================
 
+
+//================== config start =================================
+
+export const KUNGFU_RESOURCES_DIR = process.env.NODE_ENV === 'production'
+    ? path.join(process.resourcesPath, 'kungfu-resources')
+    : path.join(__resources)
+
+export const KF_CONFIG_DEFAULT_PATH = path.join(KUNGFU_RESOURCES_DIR, 'config', 'kfConfig.json')
+
+export const KF_TARADING_CONFIG_DEFAULT_PATH = path.join(KUNGFU_RESOURCES_DIR, 'config', 'kfTradingConfig.json')
+
+export const KF_CONFIG_PATH = path.join(KF_HOME, 'config', 'kfConfig.json')
+
+export const KF_TARADING_CONFIG_PATH = path.join(KF_HOME, 'config', 'kfTradingConfig.json')
+
+export const KF_FUTURE_TICKERS_CONFIG_PATH = path.join(KUNGFU_RESOURCES_DIR, 'config', 'futureTickers.json')
+
+
+//================== config start =================================
+
+
 export const getKfEnginePath = () => {
     if(process.env.NODE_ENV === 'production') {
         if(process.env.APP_TYPE === 'test'){
@@ -108,19 +129,5 @@ export const KUNGFU_ENGINE_PATH = process.env.NODE_ENV === 'production'
     ? process.resourcesPath
     : path.join(__dirname, '..', '..', '..', 'core', 'build')
 
-export const KUNGFU_RESOURCES_DIR = process.env.NODE_ENV === 'production'
-    ? path.join(process.resourcesPath, 'kungfu-resources')
-    : path.join(__resources)
-
-
-export const KF_CONFIG_DEFAULT_PATH = path.join(KUNGFU_RESOURCES_DIR, 'config', 'kfConfig.json')
-
-export const KF_TARADING_CONFIG_DEFAULT_PATH = path.join(KUNGFU_RESOURCES_DIR, 'config', 'kfTradingConfig.json')
-
-export const KF_CONFIG_PATH = path.join(KF_HOME, 'config', 'kfConfig.json')
-
-export const KF_TARADING_CONFIG_PATH = path.join(KF_HOME, 'config', 'kfTradingConfig.json')
-
-export const DEFUALT_DB_DIR = path.join(KUNGFU_RESOURCES_DIR, 'default')
 
 export const EXTENSION_DIR = path.join(KUNGFU_ENGINE_PATH, 'kfc', 'kungfu_extensions');

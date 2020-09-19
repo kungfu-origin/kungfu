@@ -250,6 +250,7 @@ interface PosData {
     avgPrice: string;
     lastPrice: string;
     unRealizedPnl: string;
+    exchangeId: string;
 }
 
 interface PosInputData {
@@ -259,6 +260,7 @@ interface PosInputData {
     volume: bigint;
     last_price: number;
     margin: number;
+    exchange_id: string;
     [propName: string]: any;
 }
 

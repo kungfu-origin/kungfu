@@ -1,9 +1,6 @@
 <template>
     <tr-dashboard :title="`下单 ${currentId}`">
         <div slot="dashboard-header">
-            <!-- <tr-dashboard-header-item>
-                <i class="el-icon-s-data mouse-over" title="多档行情"></i>
-            </tr-dashboard-header-item> -->
             <tr-dashboard-header-item>
                 <el-button size="mini" @click="$emit('showMakeOrderDashboard')">关闭</el-button>
             </tr-dashboard-header-item>
@@ -11,23 +8,11 @@
         <div class="kf-make-order-dashboard__body">
             <el-form ref="make-order-form" label-width="50px" :model="makeOrderForm">
                 <el-form-item
-                label="代码"
-                prop="instrument_id"
-                :rules="[
-                    { required: true, message: '不能为空！'},
-                ]">
-                    <el-autocomplete 
-                    v-model.trim="makeOrderForm.instrument_id"
-                    :fetch-suggestions="querySearch"
-                    placeholder="请输入代码名称"
-                    ></el-autocomplete>
-                </el-form-item>      
-                <el-form-item
                 v-if="moduleType === 'strategy'"
                 label="账户"
                 prop="name"
                 :rules="[
-                    { required: true, message: '不能为空！', trigger: 'blur' },
+                    { required: true, message: '不能为空！', trigger: 'change' },
                 ]">
                     <el-select v-model.trim="makeOrderForm.name" @change="handleSelectAccount">
                         <el-option
@@ -40,7 +25,30 @@
                             <span style="float: right">可用：{{getAvailCash(account.account_id)}}</span>
                         </el-option>
                     </el-select>
-                </el-form-item>     
+                </el-form-item>   
+                <el-form-item
+                label="代码"
+                prop="instrument_id"
+                :rules="[
+                    { required: true, message: '不能为空！'},
+                ]">
+                    <el-autocomplete 
+                    v-model.trim="makeOrderForm.instrument_id"
+                    :fetch-suggestions="querySearch"
+                    placeholder="请输入代码名称"
+                    @select="handleSelectInstrumentId"
+                    >
+                        <template v-slot="{ item }">
+                            <div class="make-order-instrument-ids__warp">
+                                <div class="make-order-instrument-id-item">
+                                    <span class="ticker">{{ item.ticker }}</span>
+                                    <span class="name">{{ item.name }}</span>
+                                </div>
+                                <div class="make-order-instrument-id-item">{{ item.exchangeId }}</div>
+                            </div>
+                        </template>
+                    </el-autocomplete>
+                </el-form-item>      
                 <el-form-item
                 label="交易所"
                 prop="exchange_id"
@@ -156,6 +164,7 @@ import { mapState } from 'vuex';
 import { biggerThanZeroValidator } from '__assets/validator';
 import { deepClone, ifProcessRunning } from '__gUtils/busiUtils';
 import { sourceTypeConfig, sideName, offsetName, priceType, hedgeFlag, exchangeIds, instrumentTypes } from '__gConfig/tradingConfig';
+import { getFutureTickersConfig } from '__assets/base'
 import { Autocomplete } from 'element-ui';
 import { from } from 'rxjs';
 
@@ -224,7 +233,18 @@ export default {
                 price_type: 0,
                 hedge_flag: 0,
             },
+
+            currentSearchTickerList: [],
+
+            futureTickers: []
         }
+    },
+
+    mounted () {
+        getFutureTickersConfig()
+            .then(res => {
+                this.futureTickers = Object.freeze(res)
+            })
     },
 
     computed: {
@@ -244,6 +264,17 @@ export default {
 
         isFuture () {
             return this.accountType.toLowerCase() === 'future'
+        },
+
+        targetTickersSource () {
+            const accountType = this.accountType.toLowerCase();
+            if (accountType === 'stock') {
+                return this.futureTickers
+            } else if (accountType === 'future') {
+                return this.futureTickers
+            } else {
+                return []
+            }
         },
 
         currentAccountResolved () {
@@ -283,6 +314,10 @@ export default {
 
             return ''
         },
+
+        currentSearchTarget () {
+
+        },
     },
 
     watch: {
@@ -291,8 +326,9 @@ export default {
 
             this.$nextTick()
                 .then(() => {
-                    const { instrumentId, lastPrice, totalVolume, directionOrigin } = newPosData;
+                    const { instrumentId, lastPrice, totalVolume, directionOrigin, exchangeId } = newPosData;
                     this.$set(this.makeOrderForm, 'instrument_id', instrumentId);
+                    this.$set(this.makeOrderForm, 'exchange_id', exchangeId);
                     this.$set(this.makeOrderForm, 'limit_price', lastPrice);
                     this.$set(this.makeOrderForm, 'volume', totalVolume);
                     
@@ -306,11 +342,16 @@ export default {
                         this.$set(this.makeOrderForm, 'side', 0)
                     }
                 })
-
-        }
+        },
     },
 
     methods: {
+        handleSelectInstrumentId (item) {
+            const { ticker, exchangeId } = item;
+            this.$set(this.makeOrderForm, 'instrument_id', ticker)
+            this.$set(this.makeOrderForm, 'exchange_id', exchangeId)
+        },
+
         handleClose () {
             this.clearData();
         },
@@ -355,12 +396,6 @@ export default {
                         .then(() => this.$message.success('下单指令已发送！'))
                         .catch(err => this.$message.error(err))
                     
-                    //save instrumentid to ls
-                    const instrumentIdsList = ls.get('instrument_ids_list');
-                    ls.set('instrument_ids_list', {
-                        ...instrumentIdsList,
-                        [makeOrderForm.instrument_id || '']: +new Date().getTime()
-                    })
                 }
             })
         },
@@ -373,20 +408,18 @@ export default {
         },
 
         querySearch (queryString, cb) {
-            const t = this;
-            const instrumentIdsList = ls.get('instrument_ids_list') || {};
-            const instrumentIdsListResolve = Object.keys(instrumentIdsList)
-                .map(key => ({value: key, insertTime: instrumentIdsList[key]}))
-                .sort((a, b) => {
-                    if(a.insertTime > b.insertTime) return -1
-                    else if(b.insertTime > a.insertTime) return 1
-                    else return 0
-                })
-
-            const results = (queryString.trim() 
-            ? instrumentIdsListResolve.filter(instrumentId => (instrumentId.value.includes(queryString))) 
-            : instrumentIdsListResolve)
+            const results = this.getSearchTickers(queryString);
             cb(results)
+        },
+
+        getSearchTickers (queryString) {
+            return this.targetTickersSource.filter(item => {
+                const { ticker, name, exchangeId } = item
+                if (ticker.toLowerCase().includes(queryString.toLowerCase())) return true;
+                if (name.toLowerCase().includes(queryString.toLowerCase())) return true;
+                if (exchangeId.toUpperCase().includes(queryString.toUpperCase())) return true;
+                return false
+            })
         },
 
         getAvailCash (accountId) {
@@ -431,6 +464,21 @@ export default {
 @import "@/assets/scss/skin.scss";
 $size: 25px;
 $fontSize: 10px;
+
+.make-order-instrument-ids__warp {
+    display: flex;
+    justify-content: space-between;
+    padding-right: 16px;
+    box-sizing: border-box;
+
+    .make-order-instrument-id-item {
+
+        .ticker {
+            display: inline-block;
+            width: 50px;
+        }
+    }
+}
 
 .kf-make-order-dashboard__body {
     padding: 0 5px 10px 10px;
