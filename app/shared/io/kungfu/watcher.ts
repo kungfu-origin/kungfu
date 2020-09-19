@@ -5,6 +5,7 @@ import { toDecimal } from '__gUtils/busiUtils';
 import { readJsonSync } from '__gUtils/fileUtils';
 import { offsetName, orderStatus, sideName, posDirection, priceType, hedgeFlag, instrumentType, volumeCondition, timeCondition } from "__gConfig/tradingConfig";
 import { logger } from '../../utils/logUtils';
+import { watch } from 'fs-extra';
 
 
 
@@ -31,7 +32,14 @@ export const watcher: any = (() => {
 
 
 export const startGetKungfuTradingData = (callback: Function, interval = 1000) => {
-    if ((process.env.RENDERER_TYPE !== 'app') && (process.env.APP_TYPE !== 'cli')) return
+    if (process.env.RENDERER_TYPE !== 'app') {
+        if (process.env.RENDERER_TYPE !== 'makeOrder') {
+            if (process.env.APP_TYPE !== 'cli') {
+                return 
+            }
+        }
+    }
+    
     setTimerPromiseTask(() => {
         return new Promise((resolve) => {
             if (!watcher.isLive() && !watcher.isStarted() && watcher.isUsable()) {
@@ -51,7 +59,14 @@ export const startGetKungfuTradingData = (callback: Function, interval = 1000) =
 
 
 export const startGetKungfuGlobalData = (callback: Function, interval = 1000) => {
-    if ((process.env.RENDERER_TYPE !== 'app') && (process.env.APP_TYPE !== 'cli')) return
+    if (process.env.RENDERER_TYPE !== 'app') {
+        if (process.env.RENDERER_TYPE !== 'makeOrder') {
+            if (process.env.APP_TYPE !== 'cli') {
+                return 
+            }
+        }
+    }
+    
     setTimerPromiseTask(() => {
         return new Promise((resolve) => {
             if (!watcher.isLive() && !watcher.isStarted() && watcher.isUsable()) {

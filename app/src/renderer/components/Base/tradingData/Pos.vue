@@ -32,7 +32,6 @@
 
 <script>
 
-import MakeOrderDialog from '../MakeOrderDialog';
 import tradingDataMixin from './js/tradingDataMixin';
 
 import { debounce } from '__gUtils/busiUtils';
@@ -109,11 +108,6 @@ export default {
             ]
         }
     },
-
-    components: {
-        MakeOrderDialog
-    },
-
 
     watch: {
         kungfuData (positions) {

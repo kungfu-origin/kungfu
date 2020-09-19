@@ -165,6 +165,7 @@ import { Autocomplete } from 'element-ui';
 import { from } from 'rxjs';
 import { ipcRenderer } from 'electron';
 
+import { buildTradingDataPipe } from '__io/kungfu/tradingData';
 import makeOrderMixin from '@/components/Base/tradingData/js/makeOrderMixin';
 
 const ls = require('local-storage');
@@ -188,7 +189,6 @@ function filterPriceType (priceType) {
 export default {
 
     mixins: [ makeOrderMixin ],
-
 
     data () {
         this.sourceTypeConfig = sourceTypeConfig;
@@ -297,11 +297,15 @@ export default {
         avaliableOrderVolume () {
 
             if (this.makeOrderForm.price_type === 0) {
-                const price = +this.makeOrderForm.limit_price;
-                if (!+price) return '';
-                if (!+this.avaliableCash) return ''
-                return Math.floor(this.avaliableCash / price)
-            }
+                if (this.makeOrderForm.side === 0) { //买
+                    const price = +this.makeOrderForm.limit_price;
+                    if (!+price) return '';
+                    if (!+this.avaliableCash) return ''
+                    return Math.floor(this.avaliableCash / price)
+                } else if (this.makeOrderForm.side === 1) { //卖
+                    return this.makeOrderByPosData.totalVolume || ''
+                }                
+            } 
 
             return ''
         },
@@ -313,6 +317,9 @@ export default {
 
     watch: {
         makeOrderByPosData (newPosData) {
+
+            if (!Object.keys(newPosData || {}).length) return;
+
             this.clearData();
 
             this.$nextTick()
@@ -334,17 +341,16 @@ export default {
                     }
                 })
         },
+
+        "makeOrderForm.instrument_id" (instrumentId) {
+            // ticker 变了，清空 makeOrderByPosData
+            if (instrumentId !== this.makeOrderByPosData.instrumentId) {
+                this.makeOrderByPosData = {}
+            }
+        }
     },
 
     methods: {
-        bindListenRenderEvents () {
-            ipcRenderer.on('init-make-order-win-info', (event, info) => {
-                const { currentId, makeOrderByPosData, moduleType } = info;                
-                this.currentId = currentId;
-                this.moduleType = moduleType
-                this.makeOrderByPosData = makeOrderByPosData;
-            })
-        },
 
         handleSelectInstrumentId (item) {
             const { ticker, exchangeId } = item;
@@ -368,6 +374,25 @@ export default {
 
         handleSelectAccount (account) {
             this.currentAccount = account;
+        },
+
+        listenKungfuData (type) {
+            this.tradingDataPipe && this.tradingDataPipe.unsubscribe();
+            this.tradingDataPipe = buildTradingDataPipe(type).subscribe(data => {
+                const assets = data['assets'];
+                this.$store.dispatch('setAccountsAsset', Object.freeze(JSON.parse(JSON.stringify(assets))));
+            })
+        },
+
+        bindListenRenderEvents () {
+            ipcRenderer.on('init-make-order-win-info', (event, info) => {
+                const { currentId, makeOrderByPosData, moduleType } = info;                
+                this.currentId = currentId;
+                this.moduleType = moduleType
+                this.makeOrderByPosData = makeOrderByPosData;
+
+                this.listenKungfuData(moduleType)
+            })
         },
 
         submit () {
@@ -400,6 +425,7 @@ export default {
         },
 
         getSearchTickers (queryString = '') {
+            
             return this.targetTickersSource.filter(item => {
                 const { ticker, name, exchangeId } = {
                     ticker: '',
