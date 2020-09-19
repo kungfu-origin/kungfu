@@ -125,6 +125,7 @@ export default {
     },
     
     methods:{
+
         handleExport () {
             const t = this;
             t.$saveFile({

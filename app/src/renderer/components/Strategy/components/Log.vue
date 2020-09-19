@@ -193,11 +193,6 @@ export default {
                     'getStrategyLog', 
                     BrowserWindow.getFocusedWindow(),
                     BrowserWindow,
-                    // {
-                    //     width: 800,
-                    //     height: 600,
-                    //     show: true
-                    // }
                 ).then(({ win, curWinId }) => {
                     win.webContents.send('get-strategy-log', {
                         winId: curWinId,

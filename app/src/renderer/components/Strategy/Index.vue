@@ -15,15 +15,7 @@
                             <Log></Log>                         
                         </el-col>
                         <el-col :span="10">
-                            <MakeOrderDashboard
-                            v-if="showMakeOrderDashboard"
-                            moduleType="strategy"
-                            :currentId="strategyId"
-                            :makeOrderByPosData="makeOrderByPosData"
-                            @showMakeOrderDashboard="handleShowOrCloseMakeOrderDashboard(false)"
-                            ></MakeOrderDashboard>
                             <Pnl
-                            v-else
                             ref="pnl"
                             :currentId="strategyId" 
                             moduleType="strategy"
@@ -45,7 +37,6 @@
                         </el-col>
                         <el-col :span="10">
                             <Pnl
-                            v-if="!showMakeOrderDashboard"
                             ref="pnl"
                             :currentId="strategyId" 
                             moduleType="strategy"
@@ -53,13 +44,6 @@
                             :dailyPnl="dailyPnl"
                             :addTime="addTime"                
                             ></Pnl>
-                            <MakeOrderDashboard
-                            v-else
-                            moduleType="strategy"
-                            :currentId="strategyId"
-                            :makeOrderByPosData="makeOrderByPosData"
-                            @showMakeOrderDashboard="handleShowOrCloseMakeOrderDashboard(false)"
-                            ></MakeOrderDashboard>
                         </el-col>
                     </el-row>
 
@@ -162,7 +146,6 @@ import CurrentOrder from '../Base/tradingData/CurrentOrder';
 import TradeRecord from '../Base/tradingData/TradeRecord';
 import Pos from '../Base/tradingData/Pos';
 import Pnl from '../Base/tradingData/pnl/Index';
-import MakeOrderDashboard from '../Base/MakeOrderDashboard';
 
 import { buildTradingDataPipe } from '__io/kungfu/tradingData';
 import accountStrategyMixins from '@/assets/js/mixins/accountStrategyMixins';
@@ -172,6 +155,8 @@ export default {
 
     data(){
         this.tradingDataPipe = null;
+        this.moduleType = 'strategy';
+
         return {
             orders: Object.freeze([]),
             trades: Object.freeze([]),
@@ -240,7 +225,7 @@ export default {
 
     components: {
         Strategy, CurrentOrder, TradeRecord, 
-        Pos, Log, Pnl, MakeOrderDashboard
+        Pos, Log, Pnl
     },
 
     methods:{

@@ -195,31 +195,37 @@ export const throttleInsert = (interval = 300, type = 'push'): Function => {
  * 新建窗口
  * @param  {string} htmlPath
  */
-export const openVueWin = (htmlPath: string, routerPath: string, BrowserWindow: any): void => {
+export const openVueWin = (htmlPath: string, routerPath: string, BrowserWindow: any, windowConfig: {}): void => {
+
+    let x,y;
+
+    const currentWindow = BrowserWindow.getFocusedWindow();//获取当前活动的浏览器窗口。
+
+    if (currentWindow) { //如果上一步中有活动窗口，则根据当前活动窗口的右下方设置下一个窗口的坐标
+        const [ currentWindowX, currentWindowY ] = currentWindow.getPosition();
+        x = currentWindowX + 10;
+        y = currentWindowY + 10;
+    }
+
     const modalPath = process.env.NODE_ENV !== 'production'
     ? `http://localhost:9090/${htmlPath}.html#${routerPath}`
     : `file://${__dirname}/${htmlPath}.html#${routerPath}`
-    const isDevelopment = process.env.NODE_ENV === "development"
     
     let win = new BrowserWindow({
+        x,
+        y,
         width: 1080, 
         height: 766,
         backgroundColor: '#161B2E',
         webPreferences: {
             nodeIntegration: true
         },
+        ...windowConfig
     });
-    if(isDevelopment) {
-        win.webContents.on("did-frame-finish-load", () => {
-            win.webContents.once("devtools-opened", () => {
-                win.focus();
-            });
-            win.webContents.openDevTools();
-        });
-    }
+
     win.loadURL(modalPath)
-    win.show()
-    win.on('close', () => win = null)
+    win.on('close', () => { win = null })
+    return win
 }
 
 /**

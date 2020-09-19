@@ -1,18 +1,13 @@
 <template>
     <tr-dashboard :title="`下单 ${currentId}`">
-        <div slot="dashboard-header">
-            <tr-dashboard-header-item>
-                <el-button size="mini" @click="$emit('showMakeOrderDashboard')">关闭</el-button>
-            </tr-dashboard-header-item>
-        </div>
-        <div class="kf-make-order-dashboard__body">
-            <el-form ref="make-order-form" label-width="50px" :model="makeOrderForm">
+        <div class="kf-make-order-window__body">
+            <el-form ref="make-order-form" label-width="60px" :model="makeOrderForm">
                 <el-form-item
                 v-if="moduleType === 'strategy'"
                 label="账户"
                 prop="name"
                 :rules="[
-                    { required: true, message: '不能为空！', trigger: 'change' },
+                    { required: true, message: '不能为空！', trigger: 'change'},
                 ]">
                     <el-select v-model.trim="makeOrderForm.name" @change="handleSelectAccount">
                         <el-option
@@ -30,9 +25,10 @@
                 label="代码"
                 prop="instrument_id"
                 :rules="[
-                    { required: true, message: '不能为空！'},
+                    { required: true, message: '不能为空！', trigger: 'blur'},
                 ]">
                     <el-autocomplete 
+                    ref="insturment-id-input"
                     v-model.trim="makeOrderForm.instrument_id"
                     :fetch-suggestions="querySearch"
                     placeholder="请输入代码名称"
@@ -106,8 +102,8 @@
                         label="价格"
                         prop="limit_price"
                         :rules="[
-                            { required: true, message: '不能为空！' },
-                            { validator: biggerThanZeroValidator, trigger: 'blur'}
+                            { required: true, message: '不能为空！', trigger: 'blur' },
+                            { validator: biggerThanZeroValidator}
                         ]">
                             <el-input-number
                             :precision="2"
@@ -132,8 +128,8 @@
                         prop="volume"
                         class="no-margin"
                         :rules="[
-                            { required: true, message: '不能为空！' },
-                            { validator: biggerThanZeroValidator, trigger: 'blur'}
+                            { required: true, message: '不能为空！', trigger: 'blur' },
+                            { validator: biggerThanZeroValidator}
                         ]">
                             <el-input-number 
                             :step="100"  
@@ -162,15 +158,17 @@
 import Vue from 'vue';
 import { mapState } from 'vuex';
 import { biggerThanZeroValidator } from '__assets/validator';
-import { deepClone, ifProcessRunning } from '__gUtils/busiUtils';
+import { deepClone } from '__gUtils/busiUtils';
 import { sourceTypeConfig, sideName, offsetName, priceType, hedgeFlag, exchangeIds, instrumentTypes } from '__gConfig/tradingConfig';
 import { getFutureTickersConfig } from '__assets/base'
 import { Autocomplete } from 'element-ui';
 import { from } from 'rxjs';
+import { ipcRenderer } from 'electron';
 
 import makeOrderMixin from '@/components/Base/tradingData/js/makeOrderMixin';
 
 const ls = require('local-storage');
+const REMOTE = require('electron').remote
 
 Vue.use(Autocomplete)
 
@@ -186,28 +184,11 @@ function filterPriceType (priceType) {
     return filterPriceType
 }
 
+
 export default {
 
     mixins: [ makeOrderMixin ],
 
-    props: {
-        currentId: {
-            type: String,
-            default: ''
-        },
-
-        moduleType: {
-            type: String, //'account' : 'strategy',
-            default: ''
-        },
-
-        makeOrderByPosData: {
-            type: Object,
-            default: () => ({})
-        },
-
-        pos: Object
-    },
 
     data () {
         this.sourceTypeConfig = sourceTypeConfig;
@@ -220,6 +201,10 @@ export default {
         this.biggerThanZeroValidator = biggerThanZeroValidator;
 
         return {
+            currentId: '',
+            moduleType: '',
+            makeOrderByPosData: {},
+
             currentAccount: '', //only strategy
             makeOrderForm: {
                 name: '', // account_id in strategy
@@ -244,7 +229,9 @@ export default {
         getFutureTickersConfig()
             .then(res => {
                 this.futureTickers = Object.freeze(res)
-            })
+            });
+
+        this.bindListenRenderEvents();
     },
 
     computed: {
@@ -257,17 +244,17 @@ export default {
         }),
 
         accountType() {
-            const sourceName = this.currentSourceName;
+            const sourceName = this.currentSourceName || '';
             if (!sourceName) return 'stock';
             return (this.tdAccountSource[sourceName] || {}).typeName || ''
         },
 
         isFuture () {
-            return this.accountType.toLowerCase() === 'future'
+            return (this.accountType || '').toLowerCase() === 'future'
         },
 
         targetTickersSource () {
-            const accountType = this.accountType.toLowerCase();
+            const accountType = (this.accountType || '').toLowerCase();
             if (accountType === 'stock') {
                 return this.futureTickers
             } else if (accountType === 'future') {
@@ -279,9 +266,11 @@ export default {
 
         currentAccountResolved () {
             if (this.moduleType === 'account') {
-                return this.currentId
+                return this.currentId || ''
             } else if (this.moduleType === 'strategy') {
                 return this.currentAccount
+            } else {
+                return ''
             }
         }, 
 
@@ -291,9 +280,11 @@ export default {
 
         currentSourceName() {
             if (this.moduleType === 'account') {
-                return this.currentId.toSourceName()
+                return (this.currentId || '').toSourceName()
             } else if (this.moduleType === 'strategy') {
                 return this.currentAccount.toSourceName();
+            } else {
+                return ''
             }
         },
 
@@ -346,10 +337,25 @@ export default {
     },
 
     methods: {
+        bindListenRenderEvents () {
+            ipcRenderer.on('init-make-order-win-info', (event, info) => {
+                const { currentId, makeOrderByPosData, moduleType } = info;                
+                this.currentId = currentId;
+                this.moduleType = moduleType
+                this.makeOrderByPosData = makeOrderByPosData;
+            })
+        },
+
         handleSelectInstrumentId (item) {
             const { ticker, exchangeId } = item;
             this.$set(this.makeOrderForm, 'instrument_id', ticker)
             this.$set(this.makeOrderForm, 'exchange_id', exchangeId)
+            
+            this.$nextTick()
+                .then(() => {
+                    this.$refs['make-order-form'].validateField('instrument_id');
+                })
+            
         },
 
         handleClose () {
@@ -370,27 +376,9 @@ export default {
                 if(valid) {
                     //需要对account_id再处理
                     let makeOrderForm = deepClone(t.makeOrderForm);
-                    const gatewayName = `td_${t.currentSourceName}_${t.currentAccountId}`;
-
-                    if (!ifProcessRunning(gatewayName, t.processStatus)) {
-                        t.$message.warning(`需要先启动 ${makeOrderForm.name} 交易进程！`)
-                        return;
-                    }
-
+                    console.log(makeOrderForm, '-----====', this.moduleType, makeOrderForm, t.currentAccountResolved, t.currentId)
                     const instrumentType = t.getInstrumentType(t.currentAccountResolved);
                     makeOrderForm['instrument_type'] = instrumentType;
-
-                    //sell
-                    if ((t.makeOrderForm.side === 1) && (instrumentType === 'Stock')) {
-                        const instrumentId = t.makeOrderForm.instrument_id;
-                        const targetVolume = t.makeOrderForm.volume;
-                        const posItem = t.pos[instrumentId + '多'] || {};
-                        const totalVolume = posItem.totalVolume || 0;
-                        if (totalVolume <= targetVolume) {
-                            t.$message.warning(`持仓不足！当前 ${instrumentId} 持仓 ${totalVolume}`)
-                            return
-                        }
-                    }
 
                     this.makeOrder(this.moduleType, makeOrderForm, t.currentAccountResolved, t.currentId)
                         .then(() => this.$message.success('下单指令已发送！'))
@@ -412,9 +400,15 @@ export default {
             cb(results)
         },
 
-        getSearchTickers (queryString) {
+        getSearchTickers (queryString = '') {
             return this.targetTickersSource.filter(item => {
-                const { ticker, name, exchangeId } = item
+                const { ticker, name, exchangeId } = {
+                    ticker: '',
+                    name: '',
+                    exchangeId: '',
+                    ...item
+                }
+
                 if (ticker.toLowerCase().includes(queryString.toLowerCase())) return true;
                 if (name.toLowerCase().includes(queryString.toLowerCase())) return true;
                 if (exchangeId.toUpperCase().includes(queryString.toUpperCase())) return true;
@@ -463,7 +457,7 @@ export default {
 <style lang="scss">
 @import "@/assets/scss/skin.scss";
 $size: 25px;
-$fontSize: 10px;
+$fontSize: 12px;
 
 .make-order-instrument-ids__warp {
     display: flex;
@@ -480,8 +474,8 @@ $fontSize: 10px;
     }
 }
 
-.kf-make-order-dashboard__body {
-    padding: 0 5px 10px 10px;
+.kf-make-order-window__body {
+    padding: 0 12px 10px 10px;
     box-sizing: border-box;
     display: flex;
     justify-content: space-around;
@@ -588,7 +582,7 @@ $fontSize: 10px;
     }
 
     .make-order-btns {
-        padding-left: 10px;
+        padding-left: 20px;
         width: 52px;
         display: flex;
         flex-direction: column;

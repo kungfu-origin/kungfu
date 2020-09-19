@@ -11,16 +11,7 @@
                     <el-col :span="monitTrades ? 12 : 14">
                         <MdAccount></MdAccount>
                     </el-col>
-                    <el-col :span="monitTrades ? 12 : 10" v-if="showMakeOrderDashboard">
-                        <MakeOrderDashboard
-                        moduleType="account"
-                        :currentId="currentId"
-                        :makeOrderByPosData="makeOrderByPosData"
-                        @showMakeOrderDashboard="handleShowOrCloseMakeOrderDashboard(false)"
-                        ></MakeOrderDashboard>
-                    </el-col>
-
-                    <el-col :span="monitTrades ? 12 : 10" v-if="!showMakeOrderDashboard">
+                    <el-col :span="monitTrades ? 12 : 10">
                         <Pnl 
                         :currentId="currentId" 
                         moduleType="account"
@@ -79,7 +70,6 @@ import TdAccount from './components/TdAccount';
 import MdAccount from './components/MdAccount';
 import CurrentOrder from '../Base/tradingData/CurrentOrder';
 import TradeRecord from '../Base/tradingData/TradeRecord';
-import MakeOrderDashboard from '../Base/MakeOrderDashboard';
 import Pos from '../Base/tradingData/Pos';
 import Pnl from '../Base/tradingData/pnl/Index';
 
@@ -92,8 +82,9 @@ export default {
     mixins: [ accountStrategyMixins ],
 
     data() {
-        const t = this;
         this.tradingDataPipe = null;
+        this.moduleType = 'account';
+
         return {
             orders: Object.freeze([]),
             trades: Object.freeze([]),
@@ -111,7 +102,6 @@ export default {
     components: {
         TdAccount, MdAccount, Pnl, Pos,
         CurrentOrder, TradeRecord,
-        MakeOrderDashboard
     },
 
     computed:{

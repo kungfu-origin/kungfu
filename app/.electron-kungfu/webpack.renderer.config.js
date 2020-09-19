@@ -33,6 +33,7 @@ let rendererConfig = {
   entry: {
     index: path.join(__dirname, '../src/renderer/views/index/main.js'),
     code: path.join(__dirname, '../src/renderer/views/code/main.js'),
+    makeOrder: path.join(__dirname, '../src/renderer/views/makeOrder/main.js'),
   },
 
   output: {
@@ -155,6 +156,19 @@ let rendererConfig = {
         removeComments: true
       },
       chunks: ['code'],
+      nodeModules: process.env.NODE_ENV !== 'production'
+        ? path.resolve(__dirname, '../node_modules')
+        : false
+    }),
+    new HtmlWebpackPlugin({
+      filename: 'makeOrder.html',
+      template: path.resolve(__dirname, '../src/index.ejs'),
+      minify: {
+        collapseWhitespace: true,
+        removeAttributeQuotes: true,
+        removeComments: true
+      },
+      chunks: ['makeOrder'],
       nodeModules: process.env.NODE_ENV !== 'production'
         ? path.resolve(__dirname, '../node_modules')
         : false

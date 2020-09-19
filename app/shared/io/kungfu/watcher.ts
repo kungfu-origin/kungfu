@@ -18,9 +18,14 @@ export const watcher: any = (() => {
         return kungfu.watcher(KF_HOME, kungfu.formatStringToHashHex(id), bypassQuote);
     }
 
-    if (process.env.RENDERER_TYPE !== 'app') return {}
 
-    const id = [process.env.APP_TYPE].join('');
+    if (process.env.RENDERER_TYPE !== 'app') {
+        if (process.env.RENDERER_TYPE !== 'makeOrder') {
+            return {}
+        }
+    }
+
+    const id = [process.env.APP_TYPE, process.env.RENDERER_TYPE].join('');
     return kungfu.watcher(KF_HOME, kungfu.formatStringToHashHex(id), bypassQuote);
 })()
 
