@@ -507,18 +507,28 @@ $fontSize: 12px;
     min-height: 100%;
 
     .el-form {
-        flex: 1
+        flex: 1;
+
+        .el-form-item__error {
+            padding-top: 2px;
+        }
     }
 
     .el-form-item {
-        margin-bottom: 10px;
+        margin-bottom: 15px;
 
         .el-form-item__label {
-            line-height: $size;
             font-size: $fontSize;
             text-align: left;    
             padding-right: 5px;
+            line-height: 30px;
         }
+
+        .el-form-item__content {
+            line-height: 30px;
+        }
+
+
 
         &.no-margin {
             margin-bottom: 0px;
@@ -528,36 +538,9 @@ $fontSize: 12px;
             margin-right: 8px; 
         }
 
-        .el-form-item__content {
-            line-height: $size;
-
-            .el-input__inner {
-                height: $size;
-                line-height: $size;
-            }
-        }
-
-        .el-form-item__error {
-            font-size: 9px;
-            padding-top: 1px;
-        }
-
-        .el-input-number {
-            line-height: $size;
-        }
-
         .el-radio__label {
             font-size: $fontSize;
             padding-left: 5px;
-        }
-
-        .el-input-number__increase, .el-input-number__decrease {
-            width: $size;
-            height: $size - 2;
-        }
-
-        .el-input__icon {
-            line-height: $size - 2;
         }
 
         .el-radio.is-checked {
@@ -593,14 +576,14 @@ $fontSize: 12px;
     }
 
     .make-order-line {
-        margin-bottom: 10px;
+        margin-bottom: 15px;
 
         .make-order-line-info {
             
             span {
                 display: block;
                 color: $font;
-                font-size: 10px;
+                font-size: 12px;
                 text-align: right;
             }
         }
@@ -608,7 +591,7 @@ $fontSize: 12px;
 
     .make-order-btns {
         padding-left: 20px;
-        width: 52px;
+        width: 70px;
         display: flex;
         flex-direction: column;
         justify-content: flex-start;

@@ -10,6 +10,12 @@ export default {
         }
     },
 
+
+
+    mounted () {
+        this.emitCurrentMakeOrderWinInfo();
+    },
+
     watch: {
         currentIdInAccountStrategyResolved () {
             this.emitCurrentMakeOrderWinInfo();
@@ -39,7 +45,7 @@ export default {
                     BrowserWindow, 
                     {
                         width: 410,
-                        height: 410
+                        height: 460
                     }
                 )
 
