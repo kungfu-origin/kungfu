@@ -376,7 +376,6 @@ export default {
                 if(valid) {
                     //需要对account_id再处理
                     let makeOrderForm = deepClone(t.makeOrderForm);
-                    console.log(makeOrderForm, '-----====', this.moduleType, makeOrderForm, t.currentAccountResolved, t.currentId)
                     const instrumentType = t.getInstrumentType(t.currentAccountResolved);
                     makeOrderForm['instrument_type'] = instrumentType;
 

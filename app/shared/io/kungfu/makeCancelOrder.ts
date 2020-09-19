@@ -15,6 +15,7 @@ interface MakeOrderData {
 
 export const kungfuMakeOrder = (makeOrderData: MakeOrderData, accountId: string, strategyId?: string) => {
     const accountLocation = encodeKungfuLocation(accountId, 'td');
+
     if (!watcher.isReadyToInteract(accountLocation)) {
         return Promise.reject(new Error(`需要先启动 TD ${accountId} 交易进程！`))
     }
