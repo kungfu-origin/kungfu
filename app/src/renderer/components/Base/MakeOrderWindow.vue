@@ -40,7 +40,7 @@
                                     <span class="ticker">{{ item.ticker }}</span>
                                     <span class="name">{{ item.name }}</span>
                                 </div>
-                                <div class="make-order-instrument-id-item">{{ item.exchangeId }}</div>
+                                <div class="make-order-instrument-id-item">{{ (item.exchangeId || '').toUpperCase() }}</div>
                             </div>
                         </template>
                     </el-autocomplete>
@@ -160,7 +160,7 @@ import { mapState } from 'vuex';
 import { biggerThanZeroValidator } from '__assets/validator';
 import { deepClone } from '__gUtils/busiUtils';
 import { sourceTypeConfig, sideName, offsetName, priceType, hedgeFlag, exchangeIds, instrumentTypes } from '__gConfig/tradingConfig';
-import { getFutureTickersConfig } from '__assets/base'
+import { getFutureTickersConfig, getStockTickersConfig } from '__assets/base'
 import { Autocomplete } from 'element-ui';
 import { from } from 'rxjs';
 import { ipcRenderer } from 'electron';
@@ -221,7 +221,8 @@ export default {
 
             currentSearchTickerList: [],
 
-            futureTickers: []
+            futureTickers: [],
+            stockTickers: []
         }
     },
 
@@ -230,6 +231,12 @@ export default {
             .then(res => {
                 this.futureTickers = Object.freeze(res)
             });
+
+        getStockTickersConfig()
+            .then(res => {
+                this.stockTickers = Object.freeze(res)
+                console.log(this.stockTickers)
+            })
 
         this.bindListenRenderEvents();
     },
@@ -256,7 +263,7 @@ export default {
         targetTickersSource () {
             const accountType = (this.accountType || '').toLowerCase();
             if (accountType === 'stock') {
-                return this.futureTickers
+                return this.stockTickers
             } else if (accountType === 'future') {
                 return this.futureTickers
             } else {
@@ -355,7 +362,7 @@ export default {
         handleSelectInstrumentId (item) {
             const { ticker, exchangeId } = item;
             this.$set(this.makeOrderForm, 'instrument_id', ticker)
-            this.$set(this.makeOrderForm, 'exchange_id', exchangeId)
+            this.$set(this.makeOrderForm, 'exchange_id', (exchangeId || '').toUpperCase())
             
             this.$nextTick()
                 .then(() => {

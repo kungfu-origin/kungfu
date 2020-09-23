@@ -113,6 +113,8 @@ export const KF_TARADING_CONFIG_PATH = path.join(KF_HOME, 'config', 'kfTradingCo
 
 export const KF_FUTURE_TICKERS_CONFIG_PATH = path.join(KUNGFU_RESOURCES_DIR, 'config', 'futureTickers.json')
 
+export const KF_STOCK_TICKERS_CONFIG_PATH = path.join(KUNGFU_RESOURCES_DIR, 'config', 'stockTickers.json')
+
 
 //================== config start =================================
 
