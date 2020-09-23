@@ -48,7 +48,8 @@ export default {
                         height: 460
                     }
                 )
-
+                
+                window.makeOrderWin.setAlwaysOnTop(true);
                 this.bindMakeOrderWinEvent();
             } 
             
