@@ -5,6 +5,7 @@
 #include "trader_ctp.h"
 #include "serialize_ctp.h"
 #include "type_convert_ctp.h"
+#include "DataCollect.h"
 #include <chrono>
 #include <kungfu/wingchun/encoding.h>
 
@@ -18,9 +19,13 @@ namespace kungfu::wingchun::ctp {
 TraderCTP::TraderCTP(bool low_latency, locator_ptr locator, const std::string &account_id,
                      const std::string &json_config)
     : Trader(low_latency, std::move(locator), SOURCE_CTP, account_id), front_id_(-1), session_id_(-1), order_ref_(-1),
-      request_id_(0), api_(nullptr) {
-  yijinjing::log::copy_log_settings(get_io_device()->get_home(), SOURCE_CTP);
-  config_ = nlohmann::json::parse(json_config);
+      request_id_(0), system_info_len_(0), api_(nullptr) {
+    yijinjing::log::copy_log_settings(get_io_device()->get_home(), SOURCE_CTP);
+    config_ = nlohmann::json::parse(json_config);
+
+    memset(system_info_, 0, 344);
+    CTP_GetSystemInfo(system_info_, system_info_len_);
+    SPDLOG_INFO("SystemInfo len: {}", system_info_len_);
 }
 
 TraderCTP::~TraderCTP() {
@@ -132,8 +137,9 @@ bool TraderCTP::cancel_order(const event_ptr &event) {
 }
 
 void TraderCTP::OnFrontConnected() {
-  req_auth();
-  SPDLOG_INFO("connected");
+    auto version = api_->GetApiVersion();
+    SPDLOG_INFO("connected, API version: {}", version);
+    req_auth();
 }
 
 void TraderCTP::OnFrontDisconnected(int nReason) {
@@ -394,17 +400,16 @@ void TraderCTP::on_start() {
 }
 
 bool TraderCTP::login() {
-  CThostFtdcReqUserLoginField login_field = {};
-  strcpy(login_field.TradingDay, "");
-  strcpy(login_field.UserID, config_.account_id.c_str());
-  strcpy(login_field.BrokerID, config_.broker_id.c_str());
-  strcpy(login_field.Password, config_.password.c_str());
-  int rtn = api_->ReqUserLogin(&login_field, ++request_id_);
-  if (rtn != 0) {
-    SPDLOG_ERROR("failed to request login for UserID {} BrokerID {}, error id: {}", login_field.UserID,
-                 login_field.BrokerID, rtn);
-  }
-  return rtn == 0;
+    CThostFtdcReqUserLoginField login_field = {};
+    strcpy(login_field.BrokerID, config_.broker_id.c_str());
+    strcpy(login_field.UserID, config_.account_id.c_str());
+    strcpy(login_field.Password, config_.password.c_str());
+    int rtn = api_->ReqUserLogin(&login_field, ++request_id_);
+    if (rtn != 0) {
+        SPDLOG_ERROR("failed to request login for UserID {} BrokerID {}, error id: {}", login_field.UserID,
+                     login_field.BrokerID, rtn);
+    }
+    return rtn == 0;
 }
 
 bool TraderCTP::req_settlement_confirm() {
@@ -417,20 +422,20 @@ bool TraderCTP::req_settlement_confirm() {
 }
 
 bool TraderCTP::req_auth() {
-  SPDLOG_INFO("request auth");
-  struct CThostFtdcReqAuthenticateField req = {};
-  strcpy(req.UserID, config_.account_id.c_str());
-  strcpy(req.BrokerID, config_.broker_id.c_str());
-  if (config_.product_info.length() > 0) {
-    strcpy(req.UserProductInfo, config_.product_info.c_str());
-  }
-  strcpy(req.AppID, config_.app_id.c_str());
-  strcpy(req.AuthCode, config_.auth_code.c_str());
-  int rtn = this->api_->ReqAuthenticate(&req, ++request_id_);
-  if (rtn != 0) {
-    SPDLOG_ERROR("failed to req auth, error id = {}", rtn);
-  }
-  return rtn == 0;
+    SPDLOG_INFO("request auth");
+    struct CThostFtdcReqAuthenticateField req = {};
+    strcpy(req.BrokerID, config_.broker_id.c_str());
+    strcpy(req.UserID, config_.account_id.c_str());
+    if (config_.product_info.length() > 0) {
+        strcpy(req.UserProductInfo, config_.product_info.c_str());
+    }
+    strcpy(req.AppID, config_.app_id.c_str());
+    strcpy(req.AuthCode, config_.auth_code.c_str());
+    int rtn = this->api_->ReqAuthenticate(&req, ++request_id_);
+    if (rtn != 0) {
+        SPDLOG_ERROR("failed to req auth, error id = {}", rtn);
+    }
+    return rtn == 0;
 }
 
 bool TraderCTP::req_qry_instrument() {

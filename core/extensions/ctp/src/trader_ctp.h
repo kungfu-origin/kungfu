@@ -86,6 +86,8 @@ private:
   int order_ref_;
   int request_id_;
 
+  char system_info_[344];
+  int system_info_len_;
   CThostFtdcTraderApi *api_;
 
   std::unordered_map<std::string, uint64_t> inbound_order_refs_;
