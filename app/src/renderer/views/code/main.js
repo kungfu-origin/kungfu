@@ -12,6 +12,7 @@ import App from './App.vue';
 
 import '@/assets/iconfont/iconfont.js';
 import '@/assets/iconfont/iconfont.css';
+import 'monaco-editor/min/vs/editor/editor.main.css';
 
 Vue.use(ElementUI)
 

@@ -167,13 +167,14 @@
     "kungfu-core": "*",
     "local-storage": "^2.0.0",
     "log4js": "^4.0.2",
-    "monaco-editor": "0.18.1",
     "physical-cpu-count": "^2.0.0",
     "pm2": "4.4.0",
     "tail": "^2.0.2",
     "taskkill": "^2.0.0",
     "vue": "^2.6.11",
-    "vuex-electron": "^1.0.3"
+    "vuex-electron": "^1.0.3",
+    "monaco-editor": "^0.21.2",
+    "monaco-editor-webpack-plugin": "^2.0.0"
   },
   "devDependencies": {
     "@types/node": "^12.6.2",
@@ -215,7 +216,6 @@
     "mkdirp": "^0.5.1",
     "mocha": "^6.1.4",
     "moment": "^2.24.0",
-    "monaco-editor-webpack-plugin": "1.7.0",
     "multispinner": "^0.2.1",
     "node-loader": "^0.6.0",
     "node-sass": "^4.12.0",
