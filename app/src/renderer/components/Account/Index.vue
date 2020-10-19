@@ -28,7 +28,7 @@
                         v-model="monitOrders"
                         :currentId="currentId"
                         :kungfuData="orders"
-                        :gatewayName="`td_${currentAccount.account_id}`"
+                        :gatewayName="currentAccount.account_id"
                         :orderStat="orderStat"
                         @showHistory="handleShowHistory"
                         />   

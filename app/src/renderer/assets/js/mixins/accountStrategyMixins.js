@@ -63,6 +63,14 @@ export default {
         },
 
         handleMakeOrderByPos (item) {
+
+            if (this.moduleType === 'account') {
+                if (!this.currentId) {
+                    this.$message.warning(`需要先添加交易进程！`)
+                    return;
+                }
+            }
+
             this.makeOrderByPosData = Object.freeze(item)
             this.$nextTick()
                 .then(() => {

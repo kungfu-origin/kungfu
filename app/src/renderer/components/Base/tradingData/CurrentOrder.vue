@@ -146,6 +146,11 @@ export default {
             processStatus: state => state.BASE.processStatus
         }),
 
+        gatewayNameResolved () {
+            if (this.gatewayName) return `td_${this.gatewayName}`;
+            else return ''
+        },
+
         title () {
             if (this.name) return this.name;
             return this.todayFinish ? `委托记录 ${this.currentTitle}` : `未完成委托 ${this.currentTitle}`
@@ -311,8 +316,14 @@ export default {
 
             //先判断对应进程是否启动
             if (this.moduleType === 'account') {
-                if(this.processStatus[this.gatewayName] !== 'online'){
-                    this.$message.warning(`需要先启动 ${this.gatewayName.toAccountId()} 交易进程！`)
+
+                if (!this.gatewayNameResolved) {
+                    this.$message.warning(`需要先添加交易进程！`)
+                    return   
+                }
+
+                if(this.processStatus[this.gatewayNameResolved] !== 'online'){
+                    this.$message.warning(`需要先启动 ${this.gatewayNameResolved.toAccountId()} 交易进程！`)
                     return;
                 }
             }
@@ -336,7 +347,10 @@ export default {
 
             })
             .then(() => this.$message.success('撤单指令已发送！'))
-            .catch(err => this.$message.error(err.message || '撤单指令发送失败！'))
+            .catch(err => {
+                if(err == 'cancel') return;
+                this.$message.error(err.message || '撤单指令发送失败！')
+            })
         },
 
         //查看当日已完成
