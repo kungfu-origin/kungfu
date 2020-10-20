@@ -203,6 +203,7 @@ void master::on_request_write_to(const event_ptr &event) {
     return;
   }
   reader_->join(get_location(app_uid), request.dest_id, trigger_time);
+  app_cache_shift_[app_uid].ensure_storage(request.dest_id);
   require_write_to(trigger_time, app_uid, request.dest_id);
   if (is_location_live(request.dest_id) and has_writer(request.dest_id)) {
     require_read_from(0, request.dest_id, app_uid, trigger_time);
@@ -222,6 +223,7 @@ void master::on_request_read_from(const event_ptr &event) {
     return;
   }
   reader_->join(get_location(request.source_id), app_uid, trigger_time);
+  app_cache_shift_[request.source_id].ensure_storage(app_uid);
   require_write_to(trigger_time, request.source_id, app_uid);
   require_read_from(trigger_time, app_uid, request.source_id, request.from_time);
   Channel channel = {};
@@ -241,6 +243,7 @@ void master::on_channel_request(const event_ptr &event) {
   auto trigger_time = event->gen_time();
   if (is_location_live(request.source_id) and not has_channel(request.source_id, request.dest_id)) {
     reader_->join(get_location(request.source_id), request.dest_id, trigger_time);
+    app_cache_shift_[request.source_id].ensure_storage(request.dest_id);
     require_write_to(trigger_time, request.source_id, request.dest_id);
     register_channel(trigger_time, request);
     get_writer(location::PUBLIC)->write(trigger_time, request);
