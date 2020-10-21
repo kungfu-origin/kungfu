@@ -60,6 +60,8 @@ private:
 
   void try_add_location(int64_t trigger_time, const data::location_ptr &app_location);
 
+  void require_cached_write_to(int64_t trigger_time, uint32_t source_id, uint32_t dest_id);
+
   void feed(const event_ptr &event);
 
   void pong(const event_ptr &event);
