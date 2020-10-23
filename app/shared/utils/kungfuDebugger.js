@@ -140,7 +140,7 @@ export const kfDebugger = new class {
             return false;
         }
         else {
-            const order = this.makeOrder(ticker, InstrumentType.Stock, this.stockTickers[ticker].exchangeId, price, volume, Side.Buy, Offset.Open)
+            const order = this.makeOrder(ticker, InstrumentType.Stock, this.stockTickers[ticker].exchangeId.toUpperCase(), price, volume, Side.Buy, Offset.Open)
             return this.issueOrder(order)
         }
     }
@@ -150,7 +150,7 @@ export const kfDebugger = new class {
             return false;
         }
         else {
-            const order = this.makeOrder(ticker, InstrumentType.Stock, this.stockTickers[ticker].exchangeId, price, volume, Side.Sell, Offset.Open)
+            const order = this.makeOrder(ticker, InstrumentType.Stock, this.stockTickers[ticker].exchangeId.toUpperCase(), price, volume, Side.Sell, Offset.Open)
             return this.issueOrder(order)
         }
     }
