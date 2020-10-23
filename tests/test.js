@@ -1,7 +1,3 @@
-import {InstrumentType, Offset, Side} from "kungfu/shared/utils/kungfuDebugger";
-
-var order = kfDebugger.makeOrder('600000', InstrumentType.Stock, ExchangeId.SSE, 10.0, 200, Side.Buy, Offset.Open)
-console.log(order)
 
 // add xtp md config
 var mdLocation = kfDebugger.makeMdLocation('xtp')

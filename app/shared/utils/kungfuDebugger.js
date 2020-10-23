@@ -69,14 +69,6 @@ export const kfDebugger = new class {
         this.stockTickers = {}
         const stockArray = fs.readJsonSync(path.join(process.resourcesPath, 'kungfu-resources', 'config', 'stockTickers.json'), { throws: false })
         stockArray.stock.forEach(item => this.stockTickers[item.ticker] = item)
-        pm2.connect(true, function(err) {
-            if (err) {
-                console.error('failed to connect pm2 daemon ', err)
-            } else {
-                console.info('connected to pm2 daemon')
-            }
-        });
-
     }
 
     removeConfig(location) { return watcher.config.removeConfig(location)}
