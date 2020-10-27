@@ -45,9 +45,6 @@ export default {
                 }
             }
 
-            console.log(this.moduleType, this.currentId, '---')
-
-
             if (!window.makeOrderWin) {
                 window.makeOrderWin = this.$utils.openVueWin(
                     'makeOrder', 
