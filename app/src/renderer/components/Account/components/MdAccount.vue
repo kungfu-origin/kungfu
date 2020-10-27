@@ -2,6 +2,9 @@
       <tr-dashboard title="行情源">
         <div slot="dashboard-header">
             <tr-dashboard-header-item>
+                <el-switch :value="allmdProcessRunning" @change="handleMdSwitchAll()"></el-switch>
+            </tr-dashboard-header-item>
+            <tr-dashboard-header-item>
                 <el-button size="mini" @click="handleAdd" title="添加" id="add-account-btn">添加</el-button>
             </tr-dashboard-header-item>
         </div>
@@ -109,7 +112,18 @@ export default {
             mdList: state => state.ACCOUNT.mdList,
             mdTdState: state => state.ACCOUNT.mdTdState,
             processStatus: state => state.BASE.processStatus
-        })
+        }),
+
+        allmdProcessRunning () {
+            const notRunningList = this.mdList.filter(item => {
+                const isRunning = this.$utils.ifProcessRunning('md_' + item.ource_name, this.processStatus)
+                if (!isRunning) return true
+                else return false
+            })
+
+            if (notRunningList.length) return false;
+            return true
+        },
     },
 
     components: {
@@ -137,6 +151,10 @@ export default {
                 if(err == 'cancel') return
                 t.$message.error(err.message || '操作失败！')
             })
+        },
+
+        handleMdSwitchAll () {
+            console.log(111)
         },
 
         handleMdSwitch(value, account) {
