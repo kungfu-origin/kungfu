@@ -80,7 +80,7 @@ export default {
         },
 
         handleBlurAdjustOrderInput (type) {
-            const { instrument_id, limit_price, limitPriceOld, volume, volumeOld } = this.adjustOrderForm;
+            const { limit_price, volume } = this.adjustOrderForm;
 
             if (!+limit_price) {
                 this.clearAdjustOrderData()
@@ -92,15 +92,9 @@ export default {
                 return
             }
 
-            this.$confirm(
-                this.getAdjustOrderTips(type, instrument_id, limit_price, limitPriceOld, volume, volumeOld),
-                '提示', 
-                {
-                    confirmButtonText: '确 定', 
-                    cancelButtonText: '取 消'
-                })
-                .then(() => this.adjustOrderInputVisibility = false)
-                .then(() => this.cancelOrder(this.adjustOrderTargetData))
+            this.adjustOrderInputVisibility = false;
+
+            this.cancelOrder(this.adjustOrderTargetData)
                 .then(() => this.$message.success('撤单指令已发送！'))
                 .then(() => delayMiliSeconds(1000))
                 .then(() => this.makeOrder(

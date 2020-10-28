@@ -62,13 +62,13 @@ function getModeName(m) {
     return (objectFlip(mode)[m] || '').toLowerCase()
 }
 
-export const kfDebugger = new class {
+export const kfDebugger = class {
     constructor() {
         this.kfHome =  path.join(electron.remote.app.getPath('userData'), 'app');
         this.futureTickers = fs.readJsonSync(path.join(process.resourcesPath, 'kungfu-resources', 'config', 'futureTickers.json'), { throws: false })
         this.stockTickers = {}
         const stockArray = fs.readJsonSync(path.join(process.resourcesPath, 'kungfu-resources', 'config', 'stockTickers.json'), { throws: false })
-        stockArray.stock.forEach(item => this.stockTickers[item.ticker] = item)
+        ((stockArray || {}).stock || []).forEach(item => this.stockTickers[item.ticker] = item)
     }
 
     removeConfig(location) { return watcher.config.removeConfig(location)}

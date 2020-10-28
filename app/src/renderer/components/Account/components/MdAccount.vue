@@ -2,7 +2,7 @@
       <tr-dashboard title="行情源">
         <div slot="dashboard-header">
             <tr-dashboard-header-item>
-                <el-switch :value="allmdProcessRunning" @change="handleMdSwitchAll()"></el-switch>
+                <el-button size="mini" @click="handleMdSwitchAll" :title="startAllTxt">{{ startAllTxt }}</el-button>
             </tr-dashboard-header-item>
             <tr-dashboard-header-item>
                 <el-button size="mini" @click="handleAdd" title="添加" id="add-account-btn">添加</el-button>
@@ -114,16 +114,23 @@ export default {
             processStatus: state => state.BASE.processStatus
         }),
 
-        allmdProcessRunning () {
+        allMdProcessRunning () {
             const notRunningList = this.mdList.filter(item => {
-                const isRunning = this.$utils.ifProcessRunning('md_' + item.ource_name, this.processStatus)
-                console.log(item, isRunning)
+                const isRunning = this.$utils.ifProcessRunning('md_' + item.source_name, this.processStatus)
                 if (!isRunning) return true
                 else return false
             })
 
             if (notRunningList.length) return false;
             return true
+        },
+
+        startAllTxt () {
+            if (this.allMdProcessRunning) {
+                return '关闭全部'
+            } else {
+                return '开启全部'
+            }
         },
     },
 
@@ -155,12 +162,20 @@ export default {
         },
 
         handleMdSwitchAll () {
-            console.log(111)
+            this.mdList
+                .filter(item => {
+                    const status = this.$utils.ifProcessRunning('md_' + item.source_name, this.processStatus)
+                    return status === this.allMdProcessRunning
+                })
+                .forEach(item => {
+                    switchMd(item, !this.allMdProcessRunning)
+                })
+
+            this.$message.success(`正在${this.startAllTxt}行情进程，请稍后！`)
         },
 
         handleMdSwitch(value, account) {
-            const t = this
-            switchMd(account, value).then(({ type, message }) => t.$message[type](message))  
+            switchMd(account, value).then(({ type, message }) => this.$message[type](message))  
         },
 
         handleOpenLogFile(row){

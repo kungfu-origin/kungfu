@@ -5,7 +5,7 @@
                 <tr-search-input v-model.trim="accountIdKey"></tr-search-input>
             </tr-dashboard-header-item>
             <tr-dashboard-header-item>
-                <el-switch :value="allTdProcessRunning" @change="handleMdSwitchAll()"></el-switch>
+                <el-button size="mini" @click="handleMdSwitchAll" :title="startAllTxt">{{ startAllTxt }}</el-button>
             </tr-dashboard-header-item>
             <tr-dashboard-header-item>
                 <el-button size="mini" @click="handleAdd" title="添加" id="add-account-btn">添加</el-button>
@@ -260,7 +260,7 @@ export default {
             return t.tdList.filter(a => (a.account_id.includes(t.accountIdSearchKeyDebounce)));
         },
 
-        allTdProcessRunning () {
+         allTdProcessRunning () {
              const notRunningList = this.tdList.filter(item => {
                 const isRunning = this.$utils.ifProcessRunning('td_' + item.account_id, this.processStatus)
                 if (!isRunning) return true
@@ -269,6 +269,14 @@ export default {
 
             if (notRunningList.length) return false;
             return true
+        },
+
+        startAllTxt () {
+            if (this.allTdProcessRunning) {
+                return '关闭全部'
+            } else {
+                return '开启全部'
+            }
         },
     },
     watch: {
@@ -280,7 +288,16 @@ export default {
 
     methods:{
         handleMdSwitchAll () {
-            
+            this.tdList
+                .filter(item => {
+                    const status = this.$utils.ifProcessRunning('td_' + item.account_id, this.processStatus)
+                    return status === this.allTdProcessRunning
+                })
+                .forEach(item => {
+                    switchTd(item, !this.allTdProcessRunning)
+                })
+
+            this.$message.success(`正在${this.startAllTxt}交易进程，请稍后！`)
         },
 
         //删除账户信息
@@ -329,8 +346,7 @@ export default {
 
         //Td开关
         handleTdSwitch(value, account) {
-            const t = this;
-            switchTd(account, value).then(({ type, message }) => t.$message[type](message))
+            switchTd(account, value).then(({ type, message }) => this.$message[type](message))
         },
 
         //打开日志
