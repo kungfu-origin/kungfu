@@ -31,8 +31,7 @@
             >
                 <template v-slot="{item}">
                     <ul class="tr-table-row" 
-                    @dblclick="$emit('dbclick', item)"
-                    @click="$emit('click', item)"
+                    @dblclick="$emit('dbclickRow', item)"
                     >
                         <li 
                         :title="item[column.prop] || ''"
@@ -51,7 +50,7 @@
                         :style="{                             
                             'max-width': getHeaderWidth(column)
                         }"
-                        @dblclick="e => handleDoubleClickCell(e, item, column)"
+                        @click="e => $emit('clickCell', e, item, column)"
                         >
                             <template v-if="column.type !== 'operation'">
                                 {{item[column.prop]}}
@@ -206,12 +205,6 @@ export default {
     },
 
     methods: {
-
-        handleDoubleClickCell (e, row, cell) {
-            this.$emit('dbClickCell', e, row, cell)
-        },
-
-
         triggerToBottom() {
             const t = this;
             t.$nextTick().then(() => {

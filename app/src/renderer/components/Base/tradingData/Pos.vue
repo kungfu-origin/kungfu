@@ -16,7 +16,7 @@
         :data="tableData"
         :schema="schema"
         :renderCellClass="renderCellClass"
-        @dbclick="item => $emit('makeOrder', item)"
+        @dbclickRow="item => $emit('makeOrder', item)"
     ></tr-table>
 
     <make-order-dialog

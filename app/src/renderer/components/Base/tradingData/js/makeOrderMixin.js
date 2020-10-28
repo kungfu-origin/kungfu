@@ -119,6 +119,11 @@ export default {
         },
 
         handleCancelOrder (orderData) {
+
+            if ([0,1,3,4,5,6,8].indexOf(+orderData.status) !== -1) {
+                return Promise.resolve(false)
+            }
+
             return this.cancelOrder(orderData)
                 .then(() => this.$message.success('撤单指令已发送！'))
                 .catch(err => this.$message.error(err.message || '撤单指令发送失败！'))

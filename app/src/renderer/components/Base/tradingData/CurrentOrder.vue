@@ -30,21 +30,15 @@
             <el-button size="mini" type="danger" style="color: #fff" title="全部撤单" @click="handleCancelAllOrders">全部撤单</el-button>
         </tr-dashboard-header-item>
     </div>
+    <!-- handleShowDetail -->
     <tr-table
     v-if="rendererTable"
     :data="tableData"
     :schema="schema"
     :renderCellClass="renderCellClass"
-    @dbclick="handleShowDetail"
-    @dbClickCell="handleShowAdjustOrder"
+    @dbclickRow="handleCancelOrder"
+    @clickCell="handleShowAdjustOrder"
     >
-        <template v-slot:oper="{ oper }">
-            <i 
-            v-if="[0,1,3,4,5,6,8].indexOf(+oper.status) === -1"
-            class="el-icon-close mouse-over" 
-            title="撤单" 
-            @click.stop="handleCancelOrder(oper)"/>
-        </template>
     </tr-table>
     <date-picker-dialog 
     @confirm="handleConfirmDateRangeForExport"
