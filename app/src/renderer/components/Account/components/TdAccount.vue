@@ -5,6 +5,9 @@
                 <tr-search-input v-model.trim="accountIdKey"></tr-search-input>
             </tr-dashboard-header-item>
             <tr-dashboard-header-item>
+                <el-switch :value="allTdProcessRunning" @change="handleMdSwitchAll()"></el-switch>
+            </tr-dashboard-header-item>
+            <tr-dashboard-header-item>
                 <el-button size="mini" @click="handleAdd" title="添加" id="add-account-btn">添加</el-button>
             </tr-dashboard-header-item>
         </div>
@@ -256,6 +259,17 @@ export default {
             if(!t.accountIdSearchKeyDebounce) return t.tdList;
             return t.tdList.filter(a => (a.account_id.includes(t.accountIdSearchKeyDebounce)));
         },
+
+        allTdProcessRunning () {
+             const notRunningList = this.tdList.filter(item => {
+                const isRunning = this.$utils.ifProcessRunning('td_' + item.account_id, this.processStatus)
+                if (!isRunning) return true
+                else return false
+            })
+
+            if (notRunningList.length) return false;
+            return true
+        },
     },
     watch: {
         //防抖
@@ -265,6 +279,10 @@ export default {
     },
 
     methods:{
+        handleMdSwitchAll () {
+            
+        },
+
         //删除账户信息
         handleDeleteTd(row) {
             const t = this

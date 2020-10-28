@@ -117,6 +117,7 @@ export default {
         allmdProcessRunning () {
             const notRunningList = this.mdList.filter(item => {
                 const isRunning = this.$utils.ifProcessRunning('md_' + item.ource_name, this.processStatus)
+                console.log(item, isRunning)
                 if (!isRunning) return true
                 else return false
             })
