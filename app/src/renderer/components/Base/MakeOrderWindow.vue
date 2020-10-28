@@ -235,7 +235,6 @@ export default {
         getStockTickersConfig()
             .then(res => {
                 this.stockTickers = Object.freeze(res)
-                console.log(this.stockTickers)
             })
 
         this.bindListenRenderEvents();

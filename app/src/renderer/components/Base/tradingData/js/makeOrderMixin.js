@@ -80,7 +80,7 @@ export default {
         },
 
         handleBlurAdjustOrderInput (type) {
-            const { limit_price, volume } = this.adjustOrderForm;
+            const { limit_price, limitPriceOld, volume, volumeOld } = this.adjustOrderForm;
 
             if (!+limit_price) {
                 this.clearAdjustOrderData()
@@ -90,6 +90,18 @@ export default {
             if (!+volume) {
                 this.clearAdjustOrderData()
                 return
+            }
+
+            if (type === 'price') {
+                if (limitPrice === limitPriceOld) {
+                    return
+                }
+            }
+
+            if (type === 'volume') {
+                if (volume === volumeOld) {
+                    return
+                }
             }
 
             this.adjustOrderInputVisibility = false;

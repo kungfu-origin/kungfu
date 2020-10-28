@@ -38,6 +38,7 @@
     :renderCellClass="renderCellClass"
     @dbclickRow="handleCancelOrder"
     @clickCell="handleShowAdjustOrder"
+    @rightClickRow="handleShowDetail"
     >
     </tr-table>
     <date-picker-dialog 

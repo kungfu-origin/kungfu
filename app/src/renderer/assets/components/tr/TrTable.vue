@@ -32,6 +32,7 @@
                 <template v-slot="{item}">
                     <ul class="tr-table-row" 
                     @dblclick="$emit('dbclickRow', item)"
+                    @mousedown="e => handleMousedown(e, item)"
                     >
                         <li 
                         :title="item[column.prop] || ''"
@@ -50,7 +51,7 @@
                         :style="{                             
                             'max-width': getHeaderWidth(column)
                         }"
-                        @click="e => $emit('clickCell', e, item, column)"
+                        @click.stop="e => $emit('clickCell', e, item, column)"
                         >
                             <template v-if="column.type !== 'operation'">
                                 {{item[column.prop]}}
@@ -205,6 +206,13 @@ export default {
     },
 
     methods: {
+
+        handleMousedown (e, item) {
+            if (e.button === 2) {
+                this.$emit('rightClickRow', item)
+            }
+        },
+
         triggerToBottom() {
             const t = this;
             t.$nextTick().then(() => {
