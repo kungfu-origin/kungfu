@@ -37,7 +37,7 @@ let rendererConfig = {
   },
 
   output: {
-    filename: '[name].js',
+    filename: 'js/[name].js',
     libraryTarget: 'commonjs2',
     path: path.join(__dirname, '../dist/app')
   },
@@ -48,13 +48,19 @@ let rendererConfig = {
 
   module: {
     rules: [
-      {
-        test: /\.css$/,
-        use: ['style-loader', 'css-loader', 'sass-loader']
+      { 
+        test: /\.css$/, 
+        use: ExtractTextPlugin.extract({ 
+          fallback: 'style-loader', 
+          use: [ 'css-loader' ] 
+        }) 
       },
       {
         test: /\.scss$/,
-        use: ['style-loader', 'css-loader', 'sass-loader']
+        use: ExtractTextPlugin.extract({
+          fallback: 'style-loader', 
+          use: ['css-loader', 'sass-loader']
+        }),
       },
       {
         test: /\.html$/,
@@ -162,6 +168,10 @@ let rendererConfig = {
       nodeModules: process.env.NODE_ENV !== 'production'
         ? path.resolve(__dirname, '../node_modules')
         : false
+    }),
+
+    new ExtractTextPlugin({
+      filename: `css/[name].css`,
     }),
 
     new webpack.NoEmitOnErrorsPlugin(),

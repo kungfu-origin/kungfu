@@ -105,16 +105,11 @@ export const KUNGFU_RESOURCES_DIR = process.env.NODE_ENV === 'production'
     ? path.join(process.resourcesPath, 'kungfu-resources')
     : path.join(__resources)
 
-
 export const KF_CONFIG_DEFAULT_PATH = path.join(KUNGFU_RESOURCES_DIR, 'config', 'kfConfig.json')
-
-console.log(KF_CONFIG_DEFAULT_PATH)
 
 export const KF_TARADING_CONFIG_DEFAULT_PATH = path.join(KUNGFU_RESOURCES_DIR, 'config', 'kfTradingConfig.json')
 
 export const KF_CONFIG_PATH = path.join(KF_HOME, 'config', 'kfConfig.json')
-
-console.log(KF_CONFIG_PATH)
 
 export const KF_TARADING_CONFIG_PATH = path.join(KF_HOME, 'config', 'kfTradingConfig.json')
 
