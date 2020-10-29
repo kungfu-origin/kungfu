@@ -3,8 +3,10 @@ const pm2 = require('pm2');
 const path = require('path');
 const fs = require('fs-extra');
 const electron = require('electron');
-const watcher = require('__io/kungfu/watcher');
+const { watcher } = require('__io/kungfu/watcher');
+const { kungfu} = require('__gUtils/kungfuUtils');
 const { KUNGFU_RESOURCES_DIR } = require('__gConfig/pathConfig');
+const { KF_HOME, KUNGFU_ENGINE_PATH, KF_CONFIG_PATH, buildProcessLogPath } = require('__gConfig/pathConfig');
 
 const category = { MD: 0, TD: 1, STRATEGY: 2, SYSTEM: 3}
 
@@ -72,8 +74,6 @@ function getModeName(m) {
 
 const kfDebugger = new class {
     constructor() {
-        console.log(watcher)
-        this.kfHome =  path.join(electron.remote.app.getPath('userData'), 'app');
         this.futureTickers = fs.readJsonSync(path.join(KUNGFU_RESOURCES_DIR, 'config', 'futureTickers.json'), { throws: false })
         this.stockTickers = {}
         const stockArray = fs.readJsonSync(path.join(KUNGFU_RESOURCES_DIR, 'config', 'stockTickers.json'), { throws: false })
@@ -211,7 +211,7 @@ const kfDebugger = new class {
             "force": true,
             "execMode": "fork",
             "env": {
-                "KF_HOME": this.kfHome,
+                "KF_HOME": KF_HOME,
             },
             "killTimeout": 16000
         }

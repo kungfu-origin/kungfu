@@ -19,7 +19,7 @@ export const watcher: any = (() => {
 
 
     if (process.env.RENDERER_TYPE !== 'app') {
-        if (process.env.RENDERER_TYPE !== 'makeOrder') {
+        if (process.env.RENDERER_TYPE !== 'makeOrder' && process.env.APP_TYPE != 'test') {
             return {}
         }
     }
