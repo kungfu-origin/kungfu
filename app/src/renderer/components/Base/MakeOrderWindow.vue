@@ -384,6 +384,7 @@ export default {
 
         listenKungfuData (type) {
             this.tradingDataPipe && this.tradingDataPipe.unsubscribe();
+
             this.tradingDataPipe = buildTradingDataPipe(type).subscribe(data => {
                 const assets = data['assets'];
                 this.$store.dispatch('setAccountsAsset', Object.freeze(JSON.parse(JSON.stringify(assets))));
@@ -397,7 +398,7 @@ export default {
                 this.moduleType = moduleType
                 this.makeOrderByPosData = makeOrderByPosData;
 
-                this.listenKungfuData(moduleType)
+                this.listenKungfuData('account')
             })
         },
 
