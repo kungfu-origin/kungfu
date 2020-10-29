@@ -3,11 +3,11 @@ const path = require('path');
 const fs = require('fs-extra');
 const electron = require('electron');
 
-export const category = { MD: 0, TD: 1, STRATEGY: 2, SYSTEM: 3}
+const category = { MD: 0, TD: 1, STRATEGY: 2, SYSTEM: 3}
 
-export const mode = {LIVE: 0, DATA: 1, REPLAY:2, BACKTEST: 3}
+const mode = {LIVE: 0, DATA: 1, REPLAY:2, BACKTEST: 3}
 
-export const InstrumentType = {
+const InstrumentType = {
     Unknown: 0,     //未知
     Stock: 1,       //普通股票
     Future: 2,      //期货
@@ -19,7 +19,7 @@ export const InstrumentType = {
     Repo:8         //回购
 }
 
-export const Side = {
+const Side = {
     Buy: 0,//买入
     Sell: 1,//卖出
     Lock: 2,//锁仓
@@ -41,10 +41,13 @@ export const Side = {
     GuaranteeStockTransferOut:18//担保品转出
 }
 
-export const Offset = {Open: 0, Close:1, CloseToday:2, CloseYesterday:3 }
+const Offset = {Open: 0, Close:1, CloseToday:2, CloseYesterday:3 }
 
-export const ExchangeId = {SHFE: 'SHFE', DCE: 'DCE', CZCE: 'CZCE', SSE: 'SSE'}
+const ExchangeId = {SHFE: 'SHFE', DCE: 'DCE', CZCE: 'CZCE', SSE: 'SSE'}
 
+function sleep(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 function objectFlip(obj) {
   const ret = {};
@@ -62,13 +65,14 @@ function getModeName(m) {
     return (objectFlip(mode)[m] || '').toLowerCase()
 }
 
-export const kfDebugger = class {
+const kfDebugger = new class {
     constructor() {
+        console.log(watcher)
         this.kfHome =  path.join(electron.remote.app.getPath('userData'), 'app');
         this.futureTickers = fs.readJsonSync(path.join(process.resourcesPath, 'kungfu-resources', 'config', 'futureTickers.json'), { throws: false })
         this.stockTickers = {}
         const stockArray = fs.readJsonSync(path.join(process.resourcesPath, 'kungfu-resources', 'config', 'stockTickers.json'), { throws: false })
-        ((stockArray || {}).stock || []).forEach(item => this.stockTickers[item.ticker] = item)
+
     }
 
     removeConfig(location) { return watcher.config.removeConfig(location)}
@@ -129,10 +133,27 @@ export const kfDebugger = class {
         return newOrder
     }
 
-    issueOrder(order) {
-        if (! this.targetAccountLocation) { return false;}
-        if (! this.targetStrategyLocation) { return watcher.issueOrder(order, this.targetAccountLocation)}
-        else {return watcher.issueOrder(order, this.targetAccountLocation, this.targetStrategyLocation)}
+    async issueOrder(order) {
+        if (! this.targetAccountLocation) {
+            return false;
+        }
+        if (!watcher.isReadyToInteract(this.targetAccountLocation)) {
+                await sleep(5000);
+        }
+        console.log(watcher.appStates)
+        if (!watcher.isReadyToInteract(this.targetAccountLocation)) {
+            console.error(`tareget account ${this.targetAccountLocation.name}@${this.targetAccountLocation.group} is not ready to interact`)
+            return false;
+        }
+        if (! this.targetStrategyLocation) {
+            const result = watcher.issueOrder(order, this.targetAccountLocation)
+            console.log(`issue order to ${this.targetAccountLocation.name}@${this.targetAccountLocation.group}, result is ${result}`)
+            return result
+        }
+        else {
+            console.log(`issue order from ${this.targetStrategyLocation.name} to ${this.targetAccountLocation.name}@${this.targetAccountLocation.group}`)
+            return watcher.issueOrder(order, this.targetAccountLocation, this.targetStrategyLocation)
+        }
     }
 
     buy(ticker, price, volume) {
@@ -151,6 +172,7 @@ export const kfDebugger = class {
         }
         else {
             const order = this.makeOrder(ticker, InstrumentType.Stock, this.stockTickers[ticker].exchangeId.toUpperCase(), price, volume, Side.Sell, Offset.Open)
+            console.log(order)
             return this.issueOrder(order)
         }
     }
@@ -188,8 +210,9 @@ export const kfDebugger = class {
             },
             "killTimeout": 16000
         }
+        var name = ''
         if (location.category === 'td' || location.category === category.TD) {
-            const name = `td_${location.group}_${location.name}`
+            name = `td_${location.group}_${location.name}`
             const logPath = path.join(this.kfHome, 'log', `${name}.log`)
             options = {
                 ...options,
@@ -200,7 +223,7 @@ export const kfDebugger = class {
             }
 
         } else if (location.category === 'md' || location.category === category.MD) {
-            const name = 'md_' + location.group
+            name = 'md_' + location.group
             const logPath = path.join(this.kfHome, 'log', `${name}.log`)
             options = {
                 ...options,
@@ -212,6 +235,7 @@ export const kfDebugger = class {
         } else if (location.category === 'strategy' || location.category == category.STRATEGY) {
             const config = JSON.parse(this.getConfig(location).value)
             const logPath = path.join(this.kfHome, 'log', `${config.strategy_id}.log`)
+            name = config.strategy_id
             options = {
                 ...options,
                 'name': config.strategy_id,
@@ -220,9 +244,17 @@ export const kfDebugger = class {
                 'args': `strategy -n ${config.strategy_id} -p ${config.strategy_path}`,
             }
         }
-        console.log('start process with options', options)
-        pm2.start(options, function (err, apps) {
-                console.log(err)})
+        console.log('pm2 describe ', name)
+        console.log(options)
+        pm2.describe(name, (err, processDescriptionList) => {
+             if (processDescriptionList  === undefined || processDescriptionList.length === 0) {
+                 pm2.start(options, (err, proc) => { console.log('started')})
+             } else if (processDescriptionList[0].pid === undefined) {
+                 pm2.restart(name, (err, proc) => {
+                     console.log(`restart ${name}`)
+                 })
+             }
+        })
     }
 
     execLocalFile(filePath) {
@@ -230,3 +262,5 @@ export const kfDebugger = class {
            eval(data)})
     }
 }();
+
+module.exports = {kfDebugger}
