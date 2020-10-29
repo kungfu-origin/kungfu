@@ -77,7 +77,7 @@ const kfDebugger = new class {
         this.futureTickers = fs.readJsonSync(path.join(KUNGFU_RESOURCES_DIR, 'config', 'futureTickers.json'), { throws: false })
         this.stockTickers = {}
         const stockArray = fs.readJsonSync(path.join(KUNGFU_RESOURCES_DIR, 'config', 'stockTickers.json'), { throws: false })
-
+        stockArray['stock'].map(item => { this.stockTickers[item.ticker] = item})
     }
 
     removeConfig(location) { return watcher.config.removeConfig(location)}
