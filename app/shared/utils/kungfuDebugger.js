@@ -201,7 +201,7 @@ const kfDebugger = new class {
     startProcess(location) {
         var options = {
             "script": `kfc`,
-            "cwd": path.join(process.resourcesPath, 'kfc'),
+            "cwd":  path.join(KUNGFU_ENGINE_PATH, 'kfc'),
             "logType": "json",
             "mergeLogs": true,
             "logDateFormat": "YYYY-MM-DD HH:mm:ss",
@@ -215,10 +215,11 @@ const kfDebugger = new class {
             },
             "killTimeout": 16000
         }
+        console.log(options)
         var name = ''
         if (location.category === 'td' || location.category === category.TD) {
             name = `td_${location.group}_${location.name}`
-            const logPath = path.join(this.kfHome, 'log', `${name}.log`)
+            const logPath = path.join(KF_HOME, 'log', `${name}.log`)
             options = {
                 ...options,
                 'name': name,
@@ -229,7 +230,7 @@ const kfDebugger = new class {
 
         } else if (location.category === 'md' || location.category === category.MD) {
             name = 'md_' + location.group
-            const logPath = path.join(this.kfHome, 'log', `${name}.log`)
+            const logPath = path.join(KF_HOME, 'log', `${name}.log`)
             options = {
                 ...options,
                 'name': name,
@@ -239,7 +240,7 @@ const kfDebugger = new class {
             }
         } else if (location.category === 'strategy' || location.category == category.STRATEGY) {
             const config = JSON.parse(this.getConfig(location).value)
-            const logPath = path.join(this.kfHome, 'log', `${config.strategy_id}.log`)
+            const logPath = path.join(KF_HOME, 'log', `${config.strategy_id}.log`)
             name = config.strategy_id
             options = {
                 ...options,
