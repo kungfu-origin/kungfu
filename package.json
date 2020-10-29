@@ -5,7 +5,7 @@
   "description": "KungFu Trader",
   "license": "Apache-2.0",
   "private": true,
-  "workspaces": ["core", "cli2", "app"],
+  "workspaces": ["core", "cli2", "app", "tests"],
   "scripts": {
     "postinstall": "yarn wsrun --serial install-deps",
     "build": "yarn run clean && yarn run env-electron && yarn wsrun --serial --fast-exit build",

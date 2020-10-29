@@ -1,11 +1,16 @@
+
 const pm2 = require('pm2');
 const path = require('path');
 const fs = require('fs-extra');
 const electron = require('electron');
+const watcher = require('__io/kungfu/watcher');
+const { KUNGFU_RESOURCES_DIR } = require('__gConfig/pathConfig');
 
 const category = { MD: 0, TD: 1, STRATEGY: 2, SYSTEM: 3}
 
 const mode = {LIVE: 0, DATA: 1, REPLAY:2, BACKTEST: 3}
+
+
 
 const InstrumentType = {
     Unknown: 0,     //未知
@@ -69,9 +74,9 @@ const kfDebugger = new class {
     constructor() {
         console.log(watcher)
         this.kfHome =  path.join(electron.remote.app.getPath('userData'), 'app');
-        this.futureTickers = fs.readJsonSync(path.join(process.resourcesPath, 'kungfu-resources', 'config', 'futureTickers.json'), { throws: false })
+        this.futureTickers = fs.readJsonSync(path.join(KUNGFU_RESOURCES_DIR, 'config', 'futureTickers.json'), { throws: false })
         this.stockTickers = {}
-        const stockArray = fs.readJsonSync(path.join(process.resourcesPath, 'kungfu-resources', 'config', 'stockTickers.json'), { throws: false })
+        const stockArray = fs.readJsonSync(path.join(KUNGFU_RESOURCES_DIR, 'config', 'stockTickers.json'), { throws: false })
 
     }
 
