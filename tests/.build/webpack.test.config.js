@@ -60,10 +60,6 @@ let testConfig = {
   plugins: [
     new webpack.NoEmitOnErrorsPlugin(),
     new webpack.DefinePlugin({
-      'process.env.LANG_ENV': '"en"',
-      'process.env.APP_TYPE': '"test"',
-    }),
-    new webpack.DefinePlugin({
       '__resources': process.env.NODE_ENV !== 'production' ? `"${path.join(__dirname, '../../app/resources').replace(/\\/g, '\\\\')}"` : '',
       'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
       'process.env.LANG_ENV': '"en"',
