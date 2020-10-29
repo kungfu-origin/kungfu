@@ -4,6 +4,8 @@ const { addFileSync } = require('__gUtils/fileUtils');
 const KF_HOME_BASE_DIR_RESOLVE = (() => {
     if ( process.env.APP_TYPE === 'cli' ) {
         return require('__gConfig/cliKfHomePathConfig').KF_HOME_BASE_DIR_RESOLVE
+     } else if ( process.env.APP_TYPE === 'test' ) {
+        return require('__gConfig/cliKfHomePathConfig').KF_HOME_BASE_DIR_RESOLVE
      } else {
         return require('__gConfig/appKfHomePathConfig').KF_HOME_BASE_DIR_RESOLVE
      }
@@ -104,13 +106,15 @@ export const KUNGFU_RESOURCES_DIR = process.env.NODE_ENV === 'production'
     : path.join(__resources)
 
 
-console.log(KUNGFU_RESOURCES_DIR, '---')
-
 export const KF_CONFIG_DEFAULT_PATH = path.join(KUNGFU_RESOURCES_DIR, 'config', 'kfConfig.json')
+
+console.log(KF_CONFIG_DEFAULT_PATH)
 
 export const KF_TARADING_CONFIG_DEFAULT_PATH = path.join(KUNGFU_RESOURCES_DIR, 'config', 'kfTradingConfig.json')
 
 export const KF_CONFIG_PATH = path.join(KF_HOME, 'config', 'kfConfig.json')
+
+console.log(KF_CONFIG_PATH)
 
 export const KF_TARADING_CONFIG_PATH = path.join(KF_HOME, 'config', 'kfTradingConfig.json')
 
@@ -121,14 +125,6 @@ export const KF_STOCK_TICKERS_CONFIG_PATH = path.join(KUNGFU_RESOURCES_DIR, 'con
 
 //================== config start =================================
 
-
-export const getKfEnginePath = () => {
-    if(process.env.NODE_ENV === 'production') {
-        if(process.env.APP_TYPE === 'test'){
-            return process.env.KUNGFU_ENGINE_PATH || ''
-        }
-    }
-}
 
 export const KUNGFU_ENGINE_PATH = process.env.NODE_ENV === 'production' 
     ? process.resourcesPath
