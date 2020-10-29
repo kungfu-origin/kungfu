@@ -93,7 +93,7 @@ export default {
             }
 
             if (type === 'price') {
-                if (limitPrice === limitPriceOld) {
+                if (limit_price === limitPriceOld) {
                     return
                 }
             }
