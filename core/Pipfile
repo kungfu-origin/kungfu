@@ -1,5 +1,5 @@
 [packages]
-conan = "==1.29"
+conan = "==1.31"
 pywin32 = {version = "==227",sys_platform = "== 'win32'"}
 pyinstaller = "==3.6"
 click = "==7.1.1"
