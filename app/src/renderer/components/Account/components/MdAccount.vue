@@ -97,6 +97,7 @@ import { mapState, mapGetters } from 'vuex';
 import { getMdList } from '__io/kungfu/account';
 import { LOG_DIR } from '__gConfig/pathConfig';
 import { switchMd, deleteMd } from '__io/actions/account';
+import { loopToRunProcess } from '__gUtils/busiUtils';
 
 import SetAccountDialog from './SetAccountDialog';
 import SetSourceDialog from './SetSourceDialog';
@@ -162,14 +163,17 @@ export default {
         },
 
         handleMdSwitchAll () {
-            this.mdList
+            const targetDirection = this.allMdProcessRunning;
+            const promiseList = this.mdList
                 .filter(item => {
                     const status = this.$utils.ifProcessRunning('md_' + item.source_name, this.processStatus)
-                    return status === this.allMdProcessRunning
+                    return status === targetDirection
                 })
-                .forEach(item => {
-                    switchMd(item, !this.allMdProcessRunning)
+                .map(item => {
+                    return () => switchMd(item, !targetDirection)
                 })
+
+            loopToRunProcess(promiseList)
 
             this.$message.success(`正在${this.startAllTxt}行情进程，请稍后！`)
         },

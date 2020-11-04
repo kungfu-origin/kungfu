@@ -217,6 +217,7 @@ import { deleteProcess } from '__gUtils/processUtils';
 import { TD_DIR, LOG_DIR } from '__gConfig/pathConfig';
 import { removeFileFolder } from "__gUtils/fileUtils";
 import { deleteTd, switchTd } from '__io/actions/account';
+import { loopToRunProcess } from '__gUtils/busiUtils';
 
 import mdTdMixin from '../js/mdTdMixin';
 
@@ -288,14 +289,17 @@ export default {
 
     methods:{
         handleMdSwitchAll () {
-            this.tdList
+            const targetDirection = !!this.allTdProcessRunning;
+            const promiseList = this.tdList
                 .filter(item => {
                     const status = this.$utils.ifProcessRunning('td_' + item.account_id, this.processStatus)
-                    return status === this.allTdProcessRunning
+                    return status === targetDirection
                 })
-                .forEach(item => {
-                    switchTd(item, !this.allTdProcessRunning)
+                .map(item => {
+                    return () => switchTd(item, !targetDirection)
                 })
+            
+            loopToRunProcess(promiseList)
 
             this.$message.success(`正在${this.startAllTxt}交易进程，请稍后！`)
         },

@@ -31,6 +31,7 @@ export const deleteMd = (row: Td): Promise<any> => {
 export const switchTd = (account: Td, value: boolean): Promise<any> => {
     const { account_id } = account
     const tdProcessId: string = `td_${account_id}`
+
     if(!value){
         return deleteProcess(tdProcessId)
         .then((): MessageData => ({ type: 'success', message: '操作成功！' }))       

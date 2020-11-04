@@ -512,3 +512,19 @@ export const setTimerPromiseTask = (fn: Function, interval = 500) => {
     }
 } 
 
+export const loopToRunProcess = async (promiseFunc: Array<Function>, interval = 1000) => {
+    let i = 0, len = promiseFunc.length;
+    let resList = [];
+    for (i = 0; i < len; i++) {
+        const pFunc = promiseFunc[i];
+        try {
+            const res = await pFunc();
+            resList.push(res);
+        } catch (err) {
+            resList.push(err)
+        }
+        
+        await(delayMiliSeconds(interval))
+    }
+    return resList
+}
