@@ -161,7 +161,8 @@ export default {
         },
 
         handleMdSwitch(value, account) {
-            switchMd(account, value).then(({ type, message }) => this.$message[type](message))  
+            this.insertMaunalClosedProcssSet(account.source_name, value)
+            return switchMd(account, value).then(({ type, message }) => this.$message[type](message))  
         },
 
         handleOpenLogFile(row){
@@ -178,8 +179,9 @@ export default {
         switchAllProcess () {
             const promiseList = this.mdList
                 .filter(item => {
+                    const id = item.source_name;
                     const status = this.$utils.ifProcessRunning('md_' + item.source_name, this.processStatus)
-                    return status === false 
+                    return !status && !this.maunalClosedProcssSet.has(id)
                 })
                 .map(item => {
                     return () => switchMd(item, true)

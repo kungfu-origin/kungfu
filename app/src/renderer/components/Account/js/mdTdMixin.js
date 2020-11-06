@@ -3,6 +3,9 @@ import { setTimerPromiseTask } from '__gUtils/busiUtils';
 
 export default {
     data () {
+
+        const maunalClosedProcssList = JSON.parse(localStorage.getItem(`maunalClosedProcssList_${this.tdmdType}`) || '[]')
+
         return  {
             method: 'add',
             accountForm: {},
@@ -14,7 +17,9 @@ export default {
 
             renderTable: false,
 
-            keepAllProcessRunning: !!(+localStorage.getItem(`keepAllProcessRunning_${this.tdmdType}`))
+            keepAllProcessRunning: !!(+localStorage.getItem(`keepAllProcessRunning_${this.tdmdType}`)),
+            
+            maunalClosedProcssSet: new Set(maunalClosedProcssList)
         }
     },
 
@@ -87,6 +92,16 @@ export default {
             if (this.switchAllProcess) {
                 this.keepRunningTimer = setTimerPromiseTask(this.switchAllProcess, 3000)
             }
+        },
+
+        insertMaunalClosedProcssSet (id, status) {
+            if (status) {
+                this.maunalClosedProcssSet.delete(id)
+            } else {
+                this.maunalClosedProcssSet.add(id)
+            }
+
+            localStorage.setItem(`maunalClosedProcssList_${this.tdmdType}`, JSON.stringify(Array.from(this.maunalClosedProcssSet)))
         },
 
         //添加或修改账户详情后的操作

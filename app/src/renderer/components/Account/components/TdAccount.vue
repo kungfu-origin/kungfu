@@ -324,7 +324,8 @@ export default {
 
         //Td开关
         handleTdSwitch(value, account) {
-            switchTd(account, value).then(({ type, message }) => this.$message[type](message))
+            this.insertMaunalClosedProcssSet(account.account_id, value)
+            return switchTd(account, value).then(({ type, message }) => this.$message[type](message))
         },
 
         //打开日志
@@ -336,10 +337,12 @@ export default {
         switchAllProcess () {
             const promiseList = this.tdList
                 .filter(item => {
+                    const id = item.account_id;
                     const status = this.$utils.ifProcessRunning('td_' + item.account_id, this.processStatus)
-                    return status === false
+                    return !status && !this.maunalClosedProcssSet.has(id)
                 })
                 .map(item => {
+                    console.log(item, '--')
                     return () => switchTd(item, true)
                 })
             
