@@ -208,16 +208,18 @@
 
 <script>
 import { mapState, mapGetters } from 'vuex';
-import { debounce } from '__gUtils/busiUtils';
-import { getTdList } from '__io/kungfu/account';
+
 import SetAccountDialog from './SetAccountDialog';
 import SetSourceDialog from './SetSourceDialog';
 
+import { debounce } from '__gUtils/busiUtils';
+import { getTdList } from '__io/kungfu/account';
 import { deleteProcess } from '__gUtils/processUtils';
 import { TD_DIR, LOG_DIR } from '__gConfig/pathConfig';
 import { removeFileFolder } from "__gUtils/fileUtils";
 import { deleteTd, switchTd } from '__io/actions/account';
 import { loopToRunProcess } from '__gUtils/busiUtils';
+import { watcher } from '__io/kungfu/watcher';
 
 import mdTdMixin from '../js/mdTdMixin';
 
@@ -342,11 +344,10 @@ export default {
                     return !status && !this.maunalClosedProcssSet.has(id)
                 })
                 .map(item => {
-                    console.log(item, '--')
                     return () => switchTd(item, true)
                 })
             
-            if (this.ifMasterLedgerRunning) {
+            if (this.ifMasterLedgerRunning && watcher.isLive) {
                 return loopToRunProcess(promiseList)
             } else {
                 return Promise.resolve(false)
