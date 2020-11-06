@@ -67,6 +67,8 @@ import { mapState } from 'vuex';
 import { statusConfig } from '__gConfig/statusConfig';
 import { switchTd, switchMd } from '__io/actions/account';
 
+console.log('111_22_33')
+
 export default {
     data(){
         let statusLevel = {};

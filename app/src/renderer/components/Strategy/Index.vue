@@ -1,5 +1,5 @@
 <template>
-    <main-content>
+    <MainContent>
         <div class="trader-content" v-if="!(monitOrders || monitTrades)">
             <template v-if="monitStrategies">
                 <el-col :span="14">
@@ -134,7 +134,7 @@
                 </el-row>
             </el-col>
         </div>
-    </main-content>
+    </MainContent>
 </template>
 <script>
 
@@ -146,6 +146,7 @@ import CurrentOrder from '../Base/tradingData/CurrentOrder';
 import TradeRecord from '../Base/tradingData/TradeRecord';
 import Pos from '../Base/tradingData/Pos';
 import Pnl from '../Base/tradingData/pnl/Index';
+import MainContent from '@/components/Layout/MainContent';
 
 import { buildTradingDataPipe } from '__io/kungfu/tradingData';
 import accountStrategyMixins from '@/assets/js/mixins/accountStrategyMixins';
@@ -225,7 +226,8 @@ export default {
 
     components: {
         Strategy, CurrentOrder, TradeRecord, 
-        Pos, Log, Pnl
+        Pos, Log, Pnl,
+        MainContent
     },
 
     methods:{

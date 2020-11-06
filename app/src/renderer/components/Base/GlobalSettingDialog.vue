@@ -229,6 +229,8 @@ const path = require("path");
 Vue.use(Collapse);
 Vue.use(CollapseItem);
 
+console.log(555)
+
 export default {
 name: "global-setting-dialog",
 props: {
