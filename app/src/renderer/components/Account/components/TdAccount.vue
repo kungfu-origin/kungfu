@@ -334,14 +334,13 @@ export default {
         },
 
         switchAllProcess () {
-            const targetDirection = !!this.allTdProcessRunning;
             const promiseList = this.tdList
                 .filter(item => {
                     const status = this.$utils.ifProcessRunning('td_' + item.account_id, this.processStatus)
-                    return status === targetDirection
+                    return status === false
                 })
                 .map(item => {
-                    return () => switchTd(item, !targetDirection)
+                    return () => switchTd(item, true)
                 })
             
             if (this.ifMasterLedgerRunning) {

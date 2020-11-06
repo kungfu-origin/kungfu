@@ -176,14 +176,13 @@ export default {
         },
 
         switchAllProcess () {
-            const targetDirection = this.allMdProcessRunning;
             const promiseList = this.mdList
                 .filter(item => {
                     const status = this.$utils.ifProcessRunning('md_' + item.source_name, this.processStatus)
-                    return status === targetDirection
+                    return status === false 
                 })
                 .map(item => {
-                    return () => switchMd(item, !targetDirection)
+                    return () => switchMd(item, true)
                 })
 
             if (this.ifMasterLedgerRunning) {
