@@ -1,7 +1,20 @@
 
-import { kungfuCancelOrder, kungfuMakeOrder } from '__io/kungfu/makeCancelOrder';
-import { decodeKungfuLocation } from '__io/kungfu/watcher';
+// import { kungfuCancelOrder, kungfuMakeOrder } from '__io/kungfu/makeCancelOrder';
+// import { decodeKungfuLocation } from '__io/kungfu/watcher';
 import { delayMiliSeconds } from '__gUtils/busiUtils';
+
+
+const kungfuCancelOrder = (...params) => {
+    console.log(params, 'kungfuCancelOrder')
+}
+
+const kungfuMakeOrder = (...params) => {
+    console.log(params, 'kungfuMakeOrder')
+}
+
+const decodeKungfuLocation = (...params) => {
+    console.log(params, 'decodeKungfuLocation')
+}
 
 export default {
 
