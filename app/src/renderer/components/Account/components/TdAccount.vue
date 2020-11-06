@@ -344,7 +344,11 @@ export default {
                     return () => switchTd(item, !targetDirection)
                 })
             
-            return loopToRunProcess(promiseList)
+            if (this.ifMasterLedgerRunning) {
+                return loopToRunProcess(promiseList)
+            } else {
+                return Promise.resolve(false)
+            }
         },
 
         //获取账户列表

@@ -1,4 +1,4 @@
-import { mapState } from 'vuex';
+import { mapGetters, mapState } from 'vuex';
 import { setTimerPromiseTask } from '__gUtils/busiUtils';
 
 export default {
@@ -27,7 +27,11 @@ export default {
     computed: {
         ...mapState({
             processStatus: state => state.BASE.processStatus || {}
-        })
+        }),
+
+        ...mapGetters([
+            "ifMasterLedgerRunning"
+        ])
     },
 
     watch: {

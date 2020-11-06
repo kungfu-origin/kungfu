@@ -186,7 +186,11 @@ export default {
                     return () => switchMd(item, !targetDirection)
                 })
 
-            return loopToRunProcess(promiseList)
+            if (this.ifMasterLedgerRunning) {
+                return loopToRunProcess(promiseList)
+            } else {
+                return Promise.resolve(false)
+            }
         },
 
          //删除前进行一些判断
