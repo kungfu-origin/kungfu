@@ -86,13 +86,13 @@ let testConfig = {
 /**
  * Adjust testConfig for production settings
  */
-if (process.env.NODE_ENV === 'production') {
-  testConfig.plugins.push(
-    new OptimizeJsPlugin({
-      sourceMap: false
-    })
-  )
-}
+// if (process.env.NODE_ENV === 'production') {
+//   testConfig.plugins.push(
+//     new OptimizeJsPlugin({
+//       sourceMap: false
+//     })
+//   )
+// }
 
 
 module.exports = testConfig

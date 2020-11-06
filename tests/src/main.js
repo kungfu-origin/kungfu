@@ -26,9 +26,8 @@ function getKungfuHome() {
 function getTestCasePath() {
    if (process.env.NODE_ENV === 'development') {
        return path.join(__dirname, '..', 'cases');
-   }
-   if (os.platform() === 'darwin') {
-       return path.join('/Applications/Kungfu.app/Contents/Resources/kfc');
+   } else {
+       return path.join(getKungfuHome(), 'test', 'cases');
    }
 }
 
