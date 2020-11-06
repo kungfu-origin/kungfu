@@ -10,10 +10,10 @@ export default {
 
     mounted(){
         this.removeLoadingMask();
-        this.$store.dispatch('getTdMdList');
-        this.$store.dispatch('getStrategyList');
-        this.$store.dispatch('getAccountSourceConfig');
-        this.$store.dispatch('getKungfuConfig');
+        // this.$store.dispatch('getTdMdList');
+        // this.$store.dispatch('getStrategyList');
+        // this.$store.dispatch('getAccountSourceConfig');
+        // this.$store.dispatch('getKungfuConfig');
     },
 
     methods: {

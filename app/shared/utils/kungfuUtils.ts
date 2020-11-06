@@ -1,6 +1,8 @@
 
 import { KF_HOME } from '__gConfig/pathConfig';
 
+console.log(123123)
+
 // process.env.KF_LOG_LEVEL = 'trace';
 
 export const kungfu = require('kungfu-core').kungfu;

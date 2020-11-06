@@ -165,7 +165,7 @@ import { Autocomplete } from 'element-ui';
 import { from } from 'rxjs';
 import { ipcRenderer } from 'electron';
 
-import { buildTradingDataPipe } from '__io/kungfu/tradingData';
+// import { buildTradingDataPipe } from '__io/kungfu/tradingData';
 import makeOrderMixin from '@/components/Base/tradingData/js/makeOrderMixin';
 
 const ls = require('local-storage');
@@ -385,10 +385,10 @@ export default {
         listenKungfuData (type) {
             this.tradingDataPipe && this.tradingDataPipe.unsubscribe();
 
-            this.tradingDataPipe = buildTradingDataPipe(type).subscribe(data => {
-                const assets = data['assets'];
-                this.$store.dispatch('setAccountsAsset', Object.freeze(JSON.parse(JSON.stringify(assets))));
-            })
+            // this.tradingDataPipe = buildTradingDataPipe(type).subscribe(data => {
+            //     const assets = data['assets'];
+            //     this.$store.dispatch('setAccountsAsset', Object.freeze(JSON.parse(JSON.stringify(assets))));
+            // })
         },
 
         bindListenRenderEvents () {
