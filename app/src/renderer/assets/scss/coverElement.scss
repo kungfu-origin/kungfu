@@ -409,6 +409,11 @@ p.el-select-dropdown__empty{
 -------------------------- */
 .el-button{
     border: none;
+
+    &.active {
+        background: $vi !important;
+        color: #fff;
+    }
 }
 
 .el-button:hover, .el-button:focus{

@@ -1,4 +1,6 @@
-//type: 'md' / 'td'
+import { mapState } from 'vuex';
+import { setTimerPromiseTask } from '__gUtils/busiUtils';
+
 export default {
     data () {
         return  {
@@ -10,17 +12,46 @@ export default {
                 setAccount: false,
             },
 
-            renderTable: false
+            renderTable: false,
+
+            keepAllProcessRunning: !!(+localStorage.getItem(`keepAllProcessRunning_${this.tdmdType}`))
         }
     },
 
     mounted () {
-        const t = this;
-        t.renderTable = true;
-        t.getTableList();
+        this.renderTable = true;
+        this.getTableList();
+        this.keepProcessRunningLoopResolved()
+    },
+
+    computed: {
+        ...mapState({
+            processStatus: state => state.BASE.processStatus || {}
+        })
+    },
+
+    watch: {
+        keepAllProcessRunning (keepAllProcessRunning) {
+            if (keepAllProcessRunning) {
+                this.keepProcessRunningLoop()
+            } else {
+                this.keepRunningTimer && this.keepRunningTimer.clearLoop()
+            }
+        },
+        
     },
 
     methods: {
+        handleToggleKeepAllProcessRunning () {
+            if (this.keepAllProcessRunning) {
+                localStorage.setItem(`keepAllProcessRunning_${this.tdmdType}`, 0)
+            } else {
+                localStorage.setItem(`keepAllProcessRunning_${this.tdmdType}`, 1)
+            }
+
+            this.keepAllProcessRunning = !this.keepAllProcessRunning
+        },
+
         //添加账户，打开选择柜台弹窗
         handleAdd () {
             this.visiblity.selectSource = true;
@@ -28,32 +59,42 @@ export default {
 
         //编辑账户
         handleOpenUpdateAccountDialog (row) {
-            const t = this
-            t.method = 'update'
-            t.accountForm = JSON.parse(row.config) 
-            t.selectedSource = row.source_name
-            t.visiblity.setAccount = true
+            this.method = 'update'
+            this.accountForm = JSON.parse(row.config) 
+            this.selectedSource = row.source_name
+            this.visiblity.setAccount = true
         },
         //选择柜台
         handleSelectSource (sourceName) {
-            const t = this
-            t.method = 'add';
-            t.selectedSource = sourceName
-            t.visiblity.setAccount = true
+            this.method = 'add';
+            this.selectedSource = sourceName
+            this.visiblity.setAccount = true
+        },
+
+        keepProcessRunningLoopResolved () {
+            if (this.keepAllProcessRunning) {
+                this.keepProcessRunningLoop()
+            } else {
+                this.keepRunningTimer && this.keepRunningTimer.clearLoop()
+            }
+        },
+
+        keepProcessRunningLoop () {
+            if (this.switchAllProcess) {
+                this.keepRunningTimer = setTimerPromiseTask(this.switchAllProcess, 3000)
+            }
         },
 
         //添加或修改账户详情后的操作
         successSubmitSetting () {
-            const t = this;
-            t.getTableList();
-            t.refreshData();
+            this.getTableList();
+            this.refreshData();
         },
 
         //清空数据
         refreshData () {
-            const t = this
-            t.selectedSource = ''
-            t.accountForm = {};
+            this.selectedSource = ''
+            this.accountForm = {};
         },
     }
     

@@ -5,7 +5,7 @@
                 <tr-search-input v-model.trim="accountIdKey"></tr-search-input>
             </tr-dashboard-header-item>
             <tr-dashboard-header-item>
-                <el-button size="mini" @click="handleMdSwitchAll" :title="startAllTxt">{{ startAllTxt }}</el-button>
+                <el-button size="mini" :class="{ 'active': keepAllProcessRunning }" @click="handleToggleKeepAllProcessRunning" title="保持开启">保持开启</el-button>
             </tr-dashboard-header-item>
             <tr-dashboard-header-item>
                 <el-button size="mini" @click="handleAdd" title="添加" id="add-account-btn">添加</el-button>
@@ -228,6 +228,8 @@ export default {
     mixins: [ mdTdMixin ],
 
     data() {
+        this.tdmdType = 'td';
+
         return {
             accountIdKey: '',
             accountIdSearchKeyDebounce: '',
@@ -246,7 +248,6 @@ export default {
             accountsAsset: state => state.ACCOUNT.accountsAsset || {},
             tdList: state => state.ACCOUNT.tdList || [], 
             currentAccount: state => state.ACCOUNT.currentAccount || {},
-            processStatus: state => state.BASE.processStatus || {}
         }),
 
         currentId () {
@@ -255,10 +256,9 @@ export default {
 
         //用来存放筛选完的列表
         accountFilter() {
-            const t = this
             let accounts = []
-            if(!t.accountIdSearchKeyDebounce) return t.tdList;
-            return t.tdList.filter(a => (a.account_id.includes(t.accountIdSearchKeyDebounce)));
+            if(!this.accountIdSearchKeyDebounce) return this.tdList;
+            return this.tdList.filter(a => (a.account_id.includes(this.accountIdSearchKeyDebounce)));
         },
 
          allTdProcessRunning () {
@@ -271,14 +271,6 @@ export default {
             if (notRunningList.length) return false;
             return true
         },
-
-        startAllTxt () {
-            if (this.allTdProcessRunning) {
-                return '关闭全部'
-            } else {
-                return '开启全部'
-            }
-        },
     },
     watch: {
         //防抖
@@ -288,64 +280,46 @@ export default {
     },
 
     methods:{
-        handleMdSwitchAll () {
-            const targetDirection = !!this.allTdProcessRunning;
-            const promiseList = this.tdList
-                .filter(item => {
-                    const status = this.$utils.ifProcessRunning('td_' + item.account_id, this.processStatus)
-                    return status === targetDirection
-                })
-                .map(item => {
-                    return () => switchTd(item, !targetDirection)
-                })
-            
-            loopToRunProcess(promiseList)
-
-            this.$message.success(`正在${this.startAllTxt}交易进程，请稍后！`)
-        },
-
+       
         //删除账户信息
         handleDeleteTd(row) {
-            const t = this
-            if(!t.judgeCondition(row)) return;
+            if(!this.judgeCondition(row)) return;
             const { account_id } = row
             //查看该账户下是否存在task中的td任务
             const tdProcessId = `td_${account_id}`
             const accountId = account_id.toAccountId()
-            t.$confirm(`删除账户${accountId}会删除所有相关信息，确认删除吗？`, '提示', {
+            this.$confirm(`删除账户${accountId}会删除所有相关信息，确认删除吗？`, '提示', {
                 confirmButtonText: '确 定',
                 cancelButtonText: '取 消',
             })
-            .then(() => deleteTd(row, t.tdList))
-            .then(() => t.getTableList())
+            .then(() => deleteTd(row, this.tdList))
+            .then(() => this.getTableList())
             .then(() => {
                 //如果删除的项是选中的项，则默认选中第一项,如果没有项了，则当前项为空对象{}
-                if(t.currentId == row.account_id) {
-                    const currentAccount = t.tdList.length ? t.tdList[0] : {}
-                    t.$store.dispatch('setCurrentAccount', currentAccount)
-                }else if(!t.tdList.length){
-                    t.$store.dispatch('setCurrentAccount', {})
+                if(this.currentId == row.account_id) {
+                    const currentAccount = this.tdList.length ? this.tdList[0] : {}
+                    this.$store.dispatch('setCurrentAccount', currentAccount)
+                }else if(!this.tdList.length){
+                    this.$store.dispatch('setCurrentAccount', {})
                 }
             })
-            .then(() => t.$message.success('操作成功！'))
+            .then(() => this.$message.success('操作成功！'))
             .catch((err) => {
                 if(err == 'cancel') return
-                t.$message.error(err.message || '操作失败！')
+                this.$message.error(err.message || '操作失败！')
             })
         },
 
         //选中行的背景颜色
         handleSelectRow(row) {
-            const t = this;
-            if(row.row.account_id == t.currentId) {
+            if(row.row.account_id == this.currentId) {
                 return 'selected-bg'
             }
         },
 
         //当前行高亮
         handleRowClick(row) {
-            const t = this;
-            t.$store.dispatch('setCurrentAccount', row)
+            this.$store.dispatch('setCurrentAccount', row)
         },
 
         //Td开关
@@ -359,29 +333,39 @@ export default {
             this.$showLog(logPath)
         },
 
-        handleFeeSetting() {},
+        switchAllProcess () {
+            const targetDirection = !!this.allTdProcessRunning;
+            const promiseList = this.tdList
+                .filter(item => {
+                    const status = this.$utils.ifProcessRunning('td_' + item.account_id, this.processStatus)
+                    return status === targetDirection
+                })
+                .map(item => {
+                    return () => switchTd(item, !targetDirection)
+                })
+            
+            return loopToRunProcess(promiseList)
+        },
 
         //获取账户列表
         getTableList() {
-            const t = this
             return getTdList()
                 .then(tdList => {
-                    t.$store.dispatch('setTdList', tdList);
-                    if(!t.currentId) t.$store.dispatch('setCurrentAccount', tdList[0] || {})
+                    this.$store.dispatch('setTdList', tdList);
+                    if(!this.currentId) this.$store.dispatch('setCurrentAccount', tdList[0] || {})
                     return tdList
                 })
                 .catch(err => {
-                    t.$message.error(err.message || '操作失败！')
+                    this.$message.error(err.message || '操作失败！')
                 })
         },
 
         //删除前进行一些判断
         judgeCondition(row) {
-            const t = this
             const { account_id } = row
             //判断td是否开启，开启则无法删除
-            if(t.$utils.ifProcessRunning(`td_${account_id}`, t.processStatus)) {
-                t.$message.warning('需先停止交易进程！')
+            if(this.$utils.ifProcessRunning(`td_${account_id}`, this.processStatus)) {
+                this.$message.warning('需先停止交易进程！')
                 return false
             }
             return true
