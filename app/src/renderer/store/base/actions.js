@@ -41,7 +41,7 @@ export const getAccountSourceConfig = ({ dispatch }) => {
 }
 
 //初始化kungfu trader
-export const getKungfuConfig = ({ dispatch, state }) => {
+export const getKungfuConfig = ({ dispatch }) => {
     const kfConfig = readJsonSync(KF_CONFIG_PATH)
     dispatch('setKungfuConfig', kfConfig)
 }
