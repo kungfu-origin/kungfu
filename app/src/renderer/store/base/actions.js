@@ -32,9 +32,11 @@ export const setKungfuConfigByKeys = ({ commit, state }, kfConfig) => {
 }
 
 export const getAccountSourceConfig = ({ dispatch }) => {
-    return getAccountSource().then(accountSource => {
+    return getAccountSource()
+    .then(accountSource => {
         dispatch('setTdAccountSource', accountSource.td)
         dispatch('setMdAccountSource', accountSource.md)
+        return accountSource
     })
 }
 

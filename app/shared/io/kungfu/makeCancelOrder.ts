@@ -1,8 +1,6 @@
 import { longfist, encodeKungfuLocation } from '__gUtils/kungfuUtils';
 import { watcher, decodeKungfuLocation } from '__io/kungfu/watcher';
 
-console.log(222)
-
 interface MakeOrderData {
     intrument_id: string,
     intrument_type: Number,

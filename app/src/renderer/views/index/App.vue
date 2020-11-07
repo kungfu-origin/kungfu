@@ -37,8 +37,13 @@ import { buildKungfuGlobalDataPipe } from '__io/kungfu/tradingData';
 import { deleteProcess } from '__gUtils/processUtils';
 import { watcher } from '__io/kungfu/watcher';
 
+import ipcListenerMixin from '@/ipcMsg/ipcListenerMixin.js';
+
 export default {
     name: 'app',
+
+    mixins: [ ipcListenerMixin ],
+
     data() {
         this.kungfuGloablDataObserver = null;
         return {

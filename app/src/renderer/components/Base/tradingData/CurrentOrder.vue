@@ -102,11 +102,12 @@ import { aliveOrderStatusList } from '__gConfig/tradingConfig';
 import { writeCSV } from '__gUtils/fileUtils';
 
 import makeOrderMixin from '@/components/Base/tradingData/js/makeOrderMixin';
+import makeOrderCoreMixin from '@/components/Base/tradingData/js/makeOrderCoreMixin';
 
 export default {
     name: "current-orders",
    
-   mixins: [ tradingDataMixin, makeOrderMixin ],
+   mixins: [ tradingDataMixin, makeOrderMixin, makeOrderCoreMixin ],
 
     props: {
         gatewayName: {

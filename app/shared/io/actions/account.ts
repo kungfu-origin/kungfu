@@ -5,8 +5,6 @@ import { startTd, startMd, deleteProcess } from '__gUtils/processUtils';
 
 const path = require('path')
 
-console.log('111_222')
-
 //删除账户需要将所关联的数据库以及进程都关掉
 //判断task表和进程中是否存在，有则删除
 export const deleteTd = (row: Td): Promise<any> => {

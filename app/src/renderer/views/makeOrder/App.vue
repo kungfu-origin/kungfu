@@ -5,17 +5,41 @@
 </template>
 <script>
 
-
+import { ipcEmitDataByName } from '@/ipcMsg/emitter';
+import { setTimerPromiseTask } from '__gUtils/busiUtils';
 
 export default {
     name: 'app',
 
     mounted(){
         this.removeLoadingMask();
-        // this.$store.dispatch('getTdMdList');
-        // this.$store.dispatch('getStrategyList');
-        // this.$store.dispatch('getAccountSourceConfig');
-        // this.$store.dispatch('getKungfuConfig');
+
+        ipcEmitDataByName('tdMdList')
+            .then(({ data }) => {
+                const { mdList, tdList } = data;
+                this.$store.dispatch('setTdList', tdList)
+                this.$store.dispatch('setMdList', mdList)
+            })
+
+        ipcEmitDataByName('strategyList')
+            .then(({ data }) => {
+                this.$store.dispatch('setStrategyList', data)
+
+            })
+
+        ipcEmitDataByName('accountSourceConfig')
+            .then(({ data }) => {
+                const { md, td } = data;
+                this.$store.dispatch('setTdAccountSource', td)
+                this.$store.dispatch('setMdAccountSource', md)
+            })
+
+        setTimerPromiseTask(() => ipcEmitDataByName('accountsAsset')
+            .then(({ data }) => {
+                this.$store.dispatch('setAccountsAsset', data);
+            }),
+            3000
+        )
     },
 
     methods: {

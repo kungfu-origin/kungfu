@@ -2,7 +2,7 @@
 /* eslint-disable */
 import Vue from 'vue';
 import './setKungfuParamsOnWindow';
-// import store from '@/store';
+import store from './store';
 import router from './routers';
 import * as utils from '__gUtils/busiUtils'
 import ElementUI from 'element-ui';
@@ -17,7 +17,7 @@ import '@/assets/iconfont/iconfont.css';
 Vue.use(ElementUI)
 
 Vue.config.productionTip = false
-// Vue.store = Vue.prototype.$store = store
+Vue.store = Vue.prototype.$store = store
 Vue.utils = Vue.prototype.$utils = utils
 
 //tr 组件
@@ -31,7 +31,7 @@ Vue.filter('moment', function (value, formatString) {
 
 new Vue({
     router,
-    // store,
+    store,
     render: h => h(App)
 }).$mount('#app', true)
 
@@ -42,7 +42,5 @@ startGetProcessStatus((processStatus) => {
     Vue.store.dispatch('setProcessStatus', processStatus)
 });
 
-
-
-console.log(electron.remote.BrowserWindow)
+window.electron = electron
 

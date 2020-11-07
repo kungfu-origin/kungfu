@@ -1,20 +1,4 @@
-
-// import { kungfuCancelOrder, kungfuMakeOrder } from '__io/kungfu/makeCancelOrder';
-// import { decodeKungfuLocation } from '__io/kungfu/watcher';
 import { delayMiliSeconds } from '__gUtils/busiUtils';
-
-
-const kungfuCancelOrder = (...params) => {
-    console.log(params, 'kungfuCancelOrder')
-}
-
-const kungfuMakeOrder = (...params) => {
-    console.log(params, 'kungfuMakeOrder')
-}
-
-const decodeKungfuLocation = (...params) => {
-    console.log(params, 'decodeKungfuLocation')
-}
 
 export default {
 
@@ -119,7 +103,7 @@ export default {
 
             this.adjustOrderInputVisibility = false;
 
-            this.cancelOrder(this.adjustOrderTargetData)
+            this.cancelOrder(this.moduleType, this.adjustOrderTargetData, this.currentId)
                 .then(() => this.$message.success('撤单指令已发送！'))
                 .then(() => delayMiliSeconds(1000))
                 .then(() => this.makeOrder(
@@ -144,12 +128,11 @@ export default {
         },
 
         handleCancelOrder (orderData) {
-
             if ([0,1,3,4,5,6,8].indexOf(+orderData.status) !== -1) {
                 return Promise.resolve(false)
             }
 
-            return this.cancelOrder(orderData)
+            return this.cancelOrder(this.moduleType, orderData, this.currentId)
                 .then(() => this.$message.success('撤单指令已发送！'))
                 .catch(err => this.$message.error(err.message || '撤单指令发送失败！'))
         },
@@ -169,26 +152,6 @@ export default {
                 return this.adjustOrderForm.name
             }
         }, 
-
-        cancelOrder (orderData) {
-            const kungfuLocation = decodeKungfuLocation(orderData.source);
-            const accountId = `${kungfuLocation.group}_${kungfuLocation.name}`;
-            
-            //撤单   
-            if (this.moduleType === 'strategy') {
-                return kungfuCancelOrder( orderData.orderId, accountId, this.currentId)
-            } else if (this.moduleType === 'account') {
-                return kungfuCancelOrder( orderData.orderId, accountId)
-            }
-        },
-
-        makeOrder (moduleType, makeOrderForm, currentAccountResolved, strategyId) {
-            if (moduleType === 'account') {
-                return kungfuMakeOrder(makeOrderForm, currentAccountResolved)
-            } else if (moduleType === 'strategy') {
-                return kungfuMakeOrder(makeOrderForm, currentAccountResolved, strategyId)
-            }
-        },
 
         clearAdjustOrderData () {
             this.adjustOrderInputVisibility = false;

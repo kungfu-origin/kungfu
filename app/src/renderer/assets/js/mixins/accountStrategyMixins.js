@@ -45,27 +45,12 @@ export default {
                 }
             }
 
-            if (!window.makeOrderWin) {
-                this.$utils.openVueWin(
-                    'makeOrder', 
-                    `/make-order`, 
-                    BrowserWindow, 
-                    {
-                        width: 410,
-                        height: 460
-                    }
-                ).then(({ win, curWinId }) => {
-                    window.makeOrderWin = win;
-                    window.makeOrderWin.faId = curWinId
-                    window.makeOrderWin.setAlwaysOnTop(true);
-                    this.bindMakeOrderWinEvent();
-                })
-            } else {
-                this.emitCurrentMakeOrderWinInfo();
-            }
-            
-            window.makeOrderWin.show && window.makeOrderWin.show();
-            window.makeOrderWin.focus && window.makeOrderWin.focus();
+            return this.buildMakeOrderWin()
+                .then(() => {
+                    this.emitCurrentMakeOrderWinInfo();
+                    window.makeOrderWin.show && window.makeOrderWin.show();
+                    window.makeOrderWin.focus && window.makeOrderWin.focus();
+                })        
         },
 
         handleMakeOrderByPos (item) {
@@ -76,9 +61,29 @@ export default {
                 })
         },
 
+        buildMakeOrderWin () {
+            if (!window.makeOrderWin) {
+                return this.$utils.openVueWin(
+                    'makeOrder', 
+                    `/make-order`, 
+                    BrowserWindow, 
+                    {
+                        width: 410,
+                        height: 460
+                    }
+                ).then((win) => {
+                    window.makeOrderWin = win;
+                    window.makeOrderWin.setAlwaysOnTop(true);
+                    this.bindMakeOrderWinEvent();
+                })
+            } else {
+                return Promise.resolve(true)
+            }
+        },
+
         emitCurrentMakeOrderWinInfo () {
             if (!window.makeOrderWin) return;
-
+            
             window.makeOrderWin.webContents.send('init-make-order-win-info', {
                 moduleType: this.moduleType,
                 currentId: this.currentIdInAccountStrategyResolved,
@@ -87,9 +92,6 @@ export default {
         },
 
         bindMakeOrderWinEvent () {
-
-            this.emitCurrentMakeOrderWinInfo();
-
 
             window.makeOrderWin.on('show', () => {
                 this.emitCurrentMakeOrderWinInfo();

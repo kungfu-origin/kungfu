@@ -224,14 +224,14 @@ export const openVueWin = (htmlPath: string, routerPath: string, BrowserWindow: 
         });
     
         win.on('close', () => { win = null })
+        win.setParentWindow(currentWindow)
         win.webContents.loadURL(modalPath)
         win.webContents.on('did-finish-load', () => {
             if(!currentWindow || Object.keys(currentWindow).length == 0 ) {
                 reject(new Error('当前页面没有聚焦！'))
                 return;
             }
-            const curWinId = currentWindow.id;
-            resolve({ win, curWinId })
+            resolve(win)
         })
     })
 }
@@ -255,6 +255,7 @@ export const buildTask = (taskPath: string, BrowserWindow: any, debugOptions = {
         })
 
         win.on('close', () => { win = null })
+        win.setParentWindow(currentWindow)
         win.webContents.loadURL(taskFullPath)
         win.webContents.on('did-finish-load', () => { 
             if(!currentWindow || Object.keys(currentWindow).length == 0 ) {

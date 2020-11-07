@@ -162,11 +162,10 @@ import { deepClone } from '__gUtils/busiUtils';
 import { sourceTypeConfig, sideName, offsetName, priceType, hedgeFlag, exchangeIds, instrumentTypes } from '__gConfig/tradingConfig';
 import { getFutureTickersConfig, getStockTickersConfig } from '__assets/base'
 import { Autocomplete } from 'element-ui';
-import { from } from 'rxjs';
 import { ipcRenderer } from 'electron';
 
-// import { buildTradingDataPipe } from '__io/kungfu/tradingData';
 import makeOrderMixin from '@/components/Base/tradingData/js/makeOrderMixin';
+import makeOrderIPCMixin from '@/components/Base/tradingData/js/makeOrderIPCMixin';
 
 const ls = require('local-storage');
 const REMOTE = require('electron').remote
@@ -188,7 +187,7 @@ function filterPriceType (priceType) {
 
 export default {
 
-    mixins: [ makeOrderMixin ],
+    mixins: [ makeOrderMixin, makeOrderIPCMixin ],
 
     data () {
         this.sourceTypeConfig = sourceTypeConfig;
@@ -242,11 +241,11 @@ export default {
 
     computed: {
         ...mapState({
-            tdAccountSource: state => state.BASE.tdAccountSource,
-            strategyList: state => state.STRATEGY.strategyList,
-            tdList: state => state.ACCOUNT.tdList,
-            accountsAsset: state => state.ACCOUNT.accountsAsset,
-            processStatus: state => state.BASE.processStatus,
+            tdAccountSource: state => state.tdAccountSource,
+            strategyList: state => state.strategyList,
+            tdList: state => state.tdList,
+            accountsAsset: state => state.accountsAsset,
+            processStatus: state => state.processStatus,
         }),
 
         accountType() {
@@ -382,23 +381,12 @@ export default {
             this.currentAccount = account;
         },
 
-        listenKungfuData (type) {
-            this.tradingDataPipe && this.tradingDataPipe.unsubscribe();
-
-            // this.tradingDataPipe = buildTradingDataPipe(type).subscribe(data => {
-            //     const assets = data['assets'];
-            //     this.$store.dispatch('setAccountsAsset', Object.freeze(JSON.parse(JSON.stringify(assets))));
-            // })
-        },
-
         bindListenRenderEvents () {
             ipcRenderer.on('init-make-order-win-info', (event, info) => {
                 const { currentId, makeOrderByPosData, moduleType } = info;                
                 this.currentId = currentId;
                 this.moduleType = moduleType
                 this.makeOrderByPosData = makeOrderByPosData;
-
-                this.listenKungfuData('account')
             })
         },
 
@@ -412,8 +400,6 @@ export default {
                     makeOrderForm['instrument_type'] = instrumentType;
 
                     this.makeOrder(this.moduleType, makeOrderForm, t.currentAccountResolved, t.currentId)
-                        .then(() => this.$message.success('下单指令已发送！'))
-                        .catch(err => this.$message.error(err))
                     
                 }
             })

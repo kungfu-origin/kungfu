@@ -43,12 +43,11 @@ export const removeFileFolderPending = ({commit}, {id, type}) => {
 
 //更新straetegyList
 export const getStrategyList = ({dispatch}) => {
-    return new Promise(resolve => {
-        STRATEGY_API.getStrategyList().then((res) => {
+    return STRATEGY_API.getStrategyList()
+        .then((res) => {
             dispatch('setStrategyList', res);
-            resolve(res)
+            return res
         })
-    })
 }
 
 //标记入口文件

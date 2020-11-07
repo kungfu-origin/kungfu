@@ -1,6 +1,6 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
-import MakeOrderWindow from '@/components/Base/MakeOrderWindow';
+import MakeOrderWindow from '@/views/makeOrder/components/MakeOrderWindow';
 
 
 Vue.use(VueRouter)
