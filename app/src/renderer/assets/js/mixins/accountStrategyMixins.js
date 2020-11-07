@@ -46,7 +46,7 @@ export default {
             }
 
             if (!window.makeOrderWin) {
-                window.makeOrderWin = this.$utils.openVueWin(
+                this.$utils.openVueWin(
                     'makeOrder', 
                     `/make-order`, 
                     BrowserWindow, 
@@ -54,19 +54,18 @@ export default {
                         width: 410,
                         height: 460
                     }
-                )
-                
-                window.makeOrderWin.setAlwaysOnTop(true);
-                this.bindMakeOrderWinEvent();
-            } 
+                ).then(({ win, curWinId }) => {
+                    window.makeOrderWin = win;
+                    window.makeOrderWin.faId = curWinId
+                    window.makeOrderWin.setAlwaysOnTop(true);
+                    this.bindMakeOrderWinEvent();
+                })
+            } else {
+                this.emitCurrentMakeOrderWinInfo();
+            }
             
             window.makeOrderWin.show && window.makeOrderWin.show();
             window.makeOrderWin.focus && window.makeOrderWin.focus();
-
-            this.$nextTick()
-                .then(() => {
-                    this.emitCurrentMakeOrderWinInfo();
-                })
         },
 
         handleMakeOrderByPos (item) {
@@ -88,9 +87,9 @@ export default {
         },
 
         bindMakeOrderWinEvent () {
-            window.makeOrderWin.webContents.on('did-finish-load', () => {
-                this.emitCurrentMakeOrderWinInfo();
-            })
+
+            this.emitCurrentMakeOrderWinInfo();
+
 
             window.makeOrderWin.on('show', () => {
                 this.emitCurrentMakeOrderWinInfo();

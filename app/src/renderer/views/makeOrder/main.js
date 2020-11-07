@@ -9,6 +9,7 @@ import ElementUI from 'element-ui';
 import Components from '@/assets/components'
 import moment from 'moment';
 import App from './App.vue';
+import electron from 'electron';
 
 import '@/assets/iconfont/iconfont.js';
 import '@/assets/iconfont/iconfont.css';
@@ -43,5 +44,5 @@ startGetProcessStatus((processStatus) => {
 
 
 
-
+console.log(electron.remote.BrowserWindow)
 

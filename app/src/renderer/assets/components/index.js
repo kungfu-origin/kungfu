@@ -58,7 +58,6 @@ const BrowserWindow = require('electron').remote.BrowserWindow;
 const showLog = (logPath) => {
     buildTask(
         'showLog', 
-        BrowserWindow.getFocusedWindow(), 
         BrowserWindow,
         {
             width: 600,

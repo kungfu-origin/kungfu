@@ -195,11 +195,10 @@ export const throttleInsert = (interval = 300, type = 'push'): Function => {
  * 新建窗口
  * @param  {string} htmlPath
  */
-export const openVueWin = (htmlPath: string, routerPath: string, BrowserWindow: any, windowConfig: {}): void => {
-
-    let x,y;
+export const openVueWin = (htmlPath: string, routerPath: string, BrowserWindow: any, windowConfig: {}) => {
 
     const currentWindow = BrowserWindow.getFocusedWindow();//获取当前活动的浏览器窗口。
+    let x: Number,y: Number;
 
     if (currentWindow) { //如果上一步中有活动窗口，则根据当前活动窗口的右下方设置下一个窗口的坐标
         const [ currentWindowX, currentWindowY ] = currentWindow.getPosition();
@@ -211,39 +210,43 @@ export const openVueWin = (htmlPath: string, routerPath: string, BrowserWindow: 
     ? `http://localhost:9090/${htmlPath}.html#${routerPath}`
     : `file://${__dirname}/${htmlPath}.html#${routerPath}`
     
-    let win = new BrowserWindow({
-        x,
-        y,
-        width: 1080, 
-        height: 766,
-        backgroundColor: '#161B2E',
-        webPreferences: {
-            nodeIntegration: true
-        },
-        ...windowConfig
-    });
-
-    win.loadURL(modalPath)
-    win.on('close', () => { win = null })
-    return win
+    return new Promise(( resolve, reject ) => {
+        let win = new BrowserWindow({
+            x,
+            y,
+            width: 1080, 
+            height: 766,
+            backgroundColor: '#161B2E',
+            webPreferences: {
+                nodeIntegration: true
+            },
+            ...windowConfig
+        });
+    
+        win.on('close', () => { win = null })
+        win.webContents.loadURL(modalPath)
+        win.webContents.on('did-finish-load', () => {
+            if(!currentWindow || Object.keys(currentWindow).length == 0 ) {
+                reject(new Error('当前页面没有聚焦！'))
+                return;
+            }
+            const curWinId = currentWindow.id;
+            resolve({ win, curWinId })
+        })
+    })
 }
 
 /**
  * 启动任务，利用electron多进程
  * @param  {} taskPath
  */
-export const buildTask = (
-    taskPath: string, 
-    curWin: any, 
-    BrowserWindow: any, 
-    debugOptions = { 
-        width: 0,
-        height: 0,
-        show: false
-    }) => {
+export const buildTask = (taskPath: string, BrowserWindow: any, debugOptions = { width: 0, height: 0, show: false }) => {
+    
     const taskFullPath = `file://${path.join(__resources, 'tasks', taskPath + '.html')}`;
-    return new Promise((resolve, reject) => {
-        const win = new BrowserWindow({
+    const currentWindow = BrowserWindow.getFocusedWindow();//获取当前活动的浏览器窗口。
+    
+    return new Promise(( resolve, reject ) => {
+        let win = new BrowserWindow({
             webPreferences: {
                 nodeIntegration: true
             },
@@ -251,14 +254,15 @@ export const buildTask = (
 		    backgroundColor: '#161B2E',
         })
 
+        win.on('close', () => { win = null })
         win.webContents.loadURL(taskFullPath)
         win.webContents.on('did-finish-load', () => { 
-            if(!curWin || Object.keys(curWin).length == 0 ) {
+            if(!currentWindow || Object.keys(currentWindow).length == 0 ) {
                 reject(new Error('当前页面没有聚焦！'))
                 return;
             }
-            const curWinId = curWin.id;
-            resolve({win, curWinId})
+            const curWinId = currentWindow.id;
+            resolve({ win, curWinId })
         })
     })
 }
