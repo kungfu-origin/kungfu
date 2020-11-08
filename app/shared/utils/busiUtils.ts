@@ -195,9 +195,10 @@ export const throttleInsert = (interval = 300, type = 'push'): Function => {
  * 新建窗口
  * @param  {string} htmlPath
  */
-export const openVueWin = (htmlPath: string, routerPath: string, BrowserWindow: any, windowConfig: {}) => {
-
-    const currentWindow = BrowserWindow.getFocusedWindow();//获取当前活动的浏览器窗口。
+export const openVueWin = (htmlPath: string, routerPath: string, electronRemote: any, windowConfig: {}) => {
+    const BrowserWindow: any = electronRemote.BrowserWindow;
+    const currentWindow: any = electronRemote.getCurrentWindow();
+    
     let x: Number,y: Number;
 
     if (currentWindow) { //如果上一步中有活动窗口，则根据当前活动窗口的右下方设置下一个窗口的坐标
@@ -222,8 +223,7 @@ export const openVueWin = (htmlPath: string, routerPath: string, BrowserWindow: 
             },
             ...windowConfig
         });
-    
-        win.on('close', () => { win = null })
+       
         win.setParentWindow(currentWindow)
         win.webContents.loadURL(modalPath)
         win.webContents.on('did-finish-load', () => {
@@ -233,6 +233,13 @@ export const openVueWin = (htmlPath: string, routerPath: string, BrowserWindow: 
             }
             resolve(win)
         })
+
+        let winId = win.id;
+        window && window.ELEC_WIN_MAP && window.ELEC_WIN_MAP.add(winId, win)
+        win.on('close', () => { 
+            window && window.ELEC_WIN_MAP && window.ELEC_WIN_MAP.delete(winId)
+            win = null;
+        })
     })
 }
 
@@ -240,10 +247,11 @@ export const openVueWin = (htmlPath: string, routerPath: string, BrowserWindow: 
  * 启动任务，利用electron多进程
  * @param  {} taskPath
  */
-export const buildTask = (taskPath: string, BrowserWindow: any, debugOptions = { width: 0, height: 0, show: false }) => {
+export const buildTask = (taskPath: string, electronRemote: any, debugOptions = { width: 0, height: 0, show: false }) => {
     
     const taskFullPath = `file://${path.join(__resources, 'tasks', taskPath + '.html')}`;
-    const currentWindow = BrowserWindow.getFocusedWindow();//获取当前活动的浏览器窗口。
+    const BrowserWindow: any = electronRemote.BrowserWindow;
+    const currentWindow: any = electronRemote.getCurrentWindow();
     
     return new Promise(( resolve, reject ) => {
         let win = new BrowserWindow({
@@ -254,7 +262,6 @@ export const buildTask = (taskPath: string, BrowserWindow: any, debugOptions = {
 		    backgroundColor: '#161B2E',
         })
 
-        win.on('close', () => { win = null })
         win.setParentWindow(currentWindow)
         win.webContents.loadURL(taskFullPath)
         win.webContents.on('did-finish-load', () => { 
@@ -264,6 +271,14 @@ export const buildTask = (taskPath: string, BrowserWindow: any, debugOptions = {
             }
             const curWinId = currentWindow.id;
             resolve({ win, curWinId })
+        })
+
+        let winId = win.id;
+        window && window.ELEC_WIN_MAP && window.ELEC_WIN_MAP.add(winId, win)
+        win.on('close', () => { 
+            window && window.ELEC_WIN_MAP && window.ELEC_WIN_MAP.delete(winId)
+            win = null;
+            
         })
     })
 }

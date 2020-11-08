@@ -1,5 +1,5 @@
 
-const BrowserWindow = require('electron').remote.BrowserWindow
+const remote = require('electron').remote
 
 export default {
 
@@ -66,12 +66,10 @@ export default {
                 return this.$utils.openVueWin(
                     'makeOrder', 
                     `/make-order`, 
-                    BrowserWindow, 
-                    {
-                        width: 410,
-                        height: 460
-                    }
+                    remote, 
+                    { width: 410, height: 460 }
                 ).then((win) => {
+                    
                     window.makeOrderWin = win;
                     window.makeOrderWin.setAlwaysOnTop(true);
                     this.bindMakeOrderWinEvent();

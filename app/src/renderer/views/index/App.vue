@@ -26,14 +26,13 @@
 import path from 'path';
 
 import { mapState } from 'vuex';
-import { ipcRenderer } from 'electron';
 
 import GlobalSettingDialog from '@/components/Base/GlobalSettingDialog';
 
 import { KF_HOME, LIVE_TRADING_DB_DIR } from '__gConfig/pathConfig';
 import { existsSync } from '__gUtils/fileUtils';
 import { deepClone, delayMiliSeconds, debounce } from '__gUtils/busiUtils';
-import { buildKungfuGlobalDataPipe } from '__io/kungfu/tradingData';
+import { buildKungfuGlobalDataPipe, buildTradingDataPipe } from '__io/kungfu/tradingData';
 import { deleteProcess } from '__gUtils/processUtils';
 import { watcher } from '__io/kungfu/watcher';
 
@@ -48,7 +47,6 @@ export default {
         this.kungfuGloablDataObserver = null;
         return {
             watcherLoading: false,
-            globalSettingDialogVisiblity: false
         }
     },
 
@@ -57,23 +55,20 @@ export default {
     },
 
     mounted(){
+
         this.removeLoadingMask();
         this.removeKeyDownEvent();
-        //ipc event
-        this.bindMainProcessEvent();
-        this.getWatcherStatus();
 
         this.$store.dispatch('getTdMdList');
         this.$store.dispatch('getStrategyList');
         this.$store.dispatch('getAccountSourceConfig');
         this.$store.dispatch('getKungfuConfig');
-        this.kungfuGloablDataObserver = this.subKungfuGlobalData();
 
-    },
+        this.bindKungfuGlobalDataListener();
+        this.bindTradingDataListener();
 
-    destroyed() {
-        this.kungfuGloablDataObserver.unsubscribe();
-        ipcRenderer.removeAllListeners('main-process-messages')        
+        this.getWatcherStatus();
+
     },
 
     computed: {
@@ -121,8 +116,8 @@ export default {
             }, 500)
         },
 
-        subKungfuGlobalData () {
-            return buildKungfuGlobalDataPipe().subscribe(data => {
+        bindKungfuGlobalDataListener () {
+            this.kungfuGloablDataObserver = buildKungfuGlobalDataPipe().subscribe(data => {
                 data.gatewayStates.forEach(gatewayState => {
                     this.$store.dispatch('setOneMdTdState', {
                         id: gatewayState.processId,
@@ -131,6 +126,14 @@ export default {
                 })
             })
         },
+
+        bindTradingDataListener () {
+            this.tradingDataPipe = buildTradingDataPipe('account').subscribe(data => {
+                const assets = data['assets'];
+                this.$store.dispatch('setAccountsAsset', Object.freeze(JSON.parse(JSON.stringify(assets))));
+            })
+        },
+
 
         removeKeyDownEvent () {
             //解除回车带来的一些不好的影响
@@ -141,18 +144,6 @@ export default {
                 }
             })
         },
-
-        bindMainProcessEvent () {
-            const t = this;
-            ipcRenderer.removeAllListeners('main-process-messages')
-            ipcRenderer.on('main-process-messages', (event, args) => {
-                switch (args) {
-                    case 'open-setting-dialog':
-                        t.globalSettingDialogVisiblity = true;
-                        break
-                }
-            })
-        }
     }
 }
 </script>

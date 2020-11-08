@@ -1,7 +1,6 @@
 
 import { mapState } from 'vuex';
 import { ipcRenderer, remote } from 'electron';
-import { buildTradingDataPipe } from '__io/kungfu/tradingData';
 import makeOrderCoreMixin from '@/components/Base/tradingData/js/makeOrderCoreMixin';
 
 const BrowserWindow = remote.BrowserWindow;
@@ -11,9 +10,15 @@ export default {
 
     mixins: [ makeOrderCoreMixin ],
 
+    data () {
+        return {
+            globalSettingDialogVisiblity: false
+        }
+    },
+
     mounted () {
         this.bindIPCListener();
-        this.bindTradingDataListener();
+        this.bindMainIPCListener();
     },
 
     destroyed(){
@@ -28,14 +33,18 @@ export default {
 
     methods: {
 
-        bindTradingDataListener () {
-            this.tradingDataPipe = buildTradingDataPipe('account').subscribe(data => {
-                const assets = data['assets'];
-                this.$store.dispatch('setAccountsAsset', Object.freeze(JSON.parse(JSON.stringify(assets))));
+        bindMainIPCListener () {
+            ipcRenderer.on('main-process-messages', (event, args) => {
+                switch (args) {
+                    case 'open-setting-dialog':
+                        this.globalSettingDialogVisiblity = true;
+                        break
+                }
             })
         },
         
         bindIPCListener () {
+
             ipcRenderer.on('ipc-emit-tdMdList', (event, { childWinId }) => {
                 const childWin = BrowserWindow.fromId(childWinId);
                 return this.$store.dispatch('getTdMdList')

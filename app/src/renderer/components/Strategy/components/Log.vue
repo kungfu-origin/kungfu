@@ -38,8 +38,7 @@ import { Tail } from 'tail';
 import { clearFileContent, addFileSync, existsSync } from '__gUtils/fileUtils';
 import { ipcRenderer } from 'electron';
 import { platform } from '__gConfig/platformConfig';
-const BrowserWindow = require('electron').remote.BrowserWindow;
-
+import { remote } from 'electron'
 
 export default {
     name: 'log',
@@ -183,7 +182,7 @@ export default {
             return new Promise((resolve, reject) => {
                 buildTask(
                     'getStrategyLog', 
-                    BrowserWindow,
+                    remote,
                 ).then(({ win, curWinId }) => {
                     win.webContents.send('get-strategy-log', {
                         winId: curWinId,

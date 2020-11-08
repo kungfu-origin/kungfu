@@ -1,3 +1,5 @@
+import { remote } from 'electron';
+
 import TrNoData from './tr/TrNoData';
 import TableHeader from './tr/TableHeader';
 import TableHeaderItem from './tr/TableHeaderItem';
@@ -54,11 +56,10 @@ const saveFile = ({
 }
 
 //显示log
-const BrowserWindow = require('electron').remote.BrowserWindow;
 const showLog = (logPath) => {
     buildTask(
         'showLog', 
-        BrowserWindow,
+        remote,
         {
             width: 600,
             height: 800,
@@ -69,6 +70,7 @@ const showLog = (logPath) => {
             winId: curWinId,
             logPath
         });
+
     })
 }
 

@@ -5,6 +5,7 @@ declare var python_version: string;
 declare module NodeJS {
     interface Window { 
         fileId: number;
+        ELEC_WIN_MAP: any;
     }
 
     interface Global {
