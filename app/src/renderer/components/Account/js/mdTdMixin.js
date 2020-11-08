@@ -16,17 +16,12 @@ export default {
             },
 
             renderTable: false,
-
-            keepAllProcessRunning: !!(+localStorage.getItem(`keepAllProcessRunning_${this.tdmdType}`)),
-            
-            maunalClosedProcssSet: new Set(maunalClosedProcssList)
         }
     },
 
     mounted () {
         this.renderTable = true;
         this.getTableList();
-        this.keepProcessRunningLoopResolved()
     },
 
     computed: {
@@ -36,15 +31,13 @@ export default {
 
         ...mapGetters([
             "ifMasterLedgerRunning"
-        ])
-    },
+        ]),
 
-    watch: {
-        keepAllProcessRunning (keepAllProcessRunning) {
-            if (keepAllProcessRunning) {
-                this.keepProcessRunningLoop()
+        allProcessBtnTxt () {
+            if (this.allProcessRunning) {
+                return '关闭全部'
             } else {
-                this.keepRunningTimer && this.keepRunningTimer.clearLoop()
+                return '开启全部'
             }
         },
         
@@ -52,13 +45,17 @@ export default {
 
     methods: {
         handleToggleKeepAllProcessRunning () {
-            if (this.keepAllProcessRunning) {
-                localStorage.setItem(`keepAllProcessRunning_${this.tdmdType}`, 0)
-            } else {
-                localStorage.setItem(`keepAllProcessRunning_${this.tdmdType}`, 1)
-            }
+            const targetStatus = !this.allProcessRunning
+            let count = 0;
+            let timer = setTimerPromiseTask(() => {
+                count++;
+                if (count > 3) {
+                    timer.clearLoop()
+                }
+                return this.switchAllProcess(targetStatus)
+            }, 5000)
 
-            this.keepAllProcessRunning = !this.keepAllProcessRunning
+            this.$message.success(`正在${this.allProcessBtnTxt} ${this.tdmdType} 进程`)
         },
 
         //添加账户，打开选择柜台弹窗
@@ -73,35 +70,12 @@ export default {
             this.selectedSource = row.source_name
             this.visiblity.setAccount = true
         },
+        
         //选择柜台
         handleSelectSource (sourceName) {
             this.method = 'add';
             this.selectedSource = sourceName
             this.visiblity.setAccount = true
-        },
-
-        keepProcessRunningLoopResolved () {
-            if (this.keepAllProcessRunning) {
-                this.keepProcessRunningLoop()
-            } else {
-                this.keepRunningTimer && this.keepRunningTimer.clearLoop()
-            }
-        },
-
-        keepProcessRunningLoop () {
-            if (this.switchAllProcess) {
-                this.keepRunningTimer = setTimerPromiseTask(this.switchAllProcess, 3000)
-            }
-        },
-
-        insertMaunalClosedProcssSet (id, status) {
-            if (status) {
-                this.maunalClosedProcssSet.delete(id)
-            } else {
-                this.maunalClosedProcssSet.add(id)
-            }
-
-            localStorage.setItem(`maunalClosedProcssList_${this.tdmdType}`, JSON.stringify(Array.from(this.maunalClosedProcssSet)))
         },
 
         //添加或修改账户详情后的操作

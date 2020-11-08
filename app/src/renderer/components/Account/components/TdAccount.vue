@@ -5,7 +5,7 @@
                 <tr-search-input v-model.trim="accountIdKey"></tr-search-input>
             </tr-dashboard-header-item>
             <tr-dashboard-header-item>
-                <el-button size="mini" :class="{ 'active': keepAllProcessRunning }" @click="handleToggleKeepAllProcessRunning" title="保持开启">保持开启</el-button>
+                <el-button size="mini" @click="handleToggleKeepAllProcessRunning" :title="allProcessBtnTxt">{{ allProcessBtnTxt }}</el-button>
             </tr-dashboard-header-item>
             <tr-dashboard-header-item>
                 <el-button size="mini" @click="handleAdd" title="添加" id="add-account-btn">添加</el-button>
@@ -263,7 +263,7 @@ export default {
             return this.tdList.filter(a => (a.account_id.includes(this.accountIdSearchKeyDebounce)));
         },
 
-         allTdProcessRunning () {
+        allProcessRunning () {
              const notRunningList = this.tdList.filter(item => {
                 const isRunning = this.$utils.ifProcessRunning('td_' + item.account_id, this.processStatus)
                 if (!isRunning) return true
@@ -326,7 +326,6 @@ export default {
 
         //Td开关
         handleTdSwitch(value, account) {
-            this.insertMaunalClosedProcssSet(account.account_id, value)
             return switchTd(account, value).then(({ type, message }) => this.$message[type](message))
         },
 
@@ -336,15 +335,15 @@ export default {
             this.$showLog(logPath)
         },
 
-        switchAllProcess () {
+        switchAllProcess (targetStatus) {
             const promiseList = this.tdList
                 .filter(item => {
                     const id = item.account_id;
                     const status = this.$utils.ifProcessRunning('td_' + item.account_id, this.processStatus)
-                    return !status && !this.maunalClosedProcssSet.has(id)
+                    return status !== targetStatus
                 })
                 .map(item => {
-                    return () => switchTd(item, true)
+                    return () => switchTd(item, targetStatus)
                 })
             
             if (this.ifMasterLedgerRunning && watcher.isLive) {
