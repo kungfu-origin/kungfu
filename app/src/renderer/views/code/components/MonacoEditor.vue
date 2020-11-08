@@ -36,9 +36,9 @@ export default {
 
     computed: {
         ...mapState({
-            currentFile: state => state.STRATEGY.currentFile,
-            fileTree: state => state.STRATEGY.fileTree,
-            code: state => state.BASE.kfConfig.code || {}
+            currentFile: state => state.currentFile,
+            fileTree: state => state.fileTree,
+            code: state => state.kfConfig.code || {}
         })
     },
 

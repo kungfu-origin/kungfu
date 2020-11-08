@@ -11,34 +11,9 @@ export const setStrategyList = ({commit}, strategyList) => {
     commit('SET_STRATEGY_LIST', strategyList)
 }
 
-//策略编辑，设置当前文件
-export const setCurrentFile = ({commit}, file) => {
-    commit('SET_CURRENT_FILE', file)
-}
-
-export const setStrategiesAsset = ({ commit }, strategiesAsset) => {
-    commit('SET_STRATEGIES_ASSET', strategiesAsset)
-}
-
-//策略编辑，设置文件树
-export const setFileTree = ({commit}, fileTree) => {
-    commit('SET_FILE_TREE', fileTree)    
-}
-
-//策略编辑，设置文件节点
-export const setFileNode = ({commit}, {id, attr, val}) => {
-    commit('SET_FILE_NODE', {id, attr, val})
-}
-
-//策略编辑，添加文件或文件夹时，添加“pending”
-export const addFileFolderPending = ({commit}, {id, type}) => {
-    commit('ADD_FILE_FOLDER_PENDING', {id, type})
-}
-
-//策略编辑时，添加文件或文件夹时，删除“pending”
-export const removeFileFolderPending = ({commit}, {id, type}) => {
-    commit('REMOVE_FILE_FOLDER_PENDING', {id, type})
-
+//删除策略
+export const deleteStrategy = ({dispatch}, strategyId) => {
+    return deleteStrat(strategyId).then(() => dispatch('getStrategyList'))
 }
 
 //更新straetegyList
@@ -50,12 +25,6 @@ export const getStrategyList = ({dispatch}) => {
         })
 }
 
-//标记入口文件
-export const setEntryFile = ({commit}, entryFile) => {
-    commit("SET_ENTRY_FILE", entryFile)
-}
-
-//删除策略
-export const deleteStrategy = ({dispatch}, strategyId) => {
-    return deleteStrat(strategyId).then(() => dispatch('getStrategyList'))
+export const setStrategiesAsset = ({ commit }, strategiesAsset) => {
+    commit('SET_STRATEGIES_ASSET', strategiesAsset)
 }

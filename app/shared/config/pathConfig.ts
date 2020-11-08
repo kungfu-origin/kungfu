@@ -1,5 +1,7 @@
+import { addFileSync } from '__gUtils/fileUtils'
+
 const path = require('path');
-const { addFileSync } = require('__gUtils/fileUtils');
+
 
 const KF_HOME_BASE_DIR_RESOLVE = (() => {
     if ( process.env.APP_TYPE === 'cli' ) {

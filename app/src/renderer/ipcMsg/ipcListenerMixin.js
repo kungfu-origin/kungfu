@@ -64,14 +64,6 @@ export default {
                     })
             })
 
-            ipcRenderer.on('ipc-emit-accountSourceConfig', (event, { childWinId }) => {
-                const childWin = BrowserWindow.fromId(childWinId);
-                return this.$store.dispatch('getAccountSourceConfig')
-                    .then(accountSource => {
-                        childWin.webContents.send('ipc-res-accountSourceConfig', Object.freeze(accountSource))
-                    })
-            })
-
             ipcRenderer.on('ipc-emit-accountsAsset', (event, { childWinId }) => {
                 const childWin = BrowserWindow.fromId(childWinId);
                 childWin.webContents.send('ipc-res-accountsAsset', Object.freeze(this.accountsAsset))
@@ -96,6 +88,14 @@ export default {
                     .catch(err => this.$message.error(err.message || '下单指令发送失败！'))
                     .finally(() => {
                         childWin.webContents.send('ipc-res-makeOrder')
+                    })
+            })
+
+            ipcRenderer.on('ipc-emit-kungfuConfig', (event, { childWinId }) => {
+                const childWin = BrowserWindow.fromId(childWinId);
+                return this.$store.dispatch('getKungfuConfig')
+                    .then(kfConfig => {
+                        childWin.webContents.send('ipc-res-kungfuConfig', Object.freeze(kfConfig))
                     })
             })
         },

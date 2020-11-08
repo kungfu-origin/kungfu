@@ -1,6 +1,8 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 
+import { getAccountSource } from '__gConfig/accountConfig';
+
 Vue.use(Vuex)
 
 export default new Vuex.Store({
@@ -50,31 +52,47 @@ export default new Vuex.Store({
     },
 
     actions: {
+        //common
         setAccountsAsset ({ commit }, accountsAsset) {
             commit('SET_ACCOUNTS_ASSET', accountsAsset)
         },        
 
+        //common
         setProcessStatus ({ commit }, processStatus) {
             commit('SET_PROCESS_STATUS', processStatus)
         },
 
+        //common
         setTdAccountSource ({ commit }, tdAccountSource) {
             commit('SET_TD_ACCOUNT_SOURCE', tdAccountSource)
         },
         
+        //common
         setMdAccountSource ({ commit }, mdAccountSource) {
             commit('SET_MD_ACCOUNT_SOURCE', mdAccountSource)
         },
 
-        //设置当前策略列表
+        //common
+        getAccountSourceConfig ({ dispatch }) {
+            return getAccountSource()
+            .then(accountSource => {
+                dispatch('setTdAccountSource', accountSource.td)
+                dispatch('setMdAccountSource', accountSource.md)
+                return accountSource
+            })
+        },
+
+        //common
         setStrategyList ({ commit }, strategyList) {
             commit('SET_STRATEGY_LIST', strategyList)
         },
 
+        //common
         setTdList ({ commit }, tdList) {
             commit('SET_TD_LIST', tdList)
         },
 
+        //common
         setMdList ({ commit }, mdList) {
             commit('SET_MD_LIST', mdList)
         }

@@ -10,7 +10,7 @@
 
 import Editor from './components/MonacoEditor';
 import FileTree from './components/FileTree';
-import MainContent from '@/components/Layout/MainContentPure'
+import MainContent from '@/components/Layout/MainContentForCode'
 
 import * as STRATEGY_API from '__io/kungfu/strategy';
 import { setTimeout } from 'timers';

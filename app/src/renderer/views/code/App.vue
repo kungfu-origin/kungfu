@@ -5,12 +5,19 @@
 </template>
 <script>
 
+import { ipcEmitDataByName } from '@/ipcMsg/emitter';
+
 export default {
     name: 'app',
 
     mounted(){
         this.removeLoadingMask();
-        this.$store.dispatch('getStrategyList');
+
+        ipcEmitDataByName('strategyList')
+            .then(({ data }) => {
+                this.$store.dispatch('setStrategyList', data)
+            })
+
         this.$store.dispatch('getKungfuConfig');
     },
 

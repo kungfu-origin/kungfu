@@ -27,19 +27,14 @@ export default {
 
             })
 
-        ipcEmitDataByName('accountSourceConfig')
-            .then(({ data }) => {
-                const { md, td } = data;
-                this.$store.dispatch('setTdAccountSource', td)
-                this.$store.dispatch('setMdAccountSource', md)
-            })
-
         setTimerPromiseTask(() => ipcEmitDataByName('accountsAsset')
             .then(({ data }) => {
                 this.$store.dispatch('setAccountsAsset', data);
             }),
             3000
         )
+
+        this.$store.dispatch('getAccountSourceConfig');
     },
 
     methods: {
