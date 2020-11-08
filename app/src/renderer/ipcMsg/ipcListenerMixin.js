@@ -1,6 +1,9 @@
 
 import { mapState } from 'vuex';
 import { ipcRenderer, remote } from 'electron';
+
+import { getStrategyById, updateStrategyPath } from '__io/kungfu/strategy';
+
 import makeOrderCoreMixin from '@/components/Base/tradingData/js/makeOrderCoreMixin';
 
 const BrowserWindow = remote.BrowserWindow;
@@ -96,6 +99,24 @@ export default {
                 return this.$store.dispatch('getKungfuConfig')
                     .then(kfConfig => {
                         childWin.webContents.send('ipc-res-kungfuConfig', Object.freeze(kfConfig))
+                    })
+            })
+
+            ipcRenderer.on('ipc-emit-strategyById', (event, { childWinId, params }) => {
+                const childWin = BrowserWindow.fromId(childWinId);
+                const { strategyId } = params;
+                return getStrategyById(strategyId)
+                    .then(strategies => {
+                        childWin.webContents.send('ipc-res-strategyById', Object.freeze(strategies))
+                    })
+            })
+
+            ipcRenderer.on('ipc-emit-updateStrategyPath', (event, { childWinId, params }) => {
+                const childWin = BrowserWindow.fromId(childWinId);
+                const { strategyId, strategyPath } = params;
+                return updateStrategyPath(strategyId, strategyPath)
+                    .then(() => {
+                        childWin.webContents.send('ipc-res-updateStrategyPath')
                     })
             })
         },

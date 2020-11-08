@@ -24,11 +24,13 @@
     </div>
 </template>
 <script>
-import * as STRATEGY_API from '__io/kungfu/strategy';
-import path from 'path';
-import FileNode from './FileNode';
 import {mapState} from 'vuex';
+import path from 'path';
+
+import FileNode from './FileNode';
+
 import * as CODE_UTILS from "__gUtils/fileUtils";
+import { ipcEmitDataByName } from '@/ipcMsg/emitter'
 
 export default {
     props: {
@@ -121,7 +123,12 @@ export default {
 
         //bind data中path 与 sqlite中path
         async bindStrategyPath(strategyPath){
-            await STRATEGY_API.updateStrategyPath(this.strategy.strategy_id, strategyPath[0])
+            
+            await ipcEmitDataByName('updateStrategyPath', {
+                strategyId: this.strategy.strategy_id,
+                strategyPath: strategyPath[0]
+            })
+            
             this.$message.success(`策略${this.strategy.strategy_id}文件路径修改成功！`)
             //每次更新path，需要通知root组件更新stratgy
             this.$emit('updateStrategy')

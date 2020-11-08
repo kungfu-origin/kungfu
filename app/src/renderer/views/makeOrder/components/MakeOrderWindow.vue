@@ -300,14 +300,26 @@ export default {
         },        
 
         avaliableOrderVolume () {
-
             if (this.makeOrderForm.price_type === 0) {
+                
                 if (this.makeOrderForm.side === 0) { //买
+                    
                     const price = +this.makeOrderForm.limit_price;
+                    
                     if (!+price) return '';
+                    
                     if (!+this.avaliableCash) return ''
+                    
                     return Math.floor(this.avaliableCash / price)
+
                 } else if (this.makeOrderForm.side === 1) { //卖
+                    
+                    const { instrumentId, totalVolume } = this.makeOrderByPosData;
+
+                    if (instrumentId !== this.makeOrderForm.instrument_id) {
+                        return ''
+                    }
+
                     return this.makeOrderByPosData.totalVolume || ''
                 }                
             } 
@@ -346,13 +358,6 @@ export default {
                     }
                 })
         },
-
-        "makeOrderForm.instrument_id" (instrumentId) {
-            // ticker 变了，清空 makeOrderByPosData
-            if (instrumentId !== this.makeOrderByPosData.instrumentId) {
-                this.makeOrderByPosData = {}
-            }
-        }
     },
 
     methods: {
@@ -385,7 +390,7 @@ export default {
             ipcRenderer.on('init-make-order-win-info', (event, info) => {
                 const { currentId, makeOrderByPosData, moduleType } = info;                
                 this.currentId = currentId;
-                this.moduleType = moduleType
+                this.moduleType = moduleType;
                 this.makeOrderByPosData = makeOrderByPosData;
             })
         },
