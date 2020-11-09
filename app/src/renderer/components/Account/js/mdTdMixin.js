@@ -47,17 +47,19 @@ export default {
         handleToggleKeepAllProcessRunning () {
             const targetStatus = !this.allProcessRunning;
             const allProcessBtnTxt = this.allProcessBtnTxt;
+
+            timer && timer.clearLoop && timer.clearLoop();
             let count = 0;
             let timer = setTimerPromiseTask(() => {
                 count++;
 
                 if (!targetStatus) {
                     if (count > 3) {
-                        timer.clearLoop()
+                        timer && timer.clearLoop && timer.clearLoop();
                     }
                 } else {
                     if (count > 3) {
-                        timer.clearLoop()
+                        timer && timer.clearLoop && timer.clearLoop();
                     }
                 }
 
@@ -65,7 +67,7 @@ export default {
                 console.log(targetStatus, this.allProcessRunning)
                 if (targetStatus === this.allProcessRunning) {
                     this.$message.success(`${allProcessBtnTxt} ${this.tdmdType} 进程 完成`)                
-                    timer.clearLoop()
+                    timer && timer.clearLoop && timer.clearLoop();
                     return Promise.resolve(false);
                 }
 
