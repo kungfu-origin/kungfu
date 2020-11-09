@@ -218,13 +218,13 @@ export const openVueWin = (htmlPath: string, routerPath: string, electronRemote:
             width: 1080, 
             height: 766,
             backgroundColor: '#161B2E',
+            parent: currentWindow,
             webPreferences: {
                 nodeIntegration: true
             },
             ...windowConfig
         });
        
-        win.setParentWindow(currentWindow)
         win.webContents.loadURL(modalPath)
         win.webContents.on('did-finish-load', () => {
             if(!currentWindow || Object.keys(currentWindow).length == 0 ) {
@@ -255,6 +255,7 @@ export const buildTask = (taskPath: string, electronRemote: any, debugOptions = 
     
     return new Promise(( resolve, reject ) => {
         let win = new BrowserWindow({
+            parent: currentWindow,
             webPreferences: {
                 nodeIntegration: true
             },
@@ -262,7 +263,6 @@ export const buildTask = (taskPath: string, electronRemote: any, debugOptions = 
 		    backgroundColor: '#161B2E',
         })
 
-        win.setParentWindow(currentWindow)
         win.webContents.loadURL(taskFullPath)
         win.webContents.on('did-finish-load', () => { 
             if(!currentWindow || Object.keys(currentWindow).length == 0 ) {

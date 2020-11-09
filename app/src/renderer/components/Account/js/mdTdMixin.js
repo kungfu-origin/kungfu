@@ -49,9 +49,17 @@ export default {
             let count = 0;
             let timer = setTimerPromiseTask(() => {
                 count++;
-                if (count > 3) {
-                    timer.clearLoop()
+
+                if (!targetStatus) {
+                    if (count > 1) {
+                        timer.clearLoop()
+                    }
+                } else {
+                    if (count > 3) {
+                        timer.clearLoop()
+                    }
                 }
+
                 return this.switchAllProcess(targetStatus)
             }, 5000)
 
