@@ -64,7 +64,7 @@ export default {
                 count++;
 
                 if (count >= 3) {
-                    this.$message.success(`${this.targetTipTxt} ${this.tdmdType} 进程未完成，请手动 ${this.targetTipTxt}`)                
+                    this.$message.warning(`${this.targetTipTxt} ${this.tdmdType} 进程未完成，请手动 ${this.targetTipTxt}`)                
                     this.clearAllProcessSwitchTimer()
                     return Promise.resolve(false);
                 }
