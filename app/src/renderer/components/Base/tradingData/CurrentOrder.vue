@@ -68,8 +68,8 @@
         >
         <el-input-number
             v-if="adjustOrderProp === 'limitPrice'"
-            :precision="2"
-            :step="0.01"
+            :precision="3"
+            :step="0.001"
             :controls="false"
             placeholder="价格"
             v-model.trim="adjustOrderForm.limit_price"

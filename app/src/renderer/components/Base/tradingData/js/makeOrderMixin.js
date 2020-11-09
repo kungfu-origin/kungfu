@@ -137,14 +137,6 @@ export default {
                 .catch(err => this.$message.error(err.message || '撤单指令发送失败！'))
         },
 
-        getAdjustOrderTips (type, instrument_id, limit_price, limitPriceOld, volume, volumeOld) {
-            if (type === 'volume') {
-                return `确认调整： 商品 ${instrument_id}, 价格 ${limit_price}, 原未成交量 ${volumeOld}, 新设定交易量 ${volume}`
-            } else {
-                return `确认调整： 商品 ${instrument_id}, 原价格 ${limitPriceOld}, 新设定价格 ${limit_price}, 交易量 ${volume}`
-            }
-        },
-
         getAdjustOrderAccountResolved () {
             if (this.moduleType === 'account') {
                 return this.currentId
