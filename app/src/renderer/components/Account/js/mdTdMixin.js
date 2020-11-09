@@ -45,37 +45,42 @@ export default {
 
     methods: {
         handleToggleKeepAllProcessRunning () {
-            const targetStatus = !this.allProcessRunning;
-            const allProcessBtnTxt = this.allProcessBtnTxt;
 
-            timer && timer.clearLoop && timer.clearLoop();
+            if (this.startAllProcessSwitchLoopController) {
+                this.$message.warning(`请等待 ${this.targetTipTxt} ${this.tdmdType} 进程结束`)                
+                return;
+            };
+
+            this.clearAllProcessSwitchTimer()
+
+            this.startAllProcessSwitchLoopController = true;
+            this.targetStatus = !this.allProcessRunning;
+            this.targetTipTxt = this.allProcessBtnTxt;
+
+            
             let count = 0;
-            let timer = setTimerPromiseTask(() => {
+
+            this.allProcessSwitchTimer = setTimerPromiseTask(() => {
                 count++;
 
-                if (!targetStatus) {
-                    if (count > 3) {
-                        timer && timer.clearLoop && timer.clearLoop();
-                    }
-                } else {
-                    if (count > 3) {
-                        timer && timer.clearLoop && timer.clearLoop();
-                    }
+                if (count >= 3) {
+                    this.$message.success(`${this.targetTipTxt} ${this.tdmdType} 进程未完成，请手动 ${this.targetTipTxt}`)                
+                    this.clearAllProcessSwitchTimer()
+                    return Promise.resolve(false);
                 }
 
                 //全部开启成功
-                console.log(targetStatus, this.allProcessRunning)
-                if (targetStatus === this.allProcessRunning) {
-                    this.$message.success(`${allProcessBtnTxt} ${this.tdmdType} 进程 完成`)                
-                    timer && timer.clearLoop && timer.clearLoop();
+                if (this.targetStatus === this.allProcessRunning) {
+                    this.$message.success(`${this.targetTipTxt} ${this.tdmdType} 进程 完成`)                
+                    this.clearAllProcessSwitchTimer()
                     return Promise.resolve(false);
                 }
 
                 const loopTxt = count === 1 ? '' : `第${count}次`
-                this.$message.info(`正在尝试 ${allProcessBtnTxt} ${this.tdmdType} 进程 ${loopTxt}`)                
+                this.$message.info(`正在尝试 ${this.targetTipTxt} ${this.tdmdType} 进程 ${loopTxt}`)                
 
-                return this.switchAllProcess(targetStatus)
-            }, 5000)
+                return this.switchAllProcess(this.targetStatus)
+            }, 2000)
 
         },
 
@@ -97,6 +102,11 @@ export default {
             this.method = 'add';
             this.selectedSource = sourceName
             this.visiblity.setAccount = true
+        },
+
+        clearAllProcessSwitchTimer () {
+            this.allProcessSwitchTimer && this.allProcessSwitchTimer.clearLoop && this.allProcessSwitchTimer.clearLoop();
+            this.startAllProcessSwitchLoopController = false;
         },
 
         //添加或修改账户详情后的操作
