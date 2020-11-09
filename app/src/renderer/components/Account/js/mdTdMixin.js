@@ -45,13 +45,14 @@ export default {
 
     methods: {
         handleToggleKeepAllProcessRunning () {
-            const targetStatus = !this.allProcessRunning
+            const targetStatus = !this.allProcessRunning;
+            const allProcessBtnTxt = this.allProcessBtnTxt;
             let count = 0;
             let timer = setTimerPromiseTask(() => {
                 count++;
 
                 if (!targetStatus) {
-                    if (count > 1) {
+                    if (count > 3) {
                         timer.clearLoop()
                     }
                 } else {
@@ -60,10 +61,20 @@ export default {
                     }
                 }
 
+                //全部开启成功
+                console.log(targetStatus, this.allProcessRunning)
+                if (targetStatus === this.allProcessRunning) {
+                    this.$message.success(`${allProcessBtnTxt} ${this.tdmdType} 进程 完成`)                
+                    timer.clearLoop()
+                    return Promise.resolve(false);
+                }
+
+                const loopTxt = count === 1 ? '' : `第${count}次`
+                this.$message.info(`正在尝试 ${allProcessBtnTxt} ${this.tdmdType} 进程 ${loopTxt}`)                
+
                 return this.switchAllProcess(targetStatus)
             }, 5000)
 
-            this.$message.success(`正在${this.allProcessBtnTxt} ${this.tdmdType} 进程`)
         },
 
         //添加账户，打开选择柜台弹窗

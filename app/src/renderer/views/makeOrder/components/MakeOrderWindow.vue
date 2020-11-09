@@ -106,8 +106,8 @@
                             { validator: biggerThanZeroValidator}
                         ]">
                             <el-input-number
-                            :precision="2"
-                            :step="0.01"
+                            :precision="3"
+                            :step="0.001"
                             :controls="false"
                             placeholder="请输入价格"
                             v-model.trim="makeOrderForm.limit_price"></el-input-number>                
