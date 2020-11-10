@@ -79,6 +79,8 @@ public:
 
   shift(const shift &copy);
 
+  void ensure_storage(uint32_t dest);
+
   template <typename TargetType> void operator>>(TargetType &target) {
     for (auto dest : location_->locator->list_location_dest(location_)) {
       ensure_storage(dest);
@@ -110,8 +112,6 @@ public:
 private:
   yijinjing::data::location_ptr location_;
   std::unordered_map<uint32_t, StateStoragePtr> storage_map_;
-
-  void ensure_storage(uint32_t dest);
 
   template <typename DataType>
   std::enable_if_t<not std::is_same_v<DataType, longfist::types::DailyAsset>>

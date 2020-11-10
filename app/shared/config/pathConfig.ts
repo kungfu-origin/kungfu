@@ -1,16 +1,12 @@
-/*
- * @Author: your name
- * @Date: 2020-05-28 15:00:46
- * @LastEditTime: 2020-05-28 15:46:55
- * @LastEditors: your name
- * @Description: In User Settings Edit
- * @FilePath: /kungfu/app/shared/config/pathConfig.ts
- */ 
+import { addFileSync } from '__gUtils/fileUtils'
+
 const path = require('path');
-const { addFileSync } = require('__gUtils/fileUtils');
+
 
 const KF_HOME_BASE_DIR_RESOLVE = (() => {
     if ( process.env.APP_TYPE === 'cli' ) {
+        return require('__gConfig/cliKfHomePathConfig').KF_HOME_BASE_DIR_RESOLVE
+     } else if ( process.env.APP_TYPE === 'test' ) {
         return require('__gConfig/cliKfHomePathConfig').KF_HOME_BASE_DIR_RESOLVE
      } else {
         return require('__gConfig/appKfHomePathConfig').KF_HOME_BASE_DIR_RESOLVE
@@ -77,22 +73,12 @@ export const buildProcessLogPath = (processId: string) => path.join(LOG_DIR, `${
 
 //================== others end ===================================
 
-export const getKfEnginePath = () => {
-    if(process.env.NODE_ENV === 'production') {
-        if(process.env.APP_TYPE === 'test'){
-            return process.env.KUNGFU_ENGINE_PATH || ''
-        }
-    }
-}
 
-export const KUNGFU_ENGINE_PATH = process.env.NODE_ENV === 'production' 
-    ? process.resourcesPath
-    : path.join(__dirname, '..', '..', '..', 'core', 'build')
+//================== config start =================================
 
 export const KUNGFU_RESOURCES_DIR = process.env.NODE_ENV === 'production'
     ? path.join(process.resourcesPath, 'kungfu-resources')
     : path.join(__resources)
-
 
 export const KF_CONFIG_DEFAULT_PATH = path.join(KUNGFU_RESOURCES_DIR, 'config', 'kfConfig.json')
 
@@ -102,6 +88,17 @@ export const KF_CONFIG_PATH = path.join(KF_HOME, 'config', 'kfConfig.json')
 
 export const KF_TARADING_CONFIG_PATH = path.join(KF_HOME, 'config', 'kfTradingConfig.json')
 
-export const DEFUALT_DB_DIR = path.join(KUNGFU_RESOURCES_DIR, 'default')
+export const KF_FUTURE_TICKERS_CONFIG_PATH = path.join(KUNGFU_RESOURCES_DIR, 'config', 'futureTickers.json')
+
+export const KF_STOCK_TICKERS_CONFIG_PATH = path.join(KUNGFU_RESOURCES_DIR, 'config', 'stockTickers.json')
+
+
+//================== config start =================================
+
+
+export const KUNGFU_ENGINE_PATH = process.env.NODE_ENV === 'production' 
+    ? process.resourcesPath
+    : path.join(__dirname, '..', '..', '..', 'core', 'build')
+
 
 export const EXTENSION_DIR = path.join(KUNGFU_ENGINE_PATH, 'kfc', 'kungfu_extensions');

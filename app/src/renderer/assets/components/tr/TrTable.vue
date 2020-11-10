@@ -30,7 +30,10 @@
             :buffer="100"
             >
                 <template v-slot="{item}">
-                    <ul class="tr-table-row" @dblclick="handleDoubleClick(item)">
+                    <ul class="tr-table-row" 
+                    @dblclick="e => handleDbClickRow(e, item)"
+                    @mousedown="e => handleMousedown(e, item)"
+                    >
                         <li 
                         :title="item[column.prop] || ''"
                         :class="[
@@ -47,7 +50,9 @@
                         :key="`${column.prop}_${item.id}_${item[column.prop]}`"       
                         :style="{                             
                             'max-width': getHeaderWidth(column)
-                        }">
+                        }"
+                        @click.stop="e => handleClickCell(e, item, column)"
+                        >
                             <template v-if="column.type !== 'operation'">
                                 {{item[column.prop]}}
                             </template>
@@ -150,6 +155,8 @@ export default {
     },
 
     data(){
+        this.clickTimer = null;
+
         return {
             bodyWidth: 0,
             isScroll: false,
@@ -206,8 +213,23 @@ export default {
     },
 
     methods: {
-        handleDoubleClick (item) {
-            this.$emit('dbclick', item)
+
+        handleDbClickRow (e, item) {
+            this.$emit('dbclickRow', item)
+            clearTimeout(this.clickTimer)
+        },
+
+        handleClickCell (e, item, column) {
+            clearTimeout(this.clickTimer)
+            this.clickTimer = setTimeout(() => {
+                this.$emit('clickCell', e, item, column)
+            }, 200)
+        },
+
+        handleMousedown (e, item) {
+            if (e.button === 2) {
+                this.$emit('rightClickRow', item)
+            }
         },
 
         triggerToBottom() {

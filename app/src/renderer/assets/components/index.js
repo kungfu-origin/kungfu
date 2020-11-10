@@ -1,3 +1,5 @@
+import { remote } from 'electron';
+
 import TrNoData from './tr/TrNoData';
 import TableHeader from './tr/TableHeader';
 import TableHeaderItem from './tr/TableHeaderItem';
@@ -7,21 +9,18 @@ import TrTabTopItem from './tr/TrTabTopItem.vue';
 import TrFooterItem from './tr/TrFooterIterm.vue';
 import TrMenu from './tr/TrMenu.vue';
 import TrMenuItem from './tr/TrMenuItem.vue';
-import TrPnl from './tr/TrPnl.vue';
 import TrDashboard from './tr/TrDashboard.vue';
 import TrDashboardHeaderItem from './tr/TrDashboardHeaderItem.vue';
 import TrTable from './tr/TrTable.vue';
 import TrSearchInput from './tr/TrSearchInput.vue';
 import TrSettingDashboard from './tr/TrSettingDashboard.vue';
 
-import MainContent from '@/components/Layout/MainContent';
 import { buildTask } from '__gUtils/busiUtils';
 
 const components = [
     TrNoData,
     TableHeader,
     TableHeaderItem,
-    MainContent,
     TrStatus,
     TrTabTop,
     TrTabTopItem,
@@ -30,7 +29,6 @@ const components = [
     TrMenuItem,
     TrDashboard,
     TrDashboardHeaderItem,
-    TrPnl,
     TrTable,
     TrSearchInput,
     TrSettingDashboard
@@ -58,12 +56,10 @@ const saveFile = ({
 }
 
 //显示log
-const BrowserWindow = require('electron').remote.BrowserWindow;
 const showLog = (logPath) => {
     buildTask(
         'showLog', 
-        BrowserWindow.getFocusedWindow(), 
-        BrowserWindow,
+        remote,
         {
             width: 600,
             height: 800,
@@ -74,6 +70,7 @@ const showLog = (logPath) => {
             winId: curWinId,
             logPath
         });
+
     })
 }
 

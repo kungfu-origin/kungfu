@@ -35,6 +35,11 @@ export const getTdMdList = ({ dispatch }) => {
             const mdList = tdMdList[1] || [];
             dispatch('setTdList', tdList);
             dispatch('setMdList', mdList || [])
+
+            return {
+                tdList,
+                mdList
+            }
         })
     
 }

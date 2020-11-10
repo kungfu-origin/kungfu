@@ -16,6 +16,7 @@ def test_timer(context, event):
 
 def test_time_interval(context, event):
     context.log.info('test time interval')
+    context.log.info('test time interval')
 
 
 def pre_start(context):

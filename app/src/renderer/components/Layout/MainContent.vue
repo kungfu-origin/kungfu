@@ -43,10 +43,6 @@
                 <tr-footer-item class="fr" v-if="currentRouter !== 'kungfuCodeEditor'">
                     <EngineStatus></EngineStatus>
                 </tr-footer-item>
-
-                <tr-footer-item class="fr" v-if="currentRouter === 'kungfuCodeEditor'">
-                    <CodeSpaceTab></CodeSpaceTab>
-                </tr-footer-item>
             </div>
         </el-footer>
     </el-container>
@@ -57,7 +53,6 @@ import { deepClone } from '__gUtils/busiUtils';
 import { mapState, mapGetters } from 'vuex';
 import EngineStatus from './components/EngineStatus';
 import CoreStatus from './components/CoreStatus';
-import CodeSpaceTab from './components/CodeSpaceTab';
 
 export default {
     name: 'main-content',
@@ -87,7 +82,6 @@ export default {
     components: {
         EngineStatus,
 		CoreStatus,
-        CodeSpaceTab,
     },
 
     computed:{

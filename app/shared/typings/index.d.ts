@@ -5,6 +5,7 @@ declare var python_version: string;
 declare module NodeJS {
     interface Window { 
         fileId: number;
+        ELEC_WIN_MAP: any;
     }
 
     interface Global {
@@ -122,12 +123,17 @@ interface OrderData {
 
     instrumentId: string;
     instrumentType: string;
+    instrumentTypeOrigin: number;
     exchangeId: string;
 
     side: string;
+    sideOrigin: number;
     offset: string;
+    offsetOrigin: number;
     hedgeFlag: string;
+    hedgeFlagOrigin: number;
     priceType: string;
+    priceTypeOrigin: number;
     volumeCondition: string;
     timeCondition: string;
 
@@ -238,12 +244,14 @@ interface PosData {
     id: string;
     instrumentId: string;
     direction: string;
+    directionOrigin: Number;
     yesterdayVolume: Number;
     todayVolume: Number;
     totalVolume: Number;
     avgPrice: string;
     lastPrice: string;
     unRealizedPnl: string;
+    exchangeId: string;
 }
 
 interface PosInputData {
@@ -253,6 +261,7 @@ interface PosInputData {
     volume: bigint;
     last_price: number;
     margin: number;
+    exchange_id: string;
     [propName: string]: any;
 }
 

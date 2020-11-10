@@ -6,9 +6,6 @@ export default {
     state: {
         currentStrategy: '', //当前运行策略
         strategyList: [], //策略列表
-        currentFile: {}, //文件树高亮
-        entryFile: {}, //入口文件
-        fileTree: {}, //文件树
         strategyiesAsset: {}
     },
     actions,

@@ -32,14 +32,16 @@ export const setKungfuConfigByKeys = ({ commit, state }, kfConfig) => {
 }
 
 export const getAccountSourceConfig = ({ dispatch }) => {
-    return getAccountSource().then(accountSource => {
+    return getAccountSource()
+    .then(accountSource => {
         dispatch('setTdAccountSource', accountSource.td)
         dispatch('setMdAccountSource', accountSource.md)
+        return accountSource
     })
 }
 
 //初始化kungfu trader
-export const getKungfuConfig = ({ dispatch, state }) => {
+export const getKungfuConfig = ({ dispatch }) => {
     const kfConfig = readJsonSync(KF_CONFIG_PATH)
     dispatch('setKungfuConfig', kfConfig)
 }

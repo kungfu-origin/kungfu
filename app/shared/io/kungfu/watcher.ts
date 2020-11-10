@@ -7,8 +7,6 @@ import { offsetName, orderStatus, sideName, posDirection, priceType, hedgeFlag, 
 import { logger } from '../../utils/logUtils';
 import {KF_RUNTIME_DIR} from "../../config/pathConfig";
 
-
-
 export const watcher: any = (() => {
     const kfSystemConfig: any = readJsonSync(KF_CONFIG_PATH)
     const bypassQuote = (kfSystemConfig.performance || {}).bypassQuote || false;
@@ -19,15 +17,27 @@ export const watcher: any = (() => {
         return kungfu.watcher(KF_HOME, kungfu.formatStringToHashHex(id), bypassQuote);
     }
 
-    if (process.env.RENDERER_TYPE !== 'app') return {}
 
-    const id = [process.env.APP_TYPE].join('');
+    if (process.env.RENDERER_TYPE !== 'app') {
+        if (process.env.RENDERER_TYPE !== 'makeOrder' && process.env.APP_TYPE != 'test') {
+            return {}
+        }
+    }
+
+    const id = [process.env.APP_TYPE, process.env.RENDERER_TYPE].join('');
     return kungfu.watcher(KF_HOME, kungfu.formatStringToHashHex(id), bypassQuote);
 })()
 
 
 export const startGetKungfuTradingData = (callback: Function, interval = 1000) => {
-    if ((process.env.RENDERER_TYPE !== 'app') && (process.env.APP_TYPE !== 'cli')) return
+    if (process.env.RENDERER_TYPE !== 'app') {
+        if (process.env.RENDERER_TYPE !== 'makeOrder') {
+            if (process.env.APP_TYPE !== 'cli') {
+                return 
+            }
+        }
+    }
+    
     setTimerPromiseTask(() => {
         return new Promise((resolve) => {
             if (!watcher.isLive() && !watcher.isStarted() && watcher.isUsable()) {
@@ -47,7 +57,14 @@ export const startGetKungfuTradingData = (callback: Function, interval = 1000) =
 
 
 export const startGetKungfuGlobalData = (callback: Function, interval = 1000) => {
-    if ((process.env.RENDERER_TYPE !== 'app') && (process.env.APP_TYPE !== 'cli')) return
+    if (process.env.RENDERER_TYPE !== 'app') {
+        if (process.env.RENDERER_TYPE !== 'makeOrder') {
+            if (process.env.APP_TYPE !== 'cli') {
+                return 
+            }
+        }
+    }
+    
     setTimerPromiseTask(() => {
         return new Promise((resolve) => {
             if (!watcher.isLive() && !watcher.isStarted() && watcher.isUsable()) {
@@ -195,12 +212,18 @@ export const dealOrder = (item: OrderInputData): OrderData => {
         
         instrumentId: item.instrument_id,
         instrumentType: instrumentType[item.instrument_type],
+        instrumentTypeOrigin: item.instrument_type,
         exchangeId: item.exchange_id,
         
         side: sideName[item.side] ? sideName[item.side] : '--',
+        sideOrigin: item.side,
         offset: offsetName[item.offset] ? offsetName[item.offset] : '--',
+        offsetOrigin: item.offset,
         hedgeFlag: hedgeFlag[item.hedge_flag] ? hedgeFlag[item.hedge_flag] : '--',
+        hedgeFlagOrigin: item.hedge_flag,
+
         priceType: priceType[item.price_type],
+        priceTypeOrigin: item.price_type,
         volumeCondition: volumeCondition[item.volume_condition],
         timeCondition: timeCondition[item.time_condition],
 
@@ -258,12 +281,14 @@ export const dealPos = (item: PosInputData): PosData => {
         id: item.instrument_id + direction,
         instrumentId: item.instrument_id,
         direction,
+        directionOrigin: item.direction,
         yesterdayVolume: Number(item.yesterday_volume),
         todayVolume: Number(item.volume) - Number(item.yesterday_volume),
         totalVolume: Number(item.volume),
         avgPrice: toDecimal(item.avg_open_price || item.position_cost_price, 3) || '--',
         lastPrice: toDecimal(item.last_price, 3) || '--',
-        unRealizedPnl: toDecimal(item.unrealized_pnl) + '' || '--'
+        unRealizedPnl: toDecimal(item.unrealized_pnl) + '' || '--',
+        exchangeId: item.exchange_id
     }
 }
 

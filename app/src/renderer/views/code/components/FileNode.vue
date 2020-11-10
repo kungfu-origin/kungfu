@@ -105,9 +105,9 @@ export default {
 
     computed: {
         ...mapState({
-            currentFile: state => state.STRATEGY.currentFile,
-            entryFile: state => state.STRATEGY.entryFile,
-            fileTree: state => state.STRATEGY.fileTree,
+            currentFile: state => state.currentFile,
+            entryFile: state => state.entryFile,
+            fileTree: state => state.fileTree,
         })
     },
 

@@ -7,6 +7,7 @@ const csv = require("fast-csv");
 declare global {
     interface Window { 
         fileId: number;
+        ELEC_WIN_MAP: any;
     }
 }
 

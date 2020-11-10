@@ -126,8 +126,11 @@ p.el-select-dropdown__empty{
 }
 
 .el-select-dropdown__item {
+    display: flex;
+    align-items: center;
+
     .el-tag {
-        vertical-align: middle;
+        margin: 0 5px;
     }
 }
 
@@ -406,6 +409,11 @@ p.el-select-dropdown__empty{
 -------------------------- */
 .el-button{
     border: none;
+
+    &.active {
+        background: $vi !important;
+        color: #fff;
+    }
 }
 
 .el-button:hover, .el-button:focus{

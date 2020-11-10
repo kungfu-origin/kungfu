@@ -30,20 +30,16 @@
             <el-button size="mini" type="danger" style="color: #fff" title="全部撤单" @click="handleCancelAllOrders">全部撤单</el-button>
         </tr-dashboard-header-item>
     </div>
+    <!-- handleShowDetail -->
     <tr-table
     v-if="rendererTable"
     :data="tableData"
     :schema="schema"
     :renderCellClass="renderCellClass"
-    @dbclick="handleShowDetail"
+    @dbclickRow="handleCancelOrder"
+    @clickCell="handleShowAdjustOrder"
+    @rightClickRow="handleShowDetail"
     >
-        <template v-slot:oper="{ oper }">
-            <i 
-            v-if="[0,1,3,4,5,6,8].indexOf(+oper.status) === -1"
-            class="el-icon-close mouse-over" 
-            title="撤单" 
-            @click.stop="handleCancelOrder(oper)"/>
-        </template>
     </tr-table>
     <date-picker-dialog 
     @confirm="handleConfirmDateRangeForExport"
@@ -57,6 +53,40 @@
     :visible.sync="dateRangeDialogVisiblityForHistory"   
     :loading="dateRangeExportLoading" 
     ></date-picker-dialog>
+
+    <div class="kf-ajust-order-in-orders-dashboard__warp">
+        <div class="mask" v-if="adjustOrderInputVisibility" @click="handleHideAdjustOrder"></div>
+        <div 
+        class="kf-ajust-order-in-orders-dashboard__content" 
+        v-if="adjustOrderInputVisibility"
+        :style="{
+            left: adjustOrderInputSizeData.left,
+            top: adjustOrderInputSizeData.top,
+            width: adjustOrderInputSizeData.width,
+            height: adjustOrderInputSizeData.height
+        }"
+        >
+        <el-input-number
+            v-if="adjustOrderProp === 'limitPrice'"
+            :precision="3"
+            :step="0.001"
+            :controls="false"
+            placeholder="价格"
+            v-model.trim="adjustOrderForm.limit_price"
+            @blur="handleBlurAdjustOrderInput('price')"
+            >
+            </el-input-number>                
+        <el-input-number
+            v-if="adjustOrderProp === 'volumeTraded'"
+            :step="100"  
+            :controls="false"
+            placeholder="数量"
+            v-model.trim="adjustOrderForm.volume"
+            @blur="handleBlurAdjustOrderInput('volume')"                                    
+            ></el-input-number>   
+        </div>
+    </div>
+
   </tr-dashboard>
 </template>
 
@@ -67,16 +97,17 @@ import DatePickerDialog from '../DatePickerDialog';
 import tradingDataMixin from './js/tradingDataMixin';
 
 import { dealOrder } from "__io/kungfu/watcher";
-import { kungfuCancelOrder, kungfuCancelAllOrders } from '__io/kungfu/makeCancelOrder';
-import { decodeKungfuLocation } from '__io/kungfu/watcher';
+import { kungfuCancelAllOrders } from '__io/kungfu/makeCancelOrder';
 import { aliveOrderStatusList } from '__gConfig/tradingConfig';
 import { writeCSV } from '__gUtils/fileUtils';
 
+import makeOrderMixin from '@/components/Base/tradingData/js/makeOrderMixin';
+import makeOrderCoreMixin from '@/components/Base/tradingData/js/makeOrderCoreMixin';
 
 export default {
     name: "current-orders",
    
-   mixins: [ tradingDataMixin ],
+   mixins: [ tradingDataMixin, makeOrderMixin, makeOrderCoreMixin ],
 
     props: {
         gatewayName: {
@@ -111,13 +142,18 @@ export default {
             processStatus: state => state.BASE.processStatus
         }),
 
+        gatewayNameResolved () {
+            if (this.gatewayName) return `td_${this.gatewayName}`;
+            else return ''
+        },
+
         title () {
             if (this.name) return this.name;
             return this.todayFinish ? `委托记录 ${this.currentTitle}` : `未完成委托 ${this.currentTitle}`
         },
 
         schema () {
-             if (this.dateForHistory) {
+            if (this.dateForHistory) {
                 return [
                 {
                     type: "text",
@@ -133,13 +169,15 @@ export default {
                     type: "text",
                     label: "",
                     prop: "side",
-                    width: '60px'
-                },{
+                    width: '40px'
+                },
+                {
                     type: "text",
                     label: "",
                     prop: "offset",
                     width: '40px'
-                },{
+                },
+                {
                     type: "number",
                     label: "委托价",
                     prop: "limitPrice",
@@ -159,6 +197,11 @@ export default {
                     type: "account-strategy",
                     label: this.moduleType == 'account' ? '策略' : '账户',
                     prop: this.moduleType == 'account' ? 'clientId' : 'accountId',
+                },{
+                    type: 'operation',
+                    label: '',
+                    prop: 'oper',
+                    width: '40px'
                 }]
             }
 
@@ -177,13 +220,15 @@ export default {
                 type: "text",
                 label: "",
                 prop: "side",
-                width: '60px',
-            },{
+                width: '40px',
+            },
+            {
                 type: "text",
                 label: "",
                 prop: "offset",
                 width: '40px'
-            },{
+            },
+            {
                 type: "number",
                 label: "委托价",
                 prop: "limitPrice",
@@ -219,6 +264,7 @@ export default {
                 prop: 'oper',
                 width: '40px'
             }]
+            .filter(item => !!item)
         }
     },
 
@@ -262,32 +308,18 @@ export default {
             });
         },
 
-        handleCancelOrder (props) {
-            const kungfuLocation = decodeKungfuLocation(props.source);
-            const accountId = `${kungfuLocation.group}_${kungfuLocation.name}`;
-            const gatewayName = `td_${accountId}`;
-            if(this.processStatus[gatewayName] !== 'online') {
-                this.$message.warning(`需要先启动 TD ${accountId} 交易进程！`)
-                return;
-            }
-            //撤单   
-            if (this.moduleType === 'strategy') {
-                kungfuCancelOrder( props.orderId, accountId, this.currentId)
-                    .then(() => this.$message.success('撤单指令已发送！'))
-                    .catch(err => this.$message.error(err.message || '撤单指令发送失败！'))
-            } else if (this.moduleType === 'account') {
-                kungfuCancelOrder( props.orderId, accountId)
-                    .then(() => this.$message.success('撤单指令已发送！'))
-                    .catch(err => this.$message.error(err.message || '撤单指令发送失败！'))
-            }
-        },
-
         handleCancelAllOrders () {
 
             //先判断对应进程是否启动
             if (this.moduleType === 'account') {
-                if(this.processStatus[this.gatewayName] !== 'online'){
-                    this.$message.warning(`需要先启动 ${this.gatewayName.toAccountId()} 交易进程！`)
+
+                if (!this.gatewayNameResolved) {
+                    this.$message.warning(`需要先添加交易进程！`)
+                    return   
+                }
+
+                if(this.processStatus[this.gatewayNameResolved] !== 'online'){
+                    this.$message.warning(`需要先启动 ${this.gatewayNameResolved.toAccountId()} 交易进程！`)
                     return;
                 }
             }
@@ -311,7 +343,10 @@ export default {
 
             })
             .then(() => this.$message.success('撤单指令已发送！'))
-            .catch(err => this.$message.error(err.message || '撤单指令发送失败！'))
+            .catch(err => {
+                if(err == 'cancel') return;
+                this.$message.error(err.message || '撤单指令发送失败！')
+            })
         },
 
         //查看当日已完成
@@ -363,9 +398,58 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
+
+@import "@/assets/scss/skin.scss";
+
     .trading-day-header {
         font-size: 10px;
         padding-left: 10px;
+    }
+
+    .kf-ajust-order-in-orders-dashboard__warp {
+
+        .mask {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 99
+        }
+
+        .kf-ajust-order-in-orders-dashboard__content {
+            position: fixed;
+            z-index: 100;
+            background: $bg_card;
+
+            .el-input-number.is-without-controls {
+                line-height: 20px;
+
+                .el-input {
+                    line-height: 20px;
+                }
+
+                input.el-input__inner {
+                    height: 25px;
+                    line-height: 25px;
+                    padding: 5px;
+                    box-sizing: border-box;
+
+                    ::-webkit-input-placeholder { /* WebKit browsers */
+                        font-size: 10px;
+                    }
+
+                    ::-moz-placeholder { /* Mozilla Firefox 19+ */
+                        font-size: 10px;
+                    }
+
+                    :-ms-input-placeholder { /* Internet Explorer 10+ */
+                        font-size: 10px;
+                    }   
+                }
+            }
+        }
     }
 </style>

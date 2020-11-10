@@ -1,5 +1,5 @@
 <template>
-    <main-content
+    <MainContent
 		:ifSideBar="false"
 		:ifFooter="false"
 	>
@@ -62,7 +62,7 @@
                 </el-col>
 
         </div>
-    </main-content>
+    </MainContent>
 </template>
 
 <script>
@@ -72,6 +72,7 @@ import CurrentOrder from '../Base/tradingData/CurrentOrder';
 import TradeRecord from '../Base/tradingData/TradeRecord';
 import Pos from '../Base/tradingData/Pos';
 import Pnl from '../Base/tradingData/pnl/Index';
+import MainContent from '@/components/Layout/MainContent';
 
 export default {
 
@@ -96,7 +97,8 @@ export default {
 	},
 	
 	components: {
-        CurrentOrder, TradeRecord, Pos, Log, Pnl 
+        CurrentOrder, TradeRecord, Pos, Log, Pnl,
+        MainContent
     },
 
 }

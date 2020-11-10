@@ -8,7 +8,7 @@
             <i class="el-icon-download mouse-over" title="导出" @click="handleExport"></i>
         </tr-dashboard-header-item>
         <tr-dashboard-header-item v-if="!ifBacktest">
-            <el-button size="mini" @click="makeOrderDialogVisiblity = true">下单</el-button>
+            <el-button size="mini" @click="$emit('showMakeOrderDashboard')">下单</el-button>
         </tr-dashboard-header-item>
     </div>
     <tr-table
@@ -16,6 +16,7 @@
         :data="tableData"
         :schema="schema"
         :renderCellClass="renderCellClass"
+        @dbclickRow="item => $emit('makeOrder', item)"
     ></tr-table>
 
     <make-order-dialog
@@ -31,7 +32,6 @@
 
 <script>
 
-import MakeOrderDialog from '../MakeOrderDialog';
 import tradingDataMixin from './js/tradingDataMixin';
 
 import { debounce } from '__gUtils/busiUtils';
@@ -109,11 +109,6 @@ export default {
         }
     },
 
-    components: {
-        MakeOrderDialog
-    },
-
-
     watch: {
         kungfuData (positions) {
             const positionsResolve = this.dealPositionList(positions, this.searchKeyword) || {};
@@ -122,12 +117,9 @@ export default {
             this.dataByKey = positionsResolve.dataByKey || {};
         }
     },
-
-    destroyed(){
-        this.saveInstrumentIdsToLS();
-    },
     
     methods:{
+
         handleExport () {
             const t = this;
             t.$saveFile({
@@ -179,28 +171,6 @@ export default {
         getKey(data) {
             return (data.instrumentId + data.direction)
         },
-
-        saveInstrumentIdsToLS () {
-            if(!this.tableData.length) return;
-            const instrumentIdsList = ls.get('instrument_ids_list')
-            const instrumentIds = this.tableData
-                .map(item => item.instrumentId)
-                .reduce((result, item) => {
-                    if (typeof result !== "object") {
-                        return {
-                            [result]: 1,
-                            [item]: 1
-                        }
-                    }
-                    result[item] = 1;
-                    return result;
-                })
-            
-            ls.set('instrument_ids_list', {
-                ...instrumentIdsList,
-                ...instrumentIds
-            })
-        }
     }
 }
 </script>

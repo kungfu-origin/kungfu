@@ -67,6 +67,10 @@ void master::register_app(const event_ptr &event) {
   try_add_location(event->gen_time(), master_cmd_location);
   app_cmd_locations_.emplace(app_location->uid, master_cmd_location->uid);
 
+  app_cache_shift_.emplace(app_location->uid, app_location);
+  app_cache_shift_.emplace(master_cmd_location->uid, master_cmd_location);
+  app_cache_shift_[master_cmd_location->uid].ensure_storage(app_location->uid);
+
   register_data.last_active_time = session_builder_.find_last_active_time(app_location);
   register_location(event->gen_time(), register_data);
 
@@ -79,8 +83,8 @@ void master::register_app(const event_ptr &event) {
   public_writer->write(event->gen_time(), *std::dynamic_pointer_cast<Location>(app_location));
   public_writer->write(event->gen_time(), register_data);
 
-  require_write_to(event->gen_time(), app_location->uid, location::PUBLIC);
-  require_write_to(event->gen_time(), app_location->uid, master_cmd_location->uid);
+  require_cached_write_to(event->gen_time(), app_location->uid, location::PUBLIC);
+  require_cached_write_to(event->gen_time(), app_location->uid, master_cmd_location->uid);
 
   app_cmd_writer->mark(event->gen_time(), SessionStart::tag);
 
@@ -88,7 +92,6 @@ void master::register_app(const event_ptr &event) {
   write_trading_day(event->gen_time(), app_cmd_writer);
   write_profile_data(event->gen_time(), app_cmd_writer);
 
-  app_cache_shift_.emplace(app_location->uid, app_location);
   app_cache_shift_[app_location->uid] >> app_cmd_writer;
 
   app_cmd_writer->mark(start_time_, RequestStart::tag);
@@ -136,6 +139,11 @@ void master::on_active() {
     last_check_ = now;
   }
   handle_timer_tasks();
+}
+
+void master::require_cached_write_to(int64_t trigger_time, uint32_t source_id, uint32_t dest_id) {
+  app_cache_shift_[source_id].ensure_storage(dest_id);
+  require_write_to(trigger_time, source_id, dest_id);
 }
 
 void master::handle_timer_tasks() {
@@ -203,7 +211,7 @@ void master::on_request_write_to(const event_ptr &event) {
     return;
   }
   reader_->join(get_location(app_uid), request.dest_id, trigger_time);
-  require_write_to(trigger_time, app_uid, request.dest_id);
+  require_cached_write_to(trigger_time, app_uid, request.dest_id);
   if (is_location_live(request.dest_id) and has_writer(request.dest_id)) {
     require_read_from(0, request.dest_id, app_uid, trigger_time);
   }
@@ -222,7 +230,7 @@ void master::on_request_read_from(const event_ptr &event) {
     return;
   }
   reader_->join(get_location(request.source_id), app_uid, trigger_time);
-  require_write_to(trigger_time, request.source_id, app_uid);
+  require_cached_write_to(trigger_time, request.source_id, app_uid);
   require_read_from(trigger_time, app_uid, request.source_id, request.from_time);
   Channel channel = {};
   channel.source_id = request.source_id;
@@ -241,7 +249,7 @@ void master::on_channel_request(const event_ptr &event) {
   auto trigger_time = event->gen_time();
   if (is_location_live(request.source_id) and not has_channel(request.source_id, request.dest_id)) {
     reader_->join(get_location(request.source_id), request.dest_id, trigger_time);
-    require_write_to(trigger_time, request.source_id, request.dest_id);
+    require_cached_write_to(trigger_time, request.source_id, request.dest_id);
     register_channel(trigger_time, request);
     get_writer(location::PUBLIC)->write(trigger_time, request);
   }

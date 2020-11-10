@@ -229,8 +229,6 @@ import { debounce } from '__gUtils/busiUtils';
 import { chineseValidator, specialStrValidator, noZeroAtFirstValidator, noKeywordValidatorBuilder } from '__assets/validator';
 
 
-const BrowserWindow = require('electron').remote.BrowserWindow
-
 export default {
     props: {
         value: {
@@ -356,7 +354,11 @@ export default {
 
         //编辑策略
         handleEditStrategy(row){
-            this.$utils.openVueWin('code', `/kungfuCodeEditor/${row.strategy_id}`, BrowserWindow)
+            this.$utils.openVueWin(
+                'code', 
+                `/kungfuCodeEditor/${row.strategy_id}`, 
+                remote
+            )
         },
 
         handleStartAndBacktestWin (row) {

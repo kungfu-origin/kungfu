@@ -12,3 +12,4 @@ window.longfist = longfist;
 window.kungfu = kungfu;
 window.kungfuConfigStore = kungfuConfigStore;
 
+

@@ -1,5 +1,5 @@
 <template>
-    <main-content>
+    <MainContent>
         <div class="extension-content">
             <el-col :span="10" style="height: 100%">
                 <extension-list>
@@ -11,12 +11,16 @@
                 222
             </el-col>
         </div>
-    </main-content>
+    </MainContent>
 </template>
 <script>
+
+import MainContent from '@/components/Layout/MainContent';
 import ExtensionList from './components/ExtensionList';
+
 export default {
     components: {
+        MainContent,
         ExtensionList
     }
 }

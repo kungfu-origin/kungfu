@@ -33,11 +33,12 @@ let rendererConfig = {
   entry: {
     index: path.join(__dirname, '../src/renderer/views/index/main.js'),
     code: path.join(__dirname, '../src/renderer/views/code/main.js'),
-    backtest: path.join(__dirname, '../src/renderer/views/backtest/main.js')
+    // backtest: path.join(__dirname, '../src/renderer/views/backtest/main.js'),
+    makeOrder: path.join(__dirname, '../src/renderer/views/makeOrder/main.js'),
   },
 
   output: {
-    filename: '[name].js',
+    filename: 'js/[name].js',
     libraryTarget: 'commonjs2',
     path: path.join(__dirname, '../dist/app')
   },
@@ -48,22 +49,19 @@ let rendererConfig = {
 
   module: {
     rules: [
-      {
-        test: /\.css$/,
-        use: ExtractTextPlugin.extract({
-          fallback: 'style-loader',
-          use: 'css-loader'
-        })
+      { 
+        test: /\.css$/, 
+        use: ExtractTextPlugin.extract({ 
+          fallback: 'style-loader', 
+          use: [ 'css-loader' ] 
+        }) 
       },
       {
         test: /\.scss$/,
-        loaders: [{
-            loader: "style-loader" // 将 JS 字符串生成为 style 节点
-        }, {
-            loader: "css-loader" // 将 CSS 转化成 CommonJS 模块
-        }, {
-            loader: "sass-loader" // 将 Sass 编译成 CSS
-        }]
+        use: ExtractTextPlugin.extract({
+          fallback: 'style-loader', 
+          use: ['css-loader', 'sass-loader']
+        }),
       },
       {
         test: /\.html$/,
@@ -133,7 +131,6 @@ let rendererConfig = {
   },
 
   plugins: [
-    new ExtractTextPlugin('styles.css'),
     new HtmlWebpackPlugin({
       filename: 'index.html',
       template: path.resolve(__dirname, '../src/index.ejs'),
@@ -161,18 +158,23 @@ let rendererConfig = {
         : false
     }),
     new HtmlWebpackPlugin({
-      filename: 'backtest.html',
+      filename: 'makeOrder.html',
       template: path.resolve(__dirname, '../src/index.ejs'),
       minify: {
         collapseWhitespace: true,
         removeAttributeQuotes: true,
         removeComments: true
       },
-      chunks: ['backtest'],
+      chunks: ['makeOrder'],
       nodeModules: process.env.NODE_ENV !== 'production'
         ? path.resolve(__dirname, '../node_modules')
         : false
     }),
+
+    new ExtractTextPlugin({
+      filename: `css/[name].css`,
+    }),
+
     new webpack.NoEmitOnErrorsPlugin(),
     new MonacoWebpackPlugin({
       languages: [

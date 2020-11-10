@@ -5,8 +5,7 @@
   </div>
 </template>
 <script>
-import * as monaco from "monaco-editor/esm/vs/editor/editor.api";
-import "monaco-editor/esm/vs/editor/contrib/find/findController.js";
+import * as monaco from "monaco-editor/esm/vs/editor/editor.main.js";
 
 import { keywordsList, kungfuFunctions, kungfuProperties, kungfuKeywords, pythonKeywords } from "../hint/monaco.python.hint";
 import { mapState } from "vuex";
@@ -37,9 +36,9 @@ export default {
 
     computed: {
         ...mapState({
-            currentFile: state => state.STRATEGY.currentFile,
-            fileTree: state => state.STRATEGY.fileTree,
-            code: state => state.BASE.kfConfig.code || {}
+            currentFile: state => state.currentFile,
+            fileTree: state => state.fileTree,
+            code: state => state.kfConfig.code || {}
         })
     },
 
@@ -97,7 +96,7 @@ export default {
         createEditor(file, codeText) {
             const t = this;
             if (document.getElementById("editor-content")) {
-                    document.querySelector("#editor-content").innerHTML = "";
+                    document.getElementById("editor-content").innerHTML = "";
                     const fileLanguage = languageJSON[file.ext] || 'plaintext';
                     const editor = monaco.editor.create(
                         document.getElementById("editor-content"),
@@ -228,31 +227,33 @@ function pythonProvideCompletionItems (model, position, context, token) {
 <style lang="scss">
 @import "@/assets/scss/skin.scss";
 .code-editor {
-    width: calc(100% - 300px);
+    flex: 1;
     background: $bg_card;
-    #editor-content {
-    overflow: hidden;
-    width: 100%;
-    height: 100%;
 
-    /* Make horizontal scrollbar, decorations overview ruler and vertical scrollbar arrows opaque */
-    .vs-dark .monaco-scrollable-element > .scrollbar > .slider {
-      background: $bg_light;
+    #editor-content {
+        overflow: hidden;
+        width: 100%;
+        height: 100%;
+
+        /* Make horizontal scrollbar, decorations overview ruler and vertical scrollbar arrows opaque */
+        .vs-dark .monaco-scrollable-element > .scrollbar > .slider {
+        background: $bg_light;
+        }
+        .monaco-editor .lines-content .cigra {
+        box-shadow: 1px 0 0 0 $input_bg inset;
+        }
     }
-    .monaco-editor .lines-content .cigra {
-      box-shadow: 1px 0 0 0 $input_bg inset;
+
+    .tr-logo {
+        color: $bg;
+        font-size: 160px;
+        display: block;
+        margin: auto;
+        text-align: center;
+        position: relative;
+        top: 45%;
+        transform: translateY(-50%);
     }
-  }
-  .tr-logo {
-    color: $bg;
-    font-size: 160px;
-    display: block;
-    margin: auto;
-    text-align: center;
-    position: relative;
-    top: 45%;
-    transform: translateY(-50%);
-  }
 }
 </style>
 

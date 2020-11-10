@@ -28,7 +28,7 @@ export default {
     
     computed: {
         ...mapState({
-            code: state => state.BASE.kfConfig.code || {} 
+            code: state => state.kfConfig.code || {} 
         })
     },
 

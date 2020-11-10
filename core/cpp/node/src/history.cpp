@@ -34,9 +34,9 @@ Napi::Value History::SelectPeriod(const Napi::CallbackInfo &info) {
     serialize::InitStateMap(info, result_ref, "history");
     for (const auto &config : profile_.get_all(Config{})) {
       auto state_location = location::make_shared(config, locator_);
-      serialize::JsRestoreState(result_ref, state_location)(false, from, to);
+      serialize::JsRestoreState(result_ref, state_location)(from, to);
     }
-    serialize::JsRestoreState(result_ref, ledger_location_)(false, from, to);
+    serialize::JsRestoreState(result_ref, ledger_location_)(from, to);
     return result_ref.Value();
   } catch (const std::exception &ex) {
     SPDLOG_ERROR("failed to select: {}", ex.what());

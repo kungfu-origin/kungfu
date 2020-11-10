@@ -2,6 +2,9 @@
       <tr-dashboard title="行情源">
         <div slot="dashboard-header">
             <tr-dashboard-header-item>
+                <el-button size="mini" @click="handleToggleKeepAllProcessRunning" :title="allProcessBtnTxt">{{ allProcessBtnTxt }}</el-button>
+            </tr-dashboard-header-item>
+            <tr-dashboard-header-item>
                 <el-button size="mini" @click="handleAdd" title="添加" id="add-account-btn">添加</el-button>
             </tr-dashboard-header-item>
         </div>
@@ -94,6 +97,8 @@ import { mapState, mapGetters } from 'vuex';
 import { getMdList } from '__io/kungfu/account';
 import { LOG_DIR } from '__gConfig/pathConfig';
 import { switchMd, deleteMd } from '__io/actions/account';
+import { loopToRunProcess } from '__gUtils/busiUtils';
+import { watcher } from '__io/kungfu/watcher';
 
 import SetAccountDialog from './SetAccountDialog';
 import SetSourceDialog from './SetSourceDialog';
@@ -103,13 +108,31 @@ import mdTdMixin from '../js/mdTdMixin';
 export default {
     mixins: [ mdTdMixin ],
 
+    data () {
+        this.tdmdType = 'md';
+
+        return {
+
+        }
+    },
+
     computed: {
         ...mapState({
             mdAccountSource: state => state.BASE.mdAccountSource || {},
             mdList: state => state.ACCOUNT.mdList,
             mdTdState: state => state.ACCOUNT.mdTdState,
-            processStatus: state => state.BASE.processStatus
-        })
+        }),
+
+        allProcessRunning () {
+            const notRunningList = this.mdList.filter(item => {
+                const isRunning = this.$utils.ifProcessRunning('md_' + item.source_name, this.processStatus)
+                if (!isRunning) return true
+                else return false
+            })
+
+            if (notRunningList.length) return false;
+            return true
+        },
     },
 
     components: {
@@ -121,27 +144,25 @@ export default {
 
         //删除账户信息
         handleDeleteMd(row) {
-            const t = this
-            if(!t.judgeCondition(row)) return;
+            if(!this.judgeCondition(row)) return;
             const { source_name } = row
             //查看该账户下是否存在task中的td任务
             const mdProcessId = `md_${source_name}`
-            t.$confirm(`删除行情源${source_name}会删除所有相关信息，确认删除吗？`, '提示', {
+            this.$confirm(`删除行情源${source_name}会删除所有相关信息，确认删除吗？`, '提示', {
                 confirmButtonText: '确 定',
                 cancelButtonText: '取 消',
             })
-            .then(() => deleteMd(row, t.tdList))
-            .then(() => t.getTableList())
-            .then(() => t.$message.success('操作成功！'))
+            .then(() => deleteMd(row, this.tdList))
+            .then(() => this.getTableList())
+            .then(() => this.$message.success('操作成功！'))
             .catch((err) => {
                 if(err == 'cancel') return
-                t.$message.error(err.message || '操作失败！')
+                this.$message.error(err.message || '操作失败！')
             })
         },
 
         handleMdSwitch(value, account) {
-            const t = this
-            switchMd(account, value).then(({ type, message }) => t.$message[type](message))  
+            return switchMd(account, value).then(({ type, message }) => this.$message[type](message))  
         },
 
         handleOpenLogFile(row){
@@ -150,19 +171,35 @@ export default {
         },
 
         handleNoAvailSource(bool) {
-            const t = this;
             if(bool) {
-                t.$message.info('行情源都已添加！')
+                this.$message.info('行情源都已添加！')
+            }
+        },
+
+        switchAllProcess (targetStatus) {
+            const promiseList = this.mdList
+                .filter(item => {
+                    const id = item.source_name;
+                    const status = this.$utils.ifProcessRunning('md_' + item.source_name, this.processStatus)
+                    return status !== targetStatus
+                })
+                .map(item => {
+                    return () => switchMd(item, targetStatus)
+                })
+
+            if (this.ifMasterLedgerRunning && watcher.isLive) {
+                return loopToRunProcess(promiseList)
+            } else {
+                return Promise.resolve(false)
             }
         },
 
          //删除前进行一些判断
         judgeCondition(row) {
-            const t = this
             const { source_name } = row
             //判断td是否开启，开启则无法删除
-            if(t.$utils.ifProcessRunning(`md_${source_name}`, t.processStatus)) {
-                t.$message.warning('需先停止行情源进程！')
+            if(this.$utils.ifProcessRunning(`md_${source_name}`, this.processStatus)) {
+                this.$message.warning('需先停止行情源进程！')
                 return false
             }
             return true
@@ -170,12 +207,11 @@ export default {
 
         //获取账户列表
         getTableList() {
-            const t = this;
             return getMdList()
                 .then(res => {
-                    t.$store.dispatch('setMdList', res || [])
+                    this.$store.dispatch('setMdList', res || [])
                 }).catch(err => {
-                    t.$message.error(err.message || '操作失败！')
+                    this.$message.error(err.message || '操作失败！')
                 })
         },
     }

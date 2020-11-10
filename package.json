@@ -1,17 +1,18 @@
 {
   "name": "kungfu",
   "author": "taurus.ai",
-  "version": "2.2.5",
+  "version": "2.2.7",
   "description": "KungFu Trader",
   "license": "Apache-2.0",
   "private": true,
-  "workspaces": ["core", "cli2", "app"],
+  "workspaces": ["core", "cli2", "app", "tests"],
   "scripts": {
     "postinstall": "yarn wsrun --serial install-deps",
     "build": "yarn run clean && yarn run env-electron && yarn wsrun --serial --fast-exit build",
     "build-cli": "yarn run clean && yarn run env-cli && yarn wsrun --serial --fast-exit build-cli",
     "env-cli": "npm config set kungfu-core:runtime node",
     "env-electron": "npm config set kungfu-core:runtime electron",
+    "env-pypi": "npm config set kungfu-core:pypi https://pypi.python.org/simple",
     "clean": "yarn wsrun clean"
   },
   "dependencies": {

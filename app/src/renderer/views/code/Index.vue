@@ -1,16 +1,18 @@
 <template>
-<main-content :ifSideBar="false">
+<MainContent :ifSideBar="false">
     <div class="code-content">
         <FileTree :strategy="strategy" @updateStrategy="handleUpdateStrategy"></FileTree>
         <Editor ref='code-editor'></Editor>
     </div>
-</main-content>
+</MainContent>
 </template>
 <script>
 
-import * as STRATEGY_API from '__io/kungfu/strategy';
-import FileTree from './components/FileTree';
 import Editor from './components/MonacoEditor';
+import FileTree from './components/FileTree';
+import MainContent from '@/components/Layout/MainContentForCode'
+
+import { ipcEmitDataByName } from '@/ipcMsg/emitter';
 import { setTimeout } from 'timers';
 
 const { dialog } = require('electron').remote;
@@ -25,7 +27,8 @@ export default {
     },
 
     components: {
-        FileTree, Editor, 
+        FileTree, Editor,
+        MainContent
     },
 
     mounted(){
@@ -70,8 +73,8 @@ export default {
 
         //更新strategy
         async updateStrategy(strategyId){
-            const strategies = await STRATEGY_API.getStrategyById(strategyId);
-            this.strategy = strategies[0]
+            const { data } = await ipcEmitDataByName('strategyById', { strategyId })
+            this.strategy = data[0]
         }
     }
 

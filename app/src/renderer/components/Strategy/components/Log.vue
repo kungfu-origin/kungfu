@@ -38,8 +38,7 @@ import { Tail } from 'tail';
 import { clearFileContent, addFileSync, existsSync } from '__gUtils/fileUtils';
 import { ipcRenderer } from 'electron';
 import { platform } from '__gConfig/platformConfig';
-const BrowserWindow = require('electron').remote.BrowserWindow;
-
+import { remote } from 'electron'
 
 export default {
     name: 'log',
@@ -104,33 +103,29 @@ export default {
 
     watch: {
         searchKeyword: debounce(function(newVal){
-            const t = this;
-            t.resetData(true)
-            t.processId && t.init(t.processId, t.logPath, t.searchKeyword)
+            this.resetData(true)
+            this.processId && this.init(this.processId, this.logPath, this.searchKeyword)
         }),
 
         processId: debounce(function(val){
-            const t = this;
-            t.resetData();
+            this.resetData();
             if(!val) return;
-            t.rendererTable = false;
-            t.$nextTick().then(() => {
-                t.rendererTable = true;
-                t.init(t.processId, t.logPath)
+            this.rendererTable = false;
+            this.$nextTick().then(() => {
+                this.rendererTable = true;
+                this.init(this.processId, this.logPath)
             })
         }, 100),
 
         ifScrollToBottom(val){
-            const t = this;
-            if(val) t.scrollToBottom()
+            if(val) this.scrollToBottom()
         }
     },
 
     mounted(){
-        const t = this;
-        t.rendererTable = true;
-        t.resetData();
-        t.processId && t.init(t.processId, t.logPath);
+        this.rendererTable = true;
+        this.resetData();
+        this.processId && this.init(this.processId, this.logPath);
     },
 
     destroyed(){
@@ -141,20 +136,19 @@ export default {
     methods:{
         //清空
         handleClearLog(){
-            const t = this;
-            t.$confirm('确认清空该日志？', '提示', {
+            this.$confirm('确认清空该日志？', '提示', {
                 confirmButtonText: '确 定',
                 cancelButtonText: '取 消',
             })
-            .then(() => clearFileContent(buildProcessLogPath(t.processId)))
+            .then(() => clearFileContent(buildProcessLogPath(this.processId)))
             .then(() => {
-                t.resetData();
-                t.processId && t.init(t.processId, t.logPath)
-                t.$message.success('操作成功！')
+                this.resetData();
+                this.processId && this.init(this.processId, this.logPath)
+                this.$message.success('操作成功！')
             })
             .catch((err) => {
                 if(err == 'cancel') return
-                t.$message.error(err.message || '操作失败！')
+                this.$message.error(err.message || '操作失败！')
             })
         },
 
@@ -163,41 +157,32 @@ export default {
         },
 
         handleRefresh(){
-            const t = this;
-            t.resetData();
-            t.processId && t.init(t.processId, t.logPath, t.searchKeyword)
+            this.resetData();
+            this.processId && this.init(this.processId, this.logPath, this.searchKeyword)
         },
 
         init: debounce(function(processId, logPath, searchKeyword){
-            const t = this;
             //文件不存在则创建
             if(!existsSync(logPath)){
-                t.tableData = Object.freeze([])
+                this.tableData = Object.freeze([])
                 addFileSync('', logPath, 'file')
             }
 
-            t.getLogByTask(logPath, searchKeyword).then(logList => {
-                t.tableData = Object.freeze(logList)
-                t.scrollToBottom()
+            this.getLogByTask(logPath, searchKeyword).then(logList => {
+                this.tableData = Object.freeze(logList)
+                this.scrollToBottom()
             }).catch(err => {
-                t.tableData = Object.freeze([])
+                this.tableData = Object.freeze([])
             }).finally(() => {
-                t.startWatchingTail(processId, logPath, searchKeyword)
+                this.startWatchingTail(processId, logPath, searchKeyword)
             })
         }, 100),
 
         getLogByTask(logPath, searchKeyword){
-            const t = this;
             return new Promise((resolve, reject) => {
                 buildTask(
                     'getStrategyLog', 
-                    BrowserWindow.getFocusedWindow(),
-                    BrowserWindow,
-                    // {
-                    //     width: 800,
-                    //     height: 600,
-                    //     show: true
-                    // }
+                    remote,
                 ).then(({ win, curWinId }) => {
                     win.webContents.send('get-strategy-log', {
                         winId: curWinId,
@@ -214,50 +199,48 @@ export default {
 
         //开始监听日志尾部
         startWatchingTail(processId, logPath, searchKeyword){
-            const t = this;
-            t.clearTailWatcher();
+            this.clearTailWatcher();
             let logWaitList = [];
             let throttleInsertLog = throttleInsert(500)
             let throttleClearLog = throttle(() => {
-                    const len = t.tableData.length
-                    if(len > 1000) t.tableData = t.tableData.slice(len - 1000, len)
+                    const len = this.tableData.length
+                    if(len > 1000) this.tableData = this.tableData.slice(len - 1000, len)
                 }, 60000);
             
-            t.tailObserver = new Tail(logPath, {
+            this.tailObserver = new Tail(logPath, {
                 flushAtEOF: true,
                 useWatchFile: true,
                 follow: true,
             });   
-            t.tailObserver.watch();  
-            t.tailObserver.on('line', line => ((curProcId, curKw) => {
+            this.tailObserver.watch();  
+            this.tailObserver.on('line', line => ((curProcId, curKw) => {
                 if(curKw) return;
-                if(curProcId !== t.processId) return;
-                const logData = dealLogMessage(line, t.searchKeyword);
+                if(curProcId !== this.processId) return;
+                const logData = dealLogMessage(line, this.searchKeyword);
                 throttleInsertLog(logData).then(logList => {
                     if(!logList) return;
-                    t.tableData = t.pushTableData(logList);
-                    if(t.ifScrollToBottom) t.scrollToBottom()
+                    this.tableData = this.pushTableData(logList);
+                    if(this.ifScrollToBottom) this.scrollToBottom()
                 })
                 throttleClearLog()
             })(processId, searchKeyword))
 
-            t.tailObserver.on('error', err => {
-                if(t.tailObserver !== null) t.clearTailWatcher();
-                t.tailObserver = null;
+            this.tailObserver.on('error', err => {
+                if(this.tailObserver !== null) this.clearTailWatcher();
+                this.tailObserver = null;
             }) 
         },
         
         //往日志列表里推送数据
         pushTableData(itemList){
-            const t = this;
-            const tableData = t.tableData.slice(0);
+            const tableData = this.tableData.slice(0);
             itemList.kfForEach(item => {
-                t.logCount++;
+                this.logCount++;
                 if(!item || !item.message) return;
                 tableData.push(Object.freeze({
                     ...item,
                     nano: true,
-                    id: t.logCount
+                    id: this.logCount
                 }))
             }) 
             return Object.freeze(tableData)
@@ -265,38 +248,34 @@ export default {
 
         //重置数据
         resetData(ifSearchKeyword=false) {
-            const t = this;
-            t.logCount = 10000;
-            !ifSearchKeyword && (t.searchKeyword = '');
-            t.clearTailWatcher();
-            t.tableData = Object.freeze([]);
-            t.ifScrollToBottom = true;
+            this.logCount = 10000;
+            !ifSearchKeyword && (this.searchKeyword = '');
+            this.clearTailWatcher();
+            this.tableData = Object.freeze([]);
+            this.ifScrollToBottom = true;
         },
 
         clearTailWatcher(){
-            const t = this;
-            if(t.tailObserver != null) t.tailObserver.unwatch();
-            t.tailObserver = null;
+            if(this.tailObserver != null) this.tailObserver.unwatch();
+            this.tailObserver = null;
             return true;
         },
 
         //加载完数据
         scrollToBottom: throttle(function() {
-            const t = this;
-            const $logTable = t.$refs['logTable'];
+            const $logTable = this.$refs['logTable'];
             if(!$logTable) return;
-            t.$nextTick().then(() => { 
+            this.$nextTick().then(() => { 
                 $logTable.triggerToBottom()
             })
         }, 1000),
 
         renderCellClass(prop, item){
-            const t = this;
             if(prop === 'type') {
-                return t.logColor[item.type] || ''
+                return this.logColor[item.type] || ''
             }
             if(item.type === 'error' || item.type === 'critical') {
-                return t.logColor[item.type]
+                return this.logColor[item.type]
             }
             
         },

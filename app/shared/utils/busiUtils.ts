@@ -195,49 +195,67 @@ export const throttleInsert = (interval = 300, type = 'push'): Function => {
  * 新建窗口
  * @param  {string} htmlPath
  */
-export const openVueWin = (htmlPath: string, routerPath: string, BrowserWindow: any): void => {
+export const openVueWin = (htmlPath: string, routerPath: string, electronRemote: any, windowConfig: {}) => {
+    const BrowserWindow: any = electronRemote.BrowserWindow;
+    const currentWindow: any = electronRemote.getCurrentWindow();
+    
+    let x: Number,y: Number;
+
+    if (currentWindow) { //如果上一步中有活动窗口，则根据当前活动窗口的右下方设置下一个窗口的坐标
+        const [ currentWindowX, currentWindowY ] = currentWindow.getPosition();
+        x = currentWindowX + 10;
+        y = currentWindowY + 10;
+    }
+
     const modalPath = process.env.NODE_ENV !== 'production'
     ? `http://localhost:9090/${htmlPath}.html#${routerPath}`
     : `file://${__dirname}/${htmlPath}.html#${routerPath}`
-    const isDevelopment = process.env.NODE_ENV === "development"
     
-    let win = new BrowserWindow({
-        width: 1080, 
-        height: 766,
-        backgroundColor: '#161B2E',
-        webPreferences: {
-            nodeIntegration: true
-        },
-    });
-    if(isDevelopment) {
-        win.webContents.on("did-frame-finish-load", () => {
-            win.webContents.once("devtools-opened", () => {
-                win.focus();
-            });
-            win.webContents.openDevTools();
+    return new Promise(( resolve, reject ) => {
+        let win = new BrowserWindow({
+            x,
+            y,
+            width: 1080, 
+            height: 766,
+            backgroundColor: '#161B2E',
+            parent: currentWindow,
+            webPreferences: {
+                nodeIntegration: true
+            },
+            ...windowConfig
         });
-    }
-    win.loadURL(modalPath)
-    win.show()
-    win.on('close', () => win = null)
+       
+        win.webContents.loadURL(modalPath)
+        win.webContents.on('did-finish-load', () => {
+            if(!currentWindow || Object.keys(currentWindow).length == 0 ) {
+                reject(new Error('当前页面没有聚焦！'))
+                return;
+            }
+            resolve(win)
+        })
+
+        let winId = win.id;
+        window && window.ELEC_WIN_MAP && window.ELEC_WIN_MAP.add(winId, win)
+        win.on('close', () => { 
+            window && window.ELEC_WIN_MAP && window.ELEC_WIN_MAP.delete(winId)
+            win = null;
+        })
+    })
 }
 
 /**
  * 启动任务，利用electron多进程
  * @param  {} taskPath
  */
-export const buildTask = (
-    taskPath: string, 
-    curWin: any, 
-    BrowserWindow: any, 
-    debugOptions = { 
-        width: 0,
-        height: 0,
-        show: false
-    }) => {
+export const buildTask = (taskPath: string, electronRemote: any, debugOptions = { width: 0, height: 0, show: false }) => {
+    
     const taskFullPath = `file://${path.join(__resources, 'tasks', taskPath + '.html')}`;
-    return new Promise((resolve, reject) => {
-        const win = new BrowserWindow({
+    const BrowserWindow: any = electronRemote.BrowserWindow;
+    const currentWindow: any = electronRemote.getCurrentWindow();
+    
+    return new Promise(( resolve, reject ) => {
+        let win = new BrowserWindow({
+            parent: currentWindow,
             webPreferences: {
                 nodeIntegration: true
             },
@@ -247,12 +265,20 @@ export const buildTask = (
 
         win.webContents.loadURL(taskFullPath)
         win.webContents.on('did-finish-load', () => { 
-            if(!curWin || Object.keys(curWin).length == 0 ) {
+            if(!currentWindow || Object.keys(currentWindow).length == 0 ) {
                 reject(new Error('当前页面没有聚焦！'))
                 return;
             }
-            const curWinId = curWin.id;
-            resolve({win, curWinId})
+            const curWinId = currentWindow.id;
+            resolve({ win, curWinId })
+        })
+
+        let winId = win.id;
+        window && window.ELEC_WIN_MAP && window.ELEC_WIN_MAP.add(winId, win)
+        win.on('close', () => { 
+            window && window.ELEC_WIN_MAP && window.ELEC_WIN_MAP.delete(winId)
+            win = null;
+            
         })
     })
 }
@@ -506,3 +532,20 @@ export const setTimerPromiseTask = (fn: Function, interval = 500) => {
         }
     }
 } 
+
+export const loopToRunProcess = async (promiseFunc: Array<Function>, interval = 1000) => {
+    let i = 0, len = promiseFunc.length;
+    let resList = [];
+    for (i = 0; i < len; i++) {
+        const pFunc = promiseFunc[i];
+        try {
+            const res = await pFunc();
+            resList.push(res);
+        } catch (err) {
+            resList.push(err)
+        }
+        
+        await(delayMiliSeconds(interval))
+    }
+    return resList
+}

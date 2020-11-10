@@ -1,17 +1,17 @@
 <template>
-    <main-content>
+    <MainContent>
         <div class="account-content">
             <el-col :span="monitTrades ? 10 : 14">
                 <el-row style="height: 33.333%">
                     <el-col>
-                       <TdAccount/>
+                       <TdAccount></TdAccount>
                     </el-col>
                 </el-row>
                 <el-row style="height: 33.333%" v-if="!monitOrders">
-                    <el-col :span="14">
+                    <el-col :span="monitTrades ? 12 : 14">
                         <MdAccount></MdAccount>
                     </el-col>
-                    <el-col :span="10">
+                    <el-col :span="monitTrades ? 12 : 10">
                         <Pnl 
                         :currentId="currentId" 
                         moduleType="account"
@@ -24,10 +24,11 @@
                     <el-col>
                         <CurrentOrder
                         moduleType="account" 
+                        :accountType="accountType"
                         v-model="monitOrders"
                         :currentId="currentId"
                         :kungfuData="orders"
-                        :gatewayName="`td_${currentAccount.account_id}`"
+                        :gatewayName="currentAccount.account_id"
                         :orderStat="orderStat"
                         @showHistory="handleShowHistory"
                         />   
@@ -42,6 +43,8 @@
                     :currentId="currentId" 
                     :accountType="accountType"
                     :kungfuData="positions"
+                    @showMakeOrderDashboard="handleShowOrCloseMakeOrderDashboard(true)"
+                    @makeOrder="handleMakeOrderByPos"
                     />
                 </el-row>
                 
@@ -57,7 +60,7 @@
                 </el-row>
             </el-col>
         </div>
-    </main-content>
+    </MainContent>
 </template>
 
 <script>
@@ -69,14 +72,20 @@ import CurrentOrder from '../Base/tradingData/CurrentOrder';
 import TradeRecord from '../Base/tradingData/TradeRecord';
 import Pos from '../Base/tradingData/Pos';
 import Pnl from '../Base/tradingData/pnl/Index';
+import MainContent from '@/components/Layout/MainContent';
 
 import { buildTradingDataPipe } from '__io/kungfu/tradingData';
+import accountStrategyMixins from '@/assets/js/mixins/accountStrategyMixins';
 
 export default {
     name: 'account',
+
+    mixins: [ accountStrategyMixins ],
+
     data() {
-        const t = this;
         this.tradingDataPipe = null;
+        this.moduleType = 'account';
+
         return {
             orders: Object.freeze([]),
             trades: Object.freeze([]),
@@ -87,13 +96,14 @@ export default {
 
             historyData: {},
             monitOrders: false,
-            monitTrades: false
+            monitTrades: false,
         }
     },
 
     components: {
         TdAccount, MdAccount, Pnl, Pos,
-        CurrentOrder, TradeRecord
+        CurrentOrder, TradeRecord,
+        MainContent
     },
 
     computed:{

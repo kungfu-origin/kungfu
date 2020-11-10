@@ -1,16 +1,16 @@
 <template>
-    <main-content>
+    <MainContent>
         <div class="trader-content" v-if="!(monitOrders || monitTrades)">
             <template v-if="monitStrategies">
                 <el-col :span="14">
-                    <el-row style="height: 66.66%">
+                    <el-row style="height: 60%">
                         <el-col>
                             <Strategy
                             v-model="monitStrategies"
                             ></Strategy>
                         </el-col>
                     </el-row>
-                    <el-row style="height: 33.33%">
+                    <el-row style="height: 40%">
                         <el-col :span="14">
                             <Log></Log>                         
                         </el-col>
@@ -46,6 +46,7 @@
                             ></Pnl>
                         </el-col>
                     </el-row>
+
                     <el-row style="height: 66.66%">
                         <el-col>
                             <Log></Log>                         
@@ -57,10 +58,12 @@
             <el-col  :span="10">
                 <el-row style="height: 33.333%">
                         <Pos
-                        :currentId="strategyId"
                         moduleType="strategy"
+                        :currentId="strategyId"
                         :kungfuData="positions"   
-                        :addTime="addTime"                
+                        :addTime="addTime" 
+                        @showMakeOrderDashboard="handleShowOrCloseMakeOrderDashboard(true)"
+                        @makeOrder="handleMakeOrderByPos"
                         ></Pos>
                 </el-row>
                 <el-row  style="height: 33.333%">
@@ -98,19 +101,7 @@
                             ></Strategy>
                         </el-col>
                     </el-row>
-                     <el-row style="height: 33.33%">
-                        <el-col>
-                            <Pnl
-                            ref="pnl"
-                            :currentId="strategyId" 
-                            moduleType="strategy"
-                            :minPnl="pnl"   
-                            :dailyPnl="dailyPnl"
-                            :addTime="addTime"                
-                            ></Pnl>                        
-                        </el-col>
-                    </el-row>
-                    <el-row style="height: 33.33%">
+                    <el-row style="height: 66.66%">
                         <el-col>
                             <Log></Log>                         
                         </el-col>
@@ -118,8 +109,8 @@
                 </el-col>
             </template>
                 
-            <el-col  :span="14">
-                <el-row  style="height: 100%">
+            <el-col :span="14">
+                <el-row :style="{ height: '100%' }">
                         <CurrentOrder
                         v-if="monitOrders"
                         moduleType="strategy"
@@ -143,7 +134,7 @@
                 </el-row>
             </el-col>
         </div>
-    </main-content>
+    </MainContent>
 </template>
 <script>
 
@@ -155,12 +146,18 @@ import CurrentOrder from '../Base/tradingData/CurrentOrder';
 import TradeRecord from '../Base/tradingData/TradeRecord';
 import Pos from '../Base/tradingData/Pos';
 import Pnl from '../Base/tradingData/pnl/Index';
+import MainContent from '@/components/Layout/MainContent';
 
 import { buildTradingDataPipe } from '__io/kungfu/tradingData';
+import accountStrategyMixins from '@/assets/js/mixins/accountStrategyMixins';
 
 export default {
+    mixins: [ accountStrategyMixins ],
+
     data(){
         this.tradingDataPipe = null;
+        this.moduleType = 'strategy';
+
         return {
             orders: Object.freeze([]),
             trades: Object.freeze([]),
@@ -228,7 +225,9 @@ export default {
     },
 
     components: {
-        Strategy, CurrentOrder, TradeRecord, Pos, Log, Pnl 
+        Strategy, CurrentOrder, TradeRecord, 
+        Pos, Log, Pnl,
+        MainContent
     },
 
     methods:{

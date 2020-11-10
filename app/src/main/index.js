@@ -40,14 +40,6 @@ function createWindow () {
 	// and load the index.html of the app.
 	if(isDevelopment){
 		mainWindow.loadURL('http://localhost:9090/index.html')
-		if (mainWindow && mainWindow.webContents) {
-			mainWindow.webContents.on("did-frame-finish-load", () => {
-				mainWindow.webContents.once("devtools-opened", () => {
-					mainWindow.focus();
-				});
-				mainWindow.webContents.openDevTools();
-			});
-		}
 	}else{
 		const filePath = path.join(__dirname, "index.html");
 		mainWindow.loadFile(filePath)
