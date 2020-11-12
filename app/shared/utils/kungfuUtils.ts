@@ -1,13 +1,13 @@
 
-import { KF_RUNTIME_DIR } from '__gConfig/pathConfig';
+import { KF_HOME } from '__gConfig/pathConfig';
 
 // process.env.KF_LOG_LEVEL = 'trace';
 
 export const kungfu = require('kungfu-core').kungfu;
 export const longfist = kungfu.longfist;
-export const kungfuConfigStore = kungfu.ConfigStore(KF_RUNTIME_DIR);
-export const commissionStore = kungfu.CommissionStore(KF_RUNTIME_DIR);
-export const history = kungfu.History(KF_RUNTIME_DIR);
+export const kungfuConfigStore = kungfu.ConfigStore(KF_HOME);
+export const commissionStore = kungfu.CommissionStore(KF_HOME);
+export const history = kungfu.History(KF_HOME);
 
 export const getAllKfConfig = () => {
     return kungfuConfigStore.getAllConfig();

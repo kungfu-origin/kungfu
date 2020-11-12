@@ -33,7 +33,6 @@ import { mapState } from 'vuex';
 
 import GlobalSettingDialog from '@/components/Base/GlobalSettingDialog';
 
-import { KF_HOME } from '__gConfig/pathConfig';
 import { existsSync } from '__gUtils/fileUtils';
 import { deepClone, delayMiliSeconds, debounce } from '__gUtils/busiUtils';
 import { buildKungfuGlobalDataPipe, buildTradingDataPipe } from '__io/kungfu/tradingData';

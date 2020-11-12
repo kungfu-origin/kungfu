@@ -5,7 +5,6 @@ import { toDecimal } from '__gUtils/busiUtils';
 import { readJsonSync } from '__gUtils/fileUtils';
 import { offsetName, orderStatus, sideName, posDirection, priceType, hedgeFlag, instrumentType, volumeCondition, timeCondition } from "__gConfig/tradingConfig";
 import { logger } from '../../utils/logUtils';
-import {KF_RUNTIME_DIR} from "../../config/pathConfig";
 
 export const watcher: any = (() => {
     const kfSystemConfig: any = readJsonSync(KF_CONFIG_PATH)
