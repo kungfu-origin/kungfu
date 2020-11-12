@@ -17,31 +17,31 @@ addFileSync('', KF_HOME_BASE_DIR_RESOLVE, 'folder');
 export const KF_HOME_BASE_DIR = KF_HOME_BASE_DIR_RESOLVE;
 
 //BASE
-export const APP_HOME = path.join(KF_HOME_BASE_DIR, 'home')
-addFileSync('', APP_HOME, 'folder')
-
-//RUNTIME
-export const KF_HOME = path.join(APP_HOME, 'runtime')
+export const KF_HOME = path.join(KF_HOME_BASE_DIR, 'home')
 addFileSync('', KF_HOME, 'folder')
 
+//RUNTIME
+export const KF_RUNTIME_DIR = path.join(KF_HOME, 'runtime')
+addFileSync('', KF_RUNTIME_DIR, 'folder')
+
 //DATASET
-export const KF_DATASET_DIR = path.join(APP_HOME, 'dataset')
+export const KF_DATASET_DIR = path.join(KF_HOME, 'dataset')
 addFileSync('', KF_DATASET_DIR, 'folder')
 
 //system
-export const SYSTEM_DIR = path.join(KF_HOME, 'system');
+export const SYSTEM_DIR = path.join(KF_RUNTIME_DIR, 'system');
 addFileSync('', SYSTEM_DIR, 'folder')
 
 //strategy
-export const STRATEGY_DIR = path.join(KF_HOME, 'strategy');
+export const STRATEGY_DIR = path.join(KF_RUNTIME_DIR, 'strategy');
 addFileSync('', STRATEGY_DIR, 'folder')
 
 //td
-export const TD_DIR = path.join(KF_HOME, 'td');
+export const TD_DIR = path.join(KF_RUNTIME_DIR, 'td');
 addFileSync('', TD_DIR, 'folder')
 
 //md
-export const MD_DIR = path.join(KF_HOME, 'md');
+export const MD_DIR = path.join(KF_RUNTIME_DIR, 'md');
 addFileSync('', MD_DIR, 'folder')
 
 //ledger
@@ -49,7 +49,7 @@ export const LEDGER_DIR = path.join(SYSTEM_DIR, 'service', 'ledger')
 addFileSync('', LEDGER_DIR, 'folder')
 
 //log
-export const LOG_DIR = path.join(APP_HOME, 'logview');
+export const LOG_DIR = path.join(KF_HOME, 'logview');
 addFileSync('', LOG_DIR, 'folder')
 
 
@@ -61,7 +61,7 @@ export const BASE_DB_DIR = path.join(SYSTEM_DIR, 'etc', 'kungfu', 'db', 'live');
 
 //================= account related start ==========================
 //gateway
-export const buildGatewayPath = (gatewayName: string) => path.join(KF_HOME, ...gatewayName.split('_'))
+export const buildGatewayPath = (gatewayName: string) => path.join(KF_RUNTIME_DIR, ...gatewayName.split('_'))
 
 
 //================== others start =================================
@@ -84,9 +84,9 @@ export const KF_CONFIG_DEFAULT_PATH = path.join(KUNGFU_RESOURCES_DIR, 'config', 
 
 export const KF_TARADING_CONFIG_DEFAULT_PATH = path.join(KUNGFU_RESOURCES_DIR, 'config', 'kfTradingConfig.json')
 
-export const KF_CONFIG_PATH = path.join(APP_HOME, 'config', 'kfConfig.json')
+export const KF_CONFIG_PATH = path.join(KF_HOME, 'config', 'kfConfig.json')
 
-export const KF_TARADING_CONFIG_PATH = path.join(APP_HOME, 'config', 'kfTradingConfig.json')
+export const KF_TARADING_CONFIG_PATH = path.join(KF_HOME, 'config', 'kfTradingConfig.json')
 
 export const KF_FUTURE_TICKERS_CONFIG_PATH = path.join(KUNGFU_RESOURCES_DIR, 'config', 'futureTickers.json')
 

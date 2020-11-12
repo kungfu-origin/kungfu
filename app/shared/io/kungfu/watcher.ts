@@ -1,4 +1,4 @@
-import { KF_HOME, KF_CONFIG_PATH } from '__gConfig/pathConfig';
+import { KF_RUNTIME_DIR, KF_CONFIG_PATH } from '__gConfig/pathConfig';
 import { setTimerPromiseTask } from '__gUtils/busiUtils';
 import { kungfu } from '__gUtils/kungfuUtils';
 import { toDecimal } from '__gUtils/busiUtils';
@@ -13,7 +13,7 @@ export const watcher: any = (() => {
     if (process.env.APP_TYPE === 'cli') {
         const windowType = process.env.CLI_WINDOW_TYPE || '';
         const id = [process.env.APP_TYPE, windowType].join('');
-        return kungfu.watcher(KF_HOME, kungfu.formatStringToHashHex(id), bypassQuote);
+        return kungfu.watcher(KF_RUNTIME_DIR, kungfu.formatStringToHashHex(id), bypassQuote);
     }
 
 
@@ -24,7 +24,7 @@ export const watcher: any = (() => {
     }
 
     const id = [process.env.APP_TYPE, process.env.RENDERER_TYPE].join('');
-    return kungfu.watcher(KF_HOME, kungfu.formatStringToHashHex(id), bypassQuote);
+    return kungfu.watcher(KF_RUNTIME_DIR, kungfu.formatStringToHashHex(id), bypassQuote);
 })()
 
 
