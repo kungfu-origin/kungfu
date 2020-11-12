@@ -19,6 +19,7 @@ export const KF_HOME_BASE_DIR = KF_HOME_BASE_DIR_RESOLVE;
 //BASE
 export const KF_HOME = path.join(KF_HOME_BASE_DIR, 'home')
 addFileSync('', KF_HOME, 'folder')
+console.log(KF_HOME, '---')
 
 //RUNTIME
 export const KF_RUNTIME_DIR = path.join(KF_HOME, 'runtime')
