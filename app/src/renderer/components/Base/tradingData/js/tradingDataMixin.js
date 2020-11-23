@@ -71,7 +71,7 @@ export default {
             return []
         },
 
-        currentTitle() {
+        currentTitle () {
             return this.currentId ? `${this.currentId}` : ''
         },
     },
@@ -169,7 +169,6 @@ export default {
         },
 
         resetData() {
-            this.todayFinish = true;
             this.searchKeyword = "";
             this.tableData = Object.freeze([]);
             return true;

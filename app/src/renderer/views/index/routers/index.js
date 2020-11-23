@@ -9,8 +9,8 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
 import StrategyRouter from './strategy';
-import AccountRouter from './account';
-import DataManagementRouter from './dataManagement';
+import Account from '@/views/index/components/account/Index';
+
 
 Vue.use(VueRouter)
 
@@ -18,8 +18,11 @@ export default new VueRouter({
     mode: 'hash',
     routes: [
         ...StrategyRouter,
-        ...AccountRouter,
-        ...DataManagementRouter,
+        { 
+            path: '/',
+            name: 'Account',
+            component: Account
+        },
         { path: '*', redirect: '/' }
     ]
 })

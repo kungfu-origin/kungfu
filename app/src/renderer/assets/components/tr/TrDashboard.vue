@@ -76,7 +76,7 @@ export default {
 .tr-dashboard-header{
     height: 36px;
     line-height: 36px;
-    padding: 0px 5px 0px 10px;
+    padding: 0px 6px;
     overflow: hidden;
     box-sizing: border-box;
     display: flex;

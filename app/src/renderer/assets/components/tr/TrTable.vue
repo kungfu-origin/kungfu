@@ -1,8 +1,9 @@
 <template>
     <div class="tr-table">
-        <ul class="tr-table-header tr-table-row">
+        <ul class="tr-table-header tr-table-row ">
             <li 
             :class="[
+            'user-select-none',
             'text-overflow', 
             'tr-table-cell',
             column.type === 'number' ? 'number' : '',
@@ -277,6 +278,8 @@ export default {
         white-space: nowrap;
         padding-right: 16px;
         box-sizing: border-box;
+
+        
 
         .tr-table-cell{
             height: 25px;

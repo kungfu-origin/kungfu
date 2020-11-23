@@ -1,5 +1,5 @@
 <template>
-      <tr-dashboard title="行情源">
+      <tr-dashboard title="">
         <div slot="dashboard-header">
             <tr-dashboard-header-item>
                 <el-button size="mini" @click="handleToggleKeepAllProcessRunning" :title="allProcessBtnTxt">{{ allProcessBtnTxt }}</el-button>

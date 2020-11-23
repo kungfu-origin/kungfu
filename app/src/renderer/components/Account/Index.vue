@@ -22,7 +22,7 @@
                 </el-row>
                 <el-row :style="{ 'height': monitOrders ? '66.66%' : '33.333%' }">
                     <el-col>
-                        <CurrentOrder
+                        <OrderRecord
                         moduleType="account" 
                         :accountType="accountType"
                         v-model="monitOrders"
@@ -68,7 +68,7 @@ import {mapState, mapGetters} from 'vuex'
 
 import TdAccount from './components/TdAccount';
 import MdAccount from './components/MdAccount';
-import CurrentOrder from '../Base/tradingData/CurrentOrder';
+import OrderRecord from '../Base/tradingData/OrderRecord';
 import TradeRecord from '../Base/tradingData/TradeRecord';
 import Pos from '../Base/tradingData/Pos';
 import Pnl from '../Base/tradingData/pnl/Index';
@@ -102,7 +102,7 @@ export default {
 
     components: {
         TdAccount, MdAccount, Pnl, Pos,
-        CurrentOrder, TradeRecord,
+        OrderRecord, TradeRecord,
         MainContent
     },
 

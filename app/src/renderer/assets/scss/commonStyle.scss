@@ -294,22 +294,6 @@
     }
 }
 
-/* tabs
-------------------------------- */
-.tr-tabs{
-    background: $bg_card;;
-    .el-tabs__item{
-        height: $tabHeight;
-        line-height: $tabHeight;
-        font-size: 14px;
-    }
-    .el-tabs__content{
-        height: calc(100% - 36px) !important;
-    }
-    i{
-        font-size: 14px !important;
-    }
-}
 
 
 // /* 滚动条
@@ -371,4 +355,12 @@ div
     max-width: 164px;
     display: inline-block;
     vertical-align: bottom;
+}
+
+.user-select-none {
+    -moz-user-select:none !important; /*火狐*/
+    -webkit-user-select:none !important; /*webkit浏览器*/
+    -ms-user-select:none !important; /*IE10*/
+    -khtml-user-select:none !important; /*早期浏览器*/
+    user-select:none !important;
 }

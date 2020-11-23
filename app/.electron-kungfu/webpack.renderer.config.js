@@ -33,7 +33,6 @@ let rendererConfig = {
   entry: {
     index: path.join(__dirname, '../src/renderer/views/index/main.js'),
     code: path.join(__dirname, '../src/renderer/views/code/main.js'),
-    // backtest: path.join(__dirname, '../src/renderer/views/backtest/main.js'),
     makeOrder: path.join(__dirname, '../src/renderer/views/makeOrder/main.js'),
   },
 

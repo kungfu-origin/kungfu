@@ -1,5 +1,5 @@
 <template>
-<tr-dashboard :title="name ? name : `成交记录 ${currentTitle}`">
+<tr-dashboard :title="currentTitle">
     <div slot="dashboard-header">
         <tr-dashboard-header-item>
             <tr-search-input v-model.trim="searchKeyword"></tr-search-input>
@@ -62,11 +62,6 @@ export default {
             type: Object,
             default: () => ({})
         },
-
-        name: {
-            type: String,
-            default: ''
-        }
     },
 
     components: {

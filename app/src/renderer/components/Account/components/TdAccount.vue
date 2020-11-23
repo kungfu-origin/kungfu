@@ -1,5 +1,5 @@
 <template>
-    <tr-dashboard title="交易账户">
+    <tr-dashboard title="">
         <div slot="dashboard-header">
             <tr-dashboard-header-item>
                 <tr-search-input v-model.trim="accountIdKey"></tr-search-input>

@@ -1,32 +1,20 @@
 <template>
-  <tr-dashboard :title="title">
+  <tr-dashboard :title="currentTitle">
     <div slot="dashboard-header">
         <tr-dashboard-header-item>
             <tr-search-input v-model.trim="searchKeyword"></tr-search-input>
         </tr-dashboard-header-item>
-        <tr-dashboard-header-item v-if="!ifBacktest && !dateForHistory">
+        <tr-dashboard-header-item v-if="!dateForHistory">
             <i class="el-icon-date mouse-over" title="历史" @click="dateRangeDialogVisiblityForHistory = true"></i>
         </tr-dashboard-header-item>
-        <tr-dashboard-header-item v-if="!ifBacktest && dateForHistory">
+        <tr-dashboard-header-item v-if="dateForHistory">
             <span>{{ dateForHistory }}</span>
             <i class="el-icon-close mouse-over" @click="handleClearHistory"></i>
         </tr-dashboard-header-item>
-        <tr-dashboard-header-item v-if="!todayFinish && !ifBacktest">
-            <i class="el-icon-s-claim mouse-over" title="委托记录" @click="handleCheckTodayFinished"></i>
-        </tr-dashboard-header-item>
-        <tr-dashboard-header-item v-else-if="!ifBacktest">
-            <i class="el-icon-s-release mouse-over" title="未完成委托" @click="handleCheckTodayUnfinished"></i>
-        </tr-dashboard-header-item>
-        <tr-dashboard-header-item v-if="!ifBacktest">
+        <tr-dashboard-header-item>
             <i class="el-icon-download mouse-over" title="导出" @click="dateRangeDialogVisiblityForExport = true"></i>
         </tr-dashboard-header-item>
-        <tr-dashboard-header-item v-if="!value">
-            <i class="el-icon-monitor mouse-over" title="打开监控" @click="handleMonitOrders"></i>
-        </tr-dashboard-header-item>
-        <tr-dashboard-header-item v-else>
-            <i class="el-icon-s-platform mouse-over" title="关闭监控" @click="handleMonitOrders"></i>
-        </tr-dashboard-header-item>
-        <tr-dashboard-header-item v-if="!ifBacktest">
+        <tr-dashboard-header-item>
             <el-button size="mini" type="danger" style="color: #fff" title="全部撤单" @click="handleCancelAllOrders">全部撤单</el-button>
         </tr-dashboard-header-item>
     </div>
@@ -110,6 +98,7 @@ export default {
    mixins: [ tradingDataMixin, makeOrderMixin, makeOrderCoreMixin ],
 
     props: {
+
         gatewayName: {
             type: String,
             default:''
@@ -123,13 +112,17 @@ export default {
         name: {
             type: String,
             default: ''
-        }
+        },
+
+        todayFinish: {
+            type: Boolean,
+            default: true
+        },
     },
 
     data () {
         return {
             kungfuBoardType: 'order',
-            todayFinish: true, //为 ture 显示当日已完成
         };
     },
 
@@ -145,11 +138,6 @@ export default {
         gatewayNameResolved () {
             if (this.gatewayName) return `td_${this.gatewayName}`;
             else return ''
-        },
-
-        title () {
-            if (this.name) return this.name;
-            return this.todayFinish ? `委托记录 ${this.currentTitle}` : `未完成委托 ${this.currentTitle}`
         },
 
         schema () {
@@ -347,15 +335,6 @@ export default {
                 if(err == 'cancel') return;
                 this.$message.error(err.message || '撤单指令发送失败！')
             })
-        },
-
-        //查看当日已完成
-        handleCheckTodayFinished () {
-            this.todayFinish = true;
-        },
-
-        handleCheckTodayUnfinished () {
-            this.todayFinish = false;
         },
 
         //对返回的数据进行处理

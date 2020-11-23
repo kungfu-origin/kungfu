@@ -16,12 +16,12 @@
         width="450px"
         >
             <div style="margin: 10px 0 20px">
-                <tr-status :value="loadingData.archive ? '100' : '3'" :hasText="false"></tr-status>
-                {{ loadingData.archive ? '功夫归档完成 ✓' : '功夫归档中...' }}
-            </div>
-            <div style="margin: 10px 0 20px">
                 <tr-status :value="loadingData.watcher ? '100' : '3'" :hasText="false"></tr-status>
                 {{ loadingData.watcher ? '功夫环境准备完成 ✓' : '功夫环境准备中...' }}
+            </div>
+            <div style="margin: 10px 0 20px">
+                <tr-status :value="loadingData.archive ? '100' : '3'" :hasText="false"></tr-status>
+                {{ loadingData.archive ? '功夫归档完成 ✓' : '功夫归档中...' }}
             </div>
         </el-dialog>
     </div>

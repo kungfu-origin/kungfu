@@ -67,7 +67,7 @@
                         ></Pos>
                 </el-row>
                 <el-row  style="height: 33.333%">
-                        <CurrentOrder
+                        <OrderRecord
                         moduleType="strategy"
                         v-model="monitOrders"
                         :currentId="strategyId"
@@ -75,7 +75,7 @@
                         :addTime="addTime"   
                         :orderStat="orderStat"   
                         @showHistory="handleShowHistory"          
-                        ></CurrentOrder>                      
+                        ></OrderRecord>                      
                 </el-row>
                 <el-row style="height: 33.333%">
                         <TradeRecord 
@@ -111,7 +111,7 @@
                 
             <el-col :span="14">
                 <el-row :style="{ height: '100%' }">
-                        <CurrentOrder
+                        <OrderRecord
                         v-if="monitOrders"
                         moduleType="strategy"
                         v-model="monitOrders"
@@ -120,7 +120,7 @@
                         :addTime="addTime"   
                         :orderStat="orderStat"   
                         @showHistory="handleShowHistory"          
-                        ></CurrentOrder>    
+                        ></OrderRecord>    
                         <TradeRecord 
                         v-if="monitTrades"
                         moduleType="strategy"
@@ -142,7 +142,7 @@ import { mapState, mapGetters } from 'vuex';
 
 import Strategy from './components/Strategy';
 import Log from './components/Log';
-import CurrentOrder from '../Base/tradingData/CurrentOrder';
+import OrderRecord from '../Base/tradingData/OrderRecord';
 import TradeRecord from '../Base/tradingData/TradeRecord';
 import Pos from '../Base/tradingData/Pos';
 import Pnl from '../Base/tradingData/pnl/Index';
@@ -225,7 +225,7 @@ export default {
     },
 
     components: {
-        Strategy, CurrentOrder, TradeRecord, 
+        Strategy, OrderRecord, TradeRecord, 
         Pos, Log, Pnl,
         MainContent
     },

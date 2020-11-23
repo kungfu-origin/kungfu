@@ -11,13 +11,16 @@
             color: $font_5;
         }
     }
+
     .el-dialog__body{
         padding: 24px 24px 24px 24px;
     }
+
     .el-dialog__footer{
         border-top: 1px solid $bg_light;
         padding: 12px 16px;
     }
+
     .el-row{
         margin-bottom: 8px;
         &:last-child{
@@ -117,6 +120,7 @@
     .el-select-dropdown__item.hover, .el-select-dropdown__item:hover{
         background: $input_bg;
     }
+
     .is-disabled{
         color: $disabled;
     }
@@ -172,6 +176,7 @@ p.el-select-dropdown__empty{
             }
         }
     }
+
     .el-picker-panel__content{
         // border-top: 1px solid $input_bg;
         margin-bottom: 0px;
@@ -199,13 +204,16 @@ p.el-select-dropdown__empty{
         line-height: 24px;
         color: $icon;
     }
+
     .el-range-separator{
         line-height: 24px;
     }
+
     .el-range__close-icon{
         line-height: 24px;
         color: $icon;
     }
+
     .el-range-input{
         color: $font_5;
     }
@@ -246,6 +254,7 @@ p.el-select-dropdown__empty{
     .el-time-panel__footer{
         background: $bg_light;
     }
+
     .el-time-panel__content::after, .el-time-panel__content::before{
         border-top: 1px solid $icon;
         border-bottom: 1px solid $icon;
@@ -276,9 +285,11 @@ p.el-select-dropdown__empty{
         line-height: 20px;
         color: $icon;
     }
+
     .el-range-separator{
         line-height: 20px;
     }
+
     .el-range__close-icon{
         line-height: 20px;
         color: $icon;
@@ -329,23 +340,29 @@ p.el-select-dropdown__empty{
 }
 .el-table{
     background: $bg_card;
+
     .cell{
         transform: translateZ(0);
         white-space: nowrap;
         line-height: 25px;
+        padding: 0 6px;
         font-family: Consolas, Monaco, monospace,"Microsoft YaHei",sans-serif;
     }
+
     .blink-cell .cell{
         padding: 0;
     }
+
     th{
         background: $tab_header; //头部的颜色
         color: $font;
     }
+
     tr{
         background: $bg_card; //表格内容的背景
         color: $font_5;
     }
+
     .el-table__body-wrapper{
         background: $bg_card;
     }
@@ -353,17 +370,21 @@ p.el-select-dropdown__empty{
     .el-table__empty-block .el-table__empty-text{
         color: $input_bg
     }
+
     .el-input{
         .el-input__inner{
             border-radius: 0;
         }
     }
+
     .selected-bg{
         background:  $bg_light
     }
+
     .el-radio{
         padding: 0px;
     }
+
     .el-table__empty-block{
         padding-bottom: 25px;
         box-sizing: border-box;
@@ -432,6 +453,7 @@ p.el-select-dropdown__empty{
         background: $input_bg;
 
     }
+
     .el-icon-loading {
         color: #fff;
     }
@@ -460,29 +482,40 @@ p.el-select-dropdown__empty{
 
 .el-tabs{
     height: 100%;
-    .el-tabs__content{
-        height: calc(100% - 40px);
-        overflow: inherit;
-        .el-tab-pane{
-            height: 100%;
-            &>div{
-                position: relative;
+    box-sizing: border-box;
+
+    &.el-tabs--border-card {
+        display: flex;
+        flex-direction: column;
+        background-color: $bg;
+        border: 0;
+        
+        .el-tabs__header.is-top {
+            margin: 0;
+            background-color: $bg;
+            padding-right: 8px;
+            box-sizing: border-box;
+            border: 0;
+
+            .el-tabs__item {
+                height: 36px;
+                line-height: 36px;
+                border: 0;
+                padding: 0 20px;
+
+                &.is-active {
+                    border: 0;
+                    background-color: $bg_card;
+                }
+            }
+        }
+
+        .el-tabs__content {
+            padding: 0;
+            flex: 1;
+
+            .el-tab-pane {
                 height: 100%;
-            }
-        }
-    }
-    .el-tabs__header{
-        margin-bottom: 1px;
-        .el-tabs__nav-wrap{
-            padding-left: 10px;
-            &::after{
-                background-color: $bg_light;
-                height: 1px;
-            }
-        }
-        .el-tabs__nav{
-            .el-tabs__active-bar {
-                height: 1px !important;
             }
         }
     }
@@ -566,6 +599,7 @@ p.el-select-dropdown__empty{
     .popper__arrow{
         bottom: -7px;
     }
+
     .popper__arrow::after{
         border-top-color: $tab_header;
     }
@@ -645,10 +679,12 @@ p.el-select-dropdown__empty{
             color: $vi;
         }
     }
+
     .el-menu--popup{
         padding: 0px;
         min-width: 120px;
     }
+
     .el-menu--popup-right-start{
         margin: 0px;
         .el-menu-item{
@@ -689,36 +725,4 @@ p.el-select-dropdown__empty{
         border-radius: 0;
         right: 0;
     }  
-}
-
-.el-tabs {
-
-    &.el-tabs--border-card {
-        background: $bg_card;
-        border: 0;
-
-        .el-tabs__header {
-            background: $bg_card;
-            border-bottom: 1px solid $bg_light;
-
-            .el-tabs__item {
-                height: 36px;
-                line-height: 36px;
-                border-left-color: $bg_light;
-                border-right-color: $bg_light;
-                box-sizing: border-box;
-                font-size: 12px;
-
-                &.is-active {
-                    font-size: 14px;
-                    background: $tab_header;
-                    border-bottom-color: $bg_light;
-                }
-            }
-        }
-
-        .el-tabs__content {
-            box-sizing: border-box;
-        }
-    }
 }
