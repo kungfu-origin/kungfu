@@ -68,7 +68,7 @@
                 </el-table-column>
                     
                 <el-table-column
-                    label="连接"
+                    label="进程"
                     min-width="60"
                     >
                     <template slot-scope="props">

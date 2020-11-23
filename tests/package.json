@@ -20,6 +20,7 @@
     "install-deps": "node -v",
     "clean": "rimraf ./dist/* ./build/*",
     "build": "node -v",
+    "build-cli": "node -v",
     "build-test": "node ./.build/build.js && yarn run cp",
     "build-linux": " yarn run dist && pkg . -t=node10.17-linux-x64 --out-path=build/test",
     "build-mac": " yarn run dist && pkg . -t=node10.17-macos-x64 --out-path=build/test",
