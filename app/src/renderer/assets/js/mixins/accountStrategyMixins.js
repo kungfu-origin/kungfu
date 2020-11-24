@@ -39,10 +39,7 @@ export default {
         handleShowOrCloseMakeOrderDashboard () {
 
             if (this.moduleType === 'account') {
-                if (!this.currentId) {
-                    this.$message.warning(`需要先添加交易进程！`)
-                    return;
-                }
+                return
             }
 
             return this.buildMakeOrderWin()

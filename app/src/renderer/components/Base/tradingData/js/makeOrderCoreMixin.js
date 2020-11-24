@@ -1,8 +1,35 @@
+import { mapState } from 'vuex';
 
 import { kungfuCancelOrder, kungfuMakeOrder } from '__io/kungfu/makeCancelOrder';
 import { decodeKungfuLocation } from '__io/kungfu/watcher';
 
 export default {
+    props: {
+        currentId: {
+            type: [ String, Number ],
+            default: ''
+        },
+
+        moduleType: {
+            type: String,
+            default: ''
+        },
+
+        makeOrderByPosData: {
+            type: Object,
+            default: () => ({})
+        },
+    },
+
+    computed: {
+        ...mapState({
+            tdAccountSource: state => state.BASE.tdAccountSource || {},
+            strategyList: state => state.STRATEGY.strategyList,
+            tdList: state => state.ACCOUNT.tdList,
+            accountsAsset: state => state.ACCOUNT.accountsAsset,
+            processStatus: state => state.BASE.processStatus,
+        }),
+    },
 
     methods: {
         cancelOrder (moduleType, orderData, strategyId) {
@@ -23,6 +50,10 @@ export default {
             } else if (moduleType === 'strategy') {
                 return kungfuMakeOrder(makeOrderForm, currentAccountResolved, strategyId)
             }
+        },
+
+        init () {
+            
         },
     }
 

@@ -1,5 +1,5 @@
 <template>
-<tr-dashboard :title="currentTitle">
+<tr-dashboard :title="`${currentTitle}`">
     <div slot="dashboard-header">
         <tr-dashboard-header-item>
             <tr-search-input v-model.trim="searchKeyword"></tr-search-input>

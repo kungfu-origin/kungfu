@@ -25,12 +25,16 @@
                 </el-col>
             </el-row>
             <el-row style="height: 50%">
-                <el-col :span="6">
-                
+                <el-col :span="7">
+                    <MakeOrderDashboard
+                        :currentId="currentId"
+                        moduleType="account" 
+                        :makeOrderByPosData="makeOrderByPosData"
+                    ></MakeOrderDashboard>
                 </el-col>
-                <el-col :span="18">
+                <el-col :span="17">
                     <el-tabs v-model="currentTradingDataTabName" type="border-card">
-                          <el-tab-pane label="全部委托" name="orders">
+                          <el-tab-pane label="委托记录" name="orders">
                             <OrderRecord
                             moduleType="account" 
                             :accountType="accountType"
@@ -38,19 +42,6 @@
                             :kungfuData="orders"
                             :gatewayName="currentAccount.account_id"
                             :orderStat="orderStat"
-                            :todayFinish="true"
-                            @showHistory="handleShowHistory"
-                            />   
-                        </el-tab-pane>
-                        <el-tab-pane label="未完成委托" name="unfinishedOrders">
-                            <OrderRecord
-                            moduleType="account" 
-                            :accountType="accountType"
-                            :currentId="currentId"
-                            :kungfuData="orders"
-                            :gatewayName="currentAccount.account_id"
-                            :orderStat="orderStat"
-                            :todayFinish="false"
                             @showHistory="handleShowHistory"
                             />   
                         </el-tab-pane>
@@ -80,6 +71,7 @@ import MdAccount from '@/components/Account//components/MdAccount';
 import OrderRecord from '@/components/Base/tradingData/OrderRecord';
 import TradeRecord from '@/components/Base/tradingData/TradeRecord';
 import Pos from '@/components/Base/tradingData/Pos';
+import MakeOrderDashboard from '@/components/Base/MakeOrderDashboard';
 import MainContent from '@/components/Layout/MainContent';
 
 import { buildTradingDataPipe } from '__io/kungfu/tradingData';
@@ -112,6 +104,7 @@ export default {
     components: {
         TdAccount, MdAccount, Pos,
         OrderRecord, TradeRecord,
+        MakeOrderDashboard,
         MainContent
     },
 
@@ -171,7 +164,6 @@ export default {
 
         handleAccountTabClick (tab, event) {
             this.$store.dispatch('setCurrentAccountTabName', tab.name)
-            console.log(tab.name)
         },
 
         handleShowHistory ({ date, data, type }) {

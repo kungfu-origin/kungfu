@@ -58,7 +58,7 @@
         </div>
         <span slot="reference" :class="[currentStatus]">
             <i class="el-icon-s-operation"></i>
-            账户状态
+            账户进程状态
         </span>
     </el-popover>
 </template>

@@ -1,16 +1,25 @@
 <template>
-  <tr-dashboard :title="currentTitle">
+  <tr-dashboard :title="currentTitleResolved">
     <div slot="dashboard-header">
         <tr-dashboard-header-item>
             <tr-search-input v-model.trim="searchKeyword"></tr-search-input>
         </tr-dashboard-header-item>
+
         <tr-dashboard-header-item v-if="!dateForHistory">
             <i class="el-icon-date mouse-over" title="历史" @click="dateRangeDialogVisiblityForHistory = true"></i>
         </tr-dashboard-header-item>
-        <tr-dashboard-header-item v-if="dateForHistory">
+        <tr-dashboard-header-item v-else>
             <span>{{ dateForHistory }}</span>
             <i class="el-icon-close mouse-over" @click="handleClearHistory"></i>
         </tr-dashboard-header-item>
+
+        <tr-dashboard-header-item v-if="todayFinish">
+            <i class="el-icon-circle-check mouse-over" title="查看未完成委托" @click="todayFinish = false"></i>
+        </tr-dashboard-header-item>
+        <tr-dashboard-header-item v-else>
+            <i class="el-icon-success mouse-over" title="查看全部委托" @click="todayFinish = true"></i>
+        </tr-dashboard-header-item>
+
         <tr-dashboard-header-item>
             <i class="el-icon-download mouse-over" title="导出" @click="dateRangeDialogVisiblityForExport = true"></i>
         </tr-dashboard-header-item>
@@ -113,21 +122,17 @@ export default {
             type: String,
             default: ''
         },
-
-        todayFinish: {
-            type: Boolean,
-            default: true
-        },
     },
 
     data () {
         return {
+            todayFinish: true,
             kungfuBoardType: 'order',
         };
     },
 
     components: {
-        DatePickerDialog
+        DatePickerDialog,
     },
 
     computed: {
@@ -253,7 +258,15 @@ export default {
                 width: '40px'
             }]
             .filter(item => !!item)
-        }
+        },
+
+        currentTitleResolved () {
+            if (this.todayFinish) {
+                return `全部委托 ${this.currentTitle}`
+            } else {
+                return `未完成委托 ${this.currentTitle}`
+            }
+        },
     },
 
     watch: {

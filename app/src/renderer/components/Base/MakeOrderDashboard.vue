@@ -1,5 +1,5 @@
 <template>
-    <tr-dashboard :title="`下单 ${currentId}`">
+    <tr-dashboard :title="`下单面板 ${currentId}`">
         <div class="kf-make-order-window__body">
             <el-form ref="make-order-form" label-width="60px" :model="makeOrderForm">
                 <el-form-item
@@ -164,10 +164,9 @@ import { getFutureTickersConfig, getStockTickersConfig } from '__assets/base'
 import { Autocomplete } from 'element-ui';
 
 import makeOrderMixin from '@/components/Base/tradingData/js/makeOrderMixin';
-import makeOrderIPCMixin from '@/components/Base/tradingData/js/makeOrderIPCMixin';
+import makeOrderCoreMixin from '@/components/Base/tradingData/js/makeOrderCoreMixin';
 
 const ls = require('local-storage');
-const REMOTE = require('electron').remote
 
 Vue.use(Autocomplete)
 
@@ -186,7 +185,7 @@ function filterPriceType (priceType) {
 
 export default {
 
-    mixins: [ makeOrderMixin, makeOrderIPCMixin ],
+    mixins: [ makeOrderMixin, makeOrderCoreMixin ],
 
     data () {
         this.sourceTypeConfig = sourceTypeConfig;
@@ -199,7 +198,6 @@ export default {
         this.biggerThanZeroValidator = biggerThanZeroValidator;
 
         return {
-
             currentAccount: '', //only strategy
             makeOrderForm: {
                 name: '', // account_id in strategy
@@ -232,17 +230,10 @@ export default {
                 this.stockTickers = Object.freeze(res)
             })
 
-
+        this.init();
     },
 
     computed: {
-        ...mapState({
-            tdAccountSource: state => state.tdAccountSource,
-            strategyList: state => state.strategyList,
-            tdList: state => state.tdList,
-            accountsAsset: state => state.accountsAsset,
-            processStatus: state => state.processStatus,
-        }),
 
         accountType() {
             const sourceName = this.currentSourceName || '';
@@ -329,6 +320,7 @@ export default {
     },
 
     watch: {
+        
         makeOrderByPosData (newPosData) {
 
             if (!Object.keys(newPosData || {}).length) return;
@@ -380,7 +372,7 @@ export default {
 
         handleSelectAccount (account) {
             this.currentAccount = account;
-        },
+        },        
 
         submit () {
             const t = this;
