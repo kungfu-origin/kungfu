@@ -24,7 +24,7 @@ function filterPriceType (priceType) {
 export default {
 
     template: `
-        <tr-dashboard :title="'下单面板' + currentId">
+        <tr-dashboard :title="'下单面板 ' + currentId">
         <div class="kf-make-order-window__body">
             <el-form ref="make-order-form" label-width="60px" :model="makeOrderForm">
                 <el-form-item
