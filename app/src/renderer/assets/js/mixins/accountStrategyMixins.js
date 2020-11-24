@@ -39,7 +39,7 @@ export default {
         handleShowOrCloseMakeOrderDashboard () {
 
             if (this.moduleType === 'account') {
-                return
+                return Promise.resolve(true)
             }
 
             return this.buildMakeOrderWin()

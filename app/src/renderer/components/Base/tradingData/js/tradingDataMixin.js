@@ -5,10 +5,6 @@ import { writeCSV } from '__gUtils/fileUtils';
 
 export default {
     props: {
-        value: {
-            type: Boolean,
-            default: false
-        },
 
         currentId: {
             type: String,
@@ -39,6 +35,11 @@ export default {
         ifBacktest: {
             type: Boolean,
             default: false
+        },
+
+        noTitle: {
+            type: Boolean,
+            default: false,
         }
     },
 

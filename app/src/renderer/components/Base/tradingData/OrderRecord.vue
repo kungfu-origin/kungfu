@@ -13,11 +13,9 @@
             <i class="el-icon-close mouse-over" @click="handleClearHistory"></i>
         </tr-dashboard-header-item>
 
-        <tr-dashboard-header-item v-if="todayFinish">
-            <i class="el-icon-circle-check mouse-over" title="查看未完成委托" @click="todayFinish = false"></i>
-        </tr-dashboard-header-item>
-        <tr-dashboard-header-item v-else>
-            <i class="el-icon-success mouse-over" title="查看全部委托" @click="todayFinish = true"></i>
+        <tr-dashboard-header-item v-if="todayFinishPreSetting === undefined">
+            <i class="el-icon-circle-check mouse-over"  v-if="todayFinish" title="查看未完成委托" @click="todayFinish = false"></i>
+            <i class="el-icon-success mouse-over" v-else title="查看全部委托" @click="todayFinish = true"></i>
         </tr-dashboard-header-item>
 
         <tr-dashboard-header-item>
@@ -90,21 +88,21 @@
 <script>
 import { mapState } from 'vuex';
 
-import DatePickerDialog from '../DatePickerDialog';
-import tradingDataMixin from './js/tradingDataMixin';
+import DatePickerDialog from '@/components/Base/DatePickerDialog';
 
 import { dealOrder } from "__io/kungfu/watcher";
 import { kungfuCancelAllOrders } from '__io/kungfu/makeCancelOrder';
 import { aliveOrderStatusList } from '__gConfig/tradingConfig';
 import { writeCSV } from '__gUtils/fileUtils';
 
-import makeOrderMixin from '@/components/Base/tradingData/js/makeOrderMixin';
-import makeOrderCoreMixin from '@/components/Base/tradingData/js/makeOrderCoreMixin';
+import makeOrderMixin from '@/components/Base/makeOrder/js/makeOrderMixin';
+import makeOrderCoreMixin from '@/components/Base/makeOrder/js/makeOrderCoreMixin';
+import tradingDataMixin from '@/components/Base/tradingData/js/tradingDataMixin';
 
 export default {
-    name: "current-orders",
+    name: "orders",
    
-   mixins: [ tradingDataMixin, makeOrderMixin, makeOrderCoreMixin ],
+    mixins: [ tradingDataMixin, makeOrderMixin, makeOrderCoreMixin ],
 
     props: {
 
@@ -122,11 +120,16 @@ export default {
             type: String,
             default: ''
         },
+
+        todayFinishPreSetting: {
+            type: [ Object, Boolean ],
+            default: () => undefined
+        }
     },
 
     data () {
         return {
-            todayFinish: true,
+            todayFinish: this.todayFinishPreSetting !== undefined ? this.todayFinishPreSetting : true,
             kungfuBoardType: 'order',
         };
     },
@@ -261,6 +264,10 @@ export default {
         },
 
         currentTitleResolved () {
+            if (this.noTitle) {
+                return ''
+            }
+
             if (this.todayFinish) {
                 return `全部委托 ${this.currentTitle}`
             } else {

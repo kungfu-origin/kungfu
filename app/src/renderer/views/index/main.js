@@ -12,6 +12,7 @@ import { remote } from 'electron'
 import App from './App.vue';
 import '@/assets/iconfont/iconfont.js';
 import '@/assets/iconfont/iconfont.css';
+import '@/assets/scss/makeOrder.scss';
 
 Vue.use(ElementUI)
 

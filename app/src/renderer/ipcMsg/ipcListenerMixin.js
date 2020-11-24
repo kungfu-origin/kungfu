@@ -4,7 +4,7 @@ import { ipcRenderer, remote } from 'electron';
 
 import { getStrategyById, updateStrategyPath } from '__io/kungfu/strategy';
 
-import makeOrderCoreMixin from '@/components/Base/tradingData/js/makeOrderCoreMixin';
+import makeOrderCoreMixin from '@/components/Base/makeOrder/js/makeOrderCoreMixin';
 
 const BrowserWindow = remote.BrowserWindow;
 

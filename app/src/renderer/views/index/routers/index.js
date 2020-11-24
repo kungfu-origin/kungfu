@@ -8,21 +8,27 @@
  */ 
 import Vue from 'vue';
 import VueRouter from 'vue-router';
-import StrategyRouter from './strategy';
 import Account from '@/views/index/components/account/Index';
-
+import Strategy from '@/components/Strategy/Index'
 
 Vue.use(VueRouter)
 
 export default new VueRouter({
     mode: 'hash',
     routes: [
-        ...StrategyRouter,
         { 
             path: '/',
             name: 'Account',
             component: Account
         },
-        { path: '*', redirect: '/' }
+        { 
+            path: '/strategy', 
+            name: 'strategy', 
+            component: Strategy
+        },
+        { 
+            path: '*', 
+            redirect: '/' 
+        }
     ]
 })

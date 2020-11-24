@@ -12,6 +12,7 @@ import electron from 'electron';
 
 import '@/assets/iconfont/iconfont.js';
 import '@/assets/iconfont/iconfont.css';
+import '@/assets/scss/makeOrder.scss';
 
 Vue.use(ElementUI)
 

@@ -34,9 +34,25 @@
                 </el-col>
                 <el-col :span="17">
                     <el-tabs v-model="currentTradingDataTabName" type="border-card">
-                          <el-tab-pane label="委托记录" name="orders">
+                        <el-tab-pane :label="`全部委托 ${showCurrentIdInTabName('orders')}`" name="orders">
                             <OrderRecord
                             moduleType="account" 
+                            :noTitle="true"
+                            :todayFinishPreSetting="true"
+                            :accountType="accountType"
+                            :currentId="currentId"
+                            :kungfuData="orders"
+                            :gatewayName="currentAccount.account_id"
+                            :orderStat="orderStat"
+
+                            @showHistory="handleShowHistory"
+                            />   
+                        </el-tab-pane>
+                        <el-tab-pane :label="`未完成委托 ${showCurrentIdInTabName('unfinishedOrders')}`" name="unfinishedOrders">
+                            <OrderRecord
+                            moduleType="account" 
+                            :noTitle="true"
+                            :todayFinishPreSetting="false"
                             :accountType="accountType"
                             :currentId="currentId"
                             :kungfuData="orders"
@@ -45,10 +61,10 @@
                             @showHistory="handleShowHistory"
                             />   
                         </el-tab-pane>
-                        <el-tab-pane label="成交记录" name="trades">
+                        <el-tab-pane :label="`成交记录 ${showCurrentIdInTabName('trades')}`" name="trades">
                             <TradeRecord
                             moduleType="account" 
-                            v-model="monitTrades"
+                            :noTitle="true"
                             :currentId="currentId"
                             :kungfuData="trades"
                             :orderStat="orderStat"
@@ -71,7 +87,7 @@ import MdAccount from '@/components/Account//components/MdAccount';
 import OrderRecord from '@/components/Base/tradingData/OrderRecord';
 import TradeRecord from '@/components/Base/tradingData/TradeRecord';
 import Pos from '@/components/Base/tradingData/Pos';
-import MakeOrderDashboard from '@/components/Base/MakeOrderDashboard';
+import MakeOrderDashboard from '@/components/Base/makeOrder/MakeOrderDashboard';
 import MainContent from '@/components/Layout/MainContent';
 
 import { buildTradingDataPipe } from '__io/kungfu/tradingData';
@@ -95,7 +111,6 @@ export default {
             orderStat: Object.freeze({}),
 
             historyData: {},
-            monitTrades: false,
 
             currentTradingDataTabName: "orders"
         }
@@ -171,6 +186,10 @@ export default {
                 date,
                 data
             })
+        },
+
+        showCurrentIdInTabName (target) {
+            return this.currentTradingDataTabName === target ? this.currentId : ''
         }
     },
 

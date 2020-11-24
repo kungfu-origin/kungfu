@@ -12,7 +12,7 @@ export default {
 @import "@/assets/scss/skin.scss";
 
 .footer-btn{
-    width: 110px;
+    width: auto;
     height: 22px;
     line-height: 24px;
     padding: 0px 10px 0px 10px;

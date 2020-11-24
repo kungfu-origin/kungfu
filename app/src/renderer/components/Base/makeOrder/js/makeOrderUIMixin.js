@@ -1,5 +1,30 @@
-<template>
-    <tr-dashboard :title="`下单面板 ${currentId}`">
+import Vue from 'vue';
+import { biggerThanZeroValidator } from '__assets/validator';
+import { deepClone } from '__gUtils/busiUtils';
+import { sourceTypeConfig, sideName, offsetName, priceType, hedgeFlag, exchangeIds, instrumentTypes } from '__gConfig/tradingConfig';
+import { getFutureTickersConfig, getStockTickersConfig } from '__assets/base'
+import { Autocomplete } from 'element-ui';
+
+const ls = require('local-storage');
+
+Vue.use(Autocomplete)
+
+function filterPriceType (priceType) {
+    let filterPriceType = {};
+
+    Object.keys(priceType || {}).forEach(key => {
+        if (key <= 1) {
+            filterPriceType[key] = priceType[key]
+        }
+    })
+
+    return filterPriceType
+}
+
+export default {
+
+    template: `
+        <tr-dashboard :title="'下单面板' + currentId">
         <div class="kf-make-order-window__body">
             <el-form ref="make-order-form" label-width="60px" :model="makeOrderForm">
                 <el-form-item
@@ -152,40 +177,8 @@
             </div>
         </div>
     </tr-dashboard>
-</template>
+    `,
 
-<script>
-import Vue from 'vue';
-import { mapState } from 'vuex';
-import { biggerThanZeroValidator } from '__assets/validator';
-import { deepClone } from '__gUtils/busiUtils';
-import { sourceTypeConfig, sideName, offsetName, priceType, hedgeFlag, exchangeIds, instrumentTypes } from '__gConfig/tradingConfig';
-import { getFutureTickersConfig, getStockTickersConfig } from '__assets/base'
-import { Autocomplete } from 'element-ui';
-
-import makeOrderMixin from '@/components/Base/tradingData/js/makeOrderMixin';
-import makeOrderCoreMixin from '@/components/Base/tradingData/js/makeOrderCoreMixin';
-
-const ls = require('local-storage');
-
-Vue.use(Autocomplete)
-
-function filterPriceType (priceType) {
-    let filterPriceType = {};
-
-    Object.keys(priceType || {}).forEach(key => {
-        if (key <= 1) {
-            filterPriceType[key] = priceType[key]
-        }
-    })
-
-    return filterPriceType
-}
-
-
-export default {
-
-    mixins: [ makeOrderMixin, makeOrderCoreMixin ],
 
     data () {
         this.sourceTypeConfig = sourceTypeConfig;
@@ -320,7 +313,7 @@ export default {
     },
 
     watch: {
-        
+
         makeOrderByPosData (newPosData) {
 
             if (!Object.keys(newPosData || {}).length) return;
@@ -452,140 +445,4 @@ export default {
             };
         },
     }
-
 }
-</script>
-
-<style lang="scss">
-@import "@/assets/scss/skin.scss";
-$size: 25px;
-$fontSize: 12px;
-
-.make-order-instrument-ids__warp {
-    display: flex;
-    justify-content: space-between;
-    padding-right: 16px;
-    box-sizing: border-box;
-
-    .make-order-instrument-id-item {
-
-        .ticker {
-            display: inline-block;
-            width: 50px;
-        }
-    }
-}
-
-.kf-make-order-window__body {
-    padding: 0 12px 10px 10px;
-    box-sizing: border-box;
-    display: flex;
-    justify-content: space-around;
-    min-height: 100%;
-
-    .el-form {
-        flex: 1;
-
-        .el-form-item__error {
-            padding-top: 2px;
-        }
-    }
-
-    .el-form-item {
-        margin-bottom: 15px;
-
-        .el-form-item__label {
-            font-size: $fontSize;
-            text-align: left;    
-            padding-right: 5px;
-            line-height: 30px;
-        }
-
-        .el-form-item__content {
-            line-height: 30px;
-        }
-
-
-
-        &.no-margin {
-            margin-bottom: 0px;
-        }
-
-        .el-radio {
-            margin-right: 8px; 
-        }
-
-        .el-radio__label {
-            font-size: $fontSize;
-            padding-left: 5px;
-        }
-
-        .el-radio.is-checked {
-
-            &.green-radio {
-                .el-radio__input.is-checked {
-
-                    .el-radio__inner {
-                        background: $green;
-                        border-color: $green;
-                    }
-                }
-                
-                .el-radio__label {
-                    color: $green;
-                }
-            }
-
-            &.red-radio {
-                .el-radio__input.is-checked {
-
-                    .el-radio__inner {
-                        background: $red;
-                        border-color: $red;
-                    }
-                }
-                
-                .el-radio__label {
-                    color: $red;
-                }
-            }
-        }
-    }
-
-    .make-order-line {
-        margin-bottom: 15px;
-
-        .make-order-line-info {
-            
-            span {
-                display: block;
-                color: $font;
-                font-size: 12px;
-                text-align: right;
-            }
-        }
-    }
-
-    .make-order-btns {
-        padding-left: 20px;
-        width: 70px;
-        display: flex;
-        flex-direction: column;
-        justify-content: flex-start;
-        box-sizing: border-box;
-
-        .el-button {
-            height: 100%;
-            width: 100%;
-            margin: 0;
-            padding: 0 5px;
-            box-sizing: border-box;
-            text-align: center;
-            word-break: break-word;
-            word-wrap: unset;
-            white-space: normal;
-        }
-    }
-}
-
-</style>
