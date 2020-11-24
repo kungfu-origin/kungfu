@@ -140,8 +140,33 @@ export const transformTradingItemListToData = (list: any[], type: string) => {
                 data[clientId].push(item)
             }
         })
+    } else if (type === 'ticker') {
+        list.kfForEach((item: any) => {
+            const instrumentId = `${item.instrument_id}_${item.direction}`;
+            if (!instrumentId) return;
+            if (!data[instrumentId]) data[instrumentId] = [];
+            data[instrumentId].push(item)
+        })
+
     }
+
     return data
+}
+
+export const transformPositionByTickerByMerge = (positionsByTicker: { [propname: string]: PosInputData[] }) => {
+    const positionsByTickerList = Object.values(positionsByTicker)
+        .map((tickerList: PosInputData[]) => {
+            return tickerList.reduce((item1: PosInputData, item2: PosInputData) => {
+                return {
+                    ...item1,
+                    yesterday_volume: item1.yesterday_volume + item2.yesterday_volume,
+                    volume: item1.volume + item2.volume,
+                    unrealized_pnl: item1.unrealized_pnl + item2.unrealized_pnl
+                }
+            })
+        })
+    
+    return positionsByTickerList
 }
 
 

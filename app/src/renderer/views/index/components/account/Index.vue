@@ -10,7 +10,14 @@
                         <el-tab-pane label="行情源" name="mdList">
                             <MdAccount></MdAccount>
                         </el-tab-pane>
-                        <el-tab-pane label="交易标的" name="tickerList">交易标的</el-tab-pane>
+                        <el-tab-pane label="交易标的" name="tickerList">
+                            <Pos 
+                            moduleType="account"
+                            :currentId="currentId" 
+                            :accountType="accountType"
+                            :kungfuData="positionsByTicker"
+                            />
+                        </el-tab-pane>
                     </el-tabs>
                 </el-col>
                 <el-col :span="8">
@@ -91,6 +98,7 @@ import MakeOrderDashboard from '@/components/Base/makeOrder/MakeOrderDashboard';
 import MainContent from '@/components/Layout/MainContent';
 
 import { buildTradingDataPipe } from '__io/kungfu/tradingData';
+import { transformPositionByTickerByMerge } from '__io/kungfu/watcher';
 import accountStrategyMixins from '@/assets/js/mixins/accountStrategyMixins';
 
 export default {
@@ -106,8 +114,7 @@ export default {
             orders: Object.freeze([]),
             trades: Object.freeze([]),
             positions: Object.freeze([]),
-            pnl: Object.freeze([]),
-            dailyPnl: Object.freeze([]),
+            positionsByTicker: Object.freeze([]),
             orderStat: Object.freeze({}),
 
             historyData: {},
@@ -132,41 +139,39 @@ export default {
 
         //账户的类型，根据是哪个柜台的，可以判断是是期货还是股票还是证券
         accountType() {
-            const t = this;
-            const source_name = t.currentAccount.source_name
+            const source_name = this.currentAccount.source_name
             if(!source_name) return
-            return (t.tdAccountSource[source_name] || {}).typeName || ''
+            return (this.tdAccountSource[source_name] || {}).typeName || ''
         },
 
         currentId() {
-            const t = this;
-            return t.currentAccount.account_id || ''
+            return this.currentAccount.account_id || ''
         }
     },
 
     mounted(){
-        const t = this;
-        t.tradingDataPipe = buildTradingDataPipe('account').subscribe(data => {
+        this.tradingDataPipe = buildTradingDataPipe('account').subscribe(data => {
             if (this.historyData['order'] && ((this.historyData['order'] || {}).date)) {
                 this.orders = Object.freeze(this.historyData['order'].data)
             } else {
-                const orders = data['orders'][t.currentId];
+                const orders = data['orders'][this.currentId];
                 this.orders = Object.freeze(orders || []);
             }
 
             if (this.historyData['trade'] && ((this.historyData['trade'] || {}).date)) {
                 this.trades = Object.freeze(this.historyData['trade'].data)
             } else {
-                const trades = data['trades'][t.currentId];
+                const trades = data['trades'][this.currentId];
                 this.trades = Object.freeze(trades || []);
             }
       
-            const positions = data['positions'][t.currentId];
+
+            const positions = data['positions'][this.currentId];
             this.positions = Object.freeze(positions || []);
-            const pnl = data['pnl'][t.currentId];
-            this.pnl = Object.freeze(pnl || []);
-            const dailyPnl = data['dailyPnl'][t.currentId];
-            this.dailyPnl = Object.freeze(dailyPnl || []);
+
+            const positionsByTicker = data['positionsByTicker'];
+            this.positionsByTicker = Object.freeze(transformPositionByTickerByMerge(positionsByTicker) || []);
+
             const orderStat = data['orderStat'];
             this.orderStat = Object.freeze(orderStat || {});
 

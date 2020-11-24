@@ -258,6 +258,7 @@ interface PosInputData {
     instrument_id: string;
     direction: number;
     yesterday_volume: bigint;
+    unrealized_pnl: number,
     volume: bigint;
     last_price: number;
     margin: number;
