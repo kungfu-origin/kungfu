@@ -12,10 +12,13 @@
                         </el-tab-pane>
                         <el-tab-pane label="交易标的" name="tickerList">
                             <Pos 
+                            :noTitle="true"
                             moduleType="account"
                             :currentId="currentId" 
                             :accountType="accountType"
                             :kungfuData="positionsByTicker"
+                            :currentTicker="currentTickerResolved"
+                            @activeTicker="setCurrentTicker"
                             />
                         </el-tab-pane>
                     </el-tabs>
@@ -87,7 +90,7 @@
 </template>
 
 <script>
-import {mapState, mapGetters} from 'vuex'
+import { mapState, mapGetters } from 'vuex'
 
 import TdAccount from '@/components/Account/components/TdAccount';
 import MdAccount from '@/components/Account//components/MdAccount';
@@ -98,7 +101,7 @@ import MakeOrderDashboard from '@/components/Base/makeOrder/MakeOrderDashboard';
 import MainContent from '@/components/Layout/MainContent';
 
 import { buildTradingDataPipe } from '__io/kungfu/tradingData';
-import { transformPositionByTickerByMerge } from '__io/kungfu/watcher';
+import { transformPositionByTickerByMerge, dealPos } from '__io/kungfu/watcher';
 import accountStrategyMixins from '@/assets/js/mixins/accountStrategyMixins';
 
 export default {
@@ -133,9 +136,18 @@ export default {
     computed:{
         ...mapState({
             currentAccount: state => state.ACCOUNT.currentAccount, //选中的账户
+            currentTicker: state => state.ACCOUNT.currentTicker,
+            currentAccountTabName: state => state.ACCOUNT.currentAccountTabName,
             tdAccountSource: state => state.BASE.tdAccountSource || {},
-            currentAccountTabName: state => state.ACCOUNT.currentAccountTabName
         }),
+
+        currentTickerResolved () {
+            if (this.currentAccountTabName === 'tickerList') {
+                return this.currentTicker
+            } else {
+                return null
+            }
+        },
 
         //账户的类型，根据是哪个柜台的，可以判断是是期货还是股票还是证券
         accountType() {
@@ -171,6 +183,7 @@ export default {
 
             const positionsByTicker = data['positionsByTicker'];
             this.positionsByTicker = Object.freeze(transformPositionByTickerByMerge(positionsByTicker) || []);
+            this.initSetCurrentTicker(this.positionsByTicker);
 
             const orderStat = data['orderStat'];
             this.orderStat = Object.freeze(orderStat || {});
@@ -195,7 +208,24 @@ export default {
 
         showCurrentIdInTabName (target) {
             return this.currentTradingDataTabName === target ? this.currentId : ''
-        }
+        },
+
+        setCurrentTicker (item) {
+            this.$store.dispatch('setCurrentTicker', item)
+        },
+
+        initSetCurrentTicker (tickerList) {
+            if (!this.currentTicker || !this.currentTicker.instrumentId) {
+                if (tickerList.length) {
+                    const tickerListSort = tickerList.slice(0).sort((a, b) => {
+                        const result = a.instrument_id.localeCompare(b.instrument_id);
+                        return result === 0 ? a.direction.localeCompare(b.direction) : result;
+                    })
+
+                    this.$store.dispatch('setCurrentTicker', dealPos(tickerListSort[0]))
+                }
+            }
+        },
     },
 
     destroyed(){

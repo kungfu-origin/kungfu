@@ -1,5 +1,5 @@
 <template>
-<tr-dashboard :title="name ? name : `持仓 ${currentTitle}`">
+<tr-dashboard :title="noTitle ? '' : `持仓 ${currentTitle}`">
     <div slot="dashboard-header">
         <tr-dashboard-header-item>
             <tr-search-input v-model.trim="searchKeyword"></tr-search-input>
@@ -16,7 +16,8 @@
         :data="tableData"
         :schema="schema"
         :renderCellClass="renderCellClass"
-        @clickCell="(e, item) => $emit('makeOrder', item)"
+        :isActiveFunc="isActiveTicker"
+        @clickCell="(e, item) => isTickerModule ? $emit('activeTicker', item) : $emit('makeOrder', item)"
     ></tr-table>
 
     <make-order-dialog
@@ -47,9 +48,15 @@ export default {
     mixins: [ tradingDataMixin ],
 
     props: {
+
         name: {
             type: String,
             default: ''
+        },
+
+        currentTicker: {
+            type: Object,
+            default: () => null
         }
     },
 
@@ -63,7 +70,6 @@ export default {
 
     computed:{
         schema() {
-            const t = this
             return [{
                     type: 'text',
                     label: '代码',
@@ -106,7 +112,12 @@ export default {
                     flex: 1.5
                 }
             ]
-        }
+        },
+
+        isTickerModule () {
+            if (this.currentTicker && this.currentTicker.instrumentId) return true
+            return false;
+        },
     },
 
     watch: {
@@ -121,19 +132,16 @@ export default {
     methods:{
 
         handleExport () {
-            const t = this;
-            t.$saveFile({
+            this.$saveFile({
                 title: '保存持仓信息',
             }).then(filename => {
                 if(!filename) return;
-                writeCSV(filename, t.tableData)
+                writeCSV(filename, this.tableData)
             })
         },
 
         dealPositionList (positions, searchKeyword) {
-            const t = this;
             let positionDataByKey = {};
-
             let positionsAfterFilter = positions
                 .filter(item => {
                     if (searchKeyword.trim() === '') return true;
@@ -141,8 +149,8 @@ export default {
                     return instrument_id.includes(searchKeyword);
                 })
 
-            if (t.moduleType === 'strategy') {
-                positionsAfterFilter = positionsAfterFilter.filter(item => item.update_time >= BigInt(t.addTime));
+            if (this.moduleType === 'strategy') {
+                positionsAfterFilter = positionsAfterFilter.filter(item => item.update_time >= BigInt(this.addTime));
             }
 
 
@@ -154,7 +162,7 @@ export default {
             positionsAfterFilter.kfForEach(item => {
                 let positionData = dealPos(item);
                 positionData.update = true;
-                const poskey = t.getKey(positionData);
+                const poskey = this.getKey(positionData);
                 positionDataByKey[poskey] = Object.freeze(positionData);
             })
 
@@ -169,8 +177,17 @@ export default {
 
         //拼接key值
         getKey(data) {
-            return (data.instrumentId + data.direction)
+            return `${data.instrumentId}${data.direction}`
         },
+
+        isActiveTicker (item) {
+            if (!this.isTickerModule) return false
+
+            const key = this.getKey(item);
+            const keyOfCurrentTicker = this.getKey(this.currentTicker)
+            if (key === keyOfCurrentTicker) return true;
+            return false;
+        }
     }
 }
 </script>

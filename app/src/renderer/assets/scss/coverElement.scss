@@ -338,6 +338,7 @@ p.el-select-dropdown__empty{
         }
     }
 }
+
 .el-table{
     background: $bg_card;
 
@@ -348,6 +349,18 @@ p.el-select-dropdown__empty{
         padding: 0 6px;
         font-family: Consolas, Monaco, monospace,"Microsoft YaHei",sans-serif;
     }
+
+    .el-table__body {
+
+        .cell {
+            line-height: 20px;
+        }
+    }
+
+    th.is-leaf, td {
+        border: 0 !important;
+    }
+
 
     .blink-cell .cell{
         padding: 0;

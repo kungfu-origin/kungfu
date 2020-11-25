@@ -64,7 +64,7 @@
 </template>
 
 <script>
-import {mapState, mapGetters} from 'vuex'
+import { mapState, mapGetters } from 'vuex'
 
 import TdAccount from './components/TdAccount';
 import MdAccount from './components/MdAccount';

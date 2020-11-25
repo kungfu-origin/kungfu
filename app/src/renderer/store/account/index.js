@@ -11,6 +11,7 @@ export default {
         mdList: [],
         currentAccount: {},
         currentAccountTabName: 'tdList',
+        currentTicker: {}
     },
 
     actions: {
@@ -20,6 +21,10 @@ export default {
             commit('SET_CURRENT_ACCOUNT', account)
         },
 
+        setCurrentTicker ({ commit }, ticker) {
+            commit('SET_CURRENT_TICKER', ticker)
+        },
+ 
         setOneMdTdState ({ commit },  { id, stateData }) {
             commit('SET_ONE_MD_TD_STATE',  { id, stateData })
         },
@@ -63,6 +68,10 @@ export default {
     },
 
     mutations: {
+
+        SET_CURRENT_TICKER (state, ticker) {
+            state.currentTicker = ticker;
+        },
 
         SET_CURRENT_ACCOUNT_TAB_NAME (state, name) {
             state.currentAccountTabName = name;

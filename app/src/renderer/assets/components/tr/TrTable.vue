@@ -31,7 +31,10 @@
             :buffer="100"
             >
                 <template v-slot="{item}">
-                    <ul class="tr-table-row" 
+                    <ul :class="{ 
+                        'tr-table-row': true,
+                        'is-active': isActiveFunc(item)    
+                    }" 
                     @dblclick="e => handleDbClickRow(e, item)"
                     @mousedown="e => handleMousedown(e, item)"
                     >
@@ -152,6 +155,11 @@ export default {
         keyField: {
             type: String,
             default: 'id'
+        },
+
+        isActiveFunc: {
+            type: Function,
+            default: () => false
         }
     },
 
@@ -268,6 +276,7 @@ export default {
     flex-direction: column;
     height: 100%;
     position: relative;
+
     .tr-table-header{
         display: flex;
         flex-direction: row;
@@ -309,6 +318,10 @@ export default {
         flex-direction: row;
         justify-content: flex-start;
         cursor: pointer;
+
+        &.is-active {
+            background: $bg_light;
+        }
 
         .oper{
             text-align: left;
