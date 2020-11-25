@@ -94,6 +94,7 @@ import { dealOrder } from "__io/kungfu/watcher";
 import { kungfuCancelAllOrders } from '__io/kungfu/makeCancelOrder';
 import { aliveOrderStatusList } from '__gConfig/tradingConfig';
 import { writeCSV } from '__gUtils/fileUtils';
+import { ordersHeader } from '@/components/Base/tradingData/js/tableHeaderConfig';
 
 import makeOrderMixin from '@/components/Base/makeOrder/js/makeOrderMixin';
 import makeOrderCoreMixin from '@/components/Base/makeOrder/js/makeOrderCoreMixin';
@@ -149,118 +150,7 @@ export default {
         },
 
         schema () {
-            if (this.dateForHistory) {
-                return [
-                {
-                    type: "text",
-                    label: "下单时间",
-                    prop: "updateTimeMMDD",
-                    width: "140px"
-                },{
-                    type: "text",
-                    label: "代码",
-                    prop: "instrumentId",
-                    width: '60px'
-                },{
-                    type: "text",
-                    label: "",
-                    prop: "side",
-                    width: '40px'
-                },
-                {
-                    type: "text",
-                    label: "",
-                    prop: "offset",
-                    width: '40px'
-                },
-                {
-                    type: "number",
-                    label: "委托价",
-                    prop: "limitPrice",
-                    width: '80px'
-                },{
-                    type: "text",
-                    align: "center",
-                    label: "已成交/全部",
-                    prop: "volumeTraded",
-                    width: '80px'
-                },{
-                    type: "text",
-                    label: "订单状态",
-                    prop: "statusName",
-                    width: '60px'
-                },{
-                    type: "account-strategy",
-                    label: this.moduleType == 'account' ? '策略' : '账户',
-                    prop: this.moduleType == 'account' ? 'clientId' : 'accountId',
-                },{
-                    type: 'operation',
-                    label: '',
-                    prop: 'oper',
-                    width: '40px'
-                }]
-            }
-
-            return  [
-            {
-                type: "text",
-                label: "下单时间",
-                prop: "updateTime",
-                width: '70px'
-            },{
-                type: "text",
-                label: "代码",
-                prop: "instrumentId",
-                width: '60px'
-            },{
-                type: "text",
-                label: "",
-                prop: "side",
-                width: '40px',
-            },
-            {
-                type: "text",
-                label: "",
-                prop: "offset",
-                width: '40px'
-            },
-            {
-                type: "number",
-                label: "委托价",
-                prop: "limitPrice",
-                width: '80px'
-            },{
-                type: "text",
-                align: "center",
-                label: "已成交/全部",
-                prop: "volumeTraded",
-                width: '80px'
-            },{
-                type: "text",
-                label: "订单状态",
-                prop: "statusName",
-                width: '60px'
-            },{
-                type: 'number',
-                label: "系统延迟(μs)",
-                prop: "latencySystem", 
-                width: '90px'
-            },{
-                type: 'number',
-                label: "网络延迟(μs)",
-                prop: "latencyNetwork", 
-                width: '90px'
-            },{
-                type: "account-strategy",
-                label: this.moduleType == 'account' ? '策略' : '账户',
-                prop: this.moduleType == 'account' ? 'clientId' : 'accountId',
-            },{
-                type: 'operation',
-                label: '',
-                prop: 'oper',
-                width: '40px'
-            }]
-            .filter(item => !!item)
+            return ordersHeader(this.dateForHistory, this.moduleType)
         },
 
         currentTitleResolved () {
