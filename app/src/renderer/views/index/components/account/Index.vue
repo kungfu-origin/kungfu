@@ -2,7 +2,7 @@
     <MainContent>
         <div class="account-content">
             <el-row style="height: 50%">
-                <el-col :span="16">
+                <el-col :span="14">
                     <el-tabs :value="currentAccountTabName" type="border-card" @tab-click="handleAccountTabClick">
                         <el-tab-pane label="账户列表" name="tdList">
                             <TdAccount></TdAccount>
@@ -21,7 +21,7 @@
                         </el-tab-pane>
                     </el-tabs>
                 </el-col>
-                <el-col :span="8">
+                <el-col :span="10">
                     <Pos 
                     :moduleType="moduleType"
                     :currentId="currentId" 
@@ -161,12 +161,16 @@ export default {
             }
         },
 
-        currentId() {
+        currentId () {
             if (this.moduleType === 'ticker') {
-                return this.currentTicker.instrumentId || ''
+                return `${this.currentTicker.instrumentId} ${this.currentTicker.direction}`
             } else {
                 return this.currentAccount.account_id || ''
             }
+        },
+
+        currentTickerId () {
+            return `${this.currentTicker.instrumentId}_${this.currentTicker.directionOrigin}`
         }
     },
 
@@ -179,7 +183,7 @@ export default {
             }
 
             const positionsByTicker = data['positionsByTicker'];
-            this.positionsByTicker = Object.freeze(transformPositionByTickerByMerge(positionsByTicker) || []);
+            this.positionsByTicker = Object.freeze(transformPositionByTickerByMerge(positionsByTicker, 'account') || []);
             this.initSetCurrentTicker(this.positionsByTicker);
 
             const orderStat = data['orderStat'];
@@ -247,14 +251,18 @@ export default {
 
         dealTradingDataByTiker (data) {
             const orders = data['ordersByTicker'].filter(item => {
-                return item.instrument_id === this.currentId
+                return `${item.instrument_id}_${item.side}` === this.currentTickerId
             })
             this.orders = Object.freeze(orders || []);
 
             const trades = data['tradesByTicker'].filter(item => {
-                return item.instrument_id === this.currentId
+                return `${item.instrument_id}_${item.side}` === this.currentTickerId
             })
             this.trades = Object.freeze(trades || []);
+
+            const positionsByTicker = data['positionsByTicker'][this.currentTickerId] || [];
+            const positionsByTickerForAccount = positionsByTicker.filter(item => !!item.account_id && !item.client_id);
+            this.positions = Object.freeze(positionsByTickerForAccount)
         }
     },
 

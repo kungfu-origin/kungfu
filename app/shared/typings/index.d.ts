@@ -252,6 +252,10 @@ interface PosData {
     lastPrice: string;
     unRealizedPnl: string;
     exchangeId: string;
+    accountId: string;
+    sourceId: string;
+    clientId: string;
+    accountIdResolved: string;
 }
 
 interface PosInputData {
@@ -263,6 +267,9 @@ interface PosInputData {
     last_price: number;
     margin: number;
     exchange_id: string;
+    account_id: string;
+    source_id: string;
+    client_id: string;
     [propName: string]: any;
 }
 

@@ -153,10 +153,17 @@ export const transformTradingItemListToData = (list: any[], type: string) => {
     return data
 }
 
-export const transformPositionByTickerByMerge = (positionsByTicker: { [propname: string]: PosInputData[] }) => {
+export const transformPositionByTickerByMerge = (positionsByTicker: { [propname: string]: PosInputData[] }, type: string) => {
     const positionsByTickerList = Object.values(positionsByTicker)
         .map((tickerList: PosInputData[]) => {
-            return tickerList.reduce((item1: PosInputData, item2: PosInputData) => {
+            return tickerList
+            .filter(item => {
+                if (!item.account_id) return false;
+                if (type === 'account') return !item.client_id;
+                if (type === 'strategy') return item.client_id;
+                return true;
+            })
+            .reduce((item1: PosInputData, item2: PosInputData) => {
                 return {
                     ...item1,
                     yesterday_volume: item1.yesterday_volume + item2.yesterday_volume,
@@ -312,7 +319,11 @@ export const dealPos = (item: PosInputData): PosData => {
         avgPrice: toDecimal(item.avg_open_price || item.position_cost_price, 3) || '--',
         lastPrice: toDecimal(item.last_price, 3) || '--',
         unRealizedPnl: toDecimal(item.unrealized_pnl) + '' || '--',
-        exchangeId: item.exchange_id
+        exchangeId: item.exchange_id,
+        accountId: item.account_id,
+        sourceId: item.source_id,
+        clientId: item.client_id,
+        accountIdResolved: `${item.source_id}_${item.account_id}`
     }
 }
 

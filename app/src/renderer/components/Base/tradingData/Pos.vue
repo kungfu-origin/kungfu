@@ -15,6 +15,7 @@
         v-if="rendererTable"
         :data="tableData"
         :schema="schema"
+        :keyField="moduleType === 'ticker' ? 'accountIdResolved' : 'id'"
         :renderCellClass="renderCellClass"
         :isActiveFunc="isActiveTicker"
         @clickCell="(e, item) => isTickerModule ? $emit('activeTicker', item) : $emit('makeOrder', item)"
@@ -71,7 +72,7 @@ export default {
 
     computed:{
         schema() {
-            return posHeader()
+            return posHeader(this.moduleType)
         },
 
         isTickerModule () {
@@ -137,7 +138,10 @@ export default {
 
         //拼接key值
         getKey(data) {
-            return `${data.instrumentId}${data.direction}`
+            if (this.moduleType === 'ticker') {
+                return data.accountIdResolved
+            }
+            return `${data.instrumentId}_${data.direction}`
         },
 
         isActiveTicker (item) {
