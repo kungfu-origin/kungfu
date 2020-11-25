@@ -34,8 +34,8 @@
                     />
                 </el-col>
             </el-row>
-            <el-row style="height: 50%">
-                <el-col :span="7">
+            <el-row style="height: 50%" class="flex-row">
+                <el-col :span="7" :style="{ 'max-width': '400px' }">
                     <MakeOrderDashboard
                         :currentId="currentId"
                         moduleType="account" 
@@ -163,23 +163,7 @@ export default {
 
     mounted(){
         this.tradingDataPipe = buildTradingDataPipe('account').subscribe(data => {
-            if (this.historyData['order'] && ((this.historyData['order'] || {}).date)) {
-                this.orders = Object.freeze(this.historyData['order'].data)
-            } else {
-                const orders = data['orders'][this.currentId];
-                this.orders = Object.freeze(orders || []);
-            }
-
-            if (this.historyData['trade'] && ((this.historyData['trade'] || {}).date)) {
-                this.trades = Object.freeze(this.historyData['trade'].data)
-            } else {
-                const trades = data['trades'][this.currentId];
-                this.trades = Object.freeze(trades || []);
-            }
-      
-
-            const positions = data['positions'][this.currentId];
-            this.positions = Object.freeze(positions || []);
+            this.dealTradingData(data);
 
             const positionsByTicker = data['positionsByTicker'];
             this.positionsByTicker = Object.freeze(transformPositionByTickerByMerge(positionsByTicker) || []);
@@ -225,6 +209,26 @@ export default {
                     this.$store.dispatch('setCurrentTicker', dealPos(tickerListSort[0]))
                 }
             }
+        },
+
+        dealTradingData (data) {
+            if (this.historyData['order'] && ((this.historyData['order'] || {}).date)) {
+                this.orders = Object.freeze(this.historyData['order'].data)
+            } else {
+                const orders = data['orders'][this.currentId];
+                this.orders = Object.freeze(orders || []);
+            }
+
+            if (this.historyData['trade'] && ((this.historyData['trade'] || {}).date)) {
+                this.trades = Object.freeze(this.historyData['trade'].data)
+            } else {
+                const trades = data['trades'][this.currentId];
+                this.trades = Object.freeze(trades || []);
+            }
+      
+            const positions = data['positions'][this.currentId];
+            this.positions = Object.freeze(positions || []);
+
         },
     },
 

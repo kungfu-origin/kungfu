@@ -364,3 +364,11 @@ div
     -khtml-user-select:none !important; /*早期浏览器*/
     user-select:none !important;
 }
+
+.flex-row.el-row {
+    display: flex;
+
+    >.el-col {
+        flex: 1;
+    }
+}
