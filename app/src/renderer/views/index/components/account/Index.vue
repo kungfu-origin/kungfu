@@ -13,9 +13,7 @@
                         <el-tab-pane label="交易标的" name="tickerList">
                             <Pos 
                             :noTitle="true"
-                            moduleType="account"
-                            :currentId="currentId" 
-                            :accountType="accountType"
+                            moduleType="acocunt"
                             :kungfuData="positionsByTicker"
                             :currentTicker="currentTickerResolved"
                             @activeTicker="setCurrentTicker"
@@ -25,7 +23,7 @@
                 </el-col>
                 <el-col :span="8">
                     <Pos 
-                    moduleType="account"
+                    :moduleType="moduleType"
                     :currentId="currentId" 
                     :accountType="accountType"
                     :kungfuData="positions"
@@ -38,7 +36,7 @@
                 <el-col :span="7" :style="{ 'max-width': '400px' }">
                     <MakeOrderDashboard
                         :currentId="currentId"
-                        moduleType="account" 
+                        :moduleType="moduleType" 
                         :makeOrderByPosData="makeOrderByPosData"
                     ></MakeOrderDashboard>
                 </el-col>
@@ -46,7 +44,7 @@
                     <el-tabs v-model="currentTradingDataTabName" type="border-card">
                         <el-tab-pane :label="`全部委托 ${showCurrentIdInTabName('orders')}`" name="orders">
                             <OrderRecord
-                            moduleType="account" 
+                            :moduleType="moduleType" 
                             :noTitle="true"
                             :todayFinishPreSetting="true"
                             :accountType="accountType"
@@ -60,7 +58,7 @@
                         </el-tab-pane>
                         <el-tab-pane :label="`未完成委托 ${showCurrentIdInTabName('unfinishedOrders')}`" name="unfinishedOrders">
                             <OrderRecord
-                            moduleType="account" 
+                            :moduleType="moduleType" 
                             :noTitle="true"
                             :todayFinishPreSetting="false"
                             :accountType="accountType"
@@ -73,7 +71,7 @@
                         </el-tab-pane>
                         <el-tab-pane :label="`成交记录 ${showCurrentIdInTabName('trades')}`" name="trades">
                             <TradeRecord
-                            moduleType="account" 
+                            :moduleType="moduleType" 
                             :noTitle="true"
                             :currentId="currentId"
                             :kungfuData="trades"
@@ -111,7 +109,6 @@ export default {
 
     data() {
         this.tradingDataPipe = null;
-        this.moduleType = 'account';
 
         return {
             orders: Object.freeze([]),
@@ -156,14 +153,30 @@ export default {
             return (this.tdAccountSource[source_name] || {}).typeName || ''
         },
 
+        moduleType () {
+            if (this.currentAccountTabName === 'tickerList') {
+                return 'ticker'
+            } else {
+                return 'account'
+            }
+        },
+
         currentId() {
-            return this.currentAccount.account_id || ''
+            if (this.moduleType === 'ticker') {
+                return this.currentTicker.instrumentId || ''
+            } else {
+                return this.currentAccount.account_id || ''
+            }
         }
     },
 
     mounted(){
         this.tradingDataPipe = buildTradingDataPipe('account').subscribe(data => {
-            this.dealTradingData(data);
+            if (this.moduleType === 'ticker') {
+                this.dealTradingDataByTiker(data)
+            } else {
+                this.dealTradingData(data);
+            }
 
             const positionsByTicker = data['positionsByTicker'];
             this.positionsByTicker = Object.freeze(transformPositionByTickerByMerge(positionsByTicker) || []);
@@ -212,6 +225,7 @@ export default {
         },
 
         dealTradingData (data) {
+
             if (this.historyData['order'] && ((this.historyData['order'] || {}).date)) {
                 this.orders = Object.freeze(this.historyData['order'].data)
             } else {
@@ -230,6 +244,18 @@ export default {
             this.positions = Object.freeze(positions || []);
 
         },
+
+        dealTradingDataByTiker (data) {
+            const orders = data['ordersByTicker'].filter(item => {
+                return item.instrument_id === this.currentId
+            })
+            this.orders = Object.freeze(orders || []);
+
+            const trades = data['tradesByTicker'].filter(item => {
+                return item.instrument_id === this.currentId
+            })
+            this.trades = Object.freeze(trades || []);
+        }
     },
 
     destroyed(){

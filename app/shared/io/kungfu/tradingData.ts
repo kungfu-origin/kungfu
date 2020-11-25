@@ -39,7 +39,9 @@ export const buildTradingDataPipe = (type: string) => {
 
             return {
                 orders: transformOrderTradeListToData(orders, type),
+                ordersByTicker: orders,
                 trades: transformOrderTradeListToData(trades, type),
+                tradesByTicker: trades,
                 positions: transformTradingItemListToData(positions, type),
                 positionsByTicker: transformTradingItemListToData(positions, 'ticker'),
                 assets: transformAssetItemListToData(assets, type),
