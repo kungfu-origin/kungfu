@@ -345,16 +345,9 @@ p.el-select-dropdown__empty{
     .cell{
         transform: translateZ(0);
         white-space: nowrap;
-        line-height: 25px;
+        line-height: 26px;
         padding: 0 6px;
         font-family: Consolas, Monaco, monospace,"Microsoft YaHei",sans-serif;
-    }
-
-    .el-table__body {
-
-        .cell {
-            line-height: 20px;
-        }
     }
 
     th.is-leaf, td {

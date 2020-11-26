@@ -156,14 +156,16 @@ export const transformTradingItemListToData = (list: any[], type: string) => {
 export const transformPositionByTickerByMerge = (positionsByTicker: { [propname: string]: PosInputData[] }, type: string) => {
     const positionsByTickerList = Object.values(positionsByTicker)
         .map((tickerList: PosInputData[]) => {
-            return tickerList
+            const tickerListResolved = tickerList
             .filter(item => {
                 if (!item.account_id) return false;
                 if (type === 'account') return !item.client_id;
                 if (type === 'strategy') return item.client_id;
                 return true;
             })
-            .reduce((item1: PosInputData, item2: PosInputData) => {
+
+            if (!tickerListResolved.length) return [];
+            return tickerListResolved.reduce((item1: PosInputData, item2: PosInputData) => {
                 return {
                     ...item1,
                     yesterday_volume: item1.yesterday_volume + item2.yesterday_volume,
