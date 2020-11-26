@@ -1,34 +1,10 @@
-import Vue from 'vue';
-import { biggerThanZeroValidator } from '__assets/validator';
-import { deepClone } from '__gUtils/busiUtils';
-import { sourceTypeConfig, sideName, offsetName, priceType, hedgeFlag, exchangeIds, instrumentTypes } from '__gConfig/tradingConfig';
-import { getFutureTickersConfig, getStockTickersConfig } from '__assets/base'
-import { Autocomplete } from 'element-ui';
 
-const ls = require('local-storage');
-
-Vue.use(Autocomplete)
-
-function filterPriceType (priceType) {
-    let filterPriceType = {};
-
-    Object.keys(priceType || {}).forEach(key => {
-        if (key <= 1) {
-            filterPriceType[key] = priceType[key]
-        }
-    })
-
-    return filterPriceType
-}
-
-export default {
-
-    template: `
-        <tr-dashboard :title="'下单面板 ' + currentId">
+<template>
+    <tr-dashboard :title="'下单面板 ' + currentId">
         <div class="kf-make-order-window__body">
             <el-form ref="make-order-form" label-width="60px" :model="makeOrderForm">
                 <el-form-item
-                v-if="moduleType === 'strategy'"
+                v-if="moduleType !== 'account'"
                 label="账户"
                 prop="name"
                 :rules="[
@@ -177,8 +153,35 @@ export default {
             </div>
         </div>
     </tr-dashboard>
-    `,
+</template>
 
+<script>
+
+import Vue from 'vue';
+import { biggerThanZeroValidator } from '__assets/validator';
+import { deepClone } from '__gUtils/busiUtils';
+import { sourceTypeConfig, sideName, offsetName, priceType, hedgeFlag, exchangeIds, InstrumentTypes } from '__gConfig/tradingConfig';
+import { getFutureTickersConfig, getStockTickersConfig } from '__assets/base'
+import { Autocomplete } from 'element-ui';
+
+const ls = require('local-storage');
+
+Vue.use(Autocomplete)
+
+function filterPriceType (priceType) {
+    let filterPriceType = {};
+
+    Object.keys(priceType || {}).forEach(key => {
+        if (key <= 1) {
+            filterPriceType[key] = priceType[key]
+        }
+    })
+
+    return filterPriceType
+}
+
+
+export default {
 
     data () {
         this.sourceTypeConfig = sourceTypeConfig;
@@ -228,6 +231,18 @@ export default {
 
     computed: {
 
+        currentSourceName() {
+            if (this.moduleType === 'account') {
+                return (this.currentId || '').toSourceName()
+            } else if (this.moduleType === 'strategy') {
+                return this.currentAccount.toSourceName();
+            } else if (this.moduleType === 'ticker') {
+                return this.currentAccount.toSourceName();
+            } else {
+                return ''
+            }
+        },
+
         accountType() {
             const sourceName = this.currentSourceName || '';
             if (!sourceName) return 'Stock';
@@ -254,20 +269,8 @@ export default {
                 return this.currentId || ''
             } else if (this.moduleType === 'strategy') {
                 return this.currentAccount
-            } else {
-                return ''
-            }
-        }, 
-
-        currentAccountId() {
-            return this.currentAccountResolved.toAccountId()
-        },
-
-        currentSourceName() {
-            if (this.moduleType === 'account') {
-                return (this.currentId || '').toSourceName()
-            } else if (this.moduleType === 'strategy') {
-                return this.currentAccount.toSourceName();
+            } else if (this.moduleType === 'ticker'){
+                return this.currentAccount
             } else {
                 return ''
             }
@@ -316,14 +319,15 @@ export default {
 
         makeOrderByPosData (newPosData) {
 
-            if (!Object.keys(newPosData || {}).length) return;
+            if (!newPosData || !Object.keys(newPosData || {}).length) return;
 
             this.clearData();
 
             this.$nextTick()
                 .then(() => {
-                    const { instrumentId, lastPrice, totalVolume, directionOrigin, exchangeId } = newPosData;
+                    const { instrumentId, instrumentType, lastPrice, totalVolume, directionOrigin, exchangeId, accountIdResolved } = newPosData;
                     this.$set(this.makeOrderForm, 'instrument_id', instrumentId);
+                    this.$set(this.makeOrderForm, 'instrument_type', instrumentType);
                     this.$set(this.makeOrderForm, 'exchange_id', exchangeId);
                     this.$set(this.makeOrderForm, 'limit_price', lastPrice);
                     this.$set(this.makeOrderForm, 'volume', totalVolume);
@@ -336,6 +340,11 @@ export default {
                         this.$set(this.makeOrderForm, 'side', 1)
                     } else if (directionOrigin === 1) {
                         this.$set(this.makeOrderForm, 'side', 0)
+                    }
+
+                    if (this.moduleType === 'ticker') {
+                        this.$set(this.makeOrderForm, 'name', accountIdResolved);
+                        this.handleSelectAccount(accountIdResolved)
                     }
                 })
         },
@@ -369,14 +378,17 @@ export default {
 
         submit () {
             const t = this;
-            t.$refs['make-order-form'].validate(valid => {
+            this.$refs['make-order-form'].validate(valid => {
                 if(valid) {
                     //需要对account_id再处理
                     let makeOrderForm = deepClone(t.makeOrderForm);
-                    const instrumentType = t.getInstrumentType(t.currentAccountResolved);
-                    makeOrderForm['instrument_type'] = instrumentType;
 
-                    this.makeOrder(this.moduleType, makeOrderForm, t.currentAccountResolved, t.currentId)
+                    if (makeOrderForm['instrument_type'] === '') {
+                        const instrumentType = this.getInstrumentType(t.currentAccountResolved);
+                        makeOrderForm['instrument_type'] = instrumentType;
+                    }
+                    
+                    this.makeOrder(t.moduleType, makeOrderForm, t.currentAccountResolved, t.currentId)
                     
                 }
             })
@@ -386,7 +398,7 @@ export default {
             const sourceName = accountId.split('_')[0] || '';
             const config = this.tdAccountSource[sourceName] || '';
             const typeName = config.typeName || 'Unknow';
-            return instrumentTypes[typeName] || 0
+            return InstrumentTypes[typeName] || 0
         },
 
         querySearch (queryString, cb) {
@@ -395,7 +407,6 @@ export default {
         },
 
         getSearchTickers (queryString = '') {
-            
             return this.targetTickersSource.filter(item => {
                 const { ticker, name, exchangeId } = {
                     ticker: '',
@@ -429,7 +440,6 @@ export default {
         },
         
         clearData () {
-            this.$emit('update:visible', false)
             this.currentAccount = '';
             this.makeOrderForm = {
                 name: '', // account_id
@@ -446,3 +456,5 @@ export default {
         },
     }
 }
+
+</script>

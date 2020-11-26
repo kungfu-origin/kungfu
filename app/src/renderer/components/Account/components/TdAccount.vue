@@ -137,10 +137,10 @@
                             'number': true,
                             'nano': true,
                         }"
-                        :key="`${props.row.account_id}_${calcCash(props.row, (isFuture(props.row) ? 'margin' : 'marketValue'))}`"                        
+                        :key="`${props.row.account_id}_${calcCash(props.row, (isFutureAccount(props.row) ? 'margin' : 'marketValue'))}`"                        
 
                         >
-                            <template v-if="isFuture(props.row)">
+                            <template v-if="isFutureAccount(props.row)">
                                 {{calcCash(props.row, 'margin') || '--'}}
                             </template>
                             <template v-else>
@@ -378,7 +378,7 @@ export default {
         },
 
         //是否为期货
-        isFuture(row) {
+        isFutureAccount(row) {
             return (this.tdAccountSource[row.source_name] || {}).typeName == 'future'
         },
 

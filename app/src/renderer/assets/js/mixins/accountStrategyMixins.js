@@ -36,12 +36,15 @@ export default {
 
     methods: {
 
-        handleShowOrCloseMakeOrderDashboard () {
+        handleMakeOrderByPos (item) {
+            this.makeOrderByPosData = Object.freeze(item);
+            this.$nextTick().then(() => this.handleShowOrCloseMakeOrderDashboard());
+        },
 
-            if (this.moduleType === 'account') {
+        handleShowOrCloseMakeOrderDashboard () {
+            if (this.moduleType !== 'strategy') {
                 return Promise.resolve(true)
             }
-
             return this.buildMakeOrderWin()
                 .then(() => {
                     this.emitCurrentMakeOrderWinInfo();
@@ -50,27 +53,14 @@ export default {
                 })        
         },
 
-        handleMakeOrderByPos (item) {
-            this.makeOrderByPosData = Object.freeze(item)
-            this.$nextTick()
-                .then(() => {
-                    this.handleShowOrCloseMakeOrderDashboard();
-                })
-        },
-
         buildMakeOrderWin () {
             if (!window.makeOrderWin) {
-                return this.$utils.openVueWin(
-                    'makeOrder', 
-                    `/make-order`, 
-                    remote, 
-                    { width: 410, height: 460 }
-                ).then((win) => {
-                    
-                    window.makeOrderWin = win;
-                    window.makeOrderWin.setAlwaysOnTop(true);
-                    this.bindMakeOrderWinEvent();
-                })
+                return this.$utils.openVueWin('makeOrder', `/make-order`, remote, { width: 410, height: 460 })
+                    .then((win) => {
+                        window.makeOrderWin = win;
+                        window.makeOrderWin.setAlwaysOnTop(true);
+                        this.bindMakeOrderWinEvent();
+                    })
             } else {
                 return Promise.resolve(true)
             }

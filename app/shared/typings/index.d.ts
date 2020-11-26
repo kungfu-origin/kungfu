@@ -215,7 +215,7 @@ interface TradeData {
     side: string;
     offset: string;
     price: string;
-    volume: Number;
+    volume: number;
     orderId: string;
     clientId: string;
     accountId: string;
@@ -243,11 +243,12 @@ interface TradeInputData {
 interface PosData {
     id: string;
     instrumentId: string;
+    instrumentType: number;
     direction: string;
-    directionOrigin: Number;
-    yesterdayVolume: Number;
-    todayVolume: Number;
-    totalVolume: Number;
+    directionOrigin: number;
+    yesterdayVolume: number;
+    todayVolume: number;
+    totalVolume: number;
     avgPrice: string;
     lastPrice: string;
     unRealizedPnl: string;
@@ -260,6 +261,7 @@ interface PosData {
 
 interface PosInputData {
     instrument_id: string;
+    instrument_type: number;
     direction: number;
     yesterday_volume: bigint;
     unrealized_pnl: number,

@@ -115,7 +115,7 @@ export const exchangeIds: StringToStringObject = {
     "INE": "能源中心"
 }
 
-export const instrumentTypes: StringToNumberObject = {
+export const InstrumentTypes: StringToNumberObject = {
     Unknown         :0,
     Stock           :1,
     Future          :2,

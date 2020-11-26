@@ -20,15 +20,6 @@
         :isActiveFunc="isActiveTicker"
         @clickCell="(e, item) => isTickerModule ? $emit('activeTicker', item) : $emit('makeOrder', item)"
     ></tr-table>
-
-    <make-order-dialog
-        v-if="makeOrderDialogVisiblity"
-        :visible.sync="makeOrderDialogVisiblity"
-        :moduleType="moduleType"
-        :currentId="currentId"
-        :pos="dataByKey"
-    >
-    </make-order-dialog>
 </tr-dashboard>
 </template>
 
@@ -65,7 +56,6 @@ export default {
     data() {
         return {
             tableData: Object.freeze([]),
-            makeOrderDialogVisiblity: false,
             dataByKey: Object.freeze({})
         }
     },

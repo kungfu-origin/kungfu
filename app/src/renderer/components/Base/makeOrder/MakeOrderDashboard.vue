@@ -2,13 +2,14 @@
 
 <script>
 
-import makeOrderUIMixin from '@/components/Base/makeOrder/js/makeOrderUIMixin';
+import makeOrderUIMixin from '@/components/Base/makeOrder/makeOrderUIMixin.vue';
 import makeOrderMixin from '@/components/Base/makeOrder/js/makeOrderMixin';
 import makeOrderCoreMixin from '@/components/Base/makeOrder/js/makeOrderCoreMixin';
 
 
 export default {
-    mixins: [ makeOrderUIMixin, makeOrderMixin, makeOrderCoreMixin ],
+    name: 'MakeOrderDashboard',
+    mixins: [ makeOrderMixin, makeOrderCoreMixin, makeOrderUIMixin ],
 
 }
 </script>
