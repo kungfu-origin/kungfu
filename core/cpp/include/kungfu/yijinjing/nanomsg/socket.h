@@ -186,7 +186,7 @@ private:
   const nlohmann::json binding_;
   const std::string msg_;
 
-  template <typename T>[[nodiscard]] T get_meta(const std::string &name, T default_value) const {
+  template <typename T> [[nodiscard]] T get_meta(const std::string &name, T default_value) const {
     if (binding_.find(name) == binding_.end()) {
       return default_value;
     }
