@@ -54,15 +54,15 @@ struct Book {
   [[nodiscard]] longfist::types::Position &get_position(longfist::enums::Direction direction, const char *exchange_id,
                                                         const char *instrument_id);
 
-  template <typename TradingData>[[nodiscard]] bool has_position_for(const TradingData &data) const {
+  template <typename TradingData> [[nodiscard]] bool has_position_for(const TradingData &data) const {
     return has_position(data.exchange_id, data.instrument_id);
   }
 
-  template <typename TradingData>[[nodiscard]] bool has_long_position_for(const TradingData &data) const {
+  template <typename TradingData> [[nodiscard]] bool has_long_position_for(const TradingData &data) const {
     return has_long_position(data.exchange_id, data.instrument_id);
   }
 
-  template <typename TradingData>[[nodiscard]] bool has_short_position_for(const TradingData &data) const {
+  template <typename TradingData> [[nodiscard]] bool has_short_position_for(const TradingData &data) const {
     return has_short_position(data.exchange_id, data.instrument_id);
   }
 
@@ -72,7 +72,7 @@ struct Book {
     return get_position(direction, data.exchange_id, data.instrument_id);
   }
 
-  template <typename TradingData>[[nodiscard]] longfist::types::Position &get_position_for(const TradingData &data) {
+  template <typename TradingData> [[nodiscard]] longfist::types::Position &get_position_for(const TradingData &data) {
     auto direction = get_direction(data.instrument_type, data.side, data.offset);
     return get_position(direction, data.exchange_id, data.instrument_id);
   }

@@ -25,11 +25,11 @@ void MarketData::on_start() {
   events_ | is(InstrumentKey::tag) | $$(subscribe({event->data<InstrumentKey>()}));
 }
 
-bool MarketData::has_instrument(const std::string& instrument_id) const {
+bool MarketData::has_instrument(const std::string &instrument_id) const {
   return instruments_.find(instrument_id) != instruments_.end();
 }
 
-const Instrument &MarketData::get_instrument(const std::string& instrument_id) const {
+const Instrument &MarketData::get_instrument(const std::string &instrument_id) const {
   return instruments_.at(instrument_id);
 }
 

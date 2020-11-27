@@ -42,7 +42,7 @@ public:
 
   void guard_positions();
 
-  void set_bypass_quotes(bool bypass_quotes){bypass_quotes_ = bypass_quotes;}
+  void set_bypass_quotes(bool bypass_quotes) { bypass_quotes_ = bypass_quotes; }
 
 private:
   yijinjing::practice::apprentice &app_;

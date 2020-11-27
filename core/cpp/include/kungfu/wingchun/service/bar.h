@@ -9,7 +9,7 @@
 namespace kungfu::wingchun::service {
 class BarGenerator : public broker::MarketData {
 public:
-  BarGenerator(const yijinjing::data::locator_ptr& locator, longfist::enums::mode m, bool low_latency,
+  BarGenerator(const yijinjing::data::locator_ptr &locator, longfist::enums::mode m, bool low_latency,
                const std::string &json_config);
 
   void on_start() override;
