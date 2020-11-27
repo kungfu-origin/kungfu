@@ -48,8 +48,8 @@ OPTION(NNG_ENABLE_NNGCAT "" OFF)
 ############################################################
 
 INCLUDE_DIRECTORIES(deps/hana-1.7.0/include)
-INCLUDE_DIRECTORIES(deps/json-3.5.0/include)
-INCLUDE_DIRECTORIES(deps/sqlite3-3.30.1/include)
+INCLUDE_DIRECTORIES(deps/json-3.9.1/include)
+INCLUDE_DIRECTORIES(deps/sqlite3-3.33.0/include)
 INCLUDE_DIRECTORIES(deps/sqlite_orm-1.6/include)
 INCLUDE_DIRECTORIES(deps/nng-1.3.2/include)
 INCLUDE_DIRECTORIES(deps/tabulate-1.0/include)
