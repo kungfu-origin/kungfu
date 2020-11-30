@@ -1,99 +1,46 @@
 {
-    "zn":{
-        "exchangeId":"SHFE",
-        "include":[
-            {
-                "ticker":"zn2009",
-                "name":"锌2009"
-            },
-            {
-                "ticker":"zn2010",
-                "name":"锌2010"
-            },
-            {
-                "ticker":"zn2011",
-                "name":"锌2011"
-            },
-            {
-                "ticker":"zn2012",
-                "name":"锌2012"
-            },
-            {
-                "ticker":"zn2101",
-                "name":"锌2101"
-            },
-            {
-                "ticker":"zn2102",
-                "name":"锌2102"
-            },
-            {
-                "ticker":"zn2103",
-                "name":"锌2103"
-            },
-            {
-                "ticker":"zn2104",
-                "name":"锌2104"
-            },
-            {
-                "ticker":"zn2105",
-                "name":"锌2105"
-            },
-            {
-                "ticker":"zn2106",
-                "name":"锌2106"
-            },
-            {
-                "ticker":"zn2107",
-                "name":"锌2107"
-            },
-            {
-                "ticker":"zn2108",
-                "name":"锌2108"
-            }
-        ]
-    },
-    "j":{
+    "a":{
         "exchangeId":"DCE",
         "include":[
             {
-                "ticker":"j2010",
-                "name":"冶金焦炭2010"
+                "ticker":"a2105",
+                "name":"黄大豆1号2105"
             },
             {
-                "ticker":"j2011",
-                "name":"冶金焦炭2011"
+                "ticker":"a2103",
+                "name":"黄大豆1号2103"
             },
             {
-                "ticker":"j2012",
-                "name":"冶金焦炭2012"
+                "ticker":"a2101",
+                "name":"黄大豆1号2101"
             },
             {
-                "ticker":"j2101",
-                "name":"冶金焦炭2101"
+                "ticker":"a2107",
+                "name":"黄大豆1号2107"
             },
             {
-                "ticker":"j2102",
-                "name":"冶金焦炭2102"
+                "ticker":"a88",
+                "name":"黄大豆号主力连续"
             },
             {
-                "ticker":"j2103",
-                "name":"冶金焦炭2103"
+                "ticker":"a888",
+                "name":"黄大豆号主力连续价差平滑"
             },
             {
-                "ticker":"j2104",
-                "name":"冶金焦炭2104"
+                "ticker":"a99",
+                "name":"黄大豆号指数连续"
             },
             {
-                "ticker":"j2105",
-                "name":"冶金焦炭2105"
+                "ticker":"a889",
+                "name":"黄大豆号主力连续价差平滑（后复权）"
             },
             {
-                "ticker":"j2106",
-                "name":"冶金焦炭2106"
+                "ticker":"a2109",
+                "name":"黄大豆1号2109"
             },
             {
-                "ticker":"j2108",
-                "name":"冶金焦炭2108"
+                "ticker":"a2111",
+                "name":"黄大豆1号2111"
             }
         ]
     },
@@ -101,44 +48,48 @@
         "exchangeId":"SHFE",
         "include":[
             {
-                "ticker":"ag2009",
-                "name":"白银2009"
+                "ticker":"ag889",
+                "name":"白银主力连续价差平滑（后复权）"
             },
             {
-                "ticker":"ag2010",
-                "name":"白银2010"
-            },
-            {
-                "ticker":"ag2011",
-                "name":"白银2011"
-            },
-            {
-                "ticker":"ag2012",
-                "name":"白银2012"
+                "ticker":"ag88",
+                "name":"白银主力连续"
             },
             {
                 "ticker":"ag2101",
                 "name":"白银2101"
             },
             {
-                "ticker":"ag2102",
-                "name":"白银2102"
-            },
-            {
                 "ticker":"ag2103",
                 "name":"白银2103"
-            },
-            {
-                "ticker":"ag2104",
-                "name":"白银2104"
             },
             {
                 "ticker":"ag2105",
                 "name":"白银2105"
             },
             {
+                "ticker":"ag2102",
+                "name":"白银2102"
+            },
+            {
+                "ticker":"ag99",
+                "name":"白银指数连续"
+            },
+            {
+                "ticker":"ag888",
+                "name":"白银主力连续价差平滑"
+            },
+            {
                 "ticker":"ag2106",
                 "name":"白银2106"
+            },
+            {
+                "ticker":"ag2012",
+                "name":"白银2012"
+            },
+            {
+                "ticker":"ag2104",
+                "name":"白银2104"
             },
             {
                 "ticker":"ag2107",
@@ -147,77 +98,24 @@
             {
                 "ticker":"ag2108",
                 "name":"白银2108"
-            }
-        ]
-    },
-    "eg":{
-        "exchangeId":"DCE",
-        "include":[
-            {
-                "ticker":"eg2009",
-                "name":"乙二醇2009"
             },
             {
-                "ticker":"eg2010",
-                "name":"乙二醇2010"
+                "ticker":"ag2109",
+                "name":"白银2109"
             },
             {
-                "ticker":"eg2011",
-                "name":"乙二醇2011"
+                "ticker":"ag2110",
+                "name":"白银2110"
             },
             {
-                "ticker":"eg2012",
-                "name":"乙二醇2012"
-            },
-            {
-                "ticker":"eg2101",
-                "name":"乙二醇2101"
-            },
-            {
-                "ticker":"eg2102",
-                "name":"乙二醇2102"
-            },
-            {
-                "ticker":"eg2103",
-                "name":"乙二醇2103"
-            },
-            {
-                "ticker":"eg2104",
-                "name":"乙二醇2104"
-            },
-            {
-                "ticker":"eg2105",
-                "name":"乙二醇2105"
-            },
-            {
-                "ticker":"eg2106",
-                "name":"乙二醇2106"
-            },
-            {
-                "ticker":"eg2107",
-                "name":"乙二醇2107"
-            },
-            {
-                "ticker":"eg2108",
-                "name":"乙二醇2108"
+                "ticker":"ag2111",
+                "name":"白银2111"
             }
         ]
     },
     "al":{
         "exchangeId":"SHFE",
         "include":[
-            {
-                "ticker":"al2009",
-                "name":"铝2009"
-            },
-            {
-                "ticker":"al2010",
-                "name":"铝2010"
-            },
-            {
-                "ticker":"al2011",
-                "name":"铝2011"
-            },
             {
                 "ticker":"al2012",
                 "name":"铝2012"
@@ -227,161 +125,111 @@
                 "name":"铝2101"
             },
             {
+                "ticker":"al2104",
+                "name":"铝2104"
+            },
+            {
                 "ticker":"al2102",
                 "name":"铝2102"
             },
             {
-                "ticker":"al2103",
-                "name":"铝2103"
-            },
-            {
-                "ticker":"al2104",
-                "name":"铝2104"
+                "ticker":"al889",
+                "name":"铝主力连续价差平滑（后复权）"
             },
             {
                 "ticker":"al2105",
                 "name":"铝2105"
             },
             {
-                "ticker":"al2106",
-                "name":"铝2106"
+                "ticker":"al88",
+                "name":"铝主力连续"
+            },
+            {
+                "ticker":"al888",
+                "name":"铝主力连续价差平滑"
             },
             {
                 "ticker":"al2107",
                 "name":"铝2107"
             },
             {
+                "ticker":"al2106",
+                "name":"铝2106"
+            },
+            {
+                "ticker":"al2103",
+                "name":"铝2103"
+            },
+            {
+                "ticker":"al99",
+                "name":"铝指数连续"
+            },
+            {
                 "ticker":"al2108",
                 "name":"铝2108"
+            },
+            {
+                "ticker":"al2109",
+                "name":"铝2109"
+            },
+            {
+                "ticker":"al2110",
+                "name":"铝2110"
+            },
+            {
+                "ticker":"al2111",
+                "name":"铝2111"
             }
         ]
     },
-    "JR":{
+    "AP":{
         "exchangeId":"CZCE",
         "include":[
             {
-                "ticker":"JR011",
-                "name":"粳稻011"
+                "ticker":"AP101",
+                "name":"鲜苹果2101"
             },
             {
-                "ticker":"JR101",
-                "name":"粳稻101"
+                "ticker":"AP103",
+                "name":"鲜苹果2103"
             },
             {
-                "ticker":"JR105",
-                "name":"粳稻105"
-            }
-        ]
-    },
-    "eb":{
-        "exchangeId":"DCE",
-        "include":[
-            {
-                "ticker":"eb2009",
-                "name":"苯乙烯2009"
+                "ticker":"AP012",
+                "name":"鲜苹果2012"
             },
             {
-                "ticker":"eb2010",
-                "name":"苯乙烯2010"
+                "ticker":"AP89",
+                "name":"鲜苹果主力连续价差平滑（后复权）"
             },
             {
-                "ticker":"eb2011",
-                "name":"苯乙烯2011"
+                "ticker":"AP8",
+                "name":"鲜苹果主力连续"
             },
             {
-                "ticker":"eb2012",
-                "name":"苯乙烯2012"
+                "ticker":"AP105",
+                "name":"鲜苹果2105"
             },
             {
-                "ticker":"eb2101",
-                "name":"苯乙烯2101"
+                "ticker":"AP88",
+                "name":"鲜苹果主力连续价差平滑"
             },
             {
-                "ticker":"eb2102",
-                "name":"苯乙烯2102"
+                "ticker":"AP9",
+                "name":"鲜苹果指数连续"
             },
             {
-                "ticker":"eb2103",
-                "name":"苯乙烯2103"
+                "ticker":"AP110",
+                "name":"鲜苹果2110"
             },
             {
-                "ticker":"eb2104",
-                "name":"苯乙烯2104"
-            },
-            {
-                "ticker":"eb2105",
-                "name":"苯乙烯2105"
-            },
-            {
-                "ticker":"eb2106",
-                "name":"苯乙烯2106"
-            },
-            {
-                "ticker":"eb2107",
-                "name":"苯乙烯2107"
-            },
-            {
-                "ticker":"eb2108",
-                "name":"苯乙烯2108"
-            }
-        ]
-    },
-    "MAMA":{
-        "exchangeId":"CZCE",
-        "include":[
-            {
-                "ticker":"MA010",
-                "name":"甲醇MA010"
-            },
-            {
-                "ticker":"MA011",
-                "name":"甲醇MA011"
-            },
-            {
-                "ticker":"MA012",
-                "name":"甲醇MA012"
-            },
-            {
-                "ticker":"MA101",
-                "name":"甲醇MA101"
-            },
-            {
-                "ticker":"MA102",
-                "name":"甲醇MA102"
-            },
-            {
-                "ticker":"MA103",
-                "name":"甲醇MA103"
-            },
-            {
-                "ticker":"MA104",
-                "name":"甲醇MA104"
-            },
-            {
-                "ticker":"MA105",
-                "name":"甲醇MA105"
-            },
-            {
-                "ticker":"MA106",
-                "name":"甲醇MA106"
-            },
-            {
-                "ticker":"MA107",
-                "name":"甲醇MA107"
-            },
-            {
-                "ticker":"MA108",
-                "name":"甲醇MA108"
+                "ticker":"AP111",
+                "name":"鲜苹果2111"
             }
         ]
     },
     "au":{
         "exchangeId":"SHFE",
         "include":[
-            {
-                "ticker":"au2010",
-                "name":"黄金2010"
-            },
             {
                 "ticker":"au2012",
                 "name":"黄金2012"
@@ -399,65 +247,378 @@
                 "name":"黄金2106"
             },
             {
-                "ticker":"au2009",
-                "name":"黄金2009"
-            },
-            {
                 "ticker":"au2108",
                 "name":"黄金2108"
             },
             {
-                "ticker":"au2011",
-                "name":"黄金2011"
+                "ticker":"au888",
+                "name":"黄金主力连续价差平滑"
+            },
+            {
+                "ticker":"au88",
+                "name":"黄金主力连续"
+            },
+            {
+                "ticker":"au889",
+                "name":"黄金主力连续价差平滑（后复权）"
+            },
+            {
+                "ticker":"au99",
+                "name":"黄金指数连续"
+            },
+            {
+                "ticker":"au2110",
+                "name":"黄金2110"
+            },
+            {
+                "ticker":"au2101",
+                "name":"黄金2101"
+            },
+            {
+                "ticker":"au2112",
+                "name":"黄金2112"
             }
         ]
     },
-    "FG":{
+    "b":{
+        "exchangeId":"DCE",
+        "include":[
+            {
+                "ticker":"b2101",
+                "name":"黄大豆2号2101"
+            },
+            {
+                "ticker":"b2102",
+                "name":"黄大豆2号2102"
+            },
+            {
+                "ticker":"b2012",
+                "name":"黄大豆2号2012"
+            },
+            {
+                "ticker":"b2103",
+                "name":"黄大豆2号2103"
+            },
+            {
+                "ticker":"b889",
+                "name":"黄大豆号主力连续价差平滑（后复权）"
+            },
+            {
+                "ticker":"b88",
+                "name":"黄大豆号主力连续"
+            },
+            {
+                "ticker":"b99",
+                "name":"黄大豆号指数连续"
+            },
+            {
+                "ticker":"b2104",
+                "name":"黄大豆2号2104"
+            },
+            {
+                "ticker":"b2105",
+                "name":"黄大豆2号2105"
+            },
+            {
+                "ticker":"b2106",
+                "name":"黄大豆2号2106"
+            },
+            {
+                "ticker":"b2107",
+                "name":"黄大豆2号2107"
+            },
+            {
+                "ticker":"b888",
+                "name":"黄大豆号主力连续价差平滑"
+            },
+            {
+                "ticker":"b2108",
+                "name":"黄大豆2号2108"
+            },
+            {
+                "ticker":"b2109",
+                "name":"黄大豆2号2109"
+            },
+            {
+                "ticker":"b2110",
+                "name":"黄大豆2号2110"
+            },
+            {
+                "ticker":"b2111",
+                "name":"黄大豆2号2111"
+            }
+        ]
+    },
+    "bb":{
+        "exchangeId":"DCE",
+        "include":[
+            {
+                "ticker":"bb2102",
+                "name":"细木工板2102"
+            },
+            {
+                "ticker":"bb888",
+                "name":"细木工板主力连续价差平滑"
+            },
+            {
+                "ticker":"bb2106",
+                "name":"细木工板2106"
+            },
+            {
+                "ticker":"bb88",
+                "name":"细木工板主力连续"
+            },
+            {
+                "ticker":"bb2107",
+                "name":"细木工板2107"
+            },
+            {
+                "ticker":"bb2012",
+                "name":"细木工板2012"
+            },
+            {
+                "ticker":"bb2105",
+                "name":"细木工板2105"
+            },
+            {
+                "ticker":"bb2101",
+                "name":"细木工板2101"
+            },
+            {
+                "ticker":"bb2104",
+                "name":"细木工板2104"
+            },
+            {
+                "ticker":"bb889",
+                "name":"细木工板主力连续价差平滑（后复权）"
+            },
+            {
+                "ticker":"bb99",
+                "name":"细木工板指数连续"
+            },
+            {
+                "ticker":"bb2103",
+                "name":"细木工板2103"
+            },
+            {
+                "ticker":"bb2108",
+                "name":"细木工板2108"
+            },
+            {
+                "ticker":"bb2109",
+                "name":"细木工板2109"
+            },
+            {
+                "ticker":"bb2110",
+                "name":"细木工板2110"
+            },
+            {
+                "ticker":"bb2111",
+                "name":"细木工板2111"
+            }
+        ]
+    },
+    "bu":{
+        "exchangeId":"SHFE",
+        "include":[
+            {
+                "ticker":"bu2203",
+                "name":"沥青2203"
+            },
+            {
+                "ticker":"bu2109",
+                "name":"沥青2109"
+            },
+            {
+                "ticker":"bu2101",
+                "name":"沥青2101"
+            },
+            {
+                "ticker":"bu2112",
+                "name":"沥青2112"
+            },
+            {
+                "ticker":"bu2012",
+                "name":"沥青2012"
+            },
+            {
+                "ticker":"bu2103",
+                "name":"沥青2103"
+            },
+            {
+                "ticker":"bu2106",
+                "name":"沥青2106"
+            },
+            {
+                "ticker":"bu2206",
+                "name":"沥青2206"
+            },
+            {
+                "ticker":"bu88",
+                "name":"石油沥青主力连续"
+            },
+            {
+                "ticker":"bu888",
+                "name":"石油沥青主力连续价差平滑"
+            },
+            {
+                "ticker":"bu889",
+                "name":"石油沥青主力连续价差平滑（后复权）"
+            },
+            {
+                "ticker":"bu99",
+                "name":"石油沥青指数连续"
+            },
+            {
+                "ticker":"bu2102",
+                "name":"沥青2102"
+            },
+            {
+                "ticker":"bu2209",
+                "name":"沥青2209"
+            },
+            {
+                "ticker":"bu2104",
+                "name":"沥青2104"
+            },
+            {
+                "ticker":"bu2105",
+                "name":"沥青2105"
+            }
+        ]
+    },
+    "c":{
+        "exchangeId":"DCE",
+        "include":[
+            {
+                "ticker":"c2101",
+                "name":"黄玉米2101"
+            },
+            {
+                "ticker":"c2103",
+                "name":"黄玉米2103"
+            },
+            {
+                "ticker":"c2105",
+                "name":"黄玉米2105"
+            },
+            {
+                "ticker":"c2107",
+                "name":"黄玉米2107"
+            },
+            {
+                "ticker":"c889",
+                "name":"黄玉米主力连续价差平滑（后复权）"
+            },
+            {
+                "ticker":"c99",
+                "name":"黄玉米指数连续"
+            },
+            {
+                "ticker":"c888",
+                "name":"黄玉米主力连续价差平滑"
+            },
+            {
+                "ticker":"c88",
+                "name":"黄玉米主力连续"
+            },
+            {
+                "ticker":"c2109",
+                "name":"黄玉米2109"
+            },
+            {
+                "ticker":"c2111",
+                "name":"黄玉米2111"
+            }
+        ]
+    },
+    "CF":{
         "exchangeId":"CZCE",
         "include":[
             {
-                "ticker":"FG010",
-                "name":"玻璃010"
+                "ticker":"CF101",
+                "name":"棉花2101"
             },
             {
-                "ticker":"FG011",
-                "name":"玻璃011"
+                "ticker":"CF103",
+                "name":"棉花2103"
             },
             {
-                "ticker":"FG012",
-                "name":"玻璃012"
+                "ticker":"CF105",
+                "name":"棉花2105"
             },
             {
-                "ticker":"FG101",
-                "name":"玻璃101"
+                "ticker":"CF107",
+                "name":"棉花2107"
             },
             {
-                "ticker":"FG102",
-                "name":"玻璃102"
+                "ticker":"CF9",
+                "name":"一号棉花指数连续"
             },
             {
-                "ticker":"FG103",
-                "name":"玻璃103"
+                "ticker":"CF89",
+                "name":"一号棉花主力连续价差平滑（后复权）"
             },
             {
-                "ticker":"FG104",
-                "name":"玻璃104"
+                "ticker":"CF8",
+                "name":"一号棉花主力连续"
             },
             {
-                "ticker":"FG105",
-                "name":"玻璃105"
+                "ticker":"CF88",
+                "name":"一号棉花主力连续价差平滑"
             },
             {
-                "ticker":"FG106",
-                "name":"玻璃106"
+                "ticker":"CF109",
+                "name":"棉花2109"
             },
             {
-                "ticker":"FG107",
-                "name":"玻璃107"
+                "ticker":"CF111",
+                "name":"棉花2111"
+            }
+        ]
+    },
+    "CJ":{
+        "exchangeId":"CZCE",
+        "include":[
+            {
+                "ticker":"CJ101",
+                "name":"红枣2101"
             },
             {
-                "ticker":"FG108",
-                "name":"玻璃108"
+                "ticker":"CJ105",
+                "name":"红枣2105"
+            },
+            {
+                "ticker":"CJ103",
+                "name":"红枣2103"
+            },
+            {
+                "ticker":"CJ012",
+                "name":"红枣2012"
+            },
+            {
+                "ticker":"CJ9",
+                "name":"红枣指数连续"
+            },
+            {
+                "ticker":"CJ89",
+                "name":"红枣主力连续价差平滑（后复权）"
+            },
+            {
+                "ticker":"CJ8",
+                "name":"红枣主力连续"
+            },
+            {
+                "ticker":"CJ107",
+                "name":"红枣2107"
+            },
+            {
+                "ticker":"CJ88",
+                "name":"红枣主力连续价差平滑"
+            },
+            {
+                "ticker":"CJ109",
+                "name":"红枣2109"
             }
         ]
     },
@@ -465,12 +626,16 @@
         "exchangeId":"DCE",
         "include":[
             {
-                "ticker":"cs2011",
-                "name":"玉米淀粉2011"
+                "ticker":"cs888",
+                "name":"玉米淀粉主力连续价差平滑"
             },
             {
                 "ticker":"cs2101",
                 "name":"玉米淀粉2101"
+            },
+            {
+                "ticker":"cs88",
+                "name":"玉米淀粉主力连续"
             },
             {
                 "ticker":"cs2103",
@@ -483,24 +648,28 @@
             {
                 "ticker":"cs2107",
                 "name":"玉米淀粉2107"
+            },
+            {
+                "ticker":"cs889",
+                "name":"玉米淀粉主力连续价差平滑（后复权）"
+            },
+            {
+                "ticker":"cs99",
+                "name":"玉米淀粉指数连续"
+            },
+            {
+                "ticker":"cs2109",
+                "name":"玉米淀粉2109"
+            },
+            {
+                "ticker":"cs2111",
+                "name":"玉米淀粉2111"
             }
         ]
     },
     "cu":{
         "exchangeId":"SHFE",
         "include":[
-            {
-                "ticker":"cu2009",
-                "name":"铜2009"
-            },
-            {
-                "ticker":"cu2010",
-                "name":"铜2010"
-            },
-            {
-                "ticker":"cu2011",
-                "name":"铜2011"
-            },
             {
                 "ticker":"cu2012",
                 "name":"铜2012"
@@ -534,572 +703,381 @@
                 "name":"铜2107"
             },
             {
+                "ticker":"cu889",
+                "name":"铜主力连续价差平滑（后复权）"
+            },
+            {
+                "ticker":"cu88",
+                "name":"铜主力连续"
+            },
+            {
+                "ticker":"cu99",
+                "name":"铜指数连续"
+            },
+            {
+                "ticker":"cu888",
+                "name":"铜主力连续价差平滑"
+            },
+            {
                 "ticker":"cu2108",
                 "name":"铜2108"
+            },
+            {
+                "ticker":"cu2109",
+                "name":"铜2109"
+            },
+            {
+                "ticker":"cu2110",
+                "name":"铜2110"
+            },
+            {
+                "ticker":"cu2111",
+                "name":"铜2111"
             }
         ]
     },
-    "ni":{
-        "exchangeId":"SHFE",
+    "CY":{
+        "exchangeId":"CZCE",
         "include":[
             {
-                "ticker":"ni2009",
-                "name":"镍2009"
+                "ticker":"CY104",
+                "name":"棉纱2104"
             },
             {
-                "ticker":"ni2010",
-                "name":"镍2010"
+                "ticker":"CY107",
+                "name":"棉纱2107"
             },
             {
-                "ticker":"ni2011",
-                "name":"镍2011"
+                "ticker":"CY102",
+                "name":"棉纱2102"
             },
             {
-                "ticker":"ni2012",
-                "name":"镍2012"
+                "ticker":"CY103",
+                "name":"棉纱2103"
             },
             {
-                "ticker":"ni2101",
-                "name":"镍2101"
+                "ticker":"CY8",
+                "name":"棉纱主力连续"
             },
             {
-                "ticker":"ni2102",
-                "name":"镍2102"
+                "ticker":"CY012",
+                "name":"棉纱2012"
             },
             {
-                "ticker":"ni2103",
-                "name":"镍2103"
+                "ticker":"CY88",
+                "name":"棉纱主力连续价差平滑"
             },
             {
-                "ticker":"ni2104",
-                "name":"镍2104"
+                "ticker":"CY101",
+                "name":"棉纱2101"
             },
             {
-                "ticker":"ni2105",
-                "name":"镍2105"
+                "ticker":"CY106",
+                "name":"棉纱2106"
             },
             {
-                "ticker":"ni2106",
-                "name":"镍2106"
+                "ticker":"CY105",
+                "name":"棉纱2105"
             },
             {
-                "ticker":"ni2107",
-                "name":"镍2107"
+                "ticker":"CY9",
+                "name":"棉纱指数连续"
             },
             {
-                "ticker":"ni2108",
-                "name":"镍2108"
+                "ticker":"CY89",
+                "name":"棉纱主力连续价差平滑（后复权）"
+            },
+            {
+                "ticker":"CY108",
+                "name":"棉纱2108"
+            },
+            {
+                "ticker":"CY109",
+                "name":"棉纱2109"
+            },
+            {
+                "ticker":"CY110",
+                "name":"棉纱2110"
+            },
+            {
+                "ticker":"CY111",
+                "name":"棉纱2111"
             }
         ]
     },
-    "pp":{
+    "eb":{
         "exchangeId":"DCE",
         "include":[
             {
-                "ticker":"pp2010",
-                "name":"聚丙烯2010"
+                "ticker":"eb2106",
+                "name":"苯乙烯2106"
             },
             {
-                "ticker":"pp2011",
-                "name":"聚丙烯2011"
+                "ticker":"eb888",
+                "name":"苯乙烯主力连续价差平滑"
             },
             {
-                "ticker":"pp2012",
-                "name":"聚丙烯2012"
+                "ticker":"eb889",
+                "name":"苯乙烯主力连续价差平滑（后复权）"
             },
             {
-                "ticker":"pp2101",
-                "name":"聚丙烯2101"
+                "ticker":"eb2101",
+                "name":"苯乙烯2101"
             },
             {
-                "ticker":"pp2102",
-                "name":"聚丙烯2102"
+                "ticker":"eb2012",
+                "name":"苯乙烯2012"
             },
             {
-                "ticker":"pp2103",
-                "name":"聚丙烯2103"
+                "ticker":"eb88",
+                "name":"苯乙烯主力连续"
             },
             {
-                "ticker":"pp2104",
-                "name":"聚丙烯2104"
+                "ticker":"eb2104",
+                "name":"苯乙烯2104"
             },
             {
-                "ticker":"pp2105",
-                "name":"聚丙烯2105"
+                "ticker":"eb99",
+                "name":"苯乙烯指数连续"
             },
             {
-                "ticker":"pp2106",
-                "name":"聚丙烯2106"
+                "ticker":"eb2102",
+                "name":"苯乙烯2102"
             },
             {
-                "ticker":"pp2107",
-                "name":"聚丙烯2107"
+                "ticker":"eb2105",
+                "name":"苯乙烯2105"
             },
             {
-                "ticker":"pp2108",
-                "name":"聚丙烯2108"
+                "ticker":"eb2103",
+                "name":"苯乙烯2103"
+            },
+            {
+                "ticker":"eb2107",
+                "name":"苯乙烯2107"
+            },
+            {
+                "ticker":"eb2108",
+                "name":"苯乙烯2108"
+            },
+            {
+                "ticker":"eb2109",
+                "name":"苯乙烯2109"
+            },
+            {
+                "ticker":"eb2110",
+                "name":"苯乙烯2110"
+            },
+            {
+                "ticker":"eb2111",
+                "name":"苯乙烯2111"
             }
         ]
     },
-    "rr":{
+    "eg":{
         "exchangeId":"DCE",
         "include":[
             {
-                "ticker":"rr2010",
-                "name":"粳米2010"
+                "ticker":"eg2102",
+                "name":"乙二醇2102"
             },
             {
-                "ticker":"rr2011",
-                "name":"粳米2011"
+                "ticker":"eg2105",
+                "name":"乙二醇2105"
             },
             {
-                "ticker":"rr2012",
-                "name":"粳米2012"
+                "ticker":"eg88",
+                "name":"乙二醇主力连续"
             },
             {
-                "ticker":"rr2101",
-                "name":"粳米2101"
+                "ticker":"eg2107",
+                "name":"乙二醇2107"
             },
             {
-                "ticker":"rr2102",
-                "name":"粳米2102"
+                "ticker":"eg2101",
+                "name":"乙二醇2101"
             },
             {
-                "ticker":"rr2103",
-                "name":"粳米2103"
+                "ticker":"eg2103",
+                "name":"乙二醇2103"
             },
             {
-                "ticker":"rr2104",
-                "name":"粳米2104"
+                "ticker":"eg2012",
+                "name":"乙二醇2012"
             },
             {
-                "ticker":"rr2105",
-                "name":"粳米2105"
+                "ticker":"eg99",
+                "name":"乙二醇指数连续"
             },
             {
-                "ticker":"rr2106",
-                "name":"粳米2106"
+                "ticker":"eg2104",
+                "name":"乙二醇2104"
             },
             {
-                "ticker":"rr2107",
-                "name":"粳米2107"
+                "ticker":"eg2106",
+                "name":"乙二醇2106"
             },
             {
-                "ticker":"rr2108",
-                "name":"粳米2108"
+                "ticker":"eg888",
+                "name":"乙二醇主力连续价差平滑"
+            },
+            {
+                "ticker":"eg889",
+                "name":"乙二醇主力连续价差平滑（后复权）"
+            },
+            {
+                "ticker":"eg2108",
+                "name":"乙二醇2108"
+            },
+            {
+                "ticker":"eg2109",
+                "name":"乙二醇2109"
+            },
+            {
+                "ticker":"eg2110",
+                "name":"乙二醇2110"
+            },
+            {
+                "ticker":"eg2111",
+                "name":"乙二醇2111"
             }
         ]
     },
-    "p":{
+    "fb":{
         "exchangeId":"DCE",
         "include":[
             {
-                "ticker":"p2010",
-                "name":"棕榈油2010"
+                "ticker":"fb88",
+                "name":"中密度纤维板主力连续"
             },
             {
-                "ticker":"p2011",
-                "name":"棕榈油2011"
+                "ticker":"fb2012",
+                "name":"纤维板2012"
             },
             {
-                "ticker":"p2012",
-                "name":"棕榈油2012"
+                "ticker":"fb2103",
+                "name":"纤维板2103"
             },
             {
-                "ticker":"p2101",
-                "name":"棕榈油2101"
+                "ticker":"fb2107",
+                "name":"纤维板2107"
             },
             {
-                "ticker":"p2102",
-                "name":"棕榈油2102"
+                "ticker":"fb889",
+                "name":"中密度纤维板主力连续价差平滑（后复权）"
             },
             {
-                "ticker":"p2103",
-                "name":"棕榈油2103"
+                "ticker":"fb2101",
+                "name":"纤维板2101"
             },
             {
-                "ticker":"p2104",
-                "name":"棕榈油2104"
+                "ticker":"fb2102",
+                "name":"纤维板2102"
             },
             {
-                "ticker":"p2105",
-                "name":"棕榈油2105"
+                "ticker":"fb888",
+                "name":"中密度纤维板主力连续价差平滑"
             },
             {
-                "ticker":"p2106",
-                "name":"棕榈油2106"
+                "ticker":"fb2105",
+                "name":"纤维板2105"
             },
             {
-                "ticker":"p2107",
-                "name":"棕榈油2107"
+                "ticker":"fb99",
+                "name":"中密度纤维板指数连续"
+            },
+            {
+                "ticker":"fb2104",
+                "name":"纤维板2104"
+            },
+            {
+                "ticker":"fb2106",
+                "name":"纤维板2106"
+            },
+            {
+                "ticker":"fb2108",
+                "name":"纤维板2108"
+            },
+            {
+                "ticker":"fb2109",
+                "name":"纤维板2109"
+            },
+            {
+                "ticker":"fb2110",
+                "name":"纤维板2110"
+            },
+            {
+                "ticker":"fb2111",
+                "name":"纤维板2111"
             }
         ]
     },
-    "TS":{
-        "exchangeId":"CFFEX",
-        "include":[
-            {
-                "ticker":"TS2012",
-                "name":"2年期国债2012"
-            },
-            {
-                "ticker":"TS2103",
-                "name":"2年期国债2103"
-            },
-            {
-                "ticker":"TS2106",
-                "name":"2年期国债2106"
-            }
-        ]
-    },
-    "pb":{
-        "exchangeId":"SHFE",
-        "include":[
-            {
-                "ticker":"pb2009",
-                "name":"铅2009"
-            },
-            {
-                "ticker":"pb2010",
-                "name":"铅2010"
-            },
-            {
-                "ticker":"pb2011",
-                "name":"铅2011"
-            },
-            {
-                "ticker":"pb2012",
-                "name":"铅2012"
-            },
-            {
-                "ticker":"pb2101",
-                "name":"铅2101"
-            },
-            {
-                "ticker":"pb2102",
-                "name":"铅2102"
-            },
-            {
-                "ticker":"pb2103",
-                "name":"铅2103"
-            },
-            {
-                "ticker":"pb2104",
-                "name":"铅2104"
-            },
-            {
-                "ticker":"pb2105",
-                "name":"铅2105"
-            },
-            {
-                "ticker":"pb2106",
-                "name":"铅2106"
-            },
-            {
-                "ticker":"pb2107",
-                "name":"铅2107"
-            },
-            {
-                "ticker":"pb2108",
-                "name":"铅2108"
-            }
-        ]
-    },
-    "lu":{
-        "exchangeId":"INE",
-        "include":[
-            {
-                "ticker":"lu2103",
-                "name":"低硫燃料油2103"
-            },
-            {
-                "ticker":"lu2105",
-                "name":"低硫燃料油2105"
-            },
-            {
-                "ticker":"lu2101",
-                "name":"低硫燃料油2101"
-            },
-            {
-                "ticker":"lu2102",
-                "name":"低硫燃料油2102"
-            },
-            {
-                "ticker":"lu2106",
-                "name":"低硫燃料油2106"
-            },
-            {
-                "ticker":"lu2104",
-                "name":"低硫燃料油2104"
-            },
-            {
-                "ticker":"lu2107",
-                "name":"低硫燃料油2107"
-            },
-            {
-                "ticker":"lu2108",
-                "name":"低硫燃料油2108"
-            },
-            {
-                "ticker":"lu2109",
-                "name":"低硫燃料油2109"
-            }
-        ]
-    },
-    "LR":{
+    "FG":{
         "exchangeId":"CZCE",
         "include":[
             {
-                "ticker":"LR011",
-                "name":"晚籼稻011"
-            }
-        ]
-    },
-    "pg":{
-        "exchangeId":"DCE",
-        "include":[
-            {
-                "ticker":"pg2103",
-                "name":"液化石油气2103"
+                "ticker":"FG8",
+                "name":"玻璃主力连续"
             },
             {
-                "ticker":"pg2011",
-                "name":"液化石油气2011"
+                "ticker":"FG104",
+                "name":"玻璃2104"
             },
             {
-                "ticker":"pg2101",
-                "name":"液化石油气2101"
+                "ticker":"FG012",
+                "name":"玻璃2012"
             },
             {
-                "ticker":"pg2012",
-                "name":"液化石油气2012"
+                "ticker":"FG101",
+                "name":"玻璃2101"
             },
             {
-                "ticker":"pg2102",
-                "name":"液化石油气2102"
+                "ticker":"FG107",
+                "name":"玻璃2107"
             },
             {
-                "ticker":"pg2104",
-                "name":"液化石油气2104"
+                "ticker":"FG102",
+                "name":"玻璃2102"
             },
             {
-                "ticker":"pg2105",
-                "name":"液化石油气2105"
+                "ticker":"FG106",
+                "name":"玻璃2106"
             },
             {
-                "ticker":"pg2106",
-                "name":"液化石油气2106"
+                "ticker":"FG103",
+                "name":"玻璃2103"
             },
             {
-                "ticker":"pg2107",
-                "name":"液化石油气2107"
+                "ticker":"FG105",
+                "name":"玻璃2105"
             },
             {
-                "ticker":"pg2108",
-                "name":"液化石油气2108"
-            }
-        ]
-    },
-    "rb":{
-        "exchangeId":"SHFE",
-        "include":[
-            {
-                "ticker":"rb2009",
-                "name":"螺纹钢2009"
+                "ticker":"FG9",
+                "name":"玻璃指数连续"
             },
             {
-                "ticker":"rb2010",
-                "name":"螺纹钢2010"
+                "ticker":"FG89",
+                "name":"玻璃主力连续价差平滑（后复权）"
             },
             {
-                "ticker":"rb2011",
-                "name":"螺纹钢2011"
+                "ticker":"FG88",
+                "name":"玻璃主力连续价差平滑"
             },
             {
-                "ticker":"rb2012",
-                "name":"螺纹钢2012"
+                "ticker":"FG108",
+                "name":"玻璃2108"
             },
             {
-                "ticker":"rb2101",
-                "name":"螺纹钢2101"
+                "ticker":"FG109",
+                "name":"玻璃2109"
             },
             {
-                "ticker":"rb2102",
-                "name":"螺纹钢2102"
+                "ticker":"FG110",
+                "name":"玻璃2110"
             },
             {
-                "ticker":"rb2103",
-                "name":"螺纹钢2103"
-            },
-            {
-                "ticker":"rb2104",
-                "name":"螺纹钢2104"
-            },
-            {
-                "ticker":"rb2105",
-                "name":"螺纹钢2105"
-            },
-            {
-                "ticker":"rb2106",
-                "name":"螺纹钢2106"
-            },
-            {
-                "ticker":"rb2107",
-                "name":"螺纹钢2107"
-            },
-            {
-                "ticker":"rb2108",
-                "name":"螺纹钢2108"
-            }
-        ]
-    },
-    "TF":{
-        "exchangeId":"CFFEX",
-        "include":[
-            {
-                "ticker":"TF2012",
-                "name":"5年期国债2012"
-            },
-            {
-                "ticker":"TF2103",
-                "name":"5年期国债2103"
-            },
-            {
-                "ticker":"TF2106",
-                "name":"5年期国债2106"
-            }
-        ]
-    },
-    "RM":{
-        "exchangeId":"CZCE",
-        "include":[
-            {
-                "ticker":"RM011",
-                "name":"菜籽粕011"
-            },
-            {
-                "ticker":"RM101",
-                "name":"菜籽粕101"
-            },
-            {
-                "ticker":"RM103",
-                "name":"菜籽粕103"
-            },
-            {
-                "ticker":"RM105",
-                "name":"菜籽粕105"
-            },
-            {
-                "ticker":"RM107",
-                "name":"菜籽粕107"
-            },
-            {
-                "ticker":"RM108",
-                "name":"菜籽粕108"
-            }
-        ]
-    },
-    "nr":{
-        "exchangeId":"INE",
-        "include":[
-            {
-                "ticker":"nr2009",
-                "name":"20号胶2009"
-            },
-            {
-                "ticker":"nr2010",
-                "name":"20号胶2010"
-            },
-            {
-                "ticker":"nr2011",
-                "name":"20号胶2011"
-            },
-            {
-                "ticker":"nr2012",
-                "name":"20号胶2012"
-            },
-            {
-                "ticker":"nr2101",
-                "name":"20号胶2101"
-            },
-            {
-                "ticker":"nr2102",
-                "name":"20号胶2102"
-            },
-            {
-                "ticker":"nr2103",
-                "name":"20号胶2103"
-            },
-            {
-                "ticker":"nr2105",
-                "name":"20号胶2105"
-            }
-        ]
-    },
-    "PM":{
-        "exchangeId":"CZCE",
-        "include":[
-            {
-                "ticker":"PM103",
-                "name":"普通小麦103"
-            },
-            {
-                "ticker":"PM105",
-                "name":"普通小麦105"
-            }
-        ]
-    },
-    "CJ":{
-        "exchangeId":"CZCE",
-        "include":[
-            {
-                "ticker":"CJ012",
-                "name":"红枣012"
-            },
-            {
-                "ticker":"CJ101",
-                "name":"红枣101"
-            },
-            {
-                "ticker":"CJ103",
-                "name":"红枣103"
-            },
-            {
-                "ticker":"CJ105",
-                "name":"红枣105"
-            },
-            {
-                "ticker":"CJ107",
-                "name":"红枣107"
-            }
-        ]
-    },
-    "AP":{
-        "exchangeId":"CZCE",
-        "include":[
-            {
-                "ticker":"AP010",
-                "name":"鲜苹果010"
-            },
-            {
-                "ticker":"AP011",
-                "name":"鲜苹果011"
-            },
-            {
-                "ticker":"AP012",
-                "name":"鲜苹果012"
-            },
-            {
-                "ticker":"AP101",
-                "name":"鲜苹果101"
-            },
-            {
-                "ticker":"AP103",
-                "name":"鲜苹果103"
-            },
-            {
-                "ticker":"AP105",
-                "name":"鲜苹果105"
+                "ticker":"FG111",
+                "name":"玻璃2111"
             }
         ]
     },
@@ -1107,20 +1085,40 @@
         "exchangeId":"SHFE",
         "include":[
             {
-                "ticker":"fu2010",
-                "name":"燃料油2010"
+                "ticker":"fu2108",
+                "name":"燃料油2108"
             },
             {
-                "ticker":"fu2011",
-                "name":"燃料油2011"
+                "ticker":"fu889",
+                "name":"燃料油主力连续价差平滑（后复权）"
+            },
+            {
+                "ticker":"fu2104",
+                "name":"燃料油2104"
             },
             {
                 "ticker":"fu2012",
                 "name":"燃料油2012"
             },
             {
+                "ticker":"fu2106",
+                "name":"燃料油2106"
+            },
+            {
+                "ticker":"fu99",
+                "name":"燃料油指数连续"
+            },
+            {
                 "ticker":"fu2101",
                 "name":"燃料油2101"
+            },
+            {
+                "ticker":"fu2107",
+                "name":"燃料油2107"
+            },
+            {
+                "ticker":"fu2105",
+                "name":"燃料油2105"
             },
             {
                 "ticker":"fu2102",
@@ -1131,287 +1129,24 @@
                 "name":"燃料油2103"
             },
             {
-                "ticker":"fu2104",
-                "name":"燃料油2104"
+                "ticker":"fu88",
+                "name":"燃料油主力连续"
             },
             {
-                "ticker":"fu2105",
-                "name":"燃料油2105"
-            },
-            {
-                "ticker":"fu2106",
-                "name":"燃料油2106"
-            },
-            {
-                "ticker":"fu2107",
-                "name":"燃料油2107"
-            },
-            {
-                "ticker":"fu2108",
-                "name":"燃料油2108"
+                "ticker":"fu888",
+                "name":"燃料油主力连续价差平滑"
             },
             {
                 "ticker":"fu2109",
                 "name":"燃料油2109"
-            }
-        ]
-    },
-    "ru":{
-        "exchangeId":"SHFE",
-        "include":[
-            {
-                "ticker":"ru2009",
-                "name":"天然橡胶2009"
             },
             {
-                "ticker":"ru2010",
-                "name":"天然橡胶2010"
+                "ticker":"fu2110",
+                "name":"燃料油2110"
             },
             {
-                "ticker":"ru2011",
-                "name":"天然橡胶2011"
-            },
-            {
-                "ticker":"ru2101",
-                "name":"天然橡胶2101"
-            },
-            {
-                "ticker":"ru2103",
-                "name":"天然橡胶2103"
-            },
-            {
-                "ticker":"ru2104",
-                "name":"天然橡胶2104"
-            },
-            {
-                "ticker":"ru2105",
-                "name":"天然橡胶2105"
-            },
-            {
-                "ticker":"ru2106",
-                "name":"天然橡胶2106"
-            },
-            {
-                "ticker":"ru2107",
-                "name":"天然橡胶2107"
-            },
-            {
-                "ticker":"ru2108",
-                "name":"天然橡胶2108"
-            }
-        ]
-    },
-    "CY":{
-        "exchangeId":"CZCE",
-        "include":[
-            {
-                "ticker":"CY101",
-                "name":"棉纱101"
-            },
-            {
-                "ticker":"CY104",
-                "name":"棉纱104"
-            },
-            {
-                "ticker":"CY105",
-                "name":"棉纱105"
-            }
-        ]
-    },
-    "CF":{
-        "exchangeId":"CZCE",
-        "include":[
-            {
-                "ticker":"CF011",
-                "name":"一号棉花011"
-            },
-            {
-                "ticker":"CF101",
-                "name":"一号棉花101"
-            },
-            {
-                "ticker":"CF103",
-                "name":"一号棉花103"
-            },
-            {
-                "ticker":"CF105",
-                "name":"一号棉花105"
-            },
-            {
-                "ticker":"CF107",
-                "name":"一号棉花107"
-            }
-        ]
-    },
-    "bu":{
-        "exchangeId":"SHFE",
-        "include":[
-            {
-                "ticker":"bu2009",
-                "name":"石油沥青2009"
-            },
-            {
-                "ticker":"bu2012",
-                "name":"石油沥青2012"
-            },
-            {
-                "ticker":"bu2103",
-                "name":"石油沥青2103"
-            },
-            {
-                "ticker":"bu2106",
-                "name":"石油沥青2106"
-            },
-            {
-                "ticker":"bu2109",
-                "name":"石油沥青2109"
-            },
-            {
-                "ticker":"bu2112",
-                "name":"石油沥青2112"
-            },
-            {
-                "ticker":"bu2203",
-                "name":"石油沥青2203"
-            },
-            {
-                "ticker":"bu2010",
-                "name":"石油沥青2010"
-            },
-            {
-                "ticker":"bu2011",
-                "name":"石油沥青2011"
-            },
-            {
-                "ticker":"bu2206",
-                "name":"石油沥青2206"
-            },
-            {
-                "ticker":"bu2101",
-                "name":"石油沥青2101"
-            },
-            {
-                "ticker":"bu2102",
-                "name":"石油沥青2102"
-            }
-        ]
-    },
-    "fb":{
-        "exchangeId":"DCE",
-        "include":[
-            {
-                "ticker":"fb2010",
-                "name":"纤维板2010"
-            },
-            {
-                "ticker":"fb2011",
-                "name":"纤维板2011"
-            },
-            {
-                "ticker":"fb2101",
-                "name":"纤维板2101"
-            }
-        ]
-    },
-    "wr":{
-        "exchangeId":"SHFE",
-        "include":[
-            {
-                "ticker":"wr2009",
-                "name":"线材2009"
-            },
-            {
-                "ticker":"wr2010",
-                "name":"线材2010"
-            },
-            {
-                "ticker":"wr2011",
-                "name":"线材2011"
-            },
-            {
-                "ticker":"wr2012",
-                "name":"线材2012"
-            },
-            {
-                "ticker":"wr2101",
-                "name":"线材2101"
-            },
-            {
-                "ticker":"wr2102",
-                "name":"线材2102"
-            },
-            {
-                "ticker":"wr2103",
-                "name":"线材2103"
-            },
-            {
-                "ticker":"wr2105",
-                "name":"线材2105"
-            },
-            {
-                "ticker":"wr2106",
-                "name":"线材2106"
-            },
-            {
-                "ticker":"wr2107",
-                "name":"线材2107"
-            },
-            {
-                "ticker":"wr2108",
-                "name":"线材2108"
-            }
-        ]
-    },
-    "jd":{
-        "exchangeId":"DCE",
-        "include":[
-            {
-                "ticker":"jd2009",
-                "name":"鲜鸡蛋2009"
-            },
-            {
-                "ticker":"jd2010",
-                "name":"鲜鸡蛋2010"
-            },
-            {
-                "ticker":"jd2011",
-                "name":"鲜鸡蛋2011"
-            },
-            {
-                "ticker":"jd2012",
-                "name":"鲜鸡蛋2012"
-            },
-            {
-                "ticker":"jd2101",
-                "name":"鲜鸡蛋2101"
-            },
-            {
-                "ticker":"jd2102",
-                "name":"鲜鸡蛋2102"
-            },
-            {
-                "ticker":"jd2103",
-                "name":"鲜鸡蛋2103"
-            },
-            {
-                "ticker":"jd2104",
-                "name":"鲜鸡蛋2104"
-            },
-            {
-                "ticker":"jd2105",
-                "name":"鲜鸡蛋2105"
-            },
-            {
-                "ticker":"jd2106",
-                "name":"鲜鸡蛋2106"
-            },
-            {
-                "ticker":"jd2107",
-                "name":"鲜鸡蛋2107"
-            },
-            {
-                "ticker":"jd2108",
-                "name":"鲜鸡蛋2108"
+                "ticker":"fu2111",
+                "name":"燃料油2111"
             }
         ]
     },
@@ -1419,675 +1154,74 @@
         "exchangeId":"SHFE",
         "include":[
             {
-                "ticker":"hc2009",
-                "name":"热轧卷板2009"
-            },
-            {
-                "ticker":"hc2010",
-                "name":"热轧卷板2010"
-            },
-            {
-                "ticker":"hc2011",
-                "name":"热轧卷板2011"
-            },
-            {
-                "ticker":"hc2012",
-                "name":"热轧卷板2012"
-            },
-            {
-                "ticker":"hc2101",
-                "name":"热轧卷板2101"
+                "ticker":"hc2104",
+                "name":"热轧卷板2104"
             },
             {
                 "ticker":"hc2102",
                 "name":"热轧卷板2102"
             },
             {
-                "ticker":"hc2103",
-                "name":"热轧卷板2103"
+                "ticker":"hc2012",
+                "name":"热轧卷板2012"
             },
             {
-                "ticker":"hc2104",
-                "name":"热轧卷板2104"
+                "ticker":"hc2107",
+                "name":"热轧卷板2107"
+            },
+            {
+                "ticker":"hc2106",
+                "name":"热轧卷板2106"
+            },
+            {
+                "ticker":"hc2101",
+                "name":"热轧卷板2101"
+            },
+            {
+                "ticker":"hc889",
+                "name":"热轧卷板主力连续价差平滑（后复权）"
+            },
+            {
+                "ticker":"hc88",
+                "name":"热轧卷板主力连续"
+            },
+            {
+                "ticker":"hc2103",
+                "name":"热轧卷板2103"
             },
             {
                 "ticker":"hc2105",
                 "name":"热轧卷板2105"
             },
             {
-                "ticker":"hc2106",
-                "name":"热轧卷板2106"
-            }
-        ]
-    },
-    "IC":{
-        "exchangeId":"CFFEX",
-        "include":[
-            {
-                "ticker":"IC2009",
-                "name":"中证500指数2009"
-            },
-            {
-                "ticker":"IC2012",
-                "name":"中证500指数2012"
-            },
-            {
-                "ticker":"IC2103",
-                "name":"中证500指数2103"
-            },
-            {
-                "ticker":"IC2010",
-                "name":"中证500指数2010"
-            }
-        ]
-    },
-    "WH":{
-        "exchangeId":"CZCE",
-        "include":[
-            {
-                "ticker":"WH011",
-                "name":"优质强筋小麦011"
-            },
-            {
-                "ticker":"WH101",
-                "name":"优质强筋小麦101"
-            },
-            {
-                "ticker":"WH103",
-                "name":"优质强筋小麦103"
-            },
-            {
-                "ticker":"WH105",
-                "name":"优质强筋小麦105"
-            }
-        ]
-    },
-    "SR":{
-        "exchangeId":"CZCE",
-        "include":[
-            {
-                "ticker":"SR011",
-                "name":"白砂糖011"
-            },
-            {
-                "ticker":"SR101",
-                "name":"白砂糖101"
-            },
-            {
-                "ticker":"SR103",
-                "name":"白砂糖103"
-            },
-            {
-                "ticker":"SR105",
-                "name":"白砂糖105"
-            },
-            {
-                "ticker":"SR107",
-                "name":"白砂糖107"
-            }
-        ]
-    },
-    "a":{
-        "exchangeId":"DCE",
-        "include":[
-            {
-                "ticker":"a2011",
-                "name":"黄大豆1号2011"
-            },
-            {
-                "ticker":"a2101",
-                "name":"黄大豆1号2101"
-            },
-            {
-                "ticker":"a2103",
-                "name":"黄大豆1号2103"
-            },
-            {
-                "ticker":"a2105",
-                "name":"黄大豆1号2105"
-            },
-            {
-                "ticker":"a2107",
-                "name":"黄大豆1号2107"
-            }
-        ]
-    },
-    "c":{
-        "exchangeId":"DCE",
-        "include":[
-            {
-                "ticker":"c2011",
-                "name":"黄玉米2011"
-            },
-            {
-                "ticker":"c2101",
-                "name":"黄玉米2101"
-            },
-            {
-                "ticker":"c2103",
-                "name":"黄玉米2103"
-            },
-            {
-                "ticker":"c2105",
-                "name":"黄玉米2105"
-            },
-            {
-                "ticker":"c2107",
-                "name":"黄玉米2107"
-            }
-        ]
-    },
-    "b":{
-        "exchangeId":"DCE",
-        "include":[
-            {
-                "ticker":"b2010",
-                "name":"黄大豆2号2010"
-            },
-            {
-                "ticker":"b2011",
-                "name":"黄大豆2号2011"
-            },
-            {
-                "ticker":"b2012",
-                "name":"黄大豆2号2012"
-            },
-            {
-                "ticker":"b2101",
-                "name":"黄大豆2号2101"
-            },
-            {
-                "ticker":"b2102",
-                "name":"黄大豆2号2102"
-            },
-            {
-                "ticker":"b2103",
-                "name":"黄大豆2号2103"
-            },
-            {
-                "ticker":"b2104",
-                "name":"黄大豆2号2104"
-            },
-            {
-                "ticker":"b2105",
-                "name":"黄大豆2号2105"
-            },
-            {
-                "ticker":"b2106",
-                "name":"黄大豆2号2106"
-            },
-            {
-                "ticker":"b2107",
-                "name":"黄大豆2号2107"
-            },
-            {
-                "ticker":"b2108",
-                "name":"黄大豆2号2108"
-            }
-        ]
-    },
-    "sc":{
-        "exchangeId":"INE",
-        "include":[
-            {
-                "ticker":"sc2012",
-                "name":"原油2012"
-            },
-            {
-                "ticker":"sc2103",
-                "name":"原油2103"
-            },
-            {
-                "ticker":"sc2106",
-                "name":"原油2106"
-            },
-            {
-                "ticker":"sc2109",
-                "name":"原油2109"
-            },
-            {
-                "ticker":"sc2112",
-                "name":"原油2112"
-            },
-            {
-                "ticker":"sc2203",
-                "name":"原油2203"
-            },
-            {
-                "ticker":"sc2206",
-                "name":"原油2206"
-            },
-            {
-                "ticker":"sc2209",
-                "name":"原油2209"
-            },
-            {
-                "ticker":"sc2010",
-                "name":"原油2010"
-            },
-            {
-                "ticker":"sc2011",
-                "name":"原油2011"
-            },
-            {
-                "ticker":"sc2212",
-                "name":"原油2212"
-            },
-            {
-                "ticker":"sc2101",
-                "name":"原油2101"
-            },
-            {
-                "ticker":"sc2102",
-                "name":"原油2102"
-            },
-            {
-                "ticker":"sc2303",
-                "name":"原油2303"
-            },
-            {
-                "ticker":"sc2104",
-                "name":"原油2104"
-            },
-            {
-                "ticker":"sc2105",
-                "name":"原油2105"
-            },
-            {
-                "ticker":"sc2306",
-                "name":"原油2306"
-            },
-            {
-                "ticker":"sc2107",
-                "name":"原油2107"
-            },
-            {
-                "ticker":"sc2108",
-                "name":"原油2108"
-            },
-            {
-                "ticker":"sc2309",
-                "name":"原油2309"
-            }
-        ]
-    },
-    "OI":{
-        "exchangeId":"CZCE",
-        "include":[
-            {
-                "ticker":"OI011",
-                "name":"菜籽油011"
-            },
-            {
-                "ticker":"OI101",
-                "name":"菜籽油101"
-            },
-            {
-                "ticker":"OI103",
-                "name":"菜籽油103"
-            },
-            {
-                "ticker":"OI105",
-                "name":"菜籽油105"
-            },
-            {
-                "ticker":"OI107",
-                "name":"菜籽油107"
-            }
-        ]
-    },
-    "jm":{
-        "exchangeId":"DCE",
-        "include":[
-            {
-                "ticker":"jm2010",
-                "name":"焦煤2010"
-            },
-            {
-                "ticker":"jm2011",
-                "name":"焦煤2011"
-            },
-            {
-                "ticker":"jm2012",
-                "name":"焦煤2012"
-            },
-            {
-                "ticker":"jm2101",
-                "name":"焦煤2101"
-            },
-            {
-                "ticker":"jm2102",
-                "name":"焦煤2102"
-            },
-            {
-                "ticker":"jm2103",
-                "name":"焦煤2103"
-            },
-            {
-                "ticker":"jm2104",
-                "name":"焦煤2104"
-            },
-            {
-                "ticker":"jm2105",
-                "name":"焦煤2105"
-            }
-        ]
-    },
-    "ss":{
-        "exchangeId":"SHFE",
-        "include":[
-            {
-                "ticker":"ss2009",
-                "name":"不锈钢2009"
-            },
-            {
-                "ticker":"ss2010",
-                "name":"不锈钢2010"
-            },
-            {
-                "ticker":"ss2011",
-                "name":"不锈钢2011"
-            },
-            {
-                "ticker":"ss2012",
-                "name":"不锈钢2012"
-            },
-            {
-                "ticker":"ss2101",
-                "name":"不锈钢2101"
-            },
-            {
-                "ticker":"ss2102",
-                "name":"不锈钢2102"
-            },
-            {
-                "ticker":"ss2103",
-                "name":"不锈钢2103"
-            },
-            {
-                "ticker":"ss2104",
-                "name":"不锈钢2104"
-            },
-            {
-                "ticker":"ss2105",
-                "name":"不锈钢2105"
-            },
-            {
-                "ticker":"ss2106",
-                "name":"不锈钢2106"
-            },
-            {
-                "ticker":"ss2107",
-                "name":"不锈钢2107"
-            },
-            {
-                "ticker":"ss2108",
-                "name":"不锈钢2108"
-            }
-        ]
-    },
-    "RS":{
-        "exchangeId":"CZCE",
-        "include":[
-            {
-                "ticker":"RS011",
-                "name":"油菜籽011"
-            }
-        ]
-    },
-    "sp":{
-        "exchangeId":"SHFE",
-        "include":[
-            {
-                "ticker":"sp2009",
-                "name":"漂针浆2009"
-            },
-            {
-                "ticker":"sp2010",
-                "name":"漂针浆2010"
-            },
-            {
-                "ticker":"sp2011",
-                "name":"漂针浆2011"
-            },
-            {
-                "ticker":"sp2012",
-                "name":"漂针浆2012"
-            },
-            {
-                "ticker":"sp2101",
-                "name":"漂针浆2101"
-            },
-            {
-                "ticker":"sp2102",
-                "name":"漂针浆2102"
-            },
-            {
-                "ticker":"sp2103",
-                "name":"漂针浆2103"
-            },
-            {
-                "ticker":"sp2104",
-                "name":"漂针浆2104"
-            },
-            {
-                "ticker":"sp2105",
-                "name":"漂针浆2105"
-            },
-            {
-                "ticker":"sp2106",
-                "name":"漂针浆2106"
-            },
-            {
-                "ticker":"sp2107",
-                "name":"漂针浆2107"
-            },
-            {
-                "ticker":"sp2108",
-                "name":"漂针浆2108"
-            }
-        ]
-    },
-    "m":{
-        "exchangeId":"DCE",
-        "include":[
-            {
-                "ticker":"m2011",
-                "name":"豆粕2011"
-            },
-            {
-                "ticker":"m2012",
-                "name":"豆粕2012"
-            },
-            {
-                "ticker":"m2101",
-                "name":"豆粕2101"
-            },
-            {
-                "ticker":"m2103",
-                "name":"豆粕2103"
-            },
-            {
-                "ticker":"m2105",
-                "name":"豆粕2105"
-            },
-            {
-                "ticker":"m2107",
-                "name":"豆粕2107"
-            },
-            {
-                "ticker":"m2108",
-                "name":"豆粕2108"
-            }
-        ]
-    },
-    "l":{
-        "exchangeId":"DCE",
-        "include":[
-            {
-                "ticker":"l2010",
-                "name":"线型低密度聚乙烯2010"
-            },
-            {
-                "ticker":"l2011",
-                "name":"线型低密度聚乙烯2011"
-            },
-            {
-                "ticker":"l2012",
-                "name":"线型低密度聚乙烯2012"
-            },
-            {
-                "ticker":"l2101",
-                "name":"线型低密度聚乙烯2101"
-            },
-            {
-                "ticker":"l2102",
-                "name":"线型低密度聚乙烯2102"
-            },
-            {
-                "ticker":"l2103",
-                "name":"线型低密度聚乙烯2103"
-            },
-            {
-                "ticker":"l2104",
-                "name":"线型低密度聚乙烯2104"
-            },
-            {
-                "ticker":"l2105",
-                "name":"线型低密度聚乙烯2105"
-            },
-            {
-                "ticker":"l2106",
-                "name":"线型低密度聚乙烯2106"
-            },
-            {
-                "ticker":"l2107",
-                "name":"线型低密度聚乙烯2107"
-            },
-            {
-                "ticker":"l2108",
-                "name":"线型低密度聚乙烯2108"
-            }
-        ]
-    },
-    "IFIF":{
-        "exchangeId":"CFFEX",
-        "include":[
-            {
-                "ticker":"IF2009",
-                "name":"IF2009"
-            },
-            {
-                "ticker":"IF2012",
-                "name":"IF2012"
-            },
-            {
-                "ticker":"IF2103",
-                "name":"IF2103"
-            },
-            {
-                "ticker":"IF2010",
-                "name":"IF2010"
-            }
-        ]
-    },
-    "UR":{
-        "exchangeId":"CZCE",
-        "include":[
-            {
-                "ticker":"UR010",
-                "name":"尿素010"
-            },
-            {
-                "ticker":"UR011",
-                "name":"尿素011"
-            },
-            {
-                "ticker":"UR012",
-                "name":"尿素012"
-            },
-            {
-                "ticker":"UR101",
-                "name":"尿素101"
-            },
-            {
-                "ticker":"UR102",
-                "name":"尿素102"
-            },
-            {
-                "ticker":"UR103",
-                "name":"尿素103"
-            },
-            {
-                "ticker":"UR104",
-                "name":"尿素104"
-            },
-            {
-                "ticker":"UR105",
-                "name":"尿素105"
-            },
-            {
-                "ticker":"UR106",
-                "name":"尿素106"
-            },
-            {
-                "ticker":"UR107",
-                "name":"尿素107"
-            }
-        ]
-    },
-    "ZCZC":{
-        "exchangeId":"CZCE",
-        "include":[
-            {
-                "ticker":"ZC010",
-                "name":"动力煤ZC010"
-            },
-            {
-                "ticker":"ZC011",
-                "name":"动力煤ZC011"
-            },
-            {
-                "ticker":"ZC012",
-                "name":"动力煤ZC012"
-            },
-            {
-                "ticker":"ZC101",
-                "name":"动力煤ZC101"
+                "ticker":"hc888",
+                "name":"热轧卷板主力连续价差平滑"
             },
             {
-                "ticker":"ZC102",
-                "name":"动力煤ZC102"
+                "ticker":"hc99",
+                "name":"热轧卷板指数连续"
             },
             {
-                "ticker":"ZC103",
-                "name":"动力煤ZC103"
+                "ticker":"hc2108",
+                "name":"热轧卷板2108"
             },
             {
-                "ticker":"ZC105",
-                "name":"动力煤ZC105"
+                "ticker":"hc2109",
+                "name":"热轧卷板2109"
             },
             {
-                "ticker":"ZC107",
-                "name":"动力煤ZC107"
+                "ticker":"hc2110",
+                "name":"热轧卷板2110"
             },
             {
-                "ticker":"ZC109",
-                "name":"动力煤ZC109"
+                "ticker":"hc2111",
+                "name":"热轧卷板2111"
             }
         ]
     },
     "i":{
         "exchangeId":"DCE",
         "include":[
-            {
-                "ticker":"i2010",
-                "name":"铁矿石2010"
-            },
-            {
-                "ticker":"i2011",
-                "name":"铁矿石2011"
-            },
             {
                 "ticker":"i2012",
                 "name":"铁矿石2012"
@@ -2121,8 +1255,136 @@
                 "name":"铁矿石2107"
             },
             {
+                "ticker":"i88",
+                "name":"铁矿石主力连续"
+            },
+            {
+                "ticker":"i888",
+                "name":"铁矿石主力连续价差平滑"
+            },
+            {
+                "ticker":"i99",
+                "name":"铁矿石指数连续"
+            },
+            {
+                "ticker":"i889",
+                "name":"铁矿石主力连续价差平滑（后复权）"
+            },
+            {
                 "ticker":"i2108",
                 "name":"铁矿石2108"
+            },
+            {
+                "ticker":"i2109",
+                "name":"铁矿石2109"
+            },
+            {
+                "ticker":"i2110",
+                "name":"铁矿石2110"
+            },
+            {
+                "ticker":"i2111",
+                "name":"铁矿石2111"
+            }
+        ]
+    },
+    "IC":{
+        "exchangeId":"CFFEX",
+        "include":[
+            {
+                "ticker":"IC888",
+                "name":"中证主力连续价差平滑"
+            },
+            {
+                "ticker":"IC99",
+                "name":"中证指数连续"
+            },
+            {
+                "ticker":"IC2103",
+                "name":"中证500指数2103"
+            },
+            {
+                "ticker":"IC88",
+                "name":"中证主力连续"
+            },
+            {
+                "ticker":"IC889",
+                "name":"中证主力连续价差平滑（后复权）"
+            },
+            {
+                "ticker":"IC2012",
+                "name":"中证500指数2012"
+            },
+            {
+                "ticker":"IC2106",
+                "name":"中证500指数2106"
+            },
+            {
+                "ticker":"IC2101",
+                "name":"中证500指数2101"
+            }
+        ]
+    },
+    "ICA":{
+        "exchangeId":"CFFEX",
+        "include":[
+            {
+                "ticker":"IC88A3",
+                "name":"中证次次主力连续"
+            },
+            {
+                "ticker":"IC88A2",
+                "name":"中证次主力连续"
+            }
+        ]
+    },
+    "IF":{
+        "exchangeId":"CFFEX",
+        "include":[
+            {
+                "ticker":"IF888",
+                "name":"沪深主力连续价差平滑"
+            },
+            {
+                "ticker":"IF2103",
+                "name":"IF2103"
+            },
+            {
+                "ticker":"IF2012",
+                "name":"IF2012"
+            },
+            {
+                "ticker":"IF889",
+                "name":"沪深主力连续价差平滑（后复权）"
+            },
+            {
+                "ticker":"IF88",
+                "name":"沪深主力连续"
+            },
+            {
+                "ticker":"IF99",
+                "name":"沪深指数连续"
+            },
+            {
+                "ticker":"IF2106",
+                "name":"IF2106"
+            },
+            {
+                "ticker":"IF2101",
+                "name":"IF2101"
+            }
+        ]
+    },
+    "IFA":{
+        "exchangeId":"CFFEX",
+        "include":[
+            {
+                "ticker":"IF88A2",
+                "name":"沪深次主力连续"
+            },
+            {
+                "ticker":"IF88A3",
+                "name":"沪深次次主力连续"
             }
         ]
     },
@@ -2130,38 +1392,1734 @@
         "exchangeId":"CFFEX",
         "include":[
             {
-                "ticker":"IH2009",
-                "name":"上证50指数2009"
+                "ticker":"IH2103",
+                "name":"上证50指数2103"
+            },
+            {
+                "ticker":"IH88",
+                "name":"上证主力连续"
+            },
+            {
+                "ticker":"IH888",
+                "name":"上证主力连续价差平滑"
             },
             {
                 "ticker":"IH2012",
                 "name":"上证50指数2012"
             },
             {
-                "ticker":"IH2103",
-                "name":"上证50指数2103"
+                "ticker":"IH889",
+                "name":"上证主力连续价差平滑（后复权）"
             },
             {
-                "ticker":"IH2010",
-                "name":"上证50指数2010"
+                "ticker":"IH99",
+                "name":"上证指数连续"
+            },
+            {
+                "ticker":"IH2106",
+                "name":"上证50指数2106"
+            },
+            {
+                "ticker":"IH2101",
+                "name":"上证50指数2101"
+            }
+        ]
+    },
+    "IHA":{
+        "exchangeId":"CFFEX",
+        "include":[
+            {
+                "ticker":"IH88A3",
+                "name":"上证次次主力连续"
+            },
+            {
+                "ticker":"IH88A2",
+                "name":"上证次主力连续"
+            }
+        ]
+    },
+    "j":{
+        "exchangeId":"DCE",
+        "include":[
+            {
+                "ticker":"j889",
+                "name":"冶金焦炭主力连续价差平滑（后复权）"
+            },
+            {
+                "ticker":"j2105",
+                "name":"冶金焦炭2105"
+            },
+            {
+                "ticker":"j2103",
+                "name":"冶金焦炭2103"
+            },
+            {
+                "ticker":"j2104",
+                "name":"冶金焦炭2104"
+            },
+            {
+                "ticker":"j888",
+                "name":"冶金焦炭主力连续价差平滑"
+            },
+            {
+                "ticker":"j2106",
+                "name":"冶金焦炭2106"
+            },
+            {
+                "ticker":"j2012",
+                "name":"冶金焦炭2012"
+            },
+            {
+                "ticker":"j2102",
+                "name":"冶金焦炭2102"
+            },
+            {
+                "ticker":"j99",
+                "name":"冶金焦炭指数连续"
+            },
+            {
+                "ticker":"j2101",
+                "name":"冶金焦炭2101"
+            },
+            {
+                "ticker":"j88",
+                "name":"冶金焦炭主力连续"
+            },
+            {
+                "ticker":"j2107",
+                "name":"冶金焦炭2107"
+            },
+            {
+                "ticker":"j2108",
+                "name":"冶金焦炭2108"
+            },
+            {
+                "ticker":"j2109",
+                "name":"冶金焦炭2109"
+            },
+            {
+                "ticker":"j2110",
+                "name":"冶金焦炭2110"
+            },
+            {
+                "ticker":"j2111",
+                "name":"冶金焦炭2111"
+            }
+        ]
+    },
+    "jd":{
+        "exchangeId":"DCE",
+        "include":[
+            {
+                "ticker":"jd2101",
+                "name":"鸡蛋2101"
+            },
+            {
+                "ticker":"jd2103",
+                "name":"鸡蛋2103"
+            },
+            {
+                "ticker":"jd2106",
+                "name":"鸡蛋2106"
+            },
+            {
+                "ticker":"jd888",
+                "name":"鸡蛋主力连续价差平滑"
+            },
+            {
+                "ticker":"jd2104",
+                "name":"鸡蛋2104"
+            },
+            {
+                "ticker":"jd2012",
+                "name":"鸡蛋2012"
+            },
+            {
+                "ticker":"jd99",
+                "name":"鸡蛋指数连续"
+            },
+            {
+                "ticker":"jd889",
+                "name":"鸡蛋主力连续价差平滑（后复权）"
+            },
+            {
+                "ticker":"jd2107",
+                "name":"鸡蛋2107"
+            },
+            {
+                "ticker":"jd2105",
+                "name":"鸡蛋2105"
+            },
+            {
+                "ticker":"jd2102",
+                "name":"鸡蛋2102"
+            },
+            {
+                "ticker":"jd88",
+                "name":"鸡蛋主力连续"
+            },
+            {
+                "ticker":"jd2108",
+                "name":"鸡蛋2108"
+            },
+            {
+                "ticker":"jd2109",
+                "name":"鸡蛋2109"
+            },
+            {
+                "ticker":"jd2110",
+                "name":"鸡蛋2110"
+            },
+            {
+                "ticker":"jd2111",
+                "name":"鸡蛋2111"
+            }
+        ]
+    },
+    "jm":{
+        "exchangeId":"DCE",
+        "include":[
+            {
+                "ticker":"jm2105",
+                "name":"焦煤2105"
+            },
+            {
+                "ticker":"jm889",
+                "name":"焦煤主力连续价差平滑（后复权）"
+            },
+            {
+                "ticker":"jm2102",
+                "name":"焦煤2102"
+            },
+            {
+                "ticker":"jm2107",
+                "name":"焦煤2107"
+            },
+            {
+                "ticker":"jm2101",
+                "name":"焦煤2101"
+            },
+            {
+                "ticker":"jm2106",
+                "name":"焦煤2106"
+            },
+            {
+                "ticker":"jm99",
+                "name":"焦煤指数连续"
+            },
+            {
+                "ticker":"jm88",
+                "name":"焦煤主力连续"
+            },
+            {
+                "ticker":"jm2104",
+                "name":"焦煤2104"
+            },
+            {
+                "ticker":"jm2012",
+                "name":"焦煤2012"
+            },
+            {
+                "ticker":"jm888",
+                "name":"焦煤主力连续价差平滑"
+            },
+            {
+                "ticker":"jm2103",
+                "name":"焦煤2103"
+            },
+            {
+                "ticker":"jm2108",
+                "name":"焦煤2108"
+            },
+            {
+                "ticker":"jm2109",
+                "name":"焦煤2109"
+            },
+            {
+                "ticker":"jm2110",
+                "name":"焦煤2110"
+            },
+            {
+                "ticker":"jm2111",
+                "name":"焦煤2111"
+            }
+        ]
+    },
+    "JR":{
+        "exchangeId":"CZCE",
+        "include":[
+            {
+                "ticker":"JR8",
+                "name":"粳稻主力连续"
+            },
+            {
+                "ticker":"JR107",
+                "name":"粳稻2107"
+            },
+            {
+                "ticker":"JR101",
+                "name":"粳稻2101"
+            },
+            {
+                "ticker":"JR103",
+                "name":"粳稻2103"
+            },
+            {
+                "ticker":"JR89",
+                "name":"粳稻主力连续价差平滑（后复权）"
+            },
+            {
+                "ticker":"JR105",
+                "name":"粳稻2105"
+            },
+            {
+                "ticker":"JR88",
+                "name":"粳稻主力连续价差平滑"
+            },
+            {
+                "ticker":"JR9",
+                "name":"粳稻指数连续"
+            },
+            {
+                "ticker":"JR109",
+                "name":"粳稻2109"
+            },
+            {
+                "ticker":"JR111",
+                "name":"粳稻2111"
+            }
+        ]
+    },
+    "l":{
+        "exchangeId":"DCE",
+        "include":[
+            {
+                "ticker":"l2012",
+                "name":"线型低密度聚乙烯2012"
+            },
+            {
+                "ticker":"l2101",
+                "name":"线型低密度聚乙烯2101"
+            },
+            {
+                "ticker":"l2102",
+                "name":"线型低密度聚乙烯2102"
+            },
+            {
+                "ticker":"l2103",
+                "name":"线型低密度聚乙烯2103"
+            },
+            {
+                "ticker":"l2104",
+                "name":"线型低密度聚乙烯2104"
+            },
+            {
+                "ticker":"l2105",
+                "name":"线型低密度聚乙烯2105"
+            },
+            {
+                "ticker":"l2106",
+                "name":"线型低密度聚乙烯2106"
+            },
+            {
+                "ticker":"l2107",
+                "name":"线型低密度聚乙烯2107"
+            },
+            {
+                "ticker":"l99",
+                "name":"线型低密度聚乙烯指数连续"
+            },
+            {
+                "ticker":"l889",
+                "name":"线型低密度聚乙烯主力连续价差平滑（后复权）"
+            },
+            {
+                "ticker":"l888",
+                "name":"线型低密度聚乙烯主力连续价差平滑"
+            },
+            {
+                "ticker":"l88",
+                "name":"线型低密度聚乙烯主力连续"
+            },
+            {
+                "ticker":"l2108",
+                "name":"线型低密度聚乙烯2108"
+            },
+            {
+                "ticker":"l2109",
+                "name":"线型低密度聚乙烯2109"
+            },
+            {
+                "ticker":"l2110",
+                "name":"线型低密度聚乙烯2110"
+            },
+            {
+                "ticker":"l2111",
+                "name":"线型低密度聚乙烯2111"
+            }
+        ]
+    },
+    "lu":{
+        "exchangeId":"INE",
+        "include":[
+            {
+                "ticker":"lu2106",
+                "name":"低硫燃料油2106"
+            },
+            {
+                "ticker":"lu2105",
+                "name":"低硫燃料油2105"
+            },
+            {
+                "ticker":"lu2101",
+                "name":"低硫燃料油2101"
+            },
+            {
+                "ticker":"lu2104",
+                "name":"低硫燃料油2104"
+            },
+            {
+                "ticker":"lu2102",
+                "name":"低硫燃料油2102"
+            },
+            {
+                "ticker":"lu2103",
+                "name":"低硫燃料油2103"
+            },
+            {
+                "ticker":"lu888",
+                "name":"低硫燃料油主力连续价差平滑"
+            },
+            {
+                "ticker":"lu88",
+                "name":"低硫燃料油主力连续"
+            },
+            {
+                "ticker":"lu2107",
+                "name":"低硫燃料油2107"
+            },
+            {
+                "ticker":"lu889",
+                "name":"低硫燃料油主力连续价差平滑（后复权）"
+            },
+            {
+                "ticker":"lu99",
+                "name":"低硫燃料油指数连续"
+            },
+            {
+                "ticker":"lu2108",
+                "name":"低硫燃料油2108"
+            },
+            {
+                "ticker":"lu2109",
+                "name":"低硫燃料油2109"
+            },
+            {
+                "ticker":"lu2110",
+                "name":"低硫燃料油2110"
+            },
+            {
+                "ticker":"lu2111",
+                "name":"低硫燃料油2111"
+            }
+        ]
+    },
+    "LR":{
+        "exchangeId":"CZCE",
+        "include":[
+            {
+                "ticker":"LR107",
+                "name":"晚籼稻2107"
+            },
+            {
+                "ticker":"LR103",
+                "name":"晚籼稻2103"
+            },
+            {
+                "ticker":"LR105",
+                "name":"晚籼稻2105"
+            },
+            {
+                "ticker":"LR101",
+                "name":"晚籼稻2101"
+            },
+            {
+                "ticker":"LR109",
+                "name":"晚籼稻2109"
+            },
+            {
+                "ticker":"LR111",
+                "name":"晚籼稻2111"
+            }
+        ]
+    },
+    "m":{
+        "exchangeId":"DCE",
+        "include":[
+            {
+                "ticker":"m2012",
+                "name":"豆粕2012"
+            },
+            {
+                "ticker":"m2101",
+                "name":"豆粕2101"
+            },
+            {
+                "ticker":"m2103",
+                "name":"豆粕2103"
+            },
+            {
+                "ticker":"m2105",
+                "name":"豆粕2105"
+            },
+            {
+                "ticker":"m2107",
+                "name":"豆粕2107"
+            },
+            {
+                "ticker":"m889",
+                "name":"豆粕主力连续价差平滑（后复权）"
+            },
+            {
+                "ticker":"m888",
+                "name":"豆粕主力连续价差平滑"
+            },
+            {
+                "ticker":"m88",
+                "name":"豆粕主力连续"
+            },
+            {
+                "ticker":"m99",
+                "name":"豆粕指数连续"
+            },
+            {
+                "ticker":"m2108",
+                "name":"豆粕2108"
+            },
+            {
+                "ticker":"m2109",
+                "name":"豆粕2109"
+            },
+            {
+                "ticker":"m2111",
+                "name":"豆粕2111"
+            }
+        ]
+    },
+    "MA":{
+        "exchangeId":"CZCE",
+        "include":[
+            {
+                "ticker":"MA012",
+                "name":"甲醇2012"
+            },
+            {
+                "ticker":"MA101",
+                "name":"甲醇2101"
+            },
+            {
+                "ticker":"MA102",
+                "name":"甲醇2102"
+            },
+            {
+                "ticker":"MA103",
+                "name":"甲醇2103"
+            },
+            {
+                "ticker":"MA104",
+                "name":"甲醇2104"
+            },
+            {
+                "ticker":"MA105",
+                "name":"甲醇2105"
+            },
+            {
+                "ticker":"MA107",
+                "name":"甲醇2107"
+            },
+            {
+                "ticker":"MA8",
+                "name":"甲醇主力连续"
+            },
+            {
+                "ticker":"MA106",
+                "name":"甲醇2106"
+            },
+            {
+                "ticker":"MA9",
+                "name":"甲醇指数连续"
+            },
+            {
+                "ticker":"MA89",
+                "name":"甲醇主力连续价差平滑（后复权）"
+            },
+            {
+                "ticker":"MA88",
+                "name":"甲醇主力连续价差平滑"
+            },
+            {
+                "ticker":"MA108",
+                "name":"甲醇2108"
+            },
+            {
+                "ticker":"MA109",
+                "name":"甲醇2109"
+            },
+            {
+                "ticker":"MA110",
+                "name":"甲醇2110"
+            },
+            {
+                "ticker":"MA111",
+                "name":"甲醇2111"
+            }
+        ]
+    },
+    "ni":{
+        "exchangeId":"SHFE",
+        "include":[
+            {
+                "ticker":"ni2104",
+                "name":"镍2104"
+            },
+            {
+                "ticker":"ni2101",
+                "name":"镍2101"
+            },
+            {
+                "ticker":"ni2107",
+                "name":"镍2107"
+            },
+            {
+                "ticker":"ni88",
+                "name":"镍主力连续"
+            },
+            {
+                "ticker":"ni99",
+                "name":"镍指数连续"
+            },
+            {
+                "ticker":"ni888",
+                "name":"镍主力连续价差平滑"
+            },
+            {
+                "ticker":"ni2102",
+                "name":"镍2102"
+            },
+            {
+                "ticker":"ni2012",
+                "name":"镍2012"
+            },
+            {
+                "ticker":"ni2103",
+                "name":"镍2103"
+            },
+            {
+                "ticker":"ni889",
+                "name":"镍主力连续价差平滑（后复权）"
+            },
+            {
+                "ticker":"ni2105",
+                "name":"镍2105"
+            },
+            {
+                "ticker":"ni2106",
+                "name":"镍2106"
+            },
+            {
+                "ticker":"ni2108",
+                "name":"镍2108"
+            },
+            {
+                "ticker":"ni2109",
+                "name":"镍2109"
+            },
+            {
+                "ticker":"ni2110",
+                "name":"镍2110"
+            },
+            {
+                "ticker":"ni2111",
+                "name":"镍2111"
+            }
+        ]
+    },
+    "nr":{
+        "exchangeId":"INE",
+        "include":[
+            {
+                "ticker":"nr2107",
+                "name":"20号胶2107"
+            },
+            {
+                "ticker":"nr2102",
+                "name":"20号胶2102"
+            },
+            {
+                "ticker":"nr2105",
+                "name":"20号胶2105"
+            },
+            {
+                "ticker":"nr2104",
+                "name":"20号胶2104"
+            },
+            {
+                "ticker":"nr2101",
+                "name":"20号胶2101"
+            },
+            {
+                "ticker":"nr2103",
+                "name":"20号胶2103"
+            },
+            {
+                "ticker":"nr99",
+                "name":"号胶指数连续"
+            },
+            {
+                "ticker":"nr2012",
+                "name":"20号胶2012"
+            },
+            {
+                "ticker":"nr889",
+                "name":"号胶主力连续价差平滑（后复权）"
+            },
+            {
+                "ticker":"nr88",
+                "name":"号胶主力连续"
+            },
+            {
+                "ticker":"nr888",
+                "name":"号胶主力连续价差平滑"
+            },
+            {
+                "ticker":"nr2106",
+                "name":"20号胶2106"
+            },
+            {
+                "ticker":"nr2108",
+                "name":"20号胶2108"
+            },
+            {
+                "ticker":"nr2109",
+                "name":"20号胶2109"
+            },
+            {
+                "ticker":"nr2110",
+                "name":"20号胶2110"
+            },
+            {
+                "ticker":"nr2111",
+                "name":"20号胶2111"
+            }
+        ]
+    },
+    "OI":{
+        "exchangeId":"CZCE",
+        "include":[
+            {
+                "ticker":"OI8",
+                "name":"菜籽油主力连续"
+            },
+            {
+                "ticker":"OI101",
+                "name":"菜籽油2101"
+            },
+            {
+                "ticker":"OI89",
+                "name":"菜籽油主力连续价差平滑（后复权）"
+            },
+            {
+                "ticker":"OI105",
+                "name":"菜籽油2105"
+            },
+            {
+                "ticker":"OI103",
+                "name":"菜籽油2103"
+            },
+            {
+                "ticker":"OI107",
+                "name":"菜籽油2107"
+            },
+            {
+                "ticker":"OI9",
+                "name":"菜籽油指数连续"
+            },
+            {
+                "ticker":"OI88",
+                "name":"菜籽油主力连续价差平滑"
+            },
+            {
+                "ticker":"OI109",
+                "name":"菜籽油2109"
+            },
+            {
+                "ticker":"OI111",
+                "name":"菜籽油2111"
+            }
+        ]
+    },
+    "p":{
+        "exchangeId":"DCE",
+        "include":[
+            {
+                "ticker":"p2106",
+                "name":"棕榈油2106"
+            },
+            {
+                "ticker":"p2012",
+                "name":"棕榈油2012"
+            },
+            {
+                "ticker":"p888",
+                "name":"棕榈油主力连续价差平滑"
+            },
+            {
+                "ticker":"p2104",
+                "name":"棕榈油2104"
+            },
+            {
+                "ticker":"p2101",
+                "name":"棕榈油2101"
+            },
+            {
+                "ticker":"p2107",
+                "name":"棕榈油2107"
+            },
+            {
+                "ticker":"p2102",
+                "name":"棕榈油2102"
+            },
+            {
+                "ticker":"p2103",
+                "name":"棕榈油2103"
+            },
+            {
+                "ticker":"p99",
+                "name":"棕榈油指数连续"
+            },
+            {
+                "ticker":"p2105",
+                "name":"棕榈油2105"
+            },
+            {
+                "ticker":"p88",
+                "name":"棕榈油主力连续"
+            },
+            {
+                "ticker":"p889",
+                "name":"棕榈油主力连续价差平滑（后复权）"
+            },
+            {
+                "ticker":"p2108",
+                "name":"棕榈油2108"
+            },
+            {
+                "ticker":"p2109",
+                "name":"棕榈油2109"
+            },
+            {
+                "ticker":"p2110",
+                "name":"棕榈油2110"
+            },
+            {
+                "ticker":"p2111",
+                "name":"棕榈油2111"
+            }
+        ]
+    },
+    "pb":{
+        "exchangeId":"SHFE",
+        "include":[
+            {
+                "ticker":"pb2102",
+                "name":"铅2102"
+            },
+            {
+                "ticker":"pb2012",
+                "name":"铅2012"
+            },
+            {
+                "ticker":"pb2106",
+                "name":"铅2106"
+            },
+            {
+                "ticker":"pb99",
+                "name":"铅指数连续"
+            },
+            {
+                "ticker":"pb2104",
+                "name":"铅2104"
+            },
+            {
+                "ticker":"pb88",
+                "name":"铅主力连续"
+            },
+            {
+                "ticker":"pb2101",
+                "name":"铅2101"
+            },
+            {
+                "ticker":"pb889",
+                "name":"铅主力连续价差平滑（后复权）"
+            },
+            {
+                "ticker":"pb888",
+                "name":"铅主力连续价差平滑"
+            },
+            {
+                "ticker":"pb2103",
+                "name":"铅2103"
+            },
+            {
+                "ticker":"pb2105",
+                "name":"铅2105"
+            },
+            {
+                "ticker":"pb2107",
+                "name":"铅2107"
+            },
+            {
+                "ticker":"pb2108",
+                "name":"铅2108"
+            },
+            {
+                "ticker":"pb2109",
+                "name":"铅2109"
+            },
+            {
+                "ticker":"pb2110",
+                "name":"铅2110"
+            },
+            {
+                "ticker":"pb2111",
+                "name":"铅2111"
+            }
+        ]
+    },
+    "pg":{
+        "exchangeId":"DCE",
+        "include":[
+            {
+                "ticker":"pg2012",
+                "name":"液化石油气2012"
+            },
+            {
+                "ticker":"pg2101",
+                "name":"液化石油气2101"
+            },
+            {
+                "ticker":"pg2102",
+                "name":"液化石油气2102"
+            },
+            {
+                "ticker":"pg2103",
+                "name":"液化石油气2103"
+            },
+            {
+                "ticker":"pg2104",
+                "name":"液化石油气2104"
+            },
+            {
+                "ticker":"pg2105",
+                "name":"液化石油气2105"
+            },
+            {
+                "ticker":"pg2106",
+                "name":"液化石油气2106"
+            },
+            {
+                "ticker":"pg2107",
+                "name":"液化石油气2107"
+            },
+            {
+                "ticker":"pg88",
+                "name":"液化石油气主力连续"
+            },
+            {
+                "ticker":"pg889",
+                "name":"液化石油气主力连续价差平滑（后复权）"
+            },
+            {
+                "ticker":"pg888",
+                "name":"液化石油气主力连续价差平滑"
+            },
+            {
+                "ticker":"pg99",
+                "name":"液化石油气指数连续"
+            },
+            {
+                "ticker":"pg2108",
+                "name":"液化石油气2108"
+            },
+            {
+                "ticker":"pg2109",
+                "name":"液化石油气2109"
+            },
+            {
+                "ticker":"pg2110",
+                "name":"液化石油气2110"
+            },
+            {
+                "ticker":"pg2111",
+                "name":"液化石油气2111"
+            }
+        ]
+    },
+    "PM":{
+        "exchangeId":"CZCE",
+        "include":[
+            {
+                "ticker":"PM101",
+                "name":"普通小麦2101"
+            },
+            {
+                "ticker":"PM88",
+                "name":"普通小麦主力连续价差平滑"
+            },
+            {
+                "ticker":"PM9",
+                "name":"普通小麦指数连续"
+            },
+            {
+                "ticker":"PM8",
+                "name":"普通小麦主力连续"
+            },
+            {
+                "ticker":"PM89",
+                "name":"普通小麦主力连续价差平滑（后复权）"
+            },
+            {
+                "ticker":"PM107",
+                "name":"普通小麦2107"
+            },
+            {
+                "ticker":"PM103",
+                "name":"普通小麦2103"
+            },
+            {
+                "ticker":"PM105",
+                "name":"普通小麦2105"
+            },
+            {
+                "ticker":"PM109",
+                "name":"普通小麦2109"
+            },
+            {
+                "ticker":"PM111",
+                "name":"普通小麦2111"
+            }
+        ]
+    },
+    "pp":{
+        "exchangeId":"DCE",
+        "include":[
+            {
+                "ticker":"pp2012",
+                "name":"聚丙烯2012"
+            },
+            {
+                "ticker":"pp2101",
+                "name":"聚丙烯2101"
+            },
+            {
+                "ticker":"pp2102",
+                "name":"聚丙烯2102"
+            },
+            {
+                "ticker":"pp2103",
+                "name":"聚丙烯2103"
+            },
+            {
+                "ticker":"pp2104",
+                "name":"聚丙烯2104"
+            },
+            {
+                "ticker":"pp2105",
+                "name":"聚丙烯2105"
+            },
+            {
+                "ticker":"pp2106",
+                "name":"聚丙烯2106"
+            },
+            {
+                "ticker":"pp2107",
+                "name":"聚丙烯2107"
+            },
+            {
+                "ticker":"pp88",
+                "name":"聚丙烯主力连续"
+            },
+            {
+                "ticker":"pp888",
+                "name":"聚丙烯主力连续价差平滑"
+            },
+            {
+                "ticker":"pp99",
+                "name":"聚丙烯指数连续"
+            },
+            {
+                "ticker":"pp889",
+                "name":"聚丙烯主力连续价差平滑（后复权）"
+            },
+            {
+                "ticker":"pp2108",
+                "name":"聚丙烯2108"
+            },
+            {
+                "ticker":"pp2109",
+                "name":"聚丙烯2109"
+            },
+            {
+                "ticker":"pp2110",
+                "name":"聚丙烯2110"
+            },
+            {
+                "ticker":"pp2111",
+                "name":"聚丙烯2111"
+            }
+        ]
+    },
+    "rb":{
+        "exchangeId":"SHFE",
+        "include":[
+            {
+                "ticker":"rb2012",
+                "name":"螺纹钢2012"
+            },
+            {
+                "ticker":"rb2106",
+                "name":"螺纹钢2106"
+            },
+            {
+                "ticker":"rb2103",
+                "name":"螺纹钢2103"
+            },
+            {
+                "ticker":"rb2104",
+                "name":"螺纹钢2104"
+            },
+            {
+                "ticker":"rb2101",
+                "name":"螺纹钢2101"
+            },
+            {
+                "ticker":"rb888",
+                "name":"螺纹钢主力连续价差平滑"
+            },
+            {
+                "ticker":"rb2105",
+                "name":"螺纹钢2105"
+            },
+            {
+                "ticker":"rb2107",
+                "name":"螺纹钢2107"
+            },
+            {
+                "ticker":"rb88",
+                "name":"螺纹钢主力连续"
+            },
+            {
+                "ticker":"rb2102",
+                "name":"螺纹钢2102"
+            },
+            {
+                "ticker":"rb889",
+                "name":"螺纹钢主力连续价差平滑（后复权）"
+            },
+            {
+                "ticker":"rb99",
+                "name":"螺纹钢指数连续"
+            },
+            {
+                "ticker":"rb2108",
+                "name":"螺纹钢2108"
+            },
+            {
+                "ticker":"rb2109",
+                "name":"螺纹钢2109"
+            },
+            {
+                "ticker":"rb2110",
+                "name":"螺纹钢2110"
+            },
+            {
+                "ticker":"rb2111",
+                "name":"螺纹钢2111"
+            }
+        ]
+    },
+    "RI":{
+        "exchangeId":"CZCE",
+        "include":[
+            {
+                "ticker":"RI8",
+                "name":"早籼稻主力连续"
+            },
+            {
+                "ticker":"RI105",
+                "name":"早籼稻2105"
+            },
+            {
+                "ticker":"RI103",
+                "name":"早籼稻2103"
+            },
+            {
+                "ticker":"RI9",
+                "name":"早籼稻指数连续"
+            },
+            {
+                "ticker":"RI88",
+                "name":"早籼稻主力连续价差平滑"
+            },
+            {
+                "ticker":"RI89",
+                "name":"早籼稻主力连续价差平滑（后复权）"
+            },
+            {
+                "ticker":"RI101",
+                "name":"早籼稻2101"
+            },
+            {
+                "ticker":"RI107",
+                "name":"早籼稻2107"
+            },
+            {
+                "ticker":"RI109",
+                "name":"早籼稻2109"
+            },
+            {
+                "ticker":"RI111",
+                "name":"早籼稻2111"
+            }
+        ]
+    },
+    "RM":{
+        "exchangeId":"CZCE",
+        "include":[
+            {
+                "ticker":"RM101",
+                "name":"菜籽粕2101"
+            },
+            {
+                "ticker":"RM103",
+                "name":"菜籽粕2103"
+            },
+            {
+                "ticker":"RM105",
+                "name":"菜籽粕2105"
+            },
+            {
+                "ticker":"RM8",
+                "name":"菜籽粕主力连续"
+            },
+            {
+                "ticker":"RM107",
+                "name":"菜籽粕2107"
+            },
+            {
+                "ticker":"RM9",
+                "name":"菜籽粕指数连续"
+            },
+            {
+                "ticker":"RM89",
+                "name":"菜籽粕主力连续价差平滑（后复权）"
+            },
+            {
+                "ticker":"RM88",
+                "name":"菜籽粕主力连续价差平滑"
+            },
+            {
+                "ticker":"RM108",
+                "name":"菜籽粕2108"
+            },
+            {
+                "ticker":"RM109",
+                "name":"菜籽粕2109"
+            },
+            {
+                "ticker":"RM111",
+                "name":"菜籽粕2111"
+            }
+        ]
+    },
+    "rr":{
+        "exchangeId":"DCE",
+        "include":[
+            {
+                "ticker":"rr2103",
+                "name":"粳米2103"
+            },
+            {
+                "ticker":"rr2102",
+                "name":"粳米2102"
+            },
+            {
+                "ticker":"rr2012",
+                "name":"粳米2012"
+            },
+            {
+                "ticker":"rr2101",
+                "name":"粳米2101"
+            },
+            {
+                "ticker":"rr889",
+                "name":"粳米主力连续价差平滑（后复权）"
+            },
+            {
+                "ticker":"rr2104",
+                "name":"粳米2104"
+            },
+            {
+                "ticker":"rr88",
+                "name":"粳米主力连续"
+            },
+            {
+                "ticker":"rr2107",
+                "name":"粳米2107"
+            },
+            {
+                "ticker":"rr2106",
+                "name":"粳米2106"
+            },
+            {
+                "ticker":"rr888",
+                "name":"粳米主力连续价差平滑"
+            },
+            {
+                "ticker":"rr2105",
+                "name":"粳米2105"
+            },
+            {
+                "ticker":"rr99",
+                "name":"粳米指数连续"
+            },
+            {
+                "ticker":"rr2108",
+                "name":"粳米2108"
+            },
+            {
+                "ticker":"rr2109",
+                "name":"粳米2109"
+            },
+            {
+                "ticker":"rr2110",
+                "name":"粳米2110"
+            },
+            {
+                "ticker":"rr2111",
+                "name":"粳米2111"
+            }
+        ]
+    },
+    "RS":{
+        "exchangeId":"CZCE",
+        "include":[
+            {
+                "ticker":"RS9",
+                "name":"油菜籽指数连续"
+            },
+            {
+                "ticker":"RS89",
+                "name":"油菜籽主力连续价差平滑（后复权）"
+            },
+            {
+                "ticker":"RS107",
+                "name":"油菜籽2107"
+            },
+            {
+                "ticker":"RS88",
+                "name":"油菜籽主力连续价差平滑"
+            },
+            {
+                "ticker":"RS8",
+                "name":"油菜籽主力连续"
+            },
+            {
+                "ticker":"RS108",
+                "name":"油菜籽2108"
+            },
+            {
+                "ticker":"RS109",
+                "name":"油菜籽2109"
+            },
+            {
+                "ticker":"RS111",
+                "name":"油菜籽2111"
+            }
+        ]
+    },
+    "ru":{
+        "exchangeId":"SHFE",
+        "include":[
+            {
+                "ticker":"ru2101",
+                "name":"天然橡胶2101"
+            },
+            {
+                "ticker":"ru2103",
+                "name":"天然橡胶2103"
+            },
+            {
+                "ticker":"ru2104",
+                "name":"天然橡胶2104"
+            },
+            {
+                "ticker":"ru2105",
+                "name":"天然橡胶2105"
+            },
+            {
+                "ticker":"ru2106",
+                "name":"天然橡胶2106"
+            },
+            {
+                "ticker":"ru2107",
+                "name":"天然橡胶2107"
+            },
+            {
+                "ticker":"ru99",
+                "name":"天然橡胶指数连续"
+            },
+            {
+                "ticker":"ru88",
+                "name":"天然橡胶主力连续"
+            },
+            {
+                "ticker":"ru889",
+                "name":"天然橡胶主力连续价差平滑（后复权）"
+            },
+            {
+                "ticker":"ru888",
+                "name":"天然橡胶主力连续价差平滑"
+            },
+            {
+                "ticker":"ru2108",
+                "name":"天然橡胶2108"
+            },
+            {
+                "ticker":"ru2109",
+                "name":"天然橡胶2109"
+            },
+            {
+                "ticker":"ru2110",
+                "name":"天然橡胶2110"
+            },
+            {
+                "ticker":"ru2111",
+                "name":"天然橡胶2111"
+            }
+        ]
+    },
+    "SA":{
+        "exchangeId":"CZCE",
+        "include":[
+            {
+                "ticker":"SA104",
+                "name":"纯碱2104"
+            },
+            {
+                "ticker":"SA107",
+                "name":"纯碱2107"
+            },
+            {
+                "ticker":"SA103",
+                "name":"纯碱2103"
+            },
+            {
+                "ticker":"SA101",
+                "name":"纯碱2101"
+            },
+            {
+                "ticker":"SA89",
+                "name":"纯碱主力连续价差平滑（后复权）"
+            },
+            {
+                "ticker":"SA9",
+                "name":"纯碱指数连续"
+            },
+            {
+                "ticker":"SA8",
+                "name":"纯碱主力连续"
+            },
+            {
+                "ticker":"SA012",
+                "name":"纯碱2012"
+            },
+            {
+                "ticker":"SA88",
+                "name":"纯碱主力连续价差平滑"
+            },
+            {
+                "ticker":"SA106",
+                "name":"纯碱2106"
+            },
+            {
+                "ticker":"SA102",
+                "name":"纯碱2102"
+            },
+            {
+                "ticker":"SA105",
+                "name":"纯碱2105"
+            },
+            {
+                "ticker":"SA108",
+                "name":"纯碱2108"
+            },
+            {
+                "ticker":"SA109",
+                "name":"纯碱2109"
+            },
+            {
+                "ticker":"SA110",
+                "name":"纯碱2110"
+            },
+            {
+                "ticker":"SA111",
+                "name":"纯碱2111"
+            }
+        ]
+    },
+    "sc":{
+        "exchangeId":"INE",
+        "include":[
+            {
+                "ticker":"sc2101",
+                "name":"原油2101"
+            },
+            {
+                "ticker":"sc2012",
+                "name":"原油2012"
+            },
+            {
+                "ticker":"sc2108",
+                "name":"原油2108"
+            },
+            {
+                "ticker":"sc2107",
+                "name":"原油2107"
+            },
+            {
+                "ticker":"sc2104",
+                "name":"原油2104"
+            },
+            {
+                "ticker":"sc2203",
+                "name":"原油2203"
+            },
+            {
+                "ticker":"sc2103",
+                "name":"原油2103"
+            },
+            {
+                "ticker":"sc2303",
+                "name":"原油2303"
+            },
+            {
+                "ticker":"sc2102",
+                "name":"原油2102"
+            },
+            {
+                "ticker":"sc2109",
+                "name":"原油2109"
+            },
+            {
+                "ticker":"sc2206",
+                "name":"原油2206"
+            },
+            {
+                "ticker":"sc2112",
+                "name":"原油2112"
+            },
+            {
+                "ticker":"sc888",
+                "name":"原油主力连续价差平滑"
+            },
+            {
+                "ticker":"sc2306",
+                "name":"原油2306"
+            },
+            {
+                "ticker":"sc88",
+                "name":"原油主力连续"
+            },
+            {
+                "ticker":"sc2106",
+                "name":"原油2106"
+            },
+            {
+                "ticker":"sc2105",
+                "name":"原油2105"
+            },
+            {
+                "ticker":"sc2209",
+                "name":"原油2209"
+            },
+            {
+                "ticker":"sc99",
+                "name":"原油指数连续"
+            },
+            {
+                "ticker":"sc2212",
+                "name":"原油2212"
+            },
+            {
+                "ticker":"sc889",
+                "name":"原油主力连续价差平滑（后复权）"
+            },
+            {
+                "ticker":"sc2309",
+                "name":"原油2309"
+            },
+            {
+                "ticker":"sc2110",
+                "name":"原油2110"
+            },
+            {
+                "ticker":"sc2111",
+                "name":"原油2111"
+            }
+        ]
+    },
+    "SF":{
+        "exchangeId":"CZCE",
+        "include":[
+            {
+                "ticker":"SF103",
+                "name":"硅铁2103"
+            },
+            {
+                "ticker":"SF012",
+                "name":"硅铁2012"
+            },
+            {
+                "ticker":"SF107",
+                "name":"硅铁2107"
+            },
+            {
+                "ticker":"SF105",
+                "name":"硅铁2105"
+            },
+            {
+                "ticker":"SF101",
+                "name":"硅铁2101"
+            },
+            {
+                "ticker":"SF104",
+                "name":"硅铁2104"
+            },
+            {
+                "ticker":"SF106",
+                "name":"硅铁2106"
+            },
+            {
+                "ticker":"SF9",
+                "name":"硅铁指数连续"
+            },
+            {
+                "ticker":"SF102",
+                "name":"硅铁2102"
+            },
+            {
+                "ticker":"SF88",
+                "name":"硅铁主力连续价差平滑"
+            },
+            {
+                "ticker":"SF89",
+                "name":"硅铁主力连续价差平滑（后复权）"
+            },
+            {
+                "ticker":"SF8",
+                "name":"硅铁主力连续"
+            },
+            {
+                "ticker":"SF108",
+                "name":"硅铁2108"
+            },
+            {
+                "ticker":"SF109",
+                "name":"硅铁2109"
+            },
+            {
+                "ticker":"SF110",
+                "name":"硅铁2110"
+            },
+            {
+                "ticker":"SF111",
+                "name":"硅铁2111"
+            }
+        ]
+    },
+    "SM":{
+        "exchangeId":"CZCE",
+        "include":[
+            {
+                "ticker":"SM101",
+                "name":"锰硅2101"
+            },
+            {
+                "ticker":"SM103",
+                "name":"锰硅2103"
+            },
+            {
+                "ticker":"SM105",
+                "name":"锰硅2105"
+            },
+            {
+                "ticker":"SM012",
+                "name":"锰硅2012"
+            },
+            {
+                "ticker":"SM104",
+                "name":"锰硅2104"
+            },
+            {
+                "ticker":"SM102",
+                "name":"锰硅2102"
+            },
+            {
+                "ticker":"SM106",
+                "name":"锰硅2106"
+            },
+            {
+                "ticker":"SM9",
+                "name":"锰硅指数连续"
+            },
+            {
+                "ticker":"SM88",
+                "name":"锰硅主力连续价差平滑"
+            },
+            {
+                "ticker":"SM8",
+                "name":"锰硅主力连续"
+            },
+            {
+                "ticker":"SM107",
+                "name":"锰硅2107"
+            },
+            {
+                "ticker":"SM89",
+                "name":"锰硅主力连续价差平滑（后复权）"
+            },
+            {
+                "ticker":"SM108",
+                "name":"锰硅2108"
+            },
+            {
+                "ticker":"SM109",
+                "name":"锰硅2109"
+            },
+            {
+                "ticker":"SM110",
+                "name":"锰硅2110"
+            },
+            {
+                "ticker":"SM111",
+                "name":"锰硅2111"
             }
         ]
     },
     "sn":{
         "exchangeId":"SHFE",
         "include":[
-            {
-                "ticker":"sn2009",
-                "name":"锡2009"
-            },
-            {
-                "ticker":"sn2010",
-                "name":"锡2010"
-            },
-            {
-                "ticker":"sn2011",
-                "name":"锡2011"
-            },
             {
                 "ticker":"sn2012",
                 "name":"锡2012"
@@ -2171,8 +3129,24 @@
                 "name":"锡2101"
             },
             {
+                "ticker":"sn2106",
+                "name":"锡2106"
+            },
+            {
+                "ticker":"sn889",
+                "name":"锡主力连续价差平滑（后复权）"
+            },
+            {
                 "ticker":"sn2102",
                 "name":"锡2102"
+            },
+            {
+                "ticker":"sn2105",
+                "name":"锡2105"
+            },
+            {
+                "ticker":"sn88",
+                "name":"锡主力连续"
             },
             {
                 "ticker":"sn2103",
@@ -2183,67 +3157,458 @@
                 "name":"锡2104"
             },
             {
-                "ticker":"sn2105",
-                "name":"锡2105"
-            },
-            {
-                "ticker":"sn2106",
-                "name":"锡2106"
-            },
-            {
                 "ticker":"sn2107",
                 "name":"锡2107"
+            },
+            {
+                "ticker":"sn888",
+                "name":"锡主力连续价差平滑"
+            },
+            {
+                "ticker":"sn99",
+                "name":"锡指数连续"
+            },
+            {
+                "ticker":"sn2108",
+                "name":"锡2108"
+            },
+            {
+                "ticker":"sn2109",
+                "name":"锡2109"
+            },
+            {
+                "ticker":"sn2110",
+                "name":"锡2110"
+            },
+            {
+                "ticker":"sn2111",
+                "name":"锡2111"
             }
         ]
     },
-    "SM":{
+    "sp":{
+        "exchangeId":"SHFE",
+        "include":[
+            {
+                "ticker":"sp2101",
+                "name":"漂针浆2101"
+            },
+            {
+                "ticker":"sp99",
+                "name":"漂针浆指数连续"
+            },
+            {
+                "ticker":"sp2106",
+                "name":"漂针浆2106"
+            },
+            {
+                "ticker":"sp2012",
+                "name":"漂针浆2012"
+            },
+            {
+                "ticker":"sp889",
+                "name":"漂针浆主力连续价差平滑（后复权）"
+            },
+            {
+                "ticker":"sp2103",
+                "name":"漂针浆2103"
+            },
+            {
+                "ticker":"sp2107",
+                "name":"漂针浆2107"
+            },
+            {
+                "ticker":"sp888",
+                "name":"漂针浆主力连续价差平滑"
+            },
+            {
+                "ticker":"sp2104",
+                "name":"漂针浆2104"
+            },
+            {
+                "ticker":"sp2102",
+                "name":"漂针浆2102"
+            },
+            {
+                "ticker":"sp2105",
+                "name":"漂针浆2105"
+            },
+            {
+                "ticker":"sp88",
+                "name":"漂针浆主力连续"
+            },
+            {
+                "ticker":"sp2108",
+                "name":"漂针浆2108"
+            },
+            {
+                "ticker":"sp2109",
+                "name":"漂针浆2109"
+            },
+            {
+                "ticker":"sp2110",
+                "name":"漂针浆2110"
+            },
+            {
+                "ticker":"sp2111",
+                "name":"漂针浆2111"
+            }
+        ]
+    },
+    "SR":{
         "exchangeId":"CZCE",
         "include":[
             {
-                "ticker":"SM010",
-                "name":"锰硅010"
+                "ticker":"SR101",
+                "name":"白砂糖2101"
             },
             {
-                "ticker":"SM011",
-                "name":"锰硅011"
+                "ticker":"SR103",
+                "name":"白砂糖2103"
             },
             {
-                "ticker":"SM012",
-                "name":"锰硅012"
+                "ticker":"SR105",
+                "name":"白砂糖2105"
             },
             {
-                "ticker":"SM101",
-                "name":"锰硅101"
+                "ticker":"SR89",
+                "name":"白砂糖主力连续价差平滑（后复权）"
             },
             {
-                "ticker":"SM102",
-                "name":"锰硅102"
+                "ticker":"SR88",
+                "name":"白砂糖主力连续价差平滑"
             },
             {
-                "ticker":"SM103",
-                "name":"锰硅103"
+                "ticker":"SR107",
+                "name":"白砂糖2107"
             },
             {
-                "ticker":"SM104",
-                "name":"锰硅104"
+                "ticker":"SR8",
+                "name":"白砂糖主力连续"
             },
             {
-                "ticker":"SM105",
-                "name":"锰硅105"
+                "ticker":"SR9",
+                "name":"白砂糖指数连续"
+            },
+            {
+                "ticker":"SR109",
+                "name":"白砂糖2109"
+            },
+            {
+                "ticker":"SR111",
+                "name":"白砂糖2111"
+            }
+        ]
+    },
+    "ss":{
+        "exchangeId":"SHFE",
+        "include":[
+            {
+                "ticker":"ss2012",
+                "name":"不锈钢2012"
+            },
+            {
+                "ticker":"ss2102",
+                "name":"不锈钢2102"
+            },
+            {
+                "ticker":"ss2101",
+                "name":"不锈钢2101"
+            },
+            {
+                "ticker":"ss2105",
+                "name":"不锈钢2105"
+            },
+            {
+                "ticker":"ss88",
+                "name":"不锈钢主力连续"
+            },
+            {
+                "ticker":"ss2104",
+                "name":"不锈钢2104"
+            },
+            {
+                "ticker":"ss889",
+                "name":"不锈钢主力连续价差平滑（后复权）"
+            },
+            {
+                "ticker":"ss99",
+                "name":"不锈钢指数连续"
+            },
+            {
+                "ticker":"ss2106",
+                "name":"不锈钢2106"
+            },
+            {
+                "ticker":"ss2103",
+                "name":"不锈钢2103"
+            },
+            {
+                "ticker":"ss888",
+                "name":"不锈钢主力连续价差平滑"
+            },
+            {
+                "ticker":"ss2107",
+                "name":"不锈钢2107"
+            },
+            {
+                "ticker":"ss2108",
+                "name":"不锈钢2108"
+            },
+            {
+                "ticker":"ss2109",
+                "name":"不锈钢2109"
+            },
+            {
+                "ticker":"ss2110",
+                "name":"不锈钢2110"
+            },
+            {
+                "ticker":"ss2111",
+                "name":"不锈钢2111"
+            }
+        ]
+    },
+    "T":{
+        "exchangeId":"CFFEX",
+        "include":[
+            {
+                "ticker":"T888",
+                "name":"年期国债主力连续价差平滑"
+            },
+            {
+                "ticker":"T889",
+                "name":"年期国债主力连续价差平滑（后复权）"
+            },
+            {
+                "ticker":"T99",
+                "name":"年期国债指数连续"
+            },
+            {
+                "ticker":"T88",
+                "name":"年期国债主力连续"
+            },
+            {
+                "ticker":"T2012",
+                "name":"10年期国债2012"
+            },
+            {
+                "ticker":"T2103",
+                "name":"10年期国债2103"
+            },
+            {
+                "ticker":"T2106",
+                "name":"10年期国债2106"
+            }
+        ]
+    },
+    "TA":{
+        "exchangeId":"CZCE",
+        "include":[
+            {
+                "ticker":"TA101",
+                "name":"精对苯二甲酸2101"
+            },
+            {
+                "ticker":"TA012",
+                "name":"精对苯二甲酸2012"
+            },
+            {
+                "ticker":"TA103",
+                "name":"精对苯二甲酸2103"
+            },
+            {
+                "ticker":"TA102",
+                "name":"精对苯二甲酸2102"
+            },
+            {
+                "ticker":"TA104",
+                "name":"精对苯二甲酸2104"
+            },
+            {
+                "ticker":"TA105",
+                "name":"精对苯二甲酸2105"
+            },
+            {
+                "ticker":"TA88",
+                "name":"精对苯二甲酸主力连续价差平滑"
+            },
+            {
+                "ticker":"TA9",
+                "name":"精对苯二甲酸指数连续"
+            },
+            {
+                "ticker":"TA89",
+                "name":"精对苯二甲酸主力连续价差平滑（后复权）"
+            },
+            {
+                "ticker":"TA106",
+                "name":"精对苯二甲酸2106"
+            },
+            {
+                "ticker":"TA8",
+                "name":"精对苯二甲酸主力连续"
+            },
+            {
+                "ticker":"TA107",
+                "name":"精对苯二甲酸2107"
+            },
+            {
+                "ticker":"TA108",
+                "name":"精对苯二甲酸2108"
+            },
+            {
+                "ticker":"TA109",
+                "name":"精对苯二甲酸2109"
+            },
+            {
+                "ticker":"TA110",
+                "name":"精对苯二甲酸2110"
+            },
+            {
+                "ticker":"TA111",
+                "name":"精对苯二甲酸2111"
+            }
+        ]
+    },
+    "TF":{
+        "exchangeId":"CFFEX",
+        "include":[
+            {
+                "ticker":"TF2012",
+                "name":"5年期国债2012"
+            },
+            {
+                "ticker":"TF88",
+                "name":"年期国债主力连续"
+            },
+            {
+                "ticker":"TF889",
+                "name":"年期国债主力连续价差平滑（后复权）"
+            },
+            {
+                "ticker":"TF99",
+                "name":"年期国债指数连续"
+            },
+            {
+                "ticker":"TF888",
+                "name":"年期国债主力连续价差平滑"
+            },
+            {
+                "ticker":"TF2103",
+                "name":"5年期国债2103"
+            },
+            {
+                "ticker":"TF2106",
+                "name":"5年期国债2106"
+            }
+        ]
+    },
+    "TS":{
+        "exchangeId":"CFFEX",
+        "include":[
+            {
+                "ticker":"TS888",
+                "name":"年期国债主力连续价差平滑"
+            },
+            {
+                "ticker":"TS2012",
+                "name":"2年期国债2012"
+            },
+            {
+                "ticker":"TS889",
+                "name":"年期国债主力连续价差平滑（后复权）"
+            },
+            {
+                "ticker":"TS99",
+                "name":"年期国债指数连续"
+            },
+            {
+                "ticker":"TS88",
+                "name":"年期国债主力连续"
+            },
+            {
+                "ticker":"TS2103",
+                "name":"2年期国债2103"
+            },
+            {
+                "ticker":"TS2106",
+                "name":"2年期国债2106"
+            }
+        ]
+    },
+    "UR":{
+        "exchangeId":"CZCE",
+        "include":[
+            {
+                "ticker":"UR107",
+                "name":"尿素2107"
+            },
+            {
+                "ticker":"UR101",
+                "name":"尿素2101"
+            },
+            {
+                "ticker":"UR8",
+                "name":"尿素主力连续"
+            },
+            {
+                "ticker":"UR89",
+                "name":"尿素主力连续价差平滑（后复权）"
+            },
+            {
+                "ticker":"UR106",
+                "name":"尿素2106"
+            },
+            {
+                "ticker":"UR9",
+                "name":"尿素指数连续"
+            },
+            {
+                "ticker":"UR105",
+                "name":"尿素2105"
+            },
+            {
+                "ticker":"UR012",
+                "name":"尿素2012"
+            },
+            {
+                "ticker":"UR102",
+                "name":"尿素2102"
+            },
+            {
+                "ticker":"UR103",
+                "name":"尿素2103"
+            },
+            {
+                "ticker":"UR104",
+                "name":"尿素2104"
+            },
+            {
+                "ticker":"UR88",
+                "name":"尿素主力连续价差平滑"
+            },
+            {
+                "ticker":"UR108",
+                "name":"尿素2108"
+            },
+            {
+                "ticker":"UR109",
+                "name":"尿素2109"
+            },
+            {
+                "ticker":"UR110",
+                "name":"尿素2110"
+            },
+            {
+                "ticker":"UR111",
+                "name":"尿素2111"
             }
         ]
     },
     "v":{
         "exchangeId":"DCE",
         "include":[
-            {
-                "ticker":"v2010",
-                "name":"聚氯乙烯2010"
-            },
-            {
-                "ticker":"v2011",
-                "name":"聚氯乙烯2011"
-            },
             {
                 "ticker":"v2012",
                 "name":"聚氯乙烯2012"
@@ -2267,6 +3632,160 @@
             {
                 "ticker":"v2105",
                 "name":"聚氯乙烯2105"
+            },
+            {
+                "ticker":"v2106",
+                "name":"聚氯乙烯2106"
+            },
+            {
+                "ticker":"v2107",
+                "name":"聚氯乙烯2107"
+            },
+            {
+                "ticker":"v888",
+                "name":"聚氯乙烯主力连续价差平滑"
+            },
+            {
+                "ticker":"v88",
+                "name":"聚氯乙烯主力连续"
+            },
+            {
+                "ticker":"v99",
+                "name":"聚氯乙烯指数连续"
+            },
+            {
+                "ticker":"v889",
+                "name":"聚氯乙烯主力连续价差平滑（后复权）"
+            },
+            {
+                "ticker":"v2108",
+                "name":"聚氯乙烯2108"
+            },
+            {
+                "ticker":"v2109",
+                "name":"聚氯乙烯2109"
+            },
+            {
+                "ticker":"v2110",
+                "name":"聚氯乙烯2110"
+            },
+            {
+                "ticker":"v2111",
+                "name":"聚氯乙烯2111"
+            }
+        ]
+    },
+    "WH":{
+        "exchangeId":"CZCE",
+        "include":[
+            {
+                "ticker":"WH107",
+                "name":"优质强筋小麦2107"
+            },
+            {
+                "ticker":"WH105",
+                "name":"优质强筋小麦2105"
+            },
+            {
+                "ticker":"WH103",
+                "name":"优质强筋小麦2103"
+            },
+            {
+                "ticker":"WH101",
+                "name":"优质强筋小麦2101"
+            },
+            {
+                "ticker":"WH8",
+                "name":"优质强筋小麦主力连续"
+            },
+            {
+                "ticker":"WH9",
+                "name":"优质强筋小麦指数连续"
+            },
+            {
+                "ticker":"WH89",
+                "name":"优质强筋小麦主力连续价差平滑（后复权）"
+            },
+            {
+                "ticker":"WH88",
+                "name":"优质强筋小麦主力连续价差平滑"
+            },
+            {
+                "ticker":"WH109",
+                "name":"优质强筋小麦2109"
+            },
+            {
+                "ticker":"WH111",
+                "name":"优质强筋小麦2111"
+            }
+        ]
+    },
+    "wr":{
+        "exchangeId":"SHFE",
+        "include":[
+            {
+                "ticker":"wr2102",
+                "name":"线材2102"
+            },
+            {
+                "ticker":"wr888",
+                "name":"线材主力连续价差平滑"
+            },
+            {
+                "ticker":"wr2106",
+                "name":"线材2106"
+            },
+            {
+                "ticker":"wr2107",
+                "name":"线材2107"
+            },
+            {
+                "ticker":"wr2101",
+                "name":"线材2101"
+            },
+            {
+                "ticker":"wr2103",
+                "name":"线材2103"
+            },
+            {
+                "ticker":"wr2012",
+                "name":"线材2012"
+            },
+            {
+                "ticker":"wr2105",
+                "name":"线材2105"
+            },
+            {
+                "ticker":"wr889",
+                "name":"线材主力连续价差平滑（后复权）"
+            },
+            {
+                "ticker":"wr2104",
+                "name":"线材2104"
+            },
+            {
+                "ticker":"wr88",
+                "name":"线材主力连续"
+            },
+            {
+                "ticker":"wr99",
+                "name":"线材指数连续"
+            },
+            {
+                "ticker":"wr2108",
+                "name":"线材2108"
+            },
+            {
+                "ticker":"wr2109",
+                "name":"线材2109"
+            },
+            {
+                "ticker":"wr2110",
+                "name":"线材2110"
+            },
+            {
+                "ticker":"wr2111",
+                "name":"线材2111"
             }
         ]
     },
@@ -2274,180 +3793,296 @@
         "exchangeId":"DCE",
         "include":[
             {
-                "ticker":"y2011",
-                "name":"豆油2011"
+                "ticker":"y2103",
+                "name":"豆油2103"
             },
             {
                 "ticker":"y2012",
                 "name":"豆油2012"
             },
             {
-                "ticker":"y2101",
-                "name":"豆油2101"
+                "ticker":"y2107",
+                "name":"豆油2107"
             },
             {
-                "ticker":"y2103",
-                "name":"豆油2103"
+                "ticker":"y2101",
+                "name":"豆油2101"
             },
             {
                 "ticker":"y2105",
                 "name":"豆油2105"
             },
             {
-                "ticker":"y2107",
-                "name":"豆油2107"
+                "ticker":"y888",
+                "name":"豆油主力连续价差平滑"
+            },
+            {
+                "ticker":"y889",
+                "name":"豆油主力连续价差平滑（后复权）"
+            },
+            {
+                "ticker":"y88",
+                "name":"豆油主力连续"
+            },
+            {
+                "ticker":"y99",
+                "name":"豆油指数连续"
             },
             {
                 "ticker":"y2108",
                 "name":"豆油2108"
+            },
+            {
+                "ticker":"y2109",
+                "name":"豆油2109"
+            },
+            {
+                "ticker":"y2111",
+                "name":"豆油2111"
             }
         ]
     },
-    "SA":{
+    "ZC":{
         "exchangeId":"CZCE",
         "include":[
             {
-                "ticker":"SA011",
-                "name":"纯碱011"
+                "ticker":"ZC012",
+                "name":"动力煤2012"
             },
             {
-                "ticker":"SA010",
-                "name":"纯碱010"
+                "ticker":"ZC101",
+                "name":"动力煤2101"
             },
             {
-                "ticker":"SA012",
-                "name":"纯碱012"
+                "ticker":"ZC89",
+                "name":"动力煤主力连续价差平滑（后复权）"
             },
             {
-                "ticker":"SA101",
-                "name":"纯碱101"
+                "ticker":"ZC103",
+                "name":"动力煤2103"
             },
             {
-                "ticker":"SA102",
-                "name":"纯碱102"
+                "ticker":"ZC104",
+                "name":"动力煤2104"
             },
             {
-                "ticker":"SA103",
-                "name":"纯碱103"
+                "ticker":"ZC102",
+                "name":"动力煤2102"
             },
             {
-                "ticker":"SA104",
-                "name":"纯碱104"
+                "ticker":"ZC106",
+                "name":"动力煤2106"
             },
             {
-                "ticker":"SA105",
-                "name":"纯碱105"
+                "ticker":"ZC107",
+                "name":"动力煤2107"
             },
             {
-                "ticker":"SA106",
-                "name":"纯碱106"
+                "ticker":"ZC105",
+                "name":"动力煤2105"
             },
             {
-                "ticker":"SA107",
-                "name":"纯碱107"
+                "ticker":"ZC9",
+                "name":"动力煤指数连续"
             },
             {
-                "ticker":"SA108",
-                "name":"纯碱108"
+                "ticker":"ZC108",
+                "name":"动力煤2108"
+            },
+            {
+                "ticker":"ZC8",
+                "name":"动力煤主力连续"
+            },
+            {
+                "ticker":"ZC88",
+                "name":"动力煤主力连续价差平滑"
+            },
+            {
+                "ticker":"ZC109",
+                "name":"动力煤2109"
+            },
+            {
+                "ticker":"ZC110",
+                "name":"动力煤2110"
+            },
+            {
+                "ticker":"ZC111",
+                "name":"动力煤2111"
             }
         ]
     },
-    "TA":{
+    "zn":{
+        "exchangeId":"SHFE",
+        "include":[
+            {
+                "ticker":"zn2012",
+                "name":"锌2012"
+            },
+            {
+                "ticker":"zn2102",
+                "name":"锌2102"
+            },
+            {
+                "ticker":"zn88",
+                "name":"锌主力连续"
+            },
+            {
+                "ticker":"zn2103",
+                "name":"锌2103"
+            },
+            {
+                "ticker":"zn2104",
+                "name":"锌2104"
+            },
+            {
+                "ticker":"zn99",
+                "name":"锌指数连续"
+            },
+            {
+                "ticker":"zn2107",
+                "name":"锌2107"
+            },
+            {
+                "ticker":"zn2105",
+                "name":"锌2105"
+            },
+            {
+                "ticker":"zn2101",
+                "name":"锌2101"
+            },
+            {
+                "ticker":"zn889",
+                "name":"锌主力连续价差平滑（后复权）"
+            },
+            {
+                "ticker":"zn2106",
+                "name":"锌2106"
+            },
+            {
+                "ticker":"zn888",
+                "name":"锌主力连续价差平滑"
+            },
+            {
+                "ticker":"zn2108",
+                "name":"锌2108"
+            },
+            {
+                "ticker":"zn2109",
+                "name":"锌2109"
+            },
+            {
+                "ticker":"zn2110",
+                "name":"锌2110"
+            },
+            {
+                "ticker":"zn2111",
+                "name":"锌2111"
+            }
+        ]
+    },
+    "PF":{
         "exchangeId":"CZCE",
         "include":[
             {
-                "ticker":"TA010",
-                "name":"精对苯二甲酸010"
+                "ticker":"PF107",
+                "name":"短纤2107"
             },
             {
-                "ticker":"TA011",
-                "name":"精对苯二甲酸011"
+                "ticker":"PF108",
+                "name":"短纤2108"
             },
             {
-                "ticker":"TA012",
-                "name":"精对苯二甲酸012"
+                "ticker":"PF105",
+                "name":"短纤2105"
             },
             {
-                "ticker":"TA101",
-                "name":"精对苯二甲酸101"
+                "ticker":"PF106",
+                "name":"短纤2106"
             },
             {
-                "ticker":"TA102",
-                "name":"精对苯二甲酸102"
+                "ticker":"PF109",
+                "name":"短纤2109"
             },
             {
-                "ticker":"TA103",
-                "name":"精对苯二甲酸103"
+                "ticker":"PF108",
+                "name":"短纤主力连续价差平滑（后复权）"
             },
             {
-                "ticker":"TA104",
-                "name":"精对苯二甲酸104"
+                "ticker":"PF108",
+                "name":"短纤指数连续"
             },
             {
-                "ticker":"TA105",
-                "name":"精对苯二甲酸105"
+                "ticker":"PF108",
+                "name":"短纤主力连续"
             },
             {
-                "ticker":"TA106",
-                "name":"精对苯二甲酸106"
+                "ticker":"PF108",
+                "name":"短纤主力连续价差平滑"
             },
             {
-                "ticker":"TA107",
-                "name":"精对苯二甲酸107"
+                "ticker":"PF110",
+                "name":"短纤2110"
             },
             {
-                "ticker":"TA108",
-                "name":"精对苯二甲酸108"
+                "ticker":"PF111",
+                "name":"短纤2111"
             }
         ]
     },
-    "SF":{
-        "exchangeId":"CZCE",
+    "bc":{
+        "exchangeId":"INE",
         "include":[
             {
-                "ticker":"SF010",
-                "name":"硅铁010"
+                "ticker":"bc2106",
+                "name":"国际铜2106"
             },
             {
-                "ticker":"SF011",
-                "name":"硅铁011"
+                "ticker":"bc2104",
+                "name":"国际铜2104"
             },
             {
-                "ticker":"SF012",
-                "name":"硅铁012"
+                "ticker":"bc2108",
+                "name":"国际铜2108"
             },
             {
-                "ticker":"SF101",
-                "name":"硅铁101"
+                "ticker":"bc2105",
+                "name":"国际铜2105"
             },
             {
-                "ticker":"SF102",
-                "name":"硅铁102"
+                "ticker":"bc2110",
+                "name":"国际铜2110"
             },
             {
-                "ticker":"SF103",
-                "name":"硅铁103"
+                "ticker":"bc2109",
+                "name":"国际铜2109"
             },
             {
-                "ticker":"SF105",
-                "name":"硅铁105"
-            }
-        ]
-    },
-    "T":{
-        "exchangeId":"CFFEX",
-        "include":[
-            {
-                "ticker":"T2012",
-                "name":"10年期国债2012"
+                "ticker":"bc2111",
+                "name":"国际铜2111"
             },
             {
-                "ticker":"T2103",
-                "name":"10年期国债2103"
+                "ticker":"bc2106",
+                "name":"国际铜指数连续"
             },
             {
-                "ticker":"T2106",
-                "name":"10年期国债2106"
+                "ticker":"bc2106",
+                "name":"国际铜主力连续"
+            },
+            {
+                "ticker":"bc2106",
+                "name":"国际铜主力连续价差平滑"
+            },
+            {
+                "ticker":"bc2107",
+                "name":"国际铜2107"
+            },
+            {
+                "ticker":"bc2103",
+                "name":"国际铜2103"
+            },
+            {
+                "ticker":"bc2106",
+                "name":"国际铜主力连续价差平滑（后复权）"
             }
         ]
     }

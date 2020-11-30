@@ -67,7 +67,7 @@ export default {
                     'makeOrder', 
                     `/make-order`, 
                     remote, 
-                    { width: 410, height: 460 }
+                    { width: 410, height: 500 }
                 ).then((win) => {
                     
                     window.makeOrderWin = win;
