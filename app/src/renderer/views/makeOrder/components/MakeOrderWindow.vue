@@ -153,8 +153,8 @@
                 ]"
                 >
                     <el-radio-group size="mini" v-model="buyType">
-                        <el-radio size="mini"  label="volume">数量</el-radio>
-                        <el-radio size="mini"  label="price">金额</el-radio>
+                        <el-radio size="mini"  label="volume">按数量</el-radio>
+                        <el-radio size="mini"  label="price">按金额</el-radio>
                     </el-radio-group>
                 </el-form-item>
 
@@ -322,8 +322,7 @@ export default {
         },
 
         isFuture () {
-            return true;
-            // return (this.accountType || '').toLowerCase() === 'future'
+            return (this.accountType || '').toLowerCase() === 'future'
         },
 
         targetTickersSource () {
