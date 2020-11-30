@@ -62,7 +62,24 @@
                             :value="exchangeId">
                         </el-option>
                     </el-select>
-                </el-form-item>     
+                </el-form-item>    
+
+                <el-form-item
+                v-if="isFuture"
+                label="套保投机"
+                prop="hedge_flag"
+                :rules="[
+                    { required: true, message: '不能为空！', trigger: 'change'},
+                ]">
+                    <el-select v-model.trim="makeOrderForm.hedge_flag">
+                        <el-option
+                            v-for="key in Object.keys(hedgeFlag || {})"
+                            :key="key"
+                            :label="hedgeFlag[key]"
+                            :value="+key">
+                        </el-option>
+                    </el-select>
+                </el-form-item>  
 
                 <el-form-item
                 label="买卖"
@@ -305,7 +322,8 @@ export default {
         },
 
         isFuture () {
-            return (this.accountType || '').toLowerCase() === 'future'
+            return true;
+            // return (this.accountType || '').toLowerCase() === 'future'
         },
 
         targetTickersSource () {
