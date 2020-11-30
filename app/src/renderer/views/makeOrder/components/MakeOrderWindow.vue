@@ -1,7 +1,7 @@
 <template>
     <tr-dashboard :title="`下单 ${currentId}`">
         <div class="kf-make-order-window__body">
-            <el-form ref="make-order-form" label-width="60px" :model="makeOrderForm">
+            <el-form ref="make-order-form" label-width="70px" :model="makeOrderForm">
                 <el-form-item
                 v-if="moduleType === 'strategy'"
                 label="账户"
@@ -21,17 +21,19 @@
                         </el-option>
                     </el-select>
                 </el-form-item>   
+
                 <el-form-item
                 label="代码"
                 prop="instrument_id"
                 :rules="[
-                    { required: true, message: '不能为空！', trigger: 'blur'},
+                    { required: true, message: '不能为空！', trigger: 'input'},
                 ]">
                     <el-autocomplete 
                     ref="insturment-id-input"
                     v-model.trim="makeOrderForm.instrument_id"
                     :fetch-suggestions="querySearch"
                     placeholder="请输入代码名称"
+                    @blur="handleBlurInstrumentId"
                     @select="handleSelectInstrumentId"
                     >
                         <template v-slot="{ item }">
@@ -45,11 +47,12 @@
                         </template>
                     </el-autocomplete>
                 </el-form-item>      
+
                 <el-form-item
                 label="交易所"
                 prop="exchange_id"
                 :rules="[
-                    { required: true, message: '不能为空！', trigger: 'blur' },
+                    { required: true, message: '不能为空！', trigger: 'change' },
                 ]">
                     <el-select v-model.trim="makeOrderForm.exchange_id">
                         <el-option
@@ -60,35 +63,38 @@
                         </el-option>
                     </el-select>
                 </el-form-item>     
+
                 <el-form-item
                 label="买卖"
                 prop="side"
                 class="no-margin"
                 :rules="[
-                    { required: true, message: '不能为空！', trigger: 'blur' },
+                    { required: true, message: '不能为空！', trigger: 'change' },
                 ]">
                     <el-radio-group size="mini" v-model="makeOrderForm.side">
                         <el-radio size="mini" :class="{ 'red-radio': +key === 0, 'green-radio': +key === 1 }"  v-for="key in Object.keys(sideName || {}).slice(0, 2)" :key="key" :label="+key">{{ sideName[key] }}</el-radio>
                     </el-radio-group>
                 </el-form-item>
+
                 <el-form-item
                 v-if="isFuture"
                 label="开平"
                 prop="offset"
                 class="no-margin"
                 :rules="[
-                    { required: true, message: '不能为空！', trigger: 'blur' },
+                    { required: true, message: '不能为空！', trigger: 'change' },
                 ]">
                     <el-radio-group size="mini" v-model="makeOrderForm.offset">
                         <el-radio size="mini" :class="{ 'red-radio': +key === 0, 'green-radio': +key !== 0 }" v-for="key in Object.keys(offsetName || {})" :key="key" :label="+key">{{ offsetName[key] }}</el-radio>
                     </el-radio-group>
                 </el-form-item>
+
                 <el-form-item
                 label="类型"
                 prop="price_type"
                 class="no-margin"
                 :rules="[
-                    { required: true, message: '不能为空！', trigger: 'blur' },
+                    { required: true, message: '不能为空！', trigger: 'change' },
                 ]">
                     <el-radio-group size="mini" v-model="makeOrderForm.price_type">
                         <el-radio size="mini" v-for="key in Object.keys(priceType || {})" :label="+key" :key="key">{{ priceType[key] }}</el-radio>
@@ -102,8 +108,8 @@
                         label="价格"
                         prop="limit_price"
                         :rules="[
-                            { required: true, message: '不能为空！', trigger: 'blur' },
-                            { validator: biggerThanZeroValidator}
+                            { required: true, message: '不能为空！', trigger: 'input' },
+                            { validator: biggerThanZeroValidator, trigger: 'blur'}
                         ]">
                             <el-input-number
                             :precision="3"
@@ -121,15 +127,29 @@
                     </el-col>
                 </el-row>
 
-                <el-row class="make-order-line">
+                <el-form-item
+                label="买入方式"
+                class="no-margin"
+                v-if="!isFuture && (makeOrderForm.price_type === 0)"
+                :rules="[
+                    { required: true, message: '不能为空！', trigger: 'change' },
+                ]"
+                >
+                    <el-radio-group size="mini" v-model="buyType">
+                        <el-radio size="mini"  label="volume">数量</el-radio>
+                        <el-radio size="mini"  label="price">金额</el-radio>
+                    </el-radio-group>
+                </el-form-item>
+
+                <el-row class="make-order-line" v-if="buyType === 'volume'">
                     <el-col :span="16">
                         <el-form-item
                         label="数量"
                         prop="volume"
                         class="no-margin"
                         :rules="[
-                            { required: true, message: '不能为空！', trigger: 'blur' },
-                            { validator: biggerThanZeroValidator}
+                            { required: true, message: '不能为空！', trigger: 'input' },
+                            { validator: biggerThanZeroValidator, trigger: 'blur'}
                         ]">
                             <el-input-number 
                             :step="100"  
@@ -142,6 +162,33 @@
                     <el-col :span="8">
                         <div class="make-order-line-info">
                             <span>可下单手数</span>
+                            <span>{{ avaliableOrderVolume || '-' }}</span>
+                        </div>
+                    </el-col>
+                </el-row>
+
+
+                <el-row class="make-order-line" v-else>
+                    <el-col :span="16">
+                        <el-form-item
+                        label="总金额"
+                        prop="totalPrice"
+                        class="no-margin"
+                        :rules="[
+                            { required: true, message: '不能为空！', trigger: 'input' },
+                            { validator: biggerThanZeroValidator, trigger: 'blur'}
+                        ]">
+                            <el-input-number 
+                            :step="100"  
+                            :controls="false"
+                            placeholder="请输入数量"
+                            v-model.trim="makeOrderForm.totalPrice"
+                            ></el-input-number>                
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                        <div class="make-order-line-info">
+                            <span>下单手数</span>
                             <span>{{ avaliableOrderVolume || '-' }}</span>
                         </div>
                     </el-col>
@@ -212,11 +259,14 @@ export default {
                 exchange_id: '',
                 limit_price: 0,
                 volume: 0,
+                totalPrice: 0,
                 side: 0,
                 offset: 0,
                 price_type: 0,
                 hedge_flag: 0,
             },
+
+            buyType: 'volume', // volume or price
 
             currentSearchTickerList: [],
 
@@ -300,6 +350,11 @@ export default {
         },        
 
         avaliableOrderVolume () {
+
+            if (this.buyType === 'price') {
+                return this.makeOrderForm.volume
+            }
+
             if (this.makeOrderForm.price_type === 0) {
                 
                 if (this.makeOrderForm.side === 0) { //买
@@ -325,10 +380,6 @@ export default {
             } 
 
             return ''
-        },
-
-        currentSearchTarget () {
-
         },
     },
 
@@ -358,11 +409,65 @@ export default {
                     }
                 })
         },
+
+        "makeOrderForm.totalPrice" (val) {
+            if (this.buyType !== 'price') return;
+            const price = +this.makeOrderForm.limit_price;
+            const totalPrice = +val;
+
+            if (price && !isNaN(price)) {
+                if (totalPrice && !isNaN(totalPrice)) {
+                    if (totalPrice > 0) {
+                        if (price > 0) {
+                            this.$set(this.makeOrderForm, 'volume', Math.floor(totalPrice / price))
+                            return;
+                        }
+                    }
+                }
+            }
+
+            this.$set(this.makeOrderForm, 'volume', 0)
+        },
+
+         "makeOrderForm.limit_price" (val) {
+            if (this.buyType !== 'price') return;
+            const price = +val;
+            const totalPrice = +this.makeOrderForm.totalPrice;
+
+            if (price && !isNaN(price)) {
+                if (totalPrice && !isNaN(totalPrice)) {
+                    if (totalPrice > 0) {
+                        if (price > 0) {
+                            this.$set(this.makeOrderForm, 'volume', Math.floor(totalPrice / price))
+                            return;
+                        }
+                    }
+                }
+            }
+
+            this.$set(this.makeOrderForm, 'volume', 0)
+        },
+
+        "makeOrderForm.price_type" (val) {
+            if (+val === 1) {
+                this.buyType = 'volume'
+            }
+        }
+        
     },
 
     methods: {
 
+        handleBlurInstrumentId (e, item) {
+            //当手动输入ticker，清空除了instumentId外的一切
+            this.setInstumentIdTimer = setTimeout(() => {
+                this.clearData(true)
+            }, 300)
+        },
+
         handleSelectInstrumentId (item) {
+            this.setInstumentIdTimer && clearTimeout(this.setInstumentIdTimer)
+            this.clearData(true)
             const { ticker, exchangeId } = item;
             this.$set(this.makeOrderForm, 'instrument_id', ticker)
             this.$set(this.makeOrderForm, 'exchange_id', (exchangeId || '').toUpperCase())
@@ -403,6 +508,7 @@ export default {
                     let makeOrderForm = deepClone(t.makeOrderForm);
                     const instrumentType = t.getInstrumentType(t.currentAccountResolved);
                     makeOrderForm['instrument_type'] = instrumentType;
+                    delete makeOrderForm.totalPrice
 
                     this.makeOrder(this.moduleType, makeOrderForm, t.currentAccountResolved, t.currentId)
                     
@@ -456,21 +562,26 @@ export default {
             return this.tdAccountSource[sourceName]
         },
         
-        clearData () {
+        clearData (exceptId=false) {
             this.$emit('update:visible', false)
             this.currentAccount = '';
-            this.makeOrderForm = {
-                name: '', // account_id
-                instrument_id: '',
-                instrument_type: '',
-                exchange_id: '',
-                limit_price: 0,
-                volume: 0,
-                side: 0,
-                offset: 0,
-                price_type: 0,
-                hedge_flag: 0,
-            };
+            this.buyType = 'volume';
+            
+            if (!exceptId) {
+                this.$set(this.makeOrderForm, 'instrument_id', '')
+            }
+
+            this.$set(this.makeOrderForm, 'name', '')
+            this.$set(this.makeOrderForm, 'instrument_type', '')
+            this.$set(this.makeOrderForm, 'exchange_id', '')
+            this.$set(this.makeOrderForm, 'limit_price', 0)
+            this.$set(this.makeOrderForm, 'totalPrice', 0)
+            this.$set(this.makeOrderForm, 'volume', 0)
+            this.$set(this.makeOrderForm, 'side', 0)
+            this.$set(this.makeOrderForm, 'offset', 0)
+            this.$set(this.makeOrderForm, 'price_type', 0)
+            this.$set(this.makeOrderForm, 'hedge_flag', 0)
+ 
         },
     }
 
