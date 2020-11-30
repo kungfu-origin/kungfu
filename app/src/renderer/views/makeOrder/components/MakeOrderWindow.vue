@@ -30,7 +30,7 @@
                 ]">
                     <el-autocomplete 
                     ref="insturment-id-input"
-                    v-model.trim="makeOrderForm.instrument_id"
+                    v-model="makeOrderForm.instrument_id"
                     :fetch-suggestions="querySearch"
                     placeholder="请输入代码名称"
                     @blur="handleBlurInstrumentId"
@@ -477,6 +477,9 @@ export default {
     methods: {
 
         handleBlurInstrumentId (e, item) {
+            const value = e.target.value.trim();
+            this.$set(this.makeOrderForm, 'instrument_id', value);
+
             //当手动输入ticker，清空除了instumentId外的一切
             this.setInstumentIdTimer = setTimeout(() => {
                 this.clearData(true)
