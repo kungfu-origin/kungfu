@@ -589,9 +589,9 @@ export default {
             
             if (!exceptId) {
                 this.$set(this.makeOrderForm, 'instrument_id', '')
+                this.$set(this.makeOrderForm, 'name', '')
             }
 
-            this.$set(this.makeOrderForm, 'name', '')
             this.$set(this.makeOrderForm, 'instrument_type', '')
             this.$set(this.makeOrderForm, 'exchange_id', '')
             this.$set(this.makeOrderForm, 'limit_price', 0)
