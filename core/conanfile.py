@@ -182,6 +182,7 @@ class KungfuCoreConan(ConanFile):
         ] + build_option + debug_option + [cmd]
 
     def __run_cmake_js(self, build_type, cmd):
+        [os.environ.pop(env_key) for env_key in os.environ if env_key.startswith('npm_') or env_key.startswith('NPM_')] # workaround for msvc
         tools.rmdir(self.build_extensions_dir)
         rc = psutil.Popen(self.__build_cmake_js_cmd(cmd)).wait()
         if rc != 0:
