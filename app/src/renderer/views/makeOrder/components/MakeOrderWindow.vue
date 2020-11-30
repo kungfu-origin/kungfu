@@ -16,7 +16,7 @@
                             :label="account.account_id.toAccountId()"
                             :value="account.account_id">
                             <span style="color: #fff">{{account.account_id.toAccountId()}}</span>
-                            <el-tag :type="getAccountType(account.source_name).type">{{sourceTypeConfig[getAccountType(account.source_name).typeName].name}}</el-tag>
+                            <el-tag :type="getAccountType(account.source_name).type">{{(sourceTypeConfig[getAccountType(account.source_name).typeName] || {}).name || ''}}</el-tag>
                             <span style="float: right">可用：{{getAvailCash(account.account_id)}}</span>
                         </el-option>
                     </el-select>
@@ -579,7 +579,7 @@ export default {
         },
 
         getAccountType (sourceName) {
-            return this.tdAccountSource[sourceName]
+            return this.tdAccountSource[sourceName] || {}
         },
         
         clearData (exceptId=false) {
