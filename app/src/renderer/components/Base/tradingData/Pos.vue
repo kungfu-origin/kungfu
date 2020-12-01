@@ -94,6 +94,7 @@ export default {
         dealPositionList (positions, searchKeyword) {
             let positionDataByKey = {};
             let positionsAfterFilter = positions
+                .filter(item => !!Number(item.volume))
                 .filter(item => {
                     if (searchKeyword.trim() === '') return true;
                     const { instrument_id } = item;

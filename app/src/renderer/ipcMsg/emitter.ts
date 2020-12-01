@@ -7,7 +7,7 @@ ipcRenderer.setMaxListeners(10)
 
 export const ipcEmitDataByName = (name: string, postData?: any, interval?: number) => {
     
-    interval = interval || 3000;
+    interval = interval || 5000;
 
     return new Promise(( resolve, reject ) => {
         paWin.webContents.send(`ipc-emit-${name}`, { 

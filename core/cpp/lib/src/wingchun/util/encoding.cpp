@@ -15,7 +15,7 @@
 namespace kungfu::wingchun {
 // utility wrapper to adapt locale-bound facets for wstring/wbuffer convert
 template <class Facet> struct deletable_facet : Facet {
-  template <class... Args> explicit deletable_facet(Args &&... args) : Facet(std::forward<Args>(args)...) {}
+  template <class... Args> explicit deletable_facet(Args &&...args) : Facet(std::forward<Args>(args)...) {}
 
   ~deletable_facet() override = default;
 };

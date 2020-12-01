@@ -223,7 +223,7 @@ static constexpr auto $(Arg an) -> decltype(subscribe<event_ptr>(std::forward<Ar
 }
 
 template <class... ArgN>
-static constexpr auto $(ArgN &&... an) -> decltype(subscribe<event_ptr>(std::forward<ArgN>(an)...)) {
+static constexpr auto $(ArgN &&...an) -> decltype(subscribe<event_ptr>(std::forward<ArgN>(an)...)) {
   return subscribe<event_ptr>(std::forward<ArgN>(an)...);
 }
 

@@ -55,12 +55,17 @@ export default {
 
         buildMakeOrderWin () {
             if (!window.makeOrderWin) {
-                return this.$utils.openVueWin('makeOrder', `/make-order`, remote, { width: 410, height: 460 })
-                    .then((win) => {
-                        window.makeOrderWin = win;
-                        window.makeOrderWin.setAlwaysOnTop(true);
-                        this.bindMakeOrderWinEvent();
-                    })
+                return this.$utils.openVueWin(
+                    'makeOrder', 
+                    `/make-order`, 
+                    remote, 
+                    { width: 470, height: 520 }
+                ).then((win) => {
+                    
+                    window.makeOrderWin = win;
+                    window.makeOrderWin.setAlwaysOnTop(true);
+                    this.bindMakeOrderWinEvent();
+                })
             } else {
                 return Promise.resolve(true)
             }

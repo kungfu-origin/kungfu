@@ -84,6 +84,7 @@ export default {
             })
 
             ipcRenderer.on('ipc-emit-makeOrder', (event, { childWinId, params }) => {
+
                 const childWin = BrowserWindow.fromId(childWinId);
                 const { moduleType, makeOrderForm, currentAccountResolved, strategyId } = params;
                 return this.makeOrder(moduleType, makeOrderForm, currentAccountResolved, strategyId)
