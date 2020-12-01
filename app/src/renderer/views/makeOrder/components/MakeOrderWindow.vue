@@ -405,7 +405,7 @@ export default {
 
             if (!Object.keys(newPosData || {}).length) return;
 
-            this.clearData();
+            this.clearData(true);
 
             this.$nextTick()
                 .then(() => {
