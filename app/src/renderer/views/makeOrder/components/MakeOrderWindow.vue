@@ -326,10 +326,6 @@ export default {
         },
 
         targetTickersSource () {
-            if (process.env.NODE_ENV === 'development') {
-                return this.futureTickers
-            }
-
             const accountType = (this.accountType || '').toLowerCase();
             if (accountType === 'stock') {
                 return this.stockTickers
