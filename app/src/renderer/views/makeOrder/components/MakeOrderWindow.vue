@@ -522,16 +522,15 @@ export default {
         },
 
         submit () {
-            const t = this;
-            t.$refs['make-order-form'].validate(valid => {
+            this.$refs['make-order-form'].validate(valid => {
                 if(valid) {
                     //需要对account_id再处理
-                    let makeOrderForm = deepClone(t.makeOrderForm);
-                    const instrumentType = t.getInstrumentType(t.currentAccountResolved);
+                    let makeOrderForm = deepClone(this.makeOrderForm);
+                    const instrumentType = this.getInstrumentType(this.currentAccountResolved);
                     makeOrderForm['instrument_type'] = instrumentType;
                     delete makeOrderForm.totalPrice
 
-                    this.makeOrder(this.moduleType, makeOrderForm, t.currentAccountResolved, t.currentId)
+                    this.makeOrder(this.moduleType, makeOrderForm, this.currentAccountResolved, this.currentId)
                     
                 }
             })
@@ -585,12 +584,12 @@ export default {
         
         clearData (exceptId=false) {
             this.$emit('update:visible', false)
-            this.currentAccount = '';
             this.buyType = 'volume';
             
             if (!exceptId) {
                 this.$set(this.makeOrderForm, 'instrument_id', '')
                 this.$set(this.makeOrderForm, 'name', '')
+                this.currentAccount = '';
             }
 
             this.$set(this.makeOrderForm, 'instrument_type', '')
