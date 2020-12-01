@@ -326,6 +326,10 @@ export default {
         },
 
         targetTickersSource () {
+            if (process.env.NODE_ENV === 'development') {
+                return this.futureTickers
+            }
+
             const accountType = (this.accountType || '').toLowerCase();
             if (accountType === 'stock') {
                 return this.stockTickers
@@ -482,6 +486,7 @@ export default {
             //当手动输入ticker，清空除了instumentId外的一切
             this.setInstumentIdTimer = setTimeout(() => {
                 this.clearData(true)
+                clearTimeout(this.setInstumentIdTimer)
             }, 300)
         },
 
@@ -623,7 +628,6 @@ $fontSize: 12px;
 
         .ticker {
             display: inline-block;
-            width: 50px;
         }
     }
 }
