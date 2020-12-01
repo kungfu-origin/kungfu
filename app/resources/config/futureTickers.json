@@ -3255,6 +3255,569 @@
             }
         ]
     },
+
+    "SPaa":{
+        "exchangeId":"DCE",
+        "include":[
+            {
+                "ticker":"SP a2101&a2105",
+                "name":"豆一"
+            }
+        ]
+    },
+    "SPbb":{
+        "exchangeId":"DCE",
+        "include":[
+            {
+                "ticker":"SP b2012&b2101",
+                "name":"豆二"
+            },
+            {
+                "ticker":"SP b2012&b2102",
+                "name":"豆二"
+            },
+            {
+                "ticker":"SP b2101&b2102",
+                "name":"豆二"
+            },
+            {
+                "ticker":"SP b2101&b2103",
+                "name":"豆二"
+            },
+            {
+                "ticker":"SP b2101&b2105",
+                "name":"豆二"
+            },
+            {
+                "ticker":"SP b2103&b2105",
+                "name":"豆二"
+            },
+            {
+                "ticker":"SP b2105&b2107",
+                "name":"豆二"
+            }
+        ]
+    },
+    "SPbbbb":{
+        "exchangeId":"DCE",
+        "include":[
+            {
+                "ticker":"SP bb2101&bb2105",
+                "name":"胶合板"
+            }
+        ]
+    },
+    "SPcc":{
+        "exchangeId":"DCE",
+        "include":[
+            {
+                "ticker":"SP c2101&c2103",
+                "name":"玉米"
+            },
+            {
+                "ticker":"SP c2101&c2105",
+                "name":"玉米"
+            },
+            {
+                "ticker":"SP c2103&c2105",
+                "name":"玉米"
+            },
+            {
+                "ticker":"SP c2105&c2107",
+                "name":"玉米"
+            },
+            {
+                "ticker":"SP c2107&c2109",
+                "name":"玉米"
+            }
+        ]
+    },
+    "SPcscs":{
+        "exchangeId":"DCE",
+        "include":[
+            {
+                "ticker":"SP cs2101&cs2103",
+                "name":"玉米淀粉"
+            },
+            {
+                "ticker":"SP cs2101&cs2105",
+                "name":"玉米淀粉"
+            },
+            {
+                "ticker":"SP cs2103&cs2105",
+                "name":"玉米淀粉"
+            }
+        ]
+    },
+    "SPebeb":{
+        "exchangeId":"DCE",
+        "include":[
+            {
+                "ticker":"SP eb2012&eb2102",
+                "name":"苯乙烯"
+            },
+            {
+                "ticker":"SP eb2101&eb2102",
+                "name":"苯乙烯"
+            },
+            {
+                "ticker":"SP eb2101&eb2105",
+                "name":"苯乙烯"
+            },
+            {
+                "ticker":"SP eb2102&eb2103",
+                "name":"苯乙烯"
+            },
+            {
+                "ticker":"SP eb2102&eb2104",
+                "name":"苯乙烯"
+            }
+        ]
+    },
+    "SPegeg":{
+        "exchangeId":"DCE",
+        "include":[
+            {
+                "ticker":"SP eg2012&eg2102",
+                "name":"乙二醇"
+            },
+            {
+                "ticker":"SP eg2101&eg2102",
+                "name":"乙二醇"
+            },
+            {
+                "ticker":"SP eg2101&eg2105",
+                "name":"乙二醇"
+            },
+            {
+                "ticker":"SP eg2102&eg2103",
+                "name":"乙二醇"
+            },
+            {
+                "ticker":"SP eg2102&eg2104",
+                "name":"乙二醇"
+            }
+        ]
+    },
+    "SPfbfb":{
+        "exchangeId":"DCE",
+        "include":[
+            {
+                "ticker":"SP fb2101&fb2105",
+                "name":"纤维板"
+            }
+        ]
+    },
+    "SPii":{
+        "exchangeId":"DCE",
+        "include":[
+            {
+                "ticker":"SP i2012&i2102",
+                "name":"铁矿石"
+            },
+            {
+                "ticker":"SP i2101&i2102",
+                "name":"铁矿石"
+            },
+            {
+                "ticker":"SP i2101&i2103",
+                "name":"铁矿石"
+            },
+            {
+                "ticker":"SP i2101&i2105",
+                "name":"铁矿石"
+            },
+            {
+                "ticker":"SP i2102&i2103",
+                "name":"铁矿石"
+            },
+            {
+                "ticker":"SP i2102&i2104",
+                "name":"铁矿石"
+            },
+            {
+                "ticker":"SP i2103&i2105",
+                "name":"铁矿石"
+            },
+            {
+                "ticker":"SP i2105&i2107",
+                "name":"铁矿石"
+            }
+        ]
+    },
+    "SPjj":{
+        "exchangeId":"DCE",
+        "include":[
+            {
+                "ticker":"SP j2012&j2102",
+                "name":"焦炭"
+            },
+            {
+                "ticker":"SP j2101&j2102",
+                "name":"焦炭"
+            },
+            {
+                "ticker":"SP j2101&j2105",
+                "name":"焦炭"
+            },
+            {
+                "ticker":"SP j2102&j2103",
+                "name":"焦炭"
+            },
+            {
+                "ticker":"SP j2102&j2104",
+                "name":"焦炭"
+            }
+        ]
+    },
+    "SPjdjd":{
+        "exchangeId":"DCE",
+        "include":[
+            {
+                "ticker":"SP jd2012&jd2101",
+                "name":"鸡蛋"
+            },
+            {
+                "ticker":"SP jd2101&jd2103",
+                "name":"鸡蛋"
+            },
+            {
+                "ticker":"SP jd2101&jd2105",
+                "name":"鸡蛋"
+            },
+            {
+                "ticker":"SP jd2102&jd2103",
+                "name":"鸡蛋"
+            },
+            {
+                "ticker":"SP jd2103&jd2104",
+                "name":"鸡蛋"
+            },
+            {
+                "ticker":"SP jd2103&jd2105",
+                "name":"鸡蛋"
+            }
+        ]
+    },
+    "SPjmjm":{
+        "exchangeId":"DCE",
+        "include":[
+            {
+                "ticker":"SP jm2012&jm2102",
+                "name":"焦煤"
+            },
+            {
+                "ticker":"SP jm2101&jm2102",
+                "name":"焦煤"
+            },
+            {
+                "ticker":"SP jm2101&jm2105",
+                "name":"焦煤"
+            },
+            {
+                "ticker":"SP jm2102&jm2103",
+                "name":"焦煤"
+            },
+            {
+                "ticker":"SP jm2102&jm2104",
+                "name":"焦煤"
+            }
+        ]
+    },
+    "SPll":{
+        "exchangeId":"DCE",
+        "include":[
+            {
+                "ticker":"SP l2012&l2102",
+                "name":"聚乙烯"
+            },
+            {
+                "ticker":"SP l2101&l2102",
+                "name":"聚乙烯"
+            },
+            {
+                "ticker":"SP l2101&l2105",
+                "name":"聚乙烯"
+            },
+            {
+                "ticker":"SP l2102&l2103",
+                "name":"聚乙烯"
+            },
+            {
+                "ticker":"SP l2102&l2104",
+                "name":"聚乙烯"
+            }
+        ]
+    },
+    "SPmm":{
+        "exchangeId":"DCE",
+        "include":[
+            {
+                "ticker":"SP m2101&m2103",
+                "name":"豆粕"
+            },
+            {
+                "ticker":"SP m2101&m2105",
+                "name":"豆粕"
+            },
+            {
+                "ticker":"SP m2103&m2105",
+                "name":"豆粕"
+            },
+            {
+                "ticker":"SP m2105&m2107",
+                "name":"豆粕"
+            },
+            {
+                "ticker":"SP m2107&m2108",
+                "name":"豆粕"
+            },
+            {
+                "ticker":"SP m2107&m2109",
+                "name":"豆粕"
+            }
+        ]
+    },
+    "SPpp":{
+        "exchangeId":"DCE",
+        "include":[
+            {
+                "ticker":"SP p2012&p2102",
+                "name":"棕榈油"
+            },
+            {
+                "ticker":"SP p2101&p2102",
+                "name":"棕榈油"
+            },
+            {
+                "ticker":"SP p2101&p2105",
+                "name":"棕榈油"
+            },
+            {
+                "ticker":"SP p2102&p2103",
+                "name":"棕榈油"
+            },
+            {
+                "ticker":"SP p2102&p2104",
+                "name":"棕榈油"
+            }
+        ]
+    },
+    "SPpgpg":{
+        "exchangeId":"DCE",
+        "include":[
+            {
+                "ticker":"SP pg2012&pg2101",
+                "name":"液化石油气"
+            },
+            {
+                "ticker":"SP pg2012&pg2102",
+                "name":"液化石油气"
+            },
+            {
+                "ticker":"SP pg2101&pg2102",
+                "name":"液化石油气"
+            },
+            {
+                "ticker":"SP pg2102&pg2103",
+                "name":"液化石油气"
+            },
+            {
+                "ticker":"SP pg2102&pg2104",
+                "name":"液化石油气"
+            }
+        ]
+    },
+    "SPpppp":{
+        "exchangeId":"DCE",
+        "include":[
+            {
+                "ticker":"SP pp2012&pp2102",
+                "name":"聚丙烯"
+            },
+            {
+                "ticker":"SP pp2101&pp2102",
+                "name":"聚丙烯"
+            },
+            {
+                "ticker":"SP pp2101&pp2105",
+                "name":"聚丙烯"
+            },
+            {
+                "ticker":"SP pp2102&pp2103",
+                "name":"聚丙烯"
+            },
+            {
+                "ticker":"SP pp2102&pp2104",
+                "name":"聚丙烯"
+            }
+        ]
+    },
+    "SPrrrr":{
+        "exchangeId":"DCE",
+        "include":[
+            {
+                "ticker":"SP rr2012&rr2101",
+                "name":"粳米"
+            },
+            {
+                "ticker":"SP rr2012&rr2102",
+                "name":"粳米"
+            },
+            {
+                "ticker":"SP rr2101&rr2102",
+                "name":"粳米"
+            },
+            {
+                "ticker":"SP rr2101&rr2103",
+                "name":"粳米"
+            },
+            {
+                "ticker":"SP rr2101&rr2105",
+                "name":"粳米"
+            }
+        ]
+    },
+    "SPvv":{
+        "exchangeId":"DCE",
+        "include":[
+            {
+                "ticker":"SP v2012&v2102",
+                "name":"聚氯乙烯"
+            },
+            {
+                "ticker":"SP v2101&v2102",
+                "name":"聚氯乙烯"
+            },
+            {
+                "ticker":"SP v2101&v2105",
+                "name":"聚氯乙烯"
+            },
+            {
+                "ticker":"SP v2102&v2103",
+                "name":"聚氯乙烯"
+            },
+            {
+                "ticker":"SP v2102&v2104",
+                "name":"聚氯乙烯"
+            }
+        ]
+    },
+    "SPyy":{
+        "exchangeId":"DCE",
+        "include":[
+            {
+                "ticker":"SP y2101&y2105",
+                "name":"豆油"
+            },
+            {
+                "ticker":"SP y2105&y2107",
+                "name":"豆油"
+            },
+            {
+                "ticker":"SP y2107&y2108",
+                "name":"豆油"
+            },
+            {
+                "ticker":"SP y2107&y2109",
+                "name":"豆油"
+            }
+        ]
+    },
+    "SPCam":{
+        "exchangeId":"DCE",
+        "include":[
+            {
+                "ticker":"SPC a2101&m2101",
+                "name":"豆一和豆粕"
+            },
+            {
+                "ticker":"SPC a2105&m2105",
+                "name":"豆一和豆粕"
+            },
+            {
+                "ticker":"SPC a2107&m2107",
+                "name":"豆一和豆粕"
+            }
+        ]
+    },
+    "SPCbm":{
+        "exchangeId":"DCE",
+        "include":[
+            {
+                "ticker":"SPC b2012&m2012",
+                "name":"豆二和豆粕"
+            },
+            {
+                "ticker":"SPC b2101&m2101",
+                "name":"豆二和豆粕"
+            },
+            {
+                "ticker":"SPC b2105&m2105",
+                "name":"豆二和豆粕"
+            },
+            {
+                "ticker":"SPC b2107&m2107",
+                "name":"豆二和豆粕"
+            }
+        ]
+    },
+    "SPCccs":{
+        "exchangeId":"DCE",
+        "include":[
+            {
+                "ticker":"SPC c2101&cs2101",
+                "name":"玉米和玉米淀粉"
+            },
+            {
+                "ticker":"SPC c2103&cs2103",
+                "name":"玉米和玉米淀粉"
+            },
+            {
+                "ticker":"SPC c2105&cs2105",
+                "name":"玉米和玉米淀粉"
+            },
+            {
+                "ticker":"SPC c2107&cs2107",
+                "name":"玉米和玉米淀粉"
+            }
+        ]
+    },
+    "SPClv":{
+        "exchangeId":"DCE",
+        "include":[
+            {
+                "ticker":"SPC l2101&v2101",
+                "name":"聚乙烯和聚氯乙烯"
+            },
+            {
+                "ticker":"SPC l2102&v2102",
+                "name":"聚乙烯和聚氯乙烯"
+            },
+            {
+                "ticker":"SPC l2105&v2105",
+                "name":"聚乙烯和聚氯乙烯"
+            }
+        ]
+    },
+    "SPCyp":{
+        "exchangeId":"DCE",
+        "include":[
+            {
+                "ticker":"SPC y2101&p2101",
+                "name":"豆油和棕榈油"
+            },
+            {
+                "ticker":"SPC y2105&p2105",
+                "name":"豆油和棕榈油"
+            },
+            {
+                "ticker":"SPC y2107&p2107",
+                "name":"豆油和棕榈油"
+            }
+        ]
+    },
+
     "SR":{
         "exchangeId":"CZCE",
         "include":[
