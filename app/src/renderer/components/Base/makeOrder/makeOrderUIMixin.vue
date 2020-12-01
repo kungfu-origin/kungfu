@@ -259,9 +259,6 @@ export default {
         this.biggerThanZeroValidator = biggerThanZeroValidator;
 
         return {
-            currentId: '',
-            moduleType: '',
-            makeOrderByPosData: {},
 
             currentAccount: '', //only strategy
             makeOrderForm: {
@@ -298,17 +295,10 @@ export default {
                 this.stockTickers = Object.freeze(res)
             })
 
-        this.bindListenRenderEvents();
+        this.init();
     },
 
     computed: {
-        ...mapState({
-            tdAccountSource: state => state.tdAccountSource,
-            strategyList: state => state.strategyList,
-            tdList: state => state.tdList,
-            accountsAsset: state => state.accountsAsset,
-            processStatus: state => state.processStatus,
-        }),
 
         accountType() {
             const sourceName = this.currentSourceName || '';
@@ -505,15 +495,6 @@ export default {
 
         handleSelectAccount (account) {
             this.currentAccount = account;
-        },
-
-        bindListenRenderEvents () {
-            ipcRenderer.on('init-make-order-win-info', (event, info) => {
-                const { currentId, makeOrderByPosData, moduleType } = info;                
-                this.currentId = currentId;
-                this.moduleType = moduleType;
-                this.makeOrderByPosData = makeOrderByPosData;
-            })
         },
 
         submit () {
