@@ -121,28 +121,28 @@ export default {
     methods:{
 
         handleExport () {
-            const t = this;
-            t.$saveFile({
+            this.$saveFile({
                 title: '保存持仓信息',
             }).then(filename => {
                 if(!filename) return;
-                writeCSV(filename, t.tableData)
+                writeCSV(filename, this.tableData)
             })
         },
 
         dealPositionList (positions, searchKeyword) {
-            const t = this;
             let positionDataByKey = {};
 
+
             let positionsAfterFilter = positions
+                .filter(item => !!Number(item.volume))
                 .filter(item => {
                     if (searchKeyword.trim() === '') return true;
                     const { instrument_id } = item;
                     return instrument_id.includes(searchKeyword);
                 })
 
-            if (t.moduleType === 'strategy') {
-                positionsAfterFilter = positionsAfterFilter.filter(item => item.update_time >= BigInt(t.addTime));
+            if (this.moduleType === 'strategy') {
+                positionsAfterFilter = positionsAfterFilter.filter(item => item.update_time >= BigInt(this.addTime));
             }
 
 
@@ -154,7 +154,7 @@ export default {
             positionsAfterFilter.kfForEach(item => {
                 let positionData = dealPos(item);
                 positionData.update = true;
-                const poskey = t.getKey(positionData);
+                const poskey = this.getKey(positionData);
                 positionDataByKey[poskey] = Object.freeze(positionData);
             })
 
