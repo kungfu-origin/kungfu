@@ -70,8 +70,8 @@ public:
    * @param volume trade volume
    * @param type price type
    * @param side side
-   * @param offset Deprecated, defaults to longfist::enums::Offset::Open
-   * @param hedge_flag Deprecated, defaults to longfist::enums::HedgeFlag::Speculation
+   * @param offset defaults to longfist::enums::Offset::Open
+   * @param hedge_flag defaults to longfist::enums::HedgeFlag::Speculation
    * @return inserted order ID
    */
   virtual uint64_t insert_order(const std::string &instrument_id, const std::string &exchange_id,
