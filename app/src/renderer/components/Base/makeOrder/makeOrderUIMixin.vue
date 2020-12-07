@@ -387,29 +387,30 @@ export default {
 
     watch: {
         makeOrderByPosData (newPosData) {
-
             if (!Object.keys(newPosData || {}).length) return;
-
             this.clearData(true);
 
-            this.$nextTick()
-                .then(() => {
-                    const { instrumentId, lastPrice, totalVolume, directionOrigin, exchangeId } = newPosData;
-                    this.$set(this.makeOrderForm, 'instrument_id', instrumentId);
-                    this.$set(this.makeOrderForm, 'exchange_id', exchangeId);
-                    this.$set(this.makeOrderForm, 'limit_price', lastPrice);
-                    this.$set(this.makeOrderForm, 'volume', totalVolume);
-                    
-                    if (this.isFuture) {
-                        this.$set(this.makeOrderForm, 'offset', 1)
-                    }
-                    
-                    if (directionOrigin === 0) {
-                        this.$set(this.makeOrderForm, 'side', 1)
-                    } else if (directionOrigin === 1) {
-                        this.$set(this.makeOrderForm, 'side', 0)
-                    }
-                })
+            const { instrumentId, lastPrice, totalVolume, directionOrigin, exchangeId } = newPosData;
+            this.$set(this.makeOrderForm, 'instrument_id', instrumentId);
+            this.$set(this.makeOrderForm, 'exchange_id', exchangeId);
+            this.$set(this.makeOrderForm, 'limit_price', lastPrice);
+            this.$set(this.makeOrderForm, 'volume', totalVolume);
+            
+            if (this.isFuture) {
+                this.$set(this.makeOrderForm, 'offset', 1)
+            }
+            
+            if (directionOrigin === 0) {
+                this.$set(this.makeOrderForm, 'side', 1)
+            } else if (directionOrigin === 1) {
+                this.$set(this.makeOrderForm, 'side', 0)
+            }
+        },
+
+        buyType (val) {
+            if (val === 'price') {
+                this.$set(this.makeOrderForm, 'volume', 0)
+            }
         },
 
         "makeOrderForm.totalPrice" (val) {

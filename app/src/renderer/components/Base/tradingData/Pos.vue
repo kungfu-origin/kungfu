@@ -8,7 +8,7 @@
             <i class="el-icon-download mouse-over" title="导出" @click="handleExport"></i>
         </tr-dashboard-header-item>
         <tr-dashboard-header-item>
-            <el-button size="mini" @click="$emit('showMakeOrderDashboard')">下单</el-button>
+            <!-- <el-button size="mini" @click="$emit('showMakeOrderDashboard')">下单</el-button> -->
         </tr-dashboard-header-item>
     </div>
     <tr-table

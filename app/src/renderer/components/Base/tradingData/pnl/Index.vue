@@ -1,5 +1,5 @@
 <template>
-    <tr-dashboard title="收益曲线">
+    <tr-dashboard :title="noTitle ? '' : '收益曲线'">
     <div slot="dashboard-header" class="pnl-header">
         <tr-dashboard-header-item width="30px">
             <span :class="{'color-vi': chartType == 'day'}" @click="handleSelectChart('day')">日线</span>
@@ -27,6 +27,13 @@ import MinChart from './MinChart';
 
 export default {
 
+    props: {
+        noTitle: {
+            type: Boolean,
+            default: false
+        },
+    },
+
     inheritAttrs: false,
     
     data(){
@@ -41,24 +48,24 @@ export default {
     },
 
     mounted() {
-        const t = this;
         window.addEventListener("resize", () => { 
-            t.$refs['day-chart'] && t.$refs['day-chart'].myChart && t.$refs['day-chart'].myChart.resize()
-            t.$refs['min-chart'] && t.$refs['min-chart'].myChart && t.$refs['min-chart'].myChart.resize()
+            this.$refs['day-chart'] && this.$refs['day-chart'].myChart && this.$refs['day-chart'].myChart.resize()
+            this.$refs['min-chart'] && this.$refs['min-chart'].myChart && this.$refs['min-chart'].myChart.resize()
         })
     },
 
     methods: {
         handleSelectChart(type) {
-            const t = this
-            t.chartType = type
+            this.chartType = type
         }
     }
 }
 </script>
 
 <style lang="scss">
+
 @import '@/assets/scss/skin.scss';
+
 .pnl-header{
     font-size: 11px;
     span{

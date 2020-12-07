@@ -1,16 +1,16 @@
 <template>
     <MainContent>
         <div class="account-content">
-            <el-row style="height: 50%">
+            <el-row style="height: 60%">
                 <el-col :span="14">
                     <el-tabs :value="currentAccountTabName" type="border-card" @tab-click="handleAccountTabClick">
-                        <el-tab-pane label="账户列表" name="tdList">
+                        <el-tab-pane :lazy="true" label="账户列表" name="tdList">
                             <TdAccount></TdAccount>
                         </el-tab-pane>
-                        <el-tab-pane label="行情源" name="mdList">
+                        <el-tab-pane :lazy="true" label="行情源" name="mdList">
                             <MdAccount></MdAccount>
                         </el-tab-pane>
-                        <el-tab-pane label="交易标的" name="tickerList">
+                        <el-tab-pane :lazy="true" label="交易标的" name="tickerList">
                             <Pos 
                             :noTitle="true"
                             moduleType="acocunt"
@@ -22,17 +22,42 @@
                     </el-tabs>
                 </el-col>
                 <el-col :span="10">
-                    <Pos 
-                    :moduleType="moduleType"
-                    :currentId="currentId" 
-                    :accountType="accountType"
-                    :kungfuData="positions"
-                    @showMakeOrderDashboard="handleShowOrCloseMakeOrderDashboard(true)"
-                    @makeOrder="handleMakeOrderByPos"
-                    />
+                    <el-row style="height: 50%">
+                        <Pos 
+                        :moduleType="moduleType"
+                        :currentId="currentId" 
+                        :accountType="accountType"
+                        :kungfuData="positions"
+                        @showMakeOrderDashboard="handleShowOrCloseMakeOrderDashboard(true)"
+                        @makeOrder="handleMakeOrderByPos"
+                        />
+                    </el-row>
+                    <el-row style="height: 50%">
+                        <el-tabs type="border-card" v-model="currentTradesPnlTabNum">
+                            <el-tab-pane :lazy="true" :label="`成交记录 ${showCurrentIdInTabName(currentTradesPnlTabNum, 'trades')}`" name="trades">
+                                <TradeRecord
+                                :noTitle="true"
+                                :moduleType="moduleType" 
+                                :currentId="currentId"
+                                :kungfuData="trades"
+                                :orderStat="orderStat"
+                                @showHistory="handleShowHistory"
+                                />
+                            </el-tab-pane>
+                            <el-tab-pane :lazy="true" :label="`盈利曲线 ${showCurrentIdInTabName(currentTradesPnlTabNum, 'pnl')}`" name="pnl">
+                                <Pnl 
+                                :noTitle="true"
+                                :currentId="currentId" 
+                                :moduleType="moduleType"
+                                :minPnl="pnl"
+                                :dailyPnl="dailyPnl"
+                                />
+                            </el-tab-pane>
+                        </el-tabs>
+                    </el-row>
                 </el-col>
             </el-row>
-            <el-row style="height: 50%" class="flex-row">
+            <el-row style="height: 40%" class="flex-row">
                 <el-col :span="7" :style="{ 'max-width': '400px' }">
                     <MakeOrderDashboard
                         :currentId="currentId"
@@ -41,25 +66,24 @@
                     ></MakeOrderDashboard>
                 </el-col>
                 <el-col :span="17">
-                    <el-tabs v-model="currentTradingDataTabName" type="border-card">
-                        <el-tab-pane :label="`全部委托 ${showCurrentIdInTabName('orders')}`" name="orders">
+                    <el-tabs v-model="currentOrdesTabName" type="border-card">
+                        <el-tab-pane :lazy="true" :label="`全部委托 ${showCurrentIdInTabName(currentOrdesTabName, 'orders')}`" name="orders">
                             <OrderRecord
-                            :moduleType="moduleType" 
                             :noTitle="true"
+                            :moduleType="moduleType" 
                             :todayFinishPreSetting="true"
                             :accountType="accountType"
                             :currentId="currentId"
                             :kungfuData="orders"
                             :gatewayName="currentAccount.account_id"
                             :orderStat="orderStat"
-
                             @showHistory="handleShowHistory"
                             />   
                         </el-tab-pane>
-                        <el-tab-pane :label="`未完成委托 ${showCurrentIdInTabName('unfinishedOrders')}`" name="unfinishedOrders">
+                        <el-tab-pane :lazy="true" :label="`未完成委托 ${showCurrentIdInTabName(currentOrdesTabName, 'unfinishedOrders')}`" name="unfinishedOrders">
                             <OrderRecord
-                            :moduleType="moduleType" 
                             :noTitle="true"
+                            :moduleType="moduleType" 
                             :todayFinishPreSetting="false"
                             :accountType="accountType"
                             :currentId="currentId"
@@ -68,16 +92,6 @@
                             :orderStat="orderStat"
                             @showHistory="handleShowHistory"
                             />   
-                        </el-tab-pane>
-                        <el-tab-pane :label="`成交记录 ${showCurrentIdInTabName('trades')}`" name="trades">
-                            <TradeRecord
-                            :moduleType="moduleType" 
-                            :noTitle="true"
-                            :currentId="currentId"
-                            :kungfuData="trades"
-                            :orderStat="orderStat"
-                            @showHistory="handleShowHistory"
-                            />
                         </el-tab-pane>
                     </el-tabs>
                 </el-col>
@@ -95,6 +109,7 @@ import MdAccount from '@/components/Account//components/MdAccount';
 import OrderRecord from '@/components/Base/tradingData/OrderRecord';
 import TradeRecord from '@/components/Base/tradingData/TradeRecord';
 import Pos from '@/components/Base/tradingData/Pos';
+import Pnl from '@/components/Base/tradingData/pnl/Index';
 import MakeOrderDashboard from '@/components/Base/makeOrder/MakeOrderDashboard';
 import MainContent from '@/components/Layout/MainContent';
 
@@ -113,18 +128,22 @@ export default {
         return {
             orders: Object.freeze([]),
             trades: Object.freeze([]),
+            pnl: Object.freeze([]),
+            dailyPnl: Object.freeze([]),
             positions: Object.freeze([]),
             positionsByTicker: Object.freeze([]),
             orderStat: Object.freeze({}),
 
             historyData: {},
 
-            currentTradingDataTabName: "orders"
+            currentOrdesTabName: "orders",
+            currentTradesPnlTabNum: "trades"
         }
     },
 
     components: {
         TdAccount, MdAccount, Pos,
+        Pnl,
         OrderRecord, TradeRecord,
         MakeOrderDashboard,
         MainContent
@@ -207,8 +226,8 @@ export default {
             })
         },
 
-        showCurrentIdInTabName (target) {
-            return this.currentTradingDataTabName === target ? this.currentId : ''
+        showCurrentIdInTabName (currentTabName, target) {
+            return currentTabName === target ? this.currentId : ''
         },
 
         setCurrentTicker (item) {
@@ -246,6 +265,11 @@ export default {
       
             const positions = data['positions'][this.currentId];
             this.positions = Object.freeze(positions || []);
+
+            const pnl = data['pnl'][this.currentId];
+            this.pnl = Object.freeze(pnl || []);
+            const dailyPnl = data['dailyPnl'][this.currentId];
+            this.dailyPnl = Object.freeze(dailyPnl || []);
 
         },
 
@@ -290,6 +314,13 @@ export default {
 
     &:last-child .tr-dashboard{
         padding-bottom: 0px;
+    }
+
+    .el-col:last-child {
+
+        .tr-dashboard {
+            padding-right: 0;
+        }
     }
 }
 
