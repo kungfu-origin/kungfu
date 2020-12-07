@@ -41,6 +41,16 @@ inline void from_ctp_comb_offset(const TThostFtdcCombOffsetFlagType ctp_offset, 
   }
 }
 
+inline void to_ctp_comb_hedge_flag(TThostFtdcCombHedgeFlagType ctp_hedge_flag, const HedgeFlag &hedge_flag) {
+  if (hedge_flag == HedgeFlag::Speculation) {
+    ctp_hedge_flag[0] = THOST_FTDC_HF_Speculation;
+  } else if (hedge_flag == HedgeFlag::Arbitrage) {
+    ctp_hedge_flag[0] = THOST_FTDC_HF_Arbitrage;
+  } else if (hedge_flag == HedgeFlag::Hedge) {
+    ctp_hedge_flag[0] = THOST_FTDC_HF_Hedge;
+  }
+}
+
 inline void from_ctp_offset(const TThostFtdcOffsetFlagType ctp_offset, Offset &offset) {
   if (ctp_offset == THOST_FTDC_OF_Close) {
     offset = Offset::Close;
@@ -232,7 +242,7 @@ inline void to_ctp(CThostFtdcInputOrderField &des, const OrderInput &ori) {
   strcpy(des.ExchangeID, ori.exchange_id);
   to_ctp_direction(des.Direction, ori.side);
   to_ctp_comb_offset(des.CombOffsetFlag, ori.offset);
-  des.CombHedgeFlag[0] = THOST_FTDC_HF_Speculation;
+  to_ctp_comb_hedge_flag(des.CombHedgeFlag, ori.hedge_flag);
   des.VolumeTotalOriginal = ori.volume;
   des.ContingentCondition = THOST_FTDC_CC_Immediately;
   to_ctp_price_type(des.OrderPriceType, des.VolumeCondition, des.TimeCondition, ori.price_type);

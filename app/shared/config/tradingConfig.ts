@@ -102,7 +102,7 @@ export const hedgeFlag: NumberToStringObject = {
     0: isEnglish ? 'Speculation': '投机',
     1: isEnglish ? 'Arbitrage': '套利',
     2: isEnglish ? 'Hedge': '套保',
-    3: isEnglish ? 'Covered': '备兑'
+    // 3: isEnglish ? 'Covered': '备兑'
 }
 
 export const exchangeIds: StringToStringObject = {
