@@ -164,7 +164,7 @@ export const transformPositionByTickerByMerge = (positionsByTicker: { [propname:
                 return true;
             })
 
-            if (!tickerListResolved.length) return [];
+            if (!tickerListResolved.length) return null;
             return tickerListResolved.reduce((item1: PosInputData, item2: PosInputData) => {
                 return {
                     ...item1,
@@ -174,6 +174,7 @@ export const transformPositionByTickerByMerge = (positionsByTicker: { [propname:
                 }
             })
         })
+        .filter(item => !!item)
     
     return positionsByTickerList
 }

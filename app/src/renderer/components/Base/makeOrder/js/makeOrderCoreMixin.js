@@ -49,6 +49,8 @@ export default {
                 return kungfuMakeOrder(makeOrderForm, currentAccountResolved)
             } else if (moduleType === 'strategy') {
                 return kungfuMakeOrder(makeOrderForm, currentAccountResolved, strategyId)
+            } else if (moduleType === 'ticker') {
+                return kungfuMakeOrder(makeOrderForm, currentAccountResolved)
             }
         },
 

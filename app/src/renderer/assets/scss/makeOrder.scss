@@ -31,79 +31,79 @@ $fontSize: 12px;
         .el-form-item__error {
             padding-top: 2px;
         }
-    }
 
-    .el-form-item {
-        margin-bottom: 15px;
-
-        .el-form-item__label {
-            font-size: $fontSize;
-            text-align: left;    
-            padding-right: 5px;
-            line-height: 30px;
-        }
-
-        .el-form-item__content {
-            line-height: 30px;
-        }
-
-
-
-        &.no-margin {
-            margin-bottom: 0px;
-        }
-
-        .el-radio {
-            margin-right: 8px; 
-        }
-
-        .el-radio__label {
-            font-size: $fontSize;
-            padding-left: 5px;
-        }
-
-        .el-radio.is-checked {
-
-            &.green-radio {
-                .el-radio__input.is-checked {
-
-                    .el-radio__inner {
-                        background: $green;
-                        border-color: $green;
+        .el-form-item {
+            margin-bottom: 15px;
+    
+            .el-form-item__label {
+                font-size: $fontSize;
+                text-align: left;    
+                padding-right: 5px;
+                line-height: 30px;
+            }
+    
+            .el-form-item__content {
+                line-height: 30px;
+            }
+    
+    
+    
+            &.no-margin {
+                margin-bottom: 0px;
+            }
+    
+            .el-radio {
+                margin-right: 8px; 
+            }
+    
+            .el-radio__label {
+                font-size: $fontSize;
+                padding-left: 5px;
+            }
+    
+            .el-radio.is-checked {
+    
+                &.green-radio {
+                    .el-radio__input.is-checked {
+    
+                        .el-radio__inner {
+                            background: $green;
+                            border-color: $green;
+                        }
+                    }
+                    
+                    .el-radio__label {
+                        color: $green;
                     }
                 }
-                
-                .el-radio__label {
-                    color: $green;
-                }
-            }
-
-            &.red-radio {
-                .el-radio__input.is-checked {
-
-                    .el-radio__inner {
-                        background: $red;
-                        border-color: $red;
+    
+                &.red-radio {
+                    .el-radio__input.is-checked {
+    
+                        .el-radio__inner {
+                            background: $red;
+                            border-color: $red;
+                        }
                     }
-                }
-                
-                .el-radio__label {
-                    color: $red;
+                    
+                    .el-radio__label {
+                        color: $red;
+                    }
                 }
             }
         }
-    }
-
-    .make-order-line {
-        margin-bottom: 15px;
-
-        .make-order-line-info {
-            
-            span {
-                display: block;
-                color: $font;
-                font-size: 12px;
-                text-align: right;
+    
+        .make-order-line {
+            margin-bottom: 15px;
+    
+            .make-order-line-info {
+                
+                span {
+                    display: block;
+                    color: $font;
+                    font-size: 12px;
+                    text-align: right;
+                }
             }
         }
     }

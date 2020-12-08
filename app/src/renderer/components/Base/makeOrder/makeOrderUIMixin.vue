@@ -2,9 +2,9 @@
 <template>
     <tr-dashboard :title="`下单 ${currentId}`">
         <div class="kf-make-order-window__body">
-            <el-form ref="make-order-form" label-width="70px" :model="makeOrderForm">
+            <el-form ref="make-order-form" label-width="60px" :model="makeOrderForm">
                 <el-form-item
-                v-if="moduleType === 'strategy'"
+                v-if="moduleType !== 'account'"
                 label="账户"
                 prop="name"
                 :rules="[
@@ -23,63 +23,67 @@
                     </el-select>
                 </el-form-item>   
 
-                <el-form-item
-                label="代码"
-                prop="instrument_id"
-                :rules="[
-                    { required: true, message: '不能为空！', trigger: 'input'},
-                ]">
-                    <el-autocomplete 
-                    ref="insturment-id-input"
-                    v-model="makeOrderForm.instrument_id"
-                    :fetch-suggestions="querySearch"
-                    placeholder="请输入代码名称"
-                    @blur="handleBlurInstrumentId"
-                    @select="handleSelectInstrumentId"
-                    >
-                        <template v-slot="{ item }">
-                            <div class="make-order-instrument-ids__warp">
-                                <div class="make-order-instrument-id-item">
-                                    <span class="ticker">{{ item.ticker }}</span>
-                                    <span class="name">{{ item.name }}</span>
-                                </div>
-                                <div class="make-order-instrument-id-item">{{ (item.exchangeId || '').toUpperCase() }}</div>
-                            </div>
-                        </template>
-                    </el-autocomplete>
-                </el-form-item>      
-
-                <el-form-item
-                label="交易所"
-                prop="exchange_id"
-                :rules="[
-                    { required: true, message: '不能为空！', trigger: 'change' },
-                ]">
-                    <el-select v-model.trim="makeOrderForm.exchange_id">
-                        <el-option
-                            v-for="exchangeId in Object.keys(exchangeIds)"
-                            :key="exchangeId"
-                            :label="exchangeIds[exchangeId]"
-                            :value="exchangeId">
-                        </el-option>
-                    </el-select>
-                </el-form-item>    
+                <el-row class="make-order-line">
+                    <el-col :span="14">
+                        <el-form-item
+                        label="代码"
+                        prop="instrument_id"
+                        :rules="[
+                            { required: true, message: '不能为空！', trigger: 'input'},
+                        ]">
+                            <el-autocomplete 
+                            ref="insturment-id-input"
+                            v-model="makeOrderForm.instrument_id"
+                            :fetch-suggestions="querySearch"
+                            placeholder="请输入代码名称"
+                            @blur="handleBlurInstrumentId"
+                            @select="handleSelectInstrumentId"
+                            >
+                                <template v-slot="{ item }">
+                                    <div class="make-order-instrument-ids__warp">
+                                        <div class="make-order-instrument-id-item">
+                                            <span class="ticker">{{ item.ticker }}</span>
+                                            <span class="name">{{ item.name }}</span>
+                                        </div>
+                                        <div class="make-order-instrument-id-item">{{ (item.exchangeId || '').toUpperCase() }}</div>
+                                    </div>
+                                </template>
+                            </el-autocomplete>
+                        </el-form-item>      
+                    </el-col>
+                    <el-col :span="1">
+                        <div :style="{ width: '1px', height: '1px' }"></div>
+                    </el-col>
+                    <el-col  :span="9">
+                        <el-form-item
+                        label="交易所"
+                        prop="exchange_id"
+                        :rules="[
+                            { required: true, message: '不能为空！', trigger: 'change' },
+                        ]">
+                            <el-select v-model.trim="makeOrderForm.exchange_id">
+                                <el-option
+                                    v-for="exchangeId in Object.keys(exchangeIds)"
+                                    :key="exchangeId"
+                                    :label="exchangeIds[exchangeId]"
+                                    :value="exchangeId">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>  
+                    </el-col>
+                </el-row>
 
                 <el-form-item
                 v-if="isFuture"
-                label="套保投机"
+                label="套保"
                 prop="hedge_flag"
+                class="no-margin"
                 :rules="[
                     { required: true, message: '不能为空！', trigger: 'change'},
                 ]">
-                    <el-select v-model.trim="makeOrderForm.hedge_flag">
-                        <el-option
-                            v-for="key in Object.keys(hedgeFlag || {})"
-                            :key="key"
-                            :label="hedgeFlag[key]"
-                            :value="+key">
-                        </el-option>
-                    </el-select>
+                    <el-radio-group size="mini" v-model="makeOrderForm.hedge_flag">
+                        <el-radio size="mini"  v-for="key in Object.keys(hedgeFlag || {})" :key="key" :label="+key">{{ hedgeFlag[key] }}</el-radio>
+                    </el-radio-group>
                 </el-form-item>  
 
                 <el-form-item
@@ -121,7 +125,7 @@
 
 
                 <el-row class="make-order-line" v-if="makeOrderForm.price_type === 0">
-                    <el-col :span="16">
+                    <el-col :span="14">
                         <el-form-item
                         label="价格"
                         prop="limit_price"
@@ -137,7 +141,7 @@
                             v-model.trim="makeOrderForm.limit_price"></el-input-number>                
                         </el-form-item>
                     </el-col>
-                    <el-col :span="8">
+                    <el-col :span="10">
                         <div class="make-order-line-info">
                             <span>可用金额</span>
                             <span>{{ avaliableCash || '-' }}</span>
@@ -146,7 +150,7 @@
                 </el-row>
 
                 <el-form-item
-                label="买入方式"
+                label="方式"
                 class="no-margin"
                 v-if="!isFuture && (makeOrderForm.price_type === 0)"
                 :rules="[
@@ -160,7 +164,7 @@
                 </el-form-item>
 
                 <el-row class="make-order-line" v-if="buyType === 'volume'">
-                    <el-col :span="16">
+                    <el-col :span="14">
                         <el-form-item
                         label="数量"
                         prop="volume"
@@ -177,7 +181,7 @@
                             ></el-input-number>                
                         </el-form-item>
                     </el-col>
-                    <el-col :span="8">
+                    <el-col :span="10">
                         <div class="make-order-line-info">
                             <span>可下单手数</span>
                             <span>{{ avaliableOrderVolume || '-' }}</span>
@@ -260,7 +264,7 @@ export default {
 
         return {
 
-            currentAccount: '', //only strategy
+            currentAccount: '', //except account
             makeOrderForm: {
                 name: '', // account_id in strategy
                 instrument_id: '',
@@ -326,6 +330,8 @@ export default {
                 return this.currentId || ''
             } else if (this.moduleType === 'strategy') {
                 return this.currentAccount
+            } else if (this.moduleType === 'ticker') {
+                return this.currentAccount
             } else {
                 return ''
             }
@@ -390,11 +396,18 @@ export default {
             if (!Object.keys(newPosData || {}).length) return;
             this.clearData(true);
 
-            const { instrumentId, lastPrice, totalVolume, directionOrigin, exchangeId } = newPosData;
+            const { instrumentId, lastPrice, totalVolume, directionOrigin, exchangeId, accountIdResolved, instrumentType } = newPosData;
+
             this.$set(this.makeOrderForm, 'instrument_id', instrumentId);
             this.$set(this.makeOrderForm, 'exchange_id', exchangeId);
             this.$set(this.makeOrderForm, 'limit_price', lastPrice);
             this.$set(this.makeOrderForm, 'volume', totalVolume);
+            this.$set(this.makeOrderForm, 'instrument_type', instrumentType);
+
+            if (this.moduleType !== 'strategy') {
+                this.$set(this.makeOrderForm, 'name', accountIdResolved);
+                this.currentAccount = accountIdResolved
+            }
             
             if (this.isFuture) {
                 this.$set(this.makeOrderForm, 'offset', 1)
@@ -501,10 +514,14 @@ export default {
         submit () {
             this.$refs['make-order-form'].validate(valid => {
                 if(valid) {
+                    //当下单不是从posdata进入
+                    if (!this.makeOrderForm.instrument_type) {
+                        const instrumentType = this.getInstrumentType(this.currentAccountResolved);
+                        this.$set(this.makeOrderForm, 'instrument_type', instrumentType)
+                    }
+
                     //需要对account_id再处理
                     let makeOrderForm = deepClone(this.makeOrderForm);
-                    const instrumentType = this.getInstrumentType(this.currentAccountResolved);
-                    makeOrderForm['instrument_type'] = instrumentType;
                     delete makeOrderForm.totalPrice
 
                     this.makeOrder(this.moduleType, makeOrderForm, this.currentAccountResolved, this.currentId)
@@ -517,7 +534,7 @@ export default {
             const sourceName = accountId.split('_')[0] || '';
             const config = this.tdAccountSource[sourceName] || '';
             const typeName = config.typeName || 'Unknow';
-            return instrumentTypes[typeName] || 0
+            return InstrumentTypes[typeName] || 0
         },
 
         querySearch (queryString, cb) {

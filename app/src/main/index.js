@@ -275,7 +275,12 @@ function openUrl(url) {
 }
 
 
-process.on('uncaughtException', function(err) {
+process.on('uncaughtException', err => {
 	console.log(err, '====')
     logger.error('[MASTER] Error caught in uncaughtException event:', err);
 });
+
+process.stderr.on('data', err => {
+	console.log(err, '----')
+    logger.error('[MASTER] Error caught in stderr event:', err);
+})

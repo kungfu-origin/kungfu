@@ -32,7 +32,7 @@
                         @makeOrder="handleMakeOrderByPos"
                         />
                     </el-row>
-                    <el-row style="height: 50%">
+                    <el-row style="height: 50%" class="has-padding-bottom">
                         <el-tabs type="border-card" v-model="currentTradesPnlTabNum">
                             <el-tab-pane :lazy="true" :label="`成交记录 ${showCurrentIdInTabName(currentTradesPnlTabNum, 'trades')}`" name="trades">
                                 <TradeRecord
@@ -44,7 +44,7 @@
                                 @showHistory="handleShowHistory"
                                 />
                             </el-tab-pane>
-                            <el-tab-pane :lazy="true" :label="`盈利曲线 ${showCurrentIdInTabName(currentTradesPnlTabNum, 'pnl')}`" name="pnl">
+                            <el-tab-pane :disabled="moduleType === 'ticker'" :lazy="true" :label="`盈利曲线 ${showCurrentIdInTabName(currentTradesPnlTabNum, 'pnl')}`" name="pnl">
                                 <Pnl 
                                 :noTitle="true"
                                 :currentId="currentId" 
@@ -58,7 +58,7 @@
                 </el-col>
             </el-row>
             <el-row style="height: 40%" class="flex-row">
-                <el-col :span="7" :style="{ 'max-width': '400px' }">
+                <el-col :span="7" :style="{ 'max-width': '450px' }">
                     <MakeOrderDashboard
                         :currentId="currentId"
                         :moduleType="moduleType" 
@@ -182,7 +182,7 @@ export default {
 
         currentId () {
             if (this.moduleType === 'ticker') {
-                return `${this.currentTicker.instrumentId} ${this.currentTicker.direction}`
+                return `${this.currentTicker.instrumentId || ''} ${this.currentTicker.direction || ''}`
             } else {
                 return this.currentAccount.account_id || ''
             }
@@ -193,6 +193,15 @@ export default {
         }
     },
 
+    watch: {
+
+        moduleType (val) {
+            if (val === 'ticker') {
+                this.currentTradesPnlTabNum = 'trades'
+            }
+        },
+    },
+
     mounted(){
         this.tradingDataPipe = buildTradingDataPipe('account').subscribe(data => {
             if (this.moduleType === 'ticker') {
@@ -201,7 +210,7 @@ export default {
                 this.dealTradingData(data);
             }
 
-            const positionsByTicker = data['positionsByTicker'];
+            const positionsByTicker = data['positionsByTicker'] || {};
             this.positionsByTicker = Object.freeze(transformPositionByTickerByMerge(positionsByTicker, 'account') || []);
             this.initSetCurrentTicker(this.positionsByTicker);
 
@@ -238,11 +247,17 @@ export default {
             if (!this.currentTicker || !this.currentTicker.instrumentId) {
                 if (tickerList.length) {
                     const tickerListSort = tickerList.slice(0).sort((a, b) => {
-                        const result = a.instrument_id.localeCompare(b.instrument_id);
-                        return result === 0 ? a.direction.localeCompare(b.direction) : result;
+                        const aid = a.instrumentId || ''
+                        const bid = b.instrumentId || ''
+                        const ad = a.direction || '';
+                        const bd = b.direction || '';
+                        const result = aid.localeCompare(bid);
+                        return result === 0 ? ad.localeCompare(bd) : result;
                     })
 
-                    this.$store.dispatch('setCurrentTicker', dealPos(tickerListSort[0]))
+                    if (tickerListSort.length) {
+                        this.$store.dispatch('setCurrentTicker', dealPos(tickerListSort[0]))
+                    }
                 }
             }
         },
@@ -275,12 +290,12 @@ export default {
 
         dealTradingDataByTiker (data) {
             const orders = data['ordersByTicker'].filter(item => {
-                return `${item.instrument_id}_${item.side}` === this.currentTickerId
+                return this.currentTicker.instrumentId.includes(item.instrument_id)
             })
             this.orders = Object.freeze(orders || []);
 
             const trades = data['tradesByTicker'].filter(item => {
-                return `${item.instrument_id}_${item.side}` === this.currentTickerId
+                return this.currentTicker.instrumentId.includes(item.instrument_id)
             })
             this.trades = Object.freeze(trades || []);
 
@@ -320,6 +335,16 @@ export default {
 
         .tr-dashboard {
             padding-right: 0;
+        }
+    }
+}
+
+.el-row {
+
+    &.has-padding-bottom {
+
+        .tr-dashboard {
+            padding-bottom: 8px !important;
         }
     }
 }
