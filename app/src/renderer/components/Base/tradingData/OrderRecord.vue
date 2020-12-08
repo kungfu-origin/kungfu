@@ -14,8 +14,8 @@
         </tr-dashboard-header-item>
 
         <tr-dashboard-header-item v-if="todayFinishPreSetting === undefined">
-            <i class="el-icon-circle-check mouse-over"  v-if="todayFinish" title="查看未完成委托" @click="todayFinish = false"></i>
-            <i class="el-icon-success mouse-over" v-else title="查看全部委托" @click="todayFinish = true"></i>
+            <i class="el-icon-success mouse-over"  v-if="todayFinish" title="查看未完成委托" @click="todayFinish = false"></i>
+            <i class="el-icon-circle-check mouse-over" v-else title="查看全部委托" @click="todayFinish = true"></i>
         </tr-dashboard-header-item>
 
         <tr-dashboard-header-item>
