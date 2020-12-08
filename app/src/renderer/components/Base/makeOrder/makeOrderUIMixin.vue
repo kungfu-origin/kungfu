@@ -1,6 +1,11 @@
 
 <template>
     <tr-dashboard :title="`下单 ${currentId}`">
+        <div slot="dashboard-header">
+            <tr-dashboard-header-item>
+                <el-button size="mini" @click="clearData" style="width: 50px;">重置</el-button>
+            </tr-dashboard-header-item>
+        </div>
         <div class="kf-make-order-window__body">
             <el-form ref="make-order-form" label-width="60px" :model="makeOrderForm">
                 <el-form-item
@@ -94,7 +99,7 @@
                     { required: true, message: '不能为空！', trigger: 'change' },
                 ]">
                     <el-radio-group size="mini" v-model="makeOrderForm.side">
-                        <el-radio size="mini" :class="{ 'red-radio': +key === 0, 'green-radio': +key === 1 }"  v-for="key in Object.keys(sideName || {}).slice(0, 2)" :key="key" :label="+key">{{ sideName[key] }}</el-radio>
+                        <el-radio size="mini" :class="{ 'red-radio': +key === 0, 'green-radio': +key === 1 }"  v-for="key in Object.keys(SideName || {}).slice(0, 2)" :key="key" :label="+key">{{ SideName[key] }}</el-radio>
                     </el-radio-group>
                 </el-form-item>
 
@@ -107,7 +112,7 @@
                     { required: true, message: '不能为空！', trigger: 'change' },
                 ]">
                     <el-radio-group size="mini" v-model="makeOrderForm.offset">
-                        <el-radio size="mini" :class="{ 'red-radio': +key === 0, 'green-radio': +key !== 0 }" v-for="key in Object.keys(offsetName || {})" :key="key" :label="+key">{{ offsetName[key] }}</el-radio>
+                        <el-radio size="mini" :class="{ 'red-radio': +key === 0, 'green-radio': +key !== 0 }" v-for="key in Object.keys(OffsetName || {})" :key="key" :label="+key">{{ OffsetName[key] }}</el-radio>
                     </el-radio-group>
                 </el-form-item>
 
@@ -228,7 +233,7 @@
 import Vue from 'vue';
 import { biggerThanZeroValidator } from '__assets/validator';
 import { deepClone } from '__gUtils/busiUtils';
-import { sourceTypeConfig, sideName, offsetName, priceType, hedgeFlag, exchangeIds, InstrumentTypes } from '__gConfig/tradingConfig';
+import { sourceTypeConfig, SideName, OffsetName, priceType, hedgeFlag, exchangeIds, InstrumentTypes } from '__gConfig/tradingConfig';
 import { getFutureTickersConfig, getStockTickersConfig } from '__assets/base'
 import { Autocomplete } from 'element-ui';
 
@@ -254,8 +259,8 @@ export default {
     
     data () {
         this.sourceTypeConfig = sourceTypeConfig;
-        this.offsetName = offsetName;
-        this.sideName = sideName;
+        this.OffsetName = OffsetName;
+        this.SideName = SideName;
         this.priceType = filterPriceType(priceType)
         this.hedgeFlag = hedgeFlag;
         this.exchangeIds = exchangeIds;
@@ -409,8 +414,11 @@ export default {
                 this.currentAccount = accountIdResolved
             }
             
+            
             if (this.isFuture) {
                 this.$set(this.makeOrderForm, 'offset', 1)
+            } else {
+                this.$set(this.makeOrderForm, 'offset', 0)
             }
             
             if (directionOrigin === 0) {
@@ -504,15 +512,8 @@ export default {
         },
 
         handleMakeOrder () {
-            this.submit()
-        },
-
-        handleSelectAccount (account) {
-            this.currentAccount = account;
-        },
-
-        submit () {
             this.$refs['make-order-form'].validate(valid => {
+                
                 if(valid) {
                     //当下单不是从posdata进入
                     if (!this.makeOrderForm.instrument_type) {
@@ -520,14 +521,14 @@ export default {
                         this.$set(this.makeOrderForm, 'instrument_type', instrumentType)
                     }
 
-                    //需要对account_id再处理
                     let makeOrderForm = deepClone(this.makeOrderForm);
-                    delete makeOrderForm.totalPrice
-
                     this.makeOrder(this.moduleType, makeOrderForm, this.currentAccountResolved, this.currentId)
-                    
                 }
             })
+        },
+
+        handleSelectAccount (account) {
+            this.currentAccount = account;
         },
 
         getInstrumentType (accountId) {
@@ -577,6 +578,7 @@ export default {
         },
         
         clearData (exceptId=false) {
+            this.$refs['make-order-form'].resetFields();
             this.$emit('update:visible', false)
             this.buyType = 'volume';
             

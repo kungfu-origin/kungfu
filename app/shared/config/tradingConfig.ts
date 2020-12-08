@@ -5,14 +5,14 @@ const isEnglish = process.env.LANG_ENV === 'en';
 // close = '1',
 // close_today = '2',
 // close_yesterday = '3'
-export const offsetName: NumberToStringObject = {
+export const OffsetName: NumberToStringObject = {
     0: isEnglish ? 'Open' : '开',
     1: isEnglish ? 'Close' : '平',
     2: isEnglish ? 'CloseToday' : '平今',
     3: isEnglish ? 'CloseYest' : '平昨'
 }
 
-export const sideName: NumberToStringObject = {
+export const SideName: NumberToStringObject = {
     0: isEnglish ? 'Buy'                                : '买',
     1: isEnglish ? 'Sell'                               : '卖',
     2: isEnglish ? 'Lock'                               : '锁仓',
@@ -36,7 +36,7 @@ export const sideName: NumberToStringObject = {
 }
 
 
-export const posDirection: NumberToStringObject = {
+export const PosDirection: NumberToStringObject = {
     0: isEnglish ? 'Long' : '多',
     1: isEnglish ? 'Short' : '空' 
 }

@@ -3,7 +3,7 @@ import { setTimerPromiseTask } from '__gUtils/busiUtils';
 import { kungfu } from '__gUtils/kungfuUtils';
 import { toDecimal } from '__gUtils/busiUtils';
 import { readJsonSync } from '__gUtils/fileUtils';
-import { offsetName, orderStatus, sideName, posDirection, priceType, hedgeFlag, instrumentType, volumeCondition, timeCondition } from "__gConfig/tradingConfig";
+import { OffsetName, orderStatus, SideName, PosDirection, priceType, hedgeFlag, instrumentType, volumeCondition, timeCondition } from "__gConfig/tradingConfig";
 import { logger } from '../../utils/logUtils';
 
 export const watcher: any = (() => {
@@ -249,9 +249,9 @@ export const dealOrder = (item: OrderInputData): OrderData => {
         instrumentTypeOrigin: item.instrument_type,
         exchangeId: item.exchange_id,
         
-        side: sideName[item.side] ? sideName[item.side] : '--',
+        side: SideName[item.side] ? SideName[item.side] : '--',
         sideOrigin: item.side,
-        offset: offsetName[item.offset] ? offsetName[item.offset] : '--',
+        offset: OffsetName[item.offset] ? OffsetName[item.offset] : '--',
         offsetOrigin: item.offset,
         hedgeFlag: hedgeFlag[item.hedge_flag] ? hedgeFlag[item.hedge_flag] : '--',
         hedgeFlagOrigin: item.hedge_flag,
@@ -296,8 +296,8 @@ export const dealTrade = (item: TradeInputData): TradeData => {
         orderId: item.order_id.toString(),
         updateTimeNum: +Number(updateTime || 0),
         instrumentId: item.instrument_id,
-        side: sideName[item.side] ? sideName[item.side] : '--',
-        offset: offsetName[item.offset],
+        side: SideName[item.side] ? SideName[item.side] : '--',
+        offset: OffsetName[item.offset],
         price: toDecimal(+item.price, 3),
         volume: Number(item.volume),
         clientId: resolveClientId(item.dest || ''),
@@ -310,7 +310,7 @@ export const dealTrade = (item: TradeInputData): TradeData => {
 
 export const dealPos = (item: PosInputData): PosData => {
     //item.type :'0': 未知, '1': 股票, '2': 期货, '3': 债券
-    const direction: string = posDirection[item.direction] || '--';
+    const direction: string = PosDirection[item.direction] || '--';
     return {
         id: item.instrument_id + direction,
         instrumentId: item.instrument_id,

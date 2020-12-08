@@ -27,6 +27,10 @@ export default {
         white-space: nowrap;
         font-size: 12px;
 
+        button {
+            box-sizing: border-box;
+        }
+
         .el-checkbox{
             .el-checkbox__label{
                 font-size: 12px;
