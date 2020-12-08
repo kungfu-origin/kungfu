@@ -175,7 +175,7 @@ export default {
             return true;
         },
 
-        renderCellClass(prop, item) {
+        renderCellClass(prop, item) {   
             switch (prop) {
                 case 'side':
                     if (item.side === '买') return 'red';
@@ -186,8 +186,8 @@ export default {
                     else if (item.offset === '平仓') return 'green';
                     break;
                 case 'statusName':
-                    if (item.statusName === '错误') return 'red';
-                    else if (['已成交', '部分撤单', '已撤单'].indexOf(item.statusName) !== -1) return 'green';
+                    if (+item.status === 4) return 'red';
+                    else if ([3, 5, 6].indexOf(+item.status) !== -1) return 'green';
                     else return 'gray';
                 case 'direction':
                     if (item.direction === '多') return 'red';

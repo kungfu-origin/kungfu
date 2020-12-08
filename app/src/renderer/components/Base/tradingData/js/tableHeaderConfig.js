@@ -38,7 +38,7 @@ export const ordersHeader = (dateForHistory, moduleType) => {
                 type: "text",
                 label: "订单状态",
                 prop: "statusName",
-                width: '60px'
+                width: '120px'
             },{
                 type: "account-strategy",
                 label: moduleType == 'account' ? '策略' : '账户',
@@ -90,7 +90,7 @@ export const ordersHeader = (dateForHistory, moduleType) => {
             type: "text",
             label: "订单状态",
             prop: "statusName",
-            width: '60px'
+            width: '120px'
         },{
             type: 'number',
             label: "系统延迟(μs)",

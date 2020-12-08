@@ -273,7 +273,7 @@ export const dealOrder = (item: OrderInputData): OrderData => {
         volumeTraded: item.volume_traded.toString() + "/" + item.volume.toString(),
         volumeLeft: item.volume_left.toString(),
 
-        statusName: orderStatus[item.status],
+        statusName: +item.status !== 4 ? orderStatus[item.status] : item.error_msg.toString(),
         status: item.status,
 
         tax: item.tax,
