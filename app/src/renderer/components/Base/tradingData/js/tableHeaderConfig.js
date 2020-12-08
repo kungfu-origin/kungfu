@@ -68,14 +68,12 @@ export const ordersHeader = (dateForHistory, moduleType) => {
             label: "",
             prop: "side",
             width: '40px',
-        },
-        {
+        },{
             type: "text",
             label: "",
             prop: "offset",
             width: '40px'
-        },
-        {
+        },{
             type: "number",
             label: "委托价",
             prop: "limitPrice",
