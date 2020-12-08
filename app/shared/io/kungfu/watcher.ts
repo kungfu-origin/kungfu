@@ -3,7 +3,7 @@ import { setTimerPromiseTask } from '__gUtils/busiUtils';
 import { kungfu } from '__gUtils/kungfuUtils';
 import { toDecimal } from '__gUtils/busiUtils';
 import { readJsonSync } from '__gUtils/fileUtils';
-import { OffsetName, orderStatus, SideName, PosDirection, priceType, hedgeFlag, instrumentType, volumeCondition, timeCondition } from "__gConfig/tradingConfig";
+import { OffsetName, orderStatus, SideName, PosDirection, priceType, hedgeFlag, InstrumentType, volumeCondition, timeCondition } from "__gConfig/tradingConfig";
 import { logger } from '../../utils/logUtils';
 
 export const watcher: any = (() => {
@@ -235,6 +235,7 @@ function resolveAccountId(source: string, dest: string): string {
 
 export const dealOrder = (item: OrderInputData): OrderData => {
     const updateTime = item.update_time || item.insert_time;
+    const instrumentType = item.instrument_type;
     return {
         id: [item.order_id.toString(), item.account_id.toString()].join('-'),
         updateTime: kungfu.formatTime(updateTime, '%H:%M:%S'),
@@ -245,13 +246,17 @@ export const dealOrder = (item: OrderInputData): OrderData => {
         parentId: item.parent_id.toString(),
         
         instrumentId: item.instrument_id,
-        instrumentType: instrumentType[item.instrument_type],
+        instrumentType: InstrumentType[item.instrument_type],
         instrumentTypeOrigin: item.instrument_type,
         exchangeId: item.exchange_id,
         
         side: SideName[item.side] ? SideName[item.side] : '--',
         sideOrigin: item.side,
-        offset: OffsetName[item.offset] ? OffsetName[item.offset] : '--',
+        offset: instrumentType === 1 || instrumentType === 5 ? 
+            '--' : 
+            OffsetName[item.offset] ? 
+                OffsetName[item.offset] : 
+                '--',
         offsetOrigin: item.offset,
         hedgeFlag: hedgeFlag[item.hedge_flag] ? hedgeFlag[item.hedge_flag] : '--',
         hedgeFlagOrigin: item.hedge_flag,
@@ -289,6 +294,7 @@ export const dealOrder = (item: OrderInputData): OrderData => {
 
 export const dealTrade = (item: TradeInputData): TradeData => {
     const updateTime = item.trade_time || item.update_time;
+    const instrumentType = item.instrument_type;
     return {
         id: [item.account_id.toString(), item.trade_id.toString(), updateTime.toString()].join('_'),
         updateTime: kungfu.formatTime(updateTime, '%H:%M:%S'),
@@ -297,7 +303,11 @@ export const dealTrade = (item: TradeInputData): TradeData => {
         updateTimeNum: +Number(updateTime || 0),
         instrumentId: item.instrument_id,
         side: SideName[item.side] ? SideName[item.side] : '--',
-        offset: OffsetName[item.offset],
+        offset: instrumentType === 1 || instrumentType === 5 ? 
+            '--' : 
+            OffsetName[item.offset] ? 
+                OffsetName[item.offset] : 
+                '--',
         price: toDecimal(+item.price, 3),
         volume: Number(item.volume),
         clientId: resolveClientId(item.dest || ''),
@@ -407,7 +417,7 @@ export const dealQuote = (quote: QuoteDataInput): QuoteData => {
         exchangeId: quote.exchange_id,
         highPrice: toDecimal(quote.high_price, 3),
         instrumentId: quote.instrument_id,
-        instrumentType: instrumentType[quote.instrument_type],
+        instrumentType: InstrumentType[quote.instrument_type],
         lastPrice: toDecimal(quote.last_price, 3),
         lowPrice: toDecimal(quote.low_price, 3),
         lowerLimitPrice: toDecimal(quote.lower_limit_price, 3),

@@ -128,7 +128,7 @@ export const InstrumentTypes: StringToNumberObject = {
 }
 
 
-export const instrumentType: NumberToStringObject = {
+export const InstrumentType: NumberToStringObject = {
     0: isEnglish ? 'Unknown'     : '未知',
     1: isEnglish ? 'Stock'       : '普通股票',
     2: isEnglish ? 'Future'      : '期货',
