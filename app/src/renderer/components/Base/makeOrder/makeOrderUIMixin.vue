@@ -168,7 +168,7 @@
                     </el-radio-group>
                 </el-form-item>
 
-                <el-row class="make-order-line" v-if="buyType === 'volume'">
+                <el-row v-if="buyType === 'volume'">
                     <el-col :span="14">
                         <el-form-item
                         label="数量"
@@ -195,7 +195,7 @@
                 </el-row>
 
 
-                <el-row class="make-order-line" v-else>
+                <el-row v-else>
                     <el-col :span="16">
                         <el-form-item
                         label="总金额"

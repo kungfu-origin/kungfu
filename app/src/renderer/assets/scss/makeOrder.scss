@@ -95,15 +95,15 @@ $fontSize: 12px;
     
         .make-order-line {
             margin-bottom: 15px;
-    
-            .make-order-line-info {
+        }
+
+        .make-order-line-info {
                 
-                span {
-                    display: block;
-                    color: $font;
-                    font-size: 12px;
-                    text-align: right;
-                }
+            span {
+                display: block;
+                color: $font;
+                font-size: 12px;
+                text-align: right;
             }
         }
     }
