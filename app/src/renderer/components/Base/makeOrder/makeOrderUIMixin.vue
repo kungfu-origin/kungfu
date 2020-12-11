@@ -579,7 +579,6 @@ export default {
         },
         
         clearData (exceptId=false) {
-            console.log(this.$refs['make-order-form'])
             this.$refs['make-order-form'].resetFields();
             this.$emit('update:visible', false)
             
