@@ -40,7 +40,6 @@ def add_lib(path):
 add_lib(build_cpp_dir)
 add_lib(build_deps_dir)
 
-datas.extend(collect_data_files('tushare'))
 datas.extend(collect_data_files('plotly'))
 datas.extend(collect_data_files('wcwidth'))
 
@@ -49,8 +48,6 @@ hiddenimports = [
     'kungfu.yijinjing.sinks.csv',
     'numpy',
     'pandas',
-    'rqalpha',
-    'tushare',
     'plotly',
     'wcwidth',
     "recordclass",
