@@ -75,7 +75,7 @@ export default {
         kungfuData (positions) {
             const positionsResolve = this.dealPositionList(positions, this.searchKeyword) || {};
             const dataList = positionsResolve.dataList || [];
-            (dataList.length) && (this.tableData = dataList);
+            this.tableData = dataList;
             this.dataByKey = positionsResolve.dataByKey || {};
         }
     },

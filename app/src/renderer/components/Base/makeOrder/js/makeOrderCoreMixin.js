@@ -27,7 +27,6 @@ export default {
             strategyList: state => state.STRATEGY.strategyList,
             tdList: state => state.ACCOUNT.tdList,
             accountsAsset: state => state.ACCOUNT.accountsAsset,
-            processStatus: state => state.BASE.processStatus,
         }),
     },
 

@@ -31,11 +31,3 @@ new Vue({
 }).$mount('#app', true)
 
 
-//kungfu master 启动流程
-const { startGetProcessStatus } = require('__gUtils/processUtils');
-startGetProcessStatus((processStatus) => {
-    Vue.store.dispatch('setProcessStatus', processStatus)
-});
-
-window.electron = electron
-

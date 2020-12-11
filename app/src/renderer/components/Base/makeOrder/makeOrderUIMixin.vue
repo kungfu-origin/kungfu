@@ -157,18 +157,19 @@
                 <el-form-item
                 label="方式"
                 class="no-margin"
+                prop="buyType"
                 v-if="!isFuture && (makeOrderForm.price_type === 0)"
                 :rules="[
                     { required: true, message: '不能为空！', trigger: 'change' },
                 ]"
                 >
-                    <el-radio-group size="mini" v-model="buyType">
+                    <el-radio-group size="mini" v-model="makeOrderForm.buyType">
                         <el-radio size="mini"  label="volume">按数量</el-radio>
                         <el-radio size="mini"  label="price">按金额</el-radio>
                     </el-radio-group>
                 </el-form-item>
 
-                <el-row v-if="buyType === 'volume'">
+                <el-row v-if="makeOrderForm.buyType === 'volume'">
                     <el-col :span="14">
                         <el-form-item
                         label="数量"
@@ -282,9 +283,9 @@ export default {
                 offset: 0,
                 price_type: 0,
                 hedge_flag: 0,
+                buyType: 'volume', // volume or price
             },
 
-            buyType: 'volume', // volume or price
 
             currentSearchTickerList: [],
 
@@ -364,7 +365,7 @@ export default {
 
         avaliableOrderVolume () {
 
-            if (this.buyType === 'price') {
+            if (this.makeOrderForm.buyType === 'price') {
                 return this.makeOrderForm.volume
             }
 
@@ -428,14 +429,14 @@ export default {
             }
         },
 
-        buyType (val) {
+        'makeOrderForm.buyType' (val) {
             if (val === 'price') {
                 this.$set(this.makeOrderForm, 'volume', 0)
             }
         },
 
         "makeOrderForm.totalPrice" (val) {
-            if (this.buyType !== 'price') return;
+            if (this.makeOrderForm.buyType !== 'price') return;
             const price = +this.makeOrderForm.limit_price;
             const totalPrice = +val;
 
@@ -454,7 +455,7 @@ export default {
         },
 
          "makeOrderForm.limit_price" (val) {
-            if (this.buyType !== 'price') return;
+            if (this.makeOrderForm.buyType !== 'price') return;
             const price = +val;
             const totalPrice = +this.makeOrderForm.totalPrice;
 
@@ -474,7 +475,7 @@ export default {
 
         "makeOrderForm.price_type" (val) {
             if (+val === 1) {
-                this.buyType = 'volume'
+                this.makeOrderForm.buyType = 'volume'
             }
         }
         
@@ -578,9 +579,9 @@ export default {
         },
         
         clearData (exceptId=false) {
+            console.log(this.$refs['make-order-form'])
             this.$refs['make-order-form'].resetFields();
             this.$emit('update:visible', false)
-            this.buyType = 'volume';
             
             if (!exceptId) {
                 this.$set(this.makeOrderForm, 'instrument_id', '')
@@ -588,6 +589,7 @@ export default {
                 this.currentAccount = '';
             }
 
+            this.$set(this.makeOrderForm, 'buyType', 'volume')
             this.$set(this.makeOrderForm, 'instrument_type', '')
             this.$set(this.makeOrderForm, 'exchange_id', '')
             this.$set(this.makeOrderForm, 'limit_price', 0)

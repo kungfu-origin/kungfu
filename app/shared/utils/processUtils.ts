@@ -162,22 +162,20 @@ const dealSpaceInPath = (pathname: string): string => {
 
 export const describeProcess = (name: string): Promise<any> => {
     return new Promise((resolve, reject) => {
-        pm2Connect().then(() => {
-            try {
-                pm2.describe(name, (err: any, res: object): void => {
-                    if (err) {
-                        err = err.length ? err[0] : err;
-                        logger.error('[describeProcess]', err)
-                        reject(err);
-                        return;
-                    }
-                    resolve(res)
-                })
-            } catch (err) {
-                logger.error('[TC describeProcess]', err)
-                reject(err)
-            }
-        }).catch(err => reject(err))
+        try {
+            pm2.describe(name, (err: any, res: object): void => {
+                if (err) {
+                    err = err.length ? err[0] : err;
+                    logger.error('[describeProcess]', err)
+                    reject(err);
+                    return;
+                }
+                resolve(res)
+            })
+        } catch (err) {
+            logger.error('[TC describeProcess]', err)
+            reject(err)
+        }
     })
 }
 
