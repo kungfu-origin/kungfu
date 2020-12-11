@@ -6,6 +6,7 @@ declare module NodeJS {
     interface Window { 
         fileId: number;
         ELEC_WIN_MAP: any;
+        pm2: any;
     }
 
     interface Global {

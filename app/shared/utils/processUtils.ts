@@ -12,9 +12,6 @@ import { logger } from '__gUtils/logUtils';
 import { readJsonSync } from '__gUtils/fileUtils';
 import { setTimerPromiseTask, delayMiliSeconds } from '__gUtils/busiUtils';
 import { getProcesses } from 'getprocesses';
-import { resolve } from 'dns';
-import { stat } from 'fs';
-
 
 const path = require('path');
 const fkill = require('fkill');
@@ -94,8 +91,9 @@ export const killExtra = () => kfKill([kfc, 'pm2'])
 const pm2Connect = (): Promise<void> => {
     return new Promise((resolve, reject) => {
         try {
-            let noDaemon = platform === 'win' ? true : false
-            if (process.env.NODE_ENV !== 'production') noDaemon = false;
+            //let noDaemon = platform === 'win' ? true : false
+            //if (process.env.NODE_ENV !== 'production') noDaemon = false;
+            let noDaemon = false;
             pm2.connect(noDaemon, (err: any): void => {
                 if (err) {
                     err = err.length ? err[0] : err;

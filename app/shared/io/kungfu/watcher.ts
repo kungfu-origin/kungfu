@@ -89,18 +89,16 @@ export const transformOrderTradeListToData = (list: any[], type: string) => {
     if (type === 'account') {
         list.kfForEach((item: any) => {
             const location = decodeKungfuLocation(item.source);
-            if (!location) return;
+            if (!location || !location.name) return;
             const accountId = `${location.group}_${location.name}`;
-            if (!accountId) return;
             if (!data[accountId]) data[accountId] = [];
             data[accountId].push(item)
         })
     } else if (type === 'strategy') {
         list.kfForEach((item: any) => {
             const location = decodeKungfuLocation(item.dest);
-            if (!location) return;
+            if (!location || !location.name) return;
             const clientId = location.name;
-            if (!clientId) return;
             if (!data[clientId]) data[clientId] = [];
             data[clientId].push(item)
         })
@@ -122,8 +120,8 @@ export const transformTradingItemListToData = (list: any[], type: string) => {
     let data: StringToAnyObject = {}
     if (type === 'account') {
         list.kfForEach((item: any) => {
+            if (!item.account_id) return;
             const accountId = `${item.source_id}_${item.account_id}`;
-            if (!accountId) return;
             const ledgerCategory = +item.ledger_category;
             if (ledgerCategory === 0) {
                 if (!data[accountId]) data[accountId] = [];
@@ -142,13 +140,14 @@ export const transformTradingItemListToData = (list: any[], type: string) => {
         })
     } else if (type === 'ticker') {
         list.kfForEach((item: any) => {
+            if (!item.account_id) return;
             const instrumentId = `${item.instrument_id}_${item.direction}`;
             if (!instrumentId) return;
             if (!data[instrumentId]) data[instrumentId] = [];
             data[instrumentId].push(item)
         })
 
-    }
+    } 
 
     return data
 }
