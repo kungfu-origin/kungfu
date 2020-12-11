@@ -5,7 +5,6 @@
 #include "trader_ctp.h"
 #include "serialize_ctp.h"
 #include "type_convert_ctp.h"
-#include "DataCollect.h"
 #include <chrono>
 #include <kungfu/wingchun/encoding.h>
 
@@ -23,9 +22,9 @@ TraderCTP::TraderCTP(bool low_latency, locator_ptr locator, const std::string &a
     yijinjing::log::copy_log_settings(get_io_device()->get_home(), SOURCE_CTP);
     config_ = nlohmann::json::parse(json_config);
 
-    memset(system_info_, 0, 344);
-    CTP_GetSystemInfo(system_info_, system_info_len_);
-    SPDLOG_INFO("SystemInfo len: {}", system_info_len_);
+//    memset(system_info_, 0, 344);
+//    CTP_GetSystemInfo(system_info_, system_info_len_);
+//    SPDLOG_INFO("SystemInfo len: {}", system_info_len_);
 }
 
 TraderCTP::~TraderCTP() {
