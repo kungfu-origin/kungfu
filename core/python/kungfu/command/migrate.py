@@ -19,8 +19,8 @@ def migrate_to_2_3(ctx):
     if len(os.listdir(ctx.runtime_dir)) != 0:
         print(f'runtime {ctx.runtime_dir} is not empty')
 
-    for category_value in yjj.category.__members__:
-        category_name = lf.enums.get_category_name(yjj.category.__members__[category_value])
+    for category_value in lf.enums.category.__members__:
+        category_name = lf.enums.get_category_name(lf.enums.category.__members__[category_value])
         category_dir = os.path.join(ctx.home, category_name)
         if os.path.exists(category_dir):
             shutil.move(category_dir, ctx.runtime_dir)

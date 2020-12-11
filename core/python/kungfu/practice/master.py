@@ -130,7 +130,7 @@ class Master(yjj.master):
         if pid not in self.ctx.apprentices:
             return False
         registry = self.ctx.apprentices[pid]['register']
-        return registry.category == yjj.category.SYSTEM and registry.group == 'node'
+        return registry.category == lf.enums.category.SYSTEM and registry.group == 'node'
 
     def filter_live_process(self, pid):
         return [self.ctx.apprentices[pid]] if self.is_live_process(pid) and not self.is_node_process(pid) else []

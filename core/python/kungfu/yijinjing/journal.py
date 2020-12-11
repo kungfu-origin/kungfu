@@ -88,7 +88,7 @@ def read_session(ctx, session_id, io_type):
     io_device = yjj.io_device_console(home, ctx.console_width, ctx.console_height)
 
     show_in = (io_type == 'in' or io_type == 'all') and not (
-            io_device.home.category == yjj.category.SYSTEM and io_device.home.group == 'master' and io_device.home.name == 'master')
+            io_device.home.category == lf.enums.category.SYSTEM and io_device.home.group == 'master' and io_device.home.name == 'master')
     show_out = io_type == 'out' or io_type == 'all'
 
     return locations, session, io_device, show_in, show_out
