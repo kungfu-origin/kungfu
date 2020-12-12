@@ -5,6 +5,9 @@ import { toDecimal } from '__gUtils/busiUtils';
 import { readJsonSync } from '__gUtils/fileUtils';
 import { OffsetName, orderStatus, SideName, PosDirection, priceType, hedgeFlag, InstrumentType, volumeCondition, timeCondition } from "__gConfig/tradingConfig";
 import { logger } from '../../utils/logUtils';
+import { decode } from 'punycode';
+import { commissionStore } from '../../utils/kungfuUtils';
+import { CONNREFUSED } from 'dns';
 
 var iconv = require('iconv-lite');
 
@@ -223,24 +226,48 @@ function resolveClientId(dest: string): string {
     return name
 }
 
+interface SourceDest {
+    sourceGroup:string;
+    sourceName:string;
+    destGroup: string;
+}
 
-function resolveAccountId(source: string, dest: string): string {
+function resolveSourceDest (source: string, dest: string): SourceDest {
     const kungfuLocationSource: KungfuLocation = decodeKungfuLocation(source)
     const kungfuLocationDest: KungfuLocation = decodeKungfuLocation(dest)
     
-    const name = kungfuLocationSource.group + '_' + kungfuLocationSource.name;
-    const group = kungfuLocationDest.group === 'node' ? '手动' : '';
+    return {
+        sourceGroup: kungfuLocationSource.group.toString(),
+        sourceName: kungfuLocationSource.name.toString(),
+        destGroup: kungfuLocationDest.group.toString()
+    }
+}
+
+function resolveAccountId(source: string, dest: string): string {
+    const { sourceName, sourceGroup, destGroup  } = resolveSourceDest(source, dest)
+    const name = sourceGroup + '_' + sourceName;
+    const group = destGroup === 'node' ? '手动' : '';
     return [group, name].join(' ')
 }
 
-
 export const dealOrder = (item: OrderInputData): OrderData => {
-    const updateTime = item.update_time || item.insert_time;
-    const instrumentType = item.instrument_type;
-    const isGBK = (item.source || '').toLowerCase().includes('ctp');
+    const { source, dest, instrument_type, update_time, insert_time } = item;
+    const updateTime = update_time || insert_time;
+    const instrumentType = instrument_type;
+    const sourceId =  resolveSourceDest(source, dest).sourceGroup;
+    const isGBK = sourceId.toLowerCase().includes('ctp');
     const errMsg = item.error_msg;
     const errMsgResolved = isGBK ? iconv.decode(errMsg, 'gbk') : errMsg;
-    console.log(item.source, isGBK,iconv.decode(errMsg, 'utf8'),iconv.decode(iconv.decode(errMsg, 'utf8'), 'gbk'))
+
+    const encodeMsg1 = iconv.encode(errMsg, 'utf8')
+  
+    console.log(iconv.decode(encodeMsg1, 'gbk'))
+    
+
+    console.log('========')
+ 
+    
+  
     return {
         id: [item.order_id.toString(), item.account_id.toString()].join('-'),
         updateTime: kungfu.formatTime(updateTime, '%H:%M:%S'),
@@ -287,12 +314,12 @@ export const dealOrder = (item: OrderInputData): OrderData => {
         errorId: item.error_id,
         errorMsg: errMsgResolved,
 
-        clientId: resolveClientId(item.dest || ''),
-        accountId: resolveAccountId(item.source, item.dest),
-        sourceId: item.source,
+        clientId: resolveClientId(dest || ''),
+        accountId: resolveAccountId(source, dest),
+        sourceId: sourceId,
        
-        source: item.source,
-        dest: item.dest
+        source: source,
+        dest: dest
     }
 }
 
