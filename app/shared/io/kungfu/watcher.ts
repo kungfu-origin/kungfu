@@ -6,6 +6,8 @@ import { readJsonSync } from '__gUtils/fileUtils';
 import { OffsetName, orderStatus, SideName, PosDirection, priceType, hedgeFlag, InstrumentType, volumeCondition, timeCondition } from "__gConfig/tradingConfig";
 import { logger } from '../../utils/logUtils';
 
+var iconv = require('iconv-lite');
+
 export const watcher: any = (() => {
     const kfSystemConfig: any = readJsonSync(KF_CONFIG_PATH)
     const bypassQuote = (kfSystemConfig.performance || {}).bypassQuote || false;
@@ -235,6 +237,10 @@ function resolveAccountId(source: string, dest: string): string {
 export const dealOrder = (item: OrderInputData): OrderData => {
     const updateTime = item.update_time || item.insert_time;
     const instrumentType = item.instrument_type;
+    const isGBK = (item.source || '').toLowerCase().includes('ctp');
+    const errMsg = item.error_msg;
+    const errMsgResolved = isGBK ? iconv.decode(errMsg, 'gbk') : errMsg;
+    console.log(item.source, isGBK,iconv.decode(errMsg, 'utf8'),iconv.decode(iconv.decode(errMsg, 'utf8'), 'gbk'))
     return {
         id: [item.order_id.toString(), item.account_id.toString()].join('-'),
         updateTime: kungfu.formatTime(updateTime, '%H:%M:%S'),
@@ -279,11 +285,11 @@ export const dealOrder = (item: OrderInputData): OrderData => {
         comission: item.commission,
 
         errorId: item.error_id,
-        errorMsg: item.error_msg.toString(),
+        errorMsg: errMsgResolved,
 
         clientId: resolveClientId(item.dest || ''),
         accountId: resolveAccountId(item.source, item.dest),
-        sourceId: item.source_id,
+        sourceId: item.source,
        
         source: item.source,
         dest: item.dest

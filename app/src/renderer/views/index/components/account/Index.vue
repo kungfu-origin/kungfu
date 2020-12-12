@@ -252,7 +252,7 @@ export default {
                         const ad = a.direction || '';
                         const bd = b.direction || '';
                         const result = aid.localeCompare(bid);
-                        return result === 0 ? ad.localeCompare(bd) : result;
+                        return result === 0 ? ad.toString().localeCompare(bd.toString()) : result;
                     })
 
                     if (tickerListSort.length) {
@@ -278,7 +278,7 @@ export default {
                 this.trades = Object.freeze(trades || []);
             }
       
-            const positions = data['positions'][this.currentId];
+            const positions = data['positions'][this.currentId] || [];
             this.positions = Object.freeze(positions || []);
 
             const pnl = data['pnl'][this.currentId];

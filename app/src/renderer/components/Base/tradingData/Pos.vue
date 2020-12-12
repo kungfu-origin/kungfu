@@ -122,7 +122,7 @@ export default {
                 dataByKey: Object.freeze(positionDataByKey),
                 dataList: Object.freeze(Object.values(positionDataByKey).sort((a, b) => {
                     const result = a.instrumentId.localeCompare(b.instrumentId);
-                    return result === 0 ? a.direction.localeCompare(b.direction) : result;
+                    return result === 0 ? (a.direction || '').toString().localeCompare((b.direction || '').toString()) : result;
                 }))
             };
         },
