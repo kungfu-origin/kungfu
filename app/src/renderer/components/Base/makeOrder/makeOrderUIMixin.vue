@@ -28,55 +28,47 @@
                     </el-select>
                 </el-form-item>   
 
-                <el-row class="make-order-line">
-                    <el-col :span="14">
-                        <el-form-item
-                        label="代码"
-                        prop="instrument_id"
-                        :rules="[
-                            { required: true, message: '不能为空！', trigger: 'input'},
-                        ]">
-                            <el-autocomplete 
-                            ref="insturment-id-input"
-                            v-model="makeOrderForm.instrument_id"
-                            :fetch-suggestions="querySearch"
-                            placeholder="请输入代码名称"
-                            @blur="handleBlurInstrumentId"
-                            @select="handleSelectInstrumentId"
-                            >
-                                <template v-slot="{ item }">
-                                    <div class="make-order-instrument-ids__warp">
-                                        <div class="make-order-instrument-id-item">
-                                            <span class="ticker">{{ item.ticker }}</span>
-                                            <span class="name">{{ item.name }}</span>
-                                        </div>
-                                        <div class="make-order-instrument-id-item">{{ (item.exchangeId || '').toUpperCase() }}</div>
-                                    </div>
-                                </template>
-                            </el-autocomplete>
-                        </el-form-item>      
-                    </el-col>
-                    <el-col :span="1">
-                        <div :style="{ width: '1px', height: '1px' }"></div>
-                    </el-col>
-                    <el-col  :span="9">
-                        <el-form-item
-                        label="交易所"
-                        prop="exchange_id"
-                        :rules="[
-                            { required: true, message: '不能为空！', trigger: 'change' },
-                        ]">
-                            <el-select v-model.trim="makeOrderForm.exchange_id">
-                                <el-option
-                                    v-for="exchangeId in Object.keys(exchangeIds)"
-                                    :key="exchangeId"
-                                    :label="exchangeIds[exchangeId]"
-                                    :value="exchangeId">
-                                </el-option>
-                            </el-select>
-                        </el-form-item>  
-                    </el-col>
-                </el-row>
+                <el-form-item
+                label="代码"
+                prop="instrument_id"
+                :rules="[
+                    { required: true, message: '不能为空！', trigger: 'input'},
+                ]">
+                    <el-autocomplete 
+                    ref="insturment-id-input"
+                    v-model="makeOrderForm.instrument_id"
+                    :fetch-suggestions="querySearch"
+                    placeholder="请输入代码名称"
+                    @blur="handleBlurInstrumentId"
+                    @select="handleSelectInstrumentId"
+                    >
+                        <template v-slot="{ item }">
+                            <div class="make-order-instrument-ids__warp">
+                                <div class="make-order-instrument-id-item">
+                                    <span class="ticker">{{ item.ticker }}</span>
+                                    <span class="name">{{ item.name }}</span>
+                                </div>
+                                <div class="make-order-instrument-id-item">{{ (item.exchangeId || '').toUpperCase() }}</div>
+                            </div>
+                        </template>
+                    </el-autocomplete>
+                </el-form-item>      
+            
+                <el-form-item
+                label="交易所"
+                prop="exchange_id"
+                :rules="[
+                    { required: true, message: '不能为空！', trigger: 'change' },
+                ]">
+                    <el-select v-model.trim="makeOrderForm.exchange_id">
+                        <el-option
+                            v-for="exchangeId in Object.keys(exchangeIds)"
+                            :key="exchangeId"
+                            :label="exchangeIds[exchangeId]"
+                            :value="exchangeId">
+                        </el-option>
+                    </el-select>
+                </el-form-item>  
 
                 <el-form-item
                 v-if="allowShorted"
