@@ -256,7 +256,6 @@ function filterPriceType (priceType) {
 
 
 export default {
-
     
     data () {
         this.sourceTypeConfig = sourceTypeConfig;
@@ -285,7 +284,6 @@ export default {
                 hedge_flag: 0,
                 buyType: 'volume', // volume or price
             },
-
 
             currentSearchTickerList: [],
 
@@ -352,6 +350,8 @@ export default {
                 return (this.currentId || '').toSourceName()
             } else if (this.moduleType === 'strategy') {
                 return this.currentAccount.toSourceName();
+            } else if (this.moduleType === 'ticker') {
+                return this.currentAccount.toSourceName();
             } else {
                 return ''
             }
@@ -415,7 +415,6 @@ export default {
                 this.currentAccount = accountIdResolved
             }
             
-            
             if (this.isFuture) {
                 this.$set(this.makeOrderForm, 'offset', 1)
             } else {
@@ -478,7 +477,6 @@ export default {
                 this.makeOrderForm.buyType = 'volume'
             }
         }
-        
     },
 
     methods: {

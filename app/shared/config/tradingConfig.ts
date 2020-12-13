@@ -140,6 +140,10 @@ export const InstrumentType: NumberToStringObject = {
     8: isEnglish ? 'Repo'        : '回购'
 }
 
+export const allowShorted = (instrumentType: number) => {
+    if ([2, 4].includes(instrumentType)) return true;
+    return false
+}
 
 export const priceType: NumberToStringObject = {
     0: isEnglish ? 'Limit'       : '限价',

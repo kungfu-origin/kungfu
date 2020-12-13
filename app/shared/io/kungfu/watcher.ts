@@ -3,11 +3,9 @@ import { setTimerPromiseTask } from '__gUtils/busiUtils';
 import { kungfu } from '__gUtils/kungfuUtils';
 import { toDecimal } from '__gUtils/busiUtils';
 import { readJsonSync } from '__gUtils/fileUtils';
-import { OffsetName, orderStatus, SideName, PosDirection, priceType, hedgeFlag, InstrumentType, volumeCondition, timeCondition } from "__gConfig/tradingConfig";
+import { OffsetName, orderStatus, SideName, PosDirection, priceType, hedgeFlag, InstrumentType, volumeCondition, timeCondition, allowShorted } from "__gConfig/tradingConfig";
 import { logger } from '../../utils/logUtils';
-import { decode } from 'punycode';
-import { commissionStore } from '../../utils/kungfuUtils';
-import { CONNREFUSED } from 'dns';
+
 
 var iconv = require('iconv-lite');
 
@@ -257,16 +255,7 @@ export const dealOrder = (item: OrderInputData): OrderData => {
     const sourceId =  resolveSourceDest(source, dest).sourceGroup;
     const isGBK = sourceId.toLowerCase().includes('ctp');
     const errMsg = item.error_msg;
-    const errMsgResolved = isGBK ? iconv.decode(errMsg, 'gbk') : errMsg;
-
-    const encodeMsg1 = iconv.encode(errMsg, 'utf8')
-  
-    console.log(iconv.decode(encodeMsg1, 'gbk'))
-    
-
-    console.log('========')
- 
-    
+    const errMsgResolved = isGBK ? orderStatus[item.status] : errMsg;
   
     return {
         id: [item.order_id.toString(), item.account_id.toString()].join('-'),
@@ -284,7 +273,7 @@ export const dealOrder = (item: OrderInputData): OrderData => {
         
         side: SideName[item.side] ? SideName[item.side] : '--',
         sideOrigin: item.side,
-        offset: instrumentType === 1 || instrumentType === 5 ? 
+        offset: !allowShorted(instrumentType) ? 
             '--' : 
             OffsetName[item.offset] ? 
                 OffsetName[item.offset] : 
@@ -305,14 +294,14 @@ export const dealOrder = (item: OrderInputData): OrderData => {
         volumeTraded: item.volume_traded.toString() + "/" + item.volume.toString(),
         volumeLeft: item.volume_left.toString(),
 
-        statusName: +item.status !== 4 ? orderStatus[item.status] : item.error_msg.toString(),
+        statusName: +item.status !== 4 ? orderStatus[item.status] : errMsgResolved,
         status: item.status,
 
         tax: item.tax,
         comission: item.commission,
 
         errorId: item.error_id,
-        errorMsg: errMsgResolved,
+        errorMsg: errMsg,
 
         clientId: resolveClientId(dest || ''),
         accountId: resolveAccountId(source, dest),

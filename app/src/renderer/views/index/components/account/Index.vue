@@ -289,8 +289,21 @@ export default {
         },
 
         dealTradingDataByTiker (data) {
+            // 0 long 1 short
+            const { instrumentId, directionOrigin } = this.currentTicker;
             const orders = data['ordersByTicker'].filter(item => {
-                return this.currentTicker.instrumentId.includes(item.instrument_id)
+                if (!instrumentId.includes(item.instrument_id)) {
+                    return false;
+                }
+                
+                const { offset, price_type, instrument_type } = item;
+                if (instrument_type === 1 || instrument_type === 5) {
+                    return true;
+                }
+
+                if (directionOrigin === 0) {
+                    
+                } 
             })
             this.orders = Object.freeze(orders || []);
 
