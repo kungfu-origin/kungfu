@@ -522,6 +522,8 @@ export default {
 
                     let makeOrderForm = deepClone(this.makeOrderForm);
                     this.makeOrder(this.moduleType, makeOrderForm, this.currentAccountResolved, this.currentId)
+                        .then(() => this.$message.success('下单指令已发送！'))
+                        .catch(err => this.$message.error(err.message || '下单指令发送失败！'))
                 }
             })
         },
