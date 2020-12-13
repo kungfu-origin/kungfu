@@ -13,18 +13,15 @@ export const getAllKfConfig = () => {
     return kungfuConfigStore.getAllConfig();
 }
 
-
 export const setKfConfig = (key: string, type: string, config: string) => {
     const kungfuKey = encodeKungfuLocation(key, type);
     return kungfuConfigStore.setConfig(kungfuKey.category, kungfuKey.group, kungfuKey.name, kungfuKey.mode, config)
 }
 
-
 export const getKfConfig = (key: string, type: string) => {
     const kungfuKey = encodeKungfuLocation(key, type);
     return kungfuConfigStore.getConfig(kungfuKey.category, kungfuKey.group, kungfuKey.name, kungfuKey.mode)
 }
-
 
 export const removeKfConfig = (key: string, type: string) => {
     const kungfuKey = encodeKungfuLocation(key, type);

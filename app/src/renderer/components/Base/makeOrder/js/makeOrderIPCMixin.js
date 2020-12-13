@@ -15,7 +15,7 @@ export default {
             makeOrderByPosData: {}
         }
     },
-    
+
 
     computed: {
         ...mapState({
@@ -23,6 +23,7 @@ export default {
             strategyList: state => state.strategyList,
             tdList: state => state.tdList,
             accountsAsset: state => state.accountsAsset,
+            currentTicker: state => state.currentTicker || {}
         }),
     },
 

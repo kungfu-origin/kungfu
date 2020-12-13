@@ -79,7 +79,7 @@
                 </el-row>
 
                 <el-form-item
-                v-if="isFuture"
+                v-if="allowShorted"
                 label="套保"
                 prop="hedge_flag"
                 class="no-margin"
@@ -104,7 +104,7 @@
                 </el-form-item>
 
                 <el-form-item
-                v-if="isFuture"
+                v-if="allowShorted"
                 label="开平"
                 prop="offset"
                 class="no-margin"
@@ -158,7 +158,7 @@
                 label="方式"
                 class="no-margin"
                 prop="buyType"
-                v-if="!isFuture && (makeOrderForm.price_type === 0)"
+                v-if="!allowShorted && (makeOrderForm.price_type === 0)"
                 :rules="[
                     { required: true, message: '不能为空！', trigger: 'change' },
                 ]"
@@ -234,7 +234,7 @@
 import Vue from 'vue';
 import { biggerThanZeroValidator } from '__assets/validator';
 import { deepClone } from '__gUtils/busiUtils';
-import { sourceTypeConfig, SideName, OffsetName, priceType, hedgeFlag, exchangeIds, InstrumentTypes } from '__gConfig/tradingConfig';
+import { sourceTypeConfig, SideName, OffsetName, priceType, hedgeFlag, exchangeIds, InstrumentTypes, allowShorted } from '__gConfig/tradingConfig';
 import { getFutureTickersConfig, getStockTickersConfig } from '__assets/base'
 import { Autocomplete } from 'element-ui';
 
@@ -314,7 +314,16 @@ export default {
             return (this.tdAccountSource[sourceName] || {}).typeName || ''
         },
 
-        isFuture () {
+        allowShorted () {
+            if (this.moduleType === 'ticker') {
+                const instrumentType = this.currentTicker.instrumentType || 0;
+                if (allowShorted(instrumentType)) {
+                    return true
+                } else {
+                    return false
+                }
+            }
+
             return (this.accountType || '').toLowerCase() === 'future'
         },
 
@@ -415,7 +424,7 @@ export default {
                 this.currentAccount = accountIdResolved
             }
             
-            if (this.isFuture) {
+            if (this.allowShorted) {
                 this.$set(this.makeOrderForm, 'offset', 1)
             } else {
                 this.$set(this.makeOrderForm, 'offset', 0)
