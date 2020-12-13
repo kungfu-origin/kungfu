@@ -318,38 +318,38 @@ export default {
             const positionsByTicker = data['positionsByTicker'][this.currentTickerId] || [];
             const positionsByTickerForAccount = positionsByTicker.filter(item => !!item.account_id && !item.client_id);
             this.positions = Object.freeze(positionsByTickerForAccount)
-        }
-    },
+        },
 
-    orderTradesFilterByPosTicker (direction, offset, side, instrument_type) {
-        if (!allowShorted(instrument_type)) {
-            return true;
-        }
+        orderTradesFilterByPosTicker (direction, offset, side, instrument_type) {
+            if (!allowShorted(instrument_type)) {
+                return true;
+            }
 
-        // long
-        if (direction === 0) {
-            if (offset === 0) {
-                if (side === 0) {
-                    return true
+            // long
+            if (direction === 0) {
+                if (offset === 0) {
+                    if (side === 0) {
+                        return true
+                    }
+                } else {
+                    if (side === 1) {
+                        return true
+                    }
                 }
             } else {
-                if (side === 1) {
-                    return true
+                if (offset === 0) {
+                    if (side === 1) {
+                        return true;
+                    }
+                } else {
+                    if (side === 0) {
+                        return true;
+                    }
                 }
-            }
-        } else {
-            if (offset === 0) {
-                if (side === 1) {
-                    return true;
-                }
-            } else {
-                if (side === 0) {
-                    return true;
-                }
-            }
-        } 
+            } 
 
-        return false;
+            return false;
+        },
     },
 
     destroyed(){
