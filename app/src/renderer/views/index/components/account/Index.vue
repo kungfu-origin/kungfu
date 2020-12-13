@@ -299,7 +299,7 @@ export default {
                 }
                 
                 const { offset, side, instrument_type } = item;
-                return orderTradesFilterByPosTicker(directionOrigin, offset, side, instrument_type)
+                return this.orderTradesFilterByPosTicker(directionOrigin, offset, side, instrument_type)
                 
             })
             this.orders = Object.freeze(orders || []);
@@ -310,7 +310,7 @@ export default {
                 }
                 
                 const { offset, side, instrument_type } = item;
-                return orderTradesFilterByPosTicker(directionOrigin, offset, side, instrument_type)
+                return this.orderTradesFilterByPosTicker(directionOrigin, offset, side, instrument_type)
                 
             })
             this.trades = Object.freeze(trades || []);
