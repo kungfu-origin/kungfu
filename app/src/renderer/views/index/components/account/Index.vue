@@ -115,6 +115,9 @@ import MainContent from '@/components/Layout/MainContent';
 
 import { buildTradingDataPipe } from '__io/kungfu/tradingData';
 import { transformPositionByTickerByMerge, dealPos } from '__io/kungfu/watcher';
+import { allowShorted } from "__gConfig/tradingConfig";
+
+
 import accountStrategyMixins from '@/assets/js/mixins/accountStrategyMixins';
 
 export default {
@@ -289,26 +292,26 @@ export default {
         },
 
         dealTradingDataByTiker (data) {
-            // 0 long 1 short
             const { instrumentId, directionOrigin } = this.currentTicker;
             const orders = data['ordersByTicker'].filter(item => {
                 if (!instrumentId.includes(item.instrument_id)) {
                     return false;
                 }
                 
-                const { offset, price_type, instrument_type } = item;
-                if (instrument_type === 1 || instrument_type === 5) {
-                    return true;
-                }
-
-                if (directionOrigin === 0) {
-                    
-                } 
+                const { offset, side, instrument_type } = item;
+                return orderTradesFilterByPosTicker(directionOrigin, offset, side, instrument_type)
+                
             })
             this.orders = Object.freeze(orders || []);
 
             const trades = data['tradesByTicker'].filter(item => {
-                return this.currentTicker.instrumentId.includes(item.instrument_id)
+                if (!instrumentId.includes(item.instrument_id)) {
+                    return false;
+                }
+                
+                const { offset, side, instrument_type } = item;
+                return orderTradesFilterByPosTicker(directionOrigin, offset, side, instrument_type)
+                
             })
             this.trades = Object.freeze(trades || []);
 
@@ -316,6 +319,37 @@ export default {
             const positionsByTickerForAccount = positionsByTicker.filter(item => !!item.account_id && !item.client_id);
             this.positions = Object.freeze(positionsByTickerForAccount)
         }
+    },
+
+    orderTradesFilterByPosTicker (direction, offset, side, instrument_type) {
+        if (!allowShorted(instrument_type)) {
+            return true;
+        }
+
+        // long
+        if (direction === 0) {
+            if (offset === 0) {
+                if (side === 0) {
+                    return true
+                }
+            } else {
+                if (side === 1) {
+                    return true
+                }
+            }
+        } else {
+            if (offset === 0) {
+                if (side === 1) {
+                    return true;
+                }
+            } else {
+                if (side === 0) {
+                    return true;
+                }
+            }
+        } 
+
+        return false;
     },
 
     destroyed(){
