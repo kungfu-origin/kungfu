@@ -18,7 +18,7 @@
         :keyField="moduleType === 'ticker' ? 'accountIdResolved' : 'id'"
         :renderCellClass="renderCellClass"
         :isActiveFunc="isActiveTicker"
-        @clickCell="(e, item) => isTickerModule ? $emit('activeTicker', item) : $emit('makeOrder', item)"
+        @clickCell="(e, item) => handleClickCell(item)"
     ></tr-table>
 </tr-dashboard>
 </template>
@@ -81,6 +81,14 @@ export default {
     },
     
     methods:{
+
+        handleClickCell (item) {
+            if (this.isTickerModule) {
+                this.$emit('activeTicker', item)
+            } else {
+                this.$emit('makeOrder', item)
+            }
+        },
 
         handleExport () {
             this.$saveFile({

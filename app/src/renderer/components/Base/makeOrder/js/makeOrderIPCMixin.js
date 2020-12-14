@@ -12,6 +12,7 @@ export default {
         return {
             currentId: '',
             moduleType: '',
+            currentTicker: {},
             makeOrderByPosData: {}
         }
     },
@@ -23,7 +24,6 @@ export default {
             strategyList: state => state.strategyList,
             tdList: state => state.tdList,
             accountsAsset: state => state.accountsAsset,
-            currentTicker: state => state.currentTicker || {}
         }),
     },
 
@@ -42,10 +42,11 @@ export default {
 
         bindIPCOrderDataListener () {
             ipcRenderer.on('init-make-order-win-info', (event, info) => {
-                const { currentId, makeOrderByPosData, moduleType } = info;                
+                const { currentId, makeOrderByPosData, moduleType, currentTicker } = info;                
                 this.currentId = currentId;
                 this.moduleType = moduleType;
                 this.makeOrderByPosData = makeOrderByPosData;
+                this.currentTicker = currentTicker;
             })
         },
     }

@@ -1,7 +1,7 @@
 <template>
     <MainContent>
         <div class="account-content">
-            <el-row style="height: 60%">
+            <el-row style="height: 55%">
                 <el-col :span="14">
                     <el-tabs :value="currentAccountTabName" type="border-card" @tab-click="handleAccountTabClick">
                         <el-tab-pane :lazy="true" label="账户列表" name="tdList">
@@ -57,7 +57,7 @@
                     </el-row>
                 </el-col>
             </el-row>
-            <el-row style="height: 40%" class="flex-row">
+            <el-row style="height: 45%" class="flex-row">
                 <el-col :span="7" :style="{ 'max-width': '450px' }">
                     <MakeOrderDashboard
                         :currentId="currentId"
@@ -250,8 +250,8 @@ export default {
             if (!this.currentTicker || !this.currentTicker.instrumentId) {
                 if (tickerList.length) {
                     const tickerListSort = tickerList.slice(0).sort((a, b) => {
-                        const aid = a.instrumentId || ''
-                        const bid = b.instrumentId || ''
+                        const aid = a.instrument_id || ''
+                        const bid = b.instrument_id || ''
                         const ad = a.direction || '';
                         const bd = b.direction || '';
                         const result = aid.localeCompare(bid);

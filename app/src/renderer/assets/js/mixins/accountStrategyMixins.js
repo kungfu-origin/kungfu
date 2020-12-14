@@ -28,6 +28,8 @@ export default {
                 return this.strategyId
             } else if (this.moduleType === 'account') {
                 return this.currentId
+            } else if (this.moduleType === 'ticker'){
+                return this.currentId
             } else {
                 return ''
             }
@@ -42,9 +44,6 @@ export default {
         },
 
         handleShowOrCloseMakeOrderDashboard () {
-            if (this.moduleType !== 'strategy') {
-                return Promise.resolve(true)
-            }
             return this.buildMakeOrderWin()
                 .then(() => {
                     this.emitCurrentMakeOrderWinInfo();
@@ -77,7 +76,8 @@ export default {
             window.makeOrderWin.webContents.send('init-make-order-win-info', {
                 moduleType: this.moduleType,
                 currentId: this.currentIdInAccountStrategyResolved,
-                makeOrderByPosData: this.makeOrderByPosData
+                makeOrderByPosData: this.makeOrderByPosData,
+                currentTicker: this.currentTicker
             })
         },
 
