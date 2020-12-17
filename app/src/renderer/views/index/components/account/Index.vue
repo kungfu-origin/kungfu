@@ -118,7 +118,7 @@ import { transformPositionByTickerByMerge, dealPos } from '__io/kungfu/watcher';
 import { allowShorted } from "__gConfig/tradingConfig";
 
 
-import accountStrategyMixins from '@/assets/js/mixins/accountStrategyMixins';
+import accountStrategyMixins from '@/views/index/js/accountStrategyMixins';
 
 export default {
     name: 'account',

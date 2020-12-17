@@ -10,8 +10,6 @@ export default {
         }
     },
 
-
-
     mounted () {
         this.emitCurrentMakeOrderWinInfo();
     },

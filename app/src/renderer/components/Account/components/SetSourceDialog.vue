@@ -55,46 +55,44 @@ export default {
 
     },
 
-    data() {
+    data () {
         this.sourceTypeConfig = sourceTypeConfig;
         return {
             selectedSource: ''
         }
     },
 
-    beforeMount() {
+    beforeMount () {
         this.ifNoAvailSource();
     },
 
     computed: {
-        filteredAccountSource() {
+
+        filteredAccountSource () {
             return this.buildSourceList();
         }
     },
 
     methods: {
-        handleSelectSource() {
-            const t = this;
-            if(!t.selectedSource) {
-                t.$message.warning('还没有选择柜台！')
+        handleSelectSource () {
+            if(!this.selectedSource) {
+                this.$message.warning('还没有选择柜台！')
                 return;
             };
 
-            t.$emit('confirm', t.selectedSource)
-            t.refreshData();
+            this.$emit('confirm', this.selectedSource)
+            this.refreshData();
         },
 
-        handleCloseSelectSource() {
-            const t = this;
-            t.refreshData();
+        handleCloseSelectSource () {
+            this.refreshData();
         },
 
-        buildSourceList() {
-            const t = this;
-            let accountSource = deepClone(t.accountSource);
+        buildSourceList () {
+            let accountSource = deepClone(this.accountSource);
 
             //only the md steps this process
-            t.existMdList.forEach(md => {
+            this.existMdList.forEach(md => {
                 const source = md.source_name;
                 if(accountSource[source]) delete accountSource[source]
             })
@@ -102,20 +100,18 @@ export default {
             return accountSource
         },
 
-        ifNoAvailSource() {
-            const t = this;
-            const accountSource = t.buildSourceList();
+        ifNoAvailSource () {
+            const accountSource = this.buildSourceList();
             if(Object.keys(accountSource || {}).length === 0) {
-                t.$emit('noAvailSources', true)
-                t.refreshData();
+                this.$emit('noAvailSources', true)
+                this.refreshData();
                 return 
             }
         },
 
-        refreshData() {
-            const t = this;
-            t.selectedSource = ''
-            t.$emit('update:visible', false);
+        refreshData () {
+            this.selectedSource = ''
+            this.$emit('update:visible', false);
         }
     }
 }

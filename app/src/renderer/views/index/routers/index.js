@@ -9,7 +9,7 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
 import Account from '@/views/index/components/account/Index';
-import Strategy from '@/components/Strategy/Index'
+import Strategy from '@/views/index/components/strategy/Index'
 
 Vue.use(VueRouter)
 

@@ -140,16 +140,16 @@
 
 import { mapState, mapGetters } from 'vuex';
 
-import Strategy from './components/Strategy';
-import Log from './components/Log';
-import OrderRecord from '../Base/tradingData/OrderRecord';
-import TradeRecord from '../Base/tradingData/TradeRecord';
-import Pos from '../Base/tradingData/Pos';
-import Pnl from '../Base/tradingData/pnl/Index';
+import Strategy from '@/components/Strategy/Strategy';
+import Log from '@/components/Strategy/Log';
+import OrderRecord from '@/components/Base/tradingData/OrderRecord';
+import TradeRecord from '@/components/Base/tradingData/TradeRecord';
+import Pos from '@/components/Base/tradingData/Pos';
+import Pnl from '@/components/Base/tradingData/pnl/Index';
 import MainContent from '@/components/Layout/MainContent';
 
 import { buildTradingDataPipe } from '__io/kungfu/tradingData';
-import accountStrategyMixins from '@/assets/js/mixins/accountStrategyMixins';
+import accountStrategyMixins from '@/views/index/js/accountStrategyMixins';
 
 export default {
     mixins: [ accountStrategyMixins ],
