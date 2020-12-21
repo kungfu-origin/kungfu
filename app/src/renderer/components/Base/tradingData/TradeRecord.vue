@@ -47,7 +47,6 @@ import tradingDataMixin from '@/components/Base/tradingData/js/tradingDataMixin'
 
 import { debounce } from "__gUtils/busiUtils";
 import { dealTrade } from "__io/kungfu/watcher";
-import { writeCSV } from '__gUtils/fileUtils';
 import { tradesHeader } from '@/components/Base/tradingData/js/tableHeaderConfig';
 
 export default {
