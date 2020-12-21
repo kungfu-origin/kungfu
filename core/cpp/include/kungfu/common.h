@@ -128,13 +128,15 @@ template <typename T, size_t N> struct array {
 
   [[nodiscard]] size_t size() const { return N; }
 
+  [[nodiscard]] std::string to_string() const { return array_to_string<T, N>{}(value); }
+
   operator T *() { return static_cast<T *>(value); }
 
   operator const T *() const { return static_cast<const T *>(value); }
 
   operator const void *() const { return static_cast<const void *>(value); }
 
-  operator std::string() const { return array_to_string<T, N>{}(value); }
+  operator std::string() const { return to_string(); }
 
   T &operator[](int i) const { return const_cast<T &>(value[i]); }
 
@@ -159,6 +161,10 @@ template <typename T, size_t N> void from_json(const nlohmann::json &j, array<T,
   for (int i = 0; i < N; i++) {
     value.value[i] = j[i].get<T>();
   }
+}
+
+template <typename T, size_t N> std::ostream &operator<<(std::ostream &os, array<T, N> t) {
+  return os << t.to_string();
 }
 
 template <typename T> struct is_array : public std::false_type {};

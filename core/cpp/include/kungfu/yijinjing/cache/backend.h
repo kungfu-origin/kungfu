@@ -12,15 +12,27 @@
 #include <kungfu/yijinjing/time.h>
 
 namespace kungfu::yijinjing::cache {
+template <typename ValueType> std::enable_if_t<is_numeric_v<ValueType>, ValueType> make_default() {
+  return static_cast<ValueType>(0);
+}
+
+template <typename ValueType> std::enable_if_t<not is_numeric_v<ValueType>, ValueType> make_default() {
+  return ValueType();
+}
+
 constexpr auto make_storage_ptr = [](const std::string &db_file, const auto &types) {
   using namespace boost::hana;
-  constexpr auto make_table = [](const auto &types) {
+  using namespace sqlite_orm;
+
+  constexpr auto make_tables = [](const auto &types) {
     return [&](auto key) {
       using DataType = typename decltype(+types[key])::type;
       auto columns = transform(accessors<DataType>(), [](auto it) {
         auto name = first(it);
         auto accessor = second(it);
-        return sqlite_orm::make_column(name.c_str(), member_pointer_trait<decltype(accessor)>().pointer());
+        auto member_pointer = member_pointer_trait<decltype(accessor)>().pointer();
+        using MemberType = std::decay_t<decltype(accessor(DataType()))>;
+        return make_column(name.c_str(), member_pointer, default_value(make_default<MemberType>()));
       });
       auto pk_members = transform(DataType::primary_keys, [](auto pk) {
         auto filter = [&](auto it) { return pk == first(it); };
@@ -28,23 +40,23 @@ constexpr auto make_storage_ptr = [](const std::string &db_file, const auto &typ
         auto accessor = second(*pk_member);
         return member_pointer_trait<decltype(accessor)>().pointer();
       });
-      auto make_primary_keys = [](auto... keys) { return sqlite_orm::primary_key(keys...); };
+      auto make_primary_keys = [](auto... keys) { return primary_key(keys...); };
       auto primary_keys = unpack(pk_members, make_primary_keys);
       constexpr auto table_maker = [](const std::string &table_name, const auto &primary_keys) {
-        return [&](auto... columns) { return sqlite_orm::make_table(table_name, columns..., primary_keys); };
+        return [&](auto... columns) { return make_table(table_name, columns..., primary_keys); };
       };
       return unpack(columns, table_maker(key.c_str(), primary_keys));
     };
   };
   constexpr auto storage_ptr_maker = [](const std::string &db_file) {
     return [&](auto... tables) {
-      using storage_type = decltype(sqlite_orm::make_storage(db_file, tables...));
-      auto storage_ptr = std::make_shared<storage_type>(sqlite_orm::make_storage(db_file, tables...));
+      using storage_type = decltype(make_storage(db_file, tables...));
+      auto storage_ptr = std::make_shared<storage_type>(make_storage(db_file, tables...));
       storage_ptr->busy_timeout(time_unit::MILLISECONDS_PER_SECOND);
       return storage_ptr;
     };
   };
-  auto tables = transform(keys(types), make_table(types));
+  auto tables = transform(keys(types), make_tables(types));
   return unpack(tables, storage_ptr_maker(db_file));
 };
 

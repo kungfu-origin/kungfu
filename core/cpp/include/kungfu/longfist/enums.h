@@ -11,6 +11,8 @@
 namespace kungfu::longfist::enums {
 enum class mode : int8_t { LIVE, DATA, REPLAY, BACKTEST };
 
+inline std::ostream &operator<<(std::ostream &os, mode t) { return os << int8_t(t); }
+
 inline std::string get_mode_name(mode m) {
   switch (m) {
   case mode::LIVE:
@@ -40,6 +42,8 @@ inline mode get_mode_by_name(const std::string &name) {
 }
 
 enum class category : int8_t { MD, TD, STRATEGY, SYSTEM };
+
+inline std::ostream &operator<<(std::ostream &os, category t) { return os << int8_t(t); }
 
 inline std::string get_category_name(category c) {
   switch (c) {
