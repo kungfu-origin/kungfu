@@ -13,7 +13,6 @@
 <script>
 import lineConfig from './config/lineEchart'
 import { kungfu } from '__gUtils/kungfuUtils';
-import { mapState } from 'vuex'
 import { toDecimal, deepClone } from '__gUtils/busiUtils';
 const { echarts } = require('@/assets/js/static/echarts.min.js')
 

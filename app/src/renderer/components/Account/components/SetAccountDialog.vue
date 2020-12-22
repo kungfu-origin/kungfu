@@ -53,7 +53,6 @@
 </template>
 
 <script>
-import { mapState } from 'vuex';
 import { addTd, updateTdConfig, addMd, updateMdConfig } from '__io/kungfu/account';
 
 import { deepClone } from '__gUtils/busiUtils';
@@ -95,6 +94,7 @@ export default {
             default: 'td'
         }
     },
+    
     data() {
         return {
             postForm: deepClone(this.value)

@@ -50,7 +50,7 @@
     </el-popover>
 </template>
 <script>
-import { mapGetters, mapState } from 'vuex';
+import { mapState } from 'vuex';
 import { statusConfig } from '__gConfig/statusConfig';
 import { ifProcessRunning } from '__gUtils/busiUtils';
 import { switchLedger } from '__io/actions/base';

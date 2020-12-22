@@ -258,24 +258,22 @@ data() {
 },
 
 async beforeMount() {
-	const t = this;
-	t.getSourceListOptions();
+	this.getSourceListOptions();
 
 	//获取
-	t.tables.commission = await getKfCommission();
+	this.tables.commission = await getKfCommission();
 },
 
 mounted() {
-	const t = this;
 	//设置高亮
-	const firstKeyOfSystemConfig = Object.keys(t.settingConfig.system.config || {})[0] || ''
-	t.activeSettingItem = `system-${firstKeyOfSystemConfig}`
+	const firstKeyOfSystemConfig = Object.keys(this.settingConfig.system.config || {})[0] || ''
+	this.activeSettingItem = `system-${firstKeyOfSystemConfig}`
 
 	//滚动
-	t.$nextTick()
+	this.$nextTick()
 	.then(() => {
 		const $settingContent = document.querySelectorAll('.setting-content')[0]
-		$settingContent.addEventListener('scroll', throttle(t.setActiveMenu))	
+		$settingContent.addEventListener('scroll', throttle(this.setActiveMenu))	
 	})
 
 },
@@ -287,50 +285,44 @@ computed: {
 },
 
 beforeDestroy() {
-	const t = this;
-	t.saveTables();
+	this.saveTables();
 },
 
 methods: {
 	handleClickSettingType (typeKey, itemKey) {
-		const t = this;
-		t.activeSettingItem = `${typeKey}-${itemKey}`;
+		this.activeSettingItem = `${typeKey}-${itemKey}`;
 		document
-			.querySelector(`#setting-item-${t.activeSettingItem}`)
+			.querySelector(`#setting-item-${this.activeSettingItem}`)
 			.scrollIntoView();
 	},
 
 	handleSelectFilePath (settingKey, itemKey, configKey) {
-		const t = this;
 		dialog.showOpenDialog({
 			properties: ['openFile']
 		}, (filePath) => {
 			if(!filePath || !filePath[0]) return;
-			t.settingConfig[settingKey].value[itemKey][configKey] = filePath[0]
-			t.handleIuput(settingKey)
+			this.settingConfig[settingKey].value[itemKey][configKey] = filePath[0]
+			this.handleIuput(settingKey)
 		})
 	},
 
 	handleCancel () {
-		const t = this;
-		t.close();
+		this.close();
 	},
 
 	handleIuput (settingKey) {
-		const t = this;
-		const settingData = t.settingConfig[settingKey].value;
-		const outputPath = t.settingConfig[settingKey].outputPath;
-		t.$nextTick()
+		const settingData = this.settingConfig[settingKey].value;
+		const outputPath = this.settingConfig[settingKey].outputPath;
+		this.$nextTick()
 			.then(() => outputJsonSync(outputPath, settingData || {}))
 			.then(() => readJsonSync(outputPath))
 			.then(config => {
 				if (!config) return;
-				t.$set(t.settingConfig[settingKey], "value", config);
+				this.$set(this.settingConfig[settingKey], "value", config);
 			});
 	},
 
 	handleSwitchProcess (value, config, settingData) {
-		const t = this;
 		//开启
 		if (value) {
 			switchCustomProcess(value, config.target);
@@ -352,12 +344,11 @@ methods: {
 
 	//table 添加row
 	handleAddRow (target, row, index) {
-		const t = this;
 		const tmp = [{}, ...row].reduce((a, b) => {
 			a[b.key] = b.default;
 			return a;
 		});
-		t.tables[target].splice(index + 1, 0, {
+		this.tables[target].splice(index + 1, 0, {
 			...tmp,
 			rowid: `tmp_${+new Date().getTime()}`
 		});
@@ -365,12 +356,10 @@ methods: {
 
 	//table remove row
 	handleRemoveRow (target, index) {
-		const t = this;
-		t.tables[target].splice(index, 1);
+		this.tables[target].splice(index, 1);
 	},
 
 	setActiveMenu () {
-		const t = this;
 		const $settingItems = Array().slice.call(document.querySelectorAll('.global-setting-item'));
 		const visibleItems = $settingItems.filter(settingItem => {
 			const visibleData = settingItem.getBoundingClientRect();
@@ -380,23 +369,21 @@ methods: {
 		})
 		if(visibleItems[0]) {
 			const idVal = visibleItems[0].getAttribute('id')
-			t.activeSettingItem = idVal.split('setting-item-')[1]
+			this.activeSettingItem = idVal.split('setting-item-')[1]
 		}
 	},
 
 	getSourceListOptions () {
-		const t = this;
-		getSourceList().then(sourceList => (t.sourceList = sourceList));
+		getSourceList().then(sourceList => (this.sourceList = sourceList));
 	},
 
 	saveTables () {
-		const t = this;
-		Object.keys(t.tablesSaveMethods || {}).forEach(key => {
-			const filters = t.tablesSaveMethods[key].filters;
-			const saveMethod = t.tablesSaveMethods[key].method;
+		Object.keys(this.tablesSaveMethods || {}).forEach(key => {
+			const filters = this.tablesSaveMethods[key].filters;
+			const saveMethod = this.tablesSaveMethods[key].method;
 
 			//去重
-			const targetDataResolve = [{}, ...t.tables[key]].reduce((a, b) => {
+			const targetDataResolve = [{}, ...this.tables[key]].reduce((a, b) => {
 				const rowKey = filters.map(k => {
 					return b[k].toString() || "" 
 				}).join("_");
