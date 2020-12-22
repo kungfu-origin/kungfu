@@ -112,9 +112,7 @@ public:
     if (book->orders.find(order.order_id) == book->orders.end()) {
       book->orders.emplace(order.order_id, order);
     }
-    if (order.status != OrderStatus::Submitted and order.status != OrderStatus::Pending and
-        order.status != OrderStatus::PartialFilledActive and order.status != OrderStatus::Lost and
-        order.volume_left > 0) {
+    if (is_final_status(order.status)) {
       auto &position = book->get_position_for(order);
       auto instrument_key = hash_instrument(order.exchange_id, order.instrument_id);
       if (book->instruments.find(instrument_key) == book->instruments.end()) {
@@ -123,15 +121,14 @@ public:
       }
       auto &instrument = book->instruments.at(instrument_key);
       if (order.offset == Offset::Open) {
-        auto frozen_margin =
-            instrument.contract_multiplier * order.frozen_price * order.volume * margin_ratio(instrument, position);
+        auto frozen_margin = instrument.contract_multiplier * order.frozen_price * order.volume_left *
+                             margin_ratio(instrument, position);
         book->asset.avail += frozen_margin;
         book->asset.frozen_cash -= frozen_margin;
         book->asset.frozen_margin -= frozen_margin;
       }
-      if ((order.offset == Offset::Close or order.offset == Offset::CloseYesterday) and
-          position.frozen_total >= order.volume_left) {
-        position.frozen_total -= order.volume_left;
+      if (order.offset == Offset::Close or order.offset == Offset::CloseYesterday) {
+        position.frozen_total = std::max(position.frozen_total - order.volume_left, VOLUME_ZERO);
         position.frozen_yesterday = std::max(position.frozen_yesterday - order.volume_left, VOLUME_ZERO);
       }
       if (order.offset == Offset::CloseToday and position.frozen_total >= order.volume_left) {

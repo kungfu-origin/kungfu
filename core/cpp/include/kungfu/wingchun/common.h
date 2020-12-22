@@ -92,18 +92,26 @@ inline bool is_final_status(const longfist::enums::OrderStatus &status) {
   case longfist::enums::OrderStatus::Submitted:
   case longfist::enums::OrderStatus::Pending:
   case longfist::enums::OrderStatus::PartialFilledActive:
+  case longfist::enums::OrderStatus::Unknown:
     return false;
   default:
     return true;
   }
 }
 
-inline bool is_reverse_repurchase(const std::string &instrument_id, const std::string &exchange_id) {
+inline bool is_convertible_bond(const std::string& instrument_id, const std::string& exchange_id) {
+  return ((string_equals_n(instrument_id, "123", 3) || string_equals_n(instrument_id, "128", 3) || 
+           string_equals_n(instrument_id, "117", 3) || string_equals_n(instrument_id, "127", 3) ||
+           string_equals_n(instrument_id, "125", 3) || string_equals_n(instrument_id, "126", 3)) && string_equals(exchange_id, EXCHANGE_SZE)) ||
+         ((string_equals_n(instrument_id, "110", 3) || string_equals_n(instrument_id, "113", 3)) && string_equals(exchange_id, EXCHANGE_SSE)); 
+}
+
+inline bool is_repo(const std::string &instrument_id, const std::string &exchange_id) {
   return (string_equals_n(instrument_id, "204", 3) && string_equals(exchange_id, EXCHANGE_SSE)) ||
          (string_equals_n(instrument_id, "1318", 4) && string_equals(exchange_id, EXCHANGE_SZE));
 }
 
-inline double get_reverse_repurchase_commission_rate(const std::string &instrument_id) {
+inline double get_repo_commission_rate(const std::string &instrument_id) {
   if (string_equals(instrument_id, "204001") || string_equals(instrument_id, "131810")) {
     return 0.00001;
   } else if (string_equals(instrument_id, "204002") || string_equals(instrument_id, "131811")) {
@@ -127,7 +135,7 @@ inline double get_reverse_repurchase_commission_rate(const std::string &instrume
   }
 }
 
-inline int get_reverse_repurchase_expire_days(const std::string &instrument_id) {
+inline int get_repo_expire_days(const std::string &instrument_id) {
   if (string_equals(instrument_id, "204001") || string_equals(instrument_id, "131810")) {
     return 1;
   } else if (string_equals(instrument_id, "204002") || string_equals(instrument_id, "131811")) {

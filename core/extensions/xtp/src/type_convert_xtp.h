@@ -174,12 +174,7 @@ inline void from_xtp(const XTPMarketDataStruct &ori, Quote &des) {
   if (ori.data_type == XTP_MARKETDATA_OPTION) {
     des.instrument_type = InstrumentType::StockOption;
   } else {
-    // 目前除逆回购之外的债券均当做股票
-    if (is_reverse_repurchase(des.instrument_id, des.exchange_id)) {
-      des.instrument_type = InstrumentType::Bond;
-    } else {
-      des.instrument_type = InstrumentType::Stock;
-    }
+    des.instrument_type = get_instrument_type(des.instrument_id, des.exchange_id);
   }
 
   des.last_price = ori.last_price;
@@ -211,12 +206,7 @@ inline void from_xtp(const XTPMarketDataStruct &ori, int64_t *bid1_qty, int32_t 
   if (ori.data_type == XTP_MARKETDATA_OPTION) {
     des.instrument_type = InstrumentType::StockOption;
   } else {
-    // 目前除逆回购之外的债券均当做股票
-    if (is_reverse_repurchase(des.instrument_id, des.exchange_id)) {
-      des.instrument_type = InstrumentType::Bond;
-    } else {
-      des.instrument_type = InstrumentType::Stock;
-    }
+    des.instrument_type = get_instrument_type(des.instrument_id, des.exchange_id);
   }
   des.last_price = ori.last_price;
   des.bid_price1 = ori.bid[0];
