@@ -214,8 +214,9 @@
 
 <script>
 import Vue from "vue";
-import { mapGetters, mapState } from "vuex";
+import { mapState } from "vuex";
 import { Collapse, CollapseItem } from "element-ui";
+
 import { readJsonSync, outputJsonSync } from "__gUtils/fileUtils";
 import { LOG_DIR, KUNGFU_RESOURCES_DIR } from "__gConfig/pathConfig";
 import { getExtensionConfigs, getExtensions, getSourceList, debounce, throttle } from "__gUtils/busiUtils";

@@ -3,9 +3,6 @@ import { setTimerPromiseTask } from '__gUtils/busiUtils';
 
 export default {
     data () {
-
-        const maunalClosedProcssList = JSON.parse(localStorage.getItem(`maunalClosedProcssList_${this.tdmdType}`) || '[]')
-
         return  {
             method: 'add',
             accountForm: {},

@@ -93,16 +93,16 @@
 <script>
 import path from 'path';
 import Vue from 'vue';
-import { mapState, mapGetters } from 'vuex';
+import { mapState } from 'vuex';
+
+import SetAccountDialog from './SetAccountDialog';
+import SetSourceDialog from './SetSourceDialog';
+
 import { getMdList } from '__io/kungfu/account';
 import { LOG_DIR } from '__gConfig/pathConfig';
 import { switchMd, deleteMd } from '__io/actions/account';
 import { loopToRunProcess } from '__gUtils/busiUtils';
 import { watcher } from '__io/kungfu/watcher';
-
-import SetAccountDialog from './SetAccountDialog';
-import SetSourceDialog from './SetSourceDialog';
-
 import mdTdMixin from '../js/mdTdMixin';
 
 export default {

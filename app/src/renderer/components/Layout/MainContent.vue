@@ -36,11 +36,11 @@
         <!-- 底部 -->
         <el-footer :height="!ifFooter ? '0' : '30px'">
             <div class="footer-content" v-if="ifFooter">
-                <tr-footer-item class="fr" v-if="currentRouter !== 'kungfuCodeEditor'">
+                <tr-footer-item class="fr">
                     <CoreStatus></CoreStatus>
                 </tr-footer-item>
             
-                <tr-footer-item class="fr" v-if="currentRouter !== 'kungfuCodeEditor'">
+                <tr-footer-item class="fr">
                     <EngineStatus></EngineStatus>
                 </tr-footer-item>
             </div>
@@ -49,8 +49,7 @@
 </template>
 
 <script>
-import { deepClone } from '__gUtils/busiUtils';
-import { mapState, mapGetters } from 'vuex';
+
 import EngineStatus from './components/EngineStatus';
 import CoreStatus from './components/CoreStatus';
 
@@ -70,28 +69,14 @@ export default {
 
     data() {
         return {
-            currentRouter: '',
             infoListVisiblity: false,
         }
-    },
-
-    created() {
-        this.currentRouter = this.$router.history.current.name
     },
 
     components: {
         EngineStatus,
 		CoreStatus,
     },
-
-    computed:{
-        ...mapState({
-            tradeLogVisible: state => state.BASE.tradeLogVisible
-        })
-    },
-
-    methods:{
-    }
 }
 </script>
 

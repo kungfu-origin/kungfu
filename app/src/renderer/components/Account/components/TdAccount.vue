@@ -207,7 +207,7 @@
 </template>
 
 <script>
-import { mapState, mapGetters } from 'vuex';
+import { mapState } from 'vuex';
 
 import SetAccountDialog from './SetAccountDialog';
 import SetSourceDialog from './SetSourceDialog';

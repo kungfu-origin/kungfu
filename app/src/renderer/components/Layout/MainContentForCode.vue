@@ -30,11 +30,7 @@
         <!-- 底部 -->
         <el-footer :height="!ifFooter ? '0' : '30px'">
             <div class="footer-content" v-if="ifFooter">
-                <tr-footer-item class="fr" v-if="currentRouter !== 'kungfuCodeEditor'">
-                    <CoreStatus></CoreStatus>
-                </tr-footer-item>
-                
-                <tr-footer-item class="fr" v-if="currentRouter === 'kungfuCodeEditor'">
+                <tr-footer-item class="fr">
                     <CodeSpaceTab></CodeSpaceTab>
                 </tr-footer-item>
             </div>
@@ -43,12 +39,9 @@
 </template>
 
 <script>
-import { mapState, mapGetters } from 'vuex';
 
 import CoreStatus from './components/CoreStatus';
 import CodeSpaceTab from './components/CodeSpaceTab';
-
-import { deepClone } from '__gUtils/busiUtils';
 
 export default {
     name: 'main-content',
@@ -66,24 +59,13 @@ export default {
 
     data() {
         return {
-            currentRouter: '',
             infoListVisiblity: false,
         }
-    },
-
-    created() {
-        this.currentRouter = this.$router.history.current.name
     },
 
     components: {
 		CoreStatus,
         CodeSpaceTab,
-    },
-
-    computed:{
-        ...mapState({
-            tradeLogVisible: state => state.BASE.tradeLogVisible
-        })
     },
 
     methods:{
