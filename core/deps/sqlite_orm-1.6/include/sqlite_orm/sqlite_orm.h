@@ -9688,7 +9688,7 @@ namespace sqlite_orm {
                 if(context.replace_bindable_with_question) {
                     return "?";
                 } else {
-                    return "\"" + c + "\"";
+                    return "'" + c + "'";
                 }
             }
         };
