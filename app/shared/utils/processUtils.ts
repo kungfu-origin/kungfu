@@ -15,10 +15,10 @@ import { setTimerPromiseTask, delayMiliSeconds } from '__gUtils/busiUtils';
 import { getProcesses } from 'getprocesses';
 
 const path = require('path');
-const pm2 = require('pm2');
 const taskkill = require('taskkill');
 const physicalCpuCount = require('physical-cpu-count');
 const fkill = require('fkill');
+const pm2 = require('pm2');
 
 export const _pm2 = pm2;
 

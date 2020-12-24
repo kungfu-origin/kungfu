@@ -163,9 +163,8 @@
     "kungfu-core": "*",
     "fkill": "^6.1.0",
     "physical-cpu-count": "^2.0.0",
-    "pm2": "4.4.0",
-    "taskkill": "^2.0.0"
- 
+    "taskkill": "^2.0.0",
+    "pm2": "4.5.1"
   },
   "devDependencies": {
     "log4js": "^4.0.2",
