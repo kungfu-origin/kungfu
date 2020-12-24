@@ -13,7 +13,6 @@ let whiteListedModules = [
   'vuex', 
   'vue-router', 
   'vue-virtual-scroller', 
-  'codemirror',
   "rxjs",
   "moment",
   "mime",
