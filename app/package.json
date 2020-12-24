@@ -160,14 +160,14 @@
     "fs-extra": "7.0.1",
     "gaze": "^1.1.3",
     "getprocesses": "^1.1.1",
-    "kungfu-core": "*"
- 
-  },
-  "devDependencies": {
+    "kungfu-core": "*",
     "fkill": "^6.1.0",
     "physical-cpu-count": "^2.0.0",
     "pm2": "4.4.0",
-    "taskkill": "^2.0.0",
+    "taskkill": "^2.0.0"
+ 
+  },
+  "devDependencies": {
     "log4js": "^4.0.2",
     "tail": "^2.0.2",
     "vue": "^2.6.11",
