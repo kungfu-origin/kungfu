@@ -6,6 +6,7 @@
  * @Description: In User Settings Edit
  * @FilePath: /kungfu/app/shared/utils/processUtils.ts
  */ 
+
 import { KF_HOME, KUNGFU_ENGINE_PATH, KF_CONFIG_PATH, buildProcessLogPath } from '__gConfig/pathConfig';
 import { platform } from '__gConfig/platformConfig';
 import { logger } from '__gUtils/logUtils';
@@ -14,11 +15,12 @@ import { setTimerPromiseTask, delayMiliSeconds } from '__gUtils/busiUtils';
 import { getProcesses } from 'getprocesses';
 
 const path = require('path');
-const fkill = require('fkill');
+const pm2 = require('pm2');
 const taskkill = require('taskkill');
-const physicalCpuCount = require('physical-cpu-count')
+const physicalCpuCount = require('physical-cpu-count');
+const fkill = require('fkill');
 
-export const pm2 = require('pm2');
+export const _pm2 = pm2;
 
 //=========================== task kill =========================================
 export const findProcessByKeywords = (tasks: string[]): Promise<any> => {
@@ -50,6 +52,7 @@ const winKill = async (tasks: string[]): Promise<any> => {
 }
 
 const macKill = (tasks: string[]): any => {
+    //@ts-ignore
     return fkill(tasks, {
         force: true,
         silent: true,
@@ -61,6 +64,7 @@ const linuxKill = async (tasks: string[]): Promise<any> => {
     try {
         const pIdList: any = await findProcessByKeywords(tasks);
         if (!pIdList || !pIdList.length) return new Promise(resolve => resolve(true))
+        //@ts-ignore
         return fkill(pIdList, {
             force: true,
             silent: true,
@@ -343,7 +347,7 @@ export function startProcessLoopGetStatus (options: Pm2Options, cb: Function) {
 }
 
 //启动pageEngine
-export const startMaster = async (force: boolean): Promise<void> => {
+export const startMaster = async (force: boolean): Promise<any> => {
     const processName = 'master';
     const master = await describeProcess(processName);
     if (master instanceof Error) throw master
@@ -361,7 +365,7 @@ export const startMaster = async (force: boolean): Promise<void> => {
 }
 
 //启动ledger
-export const startLedger = async (force: boolean): Promise<void> => {
+export const startLedger = async (force: boolean): Promise<any> => {
     const processName = 'ledger';
     const ledger = await describeProcess(processName);
     if (ledger instanceof Error) throw ledger
@@ -375,7 +379,7 @@ export const startLedger = async (force: boolean): Promise<void> => {
 
 
 //启动md
-export const startMd = (source: string): Promise<void> => {
+export const startMd = (source: string): Promise<any> => {
     return startProcess({
         "name": `md_${source}`,
         "args": `md -s "${source}"`,
@@ -383,7 +387,7 @@ export const startMd = (source: string): Promise<void> => {
 }
 
 //启动td
-export const startTd = (accountId: string): Promise<void> => {
+export const startTd = (accountId: string): Promise<any> => {
     const { source, id } = accountId.parseSourceAccountId();
     return startProcess({
         "name": `td_${accountId}`,
@@ -417,7 +421,7 @@ export const startBar = (targetName: string, source: string, timeInterval: strin
     }).catch(err => logger.error('[startBar]', err))
 }
 
-export const startCustomProcess = (targetName: string, params: string): Promise<void> => {
+export const startCustomProcess = (targetName: string, params: string): Promise<any> => {
     return startProcess({
         "name": targetName,
         "args": `${targetName} ${params}`
@@ -482,9 +486,8 @@ export const deleteProcess = (processName: string) => {
                 if (!pids || !pids.length) return
                 logger.info('[KILL PROCESS] by pids', pids)
                 kfKill(pids)
-                    .then(() => logger.info('[KILL PROCESS] by pids success', pids)
-                        .catch((err: Error) => logger.error(['[kfKill pm2Delete]'], err))
-                    )
+                    .then(() => logger.info('[KILL PROCESS] by pids success', pids))
+                    .catch((err: Error) => logger.error(['[kfKill pm2Delete]'], err))
             })
     })
 }

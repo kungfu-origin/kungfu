@@ -32,9 +32,6 @@ import { dealPos } from '__io/kungfu/watcher';
 import { writeCSV } from '__gUtils/fileUtils';
 import { posHeader } from '@/components/Base/tradingData/js/tableHeaderConfig';
 
-
-const ls = require('local-storage');
-
 export default {
     name: 'positions',
   

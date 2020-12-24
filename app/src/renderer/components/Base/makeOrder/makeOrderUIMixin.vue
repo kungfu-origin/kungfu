@@ -230,8 +230,6 @@ import { sourceTypeConfig, SideName, OffsetName, priceType, hedgeFlag, exchangeI
 import { getFutureTickersConfig, getStockTickersConfig } from '__assets/base'
 import { Autocomplete } from 'element-ui';
 
-const ls = require('local-storage');
-
 Vue.use(Autocomplete)
 
 function filterPriceType (priceType) {

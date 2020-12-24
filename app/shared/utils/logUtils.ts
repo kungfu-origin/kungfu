@@ -1,7 +1,7 @@
-import  { LOG_DIR } from '__gConfig/pathConfig';
+import * as log4js from 'log4js';
+import { LOG_DIR } from '__gConfig/pathConfig';
 
 const path = require('path')
-const log4js = require('log4js');
 
 log4js.configure({
     appenders: {
@@ -15,7 +15,3 @@ log4js.configure({
 
 export const logger = log4js.getLogger('app');
 
-
-export const targetLogger = (processName: string) => {
-    
-}

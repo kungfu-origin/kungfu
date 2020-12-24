@@ -6,9 +6,6 @@ import { readJsonSync } from '__gUtils/fileUtils';
 import { OffsetName, orderStatus, SideName, PosDirection, priceType, hedgeFlag, InstrumentType, volumeCondition, timeCondition, allowShorted } from "__gConfig/tradingConfig";
 import { logger } from '../../utils/logUtils';
 
-
-var iconv = require('iconv-lite');
-
 export const watcher: any = (() => {
     const kfSystemConfig: any = readJsonSync(KF_CONFIG_PATH)
     const bypassQuote = (kfSystemConfig.performance || {}).bypassQuote || false;
