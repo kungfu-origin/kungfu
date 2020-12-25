@@ -7,18 +7,7 @@ const { dependencies } = require('../package.json')
 const webpack = require('webpack')
 const OptimizeJsPlugin = require("optimize-js-plugin");
 
-let whiteListedModules = [
-  'vue', 
-  'element-ui', 
-  'vuex', 
-  'vue-router', 
-  'vue-virtual-scroller', 
-  "rxjs",
-  "moment",
-  "mime",
-  "readline",
-  "fast-csv"
-];
+let whiteListedModules = [];
 
 let mainConfig = {
   entry: {

@@ -13,18 +13,7 @@ const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 
 
-let whiteListedModules = [
-  'vue', 
-  'element-ui', 
-  'vuex', 
-  'vue-router', 
-  'vue-virtual-scroller', 
-  "rxjs",
-  "moment",
-  "mime",
-  "readline",
-  "fast-csv"
-];
+let whiteListedModules = [];
 
 let rendererConfig = {
   devtool: '#cheap-module-eval-source-map',
