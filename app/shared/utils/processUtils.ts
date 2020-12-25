@@ -6,6 +6,7 @@
  * @Description: In User Settings Edit
  * @FilePath: /kungfu/app/shared/utils/processUtils.ts
  */ 
+import * as fkill from 'fkill';
 
 import { KF_HOME, KUNGFU_ENGINE_PATH, KF_CONFIG_PATH, buildProcessLogPath } from '__gConfig/pathConfig';
 import { platform } from '__gConfig/platformConfig';
@@ -17,7 +18,7 @@ import { getProcesses } from 'getprocesses';
 const path = require('path');
 const taskkill = require('taskkill');
 const physicalCpuCount = require('physical-cpu-count');
-const fkill = require('fkill');
+// const fkill = require('fkill');
 const pm2 = require('pm2');
 
 export const _pm2 = pm2;
