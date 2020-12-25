@@ -6,6 +6,12 @@
  * @Description: In User Settings Edit
  * @FilePath: /kungfu/app/shared/utils/processUtils.ts
  */ 
+
+//@ts-ignore
+import * as taskkill from 'taskkill';
+//@ts-ignore
+import * as physicalCpuCount from 'physical-cpu-count';
+
 import { KF_HOME, KUNGFU_ENGINE_PATH, KF_CONFIG_PATH, buildProcessLogPath } from '__gConfig/pathConfig';
 import { platform } from '__gConfig/platformConfig';
 import { logger } from '__gUtils/logUtils';
@@ -14,8 +20,6 @@ import { setTimerPromiseTask, delayMiliSeconds } from '__gUtils/busiUtils';
 import { getProcesses } from 'getprocesses';
 
 const path = require('path');
-const taskkill = require('taskkill');
-const physicalCpuCount = require('physical-cpu-count');
 const fkill = require('fkill');
 const pm2 = require('pm2');
 

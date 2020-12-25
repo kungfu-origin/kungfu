@@ -155,17 +155,17 @@
     }
   },
   "dependencies": {
-    "@babel/polyfill": "^7.2.5",
-    "bindings": "^1.5.0",
     "fs-extra": "7.0.1",
     "gaze": "^1.1.3",
     "kungfu-core": "*",
-    "physical-cpu-count": "^2.0.0",
     "pm2": "4.5.1",
-    "taskkill": "^2.0.0",
     "fkill": "^6.1.0"
   },
   "devDependencies": {
+    "bindings": "^1.5.0",
+    "physical-cpu-count": "^2.0.0",
+    "taskkill": "^2.0.0",
+    "@babel/plugin-proposal-object-rest-spread": "^7.12.1",
     "@types/node": "^12.6.2",
     "aws-sdk": "^2.395.0",
     "babel-loader": "^7.1.1",

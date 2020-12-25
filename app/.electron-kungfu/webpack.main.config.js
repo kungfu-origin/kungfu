@@ -7,14 +7,12 @@ const { dependencies } = require('../package.json')
 const webpack = require('webpack')
 const OptimizeJsPlugin = require("optimize-js-plugin");
 
-let whiteListedModules = [];
-
 let mainConfig = {
   entry: {
     main: path.join(__dirname, '../src/main/index.js')
   },
   externals: [
-    ...Object.keys(dependencies || {}).filter(d => !whiteListedModules.includes(d))
+    ...Object.keys(dependencies || {})
   ],
   module: {
     rules: [
@@ -25,7 +23,7 @@ let mainConfig = {
       },
       {
         test: /\.ts$/,
-        use: ['babel-loader', 'ts-loader'],
+        use: 'ts-loader',
         exclude: /node_modules/
       },
       {

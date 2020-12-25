@@ -13,8 +13,6 @@ const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 
 
-let whiteListedModules = [];
-
 let rendererConfig = {
   devtool: '#cheap-module-eval-source-map',
 
@@ -31,7 +29,7 @@ let rendererConfig = {
   },
   
   externals: [
-    ...Object.keys(dependencies || {}).filter(d => !whiteListedModules.includes(d))
+    ...Object.keys(dependencies || {})
   ],
 
   module: {
