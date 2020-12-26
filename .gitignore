@@ -63,3 +63,5 @@ __pycache__/
 
 #inquirer-path
 */inquirer-path/lib/
+
+commit.sh
