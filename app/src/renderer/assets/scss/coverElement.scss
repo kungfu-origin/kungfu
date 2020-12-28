@@ -342,6 +342,10 @@ p.el-select-dropdown__empty{
 .el-table{
     background: $bg_card;
 
+    .el-table__empty-block {
+        padding: 0 !important;
+    }
+
     .cell{
         transform: translateZ(0);
         white-space: nowrap;
