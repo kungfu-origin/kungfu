@@ -1,6 +1,9 @@
 name: Centos CI
 
-on: [push, pull_request]
+on: 
+  push:
+    branches:
+      - release
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -14,3 +17,4 @@ jobs:
     - uses: actions/upload-artifact@v2
       with:
           path: app/build/app/*.rpm
+          path: app/build/app/*.appimage

@@ -4,7 +4,10 @@ name: Mac CI
 
 # Controls when the action will run. Triggers the workflow on push or pull request
 # evepushnts but only for the master branch
-on: [push, pull_request]
+on: 
+  push:
+    branches:
+      - release
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
