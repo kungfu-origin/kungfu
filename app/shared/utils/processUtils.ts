@@ -311,7 +311,7 @@ export const startArchiveMake = () => {
 }
 
 
-export function startArchiveMakeTask (cb: Function) {
+export function startArchiveMakeTask (cb?: Function) {
     return new Promise(resolve => {
         startArchiveMake()
             .then(() => {

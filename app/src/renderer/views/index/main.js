@@ -37,7 +37,7 @@ const { startGetProcessStatus, startMaster, startLedger, startArchiveMakeTask, _
 startArchiveMakeTask((archiveStatus) => {
     window.archiveStatus = archiveStatus
 })
-.then(res => startMaster(false))
+.then(() => startMaster(false))
 .finally(() => {
     startGetProcessStatus((processStatus) => {
         Vue.store.dispatch('setProcessStatus', processStatus)

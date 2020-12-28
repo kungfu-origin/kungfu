@@ -5,7 +5,7 @@ switch (os.platform()) {
     case 'win32':
         return 'win';
     case 'darwin':
-        childProcess.exec(`npm run build-mac`, (err, stdout) => {
+        childProcess.exec(`yarn run build-mac`, (err, stdout) => {
             if(err) {
                 console.error(err)
                 process.exit(1)
@@ -14,7 +14,7 @@ switch (os.platform()) {
         })
         return 'mac';
     case 'linux':
-        childProcess.exec(`npm run build-linux`, (err, stdout) => {
+        childProcess.exec(`yarn run build-linux`, (err, stdout) => {
             if(err) {
                 console.error(err)
                 process.exit(1)

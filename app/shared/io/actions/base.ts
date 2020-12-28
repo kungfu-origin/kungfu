@@ -12,6 +12,7 @@ export const switchMaster = async (status: boolean): Promise<any> => {
         } catch(err) {
             throw err
         }
+        return
     } 
     try {
 

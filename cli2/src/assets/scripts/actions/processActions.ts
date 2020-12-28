@@ -1,8 +1,9 @@
 
 import { dealStatus } from '@/assets/scripts/utils';
 
+import { watcher } from '__io/kungfu/watcher';
 import { setTimerPromiseTask } from '__gUtils/busiUtils';
-import { listProcessStatusWithDetail } from '__gUtils/processUtils';
+import { listProcessStatusWithDetail, startArchiveMakeTask } from '__gUtils/processUtils';
 import { logger } from '__gUtils/logUtils';
 
 import { switchMaster, switchLedger, switchCustomProcess } from '__io/actions/base';
@@ -23,10 +24,22 @@ export const switchProcess = (proc: any, messageBoard: any) =>{
     const status = proc.status !== '--';
     const startOrStop = !!status ? 'Stop' : 'Start';
     const startOrStopMaster = !!status ? 'Restart' : 'Start';
+
+    if (!status) {
+        if (proc.processId !== 'master') {
+            if (!watcher.isLive()) {
+                messageBoard.log(`Watcher is not alive! Start master and waitting for a while.`, 2)
+                return 
+            }
+        }
+    }
+
     switch(proc.type) {
         case 'main':
             if (proc.processId === 'master') {
-                switchMaster(!status)
+                //开启，要归档
+                preSwitchMain(status, messageBoard)
+                .then(() => switchMaster(!status))
                 .then(() => messageBoard.log(`${startOrStopMaster} Master process success!`, 2))
                 .catch((err: Error) => logger.error(err))
             }
@@ -246,3 +259,11 @@ export const strategyListObservable = () => {
 }
 
 
+function preSwitchMain (status: boolean, messageBoard: any) {
+    if (!status) {
+        return startArchiveMakeTask()
+            .then(() => messageBoard.log(`Archive success!`, 2))
+    }
+
+    return Promise.resolve(true)
+}
