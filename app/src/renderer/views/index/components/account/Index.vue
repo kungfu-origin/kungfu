@@ -22,7 +22,7 @@
                     </el-tabs>
                 </el-col>
                 <el-col :span="10">
-                    <el-row style="height: 50%">
+                    <el-row style="height: 45%">
                         <Pos 
                         :moduleType="moduleType"
                         :currentId="currentId" 
@@ -32,7 +32,7 @@
                         @makeOrder="handleMakeOrderByPos"
                         />
                     </el-row>
-                    <el-row style="height: 50%" class="has-padding-bottom">
+                    <el-row style="height: 55%" class="has-padding-bottom">
                         <el-tabs type="border-card" v-model="currentTradesPnlTabNum">
                             <el-tab-pane :lazy="true" :label="`成交记录 ${showCurrentIdInTabName(currentTradesPnlTabNum, 'trades')}`" name="trades">
                                 <TradeRecord
@@ -58,14 +58,14 @@
                 </el-col>
             </el-row>
             <el-row style="height: 45%" class="flex-row">
-                <el-col :span="7" :style="{ 'max-width': '450px' }">
+                <el-col :span="6" :style="{ 'max-width': '450px' }">
                     <MakeOrderDashboard
                         :currentId="currentId"
                         :moduleType="moduleType" 
                         :makeOrderByPosData="makeOrderByPosData"
                     ></MakeOrderDashboard>
                 </el-col>
-                <el-col :span="17">
+                <el-col :span="18">
                     <el-tabs v-model="currentOrdesTabName" type="border-card">
                         <el-tab-pane :lazy="true" :label="`全部委托 ${showCurrentIdInTabName(currentOrdesTabName, 'orders')}`" name="orders">
                             <OrderRecord
