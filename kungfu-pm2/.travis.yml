@@ -1,0 +1,24 @@
+language: node_js
+node_js:
+  - "15"
+  - "14"
+  - "12"
+  - "10"
+  - "8"
+git:
+  depth: 2
+os:
+  - linux
+arch:
+  - amd64
+before_install:
+  - sudo apt-get -qq update
+  - sudo apt-get install python3
+  - sudo apt-get install php7.0-cli
+  - if [[ $(uname -m) == 's390x' ]]; then
+      sudo apt-get install bc;
+    fi
+services:
+  - docker
+install:
+  - npm install

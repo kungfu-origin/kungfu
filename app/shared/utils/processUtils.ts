@@ -21,7 +21,7 @@ import { getProcesses } from 'getprocesses';
 
 const path = require('path');
 const fkill = require('fkill');
-const pm2 = require('pm2');
+const pm2 = require('kungfu-pm2');
 
 export const _pm2 = pm2;
 

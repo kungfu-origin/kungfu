@@ -158,7 +158,7 @@
     "fs-extra": "7.0.1",
     "gaze": "^1.1.3",
     "kungfu-core": "*",
-    "pm2": "4.5.1",
+    "kungfu-pm2": "*",
     "fkill": "^6.1.0"
   },
   "devDependencies": {

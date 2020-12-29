@@ -1,0 +1,16 @@
+test
+apps
+doc
+/pres
+*.log
+*.pid
+examples
+*.pyc
+.github
+.cache-require-paths.json
+*.heapsnapshot
+packager
+artifacts
+.editorconfig
+.bithoundrc
+dist
