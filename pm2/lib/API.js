@@ -1919,14 +1919,14 @@ class API {
 require('./API/Modules/index.js')(API);
 
 require('./API/pm2-plus/link.js')(API);
-// require('./API/pm2-plus/process-selector.js')(API);
-// require('./API/pm2-plus/helpers.js')(API);
+require('./API/pm2-plus/process-selector.js')(API);
+require('./API/pm2-plus/helpers.js')(API);
 
-require('./API/Configuration.js')(API);
+// require('./API/Configuration.js')(API);
 require('./API/Version.js')(API);
 require('./API/Startup.js')(API);
 require('./API/LogManagement.js')(API);
-require('./API/Containerizer.js')(API);
+// require('./API/Containerizer.js')(API);
 
 
 module.exports = API;

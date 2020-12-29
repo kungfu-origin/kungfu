@@ -11,7 +11,6 @@ import { shutdown } from '@/commanders/shutdown';
 import { monitKill } from '@/commanders/monitKill';
 
 import { monitPrompt } from '@/components/index';
-import { kfKill } from '__gUtils/processUtils';
 import { removeFilesInFolder } from '__gUtils/fileUtils';
 import { LOG_DIR, BASE_DB_DIR, KF_HOME } from '__gConfig/pathConfig';
 import { logger } from '__gUtils/logUtils';

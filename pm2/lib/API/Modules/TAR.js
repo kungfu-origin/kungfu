@@ -17,7 +17,7 @@ module.exports = {
   uninstall,
   start,
   publish,
-  package
+  "package": packageResolved
 }
 
 /**
@@ -268,7 +268,7 @@ function getModuleName(module_filepath, cb) {
   });
 }
 
-function package(module_path, target_path, cb) {
+function packageResolved(module_path, target_path, cb) {
   var base_folder = path.dirname(module_path)
   var module_folder_name = path.basename(module_path)
   var pkg = require(path.join(module_path, 'package.json'))
@@ -314,7 +314,7 @@ function publish(PM2, folder, cb) {
 
   Common.logMod(`Starting publishing procedure for ${module_name}@${pkg.version}`)
 
-  package(current_path, target_path, (err, res) => {
+  packageResolved(current_path, target_path, (err, res) => {
     if (err) {
       Common.errMod('Can\'t package, exiting')
       process.exit(1)

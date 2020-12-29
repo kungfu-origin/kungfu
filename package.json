@@ -7,7 +7,7 @@
   "private": true,
   "workspaces": [
     "core",
-    "kungfu-pm2",
+    "pm2",
     "cli2",
     "app",
     "tests"

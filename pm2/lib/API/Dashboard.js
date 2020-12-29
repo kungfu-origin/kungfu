@@ -4,6 +4,10 @@
  * can be found in the LICENSE file.
  */
 
+
+console.log(' ======= Load Dashboard ====== ')
+
+
 var os         = require('os');
 var p          = require('path');
 var blessed    = require('blessed');
