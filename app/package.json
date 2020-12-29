@@ -92,6 +92,7 @@
         "from": "../cli2/build/cli",
         "to": "kungfu-cli",
         "filter": [
+          "fsevents.node",
           "kungfu-cli",
           "kungfu-cli.*",
           "node_kungfu.node",

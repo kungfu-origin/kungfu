@@ -6,14 +6,6 @@
     "stage-0"
   ],
   "comments": false,
-  "env": {
-    "development": {
-      "plugins": []
-    },
-    "production": {
-      "plugins": []
-    }
-  },
   "plugins": [
     "transform-runtime"
   ]

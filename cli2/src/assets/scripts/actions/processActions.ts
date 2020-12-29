@@ -261,6 +261,7 @@ export const strategyListObservable = () => {
 
 function preSwitchMain (status: boolean, messageBoard: any) {
     if (!status) {
+        messageBoard.log(`Start Archive, Please wait...`, 2)
         return startArchiveMakeTask()
             .then(() => messageBoard.log(`Archive success!`, 2))
     }
