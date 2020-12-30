@@ -51,7 +51,14 @@ function startRenderer () {
       heartbeat: 1000 
     })
 
-    compiler.plugin('compilation', compilation => {
+    console.log(compiler.hooks.compilation, '-----')
+
+    compiler.hooks.compilation.tap('MyPlugin', (params, cb) => {
+      console.log(params, cb, '====')
+      cb()
+    })
+
+    compiler.hooks('compilation', compilation => {
       compilation.plugin('html-webpack-plugin-after-emit', (data, cb) => {
         hotMiddleware.publish({ action: 'reload' })
         cb()

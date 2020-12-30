@@ -43,10 +43,6 @@ module.exports = {
           MiniCssExtractPlugin.loader,
           'css-loader'
         ]
-        // use: ExtractTextPlugin.extract({ 
-        //   fallback: 'style-loader', 
-        //   use: [ 'css-loader' ] 
-        // }) 
       },
       {
         test: /\.scss$/,
@@ -55,11 +51,6 @@ module.exports = {
           'css-loader',
           'sass-loader'
         ]
-        
-        // ExtractTextPlugin.extract({
-        //   fallback: 'style-loader', 
-        //   use: ['css-loader', 'sass-loader']
-        // }),
       },
       {
         test: /\.html$/,
@@ -160,10 +151,6 @@ module.exports = {
         ? path.resolve(__dirname, '../node_modules')
         : false
     }),
-
-    // new ExtractTextPlugin({
-      // filename: `css/[name].css`,
-    // }),
 
     new MiniCssExtractPlugin(),
 
