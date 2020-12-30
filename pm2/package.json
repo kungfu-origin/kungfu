@@ -36,7 +36,6 @@
     "clean": "node -v",
     "test": "bash test/unit.sh && bash test/e2e.sh"
   },
-
   "bin": "./index.js",
   "dependencies": {
     "@pm2/agent": "~1.0.2",
@@ -56,6 +55,7 @@
     "fclone": "1.0.11",
     "mkdirp": "1.0.4",
     "needle": "2.4.0",
+    "osx-temperature-sensor": "^1.0.7",
     "pidusage": "2.0.21",
     "pm2-axon": "4.0.0",
     "pm2-axon-rpc": "0.6.0",
