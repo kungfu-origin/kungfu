@@ -9,7 +9,7 @@ namespace kungfu::wingchun::book {
         RepoAccountingMethod() = default;
 
         void apply_order_input(Book_ptr& book, const OrderInput& input) override {
-            if (input.side == Side::Buy) {
+            if (input.side == Side::Sell) {
                 book->asset.frozen_cash += input.volume;
                 book->asset.avail -= input.volume;
                 update_position(book, book->get_position_for(input));
@@ -22,7 +22,7 @@ namespace kungfu::wingchun::book {
             }
 
             if (is_final_status(order.status)) {
-                if (order.side == Side::Buy) {
+                if (order.side == Side::Sell) {
                     book->asset.frozen_cash -= order.volume_left;
                     book->asset.avail += order.volume_left;
                 }
@@ -34,7 +34,7 @@ namespace kungfu::wingchun::book {
             // 无需计算逆回购的收益，逆回购收益在买入时就固定了
         }
 
-        void apply_buy(Book_ptr& book, const Trade& trade) override {
+        void apply_sell(Book_ptr& book, const Trade& trade) override {
             auto& position = book->get_position_for(trade);
             if (position.volume + trade.volume > 0) {
                 position.avg_open_price = (position.avg_open_price * position.volume + trade.price * trade.volume) / (double)(position.volume + trade.volume);
