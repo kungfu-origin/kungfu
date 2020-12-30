@@ -12,6 +12,8 @@ import * as taskkill from 'taskkill';
 //@ts-ignore
 import * as physicalCpuCount from 'physical-cpu-count';
 
+import * as pm2 from 'kungfu-pm2'
+
 import { KF_HOME, KUNGFU_ENGINE_PATH, KF_CONFIG_PATH, buildProcessLogPath } from '__gConfig/pathConfig';
 import { platform } from '__gConfig/platformConfig';
 import { logger } from '__gUtils/logUtils';
@@ -21,7 +23,7 @@ import { getProcesses } from 'getprocesses';
 
 const path = require('path');
 const fkill = require('fkill');
-const pm2 = require('kungfu-pm2');
+// const pm2 = require('kungfu-pm2');
 
 export const _pm2 = pm2;
 

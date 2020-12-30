@@ -1,52 +1,34 @@
 {
   "comments": false,
   "env": {
-    "test": {
-      "presets": [
-        ["env", {
-          "targets": { "node": 10 }
-        }],
-        "stage-0"
-      ],
-      "plugins": ["istanbul"]
-    },
     "main": {
       "presets": [
-        ["env", {
+        ["@babel/preset-env", {
+          "useBuiltIns": "usage",
+          "modules": false,
+          "corejs": "3.3.5",
           "targets": { "node": 10 }
-        }],
-        "stage-0",
-        ["es2015", {"modules": false}],
-        "stage-2"
+        }]
       ]
     },
     "renderer": {
       "presets": [
-        ["env", {
-          "modules": false
-        }],
-        "stage-0",
-        ["es2015", {"modules": false}],
-        "stage-2"
-      ]
-    },
-    "web": {
-      "presets": [
-        ["env", {
-          "modules": false
-        }],
-        "stage-0"
+        ["@babel/preset-env", {
+          "useBuiltIns": "usage",
+          "modules": false,
+          "corejs": "3.3.5"
+        }]
       ]
     }
   },
   "plugins": [
-    "transform-runtime",
-    [
-      "component",
-      {
-        "libraryName": "element-ui",
-        "styleLibraryName": "theme-chalk"
-      }
-    ]
+    "@babel/plugin-transform-runtime",
+    ["@babel/plugin-proposal-object-rest-spread", { "loose": true, "useBuiltIns": true }],
+     // Stage 2
+    ["@babel/plugin-proposal-decorators", { "legacy": true }],
+    "@babel/plugin-proposal-function-sent",
+    "@babel/plugin-proposal-export-namespace-from",
+    "@babel/plugin-proposal-numeric-separator",
+    "@babel/plugin-proposal-throw-expressions"
   ]
 }
