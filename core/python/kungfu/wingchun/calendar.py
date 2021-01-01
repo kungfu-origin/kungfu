@@ -5,6 +5,7 @@ from chinese_calendar import is_workday
 
 class Calendar:
     def __init__(self, ctx):
+        self.ctx = ctx
         self.update_trading_day(datetime.datetime.now())
 
     def update_trading_day(self, now):
@@ -28,4 +29,8 @@ class Calendar:
         return int((day - kft.EPOCH).total_seconds() * kft.NANO_PER_SECOND)
 
     def is_trading_day(self, dt):
-        return dt.isoweekday() <= 5 and is_workday(dt)
+        try:
+            return dt.isoweekday() <= 5 and is_workday(dt)
+        except:
+            self.ctx.logger.error('failed to test is workday')
+            return dt.isoweekday() <= 5
