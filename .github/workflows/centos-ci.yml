@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - release
+      - 2.3
 jobs:
   build:
     runs-on: ubuntu-latest
