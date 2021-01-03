@@ -7,7 +7,6 @@
   "private": true,
   "workspaces": [
     "core",
-    "pm2",
     "cli2",
     "app",
     "tests"

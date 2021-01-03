@@ -1,5 +1,0 @@
-{
-  "name" : "echo-to",
-  "script" : "echo-to.js",
-  "options": [""]
-}

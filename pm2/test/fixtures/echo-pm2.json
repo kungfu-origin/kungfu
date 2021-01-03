@@ -1,5 +1,0 @@
-{
-  "name" : "echo",
-  "script" : "echo.js",
-  "options": [""]
-}

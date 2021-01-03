@@ -1,7 +1,0 @@
-[
-  {
-    "name"        : "no_vizion",
-    "script"      : "./echo.js",
-    "vizion" : false
-  }
-]

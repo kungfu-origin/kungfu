@@ -6,19 +6,16 @@ const path = require('path')
 const { dependencies } = require('../package.json')
 const webpack = require('webpack')
 
-// const ExtractTextPlugin = require('extract-text-webpack-plugin');
-const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const OptimizeJsPlugin = require("optimize-js-plugin");
 const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 
 
-const { getPythonVersion } = require('./utils');
-const pyVersion = getPythonVersion() || '3'
+let rendererConfig = {
+  devtool: '#cheap-module-eval-source-map',
 
-const isProd = process.env.NODE_ENV === 'production';
-
-module.exports = {
-  devtool: 'eval',
   entry: {
     index: path.join(__dirname, '../src/renderer/views/index/main.js'),
     code: path.join(__dirname, '../src/renderer/views/code/main.js'),
@@ -39,18 +36,17 @@ module.exports = {
     rules: [
       { 
         test: /\.css$/, 
-        use: [
-          MiniCssExtractPlugin.loader,
-          'css-loader'
-        ]
+        use: ExtractTextPlugin.extract({ 
+          fallback: 'style-loader', 
+          use: [ 'css-loader' ] 
+        }) 
       },
       {
         test: /\.scss$/,
-        use: [
-          MiniCssExtractPlugin.loader,
-          'css-loader',
-          'sass-loader'
-        ]
+        use: ExtractTextPlugin.extract({
+          fallback: 'style-loader', 
+          use: ['css-loader', 'sass-loader']
+        }),
       },
       {
         test: /\.html$/,
@@ -87,6 +83,10 @@ module.exports = {
         test: /\.(png|jpe?g|gif|svg)(\?.*)?$/,
         use: {
           loader: 'url-loader',
+          query: {
+            limit: 10000,
+            name: 'imgs/[name]--[folder].[ext]'
+          }
         }
       },
       {
@@ -101,6 +101,10 @@ module.exports = {
         test: /\.(woff2?|eot|ttf|otf)(\?.*)?$/,
         use: {
           loader: 'url-loader',
+          query: {
+            limit: 10000,
+            name: 'fonts/[name]--[folder].[ext]'
+          }
         }
       }
     ]
@@ -152,26 +156,17 @@ module.exports = {
         : false
     }),
 
-    new MiniCssExtractPlugin(),
+    new ExtractTextPlugin({
+      filename: `css/[name].css`,
+    }),
 
+    new webpack.NoEmitOnErrorsPlugin(),
     new MonacoWebpackPlugin({
       languages: [
         'python', 'cpp', 'shell', 'json', 'yaml'
       ]
-    }),
-
-    new webpack.HotModuleReplacementPlugin(),
-    new webpack.DefinePlugin({
-      'python_version': `"${pyVersion.toString()}"`,
-      'process.env.NODE_ENV': isProd ? '"production"' : '"development"',
-      'process.env.APP_TYPE': '"renderer"',
-    }),
-
-    !isProd ? new webpack.DefinePlugin({
-      '__resources': `"${path.join(__dirname, '../resources').replace(/\\/g, '\\\\')}"`,
-    }): null,
-
-  ].filter(p => !!p),
+    })
+  ],
 
   resolve: {
     alias: {
@@ -188,4 +183,42 @@ module.exports = {
   target: 'electron-renderer'
 }
 
+const { getPythonVersion } = require('./utils');
+const pyVersion = getPythonVersion() || '3'
 
+/**
+ * Adjust rendererConfig for development settings
+ */
+if (process.env.NODE_ENV !== 'production') {
+  rendererConfig.plugins.push(
+    new webpack.HotModuleReplacementPlugin(),
+    new webpack.DefinePlugin({
+      '__resources': `"${path.join(__dirname, '../resources').replace(/\\/g, '\\\\')}"`,
+      'python_version': `"${pyVersion.toString()}"`,
+      'process.env.NODE_ENV': '"development"',
+      'process.env.APP_TYPE': '"renderer"',
+    }),
+  )
+}
+
+/**
+ * Adjust rendererConfig for production settings
+ */
+if (process.env.NODE_ENV === 'production') {
+  rendererConfig.devtool = ''
+  rendererConfig.plugins.push(
+    new OptimizeJsPlugin({
+      sourceMap: false
+    }),
+    new webpack.DefinePlugin({
+      'python_version': `"${pyVersion.toString()}"`,
+      'process.env.NODE_ENV': JSON.stringify('production'),
+      'process.env.APP_TYPE': '"renderer"',
+    }),
+    // new BundleAnalyzerPlugin({
+    //   analyzerMode: 'static',
+    // }),
+  )
+}
+
+module.exports = rendererConfig

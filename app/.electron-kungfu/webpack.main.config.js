@@ -5,19 +5,9 @@ process.env.BABEL_ENV = 'main'
 const path = require('path')
 const { dependencies } = require('../package.json')
 const webpack = require('webpack')
-const { getCommitVersion, getPythonVersion } = require('./utils');
-const gitCommitVersion = getCommitVersion() || 'latest'
-const pyVersion = getPythonVersion() || '3'
+const OptimizeJsPlugin = require("optimize-js-plugin");
 
-const isProd = process.env.NODE_ENV === 'production';
-
-console.log('NODE_ENV', process.env.NODE_ENV)
-console.log('gitCommitVersion', gitCommitVersion)
-console.log('pyVersion', pyVersion)
-
-module.exports = {
-  
-  devtool: 'eval',
+let mainConfig = {
   entry: {
     main: path.join(__dirname, '../src/main/index.js')
   },
@@ -44,6 +34,10 @@ module.exports = {
         test: /\.(png|jpe?g|gif|svg)(\?.*)?$/,
         use: {
           loader: 'url-loader',
+          query: {
+            limit: 10000,
+            name: 'imgs/[name]--[folder].[ext]'
+          }
         }
       },
       {
@@ -57,7 +51,11 @@ module.exports = {
       {
         test: /\.(woff2?|eot|ttf|otf)(\?.*)?$/,
         use: {
-          loader: 'url-loader'
+          loader: 'url-loader',
+          query: {
+            limit: 10000,
+            name: 'fonts/[name]--[folder].[ext]'
+          }
         }
       }
     ]
@@ -71,22 +69,9 @@ module.exports = {
     libraryTarget: 'commonjs2',
     path: path.join(__dirname, '../dist/app')
   },
-
   plugins: [
-
-    new webpack.DefinePlugin({
-      'git_commit_version': `"${gitCommitVersion.toString()}"`,
-      'python_version': `"${pyVersion.toString()}"`,
-      'process.env.NODE_ENV': isProd ? 'development' : '"development"',
-      'process.env.APP_TYPE': '"main"',
-    }),
-
-    !isProd ? new webpack.DefinePlugin({
-      '__resources': `"${path.join(__dirname, '../resources').replace(/\\/g, '\\\\')}"`,
-    }): null
-
-  ].filter(p => !!p),
-
+    new webpack.NoEmitOnErrorsPlugin(),
+  ],
   resolve: {
     alias: {
       '__root': path.join(__dirname, '..'),
@@ -100,3 +85,46 @@ module.exports = {
   },
   target: 'electron-main'
 }
+
+const { getCommitVersion, getPythonVersion } = require('./utils');
+const gitCommitVersion = getCommitVersion() || 'latest'
+const pyVersion = getPythonVersion() || '3'
+
+
+/**
+ * Adjust mainConfig for development settings
+ */
+if (process.env.NODE_ENV !== 'production') {
+  mainConfig.plugins.push(
+    new webpack.DefinePlugin({
+      'git_commit_version': `"${gitCommitVersion.toString()}"`,
+      'python_version': `"${pyVersion.toString()}"`,
+      'process.env.NODE_ENV': '"development"',
+      'process.env.APP_TYPE': '"main"',
+    }),
+    new webpack.DefinePlugin({
+      '__resources': `"${path.join(__dirname, '../resources').replace(/\\/g, '\\\\')}"`,
+    })
+  )
+}
+
+
+/**
+ * Adjust mainConfig for production settings
+ */
+if (process.env.NODE_ENV === 'production') {
+  mainConfig.devtool = ''
+  mainConfig.plugins.push(
+    new OptimizeJsPlugin({
+      sourceMap: false
+    }),
+    new webpack.DefinePlugin({
+      'git_commit_version': `"${gitCommitVersion.toString()}"`,
+      'python_version': `"${pyVersion.toString()}"`,
+      'process.env.NODE_ENV': '"production"',
+      'process.env.APP_TYPE': '"main"',
+    })
+  )
+}
+
+module.exports = mainConfig

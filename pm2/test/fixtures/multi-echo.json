@@ -1,9 +1,0 @@
-[{
-  "name" : "echo2",
-  "script" : "echo.js",
-  "max" : "1"
-}, {
-  "name" : "echo3",
-  "script" : "echo.js",
-  "max" : "1"
-}]
