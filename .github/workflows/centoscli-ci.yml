@@ -1,0 +1,22 @@
+name: Centos CI
+
+on: 
+  push:
+    branches:
+      - release
+      - 2.3
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: 'docker.io/kungfutrader/kungfu-builder-centos:latest'
+    steps:
+    - uses: actions/checkout@v1
+    - run: |
+        yarn env-pypi
+        yarn install
+        yarn build-cli
+    - uses: actions/upload-artifact@v2
+      with:
+        - path: app/build/app/*.rpm
+        - path: app/build/app/*.appimage
+
