@@ -1,6 +1,5 @@
 {
     "resolveJsonModule": true,
-    "esModuleInterop": true,
     "module": "commonjs",
     "include": [
         "../app/shared/**/*",

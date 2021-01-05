@@ -1,0 +1,18 @@
+{
+  "name": "kfext_trader_timer",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "install-deps": "node -v",
+    "dist": "cross-env NODE_ENV=production node --max_old_space_size=8192 ../node_modules/webpack/bin/webpack.js --progress --colors --config .build/webpack.ext.config.js",
+    "build": "yarn run dist",
+    "build-cli": "node -v",
+    "dev": "node .build/dev-ext.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+  }
+}

@@ -195,6 +195,45 @@ function getRocketParams(name: String, ifRocket: Boolean) {
     return rocket
 }
 
+export const startTask = (options: any) => {
+    const optionsResolved = {
+        ...options,
+        "args": '',
+        "cwd": '/Users/zhangyizhi/Project/kungfu/kfext_task_timer/dist',
+        "script": 'index.js',
+        "output": buildProcessLogPath(options.name),
+        "error": buildProcessLogPath(options.name),
+        "mergeLogs": true,
+        "logDateFormat": "YYYY-MM-DD HH:mm:ss",
+        "autorestart": false,
+        "maxRestarts": 1,
+        "watch": false,
+        "force": true,
+        "execMode": "fork",
+        "killTimeout": 16000
+    }
+
+
+    return new Promise((resolve, reject) => {
+        pm2Connect().then(() => {
+            try {
+                pm2.start(optionsResolved, (err: any, apps: object): void => {
+                    if (err) {
+                        err = err.length ? err[0] : err;
+                        logger.error('[startProcess]', JSON.stringify(options), err)
+                        reject(err);
+                        return;
+                    };
+                    resolve(apps);
+                })
+            } catch (err) {
+                logger.error('[TC startProcess]', JSON.stringify(options), err)
+                reject(err)
+            }
+        }).catch(err => reject(err))
+    })
+}
+
 export const startProcess = async (options: any, no_ext = false): Promise<object> => {
     const extensionName = platform === 'win' ? '.exe' : ''
     const kfConfig: any = readJsonSync(KF_CONFIG_PATH) || {}
@@ -555,3 +594,4 @@ export const buildStartDatasetByDataSeriesIdOptions = (namespace: string, dataSe
         "args": ['data', 'get', '-n', dataSeriesId, '-s', 'kfa'].join(' ')
     }
 }
+

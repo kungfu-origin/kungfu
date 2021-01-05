@@ -6,6 +6,8 @@ import { getStrategyById, updateStrategyPath } from '__io/kungfu/strategy';
 
 import makeOrderCoreMixin from '@/components/Base/makeOrder/js/makeOrderCoreMixin';
 
+const { _pm2 } = require('__gUtils/processUtils');
+
 const BrowserWindow = remote.BrowserWindow;
 
 //一直启动，无需remove listener
@@ -22,6 +24,7 @@ export default {
     mounted () {
         this.bindIPCListener();
         this.bindMainIPCListener();
+        this.bindPMPCListener();
     },
 
     destroyed(){
@@ -43,6 +46,15 @@ export default {
                         this.globalSettingDialogVisiblity = true;
                         break
                 }
+            })
+        },
+
+        bindPMPCListener () {
+
+            _pm2.launchBus((err, pm2_bus) => {
+                pm2_bus.on('process:msg', (packet) => {
+                    console.log(packet, '----')
+                })
             })
         },
         
