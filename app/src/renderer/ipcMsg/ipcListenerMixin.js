@@ -53,7 +53,7 @@ export default {
 
             _pm2.launchBus((err, pm2_bus) => {
                 pm2_bus.on('process:msg', (packet) => {
-                    console.log(packet, '----')
+                    // console.log(packet, '----')
                 })
             })
         },

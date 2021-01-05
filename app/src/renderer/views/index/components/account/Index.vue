@@ -19,6 +19,9 @@
                             @activeTicker="setCurrentTicker"
                             />
                         </el-tab-pane>
+                        <el-tab-pane :lazy="true" label="交易任务" name="tradingTask">
+                            <Task></Task>
+                        </el-tab-pane>
                     </el-tabs>
                 </el-col>
                 <el-col :span="10">
@@ -106,6 +109,7 @@ import { mapState, mapGetters } from 'vuex'
 
 import TdAccount from '@/components/Account/components/TdAccount';
 import MdAccount from '@/components/Account//components/MdAccount';
+import Task from '@/components/Task/Index';
 import OrderRecord from '@/components/Base/tradingData/OrderRecord';
 import TradeRecord from '@/components/Base/tradingData/TradeRecord';
 import Pos from '@/components/Base/tradingData/Pos';
@@ -147,6 +151,7 @@ export default {
     components: {
         TdAccount, MdAccount, Pos,
         Pnl,
+        Task,
         OrderRecord, TradeRecord,
         MakeOrderDashboard,
         MainContent

@@ -187,7 +187,8 @@
                 { validator: specialStrValidator, trigger: 'blur' },
                 { validator: noZeroAtFirstValidator, trigger: 'blur' },
                 { validator: noKeywordValidatorBuilder('all'), trigger: 'blur' },
-                { validator: noKeywordValidatorBuilder('ledger'), trigger: 'blur' }
+                { validator: noKeywordValidatorBuilder('ledger'), trigger: 'blur' },
+                { validator: noKeywordValidatorBuilder('task'), trigger: 'blur' }
                 ]"
             >
                 <el-input 

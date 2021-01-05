@@ -199,7 +199,7 @@ export const startTask = (options: any) => {
     const optionsResolved = {
         ...options,
         "args": '',
-        "cwd": '/Users/zhangyizhi/Project/kungfu/kfext_task_timer/dist',
+        "cwd": '/Users/zhangyizhi/Project/kungfu/kfext_task_timerTrader/dist',
         "script": 'index.js',
         "output": buildProcessLogPath(options.name),
         "error": buildProcessLogPath(options.name),
@@ -472,22 +472,18 @@ export const startCustomProcess = (targetName: string, params: string): Promise<
     }).catch(err => logger.error(`[start${targetName}]`, err))
 }
 
-//列出所有进程
-export const listProcessStatus = () => {
-    return pm2List().then((pList: any[]): StringToStringObject => {
-        let processStatus: any = {}
-        Object.freeze(pList).forEach(p => {
-            const name = p.name;
-            const status = p.pm2_env.status
-            processStatus[name] = status
-        })
-        return processStatus
+function buildProcessStatus (pList: any[]): StringToStringObject {
+    let processStatus: any = {}
+    Object.freeze(pList).forEach(p => {
+        const name = p.name;
+        const status = p.pm2_env.status
+        processStatus[name] = status
     })
+    return processStatus
 }
 
-export const listProcessStatusWithDetail = () => {
-    return pm2List().then((pList: any[]): StringToProcessStatusDetail => {
-        let processStatus: any = {}
+function buildProcessStatusWidthDetail (pList: any[]): StringToProcessStatusDetail {
+    let processStatus: any = {}
         Object.freeze(pList).forEach(p => {
             const { monit, pid, name, pm2_env } = p;
             const status = pm2_env.status
@@ -499,7 +495,19 @@ export const listProcessStatusWithDetail = () => {
             }
         })
         return processStatus
+}
+
+//列出所有进程
+export const listProcessStatus = () => {
+    return pm2List().then((pList: any[]): { processStatus: StringToStringObject, processStatusWithDetail: StringToProcessStatusDetail } => {
+        const processStatus = buildProcessStatus(pList)
+        const processStatusWithDetail = buildProcessStatusWidthDetail(pList)
+        return { processStatus, processStatusWithDetail }
     })
+}
+
+export const listProcessStatusWithDetail = () => {
+    return pm2List().then((pList: any[]) => buildProcessStatusWidthDetail(pList))
 }
 
 //删除进程
@@ -566,9 +574,12 @@ export const startGetProcessStatus = (callback: Function) => {
     setTimerPromiseTask(() => {
         return listProcessStatus()
             .then(res => {
-                const processStatus = Object.freeze(res || {});
-                if (Object.keys(processStatus).length && callback) {
-                    callback(processStatus)
+                const { processStatus, processStatusWithDetail } = res;
+                if (callback) {
+                    callback({
+                        processStatus: Object.freeze(processStatus || {}), 
+                        processStatusWithDetail: Object.freeze(processStatusWithDetail || {})
+                    })
                 }
             })
             .catch(err => console.error(err))

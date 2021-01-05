@@ -39,8 +39,10 @@ startArchiveMakeTask((archiveStatus) => {
 })
 .then(() => startMaster(false))
 .finally(() => {
-    startGetProcessStatus((processStatus) => {
+    startGetProcessStatus(res => {
+        const { processStatus, processStatusWithDetail } = res;
         Vue.store.dispatch('setProcessStatus', processStatus)
+        Vue.store.dispatch('setProcessStatusWithDetail', processStatusWithDetail)
     });
 
     utils.delayMiliSeconds(1000)

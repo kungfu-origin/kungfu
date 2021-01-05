@@ -5,26 +5,11 @@ process.env.BABEL_ENV = 'main'
 const path = require('path')
 const webpack = require('webpack')
 const OptimizeJsPlugin = require("optimize-js-plugin");
-const { dependencies } = require('../package.json');
 
-
-const nodeModules = {};
-Object.keys(dependencies || {})
-  .filter(function(x) {
-    return ['.bin'].indexOf(x) === -1 
-  })
-  .forEach(function(mod) {
-    nodeModules[mod] = 'commonjs ' + mod;
-  });
-
-nodeModules['kungfu-core'] = 'commonjs kungfu-core';
 
 let extConfig = {
   entry: {
     index: path.join(__dirname, '../src/index.ts')
-  },
-  externals: {
-    ...nodeModules,
   },
   module: {
     rules: [

@@ -157,11 +157,11 @@ export const dateFormatYYMMDDValidator = (rule: any, value: any, callback: Funct
 
 export const noKeywordValidatorBuilder = (keyword: string) => {
     return (rule: any, value: any, callback: Function): void => {
-        if (value.trim() === keyword) {
+        if ((value || '').trim().toString().includes(keyword)) {
             callback(new Error(
                 isEnglish
-                    ?  `"${keyword}" is not allowed!`
-                    : `不能以 "${keyword}" 命名`
+                    ? `Including "${keyword}" is not allowed!`
+                    : `命名不能包含 "${keyword}" `
             ))
         } else {
             callback();

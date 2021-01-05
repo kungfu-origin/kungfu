@@ -4,8 +4,10 @@ process.on('message', (packet) => {
     console.log([packet, '---'])
 })
 
+let count = 0
+
 setInterval(() => {
-    console.log('send')
+    console.log('send', count++)
     //@ts-ignore
     process.send({
         type: 'process:msg',
@@ -16,4 +18,4 @@ setInterval(() => {
             }
         }
     })
-}, 1000)
+}, 10000)
