@@ -90,24 +90,7 @@ export const getSystemConfig = (): { [propName: string]: SystemConfigItem } => (
                 "type": SystemConfigChildItemTypeEnum.Bool,
                 "required": true
             },
-            {
-                "key": "cleanBeforeLaunchMaster",
-                "name": isEnglish ? "Clean Before Launch Master" : "启动master前清空数据",
-                "cli": true,
-                "tip": isEnglish ? "Clean Before Launch Master" : "设置是否在启动master前清空历史数据，这样能获得更好的性能体验",
-                "default": false,
-                "type": SystemConfigChildItemTypeEnum.Bool,
-                "required": true
-            },
-            {
-                "key": "archive",
-                "name": isEnglish ? "Archive" : "归档",
-                "cli": true,
-                "tip": isEnglish ? "Clean with Archive" : "设置是否在启动master前清空历史数据时归档",
-                "default": false,
-                "type": SystemConfigChildItemTypeEnum.Bool,
-                "required": true
-            }
+           
             
         ]
     },

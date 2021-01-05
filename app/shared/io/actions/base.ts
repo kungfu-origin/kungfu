@@ -14,19 +14,6 @@ export const switchMaster = async (status: boolean): Promise<any> => {
         }
     } 
     try {
-
-        const kfSystemConfig: any = readJsonSync(KF_CONFIG_PATH) || {};
-        const ifCleanBeforeLaunchMaster = ((kfSystemConfig.performance || {}).cleanBeforeLaunchMaster) || false;
-        const ifArchive = ((kfSystemConfig.performance || {}).archive) || false;
-        const archiveParams = ifArchive ? '-A' : ''
-
-        if (ifCleanBeforeLaunchMaster) {
-            await startProcessLoopGetStatus({
-                "name": 'journalClean',
-                "args": `journal clean ${archiveParams}`
-            }, () => {})
-        }
-
         await startMaster(false)
         await delayMiliSeconds(1000)
         await startLedger(false)
