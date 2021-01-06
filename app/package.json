@@ -24,7 +24,7 @@
     "clean": "rimraf ./dist/* ./build/*",
     "build:install": "electron-builder",
     "build": "node --max_old_space_size=8192 .electron-kungfu/build.js && electron-builder",
-    "build-cli": "yarn run build",
+    "build-cli": "node --max_old_space_size=8192 .electron-kungfu/build.js && electron-builder --config.productName=Kungfu-CLI",
     "dev": "node .electron-kungfu/dev-runner.js",
     "dist": "yarn run dist:main && yarn run dist:render",
     "dist:main": "cross-env NODE_ENV=production node --max_old_space_size=8192 ../node_modules/webpack/bin/webpack.js --config .electron-kungfu/webpack.main.config.js",
@@ -33,7 +33,7 @@
   },
   "build": {
     "productName": "Kungfu",
-    "artifactName": "${productName}-${buildVersion}-${os}-${arch}-${channel}.${ext}",
+    "artifactName": "${productName}-${ext}-${buildVersion}-${os}-${arch}-${channel}.${ext}",
     "generateUpdatesFilesForAllChannels": true,
     "appId": "taurus.ai.KungFu.Trader",
     "directories": {
