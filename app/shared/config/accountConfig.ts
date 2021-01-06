@@ -17,6 +17,7 @@ export const getAccountSource = async (): Promise<StringToSource> => {
     let mdSources: Sources = {};
     try {
         const configs = await getExtensionConfigs();
+        console.log('configs', configs, '---')
         configs.forEach((c: any): void => {
             if(c.type === 'source') {
                 const config: AccountSettingOrigin = c.config;
