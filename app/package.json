@@ -33,7 +33,7 @@
   },
   "build": {
     "productName": "Kungfu",
-    "artifactName": "${productName}-${ext}-${buildVersion}-${os}-${arch}-${channel}.${ext}",
+    "artifactName": "${productName}-${buildVersion}-${os}-${arch}-${channel}.${ext}",
     "generateUpdatesFilesForAllChannels": true,
     "appId": "taurus.ai.KungFu.Trader",
     "directories": {
