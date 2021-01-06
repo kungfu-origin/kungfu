@@ -36,7 +36,7 @@ let extConfig = {
   output: {
     filename: '[name].js',
     libraryTarget: 'commonjs2',
-    path: path.join(__dirname, '../dist')
+    path: path.join(__dirname, '../lib')
   },
   plugins: [
     new webpack.NoEmitOnErrorsPlugin(),

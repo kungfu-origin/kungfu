@@ -90,7 +90,7 @@ export default {
 
     watch: {
         processStatus (newProcess) {
-            this.tableList = Object.keys(processStatusWithDetail || {})
+            this.tableList = Object.keys(this.processStatusWithDetail || {})
                 .map(key => {
                     return {
                         processId: key,
@@ -104,8 +104,10 @@ export default {
                     return false
                 })
         },
+
     },
 
+    
     methods: {
 
         handleAddTask () {

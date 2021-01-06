@@ -2,7 +2,7 @@
   "name": "kfext_trader_timer",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "lib/index.js",
   "scripts": {
     "install-deps": "node -v",
     "dist": "cross-env NODE_ENV=production node --max_old_space_size=8192 ../node_modules/webpack/bin/webpack.js --progress --colors --config .build/webpack.ext.config.js",
@@ -17,5 +17,52 @@
   "dependencies": {},
   "devDependencies": {
     "rimraf": "^3.0.2"
+  },
+
+  "kungfuConfig": {
+    "type": "task",
+    "key": "timer_trader",
+    "name": "定时任务",
+    "config": [
+      {
+        "key": "ticker",
+        "name": "标的",
+        "type": "str",
+        "required": true
+      },{
+        "key": "offset",
+        "name": "开平",
+        "type": "select",
+        "data": "offset",
+        "required": true
+      },{
+        "key": "side",
+        "name": "买卖",
+        "type": "select",
+        "data": "side",
+        "required": true
+      },{
+        "key": "volume",
+        "name": "数量",
+        "type": "int",
+        "required": true
+      },{
+        "key": "triggerTime",
+        "name": "触发时间",
+        "type": "timePicker",
+        "required": true
+      },{
+        "key": "finishTime",
+        "name": "结束时间",
+        "type": "timePicker",
+        "required": true
+      },{
+        "key": "step",
+        "name": "频率",
+        "type": "int",
+        "required": true,
+        "tip": "单位秒"
+      }
+    ]
   }
 }
