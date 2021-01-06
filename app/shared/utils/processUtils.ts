@@ -199,7 +199,7 @@ export const startTask = (options: any) => {
     const optionsResolved = {
         ...options,
         "args": '',
-        "cwd": '/Users/zhangyizhi/Project/kungfu/kfext_task_timerTrader/dist',
+        "cwd": '/Users/zhangyizhi/Project/kungfu/kfext_task_timerTrader/lib',
         "script": 'index.js',
         "output": buildProcessLogPath(options.name),
         "error": buildProcessLogPath(options.name),

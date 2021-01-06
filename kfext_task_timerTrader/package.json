@@ -2,7 +2,7 @@
   "name": "kfext_trader_timer",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "lib/index.js",
   "scripts": {
     "install-deps": "node -v",
     "dist": "cross-env NODE_ENV=production node --max_old_space_size=8192 ../node_modules/webpack/bin/webpack.js --progress --colors --config .build/webpack.ext.config.js",
@@ -14,5 +14,34 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+  },
+
+  "kungfuConfig": {
+    "type": "trader_task",
+    "config": [
+      {
+        "key": "ticker",
+        "name": "标的",
+        "type": "str"
+      },{
+        "key": "offset",
+        "name": "开平",
+        "type": "select",
+        "options": "offset"
+      },{
+        "key": "side",
+        "name": "买卖",
+        "type": "select",
+        "options": "side"
+      },{
+        "key": "triggerTime",
+        "name": "触发时间",
+        "type": "timePicker"
+      },{
+        "key": "finishTime",
+        "name": "结束时间",
+        "type": "timePicker"
+      }
+    ]
   }
 }
