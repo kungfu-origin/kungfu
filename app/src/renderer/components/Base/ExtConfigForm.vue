@@ -1,40 +1,43 @@
 <template>
 	<el-form
 		ref="extForm"
-		label-width="140px"
+		label-width="90px"
 		:model="form"
+		class="ext-form"
 	>
 		<el-form-item 
             v-for="item of configList" :key="item.key"
             :label="item.name"
             :prop="item.key"
             :rules="buildValidators(item)"
+			:class="{ 'is-radio': item.type === 'radio' }"
             >
                 <el-col :span="19">
-                    <el-input size="mini" :class="item.key" v-if="item.type === 'str'" :value="form[item.key]" @input="e => handleInputValue(item.key, e)" :type="item.key" :disabled="method == 'update' && (uniKey == item.key)"></el-input>
-                    <el-input size="mini" :class="item.key" v-if="item.type === 'password'" :type="item.key" :value="form[item.key]" @input="e => handleInputValue(item.key, e)" :disabled="method == 'update' && (uniKey == item.key)" show-password></el-input>
+                    <el-input size="mini" :class="item.key" v-if="item.type === 'str'" v-model="form[item.key]" :type="item.key" :disabled="method == 'update' && (uniKey == item.key)"></el-input>
+                    <el-input size="mini" :class="item.key" v-if="item.type === 'password'" :type="item.key" v-model="form[item.key]" :disabled="method == 'update' && (uniKey == item.key)" show-password></el-input>
                     <el-switch size="mini" :class="item.key" v-if="item.type === 'bool'" :value="form[item.key]" @change="e => handleInputValue(item.key, e)"></el-switch>
-                    <el-input-number size="mini" :class="item.key" v-if="item.type === 'int'" :controls="false" :value="form[item.key]" @input="e => handleInputValue(item.key, e)"></el-input-number>
-                    <el-input-number size="mini" :class="item.key" v-if="item.type === 'float'" :controls="false" :value="form[item.key]" @input="e => handleInputValue(item.key, e)"></el-input-number>
+                    <el-input-number size="mini" :class="item.key" v-if="item.type === 'int'" :controls="false" v-model="form[item.key]"></el-input-number>
+                    <el-input-number size="mini" :class="item.key" v-if="item.type === 'float'" :controls="false" v-model="form[item.key]"></el-input-number>
                     <span class="account-setting-path path-selection-in-dialog text-overflow" v-if="item.type === 'file'" :title="form[item.key]">{{form[item.key]}}</span>                    
                     <el-button size="mini" icon="el-icon-more" v-if="item.type === 'file'" @click="handleSelectFile(item.key)"></el-button>
-                    <el-select :class="item.key" size="mini" v-if="item.type === 'select'" :multiple="item.multiple" collapse-tags :value="form[item.key]" @change="e => handleInputValue(item.key, e)" placeholder="请选择">
+                    <el-select :class="item.key" size="mini" v-if="item.type === 'select'" :multiple="item.multiple" collapse-tags v-model="form[item.key]" placeholder="请选择">
                         <el-option
-						v-for="option in item.data || item.options"
+						v-for="option in resolvedSelectOrRatioOptions(item)"
 						:key="option.value"
 						:label="option.name"
 						:value="option.value">
                         </el-option>
                     </el-select>
-					 <el-radio-group :class="item.key" size="mini" v-if="item.type === 'radio'" :value="form[item.key]" @change="e => handleInputValue(item.key, e)">
+					 <el-radio-group :class="item.key" size="mini" v-if="item.type === 'radio'" v-model="form[item.key]">
                         <el-radio 
-						v-for="option in item.data || item.options"
+						v-for="option in resolvedSelectOrRatioOptions(item)"
 						:key="option.value"
-						size="mini"  
-						label="option.value">
+						:label="option.value">
 							{{ option.name }}
 						</el-radio>
                     </el-radio-group>
+					<el-time-picker size="mini" :class="item.key" v-if="item.type === 'timePicker'" v-model="form[item.key]" :clearable="true" :picker-options="{ selectableRange: '00:00:00 - 23:59:59', format: 'HHmmss' }">
+					</el-time-picker>
 
                 </el-col>
                 <el-col :span="2" :offset="1" v-if="item.tip">
@@ -49,6 +52,8 @@
 <script>
 
 import { deepClone } from '__gUtils/busiUtils';
+
+import { OffsetName, SideName } from '__gConfig/tradingConfig';
 
 export default {
 	props: {
@@ -78,6 +83,11 @@ export default {
 
 	data () {
 
+		this.kungfuKeywordsData = {
+			offset: OffsetName,
+			side: SideName
+		}
+
 		return {
 			form: deepClone(this.value || {})
 		}
@@ -99,6 +109,7 @@ export default {
 	methods: {	
 
         handleInputValue (key, e) {
+			console.log(key, e)
             this.$set(this.form, key, e)
         },
 
@@ -131,13 +142,26 @@ export default {
                         }
                     }
                     
-                    if(item.default) {
+                    if(item.default !== undefined) {
                         this.$set(this.form, key, item.default)
                     } else {
                         this.$set(this.form, key, '')
                     }
                 }
-            })
+			})
+		},
+
+		resolvedSelectOrRatioOptions (item) {
+			const options = item.options || item.data || [];
+			if (typeof options !== 'string' || !this.kungfuKeywordsData[options]) return options;
+			const target = this.kungfuKeywordsData[options];
+			return Object.keys(target || {})
+				.map(key => {
+					return {
+						name: target[key],
+						value: key
+					}
+				})			
 		},
 
  		buildValidators(item) {
@@ -166,6 +190,33 @@ export default {
 }
 </script>
 
-<style>
+<style lang="scss">
+        
+        .el-form {
 
+			&.ext-form {
+
+				.el-form-item {
+					margin-bottom: 10px;
+
+					&:last-child {
+						margin-bottom: 10px;
+					}
+
+					&.is-radio {
+						margin-bottom: 0;
+					}
+
+					.el-radio {
+						margin-right: 18px;
+					}
+
+					.el-radio__label {
+						font-size: 12px;
+						padding-left: 5px;
+					}
+				}
+			}
+        }
+    
 </style>

@@ -59,7 +59,13 @@ interface ProcessStatusDetail {
     monit: {
         memory: bigint;
         cpu: number;
-    }
+    },
+    pid: string,
+    name: string,
+    created_at: string,
+    script: string,
+    cwd: string,
+    args: string
 }
 
 interface StringToProcessStatusDetail {

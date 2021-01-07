@@ -30,16 +30,36 @@
         "type": "str",
         "required": true
       },{
-        "key": "offset",
-        "name": "开平",
-        "type": "select",
-        "data": "offset",
-        "required": true
-      },{
         "key": "side",
         "name": "买卖",
-        "type": "select",
-        "data": "side",
+        "type": "radio",
+        "data": [
+          {
+            "name": "买",
+            "value": 0
+          },
+          {
+            "name": "卖",
+            "value": 1
+          }
+        ],
+        "default": 0,
+        "required": true
+      },{
+        "key": "offset",
+        "name": "开平",
+        "type": "radio",
+        "data": [
+          {
+            "name": "开",
+            "value": 0
+          },
+          {
+            "name": "平",
+            "value": 1
+          }
+        ],
+        "default": 0,
         "required": true
       },{
         "key": "volume",
@@ -55,6 +75,7 @@
         "key": "finishTime",
         "name": "结束时间",
         "type": "timePicker",
+        "laterThan": "triggerTime",
         "required": true
       },{
         "key": "step",

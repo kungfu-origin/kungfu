@@ -32,7 +32,7 @@ new Vue({
 }).$mount('#app', true)
 
 
-const { startGetProcessStatus, startTask, startMaster, startLedger, startArchiveMakeTask, _pm2 } = require('__gUtils/processUtils');
+const { startGetProcessStatus, startMaster, startLedger, startArchiveMakeTask, _pm2 } = require('__gUtils/processUtils');
 
 startArchiveMakeTask((archiveStatus) => {
     window.archiveStatus = archiveStatus
@@ -60,7 +60,3 @@ currentWin.on('close', (e) => {
 })
 
 window.pm2 = _pm2;
-
-startTask({
-    name: 'test_task'
-})

@@ -1,4 +1,4 @@
-import { startCustomProcess, deleteProcess, killKfc, startMaster, startLedger, startProcessLoopGetStatus } from '__gUtils/processUtils';
+import { startCustomProcess, deleteProcess, killKfc, startMaster, startLedger, startTask, stopProcess } from '__gUtils/processUtils';
 import { delayMiliSeconds } from '__gUtils/busiUtils';
 import { buildCustomProcessConfig } from '__gConfig/systemConfig';
 import { KF_TARADING_CONFIG_PATH, KF_CONFIG_PATH } from '__gConfig/pathConfig';
@@ -51,4 +51,14 @@ export const switchCustomProcess = (status: boolean, targetName: string) => {
         });
         
     return startCustomProcess(targetName, params.join(' '))
+}
+
+
+export const switchTask = (processName: string, status: Boolean, options: any) => {
+    if (!status) return stopProcess(processName)
+    return startTask({
+        name: processName,
+        ...options
+    })
+
 }

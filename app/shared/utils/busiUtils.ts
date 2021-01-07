@@ -467,7 +467,7 @@ export const getExtensions = async (extDir: string): Promise<any> => {
 
 export const getExtensionPaths = (extDir: string): Promise<any> => {
     return getExtensions(extDir).then((filePaths: string[]): string[] => {
-        return filePaths.map((fp: string): string => path.join(fp, 'package.json'))
+        return filePaths.map((fp: string): string => path.resolve(path.join(fp, 'package.json')))
     })
 }
 
@@ -476,14 +476,17 @@ export const getExtensionConfigs = async (extDir: string): Promise<any> => {
         const packageJSONPaths: string[] = await getExtensionPaths(extDir)
         const packageJsons = await Promise.all(packageJSONPaths.map((p: string) => fse.readJson(p)))
         return packageJsons
-            .map((p: any) => {
+            .map((p: any, index: number) => {
                 const kungfuConfig = p[KUNGFU_KEY_IN_PACKAGEJSON];
                 if(kungfuConfig) {
                     const type: string = kungfuConfig.type;
                     const config: SourceConfig = kungfuConfig.config
                     return  {
                         type,
-                        config
+                        config,
+                        key: kungfuConfig.key,
+                        name: kungfuConfig.name,
+                        packageJSONPath: packageJSONPaths[index]
                     }
                 }
             })

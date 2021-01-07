@@ -20,6 +20,7 @@ import { logger } from '__gUtils/logUtils';
 import { readJsonSync } from '__gUtils/fileUtils';
 import { setTimerPromiseTask, delayMiliSeconds } from '__gUtils/busiUtils';
 import { getProcesses } from 'getprocesses';
+import { resolve } from 'dns';
 
 const path = require('path');
 const fkill = require('fkill');
@@ -197,7 +198,6 @@ function getRocketParams(name: String, ifRocket: Boolean) {
 
 export const startTask = (options: any) => {
     const optionsResolved = {
-        ...options,
         "args": '',
         "cwd": '/Users/zhangyizhi/Project/kungfu/kfext_task_timerTrader/lib',
         "script": 'index.js',
@@ -210,7 +210,8 @@ export const startTask = (options: any) => {
         "watch": false,
         "force": true,
         "execMode": "fork",
-        "killTimeout": 16000
+        "killTimeout": 16000,
+        ...options,
     }
 
 
@@ -486,12 +487,21 @@ function buildProcessStatusWidthDetail (pList: any[]): StringToProcessStatusDeta
     let processStatus: any = {}
         Object.freeze(pList).forEach(p => {
             const { monit, pid, name, pm2_env } = p;
-            const status = pm2_env.status
+            const status = pm2_env.status;
+            const created_at = pm2_env.created_at;
+            const cwd = pm2_env.cwd;
+            const script = pm2_env.script;
+            const args = pm2_env.args;
+
             processStatus[name] = {
                 status,
                 monit,
                 pid,
-                name
+                name,
+                created_at,
+                script,
+                cwd,
+                args
             }
         })
         return processStatus
@@ -541,6 +551,19 @@ export const deleteProcess = (processName: string) => {
                     .then(() => logger.info('[KILL PROCESS] by pids success', pids))
                     .catch((err: Error) => logger.error(['[kfKill pm2Delete]'], err))
             })
+    })
+}
+
+export const stopProcess = (processName: string) => {
+    return new Promise((resolve, reject) => {
+        pm2.stop(processName, ((err: Error) => {
+            if (err) {
+                reject(err)
+                return;
+            }
+
+            resolve(true)
+        }))
     })
 }
 

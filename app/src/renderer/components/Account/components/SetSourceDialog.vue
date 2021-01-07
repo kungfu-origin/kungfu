@@ -35,7 +35,6 @@
 import { sourceTypeConfig } from '__gConfig/tradingConfig';
 import { deepClone } from '__gUtils/busiUtils';
 
-
 export default {
     props: {
         accountSource: {
