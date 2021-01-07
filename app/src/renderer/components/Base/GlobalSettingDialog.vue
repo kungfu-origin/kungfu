@@ -219,7 +219,7 @@ import { Collapse, CollapseItem } from "element-ui";
 
 import { readJsonSync, outputJsonSync } from "__gUtils/fileUtils";
 import { LOG_DIR, KUNGFU_RESOURCES_DIR } from "__gConfig/pathConfig";
-import { getExtensionConfigs, getExtensions, getSourceList, debounce, throttle } from "__gUtils/busiUtils";
+import { getSourceList, debounce, throttle } from "__gUtils/busiUtils";
 import { buildSystemConfig } from "__gConfig/systemConfig";
 import { switchCustomProcess } from "__io/actions/base";
 import { getKfCommission, setKfCommission } from '__gUtils/kungfuUtils';

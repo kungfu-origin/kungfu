@@ -61,7 +61,7 @@ export default {
 		//确认唯一
 		uniKeyValidator: {
 			type: Function,
-			default: () => {}
+			default: (rule, value, callback) => { callback() }
 		},
 		uniKey: "",
 

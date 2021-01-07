@@ -1,6 +1,8 @@
 import readline from 'readline';
 import { EXTENSION_DIR } from '__gConfig/pathConfig';
-import { listDir, statSync, readJsonSync } from '__gUtils/fileUtils';
+import { listDir } from '__gUtils/fileUtils';
+
+const fse = require('fs-extra')
 
 const path = require("path");
 const fs = require('fs-extra');
@@ -444,60 +446,55 @@ export const getLog = (logPath: string, searchKeyword?: string, dealLogMessageMe
     })
 }
 
-export const getExtensions = (): Promise<any> => {
-    return listDir(EXTENSION_DIR)
-    .then(async (files: string[]) => {
-        const promises = files.map(fp => {
-            fp = path.join(EXTENSION_DIR, fp);
-            const stat: any = statSync(fp);
-            let isDir: boolean;
-            if(stat) isDir = stat.isDirectory();    
-            else return false;
-            if(isDir) {
-                return listDir(fp).then((childFiles: string[]) => {
-                    if(childFiles.includes('package.json')) return fp;
-                    else return false;
-                })
-            } else {
-                return false
-            }
-           
-        })
-        const fpList = await Promise.all(promises)
-        return fpList.filter(f => !!f)
+export const getExtensions = async (extDir: string): Promise<any> => {
+    const files = await listDir(extDir);
+    const filesResolved = files.map((fp: string) => path.join(extDir, fp))
+    const statFiles = await Promise.all(filesResolved.map((fp: string) => fse.stat(fp)))
+    
+    const afterFilterFiles = filesResolved.filter((fp: string, index: number) => {
+        const statData: any = statFiles[index];
+        return statData.isDirectory()
     })
-    .catch((err: Error) => {
-        console.log(err)
+
+    const childFilesList = await Promise.all(afterFilterFiles.map((fp: string) => listDir(fp)))
+
+    return afterFilterFiles.filter((fp: string, index: number) => {
+        const childFiles: any = childFilesList[index];
+        if(childFiles.includes('package.json')) return true;
+        else return false
     })
 }
 
-export const getExtensionPaths = (): Promise<any> => {
-    return getExtensions().then((filePaths: string[]): string[] => {
+export const getExtensionPaths = (extDir: string): Promise<any> => {
+    return getExtensions(extDir).then((filePaths: string[]): string[] => {
         return filePaths.map((fp: string): string => path.join(fp, 'package.json'))
     })
 }
 
-export const getExtensionConfigs = async (): Promise<any> => {
+export const getExtensionConfigs = async (extDir: string): Promise<any> => {
     try {
-        const packageJSONPaths: string[] = await getExtensionPaths()
-        return packageJSONPaths.map((p: string) => {
-            const packageJSON: any = readJsonSync(p)
-            const kungfuConfig: ExtensionJSON = packageJSON[KUNGFU_KEY_IN_PACKAGEJSON];
-            if(kungfuConfig) {
-                const type: string = kungfuConfig.type;
-                const config: SourceConfig = kungfuConfig.config
-                return  {
-                    type,
-                    config
+        const packageJSONPaths: string[] = await getExtensionPaths(extDir)
+        const packageJsons = await Promise.all(packageJSONPaths.map((p: string) => fse.readJson(p)))
+        return packageJsons
+            .map((p: any) => {
+                const kungfuConfig = p[KUNGFU_KEY_IN_PACKAGEJSON];
+                if(kungfuConfig) {
+                    const type: string = kungfuConfig.type;
+                    const config: SourceConfig = kungfuConfig.config
+                    return  {
+                        type,
+                        config
+                    }
                 }
-            }
-        }).filter(config => !!config)
+            })
+            .filter(config => !!config)
+
     } catch (err) {
         console.error(err)
     }
 }
 
-export const getSourceList = () => getExtensionConfigs()
+export const getSourceList = () => getExtensionConfigs(EXTENSION_DIR)
     .then(extList => {
         const sourceList = extList
         .filter((e: any) => e.type === "source")

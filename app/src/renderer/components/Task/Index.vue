@@ -65,6 +65,10 @@
 
 import { mapState } from 'vuex';
 
+import { getExtensionConfigs } from '__gUtils/busiUtils';
+import { TASK_EXTENSION_DIR } from '__gConfig/pathConfig';
+
+
 import baseMixin from '@/assets/js/mixins/baseMixin';
 
 export default {
@@ -79,6 +83,14 @@ export default {
 
             searchFilterKey: 'processId'
         }
+    },
+
+    mounted () {
+
+        getExtensionConfigs(TASK_EXTENSION_DIR)
+            .then(exts => {
+                console.log(exts)
+            })
     },
 
     computed: {
