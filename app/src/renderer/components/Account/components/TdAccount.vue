@@ -175,7 +175,7 @@
                     min-width="120"
                 >
                     <template slot-scope="props">
-                        <span class="tr-oper" @click.stop="handleOpenLogFile(props.row)"><i class="el-icon-document mouse-over" title="打开日志文件"></i></span>
+                        <span class="tr-oper" @click.stop="handleOpenLogFile(`td_${props.row.account_id}`)"><i class="el-icon-document mouse-over" title="打开日志文件"></i></span>
                         <span class="tr-oper" @click.stop="handleOpenUpdateAccountDialog(props.row)"><i class="el-icon-setting mouse-over" title="TD 设置"></i></span>
                         <span :class="['tr-oper-delete', `delete-${props.row.account_id}`] " @click.stop="handleDeleteTd(props.row)"><i class=" el-icon-delete mouse-over" title="删除 TD"></i></span>
                     </template>
@@ -222,12 +222,13 @@ import { loopToRunProcess } from '__gUtils/busiUtils';
 import { watcher } from '__io/kungfu/watcher';
 
 import mdTdMixin from '../js/mdTdMixin';
+import openLogMixin from '@/assets/js/mixins/openLogMixin';
 
 import path from 'path'
 export default {
     name: 'account',
 
-    mixins: [ mdTdMixin ],
+    mixins: [ mdTdMixin, openLogMixin ],
 
     data() {
         this.tdmdType = 'td';
@@ -327,12 +328,6 @@ export default {
         //Td开关
         handleTdSwitch(value, account) {
             return switchTd(account, value).then(({ type, message }) => this.$message[type](message))
-        },
-
-        //打开日志
-        handleOpenLogFile(row){
-            const logPath = path.join(LOG_DIR, `td_${row.account_id}.log`);
-            this.$showLog(logPath)
         },
 
         switchAllProcess (targetStatus) {

@@ -16,6 +16,7 @@
             :configList="(accountSource[source] || {}).config || []"
             :uniKeyValidator="validateAccountId"
             :uniKey="accountSourceKey"
+            labelWidth="140px"
             :method="method"
         ></ExtConfigForm>
     

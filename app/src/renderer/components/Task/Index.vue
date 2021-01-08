@@ -60,6 +60,8 @@
                 align="right"
             >
                 <template slot-scope="props">
+                    <span class="tr-oper" @click.stop="handleOpenLogFile(props.row.processId)"><i class="el-icon-document mouse-over" title="打开日志文件"></i></span>
+                    <span class="tr-oper" @click.stop="handleOpenUpdateTaskDialog(props.row)"><i class="el-icon-setting mouse-over" title="设置"></i></span>
                     <span class="tr-oper-delete" @click.stop="handleDeleteTask(props.row)"><i class="mouse-over el-icon-delete"></i></span>
                 </template>
             </el-table-column>
@@ -67,7 +69,10 @@
     </div>
 
     <SetTaskDialog
+        v-if="setTaskDialogVisiblity"
         :visible.sync="setTaskDialogVisiblity"
+        :value="setTaskInitData"
+        :currentActiveConfigKey="setTaskInitKey"
         :method="setTaskMethod"
         :configList="extConfigList"
         @confirm="handleConfirm"
@@ -80,24 +85,24 @@
 <script>
 
 import path from 'path';
-import { mapState } from 'vuex';
 import moment from 'moment';
+import { mapState } from 'vuex';
 
 import SetTaskDialog from './SetTaskDialog';
 
-import { getExtensionConfigs, ifProcessRunning } from '__gUtils/busiUtils';
+import { getExtensionConfigs, ifProcessRunning, findTargetFromArray, deepClone } from '__gUtils/busiUtils';
 import { deleteProcess } from '__gUtils/processUtils';
 import { TASK_EXTENSION_DIR } from '__gConfig/pathConfig';
 import { switchTask } from '__io/actions/base';
 
-
 import baseMixin from '@/assets/js/mixins/baseMixin';
+import openLogMixin from '@/assets/js/mixins/openLogMixin';
 
 export default {
 
     name: 'task',
     
-    mixins: [ baseMixin ],
+    mixins: [ baseMixin, openLogMixin ],
 
     components: {
         SetTaskDialog
@@ -107,9 +112,13 @@ export default {
 
         return {
             setTaskMethod: 'add',
+            setTaskInitData: {},
+            setTaskInitKey: '',
+            setTaskTarget: null,
             setTaskDialogVisiblity: false,
             searchFilterKey: 'processId',
             extConfigList: [],
+            
         }
     },
 
@@ -142,39 +151,65 @@ export default {
                     return false
                 })
         },
-
     },
 
-    
     methods: {
 
         handleAddTask () {
-
             if (!this.extConfigList.length) {
                 this.$message.warning('暂无交易任务可选项！')
                 return;
             }
 
             this.setTaskMethod = 'add';
+            this.setTaskInitData = {};
+            this.setTaskInitKey = ""
+            this.setTaskTarget = null
             this.setTaskDialogVisiblity = true;
         },
 
-        handleConfirm (extSettingData, configIndex) {
-            const configInfo = this.extConfigList[configIndex];
+        handleOpenUpdateTaskDialog (data) {
+            this.setTaskMethod = 'update';
+            this.setTaskInitData = this.parseArgs(data.args)
+            this.setTaskInitKey = this.getTaskConfigKeyFromProcessId(data.processId)
+            this.setTaskTarget = data;
+            this.setTaskDialogVisiblity = true;
+        },
+
+        async handleConfirm (extSettingData, configKey) {
+            const configInfo = this.getTargetConfigByKey(configKey);
+
+            if (!configInfo) {
+                this.$message.error('配置信息不存在！')
+                return
+            }
+
+            if (this.setTaskMethod === 'update') {
+                if (this.setTaskTarget) {
+                    await this.handleDeleteTask(this.setTaskTarget)
+                }
+            }
+
             const currentTimestamp = moment().format('HHmmss') + '';
             const processName = 'task_' + configInfo.key + '_' + currentTimestamp;
             const packageJSONPath = configInfo.packageJSONPath;
+
             return switchTask(processName, true, {
-                args: `-c ${extSettingData}`,
+                args: this.formArgs(JSON.parse(extSettingData)),
                 cwd: path.resolve(packageJSONPath, '..', 'lib'),
                 script: 'index.js'
             })
             
         },
 
-        handleDeleteTask (data) {
+        handleDeleteTask (data, update = false) {
+            
+            const tips = update 
+                ?  `更新配置需停止并删除交易任务 ${processId}，确认停止并删除吗？`
+                : `确认停止并删除交易任务 ${processId} 吗？`
+
             const { processId } = data;
-            return this.$confirm(`确认停止并删除交易任务 ${processId} 吗？`, '提示', {
+            return this.$confirm(tips, '提示', {
                 confirmButtonText: '确 定',
                 cancelButtonText: '取 消',
             })
@@ -193,6 +228,52 @@ export default {
                 cwd,
                 script
             })
+        },
+
+        getTargetConfigByKey (key) {
+            return findTargetFromArray(this.extConfigList, 'key', key)
+        },
+
+        formArgs (data) {
+            return Object.keys(data || {})
+                .map(key => `-${key} ${data[key]}`)
+                .join(' ')
+        },
+
+        getTaskConfigKeyFromProcessId (processId) {
+            let processIdSplit = processId.split('_');
+            processIdSplit.pop()
+            processIdSplit.shift()
+            return processIdSplit.join("_")
+        },
+
+        parseArgs (args) {
+            let list = [];
+            let tmpList = [];
+            args.forEach((element, index) => {
+                if (index % 2 === 0) {
+                    element = element.slice(1)
+                } else {
+                    //if number，number it
+                    if (!Number.isNaN(+element)) {
+                        element = +element
+                    }
+                }
+
+                tmpList.push(element)
+
+                if (index % 2 !== 0) {
+                    list.push(tmpList.slice(0))
+                    tmpList = []
+                } 
+            });
+
+            let obj = {}
+            list.forEach(l => {
+                obj[l[0] || ''] = l[1] || ''
+            })
+
+            return deepClone(obj)
         },
 
         getExtensionConfigs () {

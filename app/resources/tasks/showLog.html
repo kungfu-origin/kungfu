@@ -210,6 +210,8 @@
         }catch(err){
             return false;
         }
+        console.log(lineData, '----')
+        
         let messages = lineData.message.split('\n').filter(m => m !== '');
         return messages.map(message => {
             message = message.split('\n[')
@@ -227,6 +229,7 @@
                 message.includes('uncaught exception') 
             ) 
             message = `<span class="error red">${message}</span>`
+            console.log(message, '====')
             return { message }
         })
     }

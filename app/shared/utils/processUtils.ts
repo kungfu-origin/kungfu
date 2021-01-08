@@ -201,6 +201,7 @@ export const startTask = (options: any) => {
         "args": '',
         "cwd": '/Users/zhangyizhi/Project/kungfu/kfext_task_timerTrader/lib',
         "script": 'index.js',
+        "logType": "json",
         "output": buildProcessLogPath(options.name),
         "error": buildProcessLogPath(options.name),
         "mergeLogs": true,

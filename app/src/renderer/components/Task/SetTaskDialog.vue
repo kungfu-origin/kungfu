@@ -1,8 +1,7 @@
 <template>
      <el-dialog 
     width="540px" 
-    title="添加交易任务"  
-    v-if="visible"
+    :title="`${method === 'add'? '添加' : '设置'} 交易任务`"  
     :visible="visible" 
     :close-on-click-modal="false"
     :close-on-press-escape="true"
@@ -17,7 +16,7 @@
                 :key="item.key"
                 :label="item.name"
                 size="mini"
-                :name="index.toString()"
+                :name="item.key"
             >
                 <ExtConfigForm
                     ref="taskSettingForm"
@@ -41,6 +40,13 @@ import ExtConfigForm from '@/components/Base/ExtConfigForm';
 export default {
 
     props: {
+        value: {
+            type: Object,
+            default: () => ({})
+        },
+
+        currentActiveConfigKey: '',
+
         configList: {
             type: Array,
             default: () => []
@@ -58,19 +64,21 @@ export default {
     },
 
     components: {
-
         ExtConfigForm
     },
 
     data () {
-
-        const postFormList = this.configList.map(c => {});
-
         return {
-            activeTabName: '0',
-            postFormList: postFormList
+            activeTabName: this.getActiveTabNameByProps(),
+            postFormList: this.getPostFormListByProps()
         }
         
+    },
+
+    computed: {
+        targetConfigIndex () {
+            return this.configList.findIndex(item => item.key === this.activeTabName)
+        },
     },
 
     methods: {
@@ -80,13 +88,30 @@ export default {
         },
 
         handleSubmitSetting () {
-            this.$refs.taskSettingForm[this.activeTabName].validate(valid => {
+            this.$refs.taskSettingForm[this.targetConfigIndex].validate(valid => {
                 if (valid) {
-                    const postData = this.postFormList[this.activeTabName]
+                    const postData = this.postFormList[this.targetConfigIndex]
                     this.$emit('confirm', JSON.stringify(postData), this.activeTabName)
                     this.handleClose();
                 }
             })
+        },
+
+        getActiveTabNameByProps () {
+            const defaultKey = (this.configList[0] || {}).key || '';
+            return this.currentActiveConfigKey ? this.currentActiveConfigKey : defaultKey
+        },
+
+        getPostFormListByProps () {
+            const configIndexByKey = this.getConfigIndexByKey(this.currentActiveConfigKey);
+            return this.configList.map((c, i) => {
+                if (i === configIndexByKey) return this.value;
+                return {}
+            });
+        },
+
+        getConfigIndexByKey (key) {
+            return this.configList.findIndex(c => c.key === key)
         },
 
         refreshData () {

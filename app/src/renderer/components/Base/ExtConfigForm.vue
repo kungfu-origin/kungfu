@@ -1,7 +1,7 @@
 <template>
 	<el-form
 		ref="extForm"
-		label-width="90px"
+		:label-width="labelWidth"
 		:model="form"
 		class="ext-form"
 	>
@@ -38,7 +38,6 @@
                     </el-radio-group>
 					<el-time-picker size="mini" :class="item.key" v-if="item.type === 'timePicker'" v-model="form[item.key]" :clearable="true" :picker-options="{ selectableRange: '00:00:00 - 23:59:59', format: 'HHmmss' }">
 					</el-time-picker>
-
                 </el-col>
                 <el-col :span="2" :offset="1" v-if="item.tip">
                     <el-tooltip class="item" effect="dark" :content="item.tip" placement="right">
@@ -50,6 +49,8 @@
 </template>
 
 <script>
+
+import moment from 'moment';
 
 import { deepClone } from '__gUtils/busiUtils';
 
@@ -68,6 +69,12 @@ export default {
 			type: Function,
 			default: (rule, value, callback) => { callback() }
 		},
+
+		labelWidth: {
+			type: String,
+			default: "70px"
+		},
+
 		uniKey: "",
 
 		//添加/删除
@@ -82,7 +89,6 @@ export default {
 	},
 
 	data () {
-
 		this.kungfuKeywordsData = {
 			offset: OffsetName,
 			side: SideName
@@ -107,9 +113,7 @@ export default {
 	},
 
 	methods: {	
-
         handleInputValue (key, e) {
-			console.log(key, e)
             this.$set(this.form, key, e)
         },
 

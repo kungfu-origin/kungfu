@@ -11,7 +11,7 @@
             <i class="el-icon-refresh mouse-over" title="刷新" @click="handleRefresh"></i>
         </tr-dashboard-header-item>
         <tr-dashboard-header-item>
-            <i class="el-icon-document mouse-over" title="打开日志文件"  @click="handleOpenLogFile(logPath)"></i>
+            <i class="el-icon-document mouse-over" title="打开日志文件"  @click="handleOpenLogFile(logPath, true)"></i>
         </tr-dashboard-header-item>
         <tr-dashboard-header-item>
             <el-button size="mini" @click="handleClearLog" title="清空">清空</el-button>
@@ -38,10 +38,14 @@ import { Tail } from 'tail';
 import { clearFileContent, addFileSync, existsSync } from '__gUtils/fileUtils';
 import { ipcRenderer } from 'electron';
 import { platform } from '__gConfig/platformConfig';
-import { remote } from 'electron'
+import { remote } from 'electron';
+
+import openLogMixin from '@/assets/js/mixins/openLogMixin';
 
 export default {
     name: 'log',
+
+    mixins: [ openLogMixin ],
 
     props: {
         name: {
@@ -150,10 +154,6 @@ export default {
                 if(err == 'cancel') return
                 this.$message.error(err.message || '操作失败！')
             })
-        },
-
-        handleOpenLogFile(logPath){
-            this.$showLog(logPath)
         },
 
         handleRefresh(){

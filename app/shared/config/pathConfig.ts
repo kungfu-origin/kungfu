@@ -1,6 +1,6 @@
-import { addFileSync } from '__gUtils/fileUtils'
-
-const path = require('path');
+import path from 'path';
+import { addFileSync } from '__gUtils/fileUtils';
+import moment from 'moment';
 
 
 const KF_HOME_BASE_DIR_RESOLVE = (() => {
@@ -67,7 +67,10 @@ export const buildGatewayPath = (gatewayName: string) => path.join(KF_RUNTIME_DI
 //================== others start =================================
 
 //获取进程日志地址
-export const buildProcessLogPath = (processId: string) => path.join(LOG_DIR, `${processId}.log`)
+export const buildProcessLogPath = (processId: string) => {
+    const tmk = moment().format('YYYYMMDD')
+    return path.join(LOG_DIR, `${processId}-${tmk}.log`)
+}
 
 
 

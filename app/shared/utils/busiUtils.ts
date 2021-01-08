@@ -549,3 +549,12 @@ export const loopToRunProcess = async (promiseFunc: Array<Function>, interval = 
     }
     return resList
 }
+
+
+export const findTargetFromArray = ( list: any[], targetKey: string, targetValue: string | number ) => {
+    const targetList = list.filter(item => item[targetKey] === targetValue )
+    if (targetList) {
+        return targetList[0]
+    }
+    return null
+}

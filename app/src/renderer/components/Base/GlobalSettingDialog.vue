@@ -67,7 +67,7 @@
 					<span
 						class="tr-oper"
 						v-if="config.type === 'process'"
-						@click.stop="handleOpenLogFile(config)"
+						@click.stop="handleOpenLogFile(config.target)"
 					>
 						<i class="el-icon-document mouse-over"></i> {{item.name}}日志
 					</span>
@@ -224,6 +224,8 @@ import { buildSystemConfig } from "__gConfig/systemConfig";
 import { switchCustomProcess } from "__io/actions/base";
 import { getKfCommission, setKfCommission } from '__gUtils/kungfuUtils';
 
+import openLogMixin from '@/assets/js/mixins/openLogMixin';
+
 const { shell, dialog }  = require('electron').remote 
 const path = require("path");
 
@@ -231,188 +233,185 @@ Vue.use(Collapse);
 Vue.use(CollapseItem);
 
 export default {
-name: "global-setting-dialog",
-props: {
-	visible: {
-	type: Boolean,
-	default: false
-	}
-},
+	name: "global-setting-dialog",
 
-data() {
-	return {
-		activeSettingTypes: ["system", "trading"],
-		activeSettingItem: "",
-		settingConfig: buildSystemConfig(),
+	mixins: [ openLogMixin ],
 
-		sourceList: [],
-		tables: {
-			commission: []
-		},
-		tablesSaveMethods: {
-			commission: {
-				filters: ["product_id", "mode", "exchange_id"], //必填，且唯一
-				method: setKfCommission,
+	props: {
+		visible: {
+		type: Boolean,
+		default: false
+		}
+	},
+
+	data() {
+		return {
+			activeSettingTypes: ["system", "trading"],
+			activeSettingItem: "",
+			settingConfig: buildSystemConfig(),
+
+			sourceList: [],
+			tables: {
+				commission: []
+			},
+			tablesSaveMethods: {
+				commission: {
+					filters: ["product_id", "mode", "exchange_id"], //必填，且唯一
+					method: setKfCommission,
+				}
 			}
-		}
-	};
-},
-
-async beforeMount() {
-	this.getSourceListOptions();
-
-	//获取
-	this.tables.commission = await getKfCommission();
-},
-
-mounted() {
-	//设置高亮
-	const firstKeyOfSystemConfig = Object.keys(this.settingConfig.system.config || {})[0] || ''
-	this.activeSettingItem = `system-${firstKeyOfSystemConfig}`
-
-	//滚动
-	this.$nextTick()
-	.then(() => {
-		const $settingContent = document.querySelectorAll('.setting-content')[0]
-		$settingContent.addEventListener('scroll', throttle(this.setActiveMenu))	
-	})
-
-},
-
-computed: {
-	...mapState({
-		processStatus: state => state.BASE.processStatus || {}
-	})
-},
-
-beforeDestroy() {
-	this.saveTables();
-},
-
-methods: {
-	handleClickSettingType (typeKey, itemKey) {
-		this.activeSettingItem = `${typeKey}-${itemKey}`;
-		document
-			.querySelector(`#setting-item-${this.activeSettingItem}`)
-			.scrollIntoView();
+		};
 	},
 
-	handleSelectFilePath (settingKey, itemKey, configKey) {
-		dialog.showOpenDialog({
-			properties: ['openFile']
-		}, (filePath) => {
-			if(!filePath || !filePath[0]) return;
-			this.settingConfig[settingKey].value[itemKey][configKey] = filePath[0]
-			this.handleIuput(settingKey)
-		})
+	async beforeMount() {
+		this.getSourceListOptions();
+
+		//获取
+		this.tables.commission = await getKfCommission();
 	},
 
-	handleCancel () {
-		this.close();
-	},
+	mounted() {
+		//设置高亮
+		const firstKeyOfSystemConfig = Object.keys(this.settingConfig.system.config || {})[0] || ''
+		this.activeSettingItem = `system-${firstKeyOfSystemConfig}`
 
-	handleIuput (settingKey) {
-		const settingData = this.settingConfig[settingKey].value;
-		const outputPath = this.settingConfig[settingKey].outputPath;
+		//滚动
 		this.$nextTick()
-			.then(() => outputJsonSync(outputPath, settingData || {}))
-			.then(() => readJsonSync(outputPath))
-			.then(config => {
-				if (!config) return;
-				this.$set(this.settingConfig[settingKey], "value", config);
-			});
-	},
-
-	handleSwitchProcess (value, config, settingData) {
-		//开启
-		if (value) {
-			switchCustomProcess(value, config.target);
-		} else {
-			switchCustomProcess(value, config.target);
-		}
-	},
-
-	//打开日志
-	handleOpenLogFile (config) {
-		const logPath = path.join(LOG_DIR, `${config.target}.log`);
-		this.$showLog(logPath);
-	},
-
-	//打开文件夹 
-	handleOpenWhlFolder () {
-		shell.showItemInFolder(path.join(KUNGFU_RESOURCES_DIR, 'python'));
-	},
-
-	//table 添加row
-	handleAddRow (target, row, index) {
-		const tmp = [{}, ...row].reduce((a, b) => {
-			a[b.key] = b.default;
-			return a;
-		});
-		this.tables[target].splice(index + 1, 0, {
-			...tmp,
-			rowid: `tmp_${+new Date().getTime()}`
-		});
-	},
-
-	//table remove row
-	handleRemoveRow (target, index) {
-		this.tables[target].splice(index, 1);
-	},
-
-	setActiveMenu () {
-		const $settingItems = Array().slice.call(document.querySelectorAll('.global-setting-item'));
-		const visibleItems = $settingItems.filter(settingItem => {
-			const visibleData = settingItem.getBoundingClientRect();
-			const top = visibleData.top - 145;
-			if(top > 0) return true;
-			else return false;
+		.then(() => {
+			const $settingContent = document.querySelectorAll('.setting-content')[0]
+			$settingContent.addEventListener('scroll', throttle(this.setActiveMenu))	
 		})
-		if(visibleItems[0]) {
-			const idVal = visibleItems[0].getAttribute('id')
-			this.activeSettingItem = idVal.split('setting-item-')[1]
-		}
+
 	},
 
-	getSourceListOptions () {
-		getSourceList().then(sourceList => (this.sourceList = sourceList));
+	computed: {
+		...mapState({
+			processStatus: state => state.BASE.processStatus || {}
+		})
 	},
 
-	saveTables () {
-		Object.keys(this.tablesSaveMethods || {}).forEach(key => {
-			const filters = this.tablesSaveMethods[key].filters;
-			const saveMethod = this.tablesSaveMethods[key].method;
+	beforeDestroy() {
+		this.saveTables();
+	},
 
-			//去重
-			const targetDataResolve = [{}, ...this.tables[key]].reduce((a, b) => {
-				const rowKey = filters.map(k => {
-					return b[k].toString() || "" 
-				}).join("_");
-				a[rowKey] = b;
+	methods: {
+		handleClickSettingType (typeKey, itemKey) {
+			this.activeSettingItem = `${typeKey}-${itemKey}`;
+			document
+				.querySelector(`#setting-item-${this.activeSettingItem}`)
+				.scrollIntoView();
+		},
+
+		handleSelectFilePath (settingKey, itemKey, configKey) {
+			dialog.showOpenDialog({
+				properties: ['openFile']
+			}, (filePath) => {
+				if(!filePath || !filePath[0]) return;
+				this.settingConfig[settingKey].value[itemKey][configKey] = filePath[0]
+				this.handleIuput(settingKey)
+			})
+		},
+
+		handleCancel () {
+			this.close();
+		},
+
+		handleIuput (settingKey) {
+			const settingData = this.settingConfig[settingKey].value;
+			const outputPath = this.settingConfig[settingKey].outputPath;
+			this.$nextTick()
+				.then(() => outputJsonSync(outputPath, settingData || {}))
+				.then(() => readJsonSync(outputPath))
+				.then(config => {
+					if (!config) return;
+					this.$set(this.settingConfig[settingKey], "value", config);
+				});
+		},
+
+		handleSwitchProcess (value, config, settingData) {
+			//开启
+			if (value) {
+				switchCustomProcess(value, config.target);
+			} else {
+				switchCustomProcess(value, config.target);
+			}
+		},
+
+		//打开文件夹 
+		handleOpenWhlFolder () {
+			shell.showItemInFolder(path.join(KUNGFU_RESOURCES_DIR, 'python'));
+		},
+
+		//table 添加row
+		handleAddRow (target, row, index) {
+			const tmp = [{}, ...row].reduce((a, b) => {
+				a[b.key] = b.default;
 				return a;
 			});
-
-			//去掉无效的key
-			const targetData = Object.values(targetDataResolve || {}).filter(row => {
-				delete row.rowid;
-				let i,
-				len = filters.length;
-				for (i = 0; i < len; i++) {
-					const key = filters[i];
-					if (row[key].toString() === "") return false;
-				}
-				return true;
+			this.tables[target].splice(index + 1, 0, {
+				...tmp,
+				rowid: `tmp_${+new Date().getTime()}`
 			});
-			
-			saveMethod(Object.freeze(targetData))
-				.catch(err => console.error(err));
-		});
-	},
+		},
 
-	close () {
-		this.$emit("update:visible", false);
+		//table remove row
+		handleRemoveRow (target, index) {
+			this.tables[target].splice(index, 1);
+		},
+
+		setActiveMenu () {
+			const $settingItems = Array().slice.call(document.querySelectorAll('.global-setting-item'));
+			const visibleItems = $settingItems.filter(settingItem => {
+				const visibleData = settingItem.getBoundingClientRect();
+				const top = visibleData.top - 145;
+				if(top > 0) return true;
+				else return false;
+			})
+			if(visibleItems[0]) {
+				const idVal = visibleItems[0].getAttribute('id')
+				this.activeSettingItem = idVal.split('setting-item-')[1]
+			}
+		},
+
+		getSourceListOptions () {
+			getSourceList().then(sourceList => (this.sourceList = sourceList));
+		},
+
+		saveTables () {
+			Object.keys(this.tablesSaveMethods || {}).forEach(key => {
+				const filters = this.tablesSaveMethods[key].filters;
+				const saveMethod = this.tablesSaveMethods[key].method;
+
+				//去重
+				const targetDataResolve = [{}, ...this.tables[key]].reduce((a, b) => {
+					const rowKey = filters.map(k => {
+						return b[k].toString() || "" 
+					}).join("_");
+					a[rowKey] = b;
+					return a;
+				});
+
+				//去掉无效的key
+				const targetData = Object.values(targetDataResolve || {}).filter(row => {
+					delete row.rowid;
+					let i,
+					len = filters.length;
+					for (i = 0; i < len; i++) {
+						const key = filters[i];
+						if (row[key].toString() === "") return false;
+					}
+					return true;
+				});
+				
+				saveMethod(Object.freeze(targetData))
+					.catch(err => console.error(err));
+			});
+		},
+
+		close () {
+			this.$emit("update:visible", false);
+		}
 	}
-}
 };
 </script>
 

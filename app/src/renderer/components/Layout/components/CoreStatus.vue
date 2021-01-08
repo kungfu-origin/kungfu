@@ -19,7 +19,7 @@
                     </span>
                     <span class="core-process-item switch" v-if="NODE_ENV === 'development'"></span>
                     <span class="core-process-item get-log">
-                        <i class="el-icon-document mouse-over" title="打开日志文件" @click="handleOpenLog('master.log')" ></i>
+                        <i class="el-icon-document mouse-over" title="打开日志文件" @click="handleOpenLogFile('master')" ></i>
                     </span>
                 </div>
             </div>
@@ -38,7 +38,7 @@
                         <el-switch  :value="$utils.ifProcessRunning('ledger', processStatus)" @change="handleLedgerSwitch"></el-switch>
                     </span>
                      <span class="core-process-item get-log">
-                        <i class="el-icon-document mouse-over" title="打开日志文件" @click="handleOpenLog('ledger.log')" ></i>
+                        <i class="el-icon-document mouse-over" title="打开日志文件" @click="handleOpenLogFile('ledger')" ></i>
                     </span>
                 </div>
             </div>
@@ -56,10 +56,12 @@ import { ifProcessRunning } from '__gUtils/busiUtils';
 import { switchLedger } from '__io/actions/base';
 import { LOG_DIR } from '__gConfig/pathConfig';
 
-const path = require('path');
+import openLogMixin from '@/assets/js/mixins/openLogMixin';
 
 export default {
-    data(){
+    mixins: [ openLogMixin ],
+
+    data () {
         let statusLevel = {};
         Object.keys(statusConfig || {}).map(key => {
             statusLevel[key] = statusConfig[key].level;
@@ -115,10 +117,6 @@ export default {
         handleLedgerSwitch (e) {
             switchLedger(e)
         },
-
-        handleOpenLog(target) {
-            this.$showLog(path.join(LOG_DIR, target))
-        }
     }
 }
 </script>
