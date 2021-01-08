@@ -1,21 +1,9 @@
+import minimist from 'minimist';
 
+const argv = minimist(process.argv.slice(2))
 
-process.on('message', (packet) => {
-    console.log([packet, '---'])
-})
+const { accountId, ticker, side, offset, volume, steps, triggerTime, finishTime } = argv
 
-let count = 0
-
-setInterval(() => {
-    console.log('send', count++)
-    //@ts-ignore
-    process.send({
-        type: 'process:msg',
-        data: {
-            success: true,
-            data: {
-                aaa: 111
-            }
-        }
-    })
-}, 10000)
+console.log(process.argv)
+console.log(argv)
+console.log(accountId, ticker, side, offset, volume, steps, triggerTime, finishTime, '---')

@@ -16,20 +16,28 @@
   "license": "ISC",
   "dependencies": {},
   "devDependencies": {
+    "@types/minimist": "^1.2.1",
     "rimraf": "^3.0.2"
   },
-
   "kungfuConfig": {
     "type": "task",
     "key": "timer_trader",
     "name": "定时任务",
     "config": [
       {
+        "key": "accountId",
+        "name": "账户",
+        "type": "account",
+        "required": true
+      },
+      {
         "key": "ticker",
         "name": "标的",
         "type": "str",
-        "required": true
-      },{
+        "required": true,
+        "tip": "多个标的请用英文逗号分隔"
+      },
+      {
         "key": "side",
         "name": "买卖",
         "type": "radio",
@@ -45,7 +53,8 @@
         ],
         "default": 0,
         "required": true
-      },{
+      },
+      {
         "key": "offset",
         "name": "开平",
         "type": "radio",
@@ -61,28 +70,31 @@
         ],
         "default": 0,
         "required": true
-      },{
+      },
+      {
         "key": "volume",
         "name": "数量",
         "type": "int",
         "required": true
-      },{
+      },
+      {
         "key": "triggerTime",
         "name": "触发时间",
         "type": "timePicker",
         "required": true
-      },{
+      },
+      {
         "key": "finishTime",
         "name": "结束时间",
         "type": "timePicker",
         "laterThan": "triggerTime",
         "required": true
-      },{
-        "key": "step",
-        "name": "频率",
+      },
+      {
+        "key": "steps",
+        "name": "总次数",
         "type": "int",
-        "required": true,
-        "tip": "单位秒"
+        "required": true
       }
     ]
   }
