@@ -80,7 +80,7 @@
   "include": [
     "../app/shared/**/*",
     "src/**/*",
-    "src/*"
+    "src/*",
 ],
 
 

@@ -36,7 +36,7 @@
 							{{ option.name }}
 						</el-radio>
                     </el-radio-group>
-					<el-time-picker size="mini" :class="item.key" v-if="item.type === 'timePicker'" v-model="form[item.key]" :clearable="true" :picker-options="{ selectableRange: '00:00:00 - 23:59:59', format: 'HHmmss' }">
+					<el-time-picker size="mini" :class="item.key" v-if="item.type === 'timePicker'" v-model="form[item.key]" @blur="handleChangeTimePicker(item.key)" :clearable="true" :picker-options="{ selectableRange: '00:00:00 - 23:59:59', format: 'HHmmss' }">
 					</el-time-picker>
 					<el-select :class="item.key" size="mini" v-if="item.type === 'account'"  v-model.trim="form[item.key]">
                         <el-option
@@ -135,6 +135,13 @@ export default {
 	},
 
 	methods: {	
+		//日期必须要重写，不然有问题
+		handleChangeTimePicker (key) {
+			const theTime = this.form[key];
+			const mt = moment(theTime)
+			this.$set(this.form, key, mt.valueOf())
+		},
+
         handleInputValue (key, e) {
             this.$set(this.form, key, e)
         },

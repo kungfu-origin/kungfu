@@ -2,6 +2,7 @@
 import { mapState } from 'vuex';
 import { ipcRenderer, remote } from 'electron';
 
+import { watcher, dealQuote } from '__io/kungfu/watcher';
 import { getStrategyById, updateStrategyPath } from '__io/kungfu/strategy';
 
 import makeOrderCoreMixin from '@/components/Base/makeOrder/js/makeOrderCoreMixin';
@@ -53,7 +54,34 @@ export default {
 
             _pm2.launchBus((err, pm2_bus) => {
                 pm2_bus.on('process:msg', (packet) => {
-                    // console.log(packet, '----')
+                    const data = packet.data;
+                    const processData = packet.process;
+                    const pm2Id = processData.pm_id;
+                    const processName = processData.name;
+                    const dataType = data.type;
+
+                    switch (dataType) {
+                        case 'MARKET_DATA':
+                            if (watcher.isLive()) {
+                                watcher.step();
+
+                                _pm2.sendDataToProcessId({
+                                    type: 'process:msg',
+                                    data: Object.values(watcher.ledger.Quote || {}).map(quote => dealQuote(quote)),
+                                    id: pm2Id,
+                                    topic: 'MARKET_DATA'
+                                }, (err) => {
+                                    if (err) {
+                                        console.error(processName, err)
+                                    }
+                                })
+                            }
+                            break;
+                        case 'MAKE_ORDER':
+                            break;
+                        case 'CANCEL_ORDER':
+                            break;
+                    }
                 })
             })
         },

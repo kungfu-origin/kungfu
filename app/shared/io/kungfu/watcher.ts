@@ -49,7 +49,7 @@ export const startGetKungfuTradingData = (callback: Function, interval = 1000) =
             callback({
                 ledger: watcher.ledger,
             });
-            resolve();
+            resolve(true);
         })
     }, interval);
 }

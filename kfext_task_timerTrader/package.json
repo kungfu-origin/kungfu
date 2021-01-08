@@ -14,7 +14,10 @@
   },
   "author": "",
   "license": "ISC",
-  "dependencies": {},
+  "dependencies": {
+    "moment": "^2.29.1",
+    "rxjs": "^6.6.3"
+  },
   "devDependencies": {
     "@types/minimist": "^1.2.1",
     "rimraf": "^3.0.2"
