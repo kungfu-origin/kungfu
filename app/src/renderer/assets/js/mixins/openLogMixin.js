@@ -16,8 +16,6 @@ export default {
                 logPath = path.join(LOG_DIR, `${id}-${tmk}.log`);
             }
 
-            console.log(logPath, '---')
-
             this.$showLog(logPath)
         },
     }

@@ -38,6 +38,17 @@
                     </el-radio-group>
 					<el-time-picker size="mini" :class="item.key" v-if="item.type === 'timePicker'" v-model="form[item.key]" :clearable="true" :picker-options="{ selectableRange: '00:00:00 - 23:59:59', format: 'HHmmss' }">
 					</el-time-picker>
+					<el-select :class="item.key" size="mini" v-if="item.type === 'account'"  v-model.trim="form[item.key]">
+                        <el-option
+                            v-for="account in tdList"
+                            :key="account.account_id.toAccountId()"
+                            :label="account.account_id.toAccountId()"
+                            :value="account.account_id">
+                            <span style="color: #fff">{{account.account_id.toAccountId()}}</span>
+                            <el-tag :type="getAccountType(account.source_name).type">{{(sourceTypeConfig[getAccountType(account.source_name).typeName] || {}).name || ''}}</el-tag>
+                            <span style="float: right">可用：{{getAvailCash(account.account_id)}}</span>
+                        </el-option>
+                    </el-select>
                 </el-col>
                 <el-col :span="2" :offset="1" v-if="item.tip">
                     <el-tooltip class="item" effect="dark" :content="item.tip" placement="right">
@@ -51,10 +62,10 @@
 <script>
 
 import moment from 'moment';
+import { mapState } from 'vuex';
 
 import { deepClone } from '__gUtils/busiUtils';
-
-import { OffsetName, SideName } from '__gConfig/tradingConfig';
+import { OffsetName, SideName, sourceTypeConfig } from '__gConfig/tradingConfig';
 
 export default {
 	props: {
@@ -72,7 +83,7 @@ export default {
 
 		labelWidth: {
 			type: String,
-			default: "70px"
+			default: "80px"
 		},
 
 		uniKey: "",
@@ -89,6 +100,8 @@ export default {
 	},
 
 	data () {
+
+        this.sourceTypeConfig = sourceTypeConfig;
 		this.kungfuKeywordsData = {
 			offset: OffsetName,
 			side: SideName
@@ -101,6 +114,15 @@ export default {
 
 	mounted () {
 		this.initForm();
+	},
+
+	computed: {
+
+		...mapState({
+			tdList: state => state.ACCOUNT.tdList || [], 
+            tdAccountSource: state => state.BASE.tdAccountSource || {},
+            accountsAsset: state => state.ACCOUNT.accountsAsset,
+		})
 	},
 
 	watch: {
@@ -182,15 +204,21 @@ export default {
             if(item.validator && item.validator.length) {
                 validators = [...validators, ...item.validator.map(v => ({validator: v, trigger: 'blur'}))]
             }
-
             
             return validators
 		},
 		
-        
+		 getAvailCash (accountId) {
+            if(!accountId) return 0;
+            const targetAccount = this.accountsAsset[accountId] || null
+            if(!targetAccount) return 0
+            return targetAccount.avail || 0
+		},
+		
+		getAccountType (sourceName) {
+            return this.tdAccountSource[sourceName] || {}
+        },
 	}
-
-
 }
 </script>
 

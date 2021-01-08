@@ -22,6 +22,7 @@
                     ref="taskSettingForm"
                     v-model="postFormList[index]"
                     :configList="item.config"
+                    labelWidth="90px"
                     method="add"
                 ></ExtConfigForm>
             </el-tab-pane>

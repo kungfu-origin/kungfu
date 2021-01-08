@@ -176,7 +176,7 @@ export default {
             this.setTaskDialogVisiblity = true;
         },
 
-        async handleConfirm (extSettingData, configKey) {
+        handleConfirm (extSettingData, configKey) {
             const configInfo = this.getTargetConfigByKey(configKey);
 
             if (!configInfo) {
@@ -184,40 +184,41 @@ export default {
                 return
             }
 
-            if (this.setTaskMethod === 'update') {
-                if (this.setTaskTarget) {
-                    await this.handleDeleteTask(this.setTaskTarget)
-                }
-            }
-
             const currentTimestamp = moment().format('HHmmss') + '';
             const processName = 'task_' + configInfo.key + '_' + currentTimestamp;
             const packageJSONPath = configInfo.packageJSONPath;
 
-            return switchTask(processName, true, {
-                args: this.formArgs(JSON.parse(extSettingData)),
-                cwd: path.resolve(packageJSONPath, '..', 'lib'),
-                script: 'index.js'
-            })
-            
+            return this.preUpdate()
+                .then(res => {
+
+                    if (!res) return Promise.resolve(true)
+
+                    return switchTask(processName, true, {
+                        args: this.formArgs(JSON.parse(extSettingData)),
+                        cwd: path.resolve(packageJSONPath, '..', 'lib'),
+                        script: 'index.js'
+                    })
+                })
         },
 
         handleDeleteTask (data, update = false) {
-            
+            const { processId } = data;
             const tips = update 
-                ?  `更新配置需停止并删除交易任务 ${processId}，确认停止并删除吗？`
+                ? `更新配置需停止并删除交易任务 ${processId}，确认停止并删除吗？`
                 : `确认停止并删除交易任务 ${processId} 吗？`
 
-            const { processId } = data;
             return this.$confirm(tips, '提示', {
                 confirmButtonText: '确 定',
                 cancelButtonText: '取 消',
             })
             .then(() => deleteProcess(processId))
             .then(() => this.$message.success('操作成功！'))
+            .then(() => true)
             .catch((err) => {
-                if(err == 'cancel') return
-                this.$message.error(err.message || '操作失败！')
+                if(err !== 'cancel') {
+                    this.$message.error(err.message || '操作失败！')
+                }
+                return false
             })
         },
 
@@ -230,13 +231,23 @@ export default {
             })
         },
 
+        preUpdate () {
+            if (this.setTaskMethod === 'update') {
+                if (this.setTaskTarget) {
+                    return this.handleDeleteTask(this.setTaskTarget, true)
+                }
+            }
+
+            return Promise.resolve(true)
+        },
+
         getTargetConfigByKey (key) {
             return findTargetFromArray(this.extConfigList, 'key', key)
         },
 
         formArgs (data) {
             return Object.keys(data || {})
-                .map(key => `-${key} ${data[key]}`)
+                .map(key => `--${key} ${data[key]}`)
                 .join(' ')
         },
 
@@ -252,7 +263,8 @@ export default {
             let tmpList = [];
             args.forEach((element, index) => {
                 if (index % 2 === 0) {
-                    element = element.slice(1)
+                    // remove '--' 
+                    element = element.slice(2)
                 } else {
                     //if number，number it
                     if (!Number.isNaN(+element)) {
