@@ -49,7 +49,7 @@ export const LEDGER_DIR = path.join(SYSTEM_DIR, 'service', 'ledger')
 addFileSync('', LEDGER_DIR, 'folder')
 
 //log
-const tmk = moment().format('YYYY-MM-DD')
+const tmk = moment().format('YYYYMMDD')
 export const LOG_PA_DIR = path.join(KF_HOME, 'logview')
 addFileSync('', LOG_PA_DIR, 'folder')
 export const LOG_DIR = path.join(LOG_PA_DIR, tmk);
