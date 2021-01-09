@@ -49,7 +49,8 @@ export const LEDGER_DIR = path.join(SYSTEM_DIR, 'service', 'ledger')
 addFileSync('', LEDGER_DIR, 'folder')
 
 //log
-export const LOG_DIR = path.join(KF_HOME, 'logview');
+const tmk = moment().format('YYYY-MM-DD')
+export const LOG_DIR = path.join(KF_HOME, 'logview', tmk);
 addFileSync('', LOG_DIR, 'folder')
 
 
@@ -68,8 +69,7 @@ export const buildGatewayPath = (gatewayName: string) => path.join(KF_RUNTIME_DI
 
 //获取进程日志地址
 export const buildProcessLogPath = (processId: string) => {
-    const tmk = moment().format('YYYYMMDD')
-    return path.join(LOG_DIR, `${processId}-${tmk}.log`)
+    return path.join(LOG_DIR, `${processId}.log`)
 }
 
 

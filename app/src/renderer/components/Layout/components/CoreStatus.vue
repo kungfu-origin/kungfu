@@ -54,7 +54,6 @@ import { mapState } from 'vuex';
 import { statusConfig } from '__gConfig/statusConfig';
 import { ifProcessRunning } from '__gUtils/busiUtils';
 import { switchLedger } from '__io/actions/base';
-import { LOG_DIR } from '__gConfig/pathConfig';
 
 import openLogMixin from '@/assets/js/mixins/openLogMixin';
 

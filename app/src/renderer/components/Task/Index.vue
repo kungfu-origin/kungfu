@@ -188,8 +188,6 @@ export default {
             const processName = 'task_' + configInfo.key + '_' + currentTimestamp;
             const packageJSONPath = configInfo.packageJSONPath;
 
-            console.log(extSettingData)
-
             return this.preUpdate()
                 .then(res => {
 

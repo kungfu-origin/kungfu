@@ -27,7 +27,7 @@ const reqTradingDataTimer = setInterval(() => {
     process.send({
         type: 'process:msg',
         data: {
-            type: 'MARKET_DATA'
+            type: 'LEDGER_DATA'
         }
     })
 }, 1000)
@@ -81,5 +81,5 @@ const combineLatestObserver = combineLatest(
 
 combineLatestObserver.subscribe((data) => {
     
-    console.log(data, '----')
+    
 })

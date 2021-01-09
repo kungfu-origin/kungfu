@@ -23084,7 +23084,7 @@ var reqTradingDataTimer = setInterval(function () {
     process.send({
         type: 'process:msg',
         data: {
-            type: 'MARKET_DATA'
+            type: 'LEDGER_DATA'
         }
     });
 }, 1000);
@@ -23125,7 +23125,6 @@ var combineLatestObserver = Object(__WEBPACK_IMPORTED_MODULE_1_rxjs__["b" /* com
     };
 });
 combineLatestObserver.subscribe(function (data) {
-    console.log(data, '----');
 });
 
 

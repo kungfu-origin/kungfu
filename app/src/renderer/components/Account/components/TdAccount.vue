@@ -215,7 +215,7 @@ import SetSourceDialog from './SetSourceDialog';
 import { debounce } from '__gUtils/busiUtils';
 import { getTdList } from '__io/kungfu/account';
 import { deleteProcess } from '__gUtils/processUtils';
-import { TD_DIR, LOG_DIR } from '__gConfig/pathConfig';
+import { TD_DIR } from '__gConfig/pathConfig';
 import { removeFileFolder } from "__gUtils/fileUtils";
 import { deleteTd, switchTd } from '__io/actions/account';
 import { loopToRunProcess } from '__gUtils/busiUtils';

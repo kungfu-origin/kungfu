@@ -218,7 +218,7 @@ import { mapState } from "vuex";
 import { Collapse, CollapseItem } from "element-ui";
 
 import { readJsonSync, outputJsonSync } from "__gUtils/fileUtils";
-import { LOG_DIR, KUNGFU_RESOURCES_DIR } from "__gConfig/pathConfig";
+import { KUNGFU_RESOURCES_DIR } from "__gConfig/pathConfig";
 import { getSourceList, debounce, throttle } from "__gUtils/busiUtils";
 import { buildSystemConfig } from "__gConfig/systemConfig";
 import { switchCustomProcess } from "__io/actions/base";

@@ -61,7 +61,7 @@ export default {
                     const dataType = data.type;
 
                     switch (dataType) {
-                        case 'MARKET_DATA':
+                        case 'LEDGER_DATA':
                             if (watcher.isLive()) {
                                 watcher.step();
 
@@ -69,7 +69,7 @@ export default {
                                     type: 'process:msg',
                                     data: Object.values(watcher.ledger.Quote || {}).map(quote => dealQuote(quote)),
                                     id: pm2Id,
-                                    topic: 'MARKET_DATA'
+                                    topic: 'LEDGER_DATA'
                                 }, (err) => {
                                     if (err) {
                                         console.error(processName, err)
