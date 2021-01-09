@@ -3,7 +3,7 @@
     <tr-dashboard :title="`下单 ${currentId}`">
         <div slot="dashboard-header">
             <tr-dashboard-header-item>
-                <el-button size="mini" @click="clearData" style="width: 50px;">重置</el-button>
+                <el-button size="mini" @click="clearData()" style="width: 50px;">重置</el-button>
             </tr-dashboard-header-item>
         </div>
         <div class="kf-make-order-window__body">
@@ -578,10 +578,9 @@ export default {
         },
         
         clearData (exceptId=false) {
-            this.$refs['make-order-form'].resetFields();
             this.$emit('update:visible', false)
-            
             if (!exceptId) {
+                this.$refs['make-order-form'].resetFields();
                 this.$set(this.makeOrderForm, 'instrument_id', '')
                 this.$set(this.makeOrderForm, 'name', '')
                 this.currentAccount = '';
