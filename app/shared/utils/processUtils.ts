@@ -236,7 +236,7 @@ export const startTask = (options: any) => {
     })
 }
 
-export const startProcess = async (options: any, no_ext = false): Promise<object> => {
+export const startProcess = (options: any, no_ext = false): Promise<object> => {
     const extensionName = platform === 'win' ? '.exe' : ''
     const kfConfig: any = readJsonSync(KF_CONFIG_PATH) || {}
     const ifRocket = ((kfConfig.performance || {}).rocket) || false;

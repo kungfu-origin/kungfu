@@ -50,7 +50,9 @@ addFileSync('', LEDGER_DIR, 'folder')
 
 //log
 const tmk = moment().format('YYYY-MM-DD')
-export const LOG_DIR = path.join(KF_HOME, 'logview', tmk);
+export const LOG_PA_DIR = path.join(KF_HOME, 'logview')
+addFileSync('', LOG_PA_DIR, 'folder')
+export const LOG_DIR = path.join(LOG_PA_DIR, tmk);
 addFileSync('', LOG_DIR, 'folder')
 
 
