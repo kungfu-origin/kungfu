@@ -398,6 +398,7 @@ export default {
 
     watch: {
         makeOrderByPosData (newPosData) {
+            
             if (!Object.keys(newPosData || {}).length) return;
             this.clearData(true);
 

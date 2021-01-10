@@ -453,6 +453,7 @@ interface QuoteData {
     highPrice: string
     instrumentId: string
     instrumentType: string
+    instrumentTypeOrigin: number;
     lastPrice: string
     lowPrice: string
     lowerLimitPrice: string

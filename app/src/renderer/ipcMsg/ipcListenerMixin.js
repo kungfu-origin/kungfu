@@ -2,7 +2,7 @@
 import { mapState } from 'vuex';
 import { ipcRenderer, remote } from 'electron';
 
-import { watcher, dealQuote } from '__io/kungfu/watcher';
+import { watcher, dealQuote, dealPos } from '__io/kungfu/watcher';
 import { getStrategyById, updateStrategyPath } from '__io/kungfu/strategy';
 
 import makeOrderCoreMixin from '@/components/Base/makeOrder/js/makeOrderCoreMixin';
@@ -64,10 +64,16 @@ export default {
                         case 'LEDGER_DATA':
                             if (watcher.isLive()) {
                                 watcher.step();
+                                const ledger = watcher.ledger;
+                                const positions = Object.values(ledger.Position || {});
+                                const quotes = Object.values(ledger.Quote || {});
 
                                 _pm2.sendDataToProcessId({
                                     type: 'process:msg',
-                                    data: Object.values(watcher.ledger.Quote || {}).map(quote => dealQuote(quote)),
+                                    data: {
+                                        positions: positions.map(pos => dealPos(pos)),
+                                        quetos: quotes.map(quote => dealQuote(quote)),
+                                    },
                                     id: pm2Id,
                                     topic: 'LEDGER_DATA'
                                 }, (err) => {

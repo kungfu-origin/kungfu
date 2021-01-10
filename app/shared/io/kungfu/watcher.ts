@@ -436,6 +436,7 @@ export const dealQuote = (quote: QuoteDataInput): QuoteData => {
         highPrice: toDecimal(quote.high_price, 3),
         instrumentId: quote.instrument_id,
         instrumentType: InstrumentType[quote.instrument_type],
+        instrumentTypeOrigin: quote.instrument_type,
         lastPrice: toDecimal(quote.last_price, 3),
         lowPrice: toDecimal(quote.low_price, 3),
         lowerLimitPrice: toDecimal(quote.lower_limit_price, 3),

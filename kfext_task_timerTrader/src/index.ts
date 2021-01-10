@@ -10,15 +10,19 @@ const { accountId, ticker, side, offset, volume, steps, triggerTime, finishTime 
 const triggerTimeStr = moment(triggerTime).format('YYYYMMDD HH:mm:ss');
 const finishTimeStr = moment(finishTime).format('YYYYMMDD HH:mm:ss');
 const deltaTimestamp = Math.ceil((finishTime - triggerTime) / steps);
+const tickers = ticker.toString().split(',')
+    .map((t: string) => t.trim())
+    .filter((t: string) => !!t)
 
 
 
 console.log('===========================================')
 console.log('[ARGS]: accountId', accountId, 'ticker', ticker, 'side', side, 'offset', offset, 'volume', volume, 'steps', steps, 'triggerTime', triggerTime, 'finishTime', finishTime)
 console.log('===========================================')
-console.log('triggerTime', triggerTime, triggerTimeStr)
-console.log('finishTime', finishTime, finishTimeStr)
-console.log('deltaTimestamp', deltaTimestamp)
+console.log('TriggerTime', triggerTime, triggerTimeStr)
+console.log('FinishTime', finishTime, finishTimeStr)
+console.log('Executing every ', deltaTimestamp, 'ms')
+console.log('Target Tickers ', tickers.join(','))
 console.log('===========================================')
 
 //行情request
@@ -70,16 +74,24 @@ const PROCESS_MSG_OBSERVER = new Observable(subscriber => {
 const combineLatestObserver = combineLatest(
     TIMER_COUNT_OBSERVER,
     PROCESS_MSG_OBSERVER,
-    (timeCount: number, plist: Proc[]) => {
+    (timeCount: number, proc: Proc) => {
         return {
             timeCount, 
-            plist
+            proc
         }       
     }
 )
 
+var dealedTimeCount: number = -1;
+combineLatestObserver.subscribe((data: any) => {
+    const { timeCount, proc } = data;
+    console.log(timeCount, dealedTimeCount)
 
-combineLatestObserver.subscribe((data) => {
+    if (timeCount <= dealedTimeCount) return;
+    dealedTimeCount = timeCount;
+
+    console.log(timeCount, dealedTimeCount, '---')    
+    console.log(proc)
     
     
 })
