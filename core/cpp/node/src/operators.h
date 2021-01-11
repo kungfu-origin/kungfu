@@ -79,14 +79,12 @@ private:
 
   template <typename ValueType>
   std::enable_if_t<kungfu::is_array_of_others_v<ValueType, char>> InitValue(Napi::Object &object, const char *name) {
-    auto buffer = Napi::ArrayBuffer::New(object.Env(), ValueType::length);
-    object.Set(name, buffer);
+    object.Set(name, Napi::Array::New(object.Env(), ValueType::length));
   }
 
   template <typename ValueType>
   std::enable_if_t<kungfu::is_vector_v<ValueType>> InitValue(Napi::Object &object, const char *name) {
-    auto buffer = Napi::ArrayBuffer::New(object.Env(), 0);
-    object.Set(name, buffer);
+    object.Set(name, Napi::Array::New(object.Env(), ValueType::length));
   }
 
   template <typename ValueType>
@@ -167,31 +165,37 @@ private:
   }
 
   template <typename ValueType>
-  std::enable_if_t<kungfu::is_array_of_others_v<ValueType, char>> Set(Napi::Object &object, const char *name,
-                                                                      const ValueType &value) {
-    using ElementType = typename ValueType::element_type;
-    size_t element_size = sizeof(ElementType);
-    auto buffer = Napi::ArrayBuffer::New(object.Env(), ValueType::length * element_size);
+  std::enable_if_t<kungfu::is_array_of_others_v<ValueType, char> or kungfu::is_vector_v<ValueType>>
+  Set(Napi::Object &object, const char *name, const ValueType &value) {
+    auto array = Napi::Array::New(object.Env(), ValueType::length);
     for (int i = 0; i < ValueType::length; i++) {
-      auto addr = reinterpret_cast<ElementType *>(reinterpret_cast<uintptr_t>(buffer.Data()) + i * element_size);
-      *addr = value[i];
+      array.Set(i, ToNapiValue(object, value[i]));
     }
-    object.Set(name, buffer);
-  }
-
-  template <typename ValueType> void Set(Napi::Object &object, const char *name, const std::vector<ValueType> &value) {
-    auto buffer = Napi::ArrayBuffer::New(object.Env(), value.size() * sizeof(ValueType));
-    for (int i = 0; i < value.size(); i++) {
-      auto addr = reinterpret_cast<ValueType *>(reinterpret_cast<uintptr_t>(buffer.Data()) + i * sizeof(ValueType));
-      *addr = value[i];
-    }
-    object.Set(name, buffer);
+    object.Set(name, array);
   }
 
   template <typename ValueType>
   std::enable_if_t<std::is_same_v<ValueType, std::string>> Set(Napi::Object &object, const char *name,
                                                                const ValueType &value) {
     object.Set(name, Napi::String::New(object.Env(), value));
+  }
+
+  template <typename ValueType>
+  std::enable_if_t<kungfu::is_signed_int_v<ValueType> or std::is_floating_point_v<ValueType>, Napi::Value>
+  ToNapiValue(Napi::Object &object, const ValueType &value) {
+    return Napi::Number::New(object.Env(), value);
+  }
+
+  template <typename ValueType>
+  std::enable_if_t<kungfu::is_signed_bigint_v<ValueType>, Napi::Value> ToNapiValue(Napi::Object &object,
+                                                                                   const ValueType &value) {
+    return Napi::BigInt::New(object.Env(), value);
+  }
+
+  template <typename ValueType>
+  std::enable_if_t<std::is_same_v<ValueType, std::string>, Napi::Value> ToNapiValue(Napi::Object &object,
+                                                                                    const ValueType &value) {
+    return Napi::String::New(object.Env(), value);
   }
 };
 
