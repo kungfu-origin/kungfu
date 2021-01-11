@@ -45,6 +45,7 @@ class Strategy(wc.Strategy):
         self._on_trading_day = getattr(self._module, "on_trading_day", lambda ctx, trading_day: None)
         self._on_bar = getattr(self._module, "on_bar", lambda ctx, bar: None)
         self._on_quote = getattr(self._module, 'on_quote', lambda ctx, quote: None)
+        self._on_top_of_book = getattr(self._module, 'on_top_of_book', lambda ctx, top_of_book: None)
         self._on_entrust = getattr(self._module, 'on_entrust', lambda ctx, entrust: None)
         self._on_transaction = getattr(self._module, "on_transaction", lambda ctx, transaction: None)
         self._on_order = getattr(self._module, 'on_order', lambda ctx, order: None)
@@ -126,7 +127,7 @@ class Strategy(wc.Strategy):
         self.__call_proxy(self._on_quote, self.ctx, quote)
 
     def on_top_of_book(self, wc_context, top_of_book):
-        self._on_top_of_book(self.ctx, top_of_book)
+        self.__call_proxy(self._on_top_of_book, self.ctx, top_of_book)
 
     def on_bar(self, wc_context, bar):
         self.__call_proxy(self._on_bar, self.ctx, bar)
