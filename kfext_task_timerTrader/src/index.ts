@@ -2,7 +2,7 @@ import minimist from 'minimist';
 import { Observable, combineLatest } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 import moment from 'moment';
-import { transformArrayToObjectByKey, makeOrderDirectionType, buildTarget, reqMakeOrder } from './assets/utils';
+import { transformArrayToObjectByKey, makeOrderDirectionType, buildTarget, reqMakeOrder, getAliveOrders } from './assets/utils';
 
 
 
@@ -132,15 +132,21 @@ const positionsPipe = () => {
 const combineLatestObserver = combineLatest(
     TIMER_COUNT_OBSERVER(),
     quotesPipe(),
-    positionsPipe()
+    positionsPipe(),
+    ordersPipe(),
 )
 
 var dealedTimeCount: number = -1;
 var targetPosData: any = null;
 
-combineLatestObserver.subscribe(([timeCount, quotes, positions]: [ number, { [prop: string]: QuoteData }, { [prop: string]: PosData } ] ) => {
+combineLatestObserver.subscribe((
+    [ timeCount, quotes, positions, orders ]: 
+    [ number, { [prop: string]: QuoteData }, { [prop: string]: PosData }, OrderData[] ] 
+) => {
 
     // 判断是否可以交易
+    const aliveOrders = getAliveOrders(orders)
+    console.log('aliveOrders', aliveOrders)
     
 
     if (timeCount <= dealedTimeCount) return;
@@ -173,11 +179,8 @@ combineLatestObserver.subscribe(([timeCount, quotes, positions]: [ number, { [pr
         ticker: TICKER, 
         targetVolume: TARGET_VOLUME, 
         timeCount };
-
-    if (timeCount !== 0) {
-        //先撤单
-    }
     
+    //再下单
     reqMakeOrder(baseData, quote, pos)       
 
     //最后一步

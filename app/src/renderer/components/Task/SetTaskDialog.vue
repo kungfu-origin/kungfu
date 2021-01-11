@@ -96,7 +96,7 @@ export default {
                     const postData = this.postFormList[this.targetConfigIndex]
                     this.$emit('confirm', JSON.stringify({
                         ...postData,
-                        parentId: +moment().valueOf()
+                        parentId: BigInt(+moment().valueOf()).toString()
 
                     }), this.activeTabName)
                     this.handleClose();

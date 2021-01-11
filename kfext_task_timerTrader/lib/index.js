@@ -23089,7 +23089,7 @@ var triggerTimeStr = __WEBPACK_IMPORTED_MODULE_3_moment___default()(triggerTime)
 var finishTimeStr = __WEBPACK_IMPORTED_MODULE_3_moment___default()(finishTime).format('YYYYMMDD HH:mm:ss');
 var deltaTimestamp = Math.ceil((finishTime - triggerTime) / steps);
 var TICKER = ticker.toString().trim();
-var TARGET_DIRECTION = Object(__WEBPACK_IMPORTED_MODULE_4__assets_utils__["b" /* makeOrderDirectionType */])(side, offset);
+var TARGET_DIRECTION = Object(__WEBPACK_IMPORTED_MODULE_4__assets_utils__["c" /* makeOrderDirectionType */])(side, offset);
 var TARGET_VOLUME = volume;
 var LAST_STEP_COUNTE = steps - 1;
 console.log('===========================================');
@@ -23152,7 +23152,7 @@ var quotesPipe = function () {
             var instrumentId = quoteData['instrumentId'];
             return TICKER === instrumentId.toString();
         });
-        return Object(__WEBPACK_IMPORTED_MODULE_4__assets_utils__["d" /* transformArrayToObjectByKey */])(quotesAfterFilter, ['instrumentId']);
+        return Object(__WEBPACK_IMPORTED_MODULE_4__assets_utils__["e" /* transformArrayToObjectByKey */])(quotesAfterFilter, ['instrumentId']);
     }));
 };
 var ordersPipe = function () {
@@ -23177,15 +23177,17 @@ var positionsPipe = function () {
             }
             return false;
         });
-        return Object(__WEBPACK_IMPORTED_MODULE_4__assets_utils__["d" /* transformArrayToObjectByKey */])(positionsAfterFilter, ['instrumentId', 'directionOrigin']);
+        return Object(__WEBPACK_IMPORTED_MODULE_4__assets_utils__["e" /* transformArrayToObjectByKey */])(positionsAfterFilter, ['instrumentId', 'directionOrigin']);
     }));
 };
-var combineLatestObserver = Object(__WEBPACK_IMPORTED_MODULE_1_rxjs__["b" /* combineLatest */])(TIMER_COUNT_OBSERVER(), quotesPipe(), positionsPipe());
+var combineLatestObserver = Object(__WEBPACK_IMPORTED_MODULE_1_rxjs__["b" /* combineLatest */])(TIMER_COUNT_OBSERVER(), quotesPipe(), positionsPipe(), ordersPipe());
 var dealedTimeCount = -1;
 var targetPosData = null;
 combineLatestObserver.subscribe(function (_a) {
+    var timeCount = _a[0], quotes = _a[1], positions = _a[2], orders = _a[3];
     // 判断是否可以交易
-    var timeCount = _a[0], quotes = _a[1], positions = _a[2];
+    var aliveOrders = Object(__WEBPACK_IMPORTED_MODULE_4__assets_utils__["b" /* getAliveOrders */])(orders);
+    console.log('aliveOrders', aliveOrders);
     if (timeCount <= dealedTimeCount)
         return;
     dealedTimeCount = timeCount;
@@ -23208,10 +23210,8 @@ combineLatestObserver.subscribe(function (_a) {
     var quote = quotes[TICKER];
     var pos = positions[TICKER + "_" + TARGET_DIRECTION] || {};
     var baseData = __assign(__assign({}, argv), { ticker: TICKER, targetVolume: TARGET_VOLUME, timeCount: timeCount });
-    if (timeCount !== 0) {
-        //先撤单
-    }
-    Object(__WEBPACK_IMPORTED_MODULE_4__assets_utils__["c" /* reqMakeOrder */])(baseData, quote, pos);
+    //再下单
+    Object(__WEBPACK_IMPORTED_MODULE_4__assets_utils__["d" /* reqMakeOrder */])(baseData, quote, pos);
     //最后一步
     if (timeCount === LAST_STEP_COUNTE) {
         return;
@@ -32973,10 +32973,11 @@ function zipAll(project) {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "d", function() { return transformArrayToObjectByKey; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return makeOrderDirectionType; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "e", function() { return transformArrayToObjectByKey; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "c", function() { return makeOrderDirectionType; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return buildTarget; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "c", function() { return reqMakeOrder; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "d", function() { return reqMakeOrder; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return getAliveOrders; });
 var __assign = (this && this.__assign) || function () {
     __assign = Object.assign || function(t) {
         for (var s, i = 1, n = arguments.length; i < n; i++) {
@@ -33082,8 +33083,6 @@ var reqMakeOrder = function (baseData, quote, pos) {
     var instrumentType = pos.instrumentType;
     var instrumentTypeResolved = +instrumentTypeOrigin || +instrumentType;
     console.log('instrumentType', instrumentTypeOrigin, instrumentType, '---------------');
-    //先撤单
-    //再下单
     var unfinishedSteps = steps - timeCount || 1;
     if (unfinishedSteps < 0) {
         console.error('[ERROR] steps - timeCount = ', unfinishedSteps);
@@ -33122,6 +33121,21 @@ function dealMakeOrderVolume(instrumentType, volume) {
     }
     return volume;
 }
+var getAliveOrders = function (orders) {
+    var aliveOrderStatusList = [1, 2, 7];
+    return orders
+        .map(function (order) {
+        var status = order.status, orderId = order.orderId;
+        return { orderId: orderId, status: status };
+    })
+        .filter(function (order) {
+        var status = order.status;
+        if (aliveOrderStatusList.includes(+status)) {
+            return true;
+        }
+        return false;
+    });
+};
 
 
 /***/ })

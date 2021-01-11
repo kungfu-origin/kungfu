@@ -64,13 +64,16 @@ export default {
 
                     switch (dataType) {
                         case 'REQ_LEDGER_DATA':
-                            const parentId = data.parentId
+                            const parentId = data.parentId;
                             this.resLedgerData(parentId, pm2Id, processName)
                             break;
                         case 'MAKE_ORDER_BY_PARENT_ID':
                             const makeOrderData = data.body;
-                            console.log(makeOrderData)
-                            return this.makeOrder('account', makeOrderData, makeOrderData.name)
+                            const markOrderDataResolved = {
+                                ...makeOrderData,
+                                parent_id: BigInt(makeOrderData.parent_id)
+                            }
+                            return this.makeOrder('account', markOrderDataResolved, makeOrderData.name)
                         case 'CANCEL_ORDER_BY_CLINET_ID':
                             break
                     }
@@ -85,10 +88,11 @@ export default {
                 const { orders, positions, quotes } = this.buildLedgerDataForTask(ledger, parentId)
                 _pm2.sendDataToProcessId({
                     type: 'process:msg',
+                    parentId,
                     data: {
                         positions: positions.map(pos => dealPos(pos)),
                         quotes: quotes.map(quote => dealQuote(quote)),
-                        orders: orders.map(orders => dealOrder(orders))
+                        orders: orders.map(order => dealOrder(order))
                     },
                     id: pm2Id,
                     topic: 'LEDGER_DATA'
@@ -104,8 +108,10 @@ export default {
         buildLedgerDataForTask (ledger, parentId) {
             const positions = Object.values(ledger.Position || {});
             const quotes = Object.values(ledger.Quote || {});
-            const orders = Object.values(ledger.Orders || {}).filter(order => order.parent_id === parentId);
-            console.log(parentId, orders)
+            const orders = Object.values(ledger.Order || {})
+                .filter(order => {
+                    return order.parent_id.toString() === parentId.toString()
+                });
             return {
                 positions,
                 quotes,

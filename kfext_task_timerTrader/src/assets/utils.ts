@@ -102,9 +102,7 @@ export const reqMakeOrder = (baseData: any, quote: QuoteData, pos: PosData) => {
     const instrumentTypeResolved = +instrumentTypeOrigin || +instrumentType
     console.log('instrumentType', instrumentTypeOrigin, instrumentType, '---------------')
 
-    //先撤单
 
-    //再下单
     const unfinishedSteps = steps - timeCount || 1;
     if (unfinishedSteps < 0) {
         console.error('[ERROR] steps - timeCount = ', unfinishedSteps)
@@ -147,4 +145,20 @@ function dealMakeOrderVolume (instrumentType: number, volume: number) {
     }
 
     return volume
+}
+
+export const getAliveOrders = (orders: OrderData[]) => {
+    const aliveOrderStatusList = [1, 2, 7]
+    return orders
+    .map(order => {
+        const { status, orderId } = order;
+        return { orderId, status }
+    })
+    .filter(order => {
+        const { status } = order;
+        if (aliveOrderStatusList.includes(+status)) {
+            return true;
+        }
+        return false
+    })
 }
