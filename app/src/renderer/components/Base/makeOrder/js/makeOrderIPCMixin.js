@@ -36,6 +36,11 @@ export default {
             return ipcEmitDataByName('makeOrder', { moduleType, makeOrderForm, currentAccountResolved, strategyId })
         },
 
+        subscribeTicker (sourceName, exchangeId, ticker) {
+            console.log(sourceName, exchangeId, ticker)
+            return Promise.resolve(true)
+        },
+
         init () {
             this.bindIPCOrderDataListener();
         },

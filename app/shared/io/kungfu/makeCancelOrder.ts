@@ -13,6 +13,17 @@ interface MakeOrderData {
     hedge_flag: number
 }
 
+export const kungfuSubscribeTicker = (sourceName: string, exchangeId: string, ticker: string) => {
+    console.log('kungfuSubscribeTicker', sourceName, exchangeId, ticker )
+    return Promise.resolve(
+        watcher.requestMarketData(
+            encodeKungfuLocation(sourceName, 'md'),
+            exchangeId, 
+            ticker
+        )
+    )
+}
+
 export const kungfuMakeOrder = (makeOrderData: MakeOrderData, accountId: string, strategyId?: string, parentId?: number) => {
     const accountLocation = encodeKungfuLocation(accountId, 'td');
 

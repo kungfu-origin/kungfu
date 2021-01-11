@@ -23192,7 +23192,6 @@ combineLatestObserver.subscribe(function (_a) {
         var pos_1 = positions[TICKER + "_" + TARGET_DIRECTION] || {};
         //需保证在有持仓的情况下
         if (pos_1) {
-            console.log("[\u5236\u5B9A\u4EA4\u6613\u8BA1\u5212] " + JSON.stringify(targetPosData));
             var totalVolume = pos_1.totalVolume;
             var totalVolumeResolved = totalVolume || 0;
             targetPosData = Object(__WEBPACK_IMPORTED_MODULE_4__assets_utils__["a" /* buildTarget */])({
@@ -23202,6 +23201,7 @@ combineLatestObserver.subscribe(function (_a) {
                 totalVolume: totalVolumeResolved,
                 targetVolume: TARGET_VOLUME
             });
+            console.log("[\u5236\u5B9A\u4EA4\u6613\u8BA1\u5212] " + JSON.stringify(targetPosData));
         }
     }
     if (timeCount <= dealedTimeCount)
@@ -33135,7 +33135,7 @@ var reqCancelOrder = function (parentId) {
     });
 };
 function dealMakeOrderVolume(instrumentType, volume) {
-    var scale100 = [1]; //stock 100的倍数
+    var scale100 = [0, 1, 4, 5]; //stock 100的倍数
     if (scale100.includes(+instrumentType)) {
         var scale = +Number(volume / 100).toFixed(0);
         var scaleResolved = scale < 1 ? 1 : scale;

@@ -147,7 +147,7 @@ export const reqCancelOrder = (parentId: string) => {
 }
 
 function dealMakeOrderVolume (instrumentType: number, volume: number) {
-    const scale100 = [1] //stock 100的倍数
+    const scale100 = [0, 1, 4, 5] //stock 100的倍数
     
     if (scale100.includes(+instrumentType)) {
         const scale = +Number(volume / 100).toFixed(0)

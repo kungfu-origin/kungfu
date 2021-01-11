@@ -156,7 +156,6 @@ combineLatestObserver.subscribe((
         const pos = positions[`${TICKER}_${TARGET_DIRECTION}`] || {};
         //需保证在有持仓的情况下
         if (pos) {
-            console.log(`[制定交易计划] ${JSON.stringify(targetPosData)}`)
             const { totalVolume } = pos;
             const totalVolumeResolved = totalVolume || 0;
             targetPosData = buildTarget({ 
@@ -166,6 +165,7 @@ combineLatestObserver.subscribe((
                 totalVolume: totalVolumeResolved,
                 targetVolume: TARGET_VOLUME
             })
+            console.log(`[制定交易计划] ${JSON.stringify(targetPosData)}`)
         }
     }
 

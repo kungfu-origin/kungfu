@@ -78,6 +78,9 @@ export default {
                             const ordersByParentId = this.getTargetOrdersByParentId(ledger, parentId)
                             ordersByParentId.forEach(order => this.cancelOrder('acccount', order))
                             break
+                        case "SUBSCRIBE_BY_TICKER":
+                            const { sourceName, exchangeId, ticker } = data;
+
                     }
                 })
             })
