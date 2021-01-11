@@ -170,6 +170,7 @@ inline void from_xtp(const XTPMarketDataStruct &ori, Quote &des) {
   strcpy(des.trading_day, yijinjing::time::strftime(des.data_time, KUNGFU_TRADING_DAY_FORMAT).c_str());
   strcpy(des.instrument_id, ori.ticker);
   from_xtp(ori.exchange_id, des.exchange_id);
+  des.instrument_type = get_instrument_type(des.exchange_id, des.instrument_id);
 
   if (ori.data_type == XTP_MARKETDATA_OPTION) {
     des.instrument_type = InstrumentType::StockOption;
