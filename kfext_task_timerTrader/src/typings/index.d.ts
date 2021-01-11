@@ -8,3 +8,8 @@ interface ProcPayload {
         orders: OrderData[];
     }
 }
+
+interface OrderIdData {
+    status: number;
+    orderId: string
+}

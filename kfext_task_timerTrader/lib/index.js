@@ -23089,6 +23089,7 @@ var triggerTimeStr = __WEBPACK_IMPORTED_MODULE_3_moment___default()(triggerTime)
 var finishTimeStr = __WEBPACK_IMPORTED_MODULE_3_moment___default()(finishTime).format('YYYYMMDD HH:mm:ss');
 var deltaTimestamp = Math.ceil((finishTime - triggerTime) / steps);
 var TICKER = ticker.toString().trim();
+var PARENT_ID = parentId;
 var TARGET_DIRECTION = Object(__WEBPACK_IMPORTED_MODULE_4__assets_utils__["c" /* makeOrderDirectionType */])(side, offset);
 var TARGET_VOLUME = volume;
 var LAST_STEP_COUNTE = steps - 1;
@@ -23108,7 +23109,7 @@ var reqTradingDataTimer = setInterval(function () {
         type: 'process:msg',
         data: {
             type: 'REQ_LEDGER_DATA',
-            parentId: parentId
+            parentId: PARENT_ID
         }
     });
 }, 1000);
@@ -23152,7 +23153,7 @@ var quotesPipe = function () {
             var instrumentId = quoteData['instrumentId'];
             return TICKER === instrumentId.toString();
         });
-        return Object(__WEBPACK_IMPORTED_MODULE_4__assets_utils__["e" /* transformArrayToObjectByKey */])(quotesAfterFilter, ['instrumentId']);
+        return Object(__WEBPACK_IMPORTED_MODULE_4__assets_utils__["f" /* transformArrayToObjectByKey */])(quotesAfterFilter, ['instrumentId']);
     }));
 };
 var ordersPipe = function () {
@@ -23177,24 +23178,21 @@ var positionsPipe = function () {
             }
             return false;
         });
-        return Object(__WEBPACK_IMPORTED_MODULE_4__assets_utils__["e" /* transformArrayToObjectByKey */])(positionsAfterFilter, ['instrumentId', 'directionOrigin']);
+        return Object(__WEBPACK_IMPORTED_MODULE_4__assets_utils__["f" /* transformArrayToObjectByKey */])(positionsAfterFilter, ['instrumentId', 'directionOrigin']);
     }));
 };
 var combineLatestObserver = Object(__WEBPACK_IMPORTED_MODULE_1_rxjs__["b" /* combineLatest */])(TIMER_COUNT_OBSERVER(), quotesPipe(), positionsPipe(), ordersPipe());
 var dealedTimeCount = -1;
 var targetPosData = null;
+var hasCancelOrderInThisLoop = false;
 combineLatestObserver.subscribe(function (_a) {
     var timeCount = _a[0], quotes = _a[1], positions = _a[2], orders = _a[3];
-    // 判断是否可以交易
-    var aliveOrders = Object(__WEBPACK_IMPORTED_MODULE_4__assets_utils__["b" /* getAliveOrders */])(orders);
-    console.log('aliveOrders', aliveOrders);
-    if (timeCount <= dealedTimeCount)
-        return;
-    dealedTimeCount = timeCount;
+    //制定全部交易计划
     if (!targetPosData) {
         var pos_1 = positions[TICKER + "_" + TARGET_DIRECTION] || {};
         //需保证在有持仓的情况下
         if (pos_1) {
+            console.log("[\u5236\u5B9A\u4EA4\u6613\u8BA1\u5212] " + JSON.stringify(targetPosData));
             var totalVolume = pos_1.totalVolume;
             var totalVolumeResolved = totalVolume || 0;
             targetPosData = Object(__WEBPACK_IMPORTED_MODULE_4__assets_utils__["a" /* buildTarget */])({
@@ -23206,16 +23204,31 @@ combineLatestObserver.subscribe(function (_a) {
             });
         }
     }
-    console.log('============ 正在执行 ', timeCount, "/ " + steps + " ==============");
-    var quote = quotes[TICKER];
-    var pos = positions[TICKER + "_" + TARGET_DIRECTION] || {};
-    var baseData = __assign(__assign({}, argv), { ticker: TICKER, targetVolume: TARGET_VOLUME, timeCount: timeCount });
-    //再下单
-    Object(__WEBPACK_IMPORTED_MODULE_4__assets_utils__["d" /* reqMakeOrder */])(baseData, quote, pos);
-    //最后一步
-    if (timeCount === LAST_STEP_COUNTE) {
+    if (timeCount <= dealedTimeCount)
+        return;
+    // 判断是否可以交易, 如不能交易，先撤单
+    var aliveOrders = Object(__WEBPACK_IMPORTED_MODULE_4__assets_utils__["b" /* getAliveOrders */])(orders);
+    if (aliveOrders.length) {
+        console.log("[CHECK ORDERS] \u6D3B\u52A8\u8BA2\u5355\u6570\u91CF " + aliveOrders.length + " / " + PARENT_ID + "\u4E0B\u5168\u90E8\u8BA2\u5355\u6570\u91CF " + orders.length + ", \u7B49\u5F85\u5168\u90E8\u8BA2\u5355\u7ED3\u675F");
+        if (!hasCancelOrderInThisLoop) {
+            Object(__WEBPACK_IMPORTED_MODULE_4__assets_utils__["d" /* reqCancelOrder */])(PARENT_ID);
+            hasCancelOrderInThisLoop = true;
+            console.log("[\u64A4\u5355] " + PARENT_ID);
+        }
         return;
     }
+    //制定本次交易计划
+    //再下单
+    var quote = quotes[TICKER];
+    var pos = positions[TICKER + "_" + TARGET_DIRECTION] || {};
+    Object(__WEBPACK_IMPORTED_MODULE_4__assets_utils__["e" /* reqMakeOrder */])(__assign(__assign({}, argv), { ticker: TICKER, targetVolume: TARGET_VOLUME, timeCount: timeCount }), quote, pos);
+    // //最后一步
+    // if (timeCount === LAST_STEP_COUNTE) {
+    //     return;
+    // }
+    console.log('============ 已完成执行 ', timeCount, "/ " + steps + " ==============");
+    hasCancelOrderInThisLoop = false;
+    dealedTimeCount = timeCount; //此时记录下来
 });
 
 
@@ -32973,10 +32986,11 @@ function zipAll(project) {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "e", function() { return transformArrayToObjectByKey; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "f", function() { return transformArrayToObjectByKey; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "c", function() { return makeOrderDirectionType; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return buildTarget; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "d", function() { return reqMakeOrder; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "e", function() { return reqMakeOrder; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "d", function() { return reqCancelOrder; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return getAliveOrders; });
 var __assign = (this && this.__assign) || function () {
     __assign = Object.assign || function(t) {
@@ -33080,19 +33094,17 @@ var reqMakeOrder = function (baseData, quote, pos) {
         return;
     }
     var instrumentTypeOrigin = quote.instrumentTypeOrigin, lastPrice = quote.lastPrice, upperLimitPrice = quote.upperLimitPrice, lowerLimitPrice = quote.lowerLimitPrice, instrumentId = quote.instrumentId, exchangeId = quote.exchangeId;
-    var instrumentType = pos.instrumentType;
-    var instrumentTypeResolved = +instrumentTypeOrigin || +instrumentType;
-    console.log('instrumentType', instrumentTypeOrigin, instrumentType, '---------------');
+    console.log('instrumentType', instrumentTypeOrigin, '---------------');
     var unfinishedSteps = steps - timeCount || 1;
     if (unfinishedSteps < 0) {
         console.error('[ERROR] steps - timeCount = ', unfinishedSteps);
     }
     var targetVolumeThisStep = Math.ceil(targetVolume / unfinishedSteps);
-    var theVolume = dealMakeOrderVolume(+instrumentTypeResolved, targetVolumeThisStep);
+    var theVolume = dealMakeOrderVolume(+instrumentTypeOrigin, targetVolumeThisStep);
     var makeOrderData = {
         name: accountId,
         instrument_id: instrumentId,
-        instrument_type: +instrumentTypeResolved,
+        instrument_type: +instrumentTypeOrigin,
         exchange_id: exchangeId,
         limit_price: lastPrice,
         volume: theVolume || 0,
@@ -33111,6 +33123,16 @@ var reqMakeOrder = function (baseData, quote, pos) {
         }
     });
     console.log("[\u4E0B\u5355] " + JSON.stringify(makeOrderData));
+};
+var reqCancelOrder = function (parentId) {
+    //@ts-ignore
+    process.send({
+        type: 'process:msg',
+        data: {
+            type: 'CANCEL_ORDER_BY_PARENT_ID',
+            parentId: parentId
+        }
+    });
 };
 function dealMakeOrderVolume(instrumentType, volume) {
     var scale100 = [1]; //stock 100的倍数

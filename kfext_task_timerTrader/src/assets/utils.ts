@@ -98,9 +98,7 @@ export const reqMakeOrder = (baseData: any, quote: QuoteData, pos: PosData) => {
     }
 
     const { instrumentTypeOrigin, lastPrice, upperLimitPrice, lowerLimitPrice, instrumentId, exchangeId } = quote;
-    const { instrumentType } = pos
-    const instrumentTypeResolved = +instrumentTypeOrigin || +instrumentType
-    console.log('instrumentType', instrumentTypeOrigin, instrumentType, '---------------')
+    console.log('instrumentType', instrumentTypeOrigin, '---------------')
 
 
     const unfinishedSteps = steps - timeCount || 1;
@@ -108,11 +106,11 @@ export const reqMakeOrder = (baseData: any, quote: QuoteData, pos: PosData) => {
         console.error('[ERROR] steps - timeCount = ', unfinishedSteps)
     }
     const targetVolumeThisStep = Math.ceil(targetVolume / unfinishedSteps);
-    const theVolume = dealMakeOrderVolume(+instrumentTypeResolved, targetVolumeThisStep)
+    const theVolume = dealMakeOrderVolume(+instrumentTypeOrigin, targetVolumeThisStep)
     const makeOrderData = { 
         name: accountId,
         instrument_id: instrumentId,
-        instrument_type: +instrumentTypeResolved,
+        instrument_type: +instrumentTypeOrigin,
         exchange_id: exchangeId,
         limit_price: lastPrice,
         volume: theVolume || 0,
@@ -133,6 +131,19 @@ export const reqMakeOrder = (baseData: any, quote: QuoteData, pos: PosData) => {
         }
     })
     console.log(`[下单] ${JSON.stringify(makeOrderData)}`)
+}
+
+
+
+export const reqCancelOrder = (parentId: string) => {
+    //@ts-ignore
+    process.send({
+        type: 'process:msg',
+        data: {
+            type: 'CANCEL_ORDER_BY_PARENT_ID',
+            parentId
+        }
+    })
 }
 
 function dealMakeOrderVolume (instrumentType: number, volume: number) {

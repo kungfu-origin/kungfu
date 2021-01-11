@@ -61,10 +61,10 @@ export default {
                     const pm2Id = processData.pm_id;
                     const processName = processData.name;
                     const dataType = data.type;
+                    const parentId = data.parentId || '';
 
                     switch (dataType) {
                         case 'REQ_LEDGER_DATA':
-                            const parentId = data.parentId;
                             this.resLedgerData(parentId, pm2Id, processName)
                             break;
                         case 'MAKE_ORDER_BY_PARENT_ID':
@@ -75,6 +75,8 @@ export default {
                             }
                             return this.makeOrder('account', markOrderDataResolved, makeOrderData.name)
                         case 'CANCEL_ORDER_BY_CLINET_ID':
+                            const ordersByParentId = this.getTargetOrdersByParentId(ledger, parentId)
+                            ordersByParentId.forEach(order => this.cancelOrder('acccount', order))
                             break
                     }
                 })
@@ -108,15 +110,19 @@ export default {
         buildLedgerDataForTask (ledger, parentId) {
             const positions = Object.values(ledger.Position || {});
             const quotes = Object.values(ledger.Quote || {});
-            const orders = Object.values(ledger.Order || {})
-                .filter(order => {
-                    return order.parent_id.toString() === parentId.toString()
-                });
+            const orders = this.getTargetOrdersByParentId(ledger.Order, parentId)
             return {
                 positions,
                 quotes,
                 orders
             }
+        },
+
+        getTargetOrdersByParentId (orders, parentId) {
+            return Object.values(orders || {})
+                .filter(order => {
+                    return order.parent_id.toString() === parentId.toString()
+                });
         },
         
         bindIPCListener () {

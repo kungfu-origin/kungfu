@@ -2,7 +2,14 @@ import minimist from 'minimist';
 import { Observable, combineLatest } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 import moment from 'moment';
-import { transformArrayToObjectByKey, makeOrderDirectionType, buildTarget, reqMakeOrder, getAliveOrders } from './assets/utils';
+import { 
+    transformArrayToObjectByKey, 
+    makeOrderDirectionType, 
+    buildTarget, 
+    reqMakeOrder, 
+    getAliveOrders,
+    reqCancelOrder
+} from './assets/utils';
 
 
 
@@ -14,13 +21,12 @@ const { ticker, side, offset, volume, steps, triggerTime, finishTime, parentId }
 const triggerTimeStr = moment(triggerTime).format('YYYYMMDD HH:mm:ss');
 const finishTimeStr = moment(finishTime).format('YYYYMMDD HH:mm:ss');
 const deltaTimestamp = Math.ceil((finishTime - triggerTime) / steps);
-const TICKER = ticker.toString().trim()
+const TICKER = ticker.toString().trim();
+const PARENT_ID = parentId; 
     
 const TARGET_DIRECTION = makeOrderDirectionType(side, offset);
 const TARGET_VOLUME = volume;
 const LAST_STEP_COUNTE = steps - 1;
-
-
 
 console.log('===========================================')
 console.log('[ARGS]', process.argv.slice(2).join(','))
@@ -39,7 +45,7 @@ const reqTradingDataTimer = setInterval(() => {
         type: 'process:msg',
         data: {
             type: 'REQ_LEDGER_DATA',
-            parentId
+            parentId: PARENT_ID
         }
     })
 }, 1000)
@@ -138,24 +144,19 @@ const combineLatestObserver = combineLatest(
 
 var dealedTimeCount: number = -1;
 var targetPosData: any = null;
+var hasCancelOrderInThisLoop = false;
 
 combineLatestObserver.subscribe((
     [ timeCount, quotes, positions, orders ]: 
     [ number, { [prop: string]: QuoteData }, { [prop: string]: PosData }, OrderData[] ] 
 ) => {
 
-    // 判断是否可以交易
-    const aliveOrders = getAliveOrders(orders)
-    console.log('aliveOrders', aliveOrders)
-    
-
-    if (timeCount <= dealedTimeCount) return;
-    dealedTimeCount = timeCount;
-
+    //制定全部交易计划
     if (!targetPosData) {
         const pos = positions[`${TICKER}_${TARGET_DIRECTION}`] || {};
         //需保证在有持仓的情况下
         if (pos) {
+            console.log(`[制定交易计划] ${JSON.stringify(targetPosData)}`)
             const { totalVolume } = pos;
             const totalVolumeResolved = totalVolume || 0;
             targetPosData = buildTarget({ 
@@ -168,25 +169,42 @@ combineLatestObserver.subscribe((
         }
     }
 
+    if (timeCount <= dealedTimeCount) return;
+    
+    // 判断是否可以交易, 如不能交易，先撤单
+    const aliveOrders = getAliveOrders(orders)
+    if (aliveOrders.length) {
+        console.log(`[CHECK ORDERS] 活动订单数量 ${aliveOrders.length} / ${PARENT_ID}下全部订单数量 ${orders.length}, 等待全部订单结束`)
+        if (!hasCancelOrderInThisLoop) {
+            reqCancelOrder(PARENT_ID)
+            hasCancelOrderInThisLoop = true
+            console.log(`[撤单] ${PARENT_ID}`)
+        }
+        return
+    } 
 
-    console.log('============ 正在执行 ', timeCount, `/ ${steps} ==============`)    
+    //制定本次交易计划
 
-
+    
+    //再下单
     const quote = quotes[TICKER];
-    const pos = positions[`${TICKER}_${TARGET_DIRECTION}`] || {};
-    const baseData = { 
+    const pos = positions[`${TICKER}_${TARGET_DIRECTION}`] || {};    
+    reqMakeOrder({
         ...argv, 
         ticker: TICKER, 
         targetVolume: TARGET_VOLUME, 
-        timeCount };
-    
-    //再下单
-    reqMakeOrder(baseData, quote, pos)       
+        timeCount
+    }, quote, pos)    
+  
 
-    //最后一步
-    if (timeCount === LAST_STEP_COUNTE) {
+    // //最后一步
+    // if (timeCount === LAST_STEP_COUNTE) {
 
-        return;
-    }
+    //     return;
+    // }
+
+    console.log('============ 已完成执行 ', timeCount, `/ ${steps} ==============`)    
+    hasCancelOrderInThisLoop = false;
+    dealedTimeCount = timeCount; //此时记录下来
 
 })

@@ -189,6 +189,8 @@ export default {
             const processName = 'task_' + key + '_' + processNameByUniKey;
             const args = this.formArgs(extSettingData);
 
+            console.log(processName)
+
             return this.preUpdate()
                 .then(res => {
                     if (!res) return Promise.resolve(true)
@@ -239,7 +241,7 @@ export default {
         },
 
         preUpdate () {
-
+            console.log(this.processStatus)
             if (this.setTaskTarget) {
                 return this.handleDeleteTask(this.setTaskTarget, true)
             }
