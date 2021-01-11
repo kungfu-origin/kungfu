@@ -85,7 +85,7 @@ export const buildTarget = ({ offset, side, ticker, totalVolume, targetVolume }:
 
 
 export const reqMakeOrder = (baseData: any, quote: QuoteData, pos: PosData) => {
-    const { ticker, side, offset, steps, accountId, targetVolume, timeCount } = baseData;
+    const { ticker, side, offset, steps, accountId, targetVolume, timeCount, parentId } = baseData;
 
     if (!quote) {
         console.error(`暂无${ticker}行情信息`)
@@ -126,7 +126,7 @@ export const reqMakeOrder = (baseData: any, quote: QuoteData, pos: PosData) => {
         type: 'process:msg',
         data: {
             type: 'MAKE_ORDER_BY_PARENT_ID',
-            parentId: 
+            parentId: parentId,
             body: {
                 ...makeOrderData
             }

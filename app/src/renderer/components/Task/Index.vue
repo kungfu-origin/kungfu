@@ -186,7 +186,6 @@ export default {
             const extSettingData = JSON.parse(extSettingJSONString)
             const { key, uniKey, packageJSONPath } = configInfo;
             const processNameByUniKey = this.formUnikeyInProcessName(uniKey, extSettingData);
-            console.log(processNameByUniKey, '---')
             const processName = 'task_' + key + '_' + processNameByUniKey;
             const args = this.formArgs(extSettingData);
 
@@ -260,9 +259,7 @@ export default {
 
         getTaskConfigKeyFromProcessId (processId) {
             let processIdSplit = processId.split('_');
-            processIdSplit.pop()
-            processIdSplit.shift()
-            return processIdSplit.join("_")
+            return processIdSplit[1]
         },
 
         parseArgs (args) {

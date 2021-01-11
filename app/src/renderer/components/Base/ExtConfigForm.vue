@@ -13,8 +13,8 @@
 			:class="{ 'is-radio': item.type === 'radio' }"
             >
                 <el-col :span="19">
-                    <el-input size="mini" :class="item.key" v-if="item.type === 'str'" v-model="form[item.key]" :type="item.key" :disabled="isDisabled(item.key)"></el-input>
-                    <el-input size="mini" :class="item.key" v-if="item.type === 'password'" :type="item.key" v-model="form[item.key]" :disabled="isDisabled(item.key)" show-password></el-input>
+                    <el-input size="mini" :disabled="isDisabled(item.key)" :class="item.key" v-if="item.type === 'str'" v-model="form[item.key]" :type="item.key" ></el-input>
+                    <el-input size="mini" :disabled="isDisabled(item.key)" :class="item.key" v-if="item.type === 'password'" :type="item.key" v-model="form[item.key]"  show-password></el-input>
                     <el-switch size="mini" :disabled="isDisabled(item.key)" :class="item.key" v-if="item.type === 'bool'" :value="form[item.key]" @change="e => handleInputValue(item.key, e)"></el-switch>
                     <el-input-number size="mini" :disabled="isDisabled(item.key)" :class="item.key" v-if="item.type === 'int'" :controls="false" v-model="form[item.key]"></el-input-number>
                     <el-input-number size="mini" :disabled="isDisabled(item.key)" :class="item.key" v-if="item.type === 'float'" :controls="false" v-model="form[item.key]"></el-input-number>
@@ -117,6 +117,7 @@ export default {
 
 	mounted () {
 		this.initForm();
+		this.configList
 	},
 
 	computed: {

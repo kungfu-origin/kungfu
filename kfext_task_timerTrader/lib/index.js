@@ -23084,7 +23084,7 @@ var __assign = (this && this.__assign) || function () {
 var argv = __WEBPACK_IMPORTED_MODULE_0_minimist___default()(process.argv.slice(2), {
     string: 'ticker',
 });
-var accountId = argv.accountId, ticker = argv.ticker, side = argv.side, offset = argv.offset, volume = argv.volume, steps = argv.steps, triggerTime = argv.triggerTime, finishTime = argv.finishTime;
+var ticker = argv.ticker, side = argv.side, offset = argv.offset, volume = argv.volume, steps = argv.steps, triggerTime = argv.triggerTime, finishTime = argv.finishTime;
 var triggerTimeStr = __WEBPACK_IMPORTED_MODULE_3_moment___default()(triggerTime).format('YYYYMMDD HH:mm:ss');
 var finishTimeStr = __WEBPACK_IMPORTED_MODULE_3_moment___default()(finishTime).format('YYYYMMDD HH:mm:ss');
 var deltaTimestamp = Math.ceil((finishTime - triggerTime) / steps);
@@ -23110,7 +23110,7 @@ var reqTradingDataTimer = setInterval(function () {
             type: 'REQ_LEDGER_DATA'
         }
     });
-}, 1000);
+}, 100);
 var TIMER_COUNT_OBSERVER = function () { return new __WEBPACK_IMPORTED_MODULE_1_rxjs__["a" /* Observable */](function (subscriber) {
     var count = -1;
     var secondsCounterTimer = setInterval(function () {
@@ -33055,7 +33055,7 @@ var buildTarget = function (_a) {
     return undefined;
 };
 var reqMakeOrder = function (baseData, quote, pos) {
-    var ticker = baseData.ticker, side = baseData.side, offset = baseData.offset, steps = baseData.steps, accountId = baseData.accountId, targetVolume = baseData.targetVolume, timeCount = baseData.timeCount;
+    var ticker = baseData.ticker, side = baseData.side, offset = baseData.offset, steps = baseData.steps, accountId = baseData.accountId, targetVolume = baseData.targetVolume, timeCount = baseData.timeCount, parentId = baseData.parentId;
     if (!quote) {
         console.error("\u6682\u65E0" + ticker + "\u884C\u60C5\u4FE1\u606F");
         return;
@@ -33091,6 +33091,7 @@ var reqMakeOrder = function (baseData, quote, pos) {
         type: 'process:msg',
         data: {
             type: 'MAKE_ORDER_BY_PARENT_ID',
+            parentId: parentId,
             body: __assign({}, makeOrderData)
         }
     });

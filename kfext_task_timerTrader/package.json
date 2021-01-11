@@ -24,7 +24,7 @@
   },
   "kungfuConfig": {
     "type": "task",
-    "key": "timer_trader",
+    "key": "timerTrader",
     "name": "定时任务",
     "uniKey": ["accountId", "ticker"],
     "config": [

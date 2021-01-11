@@ -37,6 +37,7 @@
 
 <script>
 
+import moment from 'moment';
 import ExtConfigForm from '@/components/Base/ExtConfigForm';
 
 export default {
@@ -93,7 +94,11 @@ export default {
             this.$refs.taskSettingForm[this.targetConfigIndex].validate(valid => {
                 if (valid) {
                     const postData = this.postFormList[this.targetConfigIndex]
-                    this.$emit('confirm', JSON.stringify(postData), this.activeTabName)
+                    this.$emit('confirm', JSON.stringify({
+                        ...postData,
+                        parentId: +moment().valueOf()
+
+                    }), this.activeTabName)
                     this.handleClose();
                 }
             })
