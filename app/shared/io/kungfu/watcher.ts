@@ -270,11 +270,12 @@ export const dealOrder = (item: OrderInputData): OrderData => {
         
         side: SideName[item.side] ? SideName[item.side] : '--',
         sideOrigin: item.side,
-        offset: !allowShorted(instrumentType) ? 
-            '--' : 
-            OffsetName[item.offset] ? 
-                OffsetName[item.offset] : 
-                '--',
+        // offset: !allowShorted(instrumentType) ? 
+        //     '--' : 
+        //     OffsetName[item.offset] ? 
+        //         OffsetName[item.offset] : 
+        //         '--',
+        offset: OffsetName[item.offset],
         offsetOrigin: item.offset,
         hedgeFlag: hedgeFlag[item.hedge_flag] ? hedgeFlag[item.hedge_flag] : '--',
         hedgeFlagOrigin: item.hedge_flag,
@@ -321,11 +322,12 @@ export const dealTrade = (item: TradeInputData): TradeData => {
         updateTimeNum: +Number(updateTime || 0),
         instrumentId: item.instrument_id,
         side: SideName[item.side] ? SideName[item.side] : '--',
-        offset: instrumentType === 1 || instrumentType === 5 ? 
-            '--' : 
-            OffsetName[item.offset] ? 
-                OffsetName[item.offset] : 
-                '--',
+        // offset: instrumentType === 1 || instrumentType === 5 ? 
+        //     '--' : 
+        //     OffsetName[item.offset] ? 
+        //         OffsetName[item.offset] : 
+        //         '--',
+        offset: OffsetName[item.offset],
         price: toDecimal(+item.price, 3),
         volume: Number(item.volume),
         clientId: resolveClientId(item.dest || ''),

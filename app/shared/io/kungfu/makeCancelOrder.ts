@@ -13,7 +13,7 @@ interface MakeOrderData {
     hedge_flag: number
 }
 
-export const kungfuMakeOrder = (makeOrderData: MakeOrderData, accountId: string, strategyId?: string) => {
+export const kungfuMakeOrder = (makeOrderData: MakeOrderData, accountId: string, strategyId?: string, parentId?: number) => {
     const accountLocation = encodeKungfuLocation(accountId, 'td');
 
     if (!watcher.isReadyToInteract(accountLocation)) {
@@ -24,10 +24,19 @@ export const kungfuMakeOrder = (makeOrderData: MakeOrderData, accountId: string,
         ...longfist.OrderInput(),
         ...makeOrderData
     }
-
     if (strategyId) {
         const strategyLocation = encodeKungfuLocation(strategyId, 'strategy');
         return Promise.resolve(watcher.issueOrder(orderInput, accountLocation, strategyLocation))
+    } else if (parentId) {
+        console.log({
+            ...orderInput,
+            parentId: parentId
+        }, '======')
+        return Promise.resolve(watcher.issueOrder({
+            ...orderInput,
+            parentId: parentId
+        }, accountLocation))
+        
     } else {
         return Promise.resolve(watcher.issueOrder(orderInput, accountLocation))
     }

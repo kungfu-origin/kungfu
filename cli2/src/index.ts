@@ -12,7 +12,7 @@ import { monitKill } from '@/commanders/monitKill';
 
 import { monitPrompt } from '@/components/index';
 import { removeFilesInFolder } from '__gUtils/fileUtils';
-import { LOG_PA_DIR, BASE_DB_DIR, KF_HOME } from '__gConfig/pathConfig';
+import { LOG_DIR, BASE_DB_DIR, KF_HOME } from '__gConfig/pathConfig';
 import { logger } from '__gUtils/logUtils';
 
 const CFonts = require('cfonts');
@@ -153,7 +153,7 @@ program
     .command('clearlog')
     .description('clear all logs (should do it often)')
     .action(() => {
-        return removeFilesInFolder(LOG_PA_DIR)
+        return removeFilesInFolder(LOG_DIR)
             .then(() => console.success('Clear all logs'))
             .catch((err: Error) => {
                 console.error(err)
@@ -171,7 +171,7 @@ program
                 console.log(KF_HOME)
                 break;
             case 'log':
-                console.log(LOG_PA_DIR)
+                console.log(LOG_DIR)
                 break;
             case 'base':
                 console.log(BASE_DB_DIR)

@@ -44,7 +44,7 @@
                 </template>
             </el-table-column>
               <el-table-column
-                label="运行"
+                label="进程"
                 sortable    
             >
                 <template slot-scope="props" v-if="props.row.strategy_id">

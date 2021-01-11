@@ -2,7 +2,6 @@ import path from 'path';
 import { addFileSync } from '__gUtils/fileUtils';
 import moment from 'moment';
 
-
 const KF_HOME_BASE_DIR_RESOLVE = (() => {
     if ( process.env.APP_TYPE === 'cli' ) {
         return require('__gConfig/cliKfHomePathConfig').KF_HOME_BASE_DIR_RESOLVE
@@ -49,10 +48,7 @@ export const LEDGER_DIR = path.join(SYSTEM_DIR, 'service', 'ledger')
 addFileSync('', LEDGER_DIR, 'folder')
 
 //log
-const tmk = moment().format('YYYYMMDD')
-export const LOG_PA_DIR = path.join(KF_HOME, 'logview')
-addFileSync('', LOG_PA_DIR, 'folder')
-export const LOG_DIR = path.join(LOG_PA_DIR, tmk);
+export const LOG_DIR = path.join(KF_HOME, 'logview')
 addFileSync('', LOG_DIR, 'folder')
 
 
@@ -71,7 +67,8 @@ export const buildGatewayPath = (gatewayName: string) => path.join(KF_RUNTIME_DI
 
 //获取进程日志地址
 export const buildProcessLogPath = (processId: string) => {
-    return path.join(LOG_DIR, `${processId}.log`)
+    const tmk = moment().format('YYYYMMDD')
+    return path.join(LOG_DIR, tmk, `${processId}.log`)
 }
 
 

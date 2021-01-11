@@ -22,8 +22,9 @@
                     ref="taskSettingForm"
                     v-model="postFormList[index]"
                     :configList="item.config"
+                    :uniKey="item.uniKey || ''"
                     labelWidth="90px"
-                    method="add"
+                    :method="method"
                 ></ExtConfigForm>
             </el-tab-pane>
         </el-tabs>        

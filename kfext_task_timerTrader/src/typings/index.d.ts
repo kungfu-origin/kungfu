@@ -1,6 +1,9 @@
 
 
-interface Proc {
+interface ProcPayload {
     topic: string;
-    data: QuoteData[]
+    data: {
+        quotes: QuoteData[];
+        positions: PosData[];
+    }
 }

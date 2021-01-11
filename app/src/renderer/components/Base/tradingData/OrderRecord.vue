@@ -21,7 +21,7 @@
         <tr-dashboard-header-item>
             <i class="el-icon-download mouse-over" title="导出" @click="dateRangeDialogVisiblityForExport = true"></i>
         </tr-dashboard-header-item>
-        <tr-dashboard-header-item v-if="moduleType === 'strategy'">
+        <tr-dashboard-header-item>
             <el-button size="mini" type="danger" style="color: #fff" title="全部撤单" @click="handleCancelAllOrders">全部撤单</el-button>
         </tr-dashboard-header-item>
     </div>

@@ -26,6 +26,7 @@
     "type": "task",
     "key": "timer_trader",
     "name": "定时任务",
+    "uniKey": ["accountId", "ticker"],
     "config": [
       {
         "key": "accountId",
@@ -37,8 +38,22 @@
         "key": "ticker",
         "name": "标的",
         "type": "str",
+        "required": true
+      },
+      {
+        "key": "exchangeId",
+        "name": "交易所",
+        "type": "select",
         "required": true,
-        "tip": "多个标的请用英文逗号分隔"
+        "data": [
+          { "value": "SSE",   "name": "上交所" },
+          { "value": "SZE",   "name": "深交所" },
+          { "value": "SHFE",  "name": "上期所" },
+          { "value": "DCE",   "name": "大商所" },
+          { "value": "CZCE",  "name": "郑商所" },
+          { "value": "CFFEX", "name": "中金所" },
+          { "value": "INE",   "name": "能源中心" }
+        ]
       },
       {
         "key": "side",

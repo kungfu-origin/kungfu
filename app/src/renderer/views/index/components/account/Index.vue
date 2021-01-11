@@ -99,7 +99,6 @@
                     </el-tabs>
                 </el-col>
             </el-row>
-
         </div>
     </MainContent>
 </template>

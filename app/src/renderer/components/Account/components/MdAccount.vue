@@ -156,7 +156,7 @@ export default {
             .then(() => deleteMd(row, this.tdList))
             .then(() => this.getTableList())
             .then(() => this.$message.success('操作成功！'))
-            .catch((err) => {
+            .catch(err => {
                 if(err == 'cancel') return
                 this.$message.error(err.message || '操作失败！')
             })

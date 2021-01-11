@@ -480,10 +480,12 @@ export const getExtensionConfigs = async (extDir: string): Promise<any> => {
                 const kungfuConfig = p[KUNGFU_KEY_IN_PACKAGEJSON];
                 if(kungfuConfig) {
                     const type: string = kungfuConfig.type;
+                    const uniKey: string | Array<string>= kungfuConfig.uniKey;
                     const config: SourceConfig = kungfuConfig.config
                     return  {
                         type,
                         config,
+                        uniKey,
                         key: kungfuConfig.key,
                         name: kungfuConfig.name,
                         packageJSONPath: packageJSONPaths[index]

@@ -44,13 +44,15 @@ export default {
             }
         },
 
-        makeOrder (moduleType, makeOrderForm, currentAccountResolved, strategyId) {
+        makeOrder (moduleType, makeOrderForm, currentAccountResolved, strategyId, parentId) {
             if (moduleType === 'account') {
                 return kungfuMakeOrder(makeOrderForm, currentAccountResolved)
             } else if (moduleType === 'strategy') {
                 return kungfuMakeOrder(makeOrderForm, currentAccountResolved, strategyId)
             } else if (moduleType === 'ticker') {
                 return kungfuMakeOrder(makeOrderForm, currentAccountResolved)
+            } else if (moduleType === 'parent') {
+                return kungfuMakeOrder(makeOrderForm, currentAccountResolved, undefined, parentId)
             }
         },
 

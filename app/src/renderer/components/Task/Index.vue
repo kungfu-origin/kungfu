@@ -20,7 +20,7 @@
                 label="任务ID"
                 sortable
                 :show-overflow-tooltip="true"       
-                width="249px"  
+                width="300px"  
                 >
             </el-table-column>
             <el-table-column
@@ -37,7 +37,7 @@
                 </template>
             </el-table-column>
             <el-table-column
-                label="运行"
+                label="进程"
                 sortable    
             >
                 <template slot-scope="props">
@@ -169,6 +169,7 @@ export default {
         },
 
         handleOpenUpdateTaskDialog (data) {
+            console.log('parseArgs', data.args)
             this.setTaskMethod = 'update';
             this.setTaskInitData = this.parseArgs(data.args)
             this.setTaskInitKey = this.getTaskConfigKeyFromProcessId(data.processId)
@@ -176,25 +177,24 @@ export default {
             this.setTaskDialogVisiblity = true;
         },
 
-        handleConfirm (extSettingData, configKey) {
+        handleConfirm (extSettingJSONString, configKey) {
             const configInfo = this.getTargetConfigByKey(configKey);
-
             if (!configInfo) {
                 this.$message.error('配置信息不存在！')
                 return
             }
-
-            const currentTimestamp = moment().format('HHmmss') + '';
-            const processName = 'task_' + configInfo.key + '_' + currentTimestamp;
-            const packageJSONPath = configInfo.packageJSONPath;
+            const extSettingData = JSON.parse(extSettingJSONString)
+            const { key, uniKey, packageJSONPath } = configInfo;
+            const processNameByUniKey = this.formUnikeyInProcessName(uniKey, extSettingData);
+            console.log(processNameByUniKey, '---')
+            const processName = 'task_' + key + '_' + processNameByUniKey;
+            const args = this.formArgs(extSettingData);
 
             return this.preUpdate()
                 .then(res => {
-
                     if (!res) return Promise.resolve(true)
-
                     return switchTask(processName, true, {
-                        args: this.formArgs(JSON.parse(extSettingData)),
+                        args,
                         cwd: path.resolve(packageJSONPath, '..', 'lib'),
                         script: 'index.js'
                     })
@@ -231,11 +231,18 @@ export default {
             })
         },
 
+        formUnikeyInProcessName (uniKey, form) {
+            if (typeof uniKey === 'string') {
+                return form[uniKey]
+            } else {
+                return uniKey.map(key => form[key]).join('_')
+            }
+        },
+
         preUpdate () {
-            if (this.setTaskMethod === 'update') {
-                if (this.setTaskTarget) {
-                    return this.handleDeleteTask(this.setTaskTarget, true)
-                }
+
+            if (this.setTaskTarget) {
+                return this.handleDeleteTask(this.setTaskTarget, true)
             }
 
             return Promise.resolve(true)

@@ -45,8 +45,8 @@ export default {
             return this.buildMakeOrderWin()
                 .then(() => {
                     this.emitCurrentMakeOrderWinInfo();
-                    window.makeOrderWin.show && window.makeOrderWin.show();
-                    window.makeOrderWin.focus && window.makeOrderWin.focus();
+                    window.makeOrderWin && window.makeOrderWin.show && window.makeOrderWin.show();
+                    window.makeOrderWin && window.makeOrderWin.focus && window.makeOrderWin.focus();
                 })        
         },
 

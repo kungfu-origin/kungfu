@@ -17,6 +17,7 @@ export default {
     mixins: [ makeOrderCoreMixin ],
 
     data () {
+        this.BUS = null;
         return {
             globalSettingDialogVisiblity: false
         }
@@ -51,8 +52,9 @@ export default {
         },
 
         bindPMPCListener () {
-
+            this.BUS && this.BUS.off();
             _pm2.launchBus((err, pm2_bus) => {
+                this.BUS = pm2_bus
                 pm2_bus.on('process:msg', (packet) => {
                     const data = packet.data;
                     const processData = packet.process;
@@ -61,18 +63,17 @@ export default {
                     const dataType = data.type;
 
                     switch (dataType) {
-                        case 'LEDGER_DATA':
+                        case 'REQ_LEDGER_DATA':
                             if (watcher.isLive()) {
                                 watcher.step();
                                 const ledger = watcher.ledger;
                                 const positions = Object.values(ledger.Position || {});
                                 const quotes = Object.values(ledger.Quote || {});
-
                                 _pm2.sendDataToProcessId({
                                     type: 'process:msg',
                                     data: {
                                         positions: positions.map(pos => dealPos(pos)),
-                                        quetos: quotes.map(quote => dealQuote(quote)),
+                                        quotes: quotes.map(quote => dealQuote(quote)),
                                     },
                                     id: pm2Id,
                                     topic: 'LEDGER_DATA'
@@ -83,10 +84,12 @@ export default {
                                 })
                             }
                             break;
-                        case 'MAKE_ORDER':
-                            break;
-                        case 'CANCEL_ORDER':
-                            break;
+                        case 'MAKE_ORDER_BY_PARENT_ID':
+                            const makeOrderData = data.body;
+                            console.log(makeOrderData)
+                            return this.makeOrder('parent', makeOrderData, makeOrderData.name, processName)
+                        case 'CANCEL_ORDER_BY_CLINET_ID':
+                            break
                     }
                 })
             })
@@ -94,6 +97,7 @@ export default {
         
         bindIPCListener () {
 
+            ipcRenderer.removeAllListeners('ipc-emit-tdMdList')
             ipcRenderer.on('ipc-emit-tdMdList', (event, { childWinId }) => {
                 const childWin = BrowserWindow.fromId(childWinId);
                 return this.$store.dispatch('getTdMdList')
@@ -105,6 +109,7 @@ export default {
                     })
             })
 
+            ipcRenderer.removeAllListeners('ipc-emit-strategyList')
             ipcRenderer.on('ipc-emit-strategyList', (event, { childWinId }) => {
                 const childWin = BrowserWindow.fromId(childWinId);
                 return this.$store.dispatch('getStrategyList')
@@ -113,11 +118,13 @@ export default {
                     })
             })
 
+            ipcRenderer.removeAllListeners('ipc-emit-accountsAsset')
             ipcRenderer.on('ipc-emit-accountsAsset', (event, { childWinId }) => {
                 const childWin = BrowserWindow.fromId(childWinId);
                 childWin.webContents.send('ipc-res-accountsAsset', Object.freeze(this.accountsAsset))
             })
 
+            ipcRenderer.removeAllListeners('ipc-emit-cancelOrder')
             ipcRenderer.on('ipc-emit-cancelOrder', (event, { childWinId, params }) => {
                 const childWin = BrowserWindow.fromId(childWinId);
                 const { moduleType, orderData, strategyId } = params;
@@ -129,8 +136,8 @@ export default {
                     })
             })
 
+            ipcRenderer.removeAllListeners('ipc-emit-makeOrder')
             ipcRenderer.on('ipc-emit-makeOrder', (event, { childWinId, params }) => {
-
                 const childWin = BrowserWindow.fromId(childWinId);
                 const { moduleType, makeOrderForm, currentAccountResolved, strategyId } = params;
                 return this.makeOrder(moduleType, makeOrderForm, currentAccountResolved, strategyId)
@@ -141,6 +148,7 @@ export default {
                     })
             })
 
+            ipcRenderer.removeAllListeners('ipc-emit-kungfuConfig')
             ipcRenderer.on('ipc-emit-kungfuConfig', (event, { childWinId }) => {
                 const childWin = BrowserWindow.fromId(childWinId);
                 return this.$store.dispatch('getKungfuConfig')
@@ -149,6 +157,7 @@ export default {
                     })
             })
 
+            ipcRenderer.removeAllListeners('ipc-emit-strategyById')
             ipcRenderer.on('ipc-emit-strategyById', (event, { childWinId, params }) => {
                 const childWin = BrowserWindow.fromId(childWinId);
                 const { strategyId } = params;
@@ -158,6 +167,7 @@ export default {
                     })
             })
 
+            ipcRenderer.removeAllListeners('ipc-emit-updateStrategyPath')
             ipcRenderer.on('ipc-emit-updateStrategyPath', (event, { childWinId, params }) => {
                 const childWin = BrowserWindow.fromId(childWinId);
                 const { strategyId, strategyPath } = params;

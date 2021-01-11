@@ -13,14 +13,14 @@
 			:class="{ 'is-radio': item.type === 'radio' }"
             >
                 <el-col :span="19">
-                    <el-input size="mini" :class="item.key" v-if="item.type === 'str'" v-model="form[item.key]" :type="item.key" :disabled="method == 'update' && (uniKey == item.key)"></el-input>
-                    <el-input size="mini" :class="item.key" v-if="item.type === 'password'" :type="item.key" v-model="form[item.key]" :disabled="method == 'update' && (uniKey == item.key)" show-password></el-input>
-                    <el-switch size="mini" :class="item.key" v-if="item.type === 'bool'" :value="form[item.key]" @change="e => handleInputValue(item.key, e)"></el-switch>
-                    <el-input-number size="mini" :class="item.key" v-if="item.type === 'int'" :controls="false" v-model="form[item.key]"></el-input-number>
-                    <el-input-number size="mini" :class="item.key" v-if="item.type === 'float'" :controls="false" v-model="form[item.key]"></el-input-number>
+                    <el-input size="mini" :class="item.key" v-if="item.type === 'str'" v-model="form[item.key]" :type="item.key" :disabled="isDisabled(item.key)"></el-input>
+                    <el-input size="mini" :class="item.key" v-if="item.type === 'password'" :type="item.key" v-model="form[item.key]" :disabled="isDisabled(item.key)" show-password></el-input>
+                    <el-switch size="mini" :disabled="isDisabled(item.key)" :class="item.key" v-if="item.type === 'bool'" :value="form[item.key]" @change="e => handleInputValue(item.key, e)"></el-switch>
+                    <el-input-number size="mini" :disabled="isDisabled(item.key)" :class="item.key" v-if="item.type === 'int'" :controls="false" v-model="form[item.key]"></el-input-number>
+                    <el-input-number size="mini" :disabled="isDisabled(item.key)" :class="item.key" v-if="item.type === 'float'" :controls="false" v-model="form[item.key]"></el-input-number>
                     <span class="account-setting-path path-selection-in-dialog text-overflow" v-if="item.type === 'file'" :title="form[item.key]">{{form[item.key]}}</span>                    
                     <el-button size="mini" icon="el-icon-more" v-if="item.type === 'file'" @click="handleSelectFile(item.key)"></el-button>
-                    <el-select :class="item.key" size="mini" v-if="item.type === 'select'" :multiple="item.multiple" collapse-tags v-model="form[item.key]" placeholder="请选择">
+                    <el-select :disabled="isDisabled(item.key)" :class="item.key" size="mini" v-if="item.type === 'select'" :multiple="item.multiple" collapse-tags v-model="form[item.key]" placeholder="请选择">
                         <el-option
 						v-for="option in resolvedSelectOrRatioOptions(item)"
 						:key="option.value"
@@ -28,7 +28,7 @@
 						:value="option.value">
                         </el-option>
                     </el-select>
-					 <el-radio-group :class="item.key" size="mini" v-if="item.type === 'radio'" v-model="form[item.key]">
+					 <el-radio-group :disabled="isDisabled(item.key)" :class="item.key" size="mini" v-if="item.type === 'radio'" v-model="form[item.key]">
                         <el-radio 
 						v-for="option in resolvedSelectOrRatioOptions(item)"
 						:key="option.value"
@@ -38,7 +38,7 @@
                     </el-radio-group>
 					<el-time-picker size="mini" :class="item.key" v-if="item.type === 'timePicker'" v-model="form[item.key]" @blur="handleChangeTimePicker(item.key)" :clearable="true" :picker-options="{ selectableRange: '00:00:00 - 23:59:59', format: 'HHmmss' }">
 					</el-time-picker>
-					<el-select :class="item.key" size="mini" v-if="item.type === 'account'"  v-model.trim="form[item.key]">
+					<el-select :disabled="isDisabled(item.key)" :class="item.key" size="mini" v-if="item.type === 'account'"  v-model.trim="form[item.key]">
                         <el-option
                             v-for="account in tdList"
                             :key="account.account_id.toAccountId()"
@@ -86,7 +86,10 @@ export default {
 			default: "80px"
 		},
 
-		uniKey: "",
+		uniKey: {
+			type: [ String, Array ],
+			default: () => ""
+		},
 
 		//添加/删除
 		value: {
@@ -156,6 +159,18 @@ export default {
                 this.$set(this.postForm, targetKey, filePath[0]);
                 this.$refs.extForm.validateField(targetKey) //手动进行再次验证，因数据放在span中，改变数据后无法触发验证
             })
+		},
+
+		isDisabled (key) {
+			return this.method === 'update' && this.isUniKey(key)
+		},
+
+		isUniKey (key) {
+			if (typeof this.uniKey === 'string') {
+				return this.uniKey === key
+			} else {
+				return this.uniKey.includes(key)
+			}
 		},
 		
 		//for paComponents

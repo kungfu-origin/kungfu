@@ -514,16 +514,25 @@ export default {
             this.$refs['make-order-form'].validate(valid => {
                 
                 if(valid) {
+
                     //当下单不是从posdata进入
                     if (!this.makeOrderForm.instrument_type) {
                         const instrumentType = this.getInstrumentType(this.currentAccountResolved);
                         this.$set(this.makeOrderForm, 'instrument_type', instrumentType)
                     }
 
-                    let makeOrderForm = deepClone(this.makeOrderForm);
+                    const makeOrderForm = deepClone(this.makeOrderForm);
+                    // const makeOrderConfirmTip = this.buildMakeOrderFormInfo(makeOrderForm)
+                    // this.$confirm(makeOrderConfirmTip, '提示', {
+                    //     confirmButtonText: '确 定',
+                    //     cancelButtonText: '取 消',
+                    // })
                     this.makeOrder(this.moduleType, makeOrderForm, this.currentAccountResolved, this.currentId)
                         .then(() => this.$message.success('下单指令已发送！'))
-                        .catch(err => this.$message.error(err.message || '下单指令发送失败！'))
+                        .catch(err => {
+                            if (err === 'cancel') return;    
+                            this.$message.error(err.message || '下单指令发送失败！')
+                        })
                 }
             })
         },
@@ -531,6 +540,13 @@ export default {
         handleSelectAccount (account) {
             this.currentAccount = account;
         },
+
+        // buildMakeOrderFormInfo (makeOrderForm) {
+        //     console.log(makeOrderForm)
+        //     const { instrument_type, side, offset, volume, limit_price, accountId, instrument_id } = makeOrderForm;
+            
+        //     return '确认下单'
+        // },
 
         getInstrumentType (accountId) {
             const sourceName = accountId.split('_')[0] || '';
