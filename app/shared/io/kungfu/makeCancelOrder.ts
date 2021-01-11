@@ -14,7 +14,6 @@ interface MakeOrderData {
 }
 
 export const kungfuSubscribeTicker = (sourceName: string, exchangeId: string, ticker: string) => {
-    console.log('kungfuSubscribeTicker', sourceName, exchangeId, ticker )
     return Promise.resolve(
         watcher.requestMarketData(
             encodeKungfuLocation(sourceName, 'md'),
@@ -39,7 +38,6 @@ export const kungfuMakeOrder = (makeOrderData: MakeOrderData, accountId: string,
         const strategyLocation = encodeKungfuLocation(strategyId, 'strategy');
         return Promise.resolve(watcher.issueOrder(orderInput, accountLocation, strategyLocation))
     } else {
-        console.log('makeOrder', orderInput)
         return Promise.resolve(watcher.issueOrder(orderInput, accountLocation))
     }
 }

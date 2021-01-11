@@ -4,6 +4,7 @@ import { ipcRenderer, remote } from 'electron';
 
 import { watcher, dealQuote, dealPos, dealOrder } from '__io/kungfu/watcher';
 import { getStrategyById, updateStrategyPath } from '__io/kungfu/strategy';
+import { transformTradingItemListToData } from '__io/kungfu/watcher';
 
 import makeOrderCoreMixin from '@/components/Base/makeOrder/js/makeOrderCoreMixin';
 
@@ -61,11 +62,11 @@ export default {
                     const pm2Id = processData.pm_id;
                     const processName = processData.name;
                     const dataType = data.type;
-                    const parentId = data.parentId || '';
+                    let { accountId, exchangeId, ticker, parentId } = data.body || {};
 
                     switch (dataType) {
                         case 'REQ_LEDGER_DATA':
-                            this.resLedgerData(parentId, pm2Id, processName)
+                            this.resLedgerData(parentId, pm2Id, accountId, processName)
                             break;
                         case 'MAKE_ORDER_BY_PARENT_ID':
                             const makeOrderData = data.body;
@@ -79,18 +80,19 @@ export default {
                             ordersByParentId.forEach(order => this.cancelOrder('acccount', order))
                             break
                         case "SUBSCRIBE_BY_TICKER":
-                            const { sourceName, exchangeId, ticker } = data;
+                            const sourceName = (accountId || '').toSourceName();
+                            this.subscribeTicker(sourceName, exchangeId, ticker)
 
                     }
                 })
             })
         },
 
-        resLedgerData (parentId, pm2Id, processName) {
+        resLedgerData (parentId, pm2Id, accountId, processName) {
             if (watcher.isLive()) {
                 watcher.step();
                 const ledger = watcher.ledger;
-                const { orders, positions, quotes } = this.buildLedgerDataForTask(ledger, parentId)
+                const { orders, positions, quotes } = this.buildLedgerDataForTask(ledger, accountId, parentId)
                 _pm2.sendDataToProcessId({
                     type: 'process:msg',
                     parentId,
@@ -110,12 +112,13 @@ export default {
         },
 
         //pos, quote, orders
-        buildLedgerDataForTask (ledger, parentId) {
+        buildLedgerDataForTask (ledger, accountId, parentId) {
             const positions = Object.values(ledger.Position || {});
+            const positionsResolved = transformTradingItemListToData(positions, 'account')[accountId] || [];
             const quotes = Object.values(ledger.Quote || {});
             const orders = this.getTargetOrdersByParentId(ledger.Order, parentId)
             return {
-                positions,
+                positions: positionsResolved,
                 quotes,
                 orders
             }

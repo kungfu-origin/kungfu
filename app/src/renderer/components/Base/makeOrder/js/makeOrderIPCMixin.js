@@ -37,7 +37,6 @@ export default {
         },
 
         subscribeTicker (sourceName, exchangeId, ticker) {
-            console.log(sourceName, exchangeId, ticker)
             return Promise.resolve(true)
         },
 

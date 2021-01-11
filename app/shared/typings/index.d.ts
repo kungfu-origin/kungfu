@@ -440,6 +440,8 @@ interface QuoteDataInput {
     turnover: number
     upper_limit_price: number
     volume: bigint
+    ask_price: Array<number>
+    bid_price: Array<number>
 }
 
 
@@ -467,5 +469,7 @@ interface QuoteData {
     tradingDay: string
     turnover: number
     upperLimitPrice: string
-    volume: number
+    volume: number,
+    askPrices: Array<number>,
+    bidPrices: Array<number>,
 }

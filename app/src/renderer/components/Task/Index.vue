@@ -92,7 +92,8 @@ import SetTaskDialog from './SetTaskDialog';
 
 import { getExtensionConfigs, ifProcessRunning, findTargetFromArray, deepClone } from '__gUtils/busiUtils';
 import { deleteProcess } from '__gUtils/processUtils';
-import { TASK_EXTENSION_DIR } from '__gConfig/pathConfig';
+import { removeFileFolder } from '__gUtils/fileUtils';
+import { TASK_EXTENSION_DIR, buildProcessLogPath } from '__gConfig/pathConfig';
 import { switchTask } from '__io/actions/base';
 
 import baseMixin from '@/assets/js/mixins/baseMixin';
@@ -189,8 +190,6 @@ export default {
             const processName = 'task_' + key + '_' + processNameByUniKey;
             const args = this.formArgs(extSettingData);
 
-            console.log(processName)
-
             return this.preUpdate()
                 .then(res => {
                     if (!res) return Promise.resolve(true)
@@ -213,6 +212,7 @@ export default {
                 cancelButtonText: '取 消',
             })
             .then(() => deleteProcess(processId))
+            .then(() => removeFileFolder(buildProcessLogPath(processId)))
             .then(() => this.$message.success('操作成功！'))
             .then(() => true)
             .catch((err) => {
@@ -225,7 +225,7 @@ export default {
 
         handleTaskSwitch (e, data) {
             const { processId, args, cwd, script } = data;
-            return switchTask(processId, e,  {
+            return switchTask(processId, e, {
                 args,
                 cwd,
                 script
@@ -241,7 +241,6 @@ export default {
         },
 
         preUpdate () {
-            console.log(this.processStatus)
             if (this.setTaskTarget) {
                 return this.handleDeleteTask(this.setTaskTarget, true)
             }

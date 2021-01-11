@@ -491,7 +491,8 @@ function buildProcessStatusWidthDetail (pList: any[]): StringToProcessStatusDeta
             const status = pm2_env.status;
             const created_at = pm2_env.created_at;
             const cwd = pm2_env.cwd;
-            const script = pm2_env.script;
+            const pm_exec_path = (pm2_env.pm_exec_path || "").split('\/');
+            const script = pm2_env.script || pm_exec_path[pm_exec_path.length - 1]
             const args = pm2_env.args;
 
             processStatus[name] = {
