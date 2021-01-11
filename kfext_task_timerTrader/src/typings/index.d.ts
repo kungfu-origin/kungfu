@@ -5,5 +5,6 @@ interface ProcPayload {
     data: {
         quotes: QuoteData[];
         positions: PosData[];
+        orders: OrderData[];
     }
 }

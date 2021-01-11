@@ -2,7 +2,7 @@
 import { mapState } from 'vuex';
 import { ipcRenderer, remote } from 'electron';
 
-import { watcher, dealQuote, dealPos } from '__io/kungfu/watcher';
+import { watcher, dealQuote, dealPos, dealOrder } from '__io/kungfu/watcher';
 import { getStrategyById, updateStrategyPath } from '__io/kungfu/strategy';
 
 import makeOrderCoreMixin from '@/components/Base/makeOrder/js/makeOrderCoreMixin';
@@ -64,35 +64,53 @@ export default {
 
                     switch (dataType) {
                         case 'REQ_LEDGER_DATA':
-                            if (watcher.isLive()) {
-                                watcher.step();
-                                const ledger = watcher.ledger;
-                                const positions = Object.values(ledger.Position || {});
-                                const quotes = Object.values(ledger.Quote || {});
-                                _pm2.sendDataToProcessId({
-                                    type: 'process:msg',
-                                    data: {
-                                        positions: positions.map(pos => dealPos(pos)),
-                                        quotes: quotes.map(quote => dealQuote(quote)),
-                                    },
-                                    id: pm2Id,
-                                    topic: 'LEDGER_DATA'
-                                }, (err) => {
-                                    if (err) {
-                                        console.error(processName, err)
-                                    }
-                                })
-                            }
+                            const parentId = data.parentId
+                            this.resLedgerData(parentId, pm2Id, processName)
                             break;
                         case 'MAKE_ORDER_BY_PARENT_ID':
                             const makeOrderData = data.body;
                             console.log(makeOrderData)
-                            return this.makeOrder('parent', makeOrderData, makeOrderData.name, processName)
+                            return this.makeOrder('account', makeOrderData, makeOrderData.name)
                         case 'CANCEL_ORDER_BY_CLINET_ID':
                             break
                     }
                 })
             })
+        },
+
+        resLedgerData (parentId, pm2Id, processName) {
+            if (watcher.isLive()) {
+                watcher.step();
+                const ledger = watcher.ledger;
+                const { orders, positions, quotes } = this.buildLedgerDataForTask(ledger, parentId)
+                _pm2.sendDataToProcessId({
+                    type: 'process:msg',
+                    data: {
+                        positions: positions.map(pos => dealPos(pos)),
+                        quotes: quotes.map(quote => dealQuote(quote)),
+                        orders: orders.map(orders => dealOrder(orders))
+                    },
+                    id: pm2Id,
+                    topic: 'LEDGER_DATA'
+                }, (err) => {
+                    if (err) {
+                        console.error(processName, err)
+                    }
+                })
+            }
+        },
+
+        //pos, quote, orders
+        buildLedgerDataForTask (ledger, parentId) {
+            const positions = Object.values(ledger.Position || {});
+            const quotes = Object.values(ledger.Quote || {});
+            const orders = Object.values(ledger.Orders || {}).filter(order => order.parent_id === parentId);
+            console.log(parentId, orders)
+            return {
+                positions,
+                quotes,
+                orders
+            }
         },
         
         bindIPCListener () {

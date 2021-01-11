@@ -97,8 +97,10 @@ export const reqMakeOrder = (baseData: any, quote: QuoteData, pos: PosData) => {
         return
     }
 
-    const { lastPrice, upperLimitPrice, lowerLimitPrice, instrumentId, exchangeId } = quote;
-    const { instrumentType } = pos;
+    const { instrumentTypeOrigin, lastPrice, upperLimitPrice, lowerLimitPrice, instrumentId, exchangeId } = quote;
+    const { instrumentType } = pos
+    const instrumentTypeResolved = +instrumentTypeOrigin || +instrumentType
+    console.log('instrumentType', instrumentTypeOrigin, instrumentType, '---------------')
 
     //先撤单
 
@@ -108,25 +110,25 @@ export const reqMakeOrder = (baseData: any, quote: QuoteData, pos: PosData) => {
         console.error('[ERROR] steps - timeCount = ', unfinishedSteps)
     }
     const targetVolumeThisStep = Math.ceil(targetVolume / unfinishedSteps);
-    const theVolume = dealMakeOrderVolume(instrumentType, targetVolumeThisStep)
+    const theVolume = dealMakeOrderVolume(+instrumentTypeResolved, targetVolumeThisStep)
     const makeOrderData = { 
         name: accountId,
         instrument_id: instrumentId,
-        instrument_type: instrumentType,
+        instrument_type: +instrumentTypeResolved,
         exchange_id: exchangeId,
         limit_price: lastPrice,
         volume: theVolume || 0,
         side: side,
         offset: offset,
         price_type: 0,
-        hedge_flag: 0
+        hedge_flag: 0,
+        parent_id: parentId
     }
     //@ts-ignore
     process.send({
         type: 'process:msg',
         data: {
             type: 'MAKE_ORDER_BY_PARENT_ID',
-            parentId: parentId,
             body: {
                 ...makeOrderData
             }

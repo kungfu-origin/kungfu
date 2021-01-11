@@ -10,7 +10,7 @@ import { transformArrayToObjectByKey, makeOrderDirectionType, buildTarget, reqMa
 const argv = minimist(process.argv.slice(2), {
     string: 'ticker',
 })
-const { ticker, side, offset, volume, steps, triggerTime, finishTime } = argv;
+const { ticker, side, offset, volume, steps, triggerTime, finishTime, parentId } = argv;
 const triggerTimeStr = moment(triggerTime).format('YYYYMMDD HH:mm:ss');
 const finishTimeStr = moment(finishTime).format('YYYYMMDD HH:mm:ss');
 const deltaTimestamp = Math.ceil((finishTime - triggerTime) / steps);
@@ -38,10 +38,11 @@ const reqTradingDataTimer = setInterval(() => {
     process.send({
         type: 'process:msg',
         data: {
-            type: 'REQ_LEDGER_DATA'
+            type: 'REQ_LEDGER_DATA',
+            parentId
         }
     })
-}, 100)
+}, 1000)
 
 const TIMER_COUNT_OBSERVER = (): Observable<number> => new Observable((subscriber) => {
     let count: number = -1;
@@ -93,6 +94,19 @@ const quotesPipe = () => {
     )
 }
 
+const ordersPipe = () => {
+    return PROCESS_MSG_OBSERVER().pipe(
+        filter((payload: ProcPayload) => {
+            return payload.topic === 'LEDGER_DATA'
+        }),
+        map((payload: ProcPayload): OrderData[] => {
+            const { data } = payload;
+            const { orders } = data;
+            return orders
+        })
+    )
+}
+
 
 const positionsPipe = () => {
     return PROCESS_MSG_OBSERVER().pipe(
@@ -126,20 +140,26 @@ var targetPosData: any = null;
 
 combineLatestObserver.subscribe(([timeCount, quotes, positions]: [ number, { [prop: string]: QuoteData }, { [prop: string]: PosData } ] ) => {
 
+    // 判断是否可以交易
+    
+
     if (timeCount <= dealedTimeCount) return;
     dealedTimeCount = timeCount;
 
     if (!targetPosData) {
         const pos = positions[`${TICKER}_${TARGET_DIRECTION}`] || {};
-        const { totalVolume } = pos;
-        const totalVolumeResolved = totalVolume || 0;
-        targetPosData = buildTarget({ 
-            offset,
-            side,
-            ticker,
-            totalVolume: totalVolumeResolved,
-            targetVolume: TARGET_VOLUME
-        })
+        //需保证在有持仓的情况下
+        if (pos) {
+            const { totalVolume } = pos;
+            const totalVolumeResolved = totalVolume || 0;
+            targetPosData = buildTarget({ 
+                offset,
+                side,
+                ticker,
+                totalVolume: totalVolumeResolved,
+                targetVolume: TARGET_VOLUME
+            })
+        }
     }
 
 

@@ -23084,7 +23084,7 @@ var __assign = (this && this.__assign) || function () {
 var argv = __WEBPACK_IMPORTED_MODULE_0_minimist___default()(process.argv.slice(2), {
     string: 'ticker',
 });
-var ticker = argv.ticker, side = argv.side, offset = argv.offset, volume = argv.volume, steps = argv.steps, triggerTime = argv.triggerTime, finishTime = argv.finishTime;
+var ticker = argv.ticker, side = argv.side, offset = argv.offset, volume = argv.volume, steps = argv.steps, triggerTime = argv.triggerTime, finishTime = argv.finishTime, parentId = argv.parentId;
 var triggerTimeStr = __WEBPACK_IMPORTED_MODULE_3_moment___default()(triggerTime).format('YYYYMMDD HH:mm:ss');
 var finishTimeStr = __WEBPACK_IMPORTED_MODULE_3_moment___default()(finishTime).format('YYYYMMDD HH:mm:ss');
 var deltaTimestamp = Math.ceil((finishTime - triggerTime) / steps);
@@ -23107,10 +23107,11 @@ var reqTradingDataTimer = setInterval(function () {
     process.send({
         type: 'process:msg',
         data: {
-            type: 'REQ_LEDGER_DATA'
+            type: 'REQ_LEDGER_DATA',
+            parentId: parentId
         }
     });
-}, 100);
+}, 1000);
 var TIMER_COUNT_OBSERVER = function () { return new __WEBPACK_IMPORTED_MODULE_1_rxjs__["a" /* Observable */](function (subscriber) {
     var count = -1;
     var secondsCounterTimer = setInterval(function () {
@@ -23154,6 +23155,15 @@ var quotesPipe = function () {
         return Object(__WEBPACK_IMPORTED_MODULE_4__assets_utils__["d" /* transformArrayToObjectByKey */])(quotesAfterFilter, ['instrumentId']);
     }));
 };
+var ordersPipe = function () {
+    return PROCESS_MSG_OBSERVER().pipe(Object(__WEBPACK_IMPORTED_MODULE_2_rxjs_operators__["a" /* filter */])(function (payload) {
+        return payload.topic === 'LEDGER_DATA';
+    }), Object(__WEBPACK_IMPORTED_MODULE_2_rxjs_operators__["b" /* map */])(function (payload) {
+        var data = payload.data;
+        var orders = data.orders;
+        return orders;
+    }));
+};
 var positionsPipe = function () {
     return PROCESS_MSG_OBSERVER().pipe(Object(__WEBPACK_IMPORTED_MODULE_2_rxjs_operators__["a" /* filter */])(function (payload) {
         return payload.topic === 'LEDGER_DATA';
@@ -23174,21 +23184,25 @@ var combineLatestObserver = Object(__WEBPACK_IMPORTED_MODULE_1_rxjs__["b" /* com
 var dealedTimeCount = -1;
 var targetPosData = null;
 combineLatestObserver.subscribe(function (_a) {
+    // 判断是否可以交易
     var timeCount = _a[0], quotes = _a[1], positions = _a[2];
     if (timeCount <= dealedTimeCount)
         return;
     dealedTimeCount = timeCount;
     if (!targetPosData) {
         var pos_1 = positions[TICKER + "_" + TARGET_DIRECTION] || {};
-        var totalVolume = pos_1.totalVolume;
-        var totalVolumeResolved = totalVolume || 0;
-        targetPosData = Object(__WEBPACK_IMPORTED_MODULE_4__assets_utils__["a" /* buildTarget */])({
-            offset: offset,
-            side: side,
-            ticker: ticker,
-            totalVolume: totalVolumeResolved,
-            targetVolume: TARGET_VOLUME
-        });
+        //需保证在有持仓的情况下
+        if (pos_1) {
+            var totalVolume = pos_1.totalVolume;
+            var totalVolumeResolved = totalVolume || 0;
+            targetPosData = Object(__WEBPACK_IMPORTED_MODULE_4__assets_utils__["a" /* buildTarget */])({
+                offset: offset,
+                side: side,
+                ticker: ticker,
+                totalVolume: totalVolumeResolved,
+                targetVolume: TARGET_VOLUME
+            });
+        }
     }
     console.log('============ 正在执行 ', timeCount, "/ " + steps + " ==============");
     var quote = quotes[TICKER];
@@ -33064,8 +33078,10 @@ var reqMakeOrder = function (baseData, quote, pos) {
         console.error("\u6682\u65E0" + ticker + "_" + targetVolume + "\u6301\u4ED3\u4FE1\u606F");
         return;
     }
-    var lastPrice = quote.lastPrice, upperLimitPrice = quote.upperLimitPrice, lowerLimitPrice = quote.lowerLimitPrice, instrumentId = quote.instrumentId, exchangeId = quote.exchangeId;
+    var instrumentTypeOrigin = quote.instrumentTypeOrigin, lastPrice = quote.lastPrice, upperLimitPrice = quote.upperLimitPrice, lowerLimitPrice = quote.lowerLimitPrice, instrumentId = quote.instrumentId, exchangeId = quote.exchangeId;
     var instrumentType = pos.instrumentType;
+    var instrumentTypeResolved = +instrumentTypeOrigin || +instrumentType;
+    console.log('instrumentType', instrumentTypeOrigin, instrumentType, '---------------');
     //先撤单
     //再下单
     var unfinishedSteps = steps - timeCount || 1;
@@ -33073,25 +33089,25 @@ var reqMakeOrder = function (baseData, quote, pos) {
         console.error('[ERROR] steps - timeCount = ', unfinishedSteps);
     }
     var targetVolumeThisStep = Math.ceil(targetVolume / unfinishedSteps);
-    var theVolume = dealMakeOrderVolume(instrumentType, targetVolumeThisStep);
+    var theVolume = dealMakeOrderVolume(+instrumentTypeResolved, targetVolumeThisStep);
     var makeOrderData = {
         name: accountId,
         instrument_id: instrumentId,
-        instrument_type: instrumentType,
+        instrument_type: +instrumentTypeResolved,
         exchange_id: exchangeId,
         limit_price: lastPrice,
         volume: theVolume || 0,
         side: side,
         offset: offset,
         price_type: 0,
-        hedge_flag: 0
+        hedge_flag: 0,
+        parent_id: parentId
     };
     //@ts-ignore
     process.send({
         type: 'process:msg',
         data: {
             type: 'MAKE_ORDER_BY_PARENT_ID',
-            parentId: parentId,
             body: __assign({}, makeOrderData)
         }
     });
