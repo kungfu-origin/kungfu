@@ -161,7 +161,7 @@ function dealMakeOrderVolume (instrumentType: number, volume: number) {
         return scaleResolved * 100
     }
 
-    return volume
+    return Number(volume).toFixed(0)
 }
 
 export const getAliveOrders = (orders: OrderData[]) => {

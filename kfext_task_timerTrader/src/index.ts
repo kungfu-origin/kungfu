@@ -208,6 +208,7 @@ combineLatestObserver.subscribe((
         return;
     }
 
+    console.log(`[交易检查] ${timeCount + 1} / ${steps} `)
     
     // 判断是否可以交易, 如不能交易，先撤单
     const aliveOrders = getAliveOrders(orders)
@@ -224,7 +225,7 @@ combineLatestObserver.subscribe((
     //制定本次交易计划
     const instrumentType = quote.instrumentTypeOrigin;
     const unfinishedSteps = steps - timeCount
-    const { total, thisStepVolume, currentVolume, currentVolumeCount }  = calcVolumeThisStep(
+    const { total, thisStepVolume, currentVolume }  = calcVolumeThisStep(
         positions,
         TICKER,
         TARGET_DIRECTION,
