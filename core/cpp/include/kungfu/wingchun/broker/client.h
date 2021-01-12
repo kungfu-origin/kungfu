@@ -19,7 +19,7 @@ struct ResumePolicy {
   [[nodiscard]] int64_t get_connect_time(const yijinjing::practice::apprentice &app,
                                          const longfist::types::Register &broker) const;
 
-  [[nodiscard]] virtual int64_t get_resmue_time(const yijinjing::practice::apprentice &app,
+  [[nodiscard]] virtual int64_t get_resume_time(const yijinjing::practice::apprentice &app,
                                                 const longfist::types::Register &broker) const = 0;
 };
 
@@ -27,7 +27,7 @@ struct ResumePolicy {
  * Always resume from the last unread frame, is intended to be used by system services that needs continuity.
  */
 struct ContinuousResumePolicy : public ResumePolicy {
-  [[nodiscard]] int64_t get_resmue_time(const yijinjing::practice::apprentice &app,
+  [[nodiscard]] int64_t get_resume_time(const yijinjing::practice::apprentice &app,
                                         const longfist::types::Register &broker) const override;
 };
 
@@ -36,7 +36,7 @@ struct ContinuousResumePolicy : public ResumePolicy {
  * This policy ensures the client does not look back data before today, is intended to be used by strategies.
  */
 struct IntradayResumePolicy : public ResumePolicy {
-  [[nodiscard]] int64_t get_resmue_time(const yijinjing::practice::apprentice &app,
+  [[nodiscard]] int64_t get_resume_time(const yijinjing::practice::apprentice &app,
                                         const longfist::types::Register &broker) const override;
 };
 

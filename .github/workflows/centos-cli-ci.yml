@@ -1,4 +1,4 @@
-name: Centos CI
+name: CLI CI
 
 on: 
   push:
