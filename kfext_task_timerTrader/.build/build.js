@@ -3,6 +3,13 @@ const childProcess = require('child_process');
 
 switch (os.platform()) {
     case 'win32':
+        childProcess.exec(`yarn run build-win`, (err, stdout) => {
+            if(err) {
+                console.error(err)
+                process.exit(1)
+            }
+            console.log(stdout)
+        })
         return 'win';
     case 'darwin':
         childProcess.exec(`yarn run build-mac`, (err, stdout) => {
