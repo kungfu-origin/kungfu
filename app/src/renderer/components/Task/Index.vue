@@ -86,6 +86,7 @@
 
 import path from 'path';
 import moment from 'moment';
+import minimist from 'minimist';
 import { mapState } from 'vuex';
 
 import SetTaskDialog from './SetTaskDialog';
@@ -172,7 +173,7 @@ export default {
         handleOpenUpdateTaskDialog (data) {
             console.log('parseArgs', data.args)
             this.setTaskMethod = 'update';
-            this.setTaskInitData = this.parseArgs(data.args)
+            this.setTaskInitData = minimist(data.args, { string: 'ticker' })
             this.setTaskInitKey = this.getTaskConfigKeyFromProcessId(data.processId)
             this.setTaskTarget = data;
             this.setTaskDialogVisiblity = true;
@@ -261,36 +262,6 @@ export default {
         getTaskConfigKeyFromProcessId (processId) {
             let processIdSplit = processId.split('_');
             return processIdSplit[1]
-        },
-
-        parseArgs (args) {
-            let list = [];
-            let tmpList = [];
-            args.forEach((element, index) => {
-                if (index % 2 === 0) {
-                    // remove '--' 
-                    element = element.slice(2)
-                } else {
-                    //if number，number it
-                    if (!Number.isNaN(+element)) {
-                        element = +element
-                    }
-                }
-
-                tmpList.push(element)
-
-                if (index % 2 !== 0) {
-                    list.push(tmpList.slice(0))
-                    tmpList = []
-                } 
-            });
-
-            let obj = {}
-            list.forEach(l => {
-                obj[l[0] || ''] = l[1] || ''
-            })
-
-            return deepClone(obj)
         },
 
         getExtensionConfigs () {

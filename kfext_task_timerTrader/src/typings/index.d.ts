@@ -13,3 +13,13 @@ interface OrderIdData {
     status: number;
     orderId: string
 }
+
+interface VolumeRecordData {
+    d: number;
+    v: number;
+}
+
+interface direcData {
+    d: number,
+    n: string
+}

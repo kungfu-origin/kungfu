@@ -23084,24 +23084,37 @@ var __assign = (this && this.__assign) || function () {
 var argv = __WEBPACK_IMPORTED_MODULE_0_minimist___default()(process.argv.slice(2), {
     string: 'ticker',
 });
-var ticker = argv.ticker, side = argv.side, offset = argv.offset, volume = argv.volume, steps = argv.steps, triggerTime = argv.triggerTime, finishTime = argv.finishTime, parentId = argv.parentId;
+var ticker = argv.ticker, side = argv.side, offset = argv.offset, volume = argv.volume, steps = argv.steps, triggerTime = argv.triggerTime, finishTime = argv.finishTime, exchangeId = argv.exchangeId, parentId = argv.parentId, accountId = argv.accountId;
 var triggerTimeStr = __WEBPACK_IMPORTED_MODULE_3_moment___default()(triggerTime).format('YYYYMMDD HH:mm:ss');
 var finishTimeStr = __WEBPACK_IMPORTED_MODULE_3_moment___default()(finishTime).format('YYYYMMDD HH:mm:ss');
 var deltaTimestamp = Math.ceil((finishTime - triggerTime) / steps);
 var TICKER = ticker.toString().trim();
 var PARENT_ID = parentId;
-var TARGET_DIRECTION = Object(__WEBPACK_IMPORTED_MODULE_4__assets_utils__["c" /* makeOrderDirectionType */])(side, offset);
+var TARGET_DIRECTION = Object(__WEBPACK_IMPORTED_MODULE_4__assets_utils__["d" /* makeOrderDirectionType */])(side, offset).d;
+var OPERATION_NAME = Object(__WEBPACK_IMPORTED_MODULE_4__assets_utils__["d" /* makeOrderDirectionType */])(side, offset).n;
 var TARGET_VOLUME = volume;
-var LAST_STEP_COUNTE = steps - 1;
+var LAST_STEP_COUNT = steps - 1;
 console.log('===========================================');
 console.log('[ARGS]', process.argv.slice(2).join(','));
-// console.log('[ARGS]: accountId', accountId, 'ticker', ticker, 'side', side, 'offset', offset, 'volume', volume, 'steps', steps, 'triggerTime', triggerTime, 'finishTime', finishTime)
 console.log('===========================================');
 console.log('TriggerTime', triggerTime, triggerTimeStr);
 console.log('FinishTime', finishTime, finishTimeStr);
 console.log('Executing every ', deltaTimestamp, 'ms');
 console.log('Target Ticker ', TICKER);
 console.log('===========================================');
+//@ts-ignore
+process.send({
+    type: 'process:msg',
+    data: {
+        type: 'SUBSCRIBE_BY_TICKER',
+        body: {
+            ticker: TICKER,
+            exchangeId: exchangeId,
+            accountId: accountId
+        }
+    }
+});
+console.log("[\u8BA2\u9605] " + TICKER + " " + exchangeId + " " + accountId);
 //行情request
 var reqTradingDataTimer = setInterval(function () {
     //@ts-ignore
@@ -23109,22 +23122,24 @@ var reqTradingDataTimer = setInterval(function () {
         type: 'process:msg',
         data: {
             type: 'REQ_LEDGER_DATA',
-            parentId: PARENT_ID
+            body: {
+                parentId: PARENT_ID,
+                accountId: accountId
+            }
         }
     });
 }, 1000);
+var secondsCounterTimer = null;
 var TIMER_COUNT_OBSERVER = function () { return new __WEBPACK_IMPORTED_MODULE_1_rxjs__["a" /* Observable */](function (subscriber) {
     var count = -1;
-    var secondsCounterTimer = setInterval(function () {
+    secondsCounterTimer = setInterval(function () {
         var currentTimestamp = __WEBPACK_IMPORTED_MODULE_3_moment___default()().valueOf();
         if (currentTimestamp >= finishTime) {
-            console.log('定时交易任务结束！');
-            clearInterval(secondsCounterTimer);
-            clearInterval(reqTradingDataTimer);
+            handleFinished();
             return;
         }
         var currentCount = Math.ceil((currentTimestamp - triggerTime) / deltaTimestamp);
-        if (currentCount >= 0 && currentCount <= LAST_STEP_COUNTE) {
+        if (currentCount >= 0 && currentCount <= LAST_STEP_COUNT) {
             if (count !== currentCount) {
                 subscriber.next(currentCount);
                 count = +currentCount;
@@ -23153,7 +23168,7 @@ var quotesPipe = function () {
             var instrumentId = quoteData['instrumentId'];
             return TICKER === instrumentId.toString();
         });
-        return Object(__WEBPACK_IMPORTED_MODULE_4__assets_utils__["f" /* transformArrayToObjectByKey */])(quotesAfterFilter, ['instrumentId']);
+        return Object(__WEBPACK_IMPORTED_MODULE_4__assets_utils__["g" /* transformArrayToObjectByKey */])(quotesAfterFilter, ['instrumentId']);
     }));
 };
 var ordersPipe = function () {
@@ -23171,6 +23186,10 @@ var positionsPipe = function () {
     }), Object(__WEBPACK_IMPORTED_MODULE_2_rxjs_operators__["b" /* map */])(function (payload) {
         var data = payload.data;
         var positions = data.positions;
+        if (!positions || !positions.length) {
+            console.log('[WARNING] 系统内无持仓');
+            return null;
+        }
         var positionsAfterFilter = positions.filter(function (posData) {
             var instrumentId = posData.instrumentId;
             if (TICKER === instrumentId.toString()) {
@@ -23178,7 +23197,7 @@ var positionsPipe = function () {
             }
             return false;
         });
-        return Object(__WEBPACK_IMPORTED_MODULE_4__assets_utils__["f" /* transformArrayToObjectByKey */])(positionsAfterFilter, ['instrumentId', 'directionOrigin']);
+        return Object(__WEBPACK_IMPORTED_MODULE_4__assets_utils__["g" /* transformArrayToObjectByKey */])(positionsAfterFilter, ['instrumentId', 'directionOrigin']);
     }));
 };
 var combineLatestObserver = Object(__WEBPACK_IMPORTED_MODULE_1_rxjs__["b" /* combineLatest */])(TIMER_COUNT_OBSERVER(), quotesPipe(), positionsPipe(), ordersPipe());
@@ -23187,49 +23206,81 @@ var targetPosData = null;
 var hasCancelOrderInThisLoop = false;
 combineLatestObserver.subscribe(function (_a) {
     var timeCount = _a[0], quotes = _a[1], positions = _a[2], orders = _a[3];
+    var quote = quotes[TICKER];
+    if (positions === null) {
+        return;
+    }
+    var pos = positions[TICKER + "_" + TARGET_DIRECTION];
     //制定全部交易计划
     if (!targetPosData) {
-        var pos_1 = positions[TICKER + "_" + TARGET_DIRECTION] || {};
-        //需保证在有持仓的情况下
-        if (pos_1) {
-            var totalVolume = pos_1.totalVolume;
-            var totalVolumeResolved = totalVolume || 0;
-            targetPosData = Object(__WEBPACK_IMPORTED_MODULE_4__assets_utils__["a" /* buildTarget */])({
-                offset: offset,
-                side: side,
-                ticker: ticker,
-                totalVolume: totalVolumeResolved,
-                targetVolume: TARGET_VOLUME
-            });
-            console.log("[\u5236\u5B9A\u4EA4\u6613\u8BA1\u5212] " + JSON.stringify(targetPosData));
-        }
+        var totalVolume = (pos || {}).totalVolume;
+        targetPosData = Object(__WEBPACK_IMPORTED_MODULE_4__assets_utils__["a" /* buildTarget */])({
+            offset: offset,
+            side: side,
+            ticker: ticker,
+            totalVolume: totalVolume || 0,
+            targetVolume: TARGET_VOLUME
+        });
     }
-    if (timeCount <= dealedTimeCount)
+    if (!targetPosData) {
         return;
+    }
+    ;
     // 判断是否可以交易, 如不能交易，先撤单
-    var aliveOrders = Object(__WEBPACK_IMPORTED_MODULE_4__assets_utils__["b" /* getAliveOrders */])(orders);
+    var aliveOrders = Object(__WEBPACK_IMPORTED_MODULE_4__assets_utils__["c" /* getAliveOrders */])(orders);
     if (aliveOrders.length) {
-        console.log("[CHECK ORDERS] \u6D3B\u52A8\u8BA2\u5355\u6570\u91CF " + aliveOrders.length + " / " + PARENT_ID + "\u4E0B\u5168\u90E8\u8BA2\u5355\u6570\u91CF " + orders.length + ", \u7B49\u5F85\u5168\u90E8\u8BA2\u5355\u7ED3\u675F");
         if (!hasCancelOrderInThisLoop) {
-            Object(__WEBPACK_IMPORTED_MODULE_4__assets_utils__["d" /* reqCancelOrder */])(PARENT_ID);
+            Object(__WEBPACK_IMPORTED_MODULE_4__assets_utils__["e" /* reqCancelOrder */])(PARENT_ID);
             hasCancelOrderInThisLoop = true;
-            console.log("[\u64A4\u5355] " + PARENT_ID);
+            console.log("[CHECK ORDERS] \u6D3B\u52A8\u8BA2\u5355\u6570\u91CF " + aliveOrders.length + " / " + orders.length + ", \u7B49\u5F85\u5168\u90E8\u8BA2\u5355\u7ED3\u675F");
+            console.log("[\u64A4\u5355] PARENTID: " + PARENT_ID);
         }
+        return;
+    }
+    if (!quote) {
+        console.error("\u6682\u65E0" + ticker + "\u884C\u60C5\u4FE1\u606F");
+        return;
+    }
+    if (timeCount <= dealedTimeCount) {
         return;
     }
     //制定本次交易计划
-    //再下单
-    var quote = quotes[TICKER];
-    var pos = positions[TICKER + "_" + TARGET_DIRECTION] || {};
-    Object(__WEBPACK_IMPORTED_MODULE_4__assets_utils__["e" /* reqMakeOrder */])(__assign(__assign({}, argv), { ticker: TICKER, targetVolume: TARGET_VOLUME, timeCount: timeCount }), quote, pos);
-    // //最后一步
-    // if (timeCount === LAST_STEP_COUNTE) {
-    //     return;
-    // }
-    console.log('============ 已完成执行 ', timeCount, "/ " + steps + " ==============");
+    var instrumentType = quote.instrumentTypeOrigin;
+    var unfinishedSteps = steps - timeCount;
+    var _b = Object(__WEBPACK_IMPORTED_MODULE_4__assets_utils__["b" /* calcVolumeThisStep */])(positions, TICKER, TARGET_DIRECTION, targetPosData, unfinishedSteps, instrumentType), total = _b.total, thisStepVolume = _b.thisStepVolume, currentVolume = _b.currentVolume, currentVolumeCount = _b.currentVolumeCount;
+    if (total === 0) {
+        console.log('=========================================');
+        console.log('=============== 交易任务完成 ==============');
+        console.log('==========================================');
+        handleFinished();
+    }
+    if (timeCount > LAST_STEP_COUNT) {
+        handleFinished();
+        return;
+    }
+    console.log("========= \u4EA4\u6613\u6761\u4EF6\u6EE1\u8DB3\uFF0C\u5F00\u59CB " + (timeCount + 1) + " / " + steps + " =========");
+    if ((offset === 0) || (currentVolume >= thisStepVolume)) {
+        console.log("\u8FD8\u9700 " + OPERATION_NAME + " " + total + ", \u672C\u6B21\u9700 " + OPERATION_NAME + " " + thisStepVolume);
+        Object(__WEBPACK_IMPORTED_MODULE_4__assets_utils__["f" /* reqMakeOrder */])(__assign(__assign({}, argv), { volume: thisStepVolume }), quote, unfinishedSteps);
+    }
+    else {
+        var deltaVolume = +Number(thisStepVolume - currentVolume).toFixed(0);
+        var deltaVolumeResolved = Math.min(currentVolumeCount, deltaVolume);
+        var contOperationName = Object(__WEBPACK_IMPORTED_MODULE_4__assets_utils__["d" /* makeOrderDirectionType */])(side, 0).n;
+        console.log("\n            \u8FD8\u9700 " + OPERATION_NAME + " " + total + ", \u672C\u6B21\u9700 " + OPERATION_NAME + " " + thisStepVolume + ", \n            \u6301\u4ED3\u4E0D\u8DB3,\n            \u9700 " + OPERATION_NAME + " " + currentVolume + ",\n            " + contOperationName + " " + deltaVolumeResolved + ",\n        ");
+        Object(__WEBPACK_IMPORTED_MODULE_4__assets_utils__["f" /* reqMakeOrder */])(__assign(__assign({}, argv), { volume: currentVolume }), quote, unfinishedSteps);
+        Object(__WEBPACK_IMPORTED_MODULE_4__assets_utils__["f" /* reqMakeOrder */])(__assign(__assign({}, argv), { offset: 0, volume: deltaVolume }), quote, unfinishedSteps);
+    }
+    console.log("============ \u5DF2\u5B8C\u6210\u6267\u884C " + (timeCount + 1) + " / " + steps + " ==============");
     hasCancelOrderInThisLoop = false;
     dealedTimeCount = timeCount; //此时记录下来
 });
+function handleFinished() {
+    console.log("====================== \u65F6\u95F4\u622A\u6B62\uFF0C\u4EA4\u6613\u7ED3\u675F ======================");
+    secondsCounterTimer && clearInterval(secondsCounterTimer);
+    reqTradingDataTimer && clearInterval(reqTradingDataTimer);
+    process.exit(0);
+}
 
 
 /***/ }),
@@ -32986,12 +33037,13 @@ function zipAll(project) {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "f", function() { return transformArrayToObjectByKey; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "c", function() { return makeOrderDirectionType; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "g", function() { return transformArrayToObjectByKey; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "d", function() { return makeOrderDirectionType; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return buildTarget; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "e", function() { return reqMakeOrder; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "d", function() { return reqCancelOrder; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return getAliveOrders; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "f", function() { return reqMakeOrder; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "e", function() { return reqCancelOrder; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "c", function() { return getAliveOrders; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return calcVolumeThisStep; });
 var __assign = (this && this.__assign) || function () {
     __assign = Object.assign || function(t) {
         for (var s, i = 1, n = arguments.length; i < n; i++) {
@@ -33014,30 +33066,32 @@ var transformArrayToObjectByKey = function (targetList, keys) {
 var makeOrderDirectionType = function (side, offset) {
     if (+side === 0) {
         if (+offset === 0) {
-            return 0; // 'long-open'
+            return { d: 0, n: '买开' }; // 'long-open'
         }
         else if (+offset === 1) {
-            return 1; // 'short-close'
+            return { d: 1, n: '买平' }; // 'short-close'
         }
     }
     else if (+side === 1) {
         if (+offset === 0) {
-            return 1; // 'short-open'
+            return { d: 1, n: '卖开' }; // 'short-open'
         }
         else if (+offset === 1) {
-            return 0; // 'long-close'
+            return { d: 0, n: '卖平' }; // 'long-close'
         }
     }
-    return 0;
+    return {
+        d: 0,
+        n: '未知'
+    };
 };
 var buildTarget = function (_a) {
-    var _b, _c, _d, _e, _f, _g, _h, _j;
     var offset = _a.offset, side = _a.side, ticker = _a.ticker, totalVolume = _a.totalVolume, targetVolume = _a.targetVolume;
     if (+side === 0) {
         if (+offset === 0) {
             console.log("[TRAGET] \u6807\u7684 " + ticker + "\uFF0C\u73B0\u6709\u591A\u4ED3 " + totalVolume + "\uFF0C\u76EE\u6807\u4E70\u5F00 " + targetVolume);
             return [
-                (_b = {}, _b[ticker + "_0"] = totalVolume + targetVolume, _b)
+                { d: 0, v: totalVolume + targetVolume }
             ];
         }
         else if (+offset === 1) {
@@ -33045,14 +33099,14 @@ var buildTarget = function (_a) {
                 var delta = targetVolume - totalVolume;
                 console.log("[TRAGET] \u6807\u7684 " + ticker + "\uFF0C\u73B0\u6709\u7A7A\u4ED3 " + totalVolume + "\uFF0C\u76EE\u6807\u4E70\u5E73 " + targetVolume + "\uFF0C\u73B0\u6709\u6301\u4ED3\u4E0D\u8DB3\uFF0C\u9700\u4E70\u5E73 " + totalVolume + "\uFF0C\u4E70\u5F00 " + delta);
                 return [
-                    (_c = {}, _c[ticker + "_1"] = 0, _c),
-                    (_d = {}, _d[ticker + "_0"] = delta, _d)
+                    { d: 1, v: 0 },
+                    { d: 0, v: delta }
                 ];
             }
             else {
                 console.log("[TRAGET] \u6807\u7684 " + ticker + "\uFF0C\u73B0\u6709\u7A7A\u4ED3 " + totalVolume + "\uFF0C\u76EE\u6807\u4E70\u5E73 " + targetVolume);
                 return [
-                    (_e = {}, _e[ticker + "_1"] = totalVolume - targetVolume, _e),
+                    { d: 1, v: totalVolume - targetVolume },
                 ];
             }
         }
@@ -33061,7 +33115,7 @@ var buildTarget = function (_a) {
         if (+offset === 0) {
             console.log("[TRAGET] \u6807\u7684 " + ticker + "\uFF0C\u73B0\u6709\u7A7A\u4ED3" + totalVolume + "\uFF0C\u76EE\u6807\u5356\u5F00" + targetVolume);
             return [
-                (_f = {}, _f[ticker + "_1"] = totalVolume + targetVolume, _f),
+                { d: 1, v: totalVolume + targetVolume },
             ];
         }
         else if (+offset === 1) {
@@ -33069,45 +33123,31 @@ var buildTarget = function (_a) {
                 var delta = targetVolume - totalVolume;
                 console.log("[TRAGET] \u6807\u7684 " + ticker + "\uFF0C\u73B0\u6709\u591A\u4ED3 " + totalVolume + "\uFF0C\u76EE\u6807\u5356\u5E73 " + targetVolume + "\uFF0C\u73B0\u6709\u6301\u4ED3\u4E0D\u8DB3\uFF0C\u9700\u5356\u5E73 " + totalVolume + "\uFF0C\u5356\u5F00 " + delta);
                 return [
-                    (_g = {}, _g[ticker + "_0"] = 0, _g),
-                    (_h = {}, _h[ticker + "_1"] = delta, _h)
+                    { d: 0, v: 0 },
+                    { d: 1, v: delta }
                 ];
             }
             else {
                 console.log("[TRAGET] \u6807\u7684 " + ticker + "\uFF0C\u73B0\u6709\u591A\u4ED3 " + totalVolume + "\uFF0C\u76EE\u6807\u5356\u5E73 " + targetVolume);
                 return [
-                    (_j = {}, _j[ticker + "_0"] = totalVolume - targetVolume, _j),
+                    { d: 0, v: totalVolume - targetVolume },
                 ];
             }
         }
     }
-    return undefined;
+    return false;
 };
-var reqMakeOrder = function (baseData, quote, pos) {
-    var ticker = baseData.ticker, side = baseData.side, offset = baseData.offset, steps = baseData.steps, accountId = baseData.accountId, targetVolume = baseData.targetVolume, timeCount = baseData.timeCount, parentId = baseData.parentId;
-    if (!quote) {
-        console.error("\u6682\u65E0" + ticker + "\u884C\u60C5\u4FE1\u606F");
-        return;
-    }
-    if (!pos) {
-        console.error("\u6682\u65E0" + ticker + "_" + targetVolume + "\u6301\u4ED3\u4FE1\u606F");
-        return;
-    }
-    var instrumentTypeOrigin = quote.instrumentTypeOrigin, lastPrice = quote.lastPrice, upperLimitPrice = quote.upperLimitPrice, lowerLimitPrice = quote.lowerLimitPrice, instrumentId = quote.instrumentId, exchangeId = quote.exchangeId;
-    console.log('instrumentType', instrumentTypeOrigin, '---------------');
-    var unfinishedSteps = steps - timeCount || 1;
-    if (unfinishedSteps < 0) {
-        console.error('[ERROR] steps - timeCount = ', unfinishedSteps);
-    }
-    var targetVolumeThisStep = Math.ceil(targetVolume / unfinishedSteps);
-    var theVolume = dealMakeOrderVolume(+instrumentTypeOrigin, targetVolumeThisStep);
+var reqMakeOrder = function (baseData, quote, unfinishedSteps) {
+    var side = baseData.side, offset = baseData.offset, accountId = baseData.accountId, volume = baseData.volume, parentId = baseData.parentId;
+    var instrumentTypeOrigin = quote.instrumentTypeOrigin, lastPrice = quote.lastPrice, instrumentId = quote.instrumentId, exchangeId = quote.exchangeId;
+    var makeOrderPrice = getMakeOrderPrice(side, quote, unfinishedSteps);
     var makeOrderData = {
         name: accountId,
         instrument_id: instrumentId,
         instrument_type: +instrumentTypeOrigin,
         exchange_id: exchangeId,
-        limit_price: lastPrice,
-        volume: theVolume || 0,
+        limit_price: makeOrderPrice,
+        volume: volume,
         side: side,
         offset: offset,
         price_type: 0,
@@ -33124,13 +33164,35 @@ var reqMakeOrder = function (baseData, quote, pos) {
     });
     console.log("[\u4E0B\u5355] " + JSON.stringify(makeOrderData));
 };
+function getMakeOrderPrice(side, quote, unfinishedSteps) {
+    var upperLimitPrice = quote.upperLimitPrice, lowerLimitPrice = quote.lowerLimitPrice, lastPrice = quote.lastPrice, askPrices = quote.askPrices, bidPrices = quote.bidPrices;
+    if (+side === 0) {
+        if (unfinishedSteps > 1) {
+            return askPrices[0];
+        }
+        else {
+            return upperLimitPrice;
+        }
+    }
+    else if (+side === 1) {
+        if (unfinishedSteps > 1) {
+            return bidPrices[0];
+        }
+        else {
+            return lowerLimitPrice;
+        }
+    }
+    return lastPrice;
+}
 var reqCancelOrder = function (parentId) {
     //@ts-ignore
     process.send({
         type: 'process:msg',
         data: {
             type: 'CANCEL_ORDER_BY_PARENT_ID',
-            parentId: parentId
+            body: {
+                parentId: parentId
+            }
         }
     });
 };
@@ -33157,6 +33219,35 @@ var getAliveOrders = function (orders) {
         }
         return false;
     });
+};
+var calcVolumeThisStep = function (positions, TICKER, TARGET_DIRECTION, targetPosData, unfinishedSteps, instrumentType) {
+    var _a;
+    var pos = positions[TICKER + "_" + TARGET_DIRECTION] || {};
+    var posCont = positions[TICKER + "_" + Math.abs(TARGET_DIRECTION - 1)] || {};
+    var currentVolume = +pos.totalVolume || 0;
+    var currentVolumeCount = +posCont.totalVolume || 0;
+    var currentVolumeData = (_a = {},
+        _a[+TARGET_DIRECTION] = currentVolume,
+        _a[+Math.abs(TARGET_DIRECTION - 1)] = currentVolumeCount,
+        _a);
+    var totalTargetVolume = targetPosData
+        .map(function (item) {
+        var d = item.d, v = item.v;
+        var currentV = currentVolumeData[d];
+        var delta = v - currentV;
+        return Math.abs(delta);
+    })
+        .reduce(function (delta1, delta2) {
+        console.log(delta1, delta2);
+        return +delta1 + +delta2;
+    }) || 0;
+    var targetVolumeByStep = unfinishedSteps === 1 ? totalTargetVolume : totalTargetVolume / unfinishedSteps;
+    return {
+        currentVolume: currentVolume,
+        currentVolumeCount: currentVolumeCount,
+        total: totalTargetVolume,
+        thisStepVolume: dealMakeOrderVolume(instrumentType, targetVolumeByStep)
+    };
 };
 
 

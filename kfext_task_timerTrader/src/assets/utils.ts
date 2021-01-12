@@ -10,22 +10,25 @@ export const transformArrayToObjectByKey = (targetList: Array<any>, keys: Array<
     return data
 }
 
-export const makeOrderDirectionType = (side: number, offset: number): number => {
+export const makeOrderDirectionType = (side: number, offset: number): direcData => {
     if (+side === 0) {
         if (+offset === 0) {
-            return 0 // 'long-open'
+            return { d: 0, n: '买开'} // 'long-open'
         } else if (+offset === 1) {
-            return 1 // 'short-close'
+            return { d: 1, n: '买平'} // 'short-close'
         }
     } else if (+side === 1) {
         if (+offset === 0) {
-            return 1 // 'short-open'
+            return { d: 1, n: '卖开' } // 'short-open'
         } else if (+offset === 1) {
-            return 0 // 'long-close'
+            return { d: 0, n: '卖平' } // 'long-close'
         }
     }
 
-    return 0
+    return {
+        d: 0,
+        n: '未知'
+    }
 }
 
 export const buildTarget = ({ offset, side, ticker, totalVolume, targetVolume }: { 
@@ -34,25 +37,25 @@ export const buildTarget = ({ offset, side, ticker, totalVolume, targetVolume }:
     ticker: string,
     totalVolume: number,
     targetVolume: number
-}) => {
+}): VolumeRecordData[] | Boolean => {
     if (+side === 0) {
         if (+offset === 0) {
             console.log(`[TRAGET] 标的 ${ticker}，现有多仓 ${totalVolume}，目标买开 ${targetVolume}`)    
             return [
-                { [ `${ticker}_0` ]: totalVolume + targetVolume }
+                { d: 0, v: totalVolume + targetVolume }
             ]            
         } else if (+offset === 1) {
             if (targetVolume > totalVolume) {
                 const delta = targetVolume - totalVolume;
                 console.log(`[TRAGET] 标的 ${ticker}，现有空仓 ${totalVolume}，目标买平 ${targetVolume}，现有持仓不足，需买平 ${totalVolume}，买开 ${delta}`)                
                 return [
-                    { [ `${ticker}_1` ]: 0 },
-                    { [ `${ticker}_0` ]: delta }
+                    { d: 1, v: 0 },
+                    { d: 0, v: delta }
                 ]
             } else {
                 console.log(`[TRAGET] 标的 ${ticker}，现有空仓 ${totalVolume}，目标买平 ${targetVolume}`)    
                 return [
-                    { [ `${ticker}_1` ]: totalVolume - targetVolume },
+                    { d: 1, v: totalVolume - targetVolume },
                 ]
             }
         }
@@ -60,60 +63,43 @@ export const buildTarget = ({ offset, side, ticker, totalVolume, targetVolume }:
         if (+offset === 0) {
             console.log(`[TRAGET] 标的 ${ticker}，现有空仓${totalVolume}，目标卖开${targetVolume}`)      
             return [
-                { [ `${ticker}_1` ]: totalVolume + targetVolume },
+                { d: 1, v: totalVolume + targetVolume },
             ]
         } else if (+offset === 1) {
             if (targetVolume > totalVolume) {
                 const delta = targetVolume - totalVolume;
                 console.log(`[TRAGET] 标的 ${ticker}，现有多仓 ${totalVolume}，目标卖平 ${targetVolume}，现有持仓不足，需卖平 ${totalVolume}，卖开 ${delta}`)                
                 return [
-                    { [ `${ticker}_0` ]: 0 },
-                    { [ `${ticker}_1` ]: delta }
+                    { d: 0, v: 0 },
+                    { d: 1, v: delta }
                 ]   
             } else {
                 console.log(`[TRAGET] 标的 ${ticker}，现有多仓 ${totalVolume}，目标卖平 ${targetVolume}`)                
                 return [
-                    { [ `${ticker}_0` ]: totalVolume - targetVolume },
+                    { d: 0, v: totalVolume - targetVolume },
                 ]
             }
         }
     }
 
-    return undefined
+    return false
 }
 
 
 
-export const reqMakeOrder = (baseData: any, quote: QuoteData, pos: PosData) => {
-    const { ticker, side, offset, steps, accountId, targetVolume, timeCount, parentId } = baseData;
+export const reqMakeOrder = (baseData: any, quote: QuoteData, unfinishedSteps: number) => {
+    const { side, offset, accountId, volume, parentId } = baseData;
+    const { instrumentTypeOrigin, lastPrice, instrumentId, exchangeId } = quote;
 
-    if (!quote) {
-        console.error(`暂无${ticker}行情信息`)
-        return
-    }
+    const makeOrderPrice = getMakeOrderPrice(side, quote, unfinishedSteps)
 
-    if (!pos) {
-        console.error(`暂无${ticker}_${targetVolume}持仓信息`)
-        return
-    }
-
-    const { instrumentTypeOrigin, lastPrice, upperLimitPrice, lowerLimitPrice, instrumentId, exchangeId } = quote;
-    console.log('instrumentType', instrumentTypeOrigin, '---------------')
-
-
-    const unfinishedSteps = steps - timeCount || 1;
-    if (unfinishedSteps < 0) {
-        console.error('[ERROR] steps - timeCount = ', unfinishedSteps)
-    }
-    const targetVolumeThisStep = Math.ceil(targetVolume / unfinishedSteps);
-    const theVolume = dealMakeOrderVolume(+instrumentTypeOrigin, targetVolumeThisStep)
     const makeOrderData = { 
         name: accountId,
         instrument_id: instrumentId,
         instrument_type: +instrumentTypeOrigin,
         exchange_id: exchangeId,
-        limit_price: lastPrice,
-        volume: theVolume || 0,
+        limit_price: makeOrderPrice,
+        volume,
         side: side,
         offset: offset,
         price_type: 0,
@@ -133,7 +119,25 @@ export const reqMakeOrder = (baseData: any, quote: QuoteData, pos: PosData) => {
     console.log(`[下单] ${JSON.stringify(makeOrderData)}`)
 }
 
+function getMakeOrderPrice (side: number, quote: QuoteData, unfinishedSteps: number ) {
+    const { upperLimitPrice, lowerLimitPrice, lastPrice, askPrices, bidPrices } = quote;
+    
+    if (+side === 0) {
+        if (unfinishedSteps > 1) {
+            return askPrices[0]
+        } else {
+            return upperLimitPrice
+        }
+    } else if (+side === 1) {
+        if (unfinishedSteps > 1) {
+            return bidPrices[0]
+        } else {
+            return lowerLimitPrice
+        }
+    }
 
+    return lastPrice
+}
 
 export const reqCancelOrder = (parentId: string) => {
     //@ts-ignore
@@ -141,7 +145,9 @@ export const reqCancelOrder = (parentId: string) => {
         type: 'process:msg',
         data: {
             type: 'CANCEL_ORDER_BY_PARENT_ID',
-            parentId
+            body: {
+                parentId
+            }
         }
     })
 }
@@ -173,3 +179,35 @@ export const getAliveOrders = (orders: OrderData[]) => {
         return false
     })
 }
+
+export const calcVolumeThisStep = (positions: { [propName: string]: PosData }, TICKER: string, TARGET_DIRECTION: number, targetPosData: VolumeRecordData[] , unfinishedSteps: number, instrumentType: number) => {
+    const pos = positions[`${TICKER}_${TARGET_DIRECTION}`] || {};
+    const posCont = positions[`${TICKER}_${Math.abs(TARGET_DIRECTION - 1)}`] || {};
+    const currentVolume = +pos.totalVolume || 0;
+    const currentVolumeCount = +posCont.totalVolume || 0;
+    const currentVolumeData: any = {
+        [+TARGET_DIRECTION]: currentVolume,
+        [+Math.abs(TARGET_DIRECTION - 1)]: currentVolumeCount
+    }
+    const totalTargetVolume: number = targetPosData
+    .map((item: VolumeRecordData): number => {
+        const { d, v } = item;
+        const currentV = currentVolumeData[d]
+        const delta = v - currentV
+        return Math.abs(delta)
+    }) 
+    .reduce((delta1: number, delta2: number) => {
+        console.log(delta1, delta2)
+        return +delta1 + +delta2
+    }) || 0
+
+    const targetVolumeByStep = unfinishedSteps === 1 ? totalTargetVolume : totalTargetVolume / unfinishedSteps
+
+    return {
+        currentVolume,
+        currentVolumeCount,
+        total: totalTargetVolume,
+        thisStepVolume: dealMakeOrderVolume( instrumentType, targetVolumeByStep)
+    }
+}
+
