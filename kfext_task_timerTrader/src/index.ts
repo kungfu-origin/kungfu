@@ -203,6 +203,11 @@ combineLatestObserver.subscribe((
         return;
     }
 
+    //必须在这里，以下都是在这个loop开始后执行
+    if (timeCount <= dealedTimeCount) {
+        return;
+    }
+
     
     // 判断是否可以交易, 如不能交易，先撤单
     const aliveOrders = getAliveOrders(orders)
@@ -215,10 +220,6 @@ combineLatestObserver.subscribe((
         }
         return
     } 
-
-    if (timeCount <= dealedTimeCount) {
-        return;
-    }
     
     //制定本次交易计划
     const instrumentType = quote.instrumentTypeOrigin;
@@ -239,6 +240,7 @@ combineLatestObserver.subscribe((
         handleFinished()
     }
 
+    //时间到
     if (timeCount > LAST_STEP_COUNT) {
         handleFinished()
         return;
