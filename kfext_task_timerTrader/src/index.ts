@@ -142,7 +142,6 @@ const positionsPipe = () => {
             const { positions } = data;
 
             if (!positions || !positions.length) {
-                console.log('[WARNING] 系统内无持仓')
                 return null
             }
 
@@ -174,15 +173,14 @@ combineLatestObserver.subscribe((
     [ number, { [prop: string]: QuoteData }, null | { [prop: string]: PosData }, OrderData[] ] 
 ) => {
 
-    const quote = quotes[TICKER];
 
     if (positions === null) {
+        console.error(`[WARNING] 暂无${ticker}持仓信息`)
         return
     }
 
-    const pos = positions[`${TICKER}_${TARGET_DIRECTION}`];
-
     //制定全部交易计划
+    const pos = positions[`${TICKER}_${TARGET_DIRECTION}`];
     if (!targetPosData) {
         const { totalVolume } = pos || {};
         targetPosData = buildTarget({ 
@@ -192,11 +190,19 @@ combineLatestObserver.subscribe((
             totalVolume: totalVolume || 0,
             targetVolume: TARGET_VOLUME
         })
+
+        //依然没有
+        if (!targetPosData) {
+            return
+        };
     }
 
-    if (!targetPosData) {
-        return
-    };
+    const quote = quotes[TICKER];
+    if (!quote) {
+        console.error(`[WARNING] 暂无${ticker}行情信息`)
+        return;
+    }
+
     
     // 判断是否可以交易, 如不能交易，先撤单
     const aliveOrders = getAliveOrders(orders)
@@ -204,22 +210,15 @@ combineLatestObserver.subscribe((
         if (!hasCancelOrderInThisLoop) {
             reqCancelOrder(PARENT_ID)
             hasCancelOrderInThisLoop = true
-            console.log(`[CHECK ORDERS] 活动订单数量 ${aliveOrders.length} / ${orders.length}, 等待全部订单结束`)
+            console.log(`[检查订单] 活动订单数量 ${aliveOrders.length} / ${orders.length}, 等待全部订单结束`)
             console.log(`[撤单] PARENTID: ${PARENT_ID}`)
         }
         return
     } 
 
-  
-    if (!quote) {
-        console.error(`暂无${ticker}行情信息`)
-        return;
-    }
-
     if (timeCount <= dealedTimeCount) {
         return;
     }
-
     
     //制定本次交易计划
     const instrumentType = quote.instrumentTypeOrigin;
@@ -249,20 +248,26 @@ combineLatestObserver.subscribe((
 
     if ((offset === 0) || (currentVolume >= thisStepVolume)) {
         console.log(`还需 ${OPERATION_NAME} ${total}, 本次需 ${OPERATION_NAME} ${thisStepVolume}`)
-        reqMakeOrder({ ...argv, volume: thisStepVolume }, quote, unfinishedSteps)    
+        if (+thisStepVolume > 0) {
+            reqMakeOrder({ ...argv, volume: thisStepVolume }, quote, unfinishedSteps)    
+        }
     } else {
         const deltaVolume = +Number(thisStepVolume - currentVolume).toFixed(0);
-        const deltaVolumeResolved = Math.min(currentVolumeCount, deltaVolume)
         const contOperationName = makeOrderDirectionType(side, 0).n;
         console.log(`
             还需 ${OPERATION_NAME} ${total}, 本次需 ${OPERATION_NAME} ${thisStepVolume}, 
             持仓不足,
             需 ${OPERATION_NAME} ${currentVolume},
-            ${contOperationName} ${deltaVolumeResolved},
+            ${contOperationName} ${deltaVolume},
         `)
 
-        reqMakeOrder({ ...argv, volume: currentVolume }, quote, unfinishedSteps)    
-        reqMakeOrder({ ...argv, offset: 0, volume: deltaVolume }, quote, unfinishedSteps)    
+        if (+currentVolume > 0) {
+            reqMakeOrder({ ...argv, volume: currentVolume }, quote, unfinishedSteps)    
+        } 
+
+        if (+deltaVolume > 0) {
+            reqMakeOrder({ ...argv, offset: 0, volume: deltaVolume }, quote, unfinishedSteps)    
+        }
     }
 
     console.log(`============ 已完成执行 ${timeCount + 1} / ${steps} ==============`)    

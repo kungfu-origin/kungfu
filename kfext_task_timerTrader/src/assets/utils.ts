@@ -197,7 +197,6 @@ export const calcVolumeThisStep = (positions: { [propName: string]: PosData }, T
         return Math.abs(delta)
     }) 
     .reduce((delta1: number, delta2: number) => {
-        console.log(delta1, delta2)
         return +delta1 + +delta2
     }) || 0
 
