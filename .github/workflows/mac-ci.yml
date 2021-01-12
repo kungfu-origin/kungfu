@@ -4,11 +4,12 @@ name: Mac CI
 
 # Controls when the action will run. Triggers the workflow on push or pull request
 # evepushnts but only for the master branch
-on: 
+on:
   push:
     branches:
       - release
       - 2.3
+      - ci
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a single job called "build"
@@ -20,20 +21,31 @@ jobs:
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-    - uses: actions/checkout@v2
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: cn-northwest-1
     - name: Setup Node.js environment
       uses: actions/setup-node@v1.4.4
     - name: Setup python environment
       uses: actions/setup-python@v2
       with:
-          python-version: '3.7' # Version range or exact version of a Python version to use, using SemVer's version r
+        python-version: '3.7' # Version range or exact version of a Python version to use, using SemVer's version r
     - name: Run Kungfu CI
       run: |
         npm install -g electron-builder
-        pip install pipenv==2018.11.26
+        pip install pipenv==2020.11.15
         yarn env-pypi
         yarn install
         yarn build
-    - uses: actions/upload-artifact@v2
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v2
       with:
-          path: app/build/app/*.dmg
+        path: app/build/app/*.dmg
+    - name: Copy files to S3
+      run: |
+        aws s3 sync app/build/app s3://kungfu

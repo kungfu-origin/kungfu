@@ -4,7 +4,7 @@ name: WIN CI
 
 # Controls when the action will run. Triggers the workflow on push or pull request
 # evepushnts but only for the master branch
-on: 
+on:
   push:
     branches:
       - release
@@ -26,14 +26,14 @@ jobs:
     - name: Setup python environment
       uses: actions/setup-python@v2
       with:
-          python-version: '3.7' # Version range or exact version of a Python version to use, using SemVer's version r
+        python-version: '3.7' # Version range or exact version of a Python version to use, using SemVer's version r
     - name: Run Kungfu CI
       run: |
-        pip install pipenv
+        pip install pipenv==2020.11.15
         npm install -g electron-builder
         yarn env-pypi
         yarn install
         yarn build
     - uses: actions/upload-artifact@v2
       with:
-          path: app/build/app/*.exe
+        path: app/build/app/*.exe
