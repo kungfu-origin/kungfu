@@ -30,14 +30,14 @@ const OPERATION_NAME = makeOrderDirectionType(side, offset).n;
 const TARGET_VOLUME = volume;
 const LAST_STEP_COUNT = steps - 1;
 
-console.log('===========================================')
+console.log('==================== 交易信息 =======================')
 console.log('[ARGS]', process.argv.slice(2).join(','))
-console.log('===========================================')
-console.log('TriggerTime', triggerTime, triggerTimeStr)
-console.log('FinishTime', finishTime, finishTimeStr)
-console.log('Executing every ', deltaTimestamp, 'ms')
-console.log('Target Ticker ', TICKER)
-console.log('===========================================')
+console.log('===================================================')
+console.log('[开始时间]', triggerTime, triggerTimeStr)
+console.log('[结束时间]', finishTime, finishTimeStr)
+console.log('[执行间隔]', deltaTimestamp, 'ms')
+console.log('[目标标的] ', TICKER)
+console.log('===================================================')
 
 
 //@ts-ignore

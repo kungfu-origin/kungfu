@@ -101,10 +101,8 @@ if (process.env.NODE_ENV !== 'production') {
       'python_version': `"${pyVersion.toString()}"`,
       'process.env.NODE_ENV': '"development"',
       'process.env.APP_TYPE': '"main"',
-    }),
-    new webpack.DefinePlugin({
       '__resources': `"${path.join(__dirname, '../resources').replace(/\\/g, '\\\\')}"`,
-    })
+    }),
   )
 }
 

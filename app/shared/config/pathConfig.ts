@@ -106,5 +106,5 @@ export const KUNGFU_ENGINE_PATH = process.env.NODE_ENV === 'production'
 export const EXTENSION_DIR = path.join(KUNGFU_ENGINE_PATH, 'kfc', 'kungfu_extensions');
 
 export const TASK_EXTENSION_DIR = process.env.NODE_ENV === 'production'
-    ? process.resourcesPath
+    ? path.join(process.resourcesPath, 'kungfu-extensions')
     : path.join(__dirname, '..', '..', '..')

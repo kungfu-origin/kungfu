@@ -89,6 +89,10 @@
         ]
       },
       {
+        "from": "../kfext_task_timerTrader/build/ext",
+        "to": "kungfu-extensions/timer-trader"
+      },
+      {
         "from": "../cli2/build/cli",
         "to": "kungfu-cli",
         "filter": [

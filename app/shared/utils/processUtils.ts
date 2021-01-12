@@ -196,11 +196,19 @@ function getRocketParams(name: String, ifRocket: Boolean) {
     return rocket
 }
 
+function parseScriptName () {
+    if (process.env.NODE_ENV === 'production') {
+        const extensionName = platform === 'win' ? '.exe' : ''
+        return `index${extensionName}`
+    } else {
+        return `index.js`
+    }
+}
+
 export const startTask = (options: any) => {
+
+    const script = parseScriptName();
     const optionsResolved = {
-        "args": '',
-        "cwd": '/Users/zhangyizhi/Project/kungfu/kfext_task_timerTrader/lib',
-        "script": 'index.js',
         "logType": "json",
         "output": buildProcessLogPath(options.name),
         "error": buildProcessLogPath(options.name),
@@ -213,6 +221,7 @@ export const startTask = (options: any) => {
         "execMode": "fork",
         "killTimeout": 16000,
         ...options,
+        script
     }
 
 

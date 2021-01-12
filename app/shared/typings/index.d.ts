@@ -16,7 +16,7 @@ declare module NodeJS {
     }
      
     interface Process {
-        resourcesPath: string
+        resourcesPath: string,
     }
 }
 

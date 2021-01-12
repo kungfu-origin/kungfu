@@ -196,8 +196,7 @@ export default {
                     if (!res) return Promise.resolve(true)
                     return switchTask(processName, true, {
                         args,
-                        cwd: path.resolve(packageJSONPath, '..', 'lib'),
-                        script: 'index.js'
+                        cwd: process.env.NODE_ENV === 'production' ? path.resolve(packageJSONPath, '..') : path.resolve(packageJSONPath, '..', 'lib'),
                     })
                 })
         },
@@ -265,9 +264,11 @@ export default {
         },
 
         getExtensionConfigs () {
+            console.log(TASK_EXTENSION_DIR)
             return getExtensionConfigs(TASK_EXTENSION_DIR)
                 .then(exts => {
-                    this.extConfigList = exts.filter(({ type }) => type === 'task')
+                    console.log(exts)
+                    this.extConfigList = Object.freeze(exts.filter(({ type }) => type === 'task'))
                 })
         },
     }
