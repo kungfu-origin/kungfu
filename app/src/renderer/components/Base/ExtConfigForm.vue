@@ -196,7 +196,19 @@ export default {
 		//日期必须要重写，不然有问题
 		handleChangeTimePicker (key) {
 			const theTime = this.form[key];
-			const mt = moment(theTime)
+			let mt = moment(theTime);
+			const date = mt.format('YYYYMMDD');
+			const today = moment().format('YYYYMMDD');
+			const yearToday = moment().get('year');
+			const monthToday = moment().get('month');
+			const dayToday = moment().get('date');
+
+			if (date !== today) {
+				mt.set('year', yearToday)
+				mt.set('month', monthToday)
+				mt.set('date', dayToday)
+			}
+
 			this.$set(this.form, key, mt.valueOf())
 		},
 
