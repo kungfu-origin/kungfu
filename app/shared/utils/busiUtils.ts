@@ -1,11 +1,9 @@
+import fse from 'fs-extra';
 import readline from 'readline';
 import { EXTENSION_DIR } from '__gConfig/pathConfig';
 import { listDir } from '__gUtils/fileUtils';
 
-const fse = require('fs-extra')
-
 const path = require("path");
-const fs = require('fs-extra');
 
 interface LogLineData {
     message: string;
@@ -412,7 +410,7 @@ export const getLog = (logPath: string, searchKeyword?: string, dealLogMessageMe
     const numList: NumList = buildListByLineNum(50);    
     let logId: number = 0;            
     return new Promise((resolve, reject) => {
-        fs.stat(logPath, (err: Error, stats: any) => {
+        fse.stat(logPath, (err: Error, stats: any) => {
             if(err){
                 reject(err)
                 return;
@@ -420,7 +418,7 @@ export const getLog = (logPath: string, searchKeyword?: string, dealLogMessageMe
 
             const startSize = stats.size - 1000000 < 0 ? 0 : stats.size - 1000000;
             const lineReader = readline.createInterface({
-                input: fs.createReadStream(logPath, {
+                input: fse.createReadStream(logPath, {
                     start: startSize
                 })
             })

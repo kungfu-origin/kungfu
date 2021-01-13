@@ -79,7 +79,7 @@
                     { required: true, message: '不能为空！', trigger: 'change'},
                 ]">
                     <el-radio-group size="mini" v-model="makeOrderForm.hedge_flag">
-                        <el-radio size="mini"  v-for="key in Object.keys(hedgeFlag || {})" :key="key" :label="+key">{{ hedgeFlag[key] }}</el-radio>
+                        <el-radio size="mini"  v-for="key in Object.keys(HedgeFlag || {})" :key="key" :label="+key">{{ HedgeFlag[key] }}</el-radio>
                     </el-radio-group>
                 </el-form-item>  
 
@@ -116,7 +116,7 @@
                     { required: true, message: '不能为空！', trigger: 'change' },
                 ]">
                     <el-radio-group size="mini" v-model="makeOrderForm.price_type">
-                        <el-radio size="mini" v-for="key in Object.keys(priceType || {})" :label="+key" :key="key">{{ priceType[key] }}</el-radio>
+                        <el-radio size="mini" v-for="key in Object.keys(PriceType || {})" :label="+key" :key="key">{{ PriceType[key] }}</el-radio>
                     </el-radio-group>
                 </el-form-item>
 
@@ -226,18 +226,18 @@
 import Vue from 'vue';
 import { biggerThanZeroValidator } from '__assets/validator';
 import { deepClone } from '__gUtils/busiUtils';
-import { SourceTypeConfig, SideName, OffsetName, priceType, hedgeFlag, ExchangeIds, InstrumentTypes, allowShorted } from 'kungfu-shared/config/tradingConfig';
+import { SourceTypeConfig, SideName, OffsetName, PriceType, HedgeFlag, ExchangeIds, InstrumentTypes, allowShorted } from 'kungfu-shared/config/tradingConfig';
 import { getFutureTickersConfig, getStockTickersConfig } from '__assets/base'
 import { Autocomplete } from 'element-ui';
 
 Vue.use(Autocomplete)
 
-function filterPriceType (priceType) {
+function filterPriceType (PriceType) {
     let filterPriceType = {};
 
-    Object.keys(priceType || {}).forEach(key => {
+    Object.keys(PriceType || {}).forEach(key => {
         if (key <= 1) {
-            filterPriceType[key] = priceType[key]
+            filterPriceType[key] = PriceType[key]
         }
     })
 
@@ -251,8 +251,8 @@ export default {
         this.SourceTypeConfig = SourceTypeConfig;
         this.OffsetName = OffsetName;
         this.SideName = SideName;
-        this.priceType = filterPriceType(priceType)
-        this.hedgeFlag = hedgeFlag;
+        this.PriceType = filterPriceType(PriceType)
+        this.HedgeFlag = HedgeFlag;
         this.ExchangeIds = ExchangeIds;
 
         this.biggerThanZeroValidator = biggerThanZeroValidator;

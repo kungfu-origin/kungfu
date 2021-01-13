@@ -21,7 +21,10 @@ let extConfig = {
       {
         test: /\.ts$/,
         use: 'ts-loader',
-        exclude: /node_modules/
+        include: [
+          path.resolve(__dirname, '..', 'src'),
+          path.resolve(__dirname, '..', '..', 'node_modules', 'kungfu-shared'),
+        ]
       },
       {
         test: /\.node$/,

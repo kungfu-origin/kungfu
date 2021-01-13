@@ -21,7 +21,7 @@
   "dependencies": {
     "moment": "^2.29.1",
     "rxjs": "^6.6.3",
-    "kungfu-shared": "*"
+    "kungfu-shared": "git+ssh://git@github.com:kungfu-trader/kungfu-shared.git"
   },
   "devDependencies": {
     "@types/minimist": "^1.2.1",

@@ -3,7 +3,7 @@ import { setTimerPromiseTask } from '__gUtils/busiUtils';
 import { kungfu } from '__io/kungfu/kungfuUtils';
 import { toDecimal } from '__gUtils/busiUtils';
 import { readJsonSync } from '__gUtils/fileUtils';
-import { OffsetName, orderStatus, SideName, PosDirection, priceType, hedgeFlag, InstrumentType, volumeCondition, timeCondition, allowShorted } from "kungfu-shared/config/tradingConfig";
+import { OffsetName, OrderStatus, SideName, PosDirection, PriceType, HedgeFlag, InstrumentType, VolumeCondition, TimeCondition, allowShorted } from "kungfu-shared/config/tradingConfig";
 import { logger } from '../../utils/logUtils';
 
 export const watcher: any = (() => {
@@ -252,7 +252,7 @@ export const dealOrder = (item: OrderInputData): OrderData => {
     const sourceId =  resolveSourceDest(source, dest).sourceGroup;
     const isGBK = sourceId.toLowerCase().includes('ctp');
     const errMsg = item.error_msg;
-    const errMsgResolved = isGBK ? orderStatus[item.status] : errMsg;
+    const errMsgResolved = isGBK ? OrderStatus[item.status] : errMsg;
   
     return {
         id: [item.order_id.toString(), item.account_id.toString()].join('-'),
@@ -277,13 +277,13 @@ export const dealOrder = (item: OrderInputData): OrderData => {
         //         '--',
         offset: OffsetName[item.offset],
         offsetOrigin: item.offset,
-        hedgeFlag: hedgeFlag[item.hedge_flag] ? hedgeFlag[item.hedge_flag] : '--',
+        hedgeFlag: HedgeFlag[item.hedge_flag] ? HedgeFlag[item.hedge_flag] : '--',
         hedgeFlagOrigin: item.hedge_flag,
 
-        priceType: priceType[item.price_type],
+        priceType: PriceType[item.price_type],
         priceTypeOrigin: item.price_type,
-        volumeCondition: volumeCondition[item.volume_condition],
-        timeCondition: timeCondition[item.time_condition],
+        volumeCondition: VolumeCondition[item.volume_condition],
+        timeCondition: TimeCondition[item.time_condition],
 
         limitPrice: toDecimal(item.limit_price, 3) || '--',
         frozenPrice: toDecimal(item.frozen_price, 3) || '--',
@@ -292,7 +292,7 @@ export const dealOrder = (item: OrderInputData): OrderData => {
         volumeTraded: item.volume_traded.toString() + "/" + item.volume.toString(),
         volumeLeft: item.volume_left.toString(),
 
-        statusName: +item.status !== 4 ? orderStatus[item.status] : errMsgResolved,
+        statusName: +item.status !== 4 ? OrderStatus[item.status] : errMsgResolved,
         status: item.status,
 
         tax: item.tax,

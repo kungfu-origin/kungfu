@@ -167,7 +167,7 @@
     "pm2": "4.5.1"
   },
   "devDependencies": {
-    "kungfu-shared": "*",
+    "kungfu-shared": "git+ssh://git@github.com:kungfu-trader/kungfu-shared.git",
     "@types/node": "^12.6.2",
     "aws-sdk": "^2.395.0",
     "babel-loader": "^7.1.1",

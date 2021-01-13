@@ -6,7 +6,6 @@
   "license": "Apache-2.0",
   "private": true,
   "workspaces": [
-    "shared",
     "core",
     "cli2",
     "kfext_task_timerTrader",

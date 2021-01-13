@@ -1,4 +1,5 @@
-import moment from 'moment';
+
+import { InstrumentTypes, aliveOrderStatusList } from 'kungfu-shared/config/tradingConfig';
 
 export const transformArrayToObjectByKey = (targetList: Array<any>, keys: Array<string>): any => {
     let data: any = {};
@@ -153,7 +154,13 @@ export const reqCancelOrder = (parentId: string) => {
 }
 
 function dealMakeOrderVolume (instrumentType: number, volume: number) {
-    const scale100 = [0, 1, 4, 5] //stock 100的倍数
+    //stock 100的倍数
+    const scale100 = Object.keys(InstrumentTypes)
+        .filter(key => {
+            if (key.toLowerCase().includes('stock')) return true;
+            return false;
+        })
+        .map(key => +InstrumentTypes[key])
     
     if (scale100.includes(+instrumentType)) {
         const scale = +Number(volume / 100).toFixed(0)
@@ -165,7 +172,6 @@ function dealMakeOrderVolume (instrumentType: number, volume: number) {
 }
 
 export const getAliveOrders = (orders: OrderData[]) => {
-    const aliveOrderStatusList = [1, 2, 7]
     return orders
     .map(order => {
         const { status, orderId } = order;
