@@ -175,7 +175,7 @@ combineLatestObserver.subscribe((
 
 
     if (positions === null) {
-        console.error(`[WARNING] 暂无${ticker}持仓信息`)
+        console.error(`[WARNING] 暂无${ticker}持仓信息，需保证TD进程开启`)
         return
     }
 
@@ -199,7 +199,7 @@ combineLatestObserver.subscribe((
 
     const quote = quotes[TICKER];
     if (!quote) {
-        console.error(`[WARNING] 暂无${ticker}行情信息`)
+        console.error(`[WARNING] 暂无${ticker}行情信息，需保证MD进程开启`)
         return;
     }
 
