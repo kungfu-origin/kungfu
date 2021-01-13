@@ -25689,6 +25689,7 @@ combineLatestObserver.subscribe(function (_a) {
     if (timeCount <= dealedTimeCount) {
         return;
     }
+    console.log("[\u4EA4\u6613\u68C0\u67E5] " + (timeCount + 1) + " / " + steps + " ");
     // 判断是否可以交易, 如不能交易，先撤单
     var aliveOrders = Object(__WEBPACK_IMPORTED_MODULE_4__assets_utils__["c" /* getAliveOrders */])(orders);
     if (aliveOrders.length) {
@@ -25703,7 +25704,7 @@ combineLatestObserver.subscribe(function (_a) {
     //制定本次交易计划
     var instrumentType = quote.instrumentTypeOrigin;
     var unfinishedSteps = steps - timeCount;
-    var _b = Object(__WEBPACK_IMPORTED_MODULE_4__assets_utils__["b" /* calcVolumeThisStep */])(positions, TICKER, TARGET_DIRECTION, targetPosData, unfinishedSteps, instrumentType), total = _b.total, thisStepVolume = _b.thisStepVolume, currentVolume = _b.currentVolume, currentVolumeCount = _b.currentVolumeCount;
+    var _b = Object(__WEBPACK_IMPORTED_MODULE_4__assets_utils__["b" /* calcVolumeThisStep */])(positions, TICKER, TARGET_DIRECTION, targetPosData, unfinishedSteps, instrumentType), total = _b.total, thisStepVolume = _b.thisStepVolume, currentVolume = _b.currentVolume;
     if (total === 0) {
         console.log('=========================================');
         console.log('=============== 交易任务完成 ==============');
@@ -33211,7 +33212,7 @@ function dealMakeOrderVolume(instrumentType, volume) {
         var scaleResolved = scale < 1 ? 1 : scale;
         return scaleResolved * 100;
     }
-    return volume;
+    return +Number(volume).toFixed(0);
 }
 var getAliveOrders = function (orders) {
     var aliveOrderStatusList = [1, 2, 7];

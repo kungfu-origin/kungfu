@@ -38,7 +38,9 @@ Pipfile.lock
 yarn.lock
 
 #js third part
+*/lib
 */inquirer-path/lib/*
+*/inquirer-path/lib
 */inquirer-path/node_modules/*
 */_version.py
 
@@ -61,7 +63,5 @@ MANIFEST
 # Byte-compiled / optimized / DLL files
 __pycache__/
 
-#inquirer-path
-*/inquirer-path/lib/
 
 commit.sh
