@@ -1,9 +1,9 @@
 import { KF_RUNTIME_DIR, KF_CONFIG_PATH } from '__gConfig/pathConfig';
 import { setTimerPromiseTask } from '__gUtils/busiUtils';
-import { kungfu } from '__gUtils/kungfuUtils';
+import { kungfu } from '__io/kungfu/kungfuUtils';
 import { toDecimal } from '__gUtils/busiUtils';
 import { readJsonSync } from '__gUtils/fileUtils';
-import { OffsetName, orderStatus, SideName, PosDirection, priceType, hedgeFlag, InstrumentType, volumeCondition, timeCondition, allowShorted } from "__gConfig/tradingConfig";
+import { OffsetName, orderStatus, SideName, PosDirection, priceType, hedgeFlag, InstrumentType, volumeCondition, timeCondition, allowShorted } from "kungfu-shared/config/tradingConfig";
 import { logger } from '../../utils/logUtils';
 
 export const watcher: any = (() => {

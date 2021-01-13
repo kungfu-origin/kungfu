@@ -20,7 +20,8 @@
   "license": "ISC",
   "dependencies": {
     "moment": "^2.29.1",
-    "rxjs": "^6.6.3"
+    "rxjs": "^6.6.3",
+    "kungfu-shared": "*"
   },
   "devDependencies": {
     "@types/minimist": "^1.2.1",
@@ -47,44 +48,15 @@
       {
         "key": "ticker",
         "name": "标的",
-        "type": "str",
+        "type": "instrumentId",
         "required": true
       },
       {
         "key": "exchangeId",
         "name": "交易所",
-        "type": "select",
-        "required": true,
-        "data": [
-          {
-            "value": "SSE",
-            "name": "上交所"
-          },
-          {
-            "value": "SZE",
-            "name": "深交所"
-          },
-          {
-            "value": "SHFE",
-            "name": "上期所"
-          },
-          {
-            "value": "DCE",
-            "name": "大商所"
-          },
-          {
-            "value": "CZCE",
-            "name": "郑商所"
-          },
-          {
-            "value": "CFFEX",
-            "name": "中金所"
-          },
-          {
-            "value": "INE",
-            "name": "能源中心"
-          }
-        ]
+        "type": "exchangeId",
+        "required": true
+
       },
       {
         "key": "side",

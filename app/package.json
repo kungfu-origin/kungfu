@@ -167,6 +167,7 @@
     "pm2": "4.5.1"
   },
   "devDependencies": {
+    "kungfu-shared": "*",
     "@types/node": "^12.6.2",
     "aws-sdk": "^2.395.0",
     "babel-loader": "^7.1.1",

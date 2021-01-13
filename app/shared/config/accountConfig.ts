@@ -1,6 +1,6 @@
 import * as VALIDATOR from '__assets/validator'
 import { getExtensionConfigs, deepClone } from '__gUtils/busiUtils';
-import { sourceTypeConfig } from '__gConfig/tradingConfig';
+import { SourceTypeConfig } from 'kungfu-shared/config/tradingConfig';
 import { EXTENSION_DIR } from '__gConfig/pathConfig';
 
 const dealValidator = (accountConfigItems: AccountSettingItem[]) => {
@@ -23,7 +23,7 @@ export const getAccountSource = async (): Promise<StringToSource> => {
                 const config: AccountSettingOrigin = c.config;
                 const source: string = config.name;
                 const typeName: string = config.type;
-                const type: string = (sourceTypeConfig[typeName] || {}).color || '';
+                const type: string = (SourceTypeConfig[typeName] || {}).color || '';
         
                 let tdItemConfig: AccountSettingItem[] = deepClone(config.td_config || []); //不可以为 []
                 let mdItemConfig: AccountSettingItem[] = deepClone(config.md_config || []); //可以为 []

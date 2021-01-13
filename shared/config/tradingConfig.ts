@@ -72,7 +72,7 @@ export const orderStatus: NumberToStringObject = {
 
 export const aliveOrderStatusList = [1, 2, 7]
 
-export const sourceTypeConfig: SourceType = {
+export const SourceTypeConfig: SourceType = {
     'Stock': {
         name: isEnglish ? 'stock' : '股票',
         kfId: 1,
@@ -105,7 +105,7 @@ export const hedgeFlag: NumberToStringObject = {
     // 3: isEnglish ? 'Covered': '备兑'
 }
 
-export const exchangeIds: StringToStringObject = {
+export const ExchangeIds: StringToStringObject = {
     "SSE": "上交所",
     "SZE": "深交所",
     "SHFE": "上期所",

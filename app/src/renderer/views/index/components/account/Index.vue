@@ -118,7 +118,7 @@ import MainContent from '@/components/Layout/MainContent';
 
 import { buildTradingDataPipe } from '__io/kungfu/tradingData';
 import { transformPositionByTickerByMerge, dealPos } from '__io/kungfu/watcher';
-import { allowShorted } from "__gConfig/tradingConfig";
+import { allowShorted } from "kungfu-shared/config/tradingConfig";
 
 
 import accountStrategyMixins from '@/views/index/js/accountStrategyMixins';

@@ -17,7 +17,7 @@
                                 v-if="item.typeName"
                                 :type="item.type" 
                                 >
-                                    {{(sourceTypeConfig[item.typeName] || {}).name || ''}}
+                                    {{(SourceTypeConfig[item.typeName] || {}).name || ''}}
                                 </el-tag>
                             </el-radio>
                         </el-col>
@@ -32,7 +32,7 @@
 
 <script>
 
-import { sourceTypeConfig } from '__gConfig/tradingConfig';
+import { SourceTypeConfig } from 'kungfu-shared/config/tradingConfig';
 import { deepClone } from '__gUtils/busiUtils';
 
 export default {
@@ -55,7 +55,7 @@ export default {
     },
 
     data () {
-        this.sourceTypeConfig = sourceTypeConfig;
+        this.SourceTypeConfig = SourceTypeConfig;
         return {
             selectedSource: ''
         }

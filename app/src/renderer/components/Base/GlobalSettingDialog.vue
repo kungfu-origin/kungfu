@@ -222,7 +222,7 @@ import { KUNGFU_RESOURCES_DIR } from "__gConfig/pathConfig";
 import { getSourceList, debounce, throttle } from "__gUtils/busiUtils";
 import { buildSystemConfig } from "__gConfig/systemConfig";
 import { switchCustomProcess } from "__io/actions/base";
-import { getKfCommission, setKfCommission } from '__gUtils/kungfuUtils';
+import { getKfCommission, setKfCommission } from '__io/kungfu/kungfuUtils';
 
 import openLogMixin from '@/assets/js/mixins/openLogMixin';
 

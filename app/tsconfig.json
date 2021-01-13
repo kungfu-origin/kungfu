@@ -49,7 +49,6 @@
       // "typeRoots": [],                       /* List of folders to include type definitions from. */
       "types": [
         "node",
-        
         "fs-extra",  
       ],                           /* Type declaration files to be included in compilation. */
       // "allowSyntheticDefaultImports": true,  /* Allow default imports from modules with no default export. This does not affect code emit, just typechecking. */
@@ -78,7 +77,8 @@
     ],
   
     "include": [
-        "shared/**/*",
+      "../node_modules/kungfu-shared/**/*",
+        "../app/shared/**/*",
         "src/**/*", 
         "resources/keywords/resolveAPIMd.js",
         "resources/keywords",

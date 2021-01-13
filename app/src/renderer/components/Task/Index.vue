@@ -264,10 +264,8 @@ export default {
         },
 
         getExtensionConfigs () {
-            console.log(TASK_EXTENSION_DIR)
             return getExtensionConfigs(TASK_EXTENSION_DIR)
                 .then(exts => {
-                    console.log(exts)
                     this.extConfigList = Object.freeze(exts.filter(({ type }) => type === 'task'))
                 })
         },

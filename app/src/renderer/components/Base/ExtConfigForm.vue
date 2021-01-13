@@ -20,7 +20,7 @@
                     <el-input-number size="mini" :disabled="isDisabled(item.key)" :class="item.key" v-if="item.type === 'float'" :controls="false" v-model="form[item.key]"></el-input-number>
                     <span class="account-setting-path path-selection-in-dialog text-overflow" v-if="item.type === 'file'" :title="form[item.key]">{{form[item.key]}}</span>                    
                     <el-button size="mini" icon="el-icon-more" v-if="item.type === 'file'" @click="handleSelectFile(item.key)"></el-button>
-                    <el-select :disabled="isDisabled(item.key)" :class="item.key" size="mini" v-if="item.type === 'select'" :multiple="item.multiple" collapse-tags v-model="form[item.key]" placeholder="请选择">
+                    <el-select :disabled="isDisabled(item.key)" :class="item.key" size="mini" v-if="item.type === 'select'" :multiple="item.multiple" collapse-tags v-model="form[item.key]">
                         <el-option
 						v-for="option in resolvedSelectOrRatioOptions(item)"
 						:key="option.value"
@@ -45,10 +45,38 @@
                             :label="account.account_id.toAccountId()"
                             :value="account.account_id">
                             <span style="color: #fff">{{account.account_id.toAccountId()}}</span>
-                            <el-tag :type="getAccountType(account.source_name).type">{{(sourceTypeConfig[getAccountType(account.source_name).typeName] || {}).name || ''}}</el-tag>
+                            <el-tag :type="getAccountType(account.source_name).type">{{(SourceTypeConfig[getAccountType(account.source_name).typeName] || {}).name || ''}}</el-tag>
                             <span style="float: right">可用：{{getAvailCash(account.account_id)}}</span>
                         </el-option>
                     </el-select>
+					 <el-select :disabled="isDisabled(item.key)" :class="item.key" size="mini" v-if="item.type === 'exchangeId'" v-model.trim="form[item.key]">
+                        <el-option
+						v-for="option in ExchangeIds"
+						:key="option.value"
+						:label="option.name"
+						:value="option.value">
+                        </el-option>
+                    </el-select>
+					<el-autocomplete 
+					:disabled="isDisabled(item.key)" 
+					:class="item.key" 
+					size="mini"
+                    ref="insturment-id-input"
+					v-if="item.type === 'instrumentId'"
+                    v-model="form[item.key]"
+                    :fetch-suggestions="querySearch"
+                    @select="e => handleSelectInstrumentId(item.key, item.exchangeIdKey, e)"
+                    >
+                        <template v-slot="{ item }">
+                            <div class="make-order-instrument-ids__warp">
+                                <div class="make-order-instrument-id-item">
+                                    <span class="ticker">{{ item.ticker }}</span>
+                                    <span class="name">{{ item.name }}</span>
+                                </div>
+                                <div class="make-order-instrument-id-item">{{ (item.exchangeId || '').toUpperCase() }}</div>
+                            </div>
+                        </template>
+                    </el-autocomplete>
                 </el-col>
                 <el-col :span="2" :offset="1" v-if="item.tip">
                     <el-tooltip class="item" effect="dark" :content="item.tip" placement="right">
@@ -60,12 +88,16 @@
 </template>
 
 <script>
-
+import Vue from 'vue';
 import moment from 'moment';
 import { mapState } from 'vuex';
 
 import { deepClone } from '__gUtils/busiUtils';
-import { OffsetName, SideName, sourceTypeConfig } from '__gConfig/tradingConfig';
+import { OffsetName, SideName, SourceTypeConfig, ExchangeIds } from 'kungfu-shared/config/tradingConfig';
+import { getFutureTickersConfig, getStockTickersConfig } from '__assets/base'
+import { Autocomplete } from 'element-ui';
+
+Vue.use(Autocomplete)
 
 export default {
 	props: {
@@ -104,11 +136,21 @@ export default {
 
 	data () {
 
-        this.sourceTypeConfig = sourceTypeConfig;
+		this.ExchangeIds = Object.keys(ExchangeIds || {}).map(key => {
+			return {
+				value: key,
+				name: ExchangeIds[key]
+			}
+		})
+
+        this.SourceTypeConfig = SourceTypeConfig;
 		this.kungfuKeywordsData = {
 			offset: OffsetName,
 			side: SideName
 		}
+
+
+        this.targetTickersSource = []
 
 		return {
 			form: deepClone(this.value || {})
@@ -117,16 +159,15 @@ export default {
 
 	mounted () {
 		this.initForm();
-		this.configList
+		this.getInstrumentIds();
 	},
 
 	computed: {
-
 		...mapState({
 			tdList: state => state.ACCOUNT.tdList || [], 
             tdAccountSource: state => state.BASE.tdAccountSource || {},
             accountsAsset: state => state.ACCOUNT.accountsAsset,
-		})
+		}),
 	},
 
 	watch: {
@@ -138,7 +179,20 @@ export default {
 		} 
 	},
 
-	methods: {	
+	methods: {		
+		handleSelectInstrumentId (key, exchangeIdKey, item) {
+			exchangeIdKey = exchangeIdKey || 'exchangeId';
+            const { ticker, exchangeId } = item;
+            this.$set(this.form, key, ticker)
+            this.$set(this.form, exchangeIdKey, (exchangeId || '').toUpperCase())
+            
+            this.$nextTick()
+                .then(() => {
+                    this.$refs['extForm'].validateField(key);
+                })
+            
+        },
+
 		//日期必须要重写，不然有问题
 		handleChangeTimePicker (key) {
 			const theTime = this.form[key];
@@ -161,6 +215,34 @@ export default {
                 this.$refs.extForm.validateField(targetKey) //手动进行再次验证，因数据放在span中，改变数据后无法触发验证
             })
 		},
+
+		getInstrumentIds () {
+			Promise.all([ getFutureTickersConfig(), getStockTickersConfig() ])
+				.then(([futures, tickers]) => {
+					this.targetTickersSource = Object.freeze([ ...Object.freeze(futures || []), ...Object.freeze(tickers || []) ])
+				})
+		},
+
+		querySearch (queryString, cb) {
+            const results = this.getSearchTickers(queryString);
+            cb(results)
+        },
+
+		getSearchTickers (queryString = '') {
+            return this.targetTickersSource.filter(item => {
+                const { ticker, name, exchangeId } = {
+                    ticker: '',
+                    name: '',
+                    exchangeId: '',
+                    ...item
+                }
+
+                if (ticker.toLowerCase().includes(queryString.toLowerCase())) return true;
+                if (name.toLowerCase().includes(queryString.toLowerCase())) return true;
+                if (exchangeId.toUpperCase().includes(queryString.toUpperCase())) return true;
+                return false
+            })
+        },
 
 		isDisabled (key) {
 			return this.method === 'update' && this.isUniKey(key)

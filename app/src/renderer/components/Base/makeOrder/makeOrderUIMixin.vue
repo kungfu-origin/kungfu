@@ -22,7 +22,7 @@
                             :label="account.account_id.toAccountId()"
                             :value="account.account_id">
                             <span style="color: #fff">{{account.account_id.toAccountId()}}</span>
-                            <el-tag :type="getAccountType(account.source_name).type">{{(sourceTypeConfig[getAccountType(account.source_name).typeName] || {}).name || ''}}</el-tag>
+                            <el-tag :type="getAccountType(account.source_name).type">{{(SourceTypeConfig[getAccountType(account.source_name).typeName] || {}).name || ''}}</el-tag>
                             <span style="float: right">可用：{{getAvailCash(account.account_id)}}</span>
                         </el-option>
                     </el-select>
@@ -62,9 +62,9 @@
                 ]">
                     <el-select v-model.trim="makeOrderForm.exchange_id">
                         <el-option
-                            v-for="exchangeId in Object.keys(exchangeIds)"
+                            v-for="exchangeId in Object.keys(ExchangeIds)"
                             :key="exchangeId"
-                            :label="exchangeIds[exchangeId]"
+                            :label="ExchangeIds[exchangeId]"
                             :value="exchangeId">
                         </el-option>
                     </el-select>
@@ -226,7 +226,7 @@
 import Vue from 'vue';
 import { biggerThanZeroValidator } from '__assets/validator';
 import { deepClone } from '__gUtils/busiUtils';
-import { sourceTypeConfig, SideName, OffsetName, priceType, hedgeFlag, exchangeIds, InstrumentTypes, allowShorted } from '__gConfig/tradingConfig';
+import { SourceTypeConfig, SideName, OffsetName, priceType, hedgeFlag, ExchangeIds, InstrumentTypes, allowShorted } from 'kungfu-shared/config/tradingConfig';
 import { getFutureTickersConfig, getStockTickersConfig } from '__assets/base'
 import { Autocomplete } from 'element-ui';
 
@@ -248,12 +248,12 @@ function filterPriceType (priceType) {
 export default {
     
     data () {
-        this.sourceTypeConfig = sourceTypeConfig;
+        this.SourceTypeConfig = SourceTypeConfig;
         this.OffsetName = OffsetName;
         this.SideName = SideName;
         this.priceType = filterPriceType(priceType)
         this.hedgeFlag = hedgeFlag;
-        this.exchangeIds = exchangeIds;
+        this.ExchangeIds = ExchangeIds;
 
         this.biggerThanZeroValidator = biggerThanZeroValidator;
 

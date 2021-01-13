@@ -25685,6 +25685,10 @@ combineLatestObserver.subscribe(function (_a) {
         console.error("[WARNING] \u6682\u65E0" + ticker + "\u884C\u60C5\u4FE1\u606F");
         return;
     }
+    //必须在这里，以下都是在这个loop开始后执行
+    if (timeCount <= dealedTimeCount) {
+        return;
+    }
     // 判断是否可以交易, 如不能交易，先撤单
     var aliveOrders = Object(__WEBPACK_IMPORTED_MODULE_4__assets_utils__["c" /* getAliveOrders */])(orders);
     if (aliveOrders.length) {
@@ -25694,9 +25698,6 @@ combineLatestObserver.subscribe(function (_a) {
             console.log("[\u68C0\u67E5\u8BA2\u5355] \u6D3B\u52A8\u8BA2\u5355\u6570\u91CF " + aliveOrders.length + " / " + orders.length + ", \u7B49\u5F85\u5168\u90E8\u8BA2\u5355\u7ED3\u675F");
             console.log("[\u64A4\u5355] PARENTID: " + PARENT_ID);
         }
-        return;
-    }
-    if (timeCount <= dealedTimeCount) {
         return;
     }
     //制定本次交易计划
@@ -25709,6 +25710,7 @@ combineLatestObserver.subscribe(function (_a) {
         console.log('==========================================');
         handleFinished();
     }
+    //时间到
     if (timeCount > LAST_STEP_COUNT) {
         handleFinished();
         return;

@@ -208,7 +208,6 @@ combineLatestObserver.subscribe((
         return;
     }
 
-    
     // 判断是否可以交易, 如不能交易，先撤单
     const aliveOrders = getAliveOrders(orders)
     if (aliveOrders.length) {

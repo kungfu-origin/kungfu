@@ -8,7 +8,7 @@ import { parseToString, TABLE_BASE_OPTIONS, DEFAULT_PADDING, dealNum } from '@/a
 import { tradingDataObservale } from '@/assets/scripts/actions/tradingDataActions';
 import { switchProcess, processListObservable } from '@/assets/scripts/actions/processActions';
 import { kungfuCancelAllOrders } from '__io/kungfu/makeCancelOrder';
-import { aliveOrderStatusList } from '__gConfig/tradingConfig';
+import { aliveOrderStatusList } from 'kungfu-shared/config/tradingConfig';
 
 const blessed = require('blessed');
 

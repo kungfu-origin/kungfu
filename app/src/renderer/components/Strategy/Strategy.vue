@@ -222,7 +222,7 @@ import { remote } from 'electron';
 import { mapState, mapGetters } from 'vuex';
 import { openVueWin } from '__gUtils/busiUtils';
 import { deleteProcess } from '__gUtils/processUtils';
-import { encodeKungfuLocation } from '__gUtils/kungfuUtils';
+import { encodeKungfuLocation } from '__io/kungfu/kungfuUtils';
 import { watcher } from '__io/kungfu/watcher';
 import * as STRATEGY_API from '__io/kungfu/strategy';
 import { switchStrategy } from '__io/actions/strategy';
