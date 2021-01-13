@@ -1,5 +1,5 @@
 
-import { InstrumentTypes, aliveOrderStatusList } from 'kungfu-shared/config/tradingConfig';
+import { InstrumentTypes, aliveOrderStatusList, ExchangeIds, SideName, OffsetName } from 'kungfu-shared/config/tradingConfig';
 
 export const transformArrayToObjectByKey = (targetList: Array<any>, keys: Array<string>): any => {
     let data: any = {};
@@ -90,7 +90,7 @@ export const buildTarget = ({ offset, side, ticker, totalVolume, targetVolume }:
 
 export const reqMakeOrder = (baseData: any, quote: QuoteData, unfinishedSteps: number) => {
     const { side, offset, accountId, volume, parentId } = baseData;
-    const { instrumentTypeOrigin, lastPrice, instrumentId, exchangeId } = quote;
+    const { instrumentTypeOrigin, instrumentId, exchangeId } = quote;
 
     const makeOrderPrice = getMakeOrderPrice(side, quote, unfinishedSteps)
 
@@ -117,7 +117,18 @@ export const reqMakeOrder = (baseData: any, quote: QuoteData, unfinishedSteps: n
             }
         }
     })
-    console.log(`[下单] ${JSON.stringify(makeOrderData)}`)
+    console.log(`--------- [下单] ---------`)
+    console.log(`[账户] ${makeOrderData.name}`)
+    console.log(`[标的] ${makeOrderData.instrument_id}`)
+    console.log(`[交易所] ${ExchangeIds[makeOrderData.exchange_id]}`)
+    console.log(`[交易数量] ${makeOrderData.volume}`)
+    console.log(`[买卖] ${SideName[makeOrderData.side]}`)
+    console.log(`[开平] ${OffsetName[makeOrderData.offset]}`)
+    console.log(`[价格] ${makeOrderData.limit_price}`)
+    console.log(`[订单组] ${makeOrderData.parent_id}`)
+    console.log(`---------------------------`)
+            
+            
 }
 
 function getMakeOrderPrice (side: number, quote: QuoteData, unfinishedSteps: number ) {

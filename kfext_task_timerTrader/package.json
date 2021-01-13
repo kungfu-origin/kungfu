@@ -19,11 +19,12 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "kungfu-shared": "git+ssh://git@github.com:kungfu-trader/kungfu-shared.git",
     "moment": "^2.29.1",
-    "rxjs": "^6.6.3",
-    "kungfu-shared": "git+ssh://git@github.com:kungfu-trader/kungfu-shared.git"
+    "rxjs": "^6.6.3"
   },
   "devDependencies": {
+    "@types/node": "^14.14.20",
     "@types/minimist": "^1.2.1",
     "copyfiles": "^2.4.1",
     "pkg": "^4.4.9",
@@ -56,7 +57,6 @@
         "name": "交易所",
         "type": "exchangeId",
         "required": true
-
       },
       {
         "key": "side",

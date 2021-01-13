@@ -2,8 +2,8 @@
     "resolveJsonModule": true,
     "module": "commonjs",
     "include": [
-        "../app/shared/**/*",
         "../node_modules/kungfu-shared/**/*",
+        "../app/shared/**/*",
         "src/**/*",
         "src/*"
     ],

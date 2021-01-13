@@ -44,7 +44,6 @@ let extConfig = {
   plugins: [
     new webpack.NoEmitOnErrorsPlugin(),
     new webpack.DefinePlugin({
-      'process.env.LANG_ENV': '"en"',
       'process.env.APP_TYPE': '"ext"',
     }),
   ],
@@ -87,7 +86,6 @@ if (process.env.NODE_ENV === 'production') {
   extConfig.plugins.push(
     new webpack.DefinePlugin({
       'process.env.NODE_ENV': '"production"',
-      'process.env.LANG_ENV': '"en"',
       'python_version': `"${pyVersion.toString()}"`,
     }),
     new OptimizeJsPlugin({

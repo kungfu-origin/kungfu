@@ -1,5 +1,5 @@
 import minimist from 'minimist';
-import { Observable, combineLatest, TimeInterval } from 'rxjs';
+import { Observable, combineLatest } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 import moment from 'moment';
 import { 
@@ -173,6 +173,11 @@ combineLatestObserver.subscribe((
     [ number, { [prop: string]: QuoteData }, null | { [prop: string]: PosData }, OrderData[] ] 
 ) => {
 
+    const quote = quotes[TICKER];
+    if (!quote) {
+        console.error(`[WARNING] 暂无${ticker}行情信息，需保证MD进程开启`)
+        return;
+    }
 
     if (positions === null) {
         console.error(`[WARNING] 暂无${ticker}持仓信息，需保证TD进程开启`)
@@ -195,12 +200,6 @@ combineLatestObserver.subscribe((
         if (!targetPosData) {
             return
         };
-    }
-
-    const quote = quotes[TICKER];
-    if (!quote) {
-        console.error(`[WARNING] 暂无${ticker}行情信息，需保证MD进程开启`)
-        return;
     }
 
     //必须在这里，以下都是在这个loop开始后执行
@@ -235,13 +234,13 @@ combineLatestObserver.subscribe((
     )
 
     if (total === 0) {
-        console.log('=========================================')
-        console.log('=============== 交易任务完成 ==============')
-        console.log('==========================================')
+        console.log('========================================================')
+        console.log(`====================== 交易任务完成 ======================`)
+        console.log('=========================================================')
         handleFinished()
     }
 
-    //时间到
+    //时间到，需在此处，以显示交易完成s s s s s s s
     if (timeCount > LAST_STEP_COUNT) {
         handleFinished()
         return;
