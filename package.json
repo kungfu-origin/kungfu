@@ -8,6 +8,7 @@
   "workspaces": [
     "core",
     "cli2",
+    "kfext_task_timerTrader",
     "app",
     "tests"
   ],

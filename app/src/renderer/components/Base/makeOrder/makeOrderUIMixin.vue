@@ -22,7 +22,7 @@
                             :label="account.account_id.toAccountId()"
                             :value="account.account_id">
                             <span style="color: #fff">{{account.account_id.toAccountId()}}</span>
-                            <el-tag :type="getAccountType(account.source_name).type">{{(sourceTypeConfig[getAccountType(account.source_name).typeName] || {}).name || ''}}</el-tag>
+                            <el-tag :type="getAccountType(account.source_name).type">{{(SourceTypeConfig[getAccountType(account.source_name).typeName] || {}).name || ''}}</el-tag>
                             <span style="float: right">可用：{{getAvailCash(account.account_id)}}</span>
                         </el-option>
                     </el-select>
@@ -62,9 +62,9 @@
                 ]">
                     <el-select v-model.trim="makeOrderForm.exchange_id">
                         <el-option
-                            v-for="exchangeId in Object.keys(exchangeIds)"
+                            v-for="exchangeId in Object.keys(ExchangeIds)"
                             :key="exchangeId"
-                            :label="exchangeIds[exchangeId]"
+                            :label="ExchangeIds[exchangeId]"
                             :value="exchangeId">
                         </el-option>
                     </el-select>
@@ -79,7 +79,7 @@
                     { required: true, message: '不能为空！', trigger: 'change'},
                 ]">
                     <el-radio-group size="mini" v-model="makeOrderForm.hedge_flag">
-                        <el-radio size="mini"  v-for="key in Object.keys(hedgeFlag || {})" :key="key" :label="+key">{{ hedgeFlag[key] }}</el-radio>
+                        <el-radio size="mini"  v-for="key in Object.keys(HedgeFlag || {})" :key="key" :label="+key">{{ HedgeFlag[key] }}</el-radio>
                     </el-radio-group>
                 </el-form-item>  
 
@@ -116,7 +116,7 @@
                     { required: true, message: '不能为空！', trigger: 'change' },
                 ]">
                     <el-radio-group size="mini" v-model="makeOrderForm.price_type">
-                        <el-radio size="mini" v-for="key in Object.keys(priceType || {})" :label="+key" :key="key">{{ priceType[key] }}</el-radio>
+                        <el-radio size="mini" v-for="key in Object.keys(PriceType || {})" :label="+key" :key="key">{{ PriceType[key] }}</el-radio>
                     </el-radio-group>
                 </el-form-item>
 
@@ -226,18 +226,18 @@
 import Vue from 'vue';
 import { biggerThanZeroValidator } from '__assets/validator';
 import { deepClone } from '__gUtils/busiUtils';
-import { sourceTypeConfig, SideName, OffsetName, priceType, hedgeFlag, exchangeIds, InstrumentTypes, allowShorted } from '__gConfig/tradingConfig';
+import { SourceTypeConfig, SideName, OffsetName, PriceType, HedgeFlag, ExchangeIds, InstrumentTypes, allowShorted } from 'kungfu-shared/config/tradingConfig';
 import { getFutureTickersConfig, getStockTickersConfig } from '__assets/base'
 import { Autocomplete } from 'element-ui';
 
 Vue.use(Autocomplete)
 
-function filterPriceType (priceType) {
+function filterPriceType (PriceType) {
     let filterPriceType = {};
 
-    Object.keys(priceType || {}).forEach(key => {
+    Object.keys(PriceType || {}).forEach(key => {
         if (key <= 1) {
-            filterPriceType[key] = priceType[key]
+            filterPriceType[key] = PriceType[key]
         }
     })
 
@@ -248,12 +248,12 @@ function filterPriceType (priceType) {
 export default {
     
     data () {
-        this.sourceTypeConfig = sourceTypeConfig;
+        this.SourceTypeConfig = SourceTypeConfig;
         this.OffsetName = OffsetName;
         this.SideName = SideName;
-        this.priceType = filterPriceType(priceType)
-        this.hedgeFlag = hedgeFlag;
-        this.exchangeIds = exchangeIds;
+        this.PriceType = filterPriceType(PriceType)
+        this.HedgeFlag = HedgeFlag;
+        this.ExchangeIds = ExchangeIds;
 
         this.biggerThanZeroValidator = biggerThanZeroValidator;
 
@@ -398,6 +398,7 @@ export default {
 
     watch: {
         makeOrderByPosData (newPosData) {
+            
             if (!Object.keys(newPosData || {}).length) return;
             this.clearData(true);
 
@@ -513,16 +514,25 @@ export default {
             this.$refs['make-order-form'].validate(valid => {
                 
                 if(valid) {
+
                     //当下单不是从posdata进入
                     if (!this.makeOrderForm.instrument_type) {
                         const instrumentType = this.getInstrumentType(this.currentAccountResolved);
                         this.$set(this.makeOrderForm, 'instrument_type', instrumentType)
                     }
 
-                    let makeOrderForm = deepClone(this.makeOrderForm);
+                    const makeOrderForm = deepClone(this.makeOrderForm);
+                    // const makeOrderConfirmTip = this.buildMakeOrderFormInfo(makeOrderForm)
+                    // this.$confirm(makeOrderConfirmTip, '提示', {
+                    //     confirmButtonText: '确 定',
+                    //     cancelButtonText: '取 消',
+                    // })
                     this.makeOrder(this.moduleType, makeOrderForm, this.currentAccountResolved, this.currentId)
                         .then(() => this.$message.success('下单指令已发送！'))
-                        .catch(err => this.$message.error(err.message || '下单指令发送失败！'))
+                        .catch(err => {
+                            if (err === 'cancel') return;    
+                            this.$message.error(err.message || '下单指令发送失败！')
+                        })
                 }
             })
         },
@@ -530,6 +540,13 @@ export default {
         handleSelectAccount (account) {
             this.currentAccount = account;
         },
+
+        // buildMakeOrderFormInfo (makeOrderForm) {
+        //     console.log(makeOrderForm)
+        //     const { instrument_type, side, offset, volume, limit_price, accountId, instrument_id } = makeOrderForm;
+            
+        //     return '确认下单'
+        // },
 
         getInstrumentType (accountId) {
             const sourceName = accountId.split('_')[0] || '';

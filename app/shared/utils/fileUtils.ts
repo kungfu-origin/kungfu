@@ -1,8 +1,8 @@
+import fse from 'fs-extra';
+import csv from 'fast-csv';
 import { deepClone } from '__gUtils/busiUtils';
 
 const path = require("path");
-const fse = require('fs-extra');
-const csv = require("fast-csv");
 
 declare global {
     interface Window { 
@@ -282,7 +282,7 @@ export const writeFile = (filePath: string, data: string): Promise<void> => {
     })
 }
 
-export const writeCSV = (filePath: string, data: string): Promise<void> => {
+export const writeCSV = (filePath: string, data: any[]): Promise<void> => {
     filePath = path.normalize(filePath)
     return new Promise((resolve) => {
         csv.writeToPath(filePath, data, {
@@ -297,15 +297,7 @@ export const writeCSV = (filePath: string, data: string): Promise<void> => {
 //清空文件内容
 export const clearFileContent = (filePath: string): Promise<any> => {
     filePath = path.normalize(filePath)
-    return new Promise((resolve, reject) => {
-        fse.outputFile(filePath, '', (err: Error, data: any): void => {
-            if(err){
-                reject(err);
-                return;
-            }
-            resolve(data)
-        })
-    })
+    return fse.outputFile(filePath, '')
 }
 
 

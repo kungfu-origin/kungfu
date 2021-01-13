@@ -1,9 +1,9 @@
 import { KF_RUNTIME_DIR, KF_CONFIG_PATH } from '__gConfig/pathConfig';
 import { setTimerPromiseTask } from '__gUtils/busiUtils';
-import { kungfu } from '__gUtils/kungfuUtils';
+import { kungfu } from '__io/kungfu/kungfuUtils';
 import { toDecimal } from '__gUtils/busiUtils';
 import { readJsonSync } from '__gUtils/fileUtils';
-import { OffsetName, orderStatus, SideName, PosDirection, priceType, hedgeFlag, InstrumentType, volumeCondition, timeCondition, allowShorted } from "__gConfig/tradingConfig";
+import { OffsetName, OrderStatus, SideName, PosDirection, PriceType, HedgeFlag, InstrumentType, VolumeCondition, TimeCondition, allowShorted } from "kungfu-shared/config/tradingConfig";
 import { logger } from '../../utils/logUtils';
 
 export const watcher: any = (() => {
@@ -49,7 +49,7 @@ export const startGetKungfuTradingData = (callback: Function, interval = 1000) =
             callback({
                 ledger: watcher.ledger,
             });
-            resolve();
+            resolve(true);
         })
     }, interval);
 }
@@ -252,7 +252,7 @@ export const dealOrder = (item: OrderInputData): OrderData => {
     const sourceId =  resolveSourceDest(source, dest).sourceGroup;
     const isGBK = sourceId.toLowerCase().includes('ctp');
     const errMsg = item.error_msg;
-    const errMsgResolved = isGBK ? orderStatus[item.status] : errMsg;
+    const errMsgResolved = isGBK ? OrderStatus[item.status] : errMsg;
   
     return {
         id: [item.order_id.toString(), item.account_id.toString()].join('-'),
@@ -270,19 +270,20 @@ export const dealOrder = (item: OrderInputData): OrderData => {
         
         side: SideName[item.side] ? SideName[item.side] : '--',
         sideOrigin: item.side,
-        offset: !allowShorted(instrumentType) ? 
-            '--' : 
-            OffsetName[item.offset] ? 
-                OffsetName[item.offset] : 
-                '--',
+        // offset: !allowShorted(instrumentType) ? 
+        //     '--' : 
+        //     OffsetName[item.offset] ? 
+        //         OffsetName[item.offset] : 
+        //         '--',
+        offset: OffsetName[item.offset],
         offsetOrigin: item.offset,
-        hedgeFlag: hedgeFlag[item.hedge_flag] ? hedgeFlag[item.hedge_flag] : '--',
+        hedgeFlag: HedgeFlag[item.hedge_flag] ? HedgeFlag[item.hedge_flag] : '--',
         hedgeFlagOrigin: item.hedge_flag,
 
-        priceType: priceType[item.price_type],
+        priceType: PriceType[item.price_type],
         priceTypeOrigin: item.price_type,
-        volumeCondition: volumeCondition[item.volume_condition],
-        timeCondition: timeCondition[item.time_condition],
+        volumeCondition: VolumeCondition[item.volume_condition],
+        timeCondition: TimeCondition[item.time_condition],
 
         limitPrice: toDecimal(item.limit_price, 3) || '--',
         frozenPrice: toDecimal(item.frozen_price, 3) || '--',
@@ -291,7 +292,7 @@ export const dealOrder = (item: OrderInputData): OrderData => {
         volumeTraded: item.volume_traded.toString() + "/" + item.volume.toString(),
         volumeLeft: item.volume_left.toString(),
 
-        statusName: +item.status !== 4 ? orderStatus[item.status] : errMsgResolved,
+        statusName: +item.status !== 4 ? OrderStatus[item.status] : errMsgResolved,
         status: item.status,
 
         tax: item.tax,
@@ -321,11 +322,12 @@ export const dealTrade = (item: TradeInputData): TradeData => {
         updateTimeNum: +Number(updateTime || 0),
         instrumentId: item.instrument_id,
         side: SideName[item.side] ? SideName[item.side] : '--',
-        offset: instrumentType === 1 || instrumentType === 5 ? 
-            '--' : 
-            OffsetName[item.offset] ? 
-                OffsetName[item.offset] : 
-                '--',
+        // offset: instrumentType === 1 || instrumentType === 5 ? 
+        //     '--' : 
+        //     OffsetName[item.offset] ? 
+        //         OffsetName[item.offset] : 
+        //         '--',
+        offset: OffsetName[item.offset],
         price: toDecimal(+item.price, 3),
         volume: Number(item.volume),
         clientId: resolveClientId(item.dest || ''),
@@ -436,6 +438,7 @@ export const dealQuote = (quote: QuoteDataInput): QuoteData => {
         highPrice: toDecimal(quote.high_price, 3),
         instrumentId: quote.instrument_id,
         instrumentType: InstrumentType[quote.instrument_type],
+        instrumentTypeOrigin: quote.instrument_type,
         lastPrice: toDecimal(quote.last_price, 3),
         lowPrice: toDecimal(quote.low_price, 3),
         lowerLimitPrice: toDecimal(quote.lower_limit_price, 3),
@@ -450,6 +453,8 @@ export const dealQuote = (quote: QuoteDataInput): QuoteData => {
         turnover: quote.turnover,
         upperLimitPrice: toDecimal(quote.upper_limit_price, 3),
         volume: Number(quote.volume),
+        askPrices: quote.ask_price || [],
+        bidPrices: quote.bid_price || []
     }
        
 

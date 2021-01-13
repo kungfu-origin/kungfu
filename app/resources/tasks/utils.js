@@ -105,7 +105,7 @@ function getLog(logPath, searchKeyword, dealMessageFunc){
                 return;
             }
 
-            const startSize = stats.size - 1000000 < 0 ? 0 : stats.size - 1000000;
+            const startSize = stats.size - 10000000 < 0 ? 0 : stats.size - 10000000;
             const lineReader = readline.createInterface({
                 input: fs.createReadStream(logPath, {
                     start: startSize

@@ -1,8 +1,7 @@
+import fse from 'fs-extra';
 import { KF_CONFIG_DEFAULT_PATH, KF_CONFIG_PATH, KF_TARADING_CONFIG_DEFAULT_PATH, KF_TARADING_CONFIG_PATH, KF_FUTURE_TICKERS_CONFIG_PATH, KF_STOCK_TICKERS_CONFIG_PATH } from '__gConfig/pathConfig';
 import { existsSync, addFileSync, readJsonSync, outputJsonSync } from '__gUtils/fileUtils';
 import { logger } from '__gUtils/logUtils'
-
-const fse = require('fs-extra');
 
 export const initConfig = () => {
     if(!existsSync(KF_CONFIG_PATH)) {

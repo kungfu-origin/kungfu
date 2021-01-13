@@ -44,7 +44,7 @@
                 </template>
             </el-table-column>
               <el-table-column
-                label="运行"
+                label="进程"
                 sortable    
             >
                 <template slot-scope="props" v-if="props.row.strategy_id">
@@ -187,7 +187,8 @@
                 { validator: specialStrValidator, trigger: 'blur' },
                 { validator: noZeroAtFirstValidator, trigger: 'blur' },
                 { validator: noKeywordValidatorBuilder('all'), trigger: 'blur' },
-                { validator: noKeywordValidatorBuilder('ledger'), trigger: 'blur' }
+                { validator: noKeywordValidatorBuilder('ledger'), trigger: 'blur' },
+                { validator: noKeywordValidatorBuilder('task'), trigger: 'blur' }
                 ]"
             >
                 <el-input 
@@ -221,7 +222,7 @@ import { remote } from 'electron';
 import { mapState, mapGetters } from 'vuex';
 import { openVueWin } from '__gUtils/busiUtils';
 import { deleteProcess } from '__gUtils/processUtils';
-import { encodeKungfuLocation } from '__gUtils/kungfuUtils';
+import { encodeKungfuLocation } from '__io/kungfu/kungfuUtils';
 import { watcher } from '__io/kungfu/watcher';
 import * as STRATEGY_API from '__io/kungfu/strategy';
 import { switchStrategy } from '__io/actions/strategy';

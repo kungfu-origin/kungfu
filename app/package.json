@@ -89,6 +89,10 @@
         ]
       },
       {
+        "from": "../kfext_task_timerTrader/build/ext",
+        "to": "kungfu-extensions/timer-trader"
+      },
+      {
         "from": "../cli2/build/cli",
         "to": "kungfu-cli",
         "filter": [
@@ -163,6 +167,7 @@
     "pm2": "4.5.1"
   },
   "devDependencies": {
+    "kungfu-shared": "git+ssh://git@github.com:kungfu-trader/kungfu-shared.git",
     "@types/node": "^12.6.2",
     "aws-sdk": "^2.395.0",
     "babel-loader": "^7.1.1",
@@ -206,6 +211,7 @@
     "jquery": "^3.4.1",
     "log4js": "^4.0.2",
     "mime": "^2.4.0",
+    "minimist": "^1.2.5",
     "mkdirp": "^0.5.1",
     "mocha": "^6.1.4",
     "moment": "^2.24.0",

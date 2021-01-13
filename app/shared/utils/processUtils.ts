@@ -12,14 +12,13 @@ import * as taskkill from 'taskkill';
 //@ts-ignore
 import * as physicalCpuCount from 'physical-cpu-count';
 
-// import * as pm2 from 'pm2'
-
 import { KF_HOME, KUNGFU_ENGINE_PATH, KF_CONFIG_PATH, buildProcessLogPath } from '__gConfig/pathConfig';
 import { platform } from '__gConfig/platformConfig';
 import { logger } from '__gUtils/logUtils';
 import { readJsonSync } from '__gUtils/fileUtils';
 import { setTimerPromiseTask, delayMiliSeconds } from '__gUtils/busiUtils';
 import { getProcesses } from 'getprocesses';
+
 
 const path = require('path');
 const fkill = require('fkill');
@@ -195,7 +194,56 @@ function getRocketParams(name: String, ifRocket: Boolean) {
     return rocket
 }
 
-export const startProcess = async (options: any, no_ext = false): Promise<object> => {
+function parseScriptName () {
+    if (process.env.NODE_ENV === 'production') {
+        const extensionName = platform === 'win' ? '.exe' : ''
+        return `index${extensionName}`
+    } else {
+        return `index.js`
+    }
+}
+
+export const startTask = (options: any) => {
+
+    const script = parseScriptName();
+    const optionsResolved = {
+        "logType": "json",
+        "output": buildProcessLogPath(options.name),
+        "error": buildProcessLogPath(options.name),
+        "mergeLogs": true,
+        "logDateFormat": "YYYY-MM-DD HH:mm:ss",
+        "autorestart": false,
+        "maxRestarts": 1,
+        "watch": false,
+        "force": true,
+        "execMode": "fork",
+        "killTimeout": 16000,
+        ...options,
+        script
+    }
+
+
+    return new Promise((resolve, reject) => {
+        pm2Connect().then(() => {
+            try {
+                pm2.start(optionsResolved, (err: any, apps: object): void => {
+                    if (err) {
+                        err = err.length ? err[0] : err;
+                        logger.error('[startProcess]', JSON.stringify(options), err)
+                        reject(err);
+                        return;
+                    };
+                    resolve(apps);
+                })
+            } catch (err) {
+                logger.error('[TC startProcess]', JSON.stringify(options), err)
+                reject(err)
+            }
+        }).catch(err => reject(err))
+    })
+}
+
+export const startProcess = (options: any, no_ext = false): Promise<object> => {
     const extensionName = platform === 'win' ? '.exe' : ''
     const kfConfig: any = readJsonSync(KF_CONFIG_PATH) || {}
     const ifRocket = ((kfConfig.performance || {}).rocket) || false;
@@ -433,34 +481,52 @@ export const startCustomProcess = (targetName: string, params: string): Promise<
     }).catch(err => logger.error(`[start${targetName}]`, err))
 }
 
-//列出所有进程
-export const listProcessStatus = () => {
-    return pm2List().then((pList: any[]): StringToStringObject => {
-        let processStatus: any = {}
-        Object.freeze(pList).forEach(p => {
-            const name = p.name;
-            const status = p.pm2_env.status
-            processStatus[name] = status
-        })
-        return processStatus
+function buildProcessStatus (pList: any[]): StringToStringObject {
+    let processStatus: any = {}
+    Object.freeze(pList).forEach(p => {
+        const name = p.name;
+        const status = p.pm2_env.status
+        processStatus[name] = status
     })
+    return processStatus
 }
 
-export const listProcessStatusWithDetail = () => {
-    return pm2List().then((pList: any[]): StringToProcessStatusDetail => {
-        let processStatus: any = {}
+function buildProcessStatusWidthDetail (pList: any[]): StringToProcessStatusDetail {
+    let processStatus: any = {}
         Object.freeze(pList).forEach(p => {
             const { monit, pid, name, pm2_env } = p;
-            const status = pm2_env.status
+            const status = pm2_env.status;
+            const created_at = pm2_env.created_at;
+            const cwd = pm2_env.cwd;
+            const pm_exec_path = (pm2_env.pm_exec_path || "").split('\/');
+            const script = pm2_env.script || pm_exec_path[pm_exec_path.length - 1]
+            const args = pm2_env.args;
+
             processStatus[name] = {
                 status,
                 monit,
                 pid,
-                name
+                name,
+                created_at,
+                script,
+                cwd,
+                args
             }
         })
         return processStatus
+}
+
+//列出所有进程
+export const listProcessStatus = () => {
+    return pm2List().then((pList: any[]): { processStatus: StringToStringObject, processStatusWithDetail: StringToProcessStatusDetail } => {
+        const processStatus = buildProcessStatus(pList)
+        const processStatusWithDetail = buildProcessStatusWidthDetail(pList)
+        return { processStatus, processStatusWithDetail }
     })
+}
+
+export const listProcessStatusWithDetail = () => {
+    return pm2List().then((pList: any[]) => buildProcessStatusWidthDetail(pList))
 }
 
 //删除进程
@@ -497,6 +563,19 @@ export const deleteProcess = (processName: string) => {
     })
 }
 
+export const stopProcess = (processName: string) => {
+    return new Promise((resolve, reject) => {
+        pm2.stop(processName, ((err: Error) => {
+            if (err) {
+                reject(err)
+                return;
+            }
+
+            resolve(true)
+        }))
+    })
+}
+
 //干掉守护进程
 export const killGodDaemon = () => {
     return new Promise((resolve, reject) => {
@@ -527,9 +606,12 @@ export const startGetProcessStatus = (callback: Function) => {
     setTimerPromiseTask(() => {
         return listProcessStatus()
             .then(res => {
-                const processStatus = Object.freeze(res || {});
-                if (Object.keys(processStatus).length && callback) {
-                    callback(processStatus)
+                const { processStatus, processStatusWithDetail } = res;
+                if (callback) {
+                    callback({
+                        processStatus: Object.freeze(processStatus || {}), 
+                        processStatusWithDetail: Object.freeze(processStatusWithDetail || {})
+                    })
                 }
             })
             .catch(err => console.error(err))
@@ -555,3 +637,4 @@ export const buildStartDatasetByDataSeriesIdOptions = (namespace: string, dataSe
         "args": ['data', 'get', '-n', dataSeriesId, '-s', 'kfa'].join(' ')
     }
 }
+

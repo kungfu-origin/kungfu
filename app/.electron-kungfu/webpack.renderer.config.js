@@ -12,6 +12,11 @@ const OptimizeJsPlugin = require("optimize-js-plugin");
 const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 
+console.log(   path.resolve(__dirname, '..', 'resources'),
+path.resolve(__dirname, '..', 'src'),
+path.resolve(__dirname, '..', 'shared'),
+path.resolve(__dirname, '..', '..', 'node_modules', 'kungfu-shared'),
+)
 
 let rendererConfig = {
   devtool: '#cheap-module-eval-source-map',
@@ -55,7 +60,12 @@ let rendererConfig = {
       {
         test: /\.ts$/,
         use: 'ts-loader',
-        exclude: /node_modules/
+        include: [
+          path.resolve(__dirname, '..', 'resources'),
+          path.resolve(__dirname, '..', 'src'),
+          path.resolve(__dirname, '..', 'shared'),
+          path.resolve(__dirname, '..', '..', 'node_modules', 'kungfu-shared'),
+        ]
       },
       {
         test: /\.js$/,

@@ -12,7 +12,7 @@
 
 <script>
 import lineConfig from './config/lineEchart'
-import { kungfu } from '__gUtils/kungfuUtils';
+import { kungfu } from '__io/kungfu/kungfuUtils';
 import { toDecimal, deepClone } from '__gUtils/busiUtils';
 const { echarts } = require('@/assets/js/static/echarts.min.js')
 

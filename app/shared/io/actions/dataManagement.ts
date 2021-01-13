@@ -1,12 +1,9 @@
-
-
+import fse from 'fs-extra';
 import { KF_DATASET_DIR } from '__gConfig/pathConfig';
 import { listDir, removeFileFolder } from '__gUtils/fileUtils';
 
 
 const path = require('path');
-const fse = require('fs-extra')
-
 
 export const makeDataSeriesDir = (dirname: string) => {
     return fse.ensureDir(path.join(KF_DATASET_DIR, dirname))

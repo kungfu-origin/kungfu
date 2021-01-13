@@ -1,6 +1,6 @@
 import { mapState } from 'vuex';
 
-import { kungfuCancelOrder, kungfuMakeOrder } from '__io/kungfu/makeCancelOrder';
+import { kungfuCancelOrder, kungfuMakeOrder, kungfuSubscribeTicker } from '__io/kungfu/makeCancelOrder';
 import { decodeKungfuLocation } from '__io/kungfu/watcher';
 
 export default {
@@ -44,7 +44,7 @@ export default {
             }
         },
 
-        makeOrder (moduleType, makeOrderForm, currentAccountResolved, strategyId) {
+        makeOrder (moduleType, makeOrderForm, currentAccountResolved, strategyId, parentId) {
             if (moduleType === 'account') {
                 return kungfuMakeOrder(makeOrderForm, currentAccountResolved)
             } else if (moduleType === 'strategy') {
@@ -52,6 +52,10 @@ export default {
             } else if (moduleType === 'ticker') {
                 return kungfuMakeOrder(makeOrderForm, currentAccountResolved)
             }
+        },
+
+        subscribeTicker (sourceName, exchangeId, ticker) {
+            return kungfuSubscribeTicker(sourceName, exchangeId, ticker)
         },
 
         init () {

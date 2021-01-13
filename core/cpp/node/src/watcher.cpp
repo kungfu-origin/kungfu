@@ -177,6 +177,41 @@ Napi::Value Watcher::CancelOrder(const Napi::CallbackInfo &info) {
   return InteractWithTD<OrderAction>(info, &OrderAction::order_action_id);
 }
 
+Napi::Value Watcher::RequestMarketData(const Napi::CallbackInfo &info) {
+  if (not IsValid(info, 0, &Napi::Value::IsObject)) {
+    return Napi::Boolean::New(info.Env(), false);
+  }
+
+  if (not IsValid(info, 1, &Napi::Value::IsString)) {
+    return Napi::Boolean::New(info.Env(), false);
+  }
+
+  if (not IsValid(info, 2, &Napi::Value::IsString)) {
+    return Napi::Boolean::New(info.Env(), false);
+  }
+
+  auto md_location = ExtractLocation(info, 0, get_locator());
+  auto exchange_id = info[1].ToString().Utf8Value();
+  auto instrument_id = info[2].ToString().Utf8Value();
+
+  SPDLOG_INFO("request market data {}@{} from {}", exchange_id, instrument_id, md_location->uname);
+
+  if (not has_writer(md_location->uid)) {
+    return Napi::Boolean::New(info.Env(), false);
+  }
+
+  auto writer = get_writer(md_location->uid);
+  uint32_t key = hash_instrument(exchange_id.c_str(), instrument_id.c_str());
+  InstrumentKey instrument_key = {};
+  instrument_key.key = key;
+  strcpy(instrument_key.instrument_id, instrument_id.c_str());
+  strcpy(instrument_key.exchange_id, exchange_id.c_str());
+  instrument_key.instrument_type = get_instrument_type(exchange_id, instrument_id);
+  writer->write(now(), instrument_key);
+
+  return Napi::Boolean::New(info.Env(), true);
+}
+
 void Watcher::Init(Napi::Env env, Napi::Object exports) {
   Napi::HandleScope scope(env);
 
@@ -193,6 +228,7 @@ void Watcher::Init(Napi::Env env, Napi::Object exports) {
                                         InstanceMethod("isReadyToInteract", &Watcher::IsReadyToInteract),         //
                                         InstanceMethod("issueOrder", &Watcher::IssueOrder),                       //
                                         InstanceMethod("cancelOrder", &Watcher::CancelOrder),                     //
+                                        InstanceMethod("requestMarketData", &Watcher::RequestMarketData),         //
                                         InstanceAccessor("locator", &Watcher::GetLocator, &Watcher::NoSet),       //
                                         InstanceAccessor("config", &Watcher::GetConfig, &Watcher::NoSet),         //
                                         InstanceAccessor("history", &Watcher::GetHistory, &Watcher::NoSet),       //

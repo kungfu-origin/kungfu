@@ -11,7 +11,8 @@ export default {
         calendar: { //交易日等相关日期信息
            
         },
-        processStatus: null,
+        processStatus: {},
+        processStatusWithDetail: {},
         tdAccountSource: {}, //账户柜台信息
         mdAccountSource: {}, //账户柜台信息
         kfConfig: {} // kf 配置
@@ -21,6 +22,10 @@ export default {
 
         setProcessStatus ({ commit }, processStatus) {
             commit('SET_PROCESS_STATUS', processStatus)
+        },
+
+        setProcessStatusWithDetail ({ commit }, processStatusWithDetail) {
+            commit('SET_PROCESS_STATUS_WITH_DETAIL', processStatusWithDetail)
         },
 
         setTdAccountSource ({ commit }, tdAccountSource) {
@@ -72,6 +77,10 @@ export default {
         
         SET_PROCESS_STATUS (state, processStatus) {
             state.processStatus = processStatus
+        },
+
+        SET_PROCESS_STATUS_WITH_DETAIL (state, processStatusWithDetail) {
+            state.processStatusWithDetail = processStatusWithDetail
         },
         
         SET_TD_ACCOUNT_SOURCE (state, tdAccountSource) {

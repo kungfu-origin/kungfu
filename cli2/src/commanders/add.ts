@@ -204,6 +204,7 @@ function buildStrategyQuestion(strategyData: any, updateModule: boolean | undefi
                     noZeroAtFirstValidator, 
                     noKeywordValidatorBuilder('all'),
                     noKeywordValidatorBuilder('ledger'),
+                    noKeywordValidatorBuilder('task'),
                     chineseValidator
                 ].forEach(validator => {
                     if(hasError) return;

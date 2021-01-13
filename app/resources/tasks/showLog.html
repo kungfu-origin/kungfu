@@ -210,6 +210,7 @@
         }catch(err){
             return false;
         }
+
         let messages = lineData.message.split('\n').filter(m => m !== '');
         return messages.map(message => {
             message = message.split('\n[')
