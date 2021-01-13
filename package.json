@@ -19,7 +19,8 @@
     "build-cli": "yarn run clean && yarn run env-cli && yarn wsrun --serial --fast-exit build-cli",
     "env-cli": "npm config set kungfu-core:runtime node",
     "env-electron": "npm config set kungfu-core:runtime electron",
-    "env-pypi": "npm config set kungfu-core:pypi https://pypi.python.org/simple",
+    "env-pypi-python": "npm config set kungfu-core:pypi https://pypi.python.org/simple",
+    "env-pypi-aliyun": "npm config set kungfu-core:pypi http://mirrors.aliyun.com/pypi/simple",
     "clean": "yarn wsrun clean"
   },
   "dependencies": {

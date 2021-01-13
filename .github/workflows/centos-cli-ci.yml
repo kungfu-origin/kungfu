@@ -1,23 +1,35 @@
 name: CLI CI
 
-on: 
+on:
   push:
     branches:
       - release
       - 2.3
+
 jobs:
   build:
     runs-on: ubuntu-latest
     container: 'docker.io/kungfutrader/kungfu-builder-centos:latest'
     steps:
-    - uses: actions/checkout@v1
-    - run: |
-        yarn env-pypi
-        yarn install
-        yarn build-cli
-    - uses: actions/upload-artifact@v2
-      with:
-        path: |
-          app/build/app/*.rpm
-          app/build/app/*.AppImage
+      - name: Checkout Code
+        uses: actions/checkout@v1
 
+      - name: Build Kungfu
+        run: |
+          yarn env-pypi-python
+          yarn install
+          yarn build-cli
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          path: |
+            app/build/app/*.rpm
+            app/build/app/*.AppImage
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: cn-northwest-1

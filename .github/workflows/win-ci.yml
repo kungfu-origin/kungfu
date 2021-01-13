@@ -18,22 +18,34 @@ jobs:
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-    # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-    - uses: actions/checkout@v2
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Checkout Code
+        uses: actions/checkout@v2
 
-    - name: Setup Node.js environment
-      uses: actions/setup-node@v1.4.4
-    - name: Setup python environment
-      uses: actions/setup-python@v2
-      with:
-        python-version: '3.7' # Version range or exact version of a Python version to use, using SemVer's version r
-    - name: Run Kungfu CI
-      run: |
-        pip install pipenv==2020.11.15
-        npm install -g electron-builder
-        yarn env-pypi
-        yarn install
-        yarn build
-    - uses: actions/upload-artifact@v2
-      with:
-        path: app/build/app/*.exe
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v1.4.4
+
+      - name: Setup Python environment
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.7' # Version range or exact version of a Python version to use, using SemVer's version r
+
+      - name: Build Kungfu
+        run: |
+          pip install pipenv==2020.11.15
+          npm install -g electron-builder
+          yarn env-pypi-python
+          yarn install
+          yarn build
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          path: app/build/app/*.exe
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: cn-northwest-1
