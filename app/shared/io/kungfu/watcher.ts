@@ -307,13 +307,14 @@ export const dealOrder = (item: OrderInputData): OrderData => {
 
 
 export const dealTrade = (item: TradeInputData): TradeData => {
+    //这个update会用延迟统计里的，因为目前是交易所时间，需要本地时间
     const updateTime = item.trade_time || item.update_time;
     return {
         id: [item.account_id.toString(), item.trade_id.toString(), updateTime.toString()].join('_'),
         updateTime: kungfu.formatTime(updateTime, '%H:%M:%S'),
         updateTimeMMDD: kungfu.formatTime(updateTime, '%m/%d %H:%M:%S'),
         updateTimeNum: +Number(updateTime || 0),
-        
+
         orderId: item.order_id.toString(),
         instrumentId: item.instrument_id,
         side: SideName[item.side] ? SideName[item.side] : '--',
@@ -369,22 +370,22 @@ export const dealAsset = (item: AssetInputData): AssetData => {
 
 
 export const dealOrderStat = (item: OrderStatInputData): OrderStatData => {
-    const insertTime = item.insert_time;
-    const ackTime = item.ack_time;
-    const mdTime = item.md_time;
-    const tradeTime = item.trade_time;
-
-    const latencyTrade = +Number(Number(tradeTime - ackTime) / 1000).toFixed(0);
-    const latencyNetwork = +Number(Number(ackTime - insertTime) / 1000).toFixed(0);
-    const latencySystem = +toDecimal(Number(insertTime - mdTime) / 1000);
+    const { insert_time, ack_time, md_time, trade_time } = item;
+    const latencyTrade = +Number(Number(trade_time - ack_time) / 1000).toFixed(0);
+    const latencyNetwork = +Number(Number(ack_time - insert_time) / 1000).toFixed(0);
+    const latencySystem = +toDecimal(Number(insert_time - md_time) / 1000);
 
     return {
-        ackTime: Number(ackTime),
-        insertTime: Number(insertTime),
-        mdTime: Number(mdTime),
+        ackTime: Number(ack_time),
+        insertTime: Number(insert_time),
+        mdTime: Number(md_time),
         latencySystem: latencySystem > 0 ? latencySystem.toString() : '',
         latencyNetwork: latencyNetwork > 0 ? latencyNetwork.toString() : '',
         latencyTrade: latencyTrade > 0 ? latencyTrade.toString() : '',
+        tradeTime: kungfu.formatTime(trade_time, '%H:%M:%S'),
+        tradeTimeMMDD: kungfu.formatTime(trade_time, '%m/%d %H:%M:%S'),
+        tradeTimeNum: +Number(trade_time || 0),
+
         orderId: item.order_id.toString(),
         dest: item.dest,
         source: item.source
