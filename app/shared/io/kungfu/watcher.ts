@@ -308,13 +308,13 @@ export const dealOrder = (item: OrderInputData): OrderData => {
 
 export const dealTrade = (item: TradeInputData): TradeData => {
     const updateTime = item.trade_time || item.update_time;
-    const instrumentType = item.instrument_type;
     return {
         id: [item.account_id.toString(), item.trade_id.toString(), updateTime.toString()].join('_'),
         updateTime: kungfu.formatTime(updateTime, '%H:%M:%S'),
         updateTimeMMDD: kungfu.formatTime(updateTime, '%m/%d %H:%M:%S'),
-        orderId: item.order_id.toString(),
         updateTimeNum: +Number(updateTime || 0),
+        
+        orderId: item.order_id.toString(),
         instrumentId: item.instrument_id,
         side: SideName[item.side] ? SideName[item.side] : '--',
         offset: OffsetName[item.offset],
