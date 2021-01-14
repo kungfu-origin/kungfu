@@ -166,23 +166,24 @@ const dealSpaceInPath = (pathname: string): string => {
 }
 
 export const describeProcess = (name: string): Promise<any> => {
+    console.log('describeProcess')
     return new Promise((resolve, reject) => {
-        pm2Connect().then(() => {
-            try {
-                pm2.describe(name, (err: any, res: object): void => {
-                    if (err) {
-                        err = err.length ? err[0] : err;
-                        logger.error('[describeProcess]', err)
-                        reject(err);
-                        return;
-                    }
-                    resolve(res)
-                })
-            } catch (err) {
-                logger.error('[TC describeProcess]', err)
-                reject(err)
-            }
-        }).catch(err => reject(err))
+        //此处无需connect，不然windows会卡死
+        try {
+            pm2.describe(name, (err: any, res: object): void => {
+                console.log(res)
+                if (err) {
+                    err = err.length ? err[0] : err;
+                    logger.error('[describeProcess]', err)
+                    reject(err);
+                    return;
+                }
+                resolve(res)
+            })
+        } catch (err) {
+            logger.error('[TC describeProcess]', err)
+            reject(err)
+        }
     })
 
 }
@@ -369,7 +370,8 @@ export function startArchiveMakeTask (cb?: Function) {
         startArchiveMake()
             .then(() => {
                 let timer = startGetProcessStatusByName('archive', (res: any[]) => {
-                    const archiveStatus = (res[0] || {}).pm2_env.status;
+                    console.log(res, '----')
+                    const archiveStatus = ((res[0] || {}).pm2_env || {}).status;
                     cb && cb(archiveStatus);
                     if (archiveStatus !== 'online') {
                         timer.clearLoop();
@@ -391,7 +393,7 @@ export function startProcessLoopGetStatus (options: Pm2Options, cb: Function) {
         startProcess({ ...options })
             .then(() => {
                 let timer = startGetProcessStatusByName(options.name, (res: any[]) => {
-                    const status = (res[0] || {}).pm2_env.status;
+                    const status = ((res[0] || {}).pm2_env || {}).status;
                     cb && cb(status);
                     if (status !== 'online') {
                         timer.clearLoop();
