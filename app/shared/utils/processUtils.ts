@@ -166,12 +166,10 @@ const dealSpaceInPath = (pathname: string): string => {
 }
 
 export const describeProcess = (name: string): Promise<any> => {
-    console.log('describeProcess')
     return new Promise((resolve, reject) => {
         //此处无需connect，不然windows会卡死
         try {
             pm2.describe(name, (err: any, res: object): void => {
-                console.log(res)
                 if (err) {
                     err = err.length ? err[0] : err;
                     logger.error('[describeProcess]', err)
