@@ -21,15 +21,21 @@
       ],
       "actions": [
         {
+          "action_name": "pipenv",
+          "inputs": ["Pipfile"],
+          "outputs": ["Pipfile.lock"],
+          "action": ["yarn", "pipenv-install"]
+        },
+        {
           "action_name": "configure",
           "inputs": ["CMakeLists.txt"],
-          "outputs": ["build/CMakeCache.txt"],
+          "outputs": ["build/conanbuildinfo.cmake"],
           "action": ["yarn", "configure"]
         },
         {
           "action_name": "compile",
-          "inputs": ["build/Makefile"],
-          "outputs": ["<(PRODUCT_DIR)"],
+          "inputs": ["build/conanbuildinfo.cmake"],
+          "outputs": ["<(PRODUCT_DIR)/*"],
           "action": ["yarn", "compile"]
         },
         {

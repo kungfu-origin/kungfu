@@ -14,7 +14,6 @@
     "tests"
   ],
   "scripts": {
-    "postinstall": "yarn wsrun --serial install-deps",
     "build": "yarn run clean && yarn run env-electron && yarn wsrun --serial --fast-exit build",
     "build-cli": "yarn run clean && yarn run env-cli && yarn wsrun --serial --fast-exit build-cli",
     "env-cli": "npm config set kungfu-core:runtime node",

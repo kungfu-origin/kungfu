@@ -3,7 +3,7 @@
   "version": "2.3.1",
   "description": "KungFu Trader App",
   "license": "Apache-2.0",
-  "homepage": "https://github.com/taurusai/kungfu",
+  "homepage": "https://www.kungfu-trader.com",
   "author": {
     "name": "taurus.ai",
     "email": "info@taurus.ai"
@@ -11,16 +11,11 @@
   "env": [
     "USE_HARD_LINKS=false"
   ],
-  "config": {
-    "pyver": "three",
-    "cmakejsopt": ""
-  },
   "main": "./dist/app/main.js",
   "engines": {
     "node": ">=10.16.0 <11.0.0"
   },
   "scripts": {
-    "install-deps": "electron-builder install-app-deps",
     "clean": "rimraf ./dist/* ./build/*",
     "build:install": "electron-builder",
     "build": "node --max_old_space_size=8192 .electron-kungfu/build.js && electron-builder",
@@ -36,13 +31,14 @@
     "artifactName": "${productName}-${buildVersion}-${os}-${arch}-${channel}.${ext}",
     "generateUpdatesFilesForAllChannels": true,
     "appId": "taurus.ai.KungFu.Trader",
+    "npmRebuild": false,
     "directories": {
       "output": "build/app"
     },
     "publish": [
       {
         "provider": "generic",
-        "url": "http://taurusai.com/kungfu"
+        "url": "https://www.kungfu-trader.com"
       }
     ],
     "files": [
@@ -201,6 +197,7 @@
     "electron-debug": "^1.4.0",
     "electron-devtools-installer": "^2.2.0",
     "electron-updater": "^4.0.6",
+    "electron-rebuild": "^2.3.4",
     "element-ui": "2.8.2",
     "extract-text-webpack-plugin": "^3.0.0",
     "fast-csv": "^2.5.0",

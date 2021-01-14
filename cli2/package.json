@@ -17,7 +17,7 @@
     "node": ">=10.16.0 <11.0.0"
   },
   "scripts": {
-    "install-deps": "cd ./src/assets/static/js/inquirer-path && yarn install && yarn compile",
+    "postinstall": "cd ./src/assets/static/js/inquirer-path && yarn install && yarn compile",
     "clean": "rimraf ./dist/* ./build/*",
     "build": "node -v",
     "build-cli": "node ./.build/build.js && yarn run cp",

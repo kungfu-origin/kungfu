@@ -26,14 +26,13 @@
     "host": "https://kungfu.s3.cn-northwest-1.amazonaws.com.cn"
   },
   "scripts": {
-    "install" : "node-pre-gyp install --fallback-to-build",
-    "install-deps": "cross-var pipenv --pypi-mirror $npm_package_config_pypi --python $npm_package_config_python_version install",
-    "build": "node-pre-gyp configure build",
-    "build-cli": "yarn run build",
+    "install": "node-pre-gyp install --fallback-to-build",
+    "build": "node-pre-gyp configure build package",
+    "build-cli": "node-pre-gyp configure build package",
+    "pipenv-install": "cross-var pipenv --pypi-mirror $npm_package_config_pypi --python $npm_package_config_python_version install",
     "configure": "cross-var pipenv run conan install . -if build -s build_type=$npm_package_config_buildtype --build missing -o log_level=$npm_package_config_loglevel -o arch=$npm_package_config_arch -o js_runtime=$npm_package_config_runtime -o node_version=$npm_package_config_node_version -o electron_version=$npm_package_config_electron_version",
     "compile": "cross-var pipenv run conan build . -bf build -s build_type=$npm_package_config_buildtype",
     "freeze": "cross-var pipenv run conan package . -bf build -pf build/kfc -s build_type=$npm_package_config_buildtype",
-    "package": "node-pre-gyp package",
     "clean": "cmake-js clean",
     "format": "pipenv run conan source .",
     "conan": "pipenv run conan",
