@@ -36,7 +36,6 @@ import GlobalSettingDialog from '@/components/Base/GlobalSettingDialog';
 import { existsSync } from '__gUtils/fileUtils';
 import { deepClone, delayMiliSeconds, debounce } from '__gUtils/busiUtils';
 import { buildKungfuGlobalDataPipe, buildTradingDataPipe } from '__io/kungfu/tradingData';
-import { deleteProcess } from '__gUtils/processUtils';
 import { watcher } from '__io/kungfu/watcher';
 
 import ipcListenerMixin from '@/ipcMsg/ipcListenerMixin.js';

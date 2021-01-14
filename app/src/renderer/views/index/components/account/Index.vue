@@ -19,7 +19,7 @@
                             @activeTicker="setCurrentTicker"
                             />
                         </el-tab-pane>
-                        <el-tab-pane :lazy="true" label="交易任务" name="tradingTask">
+                        <el-tab-pane :lazy="true" label="交易任务" name="tradingTask" v-if="isTasks">
                             <Task></Task>
                         </el-tab-pane>
                     </el-tabs>
@@ -119,7 +119,8 @@ import MainContent from '@/components/Layout/MainContent';
 import { buildTradingDataPipe } from '__io/kungfu/tradingData';
 import { transformPositionByTickerByMerge, dealPos } from '__io/kungfu/watcher';
 import { allowShorted } from "kungfu-shared/config/tradingConfig";
-
+import { getExtensionConfigs } from '__gUtils/busiUtils';
+import { TASK_EXTENSION_DIR } from '__gConfig/pathConfig';
 
 import accountStrategyMixins from '@/views/index/js/accountStrategyMixins';
 
@@ -143,7 +144,9 @@ export default {
             historyData: {},
 
             currentOrdesTabName: "orders",
-            currentTradesPnlTabNum: "trades"
+            currentTradesPnlTabNum: "trades",
+
+            isTasks: false,
         }
     },
 
@@ -210,6 +213,7 @@ export default {
     },
 
     mounted(){
+        this.getExtensionConfigs();
         this.tradingDataPipe = buildTradingDataPipe('account').subscribe(data => {
             if (this.moduleType === 'ticker') {
                 this.dealTradingDataByTiker(data)
@@ -353,6 +357,13 @@ export default {
             } 
 
             return false;
+        },
+
+        getExtensionConfigs () {
+            return getExtensionConfigs(TASK_EXTENSION_DIR)
+                .then(exts => {
+                    this.isTasks = !!exts.length
+                })
         },
     },
 

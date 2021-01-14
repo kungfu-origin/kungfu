@@ -167,21 +167,24 @@ const dealSpaceInPath = (pathname: string): string => {
 
 export const describeProcess = (name: string): Promise<any> => {
     return new Promise((resolve, reject) => {
-        try {
-            pm2.describe(name, (err: any, res: object): void => {
-                if (err) {
-                    err = err.length ? err[0] : err;
-                    logger.error('[describeProcess]', err)
-                    reject(err);
-                    return;
-                }
-                resolve(res)
-            })
-        } catch (err) {
-            logger.error('[TC describeProcess]', err)
-            reject(err)
-        }
+        pm2Connect().then(() => {
+            try {
+                pm2.describe(name, (err: any, res: object): void => {
+                    if (err) {
+                        err = err.length ? err[0] : err;
+                        logger.error('[describeProcess]', err)
+                        reject(err);
+                        return;
+                    }
+                    resolve(res)
+                })
+            } catch (err) {
+                logger.error('[TC describeProcess]', err)
+                reject(err)
+            }
+        }).catch(err => reject(err))
     })
+
 }
 
 function getRocketParams(name: String, ifRocket: Boolean) {
@@ -531,48 +534,38 @@ export const listProcessStatusWithDetail = () => {
 
 //删除进程
 export const deleteProcess = (processName: string) => {
-    return new Promise(async (resolve, reject) => {
-        var processes = [];
-        try {
-            processes = await describeProcess(processName)
-        } catch (err) {
-            logger.error('[TC describeProcess deleteProcess]', err)
-        }
+        return new Promise(async (resolve, reject) => {
+            var processes = [];
+            try {
+                processes = await describeProcess(processName)
+            } catch (err) {
+                logger.error('[TC describeProcess deleteProcess]', err)
+            }
 
-        //如果進程不存在，會跳過刪除步驟
-        if (!processes || !processes.length) {
-            resolve(true)
-            return;
-        }
+            //如果進程不存在，會跳過刪除步驟
+            if (!processes || !processes.length) {
+                resolve(true)
+                return;
+            }
 
-        pm2Delete(processName)
-            .then(() => resolve(true))
-            .catch(err => reject(err))
-            .finally(async () => {
-                const processes = await describeProcess(processName)
-                const pids = processes
-                    .map((prc: any): number => prc.pid)
-                    .filter((pid: number): boolean => !!pid)
-
-                if (!pids || !pids.length) return
-                logger.info('[KILL PROCESS] by pids', pids)
-                kfKill(pids)
-                    .then(() => logger.info('[KILL PROCESS] by pids success', pids))
-                    .catch((err: Error) => logger.error(['[kfKill pm2Delete]'], err))
-            })
-    })
+            pm2Delete(processName)
+                .then(() => resolve(true))
+                .catch(err => reject(err))
+        })
 }
 
 export const stopProcess = (processName: string) => {
     return new Promise((resolve, reject) => {
-        pm2.stop(processName, ((err: Error) => {
-            if (err) {
-                reject(err)
-                return;
-            }
-
-            resolve(true)
-        }))
+        pm2Connect().then(() => {
+            pm2.stop(processName, ((err: Error) => {
+                if (err) {
+                    reject(err)
+                    return;
+                }
+    
+                resolve(true)
+            }))
+        }).catch(err => reject(err))
     })
 }
 

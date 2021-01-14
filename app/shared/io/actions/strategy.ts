@@ -10,6 +10,7 @@ export const deleteStrat = (strategyId: string): Promise<void> => {
     return deleteStrategy(strategyId) //删除策略数据库
     .then(() => removeFileFolder(path.join(STRATEGY_DIR, strategyId))) //策略相关数据
     .then(() => removeFileFolder(buildProcessLogPath(strategyId)))//策略log
+    .then(() => deleteProcess(strategyId))
     .catch((err: Error) => console.error(err))
 }
 
