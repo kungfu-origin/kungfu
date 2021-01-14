@@ -20,6 +20,7 @@ interface VolumeRecordData {
 }
 
 interface direcData {
-    d: number,
-    n: string
+    d: number; //方向
+    n: string;
+    dc: number; //反方向
 }

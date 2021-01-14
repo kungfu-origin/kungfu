@@ -1,4 +1,5 @@
 import minimist from 'minimist';
+import { PosDirection } from 'kungfu-shared/config/tradingConfig';
 import { Observable, combineLatest } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 import moment from 'moment';
@@ -26,6 +27,7 @@ const TICKER = ticker.toString().trim();
 const PARENT_ID = parentId; 
     
 const TARGET_DIRECTION = makeOrderDirectionType(side, offset).d;
+const TARGET_DIRECTION_CONT = makeOrderDirectionType(side, offset).dc;
 const OPERATION_NAME = makeOrderDirectionType(side, offset).n;
 const TARGET_VOLUME = volume;
 const LAST_STEP_COUNT = steps - 1;
@@ -196,11 +198,14 @@ combineLatestObserver.subscribe((
             targetVolume: TARGET_VOLUME
         })
 
+
         //依然没有
         if (!targetPosData) {
             return
         };
     }
+
+    console.log(JSON.stringify(targetPosData), '---')
 
     //必须在这里，以下都是在这个loop开始后执行
     if (timeCount <= dealedTimeCount) {
@@ -212,10 +217,10 @@ combineLatestObserver.subscribe((
     // 判断是否可以交易, 如不能交易，先撤单
     const aliveOrders = getAliveOrders(orders)
     if (aliveOrders.length) {
+        console.log(`[检查订单] 活动订单数量 ${aliveOrders.length} / ${orders.length}, 等待全部订单结束`)
         if (!hasCancelOrderInThisLoop) {
             reqCancelOrder(PARENT_ID)
             hasCancelOrderInThisLoop = true
-            console.log(`[检查订单] 活动订单数量 ${aliveOrders.length} / ${orders.length}, 等待全部订单结束`)
             console.log(`[撤单] PARENTID: ${PARENT_ID}`)
         }
         return
@@ -224,10 +229,11 @@ combineLatestObserver.subscribe((
     //制定本次交易计划
     const instrumentType = quote.instrumentTypeOrigin;
     const unfinishedSteps = steps - timeCount
-    const { total, thisStepVolume, currentVolume }  = calcVolumeThisStep(
+    const { total, thisStepVolume, currentVolume, currentVolumeCont }  = calcVolumeThisStep(
         positions,
         TICKER,
         TARGET_DIRECTION,
+        TARGET_DIRECTION_CONT,
         targetPosData,
         unfinishedSteps,
         instrumentType
@@ -249,7 +255,9 @@ combineLatestObserver.subscribe((
     console.log(`========= 交易条件满足，开始 ${timeCount + 1} / ${steps} =========`)
 
     if ((offset === 0) || (currentVolume >= thisStepVolume)) {
-        console.log(`还需 ${OPERATION_NAME} ${total}, 本次需 ${OPERATION_NAME} ${thisStepVolume}`)
+        console.log(` 
+        现有 ${ticker} ${PosDirection[TARGET_DIRECTION]} ${currentVolume},
+        还需 ${OPERATION_NAME} ${total}, 本次需 ${OPERATION_NAME} ${thisStepVolume}`)
         if (+thisStepVolume > 0) {
             reqMakeOrder({ ...argv, volume: thisStepVolume }, quote, unfinishedSteps)    
         }
@@ -257,6 +265,7 @@ combineLatestObserver.subscribe((
         const deltaVolume = +Number(thisStepVolume - currentVolume).toFixed(0);
         const contOperationName = makeOrderDirectionType(side, 0).n;
         console.log(`
+            现有 ${ticker} ${PosDirection[TARGET_DIRECTION]} ${currentVolume}, ${PosDirection[TARGET_DIRECTION_CONT]}, ${currentVolumeCont}
             还需 ${OPERATION_NAME} ${total}, 本次需 ${OPERATION_NAME} ${thisStepVolume}, 
             持仓不足,
             需 ${OPERATION_NAME} ${currentVolume},

@@ -14,21 +14,22 @@ export const transformArrayToObjectByKey = (targetList: Array<any>, keys: Array<
 export const makeOrderDirectionType = (side: number, offset: number): direcData => {
     if (+side === 0) {
         if (+offset === 0) {
-            return { d: 0, n: '买开'} // 'long-open'
+            return { d: 0, n: '买开', dc: 1} // 'long-open'
         } else if (+offset === 1) {
-            return { d: 1, n: '买平'} // 'short-close'
+            return { d: 1, n: '买平', dc: 0} // 'short-close'
         }
     } else if (+side === 1) {
         if (+offset === 0) {
-            return { d: 1, n: '卖开' } // 'short-open'
+            return { d: 1, n: '卖开', dc: 0 } // 'short-open'
         } else if (+offset === 1) {
-            return { d: 0, n: '卖平' } // 'long-close'
+            return { d: 0, n: '卖平', dc: 1 } // 'long-close'
         }
     }
 
     return {
         d: 0,
-        n: '未知'
+        n: '未知',
+        dc: 1
     }
 }
 
@@ -197,14 +198,14 @@ export const getAliveOrders = (orders: OrderData[]) => {
     })
 }
 
-export const calcVolumeThisStep = (positions: { [propName: string]: PosData }, TICKER: string, TARGET_DIRECTION: number, targetPosData: VolumeRecordData[] , unfinishedSteps: number, instrumentType: number) => {
+export const calcVolumeThisStep = (positions: { [propName: string]: PosData }, TICKER: string, TARGET_DIRECTION: number, TARGET_DIRECTION_CONT: number, targetPosData: VolumeRecordData[] , unfinishedSteps: number, instrumentType: number) => {
     const pos = positions[`${TICKER}_${TARGET_DIRECTION}`] || {};
-    const posCont = positions[`${TICKER}_${Math.abs(TARGET_DIRECTION - 1)}`] || {};
+    const posCont = positions[`${TICKER}_${TARGET_DIRECTION_CONT}`] || {};
     const currentVolume = +pos.totalVolume || 0;
-    const currentVolumeCount = +posCont.totalVolume || 0;
+    const currentVolumeCont = +posCont.totalVolume || 0;
     const currentVolumeData: any = {
         [+TARGET_DIRECTION]: currentVolume,
-        [+Math.abs(TARGET_DIRECTION - 1)]: currentVolumeCount
+        [+Math.abs(TARGET_DIRECTION - 1)]: currentVolumeCont
     }
     const totalTargetVolume: number = targetPosData
     .map((item: VolumeRecordData): number => {
@@ -221,7 +222,7 @@ export const calcVolumeThisStep = (positions: { [propName: string]: PosData }, T
 
     return {
         currentVolume,
-        currentVolumeCount,
+        currentVolumeCont,
         total: totalTargetVolume,
         thisStepVolume: dealMakeOrderVolume( instrumentType, targetVolumeByStep)
     }
