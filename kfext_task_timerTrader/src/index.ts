@@ -205,8 +205,6 @@ combineLatestObserver.subscribe((
         };
     }
 
-    console.log(JSON.stringify(targetPosData), '---')
-
     //必须在这里，以下都是在这个loop开始后执行
     if (timeCount <= dealedTimeCount) {
         return;
@@ -265,7 +263,7 @@ combineLatestObserver.subscribe((
         const deltaVolume = +Number(thisStepVolume - currentVolume).toFixed(0);
         const contOperationName = makeOrderDirectionType(side, 0).n;
         console.log(`
-            现有 ${ticker} ${PosDirection[TARGET_DIRECTION]} ${currentVolume}, ${PosDirection[TARGET_DIRECTION_CONT]}, ${currentVolumeCont}
+            现有 ${ticker}${PosDirection[TARGET_DIRECTION]} ${currentVolume}, ${PosDirection[TARGET_DIRECTION_CONT]} ${currentVolumeCont}
             还需 ${OPERATION_NAME} ${total}, 本次需 ${OPERATION_NAME} ${thisStepVolume}, 
             持仓不足,
             需 ${OPERATION_NAME} ${currentVolume},
