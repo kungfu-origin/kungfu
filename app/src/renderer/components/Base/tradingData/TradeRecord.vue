@@ -108,8 +108,13 @@ export default {
                 .map(item => {
                     let tradeData = dealTrade(item);
                     let orderId = tradeData.orderId;
+                    const orderStatByOrderId = t.orderStat[orderId] || {}
                     tradeData.update = !!t.tableData.length;
-                    tradeData.latencyTrade = (t.orderStat[orderId] || {}).latencyTrade || '';
+                    tradeData.latencyTrade = orderStatByOrderId.latencyTrade || '';
+                    const { updateTime, updateTimeMMDD } = tradeData
+                    console.log(updateTime, orderStatByOrderId.tradeTime)
+                    tradeData.updateTime = !!orderStatByOrderId.tradeTimeNum ? orderStatByOrderId.tradeTime : updateTime
+                    tradeData.updateTimeMMDD = !!orderStatByOrderId.tradeTimeNum ? orderStatByOrderId.tradeTimeMMDD : updateTimeMMDD
                     return Object.freeze(tradeData)
                 })
                 .sort((a, b) => (b.updateTimeNum - a.updateTimeNum))
