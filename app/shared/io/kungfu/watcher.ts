@@ -247,7 +247,7 @@ function resolveAccountId(source: string, dest: string): string {
 
 export const dealOrder = (item: OrderInputData): OrderData => {
     const { source, dest, instrument_type, update_time, insert_time } = item;
-    const updateTime = update_time || insert_time;
+    const updateTime = insert_time || update_time;
     const instrumentType = instrument_type;
     const sourceId =  resolveSourceDest(source, dest).sourceGroup;
     const isGBK = sourceId.toLowerCase().includes('ctp');
@@ -264,17 +264,12 @@ export const dealOrder = (item: OrderInputData): OrderData => {
         parentId: item.parent_id.toString(),
         
         instrumentId: item.instrument_id,
-        instrumentType: InstrumentType[item.instrument_type],
-        instrumentTypeOrigin: item.instrument_type,
+        instrumentType: InstrumentType[instrumentType],
+        instrumentTypeOrigin: instrumentType,
         exchangeId: item.exchange_id,
         
         side: SideName[item.side] ? SideName[item.side] : '--',
         sideOrigin: item.side,
-        // offset: !allowShorted(instrumentType) ? 
-        //     '--' : 
-        //     OffsetName[item.offset] ? 
-        //         OffsetName[item.offset] : 
-        //         '--',
         offset: OffsetName[item.offset],
         offsetOrigin: item.offset,
         hedgeFlag: HedgeFlag[item.hedge_flag] ? HedgeFlag[item.hedge_flag] : '--',
@@ -322,11 +317,6 @@ export const dealTrade = (item: TradeInputData): TradeData => {
         updateTimeNum: +Number(updateTime || 0),
         instrumentId: item.instrument_id,
         side: SideName[item.side] ? SideName[item.side] : '--',
-        // offset: instrumentType === 1 || instrumentType === 5 ? 
-        //     '--' : 
-        //     OffsetName[item.offset] ? 
-        //         OffsetName[item.offset] : 
-        //         '--',
         offset: OffsetName[item.offset],
         price: toDecimal(+item.price, 3),
         volume: Number(item.volume),
