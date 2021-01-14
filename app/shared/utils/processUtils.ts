@@ -369,7 +369,7 @@ export function startArchiveMakeTask (cb?: Function) {
         startArchiveMake()
             .then(() => {
                 let timer = startGetProcessStatusByName('archive', (res: any[]) => {
-                    const archiveStatus = res[0].pm2_env.status;
+                    const archiveStatus = (res[0] || {}).pm2_env.status;
                     cb && cb(archiveStatus);
                     if (archiveStatus !== 'online') {
                         timer.clearLoop();
@@ -391,7 +391,7 @@ export function startProcessLoopGetStatus (options: Pm2Options, cb: Function) {
         startProcess({ ...options })
             .then(() => {
                 let timer = startGetProcessStatusByName(options.name, (res: any[]) => {
-                    const status = res[0].pm2_env.status;
+                    const status = (res[0] || {}).pm2_env.status;
                     cb && cb(status);
                     if (status !== 'online') {
                         timer.clearLoop();
