@@ -407,7 +407,7 @@ export const startMaster = async (force: boolean): Promise<any> => {
     const processName = 'master';
     const master = await describeProcess(processName);
     if (master instanceof Error) throw master
-    const masterStatus = master.filter((m: any) => m.pm2_env.status === 'online')
+    const masterStatus = master.filter((m: any) => ((m || {}).pm2_env || {}).status === 'online')
     if (!force && masterStatus.length === master.length && master.length !== 0) throw new Error('kungfu master正在运行！')
     try {
         await killKfc()
@@ -425,7 +425,7 @@ export const startLedger = async (force: boolean): Promise<any> => {
     const processName = 'ledger';
     const ledger = await describeProcess(processName);
     if (ledger instanceof Error) throw ledger
-    const ledgerStatus = ledger.filter((m: any): boolean => m.pm2_env.status === 'online')
+    const ledgerStatus = ledger.filter((m: any): boolean => ((m || {}).pm2_env || {}).status === 'online')
     if (!force && ledgerStatus.length === ledger.length && ledger.length !== 0) throw new Error('kungfu ledger 正在运行！')
     return startProcess({
         'name': processName,
@@ -488,7 +488,7 @@ function buildProcessStatus (pList: any[]): StringToStringObject {
     let processStatus: any = {}
     Object.freeze(pList).forEach(p => {
         const name = p.name;
-        const status = p.pm2_env.status
+        const status = ((p || {}).pm2_env || {}).status
         processStatus[name] = status
     })
     return processStatus
