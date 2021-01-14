@@ -127,8 +127,9 @@ export default {
         bindKungfuGlobalDataListener () {
             this.kungfuGloablDataObserver = buildKungfuGlobalDataPipe().subscribe(data => {
                 data.gatewayStates.forEach(gatewayState => {
+                    const { processId } = gatewayState;
                     this.$store.dispatch('setOneMdTdState', {
-                        id: gatewayState.processId,
+                        id: processId,
                         stateData: gatewayState
                     })
                 })

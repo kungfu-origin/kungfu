@@ -291,7 +291,7 @@ export const buildTask = (taskPath: string, electronRemote: any, debugOptions = 
  */
 export const ifProcessRunning = (processId: string, processStatus: any): boolean => {
     if(!processStatus) return false
-    return processStatus[processId] === 'online'
+    return processStatus[processId] === 'online' || processStatus[processId] === 'stopping'
 }
 
 /**

@@ -6,7 +6,7 @@ import { STRATEGY_DIR, buildProcessLogPath } from '__gConfig/pathConfig';
 const path = require('path');
 
 //删除策略
-export const deleteStrat = (strategyId: string): Promise<void> => {
+export const deleteStrat = (strategyId: string): Promise<any> => {
     return deleteStrategy(strategyId) //删除策略数据库
     .then(() => removeFileFolder(path.join(STRATEGY_DIR, strategyId))) //策略相关数据
     .then(() => removeFileFolder(buildProcessLogPath(strategyId)))//策略log

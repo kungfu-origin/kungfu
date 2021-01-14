@@ -35,8 +35,11 @@
                     >
                     <template slot-scope="props">
                         <tr-status 
-                        v-if="$utils.ifProcessRunning('md_' + props.row.source_name, processStatus)"
+                        v-if="$utils.ifProcessRunning(`md_${props.row.source_name}`, processStatus) && processStatus[`md_${props.row.source_name}`] === 'online'"
                         :value="(mdTdState[`md_${props.row.source_name}`] || {}).state"></tr-status>
+                        <tr-status 
+                        v-else-if="$utils.ifProcessRunning(`md_${props.row.source_name}`, processStatus) && processStatus[`md_${props.row.source_name}`] === 'stopping'"
+                        :value="processStatus[`td_${props.row.account_id}`]"></tr-status>
                         <tr-status v-else></tr-status>
                     </template>
                 </el-table-column>
