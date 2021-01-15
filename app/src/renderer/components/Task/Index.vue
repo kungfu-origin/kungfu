@@ -48,7 +48,7 @@
                 </template>
             </el-table-column>
             <el-table-column
-                label="创建时间"
+                label="执行时间"
                 sortable  
                 prop="createdAt"  
                 width="150px"
@@ -224,11 +224,10 @@ export default {
         },
 
         handleTaskSwitch (e, data) {
-            const { processId, args, cwd, script } = data;
+            const { processId, args, cwd } = data;
             return switchTask(processId, e, {
-                args,
-                cwd,
-                script
+                args: args.join(' '),
+                cwd
             })
         },
 

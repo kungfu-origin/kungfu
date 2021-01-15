@@ -407,7 +407,7 @@ function buildListByLineNum(num: number): any {
  * @param  {string} searchKeyword
  */
 export const getLog = (logPath: string, searchKeyword?: string, dealLogMessageMethod = dealLogMessage): Promise<any> => {
-    const numList: NumList = buildListByLineNum(50);    
+    const numList: NumList = buildListByLineNum(666);    
     let logId: number = 0;            
     return new Promise((resolve, reject) => {
         fse.stat(logPath, (err: Error, stats: any) => {
@@ -416,10 +416,9 @@ export const getLog = (logPath: string, searchKeyword?: string, dealLogMessageMe
                 return;
             }
 
-            const startSize = stats.size - 1000000 < 0 ? 0 : stats.size - 1000000;
             const lineReader = readline.createInterface({
                 input: fse.createReadStream(logPath, {
-                    start: startSize
+                    start: 0
                 })
             })
 

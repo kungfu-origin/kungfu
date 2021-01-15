@@ -198,21 +198,45 @@ export const getAliveOrders = (orders: OrderData[]) => {
     })
 }
 
-export const calcVolumeThisStep = (positions: { [propName: string]: PosData }, TICKER: string, TARGET_DIRECTION: number, TARGET_DIRECTION_CONT: number, targetPosData: VolumeRecordData[] , unfinishedSteps: number, instrumentType: number) => {
+export const calcVolumeThisStep = (
+        positions: StringToPosData, 
+        TICKER: string, 
+        TARGET_DIRECTION: number, 
+        TARGET_DIRECTION_CONT: number, 
+        offset: number,
+        targetPosData: VolumeRecordData[], 
+        unfinishedSteps: number, 
+        instrumentType: number
+    ) => {
     const pos = positions[`${TICKER}_${TARGET_DIRECTION}`] || {};
     const posCont = positions[`${TICKER}_${TARGET_DIRECTION_CONT}`] || {};
     const currentVolume = +pos.totalVolume || 0;
     const currentVolumeCont = +posCont.totalVolume || 0;
     const currentVolumeData: any = {
         [+TARGET_DIRECTION]: currentVolume,
-        [+Math.abs(TARGET_DIRECTION - 1)]: currentVolumeCont
+        [+TARGET_DIRECTION_CONT]: currentVolumeCont
     }
     const totalTargetVolume: number = targetPosData
     .map((item: VolumeRecordData): number => {
         const { d, v } = item;
         const currentV = currentVolumeData[d]
-        const delta = v - currentV
-        return Math.abs(delta)
+        const delta = currentV - v
+        //需要根据开平方向判断， 开->大于目标仓位->0，平->小于目标仓位->0
+        if (d === TARGET_DIRECTION) {
+            if (+offset === 0) {
+                return delta > 0 ? 0 : Math.abs(delta)
+            } else {
+                return delta < 0 ? 0 : Math.abs(delta)
+            }
+        } else {
+            //此时真实应用offset为反向
+            if (+offset === 0) {
+                return delta < 0 ? 0 : Math.abs(delta)
+            } else {
+                return delta > 0 ? 0 : Math.abs(delta)
+            }
+        }
+       
     }) 
     .reduce((delta1: number, delta2: number) => {
         return +delta1 + +delta2
@@ -228,3 +252,40 @@ export const calcVolumeThisStep = (positions: { [propName: string]: PosData }, T
     }
 }
 
+export const timeCheckBySecond = (currentSecond: number, quote: QuoteData) => {
+    if (currentSecond >= 0) return
+    const secondResolved = Math.abs(currentSecond);
+
+    if ((+secondResolved <= 10) || (+secondResolved === 120) || (+secondResolved === 60)) {
+        console.log(`[倒计时] ${secondResolved}s`)
+    }
+
+    if (+secondResolved === 120) {
+        //@ts-ignore
+        process.send({
+            type: 'process:msg',
+            data: {
+                type: 'TIME_ALERT',
+                body: {
+                    minute: '2',
+                    quoteAlive: !!quote
+                }
+            }
+        })
+    }
+
+    if (+secondResolved === 60) {
+        //@ts-ignore
+        process.send({
+            type: 'process:msg',
+            data: {
+                type: 'TIME_ALERT',
+                body: {
+                    minute: '1',
+                    quoteAlive: !!quote,
+                    quote
+                }
+            }
+        })
+    }
+}

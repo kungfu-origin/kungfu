@@ -82,6 +82,15 @@ export default {
                         case "SUBSCRIBE_BY_TICKER":
                             const sourceName = (accountId || '').toSourceName();
                             this.subscribeTicker(sourceName, exchangeId, ticker)
+                            break
+                        case "TIME_ALERT":
+                            const { minute, quoteAlive } = data.body || {};
+                            
+                            if (!quoteAlive) {
+                                this.$message.warning(`距离交易任务 ${processName} 开始执行还有 ${minute} 分钟，目前还未收到订阅行情，请检查交易进程与行情进程运行`)
+                            } else {
+                                this.$message.info(`距离交易任务 ${processName} 开始执行还有 ${minute} 分钟，请保证交易进程与行情进程运行`)
+                            }
 
                     }
                 })

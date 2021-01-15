@@ -10,8 +10,10 @@ import {
     reqMakeOrder, 
     getAliveOrders,
     reqCancelOrder,
-    calcVolumeThisStep
+    calcVolumeThisStep,
+    timeCheckBySecond
 } from './assets/utils';
+import { time } from 'console';
 
 
 
@@ -22,7 +24,7 @@ const argv = minimist(process.argv.slice(2), {
 const { ticker, side, offset, volume, steps, triggerTime, finishTime, exchangeId, parentId, accountId } = argv;
 const triggerTimeStr = moment(triggerTime).format('YYYYMMDD HH:mm:ss');
 const finishTimeStr = moment(finishTime).format('YYYYMMDD HH:mm:ss');
-const deltaTimestamp = Math.ceil((finishTime - triggerTime) / steps);
+const loopInterval = Math.ceil((finishTime - triggerTime) / steps);
 const TICKER = ticker.toString().trim();
 const PARENT_ID = parentId; 
     
@@ -37,7 +39,7 @@ console.log('[ARGS]', process.argv.slice(2).join(','))
 console.log('===================================================')
 console.log('[开始时间]', triggerTime, triggerTimeStr)
 console.log('[结束时间]', finishTime, finishTimeStr)
-console.log('[执行间隔]', deltaTimestamp, 'ms')
+console.log('[执行间隔]', loopInterval, 'ms')
 console.log('[目标标的] ', TICKER)
 console.log('===================================================')
 
@@ -72,8 +74,8 @@ var reqTradingDataTimer = setInterval(() => {
 }, 1000)
 
 var secondsCounterTimer: any = null;
-const TIMER_COUNT_OBSERVER = (): Observable<number> => new Observable((subscriber) => {
-    let count: number = -1;
+const TIMER_COUNT_OBSERVER = (): Observable<TimeCountData> => new Observable((subscriber) => {
+    let consoledSecond: number | undefined = undefined;
     secondsCounterTimer = setInterval(() => {
         const currentTimestamp = moment().valueOf();
         
@@ -82,11 +84,17 @@ const TIMER_COUNT_OBSERVER = (): Observable<number> => new Observable((subscribe
             return;
         }
 
-        const currentCount = Math.ceil((currentTimestamp - triggerTime) / deltaTimestamp)
-        if (currentCount >= 0 && currentCount <= LAST_STEP_COUNT) {
-            if (count !== currentCount) {
-                subscriber.next(currentCount)
-                count = +currentCount
+        const deltaMilliSeconds = currentTimestamp - triggerTime;
+        const currentCount = Math.floor(deltaMilliSeconds / loopInterval)
+        const currentSecond = +Number(deltaMilliSeconds / 1000).toFixed(0)
+
+        if (currentCount <= LAST_STEP_COUNT) {
+            if (consoledSecond !== currentSecond) {
+                subscriber.next({
+                    count: currentCount, 
+                    second: currentSecond
+                })
+                consoledSecond = +currentSecond
             }
         }
     }, 500)
@@ -164,97 +172,159 @@ const combineLatestObserver = combineLatest(
     quotesPipe(),
     positionsPipe(),
     ordersPipe(),
+    (
+        timeCountData: TimeCountData, 
+        quotes: StringToQuoteData, 
+        positions: StringToPosData | null, 
+        orders: OrderData[]
+    ) => {
+        const timeTraderPipData: TimeTraderPipData = {
+            timeCountData,
+            quotes,
+            positions,
+            orders
+        }
+
+        return timeTraderPipData
+    }
+    
 )
 
-var dealedTimeCount: number = -1;
+var dealedTimeCount: number = -1000000000;
+var dealedSecond: number | undefined = undefined
 var targetPosData: any = null;
 var hasCancelOrderInThisLoop = false;
 
-combineLatestObserver.subscribe((
-    [ timeCount, quotes, positions, orders ]: 
-    [ number, { [prop: string]: QuoteData }, null | { [prop: string]: PosData }, OrderData[] ] 
-) => {
-
-    const quote = quotes[TICKER];
-    if (!quote) {
-        console.error(`[WARNING] 暂无${ticker}行情信息，需保证MD进程开启`)
-        return;
-    }
-
-    if (positions === null) {
-        console.error(`[WARNING] 暂无${ticker}持仓信息，需保证TD进程开启`)
-        return
-    }
-
-    //制定全部交易计划
-    const pos = positions[`${TICKER}_${TARGET_DIRECTION}`];
-    if (!targetPosData) {
-        const { totalVolume } = pos || {};
-        targetPosData = buildTarget({ 
-            offset,
-            side,
-            ticker,
-            totalVolume: totalVolume || 0,
-            targetVolume: TARGET_VOLUME
-        })
-
-
-        //依然没有
-        if (!targetPosData) {
-            return
-        };
-    }
-
-    //必须在这里，以下都是在这个loop开始后执行
-    if (timeCount <= dealedTimeCount) {
-        return;
-    }
-
-    console.log(`[交易检查] ${timeCount + 1} / ${steps} `)
-    
-    // 判断是否可以交易, 如不能交易，先撤单
-    const aliveOrders = getAliveOrders(orders)
-    if (aliveOrders.length) {
-        console.log(`[检查订单] 活动订单数量 ${aliveOrders.length} / ${orders.length}, 等待全部订单结束`)
-        if (!hasCancelOrderInThisLoop) {
-            reqCancelOrder(PARENT_ID)
-            hasCancelOrderInThisLoop = true
-            console.log(`[撤单] PARENTID: ${PARENT_ID}`)
+combineLatestObserver
+.pipe(
+    //============================ 时间检查 start ============================
+    filter((data: TimeTraderPipData)  => {
+        const { timeCountData, quotes } = data
+        //记录时间发送alert
+        const quote = quotes[TICKER];
+        const timeCount = timeCountData.count;
+        const timeSecond = timeCountData.second;
+        if (timeSecond !== dealedSecond && timeSecond < 0) {
+            dealedSecond = timeSecond;
+            if (timeSecond < 0) {
+                timeCheckBySecond(dealedSecond, quote)
+            }
         }
-        return
-    } 
-    
+
+        if (timeCount < 0) {
+            return false
+        }
+        return true
+    })
+)
+.pipe(
+    //===================== loop之间检查，如不通过则不会进入loop start ===========
+    filter((data: TimeTraderPipData) => {
+        const { quotes, positions } = data
+        const quote = quotes[TICKER];
+
+        if (!quote) {
+            console.error(`[WARNING] 暂无${ticker}行情信息，需保证MD进程开启`)
+            return false;
+        }
+
+        if (positions === null) {
+            console.error(`[WARNING] 暂无${ticker}持仓信息，需保证TD进程开启`)
+            return false;
+        }
+
+        //制定全部交易计划
+        const pos = positions[`${TICKER}_${TARGET_DIRECTION}`];
+        if (!targetPosData) {
+            const { totalVolume } = pos || {};
+            targetPosData = buildTarget({ 
+                offset,
+                side,
+                ticker,
+                totalVolume: totalVolume || 0,
+                targetVolume: TARGET_VOLUME
+            })
+
+            //依然没有
+            if (!targetPosData) {
+                return false
+            };
+        }
+        return true;
+    })
+)
+.pipe(
+    filter((data: TimeTraderPipData) => {
+        const { timeCountData} = data
+        const timeCount = timeCountData.count;
+        if (timeCount <= dealedTimeCount) {
+            return false;
+        }
+        return true;
+    })
+)
+.pipe(
+    //===================== 进入loop检查，通过后才开始交易 start ================
+    filter((data: TimeTraderPipData) => {
+        const { timeCountData, orders } = data
+        const timeCount = timeCountData.count;
+        console.log(`[交易检查] ${timeCount + 1} / ${steps}, ${moment().format('HH:mm:ss')} `)
+        
+        // 判断是否可以交易, 如不能交易，先撤单
+        const aliveOrders = getAliveOrders(orders)
+        if (aliveOrders.length) {
+            console.log(`[检查订单] 活动订单数量 ${aliveOrders.length} / ${orders.length}, 等待全部订单结束`)
+            if (!hasCancelOrderInThisLoop) {
+                reqCancelOrder(PARENT_ID)
+                hasCancelOrderInThisLoop = true
+                console.log(`[撤单] PARENTID: ${PARENT_ID}`)
+            }
+            return false
+        } 
+        
+        return true;
+    })
+)
+.subscribe((data: TimeTraderPipData) => {
+    const { timeCountData, quotes } = data;
+    const timeCount = timeCountData.count;
+    const quote = quotes[TICKER];
+    const positions = data.positions || {}
+
+    //============================= 交易环节 start =============================
+
     //制定本次交易计划
     const instrumentType = quote.instrumentTypeOrigin;
-    const unfinishedSteps = steps - timeCount
+    const unfinishedSteps = resolveUnfinishedSteps(steps - timeCount);
     const { total, thisStepVolume, currentVolume, currentVolumeCont }  = calcVolumeThisStep(
         positions,
         TICKER,
         TARGET_DIRECTION,
         TARGET_DIRECTION_CONT,
+        offset,
         targetPosData,
         unfinishedSteps,
         instrumentType
     )
 
     if (total === 0) {
-        console.log('========================================================')
-        console.log(`====================== 交易任务完成 ======================`)
-        console.log('=========================================================')
+        console.log('================================================================')
+        console.log(`====================== 交易任务完成 ==============================`)
+        console.log('================================================================')
         handleFinished()
+        return false;
     }
 
-    //时间到，需在此处，以显示交易完成s s s s s s s
+    //时间到，需在此处，以显示交易完成
     if (timeCount > LAST_STEP_COUNT) {
         handleFinished()
-        return;
+        return false;
     }
 
     console.log(`========= 交易条件满足，开始 ${timeCount + 1} / ${steps} =========`)
 
     if ((offset === 0) || (currentVolume >= thisStepVolume)) {
-        console.log(` 
-        现有 ${ticker} ${PosDirection[TARGET_DIRECTION]} ${currentVolume},
+        console.log(`现有 ${ticker} ${PosDirection[TARGET_DIRECTION]} ${currentVolume},
         还需 ${OPERATION_NAME} ${total}, 本次需 ${OPERATION_NAME} ${thisStepVolume}`)
         if (+thisStepVolume > 0) {
             reqMakeOrder({ ...argv, volume: thisStepVolume }, quote, unfinishedSteps)    
@@ -262,12 +332,9 @@ combineLatestObserver.subscribe((
     } else {
         const deltaVolume = +Number(thisStepVolume - currentVolume).toFixed(0);
         const contOperationName = makeOrderDirectionType(side, 0).n;
-        console.log(`
-            现有 ${ticker}${PosDirection[TARGET_DIRECTION]} ${currentVolume}, ${PosDirection[TARGET_DIRECTION_CONT]} ${currentVolumeCont}
+        console.log(`现有 ${ticker}${PosDirection[TARGET_DIRECTION]} ${currentVolume}, ${PosDirection[TARGET_DIRECTION_CONT]} ${currentVolumeCont}
             还需 ${OPERATION_NAME} ${total}, 本次需 ${OPERATION_NAME} ${thisStepVolume}, 
-            持仓不足,
-            需 ${OPERATION_NAME} ${currentVolume},
-            ${contOperationName} ${deltaVolume},
+            持仓不足, 需 ${OPERATION_NAME} ${currentVolume}, ${contOperationName} ${deltaVolume},
         `)
 
         if (+currentVolume > 0) {
@@ -282,9 +349,18 @@ combineLatestObserver.subscribe((
     console.log(`============ 已完成执行 ${timeCount + 1} / ${steps} ==============`)    
     hasCancelOrderInThisLoop = false;
     dealedTimeCount = timeCount; //此时记录下来
-
+    //============================= 交易环节 end =============================
 })
 
+function resolveUnfinishedSteps (unfinishiedSteps: number) {
+    //有时虽然不是最后一步，但是时间马上截止
+    const currentTimestamp = moment().valueOf();
+    if (finishTime - currentTimestamp < 2 * loopInterval) {
+        console.log('[时间截止前，最后一步]')
+        return 1
+    } 
+    return unfinishiedSteps
+}
 
 function handleFinished () {
     console.log(`====================== 时间截止，交易结束 ======================`)

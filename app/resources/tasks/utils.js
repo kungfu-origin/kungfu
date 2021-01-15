@@ -96,19 +96,18 @@ function dealMessage(line, searchKeyword){
 }
 
 function getLog(logPath, searchKeyword, dealMessageFunc){
-    const numList = buildListByLineNum(201);    
+    const numList = buildListByLineNum(1000000000);    
     let logId = 0;            
     return new Promise((resolve, reject) => {
-        fs.stat(logPath, (err,stats) => {
+        fs.stat(logPath, (err) => {
             if(err){
                 reject(err)
                 return;
             }
 
-            const startSize = stats.size - 10000000 < 0 ? 0 : stats.size - 10000000;
             const lineReader = readline.createInterface({
                 input: fs.createReadStream(logPath, {
-                    start: startSize
+                    start: 0
                 })
             })
 
@@ -126,6 +125,7 @@ function getLog(logPath, searchKeyword, dealMessageFunc){
             })
 
             lineReader.on('close', () => {
+                console.log(logPath, numList, '---')
                 resolve(numList)
             })
         })

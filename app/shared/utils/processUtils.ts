@@ -138,28 +138,6 @@ const pm2List = (): Promise<any[]> => {
     })
 }
 
-const pm2Delete = async (target: string): Promise<void> => {
-    return new Promise((resolve, reject) => {
-        pm2Connect().then(() => {
-            try{ 
-                pm2.delete(target, (err: any): void => {
-                    if (err) {
-                        err = err.length ? err[0] : err;
-                        logger.error('[pm2Delete]', err)
-                        reject(err)
-                        return;
-                    }
-                    resolve()
-                })
-            } catch (err) {
-                logger.error('[TC pm2Delete]', err)
-                reject(err)
-            }
-        }).catch(err => reject(err))
-    })
-}
-
-
 const dealSpaceInPath = (pathname: string): string => {
     const normalizePath = path.normalize(pathname);
     return normalizePath.replace(/ /g, '\ ')
@@ -206,7 +184,6 @@ function parseScriptName () {
 }
 
 export const startTask = (options: any) => {
-
     const script = parseScriptName();
     const optionsResolved = {
         "logType": "json",
@@ -368,7 +345,6 @@ export function startArchiveMakeTask (cb?: Function) {
         startArchiveMake()
             .then(() => {
                 let timer = startGetProcessStatusByName('archive', (res: any[]) => {
-                    console.log(res, '----')
                     const archiveStatus = ((res[0] || {}).pm2_env || {}).status;
                     cb && cb(archiveStatus);
                     if (archiveStatus !== 'online') {
@@ -532,6 +508,27 @@ export const listProcessStatusWithDetail = () => {
     return pm2List().then((pList: any[]) => buildProcessStatusWidthDetail(pList))
 }
 
+const pm2Delete = async (target: string): Promise<void> => {
+    return new Promise((resolve, reject) => {
+        pm2Connect().then(() => {
+            try{ 
+                pm2.delete(target, (err: any): void => {
+                    if (err) {
+                        err = err.length ? err[0] : err;
+                        logger.error('[pm2Delete]', err)
+                        reject(err)
+                        return;
+                    }
+                    resolve()
+                })
+            } catch (err) {
+                logger.error('[TC pm2Delete]', err)
+                reject(err)
+            }
+        }).catch(err => reject(err))
+    })
+}
+
 //删除进程
 export const deleteProcess = (processName: string) => {
         return new Promise(async (resolve, reject) => {
@@ -562,7 +559,7 @@ export const stopProcess = (processName: string) => {
                     reject(err)
                     return;
                 }
-    
+
                 resolve(true)
             }))
         }).catch(err => reject(err))

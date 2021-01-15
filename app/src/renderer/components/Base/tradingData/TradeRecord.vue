@@ -112,7 +112,6 @@ export default {
                     tradeData.update = !!t.tableData.length;
                     tradeData.latencyTrade = orderStatByOrderId.latencyTrade || '';
                     const { updateTime, updateTimeMMDD } = tradeData
-                    console.log(updateTime, orderStatByOrderId.tradeTime)
                     tradeData.updateTime = !!orderStatByOrderId.tradeTimeNum ? orderStatByOrderId.tradeTime : updateTime
                     tradeData.updateTimeMMDD = !!orderStatByOrderId.tradeTimeNum ? orderStatByOrderId.tradeTimeMMDD : updateTimeMMDD
                     return Object.freeze(tradeData)
