@@ -11,12 +11,14 @@ import {
     getAliveOrders,
     reqCancelOrder,
     calcVolumeThisStep,
-    timeCheckBySecond
+    timeCheckBySecond,
+    getCurrentCount
 } from './assets/utils';
 
 
 const argv = minimist(process.argv.slice(2), {
     string: 'ticker',
+    boolean: 'lastSingularity',
 })
 const { ticker, side, offset, volume, steps, triggerTime, finishTime, exchangeId, parentId, accountId, lastSingularity, lastSingularityMilliSecond } = argv;
 const triggerTimeStr = moment(triggerTime).format('YYYYMMDD HH:mm:ss');
@@ -30,7 +32,7 @@ const TARGET_DIRECTION_CONT = makeOrderDirectionType(side, offset).dc;
 const OPERATION_NAME = makeOrderDirectionType(side, offset).n;
 const TARGET_VOLUME = volume;
 const LAST_STEP_COUNT = steps - 1;
-const LAST_SECOND = lastSingularity ? lastSingularityMilliSecond : 0
+const LAST_SINGULARITY_SECOND = lastSingularity ? lastSingularityMilliSecond : 0
 
 console.log('==================== 交易信息 =======================')
 console.log('[ARGS]', process.argv.slice(2).join(','))
@@ -73,30 +75,28 @@ var reqTradingDataTimer = setInterval(() => {
 
 var secondsCounterTimer: any = null;
 const TIMER_COUNT_OBSERVER = (): Observable<TimeCountData> => new Observable((subscriber) => {
-    let consoledSecond: number | undefined = undefined;
     secondsCounterTimer = setInterval(() => {
         const currentTimestamp = moment().valueOf();
-        
-        if (currentTimestamp >= finishTime) {
-            handleFinished()
-            return;
-        }
-
         const deltaMilliSeconds = currentTimestamp - triggerTime;
-        const currentCount = Math.floor(deltaMilliSeconds / loopInterval)
+        const currentCount = getCurrentCount({
+            currentTimestamp, 
+            deltaMilliSeconds,
+            finishTime,
+            loopInterval,
+            LAST_SINGULARITY_SECOND,
+            LAST_STEP_COUNT
+        })
         const currentSecond = +Number(deltaMilliSeconds / 1000).toFixed(0)
 
-        if (currentCount <= LAST_STEP_COUNT) {
-            if (consoledSecond !== currentSecond) {
-                subscriber.next({
-                    count: currentCount, 
-                    second: currentSecond
-                })
-                consoledSecond = +currentSecond
-            }
-        }
-    }, 500)
+        subscriber.next({
+            count: currentCount, 
+            second: currentSecond
+        })
+    
+    }, 100)
 })
+
+
 
 const PROCESS_MSG_OBSERVER = (): Observable<ProcPayload> => new Observable(subscriber => {
     process.on('message', (packet) => {
@@ -188,10 +188,11 @@ const combineLatestObserver = combineLatest(
     
 )
 
-var dealedTimeCount: number = -1000000000;
+var dealedTimeCount: number = -1000000000000;
 var dealedSecond: number | undefined = undefined
 var targetPosData: any = null;
 var hasCancelOrderInThisLoop = false;
+var hasConsoledTotalFinished = false;
 
 combineLatestObserver
 .pipe(
@@ -202,6 +203,8 @@ combineLatestObserver
         const quote = quotes[TICKER];
         const timeCount = timeCountData.count;
         const timeSecond = timeCountData.second;
+        const currentTimestamp = moment().valueOf();
+
         if (timeSecond !== dealedSecond && timeSecond < 0) {
             dealedSecond = timeSecond;
             if (timeSecond < 0) {
@@ -209,6 +212,13 @@ combineLatestObserver
             }
         }
 
+        //时间到
+        if ((timeCount > LAST_STEP_COUNT) || (currentTimestamp > finishTime)) {
+            handleFinished(quote)
+            return false;
+        }
+
+        //时间未到
         if (timeCount < 0) {
             return false
         }
@@ -266,7 +276,7 @@ combineLatestObserver
     filter((data: TimeTraderPipData) => {
         const { timeCountData, orders } = data
         const timeCount = timeCountData.count;
-        console.log(`[交易检查] ${timeCount + 1} / ${steps}, ${moment().format('HH:mm:ss')} `)
+        console.log(`[交易检查] ${timeCount + 1} / ${steps}, ${moment().format('HH:mm:ss.SSS')} `)
         
         // 判断是否可以交易, 如不能交易，先撤单
         const aliveOrders = getAliveOrders(orders)
@@ -290,7 +300,6 @@ combineLatestObserver
     const positions = data.positions || {}
 
     //============================= 交易环节 start =============================
-     console.time('trade loop consume time')
     //制定本次交易计划
     const instrumentType = quote.instrumentTypeOrigin;
     const unfinishedSteps = resolveUnfinishedSteps(steps - timeCount);
@@ -306,20 +315,17 @@ combineLatestObserver
     )
 
     if (total === 0) {
-        console.log('================================================================')
-        console.log(`====================== 交易任务完成 ==============================`)
-        console.log('================================================================')
-        handleFinished()
+        if (!hasConsoledTotalFinished) {
+            console.log('================================================================')
+            console.log(`====================== 交易任务完成 ==============================`)
+            console.log('================================================================')
+            hasConsoledTotalFinished = true;
+        }
+       
         return false;
     }
 
-    //时间到，需在此处，以显示交易完成
-    if (timeCount > LAST_STEP_COUNT) {
-        handleFinished()
-        return false;
-    }
-
-    console.log(`========= 交易条件满足，开始 ${timeCount + 1} / ${steps} =========`)
+    console.log(`========== 交易条件满足，开始 ${timeCount + 1} / ${steps} =========`)
 
     if ((offset === 0) || (currentVolume >= thisStepVolume)) {
         console.log(`现有 ${ticker} ${PosDirection[TARGET_DIRECTION]} ${currentVolume},
@@ -345,24 +351,34 @@ combineLatestObserver
     }
 
     console.log(`============ 已完成执行 ${timeCount + 1} / ${steps} ==============`)    
-    hasCancelOrderInThisLoop = false;
     dealedTimeCount = timeCount; //此时记录下来
-    console.timeEnd('trade loop consume time')
+    hasCancelOrderInThisLoop = false;
     //============================= 交易环节 end =============================
 })
 
 function resolveUnfinishedSteps (unfinishiedSteps: number) {
     //有时虽然不是最后一步，但是时间马上截止
-    const currentTimestamp = moment().valueOf();
-    if (finishTime - currentTimestamp < 2 * loopInterval) {
-        console.log('[时间截止前，最后一步]')
+    const currentTime = moment();
+    const currentTimestamp = currentTime.valueOf();
+    const limitValue = lastSingularity ? lastSingularityMilliSecond : loopInterval;
+    if (finishTime - currentTimestamp <= limitValue) {
+        console.log(`[时间截止前，最后一步] ${currentTime.format('HH:mm:ss.SSS')}`)
         return 1
     } 
     return unfinishiedSteps
 }
 
-function handleFinished () {
+function handleFinished (quote: QuoteData) {
     console.log(`====================== 时间截止，交易结束 ======================`)
+    console.log(`[收盘价格]
+    [标的] ${quote.instrumentId}
+    [卖价] ${JSON.stringify(quote.askPrices)} 
+    [买价] ${JSON.stringify(quote.bidPrices)}
+    [涨停价格] ${quote.upperLimitPrice} 
+    [跌停价格] ${quote.lowerLimitPrice} 
+    [最高价] ${quote.highPrice}
+    [最低价] ${quote.lowPrice}
+    [最新价] ${quote.lastPrice}`)
     secondsCounterTimer && clearInterval(secondsCounterTimer)
     reqTradingDataTimer && clearInterval(reqTradingDataTimer)
     process.exit(0)

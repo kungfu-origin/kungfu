@@ -289,3 +289,32 @@ export const timeCheckBySecond = (currentSecond: number, quote: QuoteData) => {
         })
     }
 }
+
+export const getCurrentCount = ({
+    currentTimestamp, 
+    deltaMilliSeconds,
+    finishTime,
+    loopInterval,
+    LAST_SINGULARITY_SECOND,
+    LAST_STEP_COUNT
+}: {
+    currentTimestamp: number; 
+    deltaMilliSeconds: number;
+    finishTime: number;
+    loopInterval: number;
+    LAST_SINGULARITY_SECOND: number;
+    LAST_STEP_COUNT: number
+}) => {
+    const deltaCurrentToFinishTime = finishTime - currentTimestamp;
+    const currentCount = Math.floor(deltaMilliSeconds / loopInterval)
+    if (LAST_SINGULARITY_SECOND) {
+        if (deltaCurrentToFinishTime <= LAST_SINGULARITY_SECOND) {
+            return LAST_STEP_COUNT
+        } else {
+            if (currentCount === LAST_STEP_COUNT) {
+                return currentCount - 1
+            }
+        }
+    }
+    return currentCount
+};
