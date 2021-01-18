@@ -77,7 +77,7 @@
     ],
   
     "include": [
-        "../node-modules/kungfu-shared/**/*",
+        "../node_modules/kungfu-shared/**/*",
         "../app/shared/**/*",
         "src/**/*", 
         "resources/keywords/resolveAPIMd.js",
