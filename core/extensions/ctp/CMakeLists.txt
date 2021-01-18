@@ -1,10 +1,10 @@
 PROJECT(kfext_ctp)
 
 IF(UNIX)
-    SET(CTP_API_VERSION v6.3.19_T1_20200423_api_tradeapi_se_linux64)
+    SET(CTP_API_VERSION v6.3.15_20190220_api_tradeapi_se_linux64)
 ENDIF()
 IF(WIN32)
-    SET(CTP_API_VERSION v6.3.19_T1_20200423_tradeapi64_se_windows)
+    SET(CTP_API_VERSION 6.3.15_20190220_tradeapi64_se_windows)
     SET(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS OFF)
 ENDIF()
 
