@@ -137,13 +137,13 @@ function getMakeOrderPrice (side: number, quote: QuoteData, unfinishedSteps: num
     
     if (+side === 0) {
         if (unfinishedSteps > 1) {
-            return askPrices[0]
+            return bidPrices[0]
         } else {
             return upperLimitPrice
         }
     } else if (+side === 1) {
         if (unfinishedSteps > 1) {
-            return bidPrices[0]
+            return askPrices[0]
         } else {
             return lowerLimitPrice
         }

@@ -13,15 +13,12 @@ import {
     calcVolumeThisStep,
     timeCheckBySecond
 } from './assets/utils';
-import { time } from 'console';
-
-
 
 
 const argv = minimist(process.argv.slice(2), {
     string: 'ticker',
 })
-const { ticker, side, offset, volume, steps, triggerTime, finishTime, exchangeId, parentId, accountId } = argv;
+const { ticker, side, offset, volume, steps, triggerTime, finishTime, exchangeId, parentId, accountId, lastSingularity, lastSingularityMilliSecond } = argv;
 const triggerTimeStr = moment(triggerTime).format('YYYYMMDD HH:mm:ss');
 const finishTimeStr = moment(finishTime).format('YYYYMMDD HH:mm:ss');
 const loopInterval = Math.ceil((finishTime - triggerTime) / steps);
@@ -33,6 +30,7 @@ const TARGET_DIRECTION_CONT = makeOrderDirectionType(side, offset).dc;
 const OPERATION_NAME = makeOrderDirectionType(side, offset).n;
 const TARGET_VOLUME = volume;
 const LAST_STEP_COUNT = steps - 1;
+const LAST_SECOND = lastSingularity ? lastSingularityMilliSecond : 0
 
 console.log('==================== 交易信息 =======================')
 console.log('[ARGS]', process.argv.slice(2).join(','))
@@ -292,7 +290,7 @@ combineLatestObserver
     const positions = data.positions || {}
 
     //============================= 交易环节 start =============================
-
+     console.time('trade loop consume time')
     //制定本次交易计划
     const instrumentType = quote.instrumentTypeOrigin;
     const unfinishedSteps = resolveUnfinishedSteps(steps - timeCount);
@@ -349,6 +347,7 @@ combineLatestObserver
     console.log(`============ 已完成执行 ${timeCount + 1} / ${steps} ==============`)    
     hasCancelOrderInThisLoop = false;
     dealedTimeCount = timeCount; //此时记录下来
+    console.timeEnd('trade loop consume time')
     //============================= 交易环节 end =============================
 })
 

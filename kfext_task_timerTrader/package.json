@@ -116,6 +116,22 @@
         "name": "总次数",
         "type": "int",
         "required": true
+      },
+      {
+        "key": "lastSingularity",
+        "name": "临界下单",
+        "type": "bool",
+        "required": false,
+        "tip": "开启后最后一步下单操作会在结束时间前执行，默认1000毫秒",
+        "default": true
+      },
+      {
+        "key": "lastSingularityMilliSecond",
+        "name": "临界下单时间",
+        "type": "int",
+        "required": false,
+        "tip": "设置临界下单临界时间, 单位毫秒，时间默认1000毫秒",
+        "default": 1000
       }
     ]
   }

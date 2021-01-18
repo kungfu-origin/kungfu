@@ -16,7 +16,7 @@
                     <el-input size="mini" :disabled="isDisabled(item.key)" :class="item.key" v-if="item.type === 'str'" v-model="form[item.key]" :type="item.key" ></el-input>
                     <el-input size="mini" :disabled="isDisabled(item.key)" :class="item.key" v-if="item.type === 'password'" :type="item.key" v-model="form[item.key]"  show-password></el-input>
                     <el-switch size="mini" :disabled="isDisabled(item.key)" :class="item.key" v-if="item.type === 'bool'" :value="form[item.key]" @change="e => handleInputValue(item.key, e)"></el-switch>
-                    <el-input-number size="mini" :disabled="isDisabled(item.key)" :class="item.key" v-if="item.type === 'int'" :controls="false" v-model="form[item.key]"></el-input-number>
+                    <el-input-number size="mini" :disabled="isDisabled(item.key)" :class="item.key" v-if="item.type === 'int'" :controls="false" :precision="0"  v-model="form[item.key]"></el-input-number>
                     <el-input-number size="mini" :disabled="isDisabled(item.key)" :class="item.key" v-if="item.type === 'float'" :controls="false" v-model="form[item.key]"></el-input-number>
                     <span class="account-setting-path path-selection-in-dialog text-overflow" v-if="item.type === 'file'" :title="form[item.key]">{{form[item.key]}}</span>                    
                     <el-button size="mini" icon="el-icon-more" v-if="item.type === 'file'" @click="handleSelectFile(item.key)"></el-button>
