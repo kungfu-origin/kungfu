@@ -55,7 +55,7 @@
     "inquirer": "^6.3.1",
     "inquirer-autocomplete-prompt": "^1.0.1",
     "kungfu-core": "*",
-    "kungfu-shared": "git+ssh://git@github.com:kungfu-trader/kungfu-shared.git",
+    "kungfu-shared": "*",
     "log4js": "^4.0.2",
     "moment": "^2.24.0",
     "node-schedule": "^1.3.2",

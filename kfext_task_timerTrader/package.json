@@ -19,7 +19,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "kungfu-shared": "git+ssh://git@github.com:kungfu-trader/kungfu-shared.git",
+    "kungfu-shared": "*",
     "moment": "^2.29.1",
     "rxjs": "^6.6.3"
   },

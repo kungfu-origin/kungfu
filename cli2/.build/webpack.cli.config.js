@@ -39,7 +39,7 @@ let cliConfig = {
         include: [
           path.resolve(__dirname, '..', 'src'),
           path.resolve(__dirname, '..', '..', 'app', 'shared'),
-          path.resolve(__dirname, '..', '..', 'node_modules', 'kungfu-shared'),
+          path.resolve(__dirname, '..', '..', 'kungfu-shared'),
         ]
       },
       {

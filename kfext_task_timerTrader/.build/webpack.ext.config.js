@@ -23,7 +23,7 @@ let extConfig = {
         use: 'ts-loader',
         include: [
           path.resolve(__dirname, '..', 'src'),
-          path.resolve(__dirname, '..', '..', 'node_modules', 'kungfu-shared'),
+          path.resolve(__dirname, '..', '..', 'kungfu-shared'),
         ]
       },
       {
