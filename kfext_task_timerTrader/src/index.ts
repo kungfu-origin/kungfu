@@ -1,5 +1,5 @@
 import minimist from 'minimist';
-import { PosDirection } from 'kungfu-shared/config/tradingConfig';
+import { PosDirection } from '../../shared/config/tradingConfig';
 import { Observable, combineLatest } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 import moment from 'moment';

@@ -1,5 +1,5 @@
 
-import { InstrumentTypes, aliveOrderStatusList, ExchangeIds, SideName, OffsetName } from 'kungfu-shared/config/tradingConfig';
+import { InstrumentTypes, aliveOrderStatusList, ExchangeIds, SideName, OffsetName } from '../../../shared/config/tradingConfig';
 
 export const transformArrayToObjectByKey = (targetList: Array<any>, keys: Array<string>): any => {
     let data: any = {};

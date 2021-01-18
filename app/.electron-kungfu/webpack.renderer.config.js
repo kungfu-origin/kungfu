@@ -59,7 +59,7 @@ let rendererConfig = {
           path.resolve(__dirname, '..', 'resources'),
           path.resolve(__dirname, '..', 'src'),
           path.resolve(__dirname, '..', 'shared'),
-          path.resolve(__dirname, '..', '..', 'kungfu-shared'),
+          path.resolve(__dirname, '..', '..', 'node_modules', 'kungfu-shared'),
         ]
       },
       {
