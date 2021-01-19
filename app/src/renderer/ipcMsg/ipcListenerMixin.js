@@ -77,6 +77,7 @@ export default {
                             return this.makeOrder('account', markOrderDataResolved, makeOrderData.name)
                         case 'CANCEL_ORDER_BY_CLINET_ID':
                             const ordersByParentId = this.getTargetOrdersByParentId(ledger, parentId)
+                            console.log(ordersByParentId, '----')
                             ordersByParentId.forEach(order => this.cancelOrder('acccount', order))
                             break
                         case "SUBSCRIBE_BY_TICKER":

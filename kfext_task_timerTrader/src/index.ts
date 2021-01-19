@@ -282,11 +282,11 @@ combineLatestObserver
         const aliveOrders = getAliveOrders(orders)
         if (aliveOrders.length) {
             console.log(`[检查订单] 活动订单数量 ${aliveOrders.length} / ${orders.length}, 等待全部订单结束`)
-            if (!hasCancelOrderInThisLoop) {
+            //if (!hasCancelOrderInThisLoop) {
                 reqCancelOrder(PARENT_ID)
-                hasCancelOrderInThisLoop = true
+            //    hasCancelOrderInThisLoop = true
                 console.log(`[撤单] PARENTID: ${PARENT_ID}`)
-            }
+            //}
             return false
         } 
         
@@ -370,15 +370,17 @@ function resolveUnfinishedSteps (unfinishiedSteps: number) {
 
 function handleFinished (quote: QuoteData) {
     console.log(`====================== 时间截止，交易结束 ======================`)
-    console.log(`[收盘价格]
-    [标的] ${quote.instrumentId}
-    [卖价] ${JSON.stringify(quote.askPrices)} 
-    [买价] ${JSON.stringify(quote.bidPrices)}
-    [涨停价格] ${quote.upperLimitPrice} 
-    [跌停价格] ${quote.lowerLimitPrice} 
-    [最高价] ${quote.highPrice}
-    [最低价] ${quote.lowPrice}
-    [最新价] ${quote.lastPrice}`)
+    if (quote) {
+        console.log(`[收盘价格]
+        [标的] ${quote.instrumentId}
+        [卖价] ${JSON.stringify(quote.askPrices)} 
+        [买价] ${JSON.stringify(quote.bidPrices)}
+        [涨停价格] ${quote.upperLimitPrice} 
+        [跌停价格] ${quote.lowerLimitPrice} 
+        [最高价] ${quote.highPrice}
+        [最低价] ${quote.lowPrice}
+        [最新价] ${quote.lastPrice}`)
+    }
     secondsCounterTimer && clearInterval(secondsCounterTimer)
     reqTradingDataTimer && clearInterval(reqTradingDataTimer)
     process.exit(0)
