@@ -5,6 +5,7 @@ import { ipcRenderer, remote } from 'electron';
 import { watcher, dealQuote, dealPos, dealOrder } from '__io/kungfu/watcher';
 import { getStrategyById, updateStrategyPath } from '__io/kungfu/strategy';
 import { transformTradingItemListToData } from '__io/kungfu/watcher';
+import { aliveOrderStatusList } from 'kungfu-shared/config/tradingConfig';
 
 import makeOrderCoreMixin from '@/components/Base/makeOrder/js/makeOrderCoreMixin';
 
@@ -75,10 +76,14 @@ export default {
                                 parent_id: BigInt(makeOrderData.parent_id)
                             }
                             return this.makeOrder('account', markOrderDataResolved, makeOrderData.name)
-                        case 'CANCEL_ORDER_BY_CLINET_ID':
-                            const ordersByParentId = this.getTargetOrdersByParentId(ledger, parentId)
-                            console.log(ordersByParentId, '----')
-                            ordersByParentId.forEach(order => this.cancelOrder('acccount', order))
+                        case 'CANCEL_ORDER_BY_PARENT_ID':
+                            const ordersByParentId = this.getTargetOrdersByParentId(watcher.ledger.Order, parentId)
+                            ordersByParentId
+                                .filter(order => aliveOrderStatusList.includes(+(order.status || 0)))
+                                .forEach(order => {
+                                    const orderData = dealOrder(order)
+                                    this.cancelOrder('account', orderData)
+                                })
                             break
                         case "SUBSCRIBE_BY_TICKER":
                             const sourceName = (accountId || '').toSourceName();
@@ -137,7 +142,8 @@ export default {
         getTargetOrdersByParentId (orders, parentId) {
             return Object.values(orders || {})
                 .filter(order => {
-                    return order.parent_id.toString() === parentId.toString()
+                    if (!order.parent_id) return false
+                    return (order.parent_id || '').toString() === (parentId || '').toString()
                 });
         },
         

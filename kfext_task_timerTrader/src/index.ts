@@ -191,7 +191,6 @@ const combineLatestObserver = combineLatest(
 var dealedTimeCount: number = -1000000000000;
 var dealedSecond: number | undefined = undefined
 var targetPosData: any = null;
-var hasCancelOrderInThisLoop = false;
 var hasConsoledTotalFinished = false;
 
 combineLatestObserver
@@ -236,15 +235,10 @@ combineLatestObserver
             return false;
         }
 
-        if (positions === null) {
-            console.error(`[WARNING] 暂无${ticker}持仓信息，需保证TD进程开启`)
-            return false;
-        }
-
         //制定全部交易计划
-        const pos = positions[`${TICKER}_${TARGET_DIRECTION}`];
+        const pos = (positions || {})[`${TICKER}_${TARGET_DIRECTION}`] || {};
         if (!targetPosData) {
-            const { totalVolume } = pos || {};
+            const { totalVolume } = pos;
             targetPosData = buildTarget({ 
                 offset,
                 side,
@@ -282,11 +276,8 @@ combineLatestObserver
         const aliveOrders = getAliveOrders(orders)
         if (aliveOrders.length) {
             console.log(`[检查订单] 活动订单数量 ${aliveOrders.length} / ${orders.length}, 等待全部订单结束`)
-            //if (!hasCancelOrderInThisLoop) {
-                reqCancelOrder(PARENT_ID)
-            //    hasCancelOrderInThisLoop = true
-                console.log(`[撤单] PARENTID: ${PARENT_ID}`)
-            //}
+            reqCancelOrder(PARENT_ID)
+            console.log(`[撤单] PARENTID: ${PARENT_ID}`)
             return false
         } 
         
@@ -352,7 +343,6 @@ combineLatestObserver
 
     console.log(`============ 已完成执行 ${timeCount + 1} / ${steps} ==============`)    
     dealedTimeCount = timeCount; //此时记录下来
-    hasCancelOrderInThisLoop = false;
     //============================= 交易环节 end =============================
 })
 
@@ -381,6 +371,7 @@ function handleFinished (quote: QuoteData) {
         [最低价] ${quote.lowPrice}
         [最新价] ${quote.lastPrice}`)
     }
+
     secondsCounterTimer && clearInterval(secondsCounterTimer)
     reqTradingDataTimer && clearInterval(reqTradingDataTimer)
     process.exit(0)
