@@ -22,9 +22,8 @@
   "scripts": {
     "install-deps": "electron-builder install-app-deps",
     "clean": "rimraf ./dist/* ./build/*",
-    "build:install": "electron-builder",
     "build":     "yarn run dist && electron-builder -c .electron-builder/release.json",
-    "build-cli": "yarn run dist && electron-builder -c .electron-builder/cli.json",
+    "build-cli": "yarn run dist && electron-builder -c .electron-builder/release.json --config.productName=Kungfu-CLI",
     "build-pro": "yarn run dist && electron-builder -c .electron-builder/pro.json",
     "dev": "node .electron-kungfu/dev-runner.js",
     "dist": "node --max_old_space_size=8192 .electron-kungfu/build.js",
