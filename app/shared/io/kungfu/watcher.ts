@@ -250,9 +250,7 @@ export const dealOrder = (item: OrderInputData): OrderData => {
     const updateTime = insert_time || update_time;
     const instrumentType = instrument_type;
     const sourceId =  resolveSourceDest(source, dest).sourceGroup;
-    const isGBK = sourceId.toLowerCase().includes('ctp');
     const errMsg = item.error_msg;
-    const errMsgResolved = isGBK ? OrderStatus[item.status] : errMsg;
   
     return {
         id: [item.order_id.toString(), item.account_id.toString()].join('-'),
@@ -287,7 +285,7 @@ export const dealOrder = (item: OrderInputData): OrderData => {
         volumeTraded: item.volume_traded.toString() + "/" + item.volume.toString(),
         volumeLeft: item.volume_left.toString(),
 
-        statusName: +item.status !== 4 ? OrderStatus[item.status] : errMsgResolved,
+        statusName: +item.status !== 4 ? OrderStatus[item.status] : errMsg,
         status: item.status,
 
         tax: item.tax,
