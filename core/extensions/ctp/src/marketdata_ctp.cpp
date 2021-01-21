@@ -49,7 +49,17 @@ bool MarketDataCTP::unsubscribe(const std::vector<InstrumentKey> &instruments) {
   return rtn == 0;
 }
 
-bool MarketDataCTP::subscribe_all() { return false; }
+bool MarketDataCTP::subscribe_all() {
+    auto length = this->instruments_.size();
+    auto targets = new char *[length];
+    size_t index = 0;
+    for (const auto& kv: this->instruments_) {
+        targets[index++] = const_cast<char*>(kv.first.c_str());
+    }
+    auto rtn = api_->SubscribeMarketData(targets, length);
+    delete[] targets;
+    return rtn == 0;
+}
 
 void MarketDataCTP::OnFrontConnected() {
   CThostFtdcReqUserLoginField login_field = {};
