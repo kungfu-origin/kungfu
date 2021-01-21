@@ -22,7 +22,7 @@
   "scripts": {
     "install-deps": "electron-builder install-app-deps",
     "clean": "rimraf ./dist/* ./build/*",
-    "build":     "yarn run dist && electron-builder -c .electron-builder/release.json",
+    "build": "yarn run dist && electron-builder -c .electron-builder/release.json",
     "build-cli": "yarn run dist && electron-builder -c .electron-builder/release.json --config.productName=Kungfu-CLI",
     "build-pro": "yarn run dist && electron-builder -c .electron-builder/pro.json",
     "dev": "node .electron-kungfu/dev-runner.js",
@@ -39,7 +39,6 @@
     "pm2": "3.5.2"
   },
   "devDependencies": {
-    "kungfu-shared": "*",
     "@types/node": "^12.6.2",
     "aws-sdk": "^2.395.0",
     "babel-loader": "^7.1.1",
@@ -81,6 +80,7 @@
     "html-webpack-plugin": "^2.30.1",
     "inject-loader": "^3.0.0",
     "jquery": "^3.4.1",
+    "kungfu-shared": "*",
     "log4js": "^4.0.2",
     "mime": "^2.4.0",
     "minimist": "^1.2.5",

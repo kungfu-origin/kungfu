@@ -112,10 +112,10 @@
                 border-radius: 3px;
                 box-sizing: border-box;
                 cursor: pointer;
-                width: 50px;
+                padding: 0 8px;
                 text-align: center;
                 color: #7D89B8;
-                font-size: 11px;
+                font-size: 12px;
             }
 
             .button:hover {
@@ -162,6 +162,9 @@
         <div id="content">
             <div class="header-content">
                     <div class="header-item fr">
+                        <div class="button" id="open-folder">文件夹</div>
+                    </div>
+                    <div class="header-item fr">
                             <div class="button" id="fresh-btn">刷新</div>
                     </div>
                     <div class="header-item fr">
@@ -183,7 +186,7 @@
     <script type="text/javascript">
     const path = require('path');
     const fs = require('fs-extra');
-    const ipc = require('electron').ipcRenderer;
+    const { ipcRenderer, shell } = require('electron');
     const BrowserWindow = require('electron').remote.BrowserWindow;
     const { getLog, debounce, clearFileContent } = require('./utils.js');
     const gaze = require('gaze');
@@ -252,8 +255,8 @@
         })
     }
 
-    ipc.on('show-log', function(event, { winId, logPath }){
-        ipc.removeAllListeners('show-log')
+    ipcRenderer.on('show-log', function(event, { winId, logPath }){
+        ipcRenderer.removeAllListeners('show-log')
         document.title = logPath
         getGlobalData.logPath = logPath;
 
@@ -269,22 +272,31 @@
         })
     })
 
+    document.getElementById('open-folder').addEventListener('click', () => {
+        const logPath = getGlobalData.logPath;
+        if (!logPath) return
+        fs.ensureFileSync(logPath)
+        shell.showItemInFolder(logPath)
+    })
+
     document.getElementById('clear-btn').addEventListener('click', () => {
         const logPath = getGlobalData.logPath;
         if(!logPath) return;
+        fs.ensureFileSync(logPath)
         clearFileContent(logPath)
     })
 
     document.getElementById('fresh-btn').addEventListener('click', () => {
         const logPath = getGlobalData.logPath;
         if(!logPath) return;
+        fs.ensureFileSync(logPath)
         showLogs(logPath, dealMessage).then(() => scrollToBottom())
     })
 
     document.getElementById('scroll-to-bottom-checkbox').addEventListener('input', () => {
-            getGlobalData.ifScrollToBottom = !getGlobalData.ifScrollToBottom
-            if(getGlobalData.ifScrollToBottom) scrollToBottom();
-        })
+        getGlobalData.ifScrollToBottom = !getGlobalData.ifScrollToBottom
+        if(getGlobalData.ifScrollToBottom) scrollToBottom();
+    })
 
     const $logContent = document.querySelector('#log-content');            
     $logContent.style.whiteSpace = ''
