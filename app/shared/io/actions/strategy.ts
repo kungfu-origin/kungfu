@@ -1,15 +1,16 @@
 import { deleteStrategy, getStrategyById } from '__io/kungfu/strategy';
 import { removeFileFolder } from '__gUtils/fileUtils';
 import { deleteProcess, startStrategy } from '__gUtils/processUtils';
-import { STRATEGY_DIR, LOG_DIR } from '__gConfig/pathConfig';
+import { STRATEGY_DIR, buildProcessLogPath } from '__gConfig/pathConfig';
 
 const path = require('path');
 
 //删除策略
-export const deleteStrat = (strategyId: string): Promise<void> => {
+export const deleteStrat = (strategyId: string): Promise<any> => {
     return deleteStrategy(strategyId) //删除策略数据库
     .then(() => removeFileFolder(path.join(STRATEGY_DIR, strategyId))) //策略相关数据
-    .then(() => removeFileFolder(path.join(LOG_DIR, strategyId + '.log')))//策略log
+    .then(() => removeFileFolder(buildProcessLogPath(strategyId)))//策略log
+    .then(() => deleteProcess(strategyId))
     .catch((err: Error) => console.error(err))
 }
 

@@ -1,4 +1,4 @@
-import { longfist, encodeKungfuLocation } from '__gUtils/kungfuUtils';
+import { longfist, encodeKungfuLocation } from '__io/kungfu/kungfuUtils';
 import { watcher, decodeKungfuLocation } from '__io/kungfu/watcher';
 
 interface MakeOrderData {
@@ -13,7 +13,17 @@ interface MakeOrderData {
     hedge_flag: number
 }
 
-export const kungfuMakeOrder = (makeOrderData: MakeOrderData, accountId: string, strategyId?: string) => {
+export const kungfuSubscribeTicker = (sourceName: string, exchangeId: string, ticker: string) => {
+    return Promise.resolve(
+        watcher.requestMarketData(
+            encodeKungfuLocation(sourceName, 'md'),
+            exchangeId, 
+            ticker
+        )
+    )
+}
+
+export const kungfuMakeOrder = (makeOrderData: MakeOrderData, accountId: string, strategyId?: string, parentId?: number) => {
     const accountLocation = encodeKungfuLocation(accountId, 'td');
 
     if (!watcher.isReadyToInteract(accountLocation)) {
@@ -24,7 +34,6 @@ export const kungfuMakeOrder = (makeOrderData: MakeOrderData, accountId: string,
         ...longfist.OrderInput(),
         ...makeOrderData
     }
-
     if (strategyId) {
         const strategyLocation = encodeKungfuLocation(strategyId, 'strategy');
         return Promise.resolve(watcher.issueOrder(orderInput, accountLocation, strategyLocation))

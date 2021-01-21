@@ -1,9 +1,9 @@
 import { KF_RUNTIME_DIR, KF_CONFIG_PATH } from '__gConfig/pathConfig';
 import { setTimerPromiseTask } from '__gUtils/busiUtils';
-import { kungfu } from '__gUtils/kungfuUtils';
+import { kungfu } from '__io/kungfu/kungfuUtils';
 import { toDecimal } from '__gUtils/busiUtils';
 import { readJsonSync } from '__gUtils/fileUtils';
-import { OffsetName, orderStatus, SideName, PosDirection, priceType, hedgeFlag, InstrumentType, volumeCondition, timeCondition, allowShorted } from "__gConfig/tradingConfig";
+import { OffsetName, OrderStatus, SideName, PosDirection, PriceType, HedgeFlag, InstrumentType, VolumeCondition, TimeCondition, allowShorted } from "kungfu-shared/config/tradingConfig";
 import { logger } from '../../utils/logUtils';
 
 export const watcher: any = (() => {
@@ -49,7 +49,7 @@ export const startGetKungfuTradingData = (callback: Function, interval = 1000) =
             callback({
                 ledger: watcher.ledger,
             });
-            resolve();
+            resolve(true);
         })
     }, interval);
 }
@@ -247,12 +247,10 @@ function resolveAccountId(source: string, dest: string): string {
 
 export const dealOrder = (item: OrderInputData): OrderData => {
     const { source, dest, instrument_type, update_time, insert_time } = item;
-    const updateTime = update_time || insert_time;
+    const updateTime = insert_time || update_time;
     const instrumentType = instrument_type;
     const sourceId =  resolveSourceDest(source, dest).sourceGroup;
-    const isGBK = sourceId.toLowerCase().includes('ctp');
     const errMsg = item.error_msg;
-    const errMsgResolved = isGBK ? orderStatus[item.status] : errMsg;
   
     return {
         id: [item.order_id.toString(), item.account_id.toString()].join('-'),
@@ -264,25 +262,21 @@ export const dealOrder = (item: OrderInputData): OrderData => {
         parentId: item.parent_id.toString(),
         
         instrumentId: item.instrument_id,
-        instrumentType: InstrumentType[item.instrument_type],
-        instrumentTypeOrigin: item.instrument_type,
+        instrumentType: InstrumentType[instrumentType],
+        instrumentTypeOrigin: instrumentType,
         exchangeId: item.exchange_id,
         
         side: SideName[item.side] ? SideName[item.side] : '--',
         sideOrigin: item.side,
-        offset: !allowShorted(instrumentType) ? 
-            '--' : 
-            OffsetName[item.offset] ? 
-                OffsetName[item.offset] : 
-                '--',
+        offset: OffsetName[item.offset],
         offsetOrigin: item.offset,
-        hedgeFlag: hedgeFlag[item.hedge_flag] ? hedgeFlag[item.hedge_flag] : '--',
+        hedgeFlag: HedgeFlag[item.hedge_flag] ? HedgeFlag[item.hedge_flag] : '--',
         hedgeFlagOrigin: item.hedge_flag,
 
-        priceType: priceType[item.price_type],
+        priceType: PriceType[item.price_type],
         priceTypeOrigin: item.price_type,
-        volumeCondition: volumeCondition[item.volume_condition],
-        timeCondition: timeCondition[item.time_condition],
+        volumeCondition: VolumeCondition[item.volume_condition],
+        timeCondition: TimeCondition[item.time_condition],
 
         limitPrice: toDecimal(item.limit_price, 3) || '--',
         frozenPrice: toDecimal(item.frozen_price, 3) || '--',
@@ -291,7 +285,7 @@ export const dealOrder = (item: OrderInputData): OrderData => {
         volumeTraded: item.volume_traded.toString() + "/" + item.volume.toString(),
         volumeLeft: item.volume_left.toString(),
 
-        statusName: +item.status !== 4 ? orderStatus[item.status] : errMsgResolved,
+        statusName: +item.status !== 4 ? OrderStatus[item.status] : errMsg,
         status: item.status,
 
         tax: item.tax,
@@ -311,21 +305,18 @@ export const dealOrder = (item: OrderInputData): OrderData => {
 
 
 export const dealTrade = (item: TradeInputData): TradeData => {
+    //这个update会用延迟统计里的，因为目前是交易所时间，需要本地时间
     const updateTime = item.trade_time || item.update_time;
-    const instrumentType = item.instrument_type;
     return {
         id: [item.account_id.toString(), item.trade_id.toString(), updateTime.toString()].join('_'),
         updateTime: kungfu.formatTime(updateTime, '%H:%M:%S'),
         updateTimeMMDD: kungfu.formatTime(updateTime, '%m/%d %H:%M:%S'),
-        orderId: item.order_id.toString(),
         updateTimeNum: +Number(updateTime || 0),
+
+        orderId: item.order_id.toString(),
         instrumentId: item.instrument_id,
         side: SideName[item.side] ? SideName[item.side] : '--',
-        offset: instrumentType === 1 || instrumentType === 5 ? 
-            '--' : 
-            OffsetName[item.offset] ? 
-                OffsetName[item.offset] : 
-                '--',
+        offset: OffsetName[item.offset],
         price: toDecimal(+item.price, 3),
         volume: Number(item.volume),
         clientId: resolveClientId(item.dest || ''),
@@ -377,22 +368,22 @@ export const dealAsset = (item: AssetInputData): AssetData => {
 
 
 export const dealOrderStat = (item: OrderStatInputData): OrderStatData => {
-    const insertTime = item.insert_time;
-    const ackTime = item.ack_time;
-    const mdTime = item.md_time;
-    const tradeTime = item.trade_time;
-
-    const latencyTrade = +Number(Number(tradeTime - ackTime) / 1000).toFixed(0);
-    const latencyNetwork = +Number(Number(ackTime - insertTime) / 1000).toFixed(0);
-    const latencySystem = +toDecimal(Number(insertTime - mdTime) / 1000);
+    const { insert_time, ack_time, md_time, trade_time } = item;
+    const latencyTrade = +Number(Number(trade_time - ack_time) / 1000).toFixed(0);
+    const latencyNetwork = +Number(Number(ack_time - insert_time) / 1000).toFixed(0);
+    const latencySystem = +toDecimal(Number(insert_time - md_time) / 1000);
 
     return {
-        ackTime: Number(ackTime),
-        insertTime: Number(insertTime),
-        mdTime: Number(mdTime),
+        ackTime: Number(ack_time),
+        insertTime: Number(insert_time),
+        mdTime: Number(md_time),
         latencySystem: latencySystem > 0 ? latencySystem.toString() : '',
         latencyNetwork: latencyNetwork > 0 ? latencyNetwork.toString() : '',
         latencyTrade: latencyTrade > 0 ? latencyTrade.toString() : '',
+        tradeTime: kungfu.formatTime(trade_time, '%H:%M:%S'),
+        tradeTimeMMDD: kungfu.formatTime(trade_time, '%m/%d %H:%M:%S'),
+        tradeTimeNum: +Number(trade_time || 0),
+
         orderId: item.order_id.toString(),
         dest: item.dest,
         source: item.source
@@ -436,6 +427,7 @@ export const dealQuote = (quote: QuoteDataInput): QuoteData => {
         highPrice: toDecimal(quote.high_price, 3),
         instrumentId: quote.instrument_id,
         instrumentType: InstrumentType[quote.instrument_type],
+        instrumentTypeOrigin: quote.instrument_type,
         lastPrice: toDecimal(quote.last_price, 3),
         lowPrice: toDecimal(quote.low_price, 3),
         lowerLimitPrice: toDecimal(quote.lower_limit_price, 3),
@@ -450,6 +442,8 @@ export const dealQuote = (quote: QuoteDataInput): QuoteData => {
         turnover: quote.turnover,
         upperLimitPrice: toDecimal(quote.upper_limit_price, 3),
         volume: Number(quote.volume),
+        askPrices: quote.ask_price || [],
+        bidPrices: quote.bid_price || []
     }
        
 

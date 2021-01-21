@@ -16,12 +16,12 @@
         width="450px"
         >
             <div style="margin: 10px 0 20px">
-                <tr-status :value="loadingData.watcher ? '100' : '3'" :hasText="false"></tr-status>
-                {{ loadingData.watcher ? '功夫环境准备完成 ✓' : '功夫环境准备中...' }}
-            </div>
-            <div style="margin: 10px 0 20px">
                 <tr-status :value="loadingData.archive ? '100' : '3'" :hasText="false"></tr-status>
                 {{ loadingData.archive ? '功夫归档完成 ✓' : '功夫归档中...' }}
+            </div>
+            <div style="margin: 10px 0 20px">
+                <tr-status :value="loadingData.watcher ? '100' : '3'" :hasText="false"></tr-status>
+                {{ loadingData.watcher ? '功夫环境准备完成 ✓' : '功夫环境准备中...' }}
             </div>
         </el-dialog>
     </div>
@@ -36,7 +36,6 @@ import GlobalSettingDialog from '@/components/Base/GlobalSettingDialog';
 import { existsSync } from '__gUtils/fileUtils';
 import { deepClone, delayMiliSeconds, debounce } from '__gUtils/busiUtils';
 import { buildKungfuGlobalDataPipe, buildTradingDataPipe } from '__io/kungfu/tradingData';
-import { deleteProcess } from '__gUtils/processUtils';
 import { watcher } from '__io/kungfu/watcher';
 
 import ipcListenerMixin from '@/ipcMsg/ipcListenerMixin.js';
@@ -128,8 +127,9 @@ export default {
         bindKungfuGlobalDataListener () {
             this.kungfuGloablDataObserver = buildKungfuGlobalDataPipe().subscribe(data => {
                 data.gatewayStates.forEach(gatewayState => {
+                    const { processId } = gatewayState;
                     this.$store.dispatch('setOneMdTdState', {
-                        id: gatewayState.processId,
+                        id: processId,
                         stateData: gatewayState
                     })
                 })

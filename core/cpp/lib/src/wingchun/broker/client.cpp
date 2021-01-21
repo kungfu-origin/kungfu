@@ -24,14 +24,14 @@ int64_t ResumePolicy::get_connect_time(const apprentice &app, const Register &br
   if (broker.checkin_time <= app.get_last_active_time()) {
     return app.get_last_active_time();
   }
-  return get_resmue_time(app, broker);
+  return get_resume_time(app, broker);
 }
 
-int64_t ContinuousResumePolicy::get_resmue_time(const apprentice &app, const Register &broker) const {
+int64_t ContinuousResumePolicy::get_resume_time(const apprentice &app, const Register &broker) const {
   return app.get_last_active_time();
 }
 
-int64_t IntradayResumePolicy::get_resmue_time(const apprentice &app, const Register &broker) const {
+int64_t IntradayResumePolicy::get_resume_time(const apprentice &app, const Register &broker) const {
   return std::max(app.get_last_active_time(), time::calendar_day_start(app.now()));
 }
 

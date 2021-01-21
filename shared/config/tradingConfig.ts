@@ -41,14 +41,6 @@ export const PosDirection: NumberToStringObject = {
     1: isEnglish ? 'Short' : '空' 
 }
 
-export const statusName: StringToStringObject = {
-    all_traded: isEnglish ? 'AllTraded' : '全部成交',
-    pending: isEnglish ? 'Pending' : '非最终状态',
-    error: isEnglish ? 'Error' : '错误',
-    canceled: isEnglish ? 'Canceled' : '全部撤销',
-    part_traded_not_queueing: isEnglish ? 'PartialFilledNotActive' : '部分撤销部分成交'
-}
-
 // Unknown = '0', // 未知
 // Submitted = '1', //已提交 
 // Pending = '2', // 等待
@@ -58,7 +50,7 @@ export const statusName: StringToStringObject = {
 // PartialFilledNotActive = '6', //部分撤单
 // PartialFilledActive = '7' //正在交易
 // 0,3,4,5,6 已完成
-export const orderStatus: NumberToStringObject = {
+export const OrderStatus: NumberToStringObject = {
     0: isEnglish ? 'Unknow' : '未知',
     1: isEnglish ? 'Submitted' : '已提交', // ing
     2: isEnglish ? 'Pending' : '等待中', // ing
@@ -72,7 +64,7 @@ export const orderStatus: NumberToStringObject = {
 
 export const aliveOrderStatusList = [1, 2, 7]
 
-export const sourceTypeConfig: SourceType = {
+export const SourceTypeConfig: SourceType = {
     'Stock': {
         name: isEnglish ? 'stock' : '股票',
         kfId: 1,
@@ -98,14 +90,14 @@ export const sourceTypeConfig: SourceType = {
     },
 }
 
-export const hedgeFlag: NumberToStringObject = {
+export const HedgeFlag: NumberToStringObject = {
     0: isEnglish ? 'Speculation': '投机',
     1: isEnglish ? 'Arbitrage': '套利',
     2: isEnglish ? 'Hedge': '套保',
     // 3: isEnglish ? 'Covered': '备兑'
 }
 
-export const exchangeIds: StringToStringObject = {
+export const ExchangeIds: StringToStringObject = {
     "SSE": "上交所",
     "SZE": "深交所",
     "SHFE": "上期所",
@@ -145,7 +137,7 @@ export const allowShorted = (instrumentType: number) => {
     return false
 }
 
-export const priceType: NumberToStringObject = {
+export const PriceType: NumberToStringObject = {
     0: isEnglish ? 'Limit'       : '限价',
     1: isEnglish ? 'Market'      : '市价',
     2: isEnglish ? 'FakBest5'    : '上海深圳最优五档即时成交剩余撤销，不需要报价',
@@ -156,13 +148,13 @@ export const priceType: NumberToStringObject = {
     7: isEnglish ? 'UnKnown'     : '未知'
 }
 
-export const volumeCondition: NumberToStringObject = {
+export const VolumeCondition: NumberToStringObject = {
     0: isEnglish ? 'Any' : '任意', 
     1: isEnglish ? 'Min' : '最小', 
     2: isEnglish ? 'All' : '全部' 
 };
 
-export const timeCondition: NumberToStringObject = { 
+export const TimeCondition: NumberToStringObject = { 
     0: isEnglish ? 'IOC' : 'IOC', 
     1: isEnglish ? 'GFD' : 'GFD', 
     2: isEnglish ? 'GTC' : 'GTC' 

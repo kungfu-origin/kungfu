@@ -171,11 +171,8 @@ inline void from_xtp(const XTPMarketDataStruct &ori, Quote &des) {
   strcpy(des.instrument_id, ori.ticker);
   from_xtp(ori.exchange_id, des.exchange_id);
 
-  if (ori.data_type == XTP_MARKETDATA_OPTION) {
-    des.instrument_type = InstrumentType::StockOption;
-  } else {
-    des.instrument_type = get_instrument_type(des.instrument_id, des.exchange_id);
-  }
+  des.instrument_type = ori.data_type != XTP_MARKETDATA_OPTION ? get_instrument_type(des.exchange_id, des.instrument_id)
+                                                               : InstrumentType::StockOption;
 
   des.last_price = ori.last_price;
   des.pre_settlement_price = ori.pre_settl_price;

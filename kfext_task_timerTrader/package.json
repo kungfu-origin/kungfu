@@ -1,0 +1,138 @@
+{
+  "name": "kfext_task_timer-trader",
+  "version": "1.0.0",
+  "description": "",
+  "main": "lib/index.js",
+  "scripts": {
+    "install-deps": "node -v",
+    "dist": "cross-env NODE_ENV=production node --max_old_space_size=8192 ../node_modules/webpack/bin/webpack.js --progress --colors --config .build/webpack.ext.config.js",
+    "build": "node ./.build/build.js && yarn run cp",
+    "build-cli": "yarn run build",
+    "build-win": " yarn run dist && pkg . -t=node10.17-win-x64 --output=build/ext/index",
+    "build-mac": " yarn run dist && pkg . -t=node10.17-macos-x64 --output=build/ext/index",
+    "build-linux": " yarn run dist && pkg . -t=node10.17-linux-x64 --output=build/ext/index",
+    "cp": "copyfiles -a -f ./package.json ./build/ext",
+    "clean": "rimraf ./lib/*",
+    "dev": "node .build/dev-ext.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "kungfu-shared": "*",
+    "moment": "^2.29.1",
+    "rxjs": "^6.6.3"
+  },
+  "devDependencies": {
+    "@types/node": "^14.14.20",
+    "@types/minimist": "^1.2.1",
+    "copyfiles": "^2.4.1",
+    "pkg": "^4.4.9",
+    "rimraf": "^3.0.2"
+  },
+  "bin": "./lib/index.js",
+  "kungfuConfig": {
+    "type": "task",
+    "key": "timerTrader",
+    "name": "定时任务",
+    "uniKey": [
+      "accountId",
+      "ticker"
+    ],
+    "config": [
+      {
+        "key": "accountId",
+        "name": "账户",
+        "type": "account",
+        "required": true
+      },
+      {
+        "key": "ticker",
+        "name": "标的",
+        "type": "instrumentId",
+        "required": true
+      },
+      {
+        "key": "exchangeId",
+        "name": "交易所",
+        "type": "exchangeId",
+        "required": true
+      },
+      {
+        "key": "side",
+        "name": "买卖",
+        "type": "radio",
+        "data": [
+          {
+            "name": "买",
+            "value": 0
+          },
+          {
+            "name": "卖",
+            "value": 1
+          }
+        ],
+        "default": 0,
+        "required": true
+      },
+      {
+        "key": "offset",
+        "name": "开平",
+        "type": "radio",
+        "data": [
+          {
+            "name": "开",
+            "value": 0
+          },
+          {
+            "name": "平",
+            "value": 1
+          }
+        ],
+        "default": 0,
+        "required": true
+      },
+      {
+        "key": "volume",
+        "name": "数量",
+        "type": "int",
+        "required": true
+      },
+      {
+        "key": "triggerTime",
+        "name": "触发时间",
+        "type": "timePicker",
+        "required": true
+      },
+      {
+        "key": "finishTime",
+        "name": "结束时间",
+        "type": "timePicker",
+        "laterThan": "triggerTime",
+        "required": true
+      },
+      {
+        "key": "steps",
+        "name": "总次数",
+        "type": "int",
+        "required": true
+      },
+      {
+        "key": "lastSingularity",
+        "name": "临界下单",
+        "type": "bool",
+        "required": false,
+        "tip": "开启后最后一步下单操作会在结束时间前执行，默认1000毫秒",
+        "default": true
+      },
+      {
+        "key": "lastSingularityMilliSecond",
+        "name": "临界下单时间",
+        "type": "int",
+        "required": false,
+        "tip": "设置临界下单临界时间, 单位毫秒，时间默认1000毫秒",
+        "default": 1000
+      }
+    ]
+  }
+}

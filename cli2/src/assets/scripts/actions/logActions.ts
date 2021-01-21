@@ -1,5 +1,5 @@
 import logColor from '__gConfig/logColorConfig';
-import { LOG_DIR } from '__gConfig/pathConfig';
+import { buildProcessLogPath } from '__gConfig/pathConfig';
 import { addFileSync } from '__gUtils/fileUtils';
 import { getLog } from '__gUtils/busiUtils';
 
@@ -81,7 +81,7 @@ const dealLogMessage = (line: string, processId: string) => {
 
 
 const getLogObservable = (pid: string) => {
-    const logPath = path.join(LOG_DIR, `${pid}.log`);
+    const logPath = buildProcessLogPath(pid)
     return new Observable(observer => {
         getLog(logPath, '', (line: string) => dealLogMessage(line, pid))
         .then((logList: NumList) => observer.next(logList))
@@ -138,7 +138,7 @@ export const getMergedLogsObservable = (processIds: string[], boardWidth: number
 const watchLogObservable = (processId: string, boardWidth: number) => {
     logWather && (logWather.unwatch());
     return new Observable(observer => {
-        const logPath = path.join(LOG_DIR, `${processId}.log`);
+        const logPath = buildProcessLogPath(processId)
         addFileSync('', logPath, 'file');
         const watcher = new Tail(logPath, {
             useWatchFile: true

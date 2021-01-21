@@ -35,8 +35,11 @@
                     >
                     <template slot-scope="props">
                         <tr-status 
-                        v-if="$utils.ifProcessRunning('md_' + props.row.source_name, processStatus)"
+                        v-if="$utils.ifProcessRunning(`md_${props.row.source_name}`, processStatus) && processStatus[`md_${props.row.source_name}`] === 'online'"
                         :value="(mdTdState[`md_${props.row.source_name}`] || {}).state"></tr-status>
+                        <tr-status 
+                        v-else-if="$utils.ifProcessRunning(`md_${props.row.source_name}`, processStatus) && processStatus[`md_${props.row.source_name}`] === 'stopping'"
+                        :value="processStatus[`md_${props.row.source_name}`]"></tr-status>
                         <tr-status v-else></tr-status>
                     </template>
                 </el-table-column>
@@ -56,7 +59,7 @@
                     min-width="120"
                 >
                     <template slot-scope="props">
-                        <span class="tr-oper" @click.stop="handleOpenLogFile(props.row)"><i class="el-icon-document mouse-over" title="打开日志"></i></span>
+                        <span class="tr-oper" @click.stop="handleOpenLogFile(`md_${props.row.source_name}`)"><i class="el-icon-document mouse-over" title="打开日志"></i></span>
                         <span class="tr-oper" @click.stop="handleOpenUpdateAccountDialog(props.row)"><i class="el-icon-setting mouse-over" title="MD 设置"></i></span>
                         <span :class="['tr-oper-delete', `delete-${props.row.source_name}`] " @click.stop="handleDeleteMd(props.row)"><i class=" el-icon-delete mouse-over" title="删除 MD"></i></span>
                     </template>
@@ -99,14 +102,15 @@ import SetAccountDialog from './SetAccountDialog';
 import SetSourceDialog from './SetSourceDialog';
 
 import { getMdList } from '__io/kungfu/account';
-import { LOG_DIR } from '__gConfig/pathConfig';
 import { switchMd, deleteMd } from '__io/actions/account';
 import { loopToRunProcess } from '__gUtils/busiUtils';
 import { watcher } from '__io/kungfu/watcher';
+
 import mdTdMixin from '../js/mdTdMixin';
+import openLogMixin from '@/assets/js/mixins/openLogMixin';
 
 export default {
-    mixins: [ mdTdMixin ],
+    mixins: [ mdTdMixin, openLogMixin ],
 
     data () {
         this.tdmdType = 'md';
@@ -155,7 +159,7 @@ export default {
             .then(() => deleteMd(row, this.tdList))
             .then(() => this.getTableList())
             .then(() => this.$message.success('操作成功！'))
-            .catch((err) => {
+            .catch(err => {
                 if(err == 'cancel') return
                 this.$message.error(err.message || '操作失败！')
             })
@@ -163,11 +167,6 @@ export default {
 
         handleMdSwitch(value, account) {
             return switchMd(account, value).then(({ type, message }) => this.$message[type](message))  
-        },
-
-        handleOpenLogFile(row){
-            const logPath = path.join(LOG_DIR, `md_${row.source_name}.log`);
-            this.$showLog(logPath)
         },
 
         handleNoAvailSource(bool) {

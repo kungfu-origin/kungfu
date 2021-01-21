@@ -1,7 +1,6 @@
-import { addFileSync } from '__gUtils/fileUtils'
-
-const path = require('path');
-
+import path from 'path';
+import { addFileSync } from '__gUtils/fileUtils';
+import moment from 'moment';
 
 const KF_HOME_BASE_DIR_RESOLVE = (() => {
     if ( process.env.APP_TYPE === 'cli' ) {
@@ -49,7 +48,7 @@ export const LEDGER_DIR = path.join(SYSTEM_DIR, 'service', 'ledger')
 addFileSync('', LEDGER_DIR, 'folder')
 
 //log
-export const LOG_DIR = path.join(KF_HOME, 'logview');
+export const LOG_DIR = path.join(KF_HOME, 'logview')
 addFileSync('', LOG_DIR, 'folder')
 
 
@@ -67,7 +66,10 @@ export const buildGatewayPath = (gatewayName: string) => path.join(KF_RUNTIME_DI
 //================== others start =================================
 
 //获取进程日志地址
-export const buildProcessLogPath = (processId: string) => path.join(LOG_DIR, `${processId}.log`)
+export const buildProcessLogPath = (processId: string) => {
+    const tmk = moment().format('YYYYMMDD')
+    return path.join(LOG_DIR, tmk, `${processId}.log`)
+}
 
 
 
@@ -102,3 +104,7 @@ export const KUNGFU_ENGINE_PATH = process.env.NODE_ENV === 'production'
 
 
 export const EXTENSION_DIR = path.join(KUNGFU_ENGINE_PATH, 'kfc', 'kungfu_extensions');
+
+export const TASK_EXTENSION_DIR = process.env.NODE_ENV === 'production'
+    ? path.join(process.resourcesPath, 'kungfu-extensions')
+    : path.join(__dirname, '..', '..', '..')

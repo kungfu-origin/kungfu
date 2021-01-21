@@ -1,8 +1,8 @@
 {
     "resolveJsonModule": true,
-    "esModuleInterop": true,
     "module": "commonjs",
     "include": [
+        "../node_modules/kungfu-shared/**/*",
         "../app/shared/**/*",
         "src/**/*",
         "src/*"

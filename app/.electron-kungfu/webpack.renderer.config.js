@@ -55,7 +55,12 @@ let rendererConfig = {
       {
         test: /\.ts$/,
         use: 'ts-loader',
-        exclude: /node_modules/
+        include: [
+          path.resolve(__dirname, '..', 'resources'),
+          path.resolve(__dirname, '..', 'src'),
+          path.resolve(__dirname, '..', 'shared'),
+          path.resolve(__dirname, '..', '..', 'shared'),
+        ]
       },
       {
         test: /\.js$/,

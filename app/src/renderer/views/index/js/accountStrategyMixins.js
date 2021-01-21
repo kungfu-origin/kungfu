@@ -45,20 +45,20 @@ export default {
             return this.buildMakeOrderWin()
                 .then(() => {
                     this.emitCurrentMakeOrderWinInfo();
-                    window.makeOrderWin.show && window.makeOrderWin.show();
-                    window.makeOrderWin.focus && window.makeOrderWin.focus();
+                    window.makeOrderWin && window.makeOrderWin.show && window.makeOrderWin.show();
+                    window.makeOrderWin && window.makeOrderWin.focus && window.makeOrderWin.focus();
                 })        
         },
 
         buildMakeOrderWin () {
-            if (!window.makeOrderWin) {
+            //仅在strategy时创建窗口
+            if (!window.makeOrderWin && this.moduleType === 'strategy') {
                 return this.$utils.openVueWin(
                     'makeOrder', 
                     `/make-order`, 
                     remote, 
                     { width: 470, height: 520 }
                 ).then((win) => {
-                    
                     window.makeOrderWin = win;
                     window.makeOrderWin.setAlwaysOnTop(true);
                     this.bindMakeOrderWinEvent();
