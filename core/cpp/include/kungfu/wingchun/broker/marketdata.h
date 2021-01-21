@@ -33,8 +33,9 @@ protected:
 
   const longfist::types::Instrument &get_instrument(const std::string &instrument_id) const;
 
-private:
   std::unordered_map<std::string, longfist::types::Instrument> instruments_ = {};
+
+private:
 
   void update_instrument(longfist::types::Instrument instrument);
 };
