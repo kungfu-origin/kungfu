@@ -1,5 +1,5 @@
 
-import { InstrumentTypes, InstrumentTypeWithDetail, aliveOrderStatusList, ExchangeIds, SideName, OffsetName } from 'kungfu-shared/config/tradingConfig';
+import { InstrumentTypes, aliveOrderStatusList, ExchangeIds, SideName, OffsetName, PosDirection } from 'kungfu-shared/config/tradingConfig';
 
 export const transformArrayToObjectByKey = (targetList: Array<any>, keys: Array<string>): any => {
     let data: any = {};
@@ -325,6 +325,99 @@ export const getCurrentCount = ({
     return currentCount
 };
 
-export const getTickerAbleToCloseTodayByInstrumentType = (instrumentType: number) => {
-    return InstrumentTypeWithDetail[instrumentType].sellToday
+export const buildTradeTaskVolumeOffset = ({
+    ticker,
+    side,
+    offset,
+    currentVolume,
+    currentYesVolume,
+    currentTodayVolume,
+    currentVolumeCont,
+    thisStepVolume,
+    total,
+    OPERATION_NAME,
+    TARGET_DIRECTION,
+    TARGET_DIRECTION_CONT
+}: {
+    ticker: string;
+    side: number;
+    offset: number;
+    currentVolume: number;
+    currentYesVolume: number;
+    currentTodayVolume: number;
+    currentVolumeCont: number;
+    thisStepVolume: number;
+    total: number;
+    OPERATION_NAME: string;
+    TARGET_DIRECTION: number;
+    TARGET_DIRECTION_CONT: number;
+}) => {
+
+    const deltaVolume = getDeltaVolume(offset, thisStepVolume, currentVolume)
+    buildTradeTaskLog(ticker, side, currentVolume, currentYesVolume, currentTodayVolume, total, currentVolumeCont, deltaVolume, thisStepVolume, OPERATION_NAME, TARGET_DIRECTION, TARGET_DIRECTION_CONT)
+
+    if (+thisStepVolume <= 0) return []
+    
+    if (offset === 0) { // 开
+        return [{ offset: 0, volume: thisStepVolume }]
+
+    } else { // 平
+        let taskList: Array<TradeTarget> = [];
+
+        //为了同时适配 现仓够与不够两种情况，持仓够，用thisStepVolume, 持仓不够，用currentVolume
+        const targetCloseVolume = Math.min(thisStepVolume, currentVolume)
+
+        //现仓不为0
+        if (targetCloseVolume > 0) {
+            if (targetCloseVolume <= currentYesVolume) { // 昨够
+                taskList = [{ offset: 3, volume: targetCloseVolume }]
+            } else if (currentYesVolume > 0) { // 昨今都有
+                const thisStepTodayVolume = +Number(targetCloseVolume - currentYesVolume).toFixed(0);
+                taskList = [{ offset: 3, volume: currentYesVolume }, { offset: 2, volume: thisStepTodayVolume }]
+            } else {// 只有今
+                taskList = [{ offset: 2, volume: targetCloseVolume }]
+            }
+        }
+
+        if (+deltaVolume > 0) {
+            taskList = [ ...taskList, { offset: 0, volume: deltaVolume }]
+        }
+
+        return taskList
+    }
+}
+
+function getDeltaVolume (offset: number, thisStepVolume: number, currentVolume: number) {
+    if (offset === 0) {
+        return -1
+    } else {
+        return +Number(thisStepVolume - currentVolume).toFixed(0);
+    }
+}
+
+function buildTradeTaskLog (
+    ticker: string,
+    side: number,
+    currentVolume: number,
+    currentYesVolume: number,
+    currentTodayVolume: number,
+    total: number,
+    currentVolumeCont: number,
+    deltaVolume: number,
+    thisStepVolume: number,
+    OPERATION_NAME: string,
+    TARGET_DIRECTION: number,
+    TARGET_DIRECTION_CONT: number
+) {
+
+    const contOperationName = makeOrderDirectionType(side, 0).n;
+    const countPos = deltaVolume <= 0 ? '' : `${PosDirection[TARGET_DIRECTION_CONT]} ${currentVolumeCont}, `;
+    const countOperation = deltaVolume <= 0 ? '' : `持仓不足, 需 ${OPERATION_NAME} ${currentVolume}, ${contOperationName} ${deltaVolume}`
+
+    console.log(
+        `现有 ${ticker} ${PosDirection[TARGET_DIRECTION]} ${currentVolume}, ${countPos}
+        其中 ${ticker}${PosDirection[TARGET_DIRECTION]} 昨 ${currentYesVolume}, 今 ${currentTodayVolume},
+        还需 ${OPERATION_NAME} ${total}, 本次需 ${OPERATION_NAME} ${thisStepVolume}, 
+        ${countOperation}`
+    )
 }

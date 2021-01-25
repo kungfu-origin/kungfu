@@ -1,5 +1,4 @@
 import minimist from 'minimist';
-import { PosDirection } from 'kungfu-shared/config/tradingConfig';
 import { Observable, combineLatest } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 import moment from 'moment';
@@ -13,7 +12,7 @@ import {
     calcVolumeThisStep,
     timeCheckBySecond,
     getCurrentCount,
-    getTickerAbleToCloseTodayByInstrumentType
+    buildTradeTaskVolumeOffset
 } from './assets/utils';
 
 
@@ -294,7 +293,6 @@ combineLatestObserver
     //============================= 交易环节 start =============================
     //制定本次交易计划
     const instrumentType = quote.instrumentTypeOrigin;
-    const sellToday = getTickerAbleToCloseTodayByInstrumentType(instrumentType)
     const unfinishedSteps = resolveUnfinishedSteps(steps - timeCount);
     const { total, thisStepVolume, currentVolume, currentYesVolume, currentTodayVolume, currentVolumeCont }  = calcVolumeThisStep(
         positions,
@@ -307,7 +305,7 @@ combineLatestObserver
         instrumentType
     )
 
-    if (total === 0) {
+    if (+total === 0) {
         if (!hasConsoledTotalFinished) {
             console.log('================================================================')
             console.log(`====================== 交易任务完成 ==============================`)
@@ -320,58 +318,31 @@ combineLatestObserver
 
     console.log(`========== 交易条件满足，开始 ${timeCount + 1} / ${steps} =========`)
 
-    if ((offset === 0) || (currentVolume >= thisStepVolume)) {
-        console.log(`现有 ${ticker} ${PosDirection[TARGET_DIRECTION]} ${currentVolume},
-        其中 昨 ${currentYesVolume}, 今 ${currentTodayVolume},
-        还需 ${OPERATION_NAME} ${total}, 本次需 ${OPERATION_NAME} ${thisStepVolume}`)
-        if (+thisStepVolume > 0) {
-            if (offset === 0) {
-                reqMakeOrder({ ...argv, volume: thisStepVolume }, quote, unfinishedSteps)    
-            } else if (!sellToday) {
-                reqMakeOrder({ ...argv, volume: thisStepVolume }, quote, unfinishedSteps)    
-            } else if (thisStepVolume <= currentYesVolume) {
-                reqMakeOrder({ ...argv, volume: thisStepVolume }, quote, unfinishedSteps)    
-            } else if (currentYesVolume > 0) { //昨今都有
-                const thisStepTodayVolume = +Number(thisStepVolume - currentYesVolume).toFixed(0);
-                console.log(`[Extra] 平昨 ${currentYesVolume}`)
-                reqMakeOrder({ ...argv, offset: 3, volume: currentYesVolume }, quote, unfinishedSteps)    
-                console.log(`[Extra] 平今 ${thisStepTodayVolume}`)
-                reqMakeOrder({ ...argv, offset: 2, volume: thisStepTodayVolume }, quote, unfinishedSteps)    
-            } else { //只有今
-                console.log(`[Extra] 平今 ${thisStepVolume}`)
-                reqMakeOrder({ ...argv, offset: 2, volume: thisStepVolume }, quote, unfinishedSteps) 
-            }
-        }
-    } else {
-        const deltaVolume = +Number(thisStepVolume - currentVolume).toFixed(0);
-        const contOperationName = makeOrderDirectionType(side, 0).n;
-        console.log(`现有 ${ticker}${PosDirection[TARGET_DIRECTION]} ${currentVolume}, ${PosDirection[TARGET_DIRECTION_CONT]} ${currentVolumeCont}
-            其中 昨 ${currentYesVolume}, 今 ${currentTodayVolume},
-            还需 ${OPERATION_NAME} ${total}, 本次需 ${OPERATION_NAME} ${thisStepVolume}, 
-            持仓不足, 需 ${OPERATION_NAME} ${currentVolume}, ${contOperationName} ${deltaVolume},
-        `)
+    const tradeTargetList: Array<TradeTarget> = buildTradeTaskVolumeOffset({
+        ticker,
+        side,
+        offset,
+        currentVolume,
+        currentYesVolume,
+        currentTodayVolume,
+        currentVolumeCont,
+        thisStepVolume,
+        total,
+        OPERATION_NAME,
+        TARGET_DIRECTION,
+        TARGET_DIRECTION_CONT
+    })
 
-        if (+currentVolume > 0) {
-            if (!sellToday) {
-                reqMakeOrder({ ...argv, volume: currentVolume }, quote, unfinishedSteps)    
-            } else if (currentVolume <= currentYesVolume) {
-                reqMakeOrder({ ...argv, volume: currentVolume }, quote, unfinishedSteps)    
-            } else if (currentYesVolume > 0) { //昨今都有
-                const thisStepTodayVolume = +Number(currentVolume - currentYesVolume).toFixed(0);
-                console.log(`[Extra] 平昨 ${currentYesVolume}`)
-                reqMakeOrder({ ...argv, offset: 3, volume: currentYesVolume }, quote, unfinishedSteps)    
-                console.log(`[Extra] 平今 ${thisStepTodayVolume}`)
-                reqMakeOrder({ ...argv, offset: 2, volume: thisStepTodayVolume }, quote, unfinishedSteps)    
-            } else { //只有今
-                console.log(`[Extra] 平今 ${currentVolume}`)
-                reqMakeOrder({ ...argv, offset: 2, volume: currentVolume }, quote, unfinishedSteps) 
-            }
-        } 
-
-        if (+deltaVolume > 0) {
-            reqMakeOrder({ ...argv, offset: 0, volume: deltaVolume }, quote, unfinishedSteps)    
+    tradeTargetList.forEach((target: TradeTarget) => {
+        const { offset, volume } = target;
+        if (+offset === 2) {
+            console.log(`[Extra] 平今 ${volume}`)
+        } else if (+offset === 3) {
+            console.log(`[Extra] 平昨 ${volume}`)
         }
-    }
+
+        reqMakeOrder({ ...argv, offset, volume }, quote, unfinishedSteps)    
+    })
 
     console.log(`============ 已完成执行 ${timeCount + 1} / ${steps} ==============`)    
     dealedTimeCount = timeCount; //此时记录下来
