@@ -1,5 +1,5 @@
 
-import { InstrumentTypes, aliveOrderStatusList, ExchangeIds, SideName, OffsetName } from 'kungfu-shared/config/tradingConfig';
+import { InstrumentTypes, InstrumentTypeWithDetail, aliveOrderStatusList, ExchangeIds, SideName, OffsetName } from 'kungfu-shared/config/tradingConfig';
 
 export const transformArrayToObjectByKey = (targetList: Array<any>, keys: Array<string>): any => {
     let data: any = {};
@@ -165,7 +165,8 @@ export const reqCancelOrder = (parentId: string) => {
     })
 }
 
-function dealMakeOrderVolume (instrumentType: number, volume: number) {
+// stock 最小下单单位为100
+function dealMakeOrderVolume (instrumentType: number, volume: number): number {
     //stock 100的倍数
     const scale100 = Object.keys(InstrumentTypes)
         .filter(key => {
@@ -173,8 +174,10 @@ function dealMakeOrderVolume (instrumentType: number, volume: number) {
             return false;
         })
         .map(key => +InstrumentTypes[key])
+
+    const isStock = scale100.includes(+instrumentType);
     
-    if (scale100.includes(+instrumentType)) {
+    if (isStock) {
         const scale = +Number(volume / 100).toFixed(0)
         const scaleResolved = scale < 1 ? 1 : scale;
         return scaleResolved * 100
@@ -211,6 +214,7 @@ export const calcVolumeThisStep = (
     const pos = positions[`${TICKER}_${TARGET_DIRECTION}`] || {};
     const posCont = positions[`${TICKER}_${TARGET_DIRECTION_CONT}`] || {};
     const currentVolume = +pos.totalVolume || 0;
+    const { yesterdayVolume, todayVolume } = pos || {};
     const currentVolumeCont = +posCont.totalVolume || 0;
     const currentVolumeData: any = {
         [+TARGET_DIRECTION]: currentVolume,
@@ -246,9 +250,11 @@ export const calcVolumeThisStep = (
 
     return {
         currentVolume,
+        currentYesVolume: yesterdayVolume,
+        currentTodayVolume: todayVolume,
         currentVolumeCont,
         total: totalTargetVolume,
-        thisStepVolume: dealMakeOrderVolume( instrumentType, targetVolumeByStep)
+        thisStepVolume: dealMakeOrderVolume(instrumentType, targetVolumeByStep)
     }
 }
 
@@ -318,3 +324,7 @@ export const getCurrentCount = ({
     }
     return currentCount
 };
+
+export const getTickerAbleToCloseTodayByInstrumentType = (instrumentType: number) => {
+    return InstrumentTypeWithDetail[instrumentType].sellToday
+}

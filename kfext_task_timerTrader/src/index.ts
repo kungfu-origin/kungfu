@@ -12,7 +12,8 @@ import {
     reqCancelOrder,
     calcVolumeThisStep,
     timeCheckBySecond,
-    getCurrentCount
+    getCurrentCount,
+    getTickerAbleToCloseTodayByInstrumentType
 } from './assets/utils';
 
 
@@ -293,8 +294,9 @@ combineLatestObserver
     //============================= 交易环节 start =============================
     //制定本次交易计划
     const instrumentType = quote.instrumentTypeOrigin;
+    const sellToday = getTickerAbleToCloseTodayByInstrumentType(instrumentType)
     const unfinishedSteps = resolveUnfinishedSteps(steps - timeCount);
-    const { total, thisStepVolume, currentVolume, currentVolumeCont }  = calcVolumeThisStep(
+    const { total, thisStepVolume, currentVolume, currentYesVolume, currentTodayVolume, currentVolumeCont }  = calcVolumeThisStep(
         positions,
         TICKER,
         TARGET_DIRECTION,
@@ -320,20 +322,50 @@ combineLatestObserver
 
     if ((offset === 0) || (currentVolume >= thisStepVolume)) {
         console.log(`现有 ${ticker} ${PosDirection[TARGET_DIRECTION]} ${currentVolume},
+        其中 昨 ${currentYesVolume}, 今 ${currentTodayVolume},
         还需 ${OPERATION_NAME} ${total}, 本次需 ${OPERATION_NAME} ${thisStepVolume}`)
         if (+thisStepVolume > 0) {
-            reqMakeOrder({ ...argv, volume: thisStepVolume }, quote, unfinishedSteps)    
+            if (offset === 0) {
+                reqMakeOrder({ ...argv, volume: thisStepVolume }, quote, unfinishedSteps)    
+            } else if (!sellToday) {
+                reqMakeOrder({ ...argv, volume: thisStepVolume }, quote, unfinishedSteps)    
+            } else if (thisStepVolume <= currentYesVolume) {
+                reqMakeOrder({ ...argv, volume: thisStepVolume }, quote, unfinishedSteps)    
+            } else if (currentYesVolume > 0) { //昨今都有
+                const thisStepTodayVolume = +Number(thisStepVolume - currentYesVolume).toFixed(0);
+                console.log(`[Extra] 平昨 ${currentYesVolume}`)
+                reqMakeOrder({ ...argv, offset: 3, volume: currentYesVolume }, quote, unfinishedSteps)    
+                console.log(`[Extra] 平今 ${thisStepTodayVolume}`)
+                reqMakeOrder({ ...argv, offset: 2, volume: thisStepTodayVolume }, quote, unfinishedSteps)    
+            } else { //只有今
+                console.log(`[Extra] 平今 ${thisStepVolume}`)
+                reqMakeOrder({ ...argv, offset: 2, volume: thisStepVolume }, quote, unfinishedSteps) 
+            }
         }
     } else {
         const deltaVolume = +Number(thisStepVolume - currentVolume).toFixed(0);
         const contOperationName = makeOrderDirectionType(side, 0).n;
         console.log(`现有 ${ticker}${PosDirection[TARGET_DIRECTION]} ${currentVolume}, ${PosDirection[TARGET_DIRECTION_CONT]} ${currentVolumeCont}
+            其中 昨 ${currentYesVolume}, 今 ${currentTodayVolume},
             还需 ${OPERATION_NAME} ${total}, 本次需 ${OPERATION_NAME} ${thisStepVolume}, 
             持仓不足, 需 ${OPERATION_NAME} ${currentVolume}, ${contOperationName} ${deltaVolume},
         `)
 
         if (+currentVolume > 0) {
-            reqMakeOrder({ ...argv, volume: currentVolume }, quote, unfinishedSteps)    
+            if (!sellToday) {
+                reqMakeOrder({ ...argv, volume: currentVolume }, quote, unfinishedSteps)    
+            } else if (currentVolume <= currentYesVolume) {
+                reqMakeOrder({ ...argv, volume: currentVolume }, quote, unfinishedSteps)    
+            } else if (currentYesVolume > 0) { //昨今都有
+                const thisStepTodayVolume = +Number(currentVolume - currentYesVolume).toFixed(0);
+                console.log(`[Extra] 平昨 ${currentYesVolume}`)
+                reqMakeOrder({ ...argv, offset: 3, volume: currentYesVolume }, quote, unfinishedSteps)    
+                console.log(`[Extra] 平今 ${thisStepTodayVolume}`)
+                reqMakeOrder({ ...argv, offset: 2, volume: thisStepTodayVolume }, quote, unfinishedSteps)    
+            } else { //只有今
+                console.log(`[Extra] 平今 ${currentVolume}`)
+                reqMakeOrder({ ...argv, offset: 2, volume: currentVolume }, quote, unfinishedSteps) 
+            }
         } 
 
         if (+deltaVolume > 0) {

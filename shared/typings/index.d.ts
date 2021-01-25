@@ -34,6 +34,11 @@ interface NumberToStringObject {
     [propName: number]: string;
 }
 
+interface NumberToAnyObject {
+    [propName: number]: any;
+}
+
+
 interface StringToStringObject {
     [propName: string]: string;
 }
