@@ -31,7 +31,7 @@ export default {
         };
     },
     mounted() {
-        const t = this;
+        
     },
 
     computed: {
@@ -44,25 +44,23 @@ export default {
 
     watch: {
         async currentFile(newFile) {
-            const t = this;
             const filePath = newFile.filePath;
             
-            if (t.currentFile.isDir) return; 
+            if (this.currentFile.isDir) return; 
 
-            t.clearState(); // 清空状态
-            t.file = newFile;
+            this.clearState(); // 清空状态
+            this.file = newFile;
             const codeText = await CODE_UTILS.getCodeText(filePath);
             
-            await t.$nextTick();
-            t.editor = t.buildEditor(t.editor, t.file, codeText);
+            await this.$nextTick();
+            this.editor = this.buildEditor(this.editor, this.file, codeText);
 
-            await t.$nextTick();
-            t.updateSpaceTab(t.code)
-            t.bindBlur(t.editor, t.file)
+            await this.$nextTick();
+            this.updateSpaceTab(this.code)
+            this.bindBlur(this.editor, this.file)
         },
 
         fileTree(newTree, oldTree) {
-            const t = this;
             const newRootPath = Object.values(newTree).map(tree => {
                 if (tree.root) return tree.filePath;
             })[0];
@@ -70,31 +68,28 @@ export default {
                 if (tree.root) return tree.filePath;
             })[0];
             if (newRootPath != oldRootPath) {
-                t.file = null;
-                t.editor = null;
+                this.file = null;
+                this.editor = null;
             }
         },
 
         code(spaceTabSetting) {
-            const t = this;
-            t.updateSpaceTab(spaceTabSetting || {})
+            this.updateSpaceTab(spaceTabSetting || {})
         }
     },
 
     methods: {
         //创建或更新editor
         buildEditor(editor, file, codeText){
-            const t = this;
             if(!editor){
-                return t.createEditor(file, codeText)
+                return this.createEditor(file, codeText)
             }else{
-                return t.updateEditor(t.editor, file, codeText)
+                return this.updateEditor(this.editor, file, codeText)
             }
         },
 
         //如果不存在editor，新建
         createEditor(file, codeText) {
-            const t = this;
             if (document.getElementById("editor-content")) {
                     document.getElementById("editor-content").innerHTML = "";
                     const fileLanguage = languageJSON[file.ext] || 'plaintext';
@@ -131,9 +126,8 @@ export default {
         },
 
         bindBlur(editor, file){
-            const t = this;
             editor !== null && editor.onDidBlurEditorText(e => {
-                t.writeFile(editor, file)
+                this.writeFile(editor, file)
             });
         },
 
@@ -143,30 +137,28 @@ export default {
         },
 
         clearState(){
-            const t = this;
-            t.editor = null;
-            t.file = null;
+            this.editor && this.editor.dispose();
+            this.editor = null;
+            this.file = null;
         },
 
         updateSpaceTab(spaceTabSetting) {
-            const t = this;
             const type = spaceTabSetting.tabSpaceType || 'spaces';
-            const size = spaceTabSetting.tabSpaceSize || 4;
+
+            if(!this.editor) return;
             
-            if(!t.editor) return;
-            
-            const model = t.editor.getModel()
+            const model = this.editor.getModel()
             if(type.toLowerCase() === 'spaces') {
                 model.updateOptions({
                     insertSpaces: true,
-                    indentSize: t.code.tabSpaceSize,
-                    tabSize: t.code.tabSpaceSize,
+                    indentSize: spaceTabSetting.tabSpaceSize,
+                    tabSize: spaceTabSetting.tabSpaceSize,
                 })
             } else if (type.toLowerCase() === 'tabs') {
                 model.updateOptions({
                     insertSpaces: false,
-                    indentSize: t.code.tabSpaceSize,
-                    tabSize: t.code.tabSpaceSize,
+                    indentSize: spaceTabSetting.tabSpaceSize,
+                    tabSize: spaceTabSetting.tabSpaceSize,
                 })
             }
         }
@@ -174,7 +166,6 @@ export default {
 };
 
 function pythonProvideCompletionItems (model, position, context, token) {
-
     const lastChars = model.getValueInRange({
         startLineNumber: position.lineNumber,
         startColumn: 0,
