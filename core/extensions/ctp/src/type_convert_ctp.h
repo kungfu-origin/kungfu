@@ -196,7 +196,7 @@ inline void from_ctp(const CThostFtdcDepthMarketDataField &ori, Quote &des) {
   strcpy(des.instrument_id, ori.InstrumentID);
   des.instrument_type = InstrumentType::Future;
   if (strcmp(des.exchange_id, "DCE") == 0){
-      const auto today = kungfu::yijinjing::time::strfnow("%Y-%m-%d");
+      const auto today = kungfu::yijinjing::time::strfnow("%Y%m%d");
       des.data_time = nsec_from_ctp_time(today.c_str(), ori.UpdateTime, ori.UpdateMillisec);
   } else {
       des.data_time = nsec_from_ctp_time(ori.ActionDay, ori.UpdateTime, ori.UpdateMillisec);
