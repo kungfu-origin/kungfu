@@ -8,7 +8,7 @@ import { killExtra } from '__gUtils/processUtils';
 import { logger } from '__gUtils/logUtils';
 import { platform } from '__gConfig/platformConfig';
 import { openUrl, openSettingDialog, showKungfuInfo, killAllBeforeQuit, showQuitMessageBox } from './utils';
-import { KF_HOME, KUNGFU_ENGINE_PATH, BASE_DB_DIR } from '__gConfig/pathConfig';
+import { KF_HOME, KUNGFU_ENGINE_PATH, BASE_DB_DIR, LOG_DIR } from '__gConfig/pathConfig';
 
 const path = require('path');
 const { app, globalShortcut, BrowserWindow, Menu, shell } = electron
@@ -199,12 +199,12 @@ function setMenu() {
 			{ label: "全选", accelerator: "CmdOrCtrl+A", role: "selectall" }
 		]
 	},{
-		label: "文件",
+		label: "打开",
 		submenu: [
 			{ label: "打开功夫资源目录（KF_HOME）", accelerator: "CmdOrCtrl+Shift+H",  click: () => shell.showItemInFolder(KF_HOME) },
 			{ label: "打开功夫安装目录",	 	   accelerator: "CmdOrCtrl+Shift+A", click: () => shell.showItemInFolder(app.getAppPath()) },			
 			{ label: "打开功夫引擎目录", 		   accelerator: "CmdOrCtrl+Shift+E", click: () => shell.showItemInFolder(KUNGFU_ENGINE_PATH) },			
-			{ label: "打开功夫基础配置DB目录", 		accelerator: "CmdOrCtrl+Shift+D", click: () => shell.showItemInFolder(BASE_DB_DIR) },			
+			{ label: "打开功夫基础配置DB", 		accelerator: "CmdOrCtrl+Shift+D", click: () => shell.showItemInFolder(path.join(BASE_DB_DIR, 'config.db')) },			
 			{ label: "打开功夫日志目录", 		   accelerator: "CmdOrCtrl+Shift+L", click: () => shell.showItemInFolder(LOG_DIR) },			
 		]
 	},{
@@ -224,11 +224,11 @@ function setMenu() {
 
 
 process.on('uncaughtException', err => {
-	console.log(err, '====')
+	console.log(err)
     logger.error('[MASTER] Error caught in uncaughtException event:', err);
 });
 
 process.stderr.on('data', err => {
-	console.log(err, '----')
+	console.log(err)
     logger.error('[MASTER] Error caught in stderr event:', err);
 })
