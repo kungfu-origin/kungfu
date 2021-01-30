@@ -43,13 +43,13 @@
     "bindings": "^1.5.0",
     "fs-extra": "7.0.1",
     "glob": "^7.1.6",
-    "node-pre-gyp": "^0.17.0",
-    "nan": "^2.14.0",
-    "node-addon-api": "==2.0.0"
+    "node-pre-gyp": "0.17.0",
+    "nan": "2.14.2",
+    "node-addon-api": "2.0.2"
   },
   "devDependencies": {
-    "cmake-js": "==6.1.0",
-    "cross-env": "^5.0.5",
-    "cross-var": "^1.1.0"
+    "cross-env": "^5.2.0",
+    "cross-var": "^1.1.0",
+    "cmake-js": "6.1.0"
   }
 }

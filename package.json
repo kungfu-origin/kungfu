@@ -23,7 +23,11 @@
     "clean": "yarn wsrun clean"
   },
   "dependencies": {
+    "wsrun": "^5.0.0",
+    "cross-env": "1.0.0",
+    "cross-var": "1.0.0",
     "nan": "0.3.0",
-    "wsrun": "^5.0.0"
+    "node-gyp": "^7.0.0",
+    "node-pre-gyp": "^0.11.0"
   }
 }
