@@ -97,7 +97,7 @@ const TIMER_COUNT_OBSERVER = (): Observable<TimeCountData> => new Observable((su
             second: currentSecond
         })
     
-    }, 100)
+    }, 50)
 })
 
 const PROCESS_MSG_OBSERVER = (): Observable<ProcPayload> => new Observable(subscriber => {
@@ -301,7 +301,7 @@ combineLatestObserver
                     console.log('[<=50ms] 最后一步强制执行')
                     return true
                 }
-                
+
                 return false
             } 
             
