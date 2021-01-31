@@ -115,6 +115,7 @@
         "key": "steps",
         "name": "总次数",
         "type": "int",
+        "tip": "将以总次数均分总时长，建议保证每步间隔不能太短（>500ms）",
         "required": true
       },
       {

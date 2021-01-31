@@ -1,4 +1,5 @@
 
+import moment from 'moment';
 import { InstrumentTypes, aliveOrderStatusList, ExchangeIds, SideName, OffsetName, PosDirection } from 'kungfu-shared/config/tradingConfig';
 
 export const transformArrayToObjectByKey = (targetList: Array<any>, keys: Array<string>): any => {
@@ -163,6 +164,7 @@ export const reqCancelOrder = (parentId: string) => {
             }
         }
     })
+    console.log(`[撤单] PARENTID: ${parentId}`)        
 }
 
 // stock 最小下单单位为100
@@ -300,19 +302,19 @@ export const getCurrentCount = ({
     currentTimestamp, 
     deltaMilliSeconds,
     finishTime,
-    loopInterval,
+    LOOP_INTERVAL,
     LAST_SINGULARITY_SECOND,
     LAST_STEP_COUNT
 }: {
     currentTimestamp: number; 
     deltaMilliSeconds: number;
     finishTime: number;
-    loopInterval: number;
+    LOOP_INTERVAL: number;
     LAST_SINGULARITY_SECOND: number;
     LAST_STEP_COUNT: number
 }) => {
     const deltaCurrentToFinishTime = finishTime - currentTimestamp;
-    const currentCount = Math.floor(deltaMilliSeconds / loopInterval)
+    const currentCount = Math.floor(deltaMilliSeconds / LOOP_INTERVAL)
     if (LAST_SINGULARITY_SECOND) {
         if (deltaCurrentToFinishTime <= LAST_SINGULARITY_SECOND) {
             return LAST_STEP_COUNT
@@ -420,4 +422,31 @@ function buildTradeTaskLog (
         还需 ${OPERATION_NAME} ${total}, 本次需 ${OPERATION_NAME} ${thisStepVolume}, 
         ${countOperation}`
     )
+}
+
+export function getCurrentTimestamp (format = false): number | string {
+    if (format) {
+        return moment().format('HH:mm:ss.SSS')
+    }
+    return +new Date().getTime()
+}
+
+
+
+export function getCancelOrderBeforeLastStepControllerTime (finishTime: number, lastStepInterval: number, lastestMakeOrdertimeStamp: number): number {
+    return +Number(((finishTime - lastestMakeOrdertimeStamp - lastStepInterval) / 2) + lastStepInterval).toFixed(0)
+}
+
+export const printQuote = (quote: QuoteData): void => {
+    if (quote) {
+        console.log(`[行情价格]
+        [标的] ${quote.instrumentId}
+        [卖价] ${JSON.stringify(quote.askPrices)} 
+        [买价] ${JSON.stringify(quote.bidPrices)}
+        [涨停价格] ${quote.upperLimitPrice} 
+        [跌停价格] ${quote.lowerLimitPrice} 
+        [最高价] ${quote.highPrice}
+        [最低价] ${quote.lowPrice}
+        [最新价] ${quote.lastPrice}`)
+    }
 }
