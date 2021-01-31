@@ -298,6 +298,7 @@ combineLatestObserver
 
                 //如果离最后截止时间小于50ms，也全部执行
                 if ( finishTime - +getCurrentTimestamp() <= 50) {
+                    console.log('[<=50ms] 最后一步强制执行')
                     return true
                 }
                 return false
