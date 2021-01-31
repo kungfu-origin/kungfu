@@ -93,7 +93,6 @@
     "node-loader": "^0.6.0",
     "node-sass": "^4.12.0",
     "optimize-js-plugin": "^0.0.4",
-    "physical-cpu-count": "^2.0.0",
     "preload-webpack-plugin": "^2.3.0",
     "require-dir": "^1.0.0",
     "rimraf": "^2.6.3",

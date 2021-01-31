@@ -9,8 +9,6 @@
 
 //@ts-ignore
 import * as taskkill from 'taskkill';
-//@ts-ignore
-import * as physicalCpuCount from 'physical-cpu-count';
 
 import { KF_HOME, KUNGFU_ENGINE_PATH, KF_CONFIG_PATH, buildProcessLogPath } from '__gConfig/pathConfig';
 import { platform } from '__gConfig/platformConfig';
@@ -21,6 +19,7 @@ import { getProcesses } from 'getprocesses';
 
 
 const path = require('path');
+const numCPUs = require('os').cpus() ? require('os').cpus().length : 1;
 const fkill = require('fkill');
 const pm2 = require('pm2');
 
@@ -167,7 +166,7 @@ export const describeProcess = (name: string): Promise<any> => {
 function getRocketParams(name: String, ifRocket: Boolean) {
     let rocket = ifRocket ? '-x' : '';
     if ((name === 'master') || (name === 'ledger')) {
-        if (physicalCpuCount <= 4) {
+        if (numCPUs <= 4) {
             rocket = '';
         }
     }
