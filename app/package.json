@@ -22,14 +22,14 @@
   "scripts": {
     "install-deps": "electron-builder install-app-deps",
     "clean": "rimraf ./dist/* ./build/*",
-    "build": "yarn run dist && electron-builder -c .electron-builder/release.json",
-    "build-cli": "yarn run dist && electron-builder -c .electron-builder/release.json --config.productName=Kungfu-CLI",
-    "build-pro": "yarn run dist && electron-builder -c .electron-builder/pro.json",
-    "dev": "node .electron-kungfu/dev-runner.js",
+    "test": " node .electron-builder/build.js",
     "dist": "node --max_old_space_size=8192 .electron-kungfu/build.js",
+    "build":     "yarn run dist && node .electron-builder/build.js",
+    "build-cli": "yarn run build --cli",
+    "build-pro": "yarn run build --pro",
+    "dev": "node .electron-kungfu/dev-runner.js",
     "dist:main": "cross-env NODE_ENV=production node --max_old_space_size=8192 ../node_modules/webpack/bin/webpack.js --config .electron-kungfu/webpack.main.config.js",
-    "dist:render": "cross-env NODE_ENV=production node --max_old_space_size=8192 ../node_modules/webpack/bin/webpack.js --config .electron-kungfu/webpack.renderer.config.js",
-    "test": " mocha"
+    "dist:render": "cross-env NODE_ENV=production node --max_old_space_size=8192 ../node_modules/webpack/bin/webpack.js --config .electron-kungfu/webpack.renderer.config.js"
   },
   "dependencies": {
     "fkill": "^6.1.0",
