@@ -51,11 +51,13 @@ switch (target) {
             "from": path.join(__dirname, '..', '..', 'kfext_tora', 'build', 'dist'),
             "to": "kfc/kungfu_extensions/tora"
         })
+        break
     case 'shengli':
         baseConfig.extraResources.push({
             "from": path.join(__dirname, '..', '..', 'kfext_shengli', 'build', 'dist'),
             "to": "kfc/kungfu_extensions/shengli"
         })
+        break
 }
 
 baseConfig.artifactName = resolveArtifactName(cli, pro, target)
