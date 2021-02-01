@@ -31,7 +31,7 @@ if (target) {
         value: 'kfc'
     }])
     
-    if (targetIndex) {
+    if (targetIndex >= 0) {
         baseConfig.extraResources[targetIndex] = {
             "from": "../core/build/kfc",
             "to": "kfc",
