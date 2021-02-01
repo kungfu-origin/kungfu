@@ -26,7 +26,7 @@
     "host": "https://kungfu.s3.cn-northwest-1.amazonaws.com.cn"
   },
   "scripts": {
-    "install": "node-pre-gyp install --fallback-to-build",
+    "install": "cross-var node node/node-pre-gyp.js install --build-type $npm_package_config_buildtype",
     "build": "node-pre-gyp configure build package",
     "build-cli": "node-pre-gyp configure build package",
     "pipenv-install": "cross-var pipenv --pypi-mirror $npm_package_config_pypi --python $npm_package_config_python_version install",
@@ -41,15 +41,16 @@
   },
   "dependencies": {
     "bindings": "^1.5.0",
+    "cross-env": "^5.2.0",
+    "cross-var": "^1.1.0",
     "fs-extra": "7.0.1",
     "glob": "^7.1.6",
     "node-pre-gyp": "0.17.0",
     "nan": "2.14.2",
-    "node-addon-api": "2.0.2"
+    "node-addon-api": "2.0.2",
+    "yargs": "^16.2.0"
   },
   "devDependencies": {
-    "cross-env": "^5.2.0",
-    "cross-var": "^1.1.0",
     "cmake-js": "6.1.0"
   }
 }
