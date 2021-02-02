@@ -23,7 +23,7 @@ const argv = minimist(process.argv.slice(2), {
     string: 'ticker',
     boolean: 'lastSingularity',
 })
-const { ticker, side, offset, volume, steps, triggerTime, finishTime, exchangeId, parentId, accountId, lastSingularity, lastSingularityMilliSecond } = argv;
+const { ticker, side, offset, volume, steps, triggerTime, finishTime, exchangeId, parentId, accountId, lastSingularity, lastSingularityMilliSecond, maxLotByStep } = argv;
 const triggerTimeStr = moment(triggerTime).format('YYYYMMDD HH:mm:ss');
 const finishTimeStr = moment(finishTime).format('YYYYMMDD HH:mm:ss');
 const LOOP_INTERVAL = Math.ceil((finishTime - triggerTime) / steps);
@@ -365,7 +365,14 @@ combineLatestObserver
                 console.log(`[Extra] 平昨 ${volume}`)
             }
 
-            reqMakeOrder({ ...argv, offset, volume }, quote, unfinishedSteps)  
+            if (+maxLotByStep > 0) {
+                splitMakeOrderStep(maxLotByStep, volume, (stepVolume: number) => {
+                    reqMakeOrder({ ...argv, offset, volume: stepVolume }, quote, unfinishedSteps)  
+                })
+            } else {
+                reqMakeOrder({ ...argv, offset, volume }, quote, unfinishedSteps)  
+            }
+
             console.log(`[下单时间] ${getCurrentTimestamp(true)}`)  
         })
 
@@ -386,8 +393,6 @@ function resolveUnfinishedSteps (unfinishiedSteps: number) {
     return unfinishiedSteps
 }
 
-
-
 function handleFinished (quote: QuoteData, printQuote: Function) {
     console.log(`====================== 时间截止，交易结束 ======================`)
     console.log('[收盘]')
@@ -395,4 +400,13 @@ function handleFinished (quote: QuoteData, printQuote: Function) {
     secondsCounterTimer && clearInterval(secondsCounterTimer)
     reqTradingDataTimer && clearInterval(reqTradingDataTimer)
     process.exit(0)
+}
+
+function splitMakeOrderStep (limit: number, total: number, cb: Function ) {
+    let left = total;
+    while (left > limit) {
+        left = left - limit
+        cb && cb(limit)
+    }
+    cb && cb(left)
 }

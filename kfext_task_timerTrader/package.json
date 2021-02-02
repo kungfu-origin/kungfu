@@ -119,6 +119,14 @@
         "required": true
       },
       {
+        "key": "maxLotByStep",
+        "name": "单次最大手数",
+        "type": "int",
+        "tip": "各个交易所不同，默认100",
+        "required": true,
+        "default": 100
+      },
+      {
         "key": "lastSingularity",
         "name": "临界下单",
         "type": "bool",
