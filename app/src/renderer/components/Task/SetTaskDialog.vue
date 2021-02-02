@@ -23,7 +23,7 @@
                     v-model="postFormList[index]"
                     :configList="item.config"
                     :uniKey="item.uniKey || ''"
-                    labelWidth="100px"
+                    labelWidth="110px"
                     :method="method"
                 ></ExtConfigForm>
             </el-tab-pane>
