@@ -19,6 +19,7 @@ using namespace kungfu::longfist::enums;
 using namespace kungfu::longfist::types;
 using namespace kungfu::yijinjing;
 using namespace kungfu::yijinjing::data;
+using namespace kungfu::node;
 
 namespace kungfu::node {
 Napi::Value FormatTime(const Napi::CallbackInfo &info) {
@@ -67,6 +68,6 @@ Napi::Object InitAll(Napi::Env env, Napi::Object exports) {
 
   return exports;
 }
+} // namespace kungfu::node
 
 NODE_API_MODULE(addon, InitAll)
-} // namespace kungfu::node
