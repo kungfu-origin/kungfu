@@ -100,9 +100,7 @@ export const killExtra = () => kfKill([kfc, 'pm2'])
 const pm2Connect = (): Promise<void> => {
     return new Promise((resolve, reject) => {
         try {
-            let noDaemon = platform === 'win' ? true : false
-            if (process.env.NODE_ENV !== 'production') noDaemon = false;
-            pm2.connect(noDaemon, (err: any): void => {
+            pm2.connect(false, (err: any): void => {
                 if (err) {
                     err = err.length ? err[0] : err;
                     logger.error('[pm2Connect]', err);
