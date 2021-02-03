@@ -24,7 +24,7 @@
     "clean": "rimraf ./dist/* ./build/*",
     "test": " node .electron-builder/build.js",
     "dist": "node --max_old_space_size=2048 .electron-kungfu/build.js",
-    "build":     "yarn run dist && node .electron-builder/build.js",
+    "build": "yarn run dist && node .electron-builder/build.js",
     "build-cli": "yarn run build --cli",
     "build-pro": "yarn run build --pro",
     "dev": "node .electron-kungfu/dev-runner.js",
@@ -39,6 +39,7 @@
     "pm2": "3.5.2"
   },
   "devDependencies": {
+    "debug": "3.1",
     "@types/node": "^12.6.2",
     "aws-sdk": "^2.395.0",
     "babel-loader": "^7.1.1",
