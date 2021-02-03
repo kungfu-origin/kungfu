@@ -5,7 +5,7 @@
   "main": "lib/index.js",
   "scripts": {
     "install-deps": "node -v",
-    "dist": "cross-env NODE_ENV=production node --max_old_space_size=8192 ../node_modules/webpack/bin/webpack.js --progress --colors --config .build/webpack.ext.config.js",
+    "dist": "cross-env NODE_ENV=production node --max_old_space_size=2048 ../node_modules/webpack/bin/webpack.js --progress --colors --config .build/webpack.ext.config.js",
     "build": "node ./.build/build.js && yarn run cp",
     "build-cli": "yarn run build",
     "build-win": " yarn run dist && pkg . -t=node10.17-win-x64 --output=build/ext/index",
