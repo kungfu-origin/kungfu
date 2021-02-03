@@ -20,5 +20,3 @@ dotted_dict = "==1.1.2"
 plotly = "==4.0.0"
 wcwidth = "==0.2.2"
 PyYAML = "==5.3.1"
-backtrader = "==1.9.75.123"
-
