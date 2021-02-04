@@ -184,7 +184,7 @@ function parseScriptName () {
 
 export const startTask = (options: any) => {
     const script = parseScriptName();
-    const optionsResolved = {
+    let optionsResolved = {
         "logType": "json",
         "output": buildProcessLogPath(options.name),
         "error": buildProcessLogPath(options.name),
@@ -195,11 +195,15 @@ export const startTask = (options: any) => {
         "watch": false,
         "force": true,
         "execMode": "fork",
+        "interpreter": process.execPath,
         "killTimeout": 16000,
         ...options,
         script
     }
 
+    if (process.env.NODE_ENV !== 'production') {
+        optionsResolved["interpreter"] = process.execPath
+    }
 
     return new Promise((resolve, reject) => {
         pm2Connect().then(() => {

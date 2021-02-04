@@ -4,7 +4,7 @@ const Common = require('pm2/lib/Common.js');
 const util = require('util');
 const debug = require('debug')('pm2:client');
 
-export function hackLaunchDaemon (opts: any, cb: Function, test: any) {
+export function hackLaunchDaemon (opts: any, cb: Function) {
     if (typeof(opts) == 'function') {
         cb = opts;
         opts = {
