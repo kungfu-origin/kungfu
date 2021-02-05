@@ -144,6 +144,23 @@ inline void from_xtp(const XTP_ORDER_STATUS_TYPE &xtp_order_status, OrderStatus 
   }
 }
 
+inline void from_xtp(XTPQSI *ticker_info, Instrument &quote) {
+  strcpy(quote.instrument_id, ticker_info->ticker);
+  if(ticker_info->exchange_id == 1)
+  {
+    quote.exchange_id = EXCHANGE_SSE;
+  }else if (ticker_info->exchange_id == 2)
+  {
+    quote.exchange_id = EXCHANGE_SZE;
+  }else
+  {
+    quote.exchange_id = "false_id";
+  }
+  quote.instrument_type = get_instrument_type(quote.exchange_id,quote.instrument_id);
+  quote.is_trading = true;
+  quote.price_tick = ticker_info->price_tick;
+}
+
 inline void from_xtp(const XTP_SIDE_TYPE &xtp_side, Side &side) {
   if (xtp_side == XTP_SIDE_BUY) {
     side = Side::Buy;
