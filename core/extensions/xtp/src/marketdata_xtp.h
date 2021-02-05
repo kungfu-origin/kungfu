@@ -158,7 +158,7 @@ public:
   ///查询可交易合约时发生错误时返回的错误信息，当error_info为空，或者error_info.error_id为0时，表明没有错误
   ///@param is_last
   ///是否此次查询可交易合约的最后一个应答，当为最后一个的时候为true，如果为false，表示还有其他后续消息响应
-  void OnQueryAllTickers(XTPQSI *ticker_info, XTPRI *error_info, bool is_last) override{};
+  void OnQueryAllTickers(XTPQSI *ticker_info, XTPRI *error_info, bool is_last) override;
 
   ///查询合约的最新价格信息应答
   ///@param ticker_info 合约的最新价格信息
