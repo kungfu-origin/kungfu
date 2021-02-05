@@ -64,6 +64,8 @@ export default {
 
     mounted(){
 
+        window.MAIN_RENDERED = true;
+
         this.removeLoadingMask();
         this.removeKeyDownEvent();
 

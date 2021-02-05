@@ -9,20 +9,21 @@
 
 //@ts-ignore
 import * as taskkill from 'taskkill';
-//@ts-ignore
-import * as physicalCpuCount from 'physical-cpu-count';
 
 import { KF_HOME, KUNGFU_ENGINE_PATH, KF_CONFIG_PATH, buildProcessLogPath } from '__gConfig/pathConfig';
 import { platform } from '__gConfig/platformConfig';
 import { logger } from '__gUtils/logUtils';
 import { readJsonSync } from '__gUtils/fileUtils';
+import { hackLaunchDaemon } from '__assets/hack';
 import { setTimerPromiseTask, delayMiliSeconds } from '__gUtils/busiUtils';
 import { getProcesses } from 'getprocesses';
 
 
 const path = require('path');
+const numCPUs = require('os').cpus() ? require('os').cpus().length : 1;
 const fkill = require('fkill');
 const pm2 = require('pm2');
+pm2.Client.__proto__.launchDaemon = hackLaunchDaemon
 
 export const _pm2 = pm2;
 
@@ -99,9 +100,7 @@ export const killExtra = () => kfKill([kfc, 'pm2'])
 const pm2Connect = (): Promise<void> => {
     return new Promise((resolve, reject) => {
         try {
-            let noDaemon = platform === 'win' ? true : false
-            if (process.env.NODE_ENV !== 'production') noDaemon = false;
-            pm2.connect(noDaemon, (err: any): void => {
+            pm2.connect(false, (err: any): void => {
                 if (err) {
                     err = err.length ? err[0] : err;
                     logger.error('[pm2Connect]', err);
@@ -167,7 +166,7 @@ export const describeProcess = (name: string): Promise<any> => {
 function getRocketParams(name: String, ifRocket: Boolean) {
     let rocket = ifRocket ? '-x' : '';
     if ((name === 'master') || (name === 'ledger')) {
-        if (physicalCpuCount <= 4) {
+        if (numCPUs <= 4) {
             rocket = '';
         }
     }
@@ -384,7 +383,7 @@ export const startMaster = async (force: boolean): Promise<any> => {
     const master = await describeProcess(processName);
     if (master instanceof Error) throw master
     const masterStatus = master.filter((m: any) => ((m || {}).pm2_env || {}).status === 'online')
-    if (!force && masterStatus.length === master.length && master.length !== 0) throw new Error('kungfu master正在运行！')
+    if (!force && masterStatus.length === master.length && master.length !== 0) throw new Error('kungfu master 正在运行！')
     try {
         await killKfc()
     } catch (err) {

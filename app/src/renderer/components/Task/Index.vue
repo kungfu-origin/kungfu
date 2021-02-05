@@ -171,7 +171,6 @@ export default {
         },
 
         handleOpenUpdateTaskDialog (data) {
-            console.log('parseArgs', data.args)
             this.setTaskMethod = 'update';
             this.setTaskInitData = minimist(data.args, { string: 'ticker', boolean: 'lastSingularity' })
             this.setTaskInitKey = this.getTaskConfigKeyFromProcessId(data.processId)

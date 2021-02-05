@@ -3,6 +3,7 @@ import Vuex from 'vuex'
 
 import { KF_CONFIG_PATH } from '__gConfig/pathConfig';
 import { readJsonSync, outputJsonSync } from '__gUtils/fileUtils';
+import { deepClone } from '__gUtils/busiUtils';
 
 Vue.use(Vuex)
 

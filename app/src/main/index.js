@@ -1,16 +1,17 @@
 
 // Modules to control application life and create native browser window
-const path = require('path');
-const { app, globalShortcut, BrowserWindow, Menu, dialog } = require('electron');
-const electron = require('electron');
-//base setting, init db
-const { initConfig } = require('__assets/base');
-const { killGodDaemon,  killExtra, killKfc, killKungfu } = require('__gUtils/processUtils');
-const { logger } = require('__gUtils/logUtils');
-const { platform } = require('__gConfig/platformConfig');
-const packageJSON = require('__root/package.json');
-const { KF_HOME, KUNGFU_ENGINE_PATH } = require('__gConfig/pathConfig');
+import electron from 'electron';
 
+//base setting, init db
+import { initConfig } from '__assets/base';
+import { killExtra } from '__gUtils/processUtils';
+import { logger } from '__gUtils/logUtils';
+import { platform } from '__gConfig/platformConfig';
+import { openUrl, openSettingDialog, showKungfuInfo, killAllBeforeQuit, showQuitMessageBox } from './utils';
+import { KF_HOME, KUNGFU_ENGINE_PATH, BASE_DB_DIR, LOG_DIR } from '__gConfig/pathConfig';
+
+const path = require('path');
+const { app, globalShortcut, BrowserWindow, Menu, shell } = electron
 
 //create db
 initConfig();
@@ -51,10 +52,19 @@ function createWindow () {
 	// in an array if your app supports multi windows, this is the time
 	// when you should delete the corresponding element.
 		if (platform !== 'mac' && !allowQuit) {
-			showQuitMessageBox();	
+			showQuitMessageBox(mainWindow)
+				.then(res => {
+					if (res) {
+						allowQuit = true;
+					}
+				})	
+				.catch(err => {
+					console.error(err)
+				})
 			e.preventDefault();
+		} else {
+			return
 		}
-		else return
 	})
 
 	mainWindow.on('crashed', () => {
@@ -137,14 +147,25 @@ app.on('will-quit', async (e) => {
 	if(allowQuit) return
 	if(process.env.APP_TYPE === 'test') {
 		try {
-			await killAllBeforeQuit()
+			allowQuit = true;
+			await killAllBeforeQuit(mainWindow)
 		} catch (err) {
 			console.error(err)
 		}
 		app.quit()
 		return;
 	}
-	if (platform === 'mac') showQuitMessageBox();
+	if (platform === 'mac') {
+		showQuitMessageBox(mainWindow)
+			.then(res => {
+				if (res) {
+					allowQuit = true;
+				}
+			})
+			.catch(err => {
+				console.error(err)
+			})
+	}
 	e.preventDefault()
 })
 
@@ -154,29 +175,40 @@ app.on('will-quit', async (e) => {
 function setMenu() {
     //添加快捷键
 	let applicationOptions = [
-		{ label: "About Kungfu", click: showKungfuInfo},
-		{ label: "Settings", accelerator: "CmdOrCtrl+,", click: openSettingDialog },
-		{ label: "Close", accelerator: "CmdOrCtrl+W", click: function() { BrowserWindow.getFocusedWindow().close() }}
+		{ label: "About Kungfu", click: () => showKungfuInfo()},
+		{ label: "Settings", accelerator: "CmdOrCtrl+,", click: () => openSettingDialog(mainWindow) },
+		{ label: "Close", accelerator: "CmdOrCtrl+W", click: () => BrowserWindow.getFocusedWindow().close()}
 	]
 
 	if(platform === 'mac') {
 		applicationOptions.push(
-			{ label: "Quit", accelerator: "Command+Q", click: function() { app.quit(); }},
+			{ label: "Quit", accelerator: "Command+Q", click: () => app.quit()},
 		)
 	}
 
 	const template = [
 	{
-		label: "Kungfu",
+		label: "功夫",
 		submenu: applicationOptions
-	},{
-		label: "Edit",
+	},,{
+		//此处必要，不然electron内使用复制粘贴会无效
+		label: "编辑",
 		submenu: [
-			{ label: "Copy", accelerator: "CmdOrCtrl+C", selector: "copy:" },
-			{ label: "Paste", accelerator: "CmdOrCtrl+V", selector: "paste:" },
+			{ label: "复制", accelerator: "CmdOrCtrl+C", selector: "copy:" },
+			{ label: "黏贴", accelerator: "CmdOrCtrl+V", selector: "paste:" },
+			{ label: "全选", accelerator: "CmdOrCtrl+A", role: "selectall" }
 		]
 	},{
-		label: "Help",
+		label: "打开",
+		submenu: [
+			{ label: "打开功夫资源目录（KF_HOME）", accelerator: "CmdOrCtrl+Shift+H",  click: () => shell.showItemInFolder(KF_HOME) },
+			{ label: "打开功夫安装目录",	 	   accelerator: "CmdOrCtrl+Shift+A", click: () => shell.showItemInFolder(app.getAppPath()) },			
+			{ label: "打开功夫引擎目录", 		   accelerator: "CmdOrCtrl+Shift+E", click: () => shell.showItemInFolder(KUNGFU_ENGINE_PATH) },			
+			{ label: "打开功夫基础配置DB", 		accelerator: "CmdOrCtrl+Shift+D", click: () => shell.showItemInFolder(path.join(BASE_DB_DIR, 'config.db')) },			
+			{ label: "打开功夫日志目录", 		   accelerator: "CmdOrCtrl+Shift+L", click: () => shell.showItemInFolder(LOG_DIR) },			
+		]
+	},{
+		label: "帮助",
 		submenu: [
 			{ label: "官网", accelerator: "", click: () => openUrl("https://www.kungfu-trader.com/") },
 			{ label: "用户手册", accelerator: "", click: () => openUrl("https://www.kungfu-trader.com/manual/")},
@@ -188,99 +220,15 @@ function setMenu() {
 	Menu.setApplicationMenu(Menu.buildFromTemplate(template))
 }
 
-function showKungfuInfo() {
-	const version = packageJSON.version;
-	const electronVersion = packageJSON.devDependencies.electron;
-	const info = `Version: ${version}\n`
-	+ `electron: ${electronVersion} \n`
-	+ `python: ${python_version}\n`
-	+ `platform: ${platform} \n`
-	+ `kungfu_home: ${KF_HOME} \n`
-	+ `kungfu_engine: ${path.resolve(KUNGFU_ENGINE_PATH, 'kfc')} \n`
-	+ `kungfu_resources: ${path.resolve(KUNGFU_ENGINE_PATH)} \n`
-	+ `commit: ${git_commit_version}`
-	dialog.showMessageBox({
-		type: 'info',
-		message: 'Kungfu',
-		defaultId: 0,
-		detail: info,
-		buttons: ['好的'],
-		icon: path.join(__resources, 'icon', 'icon.png')
-	})
-}
 
-//开启发送renderprocess 打开设置弹窗
-function openSettingDialog() {
-	if (mainWindow && mainWindow.webContents) {
-		mainWindow.webContents.send('main-process-messages', 'open-setting-dialog')
-		mainWindow.focus()
-	}
-}
-
-//退出提示
-function showQuitMessageBox(){
-	dialog.showMessageBox({
-		type: 'question',
-		title: '提示',
-		defaultId: 0,
-		cancelId: 1,
-		message: "退出应用会结束所有交易进程，确认退出吗？",
-		buttons: ['确认', `最小化至${platform !== 'mac' ? '任务栏' : ' Dock'}`],
-		icon: path.join(__resources, 'icon', 'icon.png')
-	}, (index) => {
-		if(index === 0){
-			console.time('quit clean')
-			killAllBeforeQuit().finally(() => {
-				console.timeEnd('quit clean')
-				app.quit()
-			})
-		}else{
-			if((mainWindow !== null) && !mainWindow.isDestroyed()){
-				if(platform === 'mac') mainWindow.hide();
-				else mainWindow.minimize();
-			}
-		}
-	})
-}
-
-//结束所有进程
-function KillAll(){
-	return new Promise(resolve => {
-		killKfc()
-		.catch(err => console.error(err)) 
-		.finally(() => {
-			if(platform === 'linux') killKungfu()
-			killGodDaemon()
-			.catch(err => console.error(err)) 				
-			.finally(() => {
-				killExtra()
-				.catch(err => console.error(err)) 								
-				.finally(() => {
-					resolve(true)
-				})
-			})
-		})
-	})
-}
-
-function killAllBeforeQuit() {
-	if(mainWindow && !mainWindow.isDestroyed()) mainWindow.hide()
-	allowQuit = true;
-	return KillAll()
-}
-
-
-function openUrl(url) {
-	electron.shell.openExternal(url)
-}
 
 
 process.on('uncaughtException', err => {
-	console.log(err, '====')
+	console.log(err)
     logger.error('[MASTER] Error caught in uncaughtException event:', err);
 });
 
 process.stderr.on('data', err => {
-	console.log(err, '----')
+	console.log(err)
     logger.error('[MASTER] Error caught in stderr event:', err);
 })

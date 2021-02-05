@@ -195,7 +195,12 @@ inline void from_ctp(const CThostFtdcDepthMarketDataField &ori, Quote &des) {
   strcpy(des.trading_day, ori.TradingDay);
   strcpy(des.instrument_id, ori.InstrumentID);
   des.instrument_type = InstrumentType::Future;
-  des.data_time = nsec_from_ctp_time(ori.ActionDay, ori.UpdateTime, ori.UpdateMillisec);
+  if (strcmp(des.exchange_id, "DCE") == 0){
+      const auto today = kungfu::yijinjing::time::strfnow("%Y%m%d");
+      des.data_time = nsec_from_ctp_time(today.c_str(), ori.UpdateTime, ori.UpdateMillisec);
+  } else {
+      des.data_time = nsec_from_ctp_time(ori.ActionDay, ori.UpdateTime, ori.UpdateMillisec);
+  }
   des.last_price = ori.LastPrice;
   des.pre_settlement_price = ori.PreSettlementPrice;
   des.pre_close_price = ori.PreClosePrice;
