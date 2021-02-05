@@ -174,28 +174,27 @@ export default {
     },
 
     mounted(){
-        const t = this;
-        t.tradingDataPipe = buildTradingDataPipe('strategy').subscribe(data => {
+        this.tradingDataPipe = buildTradingDataPipe('strategy').subscribe(data => {
             
             if (this.historyData['order'] && ((this.historyData['order'] || {}).date)) {
                 this.orders = Object.freeze(this.historyData['order'].data)
             } else {
-                const orders = data['orders'][t.strategyId];
+                const orders = data['orders'][this.strategyId];
                 this.orders = Object.freeze(orders || []);
             }
 
             if (this.historyData['trade'] && ((this.historyData['trade'] || {}).date)) {
                 this.trades = Object.freeze(this.historyData['trade'].data)
             } else {
-                const trades = data['trades'][t.strategyId];
+                const trades = data['trades'][this.strategyId];
                 this.trades = Object.freeze(trades || []);
             }
            
-            const positions = data['positions'][t.strategyId];
+            const positions = data['positions'][this.strategyId];
             this.positions = Object.freeze(positions || []);
-            const pnl = data['pnl'][t.strategyId];
+            const pnl = data['pnl'][this.strategyId];
             this.pnl = Object.freeze(pnl || []);
-            const dailyPnl = data['dailyPnl'][t.strategyId];
+            const dailyPnl = data['dailyPnl'][this.strategyId];
             this.dailyPnl = Object.freeze(dailyPnl || []);
             const orderStat = data['orderStat'];
             this.orderStat = Object.freeze(orderStat || {});
@@ -206,8 +205,7 @@ export default {
     },
 
     destroyed(){
-        const t = this;
-        t.tradingDataPipe && t.tradingDataPipe.unsubscribe();
+        this.tradingDataPipe && this.tradingDataPipe.unsubscribe();
     },
    
     computed: {

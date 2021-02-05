@@ -54,11 +54,8 @@ export const switchCustomProcess = (status: boolean, targetName: string) => {
 }
 
 
-export const switchTask = (processName: string, status: Boolean, options: any) => {
-    if (!status) return stopProcess(processName)
-    return startTask({
-        name: processName,
-        ...options
-    })
+export const switchTask = (status: Boolean, options: Pm2Options) => {
+    if (!status) return stopProcess(options.name)
+    return startTask(options)
 
 }

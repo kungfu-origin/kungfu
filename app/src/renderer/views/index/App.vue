@@ -27,14 +27,12 @@
     </div>
 </template>
 <script>
-import path from 'path';
 
 import { mapState } from 'vuex';
+import moment from 'moment';
 
 import GlobalSettingDialog from '@/components/Base/GlobalSettingDialog';
 
-import { existsSync } from '__gUtils/fileUtils';
-import { deepClone, delayMiliSeconds, debounce } from '__gUtils/busiUtils';
 import { buildKungfuGlobalDataPipe, buildTradingDataPipe } from '__io/kungfu/tradingData';
 import { watcher } from '__io/kungfu/watcher';
 
@@ -142,9 +140,13 @@ export default {
             this.tradingDataPipe = buildTradingDataPipe('account').subscribe(data => {
                 const assets = data['assets'];
                 this.$store.dispatch('setAccountsAsset', Object.freeze(JSON.parse(JSON.stringify(assets))));
+
+                if (this.getIfSaveInstruments()) {
+                    const instruments = data['instruments'];
+                    this.saveInstrumentsIntoLocalstorage(instruments)
+                }
             })
         },
-
 
         removeKeyDownEvent () {
             //解除回车带来的一些不好的影响
@@ -155,6 +157,35 @@ export default {
                 }
             })
         },
+
+        getIfSaveInstruments () {
+            const instrumentsSavedDate = localStorage.getItem('instrumentsSavedDate')
+            if (!instrumentsSavedDate) {
+                return true
+            } else if (instrumentsSavedDate !== moment().format('YYYY-MM-DD')) {
+                return true 
+            } else {
+                return false
+            }
+        },
+
+        saveInstrumentsIntoLocalstorage (instruments) {
+            const instrumentsResolved = instruments.filter(item => {
+                if (item.instrument_type === 1) return true;
+                if (item.instrument_type === 2) return true;
+                if (item.instrument_type === 4) return true;
+                if (item.instrument_type === 5) return true;
+                if (item.instrument_type === 6) return true;
+                if (item.instrument_type === 7) return true;
+
+                return false
+            })
+
+            if (instrumentsResolved.length) {
+                localStorage.setItem('instrumentsSavedDate', moment().format('YYYY-MM-DD'))
+                localStorage.setItem('intruments', JSON.stringify(instrumentsResolved))
+            }
+        }
     }
 }
 </script>
