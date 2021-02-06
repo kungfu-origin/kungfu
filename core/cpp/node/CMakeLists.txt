@@ -1,14 +1,14 @@
-PROJECT(node_addons)
+PROJECT(node-addons)
 
-if(WIN32)
+if (WIN32)
     SET(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS OFF)
     ADD_COMPILE_DEFINITIONS(V8_DEPRECATION_WARNINGS=1)
-endif()
+endif ()
 
-if(UNIX)
+if (UNIX)
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w")
-    SET(CMAKE_CXX_FLAGS_DEBUG  "${CMAKE_CXX_FLAGS_DEBUG} -w")
-endif()
+    SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -w")
+endif ()
 
 ############################################################
 INCLUDE_DIRECTORIES(${CMAKE_JS_INC})
@@ -30,6 +30,21 @@ MESSAGE("-- Include node-addon-api headers from ${NODE_ADDON_API_DIR}")
 ############################################################
 
 AUX_SOURCE_DIRECTORY(src SOURCE_FILES_KUNGFU)
-ADD_LIBRARY(node_kungfu SHARED ${SOURCE_FILES_KUNGFU} ${CMAKE_JS_SRC})
-SET_TARGET_PROPERTIES(node_kungfu PROPERTIES PREFIX "" SUFFIX ".node")
-TARGET_LINK_LIBRARIES(node_kungfu kungfu ${CMAKE_JS_LIB})
+
+if (${NODE_RUNTIME} STREQUAL "node")
+    SET(ADDON_NAME "kungfu-node")
+    MESSAGE(STATUS "Building node bindings ${ADDON_NAME}")
+endif ()
+
+if (${NODE_RUNTIME} STREQUAL "electron")
+    SET(ADDON_NAME "kungfu-electron")
+    MESSAGE(STATUS "Building node bindings ${ADDON_NAME}")
+endif ()
+
+if (ADDON_NAME)
+    ADD_LIBRARY(${ADDON_NAME} SHARED ${SOURCE_FILES_KUNGFU} ${CMAKE_JS_SRC})
+    SET_TARGET_PROPERTIES(${ADDON_NAME} PROPERTIES PREFIX "" SUFFIX ".node")
+    TARGET_LINK_LIBRARIES(${ADDON_NAME} kungfu ${CMAKE_JS_LIB})
+else ()
+    MESSAGE(WARNING "Unknown node runtime ${NODE_RUNTIME}")
+endif ()

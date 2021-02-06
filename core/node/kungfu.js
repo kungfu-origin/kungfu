@@ -1,7 +1,11 @@
-const bindings = exports._bindings = require('bindings')('node_kungfu.node');
 const fse = require("fs-extra");
-const path = require("path");
 const glob = require("glob");
+const path = require("path");
+
+const binary = require('node-pre-gyp');
+const config = path.resolve(path.join(path.dirname(__dirname),'package.json'))
+const bindings_path = binary.find(config);
+const bindings = exports._bindings = require(bindings_path);
 
 const hex = function (n) {
     const ns = n.toString(16);

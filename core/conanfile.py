@@ -28,18 +28,16 @@ class KungfuCoreConan(ConanFile):
     options = {
         "log_level": ["trace", "debug", "info", "warning", "error", "critical"],
         "arch": ["x64"],
-        "js_runtime": ["electron", "node"],
-        "node_version": ["10.16.0"],
-        "electron_version": ["4.2.11"]
+        "node_version": ["10.15.0"],
+        "electron_version": ["4.2.0"]
     }
     default_options = {
         "fmt:header_only": "True",
         "spdlog:header_only": "True",
         "log_level": "info",
         "arch": "x64",
-        "js_runtime": "electron",
-        "node_version": "10.16.0",
-        "electron_version": "4.2.11"
+        "node_version": "10.15.0",
+        "electron_version": "4.2.0"
     }
     cpp_files_extensions = ['.h', '.hpp', '.hxx', '.cpp', '.c', '.cc', '.cxx']
     conanfile_dir = os.path.dirname(os.path.realpath(__file__))
@@ -64,9 +62,10 @@ class KungfuCoreConan(ConanFile):
 
     def build(self):
         build_type = self.__get_build_type()
+        self.__clean_build_info(build_type)
+        self.__run_build(build_type, 'node')
+        self.__run_build(build_type, 'electron')
         self.__gen_build_info(build_type)
-        self.__run_cmake_js(build_type, 'build')
-        self.__show_build_info(build_type)
 
     def imports(self):
         self.copy('*', src='include', dst='include')
@@ -82,8 +81,8 @@ class KungfuCoreConan(ConanFile):
         os.environ['CMAKE_BUILD_TYPE'] = build_type
         return build_type
 
-    def __get_node_version(self):
-        return str(self.options.electron_version) if self.options.js_runtime == 'electron' else str(self.options.node_version)
+    def __get_node_version(self, runtime):
+        return str(self.options.electron_version) if runtime == 'electron' else str(self.options.node_version)
 
     def __list_files(self, source_dir, extensions):
         found_files = []
@@ -120,6 +119,14 @@ class KungfuCoreConan(ConanFile):
                 self.output.error(' '.join(process.cmdline()))
                 process.kill()
 
+    def __get_build_info_path(self, build_type):
+        return os.path.join(build_type, 'kungfubuildinfo.json')
+
+    def __clean_build_info(self, build_type):
+        build_info_path = self.__get_build_info_path(build_type)
+        if os.path.exists(build_info_path):
+            os.remove(build_info_path)
+
     def __gen_build_info(self, build_type):
         now = datetime.datetime.now()
         build_date = now.strftime('%Y%m%d%H%M%S')
@@ -145,7 +152,7 @@ class KungfuCoreConan(ConanFile):
             }
         }
         tools.mkdir(build_type)
-        with open(os.path.join(build_type, 'kungfubuildinfo.json'), 'w') as output:
+        with open(self.__get_build_info_path(build_type), 'w') as output:
             json.dump(build_info, output, indent=2)
         self.output.success(f'build version {build_version}')
 
@@ -155,7 +162,7 @@ class KungfuCoreConan(ConanFile):
             build_version = build_info['version']
             self.output.success(f'build version {build_version}')
 
-    def __build_cmake_js_cmd(self, cmd):
+    def __build_cmake_js_cmd(self, cmd, runtime='node'):
         spdlog_levels = {
             'trace': 'SPDLOG_LEVEL_TRACE',
             'debug': 'SPDLOG_LEVEL_DEBUG',
@@ -174,21 +181,25 @@ class KungfuCoreConan(ConanFile):
             tools.which('yarn'),
             'cmake-js',
             '--arch', str(self.options.arch),
-            '--runtime', str(self.options.js_runtime),
-            '--runtime-version', self.__get_node_version(),
+            '--runtime', runtime,
+            '--runtime-version', self.__get_node_version(runtime),
             f'--CDPYTHON_EXECUTABLE={python_path}',
             f'--CDSPDLOG_LOG_LEVEL_COMPILE={loglevel}',
             f'--CDCMAKE_BUILD_PARALLEL_LEVEL={os.cpu_count()}'
         ] + build_option + debug_option + [cmd]
 
-    def __run_cmake_js(self, build_type, cmd):
+    def __run_cmake_js(self, build_type, cmd, runtime='node'):
         [os.environ.pop(env_key) for env_key in os.environ if env_key.startswith('npm_') or env_key.startswith('NPM_')] # workaround for msvc
         tools.rmdir(self.build_extensions_dir)
-        rc = psutil.Popen(self.__build_cmake_js_cmd(cmd)).wait()
+        rc = psutil.Popen(self.__build_cmake_js_cmd(cmd, runtime)).wait()
         if rc != 0:
             self.output.error(f'cmake-js {cmd} failed')
             sys.exit(rc)
         self.output.success(f'cmake-js {cmd} done')
+
+    def __run_build(self, build_type, runtime):
+        self.__run_cmake_js(build_type, 'configure', runtime)
+        self.__run_cmake_js(build_type, 'build', runtime)
 
     def __run_pyinstaller(self, build_type):
         with tools.chdir(os.path.pardir):

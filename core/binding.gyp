@@ -5,10 +5,10 @@
             "type": "none",
             "actions": [
                 {
-                    "action_name": "pipenv-install",
+                    "action_name": "pipenv",
                     "inputs": ["<(module_root_dir)/Pipfile"],
                     "outputs": ["<(module_root_dir)/Pipfile.lock"],
-                    "action": ["python", "python/gyp-yarn.py", "pipenv-install"]
+                    "action": ["python", "python/gyp-yarn.py", "pipenv", "install"]
                 }
             ]
         },
