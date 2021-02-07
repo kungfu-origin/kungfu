@@ -2,14 +2,15 @@ const fse = require("fs-extra");
 const glob = require("glob");
 const path = require("path");
 
-const binary = require('node-pre-gyp');
-const config = path.resolve(path.join(path.dirname(__dirname),'package.json'))
-const bindings_path = binary.find(config);
+const prebuilt = require("node-pre-gyp");
+const config = path.resolve(path.join(path.dirname(__dirname),"package.json"))
+const node_bindings_path = prebuilt.find(config);
+const bindings_path = "electron" in process.versions ? node_bindings_path.replace("-node.", "-electron.") : node_bindings_path;
 const bindings = exports._bindings = require(bindings_path);
 
 const hex = function (n) {
     const ns = n.toString(16);
-    return ns.length === 8 ? ns : Array(8 - ns.length).fill('0').reduce((a, b) => a + b) + ns;
+    return ns.length === 8 ? ns : Array(8 - ns.length).fill("0").reduce((a, b) => a + b) + ns;
 };
 
 const layout_dir_from_home = function (home, category, group, name, mode, layout) {
@@ -37,7 +38,7 @@ const locator = function (home) {
         list_page_id: function (category, group, name, mode, dest_id) {
             const suffix = ".journal";
             const dest_dir = layout_dir_from_home(home, category, group, name, mode, "journal");
-            const file_re = path.join(dest_dir, hex(dest_id) + '.*' + suffix);
+            const file_re = path.join(dest_dir, hex(dest_id) + ".*" + suffix);
             const pages = glob.sync(file_re);
             return pages.map(p => parseInt(p.substr(dest_dir.length + 10, p.length - dest_dir.length - 10 - suffix.length)));
         },
@@ -47,7 +48,7 @@ const locator = function (home) {
             glob.sync(search_path).map(p => {
                 const dirs = p.split(path.sep);
                 const m = dirs.slice(dirs.length - 5);
-                locations.push({'category': m[0], 'group': m[1], 'name': m[2], 'mode': m[4]});
+                locations.push({"category": m[0], "group": m[1], "name": m[2], "mode": m[4]});
             });
             return locations;
         },

@@ -28,16 +28,14 @@ class KungfuCoreConan(ConanFile):
     options = {
         "log_level": ["trace", "debug", "info", "warning", "error", "critical"],
         "arch": ["x64"],
-        "node_version": ["10.15.0"],
-        "electron_version": ["4.2.0"]
+        "node_version": "ANY",
+        "electron_version": "ANY"
     }
     default_options = {
         "fmt:header_only": "True",
         "spdlog:header_only": "True",
         "log_level": "info",
-        "arch": "x64",
-        "node_version": "10.15.0",
-        "electron_version": "4.2.0"
+        "arch": "x64"
     }
     cpp_files_extensions = ['.h', '.hpp', '.hxx', '.cpp', '.c', '.cc', '.cxx']
     conanfile_dir = os.path.dirname(os.path.realpath(__file__))
@@ -46,6 +44,7 @@ class KungfuCoreConan(ConanFile):
     build_dir = os.path.join(conanfile_dir, 'build')
     build_python_dir = os.path.join(build_dir, 'python')
     build_extensions_dir = os.path.join(build_dir, 'build_extensions')
+    build_kfc_dir = os.path.join(build_dir, 'kfc')
 
     def source(self):
         """Performs clang-format on all C++ files"""
@@ -66,6 +65,7 @@ class KungfuCoreConan(ConanFile):
         self.__run_build(build_type, 'node')
         self.__run_build(build_type, 'electron')
         self.__gen_build_info(build_type)
+        self.__show_build_info(build_type)
 
     def imports(self):
         self.copy('*', src='include', dst='include')
@@ -120,12 +120,16 @@ class KungfuCoreConan(ConanFile):
                 process.kill()
 
     def __get_build_info_path(self, build_type):
-        return os.path.join(build_type, 'kungfubuildinfo.json')
+        return os.path.join(self.build_dir, build_type, 'kungfubuildinfo.json')
 
     def __clean_build_info(self, build_type):
         build_info_path = self.__get_build_info_path(build_type)
         if os.path.exists(build_info_path):
             os.remove(build_info_path)
+            self.output.info('Deleted kungfubuildinfo.json')
+        if os.path.exists(self.build_kfc_dir):
+            shutil.rmtree(self.build_kfc_dir)
+            self.output.info('Deleted kfc directory')
 
     def __gen_build_info(self, build_type):
         now = datetime.datetime.now()
@@ -154,10 +158,9 @@ class KungfuCoreConan(ConanFile):
         tools.mkdir(build_type)
         with open(self.__get_build_info_path(build_type), 'w') as output:
             json.dump(build_info, output, indent=2)
-        self.output.success(f'build version {build_version}')
 
     def __show_build_info(self, build_type):
-        with open(os.path.join(build_type, 'kungfubuildinfo.json'), 'r') as build_info_file:
+        with open(self.__get_build_info_path(build_type), 'r') as build_info_file:
             build_info = json.load(build_info_file)
             build_version = build_info['version']
             self.output.success(f'build version {build_version}')

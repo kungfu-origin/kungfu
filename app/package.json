@@ -13,7 +13,7 @@
   ],
   "main": "./dist/app/main.js",
   "engines": {
-    "node": ">=10.16.0 <11.0.0"
+    "node": ">=10.15.0 <11.0.0"
   },
   "scripts": {
     "clean": "rimraf ./dist/* ./build/*",
@@ -55,8 +55,7 @@
       "!**/kungfu-core/**/**/*",
       "**/kungfu-core/build/*/libkungfu.*",
       "**/kungfu-core/build/*/kungfu.*",
-      "**/kungfu-core/build/*/pykungfu*",
-      "**/kungfu-core/build/*/node_kungfu.node",
+      "**/kungfu-core/build/*/kungfu-*.node",
       "**/kungfu-core/build/*/kungfubuildinfo.json",
       "**/kungfu-core/node/*",
       "**/kungfu-core/node/**/*",
@@ -95,11 +94,11 @@
           "fsevents.node",
           "kungfu-cli",
           "kungfu-cli.*",
-          "node_kungfu.node",
-          "kungfu.dll",
-          "kungfubuildinfo.json",
+          "kungfu.*",
+          "libkungfu.*",
+          "kungfu-*.node",
           "pykungfu*",
-          "libkungfu.*"
+          "kungfubuildinfo.json"
         ]
       }
     ],
@@ -197,7 +196,6 @@
     "electron-debug": "^1.4.0",
     "electron-devtools-installer": "^2.2.0",
     "electron-updater": "^4.0.6",
-    "electron-rebuild": "^2.3.4",
     "element-ui": "2.8.2",
     "extract-text-webpack-plugin": "^3.0.0",
     "fast-csv": "^2.5.0",

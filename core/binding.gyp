@@ -8,7 +8,7 @@
                     "action_name": "pipenv",
                     "inputs": ["<(module_root_dir)/Pipfile"],
                     "outputs": ["<(module_root_dir)/Pipfile.lock"],
-                    "action": ["python", "python/gyp-yarn.py", "pipenv", "install"]
+                    "action": ["python", ".build-tools/node-gyp.py", "pipenv", "install"]
                 }
             ]
         },
@@ -21,7 +21,7 @@
                     "action_name": "configure",
                     "inputs": ["<(module_root_dir)/CMakeLists.txt"],
                     "outputs": ["<(module_root_dir)/build/conanbuildinfo.cmake"],
-                    "action": ["python", "python/gyp-yarn.py", "configure"]
+                    "action": ["python", ".build-tools/node-gyp.py", "configure"]
                 }
             ]
         },
@@ -39,7 +39,7 @@
                     },
                     "inputs": ["<@(sources)"],
                     "outputs": ["<(PRODUCT_DIR)/kungfubuildinfo.json"],
-                    "action": ["python", "python/gyp-yarn.py", "compile"]
+                    "action": ["python", ".build-tools/node-gyp.py", "compile"]
                 }
             ]
         },
@@ -52,7 +52,7 @@
                     "action_name": "freeze",
                     "inputs": ["<(PRODUCT_DIR)/kungfubuildinfo.json"],
                     "outputs": ["<(module_path)/kungfubuildinfo.json"],
-                    "action": ["python", "python/gyp-yarn.py", "freeze"]
+                    "action": ["python", ".build-tools/node-gyp.py", "freeze"]
                 }
             ]
         }
