@@ -10,6 +10,7 @@
     "core",
     "cli2",
     "kfext_task_timerTrader",
+    "kfext_task_backward",
     "app",
     "tests"
   ],

@@ -82,7 +82,7 @@ function findConfigItemIndex (configList, conditions) {
 
 
 function resolveArtifactName (cli, pro, target) {
-    const buildTime = moment().format('YYYYMMDDHHMMSS')
+    const buildTime = moment().format('MMDDHHMM')
     const appType = cli ? 'cli' : 'app';
     const targetName = target || '';
     const appTypeResolvde = pro ? `${appType}-pro` : appType
