@@ -53,10 +53,8 @@
       "!**/kungfu-core/*",
       "!**/kungfu-core/**/*",
       "!**/kungfu-core/**/**/*",
-      "**/kungfu-core/build/*/libkungfu.*",
-      "**/kungfu-core/build/*/kungfu.*",
-      "**/kungfu-core/build/*/kungfu-*.node",
-      "**/kungfu-core/build/*/kungfubuildinfo.json",
+      "**/kungfu-core/build/kfc/kungfu-electron.node",
+      "**/kungfu-core/build/kfc/kungfubuildinfo.json",
       "**/kungfu-core/node/*",
       "**/kungfu-core/node/**/*",
       "**/kungfu-core/package.json"
@@ -66,7 +64,9 @@
         "from": "../core/build/kfc",
         "to": "kfc",
         "filter": [
-          "!**/btdata"
+          "!**/btdata",
+          "!*.node",
+          "!*.stamp"
         ]
       },
       {

@@ -26,7 +26,7 @@ const argv = require("yargs/yargs")(process.argv.slice(2))
     })
     .command("build", "build from source", (yargs) => {
     }, (argv) => {
-        node_pre_gyp(["configure", "build", "package"], argv)
+        node_pre_gyp(["configure", "build"], argv)
     })
     .option("build-type", {
         choices: ["Release", "Debug"],
@@ -34,4 +34,4 @@ const argv = require("yargs/yargs")(process.argv.slice(2))
     })
     .demandCommand()
     .help()
-    .argv
+    .argv;

@@ -3,8 +3,10 @@ import sys
 import subprocess
 import platform
 
-sys.stdout.write(f"python gyp args: {sys.argv}\n")
+argv = list(map(os.path.basename, sys.argv[1:]))  # strip leading path for gyp on windows
+cmd = ["yarn", *argv]
+
+sys.stdout.write(f"{' '.join(cmd)}\n")
 sys.stdout.flush()
 
-cmd = list(map(os.path.basename, sys.argv[1:]))  # strip leading path for gyp on windows
-subprocess.run(["yarn", *cmd], check=True, shell=platform.system() == "Windows")
+subprocess.run(cmd, check=True, shell=platform.system() == "Windows")
