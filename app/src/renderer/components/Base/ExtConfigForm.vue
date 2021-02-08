@@ -71,6 +71,7 @@
 							<div class="make-order-instrument-ids__warp">
                                 <div class="make-order-instrument-id-item">
                                     <span class="ticker">{{ item.instrument_id }}</span>
+                                    <span class="name">{{ item.instrument_name }}</span>
                                 </div>
                                 <div class="make-order-instrument-id-item">{{ (item.exchange_id || '').toUpperCase() }}</div>
                             </div>
@@ -94,7 +95,6 @@ import { Autocomplete } from 'element-ui';
 
 import { deepClone } from '__gUtils/busiUtils';
 import { OffsetName, SideName, SourceTypeConfig, ExchangeIds } from 'kungfu-shared/config/tradingConfig';
-import { getFutureTickersConfig, getStockTickersConfig } from '__assets/base'
 
 import instrumentsMixin from '@/assets/js/mixins/instrumentsMixin';
 
@@ -181,9 +181,9 @@ export default {
 	methods: {		
 		handleSelectInstrumentId (key, exchangeIdKey, item) {
 			exchangeIdKey = exchangeIdKey || 'exchangeId';
-            const { ticker, exchangeId } = item;
-            this.$set(this.form, key, ticker)
-            this.$set(this.form, exchangeIdKey, (exchangeId || '').toUpperCase())
+            const { instrument_id, exchange_id } = item;
+            this.$set(this.form, key, instrument_id)
+            this.$set(this.form, exchangeIdKey, (exchange_id || '').toUpperCase())
             
             this.$nextTick()
                 .then(() => {
@@ -234,13 +234,14 @@ export default {
 
 		getSearchTickers (queryString = '') {
            return this.instrumentIds.filter(item => {
-                const { instrument_id, exchange_id } = {
-                    instrument_id: '',
+                const { instrument_id, instrument_name, exchange_id } = {
+					instrument_id: '',
+					instrument_name: '',
                     exchange_id: '',
                     ...item
                 }
 
-                if (`${instrument_id}${exchange_id}`.toLowerCase().includes(queryString.toLowerCase())) return true;
+                if (`${instrument_id}${instrument_name}${exchange_id}`.toLowerCase().includes(queryString.toLowerCase())) return true;
                 return false
             })
         },

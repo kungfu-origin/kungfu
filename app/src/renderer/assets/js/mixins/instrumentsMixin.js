@@ -19,7 +19,7 @@ export default {
                 return Object.freeze([]);
             }
             
-            return Object.freeze(JSON.parse(instruments))
+            return Object.freeze(JSON.parse(instruments).map(item => Object.freeze(item)))
         }
     },
 }

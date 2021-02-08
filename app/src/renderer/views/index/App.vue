@@ -170,28 +170,35 @@ export default {
 
         saveInstrumentsIntoLocalstorage (instruments) {
             const instrumentsResolved = instruments
-            .filter(item => {
-                if (item.instrument_type === 1) return true;
-                if (item.instrument_type === 2) return true;
-                if (item.instrument_type === 4) return true;
-                if (item.instrument_type === 5) return true;
-                if (item.instrument_type === 6) return true;
-                if (item.instrument_type === 7) return true;
+                .filter(item => {
+                    //普通股票 期货 股票期权 基金 科创板股票 指数
+                    if (item.instrument_type === 1) return true;
+                    if (item.instrument_type === 2) return true;
+                    if (item.instrument_type === 4) return true;
+                    if (item.instrument_type === 5) return true;
+                    if (item.instrument_type === 6) return true;
+                    if (item.instrument_type === 7) return true;
 
-                return false
-            })
-            .map(item => ({
-                exchange_id: item.exchange_id,
-                instrument_id: item.instrument_id
-            }))
+                    return false
+                })
+                .map(item => ({
+                    exchange_id: item.exchange_id,
+                    instrument_id: item.instrument_id,
+                    instrument_name: item.product_id
+                }))
 
             if (instrumentsResolved.length) {
-                localStorage.setItem('instrumentsSavedDate', moment().format('YYYY-MM-DD'))
-                localStorage.setItem('instruments', JSON.stringify(instrumentsResolved))
-                this.$nextTick()
-                    .then(() => {
-                        this.$bus.$emit('update:instruments')
-                    })
+                //for performance
+                let saveTimer = setTimeout(() => {
+                    localStorage.setItem('instrumentsSavedDate', moment().format('YYYY-MM-DD'))
+                    localStorage.setItem('instruments', JSON.stringify(instrumentsResolved))
+                    this.$nextTick()
+                        .then(() => {
+                            this.$bus.$emit('update:instruments')
+                            clearTimeout(saveTimer)
+                        })
+
+                }, 300)
             }
         }
     }
