@@ -21,9 +21,10 @@ Vue.config.productionTip = false
 Vue.store = Vue.prototype.$store = store
 Vue.utils = Vue.prototype.$utils = utils
 
+Vue.bus = Vue.prototype.$bus = new Vue();
+
 //tr 组件
 Vue.use(Components)
-
 
 
 new Vue({

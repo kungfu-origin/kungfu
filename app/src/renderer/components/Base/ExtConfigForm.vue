@@ -68,12 +68,11 @@
                     @select="e => handleSelectInstrumentId(item.key, item.exchangeIdKey, e)"
                     >
                         <template v-slot="{ item }">
-                            <div class="make-order-instrument-ids__warp">
+							<div class="make-order-instrument-ids__warp">
                                 <div class="make-order-instrument-id-item">
-                                    <span class="ticker">{{ item.ticker }}</span>
-                                    <span class="name">{{ item.name }}</span>
+                                    <span class="ticker">{{ item.instrument_id }}</span>
                                 </div>
-                                <div class="make-order-instrument-id-item">{{ (item.exchangeId || '').toUpperCase() }}</div>
+                                <div class="make-order-instrument-id-item">{{ (item.exchange_id || '').toUpperCase() }}</div>
                             </div>
                         </template>
                     </el-autocomplete>
@@ -91,15 +90,19 @@
 import Vue from 'vue';
 import moment from 'moment';
 import { mapState } from 'vuex';
+import { Autocomplete } from 'element-ui';
 
 import { deepClone } from '__gUtils/busiUtils';
 import { OffsetName, SideName, SourceTypeConfig, ExchangeIds } from 'kungfu-shared/config/tradingConfig';
 import { getFutureTickersConfig, getStockTickersConfig } from '__assets/base'
-import { Autocomplete } from 'element-ui';
+
+import instrumentsMixin from '@/assets/js/mixins/instrumentsMixin';
 
 Vue.use(Autocomplete)
 
 export default {
+	mixins: [ instrumentsMixin ],
+
 	props: {
 
 		configList: {
@@ -149,9 +152,6 @@ export default {
 			side: SideName
 		}
 
-
-        this.targetTickersSource = []
-
 		return {
 			form: deepClone(this.value || {})
 		}
@@ -159,7 +159,6 @@ export default {
 
 	mounted () {
 		this.initForm();
-		this.getInstrumentIds();
 	},
 
 	computed: {
@@ -228,30 +227,20 @@ export default {
             })
 		},
 
-		getInstrumentIds () {
-			Promise.all([ getFutureTickersConfig(), getStockTickersConfig() ])
-				.then(([futures, tickers]) => {
-					this.targetTickersSource = Object.freeze([ ...Object.freeze(futures || []), ...Object.freeze(tickers || []) ])
-				})
-		},
-
 		querySearch (queryString, cb) {
             const results = this.getSearchTickers(queryString);
             cb(results)
         },
 
 		getSearchTickers (queryString = '') {
-            return this.targetTickersSource.filter(item => {
-                const { ticker, name, exchangeId } = {
-                    ticker: '',
-                    name: '',
-                    exchangeId: '',
+           return this.instrumentIds.filter(item => {
+                const { instrument_id, exchange_id } = {
+                    instrument_id: '',
+                    exchange_id: '',
                     ...item
                 }
 
-                if (ticker.toLowerCase().includes(queryString.toLowerCase())) return true;
-                if (name.toLowerCase().includes(queryString.toLowerCase())) return true;
-                if (exchangeId.toUpperCase().includes(queryString.toUpperCase())) return true;
+                if (`${instrument_id}${exchange_id}`.toLowerCase().includes(queryString.toLowerCase())) return true;
                 return false
             })
         },

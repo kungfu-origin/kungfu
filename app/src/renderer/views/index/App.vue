@@ -88,12 +88,11 @@ export default {
     watch: {
         //reset state of td/md every time close
         processStatus: function(status){
-            const t = this;
             Object.keys(status || {}).forEach(key => {
                 const s = status[key]
                 if(s !== 'online') {
                     if(key.includes('td') || key.includes('md')) {
-                        t.$store.dispatch('deleteOneMdTdState', key)
+                        this.$store.dispatch('deleteOneMdTdState', key)
                     }
                 }
             })
@@ -170,7 +169,8 @@ export default {
         },
 
         saveInstrumentsIntoLocalstorage (instruments) {
-            const instrumentsResolved = instruments.filter(item => {
+            const instrumentsResolved = instruments
+            .filter(item => {
                 if (item.instrument_type === 1) return true;
                 if (item.instrument_type === 2) return true;
                 if (item.instrument_type === 4) return true;
@@ -180,10 +180,18 @@ export default {
 
                 return false
             })
+            .map(item => ({
+                exchange_id: item.exchange_id,
+                instrument_id: item.instrument_id
+            }))
 
             if (instrumentsResolved.length) {
                 localStorage.setItem('instrumentsSavedDate', moment().format('YYYY-MM-DD'))
-                localStorage.setItem('intruments', JSON.stringify(instrumentsResolved))
+                localStorage.setItem('instruments', JSON.stringify(instrumentsResolved))
+                this.$nextTick()
+                    .then(() => {
+                        this.$bus.$emit('update:instruments')
+                    })
             }
         }
     }
