@@ -156,7 +156,6 @@ inline void from_xtp(XTPQSI *ticker_info, Instrument &quote) {
   {
     quote.exchange_id = "false_id";
   }
-  strcpy(const_cast<char*>(quote.type_name.c_str()), ticker_info->ticker_name);
   quote.instrument_type = get_instrument_type(quote.exchange_id,quote.instrument_id);
   quote.is_trading = true;
   quote.price_tick = ticker_info->price_tick;
