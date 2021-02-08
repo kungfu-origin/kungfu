@@ -76,6 +76,9 @@ export default {
                                 parent_id: BigInt(makeOrderData.parent_id)
                             }
                             return this.makeOrder('account', markOrderDataResolved, makeOrderData.name)
+                                .catch(err => {
+                                    this.$message.error(err.message)
+                                })
                         case 'CANCEL_ORDER_BY_PARENT_ID':
                             const ordersByParentId = this.getTargetOrdersByParentId(watcher.ledger.Order, parentId)
                             ordersByParentId
@@ -97,7 +100,6 @@ export default {
                             } else {
                                 this.$message.info(`距离交易任务 ${processName} 开始执行还有 ${minute} 分钟，请保证交易进程与行情进程运行`)
                             }
-
                     }
                 })
             })

@@ -193,7 +193,8 @@ export default {
             return this.preUpdate()
                 .then(res => {
                     if (!res) return Promise.resolve(true)
-                    return switchTask(processName, true, {
+                    return switchTask(true, {
+                        name: processName,
                         args,
                         cwd: process.env.NODE_ENV === 'production' ? path.resolve(packageJSONPath, '..') : path.resolve(packageJSONPath, '..', 'lib'),
                     })
@@ -224,7 +225,8 @@ export default {
 
         handleTaskSwitch (e, data) {
             const { processId, args, cwd } = data;
-            return switchTask(processId, e, {
+            return switchTask(e, {
+                name: processId,
                 args: args.join(' '),
                 cwd
             })

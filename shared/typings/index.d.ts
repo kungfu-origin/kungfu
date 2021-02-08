@@ -481,3 +481,11 @@ interface QuoteData {
     askPrices: Array<number>,
     bidPrices: Array<number>,
 }
+
+interface Pm2Options {
+    name: string;
+    args: string;
+    cwd?: string;
+    script?: string;
+    interpreter?: string
+}

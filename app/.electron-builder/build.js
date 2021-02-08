@@ -17,7 +17,7 @@ console.log('argv', argv)
 
 if (pro) {
     baseConfig.extraResources.push({
-        "from": path.join(__dirname, '..', '..', 'kfext_task_timerTrader', 'build', 'ext'),
+        "from": path.join(__dirname, '..', '..', 'kfext_task_timerTrader', 'lib'),
         "to": "kungfu-extensions/timer-trader"
     })
 }
