@@ -14,7 +14,7 @@
   },
   "main": "./dist/test/index.js",
   "engines": {
-    "node": ">=10.16.0 <11.0.0"
+    "node": ">=10.15.0 <11.0.0"
   },
   "scripts": {
     "install-deps": "node -v",
