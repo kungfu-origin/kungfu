@@ -17,7 +17,7 @@ Object.keys(dependencies || {})
     nodeModules[mod] = 'commonjs ' + mod;
   });
 
-nodeModules['kungfu-core'] = 'commonjs kungfu-core';
+nodeModules['@kungfu-trader/kungfu-core'] = 'commonjs "@kungfu-trader/kungfu-core"';
 
 let cliConfig = {
   entry: {

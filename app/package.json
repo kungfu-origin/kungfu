@@ -158,7 +158,7 @@
     "fkill": "^6.1.0",
     "fs-extra": "7.0.1",
     "gaze": "^1.1.3",
-    "kungfu-core": "*",
+    "@kungfu-trader/kungfu-core": "*",
     "pm2": "3.5.2"
   },
   "devDependencies": {

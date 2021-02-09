@@ -16,7 +16,7 @@ with open(os.path.join('package.json'), 'r') as package_json_file:
 
 
 class KungfuCoreConan(ConanFile):
-    name = package_json['name']
+    name = "kungfu-core"
     version = package_json['version']
     generators = "cmake"
     requires = [

@@ -62,5 +62,7 @@ ADD_SUBDIRECTORY(cpp)
 
 ############################################################
 
-SET(KF_EXTENSIONS_BUILD_DIR ${CMAKE_BINARY_DIR}/build_extensions)
-ADD_SUBDIRECTORY(extensions)
+if (EXISTS "${PROJECT_SOURCE_DIR}/extensions")
+    SET(KF_EXTENSIONS_BUILD_DIR ${CMAKE_BINARY_DIR}/build_extensions)
+    ADD_SUBDIRECTORY(extensions)
+endif ()

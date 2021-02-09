@@ -1,5 +1,5 @@
 {
-  "name": "kungfu-core",
+  "name": "@kungfu-trader/kungfu-core",
   "author": "taurus.ai",
   "version": "2.3.0",
   "description": "KungFu Trader Core",
@@ -7,6 +7,9 @@
   "main": "node/index.js",
   "repository": {
     "url": "https://github.com/kungfu-trader/kungfu.git"
+  },
+  "publishConfig": {
+    "registry":"https://npm.pkg.github.com"
   },
   "config": {
     "buildtype": "Release",
@@ -21,13 +24,16 @@
     "module_name": "kungfu-node",
     "module_path": "build/kfc",
     "remote_path": "core/v{major}/{version}",
-    "package_name": "kfc-v{version}-{node_abi}-{platform}-{arch}.tar.gz",
+    "package_name": "kfc-v{version}-{platform}-{arch}.tar.gz",
     "host": "https://kungfu.s3.cn-northwest-1.amazonaws.com.cn"
   },
   "scripts": {
-    "install": "cross-var node .build-tools/node-pre-gyp.js --build-type $npm_package_config_buildtype install",
+    "install": "npm run setup",
+    "setup": "cross-var node .build-tools/node-pre-gyp.js --build-type $npm_package_config_buildtype install",
     "build": "cross-var node .build-tools/node-pre-gyp.js --build-type $npm_package_config_buildtype build",
-    "prepublish": "cross-var node .build-tools/node-pre-gyp.js --build-type $npm_package_config_buildtype publish",
+    "package": "node .build-tools/node-pre-gyp.js package",
+    "publish-binary": "aws s3 sync build/stage/core s3://kungfu/core --acl public-read",
+    "publish-package": "npm publish",
     "pipenv": "cross-var node .build-tools/pipenv.js --python $npm_package_config_python_version --pypi-mirror $npm_package_config_pypi",
     "configure": "cross-var pipenv run conan install . -if build -s build_type=$npm_package_config_buildtype --build missing -o log_level=$npm_package_config_loglevel -o arch=$npm_package_config_arch  -o node_version=$npm_package_config_node_version -o electron_version=$npm_package_config_electron_version",
     "compile": "cross-var pipenv run conan build . -bf build -s build_type=$npm_package_config_buildtype",
@@ -39,7 +45,6 @@
     "test": "pipenv run python python/dev_test.py"
   },
   "dependencies": {
-    "bindings": "^1.5.0",
     "cross-var": "^1.1.0",
     "fs-extra": "^9.1.0",
     "glob": "^7.1.6",
@@ -49,7 +54,6 @@
     "yargs": "^16.2.0"
   },
   "devDependencies": {
-    "cmake-js": "^6.1.0",
-    "semver": "^7.3.4"
+    "cmake-js": "^6.1.0"
   }
 }

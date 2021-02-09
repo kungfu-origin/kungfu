@@ -1,7 +1,5 @@
 name: Mac CI
 
-# Controls when the action will run. Triggers the workflow on push or pull request
-# evepushnts but only for the master branch
 on:
   push:
     branches:
@@ -9,27 +7,26 @@ on:
       - 2.3
       - ci
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
   build:
-    # The type of runner that the job will run on
     runs-on: macos-latest
     env:
       USE_HARD_LINKS: false
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Checkout Code
         uses: actions/checkout@v2
 
       - name: Setup Node.js environment
         uses: actions/setup-node@v1.4.4
+        with:
+          node-version: '10.15.0'
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@kungfu-trader'
 
       - name: Setup Python environment
         uses: actions/setup-python@v2
         with:
-          python-version: '3.7' # Version range or exact version of a Python version to use, using SemVer's version r
+          python-version: '3.7'
 
       - name: Build Kungfu
         run: |
@@ -39,11 +36,6 @@ jobs:
           yarn install
           yarn build
 
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v2
-        with:
-          path: app/build/app/*.dmg
-
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -51,6 +43,15 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: cn-northwest-1
 
-      - name: Upload to S3
-        run: |
-          aws s3 sync app/build/app s3://kungfu
+      - name: Upload to AWS S3
+        run: yarn workspace @kungfu-trader/kungfu-core publish-binary
+
+      - name: Publish to GitHub Packages
+        run: yarn workspace @kungfu-trader/kungfu-core publish-package
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload Artifact to GitHub
+        uses: actions/upload-artifact@v2
+        with:
+          path: app/build/app/*.dmg

@@ -1,9 +1,9 @@
-
+// @ts-ignore
 import { KF_RUNTIME_DIR } from '__gConfig/pathConfig';
 
 // process.env.KF_LOG_LEVEL = 'trace';
 
-export const kungfu = require('kungfu-core').kungfu;
+export const kungfu = require('@kungfu-trader/kungfu-core').kungfu;
 export const longfist = kungfu.longfist;
 export const kungfuConfigStore = kungfu.ConfigStore(KF_RUNTIME_DIR);
 export const commissionStore = kungfu.CommissionStore(KF_RUNTIME_DIR);

@@ -1,35 +1,22 @@
-const {spawn} = require("child_process");
-const path = require("path");
-const semver = require("semver");
+const {spawnSync} = require("child_process");
 
 function run(cmd, args, title) {
-    const child = spawn(cmd, args, {
+    console.log(`$ ${cmd} ${args.join(' ')}`);
+    const result = spawnSync(cmd, args, {
         shell: true,
         stdio: ["inherit", "inherit", "inherit"],
         windowsHide: true
     });
-
-    child.on("error", (error) => {
-        process.stderr.write(error);
-    });
-
-    child.on("close", code => {
-        console.log(`${title} exited with code ${code}`);
-    });
+    if (result.status !== 0) {
+        console.log(`${title} exited with code ${result.status}`);
+        process.exit(result.status);
+    }
 }
 
 function node_pre_gyp(cmd, argv) {
     const build_type_arg = argv.buildType === "Debug" ? ["--debug"] : [];
-    const yarn_args = ["node-pre-gyp", ...build_type_arg, ...cmd];
-    run("yarn", yarn_args, "node-pre-gyp install");
-}
-
-function aws_publish() {
-    const config = path.resolve(path.join(path.dirname(__dirname),"package.json"));
-    const version = require(config).version;
-    const major = semver.major(version);
-    const aws_args = ["s3", "cp", "build/stage/**/kungfu-*.tar.gz", `s3://kungfu/core/v${major}/${version}`];
-    run("aws", aws_args, "aws publish");
+    const npx_cmd_arg = ["node-pre-gyp", ...build_type_arg, ...cmd].join(' ');
+    run("npx", ["-c", `"${npx_cmd_arg}"`], "node-pre-gyp");
 }
 
 const argv = require("yargs/yargs")(process.argv.slice(2))
@@ -41,10 +28,9 @@ const argv = require("yargs/yargs")(process.argv.slice(2))
     }, (argv) => {
         node_pre_gyp(["configure", "build"], argv);
     })
-    .command("publish", "publish to AWS S3", (yargs) => {
+    .command("package", "package binary", (yargs) => {
     }, (argv) => {
         node_pre_gyp(["package"], argv);
-        aws_publish();
     })
     .option("build-type", {
         choices: ["Release", "Debug"],

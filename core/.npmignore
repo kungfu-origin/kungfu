@@ -1,0 +1,9 @@
+cmake-build-debug
+build
+node_modules
+
+package-lock.json
+Pipfile.lock
+yarn.lock
+
+extensions

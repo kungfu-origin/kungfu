@@ -14,8 +14,8 @@
     "tests"
   ],
   "scripts": {
-    "build": "yarn run clean && yarn wsrun --serial --fast-exit build",
-    "build-cli": "yarn run clean && yarn wsrun --serial --fast-exit build-cli",
+    "build": "yarn wsrun --serial --fast-exit build",
+    "build-cli": "yarn wsrun --serial --fast-exit build-cli",
     "env-pypi-python": "npm config set kungfu-core:pypi https://pypi.python.org/simple",
     "env-pypi-aliyun": "npm config set kungfu-core:pypi http://mirrors.aliyun.com/pypi/simple",
     "clean": "yarn wsrun clean"
