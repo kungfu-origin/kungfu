@@ -36,15 +36,15 @@ jobs:
           yarn install
           yarn build
 
-      - name: Configure AWS Credentials
+      - name: Publish to AWS S3
         uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: cn-northwest-1
-
-      - name: Upload to AWS S3
-        run: yarn workspace @kungfu-trader/kungfu-core publish-binary
+        run: |
+          yarn workspace @kungfu-trader/kungfu-core run package
+          yarn workspace @kungfu-trader/kungfu-core publish-binary
 
       - name: Publish to GitHub Packages
         run: yarn workspace @kungfu-trader/kungfu-core publish-package
