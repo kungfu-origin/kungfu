@@ -1,5 +1,5 @@
 {
-  "name": "kfext_task_backward",
+  "name": "kfext_task_backward-hedge",
   "version": "1.0.0",
   "description": "",
   "main": "lib/index.js",
@@ -17,12 +17,13 @@
   "license": "ISC",
   "dependencies": {
     "kungfu-shared": "*",
+    "minimist": "^1.2.5",
     "moment": "^2.29.1",
     "rxjs": "^6.6.3"
   },
   "devDependencies": {
-    "@types/node": "^14.14.20",
     "@types/minimist": "^1.2.1",
+    "@types/node": "^14.14.20",
     "copyfiles": "^2.4.1",
     "pkg": "^4.4.9",
     "rimraf": "^3.0.2"
@@ -30,7 +31,7 @@
   "bin": "./lib/index.js",
   "kungfuConfig": {
     "type": "task",
-    "key": "backwardHedge",
+    "key": "backward",
     "name": "贴水对冲",
     "uniKey": [
       "accountId",
@@ -100,20 +101,20 @@
         "required": true
       },
       {
+        "key": "interval",
+        "name": "交易间隔",
+        "type": "int",
+        "tip": "单位毫秒ms",
+        "required": true,
+        "default": 5000
+      },
+      {
         "key": "maxBackward",
         "name": "最大年化贴水",
         "type": "int",
         "tip": "单位%",
         "required": true,
         "default": 12
-      },
-      {
-        "key": "interval",
-        "name": "交易间隔",
-        "type": "int",
-        "tip": "单位秒s",
-        "required": true,
-        "default": 5
       },
       {
         "key": "avgV0",

@@ -142,7 +142,7 @@ export default {
                     return {
                         processId: key,
                         processStatus: newProcess[key].status,
-                        createdAt: moment(newProcess[key].created_at).format('YYYY-MM-DD HH:mm:ss'),
+                        createdAt: newProcess[key].created_at ? moment(newProcess[key].created_at).format('YYYY-MM-DD HH:mm:ss') : '--',
                         ...newProcess[key]
                     }
                 })

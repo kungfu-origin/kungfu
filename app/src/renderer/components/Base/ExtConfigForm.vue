@@ -31,8 +31,8 @@
 					 <el-radio-group :disabled="isDisabled(item.key)" :class="item.key" size="mini" v-if="item.type === 'radio'" v-model="form[item.key]">
                         <el-radio 
 						v-for="option in resolvedSelectOrRatioOptions(item)"
-						:key="option.value"
-						:label="option.value">
+						:key="+option.value"
+						:label="+option.value">
 							{{ option.name }}
 						</el-radio>
                     </el-radio-group>

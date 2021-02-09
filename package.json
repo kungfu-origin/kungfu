@@ -8,9 +8,9 @@
   "workspaces": [
     "shared",
     "core",
-    "cli2",
     "kfext_task_timerTrader",
-    "kfext_task_backward",
+    "kfext_task_backwardHedge",
+    "cli2",
     "app",
     "tests"
   ],

@@ -8,7 +8,6 @@ _MaxBackward = 12%   # 交易最大年化贴水
 _TimeGap = 5         # 每5秒交易一次
 
 ### def
-t = 0
 flag = 0
 iniLot = 1     # 每次下单1张
 timeRemain = (now() - _End) / (_Start - _End)

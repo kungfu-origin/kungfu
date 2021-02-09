@@ -67,8 +67,17 @@ export default {
 
                     switch (dataType) {
                         case 'REQ_LEDGER_DATA':
-                            this.resLedgerData(parentId, pm2Id, accountId, processName)
+                            this.resLedgerData(parentId, pm2Id, accountId, ticker, processName)
                             break;
+                        case "REQ_QUOTE_DATA":
+                            this.resQuoteData(pm2Id, ticker, processName)
+                            break;
+                        case "REQ_POS_DATA":
+                            this.resPosData(pm2Id, accountId, processName)
+                            break
+                        case "REQ_ORDER_DATA":
+                            this.resOrderData(pm2Id, parentId, processName)
+                            break
                         case 'MAKE_ORDER_BY_PARENT_ID':
                             const makeOrderData = data.body;
                             const markOrderDataResolved = {
@@ -105,11 +114,58 @@ export default {
             })
         },
 
-        resLedgerData (parentId, pm2Id, accountId, processName) {
+        resQuoteData (pm2Id, ticker, processName) {
+            if (!watcher.isLive()) return;
+            watcher.step();
+            const ledger = watcher.ledger;
+            const quotes = Object.values(ledger.Quote || {})
+                .filter(quote => quote.instrument_id === ticker)
+                .map(quote => dealQuote(quote));
+
+            sendResDataToProcessId("QUOTE_DATA", pm2Id, processName, { quotes })
+        },
+
+        resPosData (pm2Id, accountId, processName) {
+            if (!watcher.isLive()) return;
+            watcher.step();
+            const ledger = watcher.ledger;
+            const positions = Object.values(ledger.Position || {});
+            const positionsResolved = transformTradingItemListToData(positions, 'account')[accountId] || [];
+
+            sendResDataToProcessId("POS_DATA", pm2Id, processName, { 
+                positions: positionsResolved
+            })
+        },
+
+        resOrderData (pm2Id, parentId, processName) {
+            if (!watcher.isLive()) return;
+            watcher.step();
+            const ledger = watcher.ledger;
+            const orders = this.getTargetOrdersByParentId(ledger.Order, parentId)
+
+            sendResDataToProcessId("ORDER_DATA", pm2Id, processName, { 
+                orders
+            })
+        },
+
+        sendResDataToProcessId (topic, pm2Id, processName, data) {
+            _pm2.sendDataToProcessId({
+                type: 'process:msg',
+                data,
+                id: pm2Id,
+                topic: topic
+            }, err => {
+                if (err) {
+                    console.error(processName, err)
+                }
+            })
+        },
+
+        resLedgerData (parentId, pm2Id, accountId, ticker, processName) {
             if (watcher.isLive()) {
                 watcher.step();
                 const ledger = watcher.ledger;
-                const { orders, positions, quotes } = this.buildLedgerDataForTask(ledger, accountId, parentId)
+                const { orders, positions, quotes } = this.buildLedgerDataForTask(ledger, accountId, parentId, ticker)
                 _pm2.sendDataToProcessId({
                     type: 'process:msg',
                     parentId,
@@ -120,7 +176,7 @@ export default {
                     },
                     id: pm2Id,
                     topic: 'LEDGER_DATA'
-                }, (err) => {
+                }, err => {
                     if (err) {
                         console.error(processName, err)
                     }
@@ -129,10 +185,12 @@ export default {
         },
 
         //pos, quote, orders
-        buildLedgerDataForTask (ledger, accountId, parentId) {
+        buildLedgerDataForTask (ledger, accountId, parentId, ticker) {
             const positions = Object.values(ledger.Position || {});
             const positionsResolved = transformTradingItemListToData(positions, 'account')[accountId] || [];
-            const quotes = Object.values(ledger.Quote || {});
+            const quotes = Object.values(ledger.Quote || {}).filter(quote => {
+                return quote.instrument_id === ticker
+            })
             const orders = this.getTargetOrdersByParentId(ledger.Order, parentId)
             return {
                 positions: positionsResolved,
@@ -150,7 +208,6 @@ export default {
         },
         
         bindIPCListener () {
-
             ipcRenderer.removeAllListeners('ipc-emit-tdMdList')
             ipcRenderer.on('ipc-emit-tdMdList', (event, { childWinId }) => {
                 const childWin = BrowserWindow.fromId(childWinId);

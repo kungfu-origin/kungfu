@@ -17,12 +17,13 @@
   "license": "ISC",
   "dependencies": {
     "kungfu-shared": "*",
+    "minimist": "^1.2.5",
     "moment": "^2.29.1",
     "rxjs": "^6.6.3"
   },
   "devDependencies": {
-    "@types/node": "^14.14.20",
     "@types/minimist": "^1.2.1",
+    "@types/node": "^14.14.20",
     "copyfiles": "^2.4.1",
     "pkg": "^4.4.9",
     "rimraf": "^3.0.2"
