@@ -1,0 +1,83 @@
+name: Build and Publish
+
+on:
+  push:
+    branches:
+      - ci
+
+jobs:
+  get_build_matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      - name: Get Build Matrix From JSON
+        id: set-matrix
+        uses: ./.github/actions/get-build-matrix
+
+  build:
+    needs: get_build_matrix
+    strategy:
+      matrix: ${{ fromJson(needs.get_build_matrix.outputs.matrix) }}
+    runs-on: ${{ matrix.os }}
+    env:
+      USE_HARD_LINKS: false
+    steps:
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v2.1.4
+        with:
+          node-version: '10.15.0'
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@kungfu-trader'
+
+      - name: Setup Python environment
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.7'
+
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      - name: Build Kungfu
+        run: |
+          pip install pipenv==2020.11.15
+          yarn env-pypi-python
+          yarn install
+          yarn build
+
+      - name: Upload Artifact to GitHub
+        uses: actions/upload-artifact@v2
+        with:
+          name: 'Kungfu-Installer-${{matrix.displayTargetName}}-${{github.ref}}-${{github.sha}}.zip'
+          path: |
+            app/build/app/*.dmg
+            app/build/app/*.exe
+            app/build/app/*.rpm
+            app/build/app/*.AppImage
+
+      - name: Configure AWS Crendentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: cn-northwest-1
+
+      - name: Publish to AWS S3
+        run: |
+          yarn workspace @kungfu-trader/kungfu-core run package
+          yarn workspace @kungfu-trader/kungfu-core run publish-binary
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      - name: Publish to GitHub Packages
+        run: yarn workspace @kungfu-trader/kungfu-core run publish-package
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
