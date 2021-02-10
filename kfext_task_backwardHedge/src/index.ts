@@ -26,6 +26,9 @@ console.log('[执行间隔]', LOOP_INTERVAL, 'ms')
 console.log('[目标标的] ', TICKER)
 console.log('===================================================')
 
+//获取当月/下月/当季/下季
+const T_M_TICKER = TICKER;
+const N_M_TICKER = TICKER
 
 
 //@ts-ignore

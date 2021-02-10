@@ -161,7 +161,7 @@ export default {
             const instrumentsSavedDate = localStorage.getItem('instrumentsSavedDate')
             if (!instrumentsSavedDate) {
                 return true
-            } else if (instrumentsSavedDate !== moment().format('YYYY-MM-DD')) {
+            } else if (instrumentsSavedDate !== moment().format('YYYY-MM-DD-HH-mm')) {
                 return true 
             } else {
                 return false
@@ -190,7 +190,7 @@ export default {
             if (instrumentsResolved.length) {
                 //for performance
                 let saveTimer = setTimeout(() => {
-                    localStorage.setItem('instrumentsSavedDate', moment().format('YYYY-MM-DD'))
+                    localStorage.setItem('instrumentsSavedDate', moment().format('YYYY-MM-DD-HH-mm'))
                     localStorage.setItem('instruments', JSON.stringify(instrumentsResolved))
                     this.$nextTick()
                         .then(() => {
