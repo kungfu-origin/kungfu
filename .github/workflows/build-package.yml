@@ -1,0 +1,86 @@
+name: Build Kungfu Package
+
+on:
+  push:
+    branches:
+      - ci
+
+jobs:
+  build_matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v2
+      - id: set-matrix
+        uses: JoshuaTheMiller/conditional-build-matrix
+        with:
+          inputFile: '.github/workflows/matrix_includes.json'
+          filter: '[?runOnBranch==`${{ github.ref }}` || runOnBranch==`always`]'
+
+  build:
+    needs: build_matrix
+    strategy:
+      matrix: ${{fromJson(needs.build_matrix.outputs.matrix)}}
+    runs-on: ${{ matrix.runs_on }}
+    env:
+      USE_HARD_LINKS: false
+    steps:
+      - name: Echo Build Matrix
+        run: |
+          echo "${{fromJson(needs.build_matrix.outputs.matrix)}}"
+          echo "---"
+          echo "${{ matrix }}"
+          echo "---"
+
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v2.1.4
+        with:
+          node-version: '10.15.0'
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@kungfu-trader'
+
+      - name: Setup Python environment
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.7'
+
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      - name: Build Kungfu
+        run: |
+          pip install pipenv==2020.11.15
+          yarn env-pypi-python
+          echo "building..."
+          node --version
+          python --version
+
+#      - name: Build Kungfu
+#        run: |
+#          pip install pipenv==2020.11.15
+#          yarn env-pypi-python
+#          yarn install
+#          yarn build
+#
+#      - name: Configure AWS Crendentials
+#        uses: aws-actions/configure-aws-credentials@v1
+#        with:
+#          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+#          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+#          aws-region: cn-northwest-1
+#
+#      - name: Publish to AWS S3
+#        run: |
+#          yarn workspace @kungfu-trader/kungfu-core run package
+#          yarn workspace @kungfu-trader/kungfu-core run publish-binary
+#
+#      - name: Publish to GitHub Packages
+#        run: yarn workspace @kungfu-trader/kungfu-core run publish-package
+#        env:
+#          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#
+#      - name: Upload Artifact to GitHub
+#        uses: actions/upload-artifact@v2
+#        with:
+#          path: app/build/app/*.dmg
