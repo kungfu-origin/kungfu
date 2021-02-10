@@ -1,11 +1,15 @@
 const {spawnSync} = require("child_process");
+const fs = require("fs");
+const path = require("path");
 
 function run(cmd, args, title) {
+    const real_cwd = fs.realpathSync(path.resolve(process.cwd()));
     console.log(`$ ${cmd} ${args.join(' ')}`);
     const result = spawnSync(cmd, args, {
         shell: true,
         stdio: ["inherit", "inherit", "inherit"],
-        windowsHide: true
+        windowsHide: true,
+        cwd: real_cwd
     });
     if (result.status !== 0) {
         console.log(`${title} exited with code ${result.status}`);
