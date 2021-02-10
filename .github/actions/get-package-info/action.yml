@@ -1,0 +1,13 @@
+name: 'Kungfu Package Info'
+author: "Keren Dong"
+description: 'Get kungfu package info from github'
+inputs:
+  name:
+    description: 'name of the package.'
+    required: true
+outputs:
+  info:
+    description: 'The package information.'
+runs:
+  using: 'node12'
+  main: 'dist/index.js'

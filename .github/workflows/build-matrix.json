@@ -5,7 +5,7 @@
   },
   {
     "displayTargetName": "CentOS-7",
-    "os": "ubuntu-latest",
+    "os": "ubuntu-20.04",
     "container_image": "docker.io/kungfutrader/kungfu-builder-centos:latest"
   },
   {

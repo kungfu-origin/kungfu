@@ -19,8 +19,8 @@ function run(cmd, args, title) {
 
 function node_pre_gyp(cmd, argv) {
     const build_type_arg = argv.buildType === "Debug" ? ["--debug"] : [];
-    const npx_cmd_arg = ["node-pre-gyp", ...build_type_arg, ...cmd].join(' ');
-    run("npx", ["-c", `"${npx_cmd_arg}"`], "node-pre-gyp");
+    const yarn_cmd_arg = ["node-pre-gyp", ...build_type_arg, ...cmd];
+    run("yarn", yarn_cmd_arg, "node-pre-gyp");
 }
 
 const argv = require("yargs/yargs")(process.argv.slice(2))

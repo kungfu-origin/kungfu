@@ -28,7 +28,7 @@
     "host": "https://kungfu.s3.cn-northwest-1.amazonaws.com.cn"
   },
   "scripts": {
-    "install": "npm run setup",
+    "install": "yarn setup",
     "setup": "cross-var node .build-tools/node-pre-gyp.js --build-type $npm_package_config_buildtype install",
     "build": "cross-var node .build-tools/node-pre-gyp.js --build-type $npm_package_config_buildtype build",
     "package": "node .build-tools/node-pre-gyp.js package",
@@ -50,8 +50,10 @@
     "glob": "^7.1.6",
     "nan": "^2.14.2",
     "node-addon-api": "^2.0.0",
+    "node-gyp": "^7.1.0",
     "node-pre-gyp": "^0.17.0",
-    "yargs": "^16.2.0"
+    "yargs": "^16.2.0",
+    "yarn": "*"
   },
   "devDependencies": {
     "cmake-js": "^6.1.0"

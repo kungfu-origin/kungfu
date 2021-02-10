@@ -1,9 +1,15 @@
 name: Build and Publish
 
 on:
-  push:
-    branches:
-      - ci
+  workflow_dispatch:
+    inputs:
+      overwrite:
+        description: 'Overwrite package with existing version'
+        required: true
+        default: 'false'
+#  push:
+#    branches:
+#      - ci
 
 jobs:
   get_build_matrix:
@@ -11,7 +17,7 @@ jobs:
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
-      - name: Checkout Code
+      - name: Checkout
         uses: actions/checkout@v2
 
       - name: Get Build Matrix From JSON
@@ -26,6 +32,9 @@ jobs:
     env:
       USE_HARD_LINKS: false
     steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
       - name: Setup Node.js environment
         uses: actions/setup-node@v2.1.4
         with:
@@ -38,9 +47,6 @@ jobs:
         with:
           python-version: '3.7'
 
-      - name: Checkout Code
-        uses: actions/checkout@v2
-
       - name: Build Kungfu
         run: |
           pip install pipenv==2020.11.15
@@ -48,20 +54,24 @@ jobs:
           yarn install
           yarn build
 
-      - name: Upload Errors to GitHub
+      - name: Collect Kungfu Build Info
         uses: actions/upload-artifact@v2
         if: failure()
         with:
-          name: 'Build-Errors-${{matrix.displayTargetName}}-${{github.sha}}.zip'
+          # https://docs.github.com/en/actions/reference/context-and-expression-syntax-for-github-actions#github-context
+          name: 'Kungfu-Build-Info-${{matrix.displayTargetName}}-${{github.actor}}-${{github.sha}}'
           path: |
             yarn.lock
-            core/build/
+            core/Pipfile.lock
+            core/build/CMakeFiles/
+            core/build/kfc-conf/
+            core/build/*.txt
           if-no-files-found: ignore
 
-      - name: Upload Artifact to GitHub
+      - name: Upload Kungfu Installer
         uses: actions/upload-artifact@v2
         with:
-          name: 'Kungfu-Installer-${{matrix.displayTargetName}}-${{github.sha}}.zip'
+          name: 'Kungfu-Installer-${{matrix.displayTargetName}}-${{github.sha}}'
           path: |
             app/build/app/*.dmg
             app/build/app/*.exe
@@ -85,7 +95,7 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Code
+      - name: Checkout
         uses: actions/checkout@v2
 
       - name: Publish to GitHub Packages
