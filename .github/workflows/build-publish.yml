@@ -48,15 +48,26 @@ jobs:
           yarn install
           yarn build
 
+      - name: Upload Errors to GitHub
+        uses: actions/upload-artifact@v2
+        if: failure()
+        with:
+          name: 'Build-Errors-${{matrix.displayTargetName}}-${{github.sha}}.zip'
+          path: |
+            yarn.lock
+            core/build/
+          if-no-files-found: ignore
+
       - name: Upload Artifact to GitHub
         uses: actions/upload-artifact@v2
         with:
-          name: 'Kungfu-Installer-${{matrix.displayTargetName}}-${{github.ref}}-${{github.sha}}.zip'
+          name: 'Kungfu-Installer-${{matrix.displayTargetName}}-${{github.sha}}.zip'
           path: |
             app/build/app/*.dmg
             app/build/app/*.exe
             app/build/app/*.rpm
             app/build/app/*.AppImage
+          if-no-files-found: ignore
 
       - name: Configure AWS Crendentials
         uses: aws-actions/configure-aws-credentials@v1
