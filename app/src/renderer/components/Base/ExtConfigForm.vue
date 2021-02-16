@@ -56,6 +56,8 @@
 						:label="source"
 						:value="source"
 						>
+						<span>{{ source }}</span>
+						<el-tag :type="mdAccountSource[source].type">{{(SourceTypeConfig[mdAccountSource[source].typeName] || {}).name || ''}}</el-tag>
 						</el-option>	
 					</el-select>
 					 <el-select :disabled="isDisabled(item.key)" :class="item.key" size="mini" v-if="item.type === 'exchangeId'" v-model.trim="form[item.key]">
@@ -167,7 +169,6 @@ export default {
 	},
 
 	mounted () {
-		console.log(this.mdAccountSource, '---')
 		this.initForm();
 	},
 
@@ -175,7 +176,7 @@ export default {
 		...mapState({
 			tdList: state => state.ACCOUNT.tdList || [], 
             tdAccountSource: state => state.BASE.tdAccountSource || {},
-            mdAccountSource: state => state.BASE.mdAccountSource || {},
+			mdAccountSource: state => state.BASE.mdAccountSource || {},
 			accountsAsset: state => state.ACCOUNT.accountsAsset,
 
 		}),
