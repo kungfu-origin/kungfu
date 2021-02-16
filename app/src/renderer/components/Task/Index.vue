@@ -91,7 +91,7 @@ import { mapState } from 'vuex';
 
 import SetTaskDialog from './SetTaskDialog';
 
-import { getExtensionConfigs, ifProcessRunning, findTargetFromArray, deepClone } from '__gUtils/busiUtils';
+import { getExtensionConfigs, findTargetFromArray } from '__gUtils/busiUtils';
 import { deleteProcess } from '__gUtils/processUtils';
 import { removeFileFolder } from '__gUtils/fileUtils';
 import { TASK_EXTENSION_DIR, buildProcessLogPath } from '__gConfig/pathConfig';
@@ -172,7 +172,10 @@ export default {
 
         handleOpenUpdateTaskDialog (data) {
             this.setTaskMethod = 'update';
-            this.setTaskInitData = minimist(data.args, { string: 'ticker', boolean: 'lastSingularity' })
+            //TODO 写活
+            const minimistConfig = this.getMinimistConfig()
+            console.log(minimistConfig, '--')
+            this.setTaskInitData = minimist(data.args, minimistConfig)
             this.setTaskInitKey = this.getTaskConfigKeyFromProcessId(data.processId)
             this.setTaskTarget = data;
             this.setTaskDialogVisiblity = true;
@@ -230,6 +233,32 @@ export default {
                 args: args.join(' '),
                 cwd
             })
+        },
+
+        getMinimistConfig () {
+            let minimistConfig = {
+                string: [],
+                boolean: [],
+            };
+            this.extConfigList.forEach(config => {
+                const c = config.config;
+                c.forEach(item => {
+                    const { key, type } = item;
+                    if (type === 'instrumentId') {
+                        if (!minimistConfig.string.includes(key)) {
+                            minimistConfig.string.push(key)                        
+                        }
+                    }
+
+                    if (type === 'bool') {
+                        if (!minimistConfig.boolean.includes(key)) {
+                            minimistConfig.boolean.push(key)
+                        }
+                    }
+                })
+            })
+
+            return minimistConfig
         },
 
         formUnikeyInProcessName (uniKey, form) {
