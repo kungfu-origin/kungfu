@@ -11,8 +11,7 @@
     "kfext_task_timerTrader",
     "kfext_task_backwardHedge",
     "cli2",
-    "app",
-    "tests"
+    "app" 
   ],
   "scripts": {
     "postinstall": "yarn wsrun --serial install-deps",

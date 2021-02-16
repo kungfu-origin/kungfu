@@ -49,6 +49,15 @@
                             <span style="float: right">可用：{{getAvailCash(account.account_id)}}</span>
                         </el-option>
                     </el-select>
+					<el-select :disabled="isDisabled(item.key)" :class="item.key" size="mini" v-if="item.type === 'source'"  v-model.trim="form[item.key]">
+						<el-option
+						v-for="source in Object.keys(mdAccountSource)"
+						:key="source"
+						:label="source"
+						:value="source"
+						>
+						</el-option>	
+					</el-select>
 					 <el-select :disabled="isDisabled(item.key)" :class="item.key" size="mini" v-if="item.type === 'exchangeId'" v-model.trim="form[item.key]">
                         <el-option
 						v-for="option in ExchangeIds"
@@ -158,6 +167,7 @@ export default {
 	},
 
 	mounted () {
+		console.log(this.mdAccountSource, '---')
 		this.initForm();
 	},
 
@@ -165,7 +175,9 @@ export default {
 		...mapState({
 			tdList: state => state.ACCOUNT.tdList || [], 
             tdAccountSource: state => state.BASE.tdAccountSource || {},
-            accountsAsset: state => state.ACCOUNT.accountsAsset,
+            mdAccountSource: state => state.BASE.mdAccountSource || {},
+			accountsAsset: state => state.ACCOUNT.accountsAsset,
+
 		}),
 	},
 
@@ -175,7 +187,11 @@ export default {
 			handler (newVal) {
 				this.$emit('input', newVal)
 			}
-		} 
+		}, 
+
+		mdAccountSource (val) {
+			console.log(val, '===')
+		}
 	},
 
 	methods: {		

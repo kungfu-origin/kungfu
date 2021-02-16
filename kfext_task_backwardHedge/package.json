@@ -40,20 +40,46 @@
     "config": [
       {
         "key": "accountId",
-        "name": "账户",
+        "name": "交易账户",
         "type": "account",
         "required": true
       },
       {
         "key": "ticker",
-        "name": "标的",
+        "name": "目标合约",
         "type": "instrumentId",
+        "exchangeIdKey": "tickerExchangeId",
         "required": true
       },
       {
-        "key": "exchangeId",
-        "name": "交易所",
+        "key": "tickerExchangeId",
+        "name": "目标合约交易所",
         "type": "exchangeId",
+        "required": true
+      },
+      {
+        "key": "tickerMd",
+        "name": "合约行情柜台",
+        "type": "source",
+        "required": true
+      },
+      {
+        "key": "index",
+        "name": "目标指数",
+        "type": "instrumentId",
+        "exchangeIdKey": "indexExchangeId",
+        "required": true
+      },
+      {
+        "key": "indexExchangeId",
+        "name": "目标指数交易所",
+        "type": "exchangeId",
+        "required": true
+      },
+      {
+        "key": "indexMd",
+        "name": "指数行情柜台",
+        "type": "source",
         "required": true
       },
       {
@@ -123,7 +149,7 @@
         "required": true
       },
       {
-        "key": "avr gV1",
+        "key": "avgV1",
         "name": "下月周均成交量",
         "type": "int",
         "required": true
