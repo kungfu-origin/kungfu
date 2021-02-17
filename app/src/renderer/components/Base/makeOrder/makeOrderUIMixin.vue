@@ -499,10 +499,23 @@ export default {
         },
 
         buildMakeOrderFormInfo (makeOrderForm) {
-            console.log(makeOrderForm)
-            const { instrument_type, side, offset, volume, limit_price, accountId, instrument_id } = makeOrderForm;
-            
-            return '确认下单'
+            const { side, offset, volume, limit_price, accountId, instrument_id, price_type } = makeOrderForm;
+
+            const sideName = SideName[side];
+            const offsetName = OffsetName[offset];
+            const priceType = PriceType[price_type];
+
+            const tips = `确认下单
+            标的 ${instrument_id},
+            ${sideName},
+            ${offsetName},
+            ${priceType},
+            价格 ${limit_price},
+            数量 ${volume},
+            下单账户 ${accountId || this.currentAccountResolved}
+            `
+
+            return tips
         },
 
         getInstrumentType (accountId) {

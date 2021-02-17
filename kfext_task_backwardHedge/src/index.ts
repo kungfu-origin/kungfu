@@ -9,7 +9,7 @@ const argv = minimist(process.argv.slice(2), {
     string: ['ticker', 'index']
 })
 
-const { ticker, tickerExchangeId, index, indexExchangeId, side, offset, volume, steps, triggerTime, finishTime, interval, parentId, accountId, lastSingularity, lastSingularityMilliSecond, maxLotByStep } = argv;
+const { ticker, tickerExchangeId, tickerMd, index, indexExchangeId, indexMd, side, offset, volume, steps, triggerTime, finishTime, interval, parentId, accountId, lastSingularity, lastSingularityMilliSecond, maxLotByStep } = argv;
 
 const triggerTimeStr = moment(triggerTime).format('YYYYMMDD HH:mm:ss');
 const finishTimeStr = moment(finishTime).format('YYYYMMDD HH:mm:ss');
@@ -39,7 +39,7 @@ process.send({
         body: {
             ticker: TICKER,
             exchangeId: tickerExchangeId,
-            accountId
+            sourceId: tickerMd
         }
     }
 })
@@ -52,9 +52,9 @@ process.send({
     data: {
         type: 'SUBSCRIBE_BY_TICKER',
         body: {
-            ticker: TICKER,
+            ticker: index,
             exchangeId: indexExchangeId,
-            accountId
+            sourceId: indexMd
         }
     }
 })

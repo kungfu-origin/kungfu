@@ -63,7 +63,7 @@ export default {
                     const pm2Id = processData.pm_id;
                     const processName = processData.name;
                     const dataType = data.type;
-                    let { accountId, exchangeId, ticker, parentId } = data.body || {};
+                    let { accountId, exchangeId, ticker, parentId, sourceId } = data.body || {};
 
                     switch (dataType) {
                         case 'REQ_LEDGER_DATA':
@@ -98,7 +98,7 @@ export default {
                                 })
                             break
                         case "SUBSCRIBE_BY_TICKER":
-                            const sourceName = (accountId || '').toSourceName();
+                            const sourceName = accountId ? (accountId || '').toSourceName() : sourceId;
                             this.subscribeTicker(sourceName, exchangeId, ticker)
                             break
                         case "TIME_ALERT":
