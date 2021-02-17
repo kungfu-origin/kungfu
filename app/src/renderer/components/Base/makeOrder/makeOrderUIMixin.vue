@@ -529,6 +529,7 @@ export default {
             const results = this.getSearchTickers(queryString);
             cb(results)
         },
+        
 
         getSearchTickers (queryString = '') {
             return this.instrumentIds.filter(item => {
