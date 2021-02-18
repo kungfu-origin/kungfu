@@ -62,7 +62,7 @@ process.send({
 
 console.log(`[订阅] ${TICKER} ${exchangeId} ${accountId}`)
 
-//行情request
+//ledger data request
 var reqTradingDataTimer = setInterval(() => {
     //@ts-ignore
     process.send({
@@ -71,7 +71,8 @@ var reqTradingDataTimer = setInterval(() => {
             type: 'REQ_LEDGER_DATA',
             body: {
                 parentId: PARENT_ID,
-                accountId
+                accountId,
+                ticker: TICKER
             }
         }
     })

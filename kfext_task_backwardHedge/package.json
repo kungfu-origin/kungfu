@@ -1,5 +1,5 @@
 {
-  "name": "kfext_task_timer-trader",
+  "name": "kfext_task_backward-hedge",
   "version": "1.0.0",
   "description": "",
   "main": "lib/index.js",
@@ -31,8 +31,8 @@
   "bin": "./lib/index.js",
   "kungfuConfig": {
     "type": "task",
-    "key": "timerTrader",
-    "name": "定时任务",
+    "key": "backward",
+    "name": "贴水对冲",
     "uniKey": [
       "accountId",
       "ticker"
@@ -40,20 +40,46 @@
     "config": [
       {
         "key": "accountId",
-        "name": "账户",
+        "name": "交易账户",
         "type": "account",
         "required": true
       },
       {
         "key": "ticker",
-        "name": "标的",
+        "name": "目标合约",
         "type": "instrumentId",
+        "exchangeIdKey": "tickerExchangeId",
         "required": true
       },
       {
-        "key": "exchangeId",
-        "name": "交易所",
+        "key": "tickerExchangeId",
+        "name": "目标合约交易所",
         "type": "exchangeId",
+        "required": true
+      },
+      {
+        "key": "tickerMd",
+        "name": "合约行情柜台",
+        "type": "source",
+        "required": true
+      },
+      {
+        "key": "index",
+        "name": "目标指数",
+        "type": "instrumentId",
+        "exchangeIdKey": "indexExchangeId",
+        "required": true
+      },
+      {
+        "key": "indexExchangeId",
+        "name": "目标指数交易所",
+        "type": "exchangeId",
+        "required": true
+      },
+      {
+        "key": "indexMd",
+        "name": "指数行情柜台",
+        "type": "source",
         "required": true
       },
       {
@@ -77,16 +103,7 @@
         "key": "offset",
         "name": "开平",
         "type": "radio",
-        "data": [
-          {
-            "name": "开",
-            "value": 0
-          },
-          {
-            "name": "平",
-            "value": 1
-          }
-        ],
+        "options": "offset",
         "default": 0,
         "required": true
       },
@@ -110,35 +127,44 @@
         "required": true
       },
       {
-        "key": "steps",
-        "name": "总次数",
+        "key": "interval",
+        "name": "交易间隔",
         "type": "int",
-        "tip": "将以总次数均分总时长，建议保证每步间隔不能太短（>500ms）",
+        "tip": "单位毫秒ms",
+        "required": true,
+        "default": 5000
+      },
+      {
+        "key": "maxBackward",
+        "name": "最大年化贴水",
+        "type": "int",
+        "tip": "单位%",
+        "required": true,
+        "default": 12
+      },
+      {
+        "key": "avgV0",
+        "name": "当月周均成交量",
+        "type": "int",
         "required": true
       },
       {
-        "key": "maxLotByStep",
-        "name": "单次最大手数",
+        "key": "avgV1",
+        "name": "下月周均成交量",
         "type": "int",
-        "tip": "各个交易所不同，默认100",
-        "required": true,
-        "default": 100
+        "required": true
       },
       {
-        "key": "lastSingularity",
-        "name": "临界下单",
-        "type": "bool",
-        "required": false,
-        "tip": "开启后最后一步下单操作会在结束时间前执行，默认1000毫秒",
-        "default": true
+        "key": "avgV2",
+        "name": "当季周均成交量",
+        "type": "int",
+        "required": true
       },
       {
-        "key": "lastSingularityMilliSecond",
-        "name": "临界下单时间",
+        "key": "avgV3",
+        "name": "下季周均成交量",
         "type": "int",
-        "required": false,
-        "tip": "设置临界下单临界时间, 单位毫秒，时间默认1000毫秒",
-        "default": 1000
+        "required": true
       }
     ]
   }

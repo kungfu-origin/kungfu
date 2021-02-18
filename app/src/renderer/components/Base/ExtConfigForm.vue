@@ -31,8 +31,8 @@
 					 <el-radio-group :disabled="isDisabled(item.key)" :class="item.key" size="mini" v-if="item.type === 'radio'" v-model="form[item.key]">
                         <el-radio 
 						v-for="option in resolvedSelectOrRatioOptions(item)"
-						:key="option.value"
-						:label="option.value">
+						:key="+option.value"
+						:label="+option.value">
 							{{ option.name }}
 						</el-radio>
                     </el-radio-group>
@@ -49,6 +49,17 @@
                             <span style="float: right">可用：{{getAvailCash(account.account_id)}}</span>
                         </el-option>
                     </el-select>
+					<el-select :disabled="isDisabled(item.key)" :class="item.key" size="mini" v-if="item.type === 'source'"  v-model.trim="form[item.key]">
+						<el-option
+						v-for="source in Object.keys(mdAccountSource)"
+						:key="source"
+						:label="source"
+						:value="source"
+						>
+						<span>{{ source }}</span>
+						<el-tag :type="mdAccountSource[source].type">{{(SourceTypeConfig[mdAccountSource[source].typeName] || {}).name || ''}}</el-tag>
+						</el-option>	
+					</el-select>
 					 <el-select :disabled="isDisabled(item.key)" :class="item.key" size="mini" v-if="item.type === 'exchangeId'" v-model.trim="form[item.key]">
                         <el-option
 						v-for="option in ExchangeIds"
@@ -71,6 +82,7 @@
 							<div class="make-order-instrument-ids__warp">
                                 <div class="make-order-instrument-id-item">
                                     <span class="ticker">{{ item.instrument_id }}</span>
+                                    <span class="name">{{ item.instrument_name }}</span>
                                 </div>
                                 <div class="make-order-instrument-id-item">{{ (item.exchange_id || '').toUpperCase() }}</div>
                             </div>
@@ -94,7 +106,6 @@ import { Autocomplete } from 'element-ui';
 
 import { deepClone } from '__gUtils/busiUtils';
 import { OffsetName, SideName, SourceTypeConfig, ExchangeIds } from 'kungfu-shared/config/tradingConfig';
-import { getFutureTickersConfig, getStockTickersConfig } from '__assets/base'
 
 import instrumentsMixin from '@/assets/js/mixins/instrumentsMixin';
 
@@ -165,7 +176,9 @@ export default {
 		...mapState({
 			tdList: state => state.ACCOUNT.tdList || [], 
             tdAccountSource: state => state.BASE.tdAccountSource || {},
-            accountsAsset: state => state.ACCOUNT.accountsAsset,
+			mdAccountSource: state => state.BASE.mdAccountSource || {},
+			accountsAsset: state => state.ACCOUNT.accountsAsset,
+
 		}),
 	},
 
@@ -175,15 +188,19 @@ export default {
 			handler (newVal) {
 				this.$emit('input', newVal)
 			}
-		} 
+		}, 
+
+		mdAccountSource (val) {
+			console.log(val, '===')
+		}
 	},
 
 	methods: {		
 		handleSelectInstrumentId (key, exchangeIdKey, item) {
 			exchangeIdKey = exchangeIdKey || 'exchangeId';
-            const { ticker, exchangeId } = item;
-            this.$set(this.form, key, ticker)
-            this.$set(this.form, exchangeIdKey, (exchangeId || '').toUpperCase())
+            const { instrument_id, exchange_id } = item;
+            this.$set(this.form, key, instrument_id)
+            this.$set(this.form, exchangeIdKey, (exchange_id || '').toUpperCase())
             
             this.$nextTick()
                 .then(() => {
@@ -234,13 +251,14 @@ export default {
 
 		getSearchTickers (queryString = '') {
            return this.instrumentIds.filter(item => {
-                const { instrument_id, exchange_id } = {
-                    instrument_id: '',
+                const { instrument_id, instrument_name, exchange_id } = {
+					instrument_id: '',
+					instrument_name: '',
                     exchange_id: '',
                     ...item
                 }
 
-                if (`${instrument_id}${exchange_id}`.toLowerCase().includes(queryString.toLowerCase())) return true;
+                if (`${instrument_id}${instrument_name}${exchange_id}`.toLowerCase().includes(queryString.toLowerCase())) return true;
                 return false
             })
         },

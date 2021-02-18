@@ -46,6 +46,7 @@
                             <div class="make-order-instrument-ids__warp">
                                 <div class="make-order-instrument-id-item">
                                     <span class="ticker">{{ item.instrument_id }}</span>
+                                    <span class="name">{{ item.instrument_name }}</span>
                                 </div>
                                 <div class="make-order-instrument-id-item">{{ (item.exchange_id || '').toUpperCase() }}</div>
                             </div>
@@ -335,26 +336,17 @@ export default {
             }
 
             if (this.makeOrderForm.price_type === 0) {
-                
                 if (this.makeOrderForm.side === 0) { //买
-                    
                     const price = +this.makeOrderForm.limit_price;
-                    
                     if (!+price) return '';
-                    
                     if (!+this.avaliableCash) return ''
-                    
                     return Math.floor(this.avaliableCash / price)
-
                 } else if (this.makeOrderForm.side === 1) { //卖
-                    
                     const { instrumentId, totalVolume } = this.makeOrderByPosData;
-
                     if (instrumentId !== this.makeOrderForm.instrument_id) {
                         return ''
                     }
-
-                    return this.makeOrderByPosData.totalVolume || ''
+                    return totalVolume || ''
                 }                
             } 
 
@@ -461,9 +453,9 @@ export default {
         handleSelectInstrumentId (item) {
             this.setInstumentIdTimer && clearTimeout(this.setInstumentIdTimer)
             this.clearData(true)
-            const { ticker, exchangeId } = item;
-            this.$set(this.makeOrderForm, 'instrument_id', ticker)
-            this.$set(this.makeOrderForm, 'exchange_id', (exchangeId || '').toUpperCase())
+            const { instrument_id, exchange_id } = item;
+            this.$set(this.makeOrderForm, 'instrument_id', instrument_id)
+            this.$set(this.makeOrderForm, 'exchange_id', (exchange_id || '').toUpperCase())
             
             this.$nextTick()
                 .then(() => {
@@ -478,7 +470,6 @@ export default {
 
         handleMakeOrder () {
             this.$refs['make-order-form'].validate(valid => {
-                
                 if(valid) {
 
                     //当下单不是从posdata进入
@@ -528,13 +519,14 @@ export default {
 
         getSearchTickers (queryString = '') {
             return this.instrumentIds.filter(item => {
-                const { instrument_id, exchange_id } = {
-                    instrument_id: '',
+               const { instrument_id, instrument_name, exchange_id } = {
+					instrument_id: '',
+					instrument_name: '',
                     exchange_id: '',
                     ...item
                 }
 
-                if (`${instrument_id}${exchange_id}`.toLowerCase().includes(queryString.toLowerCase())) return true;
+                if (`${instrument_id}${instrument_name}${exchange_id}`.toLowerCase().includes(queryString.toLowerCase())) return true;
                 return false
             })
         },

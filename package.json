@@ -8,10 +8,10 @@
   "workspaces": [
     "shared",
     "core",
-    "cli2",
     "kfext_task_timerTrader",
-    "app",
-    "tests"
+    "kfext_task_backwardHedge",
+    "cli2",
+    "app" 
   ],
   "scripts": {
     "postinstall": "yarn wsrun --serial install-deps",
