@@ -1,15 +1,14 @@
 [
   {
-    "displayTargetName": "MacOS",
+    "name": "MacOS",
     "os": "macos-latest"
   },
   {
-    "displayTargetName": "CentOS-7",
-    "os": "ubuntu-20.04",
-    "container_image": "docker.io/kungfutrader/kungfu-builder-centos:latest"
+    "name": "Linux",
+    "os": "ubuntu-20.04"
   },
   {
-    "displayTargetName": "Windows",
+    "name": "Windows",
     "os": "windows-latest"
   }
 ]

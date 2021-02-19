@@ -1,5 +1,5 @@
 {
-  "name": "@kungfu-trader/get-build-matrix",
+  "name": "@kungfu-trader/action-clean-stale-packages",
   "version": "1.0.0",
   "main": "dist/index.js",
   "repository": "https://github.com/kungfu-trader/kungfu",
@@ -9,7 +9,8 @@
     "build": "ncc build index.js"
   },
   "dependencies": {
-    "@actions/core": "^1.2.6"
+    "@actions/core": "^1.2.6",
+    "node-fetch": "^2.6.0"
   },
   "devDependencies": {
     "@vercel/ncc": "^0.26.1"

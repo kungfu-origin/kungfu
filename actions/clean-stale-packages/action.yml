@@ -2,8 +2,8 @@ name: 'Kungfu Package Info'
 author: "Keren Dong"
 description: 'Get kungfu package info from github'
 inputs:
-  name:
-    description: 'name of the package.'
+  action-path:
+    description: 'Use github.action_path'
     required: true
 outputs:
   info:
