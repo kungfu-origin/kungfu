@@ -11,10 +11,7 @@ function run(cmd, args, title) {
         windowsHide: true,
         cwd: real_cwd
     });
-    if (result.status !== 0) {
-        console.log(`${title} exited with code ${result.status}`);
-        process.exit(result.status);
-    }
+    process.exit(result.status);
 }
 
 function node_pre_gyp(cmd, argv) {

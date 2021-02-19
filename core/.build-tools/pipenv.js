@@ -1,7 +1,7 @@
 const fs = require("fs");
 const fse = require("fs-extra");
 const path = require("path");
-const {spawn} = require("child_process");
+const {spawnSync} = require("child_process");
 
 const argv = require("yargs/yargs")(process.argv.slice(2))
     .option("python")
@@ -14,21 +14,17 @@ const python_opt = argv.python && !fse.existsSync(lock_path) ? ["--python", argv
 const pypi_opt = argv.pypiMirror ? ["--pypi-mirror", argv.pypiMirror] : [];
 const pipenv_args = [...python_opt, ...pypi_opt, ...argv._];
 
-console.log("$ pipenv", pipenv_args.join(' '));
+console.log(`$ pipenv ${pipenv_args.join(' ')}`);
 
-const child = spawn("pipenv", pipenv_args, {
+const result = spawnSync("pipenv", pipenv_args, {
     shell: true,
     stdio: ["inherit", "inherit", "inherit"],
     windowsHide: true
 });
 
-child.on("error", (error) => {
-    process.stderr.write(error)
-});
+if (result.status === 0) {
+    const time = new Date();
+    fs.utimesSync(lock_path, time, time);
+}
 
-child.on("exit", (code) => {
-    if (code === 0) {
-        const time = new Date();
-        fs.utimesSync(lock_path, time, time);
-    }
-});
+process.exit(result.status);
