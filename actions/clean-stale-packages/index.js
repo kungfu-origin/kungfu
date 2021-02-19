@@ -1,10 +1,12 @@
 const core = require('@actions/core');
-const {getPackage} = require("./query.js");
+const github = require("@actions/github");
+const {cleanStalePackages} = require("./clean.js");
+
 try {
-    const inputRepo = core.getInput('repo');
-    const inputPackage = core.getInput('package');
-    getPackage(argv.token, argv.owner, inputRepo, inputPackage);
-    core.setOutput("matrix", outputString);
+    const context = github.context;
+    const token = core.getInput('token');
+    const actionPath = core.getInput('action-path');
+    cleanStalePackages(context.repo.owner, token, context.repo.repo, actionPath);
 } catch (error) {
     core.setFailed(error.message);
 }

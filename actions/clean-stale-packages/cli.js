@@ -7,6 +7,6 @@ const argv = require("yargs/yargs")(process.argv.slice(2))
     .help()
     .argv;
 
-const {getPackage} = require("./query.js");
+const {cleanStalePackages} = require("./clean.js");
 
-getPackage(argv.owner, argv.token, argv.repo, argv.actionPath);
+cleanStalePackages(argv.owner, argv.token, argv.repo, argv.actionPath);

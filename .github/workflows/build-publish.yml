@@ -48,6 +48,7 @@ jobs:
           python-version: '3.7'
 
       - name: Build Kungfu
+        if: ${{ github.event.inputs.overwrite }} == "true"
         run: |
           pip install pipenv==2020.11.15
           yarn env-pypi-python
@@ -87,6 +88,7 @@ jobs:
           aws-region: cn-northwest-1
 
       - name: Publish to AWS S3
+        if: ${{ github.event.inputs.overwrite }} == "true"
         run: |
           yarn workspace @kungfu-trader/kungfu-core run package
           yarn workspace @kungfu-trader/kungfu-core run publish-binary
@@ -98,9 +100,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Delete Stale Packages
-        id: set-matrix
+      - name: Clean Stale Packages
+        if: ${{ github.event.inputs.overwrite }} == "true"
         uses: ./actions/clean-stale-packages
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          action-path: ${{ github.action_path }}
 
       - name: Publish to GitHub Packages
         if: ${{ github.event.inputs.overwrite }} == "true"

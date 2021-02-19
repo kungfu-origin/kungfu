@@ -2,12 +2,12 @@ name: 'Kungfu Package Info'
 author: "Keren Dong"
 description: 'Get kungfu package info from github'
 inputs:
+  token:
+    description: 'Use secrets.GITHUB_TOKEN'
+    required: true
   action-path:
     description: 'Use github.action_path'
     required: true
-outputs:
-  info:
-    description: 'The package information.'
 runs:
   using: 'node12'
   main: 'dist/index.js'
