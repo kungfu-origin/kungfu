@@ -20,6 +20,11 @@ if (pro) {
         "from": path.join(__dirname, '..', '..', 'kfext_task_timerTrader', 'lib'),
         "to": "kungfu-extensions/timer-trader"
     })
+
+    baseConfig.extraResources.push({
+        "from": path.join(__dirname, '..', '..', 'kfext_task_backwardHedge', 'lib'),
+        "to": "kungfu-extensions/backward-hedge"
+    })
 }
 
 if (target) {

@@ -16,7 +16,7 @@ const argv = minimist(process.argv.slice(2), {
     string: ['ticker', 'index']
 })
 
-const { ticker, tickerExchangeId, tickerMd, index, indexExchangeId, indexMd, volume, triggerTime, finishTime, interval, accountId, avgV0, avgV1, avgV2, avgV3, maxBackward } = argv;
+const { ticker, tickerExchangeId, tickerMd, index, indexExchangeId, indexMd, side, offset, volume, triggerTime, finishTime, interval, accountId, avgV0, avgV1, avgV2, avgV3, maxBackward } = argv;
 
 const triggerTimeStr = moment(triggerTime).format('YYYYMMDD HH:mm:ss');
 const finishTimeStr = moment(finishTime).format('YYYYMMDD HH:mm:ss');
@@ -105,7 +105,6 @@ process.send({
 
 console.log(`[订阅] 下季合约 ${N_S_TICKER} ${tickerExchangeId} ${accountId}`)
 
-
 //@ts-ignore
 process.send({
     type: 'process:msg',
@@ -120,7 +119,6 @@ process.send({
 })
 
 console.log(`[订阅] 指数 ${index} ${indexExchangeId} ${accountId}`)
-
 
 var reqQuoteTimer = setInterval(() => {
     //@ts-ignore
@@ -202,7 +200,6 @@ const combineLatestObserver = combineLatest(
     }
 )
 
-
 var dealedSeconds = -1000000000;
 var tradeVolumeByStep = 1; //initLot;
 var tradedVolume = 0; //flag
@@ -238,9 +235,9 @@ combineLatestObserver
             
             dealedCount = count;
             
-            console.log('====================================================================')
-            console.log(`====================== [PROCESS] Loop ${count} ==========================`)
-            console.log('====================================================================')
+            console.log('============================================================')
+            console.log(`=================== [PROCESS] Loop ${count} =====================`)
+            console.log('============================================================')
 
             return true;
         })
@@ -251,18 +248,30 @@ combineLatestObserver
   
         console.log('[信息获取] =========================')
 
-        //price: P
-        const indexP = +(quotes[index] || {}).lastPrice || 0;
-        const f0P =  +(quotes[T_M_TICKER] || {}).lastPrice || 0;
-        const f1P =  +(quotes[N_M_TICKER] || {}).lastPrice || 0;
-        const f2P =  +(quotes[T_S_TICKER] || {}).lastPrice || 0;
-        const f3P =  +(quotes[N_S_TICKER] || {}).lastPrice || 0;
+        //price: P, price data: PD
+        const indexPD = quotes[index] || {}
+        const f0PD =    quotes[T_M_TICKER] || {};
+        const f1PD =    quotes[N_M_TICKER] || {};
+        const f2PD =    quotes[T_S_TICKER] || {};
+        const f3PD =    quotes[N_S_TICKER] || {};
+        
+        const indexP =  +indexPD.lastPrice || 0
+        const f0BP =    +(f0PD.bidPrices || [])[0] || 0    
+        const f1BP =    +(f1PD.bidPrices || [])[0] || 0    
+        const f2BP =    +(f2PD.bidPrices || [])[0] || 0    
+        const f3BP =    +(f3PD.bidPrices || [])[0] || 0   
+        
+       
+        const f0AP =    +(f0PD.askPrices || [])[0] || 0    
+        const f1AP =    +(f1PD.askPrices || [])[0] || 0    
+        const f2AP =    +(f2PD.askPrices || [])[0] || 0    
+        const f3AP =    +(f3PD.askPrices || [])[0] || 0 
 
         console.log(`[指数${index}点位] ${indexP}`)
-        console.log(`[当月合约${T_M_TICKER}价格] ${f0P}`)
-        console.log(`[下月合约${N_M_TICKER}价格] ${f1P}`)
-        console.log(`[当季合约${T_S_TICKER}价格] ${f2P}`)
-        console.log(`[下季合约${N_S_TICKER}价格] ${f3P}`)
+        console.log(`[当月合约${T_M_TICKER}价格] 买一${f0BP} 卖一${f0AP}`)
+        console.log(`[下月合约${N_M_TICKER}价格] 买一${f1BP} 卖一${f1AP}`)
+        console.log(`[当季合约${T_S_TICKER}价格] 买一${f2BP} 卖一${f2AP}`)
+        console.log(`[下季合约${N_S_TICKER}价格] 买一${f3BP} 卖一${f3AP}`)
         console.log('----------------------------------')
 
         //time: T
@@ -291,10 +300,19 @@ combineLatestObserver
         console.log('----------------------------------')
 
         //backward: B
-        const f0B = +f0T === 0 ? 0 : +Number(Math.abs((f0P - indexP) / f0P / f0T * 365)).toFixed(3)
-        const f1B =                  +Number(Math.abs((f1P - indexP) / f1P / f1T * 365)).toFixed(3)
-        const f2B =                  +Number(Math.abs((f2P - indexP) / f2P / f2T * 365)).toFixed(3)
-        const f3B =                  +Number(Math.abs((f3P - indexP) / f3P / f3T * 365)).toFixed(3)
+        var f0B, f1B, f2B, f3B;
+        if (side === 0) { //买
+            f0B = +f0T === 0 ? 0 : +Number(Math.abs((f0AP - indexP) / f0AP / f0T * 365)).toFixed(3)
+            f1B =                  +Number(Math.abs((f1AP - indexP) / f1AP / f1T * 365)).toFixed(3)
+            f2B =                  +Number(Math.abs((f2AP - indexP) / f2AP / f2T * 365)).toFixed(3)
+            f3B =                  +Number(Math.abs((f3AP - indexP) / f3AP / f3T * 365)).toFixed(3)
+        } else { //卖
+            f0B = +f0T === 0 ? 0 : +Number(Math.abs((f0BP - indexP) / f0BP / f0T * 365)).toFixed(3)
+            f1B =                  +Number(Math.abs((f1BP - indexP) / f1BP / f1T * 365)).toFixed(3)
+            f2B =                  +Number(Math.abs((f2BP - indexP) / f2BP / f2T * 365)).toFixed(3)
+            f3B =                  +Number(Math.abs((f3BP - indexP) / f3BP / f3T * 365)).toFixed(3)
+        }
+       
 
         console.log(`[当月合约${T_M_TICKER}年化贴水] ${f0B}`)
         console.log(`[下月合约${N_M_TICKER}年化贴水] ${f1B}`)
