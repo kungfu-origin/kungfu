@@ -11,4 +11,4 @@ outputs:
     description: 'The filtered "strategy.matrix" statement created from loading the "inputFile".'
 runs:
   using: 'node12'
-  main: 'dist/index.js'
+  main: 'index.js'
