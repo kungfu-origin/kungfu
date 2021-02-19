@@ -20,6 +20,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v2
+        with:
+          node-version: '12'
+
       - name: Get Build Matrix From JSON
         id: set-matrix
         uses: ./actions/get-build-matrix
@@ -36,7 +41,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Setup Node.js environment
-        uses: actions/setup-node@v2.1.4
+        uses: actions/setup-node@v2
         with:
           node-version: '10.15.0'
           registry-url: 'https://npm.pkg.github.com'
@@ -99,6 +104,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v2
+        with:
+          node-version: '12'
 
       - name: Clean Stale Packages
         if: ${{ github.event.inputs.overwrite }} == "true"
