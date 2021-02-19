@@ -15,6 +15,7 @@ interface MakeOrderData {
 
 export const kungfuSubscribeTicker = (sourceName: string, exchangeId: string, ticker: string) => {
     console.log(sourceName, exchangeId, ticker)
+    console.log(encodeKungfuLocation(sourceName, 'md'))
     return Promise.resolve(
         watcher.requestMarketData(
             encodeKungfuLocation(sourceName, 'md'),

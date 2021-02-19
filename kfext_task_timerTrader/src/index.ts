@@ -117,7 +117,7 @@ const quotesPipe = () => {
         filter((payload: ProcPayload) => {
             return payload.topic === 'LEDGER_DATA'
         }),
-        map((payload: ProcPayload): { [prop: string]: QuoteData } => {
+        map((payload: ProcPayload): StringToQuoteData => {
             const { data } = payload;
             const { quotes } = data;
             const quotesAfterFilter = quotes.filter(quoteData => {
@@ -411,3 +411,4 @@ function splitMakeOrderStep (limit: number, total: number, cb: Function ) {
     }
     cb && cb(left)
 }
+
