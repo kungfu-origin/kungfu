@@ -174,7 +174,6 @@ export default {
             this.setTaskMethod = 'update';
             //TODO 写活
             const minimistConfig = this.getMinimistConfig()
-            console.log(minimistConfig, '--')
             this.setTaskInitData = minimist(data.args, minimistConfig)
             this.setTaskInitKey = this.getTaskConfigKeyFromProcessId(data.processId)
             this.setTaskTarget = data;

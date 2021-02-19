@@ -63,7 +63,7 @@ export default {
                     const pm2Id = processData.pm_id;
                     const processName = processData.name;
                     const dataType = data.type;
-                    let { accountId, exchangeId, ticker, parentId } = data.body || {};
+                    let { accountId, exchangeId, ticker, parentId, sourceId } = data.body || {};
 
                     switch (dataType) {
                         case 'REQ_LEDGER_DATA':
@@ -71,6 +71,7 @@ export default {
                             break;
                         case "REQ_QUOTE_DATA":
                             this.resQuoteData(pm2Id, ticker, processName)
+                            this.resInstrumentInfo(pm2Id, ticker, processName)
                             break;
                         case "REQ_POS_DATA":
                             this.resPosData(pm2Id, accountId, processName)
@@ -98,7 +99,7 @@ export default {
                                 })
                             break
                         case "SUBSCRIBE_BY_TICKER":
-                            const sourceName = (accountId || '').toSourceName();
+                            const sourceName = accountId ? (accountId || '').toSourceName() : sourceId;
                             this.subscribeTicker(sourceName, exchangeId, ticker)
                             break
                         case "TIME_ALERT":
@@ -118,11 +119,12 @@ export default {
             if (!watcher.isLive()) return;
             watcher.step();
             const ledger = watcher.ledger;
+
             const quotes = Object.values(ledger.Quote || {})
-                .filter(quote => quote.instrument_id === ticker)
+                .filter(quote => ticker.includes(quote.instrument_id))
                 .map(quote => dealQuote(quote));
 
-            sendResDataToProcessId("QUOTE_DATA", pm2Id, processName, { quotes })
+            this.sendResDataToProcessId("QUOTE_DATA", pm2Id, processName, { quotes })
         },
 
         resPosData (pm2Id, accountId, processName) {
@@ -132,7 +134,7 @@ export default {
             const positions = Object.values(ledger.Position || {});
             const positionsResolved = transformTradingItemListToData(positions, 'account')[accountId] || [];
 
-            sendResDataToProcessId("POS_DATA", pm2Id, processName, { 
+            this.sendResDataToProcessId("POS_DATA", pm2Id, processName, { 
                 positions: positionsResolved
             })
         },
@@ -143,8 +145,20 @@ export default {
             const ledger = watcher.ledger;
             const orders = this.getTargetOrdersByParentId(ledger.Order, parentId)
 
-            sendResDataToProcessId("ORDER_DATA", pm2Id, processName, { 
+            this.sendResDataToProcessId("ORDER_DATA", pm2Id, processName, { 
                 orders
+            })
+        },
+
+        resInstrumentInfo (pm2Id, ticker, processName) {
+            if (!watcher.isLive()) return;
+            watcher.step();
+            const ledger = watcher.ledger;
+            const instruments = Object.values(ledger.Instrument)
+                .filter(item => ticker.includes(item.instrument_id))
+
+            this.sendResDataToProcessId('INSTRUMENT_DATA', pm2Id, processName, {
+                instruments
             })
         },
 
