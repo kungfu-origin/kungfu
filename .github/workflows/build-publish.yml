@@ -13,7 +13,7 @@ on:
 
 jobs:
   prepare:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
       publishable: ${{ steps.check-packages.outputs.publishable }}
@@ -58,11 +58,10 @@ jobs:
       - name: Build Kungfu
         if: ${{ needs.prepare.outputs.publishable  == 'true' }}
         run: |
-          echo ${{ needs.prepare.outputs.publishable }} ...
-#          pip install pipenv==2020.11.15
-#          yarn env-pypi-python
-#          yarn install
-#          yarn build
+          pip install pipenv==2020.11.15
+          yarn env-pypi-python
+          yarn install
+          yarn build
 
       - name: Collect Kungfu Build Info
         uses: actions/upload-artifact@v2
@@ -99,9 +98,8 @@ jobs:
       - name: Publish to AWS S3
         if: ${{ needs.prepare.outputs.publishable  == 'true' }}
         run: |
-          echo pass
-#          yarn workspace @kungfu-trader/kungfu-core run package
-#          yarn workspace @kungfu-trader/kungfu-core run publish-binary
+          yarn workspace @kungfu-trader/kungfu-core run package
+          yarn workspace @kungfu-trader/kungfu-core run publish-binary
 
   publish:
     needs: [prepare, build]
@@ -125,6 +123,6 @@ jobs:
 
       - name: Publish to GitHub Packages
         if: ${{ needs.prepare.outputs.publishable  == 'true' }}
-        run: yarn workspace @kungfu-trader/kungfu-core run publish-package
+        run: yarn publish-package
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
