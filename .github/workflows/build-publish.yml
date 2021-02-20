@@ -58,7 +58,7 @@ jobs:
       - name: Build Kungfu
         if: ${{ needs.prepare.outputs.publishable  == 'true' }}
         run: |
-          echo ${{ github.event.inputs.overwrite }} ...
+          echo ${{ needs.prepare.outputs.publishable }} ...
 #          pip install pipenv==2020.11.15
 #          yarn env-pypi-python
 #          yarn install
@@ -104,7 +104,7 @@ jobs:
 #          yarn workspace @kungfu-trader/kungfu-core run publish-binary
 
   publish:
-    needs: build
+    needs: [prepare, build]
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout
