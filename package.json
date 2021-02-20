@@ -11,8 +11,7 @@
     "cli2",
     "kfext_task_timerTrader",
     "app",
-    "tests",
-    "actions/*"
+    "tests"
   ],
   "scripts": {
     "build": "wsrun --serial --fast-exit --exclude-missing build",

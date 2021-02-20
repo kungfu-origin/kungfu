@@ -20,14 +20,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Setup Node.js environment
-        uses: actions/setup-node@v2
-        with:
-          node-version: '12'
-
       - name: Get Build Matrix From JSON
         id: set-matrix
-        uses: ./actions/get-build-matrix
+        uses: kungfu-trader/action-build-matrix@master
 
   build:
     needs: get_build_matrix
@@ -105,14 +100,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Setup Node.js environment
-        uses: actions/setup-node@v2
-        with:
-          node-version: '12'
-
       - name: Clean Stale Packages
         if: ${{ github.event.inputs.overwrite }} == "true"
-        uses: ./actions/clean-stale-packages
+        uses: kungfu-trader/action-clean-packages@master
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           action-path: ${{ github.action_path }}
