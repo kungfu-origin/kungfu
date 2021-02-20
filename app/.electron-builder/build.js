@@ -48,21 +48,20 @@ if (target) {
             ]
         }
     }
-}
 
-switch (target) {
-    case 'tora':
+    if (target.includes('tora')) {
         baseConfig.extraResources.push({
             "from": path.join(__dirname, '..', '..', 'kfext_tora', 'build', 'dist'),
             "to": "kfc/kungfu_extensions/tora"
         })
-        break
-    case 'shengli':
+    }
+
+    if (target.includes('shengli')) {
         baseConfig.extraResources.push({
             "from": path.join(__dirname, '..', '..', 'kfext_shengli', 'build', 'dist'),
             "to": "kfc/kungfu_extensions/shengli"
         })
-        break
+    }
 }
 
 baseConfig.artifactName = resolveArtifactName(cli, pro, target)
