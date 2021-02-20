@@ -12,10 +12,11 @@ on:
       - ci
 
 jobs:
-  get_build_matrix:
+  prepare:
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
+      publishable: ${{ steps.check-packages.outputs.publishable }}
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -24,10 +25,16 @@ jobs:
         id: set-matrix
         uses: kungfu-trader/action-build-matrix@v1.0.0
 
+      - name: Check GitHub Packages
+        id: check-packages
+        uses: kungfu-trader/action-check-packages@master
+        with:
+          overwrite: ${{ github.event.inputs.overwrite }}
+
   build:
-    needs: get_build_matrix
+    needs: prepare
     strategy:
-      matrix: ${{ fromJson(needs.get_build_matrix.outputs.matrix) }}
+      matrix: ${{ fromJson(needs.prepare.outputs.matrix) }}
     runs-on: ${{ matrix.os }}
     env:
       USE_HARD_LINKS: false
@@ -48,7 +55,7 @@ jobs:
           python-version: '3.7'
 
       - name: Build Kungfu
-        if: ${{ github.event.inputs.overwrite  == 'true' }}
+        if: ${{ needs.prepare.outputs.publishable  == 'true' }}
         run: |
           echo ${{ github.event.inputs.overwrite }} ...
 #          pip install pipenv==2020.11.15
@@ -89,7 +96,7 @@ jobs:
           aws-region: cn-northwest-1
 
       - name: Publish to AWS S3
-        if: ${{ github.event.inputs.overwrite  == 'true' }}
+        if: ${{ needs.prepare.outputs.publishable  == 'true' }}
         run: |
           echo pass
 #          yarn workspace @kungfu-trader/kungfu-core run package
@@ -97,7 +104,7 @@ jobs:
 
   publish:
     needs: build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -109,14 +116,14 @@ jobs:
           scope: '@kungfu-trader'
 
       - name: Clean Stale Packages
-        if: ${{ github.event.inputs.overwrite  == 'true' }}
-        uses: kungfu-trader/action-clean-packages@master
+        if: ${{ needs.prepare.outputs.publishable  == 'true' }}
+        uses: kungfu-trader/action-clean-packages@v1.0.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           action-path: ${{ github.action_path }}
 
       - name: Publish to GitHub Packages
-        if: ${{ github.event.inputs.overwrite  == 'true' }}
+        if: ${{ needs.prepare.outputs.publishable  == 'true' }}
         run: yarn workspace @kungfu-trader/kungfu-core run publish-package
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
