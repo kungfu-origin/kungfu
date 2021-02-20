@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       overwrite:
-        description: 'Set to true to overwrite packages when publishing to github'
+        description: 'Type true to overwrite packages'
         required: true
         default: 'false'
   push:
@@ -22,7 +22,7 @@ jobs:
 
       - name: Get Build Matrix From JSON
         id: set-matrix
-        uses: kungfu-trader/action-build-matrix@master
+        uses: kungfu-trader/action-build-matrix@v1.0.0
 
   build:
     needs: get_build_matrix
@@ -48,16 +48,17 @@ jobs:
           python-version: '3.7'
 
       - name: Build Kungfu
-        if: ${{ github.event.inputs.overwrite }} == "true"
+        if: ${{ github.event.inputs.overwrite  == 'true' }}
         run: |
-          pip install pipenv==2020.11.15
-          yarn env-pypi-python
-          yarn install
-          yarn build
+          echo ${{ github.event.inputs.overwrite }} ...
+#          pip install pipenv==2020.11.15
+#          yarn env-pypi-python
+#          yarn install
+#          yarn build
 
       - name: Collect Kungfu Build Info
         uses: actions/upload-artifact@v2
-        if: failure()
+        if: ${{ failure() }}
         with:
           # https://docs.github.com/en/actions/reference/context-and-expression-syntax-for-github-actions#github-context
           name: 'Kungfu-Build-Info-${{matrix.name}}-${{github.actor}}-${{github.sha}}'
@@ -88,10 +89,11 @@ jobs:
           aws-region: cn-northwest-1
 
       - name: Publish to AWS S3
-        if: ${{ github.event.inputs.overwrite }} == "true"
+        if: ${{ github.event.inputs.overwrite  == 'true' }}
         run: |
-          yarn workspace @kungfu-trader/kungfu-core run package
-          yarn workspace @kungfu-trader/kungfu-core run publish-binary
+          echo pass
+#          yarn workspace @kungfu-trader/kungfu-core run package
+#          yarn workspace @kungfu-trader/kungfu-core run publish-binary
 
   publish:
     needs: build
@@ -100,15 +102,21 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
+      - name: Setup NPM registry
+        uses: actions/setup-node@v2
+        with:
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@kungfu-trader'
+
       - name: Clean Stale Packages
-        if: ${{ github.event.inputs.overwrite }} == "true"
+        if: ${{ github.event.inputs.overwrite  == 'true' }}
         uses: kungfu-trader/action-clean-packages@master
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           action-path: ${{ github.action_path }}
 
       - name: Publish to GitHub Packages
-        if: ${{ github.event.inputs.overwrite }} == "true"
+        if: ${{ github.event.inputs.overwrite  == 'true' }}
         run: yarn workspace @kungfu-trader/kungfu-core run publish-package
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
