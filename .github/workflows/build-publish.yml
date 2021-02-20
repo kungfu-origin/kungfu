@@ -29,6 +29,7 @@ jobs:
         id: check-packages
         uses: kungfu-trader/action-check-packages@master
         with:
+          token: ${{ secrets.GITHUB_TOKEN }}
           overwrite: ${{ github.event.inputs.overwrite }}
 
   build:
