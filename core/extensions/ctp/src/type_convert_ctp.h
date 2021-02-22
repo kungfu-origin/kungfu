@@ -300,7 +300,8 @@ inline void from_ctp(const CThostFtdcTradeField &ori, Trade &des) {
 inline void from_ctp(const CThostFtdcInstrumentField &ori, Instrument &des) {
   strcpy(des.instrument_id, ori.InstrumentID);
   strcpy(des.exchange_id, ori.ExchangeID);
-  strcpy(des.product_id, ori.ProductID);
+  //strcpy(des.product_id, ori.ProductID);
+  memcpy(des.product_id, ori.ProductID,strlen(ori.ProductID));//commit by JC
   des.instrument_type = InstrumentType::Future;
   des.delivery_year = ori.DeliveryYear;
   des.delivery_month = ori.DeliveryMonth;

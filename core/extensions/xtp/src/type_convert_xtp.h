@@ -156,7 +156,8 @@ inline void from_xtp(XTPQSI *ticker_info, Instrument &quote) {
   {
     quote.exchange_id = "false_id";
   }
-  strcpy(quote.product_id, ticker_info->ticker_name);
+  //strcpy(quote.product_id, ticker_info->ticker_name);
+  memcpy(quote.product_id, ticker_info->ticker_name,32);//commit by JC
   quote.instrument_type = get_instrument_type(quote.exchange_id,quote.instrument_id);
   quote.is_trading = true;
   quote.price_tick = ticker_info->price_tick;
