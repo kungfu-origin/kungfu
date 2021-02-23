@@ -362,30 +362,6 @@ export default {
       );
     },
 
-    querySearch(queryString, cb) {
-      const results = this.getSearchTickers(queryString);
-      cb(results);
-    },
-
-    getSearchTickers(queryString = "") {
-      return this.instrumentIds.filter((item) => {
-        const { instrument_id, instrument_name, exchange_id } = {
-          instrument_id: "",
-          instrument_name: "",
-          exchange_id: "",
-          ...item,
-        };
-
-        if (
-          `${instrument_id}${instrument_name}${exchange_id}`
-            .toLowerCase()
-            .includes(queryString.toLowerCase())
-        )
-          return true;
-        return false;
-      });
-    },
-
     isDisabled(key) {
       return this.method === "update" && this.isUniKey(key);
     },

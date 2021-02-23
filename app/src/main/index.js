@@ -196,7 +196,8 @@ function setMenu() {
 		submenu: [
 			{ label: "复制", accelerator: "CmdOrCtrl+C", selector: "copy:" },
 			{ label: "黏贴", accelerator: "CmdOrCtrl+V", selector: "paste:" },
-			{ label: "全选", accelerator: "CmdOrCtrl+A", role: "selectall" }
+			{ label: "全选", accelerator: "CmdOrCtrl+A", role: "selectall" },
+			{ label: "撤销", accelerator: "CmdOrCtrl+Z", role: "undo" }
 		]
 	},{
 		label: "打开",

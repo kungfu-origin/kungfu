@@ -20,6 +20,43 @@ export default {
             }
             
             return Object.freeze(JSON.parse(instruments).map(item => Object.freeze(item)))
-        }
+        },
+
+        querySearch (queryString, cb) {
+            const results = this.getSearchTickers(queryString);
+            cb(results)
+        },
+
+        getSearchTickers (queryString = '') {
+            return this.instrumentIds.filter(item => {
+               const { instrument_id, instrument_name, exchange_id } = {
+					instrument_id: '',
+					instrument_name: '',
+                    exchange_id: '',
+                    ...item
+                }
+
+                const instrumentName = Buffer.from(instrument_name).toString();
+
+                if (`${instrument_id}${instrumentName}${exchange_id}`.toLowerCase().includes(queryString.toLowerCase())) return true;
+                return false
+            })
+            .slice(0, 200)
+            .map(item => {
+                const { instrument_id, instrument_name, exchange_id } = {
+					instrument_id: '',
+					instrument_name: '',
+                    exchange_id: '',
+                    ...item
+                }
+                const instrumentName = Buffer.from(instrument_name).toString();
+
+                return {
+                    instrument_id,
+                    instrument_name: instrumentName,
+                    exchange_id
+                }
+            })
+        },
     },
 }
