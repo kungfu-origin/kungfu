@@ -29,15 +29,13 @@ class KungfuCoreConan(ConanFile):
         "log_level": ["trace", "debug", "info", "warning", "error", "critical"],
         "arch": ["x64"],
         "node_version": "ANY",
-        "electron_version": "ANY",
-        "dist_path": "ANY"
+        "electron_version": "ANY"
     }
     default_options = {
         "fmt:header_only": "True",
         "spdlog:header_only": "True",
         "log_level": "info",
-        "arch": "x64",
-        "dist_path": "build"
+        "arch": "x64"
     }
     cpp_files_extensions = ['.h', '.hpp', '.hxx', '.cpp', '.c', '.cc', '.cxx']
     conanfile_dir = os.path.dirname(os.path.realpath(__file__))
@@ -208,12 +206,7 @@ class KungfuCoreConan(ConanFile):
 
     def __run_pyinstaller(self, build_type):
         with tools.chdir(os.path.pardir):
-            dist_path = str(self.options.dist_path)
-            rc = psutil.Popen(['pipenv', 'run', 'pyinstaller', '--clean', '-y', f'--distpath={dist_path}', 'python/kfc-conf.spec']).wait()
-            if tools.detected_os() == 'Macos' and os.path.exists('build/kfc/.Python'):
-                os.chdir(os.path.join('build', 'kfc'))
-                os.rename('.Python', 'Python')
-                os.symlink('Python', '.Python')
+            rc = psutil.Popen(['pipenv', 'run', 'pyinstaller', '--clean', '-y', '--distpath=build', 'python/kfc-conf.spec']).wait()
             if rc != 0:
                 self.output.error('PyInstaller failed')
                 sys.exit(rc)
