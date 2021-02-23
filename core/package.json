@@ -11,6 +11,9 @@
   "publishConfig": {
     "registry":"https://npm.pkg.github.com"
   },
+  "bin": {
+    "kf-make": ".build-tools/kf-make.js"
+  },
   "config": {
     "buildtype": "Release",
     "loglevel": "trace",
@@ -34,7 +37,7 @@
     "package": "node .build-tools/node-pre-gyp.js package",
     "publish-binary": "node .build-tools/aws-s3-sync.js",
     "publish-package": "npm publish",
-    "pipenv": "cross-var node .build-tools/pipenv.js --python $npm_package_config_python_version --pypi-mirror $npm_package_config_pypi",
+    "pipenv-js": "cross-var node .build-tools/pipenv.js --python $npm_package_config_python_version --pypi-mirror $npm_package_config_pypi",
     "configure": "cross-var pipenv run conan install . -if build -s build_type=$npm_package_config_buildtype --build missing -o log_level=$npm_package_config_loglevel -o arch=$npm_package_config_arch  -o node_version=$npm_package_config_node_version -o electron_version=$npm_package_config_electron_version",
     "compile": "cross-var pipenv run conan build . -bf build -s build_type=$npm_package_config_buildtype",
     "freeze": "cross-var pipenv run conan package . -bf build -pf build/kfc -s build_type=$npm_package_config_buildtype",
