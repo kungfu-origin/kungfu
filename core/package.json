@@ -47,13 +47,13 @@
     "test": "pipenv run python python/dev_test.py"
   },
   "dependencies": {
+    "@mapbox/node-pre-gyp": "^1.0.0",
     "cross-var": "^1.1.0",
     "fs-extra": "^9.1.0",
     "glob": "^7.1.6",
     "nan": "^2.14.2",
     "node-addon-api": "^2.0.0",
     "node-gyp": "^7.1.0",
-    "node-pre-gyp": "^0.17.0",
     "yargs": "^16.2.0",
     "yarn": "*"
   },
