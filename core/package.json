@@ -12,6 +12,7 @@
     "registry":"https://npm.pkg.github.com"
   },
   "bin": {
+    "kf-info": ".build-tools/kf-info.js",
     "kf-make": ".build-tools/kf-make.js"
   },
   "config": {
@@ -44,7 +45,8 @@
     "clean": "cmake-js clean",
     "format": "pipenv run conan source .",
     "dev": "pipenv run python python/dev_run.py",
-    "test": "pipenv run python python/dev_test.py"
+    "test": "pipenv run python python/dev_test.py",
+    "aws-test": "node .build-tools/aws-test.js"
   },
   "dependencies": {
     "@mapbox/node-pre-gyp": "^1.0.0",

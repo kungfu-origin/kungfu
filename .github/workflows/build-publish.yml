@@ -60,7 +60,8 @@ jobs:
           pip install pipenv==2020.11.15
           yarn env-pypi-python
           yarn install
-          yarn build
+          yarn workspace @kungfu-trader/kungfu-core run aws-test traceroute
+#          yarn build
 
       - name: Collect Kungfu Build Info
         uses: actions/upload-artifact@v2
