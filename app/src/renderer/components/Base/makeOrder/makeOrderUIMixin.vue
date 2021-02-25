@@ -384,6 +384,8 @@ export default {
             } else if (directionOrigin === 1) {
                 this.$set(this.makeOrderForm, 'side', 0)
             }
+
+            this.$refs['make-order-form'].validate()
         },
 
         'makeOrderForm.buyType' (val) {
