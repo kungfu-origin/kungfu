@@ -128,7 +128,7 @@
                 </el-table-column>
                 <el-table-column
                     class-name="blink-cell"
-                    label="市值(保证金)"
+                    label="市值"
                     show-overflow-tooltip
                     align="right"
                     min-width="120"
@@ -140,15 +140,34 @@
                             'number': true,
                             'nano': true,
                         }"
-                        :key="`${props.row.account_id}_${calcCash(props.row, (isFutureAccount(props.row) ? 'margin' : 'marketValue'))}`"                        
+                        key="marketValue"                        
 
                         >
-                            <template v-if="isFutureAccount(props.row)">
-                                {{calcCash(props.row, 'margin') || '--'}}
-                            </template>
-                            <template v-else>
+                            <template>
                                 {{calcCash(props.row, 'marketValue') || '--'}}
                             </template>  
+                        </span>          
+                    </template>
+                </el-table-column>
+                 <el-table-column
+                    class-name="blink-cell"
+                    label="保证金"
+                    show-overflow-tooltip
+                    align="right"
+                    min-width="120"
+                    >
+                    <template slot-scope="props" >
+                        <span 
+                        :class="{
+                            'tr-table-cell': true,
+                            'number': true,
+                            'nano': true,
+                        }"
+                        key="margin"                        
+                        >
+                            <template>
+                                {{calcCash(props.row, 'margin') || '--'}}
+                            </template> 
                         </span>          
                     </template>
                 </el-table-column>
@@ -376,6 +395,7 @@ export default {
 
         //是否为期货
         isFutureAccount(row) {
+            console.log(this.tdAccountSource)
             return (this.tdAccountSource[row.source_name] || {}).typeName == 'future'
         },
 
