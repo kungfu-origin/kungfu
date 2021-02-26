@@ -60,12 +60,11 @@ jobs:
           pip install pipenv==2020.11.15
           yarn env-pypi-python
           yarn install
-          yarn workspace @kungfu-trader/kungfu-core run aws-test traceroute
 #          yarn build
 
       - name: Collect Kungfu Build Info
         uses: actions/upload-artifact@v2
-        if: ${{ failure() }}
+#        if: ${{ failure() }}
         with:
           # https://docs.github.com/en/actions/reference/context-and-expression-syntax-for-github-actions#github-context
           name: 'Kungfu-Build-Info-${{matrix.name}}-${{github.actor}}-${{github.sha}}'
@@ -104,15 +103,33 @@ jobs:
   publish:
     needs: [prepare, build]
     runs-on: ubuntu-20.04
+    container: 'docker.io/kungfutrader/kungfu-builder-centos:master'
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+
+      - name: Configure AWS Crendentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: cn-northwest-1
 
       - name: Setup NPM registry
         uses: actions/setup-node@v2
         with:
           registry-url: 'https://npm.pkg.github.com'
           scope: '@kungfu-trader'
+
+      - name: Download Artifacts
+        uses: actions/download-artifact@v2
+        with:
+          path: 'github-artifacts'
+
+      - name: Publish Artifacts to AWS
+        uses: kungfu-trader/action-aws-publish@master
+        with:
+          artifacts-path: 'github-artifacts'
 
       - name: Clean Stale Packages
         if: ${{ needs.prepare.outputs.publishable  == 'true' }}
