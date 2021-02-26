@@ -166,10 +166,11 @@ public:
           cost = (position.yesterday_volume * commission.close_ratio) +
                  (close_today_volume * commission.close_today_ratio);
         }
+        cost = cost * instrument.contract_multiplier;
       }
       auto multiplier = instrument.contract_multiplier * (position.direction == Direction::Long ? 1 : -1);
       auto price_diff = position.last_price - position.avg_open_price;
-      position.unrealized_pnl = (price_diff * position.volume - cost) * multiplier;
+      position.unrealized_pnl = (price_diff * position.volume) * multiplier - cost;
     }
   }
 
