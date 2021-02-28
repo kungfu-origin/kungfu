@@ -140,8 +140,7 @@
                             'number': true,
                             'nano': true,
                         }"
-                        key="marketValue"                        
-
+                        :key="`marketValue_${props.row.account_id}_${calcCash(props.row, 'marketValue')}`"                        
                         >
                             <template>
                                 {{calcCash(props.row, 'marketValue') || '--'}}
@@ -149,7 +148,7 @@
                         </span>          
                     </template>
                 </el-table-column>
-                 <el-table-column
+                <el-table-column
                     class-name="blink-cell"
                     label="保证金"
                     show-overflow-tooltip
@@ -163,7 +162,7 @@
                             'number': true,
                             'nano': true,
                         }"
-                        key="margin"                        
+                        :key="`margin_${props.row.account_id}_${calcCash(props.row, 'margin')}`"                        
                         >
                             <template>
                                 {{calcCash(props.row, 'margin') || '--'}}

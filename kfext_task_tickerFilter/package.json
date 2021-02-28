@@ -1,5 +1,5 @@
 {
-  "name": "kfext_task_backward-hedge",
+  "name": "kfext_task_ticker-filter",
   "version": "1.0.0",
   "description": "",
   "main": "lib/index.js",
@@ -31,8 +31,8 @@
   "bin": "./lib/index.js",
   "kungfuConfig": {
     "type": "task",
-    "key": "backward",
-    "name": "贴水对冲",
+    "key": "tickerFilter",
+    "name": "选股",
     "uniKey": [
       "accountId",
       "ticker"
@@ -45,41 +45,15 @@
         "required": true
       },
       {
-        "key": "ticker",
-        "name": "目标合约",
-        "type": "instrumentId",
-        "exchangeIdKey": "tickerExchangeId",
+        "key": "tickers",
+        "name": "标的池",
+        "type": "instrumentSet",
         "required": true
       },
       {
-        "key": "tickerExchangeId",
-        "name": "目标合约交易所",
-        "type": "exchangeId",
-        "required": true
-      },
-      {
-        "key": "tickerMd",
-        "name": "合约行情柜台",
-        "type": "source",
-        "required": true
-      },
-      {
-        "key": "index",
-        "name": "目标指数",
-        "type": "instrumentId",
-        "exchangeIdKey": "indexExchangeId",
-        "required": true
-      },
-      {
-        "key": "indexExchangeId",
-        "name": "目标指数交易所",
-        "type": "exchangeId",
-        "required": true
-      },
-      {
-        "key": "indexMd",
-        "name": "指数行情柜台",
-        "type": "source",
+        "key": "strategy",
+        "name": "筛选策略",
+        "type": "taskStrategy",
         "required": true
       },
       {
@@ -109,7 +83,7 @@
       },
       {
         "key": "volume",
-        "name": "数量",
+        "name": "目标数量",
         "type": "int",
         "required": true
       },
@@ -141,30 +115,6 @@
         "tip": "单位%",
         "required": true,
         "default": 12
-      },
-      {
-        "key": "avgV0",
-        "name": "当月周均成交量",
-        "type": "int",
-        "required": true
-      },
-      {
-        "key": "avgV1",
-        "name": "下月周均成交量",
-        "type": "int",
-        "required": true
-      },
-      {
-        "key": "avgV2",
-        "name": "当季周均成交量",
-        "type": "int",
-        "required": true
-      },
-      {
-        "key": "avgV3",
-        "name": "下季周均成交量",
-        "type": "int",
-        "required": true
       }
     ]
   }
