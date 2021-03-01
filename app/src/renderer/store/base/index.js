@@ -15,7 +15,9 @@ export default {
         processStatusWithDetail: {},
         tdAccountSource: {}, //账户柜台信息
         mdAccountSource: {}, //账户柜台信息
-        kfConfig: {} // kf 配置
+        kfConfig: {}, // kf 
+        
+        taskExts: [], // task插件
     },
 
     actions: {
@@ -67,12 +69,16 @@ export default {
             const kfConfig = readJsonSync(KF_CONFIG_PATH)
             dispatch('setKungfuConfig', kfConfig)
         },
+
+        setTaskExts ({ commit }, exts) {
+            commit('SET_TASK_EXTS', exts)
+        },
     },
 
     mutations: {
 
-        SET_TASKS (state, tasks) {
-            state.tasks = tasks
+        SET_TASK_EXTS (state, exts) {
+            state.taskExts = exts
         },
         
         SET_PROCESS_STATUS (state, processStatus) {

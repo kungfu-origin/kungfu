@@ -15,6 +15,12 @@
                         <template slot="title">账户</template>
                     </tr-menu-item>
                     <tr-menu-item
+                    route="/market-filter"
+                    >
+                        <i class="el-icon-s-operation" ></i>
+                        <template slot="title">行情</template>
+                    </tr-menu-item>
+                    <tr-menu-item
                     route="/strategy"
                     >
                         <i class="el-icon-s-order" ></i>
