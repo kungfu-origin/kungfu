@@ -16,12 +16,12 @@
     </div>
     <div class="table-body">
         <el-table
-        :data="strategyListFilter"
+        :data="tableListAfterFilter"
         @row-click="handleRowClick"
         :row-class-name="handleSelectRow"
         size="small"
         height="100%"
-        v-if="renderTable"
+        v-if="afterRender"
         >
             <el-table-column
                 prop="strategy_id"
@@ -217,20 +217,19 @@
 
 </template>
 <script>
-import path from 'path';
 import { remote } from 'electron';
-import { mapState, mapGetters } from 'vuex';
-import { openVueWin } from '__gUtils/busiUtils';
-import { deleteProcess } from '__gUtils/processUtils';
+import { mapState } from 'vuex';
 import { encodeKungfuLocation } from '__io/kungfu/kungfuUtils';
 import { watcher } from '__io/kungfu/watcher';
 import * as STRATEGY_API from '__io/kungfu/strategy';
 import { switchStrategy } from '__io/actions/strategy';
-import { debounce } from '__gUtils/busiUtils';
 import { chineseValidator, specialStrValidator, noZeroAtFirstValidator, noKeywordValidatorBuilder } from '__assets/validator';
 
+import baseMixin from '@/assets/js/mixins/baseMixin';
 
 export default {
+    mixins: [ baseMixin ],
+
     props: {
         value: {
             type: Boolean,
@@ -239,37 +238,25 @@ export default {
     },
 
     data(){
+
         this.chineseValidator = chineseValidator;
         this.specialStrValidator = specialStrValidator;
         this.noZeroAtFirstValidator = noZeroAtFirstValidator;
         this.noKeywordValidatorBuilder = noKeywordValidatorBuilder;
+        this.searchFilterKey = 'strategy_id'
+
         return {
-            searchKeyword: '',
-            searchKeywordDebounce: '',
             setStrategyDialogVisiblity: false,
             setStrategyDialogType: '',
             setStrategyForm: {
                 strategyId: '',
                 strategyPath: "",
             },
-            renderTable: false,
         }
     },
 
     beforeMount(){
-        const t = this;
-        t.getStrategyList();
-    },
-
-    mounted(){
-        const t = this;
-        t.renderTable = true;
-    },
-
-    watch: {
-        searchKeyword: debounce(function (value) {
-            this.searchKeywordDebounce = value
-        }),
+        this.getStrategyList();
     },
 
     computed: {
@@ -279,11 +266,11 @@ export default {
             strategyList: state => state.STRATEGY.strategyList,
             processStatus: state => state.BASE.processStatus
         }),
+    },
 
-        strategyListFilter(){
-            const t = this;
-            if(!t.searchKeywordDebounce) return t.strategyList;
-            return t.strategyList.filter(s => (s.strategy_id.indexOf(t.searchKeywordDebounce) !== -1))
+    watch: {
+        strategyList (newStrategyList) {
+            this.tableList = newStrategyList
         },
     },
 
@@ -294,61 +281,56 @@ export default {
 
         //绑定策略路径
         handleBindStrategyFolder(){
-            const t = this;
             const dialog = remote.dialog;
             dialog.showOpenDialog({
                 properties: ['openFile']
             }, (strategyPath) => {
                 if(!strategyPath || !strategyPath[0]) return;
-                t.setStrategyForm.strategyPath = strategyPath[0];
-                t.$refs['setStrategyForm'].validate() //手动进行再次验证，因数据放在span中，改变数据后无法触发验证
+                this.setStrategyForm.strategyPath = strategyPath[0];
+                this.$refs['setStrategyForm'].validate() //手动进行再次验证，因数据放在span中，改变数据后无法触发验证
             })
         },
 
         //选中行的背景颜色
         handleSelectRow(row) {
-            const t = this;
-            if(row.row.strategy_id == t.currentStrategy.strategy_id) {
+            if(row.row.strategy_id == this.currentStrategy.strategy_id) {
                 return 'selected-bg'
             }
         },
 
         //设置当前strategy
         handleRowClick(row) {
-            const t = this;
-            t.$store.dispatch('setCurrentStrategy', row)
+            this.$store.dispatch('setCurrentStrategy', row)
         },
         
         //添加策略
         handleAddStrategy() {
-            const t = this;
-            t.setStrategyDialogVisiblity = true;
-            t.setStrategyDialogType = 'add'
+            this.setStrategyDialogVisiblity = true;
+            this.setStrategyDialogType = 'add'
         },
 
         //删除策略
         handleDeleteStrategy(row){
-            const t = this;
             const strategy_id = row.strategy_id + ''
-            const strategyProcessStatus = t.$utils.ifProcessRunning(strategy_id, t.processStatus)
+            const strategyProcessStatus = this.$utils.ifProcessRunning(strategy_id, this.processStatus)
             if(strategyProcessStatus){
-                t.$message.warning("需先停止该策略运行！")
+                this.$message.warning("需先停止该策略运行！")
                 return;
             }
 
-            t.$confirm(`删除策略 ${strategy_id} 会删除所有相关信息，确认删除吗？`, '提示', {confirmButtonText: '确 定', cancelButtonText: '取 消'})
-            .then(() => t.$store.dispatch('deleteStrategy', strategy_id))
+            this.$confirm(`删除策略 ${strategy_id} 会删除所有相关信息，确认删除吗？`, '提示', {confirmButtonText: '确 定', cancelButtonText: '取 消'})
+            .then(() => this.$store.dispatch('deleteStrategy', strategy_id))
             .then(() => {
                  //如果删除的项是选中的项，则默认选中第一项,如果没有项了，则当前项为空对象{}
-                if (t.currentStrategy.strategy_id === strategy_id) {
-                    const currentStrategy = t.strategyList.length ? t.strategyList[0] : {}
-                    t.$store.dispatch('setCurrentStrategy', currentStrategy)
+                if (this.currentStrategy.strategy_id === strategy_id) {
+                    const currentStrategy = this.strategyList.length ? this.strategyList[0] : {}
+                    this.$store.dispatch('setCurrentStrategy', currentStrategy)
                 }
             })
-            .then(() => t.$message.success('操作成功！'))
+            .then(() => this.$message.success('操作成功！'))
             .catch((err) => {
                 if(err == 'cancel') return
-                t.$message.error(err.message || '操作失败！')
+                this.$message.error(err.message || '操作失败！')
             })
         },
 
@@ -367,10 +349,9 @@ export default {
 
         //设置策略
         handleSetStrategy(row){
-            const t = this;
-            t.setStrategyDialogVisiblity = true;
-            t.setStrategyDialogType = 'set'
-            t.setStrategyForm = {
+            this.setStrategyDialogVisiblity = true;
+            this.setStrategyDialogType = 'set'
+            this.setStrategyForm = {
                 strategyId: row.strategy_id,
                 strategyPath: row.strategy_path
             }
@@ -378,30 +359,29 @@ export default {
 
         //确认添加/编辑策略
         handleConfirmAddEditorStrategy(){
-            const t = this;
-            t.$refs['setStrategyForm'].validate(valid => {
+            this.$refs['setStrategyForm'].validate(valid => {
                 if(valid){
-                    const strategy = t.setStrategyForm.strategyId.toString();
-                    const strategyPath = t.setStrategyForm.strategyPath;
+                    const strategy = this.setStrategyForm.strategyId.toString();
+                    const strategyPath = this.setStrategyForm.strategyPath;
                     let firstStepPromise = new Promise(resolve => resolve()) // 添加编辑行为不一样；
-                    if(t.setStrategyDialogType === 'add'){
-                        firstStepPromise = t.$confirm(`添加后策略ID不能更改，确认添加 ${strategy} 吗？`, '提示', {
+                    if(this.setStrategyDialogType === 'add'){
+                        firstStepPromise = this.$confirm(`添加后策略ID不能更改，确认添加 ${strategy} 吗？`, '提示', {
                             confirmButtonText: '确 定',
                             cancelButtonText: '取 消',
                         })
                     }
                     firstStepPromise.then(() => {
                         //判断是添加还是修改数据库内容
-                        const strategyMethod = t.setStrategyDialogType === 'add' ? STRATEGY_API.addStrategy : STRATEGY_API.updateStrategyPath
+                        const strategyMethod = this.setStrategyDialogType === 'add' ? STRATEGY_API.addStrategy : STRATEGY_API.updateStrategyPath
                         strategyMethod(strategy, strategyPath)
-                        .then(() => t.getStrategyList())//get new list
+                        .then(() => this.getStrategyList())//get new list
                         .then(() => {
-                            t.$message.success((t.setStrategyDialogType === 'add'? '添加' : '修改') + '成功！')
-                            t.handleClearAddStrategyDialog()//clear
+                            this.$message.success((this.setStrategyDialogType === 'add'? '添加' : '修改') + '成功！')
+                            this.handleClearAddStrategyDialog()//clear
                         })
                         .catch((err) => {
                             if(err == 'cancel') return
-                            t.$message.error(err.message || '操作失败！')
+                            this.$message.error(err.message || '操作失败！')
                         })
                     })
                 }else{
@@ -412,7 +392,6 @@ export default {
 
         //启停策略
         handleStrategySwitch(value, strategy){
-            const t = this;
             const strategyId = strategy.strategy_id;
             
             if (!value) {
@@ -421,25 +400,23 @@ export default {
             }
          
             switchStrategy(strategyId, value)
-                .then(({ type, message }) => t.$message[type](message))
-                .catch(err => t.$message['error'](err.message || '操作失败！'))
+                .then(({ type, message }) => this.$message[type](message))
+                .catch(err => this.$message['error'](err.message || '操作失败！'))
                 
-            t.$store.dispatch('getStrategyList');
+            this.$store.dispatch('getStrategyList');
         },
 
         //关闭添加strategy弹窗, refresh数据
         handleClearAddStrategyDialog(){
-            const t = this;
-            t.setStrategyForm = { strategyId: '', strategyPath: '' };
-            t.setStrategyDialogVisiblity = false;
-            t.setStrategyDialogType = ''
+            this.setStrategyForm = { strategyId: '', strategyPath: '' };
+            this.setStrategyDialogVisiblity = false;
+            this.setStrategyDialogType = ''
         },
 
         //check策略是否重复
         validateDuplicateStrategyId(rule, value, callback){
-            const t = this;
-            const ifDuplicate = t.strategyList.filter(s => (s.strategy_id === value)).length !== 0
-            if(ifDuplicate && t.setStrategyDialogType !== 'set'){
+            const ifDuplicate = this.strategyList.filter(s => (s.strategy_id === value)).length !== 0
+            if(ifDuplicate && this.setStrategyDialogType !== 'set'){
                 callback(new Error('该策略ID已存在！'))
             }else{
                 callback()
@@ -448,13 +425,12 @@ export default {
 
         //获取策略列表
         getStrategyList(){
-            const t = this;
             return new Promise(resolve => {
-                t.$store.dispatch('getStrategyList').then(strategyList => {
+                this.$store.dispatch('getStrategyList').then(strategyList => {
                     resolve(strategyList)
                     //设置第一条为currentStrategy
-                    if(!t.currentStrategy.strategy_id){
-                        t.$store.dispatch('setCurrentStrategy', strategyList[0] || {})
+                    if(!this.currentStrategy.strategy_id){
+                        this.$store.dispatch('setCurrentStrategy', strategyList[0] || {})
                     }
                 })
             }) 

@@ -11,13 +11,10 @@ export default {
                 selectSource: false,
                 setAccount: false,
             },
-
-            renderTable: false,
         }
     },
 
     mounted () {
-        this.renderTable = true;
         this.getTableList();
     },
 

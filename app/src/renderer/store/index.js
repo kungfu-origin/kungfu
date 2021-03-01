@@ -3,7 +3,7 @@ import Vuex from 'vuex'
 import baseModule from './base';
 import accountModule from './account';
 import strategyModule from './strategy';
-import dataManagement from './dataManagement';
+import marketModule from './market';
 
 Vue.use(Vuex)
 
@@ -13,6 +13,6 @@ export default new Vuex.Store({
 		BASE: baseModule,
 		ACCOUNT: accountModule,
 		STRATEGY: strategyModule,
-		DATA_MANAGEMENT: dataManagement
+		MARKET: marketModule,
 	},
 })

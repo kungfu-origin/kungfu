@@ -38,7 +38,7 @@ export default {
         tableListAfterFilter () {
             return this.tableList.filter(item => {
                 if (!this.searchFilterKey) {
-                    return new Error('No searchFilterKey')
+                    console.error(new Error('No searchFilterKey'))
                     return true;
                 }
                 
