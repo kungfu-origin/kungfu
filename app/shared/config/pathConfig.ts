@@ -91,7 +91,14 @@ export const KF_CONFIG_PATH = path.join(KF_HOME, 'config', 'kfConfig.json')
 export const KF_TARADING_CONFIG_PATH = path.join(KF_HOME, 'config', 'kfTradingConfig.json')
 
 
-//================== config start =================================
+//================== config end =================================
+
+//================== json db start ================================
+
+export const KF_TICKER_SET_JSON_PATH = path.join(KF_HOME, 'config', 'tickerSets.json')
+addFileSync('', KF_TICKER_SET_JSON_PATH, 'file');
+
+//================== json db end ==================================
 
 
 export const KUNGFU_ENGINE_PATH = process.env.NODE_ENV === 'production' 

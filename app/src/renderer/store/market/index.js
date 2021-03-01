@@ -5,14 +5,14 @@ export default {
     },
 
     actions: {
-        addTickerSets ({ commit }, tickerSet) {
-            commit('ADD_TICKER_SETS', tickerSet)
+        getTickerSets ({ commit }, tickerSet) {
+            commit('GET_TICKER_SETS', tickerSet)
         }
     },
 
     mutations: {
-        ADD_TICKER_SETS (state, tickerSet) {
-            state.tickerSets.push(tickerSet)
+        GET_TICKER_SETS (state, tickerSet) {
+            state.tickerSets = tickerSet
         }
 
     }

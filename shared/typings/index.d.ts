@@ -504,3 +504,8 @@ interface Pm2Options {
     script?: string;
     interpreter?: string
 }
+
+interface TickerSet {
+    name: string;
+    config: TickerSet
+}

@@ -41,8 +41,8 @@ export default {
                     console.error(new Error('No searchFilterKey'))
                     return true;
                 }
-                
-                return item[this.searchFilterKey].includes(this.searchKeywordDebounce)
+
+                return (item[this.searchFilterKey] || '').includes(this.searchKeywordDebounce || '')
             })
         },
     },

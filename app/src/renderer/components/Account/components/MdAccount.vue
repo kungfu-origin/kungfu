@@ -8,7 +8,7 @@
                 <el-button size="mini" @click="handleAdd" title="添加" id="add-account-btn">添加</el-button>
             </tr-dashboard-header-item>
         </div>
-        <div class="md-source">
+        <div class="table-body md-table">
             <el-table
             size="small"
             :data="mdList"
@@ -219,7 +219,7 @@ export default {
 </script>
 <style lang="scss">
 @import '@/assets/scss/skin.scss';
-.md-source{
+.md-table{
    height: 100%;
 }
 
