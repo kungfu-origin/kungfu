@@ -36,9 +36,11 @@ export default {
                     ...item
                 }
 
-                const instrumentName = Buffer.from(instrument_name).toString();
-
                 if (`${instrument_id}${instrumentName}${exchange_id}`.toLowerCase().includes(queryString.toLowerCase())) return true;
+
+                const instrumentName = Buffer.from(instrument_name).toString();
+                if (instrumentName.toLowerCase().includes(queryString.toLowerCase())) return true;
+
                 return false
             })
             .slice(0, 200)
@@ -49,7 +51,7 @@ export default {
                     exchange_id: '',
                     ...item
                 }
-                const instrumentName = Buffer.from(instrument_name).toString();
+                const instrumentName = Buffer.from(instrument_name).toString().split('\u0000').join('')
 
                 return {
                     instrument_id,

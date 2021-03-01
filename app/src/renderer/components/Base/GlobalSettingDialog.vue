@@ -486,7 +486,6 @@ height: 88%;
 		padding-bottom: 10px;
 	}
 	.setting-sub-item__input-content {
-		width: 300px;
 		padding-bottom: 30px;
 	}
 	}

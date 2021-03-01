@@ -103,7 +103,7 @@ export const getSystemConfig = (): { [propName: string]: SystemConfigItem } => (
                 "key": 'pythonPath',
                 "name": isEnglish ? 'Select Local Python Path' : '选择本地 Python 路径',
                 "cli": true,
-                "tip": isEnglish ? 'local python path is required to be selected, and kungfu*.whl should be installed in this path' : '只有选择了本地python路径，且kungfu*.whl 通过这个python安装，Kungfu才能使用本地python',
+                "tip": isEnglish ? 'local python path is required to be selected, and kungfu*.whl should be installed in this path' : '只有选择了本地python路径，且kungfu*.whl 通过该python对应pip安装，Kungfu才能使用本地python',
                 "default": '',
                 "type": SystemConfigChildItemTypeEnum.File,
                 "required": true
@@ -225,7 +225,7 @@ export const getSystemTradingConfig = (): { [propName: string]: SystemConfigItem
       "cli": false,
       "config": [
         {
-          "key": "future",
+          "key": "Futrue",
           "name": "期货",
           "tip": "仅为期货手续费设置，股票手续费会自动读取，无需设置，设置完成后需重启Kungfu",
           "type": SystemConfigChildItemTypeEnum.Table,

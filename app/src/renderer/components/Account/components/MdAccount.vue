@@ -13,7 +13,7 @@
             size="small"
             :data="mdList"
             height="100%"
-            v-if="renderTable"
+            v-if="afterRender"
             >
                 <el-table-column
                     prop="source_name"
@@ -94,8 +94,6 @@
 </template>
 
 <script>
-import path from 'path';
-import Vue from 'vue';
 import { mapState } from 'vuex';
 
 import SetAccountDialog from './SetAccountDialog';
@@ -106,11 +104,12 @@ import { switchMd, deleteMd } from '__io/actions/account';
 import { loopToRunProcess } from '__gUtils/busiUtils';
 import { watcher } from '__io/kungfu/watcher';
 
+import baseMixin from '@/assets/js/mixins/baseMixin';
 import mdTdMixin from '../js/mdTdMixin';
 import openLogMixin from '@/assets/js/mixins/openLogMixin';
 
 export default {
-    mixins: [ mdTdMixin, openLogMixin ],
+    mixins: [ baseMixin, mdTdMixin, openLogMixin ],
 
     data () {
         this.tdmdType = 'md';

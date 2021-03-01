@@ -11,6 +11,7 @@ import VueRouter from 'vue-router';
 import Account from '@/views/index/components/account/Index';
 import MarketFilter from '@/views/index/components/marketFilter/Index';
 import Strategy from '@/views/index/components/strategy/Index'
+import MarketFilter from '@/views/index/components/marketFilter/Index'
 
 Vue.use(VueRouter)
 
@@ -24,7 +25,7 @@ export default new VueRouter({
         },
         {
             path: '/market-filter',
-            name: 'MarketFilter',
+            name: "MarketFilter",
             component: MarketFilter
         },
         { 

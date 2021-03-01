@@ -19,7 +19,7 @@
                             @activeTicker="setCurrentTicker"
                             />
                         </el-tab-pane>
-                        <el-tab-pane :lazy="true" label="交易任务" name="tradingTask" v-if="isTasks">
+                        <el-tab-pane :lazy="true" label="交易任务" name="tradingTask" v-if="taskExts.length">
                             <Task></Task>
                         </el-tab-pane>
                     </el-tabs>
@@ -145,8 +145,6 @@ export default {
 
             currentOrdesTabName: "orders",
             currentTradesPnlTabNum: "trades",
-
-            isTasks: false,
         }
     },
 
@@ -165,6 +163,7 @@ export default {
             currentTicker: state => state.ACCOUNT.currentTicker,
             currentAccountTabName: state => state.ACCOUNT.currentAccountTabName,
             tdAccountSource: state => state.BASE.tdAccountSource || {},
+            taskExts: state => state.BASE.taskExts || []
         }),
 
         currentTickerResolved () {
@@ -362,7 +361,8 @@ export default {
         getExtensionConfigs () {
             return getExtensionConfigs(TASK_EXTENSION_DIR)
                 .then(exts => {
-                    this.isTasks = !!exts.length
+                    exts = exts || []
+                    this.$store.dispatch('setTaskExts', Object.freeze(exts))
                 })
         },
     },
