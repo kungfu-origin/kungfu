@@ -60,11 +60,11 @@ jobs:
           pip install pipenv==2020.11.15
           yarn env-pypi-python
           yarn install
-#          yarn build
+          yarn build
 
       - name: Collect Kungfu Build Info
         uses: actions/upload-artifact@v2
-#        if: ${{ failure() }}
+        if: ${{ failure() }}
         with:
           # https://docs.github.com/en/actions/reference/context-and-expression-syntax-for-github-actions#github-context
           name: 'Kungfu-Build-Info-${{matrix.name}}-${{github.actor}}-${{github.sha}}'
@@ -76,10 +76,17 @@ jobs:
             core/build/*.txt
           if-no-files-found: ignore
 
-      - name: Make Prebuilt Packages
-        if: ${{ needs.prepare.outputs.publishable  == 'true' }}
+      - name: Make Prebuilt
         run: |
           yarn workspace @kungfu-trader/kungfu-core run package
+
+      - name: Upload Prebuilt
+        uses: actions/upload-artifact@v2
+        with:
+          name: 'Kungfu-Packages-${{matrix.name}}-${{github.sha}}'
+          path: |
+            */build/stage/**/*.tar.gz
+          if-no-files-found: ignore
 
       - name: Upload Kungfu Installer
         uses: actions/upload-artifact@v2
@@ -118,8 +125,8 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_US_SECRET_ACCESS_KEY }}
           aws-region: us-west-1
 
-      - name: Publish Artifacts to AWS (US)
-        uses: kungfu-trader/action-aws-publish@master
+      - name: Publish Prebuilt to AWS (US)
+        uses: kungfu-trader/action-publish-prebuilt@master
         with:
           artifacts-path: 'github-artifacts'
 
@@ -130,10 +137,24 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_CN_SECRET_ACCESS_KEY }}
           aws-region: cn-northwest-1
 
-      - name: Publish Artifacts to AWS (CN)
-        uses: kungfu-trader/action-aws-publish@master
+      - name: Publish Prebuilt to AWS (CN)
+        uses: kungfu-trader/action-publish-prebuilt@master
         with:
           artifacts-path: 'github-artifacts'
+
+      - name: Publish Prebuilt to AWS (CN) With POP - US
+        uses: kungfu-trader/action-publish-prebuilt@trace
+        with:
+          artifacts-path: 'github-artifacts'
+          s3-bucket: 'kungfu'
+          aws-proxy: ${{ secrets.PROXY_AWS_POP_US }}
+
+      - name: Publish Prebuilt to AWS (CN) With POP - HK
+        uses: kungfu-trader/action-publish-prebuilt@trace
+        with:
+          artifacts-path: 'github-artifacts'
+          s3-bucket: 'kungfu'
+          aws-proxy: ${{ secrets.PROXY_AWS_POP_HK }}
 
       - name: Clean Stale Packages
         if: ${{ needs.prepare.outputs.publishable  == 'true' }}

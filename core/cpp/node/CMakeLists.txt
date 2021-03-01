@@ -32,12 +32,12 @@ MESSAGE("-- Include node-addon-api headers from ${NODE_ADDON_API_DIR}")
 AUX_SOURCE_DIRECTORY(src SOURCE_FILES_KUNGFU)
 
 if (${NODE_RUNTIME} STREQUAL "node")
-    SET(ADDON_NAME "kungfu-node")
+    SET(ADDON_NAME "kungfu_node")
     MESSAGE(STATUS "Building node bindings ${ADDON_NAME}")
 endif ()
 
 if (${NODE_RUNTIME} STREQUAL "electron")
-    SET(ADDON_NAME "kungfu-electron")
+    SET(ADDON_NAME "kungfu_electron")
     MESSAGE(STATUS "Building node bindings ${ADDON_NAME}")
 endif ()
 

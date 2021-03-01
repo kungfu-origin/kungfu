@@ -53,7 +53,7 @@
       "!**/kungfu-core/*",
       "!**/kungfu-core/**/*",
       "!**/kungfu-core/**/**/*",
-      "**/kungfu-core/build/kfc/kungfu-electron.node",
+      "**/kungfu-core/build/kfc/kungfu_electron.node",
       "**/kungfu-core/build/kfc/kungfubuildinfo.json",
       "**/kungfu-core/node/*",
       "**/kungfu-core/node/**/*",
@@ -91,12 +91,11 @@
         "from": "../cli2/build/cli",
         "to": "kungfu-cli",
         "filter": [
-          "fsevents.node",
+          "*.node",
           "kungfu-cli",
           "kungfu-cli.*",
           "kungfu.*",
           "libkungfu.*",
-          "kungfu-*.node",
           "pykungfu*",
           "kungfubuildinfo.json"
         ]
