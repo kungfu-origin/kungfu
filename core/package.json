@@ -27,9 +27,9 @@
   "binary": {
     "module_name": "kungfu-node",
     "module_path": "build/kfc",
-    "remote_path": "core/v{major}/{version}",
+    "remote_path": "core/v{major}/v{version}",
     "package_name": "kfc-v{version}-{platform}-{arch}.tar.gz",
-    "host": "https://kungfu.s3.cn-northwest-1.amazonaws.com.cn"
+    "host": "https://kungfu-rebuilt.s3.cn-northwest-1.amazonaws.com.cn"
   },
   "scripts": {
     "install": "yarn setup",

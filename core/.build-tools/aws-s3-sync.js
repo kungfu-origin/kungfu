@@ -1,7 +1,7 @@
 const {spawnSync} = require("child_process");
 
 function run(retry_times) {
-    const aws_args = ["s3", "sync", "build/stage/core", "s3://kungfu/core", "--acl", "public-read", "--only-show-errors"];
+    const aws_args = ["s3", "sync", "build/stage/core", "s3://kungfu-prebuilt/core", "--acl", "public-read", "--only-show-errors"];
 
     console.log(`$ aws ${aws_args.join(' ')}`);
 

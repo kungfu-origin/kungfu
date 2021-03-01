@@ -76,6 +76,11 @@ jobs:
             core/build/*.txt
           if-no-files-found: ignore
 
+      - name: Make Prebuilt Packages
+        if: ${{ needs.prepare.outputs.publishable  == 'true' }}
+        run: |
+          yarn workspace @kungfu-trader/kungfu-core run package
+
       - name: Upload Kungfu Installer
         uses: actions/upload-artifact@v2
         with:
@@ -87,19 +92,6 @@ jobs:
             app/build/app/*.AppImage
           if-no-files-found: ignore
 
-      - name: Configure AWS Crendentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: cn-northwest-1
-
-      - name: Publish to AWS S3
-        if: ${{ needs.prepare.outputs.publishable  == 'true' }}
-        run: |
-          yarn workspace @kungfu-trader/kungfu-core run package
-          yarn workspace @kungfu-trader/kungfu-core run publish-binary
-
   publish:
     needs: [prepare, build]
     runs-on: ubuntu-20.04
@@ -107,13 +99,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-
-      - name: Configure AWS Crendentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: cn-northwest-1
 
       - name: Setup NPM registry
         uses: actions/setup-node@v2
@@ -125,6 +110,25 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           path: 'github-artifacts'
+
+      - name: Configure AWS Crendentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-west-1
+
+      - name: Publish Artifacts to AWS
+        uses: kungfu-trader/action-aws-publish@master
+        with:
+          artifacts-path: 'github-artifacts'
+
+      - name: Configure AWS Crendentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_CN_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_CN_SECRET_ACCESS_KEY }}
+          aws-region: cn-northwest-1
 
       - name: Publish Artifacts to AWS
         uses: kungfu-trader/action-aws-publish@master
