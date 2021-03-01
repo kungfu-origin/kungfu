@@ -411,7 +411,7 @@ export default {
     }
 }
 
-.el-col{
+.el-col {
     height: 100%;
 }
 
