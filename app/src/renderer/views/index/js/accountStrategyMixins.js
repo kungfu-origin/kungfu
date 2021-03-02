@@ -89,6 +89,7 @@ export default {
             window.makeOrderWin.on('close', () => {
                 window.makeOrderWin = null;
                 this.makeOrderByPosData = Object.freeze({})
+                this.makeOrderByQuote = Object.freeze({})
             })
         },
         

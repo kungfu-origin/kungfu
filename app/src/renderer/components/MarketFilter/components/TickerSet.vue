@@ -18,21 +18,12 @@
                         prop="name"
                         label="名称"
                         show-overflow-tooltip
-                        width="80"
+                        min-width="120"
                     ></el-table-column>
-                    <el-table-column
-                        prop="tickers"
-                        label="包含标的"
-                        show-overflow-tooltip
-                    >
-                        <template slot-scope="props">
-                            <span>{{ resolveTickers(props.row.tickers) }}</span>
-                        </template>
-                    </el-table-column>
                     <el-table-column
                         label=""
                         align="right"
-                        width="80"
+                        min-width="80"
                     >
                     <template slot-scope="props">
                         <span class="tr-oper"><i class="el-icon-setting mouse-over" title="设置" @click.stop="handleSetTickerSet(props.row)"></i></span>

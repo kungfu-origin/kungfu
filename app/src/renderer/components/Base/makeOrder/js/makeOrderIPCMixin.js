@@ -13,7 +13,8 @@ export default {
             currentId: '',
             moduleType: '',
             currentTicker: {},
-            makeOrderByPosData: {}
+            makeOrderByPosData: {},
+            makeOrderByQuote: {}
         }
     },
 

@@ -60,8 +60,8 @@
                     </el-row>
                 </el-col>
             </el-row>
-            <el-row style="height: 45%" class="flex-row">
-                <el-col :span="6" :style="{ 'max-width': '450px' }">
+            <el-row style="height: 45%">
+                <el-col :span="6">
                     <MakeOrderDashboard
                         :currentId="currentId"
                         :moduleType="moduleType" 

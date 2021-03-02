@@ -19,6 +19,7 @@
                     size="small"
                     :data="currentTickerSetTickers || []"
                     height="100%"
+                    @row-click="handleRowClick"
                     >
 
                         <el-table-column
@@ -124,6 +125,25 @@
                             </template>
                         </el-table-column>
                         <el-table-column
+                            label="7日均成交量"
+                            show-overflow-tooltip
+                            min-width="60"
+                            class-name="blink-cell"
+                        >
+                            <template slot-scope="props">
+                                 <BlinkNum
+                                :className="{
+                                    'tr-table-cell': true,
+                                    'number': true,
+                                    'nano': true,
+                                }"
+                                :theKey="props.row.instrumentId" 
+                                num="--"
+                                >
+                                </BlinkNum>
+                            </template>
+                        </el-table-column>
+                        <el-table-column
                             label=""
                             align="right"
                             min-width="40"
@@ -191,6 +211,10 @@ export default {
     },
 
     methods: {
+
+        handleRowClick (row) {
+            this.$emit('clickQuote', this.getMarketData(row))
+        },
         
         handleAddTicker () {
             this.addTickerDialogVisiblity = true;

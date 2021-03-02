@@ -1,6 +1,6 @@
 
 <template>
-    <tr-dashboard :title="`下单 ${currentId}`">
+    <tr-dashboard :title="`下单 ${currentId || ''}`">
         <div slot="dashboard-header">
             <tr-dashboard-header-item>
                 <el-button size="mini" @click="clearData()" style="width: 50px;">重置</el-button>
@@ -355,6 +355,21 @@ export default {
     },
 
     watch: {
+        makeOrderByQuote (newQuoteData) {
+            if (!Object.keys(newQuoteData || {}).length) return;
+
+            this.clearData(true);
+            
+            const { instrumentId, lastPrice, exchangeId, instrumentType } = newQuoteData;
+            this.$set(this.makeOrderForm, 'instrument_id', instrumentId);
+            this.$set(this.makeOrderForm, 'exchange_id', exchangeId);
+            this.$set(this.makeOrderForm, 'limit_price', lastPrice);
+            this.$set(this.makeOrderForm, 'instrument_type', instrumentType);
+            
+            this.$refs['make-order-form'].validate()
+                .catch(err => {})
+        },
+
         makeOrderByPosData (newPosData) {
             
             if (!Object.keys(newPosData || {}).length) return;
@@ -387,6 +402,7 @@ export default {
             }
 
             this.$refs['make-order-form'].validate()
+                .catch(err => {})
         },
 
         'makeOrderForm.buyType' (val) {

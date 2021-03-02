@@ -19,6 +19,11 @@ export default {
             type: Object,
             default: () => ({})
         },
+
+        makeOrderByQuote: {
+            type: Object,
+            default: () => ({})
+        }
     },
 
     computed: {
