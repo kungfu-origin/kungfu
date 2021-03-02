@@ -17,7 +17,6 @@ Vue.use(ElementUI)
 
 Vue.config.productionTip = false
 Vue.store = Vue.prototype.$store = store
-Vue.utils = Vue.prototype.$utils = utils
 
 //tr 组件
 Vue.use(Components)

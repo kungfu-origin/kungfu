@@ -358,11 +358,10 @@ export default {
         makeOrderByPosData (newPosData) {
             
             if (!Object.keys(newPosData || {}).length) return;
+            
             this.clearData(true);
 
             const { instrumentId, lastPrice, totalVolume, directionOrigin, exchangeId, accountIdResolved, instrumentType } = newPosData;
-
-            console.log('[Make Order] last price', instrumentId, lastPrice)
 
             this.$set(this.makeOrderForm, 'instrument_id', instrumentId);
             this.$set(this.makeOrderForm, 'exchange_id', exchangeId);

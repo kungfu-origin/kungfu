@@ -1,5 +1,6 @@
 
-const remote = require('electron').remote
+const remote = require('electron').remote;
+import { openVueWin } from '__gUtils/busiUtils';
 
 export default {
 
@@ -53,7 +54,7 @@ export default {
         buildMakeOrderWin () {
             //仅在strategy时创建窗口
             if (!window.makeOrderWin && this.moduleType === 'strategy') {
-                return this.$utils.openVueWin(
+                return openVueWin(
                     'makeOrder', 
                     `/make-order`, 
                     remote, 

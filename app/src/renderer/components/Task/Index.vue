@@ -30,7 +30,7 @@
             >
                 <template slot-scope="props">
                     <tr-status 
-                    v-if="$utils.ifProcessRunning(props.row.processId, processStatus)"
+                    v-if="ifProcessRunning(props.row.processId, processStatus)"
                     :value="props.row.processStatus"
                     ></tr-status>
                     <tr-status v-else></tr-status>
@@ -42,7 +42,7 @@
             >
                 <template slot-scope="props">
                     <el-switch
-                    :value="$utils.ifProcessRunning(props.row.processId, processStatus)"
+                    :value="ifProcessRunning(props.row.processId, processStatus)"
                     @change="e => handleTaskSwitch(e, props.row)"
                     ></el-switch> 
                 </template>
@@ -91,7 +91,7 @@ import { mapState } from 'vuex';
 
 import SetTaskDialog from './SetTaskDialog';
 
-import { getExtensionConfigs, findTargetFromArray } from '__gUtils/busiUtils';
+import { getExtensionConfigs, findTargetFromArray, ifProcessRunning } from '__gUtils/busiUtils';
 import { deleteProcess } from '__gUtils/processUtils';
 import { removeFileFolder } from '__gUtils/fileUtils';
 import { TASK_EXTENSION_DIR, buildProcessLogPath } from '__gConfig/pathConfig';
@@ -111,7 +111,8 @@ export default {
     },
 
     data () {
-
+        this.ifProcessRunning = ifProcessRunning;
+        
         return {
             setTaskMethod: 'add',
             setTaskInitData: {},

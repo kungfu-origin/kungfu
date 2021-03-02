@@ -557,3 +557,14 @@ export const findTargetFromArray = ( list: any[], targetKey: string, targetValue
     }
     return null
 }
+
+export const getIndexFromTargetTickers = (tickerList: TickerInTickerSet[], ticker: TickerInTickerSet) => {
+    return tickerList.findIndex(item => {
+        if (item.exchangeId === ticker.exchangeId) {
+            if (item.instrumentId === ticker.instrumentId) {
+                return true;
+            }
+        }
+        return false;
+    })
+}  

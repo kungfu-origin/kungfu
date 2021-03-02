@@ -37,7 +37,7 @@
             >
                 <template slot-scope="props">
                     <tr-status 
-                    v-if="$utils.ifProcessRunning(props.row.strategy_id, processStatus)"
+                    v-if="ifProcessRunning(props.row.strategy_id, processStatus)"
                     :value="processStatus[props.row.strategy_id]"
                     ></tr-status>
                     <tr-status v-else></tr-status>
@@ -49,7 +49,7 @@
             >
                 <template slot-scope="props" v-if="props.row.strategy_id">
                     <el-switch
-                    :value="$utils.ifProcessRunning(props.row.strategy_id, processStatus)"
+                    :value="ifProcessRunning(props.row.strategy_id, processStatus)"
                     @change="e => handleStrategySwitch(e, props.row)"
                     ></el-switch> 
                 </template>
@@ -219,6 +219,8 @@
 <script>
 import { remote } from 'electron';
 import { mapState } from 'vuex';
+
+import { ifProcessRunning, toDecimal } from '__gUtils/busiUtils';
 import { encodeKungfuLocation } from '__io/kungfu/kungfuUtils';
 import { watcher } from '__io/kungfu/watcher';
 import * as STRATEGY_API from '__io/kungfu/strategy';
@@ -243,7 +245,8 @@ export default {
         this.specialStrValidator = specialStrValidator;
         this.noZeroAtFirstValidator = noZeroAtFirstValidator;
         this.noKeywordValidatorBuilder = noKeywordValidatorBuilder;
-        this.searchFilterKey = 'strategy_id'
+        this.searchFilterKey = 'strategy_id';
+        this.ifProcessRunning = ifProcessRunning;
 
         return {
             setStrategyDialogVisiblity: false,
@@ -312,7 +315,7 @@ export default {
         //删除策略
         handleDeleteStrategy(row){
             const strategy_id = row.strategy_id + ''
-            const strategyProcessStatus = this.$utils.ifProcessRunning(strategy_id, this.processStatus)
+            const strategyProcessStatus = ifProcessRunning(strategy_id, this.processStatus)
             if(strategyProcessStatus){
                 this.$message.warning("需先停止该策略运行！")
                 return;
@@ -336,7 +339,7 @@ export default {
 
         //编辑策略
         handleEditStrategy(row){
-            this.$utils.openVueWin(
+            openVueWin(
                 'code', 
                 `/kungfuCodeEditor/${row.strategy_id}`, 
                 remote
@@ -344,7 +347,7 @@ export default {
         },
 
         handleStartAndBacktestWin (row) {
-            this.$utils.openVueWin('backtest', `/${row.strategy_id}`, BrowserWindow)
+            openVueWin('backtest', `/${row.strategy_id}`, BrowserWindow)
         },
 
         //设置策略
@@ -414,7 +417,7 @@ export default {
         },
 
         //check策略是否重复
-        validateDuplicateStrategyId(rule, value, callback){
+        validateDuplicateStrategyId (rule, value, callback) {
             const ifDuplicate = this.strategyList.filter(s => (s.strategy_id === value)).length !== 0
             if(ifDuplicate && this.setStrategyDialogType !== 'set'){
                 callback(new Error('该策略ID已存在！'))
@@ -438,7 +441,7 @@ export default {
 
          //计算持仓盈亏
         calcCash(row, key){
-            return this.$utils.toDecimal((this.strategyiesAsset[row.strategy_id] || {})[key]) + ''
+            return toDecimal((this.strategyiesAsset[row.strategy_id] || {})[key]) + ''
         }
     }
 }

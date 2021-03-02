@@ -1,22 +1,5 @@
 import { KF_TICKER_SET_JSON_PATH } from '__gConfig/pathConfig';
 import fse from 'fs-extra';
-import { async } from 'rxjs';
-import { retry } from 'rxjs/operators';
-
-interface TickerInTickerSet {
-    source: string;
-    exchangeId: string;
-    instrumentId: string;
-}
-
-interface TickerSet {
-    name: string;
-    tickers: TickerInTickerSet[]
-}
-
-interface stringToTickerSet {
-    [ propName: string ]: TickerSet;
-}
 
 export const getTickerSetsJSON = (): Promise<stringToTickerSet> => {
     return fse.readFile(KF_TICKER_SET_JSON_PATH)

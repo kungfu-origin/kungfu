@@ -2,17 +2,29 @@ export default {
 
     state: {
         tickerSets: [],
+
+        currentTickerSet: null,
+
+        currentTicker: null
     },
 
     actions: {
-        getTickerSets ({ commit }, tickerSet) {
-            commit('GET_TICKER_SETS', tickerSet)
+        setTickerSets ({ commit }, tickerSets) {
+            commit('SET_TICKER_SETS', tickerSets)
+        },
+
+        setCurrentTickerSet ({ commit }, tickerSet) {
+            commit('SET_CURRENT_TICKER_SET', tickerSet)
         }
     },
 
     mutations: {
-        GET_TICKER_SETS (state, tickerSet) {
-            state.tickerSets = tickerSet
+        SET_TICKER_SETS (state, tickerSets) {
+            state.tickerSets = tickerSets
+        },
+
+        SET_CURRENT_TICKER_SET (state, tickerSet) {
+            state.currentTickerSet = tickerSet
         }
 
     }

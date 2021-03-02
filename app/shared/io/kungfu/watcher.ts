@@ -141,13 +141,18 @@ export const transformTradingItemListToData = (list: any[], type: string) => {
     } else if (type === 'ticker') {
         list.kfForEach((item: any) => {
             if (!item.account_id) return;
+            if (!item.instrument_id) return;
             const instrumentId = `${item.instrument_id}_${item.direction}`;
-            if (!instrumentId) return;
             if (!data[instrumentId]) data[instrumentId] = [];
             data[instrumentId].push(item)
         })
 
-    } 
+    } else if (type === 'quote') {
+        list.kfForEach((item: any) => {
+            const instrumentId = `${item.exchange_id}_${item.instrument_id}_${item.source_id}`;
+            data[instrumentId] = item;
+        })
+    }
 
     return data
 }
@@ -194,8 +199,6 @@ export const transformAssetItemListToData = (list: any[], type: string) => {
 
     return accountIdClientIdData
 }
-
-
 
 
 export function decodeKungfuLocation(sourceOrDest: string): KungfuLocation {

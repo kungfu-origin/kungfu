@@ -35,10 +35,10 @@
                     >
                     <template slot-scope="props">
                         <tr-status 
-                        v-if="$utils.ifProcessRunning(`md_${props.row.source_name}`, processStatus) && processStatus[`md_${props.row.source_name}`] === 'online'"
+                        v-if="ifProcessRunning(`md_${props.row.source_name}`, processStatus) && processStatus[`md_${props.row.source_name}`] === 'online'"
                         :value="(mdTdState[`md_${props.row.source_name}`] || {}).state"></tr-status>
                         <tr-status 
-                        v-else-if="$utils.ifProcessRunning(`md_${props.row.source_name}`, processStatus) && processStatus[`md_${props.row.source_name}`] === 'stopping'"
+                        v-else-if="ifProcessRunning(`md_${props.row.source_name}`, processStatus) && processStatus[`md_${props.row.source_name}`] === 'stopping'"
                         :value="processStatus[`md_${props.row.source_name}`]"></tr-status>
                         <tr-status v-else></tr-status>
                     </template>
@@ -49,7 +49,7 @@
                     >
                     <template slot-scope="props">
                         <span @click.stop>
-                            <el-switch :value="$utils.ifProcessRunning('md_' + props.row.source_name, processStatus)" @change="handleMdSwitch($event, props.row)"></el-switch>
+                            <el-switch :value="ifProcessRunning('md_' + props.row.source_name, processStatus)" @change="handleMdSwitch($event, props.row)"></el-switch>
                         </span>
                     </template>
                 </el-table-column>
@@ -101,7 +101,7 @@ import SetSourceDialog from './SetSourceDialog';
 
 import { getMdList } from '__io/kungfu/account';
 import { switchMd, deleteMd } from '__io/actions/account';
-import { loopToRunProcess } from '__gUtils/busiUtils';
+import { loopToRunProcess, ifProcessRunning } from '__gUtils/busiUtils';
 import { watcher } from '__io/kungfu/watcher';
 
 import baseMixin from '@/assets/js/mixins/baseMixin';
@@ -113,6 +113,7 @@ export default {
 
     data () {
         this.tdmdType = 'md';
+        this.ifProcessRunning = ifProcessRunning;
 
         return {
 
@@ -128,7 +129,7 @@ export default {
 
         allProcessRunning () {
             const notRunningList = this.mdList.filter(item => {
-                const isRunning = this.$utils.ifProcessRunning('md_' + item.source_name, this.processStatus)
+                const isRunning = ifProcessRunning('md_' + item.source_name, this.processStatus)
                 if (!isRunning) return true
                 else return false
             })
@@ -178,7 +179,7 @@ export default {
             const promiseList = this.mdList
                 .filter(item => {
                     const id = item.source_name;
-                    const status = this.$utils.ifProcessRunning('md_' + item.source_name, this.processStatus)
+                    const status = ifProcessRunning('md_' + item.source_name, this.processStatus)
                     return status !== targetStatus
                 })
                 .map(item => {
@@ -196,7 +197,7 @@ export default {
         judgeCondition(row) {
             const { source_name } = row
             //判断td是否开启，开启则无法删除
-            if(this.$utils.ifProcessRunning(`md_${source_name}`, this.processStatus)) {
+            if(ifProcessRunning(`md_${source_name}`, this.processStatus)) {
                 this.$message.warning('需先停止行情源进程！')
                 return false
             }

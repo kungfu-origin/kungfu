@@ -506,6 +506,23 @@ p.el-select-dropdown__empty{
             padding-right: 8px;
             box-sizing: border-box;
             border: 0;
+            height: 36px;
+
+            .el-tabs__nav-next, .el-tabs__nav-prev {
+                height: 36px;
+                line-height: 36px;
+            }
+
+            .el-tabs__new-tab {
+                margin-top: 8px;
+                margin-bottom: 0;
+                margin-right: 6px;
+                border: 1px solid $icon;
+                
+                i {
+                    color: $icon;
+                }
+            }
 
             .el-tabs__item {
                 height: 36px;

@@ -20,12 +20,12 @@
                     <span class="account-process-item text-overflow"></span>
                     <span  class="account-process-item text-overflow" style="width: 81px;">
                         <tr-status 
-                        v-if="$utils.ifProcessRunning('md_' + accountItem.source_name, processStatus)"
+                        v-if="ifProcessRunning('md_' + accountItem.source_name, processStatus)"
                         :value="buildMdState(accountItem)"></tr-status>
                         <tr-status v-else></tr-status>
                     </span>
                     <span class="account-process-item status-switch" @click.stop>
-                        <el-switch :value="$utils.ifProcessRunning('md_' + accountItem.source_name, processStatus)" @change="handleMdSwitch($event, accountItem)"></el-switch>
+                        <el-switch :value="ifProcessRunning('md_' + accountItem.source_name, processStatus)" @change="handleMdSwitch($event, accountItem)"></el-switch>
                     </span>
                 </div>
             </div>
@@ -45,12 +45,12 @@
                     </span>
                     <span  class="account-process-item text-overflow " style="width: 81px;">
                         <tr-status 
-                        v-if="$utils.ifProcessRunning('td_' + accountItem.account_id, processStatus)"
+                        v-if="ifProcessRunning('td_' + accountItem.account_id, processStatus)"
                         :value="buildTdState(accountItem)"></tr-status>
                         <tr-status v-else></tr-status>
                     </span>
                     <span class="account-process-item status-switch">
-                        <el-switch :value="$utils.ifProcessRunning('td_' + accountItem.account_id, processStatus)"
+                        <el-switch :value="ifProcessRunning('td_' + accountItem.account_id, processStatus)"
                         @change="handleTdSwitch($event, accountItem)"></el-switch>
                     </span>
                 </div>
@@ -66,6 +66,7 @@
 import { mapState } from 'vuex';
 import { statusConfig } from '__gConfig/statusConfig';
 import { switchTd, switchMd } from '__io/actions/account';
+import { ifProcessRunning } from '__gUtils/busiUtils';
 
 export default {
     data(){
@@ -73,6 +74,8 @@ export default {
         Object.keys(statusConfig || {}).map(key => {
             statusLevel[key] = statusConfig[key].level;
         })
+
+        this.ifProcessRunning = ifProcessRunning;
         return {
             statusLevel
         }
@@ -95,27 +98,26 @@ export default {
         //全开，且开的状态不都是ready的，以开的状态最严重的颜色为准
         //简而言之：以最差的为准
         currentStatus(){
-            const t = this;
             let tdProcessReady = false;
             let mdProcessReady = false;
             let tdStatusReady = 0;
             let mdStatusReady = 0;
 
-            t.tdList.map(a => {
-                const tdProcessStatus = t.$utils.ifProcessRunning('td_' + a.account_id, t.processStatus)
+            this.tdList.map(a => {
+                const tdProcessStatus = this.ifProcessRunning('td_' + a.account_id, this.processStatus)
                 if(tdProcessStatus) tdProcessReady = true;
-                const tdStatus = t.buildTdState(a)
-                let level = t.statusLevel[tdStatus];
+                const tdStatus = this.buildTdState(a)
+                let level = this.statusLevel[tdStatus];
                 if(tdProcessStatus){
                     if(tdStatusReady === 0 && level > 0) tdStatusReady = level;
                     (level < tdStatusReady) && (tdStatusReady = level);
                 }
 
                 if(true){
-                    const mdProcessStatus = t.$utils.ifProcessRunning('md_' + a.source_name, t.processStatus)                                       
+                    const mdProcessStatus = this.ifProcessRunning('md_' + a.source_name, this.processStatus)                                       
                     if (mdProcessStatus) mdProcessReady = true;  
-                    const mdStatus = t.buildMdState(a)
-                    let level = t.statusLevel[mdStatus];
+                    const mdStatus = this.buildMdState(a)
+                    let level = this.statusLevel[mdStatus];
                     if(mdProcessStatus){
                         if(mdStatusReady === 0 && level > 0) mdStatusReady = level;
                         (level < mdStatusReady) && (mdStatusReady = level);
@@ -136,25 +138,21 @@ export default {
 
     methods: {
         buildMdState(accountItem){
-            const t = this;
-            return (t.mdTdState[`md_${accountItem.source_name}`] || {}).state
+            return (this.mdTdState[`md_${accountItem.source_name}`] || {}).state
         },
 
         buildTdState(accountItem){
-            const t = this;
-            return (t.mdTdState[`td_${accountItem.account_id}`] || {}).state
+            return (this.mdTdState[`td_${accountItem.account_id}`] || {}).state
         },
 
         //Td开关
         handleTdSwitch(value, account) {
-            const t = this;
-            switchTd(account, value).then(({ type, message }) => t.$message[type](message))
+            switchTd(account, value).then(({ type, message }) => this.$message[type](message))
         },
 
         //行情开关
         handleMdSwitch(value, account) {
-            const t = this
-            switchMd(account, value).then(({ type, message }) => t.$message[type](message))  
+            switchMd(account, value).then(({ type, message }) => this.$message[type](message))  
         },
     }
 }

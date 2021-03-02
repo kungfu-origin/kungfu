@@ -13,7 +13,7 @@
                     </span>
                     <span class="core-process-item text-overflow" style="width: 71px;">
                         <tr-status 
-                        v-if="$utils.ifProcessRunning('master', processStatus)"
+                        v-if="ifProcessRunning('master', processStatus)"
                         :value="buildState('master')"></tr-status>
                         <tr-status v-else></tr-status>
                     </span>
@@ -30,12 +30,12 @@
                     </span>
                     <span  class="core-process-item text-overflow" style="width: 71px;">
                         <tr-status 
-                        v-if="$utils.ifProcessRunning('ledger', processStatus)"
+                        v-if="ifProcessRunning('ledger', processStatus)"
                         :value="buildState('ledger')"></tr-status>
                         <tr-status v-else></tr-status>
                     </span>
                     <span class="core-process-item switch" v-if="NODE_ENV === 'development'">
-                        <el-switch  :value="$utils.ifProcessRunning('ledger', processStatus)" @change="handleLedgerSwitch"></el-switch>
+                        <el-switch  :value="ifProcessRunning('ledger', processStatus)" @change="handleLedgerSwitch"></el-switch>
                     </span>
                      <span class="core-process-item get-log">
                         <i class="el-icon-document mouse-over" title="打开日志文件" @click="handleOpenLogFile('ledger')" ></i>
@@ -67,6 +67,7 @@ export default {
         })
         this.nasterErrController = false;
         this.ledgerErrController = false;
+        this.ifProcessRunning = ifProcessRunning;
         return {
             statusLevel,
             NODE_ENV: process.env.NODE_ENV
@@ -82,23 +83,22 @@ export default {
         }),
 
         currentStatus(){
-            const t = this;
-            if(t.processStatus === null){
+            if(this.processStatus === null){
                 return 'color-gray'
             }
 
-            if(!ifProcessRunning('master', t.processStatus)){
-                if(!t.nasterErrController && !!t.processStatus['master']){
-                    t.$message.error('主控进程断开，不可交易，请重启应用！', 0)
-                    t.nasterErrController = true;  
+            if(!ifProcessRunning('master', this.processStatus)){
+                if(!this.nasterErrController && !!this.processStatus['master']){
+                    this.$message.error('主控进程断开，不可交易，请重启应用！', 0)
+                    this.nasterErrController = true;  
                 }
                 return 'color-red'
             }
 
-            if(!ifProcessRunning('ledger', t.processStatus)){
-                if(!t.ledgerErrController && !!t.processStatus['ledger']){
-                    t.$message.error('数据进程断开，交易数据将会丢失，请重启数据进程！', 0)
-                    t.ledgerErrController = true;  
+            if(!ifProcessRunning('ledger', this.processStatus)){
+                if(!this.ledgerErrController && !!this.processStatus['ledger']){
+                    this.$message.error('数据进程断开，交易数据将会丢失，请重启数据进程！', 0)
+                    this.ledgerErrController = true;  
                 }
                 return 'color-red'
             }
@@ -109,8 +109,7 @@ export default {
 
     methods: {
         buildState(processId) {
-            const t = this;
-            return t.processStatus[processId]
+            return this.processStatus[processId]
         },
 
         handleLedgerSwitch (e) {

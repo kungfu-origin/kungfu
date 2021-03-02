@@ -114,9 +114,10 @@
 </template>
 <script>
 import Vue from 'vue';
-import VueVirtualScroller from 'vue-virtual-scroller'
 import 'vue-virtual-scroller/dist/vue-virtual-scroller.css'
-import {debounce, sum} from '__gUtils/busiUtils';
+
+import VueVirtualScroller from 'vue-virtual-scroller'
+import { debounce, sum } from '__gUtils/busiUtils';
 
 Vue.use(VueVirtualScroller)
 export default {
@@ -175,22 +176,20 @@ export default {
 
     watch: {
         data(newVal) {
-            const t = this;
             if (newVal.length !== 0) {
-                t.$nextTick().then(() => t.show = true)
+                this.$nextTick().then(() => this.show = true)
             } else {
-                t.$nextTick().then(() => t.show = false)
+                this.$nextTick().then(() => this.show = false)
             }
         }
     },
 
     computed: {
         headerWidth(){
-            const t = this;
             let widths = []; //column use with
             let flexs = []; //column use flex
 
-            t.schema.forEach(item => {
+            this.schema.forEach(item => {
                 if(item.width !== undefined){
                     widths.push(item);
                 }else{
@@ -200,7 +199,7 @@ export default {
 
             //先减去 固定宽度集合，再算flex unit
             const flexWidthUnits  = sum(flexs.map(item => item.flex || 1))
-            const widthForFlex = t.bodyWidth - (widths.length ? t.$utils.sum(widths.map(item => parseFloat(item.width))) : 0)
+            const widthForFlex = this.bodyWidth - (widths.length ? sum(widths.map(item => parseFloat(item.width))) : 0)
             const unit = (widthForFlex - 16) / flexWidthUnits
             let headerWidthCollection = {};
             [...widths, ...flexs].forEach(item => {
@@ -211,12 +210,11 @@ export default {
     },
 
     mounted(){
-        const t = this;
-        t.calcBodyWidthHeight()
-        let $scrollerTable = t.$refs['tr-scroller-table'] || t.$refs['tr-dynamic-scroller-table'];
+        this.calcBodyWidthHeight()
+        let $scrollerTable = this.$refs['tr-scroller-table'] || this.$refs['tr-dynamic-scroller-table'];
         window.addEventListener('resize', debounce(e => {
-            t.calcBodyWidthHeight()
-                if(!$scrollerTable) $scrollerTable = t.$refs['tr-scroller-table'] || t.$refs['tr-dynamic-scroller-table'];
+            this.calcBodyWidthHeight()
+                if(!$scrollerTable) $scrollerTable = this.$refs['tr-scroller-table'] || this.$refs['tr-dynamic-scroller-table'];
                 $scrollerTable && $scrollerTable.forceUpdate && $scrollerTable.forceUpdate()              
         }, 300))
     },
@@ -242,9 +240,8 @@ export default {
         },
 
         triggerToBottom() {
-            const t = this;
-            t.$nextTick().then(() => {
-                const $scrollerTable = t.$refs['tr-scroller-table'] || t.$refs['tr-dynamic-scroller-table'];
+            this.$nextTick().then(() => {
+                const $scrollerTable = this.$refs['tr-scroller-table'] || this.$refs['tr-dynamic-scroller-table'];
                 $scrollerTable && $scrollerTable.$el && ($scrollerTable.$el.scrollTop = 1000000000)
             })
         },

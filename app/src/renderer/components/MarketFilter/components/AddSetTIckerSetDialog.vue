@@ -18,7 +18,7 @@
                             :rules="[
                                 { min: 1, max: 20, message: '长度不能超过 20 个字符', trigger: 'blur' },
                                 { required: true, message: '请输入标的池名称', trigger: 'blur' },
-                                { validator: validateDuplicateStrategyId, trigger: 'blur' },
+                                { validator: validateDuplicateTickerSet, trigger: 'blur' },
                                 { validator: specialStrValidator, trigger: 'blur' },
                                 { validator: noZeroAtFirstValidator, trigger: 'blur' },
                             ]"
@@ -65,6 +65,14 @@
                                 show-overflow-tooltip
                                 min-width="60"
                             >
+                                <template slot-scope="props">
+                                    <el-tag
+                                    v-if="(tdAccountSource[props.row.source] || {}).typeName"
+                                    :type="tdAccountSource[props.row.source].type" 
+                                    >
+                                        {{props.row.source}}
+                                    </el-tag>
+                                </template>
                             </el-table-column>
                                <el-table-column
                                     label="" 
@@ -83,7 +91,7 @@
         
         <div slot="footer" class="dialog-footer">
             <el-button  size="mini" @click="handleClose">取 消</el-button>
-            <el-button type="primary" size="mini" @click="handleSetTickerSet">确 定</el-button>
+            <el-button type="primary" size="mini" @click="handleConfirmTickerSet">确 定</el-button>
         </div>
 
     </el-dialog>
@@ -92,6 +100,7 @@
 <script>
 import { mapState } from 'vuex';
 
+import { deepClone, getIndexFromTargetTickers } from '__gUtils/busiUtils';
 import { specialStrValidator, noZeroAtFirstValidator, noKeywordValidatorBuilder } from '__assets/validator';
 
 export default {
@@ -100,6 +109,11 @@ export default {
         visible: {
             type: Boolean,
             default: false
+        },
+
+        inputData: {
+            type: Object,
+            default: {}
         },
 
         method: {
@@ -125,47 +139,36 @@ export default {
     },
 
     mounted () {
-        this.$bus.$on('add-ticker-for-ticker-set', tickerData => {
+        this.bindAddTickerListener();
 
-            if (tickerData) {
-                this.tickersList.push(tickerData)
-            }
-        })
+        if (this.method !== 'add') {
+            this.initData();
+        }
     },
 
     computed: {
 
         ...mapState({
-            tickerSets: state => state.MARKET.tickerSets
+            tickerSets: state => state.MARKET.tickerSets,
+            tdAccountSource: state => state.BASE.tdAccountSource || {}
         })
     },
 
     methods: {
 
         handleDeleteTicker (tickerData) {
-            const targetIndex = this.tickersList.findIndex(item => {
-                if (item.instrumentId === tickerData.instrumentId) {
-                    if (item.exchangeId === tickerData.exchangeId) {
-                        if (item.source === tickerData.source) {
-                            return true;
-                        }
-                    }
-                }
-                
-                return false;
-            })
-
+            const targetIndex = getIndexFromTargetTickers(this.tickersList, tickerData)
             if (targetIndex !== -1) {
                 this.tickersList.splice(targetIndex, 1)
             }
         },
 
-        handleSetTickerSet () {
+        handleConfirmTickerSet () {
             this.$refs['setTickerSetNameForm'].validate(valid => {
                 if (valid) {
                     this.$emit('confirm', {
                         name: this.setTickerSetNameForm.name,
-                        tickers: Object.freeze(this.tickersList)
+                        tickers: deepClone(this.tickersList)
                     })
                     this.handleClose()
                 }
@@ -178,10 +181,29 @@ export default {
 
         handleClose () {
             this.$emit('update:visible', false);
+            this.$emit('close')
         },
 
-          //check是否重复
-        validateDuplicateStrategyId(rule, value, callback){
+        bindAddTickerListener () {
+            this.$bus.$off('add-ticker-for-ticker-set')
+            this.$bus.$on('add-ticker-for-ticker-set', (tickerData) => {
+                const targetIndex = getIndexFromTargetTickers(this.tickersList, tickerData)
+                if (targetIndex === -1) {
+                    this.tickersList.push(tickerData)
+                } else {
+                    this.tickersList.splice(targetIndex, 1, tickerData)
+                }
+            })
+        },
+
+        initData () {
+            const { name, tickers } = this.inputData;
+            this.$set(this.setTickerSetNameForm, 'name', name)
+            this.tickersList = deepClone(tickers)
+        },
+
+        //check是否重复
+        validateDuplicateTickerSet (rule, value, callback ) {
             const ifDuplicate = this.tickerSets.filter(s => (s.name === value)).length !== 0
             if(ifDuplicate && this.method === 'add'){
                 callback(new Error('该标的池名称已存在！'))
@@ -189,10 +211,7 @@ export default {
                 callback()
             }
         },
-
-        handleSubmitSetting () {},
     }
-
 }
 </script>
 

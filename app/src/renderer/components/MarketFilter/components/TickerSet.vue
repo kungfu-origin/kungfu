@@ -11,12 +11,14 @@
                     size="small"
                     :data="tableListAfterFilter"
                     height="100%"
+                    @row-click="handleSetCurrentTickerSet"
+                    :row-class-name="handleSelectRow"
                 >
                     <el-table-column
                         prop="name"
                         label="名称"
                         show-overflow-tooltip
-                        width="60"
+                        width="80"
                     ></el-table-column>
                     <el-table-column
                         prop="tickers"
@@ -32,8 +34,10 @@
                         align="right"
                         width="80"
                     >
-                        <span class="tr-oper"><i class="el-icon-setting mouse-over" title="设置"></i></span>
-                        <span class="tr-oper-delete"><i class=" el-icon-delete mouse-over" title="删除"></i></span>
+                    <template slot-scope="props">
+                        <span class="tr-oper"><i class="el-icon-setting mouse-over" title="设置" @click.stop="handleSetTickerSet(props.row)"></i></span>
+                        <span class="tr-oper-delete"><i class=" el-icon-delete mouse-over" title="删除" @click.stop="handleRemoveTickerSet(props.row)"></i></span>
+                    </template>
                     </el-table-column>
                 </el-table>
             </div>
@@ -42,9 +46,10 @@
         <AddSetTickerSetDialog
             v-if="addSetTickerSetDialogVisiblity"
             :visible.sync="addSetTickerSetDialogVisiblity"
+            :inputData="setTickerSetDialogInput"
+            :method="addSetTickerSetDialogMethod"
             @addTicker="handleAddTicker"
-            @confirm="hanlleConfirmAddSetTickerSet"
-            
+            @confirm="handleConfirmAddSetTickerSet"    
         ></AddSetTickerSetDialog>
 
         <AddTickerDialog
@@ -57,57 +62,25 @@
 </template>
 
 <script>
-import { mapState } from 'vuex';
 
-import AddSetTickerSetDialog from './AddSetTickerSetDialog';
-import AddTickerDialog from './AddTickerDialog';
 
-import { getTickerSets, addSetTickerSet, removeTickerSetByName } from '__io/actions/market';
 
 import baseMixin from '@/assets/js/mixins/baseMixin';
+import tickerSetMixin from '@/components/MarketFilter/js/tickerSetMixin';
 
 export default {
-    mixins: [ baseMixin ],
+    mixins: [ baseMixin, tickerSetMixin ],
 
     name: 'TickerSet',
 
-    components: {
-        AddSetTickerSetDialog,
-        AddTickerDialog
-    },
+
 
     data () {
-
         this.searchFilterKey = 'name';
-
-        return {
-            addSetTickerSetDialogMethod: '',
-            addSetTickerSetDialogVisiblity: false,
-
-            addTickerDialogVisiblity: false,
-        }
+        return {}
     },
 
-    mounted () {
-        this.getTickerSet();
-    },
-
-    computed: {
-        ...mapState({
-            tickerSets: state => state.MARKET.tickerSets
-        }),
-
-        addSetTickerSetMethodName () {
-            if (this.addSetTickerSetDialogMethod === 'add') {
-                return '添加'
-            } else if (this.addSetTickerSetDialogMethod === 'update') {
-                return '设置'
-            } else {
-                return ''
-            }
-        },
-    },
-
+  
     watch: {
         tickerSets (newTickerSet) {
             this.tableList = newTickerSet
@@ -115,42 +88,18 @@ export default {
     },
 
     methods: {
-        hanlleConfirmAddSetTickerSet (tickerSet) {
-            return addSetTickerSet(tickerSet)
-                .then(() => {
-                    this.$message.success(`${this.addSetTickerSetMethodName}成功！`)
-                    this.getTickerSet()
-                })
-                .catch(err => {
-                    this.$message.error(err.message || `${this.addSetTickerSetMethodName}失败！`)
-                })
-        },
-
-        handleAddTickerConfirm (tickerData) {
-            this.$bus.$emit('add-ticker-for-ticker-set', Object.freeze(tickerData))
-        },
-
-        handleAddTicker () {
-            this.addTickerDialogVisiblity = true;
-        },
-
-        handleAddTickerSet () {
-            this.addSetTickerSetDialogMethod = 'add';
-            this.addSetTickerSetDialogVisiblity = true;
+        //选中行的背景颜色
+        handleSelectRow(row) {
+            if(row.row.name == this.currentTickerSetName) {
+                return 'selected-bg'
+            }
         },
 
         resolveTickers (tickers) {
             return tickers.map(ticker => {
                 return `${ticker.instrumentId}`
             }).join(',')
-        },
-
-        getTickerSet () {
-            return getTickerSets()
-                .then(res => {
-                    this.$store.dispatch('getTickerSets', res)
-                })
-        },
+        },      
     }
 }
 </script>

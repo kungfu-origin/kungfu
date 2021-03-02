@@ -61,10 +61,10 @@
                     >
                     <template slot-scope="props">
                         <tr-status 
-                        v-if="$utils.ifProcessRunning(`td_${props.row.account_id}`, processStatus) && processStatus[`td_${props.row.account_id}`] === 'online'"
+                        v-if="ifProcessRunning(`td_${props.row.account_id}`, processStatus) && processStatus[`td_${props.row.account_id}`] === 'online'"
                         :value="(mdTdState[`td_${props.row.account_id}`] || {}).state"></tr-status>
                         <tr-status 
-                        v-else-if="$utils.ifProcessRunning(`td_${props.row.account_id}`, processStatus) && processStatus[`td_${props.row.account_id}`] === 'stopping'"
+                        v-else-if="ifProcessRunning(`td_${props.row.account_id}`, processStatus) && processStatus[`td_${props.row.account_id}`] === 'stopping'"
                         :value="processStatus[`td_${props.row.account_id}`]"></tr-status>
                         <tr-status v-else></tr-status>
                     </template>
@@ -77,7 +77,7 @@
                     <template slot-scope="props">
                         <span @click.stop>
                         <el-switch 
-                        :value="$utils.ifProcessRunning('td_' + props.row.account_id, processStatus)"
+                        :value="ifProcessRunning('td_' + props.row.account_id, processStatus)"
                         @change="handleTdSwitch($event, props.row)"></el-switch>
                         </span>
                     </template>
@@ -233,7 +233,7 @@ import { mapState } from 'vuex';
 import SetAccountDialog from './SetAccountDialog';
 import SetSourceDialog from './SetSourceDialog';
 
-import { debounce } from '__gUtils/busiUtils';
+import { ifProcessRunning, toDecimal } from '__gUtils/busiUtils';
 import { getTdList } from '__io/kungfu/account';
 import { deleteTd, switchTd } from '__io/actions/account';
 import { loopToRunProcess } from '__gUtils/busiUtils';
@@ -250,7 +250,8 @@ export default {
 
     data() {
         this.tdmdType = 'td';
-        this.searchFilterKey = 'account_id'
+        this.searchFilterKey = 'account_id';
+        this.ifProcessRunning = ifProcessRunning;
         return {}
     },
 
@@ -274,7 +275,7 @@ export default {
 
         allProcessRunning () {
              const notRunningList = this.tdList.filter(item => {
-                const isRunning = this.$utils.ifProcessRunning('td_' + item.account_id, this.processStatus)
+                const isRunning = ifProcessRunning('td_' + item.account_id, this.processStatus)
                 if (!isRunning) return true
                 else return false
             })
@@ -341,7 +342,7 @@ export default {
             const promiseList = this.tdList
                 .filter(item => {
                     const id = item.account_id;
-                    const status = this.$utils.ifProcessRunning('td_' + item.account_id, this.processStatus)
+                    const status = ifProcessRunning('td_' + item.account_id, this.processStatus)
                     return status !== targetStatus
                 })
                 .map(item => {
@@ -372,7 +373,7 @@ export default {
         judgeCondition(row) {
             const { account_id } = row
             //判断td是否开启，开启则无法删除
-            if(this.$utils.ifProcessRunning(`td_${account_id}`, this.processStatus)) {
+            if(ifProcessRunning(`td_${account_id}`, this.processStatus)) {
                 this.$message.warning('需先停止交易进程！')
                 return false
             }
@@ -381,13 +382,12 @@ export default {
 
         //是否为期货
         isFutureAccount(row) {
-            console.log(this.tdAccountSource)
             return (this.tdAccountSource[row.source_name] || {}).typeName == 'future'
         },
 
         //计算持仓盈亏
         calcCash(row, key){
-            return this.$utils.toDecimal((this.accountsAsset[row.account_id] || {})[key]) + ''
+            return toDecimal((this.accountsAsset[row.account_id] || {})[key]) + ''
         }
     }
 }

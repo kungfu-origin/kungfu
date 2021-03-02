@@ -509,3 +509,18 @@ interface TickerSet {
     name: string;
     config: TickerSet
 }
+
+interface TickerInTickerSet {
+    source: string;
+    exchangeId: string;
+    instrumentId: string;
+}
+
+interface TickerSet {
+    name: string;
+    tickers: TickerInTickerSet[]
+}
+
+interface stringToTickerSet {
+    [ propName: string ]: TickerSet;
+}
