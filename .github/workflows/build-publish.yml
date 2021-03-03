@@ -60,6 +60,7 @@ jobs:
           pip install pipenv==2020.11.15
           yarn env-pypi-python
           yarn install
+          npm config ls
           yarn build
 
       - name: Collect Kungfu Build Info
@@ -78,6 +79,7 @@ jobs:
 
       - name: Make Prebuilt
         run: |
+          npm config ls
           yarn workspace @kungfu-trader/kungfu-core run package
 
       - name: Upload Prebuilt
