@@ -60,7 +60,6 @@ jobs:
           pip install pipenv==2020.11.15
           yarn env-pypi-python
           yarn install
-          npm config ls
           yarn build
 
       - name: Collect Kungfu Build Info
@@ -78,16 +77,13 @@ jobs:
           if-no-files-found: ignore
 
       - name: Make Prebuilt
-        run: |
-          npm config ls
-          yarn workspace @kungfu-trader/kungfu-core run package
+        run: yarn workspace @kungfu-trader/kungfu-core run package
 
       - name: Upload Prebuilt
         uses: actions/upload-artifact@v2
         with:
           name: 'Kungfu-Packages-${{matrix.name}}-${{github.sha}}'
-          path: |
-            */build/stage/**/*.tar.gz
+          path: '*/build/stage/**/*.tar.gz'
           if-no-files-found: ignore
 
       - name: Upload Kungfu Installer
@@ -95,10 +91,8 @@ jobs:
         with:
           name: 'Kungfu-Installer-${{matrix.name}}-${{github.sha}}'
           path: |
-            app/build/app/*.dmg
-            app/build/app/*.exe
-            app/build/app/*.rpm
-            app/build/app/*.AppImage
+            */build/app/*.*
+            !*/build/app/*.yml
           if-no-files-found: ignore
 
   publish:
