@@ -530,6 +530,10 @@ p.el-select-dropdown__empty{
                 border: 0;
                 padding: 0 12px;
                 font-size: 12px;
+                max-width: 300px;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
 
                 &.is-active {
                     border: 0;

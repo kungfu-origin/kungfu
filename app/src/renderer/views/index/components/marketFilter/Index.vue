@@ -31,7 +31,7 @@
                 <el-col :span="6">
                     <Task 
                     :noTitle="false" 
-                    :seletable="true"
+                    :selectable="true"
                     ></Task>
                 </el-col>
                 <el-col :span="12">
@@ -46,10 +46,10 @@
                             @showHistory="handleShowHistory"
                             />  
                         </el-tab-pane>
-                        <el-tab-pane :lazy="true" label="交易任务实盘" name="taskReal">
+                        <el-tab-pane :lazy="true" :label="`任务实盘 ${currentTaskId}`" name="taskReal">
                             111
                         </el-tab-pane>
-                        <el-tab-pane :lazy="true" label="交易任务模拟" name="taskTest">
+                        <el-tab-pane :lazy="true" :label="`任务模拟 ${currentTaskId}`" name="taskTest">
                             asd
                         </el-tab-pane>
                     </el-tabs>
@@ -60,6 +60,8 @@
 </template>
 
 <script>
+import { mapState } from 'vuex';
+
 import MainContent from '@/components/Layout/MainContent';
 import TickerSet from '@/components/MarketFilter/components/TickerSet';
 import OrderBook from '@/components/MarketFilter/components/OrderBook';
@@ -93,6 +95,12 @@ export default {
 
             historyData: {},
         }
+    },
+
+    computed: {
+        ...mapState({
+            currentTaskId: state => (state.BASE.currentTask || {}).name || ''
+        })
     },
 
     mounted () {

@@ -14,6 +14,8 @@
         size="small"
         height="100%"
         v-if="afterRender"
+        @row-click="handleRowClick"
+        :row-class-name="handleSelectRow"
         >
             <el-table-column
                 prop="processId"
@@ -161,7 +163,9 @@ export default {
     computed: {
         ...mapState({
             processStatus: state => state.BASE.processStatus,
-            processStatusWithDetail: state => state.BASE.processStatusWithDetail
+            processStatusWithDetail: state => state.BASE.processStatusWithDetail,
+            currentTask: state => state.BASE.currentTask,
+            currentTaskId: state => (state.BASE.currentTask).name
         }),
     },
 
@@ -189,10 +193,29 @@ export default {
                     }
                     return false
                 })
+
+            if (!this.tableList.length) {
+                this.$store.dispatch('setCurrentTask', {})
+            } else if (!this.currentTaskId) {
+                this.$store.dispatch('setCurrentTask', this.tableList[0])
+            }
         },
     },
 
     methods: {
+
+        //选中行的背景颜色
+        handleSelectRow(row) {
+            if (!this.selectable) return ''
+            if(row.row.name == this.currentTaskId) {
+                return 'selected-bg'
+            }
+        },
+
+        handleRowClick (row) {
+            if (!this.selectable) return;
+            this.$store.dispatch('setCurrentTask', row)
+        },
 
         handleAddTask () {
             if (!this.extConfigList.length) {
