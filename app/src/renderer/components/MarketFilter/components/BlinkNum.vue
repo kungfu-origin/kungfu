@@ -37,7 +37,6 @@ export default {
 
     watch: {
         num (newVal, oldVal) {
-            console.log(this.theKey, newVal, oldVal)
             if (Number.isNaN(+oldVal)) return ''
 
             if (+newVal > +oldVal) {

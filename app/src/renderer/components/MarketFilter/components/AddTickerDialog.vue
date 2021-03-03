@@ -17,24 +17,25 @@
                     { required: true, message: '请输入标的池名称', trigger: 'blur' },
                 ]"
             >
-                    <el-autocomplete
+                <el-autocomplete
                 size="mini"
                 ref="insturment-id-input"
+                placeholder="请输入标的"
                 v-model="tickerForm.instrumentId"
                 :fetch-suggestions="querySearch"
                 @select="e => handleSelectInstrumentId(e)"
                 >
-                <template v-slot="{ item }">
-                    <div class="make-order-instrument-ids__warp">
-                        <div class="make-order-instrument-id-item">
-                            <span class="ticker">{{ item.instrument_id }}</span>
-                            <span class="name">{{ item.instrument_name }}</span>
+                    <template v-slot="{ item }">
+                        <div class="make-order-instrument-ids__warp">
+                            <div class="make-order-instrument-id-item">
+                                <span class="ticker">{{ item.instrument_id }}</span>
+                                <span class="name">{{ item.instrument_name }}</span>
+                            </div>
+                            <div class="make-order-instrument-id-item">
+                                {{ (item.exchange_id || "").toUpperCase() }}
+                            </div>
                         </div>
-                        <div class="make-order-instrument-id-item">
-                            {{ (item.exchange_id || "").toUpperCase() }}
-                        </div>
-                    </div>
-                </template>
+                    </template>
                 </el-autocomplete>
             </el-form-item>
             <el-form-item

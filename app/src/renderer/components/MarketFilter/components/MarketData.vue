@@ -7,9 +7,13 @@
                 v-for="tickerSet in tickerSets" 
                 :key="tickerSet.name" 
                 :name="tickerSet.name" 
-                :label="tickerSet.name">
+                :label="tickerSet.name"
+                >
 
-                <tr-dashboard title="">
+                <tr-dashboard 
+                    title="" 
+                    v-if="currentTickerSet.name === tickerSet.name"
+                >
                     <div slot="dashboard-header">
                         <tr-dashboard-header-item>
                             <el-button size="mini" @click="handleAddTicker" title="添加">添加</el-button>
@@ -34,6 +38,7 @@
                             show-overflow-tooltip
                             min-width="60"
                             class-name="blink-cell"
+                            align="right"
                         >
                             <template slot-scope="props">
                                 <BlinkNum
@@ -42,7 +47,7 @@
                                     'number': true,
                                     'nano': true,
                                 }"
-                                :theKey="props.row.instrumentId"   
+                                :theKey="`${tickerSet.name}_${props.row.instrumentId}`"   
                                 :num="getValueFromMarketData(props.row, 'openPrice' )"
                                 >
                                 </BlinkNum>
@@ -53,6 +58,7 @@
                             show-overflow-tooltip
                             min-width="60"
                             class-name="blink-cell"
+                            align="right"
                         >
                             <template slot-scope="props">
                                  <BlinkNum
@@ -61,7 +67,7 @@
                                     'number': true,
                                     'nano': true,
                                 }"
-                                :theKey="props.row.instrumentId"   
+                                :theKey="`${tickerSet.name}_${props.row.instrumentId}`"   
                                 :num="getValueFromMarketData(props.row, 'closePrice' )"
                                 >
                                 </BlinkNum>
@@ -72,6 +78,7 @@
                             show-overflow-tooltip
                             min-width="60"
                             class-name="blink-cell"
+                            align="right"
                         >
                             <template slot-scope="props">
                                  <BlinkNum
@@ -80,7 +87,7 @@
                                     'number': true,
                                     'nano': true,
                                 }"
-                                :theKey="props.row.instrumentId" 
+                                :theKey="`${tickerSet.name}_${props.row.instrumentId}`"   
                                 :num="getValueFromMarketData(props.row, 'highPrice' )"
                                 >
                                 </BlinkNum>
@@ -91,6 +98,7 @@
                             show-overflow-tooltip
                             min-width="60"
                             class-name="blink-cell"
+                            align="right"
                         >
                             <template slot-scope="props">
                                  <BlinkNum
@@ -99,7 +107,7 @@
                                     'number': true,
                                     'nano': true,
                                 }"
-                                :theKey="props.row.instrumentId"   
+                                :theKey="`${tickerSet.name}_${props.row.instrumentId}`"   
                                 :num="getValueFromMarketData(props.row, 'lowPrice' )"
                                 >
                                 </BlinkNum>
@@ -110,6 +118,7 @@
                             show-overflow-tooltip
                             min-width="60"
                             class-name="blink-cell"
+                            align="right"
                         >
                             <template slot-scope="props">
                                  <BlinkNum
@@ -118,8 +127,28 @@
                                     'number': true,
                                     'nano': true,
                                 }"
-                                :theKey="props.row.instrumentId"   
+                                :theKey="`${tickerSet.name}_${props.row.instrumentId}`"     
                                 :num="getValueFromMarketData(props.row, 'lastPrice' )"
+                                >
+                                </BlinkNum>
+                            </template>
+                        </el-table-column>
+                         <el-table-column
+                            label="当日成交量"
+                            show-overflow-tooltip
+                            min-width="60"
+                            class-name="blink-cell"
+                            align="right"
+                        >
+                            <template slot-scope="props">
+                                 <BlinkNum
+                                :className="{
+                                    'tr-table-cell': true,
+                                    'number': true,
+                                    'nano': true,
+                                }"
+                                :theKey="`${tickerSet.name}_${props.row.instrumentId}`"     
+                                :num="getValueFromMarketData(props.row, 'volume' )"
                                 >
                                 </BlinkNum>
                             </template>
@@ -129,15 +158,16 @@
                             show-overflow-tooltip
                             min-width="60"
                             class-name="blink-cell"
+                            align="right"
                         >
                             <template slot-scope="props">
-                                 <BlinkNum
+                                <BlinkNum
                                 :className="{
                                     'tr-table-cell': true,
                                     'number': true,
                                     'nano': true,
                                 }"
-                                :theKey="props.row.instrumentId" 
+                                :theKey="`${tickerSet.name}_${props.row.instrumentId}`"   
                                 num="--"
                                 >
                                 </BlinkNum>
@@ -152,10 +182,8 @@
                                 <span class="tr-oper-delete" @click.stop="handleDeleteTicker(props.row)"><i class=" el-icon-delete mouse-over" title="删除标的"></i></span>
                             </template>
                         </el-table-column>
-
                     </el-table>
                 </tr-dashboard>
-
             </el-tab-pane>
         </el-tabs>      
 

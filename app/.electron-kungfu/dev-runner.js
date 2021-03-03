@@ -48,7 +48,7 @@ function startRenderer () {
     const compiler = webpack(rendererConfig)
     hotMiddleware = webpackHotMiddleware(compiler, { 
       log: false, 
-      heartbeat: 1000 
+      heartbeat: 3000 
     })
 
     compiler.plugin('compilation', compilation => {

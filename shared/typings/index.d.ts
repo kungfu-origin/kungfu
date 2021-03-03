@@ -449,24 +449,9 @@ interface QuoteDataInput {
     upper_limit_price: number
     volume: bigint
     ask_price: Array<number>
+    ask_volume: Array<BigInt>
     bid_price: Array<number>
-}
-
-interface InstrumentInputData {
-    contract_multiplier: number;
-    create_date: string;
-    delivery_month: number;
-    delivery_year: number;
-    exchange_id: string;
-    expire_date: string;
-    instrument_id: string;
-    instrument_type: number;
-    is_trading: boolean;
-    long_margin_ratio: number;
-    open_date: string;
-    price_tick: number;
-    product_id: string;
-    short_margin_ratio: number;
+    bid_volume: Array<BigInt>
 }
 
 interface QuoteData {
@@ -493,8 +478,27 @@ interface QuoteData {
     turnover: number
     upperLimitPrice: string
     volume: number,
-    askPrices: Array<number>,
-    bidPrices: Array<number>,
+    askPrices: Array<string>,
+    askVolumes: Array<string>,
+    bidPrices: Array<string>,
+    bidVolumes: Array<string>,
+}
+
+interface InstrumentInputData {
+    contract_multiplier: number;
+    create_date: string;
+    delivery_month: number;
+    delivery_year: number;
+    exchange_id: string;
+    expire_date: string;
+    instrument_id: string;
+    instrument_type: number;
+    is_trading: boolean;
+    long_margin_ratio: number;
+    open_date: string;
+    price_tick: number;
+    product_id: string;
+    short_margin_ratio: number;
 }
 
 interface Pm2Options {

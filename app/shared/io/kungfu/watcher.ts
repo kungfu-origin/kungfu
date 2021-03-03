@@ -445,8 +445,10 @@ export const dealQuote = (quote: QuoteDataInput): QuoteData => {
         turnover: quote.turnover,
         upperLimitPrice: toDecimal(quote.upper_limit_price, 3),
         volume: Number(quote.volume),
-        askPrices: quote.ask_price || [],
-        bidPrices: quote.bid_price || []
+        askPrices: quote.ask_price.map(num => toDecimal(num, 3)) || [],
+        askVolumes: quote.ask_volume.map((num: BigInt) => num.toString()) || [],
+        bidPrices: quote.bid_price.map(num => toDecimal(num, 3)) || [],
+        bidVolumes: quote.bid_volume.map((num: BigInt) => num.toString()) || [],
     }
        
 

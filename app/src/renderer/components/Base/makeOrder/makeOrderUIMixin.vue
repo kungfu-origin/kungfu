@@ -29,7 +29,7 @@
                 </el-form-item>   
 
                 <el-form-item
-                label="代码"
+                label="标的"
                 prop="instrument_id"
                 :rules="[
                     { required: true, message: '不能为空！', trigger: 'input'},
@@ -38,7 +38,7 @@
                     ref="insturment-id-input"
                     v-model="makeOrderForm.instrument_id"
                     :fetch-suggestions="querySearch"
-                    placeholder="请输入代码名称"
+                    placeholder="请输入标的"
                     @blur="handleBlurInstrumentId"
                     @select="handleSelectInstrumentId"
                     >

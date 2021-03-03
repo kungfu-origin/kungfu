@@ -8,7 +8,7 @@ export const ordersHeader = (dateForHistory, moduleType) => {
                 width: "140px"
             },{
                 type: "text",
-                label: "代码",
+                label: "标的",
                 prop: "instrumentId",
                 width: '60px'
             },{
@@ -60,7 +60,7 @@ export const ordersHeader = (dateForHistory, moduleType) => {
             width: '70px'
         },{
             type: "text",
-            label: "代码",
+            label: "标的",
             prop: "instrumentId",
             width: '60px'
         },{
@@ -159,7 +159,7 @@ export const posHeader = (moduleType) => {
     return [
         {
             type: 'text',
-            label: '代码',
+            label: '标的',
             prop: 'instrumentId',
             width: '60px'
         },{
@@ -210,7 +210,7 @@ export const tradesHeader = (dateForHistory, moduleType) => {
             width: '140px'
         },{
             type: 'text',
-            label: '代码',
+            label: '标的',
             prop: 'instrumentId',
             width: '60px'
         },{
@@ -247,7 +247,7 @@ export const tradesHeader = (dateForHistory, moduleType) => {
         width: '70px'
     },{
         type: 'text',
-        label: '代码',
+        label: '标的',
         prop: 'instrumentId',
         width: '60px'
     },{

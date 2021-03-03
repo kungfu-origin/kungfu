@@ -18,12 +18,11 @@
                         prop="name"
                         label="名称"
                         show-overflow-tooltip
-                        min-width="120"
                     ></el-table-column>
                     <el-table-column
                         label=""
                         align="right"
-                        min-width="80"
+                        width="60"
                     >
                     <template slot-scope="props">
                         <span class="tr-oper"><i class="el-icon-setting mouse-over" title="设置" @click.stop="handleSetTickerSet(props.row)"></i></span>

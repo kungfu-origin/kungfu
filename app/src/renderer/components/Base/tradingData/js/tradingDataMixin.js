@@ -48,7 +48,7 @@ export default {
             rendererTable: false,
             searchKeyword: "",
             filter: {
-                id: '', //对id、代码id、策略id模糊查询
+                id: '', //对id、标的Id、策略Id模糊查询
             },
 
             dateRangeDialogVisiblityForExport: false,
