@@ -31,8 +31,8 @@
   "bin": "./lib/index.js",
   "kungfuConfig": {
     "type": "task",
-    "key": "tickerFilter",
-    "name": "选股",
+    "key": "backwardsHedge",
+    "name": "最大贴水",
     "uniKey": [
       "accountId",
       "ticker"
@@ -44,17 +44,20 @@
         "type": "account",
         "required": true
       },
+    
       {
-        "key": "tickers",
+        "key": "tickerSet",
         "name": "标的池",
-        "type": "instrumentSet",
-        "required": true
+        "type": "tickerSet",
+        "required": true,
+        "tip": "需要预先在行情模块中设置标的池"
       },
       {
-        "key": "strategy",
-        "name": "筛选策略",
-        "type": "taskStrategy",
-        "required": true
+        "key": "index",
+        "name": "对应指数",
+        "type": "instrumentId",
+        "required": true,
+        "tip": "对应指数需包含在所选标的池内"
       },
       {
         "key": "side",
@@ -115,6 +118,80 @@
         "tip": "单位%",
         "required": true,
         "default": 12
+      }
+    ],
+
+    "displayConfig": [
+      {
+        "type": "text",
+        "label": "下单时间",
+        "prop": "updateTime",
+        "width": "70px"
+      },{
+        "type": "text",
+        "label": "标的",
+        "prop": "instrumentId",
+        "width": "60px"
+      },{
+        "type": "text",
+        "label": "对应指数",
+        "prop": "indexId",
+        "width": "60px"
+      },{
+        "type": "number",
+        "label": "合约价格",
+        "prop": "instrumentPrice",
+        "width": "60px"
+      },{
+        "type": "number",
+        "label": "期现差",
+        "prop": "delta",
+        "width": "60px"
+      },{
+        "type": "string",
+        "label": "升贴水比例",
+        "prop": "backWardsRatio",
+        "width": "60px"
+      },{
+        "type": "string",
+        "label": "年化升贴水",
+        "prop": "backWardsRatioByYears",
+        "width": "60px"
+      },{
+        "type": "string",
+        "label": "交割日期",
+        "prop": "expiredDate",
+        "width": "80px"
+      },{
+        "type": "number",
+        "label": "指数价格",
+        "prop": "indexPrice",
+        "width": "60px"
+      },{
+        "type": "text",
+        "label": "",
+        "prop": "side",
+        "width": "40px"
+      },{
+        "type": "text",
+        "label": "",
+        "prop": "offset",
+        "width": "40px"
+      },{
+        "type": "number",
+        "label": "委托价",
+        "prop": "limitPrice",
+        "width": "80px"
+      },{
+        "type": "number",
+        "label": "剩余时间(ms)",
+        "prop": "remainTime"
+      }, {
+        "type": "text",
+        "align": "center",
+        "label": "已成交/全部",
+        "prop": "volumeTraded",
+        "width": "80px"
       }
     ]
   }

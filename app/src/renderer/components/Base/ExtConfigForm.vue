@@ -200,6 +200,21 @@
             </div>
           </template>
         </el-autocomplete>
+        <el-select 
+        :disabled="isDisabled(item.key)"
+        :class="item.key"
+        size="mini"
+        v-if="item.type === 'tickerSet'"
+        v-model.trim="form[item.key]"
+        >
+          <el-option
+            v-for="item in tickerSets"
+            :key="item.name"
+            :label="item.name"
+            :value="item.name"
+          >
+          </el-option>
+        </el-select>
       </el-col>
       <el-col :span="2" :offset="1" v-if="item.tip">
         <el-tooltip
@@ -296,10 +311,11 @@ export default {
 
   computed: {
     ...mapState({
-      tdList: (state) => state.ACCOUNT.tdList || [],
-      tdAccountSource: (state) => state.BASE.tdAccountSource || {},
-      mdAccountSource: (state) => state.BASE.mdAccountSource || {},
-      accountsAsset: (state) => state.ACCOUNT.accountsAsset,
+      tdList: state => state.ACCOUNT.tdList || [],
+      tdAccountSource: state => state.BASE.tdAccountSource || {},
+      mdAccountSource: state => state.BASE.mdAccountSource || {},
+      accountsAsset: state => state.ACCOUNT.accountsAsset,
+      tickerSets: state => state.MARKET.tickerSets || []
     }),
   },
 

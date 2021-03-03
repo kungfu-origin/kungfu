@@ -27,10 +27,29 @@
                         moduleType="ticker" 
                         :makeOrderByQuote="selectedQuote"
                     ></MakeOrderDashboard>
-                </el-col>               
-                <el-col :span="18">
+                </el-col>        
+                <el-col :span="6">
+                    <Task 
+                    :noTitle="false" 
+                    :seletable="true"
+                    ></Task>
+                </el-col>
+                <el-col :span="12">
                     <el-tabs v-model="currentMarketFilterMultiFuncTabName" type="border-card">
-                        <el-tab-pane :lazy="true" label="策略筛选" name="strategy-filter">
+                        <el-tab-pane :lazy="true" label="全部委托" name="systemOrders">
+                             <OrderRecord
+                            :noTitle="true"
+                            moduleType="all" 
+                            :todayFinishPreSetting="true"
+                            :kungfuData="orders"
+                            :orderStat="orderStat"
+                            @showHistory="handleShowHistory"
+                            />  
+                        </el-tab-pane>
+                        <el-tab-pane :lazy="true" label="交易任务实盘" name="taskReal">
+                            111
+                        </el-tab-pane>
+                        <el-tab-pane :lazy="true" label="交易任务模拟" name="taskTest">
                             asd
                         </el-tab-pane>
                     </el-tabs>
@@ -46,9 +65,10 @@ import TickerSet from '@/components/MarketFilter/components/TickerSet';
 import OrderBook from '@/components/MarketFilter/components/OrderBook';
 import MarketData from '@/components/MarketFilter/components/MarketData';
 import MakeOrderDashboard from '@/components/Base/makeOrder/MakeOrderDashboard';
+import Task from '@/components/Task/Index';
+import OrderRecord from '@/components/Base/tradingData/OrderRecord';
 
-
-import { buildMarketDataPipe } from '__io/kungfu/tradingData'; 
+import { buildMarketDataPipe, buildAllOrdersPipe } from '__io/kungfu/tradingData'; 
 
 export default {
 
@@ -57,7 +77,9 @@ export default {
         TickerSet,
         MarketData,
         OrderBook,
-        MakeOrderDashboard
+        MakeOrderDashboard,
+        Task,
+        OrderRecord
     },
 
     data () {
@@ -65,7 +87,11 @@ export default {
         return {
             quoteData: {},
             selectedQuote: {},
-            currentMarketFilterMultiFuncTabName: 'strategy-filter'
+            currentMarketFilterMultiFuncTabName: 'systemOrders',
+            orders: Object.freeze([]),
+            orderStat: Object.freeze({}),
+
+            historyData: {},
         }
     },
 
@@ -73,13 +99,31 @@ export default {
         this.marketDataPipe = buildMarketDataPipe().subscribe(data => {
             this.quoteData = Object.freeze(data);
         })
+
+        this.allOrdersPipe = buildAllOrdersPipe().subscribe(data => {
+            const { orders, orderStat } = data;
+            if (this.historyData['order'] && ((this.historyData['order'] || {}).date)) {
+                this.orders = Object.freeze(this.historyData['order'].data)
+            } else {
+                const orders = data['orders'];
+                this.orders = Object.freeze(orders || []);
+            }
+            this.orderStat = Object.freeze(orderStat || {});
+        })
     },
     
     destroyed(){
         this.marketDataPipe && this.marketDataPipe.unsubscribe();
+        this.allOrdersPipe && this.allOrdersPipe.unsubscribe();
     },
 
     methods: {
+        handleShowHistory ({ date, data, type }) {
+            this.$set(this.historyData, type, {
+                date,
+                data
+            })
+        },
 
         handleMakeOrderByOrderBook (quote) {
             this.selectedQuote = Object.freeze(quote);

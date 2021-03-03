@@ -36,12 +36,13 @@ import GlobalSettingDialog from '@/components/Base/GlobalSettingDialog';
 import { buildKungfuGlobalDataPipe, buildTradingDataPipe } from '__io/kungfu/tradingData';
 import { watcher } from '__io/kungfu/watcher';
 
-import ipcListenerMixin from '@/ipcMsg/ipcListenerMixin.js';
+import ipcListenerMixin from '@/ipcMsg/ipcListenerMixin';
+import tickerSetMixin from '@/components/MarketFilter/js/tickerSetMixin';
 
 export default {
     name: 'app',
 
-    mixins: [ ipcListenerMixin ],
+    mixins: [ ipcListenerMixin, tickerSetMixin ],
 
     data() {
         this.kungfuGloablDataObserver = null;

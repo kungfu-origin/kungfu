@@ -11,7 +11,6 @@
     >
         <el-tabs tab-position="left" size="mini" v-model="activeTabName">
             <el-tab-pane
-                :lazy="true"
                 v-for="(item, index) in configList"
                 :key="item.key"
                 :label="item.name"
@@ -21,7 +20,7 @@
                 <ExtConfigForm
                     ref="taskSettingForm"
                     v-model="postFormList[index]"
-                    :configList="item.config"
+                    :configList="extendConfig(item)"
                     :uniKey="item.uniKey || ''"
                     labelWidth="140px"
                     :method="method"
@@ -102,6 +101,18 @@ export default {
                     this.handleClose();
                 }
             })
+        },
+
+        extendConfig (item) {
+            return [ ...(item.config || []),    {
+                    "key": "sim",
+                    "name": "模拟执行",
+                    "type": "bool",
+                    "required": false,
+                    "tip": "开启后会模拟执行（非实盘），同时需确认该交易任务支持模拟执行",
+                    "default": false
+                },
+            ]
         },
 
         getActiveTabNameByProps () {

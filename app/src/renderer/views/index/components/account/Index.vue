@@ -20,7 +20,7 @@
                             />
                         </el-tab-pane>
                         <el-tab-pane :lazy="true" label="交易任务" name="tradingTask" v-if="taskExts.length">
-                            <Task></Task>
+                            <Task :showExecuteTime="true"></Task>
                         </el-tab-pane>
                     </el-tabs>
                 </el-col>
@@ -75,7 +75,6 @@
                             :noTitle="true"
                             :moduleType="moduleType" 
                             :todayFinishPreSetting="true"
-                            :accountType="accountType"
                             :currentId="currentId"
                             :kungfuData="orders"
                             :gatewayName="currentAccount.account_id"
@@ -88,7 +87,6 @@
                             :noTitle="true"
                             :moduleType="moduleType" 
                             :todayFinishPreSetting="false"
-                            :accountType="accountType"
                             :currentId="currentId"
                             :kungfuData="orders"
                             :gatewayName="currentAccount.account_id"
@@ -234,7 +232,7 @@ export default {
 
     methods: {
 
-        handleAccountTabClick (tab, event) {
+        handleAccountTabClick (tab) {
             this.$store.dispatch('setCurrentAccountTabName', tab.name)
         },
 

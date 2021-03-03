@@ -63,8 +63,6 @@ export default {
 
     name: 'TickerSet',
 
-
-
     data () {
         this.searchFilterKey = 'name';
         return {}

@@ -1,5 +1,5 @@
 <template>
-<tr-dashboard title="">
+<tr-dashboard :title="noTitle ? '' : '交易任务'">
     <div slot="dashboard-header">
         <tr-dashboard-header-item>
             <tr-search-input v-model.trim="searchKeyword"></tr-search-input>
@@ -20,8 +20,19 @@
                 label="任务ID"
                 sortable
                 :show-overflow-tooltip="true"       
-                width="300px"  
+                min-width="220px"
                 >
+            </el-table-column>
+            <el-table-column
+                label="模式"
+                sortable  
+                show-overflow-tooltip
+            >
+                <template slot-scope="props">
+                    <el-tag
+                    :type="props.row.isSim ? 'success' : 'info' "
+                    >{{ props.row.isSim ? '模拟' : "实盘" }}</el-tag>
+                </template>
             </el-table-column>
             <el-table-column
                 label="状态"
@@ -37,6 +48,14 @@
                 </template>
             </el-table-column>
             <el-table-column
+                v-if="showExecuteTime"
+                label="执行时间"
+                sortable  
+                prop="createdAt"  
+                width="150px"
+            >
+            </el-table-column>
+            <el-table-column
                 label="进程"
                 sortable    
             >
@@ -48,15 +67,7 @@
                 </template>
             </el-table-column>
             <el-table-column
-                label="执行时间"
-                sortable  
-                prop="createdAt"  
-                width="150px"
-            >
-            </el-table-column>
-            <el-table-column
                 label="" 
-                width="120px"
                 align="right"
             >
                 <template slot-scope="props">
@@ -106,13 +117,31 @@ export default {
     
     mixins: [ baseMixin, openLogMixin ],
 
+    props: {
+
+        noTitle: {
+            type: Boolean,
+            default: true,
+        },
+
+        selectable: {
+            type: Boolean,
+            default: false
+        },
+
+        showExecuteTime: {
+            type: Boolean,
+            default: false,
+        }
+    },
+
     components: {
         SetTaskDialog
     },
 
     data () {
         this.ifProcessRunning = ifProcessRunning;
-        
+
         return {
             setTaskMethod: 'add',
             setTaskInitData: {},
@@ -138,13 +167,20 @@ export default {
 
     watch: {
         processStatusWithDetail (newProcess) {
+            const minimistConfig = this.getMinimistConfig()
+
             this.tableList = Object.keys(newProcess || {})
                 .map(key => {
+                    const targetProcess = newProcess[key];
+                    const argsConfig = minimist(targetProcess.args, minimistConfig)
+                    const isSim = argsConfig.sim || false;
+
                     return {
                         processId: key,
-                        processStatus: newProcess[key].status,
-                        createdAt: newProcess[key].created_at ? moment(newProcess[key].created_at).format('YYYY-MM-DD HH:mm:ss') : '--',
-                        ...newProcess[key]
+                        processStatus: targetProcess.status,
+                        createdAt: targetProcess.created_at ? moment(targetProcess.created_at).format('YYYY-MM-DD HH:mm:ss') : '--',
+                        isSim,
+                        ...targetProcess
                     }
                 })
                 .filter(({ processId }) => {
@@ -236,9 +272,10 @@ export default {
         },
 
         getMinimistConfig () {
+            //sim 为系统内置
             let minimistConfig = {
                 string: [],
-                boolean: [],
+                boolean: ['sim'],
             };
             this.extConfigList.forEach(config => {
                 const c = config.config;

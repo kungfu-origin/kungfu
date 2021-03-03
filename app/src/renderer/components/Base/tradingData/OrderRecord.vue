@@ -116,11 +116,6 @@ export default {
             default: () => ({})
         },
 
-        name: {
-            type: String,
-            default: ''
-        },
-
         todayFinishPreSetting: {
             type: [ Object, Boolean ],
             default: () => undefined

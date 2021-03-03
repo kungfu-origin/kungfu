@@ -156,6 +156,8 @@ export default {
                             return `${kungfuLocation.group}_${kungfuLocation.name}` === this.currentId
                         } else if (this.moduleType === 'strategy') {
                             return kungfuLocation.name === this.currentId
+                        } else if (this.moduleType === 'all') {
+                            return true;
                         }
 
                         return false
