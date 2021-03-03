@@ -2,7 +2,7 @@
     <tr-dashboard :title="`多档行情 ${instrumentId}`">
         <div class="kf-order-book__warp">
             <div class="ask__warp order-book-part__warp">
-                <div class="order-line" v-for="(item, index) in new Array(10)" :key="index">
+                <div class="order-line" @click="handleSelectQuote(askPrices[9 - index], 0)" v-for="(item, index) in new Array(10)" :key="index">
                     <span class="price green">{{ dealNum(askPrices[9 - index]) }}</span>
                     <span class="volume">{{ dealNum(askVolumes[9 - index]) }}</span>
                 </div>
@@ -17,7 +17,7 @@
                 </BlinkNum>
             </div> 
             <div class="bid__warp order-book-part__warp">
-                <div class="order-line" v-for="(item, index) in new Array(10)" :key="index">
+                <div class="order-line" @click="handleSelectQuote(bidPrices[index], 1)" v-for="(item, index) in new Array(10)" :key="index">
                     <span class="price red">{{ dealNum(bidPrices[index]) }}</span>
                     <span class="volume">{{ dealNum(bidVolumes[index]) }}</span>
                 </div>
@@ -62,7 +62,6 @@ export default {
         },
 
         instrumentId () {
-            console.log(this.quoteData, this.marketData, this.tickerId, '=-==')
             return (this.quoteData || {}).instrumentId || ''
         },
 
@@ -93,6 +92,16 @@ export default {
     },
 
     methods: {
+        handleSelectQuote (price, side) {
+            if (price && this.quoteData) {
+                this.$emit('makeOrder', {
+                    ...this.quoteData,
+                    makeOrderPrice: price,
+                    makeOrderSide: side
+                })
+            }
+        },
+
         dealNum (num) {
             if (num === undefined) {
                 return '--'
@@ -152,6 +161,10 @@ export default {
         display: flex;
         padding: 0 10px;
         box-sizing: border-box;
+
+        &:hover{
+            background: $bg_light;
+        }
 
         span {
             flex: 1;

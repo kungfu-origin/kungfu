@@ -360,11 +360,16 @@ export default {
 
             this.clearData(true);
             
-            const { instrumentId, lastPrice, exchangeId, instrumentType } = newQuoteData;
+            const { instrumentId, lastPrice, makeOrderPrice, makeOrderSide , exchangeId, instrumentType } = newQuoteData;
             this.$set(this.makeOrderForm, 'instrument_id', instrumentId);
             this.$set(this.makeOrderForm, 'exchange_id', exchangeId);
-            this.$set(this.makeOrderForm, 'limit_price', lastPrice);
+            this.$set(this.makeOrderForm, 'limit_price', makeOrderPrice || lastPrice);
             this.$set(this.makeOrderForm, 'instrument_type', instrumentType);
+
+            //只有点击order book后会触发
+            if (makeOrderSide !== undefined) {
+                this.$set(this.makeOrderForm, 'side', makeOrderSide);
+            }
             
             this.$refs['make-order-form'].validate()
                 .catch(err => {})

@@ -16,6 +16,7 @@
                     <OrderBook
                         :marketData="quoteData"
                         :tickerId="getTickerId(selectedQuote)"
+                        @makeOrder="handleMakeOrderByOrderBook"
                     ></OrderBook>
                 </el-col>
             </el-row>
@@ -27,6 +28,13 @@
                         :makeOrderByQuote="selectedQuote"
                     ></MakeOrderDashboard>
                 </el-col>               
+                <el-col :span="18">
+                    <el-tabs v-model="currentMarketFilterMultiFuncTabName" type="border-card">
+                        <el-tab-pane :lazy="true" label="策略筛选" name="strategy-filter">
+                            asd
+                        </el-tab-pane>
+                    </el-tabs>
+                </el-col>
             </el-row>
         </div>
     </MainContent>
@@ -56,7 +64,8 @@ export default {
         
         return {
             quoteData: {},
-            selectedQuote: {}
+            selectedQuote: {},
+            currentMarketFilterMultiFuncTabName: 'strategy-filter'
         }
     },
 
@@ -72,12 +81,15 @@ export default {
 
     methods: {
 
+        handleMakeOrderByOrderBook (quote) {
+            this.selectedQuote = Object.freeze(quote);
+        },
+
         handleClickQuote (quote) {
             this.selectedQuote = Object.freeze(quote);
         },
 
         getTickerId (quote) {
-            console.log(quote, '---')
             return `${(quote || {}).exchangeId || ''}_${(quote || {}).instrumentId || ''}_${(quote || {}).sourceId || ''}`
         }
     }
