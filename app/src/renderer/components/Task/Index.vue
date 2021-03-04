@@ -149,10 +149,6 @@ export default {
         }
     },
 
-    mounted () {
-       this.$store.dispatch('getExtensionConfigs')
-    },
-
     computed: {
         ...mapState({
             taskExtConfigList: state => state.BASE.taskExtConfigList,

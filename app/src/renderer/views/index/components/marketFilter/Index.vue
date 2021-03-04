@@ -17,7 +17,7 @@
                         <el-tab-pane :lazy="true" label="行情源" name="md">
                             <MdAccount></MdAccount>
                         </el-tab-pane>
-                        <el-tab-pane :lazy="true" label="交易任务" name="tasks">
+                        <el-tab-pane :lazy="true" label="交易任务" name="tradingTasks"  v-if="taskExts.length">
                             <Task 
                             :noTitle="false" 
                             :selectable="true"
@@ -53,7 +53,7 @@
                             @showHistory="handleShowHistory"
                             />  
                         </el-tab-pane>
-                        <el-tab-pane :lazy="true" :label="`交易任务 ${currentTaskModeResovled} ${currentTaskId}`" name="taskReal">
+                        <el-tab-pane :lazy="true"  v-if="taskExts.length" :label="`交易任务详情 ${currentTaskModeResovled} ${currentTaskId}`" name="taskReal">
                             111
                         </el-tab-pane>
                     </el-tabs>
@@ -107,7 +107,8 @@ export default {
     computed: {
         ...mapState({
             currentTickerSetName: state => (state.MARKET.currentTickerSet || {}).name || '',
-            currentTaskId: state => (state.BASE.currentTask || {}).name || ''
+            currentTaskId: state => (state.BASE.currentTask || {}).name || '',
+            taskExts: state => state.BASE.taskExts || []
         }),
 
         ...mapGetters([

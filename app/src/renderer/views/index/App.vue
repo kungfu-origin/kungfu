@@ -86,6 +86,7 @@ export default {
         this.$store.dispatch('getStrategyList');
         this.$store.dispatch('getAccountSourceConfig');
         this.$store.dispatch('getKungfuConfig');
+        this.$store.dispatch('getExtensionConfigs')
 
         this.bindKungfuGlobalDataListener();
         this.bindTradingDataListener();

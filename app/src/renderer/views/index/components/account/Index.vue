@@ -117,8 +117,6 @@ import MainContent from '@/components/Layout/MainContent';
 import { buildTradingDataPipe } from '__io/kungfu/tradingData';
 import { transformPositionByTickerByMerge, dealPos } from '__io/kungfu/watcher';
 import { allowShorted } from "kungfu-shared/config/tradingConfig";
-import { getExtensionConfigs } from '__gUtils/busiUtils';
-import { TASK_EXTENSION_DIR } from '__gConfig/pathConfig';
 
 import accountStrategyMixins from '@/views/index/js/accountStrategyMixins';
 
@@ -210,7 +208,6 @@ export default {
     },
 
     mounted(){
-        this.getExtensionConfigs();
         this.tradingDataPipe = buildTradingDataPipe('account').subscribe(data => {
             if (this.moduleType === 'ticker') {
                 this.dealTradingDataByTiker(data)
@@ -354,15 +351,7 @@ export default {
             } 
 
             return false;
-        },
-
-        getExtensionConfigs () {
-            return getExtensionConfigs(TASK_EXTENSION_DIR)
-                .then(exts => {
-                    exts = exts || []
-                    this.$store.dispatch('setTaskExts', Object.freeze(exts))
-                })
-        },
+        }
     },
 
     destroyed(){
