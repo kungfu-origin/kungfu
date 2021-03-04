@@ -27,6 +27,11 @@ addFileSync('', KF_RUNTIME_DIR, 'folder')
 export const KF_DATASET_DIR = path.join(KF_HOME, 'dataset')
 addFileSync('', KF_DATASET_DIR, 'folder')
 
+//marketData in dataSet
+export const KF_DATASET_MARKETDATA_DIR = path.join(KF_HOME, 'dataset', 'marketdata')
+addFileSync('', KF_DATASET_MARKETDATA_DIR, 'folder')
+
+
 //system
 export const SYSTEM_DIR = path.join(KF_RUNTIME_DIR, 'system');
 addFileSync('', SYSTEM_DIR, 'folder')

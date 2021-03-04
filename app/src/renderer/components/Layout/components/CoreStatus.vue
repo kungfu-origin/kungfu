@@ -55,7 +55,7 @@ import { statusConfig } from '__gConfig/statusConfig';
 import { ifProcessRunning } from '__gUtils/busiUtils';
 import { switchLedger } from '__io/actions/base';
 
-import openLogMixin from '@/assets/js/mixins/openLogMixin';
+import openLogMixin from '@/assets/mixins/openLogMixin';
 
 export default {
     mixins: [ openLogMixin ],

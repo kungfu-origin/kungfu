@@ -292,9 +292,14 @@ export default {
             line-height: 25px;
             display: inline-block;
             color: $font;
-        }
-        .tr-table-cell.number{
-            text-align: right;
+            
+            &.text-center {
+                text-align: center;
+            }
+
+            &.number{
+                text-align: right;
+            }
         }
     }
 
@@ -327,7 +332,7 @@ export default {
         }
 
         .account-strategy {
-            max-width: 100px !important;
+            max-width: 200px !important;
         }
     }
 
@@ -335,7 +340,7 @@ export default {
         background: $bg_light;
     }
 
-     .tr-table-cell{
+    .tr-table-cell{
         height: 20px;
         line-height: 20px;
         padding: 0 6px;
@@ -347,34 +352,48 @@ export default {
         font-family: Consolas,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New, monospace;
         user-select: text;
         text-align: left;
+
+        &.number {
+            text-align: right;
+        }
+
+        &.text-center {
+            text-align: center;
+        }
+
+        &.red{
+            color: $red;
+        }
+
+        &.green{
+            color: $green;
+        }
+
+        &.yellow{
+            color: $vi;
+        }
+
+        &.gray{
+            color: $font;
+        }
+
+        &.blue{
+            color: $blue;
+        }
+
+        &.update{
+            animation: nanoBlink 1.1s 1;
+        }
+
+        &.update.number.red{
+            animation: nanoRedBlink 1.1s 1;
+        }
+
+        &.update.number.green{
+            animation: nanoGreenBlink 1.1s 1;
+        }
     }
-    .tr-table-cell.number{
-        text-align: right;
-    }
-    .tr-table-cell.red{
-        color: $red;
-    }
-    .tr-table-cell.green{
-        color: $green;
-    }
-    .tr-table-cell.yellow{
-        color: $vi;
-    }
-    .tr-table-cell.gray{
-        color: $font;
-    }
-     .tr-table-cell.blue{
-        color: $blue;
-    }
-    .tr-table-cell.update{
-        animation: nanoBlink 1.1s 1;
-    }
-    .tr-table-cell.update.number.red{
-        animation: nanoRedBlink 1.1s 1;
-    }
-    .tr-table-cell.update.number.green{
-        animation: nanoGreenBlink 1.1s 1;
-    }
+
 
 
     .tr-table-body .tr-table-dynamic-scroller{

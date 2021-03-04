@@ -104,9 +104,9 @@ import { switchMd, deleteMd } from '__io/actions/account';
 import { loopToRunProcess, ifProcessRunning } from '__gUtils/busiUtils';
 import { watcher } from '__io/kungfu/watcher';
 
-import baseMixin from '@/assets/js/mixins/baseMixin';
+import baseMixin from '@/assets/mixins/baseMixin';
 import mdTdMixin from '../js/mdTdMixin';
-import openLogMixin from '@/assets/js/mixins/openLogMixin';
+import openLogMixin from '@/assets/mixins/openLogMixin';
 
 export default {
     mixins: [ baseMixin, mdTdMixin, openLogMixin ],

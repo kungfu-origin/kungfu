@@ -568,3 +568,13 @@ export const getIndexFromTargetTickers = (tickerList: TickerInTickerSet[], ticke
         return false;
     })
 }  
+
+export const flatternTickers = (tickerSets: TickerSet[]) => {
+    let tickersList: TickerInTickerSet[] = [];
+    tickerSets.forEach(tickerSet => {
+        const tickers = tickerSet.tickers || [];
+        tickersList = [ ...tickersList, ...tickers]
+    });
+
+    return tickersList || []
+}

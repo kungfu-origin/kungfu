@@ -1,7 +1,10 @@
 import Vue from 'vue';
+import minimist from 'minimist';
+
 import { getAccountSource } from '__gConfig/accountConfig';
 import { readJsonSync, outputJsonSync } from '__gUtils/fileUtils';
-import { KF_CONFIG_PATH } from '__gConfig/pathConfig';
+import { KF_CONFIG_PATH, TASK_EXTENSION_DIR } from '__gConfig/pathConfig';
+import { getExtensionConfigs } from '__gUtils/busiUtils';
 
 
 export default {
@@ -19,6 +22,7 @@ export default {
         
         taskExts: [], // task插件.
         currentTask: {},
+        taskExtConfigList: []
     },
 
     actions: {
@@ -77,10 +81,21 @@ export default {
 
         setCurrentTask ({ commit }, currentTask) {
             commit('SET_CURRENT_TASK', currentTask)
-        }
+        },
+
+        getExtensionConfigs ({ commit }) {
+            return getExtensionConfigs(TASK_EXTENSION_DIR)
+                .then(exts => {
+                    commit('SET_TASK_EXTENSION_CONFIGS', Object.freeze(exts.filter(({ type }) => type === 'task')))
+                })
+        },
     },
 
     mutations: {
+
+        SET_TASK_EXTENSION_CONFIGS (state, taskExtConfigList) {
+            state.taskExtConfigList = taskExtConfigList
+        },
 
         SET_CURRENT_TASK (state, task) {
             state.currentTask = Object.freeze(task);
@@ -114,6 +129,41 @@ export default {
     },
 
     getters: {
+        
+        currentTaskMode (state, getters) {
+            const currentTask = state.currentTask || {};
+            const args = currentTask.args || [];
+            const minimistConfig = getters.taskExtMinimistConfig;
+            const argsConfig = minimist(args, minimistConfig);
+            return argsConfig.sim ? 'sim' : 'real'
+        },
+
+        taskExtMinimistConfig (state) {
+            //sim 为系统内置
+            let minimistConfig = {
+                string: [],
+                boolean: ['sim'],
+            };
+            state.taskExtConfigList.forEach(config => {
+                const c = config.config;
+                c.forEach(item => {
+                    const { key, type } = item;
+                    if (type === 'instrumentId') {
+                        if (!minimistConfig.string.includes(key)) {
+                            minimistConfig.string.push(key)                        
+                        }
+                    }
+
+                    if (type === 'bool') {
+                        if (!minimistConfig.boolean.includes(key)) {
+                            minimistConfig.boolean.push(key)
+                        }
+                    }
+                })
+            })
+
+            return minimistConfig
+        },
 
         ifMasterLedgerRunning (state) {
             const processStatus = state.processStatus || {};

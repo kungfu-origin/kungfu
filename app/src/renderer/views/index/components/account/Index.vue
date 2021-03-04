@@ -20,7 +20,7 @@
                             />
                         </el-tab-pane>
                         <el-tab-pane :lazy="true" label="交易任务" name="tradingTask" v-if="taskExts.length">
-                            <Task :showExecuteTime="true"></Task>
+                            <Task></Task>
                         </el-tab-pane>
                     </el-tabs>
                 </el-col>

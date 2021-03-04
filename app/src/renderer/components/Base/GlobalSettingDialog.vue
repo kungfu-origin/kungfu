@@ -224,7 +224,7 @@ import { buildSystemConfig } from "__gConfig/systemConfig";
 import { switchCustomProcess } from "__io/actions/base";
 import { getKfCommission, setKfCommission } from '__io/kungfu/kungfuUtils';
 
-import openLogMixin from '@/assets/js/mixins/openLogMixin';
+import openLogMixin from '@/assets/mixins/openLogMixin';
 
 const { shell, dialog }  = require('electron').remote 
 const path = require("path");

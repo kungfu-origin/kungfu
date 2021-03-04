@@ -24,6 +24,20 @@
                 {{ loadingData.watcher ? '功夫环境准备完成 ✓' : '功夫环境准备中...' }}
             </div>
         </el-dialog>
+
+        <el-dialog
+        title="系统提示"
+        class="system-prepare-dialog"
+        :visible.sync="recordBeforeQuitLoading"
+        :show-close="false"
+        :close-on-click-modal="false"
+        width="450px"
+        >
+            <div style="margin: 10px 0 20px">
+                <tr-status :value="'3'" :hasText="false"></tr-status>
+                退出前保存数据中...
+            </div>
+        </el-dialog>
     </div>
 </template>
 <script>
@@ -77,7 +91,6 @@ export default {
         this.bindTradingDataListener();
 
         this.getWatcherStatus();
-
     },
 
     computed: {
@@ -101,7 +114,6 @@ export default {
     },
 
     methods: {
-
         removeLoadingMask () {
             if(document.getElementById('loading')) document.getElementById('loading').remove();
         },

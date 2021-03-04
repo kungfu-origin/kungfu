@@ -42,7 +42,16 @@ export default {
                     return true;
                 }
 
-                return (item[this.searchFilterKey] || '').includes(this.searchKeywordDebounce || '')
+                let mergedVal = '';
+                this.searchFilterKey
+                    .split(',')
+                    .map(key => key.trim())
+                    .forEach(key => {
+                        mergedVal += item[key]
+                    });
+            
+
+                return mergedVal.includes(this.searchKeywordDebounce || '')
             })
         },
     },

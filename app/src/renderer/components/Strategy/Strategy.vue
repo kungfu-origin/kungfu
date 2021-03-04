@@ -227,7 +227,7 @@ import * as STRATEGY_API from '__io/kungfu/strategy';
 import { switchStrategy } from '__io/actions/strategy';
 import { chineseValidator, specialStrValidator, noZeroAtFirstValidator, noKeywordValidatorBuilder } from '__assets/validator';
 
-import baseMixin from '@/assets/js/mixins/baseMixin';
+import baseMixin from '@/assets/mixins/baseMixin';
 
 export default {
     mixins: [ baseMixin ],

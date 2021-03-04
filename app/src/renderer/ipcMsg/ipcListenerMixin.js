@@ -8,6 +8,7 @@ import { transformTradingItemListToData } from '__io/kungfu/watcher';
 import { aliveOrderStatusList } from 'kungfu-shared/config/tradingConfig';
 
 import makeOrderCoreMixin from '@/components/Base/makeOrder/js/makeOrderCoreMixin';
+import recordBeforeQuitMixin from "@/assets/mixins/recordBeforeQuitMixin";
 
 const { _pm2 } = require('__gUtils/processUtils');
 
@@ -16,7 +17,7 @@ const BrowserWindow = remote.BrowserWindow;
 //一直启动，无需remove listener
 export default {
 
-    mixins: [ makeOrderCoreMixin ],
+    mixins: [ makeOrderCoreMixin, recordBeforeQuitMixin ],
 
     data () {
         this.BUS = null;
@@ -50,6 +51,13 @@ export default {
                         this.globalSettingDialogVisiblity = true;
                         break
                 }
+            })
+
+            ipcRenderer.on('record-before-quit', () => {
+                this.recordBeforeQuit()
+                    .then(() => {
+                        ipcRenderer.sendSync('record-before-quit-done')
+                    })
             })
         },
 

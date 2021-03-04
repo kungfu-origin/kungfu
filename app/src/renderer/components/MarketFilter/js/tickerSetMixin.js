@@ -4,6 +4,7 @@ import { mapState } from 'vuex';
 import AddSetTickerSetDialog from '@/components/MarketFilter/components/AddSetTickerSetDialog';
 import AddTickerDialog from '@/components/MarketFilter/components/AddTickerDialog';
 
+import { ifProcessRunning, flatternTickers } from '__gUtils/busiUtils';
 import { getTickerSets, addSetTickerSet, removeTickerSetByName } from '__io/actions/market';
 import { kungfuSubscribeTicker } from '__io/kungfu/makeCancelOrder'
 import { watcher } from '__io/kungfu/watcher';
@@ -11,7 +12,7 @@ import { watcher } from '__io/kungfu/watcher';
 export default {
 
     mounted () {
-        this.getTickerSet();
+        this.getTickerSets();
     },
 
     components: {
@@ -36,7 +37,8 @@ export default {
             tickerSets: state => state.MARKET.tickerSets,
             currentTickerSetName: state => (state.MARKET.currentTickerSet || {}).name || '',
             currentTickerSetTickers: state => (state.MARKET.currentTickerSet || {}).tickers || [],
-            currentTickerSet: state => state.MARKET.currentTickerSet || {}
+            currentTickerSet: state => state.MARKET.currentTickerSet || {},
+            processStatus: state => state.BASE.processStatus || {}
         }),
     },
 
@@ -70,7 +72,7 @@ export default {
                     this.$message.success('操作成功！')
                 })
                 .then(() => {
-                    this.getTickerSet()
+                    this.getTickerSets()
                 })
                 .catch(err => {
                     if (err === 'cancel') return; 
@@ -83,7 +85,7 @@ export default {
             return addSetTickerSet(tickerSet)
                 .then(() => {
                     this.$message.success(`操作成功！`)
-                    this.getTickerSet()
+                    this.getTickerSets()
                 })
                 .catch(err => {
                     this.$message.error(err.message || `操作失败！`)
@@ -94,7 +96,7 @@ export default {
             this.$bus.$emit('add-ticker-for-ticker-set', Object.freeze(tickerData))
         },
 
-        getTickerSet () {
+        getTickerSets () {
             return getTickerSets()
                 .then(res => {
                     this.$store.dispatch('setTickerSets', res)
@@ -119,23 +121,39 @@ export default {
             }
         },
 
-        flatternTickers (tickerSets) {
-            let tickersList = [];
-            tickerSets.forEach(tickerSet => {
-                const tickers = tickerSet.tickers || [];
-                tickersList = [ ...tickersList, ...tickers]
-            });
-
-            return tickersList
-        },
-
-        subscribeAllTickers (tickerSets) {
+        subscribeAllTickers (tickerSets, slience = true) {
             if (!watcher.isLive()) return;
-            const tickers = this.flatternTickers(tickerSets);
+            const tickers = flatternTickers(tickerSets);
             tickers.forEach(ticker => {
                 const { instrumentId, source, exchangeId } = ticker;
                 kungfuSubscribeTicker(source, exchangeId, instrumentId)
             })
+
+            if (!slience) {
+                const subscribeSuccess = this.checkAllMdProcess(tickers);
+
+                if (subscribeSuccess) {
+                    this.$message.success('正在订阅标的池内标的，请稍后')                
+                }
+            }
+        },
+
+        checkAllMdProcess (tickers) {
+            let mds = {};
+            let flag = true;
+            tickers.forEach(item => {
+                mds[item.source] = true;
+            })
+
+            Object.keys(mds || {}).forEach(source => {
+                const processId = `md_${source}`;
+                if (!ifProcessRunning(processId, this.processStatus)) {
+                    flag = false;
+                    this.$message.warning(`${source} 行情进行未开启!`)
+                }
+            })
+
+            return flag;
         }
     }
     

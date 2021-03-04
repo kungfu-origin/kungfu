@@ -40,7 +40,7 @@ import { ipcRenderer } from 'electron';
 import { platform } from '__gConfig/platformConfig';
 import { remote } from 'electron';
 
-import openLogMixin from '@/assets/js/mixins/openLogMixin';
+import openLogMixin from '@/assets/mixins/openLogMixin';
 
 export default {
     name: 'log',

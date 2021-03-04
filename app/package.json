@@ -39,7 +39,6 @@
     "pm2": "3.5.2"
   },
   "devDependencies": {
-    "debug": "3.1",
     "@types/node": "^12.6.2",
     "aws-sdk": "^2.395.0",
     "babel-loader": "^7.1.1",
@@ -65,6 +64,7 @@
     "cross-env": "^5.0.5",
     "cross-var": "^1.1.0",
     "css-loader": "^2.1.1",
+    "debug": "3.1",
     "del": "^3.0.0",
     "devtron": "^1.4.0",
     "electron": "4.2.11",

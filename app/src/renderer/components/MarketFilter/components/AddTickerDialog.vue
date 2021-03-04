@@ -106,7 +106,7 @@ import {
 } from "kungfu-shared/config/tradingConfig";
 import { deepClone } from '__gUtils/busiUtils';
 
-import instrumentsMixin from "@/assets/js/mixins/instrumentsMixin";
+import instrumentsMixin from "@/assets/mixins/instrumentsMixin";
 
 Vue.use(Autocomplete);
 

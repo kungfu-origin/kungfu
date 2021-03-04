@@ -244,7 +244,7 @@ import {
   ExchangeIds,
 } from "kungfu-shared/config/tradingConfig";
 
-import instrumentsMixin from "@/assets/js/mixins/instrumentsMixin";
+import instrumentsMixin from "@/assets/mixins/instrumentsMixin";
 
 Vue.use(Autocomplete);
 

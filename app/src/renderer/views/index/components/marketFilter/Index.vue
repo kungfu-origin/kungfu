@@ -3,14 +3,27 @@
 
         <div class="market-filter-content">
             <el-row style="height: 55%">
-                <el-col :span="4">
+                <el-col :span="6">
                     <TickerSet></TickerSet>
                 </el-col>
-                <el-col :span="16">
-                    <MarketData 
-                        :marketData="quoteData" 
-                        @clickQuote="handleClickQuote"
-                    ></MarketData>
+                <el-col :span="14">
+                    <el-tabs v-model="currentMarketDataTabName" type="border-card">
+                        <el-tab-pane :lazy="true" :label="`行情明细 ${currentTickerSetName}`" name="marketData">
+                            <MarketData 
+                                :marketData="quoteData" 
+                                @clickQuote="handleClickQuote"
+                            ></MarketData>
+                        </el-tab-pane>
+                        <el-tab-pane :lazy="true" label="行情源" name="md">
+                            <MdAccount></MdAccount>
+                        </el-tab-pane>
+                        <el-tab-pane :lazy="true" label="交易任务" name="tasks">
+                            <Task 
+                            :noTitle="false" 
+                            :selectable="true"
+                            ></Task>
+                        </el-tab-pane>
+                    </el-tabs>
                 </el-col>
                 <el-col :span="4">
                     <OrderBook
@@ -28,14 +41,8 @@
                         :makeOrderByQuote="selectedQuote"
                     ></MakeOrderDashboard>
                 </el-col>        
-                <el-col :span="6">
-                    <Task 
-                    :noTitle="false" 
-                    :selectable="true"
-                    ></Task>
-                </el-col>
-                <el-col :span="12">
-                    <el-tabs v-model="currentMarketFilterMultiFuncTabName" type="border-card">
+                <el-col :span="18">
+                    <el-tabs v-model="currentTradeDataTabName" type="border-card">
                         <el-tab-pane :lazy="true" label="全部委托" name="systemOrders">
                              <OrderRecord
                             :noTitle="true"
@@ -46,11 +53,8 @@
                             @showHistory="handleShowHistory"
                             />  
                         </el-tab-pane>
-                        <el-tab-pane :lazy="true" :label="`任务实盘 ${currentTaskId}`" name="taskReal">
+                        <el-tab-pane :lazy="true" :label="`交易任务 ${currentTaskModeResovled} ${currentTaskId}`" name="taskReal">
                             111
-                        </el-tab-pane>
-                        <el-tab-pane :lazy="true" :label="`任务模拟 ${currentTaskId}`" name="taskTest">
-                            asd
                         </el-tab-pane>
                     </el-tabs>
                 </el-col>
@@ -60,10 +64,11 @@
 </template>
 
 <script>
-import { mapState } from 'vuex';
+import { mapGetters, mapState } from 'vuex';
 
 import MainContent from '@/components/Layout/MainContent';
 import TickerSet from '@/components/MarketFilter/components/TickerSet';
+import MdAccount from '@/components/Account//components/MdAccount';
 import OrderBook from '@/components/MarketFilter/components/OrderBook';
 import MarketData from '@/components/MarketFilter/components/MarketData';
 import MakeOrderDashboard from '@/components/Base/makeOrder/MakeOrderDashboard';
@@ -81,7 +86,8 @@ export default {
         OrderBook,
         MakeOrderDashboard,
         Task,
-        OrderRecord
+        OrderRecord,
+        MdAccount
     },
 
     data () {
@@ -89,7 +95,8 @@ export default {
         return {
             quoteData: {},
             selectedQuote: {},
-            currentMarketFilterMultiFuncTabName: 'systemOrders',
+            currentMarketDataTabName: 'marketData',
+            currentTradeDataTabName: 'systemOrders',
             orders: Object.freeze([]),
             orderStat: Object.freeze({}),
 
@@ -99,8 +106,23 @@ export default {
 
     computed: {
         ...mapState({
+            currentTickerSetName: state => (state.MARKET.currentTickerSet || {}).name || '',
             currentTaskId: state => (state.BASE.currentTask || {}).name || ''
-        })
+        }),
+
+        ...mapGetters([
+            "currentTaskMode"
+        ]),
+
+        currentTaskModeResovled () {
+            if (!this.currentTaskId) return ''
+
+            if (this.currentTaskMode === 'sim') {
+                return '模拟'
+            } else {
+                return '实盘'
+            }
+        }
     },
 
     mounted () {

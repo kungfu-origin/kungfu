@@ -22,7 +22,7 @@
                 label="任务ID"
                 sortable
                 :show-overflow-tooltip="true"       
-                min-width="220px"
+                min-width="317px"
                 >
             </el-table-column>
             <el-table-column
@@ -50,7 +50,6 @@
                 </template>
             </el-table-column>
             <el-table-column
-                v-if="showExecuteTime"
                 label="执行时间"
                 sortable  
                 prop="createdAt"  
@@ -87,7 +86,7 @@
         :value="setTaskInitData"
         :currentActiveConfigKey="setTaskInitKey"
         :method="setTaskMethod"
-        :configList="extConfigList"
+        :configList="taskExtConfigList"
         @confirm="handleConfirm"
     >
     </SetTaskDialog>
@@ -100,18 +99,18 @@
 import path from 'path';
 import moment from 'moment';
 import minimist from 'minimist';
-import { mapState } from 'vuex';
+import { mapGetters, mapState } from 'vuex';
 
 import SetTaskDialog from './SetTaskDialog';
 
-import { getExtensionConfigs, findTargetFromArray, ifProcessRunning } from '__gUtils/busiUtils';
+import { findTargetFromArray, ifProcessRunning } from '__gUtils/busiUtils';
 import { deleteProcess } from '__gUtils/processUtils';
 import { removeFileFolder } from '__gUtils/fileUtils';
-import { TASK_EXTENSION_DIR, buildProcessLogPath } from '__gConfig/pathConfig';
+import { buildProcessLogPath } from '__gConfig/pathConfig';
 import { switchTask } from '__io/actions/base';
 
-import baseMixin from '@/assets/js/mixins/baseMixin';
-import openLogMixin from '@/assets/js/mixins/openLogMixin';
+import baseMixin from '@/assets/mixins/baseMixin';
+import openLogMixin from '@/assets/mixins/openLogMixin';
 
 export default {
 
@@ -129,11 +128,6 @@ export default {
         selectable: {
             type: Boolean,
             default: false
-        },
-
-        showExecuteTime: {
-            type: Boolean,
-            default: false,
         }
     },
 
@@ -151,32 +145,34 @@ export default {
             setTaskTarget: null,
             setTaskDialogVisiblity: false,
             searchFilterKey: 'processId',
-            extConfigList: [],
             
         }
     },
 
     mounted () {
-       this.getExtensionConfigs()
+       this.$store.dispatch('getExtensionConfigs')
     },
 
     computed: {
         ...mapState({
+            taskExtConfigList: state => state.BASE.taskExtConfigList,
             processStatus: state => state.BASE.processStatus,
             processStatusWithDetail: state => state.BASE.processStatusWithDetail,
             currentTask: state => state.BASE.currentTask,
             currentTaskId: state => (state.BASE.currentTask).name
         }),
+
+        ...mapGetters([
+            "taskExtMinimistConfig"
+        ])
     },
 
     watch: {
         processStatusWithDetail (newProcess) {
-            const minimistConfig = this.getMinimistConfig()
-
             this.tableList = Object.keys(newProcess || {})
                 .map(key => {
                     const targetProcess = newProcess[key];
-                    const argsConfig = minimist(targetProcess.args, minimistConfig)
+                    const argsConfig = minimist(targetProcess.args, this.taskExtMinimistConfig)
                     const isSim = argsConfig.sim || false;
 
                     return {
@@ -218,7 +214,7 @@ export default {
         },
 
         handleAddTask () {
-            if (!this.extConfigList.length) {
+            if (!this.taskExtConfigList.length) {
                 this.$message.warning('暂无交易任务可选项！')
                 return;
             }
@@ -232,9 +228,7 @@ export default {
 
         handleOpenUpdateTaskDialog (data) {
             this.setTaskMethod = 'update';
-            //TODO 写活
-            const minimistConfig = this.getMinimistConfig()
-            this.setTaskInitData = minimist(data.args, minimistConfig)
+            this.setTaskInitData = minimist(data.args, this.taskExtMinimistConfig)
             this.setTaskInitKey = this.getTaskConfigKeyFromProcessId(data.processId)
             this.setTaskTarget = data;
             this.setTaskDialogVisiblity = true;
@@ -294,33 +288,6 @@ export default {
             })
         },
 
-        getMinimistConfig () {
-            //sim 为系统内置
-            let minimistConfig = {
-                string: [],
-                boolean: ['sim'],
-            };
-            this.extConfigList.forEach(config => {
-                const c = config.config;
-                c.forEach(item => {
-                    const { key, type } = item;
-                    if (type === 'instrumentId') {
-                        if (!minimistConfig.string.includes(key)) {
-                            minimistConfig.string.push(key)                        
-                        }
-                    }
-
-                    if (type === 'bool') {
-                        if (!minimistConfig.boolean.includes(key)) {
-                            minimistConfig.boolean.push(key)
-                        }
-                    }
-                })
-            })
-
-            return minimistConfig
-        },
-
         formUnikeyInProcessName (uniKey, form) {
             if (typeof uniKey === 'string') {
                 return form[uniKey]
@@ -338,7 +305,7 @@ export default {
         },
 
         getTargetConfigByKey (key) {
-            return findTargetFromArray(this.extConfigList, 'key', key)
+            return findTargetFromArray(this.taskExtConfigList, 'key', key)
         },
 
         formArgs (data) {
@@ -350,13 +317,6 @@ export default {
         getTaskConfigKeyFromProcessId (processId) {
             let processIdSplit = processId.split('_');
             return processIdSplit[1]
-        },
-
-        getExtensionConfigs () {
-            return getExtensionConfigs(TASK_EXTENSION_DIR)
-                .then(exts => {
-                    this.extConfigList = Object.freeze(exts.filter(({ type }) => type === 'task'))
-                })
         },
     }
 

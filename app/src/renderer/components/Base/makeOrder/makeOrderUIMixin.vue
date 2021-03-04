@@ -230,7 +230,7 @@ import { deepClone } from '__gUtils/busiUtils';
 import { SourceTypeConfig, SideName, OffsetName, PriceType, HedgeFlag, ExchangeIds, InstrumentTypes, allowShorted } from 'kungfu-shared/config/tradingConfig';
 import { biggerThanZeroValidator } from '__assets/validator';
 
-import instrumentsMixin from '@/assets/js/mixins/instrumentsMixin';
+import instrumentsMixin from '@/assets/mixins/instrumentsMixin';
 
 Vue.use(Autocomplete)
 

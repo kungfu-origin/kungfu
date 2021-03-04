@@ -7,8 +7,9 @@ import { initConfig } from '__assets/base';
 import { killExtra } from '__gUtils/processUtils';
 import { logger } from '__gUtils/logUtils';
 import { platform } from '__gConfig/platformConfig';
-import { openUrl, openSettingDialog, showKungfuInfo, killAllBeforeQuit, showQuitMessageBox } from './utils';
+import { openUrl, showKungfuInfo, showQuitMessageBox } from './utils';
 import { KF_HOME, KUNGFU_ENGINE_PATH, BASE_DB_DIR, LOG_DIR } from '__gConfig/pathConfig';
+import { openSettingDialog } from "./events";
 
 const path = require('path');
 const { app, globalShortcut, BrowserWindow, Menu, shell } = electron
@@ -17,7 +18,6 @@ const { app, globalShortcut, BrowserWindow, Menu, shell } = electron
 initConfig();
 setMenu();
 
-
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 var mainWindow = null;
@@ -25,11 +25,12 @@ var allowQuit = false;
 function createWindow () {
 	// Create the browser window.
 	const electronScreen = electron.screen;    
-	const { width, height } = electronScreen.getPrimaryDisplay().size
+	const { width, height } = electronScreen.getPrimaryDisplay().size;
+
 	mainWindow = new BrowserWindow({
 		show: false,
-		width,
-		height,
+		width: width > 1920 ? 1920 : width,
+		height: height > 1200 ? 1200 : height,
 		useContentSize: true,
 		webPreferences: {
 			nodeIntegration: true
@@ -48,10 +49,12 @@ function createWindow () {
 
 	// // Emitted when the window is closed.
 	mainWindow.on('close', (e) => {
+
 	// Dereference the window object, usually you would store windows
 	// in an array if your app supports multi windows, this is the time
 	// when you should delete the corresponding element.
-		if (platform !== 'mac' && !allowQuit) {
+		if (!allowQuit) {
+			e.preventDefault();
 			showQuitMessageBox(mainWindow)
 				.then(res => {
 					if (res) {
@@ -61,7 +64,6 @@ function createWindow () {
 				.catch(err => {
 					console.error(err)
 				})
-			e.preventDefault();
 		} else {
 			return
 		}
@@ -90,7 +92,7 @@ if(!gotTheLock) {
 	allowQuit = true;
 	app.quit()
 } else {
-	app.on('second-instance', (event, commandLine, workingDirectory) => {
+	app.on('second-instance', () => {
 		if(mainWindow) {
 			if(mainWindow.isMinimized()) mainWindow.restore()
 			mainWindow.focus()
@@ -104,8 +106,6 @@ if(!gotTheLock) {
 var appReady = false, killExtraFinished = false;
 app.on('ready', () => {
 	appReady = true;
-	logger.info('app ready', 'appReady', appReady, 'killExtraFinished', killExtraFinished)
-
 	if(appReady && killExtraFinished) createWindow();
 
 	globalShortcut.register('CommandOrControl+Shift+I', () => {
@@ -118,8 +118,6 @@ console.time('init clean')
 killExtra()
 	.finally(() => {
 		console.timeEnd('init clean')
-		logger.info('kill all', appReady, 'killExtraFinished', killExtraFinished)
-
 		killExtraFinished = true;
 		if(appReady && killExtraFinished) createWindow(true)
 	})
@@ -129,7 +127,7 @@ killExtra()
 app.on('window-all-closed', function (e) {
 // On macOS it is common for applications and their menu bar
 // to stay active until the user quits explicitly with Cmd + Q
-	 if (platform !== 'mac') app.quit()
+	app.quit()
 })
 
 app.on('activate', function () {
@@ -140,32 +138,12 @@ app.on('activate', function () {
     else mainWindow && mainWindow.show()
 })
 
-app.on('will-quit', async (e) => {
+app.on('will-quit', (e) => {
+	if (allowQuit) {
+		globalShortcut.unregisterAll()
+		return
+	};	
 
-	globalShortcut.unregisterAll()
-
-	if(allowQuit) return
-	if(process.env.APP_TYPE === 'test') {
-		try {
-			allowQuit = true;
-			await killAllBeforeQuit(mainWindow)
-		} catch (err) {
-			console.error(err)
-		}
-		app.quit()
-		return;
-	}
-	if (platform === 'mac') {
-		showQuitMessageBox(mainWindow)
-			.then(res => {
-				if (res) {
-					allowQuit = true;
-				}
-			})
-			.catch(err => {
-				console.error(err)
-			})
-	}
 	e.preventDefault()
 })
 
@@ -176,7 +154,7 @@ function setMenu() {
     //添加快捷键
 	let applicationOptions = [
 		{ label: "About Kungfu", click: () => showKungfuInfo()},
-		{ label: "Settings", accelerator: "CmdOrCtrl+,", click: () => openSettingDialog(mainWindow) },
+		{ label: "Settings", accelerator: "CmdOrCtrl+,", click: () => openSettingDialog(mainWindow)},
 		{ label: "Close", accelerator: "CmdOrCtrl+W", click: () => BrowserWindow.getFocusedWindow().close()}
 	]
 
@@ -200,7 +178,7 @@ function setMenu() {
 			{ label: "撤销", accelerator: "CmdOrCtrl+Z", role: "undo" }
 		]
 	},{
-		label: "打开",
+		label: "文件",
 		submenu: [
 			{ label: "打开功夫资源目录（KF_HOME）", accelerator: "CmdOrCtrl+Shift+H",  click: () => shell.showItemInFolder(KF_HOME) },
 			{ label: "打开功夫安装目录",	 	   accelerator: "CmdOrCtrl+Shift+A", click: () => shell.showItemInFolder(app.getAppPath()) },			

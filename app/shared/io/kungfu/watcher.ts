@@ -4,7 +4,7 @@ import { kungfu } from '__io/kungfu/kungfuUtils';
 import { toDecimal } from '__gUtils/busiUtils';
 import { readJsonSync } from '__gUtils/fileUtils';
 import { OffsetName, OrderStatus, SideName, PosDirection, PriceType, HedgeFlag, InstrumentType, VolumeCondition, TimeCondition, allowShorted } from "kungfu-shared/config/tradingConfig";
-import { logger } from '../../utils/logUtils';
+import { logger } from '__gUtils/logUtils';
 
 export const watcher: any = (() => {
     const kfSystemConfig: any = readJsonSync(KF_CONFIG_PATH)
@@ -15,7 +15,6 @@ export const watcher: any = (() => {
         const id = [process.env.APP_TYPE, windowType].join('');
         return kungfu.watcher(KF_RUNTIME_DIR, kungfu.formatStringToHashHex(id), bypassQuote);
     }
-
 
     if (process.env.RENDERER_TYPE !== 'app') {
         if (process.env.RENDERER_TYPE !== 'makeOrder' && process.env.APP_TYPE != 'test') {
@@ -77,7 +76,8 @@ export const startGetKungfuGlobalData = (callback: Function, interval = 1000) =>
             callback({
                 appStates: watcher.appStates,
             });
-            resolve();
+            
+            resolve(true);
         })
     }, interval);
 }

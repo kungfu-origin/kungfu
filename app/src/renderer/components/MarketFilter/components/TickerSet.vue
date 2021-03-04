@@ -3,7 +3,13 @@
         <tr-dashboard title="标的池列表">
             <div slot="dashboard-header">
                 <tr-dashboard-header-item>
-                    <el-button size="mini" @click="handleAddTickerSet" title="添加" id="add-account-btn">添加</el-button>
+                    <tr-search-input v-model.trim="searchKeyword"></tr-search-input>
+                </tr-dashboard-header-item>
+                <tr-dashboard-header-item>
+                    <i class="el-icon-s-data mouse-over" title="添加" @click="handleSubscribeAllTickers"></i>
+                </tr-dashboard-header-item>
+                <tr-dashboard-header-item>
+                    <el-button size="mini" @click="handleAddTickerSet" title="添加">添加</el-button>
                 </tr-dashboard-header-item>
             </div>
             <div class="table-body ticker-set-table">
@@ -11,7 +17,7 @@
                     size="small"
                     :data="tableListAfterFilter"
                     height="100%"
-                    @row-click="handleSetCurrentTickerSet"
+                    @row-click="handleClickRow"
                     :row-class-name="handleSelectRow"
                 >
                     <el-table-column
@@ -19,6 +25,12 @@
                         label="名称"
                         show-overflow-tooltip
                     ></el-table-column>
+                    <el-table-column
+                        prop="tickers"
+                        label="内含标的"
+                        show-overflow-tooltip
+                    >
+                    </el-table-column>
                     <el-table-column
                         label=""
                         align="right"
@@ -53,9 +65,9 @@
 
 <script>
 
+import { findTargetFromArray } from '__gUtils/busiUtils';
 
-
-import baseMixin from '@/assets/js/mixins/baseMixin';
+import baseMixin from '@/assets/mixins/baseMixin';
 import tickerSetMixin from '@/components/MarketFilter/js/tickerSetMixin';
 
 export default {
@@ -64,20 +76,33 @@ export default {
     name: 'TickerSet',
 
     data () {
-        this.searchFilterKey = 'name';
+        this.searchFilterKey = 'name, tickers';
         return {}
     },
 
   
     watch: {
-        tickerSets (newTickerSet) {
-            this.tableList = newTickerSet
+        tickerSets (newTickerSets) {
+            this.tableList = (newTickerSets || []).map(item => ({
+                name: item.name,
+                tickers: (item.tickers || []).map(ticker => ticker.instrumentId).join(', ') 
+            }))
         },
     },
 
     methods: {
+        handleSubscribeAllTickers () {
+            this.subscribeAllTickers(this.tickerSets, false)
+        },
+
+        handleClickRow (row) {
+            const tickerSetName = row.name;
+            const targetOriginTickerSet = findTargetFromArray(this.tickerSets, 'name', tickerSetName)
+            this.handleSetCurrentTickerSet(targetOriginTickerSet)
+        },
+
         //选中行的背景颜色
-        handleSelectRow(row) {
+        handleSelectRow (row) {
             if(row.row.name == this.currentTickerSetName) {
                 return 'selected-bg'
             }

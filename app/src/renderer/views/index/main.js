@@ -5,10 +5,12 @@ import Vue from 'vue';
 import './setKungfuParamsOnWindow';
 import store from '@/store';
 import router from './routers';
-import * as utils from '__gUtils/busiUtils'
+import * as utils from '__gUtils/busiUtils';
 import ElementUI from 'element-ui';
-import Components from '@/assets/components'
-import { remote } from 'electron'
+import Components from '@/assets/components';
+import { remote } from 'electron';
+
+import { watcher } from '__io/kungfu/watcher';
 
 import App from './App.vue';
 import '@/assets/iconfont/iconfont.js';
@@ -53,15 +55,5 @@ startArchiveMakeTask((archiveStatus) => {
 })
 
 window.ELEC_WIN_MAP = new Set();
-
-const currentWin = remote.getCurrentWindow()
-currentWin.on('close', (e) => {
-    Array.from(window.ELEC_WIN_MAP).forEach(winId => {
-        const win = remote.BrowserWindow.fromId(winId)
-        win && win.close && win.close()
-    })
-})
-
 window.pm2 = _pm2;
-
 

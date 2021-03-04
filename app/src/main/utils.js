@@ -3,6 +3,7 @@ import { KF_HOME, KUNGFU_ENGINE_PATH } from '__gConfig/pathConfig';
 import { killGodDaemon, killKfc, killKungfu } from '__gUtils/processUtils';
 import { platform } from '__gConfig/platformConfig';
 import { killExtra } from '__gUtils/processUtils';
+import { reqRecordBeforeQuit } from "./events";
 
 const path = require('path');
 const { app, dialog } = electron
@@ -13,13 +14,7 @@ export function openUrl(url) {
 }
 
 
-//开启发送renderprocess 打开设置弹窗
-export function openSettingDialog (mainWindow) {
-	if (mainWindow && mainWindow.webContents) {
-		mainWindow.webContents.send('main-process-messages', 'open-setting-dialog')
-		mainWindow.focus()
-	}
-}
+
 
 export function showKungfuInfo () {
 	const version = packageJSON.version;
@@ -78,22 +73,24 @@ export function showQuitMessageBox (mainWindow) {
             defaultId: 0,
             cancelId: 1,
             message: "退出应用会结束所有交易进程，确认退出吗？",
-            buttons: ['确认', `最小化至${platform !== 'mac' ? '任务栏' : ' Dock'}`],
+            buttons: ['确认', '取消'],
             icon: path.join(__resources, 'icon', 'icon.png')
         }, (index) => {
             if(index === 0){
-                resolve(true)
-                console.time('quit clean')
-                killAllBeforeQuit(mainWindow).finally(() => {
-                    console.timeEnd('quit clean')
-                    app.quit()
-                })
+				reqRecordBeforeQuit(mainWindow)
+					.then(() => {
+						resolve(true)
+					})
+					.then(() => {
+						console.time('quit clean')
+						return killAllBeforeQuit(mainWindow).finally(() => {
+							console.timeEnd('quit clean')
+							app.quit()
+						})
+					})
+              
             }else{
                 resolve(false)
-                if((mainWindow !== null) && !mainWindow.isDestroyed()){
-                    if(platform === 'mac') mainWindow.hide();
-                    else mainWindow.minimize();
-                }
             }
         })
     })
