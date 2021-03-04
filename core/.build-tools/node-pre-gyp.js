@@ -1,5 +1,6 @@
 const {spawnSync} = require("child_process");
 const fs = require("fs");
+const glob = require("glob");
 const path = require("path");
 
 function run(cmd, args) {
@@ -7,11 +8,13 @@ function run(cmd, args) {
     console.log(`$ ${cmd} ${args.join(' ')}`);
     const result = spawnSync(cmd, args, {
         shell: true,
-        stdio: ["inherit", "inherit", "inherit"],
+        stdio: "inherit",
         windowsHide: true,
         cwd: real_cwd
     });
-    process.exit(result.status);
+    if (result.status !== 0) {
+        process.exit(result.status);
+    }
 }
 
 function node_pre_gyp(cmd, argv) {
@@ -32,6 +35,12 @@ const argv = require("yargs/yargs")(process.argv.slice(2))
     .command("package", "package binary", (yargs) => {
     }, (argv) => {
         node_pre_gyp(["package"], argv);
+        const prebuilt = glob.sync(path.join("build", "stage", "**", "*.tar.gz"))[0];
+        const wheel = glob.sync(path.join("build", "python", "dist", "*.whl"))[0];
+        if (prebuilt && wheel) {
+            console.log(`$ cp ${wheel} ${path.dirname(prebuilt)}`);
+            fs.copyFileSync(wheel, path.join(path.dirname(prebuilt), path.basename(wheel)));
+        }
     })
     .option("build-type", {
         choices: ["Release", "Debug"],

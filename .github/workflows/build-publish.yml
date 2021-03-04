@@ -55,14 +55,16 @@ jobs:
         with:
           python-version: '3.7'
 
-      - name: Build Kungfu
+      - name: Setup Kungfu environment
         run: |
           pip install pipenv==2020.11.15
           yarn env-pypi-python
           yarn install
-          yarn build
 
-      - name: Collect Kungfu Build Info
+      - name: Build Kungfu
+        run: yarn workspace kungfu run build
+
+      - name: Upload Kungfu Build Info
         uses: actions/upload-artifact@v2
         if: ${{ failure() }}
         with:
@@ -76,14 +78,16 @@ jobs:
             core/build/*.txt
           if-no-files-found: ignore
 
-      - name: Make Prebuilt
-        run: yarn workspace @kungfu-trader/kungfu-core run package
+      - name: Package Prebuilt
+        run: |
+          ls -l core/build/kfc
+          yarn workspace @kungfu-trader/kungfu-core run package
 
       - name: Upload Prebuilt
         uses: actions/upload-artifact@v2
         with:
-          name: 'Kungfu-Packages-${{matrix.name}}-${{github.sha}}'
-          path: '*/build/stage/**/*.tar.gz'
+          name: 'Kungfu-Prebuilt-${{matrix.name}}-${{github.sha}}'
+          path: '*/build/stage/**'
           if-no-files-found: ignore
 
       - name: Upload Kungfu Installer

@@ -8,7 +8,7 @@ with open('kungfubuildinfo.json', 'r') as build_info_file:
 setup(
     name="kungfu",
     version=build_info['version'],
-    author="taurus.ai",
+    author="Kungfu Origin",
     license="Apache-2.0",
     packages=[''] + find_packages(exclude=["test"]),
     package_data={
@@ -34,4 +34,5 @@ setup(
         "plotly==4.0.0"
     ],
     entry_points={"console_scripts": ["kfc = kungfu.__main__:main"]},
+    has_ext_modules=lambda: True
 )

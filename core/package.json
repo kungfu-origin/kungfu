@@ -34,7 +34,7 @@
   },
   "scripts": {
     "preinstall": "node .build-tools/kf-config.js set-prebuilt-host",
-    "install": "npm run setup",
+    "install": "yarn run setup",
     "setup": "cross-var node .build-tools/node-pre-gyp.js --build-type $npm_package_config_buildtype install",
     "build": "cross-var node .build-tools/node-pre-gyp.js --build-type $npm_package_config_buildtype build",
     "package": "node .build-tools/node-pre-gyp.js package",
