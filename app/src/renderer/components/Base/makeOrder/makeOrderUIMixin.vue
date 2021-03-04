@@ -362,6 +362,8 @@ export default {
 
             const { instrumentId, lastPrice, totalVolume, directionOrigin, exchangeId, accountIdResolved, instrumentType } = newPosData;
 
+            console.log('[Make Order] last price', instrumentId, lastPrice)
+
             this.$set(this.makeOrderForm, 'instrument_id', instrumentId);
             this.$set(this.makeOrderForm, 'exchange_id', exchangeId);
             this.$set(this.makeOrderForm, 'limit_price', lastPrice);
@@ -384,6 +386,8 @@ export default {
             } else if (directionOrigin === 1) {
                 this.$set(this.makeOrderForm, 'side', 0)
             }
+
+            this.$refs['make-order-form'].validate()
         },
 
         'makeOrderForm.buyType' (val) {
