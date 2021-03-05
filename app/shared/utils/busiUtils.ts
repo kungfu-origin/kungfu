@@ -249,7 +249,7 @@ export const openVueWin = (htmlPath: string, routerPath: string, electronRemote:
  */
 export const buildTask = (taskPath: string, electronRemote: any, debugOptions = { width: 0, height: 0, show: false }) => {
     
-    const taskFullPath = `file://${path.join(__resources, 'tasks', taskPath + '.html')}`;
+    const taskPathResolved = `file://${path.join(__resources, 'tasks', taskPath + '.html')}`;
     const BrowserWindow: any = electronRemote.BrowserWindow;
     const currentWindow: any = electronRemote.getCurrentWindow();
     
@@ -263,7 +263,7 @@ export const buildTask = (taskPath: string, electronRemote: any, debugOptions = 
 		    backgroundColor: '#161B2E',
         })
 
-        win.webContents.loadURL(taskFullPath)
+        win.webContents.loadURL(taskPathResolved)
         win.webContents.on('did-finish-load', () => { 
             if(!currentWindow || Object.keys(currentWindow).length == 0 ) {
                 reject(new Error('当前页面没有聚焦！'))

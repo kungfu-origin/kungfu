@@ -90,10 +90,9 @@ export function showQuitMessageBox (mainWindow) {
 							})
 					})
               
-            }else{
+            } else {
                 resolve(false)
             }
         })
     })
-
 }

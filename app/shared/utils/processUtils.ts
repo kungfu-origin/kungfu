@@ -351,8 +351,9 @@ async function pm2Delete (target: string): Promise<void> {
 // ================================= business ===================================
 
 export const startTask = (options: Pm2Options) => {    
+    console.log(options, '--')
     return startProcess({
-        script: 'index.js',
+        script: options.script || 'index.js',
         interpreter: process.execPath,
         ...options
     })

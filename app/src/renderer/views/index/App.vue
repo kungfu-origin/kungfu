@@ -35,7 +35,7 @@
         >
             <div style="margin: 10px 0 20px">
                 <tr-status :value="'3'" :hasText="false"></tr-status>
-                退出前保存数据中...
+                退出前保存数据中，请勿关闭
             </div>
         </el-dialog>
     </div>
@@ -49,6 +49,7 @@ import GlobalSettingDialog from '@/components/Base/GlobalSettingDialog';
 
 import { buildKungfuGlobalDataPipe, buildTradingDataPipe } from '__io/kungfu/tradingData';
 import { watcher } from '__io/kungfu/watcher';
+import { switchTask } from '__io/actions/base';
 
 import ipcListenerMixin from '@/ipcMsg/ipcListenerMixin';
 import tickerSetMixin from '@/components/MarketFilter/js/tickerSetMixin';
@@ -92,6 +93,7 @@ export default {
         this.bindTradingDataListener();
 
         this.getWatcherStatus();
+        this.calHistoryMarketData(7);
     },
 
     computed: {
@@ -214,6 +216,16 @@ export default {
 
                 }, 300)
             }
+        },
+
+        calHistoryMarketData (days) {
+            const taskCwdPath = `file://${path.join(__resources, 'tasks')}`;
+            switchTask(true, {
+                name: `cal_history_marketdata_${days}`,
+                args: `--days ${days}`,
+                cwd: taskCwdPath,
+                script: 'calHistoryMarketData.js'
+            })
         }
     }
 }

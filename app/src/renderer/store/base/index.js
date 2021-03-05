@@ -19,7 +19,6 @@ export default {
         mdAccountSource: {}, //账户柜台信息
         kfConfig: {}, // kf 
         
-        taskExts: [], // task插件.
         currentTask: {},
         taskExtConfigList: []
     },
@@ -74,10 +73,6 @@ export default {
             dispatch('setKungfuConfig', kfConfig)
         },
 
-        setTaskExts ({ commit }, exts) {
-            commit('SET_TASK_EXTS', exts)
-        },
-
         setCurrentTask ({ commit }, currentTask) {
             commit('SET_CURRENT_TASK', currentTask)
         },
@@ -98,10 +93,6 @@ export default {
 
         SET_CURRENT_TASK (state, task) {
             state.currentTask = Object.freeze(task);
-        },
-
-        SET_TASK_EXTS (state, exts) {
-            state.taskExts = exts
         },
         
         SET_PROCESS_STATUS (state, processStatus) {

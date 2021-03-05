@@ -28,7 +28,6 @@ export default {
 
     mounted () {
         this.bindIPCListener();
-        this.bindMainIPCListener();
         this.bindPMPCListener();
     },
 
@@ -43,23 +42,6 @@ export default {
     },
 
     methods: {
-
-        bindMainIPCListener () {
-            ipcRenderer.on('main-process-messages', (event, args) => {
-                switch (args) {
-                    case 'open-setting-dialog':
-                        this.globalSettingDialogVisiblity = true;
-                        break
-                }
-            })
-
-            ipcRenderer.on('record-before-quit', () => {
-                this.recordBeforeQuit()
-                    .then(() => {
-                        ipcRenderer.sendSync('record-before-quit-done')
-                    })
-            })
-        },
 
         bindPMPCListener () {
             this.BUS && this.BUS.off();
@@ -118,6 +100,12 @@ export default {
                             } else {
                                 this.$message.info(`距离交易任务 ${processName} 开始执行还有 ${minute} 分钟，请保证交易进程与行情进程运行`)
                             }
+                            break
+
+                        //周均成交量
+                        case 'SET_7_AVG_QUOTE_VOLUME':
+                            
+                            break
                     }
                 })
             })
@@ -230,6 +218,22 @@ export default {
         },
         
         bindIPCListener () {
+            ipcRenderer.removeAllListeners('ain-process-messages')
+            ipcRenderer.on('main-process-messages', (event, args) => {
+                switch (args) {
+                    case 'open-setting-dialog':
+                        this.globalSettingDialogVisiblity = true;
+                        break
+                    case 'record-before-quit':
+                        this.recordBeforeQuit()
+                            .then(() => {
+                                ipcRenderer.sendSync('record-before-quit-done')
+                            })
+                        break
+
+                }
+            })
+
             ipcRenderer.removeAllListeners('ipc-emit-tdMdList')
             ipcRenderer.on('ipc-emit-tdMdList', (event, { childWinId }) => {
                 const childWin = BrowserWindow.fromId(childWinId);

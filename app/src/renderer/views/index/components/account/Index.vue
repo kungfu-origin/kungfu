@@ -19,7 +19,7 @@
                             @activeTicker="setCurrentTicker"
                             />
                         </el-tab-pane>
-                        <el-tab-pane :lazy="true" label="交易任务" name="tradingTask" v-if="taskExts.length">
+                        <el-tab-pane :lazy="true" label="交易任务" name="tradingTask" v-if="taskExtConfigList.length">
                             <Task></Task>
                         </el-tab-pane>
                     </el-tabs>
@@ -159,7 +159,7 @@ export default {
             currentTicker: state => state.ACCOUNT.currentTicker,
             currentAccountTabName: state => state.ACCOUNT.currentAccountTabName,
             tdAccountSource: state => state.BASE.tdAccountSource || {},
-            taskExts: state => state.BASE.taskExts || []
+            taskExtConfigList: state => state.BASE.taskExtConfigList || []
         }),
 
         currentTickerResolved () {
