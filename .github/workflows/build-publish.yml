@@ -7,9 +7,6 @@ on:
         description: 'Type true to overwrite packages'
         required: true
         default: 'false'
-  push:
-    branches:
-      - ci
   pull_request:
     branches:
       - main
@@ -84,7 +81,6 @@ jobs:
 
       - name: Package Prebuilt
         run: |
-          ls -l core/build/kfc
           yarn workspace @kungfu-trader/kungfu-core run package
 
       - name: Upload Prebuilt
