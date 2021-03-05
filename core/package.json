@@ -30,10 +30,11 @@
     "module_path": "build/kfc",
     "remote_path": "core/v{major}/v{version}",
     "package_name": "kfc-v{version}-{platform}-{arch}-{configuration}.tar.gz",
-    "host": "https://kungfu-prebuilt.s3.cn-northwest-1.amazonaws.com.cn"
+    "host": "https://kungfu-prebuilt.s3.cn-north-1.amazonaws.com.cn"
   },
   "scripts": {
-    "preinstall": "node .build-tools/kf-config.js set-prebuilt-host",
+    "preinstall": "node .build-tools/kf-config.js set-source-urls",
+    "prebuild": "node .build-tools/kf-config.js show-source-urls",
     "install": "yarn run setup",
     "setup": "cross-var node .build-tools/node-pre-gyp.js --build-type $npm_package_config_buildtype install",
     "build": "cross-var node .build-tools/node-pre-gyp.js --build-type $npm_package_config_buildtype build",
@@ -46,8 +47,7 @@
     "clean": "cmake-js clean",
     "format": "pipenv run conan source .",
     "dev": "pipenv run python python/dev_run.py",
-    "test": "pipenv run python python/dev_test.py",
-    "aws-test": "node .build-tools/aws-test.js"
+    "test": "pipenv run python python/dev_test.py"
   },
   "dependencies": {
     "@mapbox/node-pre-gyp": "^1.0.0",

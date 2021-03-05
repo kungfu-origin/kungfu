@@ -3,30 +3,31 @@ const fs = require("fs");
 const glob = require("glob");
 const path = require("path");
 
-function run(cmd, args) {
+function run(cmd, argv, check=true) {
     const real_cwd = fs.realpathSync(path.resolve(process.cwd()));
-    console.log(`$ ${cmd} ${args.join(' ')}`);
-    const result = spawnSync(cmd, args, {
+    console.log(`$ ${cmd} ${argv.join(' ')}`);
+    const result = spawnSync(cmd, argv, {
         shell: true,
         stdio: "inherit",
         windowsHide: true,
         cwd: real_cwd
     });
-    if (result.status !== 0) {
+    if (check && result.status !== 0) {
         process.exit(result.status);
     }
 }
 
-function node_pre_gyp(cmd, argv) {
+function node_pre_gyp(cmd, argv, check=true) {
     const build_type_arg = argv.buildType === "Debug" ? ["--debug"] : [];
     const yarn_cmd_arg = ["node-pre-gyp", ...build_type_arg, ...cmd];
-    run("yarn", yarn_cmd_arg);
+    run("yarn", yarn_cmd_arg, check);
 }
 
 const argv = require("yargs/yargs")(process.argv.slice(2))
     .command("install", "install through node-pre-gyp", (yargs) => {
     }, (argv) => {
-        node_pre_gyp(["install", "--fallback-to-build"], argv);
+        const skipBuild = "KF_SKIP_FALLBACK_BUILD" in process.env;
+        node_pre_gyp(skipBuild ? ["install"] : ["install", "--fallback-to-build"], argv, !skipBuild);
     })
     .command("build", "build from source", (yargs) => {
     }, (argv) => {
