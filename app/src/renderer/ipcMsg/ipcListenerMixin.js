@@ -5,7 +5,7 @@ import { ipcRenderer, remote } from 'electron';
 import { watcher, dealQuote, dealPos, dealOrder } from '__io/kungfu/watcher';
 import { getStrategyById, updateStrategyPath } from '__io/kungfu/strategy';
 import { transformTradingItemListToData } from '__io/kungfu/watcher';
-import { aliveOrderStatusList } from 'kungfu-shared/config/tradingConfig';
+import { aliveOrderStatusList } from '@kungfu-trader/kungfu-shared/config/tradingConfig';
 
 import makeOrderCoreMixin from '@/components/Base/makeOrder/js/makeOrderCoreMixin';
 

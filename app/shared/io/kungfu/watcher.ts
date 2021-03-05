@@ -3,7 +3,7 @@ import { setTimerPromiseTask } from '__gUtils/busiUtils';
 import { kungfu } from '__io/kungfu/kungfuUtils';
 import { toDecimal } from '__gUtils/busiUtils';
 import { readJsonSync } from '__gUtils/fileUtils';
-import { OffsetName, OrderStatus, SideName, PosDirection, PriceType, HedgeFlag, InstrumentType, VolumeCondition, TimeCondition, allowShorted } from "kungfu-shared/config/tradingConfig";
+import { OffsetName, OrderStatus, SideName, PosDirection, PriceType, HedgeFlag, InstrumentType, VolumeCondition, TimeCondition, allowShorted } from "@kungfu-trader/kungfu-shared/config/tradingConfig";
 import { logger } from '../../utils/logUtils';
 
 export const watcher: any = (() => {

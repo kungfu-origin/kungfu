@@ -92,7 +92,7 @@ import DatePickerDialog from '@/components/Base/DatePickerDialog';
 
 import { dealOrder } from "__io/kungfu/watcher";
 import { kungfuCancelAllOrders } from '__io/kungfu/makeCancelOrder';
-import { aliveOrderStatusList } from 'kungfu-shared/config/tradingConfig';
+import { aliveOrderStatusList } from '@kungfu-trader/kungfu-shared/config/tradingConfig';
 import { ordersHeader } from '@/components/Base/tradingData/js/tableHeaderConfig';
 
 import makeOrderMixin from '@/components/Base/makeOrder/js/makeOrderMixin';

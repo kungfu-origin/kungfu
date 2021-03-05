@@ -78,7 +78,7 @@
   ],
 
   "include": [
-    "../node_modules/kungfu-shared/**/*",
+    "../node_modules/@kungfu-trader/kungfu-shared/**/*",
     "src/**/*",
     "src/*",
 ],

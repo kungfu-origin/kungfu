@@ -1,6 +1,6 @@
 import Table from '@/assets/components/Table';
 import { calcuHeaderWidth, parseToString } from "@/assets/scripts/utils";
-import { aliveOrderStatusList } from 'kungfu-shared/config/tradingConfig';
+import { aliveOrderStatusList } from '@kungfu-trader/kungfu-shared/config/tradingConfig';
 const colors = require('colors/safe');
 
 interface OrdersData {

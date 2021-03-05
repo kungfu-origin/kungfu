@@ -227,7 +227,7 @@ import Vue from 'vue';
 import { Autocomplete } from 'element-ui';
 
 import { deepClone } from '__gUtils/busiUtils';
-import { SourceTypeConfig, SideName, OffsetName, PriceType, HedgeFlag, ExchangeIds, InstrumentTypes, allowShorted } from 'kungfu-shared/config/tradingConfig';
+import { SourceTypeConfig, SideName, OffsetName, PriceType, HedgeFlag, ExchangeIds, InstrumentTypes, allowShorted } from '@kungfu-trader/kungfu-shared/config/tradingConfig';
 import { biggerThanZeroValidator } from '__assets/validator';
 
 import instrumentsMixin from '@/assets/js/mixins/instrumentsMixin';

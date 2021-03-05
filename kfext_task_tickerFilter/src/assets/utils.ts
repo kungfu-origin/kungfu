@@ -1,5 +1,5 @@
 import moment from 'moment';
-import { InstrumentTypes, aliveOrderStatusList, ExchangeIds, SideName, OffsetName, PosDirection } from 'kungfu-shared/config/tradingConfig';
+import { InstrumentTypes, aliveOrderStatusList, ExchangeIds, SideName, OffsetName, PosDirection } from '@kungfu-trader/kungfu-shared/config/tradingConfig';
 
 export const getCurrentCount = ({
     currentTimestamp, 

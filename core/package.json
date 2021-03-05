@@ -1,8 +1,8 @@
 {
   "name": "@kungfu-trader/kungfu-core",
-  "author": "taurus.ai",
+  "author": "Kungfu Origin",
   "version": "2.3.0",
-  "description": "KungFu Trader Core",
+  "description": "Kungfu Core",
   "license": "Apache-2.0",
   "main": "node/index.js",
   "repository": {

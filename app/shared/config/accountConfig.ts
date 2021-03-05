@@ -1,6 +1,6 @@
 import * as VALIDATOR from '__assets/validator'
 import { getExtensionConfigs, deepClone } from '__gUtils/busiUtils';
-import { SourceTypeConfig } from 'kungfu-shared/config/tradingConfig';
+import { SourceTypeConfig } from '@kungfu-trader/kungfu-shared/config/tradingConfig';
 import { EXTENSION_DIR } from '__gConfig/pathConfig';
 
 const dealValidator = (accountConfigItems: AccountSettingItem[]) => {

@@ -227,7 +227,7 @@ import {
   SideName,
   SourceTypeConfig,
   ExchangeIds,
-} from "kungfu-shared/config/tradingConfig";
+} from "@kungfu-trader/kungfu-shared/config/tradingConfig";
 
 import instrumentsMixin from "@/assets/js/mixins/instrumentsMixin";
 

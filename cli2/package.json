@@ -39,6 +39,8 @@
   },
   "dependencies": {
     "@babel/polyfill": "^7.2.5",
+    "@kungfu-trader/kungfu-core": "*",
+    "@kungfu-trader/kungfu-shared": "*",
     "bindings": "^1.5.0",
     "blessed": "^0.1.81",
     "blessed-contrib": "^4.8.16",
@@ -54,8 +56,6 @@
     "glob": "^7.1.6",
     "inquirer": "^6.3.1",
     "inquirer-autocomplete-prompt": "^1.0.1",
-    "@kungfu-trader/kungfu-core": "*",
-    "kungfu-shared": "*",
     "log4js": "^4.0.2",
     "moment": "^2.24.0",
     "node-schedule": "^1.3.2",
