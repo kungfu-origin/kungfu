@@ -31,13 +31,13 @@
 </template>
 
 <script>
+import fse from 'fs-extra'; 
 import { mapState } from 'vuex'
 import { debounce, throttle, throttleInsert, dealLogMessage, buildTask } from '__gUtils/busiUtils'
 import { buildProcessLogPath } from '__gConfig/pathConfig';
 import { Tail } from 'tail';
-import { clearFileContent, addFileSync, existsSync } from '__gUtils/fileUtils';
+import { writeFile, addFileSync } from '__gUtils/fileUtils';
 import { ipcRenderer } from 'electron';
-import { platform } from '__gConfig/platformConfig';
 import { remote } from 'electron';
 
 import openLogMixin from '@/assets/mixins/openLogMixin';
@@ -144,7 +144,7 @@ export default {
                 confirmButtonText: '确 定',
                 cancelButtonText: '取 消',
             })
-            .then(() => clearFileContent(buildProcessLogPath(this.processId)))
+            .then(() => writeFile(buildProcessLogPath(this.processId), ''))
             .then(() => {
                 this.resetData();
                 this.processId && this.init(this.processId, this.logPath)
@@ -163,7 +163,7 @@ export default {
 
         init: debounce(function(processId, logPath, searchKeyword){
             //文件不存在则创建
-            if(!existsSync(logPath)){
+            if(!fse.existsSync(logPath)){
                 this.tableData = Object.freeze([])
                 addFileSync('', logPath, 'file')
             }

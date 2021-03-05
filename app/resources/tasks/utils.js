@@ -4,15 +4,7 @@ const fs = require('fs-extra');
 //清空文件内容
 function clearFileContent(filePath) {
     filePath = path.normalize(filePath)
-    return new Promise((resolve, reject) => {
-        fs.outputFile(filePath, '', (err, data) => {
-            if(err){
-                reject(err);
-                return;
-            }
-            resolve(data)
-        })
-    })
+    return fs.outputFile(filePath, '')
 }
   
 //建立固定条数的list数据结构

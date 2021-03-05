@@ -1,8 +1,7 @@
 import Vue from 'vue';
 import minimist from 'minimist';
-
+import fse from "fs-extra";
 import { getAccountSource } from '__gConfig/accountConfig';
-import { readJsonSync, outputJsonSync } from '__gUtils/fileUtils';
 import { KF_CONFIG_PATH, TASK_EXTENSION_DIR } from '__gConfig/pathConfig';
 import { getExtensionConfigs } from '__gUtils/busiUtils';
 
@@ -52,7 +51,7 @@ export default {
         //部分更新kfConfig
         setKungfuConfigByKeys ({ commit, state }, kfConfig) {
             commit('SET_KF_CONFIG', kfConfig)  
-            outputJsonSync(KF_CONFIG_PATH, 
+            fse.outputJsonSync(KF_CONFIG_PATH, 
                 {
                     ...state.kfConfig,
                     ...kfConfig
@@ -71,7 +70,7 @@ export default {
 
         //初始化kungfu trader
         getKungfuConfig ({ dispatch }) {
-            const kfConfig = readJsonSync(KF_CONFIG_PATH)
+            const kfConfig = fse.readJsonSync(KF_CONFIG_PATH)
             dispatch('setKungfuConfig', kfConfig)
         },
 

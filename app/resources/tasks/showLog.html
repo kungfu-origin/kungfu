@@ -185,7 +185,7 @@
     </body>
     <script type="text/javascript">
     const path = require('path');
-    const fs = require('fs-extra');
+    const fse = require('fse-extra');
     const { ipcRenderer, shell } = require('electron');
     const BrowserWindow = require('electron').remote.BrowserWindow;
     const { getLog, debounce, clearFileContent } = require('./utils.js');
@@ -275,21 +275,21 @@
     document.getElementById('open-folder').addEventListener('click', () => {
         const logPath = getGlobalData.logPath;
         if (!logPath) return
-        fs.ensureFileSync(logPath)
+        fse.ensureFileSync(logPath)
         shell.showItemInFolder(logPath)
     })
 
     document.getElementById('clear-btn').addEventListener('click', () => {
         const logPath = getGlobalData.logPath;
         if(!logPath) return;
-        fs.ensureFileSync(logPath)
+        fse.ensureFileSync(logPath)
         clearFileContent(logPath)
     })
 
     document.getElementById('fresh-btn').addEventListener('click', () => {
         const logPath = getGlobalData.logPath;
         if(!logPath) return;
-        fs.ensureFileSync(logPath)
+        fse.ensureFileSync(logPath)
         showLogs(logPath, dealMessage).then(() => scrollToBottom())
     })
 

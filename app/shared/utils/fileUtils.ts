@@ -211,19 +211,10 @@ export const addFileSync = (parentDir = "", filename: string, type: string): voi
 }
 
 //更改文件名
-export const editFileFolderName = (oldPath: string, newPath: string): Promise<{}> => {
+export const editFileFolderName = (oldPath: string, newPath: string): Promise<void> => {
     oldPath = path.normalize(oldPath)
     newPath = path.normalize(newPath)
-    return new Promise((resolve, reject) => {
-        fse.rename(oldPath, newPath, (err: Error) => {
-            if(err){
-                console.error(err)
-                reject(err)
-                return
-            }
-            resolve({})
-        })
-    })
+    return fse.rename(oldPath, newPath)
 }
 
 
@@ -270,17 +261,8 @@ export const getCodeText = (targetPath: string): Promise<string> => {
 //写入文件
 export const writeFile = (filePath: string, data: string): Promise<void> => {
     filePath = path.normalize(filePath)
-    return new Promise((resolve, reject) => {
-        if(data === undefined) reject(new Error('input data is undefined!'))
-        fse.outputFile(filePath, data, (err: Error): void => {
-            if(err){
-                console.error(err)
-                reject(err)
-                return;
-            }
-            resolve()
-        })
-    })
+    if(data === undefined) throw new Error('input data is undefined!')
+    return fse.outputFile(filePath, data)
 }
 
 export const writeCSV = (filePath: string, data: any[]): Promise<void> => {
@@ -293,28 +275,4 @@ export const writeCSV = (filePath: string, data: any[]): Promise<void> => {
         })
     })
     
-}
-
-//清空文件内容
-export const clearFileContent = (filePath: string): Promise<any> => {
-    filePath = path.normalize(filePath)
-    return fse.outputFile(filePath, '')
-}
-
-
-
-export const existsSync = (filePath: string): boolean => {
-    return fse.existsSync(filePath)
-}
-
-export const copySync = (fromPath: string, toPath: string): void => {
-    fse.copySync(fromPath, toPath)
-}
-
-export const readJsonSync = (jsonPath: string): {} => {
-    return fse.readJsonSync(jsonPath)
-}
-
-export const outputJsonSync = (jsonPath: string, json: {}): void => {
-    return fse.outputJsonSync(jsonPath, json)
 }

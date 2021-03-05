@@ -1,13 +1,13 @@
+import fse from 'fs-extra';
 import { KF_RUNTIME_DIR, KF_CONFIG_PATH } from '__gConfig/pathConfig';
 import { setTimerPromiseTask } from '__gUtils/busiUtils';
 import { kungfu } from '__io/kungfu/kungfuUtils';
 import { toDecimal } from '__gUtils/busiUtils';
-import { readJsonSync } from '__gUtils/fileUtils';
 import { OffsetName, OrderStatus, SideName, PosDirection, PriceType, HedgeFlag, InstrumentType, VolumeCondition, TimeCondition, allowShorted } from "kungfu-shared/config/tradingConfig";
 import { logger } from '__gUtils/logUtils';
 
 export const watcher: any = (() => {
-    const kfSystemConfig: any = readJsonSync(KF_CONFIG_PATH)
+    const kfSystemConfig: any = fse.readJsonSync(KF_CONFIG_PATH)
     const bypassQuote = (kfSystemConfig.performance || {}).bypassQuote || false;
 
     if (process.env.APP_TYPE === 'cli') {

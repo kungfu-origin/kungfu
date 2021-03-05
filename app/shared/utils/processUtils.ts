@@ -1,11 +1,4 @@
-/*
- * @Author: your name
- * @Date: 2020-04-24 16:36:28
- * @LastEditTime: 2020-05-28 17:12:25
- * @LastEditors: Please set LastEditors
- * @Description: In User Settings Edit
- * @FilePath: /kungfu/app/shared/utils/processUtils.ts
- */ 
+import fse from 'fs-extra';
 
 //@ts-ignore
 import * as taskkill from 'taskkill';
@@ -13,7 +6,6 @@ import * as taskkill from 'taskkill';
 import { KF_HOME, KUNGFU_ENGINE_PATH, KF_CONFIG_PATH, buildProcessLogPath } from '__gConfig/pathConfig';
 import { platform } from '__gConfig/platformConfig';
 import { logger } from '__gUtils/logUtils';
-import { readJsonSync } from '__gUtils/fileUtils';
 import { hackLaunchDaemon } from '__assets/hack';
 import { setTimerPromiseTask, delayMiliSeconds } from '__gUtils/busiUtils';
 import { getProcesses } from 'getprocesses';
@@ -174,7 +166,7 @@ function getRocketParams(ifRocket: Boolean, considerCup = false) {
 }
 
 function buildArgs (args: string, considerCup = false): string {
-    const kfConfig: any = readJsonSync(KF_CONFIG_PATH) || {}
+    const kfConfig: any = fse.readJsonSync(KF_CONFIG_PATH) || {}
     const logLevel: string = ((kfConfig.log || {}).level) || '';
     const ifRocket = ((kfConfig.performance || {}).rocket) || false;
     const rocket = getRocketParams(ifRocket, considerCup);
@@ -367,7 +359,7 @@ export const startTask = (options: Pm2Options) => {
 }
 
 export const startStrategyProcess = async (name: string, strategyPath: string, pythonPath: string): Promise<object> => {
-    const kfConfig: any = readJsonSync(KF_CONFIG_PATH) || {}
+    const kfConfig: any = fse.readJsonSync(KF_CONFIG_PATH) || {}
     const ifRocket = ((kfConfig.performance || {}).rocket) || false;
     const logLevel: string = ((kfConfig.log || {}).level) || '';
     const rocket = getRocketParams(ifRocket, false)
@@ -449,7 +441,7 @@ export const startTd = (accountId: string): Promise<any> => {
 //启动strategy
 export const startStrategy = (strategyId: string, strategyPath: string): Promise<any> => {
     strategyPath = dealSpaceInPath(strategyPath)
-    const kfSystemConfig: any = readJsonSync(KF_CONFIG_PATH)
+    const kfSystemConfig: any = fse.readJsonSync(KF_CONFIG_PATH)
     const ifLocalPython = (kfSystemConfig.strategy || {}).python || false;
     const pythonPath = (kfSystemConfig.strategy || {}).pythonPath || '';
 

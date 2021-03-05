@@ -220,7 +220,7 @@
 import { remote } from 'electron';
 import { mapState } from 'vuex';
 
-import { ifProcessRunning, toDecimal } from '__gUtils/busiUtils';
+import { ifProcessRunning, toDecimal, openVueWin } from '__gUtils/busiUtils';
 import { encodeKungfuLocation } from '__io/kungfu/kungfuUtils';
 import { watcher } from '__io/kungfu/watcher';
 import * as STRATEGY_API from '__io/kungfu/strategy';

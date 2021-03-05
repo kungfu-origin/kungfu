@@ -1,5 +1,5 @@
+import fse from 'fs-extra';
 import { KF_CONFIG_PATH, KF_TARADING_CONFIG_PATH } from '__gConfig/pathConfig';
-import { readJsonSync, outputJsonSync } from "__gUtils/fileUtils";
 
 const isEnglish = process.env.LANG_ENV === 'en';
 
@@ -321,8 +321,8 @@ export const buildCustomProcessConfig = (): CustomProcessData => {
 }
 
 export const buildSystemConfig = () => {
-    const kfSystemConfig = readJsonSync(KF_CONFIG_PATH) || {};
-    const kfSystemTradingConfig = readJsonSync(KF_TARADING_CONFIG_PATH) || {};
+    const kfSystemConfig = fse.readJsonSync(KF_CONFIG_PATH) || {};
+    const kfSystemTradingConfig = fse.readJsonSync(KF_TARADING_CONFIG_PATH) || {};
     return {
         system: {
             key: "system",
@@ -363,8 +363,8 @@ export const mergeSystemConfigTogether = () => {
 }
 
 export const getValueByConfigItem = (configType: string, configItemKey: string) => {
-    const kfSystemConfig = readJsonSync(KF_CONFIG_PATH) || {};
-    const kfSystemTradingConfig = readJsonSync(KF_TARADING_CONFIG_PATH) || {};
+    const kfSystemConfig = fse.readJsonSync(KF_CONFIG_PATH) || {};
+    const kfSystemTradingConfig = fse.readJsonSync(KF_TARADING_CONFIG_PATH) || {};
     const kfConfigData: { [propName: string]: { [propName: string]: SystemConfigItem }}= {
         'systemConfig': kfSystemConfig,
         'systemTradingConfig': kfSystemTradingConfig
@@ -376,19 +376,19 @@ export const getValueByConfigItem = (configType: string, configItemKey: string) 
 
 export const setValueByConfigItem = (configType: string, configItemKey: string, configChildItemData: StringToAnyObject) => {
     if(configType === 'systemConfig') {
-        let kfSystemConfig: StringToAnyObject = readJsonSync(KF_CONFIG_PATH) || {};
+        let kfSystemConfig: StringToAnyObject = fse.readJsonSync(KF_CONFIG_PATH) || {};
         kfSystemConfig[configItemKey] = {
             ...kfSystemConfig[configItemKey],
             ...configChildItemData
         }
-        outputJsonSync(KF_CONFIG_PATH, kfSystemConfig)
+        fse.outputJsonSync(KF_CONFIG_PATH, kfSystemConfig)
     } else if(configType === 'systemTradingConfig') {
-        const kfSystemTradingConfig: StringToAnyObject = readJsonSync(KF_TARADING_CONFIG_PATH) || {};
+        const kfSystemTradingConfig: StringToAnyObject = fse.readJsonSync(KF_TARADING_CONFIG_PATH) || {};
         kfSystemTradingConfig[configItemKey] = {
             ...kfSystemTradingConfig[configItemKey],
             ...configChildItemData
         }
-        outputJsonSync(KF_TARADING_CONFIG_PATH, kfSystemTradingConfig)
+        fse.outputJsonSync(KF_TARADING_CONFIG_PATH, kfSystemTradingConfig)
     }
 }
 
