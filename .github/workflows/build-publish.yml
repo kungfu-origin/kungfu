@@ -106,20 +106,24 @@ jobs:
     container: 'docker.io/kungfutrader/kungfu-builder-centos:main'
     steps:
       - name: Checkout
+        if: ${{ needs.prepare.outputs.publishable  == 'true' }}
         uses: actions/checkout@v2
 
       - name: Setup NPM registry
+        if: ${{ needs.prepare.outputs.publishable  == 'true' }}
         uses: actions/setup-node@v2
         with:
           registry-url: 'https://npm.pkg.github.com'
           scope: '@kungfu-trader'
 
       - name: Download Artifacts
+        if: ${{ needs.prepare.outputs.publishable  == 'true' }}
         uses: actions/download-artifact@v2
         with:
           path: 'github-artifacts'
 
       - name: Configure AWS Crendentials (US)
+        if: ${{ needs.prepare.outputs.publishable  == 'true' }}
         uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-access-key-id: ${{ secrets.AWS_US_ACCESS_KEY_ID }}
@@ -127,11 +131,13 @@ jobs:
           aws-region: us-east-1
 
       - name: Publish Prebuilt to AWS (US)
+        if: ${{ needs.prepare.outputs.publishable  == 'true' }}
         uses: kungfu-trader/action-publish-prebuilt@main
         with:
           artifacts-path: 'github-artifacts'
 
       - name: Configure AWS Crendentials (CN)
+        if: ${{ needs.prepare.outputs.publishable  == 'true' }}
         uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-access-key-id: ${{ secrets.AWS_CN_ACCESS_KEY_ID }}
@@ -139,6 +145,7 @@ jobs:
           aws-region: cn-north-1
 
       - name: Publish Prebuilt to AWS (CN)
+        if: ${{ needs.prepare.outputs.publishable  == 'true' }}
         uses: kungfu-trader/action-publish-prebuilt@main
         with:
           artifacts-path: 'github-artifacts'
