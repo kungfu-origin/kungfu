@@ -1,17 +1,17 @@
 {
   "name": "kungfu",
   "author": "taurus.ai",
-  "version": "2.3.0",
+  "version": "2.3.2",
   "description": "KungFu Trader",
   "license": "Apache-2.0",
   "private": true,
   "workspaces": [
     "shared",
     "core",
-    "cli2",
     "kfext_task_timerTrader",
-    "app",
-    "tests"
+    "kfext_task_backwardHedge",
+    "cli2",
+    "app" 
   ],
   "scripts": {
     "build": "wsrun --serial --fast-exit --exclude-missing build",

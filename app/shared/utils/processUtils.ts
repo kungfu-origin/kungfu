@@ -9,20 +9,21 @@
 
 //@ts-ignore
 import * as taskkill from 'taskkill';
-//@ts-ignore
-import * as physicalCpuCount from 'physical-cpu-count';
 
 import { KF_HOME, KUNGFU_ENGINE_PATH, KF_CONFIG_PATH, buildProcessLogPath } from '__gConfig/pathConfig';
 import { platform } from '__gConfig/platformConfig';
 import { logger } from '__gUtils/logUtils';
 import { readJsonSync } from '__gUtils/fileUtils';
+import { hackLaunchDaemon } from '__assets/hack';
 import { setTimerPromiseTask, delayMiliSeconds } from '__gUtils/busiUtils';
 import { getProcesses } from 'getprocesses';
 
 
 const path = require('path');
+const numCPUs = require('os').cpus() ? require('os').cpus().length : 1;
 const fkill = require('fkill');
 const pm2 = require('pm2');
+pm2.Client.__proto__.launchDaemon = hackLaunchDaemon
 
 export const _pm2 = pm2;
 
@@ -99,9 +100,7 @@ export const killExtra = () => kfKill([kfc, 'pm2'])
 const pm2Connect = (): Promise<void> => {
     return new Promise((resolve, reject) => {
         try {
-            let noDaemon = platform === 'win' ? true : false
-            if (process.env.NODE_ENV !== 'production') noDaemon = false;
-            pm2.connect(noDaemon, (err: any): void => {
+            pm2.connect(false, (err: any): void => {
                 if (err) {
                     err = err.length ? err[0] : err;
                     logger.error('[pm2Connect]', err);
@@ -164,28 +163,33 @@ export const describeProcess = (name: string): Promise<any> => {
 
 }
 
-function getRocketParams(name: String, ifRocket: Boolean) {
+function getRocketParams(ifRocket: Boolean, considerCup = false) {
     let rocket = ifRocket ? '-x' : '';
-    if ((name === 'master') || (name === 'ledger')) {
-        if (physicalCpuCount <= 4) {
+    if (considerCup) {
+        if (numCPUs <= 4) {
             rocket = '';
         }
     }
     return rocket
 }
 
-function parseScriptName () {
-    if (process.env.NODE_ENV === 'production') {
-        const extensionName = platform === 'win' ? '.exe' : ''
-        return `index${extensionName}`
-    } else {
-        return `index.js`
-    }
+function buildArgs (args: string, considerCup = false): string {
+    const kfConfig: any = readJsonSync(KF_CONFIG_PATH) || {}
+    const logLevel: string = ((kfConfig.log || {}).level) || '';
+    const ifRocket = ((kfConfig.performance || {}).rocket) || false;
+    const rocket = getRocketParams(ifRocket, considerCup);
+    return [ logLevel, args, rocket ].join(' ')
 }
 
-export const startTask = (options: any) => {
-    const script = parseScriptName();
-    const optionsResolved = {
+export const startProcess = (options: Pm2Options, no_ext = false): Promise<object> => {
+    const extensionName = platform === 'win' ? '.exe' : ''
+
+    let optionsResolved: any = {
+        "name": options.name,
+        "args": options.args, //有问题
+        "cwd": options.cwd || path.join(KUNGFU_ENGINE_PATH, 'kfc'),
+        "script": options.script || `kfc${extensionName}`,
+        "interpreter": options.interpreter || 'none',
         "logType": "json",
         "output": buildProcessLogPath(options.name),
         "error": buildProcessLogPath(options.name),
@@ -196,11 +200,13 @@ export const startTask = (options: any) => {
         "watch": false,
         "force": true,
         "execMode": "fork",
+        "env": {
+            "KF_HOME": dealSpaceInPath(KF_HOME),
+        },
         "killTimeout": 16000,
-        ...options,
-        script
-    }
+    };
 
+    if (no_ext) optionsResolved['env']['KF_NO_EXT'] = 'on';
 
     return new Promise((resolve, reject) => {
         pm2Connect().then(() => {
@@ -208,161 +214,21 @@ export const startTask = (options: any) => {
                 pm2.start(optionsResolved, (err: any, apps: object): void => {
                     if (err) {
                         err = err.length ? err[0] : err;
-                        logger.error('[startProcess]', JSON.stringify(options), err)
+                        logger.error('[startProcess]', JSON.stringify(optionsResolved), err)
                         reject(err);
                         return;
                     };
                     resolve(apps);
                 })
             } catch (err) {
-                logger.error('[TC startProcess]', JSON.stringify(options), err)
+                logger.error('[TC startProcess]', JSON.stringify(optionsResolved), err)
                 reject(err)
             }
         }).catch(err => reject(err))
     })
 }
 
-export const startProcess = (options: any, no_ext = false): Promise<object> => {
-    const extensionName = platform === 'win' ? '.exe' : ''
-    const kfConfig: any = readJsonSync(KF_CONFIG_PATH) || {}
-    const ifRocket = ((kfConfig.performance || {}).rocket) || false;
-    const logLevel: string = ((kfConfig.log || {}).level) || '';
-    const rocket = getRocketParams(options.name, ifRocket);
-    const args = [logLevel, options.args, rocket].join(' ')
-
-    options = {
-        ...options,
-        "args": args,
-        "script": `kfc${extensionName}`,
-        "cwd": path.join(KUNGFU_ENGINE_PATH, 'kfc'),
-        "logType": "json",
-        "output": buildProcessLogPath(options.name),
-        "error": buildProcessLogPath(options.name),
-        "mergeLogs": true,
-        "logDateFormat": "YYYY-MM-DD HH:mm:ss",
-        "autorestart": false,
-        "maxRestarts": 1,
-        "watch": false,
-        "force": true,
-        "execMode": "fork",
-        "env": {
-            "KF_HOME": dealSpaceInPath(KF_HOME),
-        },
-        "killTimeout": 16000
-    };
-
-    if (no_ext) options['env']['KF_NO_EXT'] = 'on';
-
-    return new Promise((resolve, reject) => {
-        pm2Connect().then(() => {
-            try {
-                pm2.start(options, (err: any, apps: object): void => {
-                    if (err) {
-                        err = err.length ? err[0] : err;
-                        logger.error('[startProcess]', JSON.stringify(options), err)
-                        reject(err);
-                        return;
-                    };
-                    resolve(apps);
-                })
-            } catch (err) {
-                logger.error('[TC startProcess]', JSON.stringify(options), err)
-                reject(err)
-            }
-        }).catch(err => reject(err))
-    })
-}
-
-export const startStrategyProcess = async (name: string, strategyPath: string, pythonPath: string): Promise<object> => {
-    const kfConfig: any = readJsonSync(KF_CONFIG_PATH) || {}
-    const ifRocket = ((kfConfig.performance || {}).rocket) || false;
-    const logLevel: string = ((kfConfig.log || {}).level) || '';
-    const rocket = ifRocket ? '-x' : '';
-    const args = ['-m', 'kungfu', logLevel, 'strategy', '-n', name, '-p', `'${strategyPath}'`, rocket].join(' ')
-
-    if (!pythonPath.trim()) {
-        return Promise.reject(new Error('No local python path!'))
-    }
-
-    const fullPythonPathList = pythonPath.split('/');
-    const pythonFolder = fullPythonPathList.slice(0, fullPythonPathList.length - 1).join('/')
-    const pythonFile = fullPythonPathList.slice(fullPythonPathList.length - 1).join('/')
-
-    const optionsForPython = {
-        "name": name,
-        "args": args,
-        "cwd": pythonFolder,
-        "script": pythonFile,
-        "logType": "json",
-        "output": buildProcessLogPath(name),
-        "error": buildProcessLogPath(name),
-        "mergeLogs": true,
-        "logDateFormat": "YYYY-MM-DD HH:mm:ss",
-        "autorestart": false,
-        "maxRestarts": 1,
-        "watch": false,
-        "force": true,
-        "execMode": "fork",
-        "env": {
-            "KF_HOME": dealSpaceInPath(KF_HOME),
-        },
-        "killTimeout": 16000
-    };
-
-    return new Promise((resolve, reject) => {
-        pm2Connect().then(() => {
-            try {
-                pm2.start(optionsForPython, (err: any, apps: object): void => {
-                    if (err) {
-                        err = err.length ? err[0] : err;
-                        logger.error('[startProcess]', JSON.stringify(optionsForPython), err)
-                        reject(err);
-                        return;
-                    };
-                    resolve(apps);
-                })
-            } catch (err) {
-                logger.error('[TC startProcess]', JSON.stringify(optionsForPython), err)
-                reject(err)
-            }
-        }).catch(err => reject(err))
-    })
-}
-
-
-export const startArchiveMake = () => {
-    return startProcess({
-        "name": 'archive',
-        "args": "archive make"
-    }, true)
-    .then(res => res)
-    .catch(err => logger.error('[startArchiveMake]', err))
-}
-
-
-export function startArchiveMakeTask (cb?: Function) {
-    return new Promise(resolve => {
-        startArchiveMake()
-            .then(() => {
-                let timer = startGetProcessStatusByName('archive', (res: any[]) => {
-                    const archiveStatus = ((res[0] || {}).pm2_env || {}).status;
-                    cb && cb(archiveStatus);
-                    if (archiveStatus !== 'online') {
-                        timer.clearLoop();
-                        resolve(archiveStatus)
-                    }
-                })
-            });
-    })
-}
-
-
-interface Pm2Options {
-    name: string;
-    args: string;
-}
-
-export function startProcessLoopGetStatus (options: Pm2Options, cb: Function) {
+export function startProcessLoopGetStatus (options: Pm2Options, cb?: Function) {
     return new Promise(resolve => {
         startProcess({ ...options })
             .then(() => {
@@ -378,124 +244,6 @@ export function startProcessLoopGetStatus (options: Pm2Options, cb: Function) {
     })
 }
 
-//启动pageEngine
-export const startMaster = async (force: boolean): Promise<any> => {
-    const processName = 'master';
-    const master = await describeProcess(processName);
-    if (master instanceof Error) throw master
-    const masterStatus = master.filter((m: any) => ((m || {}).pm2_env || {}).status === 'online')
-    if (!force && masterStatus.length === master.length && master.length !== 0) throw new Error('kungfu master正在运行！')
-    try {
-        await killKfc()
-    } catch (err) {
-        logger.error('[TC killKfc startMaster]', err)
-    }
-    return startProcess({
-        "name": processName,
-        "args": "master"
-    }, true).catch(err => logger.error('[startMaster]', err))
-}
-
-//启动ledger
-export const startLedger = async (force: boolean): Promise<any> => {
-    const processName = 'ledger';
-    const ledger = await describeProcess(processName);
-    if (ledger instanceof Error) throw ledger
-    const ledgerStatus = ledger.filter((m: any): boolean => ((m || {}).pm2_env || {}).status === 'online')
-    if (!force && ledgerStatus.length === ledger.length && ledger.length !== 0) throw new Error('kungfu ledger 正在运行！')
-    return startProcess({
-        'name': processName,
-        'args': 'ledger'
-    }).catch(err => logger.error('[startLedger]', err))
-}
-
-
-//启动md
-export const startMd = (source: string): Promise<any> => {
-    return startProcess({
-        "name": `md_${source}`,
-        "args": `md -s "${source}"`,
-    }).catch(err => logger.error('[startMd]', err))
-}
-
-//启动td
-export const startTd = (accountId: string): Promise<any> => {
-    const { source, id } = accountId.parseSourceAccountId();
-    return startProcess({
-        "name": `td_${accountId}`,
-        "args": `td -s "${source}" -a "${id}"`,
-    }).catch(err => logger.error('[startTd]', err))
-}
-
-//启动strategy
-export const startStrategy = (strategyId: string, strategyPath: string): Promise<any> => {
-    strategyPath = dealSpaceInPath(strategyPath)
-    const kfSystemConfig: any = readJsonSync(KF_CONFIG_PATH)
-    const ifLocalPython = (kfSystemConfig.strategy || {}).python || false;
-    const pythonPath = (kfSystemConfig.strategy || {}).pythonPath || '';
-
-    if (ifLocalPython) {
-        return deleteProcess(strategyId)
-            .then(() => delayMiliSeconds(2000))
-            .then(() => startStrategyProcess(strategyId, strategyPath, pythonPath))
-    } else {
-        return startProcess({
-            "name": strategyId,
-            "args": `strategy -n '${strategyId}' -p '${strategyPath}'`,
-        }, false).catch(err => logger.error('[startStrategy]', err))
-    }
-}
-
-export const startBar = (targetName: string, source: string, timeInterval: string): Promise<any> => {
-    return startProcess({
-        "name": targetName,
-        "args": `bar -s ${source} --time-interval ${timeInterval}`
-    }).catch(err => logger.error('[startBar]', err))
-}
-
-export const startCustomProcess = (targetName: string, params: string): Promise<any> => {
-    return startProcess({
-        "name": targetName,
-        "args": `${targetName} ${params}`
-    }).catch(err => logger.error(`[start${targetName}]`, err))
-}
-
-function buildProcessStatus (pList: any[]): StringToStringObject {
-    let processStatus: any = {}
-    Object.freeze(pList).forEach(p => {
-        const name = p.name;
-        const status = ((p || {}).pm2_env || {}).status
-        processStatus[name] = status
-    })
-    return processStatus
-}
-
-function buildProcessStatusWidthDetail (pList: any[]): StringToProcessStatusDetail {
-    let processStatus: any = {}
-        Object.freeze(pList).forEach(p => {
-            const { monit, pid, name, pm2_env } = p;
-            const status = pm2_env.status;
-            const created_at = pm2_env.created_at;
-            const cwd = pm2_env.cwd;
-            const pm_exec_path = (pm2_env.pm_exec_path || "").split('\/');
-            const script = pm2_env.script || pm_exec_path[pm_exec_path.length - 1]
-            const args = pm2_env.args;
-
-            processStatus[name] = {
-                status,
-                monit,
-                pid,
-                name,
-                created_at,
-                script,
-                cwd,
-                args
-            }
-        })
-        return processStatus
-}
-
-//列出所有进程
 export const listProcessStatus = () => {
     return pm2List().then((pList: any[]): { processStatus: StringToStringObject, processStatusWithDetail: StringToProcessStatusDetail } => {
         const processStatus = buildProcessStatus(pList)
@@ -508,28 +256,6 @@ export const listProcessStatusWithDetail = () => {
     return pm2List().then((pList: any[]) => buildProcessStatusWidthDetail(pList))
 }
 
-const pm2Delete = async (target: string): Promise<void> => {
-    return new Promise((resolve, reject) => {
-        pm2Connect().then(() => {
-            try{ 
-                pm2.delete(target, (err: any): void => {
-                    if (err) {
-                        err = err.length ? err[0] : err;
-                        logger.error('[pm2Delete]', err)
-                        reject(err)
-                        return;
-                    }
-                    resolve()
-                })
-            } catch (err) {
-                logger.error('[TC pm2Delete]', err)
-                reject(err)
-            }
-        }).catch(err => reject(err))
-    })
-}
-
-//删除进程
 export const deleteProcess = (processName: string) => {
         return new Promise(async (resolve, reject) => {
             var processes = [];
@@ -608,8 +334,192 @@ export const startGetProcessStatus = (callback: Function) => {
     }, 1000)
 }
 
+async function pm2Delete (target: string): Promise<void> {
+    return new Promise((resolve, reject) => {
+        pm2Connect().then(() => {
+            try{ 
+                pm2.delete(target, (err: any): void => {
+                    if (err) {
+                        err = err.length ? err[0] : err;
+                        logger.error('[pm2Delete]', err)
+                        reject(err)
+                        return;
+                    }
+                    resolve()
+                })
+            } catch (err) {
+                logger.error('[TC pm2Delete]', err)
+                reject(err)
+            }
+        }).catch(err => reject(err))
+    })
+}
+
+
+// ================================= business ===================================
+
+export const startTask = (options: Pm2Options) => {    
+    return startProcess({
+        script: 'index.js',
+        interpreter: process.execPath,
+        ...options
+    })
+}
+
+export const startStrategyProcess = async (name: string, strategyPath: string, pythonPath: string): Promise<object> => {
+    const kfConfig: any = readJsonSync(KF_CONFIG_PATH) || {}
+    const ifRocket = ((kfConfig.performance || {}).rocket) || false;
+    const logLevel: string = ((kfConfig.log || {}).level) || '';
+    const rocket = getRocketParams(ifRocket, false)
+    const args = ['-m', 'kungfu', logLevel, 'strategy', '-n', name, '-p', `'${strategyPath}'`, rocket].join(' ')
+
+    if (!pythonPath.trim()) {
+        return Promise.reject(new Error('No local python path!'))
+    }
+
+    const fullPythonPathList = pythonPath.split('/');
+    const pythonFolder = fullPythonPathList.slice(0, fullPythonPathList.length - 1).join('/')
+    const pythonFile = fullPythonPathList.slice(fullPythonPathList.length - 1).join('/')
+
+    return startProcess({
+        name,
+        args,
+        cwd: pythonFolder,
+        script: pythonFile
+    })
+}
+
+
+export function startArchiveMakeTask (cb?: Function) {
+    return startProcessLoopGetStatus({
+        "name": "archive",
+        "args": buildArgs("archive make")
+    }, cb)
+} 
+
+//启动pageEngine
+export const startMaster = async (force: boolean): Promise<any> => {
+    const processName = 'master';
+    const master = await describeProcess(processName);
+    if (master instanceof Error) throw master
+    const masterStatus = master.filter((m: any) => ((m || {}).pm2_env || {}).status === 'online')
+    if (!force && masterStatus.length === master.length && master.length !== 0) throw new Error('kungfu master 正在运行！')
+    try {
+        await killKfc()
+    } catch (err) {
+        logger.error('[TC killKfc startMaster]', err)
+    }
+    return startProcess({
+        "name": processName,
+        "args": buildArgs('master', true)
+    }, true).catch(err => logger.error('[startMaster]', err))
+}
+
+//启动ledger
+export const startLedger = async (force: boolean): Promise<any> => {
+    const processName = 'ledger';
+    const ledger = await describeProcess(processName);
+    if (ledger instanceof Error) throw ledger
+    const ledgerStatus = ledger.filter((m: any): boolean => ((m || {}).pm2_env || {}).status === 'online')
+    if (!force && ledgerStatus.length === ledger.length && ledger.length !== 0) throw new Error('kungfu ledger 正在运行！')
+    return startProcess({
+        'name': processName,
+        'args': buildArgs('ledger', true)
+    }).catch(err => logger.error('[startLedger]', err))
+}
+
+
+//启动md
+export const startMd = (source: string): Promise<any> => {
+    return startProcess({
+        "name": `md_${source}`,
+        "args": buildArgs(`md -s "${source}"`),
+    }).catch(err => logger.error('[startMd]', err))
+}
+
+//启动td
+export const startTd = (accountId: string): Promise<any> => {
+    const { source, id } = accountId.parseSourceAccountId();
+    return startProcess({
+        "name": `td_${accountId}`,
+        "args": buildArgs(`td -s "${source}" -a "${id}"`),
+    }).catch(err => logger.error('[startTd]', err))
+}
+
+//启动strategy
+export const startStrategy = (strategyId: string, strategyPath: string): Promise<any> => {
+    strategyPath = dealSpaceInPath(strategyPath)
+    const kfSystemConfig: any = readJsonSync(KF_CONFIG_PATH)
+    const ifLocalPython = (kfSystemConfig.strategy || {}).python || false;
+    const pythonPath = (kfSystemConfig.strategy || {}).pythonPath || '';
+
+    if (ifLocalPython) {
+        return deleteProcess(strategyId)
+            .then(() => delayMiliSeconds(2000))
+            .then(() => startStrategyProcess(strategyId, strategyPath, pythonPath))
+    } else {
+        return startProcess({
+            "name": strategyId,
+            "args": buildArgs(`strategy -n '${strategyId}' -p '${strategyPath}'`),
+        }, false).catch(err => logger.error('[startStrategy]', err))
+    }
+}
+
+export const startBar = (targetName: string, source: string, timeInterval: string): Promise<any> => {
+    return startProcess({
+        "name": targetName,
+        "args": buildArgs(`bar -s ${source} --time-interval ${timeInterval}`)
+    }).catch(err => logger.error('[startBar]', err))
+}
+
+export const startCustomProcess = (targetName: string, params: string): Promise<any> => {
+    return startProcess({
+        "name": targetName,
+        "args": buildArgs(`${targetName} ${params}`)
+    }).catch(err => logger.error(`[start${targetName}]`, err))
+}
+
+
+// =============================== function ================================
+
+
+function buildProcessStatus (pList: any[]): StringToStringObject {
+    let processStatus: any = {}
+    Object.freeze(pList).forEach(p => {
+        const name = p.name;
+        const status = ((p || {}).pm2_env || {}).status
+        processStatus[name] = status
+    })
+    return processStatus
+}
+
+function buildProcessStatusWidthDetail (pList: any[]): StringToProcessStatusDetail {
+    let processStatus: any = {}
+        Object.freeze(pList).forEach(p => {
+            const { monit, pid, name, pm2_env } = p;
+            const status = pm2_env.status;
+            const created_at = pm2_env.created_at;
+            const cwd = pm2_env.cwd;
+            const pm_exec_path = (pm2_env.pm_exec_path || "").split('\/');
+            const script = pm2_env.script || pm_exec_path[pm_exec_path.length - 1]
+            const args = pm2_env.args;
+
+            processStatus[name] = {
+                status,
+                monit,
+                pid,
+                name,
+                created_at,
+                script,
+                cwd,
+                args
+            }
+        })
+        return processStatus
+}
+
 //循环获取processStatus
-export const startGetProcessStatusByName = (name: string, callback: Function) => {
+function startGetProcessStatusByName (name: string, callback: Function) {
     const timer = setTimerPromiseTask(() => {
         return describeProcess(name)
             .then(res => {
@@ -621,7 +531,7 @@ export const startGetProcessStatusByName = (name: string, callback: Function) =>
     return timer
 }
 
-export const buildStartDatasetByDataSeriesIdOptions = (namespace: string, dataSeriesId: string): Pm2Options => {
+const buildStartDatasetByDataSeriesIdOptions = (namespace: string, dataSeriesId: string): Pm2Options => {
     return {
         "name": namespace + dataSeriesId,
         "args": ['data', 'get', '-n', dataSeriesId, '-s', 'kfa'].join(' ')

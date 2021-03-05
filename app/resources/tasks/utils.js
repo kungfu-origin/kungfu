@@ -125,7 +125,6 @@ function getLog(logPath, searchKeyword, dealMessageFunc){
             })
 
             lineReader.on('close', () => {
-                console.log(logPath, numList, '---')
                 resolve(numList)
             })
         })

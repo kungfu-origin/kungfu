@@ -90,10 +90,6 @@ export const KF_CONFIG_PATH = path.join(KF_HOME, 'config', 'kfConfig.json')
 
 export const KF_TARADING_CONFIG_PATH = path.join(KF_HOME, 'config', 'kfTradingConfig.json')
 
-export const KF_FUTURE_TICKERS_CONFIG_PATH = path.join(KUNGFU_RESOURCES_DIR, 'config', 'futureTickers.json')
-
-export const KF_STOCK_TICKERS_CONFIG_PATH = path.join(KUNGFU_RESOURCES_DIR, 'config', 'stockTickers.json')
-
 
 //================== config start =================================
 
@@ -108,3 +104,4 @@ export const EXTENSION_DIR = path.join(KUNGFU_ENGINE_PATH, 'kfc', 'kungfu_extens
 export const TASK_EXTENSION_DIR = process.env.NODE_ENV === 'production'
     ? path.join(process.resourcesPath, 'kungfu-extensions')
     : path.join(__dirname, '..', '..', '..')
+addFileSync('', TASK_EXTENSION_DIR, 'folder')

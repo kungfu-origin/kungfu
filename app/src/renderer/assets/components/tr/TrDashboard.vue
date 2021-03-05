@@ -83,9 +83,10 @@ export default {
     justify-content: space-between;
 
     .tr-dashboard-title{
-        font-size: 14px;
+        font-size: 12px;
         display: inline-block;
         float: none;
+        color: $icon;
     }
     .header-item{
         display: inline-block;

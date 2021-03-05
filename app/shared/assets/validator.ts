@@ -144,6 +144,7 @@ export const requiredValidator = (rule: any, value: any, callback: Function): vo
     }
 }
 
+//日期格式
 export const dateFormatYYMMDDValidator = (rule: any, value: any, callback: Function): void => {
     if (moment(value.toString(), 'YYMMDD').format('YYMMDD') === 'Invalid date') {
         callback(new Error(
@@ -155,6 +156,7 @@ export const dateFormatYYMMDDValidator = (rule: any, value: any, callback: Funct
     }
 }
 
+// 不能包含关键词
 export const noKeywordValidatorBuilder = (keyword: string) => {
     return (rule: any, value: any, callback: Function): void => {
         if ((value || '').trim().toString().includes(keyword)) {

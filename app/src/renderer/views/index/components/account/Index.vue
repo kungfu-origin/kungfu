@@ -362,6 +362,7 @@ export default {
         getExtensionConfigs () {
             return getExtensionConfigs(TASK_EXTENSION_DIR)
                 .then(exts => {
+                    exts = exts || []
                     this.isTasks = !!exts.length
                 })
         },

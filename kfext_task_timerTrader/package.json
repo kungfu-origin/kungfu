@@ -5,13 +5,10 @@
   "main": "lib/index.js",
   "scripts": {
     "install-deps": "node -v",
-    "dist": "cross-env NODE_ENV=production node --max_old_space_size=8192 ../node_modules/webpack/bin/webpack.js --progress --colors --config .build/webpack.ext.config.js",
-    "build": "node ./.build/build.js && yarn run cp",
-    "build-cli": "yarn run build",
-    "build-win": " yarn run dist && pkg . -t=node10.17-win-x64 --output=build/ext/index",
-    "build-mac": " yarn run dist && pkg . -t=node10.17-macos-x64 --output=build/ext/index",
-    "build-linux": " yarn run dist && pkg . -t=node10.17-linux-x64 --output=build/ext/index",
-    "cp": "copyfiles -a -f ./package.json ./build/ext",
+    "dist": "cross-env NODE_ENV=production node --max_old_space_size=2048 ../node_modules/webpack/bin/webpack.js --progress --colors --config .build/webpack.ext.config.js",
+    "build": "yarn run dist && yarn run cp",
+    "build-cli": "yarn run dist && yarn run cp",
+    "cp": "copyfiles -a -f ./package.json ./lib",
     "clean": "rimraf ./lib/*",
     "dev": "node .build/dev-ext.js",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -20,12 +17,13 @@
   "license": "ISC",
   "dependencies": {
     "kungfu-shared": "*",
+    "minimist": "^1.2.5",
     "moment": "^2.29.1",
     "rxjs": "^6.6.3"
   },
   "devDependencies": {
-    "@types/node": "^14.14.20",
     "@types/minimist": "^1.2.1",
+    "@types/node": "^14.14.20",
     "copyfiles": "^2.4.1",
     "pkg": "^4.4.9",
     "rimraf": "^3.0.2"
@@ -115,7 +113,16 @@
         "key": "steps",
         "name": "总次数",
         "type": "int",
+        "tip": "将以总次数均分总时长，建议保证每步间隔不能太短（>500ms）",
         "required": true
+      },
+      {
+        "key": "maxLotByStep",
+        "name": "单次最大手数",
+        "type": "int",
+        "tip": "各个交易所不同，默认100",
+        "required": true,
+        "default": 100
       },
       {
         "key": "lastSingularity",

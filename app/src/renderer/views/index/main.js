@@ -1,5 +1,6 @@
 
 /* eslint-disable */
+import './errorCatch';
 import Vue from 'vue';
 import './setKungfuParamsOnWindow';
 import store from '@/store';
@@ -20,9 +21,10 @@ Vue.config.productionTip = false
 Vue.store = Vue.prototype.$store = store
 Vue.utils = Vue.prototype.$utils = utils
 
+Vue.bus = Vue.prototype.$bus = new Vue();
+
 //tr 组件
 Vue.use(Components)
-
 
 
 new Vue({
@@ -38,6 +40,7 @@ startArchiveMakeTask((archiveStatus) => {
     window.archiveStatus = archiveStatus
 })
 .then(() => startMaster(false))
+.catch(err => console.error(err.message))
 .finally(() => {
     startGetProcessStatus(res => {
         const { processStatus, processStatusWithDetail } = res;
@@ -46,7 +49,8 @@ startArchiveMakeTask((archiveStatus) => {
     });
 
     utils.delayMiliSeconds(1000)
-    .then(() => startLedger(false))
+        .then(() => startLedger(false))
+        .catch(err => console.error(err.message))
 })
 
 window.ELEC_WIN_MAP = new Set();
@@ -60,3 +64,5 @@ currentWin.on('close', (e) => {
 })
 
 window.pm2 = _pm2;
+
+

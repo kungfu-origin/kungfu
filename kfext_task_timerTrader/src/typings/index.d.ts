@@ -45,3 +45,8 @@ interface TimeTraderPipData {
     orders: OrderData[];
     [propName: string]: any;
 }
+
+interface TradeTarget  {
+    offset: number,
+    volume: number
+}

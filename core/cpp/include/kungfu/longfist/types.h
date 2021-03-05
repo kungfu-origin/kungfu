@@ -52,6 +52,14 @@ KF_DEFINE_DATA_TYPE(                              //
     (std::string, value)                          //
 );
 
+KF_DEFINE_DATA_TYPE(                                      //
+    TimeKeyValue, 20001, PK(key), TIMESTAMP(update_time), //
+    (int64_t, update_time),                               //
+    (std::string, key),                                   //
+    (std::string, label),                                 //
+    (std::string, value)                                  //
+);
+
 KF_DEFINE_PACK_TYPE(                                             //
     Commission, 10006, PK(product_id, exchange_id), PERPETUAL(), //
     (kungfu::array<char, PRODUCT_ID_LEN>, product_id),           //品种
@@ -168,7 +176,7 @@ KF_DEFINE_PACK_TYPE(                                              //
     (kungfu::array<char, EXCHANGE_ID_LEN>, exchange_id),          //交易所ID
     (InstrumentType, instrument_type),                            //合约类型
 
-    (kungfu::array<char, PRODUCT_ID_LEN>, product_id), //产品ID
+    (kungfu::array<int8_t, PRODUCT_ID_LEN>, product_id), //产品ID commit by JC
 
     (int32_t, contract_multiplier), //合约乘数
     (double, price_tick),           //最小变动价位

@@ -45,10 +45,10 @@
                         <template v-slot="{ item }">
                             <div class="make-order-instrument-ids__warp">
                                 <div class="make-order-instrument-id-item">
-                                    <span class="ticker">{{ item.ticker }}</span>
-                                    <span class="name">{{ item.name }}</span>
+                                    <span class="ticker">{{ item.instrument_id }}</span>
+                                    <span class="name">{{ item.instrument_name }}</span>
                                 </div>
-                                <div class="make-order-instrument-id-item">{{ (item.exchangeId || '').toUpperCase() }}</div>
+                                <div class="make-order-instrument-id-item">{{ (item.exchange_id || '').toUpperCase() }}</div>
                             </div>
                         </template>
                     </el-autocomplete>
@@ -224,28 +224,20 @@
 <script>
 
 import Vue from 'vue';
-import { biggerThanZeroValidator } from '__assets/validator';
+import { Autocomplete } from 'element-ui';
+
 import { deepClone } from '__gUtils/busiUtils';
 import { SourceTypeConfig, SideName, OffsetName, PriceType, HedgeFlag, ExchangeIds, InstrumentTypes, allowShorted } from 'kungfu-shared/config/tradingConfig';
-import { getFutureTickersConfig, getStockTickersConfig } from '__assets/base'
-import { Autocomplete } from 'element-ui';
+import { biggerThanZeroValidator } from '__assets/validator';
+
+import instrumentsMixin from '@/assets/js/mixins/instrumentsMixin';
 
 Vue.use(Autocomplete)
 
-function filterPriceType (PriceType) {
-    let filterPriceType = {};
-
-    Object.keys(PriceType || {}).forEach(key => {
-        if (key <= 1) {
-            filterPriceType[key] = PriceType[key]
-        }
-    })
-
-    return filterPriceType
-}
-
 
 export default {
+
+    mixins: [ instrumentsMixin ],
     
     data () {
         this.SourceTypeConfig = SourceTypeConfig;
@@ -256,6 +248,7 @@ export default {
         this.ExchangeIds = ExchangeIds;
 
         this.biggerThanZeroValidator = biggerThanZeroValidator;
+
 
         return {
 
@@ -274,25 +267,10 @@ export default {
                 hedge_flag: 0,
                 buyType: 'volume', // volume or price
             },
-
-            currentSearchTickerList: [],
-
-            futureTickers: [],
-            stockTickers: []
         }
     },
 
     mounted () {
-        getFutureTickersConfig()
-            .then(res => {
-                this.futureTickers = Object.freeze(res)
-            });
-
-        getStockTickersConfig()
-            .then(res => {
-                this.stockTickers = Object.freeze(res)
-            })
-
         this.init();
     },
 
@@ -315,17 +293,6 @@ export default {
             }
 
             return (this.accountType || '').toLowerCase() === 'future'
-        },
-
-        targetTickersSource () {
-            const accountType = (this.accountType || '').toLowerCase();
-            if (accountType === 'stock') {
-                return this.stockTickers
-            } else if (accountType === 'future') {
-                return this.futureTickers
-            } else {
-                return []
-            }
         },
 
         currentAccountResolved () {
@@ -369,26 +336,17 @@ export default {
             }
 
             if (this.makeOrderForm.price_type === 0) {
-                
                 if (this.makeOrderForm.side === 0) { //买
-                    
                     const price = +this.makeOrderForm.limit_price;
-                    
                     if (!+price) return '';
-                    
                     if (!+this.avaliableCash) return ''
-                    
                     return Math.floor(this.avaliableCash / price)
-
                 } else if (this.makeOrderForm.side === 1) { //卖
-                    
                     const { instrumentId, totalVolume } = this.makeOrderByPosData;
-
                     if (instrumentId !== this.makeOrderForm.instrument_id) {
                         return ''
                     }
-
-                    return this.makeOrderByPosData.totalVolume || ''
+                    return totalVolume || ''
                 }                
             } 
 
@@ -403,6 +361,8 @@ export default {
             this.clearData(true);
 
             const { instrumentId, lastPrice, totalVolume, directionOrigin, exchangeId, accountIdResolved, instrumentType } = newPosData;
+
+            console.log('[Make Order] last price', instrumentId, lastPrice)
 
             this.$set(this.makeOrderForm, 'instrument_id', instrumentId);
             this.$set(this.makeOrderForm, 'exchange_id', exchangeId);
@@ -426,6 +386,8 @@ export default {
             } else if (directionOrigin === 1) {
                 this.$set(this.makeOrderForm, 'side', 0)
             }
+
+            this.$refs['make-order-form'].validate()
         },
 
         'makeOrderForm.buyType' (val) {
@@ -495,9 +457,9 @@ export default {
         handleSelectInstrumentId (item) {
             this.setInstumentIdTimer && clearTimeout(this.setInstumentIdTimer)
             this.clearData(true)
-            const { ticker, exchangeId } = item;
-            this.$set(this.makeOrderForm, 'instrument_id', ticker)
-            this.$set(this.makeOrderForm, 'exchange_id', (exchangeId || '').toUpperCase())
+            const { instrument_id, exchange_id } = item;
+            this.$set(this.makeOrderForm, 'instrument_id', instrument_id)
+            this.$set(this.makeOrderForm, 'exchange_id', (exchange_id || '').toUpperCase())
             
             this.$nextTick()
                 .then(() => {
@@ -512,7 +474,6 @@ export default {
 
         handleMakeOrder () {
             this.$refs['make-order-form'].validate(valid => {
-                
                 if(valid) {
 
                     //当下单不是从posdata进入
@@ -522,12 +483,12 @@ export default {
                     }
 
                     const makeOrderForm = deepClone(this.makeOrderForm);
-                    // const makeOrderConfirmTip = this.buildMakeOrderFormInfo(makeOrderForm)
-                    // this.$confirm(makeOrderConfirmTip, '提示', {
-                    //     confirmButtonText: '确 定',
-                    //     cancelButtonText: '取 消',
-                    // })
-                    this.makeOrder(this.moduleType, makeOrderForm, this.currentAccountResolved, this.currentId)
+                    const makeOrderConfirmTip = this.buildMakeOrderFormInfo(makeOrderForm)
+                    this.$confirm(makeOrderConfirmTip, '提示', {
+                        confirmButtonText: '确 定',
+                        cancelButtonText: '取 消',
+                    })
+                        .then(() => this.makeOrder(this.moduleType, makeOrderForm, this.currentAccountResolved, this.currentId))
                         .then(() => this.$message.success('下单指令已发送！'))
                         .catch(err => {
                             if (err === 'cancel') return;    
@@ -541,12 +502,25 @@ export default {
             this.currentAccount = account;
         },
 
-        // buildMakeOrderFormInfo (makeOrderForm) {
-        //     console.log(makeOrderForm)
-        //     const { instrument_type, side, offset, volume, limit_price, accountId, instrument_id } = makeOrderForm;
-            
-        //     return '确认下单'
-        // },
+        buildMakeOrderFormInfo (makeOrderForm) {
+            const { side, offset, volume, limit_price, accountId, instrument_id, price_type } = makeOrderForm;
+
+            const sideName = SideName[side];
+            const offsetName = OffsetName[offset];
+            const priceType = PriceType[price_type];
+
+            const tips = `确认下单
+            标的 ${instrument_id},
+            ${sideName},
+            ${offsetName},
+            ${priceType},
+            价格 ${limit_price},
+            数量 ${volume},
+            下单账户 ${accountId || this.currentAccountResolved}
+            `
+
+            return tips
+        },
 
         getInstrumentType (accountId) {
             const sourceName = accountId.split('_')[0] || '';
@@ -555,27 +529,6 @@ export default {
             return InstrumentTypes[typeName] || 0
         },
 
-        querySearch (queryString, cb) {
-            const results = this.getSearchTickers(queryString);
-            cb(results)
-        },
-
-        getSearchTickers (queryString = '') {
-            
-            return this.targetTickersSource.filter(item => {
-                const { ticker, name, exchangeId } = {
-                    ticker: '',
-                    name: '',
-                    exchangeId: '',
-                    ...item
-                }
-
-                if (ticker.toLowerCase().includes(queryString.toLowerCase())) return true;
-                if (name.toLowerCase().includes(queryString.toLowerCase())) return true;
-                if (exchangeId.toUpperCase().includes(queryString.toUpperCase())) return true;
-                return false
-            })
-        },
 
         getAvailCash (accountId) {
             if(!accountId) return 0;
@@ -617,5 +570,18 @@ export default {
         },
     }
 }
+
+function filterPriceType (PriceType) {
+    let filterPriceType = {};
+
+    Object.keys(PriceType || {}).forEach(key => {
+        if (key <= 1) {
+            filterPriceType[key] = PriceType[key]
+        }
+    })
+
+    return filterPriceType
+}
+
 
 </script>

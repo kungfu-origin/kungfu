@@ -36,6 +36,7 @@ export const buildTradingDataPipe = (type: string) => {
             const pnl = Object.values(ledgerData.AssetSnapshot || {});
             const orderStat = Object.values(ledgerData.OrderStat || {});
             const dailyAsset = Object.values(ledgerData.DailyAsset || {});
+            const instruments = Object.values(ledgerData.Instrument || {});
 
             return {
                 orders: transformOrderTradeListToData(orders, type),
@@ -47,7 +48,8 @@ export const buildTradingDataPipe = (type: string) => {
                 assets: transformAssetItemListToData(assets, type),
                 pnl: transformTradingItemListToData(pnl, type),
                 dailyPnl: transformTradingItemListToData(dailyAsset, type),
-                orderStat: transformOrderStatListToData(orderStat)
+                orderStat: transformOrderStatListToData(orderStat),
+                instruments: instruments
             }
         })
     )

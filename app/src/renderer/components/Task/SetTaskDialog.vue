@@ -1,6 +1,6 @@
 <template>
      <el-dialog 
-    width="540px" 
+    width="640px" 
     :title="`${method === 'add'? '添加' : '设置'} 交易任务`"  
     :visible="visible" 
     :close-on-click-modal="false"
@@ -23,7 +23,7 @@
                     v-model="postFormList[index]"
                     :configList="item.config"
                     :uniKey="item.uniKey || ''"
-                    labelWidth="100px"
+                    labelWidth="140px"
                     :method="method"
                 ></ExtConfigForm>
             </el-tab-pane>

@@ -1,5 +1,6 @@
 
-import { InstrumentTypes, aliveOrderStatusList, ExchangeIds, SideName, OffsetName } from 'kungfu-shared/config/tradingConfig';
+import moment from 'moment';
+import { InstrumentTypes, aliveOrderStatusList, ExchangeIds, SideName, OffsetName, PosDirection } from 'kungfu-shared/config/tradingConfig';
 
 export const transformArrayToObjectByKey = (targetList: Array<any>, keys: Array<string>): any => {
     let data: any = {};
@@ -163,9 +164,11 @@ export const reqCancelOrder = (parentId: string) => {
             }
         }
     })
+    console.log(`[撤单] PARENTID: ${parentId}`)        
 }
 
-function dealMakeOrderVolume (instrumentType: number, volume: number) {
+// stock 最小下单单位为100
+function dealMakeOrderVolume (instrumentType: number, volume: number): number {
     //stock 100的倍数
     const scale100 = Object.keys(InstrumentTypes)
         .filter(key => {
@@ -173,8 +176,10 @@ function dealMakeOrderVolume (instrumentType: number, volume: number) {
             return false;
         })
         .map(key => +InstrumentTypes[key])
+
+    const isStock = scale100.includes(+instrumentType);
     
-    if (scale100.includes(+instrumentType)) {
+    if (isStock) {
         const scale = +Number(volume / 100).toFixed(0)
         const scaleResolved = scale < 1 ? 1 : scale;
         return scaleResolved * 100
@@ -211,6 +216,7 @@ export const calcVolumeThisStep = (
     const pos = positions[`${TICKER}_${TARGET_DIRECTION}`] || {};
     const posCont = positions[`${TICKER}_${TARGET_DIRECTION_CONT}`] || {};
     const currentVolume = +pos.totalVolume || 0;
+    const { yesterdayVolume, todayVolume } = pos || {};
     const currentVolumeCont = +posCont.totalVolume || 0;
     const currentVolumeData: any = {
         [+TARGET_DIRECTION]: currentVolume,
@@ -246,9 +252,11 @@ export const calcVolumeThisStep = (
 
     return {
         currentVolume,
+        currentYesVolume: yesterdayVolume,
+        currentTodayVolume: todayVolume,
         currentVolumeCont,
         total: totalTargetVolume,
-        thisStepVolume: dealMakeOrderVolume( instrumentType, targetVolumeByStep)
+        thisStepVolume: dealMakeOrderVolume(instrumentType, targetVolumeByStep)
     }
 }
 
@@ -294,19 +302,19 @@ export const getCurrentCount = ({
     currentTimestamp, 
     deltaMilliSeconds,
     finishTime,
-    loopInterval,
+    LOOP_INTERVAL,
     LAST_SINGULARITY_SECOND,
     LAST_STEP_COUNT
 }: {
     currentTimestamp: number; 
     deltaMilliSeconds: number;
     finishTime: number;
-    loopInterval: number;
+    LOOP_INTERVAL: number;
     LAST_SINGULARITY_SECOND: number;
     LAST_STEP_COUNT: number
 }) => {
     const deltaCurrentToFinishTime = finishTime - currentTimestamp;
-    const currentCount = Math.floor(deltaMilliSeconds / loopInterval)
+    const currentCount = Math.floor(deltaMilliSeconds / LOOP_INTERVAL)
     if (LAST_SINGULARITY_SECOND) {
         if (deltaCurrentToFinishTime <= LAST_SINGULARITY_SECOND) {
             return LAST_STEP_COUNT
@@ -318,3 +326,127 @@ export const getCurrentCount = ({
     }
     return currentCount
 };
+
+export const buildTradeTaskVolumeOffset = ({
+    ticker,
+    side,
+    offset,
+    currentVolume,
+    currentYesVolume,
+    currentTodayVolume,
+    currentVolumeCont,
+    thisStepVolume,
+    total,
+    OPERATION_NAME,
+    TARGET_DIRECTION,
+    TARGET_DIRECTION_CONT
+}: {
+    ticker: string;
+    side: number;
+    offset: number;
+    currentVolume: number;
+    currentYesVolume: number;
+    currentTodayVolume: number;
+    currentVolumeCont: number;
+    thisStepVolume: number;
+    total: number;
+    OPERATION_NAME: string;
+    TARGET_DIRECTION: number;
+    TARGET_DIRECTION_CONT: number;
+}) => {
+
+    const deltaVolume = getDeltaVolume(offset, thisStepVolume, currentVolume)
+    buildTradeTaskLog(ticker, side, currentVolume, currentYesVolume, currentTodayVolume, total, currentVolumeCont, deltaVolume, thisStepVolume, OPERATION_NAME, TARGET_DIRECTION, TARGET_DIRECTION_CONT)
+
+    if (+thisStepVolume <= 0) return []
+    
+    if (offset === 0) { // 开
+        return [{ offset: 0, volume: thisStepVolume }]
+
+    } else { // 平
+        let taskList: Array<TradeTarget> = [];
+
+        //为了同时适配 现仓够与不够两种情况，持仓够，用thisStepVolume, 持仓不够，用currentVolume
+        const targetCloseVolume = Math.min(thisStepVolume, currentVolume)
+
+        //现仓不为0
+        if (targetCloseVolume > 0) {
+            if (targetCloseVolume <= currentYesVolume) { // 昨够
+                taskList = [{ offset: 3, volume: targetCloseVolume }]
+            } else if (currentYesVolume > 0) { // 昨今都有
+                const thisStepTodayVolume = +Number(targetCloseVolume - currentYesVolume).toFixed(0);
+                taskList = [{ offset: 3, volume: currentYesVolume }, { offset: 2, volume: thisStepTodayVolume }]
+            } else {// 只有今
+                taskList = [{ offset: 2, volume: targetCloseVolume }]
+            }
+        }
+
+        if (+deltaVolume > 0) {
+            taskList = [ ...taskList, { offset: 0, volume: deltaVolume }]
+        }
+
+        return taskList
+    }
+}
+
+function getDeltaVolume (offset: number, thisStepVolume: number, currentVolume: number) {
+    if (offset === 0) {
+        return -1
+    } else {
+        return +Number(thisStepVolume - currentVolume).toFixed(0);
+    }
+}
+
+function buildTradeTaskLog (
+    ticker: string,
+    side: number,
+    currentVolume: number,
+    currentYesVolume: number,
+    currentTodayVolume: number,
+    total: number,
+    currentVolumeCont: number,
+    deltaVolume: number,
+    thisStepVolume: number,
+    OPERATION_NAME: string,
+    TARGET_DIRECTION: number,
+    TARGET_DIRECTION_CONT: number
+) {
+
+    const contOperationName = makeOrderDirectionType(side, 0).n;
+    const countPos = deltaVolume <= 0 ? '' : `${PosDirection[TARGET_DIRECTION_CONT]} ${currentVolumeCont}, `;
+    const countOperation = deltaVolume <= 0 ? '' : `持仓不足, 需 ${OPERATION_NAME} ${currentVolume}, ${contOperationName} ${deltaVolume}`
+
+    console.log(
+        `现有 ${ticker} ${PosDirection[TARGET_DIRECTION]} ${currentVolume}, ${countPos}
+        其中 ${ticker}${PosDirection[TARGET_DIRECTION]} 昨 ${currentYesVolume}, 今 ${currentTodayVolume},
+        还需 ${OPERATION_NAME} ${total}, 本次需 ${OPERATION_NAME} ${thisStepVolume}, 
+        ${countOperation}`
+    )
+}
+
+export function getCurrentTimestamp (format = false): number | string {
+    if (format) {
+        return moment().format('HH:mm:ss.SSS')
+    }
+    return +new Date().getTime()
+}
+
+
+
+export function getCancelOrderBeforeLastStepControllerTime (finishTime: number, lastStepInterval: number, lastestMakeOrdertimeStamp: number): number {
+    return +Number(((finishTime - lastestMakeOrdertimeStamp - lastStepInterval) / 2) + lastStepInterval).toFixed(0)
+}
+
+export const printQuote = (quote: QuoteData): void => {
+    if (quote) {
+        console.log(`[行情价格]
+        [标的] ${quote.instrumentId}
+        [卖价] ${JSON.stringify(quote.askPrices)} 
+        [买价] ${JSON.stringify(quote.bidPrices)}
+        [涨停价格] ${quote.upperLimitPrice} 
+        [跌停价格] ${quote.lowerLimitPrice} 
+        [最高价] ${quote.highPrice}
+        [最低价] ${quote.lowPrice}
+        [最新价] ${quote.lastPrice}`)
+    }
+}

@@ -1,0 +1,121 @@
+{
+  "name": "kfext_task_ticker-filter",
+  "version": "1.0.0",
+  "description": "",
+  "main": "lib/index.js",
+  "scripts": {
+    "install-deps": "node -v",
+    "dist": "cross-env NODE_ENV=production node --max_old_space_size=2048 ../node_modules/webpack/bin/webpack.js --progress --colors --config .build/webpack.ext.config.js",
+    "build": "yarn run dist && yarn run cp",
+    "build-cli": "yarn run dist && yarn run cp",
+    "cp": "copyfiles -a -f ./package.json ./lib",
+    "clean": "rimraf ./lib/*",
+    "dev": "node .build/dev-ext.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "kungfu-shared": "*",
+    "minimist": "^1.2.5",
+    "moment": "^2.29.1",
+    "rxjs": "^6.6.3"
+  },
+  "devDependencies": {
+    "@types/minimist": "^1.2.1",
+    "@types/node": "^14.14.20",
+    "copyfiles": "^2.4.1",
+    "pkg": "^4.4.9",
+    "rimraf": "^3.0.2"
+  },
+  "bin": "./lib/index.js",
+  "kungfuConfig": {
+    "type": "task",
+    "key": "tickerFilter",
+    "name": "选股",
+    "uniKey": [
+      "accountId",
+      "ticker"
+    ],
+    "config": [
+      {
+        "key": "accountId",
+        "name": "交易账户",
+        "type": "account",
+        "required": true
+      },
+      {
+        "key": "tickers",
+        "name": "标的池",
+        "type": "instrumentSet",
+        "required": true
+      },
+      {
+        "key": "strategy",
+        "name": "筛选策略",
+        "type": "taskStrategy",
+        "required": true
+      },
+      {
+        "key": "side",
+        "name": "买卖",
+        "type": "radio",
+        "data": [
+          {
+            "name": "买",
+            "value": 0
+          },
+          {
+            "name": "卖",
+            "value": 1
+          }
+        ],
+        "default": 0,
+        "required": true
+      },
+      {
+        "key": "offset",
+        "name": "开平",
+        "type": "radio",
+        "options": "offset",
+        "default": 0,
+        "required": true
+      },
+      {
+        "key": "volume",
+        "name": "目标数量",
+        "type": "int",
+        "required": true
+      },
+      {
+        "key": "triggerTime",
+        "name": "触发时间",
+        "type": "timePicker",
+        "required": true
+      },
+      {
+        "key": "finishTime",
+        "name": "结束时间",
+        "type": "timePicker",
+        "laterThan": "triggerTime",
+        "required": true
+      },
+      {
+        "key": "interval",
+        "name": "交易间隔",
+        "type": "int",
+        "tip": "单位毫秒ms",
+        "required": true,
+        "default": 5000
+      },
+      {
+        "key": "maxBackward",
+        "name": "最大年化贴水",
+        "type": "int",
+        "tip": "单位%",
+        "required": true,
+        "default": 12
+      }
+    ]
+  }
+}

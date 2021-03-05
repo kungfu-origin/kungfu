@@ -43,6 +43,7 @@ interface FileInputData extends FileData {
 
 export const listDir = (filePath: string): Promise<any[]> => {
     return new Promise((resolve, reject) => {
+        fse.ensureDirSync(filePath)
         fse.readdir(filePath, (err: Error, files: any[]) => {
             if(err) {
                 reject(err)

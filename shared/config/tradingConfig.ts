@@ -132,6 +132,61 @@ export const InstrumentType: NumberToStringObject = {
     8: isEnglish ? 'Repo'        : '回购'
 }
 
+　　
+// 最小交易单位限制了交易数量的连续性。最小交易单位目前国内市场买入股票或基金，
+// 申报数量应当为100股或其整数倍。债券以人民币1000元面额为一手。
+// 证券回购以1000元标准券或综合券为1手。债券和债券回购以1手或其整数倍进行申报，
+// 其中，上交所债券回购以100手或其整数倍进行申报。
+export const InstrumentTypeWithDetail: NumberToAnyObject = {
+    0: {
+        name: isEnglish ? 'Unknown'     : '未知',
+    },
+
+    1: {
+        name: isEnglish ? 'Stock'       : '普通股票',
+        miniTradeUnit: 100,
+        sellToday: false,
+        short: false
+    },
+
+    2: {
+        name: isEnglish ? 'Future'      : '期货',
+        miniTradeUnit: 1,
+        sellToday: true,
+        short: true
+    },
+
+    3: {
+        name: isEnglish ? 'Bond'        : '债券',
+    },
+
+    4: {
+        name: isEnglish ? 'StockOption' : '股票期权',
+    },
+
+    5: {
+        name: isEnglish ? 'Fund'        : '基金',
+        miniTradeUnit: 100,
+        sellToday: false,
+        short: false
+    },
+
+    6: {
+        name: isEnglish ? 'TechStock'   : '科创板股票',
+        miniTradeUnit: 100,
+        sellToday: false,
+        short: false
+    },
+
+    7: {
+        name: isEnglish ? 'Index'       : '指数',
+    },
+
+    8: {
+       name: isEnglish ? 'Repo'        : '回购',
+    }
+}
+
 export const allowShorted = (instrumentType: number) => {
     if ([2, 4].includes(instrumentType)) return true;
     return false

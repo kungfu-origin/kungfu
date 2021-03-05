@@ -34,6 +34,11 @@ interface NumberToStringObject {
     [propName: number]: string;
 }
 
+interface NumberToAnyObject {
+    [propName: number]: any;
+}
+
+
 interface StringToStringObject {
     [propName: string]: string;
 }
@@ -447,7 +452,22 @@ interface QuoteDataInput {
     bid_price: Array<number>
 }
 
-
+interface InstrumentInputData {
+    contract_multiplier: number;
+    create_date: string;
+    delivery_month: number;
+    delivery_year: number;
+    exchange_id: string;
+    expire_date: string;
+    instrument_id: string;
+    instrument_type: number;
+    is_trading: boolean;
+    long_margin_ratio: number;
+    open_date: string;
+    price_tick: number;
+    product_id: string;
+    short_margin_ratio: number;
+}
 
 interface QuoteData {
     id: string,
@@ -475,4 +495,12 @@ interface QuoteData {
     volume: number,
     askPrices: Array<number>,
     bidPrices: Array<number>,
+}
+
+interface Pm2Options {
+    name: string;
+    args: string;
+    cwd?: string;
+    script?: string;
+    interpreter?: string
 }

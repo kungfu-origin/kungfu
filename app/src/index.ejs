@@ -2,7 +2,7 @@
 <html>
 <head>
 	<meta charset="utf-8">
-	<title>KungFu.Trader</title>
+	<title>功夫交易系统</title>
 	<meta name="viewport" content="width=device-width,initial-scale=1.0">
 	<% if (htmlWebpackPlugin.options.nodeModules) { %>
 	<!-- Add `node_modules/` to global paths so `require` works properly in development -->
@@ -10,6 +10,7 @@
 		require('module').globalPaths.push('<%= htmlWebpackPlugin.options.nodeModules.replace(/\\/g, '\\\\') %>')
 	</script>
 	<% } %>
+
 	<style>
 		html{color:#000;background:#FFF;} 
 		body,div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,h6,pre,form, 

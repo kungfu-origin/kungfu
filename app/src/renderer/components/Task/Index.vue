@@ -91,7 +91,7 @@ import { mapState } from 'vuex';
 
 import SetTaskDialog from './SetTaskDialog';
 
-import { getExtensionConfigs, ifProcessRunning, findTargetFromArray, deepClone } from '__gUtils/busiUtils';
+import { getExtensionConfigs, findTargetFromArray } from '__gUtils/busiUtils';
 import { deleteProcess } from '__gUtils/processUtils';
 import { removeFileFolder } from '__gUtils/fileUtils';
 import { TASK_EXTENSION_DIR, buildProcessLogPath } from '__gConfig/pathConfig';
@@ -142,7 +142,7 @@ export default {
                     return {
                         processId: key,
                         processStatus: newProcess[key].status,
-                        createdAt: moment(newProcess[key].created_at).format('YYYY-MM-DD HH:mm:ss'),
+                        createdAt: newProcess[key].created_at ? moment(newProcess[key].created_at).format('YYYY-MM-DD HH:mm:ss') : '--',
                         ...newProcess[key]
                     }
                 })
@@ -171,9 +171,10 @@ export default {
         },
 
         handleOpenUpdateTaskDialog (data) {
-            console.log('parseArgs', data.args)
             this.setTaskMethod = 'update';
-            this.setTaskInitData = minimist(data.args, { string: 'ticker', boolean: 'lastSingularity' })
+            //TODO 写活
+            const minimistConfig = this.getMinimistConfig()
+            this.setTaskInitData = minimist(data.args, minimistConfig)
             this.setTaskInitKey = this.getTaskConfigKeyFromProcessId(data.processId)
             this.setTaskTarget = data;
             this.setTaskDialogVisiblity = true;
@@ -194,7 +195,8 @@ export default {
             return this.preUpdate()
                 .then(res => {
                     if (!res) return Promise.resolve(true)
-                    return switchTask(processName, true, {
+                    return switchTask(true, {
+                        name: processName,
                         args,
                         cwd: process.env.NODE_ENV === 'production' ? path.resolve(packageJSONPath, '..') : path.resolve(packageJSONPath, '..', 'lib'),
                     })
@@ -225,10 +227,37 @@ export default {
 
         handleTaskSwitch (e, data) {
             const { processId, args, cwd } = data;
-            return switchTask(processId, e, {
+            return switchTask(e, {
+                name: processId,
                 args: args.join(' '),
                 cwd
             })
+        },
+
+        getMinimistConfig () {
+            let minimistConfig = {
+                string: [],
+                boolean: [],
+            };
+            this.extConfigList.forEach(config => {
+                const c = config.config;
+                c.forEach(item => {
+                    const { key, type } = item;
+                    if (type === 'instrumentId') {
+                        if (!minimistConfig.string.includes(key)) {
+                            minimistConfig.string.push(key)                        
+                        }
+                    }
+
+                    if (type === 'bool') {
+                        if (!minimistConfig.boolean.includes(key)) {
+                            minimistConfig.boolean.push(key)
+                        }
+                    }
+                })
+            })
+
+            return minimistConfig
         },
 
         formUnikeyInProcessName (uniKey, form) {

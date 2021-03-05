@@ -5,6 +5,7 @@ import { ipcRenderer, remote } from 'electron';
 import { watcher, dealQuote, dealPos, dealOrder } from '__io/kungfu/watcher';
 import { getStrategyById, updateStrategyPath } from '__io/kungfu/strategy';
 import { transformTradingItemListToData } from '__io/kungfu/watcher';
+import { aliveOrderStatusList } from 'kungfu-shared/config/tradingConfig';
 
 import makeOrderCoreMixin from '@/components/Base/makeOrder/js/makeOrderCoreMixin';
 
@@ -62,12 +63,22 @@ export default {
                     const pm2Id = processData.pm_id;
                     const processName = processData.name;
                     const dataType = data.type;
-                    let { accountId, exchangeId, ticker, parentId } = data.body || {};
+                    let { accountId, exchangeId, ticker, parentId, sourceId } = data.body || {};
 
                     switch (dataType) {
                         case 'REQ_LEDGER_DATA':
-                            this.resLedgerData(parentId, pm2Id, accountId, processName)
+                            this.resLedgerData(parentId, pm2Id, accountId, ticker, processName)
                             break;
+                        case "REQ_QUOTE_DATA":
+                            this.resQuoteData(pm2Id, ticker, processName)
+                            this.resInstrumentInfo(pm2Id, ticker, processName)
+                            break;
+                        case "REQ_POS_DATA":
+                            this.resPosData(pm2Id, accountId, processName)
+                            break
+                        case "REQ_ORDER_DATA":
+                            this.resOrderData(pm2Id, parentId, processName)
+                            break
                         case 'MAKE_ORDER_BY_PARENT_ID':
                             const makeOrderData = data.body;
                             const markOrderDataResolved = {
@@ -75,12 +86,20 @@ export default {
                                 parent_id: BigInt(makeOrderData.parent_id)
                             }
                             return this.makeOrder('account', markOrderDataResolved, makeOrderData.name)
-                        case 'CANCEL_ORDER_BY_CLINET_ID':
-                            const ordersByParentId = this.getTargetOrdersByParentId(ledger, parentId)
-                            ordersByParentId.forEach(order => this.cancelOrder('acccount', order))
+                                .catch(err => {
+                                    this.$message.error(err.message)
+                                })
+                        case 'CANCEL_ORDER_BY_PARENT_ID':
+                            const ordersByParentId = this.getTargetOrdersByParentId(watcher.ledger.Order, parentId)
+                            ordersByParentId
+                                .filter(order => aliveOrderStatusList.includes(+(order.status || 0)))
+                                .forEach(order => {
+                                    const orderData = dealOrder(order)
+                                    this.cancelOrder('account', orderData)
+                                })
                             break
                         case "SUBSCRIBE_BY_TICKER":
-                            const sourceName = (accountId || '').toSourceName();
+                            const sourceName = accountId ? (accountId || '').toSourceName() : sourceId;
                             this.subscribeTicker(sourceName, exchangeId, ticker)
                             break
                         case "TIME_ALERT":
@@ -91,17 +110,76 @@ export default {
                             } else {
                                 this.$message.info(`距离交易任务 ${processName} 开始执行还有 ${minute} 分钟，请保证交易进程与行情进程运行`)
                             }
-
                     }
                 })
             })
         },
 
-        resLedgerData (parentId, pm2Id, accountId, processName) {
+        resQuoteData (pm2Id, ticker, processName) {
+            if (!watcher.isLive()) return;
+            watcher.step();
+            const ledger = watcher.ledger;
+
+            const quotes = Object.values(ledger.Quote || {})
+                .filter(quote => ticker.includes(quote.instrument_id))
+                .map(quote => dealQuote(quote));
+
+            this.sendResDataToProcessId("QUOTE_DATA", pm2Id, processName, { quotes })
+        },
+
+        resPosData (pm2Id, accountId, processName) {
+            if (!watcher.isLive()) return;
+            watcher.step();
+            const ledger = watcher.ledger;
+            const positions = Object.values(ledger.Position || {});
+            const positionsResolved = transformTradingItemListToData(positions, 'account')[accountId] || [];
+
+            this.sendResDataToProcessId("POS_DATA", pm2Id, processName, { 
+                positions: positionsResolved
+            })
+        },
+
+        resOrderData (pm2Id, parentId, processName) {
+            if (!watcher.isLive()) return;
+            watcher.step();
+            const ledger = watcher.ledger;
+            const orders = this.getTargetOrdersByParentId(ledger.Order, parentId)
+
+            this.sendResDataToProcessId("ORDER_DATA", pm2Id, processName, { 
+                orders
+            })
+        },
+
+        resInstrumentInfo (pm2Id, ticker, processName) {
+            if (!watcher.isLive()) return;
+            watcher.step();
+            const ledger = watcher.ledger;
+            const instruments = Object.values(ledger.Instrument)
+                .filter(item => ticker.includes(item.instrument_id))
+
+            this.sendResDataToProcessId('INSTRUMENT_DATA', pm2Id, processName, {
+                instruments
+            })
+        },
+
+        sendResDataToProcessId (topic, pm2Id, processName, data) {
+            _pm2.sendDataToProcessId({
+                type: 'process:msg',
+                data,
+                id: pm2Id,
+                topic: topic
+            }, err => {
+                if (err) {
+                    console.error(processName, err)
+                }
+            })
+        },
+
+        resLedgerData (parentId, pm2Id, accountId, ticker, processName) {
             if (watcher.isLive()) {
                 watcher.step();
                 const ledger = watcher.ledger;
-                const { orders, positions, quotes } = this.buildLedgerDataForTask(ledger, accountId, parentId)
+                const { orders, positions, quotes } = this.buildLedgerDataForTask(ledger, accountId, parentId, ticker)
                 _pm2.sendDataToProcessId({
                     type: 'process:msg',
                     parentId,
@@ -112,7 +190,7 @@ export default {
                     },
                     id: pm2Id,
                     topic: 'LEDGER_DATA'
-                }, (err) => {
+                }, err => {
                     if (err) {
                         console.error(processName, err)
                     }
@@ -121,10 +199,12 @@ export default {
         },
 
         //pos, quote, orders
-        buildLedgerDataForTask (ledger, accountId, parentId) {
+        buildLedgerDataForTask (ledger, accountId, parentId, ticker) {
             const positions = Object.values(ledger.Position || {});
             const positionsResolved = transformTradingItemListToData(positions, 'account')[accountId] || [];
-            const quotes = Object.values(ledger.Quote || {});
+            const quotes = Object.values(ledger.Quote || {}).filter(quote => {
+                return quote.instrument_id === ticker
+            })
             const orders = this.getTargetOrdersByParentId(ledger.Order, parentId)
             return {
                 positions: positionsResolved,
@@ -136,12 +216,12 @@ export default {
         getTargetOrdersByParentId (orders, parentId) {
             return Object.values(orders || {})
                 .filter(order => {
-                    return order.parent_id.toString() === parentId.toString()
+                    if (!order.parent_id) return false
+                    return (order.parent_id || '').toString() === (parentId || '').toString()
                 });
         },
         
         bindIPCListener () {
-
             ipcRenderer.removeAllListeners('ipc-emit-tdMdList')
             ipcRenderer.on('ipc-emit-tdMdList', (event, { childWinId }) => {
                 const childWin = BrowserWindow.fromId(childWinId);
