@@ -44,12 +44,14 @@
 
 import { mapState } from 'vuex';
 import moment from 'moment';
+import path from 'path';
 
 import GlobalSettingDialog from '@/components/Base/GlobalSettingDialog';
 
 import { buildKungfuGlobalDataPipe, buildTradingDataPipe } from '__io/kungfu/tradingData';
 import { watcher } from '__io/kungfu/watcher';
 import { switchTask } from '__io/actions/base';
+import { KF_DATASET_QUOTE_DIR } from '__gConfig/pathConfig';
 
 import ipcListenerMixin from '@/ipcMsg/ipcListenerMixin';
 import tickerSetMixin from '@/components/MarketFilter/js/tickerSetMixin';
@@ -219,12 +221,12 @@ export default {
         },
 
         calHistoryMarketData (days) {
-            const taskCwdPath = `file://${path.join(__resources, 'tasks')}`;
+            const taskCwdPath = path.join(__resources, 'tasks');
             switchTask(true, {
-                name: `cal_history_marketdata_${days}`,
-                args: `--days ${days}`,
+                name: `calc_history_marketdata_${days}`,
+                args: `--days ${days} --dataPath ${KF_DATASET_QUOTE_DIR}`,
                 cwd: taskCwdPath,
-                script: 'calHistoryMarketData.js'
+                script: 'calcHistoryMarketData.js'
             })
         }
     }

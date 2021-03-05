@@ -120,6 +120,7 @@ const pm2List = (): Promise<any[]> => {
                     reject(err)
                     return;
                 }
+                console.log(pList)
                 resolve(pList)
             })
         } catch (err) {
@@ -351,7 +352,6 @@ async function pm2Delete (target: string): Promise<void> {
 // ================================= business ===================================
 
 export const startTask = (options: Pm2Options) => {    
-    console.log(options, '--')
     return startProcess({
         script: options.script || 'index.js',
         interpreter: process.execPath,
