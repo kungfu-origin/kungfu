@@ -67,6 +67,7 @@ Napi::Object InitAll(Napi::Env env, Napi::Object exports) {
 
   return exports;
 }
-
-NODE_API_MODULE(addon, InitAll)
 } // namespace kungfu::node
+
+using namespace kungfu::node;
+NODE_API_MODULE(addon, InitAll)

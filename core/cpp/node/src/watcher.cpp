@@ -65,6 +65,7 @@ Watcher::Watcher(const Napi::CallbackInfo &info)
     auto saved_location = location::make_shared(item, get_locator());
     add_location(now(), saved_location);
     RestoreState(saved_location, today, INT64_MAX, sync_schema);
+    SPDLOG_WARN("restored data for {}", saved_location->uname);
   }
   RestoreState(ledger_location_, today, INT64_MAX, sync_schema);
 
@@ -104,6 +105,8 @@ Napi::Value Watcher::GetAppStates(const Napi::CallbackInfo &info) { return app_s
 Napi::Value Watcher::GetTradingDay(const Napi::CallbackInfo &info) {
   return Napi::String::New(ledger_ref_.Env(), time::strftime(get_trading_day(), KUNGFU_TRADING_DAY_FORMAT));
 }
+
+Napi::Value Watcher::Now(const Napi::CallbackInfo &info) { return Napi::BigInt::New(ledger_ref_.Env(), now()); }
 
 Napi::Value Watcher::IsUsable(const Napi::CallbackInfo &info) { return Napi::Boolean::New(info.Env(), is_usable()); }
 
@@ -217,6 +220,7 @@ void Watcher::Init(Napi::Env env, Napi::Object exports) {
 
   Napi::Function func = DefineClass(env, "Watcher",
                                     {
+                                        InstanceMethod("now", &Watcher::Now),                                     //
                                         InstanceMethod("isUsable", &Watcher::IsUsable),                           //
                                         InstanceMethod("isLive", &Watcher::IsLive),                               //
                                         InstanceMethod("isStarted", &Watcher::IsStarted),                         //
