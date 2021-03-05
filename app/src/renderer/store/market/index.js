@@ -1,3 +1,5 @@
+import Vue from 'vue';
+
 export default {
 
     state: {
@@ -5,7 +7,9 @@ export default {
 
         currentTickerSet: null,
 
-        currentTicker: null
+        currentTicker: null,
+
+        marketAvgVolume: {}
     },
 
     actions: {
@@ -15,6 +19,10 @@ export default {
 
         setCurrentTickerSet ({ commit }, tickerSet) {
             commit('SET_CURRENT_TICKER_SET', tickerSet)
+        },
+
+        setMarketAvgVolume ({ commit }, { days, data }) {
+            commit('SET_MARKET_AVG_VOLUME', { days, data })
         }
     },
 
@@ -25,6 +33,10 @@ export default {
 
         SET_CURRENT_TICKER_SET (state, tickerSet) {
             state.currentTickerSet = tickerSet
+        },
+
+        SET_MARKET_AVG_VOLUME (state, { days, data }) {
+            Vue.set(state.marketAvgVolume, days, Object.freeze(data))
         }
 
     },

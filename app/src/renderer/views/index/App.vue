@@ -95,7 +95,7 @@ export default {
         this.bindTradingDataListener();
 
         this.getWatcherStatus();
-        this.calHistoryMarketData(7);
+        this.calcMarketDataAvgVolume(7);
     },
 
     computed: {
@@ -220,13 +220,13 @@ export default {
             }
         },
 
-        calHistoryMarketData (days) {
+        calcMarketDataAvgVolume (days) {
             const taskCwdPath = path.join(__resources, 'tasks');
             switchTask(true, {
-                name: `calc_history_marketdata_${days}`,
-                args: `--days ${days} --dataPath ${KF_DATASET_QUOTE_DIR}`,
+                name: `calc_marketdata_avg_volume_${days}`,
+                args: `--days ${days} --dataPath ${JSON.stringify(KF_DATASET_QUOTE_DIR)}`,
                 cwd: taskCwdPath,
-                script: 'calcHistoryMarketData.js'
+                script: 'calcMarketDataAvgVolume.js'
             })
         }
     }

@@ -44,7 +44,9 @@ export default {
                 return tickerIds.includes(`${item.instrument_id}_${item.exchange_id}`)
             })
             
-            console.log(subscribedQuotes, '---')
+            if (!subscribedQuotes.length) {
+                return Promise.resolve(false)
+            }
             const fileName = moment().format('YYYY-MM-DD');
             return writeCSV(path.join(KF_DATASET_QUOTE_DIR, `${fileName}.csv`), subscribedQuotes)
         },

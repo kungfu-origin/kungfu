@@ -103,8 +103,8 @@ export default {
                             break
 
                         //周均成交量
-                        case 'SET_7_AVG_QUOTE_VOLUME':
-                            
+                        case 'CALC_AVG_VOLUME':
+                            this.$store.dispatch('setMarketAvgVolume', data.body)
                             break
                     }
                 })

@@ -8,7 +8,7 @@
                 </el-col>
                 <el-col :span="14">
                     <el-tabs v-model="currentMarketDataTabName" type="border-card">
-                        <el-tab-pane :lazy="true" :label="`行情明细 ${currentTickerSetName}`" name="marketData">
+                        <el-tab-pane :lazy="true" :label="`行情明细 ${currentTickerSetNameInTab}`" name="marketData">
                             <MarketData 
                                 :marketData="quoteData" 
                                 @clickQuote="handleClickQuote"
@@ -53,7 +53,7 @@
                             @showHistory="handleShowHistory"
                             />  
                         </el-tab-pane>
-                        <el-tab-pane :lazy="true"  v-if="taskExtConfigList.length" :label="`交易任务详情 ${currentTaskModeResovled} ${currentTaskId}`" name="taskReal">
+                        <el-tab-pane :lazy="true"  v-if="taskExtConfigList.length" :label="`交易任务详情 ${currentTaskModeResovled} ${currentTaskIdInTab}`" name="taskReal">
                             111
                         </el-tab-pane>
                     </el-tabs>
@@ -91,7 +91,6 @@ export default {
     },
 
     data () {
-        
         return {
             quoteData: {},
             selectedQuote: {},
@@ -114,6 +113,22 @@ export default {
         ...mapGetters([
             "currentTaskMode"
         ]),
+
+        currentTickerSetNameInTab () {
+            if (this.currentMarketDataTabName === 'marketData') {
+                return this.currentTickerSetName
+            }
+            
+            return ''
+        },
+
+        currentTaskIdInTab () {
+            if (this.currentTradeDataTabName === 'taskReal') {
+                return this.currentTaskId
+            }
+
+            return ''
+        },
 
         currentTaskModeResovled () {
             if (!this.currentTaskId) return ''

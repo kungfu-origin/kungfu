@@ -120,7 +120,6 @@ const pm2List = (): Promise<any[]> => {
                     reject(err)
                     return;
                 }
-                console.log(pList)
                 resolve(pList)
             })
         } catch (err) {

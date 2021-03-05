@@ -22,7 +22,7 @@
                 label="任务ID"
                 sortable
                 :show-overflow-tooltip="true"       
-                min-width="317px"
+                min-width="270px"
                 >
             </el-table-column>
             <el-table-column

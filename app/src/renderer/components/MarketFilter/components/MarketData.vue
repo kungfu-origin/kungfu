@@ -155,7 +155,7 @@
                             'nano': true,
                         }"
                         :theKey="`${currentTickerSet.name}_${props.row.instrumentId}`"   
-                        num="--"
+                        :num="marketAvgVolume7Days[`${props.row.instrumentId}_${props.row.exchangeId}`] || '--'"
                         >
                         </BlinkNum>
                     </template>
@@ -217,7 +217,12 @@ export default {
     computed: {
         ...mapState({
             tdAccountSource: state => state.BASE.tdAccountSource || {},
-        })
+            marketAvgVolume: state => state.MARKET.marketAvgVolume || {},
+        }),
+
+        marketAvgVolume7Days () {
+            return this.marketAvgVolume[7] || {}
+        }
     },
 
     components: {

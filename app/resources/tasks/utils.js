@@ -1,10 +1,10 @@
 const readline = require('readline');
-const fs = require('fs-extra'); 
+const fse = require('fse-extra'); 
 
 //清空文件内容
 function clearFileContent(filePath) {
     filePath = path.normalize(filePath)
-    return fs.outputFile(filePath, '')
+    return fse.outputFile(filePath, '')
 }
   
 //建立固定条数的list数据结构
@@ -91,14 +91,14 @@ function getLog(logPath, searchKeyword, dealMessageFunc){
     const numList = buildListByLineNum(1000000000);    
     let logId = 0;            
     return new Promise((resolve, reject) => {
-        fs.stat(logPath, (err) => {
+        fse.stat(logPath, (err) => {
             if(err){
                 reject(err)
                 return;
             }
 
             const lineReader = readline.createInterface({
-                input: fs.createReadStream(logPath, {
+                input: fse.createReadStream(logPath, {
                     start: 0
                 })
             })
