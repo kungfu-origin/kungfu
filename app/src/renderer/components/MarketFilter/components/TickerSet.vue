@@ -92,7 +92,7 @@ export default {
 
     methods: {
         handleSubscribeAllTickers () {
-            this.subscribeAllTickers(this.tickerSets, false)
+            this.subscribeAllTickers(false)
         },
 
         handleClickRow (row) {

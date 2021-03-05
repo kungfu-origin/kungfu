@@ -28,8 +28,8 @@ export const KF_DATASET_DIR = path.join(KF_HOME, 'dataset')
 addFileSync('', KF_DATASET_DIR, 'folder')
 
 //marketData in dataSet
-export const KF_DATASET_MARKETDATA_DIR = path.join(KF_HOME, 'dataset', 'marketdata')
-addFileSync('', KF_DATASET_MARKETDATA_DIR, 'folder')
+export const KF_DATASET_QUOTE_DIR = path.join(KF_HOME, 'dataset', 'quote')
+addFileSync('', KF_DATASET_QUOTE_DIR, 'folder')
 
 
 //system

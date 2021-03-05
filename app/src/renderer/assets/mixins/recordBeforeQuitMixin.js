@@ -1,8 +1,10 @@
 
-import fse from 'fs-extra';
-import { KF_DATASET_MARKETDATA_DIR } from '__gConfig/pathConfig';
+import moment from 'moment';
+import path from "path";
+import { writeCSV } from '__gUtils/fileUtils';
+import { KF_DATASET_QUOTE_DIR } from '__gConfig/pathConfig';
 import { watcher } from '__io/kungfu/watcher';
-import { logger } from '__gUtils/logUtils';
+import { mapGetters, mapState } from 'vuex';
 
 export default {
 
@@ -13,12 +15,22 @@ export default {
         }
     },
 
+    computed: {
+        
+        ...mapState({
+            tickerSets: state => state.MARKET.tickerSets
+        }),
+
+        ...mapGetters([
+            "flatternTickers"
+        ])
+    },
+
     methods: {
         recordBeforeQuit () {
             this.recordBeforeQuitLoading = true;
             return Promise.all([
-                this.recordQuote(),
-                this.timer()
+                this.recordQuote()
             ]).finally(() => {
                 this.recordBeforeQuitLoading = false;
             })
@@ -26,10 +38,15 @@ export default {
 
         recordQuote () {
             watcher.step()
-            logger.info(watcher.ledger.Quote)
-            const Quote = watcher.ledger.Quote;
+            const quotes = Object.values(watcher.ledger.Quote || {});
+            const tickerIds = this.flatternTickers.map(item => `${item.instrumentId}_${item.exchangeId}`).join(',')
+            const subscribedQuotes = quotes.filter(item => {
+                return tickerIds.includes(`${item.instrument_id}_${item.exchange_id}`)
+            })
             
-            return Promise.resolve(false)
+            console.log(subscribedQuotes, '---')
+            const fileName = moment().format('YYYY-MM-DD');
+            return writeCSV(path.join(KF_DATASET_QUOTE_DIR, `${fileName}.csv`), subscribedQuotes)
         },
 
         

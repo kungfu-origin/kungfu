@@ -1,10 +1,10 @@
 
-import { mapState } from 'vuex';
+import { mapGetters, mapState } from 'vuex';
 
 import AddSetTickerSetDialog from '@/components/MarketFilter/components/AddSetTickerSetDialog';
 import AddTickerDialog from '@/components/MarketFilter/components/AddTickerDialog';
 
-import { ifProcessRunning, flatternTickers } from '__gUtils/busiUtils';
+import { ifProcessRunning } from '__gUtils/busiUtils';
 import { getTickerSets, addSetTickerSet, removeTickerSetByName } from '__io/actions/market';
 import { kungfuSubscribeTicker } from '__io/kungfu/makeCancelOrder'
 import { watcher } from '__io/kungfu/watcher';
@@ -21,8 +21,6 @@ export default {
     },
 
     data () {
-
-
         return {
             addSetTickerSetDialogMethod: '',
             addSetTickerSetDialogVisiblity: false,
@@ -40,6 +38,16 @@ export default {
             currentTickerSet: state => state.MARKET.currentTickerSet || {},
             processStatus: state => state.BASE.processStatus || {}
         }),
+
+        ...mapGetters([
+            "flatternTickers"
+        ])
+    },
+
+    watch: {
+        flatternTickers () {
+            this.subscribeAllTickers()
+        }
     },
 
     methods: {
@@ -101,7 +109,6 @@ export default {
                 .then(res => {
                     this.$store.dispatch('setTickerSets', res)
                     this.initUpdateCurrentTickerSet(res)
-                    this.subscribeAllTickers(res)
                 })
         },
 
@@ -121,9 +128,9 @@ export default {
             }
         },
 
-        subscribeAllTickers (tickerSets, slience = true) {
+        subscribeAllTickers (slience = true) {
             if (!watcher.isLive()) return;
-            const tickers = flatternTickers(tickerSets);
+            const tickers = this.flatternTickers || [];
             tickers.forEach(ticker => {
                 const { instrumentId, source, exchangeId } = ticker;
                 kungfuSubscribeTicker(source, exchangeId, instrumentId)

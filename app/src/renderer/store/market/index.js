@@ -27,5 +27,17 @@ export default {
             state.currentTickerSet = tickerSet
         }
 
+    },
+
+    getters: {
+        flatternTickers (state) {
+            let tickersList = [];
+            (state.tickerSets || []).forEach(tickerSet => {
+                const tickers = tickerSet.tickers || [];
+                tickersList = [ ...tickersList, ...tickers]
+            });
+
+            return tickersList || []
+        }
     }
 }

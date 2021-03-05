@@ -83,10 +83,11 @@ export function showQuitMessageBox (mainWindow) {
 					})
 					.then(() => {
 						console.time('quit clean')
-						return killAllBeforeQuit(mainWindow).finally(() => {
-							console.timeEnd('quit clean')
-							app.quit()
-						})
+						return killAllBeforeQuit(mainWindow)
+							.finally(() => {
+								console.timeEnd('quit clean')
+								app.quit()
+							})
 					})
               
             }else{
