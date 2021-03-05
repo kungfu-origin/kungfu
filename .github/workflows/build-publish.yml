@@ -9,6 +9,9 @@ on:
         default: 'false'
   push:
     branches:
+      - ci
+  pull_request:
+    branches:
       - main
 
 jobs:
