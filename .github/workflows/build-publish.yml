@@ -9,7 +9,7 @@ on:
         default: 'false'
   push:
     branches:
-      - ci
+      - main
 
 jobs:
   prepare:
@@ -103,7 +103,7 @@ jobs:
   publish:
     needs: [prepare, build]
     runs-on: ubuntu-20.04
-    container: 'docker.io/kungfutrader/kungfu-builder-centos:master'
+    container: 'docker.io/kungfutrader/kungfu-builder-centos:main'
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -127,7 +127,7 @@ jobs:
           aws-region: us-east-1
 
       - name: Publish Prebuilt to AWS (US)
-        uses: kungfu-trader/action-publish-prebuilt@master
+        uses: kungfu-trader/action-publish-prebuilt@main
         with:
           artifacts-path: 'github-artifacts'
 
@@ -139,7 +139,7 @@ jobs:
           aws-region: cn-north-1
 
       - name: Publish Prebuilt to AWS (CN)
-        uses: kungfu-trader/action-publish-prebuilt@master
+        uses: kungfu-trader/action-publish-prebuilt@main
         with:
           artifacts-path: 'github-artifacts'
 
