@@ -364,3 +364,18 @@ div
     -khtml-user-select:none !important; /*早期浏览器*/
     user-select:none !important;
 }
+
+.auto-complete-instrument-ids__warp {
+    display: flex;
+    justify-content: space-between;
+    padding-right: 16px;
+    box-sizing: border-box;
+
+    .auto-complete-instrument-id-item {
+
+        .ticker {
+            display: inline-block;
+            width: 50px;
+        }
+    }
+}

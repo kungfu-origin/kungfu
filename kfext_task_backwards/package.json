@@ -55,7 +55,7 @@
       {
         "key": "index",
         "name": "对应指数",
-        "type": "instrumentId",
+        "type": "instrumentIdInTickerSet",
         "required": true,
         "tip": "对应指数需包含在所选标的池内"
       },
@@ -151,12 +151,12 @@
         "type": "string",
         "label": "升贴水比例",
         "prop": "backWardsRatio",
-        "width": "60px"
+        "width": "80px"
       },{
         "type": "string",
-        "label": "年化升贴水",
+        "label": "升贴水年化",
         "prop": "backWardsRatioByYears",
-        "width": "60px"
+        "width": "80px"
       },{
         "type": "string",
         "label": "交割日期",

@@ -180,7 +180,6 @@
           :disabled="isDisabled(item.key)"
           :class="item.key"
           size="mini"
-          ref="insturment-id-input"
           v-if="item.type === 'instrumentId'"
           v-model="form[item.key]"
           :fetch-suggestions="querySearch"
@@ -189,12 +188,35 @@
           "
         >
           <template v-slot="{ item }">
-            <div class="make-order-instrument-ids__warp">
-              <div class="make-order-instrument-id-item">
+            <div class="auto-complete-instrument-ids__warp">
+              <div class="auto-complete-instrument-id-item">
                 <span class="ticker">{{ item.instrument_id }}</span>
                 <span class="name">{{ item.instrument_name }}</span>
               </div>
-              <div class="make-order-instrument-id-item">
+              <div class="auto-complete-instrument-id-item">
+                {{ (item.exchange_id || "").toUpperCase() }}
+              </div>
+            </div>
+          </template>
+        </el-autocomplete>
+        <el-autocomplete
+          :disabled="isDisabled(item.key)"
+          :class="item.key"
+          size="mini"
+          v-if="item.type === 'instrumentIdInTickerSet'"
+          v-model="form[item.key]"
+          :fetch-suggestions="querySearchTickersInTickerSets"
+          @select="
+            (e) => handleSelectInstrumentId(item.key, item.exchangeIdKey, e)
+          "
+        >
+          <template v-slot="{ item }">
+            <div class="auto-complete-instrument-ids__warp">
+              <div class="auto-complete-instrument-id-item">
+                <span class="ticker">{{ item.instrument_id }}</span>
+                <span class="name">{{ item.instrument_name }}</span>
+              </div>
+              <div class="auto-complete-instrument-id-item">
                 {{ (item.exchange_id || "").toUpperCase() }}
               </div>
             </div>

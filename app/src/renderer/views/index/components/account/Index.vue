@@ -94,6 +94,10 @@
                             @showHistory="handleShowHistory"
                             />   
                         </el-tab-pane>
+                        <el-tab-pane :lazy="true"  v-if="taskExtConfigList.length" :label="`交易任务详情 ${currentTaskIdInTab}`" name="taskDetail">
+                            <TaskRecord></TaskRecord>
+                        </el-tab-pane>
+
                     </el-tabs>
                 </el-col>
             </el-row>
@@ -113,6 +117,7 @@ import Pos from '@/components/Base/tradingData/Pos';
 import Pnl from '@/components/Base/tradingData/pnl/Index';
 import MakeOrderDashboard from '@/components/Base/makeOrder/MakeOrderDashboard';
 import MainContent from '@/components/Layout/MainContent';
+import TaskRecord from '@/components/Task/TaskRecord';
 
 import { buildTradingDataPipe } from '__io/kungfu/tradingData';
 import { transformPositionByTickerByMerge, dealPos } from '__io/kungfu/watcher';
@@ -150,7 +155,8 @@ export default {
         Task,
         OrderRecord, TradeRecord,
         MakeOrderDashboard,
-        MainContent
+        MainContent,
+        TaskRecord
     },
 
     computed:{
@@ -158,8 +164,9 @@ export default {
             currentAccount: state => state.ACCOUNT.currentAccount, //选中的账户
             currentTicker: state => state.ACCOUNT.currentTicker,
             currentAccountTabName: state => state.ACCOUNT.currentAccountTabName,
+            currentTaskId: state => (state.BASE.currentTask || {}).name || '',
             tdAccountSource: state => state.BASE.tdAccountSource || {},
-            taskExtConfigList: state => state.BASE.taskExtConfigList || []
+            taskExtConfigList: state => state.BASE.taskExtConfigList || [],
         }),
 
         currentTickerResolved () {
@@ -195,6 +202,14 @@ export default {
 
         currentTickerId () {
             return `${this.currentTicker.instrumentId}_${this.currentTicker.directionOrigin}`
+        },
+
+        currentTaskIdInTab () {
+            if (this.currentOrdesTabName === 'taskDetail') {
+                return this.currentTaskId
+            }
+
+            return ''
         }
     },
 

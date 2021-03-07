@@ -43,12 +43,12 @@
                     @select="handleSelectInstrumentId"
                     >
                         <template v-slot="{ item }">
-                            <div class="make-order-instrument-ids__warp">
-                                <div class="make-order-instrument-id-item">
+                            <div class="auto-complete-instrument-ids__warp">
+                                <div class="auto-complete-instrument-id-item">
                                     <span class="ticker">{{ item.instrument_id }}</span>
                                     <span class="name">{{ item.instrument_name }}</span>
                                 </div>
-                                <div class="make-order-instrument-id-item">{{ (item.exchange_id || '').toUpperCase() }}</div>
+                                <div class="auto-complete-instrument-id-item">{{ (item.exchange_id || '').toUpperCase() }}</div>
                             </div>
                         </template>
                     </el-autocomplete>

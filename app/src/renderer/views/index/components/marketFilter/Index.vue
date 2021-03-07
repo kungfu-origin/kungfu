@@ -53,8 +53,8 @@
                             @showHistory="handleShowHistory"
                             />  
                         </el-tab-pane>
-                        <el-tab-pane :lazy="true"  v-if="taskExtConfigList.length" :label="`交易任务详情 ${currentTaskModeResovled} ${currentTaskIdInTab}`" name="taskReal">
-                            111
+                        <el-tab-pane :lazy="true"  v-if="taskExtConfigList.length" :label="`交易任务详情 ${currentTaskIdInTab}`" name="taskDetail">
+                            <TaskRecord></TaskRecord>
                         </el-tab-pane>
                     </el-tabs>
                 </el-col>
@@ -73,6 +73,7 @@ import OrderBook from '@/components/MarketFilter/components/OrderBook';
 import MarketData from '@/components/MarketFilter/components/MarketData';
 import MakeOrderDashboard from '@/components/Base/makeOrder/MakeOrderDashboard';
 import Task from '@/components/Task/Index';
+import TaskRecord from '@/components/Task/TaskRecord';
 import OrderRecord from '@/components/Base/tradingData/OrderRecord';
 
 import { buildMarketDataPipe, buildAllOrdersPipe } from '__io/kungfu/tradingData'; 
@@ -87,7 +88,8 @@ export default {
         MakeOrderDashboard,
         Task,
         OrderRecord,
-        MdAccount
+        MdAccount,
+        TaskRecord
     },
 
     data () {
@@ -123,21 +125,11 @@ export default {
         },
 
         currentTaskIdInTab () {
-            if (this.currentTradeDataTabName === 'taskReal') {
+            if (this.currentTradeDataTabName === 'taskDetail') {
                 return this.currentTaskId
             }
 
             return ''
-        },
-
-        currentTaskModeResovled () {
-            if (!this.currentTaskId) return ''
-
-            if (this.currentTaskMode === 'sim') {
-                return '模拟'
-            } else {
-                return '实盘'
-            }
         }
     },
 

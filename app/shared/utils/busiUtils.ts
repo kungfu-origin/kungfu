@@ -32,9 +32,12 @@ interface SourceConfig {
     "config": {}
 }
 
-interface ExtensionJSON {
-    type: string,
-    config: SourceConfig
+interface DisplayConfig {
+    "type": string;
+    "align": string;
+    "label": string
+    "prop": string
+    "width": string
 }
 
 const KUNGFU_KEY_IN_PACKAGEJSON = 'kungfuConfig'
@@ -412,13 +415,15 @@ export const getExtensionConfigs = async (extDir: string): Promise<any> => {
                     const type: string = kungfuConfig.type;
                     const uniKey: string | Array<string>= kungfuConfig.uniKey;
                     const config: SourceConfig = kungfuConfig.config
+                    const displayConfig: DisplayConfig = kungfuConfig.displayConfig || {} 
                     return  {
                         type,
                         config,
                         uniKey,
                         key: kungfuConfig.key,
                         name: kungfuConfig.name,
-                        packageJSONPath: packageJSONPaths[index]
+                        packageJSONPath: packageJSONPaths[index],
+                        displayConfig
                     }
                 }
             })

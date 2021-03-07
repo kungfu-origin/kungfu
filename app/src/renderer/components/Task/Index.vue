@@ -225,7 +225,7 @@ export default {
         handleOpenUpdateTaskDialog (data) {
             this.setTaskMethod = 'update';
             this.setTaskInitData = minimist(data.args, this.taskExtMinimistConfig)
-            this.setTaskInitKey = this.getTaskConfigKeyFromProcessId(data.processId)
+            this.setTaskInitKey = this.setTaskInitData.configKey || '';
             this.setTaskTarget = data;
             this.setTaskDialogVisiblity = true;
         },
@@ -236,7 +236,11 @@ export default {
                 this.$message.error('配置信息不存在！')
                 return
             }
-            const extSettingData = JSON.parse(extSettingJSONString)
+            const extSettingData = { 
+                ...JSON.parse(extSettingJSONString),
+                configKey
+            }
+
             const { key, uniKey, packageJSONPath } = configInfo;
             const processNameByUniKey = this.formUnikeyInProcessName(uniKey, extSettingData);
             const processName = 'task_' + key + '_' + processNameByUniKey;
@@ -308,11 +312,6 @@ export default {
             return Object.keys(data || {})
                 .map(key => `--${key} ${data[key]}`)
                 .join(' ')
-        },
-
-        getTaskConfigKeyFromProcessId (processId) {
-            let processIdSplit = processId.split('_');
-            return processIdSplit[1]
         },
     }
 

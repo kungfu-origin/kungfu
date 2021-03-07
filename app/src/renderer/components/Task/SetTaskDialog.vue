@@ -11,6 +11,7 @@
     >
         <el-tabs tab-position="left" size="mini" v-model="activeTabName">
             <el-tab-pane
+                :disabled="method !== 'add' && currentActiveConfigKey !== item.key"
                 v-for="(item, index) in configList"
                 :key="item.key"
                 :label="item.name"

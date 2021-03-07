@@ -13,7 +13,7 @@ export const reqRecordBeforeQuit = (mainWindow) => {
             resolve(false)
             console.timeEnd('record before quit')
             clearTimeout(timer)
-        }, 30000)
+        }, 10000)
 
         mainWindow.webContents.send('main-process-messages', 'record-before-quit')
         
