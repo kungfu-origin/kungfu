@@ -1,7 +1,6 @@
 <template>
     <tr-dashboard title="">
             <tr-table
-            v-if="currentTaskId && tableHeader"
             :data="[]"
             :schema="tableHeader"
             @dbclickRow="() => {}"
@@ -9,7 +8,6 @@
             @rightClickRow="() => {}"
             >
             </tr-table>
-
     </tr-dashboard>
 </template>
 
@@ -21,6 +19,7 @@ import { findTargetFromArray } from '__gUtils/busiUtils';
 
 
 export default {
+
     computed: {
         ...mapState({
             taskExtConfigList: state => state.BASE.taskExtConfigList,
@@ -37,8 +36,8 @@ export default {
         },
 
         tableHeader () {
-            const config = this.getTargetConfigByKey(this.currentConfigKey);
-            return config.displayConfig || []
+            const config = this.getTargetConfigByKey(this.currentConfigKey) || {};
+            return config.displayConfig || this.getTaskDetailDefaultHeaders()
         }
     },
 
@@ -46,6 +45,52 @@ export default {
         getTargetConfigByKey (key) {
             return findTargetFromArray(this.taskExtConfigList, 'key', key)
         },
+
+        getTaskDetailDefaultHeaders () {
+            return [{
+                "type": "text",
+                "label": "下单时间",
+                "prop": "updateTime",
+                "width": "70px"
+            },{
+                "type": "text",
+                "label": "标的",
+                "prop": "instrumentId",
+                "width": "60px"
+            },{
+                "type": "text",
+                "label": "",
+                "prop": "side",
+                "width": "40px"
+            },{
+                "type": "text",
+                "label": "",
+                "prop": "offset",
+                "width": "40px"
+            },{
+                "type": "number",
+                "label": "委托价",
+                "prop": "limitPrice",
+                "width": "80px"
+            },{
+                "type": "number",
+                "label": "剩余时间(ms)",
+                "prop": "remainTime",
+                "width": "100px"
+            },{
+                "type": "text",
+                "align": "center",
+                "label": "下单量",
+                "prop": "volume",
+                "width": "60px"
+            },{
+                "type": "text",
+                "align": "center",
+                "label": "成交/目标量",
+                "prop": "volumeTraded",
+                "width": "90px"
+            }]
+        }
     }
 }
 </script>

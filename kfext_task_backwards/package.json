@@ -185,13 +185,20 @@
       },{
         "type": "number",
         "label": "剩余时间(ms)",
-        "prop": "remainTime"
-      }, {
+        "prop": "remainTime",
+        "width": "100px"
+      },{
         "type": "text",
         "align": "center",
-        "label": "已成交/全部",
+        "label": "下单量",
+        "prop": "volume",
+        "width": "60px"
+      },{
+        "type": "text",
+        "align": "center",
+        "label": "成交/目标量",
         "prop": "volumeTraded",
-        "width": "80px"
+        "width": "90px"
       }
     ]
   }

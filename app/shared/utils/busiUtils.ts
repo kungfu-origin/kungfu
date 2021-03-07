@@ -302,6 +302,7 @@ export const ifProcessRunning = (processId: string, processStatus: any): boolean
  * @param  {Array} list
  */
 export const sum = (list: number[]): number => {
+    if (!list.length) return 0
     return list.reduce((accumlator, a) => (accumlator + +a))
 }
 

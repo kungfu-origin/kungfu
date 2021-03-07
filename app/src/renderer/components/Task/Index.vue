@@ -124,11 +124,6 @@ export default {
             type: Boolean,
             default: true,
         },
-
-        selectable: {
-            type: Boolean,
-            default: false
-        }
     },
 
     components: {
@@ -198,14 +193,12 @@ export default {
 
         //选中行的背景颜色
         handleSelectRow(row) {
-            if (!this.selectable) return ''
             if(row.row.name == this.currentTaskId) {
                 return 'selected-bg'
             }
         },
 
         handleRowClick (row) {
-            if (!this.selectable) return;
             this.$store.dispatch('setCurrentTask', row)
         },
 

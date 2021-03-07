@@ -19,8 +19,7 @@
                         </el-tab-pane>
                         <el-tab-pane :lazy="true" label="交易任务" name="tradingTasks"  v-if="taskExtConfigList.length">
                             <Task 
-                            :noTitle="false" 
-                            :selectable="true"
+                            :noTitle="true" 
                             ></Task>
                         </el-tab-pane>
                     </el-tabs>
@@ -53,7 +52,7 @@
                             @showHistory="handleShowHistory"
                             />  
                         </el-tab-pane>
-                        <el-tab-pane :lazy="true"  v-if="taskExtConfigList.length" :label="`交易任务详情 ${currentTaskIdInTab}`" name="taskDetail">
+                        <el-tab-pane :lazy="true"  v-if="taskExtConfigList.length" :label="`交易任务记录 ${currentTaskIdInTab}`" name="taskDetail">
                             <TaskRecord></TaskRecord>
                         </el-tab-pane>
                     </el-tabs>

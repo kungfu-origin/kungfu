@@ -20,6 +20,8 @@ const promises = targetFilenamesFromDays
 Promise.all(promises)
     .then(quotesList => {
         const avgVolumeData = calcAvgVolume(quotesList)
+
+        console.log('Calculate Results: ', avgVolumeData)
         
         process.send({
             type: 'process:msg',
