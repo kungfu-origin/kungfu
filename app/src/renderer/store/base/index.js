@@ -130,6 +130,7 @@ export default {
 
         taskExtMinimistConfig (state) {
             //sim 为系统内置
+            const stringTypes = ['instrumentIdInTickerSet', 'tickerSet', 'instrumentId']
             let minimistConfig = {
                 string: [],
                 boolean: ['sim'],
@@ -138,7 +139,8 @@ export default {
                 const c = config.config;
                 c.forEach(item => {
                     const { key, type } = item;
-                    if (type === 'instrumentId') {
+                
+                    if (stringTypes.includes(type)) {
                         if (!minimistConfig.string.includes(key)) {
                             minimistConfig.string.push(key)                        
                         }

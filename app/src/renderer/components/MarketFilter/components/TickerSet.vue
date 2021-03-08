@@ -30,11 +30,14 @@
                         label="内含标的"
                         show-overflow-tooltip
                     >
+                        <template slot-scope="props">
+                            {{ (props.row.tickers || []).map(ticker => ticker.instrumentId).join(', ')  }}
+                        </template>
                     </el-table-column>
                     <el-table-column
                         label=""
                         align="right"
-                        width="60"
+                        width="80px"
                     >
                     <template slot-scope="props">
                         <span class="tr-oper"><i class="el-icon-setting mouse-over" title="设置" @click.stop="handleSetTickerSet(props.row)"></i></span>
@@ -83,10 +86,7 @@ export default {
   
     watch: {
         tickerSets (newTickerSets) {
-            this.tableList = (newTickerSets || []).map(item => ({
-                name: item.name,
-                tickers: (item.tickers || []).map(ticker => ticker.instrumentId).join(', ') 
-            }))
+            this.tableList = newTickerSets
         },
     },
 

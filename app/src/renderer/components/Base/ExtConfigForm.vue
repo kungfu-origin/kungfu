@@ -3,7 +3,7 @@
     ref="extForm"
     :label-width="labelWidth"
     :model="form"
-    class="ext-form"
+    class="kf-ext-form"
   >
     <el-form-item
       v-for="item of configList"
@@ -126,17 +126,14 @@
             :label="account.account_id.toAccountId()"
             :value="account.account_id"
           >
-            <span style="color: #fff">{{
-              account.account_id.toAccountId()
-            }}</span>
-            <el-tag :type="getAccountType(account.source_name).type">{{
-              (
-                SourceTypeConfig[
-                  getAccountType(account.source_name).typeName
-                ] || {}
-              ).name || ""
-            }}</el-tag>
-            <span style="float: right"
+            <span class="select-item-detail__item" style="color: #fff">
+              {{account.account_id.toAccountId()}}
+              <el-tag class="select-item-detail__item" :type="getAccountType(account.source_name).type">
+                {{(SourceTypeConfig[getAccountType(account.source_name).typeName] || {}).name || ""}}
+              </el-tag>
+            </span>
+           
+            <span class="select-item-detail__item" style="float: right"
               >可用：{{ getAvailCash(account.account_id) }}</span
             >
           </el-option>
@@ -154,8 +151,8 @@
             :label="source"
             :value="source"
           >
-            <span>{{ source }}</span>
-            <el-tag :type="mdAccountSource[source].type">{{
+            <span class="select-item-detail__item">{{ source }}</span>
+            <el-tag class="select-item-detail__item" :type="mdAccountSource[source].type">{{
               (SourceTypeConfig[mdAccountSource[source].typeName] || {}).name ||
               ""
             }}</el-tag>
@@ -227,7 +224,8 @@
         :class="item.key"
         size="mini"
         v-if="item.type === 'tickerSet'"
-        v-model.trim="form[item.key]"
+        :value="form[item.key]"
+        @change="e => handleTickerSetInput(e, item)"
         >
           <el-option
             v-for="item in tickerSets"
@@ -235,6 +233,8 @@
             :label="item.name"
             :value="item.name"
           >
+            <span class="select-item-detail__item">{{ item.name }}</span>
+            <span class="select-item-detail__item">{{ (item.tickers || []).map(ticker => ticker.instrumentId).join(', ') }}</span>
           </el-option>
         </el-select>
       </el-col>
@@ -258,7 +258,7 @@ import moment from "moment";
 import { mapState } from "vuex";
 import { Autocomplete } from "element-ui";
 
-import { deepClone } from "__gUtils/busiUtils";
+import { deepClone, findTargetFromArray } from "__gUtils/busiUtils";
 import {
   OffsetName,
   SideName,
@@ -351,6 +351,16 @@ export default {
   },
 
   methods: {
+    handleTickerSetInput (e, item) {
+      this.$set(this.form, item.key, e)
+      const target = findTargetFromArray(this.tickerSets, 'name', e)
+
+      if (target) {
+        const tickers = target.tickers.map(ticker => `${ticker.instrumentId}_${ticker.exchangeId}`).join('=')
+        this.$set(this.form, item.tickersKey, tickers)
+      }
+    },
+
     handleSelectInstrumentId(key, exchangeIdKey, item) {
       exchangeIdKey = exchangeIdKey || "exchangeId";
       const { instrument_id, exchange_id } = item;
@@ -491,28 +501,36 @@ export default {
 </script>
 
 <style lang="scss">
-.el-form {
-  &.ext-form {
-    .el-form-item {
-      margin-bottom: 10px;
 
-      &:last-child {
+.kf-ext-form {
+
+
+  .el-form {
+
+    &.ext-form {
+
+      .el-form-item {
         margin-bottom: 10px;
-      }
 
-      &.is-radio {
-        margin-bottom: 0;
-      }
+        &:last-child {
+          margin-bottom: 10px;
+        }
 
-      .el-radio {
-        margin-right: 18px;
-      }
+        &.is-radio {
+          margin-bottom: 0;
+        }
 
-      .el-radio__label {
-        font-size: 12px;
-        padding-left: 5px;
+        .el-radio {
+          margin-right: 18px;
+        }
+
+        .el-radio__label {
+          font-size: 12px;
+          padding-left: 5px;
+        }
       }
     }
   }
 }
+
 </style>

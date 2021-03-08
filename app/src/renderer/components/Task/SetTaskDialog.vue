@@ -1,6 +1,6 @@
 <template>
      <el-dialog 
-    width="640px" 
+    width="700px" 
     :title="`${method === 'add'? '添加' : '设置'} 交易任务`"  
     :visible="visible" 
     :close-on-click-modal="false"
@@ -96,7 +96,8 @@ export default {
                     const postData = this.postFormList[this.targetConfigIndex]
                     this.$emit('confirm', JSON.stringify({
                         ...postData,
-                        parentId: BigInt(+moment().valueOf()).toString()
+                        parentId: BigInt(+moment().valueOf()).toString(),
+                        configKey: this.activeTabName
 
                     }), this.activeTabName)
                     this.handleClose();

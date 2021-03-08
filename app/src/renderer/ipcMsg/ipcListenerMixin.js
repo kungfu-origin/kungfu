@@ -9,6 +9,7 @@ import { aliveOrderStatusList } from 'kungfu-shared/config/tradingConfig';
 
 import makeOrderCoreMixin from '@/components/Base/makeOrder/js/makeOrderCoreMixin';
 import recordBeforeQuitMixin from "@/assets/mixins/recordBeforeQuitMixin";
+import tickerSetMixin from '@/components/MarketFilter/js/tickerSetMixin';
 
 const { _pm2 } = require('__gUtils/processUtils');
 
@@ -17,7 +18,7 @@ const BrowserWindow = remote.BrowserWindow;
 //一直启动，无需remove listener
 export default {
 
-    mixins: [ makeOrderCoreMixin, recordBeforeQuitMixin ],
+    mixins: [ makeOrderCoreMixin, recordBeforeQuitMixin, tickerSetMixin ],
 
     data () {
         this.BUS = null;
@@ -38,6 +39,7 @@ export default {
     computed: {
         ...mapState({
             accountsAsset: state => state.ACCOUNT.accountsAsset,
+            marketAvgVolume: state => state.MARKET.marketAvgVolume || {},
         })
     },
 
@@ -53,7 +55,13 @@ export default {
                     const pm2Id = processData.pm_id;
                     const processName = processData.name;
                     const dataType = data.type;
-                    let { accountId, exchangeId, ticker, parentId, sourceId } = data.body || {};
+                    const { 
+                        accountId, 
+                        exchangeId, 
+                        ticker, 
+                        parentId, 
+                        sourceId,  
+                    } = data.body || {};
 
                     switch (dataType) {
                         case 'REQ_LEDGER_DATA':
@@ -63,11 +71,8 @@ export default {
                             this.resQuoteData(pm2Id, ticker, processName)
                             this.resInstrumentInfo(pm2Id, ticker, processName)
                             break;
-                        case "REQ_POS_DATA":
-                            this.resPosData(pm2Id, accountId, processName)
-                            break
-                        case "REQ_ORDER_DATA":
-                            this.resOrderData(pm2Id, parentId, processName)
+                        case "REQ_POS_ORDER_DATA":
+                            this.resPosOrderData(pm2Id, accountId, parentId, processName)
                             break
                         case 'MAKE_ORDER_BY_PARENT_ID':
                             const makeOrderData = data.body;
@@ -92,6 +97,10 @@ export default {
                             const sourceName = accountId ? (accountId || '').toSourceName() : sourceId;
                             this.subscribeTicker(sourceName, exchangeId, ticker)
                             break
+                        case "SUBSCRIBE_BY_TICKERSET":
+                            const { tickerSet } = data.body || {}
+                            this.subscribeTickersInTickerSet(tickerSet)
+                            break;
                         case "TIME_ALERT":
                             const { minute, quoteAlive } = data.body || {};
                             
@@ -101,47 +110,40 @@ export default {
                                 this.$message.info(`距离交易任务 ${processName} 开始执行还有 ${minute} 分钟，请保证交易进程与行情进程运行`)
                             }
                             break
-
-                        //周均成交量
-                        case 'CALC_AVG_VOLUME':
+                        case 'CALC_AVG_VOLUME': //周均成交量
                             this.$store.dispatch('setMarketAvgVolume', data.body)
                             break
+                        case 'REQ_HIS_AVG_VOLUME': //历史均成交量
+                            const { days } = data.body || {};
+                            this.sendResDataToProcessId("HIS_AVG_VOLUME", pm2Id, processName, { avgVolume: this.marketAvgVolume[days] || {} })
+
                     }
                 })
             })
         },
 
-        resQuoteData (pm2Id, ticker, processName) {
+        resQuoteData (pm2Id, tickers, processName) {
             if (!watcher.isLive()) return;
             watcher.step();
             const ledger = watcher.ledger;
 
             const quotes = Object.values(ledger.Quote || {})
-                .filter(quote => ticker.includes(quote.instrument_id))
+                .filter(quote => tickers.includes(`${quote.instrument_id}_${quote.exchange_id}`))
                 .map(quote => dealQuote(quote));
 
-            this.sendResDataToProcessId("QUOTE_DATA", pm2Id, processName, { quotes })
+            this.sendResDataToProcessId("QUOTE_DATA", pm2Id, processName, { quotes })    
         },
 
-        resPosData (pm2Id, accountId, processName) {
+        resPosOrderData (pm2Id, accountId, parentId, processName) {
             if (!watcher.isLive()) return;
             watcher.step();
             const ledger = watcher.ledger;
             const positions = Object.values(ledger.Position || {});
             const positionsResolved = transformTradingItemListToData(positions, 'account')[accountId] || [];
+            const orders = this.getTargetOrdersByParentId(ledger.Order || {}, parentId)
 
-            this.sendResDataToProcessId("POS_DATA", pm2Id, processName, { 
-                positions: positionsResolved
-            })
-        },
-
-        resOrderData (pm2Id, parentId, processName) {
-            if (!watcher.isLive()) return;
-            watcher.step();
-            const ledger = watcher.ledger;
-            const orders = this.getTargetOrdersByParentId(ledger.Order, parentId)
-
-            this.sendResDataToProcessId("ORDER_DATA", pm2Id, processName, { 
+            this.sendResDataToProcessId("POS_ORDER_DATA", pm2Id, processName, { 
+                positions: positionsResolved,
                 orders
             })
         },
@@ -151,8 +153,8 @@ export default {
             watcher.step();
             const ledger = watcher.ledger;
             const instruments = Object.values(ledger.Instrument)
-                .filter(item => ticker.includes(item.instrument_id))
-
+                .filter(item => tickers.includes(`${item.instrument_id}_${item.exchange_id}`)
+                
             this.sendResDataToProcessId('INSTRUMENT_DATA', pm2Id, processName, {
                 instruments
             })
@@ -218,7 +220,7 @@ export default {
         },
         
         bindIPCListener () {
-            ipcRenderer.removeAllListeners('ain-process-messages')
+            ipcRenderer.removeAllListeners('main-process-messages')
             ipcRenderer.on('main-process-messages', (event, args) => {
                 switch (args) {
                     case 'open-setting-dialog':

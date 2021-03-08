@@ -70,6 +70,7 @@
             <el-table-column
                 label="" 
                 align="right"
+                width="100px"
             >
                 <template slot-scope="props">
                     <span class="tr-oper" @click.stop="handleOpenLogFile(props.row.processId)"><i class="el-icon-document mouse-over" title="打开日志文件"></i></span>
@@ -229,10 +230,7 @@ export default {
                 this.$message.error('配置信息不存在！')
                 return
             }
-            const extSettingData = { 
-                ...JSON.parse(extSettingJSONString),
-                configKey
-            }
+            const extSettingData = JSON.parse(extSettingJSONString);
 
             const { key, uniKey, packageJSONPath } = configInfo;
             const processNameByUniKey = this.formUnikeyInProcessName(uniKey, extSettingData);

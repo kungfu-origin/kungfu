@@ -5,6 +5,7 @@ interface ProcPayload {
         positions: PosData[];
         orders: OrderData[];
         instruments: InstrumentInputData[];
+        avgVolume: StringToNumberObject;
     }
 }
 
@@ -17,7 +18,10 @@ interface StringToQuoteData {
 interface BackWardTraderPipeData {
     seconds: number;
     quotes: StringToQuoteData;
-    instruments: StringToInstrumentData
+    instruments: StringToInstrumentData;
+    avgVolume: StringToNumberObject;
+    orders: OrderData[];
+    pos: StringToPosData | null;
 }
 
 interface StringToInstrumentData {

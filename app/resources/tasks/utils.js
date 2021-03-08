@@ -1,5 +1,5 @@
 const readline = require('readline');
-const fse = require('fse-extra'); 
+const fse = require('fs-extra'); 
 
 //清空文件内容
 function clearFileContent(filePath) {

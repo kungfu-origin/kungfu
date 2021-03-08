@@ -4,7 +4,7 @@ import { mapGetters, mapState } from 'vuex';
 import AddSetTickerSetDialog from '@/components/MarketFilter/components/AddSetTickerSetDialog';
 import AddTickerDialog from '@/components/MarketFilter/components/AddTickerDialog';
 
-import { ifProcessRunning } from '__gUtils/busiUtils';
+import { ifProcessRunning, findTargetFromArray } from '__gUtils/busiUtils';
 import { getTickerSets, addSetTickerSet, removeTickerSetByName } from '__io/actions/market';
 import { kungfuSubscribeTicker } from '__io/kungfu/makeCancelOrder'
 import { watcher } from '__io/kungfu/watcher';
@@ -131,6 +131,20 @@ export default {
         subscribeAllTickers (slience = true) {
             if (!watcher.isLive()) return;
             const tickers = this.flatternTickers || [];
+            this.subscribeTickers(tickers, slience)
+        },
+
+        subscribeTickersInTickerSet (tickerSet, slience = true) {
+            const target = findTargetFromArray(this.tickerSets, 'name', tickerSet)
+
+            if (target) {
+                this.subscribeTickers(target.tickers, slience)
+            } else {
+                this.$message.warning(`${tickerSet} 标的池不存在`)
+            }
+        },
+
+        subscribeTickers (tickers, slience = true) {
             tickers.forEach(ticker => {
                 const { instrumentId, source, exchangeId } = ticker;
                 kungfuSubscribeTicker(source, exchangeId, instrumentId)
@@ -147,21 +161,25 @@ export default {
 
         checkAllMdProcess (tickers) {
             let mds = {};
-            let flag = true;
             tickers.forEach(item => {
                 mds[item.source] = true;
             })
 
-            Object.keys(mds || {}).forEach(source => {
+            const unrunningSources = Object.keys(mds || {}).filter(source => {
                 const processId = `md_${source}`;
                 if (!ifProcessRunning(processId, this.processStatus)) {
-                    flag = false;
-                    this.$message.warning(`${source} 行情进行未开启!`)
+                    return true
+                } else {
+                    return false
                 }
             })
 
-            return flag;
+            if (unrunningSources.length) {
+                this.$message.warning(`${unrunningSources.join(', ')} 行情进行未开启!`)
+                return true
+            } else {
+                return false
+            }
         }
-    }
-    
+    }    
 }

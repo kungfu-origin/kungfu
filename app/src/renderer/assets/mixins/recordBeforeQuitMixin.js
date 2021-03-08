@@ -40,9 +40,16 @@ export default {
             watcher.step()
             const quotes = Object.values(watcher.ledger.Quote || {});
             const tickerIds = this.flatternTickers.map(item => `${item.instrumentId}_${item.exchangeId}`).join(',')
-            const subscribedQuotes = quotes.filter(item => {
-                return tickerIds.includes(`${item.instrument_id}_${item.exchange_id}`)
-            })
+            const subscribedQuotes = quotes
+                .filter(item => {
+                    return tickerIds.includes(`${item.instrument_id}_${item.exchange_id}`)
+                })
+                .map(item => {
+                    return {
+                        ...item,
+                        instrument_id: item.instrument_id.toString()
+                    }
+                })
             
             if (!subscribedQuotes.length) {
                 return Promise.resolve(false)
@@ -50,8 +57,6 @@ export default {
             const fileName = moment().format('YYYY-MM-DD');
             return writeCSV(path.join(KF_DATASET_QUOTE_DIR, `${fileName}.csv`), subscribedQuotes)
         },
-
-        
     }
 }
 

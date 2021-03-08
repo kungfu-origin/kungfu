@@ -30,6 +30,13 @@ export const getCurrentCount = ({
     return currentCount
 };
 
+export const reqTimer = (fn: Function, interval: number) => {
+    fn()
+    return setInterval(() => {
+        fn()
+    }, interval)
+}
+
 export const getCurrentTimestamp = (format = false): number | string => {
     if (format) {
         return moment().format('HH:mm:ss.SSS')

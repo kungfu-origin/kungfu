@@ -198,7 +198,7 @@ export default {
 
         initData () {
             const { name, tickers } = this.inputData;
-            this.$set(this.setTickerSetNameForm, 'name', name)
+            this.$set(this.setTickerSetNameForm, 'name', name);
             this.tickersList = deepClone(tickers)
         },
 

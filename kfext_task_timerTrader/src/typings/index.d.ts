@@ -30,14 +30,6 @@ interface TimeCountData {
     second: number;
 }
 
-interface StringToQuoteData {
-    [prop: string]: QuoteData
-}
-
-interface StringToPosData {
-    [prop: string]: PosData
-}
-
 interface TimeTraderPipData {
     timeCountData: TimeCountData;
     quotes: StringToQuoteData;

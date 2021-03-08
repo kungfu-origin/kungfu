@@ -528,3 +528,11 @@ interface TickerSet {
 interface stringToTickerSet {
     [ propName: string ]: TickerSet;
 }
+
+interface StringToQuoteData {
+    [prop: string]: QuoteData
+}
+
+interface StringToPosData {
+    [prop: string]: PosData
+}

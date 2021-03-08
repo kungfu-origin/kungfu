@@ -101,10 +101,12 @@
 } 
 
 .el-scrollbar{
+    
     .el-select-dropdown__item{
         height: 30px;
         line-height: 30px;
         padding: 0 10px;
+
         span{
             font-size: 11px;
         }
@@ -116,6 +118,7 @@
             max-width: 60px;
         }
     }
+
     //下拉hover背景色
     .el-select-dropdown__item.hover, .el-select-dropdown__item:hover{
         background: $input_bg;
@@ -132,6 +135,13 @@ p.el-select-dropdown__empty{
 .el-select-dropdown__item {
     display: flex;
     align-items: center;
+    justify-content: space-between;
+
+    .select-item-detail__item {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
 
     .el-tag {
         margin: 0 5px;

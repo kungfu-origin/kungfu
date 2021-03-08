@@ -35,7 +35,7 @@
     "name": "最大贴水",
     "uniKey": [
       "accountId",
-      "ticker"
+      "tickerSet"
     ],
     "config": [
       {
@@ -49,6 +49,7 @@
         "key": "tickerSet",
         "name": "标的池",
         "type": "tickerSet",
+        "tickersKey": "tickerSetTickers",
         "required": true,
         "tip": "需要预先在行情模块中设置标的池"
       },
