@@ -6,7 +6,7 @@
                     <tr-search-input v-model.trim="searchKeyword"></tr-search-input>
                 </tr-dashboard-header-item>
                 <tr-dashboard-header-item>
-                    <i class="el-icon-s-data mouse-over" title="订阅" @click="handleSubscribeAllTickers"></i>
+                    <span class="mouse-over" style="font-weight: 600; font-size: 11px" title="订阅" @click="handleSubscribeAllTickers">订</span>
                 </tr-dashboard-header-item>
                 <tr-dashboard-header-item>
                     <el-button size="mini" @click="handleAddTickerSet" title="添加">添加</el-button>

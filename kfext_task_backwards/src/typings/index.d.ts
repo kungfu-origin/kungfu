@@ -20,8 +20,8 @@ interface BackWardTraderPipeData {
     quotes: StringToQuoteData;
     instruments: StringToInstrumentData;
     avgVolume: StringToNumberObject;
-    orders: OrderData[];
-    pos: StringToPosData | null;
+    // orders: OrderData[];
+    // pos: StringToPosData | null;
 }
 
 interface StringToInstrumentData {

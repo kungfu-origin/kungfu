@@ -112,28 +112,36 @@ export const reqMakeOrder = (baseData: any, quote: QuoteData) => {
     console.log(`---------------------------`)
 }
 
-export const getTickerWithMaxValue = (com: { [prop: string]: number }) => {
-    const values = Object.values(com);
-    const keys = Object.keys(com);
-    const maxV = Math.max(...values);
-    const index = values.indexOf(maxV);
-    const name = keys[index];
-    return {
-        name,
-        value: maxV
-    }
+export const getTickerWithMaxValue = (targetList: Array<any>, targetKey: string) => {
+    const afterSort = (targetList || []).sort((a: any, b: any) => {
+        const vA = +a[targetKey] || 0;
+        const vB = +b[targetKey] || 0;
+        return vB - vA;
+    })
+
+    return afterSort[0]
 }
 
-export const getTickerWithMinValue = (com: { [prop: string]: number }) => {
-    const values = Object.values(com);
-    const keys = Object.keys(com);
-    const minV = Math.min(...values);
-    const index = values.indexOf(minV);
-    const name = keys[index];
-    return {
-        name,
-        value: minV
-    }
+export const getTickerWithMinValue = (targetList: Array<any>, targetKey: string) => {
+    const afterSort = (targetList || []).sort((a: any, b: any) => {
+        const vA = +a[targetKey] || 0;
+        const vB = +b[targetKey] || 0;
+        return vA - vB;
+    })
+
+    return afterSort[0]
+}
+
+export const ensureTargetIncludesAllKeys = (targetObject: any, keys: Array<string>) => {
+    let flag = true;
+
+    keys.forEach(key => {
+        if (targetObject[key] === undefined) {
+            flag = false;
+        }
+    })
+
+    return flag;
 }
 
 

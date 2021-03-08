@@ -72,7 +72,8 @@ export default {
                             this.resInstrumentInfo(pm2Id, ticker, processName)
                             break;
                         case "REQ_POS_ORDER_DATA":
-                            this.resPosOrderData(pm2Id, accountId, parentId, processName)
+                            this.resPosData(pm2Id, accountId, processName)
+                            this.resOrderData(pm2Id, parentId, processName)
                             break
                         case 'MAKE_ORDER_BY_PARENT_ID':
                             const makeOrderData = data.body;
@@ -134,26 +135,35 @@ export default {
             this.sendResDataToProcessId("QUOTE_DATA", pm2Id, processName, { quotes })    
         },
 
-        resPosOrderData (pm2Id, accountId, parentId, processName) {
+        resPosData (pm2Id, accountId, processName) {
             if (!watcher.isLive()) return;
             watcher.step();
             const ledger = watcher.ledger;
             const positions = Object.values(ledger.Position || {});
             const positionsResolved = transformTradingItemListToData(positions, 'account')[accountId] || [];
+
+            this.sendResDataToProcessId("POS_DATA", pm2Id, processName, { 
+                positions: positionsResolved,
+            })
+        },
+
+        resOrderData (pm2Id, parentId, processName) {
+            if (!watcher.isLive()) return;
+            watcher.step();
+            const ledger = watcher.ledger;
             const orders = this.getTargetOrdersByParentId(ledger.Order || {}, parentId)
 
-            this.sendResDataToProcessId("POS_ORDER_DATA", pm2Id, processName, { 
-                positions: positionsResolved,
+            this.sendResDataToProcessId("ORDER_DATA", pm2Id, processName, { 
                 orders
             })
         },
 
-        resInstrumentInfo (pm2Id, ticker, processName) {
+        resInstrumentInfo (pm2Id, tickers, processName) {
             if (!watcher.isLive()) return;
             watcher.step();
             const ledger = watcher.ledger;
             const instruments = Object.values(ledger.Instrument)
-                .filter(item => tickers.includes(`${item.instrument_id}_${item.exchange_id}`)
+                .filter(item => tickers.includes(`${item.instrument_id}_${item.exchange_id}`))
                 
             this.sendResDataToProcessId('INSTRUMENT_DATA', pm2Id, processName, {
                 instruments
