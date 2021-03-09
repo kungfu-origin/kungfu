@@ -106,7 +106,9 @@ Napi::Value Watcher::GetTradingDay(const Napi::CallbackInfo &info) {
   return Napi::String::New(ledger_ref_.Env(), time::strftime(get_trading_day(), KUNGFU_TRADING_DAY_FORMAT));
 }
 
-Napi::Value Watcher::Now(const Napi::CallbackInfo &info) { return Napi::BigInt::New(ledger_ref_.Env(), now()); }
+Napi::Value Watcher::Now(const Napi::CallbackInfo &info) {
+  return Napi::BigInt::New(ledger_ref_.Env(), time::now_in_nano());
+}
 
 Napi::Value Watcher::IsUsable(const Napi::CallbackInfo &info) { return Napi::Boolean::New(info.Env(), is_usable()); }
 
