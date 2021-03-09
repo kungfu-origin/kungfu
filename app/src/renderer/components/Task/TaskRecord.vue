@@ -3,6 +3,7 @@
             <tr-table
             :data="taskRecords"
             :schema="tableHeader"
+            :renderCellClass="renderCellClass"
             @dbclickRow="() => {}"
             @clickCell="() => {}"
             @rightClickRow="() => {}"
@@ -17,7 +18,7 @@ import { mapState, mapGetters } from 'vuex';
 import minimist from 'minimist';
 import moment from 'moment';
 
-import { findTargetFromArray } from '__gUtils/busiUtils';
+import { findTargetFromArray, getDefaultRenderCellClass } from '__gUtils/busiUtils';
 import { buildTaskDataPipe } from '__io/kungfu/tradingData';
 
 
@@ -66,29 +67,32 @@ export default {
     methods: {
 
         dealTaskRecords (dataList) {
-            const len = dataList.length;
-            const sliceIndex = len < 300 ? 0 : len - 300;
-            const dataListAfterSlice = dataList.slice(sliceIndex, len)
-            
-            return Object.freeze(dataListAfterSlice
-                .filter(record => {
-                    const { tag_a, tag_c } = record;
-                    if (tag_a !== this.currentTaskId) return false;
-                    return true;
-                })
-                .map(record => {
-                    const value = JSON.parse(record.value || '{}');
-                    return Object.freeze({
-                        ...value,
-                        id: record.update_time.toString(),
-                        updateTime: moment(value.updateTime).format('HH:mm:ss')
+    
+            return Object.freeze(
+                dataList
+                    .filter(record => {
+                        const { tag_a, tag_c } = record;
+                        if (tag_a !== this.currentTaskId) return false;
+                        if (tag_c !== 'task') return false;
+                        return true;
                     })
-                })
+                    .map(record => {
+                        const value = JSON.parse(record.value || '{}');
+                        return Object.freeze({
+                            ...value,
+                            id: record.update_time.toString(),
+                            updateTime: moment(value.updateTime).format('HH:mm:ss')
+                        })
+                    })
             )
         },
 
         getTargetConfigByKey (key) {
             return findTargetFromArray(this.taskExtConfigList, 'key', key)
+        },
+
+        renderCellClass(prop, item) {   
+            return getDefaultRenderCellClass(prop, item)
         },
 
         getTaskDetailDefaultHeaders () {

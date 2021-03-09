@@ -230,6 +230,7 @@ const combineLatestObserver = combineLatest(
 var tradeVolumeByStep = 1; //initLot;
 var tradedVolume = 0; //flag
 var dealedCount = -10000000000;
+var checkRequiredDataErrorLogged = false;
 
 
 combineLatestObserver
@@ -249,23 +250,36 @@ combineLatestObserver
             const tickersNoIndex = TICKERS.filter((ticker: string) => !ticker.includes(index))
             
             if (Object.keys(avgVolume).length === 0) {
-                console.error(`[WARNING] 暂无历史均成交量信息信息，请检查`)
+                if (!checkRequiredDataErrorLogged) {
+                    console.error(`[WARNING] 暂无历史均成交量信息信息，请检查`)
+                    checkRequiredDataErrorLogged = true;
+                }
                 return false;
             } else if (!ensureTargetIncludesAllKeys(quotes, TICKERS)) {
-                console.log(Object.keys(quotes), TICKERS)
-                console.error(`[WARNING] 暂无行情信息，需保证已订阅${TICKERS}, 且MD进程开启`)
+                if (!checkRequiredDataErrorLogged) {
+                    console.log(Object.keys(quotes), TICKERS)
+                    console.error(`[WARNING] 暂无行情信息，需保证已订阅${TICKERS}, 且MD进程开启`)
+                    checkRequiredDataErrorLogged = true;
+                }
                 return false;
             } else if (!ensureTargetIncludesAllKeys(instruments, tickersNoIndex)) {
-                console.log(Object.keys(instruments), tickersNoIndex)
-                console.error(`[WARNING] 暂无到期日信息，需保证已订阅${tickersNoIndex}, 需保证MD进程开启`)
+                if (!checkRequiredDataErrorLogged) {
+                    console.log(Object.keys(instruments), tickersNoIndex)
+                    console.error(`[WARNING] 暂无到期日信息，需保证已订阅${tickersNoIndex}, 需保证MD进程开启`)
+                    checkRequiredDataErrorLogged = true;
+                }
                 return false;
 
             } else if (!TICKERS.filter((ticker: string) => ticker.includes(index)).length) {
-                console.error(`[WARNING] ${TICKERS} 不包含指數 ${index}`)
-                finishTrade('failed')
+                if (!checkRequiredDataErrorLogged) {
+                    console.error(`[WARNING] ${TICKERS} 不包含指數 ${index}`)
+                    finishTrade('failed')
+                    checkRequiredDataErrorLogged = true;
+                }
                 return false;
             }
-            
+
+            checkRequiredDataErrorLogged = false;
             return true;
         })
     )
@@ -324,7 +338,7 @@ combineLatestObserver
                     : ensureNum(+Number(Math.abs((bid1 - indexP) / bid1 / toExpireDate * 365)).toFixed(3))
             }
 
-            recordTaskInfo(combinedInstrumentData[instrumentId_exchangeId], {}, {
+            recordTaskInfo(combinedInstrumentData[instrumentId_exchangeId], null, {
                 ...argv,
                 tradedVolume
             })

@@ -46,8 +46,10 @@ export const startGetKungfuTradingData = (callback: Function, interval = 1000) =
             if (watcher.isLive()) {
                 watcher.step();
             }
+            
             callback({
                 ledger: watcher.ledger,
+                state: watcher.state
             });
             resolve(true);
         })
@@ -56,12 +58,12 @@ export const startGetKungfuTradingData = (callback: Function, interval = 1000) =
 
 
 export const writeKungfu = (id: string, label: string, type: string, val: string) => {
-    const data = kungfu.longfist.TimeValue();
+    let data = kungfu.longfist.TimeValue();
     data.tag_a = id || '';
     data.tag_b = label || '';
     data.tag_c = type || '';
     data.value = val;
-    data.update_time = watcher.now()
+    data.update_time = watcher.now();
     watcher.publishState(data);
 }
 

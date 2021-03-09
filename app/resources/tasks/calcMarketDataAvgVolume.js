@@ -34,6 +34,10 @@ Promise.all(promises)
             }
         })
 
+        setTimeout(() => {
+            process.exit(0)
+        }, 300)
+
     })
 
 

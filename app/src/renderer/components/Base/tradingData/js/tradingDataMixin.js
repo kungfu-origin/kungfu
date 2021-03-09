@@ -2,6 +2,7 @@ import moment from 'moment';
 import { decodeKungfuLocation } from '__io/kungfu/watcher';
 import { history } from '__io/kungfu/kungfuUtils';
 import { writeCSV } from '__gUtils/fileUtils';
+import { getDefaultRenderCellClass } from '__gUtils/busiUtils';
 
 export default {
     props: {
@@ -178,43 +179,7 @@ export default {
         },
 
         renderCellClass(prop, item) {   
-            switch (prop) {
-                case 'side':
-                    if (item.side === '买') return 'red';
-                    else if (item.side === '卖') return 'green';
-                    break;
-                case 'offset':
-                    if (item.offset === '开仓') return 'red';
-                    else if (item.offset === '平仓') return 'green';
-                    break;
-                case 'statusName':
-                    if (+item.status === 4) return 'red';
-                    else if ([3, 5, 6].indexOf(+item.status) !== -1) return 'green';
-                    else return 'gray';
-                case 'direction':
-                    if (item.direction === '多') return 'red';
-                    else if (item.direction === '空') return 'green';
-                    break;
-                case 'realizedPnl':
-                    if (+item.realizedPnl > 0) return 'red';
-                    else if (+item.realizedPnl < 0) return 'green';
-                    break;
-                case 'unRealizedPnl':
-                    if (+item.unRealizedPnl > 0) return 'red';
-                    else if (+item.unRealizedPnl < 0) return 'green';
-                    break;
-                case 'lastPrice':
-                    if (+item.lastPrice > +item.avgPrice) {
-                        return item.direction === '多' ? 'red' : 'green';
-                    } else if (+item.lastPrice < +item.avgPrice) {
-                        return item.direction === '多' ? 'green' : 'red';
-                    }
-                    break;
-                case 'clientId':
-                case 'accountId':
-                    if (item.clientId.toLowerCase().includes('手动')) return 'blue';
-                    break;
-            }
+            return getDefaultRenderCellClass(prop, item)
         }
     }
 }

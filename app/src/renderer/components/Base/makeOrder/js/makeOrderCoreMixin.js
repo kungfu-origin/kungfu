@@ -32,7 +32,8 @@ export default {
             strategyList: state => state.STRATEGY.strategyList,
             tdList: state => state.ACCOUNT.tdList,
             accountsAsset: state => state.ACCOUNT.accountsAsset,
-            currentTicker: state => state.ACCOUNT.currentTicker || {}
+            currentTicker: state => state.ACCOUNT.currentTicker || {},
+            processStatus: state => state.BASE.processStatus || {}
         }),
     },
 
@@ -60,7 +61,15 @@ export default {
         },
 
         subscribeTicker (sourceName, exchangeId, ticker) {
-            return kungfuSubscribeTicker(sourceName, exchangeId, ticker)
+            if (checkAllMdProcess.call(this, [{ 
+                source: sourceName,
+                exchangeId,
+                instrumentId: ticker
+            }, this.processStatus])) {
+                return kungfuSubscribeTicker(sourceName, exchangeId, ticker)
+            } else {
+                return Promise.resolve(false)
+            }
         },
 
         init () {

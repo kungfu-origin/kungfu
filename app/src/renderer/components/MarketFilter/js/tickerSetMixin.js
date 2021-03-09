@@ -4,7 +4,7 @@ import { mapGetters, mapState } from 'vuex';
 import AddSetTickerSetDialog from '@/components/MarketFilter/components/AddSetTickerSetDialog';
 import AddTickerDialog from '@/components/MarketFilter/components/AddTickerDialog';
 
-import { ifProcessRunning, findTargetFromArray } from '__gUtils/busiUtils';
+import { checkAllMdProcess, findTargetFromArray } from '__gUtils/busiUtils';
 import { getTickerSets, addSetTickerSet, removeTickerSetByName } from '__io/actions/market';
 import { kungfuSubscribeTicker } from '__io/kungfu/makeCancelOrder'
 import { watcher } from '__io/kungfu/watcher';
@@ -146,34 +146,9 @@ export default {
             })
 
             if (!slience) {
-                const subscribeSuccess = this.checkAllMdProcess(tickers);
-
-                if (subscribeSuccess) {
+                if (checkAllMdProcess.call(this, tickers, this.processStatus)) {
                     this.$message.success('正在订阅标的池内标的，请稍后')                
                 }
-            }
-        },
-
-        checkAllMdProcess (tickers) {
-            let mds = {};
-            tickers.forEach(item => {
-                mds[item.source] = true;
-            })
-
-            const unrunningSources = Object.keys(mds || {}).filter(source => {
-                const processId = `md_${source}`;
-                if (!ifProcessRunning(processId, this.processStatus)) {
-                    return true
-                } else {
-                    return false
-                }
-            })
-
-            if (unrunningSources.length) {
-                this.$message.warning(`${unrunningSources.join(', ')} 行情进行未开启!`)
-                return false
-            } else {
-                return true
             }
         }
     }    

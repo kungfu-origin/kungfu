@@ -194,7 +194,7 @@ function getMakeOrderPrice (side: number, quote: QuoteData ) {
 
 export function recordTaskInfo (calculatedData: any, tradeData: any, globalData: any) {
     const postData = {
-        mode: globalData.sim ? 'sim' : 'real',
+        mode: globalData.sim ? '模拟' : '实盘',
         updateTime: +new Date().getTime(),
         instrumentId: calculatedData.name,
         instrumentPrice: calculatedData.instrumentPrice,
@@ -205,11 +205,12 @@ export function recordTaskInfo (calculatedData: any, tradeData: any, globalData:
         backWardsRatioByYears: calculatedData.backwardByYear,
         expiredDate: calculatedData.expireDate,
         remainDays: calculatedData.toExpireDate,
-        side: tradeData.side || '',
-        offset: tradeData.offset || '',
-        limitPrice: tradeData.limit_price || '',
-        volume: tradeData.volume || '',
+        side: tradeData ? SideName[tradeData.side] : '',
+        offset: tradeData ? OffsetName[tradeData.offset] : '',
+        limitPrice: tradeData ? tradeData.limit_price : '',
+        volume: tradeData ? tradeData.volume : '',
         volumeLefted: tradeData ? `${globalData.volume - globalData.tradedVolume} / ${globalData.volume}` : '',
+        accountId: tradeData ? tradeData.name : ''
     }
 
       //@ts-ignore

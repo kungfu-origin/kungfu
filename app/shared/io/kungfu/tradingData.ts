@@ -94,9 +94,9 @@ export const buildKungfuGlobalDataPipe = () => {
 export const buildTaskDataPipe = () => {
     return KUNGFU_TRADING_DATA_OBSERVER.pipe(
         map((data: any): any => {
-            const ledgerData = data.ledger || {};
-            const timeValueList = ledgerData.TimeValue ? ledgerData.TimeValue.sort('update_time') : [];
-            return timeValueList
+            const stateData = data.state || {};
+            const timeValueList = stateData.TimeValue ? stateData.TimeValue.sort('update_time') : [];
+            return timeValueList.slice(0, 300)
         })
     )
 }

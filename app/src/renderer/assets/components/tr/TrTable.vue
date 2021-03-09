@@ -3,13 +3,13 @@
         <ul class="tr-table-header tr-table-row ">
             <li 
             :class="[
-            'user-select-none',
-            'text-overflow', 
-            'tr-table-cell',
-            column.type === 'number' ? 'number' : '',
-            column.type === 'account-strategy' ? 'account-strategy' : '',
-            column.type === 'operation' ? 'oper' : '',
-            column.align === 'center' ? 'text-center' : ''
+                'user-select-none',
+                'text-overflow', 
+                'tr-table-cell',
+                column.type === 'number' ? 'number' : '',
+                column.type === 'account-strategy' ? 'account-strategy' : '',
+                column.type === 'operation' ? 'oper' : '',
+                column.align ? `text-${column.align}` : ''
             ]" 
             v-for="column in schema" 
             :key="column.prop" 
@@ -48,7 +48,8 @@
                             column.type === 'number' ? 'number' : '',
                             column.type === 'account-strategy' ? 'account-strategy' : '',
                             column.type === 'operation' ? 'oper' : '',
-                            column.align === 'center' ? 'text-center' : ''
+                            column.align ? `text-${column.align}` : ''
+                            
                         ]"
                         v-for="column in schema" 
                         :key="`${column.prop}_${item.id}_${item[column.prop]}`"       
@@ -297,6 +298,14 @@ export default {
                 text-align: center;
             }
 
+            &.text-right {
+                text-align: right;
+            }
+
+            &.text-left {
+                text-align: left;
+            }
+
             &.number{
                 text-align: right;
             }
@@ -359,6 +368,14 @@ export default {
 
         &.text-center {
             text-align: center;
+        }
+
+        &.text-right {
+            text-align: right;
+        }
+
+        &.text-left {
+            text-align: left;
         }
 
         &.red{

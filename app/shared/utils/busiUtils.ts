@@ -515,3 +515,74 @@ export const ensureNum = (num: number | bigint | string) => {
     if (num === 1.7976931348623157e+308) return 0
     return +num
 }
+
+export const getDefaultRenderCellClass = (prop: string, item: any) => {
+    switch (prop) {
+        case 'mode':
+            if (item.mode === '模拟') return 'green';
+            else if (item.mode === '实盘') return 'blue';
+            break;
+        case 'side':
+            if (item.side === '买') return 'red';
+            else if (item.side === '卖') return 'green';
+            break;
+        case 'offset':
+            if (item.offset === '开仓') return 'red';
+            else if (item.offset === '平仓') return 'green';
+            break;
+        case 'statusName':
+            if (+item.status === 4) return 'red';
+            else if ([3, 5, 6].indexOf(+item.status) !== -1) return 'green';
+            else return 'gray';
+        case 'direction':
+            if (item.direction === '多') return 'red';
+            else if (item.direction === '空') return 'green';
+            break;
+        case 'realizedPnl':
+            if (+item.realizedPnl > 0) return 'red';
+            else if (+item.realizedPnl < 0) return 'green';
+            break;
+        case 'unRealizedPnl':
+            if (+item.unRealizedPnl > 0) return 'red';
+            else if (+item.unRealizedPnl < 0) return 'green';
+            break;
+        case 'lastPrice':
+            if (+item.lastPrice > +item.avgPrice) {
+                return item.direction === '多' ? 'red' : 'green';
+            } else if (+item.lastPrice < +item.avgPrice) {
+                return item.direction === '多' ? 'green' : 'red';
+            }
+            break;
+        case 'clientId':
+        case 'accountId':
+            if ((item.clientId || '').toLowerCase().includes('手动')) return 'blue';
+            break;
+    }
+
+    return ''
+}
+
+
+export function checkAllMdProcess (tickers: TickerInTickerSet[], processStatus: StringToStringObject) {
+    let mds: any = {};
+    tickers.forEach(item => {
+        mds[item.source] = true;
+    })
+
+    const unrunningSources = Object.keys(mds || {}).filter(source => {
+        const processId = `md_${source}`;
+        if (!ifProcessRunning(processId, processStatus)) {
+            return true
+        } else {
+            return false
+        }
+    })
+
+    if (unrunningSources.length) {
+        // @ts-ignore
+        this.$message.warning(`${unrunningSources.join(', ')} 行情进行未开启!`)
+        return false
+    } else {
+        return true
+    }
+}

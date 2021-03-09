@@ -96,7 +96,11 @@ export default {
                             break
                         case "SUBSCRIBE_BY_TICKER":
                             const sourceName = accountId ? (accountId || '').toSourceName() : sourceId;
-                            this.subscribeTicker(sourceName, exchangeId, ticker)
+                            this.subscribeTickers([{
+                                source: sourceName,
+                                exchangeId,
+                                instrumentId: ticker
+                            }])
                             break
                         case "SUBSCRIBE_BY_TICKERSET":
                             const { tickerSet } = packetData.body || {}
@@ -112,7 +116,6 @@ export default {
                             }
                             break
                         case 'CALC_AVG_VOLUME': //周均成交量
-                            console.log('CALC_AVG_VOLUME', packetData.body, '====')
                             this.$store.dispatch('setMarketAvgVolume', packetData.body)
                             break
                         case 'REQ_HIS_AVG_VOLUME': //历史均成交量
@@ -121,7 +124,6 @@ export default {
                             break
                         case 'REQ_RECORD_DATA':
                             const { mode, data } = packetData.body
-                            console.log('EQ_RECORD_DATA', mode, data, '----')
                             writeKungfu(processName, mode, 'task', JSON.stringify(data))
                     }
                 })

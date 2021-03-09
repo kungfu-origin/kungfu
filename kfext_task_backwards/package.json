@@ -130,19 +130,19 @@
         "width": "70px"
       },{
         "type": "text",
-        "label": "模式",
+        "label": "",
         "prop": "mode",
         "width": "40px"
       },{
         "type": "text",
         "label": "标的",
         "prop": "instrumentId",
-        "width": "100px"
+        "width": "90px"
       },{
         "type": "text",
         "label": "对应指数",
         "prop": "indexId",
-        "width": "100px"
+        "width": "90px"
       },{
         "type": "number",
         "label": "合约价格",
@@ -154,12 +154,12 @@
         "prop": "backwardsDelta",
         "width": "80px"
       },{
-        "type": "string",
+        "type": "number",
         "label": "升贴水比例",
         "prop": "backWardsRatio",
         "width": "80px"
       },{
-        "type": "string",
+        "type": "number",
         "label": "升贴水年化",
         "prop": "backWardsRatioByYears",
         "width": "80px"
@@ -176,13 +176,15 @@
       },{
         "type": "text",
         "label": "",
+        "align": "center",
         "prop": "side",
-        "width": "40px"
+        "width": "30px"
       },{
         "type": "text",
+        "align": "center",
         "label": "",
         "prop": "offset",
-        "width": "40px"
+        "width": "30px"
       },{
         "type": "number",
         "label": "委托价",
@@ -194,17 +196,21 @@
         "prop": "remainDays",
         "width": "100px"
       },{
-        "type": "text",
-        "align": "center",
+        "type": "number",
         "label": "下单量",
         "prop": "volume",
         "width": "60px"
       },{
         "type": "text",
-        "align": "center",
+        "align": "right",
         "label": "成交/目标量",
         "prop": "volumeLefted",
         "width": "110px"
+      }, {
+        "type": "text",
+        "align": "right",
+        "label": "账户",
+        "prop": "accountId"
       }
     ]
   }
