@@ -132,27 +132,27 @@
         "type": "text",
         "label": "模式",
         "prop": "mode",
-        "width": "60px"
+        "width": "40px"
       },{
         "type": "text",
         "label": "标的",
         "prop": "instrumentId",
-        "width": "60px"
+        "width": "100px"
       },{
         "type": "text",
         "label": "对应指数",
         "prop": "indexId",
-        "width": "60px"
+        "width": "100px"
       },{
         "type": "number",
         "label": "合约价格",
         "prop": "instrumentPrice",
-        "width": "60px"
+        "width": "80px"
       },{
         "type": "number",
         "label": "期现差",
         "prop": "backwardsDelta",
-        "width": "60px"
+        "width": "80px"
       },{
         "type": "string",
         "label": "升贴水比例",
@@ -172,7 +172,7 @@
         "type": "number",
         "label": "指数价格",
         "prop": "indexPrice",
-        "width": "60px"
+        "width": "80px"
       },{
         "type": "text",
         "label": "",

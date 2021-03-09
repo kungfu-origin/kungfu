@@ -197,7 +197,7 @@ export function recordTaskInfo (calculatedData: any, tradeData: any, globalData:
         mode: globalData.sim ? 'sim' : 'real',
         updateTime: +new Date().getTime(),
         instrumentId: calculatedData.name,
-        instrumentPrice: '',
+        instrumentPrice: calculatedData.instrumentPrice,
         indexId: calculatedData.indexId,
         indexPrice: calculatedData.indexP,
         backwardsDelta: calculatedData.backwardsDelta,

@@ -55,13 +55,13 @@ export const startGetKungfuTradingData = (callback: Function, interval = 1000) =
 }
 
 
-export const writeKungfu = (id: string, label: string, val: string) => {
+export const writeKungfu = (id: string, label: string, type: string, val: string) => {
     const data = kungfu.longfist.TimeValue();
-    data.tag_a = id;
-    data.tag_b = label;
+    data.tag_a = id || '';
+    data.tag_b = label || '';
+    data.tag_c = type || '';
     data.value = val;
     data.update_time = watcher.now()
-    console.log(data, '---')
     watcher.publishState(data);
 }
 

@@ -314,11 +314,11 @@ combineLatestObserver
                 expireDate,
                 bid1,
                 ask1,
+                instrumentPrice: quoteData.lastPrice,
                 indexId,
                 indexP,
-                backwardsDelta: lastPrice - indexP,
+                backwardsDelta: Number(lastPrice - indexP).toFixed(3),
                 backWardsRatio: indexP * lastPrice === 0 ? '' : Number((lastPrice - indexP) / lastPrice).toFixed(3),
-
                 backwardByYear: +side === 0 
                     ? ensureNum(+Number(Math.abs((ask1 - indexP) / ask1 / toExpireDate * 365)).toFixed(3))
                     : ensureNum(+Number(Math.abs((bid1 - indexP) / bid1 / toExpireDate * 365)).toFixed(3))

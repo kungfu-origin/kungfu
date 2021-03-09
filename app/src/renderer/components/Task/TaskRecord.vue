@@ -1,7 +1,7 @@
 <template>
     <tr-dashboard title="">
             <tr-table
-            :data="[]"
+            :data="taskRecords"
             :schema="tableHeader"
             @dbclickRow="() => {}"
             @clickCell="() => {}"
@@ -15,10 +15,32 @@
 
 import { mapState, mapGetters } from 'vuex';
 import minimist from 'minimist';
+import moment from 'moment';
+
 import { findTargetFromArray } from '__gUtils/busiUtils';
+import { buildTaskDataPipe } from '__io/kungfu/tradingData';
 
 
 export default {
+
+    data () {
+
+        this.taskDataPipe = null;
+        return {
+            taskRecords: [],
+        }
+    },
+
+    mounted () {
+        this.taskDataPipe = buildTaskDataPipe()
+            .subscribe(dataList => {
+                this.taskRecords = this.dealTaskRecords(dataList);
+            })
+    },
+
+    destroyed () {
+        this.taskDataPipe && this.taskDataPipe.unsubscribe();
+    },
 
     computed: {
         ...mapState({
@@ -42,6 +64,30 @@ export default {
     },
 
     methods: {
+
+        dealTaskRecords (dataList) {
+            const len = dataList.length;
+            const sliceIndex = len < 300 ? 0 : len - 300;
+            const dataListAfterSlice = dataList.slice(sliceIndex, len)
+            
+            return Object.freeze(dataListAfterSlice
+                .filter(record => {
+                    const { tag_a, tag_c } = record;
+                    if (tag_a !== this.currentTaskId) return false;
+                    return true;
+                })
+                .map(record => {
+                    const value = JSON.parse(record.value || '{}');
+                    return Object.freeze({
+                        ...value,
+                        id: record.update_time.toString(),
+                        updateTime: moment(value.updateTime).format('HH:mm:ss')
+                    })
+                })
+                .reverse()
+            )
+        },
+
         getTargetConfigByKey (key) {
             return findTargetFromArray(this.taskExtConfigList, 'key', key)
         },
