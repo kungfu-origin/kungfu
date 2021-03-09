@@ -95,7 +95,7 @@ export const buildTaskDataPipe = () => {
     return KUNGFU_TRADING_DATA_OBSERVER.pipe(
         map((data: any): any => {
             const stateData = data.state || {};
-            const timeValueList = stateData.TimeValue ? stateData.TimeValue.sort('update_time') : [];
+            const timeValueList = stateData.TimeValue ? stateData.TimeValue.filter('tag_c', 'task').sort('update_time') : [];
             return timeValueList.slice(0, 300)
         })
     )
