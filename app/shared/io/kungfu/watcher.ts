@@ -265,7 +265,7 @@ export const dealOrder = (item: OrderInputData): OrderData => {
     const updateTime = insert_time || update_time;
     const instrumentType = instrument_type;
     const sourceId =  resolveSourceDest(source, dest).sourceGroup;
-    const errMsg = item.error_msg;
+    const errMsg = item.error_msg || OrderStatus[item.status];
   
     return {
         id: [item.order_id.toString(), item.account_id.toString()].join('-'),

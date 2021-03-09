@@ -36,7 +36,7 @@ export default {
         },
 
         SET_MARKET_AVG_VOLUME (state, { days, data }) {
-            Vue.set(state.marketAvgVolume, days, Object.freeze(data))
+            Vue.set(state.marketAvgVolume, days, data)
         }
 
     },

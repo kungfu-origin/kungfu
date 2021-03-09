@@ -190,8 +190,8 @@
         "width": "80px"
       },{
         "type": "number",
-        "label": "剩余时间(ms)",
-        "prop": "remainTime",
+        "label": "剩余天数",
+        "prop": "remainDays",
         "width": "100px"
       },{
         "type": "text",
@@ -204,7 +204,7 @@
         "align": "center",
         "label": "成交/目标量",
         "prop": "volumeLefted",
-        "width": "90px"
+        "width": "110px"
       }
     ]
   }

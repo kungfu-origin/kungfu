@@ -204,6 +204,7 @@ export function recordTaskInfo (calculatedData: any, tradeData: any, globalData:
         backWardsRatio: calculatedData.backWardsRatio,
         backWardsRatioByYears: calculatedData.backwardByYear,
         expiredDate: calculatedData.expireDate,
+        remainDays: calculatedData.toExpireDate,
         side: tradeData.side || '',
         offset: tradeData.offset || '',
         limitPrice: tradeData.limit_price || '',

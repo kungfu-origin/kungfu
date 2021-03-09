@@ -44,12 +44,6 @@ export default {
         ])
     },
 
-    watch: {
-        flatternTickers () {
-            this.subscribeAllTickers()
-        }
-    },
-
     methods: {
 
         handleSetTickerSet (tickerSet) {
@@ -145,6 +139,7 @@ export default {
         },
 
         subscribeTickers (tickers, slience = true) {
+
             tickers.forEach(ticker => {
                 const { instrumentId, source, exchangeId } = ticker;
                 kungfuSubscribeTicker(source, exchangeId, instrumentId)
@@ -176,9 +171,9 @@ export default {
 
             if (unrunningSources.length) {
                 this.$message.warning(`${unrunningSources.join(', ')} 行情进行未开启!`)
-                return true
-            } else {
                 return false
+            } else {
+                return true
             }
         }
     }    

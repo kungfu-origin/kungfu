@@ -29,8 +29,8 @@ export const buildTradingDataPipe = (type: string) => {
     return KUNGFU_TRADING_DATA_OBSERVER.pipe(
         map((data: any): any => {
             const ledgerData = data.ledger || {};
-            const orders = Object.values(ledgerData.Order || {});
-            const trades = Object.values(ledgerData.Trade || {});
+            const orders = ledgerData.Order ? ledgerData.Order.sort('update_time') : [];
+            const trades = ledgerData.Trade ? ledgerData.Trade.sort('update_time') : [];
             const positions = Object.values(ledgerData.Position || {});
             const assets = Object.values(ledgerData.Asset || {});
             const pnl = Object.values(ledgerData.AssetSnapshot || {});
@@ -60,7 +60,7 @@ export const buildAllOrdersPipe = () => {
     return KUNGFU_TRADING_DATA_OBSERVER.pipe(
         map((data: any): any => {
             const ledgerData = data.ledger || {};
-            const orders = Object.values(ledgerData.Order || {});
+            const orders = ledgerData.Order ? ledgerData.Order.sort('update_time') : [];
             const orderStat = Object.values(ledgerData.OrderStat || {});
             
             return {
@@ -95,7 +95,7 @@ export const buildTaskDataPipe = () => {
     return KUNGFU_TRADING_DATA_OBSERVER.pipe(
         map((data: any): any => {
             const ledgerData = data.ledger || {};
-            const timeValueList = Object.values(ledgerData.TimeValue || {});
+            const timeValueList = ledgerData.TimeValue ? ledgerData.TimeValue.sort('update_time') : [];
             return timeValueList
         })
     )

@@ -84,7 +84,6 @@ export default {
                         updateTime: moment(value.updateTime).format('HH:mm:ss')
                     })
                 })
-                .reverse()
             )
         },
 
