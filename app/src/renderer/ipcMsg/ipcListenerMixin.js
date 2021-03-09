@@ -2,7 +2,7 @@
 import { mapState } from 'vuex';
 import { ipcRenderer, remote } from 'electron';
 
-import { watcher, dealQuote, dealPos, dealOrder } from '__io/kungfu/watcher';
+import { watcher, dealQuote, dealPos, dealOrder, writeKungfu } from '__io/kungfu/watcher';
 import { getStrategyById, updateStrategyPath } from '__io/kungfu/strategy';
 import { transformTradingItemListToData } from '__io/kungfu/watcher';
 import { aliveOrderStatusList } from 'kungfu-shared/config/tradingConfig';
@@ -50,18 +50,18 @@ export default {
             _pm2.launchBus((err, pm2_bus) => {
                 this.BUS = pm2_bus
                 pm2_bus.on('process:msg', (packet) => {
-                    const data = packet.data;
-                    const processData = packet.process;
+                    const packetData = packet.data || {};
+                    const processData = packet.process || {};
                     const pm2Id = processData.pm_id;
                     const processName = processData.name;
-                    const dataType = data.type;
+                    const dataType = packetData.type;
                     const { 
                         accountId, 
                         exchangeId, 
                         ticker, 
                         parentId, 
                         sourceId,  
-                    } = data.body || {};
+                    } = packetData.body || {};
 
                     switch (dataType) {
                         case 'REQ_LEDGER_DATA':
@@ -76,7 +76,7 @@ export default {
                             this.resOrderData(pm2Id, parentId, processName)
                             break
                         case 'MAKE_ORDER_BY_PARENT_ID':
-                            const makeOrderData = data.body;
+                            const makeOrderData = packetData.body;
                             const markOrderDataResolved = {
                                 ...makeOrderData,
                                 parent_id: BigInt(makeOrderData.parent_id)
@@ -99,11 +99,11 @@ export default {
                             this.subscribeTicker(sourceName, exchangeId, ticker)
                             break
                         case "SUBSCRIBE_BY_TICKERSET":
-                            const { tickerSet } = data.body || {}
+                            const { tickerSet } = packetData.body || {}
                             this.subscribeTickersInTickerSet(tickerSet)
                             break;
                         case "TIME_ALERT":
-                            const { minute, quoteAlive } = data.body || {};
+                            const { minute, quoteAlive } = packetData.body || {};
                             
                             if (!quoteAlive) {
                                 this.$message.warning(`距离交易任务 ${processName} 开始执行还有 ${minute} 分钟，目前还未收到订阅行情，请检查交易进程与行情进程运行`)
@@ -112,12 +112,16 @@ export default {
                             }
                             break
                         case 'CALC_AVG_VOLUME': //周均成交量
-                            this.$store.dispatch('setMarketAvgVolume', data.body)
+                            this.$store.dispatch('setMarketAvgVolume', packetData.body)
                             break
                         case 'REQ_HIS_AVG_VOLUME': //历史均成交量
-                            const { days } = data.body || {};
+                            const { days } = packetData.body || {};
                             this.sendResDataToProcessId("HIS_AVG_VOLUME", pm2Id, processName, { avgVolume: this.marketAvgVolume[days] || {} })
-
+                            break
+                        case 'REQ_RECORD_DATA':
+                            console.log(packetData.body, '--')
+                            const { mode, data } = packetData.body
+                            writeKungfu(processName, mode, JSON.stringify(data))
                     }
                 })
             })

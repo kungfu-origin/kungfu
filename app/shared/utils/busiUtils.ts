@@ -507,3 +507,11 @@ export const getIndexFromTargetTickers = (tickerList: TickerInTickerSet[], ticke
         return false;
     })
 }  
+
+export const ensureNum = (num: number | bigint | string) => {
+    num = +(num.toString());
+    if (Number.isNaN(num)) return 0
+    if (!Number.isFinite(num)) return 0
+    if (num === 1.7976931348623157e+308) return 0
+    return +num
+}

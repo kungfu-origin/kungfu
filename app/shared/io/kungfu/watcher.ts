@@ -2,9 +2,11 @@ import fse from 'fs-extra';
 import { KF_RUNTIME_DIR, KF_CONFIG_PATH } from '__gConfig/pathConfig';
 import { setTimerPromiseTask } from '__gUtils/busiUtils';
 import { kungfu } from '__io/kungfu/kungfuUtils';
-import { toDecimal } from '__gUtils/busiUtils';
+import { toDecimal, ensureNum } from '__gUtils/busiUtils';
 import { OffsetName, OrderStatus, SideName, PosDirection, PriceType, HedgeFlag, InstrumentType, VolumeCondition, TimeCondition, allowShorted } from "kungfu-shared/config/tradingConfig";
 import { logger } from '__gUtils/logUtils';
+
+var KUNGFU_WRITER_COUNTER = 0;
 
 export const watcher: any = (() => {
     const kfSystemConfig: any = fse.readJsonSync(KF_CONFIG_PATH)
@@ -51,6 +53,18 @@ export const startGetKungfuTradingData = (callback: Function, interval = 1000) =
             resolve(true);
         })
     }, interval);
+}
+
+
+export const writeKungfu = (id: string, label: string, val: string) => {
+    const now = watcher.now();
+    const data = kungfu.longfist.TimeKeyValue();
+    data.key = now.toString() + (++KUNGFU_WRITER_COUNTER).toString();
+    data.label = id;
+    data.value = val;
+    data.update_time = now
+    console.log(data, '---')
+    watcher.publishState(data);
 }
 
 
@@ -423,31 +437,31 @@ export const dealGatewayStates = (gatewayStates: StringToStringObject): Array<Md
 export const dealQuote = (quote: QuoteDataInput): QuoteData => {
     return {
         id: quote.exchange_id + quote.source_id + quote.instrument_id.toString() + String(quote.data_time),
-        closePrice: toDecimal(quote.close_price, 3),
+        closePrice: toDecimal(ensureNum(quote.close_price), 3),
         dataTime: kungfu.formatTime(quote.data_time, '%Y-%m-%d %H:%M:%S'),
         dataTimeNumber: quote.data_time.toString(),
         exchangeId: quote.exchange_id,
-        highPrice: toDecimal(quote.high_price, 3),
+        highPrice: toDecimal(ensureNum(quote.high_price), 3),
         instrumentId: quote.instrument_id,
         instrumentType: InstrumentType[quote.instrument_type],
         instrumentTypeOrigin: quote.instrument_type,
-        lastPrice: toDecimal(quote.last_price, 3),
-        lowPrice: toDecimal(quote.low_price, 3),
-        lowerLimitPrice: toDecimal(quote.lower_limit_price, 3),
-        openInterest: quote.open_interest,
-        openPrice: toDecimal(quote.open_price, 3),
-        preClosePrice: toDecimal(quote.pre_close_price, 3),
-        preOpenInterest: quote.pre_open_interest,
-        preSettlementPrice: toDecimal(quote.pre_settlement_price, 3),
-        settlementPrice: toDecimal(quote.settlement_price, 3),
+        lastPrice: toDecimal(ensureNum(quote.last_price), 3),
+        lowPrice: toDecimal(ensureNum(quote.low_price), 3),
+        lowerLimitPrice: toDecimal(ensureNum(quote.lower_limit_price), 3),
+        openInterest: ensureNum(quote.open_interest),
+        openPrice: toDecimal(ensureNum(quote.open_price), 3),
+        preClosePrice: toDecimal(ensureNum(quote.pre_close_price), 3),
+        preOpenInterest: ensureNum(quote.pre_open_interest),
+        preSettlementPrice: toDecimal(ensureNum(quote.pre_settlement_price), 3),
+        settlementPrice: toDecimal(ensureNum(quote.settlement_price), 3),
         sourceId: quote.source_id,
         tradingDay: quote.trading_day,
-        turnover: quote.turnover,
-        upperLimitPrice: toDecimal(quote.upper_limit_price, 3),
-        volume: Number(quote.volume),
-        askPrices: quote.ask_price.map(num => toDecimal(num, 3)) || [],
+        turnover: ensureNum(quote.turnover),
+        upperLimitPrice: toDecimal(ensureNum(quote.upper_limit_price), 3),
+        volume: ensureNum(quote.volume),
+        askPrices: quote.ask_price.map(num => toDecimal(ensureNum(num), 3)) || [],
         askVolumes: quote.ask_volume.map((num: BigInt) => num.toString()) || [],
-        bidPrices: quote.bid_price.map(num => toDecimal(num, 3)) || [],
+        bidPrices: quote.bid_price.map(num => toDecimal(ensureNum(num), 3)) || [],
         bidVolumes: quote.bid_volume.map((num: BigInt) => num.toString()) || [],
     }
        
