@@ -52,11 +52,22 @@ KF_DEFINE_DATA_TYPE(                              //
     (std::string, value)                          //
 );
 
+KF_DEFINE_DATA_TYPE(                                           //
+    TimeValue, 20000, PK(update_time), TIMESTAMP(update_time), //
+    (int64_t, update_time),                                    //
+    (std::string, tag_a),                                      //
+    (std::string, tag_b),                                      //
+    (std::string, tag_c),                                      //
+    (std::string, value)                                       //
+);
+
 KF_DEFINE_DATA_TYPE(                                      //
     TimeKeyValue, 20001, PK(key), TIMESTAMP(update_time), //
     (int64_t, update_time),                               //
     (std::string, key),                                   //
-    (std::string, label),                                 //
+    (std::string, tag_a),                                 //
+    (std::string, tag_b),                                 //
+    (std::string, tag_c),                                 //
     (std::string, value)                                  //
 );
 
