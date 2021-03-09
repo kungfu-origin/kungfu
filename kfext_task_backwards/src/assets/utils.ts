@@ -72,7 +72,7 @@ export const getTickerNamesByTicker = (ticker: string) => {
 }
 
 export const reqMakeOrder = (baseData: any, quote: QuoteData) => {
-    const { side, offset, accountId, volume, parentId } = baseData;
+    const { side, offset, accountId, volume, parentId, sim } = baseData;
     const { instrumentTypeOrigin, instrumentId, exchangeId } = quote;
 
     const makeOrderPrice = getMakeOrderPrice(side, quote)
@@ -90,16 +90,28 @@ export const reqMakeOrder = (baseData: any, quote: QuoteData) => {
         hedge_flag: 0,
         parent_id: parentId
     }
-    //@ts-ignore
-    process.send({
-        type: 'process:msg',
-        data: {
-            type: 'MAKE_ORDER_BY_PARENT_ID',
-            body: {
-                ...makeOrderData
+
+    if (!ensureNum(makeOrderPrice)) {
+        console.log(`[ERROR] 下单信息错误 ${JSON.stringify(quote)}`)
+        return false;
+    }
+
+    if (!sim) {
+        //@ts-ignore
+        process.send({
+            type: 'process:msg',
+            data: {
+                type: 'MAKE_ORDER_BY_PARENT_ID',
+                body: {
+                    ...makeOrderData
+                }
             }
-        }
-    })
+        })
+    } else {
+        console.log('--------- [模拟] ---------')
+    }
+   
+
     console.log(`--------- [下单] ---------`)
     console.log(`[账户] ${makeOrderData.name}`)
     console.log(`[标的] ${makeOrderData.instrument_id}`)
@@ -110,6 +122,8 @@ export const reqMakeOrder = (baseData: any, quote: QuoteData) => {
     console.log(`[价格] ${makeOrderData.limit_price}`)
     console.log(`[订单组] ${makeOrderData.parent_id}`)
     console.log(`---------------------------`)
+
+    return makeOrderData
 }
 
 export const getTickerWithMaxValue = (targetList: Array<any>, targetKey: string) => {
@@ -144,6 +158,13 @@ export const ensureTargetIncludesAllKeys = (targetObject: any, keys: Array<strin
     return flag;
 }
 
+export function ensureNum (num: number | bigint | string) {
+    num = +(num.toString());
+    if (Number.isNaN(num)) return 0
+    if (!Number.isFinite(num)) return 0
+    if (num === 1.7976931348623157e+308) return 0
+    return +num
+}
 
 function getMonth (m: number) {
     const ms = [3, 6, 9, 12, 3]
@@ -169,4 +190,38 @@ function getMakeOrderPrice (side: number, quote: QuoteData ) {
     }
 
     return lastPrice
+}
+
+export function recordTaskInfo (calculatedData: any, tradeData: any, globalData: any) {
+    const postData = {
+        mode: globalData.sim ? 'sim' : 'real',
+        updateTime: +new Date().getTime(),
+        instrumentId: calculatedData.name,
+        instrumentPrice: '',
+        indexId: calculatedData.indexId,
+        indexPrice: calculatedData.indexP,
+        backwardsDelta: calculatedData.backwardsDelta,
+        backWardsRatio: calculatedData.backWardsRatio,
+        backWardsRatioByYears: calculatedData.backwardByYear,
+        expiredDate: calculatedData.expireDate,
+        side: tradeData.side || '',
+        offset: tradeData.offset || '',
+        limitPrice: tradeData.limit_price || '',
+        volume: tradeData.volume || '',
+        volumeLefted: tradeData ? `${globalData.volume - globalData.tradedVolume} / ${globalData.volume}` : '',
+    }
+
+      //@ts-ignore
+      process.send({
+        type: 'process:msg',
+        data: {
+            type: 'REQ_RECORD_DATA',
+            body: {
+                mode: globalData.sim ? 'sim' : 'real',
+                data: {
+                    ...postData                    
+                }
+            }
+        }
+    })
 }

@@ -32,7 +32,7 @@
   "kungfuConfig": {
     "type": "task",
     "key": "backwardsHedge",
-    "name": "最大贴水",
+    "name": "贴水对冲",
     "uniKey": [
       "accountId",
       "tickerSet"
@@ -130,6 +130,11 @@
         "width": "70px"
       },{
         "type": "text",
+        "label": "模式",
+        "prop": "mode",
+        "width": "60px"
+      },{
+        "type": "text",
         "label": "标的",
         "prop": "instrumentId",
         "width": "60px"
@@ -146,7 +151,7 @@
       },{
         "type": "number",
         "label": "期现差",
-        "prop": "delta",
+        "prop": "backwardsDelta",
         "width": "60px"
       },{
         "type": "string",
@@ -198,7 +203,7 @@
         "type": "text",
         "align": "center",
         "label": "成交/目标量",
-        "prop": "volumeTraded",
+        "prop": "volumeLefted",
         "width": "90px"
       }
     ]

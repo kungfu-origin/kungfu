@@ -6,7 +6,6 @@ import { toDecimal, ensureNum } from '__gUtils/busiUtils';
 import { OffsetName, OrderStatus, SideName, PosDirection, PriceType, HedgeFlag, InstrumentType, VolumeCondition, TimeCondition, allowShorted } from "kungfu-shared/config/tradingConfig";
 import { logger } from '__gUtils/logUtils';
 
-var KUNGFU_WRITER_COUNTER = 0;
 
 export const watcher: any = (() => {
     const kfSystemConfig: any = fse.readJsonSync(KF_CONFIG_PATH)
@@ -57,12 +56,11 @@ export const startGetKungfuTradingData = (callback: Function, interval = 1000) =
 
 
 export const writeKungfu = (id: string, label: string, val: string) => {
-    const now = watcher.now();
-    const data = kungfu.longfist.TimeKeyValue();
-    data.key = now.toString() + (++KUNGFU_WRITER_COUNTER).toString();
-    data.label = id;
+    const data = kungfu.longfist.TimeValue();
+    data.tag_a = id;
+    data.tag_b = label;
     data.value = val;
-    data.update_time = now
+    data.update_time = watcher.now()
     console.log(data, '---')
     watcher.publishState(data);
 }

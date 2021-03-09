@@ -8,6 +8,8 @@ import {
     getTickerWithMinValue,
     getTickerWithMaxValue,
     ensureTargetIncludesAllKeys,
+    ensureNum,
+    recordTaskInfo,
     reqMakeOrder 
 } from './assets/utils';
 import moment from 'moment';
@@ -18,7 +20,7 @@ const argv = minimist(process.argv.slice(2), {
     boolean: ['sim']
 })
 
-const { tickerSet, tickerSetTickers, index, side, offset, volume, triggerTime, finishTime, interval, accountId, maxBackward, parentId } = argv;
+const { tickerSet, tickerSetTickers, index, side, offset, volume, triggerTime, finishTime, interval, accountId, maxBackward, parentId, sim } = argv;
 
 const triggerTimeStr = moment(triggerTime).format('YYYYMMDD HH:mm:ss');
 const finishTimeStr = moment(finishTime).format('YYYYMMDD HH:mm:ss');
@@ -288,9 +290,9 @@ combineLatestObserver
 
         const { quotes, instruments, avgVolume } = data;
 
-        const indexFullId = TICKERS.filter((ticker: string) => ticker.includes(index))[0]
-        const indexData = quotes[indexFullId] || {};
-        const indexP = +indexData.lastPrice || 0;
+        const indexId = TICKERS.filter((ticker: string) => ticker.includes(index))[0]
+        const indexData = quotes[indexId] || {};
+        const indexP = ensureNum(indexData.lastPrice || 0);
         const today = moment(moment().format('YYYYMMDD'))
 
         let combinedInstrumentData:any = {};
@@ -299,8 +301,9 @@ combineLatestObserver
         tickersResolved.forEach((instrumentId_exchangeId: string) => {
             const quoteData = quotes[instrumentId_exchangeId] || {};
             const instrumentData = instruments[instrumentId_exchangeId] || {};
-            const bid1: number = +(quoteData.bidPrices || [])[0] || 0;
-            const ask1: number = +(quoteData.askPrices || [])[0] || 0;
+            const bid1: number = ensureNum(+(quoteData.bidPrices || [])[0] || 0);
+            const ask1: number = ensureNum(+(quoteData.askPrices || [])[0] || 0);
+            const lastPrice: number = ensureNum(quoteData.lastPrice);
             const expireDate = instrumentData.expire_date || '';
             const toExpireDate = moment(expireDate).diff(today, 'days'); 
 
@@ -311,12 +314,21 @@ combineLatestObserver
                 expireDate,
                 bid1,
                 ask1,
-                backwardByYear: +side === 0 
-                    ? +Number(Math.abs((ask1 - indexP) / ask1 / toExpireDate * 365)).toFixed(3)
-                    : +Number(Math.abs((bid1 - indexP) / bid1 / toExpireDate * 365)).toFixed(3)
-            }
-        });
+                indexId,
+                indexP,
+                backwardsDelta: lastPrice - indexP,
+                backWardsRatio: indexP * lastPrice === 0 ? '' : Number((lastPrice - indexP) / lastPrice).toFixed(3),
 
+                backwardByYear: +side === 0 
+                    ? ensureNum(+Number(Math.abs((ask1 - indexP) / ask1 / toExpireDate * 365)).toFixed(3))
+                    : ensureNum(+Number(Math.abs((bid1 - indexP) / bid1 / toExpireDate * 365)).toFixed(3))
+            }
+
+            recordTaskInfo(combinedInstrumentData[instrumentId_exchangeId], {}, {
+                ...argv,
+                tradedVolume
+            })
+        });
 
         //计算最大贴水
         const minBackWardData = getTickerWithMinValue(Object.values(combinedInstrumentData), 'backwardByYear')
@@ -329,9 +341,17 @@ combineLatestObserver
 
             //找出流动性最大的合约
             const maxLotData = getTickerWithMaxValue(Object.values(combinedInstrumentData), 'avg7Volume')
-            console.log(`[计算结果] 流动性最大 ${maxLotData.name} ${maxLotData.avg7Volume}`)
-            reqMakeOrder({ ...argv, volume: tradeVolumeByStep}, quotes[maxLotData.name]);
-            tradedVolume = tradedVolume + tradeVolumeByStep
+            console.log(`[计算结果] 流动性最大 ${maxLotData.name} ${maxLotData.avg7Volume}`);
+            const makeOrderData = reqMakeOrder({ ...argv, volume: tradeVolumeByStep}, quotes[maxLotData.name]);
+            tradedVolume = tradedVolume + tradeVolumeByStep;
+            
+            if (makeOrderData) {
+                recordTaskInfo(maxLotData, makeOrderData, {
+                    ...argv,
+                    tradedVolume
+                })
+            }
+
         } else {
             console.log(`[判断] 最小贴水 < 最大贴水 ${MAX_BACKWARD}, 在贴水小于_MaxBackward的合约中, 找出流动性最大的合约, 排除当月合约`)
 
@@ -339,7 +359,6 @@ combineLatestObserver
             const lessThanMaxBackwardList = Object.values(combinedInstrumentData)
                 .filter((item: any) => {
                     const { expireDate } = item;
-                    console.log(expireDate, moment(expireDate).format('YYYYMM'))
                     return moment(expireDate).format('YYYYMM') !== moment().format('YYYYMM')
                 })
                 .filter((item: any) => {
@@ -347,12 +366,19 @@ combineLatestObserver
                 })
 
             if (!lessThanMaxBackwardList.length) {
-                console.log('[计算结果], 排除当月合约后，无标的剩余')
+                console.log('[计算结果] 排除当月合约后，无标的剩余')
             } else {
                 const maxLotData = getTickerWithMaxValue(lessThanMaxBackwardList, 'avg7Volume')
-                console.log(`[计算结果] 流动性最大 ${maxLotData.name} ${maxLotData.avg7Volume}`)
-                reqMakeOrder({ ...argv, volume: tradeVolumeByStep}, quotes[maxLotData.name]);
+                console.log(`[计算结果] 流动性最大 ${maxLotData.name} ${maxLotData.avg7Volume}`);
+                const makeOrderData = reqMakeOrder({ ...argv, volume: tradeVolumeByStep}, quotes[maxLotData.name]);                
                 tradedVolume = tradedVolume + tradeVolumeByStep
+                
+                if (makeOrderData) {
+                    recordTaskInfo(maxLotData, makeOrderData, {
+                        ...argv,
+                        tradedVolume
+                    })
+                }
             }
         }
 
