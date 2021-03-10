@@ -218,7 +218,6 @@ import fse from 'fs-extra';
 import { mapState } from "vuex";
 import { Collapse, CollapseItem } from "element-ui";
 
-import { outputJsonSync } from "__gUtils/fileUtils";
 import { KUNGFU_RESOURCES_DIR } from "__gConfig/pathConfig";
 import { getSourceList, debounce, throttle } from "__gUtils/busiUtils";
 import { buildSystemConfig } from "__gConfig/systemConfig";
@@ -321,7 +320,7 @@ export default {
 			const settingData = this.settingConfig[settingKey].value;
 			const outputPath = this.settingConfig[settingKey].outputPath;
 			this.$nextTick()
-				.then(() => outputJsonSync(outputPath, settingData || {}))
+				.then(() => fse.outputJsonSync(outputPath, settingData || {}))
 				.then(() => fse.readJsonSync(outputPath))
 				.then(config => {
 					if (!config) return;
