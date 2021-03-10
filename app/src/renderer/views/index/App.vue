@@ -50,8 +50,6 @@ import GlobalSettingDialog from '@/components/Base/GlobalSettingDialog';
 
 import { buildKungfuGlobalDataPipe, buildTradingDataPipe } from '__io/kungfu/tradingData';
 import { watcher } from '__io/kungfu/watcher';
-import { switchTask } from '__io/actions/base';
-import { KF_DATASET_QUOTE_DIR } from '__gConfig/pathConfig';
 
 import ipcListenerMixin from '@/ipcMsg/ipcListenerMixin';
 import tickerSetMixin from '@/components/MarketFilter/js/tickerSetMixin';
@@ -95,7 +93,6 @@ export default {
         this.bindTradingDataListener();
 
         this.getWatcherStatus();
-        this.calcMarketDataAvgVolume(7);
     },
 
     computed: {
@@ -220,15 +217,7 @@ export default {
             }
         },
 
-        calcMarketDataAvgVolume (days) {
-            const taskCwdPath = path.join(__resources, 'tasks');
-            switchTask(true, {
-                name: `calc_marketdata_avg_volume_${days}`,
-                args: `--days ${days} --dataPath ${JSON.stringify(KF_DATASET_QUOTE_DIR)}`,
-                cwd: taskCwdPath,
-                script: 'calcMarketDataAvgVolume.js'
-            })
-        }
+        
     }
 }
 </script>

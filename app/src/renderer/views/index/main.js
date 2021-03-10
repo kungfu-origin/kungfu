@@ -2,15 +2,16 @@
 /* eslint-disable */
 import './errorCatch';
 import Vue from 'vue';
+import path from 'path';
 import './setKungfuParamsOnWindow';
 import store from '@/store';
 import router from './routers';
 import * as utils from '__gUtils/busiUtils';
 import ElementUI from 'element-ui';
 import Components from '@/assets/components';
-import { remote } from 'electron';
 
-import { watcher } from '__io/kungfu/watcher';
+import { switchTask } from '__io/actions/base';
+import { KF_DATASET_QUOTE_DIR } from '__gConfig/pathConfig';
 
 import App from './App.vue';
 import '@/assets/iconfont/iconfont.js';
@@ -18,14 +19,11 @@ import '@/assets/iconfont/iconfont.css';
 import '@/assets/scss/makeOrder.scss';
 
 Vue.use(ElementUI)
+Vue.use(Components)
 
 Vue.config.productionTip = false
 Vue.store = Vue.prototype.$store = store
-
 Vue.bus = Vue.prototype.$bus = new Vue();
-
-//tr 组件
-Vue.use(Components)
 
 
 new Vue({
@@ -49,6 +47,8 @@ startArchiveMakeTask((archiveStatus) => {
         Vue.store.dispatch('setProcessStatusWithDetail', processStatusWithDetail)
     });
 
+    calcMarketDataAvgVolume(7);
+
     utils.delayMiliSeconds(1000)
         .then(() => startLedger(false))
         .catch(err => console.error(err.message))
@@ -57,3 +57,13 @@ startArchiveMakeTask((archiveStatus) => {
 window.ELEC_WIN_MAP = new Set();
 window.pm2 = _pm2;
 
+
+function calcMarketDataAvgVolume (days) {
+    const taskCwdPath = path.join(__resources, 'tasks');
+    switchTask(true, {
+        name: `calc_marketdata_avg_volume_${days}`,
+        args: `--days ${days} --dataPath ${JSON.stringify(KF_DATASET_QUOTE_DIR)}`,
+        cwd: taskCwdPath,
+        script: 'calcMarketDataAvgVolume.js'
+    })
+}
