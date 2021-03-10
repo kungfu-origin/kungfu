@@ -22,8 +22,8 @@ if (pro) {
     })
 
     baseConfig.extraResources.push({
-        "from": path.join(__dirname, '..', '..', 'kfext_task_backwardHedge', 'lib'),
-        "to": "kungfu-extensions/backward-hedge"
+        "from": path.join(__dirname, '..', '..', 'kfext_task_backwards', 'lib'),
+        "to": "kungfu-extensions/backwards"
     })
 }
 
