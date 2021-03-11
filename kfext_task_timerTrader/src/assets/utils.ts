@@ -91,7 +91,7 @@ export const buildTarget = ({ offset, side, ticker, totalVolume, targetVolume }:
 
 
 export const reqMakeOrder = (baseData: any, quote: QuoteData, unfinishedSteps: number) => {
-    const { side, offset, accountId, volume, parentId } = baseData;
+    const { side, offset, accountId, volume, parentId, sim } = baseData;
     const { instrumentTypeOrigin, instrumentId, exchangeId } = quote;
 
     const makeOrderPrice = getMakeOrderPrice(side, quote, unfinishedSteps)
@@ -109,16 +109,23 @@ export const reqMakeOrder = (baseData: any, quote: QuoteData, unfinishedSteps: n
         hedge_flag: 0,
         parent_id: parentId
     }
-    //@ts-ignore
-    process.send({
-        type: 'process:msg',
-        data: {
-            type: 'MAKE_ORDER_BY_PARENT_ID',
-            body: {
-                ...makeOrderData
+
+    if (!sim) {
+
+        //@ts-ignore
+        process.send({
+            type: 'process:msg',
+            data: {
+                type: 'MAKE_ORDER_BY_PARENT_ID',
+                body: {
+                    ...makeOrderData
+                }
             }
-        }
-    })
+        })
+    } else {
+        console.log('--------- [模拟] ---------')
+    }
+
     console.log(`--------- [下单] ---------`)
     console.log(`[账户] ${makeOrderData.name}`)
     console.log(`[标的] ${makeOrderData.instrument_id}`)
@@ -130,6 +137,7 @@ export const reqMakeOrder = (baseData: any, quote: QuoteData, unfinishedSteps: n
     console.log(`[订单组] ${makeOrderData.parent_id}`)
     console.log(`---------------------------`)
             
+    return makeOrderData
             
 }
 
@@ -449,4 +457,39 @@ export const printQuote = (quote: QuoteData): void => {
         [最低价] ${quote.lowPrice}
         [最新价] ${quote.lastPrice}`)
     }
+}
+
+export function recordTaskInfo (quoteData: any, tradeData: any, globalData: any) {
+    const bid1Price = (quoteData.bidPrices || [])[0]
+    const bid1Volume = (quoteData.bidVolumes || [])[0]
+    const ask1Price = (quoteData.askPrices || [])[0]
+    const ask1Volume = (quoteData.askVolumes || [])[0]
+    const postData = {
+        mode: globalData.sim ? '模拟' : '实盘',
+        updateTime: +new Date().getTime(),
+        instrumentId: tradeData.name,
+        lastPrice: quoteData.lastPrice,
+        bid1PriceVoume: `${bid1Price}/${bid1Volume}`,
+        ask1PriceVoume: `${ask1Price}/${ask1Volume}`,
+        side: tradeData ? SideName[tradeData.side] : '',
+        offset: tradeData ? OffsetName[tradeData.offset] : '',
+        limitPrice: tradeData ? tradeData.limit_price : '',
+        volume: tradeData ? tradeData.volume : '',
+        volumeLefted: tradeData ? globalData.volumeLefted : '',
+        accountId: tradeData ? tradeData.name : ''
+    }
+
+      //@ts-ignore
+      process.send({
+        type: 'process:msg',
+        data: {
+            type: 'REQ_RECORD_DATA',
+            body: {
+                mode: globalData.sim ? 'sim' : 'real',
+                data: {
+                    ...postData                    
+                }
+            }
+        }
+    })
 }

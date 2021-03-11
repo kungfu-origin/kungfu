@@ -359,12 +359,7 @@ combineLatestObserver
             const makeOrderData = reqMakeOrder({ ...argv, volume: tradeVolumeByStep}, quotes[maxLotData.name]);
             tradedVolume = tradedVolume + tradeVolumeByStep;
             
-            if (makeOrderData) {
-                recordTaskInfo(maxLotData, makeOrderData, {
-                    ...argv,
-                    tradedVolume
-                })
-            }
+            makeOrderData && recordTaskInfo(maxLotData, makeOrderData, { ...argv, tradedVolume })
 
         } else {
             console.log(`[判断] 最小贴水 < 最大贴水 ${MAX_BACKWARD}, 在贴水小于_MaxBackward的合约中, 找出流动性最大的合约, 排除当月合约`)
@@ -385,14 +380,9 @@ combineLatestObserver
                 const maxLotData = getTickerWithMaxValue(lessThanMaxBackwardList, 'avg7Volume')
                 console.log(`[计算结果] 流动性最大 ${maxLotData.name} ${maxLotData.avg7Volume}`);
                 const makeOrderData = reqMakeOrder({ ...argv, volume: tradeVolumeByStep}, quotes[maxLotData.name]);                
-                tradedVolume = tradedVolume + tradeVolumeByStep
+                tradedVolume = tradedVolume + tradeVolumeByStep;
                 
-                if (makeOrderData) {
-                    recordTaskInfo(maxLotData, makeOrderData, {
-                        ...argv,
-                        tradedVolume
-                    })
-                }
+                makeOrderData && recordTaskInfo(maxLotData, makeOrderData, { ...argv, tradedVolume })
             }
         }
 

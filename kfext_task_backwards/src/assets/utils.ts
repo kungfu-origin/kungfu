@@ -111,7 +111,6 @@ export const reqMakeOrder = (baseData: any, quote: QuoteData) => {
         console.log('--------- [模拟] ---------')
     }
    
-
     console.log(`--------- [下单] ---------`)
     console.log(`[账户] ${makeOrderData.name}`)
     console.log(`[标的] ${makeOrderData.instrument_id}`)

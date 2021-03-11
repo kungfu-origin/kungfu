@@ -15,7 +15,8 @@ import {
     buildTradeTaskVolumeOffset,
     getCurrentTimestamp,
     getCancelOrderBeforeLastStepControllerTime,
-    printQuote
+    printQuote,
+    recordTaskInfo
 } from './assets/utils';
 
 
@@ -368,10 +369,18 @@ combineLatestObserver
 
             if (+maxLotByStep > 0) {
                 splitMakeOrderStep(maxLotByStep, volume, (stepVolume: number) => {
-                    reqMakeOrder({ ...argv, offset, volume: stepVolume }, quote, unfinishedSteps)  
+                    const makeOrderData = reqMakeOrder({ ...argv, offset, volume: stepVolume }, quote, unfinishedSteps)  
+                    makeOrderData && recordTaskInfo(quote, makeOrderData, {
+                        ...argv,
+                        volumeLefted: total,
+                    })
                 })
             } else {
-                reqMakeOrder({ ...argv, offset, volume }, quote, unfinishedSteps)  
+                const makeOrderData = reqMakeOrder({ ...argv, offset, volume }, quote, unfinishedSteps);
+                makeOrderData && recordTaskInfo({...quote}, makeOrderData, {
+                    ...argv,
+                    volumeLefted: total,
+                })
             }
 
             console.log(`[下单时间] ${getCurrentTimestamp(true)}`)  
