@@ -358,6 +358,7 @@ export const dealPos = (item: PosInputData): PosData => {
         totalVolume: Number(item.volume),
         avgPrice: toDecimal(item.avg_open_price || item.position_cost_price, 3) || '--',
         lastPrice: toDecimal(item.last_price, 3) || '--',
+        totalPrice: toDecimal(item.last_price * Number(item.volume), 3),
         unRealizedPnl: toDecimal(item.unrealized_pnl) + '' || '--',
         exchangeId: item.exchange_id,
         accountId: item.account_id,

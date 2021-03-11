@@ -149,6 +149,11 @@ export const posHeader = (moduleType) => {
                 flex: 1.2
             },{
                 type: 'number',
+                label: '资金持仓',
+                prop: 'totalPrice',
+                flex: 1.5,
+            },{
+                type: 'number',
                 label: '浮动盈亏',
                 prop: 'unRealizedPnl',
                 flex: 1.5
@@ -192,6 +197,11 @@ export const posHeader = (moduleType) => {
             label: '最新价',
             prop: 'lastPrice',
             flex: 1.2
+        },{
+            type: 'number',
+            label: '资金持仓',
+            prop: 'totalPrice',
+            flex: 1.5,
         },{
             type: 'number',
             label: '浮动盈亏',
