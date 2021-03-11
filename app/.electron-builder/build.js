@@ -63,10 +63,10 @@ if (target) {
         })
     }
 
-    if (target.includes('rough')) {
+    if (target.includes('rongh')) {
         baseConfig.extraResources.push({
-            "from": path.join(__dirname, '..', '..', 'kfext_rough', 'build', 'dist'),
-            "to": "kfc/kungfu_extensions/rough"
+            "from": path.join(__dirname, '..', '..', 'kfext_rongh', 'build', 'dist'),
+            "to": "kfc/kungfu_extensions/rongh"
         })
     }
 }
