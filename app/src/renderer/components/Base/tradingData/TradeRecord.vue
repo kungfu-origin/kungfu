@@ -88,7 +88,6 @@ export default {
 
     methods:{
         dealTradeList (trades, { searchKeyword}) {
-            const t = this;
             let tradesAfterFilter = trades
                 .filter(item => {
                     if (searchKeyword.trim() === '') return true;
@@ -97,10 +96,10 @@ export default {
                     return strings.includes(searchKeyword) 
                 })
 
-            if (t.moduleType === 'strategy') {
+            if (this.moduleType === 'strategy') {
                 tradesAfterFilter = tradesAfterFilter
                     .filter(item => {
-                        return Number(item.trade_time) >= t.addTime 
+                        return Number(item.trade_time) >= this.addTime 
                     })
             }
 
@@ -108,8 +107,8 @@ export default {
                 .map(item => {
                     let tradeData = dealTrade(item);
                     let orderId = tradeData.orderId;
-                    const orderStatByOrderId = t.orderStat[orderId] || {}
-                    tradeData.update = !!t.tableData.length;
+                    const orderStatByOrderId = this.orderStat[orderId] || {}
+                    tradeData.update = !!this.tableData.length;
                     tradeData.latencyTrade = orderStatByOrderId.latencyTrade || '';
                     const { updateTime, updateTimeMMDD } = tradeData
                     tradeData.updateTime = !!orderStatByOrderId.tradeTimeNum ? orderStatByOrderId.tradeTime : updateTime

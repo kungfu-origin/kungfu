@@ -62,6 +62,13 @@ if (target) {
             "to": "kfc/kungfu_extensions/shengli"
         })
     }
+
+    if (target.includes('rough')) {
+        baseConfig.extraResources.push({
+            "from": path.join(__dirname, '..', '..', 'kfext_rough', 'build', 'dist'),
+            "to": "kfc/kungfu_extensions/rough"
+        })
+    }
 }
 
 baseConfig.artifactName = resolveArtifactName(cli, pro, target)
