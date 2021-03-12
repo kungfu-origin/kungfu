@@ -127,7 +127,7 @@
         "type": "text",
         "label": "下单时间",
         "prop": "updateTime",
-        "width": "70px"
+        "width": "80px"
       },{
         "type": "text",
         "label": "",
@@ -135,18 +135,23 @@
         "width": "40px"
       },{
         "type": "text",
-        "label": "标的",
+        "label": "合约",
         "prop": "instrumentId",
-        "width": "90px"
-      },{
-        "type": "text",
-        "label": "对应指数",
-        "prop": "indexId",
-        "width": "90px"
+        "width": "100px"
       },{
         "type": "number",
         "label": "合约价格",
         "prop": "instrumentPrice",
+        "width": "80px"
+      },{
+        "type": "text",
+        "label": "对应指数",
+        "prop": "indexId",
+        "width": "100px"
+      },{
+        "type": "number",
+        "label": "指数价格",
+        "prop": "indexPrice",
         "width": "80px"
       },{
         "type": "number",
@@ -170,9 +175,9 @@
         "width": "80px"
       },{
         "type": "number",
-        "label": "指数价格",
-        "prop": "indexPrice",
-        "width": "80px"
+        "label": "剩余天数",
+        "prop": "remainDays",
+        "width": "100px"
       },{
         "type": "text",
         "label": "",
@@ -192,11 +197,6 @@
         "width": "80px"
       },{
         "type": "number",
-        "label": "剩余天数",
-        "prop": "remainDays",
-        "width": "100px"
-      },{
-        "type": "number",
         "label": "下单量",
         "prop": "volume",
         "width": "60px"
@@ -208,9 +208,10 @@
         "width": "110px"
       }, {
         "type": "text",
-        "align": "right",
+        "align": "left",
         "label": "账户",
-        "prop": "accountId"
+        "prop": "accountId",
+        "width": "110px"
       }
     ]
   }

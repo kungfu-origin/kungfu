@@ -469,13 +469,14 @@ export function recordTaskInfo (quoteData: any, tradeData: any, globalData: any)
         updateTime: +new Date().getTime(),
         instrumentId: tradeData.name,
         lastPrice: quoteData.lastPrice,
-        bid1PriceVoume: `${bid1Price}/${bid1Volume}`,
-        ask1PriceVoume: `${ask1Price}/${ask1Volume}`,
+        bid1PriceVolume: `${bid1Price}/${bid1Volume}`,
+        ask1PriceVolume: `${ask1Price}/${ask1Volume}`,
         side: tradeData ? SideName[tradeData.side] : '',
         offset: tradeData ? OffsetName[tradeData.offset] : '',
         limitPrice: tradeData ? tradeData.limit_price : '',
         volume: tradeData ? tradeData.volume : '',
         volumeLefted: tradeData ? globalData.volumeLefted : '',
+        count: globalData.count,
         accountId: tradeData ? tradeData.name : ''
     }
 

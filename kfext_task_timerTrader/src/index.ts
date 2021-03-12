@@ -22,7 +22,7 @@ import {
 
 const argv = minimist(process.argv.slice(2), {
     string: 'ticker',
-    boolean: 'lastSingularity',
+    boolean: [ 'lastSingularity', 'sim' ],
 })
 const { ticker, side, offset, volume, steps, triggerTime, finishTime, exchangeId, parentId, accountId, lastSingularity, lastSingularityMilliSecond, maxLotByStep } = argv;
 const triggerTimeStr = moment(triggerTime).format('YYYYMMDD HH:mm:ss');
@@ -372,14 +372,16 @@ combineLatestObserver
                     const makeOrderData = reqMakeOrder({ ...argv, offset, volume: stepVolume }, quote, unfinishedSteps)  
                     makeOrderData && recordTaskInfo(quote, makeOrderData, {
                         ...argv,
-                        volumeLefted: total,
+                        count: `${timeCount + 1}/${steps}`,
+                        volumeLefted: `${TARGET_VOLUME - total}/${TARGET_VOLUME}`,
                     })
                 })
             } else {
                 const makeOrderData = reqMakeOrder({ ...argv, offset, volume }, quote, unfinishedSteps);
                 makeOrderData && recordTaskInfo({...quote}, makeOrderData, {
                     ...argv,
-                    volumeLefted: total,
+                    count: `${timeCount + 1}/${steps}`,
+                    volumeLefted: `${TARGET_VOLUME - total}/${TARGET_VOLUME}`,
                 })
             }
 
