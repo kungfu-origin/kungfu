@@ -20,6 +20,7 @@ export const reqRecordBeforeQuit = (mainWindow) => {
         ipcMain.on('record-before-quit-done', () => {
             console.timeEnd('record before quit')
             resolve(true)
+            clearTimeout(timer)
         })
     })
 } 

@@ -247,8 +247,8 @@ export default {
             let ordersAfterFilter = orders
                 .filter(item => {
                     if (searchKeyword.trim() === '') return true;
-                    const { order_id, client_id, source_id, account_id, instrument_id } = item
-                    const strings = [ order_id.toString(), client_id, source_id, account_id, instrument_id ].join('')
+                    const { client_id, source_id, account_id, instrument_id } = item
+                    const strings = [ client_id, source_id, account_id, instrument_id ].join('')
                     return strings.includes(searchKeyword) 
                 });
             
