@@ -4,7 +4,7 @@ import { mapGetters, mapState } from 'vuex';
 import AddSetTickerSetDialog from '@/components/MarketFilter/components/AddSetTickerSetDialog';
 import AddTickerDialog from '@/components/MarketFilter/components/AddTickerDialog';
 
-import { checkAllMdProcess, findTargetFromArray } from '__gUtils/busiUtils';
+import { checkAllMdProcess, findTargetFromArray, delayMiliSeconds } from '__gUtils/busiUtils';
 import { getTickerSets, addSetTickerSet, removeTickerSetByName } from '__io/actions/market';
 import { kungfuSubscribeTicker } from '__io/kungfu/makeCancelOrder'
 import { watcher } from '__io/kungfu/watcher';
@@ -138,16 +138,18 @@ export default {
             }
         },
 
-        subscribeTickers (tickers, slience = true) {
-
-            tickers.forEach(ticker => {
+        async subscribeTickers (tickers, slience = true) {
+            let i = 0, len = tickers.length;
+            for (i; i < len; i++) {
+                const ticker = tickers[i];
                 const { instrumentId, source, exchangeId } = ticker;
                 kungfuSubscribeTicker(source, exchangeId, instrumentId)
-            })
+                await delayMiliSeconds(300)
+            }
 
             if (!slience) {
                 if (checkAllMdProcess.call(this, tickers, this.processStatus)) {
-                    this.$message.success('正在订阅标的池内标的，请稍后')                
+                    this.$message.success('订阅请求已发送，请稍后')                
                 }
             }
         }

@@ -177,7 +177,7 @@
         "type": "number",
         "label": "剩余天数",
         "prop": "remainDays",
-        "width": "100px"
+        "width": "60px"
       },{
         "type": "text",
         "label": "",

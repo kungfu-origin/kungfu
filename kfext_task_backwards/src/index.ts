@@ -331,7 +331,7 @@ combineLatestObserver
                 instrumentPrice: quoteData.lastPrice,
                 indexId,
                 indexP,
-                backwardsDelta: Number(lastPrice - indexP).toFixed(3),
+                backwardsDelta: +Number(lastPrice - indexP).toFixed(3),
                 backWardsRatio: indexP * lastPrice === 0 ? '' : Number((lastPrice - indexP) / lastPrice).toFixed(3),
                 backwardByYear: +side === 0 
                     ? ensureNum(+Number(Math.abs((ask1 - indexP) / ask1 / toExpireDate * 365)).toFixed(3))
@@ -350,7 +350,7 @@ combineLatestObserver
 
         console.log(`[计算结果] 最小贴水 ${minBackWardData.name} ${minBackWardData.backwardByYear}`)
         
-        if (minBackWard > MAX_BACKWARD ) {
+        if (+minBackWard > +MAX_BACKWARD ) {
             console.log(`[判断] 最小贴水 > 最大贴水 ${MAX_BACKWARD}, 找出流动性最大的合约`)
 
             //找出流动性最大的合约
@@ -371,7 +371,7 @@ combineLatestObserver
                     return moment(expireDate).format('YYYYMM') !== moment().format('YYYYMM')
                 })
                 .filter((item: any) => {
-                    return item.backwardByYear <= MAX_BACKWARD
+                    return +item.backwardByYear <= +MAX_BACKWARD
                 })
 
             if (!lessThanMaxBackwardList.length) {
