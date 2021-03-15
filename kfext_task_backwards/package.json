@@ -42,7 +42,8 @@
         "key": "accountId",
         "name": "交易账户",
         "type": "account",
-        "required": true
+        "required": true,
+        "unrequiredInSim": true
       },
     
       {
@@ -82,6 +83,7 @@
         "name": "开平",
         "type": "radio",
         "options": "offset",
+        "unrequiredInSim": true,
         "default": 0,
         "required": true
       },
@@ -89,20 +91,23 @@
         "key": "volume",
         "name": "目标数量",
         "type": "int",
-        "required": true
+        "required": true,
+        "unrequiredInSim": true
       },
       {
         "key": "triggerTime",
         "name": "触发时间",
         "type": "timePicker",
-        "required": true
+        "required": true,
+        "unrequiredInSim": true
       },
       {
         "key": "finishTime",
         "name": "结束时间",
         "type": "timePicker",
         "laterThan": "triggerTime",
-        "required": true
+        "required": true,
+        "unrequiredInSim": true
       },
       {
         "key": "interval",
