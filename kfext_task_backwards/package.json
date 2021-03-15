@@ -144,15 +144,15 @@
         "prop": "instrumentId",
         "width": "100px"
       },{
-        "type": "number",
-        "label": "合约价格",
-        "prop": "instrumentPrice",
-        "width": "80px"
-      },{
         "type": "text",
         "label": "对应指数",
         "prop": "indexId",
         "width": "100px"
+      },{
+        "type": "number",
+        "label": "合约价格",
+        "prop": "instrumentPrice",
+        "width": "80px"
       },{
         "type": "number",
         "label": "指数价格",

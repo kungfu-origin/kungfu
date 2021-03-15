@@ -21,12 +21,12 @@ import {
 
 
 const argv = minimist(process.argv.slice(2), {
-    string: 'ticker',
+    string: ['ticker', 'accountId'],
     boolean: [ 'lastSingularity', 'sim' ],
 })
 const { ticker, side, offset, volume, steps, triggerTime, finishTime, exchangeId, parentId, accountId, lastSingularity, lastSingularityMilliSecond, maxLotByStep } = argv;
-const triggerTimeStr = moment(triggerTime).format('YYYYMMDD HH:mm:ss');
-const finishTimeStr = moment(finishTime).format('YYYYMMDD HH:mm:ss');
+const triggerTimeStr = moment(triggerTime || '').format('YYYYMMDD HH:mm:ss');
+const finishTimeStr = moment(finishTime || '').format('YYYYMMDD HH:mm:ss');
 const LOOP_INTERVAL = Math.ceil((finishTime - triggerTime) / steps);
 const TICKER = ticker.toString().trim();
 const PARENT_ID = parentId; 

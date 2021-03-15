@@ -130,7 +130,7 @@ export default {
 
         taskExtMinimistConfig (state) {
             //sim 为系统内置
-            const stringTypes = ['instrumentIdInTickerSet', 'tickerSet', 'instrumentId']
+            const stringTypes = ['instrumentIdInTickerSet', 'tickerSet', 'instrumentId', 'account']
             let minimistConfig = {
                 string: [],
                 boolean: ['sim'],

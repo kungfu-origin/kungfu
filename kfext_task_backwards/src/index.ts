@@ -1,5 +1,5 @@
 import minimist from 'minimist';
-import { Observable, combineLatest, timer } from 'rxjs';
+import { Observable, combineLatest } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 import { 
     transformArrayToObjectByKey, 
@@ -16,24 +16,26 @@ import moment from 'moment';
 
 
 const argv = minimist(process.argv.slice(2), {
-    string: ['tickerSet', 'index'],
+    string: ['tickerSet', 'index', 'accountId'],
     boolean: ['sim']
 })
 
-const { tickerSet, tickerSetTickers, index, side, offset, volume, triggerTime, finishTime, interval, accountId, maxBackward, parentId, sim } = argv;
+const { tickerSet, tickerSetTickers, index, side, volume, triggerTime, finishTime, interval, accountId, maxBackward, sim } = argv;
 
-const triggerTimeStr = moment(triggerTime).format('YYYYMMDD HH:mm:ss');
-const finishTimeStr = moment(finishTime).format('YYYYMMDD HH:mm:ss');
+const triggerTimeResolved = !sim ? triggerTime : moment().valueOf()
+const finishTimeResolved = !sim ? finishTime : moment().endOf('day').valueOf()
+
+const triggerTimeStr = moment(triggerTimeResolved || '').format('YYYYMMDD HH:mm:ss');
+const finishTimeStr = moment(finishTimeResolved).format('YYYYMMDD HH:mm:ss');
 const LOOP_INTERVAL = interval;
 const TICKERS = tickerSetTickers.split('=');
-const PARENT_ID = parentId; 
 const MAX_BACKWARD = Number(maxBackward / 100).toFixed(3);
 
 console.log('==================== 交易信息 =======================')
 console.log('[ARGS]', process.argv.slice(2).join(','))
 console.log('===================================================')
-console.log('[开始时间]', triggerTime, triggerTimeStr)
-console.log('[结束时间]', finishTime, finishTimeStr)
+console.log('[开始时间]', triggerTimeResolved, triggerTimeStr)
+console.log('[结束时间]', finishTimeResolved, finishTimeStr)
 console.log('[执行间隔]', LOOP_INTERVAL, 'ms')
 console.log('[目标标的池] ', tickerSet, '>>>', TICKERS.join(', '))
 console.log('[对应指数]', index)
@@ -104,7 +106,7 @@ var secondsCounterTimer: any = null;
 const TIMER_COUNT_OBSERVER = (): Observable<number> => new Observable((subscriber) => {
     secondsCounterTimer = setInterval(() => {
         const currentTimestamp = +getCurrentTimestamp()
-        const deltaMilliSeconds = currentTimestamp - triggerTime;
+        const deltaMilliSeconds = currentTimestamp - triggerTimeResolved;
         const currentSecond = +Number(deltaMilliSeconds / 1000).toFixed(0)
         subscriber.next(currentSecond)
     }, 50)
@@ -236,7 +238,7 @@ var checkRequiredDataErrorLogged = false;
 combineLatestObserver
     .pipe(
         filter(() => {
-            if (+new Date().getTime() > finishTime) {
+            if (+new Date().getTime() > finishTimeResolved) {
                 finishTrade('time')
                 return false;
             } 
@@ -286,7 +288,7 @@ combineLatestObserver
     .pipe(
         filter((data: BackWardTraderPipeData) => {
             const { seconds } = data;
-            const count = +Math.ceil((+new Date().getTime() - triggerTime) / interval);
+            const count = +Math.ceil((+new Date().getTime() - triggerTimeResolved) / interval);
             
             if (count < 0) return false;
             if (dealedCount === count) return false;
@@ -357,8 +359,7 @@ combineLatestObserver
             const maxLotData = getTickerWithMaxValue(Object.values(combinedInstrumentData), 'avg7Volume')
             console.log(`[计算结果] 流动性最大 ${maxLotData.name} ${maxLotData.avg7Volume}`);
             const makeOrderData = reqMakeOrder({ ...argv, volume: tradeVolumeByStep}, quotes[maxLotData.name]);
-            tradedVolume = tradedVolume + tradeVolumeByStep;
-            
+            tradedVolume = tradedVolume + tradeVolumeByStep;            
             makeOrderData && recordTaskInfo(maxLotData, makeOrderData, { ...argv, tradedVolume })
 
         } else {
@@ -381,13 +382,14 @@ combineLatestObserver
                 console.log(`[计算结果] 流动性最大 ${maxLotData.name} ${maxLotData.avg7Volume}`);
                 const makeOrderData = reqMakeOrder({ ...argv, volume: tradeVolumeByStep}, quotes[maxLotData.name]);                
                 tradedVolume = tradedVolume + tradeVolumeByStep;
-                
                 makeOrderData && recordTaskInfo(maxLotData, makeOrderData, { ...argv, tradedVolume })
             }
         }
 
-        const timeRemain = +Number(( +new Date().getTime() - finishTime) / ( triggerTime - finishTime )).toFixed(3);
-        const tradeRemain = 1 - tradedVolume / volume;
+        if (sim) return;
+
+        const timeRemain = +Number(( +new Date().getTime() - finishTimeResolved) / ( triggerTimeResolved - finishTimeResolved )).toFixed(3);
+        const tradeRemain = 1 - tradedVolume / volume
 
         if (tradeRemain - timeRemain > 0.2) {
             console.log(`[WARNING] tradeRemain ${tradeRemain}`)
@@ -412,7 +414,7 @@ combineLatestObserver
             finishTrade('trade')
         }
 
-        if (+new Date().getTime() > finishTime) {
+        if (+new Date().getTime() > finishTimeResolved) {
             finishTrade('time')
         }
     })

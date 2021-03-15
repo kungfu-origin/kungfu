@@ -38,6 +38,7 @@
                     @dblclick="e => handleDbClickRow(e, item)"
                     @mousedown="e => handleMousedown(e, item)"
                     >
+                    <!-- if need blink, item.update need to be true -->
                         <li 
                         :title="item[column.prop] || ''"
                         :class="[
@@ -52,7 +53,7 @@
                             
                         ]"
                         v-for="column in schema" 
-                        :key="`${column.prop}_${item.id}_${item[column.prop]}`"       
+                        :key="`${column.prop}_${item.keyField}_${item[column.prop]}`"       
                         :style="{                             
                             'max-width': getHeaderWidth(column)
                         }"

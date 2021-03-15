@@ -4,6 +4,7 @@
             :data="taskRecords"
             :schema="tableHeader"
             :renderCellClass="renderCellClass"
+            keyField="updateTimestamp"
             @dbclickRow="() => {}"
             @clickCell="() => {}"
             @rightClickRow="() => {}"
@@ -67,7 +68,7 @@ export default {
     methods: {
 
         dealTaskRecords (dataList) {
-    
+
             return Object.freeze(
                 dataList
                     .filter(record => {
@@ -81,7 +82,9 @@ export default {
                         return Object.freeze({
                             ...value,
                             id: record.update_time.toString(),
-                            updateTime: moment(value.updateTime).format('HH:mm:ss')
+                            updateTime: moment(value.updateTime).format('HH:mm:ss'),
+                            updateTimestamp: record.update_time.toString(),
+                            update: true
                         })
                     })
             )

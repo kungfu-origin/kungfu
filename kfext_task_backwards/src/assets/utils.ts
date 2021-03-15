@@ -1,34 +1,7 @@
 import moment from 'moment';
-import { InstrumentTypes, aliveOrderStatusList, ExchangeIds, SideName, OffsetName, PosDirection } from 'kungfu-shared/config/tradingConfig';
+import { ExchangeIds, SideName, OffsetName } from 'kungfu-shared/config/tradingConfig';
 
-export const getCurrentCount = ({
-    currentTimestamp, 
-    deltaMilliSeconds,
-    finishTime,
-    LOOP_INTERVAL,
-    LAST_SINGULARITY_SECOND,
-    LAST_STEP_COUNT
-}: {
-    currentTimestamp: number; 
-    deltaMilliSeconds: number;
-    finishTime: number;
-    LOOP_INTERVAL: number;
-    LAST_SINGULARITY_SECOND: number;
-    LAST_STEP_COUNT: number
-}) => {
-    const deltaCurrentToFinishTime = finishTime - currentTimestamp;
-    const currentCount = Math.floor(deltaMilliSeconds / LOOP_INTERVAL)
-    if (LAST_SINGULARITY_SECOND) {
-        if (deltaCurrentToFinishTime <= LAST_SINGULARITY_SECOND) {
-            return LAST_STEP_COUNT
-        } else {
-            if (currentCount === LAST_STEP_COUNT) {
-                return currentCount - 1
-            }
-        }
-    }
-    return currentCount
-};
+
 
 export const reqTimer = (fn: Function, interval: number) => {
     fn()
@@ -200,16 +173,16 @@ export function recordTaskInfo (calculatedData: any, tradeData: any, globalData:
         indexId: calculatedData.indexId,
         indexPrice: calculatedData.indexP,
         backwardsDelta: calculatedData.backwardsDelta,
-        backWardsRatio: calculatedData.backWardsRatio * 100 + '%',
-        backWardsRatioByYears: calculatedData.backwardByYear * 100 + '%',
+        backWardsRatio: Number(calculatedData.backWardsRatio * 100).toFixed(2) + '%',
+        backWardsRatioByYears: Number(calculatedData.backwardByYear * 100).toFixed(2) + '%',
         expiredDate: calculatedData.expireDate,
         remainDays: calculatedData.toExpireDate,
         side: tradeData ? SideName[tradeData.side] : '',
-        offset: tradeData ? OffsetName[tradeData.offset] : '',
+        offset: tradeData ? OffsetName[tradeData.offset] || '' : '',
         limitPrice: tradeData ? tradeData.limit_price : '',
-        volume: tradeData ? tradeData.volume : '',
-        volumeLefted: tradeData ? `${globalData.volume - globalData.tradedVolume} / ${globalData.volume}` : '',
-        accountId: tradeData ? tradeData.name : ''
+        volume: tradeData ? tradeData.volume || 0 : '',
+        volumeLefted: tradeData ? `${globalData.volume || 0 - globalData.tradedVolume || 0} / ${globalData.volume || 0}` : '',
+        accountId: tradeData ? tradeData.name || '' : ''
     }
 
       //@ts-ignore

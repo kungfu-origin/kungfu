@@ -20,5 +20,8 @@ export const initConfig = () => {
 
 
 export const copyKungfuKey = () => {
-    fse.copyFileSync(path.join(KUNGFU_RESOURCES_DIR, 'key', 'kungfu.key'), path.join(KF_HOME, 'kungfu.key'))
+    const targetKeyFile = path.join(KF_HOME, 'kungfu.key');
+    if (!fse.existsSync(targetKeyFile)) {
+        fse.copyFileSync(path.join(KUNGFU_RESOURCES_DIR, 'key', 'kungfu.key'), targetKeyFile)
+    }
 }
