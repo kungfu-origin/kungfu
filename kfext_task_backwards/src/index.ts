@@ -418,6 +418,11 @@ combineLatestObserver
     })
 
     function finishTrade (type: string) {
+
+        if (sim) {
+            return;
+        }
+
         if (type === 'time') {
             console.log(`====================== 时间截止，交易结束 ======================`)
         }

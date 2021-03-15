@@ -17,13 +17,21 @@
                     prop="instrumentId"
                     label="标的"
                     show-overflow-tooltip
+                    min-width="80"
+                >
+                </el-table-column>
+                <el-table-column
+                    label="交易所"
+                    show-overflow-tooltip
                     min-width="60"
                 >
+                    <template slot-scope="props">
+                        <span>{{ ExchangeIds[props.row.exchangeId] }}</span>
+                    </template>
                 </el-table-column>
                 <el-table-column
                     label="开盘价"
                     show-overflow-tooltip
-                    min-width="60"
                     class-name="blink-cell"
                     align="right"
                 >
@@ -43,12 +51,11 @@
                 <el-table-column
                     label="收盘价"
                     show-overflow-tooltip
-                    min-width="60"
                     class-name="blink-cell"
                     align="right"
                 >
                     <template slot-scope="props">
-                            <BlinkNum
+                        <BlinkNum
                         :className="{
                             'tr-table-cell': true,
                             'number': true,
@@ -63,7 +70,6 @@
                 <el-table-column
                     label="最高价"
                     show-overflow-tooltip
-                    min-width="60"
                     class-name="blink-cell"
                     align="right"
                 >
@@ -83,7 +89,6 @@
                 <el-table-column
                     label="最低价"
                     show-overflow-tooltip
-                    min-width="60"
                     class-name="blink-cell"
                     align="right"
                 >
@@ -103,7 +108,6 @@
                 <el-table-column
                     label="最新价"
                     show-overflow-tooltip
-                    min-width="60"
                     class-name="blink-cell"
                     align="right"
                 >
@@ -123,9 +127,9 @@
                     <el-table-column
                     label="当日成交量"
                     show-overflow-tooltip
-                    min-width="60"
                     class-name="blink-cell"
                     align="right"
+                    min-width="100"
                 >
                     <template slot-scope="props">
                             <BlinkNum
@@ -143,9 +147,9 @@
                 <el-table-column
                     label="7日均成交量"
                     show-overflow-tooltip
-                    min-width="60"
                     class-name="blink-cell"
                     align="right"
+                    min-width="100"
                 >
                     <template slot-scope="props">
                         <BlinkNum
@@ -163,7 +167,7 @@
                 <el-table-column
                     label=""
                     align="right"
-                    min-width="40"
+                    min-width="80"
                 >
                     <template slot-scope="props">
                         <span class="tr-oper-delete" @click.stop="handleDeleteTicker(props.row)"><i class=" el-icon-delete mouse-over" title="删除标的"></i></span>
@@ -198,6 +202,7 @@ import BlinkNum from './BlinkNum';
 
 import { getIndexFromTargetTickers } from '__gUtils/busiUtils';
 import { dealQuote } from '__io/kungfu/watcher';
+import { ExchangeIds } from "kungfu-shared/config/tradingConfig";
 
 import tickerSetMixin from '@/components/MarketFilter/js/tickerSetMixin';
 
@@ -212,6 +217,11 @@ export default {
             type: Object,
             default: () => ({})
         }
+    },
+
+    data () {
+        this.ExchangeIds = ExchangeIds;
+        return {}
     },
 
     computed: {
