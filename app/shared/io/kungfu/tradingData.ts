@@ -9,18 +9,11 @@ import {
     transformAssetItemListToData 
 } from '__io/kungfu/watcher';
 
-import { startGetKungfuTradingData, startGetKungfuGlobalData } from '__io/kungfu/watcher';
+import { startGetKungfuTradingData } from '__io/kungfu/watcher';
 
 export const KUNGFU_TRADING_DATA_OBSERVER = new Observable(subscriber => {
     subscriber.next({})
     startGetKungfuTradingData((state: any) => {
-        subscriber.next(state)
-    })
-})   
-
-export const KUNGFU_GLOBAL_DATA_OBSERVER = new Observable(subscriber => {
-    subscriber.next({})
-    startGetKungfuGlobalData((state: any) => {
         subscriber.next(state)
     })
 })
@@ -82,7 +75,7 @@ export const buildMarketDataPipe = () => {
 }
 
 export const buildKungfuGlobalDataPipe = () => {
-    return KUNGFU_GLOBAL_DATA_OBSERVER.pipe(
+    return KUNGFU_TRADING_DATA_OBSERVER.pipe(
         map((data: any): any => {
             return {
                 gatewayStates: dealGatewayStates(data.appStates || {})

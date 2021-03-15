@@ -49,7 +49,8 @@ export const startGetKungfuTradingData = (callback: Function, interval = 1000) =
             
             callback({
                 ledger: watcher.ledger,
-                state: watcher.state
+                state: watcher.state,
+                appStates: watcher.appStates,
             });
             resolve(true);
         })
@@ -67,34 +68,6 @@ export const writeKungfu = (id: string, label: string, type: string, val: string
     watcher.publishState(data);
 }
 
-
-export const startGetKungfuGlobalData = (callback: Function, interval = 1000) => {
-    if (process.env.RENDERER_TYPE !== 'app') {
-        if (process.env.RENDERER_TYPE !== 'makeOrder') {
-            if (process.env.APP_TYPE !== 'cli') {
-                return 
-            }
-        }
-    }
-    
-    setTimerPromiseTask(() => {
-        return new Promise((resolve) => {
-            if (!watcher.isLive() && !watcher.isStarted() && watcher.isUsable()) {
-                watcher.setup();
-            }
-
-            if (watcher.isLive()) {
-                watcher.step();
-            }
-
-            callback({
-                appStates: watcher.appStates,
-            });
-            
-            resolve(true);
-        })
-    }, interval);
-}
 
 
 export const transformOrderTradeListToData = (list: any[], type: string) => {
