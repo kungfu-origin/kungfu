@@ -3,7 +3,7 @@
 import electron from 'electron';
 
 //base setting, init db
-import { initConfig } from '__assets/base';
+import { initConfig, copyKungfuKey } from '__assets/base';
 import { killExtra } from '__gUtils/processUtils';
 import { logger } from '__gUtils/logUtils';
 import { platform } from '__gConfig/platformConfig';
@@ -14,8 +14,8 @@ import { openSettingDialog } from "./events";
 const path = require('path');
 const { app, globalShortcut, BrowserWindow, Menu, shell } = electron
 
-//create db
 initConfig();
+copyKungfuKey();
 setMenu();
 
 // Keep a global reference of the window object, if you don't, the window will

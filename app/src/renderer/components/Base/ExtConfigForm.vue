@@ -6,7 +6,7 @@
     class="kf-ext-form"
   >
     <el-form-item
-      v-for="item of configList"
+      v-for="item of configListResolved"
       :key="item.key"
       :label="item.name"
       :prop="item.key"
@@ -271,7 +271,7 @@ import instrumentsMixin from "@/assets/mixins/instrumentsMixin";
 Vue.use(Autocomplete);
 
 export default {
-  mixins: [instrumentsMixin],
+  mixins: [ instrumentsMixin ],
 
   props: {
     configList: {
@@ -302,6 +302,7 @@ export default {
       type: Object,
       default: () => ({}),
     },
+
     method: {
       type: String,
       default: "add",
@@ -339,6 +340,15 @@ export default {
       accountsAsset: state => state.ACCOUNT.accountsAsset,
       tickerSets: state => state.MARKET.tickerSets || []
     }),
+
+
+    configListResolved () {
+      const isSim = !!this.form.sim;
+      return this.configList
+        .filter(item => {
+          return !(isSim && item.unrequiredInSim)
+        })
+    },
   },
 
   watch: {
@@ -347,7 +357,7 @@ export default {
       handler(newVal) {
         this.$emit("input", newVal);
       },
-    }
+    },
   },
 
   methods: {
@@ -361,7 +371,7 @@ export default {
       }
     },
 
-    handleSelectInstrumentId(key, exchangeIdKey, item) {
+    handleSelectInstrumentId (key, exchangeIdKey, item) {
       exchangeIdKey = exchangeIdKey || "exchangeId";
       const { instrument_id, exchange_id } = item;
       this.$set(this.form, key, instrument_id);
@@ -373,7 +383,7 @@ export default {
     },
 
     //日期必须要重写，不然有问题
-    handleChangeTimePicker(key) {
+    handleChangeTimePicker (key) {
       const theTime = this.form[key];
       let mt = moment(theTime);
       const date = mt.format("YYYYMMDD");
@@ -391,12 +401,12 @@ export default {
       this.$set(this.form, key, mt.valueOf());
     },
 
-    handleInputValue(key, e) {
+    handleInputValue (key, e) {
       this.$set(this.form, key, e);
     },
 
     //添加文件
-    handleSelectFile(targetKey) {
+    handleSelectFile (targetKey) {
       const dialog = remote.dialog;
       dialog.showOpenDialog(
         {
@@ -410,11 +420,11 @@ export default {
       );
     },
 
-    isDisabled(key) {
+    isDisabled (key) {
       return this.method === "update" && this.isUniKey(key);
     },
 
-    isUniKey(key) {
+    isUniKey (key) {
       if (typeof this.uniKey === "string") {
         return this.uniKey === key;
       } else {
@@ -423,32 +433,33 @@ export default {
     },
 
     //for paComponents
-    validate(cb) {
+    validate (cb) {
       this.$refs.extForm.validate(cb);
     },
 
-    initForm() {
-      this.configList.forEach((item) => {
-        const key = item.key;
-        const type = item.type;
-        const defaultVal = item.default;
-        if (this.form[key] === undefined || this.form[key] === "") {
-          if (type === "int") {
-            if (!+defaultVal) {
-              return;
+    initForm () {
+      this.configList
+        .forEach((item) => {
+          const key = item.key;
+          const type = item.type;
+          const defaultVal = item.default;
+          if (this.form[key] === undefined || this.form[key] === "") {
+            if (type === "int") {
+              if (!+defaultVal) {
+                return;
+              }
+            }
+
+            if (item.default !== undefined) {
+              this.$set(this.form, key, item.default);
+            } else {
+              this.$set(this.form, key, "");
             }
           }
-
-          if (item.default !== undefined) {
-            this.$set(this.form, key, item.default);
-          } else {
-            this.$set(this.form, key, "");
-          }
-        }
-      });
+        })
     },
 
-    resolvedSelectOrRatioOptions(item) {
+    resolvedSelectOrRatioOptions (item) {
       const options = item.options || item.data || [];
       if (typeof options !== "string" || !this.kungfuKeywordsData[options])
         return options;
@@ -461,7 +472,7 @@ export default {
       });
     },
 
-    buildValidators(item) {
+    buildValidators (item) {
       let validators = [];
 
       if (this.uniKey === item.key && this.method === "add") {
@@ -486,14 +497,14 @@ export default {
       return validators;
     },
 
-    getAvailCash(accountId) {
+    getAvailCash (accountId) {
       if (!accountId) return 0;
       const targetAccount = this.accountsAsset[accountId] || null;
       if (!targetAccount) return 0;
       return targetAccount.avail || 0;
     },
 
-    getAccountType(sourceName) {
+    getAccountType (sourceName) {
       return this.tdAccountSource[sourceName] || {};
     },
   },

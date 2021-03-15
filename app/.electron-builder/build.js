@@ -56,6 +56,16 @@ if (target) {
         })
     }
 
+    if (target.includes('ctpzs')) {
+        baseConfig.extraResources.push({
+            "from": "./resources/ext/ctp",
+            "to": "kfc/kungfu_extensions/ctp/",
+            "filter": [
+                '*.dll'
+            ],
+        })
+    }
+
     if (target.includes('shengli')) {
         baseConfig.extraResources.push({
             "from": path.join(__dirname, '..', '..', 'kfext_shengli', 'build', 'dist'),

@@ -237,7 +237,8 @@ export default {
             const processName = 'task_' + key + '_' + processNameByUniKey;
             const args = this.formArgs(extSettingData);
 
-            return this.preUpdate()
+            return this.configRealMode(configInfo.name, extSettingData)
+                .then(() => this.preUpdate())
                 .then(res => {
                     if (!res) return Promise.resolve(true)
                     return switchTask(true, {
@@ -270,6 +271,8 @@ export default {
             })
         },
 
+        
+
         handleTaskSwitch (e, data) {
             const { processId, args, cwd } = data;
             return switchTask(e, {
@@ -277,6 +280,17 @@ export default {
                 args: args.join(' '),
                 cwd
             })
+        },
+
+        configRealMode (name, config) {
+            if (!config.sim) {
+                return this.$confirm(`确认以实盘模式运行交易任务 ${name}`, '提示', {
+                    confirmButtonText: '确 定',
+                    cancelButtonText: '取 消',
+                })
+            } else {
+                return Promise.resolve()
+            }
         },
 
         formUnikeyInProcessName (uniKey, form) {

@@ -1,5 +1,6 @@
 import fse from 'fs-extra';
-import { KF_CONFIG_DEFAULT_PATH, KF_CONFIG_PATH, KF_TARADING_CONFIG_DEFAULT_PATH, KF_TARADING_CONFIG_PATH } from '__gConfig/pathConfig';
+import path from 'path';
+import { KF_HOME, KF_CONFIG_DEFAULT_PATH, KF_CONFIG_PATH, KF_TARADING_CONFIG_DEFAULT_PATH, KF_TARADING_CONFIG_PATH, KUNGFU_RESOURCES_DIR } from '__gConfig/pathConfig';
 import { addFileSync } from '__gUtils/fileUtils';
 import { logger } from '__gUtils/logUtils'
 
@@ -18,3 +19,6 @@ export const initConfig = () => {
 };
 
 
+export const copyKungfuKey = () => {
+    fse.copyFileSync(path.join(KUNGFU_RESOURCES_DIR, 'key', 'kungfu.key'), path.join(KF_HOME, 'kungfu.key'))
+}
