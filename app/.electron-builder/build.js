@@ -64,6 +64,19 @@ if (target) {
     }
 
     if (target.includes('rongh')) {
+
+        baseConfig.extraResources[targetIndex] = {
+            "from": "../core/build/kfc",
+            "to": "kfc",
+            "filter": [
+                "!**/btdata",
+                "!**/kungfu_extensions/tora",
+                "!**/kungfu_extensions/shengli",
+                "!**/kungfu_extensions/xtp",
+                "!**/kungfu_extensions/ctp"
+            ]
+        }
+
         baseConfig.extraResources.push({
             "from": path.join(__dirname, '..', '..', 'kfext_rongh', 'build', 'dist'),
             "to": "kfc/kungfu_extensions/rongh"
