@@ -114,9 +114,9 @@ export default {
                             const { minute, quoteAlive } = packetData.body || {};
                             
                             if (!quoteAlive) {
-                                this.$message.warning(`距离交易任务 ${processName} 开始执行还有 ${minute} 分钟，目前还未收到订阅行情，请检查交易进程与行情进程运行`)
+                                this.$message.warning(`距离算法任务 ${processName} 开始执行还有 ${minute} 分钟，目前还未收到订阅行情，请检查交易进程与行情进程运行`)
                             } else {
-                                this.$message.info(`距离交易任务 ${processName} 开始执行还有 ${minute} 分钟，请保证交易进程与行情进程运行`)
+                                this.$message.info(`距离算法任务 ${processName} 开始执行还有 ${minute} 分钟，请保证交易进程与行情进程运行`)
                             }
                             break
                         case 'CALC_AVG_VOLUME': //周均成交量

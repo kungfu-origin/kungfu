@@ -17,7 +17,7 @@
                         <el-tab-pane :lazy="true" label="行情源" name="md">
                             <MdAccount></MdAccount>
                         </el-tab-pane>
-                        <el-tab-pane :lazy="true" label="交易任务" name="tradingTasks"  v-if="taskExtConfigList.length">
+                        <el-tab-pane :lazy="true" label="算法任务" name="tradingTasks"  v-if="taskExtConfigList.length">
                             <Task 
                             :noTitle="true" 
                             ></Task>
@@ -52,7 +52,7 @@
                             @showHistory="handleShowHistory"
                             />  
                         </el-tab-pane>
-                        <el-tab-pane :lazy="true"  v-if="taskExtConfigList.length" :label="`交易任务记录 ${currentTaskIdInTab}`" name="taskDetail">
+                        <el-tab-pane :lazy="true"  v-if="taskExtConfigList.length" :label="`算法任务记录 ${currentTaskIdInTab}`" name="taskDetail">
                             <TaskRecord></TaskRecord>
                         </el-tab-pane>
                     </el-tabs>

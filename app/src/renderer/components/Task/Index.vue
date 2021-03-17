@@ -1,5 +1,5 @@
 <template>
-<tr-dashboard :title="noTitle ? '' : '交易任务'">
+<tr-dashboard :title="noTitle ? '' : '算法任务'">
     <div slot="dashboard-header">
         <tr-dashboard-header-item>
             <tr-search-input v-model.trim="searchKeyword"></tr-search-input>
@@ -26,6 +26,20 @@
                 >
             </el-table-column>
             <el-table-column
+                prop="subType"
+                label="类型"
+                sortable
+                :show-overflow-tooltip="true"       
+                >
+                <template slot-scope="props">
+                    <el-tag
+                        :type="(TaskTypeConfig[props.row.subType] || {}).color || ''" 
+                        >
+                            {{ (TaskTypeConfig[props.row.subType] || {}).name || props.row.subType }}
+                        </el-tag>                
+                    </template>
+            </el-table-column>
+            <el-table-column
                 label="状态"
                 sortable  
                 show-overflow-tooltip
@@ -42,7 +56,7 @@
                 label="执行时间"
                 sortable  
                 prop="createdAt"  
-                width="150px"
+                min-width="180px"
             >
             </el-table-column>
             <el-table-column
@@ -98,6 +112,7 @@ import { deleteProcess } from '__gUtils/processUtils';
 import { removeFileFolder } from '__gUtils/fileUtils';
 import { buildProcessLogPath } from '__gConfig/pathConfig';
 import { switchTask } from '__io/actions/base';
+import { TaskTypeConfig } from 'kungfu-shared/config/tradingConfig';
 
 import baseMixin from '@/assets/mixins/baseMixin';
 import openLogMixin from '@/assets/mixins/openLogMixin';
@@ -122,6 +137,7 @@ export default {
 
     data () {
         this.ifProcessRunning = ifProcessRunning;
+        this.TaskTypeConfig = TaskTypeConfig;
 
         return {
             setTaskMethod: 'add',
@@ -161,6 +177,8 @@ export default {
                         processId: key,
                         processStatus: targetProcess.status,
                         createdAt: targetProcess.created_at ? moment(targetProcess.created_at).format('YYYY-MM-DD HH:mm:ss') : '--',
+                        configKey: argsConfig.configKey,
+                        subType: argsConfig.subType,
                         ...targetProcess
                     }
                 })
@@ -194,7 +212,7 @@ export default {
 
         handleAddTask () {
             if (!this.taskExtConfigList.length) {
-                this.$message.warning('暂无交易任务可选项！')
+                this.$message.warning('暂无算法任务可选项！')
                 return;
             }
 
@@ -240,8 +258,8 @@ export default {
         handleDeleteTask (data, update = false) {
             const { processId } = data;
             const tips = update 
-                ? `更新配置需停止并删除交易任务 ${processId}，确认停止并删除吗？`
-                : `确认停止并删除交易任务 ${processId} 吗？`
+                ? `更新配置需停止并删除算法任务 ${processId}，确认停止并删除吗？`
+                : `确认停止并删除算法任务 ${processId} 吗？`
 
             return this.$confirm(tips, '提示', {
                 confirmButtonText: '确 定',

@@ -415,12 +415,14 @@ export const getExtensionConfigs = async (extDir: string): Promise<any> => {
                 if(kungfuConfig) {
                     const type: string = kungfuConfig.type;
                     const uniKey: string | Array<string>= kungfuConfig.uniKey;
+                    const subType: string = kungfuConfig.subType;
                     const config: SourceConfig = kungfuConfig.config
                     const displayConfig: DisplayConfig = kungfuConfig.displayConfig || {} 
                     return  {
                         type,
                         config,
                         uniKey,
+                        subType, 
                         key: kungfuConfig.key,
                         name: kungfuConfig.name,
                         packageJSONPath: packageJSONPaths[index],

@@ -1,7 +1,7 @@
 <template>
-     <el-dialog 
+    <el-dialog 
     width="700px" 
-    :title="`${method === 'add'? '添加' : '设置'} 交易任务`"  
+    :title="`${method === 'add'? '添加' : '设置'} 算法任务`"  
     :visible="visible" 
     :close-on-click-modal="false"
     :close-on-press-escape="true"
@@ -17,6 +17,7 @@
                 :label="item.name"
                 size="mini"
                 :name="item.key"
+                :lazy="true"
             >
                 <ExtConfigForm
                     ref="taskSettingForm"
@@ -97,8 +98,8 @@ export default {
                     this.$emit('confirm', JSON.stringify({
                         ...postData,
                         parentId: BigInt(+moment().valueOf()).toString(),
-                        configKey: this.activeTabName
-
+                        configKey: this.activeTabName,
+                        subType: (this.configList[this.targetConfigIndex] || {}).subType || ''
                     }), this.activeTabName)
                     this.handleClose();
                 }

@@ -3,6 +3,9 @@
         <tr-dashboard title="" >
             <div slot="dashboard-header">
                 <tr-dashboard-header-item>
+                    <span class="mouse-over" style="font-weight: 600; font-size: 11px" title="添加选股算法" @click="handleSubscribeAllTickers">筛</span>
+                </tr-dashboard-header-item>
+                <tr-dashboard-header-item>
                     <el-button size="mini" @click="handleAddTicker" title="添加">添加</el-button>
                 </tr-dashboard-header-item>
             </div>
