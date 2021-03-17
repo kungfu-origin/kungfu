@@ -241,6 +241,13 @@ combineLatestObserver
         let combinedInstrumentData:any = {};
 
         const tickersResolved = TICKERS.filter((ticker: string) => !ticker.includes(index))
+
+        if (tickersResolved.length ) {
+            console.log('[ERROR] 无合约')
+            finishTrade('failed')
+            return;
+        }
+
         tickersResolved.forEach((instrumentId_exchangeId: string) => {
             const quoteData = quotes[instrumentId_exchangeId] || {};
             const instrumentData = instruments[instrumentId_exchangeId] || {};

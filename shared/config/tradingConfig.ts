@@ -80,7 +80,7 @@ export const SourceTypeConfig: SourceType = {
     'StockOption': {
         name: isEnglish ? 'option' : '期权',
         kfId: 3,
-        color: ''
+        color: 'info'
     },
 
     'Sim': {
@@ -88,6 +88,18 @@ export const SourceTypeConfig: SourceType = {
         kfId: 4,
         color: 'success'
     },
+}
+
+export const TaskTypeConfig: any = {
+    'mFilter': {
+        name: isEnglish ? 'market' : '行情',
+        color: ''
+    },
+
+    'trade': {
+        name: isEnglish ? 'trade' : '交易',
+        color: 'info'
+    }
 }
 
 export const HedgeFlag: NumberToStringObject = {

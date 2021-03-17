@@ -32,10 +32,9 @@
   "kungfuConfig": {
     "type": "task",
     "subType": "mFilter",
-    "key": "backwardsHedge",
-    "name": "贴水对冲",
+    "key": "backwards",
+    "name": "最优贴水",
     "uniKey": [
-      "accountId",
       "tickerSet"
     ],
     "config": [
