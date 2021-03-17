@@ -9,12 +9,12 @@
             </div>
             <div class="last-price">
                 <span class="title">最新价</span>
-                <BlinkNum
+                <tr-blink-num
                     :className="{}"
                     :theKey="`${tickerId}_orderbook`"   
                     :num="lastPrice"
                     >
-                </BlinkNum>
+                </tr-blink-num>
             </div> 
             <div class="bid__warp order-book-part__warp">
                 <div class="order-line" @click="handleSelectQuote(bidPrices[index], 1)" v-for="(item, index) in new Array(10)" :key="index">
@@ -28,7 +28,6 @@
 
 <script>
 
-import BlinkNum from './BlinkNum'; 
 import { dealQuote } from '__io/kungfu/watcher';
 
 export default {
@@ -44,10 +43,6 @@ export default {
             type: String,
             default: ''
         },
-    },
-
-    components: {
-        BlinkNum
     },
 
     computed: {

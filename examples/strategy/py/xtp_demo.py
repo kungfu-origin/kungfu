@@ -24,7 +24,7 @@ def pre_start(context):
     # context.hold_positions()
     context.log.info(f"is_book_held: {context.is_book_held()}, is_positions_mirrored: {context.is_positions_mirrored()}")
     context.log.info("pre start")
-    context.add_account(Source.XTP, "15040910", 100000000.0)
+    context.add_account(Source.XTP, "15014990", 100000000.0)
     context.subscribe(Source.XTP, ["600198", "600548"], Exchange.SSE)
     # context.subscribe(source, ["159901", "300030"], Exchange.SZE)
     # context.subscribe(Source.BAR, ["159901", "300030"], Exchange.SZE)

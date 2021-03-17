@@ -40,26 +40,33 @@
                     >
                     <!-- if need blink, item.update need to be true -->
                         <li 
-                        :title="item[column.prop] || ''"
-                        :class="[
-                            renderCellClass(column.prop, item),                        
-                            'tr-table-cell', 
-                            'text-overflow',
-                            item.update ? 'update' : '',
-                            column.type === 'number' ? 'number' : '',
-                            column.type === 'account-strategy' ? 'account-strategy' : '',
-                            column.type === 'operation' ? 'oper' : '',
-                            column.align ? `text-${column.align}` : ''
-                            
-                        ]"
-                        v-for="column in schema" 
-                        :key="`${column.prop}_${item.keyField}_${item[column.prop]}`"       
-                        :style="{                             
-                            'max-width': getHeaderWidth(column)
-                        }"
-                        @click.stop="e => handleClickCell(e, item, column)"
+                            :title="item[column.prop] || ''"
+                            :class="[
+                                renderCellClass(column.prop, item),                        
+                                'tr-table-cell', 
+                                'text-overflow',
+                                item.update ? 'update' : '',
+                                column.type === 'number' ? 'number' : '',
+                                column.type === 'account-strategy' ? 'account-strategy' : '',
+                                column.type === 'operation' ? 'oper' : '',
+                                column.align ? `text-${column.align}` : ''
+                                
+                            ]"
+                            v-for="column in schema" 
+                            :key="`${column.prop}_${item.keyField}_${item[column.prop]}`"       
+                            :style="{                             
+                                'max-width': getHeaderWidth(column)
+                            }"
+                            @click.stop="e => handleClickCell(e, item, column)"
                         >
-                            <template v-if="column.type !== 'operation'">
+                            <template v-if="column.type === 'number'">
+                                <tr-blink-num
+                                :theKey="`${column.prop}${item[column.prop]}`"   
+                                :num="item[column.prop]"
+                                >
+                                </tr-blink-num>                            
+                            </template>
+                            <template v-else-if="column.type !== 'operation'">
                                 {{item[column.prop]}}
                             </template>
                             <template v-else-if="column.type === 'operation'">
@@ -401,14 +408,6 @@ export default {
 
         &.update{
             animation: nanoBlink 1.1s 1;
-        }
-
-        &.update.number.red{
-            animation: nanoRedBlink 1.1s 1;
-        }
-
-        &.update.number.green{
-            animation: nanoGreenBlink 1.1s 1;
         }
     }
 

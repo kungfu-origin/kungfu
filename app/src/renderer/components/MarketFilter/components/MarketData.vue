@@ -3,7 +3,7 @@
         <tr-dashboard title="" >
             <div slot="dashboard-header">
                 <tr-dashboard-header-item>
-                    <span class="mouse-over" style="font-weight: 600; font-size: 11px" title="添加选股算法" @click="handleSubscribeAllTickers">筛</span>
+                    <span class="mouse-over" style="font-weight: 600; font-size: 11px" title="添加选股算法" @click="handleAddTask('mFilter')">筛</span>
                 </tr-dashboard-header-item>
                 <tr-dashboard-header-item>
                     <el-button size="mini" @click="handleAddTicker" title="添加">添加</el-button>
@@ -39,16 +39,11 @@
                     align="right"
                 >
                     <template slot-scope="props">
-                        <BlinkNum
-                        :className="{
-                            'tr-table-cell': true,
-                            'number': true,
-                            'nano': true,
-                        }"
+                        <tr-blink-num
                         :theKey="`${currentTickerSet.name}_${props.row.instrumentId}`"   
                         :num="getValueFromMarketData(props.row, 'openPrice' )"
                         >
-                        </BlinkNum>
+                        </tr-blink-num>
                     </template>
                 </el-table-column>
                 <el-table-column
@@ -58,16 +53,11 @@
                     align="right"
                 >
                     <template slot-scope="props">
-                        <BlinkNum
-                        :className="{
-                            'tr-table-cell': true,
-                            'number': true,
-                            'nano': true,
-                        }"
+                        <tr-blink-num
                         :theKey="`${currentTickerSet.name}_${props.row.instrumentId}`"   
                         :num="getValueFromMarketData(props.row, 'closePrice' )"
                         >
-                        </BlinkNum>
+                        </tr-blink-num>
                     </template>
                 </el-table-column>
                 <el-table-column
@@ -77,16 +67,11 @@
                     align="right"
                 >
                     <template slot-scope="props">
-                            <BlinkNum
-                        :className="{
-                            'tr-table-cell': true,
-                            'number': true,
-                            'nano': true,
-                        }"
+                        <tr-blink-num
                         :theKey="`${currentTickerSet.name}_${props.row.instrumentId}`"   
                         :num="getValueFromMarketData(props.row, 'highPrice' )"
                         >
-                        </BlinkNum>
+                        </tr-blink-num>
                     </template>
                 </el-table-column>
                 <el-table-column
@@ -96,16 +81,11 @@
                     align="right"
                 >
                     <template slot-scope="props">
-                            <BlinkNum
-                        :className="{
-                            'tr-table-cell': true,
-                            'number': true,
-                            'nano': true,
-                        }"
+                        <tr-blink-num
                         :theKey="`${currentTickerSet.name}_${props.row.instrumentId}`"   
                         :num="getValueFromMarketData(props.row, 'lowPrice' )"
                         >
-                        </BlinkNum>
+                        </tr-blink-num>
                     </template>
                 </el-table-column>
                 <el-table-column
@@ -115,16 +95,11 @@
                     align="right"
                 >
                     <template slot-scope="props">
-                            <BlinkNum
-                        :className="{
-                            'tr-table-cell': true,
-                            'number': true,
-                            'nano': true,
-                        }"
+                        <tr-blink-num
                         :theKey="`${currentTickerSet.name}_${props.row.instrumentId}`"     
                         :num="getValueFromMarketData(props.row, 'lastPrice' )"
                         >
-                        </BlinkNum>
+                        </tr-blink-num>
                     </template>
                 </el-table-column>
                     <el-table-column
@@ -135,16 +110,11 @@
                     min-width="100"
                 >
                     <template slot-scope="props">
-                            <BlinkNum
-                        :className="{
-                            'tr-table-cell': true,
-                            'number': true,
-                            'nano': true,
-                        }"
+                        <tr-blink-num
                         :theKey="`${currentTickerSet.name}_${props.row.instrumentId}`"     
                         :num="getValueFromMarketData(props.row, 'volume' )"
                         >
-                        </BlinkNum>
+                        </tr-blink-num>
                     </template>
                 </el-table-column>
                 <el-table-column
@@ -155,16 +125,11 @@
                     min-width="100"
                 >
                     <template slot-scope="props">
-                        <BlinkNum
-                        :className="{
-                            'tr-table-cell': true,
-                            'number': true,
-                            'nano': true,
-                        }"
+                        <tr-blink-num
                         :theKey="`${currentTickerSet.name}_${props.row.instrumentId}`"   
                         :num="marketAvgVolume7Days[`${props.row.instrumentId}_${props.row.exchangeId}`] || '--'"
                         >
-                        </BlinkNum>
+                        </tr-blink-num>
                     </template>
                 </el-table-column>
                 <el-table-column
@@ -201,18 +166,17 @@
 
 import { mapState } from 'vuex';
 
-import BlinkNum from './BlinkNum'; 
-
 import { getIndexFromTargetTickers } from '__gUtils/busiUtils';
 import { dealQuote } from '__io/kungfu/watcher';
 import { ExchangeIds } from "kungfu-shared/config/tradingConfig";
 
 import tickerSetMixin from '@/components/MarketFilter/js/tickerSetMixin';
+import taskMixin from '@/components/Task/js/taskMixin';
 
 
 export default {
 
-    mixins: [ tickerSetMixin ],
+    mixins: [ tickerSetMixin, taskMixin ],
 
     props: {
 
@@ -236,10 +200,6 @@ export default {
         marketAvgVolume7Days () {
             return this.marketAvgVolume[7] || {}
         }
-    },
-
-    components: {
-        BlinkNum
     },
 
     methods: {

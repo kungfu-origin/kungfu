@@ -62,18 +62,11 @@
                 min-width="100"
                 >
                 <template slot-scope="props">
-                    <span 
-                    :class="{
-                        'tr-table-cell': true,
-                        'number': true,
-                        'nano': true,
-                        'color-red': calcCash(props.row, 'realizedPnl') > 0,
-                        'color-green': calcCash(props.row, 'realizedPnl') < 0,
-                    }"
-                    :key="`realized_pnl_${props.row.strategy_id}_${calcCash(props.row, 'realizedPnl')}`"                        
-                    >
-                    {{calcCash(props.row, 'realizedPnl') || '--'}}
-                    </span> 
+                    <tr-blink-num
+                        :theKey="`realized_pnl_${props.row.strategy_id}_${calcCash(props.row, 'realizedPnl')}`"                        
+                        :num="calcCash(props.row, 'realizedPnl') || '--'"
+                        >
+                    </tr-blink-num>
                 </template>
             </el-table-column>
             <el-table-column
@@ -84,18 +77,11 @@
                 min-width="110"
                 >
                 <template slot-scope="props">
-                    <span 
-                    :class="{
-                        'tr-table-cell': true,
-                        'number': true,
-                        'nano': true,
-                        'color-red': calcCash(props.row, 'unRealizedPnl') > 0,
-                        'color-green': calcCash(props.row, 'unRealizedPnl') < 0,
-                    }"
-                    :key="`unrealized_pnl_${props.row.strategy_id}_${calcCash(props.row, 'unRealizedPnl')}`"                        
-                    >
-                    {{calcCash(props.row, 'unRealizedPnl') || '--'}}
-                    </span> 
+                    <tr-blink-num
+                        :theKey="`unrealized_pnl_${props.row.strategy_id}_${calcCash(props.row, 'unRealizedPnl')}`"                        
+                        :num="calcCash(props.row, 'unRealizedPnl') || '--'"
+                        >
+                    </tr-blink-num> 
                 </template>
             </el-table-column>
             <el-table-column
@@ -106,18 +92,11 @@
                 min-width="120"
                 >
                 <template slot-scope="props" >
-                    <span 
-                    :class="{
-                        'tr-table-cell': true,
-                        'number': true,
-                        'nano': true,
-                    }"
-                    :key="`${props.row.strategy_id}_${calcCash(props.row, 'marketValue')}`"                        
-                    >
-                        <template>
-                            {{calcCash(props.row, 'marketValue') || '--'}}
-                        </template>  
-                    </span>          
+                    <tr-blink-num
+                        :theKey="`${props.row.strategy_id}_${calcCash(props.row, 'marketValue')}`"                        
+                        :num="calcCash(props.row, 'marketValue') || '--'"
+                        >
+                    </tr-blink-num>          
                 </template>
             </el-table-column>
             <el-table-column
@@ -127,19 +106,12 @@
                     align="right"
                     min-width="120"
                     >
-                    <template slot-scope="props" >
-                        <span 
-                        :class="{
-                            'tr-table-cell': true,
-                            'number': true,
-                            'nano': true,
-                        }"
-                        :key="`${props.row.strategy_id}_${calcCash(props.row, 'margin')}`"                        
-                        >
-                            <template>
-                                {{calcCash(props.row, 'margin') || '--'}}
-                            </template>
-                        </span>          
+                        <template slot-scope="props" >
+                            <tr-blink-num
+                            :theKey="`${props.row.strategy_id}_${calcCash(props.row, 'margin')}`"                        
+                            :num="calcCash(props.row, 'margin') || '--'"
+                            >
+                        </tr-blink-num>          
                     </template>
                 </el-table-column>
             <el-table-column

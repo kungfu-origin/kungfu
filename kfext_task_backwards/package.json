@@ -88,22 +88,20 @@
       }
     ],
 
+    "displayMode": "keyMap",
+
     "displayConfig": [
       {
         "type": "text",
-        "label": "下单时间",
+        "label": "更新时间",
         "prop": "updateTime",
         "width": "80px"
       },{
         "type": "text",
-        "label": "",
-        "prop": "mode",
-        "width": "40px"
-      },{
-        "type": "text",
         "label": "合约",
         "prop": "instrumentId",
-        "width": "100px"
+        "width": "100px",
+        "key": true
       },{
         "type": "text",
         "label": "对应指数",

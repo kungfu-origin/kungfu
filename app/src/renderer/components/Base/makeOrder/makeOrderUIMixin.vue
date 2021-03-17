@@ -181,7 +181,7 @@
                     </el-col>
                     <el-col :span="10">
                         <div class="make-order-line-info">
-                            <span>可下单手数</span>
+                            <span>可下单数量</span>
                             <span>{{ avaliableOrderVolume || '-' }}</span>
                         </div>
                     </el-col>

@@ -416,7 +416,8 @@ export const getExtensionConfigs = async (extDir: string): Promise<any> => {
                     const type: string = kungfuConfig.type;
                     const uniKey: string | Array<string>= kungfuConfig.uniKey;
                     const subType: string = kungfuConfig.subType;
-                    const config: SourceConfig = kungfuConfig.config
+                    const config: SourceConfig = kungfuConfig.config;
+                    const displayMode: string = kungfuConfig.displayMode || '';
                     const displayConfig: DisplayConfig = kungfuConfig.displayConfig || {} 
                     return  {
                         type,
@@ -426,7 +427,8 @@ export const getExtensionConfigs = async (extDir: string): Promise<any> => {
                         key: kungfuConfig.key,
                         name: kungfuConfig.name,
                         packageJSONPath: packageJSONPaths[index],
-                        displayConfig
+                        displayConfig,
+                        displayMode
                     }
                 }
             })
@@ -538,21 +540,6 @@ export const getDefaultRenderCellClass = (prop: string, item: any) => {
         case 'direction':
             if (item.direction === '多') return 'red';
             else if (item.direction === '空') return 'green';
-            break;
-        case 'realizedPnl':
-            if (+item.realizedPnl > 0) return 'red';
-            else if (+item.realizedPnl < 0) return 'green';
-            break;
-        case 'unRealizedPnl':
-            if (+item.unRealizedPnl > 0) return 'red';
-            else if (+item.unRealizedPnl < 0) return 'green';
-            break;
-        case 'lastPrice':
-            if (+item.lastPrice > +item.avgPrice) {
-                return item.direction === '多' ? 'red' : 'green';
-            } else if (+item.lastPrice < +item.avgPrice) {
-                return item.direction === '多' ? 'green' : 'red';
-            }
             break;
         case 'clientId':
         case 'accountId':

@@ -4,6 +4,7 @@ import TrNoData from './tr/TrNoData';
 import TableHeader from './tr/TableHeader';
 import TableHeaderItem from './tr/TableHeaderItem';
 import TrStatus from './tr/TrStatus';
+import TrBlinkNum from './tr/TrBlinkNum';
 import TrTabTop from './tr/TrTabTop.vue';
 import TrTabTopItem from './tr/TrTabTopItem.vue';
 import TrFooterItem from './tr/TrFooterIterm.vue';
@@ -22,6 +23,7 @@ const components = [
     TableHeader,
     TableHeaderItem,
     TrStatus,
+    TrBlinkNum,
     TrTabTop,
     TrTabTopItem,
     TrFooterItem,

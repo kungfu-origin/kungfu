@@ -59,9 +59,22 @@ export default {
             return minimist(this.currentTask.args || '', this.taskExtMinimistConfig).configKey || ''
         },
 
+        targetConfig () {
+            return this.getTargetConfigByKey(this.currentConfigKey) || {};
+        },
+
         tableHeader () {
-            const config = this.getTargetConfigByKey(this.currentConfigKey) || {};
-            return config.displayConfig || this.getTaskDetailDefaultHeaders()
+            return this.targetConfig.displayConfig || this.getTaskDetailDefaultHeaders()
+        },
+
+        displayMode () {
+            return this.targetConfig.displayMode
+        },
+
+        displayKeyMapKeys () {
+            return this.tableHeader
+                .filter(item => item.key)
+                .map(item => item.prop)
         }
     },
 
@@ -69,7 +82,7 @@ export default {
 
         dealTaskRecords (dataList) {
 
-            return Object.freeze(
+            const dataListResolved = Object.freeze(
                 dataList
                     .filter(record => {
                         const { tag_a, tag_c } = record;
@@ -88,6 +101,21 @@ export default {
                         })
                     })
             )
+
+            if (this.displayMode === 'keyMap') {
+                let keyMap = {};
+                dataListResolved.forEach(item => {
+                    const key = this.displayKeyMapKeys.map(key => item[key]).join('_');
+                    //因为此时record为时间最新在前，所以可以这么写
+                    if (!keyMap[key]) {
+                        keyMap[key] = Object.freeze(item);
+                    }
+                })
+
+                return Object.values(keyMap)
+            }
+
+            return dataListResolved
         },
 
         getTargetConfigByKey (key) {

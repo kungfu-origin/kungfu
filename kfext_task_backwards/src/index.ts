@@ -242,7 +242,7 @@ combineLatestObserver
 
         const tickersResolved = TICKERS.filter((ticker: string) => !ticker.includes(index))
 
-        if (tickersResolved.length ) {
+        if (!tickersResolved.length ) {
             console.log('[ERROR] 无合约')
             finishTrade('failed')
             return;
@@ -278,11 +278,13 @@ combineLatestObserver
 
         //计算最大贴水
         const minBackWardData = getTickerWithMinValue(Object.values(combinedInstrumentData), 'backwardByYear')
-        const minBackWard = minBackWardData.value;
+        const minBackWard = minBackWardData.backwardByYear;
 
-        console.log(`[计算结果] 最小贴水 ${minBackWardData.name} ${minBackWardData.backwardByYear}`)
+        console.log(`[计算结果] 最小贴水 ${minBackWardData.name} ${minBackWard}`)
         
         let selectedInstrument = '';
+
+        console.log(+minBackWard, +MAX_BACKWARD, +minBackWard > +MAX_BACKWARD)
         
         if (+minBackWard > +MAX_BACKWARD ) {
             console.log(`[判断] 最小贴水 > 最大贴水 ${MAX_BACKWARD}, 找出流动性最大的合约`)
