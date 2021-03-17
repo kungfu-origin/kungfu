@@ -1,11 +1,15 @@
 
 import { mapState } from 'vuex';
 import { ipcRenderer, remote } from 'electron';
+import fse from 'fs-extra';
+import path from 'path';
 
 import { watcher, dealQuote, dealPos, dealOrder, writeKungfu } from '__io/kungfu/watcher';
 import { getStrategyById, updateStrategyPath } from '__io/kungfu/strategy';
 import { transformTradingItemListToData } from '__io/kungfu/watcher';
 import { aliveOrderStatusList } from 'kungfu-shared/config/tradingConfig';
+import { MD_DIR } from '__gConfig/pathConfig';
+import { listDir } from '__gUtils/fileUtils';
 
 import makeOrderCoreMixin from '@/components/Base/makeOrder/js/makeOrderCoreMixin';
 import recordBeforeQuitMixin from "@/assets/mixins/recordBeforeQuitMixin";
@@ -249,6 +253,9 @@ export default {
                                 ipcRenderer.sendSync('record-before-quit-done')
                             })
                         break
+                    case 'clear-md-journal':
+                        this.removeJournal(MD_DIR)
+                        break
 
                 }
             })
@@ -333,5 +340,40 @@ export default {
                     })
             })
         },
+
+        removeJournal (targetFolder) {
+            
+            async function iterator (folder) {
+                const items = await listDir(folder)
+                
+                const folders = items.filter(f => {
+                    const stat = fse.statSync(path.join(folder, f))
+
+                    if (stat.isDirectory()) return true;
+                    return false;
+                })
+
+                const files = items.filter(f => {
+                    const stat = fse.statSync(path.join(folder, f))
+
+                    if (stat.isFile()) return true;
+                    return false;
+                })                
+
+                files.forEach(f => {
+                    if (f.includes('.journal')) {
+                        fse.removeSync(path.join(folder, f))
+                    }
+                })
+
+                folders.forEach(f => {
+                    iterator(path.join(folder, f))
+                })                
+            }  
+
+            iterator(targetFolder)
+        }
+
+        
     },
 }

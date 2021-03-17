@@ -119,21 +119,12 @@ export default {
     },
 
     getters: {
-        
-        currentTaskMode (state, getters) {
-            const currentTask = state.currentTask || {};
-            const args = currentTask.args || [];
-            const minimistConfig = getters.taskExtMinimistConfig;
-            const argsConfig = minimist(args, minimistConfig);
-            return argsConfig.sim ? 'sim' : 'real'
-        },
 
         taskExtMinimistConfig (state) {
-            //sim 为系统内置
             const stringTypes = ['instrumentIdInTickerSet', 'tickerSet', 'instrumentId']
             let minimistConfig = {
                 string: [],
-                boolean: ['sim'],
+                boolean: [],
             };
             state.taskExtConfigList.forEach(config => {
                 const c = config.config;

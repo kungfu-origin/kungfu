@@ -111,10 +111,6 @@ export default {
             taskExtConfigList: state => state.BASE.taskExtConfigList || []
         }),
 
-        ...mapGetters([
-            "currentTaskMode"
-        ]),
-
         currentTickerSetNameInTab () {
             if (this.currentMarketDataTabName === 'marketData') {
                 return this.currentTickerSetName

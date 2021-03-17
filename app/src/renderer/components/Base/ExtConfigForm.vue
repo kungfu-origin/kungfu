@@ -6,7 +6,7 @@
     class="kf-ext-form"
   >
     <el-form-item
-      v-for="item of configListResolved"
+      v-for="item of configList"
       :key="item.key"
       :label="item.name"
       :prop="item.key"
@@ -340,15 +340,6 @@ export default {
       accountsAsset: state => state.ACCOUNT.accountsAsset,
       tickerSets: state => state.MARKET.tickerSets || []
     }),
-
-
-    configListResolved () {
-      const isSim = !!this.form.sim;
-      return this.configList
-        .filter(item => {
-          return !(isSim && item.unrequiredInSim)
-        })
-    },
   },
 
   watch: {

@@ -22,7 +22,7 @@ import {
 
 const argv = minimist(process.argv.slice(2), {
     string: 'ticker',
-    boolean: [ 'lastSingularity', 'sim' ],
+    boolean: [ 'lastSingularity' ],
 })
 const { ticker, side, offset, volume, steps, triggerTime, finishTime, exchangeId, parentId, accountId, lastSingularity, lastSingularityMilliSecond, maxLotByStep } = argv;
 const triggerTimeStr = moment(triggerTime).format('YYYYMMDD HH:mm:ss');

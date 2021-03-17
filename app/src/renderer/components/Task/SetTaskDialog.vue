@@ -21,7 +21,7 @@
                 <ExtConfigForm
                     ref="taskSettingForm"
                     v-model="postFormList[index]"
-                    :configList="extendConfig(item)"
+                    :configList="item"
                     :uniKey="item.uniKey || ''"
                     labelWidth="140px"
                     :method="method"
@@ -103,27 +103,6 @@ export default {
                     this.handleClose();
                 }
             })
-        },
-
-        extendConfig (item) {
-
-            const ifExistedSim = item.config.filter(configItem => {
-                return configItem.key === 'sim'
-            })
-
-            if (ifExistedSim.length) {
-                return item.config || []
-            } else {
-                return [ ...(item.config || []), {
-                        "key": "sim",
-                        "name": "模拟执行",
-                        "type": "bool",
-                        "required": false,
-                        "tip": "开启后会模拟执行（非实盘），同时需确认该交易任务支持模拟执行",
-                        "default": true
-                    },
-                ]
-            } 
         },
 
         getActiveTabNameByProps () {

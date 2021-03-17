@@ -17,13 +17,13 @@ import moment from 'moment';
 
 const argv = minimist(process.argv.slice(2), {
     string: ['tickerSet', 'index'],
-    boolean: ['sim']
+    boolean: []
 })
 
-const { tickerSet, tickerSetTickers, index, side, offset, volume, triggerTime, finishTime, interval, accountId, maxBackward, parentId, sim } = argv;
+const { tickerSet, tickerSetTickers, index, side, volume, interval, maxBackward, parentId } = argv;
 
-const triggerTimeStr = moment(triggerTime).format('YYYYMMDD HH:mm:ss');
-const finishTimeStr = moment(finishTime).format('YYYYMMDD HH:mm:ss');
+const triggerTimeStr = moment().format('YYYYMMDD HH:mm:ss');
+const finishTimeStr = moment().endOf('day').format('YYYYMMDD HH:mm:ss');
 const LOOP_INTERVAL = interval;
 const TICKERS = tickerSetTickers.split('=');
 const PARENT_ID = parentId; 
@@ -418,10 +418,6 @@ combineLatestObserver
     })
 
     function finishTrade (type: string) {
-
-        if (sim) {
-            return;
-        }
 
         if (type === 'time') {
             console.log(`====================== 时间截止，交易结束 ======================`)

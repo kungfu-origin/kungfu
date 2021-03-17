@@ -32,3 +32,10 @@ export function openSettingDialog (mainWindow) {
 		mainWindow.focus()
 	}
 }
+
+export function clearMdJournal (mainWindow) {
+    if (mainWindow && mainWindow.webContents) {
+		mainWindow.webContents.send('main-process-messages', 'clear-md-journal')
+		mainWindow.focus()
+	}
+}

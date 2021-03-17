@@ -91,7 +91,7 @@ export const buildTarget = ({ offset, side, ticker, totalVolume, targetVolume }:
 
 
 export const reqMakeOrder = (baseData: any, quote: QuoteData, unfinishedSteps: number) => {
-    const { side, offset, accountId, volume, parentId, sim } = baseData;
+    const { side, offset, accountId, volume, parentId } = baseData;
     const { instrumentTypeOrigin, instrumentId, exchangeId } = quote;
 
     const makeOrderPrice = getMakeOrderPrice(side, quote, unfinishedSteps)
@@ -110,21 +110,16 @@ export const reqMakeOrder = (baseData: any, quote: QuoteData, unfinishedSteps: n
         parent_id: parentId
     }
 
-    if (!sim) {
-
-        //@ts-ignore
-        process.send({
-            type: 'process:msg',
-            data: {
-                type: 'MAKE_ORDER_BY_PARENT_ID',
-                body: {
-                    ...makeOrderData
-                }
+    //@ts-ignore
+    process.send({
+        type: 'process:msg',
+        data: {
+            type: 'MAKE_ORDER_BY_PARENT_ID',
+            body: {
+                ...makeOrderData
             }
-        })
-    } else {
-        console.log('--------- [模拟] ---------')
-    }
+        }
+    })
 
     console.log(`--------- [下单] ---------`)
     console.log(`[账户] ${makeOrderData.name}`)
@@ -465,7 +460,6 @@ export function recordTaskInfo (quoteData: any, tradeData: any, globalData: any)
     const ask1Price = (quoteData.askPrices || [])[0]
     const ask1Volume = (quoteData.askVolumes || [])[0]
     const postData = {
-        mode: globalData.sim ? '模拟' : '实盘',
         updateTime: +new Date().getTime(),
         instrumentId: tradeData.name,
         lastPrice: quoteData.lastPrice,
@@ -486,7 +480,6 @@ export function recordTaskInfo (quoteData: any, tradeData: any, globalData: any)
         data: {
             type: 'REQ_RECORD_DATA',
             body: {
-                mode: globalData.sim ? 'sim' : 'real',
                 data: {
                     ...postData                    
                 }

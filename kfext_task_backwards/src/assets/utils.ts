@@ -72,7 +72,7 @@ export const getTickerNamesByTicker = (ticker: string) => {
 }
 
 export const reqMakeOrder = (baseData: any, quote: QuoteData) => {
-    const { side, offset, accountId, volume, parentId, sim } = baseData;
+    const { side, offset, accountId, volume, parentId } = baseData;
     const { instrumentTypeOrigin, instrumentId, exchangeId } = quote;
 
     const makeOrderPrice = getMakeOrderPrice(side, quote)
@@ -96,20 +96,16 @@ export const reqMakeOrder = (baseData: any, quote: QuoteData) => {
         return false;
     }
 
-    if (!sim) {
-        //@ts-ignore
-        process.send({
-            type: 'process:msg',
-            data: {
-                type: 'MAKE_ORDER_BY_PARENT_ID',
-                body: {
-                    ...makeOrderData
-                }
+    //@ts-ignore
+    process.send({
+        type: 'process:msg',
+        data: {
+            type: 'MAKE_ORDER_BY_PARENT_ID',
+            body: {
+                ...makeOrderData
             }
-        })
-    } else {
-        console.log('--------- [模拟] ---------')
-    }
+        }
+    })
    
     console.log(`--------- [下单] ---------`)
     console.log(`[账户] ${makeOrderData.name}`)
@@ -193,7 +189,6 @@ function getMakeOrderPrice (side: number, quote: QuoteData ) {
 
 export function recordTaskInfo (calculatedData: any, tradeData: any, globalData: any) {
     const postData = {
-        mode: globalData.sim ? '模拟' : '实盘',
         updateTime: +new Date().getTime(),
         instrumentId: calculatedData.name,
         instrumentPrice: calculatedData.instrumentPrice,
@@ -218,7 +213,6 @@ export function recordTaskInfo (calculatedData: any, tradeData: any, globalData:
         data: {
             type: 'REQ_RECORD_DATA',
             body: {
-                mode: globalData.sim ? 'sim' : 'real',
                 data: {
                     ...postData                    
                 }

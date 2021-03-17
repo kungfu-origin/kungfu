@@ -9,7 +9,7 @@ import { logger } from '__gUtils/logUtils';
 import { platform } from '__gConfig/platformConfig';
 import { openUrl, showKungfuInfo, showQuitMessageBox } from './utils';
 import { KF_HOME, KUNGFU_ENGINE_PATH, BASE_DB_DIR, LOG_DIR } from '__gConfig/pathConfig';
-import { openSettingDialog } from "./events";
+import { openSettingDialog, clearMdJournal } from "./events";
 
 const path = require('path');
 const { app, globalShortcut, BrowserWindow, Menu, shell } = electron
@@ -153,14 +153,14 @@ app.on('will-quit', (e) => {
 function setMenu() {
     //添加快捷键
 	let applicationOptions = [
-		{ label: "About Kungfu", click: () => showKungfuInfo()},
-		{ label: "Settings", accelerator: "CmdOrCtrl+,", click: () => openSettingDialog(mainWindow)},
-		{ label: "Close", accelerator: "CmdOrCtrl+W", click: () => BrowserWindow.getFocusedWindow().close()}
+		{ label: "关于功夫交易", click: () => showKungfuInfo()},
+		{ label: "设置", accelerator: "CmdOrCtrl+,", click: () => openSettingDialog(mainWindow)},
+		{ label: "关闭", accelerator: "CmdOrCtrl+W", click: () => BrowserWindow.getFocusedWindow().close()}
 	]
 
 	if(platform === 'mac') {
 		applicationOptions.push(
-			{ label: "Quit", accelerator: "Command+Q", click: () => app.quit()},
+			{ label: "退出", accelerator: "Command+Q", click: () => app.quit()},
 		)
 	}
 
@@ -168,7 +168,7 @@ function setMenu() {
 	{
 		label: "功夫",
 		submenu: applicationOptions
-	},,{
+	},{
 		//此处必要，不然electron内使用复制粘贴会无效
 		label: "编辑",
 		submenu: [
@@ -181,10 +181,13 @@ function setMenu() {
 		label: "文件",
 		submenu: [
 			{ label: "打开功夫资源目录（KF_HOME）", accelerator: "CmdOrCtrl+Shift+H",  click: () => shell.showItemInFolder(KF_HOME) },
-			{ label: "打开功夫安装目录",	 	   accelerator: "CmdOrCtrl+Shift+A", click: () => shell.showItemInFolder(app.getAppPath()) },			
-			{ label: "打开功夫引擎目录", 		   accelerator: "CmdOrCtrl+Shift+E", click: () => shell.showItemInFolder(KUNGFU_ENGINE_PATH) },			
-			{ label: "打开功夫基础配置DB", 		accelerator: "CmdOrCtrl+Shift+D", click: () => shell.showItemInFolder(path.join(BASE_DB_DIR, 'config.db')) },			
-			{ label: "打开功夫日志目录", 		   accelerator: "CmdOrCtrl+Shift+L", click: () => shell.showItemInFolder(LOG_DIR) },			
+			{ label: "打开功夫安装目录", accelerator: "CmdOrCtrl+Shift+A", click: () => shell.showItemInFolder(app.getAppPath()) },			
+			{ label: "打开功夫基础配置DB", accelerator: "CmdOrCtrl+Shift+B", click: () => shell.showItemInFolder(path.join(BASE_DB_DIR, 'config.db')) },			
+		]
+	},{
+		label: '运行',
+		submenu: [
+			{ label: "清理journal", accelerator: "CmdOrCtrl+Shift+U", click: () => clearMdJournal(mainWindow)}
 		]
 	},{
 		label: "帮助",

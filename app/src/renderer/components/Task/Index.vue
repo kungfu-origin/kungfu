@@ -26,17 +26,6 @@
                 >
             </el-table-column>
             <el-table-column
-                label="模式"
-                sortable  
-                show-overflow-tooltip
-            >
-                <template slot-scope="props">
-                    <el-tag
-                    :type="props.row.isSim ? 'success' : 'info' "
-                    >{{ props.row.isSim ? '模拟' : "实盘" }}</el-tag>
-                </template>
-            </el-table-column>
-            <el-table-column
                 label="状态"
                 sortable  
                 show-overflow-tooltip
@@ -165,13 +154,11 @@ export default {
                 .map(key => {
                     const targetProcess = newProcess[key];
                     const argsConfig = minimist(targetProcess.args, this.taskExtMinimistConfig)
-                    const isSim = argsConfig.sim || false;
 
                     return {
                         processId: key,
                         processStatus: targetProcess.status,
                         createdAt: targetProcess.created_at ? moment(targetProcess.created_at).format('YYYY-MM-DD HH:mm:ss') : '--',
-                        isSim,
                         ...targetProcess
                     }
                 })
@@ -237,8 +224,7 @@ export default {
             const processName = 'task_' + key + '_' + processNameByUniKey;
             const args = this.formArgs(extSettingData);
 
-            return this.configRealMode(configInfo.name, extSettingData)
-                .then(() => this.preUpdate())
+            return this.preUpdate()
                 .then(res => {
                     if (!res) return Promise.resolve(true)
                     return switchTask(true, {
@@ -280,17 +266,6 @@ export default {
                 args: args.join(' '),
                 cwd
             })
-        },
-
-        configRealMode (name, config) {
-            if (!config.sim) {
-                return this.$confirm(`确认以实盘模式运行交易任务 ${name}`, '提示', {
-                    confirmButtonText: '确 定',
-                    cancelButtonText: '取 消',
-                })
-            } else {
-                return Promise.resolve()
-            }
         },
 
         formUnikeyInProcessName (uniKey, form) {

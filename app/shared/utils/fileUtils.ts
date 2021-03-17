@@ -41,21 +41,9 @@ interface FileInputData extends FileData {
 }
 
 
-export const listDir = (filePath: string): Promise<any[]> => {
-    return new Promise((resolve, reject) => {
+export const listDir = (filePath: string): Promise<void | string[]> => {
         fse.ensureDirSync(filePath)
-        fse.readdir(filePath, (err: Error, files: any[]) => {
-            if(err) {
-                reject(err)
-                return;
-            }
-            resolve(files)
-        })
-    })
-}
-
-export const statSync = (filePath: string): any => {
-    return fse.statSync(filePath)
+        return fse.readdir(filePath).catch(err => console.error(err))
 }
 
 export const getTreeByFilePath = (strategy: FileData, fileTree: any): Promise<FileTreeByPath> => {
@@ -69,7 +57,7 @@ export const getTreeByFilePath = (strategy: FileData, fileTree: any): Promise<Fi
     const ignoreList = ['.git', '.DS_Store']
     return new Promise((resolve, reject) => {
         listDir(filePath).then(files => {
-            files.forEach((file: any) => {
+            (files || []).forEach((file: any) => {
                 if(ignoreList.includes(file)) return;
                 const fileDir: string = path.join(filePath, file);
                 const stats: any = fse.statSync(fileDir)
