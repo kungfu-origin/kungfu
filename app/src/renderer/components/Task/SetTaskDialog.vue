@@ -21,7 +21,7 @@
                 <ExtConfigForm
                     ref="taskSettingForm"
                     v-model="postFormList[index]"
-                    :configList="item"
+                    :configList="item.config"
                     :uniKey="item.uniKey || ''"
                     labelWidth="140px"
                     :method="method"

@@ -1,5 +1,5 @@
 import minimist from 'minimist';
-import { Observable, combineLatest, timer } from 'rxjs';
+import { Observable, combineLatest } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 import { 
     transformArrayToObjectByKey, 
@@ -10,23 +10,24 @@ import {
     ensureTargetIncludesAllKeys,
     ensureNum,
     recordTaskInfo,
-    reqMakeOrder 
 } from './assets/utils';
 import moment from 'moment';
 
 
 const argv = minimist(process.argv.slice(2), {
-    string: ['tickerSet', 'index'],
+    string: ['tickerSet', 'index', 'accountId'],
     boolean: []
 })
 
-const { tickerSet, tickerSetTickers, index, side, volume, interval, maxBackward, parentId } = argv;
+const { tickerSet, tickerSetTickers, index, side, interval, maxBackward } = argv;
 
-const triggerTimeStr = moment().format('YYYYMMDD HH:mm:ss');
-const finishTimeStr = moment().endOf('day').format('YYYYMMDD HH:mm:ss');
+const triggerTime = moment().valueOf()
+const finishTime = moment().endOf('day').valueOf()
+
+const triggerTimeStr = moment(triggerTime).format('YYYYMMDD HH:mm:ss');
+const finishTimeStr = moment(finishTime).format('YYYYMMDD HH:mm:ss');
 const LOOP_INTERVAL = interval;
 const TICKERS = tickerSetTickers.split('=');
-const PARENT_ID = parentId; 
 const MAX_BACKWARD = Number(maxBackward / 100).toFixed(3);
 
 console.log('==================== 交易信息 =======================')
@@ -82,21 +83,6 @@ var reqHistoryAvgVolumeTimer = reqTimer(() => {
         }
     })
 }, 5000)
-
-
-// var reqPosOrderDataTimer = reqTimer(() => {
-//     //@ts-ignore
-//     process.send({
-//         type: 'process:msg',
-//         data: {
-//             type: 'REQ_POS_ORDER_DATA',
-//             body: {
-//                 parentId: PARENT_ID,
-//                 accountId
-//             }
-//         }
-//     })
-// }, 500)
 
 
 //时间tick
@@ -160,59 +146,16 @@ const avgVolumePipe = () => {
     )
 }
 
-// const ordersPipe = () => {
-//     return PROCESS_MSG_OBSERVER().pipe(
-//         filter((payload: ProcPayload) => {
-//             return payload.topic === 'ORDER_DATA'
-//         }),
-//         map((payload: ProcPayload): OrderData[] => {
-//             const { data } = payload;
-//             const { orders } = data;
-//             return orders
-//         })
-//     )
-// }
-
-// const positionsPipe = () => {
-//     return PROCESS_MSG_OBSERVER().pipe(
-//         filter((payload: ProcPayload) => {
-//             return payload.topic === 'POS_DATA'
-//         }),
-//         map((payload: ProcPayload): StringToPosData | null => {
-//             const { data } = payload;
-//             const { positions } = data;
-
-//             if (!positions || !positions.length) {
-//                 return null
-//             }
-
-//             const positionsAfterFilter = positions.filter(posData => {
-//                 const { instrumentId } = posData;
-//                 if (tickerSetTickers.includes(instrumentId.toString())) {
-//                     return true;
-//                 }
-//                 return false;
-//             })
-//             return transformArrayToObjectByKey(positionsAfterFilter, ['instrumentId', 'directionOrigin'])
-//         })
-//     )
-// }
-
 const combineLatestObserver = combineLatest(
     TIMER_COUNT_OBSERVER(),
     quotesPipe(),
     instrumentsPipe(),
     avgVolumePipe(),
-    // ordersPipe(),
-    // positionsPipe(),
     (
         seconds: number,
         quotes: StringToQuoteData,
         instruments: StringToInstrumentData,
-        avgVolume: StringToNumberObject,
-        // orders: OrderData[],
-        // pos: StringToPosData | null
-        
+        avgVolume: StringToNumberObject,        
     ) => {
         
         return {
@@ -220,30 +163,16 @@ const combineLatestObserver = combineLatest(
             quotes,
             instruments,
             avgVolume,
-            // orders,
-            // pos
         }
     }
 )
 
 
-var tradeVolumeByStep = 1; //initLot;
-var tradedVolume = 0; //flag
 var dealedCount = -10000000000;
 var checkRequiredDataErrorLogged = false;
 
 
 combineLatestObserver
-    .pipe(
-        filter(() => {
-            if (+new Date().getTime() > finishTime) {
-                finishTrade('time')
-                return false;
-            } 
-
-            return true
-        })
-    )
     .pipe(
         filter((data: BackWardTraderPipeData) => {
             const { avgVolume, quotes, instruments } = data;
@@ -338,10 +267,6 @@ combineLatestObserver
                     : ensureNum(+Number(Math.abs((bid1 - indexP) / bid1 / toExpireDate * 365)).toFixed(3))
             }
 
-            recordTaskInfo(combinedInstrumentData[instrumentId_exchangeId], null, {
-                ...argv,
-                tradedVolume
-            })
         });
 
         //计算最大贴水
@@ -350,16 +275,15 @@ combineLatestObserver
 
         console.log(`[计算结果] 最小贴水 ${minBackWardData.name} ${minBackWardData.backwardByYear}`)
         
+        let selectedInstrument = '';
+        
         if (+minBackWard > +MAX_BACKWARD ) {
             console.log(`[判断] 最小贴水 > 最大贴水 ${MAX_BACKWARD}, 找出流动性最大的合约`)
 
             //找出流动性最大的合约
             const maxLotData = getTickerWithMaxValue(Object.values(combinedInstrumentData), 'avg7Volume')
             console.log(`[计算结果] 流动性最大 ${maxLotData.name} ${maxLotData.avg7Volume}`);
-            const makeOrderData = reqMakeOrder({ ...argv, volume: tradeVolumeByStep}, quotes[maxLotData.name]);
-            tradedVolume = tradedVolume + tradeVolumeByStep;
-            
-            makeOrderData && recordTaskInfo(maxLotData, makeOrderData, { ...argv, tradedVolume })
+            selectedInstrument = maxLotData.name
 
         } else {
             console.log(`[判断] 最小贴水 < 最大贴水 ${MAX_BACKWARD}, 在贴水小于_MaxBackward的合约中, 找出流动性最大的合约, 排除当月合约`)
@@ -379,42 +303,20 @@ combineLatestObserver
             } else {
                 const maxLotData = getTickerWithMaxValue(lessThanMaxBackwardList, 'avg7Volume')
                 console.log(`[计算结果] 流动性最大 ${maxLotData.name} ${maxLotData.avg7Volume}`);
-                const makeOrderData = reqMakeOrder({ ...argv, volume: tradeVolumeByStep}, quotes[maxLotData.name]);                
-                tradedVolume = tradedVolume + tradeVolumeByStep;
+                selectedInstrument = maxLotData.name
+            }
+        }
+
+        Object.keys(combinedInstrumentData || {})
+            .forEach((key: string) => {
+                const instrumentData: any = combinedInstrumentData[key];
+                recordTaskInfo({
+                    ...instrumentData,
+                    selected: instrumentData.name === selectedInstrument
+                }, argv)
                 
-                makeOrderData && recordTaskInfo(maxLotData, makeOrderData, { ...argv, tradedVolume })
-            }
-        }
-
-        const timeRemain = +Number(( +new Date().getTime() - finishTime) / ( triggerTime - finishTime )).toFixed(3);
-        const tradeRemain = 1 - tradedVolume / volume;
-
-        if (tradeRemain - timeRemain > 0.2) {
-            console.log(`[WARNING] tradeRemain ${tradeRemain}`)
-            if (tradeVolumeByStep < 3) { 
-                tradeVolumeByStep = tradeVolumeByStep + 1
-            }
-        }
-
-        if (tradeRemain - timeRemain > 0.5) {
-            console.log(`[WARNING] tradeRemain ${tradeRemain}`)
-            if (tradeVolumeByStep < 5) { 
-                tradeVolumeByStep = tradeVolumeByStep + 2
-            }
-        }
-
-        //剩余不够，则算差值
-        if (tradeVolumeByStep + tradedVolume > volume) {
-            tradeVolumeByStep = volume - tradedVolume
-        }
-
-        if (tradedVolume >= volume) {
-            finishTrade('trade')
-        }
-
-        if (+new Date().getTime() > finishTime) {
-            finishTrade('time')
-        }
+            })
+        
     })
 
     function finishTrade (type: string) {
@@ -434,7 +336,6 @@ combineLatestObserver
         reqQuoteTimer && clearInterval(reqQuoteTimer)
         secondsCounterTimer && clearInterval(secondsCounterTimer)
         reqHistoryAvgVolumeTimer && clearInterval(reqHistoryAvgVolumeTimer)
-        // reqPosOrderDataTimer && clearInterval(reqPosOrderDataTimer)
 
         process.exit(0)
     }

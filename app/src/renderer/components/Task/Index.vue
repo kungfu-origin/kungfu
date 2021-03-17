@@ -150,10 +150,12 @@ export default {
 
     watch: {
         processStatusWithDetail (newProcess) {
+
             this.tableList = Object.keys(newProcess || {})
                 .map(key => {
                     const targetProcess = newProcess[key];
                     const argsConfig = minimist(targetProcess.args, this.taskExtMinimistConfig)
+
 
                     return {
                         processId: key,

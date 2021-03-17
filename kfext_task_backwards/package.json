@@ -31,6 +31,7 @@
   "bin": "./lib/index.js",
   "kungfuConfig": {
     "type": "task",
+    "subType": "mFilter",
     "key": "backwardsHedge",
     "name": "贴水对冲",
     "uniKey": [
@@ -38,13 +39,6 @@
       "tickerSet"
     ],
     "config": [
-      {
-        "key": "accountId",
-        "name": "交易账户",
-        "type": "account",
-        "required": true
-      },
-    
       {
         "key": "tickerSet",
         "name": "标的池",
@@ -75,33 +69,6 @@
           }
         ],
         "default": 0,
-        "required": true
-      },
-      {
-        "key": "offset",
-        "name": "开平",
-        "type": "radio",
-        "options": "offset",
-        "default": 0,
-        "required": true
-      },
-      {
-        "key": "volume",
-        "name": "目标数量",
-        "type": "int",
-        "required": true
-      },
-      {
-        "key": "triggerTime",
-        "name": "触发时间",
-        "type": "timePicker",
-        "required": true
-      },
-      {
-        "key": "finishTime",
-        "name": "结束时间",
-        "type": "timePicker",
-        "laterThan": "triggerTime",
         "required": true
       },
       {
@@ -139,15 +106,15 @@
         "prop": "instrumentId",
         "width": "100px"
       },{
-        "type": "number",
-        "label": "合约价格",
-        "prop": "instrumentPrice",
-        "width": "80px"
-      },{
         "type": "text",
         "label": "对应指数",
         "prop": "indexId",
         "width": "100px"
+      },{
+        "type": "number",
+        "label": "合约价格",
+        "prop": "instrumentPrice",
+        "width": "80px"
       },{
         "type": "number",
         "label": "指数价格",
@@ -186,32 +153,10 @@
         "width": "30px"
       },{
         "type": "text",
-        "align": "center",
         "label": "",
-        "prop": "offset",
+        "align": "center",
+        "prop": "selected",
         "width": "30px"
-      },{
-        "type": "number",
-        "label": "委托价",
-        "prop": "limitPrice",
-        "width": "80px"
-      },{
-        "type": "number",
-        "label": "下单量",
-        "prop": "volume",
-        "width": "60px"
-      },{
-        "type": "text",
-        "align": "right",
-        "label": "成交/目标量",
-        "prop": "volumeLefted",
-        "width": "110px"
-      }, {
-        "type": "text",
-        "align": "left",
-        "label": "账户",
-        "prop": "accountId",
-        "width": "110px"
       }
     ]
   }

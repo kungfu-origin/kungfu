@@ -121,7 +121,7 @@ export default {
     getters: {
 
         taskExtMinimistConfig (state) {
-            const stringTypes = ['instrumentIdInTickerSet', 'tickerSet', 'instrumentId']
+            const stringTypes = ['instrumentIdInTickerSet', 'tickerSet', 'instrumentId', 'account']
             let minimistConfig = {
                 string: [],
                 boolean: [],

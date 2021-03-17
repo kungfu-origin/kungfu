@@ -31,6 +31,7 @@
   "bin": "./lib/index.js",
   "kungfuConfig": {
     "type": "task",
+    "subType": "trade",
     "key": "timerTrader",
     "name": "定时任务",
     "uniKey": [
@@ -139,13 +140,6 @@
         "required": false,
         "tip": "设置临界下单临界时间, 单位毫秒，时间默认1000毫秒",
         "default": 1000
-      },{
-        "key": "sim",
-        "name": "模拟执行",
-        "type": "bool",
-        "required": false,
-        "tip": "开启后会模拟执行（非实盘），同时需确认该交易任务支持模拟执行",
-        "default": false
       }
     ],
     "displayConfig": [
@@ -154,11 +148,6 @@
         "label": "下单时间",
         "prop": "updateTime",
         "width": "80px"
-      },{
-        "type": "text",
-        "label": "",
-        "prop": "mode",
-        "width": "40px"
       },{
         "type": "text",
         "label": "标的",

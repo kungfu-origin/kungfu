@@ -518,9 +518,8 @@ export const ensureNum = (num: number | bigint | string) => {
 
 export const getDefaultRenderCellClass = (prop: string, item: any) => {
     switch (prop) {
-        case 'mode':
-            if (item.mode === '模拟') return 'green';
-            else if (item.mode === '实盘') return 'blue';
+        case 'selected':
+            if (item.selected === '✓') return 'green';
             break;
         case 'side':
             if (item.side === '买') return 'red';

@@ -1,34 +1,7 @@
 import moment from 'moment';
-import { InstrumentTypes, aliveOrderStatusList, ExchangeIds, SideName, OffsetName, PosDirection } from 'kungfu-shared/config/tradingConfig';
+import { ExchangeIds, SideName, OffsetName } from 'kungfu-shared/config/tradingConfig';
 
-export const getCurrentCount = ({
-    currentTimestamp, 
-    deltaMilliSeconds,
-    finishTime,
-    LOOP_INTERVAL,
-    LAST_SINGULARITY_SECOND,
-    LAST_STEP_COUNT
-}: {
-    currentTimestamp: number; 
-    deltaMilliSeconds: number;
-    finishTime: number;
-    LOOP_INTERVAL: number;
-    LAST_SINGULARITY_SECOND: number;
-    LAST_STEP_COUNT: number
-}) => {
-    const deltaCurrentToFinishTime = finishTime - currentTimestamp;
-    const currentCount = Math.floor(deltaMilliSeconds / LOOP_INTERVAL)
-    if (LAST_SINGULARITY_SECOND) {
-        if (deltaCurrentToFinishTime <= LAST_SINGULARITY_SECOND) {
-            return LAST_STEP_COUNT
-        } else {
-            if (currentCount === LAST_STEP_COUNT) {
-                return currentCount - 1
-            }
-        }
-    }
-    return currentCount
-};
+
 
 export const reqTimer = (fn: Function, interval: number) => {
     fn()
@@ -69,56 +42,6 @@ export const getTickerNamesByTicker = (ticker: string) => {
         tsm: `${target}${keepDateLen(ny)}${keepDateLen(tsm)}`,
         nsm: `${target}${keepDateLen(ny)}${keepDateLen(nsm)}`,
     }
-}
-
-export const reqMakeOrder = (baseData: any, quote: QuoteData) => {
-    const { side, offset, accountId, volume, parentId } = baseData;
-    const { instrumentTypeOrigin, instrumentId, exchangeId } = quote;
-
-    const makeOrderPrice = getMakeOrderPrice(side, quote)
-
-    const makeOrderData = { 
-        name: accountId,
-        instrument_id: instrumentId,
-        instrument_type: +instrumentTypeOrigin,
-        exchange_id: exchangeId,
-        limit_price: makeOrderPrice,
-        volume,
-        side: side,
-        offset: offset,
-        price_type: 0,
-        hedge_flag: 0,
-        parent_id: parentId
-    }
-
-    if (!ensureNum(makeOrderPrice)) {
-        console.log(`[ERROR] 下单信息错误 ${JSON.stringify(quote)}`)
-        return false;
-    }
-
-    //@ts-ignore
-    process.send({
-        type: 'process:msg',
-        data: {
-            type: 'MAKE_ORDER_BY_PARENT_ID',
-            body: {
-                ...makeOrderData
-            }
-        }
-    })
-   
-    console.log(`--------- [下单] ---------`)
-    console.log(`[账户] ${makeOrderData.name}`)
-    console.log(`[标的] ${makeOrderData.instrument_id}`)
-    console.log(`[交易所] ${ExchangeIds[makeOrderData.exchange_id]}`)
-    console.log(`[交易数量] ${makeOrderData.volume}`)
-    console.log(`[买卖] ${SideName[makeOrderData.side]}`)
-    console.log(`[开平] ${OffsetName[makeOrderData.offset]}`)
-    console.log(`[价格] ${makeOrderData.limit_price}`)
-    console.log(`[订单组] ${makeOrderData.parent_id}`)
-    console.log(`---------------------------`)
-
-    return makeOrderData
 }
 
 export const getTickerWithMaxValue = (targetList: Array<any>, targetKey: string) => {
@@ -187,7 +110,7 @@ function getMakeOrderPrice (side: number, quote: QuoteData ) {
     return lastPrice
 }
 
-export function recordTaskInfo (calculatedData: any, tradeData: any, globalData: any) {
+export function recordTaskInfo (calculatedData: any, globalData: any) {
     const postData = {
         updateTime: +new Date().getTime(),
         instrumentId: calculatedData.name,
@@ -195,16 +118,12 @@ export function recordTaskInfo (calculatedData: any, tradeData: any, globalData:
         indexId: calculatedData.indexId,
         indexPrice: calculatedData.indexP,
         backwardsDelta: calculatedData.backwardsDelta,
-        backWardsRatio: calculatedData.backWardsRatio * 100 + '%',
-        backWardsRatioByYears: calculatedData.backwardByYear * 100 + '%',
+        backWardsRatio: Number(calculatedData.backWardsRatio * 100).toFixed(2) + '%',
+        backWardsRatioByYears: Number(calculatedData.backwardByYear * 100).toFixed(2) + '%',
         expiredDate: calculatedData.expireDate,
         remainDays: calculatedData.toExpireDate,
-        side: tradeData ? SideName[tradeData.side] : '',
-        offset: tradeData ? OffsetName[tradeData.offset] : '',
-        limitPrice: tradeData ? tradeData.limit_price : '',
-        volume: tradeData ? tradeData.volume : '',
-        volumeLefted: tradeData ? `${globalData.volume - globalData.tradedVolume} / ${globalData.volume}` : '',
-        accountId: tradeData ? tradeData.name : ''
+        side: SideName[globalData.side],
+        selected: calculatedData.selected ? '✓' : '',
     }
 
       //@ts-ignore
