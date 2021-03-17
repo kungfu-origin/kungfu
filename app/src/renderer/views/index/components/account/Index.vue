@@ -94,7 +94,7 @@
                             @showHistory="handleShowHistory"
                             />   
                         </el-tab-pane>
-                        <el-tab-pane :lazy="true"  v-if="taskExtConfigList.length" :label="`算法任务记录 ${currentTaskIdInTab}`" name="taskDetail">
+                        <el-tab-pane :lazy="false"  v-if="taskExtConfigList.length" :label="`算法任务记录 ${currentTaskIdInTab}`" name="taskDetail">
                             <TaskRecord></TaskRecord>
                         </el-tab-pane>
 

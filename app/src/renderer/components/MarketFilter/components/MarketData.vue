@@ -3,7 +3,7 @@
         <tr-dashboard title="" >
             <div slot="dashboard-header">
                 <tr-dashboard-header-item>
-                    <span class="mouse-over" style="font-weight: 600; font-size: 11px" title="添加选股算法" @click="handleAddTask('mFilter')">筛</span>
+                    <span class="mouse-over" style="font-weight: 600; font-size: 11px" title="添加选股算法" @click="handleAddTask">筛</span>
                 </tr-dashboard-header-item>
                 <tr-dashboard-header-item>
                     <el-button size="mini" @click="handleAddTicker" title="添加">添加</el-button>
@@ -203,6 +203,15 @@ export default {
     },
 
     methods: {
+
+        handleAddTask () {
+            this.$bus.$emit('set-task', {
+                type: "mFilter", 
+                initData: {
+                    'tickerSet': this.currentTickerSetName
+                }
+            })
+        },
 
         handleRowClick (row) {
             this.$emit('clickQuote', this.getMarketData(row))

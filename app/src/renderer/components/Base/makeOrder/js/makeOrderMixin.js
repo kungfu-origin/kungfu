@@ -148,7 +148,7 @@ export default {
         clearAdjustOrderData () {
             this.adjustOrderInputVisibility = false;
             this.adjustOrderInputSizeData = Object.freeze({});
-            this.adjustOrderTargetData = Object({});
+            this.adjustOrderTargetData = Object.freeze({});
             this.adjustOrderForm = {
                 name: '', // account_id in strategy
                 instrument_id: '',

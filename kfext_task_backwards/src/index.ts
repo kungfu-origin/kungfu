@@ -27,7 +27,7 @@ const finishTime = moment().endOf('day').valueOf()
 const triggerTimeStr = moment(triggerTime).format('YYYYMMDD HH:mm:ss');
 const finishTimeStr = moment(finishTime).format('YYYYMMDD HH:mm:ss');
 const LOOP_INTERVAL = interval;
-const TICKERS = tickerSetTickers.split('=');
+const TICKERS = (tickerSetTickers || '').split('=');
 const MAX_BACKWARD = Number(maxBackward / 100).toFixed(3);
 
 console.log('==================== 交易信息 =======================')

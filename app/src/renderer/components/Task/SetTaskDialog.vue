@@ -1,10 +1,11 @@
 <template>
     <el-dialog 
     width="700px" 
-    :title="`${method === 'add'? '添加' : '设置'} 算法任务`"  
+    :title="`${method === 'add'? '添加' : '设置'} ${dialogTitle}`"  
     :visible="visible" 
     :close-on-click-modal="false"
     :close-on-press-escape="true"
+    :append-to-body="true"
     @close="handleClose"
     @keyup.enter.native="handleSubmitSetting"
     id="set-task-dialog"
@@ -12,7 +13,7 @@
         <el-tabs tab-position="left" size="mini" v-model="activeTabName">
             <el-tab-pane
                 :disabled="method !== 'add' && currentActiveConfigKey !== item.key"
-                v-for="(item, index) in configList"
+                v-for="(item, index) in configListResolved"
                 :key="item.key"
                 :label="item.name"
                 size="mini"
@@ -65,6 +66,16 @@ export default {
             type: String,
             default: 'add'
         },
+
+        outsideAddTaskType: {
+            type: String,
+            default: ''
+        },
+
+        outsideAddTaskInitData: {
+            type: Object,
+            default: () => ({})
+        }
     },
 
     components: {
@@ -80,6 +91,30 @@ export default {
     },
 
     computed: {
+
+        dialogTitle () {
+            if (this.outsideAddTaskType === 'mFilter') {
+                return '行情任务'
+            } else if (this.outsideAddTaskType === 'trade') {
+                return '交易任务'
+            } else {
+                return '算法任务'
+            }
+        },
+
+        configListResolved () {
+            if (!this.outsideAddTaskType) {
+                return this.configList
+            } else {
+                const afterFilerConfigList = this.configList.filter(item => item.subType === this.outsideAddTaskType)
+                if (afterFilerConfigList.length) {
+                    return afterFilerConfigList
+                } else {
+                    return this.configList
+                }
+            }
+        },
+
         targetConfigIndex () {
             return this.configList.findIndex(item => item.key === this.activeTabName)
         },
@@ -106,6 +141,20 @@ export default {
             })
         },
 
+        //从外部传入需要自动填写字段，根据column.type
+        resolveOutsideInput (config, value = {}) {
+            (config.config || [])
+                .forEach(item => {
+                    if (this.outsideAddTaskInitData[item.type]) {
+                        value = {
+                            ...value,
+                            [item.key]: this.outsideAddTaskInitData[item.type]
+                        }
+                    }
+                })
+            return value
+        },
+
         getActiveTabNameByProps () {
             const defaultKey = (this.configList[0] || {}).key || '';
             return this.currentActiveConfigKey ? this.currentActiveConfigKey : defaultKey
@@ -115,7 +164,7 @@ export default {
             const configIndexByKey = this.getConfigIndexByKey(this.currentActiveConfigKey);
             return this.configList.map((c, i) => {
                 if (i === configIndexByKey) return this.value;
-                return {}
+                return this.resolveOutsideInput(c, this.value); //只有在添加的时候
             });
         },
 

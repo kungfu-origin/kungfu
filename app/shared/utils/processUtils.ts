@@ -485,29 +485,29 @@ function buildProcessStatus (pList: any[]): StringToStringObject {
     return processStatus
 }
 
-function buildProcessStatusWidthDetail (pList: any[]): StringToProcessStatusDetail {
-    let processStatus: any = {}
-        Object.freeze(pList).forEach(p => {
-            const { monit, pid, name, pm2_env } = p;
-            const status = pm2_env.status;
-            const created_at = pm2_env.created_at;
-            const cwd = pm2_env.cwd;
-            const pm_exec_path = (pm2_env.pm_exec_path || "").split('\/');
-            const script = pm2_env.script || pm_exec_path[pm_exec_path.length - 1]
-            const args = pm2_env.args;
+export function buildProcessStatusWidthDetail (pList: any[]): StringToProcessStatusDetail {
+    let processStatus: any = {};
+    Object.freeze(pList).forEach(p => {
+        const { monit, pid, name, pm2_env } = p;
+        const status = pm2_env.status;
+        const created_at = pm2_env.created_at;
+        const cwd = pm2_env.cwd;
+        const pm_exec_path = (pm2_env.pm_exec_path || "").split('\/');
+        const script = pm2_env.script || pm_exec_path[pm_exec_path.length - 1]
+        const args = pm2_env.args;
 
-            processStatus[name] = {
-                status,
-                monit,
-                pid,
-                name,
-                created_at,
-                script,
-                cwd,
-                args
-            }
-        })
-        return processStatus
+        processStatus[name] = {
+            status,
+            monit,
+            pid,
+            name,
+            created_at,
+            script,
+            cwd,
+            args
+        }
+    })
+    return processStatus
 }
 
 //循环获取processStatus

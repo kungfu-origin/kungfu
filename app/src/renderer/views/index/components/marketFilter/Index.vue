@@ -17,7 +17,7 @@
                         <el-tab-pane :lazy="true" label="行情源" name="md">
                             <MdAccount></MdAccount>
                         </el-tab-pane>
-                        <el-tab-pane :lazy="true" label="算法任务" name="tradingTasks"  v-if="taskExtConfigList.length">
+                        <el-tab-pane :lazy="false" label="算法任务" name="tradingTasks"  v-if="taskExtConfigList.length">
                             <Task 
                             :noTitle="true" 
                             ></Task>
@@ -142,6 +142,10 @@ export default {
                 this.orders = Object.freeze(orders || []);
             }
             this.orderStat = Object.freeze(orderStat || {});
+        })
+
+        this.$bus.$on('after-add-task', () => {
+            console.log(111)
         })
     },
     

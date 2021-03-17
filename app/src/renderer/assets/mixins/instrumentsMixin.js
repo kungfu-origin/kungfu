@@ -8,6 +8,7 @@ export default {
     },
 
     mounted () {
+        this.$bus.$off('update:instruments')
         this.$bus.$on('update:instruments', () => {
             this.instrumentIds = this.getInstrumentIds()
         })

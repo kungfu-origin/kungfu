@@ -352,6 +352,8 @@ export default {
   },
 
   methods: {
+
+
     handleTickerSetInput (e, item) {
       this.$set(this.form, item.key, e)
       const target = findTargetFromArray(this.tickerSets, 'name', e)
@@ -434,6 +436,8 @@ export default {
           const key = item.key;
           const type = item.type;
           const defaultVal = item.default;
+
+          //用default初始化
           if (this.form[key] === undefined || this.form[key] === "") {
             if (type === "int") {
               if (!+defaultVal) {
@@ -445,6 +449,13 @@ export default {
               this.$set(this.form, key, item.default);
             } else {
               this.$set(this.form, key, "");
+            }
+          }
+
+          //处理特殊 tickerSet
+          if (type === 'tickerSet' && item.tickersKey) {
+            if (this.form[key]) {
+              this.handleTickerSetInput(this.form[key], item)
             }
           }
         })

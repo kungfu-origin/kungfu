@@ -3,8 +3,8 @@
         <div class="kf-order-book__warp">
             <div class="ask__warp order-book-part__warp">
                 <div class="order-line" @click="handleSelectQuote(askPrices[9 - index], 0)" v-for="(item, index) in new Array(10)" :key="index">
-                    <span class="price green">{{ dealNum(askPrices[9 - index]) }}</span>
                     <span class="volume">{{ dealNum(askVolumes[9 - index]) }}</span>
+                    <span class="price green">{{ dealNum(askPrices[9 - index]) }}</span>
                 </div>
             </div>
             <div class="last-price">
@@ -18,8 +18,8 @@
             </div> 
             <div class="bid__warp order-book-part__warp">
                 <div class="order-line" @click="handleSelectQuote(bidPrices[index], 1)" v-for="(item, index) in new Array(10)" :key="index">
-                    <span class="price red">{{ dealNum(bidPrices[index]) }}</span>
                     <span class="volume">{{ dealNum(bidVolumes[index]) }}</span>
+                    <span class="price red">{{ dealNum(bidPrices[index]) }}</span>
                 </div>
             </div>
         </div>
@@ -128,9 +128,16 @@ export default {
         font-weight: 600;
         padding: 0 10px;
         box-sizing: border-box;
+        display: flex;
 
         .title {
             font-size: 16px;
+            display: inline-block;
+            width: 60px;
+        }
+
+        span {
+            flex: 1;
         }
     }
 

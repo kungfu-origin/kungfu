@@ -91,6 +91,8 @@
         :currentActiveConfigKey="setTaskInitKey"
         :method="setTaskMethod"
         :configList="taskExtConfigList"
+        :outsideAddTaskType="outsideAddTaskType"
+        :outsideAddTaskInitData="outsideAddTaskInitData"
         @confirm="handleConfirm"
     >
     </SetTaskDialog>
@@ -108,7 +110,7 @@ import { mapGetters, mapState } from 'vuex';
 import SetTaskDialog from './SetTaskDialog';
 
 import { findTargetFromArray, ifProcessRunning } from '__gUtils/busiUtils';
-import { deleteProcess } from '__gUtils/processUtils';
+import { deleteProcess, buildProcessStatusWidthDetail } from '__gUtils/processUtils';
 import { removeFileFolder } from '__gUtils/fileUtils';
 import { buildProcessLogPath } from '__gConfig/pathConfig';
 import { switchTask } from '__io/actions/base';
@@ -147,7 +149,19 @@ export default {
             setTaskDialogVisiblity: false,
             searchFilterKey: 'processId',
             
+            //从外部传入，通过 bus.$emit
+            outsideAddTaskType: '',
+            outsideAddTaskInitData: {}
+            
+            
         }
+    },
+
+    mounted () {
+        this.$bus.$off('set-task')
+        this.$bus.$on('set-task', ({ type, initData }) => {
+            this.handleAddTaskFromOutSide(type, initData)
+        })
     },
 
     computed: {
@@ -170,17 +184,7 @@ export default {
             this.tableList = Object.keys(newProcess || {})
                 .map(key => {
                     const targetProcess = newProcess[key];
-                    const argsConfig = minimist(targetProcess.args, this.taskExtMinimistConfig)
-
-
-                    return {
-                        processId: key,
-                        processStatus: targetProcess.status,
-                        createdAt: targetProcess.created_at ? moment(targetProcess.created_at).format('YYYY-MM-DD HH:mm:ss') : '--',
-                        configKey: argsConfig.configKey,
-                        subType: argsConfig.subType,
-                        ...targetProcess
-                    }
+                    return this.buildTaskProcessItem(key, targetProcess)
                 })
                 .filter(({ processId }) => {
                     if (processId.includes('task')) {
@@ -210,23 +214,36 @@ export default {
             this.$store.dispatch('setCurrentTask', row)
         },
 
+        handleAddTaskFromOutSide (type, initData) {
+            this.outsideAddTaskType = type;
+            this.outsideAddTaskInitData = initData;
+            this.setTaskMethod = 'add';
+            this.setTaskInitKey = "";
+            this.setTaskInitData = {};
+            this.setTaskTarget = null;
+            this.setTaskDialogVisiblity = true;        },
+
         handleAddTask () {
             if (!this.taskExtConfigList.length) {
                 this.$message.warning('暂无算法任务可选项！')
                 return;
             }
 
+            this.outsideAddTaskType = '';
+            this.outsideAddTaskInitData = {};
             this.setTaskMethod = 'add';
+            this.setTaskInitKey = "";
             this.setTaskInitData = {};
-            this.setTaskInitKey = ""
-            this.setTaskTarget = null
+            this.setTaskTarget = null;
             this.setTaskDialogVisiblity = true;
         },
 
         handleOpenUpdateTaskDialog (data) {
+            this.outsideAddTaskType = '';
+            this.outsideAddTaskInitData = {};
             this.setTaskMethod = 'update';
-            this.setTaskInitData = minimist(data.args, this.taskExtMinimistConfig)
             this.setTaskInitKey = this.setTaskInitData.configKey || '';
+            this.setTaskInitData = minimist(data.args, this.taskExtMinimistConfig)
             this.setTaskTarget = data;
             this.setTaskDialogVisiblity = true;
         },
@@ -239,10 +256,11 @@ export default {
             }
             const extSettingData = JSON.parse(extSettingJSONString);
 
-            const { key, uniKey, packageJSONPath } = configInfo;
+            const { key, uniKey, packageJSONPath, subType } = configInfo;
             const processNameByUniKey = this.formUnikeyInProcessName(uniKey, extSettingData);
             const processName = 'task_' + key + '_' + processNameByUniKey;
             const args = this.formArgs(extSettingData);
+            const cwd = process.env.NODE_ENV === 'production' ? path.resolve(packageJSONPath, '..') : path.resolve(packageJSONPath, '..', 'lib');
 
             return this.preUpdate()
                 .then(res => {
@@ -250,7 +268,22 @@ export default {
                     return switchTask(true, {
                         name: processName,
                         args,
-                        cwd: process.env.NODE_ENV === 'production' ? path.resolve(packageJSONPath, '..') : path.resolve(packageJSONPath, '..', 'lib'),
+                        cwd
+                    })
+                    .then(apps => {
+                        const resolvedApps = buildProcessStatusWidthDetail(apps);
+                        //相当于模拟一个pmDetailData(通过pm2 start 返回的appdata跟pm2.list返回的不一致)
+                        const processWithDetail = { 
+                            ...Object.values(resolvedApps)[0] || {},
+                            args: args.split(' '),
+                            cwd,
+                            name: processName,
+                            subType,
+                            configKey
+                        };
+
+                        this.$store.dispatch('setCurrentTask', this.buildTaskProcessItem(processName, processWithDetail))
+                        this.$bus.$emit('after-add-task')
                     })
                 })
         },
@@ -277,7 +310,18 @@ export default {
             })
         },
 
-        
+        buildTaskProcessItem (key, pmData) {
+            const argsConfig = minimist(pmData.args, this.taskExtMinimistConfig)
+
+            return {
+                processId: key,
+                processStatus: pmData.status,
+                createdAt: pmData.created_at ? moment(pmData.created_at).format('YYYY-MM-DD HH:mm:ss') : '--',
+                configKey: argsConfig.configKey,
+                subType: argsConfig.subType,
+                ...pmData
+            }
+        },
 
         handleTaskSwitch (e, data) {
             const { processId, args, cwd } = data;

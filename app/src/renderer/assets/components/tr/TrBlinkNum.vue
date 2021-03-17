@@ -73,6 +73,7 @@ export default {
     animation: nanoBlink 1.1s 1;
     font-family: Consolas,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New, monospace;
     word-wrap: break-word;
+    text-align: right;
 
 
     &.green-color {
