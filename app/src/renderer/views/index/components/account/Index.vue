@@ -19,7 +19,7 @@
                             @activeTicker="setCurrentTicker"
                             />
                         </el-tab-pane>
-                        <el-tab-pane :lazy="true" label="算法任务" name="tradingTask" v-if="taskExtConfigList.length">
+                        <el-tab-pane :lazy="false" label="算法任务" name="tradingTask" v-if="taskExtConfigList.length">
                             <Task :noTitle="true"></Task>
                         </el-tab-pane>
                     </el-tabs>
@@ -94,7 +94,7 @@
                             @showHistory="handleShowHistory"
                             />   
                         </el-tab-pane>
-                        <el-tab-pane :lazy="false"  v-if="taskExtConfigList.length" :label="`算法任务记录 ${currentTaskIdInTab}`" name="taskDetail">
+                        <el-tab-pane :lazy="true"  v-if="taskExtConfigList.length" :label="`算法任务记录 ${currentTaskIdInTab}`" name="taskDetail">
                             <TaskRecord></TaskRecord>
                         </el-tab-pane>
 

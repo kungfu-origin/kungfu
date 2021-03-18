@@ -54,7 +54,7 @@ export default {
 
         configList: {
             type: Array,
-            default: () => []
+            default: () => ([])
         },
 
         visible: {
@@ -90,6 +90,11 @@ export default {
         
     },
 
+    mounted () {
+        this.activeTabName = this.getActiveTabNameByProps();
+        this.postFormList = this.getPostFormListByProps();
+    },
+
     computed: {
 
         dialogTitle () {
@@ -104,13 +109,13 @@ export default {
 
         configListResolved () {
             if (!this.outsideAddTaskType) {
-                return this.configList
+                return this.configList || []
             } else {
                 const afterFilerConfigList = this.configList.filter(item => item.subType === this.outsideAddTaskType)
                 if (afterFilerConfigList.length) {
-                    return afterFilerConfigList
+                    return afterFilerConfigList || []
                 } else {
-                    return this.configList
+                    return this.configList || []
                 }
             }
         },
@@ -143,33 +148,38 @@ export default {
 
         //从外部传入需要自动填写字段，根据column.type
         resolveOutsideInput (config, value = {}) {
-            (config.config || [])
-                .forEach(item => {
-                    if (this.outsideAddTaskInitData[item.type]) {
-                        value = {
-                            ...value,
-                            [item.key]: this.outsideAddTaskInitData[item.type]
-                        }
-                    }
-                })
+            const configResolved = config.config || [];
+            configResolved.forEach(item => {
+                if (this.outsideAddTaskInitData[item.type]) {
+                    this.$set(value, item.key, this.outsideAddTaskInitData[item.type])
+                }
+            })
+
             return value
         },
 
         getActiveTabNameByProps () {
-            const defaultKey = (this.configListResolved[0] || {}).key || '';
-            return this.currentActiveConfigKey ? this.currentActiveConfigKey : defaultKey
+            const configListResolved = this.configListResolved || [];
+            const defaultKey = (configListResolved[0] || {}).key || '';
+            return this.currentActiveConfigKey || defaultKey
         },
 
         getPostFormListByProps () {
             const configIndexByKey = this.getConfigIndexByKey(this.currentActiveConfigKey);
-            return this.configList.map((c, i) => {
-                if (i === configIndexByKey) return this.value;
-                return this.resolveOutsideInput(c, this.value); //只有在添加的时候
+            const configListResolved = this.configListResolved || [];
+            return configListResolved.map((c, i) => {
+                //在update时，才会有 currentActiveConfigKey
+                if (i === configIndexByKey) {
+                    return this.value
+                }
+
+                return this.resolveOutsideInput(c, {});
             });
         },
 
         getConfigIndexByKey (key) {
-            return this.configList.findIndex(c => c.key === key)
+            const configListResolved = this.configListResolved || [];
+            return configListResolved.findIndex(c => c.key === key)
         },
 
         refreshData () {

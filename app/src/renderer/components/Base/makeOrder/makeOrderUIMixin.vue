@@ -356,6 +356,7 @@ export default {
     },
 
     watch: {
+        
         makeOrderByQuote (newQuoteData) {
             if (!Object.keys(newQuoteData || {}).length) return;
 
