@@ -121,7 +121,8 @@ export default {
         },
 
         targetConfigIndex () {
-            return this.configList.findIndex(item => item.key === this.activeTabName)
+            const configListResolved = this.configListResolved || [];
+            return configListResolved.findIndex(item => item.key === this.activeTabName)
         },
     },
 
