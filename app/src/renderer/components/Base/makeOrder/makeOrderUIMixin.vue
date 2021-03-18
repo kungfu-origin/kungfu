@@ -216,6 +216,7 @@
             </el-form>
             <div class="make-order-btns">
                 <el-button size="medium" @click="handleMakeOrder">下单</el-button>
+                <el-button v-if="rendererType === 'app'" size="medium" class="make-order-by-task-btn" @click="handleMakeOrderByTask">算法</el-button>
             </div>
         </div>
     </tr-dashboard>
@@ -248,7 +249,7 @@ export default {
         this.ExchangeIds = ExchangeIds;
 
         this.biggerThanZeroValidator = biggerThanZeroValidator;
-
+        this.rendererType = process.env.RENDERER_TYPE
 
         return {
 
@@ -463,6 +464,17 @@ export default {
 
     methods: {
 
+        handleMakeOrderByTask () {
+            this.$bus.$emit('set-task', {
+                type: "trade", 
+                initData: {
+                    'exchangeId': this.makeOrderForm.exchange_id,
+                    'instrumentId': this.makeOrderForm.instrument_id,
+                    'account': this.currentAccountResolved
+                }
+            })
+        },
+
         handleBlurInstrumentId (e, item) {
             const value = e.target.value.trim();
             this.$set(this.makeOrderForm, 'instrument_id', value);
@@ -605,3 +617,4 @@ function filterPriceType (PriceType) {
 
 
 </script>
+

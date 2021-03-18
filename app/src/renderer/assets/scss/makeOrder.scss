@@ -111,6 +111,11 @@ $fontSize: 12px;
             word-break: break-word;
             word-wrap: unset;
             white-space: normal;
+
+            &.make-order-by-task-btn {
+                height: 120px;
+                margin-top: 10px;
+            }
         }
     }
 }

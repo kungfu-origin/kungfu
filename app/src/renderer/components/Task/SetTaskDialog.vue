@@ -156,7 +156,7 @@ export default {
         },
 
         getActiveTabNameByProps () {
-            const defaultKey = (this.configList[0] || {}).key || '';
+            const defaultKey = (this.configListResolved[0] || {}).key || '';
             return this.currentActiveConfigKey ? this.currentActiveConfigKey : defaultKey
         },
 
