@@ -4,7 +4,7 @@
             :data="taskRecords"
             :schema="tableHeader"
             :renderCellClass="renderCellClass"
-            keyField="updateTimestamp"
+            :keyField="tableKeyField"
             @dbclickRow="() => {}"
             @clickCell="() => {}"
             @rightClickRow="() => {}"
@@ -71,10 +71,22 @@ export default {
             return this.targetConfig.displayMode
         },
 
+        //这里要注意，因为tr-table的keyfield只允许str，所以如果多个key，需要构造一个id属性
         displayKeyMapKeys () {
-            return this.tableHeader
+            const keys = this.tableHeader
                 .filter(item => item.key)
                 .map(item => item.prop)
+
+            if (keys.length) return keys
+            else return ['updateTimestamp']
+        },
+
+        tableKeyField () {
+            if (this.displayMode === 'keyMap') {
+                return 'keyField'
+            } else {
+                return 'updateTimestamp'
+            }
         }
     },
 
@@ -108,7 +120,10 @@ export default {
                     const key = this.displayKeyMapKeys.map(key => item[key]).join('_');
                     //因为此时record为时间最新在前，所以可以这么写
                     if (!keyMap[key]) {
-                        keyMap[key] = Object.freeze(item);
+                        keyMap[key] = Object.freeze({
+                            ...item,
+                            keyField: key
+                        });
                     }
                 })
 

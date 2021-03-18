@@ -149,8 +149,13 @@ export const posHeader = (moduleType) => {
                 flex: 1.2
             },{
                 type: 'number',
-                label: '资金持仓',
+                label: '总成本',
                 prop: 'totalPrice',
+                flex: 1.5,
+            },{
+                type: 'number',
+                label: '总市值',
+                prop: 'totalMarketPrice',
                 flex: 1.5,
             },{
                 type: 'number',
@@ -199,8 +204,13 @@ export const posHeader = (moduleType) => {
             flex: 1.2
         },{
             type: 'number',
-            label: '资金持仓',
+            label: '总成本',
             prop: 'totalPrice',
+            flex: 1.5,
+        },{
+            type: 'number',
+            label: '总市值',
+            prop: 'totalMarketPrice',
             flex: 1.5,
         },{
             type: 'number',

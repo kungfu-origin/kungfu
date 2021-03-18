@@ -94,7 +94,7 @@ export default {
 
         dialogTitle () {
             if (this.outsideAddTaskType === 'mFilter') {
-                return '行情任务'
+                return '选股任务'
             } else if (this.outsideAddTaskType === 'trade') {
                 return '交易任务'
             } else {

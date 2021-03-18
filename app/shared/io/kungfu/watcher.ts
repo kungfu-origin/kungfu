@@ -320,6 +320,7 @@ export const dealTrade = (item: TradeInputData): TradeData => {
 export const dealPos = (item: PosInputData): PosData => {
     //item.type :'0': 未知, '1': 股票, '2': 期货, '3': 债券
     const direction: string = PosDirection[item.direction] || '--';
+    const avgPrice: string = toDecimal(item.avg_open_price || item.position_cost_price, 3) || ''
     return {
         id: item.instrument_id + direction,
         instrumentId: item.instrument_id,
@@ -329,9 +330,10 @@ export const dealPos = (item: PosInputData): PosData => {
         yesterdayVolume: Number(item.yesterday_volume),
         todayVolume: Number(item.volume) - Number(item.yesterday_volume),
         totalVolume: Number(item.volume),
-        avgPrice: toDecimal(item.avg_open_price || item.position_cost_price, 3) || '--',
+        avgPrice: avgPrice || '--',
         lastPrice: toDecimal(item.last_price, 3) || '--',
-        totalPrice: toDecimal(item.last_price * Number(item.volume), 3),
+        totalPrice: toDecimal(+avgPrice * Number(item.volume), 3) || '--',
+        totalMarketPrice: toDecimal(item.last_price * Number(item.volume), 3) || '--',
         unRealizedPnl: toDecimal(item.unrealized_pnl) + '' || '--',
         exchangeId: item.exchange_id,
         accountId: item.account_id,

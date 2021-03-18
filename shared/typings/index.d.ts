@@ -264,6 +264,7 @@ interface PosData {
     avgPrice: string;
     lastPrice: string;
     totalPrice: string;
+    totalMarketPrice: string;
     unRealizedPnl: string;
     exchangeId: string;
     accountId: string;

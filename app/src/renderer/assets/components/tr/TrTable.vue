@@ -53,7 +53,7 @@
                                 
                             ]"
                             v-for="column in schema" 
-                            :key="`${column.prop}_${item.keyField}_${item[column.prop]}`"       
+                            :key="`${column.prop}`"       
                             :style="{                             
                                 'max-width': getHeaderWidth(column)
                             }"
@@ -61,7 +61,7 @@
                         >
                             <template v-if="column.type === 'number'">
                                 <tr-blink-num
-                                :theKey="`${column.prop}${item[column.prop]}`"   
+                                :theKey="`${column.prop}_${item[keyField]}_${item[column.prop]}`"   
                                 :num="item[column.prop]"
                                 >
                                 </tr-blink-num>                            

@@ -92,7 +92,7 @@ export const SourceTypeConfig: SourceType = {
 
 export const TaskTypeConfig: any = {
     'mFilter': {
-        name: isEnglish ? 'market' : '行情',
+        name: isEnglish ? 'market' : '选股',
         color: ''
     },
 
