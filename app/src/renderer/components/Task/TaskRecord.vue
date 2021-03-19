@@ -107,7 +107,7 @@ export default {
                         return Object.freeze({
                             ...value,
                             id: record.update_time.toString(),
-                            updateTime: moment(value.updateTime).format('HH:mm:ss'),
+                            updateTime: moment(value.updateTime).format('HH:mm:ss.SSS'),
                             updateTimestamp: record.update_time.toString(),
                             update: true
                         })
