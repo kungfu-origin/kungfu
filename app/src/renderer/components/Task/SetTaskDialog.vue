@@ -18,7 +18,6 @@
                 :label="item.name"
                 size="mini"
                 :name="item.key"
-                :lazy="true"
             >
                 <ExtConfigForm
                     ref="taskSettingForm"
@@ -50,7 +49,10 @@ export default {
             default: () => ({})
         },
 
-        currentActiveConfigKey: '',
+        currentActiveConfigKey: {
+            type: String,
+            default: ''
+        },
 
         configList: {
             type: Array,
