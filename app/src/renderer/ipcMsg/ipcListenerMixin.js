@@ -127,8 +127,8 @@ export default {
                             this.sendResDataToProcessId("HIS_AVG_VOLUME", pm2Id, processName, { avgVolume: this.marketAvgVolume[days] || {} })
                             break
                         case 'REQ_RECORD_DATA':
-                            const { mode, data } = packetData.body
-                            writeKungfu(processName, mode, 'task', JSON.stringify(data))
+                            const { data } = packetData.body;
+                            writeKungfu(processName, '', 'task', JSON.stringify(data))
                     }
                 })
             })

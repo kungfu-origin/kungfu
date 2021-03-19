@@ -218,10 +218,11 @@ export default {
             this.outsideAddTaskType = type;
             this.outsideAddTaskInitData = initData;
             this.setTaskMethod = 'add';
-            this.setTaskInitKey = "";
             this.setTaskInitData = {};
+            this.setTaskInitKey = "";
             this.setTaskTarget = null;
-            this.setTaskDialogVisiblity = true;        },
+            this.setTaskDialogVisiblity = true;
+        },
 
         handleAddTask () {
             if (!this.taskExtConfigList.length) {
@@ -232,8 +233,8 @@ export default {
             this.outsideAddTaskType = '';
             this.outsideAddTaskInitData = {};
             this.setTaskMethod = 'add';
-            this.setTaskInitKey = "";
             this.setTaskInitData = {};
+            this.setTaskInitKey = "";
             this.setTaskTarget = null;
             this.setTaskDialogVisiblity = true;
         },
@@ -242,8 +243,8 @@ export default {
             this.outsideAddTaskType = '';
             this.outsideAddTaskInitData = {};
             this.setTaskMethod = 'update';
-            this.setTaskInitKey = this.setTaskInitData.configKey || '';
             this.setTaskInitData = minimist(data.args, this.taskExtMinimistConfig)
+            this.setTaskInitKey = this.setTaskInitData.configKey || '';
             this.setTaskTarget = data;
             this.setTaskDialogVisiblity = true;
         },
