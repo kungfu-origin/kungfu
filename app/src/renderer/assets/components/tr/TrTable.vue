@@ -262,7 +262,6 @@ export default {
         },
 
         getHeaderWidth (column) {
-            const prop = column.prop;
             const headerWidthByCalc = this.headerWidth[column.prop];
             const columnWidth = column.width;
 

@@ -55,11 +55,6 @@ export default {
                 bgClass = ''
             }
 
-            if (this.theKey.includes('remainDays')) {
-                console.log(this.theKey)
-                console.log(bgClass, newVal, oldVal, +parseFloat(newVal) < +parseFloat(oldVal), +parseFloat(newVal), +parseFloat(oldVal))
-            }
-
             this.colorClassName = bgClass
         }
     }
