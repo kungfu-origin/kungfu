@@ -284,7 +284,6 @@ export default {
                         };
 
                         this.$store.dispatch('setCurrentTask', this.buildTaskProcessItem(processName, processWithDetail))
-                        this.$bus.$emit('after-add-task')
                     })
                 })
         },

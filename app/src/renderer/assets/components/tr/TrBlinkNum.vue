@@ -60,7 +60,6 @@ export default {
                 console.log(bgClass, newVal, oldVal, +parseFloat(newVal) < +parseFloat(oldVal), +parseFloat(newVal), +parseFloat(oldVal))
             }
 
-
             this.colorClassName = bgClass
         }
     }

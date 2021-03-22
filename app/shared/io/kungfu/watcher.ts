@@ -241,9 +241,10 @@ export const dealOrder = (item: OrderInputData): OrderData => {
     const instrumentType = instrument_type;
     const sourceId =  resolveSourceDest(source, dest).sourceGroup;
     const errMsg = item.error_msg || OrderStatus[item.status];
+    const accountId = resolveAccountId(source, dest);
   
     return {
-        id: [item.order_id.toString(), item.account_id.toString()].join('-'),
+        id: item.order_id.toString(),
         updateTime: kungfu.formatTime(updateTime, '%H:%M:%S'),
         updateTimeMMDD: kungfu.formatTime(updateTime, '%m/%d %H:%M:%S'),
         updateTimeNum: +Number(updateTime || 0),
@@ -285,7 +286,7 @@ export const dealOrder = (item: OrderInputData): OrderData => {
         errorMsg: errMsg,
 
         clientId: resolveClientId(dest || ''),
-        accountId: resolveAccountId(source, dest),
+        accountId: accountId,
         sourceId: sourceId,
        
         source: source,

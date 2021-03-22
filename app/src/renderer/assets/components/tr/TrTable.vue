@@ -53,7 +53,7 @@
                                 
                             ]"
                             v-for="column in schema" 
-                            :key="`${column.prop}`"       
+                            :key="`${column.prop}_${item[keyField]}`"       
                             :style="{                             
                                 'max-width': getHeaderWidth(column)
                             }"

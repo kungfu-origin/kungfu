@@ -143,10 +143,6 @@ export default {
             }
             this.orderStat = Object.freeze(orderStat || {});
         })
-
-        this.$bus.$on('after-add-task', () => {
-            console.log(111)
-        })
     },
     
     destroyed(){
