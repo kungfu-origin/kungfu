@@ -1,9 +1,11 @@
 import fse from 'fs-extra';
-import readline from 'readline';
+import iconv from 'iconv-lite';
+import jschardet from 'jschardet';
+import path from 'path';
+
 import { EXTENSION_DIR } from '__gConfig/pathConfig';
 import { listDir } from '__gUtils/fileUtils';
 
-const path = require("path");
 
 interface LogLineData {
     message: string;
@@ -573,4 +575,28 @@ export function checkAllMdProcess (tickers: TickerInTickerSet[], processStatus: 
     } else {
         return true
     }
+}
+
+export function decodeBuffer (name: string[]) {
+    name = name.filter(n => !!n);
+    const bufferFrom = Buffer.from(name);
+    return isBufferGBK(bufferFrom) ? iconv.decode(bufferFrom, 'gbk') : iconv.decode(bufferFrom, 'utf8')
+}
+
+export function isBufferGBK (bufferFrom: Buffer) {
+    return jschardet.detect(bufferFrom).encoding !== 'UTF-8'
+}
+
+export const resolveInstruments = (instruments: InstrumentInputData[]) => {
+    return (instruments || []).map(item => {
+        const { instrument_id, product_id, exchange_id } = item;
+        const instrumentName = decodeBuffer(product_id)
+        return {
+            instrument_id,
+            instrument_name: instrumentName,
+            exchange_id,
+            id: `${instrument_id}${instrumentName}${exchange_id}`.toLowerCase()
+        }
+
+    })
 }

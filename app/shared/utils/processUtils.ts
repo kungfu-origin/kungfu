@@ -6,7 +6,6 @@ import * as taskkill from 'taskkill';
 import { KF_HOME, KUNGFU_ENGINE_PATH, KF_CONFIG_PATH, buildProcessLogPath } from '__gConfig/pathConfig';
 import { platform } from '__gConfig/platformConfig';
 import { logger } from '__gUtils/logUtils';
-import { hackLaunchDaemon } from '__assets/hack';
 import { setTimerPromiseTask, delayMiliSeconds } from '__gUtils/busiUtils';
 import { getProcesses } from 'getprocesses';
 
@@ -15,7 +14,6 @@ const path = require('path');
 const numCPUs = require('os').cpus() ? require('os').cpus().length : 1;
 const fkill = require('fkill');
 const pm2 = require('pm2');
-pm2.Client.__proto__.launchDaemon = hackLaunchDaemon
 
 export const _pm2 = pm2;
 

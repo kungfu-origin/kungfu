@@ -43,21 +43,22 @@
 <script>
 
 import { mapState } from 'vuex';
-import moment from 'moment';
-import path from 'path';
 
 import GlobalSettingDialog from '@/components/Base/GlobalSettingDialog';
 
 import { buildKungfuGlobalDataPipe, buildTradingDataPipe } from '__io/kungfu/tradingData';
 import { watcher } from '__io/kungfu/watcher';
 
+
 import ipcListenerMixin from '@/ipcMsg/ipcListenerMixin';
 import tickerSetMixin from '@/components/MarketFilter/js/tickerSetMixin';
+import workersMixin from '@/workers/workersMixin';
+
 
 export default {
     name: 'app',
 
-    mixins: [ ipcListenerMixin, tickerSetMixin ],
+    mixins: [ ipcListenerMixin, tickerSetMixin, workersMixin ],
 
     data() {
         this.kungfuGloablDataObserver = null;
@@ -78,6 +79,7 @@ export default {
 
     mounted(){
 
+        //打开应用后报错，比如vs2019依赖
         window.MAIN_RENDERED = true;
 
         this.removeLoadingMask();
@@ -116,6 +118,13 @@ export default {
     },
 
     methods: {
+        bindTradingDataListener () {
+            this.tradingDataPipe = buildTradingDataPipe('account').subscribe(data => {
+                const assets = data['assets'];
+                this.$store.dispatch('setAccountsAsset', Object.freeze(JSON.parse(JSON.stringify(assets))));
+            })
+        },
+
         removeLoadingMask () {
             if(document.getElementById('loading')) document.getElementById('loading').remove();
         },
@@ -150,17 +159,7 @@ export default {
             })
         },
 
-        bindTradingDataListener () {
-            this.tradingDataPipe = buildTradingDataPipe('account').subscribe(data => {
-                const assets = data['assets'];
-                this.$store.dispatch('setAccountsAsset', Object.freeze(JSON.parse(JSON.stringify(assets))));
-
-                if (this.getIfSaveInstruments()) {
-                    const instruments = data['instruments'];
-                    this.saveInstrumentsIntoLocalstorage(instruments)
-                }
-            })
-        },
+        
 
         removeKeyDownEvent () {
             //解除回车带来的一些不好的影响
@@ -170,56 +169,12 @@ export default {
                     event.preventDefault()
                 }
             })
-        },
-
-        getIfSaveInstruments () {
-            const instrumentsSavedDate = localStorage.getItem('instrumentsSavedDate')
-            if (!instrumentsSavedDate) {
-                return true
-            } else if (instrumentsSavedDate !== moment().format('YYYY-MM-DD-HH-mm')) {
-                return true 
-            } else {
-                return false
-            }
-        },
-
-        saveInstrumentsIntoLocalstorage (instruments) {
-            const instrumentsResolved = instruments
-                .filter(item => {
-                    //普通股票 期货 股票期权 基金 科创板股票 指数
-                    if (item.instrument_type === 1) return true;
-                    if (item.instrument_type === 2) return true;
-                    if (item.instrument_type === 4) return true;
-                    if (item.instrument_type === 5) return true;
-                    if (item.instrument_type === 6) return true;
-                    if (item.instrument_type === 7) return true;
-
-                    return false
-                })
-                .map(item => ({
-                    exchange_id: item.exchange_id,
-                    instrument_id: item.instrument_id,
-                    instrument_name: item.product_id
-                }))
-
-            if (instrumentsResolved.length) {
-                //for performance
-                let saveTimer = setTimeout(() => {
-                    localStorage.setItem('instrumentsSavedDate', moment().format('YYYY-MM-DD-HH-mm'))
-                    localStorage.setItem('instruments', JSON.stringify(instrumentsResolved))
-                    this.$nextTick()
-                        .then(() => {
-                            this.$bus.$emit('update:instruments')
-                            clearTimeout(saveTimer)
-                        })
-
-                }, 300)
-            }
-        },
-
-        
+        },      
     }
 }
+
+
+
 </script>
 
 <style lang="scss">

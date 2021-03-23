@@ -1,44 +1,36 @@
 
-const minimist = require('minimist')
+
+
 const fse = require('fs-extra')
 const csv = require('fast-csv');
 const moment = require('moment');
 const path = require('path');
 
-const argv = minimist(process.argv.slice(2))
 
-const { days, dataPath } = argv;
 
-const targetFilenamesFromDays = buildDaysDate(days).map(name => path.resolve(dataPath, `${name}.csv`));
 
-const promises = targetFilenamesFromDays
-    .filter(filename => {
-        return fse.existsSync(filename)
-    })
-    .map(filename => getMarketDatanByFile(filename));
+self.addEventListener('message', (e) => {
+    const { days, dataPath } = e.data || {}
+    const targetFilenamesFromDays = buildDaysDate(days).map(name => path.resolve(dataPath, `${name}.csv`));
 
-Promise.all(promises)
-    .then(quotesList => {
-        const avgVolumeData = calcAvgVolume(quotesList)
-
-        console.log('Calculate Results: ', avgVolumeData)
-        
-        process.send({
-            type: 'process:msg',
-            data: {
-                type: 'CALC_AVG_VOLUME',
-                body: {
-                    days,
-                    data: avgVolumeData 
-                }
-            }
+    const promises = targetFilenamesFromDays
+        .filter(filename => {
+            return fse.existsSync(filename)
         })
+        .map(filename => getMarketDatanByFile(filename));
 
-        setTimeout(() => {
-            process.exit(0)
-        }, 300)
+    Promise.all(promises)
+        .then(quotesList => {
+            const avgVolumeData = calcAvgVolume(quotesList)
 
-    })
+            console.log('Calculate Results: ', avgVolumeData)
+            
+            self.postMessage({
+                days,
+                data: avgVolumeData 
+            })
+        })
+})
 
 
 function getMarketDatanByFile (filename) {
@@ -50,7 +42,7 @@ function getMarketDatanByFile (filename) {
             .on('data', row => {
                 table.push(row)
             })
-            .on('end', rowCount => resolve(table));
+            .on('end', () => resolve(table));
     })
 }
 

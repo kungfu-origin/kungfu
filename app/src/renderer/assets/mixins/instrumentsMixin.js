@@ -1,4 +1,4 @@
-import { mapGetters } from "vuex"
+import { mapGetters } from "vuex";
 
 export default {
     data () {
@@ -44,36 +44,21 @@ export default {
         getSearchTickers (queryString = '') {
             return this.instrumentIds
                 .filter(item => {
-                const { instrument_id, instrument_name, exchange_id } = {
-                        instrument_id: '',
-                        instrument_name: '',
-                        exchange_id: '',
-                        ...item
-                    }
-
-                    if (`${instrument_id}${instrumentName}${exchange_id}`.toLowerCase().includes(queryString.toLowerCase())) return true;
-
-                    const instrumentName = Buffer.from(instrument_name).toString();
-                    if (instrumentName.toLowerCase().includes(queryString.toLowerCase())) return true;
-
+                    const { id } = item;
+                    if ((id || '').includes(queryString.toLowerCase())) return true;
                     return false
                 })
                 .slice(0, 300)
-                .map(item => {
-                    const { instrument_id, instrument_name, exchange_id } = {
-                        instrument_id: '',
-                        instrument_name: '',
-                        exchange_id: '',
-                        ...item
-                    }
-                    const instrumentName = Buffer.from(instrument_name).toString().split('\u0000').join('')
+        },
 
-                    return {
-                        instrument_id,
-                        instrument_name: instrumentName,
-                        exchange_id
-                    }
-                })
+        decodeProductId (productId) {
+            const productIdResolved = productId.filter(n => !!n);
+            const bufferFrom = Buffer.from(productIdResolved);
+            return this.isBufferGBK(bufferFrom) ? iconv.decode(bufferFrom, 'gbk') : iconv.decode(bufferFrom, 'utf8')
+        },
+
+        isBufferGBK (bufferFrom) {
+            return jschardet.detect(bufferFrom).encoding !== 'UTF-8'
         },
 
         getSearchTickersInTickerSets (queryString = '') {
@@ -84,8 +69,7 @@ export default {
                     return `${instrumentId}${exchangeId}${source}`.includes(queryString)
                 }))
                 .map(item => {
-                    const { instrumentId, source, exchangeId } = item;
-
+                    const { instrumentId, exchangeId } = item;
                     return {
                         instrument_id: instrumentId,
                         instrument_name: '',

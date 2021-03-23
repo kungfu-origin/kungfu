@@ -47,8 +47,6 @@ startArchiveMakeTask((archiveStatus) => {
         Vue.store.dispatch('setProcessStatusWithDetail', processStatusWithDetail)
     });
 
-    calcMarketDataAvgVolume(7);
-
     utils.delayMiliSeconds(1000)
         .then(() => startLedger(false))
         .catch(err => console.error(err.message))
@@ -57,13 +55,3 @@ startArchiveMakeTask((archiveStatus) => {
 window.ELEC_WIN_MAP = new Set();
 window.pm2 = _pm2;
 
-
-function calcMarketDataAvgVolume (days) {
-    const taskCwdPath = path.join(__resources, 'tasks');
-    switchTask(true, {
-        name: `calc_marketdata_avg_volume_${days}`,
-        args: `--days ${days} --dataPath ${JSON.stringify(KF_DATASET_QUOTE_DIR)}`,
-        cwd: taskCwdPath,
-        script: 'calcMarketDataAvgVolume.js'
-    })
-}

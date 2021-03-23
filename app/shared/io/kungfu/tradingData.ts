@@ -48,6 +48,18 @@ export const buildTradingDataPipe = (type: string) => {
     )
 }
 
+export const buildInstrumentsPipe = () => {
+    return KUNGFU_TRADING_DATA_OBSERVER.pipe(
+        map((data: any) => {
+            const ledgerData = data.ledger || {};
+            const instruments = Object.values(ledgerData.Instrument || {});
+            return {
+                instruments
+            }
+        })
+    )
+
+}
 
 export const buildAllOrdersPipe = () => {
     return KUNGFU_TRADING_DATA_OBSERVER.pipe(

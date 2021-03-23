@@ -33,7 +33,8 @@ function createWindow () {
 		height: height > 1200 ? 1200 : height,
 		useContentSize: true,
 		webPreferences: {
-			nodeIntegration: true
+			nodeIntegration: true,
+			nodeIntegrationInWorker: true
 		},
 		backgroundColor: '#161B2E',
 	})

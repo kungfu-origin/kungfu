@@ -119,9 +119,6 @@ export default {
                                 this.$message.info(`距离算法任务 ${processName} 开始执行还有 ${minute} 分钟，请保证交易进程与行情进程运行`)
                             }
                             break
-                        case 'CALC_AVG_VOLUME': //周均成交量
-                            this.$store.dispatch('setMarketAvgVolume', packetData.body)
-                            break
                         case 'REQ_HIS_AVG_VOLUME': //历史均成交量
                             const { days } = packetData.body || {};
                             this.sendResDataToProcessId("HIS_AVG_VOLUME", pm2Id, processName, { avgVolume: this.marketAvgVolume[days] || {} })

@@ -499,7 +499,7 @@ interface InstrumentInputData {
     long_margin_ratio: number;
     open_date: string;
     price_tick: number;
-    product_id: string;
+    product_id: string[];
     short_margin_ratio: number;
 }
 

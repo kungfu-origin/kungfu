@@ -1,16 +1,8 @@
 import path from 'path';
-import { addFileSync } from '__gUtils/fileUtils';
 import moment from 'moment';
 
-const KF_HOME_BASE_DIR_RESOLVE = (() => {
-    if ( process.env.APP_TYPE === 'cli' ) {
-        return require('__gConfig/cliKfHomePathConfig').KF_HOME_BASE_DIR_RESOLVE
-     } else if ( process.env.APP_TYPE === 'test' ) {
-        return require('__gConfig/cliKfHomePathConfig').KF_HOME_BASE_DIR_RESOLVE
-     } else {
-        return require('__gConfig/appKfHomePathConfig').KF_HOME_BASE_DIR_RESOLVE
-     }
-})()
+import { addFileSync } from '__gUtils/fileUtils';
+import { KF_HOME_BASE_DIR_RESOLVE } from '__gConfig/homePathConfig';
 
 addFileSync('', KF_HOME_BASE_DIR_RESOLVE, 'folder');
 export const KF_HOME_BASE_DIR = KF_HOME_BASE_DIR_RESOLVE;

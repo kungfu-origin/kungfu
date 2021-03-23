@@ -86,6 +86,14 @@ let rendererConfig = {
         }
       },
       {
+        test: /\.worker\.js$/,
+        use: {
+          loader: 'worker-loader',
+          options: { inline: true, fallback: false }
+        },
+        exclude: /node_modules/
+      },
+      {
         test: /\.(png|jpe?g|gif|svg)(\?.*)?$/,
         use: {
           loader: 'url-loader',
