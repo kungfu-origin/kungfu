@@ -23,7 +23,6 @@ self.addEventListener('message', (e) => {
         .then(quotesList => {
             const avgVolumeData = calcAvgVolume(quotesList)
 
-            console.log('Calculate Results: ', avgVolumeData)
             
             self.postMessage({
                 days,

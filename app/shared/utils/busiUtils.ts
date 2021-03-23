@@ -2,6 +2,7 @@ import fse from 'fs-extra';
 import iconv from 'iconv-lite';
 import jschardet from 'jschardet';
 import path from 'path';
+import readline from 'readline';
 
 import { EXTENSION_DIR } from '__gConfig/pathConfig';
 import { listDir } from '__gUtils/fileUtils';
@@ -252,9 +253,9 @@ export const openVueWin = (htmlPath: string, routerPath: string, electronRemote:
  * 启动任务，利用electron多进程
  * @param  {} taskPath
  */
-export const buildTask = (taskPath: string, electronRemote: any, debugOptions = { width: 0, height: 0, show: false }) => {
+export const openPage = (taskPath: string, electronRemote: any, debugOptions = { width: 0, height: 0, show: false }) => {
     
-    const taskPathResolved = `file://${path.join(__resources, 'tasks', taskPath + '.html')}`;
+    const taskPathResolved = `file://${path.join(__resources, 'pages', taskPath + '.html')}`;
     const BrowserWindow: any = electronRemote.BrowserWindow;
     const currentWindow: any = electronRemote.getCurrentWindow();
     
@@ -599,4 +600,61 @@ export const resolveInstruments = (instruments: InstrumentInputData[]) => {
         }
 
     })
+}
+
+export function getLog(logPath: string, searchKeyword: string, dealMessageFunc: Function){
+    const numList = buildListByLineNum(1000000000);    
+    let logId = 0;            
+    return new Promise((resolve, reject) => {
+        fse.stat(logPath, (err: Error) => {
+            if(err){
+                reject(err)
+                return;
+            }
+
+            const lineReader = readline.createInterface({
+                input: fse.createReadStream(logPath, {
+                    start: 0
+                })
+            })
+
+            lineReader.on('line', line => {
+                const messageData = dealMessageFunc(line, searchKeyword)
+                if(!messageData || !messageData.length) return;
+                messageData.forEach((msg: any) => {
+                    if(!msg) return;
+                    logId++
+                    numList.insert({
+                        ...msg,
+                        id: logId
+                    })
+                })
+            })
+
+            lineReader.on('close', () => {
+                resolve(numList)
+            })
+        })
+    })
+}
+
+//建立固定条数的list数据结构
+function buildListByLineNum(num: number){
+    function ListByNum(n: number){
+        //@ts-ignore
+        this.list = [];
+        //@ts-ignore
+        this.len = 0;
+        //@ts-ignore
+        this.num = n;
+    }
+
+    ListByNum.prototype.insert = function(item: any){
+        if(this.len >= this.num) this.list.shift();
+        else this.len++
+        this.list.push(item)
+    }
+
+    //@ts-ignore
+    return new ListByNum(num)
 }

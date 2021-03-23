@@ -16,7 +16,7 @@ import TrTable from './tr/TrTable.vue';
 import TrSearchInput from './tr/TrSearchInput.vue';
 import TrSettingDashboard from './tr/TrSettingDashboard.vue';
 
-import { buildTask } from '__gUtils/busiUtils';
+import { openPage } from '__gUtils/busiUtils';
 
 const components = [
     TrNoData,
@@ -59,7 +59,7 @@ const saveFile = ({
 
 //显示log
 const showLog = (logPath) => {
-    buildTask(
+    openPage(
         'showLog', 
         remote,
         {

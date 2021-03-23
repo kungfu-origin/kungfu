@@ -39,7 +39,7 @@ export default {
                     return;
                 };
 
-                console.log('set Instruments', instrumentsResolved.length)
+                console.log('Set Instruments', instrumentsResolved.length)
 
                 localStorage.setItem('instruments', JSON.stringify(instrumentsResolved))
                 self.$bus.$emit('update:instruments')
@@ -52,7 +52,11 @@ export default {
                 days: 7,
                 dataPath: KF_DATASET_QUOTE_DIR
             })
+
             Workers.calcMarketDataAvgVolumeWorker.onmessage = debounce(function (event) {{
+                
+                console.log('Calculate Results: ', event.data)
+
                 self.$store.dispatch('setMarketAvgVolume', event.data)
             }})
         },

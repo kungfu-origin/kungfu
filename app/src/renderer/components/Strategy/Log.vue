@@ -33,12 +33,14 @@
 <script>
 import fse from 'fs-extra'; 
 import { mapState } from 'vuex'
-import { debounce, throttle, throttleInsert, dealLogMessage, buildTask } from '__gUtils/busiUtils'
+import { debounce, throttle, throttleInsert, dealLogMessage, openPage } from '__gUtils/busiUtils'
 import { buildProcessLogPath } from '__gConfig/pathConfig';
 import { Tail } from 'tail';
 import { writeFile, addFileSync } from '__gUtils/fileUtils';
 import { ipcRenderer } from 'electron';
 import { remote } from 'electron';
+
+import Workers from '@/workers/index';
 
 import openLogMixin from '@/assets/mixins/openLogMixin';
 
@@ -106,9 +108,9 @@ export default {
     },
 
     watch: {
-        searchKeyword: debounce(function(newVal){
+        searchKeyword: debounce(function(){
             this.resetData(true)
-            this.processId && this.init(this.processId, this.logPath, this.searchKeyword)
+            this.processId && this.init(this.logPath, this.searchKeyword)
         }),
 
         processId: debounce(function(val){
@@ -117,7 +119,7 @@ export default {
             this.rendererTable = false;
             this.$nextTick().then(() => {
                 this.rendererTable = true;
-                this.init(this.processId, this.logPath)
+                this.init(this.logPath, this.searchKeyword)
             })
         }, 100),
 
@@ -129,7 +131,9 @@ export default {
     mounted(){
         this.rendererTable = true;
         this.resetData();
-        this.processId && this.init(this.processId, this.logPath);
+        this.processId && this.init(this.logPath, this.searchKeyword)
+
+        this.bindGetLogWorkerListener();
     },
 
     destroyed(){
@@ -147,7 +151,7 @@ export default {
             .then(() => writeFile(buildProcessLogPath(this.processId), ''))
             .then(() => {
                 this.resetData();
-                this.processId && this.init(this.processId, this.logPath)
+                this.processId && this.init(this.logPath, this.searchKeyword)
                 this.$message.success('操作成功！')
             })
             .catch((err) => {
@@ -158,49 +162,51 @@ export default {
 
         handleRefresh(){
             this.resetData();
-            this.processId && this.init(this.processId, this.logPath, this.searchKeyword)
+            this.processId && this.init(this.logPath, this.searchKeyword)
         },
 
-        init: debounce(function(processId, logPath, searchKeyword){
+        bindGetLogWorkerListener () {
+            const self = this;
+            Workers.getLogWorker.onmessage = (event) => {
+                console.log(event.data);
+                const {
+                    list,
+                    logPath,
+                    searchKeyword
+                } = event.data || [];
+
+                if (logPath !== this.logPath || searchKeyword !== this.searchKeyword) {
+                    return;
+                }
+
+                console.log('Get Log', {
+                    list,
+                    logPath,
+                    searchKeyword
+                })
+
+                self.tableData = Object.freeze(list || [])
+                self.scrollToBottom();
+                self.startWatchingTail(self.processId, logPath, searchKeyword)
+            }
+        },
+
+        init: debounce(function(logPath, searchKeyword){
             //文件不存在则创建
             if(!fse.existsSync(logPath)){
                 this.tableData = Object.freeze([])
                 addFileSync('', logPath, 'file')
             }
 
-            this.getLogByTask(logPath, searchKeyword).then(logList => {
-                this.tableData = Object.freeze(logList)
-                this.scrollToBottom()
-            }).catch(err => {
-                this.tableData = Object.freeze([])
-            }).finally(() => {
-                this.startWatchingTail(processId, logPath, searchKeyword)
+            Workers.getLogWorker.postMessage({
+                logPath,
+                searchKeyword
             })
         }, 100),
-
-        getLogByTask(logPath, searchKeyword){
-            return new Promise((resolve, reject) => {
-                buildTask(
-                    'getStrategyLog', 
-                    remote,
-                ).then(({ win, curWinId }) => {
-                    win.webContents.send('get-strategy-log', {
-                        winId: curWinId,
-                        logPath,
-                        searchKeyword
-                    });
-                    ipcRenderer.on('res-strategy-log', function resLog(event, logs){
-                        resolve(Object.freeze(logs))
-                        ipcRenderer.removeAllListeners('res-strategy-log')
-                    })
-                }).catch(err => reject(err))
-            })
-        },
 
         //开始监听日志尾部
         startWatchingTail(processId, logPath, searchKeyword){
             this.clearTailWatcher();
-            let logWaitList = [];
             let throttleInsertLog = throttleInsert(500)
             let throttleClearLog = throttle(() => {
                     const len = this.tableData.length
@@ -220,7 +226,7 @@ export default {
                 throttleInsertLog(logData).then(logList => {
                     if(!logList) return;
                     this.tableData = this.pushTableData(logList);
-                    if(this.ifScrollToBottom) this.scrollToBottom()
+                    if(this.ifScrollToBottom) this.scrollToBottom();
                 })
                 throttleClearLog()
             })(processId, searchKeyword))
@@ -264,10 +270,11 @@ export default {
         //加载完数据
         scrollToBottom: throttle(function() {
             const $logTable = this.$refs['logTable'];
-            if(!$logTable) return;
-            this.$nextTick().then(() => { 
-                $logTable.triggerToBottom()
-            })
+            if(!$logTable) return
+            this.$nextTick()
+                .then(() => { 
+                    $logTable.triggerToBottom()
+                })
         }, 1000),
 
         renderCellClass(prop, item){

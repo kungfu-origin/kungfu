@@ -74,7 +74,7 @@ export function showQuitMessageBox (mainWindow) {
             cancelId: 1,
             message: "退出应用会结束所有交易进程，确认退出吗？",
             buttons: ['确认', '取消'],
-            icon: path.join(__resources, 'icon', 'icon.png')
+            icon: path.join(__resources, 'logo', 'icon.png')
         }, (index) => {
             if(index === 0){
 				reqRecordBeforeQuit(mainWindow)

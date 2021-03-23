@@ -249,7 +249,7 @@ export default {
         },
 
         triggerToBottom() {
-            this.$nextTick().then(() => {
+            return this.$nextTick().then(() => {
                 const $scrollerTable = this.$refs['tr-scroller-table'] || this.$refs['tr-dynamic-scroller-table'];
                 $scrollerTable && $scrollerTable.$el && ($scrollerTable.$el.scrollTop = 1000000000)
             })

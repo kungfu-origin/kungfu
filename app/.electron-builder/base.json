@@ -88,14 +88,14 @@
       ]
     },
     "mac": {
-      "icon": "./.electron-builder/logo/icon.icns",
+      "icon": "./resources/logo/icon.icns",
       "type": "distribution",
       "target": [
         "dmg"
       ]
     },
     "win": {
-      "icon": "./.electron-builder/logo/icon.ico",
+      "icon": "./resources/logo/icon.ico",
       "target": [
         {
           "target": "nsis",
@@ -106,7 +106,7 @@
       ]
     },
     "linux": {
-      "icon": "./.electron-builder/logo/icn.icns",
+      "icon": "./resources/logo/icn.icns",
       "target": [
         "rpm",
         "appimage"
@@ -116,9 +116,9 @@
       "oneClick": false,
       "allowElevation": true,
       "allowToChangeInstallationDirectory": true,
-      "installerIcon": "./.electron-builder/logo/icon.ico",
-      "uninstallerIcon": "./.electron-builder/logo/icon.ico",
-      "installerHeaderIcon": "./.electron-builder/logo/icon.ico",
+      "installerIcon": "./resources/logo/icon.ico",
+      "uninstallerIcon": "./resources/logo/icon.ico",
+      "installerHeaderIcon": "./resources/logo/icon.ico",
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true
     }
