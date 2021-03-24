@@ -185,7 +185,7 @@ export default {
             delete orderData.sourceId;
             delete orderData.status;
 
-            orderData.accountId = orderData.accountId.split('手动').join(' ')
+            orderData.accountId = orderData.accountId.split('手动').join(' ').split('任务').join(' ').trim()
             
             Object.keys(orderData || {}).forEach(key => {
                 const value = orderData[key];

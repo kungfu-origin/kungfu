@@ -203,13 +203,6 @@ export function decodeKungfuLocation(sourceOrDest: string): KungfuLocation {
 
 // ========================== 交易数据处理 start ===========================
 
-function resolveClientId(dest: string): string {
-    const kungfuLocation: KungfuLocation = decodeKungfuLocation(dest);
-    if (!kungfuLocation) return '';
-    if (kungfuLocation.group === 'node') return '手动'
-    const name = kungfuLocation.name;
-    return name
-}
 
 interface SourceDest {
     sourceGroup:string;
@@ -228,12 +221,35 @@ function resolveSourceDest (source: string, dest: string): SourceDest {
     }
 }
 
-function resolveAccountId(source: string, dest: string): string {
+function resolveAccountId(source: string, dest: string, parent_id: bigint): string {
     const { sourceName, sourceGroup, destGroup  } = resolveSourceDest(source, dest)
     const name = sourceGroup + '_' + sourceName;
-    const group = destGroup === 'node' ? '手动' : '';
-    return [group, name].join(' ')
+    let mark = ''
+    if (destGroup === 'node') {
+        console.log(+parent_id.toString(), '---')
+        if (+parent_id.toString()) {
+            mark = '任务'
+        } else {
+            mark = '手动'
+        }
+    }
+    return [mark, name].join(' ')
 }
+
+function resolveClientId(dest: string, parent_id: bigint): string {
+    const kungfuLocation: KungfuLocation = decodeKungfuLocation(dest);
+    if (!kungfuLocation) return '';
+    if (kungfuLocation.group === 'node') {
+        if (+parent_id.toString()) {
+            return '任务'
+        } else {
+            return '手动'
+        }
+    }
+    const name = kungfuLocation.name;
+    return name
+}
+
 
 export const dealOrder = (item: OrderInputData): OrderData => {
     const { source, dest, instrument_type, update_time, insert_time } = item;
@@ -241,7 +257,7 @@ export const dealOrder = (item: OrderInputData): OrderData => {
     const instrumentType = instrument_type;
     const sourceId =  resolveSourceDest(source, dest).sourceGroup;
     const errMsg = item.error_msg || OrderStatus[item.status];
-    const accountId = resolveAccountId(source, dest);
+    const accountId = resolveAccountId(source, dest, item.parent_id);
   
     return {
         id: item.order_id.toString(),
@@ -285,7 +301,7 @@ export const dealOrder = (item: OrderInputData): OrderData => {
         errorId: item.error_id,
         errorMsg: errMsg,
 
-        clientId: resolveClientId(dest || ''),
+        clientId: resolveClientId(dest || '', item.parent_id),
         accountId: accountId,
         sourceId: sourceId,
        
@@ -310,8 +326,8 @@ export const dealTrade = (item: TradeInputData): TradeData => {
         offset: OffsetName[item.offset],
         price: toDecimal(+item.price, 3),
         volume: Number(item.volume),
-        clientId: resolveClientId(item.dest || ''),
-        accountId: resolveAccountId(item.source, item.dest),
+        clientId: resolveClientId(item.dest || '', item.parent_order_id),
+        accountId: resolveAccountId(item.source, item.dest, item.parent_order_id),
         sourceId: item.source_id,
         source: item.source
     }

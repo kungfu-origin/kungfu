@@ -95,7 +95,7 @@
         "type": "text",
         "label": "更新时间",
         "prop": "updateTime",
-        "width": "80px"
+        "width": "100px"
       },{
         "type": "text",
         "label": "合约",

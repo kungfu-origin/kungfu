@@ -92,6 +92,27 @@
         "required": true
       },
       {
+        "key": "priceMode",
+        "name": "价格",
+        "type": "select",
+        "options": [
+          {
+            "name": "对手价一档",
+            "value": 0
+          },
+          {
+            "name": "同方向一档",
+            "value": 1
+          },
+          {
+            "name": "最新价",
+            "value": 2
+          }
+        ],
+        "default": 1,
+        "required": true
+      },
+      {
         "key": "volume",
         "name": "数量",
         "type": "int",
@@ -147,7 +168,7 @@
         "type": "text",
         "label": "下单时间",
         "prop": "updateTime",
-        "width": "80px"
+        "width": "100px"
       },{
         "type": "text",
         "label": "标的",
@@ -162,12 +183,12 @@
         "type": "number",
         "label": "卖1价/量",
         "prop": "ask1PriceVolume",
-        "width": "150px"
+        "width": "120px"
       },{
         "type": "number",
         "label": "买1价/量",
         "prop": "bid1PriceVolume",
-        "width": "150px"
+        "width": "120px"
       },{
         "type": "text",
         "label": "",

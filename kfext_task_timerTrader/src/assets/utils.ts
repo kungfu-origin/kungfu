@@ -91,10 +91,10 @@ export const buildTarget = ({ offset, side, ticker, totalVolume, targetVolume }:
 
 
 export const reqMakeOrder = (baseData: any, quote: QuoteData, unfinishedSteps: number) => {
-    const { side, offset, accountId, volume, parentId } = baseData;
+    const { side, offset, accountId, volume, parentId, priceMode } = baseData;
     const { instrumentTypeOrigin, instrumentId, exchangeId } = quote;
 
-    const makeOrderPrice = getMakeOrderPrice(side, quote, unfinishedSteps)
+    const makeOrderPrice = getMakeOrderPrice(side, quote, unfinishedSteps, priceMode)
 
     const makeOrderData = { 
         name: accountId,
@@ -136,18 +136,30 @@ export const reqMakeOrder = (baseData: any, quote: QuoteData, unfinishedSteps: n
             
 }
 
-function getMakeOrderPrice (side: number, quote: QuoteData, unfinishedSteps: number ) {
+function getMakeOrderPrice (side: number, quote: QuoteData, unfinishedSteps: number, priceMode: number ) {
     const { upperLimitPrice, lowerLimitPrice, lastPrice, askPrices, bidPrices } = quote;
     
     if (+side === 0) {
         if (unfinishedSteps > 1) {
-            return bidPrices[0]
+            if (+priceMode === 0) {
+                return askPrices[0]
+            } else if (+priceMode === 1) {
+                return bidPrices[0]
+            } else {
+                return lastPrice
+            }
         } else {
             return upperLimitPrice
         }
     } else if (+side === 1) {
         if (unfinishedSteps > 1) {
-            return askPrices[0]
+            if (+priceMode === 0) {
+                return bidPrices[0]
+            } else if (+priceMode === 1) {
+                return askPrices[0]                
+            } else {
+                return lastPrice
+            }
         } else {
             return lowerLimitPrice
         }

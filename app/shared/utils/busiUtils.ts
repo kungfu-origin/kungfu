@@ -546,7 +546,8 @@ export const getDefaultRenderCellClass = (prop: string, item: any) => {
             break;
         case 'clientId':
         case 'accountId':
-            if ((item.clientId || '').toLowerCase().includes('手动')) return 'blue';
+            if ((item.clientId || '').toLowerCase().includes('手动')) return 'yellow';
+            if ((item.clientId || '').toLowerCase().includes('任务')) return 'blue';
             break;
     }
 

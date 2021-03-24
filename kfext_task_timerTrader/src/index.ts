@@ -24,7 +24,7 @@ const argv = minimist(process.argv.slice(2), {
     string: ['ticker', 'accountId'],
     boolean: [ 'lastSingularity' ],
 })
-const { ticker, side, offset, volume, steps, triggerTime, finishTime, exchangeId, parentId, accountId, lastSingularity, lastSingularityMilliSecond, maxLotByStep } = argv;
+const { ticker, side, offset, priceMode, volume, steps, triggerTime, finishTime, exchangeId, parentId, accountId, lastSingularity, lastSingularityMilliSecond, maxLotByStep } = argv;
 const triggerTimeStr = moment(triggerTime || '').format('YYYYMMDD HH:mm:ss');
 const finishTimeStr = moment(finishTime || '').format('YYYYMMDD HH:mm:ss');
 const LOOP_INTERVAL = Math.ceil((finishTime - triggerTime) / steps);
@@ -36,7 +36,13 @@ const TARGET_DIRECTION_CONT = makeOrderDirectionType(side, offset).dc;
 const OPERATION_NAME = makeOrderDirectionType(side, offset).n;
 const TARGET_VOLUME = volume;
 const LAST_STEP_COUNT = steps - 1;
-const LAST_SINGULARITY_SECOND = lastSingularity ? lastSingularityMilliSecond : 0
+const LAST_SINGULARITY_SECOND = lastSingularity ? lastSingularityMilliSecond : 0;
+
+const priceModeMap: any = {
+    0: "对手价一档",
+    1: "同方向一档",
+    2: "最新价"
+}
 
 console.log('==================== 交易信息 =======================')
 console.log('[ARGS]', process.argv.slice(2).join(','))
@@ -45,6 +51,7 @@ console.log('[开始时间]', triggerTime, triggerTimeStr)
 console.log('[结束时间]', finishTime, finishTimeStr)
 console.log('[执行间隔]', LOOP_INTERVAL, 'ms')
 console.log('[目标标的] ', TICKER)
+console.log('[报单价格]', priceModeMap[priceMode])
 console.log('===================================================')
 
 
@@ -199,6 +206,8 @@ var targetPosData: any = null;
 var hasConsoledTotalFinished = false;
 var hasCancelBeforeLastStep = false;
 
+var hasConsoledError = false;
+
 combineLatestObserver
     .pipe(
         //============================ 时间检查 start ============================
@@ -236,10 +245,13 @@ combineLatestObserver
             const { quotes, positions } = data
             const quote = quotes[TICKER];
 
-            if (!quote) {
+            if (!quote && !hasConsoledError) {
                 console.error(`[WARNING] 暂无${ticker}行情信息，需保证MD进程开启`)
+                hasConsoledError = true;
                 return false;
             }
+
+            hasConsoledError = false
 
             //制定全部交易计划
             const pos = (positions || {})[`${TICKER}_${TARGET_DIRECTION}`] || {};

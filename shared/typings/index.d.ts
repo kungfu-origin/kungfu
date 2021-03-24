@@ -242,6 +242,7 @@ interface TradeInputData {
     trade_id: bigint;
     order_id: bigint;
     instrument_id: string;
+    parent_order_id: bigint;
     trade_time: bigint;
     offset: number;
     side: number;

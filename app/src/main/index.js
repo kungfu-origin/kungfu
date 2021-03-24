@@ -9,7 +9,7 @@ import { logger } from '__gUtils/logUtils';
 import { platform } from '__gConfig/platformConfig';
 import { openUrl, showKungfuInfo, showQuitMessageBox } from './utils';
 import { KF_HOME, KUNGFU_ENGINE_PATH, BASE_DB_DIR, LOG_DIR } from '__gConfig/pathConfig';
-import { openSettingDialog, clearMdJournal } from "./events";
+import { openSettingDialog, clearJournal } from "./events";
 
 const path = require('path');
 const { app, globalShortcut, BrowserWindow, Menu, shell } = electron
@@ -187,7 +187,7 @@ function setMenu() {
 	},{
 		label: '运行',
 		submenu: [
-			{ label: "清理journal", accelerator: "CmdOrCtrl+Shift+U", click: () => clearMdJournal(mainWindow)}
+			{ label: "清理journal", accelerator: "CmdOrCtrl+Shift+U", click: () => clearJournal(mainWindow)}
 		]
 	},{
 		label: "帮助",

@@ -8,7 +8,7 @@ import { watcher, dealQuote, dealPos, dealOrder, writeKungfu } from '__io/kungfu
 import { getStrategyById, updateStrategyPath } from '__io/kungfu/strategy';
 import { transformTradingItemListToData } from '__io/kungfu/watcher';
 import { aliveOrderStatusList } from 'kungfu-shared/config/tradingConfig';
-import { MD_DIR } from '__gConfig/pathConfig';
+import { KF_HOME } from '__gConfig/pathConfig';
 import { listDir } from '__gUtils/fileUtils';
 
 import makeOrderCoreMixin from '@/components/Base/makeOrder/js/makeOrderCoreMixin';
@@ -250,8 +250,8 @@ export default {
                                 ipcRenderer.sendSync('record-before-quit-done')
                             })
                         break
-                    case 'clear-md-journal':
-                        this.removeJournal(MD_DIR)
+                    case 'clear-journal':
+                        this.removeJournal(KF_HOME)
                         break
 
                 }
