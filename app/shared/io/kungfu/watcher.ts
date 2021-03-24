@@ -226,7 +226,6 @@ function resolveAccountId(source: string, dest: string, parent_id: bigint): stri
     const name = sourceGroup + '_' + sourceName;
     let mark = ''
     if (destGroup === 'node') {
-        console.log(+parent_id.toString(), '---')
         if (+parent_id.toString()) {
             mark = '任务'
         } else {
