@@ -168,7 +168,6 @@ export default {
         bindGetLogWorkerListener () {
             const self = this;
             Workers.getLogWorker.onmessage = (event) => {
-                console.log(event.data);
                 const {
                     list,
                     logPath,

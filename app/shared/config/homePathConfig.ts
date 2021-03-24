@@ -13,4 +13,9 @@ const getHomePath = () => {
     }
 }
 
+if (process.env.NODE_ENV !== 'development' && process.env.APP_TYPE === 'main') {
+    global.__resources = path.join(__dirname, '/resources').replace(/\\/g, '\\\\')
+}
+
+
 export const KF_HOME_BASE_DIR_RESOLVE: string = getHomePath()

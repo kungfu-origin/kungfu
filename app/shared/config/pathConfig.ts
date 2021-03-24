@@ -4,6 +4,7 @@ import moment from 'moment';
 import { addFileSync } from '__gUtils/fileUtils';
 import { KF_HOME_BASE_DIR_RESOLVE } from '__gConfig/homePathConfig';
 
+
 addFileSync('', KF_HOME_BASE_DIR_RESOLVE, 'folder');
 export const KF_HOME_BASE_DIR = KF_HOME_BASE_DIR_RESOLVE;
 

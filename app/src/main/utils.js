@@ -33,7 +33,7 @@ export function showKungfuInfo () {
 		defaultId: 0,
 		detail: info,
 		buttons: ['好的'],
-		icon: path.join(__resources, 'icon', 'icon.png')
+		icon: path.join(__resources, 'logo', 'icon.png')
 	})
 }
 
@@ -60,7 +60,7 @@ function KillAll () {
 
 
 export function killAllBeforeQuit (mainWindow) {
-	if(mainWindow && !mainWindow.isDestroyed()) mainWindow.hide()
+	if(mainWindow && !mainWindow.isDestroyed()) mainWindow.close()
 	return KillAll()
 }
 
