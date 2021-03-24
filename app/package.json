@@ -20,8 +20,7 @@
     "node": ">=10.16.0 <11.0.0"
   },
   "scripts": {
-    "install-deps": "electron-builder install-app-deps && yarn run rebuild",
-    "rebuild": "./node_modules/.bin/electron-rebuild",
+    "install-deps": "electron-builder install-app-deps",
     "clean": "rimraf ./dist/* ./build/*",
     "test": " node .electron-builder/build.js",
     "dist": "node --max_old_space_size=2048 .electron-kungfu/build.js",
@@ -42,8 +41,7 @@
     "kungfu-core": "*",
     "minimist": "^1.2.5",
     "moment": "^2.24.0",
-    "pm2": "3.5.2",
-    "webworker-threads": "^0.7.17"
+    "pm2": "3.5.2"
   },
   "devDependencies": {
     "@types/node": "^12.6.2",
@@ -79,7 +77,6 @@
     "electron-chromedriver": "^5.0.1",
     "electron-debug": "^1.4.0",
     "electron-devtools-installer": "^2.2.0",
-    "electron-rebuild": "^2.3.5",
     "electron-updater": "^4.0.6",
     "element-ui": "2.8.2",
     "extract-text-webpack-plugin": "^3.0.0",
