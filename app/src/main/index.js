@@ -8,7 +8,7 @@ import { killExtra } from '__gUtils/processUtils';
 import { logger } from '__gUtils/logUtils';
 import { platform } from '__gConfig/platformConfig';
 import { openUrl, showKungfuInfo, showQuitMessageBox } from './utils';
-import { KF_HOME, KUNGFU_ENGINE_PATH, BASE_DB_DIR, LOG_DIR } from '__gConfig/pathConfig';
+import { KF_HOME, BASE_DB_DIR } from '__gConfig/pathConfig';
 import { openSettingDialog, clearJournal } from "./events";
 
 const path = require('path');
@@ -50,6 +50,7 @@ function createWindow () {
 
 	// // Emitted when the window is closed.
 	mainWindow.on('close', (e) => {
+
 	// Dereference the window object, usually you would store windows
 	// in an array if your app supports multi windows, this is the time
 	// when you should delete the corresponding element.
@@ -160,7 +161,7 @@ function setMenu() {
 
 	if(platform === 'mac') {
 		applicationOptions.push(
-			{ label: "退出", accelerator: "Command+Q", click: () => mainWindow && mainWindow.close()},
+			{ label: "退出", accelerator: "Command+Q", click: () => app.quit()},
 		)
 	}
 

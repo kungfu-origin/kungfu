@@ -60,7 +60,7 @@ function KillAll () {
 
 
 export function killAllBeforeQuit (mainWindow) {
-	if(mainWindow && !mainWindow.isDestroyed()) mainWindow.close()
+	if(mainWindow && !mainWindow.isDestroyed()) mainWindow.hide()
 	return KillAll()
 }
 
