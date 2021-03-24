@@ -7,9 +7,6 @@ on:
         description: 'Type true to overwrite packages'
         required: true
         default: 'false'
-  push:
-    branches:
-      - ci
   pull_request:
     branches:
       - main
@@ -84,7 +81,6 @@ jobs:
 
       - name: Package Prebuilt
         run: |
-          ls -l core/build/kfc
           yarn workspace @kungfu-trader/kungfu-core run package
 
       - name: Upload Prebuilt
@@ -145,7 +141,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_CN_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_CN_SECRET_ACCESS_KEY }}
-          aws-region: cn-north-1
+          aws-region: cn-northwest-1
 
       - name: Publish Prebuilt to AWS (CN)
         if: ${{ needs.prepare.outputs.publishable  == 'true' }}

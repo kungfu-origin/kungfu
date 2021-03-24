@@ -32,6 +32,7 @@ constexpr auto AllTypes = boost::hana::make_map( //
     TYPE_PAIR(AlgoOrderReport),                  //
     TYPE_PAIR(AlgoOrderModify),                  //
     TYPE_PAIR(Config),                           //
+    TYPE_PAIR(TimeValue),                        //
     TYPE_PAIR(TimeKeyValue),                     //
     TYPE_PAIR(Commission),                       //
     TYPE_PAIR(Session),                          //
@@ -72,6 +73,7 @@ constexpr auto AllTypes = boost::hana::make_map( //
 
 constexpr auto AllDataTypes = boost::hana::make_map( //
     TYPE_PAIR(Config),                               //
+    TYPE_PAIR(TimeValue),                            //
     TYPE_PAIR(TimeKeyValue),                         //
     TYPE_PAIR(Commission),                           //
     TYPE_PAIR(Session),                              //
@@ -123,6 +125,7 @@ constexpr auto SessionDataTypes = boost::hana::make_map( //
 
 constexpr auto StateDataTypes = boost::hana::make_map( //
     TYPE_PAIR(Config),                                 //
+    TYPE_PAIR(TimeValue),                              //
     TYPE_PAIR(TimeKeyValue),                           //
     TYPE_PAIR(Commission),                             //
     TYPE_PAIR(Instrument),                             //
