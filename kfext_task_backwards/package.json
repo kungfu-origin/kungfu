@@ -125,12 +125,12 @@
       },{
         "type": "number",
         "label": "升贴水比例",
-        "prop": "backWardsRatio",
+        "prop": "backwardsRatio",
         "width": "80px"
       },{
         "type": "number",
         "label": "升贴水年化",
-        "prop": "backWardsRatioByYears",
+        "prop": "backwardsRatioByYears",
         "width": "80px"
       },{
         "type": "string",
