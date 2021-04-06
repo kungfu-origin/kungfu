@@ -51,16 +51,6 @@ export default {
                 .slice(0, 300)
         },
 
-        decodeProductId (productId) {
-            const productIdResolved = productId.filter(n => !!n);
-            const bufferFrom = Buffer.from(productIdResolved);
-            return this.isBufferGBK(bufferFrom) ? iconv.decode(bufferFrom, 'gbk') : iconv.decode(bufferFrom, 'utf8')
-        },
-
-        isBufferGBK (bufferFrom) {
-            return jschardet.detect(bufferFrom).encoding !== 'UTF-8'
-        },
-
         getSearchTickersInTickerSets (queryString = '') {
             return this.flatternTickers
                 .filter((item => {

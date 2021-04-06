@@ -268,17 +268,20 @@ combineLatestObserver
                 indexId,
                 indexP,
                 backwardsDelta: +Number(lastPrice - indexP).toFixed(3),
-                backWardsRatio: indexP * lastPrice === 0 ? '' : Number((lastPrice - indexP) / lastPrice).toFixed(3),
-                backwardByYear: +side === 0 
+                backwardsRatio: indexP * lastPrice === 0 ? '' : Number((lastPrice - indexP) / lastPrice).toFixed(3),
+                backwardByYearABS: +side === 0 
                     ? ensureNum(+Number(Math.abs((ask1 - indexP) / ask1 / toExpireDate * 365)).toFixed(3))
-                    : ensureNum(+Number(Math.abs((bid1 - indexP) / bid1 / toExpireDate * 365)).toFixed(3))
+                    : ensureNum(+Number(Math.abs((bid1 - indexP) / bid1 / toExpireDate * 365)).toFixed(3)),
+                backwardByYear: +side === 0 
+                    ? ensureNum(+Number((ask1 - indexP) / ask1 / toExpireDate * 365).toFixed(3))
+                    : ensureNum(+Number((bid1 - indexP) / bid1 / toExpireDate * 365).toFixed(3)),
             }
 
         });
 
         //计算最大贴水
-        const minBackWardData = getTickerWithMinValue(Object.values(combinedInstrumentData), 'backwardByYear')
-        const minBackWard = minBackWardData.backwardByYear;
+        const minBackWardData = getTickerWithMinValue(Object.values(combinedInstrumentData), 'backwardByYearABS')
+        const minBackWard = minBackWardData.backwardByYearABS;
 
         console.log(`[计算结果] 最小贴水 ${minBackWardData.name} ${minBackWard}`)
         
@@ -304,7 +307,7 @@ combineLatestObserver
                     return moment(expireDate).format('YYYYMM') !== moment().format('YYYYMM')
                 })
                 .filter((item: any) => {
-                    return +item.backwardByYear <= +MAX_BACKWARD
+                    return +item.backwardByYearABS <= +MAX_BACKWARD
                 })
 
             if (!lessThanMaxBackwardList.length) {
