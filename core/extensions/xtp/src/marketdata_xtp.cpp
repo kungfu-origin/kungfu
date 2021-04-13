@@ -41,7 +41,6 @@ void MarketDataXTP::on_start() {
     SPDLOG_INFO("login success! (account_id) {}", config_.account_id);
     api_->QueryAllTickers(XTP_EXCHANGE_SH);
     api_->QueryAllTickers(XTP_EXCHANGE_SZ);
-    SPDLOG_INFO("success call QueryAllTickers() !!!!!!!");
   } else {
     update_broker_state(BrokerState::LoginFailed);
     SPDLOG_ERROR("failed to login, [{}] {}", api_->GetApiLastError()->error_id, api_->GetApiLastError()->error_msg);
