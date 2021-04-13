@@ -61,13 +61,6 @@
                 </el-col>
             </el-row>
             <el-row style="height: 45%">
-                <el-col :span="6">
-                    <MakeOrderDashboard
-                        :currentId="currentId"
-                        :moduleType="moduleType" 
-                        :makeOrderByPosData="makeOrderByPosData"
-                    ></MakeOrderDashboard>
-                </el-col>
                 <el-col :span="18">
                     <el-tabs v-model="currentOrdesTabName" type="border-card">
                         <el-tab-pane :lazy="true" :label="`全部委托 ${showCurrentIdInTabName(currentOrdesTabName, 'orders')}`" name="orders">
@@ -97,8 +90,14 @@
                         <el-tab-pane :lazy="true"  v-if="taskExtConfigList.length" :label="`算法任务记录 ${currentTaskIdInTab}`" name="taskDetail">
                             <TaskRecord></TaskRecord>
                         </el-tab-pane>
-
                     </el-tabs>
+                </el-col>
+                <el-col :span="6">
+                    <MakeOrderDashboard
+                        :currentId="currentId"
+                        :moduleType="moduleType" 
+                        :makeOrderByPosData="makeOrderByPosData"
+                    ></MakeOrderDashboard>
                 </el-col>
             </el-row>
         </div>

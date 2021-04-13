@@ -33,13 +33,6 @@
                 </el-col>
             </el-row>
             <el-row style="height: 45%">
-                <el-col :span="6">
-                    <MakeOrderDashboard
-                        :currentId="(selectedQuote || {}).instrumentId || ''"
-                        moduleType="ticker" 
-                        :makeOrderByQuote="selectedQuote"
-                    ></MakeOrderDashboard>
-                </el-col>        
                 <el-col :span="18">
                     <el-tabs v-model="currentTradeDataTabName" type="border-card">
                         <el-tab-pane :lazy="true" label="全部委托" name="systemOrders">
@@ -57,6 +50,13 @@
                         </el-tab-pane>
                     </el-tabs>
                 </el-col>
+                <el-col :span="6">
+                    <MakeOrderDashboard
+                        :currentId="(selectedQuote || {}).instrumentId || ''"
+                        moduleType="ticker" 
+                        :makeOrderByQuote="selectedQuote"
+                    ></MakeOrderDashboard>
+                </el-col>        
             </el-row>
         </div>
     </MainContent>
