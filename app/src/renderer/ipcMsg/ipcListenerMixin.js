@@ -246,7 +246,7 @@ export default {
                         break
                     case 'record-before-quit':
                         this.recordBeforeQuit()
-                            .then(() => {
+                            .finally(() => {
                                 ipcRenderer.sendSync('record-before-quit-done')
                             })
                         break
