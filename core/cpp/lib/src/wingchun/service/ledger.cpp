@@ -144,6 +144,21 @@ void Ledger::inspect_channel(int64_t trigger_time, const Channel &channel) {
 
 void Ledger::mirror_positions(int64_t trigger_time, uint32_t strategy_uid) {
   auto strategy_book = bookkeeper_.get_book(strategy_uid);
+
+  auto reset_positions = [](auto &positions) {
+    for (auto &item : positions) {
+      auto &position = item.second;
+      position.volume = 0;
+      position.yesterday_volume = 0;
+      position.frozen_total = 0;
+      position.frozen_yesterday = 0;
+      position.avg_open_price = 0;
+      position.position_cost_price = 0;
+    }
+  };
+  reset_positions(strategy_book->long_positions);
+  reset_positions(strategy_book->short_positions);
+
   auto copy_positions = [&](const auto &positions) {
     for (const auto &pair : positions) {
       auto &position = pair.second;
