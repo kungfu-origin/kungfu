@@ -84,7 +84,7 @@ const getLogObservable = (pid: string) => {
     const logPath = buildProcessLogPath(pid)
     return new Observable(observer => {
         getLog(logPath, '', (line: string) => dealLogMessage(line, pid))
-        .then((logList: NumList) => observer.next(logList))
+        .then((logList: any) => observer.next(logList))
         .catch(() => observer.next({ list: [] }))
         .finally(() => observer.complete())
     })
