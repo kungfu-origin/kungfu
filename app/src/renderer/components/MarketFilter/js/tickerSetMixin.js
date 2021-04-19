@@ -13,6 +13,7 @@ export default {
 
     mounted () {
         this.getTickerSets();
+        this.handleMdTdStateChange();
     },
 
     components: {
@@ -98,6 +99,17 @@ export default {
             this.$bus.$emit('add-ticker-for-ticker-set', Object.freeze(tickerData))
         },
 
+        handleMdTdStateChange () {
+            const self = this;
+            this.$bus.$on('mdTdStateChange', ({ processId, state }) => {
+                if (state === 100) { // ready
+                    if (processId.includes('md')) {
+                        self.subscribeTickersByProcessId(processId, true)
+                    }
+                }
+            })
+        },
+
         getTickerSets () {
             return getTickerSets()
                 .then(res => {
@@ -125,6 +137,16 @@ export default {
         subscribeAllTickers (slience = true) {
             if (!watcher.isLive()) return;
             const tickers = this.flatternTickers || [];
+            this.subscribeTickers(tickers, slience)
+        },
+
+        //通过md 订阅
+        subscribeTickersByProcessId (mdProcessId, slience = true) {
+            if (!watcher.isLive()) return;
+            const tickers = (this.flatternTickers || []).filter(({ source }) => {
+                return mdProcessId.indexOf(source) !== -1
+            })
+            
             this.subscribeTickers(tickers, slience)
         },
 

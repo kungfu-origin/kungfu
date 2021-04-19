@@ -99,7 +99,7 @@ export default {
 
     computed: {
         ...mapState({
-            processStatus: state => state.BASE.processStatus
+            processStatus: state => state.BASE.processStatus,
         })
     },
 
@@ -155,11 +155,30 @@ export default {
                         id: processId,
                         stateData: gatewayState
                     })
+
+                    this.emitMdTdStateChange(processId, gatewayState)
                 })
             })
         },
 
-        
+        emitMdTdStateChange (processId, stateData) {
+
+            this.mdTdOldState = this.mdTdOldState || {};
+            
+            const state = stateData.state;
+            const oldState = (this.mdTdOldState[processId] || {}).state || "";
+
+            //两种情况，一种是从等待 or others 变为就绪
+            //一种是从无直接100
+            if (state !== oldState || oldState === "") {
+                if (state == 100 || oldState === 100) {
+                    this.$bus.$emit('mdTdStateChange', { processId, state })
+                }
+            }
+
+            this.mdTdOldState[processId] = stateData || {};
+            
+        },
 
         removeKeyDownEvent () {
             //解除回车带来的一些不好的影响

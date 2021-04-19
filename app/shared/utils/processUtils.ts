@@ -424,7 +424,7 @@ export const startMd = (source: string): Promise<any> => {
     return startProcess({
         "name": `md_${source}`,
         "args": buildArgs(`md -s "${source}"`),
-        "maxRestarts": 5,
+        "maxRestarts": 3,
         "autorestart": true,
     }).catch(err => logger.error('[startMd]', err))
 }
@@ -435,7 +435,7 @@ export const startTd = (accountId: string): Promise<any> => {
     return startProcess({
         "name": `td_${accountId}`,
         "args": buildArgs(`td -s "${source}" -a "${id}"`),
-        "maxRestarts": 5,
+        "maxRestarts": 3,
         "autorestart": true,
     }).catch(err => logger.error('[startTd]', err))
 }

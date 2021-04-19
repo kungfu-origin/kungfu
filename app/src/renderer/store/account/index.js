@@ -78,7 +78,7 @@ export default {
         },
 
         SET_ONE_MD_TD_STATE (state, { id, stateData }) {
-            Vue.set(state.mdTdState, id, stateData)
+            Vue.set(state.mdTdState, id, Object.freeze(stateData))
         },
          
         DELETE_ONE_MD_TD_STATE (state, id) {
