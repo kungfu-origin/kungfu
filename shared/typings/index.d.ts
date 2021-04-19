@@ -509,7 +509,9 @@ interface Pm2Options {
     args: string;
     cwd?: string;
     script?: string;
-    interpreter?: string
+    interpreter?: string;
+    maxRestarts?: number;
+    autorestart?: boolean;
 }
 
 interface TickerSet {
