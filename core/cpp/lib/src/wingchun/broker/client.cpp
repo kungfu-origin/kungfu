@@ -27,6 +27,10 @@ int64_t ResumePolicy::get_connect_time(const apprentice &app, const Register &br
   return get_resume_time(app, broker);
 }
 
+int64_t StatelessResumePolicy::get_resume_time(const apprentice &app, const Register &broker) const {
+  return broker.checkin_time;
+}
+
 int64_t ContinuousResumePolicy::get_resume_time(const apprentice &app, const Register &broker) const {
   return app.get_last_active_time();
 }
@@ -207,15 +211,15 @@ void SilentAutoClient::renew(int64_t trigger_time, const location_ptr &md_locati
 
 void SilentAutoClient::sync(int64_t trigger_time, const location_ptr &td_location) {}
 
-ManualClient::ManualClient(apprentice &app) : Client(app) {}
+PassiveClient::PassiveClient(apprentice &app) : Client(app) {}
 
-const ResumePolicy &ManualClient::get_resume_policy() const { return resume_policy_; }
+const ResumePolicy &PassiveClient::get_resume_policy() const { return resume_policy_; }
 
-bool ManualClient::is_fully_subscribed(uint32_t md_location_uid) const {
+bool PassiveClient::is_fully_subscribed(uint32_t md_location_uid) const {
   return should_connect_md(app_.get_location(md_location_uid)) and enrolled_md_locations_.at(md_location_uid);
 }
 
-void ManualClient::subscribe(const location_ptr &md_location, const std::string &exchange_id,
+void PassiveClient::subscribe(const location_ptr &md_location, const std::string &exchange_id,
                              const std::string &instrument_id) {
   if (not is_fully_subscribed(md_location->uid)) {
     enrolled_md_locations_.emplace(md_location->uid, false);
@@ -223,11 +227,11 @@ void ManualClient::subscribe(const location_ptr &md_location, const std::string 
   Client::subscribe(md_location, exchange_id, instrument_id);
 }
 
-void ManualClient::subscribe_all(const location_ptr &md_location) {
+void PassiveClient::subscribe_all(const location_ptr &md_location) {
   enrolled_md_locations_.emplace(md_location->uid, true);
 }
 
-void ManualClient::renew(int64_t trigger_time, const location_ptr &md_location) {
+void PassiveClient::renew(int64_t trigger_time, const location_ptr &md_location) {
   if (is_fully_subscribed(md_location->uid)) {
     app_.get_writer(md_location->uid)->mark(trigger_time, SubscribeAll::tag);
   } else {
@@ -235,19 +239,19 @@ void ManualClient::renew(int64_t trigger_time, const location_ptr &md_location) 
   }
 }
 
-void ManualClient::sync(int64_t trigger_time, const location_ptr &td_location) {}
+void PassiveClient::sync(int64_t trigger_time, const location_ptr &td_location) {}
 
-void ManualClient::enroll_account(const location_ptr &td_location) {
+void PassiveClient::enroll_account(const location_ptr &td_location) {
   enrolled_td_locations_.emplace(td_location->uid, true);
 }
 
-bool ManualClient::should_connect_md(const location_ptr &md_location) const {
+bool PassiveClient::should_connect_md(const location_ptr &md_location) const {
   return enrolled_md_locations_.find(md_location->uid) != enrolled_md_locations_.end();
 }
 
-bool ManualClient::should_connect_td(const location_ptr &td_location) const {
+bool PassiveClient::should_connect_td(const location_ptr &td_location) const {
   return enrolled_td_locations_.find(td_location->uid) != enrolled_td_locations_.end();
 }
 
-bool ManualClient::should_connect_strategy(const location_ptr &td_location) const { return false; }
+bool PassiveClient::should_connect_strategy(const location_ptr &td_location) const { return false; }
 } // namespace kungfu::wingchun::broker
