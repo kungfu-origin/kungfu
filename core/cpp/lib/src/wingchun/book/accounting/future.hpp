@@ -190,10 +190,12 @@ private:
     book->asset.frozen_cash -= frozen_margin;
     book->asset.frozen_margin -= frozen_margin;
     book->asset.avail -= commission;
+    // book->asset.avail += frozen_margin;
     book->asset.avail -= margin;
     book->asset.accumulated_fee += commission;
     book->asset.intraday_fee += commission;
     book->asset.margin += margin;
+    SPDLOG_INFO("book->asset.margin {},book->asset.frozen_margin {}",book->asset.margin,book->asset.frozen_margin);
   }
 
   void apply_close(Book_ptr &book, const Trade &trade) {
