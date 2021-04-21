@@ -163,6 +163,10 @@ $HOME/.local/share/virtualenvs      # pipenv(unix) 存储的 Python 依赖
 
 # Version 版本
 
+* 2.3.4:
+    * 新增行情模块
+    * 解决底层bug
+    
 * 2.3.0:
     * 增加了对过去数据的归档功能 
     * 对手动下单功能进行优化
