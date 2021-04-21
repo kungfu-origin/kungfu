@@ -185,10 +185,10 @@ export const startProcess = (options: Pm2Options, no_ext = false): Promise<objec
         "error": buildProcessLogPath(options.name),
         "mergeLogs": true,
         "logDateFormat": "YYYY-MM-DD HH:mm:ss",
-        "autorestart": false,
-        "maxRestarts": 1,
+        "autorestart": options.autorestart || false,
+        "maxRestarts": options.maxRestarts || 1,
         "watch": false,
-        "force": true,
+        "force": false,
         "execMode": "fork",
         "env": {
             "KF_HOME": dealSpaceInPath(KF_HOME),
@@ -424,6 +424,8 @@ export const startMd = (source: string): Promise<any> => {
     return startProcess({
         "name": `md_${source}`,
         "args": buildArgs(`md -s "${source}"`),
+        "maxRestarts": 3,
+        "autorestart": true,
     }).catch(err => logger.error('[startMd]', err))
 }
 
@@ -433,6 +435,8 @@ export const startTd = (accountId: string): Promise<any> => {
     return startProcess({
         "name": `td_${accountId}`,
         "args": buildArgs(`td -s "${source}" -a "${id}"`),
+        "maxRestarts": 3,
+        "autorestart": true,
     }).catch(err => logger.error('[startTd]', err))
 }
 
