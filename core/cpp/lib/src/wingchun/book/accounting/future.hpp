@@ -195,8 +195,6 @@ private:
     book->asset.accumulated_fee += commission;
     book->asset.intraday_fee += commission;
     book->asset.margin += margin;
-    SPDLOG_INFO("book->asset.margin {},book->asset.frozen_margin {}",book->asset.margin,book->asset.frozen_margin);
-    SPDLOG_INFO("contract_multiplier {},price {},volume {},margin_ratio(instrument, position) {},book->get_frozen_price(trade.order_id) {}",instrument.contract_multiplier,trade.price,trade.volume,margin_ratio(instrument, position),book->get_frozen_price(trade.order_id));
   }
 
   void apply_close(Book_ptr &book, const Trade &trade) {
