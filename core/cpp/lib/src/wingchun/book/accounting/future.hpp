@@ -190,7 +190,7 @@ private:
     book->asset.frozen_cash -= frozen_margin;
     book->asset.frozen_margin -= frozen_margin;
     book->asset.avail -= commission;
-    // book->asset.avail += frozen_margin;
+    book->asset.avail += frozen_margin;
     book->asset.avail -= margin;
     book->asset.accumulated_fee += commission;
     book->asset.intraday_fee += commission;
