@@ -182,6 +182,13 @@ private:
     auto commission = calculate_commission(book, trade, instrument, position, trade.close_today_volume);
     auto frozen_margin = instrument.contract_multiplier * book->get_frozen_price(trade.order_id) * trade.volume *
                          margin_ratio(instrument, position);
+    SPDLOG_INFO("==========start=============");
+    SPDLOG_INFO("contract_multiplier {}",instrument.contract_multiplier);
+    SPDLOG_INFO("price {}",trade.price);
+    SPDLOG_INFO("volume {}",trade.volume);
+    SPDLOG_INFO("margin_ratio(instrument, position) {}",margin_ratio(instrument, position));
+    SPDLOG_INFO("book->get_frozen_price(trade.order_id) {}",book->get_frozen_price(trade.order_id));
+    SPDLOG_INFO("==========end=============");
     position.margin += margin;
     position.avg_open_price = (position.avg_open_price * position.volume + trade.price * trade.volume) /
                               double(position.volume + trade.volume);
@@ -195,8 +202,10 @@ private:
     book->asset.accumulated_fee += commission;
     book->asset.intraday_fee += commission;
     book->asset.margin += margin;
+    auto margin_ratio = margin_ratio(instrument, position);
+    auto frozen_price = book->get_frozen_price(trade.order_id);
     SPDLOG_INFO("book->asset.margin {},book->asset.frozen_margin {}",book->asset.margin,book->asset.frozen_margin);
-    SPDLOG_INFO("contract_multiplier {},price {},volume {},margin_ratio(instrument, position) {},book->get_frozen_price(trade.order_id) {}",instrument.contract_multiplier,trade.price,trade.volume,margin_ratio(instrument, position),book->get_frozen_price(trade.order_id));
+
   }
 
   void apply_close(Book_ptr &book, const Trade &trade) {
