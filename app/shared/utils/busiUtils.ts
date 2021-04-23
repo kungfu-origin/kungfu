@@ -119,6 +119,8 @@ export const deepClone = <T>(obj: T): T => {
 //(数据，保留位数，结果乘几个10，类型)
 export const toDecimal = (num = 0, digit = 2, multiply = 0, type = 'round'): string => {
     if (num === null) num = 0;
+    if (num === "") return '';
+    if (typeof num === "string" && num.trim() === "") return '';
     if (isNaN(num)) return ''; //如果为转换后为NaN,返回空
     //如果存在科学计数法的数据则返回不做处理
     if (`${num}`.includes('e')) return new Number(num).toExponential(2)

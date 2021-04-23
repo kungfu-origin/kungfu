@@ -378,8 +378,8 @@ export const dealAsset = (item: AssetInputData): AssetData => {
 
 export const dealOrderStat = (item: OrderStatInputData): OrderStatData => {
     const { insert_time, ack_time, md_time, trade_time } = item;
-    const latencyTrade = +Number(Number(trade_time - ack_time) / 1000).toFixed(0);
-    const latencyNetwork = +Number(Number(ack_time - insert_time) / 1000).toFixed(0);
+    const latencyTrade = +toDecimal(Number(trade_time - ack_time) / 1000);
+    const latencyNetwork = +toDecimal(Number(ack_time - insert_time) / 1000);
     const latencySystem = +toDecimal(Number(insert_time - md_time) / 1000);
 
     return {
