@@ -11,11 +11,8 @@
             <span>{{ dateForHistory }}</span>
             <i class="el-icon-close mouse-over" @click="handleClearHistory"></i>
         </tr-dashboard-header-item>
-        <tr-dashboard-header-item v-if="!ifBacktest">
+        <tr-dashboard-header-item>
             <i class="el-icon-download mouse-over" title="导出" @click="dateRangeDialogVisiblityForExport = true"></i>
-        </tr-dashboard-header-item>
-        <tr-dashboard-header-item v-else>
-            <i class="el-icon-s-platform mouse-over" title="关闭监控" @click="handleMonitTrades"></i>
         </tr-dashboard-header-item>
     </div>
     <tr-table
@@ -45,7 +42,6 @@
 import DatePickerDialog from '@/components/Base//DatePickerDialog';
 import tradingDataMixin from '@/components/Base/tradingData/js/tradingDataMixin';
 
-import { debounce } from "__gUtils/busiUtils";
 import { dealTrade } from "__io/kungfu/watcher";
 import { tradesHeader } from '@/components/Base/tradingData/js/tableHeaderConfig';
 

@@ -33,12 +33,11 @@
 <script>
 import fse from 'fs-extra'; 
 import { mapState } from 'vuex'
-import { debounce, throttle, throttleInsert, dealLogMessage, openPage } from '__gUtils/busiUtils'
+import { debounce, throttle, throttleInsert, dealLogMessage } from '__gUtils/busiUtils'
 import { buildProcessLogPath } from '__gConfig/pathConfig';
 import { Tail } from 'tail';
 import { writeFile, addFileSync } from '__gUtils/fileUtils';
 import { ipcRenderer } from 'electron';
-import { remote } from 'electron';
 
 import Workers from '@/workers/index';
 
@@ -93,27 +92,27 @@ export default {
         }
     },
 
-    computed:{
+    computed: {
         ...mapState({
             processId: state => state.STRATEGY.currentStrategy.strategy_id
         }),
 
-        currentTitle() {
+        currentTitle () {
             return this.processId ? `${this.processId}` : ''
         },
 
-        logPath(){
+        logPath () {
             return buildProcessLogPath(this.processId);
         },
     },
 
     watch: {
-        searchKeyword: debounce(function(){
+        searchKeyword: debounce(function () {
             this.resetData(true)
             this.processId && this.init(this.logPath, this.searchKeyword)
         }),
 
-        processId: debounce(function(val){
+        processId: debounce(function (val) {
             this.resetData();
             if(!val) return;
             this.rendererTable = false;
@@ -128,7 +127,7 @@ export default {
         }
     },
 
-    mounted(){
+    mounted () {
         this.rendererTable = true;
         this.resetData();
         this.processId && this.init(this.logPath, this.searchKeyword)
@@ -136,14 +135,14 @@ export default {
         this.bindGetLogWorkerListener();
     },
 
-    destroyed(){
+    destroyed () {
         this.resetData()
         ipcRenderer.removeAllListeners('res-strategy-log')
     },
 
     methods:{
         //清空
-        handleClearLog(){
+        handleClearLog () {
             this.$confirm('确认清空该日志？', '提示', {
                 confirmButtonText: '确 定',
                 cancelButtonText: '取 消',
@@ -160,7 +159,7 @@ export default {
             })
         },
 
-        handleRefresh(){
+        handleRefresh () {
             this.resetData();
             this.processId && this.init(this.logPath, this.searchKeyword)
         },
@@ -178,19 +177,13 @@ export default {
                     return;
                 }
 
-                console.log('Get Log', {
-                    list,
-                    logPath,
-                    searchKeyword
-                })
-
                 self.tableData = Object.freeze(list || [])
                 self.scrollToBottom();
                 self.startWatchingTail(self.processId, logPath, searchKeyword)
             }
         },
 
-        init: debounce(function(logPath, searchKeyword){
+        init: debounce(function (logPath, searchKeyword) {
             //文件不存在则创建
             if(!fse.existsSync(logPath)){
                 this.tableData = Object.freeze([])
@@ -204,7 +197,7 @@ export default {
         }, 100),
 
         //开始监听日志尾部
-        startWatchingTail(processId, logPath, searchKeyword){
+        startWatchingTail (processId, logPath, searchKeyword) {
             this.clearTailWatcher();
             let throttleInsertLog = throttleInsert(500)
             let throttleClearLog = throttle(() => {
@@ -237,7 +230,7 @@ export default {
         },
         
         //往日志列表里推送数据
-        pushTableData(itemList){
+        pushTableData (itemList) {
             const tableData = this.tableData.slice(0);
             itemList.kfForEach(item => {
                 this.logCount++;
@@ -252,7 +245,7 @@ export default {
         },
 
         //重置数据
-        resetData(ifSearchKeyword=false) {
+        resetData (ifSearchKeyword=false) {
             this.logCount = 10000;
             !ifSearchKeyword && (this.searchKeyword = '');
             this.clearTailWatcher();
@@ -260,7 +253,7 @@ export default {
             this.ifScrollToBottom = true;
         },
 
-        clearTailWatcher(){
+        clearTailWatcher () {
             if(this.tailObserver != null) this.tailObserver.unwatch();
             this.tailObserver = null;
             return true;
@@ -276,7 +269,7 @@ export default {
                 })
         }, 1000),
 
-        renderCellClass(prop, item){
+        renderCellClass (prop, item) {
             if(prop === 'type') {
                 return this.logColor[item.type] || ''
             }

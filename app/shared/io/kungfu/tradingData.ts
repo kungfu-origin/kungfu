@@ -4,7 +4,8 @@ import { map } from 'rxjs/operators';
 import { 
     dealGatewayStates, 
     transformTradingItemListToData, 
-    transformOrderTradeListToData, 
+    transformOrderTradeListToData,
+    transformOrderInputListToData, 
     transformOrderStatListToData, 
     transformAssetItemListToData 
 } from '__io/kungfu/watcher';
@@ -23,6 +24,7 @@ export const buildTradingDataPipe = (type: string) => {
         map((data: any): any => {
             const ledgerData = data.ledger || {};
             const orders = ledgerData.Order ? ledgerData.Order.sort('update_time') : [];
+            const orderInputs = ledgerData.OrderInput ? ledgerData.OrderInput.sort('update_time') : [];
             const trades = ledgerData.Trade ? ledgerData.Trade.sort('update_time') : [];
             const positions = Object.values(ledgerData.Position || {});
             const assets = Object.values(ledgerData.Asset || {});
@@ -30,9 +32,10 @@ export const buildTradingDataPipe = (type: string) => {
             const orderStat = Object.values(ledgerData.OrderStat || {});
             const dailyAsset = Object.values(ledgerData.DailyAsset || {});
             const instruments = Object.values(ledgerData.Instrument || {});
-
+            
             return {
                 orders: transformOrderTradeListToData(orders, type),
+                orderInputs: transformOrderInputListToData(orderInputs, type),
                 ordersByTicker: orders,
                 trades: transformOrderTradeListToData(trades, type),
                 tradesByTicker: trades,

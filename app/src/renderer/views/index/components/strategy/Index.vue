@@ -1,6 +1,6 @@
 <template>
     <MainContent>
-        <div class="trader-content" v-if="!(monitOrders || monitTrades)">
+        <div class="trader-content">
             <template v-if="monitStrategies">
                 <el-col :span="14">
                     <el-row style="height: 60%">
@@ -11,18 +11,8 @@
                         </el-col>
                     </el-row>
                     <el-row style="height: 40%">
-                        <el-col :span="14">
+                        <el-col :span="24">
                             <Log></Log>                         
-                        </el-col>
-                        <el-col :span="10">
-                            <Pnl
-                            ref="pnl"
-                            :currentId="strategyId" 
-                            moduleType="strategy"
-                            :minPnl="pnl"   
-                            :dailyPnl="dailyPnl"
-                            :addTime="addTime"                
-                            ></Pnl>
                         </el-col>
                     </el-row>
                 </el-col>
@@ -49,7 +39,18 @@
 
                     <el-row style="height: 66.66%">
                         <el-col>
-                            <Log></Log>                         
+                            <el-tabs type="border-card" v-model="currentStrategyDetailTab">
+                                <el-tab-pane :lazy="true" label="策略日志" name="log">
+                                    <Log></Log>                         
+                                </el-tab-pane>
+                                <el-tab-pane :lazy="true" label="委托跟踪" name="orderMap">
+                                    <OrderMap
+                                        :orders="orders"
+                                        :orderInputs="orderInputs"
+                                        :trades="trades"
+                                    ></OrderMap>
+                                </el-tab-pane>
+                            </el-tabs>
                         </el-col>
                     </el-row>
                 </el-col>
@@ -69,7 +70,6 @@
                 <el-row  style="height: 33.333%">
                         <OrderRecord
                         moduleType="strategy"
-                        v-model="monitOrders"
                         :currentId="strategyId"
                         :kungfuData="orders"                 
                         :addTime="addTime"   
@@ -80,7 +80,6 @@
                 <el-row style="height: 33.333%">
                         <TradeRecord 
                         moduleType="strategy"
-                        v-model="monitTrades"
                         :currentId="strategyId"
                         :kungfuData="trades"           
                         :addTime="addTime"    
@@ -90,60 +89,17 @@
                 </el-row>
             </el-col>
         </div>
-
-        <div class="trader-content" v-else>
-            <template>
-                <el-col :span="10">
-                    <el-row style="height: 33.33%">
-                        <el-col>
-                            <Strategy
-                            v-model="monitStrategies"
-                            ></Strategy>
-                        </el-col>
-                    </el-row>
-                    <el-row style="height: 66.66%">
-                        <el-col>
-                            <Log></Log>                         
-                        </el-col>
-                    </el-row>
-                </el-col>
-            </template>
-                
-            <el-col :span="14">
-                <el-row :style="{ height: '100%' }">
-                        <OrderRecord
-                        v-if="monitOrders"
-                        moduleType="strategy"
-                        v-model="monitOrders"
-                        :currentId="strategyId"
-                        :kungfuData="orders"                 
-                        :addTime="addTime"   
-                        :orderStat="orderStat"   
-                        @showHistory="handleShowHistory"          
-                        ></OrderRecord>    
-                        <TradeRecord 
-                        v-if="monitTrades"
-                        moduleType="strategy"
-                        v-model="monitTrades"
-                        :currentId="strategyId"
-                        :kungfuData="trades"           
-                        :addTime="addTime"    
-                        :orderStat="orderStat"
-                        @showHistory="handleShowHistory"          
-                        ></TradeRecord>                  
-                </el-row>
-            </el-col>
-        </div>
     </MainContent>
 </template>
 <script>
 
-import { mapState, mapGetters } from 'vuex';
+import { mapState } from 'vuex';
 
 import Strategy from '@/components/Strategy/Strategy';
 import Log from '@/components/Strategy/Log';
 import OrderRecord from '@/components/Base/tradingData/OrderRecord';
 import TradeRecord from '@/components/Base/tradingData/TradeRecord';
+import OrderMap from "@/components/Base/tradingData/OrderMap";
 import Pos from '@/components/Base/tradingData/Pos';
 import Pnl from '@/components/Base/tradingData/pnl/Index';
 import MainContent from '@/components/Layout/MainContent';
@@ -160,6 +116,7 @@ export default {
 
         return {
             orders: Object.freeze([]),
+            orderInputs: Object.freeze([]),
             trades: Object.freeze([]),
             positions: Object.freeze([]),
             pnl: Object.freeze([]),
@@ -168,8 +125,7 @@ export default {
 
             historyData: {},
             monitStrategies: false,
-            monitOrders: false,
-            monitTrades: false
+            currentStrategyDetailTab: "log"
         }
     },
 
@@ -189,7 +145,10 @@ export default {
                 const trades = data['trades'][this.strategyId];
                 this.trades = Object.freeze(trades || []);
             }
-           
+
+            const orderInputs = data['orderInputs'][this.strategyId];
+            this.orderInputs = Object.freeze(orderInputs);
+
             const positions = data['positions'][this.strategyId];
             this.positions = Object.freeze(positions || []);
             const pnl = data['pnl'][this.strategyId];
@@ -223,7 +182,7 @@ export default {
     },
 
     components: {
-        Strategy, OrderRecord, TradeRecord, 
+        Strategy, OrderRecord, OrderMap, TradeRecord, 
         Pos, Log, Pnl,
         MainContent
     },
