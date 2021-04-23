@@ -165,6 +165,7 @@ $HOME/.local/share/virtualenvs      # pipenv(unix) 存储的 Python 依赖
 
 * 2.3.4:
     * 新增行情模块
+    * 新增策略下单细节展示
     * 解决底层bug
     
 * 2.3.0:
