@@ -8,8 +8,7 @@
         ref="logTable"
         :data="orderMap"
         :schema="schema"
-        :sizeDependencies="['trades']"
-        :renderCellClass="renderCellClass"
+        :sizeDependencies="['trades', 'order']"
         ></tr-table>
     </tr-dashboard>
 </template>
@@ -42,16 +41,16 @@ export default {
     data () {
           this.schema = [
             {
-                label: 'orderInput',
+                label: '下单',
                 prop: 'orderInput',
             },
             {
-                label: 'onOrder',
+                label: '返回委托',
                 prop: 'order',
             },
             
             {
-                label: 'onTrade',
+                label: '返回成交',
                 prop: 'trades',
             },
         ];
@@ -127,45 +126,51 @@ export default {
         },
 
         ResolveOrderMap (orderMap) {
-            return Object.values(orderMap || {}).map(item => {
+            return Object.freeze(Object.values(orderMap || {}).map(item => {
                 const { id, orderInput, order, trades } = item;
-                return {
+                return Object.freeze({
                     id,
                     orderInput: this.turnOrderInputToLog(orderInput),
                     order: this.turnOrderToLog(order),
                     trades: this.turnTradesToLog(trades || [])
-                }
-            })
+                })
+            }).reverse());
         },
 
         turnOrderInputToLog (orderInput) {
-            const { orderId, priceType, limitPrice, side, offset, volume, hedgeFlag, accountId, exchangeId } = orderInput
+            const { instrumentId, orderId, priceType, limitPrice, volume, hedgeFlag, accountId, exchangeId, updateTime } = orderInput
             return `
-                OrderId: ${orderId} <br/>
+                Time: ${updateTime} <br/>
+                InstrumentId: ${instrumentId} <br/>
                 PriceType: ${priceType} <br/>
                 LimitPrice: ${limitPrice} <br/>
-                Side: ${side} <br/>
-                Offset: ${offset} <br/>
+                Side: ${this.renderLine('side', orderInput)} <br/>
+                Offset: ${this.renderLine('offset', orderInput)} <br/>
                 HedgeFlag: ${hedgeFlag} <br/>
                 volume: ${volume} <br/>
                 Exchange: ${exchangeId} <br/>
                 Account: ${accountId} <br/>
+                OrderId: ${orderId} <br/>
+                <br/>
             `
         },
 
         turnOrderToLog (order) {
-            const { orderId, priceType, limitPrice, side, offset, volume, hedgeFlag, accountId, exchangeId } = order
+            const { instrumentId, orderId, priceType, limitPrice, volumeTraded, hedgeFlag, accountId, exchangeId, updateTime } = order
             return `
-                OrderId: ${orderId} <br/>
+                Time: ${updateTime} <br/>
+                InstrumentId: ${instrumentId} <br/>
                 PriceType: ${priceType} <br/>
                 LimitPrice: ${limitPrice} <br/>
-                Side: ${side} <br/>
-                Offset: ${offset} <br/>
+                Side: ${this.renderLine('side', order)} <br/>
+                Offset: ${this.renderLine('offset', order)} <br/>
                 HedgeFlag: ${hedgeFlag} <br/>
-                volume: ${volumeTraded}/${volume} <br/>
+                volume: ${volumeTraded} <br/>
                 Exchange: ${exchangeId} <br/>
                 Account: ${accountId} <br/>
-                Status: ${statusName} <br/>
+                Status: ${this.renderLine('status', order)} <br/>
+                OrderId: ${orderId} <br/>
+                <br/>
             `       
         },
 
@@ -177,8 +182,27 @@ export default {
             this.orderMap = [];
         },
 
-        renderCellClass (prop, item) {
-
+        renderLine (prop, item) {
+            switch (prop) {
+                case "side":
+                    if (item.side === "买") {
+                        return `<span class="red">${item.side}</span>`
+                    } else {
+                        return `<span class="green">${item.side}</span>`
+                    }
+                case "offset":
+                    if (item.offset.includes("平")) {
+                        return `<span class="green">${item.offset}</span>`
+                    } else {
+                        return `<span class="red">${item.offset}</span>`
+                    }
+                case "status":
+                    if (+item.status !== 4) {
+                        return item.statusName
+                    } else {
+                        return `<span class="red">${item.statusName}</span>`
+                    }
+            }
         }
     }
 

@@ -23,9 +23,9 @@ export const buildTradingDataPipe = (type: string) => {
     return KUNGFU_TRADING_DATA_OBSERVER.pipe(
         map((data: any): any => {
             const ledgerData = data.ledger || {};
-            const orders = ledgerData.Order ? ledgerData.Order.sort('update_time') : [];
-            const orderInputs = ledgerData.OrderInput ? ledgerData.OrderInput.sort('update_time') : [];
-            const trades = ledgerData.Trade ? ledgerData.Trade.sort('update_time') : [];
+            const orders = ledgerData.Order ? ledgerData.Order.sort('ts') : [];
+            const orderInputs = ledgerData.OrderInput ? ledgerData.OrderInput.sort('ts') : [];
+            const trades = ledgerData.Trade ? ledgerData.Trade.sort('ts') : [];
             const positions = Object.values(ledgerData.Position || {});
             const assets = Object.values(ledgerData.Asset || {});
             const pnl = Object.values(ledgerData.AssetSnapshot || {});
