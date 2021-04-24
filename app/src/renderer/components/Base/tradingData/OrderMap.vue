@@ -17,7 +17,7 @@
 
 import { mapState } from 'vuex';
 
-import { debounce } from '__gUtils/busiUtils'
+import { debounce, throttle } from '__gUtils/busiUtils'
 import { dealTrade, dealOrder, dealOrderInput } from "__io/kungfu/watcher";
 
 export default {
@@ -41,16 +41,16 @@ export default {
     data () {
           this.schema = [
             {
-                label: '下单',
+                label: '下单信息',
                 prop: 'orderInput',
             },
             {
-                label: '返回委托',
+                label: '委托返回',
                 prop: 'order',
             },
             
             {
-                label: '返回成交',
+                label: '成交返回',
                 prop: 'trades',
             },
         ];
@@ -63,18 +63,17 @@ export default {
 
     mounted () {
         this.rendererTable = true;
-        this.timer = setInterval(() => {
-            const mapData = this.mergeMapByOrderId();
-            this.orderMap = this.ResolveOrderMap(mapData);
-        }, 3000)
+        this.setOrderMap();
     },
 
     computed: {
         ...mapState({
             processId: state => state.STRATEGY.currentStrategy.strategy_id
-        }),
+        }) 
+    },
 
-          processId: debounce(function (val) {
+    watch: {
+        processId: debounce(function (val) {
             this.resetData();
             if(!val) return;
             this.rendererTable = false;
@@ -82,13 +81,27 @@ export default {
                 this.rendererTable = true;
             })
         }, 100),
-    },
 
-    beforeDestroy() {
-        clearInterval(this.timer);
+        orders () {
+            this.setOrderMap()
+        },
+
+        trades () {
+            this.setOrderMap()
+        },
+
+        orderInputs () {
+            this.setOrderMap()
+        },
     },
 
     methods: {
+
+        setOrderMap: throttle(function () {
+            const mapData = this.mergeMapByOrderId();
+            this.orderMap = this.resolveOrderMap(mapData);
+        }, 500),
+
         mergeMapByOrderId () {
             let mapData = {};
          
@@ -125,7 +138,7 @@ export default {
             return Object.freeze(mapData)
         },
 
-        ResolveOrderMap (orderMap) {
+        resolveOrderMap (orderMap) {
             return Object.freeze(Object.values(orderMap || {}).map(item => {
                 const { id, orderInput, order, trades } = item;
                 return Object.freeze({
@@ -134,7 +147,7 @@ export default {
                     order: this.turnOrderToLog(order),
                     trades: this.turnTradesToLog(trades || [])
                 })
-            }).reverse());
+            }));
         },
 
         turnOrderInputToLog (orderInput) {
@@ -168,14 +181,17 @@ export default {
                 volume: ${volumeTraded} <br/>
                 Exchange: ${exchangeId} <br/>
                 Account: ${accountId} <br/>
-                Status: ${this.renderLine('status', order)} <br/>
                 OrderId: ${orderId} <br/>
+                Status: ${this.renderLine('status', order)} <br/>
                 <br/>
             `       
         },
 
         turnTradesToLog (trades) {
-            return trades.map(trade => JSON.stringify(trade)).join('\n')
+            return trades.map(trade => `
+                Time: ${trade.updateTime} <br/>
+                Price: ${trade.price} Volume: ${trade.volume} <br/>
+            `).join('<br>')
         },
 
         resetData () {

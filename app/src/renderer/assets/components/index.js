@@ -91,7 +91,7 @@ export default function (Vue) {
             Vue.prototype.$notify({
                 title: '错误',
                 message: message,
-                position: "bottom-right",
+                position: "top-right",
                 type: 'error',
                 duration: duration === 0 ? 0 : 4500
             })
@@ -100,7 +100,7 @@ export default function (Vue) {
             Vue.prototype.$notify({
                 title: '警告',
                 message: message,
-                position: "bottom-right",
+                position: "top-right",
                 type: 'warning'
             })
         },
@@ -108,7 +108,7 @@ export default function (Vue) {
             Vue.prototype.$notify({
                 title: '成功',
                 message: message,
-                position: "bottom-right",
+                position: "top-right",
                 type: 'success'
             })
         },
@@ -116,7 +116,7 @@ export default function (Vue) {
             Vue.prototype.$notify({
                 title: '启动中',
                 message: message,
-                position: "bottom-right",
+                position: "top-right",
                 type: 'info'
             })
         },
@@ -124,7 +124,7 @@ export default function (Vue) {
             Vue.prototype.$notify({
                 title: '消息',
                 message: message,
-                position: "bottom-right",
+                position: "top-right",
                 type: 'info'
             })
         }
