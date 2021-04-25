@@ -2,16 +2,12 @@
 /* eslint-disable */
 import './errorCatch';
 import Vue from 'vue';
-import path from 'path';
 import './setKungfuParamsOnWindow';
 import store from '@/store';
 import router from './routers';
 import * as utils from '__gUtils/busiUtils';
 import ElementUI from 'element-ui';
 import Components from '@/assets/components';
-
-import { switchTask } from '__io/actions/base';
-import { KF_DATASET_QUOTE_DIR } from '__gConfig/pathConfig';
 
 import App from './App.vue';
 import '@/assets/iconfont/iconfont.js';

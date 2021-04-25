@@ -236,7 +236,7 @@ interface OrderData {
 interface OrderOriginData {    
     parent_id: bigint;
     order_id: bigint;
-    ts: bigint;
+    update_time: bigint;
 
     instrument_id: string;
     instrument_type: number;
@@ -285,7 +285,7 @@ interface TradeData {
     instrumentType: string;
     instrumentTypeOrigin: number;
     exchangeId: string;
-    
+
     side: string;
     sideOrigin: number;
     offset: string;
@@ -311,7 +311,7 @@ interface TradeOriginData {
     trade_id: bigint;
     order_id: bigint;
     parent_order_id: bigint;
-    ts: bigint;
+    trade_time: bigint;
   
     instrument_id: string;
     instrument_type: number;

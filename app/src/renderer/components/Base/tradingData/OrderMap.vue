@@ -210,10 +210,12 @@ export default {
                         return `<span class="red">${item.offset}</span>`
                     }
                 case "status":
-                    if (+item.status !== 4) {
-                        return item.statusName
-                    } else {
+                    if (+item.status === 4) {
                         return `<span class="red">${item.statusName}</span>`
+                    } else if ([3, 5, 6].indexOf(+item.status) !== -1) {
+                        return `<span class="green">${item.statusName}</span>`
+                    } else {
+                        return item.statusName
                     }
             }
         }

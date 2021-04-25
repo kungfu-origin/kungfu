@@ -255,8 +255,12 @@ function resolveAccountId(source: string, dest: string, parent_id: bigint): stri
         } else {
             mark = '手动'
         }
+    } else {
+        if (+parent_id.toString()) {
+            mark = '手动'
+        }
     }
-    return [mark, name].join(' ')
+    return [name, mark].join(' ')
 }
 
 function resolveClientId(dest: string, parent_id: bigint): string {
@@ -268,9 +272,13 @@ function resolveClientId(dest: string, parent_id: bigint): string {
         } else {
             return '手动'
         }
+    } else {
+        if (+parent_id.toString()) {
+            return `${kungfuLocation.name} 手动`
+        } else {
+            return kungfuLocation.name
+        }
     }
-    const name = kungfuLocation.name;
-    return name
 }
 
 export const dealOrderInput = (item: OrderInputOriginData): OrderInputData => {
@@ -315,16 +323,16 @@ export const dealOrderInput = (item: OrderInputOriginData): OrderInputData => {
 
 
 export const dealOrder = (item: OrderOriginData): OrderData => {
-    const { source, dest, instrument_type, ts, side, offset, hedge_flag, price_type } = item;
+    const { source, dest, instrument_type, update_time, side, offset, hedge_flag, price_type } = item;
     const sourceId =  resolveSourceDest(source, dest).sourceGroup;
     const errMsg = item.error_msg || OrderStatus[item.status];
     const accountId = resolveAccountId(source, dest, item.parent_id);
   
     return {
         id: item.order_id.toString(),
-        updateTime: kungfu.formatTime(ts, '%H:%M:%S'),
-        updateTimeMMDD: kungfu.formatTime(ts, '%m/%d %H:%M:%S'),
-        updateTimeNum: +Number(ts || 0),
+        updateTime: kungfu.formatTime(update_time, '%H:%M:%S.%N'),
+        updateTimeMMDD: kungfu.formatTime(update_time, '%m/%d %H:%M:%S'),
+        updateTimeNum: +Number(update_time || 0),
 
         orderId: item.order_id.toString(),
         parentId: item.parent_id.toString(),
@@ -373,17 +381,16 @@ export const dealOrder = (item: OrderOriginData): OrderData => {
 
 
 export const dealTrade = (item: TradeOriginData): TradeData => {
-    const { source, dest, instrument_type, ts, side, offset, hedge_flag, parent_order_id } = item;
+    const { source, dest, instrument_type, trade_time, side, offset, hedge_flag, parent_order_id } = item;
     //这个update会用延迟统计里的，因为目前是交易所时间，需要本地时间
-    const updateTime = ts;
     const sourceId =  resolveSourceDest(source, dest).sourceGroup;
     const accountId = resolveAccountId(source, dest, parent_order_id);
 
     return {
-        id: [item.account_id.toString(), item.trade_id.toString(), updateTime.toString()].join('_'),
-        updateTime: kungfu.formatTime(updateTime, '%H:%M:%S'),
-        updateTimeMMDD: kungfu.formatTime(updateTime, '%m/%d %H:%M:%S'),
-        updateTimeNum: +Number(updateTime || 0),
+        id: [item.account_id.toString(), item.trade_id.toString(), trade_time.toString()].join('_'),
+        updateTime: kungfu.formatTime(trade_time, '%H:%M:%S'),
+        updateTimeMMDD: kungfu.formatTime(trade_time, '%m/%d %H:%M:%S'),
+        updateTimeNum: +Number(trade_time || 0),
         orderId: item.order_id.toString(),
         parentOrderId: parent_order_id.toString(),
 
