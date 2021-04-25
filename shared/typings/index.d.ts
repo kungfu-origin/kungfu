@@ -124,15 +124,21 @@ interface LogDataOrigin {
 
 interface OrderInputData {
     id: string;
+
     updateTime: string;
+    updateTimeMMDD: string;
+    updateTimeNum: number;
     orderId: string;
+    parentId: string;
 
     instrumentId: string;
+    instrumentType: string;
+    instrumentTypeOrigin: number;
+
     exchangeId: string;
     sourceId: string;
     accountId: string;
-    instrumentType: string;
-    instrumentTypeOrigin: number;
+
     limitPrice: string;
     frozenPrice: string;
     volume: string;
@@ -181,7 +187,6 @@ interface OrderData {
     updateTime: string;
     updateTimeMMDD: string;
     updateTimeNum: number;
-
     orderId: string;
     parentId: string;
 
@@ -228,12 +233,10 @@ interface OrderData {
     latencyNetwork?: string | number;
 }
 
-interface OrderOriginData {
-    update_time: bigint;
-    insert_time: bigint;
-
-    order_id: bigint;
+interface OrderOriginData {    
     parent_id: bigint;
+    order_id: bigint;
+    ts: bigint;
 
     instrument_id: string;
     instrument_type: number;
@@ -272,37 +275,64 @@ interface OrderOriginData {
 
 interface TradeData {
     id: string;
-    instrumentId: string;
     updateTime: string;
     updateTimeMMDD: string;
     updateTimeNum: number;
+    orderId: string;
+    parentOrderId: string;
+
+    instrumentId: string;
+    instrumentType: string;
+    instrumentTypeOrigin: number;
+    exchangeId: string;
+    
     side: string;
+    sideOrigin: number;
     offset: string;
+    offsetOrigin: number;
+    hedgeFlag: string;
+    hedgeFlagOrigin: number;
+
     price: string;
     volume: number;
-    orderId: string;
+
     clientId: string;
     accountId: string;
     sourceId: string;
+
     source: string;
+    dest: string;
+    
+    tax: string;
+    commission: string;
 }
 
 interface TradeOriginData {
+    trade_id: bigint;
+    order_id: bigint;
+    parent_order_id: bigint;
+    ts: bigint;
+  
+    instrument_id: string;
+    instrument_type: number;
+    exchange_id: string;
+
+    offset: number;
+    side: number;
+    hedge_flag: number;
+    
+    price: string;
+    volume: bigint;
+
     account_id: string;
     client_id: string;
     source_id: string;
-    trade_id: bigint;
-    order_id: bigint;
-    instrument_id: string;
-    parent_order_id: bigint;
-    trade_time: bigint;
-    offset: number;
-    side: number;
-    price: string;
-    volume: bigint;
+    
     source: string;
     dest: string;
-    [propName: string]: any;
+    
+    tax: number;
+    commission: number;
 }
 
 interface PosData {
