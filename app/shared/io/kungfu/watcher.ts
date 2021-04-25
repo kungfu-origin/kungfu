@@ -282,7 +282,11 @@ export const dealOrderInput = (item: OrderInputOriginData): OrderInputData => {
     return {
         id: item.order_id.toString(),
         orderId: item.order_id.toString(),
+        parentId: item.parent_id.toString(),
         updateTime: kungfu.formatTime(ts, '%H:%M:%S'),
+        updateTimeMMDD: kungfu.formatTime(ts, '%m/%d %H:%M:%S'),
+        updateTimeNum: +Number(ts || 0),
+
         instrumentId: item.instrument_id,
         exchangeId: item.exchange_id,
         sourceId: sourceId,
@@ -311,25 +315,23 @@ export const dealOrderInput = (item: OrderInputOriginData): OrderInputData => {
 
 
 export const dealOrder = (item: OrderOriginData): OrderData => {
-    const { source, dest, instrument_type, update_time, insert_time, side, offset, hedge_flag, price_type } = item;
-    const updateTime = insert_time || update_time;
-    const instrumentType = instrument_type;
+    const { source, dest, instrument_type, ts, side, offset, hedge_flag, price_type } = item;
     const sourceId =  resolveSourceDest(source, dest).sourceGroup;
     const errMsg = item.error_msg || OrderStatus[item.status];
     const accountId = resolveAccountId(source, dest, item.parent_id);
   
     return {
         id: item.order_id.toString(),
-        updateTime: kungfu.formatTime(updateTime, '%H:%M:%S'),
-        updateTimeMMDD: kungfu.formatTime(updateTime, '%m/%d %H:%M:%S'),
-        updateTimeNum: +Number(updateTime || 0),
+        updateTime: kungfu.formatTime(ts, '%H:%M:%S'),
+        updateTimeMMDD: kungfu.formatTime(ts, '%m/%d %H:%M:%S'),
+        updateTimeNum: +Number(ts || 0),
 
         orderId: item.order_id.toString(),
         parentId: item.parent_id.toString(),
         
         instrumentId: item.instrument_id,
-        instrumentType: InstrumentType[instrumentType],
-        instrumentTypeOrigin: instrumentType,
+        instrumentType: InstrumentType[instrument_type],
+        instrumentTypeOrigin: instrument_type,
         exchangeId: item.exchange_id,
         
         side: SideName[side] ? SideName[side] : '--',
@@ -364,31 +366,51 @@ export const dealOrder = (item: OrderOriginData): OrderData => {
         accountId: accountId,
         sourceId: sourceId,
        
-        source: source,
-        dest: dest
+        source: source.toString(),
+        dest: dest.toString()
     }
 }
 
 
 export const dealTrade = (item: TradeOriginData): TradeData => {
+    const { source, dest, instrument_type, ts, side, offset, hedge_flag, parent_order_id } = item;
     //这个update会用延迟统计里的，因为目前是交易所时间，需要本地时间
-    const updateTime = item.trade_time || item.update_time;
+    const updateTime = ts;
+    const sourceId =  resolveSourceDest(source, dest).sourceGroup;
+    const accountId = resolveAccountId(source, dest, parent_order_id);
+
     return {
         id: [item.account_id.toString(), item.trade_id.toString(), updateTime.toString()].join('_'),
         updateTime: kungfu.formatTime(updateTime, '%H:%M:%S'),
         updateTimeMMDD: kungfu.formatTime(updateTime, '%m/%d %H:%M:%S'),
         updateTimeNum: +Number(updateTime || 0),
-
         orderId: item.order_id.toString(),
+        parentOrderId: parent_order_id.toString(),
+
         instrumentId: item.instrument_id,
-        side: SideName[item.side] ? SideName[item.side] : '--',
-        offset: OffsetName[item.offset],
-        price: toDecimal(+item.price, 3),
+        instrumentType: InstrumentType[instrument_type],
+        instrumentTypeOrigin: instrument_type,
+        exchangeId: item.exchange_id,
+
+        side: SideName[side] ? SideName[side] : '--',
+        sideOrigin: side,
+        offset: OffsetName[offset],
+        offsetOrigin: offset,
+        hedgeFlag: HedgeFlag[hedge_flag] ? HedgeFlag[hedge_flag] : '--',
+        hedgeFlagOrigin: hedge_flag,
+
+        price: toDecimal(+item.price, 3) || '--',
         volume: Number(item.volume),
-        clientId: resolveClientId(item.dest || '', item.parent_order_id),
-        accountId: resolveAccountId(item.source, item.dest, item.parent_order_id),
-        sourceId: item.source_id,
-        source: item.source
+
+        clientId: resolveClientId(dest || '', parent_order_id),
+        accountId: accountId,
+        sourceId: sourceId,
+    
+        source: source.toString(),
+        dest: dest.toString(),
+
+        tax: toDecimal(+item.tax, 3) || '--',
+        commission: toDecimal(+item.commission) || '--'
     }
 }
 

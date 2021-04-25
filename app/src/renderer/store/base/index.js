@@ -120,6 +120,10 @@ export default {
 
     getters: {
 
+        proMode (state) {
+            return !!(state.taskExtConfigList || []).length
+        },
+
         taskExtMinimistConfig (state) {
             const stringTypes = ['instrumentIdInTickerSet', 'tickerSet', 'instrumentId', 'account']
             let minimistConfig = {

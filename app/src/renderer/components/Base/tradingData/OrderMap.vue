@@ -1,12 +1,16 @@
 <template>
     <tr-dashboard :noTitle="true">
-        <div slot="dashboard-header"></div>
+        <div slot="dashboard-header">
+            <tr-dashboard-header-item>
+                <tr-search-input v-model.trim="searchKeyword"></tr-search-input>
+            </tr-dashboard-header-item>
+        </div>
         <tr-table
-        v-if="rendererTable"
+        v-if="afterRender"
         scrollerType="dynamic"
         :renderHtml="true"
         ref="logTable"
-        :data="orderMap"
+        :data="tableListAfterFilter"
         :schema="schema"
         :sizeDependencies="['trades', 'order']"
         ></tr-table>
@@ -20,7 +24,11 @@ import { mapState } from 'vuex';
 import { debounce, throttle } from '__gUtils/busiUtils'
 import { dealTrade, dealOrder, dealOrderInput } from "__io/kungfu/watcher";
 
+import baseMixin from '@/assets/mixins/baseMixin';
+
 export default {
+    mixins: [ baseMixin ],
+    
     props: {
         orders: {
             type: Array,
@@ -39,7 +47,7 @@ export default {
     },
 
     data () {
-          this.schema = [
+        this.schema = [
             {
                 label: '下单信息',
                 prop: 'orderInput',
@@ -54,15 +62,15 @@ export default {
                 prop: 'trades',
             },
         ];
+        
+        this.searchFilterKey = "orderInput, order, trades";
 
         return {
-            rendererTable: false,
-            orderMap: [],
+            tableList: [],
         }
     },
 
     mounted () {
-        this.rendererTable = true;
         this.setOrderMap();
     },
 
@@ -76,30 +84,30 @@ export default {
         processId: debounce(function (val) {
             this.resetData();
             if(!val) return;
-            this.rendererTable = false;
+            this.afterRender = false;
             this.$nextTick().then(() => {
-                this.rendererTable = true;
+                this.afterRender = true;
             })
         }, 100),
 
         orders () {
-            this.setOrderMap()
+            this.setOrderMap(this.processId)
         },
 
         trades () {
-            this.setOrderMap()
+            this.setOrderMap(this.processId)
         },
 
         orderInputs () {
-            this.setOrderMap()
+            this.setOrderMap(this.processId)
         },
     },
 
     methods: {
-
-        setOrderMap: throttle(function () {
-            const mapData = this.mergeMapByOrderId();
-            this.orderMap = this.resolveOrderMap(mapData);
+        setOrderMap: throttle(function (processId) {
+            const data = this.mergeMapByOrderId();
+            if (processId !== this.processId) return;
+            this.tableList = this.resolveOrderMap(data);
         }, 500),
 
         mergeMapByOrderId () {
@@ -138,8 +146,8 @@ export default {
             return Object.freeze(mapData)
         },
 
-        resolveOrderMap (orderMap) {
-            return Object.freeze(Object.values(orderMap || {}).map(item => {
+        resolveOrderMap (tableList) {
+            return Object.freeze(Object.values(tableList || {}).map(item => {
                 const { id, orderInput, order, trades } = item;
                 return Object.freeze({
                     id,
@@ -153,49 +161,38 @@ export default {
         turnOrderInputToLog (orderInput) {
             const { instrumentId, orderId, priceType, limitPrice, volume, hedgeFlag, accountId, exchangeId, updateTime } = orderInput
             return `
-                Time: ${updateTime} <br/>
-                InstrumentId: ${instrumentId} <br/>
-                PriceType: ${priceType} <br/>
-                LimitPrice: ${limitPrice} <br/>
-                Side: ${this.renderLine('side', orderInput)} <br/>
-                Offset: ${this.renderLine('offset', orderInput)} <br/>
-                HedgeFlag: ${hedgeFlag} <br/>
-                volume: ${volume} <br/>
-                Exchange: ${exchangeId} <br/>
-                Account: ${accountId} <br/>
-                OrderId: ${orderId} <br/>
+                ${updateTime} <br/>
+                ${instrumentId} ${exchangeId} ${accountId} <br/>
+                ${priceType} ${this.renderLine('side', orderInput)} ${this.renderLine('offset', orderInput)} ${hedgeFlag} <br/>
+                价格: ${limitPrice} 量: ${volume} <br/>
+                订单ID: ${orderId} <br/>
                 <br/>
             `
         },
 
         turnOrderToLog (order) {
-            const { instrumentId, orderId, priceType, limitPrice, volumeTraded, hedgeFlag, accountId, exchangeId, updateTime } = order
+            const { instrumentId, priceType, limitPrice, volumeTraded, hedgeFlag, accountId, exchangeId, updateTime } = order
             return `
-                Time: ${updateTime} <br/>
-                InstrumentId: ${instrumentId} <br/>
-                PriceType: ${priceType} <br/>
-                LimitPrice: ${limitPrice} <br/>
-                Side: ${this.renderLine('side', order)} <br/>
-                Offset: ${this.renderLine('offset', order)} <br/>
-                HedgeFlag: ${hedgeFlag} <br/>
-                volume: ${volumeTraded} <br/>
-                Exchange: ${exchangeId} <br/>
-                Account: ${accountId} <br/>
-                OrderId: ${orderId} <br/>
-                Status: ${this.renderLine('status', order)} <br/>
+                ${updateTime} <br/>
+                ${instrumentId} ${exchangeId} ${accountId} <br/>
+                ${priceType} ${this.renderLine('side', order)} ${this.renderLine('offset', order)} ${hedgeFlag} <br/>
+                价格: ${limitPrice} 量: ${volumeTraded} <br/>
+                ${this.renderLine('status', order)}<br/>
                 <br/>
             `       
         },
 
         turnTradesToLog (trades) {
             return trades.map(trade => `
-                Time: ${trade.updateTime} <br/>
-                Price: ${trade.price} Volume: ${trade.volume} <br/>
+                ${trade.updateTime} <br/>
+                ${trade.instrumentId} ${trade.exchangeId} ${trade.accountId} <br/>
+                ${this.renderLine('side', trade)} ${this.renderLine('offset', trade)} ${trade.hedgeFlag} <br/>
+                价格: ${trade.price} 量: ${trade.volume} <br/>
             `).join('<br>')
         },
 
         resetData () {
-            this.orderMap = [];
+            this.tableList = [];
         },
 
         renderLine (prop, item) {

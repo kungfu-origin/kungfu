@@ -51,7 +51,7 @@ export default {
                     });
             
 
-                return mergedVal.includes(this.searchKeywordDebounce || '')
+                return mergedVal.indexOf(this.searchKeywordDebounce || '') !== -1
             })
         },
     },

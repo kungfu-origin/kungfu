@@ -8,7 +8,7 @@
         <div class="account-status-content">
             <div class="account-item" >
                 <div class="type-name">行情</div>
-                <div class="account-status" v-for="accountItem in mdList" :key="accountItem.account_id">
+                <div class="account-status" v-for="accountItem in mdList" :key="accountItem.source_name">
                     <span class="account-process-item source-name">
                         <el-tag
                         v-if="(mdAccountSource[accountItem.source_name]||{}).typeName"
@@ -20,12 +20,18 @@
                     <span class="account-process-item text-overflow"></span>
                     <span  class="account-process-item text-overflow" style="width: 81px;">
                         <tr-status 
-                        v-if="ifProcessRunning('md_' + accountItem.source_name, processStatus)"
-                        :value="buildMdState(accountItem)"></tr-status>
+                        v-if="ifProcessRunning(`md_${accountItem.source_name}`, processStatus) && processStatus[`md_${accountItem.source_name}`] === 'online'"
+                        :value="(mdTdState[`md_${accountItem.source_name}`] || {}).state"></tr-status>
+                        <tr-status 
+                        v-else-if="ifProcessRunning(`md_${accountItem.source_name}`, processStatus) && processStatus[`md_${accountItem.source_name}`] === 'stopping'"
+                        :value="processStatus[`md_${accountItem.source_name}`]"></tr-status>
                         <tr-status v-else></tr-status>
                     </span>
                     <span class="account-process-item status-switch" @click.stop>
-                        <el-switch :value="ifProcessRunning('md_' + accountItem.source_name, processStatus)" @change="handleMdSwitch($event, accountItem)"></el-switch>
+                        <el-switch :value="ifProcessRunning(`md_${accountItem.source_name}`, processStatus)" @change="handleMdSwitch($event, accountItem)"></el-switch>
+                    </span>
+                     <span class="account-process-item status-switch" @click.stop="handleOpenLogFile(`md_${accountItem.source_name}`)">
+                        <i class="el-icon-document mouse-over" title="打开日志文件"></i>
                     </span>
                 </div>
             </div>
@@ -45,14 +51,22 @@
                     </span>
                     <span  class="account-process-item text-overflow " style="width: 81px;">
                         <tr-status 
-                        v-if="ifProcessRunning('td_' + accountItem.account_id, processStatus)"
-                        :value="buildTdState(accountItem)"></tr-status>
+                        v-if="ifProcessRunning(`td_${accountItem.account_id}`, processStatus) && processStatus[`td_${accountItem.account_id}`] === 'online'"
+                        :value="(mdTdState[`td_${accountItem.account_id}`] || {}).state"></tr-status>
+                        <tr-status 
+                        v-else-if="ifProcessRunning(`td_${accountItem.account_id}`, processStatus) && processStatus[`td_${accountItem.account_id}`] === 'stopping'"
+                        :value="processStatus[`td_${accountItem.account_id}`]"></tr-status>
                         <tr-status v-else></tr-status>
                     </span>
                     <span class="account-process-item status-switch">
-                        <el-switch :value="ifProcessRunning('td_' + accountItem.account_id, processStatus)"
+                        <el-switch :value="ifProcessRunning(`td_${accountItem.account_id}`, processStatus)"
                         @change="handleTdSwitch($event, accountItem)"></el-switch>
                     </span>
+
+                    <span class="account-process-item status-switch" @click.stop="handleOpenLogFile(`td_${accountItem.account_id}`)">
+                        <i class="el-icon-document mouse-over" title="打开日志文件"></i>
+                    </span>
+                    
                 </div>
             </div>
         </div>
@@ -68,8 +82,12 @@ import { statusConfig } from '__gConfig/statusConfig';
 import { switchTd, switchMd } from '__io/actions/account';
 import { ifProcessRunning } from '__gUtils/busiUtils';
 
+import openLogMixin from "@/assets/mixins/openLogMixin";
+
 export default {
-    data(){
+    mixins: [ openLogMixin ],
+
+    data () {
         let statusLevel = {};
         Object.keys(statusConfig || {}).map(key => {
             statusLevel[key] = statusConfig[key].level;
@@ -97,7 +115,7 @@ export default {
         //全开，且开的状态都是ready的，显示绿色
         //全开，且开的状态不都是ready的，以开的状态最严重的颜色为准
         //简而言之：以最差的为准
-        currentStatus(){
+        currentStatus () {
             let tdProcessReady = false;
             let mdProcessReady = false;
             let tdStatusReady = 0;
@@ -137,21 +155,21 @@ export default {
     },
 
     methods: {
-        buildMdState(accountItem){
+        buildMdState (accountItem) {
             return (this.mdTdState[`md_${accountItem.source_name}`] || {}).state
         },
 
-        buildTdState(accountItem){
+        buildTdState (accountItem) {
             return (this.mdTdState[`td_${accountItem.account_id}`] || {}).state
         },
 
         //Td开关
-        handleTdSwitch(value, account) {
+        handleTdSwitch (value, account) {
             switchTd(account, value).then(({ type, message }) => this.$message[type](message))
         },
 
         //行情开关
-        handleMdSwitch(value, account) {
+        handleMdSwitch (value, account) {
             switchMd(account, value).then(({ type, message }) => this.$message[type](message))  
         },
     }
@@ -161,21 +179,25 @@ export default {
 @import "@/assets/scss/skin.scss";
 
 .account-status-content{
-    max-width: 300px;
+    max-width: 370px;
     font-family: Consolas, Monaco, monospace,"Microsoft YaHei",sans-serif;
+
     .account-item{
         float: left;
-        width: 295px;
+        width: 350px;
         margin: 10px;
+
         .type-name{
             font-size: 16px;
             color: #fff;
             margin-bottom: 10px;
             padding-left: 5px;
         }
+
         .account-status{
             font-size: 14px;
             padding: 3px 0;
+            
             .account-process-item{
                 display: inline-block;
                 width: 80px;
@@ -185,13 +207,16 @@ export default {
                 vertical-align: bottom;
                 color: $font;
             }
+
             .source-name{
                 width: 45px;
             }
+
             .account-status{
                 padding-left: 30px;
                 box-sizing: border-box;
             }
+
             .status-switch{
                 width: 40px;
             }

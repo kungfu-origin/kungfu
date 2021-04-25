@@ -2,7 +2,7 @@
     <div class="market-data__warp">
         <tr-dashboard title="" >
             <div slot="dashboard-header">
-                <tr-dashboard-header-item>
+                <tr-dashboard-header-item v-if="proMode">
                     <span class="mouse-over" style="font-weight: 600; font-size: 11px" title="添加选股算法" @click="handleAddTask">选股</span>
                 </tr-dashboard-header-item>
                 <tr-dashboard-header-item>
@@ -164,7 +164,7 @@
 
 <script>
 
-import { mapState } from 'vuex';
+import { mapGetters, mapState } from 'vuex';
 
 import { getIndexFromTargetTickers } from '__gUtils/busiUtils';
 import { dealQuote } from '__io/kungfu/watcher';
@@ -196,6 +196,10 @@ export default {
             tdAccountSource: state => state.BASE.tdAccountSource || {},
             marketAvgVolume: state => state.MARKET.marketAvgVolume || {},
         }),
+
+        ...mapGetters([
+            "proMode"
+        ]),
 
         marketAvgVolume7Days () {
             return this.marketAvgVolume[7] || {}

@@ -11,8 +11,19 @@
                         </el-col>
                     </el-row>
                     <el-row style="height: 40%">
-                        <el-col :span="24">
-                            <Log></Log>                         
+                        <el-col>
+                            <el-tabs type="border-card" v-model="currentStrategyDetailTab">
+                                <el-tab-pane :lazy="true" :label="`策略日志 ${showCurrentIdInTabName(currentStrategyDetailTab, 'log')}`" name="log">
+                                    <Log></Log>                         
+                                </el-tab-pane>
+                                <el-tab-pane :lazy="true" :label="`委托跟踪 ${showCurrentIdInTabName(currentStrategyDetailTab, 'orderMap')}`" name="orderMap">
+                                    <OrderMap
+                                        :orders="orders"
+                                        :orderInputs="orderInputs"
+                                        :trades="trades"
+                                    ></OrderMap>
+                                </el-tab-pane>
+                            </el-tabs>
                         </el-col>
                     </el-row>
                 </el-col>
@@ -40,10 +51,10 @@
                     <el-row style="height: 66.66%">
                         <el-col>
                             <el-tabs type="border-card" v-model="currentStrategyDetailTab">
-                                <el-tab-pane :lazy="true" label="策略日志" name="log">
+                                <el-tab-pane :lazy="true" :label="`策略日志 ${showCurrentIdInTabName(currentStrategyDetailTab, 'log')}`" name="log">
                                     <Log></Log>                         
                                 </el-tab-pane>
-                                <el-tab-pane :lazy="true" label="委托跟踪" name="orderMap">
+                                <el-tab-pane :lazy="true" :label="`委托跟踪 ${showCurrentIdInTabName(currentStrategyDetailTab, 'orderMap')}`" name="orderMap">
                                     <OrderMap
                                         :orders="orders"
                                         :orderInputs="orderInputs"
@@ -188,13 +199,16 @@ export default {
     },
 
     methods:{
-
         handleShowHistory ({ date, data, type }) {
             this.$set(this.historyData, type, {
                 date,
                 data
             })
-        }
+        },
+
+        showCurrentIdInTabName (currentTabName, target) {
+            return currentTabName === target ? this.strategyId : ''
+        },
     }
 }
 </script>
