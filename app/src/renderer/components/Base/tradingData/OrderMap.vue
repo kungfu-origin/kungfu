@@ -171,13 +171,14 @@ export default {
         },
 
         turnOrderToLog (order) {
-            const { instrumentId, priceType, limitPrice, volumeTraded, hedgeFlag, accountId, exchangeId, updateTime } = order
+            const { instrumentId, orderId, priceType, limitPrice, volumeTraded, hedgeFlag, accountId, exchangeId, updateTime } = order
             return `
                 ${updateTime} <br/>
                 ${instrumentId} ${exchangeId} ${accountId} <br/>
                 ${priceType} ${this.renderLine('side', order)} ${this.renderLine('offset', order)} ${hedgeFlag} <br/>
                 价格: ${limitPrice} 量: ${volumeTraded} <br/>
                 ${this.renderLine('status', order)}<br/>
+                订单ID: ${orderId} <br/>
                 <br/>
             `       
         },
@@ -188,7 +189,10 @@ export default {
                 ${trade.instrumentId} ${trade.exchangeId} ${trade.accountId} <br/>
                 ${this.renderLine('side', trade)} ${this.renderLine('offset', trade)} ${trade.hedgeFlag} <br/>
                 价格: ${trade.price} 量: ${trade.volume} <br/>
-            `).join('<br>')
+                税: ${trade.tax} 手续费 ${trade.commission} <br/>
+                订单ID: ${trade.orderId} <br/>
+                
+            `).join('<br/>') + "<br/>"
         },
 
         resetData () {

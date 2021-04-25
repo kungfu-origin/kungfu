@@ -291,8 +291,8 @@ export const dealOrderInput = (item: OrderInputOriginData): OrderInputData => {
         id: item.order_id.toString(),
         orderId: item.order_id.toString(),
         parentId: item.parent_id.toString(),
-        updateTime: kungfu.formatTime(ts, '%H:%M:%S'),
-        updateTimeMMDD: kungfu.formatTime(ts, '%m/%d %H:%M:%S'),
+        updateTime: kungfu.formatTime(ts, '%H:%M:%S.%N').slice(0, 12),
+        updateTimeMMDD: kungfu.formatTime(ts, '%m/%d %H:%M:%S.%N'),
         updateTimeNum: +Number(ts || 0),
 
         instrumentId: item.instrument_id,
@@ -330,8 +330,8 @@ export const dealOrder = (item: OrderOriginData): OrderData => {
   
     return {
         id: item.order_id.toString(),
-        updateTime: kungfu.formatTime(update_time, '%H:%M:%S.%N'),
-        updateTimeMMDD: kungfu.formatTime(update_time, '%m/%d %H:%M:%S'),
+        updateTime: kungfu.formatTime(update_time, '%H:%M:%S.%N').slice(0, 12),
+        updateTimeMMDD: kungfu.formatTime(update_time, '%m/%d %H:%M:%S.%N'),
         updateTimeNum: +Number(update_time || 0),
 
         orderId: item.order_id.toString(),
@@ -388,8 +388,8 @@ export const dealTrade = (item: TradeOriginData): TradeData => {
 
     return {
         id: [item.account_id.toString(), item.trade_id.toString(), trade_time.toString()].join('_'),
-        updateTime: kungfu.formatTime(trade_time, '%H:%M:%S'),
-        updateTimeMMDD: kungfu.formatTime(trade_time, '%m/%d %H:%M:%S'),
+        updateTime: kungfu.formatTime(trade_time, '%H:%M:%S.%N').slice(0, 12),
+        updateTimeMMDD: kungfu.formatTime(trade_time, '%m/%d %H:%M:%S.%N'),
         updateTimeNum: +Number(trade_time || 0),
         orderId: item.order_id.toString(),
         parentOrderId: parent_order_id.toString(),
@@ -417,7 +417,7 @@ export const dealTrade = (item: TradeOriginData): TradeData => {
         dest: dest.toString(),
 
         tax: toDecimal(+item.tax, 3) || '--',
-        commission: toDecimal(+item.commission) || '--'
+        commission: toDecimal(+item.commission, 3) || '--'
     }
 }
 
