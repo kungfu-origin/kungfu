@@ -282,7 +282,7 @@ function resolveClientId(dest: string, parent_id: bigint): string {
 }
 
 export const dealOrderInput = (item: OrderInputOriginData): OrderInputData => {
-    const { source, dest, instrument_type, ts, side, offset, hedge_flag, price_type } = item;
+    const { source, dest, instrument_type, insert_time, side, offset, hedge_flag, price_type } = item;
     //与正常相反 dest source
     const sourceId =  resolveSourceDest(dest, source).sourceGroup;
     const accountId = resolveAccountId(dest, source, item.parent_id);
@@ -291,9 +291,9 @@ export const dealOrderInput = (item: OrderInputOriginData): OrderInputData => {
         id: item.order_id.toString(),
         orderId: item.order_id.toString(),
         parentId: item.parent_id.toString(),
-        updateTime: kungfu.formatTime(ts, '%H:%M:%S.%N').slice(0, 12),
-        updateTimeMMDD: kungfu.formatTime(ts, '%m/%d %H:%M:%S.%N').slice(0, 18),
-        updateTimeNum: +Number(ts || 0),
+        updateTime: kungfu.formatTime(insert_time, '%H:%M:%S.%N').slice(0, 12),
+        updateTimeMMDD: kungfu.formatTime(insert_time, '%m/%d %H:%M:%S.%N').slice(0, 18),
+        updateTimeNum: +Number(insert_time || 0),
 
         instrumentId: item.instrument_id,
         exchangeId: item.exchange_id,

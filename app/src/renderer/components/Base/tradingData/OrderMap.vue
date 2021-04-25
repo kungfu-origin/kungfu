@@ -44,6 +44,11 @@ export default {
             type: Array,
             default: () => ([])
         },
+
+        orderStat: {
+            type: Object,
+            default: () => ({})
+        },
     },
 
     data () {
@@ -117,7 +122,7 @@ export default {
                 const itemResolved = dealOrderInput(item);
                 const { orderId, updateTime } = itemResolved;
                 if (!mapData[orderId]) mapData[orderId] = {};
-                mapData[orderId]['orderInput'] = itemResolved;  
+                mapData[orderId]['orderInput'] = Object.freeze(itemResolved);  
                 mapData[orderId]['id'] = orderId;  
                 mapData[orderId]['ts'] = updateTime;  
 
@@ -127,20 +132,27 @@ export default {
                 const itemResolved = dealOrder(item);
                 const { orderId } = itemResolved;
                 if (!mapData[orderId]) return;
-                mapData[orderId]['order'] = itemResolved;      
+                mapData[orderId]['order'] = Object.freeze(itemResolved);      
             })
 
 
             this.trades.kfForEach(item => {
-                const itemResolved = dealTrade(item);
+                let itemResolved = dealTrade(item);
                 const { orderId } = itemResolved;
+
                 if (!mapData[orderId]) return;
 
+                const orderStatByOrderId = this.orderStat[orderId] || {};
+                //ctp trade返回的是交易所时间（xtp是自己维护），所用orderState内时间代替
+                const { updateTime, updateTimeMMDD } = itemResolved;
+                itemResolved.updateTime = !!orderStatByOrderId.tradeTimeNum ? orderStatByOrderId.tradeTime : updateTime;
+                itemResolved.updateTimeMMDD = !!orderStatByOrderId.tradeTimeNum ? orderStatByOrderId.tradeTimeMMDD : updateTimeMMDD;
+                
                 if (!(mapData[orderId] || {})['trades']) {
                     mapData[orderId]['trades'] = []
                 } 
 
-                mapData[orderId]['trades'].push(itemResolved);
+                mapData[orderId]['trades'].push(Object.freeze(itemResolved));
             })
 
             return Object.freeze(mapData)

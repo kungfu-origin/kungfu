@@ -160,7 +160,7 @@ interface OrderInputData {
 interface OrderInputOriginData {
     order_id: bigint;
     parent_id: bigint;
-    ts: bigint;
+    insert_time: bigint;
 
     instrument_id: string;
     exchange_id: string;

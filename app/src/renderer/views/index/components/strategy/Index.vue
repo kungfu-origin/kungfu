@@ -21,6 +21,7 @@
                                         :orders="orders"
                                         :orderInputs="orderInputs"
                                         :trades="trades"
+                                        :orderStat="orderStat"
                                     ></OrderMap>
                                 </el-tab-pane>
                             </el-tabs>
@@ -59,6 +60,7 @@
                                         :orders="orders"
                                         :orderInputs="orderInputs"
                                         :trades="trades"
+                                        :orderStat="orderStat"
                                     ></OrderMap>
                                 </el-tab-pane>
                             </el-tabs>
