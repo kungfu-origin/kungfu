@@ -292,7 +292,7 @@ export const dealOrderInput = (item: OrderInputOriginData): OrderInputData => {
         orderId: item.order_id.toString(),
         parentId: item.parent_id.toString(),
         updateTime: kungfu.formatTime(ts, '%H:%M:%S.%N').slice(0, 12),
-        updateTimeMMDD: kungfu.formatTime(ts, '%m/%d %H:%M:%S.%N'),
+        updateTimeMMDD: kungfu.formatTime(ts, '%m/%d %H:%M:%S.%N').slice(0, 18),
         updateTimeNum: +Number(ts || 0),
 
         instrumentId: item.instrument_id,
@@ -331,7 +331,7 @@ export const dealOrder = (item: OrderOriginData): OrderData => {
     return {
         id: item.order_id.toString(),
         updateTime: kungfu.formatTime(update_time, '%H:%M:%S.%N').slice(0, 12),
-        updateTimeMMDD: kungfu.formatTime(update_time, '%m/%d %H:%M:%S.%N'),
+        updateTimeMMDD: kungfu.formatTime(update_time, '%m/%d %H:%M:%S.%N').slice(0, 18),
         updateTimeNum: +Number(update_time || 0),
 
         orderId: item.order_id.toString(),
@@ -389,7 +389,7 @@ export const dealTrade = (item: TradeOriginData): TradeData => {
     return {
         id: [item.account_id.toString(), item.trade_id.toString(), trade_time.toString()].join('_'),
         updateTime: kungfu.formatTime(trade_time, '%H:%M:%S.%N').slice(0, 12),
-        updateTimeMMDD: kungfu.formatTime(trade_time, '%m/%d %H:%M:%S.%N'),
+        updateTimeMMDD: kungfu.formatTime(trade_time, '%m/%d %H:%M:%S.%N').slice(0, 18),
         updateTimeNum: +Number(trade_time || 0),
         orderId: item.order_id.toString(),
         parentOrderId: parent_order_id.toString(),
@@ -478,8 +478,8 @@ export const dealOrderStat = (item: OrderStatOriginData): OrderStatData => {
         latencySystem: latencySystem > 0 ? latencySystem.toString() : '',
         latencyNetwork: latencyNetwork > 0 ? latencyNetwork.toString() : '',
         latencyTrade: latencyTrade > 0 ? latencyTrade.toString() : '',
-        tradeTime: kungfu.formatTime(trade_time, '%H:%M:%S'),
-        tradeTimeMMDD: kungfu.formatTime(trade_time, '%m/%d %H:%M:%S'),
+        tradeTime: kungfu.formatTime(trade_time, '%H:%M:%S.%N').slice(0, 12),
+        tradeTimeMMDD: kungfu.formatTime(trade_time, '%m/%d %H:%M:%S.%N').slice(0, 18),
         tradeTimeNum: +Number(trade_time || 0),
 
         orderId: item.order_id.toString(),
