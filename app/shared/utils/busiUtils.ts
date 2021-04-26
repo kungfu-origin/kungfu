@@ -385,6 +385,7 @@ export const dealLogMessage = (line: string, searchKeyword?: string):any => {
 }
 
 export const getExtensions = async (extDir: string): Promise<any> => {
+    if (!fse.existsSync(extDir)) return [];
     const files = await listDir(extDir);
     const filesResolved = (files || []).map((fp: string) => path.join(extDir, fp))
     const statFiles = await Promise.all(filesResolved.map((fp: string) => fse.stat(fp)))
