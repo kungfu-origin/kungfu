@@ -117,7 +117,6 @@ Book_ptr Bookkeeper::make_book(uint32_t location_uid) {
 }
 
 void Bookkeeper::update_instrument(const longfist::types::Instrument &instrument) {
-  SPDLOG_INFO("instrument.instrument_id {},instrument.exchange_id {},instrument.long_margin_ratio {},instrument.short_margin_ratio {}",instrument.instrument_id ,instrument.exchange_id ,instrument.long_margin_ratio ,instrument.short_margin_ratio);
   instruments_.emplace(hash_instrument(instrument.exchange_id, instrument.instrument_id), instrument);
 }
 
