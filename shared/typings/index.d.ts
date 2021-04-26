@@ -122,6 +122,64 @@ interface LogDataOrigin {
     process_id: number
 }
 
+interface OrderInputData {
+    id: string;
+
+    updateTime: string;
+    updateTimeMMDD: string;
+    updateTimeNum: number;
+    orderId: string;
+    parentId: string;
+
+    instrumentId: string;
+    instrumentType: string;
+    instrumentTypeOrigin: number;
+
+    exchangeId: string;
+    sourceId: string;
+    accountId: string;
+
+    limitPrice: string;
+    frozenPrice: string;
+    volume: string;
+
+    side: string;
+    sideOrigin: number;
+    offset: string;
+    offsetOrigin: number;
+    hedgeFlag: string;
+    hedgeFlagOrigin: number;
+    priceType: string;
+    priceTypeOrigin: number;
+
+    source: string;
+    dest: string;
+    
+}
+
+interface OrderInputOriginData {
+    order_id: bigint;
+    parent_id: bigint;
+    insert_time: bigint;
+
+    instrument_id: string;
+    exchange_id: string;
+    source_id: string;
+    account_id: string;
+    instrument_type: number;
+    limit_price: number;
+    frozen_price: number;
+    volume: bigInt;
+    
+    side: number;
+    offset: number;
+    hedge_flag: number;
+    price_type: number;
+
+    source: string;
+    dest: string;
+}
+
 
 interface OrderData {
     id: string;
@@ -129,7 +187,6 @@ interface OrderData {
     updateTime: string;
     updateTimeMMDD: string;
     updateTimeNum: number;
-
     orderId: string;
     parentId: string;
 
@@ -176,12 +233,10 @@ interface OrderData {
     latencyNetwork?: string | number;
 }
 
-interface OrderInputData {
-    update_time: bigint;
-    insert_time: bigint;
-
-    order_id: bigint;
+interface OrderOriginData {    
     parent_id: bigint;
+    order_id: bigint;
+    update_time: bigint;
 
     instrument_id: string;
     instrument_type: number;
@@ -220,37 +275,64 @@ interface OrderInputData {
 
 interface TradeData {
     id: string;
-    instrumentId: string;
     updateTime: string;
     updateTimeMMDD: string;
     updateTimeNum: number;
+    orderId: string;
+    parentOrderId: string;
+
+    instrumentId: string;
+    instrumentType: string;
+    instrumentTypeOrigin: number;
+    exchangeId: string;
+
     side: string;
+    sideOrigin: number;
     offset: string;
+    offsetOrigin: number;
+    hedgeFlag: string;
+    hedgeFlagOrigin: number;
+
     price: string;
     volume: number;
-    orderId: string;
+
     clientId: string;
     accountId: string;
     sourceId: string;
+
     source: string;
+    dest: string;
+    
+    tax: string;
+    commission: string;
 }
 
-interface TradeInputData {
+interface TradeOriginData {
+    trade_id: bigint;
+    order_id: bigint;
+    parent_order_id: bigint;
+    trade_time: bigint;
+  
+    instrument_id: string;
+    instrument_type: number;
+    exchange_id: string;
+
+    offset: number;
+    side: number;
+    hedge_flag: number;
+    
+    price: string;
+    volume: bigint;
+
     account_id: string;
     client_id: string;
     source_id: string;
-    trade_id: bigint;
-    order_id: bigint;
-    instrument_id: string;
-    parent_order_id: bigint;
-    trade_time: bigint;
-    offset: number;
-    side: number;
-    price: string;
-    volume: bigint;
+    
     source: string;
     dest: string;
-    [propName: string]: any;
+    
+    tax: number;
+    commission: number;
 }
 
 interface PosData {
@@ -274,7 +356,7 @@ interface PosData {
     accountIdResolved: string;
 }
 
-interface PosInputData {
+interface PosOriginData {
     instrument_id: string;
     instrument_type: number;
     direction: number;
@@ -290,21 +372,6 @@ interface PosInputData {
     [propName: string]: any;
 }
 
-interface AssetInputData {
-    account_id: string;
-    source_id: string;
-    client_id: string;
-    initial_equity: number;
-    static_equity: number;
-    dynamic_equity: number;
-    realized_pnl: number;
-    unrealized_pnl: number;
-    avail: number;
-    market_value: number;
-    margin: number;
-    ledger_category: number;
-}
-
 interface AssetData {
     accountId: string;
     clientId: string;
@@ -318,14 +385,19 @@ interface AssetData {
     margin: string;
 }
 
-interface OrderStatInputData {
-    ack_time: bigint;
-    insert_time: bigint;
-    md_time: bigint;
-    trade_time: bigint;
-    order_id: bigint;
-    dest: string;
-    source: string
+interface AssetOriginData {
+    account_id: string;
+    source_id: string;
+    client_id: string;
+    initial_equity: number;
+    static_equity: number;
+    dynamic_equity: number;
+    realized_pnl: number;
+    unrealized_pnl: number;
+    avail: number;
+    market_value: number;
+    margin: number;
+    ledger_category: number;
 }
 
 interface OrderStatData {
@@ -341,6 +413,16 @@ interface OrderStatData {
     tradeTime: string;
     tradeTimeMMDD: string;
     tradeTimeNum: number;
+}
+
+interface OrderStatOriginData {
+    ack_time: bigint;
+    insert_time: bigint;
+    md_time: bigint;
+    trade_time: bigint;
+    order_id: bigint;
+    dest: string;
+    source: string
 }
 
 interface AccountSettingItem {

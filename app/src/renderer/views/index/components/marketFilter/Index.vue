@@ -36,7 +36,7 @@
                 <el-col :span="18">
                     <el-tabs v-model="currentTradeDataTabName" type="border-card">
                         <el-tab-pane :lazy="true" label="全部委托" name="systemOrders">
-                             <OrderRecord
+                            <OrderRecord
                             :noTitle="true"
                             moduleType="all" 
                             :todayFinishPreSetting="true"
@@ -45,7 +45,7 @@
                             @showHistory="handleShowHistory"
                             />  
                         </el-tab-pane>
-                        <el-tab-pane :lazy="true"  v-if="taskExtConfigList.length" :label="`算法任务记录 ${currentTaskIdInTab}`" name="taskDetail">
+                        <el-tab-pane :lazy="true"  v-if="proMode" :label="`算法任务记录 ${currentTaskIdInTab}`" name="taskDetail">
                             <TaskRecord></TaskRecord>
                         </el-tab-pane>
                     </el-tabs>
@@ -110,6 +110,10 @@ export default {
             currentTaskId: state => (state.BASE.currentTask || {}).name || '',
             taskExtConfigList: state => state.BASE.taskExtConfigList || []
         }),
+
+        ...mapGetters([
+            "proMode"
+        ]),
 
         currentTickerSetNameInTab () {
             if (this.currentMarketDataTabName === 'marketData') {

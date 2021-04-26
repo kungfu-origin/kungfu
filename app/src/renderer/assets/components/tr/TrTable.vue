@@ -106,8 +106,11 @@
                             :style="{                             
                                 'max-width': getHeaderWidth(column)
                             }">
-                                <template v-if="column.type !== 'operation'">
+                                <template v-if="column.type !== 'operation' && !renderHtml">
                                     {{item[column.prop]}}
+                                </template>
+                                <template v-else-if="column.type !== 'operation' && renderHtml" >
+                                    <span class="tr-table-cell__html-render" v-html="item[column.prop]"></span>
                                 </template>
                                 <template v-else-if="column.type === 'operation'">
                                     <slot name="oper" v-bind:props="item"></slot>
@@ -160,6 +163,11 @@ export default {
             default: () => {
                 return ''
             }
+        },
+
+        renderHtml: {
+            type: Boolean,
+            default: false
         },
 
         keyField: {
@@ -408,6 +416,10 @@ export default {
         &.update{
             animation: nanoBlink 1.1s 1;
         }
+
+        .tr-table-cell__html-render {
+            user-select: text;
+        }
     }
 
 
@@ -417,7 +429,7 @@ export default {
             .tr-table-cell{
                 height: auto;
                 line-height: 20px;
-                word-break: break-all;
+                word-break: break-word;
             }
         }
     }

@@ -11,7 +11,8 @@ export const reqRecordBeforeQuit = (mainWindow) => {
         console.time('record before quit')
         const timer = setTimeout(() => {
             resolve(false)
-            console.timeEnd('record before quit timeout')
+            console.timeEnd('record before quit');
+            console.log("record before quit timeout");
             clearTimeout(timer)
         }, 5000)
 

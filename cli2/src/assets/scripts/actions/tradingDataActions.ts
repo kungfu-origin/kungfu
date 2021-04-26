@@ -38,9 +38,9 @@ export const tradingDataObservale = (type: string, processId: string) => {
 }
 
 
-function dealOrdersFromWatcher (orders: OrderInputData[], orderStat: { [prop: string]: OrderStatData }) {
+function dealOrdersFromWatcher (orders: OrderOriginData[], orderStat: { [prop: string]: OrderStatData }) {
     let orderDataByKey: { [propName: string]: OrderData } = {};
-    orders.kfForEach((item: OrderInputData) => {
+    orders.kfForEach((item: OrderOriginData) => {
         const orderData = dealOrder(item);
         const latencyData = orderStat[orderData.orderId] || {};
         const latencySystem = latencyData.latencySystem || '';
@@ -58,17 +58,17 @@ function dealOrdersFromWatcher (orders: OrderInputData[], orderStat: { [prop: st
     }))
 }
 
-function dealTradesFromWathcer (trades: TradeInputData[]) {
+function dealTradesFromWathcer (trades: TradeOriginData[]) {
     return trades
         .map(item => dealTrade(item))
         .sort((a: TradeData, b: TradeData) => b.updateTimeNum - a.updateTimeNum)
 }
 
-function dealPosFromWatcher (positions: PosInputData[]) {
+function dealPosFromWatcher (positions: PosOriginData[]) {
     let positionDataByKey: { [propName: string]: PosData } = {};
     
     positions
-    .sort((pos1: PosInputData, pos2: PosInputData) => {
+    .sort((pos1: PosOriginData, pos2: PosOriginData) => {
         if (pos1.instrument_id > pos2.instrument_id) {
             return 1
         } else if (pos1.instrument_id < pos2.instrument_id) {
@@ -77,7 +77,7 @@ function dealPosFromWatcher (positions: PosInputData[]) {
             return 0
         };
     })
-    .kfForEach((item: PosInputData) => {
+    .kfForEach((item: PosOriginData) => {
         let positionData = dealPos(item);
         const poskey = positionData.instrumentId + positionData.direction
         positionDataByKey[poskey] = positionData;

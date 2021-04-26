@@ -36,7 +36,13 @@ export const kungfuMakeOrder = (makeOrderData: MakeOrderData, accountId: string,
     }
     if (strategyId) {
         const strategyLocation = encodeKungfuLocation(strategyId, 'strategy');
-        return Promise.resolve(watcher.issueOrder(orderInput, accountLocation, strategyLocation))
+        //设置orderInput的parentid，来标记该order为策略手动下单
+        const parentId = BigInt(+new Date().getTime());
+
+        return Promise.resolve(watcher.issueOrder({
+            ...orderInput,
+            parent_id: parentId
+        }, accountLocation, strategyLocation))
     } else {
         return Promise.resolve(watcher.issueOrder(orderInput, accountLocation))
     }

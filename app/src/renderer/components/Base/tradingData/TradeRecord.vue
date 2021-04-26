@@ -11,11 +11,8 @@
             <span>{{ dateForHistory }}</span>
             <i class="el-icon-close mouse-over" @click="handleClearHistory"></i>
         </tr-dashboard-header-item>
-        <tr-dashboard-header-item v-if="!ifBacktest">
+        <tr-dashboard-header-item>
             <i class="el-icon-download mouse-over" title="导出" @click="dateRangeDialogVisiblityForExport = true"></i>
-        </tr-dashboard-header-item>
-        <tr-dashboard-header-item v-else>
-            <i class="el-icon-s-platform mouse-over" title="关闭监控" @click="handleMonitTrades"></i>
         </tr-dashboard-header-item>
     </div>
     <tr-table
@@ -45,7 +42,6 @@
 import DatePickerDialog from '@/components/Base//DatePickerDialog';
 import tradingDataMixin from '@/components/Base/tradingData/js/tradingDataMixin';
 
-import { debounce } from "__gUtils/busiUtils";
 import { dealTrade } from "__io/kungfu/watcher";
 import { tradesHeader } from '@/components/Base/tradingData/js/tableHeaderConfig';
 
@@ -110,6 +106,7 @@ export default {
                     const orderStatByOrderId = this.orderStat[orderId] || {}
                     tradeData.update = !!this.tableData.length;
                     tradeData.latencyTrade = orderStatByOrderId.latencyTrade || '';
+                    //ctp trade返回的是交易所时间（xtp是自己维护），所用orderState内时间代替
                     const { updateTime, updateTimeMMDD } = tradeData
                     tradeData.updateTime = !!orderStatByOrderId.tradeTimeNum ? orderStatByOrderId.tradeTime : updateTime
                     tradeData.updateTimeMMDD = !!orderStatByOrderId.tradeTimeNum ? orderStatByOrderId.tradeTimeMMDD : updateTimeMMDD

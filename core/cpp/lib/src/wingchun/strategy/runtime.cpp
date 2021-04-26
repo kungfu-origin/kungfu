@@ -74,6 +74,7 @@ void RuntimeContext::subscribe_all(const std::string &source) {
 uint64_t RuntimeContext::insert_order(const std::string &instrument_id, const std::string &exchange_id,
                                       const std::string &account, double limit_price, int64_t volume, PriceType type,
                                       Side side, Offset offset, HedgeFlag hedge_flag) {
+  auto insert_time = time::now_in_nano();
   auto account_location_uid = lookup_account_location_id(account);
   if (not broker_client_.is_ready(account_location_uid)) {
     SPDLOG_ERROR("account {} not ready", account);
@@ -99,6 +100,7 @@ uint64_t RuntimeContext::insert_order(const std::string &instrument_id, const st
   input.side = side;
   input.offset = offset;
   input.hedge_flag = hedge_flag;
+  input.insert_time = insert_time;
   writer->close_data();
   bookkeeper_.on_order_input(app_.now(), app_.get_home_uid(), account_location_uid, input);
   return input.order_id;
