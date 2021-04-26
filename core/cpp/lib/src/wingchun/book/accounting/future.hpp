@@ -88,8 +88,7 @@ public:
     }
     auto &instrument = book->instruments.at(instrument_key);
     if (input.offset == Offset::Open) {
-      auto frozen_margin =
-          instrument.contract_multiplier * input.frozen_price * input.volume * margin_ratio(instrument, position);
+      auto frozen_margin = instrument.contract_multiplier * input.frozen_price * input.volume * margin_ratio(instrument, position);
       book->asset.avail -= frozen_margin;
       book->asset.frozen_cash += frozen_margin;
       book->asset.frozen_margin += frozen_margin;

@@ -109,4 +109,3 @@ export const EXTENSION_DIR = path.join(KUNGFU_ENGINE_PATH, 'kfc', 'kungfu_extens
 export const TASK_EXTENSION_DIR = process.env.NODE_ENV === 'production'
     ? path.join(process.resourcesPath, 'kungfu-extensions')
     : path.join(__dirname, '..', '..', '..')
-addFileSync('', TASK_EXTENSION_DIR, 'folder')
