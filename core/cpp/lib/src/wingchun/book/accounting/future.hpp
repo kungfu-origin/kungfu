@@ -175,13 +175,13 @@ public:
   }
 
 private:
-  void apply_open(Book_ptr &book, const Trade &trade) {
+  void apply_open(Book_ptr &book, const Trade &trade) { 
     auto &position = book->get_position_for(trade);
     auto &instrument = book->instruments.at(hash_instrument(trade.exchange_id, trade.instrument_id));
     auto margin = instrument.contract_multiplier * trade.price * trade.volume * margin_ratio(instrument, position);
     SPDLOG_INFO("=============START=================");
-    SPDLOG_INFO("contract_multiplier {},price {},volume {},margin_ratio(instrument, position) {}",instrument.contract_multiplier,trade.price,trade.volume,margin_ratio(instrument, position));
-    SPDLOG_INFO("=============END=================");
+    SPDLOG_INFO("contract_multiplier {},price {},volume {},margin_ratio(instrument, position) {}, margin {}",instrument.contract_multiplier,trade.price,trade.volume,margin_ratio(instrument, position),margin);
+    SPDLOG_INFO("==============================================================================================");
     auto commission = calculate_commission(book, trade, instrument, position, trade.close_today_volume);
     auto frozen_margin = instrument.contract_multiplier * book->get_frozen_price(trade.order_id) * trade.volume *
                          margin_ratio(instrument, position);
@@ -190,6 +190,8 @@ private:
                               double(position.volume + trade.volume);
     position.volume += trade.volume;
     update_position(book, position);
+    SPDLOG_INFO("commission {},frozen_margin {}",commission,frozen_margin);
+    SPDLOG_INFO("=============END=================");
     book->asset.frozen_cash -= frozen_margin;
     book->asset.frozen_margin -= frozen_margin;
     book->asset.avail -= commission;
