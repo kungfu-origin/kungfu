@@ -32,20 +32,10 @@
             <template v-else>
                 <el-col :span="14">
                     <el-row style="height: 33.33%">
-                        <el-col :span="14">
+                        <el-col>
                             <Strategy
                             v-model="monitStrategies"
                             ></Strategy>
-                        </el-col>
-                        <el-col :span="10">
-                            <Pnl
-                            ref="pnl"
-                            :currentId="strategyId" 
-                            moduleType="strategy"
-                            :minPnl="pnl"   
-                            :dailyPnl="dailyPnl"
-                            :addTime="addTime"                
-                            ></Pnl>
                         </el-col>
                     </el-row>
 
@@ -71,14 +61,30 @@
                 
             <el-col  :span="10">
                 <el-row style="height: 33.333%">
-                        <Pos
-                        moduleType="strategy"
-                        :currentId="strategyId"
-                        :kungfuData="positions"   
-                        :addTime="addTime" 
-                        @showMakeOrderDashboard="handleShowOrCloseMakeOrderDashboard(true)"
-                        @makeOrder="handleMakeOrderByPos"
-                        ></Pos>
+                    <el-tabs type="border-card" v-model="currentStrategyPosPnlTab">
+                        <el-tab-pane :lazy="true" :label="`持仓 ${showCurrentIdInTabName(currentStrategyPosPnlTab, 'pos')}`" name="pos">
+                            <Pos
+                            :noTitle="true"
+                            moduleType="strategy"
+                            :currentId="strategyId"
+                            :kungfuData="positions"   
+                            :addTime="addTime" 
+                            @showMakeOrderDashboard="handleShowOrCloseMakeOrderDashboard(true)"
+                            @makeOrder="handleMakeOrderByPos"
+                            ></Pos>
+                        </el-tab-pane>
+                        <el-tab-pane :lazy="true" :label="`盈利曲线 ${showCurrentIdInTabName(currentStrategyPosPnlTab, 'pnl')}`" name="pnl">
+                            <Pnl
+                            :noTitle="true"
+                            ref="pnl"
+                            :currentId="strategyId" 
+                            moduleType="strategy"
+                            :minPnl="pnl"   
+                            :dailyPnl="dailyPnl"
+                            :addTime="addTime"                
+                            ></Pnl>
+                        </el-tab-pane>
+                    </el-tabs> 
                 </el-row>
                 <el-row  style="height: 33.333%">
                         <OrderRecord
@@ -138,7 +144,8 @@ export default {
 
             historyData: {},
             monitStrategies: false,
-            currentStrategyDetailTab: "log"
+            currentStrategyDetailTab: "log",
+            currentStrategyPosPnlTab: "pos",
         }
     },
 
@@ -230,6 +237,13 @@ export default {
 
 .el-row > .tr-dashboard{
     padding-right: 0px;
+}
+
+.el-row > .el-tabs {
+
+    .tr-dashboard{
+        padding-right: 0px;
+    }
 }
 
 .trader-content > .el-row:last-child .tr-dashboard{
