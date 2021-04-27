@@ -292,7 +292,7 @@ export const tradesHeader = (dateForHistory, moduleType) => {
         width: '60px'
     },{
         type: 'number',
-        label: "交易延迟(μs)",
+        label: "成交延迟(μs)",
         prop: "latencyTrade", 
         width: '90px'
     },{
