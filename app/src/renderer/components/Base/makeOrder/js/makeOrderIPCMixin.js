@@ -1,5 +1,5 @@
 
-import { mapState } from 'vuex';
+import { mapState, mapGetters } from 'vuex';
 
 import { ipcEmitDataByName } from '@/ipcMsg/emitter';
 import { ipcRenderer } from 'electron';
@@ -26,6 +26,10 @@ export default {
             tdList: state => state.tdList,
             accountsAsset: state => state.accountsAsset,
         }),
+
+        ...mapGetters([
+            "proMode"
+        ]),
     },
 
     methods: {

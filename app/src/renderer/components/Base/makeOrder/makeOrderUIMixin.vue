@@ -216,7 +216,7 @@
             </el-form>
             <div class="make-order-btns">
                 <el-button size="medium" @click="handleMakeOrder">下单</el-button>
-                <el-button v-if="rendererType === 'app'" size="medium" class="make-order-by-task-btn" @click="handleMakeOrderByTask">算法</el-button>
+                <el-button v-if="rendererType === 'app' && proMode" size="medium" class="make-order-by-task-btn" @click="handleMakeOrderByTask">算法</el-button>
             </div>
         </div>
     </tr-dashboard>

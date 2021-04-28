@@ -1,4 +1,4 @@
-import { mapState } from 'vuex';
+import { mapState, mapGetters } from 'vuex';
 
 import { kungfuCancelOrder, kungfuMakeOrder, kungfuSubscribeTicker } from '__io/kungfu/makeCancelOrder';
 import { decodeKungfuLocation } from '__io/kungfu/watcher';
@@ -35,6 +35,10 @@ export default {
             currentTicker: state => state.ACCOUNT.currentTicker || {},
             processStatus: state => state.BASE.processStatus || {}
         }),
+
+        ...mapGetters([
+            "proMode"
+        ]),
     },
 
     methods: {
