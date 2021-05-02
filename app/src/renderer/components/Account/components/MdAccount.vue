@@ -102,7 +102,6 @@ import SetSourceDialog from './SetSourceDialog';
 import { getMdList } from '__io/kungfu/account';
 import { switchMd, deleteMd } from '__io/actions/account';
 import { loopToRunProcess, ifProcessRunning } from '__gUtils/busiUtils';
-import { watcher } from '__io/kungfu/watcher';
 
 import baseMixin from '@/assets/mixins/baseMixin';
 import mdTdMixin from '../js/mdTdMixin';
@@ -186,7 +185,7 @@ export default {
                     return () => switchMd(item, targetStatus)
                 })
 
-            if (this.ifMasterLedgerRunning && watcher.isLive) {
+            if (this.ifMasterLedgerRunning && this.watcherIsLive) {
                 return loopToRunProcess(promiseList)
             } else {
                 return Promise.resolve(false)

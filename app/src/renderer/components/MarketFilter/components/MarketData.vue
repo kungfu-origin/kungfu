@@ -167,7 +167,6 @@
 import { mapGetters, mapState } from 'vuex';
 
 import { getIndexFromTargetTickers } from '__gUtils/busiUtils';
-import { dealQuote } from '__io/kungfu/watcher';
 import { ExchangeIds } from "kungfu-shared/config/tradingConfig";
 
 import tickerSetMixin from '@/components/MarketFilter/js/tickerSetMixin';
@@ -273,11 +272,7 @@ export default {
             const { exchangeId, instrumentId, source } = tickerData;
             const id = `${exchangeId}_${instrumentId}_${source}`;
             const target = this.marketData[id] || null;
-            if (target) {
-                return dealQuote(target)
-            } else {
-                return target                
-            }
+            return target;
         }
     }
 }

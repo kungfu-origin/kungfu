@@ -1,3 +1,4 @@
+import { mapState } from 'vuex';
 import { debounce } from '__gUtils/busiUtils';
 
 export default {
@@ -35,6 +36,10 @@ export default {
     },
 
     computed: {
+        ...mapState({
+            watcherIsLive: state => state.base.watcherIsLive
+        }),
+
         tableListAfterFilter () {
             return this.tableList.filter(item => {
                 if (!this.searchFilterKey) {

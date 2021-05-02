@@ -45,8 +45,7 @@
 import { mapState } from 'vuex';
 
 import GlobalSettingDialog from '@/components/Base/GlobalSettingDialog';
-
-import { buildKungfuGlobalDataPipe, buildTradingDataPipe } from '__io/kungfu/tradingData';
+import { buildTradingDataAccountPipeByDeamon, buildKungfuGlobalDataPipeByDeamon } from '@/ipcMsg/deamon';
 import { watcher } from '__io/kungfu/watcher';
 
 
@@ -99,6 +98,7 @@ export default {
 
     computed: {
         ...mapState({
+            watcherIsLive: state => state.BASE.watcherIsLive,
             processStatus: state => state.BASE.processStatus,
         })
     },
@@ -119,9 +119,9 @@ export default {
 
     methods: {
         bindTradingDataListener () {
-            this.tradingDataPipe = buildTradingDataPipe('account').subscribe(data => {
+            this.tradingDataPipe = buildTradingDataAccountPipeByDeamon().subscribe(data => {
                 const assets = data['assets'];
-                this.$store.dispatch('setAccountsAsset', Object.freeze(JSON.parse(JSON.stringify(assets))));
+                this.$store.dispatch('setAccountsAsset', Object.freeze(assets));
             })
         },
 
@@ -131,7 +131,7 @@ export default {
 
         getWatcherStatus () {
             let timer = setInterval(() => {
-                const watcherStatus = watcher.isLive();
+                const watcherStatus = this.watcherIsLive;
                 const archiveFinished = (window.archiveStatus !== 'online') && (window.archiveStatus !== undefined);
 
                 this.$set(this.loadingData, 'archive', archiveFinished);
@@ -148,16 +148,22 @@ export default {
         },
 
         bindKungfuGlobalDataListener () {
-            this.kungfuGloablDataObserver = buildKungfuGlobalDataPipe().subscribe(data => {
-                data.gatewayStates.forEach(gatewayState => {
+            this.kungfuGloablDataObserver = buildKungfuGlobalDataPipeByDeamon().subscribe(data => {
+                
+                const gatewayStates = data["gatewayStates"] || [];
+                gatewayStates.forEach(gatewayState => {
                     const { processId } = gatewayState;
                     this.$store.dispatch('setOneMdTdState', {
                         id: processId,
                         stateData: gatewayState
                     })
 
+                    //做柜台就绪回调
                     this.emitMdTdStateChange(processId, gatewayState)
                 })
+
+                const watcherIsLive = data["watcherIsLive"] || false;
+                this.$store.dispatch('setWatcherIsLive', watcherIsLive)
             })
         },
 

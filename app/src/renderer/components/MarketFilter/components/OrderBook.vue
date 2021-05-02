@@ -28,8 +28,6 @@
 
 <script>
 
-import { dealQuote } from '__io/kungfu/watcher';
-
 export default {
 
     props: {
@@ -49,11 +47,7 @@ export default {
 
         quoteData () {
             const quote = this.marketData[this.tickerId] || null;
-            if (quote) {
-                return dealQuote(quote)
-            } else {
-                return quote
-            }
+            return quote;
         },
 
         instrumentId () {

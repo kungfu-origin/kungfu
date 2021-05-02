@@ -148,9 +148,8 @@ export const debounce = (fn: Function, interval = 300): Function => {
         const args: any = arguments;
         timeout && clearTimeout(timeout);
         timeout = null;
+        fn.apply(t, args);
         timeout = setTimeout(() => {
-            if(!timeout) return;
-            fn.apply(t, args);
             timeout && clearTimeout(timeout);
             timeout = null;
         }, interval);
@@ -160,12 +159,12 @@ export const debounce = (fn: Function, interval = 300): Function => {
 export const throttle = (fn: Function, interval = 300): Function => {
     let timer: NodeJS.Timer | null;
     return function(){
-        if(timer) return 
+        if (timer) return;
         //@ts-ignore
         const t: any = this;
         const args: any = arguments;
+        fn.apply(t, args);
         timer = setTimeout(() => {
-            fn.apply(t, args);
             timer && clearTimeout(timer)
             timer = null
         }, interval)

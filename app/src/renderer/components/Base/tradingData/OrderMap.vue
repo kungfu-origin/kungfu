@@ -22,7 +22,6 @@
 import { mapState } from 'vuex';
 
 import { debounce, throttle } from '__gUtils/busiUtils'
-import { dealTrade, dealOrder, dealOrderInput } from "__io/kungfu/watcher";
 
 import baseMixin from '@/assets/mixins/baseMixin';
 
@@ -76,7 +75,7 @@ export default {
     },
 
     mounted () {
-        this.setOrderMap();
+        this.setOrderMap(this.processId);
     },
 
     computed: {
@@ -109,27 +108,28 @@ export default {
     },
 
     methods: {
+
         setOrderMap: throttle(function (processId) {
             const data = this.mergeMapByOrderId();
             if (processId !== this.processId) return;
             this.tableList = this.resolveOrderMap(data);
-        }, 500),
+        }, 100),
 
         mergeMapByOrderId () {
             let mapData = {};
          
             this.orderInputs.kfForEach(item => {
-                const itemResolved = dealOrderInput(item);
+                const itemResolved = item;
                 const { orderId, updateTime } = itemResolved;
                 if (!mapData[orderId]) mapData[orderId] = {};
                 mapData[orderId]['orderInput'] = Object.freeze(itemResolved);  
                 mapData[orderId]['id'] = orderId;  
-                mapData[orderId]['ts'] = updateTime;  
+                mapData[orderId]['updateTime'] = updateTime;  
 
             })
 
                this.orders.kfForEach(item => {
-                const itemResolved = dealOrder(item);
+                const itemResolved = item;
                 const { orderId } = itemResolved;
                 if (!mapData[orderId]) return;
                 mapData[orderId]['order'] = Object.freeze(itemResolved);      
@@ -137,7 +137,7 @@ export default {
 
 
             this.trades.kfForEach(item => {
-                let itemResolved = dealTrade(item);
+                let itemResolved = item;
                 const { orderId } = itemResolved;
 
                 if (!mapData[orderId]) return;

@@ -199,7 +199,6 @@ import { ifProcessRunning, toDecimal } from '__gUtils/busiUtils';
 import { getTdList } from '__io/kungfu/account';
 import { deleteTd, switchTd } from '__io/actions/account';
 import { loopToRunProcess } from '__gUtils/busiUtils';
-import { watcher } from '__io/kungfu/watcher';
 
 import baseMixin from '@/assets/mixins/baseMixin';
 import mdTdMixin from '../js/mdTdMixin';
@@ -311,7 +310,7 @@ export default {
                     return () => switchTd(item, targetStatus)
                 })
             
-            if (this.ifMasterLedgerRunning && watcher.isLive) {
+            if (this.ifMasterLedgerRunning && this.watcherIsLive) {
                 return loopToRunProcess(promiseList)
             } else {
                 return Promise.resolve(false)

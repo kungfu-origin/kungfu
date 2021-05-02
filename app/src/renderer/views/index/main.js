@@ -29,7 +29,7 @@ new Vue({
 }).$mount('#app', true)
 
 
-const { startGetProcessStatus, startMaster, startLedger, startArchiveMakeTask, _pm2 } = require('__gUtils/processUtils');
+const { startGetProcessStatus, startMaster, startLedger, startDeamon, startArchiveMakeTask, _pm2 } = require('__gUtils/processUtils');
 
 startArchiveMakeTask((archiveStatus) => {
     window.archiveStatus = archiveStatus
@@ -46,6 +46,9 @@ startArchiveMakeTask((archiveStatus) => {
     utils.delayMiliSeconds(1000)
         .then(() => startLedger(false))
         .catch(err => console.error(err.message))
+
+    utils.delayMiliSeconds(1000)
+        .then(() => startDeamon())
 })
 
 window.ELEC_WIN_MAP = new Set();

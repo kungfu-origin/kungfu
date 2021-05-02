@@ -2,8 +2,8 @@
 import moment from 'moment';
 
 import { debounce } from '__gUtils/busiUtils';
-import { buildInstrumentsPipe } from '__io/kungfu/tradingData';
 import { KF_DATASET_QUOTE_DIR } from '__gConfig/pathConfig';
+import { buildInstrumentsPipeByDeamon } from '@/ipcMsg/deamon';
 
 import Workers from '@/workers/index';
 
@@ -20,7 +20,7 @@ export default {
 
     methods: {
         bindInstrumentsDataListener () {
-            this.instrumentsDataPipe = buildInstrumentsPipe().subscribe(data => {
+            this.instrumentsDataPipe = buildInstrumentsPipeByDeamon().subscribe(data => {
                 if (this.getIfSaveInstruments()) {
                     const instruments = data['instruments'] || [];
                     if (!instruments.length) return;

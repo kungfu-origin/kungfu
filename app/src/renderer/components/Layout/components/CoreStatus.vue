@@ -42,6 +42,23 @@
                     </span>
                 </div>
             </div>
+            <div class="core-item" >
+                <div class="core-status">
+                    <span class="core-process-item  core-process-title text-overflow" title="数据进程">
+                        守护进程 <el-tag>Deamon</el-tag>
+                    </span>
+                    <span  class="core-process-item text-overflow" style="width: 71px;">
+                        <tr-status 
+                        v-if="ifProcessRunning('kungfuDeamon', processStatus)"
+                        :value="buildState('kungfuDeamon')"></tr-status>
+                        <tr-status v-else></tr-status>
+                    </span>
+                    <span class="core-process-item switch" v-if="NODE_ENV === 'development'"></span>
+                     <span class="core-process-item get-log">
+                        <i class="el-icon-document mouse-over" title="打开日志文件" @click="handleOpenLogFile('kungfuDeamon')" ></i>
+                    </span>
+                </div>
+            </div>
         </div>
         <span slot="reference" :class="[currentStatus]">
             <i class="el-icon-monitor"></i>

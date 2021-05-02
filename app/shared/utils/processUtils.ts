@@ -187,8 +187,8 @@ export const startProcess = (options: Pm2Options, no_ext = false): Promise<objec
         "logDateFormat": "YYYY-MM-DD HH:mm:ss",
         "autorestart": options.autorestart || false,
         "maxRestarts": options.maxRestarts || 1,
-        "watch": false,
-        "force": false,
+        "watch": options.watch || false,
+        "force": options.force || false,
         "execMode": "fork",
         "env": {
             "KF_HOME": dealSpaceInPath(KF_HOME),
@@ -203,6 +203,7 @@ export const startProcess = (options: Pm2Options, no_ext = false): Promise<objec
             try {
                 pm2.start(optionsResolved, (err: any, apps: object): void => {
                     if (err) {
+                        console.log(err)
                         err = err.length ? err[0] : err;
                         logger.error('[startProcess]', JSON.stringify(optionsResolved), err)
                         reject(err);
@@ -471,6 +472,20 @@ export const startCustomProcess = (targetName: string, params: string): Promise<
         "name": targetName,
         "args": buildArgs(`${targetName} ${params}`)
     }).catch(err => logger.error(`[start${targetName}]`, err))
+}
+
+export const startDeamon = (): Promise<any> => {
+    return startProcess({
+        "name": "kungfuDeamon",
+        "args": "",
+        "maxRestarts": 3,
+        "autorestart": true,
+        force: true,
+        watch: process.env.NODE_ENV === 'development' ? true : false,
+        script:  "deamon.js",
+        cwd: path.join(__dirname, '..','..', 'dist', 'app'),
+        interpreter: process.execPath,
+    }).catch(err => logger.error('[startTd]', err))
 }
 
 

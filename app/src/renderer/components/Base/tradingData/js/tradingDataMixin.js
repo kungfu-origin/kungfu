@@ -152,7 +152,7 @@ export default {
                     
                     const targetListAfterFilter = targetList.filter(item => {
                         const locationKey = item[kungfuIdKey];
-                        const kungfuLocation = decodeKungfuLocation(locationKey);
+                        const kungfuLocation = decodeKungfuLocation(+locationKey);
                         if (this.moduleType === 'account') {
                             return `${kungfuLocation.group}_${kungfuLocation.name}` === this.currentId
                         } else if (this.moduleType === 'strategy') {

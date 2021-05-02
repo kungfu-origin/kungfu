@@ -42,6 +42,7 @@ export default {
 
     computed: {
         ...mapState({
+            watcherIsLive: state => state.BASE.watcherIsLive,
             accountsAsset: state => state.ACCOUNT.accountsAsset,
             marketAvgVolume: state => state.MARKET.marketAvgVolume || {},
         })
@@ -132,7 +133,7 @@ export default {
         },
 
         resQuoteData (pm2Id, tickers, processName) {
-            if (!watcher.isLive()) return;
+            if (!this.watcherIsLive()) return;
             watcher.step();
             const ledger = watcher.ledger;
 
@@ -144,7 +145,7 @@ export default {
         },
 
         resPosData (pm2Id, accountId, processName) {
-            if (!watcher.isLive()) return;
+            if (!this.watcherIsLive()) return;
             watcher.step();
             const ledger = watcher.ledger;
             const positions = Object.values(ledger.Position || {});
@@ -156,7 +157,7 @@ export default {
         },
 
         resOrderData (pm2Id, parentId, processName) {
-            if (!watcher.isLive()) return;
+            if (!this.watcherIsLive()) return;
             watcher.step();
             const ledger = watcher.ledger;
             const orders = this.getTargetOrdersByParentId(ledger.Order || {}, parentId)
@@ -167,7 +168,7 @@ export default {
         },
 
         resInstrumentInfo (pm2Id, tickers, processName) {
-            if (!watcher.isLive()) return;
+            if (!this.watcherIsLive()) return;
             watcher.step();
             const ledger = watcher.ledger;
             const instruments = Object.values(ledger.Instrument)
@@ -192,7 +193,7 @@ export default {
         },
 
         resLedgerData (parentId, pm2Id, accountId, ticker, processName) {
-            if (watcher.isLive()) {
+            if (this.watcherIsLive()) {
                 watcher.step();
                 const ledger = watcher.ledger;
                 const { orders, positions, quotes } = this.buildLedgerDataForTask(ledger, accountId, parentId, ticker)

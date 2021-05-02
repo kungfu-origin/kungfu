@@ -69,7 +69,7 @@ export const kungfuCancelOrder = (orderId: string, accountId: string, strategyId
 
 export const kungfuCancelAllOrders = (orderDataList: OrderData[], strategyId?: string) => {
     const promiseList = orderDataList.map((orderData:  OrderData) => {
-        const kungfuLocation = decodeKungfuLocation(orderData.source);
+        const kungfuLocation = decodeKungfuLocation(+orderData.source);
         const accountId = `${kungfuLocation.group}_${kungfuLocation.name}`;
         const accountLocation = encodeKungfuLocation(accountId, 'td');
 

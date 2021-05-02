@@ -37,7 +37,8 @@ export default {
             currentTickerSetName: state => (state.MARKET.currentTickerSet || {}).name || '',
             currentTickerSetTickers: state => (state.MARKET.currentTickerSet || {}).tickers || [],
             currentTickerSet: state => state.MARKET.currentTickerSet || {},
-            processStatus: state => state.BASE.processStatus || {}
+            processStatus: state => state.BASE.processStatus || {},
+            watcherIsLive: state => state.BASE.watcherIsLive || false,
         }),
 
         ...mapGetters([
@@ -135,14 +136,14 @@ export default {
         },
 
         subscribeAllTickers (slience = true) {
-            if (!watcher.isLive()) return;
+            if (!this.watcherIsLive) return;
             const tickers = this.flatternTickers || [];
             this.subscribeTickers(tickers, slience)
         },
 
         //通过md 订阅
         subscribeTickersByProcessId (mdProcessId, slience = true) {
-            if (!watcher.isLive()) return;
+            if (!this.watcherIsLive) return;
             const tickers = (this.flatternTickers || []).filter(({ source }) => {
                 return mdProcessId.indexOf(source) !== -1
             })

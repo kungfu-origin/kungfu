@@ -43,7 +43,7 @@ export default {
 
     methods: {
         cancelOrder (moduleType, orderData, strategyId) {
-            const kungfuLocation = decodeKungfuLocation(orderData.source);
+            const kungfuLocation = decodeKungfuLocation(+orderData.source);
             const accountId = `${kungfuLocation.group}_${kungfuLocation.name}`;
             
             //撤单   

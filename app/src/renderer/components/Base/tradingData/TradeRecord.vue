@@ -42,7 +42,6 @@
 import DatePickerDialog from '@/components/Base//DatePickerDialog';
 import tradingDataMixin from '@/components/Base/tradingData/js/tradingDataMixin';
 
-import { dealTrade } from "__io/kungfu/watcher";
 import { tradesHeader } from '@/components/Base/tradingData/js/tableHeaderConfig';
 
 export default {
@@ -87,21 +86,21 @@ export default {
             let tradesAfterFilter = trades
                 .filter(item => {
                     if (searchKeyword.trim() === '') return true;
-                    const { trade_id, client_id, account_id, source_id, instrument_id } = item
-                    const strings = [ trade_id.toString(), client_id, account_id, source_id, instrument_id ].join('')
+                    const { tradeId, clientId, accountId, sourceId, instrumentId } = item
+                    const strings = [ tradeId, clientId, accountId, sourceId, instrumentId ].join('')
                     return strings.includes(searchKeyword) 
                 })
 
             if (this.moduleType === 'strategy') {
                 tradesAfterFilter = tradesAfterFilter
                     .filter(item => {
-                        return Number(item.trade_time) >= this.addTime 
+                        return Number(item.updateTimeNum) >= this.addTime 
                     })
             }
 
             tradesAfterFilter = tradesAfterFilter
                 .map(item => {
-                    let tradeData = dealTrade(item);
+                    let tradeData = { ...item };
                     let orderId = tradeData.orderId;
                     const orderStatByOrderId = this.orderStat[orderId] || {}
                     tradeData.update = !!this.tableData.length;

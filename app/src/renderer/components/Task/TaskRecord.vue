@@ -20,7 +20,7 @@ import minimist from 'minimist';
 import moment from 'moment';
 
 import { findTargetFromArray, getDefaultRenderCellClass } from '__gUtils/busiUtils';
-import { buildTaskDataPipe } from '__io/kungfu/tradingData';
+import { buildTaskDataPipeByDeamon } from '@/ipcMsg/Deamon';
 
 
 export default {
@@ -34,7 +34,7 @@ export default {
     },
 
     mounted () {
-        this.taskDataPipe = buildTaskDataPipe()
+        this.taskDataPipe = buildTaskDataPipeByDeamon()
             .subscribe(dataList => {
                 this.taskRecords = this.dealTaskRecords(dataList);
             })

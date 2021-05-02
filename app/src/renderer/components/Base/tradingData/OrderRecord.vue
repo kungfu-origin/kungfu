@@ -90,7 +90,6 @@ import { mapState } from 'vuex';
 
 import DatePickerDialog from '@/components/Base/DatePickerDialog';
 
-import { dealOrder } from "__io/kungfu/watcher";
 import { kungfuCancelAllOrders } from '__io/kungfu/makeCancelOrder';
 import { aliveOrderStatusList } from 'kungfu-shared/config/tradingConfig';
 import { ordersHeader } from '@/components/Base/tradingData/js/tableHeaderConfig';
@@ -247,8 +246,8 @@ export default {
             let ordersAfterFilter = orders
                 .filter(item => {
                     if (searchKeyword.trim() === '') return true;
-                    const { client_id, source_id, account_id, instrument_id } = item
-                    const strings = [ client_id, source_id, account_id, instrument_id ].join('')
+                    const { clientId, sourceId, accountId, instrumentId } = item
+                    const strings = [ clientId, sourceId, accountId, instrumentId ].join('')
                     return strings.includes(searchKeyword) 
                 });
             
@@ -260,13 +259,13 @@ export default {
             }
 
             if (this.moduleType === 'strategy') {
-                ordersAfterFilter = ordersAfterFilter.filter(item => Number(item.update_time) >= this.addTime )
+                ordersAfterFilter = ordersAfterFilter.filter(item => Number(item.updateTimeNum) >= this.addTime )
             }
 
             if (!ordersAfterFilter.length) return Object.freeze([]);
 
             ordersAfterFilter.kfForEach(item => {
-                let orderData = dealOrder(item);
+                let orderData = { ...item };
                 orderData.update = true;
                 orderData.latencySystem = (this.orderStat[orderData.orderId] || {}).latencySystem || '';
                 orderData.latencyNetwork = (this.orderStat[orderData.orderId] || {}).latencyNetwork || '';

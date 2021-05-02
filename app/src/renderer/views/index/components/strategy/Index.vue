@@ -123,7 +123,8 @@ import Pos from '@/components/Base/tradingData/Pos';
 import Pnl from '@/components/Base/tradingData/pnl/Index';
 import MainContent from '@/components/Layout/MainContent';
 
-import { buildTradingDataPipe } from '__io/kungfu/tradingData';
+import { buildTradingDataStrategyPipeByDeamon } from '@/ipcMsg/deamon';
+
 import accountStrategyMixins from '@/views/index/js/accountStrategyMixins';
 
 export default {
@@ -150,7 +151,7 @@ export default {
     },
 
     mounted(){
-        this.tradingDataPipe = buildTradingDataPipe('strategy').subscribe(data => {
+        this.tradingDataPipe = buildTradingDataStrategyPipeByDeamon().subscribe(data => {
             
             if (this.historyData['order'] && ((this.historyData['order'] || {}).date)) {
                 this.orders = Object.freeze(this.historyData['order'].data)
@@ -171,15 +172,17 @@ export default {
 
             const positions = data['positions'][this.strategyId];
             this.positions = Object.freeze(positions || []);
+  
+            const orderStat = data['orderStat'];
+            this.orderStat = Object.freeze(orderStat || {});
+
             const pnl = data['pnl'][this.strategyId];
             this.pnl = Object.freeze(pnl || []);
             const dailyPnl = data['dailyPnl'][this.strategyId];
             this.dailyPnl = Object.freeze(dailyPnl || []);
-            const orderStat = data['orderStat'];
-            this.orderStat = Object.freeze(orderStat || {});
 
             const assets = data['assets'];
-            this.$store.dispatch('setStrategiesAsset', Object.freeze(JSON.parse(JSON.stringify(assets))));
+            this.$store.dispatch('setStrategiesAsset', Object.freeze(assets));
         })
     },
 

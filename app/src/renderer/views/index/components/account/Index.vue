@@ -118,8 +118,8 @@ import MakeOrderDashboard from '@/components/Base/makeOrder/MakeOrderDashboard';
 import MainContent from '@/components/Layout/MainContent';
 import TaskRecord from '@/components/Task/TaskRecord';
 
-import { buildTradingDataPipe } from '__io/kungfu/tradingData';
-import { transformPositionByTickerByMerge, dealPos } from '__io/kungfu/watcher';
+import { transformPositionByTickerByMerge } from '__io/kungfu/watcher';
+import { buildTradingDataAccountPipeByDeamon } from '@/ipcMsg/deamon';
 import { allowShorted } from "kungfu-shared/config/tradingConfig";
 
 import accountStrategyMixins from '@/views/index/js/accountStrategyMixins';
@@ -225,8 +225,9 @@ export default {
         },
     },
 
-    mounted(){
-        this.tradingDataPipe = buildTradingDataPipe('account').subscribe(data => {
+    mounted ( ) {
+        this.tradingDataPipe = buildTradingDataAccountPipeByDeamon().subscribe(data => {
+
             if (this.moduleType === 'ticker') {
                 this.dealTradingDataByTiker(data)
             } else {
@@ -239,10 +240,12 @@ export default {
 
             const orderStat = data['orderStat'];
             this.orderStat = Object.freeze(orderStat || {});
-
-            const assets = data['assets'];
-            this.$store.dispatch('setAccountsAsset', Object.freeze(JSON.parse(JSON.stringify(assets))));
         })
+    
+    },
+
+    destroyed ( ) {
+        this.tradingDataPipe && this.tradingDataPipe.unsubscribe();
     },
 
     methods: {
@@ -270,8 +273,8 @@ export default {
             if (!this.currentTicker || !this.currentTicker.instrumentId) {
                 if (tickerList.length) {
                     const tickerListSort = tickerList.slice(0).sort((a, b) => {
-                        const aid = a.instrument_id || ''
-                        const bid = b.instrument_id || ''
+                        const aid = a.instrumentId || ''
+                        const bid = b.instrumentId || ''
                         const ad = a.direction || '';
                         const bd = b.direction || '';
                         const result = aid.localeCompare(bid);
@@ -279,7 +282,7 @@ export default {
                     })
 
                     if (tickerListSort.length) {
-                        this.$store.dispatch('setCurrentTicker', dealPos(tickerListSort[0]))
+                        this.$store.dispatch('setCurrentTicker', tickerListSort[0])
                     }
                 }
             }
@@ -301,7 +304,7 @@ export default {
                 this.trades = Object.freeze(trades || []);
             }
       
-            const positions = data['positions'][this.currentId] || [];
+            const positions = data['positions'][this.currentId];
             this.positions = Object.freeze(positions || []);
 
             const pnl = data['pnl'][this.currentId];
@@ -309,39 +312,46 @@ export default {
             const dailyPnl = data['dailyPnl'][this.currentId];
             this.dailyPnl = Object.freeze(dailyPnl || []);
 
+            const assets = data['assets'];
+            this.$store.dispatch('setAccountsAsset', Object.freeze(assets));
+
         },
 
         dealTradingDataByTiker (data) {
             const { instrumentId, directionOrigin } = this.currentTicker;
-            const orders = data['ordersByTicker'].filter(item => {
-                if (!instrumentId.includes(item.instrument_id)) {
+            const orders = data['ordersByTicker']
+            .filter(item => {
+                if (!instrumentId.includes(item.instrumentId)) {
                     return false;
                 }
                 
-                const { offset, side, instrument_type } = item;
-                return this.orderTradesFilterByPosTicker(directionOrigin, offset, side, instrument_type)
+                const { offsetOrigin, sideOrigin, instrumentTypeOrigin } = item;
+                return this.orderTradesFilterByPosTicker(directionOrigin, offsetOrigin, sideOrigin, instrumentTypeOrigin)
                 
             })
+            .map(item => Object.freeze(item))
             this.orders = Object.freeze(orders || []);
 
-            const trades = data['tradesByTicker'].filter(item => {
-                if (!instrumentId.includes(item.instrument_id)) {
+            const trades = data['tradesByTicker']
+            .filter(item => {
+                if (!instrumentId.includes(item.instrumentId)) {
                     return false;
                 }
-                
-                const { offset, side, instrument_type } = item;
-                return this.orderTradesFilterByPosTicker(directionOrigin, offset, side, instrument_type)
+
+                const { offsetOrigin, sideOrigin, instrumentTypeOrigin } = item;
+                return this.orderTradesFilterByPosTicker(directionOrigin, offsetOrigin, sideOrigin, instrumentTypeOrigin)
                 
             })
+            .map(item => Object.freeze(item))
             this.trades = Object.freeze(trades || []);
 
             const positionsByTicker = data['positionsByTicker'][this.currentTickerId] || [];
-            const positionsByTickerForAccount = positionsByTicker.filter(item => !!item.account_id && !item.client_id);
+            const positionsByTickerForAccount = positionsByTicker.filter(item => !!item.accountId && !item.clientId);
             this.positions = Object.freeze(positionsByTickerForAccount)
         },
 
-        orderTradesFilterByPosTicker (direction, offset, side, instrument_type) {
-            if (!allowShorted(instrument_type)) {
+        orderTradesFilterByPosTicker (direction, offset, side, instrumentType) {
+            if (!allowShorted(instrumentType)) {
                 return true;
             }
 
@@ -356,7 +366,7 @@ export default {
                         return true
                     }
                 }
-            } else {
+            } else { //short
                 if (offset === 0) {
                     if (side === 1) {
                         return true;
@@ -372,9 +382,7 @@ export default {
         }
     },
 
-    destroyed(){
-        this.tradingDataPipe && this.tradingDataPipe.unsubscribe();
-    },
+
  
 }
 </script>

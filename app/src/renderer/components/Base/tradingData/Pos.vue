@@ -27,7 +27,6 @@
 
 import tradingDataMixin from './js/tradingDataMixin';
 
-import { dealPos } from '__io/kungfu/watcher';
 import { writeCSV } from '__gUtils/fileUtils';
 import { posHeader } from '@/components/Base/tradingData/js/tableHeaderConfig';
 
@@ -98,15 +97,15 @@ export default {
         dealPositionList (positions, searchKeyword) {
             let positionDataByKey = {};
             let positionsAfterFilter = positions
-                .filter(item => !!Number(item.volume))
+                .filter(item => !!Number(item.totalVolume))
                 .filter(item => {
                     if (searchKeyword.trim() === '') return true;
-                    const { instrument_id } = item;
-                    return instrument_id.includes(searchKeyword);
+                    const { instrumentId } = item;
+                    return instrumentId.includes(searchKeyword);
                 })
 
             if (this.moduleType === 'strategy') {
-                positionsAfterFilter = positionsAfterFilter.filter(item => item.update_time >= BigInt(this.addTime));
+                positionsAfterFilter = positionsAfterFilter.filter(item => item.updateTimeNum >= BigInt(this.addTime));
             }
 
 
@@ -116,7 +115,7 @@ export default {
             };
 
             positionsAfterFilter.kfForEach(item => {
-                let positionData = dealPos(item);
+                let positionData = { ...item };
                 positionData.update = true;
                 const poskey = this.getKey(positionData);
                 positionDataByKey[poskey] = Object.freeze(positionData);
@@ -126,7 +125,7 @@ export default {
                 dataByKey: Object.freeze(positionDataByKey),
                 dataList: Object.freeze(Object.values(positionDataByKey).sort((a, b) => {
                     const result = a.instrumentId.localeCompare(b.instrumentId);
-                    return result === 0 ? (a.direction || '').toString().localeCompare((b.direction || '').toString()) : result;
+                    return result === 0 ? (a.directionOrigin || '').toString().localeCompare((b.directionOrigin || '').toString()) : result;
                 }))
             };
         },
@@ -136,7 +135,7 @@ export default {
             if (this.moduleType === 'ticker') {
                 return data.accountIdResolved
             }
-            return `${data.instrumentId}_${data.direction}`
+            return `${data.instrumentId}_${data.directionOrigin}`
         },
 
         isActiveTicker (item) {

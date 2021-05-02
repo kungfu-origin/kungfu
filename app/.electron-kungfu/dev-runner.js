@@ -11,6 +11,8 @@ const webpackHotMiddleware = require('webpack-hot-middleware')
 
 const mainConfig = require('./webpack.main.config')
 const rendererConfig = require('./webpack.renderer.config')
+const deamonConfig = require('./webpack.deamon.config')
+
 
 let electronProcess = null
 let manualRestart = false
@@ -116,6 +118,31 @@ function startMain () {
   })
 }
 
+
+function startDeamon () {
+  return new Promise((resolve, reject) => {
+    deamonConfig.entry.deamon = [].concat(deamonConfig.entry.deamon)
+
+    const compiler = webpack(deamonConfig)
+
+    compiler.plugin('watch-run', (compilation, done) => {
+      logStats('Deamon', chalk.white.bold('compiling...'))
+      hotMiddleware.publish({ action: 'compiling' })
+      done()
+    })
+
+    compiler.watch({}, (err, stats) => {
+      if (err) {
+        console.log(err)
+        return
+      }
+
+      logStats('Deamon', stats)
+      resolve()
+    })
+  })
+}
+
 function startElectron () {
   electronProcess = spawn(electron, ['--inspect=5858', '.'])
 
@@ -169,7 +196,7 @@ function greeting () {
 function init () {
   greeting()
 
-  Promise.all([startRenderer(), startMain()])
+  Promise.all([startRenderer(), startMain(), startDeamon()])
     .then(() => {
       startElectron()
     })

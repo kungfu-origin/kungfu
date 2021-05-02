@@ -75,7 +75,7 @@ import Task from '@/components/Task/Index';
 import TaskRecord from '@/components/Task/TaskRecord';
 import OrderRecord from '@/components/Base/tradingData/OrderRecord';
 
-import { buildMarketDataPipe, buildAllOrdersPipe } from '__io/kungfu/tradingData'; 
+import { buildMarketDataPipeByDeamon, buildAllOrdersPipeByDeamon } from '@/ipcMsg/deamon'; 
 
 export default {
 
@@ -133,18 +133,19 @@ export default {
     },
 
     mounted () {
-        this.marketDataPipe = buildMarketDataPipe().subscribe(data => {
+        this.marketDataPipe = buildMarketDataPipeByDeamon().subscribe(data => {
             this.quoteData = Object.freeze(data);
         })
 
-        this.allOrdersPipe = buildAllOrdersPipe().subscribe(data => {
-            const { orders, orderStat } = data;
+        this.allOrdersPipe = buildAllOrdersPipeByDeamon().subscribe(data => {
             if (this.historyData['order'] && ((this.historyData['order'] || {}).date)) {
                 this.orders = Object.freeze(this.historyData['order'].data)
             } else {
                 const orders = data['orders'];
                 this.orders = Object.freeze(orders || []);
             }
+
+            const orderStat = data['orderStat'];
             this.orderStat = Object.freeze(orderStat || {});
         })
     },

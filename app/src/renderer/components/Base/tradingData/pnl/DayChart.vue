@@ -3,7 +3,7 @@
     <div class="day-chart">
         <div class="day-current pnl-statis">
             <!-- <div>累计收益率：<span :class="{'text-overflow': true, 'color-green': accumulatedPnlRatio < 0, 'color-red': accumulatedPnlRatio > 0}" :title="accumulatedPnlRatio + '%'">{{accumulatedPnlRatio + '%'}}</span> </div> -->
-            <div v-if="accumulatedPnl !== ''">累计收益：<span :class="{'text-overflow': true, 'color-green': accumulatedPnl < 0, 'color-red': accumulatedPnl > 0}" :title="accumulatedPnl">{{accumulatedPnl}}</span></div>
+            <div v-if="accumulatedPnl !== ''">累计收益：<span :class="{'text-overflow': true, 'color-green': accumulatedPnl < 0, 'color-red': accumulatedPnl > 0}" :title="accumulatedPnl">{{ accumulatedPnl }}</span></div>
         </div>
         <tr-no-data v-if="(accumulatedPnl === '') || (dailyPnl.length == 0) || !rendererPnl" />
         <div id="daily-chart" v-else></div>
@@ -13,7 +13,7 @@
 <script>
 import lineConfig from './config/lineEchart';
 import { toDecimal, deepClone } from '__gUtils/busiUtils';
-const { echarts } = require('@/assets/js/static/echarts.min.js')
+import echarts from '@/assets/js/static/echarts.min.js'
 
 export default {
     name: 'day-chart',
@@ -82,6 +82,7 @@ export default {
 
         dailyPnl (dailyPnlList, oldPnlMinList) {
             const { timeList, pnlDataList } = this.dealDailyPnlList(dailyPnlList.slice(0))
+
             if ((!oldPnlMinList.length && dailyPnlList.length) || !this.myChart) {
                 this.$nextTick().then(() => this.initChart(timeList, pnlDataList))
             } else if (oldPnlMinList.length && dailyPnlList.length) {
@@ -108,10 +109,10 @@ export default {
         dealDailyPnlList (dailyPnlList) {
             let timeList = [], pnlDataList = [];
             dailyPnlList
-                .filter(pnlData => Number(pnlData.update_time) >= this.addTime)
-                .sort((a, b) => a.update_time - b.update_time)
+                .filter(pnlData => Number(pnlData.updateTimeNum) >= this.addTime)
+                .sort((a, b) => a.updateTimeNum - b.updateTimeNum)
                 .kfForEach(pnlData => {
-                    const tradingDay = pnlData.trading_day.slice(4)
+                    const tradingDay = pnlData.tradingDay.slice(4)
                     timeList.push(tradingDay);
                     const pnlValue = this.calcuAccumlatedPnl(pnlData)
                     pnlDataList.push(pnlValue)
@@ -124,7 +125,7 @@ export default {
         },
 
         calcuAccumlatedPnl(pnlData) {
-            return toDecimal(+pnlData.unrealized_pnl + +pnlData.realized_pnl)
+            return toDecimal(+pnlData.unrealizedPnl + +pnlData.realizedPnl)
         },
 
         updateChart(timeList, pnlDataList) {

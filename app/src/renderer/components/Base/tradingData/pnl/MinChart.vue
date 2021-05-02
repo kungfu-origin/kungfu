@@ -12,9 +12,9 @@
 
 <script>
 import lineConfig from './config/lineEchart'
-import { kungfu } from '__io/kungfu/kungfuUtils';
 import { toDecimal, deepClone } from '__gUtils/busiUtils';
-const { echarts } = require('@/assets/js/static/echarts.min.js')
+import echarts from '@/assets/js/static/echarts.min.js'
+
 
 export default {
     name: 'min-chart',
@@ -111,11 +111,10 @@ export default {
             let timeList = [], pnlDataList = [];
 
             minPnlList
-                .filter(pnlData => Number(pnlData.update_time) >= this.addTime)
-                .sort((a, b) => a.update_time - b.update_time)
+                .filter(pnlData => Number(pnlData.updateTimeNum) >= this.addTime)
+                .sort((a, b) => a.updateTimeNum - b.updateTimeNum)
                 .kfForEach(pnlData => {
-                    const updateTime = kungfu.formatTime(pnlData.update_time, '%H:%M');
-                    timeList.push(updateTime);
+                    timeList.push(pnlData.updateTime);
                     const pnlValue = this.calcuIntradayPnl(pnlData)
                     pnlDataList.push(pnlValue)
                 })
@@ -127,7 +126,7 @@ export default {
         },
 
         calcuIntradayPnl (pnlData) {
-            return toDecimal(+pnlData.unrealized_pnl + +pnlData.realized_pnl)
+            return toDecimal(+pnlData.unrealizedPnl + +pnlData.realizedPnl)
         },
 
         updateChart (timeList, pnlDataList) {
