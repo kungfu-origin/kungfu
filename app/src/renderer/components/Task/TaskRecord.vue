@@ -35,8 +35,9 @@ export default {
 
     mounted () {
         this.taskDataPipe = buildTaskDataPipeByDeamon()
-            .subscribe(dataList => {
-                this.taskRecords = this.dealTaskRecords(dataList);
+            .subscribe(data => {
+                const { timeValueList } = data;
+                this.taskRecords = this.dealTaskRecords(timeValueList);
             })
     },
 

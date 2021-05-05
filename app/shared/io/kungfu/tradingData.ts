@@ -121,7 +121,9 @@ export const buildTaskDataPipe = () => {
         map((data: any): any => {
             const stateData = data.state || {};
             const timeValueList = stateData.TimeValue ? stateData.TimeValue.filter('tag_c', 'task').sort('update_time') : [];
-            return timeValueList.slice(0, 300)
+            return {
+                timeValueList: timeValueList.slice(0, 300)
+            }
         })
     )
 }
