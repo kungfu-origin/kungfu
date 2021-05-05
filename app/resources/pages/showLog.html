@@ -228,9 +228,12 @@
                 message.includes('Failed') ||
                 message.includes('Traceback')  ||
                 message.includes('critical') ||
-                message.includes('uncaught exception') 
-            ) 
-            message = `<span class="error red">${message}</span>`
+                message.includes('uncaught exception') ||
+                lineData.type === 'err'
+            ) {
+                message = `<span class="error red">${message}</span>`
+            }
+
             return { message }
         })
     }

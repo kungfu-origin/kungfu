@@ -189,9 +189,9 @@ export const transformPositionByTickerByMerge = (positionsByTicker: { [propname:
             return tickerListResolved.reduce((item1: PosData, item2: PosData) => {
                 return {
                     ...item1,
-                    yesterdayVolume: item1.yesterdayVolume + item2.yesterdayVolume,
-                    volume: item1.totalVolume + item2.totalVolume,
-                    unRealizedPnl: item1.unRealizedPnl + item2.unRealizedPnl
+                    yesterdayVolume: +item1.yesterdayVolume || 0 + +item2.yesterdayVolume || 0,
+                    volume: +item1.totalVolume || 0 + +item2.totalVolume || 0,
+                    unRealizedPnl: +item1.unRealizedPnl || 0 + +item2.unRealizedPnl || 0
                 }
             })
         })
@@ -451,7 +451,7 @@ export const dealPos = (item: PosOriginData): PosData => {
         lastPrice: toDecimal(item.last_price, 3) || '--',
         totalPrice: toDecimal(+avgPrice * Number(item.volume), 3) || '--',
         totalMarketPrice: toDecimal(item.last_price * Number(item.volume), 3) || '--',
-        unRealizedPnl: toDecimal(item.unrealized_pnl) + '' || '--',
+        unRealizedPnl: Number(item.unrealized_pnl),
         exchangeId: item.exchange_id,
         
         accountId: item.account_id,
