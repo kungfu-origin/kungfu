@@ -2,6 +2,9 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { 
+    startGetKungfuTradingData,
+    watcher,
+
     dealGatewayStates, 
     transformTradingItemListToData, 
     transformOrderTradeListToData,
@@ -19,7 +22,7 @@ import {
     dealQuote
 } from '__io/kungfu/watcher';
 
-import { startGetKungfuTradingData, watcher } from '__io/kungfu/watcher';
+import { ensureLeaderData } from '__gUtils/busiUtils';
 
 export const KUNGFU_TRADING_DATA_OBSERVER = new Observable(subscriber => {
     subscriber.next({})
@@ -27,14 +30,6 @@ export const KUNGFU_TRADING_DATA_OBSERVER = new Observable(subscriber => {
         subscriber.next(state)
     }, 1500)
 })
-
-function ensureLeaderData (data: any, key = '') {
-    if (!key) {
-        return data ? data.list() : []
-    }
-
-    return data ? data.sort(key) : []
-}
  
 export const buildTradingDataPipe = (type: string) => {
     return KUNGFU_TRADING_DATA_OBSERVER.pipe(

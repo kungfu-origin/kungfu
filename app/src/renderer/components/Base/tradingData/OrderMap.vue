@@ -128,7 +128,7 @@ export default {
 
             })
 
-               this.orders.kfForEach(item => {
+            this.orders.kfForEach(item => {
                 const itemResolved = item;
                 const { orderId } = itemResolved;
                 if (!mapData[orderId]) return;
@@ -137,7 +137,7 @@ export default {
 
 
             this.trades.kfForEach(item => {
-                let itemResolved = item;
+                let itemResolved = { ...item };
                 const { orderId } = itemResolved;
 
                 if (!mapData[orderId]) return;
@@ -159,7 +159,14 @@ export default {
         },
 
         resolveOrderMap (tableList) {
-            return Object.freeze(Object.values(tableList || {}).map(item => {
+            return Object.freeze(Object.values(tableList || {}).filter(item => {
+                const { id, orderInput, order, trades } = item;
+                if (!id || !orderInput || !order || !trades) {
+                    return false;
+                }
+
+                return true;
+            }).map(item => {
                 const { id, orderInput, order, trades } = item;
                 return Object.freeze({
                     id,

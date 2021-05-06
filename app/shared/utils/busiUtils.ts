@@ -590,7 +590,7 @@ export function isBufferGBK (bufferFrom: Buffer) {
     return jschardet.detect(bufferFrom).encoding !== 'UTF-8'
 }
 
-export const resolveInstruments = (instruments: InstrumentInputData[]) => {
+export const resolveInstruments = (instruments: InstrumentOriginData[]) => {
     return (instruments || []).map(item => {
         const { instrument_id, product_id, exchange_id } = item;
         const instrumentName = decodeBuffer(product_id)
@@ -659,4 +659,12 @@ function buildListByLineNum(num: number){
 
     //@ts-ignore
     return new ListByNum(num)
+}
+
+export function ensureLeaderData (data: any, key = '') {
+    if (!key) {
+        return data ? data.list() : []
+    }
+
+    return data ? data.sort(key) : []
 }

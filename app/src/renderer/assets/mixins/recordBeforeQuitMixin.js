@@ -6,7 +6,6 @@ import { mapGetters, mapState } from 'vuex';
 import { writeCSV } from '__gUtils/fileUtils';
 import { KF_DATASET_QUOTE_DIR } from '__gConfig/pathConfig';
 import { watcher } from '__io/kungfu/watcher';
-import { delayMiliSeconds } from '__gUtils/busiUtils';
 
 export default {
 
@@ -39,7 +38,6 @@ export default {
         },
 
         recordQuote () {
-
             
             watcher.step()
             const quotes = Object.values(watcher.ledger.Quote || {});
