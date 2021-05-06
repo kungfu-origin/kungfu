@@ -6,6 +6,34 @@ import {
     buildKungfuGlobalDataPipe,
     buildTaskDataPipe,
 } from "__io/kungfu/tradingData";
+import { watcher } from '__io/kungfu/watcher';
+import { encodeKungfuLocation } from '__io/kungfu/kungfuUtils';
+
+const { _pm2 } = require('__gUtils/processUtils');
+
+_pm2.launchBus((err: Error, pm2_bus: any) => {
+    pm2_bus.on('process:msg', (packet: any) => {
+        const packetData = packet.data || {};
+        const processData = packet.process || {};
+        const pm2Id = processData.pm_id;
+        const processName = processData.name;
+        const dataType = packetData.type;
+        const { 
+            accountId, 
+            exchangeId, 
+            ticker, 
+            parentId, 
+            sourceId,  
+        } = packetData.body || {};
+    })
+})
+
+
+process.on('message', (packet: any) => {
+    const { type, topic, data } = packet;        
+    
+})
+
 
 
 buildTradingDataPipe('account').subscribe((data: any) => {
@@ -107,3 +135,5 @@ buildTaskDataPipe().subscribe((data: any) => {
         }
     })
 })
+
+
