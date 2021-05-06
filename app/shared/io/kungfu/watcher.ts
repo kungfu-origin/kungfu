@@ -9,7 +9,17 @@ import { logger } from '__gUtils/logUtils';
 
 export const watcher: any = (() => {
     const kfSystemConfig: any = fse.readJsonSync(KF_CONFIG_PATH)
-    const bypassQuote = (kfSystemConfig.performance || {}).bypassQuote || false;
+    const bypassQuote = !!process.env.BY_PASS_QUOTE || (kfSystemConfig.performance || {}).bypassQuote || false;
+
+    if (process.env.RENDERER_TYPE !== 'app') {
+        if (process.env.APP_TYPE !== 'cli') {
+            if (process.env.APP_TYPE !== 'deamon') {
+                return {
+                    noWatcher: true
+                }
+            }
+        }
+    }
 
     if (process.env.APP_TYPE === 'cli') {
         const windowType = process.env.CLI_WINDOW_TYPE || '';
@@ -21,27 +31,36 @@ export const watcher: any = (() => {
         return kungfu.watcher(KF_RUNTIME_DIR, kungfu.formatStringToHashHex('kungfu_deamon'), bypassQuote);
     }
 
-    if (process.env.RENDERER_TYPE !== 'app') {
-        if (process.env.RENDERER_TYPE !== 'makeOrder' && process.env.APP_TYPE != 'test') {
-            return {}
-        }
-    }
 
     const id = [process.env.APP_TYPE, process.env.RENDERER_TYPE].join('');
-    return kungfu.watcher(KF_RUNTIME_DIR, kungfu.formatStringToHashHex(id), bypassQuote);
+    return kungfu.watcher(KF_RUNTIME_DIR, kungfu.formatStringToHashHex(id), true);
 })()
 
 
-export const startGetKungfuTradingData = (callback: Function, interval = 500) => {
-    if (process.env.RENDERER_TYPE !== 'app') {
-        if (process.env.RENDERER_TYPE !== 'makeOrder') {
-            if (process.env.APP_TYPE !== 'cli') {
-                return 
-            }
-        }
-    }
+export const startGetKungfuStep = (interval = 500) => {
     
-    setTimerPromiseTask(() => {
+    if (watcher.noWatcher) return;
+    
+    return setTimerPromiseTask(() => {
+        return new Promise((resolve) => {
+            if (!watcher.isLive() && !watcher.isStarted() && watcher.isUsable()) {
+                watcher.setup();
+            }
+
+            if (watcher.isLive()) {
+                watcher.step();
+            }
+        
+            resolve(true);
+        })
+    }, interval);
+}
+
+export const startGetKungfuTradingData = (callback: Function, interval = 500) => {
+    
+    if (watcher.noWatcher) return;
+    
+    return setTimerPromiseTask(() => {
         return new Promise((resolve) => {
             if (!watcher.isLive() && !watcher.isStarted() && watcher.isUsable()) {
                 watcher.setup();

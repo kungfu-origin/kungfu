@@ -14,6 +14,10 @@ interface MakeOrderData {
 }
 
 export const kungfuSubscribeTicker = (sourceName: string, exchangeId: string, ticker: string) => {
+    if (!watcher.isLive()) {
+        return Promise.reject(new Error(`Master 未连接！`))
+    }
+
     return Promise.resolve(
         watcher.requestMarketData(
             encodeKungfuLocation(sourceName, 'md'),
@@ -24,8 +28,12 @@ export const kungfuSubscribeTicker = (sourceName: string, exchangeId: string, ti
 }
 
 export const kungfuMakeOrder = (makeOrderData: MakeOrderData, accountId: string, strategyId?: string, parentId?: number) => {
-    const accountLocation = encodeKungfuLocation(accountId, 'td');
 
+    if (!watcher.isLive()) {
+        return Promise.reject(new Error(`Master 未连接！`))
+    }
+
+    const accountLocation = encodeKungfuLocation(accountId, 'td');
     if (!watcher.isReadyToInteract(accountLocation)) {
         return Promise.reject(new Error(`需要先启动 TD ${accountId} 交易进程！`))
     }
@@ -38,7 +46,7 @@ export const kungfuMakeOrder = (makeOrderData: MakeOrderData, accountId: string,
         const strategyLocation = encodeKungfuLocation(strategyId, 'strategy');
         //设置orderInput的parentid，来标记该order为策略手动下单
         const parentId = BigInt(+new Date().getTime());
-
+        
         return Promise.resolve(watcher.issueOrder({
             ...orderInput,
             parent_id: parentId
@@ -49,6 +57,10 @@ export const kungfuMakeOrder = (makeOrderData: MakeOrderData, accountId: string,
 }
 
 export const kungfuCancelOrder = (orderId: string, accountId: string, strategyId?: string) => {
+    if (!watcher.isLive()) {
+        return Promise.reject(new Error(`Master 未连接！`))
+    }
+
     const accountLocation = encodeKungfuLocation(accountId, 'td');
     if (!watcher.isReadyToInteract(accountLocation)) {
         return Promise.reject(new Error(`需要先启动 TD ${accountId} 交易进程！`))
@@ -68,6 +80,10 @@ export const kungfuCancelOrder = (orderId: string, accountId: string, strategyId
 }
 
 export const kungfuCancelAllOrders = (orderDataList: OrderData[], strategyId?: string) => {
+    if (!watcher.isLive()) {
+        return Promise.reject(new Error(`Master 未连接！`))
+    }
+    
     const promiseList = orderDataList.map((orderData:  OrderData) => {
         const kungfuLocation = decodeKungfuLocation(+orderData.source);
         const accountId = `${kungfuLocation.group}_${kungfuLocation.name}`;

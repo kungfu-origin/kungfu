@@ -239,8 +239,7 @@ export default {
             strategyiesAsset: state => state.STRATEGY.strategyiesAsset || {},
             currentStrategy: state => state.STRATEGY.currentStrategy,
             strategyList: state => state.STRATEGY.strategyList,
-            processStatus: state => state.BASE.processStatus || {},
-            processStatusWithDetail: state => state.BASE.processStatusWithDetail || {},
+            processStatus: state => state.BASE.processStatus
         }),
     },
 
@@ -371,21 +370,10 @@ export default {
             const strategyId = strategy.strategy_id;
             
             if (!value) {
-                console.log(this.processStatusWithDetail)
-                const kungfuDeamonProcess = this.processStatusWithDetail.kungfuDeamon || {};
-                const pid = kungfuDeamonProcess.pid;
-                _pm2.sendDataToProcessId({
-                    type: 'process:deamon:req',
-                    data: {
-                        strategyId
-                    },
-                    id: pid,
-                    topic: "DEAMON_REQUEST_STOP_STRATEGY_BY_ID"
-                }, err => {
-                    if (err) {
-                        console.error(processName, err)
-                    }
-                })
+                const strategyLocation = encodeKungfuLocation(strategyId, 'strategy');
+                if (watcher.isLive()) {
+                    watcher.requestStop(strategyLocation)
+                }
             }
          
             switchStrategy(strategyId, value)

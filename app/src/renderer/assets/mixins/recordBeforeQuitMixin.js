@@ -39,6 +39,8 @@ export default {
         },
 
         recordQuote () {
+
+            
             watcher.step()
             const quotes = Object.values(watcher.ledger.Quote || {});
             const tickerIds = this.flatternTickers.map(item => `${item.instrumentId}_${item.exchangeId}`).join(',')

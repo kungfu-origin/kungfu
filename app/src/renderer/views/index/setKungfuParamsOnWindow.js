@@ -1,17 +1,19 @@
 
 process.env.ELECTRON_RUN_AS_NODE = true;
-
-process.env.RENDERER_TYPE = 'app'
+process.env.RENDERER_TYPE = 'app';
+process.env.BY_PASS_QUOTE = true;
 
 
 
 // debug export
 const { kungfu, longfist, kungfuConfigStore } = require('__io/kungfu/kungfuUtils')
-const { watcher } = require('__io/kungfu/watcher');
+const { watcher, startGetKungfuStep } = require('__io/kungfu/watcher');
 
 window.watcher = watcher;
 window.longfist = longfist;
 window.kungfu = kungfu;
 window.kungfuConfigStore = kungfuConfigStore;
+
+startGetKungfuStep();
 
 
