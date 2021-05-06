@@ -159,14 +159,7 @@ export default {
         },
 
         resolveOrderMap (tableList) {
-            return Object.freeze(Object.values(tableList || {}).filter(item => {
-                const { id, orderInput, order, trades } = item;
-                if (!id || !orderInput || !order || !trades) {
-                    return false;
-                }
-
-                return true;
-            }).map(item => {
+            return Object.freeze(Object.values(tableList || {}).map(item => {
                 const { id, orderInput, order, trades } = item;
                 return Object.freeze({
                     id,
@@ -178,6 +171,8 @@ export default {
         },
 
         turnOrderInputToLog (orderInput) {
+            if (!orderInput) return "";
+
             const { instrumentId, orderId, priceType, limitPrice, volume, hedgeFlag, accountId, exchangeId, updateTime } = orderInput
             return `
                 ${updateTime} <br/>
@@ -190,6 +185,8 @@ export default {
         },
 
         turnOrderToLog (order) {
+            if (!order) return "";
+
             const { instrumentId, orderId, priceType, limitPrice, volumeTraded, hedgeFlag, accountId, exchangeId, updateTime } = order
             return `
                 ${updateTime} <br/>
@@ -203,6 +200,7 @@ export default {
         },
 
         turnTradesToLog (trades) {
+            if (!trades) return ""
             return trades.map(trade => `
                 ${trade.updateTime} <br/>
                 ${trade.instrumentId} ${trade.exchangeId} ${trade.accountId} <br/>

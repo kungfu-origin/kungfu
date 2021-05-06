@@ -27,7 +27,7 @@ export const resLedgerData = (parentId: string, pm2Id: number, accountId: string
 
     watcher.step();
     const ledger = watcher.ledger;
-    const quotes = ledger.Quote ? ledger.Quote.filter('instrument_id', ticker).map((item: QuoteOriginData) => dealQuote(item)) : [];
+    const quotes = ensureLeaderData(ledger.Quote.filter('instrument_id', ticker)).map((item: QuoteOriginData) => dealQuote(item));
     const orders = getTargetOrdersByParentId(parentId);
     const positions = ensureLeaderData(ledger.Position).map((item: PosOriginData) => dealPos(item));
     const positionsResolved = transformTradingItemListToData(positions, 'account')[accountId] || [];
@@ -88,7 +88,7 @@ export const resOrderData = (pm2Id: number, parentId: string, processName: strin
 
 function getTargetOrdersByParentId (parentId: string) {
     const Order = watcher.ledger.Order;
-    return Order.filter('parent_id', BigInt(parentId)).map((item: OrderOriginData) => dealOrder(item))
+    return ensureLeaderData(Order.filter('parent_id', BigInt(parentId))).map((item: OrderOriginData) => dealOrder(item))
 }
 
 

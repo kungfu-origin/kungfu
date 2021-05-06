@@ -18,6 +18,10 @@ export const kungfuSubscribeTicker = (sourceName: string, exchangeId: string, ti
         return Promise.reject(new Error(`Master 未连接！`))
     }
 
+    console.log( encodeKungfuLocation(sourceName, 'md'),
+    exchangeId, 
+    ticker)
+
     return Promise.resolve(
         watcher.requestMarketData(
             encodeKungfuLocation(sourceName, 'md'),

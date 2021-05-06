@@ -5,8 +5,11 @@ import { InstrumentTypes, aliveOrderStatusList, ExchangeIds, SideName, OffsetNam
 export const transformArrayToObjectByKey = (targetList: Array<any>, keys: Array<string>): any => {
     let data: any = {};
     (targetList || []).forEach(item => {
-        const key:string = keys.map(k => item[k]).join('_')
-        data[key] = item
+        const key:string = keys.map(k => item[k]).filter(k => !!k).join('_')
+
+        if (key) {
+            data[key] = item
+        }
     })
 
     return data

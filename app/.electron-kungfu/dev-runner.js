@@ -126,12 +126,6 @@ function startDeamon () {
 
     const compiler = webpack(deamonConfig)
 
-    compiler.plugin('watch-run', (compilation, done) => {
-      logStats('Deamon', chalk.white.bold('compiling...'))
-      hotMiddleware.publish({ action: 'compiling' })
-      done()
-    })
-
     compiler.watch({}, (err, stats) => {
       if (err) {
         console.log(err)

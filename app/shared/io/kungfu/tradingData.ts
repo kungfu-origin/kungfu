@@ -26,15 +26,15 @@ import { ensureLeaderData } from '__gUtils/busiUtils';
 
 export const KUNGFU_TRADING_DATA_OBSERVER = new Observable(subscriber => {
     subscriber.next({})
-    startGetKungfuTradingData((state: any) => {
-        subscriber.next(state)
+    startGetKungfuTradingData((watcher: any) => {
+        subscriber.next(watcher)
     }, 1500)
 })
  
 export const buildTradingDataPipe = (type: string) => {
     return KUNGFU_TRADING_DATA_OBSERVER.pipe(
-        map((data: any): any => {
-            const ledgerData = data.ledger || {};
+        map(() => {
+            const ledgerData = watcher.ledger
             const orderInputs = ensureLeaderData(ledgerData.OrderInput, 'insert_time').slice(0, 200).map((item: OrderInputOriginData) => dealOrderInput(item));
             const orders = ensureLeaderData(ledgerData.Order, 'update_time').slice(0, 200).map((item: OrderOriginData) => dealOrder(item));
             const trades = ensureLeaderData(ledgerData.Trade, 'trade_time').slice(0, 200).map((item: TradeOriginData) => dealTrade(item));
@@ -64,8 +64,8 @@ export const buildTradingDataPipe = (type: string) => {
 
 export const buildInstrumentsPipe = () => {
     return KUNGFU_TRADING_DATA_OBSERVER.pipe(
-        map((data: any) => {
-            const ledgerData = data.ledger || {};
+        map(() => {
+            const ledgerData = watcher.ledger
             const instruments = ensureLeaderData(ledgerData.Instrument);
             return {
                 instruments
@@ -77,8 +77,8 @@ export const buildInstrumentsPipe = () => {
 
 export const buildAllOrdersPipe = () => {
     return KUNGFU_TRADING_DATA_OBSERVER.pipe(
-        map((data: any): any => {
-            const ledgerData = data.ledger || {};
+        map(() => {
+            const ledgerData = watcher.ledger
             const orders = ensureLeaderData(ledgerData.Order, 'update_time').slice(0, 200).map((item: OrderOriginData) => dealOrder(item));
             const orderStat = ensureLeaderData(ledgerData.OrderStat).map((item: OrderStatOriginData) => dealOrderStat(item));
             
@@ -92,8 +92,8 @@ export const buildAllOrdersPipe = () => {
 
 export const buildMarketDataPipe = () => {
     return KUNGFU_TRADING_DATA_OBSERVER.pipe(
-        map((data: any): any => {
-            const ledgerData = data.ledger || {};
+        map(() => {
+            const ledgerData = watcher.ledger
             const quotes = ensureLeaderData(ledgerData.Quote).map((item: QuoteOriginData) => dealQuote(item));
             return transformTradingItemListToData(quotes, 'quote')
         })
@@ -102,10 +102,10 @@ export const buildMarketDataPipe = () => {
 
 export const buildKungfuGlobalDataPipe = () => {
     return KUNGFU_TRADING_DATA_OBSERVER.pipe(
-        map((data: any): any => {
+        map(() => {
             return {
                 watcherIsLive: watcher.isLive() || false,
-                gatewayStates: dealGatewayStates(data.appStates || {})
+                gatewayStates: dealGatewayStates(watcher.appStates)
             }
         })
     )
@@ -113,11 +113,11 @@ export const buildKungfuGlobalDataPipe = () => {
 
 export const buildTaskDataPipe = () => {
     return KUNGFU_TRADING_DATA_OBSERVER.pipe(
-        map((data: any): any => {
-            const stateData = data.state || {};
-            const timeValueList = stateData.TimeValue ? stateData.TimeValue.filter('tag_c', 'task').sort('update_time') : [];
+        map(() => {
+            const stateData = watcher.state;
+            const timeValueList = ensureLeaderData(stateData.TimeValue.filter('tag_c', 'task'), 'update_time').slice(0, 300);
             return {
-                timeValueList: timeValueList.slice(0, 300)
+                timeValueList: timeValueList
             }
         })
     )

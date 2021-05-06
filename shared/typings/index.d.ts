@@ -354,7 +354,7 @@ interface PosData {
     lastPrice: string;
     totalPrice: string;
     totalMarketPrice: string;
-    unRealizedPnl: string;
+    unRealizedPnl: number;
     exchangeId: string;
     accountId: string;
     sourceId: string;
@@ -640,7 +640,7 @@ interface QuoteData {
     bidVolumes: Array<string>,
 }
 
-interface InstrumentInputData {
+interface InstrumentOriginData {
     contract_multiplier: number;
     create_date: string;
     delivery_month: number;
@@ -667,6 +667,7 @@ interface Pm2Options {
     autorestart?: boolean;
     force?: boolean;
     watch?: boolean;
+    env?: any;
 }
 
 interface TickerSet {

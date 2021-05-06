@@ -99,17 +99,3 @@ export const buildMarketDataPipeByDeamon = () => {
         })
     )
 }
-
-export const buildTaskDataPipeByDeamon = () => {
-    return baseDeamonDataObserver
-    .pipe(
-        filter(packet => {
-            const { type } = packet || {};
-            return type === "DEAMON_TASK_DATA"
-        }),
-        map(packet => {
-            const { body } = packet || {};
-            return body.data
-        })
-    )
-}

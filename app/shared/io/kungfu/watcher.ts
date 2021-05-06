@@ -9,7 +9,7 @@ import { logger } from '__gUtils/logUtils';
 
 export const watcher: any = (() => {
     const kfSystemConfig: any = fse.readJsonSync(KF_CONFIG_PATH)
-    const bypassQuote = !!process.env.BY_PASS_QUOTE || (kfSystemConfig.performance || {}).bypassQuote || false;
+    const bypassQuote = (kfSystemConfig.performance || {}).bypassQuote || false;
 
     if (process.env.RENDERER_TYPE !== 'app') {
         if (process.env.APP_TYPE !== 'cli') {
@@ -28,7 +28,7 @@ export const watcher: any = (() => {
     }
 
     if (process.env.APP_TYPE === "deamon") {
-        return kungfu.watcher(KF_RUNTIME_DIR, kungfu.formatStringToHashHex('kungfu_deamon'), bypassQuote);
+        return kungfu.watcher(KF_RUNTIME_DIR, kungfu.formatStringToHashHex('kungfu_deamon'), false);
     }
 
 
@@ -70,11 +70,7 @@ export const startGetKungfuTradingData = (callback: Function, interval = 500) =>
                 watcher.step();
             }
             
-            callback({
-                ledger: watcher.ledger,
-                state: watcher.state,
-                appStates: watcher.appStates,
-            });
+            callback(true);
             resolve(true);
         })
     }, interval);

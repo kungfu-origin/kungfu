@@ -191,6 +191,7 @@ export const startProcess = (options: Pm2Options, no_ext = false): Promise<objec
         "force": options.force || false,
         "execMode": "fork",
         "env": {
+            ...options.env,
             "KF_HOME": dealSpaceInPath(KF_HOME),
         },
         "killTimeout": 16000,
@@ -353,7 +354,8 @@ export const startTask = (options: Pm2Options) => {
     return startProcess({
         script: options.script || 'index.js',
         interpreter: process.execPath,
-        ...options
+        ...options,
+        force: true
     })
 }
 

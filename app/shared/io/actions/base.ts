@@ -1,5 +1,5 @@
 import fse from 'fs-extra';
-import { startCustomProcess, deleteProcess, killKfc, startMaster, startLedger, startTask, stopProcess } from '__gUtils/processUtils';
+import { startCustomProcess, deleteProcess, killKfc, startMaster, startLedger, startDeamon, startTask, stopProcess } from '__gUtils/processUtils';
 import { delayMiliSeconds } from '__gUtils/busiUtils';
 import { buildCustomProcessConfig } from '__gConfig/systemConfig';
 import { KF_TARADING_CONFIG_PATH, KF_CONFIG_PATH } from '__gConfig/pathConfig';
@@ -25,6 +25,11 @@ export const switchMaster = async (status: boolean): Promise<any> => {
 export const switchLedger = (status: boolean): Promise<any> => {
     if(!status) return deleteProcess('ledger')   
     return startLedger(false)
+}
+
+export const switchDeamon = (status: boolean): Promise<any> => {
+    if (!status) return deleteProcess('kungfuDeamon');
+    return startDeamon()
 }
 
 export const switchCustomProcess = (status: boolean, targetName: string) => {
@@ -55,6 +60,7 @@ export const switchCustomProcess = (status: boolean, targetName: string) => {
 
 
 export const switchTask = (status: Boolean, options: Pm2Options) => {
+    console.log(status, '12312')
     if (!status) return stopProcess(options.name)
     return startTask(options)
 

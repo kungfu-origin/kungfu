@@ -45,7 +45,7 @@
             <div class="core-item" >
                 <div class="core-status">
                     <span class="core-process-item  core-process-title text-overflow" title="数据进程">
-                        守护进程 <el-tag>Deamon</el-tag>
+                        通信进程 <el-tag>Deamon</el-tag>
                     </span>
                     <span  class="core-process-item text-overflow" style="width: 71px;">
                         <tr-status 
@@ -53,8 +53,10 @@
                         :value="buildState('kungfuDeamon')"></tr-status>
                         <tr-status v-else></tr-status>
                     </span>
-                    <span class="core-process-item switch" v-if="NODE_ENV === 'development'"></span>
-                     <span class="core-process-item get-log">
+                    <span class="core-process-item switch" v-if="NODE_ENV === 'development'">
+                        <el-switch  :value="ifProcessRunning('kungfuDeamon', processStatus)" @change="handleDeamonSwitch"></el-switch>
+                    </span>
+                    <span class="core-process-item get-log">
                         <i class="el-icon-document mouse-over" title="打开日志文件" @click="handleOpenLogFile('kungfuDeamon')" ></i>
                     </span>
                 </div>
@@ -70,7 +72,7 @@
 import { mapState } from 'vuex';
 import { statusConfig } from '__gConfig/statusConfig';
 import { ifProcessRunning } from '__gUtils/busiUtils';
-import { switchLedger } from '__io/actions/base';
+import { switchLedger, switchDeamon } from '__io/actions/base';
 
 import openLogMixin from '@/assets/mixins/openLogMixin';
 
@@ -132,6 +134,10 @@ export default {
         handleLedgerSwitch (e) {
             switchLedger(e)
         },
+
+        handleDeamonSwitch (e) {
+            switchDeamon(e)
+        }
     }
 }
 </script>

@@ -1,7 +1,6 @@
 
 process.env.ELECTRON_RUN_AS_NODE = true;
 process.env.RENDERER_TYPE = 'app';
-process.env.BY_PASS_QUOTE = true;
 
 
 

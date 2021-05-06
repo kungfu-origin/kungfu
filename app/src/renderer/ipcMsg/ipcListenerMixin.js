@@ -89,6 +89,7 @@ export default {
                                 })
                             break
                         case "SUBSCRIBE_BY_TICKER":
+                            
                             const sourceName = accountId ? (accountId || '').toSourceName() : sourceId;
                             this.subscribeTickers([{
                                 source: sourceName,

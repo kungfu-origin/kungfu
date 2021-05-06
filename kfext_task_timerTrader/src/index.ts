@@ -245,9 +245,11 @@ combineLatestObserver
             const { quotes, positions } = data
             const quote = quotes[TICKER];
 
-            if (!quote && !hasConsoledError) {
-                console.error(`[WARNING] 暂无${ticker}行情信息，需保证MD进程开启`)
-                hasConsoledError = true;
+            if (!quote) {
+                if (!hasConsoledError) {
+                    console.error(`[WARNING] 暂无${ticker}行情信息，需保证MD进程开启`)
+                    hasConsoledError = true;
+                }
                 return false;
             }
 

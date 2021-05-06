@@ -4,7 +4,6 @@ import {
     buildAllOrdersPipe,
     buildMarketDataPipe,
     buildKungfuGlobalDataPipe,
-    buildTaskDataPipe,
 } from "__io/kungfu/tradingData";
 
 import * as PM2_METHODS from './pm2Methods';
@@ -94,21 +93,6 @@ buildMarketDataPipe().subscribe((data: any) => {
         }
     })
 })
-
-buildTaskDataPipe().subscribe((data: any) => {
-    //@ts-ignore
-    process.send({
-        type: "process:msg",
-        data: {
-            type: "DEAMON_TASK_DATA",
-            body: {
-                timestamp: new Date().getTime(),
-                data,
-            }
-        }
-    })
-})
-
 
 const { _pm2 } = require('__gUtils/processUtils');
 
