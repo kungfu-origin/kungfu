@@ -6,7 +6,11 @@ import {
     buildKungfuGlobalDataPipe,
 } from "__io/kungfu/tradingData";
 
+import { transformTradingItemListToData, dealQuote } from '__io/kungfu/watcher';
+
 import * as PM2_METHODS from './pm2Methods';
+
+var QuotesRequiredInApp: TickerInTickerSet[] = [];
 
 buildTradingDataPipe('account').subscribe((data: any) => {
     //@ts-ignore
@@ -81,6 +85,13 @@ buildAllOrdersPipe().subscribe((data: any) => {
 })
 
 buildMarketDataPipe().subscribe((data: any) => {
+    const quotesAfterFilterKeys = QuotesRequiredInApp.map((item: TickerInTickerSet) => item.instrumentId)    
+    const quotesAfterFilter =  QuotesRequiredInApp ? data.filter((item: QuoteOriginData) => {
+        return quotesAfterFilterKeys.indexOf(item.instrument_id) !== -1;
+    }) : [];
+
+    const quotesResolved = quotesAfterFilter.map((item: QuoteOriginData) => dealQuote(item));
+
     //@ts-ignore
     process.send({
         type: "process:msg",
@@ -88,11 +99,14 @@ buildMarketDataPipe().subscribe((data: any) => {
             type: "DEAMON_MARKET_DATA",
             body: {
                 timestamp: new Date().getTime(),
-                data,
+                data: transformTradingItemListToData(quotesResolved, 'quote'),
             }
         }
     })
 })
+
+
+
 
 const { _pm2 } = require('__gUtils/processUtils');
 
@@ -125,10 +139,23 @@ _pm2.launchBus((err: Error, pm2_bus: any) => {
             case "REQ_POS_ORDER_DATA":
                 PM2_METHODS.resPosData(pm2Id, accountId, processName)
                 PM2_METHODS.resOrderData(pm2Id, parentId, processName)
-                break
+                break;
+         
             // case 'REQ_RECORD_DATA':
             //     const { data } = packetData.body;
             //     writeKungfu(processName, '', 'task', JSON.stringify(data))
         }
     })
+})
+
+
+process.on('message', (packet) => {
+    const { type, topic, data } = packet;        
+    
+    if (type !== 'process:msg')  return;
+    switch (topic) {
+        case "MAIN_RENDERER_SUBSCRIBED_TICKERS":
+            QuotesRequiredInApp = data;
+            break;
+    }
 })

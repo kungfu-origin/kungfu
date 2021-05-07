@@ -205,6 +205,14 @@ export default {
         }
     },
 
+    mounted () {
+        this.bindAddTickerToTickerSet();
+    },
+
+    beforeDestroy () {
+        this.$bus.$off('add-ticker-for-ticker-set');
+    },
+
     methods: {
 
         handleAddTask () {
@@ -222,7 +230,6 @@ export default {
         
         handleAddTicker () {
             this.addTickerDialogVisiblity = true;
-            this.bindAddTickerToTickerSet();
         },
 
         handleDeleteTicker (ticker) {
@@ -240,7 +247,6 @@ export default {
         },
 
         bindAddTickerToTickerSet () {
-            this.$bus.$off('add-ticker-for-ticker-set')
             this.$bus.$on('add-ticker-for-ticker-set', (tickerData) => {
                 const { name, tickers } = this.currentTickerSet;
                 const targetIndex = getIndexFromTargetTickers(tickers, tickerData)

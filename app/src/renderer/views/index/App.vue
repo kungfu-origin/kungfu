@@ -177,9 +177,10 @@ export default {
             //两种情况，一种是从等待 or others 变为就绪
             //一种是从无直接100
             if (state !== oldState || oldState === "") {
-                if (state == 100 || oldState === 100) {
-                    this.$bus.$emit('mdTdStateChange', { processId, state })
-                }
+                    if (state == 100 && oldState !== 100) {
+                        console.log("MdTdStateReady", processId, state, oldState)
+                        this.$bus.$emit('mdTdStateReady', { processId, state })
+                    }
             }
 
             this.mdTdOldState[processId] = stateData || {};

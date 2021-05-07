@@ -1,26 +1,13 @@
 
 import { 
-
     watcher,
-
-    dealGatewayStates, 
     transformTradingItemListToData, 
-    transformOrderTradeListToData,
-    transformOrderInputListToData, 
-    transformOrderStatListToData, 
-    transformAssetItemListToData,
-
-    dealOrderInput,
     dealOrder,
-    dealTrade,
     dealPos,
-    dealAsset,
-    dealOrderStat,
-    dealSnapshot,
     dealQuote
 } from '__io/kungfu/watcher';
 import { ensureLeaderData } from '__gUtils/busiUtils';
-const { _pm2 } = require('__gUtils/processUtils');
+const { sendDataToProcessIdByPm2 } = require('__gUtils/processUtils');
 
 export const resLedgerData = (parentId: string, pm2Id: number, accountId: string, ticker: string, processName: string) => {
     if (!watcher.isLive()) return;
@@ -32,7 +19,7 @@ export const resLedgerData = (parentId: string, pm2Id: number, accountId: string
     const positions = ensureLeaderData(ledger.Position).map((item: PosOriginData) => dealPos(item));
     const positionsResolved = transformTradingItemListToData(positions, 'account')[accountId] || [];
     
-    sendResDataToProcessId("LEDGER_DATA", pm2Id, processName, { 
+    sendDataToProcessIdByPm2("LEDGER_DATA", pm2Id, processName, { 
         positions: positionsResolved, 
         quotes, 
         orders 
@@ -48,7 +35,7 @@ export const resQuoteData = (pm2Id: number, tickers: string, processName: string
         .filter((quote: QuoteOriginData) => tickers.includes(`${quote.instrument_id}_${quote.exchange_id}`))
         .map((quote: QuoteOriginData) => dealQuote(quote));
 
-    sendResDataToProcessId("QUOTE_DATA", pm2Id, processName, { quotes })    
+    sendDataToProcessIdByPm2("QUOTE_DATA", pm2Id, processName, { quotes })    
 }
 
 export const resInstrumentInfo = (pm2Id: number, tickers: string, processName: string) => {
@@ -59,7 +46,7 @@ export const resInstrumentInfo = (pm2Id: number, tickers: string, processName: s
     const instruments = ensureLeaderData(ledger.Instrument)
         .filter((item: InstrumentOriginData) => tickers.includes(`${item.instrument_id}_${item.exchange_id}`))
         
-    sendResDataToProcessId('INSTRUMENT_DATA', pm2Id, processName, { instruments })
+    sendDataToProcessIdByPm2('INSTRUMENT_DATA', pm2Id, processName, { instruments })
 }
 
 export const resPosData = (pm2Id: number, accountId: string, processName: string) => {
@@ -70,7 +57,7 @@ export const resPosData = (pm2Id: number, accountId: string, processName: string
     const positions = ensureLeaderData(ledger.Position).map((item: PosOriginData) => dealPos(item));
     const positionsResolved = transformTradingItemListToData(positions, 'account')[accountId] || [];
 
-    sendResDataToProcessId("POS_DATA", pm2Id, processName, { 
+    sendDataToProcessIdByPm2("POS_DATA", pm2Id, processName, { 
         positions: positionsResolved,
     })
 }
@@ -81,7 +68,7 @@ export const resOrderData = (pm2Id: number, parentId: string, processName: strin
     watcher.step();
     const orders = getTargetOrdersByParentId(parentId);
     
-    sendResDataToProcessId("ORDER_DATA", pm2Id, processName, { 
+    sendDataToProcessIdByPm2("ORDER_DATA", pm2Id, processName, { 
         orders
     })
 }
@@ -89,18 +76,4 @@ export const resOrderData = (pm2Id: number, parentId: string, processName: strin
 function getTargetOrdersByParentId (parentId: string) {
     const Order = watcher.ledger.Order;
     return ensureLeaderData(Order.filter('parent_id', BigInt(parentId))).map((item: OrderOriginData) => dealOrder(item))
-}
-
-
-function sendResDataToProcessId (topic: string, pm2Id: number, processName: string, data: any) {
-    _pm2.sendDataToProcessId({
-        type: 'process:msg',
-        data,
-        id: pm2Id,
-        topic: topic
-    }, (err: Error) => {
-        if (err) {
-            console.error(processName, err)
-        }
-    })
 }

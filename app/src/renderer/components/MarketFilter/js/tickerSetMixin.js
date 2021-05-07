@@ -5,15 +5,19 @@ import AddSetTickerSetDialog from '@/components/MarketFilter/components/AddSetTi
 import AddTickerDialog from '@/components/MarketFilter/components/AddTickerDialog';
 
 import { checkAllMdProcess, findTargetFromArray, delayMiliSeconds } from '__gUtils/busiUtils';
+import { sendDataToDeamonByPm2 } from "__gUtils/processUtils";
 import { getTickerSets, addSetTickerSet, removeTickerSetByName } from '__io/actions/market';
 import { kungfuSubscribeTicker } from '__io/kungfu/makeCancelOrder'
-import { watcher } from '__io/kungfu/watcher';
 
 export default {
 
     mounted () {
         this.getTickerSets();
         this.handleMdTdStateChange();
+    },
+
+    beforeDestroy() {
+        this.$bus.$off('mdTdStateReady');
     },
 
     components: {
@@ -102,11 +106,9 @@ export default {
 
         handleMdTdStateChange () {
             const self = this;
-            this.$bus.$on('mdTdStateChange', ({ processId, state }) => {
-                if (state === 100) { // ready
-                    if (processId.includes('md')) {
-                        self.subscribeTickersByProcessId(processId, true)
-                    }
+            this.$bus.$on('mdTdStateReady', function({ processId }) {
+                if (processId.includes('md')) {
+                    self.subscribeTickersByProcessId(processId)
                 }
             })
         },
@@ -139,16 +141,13 @@ export default {
             if (!this.watcherIsLive) return;
             const tickers = this.flatternTickers || [];
             this.subscribeTickers(tickers, slience)
+            sendDataToDeamonByPm2('MAIN_RENDERER_SUBSCRIBED_TICKERS', tickers)
         },
 
         //通过md 订阅
         subscribeTickersByProcessId (mdProcessId, slience = true) {
-            if (!this.watcherIsLive) return;
-            const tickers = (this.flatternTickers || []).filter(({ source }) => {
-                return mdProcessId.indexOf(source) !== -1
-            })
-            
-            this.subscribeTickers(tickers, slience)
+            this.subscribeAllTickers(slience)
+            console.log("Subscribe All Ticker", mdProcessId)
         },
 
         subscribeTickersInTickerSet (tickerSet, slience = true) {
@@ -162,10 +161,13 @@ export default {
         },
 
         async subscribeTickers (tickers, slience = true) {
+            if (!this.watcherIsLive) return;
+
             let i = 0, len = tickers.length;
             for (i; i < len; i++) {
                 const ticker = tickers[i];
                 const { instrumentId, source, exchangeId } = ticker;
+                console.log(instrumentId, source, exchangeId)
                 kungfuSubscribeTicker(source, exchangeId, instrumentId)
                 await delayMiliSeconds(300)
             }

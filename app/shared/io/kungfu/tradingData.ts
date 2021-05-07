@@ -19,7 +19,6 @@ import {
     dealAsset,
     dealOrderStat,
     dealSnapshot,
-    dealQuote
 } from '__io/kungfu/watcher';
 
 import { ensureLeaderData } from '__gUtils/busiUtils';
@@ -94,8 +93,8 @@ export const buildMarketDataPipe = () => {
     return KUNGFU_TRADING_DATA_OBSERVER.pipe(
         map(() => {
             const ledgerData = watcher.ledger
-            const quotes = ensureLeaderData(ledgerData.Quote).map((item: QuoteOriginData) => dealQuote(item));
-            return transformTradingItemListToData(quotes, 'quote')
+            const quotes = ensureLeaderData(ledgerData.Quote)
+            return quotes
         })
     )
 }

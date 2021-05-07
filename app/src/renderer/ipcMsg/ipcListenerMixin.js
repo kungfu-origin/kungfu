@@ -4,7 +4,7 @@ import { ipcRenderer, remote } from 'electron';
 import fse from 'fs-extra';
 import path from 'path';
 
-import { watcher, dealQuote, dealPos, dealOrder, writeKungfu } from '__io/kungfu/watcher';
+import { watcher,  dealOrder, writeKungfu } from '__io/kungfu/watcher';
 import { getStrategyById, updateStrategyPath } from '__io/kungfu/strategy';
 import { transformTradingItemListToData } from '__io/kungfu/watcher';
 import { aliveOrderStatusList } from 'kungfu-shared/config/tradingConfig';
@@ -15,7 +15,7 @@ import makeOrderCoreMixin from '@/components/Base/makeOrder/js/makeOrderCoreMixi
 import recordBeforeQuitMixin from "@/assets/mixins/recordBeforeQuitMixin";
 import tickerSetMixin from '@/components/MarketFilter/js/tickerSetMixin';
 
-const { _pm2 } = require('__gUtils/processUtils');
+const { _pm2, sendDataToProcessIdByPm2 } = require('__gUtils/processUtils');
 
 const BrowserWindow = remote.BrowserWindow;
 
@@ -79,6 +79,7 @@ export default {
                                 .catch(err => {
                                     this.$message.error(err.message)
                                 })
+
                         case 'CANCEL_ORDER_BY_PARENT_ID':
                             const ordersByParentId = this.getTargetOrdersByParentId(watcher.ledger.Order, parentId)
                             ordersByParentId
@@ -88,50 +89,40 @@ export default {
                                     this.cancelOrder('account', orderData)
                                 })
                             break
+
                         case "SUBSCRIBE_BY_TICKER":
-                            
                             const sourceName = accountId ? (accountId || '').toSourceName() : sourceId;
                             this.subscribeTickers([{
                                 source: sourceName,
                                 exchangeId,
                                 instrumentId: ticker
                             }])
-                            break
+                            break;
+
                         case "SUBSCRIBE_BY_TICKERSET":
                             const { tickerSet } = packetData.body || {}
                             this.subscribeTickersInTickerSet(tickerSet)
                             break;
+
                         case "TIME_ALERT":
                             const { minute, quoteAlive } = packetData.body || {};
-                            
                             if (!quoteAlive) {
                                 this.$message.warning(`距离算法任务 ${processName} 开始执行还有 ${minute} 分钟，目前还未收到订阅行情，请检查交易进程与行情进程运行`)
                             } else {
                                 this.$message.info(`距离算法任务 ${processName} 开始执行还有 ${minute} 分钟，请保证交易进程与行情进程运行`)
                             }
-                            break
+                            break;
+
                         case 'REQ_HIS_AVG_VOLUME': //历史均成交量
                             const { days } = packetData.body || {};
-                            this.sendResDataToProcessId("HIS_AVG_VOLUME", pm2Id, processName, { avgVolume: this.marketAvgVolume[days] || {} })
-                            break
+                            sendDataToProcessIdByPm2("HIS_AVG_VOLUME", pm2Id, processName, { avgVolume: this.marketAvgVolume[days] || {} })
+                            break;
+
                         case 'REQ_RECORD_DATA':
                             const { data } = packetData.body;
                             writeKungfu(processName, '', 'task', JSON.stringify(data))
                     }
                 })
-            })
-        },
-
-        sendResDataToProcessId (topic, pm2Id, processName, data) {
-            _pm2.sendDataToProcessId({
-                type: 'process:msg',
-                data,
-                id: pm2Id,
-                topic: topic
-            }, err => {
-                if (err) {
-                    console.error(processName, err)
-                }
             })
         },
 

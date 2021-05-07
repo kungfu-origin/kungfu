@@ -16,7 +16,9 @@ export default {
         this.bindAvgMarketVolumeListener();
     },
 
-    destroyed () {},
+    destroyed () {
+        this.instrumentsDataPipe && this.instrumentsDataPipe.unsubscribe()
+    },
 
     methods: {
         bindInstrumentsDataListener () {
@@ -70,6 +72,16 @@ export default {
 
         saveInstrumentsIntoLocalstorage (instruments) {
             if (!instruments.length) return;
+
+            // 0 Unknown,     //未知
+            // 1 Stock,       //普通股票
+            // 2 Future,      //期货
+            // 3 Bond,        //债券
+            // 4 tockOption, //股票期权
+            // 5 Fund,        //基金
+            // 6 TechStock,   //科创板股票
+            // 7 Index,       //指数
+            // 8 Repo         //回购
 
             const instrumentsResolved = instruments
                 .filter(item => {

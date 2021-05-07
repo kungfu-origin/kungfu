@@ -286,6 +286,7 @@ export const stopProcess = (processName: string) => {
 
 //干掉守护进程
 export const killGodDaemon = () => {
+    logger.info('[Pm2 Kill GodDeamon]')
     return new Promise((resolve, reject) => {
         pm2Connect().then(() => {
             try {
@@ -327,6 +328,7 @@ export const startGetProcessStatus = (callback: Function) => {
 }
 
 async function pm2Delete (target: string): Promise<void> {
+    logger.info('[Pm2Delete] === ', target)
     return new Promise((resolve, reject) => {
         pm2Connect().then(() => {
             try{ 
@@ -504,21 +506,35 @@ function buildProcessStatus (pList: any[]): StringToStringObject {
     return processStatus
 }
 
+interface Pm2Detail {
+    status: string;
+    monit: boolean;
+    pid: number;
+    pm_id: number;
+    name: string;
+    created_at: string;
+    script: string;
+    cwd: string;
+    args: string[];
+}
+
 export function buildProcessStatusWidthDetail (pList: any[]): StringToProcessStatusDetail {
-    let processStatus: any = {};
+    let processStatus: StringToProcessStatusDetail = {};
     Object.freeze(pList).forEach(p => {
-        const { monit, pid, name, pm2_env } = p;
+        const { monit, pid, name, pm2_env, pm_id } = p;
         const status = pm2_env.status;
         const created_at = pm2_env.created_at;
         const cwd = pm2_env.cwd;
         const pm_exec_path = (pm2_env.pm_exec_path || "").split('\/');
         const script = pm2_env.script || pm_exec_path[pm_exec_path.length - 1]
         const args = pm2_env.args;
+        
 
         processStatus[name] = {
             status,
             monit,
             pid,
+            pm_id,
             name,
             created_at,
             script,
@@ -526,6 +542,7 @@ export function buildProcessStatusWidthDetail (pList: any[]): StringToProcessSta
             args
         }
     })
+
     return processStatus
 }
 
@@ -542,10 +559,35 @@ function startGetProcessStatusByName (name: string, callback: Function) {
     return timer
 }
 
-const buildStartDatasetByDataSeriesIdOptions = (namespace: string, dataSeriesId: string): Pm2Options => {
-    return {
-        "name": namespace + dataSeriesId,
-        "args": ['data', 'get', '-n', dataSeriesId, '-s', 'kfa'].join(' ')
-    }
+export const sendDataToProcessIdByPm2 = (topic: string, pm2Id: number, processName: string, data: any) => {
+    pm2.sendDataToProcessId({
+        type: 'process:msg',
+        data,
+        id: pm2Id,
+        topic: topic
+    }, (err: Error) => {
+        if (err) {
+            console.error(processName, err)
+        }
+    })
 }
 
+export const sendDataToDeamonByPm2 = (topic: string, data: any): Promise<any> => {
+    return getKungfuDeamonPmId()
+        .then(pmid => {
+            if (pmid === -1) {
+                return Promise.reject('KungfuDeamon not exsited！')
+            } else {
+                return pmid
+            }
+        })
+        .then((pmId: number) => sendDataToProcessIdByPm2(topic, pmId, "kungfuDeamon", data))
+}
+
+function getKungfuDeamonPmId () {
+    return listProcessStatus()
+        .then(({ processStatusWithDetail }) => {
+            const kungfuDeamonPrc: ProcessStatusDetail = processStatusWithDetail['kungfuDeamon'] || {};
+            return kungfuDeamonPrc.pm_id || -1;
+        })
+}

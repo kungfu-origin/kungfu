@@ -158,10 +158,13 @@ export default {
     },
 
     mounted () {
-        this.$bus.$off('set-task')
         this.$bus.$on('set-task', ({ type, initData }) => {
             this.handleAddTaskFromOutSide(type, initData)
         })
+    },
+
+    beforeDestroy () {
+        this.$bus.$off('set-task');
     },
 
     computed: {
