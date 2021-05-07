@@ -43,11 +43,10 @@
 <script>
 
 import { mapState } from 'vuex';
+import moment from "moment"
 
 import GlobalSettingDialog from '@/components/Base/GlobalSettingDialog';
-import { buildTradingDataAccountPipeByDeamon, buildKungfuGlobalDataPipeByDeamon } from '@/ipcMsg/deamon';
-import { watcher } from '__io/kungfu/watcher';
-
+import { buildInstrumentsPipeByDeamon, buildTradingDataAccountPipeByDeamon, buildKungfuGlobalDataPipeByDeamon } from '@/ipcMsg/deamon';
 
 import ipcListenerMixin from '@/ipcMsg/ipcListenerMixin';
 import tickerSetMixin from '@/components/MarketFilter/js/tickerSetMixin';
@@ -61,6 +60,7 @@ export default {
 
     data() {
         this.kungfuGloablDataObserver = null;
+        this.oldInstruments = Object.freeze(JSON.parse(localStorage.getItem('instruments') || "[]"));
         return {
             watcherLoading: false,
             globalSettingDialogVisiblity: false,
@@ -92,6 +92,7 @@ export default {
 
         this.bindKungfuGlobalDataListener();
         this.bindTradingDataListener();
+        this.bindInstrumentsDataListener();
 
         this.getWatcherStatus();
     },
@@ -118,11 +119,44 @@ export default {
     },
 
     methods: {
+        bindInstrumentsDataListener () {
+            this.instrumentsDataPipe = buildInstrumentsPipeByDeamon().subscribe(data => {
+                const instruments = data['instruments'] || [];
+
+                if (!instruments || !instruments.length) {
+                    localStorage.setItem('instrumentsSavedDate', '')
+                    return;
+                }
+                
+                if (this.getIfSaveInstruments(instruments || [])) {
+                    localStorage.setItem('instrumentsSavedDate', moment().format('YYYY-MM-DD-HH-mm'))
+                    localStorage.setItem('instruments', JSON.stringify(instruments))
+                    this.oldInstruments = instruments; //refresh old instruments
+                }
+            })
+        },
+
         bindTradingDataListener () {
             this.tradingDataPipe = buildTradingDataAccountPipeByDeamon().subscribe(data => {
                 const assets = data['assets'];
                 this.$store.dispatch('setAccountsAsset', Object.freeze(assets));
             })
+        },
+
+        getIfSaveInstruments (newInstruments) {
+
+            if (newInstruments.length !== this.oldInstruments.length) {
+                return true;
+            }
+
+            const instrumentsSavedDate = localStorage.getItem('instrumentsSavedDate')
+            if (!instrumentsSavedDate) {
+                return true
+            } else if (instrumentsSavedDate !== moment().format('YYYY-MM-DD-HH-mm')) {
+                return true 
+            } else {
+                return false
+            }
         },
 
         removeLoadingMask () {
@@ -178,7 +212,6 @@ export default {
             //一种是从无直接100
             if (state !== oldState || oldState === "") {
                     if (state == 100 && oldState !== 100) {
-                        console.log("MdTdStateReady", processId, state, oldState)
                         this.$bus.$emit('mdTdStateReady', { processId, state })
                     }
             }

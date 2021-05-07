@@ -26,11 +26,9 @@ export default {
     methods: {
         getInstrumentIds () {
             const instruments = localStorage.getItem('instruments')
-
             if (!instruments) {
                 return Object.freeze([]);
             }
-            
             return Object.freeze(JSON.parse(instruments).map(item => Object.freeze(item)))
         },
 

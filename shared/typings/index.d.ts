@@ -65,12 +65,13 @@ interface ProcessStatusDetail {
         memory: bigint;
         cpu: number;
     },
-    pid: string,
-    name: string,
-    created_at: string,
-    script: string,
-    cwd: string,
-    args: string
+    pid: string;
+    pm_id: number;
+    name: string;
+    created_at: string;
+    script: string;
+    cwd: string;
+    args: string;
 }
 
 interface StringToProcessStatusDetail {

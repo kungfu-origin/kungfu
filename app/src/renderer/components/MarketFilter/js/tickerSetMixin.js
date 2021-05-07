@@ -147,7 +147,6 @@ export default {
         //通过md 订阅
         subscribeTickersByProcessId (mdProcessId, slience = true) {
             this.subscribeAllTickers(slience)
-            console.log("Subscribe All Ticker", mdProcessId)
         },
 
         subscribeTickersInTickerSet (tickerSet, slience = true) {
@@ -167,7 +166,6 @@ export default {
             for (i; i < len; i++) {
                 const ticker = tickers[i];
                 const { instrumentId, source, exchangeId } = ticker;
-                console.log(instrumentId, source, exchangeId)
                 kungfuSubscribeTicker(source, exchangeId, instrumentId)
                 await delayMiliSeconds(300)
             }

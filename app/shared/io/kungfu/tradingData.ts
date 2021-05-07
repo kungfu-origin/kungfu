@@ -21,7 +21,7 @@ import {
     dealSnapshot,
 } from '__io/kungfu/watcher';
 
-import { ensureLeaderData } from '__gUtils/busiUtils';
+import { ensureLeaderData, resolveInstruments } from '__gUtils/busiUtils';
 
 export const KUNGFU_TRADING_DATA_OBSERVER = new Observable(subscriber => {
     subscriber.next({})
@@ -66,8 +66,20 @@ export const buildInstrumentsPipe = () => {
         map(() => {
             const ledgerData = watcher.ledger
             const instruments = ensureLeaderData(ledgerData.Instrument);
+            const instrumentsAfterFilter = instruments
+                .filter((item: InstrumentOriginData) => {
+                    //普通股票 期货 股票期权 基金 科创板股票 指数
+                    if (item.instrument_type === 1) return true;
+                    if (item.instrument_type === 2) return true;
+                    if (item.instrument_type === 4) return true;
+                    if (item.instrument_type === 5) return true;
+                    if (item.instrument_type === 6) return true;
+                    if (item.instrument_type === 7) return true;
+
+                    return false
+                })
             return {
-                instruments
+                instruments: resolveInstruments(instrumentsAfterFilter)
             }
         })
     )
