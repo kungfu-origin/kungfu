@@ -142,6 +142,9 @@ export default {
                         break
                     case 'clear-journal':
                         this.removeJournal(KF_HOME)
+                            .then(() => {
+                                this.$message.success('清理 journal 完成！')
+                            })
                         break
 
                 }
@@ -259,6 +262,8 @@ export default {
             }  
 
             iterator(targetFolder)
+
+            return Promise.resolve(true)
         }
 
         

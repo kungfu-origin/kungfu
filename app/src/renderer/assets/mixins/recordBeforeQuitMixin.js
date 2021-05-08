@@ -38,7 +38,6 @@ export default {
         },
 
         recordQuote () {
-            
             const tickerIds = this.flatternTickers.map(item => `${item.instrumentId}_${item.exchangeId}`).join(',')
             const subscribedQuotes = this.quotes
                 .filter(item => {

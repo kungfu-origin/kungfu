@@ -86,6 +86,7 @@ export default {
         })
         this.nasterErrController = false;
         this.ledgerErrController = false;
+        this.kungfuDaemonController = false;
         this.ifProcessRunning = ifProcessRunning;
         return {
             statusLevel,
