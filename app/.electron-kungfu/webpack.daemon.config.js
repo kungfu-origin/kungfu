@@ -58,22 +58,15 @@ let daemonConfig = {
   target: 'node'
 }
 
-const { getCommitVersion, getPythonVersion } = require('./utils');
-const gitCommitVersion = getCommitVersion() || 'latest'
-const pyVersion = getPythonVersion() || '3'
-
-
 /**
  * Adjust daemonConfig for development settings
  */
 if (process.env.NODE_ENV !== 'production') {
   daemonConfig.plugins.push(
     new webpack.DefinePlugin({
-      'git_commit_version': `"${gitCommitVersion.toString()}"`,
-      'python_version': `"${pyVersion.toString()}"`,
+      '__resources': `"${path.join(__dirname, '../resources').replace(/\\/g, '\\\\')}"`,
       'process.env.NODE_ENV': '"development"',
       'process.env.APP_TYPE': '"daemon"',
-      '__resources': `"${path.join(__dirname, '../resources').replace(/\\/g, '\\\\')}"`,
     }),
   )
 }
@@ -88,8 +81,6 @@ if (process.env.NODE_ENV === 'production') {
       sourceMap: false
     }),
     new webpack.DefinePlugin({
-      'git_commit_version': `"${gitCommitVersion.toString()}"`,
-      'python_version': `"${pyVersion.toString()}"`,
       'process.env.NODE_ENV': '"production"',
       'process.env.APP_TYPE': '"daemon"',
     })

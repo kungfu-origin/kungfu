@@ -226,7 +226,7 @@ if (process.env.NODE_ENV === 'production') {
     }),
     new webpack.DefinePlugin({
       'python_version': `"${pyVersion.toString()}"`,
-      'process.env.NODE_ENV': JSON.stringify('production'),
+      'process.env.NODE_ENV': '"production"',
       'process.env.APP_TYPE': '"renderer"',
     }),
     // new BundleAnalyzerPlugin({

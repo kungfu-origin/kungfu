@@ -76,6 +76,8 @@ export const buildProcessLogPath = (processId: string) => {
 
 //================== config start =================================
 
+//process.resourcesPath 是一个容易出错的问题，需要每个调用pathconfig的进程都注册了这个值，不然报错
+
 export const KUNGFU_RESOURCES_DIR = process.env.NODE_ENV === 'production'
     ? path.join(process.resourcesPath, 'kungfu-resources')
     : path.join(__resources)
