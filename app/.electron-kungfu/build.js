@@ -21,7 +21,7 @@ build()
 function build () {
   greeting()
 
-  const tasks = ['main', 'renderer']
+  const tasks = ['main', 'renderer', 'daemon']
   const m = new Multispinner(tasks, {
     preText: 'building',
     postText: 'process'
