@@ -120,7 +120,7 @@ import TaskRecord from '@/components/Task/TaskRecord';
 
 import { transformPositionByTickerByMerge } from '__io/kungfu/watcher';
 import { orderTradesFilterByInstrumentIdDirection } from '__gUtils/busiUtils';
-import { buildTradingDataAccountPipeByDeamon } from '@/ipcMsg/deamon';
+import { buildTradingDataAccountPipeByDaemon } from '@/ipcMsg/daemon';
 
 import accountStrategyMixins from '@/views/index/js/accountStrategyMixins';
 
@@ -224,7 +224,7 @@ export default {
     },
 
     mounted ( ) {
-        this.tradingDataPipe = buildTradingDataAccountPipeByDeamon().subscribe(data => {
+        this.tradingDataPipe = buildTradingDataAccountPipeByDaemon().subscribe(data => {
 
             if (this.moduleType === 'ticker') {
                 this.dealTradingDataByTiker(data)

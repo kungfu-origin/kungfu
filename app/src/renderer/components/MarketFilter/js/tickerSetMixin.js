@@ -5,7 +5,7 @@ import AddSetTickerSetDialog from '@/components/MarketFilter/components/AddSetTi
 import AddTickerDialog from '@/components/MarketFilter/components/AddTickerDialog';
 
 import { checkAllMdProcess, findTargetFromArray, delayMiliSeconds } from '__gUtils/busiUtils';
-import { sendDataToDeamonByPm2 } from "__gUtils/processUtils";
+import { sendDataToDaemonByPm2 } from "__gUtils/processUtils";
 import { getTickerSets, addSetTickerSet, removeTickerSetByName } from '__io/actions/market';
 import { kungfuSubscribeTicker } from '__io/kungfu/makeCancelOrder'
 
@@ -141,7 +141,7 @@ export default {
             if (!this.watcherIsLive) return;
             const tickers = this.flatternTickers || [];
             this.subscribeTickers(tickers, slience)
-            sendDataToDeamonByPm2('MAIN_RENDERER_SUBSCRIBED_TICKERS', tickers)
+            sendDataToDaemonByPm2('MAIN_RENDERER_SUBSCRIBED_TICKERS', tickers)
         },
 
         //通过md 订阅

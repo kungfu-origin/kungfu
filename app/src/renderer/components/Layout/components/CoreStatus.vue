@@ -45,19 +45,19 @@
             <div class="core-item" >
                 <div class="core-status">
                     <span class="core-process-item  core-process-title text-overflow" title="数据进程">
-                        通信进程 <el-tag>Deamon</el-tag>
+                        通信进程 <el-tag>Daemon</el-tag>
                     </span>
                     <span  class="core-process-item text-overflow" style="width: 71px;">
                         <tr-status 
-                        v-if="ifProcessRunning('kungfuDeamon', processStatus)"
-                        :value="buildState('kungfuDeamon')"></tr-status>
+                        v-if="ifProcessRunning('kungfuDaemon', processStatus)"
+                        :value="buildState('kungfuDaemon')"></tr-status>
                         <tr-status v-else></tr-status>
                     </span>
                     <span class="core-process-item switch" v-if="NODE_ENV === 'development'">
-                        <el-switch  :value="ifProcessRunning('kungfuDeamon', processStatus)" @change="handleDeamonSwitch"></el-switch>
+                        <el-switch  :value="ifProcessRunning('kungfuDaemon', processStatus)" @change="handleDaemonSwitch"></el-switch>
                     </span>
                     <span class="core-process-item get-log">
-                        <i class="el-icon-document mouse-over" title="打开日志文件" @click="handleOpenLogFile('kungfuDeamon')" ></i>
+                        <i class="el-icon-document mouse-over" title="打开日志文件" @click="handleOpenLogFile('kungfuDaemon')" ></i>
                     </span>
                 </div>
             </div>
@@ -72,7 +72,7 @@
 import { mapState } from 'vuex';
 import { statusConfig } from '__gConfig/statusConfig';
 import { ifProcessRunning } from '__gUtils/busiUtils';
-import { switchLedger, switchDeamon } from '__io/actions/base';
+import { switchLedger, switchDaemon } from '__io/actions/base';
 
 import openLogMixin from '@/assets/mixins/openLogMixin';
 
@@ -135,8 +135,8 @@ export default {
             switchLedger(e)
         },
 
-        handleDeamonSwitch (e) {
-            switchDeamon(e)
+        handleDaemonSwitch (e) {
+            switchDaemon(e)
         }
     }
 }

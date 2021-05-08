@@ -13,7 +13,7 @@ export const watcher: any = (() => {
 
     if (process.env.RENDERER_TYPE !== 'app') {
         if (process.env.APP_TYPE !== 'cli') {
-            if (process.env.APP_TYPE !== 'deamon') {
+            if (process.env.APP_TYPE !== 'daemon') {
                 return {
                     noWatcher: true
                 }
@@ -27,8 +27,8 @@ export const watcher: any = (() => {
         return kungfu.watcher(KF_RUNTIME_DIR, kungfu.formatStringToHashHex(id), bypassQuote);
     }
 
-    if (process.env.APP_TYPE === "deamon") {
-        return kungfu.watcher(KF_RUNTIME_DIR, kungfu.formatStringToHashHex('kungfu_deamon'), false);
+    if (process.env.APP_TYPE === "daemon") {
+        return kungfu.watcher(KF_RUNTIME_DIR, kungfu.formatStringToHashHex('kungfu_daemon'), false);
     }
 
 

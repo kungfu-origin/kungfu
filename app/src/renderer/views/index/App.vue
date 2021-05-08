@@ -46,8 +46,7 @@ import { mapState } from 'vuex';
 import moment from "moment"
 
 import GlobalSettingDialog from '@/components/Base/GlobalSettingDialog';
-import { buildInstrumentsPipeByDeamon, buildTradingDataAccountPipeByDeamon, buildKungfuGlobalDataPipeByDeamon } from '@/ipcMsg/deamon';
-
+import { buildMarketDataPipeByDaemon, buildInstrumentsPipeByDaemon, buildTradingDataAccountPipeByDaemon, buildKungfuGlobalDataPipeByDaemon } from '@/ipcMsg/daemon';
 import ipcListenerMixin from '@/ipcMsg/ipcListenerMixin';
 import tickerSetMixin from '@/components/MarketFilter/js/tickerSetMixin';
 import workersMixin from '@/workers/workersMixin';
@@ -93,6 +92,7 @@ export default {
         this.bindKungfuGlobalDataListener();
         this.bindTradingDataListener();
         this.bindInstrumentsDataListener();
+        this.bindQuotesListener();
 
         this.getWatcherStatus();
     },
@@ -120,7 +120,7 @@ export default {
 
     methods: {
         bindInstrumentsDataListener () {
-            this.instrumentsDataPipe = buildInstrumentsPipeByDeamon().subscribe(data => {
+            buildInstrumentsPipeByDaemon().subscribe(data => {
                 const instruments = data['instruments'] || [];
 
                 if (!instruments || !instruments.length) {
@@ -136,8 +136,14 @@ export default {
             })
         },
 
+        bindQuotesListener () {
+            buildMarketDataPipeByDaemon().subscribe(data => {
+                this.$store.dispatch('setQuotes', Object.freeze(Object.values(data)))   
+            })
+        },
+
         bindTradingDataListener () {
-            this.tradingDataPipe = buildTradingDataAccountPipeByDeamon().subscribe(data => {
+            buildTradingDataAccountPipeByDaemon().subscribe(data => {
                 const assets = data['assets'];
                 this.$store.dispatch('setAccountsAsset', Object.freeze(assets));
             })
@@ -182,7 +188,7 @@ export default {
         },
 
         bindKungfuGlobalDataListener () {
-            this.kungfuGloablDataObserver = buildKungfuGlobalDataPipeByDeamon().subscribe(data => {
+            this.kungfuGloablDataObserver = buildKungfuGlobalDataPipeByDaemon().subscribe(data => {
                 
                 const gatewayStates = data["gatewayStates"] || [];
                 gatewayStates.forEach(gatewayState => {

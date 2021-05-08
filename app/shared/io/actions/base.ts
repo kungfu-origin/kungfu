@@ -1,5 +1,5 @@
 import fse from 'fs-extra';
-import { startCustomProcess, deleteProcess, killKfc, startMaster, startLedger, startDeamon, startTask, stopProcess } from '__gUtils/processUtils';
+import { startCustomProcess, deleteProcess, killKfc, startMaster, startLedger, startDaemon, startTask, stopProcess } from '__gUtils/processUtils';
 import { delayMiliSeconds } from '__gUtils/busiUtils';
 import { buildCustomProcessConfig } from '__gConfig/systemConfig';
 import { KF_TARADING_CONFIG_PATH, KF_CONFIG_PATH } from '__gConfig/pathConfig';
@@ -27,9 +27,9 @@ export const switchLedger = (status: boolean): Promise<any> => {
     return startLedger(false)
 }
 
-export const switchDeamon = (status: boolean): Promise<any> => {
-    if (!status) return deleteProcess('kungfuDeamon');
-    return startDeamon()
+export const switchDaemon = (status: boolean): Promise<any> => {
+    if (!status) return deleteProcess('kungfuDaemon');
+    return startDaemon()
 }
 
 export const switchCustomProcess = (status: boolean, targetName: string) => {

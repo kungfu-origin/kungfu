@@ -3,7 +3,7 @@ import { filter, map } from 'rxjs/operators';
 
 const { _pm2 } = require('__gUtils/processUtils');
 
-const baseDeamonDataObserver = new Observable(subscriber => {
+const baseDaemonDataObserver = new Observable(subscriber => {
     subscriber.next({})
     _pm2.launchBus((err, pm2_bus) => {
         if (err) {
@@ -15,8 +15,8 @@ const baseDeamonDataObserver = new Observable(subscriber => {
     })
 })
 
-export const buildTradingDataAccountPipeByDeamon = () => {
-    return baseDeamonDataObserver
+export const buildTradingDataAccountPipeByDaemon = () => {
+    return baseDaemonDataObserver
     .pipe(
         filter(packet => {
             const { type } = packet || {};
@@ -29,8 +29,8 @@ export const buildTradingDataAccountPipeByDeamon = () => {
     )
 }
 
-export const buildTradingDataStrategyPipeByDeamon = () => {
-    return baseDeamonDataObserver
+export const buildTradingDataStrategyPipeByDaemon = () => {
+    return baseDaemonDataObserver
     .pipe(
         filter(packet => {
             const { type } = packet || {};
@@ -43,8 +43,8 @@ export const buildTradingDataStrategyPipeByDeamon = () => {
     )
 }
 
-export const buildInstrumentsPipeByDeamon = () => {
-    return baseDeamonDataObserver
+export const buildInstrumentsPipeByDaemon = () => {
+    return baseDaemonDataObserver
         .pipe(
             filter(packet => {
                 const { type } = packet || {};
@@ -57,8 +57,8 @@ export const buildInstrumentsPipeByDeamon = () => {
         )
 }
 
-export const buildKungfuGlobalDataPipeByDeamon = () => {
-    return baseDeamonDataObserver
+export const buildKungfuGlobalDataPipeByDaemon = () => {
+    return baseDaemonDataObserver
         .pipe(
             filter(packet => {
                 const { type } = packet || {};
@@ -71,8 +71,8 @@ export const buildKungfuGlobalDataPipeByDeamon = () => {
         )
 }
 
-export const buildAllOrdersPipeByDeamon = () => {
-    return baseDeamonDataObserver
+export const buildAllOrdersPipeByDaemon = () => {
+    return baseDaemonDataObserver
     .pipe(
         filter(packet => {
             const { type } = packet || {};
@@ -86,8 +86,8 @@ export const buildAllOrdersPipeByDeamon = () => {
 }
 
 
-export const buildMarketDataPipeByDeamon = () => {
-    return baseDeamonDataObserver
+export const buildMarketDataPipeByDaemon = () => {
+    return baseDaemonDataObserver
     .pipe(
         filter(packet => {
             const { type } = packet || {};

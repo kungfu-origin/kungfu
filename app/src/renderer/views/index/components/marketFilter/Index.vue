@@ -75,7 +75,7 @@ import Task from '@/components/Task/Index';
 import TaskRecord from '@/components/Task/TaskRecord';
 import OrderRecord from '@/components/Base/tradingData/OrderRecord';
 
-import { buildMarketDataPipeByDeamon, buildAllOrdersPipeByDeamon } from '@/ipcMsg/deamon'; 
+import { buildMarketDataPipeByDaemon, buildAllOrdersPipeByDaemon } from '@/ipcMsg/daemon'; 
 
 import accountStrategyMixins from '@/views/index/js/accountStrategyMixins';
 
@@ -135,11 +135,11 @@ export default {
     },
 
     mounted () {
-        this.marketDataPipe = buildMarketDataPipeByDeamon().subscribe(data => {
+        this.marketDataPipe = buildMarketDataPipeByDaemon().subscribe(data => {
             this.quoteData = Object.freeze(data);
         })
 
-        this.allOrdersPipe = buildAllOrdersPipeByDeamon().subscribe(data => {
+        this.allOrdersPipe = buildAllOrdersPipeByDaemon().subscribe(data => {
             if (this.isHistoryData('order')) {
                 this.orders = this.getHistoryData('order')
             } else {

@@ -123,7 +123,7 @@ import Pos from '@/components/Base/tradingData/Pos';
 import Pnl from '@/components/Base/tradingData/pnl/Index';
 import MainContent from '@/components/Layout/MainContent';
 
-import { buildTradingDataStrategyPipeByDeamon } from '@/ipcMsg/deamon';
+import { buildTradingDataStrategyPipeByDaemon } from '@/ipcMsg/daemon';
 
 import accountStrategyMixins from '@/views/index/js/accountStrategyMixins';
 
@@ -151,7 +151,7 @@ export default {
     },
 
     mounted(){
-        this.tradingDataPipe = buildTradingDataStrategyPipeByDeamon().subscribe(data => {
+        this.tradingDataPipe = buildTradingDataStrategyPipeByDaemon().subscribe(data => {
             
             if (this.isHistoryData('order')) {
                 this.orders = this.getHistoryData('order')

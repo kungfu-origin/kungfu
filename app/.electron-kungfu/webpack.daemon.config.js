@@ -7,9 +7,9 @@ const { dependencies } = require('../package.json')
 const webpack = require('webpack')
 const OptimizeJsPlugin = require("optimize-js-plugin");
 
-let deamonConfig = {
+let daemonConfig = {
   entry: {
-    deamon: path.join(__dirname, '../src/deamon/index.ts')
+    daemon: path.join(__dirname, '../src/daemon/index.ts')
   },
   externals: [
     ...Object.keys(dependencies || {})
@@ -64,26 +64,26 @@ const pyVersion = getPythonVersion() || '3'
 
 
 /**
- * Adjust deamonConfig for development settings
+ * Adjust daemonConfig for development settings
  */
 if (process.env.NODE_ENV !== 'production') {
-  deamonConfig.plugins.push(
+  daemonConfig.plugins.push(
     new webpack.DefinePlugin({
       'git_commit_version': `"${gitCommitVersion.toString()}"`,
       'python_version': `"${pyVersion.toString()}"`,
       'process.env.NODE_ENV': '"development"',
-      'process.env.APP_TYPE': '"deamon"',
+      'process.env.APP_TYPE': '"daemon"',
       '__resources': `"${path.join(__dirname, '../resources').replace(/\\/g, '\\\\')}"`,
     }),
   )
 }
 
 /**
- * Adjust deamonConfig for production settings
+ * Adjust daemonConfig for production settings
  */
 if (process.env.NODE_ENV === 'production') {
-  deamonConfig.devtool = ''
-  deamonConfig.plugins.push(
+  daemonConfig.devtool = ''
+  daemonConfig.plugins.push(
     new OptimizeJsPlugin({
       sourceMap: false
     }),
@@ -91,9 +91,9 @@ if (process.env.NODE_ENV === 'production') {
       'git_commit_version': `"${gitCommitVersion.toString()}"`,
       'python_version': `"${pyVersion.toString()}"`,
       'process.env.NODE_ENV': '"production"',
-      'process.env.APP_TYPE': '"deamon"',
+      'process.env.APP_TYPE': '"daemon"',
     })
   )
 }
 
-module.exports = deamonConfig
+module.exports = daemonConfig

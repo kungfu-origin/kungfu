@@ -286,7 +286,7 @@ export const stopProcess = (processName: string) => {
 
 //干掉守护进程
 export const killGodDaemon = () => {
-    logger.info('[Pm2 Kill GodDeamon]')
+    logger.info('[Pm2 Kill GodDaemon]')
     return new Promise((resolve, reject) => {
         pm2Connect().then(() => {
             try {
@@ -478,16 +478,19 @@ export const startCustomProcess = (targetName: string, params: string): Promise<
     }).catch(err => logger.error(`[start${targetName}]`, err))
 }
 
-export const startDeamon = (): Promise<any> => {
+export const startDaemon = (): Promise<any> => {
+
+    console.log( 'daemonDir', process.env.NODE_ENV === 'production' ? path.join(__dirname) : path.join(__dirname, '..','..', 'dist', 'app'))
+
     return startProcess({
-        "name": "kungfuDeamon",
+        "name": "kungfuDaemon",
         "args": "",
-        "maxRestarts": 3,
+        "maxRestarts": 5,
         "autorestart": true,
         force: true,
-        watch: process.env.NODE_ENV === 'development' ? true : false,
-        script:  "deamon.js",
-        cwd: path.join(__dirname, '..','..', 'dist', 'app'),
+        watch: process.env.NODE_ENV === 'production' ? false : true,
+        script:  "daemon.js",
+        cwd: process.env.NODE_ENV === 'production' ? path.join(__dirname) : path.join(__dirname, '..','..', 'dist', 'app'),
         interpreter: process.execPath,
     }).catch(err => logger.error('[startTd]', err))
 }
@@ -572,22 +575,22 @@ export const sendDataToProcessIdByPm2 = (topic: string, pm2Id: number, processNa
     })
 }
 
-export const sendDataToDeamonByPm2 = (topic: string, data: any): Promise<any> => {
-    return getKungfuDeamonPmId()
+export const sendDataToDaemonByPm2 = (topic: string, data: any): Promise<any> => {
+    return getKungfuDaemonPmId()
         .then(pmid => {
             if (pmid === -1) {
-                return Promise.reject('KungfuDeamon not exsited！')
+                return Promise.reject('KungfuDaemon not exsited！')
             } else {
                 return pmid
             }
         })
-        .then((pmId: number) => sendDataToProcessIdByPm2(topic, pmId, "kungfuDeamon", data))
+        .then((pmId: number) => sendDataToProcessIdByPm2(topic, pmId, "kungfuDaemon", data))
 }
 
-function getKungfuDeamonPmId () {
+function getKungfuDaemonPmId () {
     return listProcessStatus()
         .then(({ processStatusWithDetail }) => {
-            const kungfuDeamonPrc: ProcessStatusDetail = processStatusWithDetail['kungfuDeamon'] || {};
-            return kungfuDeamonPrc.pm_id || -1;
+            const kungfuDaemonPrc: ProcessStatusDetail = processStatusWithDetail['kungfuDaemon'] || {};
+            return kungfuDaemonPrc.pm_id || -1;
         })
 }

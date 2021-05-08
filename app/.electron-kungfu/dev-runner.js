@@ -11,7 +11,7 @@ const webpackHotMiddleware = require('webpack-hot-middleware')
 
 const mainConfig = require('./webpack.main.config')
 const rendererConfig = require('./webpack.renderer.config')
-const deamonConfig = require('./webpack.deamon.config')
+const daemonConfig = require('./webpack.daemon.config')
 
 
 let electronProcess = null
@@ -120,11 +120,11 @@ function startMain () {
 }
 
 
-function startDeamon () {
+function startDaemon () {
   return new Promise((resolve, reject) => {
-    deamonConfig.entry.deamon = [].concat(deamonConfig.entry.deamon)
+    daemonConfig.entry.daemon = [].concat(daemonConfig.entry.daemon)
 
-    const compiler = webpack(deamonConfig)
+    const compiler = webpack(daemonConfig)
 
     compiler.watch({}, (err, stats) => {
       if (err) {
@@ -132,7 +132,7 @@ function startDeamon () {
         return
       }
 
-      logStats('Deamon', stats)
+      logStats('Daemon', stats)
       resolve()
     })
   })
@@ -191,7 +191,7 @@ function greeting () {
 function init () {
   greeting()
 
-  Promise.all([startRenderer(), startMain(), startDeamon()])
+  Promise.all([startRenderer(), startMain(), startDaemon()])
     .then(() => {
       startElectron()
     })

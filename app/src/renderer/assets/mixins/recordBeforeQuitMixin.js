@@ -5,7 +5,6 @@ import { mapGetters, mapState } from 'vuex';
 
 import { writeCSV } from '__gUtils/fileUtils';
 import { KF_DATASET_QUOTE_DIR } from '__gConfig/pathConfig';
-import { watcher } from '__io/kungfu/watcher';
 
 export default {
 
@@ -19,7 +18,8 @@ export default {
     computed: {
         
         ...mapState({
-            tickerSets: state => state.MARKET.tickerSets
+            tickerSets: state => state.MARKET.tickerSets,
+            quotes: state => state.MARKET.quotes
         }),
 
         ...mapGetters([
@@ -39,18 +39,10 @@ export default {
 
         recordQuote () {
             
-            watcher.step()
-            const quotes = Object.values(watcher.ledger.Quote || {});
             const tickerIds = this.flatternTickers.map(item => `${item.instrumentId}_${item.exchangeId}`).join(',')
-            const subscribedQuotes = quotes
+            const subscribedQuotes = this.quotes
                 .filter(item => {
-                    return tickerIds.includes(`${item.instrument_id}_${item.exchange_id}`)
-                })
-                .map(item => {
-                    return {
-                        ...item,
-                        instrument_id: item.instrument_id.toString()
-                    }
+                    return tickerIds.includes(`${item.instrumentId}_${item.exchangeId}`)
                 })
             
             if (!subscribedQuotes.length) {

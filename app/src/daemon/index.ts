@@ -140,10 +140,6 @@ _pm2.launchBus((err: Error, pm2_bus: any) => {
                 PM2_METHODS.resPosData(pm2Id, accountId, processName)
                 PM2_METHODS.resOrderData(pm2Id, parentId, processName)
                 break;
-         
-            // case 'REQ_RECORD_DATA':
-            //     const { data } = packetData.body;
-            //     writeKungfuTimeValue(processName, '', 'task', JSON.stringify(data))
         }
     })
 })

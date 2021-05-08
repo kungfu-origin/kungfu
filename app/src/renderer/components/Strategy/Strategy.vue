@@ -239,7 +239,7 @@ export default {
             strategyiesAsset: state => state.STRATEGY.strategyiesAsset || {},
             currentStrategy: state => state.STRATEGY.currentStrategy,
             strategyList: state => state.STRATEGY.strategyList,
-            processStatus: state => state.BASE.processStatus
+            processStatus: state => state.BASE.processStatus,
         }),
     },
 
