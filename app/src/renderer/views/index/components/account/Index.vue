@@ -119,8 +119,8 @@ import MainContent from '@/components/Layout/MainContent';
 import TaskRecord from '@/components/Task/TaskRecord';
 
 import { transformPositionByTickerByMerge } from '__io/kungfu/watcher';
+import { orderTradesFilterByInstrumentIdDirection } from '__gUtils/busiUtils';
 import { buildTradingDataAccountPipeByDeamon } from '@/ipcMsg/deamon';
-import { allowShorted } from "kungfu-shared/config/tradingConfig";
 
 import accountStrategyMixins from '@/views/index/js/accountStrategyMixins';
 
@@ -140,8 +140,6 @@ export default {
             positions: Object.freeze([]),
             positionsByTicker: Object.freeze([]),
             orderStat: Object.freeze({}),
-
-            historyData: {},
 
             currentOrdesTabName: "orders",
             currentTradesPnlTabNum: "trades",
@@ -254,13 +252,6 @@ export default {
             this.$store.dispatch('setCurrentAccountTabName', tab.name)
         },
 
-        handleShowHistory ({ date, data, type }) {
-            this.$set(this.historyData, type, {
-                date,
-                data
-            })
-        },
-
         showCurrentIdInTabName (currentTabName, target) {
             return currentTabName === target ? this.currentId : ''
         },
@@ -290,15 +281,15 @@ export default {
 
         dealTradingData (data) {
 
-            if (this.historyData['order'] && ((this.historyData['order'] || {}).date)) {
-                this.orders = Object.freeze(this.historyData['order'].data)
+            if (this.isHistoryData('order')) {
+                this.orders = this.getHistoryData('order')
             } else {
                 const orders = data['orders'][this.currentId];
                 this.orders = Object.freeze(orders || []);
             }
 
-            if (this.historyData['trade'] && ((this.historyData['trade'] || {}).date)) {
-                this.trades = Object.freeze(this.historyData['trade'].data)
+            if (this.isHistoryData('trade')) {
+                this.trades = this.getHistoryData('trade')
             } else {
                 const trades = data['trades'][this.currentId];
                 this.trades = Object.freeze(trades || []);
@@ -317,69 +308,38 @@ export default {
 
         },
 
+
         dealTradingDataByTiker (data) {
             const { instrumentId, directionOrigin } = this.currentTicker;
-            const orders = data['ordersByTicker']
-            .filter(item => {
-                if (!instrumentId.includes(item.instrumentId)) {
-                    return false;
-                }
-                
-                const { offsetOrigin, sideOrigin, instrumentTypeOrigin } = item;
-                return this.orderTradesFilterByPosTicker(directionOrigin, offsetOrigin, sideOrigin, instrumentTypeOrigin)
-                
-            })
-            .map(item => Object.freeze(item))
-            this.orders = Object.freeze(orders || []);
 
-            const trades = data['tradesByTicker']
-            .filter(item => {
-                if (!instrumentId.includes(item.instrumentId)) {
-                    return false;
-                }
+            if (!instrumentId) {
+                this.orders = Object.freeze([]);
+                this.trades = Object.freeze([]);
+                this.positions = Object.freeze([]);
+                return 
+            }
+            const orders = this.isHistoryData('order') ? this.getHistoryData('order') : data['ordersByTicker']
+            const ordersResolved = orders
+                .filter(item => {
+                    return orderTradesFilterByInstrumentIdDirection(item, instrumentId, directionOrigin)
+                })
+                .map(item => Object.freeze(item))
+            this.orders = Object.freeze(ordersResolved || []);
 
-                const { offsetOrigin, sideOrigin, instrumentTypeOrigin } = item;
-                return this.orderTradesFilterByPosTicker(directionOrigin, offsetOrigin, sideOrigin, instrumentTypeOrigin)
-                
-            })
-            .map(item => Object.freeze(item))
-            this.trades = Object.freeze(trades || []);
+            const trades = this.isHistoryData('trade') ? this.getHistoryData('trade') : data['tradesByTicker']
+            const tradesResolved = trades
+                .filter(item => {
+                    return orderTradesFilterByInstrumentIdDirection(item, instrumentId, directionOrigin)
+                })
+                .map(item => Object.freeze(item))
+            this.trades = Object.freeze(tradesResolved || []);
 
             const positionsByTicker = data['positionsByTicker'][this.currentTickerId] || [];
             const positionsByTickerForAccount = positionsByTicker.filter(item => !!item.accountId && !item.clientId);
             this.positions = Object.freeze(positionsByTickerForAccount)
         },
 
-        orderTradesFilterByPosTicker (direction, offset, side, instrumentType) {
-            if (!allowShorted(instrumentType)) {
-                return true;
-            }
-
-            // long
-            if (direction === 0) {
-                if (offset === 0) {
-                    if (side === 0) {
-                        return true
-                    }
-                } else {
-                    if (side === 1) {
-                        return true
-                    }
-                }
-            } else { //short
-                if (offset === 0) {
-                    if (side === 1) {
-                        return true;
-                    }
-                } else {
-                    if (side === 0) {
-                        return true;
-                    }
-                }
-            } 
-
-            return false;
-        }
+ 
     },
 
 

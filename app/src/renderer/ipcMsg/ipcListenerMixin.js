@@ -4,7 +4,7 @@ import { ipcRenderer, remote } from 'electron';
 import fse from 'fs-extra';
 import path from 'path';
 
-import { watcher,  dealOrder, writeKungfu } from '__io/kungfu/watcher';
+import { watcher,  dealOrder, writeKungfuTimeValue } from '__io/kungfu/watcher';
 import { getStrategyById, updateStrategyPath } from '__io/kungfu/strategy';
 import { transformTradingItemListToData } from '__io/kungfu/watcher';
 import { aliveOrderStatusList } from 'kungfu-shared/config/tradingConfig';
@@ -120,7 +120,7 @@ export default {
 
                         case 'REQ_RECORD_DATA':
                             const { data } = packetData.body;
-                            writeKungfu(processName, '', 'task', JSON.stringify(data))
+                            writeKungfuTimeValue(processName, '', 'task', JSON.stringify(data))
                     }
                 })
             })

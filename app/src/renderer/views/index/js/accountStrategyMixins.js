@@ -1,6 +1,7 @@
 
 const remote = require('electron').remote;
 import { openVueWin } from '__gUtils/busiUtils';
+import { dealOrder, dealTrade } from '__io/kungfu/watcher';
 
 export default {
 
@@ -8,6 +9,7 @@ export default {
 
         return {
             makeOrderByPosData: {},
+            historyData: {},
         }
     },
 
@@ -49,6 +51,13 @@ export default {
                     window.makeOrderWin && window.makeOrderWin.show && window.makeOrderWin.show();
                     window.makeOrderWin && window.makeOrderWin.focus && window.makeOrderWin.focus();
                 })        
+        },
+        
+        handleShowHistory ({ date, data, type }) {
+            this.$set(this.historyData, type, {
+                date,
+                data
+            })
         },
 
         buildMakeOrderWin () {
@@ -92,7 +101,27 @@ export default {
                 this.makeOrderByQuote = Object.freeze({})
             })
         },
-        
-     
+
+        isHistoryData (type) {
+            if (type === 'order') {
+                return this.historyData['order'] && ((this.historyData['order'] || {}).date)
+            } else if (type === 'trade') {
+                return this.historyData['trade'] && ((this.historyData['trade'] || {}).date)
+            } else {
+                throw new Error('isHistoryData type is not trade or order!')
+                return false;
+            }
+        },
+
+        getHistoryData (type) {
+            if (type === 'order') {
+                return Object.freeze((this.historyData['order'].data || []).map(item => Object.freeze(dealOrder(item))));
+            } else if (type === 'trade') {
+                return this.trades = Object.freeze((this.historyData['trade'].data || []).map(item => Object.freeze(dealTrade(item))));
+            } else {
+                throw new Error('getHistoryData type is not trade or order!')
+                return []
+            }
+        }        
     }
 }

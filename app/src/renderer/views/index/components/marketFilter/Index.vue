@@ -77,7 +77,11 @@ import OrderRecord from '@/components/Base/tradingData/OrderRecord';
 
 import { buildMarketDataPipeByDeamon, buildAllOrdersPipeByDeamon } from '@/ipcMsg/deamon'; 
 
+import accountStrategyMixins from '@/views/index/js/accountStrategyMixins';
+
 export default {
+
+    mixins: [ accountStrategyMixins ],
 
     components: {
         MainContent,
@@ -99,8 +103,6 @@ export default {
             currentTradeDataTabName: 'systemOrders',
             orders: Object.freeze([]),
             orderStat: Object.freeze({}),
-
-            historyData: {},
         }
     },
 
@@ -138,8 +140,8 @@ export default {
         })
 
         this.allOrdersPipe = buildAllOrdersPipeByDeamon().subscribe(data => {
-            if (this.historyData['order'] && ((this.historyData['order'] || {}).date)) {
-                this.orders = Object.freeze(this.historyData['order'].data)
+            if (this.isHistoryData('order')) {
+                this.orders = this.getHistoryData('order')
             } else {
                 const orders = data['orders'];
                 this.orders = Object.freeze(orders || []);
@@ -156,12 +158,6 @@ export default {
     },
 
     methods: {
-        handleShowHistory ({ date, data, type }) {
-            this.$set(this.historyData, type, {
-                date,
-                data
-            })
-        },
 
         handleMakeOrderByOrderBook (quote) {
             this.selectedQuote = Object.freeze(quote);

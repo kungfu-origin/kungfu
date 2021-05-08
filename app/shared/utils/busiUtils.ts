@@ -6,6 +6,7 @@ import readline from 'readline';
 
 import { EXTENSION_DIR } from '__gConfig/pathConfig';
 import { listDir } from '__gUtils/fileUtils';
+import { allowShorted } from "kungfu-shared/config/tradingConfig";
 
 
 interface LogLineData {
@@ -667,4 +668,54 @@ export function ensureLeaderData (data: any, key = '') {
     }
 
     return data ? data.sort(key) : []
+}
+
+const orderTradesFilterByDirection = (direction: number, offset: number, side: number, instrumentType: number) => {
+    if (!allowShorted(+instrumentType)) {
+        return true;
+    }
+
+    // long
+    if (+direction === 0) {
+        if (+offset === 0) {
+            if (+side === 0) {
+                return true
+            }
+        } else {
+            if (+side === 1) {
+                return true
+            }
+        }
+    } else { //short
+        if (+offset === 0) {
+            if (+side === 1) {
+                return true;
+            }
+        } else {
+            if (+side === 0) {
+                return true;
+            }
+        }
+    } 
+
+    return false;
+}
+
+export const orderTradesFilterByInstrumentIdDirection = (item: OrderData | TradeData, instrumentId: string, directionOrigin: number) => {
+    if (!instrumentId.includes(item.instrumentId)) {
+        return false;
+    }
+
+    const { offsetOrigin, sideOrigin, instrumentTypeOrigin } = item;
+    return orderTradesFilterByDirection(directionOrigin, offsetOrigin, sideOrigin, instrumentTypeOrigin)
+}
+
+export const buildDictFromArray = (list: any[], key: string) => {
+    let data: { [prop: string]: any } = {};
+    const keys: string[] = key.split(",");
+    list.kfForEach((item: any) => {
+        const key: string = keys.map((k: string): string => (item[k] || "").toString()).join('_');
+        data[key] = item;
+    })
+    return data;
 }

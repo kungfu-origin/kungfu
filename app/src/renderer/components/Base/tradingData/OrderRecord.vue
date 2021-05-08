@@ -272,9 +272,12 @@ export default {
                 orderDataByKey[orderData.id] = Object.freeze(orderData);
             })
 
-            return Object.freeze(Object.values(orderDataByKey).sort((a, b) =>{
-                return  b.updateTimeNum - a.updateTimeNum
-            }))
+            const ordersResolved = Object.values(orderDataByKey)
+                .sort((a, b) =>{
+                    return  b.updateTimeNum - a.updateTimeNum
+                })
+
+            return Object.freeze(ordersResolved)
         }
     }
 }

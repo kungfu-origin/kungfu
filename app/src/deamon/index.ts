@@ -143,7 +143,7 @@ _pm2.launchBus((err: Error, pm2_bus: any) => {
          
             // case 'REQ_RECORD_DATA':
             //     const { data } = packetData.body;
-            //     writeKungfu(processName, '', 'task', JSON.stringify(data))
+            //     writeKungfuTimeValue(processName, '', 'task', JSON.stringify(data))
         }
     })
 })

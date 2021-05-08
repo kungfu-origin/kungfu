@@ -37,25 +37,6 @@ export const watcher: any = (() => {
 })()
 
 
-export const startGetKungfuStep = (interval = 500) => {
-    
-    if (watcher.noWatcher) return;
-    
-    return setTimerPromiseTask(() => {
-        return new Promise((resolve) => {
-            if (!watcher.isLive() && !watcher.isStarted() && watcher.isUsable()) {
-                watcher.setup();
-            }
-
-            if (watcher.isLive()) {
-                watcher.step();
-            }
-        
-            resolve(true);
-        })
-    }, interval);
-}
-
 export const startGetKungfuTradingData = (callback: Function, interval = 500) => {
     
     if (watcher.noWatcher) return;
@@ -77,7 +58,7 @@ export const startGetKungfuTradingData = (callback: Function, interval = 500) =>
 }
 
 
-export const writeKungfu = (id: string, label: string, type: string, val: string) => {
+export const writeKungfuTimeValue = (id: string, label: string, type: string, val: string) => {
     let data = kungfu.longfist.TimeValue();
     data.tag_a = id || '';
     data.tag_b = label || '';
@@ -137,9 +118,9 @@ export const transformOrderInputListToData = (list: any[], type: string) => {
     return data;
 }
 
-export const transformOrderStatListToData = (list: any[]) => {
+export const transformOrderStatListToData = (list: OrderStatOriginData[]) => {
     let data: StringToAnyObject = {};
-    list.kfForEach((item: any) => {
+    list.kfForEach((item: OrderStatData) => {
         data[item.orderId.toString()] = item;
     })
     return data;

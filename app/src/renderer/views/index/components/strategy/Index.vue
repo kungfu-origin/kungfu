@@ -153,15 +153,15 @@ export default {
     mounted(){
         this.tradingDataPipe = buildTradingDataStrategyPipeByDeamon().subscribe(data => {
             
-            if (this.historyData['order'] && ((this.historyData['order'] || {}).date)) {
-                this.orders = Object.freeze(this.historyData['order'].data)
+            if (this.isHistoryData('order')) {
+                this.orders = this.getHistoryData('order')
             } else {
                 const orders = data['orders'][this.strategyId];
                 this.orders = Object.freeze(orders || []);
             }
 
-            if (this.historyData['trade'] && ((this.historyData['trade'] || {}).date)) {
-                this.trades = Object.freeze(this.historyData['trade'].data)
+            if (this.isHistoryData('trade')) {
+                this.trades = this.getHistoryData('trade')
             } else {
                 const trades = data['trades'][this.strategyId];
                 this.trades = Object.freeze(trades || []);
@@ -211,13 +211,6 @@ export default {
     },
 
     methods:{
-        handleShowHistory ({ date, data, type }) {
-            this.$set(this.historyData, type, {
-                date,
-                data
-            })
-        },
-
         showCurrentIdInTabName (currentTabName, target) {
             return currentTabName === target ? this.strategyId : ''
         },

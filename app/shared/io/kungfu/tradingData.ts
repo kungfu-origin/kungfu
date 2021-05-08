@@ -27,12 +27,14 @@ export const KUNGFU_TRADING_DATA_OBSERVER = new Observable(subscriber => {
     subscriber.next({})
     startGetKungfuTradingData((watcher: any) => {
         subscriber.next(watcher)
-    }, 1500)
+    }, 500)
 })
  
 export const buildTradingDataPipe = (type: string) => {
     return KUNGFU_TRADING_DATA_OBSERVER.pipe(
         map(() => {
+
+            console.time('calc')
             const ledgerData = watcher.ledger
             const orderInputs = ensureLeaderData(ledgerData.OrderInput, 'insert_time').slice(0, 200).map((item: OrderInputOriginData) => dealOrderInput(item));
             const orders = ensureLeaderData(ledgerData.Order, 'update_time').slice(0, 200).map((item: OrderOriginData) => dealOrder(item));

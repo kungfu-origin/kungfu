@@ -1,8 +1,8 @@
 import moment from 'moment';
-import { decodeKungfuLocation } from '__io/kungfu/watcher';
+import { decodeKungfuLocation, dealOrder, dealTrade } from '__io/kungfu/watcher';
 import { history } from '__io/kungfu/kungfuUtils';
 import { writeCSV } from '__gUtils/fileUtils';
-import { getDefaultRenderCellClass } from '__gUtils/busiUtils';
+import { getDefaultRenderCellClass, orderTradesFilterByInstrumentIdDirection, buildDictFromArray } from '__gUtils/busiUtils';
 
 export default {
     props: {
@@ -24,8 +24,7 @@ export default {
 
         kungfuData: {
             type: Array,
-            default: () => {
-            }
+            default: () => ([])
         },
 
         addTime: {
@@ -76,10 +75,23 @@ export default {
         currentTitle () {
             return this.currentId ? `${this.currentId}` : ''
         },
+
+        currentIdResolved () {
+            if (this.moduleType === 'account') {
+                return this.currentId
+            } else if (this.moduleType === 'strategy') {
+                return this.currentId
+            } else if (this.moduleType === 'ticker') {
+                const { instrumentId, directionOrigin } = this.currentTicker || {};
+                return `${instrumentId}_${directionOrigin}`
+            } else {
+                return ''
+            }
+        }
     },
 
     watch: {
-        currentId() {
+        currentIdResolved() {
             this.resetData();
         }
     },
@@ -146,35 +158,85 @@ export default {
             return new Promise((resolve) => {
                 let timer = setTimeout(() => {
 
-                    const kungfuData = history.selectPeriod(from, to)
-                    const targetList = this.kungfuBoardType === 'order' ? Object.values(kungfuData.Order) : Object.values(kungfuData.Trade)
-                    const kungfuIdKey = this.moduleType === 'account' ? 'source' : 'dest'
+                    const kungfuData = history.selectPeriod(from, to);
+                    const targetList = this.getHistoryTargetList(this.kungfuBoardType, kungfuData);
+                    const orderStats = kungfuData.OrderStat.list();
+                    const orderStatByOrderId = buildDictFromArray(orderStats, 'order_id');
                     
-                    const targetListAfterFilter = targetList.filter(item => {
-                        const locationKey = item[kungfuIdKey];
-                        const kungfuLocation = decodeKungfuLocation(+locationKey);
-                        if (this.moduleType === 'account') {
-                            return `${kungfuLocation.group}_${kungfuLocation.name}` === this.currentId
-                        } else if (this.moduleType === 'strategy') {
-                            return kungfuLocation.name === this.currentId
-                        } else if (this.moduleType === 'all') {
-                            return true;
-                        }
-
-                        return false
-                    })
-
+                    const targetListAfterFilter = targetList
+                        .filter(item => {
+                            if (this.moduleType === 'account') {
+                                return this.getHistoryDataKeyForFilter('account', item) === this.currentId;
+                            } else if (this.moduleType === 'strategy') {
+                                return this.getHistoryDataKeyForFilter('strategy', item) === this.currentId;
+                            } else if (this.moduleType === 'all') {
+                                return true;
+                            } else if (this.moduleType === 'ticker') {
+                                const { instrumentId, directionOrigin } = this.currentTicker;
+                                return orderTradesFilterByInstrumentIdDirection(this.dealOrderTrade(this.kungfuBoardType, item), instrumentId, directionOrigin);
+                            }
+                        })
+                        .map(item => {
+                            //加上orderStat细节
+                            const orderId = item.order_id.toString();
+                            return {
+                                ...orderStatByOrderId[orderId],
+                                ...item,
+                                dest: item.dest,
+                                source: item.source,
+                                tag: item.tag,
+                                ts: item.ts,
+                                type: item.type,
+                                uid_key: item.uid_key
+                            }
+                        });
+                    
                     this.dateRangeExportLoading = false;
-
                     resolve(targetListAfterFilter)
                     clearTimeout(timer)
                 }, 100)
             })
         },
 
+        getHistoryTargetList (kungfuBoardType, kungfuData) {
+            if (kungfuBoardType === 'order') {
+                return kungfuData.Order.sort('update_time')
+            } else if (kungfuBoardType === 'trade') {
+                return kungfuData.Trade.sort('update_time')
+            } else {
+                throw new Error('getHistoryTargetList type is not trade or order!')
+                return []
+            }
+        },
+
+        dealOrderTrade (kungfuBoardType, item) {
+            if (kungfuBoardType === 'order') {
+                return dealOrder(item)
+            } else if (kungfuBoardType === 'trade') {
+                return dealTrade(item)
+            } else {
+                throw new Error('dealOrderTrade type is not trade or order!')
+                return {}
+            }
+        },
+
+        getHistoryDataKeyForFilter (moduleType, item) {
+            if (moduleType === 'account') {
+                const kungfuLocation = decodeKungfuLocation(+item.source);
+                return `${kungfuLocation.group}_${kungfuLocation.name}`
+            } else if (moduleType === 'strategy') {
+                const kungfuLocation = decodeKungfuLocation(+item.dest);
+                return kungfuLocation.name
+            } else {
+                throw new Error('getHistoryDataKeyForFilter type is not account or strategy!')
+                return []
+            }
+        },
+
         resetData() {
             this.searchKeyword = "";
             this.tableData = Object.freeze([]);
+            this.handleClearHistory();
             return true;
         },
 
