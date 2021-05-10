@@ -207,6 +207,7 @@ var hasConsoledTotalFinished = false;
 var hasCancelBeforeLastStep = false;
 
 var hasConsoledError = false;
+var hasConsoledCancelOrderError = false;
 
 combineLatestObserver
     .pipe(
@@ -309,7 +310,10 @@ combineLatestObserver
             //判断是否可以交易, 如不能交易，先撤单
             const aliveOrders = getAliveOrders(orders)
             if (aliveOrders.length) {
-                console.log(`[检查订单] 活动订单数量 ${aliveOrders.length} / ${orders.length}, 等待全部订单结束`)
+                if (!hasConsoledCancelOrderError) {
+                    console.log(`[检查订单] 活动订单数量 ${aliveOrders.length} / ${orders.length}, 等待全部订单结束`)
+                    hasConsoledCancelOrderError = true;
+                }
                 reqCancelOrder(PARENT_ID)
 
                 //如果离最后截止时间小于50ms，也全部执行
@@ -320,6 +324,8 @@ combineLatestObserver
 
                 return false
             } 
+
+            hasConsoledCancelOrderError = false;
             
             return true;
         })
@@ -421,7 +427,7 @@ function resolveUnfinishedSteps (unfinishiedSteps: number) {
 
 function handleFinished (quote: QuoteData, printQuote: Function) {
     console.log(`====================== 时间截止，交易结束 ======================`)
-    console.log('[收盘]')
+    console.log('[时间截止]')
     printQuote(quote)
     secondsCounterTimer && clearInterval(secondsCounterTimer)
     reqTradingDataTimer && clearInterval(reqTradingDataTimer)

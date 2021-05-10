@@ -204,7 +204,7 @@ export const startProcess = (options: Pm2Options, no_ext = false): Promise<objec
             try {
                 pm2.start(optionsResolved, (err: any, apps: object): void => {
                     if (err) {
-                        console.log(err)
+                        console.error(err)
                         err = err.length ? err[0] : err;
                         logger.error('[startProcess]', JSON.stringify(optionsResolved), err)
                         reject(err);
@@ -479,8 +479,6 @@ export const startCustomProcess = (targetName: string, params: string): Promise<
 }
 
 export const startDaemon = (): Promise<any> => {
-
-    console.log( 'daemonDir', process.env.NODE_ENV === 'production' ? path.join(__dirname) : path.join(__dirname, '..','..', 'dist', 'app'))
 
     return startProcess({
         "name": "kungfuDaemon",

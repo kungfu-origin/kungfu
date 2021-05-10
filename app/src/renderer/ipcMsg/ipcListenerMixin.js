@@ -6,7 +6,7 @@ import path from 'path';
 
 import { watcher,  dealOrder, writeKungfuTimeValue } from '__io/kungfu/watcher';
 import { getStrategyById, updateStrategyPath } from '__io/kungfu/strategy';
-import { transformTradingItemListToData } from '__io/kungfu/watcher';
+import { getTargetOrdersByParentId } from '__io/kungfu/watcher';
 import { aliveOrderStatusList } from 'kungfu-shared/config/tradingConfig';
 import { KF_HOME } from '__gConfig/pathConfig';
 import { listDir } from '__gUtils/fileUtils';
@@ -81,12 +81,11 @@ export default {
                                 })
 
                         case 'CANCEL_ORDER_BY_PARENT_ID':
-                            const ordersByParentId = this.getTargetOrdersByParentId(watcher.ledger.Order, parentId)
+                            const ordersByParentId = getTargetOrdersByParentId(watcher.ledger.Order, parentId);
                             ordersByParentId
                                 .filter(order => aliveOrderStatusList.includes(+(order.status || 0)))
                                 .forEach(order => {
-                                    const orderData = dealOrder(order)
-                                    this.cancelOrder('account', orderData)
+                                    this.cancelOrder('account', order)
                                 })
                             break
 

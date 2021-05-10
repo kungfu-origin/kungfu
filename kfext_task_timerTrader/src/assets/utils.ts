@@ -233,9 +233,12 @@ export const calcVolumeThisStep = (
     ) => {
     const pos = positions[`${TICKER}_${TARGET_DIRECTION}`] || {};
     const posCont = positions[`${TICKER}_${TARGET_DIRECTION_CONT}`] || {};
+    
     const currentVolume = +pos.totalVolume || 0;
-    const { yesterdayVolume, todayVolume } = pos || {};
+    const yesterdayVolume = +pos.yesterdayVolume || 0;
+    const todayVolume = +pos.todayVolume || 0;
     const currentVolumeCont = +posCont.totalVolume || 0;
+
     const currentVolumeData: any = {
         [+TARGET_DIRECTION]: currentVolume,
         [+TARGET_DIRECTION_CONT]: currentVolumeCont
@@ -435,7 +438,7 @@ function buildTradeTaskLog (
     const countOperation = deltaVolume <= 0 ? '' : `持仓不足, 需 ${OPERATION_NAME} ${currentVolume}, ${contOperationName} ${deltaVolume}`
 
     console.log(
-        `现有 ${ticker} ${PosDirection[TARGET_DIRECTION]} ${currentVolume}, ${countPos}
+        `现有 ${ticker}${PosDirection[TARGET_DIRECTION]} ${currentVolume}, ${countPos}
         其中 ${ticker}${PosDirection[TARGET_DIRECTION]} 昨 ${currentYesVolume}, 今 ${currentTodayVolume},
         还需 ${OPERATION_NAME} ${total}, 本次需 ${OPERATION_NAME} ${thisStepVolume}, 
         ${countOperation}`

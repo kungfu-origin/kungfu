@@ -104,11 +104,11 @@ export default {
 
         isHistoryData (type) {
             if (type === 'order') {
-                return this.historyData['order'] && ((this.historyData['order'] || {}).date)
+                return !!(this.historyData['order'] && ((this.historyData['order'] || {}).date))
             } else if (type === 'trade') {
-                return this.historyData['trade'] && ((this.historyData['trade'] || {}).date)
+                return !!(this.historyData['trade'] && ((this.historyData['trade'] || {}).date))
             } else {
-                throw new Error('isHistoryData type is not trade or order!')
+                console.error('isHistoryData type is not trade or order!')
                 return false;
             }
         },
@@ -119,7 +119,7 @@ export default {
             } else if (type === 'trade') {
                 return this.trades = Object.freeze((this.historyData['trade'].data || []).map(item => Object.freeze(dealTrade(item))));
             } else {
-                throw new Error('getHistoryData type is not trade or order!')
+                console.error('getHistoryData type is not trade or order!')
                 return []
             }
         }        

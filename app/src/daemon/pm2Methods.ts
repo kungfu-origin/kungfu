@@ -2,7 +2,7 @@
 import { 
     watcher,
     transformTradingItemListToData, 
-    dealOrder,
+    getTargetOrdersByParentId,
     dealPos,
     dealQuote
 } from '__io/kungfu/watcher';
@@ -15,7 +15,7 @@ export const resLedgerData = (parentId: string, pm2Id: number, accountId: string
     watcher.step();
     const ledger = watcher.ledger;
     const quotes = ensureLeaderData(ledger.Quote.filter('instrument_id', ticker)).map((item: QuoteOriginData) => dealQuote(item));
-    const orders = getTargetOrdersByParentId(parentId);
+    const orders = getTargetOrdersByParentId(ledger.Order, parentId);
     const positions = ensureLeaderData(ledger.Position).map((item: PosOriginData) => dealPos(item));
     const positionsResolved = transformTradingItemListToData(positions, 'account')[accountId] || [];
     
@@ -66,14 +66,9 @@ export const resOrderData = (pm2Id: number, parentId: string, processName: strin
     if (!watcher.isLive()) return;
 
     watcher.step();
-    const orders = getTargetOrdersByParentId(parentId);
+    const orders = getTargetOrdersByParentId(watcher.ledger.Order, parentId);
     
     sendDataToProcessIdByPm2("ORDER_DATA", pm2Id, processName, { 
         orders
     })
-}
-
-function getTargetOrdersByParentId (parentId: string) {
-    const Order = watcher.ledger.Order;
-    return ensureLeaderData(Order.filter('parent_id', BigInt(parentId))).map((item: OrderOriginData) => dealOrder(item))
 }

@@ -28,8 +28,5 @@ if (process.env.APP_TYPE === 'daemon') {
 }
 
 
-console.log(process.resourcesPath)
-
-
 
 export const KF_HOME_BASE_DIR_RESOLVE: string = getHomePath()

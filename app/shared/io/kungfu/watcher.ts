@@ -2,7 +2,7 @@ import fse from 'fs-extra';
 import { KF_RUNTIME_DIR, KF_CONFIG_PATH } from '__gConfig/pathConfig';
 import { setTimerPromiseTask } from '__gUtils/busiUtils';
 import { kungfu } from '__io/kungfu/kungfuUtils';
-import { toDecimal, ensureNum } from '__gUtils/busiUtils';
+import { toDecimal, ensureNum, ensureLeaderData } from '__gUtils/busiUtils';
 import { OffsetName, OrderStatus, SideName, PosDirection, PriceType, HedgeFlag, InstrumentType, VolumeCondition, TimeCondition, allowShorted } from "kungfu-shared/config/tradingConfig";
 import { logger } from '__gUtils/logUtils';
 
@@ -226,6 +226,9 @@ export function decodeKungfuLocation(sourceOrDest: number): KungfuLocation {
     return location
 }
 
+export function getTargetOrdersByParentId (Orders: any, parentId: string) {
+    return ensureLeaderData(Orders.filter('parent_id', BigInt(parentId))).map((item: OrderOriginData) => dealOrder(item))
+}
 
 // ========================== 交易数据处理 start ===========================
 

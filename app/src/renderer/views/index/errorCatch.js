@@ -2,7 +2,8 @@ import { remote } from 'electron'
 const { dialog } = remote;
 
 
-process
+if (process.env.NODE_ENV === 'production') {
+    process
     .on('unhandledRejection', (reason, p) => {
         console.error(reason, 'Unhandled Rejection at Promise', p);
     })
@@ -13,3 +14,5 @@ process
             dialog.showErrorBox('错误', err, a, b)
         } 
     });
+}
+

@@ -204,7 +204,7 @@ export default {
             } else if (kungfuBoardType === 'trade') {
                 return kungfuData.Trade.sort('update_time')
             } else {
-                throw new Error('getHistoryTargetList type is not trade or order!')
+                console.error('getHistoryTargetList type is not trade or order!')
                 return []
             }
         },
@@ -215,7 +215,7 @@ export default {
             } else if (kungfuBoardType === 'trade') {
                 return dealTrade(item)
             } else {
-                throw new Error('dealOrderTrade type is not trade or order!')
+                console.error('dealOrderTrade type is not trade or order!')
                 return {}
             }
         },
@@ -228,7 +228,7 @@ export default {
                 const kungfuLocation = decodeKungfuLocation(+item.dest);
                 return kungfuLocation.name
             } else {
-                throw new Error('getHistoryDataKeyForFilter type is not account or strategy!')
+                console.error('getHistoryDataKeyForFilter type is not account or strategy!')
                 return []
             }
         },
