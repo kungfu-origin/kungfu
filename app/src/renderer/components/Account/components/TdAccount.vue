@@ -298,7 +298,7 @@ export default {
         handleTdSwitch(value, account) {
             return switchTd(account, value).then(({ type, message }) => this.$message[type](message))
         },
-
+       
         switchAllProcess (targetStatus) {
             const promiseList = this.tdList
                 .filter(item => {
