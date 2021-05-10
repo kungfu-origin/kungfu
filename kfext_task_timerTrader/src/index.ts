@@ -206,8 +206,7 @@ var targetPosData: any = null;
 var hasConsoledTotalFinished = false;
 var hasCancelBeforeLastStep = false;
 
-var hasConsoledError = false;
-var hasConsoledCancelOrderError = false;
+var hasConsoledQuoteError = false;
 
 combineLatestObserver
     .pipe(
@@ -247,14 +246,14 @@ combineLatestObserver
             const quote = quotes[TICKER];
 
             if (!quote) {
-                if (!hasConsoledError) {
+                if (!hasConsoledQuoteError) {
                     console.error(`[WARNING] 暂无${ticker}行情信息，需保证MD进程开启`)
-                    hasConsoledError = true;
+                    hasConsoledQuoteError = true;
                 }
                 return false;
             }
 
-            hasConsoledError = false
+            hasConsoledQuoteError = false
 
             //制定全部交易计划
             const pos = (positions || {})[`${TICKER}_${TARGET_DIRECTION}`] || {};
@@ -310,10 +309,8 @@ combineLatestObserver
             //判断是否可以交易, 如不能交易，先撤单
             const aliveOrders = getAliveOrders(orders)
             if (aliveOrders.length) {
-                if (!hasConsoledCancelOrderError) {
-                    console.log(`[检查订单] 活动订单数量 ${aliveOrders.length} / ${orders.length}, 等待全部订单结束`)
-                    hasConsoledCancelOrderError = true;
-                }
+                console.log(`[检查订单] 活动订单数量 ${aliveOrders.length} / ${orders.length}, 等待全部订单结束`)
+
                 reqCancelOrder(PARENT_ID)
 
                 //如果离最后截止时间小于50ms，也全部执行
@@ -324,8 +321,6 @@ combineLatestObserver
 
                 return false
             } 
-
-            hasConsoledCancelOrderError = false;
             
             return true;
         })
