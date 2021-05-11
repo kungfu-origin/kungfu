@@ -1,5 +1,5 @@
 import fse from 'fs-extra';
-import { startCustomProcess, deleteProcess, killKfc, startMaster, startLedger, startDaemon, startTask, stopProcess } from '__gUtils/processUtils';
+import { startCustomProcess, deleteProcess, killKfc, killGodDaemon, killKungfu, killExtra, startMaster, startLedger, startDaemon, startTask, stopProcess } from '__gUtils/processUtils';
 import { delayMiliSeconds } from '__gUtils/busiUtils';
 import { buildCustomProcessConfig } from '__gConfig/systemConfig';
 import { KF_TARADING_CONFIG_PATH, KF_CONFIG_PATH } from '__gConfig/pathConfig';
@@ -9,18 +9,23 @@ export const switchMaster = async (status: boolean): Promise<any> => {
         try {
             await deleteProcess('master');
             await killKfc()
+            await killExtra();
+            await killGodDaemon();
+            await killKungfu();
         } catch(err) {
             throw err
         }
+    } else {
+        try {
+            await startMaster(false)
+            await delayMiliSeconds(1000)
+            await startLedger(false)
+        } catch (err) {
+            throw err
+        } 
     } 
-    try {
-        await startMaster(false)
-        await delayMiliSeconds(1000)
-        await startLedger(false)
-    } catch (err) {
-        throw err
-    }
 }
+   
 
 export const switchLedger = (status: boolean): Promise<any> => {
     if(!status) return deleteProcess('ledger')   

@@ -1,5 +1,6 @@
 import Dashboard from '@/assets/components/Dashboard';
 import MessageBox from '@/assets/components/MessageBox';
+import Loading from '@/assets/components/Loading';
 import { DEFAULT_PADDING, TABLE_BASE_OPTIONS, parseToString } from '@/assets/scripts/utils';
 import { switchProcess, processListObservable } from '@/assets/scripts/actions/processActions';
 import { LogsAndWatcherConcatObservable } from '@/assets/scripts/actions/logActions';
@@ -108,18 +109,7 @@ export class MonitorDashboard extends Dashboard {
 
     initLoader() {
         const t = this;
-        t.boards.loader = blessed.loading({
-            parent: t.screen,
-            top: '100%-5',
-            left: '100%-40',
-            height: 5,
-            align: 'left',
-            valign: 'center',
-            width: 40,
-            tags: true,
-            hidden: true,
-            border: 'line'
-        });
+        t.boards.loader = Loading(t.screen)
     }
 
     initBoxInfo() {
@@ -183,7 +173,7 @@ export class MonitorDashboard extends Dashboard {
         t.boards.processList.key(['enter'], () => {
             const selectedIndex: number = t.boards.processList.selected;
             const curProcessItem = t.globalData.processList[selectedIndex];
-            switchProcess(curProcessItem, t.boards.message)
+            switchProcess(curProcessItem, t.boards.message, t.boards.loader)
         })
 
         t.boards.processList.key(['up', 'down'], debounce((ch: string, key: any) => {

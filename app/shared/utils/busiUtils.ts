@@ -719,3 +719,4 @@ export const buildDictFromArray = (list: any[], key: string) => {
     })
     return data;
 }
+

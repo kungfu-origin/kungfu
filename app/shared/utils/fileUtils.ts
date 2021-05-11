@@ -264,3 +264,40 @@ export const writeCSV = (filePath: string, data: any[]): Promise<void> => {
     })
     
 }
+
+export const removeJournal = (targetFolder: string) => {
+            
+    async function iterator (folder: string) {
+        const items = await listDir(folder)
+
+        if (!items) return;
+        
+        const folders = items.filter((f: string) => {
+            const stat = fse.statSync(path.join(folder, f))
+
+            if (stat.isDirectory()) return true;
+            return false;
+        })
+
+        const files = items.filter((f: string) => {
+            const stat = fse.statSync(path.join(folder, f))
+
+            if (stat.isFile()) return true;
+            return false;
+        })                
+
+        files.forEach((f: string) => {
+            if (f.includes('.journal')) {
+                fse.removeSync(path.join(folder, f))
+            }
+        })
+
+        folders.forEach((f: string) => {
+            iterator(path.join(folder, f))
+        })                
+    }  
+
+    iterator(targetFolder)
+
+    return Promise.resolve(true)
+}
