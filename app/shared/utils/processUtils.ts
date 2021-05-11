@@ -3,7 +3,7 @@ import fse from 'fs-extra';
 //@ts-ignore
 import * as taskkill from 'taskkill';
 
-import { KF_HOME, KUNGFU_ENGINE_PATH, KF_CONFIG_PATH, buildProcessLogPath } from '__gConfig/pathConfig';
+import { KF_HOME, KUNGFU_ENGINE_PATH, KF_CONFIG_PATH, APP_DIR, buildProcessLogPath } from '__gConfig/pathConfig';
 import { platform } from '__gConfig/platformConfig';
 import { logger } from '__gUtils/logUtils';
 import { setTimerPromiseTask, delayMiliSeconds } from '__gUtils/busiUtils';
@@ -82,7 +82,7 @@ export const killKfc = () => kfKill([kfc])
 
 export const killKungfu = () => kfKill(['kungfu'])
 
-export const killExtra = () => kfKill([kfc, 'pm2'])
+export const killExtra = () => kfKill([kfc, 'pm2', 'kungfuDaemon'])
 
 
 //=========================== pm2 manager =========================================
@@ -488,7 +488,7 @@ export const startDaemon = (): Promise<any> => {
         force: true,
         watch: process.env.NODE_ENV === 'production' ? false : true,
         script:  "daemon.js",
-        cwd: process.env.NODE_ENV === 'production' ? path.join(__dirname) : path.join(__dirname, '..','..', 'dist', 'app'),
+        cwd: APP_DIR,
         interpreter: process.execPath,
     }).catch(err => logger.error('[startTd]', err))
 }

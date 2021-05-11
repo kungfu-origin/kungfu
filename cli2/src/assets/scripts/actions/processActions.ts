@@ -47,16 +47,15 @@ export const switchProcess = (proc: any, messageBoard: any, loading: any) =>{
                         return messageBoard.log(`${startOrStop} Master process success!`, 2)
                     })
                     .catch((err: Error) => logger.error(err))
-            }
-            else if(proc.processId === 'ledger') {
+            } else if (proc.processId === 'ledger') {
                 loading.load(`${startOrStop} Ledger process`)
                 switchLedger(!status)
-                .then(() => {
-                    loading.stop();
-                    return messageBoard.log(`${startOrStop} Ledger process success!`, 2)
-                })
-                .catch((err: Error) => logger.error(err))
-            } 
+                    .then(() => {
+                        loading.stop();
+                        return messageBoard.log(`${startOrStop} Ledger process success!`, 2)
+                    })
+                    .catch((err: Error) => logger.error(err))
+            }
             break
         case 'md':
             loading.load(`${startOrStop} MD process`)
@@ -187,6 +186,15 @@ export const processListObservable = () => combineLatest(
 
         return [
             {
+                process: "archive",
+                processName: colors.bold('_archive'),
+                typeName: colors.bgMagenta('Main'),
+                type: 'main',
+                statusName: dealStatus(buildStatusDefault(processStatus['archive']).status),
+                status: buildStatusDefault(processStatus['archive']).status,
+                monit: buildStatusDefault(processStatus['archive']).monit
+            },
+            {
                 processId: 'master',
                 processName: colors.bold('MASTER'),
                 typeName: colors.bgMagenta('Main'),
@@ -204,6 +212,7 @@ export const processListObservable = () => combineLatest(
                 status: buildStatusDefault(processStatus['ledger']).status,
                 monit: buildStatusDefault(processStatus['ledger']).monit
             },
+
             {
                 processId: 'bar',
                 processName: colors.bold('BAR'),

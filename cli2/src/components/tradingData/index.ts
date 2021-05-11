@@ -221,10 +221,10 @@ class TradingDataDashboard extends Dashboard {
 
 			if (this.type === 'account') {
 				kungfuCancelAllOrders(aliveOrders)
-					.then(() => t.boards.message.log(`Cancel all orders signal sending`, 2))
+					.then(() => t.boards.message.log(`Cancel all orders signal sending`, 3))
 			} else if (this.type === 'strategy') {
 				kungfuCancelAllOrders(aliveOrders, this.targetId)
-					.then(() => t.boards.message.log(`Cancel all orders signal sending`, 2))
+					.then(() => t.boards.message.log(`Cancel all orders signal sending`, 3))
 			}
 		})
 	}

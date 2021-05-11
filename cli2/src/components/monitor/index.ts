@@ -187,6 +187,7 @@ export class MonitorDashboard extends Dashboard {
     }
 
     _getLogs(processItem: ProcessListItem) {
+        if (!processItem) return;
         const t = this;
         const processId = processItem.processId;
         const processIds = [processId];
