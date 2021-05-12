@@ -256,14 +256,17 @@ combineLatestObserver
 
             //制定全部交易计划
             const pos = (positions || {})[`${TICKER}_${TARGET_DIRECTION}`] || {};
+            const posCont = (positions || {})[`${TICKER}_${TARGET_DIRECTION_CONT}`] || {};
             if (!targetPosData) {
-                const { totalVolume } = pos;
+                const totalVolume = pos.totalVolume || 0;
+                const totalVolumeCount = posCont.totalVolume || 0;
                 targetPosData = buildTarget({ 
-                    offset,
-                    side,
+                    offset: +offset,
+                    side: +side,
                     ticker,
-                    totalVolume: totalVolume || 0,
-                    targetVolume: TARGET_VOLUME
+                    totalVolume: +totalVolume,
+                    totalVolumeCont: +totalVolumeCount,
+                    targetVolume: +TARGET_VOLUME
                 })
 
                 //依然没有

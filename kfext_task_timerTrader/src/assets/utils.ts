@@ -37,13 +37,15 @@ export const makeOrderDirectionType = (side: number, offset: number): direcData 
     }
 }
 
-export const buildTarget = ({ offset, side, ticker, totalVolume, targetVolume }: { 
+export const buildTarget = ({ offset, side, ticker, totalVolume, totalVolumeCont, targetVolume }: { 
     offset: number,
     side: number,
     ticker: string,
     totalVolume: number,
+    totalVolumeCont: number,
     targetVolume: number
 }): VolumeRecordData[] | Boolean => {
+    //0 long 1 short;
     if (+side === 0) {
         if (+offset === 0) {
             console.log(`[TARGET] 标的 ${ticker}，现有多仓 ${totalVolume}，目标买开 ${targetVolume}`)    
@@ -56,7 +58,7 @@ export const buildTarget = ({ offset, side, ticker, totalVolume, targetVolume }:
                 console.log(`[TARGET] 标的 ${ticker}，现有空仓 ${totalVolume}，目标买平 ${targetVolume}，现有持仓不足，需买平 ${totalVolume}，买开 ${delta}`)                
                 return [
                     { d: 1, v: 0 },
-                    { d: 0, v: delta }
+                    { d: 0, v: delta + totalVolumeCont }
                 ]
             } else {
                 console.log(`[TARGET] 标的 ${ticker}，现有空仓 ${totalVolume}，目标买平 ${targetVolume}`)    
@@ -77,7 +79,7 @@ export const buildTarget = ({ offset, side, ticker, totalVolume, targetVolume }:
                 console.log(`[TARGET] 标的 ${ticker}，现有多仓 ${totalVolume}，目标卖平 ${targetVolume}，现有持仓不足，需卖平 ${totalVolume}，卖开 ${delta}`)                
                 return [
                     { d: 0, v: 0 },
-                    { d: 1, v: delta }
+                    { d: 1, v: delta + totalVolumeCont }
                 ]   
             } else {
                 console.log(`[TARGET] 标的 ${ticker}，现有多仓 ${totalVolume}，目标卖平 ${targetVolume}`)                
@@ -221,65 +223,6 @@ export const getAliveOrders = (orders: OrderData[]) => {
     })
 }
 
-export const calcVolumeThisStep = (
-        positions: StringToPosData, 
-        TICKER: string, 
-        TARGET_DIRECTION: number, 
-        TARGET_DIRECTION_CONT: number, 
-        offset: number,
-        targetPosData: VolumeRecordData[], 
-        unfinishedSteps: number, 
-        instrumentType: number
-    ) => {
-    const pos = positions[`${TICKER}_${TARGET_DIRECTION}`] || {};
-    const posCont = positions[`${TICKER}_${TARGET_DIRECTION_CONT}`] || {};
-    const currentVolume = +pos.totalVolume || 0;
-    const currentVolumeCont = +posCont.totalVolume || 0;
-    const yesterdayVolume = +pos.yesterdayVolume || 0;
-    const todayVolume = +pos.todayVolume || 0;
-    
-    const currentVolumeData: any = {
-        [+TARGET_DIRECTION]: currentVolume,
-        [+TARGET_DIRECTION_CONT]: currentVolumeCont
-    }
-    const totalTargetVolume: number = targetPosData
-    .map((item: VolumeRecordData): number => {
-        const { d, v } = item;
-        const currentV = currentVolumeData[d]
-        const delta = currentV - v
-        //需要根据开平方向判断， 开->大于目标仓位->0，平->小于目标仓位->0
-        if (d === TARGET_DIRECTION) {
-            if (+offset === 0) {
-                return delta > 0 ? 0 : Math.abs(delta)
-            } else {
-                return delta < 0 ? 0 : Math.abs(delta)
-            }
-        } else {
-            //此时真实应用offset为反向
-            if (+offset === 0) {
-                return delta < 0 ? 0 : Math.abs(delta)
-            } else {
-                return delta > 0 ? 0 : Math.abs(delta)
-            }
-        }
-       
-    }) 
-    .reduce((delta1: number, delta2: number) => {
-        return +delta1 + +delta2
-    }) || 0
-
-    const targetVolumeByStep = unfinishedSteps === 1 ? totalTargetVolume : totalTargetVolume / unfinishedSteps
-
-    return {
-        currentVolume,
-        currentYesVolume: yesterdayVolume,
-        currentTodayVolume: todayVolume,
-        currentVolumeCont,
-        total: totalTargetVolume,
-        thisStepVolume: dealMakeOrderVolume(instrumentType, targetVolumeByStep)
-    }
-}
-
 export const timeCheckBySecond = (currentSecond: number, quote: QuoteData) => {
     if (currentSecond >= 0) return
     const secondResolved = Math.abs(currentSecond);
@@ -347,6 +290,66 @@ export const getCurrentCount = ({
     return currentCount
 };
 
+export const calcVolumeThisStep = (
+        positions: StringToPosData, 
+        TICKER: string, 
+        TARGET_DIRECTION: number, 
+        TARGET_DIRECTION_CONT: number, 
+        offset: number,
+        targetPosData: VolumeRecordData[], 
+        unfinishedSteps: number, 
+        instrumentType: number
+    ) => {
+    const pos = positions[`${TICKER}_${TARGET_DIRECTION}`] || {};
+    const posCont = positions[`${TICKER}_${TARGET_DIRECTION_CONT}`] || {};
+    const currentVolume = +pos.totalVolume || 0;
+    const currentVolumeCont = +posCont.totalVolume || 0;
+    const yesterdayVolume = +pos.yesterdayVolume || 0;
+    const todayVolume = +pos.todayVolume || 0;
+
+    const currentVolumeData: any = {
+        [+TARGET_DIRECTION]: currentVolume,
+        [+TARGET_DIRECTION_CONT]: currentVolumeCont
+    }
+
+    const totalTargetVolume: number = targetPosData
+        .map((item: VolumeRecordData): number => {
+            const { d, v } = item;
+            const currentV = currentVolumeData[d];
+            const delta = currentV - v;
+            //需要根据开平方向判断， 开->大于目标仓位->0，平->小于目标仓位->0
+            if (+d === +TARGET_DIRECTION) {
+                if (+offset === 0) {
+                    return delta > 0 ? 0 : Math.abs(delta)
+                } else {
+                    return delta < 0 ? 0 : Math.abs(delta)
+                }
+            } else {
+                //此时真实应用offset为反向
+                if (+offset === 0) {
+                    return delta < 0 ? 0 : Math.abs(delta)
+                } else {
+                    return delta > 0 ? 0 : Math.abs(delta)
+                }
+            }
+        
+        }) 
+        .reduce((delta1: number, delta2: number) => {
+            return +delta1 + +delta2
+        }) || 0;
+
+    const targetVolumeByStep = unfinishedSteps === 1 ? totalTargetVolume : totalTargetVolume / unfinishedSteps
+
+    return {
+        currentVolume,
+        currentYesVolume: yesterdayVolume,
+        currentTodayVolume: todayVolume,
+        currentVolumeCont,
+        total: totalTargetVolume,
+        thisStepVolume: dealMakeOrderVolume(instrumentType, targetVolumeByStep)
+    }
+}
+
 export const buildTradeTaskVolumeOffset = ({
     ticker,
     side,
@@ -375,6 +378,7 @@ export const buildTradeTaskVolumeOffset = ({
     TARGET_DIRECTION_CONT: number;
 }) => {
 
+    //deltaVolume 平仓计算目前仓位是否足够，小于0，足够，大于0，不够，需要反向
     const deltaVolume = getDeltaVolume(offset, thisStepVolume, currentVolume)
     buildTradeTaskLog(ticker, side, currentVolume, currentYesVolume, currentTodayVolume, total, currentVolumeCont, deltaVolume, thisStepVolume, OPERATION_NAME, TARGET_DIRECTION, TARGET_DIRECTION_CONT)
 
