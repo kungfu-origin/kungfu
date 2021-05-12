@@ -235,7 +235,6 @@ export default {
             const positionsByTicker = data['positionsByTicker'] || {};
             this.positionsByTicker = Object.freeze(transformPositionByTickerByMerge(positionsByTicker, 'account') || []);
             this.initSetCurrentTicker(this.positionsByTicker);
-
             const orderStat = data['orderStat'];
             this.orderStat = Object.freeze(orderStat || {});
         })

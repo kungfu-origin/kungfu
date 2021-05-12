@@ -28,6 +28,7 @@
 import tradingDataMixin from './js/tradingDataMixin';
 
 import { writeCSV } from '__gUtils/fileUtils';
+import { toDecimal } from '__gUtils/busiUtils';
 import { posHeader } from '@/components/Base/tradingData/js/tableHeaderConfig';
 
 export default {
@@ -117,6 +118,10 @@ export default {
             positionsAfterFilter.kfForEach(item => {
                 let positionData = { ...item };
                 positionData.update = true;
+                positionData.yesterdayVolume = toDecimal(item.yesterdayVolume);
+                positionData.totalVolume = toDecimal(item.totalVolume);
+                positionData.volume = toDecimal(item.volume);
+                positionData.unRealizedPnl = toDecimal(item.unRealizedPnl);
                 const poskey = this.getKey(positionData);
                 positionDataByKey[poskey] = Object.freeze(positionData);
             })
