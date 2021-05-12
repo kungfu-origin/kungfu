@@ -2,9 +2,9 @@
 import { mapState } from 'vuex';
 import { ipcRenderer, remote } from 'electron';
 
-import { watcher, writeKungfuTimeValue } from '__io/kungfu/watcher';
+import { watcher, writeKungfuTimeValue, getTargetOrdersByParentId } from '__io/kungfu/watcher';
+import { kungfu } from '__io/kungfu/kungfuUtils';
 import { getStrategyById, updateStrategyPath } from '__io/kungfu/strategy';
-import { getTargetOrdersByParentId } from '__io/kungfu/watcher';
 import { aliveOrderStatusList } from 'kungfu-shared/config/tradingConfig';
 import { KF_HOME } from '__gConfig/pathConfig';
 import { removeJournal } from '__gUtils/fileUtils';
@@ -117,7 +117,14 @@ export default {
 
                         case 'REQ_RECORD_DATA':
                             const { data } = packetData.body;
-                            writeKungfuTimeValue(processName, '', 'task', JSON.stringify(data))
+                            const kungfuTimeNow = watcher.now();
+                            const kungfuTimeNowStr = kungfu.formatTime(kungfuTimeNow, '%H:%M:%S.%N').slice(0, 12);
+
+                            writeKungfuTimeValue(processName, '', 'task', JSON.stringify({
+                                ...data,
+                                kungfuTimeNow: kungfuTimeNow.toString(),
+                                kungfuTimeNowStr
+                            }))
                     }
                 })
             })

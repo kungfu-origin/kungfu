@@ -166,9 +166,14 @@
     "displayConfig": [
       {
         "type": "text",
-        "label": "下单时间",
+        "label": "下单时间（本地）",
         "prop": "updateTime",
-        "width": "100px"
+        "width": "120px"
+      },{
+        "type": "text",
+        "label": "下单时间（系统）",
+        "prop": "kungfuTimeNowStr",
+        "width": "120px"
       },{
         "type": "text",
         "label": "标的",
@@ -191,6 +196,12 @@
         "width": "120px"
       },{
         "type": "text",
+        "align": "right",
+        "label": "已成交/目标",
+        "prop": "volumeLefted",
+        "width": "100px"
+      },{
+        "type": "text",
         "label": "",
         "align": "center",
         "prop": "side",
@@ -200,7 +211,7 @@
         "align": "center",
         "label": "",
         "prop": "offset",
-        "width": "30px"
+        "width": "50px"
       },{
         "type": "number",
         "label": "委托价",
@@ -211,12 +222,6 @@
         "label": "下单量",
         "prop": "volume",
         "width": "60px"
-      },{
-        "type": "text",
-        "align": "right",
-        "label": "成交/目标量",
-        "prop": "volumeLefted",
-        "width": "100px"
       },{
         "type": "text",
         "align": "right",

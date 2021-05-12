@@ -203,7 +203,6 @@ var dealedTimeCount: number = -1000000000000;
 var dealedSecond: number | undefined = undefined;
 var lastestMakeOrdertimeStamp = 0;
 var targetPosData: any = null;
-var hasConsoledTotalFinished = false;
 var hasCancelBeforeLastStep = false;
 
 var hasConsoledQuoteError = false;
@@ -307,7 +306,7 @@ combineLatestObserver
             console.log(`[交易检查] ${timeCount + 1} / ${steps}, ${getCurrentTimestamp(true)} `)
             
             //判断是否可以交易, 如不能交易，先撤单
-            const aliveOrders = getAliveOrders(orders)
+            const aliveOrders = getAliveOrders(orders);
             if (aliveOrders.length) {
                 console.log(`[检查订单] 活动订单数量 ${aliveOrders.length} / ${orders.length}, 等待全部订单结束`)
 
@@ -335,6 +334,9 @@ combineLatestObserver
         //制定本次交易计划
         const instrumentType = quote.instrumentTypeOrigin;
         const unfinishedSteps = resolveUnfinishedSteps(steps - timeCount);
+
+
+
         const { total, thisStepVolume, currentVolume, currentYesVolume, currentTodayVolume, currentVolumeCont }  = calcVolumeThisStep(
             positions,
             TICKER,
@@ -344,16 +346,10 @@ combineLatestObserver
             targetPosData,
             unfinishedSteps,
             instrumentType
-        )
+        );
 
         if (+total === 0) {
-            if (!hasConsoledTotalFinished) {
-                console.log('================================================================')
-                console.log(`====================== 交易任务完成 ==============================`)
-                console.log('================================================================')
-                hasConsoledTotalFinished = true;
-            }
-        
+            handleFinished(quote, printQuote, 'taskDone')
             return false;
         }
 
@@ -420,9 +416,15 @@ function resolveUnfinishedSteps (unfinishiedSteps: number) {
     return unfinishiedSteps
 }
 
-function handleFinished (quote: QuoteData, printQuote: Function) {
-    console.log(`====================== 时间截止，交易结束 ======================`)
-    console.log('[时间截止]')
+function handleFinished (quote: QuoteData, printQuote: Function, type = "time") {
+    if (type === 'time') {
+        console.log(`====================== 时间截止，交易结束 ======================`)
+        console.log('[时间截止]')
+    } else if (type === 'taskDone') {
+        console.log(`====================== 目标完成，交易结束 ======================`)
+        console.log('[目标完成]')
+    }
+
     printQuote(quote)
     secondsCounterTimer && clearInterval(secondsCounterTimer)
     reqTradingDataTimer && clearInterval(reqTradingDataTimer)

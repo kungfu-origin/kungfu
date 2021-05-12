@@ -5,7 +5,7 @@ import { InstrumentTypes, aliveOrderStatusList, ExchangeIds, SideName, OffsetNam
 export const transformArrayToObjectByKey = (targetList: Array<any>, keys: Array<string>): any => {
     let data: any = {};
     (targetList || []).forEach(item => {
-        const key:string = keys.map(k => item[k]).filter(k => !!k).join('_')
+        const key:string = keys.map(k => item[k].toString().trim()).filter(k => !!k).join('_')
 
         if (key) {
             data[key] = item
@@ -46,20 +46,20 @@ export const buildTarget = ({ offset, side, ticker, totalVolume, targetVolume }:
 }): VolumeRecordData[] | Boolean => {
     if (+side === 0) {
         if (+offset === 0) {
-            console.log(`[TRAGET] 标的 ${ticker}，现有多仓 ${totalVolume}，目标买开 ${targetVolume}`)    
+            console.log(`[TARGET] 标的 ${ticker}，现有多仓 ${totalVolume}，目标买开 ${targetVolume}`)    
             return [
                 { d: 0, v: totalVolume + targetVolume }
             ]            
         } else if (+offset === 1) {
             if (targetVolume > totalVolume) {
                 const delta = targetVolume - totalVolume;
-                console.log(`[TRAGET] 标的 ${ticker}，现有空仓 ${totalVolume}，目标买平 ${targetVolume}，现有持仓不足，需买平 ${totalVolume}，买开 ${delta}`)                
+                console.log(`[TARGET] 标的 ${ticker}，现有空仓 ${totalVolume}，目标买平 ${targetVolume}，现有持仓不足，需买平 ${totalVolume}，买开 ${delta}`)                
                 return [
                     { d: 1, v: 0 },
                     { d: 0, v: delta }
                 ]
             } else {
-                console.log(`[TRAGET] 标的 ${ticker}，现有空仓 ${totalVolume}，目标买平 ${targetVolume}`)    
+                console.log(`[TARGET] 标的 ${ticker}，现有空仓 ${totalVolume}，目标买平 ${targetVolume}`)    
                 return [
                     { d: 1, v: totalVolume - targetVolume },
                 ]
@@ -67,20 +67,20 @@ export const buildTarget = ({ offset, side, ticker, totalVolume, targetVolume }:
         }
     } else if (+side === 1) {
         if (+offset === 0) {
-            console.log(`[TRAGET] 标的 ${ticker}，现有空仓${totalVolume}，目标卖开${targetVolume}`)      
+            console.log(`[TARGET] 标的 ${ticker}，现有空仓${totalVolume}，目标卖开${targetVolume}`)      
             return [
                 { d: 1, v: totalVolume + targetVolume },
             ]
         } else if (+offset === 1) {
             if (targetVolume > totalVolume) {
                 const delta = targetVolume - totalVolume;
-                console.log(`[TRAGET] 标的 ${ticker}，现有多仓 ${totalVolume}，目标卖平 ${targetVolume}，现有持仓不足，需卖平 ${totalVolume}，卖开 ${delta}`)                
+                console.log(`[TARGET] 标的 ${ticker}，现有多仓 ${totalVolume}，目标卖平 ${targetVolume}，现有持仓不足，需卖平 ${totalVolume}，卖开 ${delta}`)                
                 return [
                     { d: 0, v: 0 },
                     { d: 1, v: delta }
                 ]   
             } else {
-                console.log(`[TRAGET] 标的 ${ticker}，现有多仓 ${totalVolume}，目标卖平 ${targetVolume}`)                
+                console.log(`[TARGET] 标的 ${ticker}，现有多仓 ${totalVolume}，目标卖平 ${targetVolume}`)                
                 return [
                     { d: 0, v: totalVolume - targetVolume },
                 ]
@@ -233,12 +233,11 @@ export const calcVolumeThisStep = (
     ) => {
     const pos = positions[`${TICKER}_${TARGET_DIRECTION}`] || {};
     const posCont = positions[`${TICKER}_${TARGET_DIRECTION_CONT}`] || {};
-    
     const currentVolume = +pos.totalVolume || 0;
+    const currentVolumeCont = +posCont.totalVolume || 0;
     const yesterdayVolume = +pos.yesterdayVolume || 0;
     const todayVolume = +pos.todayVolume || 0;
-    const currentVolumeCont = +posCont.totalVolume || 0;
-
+    
     const currentVolumeData: any = {
         [+TARGET_DIRECTION]: currentVolume,
         [+TARGET_DIRECTION_CONT]: currentVolumeCont
