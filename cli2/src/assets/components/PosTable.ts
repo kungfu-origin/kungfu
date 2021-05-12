@@ -40,9 +40,9 @@ class PosTable extends Table {
 				[
 					p.instrumentId,
 					direction,
-					p.yesterdayVolume,
-					p.todayVolume,
-					p.totalVolume,
+					dealNum(p.yesterdayVolume),
+					dealNum(p.todayVolume),
+					dealNum(p.totalVolume),
 					dealNum(+p.avgPrice),
 					dealNum(+p.lastPrice),
 					unRealizedPnl
