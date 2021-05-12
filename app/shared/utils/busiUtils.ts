@@ -720,3 +720,11 @@ export const buildDictFromArray = (list: any[], key: string) => {
     return data;
 }
 
+export const addTwoItemByKeyForReduce = (item1: any, item2: any, key: string) => {
+    return (+item1[key] || 0) + (+item2[key] || 0);
+}
+
+export const avgTwoItemByKeyForReduce = (item1: any, item2: any, key: string) => {
+    return addTwoItemByKeyForReduce(item1, item2, key) / 2;
+}
+

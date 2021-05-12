@@ -106,7 +106,7 @@ export default {
                     tradeData.update = !!this.tableData.length;
                     tradeData.latencyTrade = orderStatByOrderId.latencyTrade || '';
                     //ctp trade返回的是交易所时间（xtp是自己维护），所用orderState内时间代替
-                    const { updateTime, updateTimeMMDD } = tradeData
+                    const { updateTime, updateTimeNum, updateTimeMMDD } = tradeData
                     tradeData.updateTime = !!orderStatByOrderId.tradeTimeNum ? orderStatByOrderId.tradeTime : updateTime
                     tradeData.updateTimeNum = !!orderStatByOrderId.tradeTimeNum ? orderStatByOrderId.tradeTimeNum : updateTimeNum
                     tradeData.updateTimeMMDD = !!orderStatByOrderId.tradeTimeNum ? orderStatByOrderId.tradeTimeMMDD : updateTimeMMDD

@@ -2,7 +2,7 @@ import fse from 'fs-extra';
 import { KF_RUNTIME_DIR, KF_CONFIG_PATH } from '__gConfig/pathConfig';
 import { setTimerPromiseTask } from '__gUtils/busiUtils';
 import { kungfu } from '__io/kungfu/kungfuUtils';
-import { toDecimal, ensureNum, ensureLeaderData } from '__gUtils/busiUtils';
+import { toDecimal, ensureNum, ensureLeaderData, addTwoItemByKeyForReduce, avgTwoItemByKeyForReduce } from '__gUtils/busiUtils';
 import { OffsetName, OrderStatus, SideName, PosDirection, PriceType, HedgeFlag, InstrumentType, VolumeCondition, TimeCondition, allowShorted } from "kungfu-shared/config/tradingConfig";
 import { logger } from '__gUtils/logUtils';
 
@@ -171,27 +171,39 @@ export const transformTradingItemListToData = (list: any[], type: string) => {
 }
 
 export const transformPositionByTickerByMerge = (positionsByTicker: { [propname: string]: PosData[] }, type: string) => {
-    const positionsByTickerList = Object.values(positionsByTicker)
-        .map((tickerList: PosData[]) => {
+
+    const positionsByTickerList = Object.keys(positionsByTicker)
+        .map((key: string) => {
+            const tickerList: PosData[] = positionsByTicker[key];
             const tickerListResolved = tickerList
             .filter(item => {
                 if (!item.accountId) return false;
                 if (type === 'account') return !item.clientId;
                 if (type === 'strategy') return item.clientId;
+                if (+item.totalVolume === 0) return false;
                 return true;
             })
 
-            if (!tickerListResolved.length) return null;
+            if (!tickerListResolved.length) return null;    
+
             return tickerListResolved.reduce((item1: PosData, item2: PosData) => {
                 return {
                     ...item1,
-                    yesterdayVolume: +item1.yesterdayVolume || 0 + +item2.yesterdayVolume || 0,
-                    volume: +item1.totalVolume || 0 + +item2.totalVolume || 0,
-                    unRealizedPnl: +item1.unRealizedPnl || 0 + +item2.unRealizedPnl || 0
+
+                    yesterdayVolume: addTwoItemByKeyForReduce(item1, item2, 'yesterdayVolume'),
+                    todayVolume: addTwoItemByKeyForReduce(item1, item2, 'todayVolume'),
+                    totalVolume: addTwoItemByKeyForReduce(item1, item2, 'totalVolume'),
+
+                    avgPrice: avgTwoItemByKeyForReduce(item1, item2, 'avgPrice'),
+                    totalPrice: addTwoItemByKeyForReduce(item1, item2, 'totalPrice'),
+                    totalMarketPrice: addTwoItemByKeyForReduce(item1, item2, 'totalMarketPrice'),
+                    unRealizedPnl: addTwoItemByKeyForReduce(item1, item2, 'unRealizedPnl'),
                 }
             })
         })
         .filter(item => !!item)
+
+
     
     return positionsByTickerList
 }
@@ -431,7 +443,7 @@ export const dealPos = (item: PosOriginData): PosData => {
     const { update_time } = item;
     //item.type :'0': 未知, '1': 股票, '2': 期货, '3': 债券
     const direction: string = PosDirection[item.direction] || '--';
-    const avgPrice: string = toDecimal(item.avg_open_price || item.position_cost_price, 3) || ''
+    const avgPrice: number = item.avg_open_price || item.position_cost_price || 0;
     return {
         updateTime: kungfu.formatTime(update_time, '%H:%M:%S.%N').slice(0, 12),
         updateTimeMMDD: kungfu.formatTime(update_time, '%m/%d %H:%M:%S.%N').slice(0, 18),
@@ -440,18 +452,20 @@ export const dealPos = (item: PosOriginData): PosData => {
         id: item.instrument_id + direction,
         instrumentId: item.instrument_id,
         instrumentType: item.instrument_type,
+        exchangeId: item.exchange_id,
 
         direction,
         directionOrigin: item.direction,
-        yesterdayVolume: Number(item.yesterday_volume),
-        todayVolume: Number(item.volume) - Number(item.yesterday_volume),
-        totalVolume: Number(item.volume),
-        avgPrice: avgPrice || '--',
-        lastPrice: toDecimal(item.last_price, 3) || '--',
-        totalPrice: toDecimal(+avgPrice * Number(item.volume), 3) || '--',
-        totalMarketPrice: toDecimal(item.last_price * Number(item.volume), 3) || '--',
-        unRealizedPnl: Number(item.unrealized_pnl),
-        exchangeId: item.exchange_id,
+
+        yesterdayVolume: Number(item.yesterday_volume) || 0,
+        todayVolume: Number(item.volume) - Number(item.yesterday_volume) || 0,
+        totalVolume: Number(item.volume) || 0, 
+
+        avgPrice: avgPrice || 0,
+        lastPrice: item.last_price || 0,
+        totalPrice: +avgPrice * Number(item.volume) || 0,
+        totalMarketPrice: item.last_price * Number(item.volume) || 0,
+        unRealizedPnl: item.unrealized_pnl || 0,
         
         accountId: item.account_id,
         sourceId: item.source_id,

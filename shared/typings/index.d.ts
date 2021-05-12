@@ -345,18 +345,21 @@ interface PosData {
     id: string;
     instrumentId: string;
     instrumentType: number;
+    exchangeId: string;
     
     direction: string;
     directionOrigin: number;
+    
     yesterdayVolume: number;
     todayVolume: number;
     totalVolume: number;
-    avgPrice: string;
-    lastPrice: string;
-    totalPrice: string;
-    totalMarketPrice: string;
+    
+    avgPrice: number;
+    lastPrice: number;
+    totalPrice: number;
+    totalMarketPrice: number;
     unRealizedPnl: number;
-    exchangeId: string;
+    
     accountId: string;
     sourceId: string;
     clientId: string;

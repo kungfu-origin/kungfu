@@ -118,10 +118,16 @@ export default {
             positionsAfterFilter.kfForEach(item => {
                 let positionData = { ...item };
                 positionData.update = true;
-                positionData.yesterdayVolume = toDecimal(item.yesterdayVolume);
-                positionData.totalVolume = toDecimal(item.totalVolume);
-                positionData.volume = toDecimal(item.volume);
-                positionData.unRealizedPnl = toDecimal(item.unRealizedPnl);
+          
+                positionData.yesterdayVolume = toDecimal(item.yesterdayVolume); 
+                positionData.todayVolume = toDecimal(item.todayVolume); 
+                positionData.totalVolume = toDecimal(item.totalVolume); 
+                positionData.avgPrice = toDecimal(item.avgPrice); 
+                positionData.lastPrice = toDecimal(item.lastPrice); 
+                positionData.totalPrice = toDecimal(item.totalPrice); 
+                positionData.totalMarketPrice = toDecimal(item.totalMarketPrice); 
+                positionData.unRealizedPnl = toDecimal(item.unRealizedPnl); 
+
                 const poskey = this.getKey(positionData);
                 positionDataByKey[poskey] = Object.freeze(positionData);
             })
