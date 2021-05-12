@@ -49,7 +49,7 @@ export default {
                     if ((id || '').includes(queryString.toLowerCase())) return true;
                     return false
                 })
-                .slice(0, 300)
+                .slice(0, 20)
         },
 
         getSearchTickersInTickerSets (queryString = '') {
