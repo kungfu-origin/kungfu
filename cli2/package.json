@@ -21,7 +21,7 @@
     "clean": "rimraf ./dist/* ./build/*",
     "build": "node -v",
     "build-cli": "node ./.build/build.js && yarn run cp",
-    "build-win": " yarn run dist && pkg . -t=node10.17-win-x64 --output=build/ext/index",
+    "build-win": " yarn run dist && pkg . -t=node10.17-win-x64 --output=build/cli",
     "build-linux": " yarn run dist && pkg . -t=node10.17-linux-x64 --out-path=build/cli",
     "build-mac": " yarn run dist && pkg . -t=node10.17-macos-x64 --out-path=build/cli",
     "dev": "node .build/dev-cli.js",
