@@ -10,7 +10,7 @@
         <el-dialog
         title="系统提示"
         class="system-prepare-dialog"
-        :visible.sync="watcherLoading"
+        :visible="watcherLoading"
         :show-close="false"
         :close-on-click-modal="false"
         width="450px"
@@ -22,6 +22,10 @@
             <div style="margin: 10px 0 20px">
                 <tr-status :value="loadingData.watcher ? '100' : '3'" :hasText="false"></tr-status>
                 {{ loadingData.watcher ? '功夫环境准备完成 ✓' : '功夫环境准备中...' }}
+            </div>
+            <div style="margin: 10px 0 20px">
+                <tr-status :value="loadingData.daemon ? '100' : '3'" :hasText="false"></tr-status>
+                {{ loadingData.daemon ? '功夫数据通信已建立 ✓' : '等待功夫数据通信建立...' }}
             </div>
         </el-dialog>
 
@@ -61,12 +65,13 @@ export default {
         this.kungfuGloablDataObserver = null;
         this.oldInstruments = Object.freeze(JSON.parse(localStorage.getItem('instruments') || "[]"));
         return {
-            watcherLoading: false,
+
             globalSettingDialogVisiblity: false,
 
             loadingData: {
                 archive: false,
-                watcher: false
+                watcher: false,
+                daemon: false,
             }
         }
     },
@@ -99,9 +104,14 @@ export default {
 
     computed: {
         ...mapState({
-            watcherIsLive: state => state.BASE.watcherIsLive,
-            processStatus: state => state.BASE.processStatus,
-        })
+            watcherIsLive: state => state.BASE.watcherIsLive || false,
+            processStatus: state => state.BASE.processStatus || {},
+        }),
+
+        watcherLoading () {
+            const { archive, watcher, daemon } = this.loadingData;
+            return !(archive && watcher && daemon)
+        }
     },
 
     watch: {
@@ -173,18 +183,18 @@ export default {
             let timer = setInterval(() => {
                 const watcherStatus = this.watcherIsLive;
                 const archiveFinished = (window.archiveStatus !== 'online') && (window.archiveStatus !== undefined);
+                const daemonStatus = this.processStatus.kungfuDaemon === 'online';
 
                 this.$set(this.loadingData, 'archive', archiveFinished);
                 this.$set(this.loadingData, 'watcher', watcherStatus);
+                this.$set(this.loadingData, 'daemon', daemonStatus);
 
-                if (!archiveFinished) this.watcherLoading = true;
-                else if (!watcherStatus) this.watcherLoading = true;
-                else {
-                    this.watcherLoading = false;
-                    clearInterval(timer)
+                const { archive, watcher, daemon } = this.loadingData;
+                if (archive && watcher && daemon) {
+                    clearTimeout(timer)
                 }
 
-            }, 500)
+            }, 100)
         },
 
         bindKungfuGlobalDataListener () {
