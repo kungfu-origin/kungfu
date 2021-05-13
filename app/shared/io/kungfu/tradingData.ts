@@ -23,13 +23,16 @@ import {
 
 import { ensureLeaderData, resolveInstruments } from '__gUtils/busiUtils';
 
+
+
 export const KUNGFU_TRADING_DATA_OBSERVER = new Observable(subscriber => {
-    subscriber.next({})
-    startGetKungfuTradingData((watcher: any) => {
-        subscriber.next(watcher)
+    subscriber.next(new Date().getTime())
+    startGetKungfuTradingData((timestamp: number) => {
+        subscriber.next(timestamp)
+        console.log(timestamp)
     }, 500)
 })
- 
+
 export const buildTradingDataPipe = (type: string) => {
     return KUNGFU_TRADING_DATA_OBSERVER.pipe(
         map(() => {
@@ -45,7 +48,7 @@ export const buildTradingDataPipe = (type: string) => {
             const dailyAsset = ensureLeaderData(ledgerData.DailyAsset, 'trading_day').map((item: AssetSnapshotOriginData) => dealSnapshot(item));
 
             
-            return {
+            const tradingData = {
                 orders: transformOrderTradeListToData(orders, type),
                 orderInputs: transformOrderInputListToData(orderInputs, type),
                 ordersByTicker: orders,
@@ -58,6 +61,8 @@ export const buildTradingDataPipe = (type: string) => {
                 pnl: transformTradingItemListToData(pnl, type),
                 dailyPnl: transformTradingItemListToData(dailyAsset, type),
             }
+
+            return tradingData
         })
     )
 }

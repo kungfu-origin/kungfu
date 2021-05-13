@@ -51,7 +51,7 @@ export const startGetKungfuTradingData = (callback: Function, interval = 500) =>
                 watcher.step();
             }
             
-            callback(true);
+            callback(new Date().getTime());
             resolve(true);
         })
     }, interval);
