@@ -37,7 +37,7 @@ export const watcher: any = (() => {
 })()
 
 
-export const startGetKungfuTradingData = (callback: Function, interval = 500) => {
+export const startGetKungfuWathcerStep = (interval = 500) => {
     
     if (watcher.noWatcher) return;
     
@@ -51,7 +51,6 @@ export const startGetKungfuTradingData = (callback: Function, interval = 500) =>
                 watcher.step();
             }
             
-            callback(new Date().getTime());
             resolve(true);
         })
     }, interval);

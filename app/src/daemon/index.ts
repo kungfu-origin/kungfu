@@ -6,9 +6,11 @@ import {
     buildKungfuGlobalDataPipe,
 } from "__io/kungfu/tradingData";
 
-import { transformTradingItemListToData, dealQuote } from '__io/kungfu/watcher';
+import { startGetKungfuWathcerStep, transformTradingItemListToData, dealQuote } from '__io/kungfu/watcher';
 
 import * as PM2_METHODS from './pm2Methods';
+
+startGetKungfuWathcerStep()
 
 var QuotesRequiredInApp: TickerInTickerSet[] = [];
 
