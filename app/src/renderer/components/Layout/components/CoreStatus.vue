@@ -19,10 +19,10 @@
                     </span>
                     <span class="core-process-item switch" v-if="NODE_ENV === 'development'"></span>
                     <span class="core-process-item text-overflow monit">
-                        CPU: {{ getMemCpu('master', processStatusWithDetail, 'cpu') }}
+                        CPU:{{ getMemCpu('master', processStatusWithDetail, 'cpu') }}
                     </span>
                     <span class="core-process-item text-overflow monit">
-                        MEM: {{ getMemCpu('master', processStatusWithDetail, 'memory') }}
+                        MEM:{{ getMemCpu('master', processStatusWithDetail, 'memory') }}
                     </span>
                     <span class="core-process-item get-log">
                         <i class="el-icon-document mouse-over" title="打开日志文件" @click="handleOpenLogFile('master')" ></i>
@@ -44,10 +44,10 @@
                         <el-switch  :value="ifProcessRunning('ledger', processStatus)" @change="handleLedgerSwitch"></el-switch>
                     </span>
                     <span class="core-process-item text-overflow monit">
-                        CPU: {{ getMemCpu('ledger', processStatusWithDetail, 'cpu') }}
+                        CPU:{{ getMemCpu('ledger', processStatusWithDetail, 'cpu') }}
                     </span>
                     <span class="core-process-item text-overflow monit">
-                        MEM: {{ getMemCpu('ledger', processStatusWithDetail, 'memory') }}
+                        MEM:{{ getMemCpu('ledger', processStatusWithDetail, 'memory') }}
                     </span>
                      <span class="core-process-item get-log">
                         <i class="el-icon-document mouse-over" title="打开日志文件" @click="handleOpenLogFile('ledger')" ></i>

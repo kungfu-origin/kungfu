@@ -77,7 +77,9 @@ export const transformOrderTradeListToData = (list: any[], type: string) => {
             if (!location || !location.name) return;
             const accountId = `${location.group}_${location.name}`;
             if (!data[accountId]) data[accountId] = [];
-            data[accountId].push(item)
+            if (data[accountId].length < 100) {
+                data[accountId].push(item)
+            }
         })
     } else if (type === 'strategy') {
         list.kfForEach((item: any) => {
@@ -85,7 +87,9 @@ export const transformOrderTradeListToData = (list: any[], type: string) => {
             if (!location || !location.name) return;
             const clientId = location.name;
             if (!data[clientId]) data[clientId] = [];
-            data[clientId].push(item)
+            if (data[clientId].length < 100) {
+                data[clientId].push(item)
+            }
         })
     }
     return data;

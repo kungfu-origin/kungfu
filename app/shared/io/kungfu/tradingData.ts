@@ -45,10 +45,12 @@ const taskSubject: any = new Subject();
 
         return new Promise(resolve => {
 
+            console.time('[overhead] main calc time')
+
             const ledgerData = watcher.ledger
-            const orderInputs = ensureLeaderData(ledgerData.OrderInput, 'insert_time').slice(0, 100).map((item: OrderInputOriginData) => dealOrderInput(item));
-            const orders = ensureLeaderData(ledgerData.Order, 'update_time').slice(0, 100).map((item: OrderOriginData) => dealOrder(item));
-            const trades = ensureLeaderData(ledgerData.Trade, 'trade_time').slice(0, 100).map((item: TradeOriginData) => dealTrade(item));
+            const orderInputs = ensureLeaderData(ledgerData.OrderInput, 'insert_time').map((item: OrderInputOriginData) => dealOrderInput(item));
+            const orders = ensureLeaderData(ledgerData.Order, 'update_time').map((item: OrderOriginData) => dealOrder(item));
+            const trades = ensureLeaderData(ledgerData.Trade, 'trade_time').map((item: TradeOriginData) => dealTrade(item));
             const positions = ensureLeaderData(ledgerData.Position).map((item: PosOriginData) => dealPos(item));
             const positionsByTicker = transformTradingItemListToData(positions, 'ticker');
             const assets = ensureLeaderData(ledgerData.Asset).map((item: AssetOriginData) => dealAsset(item));
@@ -118,6 +120,8 @@ const taskSubject: any = new Subject();
                     gatewayStates: dealGatewayStates(watcher.appStates)
                 }
             })
+
+            console.timeEnd('[overhead] main calc time')
 
             resolve(true)
         })
@@ -196,12 +200,8 @@ export const buildKungfuGlobalDataPipe = () => {
 
 export const buildTaskDataPipe = () => {
     return taskSubject.pipe(
-        map(() => {
-            const stateData = watcher.state;
-            const timeValueList = ensureLeaderData(stateData.TimeValue.filter('tag_c', 'task'), 'update_time').slice(0, 100)
-            return {
-                timeValueList: timeValueList
-            }
+        map((data: any) => {
+            return data;
         })
     )
 }
