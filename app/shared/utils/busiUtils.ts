@@ -301,6 +301,18 @@ export const ifProcessRunning = (processId: string, processStatus: any): boolean
     return processStatus[processId] === 'online' || processStatus[processId] === 'stopping'
 }
 
+export const getMemCpu = (processId: string, processStatusWithDetail: any, type: string) => {
+    const processData = processStatusWithDetail[processId] || {};
+    const monit = processData.monit || {};    
+    if (type === 'cpu') {
+        return monit.cpu !== undefined ? Number(monit.cpu).toFixed(1) + '%' : '--';
+    } else if (type === 'memory') {
+        return monit.memory !== undefined ? Number(monit.memory / 1000000).toFixed(0) + "M" : '--';
+    } else {
+        return '--'
+    }
+}
+
 /**
  * 加法
  * @param  {Array} list

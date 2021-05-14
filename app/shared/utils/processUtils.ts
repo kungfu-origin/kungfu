@@ -483,8 +483,6 @@ export const startDaemon = (): Promise<any> => {
     return startProcess({
         "name": "kungfuDaemon",
         "args": "",
-        "maxRestarts": 5,
-        "autorestart": true,
         force: true,
         watch: process.env.NODE_ENV === 'production' ? false : true,
         script:  "daemon.js",
@@ -530,7 +528,6 @@ export function buildProcessStatusWidthDetail (pList: any[]): StringToProcessSta
         const script = pm2_env.script || pm_exec_path[pm_exec_path.length - 1]
         const args = pm2_env.args;
         
-
         processStatus[name] = {
             status,
             monit,

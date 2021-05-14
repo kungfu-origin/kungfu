@@ -1,4 +1,4 @@
-import { Observable, Subscriber } from 'rxjs';
+import { Subject } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { 
@@ -23,16 +23,23 @@ import {
 import { setTimerPromiseTask, ensureLeaderData, resolveInstruments } from '__gUtils/busiUtils';
 
 
+const tradingDataSubject: any = new Subject();
 
-export const KUNGFU_TRADING_DATA_OBSERVER = new Observable(subscriber => {
+const taskSubject: any = new Subject();
+
+
+
+(() => {
+
+    if (watcher.noWathcer) {
+        return;
+    };  
     
-    if (watcher.noWathcer) return;
-
     if (process.env.APP_TYPE !== 'daemon') {
         if (process.env.APP_TYPE !== 'cli') {
             return;
-        }
-    }
+        };
+    };
 
     setTimerPromiseTask(() => {
 
@@ -100,7 +107,7 @@ export const KUNGFU_TRADING_DATA_OBSERVER = new Observable(subscriber => {
                 orders
             }
     
-            subscriber.next({
+            tradingDataSubject.next({
                 accountTradingDataPipeData,
                 strategyTradingDataPipeData,
                 instrumentsPipeData,
@@ -117,20 +124,22 @@ export const KUNGFU_TRADING_DATA_OBSERVER = new Observable(subscriber => {
 
     }, 1000)
 
-})
+})();
 
-export const KUNGFU_TASK_DATA_OBSERVER = new Observable(subscriber => {
-    if (watcher.noWathcer) return;
+(() => {
 
-    if (process.env.APP_TYPE !== 'renderer') {
-            return;
+    if (watcher.noWathcer) {
+        return;
     }
 
+    if (process.env.RENDERER_TYPE !== 'app') {
+            return;
+    }
     setTimerPromiseTask(() => {
         return new Promise(resolve => {
             const stateData = watcher.state;
             const timeValueList = ensureLeaderData(stateData.TimeValue.filter('tag_c', 'task'), 'update_time').slice(0, 100)
-            subscriber.next({
+            taskSubject.next({
                 timeValueList: timeValueList
             })
 
@@ -138,11 +147,12 @@ export const KUNGFU_TASK_DATA_OBSERVER = new Observable(subscriber => {
         })
        
     }, 1000)
-  
-})
+
+})();
+
 
 export const buildTradingDataPipe = (type: string) => {
-    return KUNGFU_TRADING_DATA_OBSERVER.pipe(
+    return tradingDataSubject.pipe(
         map((data: any) => {
             return type === 'account' ? data.accountTradingDataPipeData : data.strategyTradingDataPipeData;
         })
@@ -150,7 +160,7 @@ export const buildTradingDataPipe = (type: string) => {
 }
 
 export const buildInstrumentsPipe = () => {
-    return KUNGFU_TRADING_DATA_OBSERVER.pipe(
+    return tradingDataSubject.pipe(
         map((data: any) => {
             return {
                 instruments: data.instrumentsPipeData
@@ -161,7 +171,7 @@ export const buildInstrumentsPipe = () => {
 }
 
 export const buildAllOrdersPipe = () => {
-    return KUNGFU_TRADING_DATA_OBSERVER.pipe(
+    return tradingDataSubject.pipe(
         map((data: any) => {
             return data.allOrdersPipeData
         })
@@ -169,7 +179,7 @@ export const buildAllOrdersPipe = () => {
 }
 
 export const buildMarketDataPipe = () => {
-    return KUNGFU_TRADING_DATA_OBSERVER.pipe(
+    return tradingDataSubject.pipe(
         map((data: any) => {
             return data.quotes
         })
@@ -177,18 +187,15 @@ export const buildMarketDataPipe = () => {
 }
 
 export const buildKungfuGlobalDataPipe = () => {
-    return KUNGFU_TRADING_DATA_OBSERVER.pipe(
-        map(() => {
-            return {
-                watcherIsLive: watcher.isLive() || false,
-                gatewayStates: dealGatewayStates(watcher.appStates)
-            }
+    return tradingDataSubject.pipe(
+        map((data: any) => {
+            return data.globalPipeData
         })
     )
 }
 
 export const buildTaskDataPipe = () => {
-    return KUNGFU_TASK_DATA_OBSERVER.pipe(
+    return taskSubject.pipe(
         map(() => {
             const stateData = watcher.state;
             const timeValueList = ensureLeaderData(stateData.TimeValue.filter('tag_c', 'task'), 'update_time').slice(0, 100)

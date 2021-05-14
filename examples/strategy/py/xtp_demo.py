@@ -42,13 +42,8 @@ def post_stop(context):
     context.log.info('strategy down')
 
 
-def on_bar(context, bar):
-    context.log.info("[on_bar] {}".format(bar))
-
-
 def on_quote(context, quote):
     # context.logger.info(f"quote: {quote}")
-    side = random.choice([Side.Buy, Side.Sell])
     side = Side.Buy
     price = quote.ask_price[0] if side == Side.Buy else quote.bid_price[0]
     price_type = random.choice([PriceType.Any, PriceType.Limit])

@@ -30,6 +30,12 @@
                     <span class="account-process-item status-switch" @click.stop>
                         <el-switch :value="ifProcessRunning(`md_${accountItem.source_name}`, processStatus)" @change="handleMdSwitch($event, accountItem)"></el-switch>
                     </span>
+                       <span class="account-process-item text-overflow">
+                        CPU: {{ getMemCpu(`md_${accountItem.source_name}`, processStatusWithDetail, 'cpu') }}
+                    </span>
+                    <span class="account-process-item text-overflow">
+                        MEM: {{ getMemCpu(`md_${accountItem.source_name}`, processStatusWithDetail, 'memory') }}
+                    </span>
                      <span class="account-process-item status-switch" @click.stop="handleOpenLogFile(`md_${accountItem.source_name}`)">
                         <i class="el-icon-document mouse-over" title="打开日志文件"></i>
                     </span>
@@ -62,7 +68,12 @@
                         <el-switch :value="ifProcessRunning(`td_${accountItem.account_id}`, processStatus)"
                         @change="handleTdSwitch($event, accountItem)"></el-switch>
                     </span>
-
+                    <span class="account-process-item text-overflow monit">
+                        CPU:{{ getMemCpu(`td_${accountItem.account_id}`, processStatusWithDetail, 'cpu') }} 
+                    </span>
+                    <span class="account-process-item text-overflow monit">
+                        MEM:{{ getMemCpu(`td_${accountItem.account_id}`, processStatusWithDetail, 'memory') }} 
+                    </span>
                     <span class="account-process-item status-switch" @click.stop="handleOpenLogFile(`td_${accountItem.account_id}`)">
                         <i class="el-icon-document mouse-over" title="打开日志文件"></i>
                     </span>
@@ -80,7 +91,7 @@
 import { mapState } from 'vuex';
 import { statusConfig } from '__gConfig/statusConfig';
 import { switchTd, switchMd } from '__io/actions/account';
-import { ifProcessRunning } from '__gUtils/busiUtils';
+import { ifProcessRunning, getMemCpu } from '__gUtils/busiUtils';
 
 import openLogMixin from "@/assets/mixins/openLogMixin";
 
@@ -94,6 +105,7 @@ export default {
         })
 
         this.ifProcessRunning = ifProcessRunning;
+        this.getMemCpu = getMemCpu;
         return {
             statusLevel
         }
@@ -105,6 +117,7 @@ export default {
             mdList: state => state.ACCOUNT.mdList,
             mdTdState: state => state.ACCOUNT.mdTdState,
             processStatus: state => state.BASE.processStatus,
+            processStatusWithDetail: state => state.BASE.processStatusWithDetail,
             tdAccountSource: state => (state.BASE.tdAccountSource || {}),
             mdAccountSource: state => (state.BASE.mdAccountSource || {})
         }),
@@ -179,12 +192,12 @@ export default {
 @import "@/assets/scss/skin.scss";
 
 .account-status-content{
-    max-width: 370px;
+    display: flex;
+    flex-direction: column;
     font-family: Consolas, Monaco, monospace,"Microsoft YaHei",sans-serif;
 
     .account-item{
         float: left;
-        width: 350px;
         margin: 10px;
 
         .type-name{
@@ -197,6 +210,8 @@ export default {
         .account-status{
             font-size: 14px;
             padding: 3px 0;
+            display: flex;
+            justify-content: space-around;
             
             .account-process-item{
                 display: inline-block;
@@ -209,12 +224,16 @@ export default {
             }
 
             .source-name{
-                width: 45px;
+                width: 60px;
             }
 
             .account-status{
                 padding-left: 30px;
                 box-sizing: border-box;
+            }
+
+            &.monit {
+                width: 95px;
             }
 
             .status-switch{
