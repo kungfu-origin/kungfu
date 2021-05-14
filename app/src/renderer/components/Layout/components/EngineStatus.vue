@@ -27,15 +27,15 @@
                         :value="processStatus[`md_${accountItem.source_name}`]"></tr-status>
                         <tr-status v-else></tr-status>
                     </span>
-                    <span class="account-process-item status-switch" @click.stop>
-                        <el-switch :value="ifProcessRunning(`md_${accountItem.source_name}`, processStatus)" @change="handleMdSwitch($event, accountItem)"></el-switch>
-                    </span>
-                       <span class="account-process-item text-overflow">
+                    <span class="account-process-item text-overflow">
                         CPU: {{ getMemCpu(`md_${accountItem.source_name}`, processStatusWithDetail, 'cpu') }}
                     </span>
                     <span class="account-process-item text-overflow">
                         MEM: {{ getMemCpu(`md_${accountItem.source_name}`, processStatusWithDetail, 'memory') }}
                     </span>
+                    <span class="account-process-item status-switch" @click.stop>
+                        <el-switch :value="ifProcessRunning(`md_${accountItem.source_name}`, processStatus)" @change="handleMdSwitch($event, accountItem)"></el-switch>
+                    </span>             
                      <span class="account-process-item status-switch" @click.stop="handleOpenLogFile(`md_${accountItem.source_name}`)">
                         <i class="el-icon-document mouse-over" title="打开日志文件"></i>
                     </span>
@@ -64,15 +64,15 @@
                         :value="processStatus[`td_${accountItem.account_id}`]"></tr-status>
                         <tr-status v-else></tr-status>
                     </span>
-                    <span class="account-process-item status-switch">
-                        <el-switch :value="ifProcessRunning(`td_${accountItem.account_id}`, processStatus)"
-                        @change="handleTdSwitch($event, accountItem)"></el-switch>
-                    </span>
                     <span class="account-process-item text-overflow monit">
                         CPU:{{ getMemCpu(`td_${accountItem.account_id}`, processStatusWithDetail, 'cpu') }} 
                     </span>
                     <span class="account-process-item text-overflow monit">
                         MEM:{{ getMemCpu(`td_${accountItem.account_id}`, processStatusWithDetail, 'memory') }} 
+                    </span>
+                    <span class="account-process-item status-switch">
+                        <el-switch :value="ifProcessRunning(`td_${accountItem.account_id}`, processStatus)"
+                        @change="handleTdSwitch($event, accountItem)"></el-switch>
                     </span>
                     <span class="account-process-item status-switch" @click.stop="handleOpenLogFile(`td_${accountItem.account_id}`)">
                         <i class="el-icon-document mouse-over" title="打开日志文件"></i>
