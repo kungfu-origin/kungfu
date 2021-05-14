@@ -40,9 +40,11 @@
 <script>
 
 import DatePickerDialog from '@/components/Base//DatePickerDialog';
-import tradingDataMixin from '@/components/Base/tradingData/js/tradingDataMixin';
 
+import { dealOrderStat } from '__io/kungfu/watcher';
 import { tradesHeader } from '@/components/Base/tradingData/js/tableHeaderConfig';
+
+import tradingDataMixin from '@/components/Base/tradingData/js/tradingDataMixin';
 
 export default {
     name: 'trades-record',
@@ -102,7 +104,7 @@ export default {
                 .map(item => {
                     let tradeData = { ...item };
                     let orderId = tradeData.orderId;
-                    const orderStatByOrderId = this.orderStat[orderId] || {}
+                    const orderStatByOrderId = dealOrderStat(this.orderStat[orderId] || null);
                     tradeData.update = !!this.tableData.length;
                     tradeData.latencyTrade = orderStatByOrderId.latencyTrade || '';
                     //ctp trade返回的是交易所时间（xtp是自己维护），所用orderState内时间代替

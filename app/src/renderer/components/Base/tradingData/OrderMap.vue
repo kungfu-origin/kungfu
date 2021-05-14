@@ -22,6 +22,7 @@
 import { mapState } from 'vuex';
 
 import { debounce, throttle } from '__gUtils/busiUtils'
+import { dealOrderStat } from '__io/kungfu/watcher';
 
 import baseMixin from '@/assets/mixins/baseMixin';
 
@@ -142,7 +143,8 @@ export default {
 
                 if (!mapData[orderId]) return;
 
-                const orderStatByOrderId = this.orderStat[orderId] || {};
+                
+                const orderStatByOrderId = dealOrderStat(this.orderStat[orderId] || null);
                 //ctp trade返回的是交易所时间（xtp是自己维护），所用orderState内时间代替
                 const { updateTime, updateTimeMMDD } = itemResolved;
                 itemResolved.updateTime = !!orderStatByOrderId.tradeTimeNum ? orderStatByOrderId.tradeTime : updateTime;

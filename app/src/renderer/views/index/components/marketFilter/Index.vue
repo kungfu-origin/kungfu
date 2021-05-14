@@ -76,6 +76,7 @@ import TaskRecord from '@/components/Task/TaskRecord';
 import OrderRecord from '@/components/Base/tradingData/OrderRecord';
 
 import { buildMarketDataPipeByDaemon, buildAllOrdersPipeByDaemon } from '@/ipcMsg/daemon'; 
+import { buildOrderStatDataPipe } from '__io/kungfu/tradingData';
 
 import accountStrategyMixins from '@/views/index/js/accountStrategyMixins';
 
@@ -147,14 +148,21 @@ export default {
                 this.orders = Object.freeze(orders || []);
             }
 
+        
+        })
+
+        this.orderStatPipe = buildOrderStatDataPipe().subscribe(data => {
             const orderStat = data['orderStat'];
             this.orderStat = Object.freeze(orderStat || {});
         })
+
+        
     },
     
     destroyed(){
         this.marketDataPipe && this.marketDataPipe.unsubscribe();
         this.allOrdersPipe && this.allOrdersPipe.unsubscribe();
+        this.orderStatPipe && this.orderStatPipe.unsubscribe();
     },
 
     methods: {

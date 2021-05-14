@@ -124,6 +124,7 @@ import Pnl from '@/components/Base/tradingData/pnl/Index';
 import MainContent from '@/components/Layout/MainContent';
 
 import { buildTradingDataStrategyPipeByDaemon } from '@/ipcMsg/daemon';
+import { buildOrderStatDataPipe } from '__io/kungfu/tradingData';
 
 import accountStrategyMixins from '@/views/index/js/accountStrategyMixins';
 
@@ -173,9 +174,6 @@ export default {
             const positions = data['positions'][this.strategyId];
             this.positions = Object.freeze(positions || []);
   
-            const orderStat = data['orderStat'];
-            this.orderStat = Object.freeze(orderStat || {});
-
             const pnl = data['pnl'][this.strategyId];
             this.pnl = Object.freeze(pnl || []);
             const dailyPnl = data['dailyPnl'][this.strategyId];
@@ -183,11 +181,17 @@ export default {
 
             const assets = data['assets'];
             this.$store.dispatch('setStrategiesAsset', Object.freeze(assets));
+        });
+
+        this.orderStatPipe = buildOrderStatDataPipe().subscribe(data => {
+            const orderStat = data['orderStat'];
+            this.orderStat = Object.freeze(orderStat || {});
         })
     },
 
     destroyed(){
         this.tradingDataPipe && this.tradingDataPipe.unsubscribe();
+        this.orderStatPipe && this.orderStatPipe.unsubscribe();
     },
    
     computed: {

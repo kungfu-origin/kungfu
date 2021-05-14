@@ -77,7 +77,7 @@ export const transformOrderTradeListToData = (list: any[], type: string) => {
             if (!location || !location.name) return;
             const accountId = `${location.group}_${location.name}`;
             if (!data[accountId]) data[accountId] = [];
-            if (data[accountId].length < 100) {
+            if (data[accountId].length < 50) {
                 data[accountId].push(item)
             }
         })
@@ -87,7 +87,7 @@ export const transformOrderTradeListToData = (list: any[], type: string) => {
             if (!location || !location.name) return;
             const clientId = location.name;
             if (!data[clientId]) data[clientId] = [];
-            if (data[clientId].length < 100) {
+            if (data[clientId].length < 50) {
                 data[clientId].push(item)
             }
         })
@@ -105,7 +105,9 @@ export const transformOrderInputListToData = (list: any[], type: string) => {
             if (!location || !location.name) return;
             const accountId = `${location.group}_${location.name}`;
             if (!data[accountId]) data[accountId] = [];
-            data[accountId].push(item)
+            if (data[accountId].length < 50) {
+                data[accountId].push(item)
+            }
         })
     } else if (type === 'strategy') {
         list.kfForEach((item: any) => {
@@ -113,7 +115,9 @@ export const transformOrderInputListToData = (list: any[], type: string) => {
             if (!location || !location.name) return;
             const clientId = location.name;
             if (!data[clientId]) data[clientId] = [];
-            data[clientId].push(item)
+            if (data[clientId].length < 50) {
+                data[clientId].push(item)
+            }
         })
     }
 
@@ -122,8 +126,8 @@ export const transformOrderInputListToData = (list: any[], type: string) => {
 
 export const transformOrderStatListToData = (list: OrderStatOriginData[]) => {
     let data: StringToAnyObject = {};
-    list.kfForEach((item: OrderStatData) => {
-        data[item.orderId.toString()] = item;
+    list.kfForEach((item: OrderStatOriginData) => {
+        data[item.order_id.toString()] = item;
     })
     return data;
 }
@@ -530,7 +534,10 @@ export const dealSnapshot = (item: AssetSnapshotOriginData): AssetSnapshotData =
     }
 }
 
-export const dealOrderStat = (item: OrderStatOriginData): OrderStatData => {
+export const dealOrderStat = (item: OrderStatOriginData | null): OrderStatData | {} => {
+
+    if (!item) return {};
+
     const { insert_time, ack_time, md_time, trade_time } = item;
     const latencyTrade = trade_time ? +toDecimal(Number(trade_time - ack_time) / 1000) : 0;
     const latencyNetwork = +toDecimal(Number(ack_time - insert_time) / 1000);

@@ -16,16 +16,15 @@ import {
     dealTrade,
     dealPos,
     dealAsset,
-    dealOrderStat,
     dealSnapshot,
 } from '__io/kungfu/watcher';
 
 import { setTimerPromiseTask, ensureLeaderData, resolveInstruments } from '__gUtils/busiUtils';
 
 
-const tradingDataSubject: any = new Subject();
+const deamonDataSubject: any = new Subject();
 
-const taskSubject: any = new Subject();
+const appDataSubject: any = new Subject();
 
 
 
@@ -54,8 +53,6 @@ const taskSubject: any = new Subject();
             const positions = ensureLeaderData(ledgerData.Position).map((item: PosOriginData) => dealPos(item));
             const positionsByTicker = transformTradingItemListToData(positions, 'ticker');
             const assets = ensureLeaderData(ledgerData.Asset).map((item: AssetOriginData) => dealAsset(item));
-            const orderStat = ensureLeaderData(ledgerData.OrderStat).map((item: OrderStatOriginData) => dealOrderStat(item));
-            const orderStatResolved = transformOrderStatListToData(orderStat);
             const pnl = ensureLeaderData(ledgerData.AssetSnapshot, 'update_time').map((item: AssetSnapshotOriginData) => dealSnapshot(item));
             const dailyAsset = ensureLeaderData(ledgerData.DailyAsset, 'trading_day').map((item: AssetSnapshotOriginData) => dealSnapshot(item));
             const instruments = ensureLeaderData(ledgerData.Instrument);
@@ -77,13 +74,12 @@ const taskSubject: any = new Subject();
             const accountTradingDataPipeData = {
                 orders: transformOrderTradeListToData(orders, 'account'),
                 orderInputs: transformOrderInputListToData(orderInputs, 'account'),
-                ordersByTicker: orders,
+                ordersByTicker: orders.slice(0, 100),
                 trades: transformOrderTradeListToData(trades, 'account'),
-                tradesByTicker: trades,
+                tradesByTicker: trades.slice(0, 100),
                 positions: transformTradingItemListToData(positions, 'account'),
                 positionsByTicker,
                 assets: transformAssetItemListToData(assets, 'account'),
-                orderStat: orderStatResolved,
                 pnl: transformTradingItemListToData(pnl, 'account'),
                 dailyPnl: transformTradingItemListToData(dailyAsset, 'account'),
             }
@@ -91,13 +87,9 @@ const taskSubject: any = new Subject();
             const strategyTradingDataPipeData = {
                 orders: transformOrderTradeListToData(orders, 'strategy'),
                 orderInputs: transformOrderInputListToData(orderInputs, 'strategy'),
-                ordersByTicker: orders,
                 trades: transformOrderTradeListToData(trades, 'strategy'),
-                tradesByTicker: trades,
                 positions: transformTradingItemListToData(positions, 'strategy'),
-                positionsByTicker,
                 assets: transformAssetItemListToData(assets, 'strategy'),
-                orderStat: orderStatResolved,
                 pnl: transformTradingItemListToData(pnl, 'strategy'),
                 dailyPnl: transformTradingItemListToData(dailyAsset, 'strategy'),
             }
@@ -105,11 +97,10 @@ const taskSubject: any = new Subject();
             const instrumentsPipeData = resolveInstruments(instrumentsAfterFilter);
     
             const allOrdersPipeData = {
-                orderStat: orderStatResolved,
-                orders
+                orders: orders.slice(0, 100)
             }
     
-            tradingDataSubject.next({
+            deamonDataSubject.next({
                 accountTradingDataPipeData,
                 strategyTradingDataPipeData,
                 instrumentsPipeData,
@@ -142,9 +133,13 @@ const taskSubject: any = new Subject();
     setTimerPromiseTask(() => {
         return new Promise(resolve => {
             const stateData = watcher.state;
+            const ledgerData = watcher.ledger;
             const timeValueList = ensureLeaderData(stateData.TimeValue.filter('tag_c', 'task'), 'update_time').slice(0, 100)
-            taskSubject.next({
-                timeValueList: timeValueList
+            const orderStat = ensureLeaderData(ledgerData.OrderStat, 'update_time');
+            const orderStatResolved = transformOrderStatListToData(orderStat);            
+            appDataSubject.next({
+                timeValueList: timeValueList,
+                orderStat: orderStatResolved
             })
 
             resolve(true)
@@ -156,7 +151,7 @@ const taskSubject: any = new Subject();
 
 
 export const buildTradingDataPipe = (type: string) => {
-    return tradingDataSubject.pipe(
+    return deamonDataSubject.pipe(
         map((data: any) => {
             return type === 'account' ? data.accountTradingDataPipeData : data.strategyTradingDataPipeData;
         })
@@ -164,7 +159,7 @@ export const buildTradingDataPipe = (type: string) => {
 }
 
 export const buildInstrumentsPipe = () => {
-    return tradingDataSubject.pipe(
+    return deamonDataSubject.pipe(
         map((data: any) => {
             return {
                 instruments: data.instrumentsPipeData
@@ -175,7 +170,7 @@ export const buildInstrumentsPipe = () => {
 }
 
 export const buildAllOrdersPipe = () => {
-    return tradingDataSubject.pipe(
+    return deamonDataSubject.pipe(
         map((data: any) => {
             return data.allOrdersPipeData
         })
@@ -183,7 +178,7 @@ export const buildAllOrdersPipe = () => {
 }
 
 export const buildMarketDataPipe = () => {
-    return tradingDataSubject.pipe(
+    return deamonDataSubject.pipe(
         map((data: any) => {
             return data.quotes
         })
@@ -191,7 +186,7 @@ export const buildMarketDataPipe = () => {
 }
 
 export const buildKungfuGlobalDataPipe = () => {
-    return tradingDataSubject.pipe(
+    return deamonDataSubject.pipe(
         map((data: any) => {
             return data.globalPipeData
         })
@@ -199,9 +194,21 @@ export const buildKungfuGlobalDataPipe = () => {
 }
 
 export const buildTaskDataPipe = () => {
-    return taskSubject.pipe(
+    return appDataSubject.pipe(
         map((data: any) => {
-            return data;
+            return {
+                timeValueList: data.timeValueList
+            };
+        })
+    )
+}
+
+export const buildOrderStatDataPipe = () => {
+    return appDataSubject.pipe(
+        map((data: any) => {
+            return {
+                orderStat: data.orderStat
+            };
         })
     )
 }

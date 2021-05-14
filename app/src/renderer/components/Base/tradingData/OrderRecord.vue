@@ -91,6 +91,7 @@ import { mapState } from 'vuex';
 import DatePickerDialog from '@/components/Base/DatePickerDialog';
 
 import { kungfuCancelAllOrders } from '__io/kungfu/makeCancelOrder';
+import { dealOrderStat } from '__io/kungfu/watcher';
 import { aliveOrderStatusList } from 'kungfu-shared/config/tradingConfig';
 import { ordersHeader } from '@/components/Base/tradingData/js/tableHeaderConfig';
 
@@ -267,8 +268,9 @@ export default {
             ordersAfterFilter.kfForEach(item => {
                 let orderData = { ...item };
                 orderData.update = true;
-                orderData.latencySystem = (this.orderStat[orderData.orderId] || {}).latencySystem || '';
-                orderData.latencyNetwork = (this.orderStat[orderData.orderId] || {}).latencyNetwork || '';
+                const orderStat = dealOrderStat(this.orderStat[orderData.orderId] || null);
+                orderData.latencySystem = orderStat.latencySystem || '';
+                orderData.latencyNetwork = orderStat.latencyNetwork || '';
                 orderDataByKey[orderData.id] = Object.freeze(orderData);
             })
 

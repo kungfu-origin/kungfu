@@ -121,6 +121,7 @@ import TaskRecord from '@/components/Task/TaskRecord';
 import { transformPositionByTickerByMerge } from '__io/kungfu/watcher';
 import { orderTradesFilterByInstrumentIdDirection } from '__gUtils/busiUtils';
 import { buildTradingDataAccountPipeByDaemon } from '@/ipcMsg/daemon';
+import { buildOrderStatDataPipe } from '__io/kungfu/tradingData';
 
 import accountStrategyMixins from '@/views/index/js/accountStrategyMixins';
 
@@ -225,7 +226,6 @@ export default {
 
     mounted ( ) {
         this.tradingDataPipe = buildTradingDataAccountPipeByDaemon().subscribe(data => {
-
             if (this.moduleType === 'ticker') {
                 this.dealTradingDataByTiker(data)
             } else {
@@ -235,14 +235,18 @@ export default {
             const positionsByTicker = data['positionsByTicker'] || {};
             this.positionsByTicker = Object.freeze(transformPositionByTickerByMerge(positionsByTicker, 'account') || []);
             this.initSetCurrentTicker(this.positionsByTicker);
+        })
+
+        
+        this.orderStatPipe = buildOrderStatDataPipe().subscribe(data => {
             const orderStat = data['orderStat'];
             this.orderStat = Object.freeze(orderStat || {});
         })
-    
     },
 
     destroyed ( ) {
         this.tradingDataPipe && this.tradingDataPipe.unsubscribe();
+        this.orderStatPipe && this.orderStatPipe.unsubscribe();
     },
 
     methods: {
