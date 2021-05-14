@@ -25,7 +25,6 @@ export const buildTradingDataAccountPipeByDaemon = () => {
             }),
             map(packet => {
                 const { body } = packet || {};
-                console.log(body.data)
                 return body.data
             })
         )
