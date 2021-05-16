@@ -741,13 +741,13 @@ const orderTradesFilterByDirection = (direction: number, offset: number, side: n
     return false;
 }
 
-export const orderTradesFilterByInstrumentIdDirection = (item: OrderData | TradeData, instrumentId: string, directionOrigin: number) => {
-    if (!instrumentId.includes(item.instrumentId)) {
+export const originOrderTradesFilterByInstrumentIdDirection = (item: OrderOriginData | TradeOriginData, instrumentId: string, directionOrigin: number) => {
+    if (!instrumentId.includes(item.instrument_id)) {
         return false;
     }
 
-    const { offsetOrigin, sideOrigin, instrumentTypeOrigin } = item;
-    return orderTradesFilterByDirection(directionOrigin, offsetOrigin, sideOrigin, instrumentTypeOrigin)
+    const { offset, side, instrument_type } = item;
+    return orderTradesFilterByDirection(directionOrigin, offset, side, instrument_type)
 }
 
 export const buildDictFromArray = (list: any[], key: string) => {

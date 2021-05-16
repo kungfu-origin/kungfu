@@ -1,7 +1,6 @@
 import {
     buildTradingDataPipe,
     buildInstrumentsPipe,
-    buildAllOrdersPipe,
     buildMarketDataPipe,
     buildKungfuGlobalDataPipe,
 } from "__io/kungfu/tradingData";
@@ -14,6 +13,7 @@ startGetKungfuWathcerStep()
 
 var QuotesRequiredInApp: TickerInTickerSet[] = [];
 
+//daemon 要考虑的性能，daemon计算占用cpu/内存，传输序列化需要限制大小，同时避免在渲染进程做大量计算
 buildTradingDataPipe('account').subscribe((data: any) => {
     //@ts-ignore
     process.send({
@@ -72,19 +72,6 @@ buildKungfuGlobalDataPipe().subscribe((data: any) => {
 })
 
 
-buildAllOrdersPipe().subscribe((data: any) => {
-    //@ts-ignore
-    process.send({
-        type: "process:msg",
-        data: {
-            type: "DEAMON_ALL_ORDERS",
-            body: {
-                timestamp: new Date().getTime(),
-                data,
-            }
-        }
-    })
-})
 
 buildMarketDataPipe().subscribe((data: any) => {
     const quotesAfterFilterKeys = QuotesRequiredInApp.map((item: TickerInTickerSet) => item.instrumentId)    

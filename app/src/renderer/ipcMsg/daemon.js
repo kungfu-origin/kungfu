@@ -71,21 +71,6 @@ export const buildKungfuGlobalDataPipeByDaemon = () => {
         )
 }
 
-export const buildAllOrdersPipeByDaemon = () => {
-    return baseDaemonDataObserver
-    .pipe(
-        filter(packet => {
-            const { type } = packet || {};
-            return type === "DEAMON_ALL_ORDERS"
-        }),
-        map(packet => {
-            const { body } = packet || {};
-            return body.data
-        })
-    )
-}
-
-
 export const buildMarketDataPipeByDaemon = () => {
     return baseDaemonDataObserver
     .pipe(

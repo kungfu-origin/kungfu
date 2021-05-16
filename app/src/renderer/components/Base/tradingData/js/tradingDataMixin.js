@@ -2,7 +2,7 @@ import moment from 'moment';
 import { decodeKungfuLocation, dealOrder, dealTrade } from '__io/kungfu/watcher';
 import { history } from '__io/kungfu/kungfuUtils';
 import { writeCSV } from '__gUtils/fileUtils';
-import { getDefaultRenderCellClass, orderTradesFilterByInstrumentIdDirection, buildDictFromArray } from '__gUtils/busiUtils';
+import { getDefaultRenderCellClass, originOrderTradesFilterByInstrumentIdDirection, buildDictFromArray } from '__gUtils/busiUtils';
 
 export default {
     props: {
@@ -173,7 +173,7 @@ export default {
                                 return true;
                             } else if (this.moduleType === 'ticker') {
                                 const { instrumentId, directionOrigin } = this.currentTicker;
-                                return orderTradesFilterByInstrumentIdDirection(this.dealOrderTrade(this.kungfuBoardType, item), instrumentId, directionOrigin);
+                                return originOrderTradesFilterByInstrumentIdDirection(item, instrumentId, directionOrigin);
                             }
                         })
                         .map(item => {
@@ -206,17 +206,6 @@ export default {
             } else {
                 console.error('getHistoryTargetList type is not trade or order!')
                 return []
-            }
-        },
-
-        dealOrderTrade (kungfuBoardType, item) {
-            if (kungfuBoardType === 'order') {
-                return dealOrder(item)
-            } else if (kungfuBoardType === 'trade') {
-                return dealTrade(item)
-            } else {
-                console.error('dealOrderTrade type is not trade or order!')
-                return {}
             }
         },
 

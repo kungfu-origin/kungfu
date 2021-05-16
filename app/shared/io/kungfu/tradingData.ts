@@ -46,17 +46,15 @@ const appDataSubject: any = new Subject();
 
             console.time('deal')
             //限制最大内存/cpu使用
-            const orderInputOrigins = ensureLeaderData(ledgerData.OrderInput, 'insert_time').slice(0, 1500);
-            const orderOrigins = ensureLeaderData(ledgerData.Order, 'update_time').slice(0, 1500);
-            const tradeOrigins = ensureLeaderData(ledgerData.Trade, 'trade_time').slice(0, 1500);
+            const orderInputOrigins = ensureLeaderData(ledgerData.OrderInput, 'insert_time').slice(0, 1000);
+            const orderOrigins = ensureLeaderData(ledgerData.Order, 'update_time').slice(0, 1000);
+            const tradeOrigins = ensureLeaderData(ledgerData.Trade, 'trade_time').slice(0, 1000);
             console.log('len', orderOrigins.length, tradeOrigins.length)
 
             const accountStrategyOrderInputs = await transformOrderInputListToData(orderInputOrigins, dealOrderInput)
             const accountStrategyOrders = await transformOrderTradeListToData(orderOrigins, dealOrder);
             const accountStrategyTrades = await transformOrderTradeListToData(tradeOrigins, dealTrade);
 
-            const allOrders = orderOrigins.slice(0, 100).map((item: OrderOriginData) => dealOrder(item));
-            const allTrades = tradeOrigins.slice(0, 100).map((item: TradeOriginData) => dealTrade(item));
             console.timeEnd('deal')
 
 
@@ -85,8 +83,6 @@ const appDataSubject: any = new Subject();
                 orders: accountStrategyOrders.account || {},
                 trades: accountStrategyTrades.account || {},
                 positions: transformTradingItemListToData(positions, 'account'),
-                ordersByTicker: allOrders,
-                tradesByTicker: allTrades,
                 positionsByTicker,
                 assets: transformAssetItemListToData(assets, 'account'),
                 pnl: transformTradingItemListToData(pnl, 'account'),
@@ -94,24 +90,19 @@ const appDataSubject: any = new Subject();
             }
     
             const strategyTradingDataPipeData = {
-                orders: accountStrategyOrders.strategy || {},
                 orderInputs: accountStrategyOrderInputs.strategy || {},
+                orders: accountStrategyOrders.strategy || {},
                 trades: accountStrategyTrades.strategy || {},
                 positions: transformTradingItemListToData(positions, 'strategy'),
                 assets: transformAssetItemListToData(assets, 'strategy'),
                 pnl: transformTradingItemListToData(pnl, 'strategy'),
                 dailyPnl: transformTradingItemListToData(dailyAsset, 'strategy'),
             }
-
-            const allOrdersPipeData = {
-                orders: allOrders,
-            }
     
             deamonDataSubject.next({
                 accountTradingDataPipeData,
                 strategyTradingDataPipeData,
                 instrumentsPipeData,
-                allOrdersPipeData,
                 quotes,
                 globalPipeData: {
                     watcherIsLive: watcher.isLive() || false,
@@ -121,7 +112,7 @@ const appDataSubject: any = new Subject();
 
             return true
 
-    }, 1000)
+    }, 800)
 
 })();
 
@@ -132,7 +123,7 @@ const appDataSubject: any = new Subject();
     }
 
     if (process.env.RENDERER_TYPE !== 'app') {
-            return;
+        return;
     }
     setTimerPromiseTask(() => {
         return new Promise(resolve => {
@@ -140,10 +131,15 @@ const appDataSubject: any = new Subject();
             const ledgerData = watcher.ledger;
             const timeValueList = ensureLeaderData(stateData.TimeValue.filter('tag_c', 'task'), 'update_time').slice(0, 100)
             const orderStat = ensureLeaderData(ledgerData.OrderStat, 'update_time');
-            const orderStatResolved = transformOrderStatListToData(orderStat);            
+            const orderStatResolved = transformOrderStatListToData(orderStat);  
+            const allOrders = ensureLeaderData(ledgerData.Order).slice(0, 1000);
+            const allTrades = ensureLeaderData(ledgerData.Trade).slice(0, 1000);
+
             appDataSubject.next({
                 timeValueList: timeValueList,
-                orderStat: orderStatResolved
+                orderStat: orderStatResolved,
+                allOrders,
+                allTrades
             })
 
             resolve(true)
@@ -171,14 +167,6 @@ export const buildInstrumentsPipe = () => {
         })
     )
 
-}
-
-export const buildAllOrdersPipe = () => {
-    return deamonDataSubject.pipe(
-        map((data: any) => {
-            return data.allOrdersPipeData
-        })
-    )
 }
 
 export const buildMarketDataPipe = () => {
@@ -213,6 +201,17 @@ export const buildOrderStatDataPipe = () => {
             return {
                 orderStat: data.orderStat
             };
+        })
+    )
+}
+
+export const buildAllOrdersTradesDataPipe = () => {
+    return appDataSubject.pipe(
+        map((data: any) => {
+            return {
+                orders: data.allOrders,
+                trades: data.allTrades
+            }
         })
     )
 }
