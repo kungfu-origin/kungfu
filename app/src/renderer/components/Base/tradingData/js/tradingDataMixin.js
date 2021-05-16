@@ -2,7 +2,7 @@ import moment from 'moment';
 import { decodeKungfuLocation, dealOrder, dealTrade } from '__io/kungfu/watcher';
 import { history } from '__io/kungfu/kungfuUtils';
 import { writeCSV } from '__gUtils/fileUtils';
-import { getDefaultRenderCellClass, originOrderTradesFilterByInstrumentIdDirection, buildDictFromArray } from '__gUtils/busiUtils';
+import { getDefaultRenderCellClass, originOrderTradesFilterByDirection, buildDictFromArray } from '__gUtils/busiUtils';
 
 export default {
     props: {
@@ -159,7 +159,8 @@ export default {
                 let timer = setTimeout(() => {
 
                     const kungfuData = history.selectPeriod(from, to);
-                    const targetList = this.getHistoryTargetList(this.kungfuBoardType, kungfuData);
+                    const { instrumentId, directionOrigin } = this.currentTicker;
+                    const targetList = this.getHistoryTargetListResolved(this.kungfuBoardType, kungfuData, this.moduleType, instrumentId);
                     const orderStats = kungfuData.OrderStat.list();
                     const orderStatByOrderId = buildDictFromArray(orderStats, 'order_id');
                     
@@ -172,8 +173,8 @@ export default {
                             } else if (this.moduleType === 'all') {
                                 return true;
                             } else if (this.moduleType === 'ticker') {
-                                const { instrumentId, directionOrigin } = this.currentTicker;
-                                return originOrderTradesFilterByInstrumentIdDirection(item, instrumentId, directionOrigin);
+                                const { offset, side, instrument_type } = item;
+                                return originOrderTradesFilterByDirection(directionOrigin, offset, side, instrument_type);
                             }
                         })
                         .map(item => {
@@ -197,15 +198,35 @@ export default {
                 }, 100)
             })
         },
+        
+        getHistoryTargetListResolved (kungfuBoardType, kungfuData, moduleType = '' , instrumentId = '') {
+            const kfDataTable = this.getHistoryTargetList(kungfuBoardType, kungfuData);
+            const sortName = this.getHistoryTargetSortName(kungfuBoardType);
+            if (moduleType === 'ticker') {
+                return kfDataTable.filter('instrument_id', instrumentId).sort(sortName);
+            } else {
+                return kfDataTable.sort(sortName);
+            }
+        },
 
-        getHistoryTargetList (kungfuBoardType, kungfuData) {
+        getHistoryTargetList (kungfuBoardType, kungfuData ) {
             if (kungfuBoardType === 'order') {
-                return kungfuData.Order.sort('update_time')
+                return kungfuData.Order
             } else if (kungfuBoardType === 'trade') {
-                return kungfuData.Trade.sort('update_time')
+                return kungfuData.Trade
             } else {
                 console.error('getHistoryTargetList type is not trade or order!')
                 return []
+            }
+        },
+
+        getHistoryTargetSortName (kungfuBoardType) {
+            if (kungfuBoardType === 'order') {
+                return 'update_time'
+            } else if (kungfuBoardType === 'trade') {
+                return 'trade_time'
+            } else {
+                return ''
             }
         },
 

@@ -710,7 +710,7 @@ export function ensureLeaderData (data: any, key = '') {
     return data ? data.sort(key) : []
 }
 
-const orderTradesFilterByDirection = (direction: number, offset: number, side: number, instrumentType: number) => {
+export const originOrderTradesFilterByDirection = (direction: number, offset: number, side: number, instrumentType: number) => {
     if (!allowShorted(+instrumentType)) {
         return true;
     }
@@ -739,15 +739,6 @@ const orderTradesFilterByDirection = (direction: number, offset: number, side: n
     } 
 
     return false;
-}
-
-export const originOrderTradesFilterByInstrumentIdDirection = (item: OrderOriginData | TradeOriginData, instrumentId: string, directionOrigin: number) => {
-    if (!instrumentId.includes(item.instrument_id)) {
-        return false;
-    }
-
-    const { offset, side, instrument_type } = item;
-    return orderTradesFilterByDirection(directionOrigin, offset, side, instrument_type)
 }
 
 export const buildDictFromArray = (list: any[], key: string) => {

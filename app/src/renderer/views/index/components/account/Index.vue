@@ -118,8 +118,8 @@ import MakeOrderDashboard from '@/components/Base/makeOrder/MakeOrderDashboard';
 import MainContent from '@/components/Layout/MainContent';
 import TaskRecord from '@/components/Task/TaskRecord';
 
-import { transformPositionByTickerByMerge, dealOrder, dealTrade } from '__io/kungfu/watcher';
-import { originOrderTradesFilterByInstrumentIdDirection } from '__gUtils/busiUtils';
+import { watcher, transformPositionByTickerByMerge, dealOrder, dealTrade } from '__io/kungfu/watcher';
+import { originOrderTradesFilterByDirection } from '__gUtils/busiUtils';
 import { buildTradingDataAccountPipeByDaemon } from '@/ipcMsg/daemon';
 import { buildOrderStatDataPipe, buildAllOrdersTradesDataPipe } from '__io/kungfu/tradingData';
 
@@ -336,8 +336,13 @@ export default {
                 this.orders = this.getHistoryData('order');
             } else {
                 this.orders = Object.freeze(
-                    data['orders']
-                    .filter(item => originOrderTradesFilterByInstrumentIdDirection(item, instrumentId, directionOrigin))
+                    watcher.ledger.Order
+                    .filter('instrument_id', instrumentId)
+                    .sort('update_time')
+                    .filter(item => {
+                        const { offset, side, instrument_type } = item;
+                        return originOrderTradesFilterByDirection(directionOrigin, offset, side, instrument_type);
+                    })
                     .slice(0, 100)
                     .map(item => Object.freeze(dealOrder(item)))
                 );
@@ -347,8 +352,13 @@ export default {
                 this.trades = this.getHistoryData('trade');
             } else {
                 this.trades = Object.freeze(
-                    data['trades']
-                    .filter(item => originOrderTradesFilterByInstrumentIdDirection(item, instrumentId, directionOrigin))
+                    watcher.ledger.Trade
+                    .filter('instrument_id', instrumentId)
+                    .sort('trade_time')
+                    .filter(item => {
+                        const { offset, side, instrument_type } = item;
+                        return originOrderTradesFilterByDirection(directionOrigin, offset, side, instrument_type);
+                    })
                     .slice(0, 100)
                     .map(item => Object.freeze(dealTrade(item)))
                 )

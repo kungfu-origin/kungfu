@@ -148,8 +148,6 @@ export default {
                 const orders = (data['orders'] || []).slice(0, 100).map(item => Object.freeze(dealOrder(item)));
                 this.orders = Object.freeze(orders || []);
             }
-
-        
         })
 
         this.orderStatPipe = buildOrderStatDataPipe().subscribe(data => {

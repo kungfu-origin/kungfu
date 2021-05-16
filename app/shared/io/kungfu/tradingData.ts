@@ -1,5 +1,6 @@
 import { Subject } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { buildDictFromArray } from '__gUtils/busiUtils';
 
 import { 
     watcher,
@@ -56,7 +57,6 @@ const appDataSubject: any = new Subject();
             const accountStrategyTrades = await transformOrderTradeListToData(tradeOrigins, dealTrade);
 
             console.timeEnd('deal')
-
 
             const positions = ensureLeaderData(ledgerData.Position).map((item: PosOriginData) => dealPos(item));
             const positionsByTicker = transformTradingItemListToData(positions, 'ticker');
@@ -132,8 +132,8 @@ const appDataSubject: any = new Subject();
             const timeValueList = ensureLeaderData(stateData.TimeValue.filter('tag_c', 'task'), 'update_time').slice(0, 100)
             const orderStat = ensureLeaderData(ledgerData.OrderStat, 'update_time');
             const orderStatResolved = transformOrderStatListToData(orderStat);  
-            const allOrders = ensureLeaderData(ledgerData.Order).slice(0, 1000);
-            const allTrades = ensureLeaderData(ledgerData.Trade).slice(0, 1000);
+            const allOrders = ensureLeaderData(ledgerData.Order, 'update_time').slice(0, 1000);
+            const allTrades = ensureLeaderData(ledgerData.Trade, 'trade_time').slice(0, 1000);
 
             appDataSubject.next({
                 timeValueList: timeValueList,
