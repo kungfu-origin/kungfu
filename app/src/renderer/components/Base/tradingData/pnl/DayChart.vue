@@ -110,7 +110,7 @@ export default {
             let timeList = [], pnlDataList = [];
             dailyPnlList
                 .filter(pnlData => Number(pnlData.updateTimeNum) >= this.addTime)
-                .sort((a, b) => a.updateTimeNum - b.updateTimeNum)
+                .reverse()
                 .kfForEach(pnlData => {
                     const tradingDay = pnlData.tradingDay.slice(4)
                     timeList.push(tradingDay);

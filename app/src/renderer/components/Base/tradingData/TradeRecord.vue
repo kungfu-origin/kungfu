@@ -4,6 +4,16 @@
         <tr-dashboard-header-item>
             <tr-search-input v-model.trim="searchKeyword"></tr-search-input>
         </tr-dashboard-header-item>
+        <tr-dashboard-header-item>
+            <el-tooltip
+                class="item"
+                effect="dark"
+                content="实时最多显示100条数据，更多数据请通过查询历史查看"
+                placement="right"
+            >
+                <i class="el-icon-question mouse-over"></i>
+            </el-tooltip>        
+        </tr-dashboard-header-item>
         <tr-dashboard-header-item v-if="!ifBacktest && !dateForHistory">
             <i class="el-icon-date mouse-over" title="历史" @click="dateRangeDialogVisiblityForHistory = true"></i>
         </tr-dashboard-header-item>

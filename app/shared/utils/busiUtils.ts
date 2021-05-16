@@ -56,7 +56,8 @@ declare global {
 
     interface Array<T> {
         removeRepeat(): any;
-        kfForEach(cb: Function): any
+        kfForEach(cb: Function): any,
+        kfForEachAsync(cb: Function): any
     }
 }
 
@@ -94,11 +95,38 @@ Array.prototype.removeRepeat = function (): any {
 Array.prototype.kfForEach = function (cb: Function): any {
     if (!cb) return;
     const t = this;
-    let i = 0, len = t.length;
+    const len = t.length;
+    let i = 0;
+    
     while (i < len) {
-        cb.call(t, t[i], i)
-        i++
+        cb.call(t, t[i], i);
+        i++;
     }
+}
+
+Array.prototype.kfForEachAsync = kfForEachAsync;
+
+function setImmediateIter (list: Array<any>, i: number, len: number, cb: Function, fcb: Function) {
+    if (i < len) {
+        setImmediate(() => {
+            cb(list[i], i)
+            setImmediateIter(list, ++i, len, cb, fcb)
+        })
+    } else {
+        fcb()
+    } 
+}
+
+function kfForEachAsync (cb: Function) {
+    //@ts-ignore
+    const t = this;
+    const len = t.length;
+    return new Promise(resolve => {
+        setImmediateIter(t, 0, len, cb, () => {
+            resolve(true)
+        })
+    })
+   
 }
 
 export const delayMiliSeconds = (miliSeconds: number): Promise<void> => {

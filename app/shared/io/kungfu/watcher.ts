@@ -66,62 +66,107 @@ export const writeKungfuTimeValue = (id: string, label: string, type: string, va
     watcher.publishState(data);
 }
 
+function setImmediateIter (task: Function, count: number, cb: Function) {
 
-
-export const transformOrderTradeListToData = (list: any[], type: string) => {
-    let data: StringToAnyObject = {};
-
-    if (type === 'account') {
-        list.kfForEach((item: any) => {
-            const location = decodeKungfuLocation(+item.source);
-            if (!location || !location.name) return;
-            const accountId = `${location.group}_${location.name}`;
-            if (!data[accountId]) data[accountId] = [];
-            if (data[accountId].length < 50) {
-                data[accountId].push(item)
-            }
+    if (count >= 0) {
+        setImmediate(() => {
+            task(count)
+            setImmediateIter(task, count--, cb)
         })
-    } else if (type === 'strategy') {
-        list.kfForEach((item: any) => {
-            const location = decodeKungfuLocation(+item.dest);
-            if (!location || !location.name) return;
-            const clientId = location.name;
-            if (!data[clientId]) data[clientId] = [];
-            if (data[clientId].length < 50) {
-                data[clientId].push(item)
+    } else {
+        cb(count)
+    } 
+}
+
+export const transformOrderTradeListToData = (list: OrderOriginData[] | TradeOriginData [], dealFunc: Function) => {
+    let accountData: { [prop: string]: OrderData[] | TradeData[] } = {};
+    let strategyData: { [prop: string]: OrderData[] | TradeData[] } = {};
+    let tmpSourceIdData: { [prop: number]: KungfuLocation } = {};
+    let tmpDestIdData: { [prop: number]: KungfuLocation } = {};
+
+    return list.kfForEachAsync((item: OrderOriginData | TradeOriginData) => {
+        const source = +item.source;
+        const tmpAccountLocation = tmpSourceIdData[source];
+        const accountLocation = tmpAccountLocation || decodeKungfuLocation(source);
+        if (accountLocation && accountLocation.name) {
+            if (!tmpAccountLocation) {
+                tmpSourceIdData[source] = accountLocation;
             }
-        })
-    }
-    return data;
+
+            const accountId = accountLocation.group + '_' + accountLocation.name;
+            if (!accountData[accountId]) accountData[accountId] = [];
+            if (accountData[accountId].length < 100) {
+                accountData[accountId].push(dealFunc(item))
+            }
+        }
+
+        const dest = +item.dest;
+        const tmpDestLocation = tmpDestIdData[dest];
+        const strategyLocation: KungfuLocation = tmpDestLocation || decodeKungfuLocation(dest);
+        if (strategyLocation && strategyLocation.name) {
+            if (!tmpDestLocation) {
+                tmpDestIdData[dest] = strategyLocation;
+            }
+
+            const strategyId = strategyLocation.name;
+            if (!strategyData[strategyId]) strategyData[strategyId] = [];
+            if (strategyData[strategyId].length < 100) {
+                strategyData[strategyId].push(dealFunc(item))
+            }
+        }
+    })
+    .then(() => {
+        return {
+            account: accountData,
+            strategy: strategyData
+        };
+    })
 }
 
 // source 跟 dest 跟普通相反，所以单独列出来
-export const transformOrderInputListToData = (list: any[], type: string) => {
-    let data: StringToAnyObject = {};
+export const transformOrderInputListToData = (list: OrderInputOriginData[], dealFunc: Function) => {
+    let accountData: { [prop: string]: OrderInputData[] } = {};
+    let strategyData: { [prop: string]: OrderInputData[] } = {};
+    let tmpSourceIdData: { [prop: number]: KungfuLocation } = {};
+    let tmpDestIdData: { [prop: number]: KungfuLocation } = {};
 
-    if (type === 'account') {
-        list.kfForEach((item: any) => {
-            const location = decodeKungfuLocation(+item.dest);
-            if (!location || !location.name) return;
-            const accountId = `${location.group}_${location.name}`;
-            if (!data[accountId]) data[accountId] = [];
-            if (data[accountId].length < 50) {
-                data[accountId].push(item)
+    return list.kfForEachAsync((item: OrderOriginData | TradeOriginData) => {
+        const dest = +item.dest;
+        const tmpAccountLocation = tmpDestIdData[dest];
+        const accountLocation = tmpAccountLocation || decodeKungfuLocation(dest);
+        if (accountLocation && accountLocation.name) {
+            if (!tmpAccountLocation) {
+                tmpDestIdData[dest] = accountLocation;
             }
-        })
-    } else if (type === 'strategy') {
-        list.kfForEach((item: any) => {
-            const location = decodeKungfuLocation(+item.source);
-            if (!location || !location.name) return;
-            const clientId = location.name;
-            if (!data[clientId]) data[clientId] = [];
-            if (data[clientId].length < 50) {
-                data[clientId].push(item)
-            }
-        })
-    }
 
-    return data;
+            const accountId = accountLocation.group + '_' + accountLocation.name;
+            if (!accountData[accountId]) accountData[accountId] = [];
+            if (accountData[accountId].length < 100) {
+                accountData[accountId].push(dealFunc(item))
+            }
+        }
+        
+        const source = +item.source;
+        const tmpStrategyLocation = tmpSourceIdData[source];
+        const strategyLocation: KungfuLocation = tmpStrategyLocation || decodeKungfuLocation(source);
+        if (strategyLocation && strategyLocation.name) {
+            if (!tmpStrategyLocation) {
+                tmpSourceIdData[source] = strategyLocation;
+            }
+
+            const strategyId = strategyLocation.name;
+            if (!strategyData[strategyId]) strategyData[strategyId] = [];
+            if (strategyData[strategyId].length < 100) {
+                strategyData[strategyId].push(dealFunc(item))
+            }
+        }
+    })
+    .then(() => {
+        return {
+            account: accountData,
+            strategy: strategyData
+        };
+    })
 }
 
 export const transformOrderStatListToData = (list: OrderStatOriginData[]) => {

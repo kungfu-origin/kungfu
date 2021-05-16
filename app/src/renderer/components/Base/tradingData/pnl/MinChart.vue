@@ -112,7 +112,7 @@ export default {
 
             minPnlList
                 .filter(pnlData => Number(pnlData.updateTimeNum) >= this.addTime)
-                .sort((a, b) => a.updateTimeNum - b.updateTimeNum)
+                .reverse()
                 .kfForEach(pnlData => {
                     timeList.push(pnlData.updateTime);
                     const pnlValue = this.calcuIntradayPnl(pnlData)

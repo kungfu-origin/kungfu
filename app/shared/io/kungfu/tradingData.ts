@@ -40,16 +40,26 @@ const appDataSubject: any = new Subject();
         };
     };
 
-    setTimerPromiseTask(() => {
+    setTimerPromiseTask(async () => {
 
-        return new Promise(resolve => {
+            const ledgerData = watcher.ledger;
 
-            console.time('[overhead] main calc time')
+            console.time('deal')
+            //限制最大内存/cpu使用
+            const orderInputOrigins = ensureLeaderData(ledgerData.OrderInput, 'insert_time').slice(0, 1500);
+            const orderOrigins = ensureLeaderData(ledgerData.Order, 'update_time').slice(0, 1500);
+            const tradeOrigins = ensureLeaderData(ledgerData.Trade, 'trade_time').slice(0, 1500);
+            console.log('len', orderOrigins.length, tradeOrigins.length)
 
-            const ledgerData = watcher.ledger
-            const orderInputs = ensureLeaderData(ledgerData.OrderInput, 'insert_time').map((item: OrderInputOriginData) => dealOrderInput(item));
-            const orders = ensureLeaderData(ledgerData.Order, 'update_time').map((item: OrderOriginData) => dealOrder(item));
-            const trades = ensureLeaderData(ledgerData.Trade, 'trade_time').map((item: TradeOriginData) => dealTrade(item));
+            const accountStrategyOrderInputs = await transformOrderInputListToData(orderInputOrigins, dealOrderInput)
+            const accountStrategyOrders = await transformOrderTradeListToData(orderOrigins, dealOrder);
+            const accountStrategyTrades = await transformOrderTradeListToData(tradeOrigins, dealTrade);
+
+            const allOrders = orderOrigins.slice(0, 100).map((item: OrderOriginData) => dealOrder(item));
+            const allTrades = tradeOrigins.slice(0, 100).map((item: TradeOriginData) => dealTrade(item));
+            console.timeEnd('deal')
+
+
             const positions = ensureLeaderData(ledgerData.Position).map((item: PosOriginData) => dealPos(item));
             const positionsByTicker = transformTradingItemListToData(positions, 'ticker');
             const assets = ensureLeaderData(ledgerData.Asset).map((item: AssetOriginData) => dealAsset(item));
@@ -68,16 +78,15 @@ const appDataSubject: any = new Subject();
     
                     return false
                 });
-            const quotes = ensureLeaderData(ledgerData.Quote)
-            
-    
+            const instrumentsPipeData = resolveInstruments(instrumentsAfterFilter);
+            const quotes = ensureLeaderData(ledgerData.Quote);
+
             const accountTradingDataPipeData = {
-                orders: transformOrderTradeListToData(orders, 'account'),
-                orderInputs: transformOrderInputListToData(orderInputs, 'account'),
-                ordersByTicker: orders.slice(0, 100),
-                trades: transformOrderTradeListToData(trades, 'account'),
-                tradesByTicker: trades.slice(0, 100),
+                orders: accountStrategyOrders.account || {},
+                trades: accountStrategyTrades.account || {},
                 positions: transformTradingItemListToData(positions, 'account'),
+                ordersByTicker: allOrders,
+                tradesByTicker: allTrades,
                 positionsByTicker,
                 assets: transformAssetItemListToData(assets, 'account'),
                 pnl: transformTradingItemListToData(pnl, 'account'),
@@ -85,19 +94,17 @@ const appDataSubject: any = new Subject();
             }
     
             const strategyTradingDataPipeData = {
-                orders: transformOrderTradeListToData(orders, 'strategy'),
-                orderInputs: transformOrderInputListToData(orderInputs, 'strategy'),
-                trades: transformOrderTradeListToData(trades, 'strategy'),
+                orders: accountStrategyOrders.strategy || {},
+                orderInputs: accountStrategyOrderInputs.strategy || {},
+                trades: accountStrategyTrades.strategy || {},
                 positions: transformTradingItemListToData(positions, 'strategy'),
                 assets: transformAssetItemListToData(assets, 'strategy'),
                 pnl: transformTradingItemListToData(pnl, 'strategy'),
                 dailyPnl: transformTradingItemListToData(dailyAsset, 'strategy'),
             }
-            
-            const instrumentsPipeData = resolveInstruments(instrumentsAfterFilter);
-    
+
             const allOrdersPipeData = {
-                orders: orders.slice(0, 100)
+                orders: allOrders,
             }
     
             deamonDataSubject.next({
@@ -112,10 +119,7 @@ const appDataSubject: any = new Subject();
                 }
             })
 
-            console.timeEnd('[overhead] main calc time')
-
-            resolve(true)
-        })
+            return true
 
     }, 1000)
 

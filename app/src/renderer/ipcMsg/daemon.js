@@ -5,7 +5,6 @@ const { _pm2 } = require('__gUtils/processUtils');
 
 const baseDaemonDataObserver = new Subject();
 
-console.log('new baseDaemonDataObserver')
 
 _pm2.launchBus((err, pm2_bus) => {
     if (err) {
