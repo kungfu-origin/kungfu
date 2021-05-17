@@ -8,6 +8,7 @@ import router from './routers';
 import * as utils from '__gUtils/busiUtils';
 import { removeJournal } from '__gUtils/fileUtils';
 import { KF_HOME } from '__gConfig/pathConfig';
+import { watcher } from '__io/kungfu/watcher';
 import ElementUI from 'element-ui';
 import Components from '@/assets/components';
 
@@ -33,12 +34,12 @@ new Vue({
 
 const { startGetProcessStatus, startMaster, startLedger, startDaemon, startArchiveMakeTask, _pm2 } = require('__gUtils/processUtils');
 
-if (process.env.NODE_ENV !== 'development') {
-    removeJournal(KF_HOME)
-}
 
-startArchiveMakeTask((archiveStatus) => {
-    window.archiveStatus = archiveStatus
+beforeAll()
+.then(() => {
+    return startArchiveMakeTask((archiveStatus) => {
+        window.archiveStatus = archiveStatus
+    })
 })
 .then(() => startMaster(false))
 .catch(err => console.error(err.message))
@@ -53,9 +54,27 @@ startArchiveMakeTask((archiveStatus) => {
         .then(() => startLedger(false))
         .catch(err => console.error(err.message))
 
-    utils.delayMiliSeconds(1000)
-        .then(() => startDaemon())
+    
+    //保证ui watcher已经启动
+    let timer = setInterval(() => {
+        if (watcher.isLive()) {
+            startDaemon()
+            .catch(err => console.error(err.message))
+            clearInterval(timer);
+        }
+
+    }, 100)
+
 })
 
 window.ELEC_WIN_MAP = new Set();
 window.pm2 = _pm2;
+
+
+function beforeAll () {
+    if (process.env.NODE_ENV !== 'development') {
+        return removeJournal(KF_HOME)
+    } else {
+        return Promise.resolve(true)
+    }
+}
