@@ -59,8 +59,8 @@ beforeAll()
     let timer = setInterval(() => {
         if (watcher.isLive() && watcher.isStarted() && watcher.isUsable()) {
             utils.delayMiliSeconds(1000)
-            .then(() => startDaemon())
-            .catch(err => console.error(err.message))
+                .then(() => startDaemon())
+                .catch(err => console.error(err.message))
             clearInterval(timer);
         }
 
