@@ -33,7 +33,9 @@ new Vue({
 
 const { startGetProcessStatus, startMaster, startLedger, startDaemon, startArchiveMakeTask, _pm2 } = require('__gUtils/processUtils');
 
-removeJournal(KF_HOME)
+if (process.env.NODE_ENV !== 'development') {
+    removeJournal(KF_HOME)
+}
 
 startArchiveMakeTask((archiveStatus) => {
     window.archiveStatus = archiveStatus
