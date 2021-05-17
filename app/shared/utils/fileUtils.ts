@@ -46,6 +46,11 @@ export const listDir = (filePath: string): Promise<void | string[]> => {
         return fse.readdir(filePath).catch(err => console.error(err))
 }
 
+export const listDirSync = (filePath: string): void | string[] => {
+    fse.ensureDirSync(filePath)
+    return fse.readdirSync(filePath)
+}
+
 export const getTreeByFilePath = (strategy: FileData, fileTree: any): Promise<FileTreeByPath> => {
     fileTree = fileTree || {};
     let strategyPath: string = strategy.filePath;
@@ -267,8 +272,8 @@ export const writeCSV = (filePath: string, data: any[]): Promise<void> => {
 
 export const removeJournal = (targetFolder: string) => {
             
-    async function iterator (folder: string) {
-        const items = await listDir(folder)
+    function iterator (folder: string) {
+        const items = listDirSync(folder)
 
         if (!items) return;
         

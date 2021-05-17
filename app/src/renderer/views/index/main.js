@@ -6,6 +6,8 @@ import './setKungfuParamsOnWindow';
 import store from '@/store';
 import router from './routers';
 import * as utils from '__gUtils/busiUtils';
+import { removeJournal } from '__gUtils/fileUtils';
+import { KF_HOME } from '__gConfig/pathConfig';
 import ElementUI from 'element-ui';
 import Components from '@/assets/components';
 
@@ -30,6 +32,8 @@ new Vue({
 
 
 const { startGetProcessStatus, startMaster, startLedger, startDaemon, startArchiveMakeTask, _pm2 } = require('__gUtils/processUtils');
+
+removeJournal(KF_HOME)
 
 startArchiveMakeTask((archiveStatus) => {
     window.archiveStatus = archiveStatus
