@@ -146,8 +146,8 @@ export default {
             }
 
             if(!ifProcessRunning('kungfuDaemon', this.processStatus)){
-                if(!this.daemonErrController && !!this.processStatus['ledger']){
-                    this.$message.warning.$message.warning('通信进程断开，无法监控交易数据，但交易仍将正常进行，如有需要请重启应用！', 0)
+                if(!this.daemonErrController && !!this.processStatus['kungfuDaemon']){
+                    this.$message.warning('通信进程断开，无法监控交易数据，但交易仍将正常进行，如有需要请重启应用！', 0)
                     this.daemonErrController = true;  
                 }
                 return 'color-red'
