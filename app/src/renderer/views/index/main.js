@@ -57,8 +57,9 @@ beforeAll()
     
     //保证ui watcher已经启动
     let timer = setInterval(() => {
-        if (watcher.isLive()) {
-            startDaemon()
+        if (watcher.isLive() && watcher.isStarted() && watcher.isUsable()) {
+            utils.delayMiliSeconds(1000)
+            .then(() => startDaemon())
             .catch(err => console.error(err.message))
             clearInterval(timer);
         }
