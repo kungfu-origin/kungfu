@@ -128,14 +128,10 @@ const appDataSubject: any = new Subject();
             const timeValueList = ensureLeaderData(stateData.TimeValue.filter('tag_c', 'task'), 'update_time').slice(0, 100)
             const orderStat = ensureLeaderData(ledgerData.OrderStat, 'insert_time').slice(0, 1000);
             const orderStatResolved = transformOrderStatListToData(orderStat);  
-            const allOrders = ensureLeaderData(ledgerData.Order, 'update_time').slice(0, 1000);
-            const allTrades = ensureLeaderData(ledgerData.Trade, 'trade_time').slice(0, 1000);
 
             appDataSubject.next({
                 timeValueList: timeValueList,
                 orderStat: orderStatResolved,
-                allOrders,
-                allTrades
             })
 
             resolve(true)
@@ -203,11 +199,8 @@ export const buildOrderStatDataPipe = () => {
 
 export const buildAllOrdersTradesDataPipe = () => {
     return appDataSubject.pipe(
-        map((data: any) => {
-            return {
-                orders: data.allOrders,
-                trades: data.allTrades
-            }
+        map(() => {
+            return {}
         })
     )
 }
