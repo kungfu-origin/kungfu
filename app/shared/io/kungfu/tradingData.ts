@@ -45,18 +45,14 @@ const appDataSubject: any = new Subject();
 
             const ledgerData = watcher.ledger;
 
-            console.time('deal')
             //限制最大内存/cpu使用
             const orderInputOrigins = ensureLeaderData(ledgerData.OrderInput, 'insert_time').slice(0, 1000);
             const orderOrigins = ensureLeaderData(ledgerData.Order, 'update_time').slice(0, 1000);
             const tradeOrigins = ensureLeaderData(ledgerData.Trade, 'trade_time').slice(0, 1000);
-            console.log('len', orderOrigins.length, tradeOrigins.length)
 
             const accountStrategyOrderInputs = await transformOrderInputListToData(orderInputOrigins, dealOrderInput)
             const accountStrategyOrders = await transformOrderTradeListToData(orderOrigins, dealOrder);
             const accountStrategyTrades = await transformOrderTradeListToData(tradeOrigins, dealTrade);
-
-            console.timeEnd('deal')
 
             const positions = ensureLeaderData(ledgerData.Position).map((item: PosOriginData) => dealPos(item));
             const positionsByTicker = transformTradingItemListToData(positions, 'ticker');
@@ -130,7 +126,7 @@ const appDataSubject: any = new Subject();
             const stateData = watcher.state;
             const ledgerData = watcher.ledger;
             const timeValueList = ensureLeaderData(stateData.TimeValue.filter('tag_c', 'task'), 'update_time').slice(0, 100)
-            const orderStat = ensureLeaderData(ledgerData.OrderStat, 'update_time');
+            const orderStat = ensureLeaderData(ledgerData.OrderStat, 'update_time').slice(0, 1000);
             const orderStatResolved = transformOrderStatListToData(orderStat);  
             const allOrders = ensureLeaderData(ledgerData.Order, 'update_time').slice(0, 1000);
             const allTrades = ensureLeaderData(ledgerData.Trade, 'trade_time').slice(0, 1000);
