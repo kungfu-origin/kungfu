@@ -1,110 +1,206 @@
-import { Observable } from 'rxjs';
+import { Subject } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { buildDictFromArray } from '__gUtils/busiUtils';
 
 import { 
+    watcher,
+
     dealGatewayStates, 
     transformTradingItemListToData, 
     transformOrderTradeListToData,
     transformOrderInputListToData, 
     transformOrderStatListToData, 
-    transformAssetItemListToData 
+    transformAssetItemListToData,
+
+    dealOrderInput,
+    dealOrder,
+    dealTrade,
+    dealPos,
+    dealAsset,
+    dealSnapshot,
 } from '__io/kungfu/watcher';
 
-import { startGetKungfuTradingData } from '__io/kungfu/watcher';
+import { setTimerPromiseTask, ensureLeaderData, resolveInstruments } from '__gUtils/busiUtils';
 
-export const KUNGFU_TRADING_DATA_OBSERVER = new Observable(subscriber => {
-    subscriber.next({})
-    startGetKungfuTradingData((state: any) => {
-        subscriber.next(state)
-    })
-})
-       
-export const buildTradingDataPipe = (type: string) => {
-    return KUNGFU_TRADING_DATA_OBSERVER.pipe(
-        map((data: any): any => {
-            const ledgerData = data.ledger || {};
-            const orders = ledgerData.Order ? ledgerData.Order.sort('ts') : [];
-            const orderInputs = ledgerData.OrderInput ? ledgerData.OrderInput.sort('ts') : [];
-            const trades = ledgerData.Trade ? ledgerData.Trade.sort('ts') : [];
-            const positions = Object.values(ledgerData.Position || {});
-            const assets = Object.values(ledgerData.Asset || {});
-            const pnl = Object.values(ledgerData.AssetSnapshot || {});
-            const orderStat = Object.values(ledgerData.OrderStat || {});
-            const dailyAsset = Object.values(ledgerData.DailyAsset || {});
-            const instruments = Object.values(ledgerData.Instrument || {});
-            
-            return {
-                orders: transformOrderTradeListToData(orders, type),
-                orderInputs: transformOrderInputListToData(orderInputs, type),
-                ordersByTicker: orders,
-                trades: transformOrderTradeListToData(trades, type),
-                tradesByTicker: trades,
-                positions: transformTradingItemListToData(positions, type),
-                positionsByTicker: transformTradingItemListToData(positions, 'ticker'),
-                assets: transformAssetItemListToData(assets, type),
-                pnl: transformTradingItemListToData(pnl, type),
-                dailyPnl: transformTradingItemListToData(dailyAsset, type),
-                orderStat: transformOrderStatListToData(orderStat),
-                instruments: instruments
+
+const deamonDataSubject: any = new Subject();
+
+const appDataSubject: any = new Subject();
+
+
+
+(() => {
+
+    if (watcher.noWathcer) {
+        return;
+    };  
+    
+    if (process.env.APP_TYPE !== 'daemon') {
+        if (process.env.APP_TYPE !== 'cli') {
+            return;
+        };
+    };
+
+    setTimerPromiseTask(async () => {
+
+            const ledgerData = watcher.ledger;
+
+            //限制最大内存/cpu使用
+            const orderInputOrigins = ensureLeaderData(ledgerData.OrderInput, 'insert_time').slice(0, 1000);
+            const orderOrigins = ensureLeaderData(ledgerData.Order, 'update_time').slice(0, 1000);
+            const tradeOrigins = ensureLeaderData(ledgerData.Trade, 'trade_time').slice(0, 1000);
+
+            const accountStrategyOrderInputs = await transformOrderInputListToData(orderInputOrigins, dealOrderInput)
+            const accountStrategyOrders = await transformOrderTradeListToData(orderOrigins, dealOrder);
+            const accountStrategyTrades = await transformOrderTradeListToData(tradeOrigins, dealTrade);
+
+            const positions = ensureLeaderData(ledgerData.Position).map((item: PosOriginData) => dealPos(item));
+            const positionsByTicker = transformTradingItemListToData(positions, 'ticker');
+            const assets = ensureLeaderData(ledgerData.Asset).map((item: AssetOriginData) => dealAsset(item));
+            const pnl = ensureLeaderData(ledgerData.AssetSnapshot, 'update_time').map((item: AssetSnapshotOriginData) => dealSnapshot(item));
+            const dailyAsset = ensureLeaderData(ledgerData.DailyAsset, 'trading_day').map((item: AssetSnapshotOriginData) => dealSnapshot(item));
+            const instruments = ensureLeaderData(ledgerData.Instrument);
+            const instrumentsAfterFilter = instruments
+                .filter((item: InstrumentOriginData) => {
+                    //普通股票 期货 股票期权 基金 科创板股票 指数
+                    if (item.instrument_type === 1) return true;
+                    if (item.instrument_type === 2) return true;
+                    if (item.instrument_type === 4) return true;
+                    if (item.instrument_type === 5) return true;
+                    if (item.instrument_type === 6) return true;
+                    if (item.instrument_type === 7) return true;
+    
+                    return false
+                });
+            const instrumentsPipeData = resolveInstruments(instrumentsAfterFilter);
+            const quotes = ensureLeaderData(ledgerData.Quote);
+
+            const accountTradingDataPipeData = {
+                orders: accountStrategyOrders.account || {},
+                trades: accountStrategyTrades.account || {},
+                positions: transformTradingItemListToData(positions, 'account'),
+                positionsByTicker,
+                assets: transformAssetItemListToData(assets, 'account'),
+                pnl: transformTradingItemListToData(pnl, 'account'),
+                dailyPnl: transformTradingItemListToData(dailyAsset, 'account'),
             }
+    
+            const strategyTradingDataPipeData = {
+                orderInputs: accountStrategyOrderInputs.strategy || {},
+                orders: accountStrategyOrders.strategy || {},
+                trades: accountStrategyTrades.strategy || {},
+                positions: transformTradingItemListToData(positions, 'strategy'),
+                assets: transformAssetItemListToData(assets, 'strategy'),
+                pnl: transformTradingItemListToData(pnl, 'strategy'),
+                dailyPnl: transformTradingItemListToData(dailyAsset, 'strategy'),
+            }
+    
+            deamonDataSubject.next({
+                accountTradingDataPipeData,
+                strategyTradingDataPipeData,
+                instrumentsPipeData,
+                quotes,
+                globalPipeData: {
+                    watcherIsLive: watcher.isLive() || false,
+                    gatewayStates: dealGatewayStates(watcher.appStates)
+                }
+            })
+
+            return true
+
+    }, 800)
+
+})();
+
+(() => {
+
+    if (watcher.noWathcer) {
+        return;
+    }
+
+    if (process.env.RENDERER_TYPE !== 'app') {
+        return;
+    }
+    setTimerPromiseTask(() => {
+        return new Promise(resolve => {
+            const stateData = watcher.state;
+            const ledgerData = watcher.ledger;
+            const timeValueList = ensureLeaderData(stateData.TimeValue.filter('tag_c', 'task'), 'update_time').slice(0, 100)
+            const orderStat = ensureLeaderData(ledgerData.OrderStat, 'insert_time').slice(0, 1000);
+            const orderStatResolved = transformOrderStatListToData(orderStat);  
+
+            appDataSubject.next({
+                timeValueList: timeValueList,
+                orderStat: orderStatResolved,
+            })
+
+            resolve(true)
+        })
+       
+    }, 1000)
+
+})();
+
+
+export const buildTradingDataPipe = (type: string) => {
+    return deamonDataSubject.pipe(
+        map((data: any) => {
+            return type === 'account' ? data.accountTradingDataPipeData : data.strategyTradingDataPipeData;
         })
     )
 }
 
 export const buildInstrumentsPipe = () => {
-    return KUNGFU_TRADING_DATA_OBSERVER.pipe(
+    return deamonDataSubject.pipe(
         map((data: any) => {
-            const ledgerData = data.ledger || {};
-            const instruments = Object.values(ledgerData.Instrument || {});
             return {
-                instruments
+                instruments: data.instrumentsPipeData
             }
         })
     )
 
-}
-
-export const buildAllOrdersPipe = () => {
-    return KUNGFU_TRADING_DATA_OBSERVER.pipe(
-        map((data: any): any => {
-            const ledgerData = data.ledger || {};
-            const orders = ledgerData.Order ? ledgerData.Order.sort('update_time') : [];
-            const orderStat = Object.values(ledgerData.OrderStat || {});
-            
-            return {
-                orderStat: transformOrderStatListToData(orderStat),
-                orders
-            }
-        })
-    )
 }
 
 export const buildMarketDataPipe = () => {
-    return KUNGFU_TRADING_DATA_OBSERVER.pipe(
-        map((data: any): any => {
-            const ledgerData = data.ledger || {};
-            const quotes = Object.values(ledgerData.Quote || {});
-            return transformTradingItemListToData(quotes, 'quote')
+    return deamonDataSubject.pipe(
+        map((data: any) => {
+            return data.quotes
         })
     )
 }
 
 export const buildKungfuGlobalDataPipe = () => {
-    return KUNGFU_TRADING_DATA_OBSERVER.pipe(
-        map((data: any): any => {
-            return {
-                gatewayStates: dealGatewayStates(data.appStates || {})
-            }
+    return deamonDataSubject.pipe(
+        map((data: any) => {
+            return data.globalPipeData
         })
     )
 }
 
 export const buildTaskDataPipe = () => {
-    return KUNGFU_TRADING_DATA_OBSERVER.pipe(
-        map((data: any): any => {
-            const stateData = data.state || {};
-            const timeValueList = stateData.TimeValue ? stateData.TimeValue.filter('tag_c', 'task').sort('update_time') : [];
-            return timeValueList.slice(0, 300)
+    return appDataSubject.pipe(
+        map((data: any) => {
+            return {
+                timeValueList: data.timeValueList
+            };
+        })
+    )
+}
+
+export const buildOrderStatDataPipe = () => {
+    return appDataSubject.pipe(
+        map((data: any) => {
+            return {
+                orderStat: data.orderStat
+            };
+        })
+    )
+}
+
+export const buildAllOrdersTradesDataPipe = () => {
+    return appDataSubject.pipe(
+        map(() => {
+            return {}
         })
     )
 }

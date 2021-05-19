@@ -76,6 +76,8 @@ export const buildProcessLogPath = (processId: string) => {
 
 //================== config start =================================
 
+//process.resourcesPath 是一个容易出错的问题，需要每个调用pathconfig的进程都注册了这个值，不然报错
+
 export const KUNGFU_RESOURCES_DIR = process.env.NODE_ENV === 'production'
     ? path.join(process.resourcesPath, 'kungfu-resources')
     : path.join(__resources)
@@ -101,11 +103,17 @@ addFileSync('', KF_TICKER_SET_JSON_PATH, 'file');
 
 export const KUNGFU_ENGINE_PATH = process.env.NODE_ENV === 'production' 
     ? process.resourcesPath
-    : path.join(__dirname, '..', '..', '..', 'core', 'build')
+    : path.resolve(path.join(__dirname, '..', '..', '..', 'core', 'build'))
 
 
 export const EXTENSION_DIR = path.join(KUNGFU_ENGINE_PATH, 'kfc', 'kungfu_extensions');
 
 export const TASK_EXTENSION_DIR = process.env.NODE_ENV === 'production'
     ? path.join(process.resourcesPath, 'kungfu-extensions')
-    : path.join(__dirname, '..', '..', '..')
+    : path.join(__dirname, '..', '..', '..');
+
+
+export const APP_DIR = process.env.NODE_ENV === 'production'
+    ? path.resolve(path.join(process.resourcesPath, 'app', 'dist', 'app'))
+    : path.resolve(path.join(__dirname, '..','..', 'dist', 'app'));
+

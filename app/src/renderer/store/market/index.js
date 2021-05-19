@@ -9,7 +9,9 @@ export default {
 
         currentTicker: null,
 
-        marketAvgVolume: {}
+        marketAvgVolume: {},
+
+        quotes: [],
     },
 
     actions: {
@@ -23,10 +25,18 @@ export default {
 
         setMarketAvgVolume ({ commit }, { days, data }) {
             commit('SET_MARKET_AVG_VOLUME', { days, data })
+        },
+
+        setQuotes ({ commit }, quotes) {
+            commit('SET_QUOTES', quotes)
         }
     },
 
     mutations: {
+        SET_QUOTES (state, quotes) {
+            state.quotes = quotes;
+        },
+
         SET_TICKER_SETS (state, tickerSets) {
             state.tickerSets = tickerSets
         },

@@ -20,8 +20,10 @@ export const getCurrentTimestamp = (format = false): number | string => {
 export const transformArrayToObjectByKey = (targetList: Array<any>, keys: Array<string>): any => {
     let data: any = {};
     (targetList || []).forEach(item => {
-        const key:string = keys.map(k => item[k]).join('_')
-        data[key] = item
+        const key:string = keys.map(k => item[k].toString().trim()).filter(k => !!k).join('_')
+        if (key) {
+            data[key] = item
+        }
     })
 
     return data

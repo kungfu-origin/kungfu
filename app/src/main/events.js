@@ -14,12 +14,13 @@ export const reqRecordBeforeQuit = (mainWindow) => {
             console.timeEnd('record before quit');
             console.log("record before quit timeout");
             clearTimeout(timer)
-        }, 5000)
+        }, 3000)
 
         mainWindow.webContents.send('main-process-messages', 'record-before-quit')
         
         ipcMain.on('record-before-quit-done', () => {
             resolve(true)
+            if (!timer) return; // if timer has been cleared
             console.timeEnd('record before quit')
             clearTimeout(timer)
         })

@@ -6,6 +6,7 @@ import readline from 'readline';
 
 import { EXTENSION_DIR } from '__gConfig/pathConfig';
 import { listDir } from '__gUtils/fileUtils';
+import { allowShorted } from "kungfu-shared/config/tradingConfig";
 
 
 interface LogLineData {
@@ -55,7 +56,8 @@ declare global {
 
     interface Array<T> {
         removeRepeat(): any;
-        kfForEach(cb: Function): any
+        kfForEach(cb: Function): any,
+        kfForEachAsync(cb: Function): any
     }
 }
 
@@ -93,11 +95,38 @@ Array.prototype.removeRepeat = function (): any {
 Array.prototype.kfForEach = function (cb: Function): any {
     if (!cb) return;
     const t = this;
-    let i = 0, len = t.length;
+    const len = t.length;
+    let i = 0;
+    
     while (i < len) {
-        cb.call(t, t[i], i)
-        i++
+        cb.call(t, t[i], i);
+        i++;
     }
+}
+
+Array.prototype.kfForEachAsync = kfForEachAsync;
+
+function setImmediateIter (list: Array<any>, i: number, len: number, cb: Function, fcb: Function) {
+    if (i < len) {
+        setImmediate(() => {
+            cb(list[i], i)
+            setImmediateIter(list, ++i, len, cb, fcb)
+        })
+    } else {
+        fcb()
+    } 
+}
+
+function kfForEachAsync (cb: Function) {
+    //@ts-ignore
+    const t = this;
+    const len = t.length;
+    return new Promise(resolve => {
+        setImmediateIter(t, 0, len, cb, () => {
+            resolve(true)
+        })
+    })
+   
 }
 
 export const delayMiliSeconds = (miliSeconds: number): Promise<void> => {
@@ -148,9 +177,8 @@ export const debounce = (fn: Function, interval = 300): Function => {
         const args: any = arguments;
         timeout && clearTimeout(timeout);
         timeout = null;
+        fn.apply(t, args);
         timeout = setTimeout(() => {
-            if(!timeout) return;
-            fn.apply(t, args);
             timeout && clearTimeout(timeout);
             timeout = null;
         }, interval);
@@ -160,12 +188,12 @@ export const debounce = (fn: Function, interval = 300): Function => {
 export const throttle = (fn: Function, interval = 300): Function => {
     let timer: NodeJS.Timer | null;
     return function(){
-        if(timer) return 
+        if (timer) return;
         //@ts-ignore
         const t: any = this;
         const args: any = arguments;
+        fn.apply(t, args);
         timer = setTimeout(() => {
-            fn.apply(t, args);
             timer && clearTimeout(timer)
             timer = null
         }, interval)
@@ -299,6 +327,18 @@ export const openPage = (taskPath: string, electronRemote: any, debugOptions = {
 export const ifProcessRunning = (processId: string, processStatus: any): boolean => {
     if(!processStatus) return false
     return processStatus[processId] === 'online' || processStatus[processId] === 'stopping'
+}
+
+export const getMemCpu = (processId: string, processStatusWithDetail: any, type: string) => {
+    const processData = processStatusWithDetail[processId] || {};
+    const monit = processData.monit || {};    
+    if (type === 'cpu') {
+        return monit.cpu !== undefined ? Number(monit.cpu).toFixed(1) + '%' : '--';
+    } else if (type === 'memory') {
+        return monit.memory !== undefined ? Number(monit.memory / 1000000).toFixed(0) + "M" : '--';
+    } else {
+        return '--'
+    }
 }
 
 /**
@@ -591,7 +631,7 @@ export function isBufferGBK (bufferFrom: Buffer) {
     return jschardet.detect(bufferFrom).encoding !== 'UTF-8'
 }
 
-export const resolveInstruments = (instruments: InstrumentInputData[]) => {
+export const resolveInstruments = (instruments: InstrumentOriginData[]) => {
     return (instruments || []).map(item => {
         const { instrument_id, product_id, exchange_id } = item;
         const instrumentName = decodeBuffer(product_id)
@@ -661,3 +701,61 @@ function buildListByLineNum(num: number){
     //@ts-ignore
     return new ListByNum(num)
 }
+
+export function ensureLeaderData (data: any, key = '') {
+    if (!key) {
+        return data ? data.list() : []
+    }
+
+    return data ? data.sort(key) : []
+}
+
+export const originOrderTradesFilterByDirection = (direction: number, offset: number, side: number, instrumentType: number) => {
+    if (!allowShorted(+instrumentType)) {
+        return true;
+    }
+
+    // long
+    if (+direction === 0) {
+        if (+offset === 0) {
+            if (+side === 0) {
+                return true
+            }
+        } else {
+            if (+side === 1) {
+                return true
+            }
+        }
+    } else { //short
+        if (+offset === 0) {
+            if (+side === 1) {
+                return true;
+            }
+        } else {
+            if (+side === 0) {
+                return true;
+            }
+        }
+    } 
+
+    return false;
+}
+
+export const buildDictFromArray = (list: any[], key: string) => {
+    let data: { [prop: string]: any } = {};
+    const keys: string[] = key.split(",");
+    list.kfForEach((item: any) => {
+        const key: string = keys.map((k: string): string => (item[k] || "").toString()).join('_');
+        data[key] = item;
+    })
+    return data;
+}
+
+export const addTwoItemByKeyForReduce = (item1: any, item2: any, key: string) => {
+    return (+item1[key] || 0) + (+item2[key] || 0);
+}
+
+export const avgTwoItemByKeyForReduce = (item1: any, item2: any, key: string) => {
+    return addTwoItemByKeyForReduce(item1, item2, key) / 2;
+}
+

@@ -46,6 +46,11 @@ export const listDir = (filePath: string): Promise<void | string[]> => {
         return fse.readdir(filePath).catch(err => console.error(err))
 }
 
+export const listDirSync = (filePath: string): void | string[] => {
+    fse.ensureDirSync(filePath)
+    return fse.readdirSync(filePath)
+}
+
 export const getTreeByFilePath = (strategy: FileData, fileTree: any): Promise<FileTreeByPath> => {
     fileTree = fileTree || {};
     let strategyPath: string = strategy.filePath;
@@ -263,4 +268,41 @@ export const writeCSV = (filePath: string, data: any[]): Promise<void> => {
         })
     })
     
+}
+
+export const removeJournal = (targetFolder: string) => {
+            
+    function iterator (folder: string) {
+        const items = listDirSync(folder)
+
+        if (!items) return;
+        
+        const folders = items.filter((f: string) => {
+            const stat = fse.statSync(path.join(folder, f))
+
+            if (stat.isDirectory()) return true;
+            return false;
+        })
+
+        const files = items.filter((f: string) => {
+            const stat = fse.statSync(path.join(folder, f))
+
+            if (stat.isFile()) return true;
+            return false;
+        })                
+
+        files.forEach((f: string) => {
+            if (f.includes('.journal')) {
+                fse.removeSync(path.join(folder, f))
+            }
+        })
+
+        folders.forEach((f: string) => {
+            iterator(path.join(folder, f))
+        })                
+    }  
+
+    iterator(targetFolder)
+
+    return Promise.resolve(true)
 }

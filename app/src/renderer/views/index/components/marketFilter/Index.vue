@@ -75,9 +75,16 @@ import Task from '@/components/Task/Index';
 import TaskRecord from '@/components/Task/TaskRecord';
 import OrderRecord from '@/components/Base/tradingData/OrderRecord';
 
-import { buildMarketDataPipe, buildAllOrdersPipe } from '__io/kungfu/tradingData'; 
+import { watcher, dealOrder } from '__io/kungfu/watcher';
+import { buildMarketDataPipeByDaemon } from '@/ipcMsg/daemon'; 
+import { ensureLeaderData } from '__gUtils/busiUtils';
+import { buildOrderStatDataPipe, buildAllOrdersTradesDataPipe } from '__io/kungfu/tradingData';
+
+import accountStrategyMixins from '@/views/index/js/accountStrategyMixins';
 
 export default {
+
+    mixins: [ accountStrategyMixins ],
 
     components: {
         MainContent,
@@ -99,8 +106,6 @@ export default {
             currentTradeDataTabName: 'systemOrders',
             orders: Object.freeze([]),
             orderStat: Object.freeze({}),
-
-            historyData: {},
         }
     },
 
@@ -133,34 +138,35 @@ export default {
     },
 
     mounted () {
-        this.marketDataPipe = buildMarketDataPipe().subscribe(data => {
+        this.marketDataPipe = buildMarketDataPipeByDaemon().subscribe(data => {
             this.quoteData = Object.freeze(data);
         })
 
-        this.allOrdersPipe = buildAllOrdersPipe().subscribe(data => {
-            const { orders, orderStat } = data;
-            if (this.historyData['order'] && ((this.historyData['order'] || {}).date)) {
-                this.orders = Object.freeze(this.historyData['order'].data)
+        this.allOrdersPipe = buildAllOrdersTradesDataPipe().subscribe(() => {
+            if (this.isHistoryData('order')) {
+                this.orders = this.getHistoryData('order')
             } else {
-                const orders = data['orders'];
-                this.orders = Object.freeze(orders || []);
+                const orders = ensureLeaderData(watcher.ledger.Order, 'update_time').slice(0, 100)
+                const ordersResolved = orders.map(item => Object.freeze(dealOrder(item)));
+                this.orders = Object.freeze(ordersResolved || []);
             }
+        })
+
+        this.orderStatPipe = buildOrderStatDataPipe().subscribe(data => {
+            const orderStat = data['orderStat'];
             this.orderStat = Object.freeze(orderStat || {});
         })
+
+        
     },
     
     destroyed(){
         this.marketDataPipe && this.marketDataPipe.unsubscribe();
         this.allOrdersPipe && this.allOrdersPipe.unsubscribe();
+        this.orderStatPipe && this.orderStatPipe.unsubscribe();
     },
 
     methods: {
-        handleShowHistory ({ date, data, type }) {
-            this.$set(this.historyData, type, {
-                date,
-                data
-            })
-        },
 
         handleMakeOrderByOrderBook (quote) {
             this.selectedQuote = Object.freeze(quote);

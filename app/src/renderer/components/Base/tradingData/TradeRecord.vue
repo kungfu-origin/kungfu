@@ -4,6 +4,16 @@
         <tr-dashboard-header-item>
             <tr-search-input v-model.trim="searchKeyword"></tr-search-input>
         </tr-dashboard-header-item>
+        <tr-dashboard-header-item>
+            <el-tooltip
+                class="item"
+                effect="dark"
+                content="实时最多显示100条数据，更多数据请通过查询历史查看"
+                placement="right"
+            >
+                <i class="el-icon-question mouse-over"></i>
+            </el-tooltip>        
+        </tr-dashboard-header-item>
         <tr-dashboard-header-item v-if="!ifBacktest && !dateForHistory">
             <i class="el-icon-date mouse-over" title="历史" @click="dateRangeDialogVisiblityForHistory = true"></i>
         </tr-dashboard-header-item>
@@ -40,10 +50,11 @@
 <script>
 
 import DatePickerDialog from '@/components/Base//DatePickerDialog';
-import tradingDataMixin from '@/components/Base/tradingData/js/tradingDataMixin';
 
-import { dealTrade } from "__io/kungfu/watcher";
+import { dealOrderStat } from '__io/kungfu/watcher';
 import { tradesHeader } from '@/components/Base/tradingData/js/tableHeaderConfig';
+
+import tradingDataMixin from '@/components/Base/tradingData/js/tradingDataMixin';
 
 export default {
     name: 'trades-record',
@@ -87,28 +98,29 @@ export default {
             let tradesAfterFilter = trades
                 .filter(item => {
                     if (searchKeyword.trim() === '') return true;
-                    const { trade_id, client_id, account_id, source_id, instrument_id } = item
-                    const strings = [ trade_id.toString(), client_id, account_id, source_id, instrument_id ].join('')
+                    const { tradeId, clientId, accountId, sourceId, instrumentId } = item
+                    const strings = [ tradeId, clientId, accountId, sourceId, instrumentId ].join('')
                     return strings.includes(searchKeyword) 
                 })
 
             if (this.moduleType === 'strategy') {
                 tradesAfterFilter = tradesAfterFilter
                     .filter(item => {
-                        return Number(item.trade_time) >= this.addTime 
+                        return Number(item.updateTimeNum) >= this.addTime 
                     })
             }
 
             tradesAfterFilter = tradesAfterFilter
                 .map(item => {
-                    let tradeData = dealTrade(item);
+                    let tradeData = { ...item };
                     let orderId = tradeData.orderId;
-                    const orderStatByOrderId = this.orderStat[orderId] || {}
+                    const orderStatByOrderId = dealOrderStat(this.orderStat[orderId] || null);
                     tradeData.update = !!this.tableData.length;
                     tradeData.latencyTrade = orderStatByOrderId.latencyTrade || '';
                     //ctp trade返回的是交易所时间（xtp是自己维护），所用orderState内时间代替
-                    const { updateTime, updateTimeMMDD } = tradeData
+                    const { updateTime, updateTimeNum, updateTimeMMDD } = tradeData
                     tradeData.updateTime = !!orderStatByOrderId.tradeTimeNum ? orderStatByOrderId.tradeTime : updateTime
+                    tradeData.updateTimeNum = !!orderStatByOrderId.tradeTimeNum ? orderStatByOrderId.tradeTimeNum : updateTimeNum
                     tradeData.updateTimeMMDD = !!orderStatByOrderId.tradeTimeNum ? orderStatByOrderId.tradeTimeMMDD : updateTimeMMDD
                     return Object.freeze(tradeData)
                 })

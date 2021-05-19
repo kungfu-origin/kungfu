@@ -6,7 +6,7 @@
         :close-on-click-modal="false"
         :close-on-press-escape="true"
         @close="handleClose"
-        @keyup.enter.native="handleSubmitSetting"
+        @keyup.enter.native="handleConfirmTickerSet"
     >
         <div class="ticker-set-dialog__warp">
             <div class="name-content">
@@ -146,6 +146,10 @@ export default {
         }
     },
 
+    beforeDestroy () {
+        this.$bus.$off('add-ticker-for-ticker-set')
+    },
+
     computed: {
 
         ...mapState({
@@ -185,7 +189,6 @@ export default {
         },
 
         bindAddTickerListener () {
-            this.$bus.$off('add-ticker-for-ticker-set')
             this.$bus.$on('add-ticker-for-ticker-set', (tickerData) => {
                 const targetIndex = getIndexFromTargetTickers(this.tickersList, tickerData)
                 if (targetIndex === -1) {

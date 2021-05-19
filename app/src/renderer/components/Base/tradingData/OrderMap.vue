@@ -22,7 +22,7 @@
 import { mapState } from 'vuex';
 
 import { debounce, throttle } from '__gUtils/busiUtils'
-import { dealTrade, dealOrder, dealOrderInput } from "__io/kungfu/watcher";
+import { dealOrderStat } from '__io/kungfu/watcher';
 
 import baseMixin from '@/assets/mixins/baseMixin';
 
@@ -76,7 +76,7 @@ export default {
     },
 
     mounted () {
-        this.setOrderMap();
+        this.setOrderMap(this.processId);
     },
 
     computed: {
@@ -109,27 +109,28 @@ export default {
     },
 
     methods: {
+
         setOrderMap: throttle(function (processId) {
             const data = this.mergeMapByOrderId();
             if (processId !== this.processId) return;
             this.tableList = this.resolveOrderMap(data);
-        }, 500),
+        }, 100),
 
         mergeMapByOrderId () {
             let mapData = {};
          
             this.orderInputs.kfForEach(item => {
-                const itemResolved = dealOrderInput(item);
+                const itemResolved = item;
                 const { orderId, updateTime } = itemResolved;
                 if (!mapData[orderId]) mapData[orderId] = {};
                 mapData[orderId]['orderInput'] = Object.freeze(itemResolved);  
                 mapData[orderId]['id'] = orderId;  
-                mapData[orderId]['ts'] = updateTime;  
+                mapData[orderId]['updateTime'] = updateTime;  
 
             })
 
-               this.orders.kfForEach(item => {
-                const itemResolved = dealOrder(item);
+            this.orders.kfForEach(item => {
+                const itemResolved = item;
                 const { orderId } = itemResolved;
                 if (!mapData[orderId]) return;
                 mapData[orderId]['order'] = Object.freeze(itemResolved);      
@@ -137,12 +138,13 @@ export default {
 
 
             this.trades.kfForEach(item => {
-                let itemResolved = dealTrade(item);
+                let itemResolved = { ...item };
                 const { orderId } = itemResolved;
 
                 if (!mapData[orderId]) return;
 
-                const orderStatByOrderId = this.orderStat[orderId] || {};
+                
+                const orderStatByOrderId = dealOrderStat(this.orderStat[orderId] || null);
                 //ctp trade返回的是交易所时间（xtp是自己维护），所用orderState内时间代替
                 const { updateTime, updateTimeMMDD } = itemResolved;
                 itemResolved.updateTime = !!orderStatByOrderId.tradeTimeNum ? orderStatByOrderId.tradeTime : updateTime;
@@ -171,6 +173,8 @@ export default {
         },
 
         turnOrderInputToLog (orderInput) {
+            if (!orderInput) return "";
+
             const { instrumentId, orderId, priceType, limitPrice, volume, hedgeFlag, accountId, exchangeId, updateTime } = orderInput
             return `
                 ${updateTime} <br/>
@@ -183,6 +187,8 @@ export default {
         },
 
         turnOrderToLog (order) {
+            if (!order) return "";
+
             const { instrumentId, orderId, priceType, limitPrice, volumeTraded, hedgeFlag, accountId, exchangeId, updateTime } = order
             return `
                 ${updateTime} <br/>
@@ -196,6 +202,7 @@ export default {
         },
 
         turnTradesToLog (trades) {
+            if (!trades) return ""
             return trades.map(trade => `
                 ${trade.updateTime} <br/>
                 ${trade.instrumentId} ${trade.exchangeId} ${trade.accountId} <br/>

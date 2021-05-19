@@ -158,10 +158,13 @@ export default {
     },
 
     mounted () {
-        this.$bus.$off('set-task')
         this.$bus.$on('set-task', ({ type, initData }) => {
             this.handleAddTaskFromOutSide(type, initData)
         })
+    },
+
+    beforeDestroy () {
+        this.$bus.$off('set-task');
     },
 
     computed: {
@@ -325,6 +328,7 @@ export default {
 
         handleTaskSwitch (e, data) {
             const { processId, args, cwd } = data;
+            console.log('switch task: ',processId, args, cwd)
             return switchTask(e, {
                 name: processId,
                 args: args.join(' '),

@@ -20,7 +20,7 @@ import minimist from 'minimist';
 import moment from 'moment';
 
 import { findTargetFromArray, getDefaultRenderCellClass } from '__gUtils/busiUtils';
-import { buildTaskDataPipe } from '__io/kungfu/tradingData';
+import { buildTaskDataPipe } from '__io/kungfu/tradingData'; //这个还是需要读watcher
 
 
 export default {
@@ -35,8 +35,9 @@ export default {
 
     mounted () {
         this.taskDataPipe = buildTaskDataPipe()
-            .subscribe(dataList => {
-                this.taskRecords = this.dealTaskRecords(dataList);
+            .subscribe(data => {
+                const { timeValueList } = data;
+                this.taskRecords = this.dealTaskRecords(timeValueList);
             })
     },
 

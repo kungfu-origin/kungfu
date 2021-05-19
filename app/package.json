@@ -1,6 +1,6 @@
 {
   "name": "kungfu",
-  "version": "2.3.4",
+  "version": "2.3.5",
   "description": "KungFu Trader App",
   "license": "Apache-2.0",
   "homepage": "https://github.com/taurusai/kungfu",
@@ -22,14 +22,14 @@
   "scripts": {
     "install-deps": "electron-builder install-app-deps",
     "clean": "rimraf ./dist/* ./build/*",
-    "test": " node .electron-builder/build.js",
-    "dist": "node --max_old_space_size=2048 .electron-kungfu/build.js",
-    "build": "yarn run dist && node .electron-builder/build.js",
-    "build-cli": "yarn run build --cli",
-    "build-pro": "yarn run build --pro",
     "dev": "node .electron-kungfu/dev-runner.js",
     "dist:main": "cross-env NODE_ENV=production node --max_old_space_size=2048 ../node_modules/webpack/bin/webpack.js --config .electron-kungfu/webpack.main.config.js",
-    "dist:render": "cross-env NODE_ENV=production node --max_old_space_size=2048 ../node_modules/webpack/bin/webpack.js --config .electron-kungfu/webpack.renderer.config.js"
+    "dist:render": "cross-env NODE_ENV=production node --max_old_space_size=2048 ../node_modules/webpack/bin/webpack.js --config .electron-kungfu/webpack.renderer.config.js",
+    "dist": "node --max_old_space_size=4096 .electron-kungfu/build.js",
+    "elec": "node .electron-builder/build.js",
+    "prebuild": "yarn run dist",
+    "build": "yarn run elec && yarn run elec --pro",
+    "build-cli": "yarn run elec --cli"
   },
   "dependencies": {
     "fast-csv": "^2.5.0",
@@ -41,7 +41,7 @@
     "kungfu-core": "*",
     "minimist": "^1.2.5",
     "moment": "^2.24.0",
-    "pm2": "3.5.2"
+    "pm2": "^4.5.6"
   },
   "devDependencies": {
     "@types/node": "^12.6.2",

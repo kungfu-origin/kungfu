@@ -72,7 +72,7 @@ function buildVolumeDataFromArrayById (targetList, ids) {
 function calcAvgVolume (quotesList) {
     let avgVolumeData = {}
     quotesList.forEach(quotes => {
-        const quotesVolumeData = buildVolumeDataFromArrayById(quotes, 'instrument_id, exchange_id');
+        const quotesVolumeData = buildVolumeDataFromArrayById(quotes, 'instrumentId, exchangeId');
 
         Object.keys(quotesVolumeData || {})
             .forEach(key => {

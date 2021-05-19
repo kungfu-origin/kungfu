@@ -123,7 +123,9 @@ import Pos from '@/components/Base/tradingData/Pos';
 import Pnl from '@/components/Base/tradingData/pnl/Index';
 import MainContent from '@/components/Layout/MainContent';
 
-import { buildTradingDataPipe } from '__io/kungfu/tradingData';
+import { buildTradingDataStrategyPipeByDaemon } from '@/ipcMsg/daemon';
+import { buildOrderStatDataPipe } from '__io/kungfu/tradingData';
+
 import accountStrategyMixins from '@/views/index/js/accountStrategyMixins';
 
 export default {
@@ -150,17 +152,17 @@ export default {
     },
 
     mounted(){
-        this.tradingDataPipe = buildTradingDataPipe('strategy').subscribe(data => {
+        this.tradingDataPipe = buildTradingDataStrategyPipeByDaemon().subscribe(data => {
             
-            if (this.historyData['order'] && ((this.historyData['order'] || {}).date)) {
-                this.orders = Object.freeze(this.historyData['order'].data)
+            if (this.isHistoryData('order')) {
+                this.orders = this.getHistoryData('order')
             } else {
                 const orders = data['orders'][this.strategyId];
                 this.orders = Object.freeze(orders || []);
             }
 
-            if (this.historyData['trade'] && ((this.historyData['trade'] || {}).date)) {
-                this.trades = Object.freeze(this.historyData['trade'].data)
+            if (this.isHistoryData('trade')) {
+                this.trades = this.getHistoryData('trade')
             } else {
                 const trades = data['trades'][this.strategyId];
                 this.trades = Object.freeze(trades || []);
@@ -171,20 +173,25 @@ export default {
 
             const positions = data['positions'][this.strategyId];
             this.positions = Object.freeze(positions || []);
+  
             const pnl = data['pnl'][this.strategyId];
             this.pnl = Object.freeze(pnl || []);
             const dailyPnl = data['dailyPnl'][this.strategyId];
             this.dailyPnl = Object.freeze(dailyPnl || []);
-            const orderStat = data['orderStat'];
-            this.orderStat = Object.freeze(orderStat || {});
 
             const assets = data['assets'];
-            this.$store.dispatch('setStrategiesAsset', Object.freeze(JSON.parse(JSON.stringify(assets))));
+            this.$store.dispatch('setStrategiesAsset', Object.freeze(assets));
+        });
+
+        this.orderStatPipe = buildOrderStatDataPipe().subscribe(data => {
+            const orderStat = data['orderStat'];
+            this.orderStat = Object.freeze(orderStat || {});
         })
     },
 
     destroyed(){
         this.tradingDataPipe && this.tradingDataPipe.unsubscribe();
+        this.orderStatPipe && this.orderStatPipe.unsubscribe();
     },
    
     computed: {
@@ -208,13 +215,6 @@ export default {
     },
 
     methods:{
-        handleShowHistory ({ date, data, type }) {
-            this.$set(this.historyData, type, {
-                date,
-                data
-            })
-        },
-
         showCurrentIdInTabName (currentTabName, target) {
             return currentTabName === target ? this.strategyId : ''
         },

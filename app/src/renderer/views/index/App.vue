@@ -10,7 +10,7 @@
         <el-dialog
         title="系统提示"
         class="system-prepare-dialog"
-        :visible.sync="watcherLoading"
+        :visible="watcherLoading"
         :show-close="false"
         :close-on-click-modal="false"
         width="450px"
@@ -22,6 +22,10 @@
             <div style="margin: 10px 0 20px">
                 <tr-status :value="loadingData.watcher ? '100' : '3'" :hasText="false"></tr-status>
                 {{ loadingData.watcher ? '功夫环境准备完成 ✓' : '功夫环境准备中...' }}
+            </div>
+            <div style="margin: 10px 0 20px">
+                <tr-status :value="loadingData.daemon ? '100' : '3'" :hasText="false"></tr-status>
+                {{ loadingData.daemon ? '功夫数据通信已建立 ✓' : '等待功夫数据通信建立...' }}
             </div>
         </el-dialog>
 
@@ -43,12 +47,11 @@
 <script>
 
 import { mapState } from 'vuex';
+import moment from "moment"
 
 import GlobalSettingDialog from '@/components/Base/GlobalSettingDialog';
-
-import { buildKungfuGlobalDataPipe, buildTradingDataPipe } from '__io/kungfu/tradingData';
+import { buildMarketDataPipeByDaemon, buildInstrumentsPipeByDaemon, buildTradingDataAccountPipeByDaemon, buildKungfuGlobalDataPipeByDaemon } from '@/ipcMsg/daemon';
 import { watcher } from '__io/kungfu/watcher';
-
 
 import ipcListenerMixin from '@/ipcMsg/ipcListenerMixin';
 import tickerSetMixin from '@/components/MarketFilter/js/tickerSetMixin';
@@ -62,13 +65,15 @@ export default {
 
     data() {
         this.kungfuGloablDataObserver = null;
+        this.oldInstruments = Object.freeze(JSON.parse(localStorage.getItem('instruments') || "[]"));
         return {
-            watcherLoading: false,
+
             globalSettingDialogVisiblity: false,
 
             loadingData: {
                 archive: false,
-                watcher: false
+                watcher: false,
+                daemon: false,
             }
         }
     },
@@ -79,8 +84,8 @@ export default {
 
     mounted(){
 
-        //打开应用后报错，比如vs2019依赖
-        window.MAIN_RENDERED = true;
+        //打开应用后报错，比如vs2019依赖, 在app启动后不显示
+        window.AFTER_APP_MOUNTED = true;
 
         this.removeLoadingMask();
         this.removeKeyDownEvent();
@@ -93,14 +98,22 @@ export default {
 
         this.bindKungfuGlobalDataListener();
         this.bindTradingDataListener();
+        this.bindInstrumentsDataListener();
+        this.bindQuotesListener();
 
         this.getWatcherStatus();
     },
 
     computed: {
         ...mapState({
-            processStatus: state => state.BASE.processStatus,
-        })
+            watcherIsLive: state => state.BASE.watcherIsLive || false,
+            processStatus: state => state.BASE.processStatus || {},
+        }),
+
+        watcherLoading () {
+            const { archive, daemon } = this.loadingData;
+            return !(archive && this.loadingData.watcher && daemon)
+        }
     },
 
     watch: {
@@ -118,11 +131,50 @@ export default {
     },
 
     methods: {
-        bindTradingDataListener () {
-            this.tradingDataPipe = buildTradingDataPipe('account').subscribe(data => {
-                const assets = data['assets'];
-                this.$store.dispatch('setAccountsAsset', Object.freeze(JSON.parse(JSON.stringify(assets))));
+        bindInstrumentsDataListener () {
+            buildInstrumentsPipeByDaemon().subscribe(data => {
+                const instruments = data['instruments'] || [];
+
+                if (!instruments || !instruments.length) {
+                    localStorage.setItem('instrumentsSavedDate', '')
+                    return;
+                }
+                
+                if (this.getIfSaveInstruments(instruments || [])) {
+                    localStorage.setItem('instrumentsSavedDate', moment().format('YYYY-MM-DD-HH-mm'))
+                    localStorage.setItem('instruments', JSON.stringify(instruments))
+                    this.oldInstruments = instruments; //refresh old instruments
+                }
             })
+        },
+
+        bindQuotesListener () {
+            buildMarketDataPipeByDaemon().subscribe(data => {
+                this.$store.dispatch('setQuotes', Object.freeze(Object.values(data)))   
+            })
+        },
+
+        bindTradingDataListener () {
+            buildTradingDataAccountPipeByDaemon().subscribe(data => {
+                const assets = data['assets'];
+                this.$store.dispatch('setAccountsAsset', Object.freeze(assets));
+            })
+        },
+
+        getIfSaveInstruments (newInstruments) {
+
+            if (newInstruments.length !== this.oldInstruments.length) {
+                return true;
+            }
+
+            const instrumentsSavedDate = localStorage.getItem('instrumentsSavedDate')
+            if (!instrumentsSavedDate) {
+                return true
+            } else if (instrumentsSavedDate !== moment().format('YYYY-MM-DD-HH-mm')) {
+                return true 
+            } else {
+                return false
+            }
         },
 
         removeLoadingMask () {
@@ -133,31 +185,37 @@ export default {
             let timer = setInterval(() => {
                 const watcherStatus = watcher.isLive();
                 const archiveFinished = (window.archiveStatus !== 'online') && (window.archiveStatus !== undefined);
+                const daemonStatus = this.processStatus.kungfuDaemon === 'online';
 
                 this.$set(this.loadingData, 'archive', archiveFinished);
                 this.$set(this.loadingData, 'watcher', watcherStatus);
+                this.$set(this.loadingData, 'daemon', daemonStatus);
 
-                if (!archiveFinished) this.watcherLoading = true;
-                else if (!watcherStatus) this.watcherLoading = true;
-                else {
-                    this.watcherLoading = false;
-                    clearInterval(timer)
+                const { archive, daemon } = this.loadingData;
+                if (archive && this.loadingData.watcher && daemon) {
+                    clearTimeout(timer)
                 }
 
-            }, 500)
+            }, 100)
         },
 
         bindKungfuGlobalDataListener () {
-            this.kungfuGloablDataObserver = buildKungfuGlobalDataPipe().subscribe(data => {
-                data.gatewayStates.forEach(gatewayState => {
+            this.kungfuGloablDataObserver = buildKungfuGlobalDataPipeByDaemon().subscribe(data => {
+                
+                const gatewayStates = data["gatewayStates"] || [];
+                gatewayStates.forEach(gatewayState => {
                     const { processId } = gatewayState;
                     this.$store.dispatch('setOneMdTdState', {
                         id: processId,
                         stateData: gatewayState
                     })
 
+                    //做柜台就绪回调
                     this.emitMdTdStateChange(processId, gatewayState)
                 })
+
+                const watcherIsLive = data["watcherIsLive"] || false;
+                this.$store.dispatch('setWatcherIsLive', watcherIsLive)
             })
         },
 
@@ -171,9 +229,9 @@ export default {
             //两种情况，一种是从等待 or others 变为就绪
             //一种是从无直接100
             if (state !== oldState || oldState === "") {
-                if (state == 100 || oldState === 100) {
-                    this.$bus.$emit('mdTdStateChange', { processId, state })
-                }
+                    if (state == 100 && oldState !== 100) {
+                        this.$bus.$emit('mdTdStateReady', { processId, state })
+                    }
             }
 
             this.mdTdOldState[processId] = stateData || {};

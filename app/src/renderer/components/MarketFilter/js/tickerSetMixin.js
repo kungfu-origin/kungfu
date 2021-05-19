@@ -5,15 +5,19 @@ import AddSetTickerSetDialog from '@/components/MarketFilter/components/AddSetTi
 import AddTickerDialog from '@/components/MarketFilter/components/AddTickerDialog';
 
 import { checkAllMdProcess, findTargetFromArray, delayMiliSeconds } from '__gUtils/busiUtils';
+import { sendDataToDaemonByPm2 } from "__gUtils/processUtils";
 import { getTickerSets, addSetTickerSet, removeTickerSetByName } from '__io/actions/market';
 import { kungfuSubscribeTicker } from '__io/kungfu/makeCancelOrder'
-import { watcher } from '__io/kungfu/watcher';
 
 export default {
 
     mounted () {
         this.getTickerSets();
         this.handleMdTdStateChange();
+    },
+
+    beforeDestroy() {
+        this.$bus.$off('mdTdStateReady');
     },
 
     components: {
@@ -37,7 +41,8 @@ export default {
             currentTickerSetName: state => (state.MARKET.currentTickerSet || {}).name || '',
             currentTickerSetTickers: state => (state.MARKET.currentTickerSet || {}).tickers || [],
             currentTickerSet: state => state.MARKET.currentTickerSet || {},
-            processStatus: state => state.BASE.processStatus || {}
+            processStatus: state => state.BASE.processStatus || {},
+            watcherIsLive: state => state.BASE.watcherIsLive || false,
         }),
 
         ...mapGetters([
@@ -101,11 +106,9 @@ export default {
 
         handleMdTdStateChange () {
             const self = this;
-            this.$bus.$on('mdTdStateChange', ({ processId, state }) => {
-                if (state === 100) { // ready
-                    if (processId.includes('md')) {
-                        self.subscribeTickersByProcessId(processId, true)
-                    }
+            this.$bus.$on('mdTdStateReady', function({ processId }) {
+                if (processId.includes('md')) {
+                    self.subscribeTickersByProcessId(processId)
                 }
             })
         },
@@ -135,19 +138,15 @@ export default {
         },
 
         subscribeAllTickers (slience = true) {
-            if (!watcher.isLive()) return;
+            if (!this.watcherIsLive) return;
             const tickers = this.flatternTickers || [];
             this.subscribeTickers(tickers, slience)
+            sendDataToDaemonByPm2('MAIN_RENDERER_SUBSCRIBED_TICKERS', tickers)
         },
 
         //通过md 订阅
         subscribeTickersByProcessId (mdProcessId, slience = true) {
-            if (!watcher.isLive()) return;
-            const tickers = (this.flatternTickers || []).filter(({ source }) => {
-                return mdProcessId.indexOf(source) !== -1
-            })
-            
-            this.subscribeTickers(tickers, slience)
+            this.subscribeAllTickers(slience)
         },
 
         subscribeTickersInTickerSet (tickerSet, slience = true) {
@@ -161,6 +160,8 @@ export default {
         },
 
         async subscribeTickers (tickers, slience = true) {
+            if (!this.watcherIsLive) return;
+
             let i = 0, len = tickers.length;
             for (i; i < len; i++) {
                 const ticker = tickers[i];

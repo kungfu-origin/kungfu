@@ -167,7 +167,6 @@
 import { mapGetters, mapState } from 'vuex';
 
 import { getIndexFromTargetTickers } from '__gUtils/busiUtils';
-import { dealQuote } from '__io/kungfu/watcher';
 import { ExchangeIds } from "kungfu-shared/config/tradingConfig";
 
 import tickerSetMixin from '@/components/MarketFilter/js/tickerSetMixin';
@@ -206,6 +205,14 @@ export default {
         }
     },
 
+    mounted () {
+        this.bindAddTickerToTickerSet();
+    },
+
+    beforeDestroy () {
+        this.$bus.$off('add-ticker-for-ticker-set');
+    },
+
     methods: {
 
         handleAddTask () {
@@ -223,7 +230,6 @@ export default {
         
         handleAddTicker () {
             this.addTickerDialogVisiblity = true;
-            this.bindAddTickerToTickerSet();
         },
 
         handleDeleteTicker (ticker) {
@@ -241,7 +247,6 @@ export default {
         },
 
         bindAddTickerToTickerSet () {
-            this.$bus.$off('add-ticker-for-ticker-set')
             this.$bus.$on('add-ticker-for-ticker-set', (tickerData) => {
                 const { name, tickers } = this.currentTickerSet;
                 const targetIndex = getIndexFromTargetTickers(tickers, tickerData)
@@ -273,11 +278,7 @@ export default {
             const { exchangeId, instrumentId, source } = tickerData;
             const id = `${exchangeId}_${instrumentId}_${source}`;
             const target = this.marketData[id] || null;
-            if (target) {
-                return dealQuote(target)
-            } else {
-                return target                
-            }
+            return target;
         }
     }
 }

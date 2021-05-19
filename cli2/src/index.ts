@@ -11,7 +11,7 @@ import { shutdown } from '@/commanders/shutdown';
 import { monitKill } from '@/commanders/monitKill';
 
 import { monitPrompt } from '@/components/index';
-import { removeFilesInFolder } from '__gUtils/fileUtils';
+import { removeFilesInFolder, removeJournal } from '__gUtils/fileUtils';
 import { LOG_DIR, BASE_DB_DIR, KF_HOME } from '__gConfig/pathConfig';
 import { logger } from '__gUtils/logUtils';
 
@@ -155,6 +155,19 @@ program
     .action(() => {
         return removeFilesInFolder(LOG_DIR)
             .then(() => console.success('Clear all logs'))
+            .catch((err: Error) => {
+                console.error(err)
+                process.exit(1)
+            })
+            .finally(() => process.exit(0))
+    })
+
+program
+    .command('clearJournal')
+    .description('clear all journal (Be carefull, this action will clear all trading data)')
+    .action(() => {
+        return removeJournal(KF_HOME)
+            .then(() => console.success('Clear all jouranl files'))
             .catch((err: Error) => {
                 console.error(err)
                 process.exit(1)

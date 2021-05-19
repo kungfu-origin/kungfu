@@ -90,8 +90,6 @@ export const getSystemConfig = (): { [propName: string]: SystemConfigItem } => (
                 "type": SystemConfigChildItemTypeEnum.Bool,
                 "required": true
             },
-           
-            
         ]
     },
     "strategy": {

@@ -239,7 +239,7 @@ export default {
             strategyiesAsset: state => state.STRATEGY.strategyiesAsset || {},
             currentStrategy: state => state.STRATEGY.currentStrategy,
             strategyList: state => state.STRATEGY.strategyList,
-            processStatus: state => state.BASE.processStatus
+            processStatus: state => state.BASE.processStatus,
         }),
     },
 
@@ -371,7 +371,9 @@ export default {
             
             if (!value) {
                 const strategyLocation = encodeKungfuLocation(strategyId, 'strategy');
-                watcher.requestStop(strategyLocation)
+                if (watcher.isLive()) {
+                    watcher.requestStop(strategyLocation)
+                }
             }
          
             switchStrategy(strategyId, value)

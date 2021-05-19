@@ -8,10 +8,13 @@ export default {
     },
 
     mounted () {
-        this.$bus.$off('update:instruments')
         this.$bus.$on('update:instruments', () => {
             this.instrumentIds = this.getInstrumentIds()
         })
+    },
+
+    beforeDestroy () {
+        this.$bus.$off('update:instruments')
     },
 
     computed: {
@@ -23,11 +26,9 @@ export default {
     methods: {
         getInstrumentIds () {
             const instruments = localStorage.getItem('instruments')
-
             if (!instruments) {
                 return Object.freeze([]);
             }
-            
             return Object.freeze(JSON.parse(instruments).map(item => Object.freeze(item)))
         },
 
@@ -48,7 +49,7 @@ export default {
                     if ((id || '').includes(queryString.toLowerCase())) return true;
                     return false
                 })
-                .slice(0, 300)
+                .slice(0, 20)
         },
 
         getSearchTickersInTickerSets (queryString = '') {

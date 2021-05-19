@@ -20,7 +20,9 @@ export default {
 
     computed: {
         ...mapState({
-            processStatus: state => state.BASE.processStatus || {}
+            processStatus: state => state.BASE.processStatus || {},
+            watcherIsLive: state => state.BASE.watcherIsLive
+
         }),
 
         ...mapGetters([

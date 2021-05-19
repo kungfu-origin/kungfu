@@ -35,6 +35,8 @@ if (target) {
         key: 'to',
         value: 'kfc'
     }])
+
+    
     
     if (targetIndex >= 0) {
         baseConfig.extraResources[targetIndex] = {
@@ -42,10 +44,9 @@ if (target) {
             "to": "kfc",
             "filter": [
                 "!**/btdata",
-                "!**/kungfu_extensions/tora",
-                "!**/kungfu_extensions/shengli",
-                "!**/kungfu_extensions/xtp"
-            ]
+                target.includes('xtp') ? "" : "!**/kungfu_extensions/xtp",
+                hasFuture(target) ? "!**/kungfu_extensions/ctp" : "",
+            ].filter(key => !!key)
         }
     }
 
@@ -56,13 +57,10 @@ if (target) {
         })
     }
 
-    if (target.includes('ctpzs')) {
+    if (target.includes('zhaos')) {
         baseConfig.extraResources.push({
-            "from": "./resources/ext/ctp",
-            "to": "kfc/kungfu_extensions/ctp/",
-            "filter": [
-                '*.dll'
-            ],
+            "from": path.join(__dirname, '..', '..', 'kfext_zhaos', 'build', 'dist'),
+            "to": "kfc/kungfu_extensions/zhaos",
         })
     }
 
@@ -74,19 +72,6 @@ if (target) {
     }
 
     if (target.includes('rongh')) {
-
-        baseConfig.extraResources[targetIndex] = {
-            "from": "../core/build/kfc",
-            "to": "kfc",
-            "filter": [
-                "!**/btdata",
-                "!**/kungfu_extensions/tora",
-                "!**/kungfu_extensions/shengli",
-                "!**/kungfu_extensions/xtp",
-                "!**/kungfu_extensions/ctp"
-            ]
-        }
-
         baseConfig.extraResources.push({
             "from": path.join(__dirname, '..', '..', 'kfext_rongh', 'build', 'dist'),
             "to": "kfc/kungfu_extensions/rongh"
@@ -99,6 +84,12 @@ builder.build({
     config: baseConfig
 })
 
+
+function hasFuture (target) {
+    if (target.includes('zhaos')) return true;
+    if (target.includes('rongh')) return true;
+    return false
+}
 
 //conditions: { key: '', value: '' }
 function findConfigItemIndex (configList, conditions) {

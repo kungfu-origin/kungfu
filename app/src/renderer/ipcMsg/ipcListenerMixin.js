@@ -1,21 +1,19 @@
 
 import { mapState } from 'vuex';
 import { ipcRenderer, remote } from 'electron';
-import fse from 'fs-extra';
-import path from 'path';
 
-import { watcher, dealQuote, dealPos, dealOrder, writeKungfu } from '__io/kungfu/watcher';
+import { watcher, writeKungfuTimeValue, getTargetOrdersByParentId } from '__io/kungfu/watcher';
+import { kungfu } from '__io/kungfu/kungfuUtils';
 import { getStrategyById, updateStrategyPath } from '__io/kungfu/strategy';
-import { transformTradingItemListToData } from '__io/kungfu/watcher';
 import { aliveOrderStatusList } from 'kungfu-shared/config/tradingConfig';
 import { KF_HOME } from '__gConfig/pathConfig';
-import { listDir } from '__gUtils/fileUtils';
+import { removeJournal } from '__gUtils/fileUtils';
 
 import makeOrderCoreMixin from '@/components/Base/makeOrder/js/makeOrderCoreMixin';
 import recordBeforeQuitMixin from "@/assets/mixins/recordBeforeQuitMixin";
 import tickerSetMixin from '@/components/MarketFilter/js/tickerSetMixin';
 
-const { _pm2 } = require('__gUtils/processUtils');
+const { _pm2, sendDataToProcessIdByPm2 } = require('__gUtils/processUtils');
 
 const BrowserWindow = remote.BrowserWindow;
 
@@ -42,6 +40,7 @@ export default {
 
     computed: {
         ...mapState({
+            watcherIsLive: state => state.BASE.watcherIsLive,
             accountsAsset: state => state.ACCOUNT.accountsAsset,
             marketAvgVolume: state => state.MARKET.marketAvgVolume || {},
         })
@@ -68,17 +67,6 @@ export default {
                     } = packetData.body || {};
 
                     switch (dataType) {
-                        case 'REQ_LEDGER_DATA':
-                            this.resLedgerData(parentId, pm2Id, accountId, ticker, processName)
-                            break;
-                        case "REQ_QUOTE_DATA":
-                            this.resQuoteData(pm2Id, ticker, processName)
-                            this.resInstrumentInfo(pm2Id, ticker, processName)
-                            break;
-                        case "REQ_POS_ORDER_DATA":
-                            this.resPosData(pm2Id, accountId, processName)
-                            this.resOrderData(pm2Id, parentId, processName)
-                            break
                         case 'MAKE_ORDER_BY_PARENT_ID':
                             const makeOrderData = packetData.body;
                             const markOrderDataResolved = {
@@ -89,15 +77,16 @@ export default {
                                 .catch(err => {
                                     this.$message.error(err.message)
                                 })
+
                         case 'CANCEL_ORDER_BY_PARENT_ID':
-                            const ordersByParentId = this.getTargetOrdersByParentId(watcher.ledger.Order, parentId)
+                            const ordersByParentId = getTargetOrdersByParentId(watcher.ledger.Order, parentId);
                             ordersByParentId
                                 .filter(order => aliveOrderStatusList.includes(+(order.status || 0)))
                                 .forEach(order => {
-                                    const orderData = dealOrder(order)
-                                    this.cancelOrder('account', orderData)
+                                    this.cancelOrder('account', order)
                                 })
                             break
+
                         case "SUBSCRIBE_BY_TICKER":
                             const sourceName = accountId ? (accountId || '').toSourceName() : sourceId;
                             this.subscribeTickers([{
@@ -105,137 +94,42 @@ export default {
                                 exchangeId,
                                 instrumentId: ticker
                             }])
-                            break
+                            break;
+
                         case "SUBSCRIBE_BY_TICKERSET":
                             const { tickerSet } = packetData.body || {}
                             this.subscribeTickersInTickerSet(tickerSet)
                             break;
+
                         case "TIME_ALERT":
                             const { minute, quoteAlive } = packetData.body || {};
-                            
                             if (!quoteAlive) {
                                 this.$message.warning(`距离算法任务 ${processName} 开始执行还有 ${minute} 分钟，目前还未收到订阅行情，请检查交易进程与行情进程运行`)
                             } else {
                                 this.$message.info(`距离算法任务 ${processName} 开始执行还有 ${minute} 分钟，请保证交易进程与行情进程运行`)
                             }
-                            break
+                            break;
+
                         case 'REQ_HIS_AVG_VOLUME': //历史均成交量
                             const { days } = packetData.body || {};
-                            this.sendResDataToProcessId("HIS_AVG_VOLUME", pm2Id, processName, { avgVolume: this.marketAvgVolume[days] || {} })
-                            break
+                            sendDataToProcessIdByPm2("HIS_AVG_VOLUME", pm2Id, processName, { avgVolume: this.marketAvgVolume[days] || {} })
+                            break;
+
                         case 'REQ_RECORD_DATA':
                             const { data } = packetData.body;
-                            writeKungfu(processName, '', 'task', JSON.stringify(data))
+                            const kungfuTimeNow = watcher.now();
+                            const kungfuTimeNowStr = kungfu.formatTime(kungfuTimeNow, '%H:%M:%S.%N').slice(0, 12);
+
+                            writeKungfuTimeValue(processName, '', 'task', JSON.stringify({
+                                ...data,
+                                kungfuTimeNow: kungfuTimeNow.toString(),
+                                kungfuTimeNowStr
+                            }))
                     }
                 })
             })
         },
 
-        resQuoteData (pm2Id, tickers, processName) {
-            if (!watcher.isLive()) return;
-            watcher.step();
-            const ledger = watcher.ledger;
-
-            const quotes = Object.values(ledger.Quote || {})
-                .filter(quote => tickers.includes(`${quote.instrument_id}_${quote.exchange_id}`))
-                .map(quote => dealQuote(quote));
-
-            this.sendResDataToProcessId("QUOTE_DATA", pm2Id, processName, { quotes })    
-        },
-
-        resPosData (pm2Id, accountId, processName) {
-            if (!watcher.isLive()) return;
-            watcher.step();
-            const ledger = watcher.ledger;
-            const positions = Object.values(ledger.Position || {});
-            const positionsResolved = transformTradingItemListToData(positions, 'account')[accountId] || [];
-
-            this.sendResDataToProcessId("POS_DATA", pm2Id, processName, { 
-                positions: positionsResolved,
-            })
-        },
-
-        resOrderData (pm2Id, parentId, processName) {
-            if (!watcher.isLive()) return;
-            watcher.step();
-            const ledger = watcher.ledger;
-            const orders = this.getTargetOrdersByParentId(ledger.Order || {}, parentId)
-
-            this.sendResDataToProcessId("ORDER_DATA", pm2Id, processName, { 
-                orders
-            })
-        },
-
-        resInstrumentInfo (pm2Id, tickers, processName) {
-            if (!watcher.isLive()) return;
-            watcher.step();
-            const ledger = watcher.ledger;
-            const instruments = Object.values(ledger.Instrument)
-                .filter(item => tickers.includes(`${item.instrument_id}_${item.exchange_id}`))
-                
-            this.sendResDataToProcessId('INSTRUMENT_DATA', pm2Id, processName, {
-                instruments
-            })
-        },
-
-        sendResDataToProcessId (topic, pm2Id, processName, data) {
-            _pm2.sendDataToProcessId({
-                type: 'process:msg',
-                data,
-                id: pm2Id,
-                topic: topic
-            }, err => {
-                if (err) {
-                    console.error(processName, err)
-                }
-            })
-        },
-
-        resLedgerData (parentId, pm2Id, accountId, ticker, processName) {
-            if (watcher.isLive()) {
-                watcher.step();
-                const ledger = watcher.ledger;
-                const { orders, positions, quotes } = this.buildLedgerDataForTask(ledger, accountId, parentId, ticker)
-                _pm2.sendDataToProcessId({
-                    type: 'process:msg',
-                    parentId,
-                    data: {
-                        positions: positions.map(pos => dealPos(pos)),
-                        quotes: quotes.map(quote => dealQuote(quote)),
-                        orders: orders.map(order => dealOrder(order))
-                    },
-                    id: pm2Id,
-                    topic: 'LEDGER_DATA'
-                }, err => {
-                    if (err) {
-                        console.error(processName, err)
-                    }
-                })
-            }
-        },
-
-        //pos, quote, orders
-        buildLedgerDataForTask (ledger, accountId, parentId, ticker) {
-            const positions = Object.values(ledger.Position || {});
-            const positionsResolved = transformTradingItemListToData(positions, 'account')[accountId] || [];
-            const quotes = Object.values(ledger.Quote || {}).filter(quote => {
-                return quote.instrument_id === ticker
-            })
-            const orders = this.getTargetOrdersByParentId(ledger.Order, parentId)
-            return {
-                positions: positionsResolved,
-                quotes,
-                orders
-            }
-        },
-
-        getTargetOrdersByParentId (orders, parentId) {
-            return Object.values(orders || {})
-                .filter(order => {
-                    if (!order.parent_id) return false
-                    return (order.parent_id || '').toString() === (parentId || '').toString()
-                });
-        },
         
         bindIPCListener () {
             ipcRenderer.removeAllListeners('main-process-messages')
@@ -251,7 +145,10 @@ export default {
                             })
                         break
                     case 'clear-journal':
-                        this.removeJournal(KF_HOME)
+                        removeJournal(KF_HOME)
+                            .then(() => {
+                                this.$message.success('清理 journal 完成！')
+                            })
                         break
 
                 }
@@ -336,41 +233,6 @@ export default {
                         childWin.webContents.send('ipc-res-updateStrategyPath')
                     })
             })
-        },
-
-        removeJournal (targetFolder) {
-            
-            async function iterator (folder) {
-                const items = await listDir(folder)
-                
-                const folders = items.filter(f => {
-                    const stat = fse.statSync(path.join(folder, f))
-
-                    if (stat.isDirectory()) return true;
-                    return false;
-                })
-
-                const files = items.filter(f => {
-                    const stat = fse.statSync(path.join(folder, f))
-
-                    if (stat.isFile()) return true;
-                    return false;
-                })                
-
-                files.forEach(f => {
-                    if (f.includes('.journal')) {
-                        fse.removeSync(path.join(folder, f))
-                    }
-                })
-
-                folders.forEach(f => {
-                    iterator(path.join(folder, f))
-                })                
-            }  
-
-            iterator(targetFolder)
-        }
-
-        
+        }        
     },
 }

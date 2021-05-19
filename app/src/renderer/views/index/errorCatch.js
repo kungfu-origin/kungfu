@@ -1,17 +1,18 @@
 import { remote } from 'electron'
 const { dialog } = remote;
 
-process.on('uncaughtException', (err) => {
 
-    if (!err) return;
+// if (process.env.NODE_ENV === 'production') {
+//     process
+//     .on('unhandledRejection', (reason, p) => {
+//         console.error(reason, 'Unhandled Rejection at Promise', p);
+//     })
+//     .on('uncaughtException', (err) => {
+//         console.error(err, 'Uncaught Exception thrown');
 
-    if (!window.MAIN_RENDERED) {
-        dialog.showErrorBox('错误', err.message)
-        return;
-    } 
+//         if (!window.AFTER_APP_MOUNTED) {
+//             dialog.showErrorBox('错误', err, a, b)
+//         } 
+//     });
+// }
 
-    if (process.env.NODE_ENV !== 'production') {
-        dialog.showErrorBox('错误', err.message)
-    }
-
-})

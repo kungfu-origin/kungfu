@@ -20,10 +20,9 @@ import { map } from 'rxjs/operators';
 const colors = require('colors');
 
 
-export const switchProcess = (proc: any, messageBoard: any) =>{
+export const switchProcess = (proc: any, messageBoard: any, loading: any) =>{
     const status = proc.status !== '--';
     const startOrStop = !!status ? 'Stop' : 'Start';
-    const startOrStopMaster = !!status ? 'Restart' : 'Start';
 
     if (!status) {
         if (proc.processId !== 'master') {
@@ -38,37 +37,62 @@ export const switchProcess = (proc: any, messageBoard: any) =>{
         case 'main':
             if (proc.processId === 'master') {
                 //开启，要归档
-                preSwitchMain(status, messageBoard)
-                .then(() => switchMaster(!status))
-                .then(() => messageBoard.log(`${startOrStopMaster} Master process success!`, 2))
-                .catch((err: Error) => logger.error(err))
-            }
-            else if(proc.processId === 'ledger') {
+                preSwitchMain(status, messageBoard, loading)
+                    .then(() => {
+                        loading.load(`${startOrStop} Master process`);
+                        return switchMaster(!status)
+                    })
+                    .then(() => {
+                        loading.stop();
+                        return messageBoard.log(`${startOrStop} Master process success!`, 2)
+                    })
+                    .catch((err: Error) => logger.error(err))
+            } else if (proc.processId === 'ledger') {
+                loading.load(`${startOrStop} Ledger process`)
                 switchLedger(!status)
-                .then(() => messageBoard.log(`${startOrStop} Ledger process success!`, 2))
-                .catch((err: Error) => logger.error(err))
-            } 
+                    .then(() => {
+                        loading.stop();
+                        return messageBoard.log(`${startOrStop} Ledger process success!`, 2)
+                    })
+                    .catch((err: Error) => logger.error(err))
+            }
             break
         case 'md':
+            loading.load(`${startOrStop} MD process`)
             switchMd(proc, !status)
-            .then(() => messageBoard.log(`${startOrStop} MD process success!`, 2))
+            .then(() => {
+                loading.stop();
+                return messageBoard.log(`${startOrStop} MD process success!`, 2)
+            })
             .catch((err: Error) => logger.error(err))
             break
         case 'td':
+            loading.load(`${startOrStop} TD process`)
             switchTd(proc, !status)
-            .then(() => messageBoard.log(`${startOrStop} TD process success!`, 2))
-            .catch((err: Error) => logger.error(err))
+                .then(() => {
+                    loading.stop();
+                    return messageBoard.log(`${startOrStop} TD process success!`, 2)
+                })
+                .catch((err: Error) => logger.error(err))
             break;
         case 'strategy':
+            loading.load(`${startOrStop} Strategy process`)
             switchStrategy(proc.processId, !status)
-            .then(() => { messageBoard.log(`${startOrStop} Strategy process success!`, 2) })
-            .catch((err: Error) => logger.error(err))
+                .then(() => { 
+                    loading.stop();
+                    return messageBoard.log(`${startOrStop} Strategy process success!`, 2) 
+                })
+                .catch((err: Error) => logger.error(err))
             break;
         default:
             const processId = proc.processId
+            loading.load(`${startOrStop} ${processId.toUpperCase()} process`)
             switchCustomProcess(!status, processId)
-            .then(() => messageBoard.log(`${startOrStop} ${processId.toUpperCase()} process success!`, 2))
-            .catch((err: Error) => logger.error(err))
+                .then(() => {
+                    loading.stop();
+                    return messageBoard.log(`${startOrStop} ${processId.toUpperCase()} process success!`, 2)
+                })
+                .catch((err: Error) => logger.error(err))
     }
 }
 
@@ -162,6 +186,15 @@ export const processListObservable = () => combineLatest(
 
         return [
             {
+                process: "archive",
+                processName: colors.bold('_archive'),
+                typeName: colors.bgMagenta('Main'),
+                type: 'main',
+                statusName: dealStatus(buildStatusDefault(processStatus['archive']).status),
+                status: buildStatusDefault(processStatus['archive']).status,
+                monit: buildStatusDefault(processStatus['archive']).monit
+            },
+            {
                 processId: 'master',
                 processName: colors.bold('MASTER'),
                 typeName: colors.bgMagenta('Main'),
@@ -179,6 +212,7 @@ export const processListObservable = () => combineLatest(
                 status: buildStatusDefault(processStatus['ledger']).status,
                 monit: buildStatusDefault(processStatus['ledger']).monit
             },
+
             {
                 processId: 'bar',
                 processName: colors.bold('BAR'),
@@ -259,11 +293,15 @@ export const strategyListObservable = () => {
 }
 
 
-function preSwitchMain (status: boolean, messageBoard: any) {
+function preSwitchMain (status: boolean, messageBoard: any, loading: any) {
     if (!status) {
-        messageBoard.log(`Start Archive, Please wait...`, 2)
+        loading && loading.load(`Start Archive, Please wait...`, 2);
         return startArchiveMakeTask()
-            .then(() => messageBoard.log(`Archive success!`, 2))
+            .then(() => {
+                console.log('---------')
+                loading && loading.stop();
+                return messageBoard.log(`Archive success!`, 2)
+        })
     }
 
     return Promise.resolve(true)
