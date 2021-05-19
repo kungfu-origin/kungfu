@@ -201,6 +201,8 @@ inline void to_json(nlohmann::json &j, const CThostFtdcInvestorPositionField &or
   j["StrikeFrozen"] = ori.StrikeFrozen;
   j["StrikeFrozenAmount"] = ori.StrikeFrozenAmount;
   j["AbandonFrozen"] = ori.AbandonFrozen;
+  j["ExchangeID"] = std::string(ori.ExchangeID);
+  j["YdStrikeFrozen"] = ori.YdStrikeFrozen;
 }
 
 inline void to_json(nlohmann::json &j, const CThostFtdcInstrumentField &ori) {

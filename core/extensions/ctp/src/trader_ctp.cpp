@@ -48,13 +48,15 @@ bool TraderCTP::req_account() {
 }
 
 bool TraderCTP::req_position() {
-  SPDLOG_INFO("request account positions");
   long_position_map_.clear();
   short_position_map_.clear();
+  uint64_t nano_sec = time::now_in_nano();
+  uint64_t time_stamp = kungfu::yijinjing::time::strptime(std::to_string(nano_sec),TIME_FORMAT);
   CThostFtdcQryInvestorPositionField req = {};
   strcpy(req.BrokerID, config_.broker_id.c_str());
   strcpy(req.InvestorID, config_.account_id.c_str());
   int rtn = api_->ReqQryInvestorPosition(&req, ++request_id_);
+  SPDLOG_INFO("request account positions rtn {},time_stamp {}",rtn,time_stamp);
   return rtn == 0;
 }
 
@@ -287,9 +289,12 @@ void TraderCTP::OnRspQryTradingAccount(CThostFtdcTradingAccountField *pTradingAc
 
 void TraderCTP::OnRspQryInvestorPosition(CThostFtdcInvestorPositionField *pInvestorPosition,
                                          CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
+  uint64_t nano_sec = time::now_in_nano();
+  uint64_t time_stamp = kungfu::yijinjing::time::strptime(std::to_string(nano_sec),TIME_FORMAT);
   if (pRspInfo != nullptr && pRspInfo->ErrorID != 0) {
     SPDLOG_ERROR("(error_id) {} (error_msg) {}", pRspInfo->ErrorID, gbk2utf8(pRspInfo->ErrorMsg));
   } else if (pInvestorPosition != nullptr) {
+    SPDLOG_INFO("request account positions OnRspQryInvestorPosition timestamp {},*pInvestorPosition {},bIsLast {}",time_stamp,to_string(*pInvestorPosition),bIsLast);
     auto direction = pInvestorPosition->PosiDirection == THOST_FTDC_PD_Long ? Direction::Long : Direction::Short;
     auto &position_map = direction == Direction::Long ? long_position_map_ : short_position_map_;
     if (position_map.find(pInvestorPosition->InstrumentID) == position_map.end()) {
@@ -324,6 +329,7 @@ void TraderCTP::OnRspQryInvestorPosition(CThostFtdcInvestorPositionField *pInves
     position.update_time = time::now_in_nano();
   }
   if (bIsLast) {
+    SPDLOG_INFO("request account positions OnRspQryInvestorPosition timestamp {},*pInvestorPosition {},bIsLast {}",time_stamp,to_string(*pInvestorPosition),bIsLast);
     auto writer = get_writer(location::PUBLIC);
     for (const auto &kv : long_position_map_) {
       const auto &position = kv.second;
