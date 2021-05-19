@@ -39,11 +39,13 @@ void TraderCTP::on_trading_day(const event_ptr &event, int64_t daytime) {
 }
 
 bool TraderCTP::req_account() {
-  SPDLOG_INFO("request account asset");
+  uint64_t nano_sec = time::now_in_nano();
+  uint64_t time_stamp = kungfu::yijinjing::time::strptime(std::to_string(nano_sec),TIME_FORMAT);
   CThostFtdcQryTradingAccountField req = {};
   strcpy(req.BrokerID, config_.broker_id.c_str());
   strcpy(req.InvestorID, config_.account_id.c_str());
   int rtn = api_->ReqQryTradingAccount(&req, ++request_id_);
+  SPDLOG_INFO("request account asset rtn {},time_stamp {}",rtn,time_stamp);
   return rtn == 0;
 }
 
@@ -250,24 +252,30 @@ void TraderCTP::OnRtnOrder(CThostFtdcOrderField *pOrder) {
 }
 
 void TraderCTP::OnRtnTrade(CThostFtdcTradeField *pTrade) {
-  SPDLOG_TRACE(to_string(*pTrade));
-  auto order_id = inbound_order_sysids_[pTrade->OrderSysID];
-  if (orders_.find(order_id) == orders_.end()) {
-    SPDLOG_ERROR("can't find order with OrderSysID: {}", pTrade->OrderSysID);
-    return;
+  if(pTrade->Price < 1){
+    SPDLOG_ERROR("Order Price too low, Not True pTrade->Price {}",pTrade->Price);
+
+  }else{
+    SPDLOG_TRACE(to_string(*pTrade));
+    auto order_id = inbound_order_sysids_[pTrade->OrderSysID];
+    if (orders_.find(order_id) == orders_.end()) {
+      SPDLOG_ERROR("can't find order with OrderSysID: {}", pTrade->OrderSysID);
+      return;
+    }
+    auto &order_state = orders_.at(order_id);
+    auto writer = get_writer(order_state.dest);
+    Trade &trade = writer->open_data<Trade>(0);
+    from_ctp(*pTrade, trade);
+    uint64_t trade_id = writer->current_frame_uid();
+    trade.trade_id = trade_id;
+    trade.order_id = order_state.data.order_id;
+    trade.parent_order_id = order_state.data.parent_id;
+    trade.trading_day = order_state.data.trading_day;
+    inbound_trade_ids_[pTrade->TradeID] = trade.uid();
+    trades_.emplace(trade.uid(), state<Trade>(order_state.source, order_state.dest, time::now_in_nano(), trade));
+    writer->close_data();
   }
-  auto &order_state = orders_.at(order_id);
-  auto writer = get_writer(order_state.dest);
-  Trade &trade = writer->open_data<Trade>(0);
-  from_ctp(*pTrade, trade);
-  uint64_t trade_id = writer->current_frame_uid();
-  trade.trade_id = trade_id;
-  trade.order_id = order_state.data.order_id;
-  trade.parent_order_id = order_state.data.parent_id;
-  trade.trading_day = order_state.data.trading_day;
-  inbound_trade_ids_[pTrade->TradeID] = trade.uid();
-  trades_.emplace(trade.uid(), state<Trade>(order_state.source, order_state.dest, time::now_in_nano(), trade));
-  writer->close_data();
+  
 }
 
 void TraderCTP::OnRspQryTradingAccount(CThostFtdcTradingAccountField *pTradingAccount, CThostFtdcRspInfoField *pRspInfo,
@@ -276,7 +284,9 @@ void TraderCTP::OnRspQryTradingAccount(CThostFtdcTradingAccountField *pTradingAc
     SPDLOG_ERROR("(error_id) {} (error_msg) {}", pRspInfo->ErrorID, gbk2utf8(pRspInfo->ErrorMsg));
     return;
   }
-  SPDLOG_TRACE(to_string(*pTradingAccount));
+  uint64_t nano_sec = time::now_in_nano();
+  uint64_t time_stamp = kungfu::yijinjing::time::strptime(std::to_string(nano_sec),TIME_FORMAT);
+  SPDLOG_INFO("request account asset OnRspQryTradingAccount timestamp {},*pTradingAccount {},bIsLast {}",time_stamp,to_string(*pTradingAccount),bIsLast);
   auto writer = get_writer(location::PUBLIC);
   Asset account = {};
   strcpy(account.account_id, get_account_id().c_str());
