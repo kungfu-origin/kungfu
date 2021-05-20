@@ -219,6 +219,7 @@ export default {
         this.noKeywordValidatorBuilder = noKeywordValidatorBuilder;
         this.searchFilterKey = 'strategy_id';
         this.ifProcessRunning = ifProcessRunning;
+        this.switchStrategyController = {};
 
         return {
             setStrategyDialogVisiblity: false,
@@ -368,6 +369,9 @@ export default {
         //启停策略
         handleStrategySwitch(value, strategy){
             const strategyId = strategy.strategy_id;
+
+            if (this.switchStrategyController[strategyId]) return;
+            this.switchStrategyController[strategyId] = true;
             
             if (!value) {
                 const strategyLocation = encodeKungfuLocation(strategyId, 'strategy');
@@ -379,6 +383,9 @@ export default {
             switchStrategy(strategyId, value)
                 .then(({ type, message }) => this.$message[type](message))
                 .catch(err => this.$message['error'](err.message || '操作失败！'))
+                .finally(() => {
+                    this.switchStrategyController[strategyId] = false;
+                })
                 
             this.$store.dispatch('getStrategyList');
         },
