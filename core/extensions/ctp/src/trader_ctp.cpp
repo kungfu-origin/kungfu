@@ -44,6 +44,7 @@ bool TraderCTP::req_account() {
   CThostFtdcQryTradingAccountField req = {};
   strcpy(req.BrokerID, config_.broker_id.c_str());
   strcpy(req.InvestorID, config_.account_id.c_str());
+  std::this_thread::sleep_for(std::chrono::seconds(1));
   int rtn = api_->ReqQryTradingAccount(&req, ++request_id_);
   SPDLOG_INFO("request account asset rtn {},time_stamp {}",rtn,time_stamp);
   return rtn == 0;
@@ -57,6 +58,7 @@ bool TraderCTP::req_position() {
   CThostFtdcQryInvestorPositionField req = {};
   strcpy(req.BrokerID, config_.broker_id.c_str());
   strcpy(req.InvestorID, config_.account_id.c_str());
+  std::this_thread::sleep_for(std::chrono::seconds(1));
   int rtn = api_->ReqQryInvestorPosition(&req, ++request_id_);
   SPDLOG_INFO("request account positions rtn {},time_stamp {}",rtn,time_stamp);
   return rtn == 0;
