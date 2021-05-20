@@ -219,7 +219,6 @@ export default {
         this.noKeywordValidatorBuilder = noKeywordValidatorBuilder;
         this.searchFilterKey = 'strategy_id';
         this.ifProcessRunning = ifProcessRunning;
-        this.switchStrategyController = {};
 
         return {
             setStrategyDialogVisiblity: false,
@@ -369,12 +368,14 @@ export default {
         //启停策略
         handleStrategySwitch(value, strategy){
             const strategyId = strategy.strategy_id;
-
-            if (this.switchStrategyController[strategyId]) return;
-            this.switchStrategyController[strategyId] = true;
             
             if (!value) {
                 const strategyLocation = encodeKungfuLocation(strategyId, 'strategy');
+                if (!watcher.isReadyToInteract(strategyLocation)) {
+                    this.$message.warning(`策略 ${strategyId} 还未准备好，请稍后再试！`)
+                    return;
+                }
+            
                 if (watcher.isLive()) {
                     watcher.requestStop(strategyLocation)
                 }
@@ -383,9 +384,6 @@ export default {
             switchStrategy(strategyId, value)
                 .then(({ type, message }) => this.$message[type](message))
                 .catch(err => this.$message['error'](err.message || '操作失败！'))
-                .finally(() => {
-                    this.switchStrategyController[strategyId] = false;
-                })
                 
             this.$store.dispatch('getStrategyList');
         },
