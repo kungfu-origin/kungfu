@@ -322,7 +322,7 @@ export default {
         },
 
 
-        dealTradingDataByTiker (data) {
+        dealTradingDataByTiker () {
             const { instrumentId, directionOrigin } = this.currentTicker;
 
             if (!instrumentId) {
@@ -339,6 +339,7 @@ export default {
                     watcher.ledger.Order
                     .filter('instrument_id', instrumentId)
                     .sort('update_time')
+                    .slice(0, 1000)
                     .filter(item => {
                         const { offset, side, instrument_type } = item;
                         return originOrderTradesFilterByDirection(directionOrigin, offset, side, instrument_type);
@@ -355,6 +356,7 @@ export default {
                     watcher.ledger.Trade
                     .filter('instrument_id', instrumentId)
                     .sort('trade_time')
+                    .slice(0, 1000)
                     .filter(item => {
                         const { offset, side, instrument_type } = item;
                         return originOrderTradesFilterByDirection(directionOrigin, offset, side, instrument_type);

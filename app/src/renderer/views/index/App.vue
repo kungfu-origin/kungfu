@@ -51,6 +51,8 @@ import moment from "moment"
 
 import GlobalSettingDialog from '@/components/Base/GlobalSettingDialog';
 import { buildMarketDataPipeByDaemon, buildInstrumentsPipeByDaemon, buildTradingDataAccountPipeByDaemon, buildKungfuGlobalDataPipeByDaemon } from '@/ipcMsg/daemon';
+import { watcher } from '__io/kungfu/watcher';
+
 import ipcListenerMixin from '@/ipcMsg/ipcListenerMixin';
 import tickerSetMixin from '@/components/MarketFilter/js/tickerSetMixin';
 import workersMixin from '@/workers/workersMixin';
@@ -109,8 +111,8 @@ export default {
         }),
 
         watcherLoading () {
-            const { archive, watcher, daemon } = this.loadingData;
-            return !(archive && watcher && daemon)
+            const { archive, daemon } = this.loadingData;
+            return !(archive && this.loadingData.watcher && daemon)
         }
     },
 
@@ -181,7 +183,7 @@ export default {
 
         getWatcherStatus () {
             let timer = setInterval(() => {
-                const watcherStatus = this.watcherIsLive;
+                const watcherStatus = watcher.isLive();
                 const archiveFinished = (window.archiveStatus !== 'online') && (window.archiveStatus !== undefined);
                 const daemonStatus = this.processStatus.kungfuDaemon === 'online';
 
@@ -189,8 +191,8 @@ export default {
                 this.$set(this.loadingData, 'watcher', watcherStatus);
                 this.$set(this.loadingData, 'daemon', daemonStatus);
 
-                const { archive, watcher, daemon } = this.loadingData;
-                if (archive && watcher && daemon) {
+                const { archive, daemon } = this.loadingData;
+                if (archive && this.loadingData.watcher && daemon) {
                     clearTimeout(timer)
                 }
 

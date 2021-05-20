@@ -75,8 +75,9 @@ import Task from '@/components/Task/Index';
 import TaskRecord from '@/components/Task/TaskRecord';
 import OrderRecord from '@/components/Base/tradingData/OrderRecord';
 
-import { dealOrder } from '__io/kungfu/watcher';
+import { watcher, dealOrder } from '__io/kungfu/watcher';
 import { buildMarketDataPipeByDaemon } from '@/ipcMsg/daemon'; 
+import { ensureLeaderData } from '__gUtils/busiUtils';
 import { buildOrderStatDataPipe, buildAllOrdersTradesDataPipe } from '__io/kungfu/tradingData';
 
 import accountStrategyMixins from '@/views/index/js/accountStrategyMixins';
@@ -141,12 +142,13 @@ export default {
             this.quoteData = Object.freeze(data);
         })
 
-        this.allOrdersPipe = buildAllOrdersTradesDataPipe().subscribe(data => {
+        this.allOrdersPipe = buildAllOrdersTradesDataPipe().subscribe(() => {
             if (this.isHistoryData('order')) {
                 this.orders = this.getHistoryData('order')
             } else {
-                const orders = (data['orders'] || []).slice(0, 100).map(item => Object.freeze(dealOrder(item)));
-                this.orders = Object.freeze(orders || []);
+                const orders = ensureLeaderData(watcher.ledger.Order, 'update_time').slice(0, 100)
+                const ordersResolved = orders.map(item => Object.freeze(dealOrder(item)));
+                this.orders = Object.freeze(ordersResolved || []);
             }
         })
 
