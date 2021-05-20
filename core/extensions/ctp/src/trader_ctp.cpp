@@ -255,7 +255,7 @@ void TraderCTP::OnRtnOrder(CThostFtdcOrderField *pOrder) {
 
 void TraderCTP::OnRtnTrade(CThostFtdcTradeField *pTrade) {
   if(pTrade->Price < 1){
-    SPDLOG_ERROR("Order Price too low, Not True pTrade->Price {}",pTrade->Price);
+    SPDLOG_ERROR("Order Price too low, Not True pTrade->Price {}, *pTrade {}",pTrade->Price,to_string(*pTrade));
 
   }else{
     SPDLOG_TRACE(to_string(*pTrade));
