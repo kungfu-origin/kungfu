@@ -180,8 +180,9 @@ export default {
                         .map(item => {
                             //加上orderStat细节
                             const orderId = item.order_id.toString();
-                            return {
+                            return Object.freeze({
                                 ...orderStatByOrderId[orderId],
+                                orderStats: orderStatByOrderId[orderId],
                                 ...item,
                                 dest: item.dest,
                                 source: item.source,
@@ -189,7 +190,7 @@ export default {
                                 ts: item.ts,
                                 type: item.type,
                                 uid_key: item.uid_key
-                            }
+                            })
                         });
                     
                     this.dateRangeExportLoading = false;
