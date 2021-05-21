@@ -179,7 +179,6 @@ export default {
                         .map(item => {
                             //加上orderStat细节
                             const orderId = item.order_id.toString();
-                            console.log(orderStatByOrderId[orderId])
                             return Object.freeze({
                                 ...orderStatByOrderId[orderId],
                                 orderStats: dealOrderStat(orderStatByOrderId[orderId] || null),

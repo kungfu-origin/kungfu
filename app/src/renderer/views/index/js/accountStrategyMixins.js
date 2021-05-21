@@ -117,14 +117,14 @@ export default {
             if (type === 'order') {
                 return Object.freeze((this.historyData['order'].data || []).map(item => {
                     return  Object.freeze({
-                        ...item.orderStat,
+                        ...item.orderStats,
                         ...dealOrder(item),
                     })
                 }));
             } else if (type === 'trade') {
                 return this.trades = Object.freeze((this.historyData['trade'].data || []).map(item => {
                     return Object.freeze({
-                        ...item.orderStat,
+                        ...item.orderStats,
                         ...dealTrade(item),
                     })
                 }));
