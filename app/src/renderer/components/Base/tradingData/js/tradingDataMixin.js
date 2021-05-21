@@ -1,5 +1,5 @@
 import moment from 'moment';
-import { decodeKungfuLocation, transformOrderStatListToData } from '__io/kungfu/watcher';
+import { decodeKungfuLocation, transformOrderStatListToData, dealOrderStat } from '__io/kungfu/watcher';
 import { history } from '__io/kungfu/kungfuUtils';
 import { writeCSV } from '__gUtils/fileUtils';
 import { getDefaultRenderCellClass, originOrderTradesFilterByDirection } from '__gUtils/busiUtils';
@@ -163,7 +163,6 @@ export default {
                     const targetList = this.getHistoryTargetListResolved(this.kungfuBoardType, kungfuData, this.moduleType, instrumentId);
                     const orderStats = kungfuData.OrderStat.list();
                     const orderStatByOrderId = transformOrderStatListToData(orderStats);
-                    
                     const targetListAfterFilter = targetList
                         .filter(item => {
                             if (this.moduleType === 'account') {
@@ -180,9 +179,10 @@ export default {
                         .map(item => {
                             //加上orderStat细节
                             const orderId = item.order_id.toString();
+                            console.log(orderStatByOrderId[orderId])
                             return Object.freeze({
                                 ...orderStatByOrderId[orderId],
-                                orderStats: orderStatByOrderId[orderId],
+                                orderStats: dealOrderStat(orderStatByOrderId[orderId] || null),
                                 ...item,
                                 dest: item.dest,
                                 source: item.source,

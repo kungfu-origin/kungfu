@@ -1,7 +1,7 @@
 
 const remote = require('electron').remote;
 import { openVueWin } from '__gUtils/busiUtils';
-import { dealOrder, dealTrade, dealOrderStat } from '__io/kungfu/watcher';
+import { dealOrder, dealTrade } from '__io/kungfu/watcher';
 
 export default {
 
@@ -117,14 +117,14 @@ export default {
             if (type === 'order') {
                 return Object.freeze((this.historyData['order'].data || []).map(item => {
                     return  Object.freeze({
-                        ...dealOrderStat(item.orderStats || null),
+                        ...item.orderStat,
                         ...dealOrder(item),
                     })
                 }));
             } else if (type === 'trade') {
                 return this.trades = Object.freeze((this.historyData['trade'].data || []).map(item => {
                     return Object.freeze({
-                        ...dealOrderStat(item.orderStats || null),
+                        ...item.orderStat,
                         ...dealTrade(item),
                     })
                 }));
