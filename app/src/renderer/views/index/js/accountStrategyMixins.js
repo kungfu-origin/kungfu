@@ -115,9 +115,19 @@ export default {
 
         getHistoryData (type) {
             if (type === 'order') {
-                return Object.freeze((this.historyData['order'].data || []).map(item => Object.freeze(dealOrder(item))));
+                return Object.freeze((this.historyData['order'].data || []).map(item => {
+                    return  Object.freeze({
+                        ...item.orderStat,
+                        ...dealOrder(item),
+                    })
+                }));
             } else if (type === 'trade') {
-                return this.trades = Object.freeze((this.historyData['trade'].data || []).map(item => Object.freeze(dealTrade(item))));
+                return this.trades = Object.freeze((this.historyData['trade'].data || []).map(item => {
+                    return Object.freeze({
+                        ...item.orderStat,
+                        ...dealTrade(item),
+                    })
+                }));
             } else {
                 console.error('getHistoryData type is not trade or order!')
                 return []

@@ -114,7 +114,7 @@ export default {
                 .map(item => {
                     let tradeData = { ...item };
                     let orderId = tradeData.orderId;
-                    const orderStatByOrderId = dealOrderStat(this.dateForHistory ? item : this.orderStat[orderId]);
+                    const orderStatByOrderId = this.dateForHistory ? item : dealOrderStat(this.orderStat[orderId] || null);
                     tradeData.update = !!this.tableData.length;
                     tradeData.latencyTrade = orderStatByOrderId.latencyTrade || '';
                     //ctp trade返回的是交易所时间（xtp是自己维护），所用orderState内时间代替
