@@ -1,8 +1,8 @@
 import moment from 'moment';
-import { decodeKungfuLocation, dealOrder, dealTrade } from '__io/kungfu/watcher';
+import { decodeKungfuLocation, transformOrderStatListToData } from '__io/kungfu/watcher';
 import { history } from '__io/kungfu/kungfuUtils';
 import { writeCSV } from '__gUtils/fileUtils';
-import { getDefaultRenderCellClass, originOrderTradesFilterByDirection, buildDictFromArray } from '__gUtils/busiUtils';
+import { getDefaultRenderCellClass, originOrderTradesFilterByDirection } from '__gUtils/busiUtils';
 
 export default {
     props: {
@@ -162,7 +162,7 @@ export default {
                     const { instrumentId, directionOrigin } = this.currentTicker || {};
                     const targetList = this.getHistoryTargetListResolved(this.kungfuBoardType, kungfuData, this.moduleType, instrumentId);
                     const orderStats = kungfuData.OrderStat.list();
-                    const orderStatByOrderId = buildDictFromArray(orderStats, 'order_id');
+                    const orderStatByOrderId = transformOrderStatListToData(orderStats);
                     
                     const targetListAfterFilter = targetList
                         .filter(item => {
