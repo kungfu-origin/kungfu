@@ -268,9 +268,9 @@ export default {
                     })
             }
 
-            // if (this.moduleType === 'strategy') {
-            //     ordersAfterFilter = ordersAfterFilter.filter(item => Number(item.updateTimeNum) >= this.addTime )
-            // }
+            if (this.moduleType === 'strategy') {
+                ordersAfterFilter = ordersAfterFilter.filter(item => Number(item.updateTimeNum) >= this.addTime )
+            }
 
             if (!ordersAfterFilter.length) return Object.freeze([]);
 

@@ -49,7 +49,8 @@ export const kungfuMakeOrder = (makeOrderData: MakeOrderData, accountId: string,
 
     const orderInput = {
         ...longfist.OrderInput(),
-        ...makeOrderData
+        ...makeOrderData,
+        insert_time: BigInt(+new Date().getTime())
     }
     if (strategyId) {
         const strategyLocation = encodeKungfuLocation(strategyId, 'strategy');

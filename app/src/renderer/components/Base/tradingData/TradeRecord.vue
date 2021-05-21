@@ -103,12 +103,12 @@ export default {
                     return strings.includes(searchKeyword) 
                 })
 
-            // if (this.moduleType === 'strategy') {
-            //     tradesAfterFilter = tradesAfterFilter
-            //         .filter(item => {
-            //             return Number(item.updateTimeNum) >= this.addTime 
-            //         })
-            // }
+            if (this.moduleType === 'strategy') {
+                tradesAfterFilter = tradesAfterFilter
+                    .filter(item => {
+                        return Number(item.updateTimeNum) >= this.addTime 
+                    })
+            }
 
             tradesAfterFilter = tradesAfterFilter
                 .map(item => {
