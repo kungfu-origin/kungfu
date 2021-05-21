@@ -3,7 +3,7 @@ export const ordersHeader = (dateForHistory, moduleType) => {
         return [
             {
                 type: "text",
-                label: "下单时间",
+                label: "委托更新时间",
                 prop: "updateTimeMMDD",
                 width: "180px"
             },{
@@ -55,7 +55,7 @@ export const ordersHeader = (dateForHistory, moduleType) => {
     return  [
         {
             type: "text",
-            label: "下单时间",
+            label: "委托更新时间",
             prop: "updateTime",
             width: '110px'
         },{
@@ -267,13 +267,13 @@ export const tradesHeader = (dateForHistory, moduleType) => {
 
     return [{
         type: 'text',
-        label: '成交时间',
+        label: '柜台成交时间',
         prop: "updateTime",
         width: '110px'
     },{
         type: 'text',
-        label: '柜台时间',
-        prop: "sourceUpdateTime",
+        label: '功夫系统时间',
+        prop: "localUpdateTime",
         width: '110px'
     },{
         type: 'text',

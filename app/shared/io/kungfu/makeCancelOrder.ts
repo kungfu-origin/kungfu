@@ -50,8 +50,11 @@ export const kungfuMakeOrder = (makeOrderData: MakeOrderData, accountId: string,
     const orderInput = {
         ...longfist.OrderInput(),
         ...makeOrderData,
-        insert_time: BigInt(+new Date().getTime())
+        insert_time: watcher.now()
     }
+
+    console.log(orderInput)
+
     if (strategyId) {
         const strategyLocation = encodeKungfuLocation(strategyId, 'strategy');
         //设置orderInput的parentid，来标记该order为策略手动下单

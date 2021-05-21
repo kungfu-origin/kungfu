@@ -119,9 +119,9 @@ export default {
                     tradeData.latencyTrade = orderStatByOrderId.latencyTrade || '';
                     //ctp trade返回的是交易所时间（xtp是自己维护），所用orderState内时间代替
                     const { updateTime, updateTimeNum, updateTimeMMDD } = tradeData
-                    tradeData.sourceUpdateTime = orderStatByOrderId.tradeTime
-                    tradeData.sourceUpdateTimeNum = orderStatByOrderId.tradeTimeNum
-                    tradeData.sourceUpdateTimeMMDD = orderStatByOrderId.tradeTimeMMDD
+                    tradeData.localUpdateTime = orderStatByOrderId.tradeTime
+                    tradeData.localUpdateTimeNum = orderStatByOrderId.tradeTimeNum
+                    tradeData.localUpdateTimeMMDD = orderStatByOrderId.tradeTimeMMDD
                     return Object.freeze(tradeData)
                 })
                 .sort((a, b) => (b.updateTimeNum - a.updateTimeNum))

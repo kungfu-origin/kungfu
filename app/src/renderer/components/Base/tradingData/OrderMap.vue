@@ -145,7 +145,7 @@ export default {
 
                 const orderStatByOrderId = dealOrderStat(this.orderStat[orderId] || null);
                 //ctp trade返回的是交易所时间（xtp是自己维护），所用orderState内时间代替
-                itemResolved.sourceUpdateTime = orderStatByOrderId.tradeTime;
+                itemResolved.localUpdateTime = orderStatByOrderId.tradeTime;
                 itemResolved.sourceUpdateTimeMMDD = orderStatByOrderId.tradeTimeMMDD;
                 
                 if (!(mapData[orderId] || {})['trades']) {
@@ -206,8 +206,8 @@ export default {
         turnTradesToLog (trades) {
             if (!trades) return ""
             return trades.map(trade => `
-                ${trade.updateTime} <br/>
-                ${trade.sourceUpdateTime}（柜台时间） <br/>
+                ${trade.localUpdateTime} <br/>
+                ${trade.updateTime}（柜台时间） <br/>
                 ${trade.instrumentId} ${trade.exchangeId} ${trade.accountId} <br/>
                 ${this.renderLine('side', trade)} ${this.renderLine('offset', trade)} ${trade.hedgeFlag} <br/>
                 价格: ${trade.price} 量: ${trade.volume} <br/>

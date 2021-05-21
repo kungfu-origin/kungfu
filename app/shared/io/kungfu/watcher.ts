@@ -172,7 +172,7 @@ export const transformOrderInputListToData = (list: OrderInputOriginData[], deal
 
 export const transformOrderStatListToData = (list: OrderStatOriginData[]) => {
     let data: StringToAnyObject = {};
-    list.kfForEach((item: OrderStatOriginData) => {
+    list.kfReverseForEach((item: OrderStatOriginData) => {
         data[item.order_id.toString()] = item;
     })
     return data;
