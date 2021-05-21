@@ -230,6 +230,11 @@ export const tradesHeader = (dateForHistory, moduleType) => {
             width: '180px'
         },{
             type: 'text',
+            label: '柜台时间',
+            prop: "sourceUpdateTimeMMDD",
+            width: '180px'
+        },{
+            type: 'text',
             label: '代码',
             prop: 'instrumentId',
             width: '60px'
@@ -264,6 +269,11 @@ export const tradesHeader = (dateForHistory, moduleType) => {
         type: 'text',
         label: '成交时间',
         prop: "updateTime",
+        width: '110px'
+    },{
+        type: 'text',
+        label: '柜台时间',
+        prop: "sourceUpdateTime",
         width: '110px'
     },{
         type: 'text',

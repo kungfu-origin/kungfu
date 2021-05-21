@@ -256,8 +256,8 @@ export default {
             let ordersAfterFilter = orders
                 .filter(item => {
                     if (searchKeyword.trim() === '') return true;
-                    const { clientId, sourceId, accountId, instrumentId } = item
-                    const strings = [ clientId, sourceId, accountId, instrumentId ].join('')
+                    const { clientId, sourceId, accountId, instrumentId, orderId } = item
+                    const strings = [ clientId, sourceId, accountId, instrumentId, orderId ].join('')
                     return strings.includes(searchKeyword) 
                 });
             
@@ -268,9 +268,9 @@ export default {
                     })
             }
 
-            if (this.moduleType === 'strategy') {
-                ordersAfterFilter = ordersAfterFilter.filter(item => Number(item.updateTimeNum) >= this.addTime )
-            }
+            // if (this.moduleType === 'strategy') {
+            //     ordersAfterFilter = ordersAfterFilter.filter(item => Number(item.updateTimeNum) >= this.addTime )
+            // }
 
             if (!ordersAfterFilter.length) return Object.freeze([]);
 
