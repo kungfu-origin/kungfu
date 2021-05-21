@@ -17,6 +17,7 @@
 
 namespace kungfu::node {
 constexpr uint64_t ID_TRANC = 0x00000000FFFFFFFF;
+constexpr uint32_t PAGE_ID_MASK = 0x80000000;
 
 class Watcher : public Napi::ObjectWrap<Watcher>, public yijinjing::practice::apprentice {
 public:
@@ -149,7 +150,7 @@ private:
                         const yijinjing::data::location_ptr &strategy_location) {
     auto account_writer = get_writer(account_location->uid);
     uint64_t id_left = (uint64_t)(strategy_location->uid xor account_location->uid) << 32u;
-    uint64_t id_right = ID_TRANC & account_writer->current_frame_uid();
+    uint64_t id_right = (ID_TRANC & account_writer->current_frame_uid()) | PAGE_ID_MASK;
     instruction.*id_ptr = id_left | id_right;
     account_writer->write_as(trigger_time, instruction, strategy_location->uid, account_location->uid);
     UpdateBook(strategy_location->uid, account_location->uid, instruction);
