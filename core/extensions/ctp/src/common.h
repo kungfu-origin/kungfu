@@ -8,6 +8,22 @@
 #include <nlohmann/json.hpp>
 #include <string>
 
+
+#ifdef UNIX
+template <class T> numeric_limits;
+#define  DOUBLE_MAX numeric_limits<double>::max()
+#define  DOUBLE_MIN numeric_limits<double>::min()
+#define  MAX_INT numeric_limits<int>::max()
+#define  MIN_INT numeric_limits<int>::min()
+#else
+
+#define  DOUBLE_MAX DBL_MAX
+#define  DOUBLE_MIN DBL_MIN
+#define  MAX_INT INT_MAX
+#define  MIN_INT INT_MIN
+
+#endif
+
 namespace kungfu::wingchun::ctp {
 struct TDConfiguration {
   std::string td_uri;
