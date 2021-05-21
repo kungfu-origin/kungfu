@@ -7,6 +7,7 @@
 
 #include <nlohmann/json.hpp>
 #include <string>
+#include <iostream>
 
 #ifdef WIN32
 #define  DOUBLE_MAX DBL_MAX
@@ -15,6 +16,7 @@
 #define  MIN_INT INT_MIN
 
 #else
+using namespace std;
 template <class T> numeric_limits;
 #define  DOUBLE_MAX numeric_limits<double>::max()
 #define  DOUBLE_MIN numeric_limits<double>::min()
