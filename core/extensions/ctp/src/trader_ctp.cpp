@@ -254,7 +254,7 @@ void TraderCTP::OnRtnOrder(CThostFtdcOrderField *pOrder) {
 }
 
 void TraderCTP::OnRtnTrade(CThostFtdcTradeField *pTrade) {
-  if(pTrade->Price < 1 || pTrade->Price == DOUBLE_MIN || pTrade->Price == DOUBLE_MAX || pTrade->Volume == MIN_INT || pTrade->Volume == MAX_INT){
+  if(pTrade->Price < 1 || pTrade->Price == 2.2250738585072014e-308 || pTrade->Price == 1.7976931348623158e+308 || pTrade->Volume == -2147483648 || pTrade->Volume == 2147483647){
     SPDLOG_ERROR("Order Price too low, Not True pTrade->Price {}, *pTrade {}",pTrade->Price,to_string(*pTrade));
 
   }else{
