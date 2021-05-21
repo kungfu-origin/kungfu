@@ -9,20 +9,6 @@
 #include <string>
 #include <iostream>
 
-// #ifdef WIN32
-// #define  DOUBLE_MAX DBL_MAX
-// #define  DOUBLE_MIN DBL_MIN
-// #define  MAX_INT INT_MAX
-// #define  MIN_INT INT_MIN
-
-// #else
-// using namespace std;
-// template <class T> numeric_limits;
-// #define  DOUBLE_MAX numeric_limits<double>::max()
-// #define  DOUBLE_MIN numeric_limits<double>::min()
-// #define  MAX_INT numeric_limits<int>::max()
-// #define  MIN_INT numeric_limits<int>::min()
-// #endif
 
 namespace kungfu::wingchun::ctp {
 struct TDConfiguration {
