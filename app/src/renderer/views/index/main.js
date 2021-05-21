@@ -16,6 +16,7 @@ import App from './App.vue';
 import '@/assets/iconfont/iconfont.js';
 import '@/assets/iconfont/iconfont.css';
 import '@/assets/scss/makeOrder.scss';
+import moment from 'moment';
 
 Vue.use(ElementUI)
 Vue.use(Components)
@@ -74,8 +75,18 @@ window.pm2 = _pm2;
 
 function beforeAll () {
     if (process.env.NODE_ENV !== 'development') {
-        return removeJournal(KF_HOME)
+        const clearJournalDate = localStorage.getItem('clearJournalDate');
+        const today = moment().format('YYYY-MM-DD');
+        console.log( localStorage.getItem('clearJournalDate'), today)
+        
+        if (clearJournalDate !== today) {
+            localStorage.setItem('clearJournalDate', today);
+            console.log( localStorage.getItem('clearJournalDate'), today)
+            return removeJournal(KF_HOME);
+        } else {
+            return Promise.resolve(true);
+        }
     } else {
-        return Promise.resolve(true)
+        return Promise.resolve(true);
     }
 }

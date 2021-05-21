@@ -159,7 +159,7 @@ export default {
                 let timer = setTimeout(() => {
 
                     const kungfuData = history.selectPeriod(from, to);
-                    const { instrumentId, directionOrigin } = this.currentTicker;
+                    const { instrumentId, directionOrigin } = this.currentTicker || {};
                     const targetList = this.getHistoryTargetListResolved(this.kungfuBoardType, kungfuData, this.moduleType, instrumentId);
                     const orderStats = kungfuData.OrderStat.list();
                     const orderStatByOrderId = buildDictFromArray(orderStats, 'order_id');

@@ -18,9 +18,18 @@ export const kungfuSubscribeTicker = (sourceName: string, exchangeId: string, ti
         return Promise.reject(new Error(`Master 未连接！`))
     }
 
+    const mdLocation = encodeKungfuLocation(sourceName, 'md');
+    
+    if (!watcher.isReadyToInteract(mdLocation)) {
+        if (process.env.NODE_ENV === 'development') {
+            console.log(mdLocation, 'is not ready')
+        }
+        return Promise.resolve(false)
+    }
+
     return Promise.resolve(
         watcher.requestMarketData(
-            encodeKungfuLocation(sourceName, 'md'),
+            mdLocation,
             exchangeId, 
             ticker
         )
@@ -89,6 +98,10 @@ export const kungfuCancelAllOrders = (orderDataList: OrderData[], strategyId?: s
         const accountId = `${kungfuLocation.group}_${kungfuLocation.name}`;
         const accountLocation = encodeKungfuLocation(accountId, 'td');
 
+        if (!watcher.isReadyToInteract(accountLocation)) {
+            return Promise.resolve(false)
+        }
+
         const orderId = orderData.orderId;
         const orderAction = {
             ...longfist.OrderAction(),
@@ -97,6 +110,9 @@ export const kungfuCancelAllOrders = (orderDataList: OrderData[], strategyId?: s
     
         if (strategyId) {
             const strategyLocation = encodeKungfuLocation(strategyId, 'strategy');
+            if (!watcher.isReadyToInteract(strategyLocation)) {
+                return Promise.resolve(false)
+            }
             return Promise.resolve(watcher.cancelOrder(orderAction, accountLocation, strategyLocation))
         } else {
             return Promise.resolve(watcher.cancelOrder(orderAction, accountLocation))

@@ -371,6 +371,11 @@ export default {
             
             if (!value) {
                 const strategyLocation = encodeKungfuLocation(strategyId, 'strategy');
+                if (!watcher.isReadyToInteract(strategyLocation)) {
+                    this.$message.warning(`策略 ${strategyId} 还未准备好，请稍后再试！`)
+                    return;
+                }
+            
                 if (watcher.isLive()) {
                     watcher.requestStop(strategyLocation)
                 }

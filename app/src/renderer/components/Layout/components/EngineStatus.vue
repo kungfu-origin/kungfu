@@ -28,10 +28,10 @@
                         <tr-status v-else></tr-status>
                     </span>
                     <span class="account-process-item text-overflow">
-                        CPU: {{ getMemCpu(`md_${accountItem.source_name}`, processStatusWithDetail, 'cpu') }}
+                        CPU:{{ getMemCpu(`md_${accountItem.source_name}`, processStatusWithDetail, 'cpu') }}
                     </span>
                     <span class="account-process-item text-overflow">
-                        MEM: {{ getMemCpu(`md_${accountItem.source_name}`, processStatusWithDetail, 'memory') }}
+                        MEM:{{ getMemCpu(`md_${accountItem.source_name}`, processStatusWithDetail, 'memory') }}
                     </span>
                     <span class="account-process-item status-switch" @click.stop>
                         <el-switch :value="ifProcessRunning(`md_${accountItem.source_name}`, processStatus)" @change="handleMdSwitch($event, accountItem)"></el-switch>
