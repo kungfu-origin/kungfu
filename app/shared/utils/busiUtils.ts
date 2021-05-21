@@ -57,6 +57,7 @@ declare global {
     interface Array<T> {
         removeRepeat(): any;
         kfForEach(cb: Function): any,
+        kfReverseForEach(cb: Function): any,
         kfForEachAsync(cb: Function): any
     }
 }
@@ -101,6 +102,15 @@ Array.prototype.kfForEach = function (cb: Function): any {
     while (i < len) {
         cb.call(t, t[i], i);
         i++;
+    }
+}
+
+Array.prototype.kfReverseForEach = function (cb: Function): any {
+    if (!cb) return;
+    const t = this;
+    let i = t.length;    
+    while (i--) {
+        cb.call(t, t[i], i);
     }
 }
 

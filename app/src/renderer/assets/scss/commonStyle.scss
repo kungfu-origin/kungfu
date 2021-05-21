@@ -11,11 +11,6 @@
             color: $vi;
         }
     }
-    -moz-user-select:none;/*火狐*/
-    -webkit-user-select:none;/*webkit浏览器*/
-    -ms-user-select:none;/*IE10*/
-    -khtml-user-select:none;/*早期浏览器*/
-    user-select:none;
 }
 
 .mouse-over-del{
@@ -27,11 +22,6 @@
             color: $red;
         }
     }
-    -moz-user-select:none;/*火狐*/
-    -webkit-user-select:none;/*webkit浏览器*/
-    -ms-user-select:none;/*IE10*/
-    -khtml-user-select:none;/*早期浏览器*/
-    user-select:none;
 }
 
 .color-red{
@@ -356,14 +346,6 @@ div
     max-width: 164px;
     display: inline-block;
     vertical-align: bottom;
-}
-
-.user-select-none {
-    -moz-user-select:none !important; /*火狐*/
-    -webkit-user-select:none !important; /*webkit浏览器*/
-    -ms-user-select:none !important; /*IE10*/
-    -khtml-user-select:none !important; /*早期浏览器*/
-    user-select:none !important;
 }
 
 .auto-complete-instrument-ids__warp {

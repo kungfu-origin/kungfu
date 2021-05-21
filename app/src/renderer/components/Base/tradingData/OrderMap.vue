@@ -121,19 +121,19 @@ export default {
          
             this.orderInputs.kfForEach(item => {
                 const itemResolved = item;
-                const { orderId, updateTime } = itemResolved;
+                const { orderId } = itemResolved;
                 if (!mapData[orderId]) mapData[orderId] = {};
                 mapData[orderId]['orderInput'] = Object.freeze(itemResolved);  
                 mapData[orderId]['id'] = orderId;  
-                mapData[orderId]['updateTime'] = updateTime;  
-
             })
 
             this.orders.kfForEach(item => {
                 const itemResolved = item;
-                const { orderId } = itemResolved;
-                if (!mapData[orderId]) return;
+                const { orderId, updateTimeNum } = itemResolved;
+                if (!mapData[orderId]) mapData[orderId] = {};
                 mapData[orderId]['order'] = Object.freeze(itemResolved);      
+                mapData[orderId]['id'] = orderId;  
+                mapData[orderId]['updateTimeNum'] = updateTimeNum;  
             })
 
 
@@ -143,12 +143,10 @@ export default {
 
                 if (!mapData[orderId]) return;
 
-                
                 const orderStatByOrderId = dealOrderStat(this.orderStat[orderId] || null);
                 //ctp trade返回的是交易所时间（xtp是自己维护），所用orderState内时间代替
-                const { updateTime, updateTimeMMDD } = itemResolved;
-                itemResolved.updateTime = !!orderStatByOrderId.tradeTimeNum ? orderStatByOrderId.tradeTime : updateTime;
-                itemResolved.updateTimeMMDD = !!orderStatByOrderId.tradeTimeNum ? orderStatByOrderId.tradeTimeMMDD : updateTimeMMDD;
+                itemResolved.localUpdateTime = orderStatByOrderId.tradeTime;
+                itemResolved.sourceUpdateTimeMMDD = orderStatByOrderId.tradeTimeMMDD;
                 
                 if (!(mapData[orderId] || {})['trades']) {
                     mapData[orderId]['trades'] = []
@@ -161,7 +159,11 @@ export default {
         },
 
         resolveOrderMap (tableList) {
-            return Object.freeze(Object.values(tableList || {}).map(item => {
+            return Object.freeze(Object.values(tableList || {})
+            .sort((a, b) =>{
+                return  b.updateTimeNum - a.updateTimeNum
+            })
+            .map(item => {
                 const { id, orderInput, order, trades } = item;
                 return Object.freeze({
                     id,
@@ -204,7 +206,8 @@ export default {
         turnTradesToLog (trades) {
             if (!trades) return ""
             return trades.map(trade => `
-                ${trade.updateTime} <br/>
+                ${trade.localUpdateTime} <br/>
+                ${trade.updateTime}（柜台时间） <br/>
                 ${trade.instrumentId} ${trade.exchangeId} ${trade.accountId} <br/>
                 ${this.renderLine('side', trade)} ${this.renderLine('offset', trade)} ${trade.hedgeFlag} <br/>
                 价格: ${trade.price} 量: ${trade.volume} <br/>

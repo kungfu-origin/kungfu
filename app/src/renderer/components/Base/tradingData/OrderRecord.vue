@@ -256,8 +256,8 @@ export default {
             let ordersAfterFilter = orders
                 .filter(item => {
                     if (searchKeyword.trim() === '') return true;
-                    const { clientId, sourceId, accountId, instrumentId } = item
-                    const strings = [ clientId, sourceId, accountId, instrumentId ].join('')
+                    const { clientId, sourceId, accountId, instrumentId, orderId } = item
+                    const strings = [ clientId, sourceId, accountId, instrumentId, orderId ].join('')
                     return strings.includes(searchKeyword) 
                 });
             
@@ -277,7 +277,7 @@ export default {
             ordersAfterFilter.kfForEach(item => {
                 let orderData = { ...item };
                 orderData.update = true;
-                const orderStat = dealOrderStat(this.orderStat[orderData.orderId] || null);
+                const orderStat = dealOrderStat(this.dateForHistory ? item : this.orderStat[orderData.orderId]);
                 orderData.latencySystem = orderStat.latencySystem || '';
                 orderData.latencyNetwork = orderStat.latencyNetwork || '';
                 orderDataByKey[orderData.id] = Object.freeze(orderData);

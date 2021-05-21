@@ -170,6 +170,8 @@ $HOME/.local/share/virtualenvs      # pipenv(unix) 存储的 Python 依赖
     * 自动删除journal，保证正常启动（脏数据不影响启动）
     * 启动后立刻关闭策略的会判断底层是否ready，解决关闭策略导致黑屏的问题
     * ctp ontrade 判断价格是否正确，拦截非正常报价，同时打印log
+    * 修复了策略手动下单会跟策略内下单重复使用orderid的问题
+    * 修复了成交记录排序的bug
 * 2.3.4:
     * 新增行情模块
     * 新增策略追踪功能

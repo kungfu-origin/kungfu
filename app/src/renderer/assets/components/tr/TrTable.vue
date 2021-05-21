@@ -3,7 +3,6 @@
         <ul class="tr-table-header tr-table-row ">
             <li 
             :class="[
-                'user-select-none',
                 'text-overflow', 
                 'tr-table-cell',
                 column.type === 'number' ? 'number' : '',

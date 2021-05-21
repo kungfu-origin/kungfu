@@ -98,8 +98,8 @@ export default {
             let tradesAfterFilter = trades
                 .filter(item => {
                     if (searchKeyword.trim() === '') return true;
-                    const { tradeId, clientId, accountId, sourceId, instrumentId } = item
-                    const strings = [ tradeId, clientId, accountId, sourceId, instrumentId ].join('')
+                    const { tradeId, clientId, accountId, sourceId, instrumentId, orderId } = item
+                    const strings = [ tradeId, clientId, accountId, sourceId, instrumentId, orderId ].join('')
                     return strings.includes(searchKeyword) 
                 })
 
@@ -114,14 +114,14 @@ export default {
                 .map(item => {
                     let tradeData = { ...item };
                     let orderId = tradeData.orderId;
-                    const orderStatByOrderId = dealOrderStat(this.orderStat[orderId] || null);
+                    const orderStatByOrderId = dealOrderStat(this.dateForHistory ? item : this.orderStat[orderId]);
                     tradeData.update = !!this.tableData.length;
                     tradeData.latencyTrade = orderStatByOrderId.latencyTrade || '';
                     //ctp trade返回的是交易所时间（xtp是自己维护），所用orderState内时间代替
                     const { updateTime, updateTimeNum, updateTimeMMDD } = tradeData
-                    tradeData.updateTime = !!orderStatByOrderId.tradeTimeNum ? orderStatByOrderId.tradeTime : updateTime
-                    tradeData.updateTimeNum = !!orderStatByOrderId.tradeTimeNum ? orderStatByOrderId.tradeTimeNum : updateTimeNum
-                    tradeData.updateTimeMMDD = !!orderStatByOrderId.tradeTimeNum ? orderStatByOrderId.tradeTimeMMDD : updateTimeMMDD
+                    tradeData.localUpdateTime = orderStatByOrderId.tradeTime
+                    tradeData.localUpdateTimeNum = orderStatByOrderId.tradeTimeNum
+                    tradeData.localUpdateTimeMMDD = orderStatByOrderId.tradeTimeMMDD
                     return Object.freeze(tradeData)
                 })
                 .sort((a, b) => (b.updateTimeNum - a.updateTimeNum))
