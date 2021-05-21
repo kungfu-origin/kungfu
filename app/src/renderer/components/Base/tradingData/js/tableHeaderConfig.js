@@ -1,63 +1,10 @@
 export const ordersHeader = (dateForHistory, moduleType) => {
-    if (dateForHistory) {
-        return [
-            {
-                type: "text",
-                label: "委托更新时间",
-                prop: "updateTimeMMDD",
-                width: "180px"
-            },{
-                type: "text",
-                label: "代码",
-                prop: "instrumentId",
-                width: '60px'
-            },{
-                type: "text",
-                label: "",
-                prop: "side",
-                width: '40px'
-            },
-            {
-                type: "text",
-                label: "",
-                prop: "offset",
-                width: '40px'
-            },
-            {
-                type: "number",
-                label: "委托价",
-                prop: "limitPrice",
-                width: '80px'
-            },{
-                type: "text",
-                align: "center",
-                label: "已成交/全部",
-                prop: "volumeTraded",
-                width: '80px'
-            },{
-                type: "text",
-                label: "订单状态",
-                prop: "statusName",
-                width: '120px'
-            },{
-                type: "account-strategy",
-                label: moduleType == 'account' ? '策略' : '账户',
-                prop: moduleType == 'account' ? 'clientId' : 'accountId',
-            },{
-                type: 'operation',
-                label: '',
-                prop: 'oper',
-                width: '40px'
-            }
-        ]
-    }
-
     return  [
         {
             type: "text",
             label: "委托更新时间",
-            prop: "updateTime",
-            width: '110px'
+            prop: dateForHistory ? "updateTimeMMDD" : "updateTime",
+            width: dateForHistory ? '180px' : '110px'
         },{
             type: "text",
             label: "代码",
@@ -222,59 +169,16 @@ export const posHeader = (moduleType) => {
 }
 
 export const tradesHeader = (dateForHistory, moduleType) => {
-    if (dateForHistory) {
-        return [{
-            type: 'text',
-            label: '成交时间',
-            prop: "updateTimeMMDD",
-            width: '180px'
-        },{
-            type: 'text',
-            label: '柜台时间',
-            prop: "sourceUpdateTimeMMDD",
-            width: '180px'
-        },{
-            type: 'text',
-            label: '代码',
-            prop: 'instrumentId',
-            width: '60px'
-        },{
-            type: 'text',
-            label: '',
-            prop: 'side',
-            width: '60px'
-        },{
-            type: 'text',
-            label: '',
-            prop: 'offset',
-            width: '40px'
-        },{
-            type: 'number',
-            label: '成交价',
-            prop: 'price',
-            width: '80px'
-        },{
-            type: 'number',
-            label: '成交量',
-            prop: 'volume',
-            width: '60px'
-        },{
-            type: 'account-strategy',
-            label: moduleType == 'account' ? '策略': '账户',
-            prop: moduleType == 'account' ? 'clientId': 'accountId',
-        }]
-    }
-
     return [{
         type: 'text',
         label: '柜台成交时间',
-        prop: "updateTime",
-        width: '110px'
+        prop: dateForHistory ? "updateTimeMMDD" : "updateTime",
+        width: dateForHistory ? "180px" : '110px'
     },{
         type: 'text',
         label: '功夫系统时间',
-        prop: "localUpdateTime",
-        width: '110px'
+        prop: dateForHistory ? "localUpdateTimeMMDD" : "localUpdateTime",
+        width: dateForHistory ? "180px" : '110px'
     },{
         type: 'text',
         label: '代码',
