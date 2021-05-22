@@ -81,7 +81,6 @@ function setImmediateIter (task: Function, count: number, cb: Function) {
 export const transformOrderTradeListToData = (list: OrderOriginData[] | TradeOriginData [], dealFunc: Function) => {
     let accountData: { [prop: string]: OrderData[] | TradeData[] } = {};
     let strategyData: { [prop: string]: OrderData[] | TradeData[] } = {};
-    let tickerData: { [prop: string]: OrderData[] | TradeData[] } = {};
     let tmpSourceIdData: { [prop: number]: KungfuLocation } = {};
     let tmpDestIdData: { [prop: number]: KungfuLocation } = {};
 
