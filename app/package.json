@@ -27,7 +27,7 @@
     "dist:render": "cross-env NODE_ENV=production node --max_old_space_size=2048 ../node_modules/webpack/bin/webpack.js --config .electron-kungfu/webpack.renderer.config.js",
     "dist": "node --max_old_space_size=4096 .electron-kungfu/build.js",
     "elec": "node .electron-builder/build.js",
-    "prebuild": "yarn run dist",
+    "prebuild": "yarn run clean && yarn run dist",
     "build": "yarn run elec && yarn run elec --pro",
     "build-cli": "yarn run elec --cli"
   },
