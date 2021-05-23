@@ -195,7 +195,8 @@ export const addFileSync = (parentDir = "", filename: string, type: string): voi
     let targetPath: string;
     if(!parentDir) targetPath = filename;
     else targetPath = path.join(parentDir, filename)
-    targetPath = path.normalize(targetPath)
+    targetPath = path.normalize(targetPath);
+    
     if(type === 'folder'){
         fse.ensureDirSync(targetPath)
     }else{
