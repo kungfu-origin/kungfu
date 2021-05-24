@@ -121,10 +121,11 @@ export default {
          
             this.orderInputs.kfForEach(item => {
                 const itemResolved = item;
-                const { orderId } = itemResolved;
+                const { orderId, updateTimeNum } = itemResolved;
                 if (!mapData[orderId]) mapData[orderId] = {};
                 mapData[orderId]['orderInput'] = Object.freeze(itemResolved);  
                 mapData[orderId]['id'] = orderId;  
+                mapData[orderId]['updateTimeNum'] = updateTimeNum;
             })
 
             this.orders.kfForEach(item => {
@@ -133,7 +134,7 @@ export default {
                 if (!mapData[orderId]) mapData[orderId] = {};
                 mapData[orderId]['order'] = Object.freeze(itemResolved);      
                 mapData[orderId]['id'] = orderId;  
-                mapData[orderId]['updateTimeNum'] = updateTimeNum;  
+                mapData[orderId]['updateTimeNum'] = mapData[orderId]['updateTimeNum'] || updateTimeNum;  
             })
 
 
