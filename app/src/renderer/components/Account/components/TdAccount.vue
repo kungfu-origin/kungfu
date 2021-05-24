@@ -197,6 +197,7 @@ import SetSourceDialog from './SetSourceDialog';
 
 import { ifProcessRunning, toDecimal } from '__gUtils/busiUtils';
 import { getTdList } from '__io/kungfu/account';
+import { watcher } from '__io/kungfu/watcher';
 import { deleteTd, switchTd } from '__io/actions/account';
 import { loopToRunProcess } from '__gUtils/busiUtils';
 
@@ -310,7 +311,7 @@ export default {
                     return () => switchTd(item, targetStatus)
                 })
             
-            if (this.ifMasterLedgerRunning && this.watcherIsLive) {
+            if (this.ifMasterLedgerRunning && watcher.isLive()) {
                 return loopToRunProcess(promiseList)
             } else {
                 return Promise.resolve(false)

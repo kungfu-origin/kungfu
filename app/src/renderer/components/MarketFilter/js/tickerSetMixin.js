@@ -7,7 +7,8 @@ import AddTickerDialog from '@/components/MarketFilter/components/AddTickerDialo
 import { checkAllMdProcess, findTargetFromArray, delayMiliSeconds, debounce } from '__gUtils/busiUtils';
 import { sendDataToDaemonByPm2 } from "__gUtils/processUtils";
 import { getTickerSets, addSetTickerSet, removeTickerSetByName } from '__io/actions/market';
-import { kungfuSubscribeTicker } from '__io/kungfu/makeCancelOrder'
+import { kungfuSubscribeTicker } from '__io/kungfu/makeCancelOrder';
+import { watcher } from '__io/kungfu/watcher';
 
 export default {
 
@@ -42,7 +43,6 @@ export default {
             currentTickerSetTickers: state => (state.MARKET.currentTickerSet || {}).tickers || [],
             currentTickerSet: state => state.MARKET.currentTickerSet || {},
             processStatus: state => state.BASE.processStatus || {},
-            watcherIsLive: state => state.BASE.watcherIsLive || false,
         }),
 
         ...mapGetters([
@@ -138,7 +138,7 @@ export default {
         },
 
         subscribeAllTickers (slience = true) {
-            if (!this.watcherIsLive) return;
+            if (!watcher.isLive()) return;
             const tickers = this.flatternTickers || [];
             this.subscribeTickers(tickers, slience)
             sendDataToDaemonByPm2('MAIN_RENDERER_SUBSCRIBED_TICKERS', tickers)
@@ -160,7 +160,7 @@ export default {
         },
 
         async subscribeTickers (tickers, slience = true) {
-            if (!this.watcherIsLive) return;
+            if (!watcher.isLive()) return;
 
             let i = 0, len = tickers.length;
             for (i; i < len; i++) {

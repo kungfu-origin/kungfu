@@ -21,8 +21,6 @@ export default {
         
         currentTask: {},
         taskExtConfigList: [],
-
-        watcherIsLive: false,
     },
 
     actions: {
@@ -84,19 +82,10 @@ export default {
                 .then(exts => {
                     commit('SET_TASK_EXTENSION_CONFIGS', Object.freeze(exts.filter(({ type }) => type === 'task')))
                 })
-        },
-
-        setWatcherIsLive ({ commit }, watcherIsLive) {
-            commit('SET_WATCHER_IS_LIVE', watcherIsLive)
         }
     },
 
     mutations: {
-
-        SET_WATCHER_IS_LIVE (state, watcherIsLive) {
-            state.watcherIsLive = watcherIsLive
-        },
-
         SET_TASK_EXTENSION_CONFIGS (state, taskExtConfigList) {
             state.taskExtConfigList = taskExtConfigList
         },

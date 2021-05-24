@@ -40,7 +40,6 @@ export default {
 
     computed: {
         ...mapState({
-            watcherIsLive: state => state.BASE.watcherIsLive,
             accountsAsset: state => state.ACCOUNT.accountsAsset,
             marketAvgVolume: state => state.MARKET.marketAvgVolume || {},
         })

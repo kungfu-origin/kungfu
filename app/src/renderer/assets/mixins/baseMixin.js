@@ -36,9 +36,6 @@ export default {
     },
 
     computed: {
-        ...mapState({
-            watcherIsLive: state => state.base.watcherIsLive
-        }),
 
         tableListAfterFilter () {
             return this.tableList.filter(item => {

@@ -100,6 +100,7 @@ import SetAccountDialog from './SetAccountDialog';
 import SetSourceDialog from './SetSourceDialog';
 
 import { getMdList } from '__io/kungfu/account';
+import { watcher } from '__io/kungfu/watcher';
 import { switchMd, deleteMd } from '__io/actions/account';
 import { loopToRunProcess, ifProcessRunning } from '__gUtils/busiUtils';
 
@@ -185,7 +186,7 @@ export default {
                     return () => switchMd(item, targetStatus)
                 })
 
-            if (this.ifMasterLedgerRunning && this.watcherIsLive) {
+            if (this.ifMasterLedgerRunning && watcher.isLive()) {
                 return loopToRunProcess(promiseList)
             } else {
                 return Promise.resolve(false)
