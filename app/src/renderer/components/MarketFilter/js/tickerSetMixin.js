@@ -4,7 +4,7 @@ import { mapGetters, mapState } from 'vuex';
 import AddSetTickerSetDialog from '@/components/MarketFilter/components/AddSetTickerSetDialog';
 import AddTickerDialog from '@/components/MarketFilter/components/AddTickerDialog';
 
-import { checkAllMdProcess, findTargetFromArray, delayMiliSeconds } from '__gUtils/busiUtils';
+import { checkAllMdProcess, findTargetFromArray, delayMiliSeconds, debounce } from '__gUtils/busiUtils';
 import { sendDataToDaemonByPm2 } from "__gUtils/processUtils";
 import { getTickerSets, addSetTickerSet, removeTickerSetByName } from '__io/actions/market';
 import { kungfuSubscribeTicker } from '__io/kungfu/makeCancelOrder'
@@ -106,11 +106,11 @@ export default {
 
         handleMdTdStateChange () {
             const self = this;
-            this.$bus.$on('mdTdStateReady', function({ processId }) {
+            this.$bus.$on('mdTdStateReady', debounce(function({ processId }) {
                 if (processId.includes('md')) {
                     self.subscribeTickersByProcessId(processId)
                 }
-            })
+            }, 2000))
         },
 
         getTickerSets () {

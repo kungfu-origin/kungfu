@@ -83,6 +83,7 @@ export default {
             },
         ];
         this.tailObserver = null;
+        this.logMaxLenLimit = 500;
         return {
             rendererTable: false,
             tableData: Object.freeze([]),
@@ -231,7 +232,7 @@ export default {
         
         //往日志列表里推送数据
         pushTableData (itemList) {
-            const tableData = this.tableData.slice(0);
+            let tableData = this.tableData.slice(0);
             itemList.kfForEach(item => {
                 this.logCount++;
                 if(!item || !item.message) return;
@@ -241,6 +242,13 @@ export default {
                     id: this.logCount
                 }))
             }) 
+
+            //最大log数
+            const len = tableData.length;
+            if (len > this.logMaxLenLimit) {
+                tableData = tableData.slice(len - 500, len)
+            }
+
             return Object.freeze(tableData)
         },
 
