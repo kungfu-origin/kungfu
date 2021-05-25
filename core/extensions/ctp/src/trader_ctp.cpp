@@ -372,7 +372,7 @@ void TraderCTP::OnRspQryInstrument(CThostFtdcInstrumentField *pInstrument, CThos
   }
   if (bIsLast) {
     writer->mark(now(), InstrumentEnd::tag);
-    SPDLOG_ERROR("BrokerState::Read");
+    SPDLOG_INFO("BrokerState::Ready");
     update_broker_state(BrokerState::Ready);
   }
 }
