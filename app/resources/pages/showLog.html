@@ -310,17 +310,27 @@
         else $logContent.style.whiteSpace = 'nowrap';
     })
 
-    var findInPage = new FindInPage(remote.getCurrentWebContents(), {
-        preload: true
-    })
+   var findInPage = null;
 
     globalShortcut.register('CommandOrControl+F', () => {
+        clearFinder();
+        findInPage = new FindInPage(remote.getCurrentWebContents(), {
+            preload: true
+        })
         findInPage.openFindWindow();
     })  
 
     globalShortcut.register('ESC', function () {
-        findInPage.closeFindWindow();
+        clearFinder();
     })
+
+    function clearFinder () {
+        if (findInPage) {
+            findInPage.closeFindWindow();
+            findInPage.destroy();
+            findInPage = null;
+        }
+    }
 
     </script>
 </html>
