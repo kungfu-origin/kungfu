@@ -100,7 +100,6 @@ const appDataSubject: any = new Subject();
                 instrumentsPipeData,
                 quotes,
                 globalPipeData: {
-                    watcherIsLive: watcher.isLive() || false,
                     gatewayStates: dealGatewayStates(watcher.appStates)
                 }
             })

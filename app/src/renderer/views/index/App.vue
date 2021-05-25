@@ -106,7 +106,6 @@ export default {
 
     computed: {
         ...mapState({
-            watcherIsLive: state => state.BASE.watcherIsLive || false,
             processStatus: state => state.BASE.processStatus || {},
         }),
 
@@ -213,9 +212,6 @@ export default {
                     //做柜台就绪回调
                     this.emitMdTdStateChange(processId, gatewayState)
                 })
-
-                const watcherIsLive = data["watcherIsLive"] || false;
-                this.$store.dispatch('setWatcherIsLive', watcherIsLive)
             })
         },
 

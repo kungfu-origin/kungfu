@@ -585,9 +585,9 @@ export const dealOrderStat = (item: OrderStatOriginData | null): OrderStatData |
     if (!item) return {};
 
     const { insert_time, ack_time, md_time, trade_time } = item;
-    const latencyTrade = trade_time ? +toDecimal(Number((trade_time || BigInt(0)) - (ack_time || BigInt(0))) / 1000) : 0;
-    const latencyNetwork = +toDecimal(Number((ack_time || BigInt(0)) - (insert_time || BigInt(0))) / 1000);
-    const latencySystem = +toDecimal(Number((insert_time || BigInt(0)) - (md_time || BigInt(0))) / 1000);
+    const latencyTrade = (trade_time && ack_time) ? +toDecimal(Number((trade_time || BigInt(0)) - (ack_time || BigInt(0))) / 1000) : 0;
+    const latencyNetwork = (ack_time && insert_time) ? +toDecimal(Number((ack_time || BigInt(0)) - (insert_time || BigInt(0))) / 1000) : 0;
+    const latencySystem = (insert_time && md_time) ? +toDecimal(Number((insert_time || BigInt(0)) - (md_time || BigInt(0))) / 1000) : 0;
 
     return {
         ackTime: Number(ack_time || BigInt(0)),
