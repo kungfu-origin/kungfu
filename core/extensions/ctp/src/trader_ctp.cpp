@@ -60,7 +60,7 @@ bool TraderCTP::req_position() {
   strcpy(req.InvestorID, config_.account_id.c_str());
   std::this_thread::sleep_for(std::chrono::seconds(1));
   int rtn = api_->ReqQryInvestorPosition(&req, ++request_id_);
-  SPDLOG_INFO("request account positions rtn {},time_stamp {}",rtn,time_stamp);
+  SPDLOG_INFO("request account positions req_position rtn {}, time_stamp {}", rtn, time_stamp);
   return rtn == 0;
 }
 
@@ -306,7 +306,7 @@ void TraderCTP::OnRspQryInvestorPosition(CThostFtdcInvestorPositionField *pInves
   if (pRspInfo != nullptr && pRspInfo->ErrorID != 0) {
     SPDLOG_ERROR("(error_id) {} (error_msg) {}", pRspInfo->ErrorID, gbk2utf8(pRspInfo->ErrorMsg));
   } else if (pInvestorPosition != nullptr) {
-    SPDLOG_INFO("request account positions OnRspQryInvestorPosition timestamp {},*pInvestorPosition {},bIsLast {}",time_stamp,to_string(*pInvestorPosition),bIsLast);
+    SPDLOG_INFO("request account positions OnRspQryInvestorPosition timestamp {}, *pInvestorPosition {}, bIsLast {}", time_stamp, to_string(*pInvestorPosition), bIsLast);
     auto direction = pInvestorPosition->PosiDirection == THOST_FTDC_PD_Long ? Direction::Long : Direction::Short;
     auto &position_map = direction == Direction::Long ? long_position_map_ : short_position_map_;
     if (position_map.find(pInvestorPosition->InstrumentID) == position_map.end()) {
@@ -341,7 +341,7 @@ void TraderCTP::OnRspQryInvestorPosition(CThostFtdcInvestorPositionField *pInves
     position.update_time = time::now_in_nano();
   }
   if (bIsLast) {
-    SPDLOG_INFO("request account positions OnRspQryInvestorPosition timestamp {},*pInvestorPosition {},bIsLast {}",time_stamp,to_string(*pInvestorPosition),bIsLast);
+    SPDLOG_INFO("request account positions OnRspQryInvestorPosition bIsLast timestamp {}, *pInvestorPosition {}, bIsLast {}", time_stamp, to_string(*pInvestorPosition), bIsLast);
     auto writer = get_writer(location::PUBLIC);
     for (const auto &kv : long_position_map_) {
       const auto &position = kv.second;
@@ -463,7 +463,7 @@ bool TraderCTP::req_qry_instrument() {
 }
 
 bool TraderCTP::req_position_detail() {
-  SPDLOG_INFO("request account positions detail");
+  SPDLOG_INFO("request account positions req_position_detail");
   CThostFtdcQryInvestorPositionDetailField req = {};
   strcpy(req.BrokerID, config_.broker_id.c_str());
   strcpy(req.InvestorID, config_.account_id.c_str());

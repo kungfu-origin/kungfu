@@ -186,7 +186,8 @@
     <script type="text/javascript">
     const path = require('path');
     const fse = require('fs-extra');
-    const { ipcRenderer, shell } = require('electron');
+    const { ipcRenderer, shell, globalShortcut } = require('electron');
+    const { FindInPage } = require('electron-find');
     const BrowserWindow = require('electron').remote.BrowserWindow;
     const { getLog, debounce, clearFileContent } = require('./utils.js');
     const gaze = require('gaze');
@@ -307,6 +308,14 @@
         if($logContent.style.whiteSpace !== '') $logContent.style.whiteSpace = '';
         else $logContent.style.whiteSpace = 'nowrap';
     })
+
+    var findInPage = new FindInPage(remote.getCurrentWebContents(), {
+        preload: true
+    })
+
+    globalShortcut.register('CommandOrControl+F', () => {
+        findInPage.openFindWindow();
+    })  
 
     </script>
 </html>
