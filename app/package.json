@@ -32,6 +32,7 @@
     "build-cli": "yarn run elec --cli"
   },
   "dependencies": {
+    "electron-find": "^1.0.6",
     "fast-csv": "^2.5.0",
     "fkill": "^6.1.0",
     "fs-extra": "7.0.1",

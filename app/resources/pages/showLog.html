@@ -186,7 +186,8 @@
     <script type="text/javascript">
     const path = require('path');
     const fse = require('fs-extra');
-    const { ipcRenderer, shell, globalShortcut } = require('electron');
+    const { ipcRenderer, shell, remote  } = require('electron');
+    const { globalShortcut } = remote;
     const { FindInPage } = require('electron-find');
     const BrowserWindow = require('electron').remote.BrowserWindow;
     const { getLog, debounce, clearFileContent } = require('./utils.js');
@@ -316,6 +317,10 @@
     globalShortcut.register('CommandOrControl+F', () => {
         findInPage.openFindWindow();
     })  
+
+    globalShortcut.register('ESC', function () {
+        findInPage.closeFindWindow();
+    })
 
     </script>
 </html>
