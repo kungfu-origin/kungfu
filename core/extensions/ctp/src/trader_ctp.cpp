@@ -38,32 +38,6 @@ void TraderCTP::on_trading_day(const event_ptr &event, int64_t daytime) {
   SPDLOG_INFO("set trading day to {}", trading_day_);
 }
 
-bool TraderCTP::req_account() {
-  uint64_t nano_sec = time::now_in_nano();
-  uint64_t time_stamp = kungfu::yijinjing::time::strptime(std::to_string(nano_sec),TIME_FORMAT);
-  CThostFtdcQryTradingAccountField req = {};
-  strcpy(req.BrokerID, config_.broker_id.c_str());
-  strcpy(req.InvestorID, config_.account_id.c_str());
-  std::this_thread::sleep_for(std::chrono::seconds(1));
-  int rtn = api_->ReqQryTradingAccount(&req, ++request_id_);
-  SPDLOG_INFO("request account asset rtn {},time_stamp {}",rtn,time_stamp);
-  return rtn == 0;
-}
-
-bool TraderCTP::req_position() {
-  long_position_map_.clear();
-  short_position_map_.clear();
-  uint64_t nano_sec = time::now_in_nano();
-  uint64_t time_stamp = kungfu::yijinjing::time::strptime(std::to_string(nano_sec),TIME_FORMAT);
-  CThostFtdcQryInvestorPositionField req = {};
-  strcpy(req.BrokerID, config_.broker_id.c_str());
-  strcpy(req.InvestorID, config_.account_id.c_str());
-  std::this_thread::sleep_for(std::chrono::seconds(1));
-  int rtn = api_->ReqQryInvestorPosition(&req, ++request_id_);
-  SPDLOG_INFO("request account positions req_position rtn {}, time_stamp {}", rtn, time_stamp);
-  return rtn == 0;
-}
-
 bool TraderCTP::insert_order(const event_ptr &event) {
   const OrderInput &input = event->data<OrderInput>();
 
@@ -287,8 +261,7 @@ void TraderCTP::OnRspQryTradingAccount(CThostFtdcTradingAccountField *pTradingAc
     return;
   }
   uint64_t nano_sec = time::now_in_nano();
-  uint64_t time_stamp = kungfu::yijinjing::time::strptime(std::to_string(nano_sec),TIME_FORMAT);
-  SPDLOG_INFO("request account asset OnRspQryTradingAccount timestamp {},*pTradingAccount {},bIsLast {}",time_stamp,to_string(*pTradingAccount),bIsLast);
+  SPDLOG_INFO("request account asset OnRspQryTradingAccount *pTradingAccount {},bIsLast {}", to_string(*pTradingAccount), bIsLast);
   auto writer = get_writer(location::PUBLIC);
   Asset account = {};
   strcpy(account.account_id, get_account_id().c_str());
@@ -296,17 +269,15 @@ void TraderCTP::OnRspQryTradingAccount(CThostFtdcTradingAccountField *pTradingAc
   account.update_time = time::now_in_nano();
   account.holder_uid = get_io_device()->get_home()->uid;
   writer->write(now(), account);
-  req_position();
 }
 
 void TraderCTP::OnRspQryInvestorPosition(CThostFtdcInvestorPositionField *pInvestorPosition,
                                          CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
   uint64_t nano_sec = time::now_in_nano();
-  uint64_t time_stamp = kungfu::yijinjing::time::strptime(std::to_string(nano_sec),TIME_FORMAT);
   if (pRspInfo != nullptr && pRspInfo->ErrorID != 0) {
     SPDLOG_ERROR("(error_id) {} (error_msg) {}", pRspInfo->ErrorID, gbk2utf8(pRspInfo->ErrorMsg));
   } else if (pInvestorPosition != nullptr) {
-    SPDLOG_INFO("request account positions OnRspQryInvestorPosition timestamp {}, *pInvestorPosition {}, bIsLast {}", time_stamp, to_string(*pInvestorPosition), bIsLast);
+    SPDLOG_INFO("request account positions OnRspQryInvestorPosition *pInvestorPosition {}, bIsLast {}", to_string(*pInvestorPosition), bIsLast);
     auto direction = pInvestorPosition->PosiDirection == THOST_FTDC_PD_Long ? Direction::Long : Direction::Short;
     auto &position_map = direction == Direction::Long ? long_position_map_ : short_position_map_;
     if (position_map.find(pInvestorPosition->InstrumentID) == position_map.end()) {
@@ -341,7 +312,7 @@ void TraderCTP::OnRspQryInvestorPosition(CThostFtdcInvestorPositionField *pInves
     position.update_time = time::now_in_nano();
   }
   if (bIsLast) {
-    SPDLOG_INFO("request account positions OnRspQryInvestorPosition bIsLast timestamp {}, *pInvestorPosition {}, bIsLast {}", time_stamp, to_string(*pInvestorPosition), bIsLast);
+    SPDLOG_INFO("request account positions OnRspQryInvestorPosition bIsLast *pInvestorPosition {}, bIsLast {}",  to_string(*pInvestorPosition), bIsLast);
     auto writer = get_writer(location::PUBLIC);
     for (const auto &kv : long_position_map_) {
       const auto &position = kv.second;
@@ -456,11 +427,37 @@ bool TraderCTP::req_auth() {
 }
 
 bool TraderCTP::req_qry_instrument() {
-  SPDLOG_INFO("request instruments");
   CThostFtdcQryInstrumentField req = {};
   int rtn = api_->ReqQryInstrument(&req, ++request_id_);
+  std::this_thread::sleep_for(std::chrono::seconds(1));
+  SPDLOG_INFO("request instruments rtn {}", rtn);
   return rtn == 0;
 }
+
+bool TraderCTP::req_account() {
+  uint64_t nano_sec = time::now_in_nano();
+  CThostFtdcQryTradingAccountField req = {};
+  strcpy(req.BrokerID, config_.broker_id.c_str());
+  strcpy(req.InvestorID, config_.account_id.c_str());
+  int rtn = api_->ReqQryTradingAccount(&req, ++request_id_);
+  std::this_thread::sleep_for(std::chrono::seconds(1));
+  SPDLOG_INFO("request account asset rtn {}", rtn);
+  return rtn == 0;
+}
+
+bool TraderCTP::req_position() {
+  long_position_map_.clear();
+  short_position_map_.clear();
+  uint64_t nano_sec = time::now_in_nano();
+  CThostFtdcQryInvestorPositionField req = {};
+  strcpy(req.BrokerID, config_.broker_id.c_str());
+  strcpy(req.InvestorID, config_.account_id.c_str());
+  int rtn = api_->ReqQryInvestorPosition(&req, ++request_id_);
+  std::this_thread::sleep_for(std::chrono::seconds(1));
+  SPDLOG_INFO("request account positions req_position rtn {}", rtn);
+  return rtn == 0;
+}
+
 
 bool TraderCTP::req_position_detail() {
   SPDLOG_INFO("request account positions req_position_detail");
