@@ -173,6 +173,7 @@ $HOME/.local/share/virtualenvs      # pipenv(unix) 存储的 Python 依赖
     * 修复了策略手动下单会跟策略内下单重复使用orderid的问题
     * 优化了成交记录排序以及展示
     * 修复了模拟柜台sim下单成交offset和side的问题
+    * 增加在日志窗口 ctrl+f 查找
 * 2.3.4:
     * 新增行情模块
     * 新增策略追踪功能
