@@ -107,6 +107,7 @@ export default {
     computed: {
         ...mapState({
             processStatus: state => state.BASE.processStatus || {},
+            daemonIsLive: state => state.BASE.daemonIsLive || false
         }),
 
         watcherLoading () {
@@ -182,9 +183,9 @@ export default {
 
         getWatcherStatus () {
             let timer = setInterval(() => {
-                const watcherStatus = watcher.isLive();
+                const watcherStatus = watcher.isLive() 
                 const archiveFinished = (window.archiveStatus !== 'online') && (window.archiveStatus !== undefined);
-                const daemonStatus = this.processStatus.kungfuDaemon === 'online';
+                const daemonStatus = (this.processStatus.kungfuDaemon === 'online') && this.daemonIsLive;
 
                 this.$set(this.loadingData, 'archive', archiveFinished);
                 this.$set(this.loadingData, 'watcher', watcherStatus);
@@ -202,18 +203,27 @@ export default {
             this.kungfuGloablDataObserver = buildKungfuGlobalDataPipeByDaemon().subscribe(data => {
                 
                 const gatewayStates = data["gatewayStates"] || [];
-                gatewayStates.forEach(gatewayState => {
-                    const { processId } = gatewayState;
-                    this.$store.dispatch('setOneMdTdState', {
-                        id: processId,
-                        stateData: gatewayState
-                    })
+                this.dealGatewayStates(gatewayStates);
 
-                    //做柜台就绪回调
-                    this.emitMdTdStateChange(processId, gatewayState)
-                })
+                //非常有必要，需要确保daemon进程watcherisLive
+                const daemonIsLive = data["daemonIsLive"] || false;
+                this.$store.dispatch("setDaemonIsLive", daemonIsLive)
+                
             })
         },
+
+        dealGatewayStates (gatewayStates) {
+            gatewayStates.forEach(gatewayState => {
+                const { processId } = gatewayState;
+                this.$store.dispatch('setOneMdTdState', {
+                    id: processId,
+                    stateData: gatewayState
+                })
+
+                //做柜台就绪回调
+                this.emitMdTdStateChange(processId, gatewayState)
+            });
+        },  
 
         emitMdTdStateChange (processId, stateData) {
 

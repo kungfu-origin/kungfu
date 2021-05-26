@@ -1,5 +1,4 @@
 import Vue from 'vue';
-import minimist from 'minimist';
 import fse from "fs-extra";
 import { getAccountSource } from '__gConfig/accountConfig';
 import { KF_CONFIG_PATH, TASK_EXTENSION_DIR } from '__gConfig/pathConfig';
@@ -21,6 +20,8 @@ export default {
         
         currentTask: {},
         taskExtConfigList: [],
+
+        daemonIsLive: false
     },
 
     actions: {
@@ -82,10 +83,18 @@ export default {
                 .then(exts => {
                     commit('SET_TASK_EXTENSION_CONFIGS', Object.freeze(exts.filter(({ type }) => type === 'task')))
                 })
+        },
+
+        setDaemonIsLive ({ commit }, daemonIsLive) {
+            commit("SET_DAEMON_IS_LIVE", daemonIsLive);
         }
     },
 
     mutations: {
+        SET_DAEMON_IS_LIVE (state, daemonIsLive) {
+            state.daemonIsLive = daemonIsLive;
+        },
+
         SET_TASK_EXTENSION_CONFIGS (state, taskExtConfigList) {
             state.taskExtConfigList = taskExtConfigList
         },
