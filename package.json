@@ -14,7 +14,7 @@
     "app" 
   ],
   "scripts": {
-    "release-sync": "git checkout release && git rebase dev && git push -f origin release && git checkout dev",
+    "release-sync": "git pull && git checkout release && git rebase dev && git push -f origin release && git checkout dev",
     "postinstall": "yarn wsrun --serial install-deps",
     "build": "yarn run clean && yarn run env-electron && yarn wsrun --serial --fast-exit build",
     "build-cli": "yarn run clean && yarn run env-cli && yarn wsrun --serial --fast-exit build-cli",
