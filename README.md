@@ -174,6 +174,8 @@ $HOME/.local/share/virtualenvs      # pipenv(unix) 存储的 Python 依赖
     * 优化了成交记录排序以及展示
     * 修复了模拟柜台sim下单成交offset和side的问题
     * 增加在日志窗口 ctrl+f 查找
+    * 修复ctp 请求持仓短时间重复发起的问题
+    * 升级了kungfu依赖python版本3.7.5 -> 3.7.9
 * 2.3.4:
     * 新增行情模块
     * 新增策略追踪功能
