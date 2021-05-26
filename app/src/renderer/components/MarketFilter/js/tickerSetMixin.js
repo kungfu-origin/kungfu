@@ -89,7 +89,7 @@ export default {
             
         },
 
-        handleConfirmAddSetTickerSet (tickerSet) {
+        handleConfirmAddSetTickerSet (tickerSet) {    
             return addSetTickerSet(tickerSet)
                 .then(() => {
                     this.$message.success(`操作成功！`)
@@ -100,8 +100,11 @@ export default {
                 })
         },
 
-        handleAddTickerConfirm (tickerData) {
-            this.$bus.$emit('add-ticker-for-ticker-set', Object.freeze(tickerData))
+        handleAddTickerConfirm (tickerData, inTickerSet = false) {
+            this.$bus.$emit('add-ticker-for-ticker-set', {
+                tickerData: Object.freeze(tickerData),
+                inTickerSet
+            })
         },
 
         handleMdTdStateChange () {

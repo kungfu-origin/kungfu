@@ -54,13 +54,13 @@
             :inputData="setTickerSetDialogInput"
             :method="addSetTickerSetDialogMethod"
             @addTicker="handleAddTicker"
-            @confirm="handleConfirmAddSetTickerSet"    
+            @confirm="tickerSet => handleConfirmAddSetTickerSet(tickerSet)"    
         ></AddSetTickerSetDialog>
 
         <AddTickerDialog
             v-if="addTickerDialogVisiblity"
             :visible.sync="addTickerDialogVisiblity"
-            @confirm="handleAddTickerConfirm"
+            @confirm="tickerData => handleAddTickerConfirm(tickerData, true)"
         >
         </AddTickerDialog>
     </div>

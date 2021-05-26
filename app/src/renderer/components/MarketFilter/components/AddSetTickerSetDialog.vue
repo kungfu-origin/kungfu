@@ -189,7 +189,7 @@ export default {
         },
 
         bindAddTickerListener () {
-            this.$bus.$on('add-ticker-for-ticker-set', (tickerData) => {
+            this.$bus.$on('add-ticker-for-ticker-set', ({ tickerData }) => {
                 const targetIndex = getIndexFromTargetTickers(this.tickersList, tickerData)
                 if (targetIndex === -1) {
                     this.tickersList.push(tickerData)

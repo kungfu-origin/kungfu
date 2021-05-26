@@ -247,7 +247,8 @@ export default {
         },
 
         bindAddTickerToTickerSet () {
-            this.$bus.$on('add-ticker-for-ticker-set', (tickerData) => {
+            this.$bus.$on('add-ticker-for-ticker-set', ({ tickerData, inTickerSet }) => {
+                if (inTickerSet) return;
                 const { name, tickers } = this.currentTickerSet;
                 const targetIndex = getIndexFromTargetTickers(tickers || {}, tickerData)
                 let newTickers = tickers.slice(0);
