@@ -5,6 +5,7 @@ on:
     branches:
       - release
       - 2.3
+      - filesystem
 jobs:
   build:
     runs-on: ubuntu-latest

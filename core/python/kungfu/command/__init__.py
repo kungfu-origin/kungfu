@@ -103,7 +103,7 @@ def kfc(ctx, home, log_level, name):
 
     # have to keep locator alive from python side
     # https://github.com/pybind/pybind11/issues/1546
-    ctx.runtime_locator = yjj.locator(ctx.runtime_dir)
+    ctx.runtime_locator = Locator(ctx.runtime_dir)
     ctx.config_location = yjj.location(lf.enums.mode.LIVE, lf.enums.category.SYSTEM, 'etc', 'kungfu', ctx.runtime_locator)
     ctx.console_location = yjj.location(lf.enums.mode.LIVE, lf.enums.category.SYSTEM, 'service', 'console', ctx.runtime_locator)
     ctx.index_location = yjj.location(lf.enums.mode.LIVE, lf.enums.category.SYSTEM, 'journal', 'index', ctx.runtime_locator)
