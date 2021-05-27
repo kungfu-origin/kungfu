@@ -46,6 +46,7 @@
     "vue-virtual-scroller": "^1.0.10"
   },
   "devDependencies": {
+    "@types/fs-extra": "^9.0.11",
     "@types/node": "^12.6.2",
     "aws-sdk": "^2.395.0",
     "babel-loader": "^7.1.1",
