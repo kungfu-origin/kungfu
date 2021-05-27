@@ -579,13 +579,13 @@ export const sendDataToDaemonByPm2 = (topic: string, data: any): Promise<any> =>
                 return pmid
             }
         })
-        .then((pmId: number | never): void => {
+        .then((pmId: number): void => {
             if (!pmId) return;
             sendDataToProcessIdByPm2(topic, pmId, "kungfuDaemon", data)
         })
 }
 
-function getKungfuDaemonPmId () {
+function getKungfuDaemonPmId (): Promise<any> {
     return listProcessStatus()
         .then(({ processStatusWithDetail }) => {
             const kungfuDaemonPrc: ProcessStatusDetail = processStatusWithDetail['kungfuDaemon'] || {};
