@@ -15,7 +15,6 @@
   ],
   "scripts": {
     "release-sync": "git pull && git checkout release && git rebase dev && git push -f origin release && git checkout dev",
-    "preinstall": "git config --global url.'git@github.com:'.insteadOf https://github.com/ && git config --global url.'git://'.insteadOf https://",
     "postinstall": "yarn wsrun --serial install-deps",
     "build": "yarn run clean && yarn run env-electron && yarn wsrun --serial --fast-exit build",
     "build-cli": "yarn run clean && yarn run env-cli && yarn wsrun --serial --fast-exit build-cli",
