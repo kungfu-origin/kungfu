@@ -557,7 +557,7 @@ function startGetProcessStatusByName (name: string, callback: Function) {
     return timer
 }
 
-export const sendDataToProcessIdByPm2 = (topic: string, pm2Id: number, processName: string, data: any) => {
+export const sendDataToProcessIdByPm2 = (topic: string, pm2Id: number, processName: string, data: any): void => {
     pm2.sendDataToProcessId({
         type: 'process:msg',
         data,
@@ -579,7 +579,7 @@ export const sendDataToDaemonByPm2 = (topic: string, data: any): Promise<any> =>
                 return pmid
             }
         })
-        .then((pmId: number) => sendDataToProcessIdByPm2(topic, pmId, "kungfuDaemon", data))
+        .then((pmId: number): void => sendDataToProcessIdByPm2(topic, pmId, "kungfuDaemon", data))
 }
 
 function getKungfuDaemonPmId () {
