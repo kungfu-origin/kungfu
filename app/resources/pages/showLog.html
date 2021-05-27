@@ -314,10 +314,7 @@
 
     window.onload = () => {
 
-        console.log(666, globalShortcut.isRegistered('CommandOrControl+F'))
-
         globalShortcut.register('CommandOrControl+F', () => {
-            console.log(111)
             clearFinder();
             findInPage = new FindInPage(remote.getCurrentWebContents(), {
                 preload: true
