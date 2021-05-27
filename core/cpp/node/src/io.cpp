@@ -48,43 +48,44 @@ std::string Locator::get_env(const std::string &name) const {
   return v.As<Napi::String>().Utf8Value();
 }
 
-std::string Locator::layout_dir(location_ptr location, longfist::enums::layout l) const {
+std::string Locator::layout_dir(const location_ptr &location, longfist::enums::layout layout) const {
   auto js_delegate = locator_ref_.Get("layout_dir").As<Napi::Function>();
   auto v = js_delegate.Call({
       Napi::String::New(locator_ref_.Env(), get_category_name(location->category)),          //
-      Napi::String::New(locator_ref_.Env(), location->group),                                //
-      Napi::String::New(locator_ref_.Env(), location->name),                                 //
+      Napi::String::New(locator_ref_.Env(), location->group),                                      //
+      Napi::String::New(locator_ref_.Env(), location->name),                                       //
       Napi::String::New(locator_ref_.Env(), longfist::enums::get_mode_name(location->mode)), //
-      Napi::String::New(locator_ref_.Env(), longfist::enums::get_layout_name(l))             //
+      Napi::String::New(locator_ref_.Env(), longfist::enums::get_layout_name(layout))        //
   });
   return v.As<Napi::String>().Utf8Value();
 }
 
-std::string Locator::layout_file(location_ptr location, longfist::enums::layout l, const std::string &name) const {
+std::string Locator::layout_file(const location_ptr &location, longfist::enums::layout layout,
+                                 const std::string &name) const {
   auto js_delegate = locator_ref_.Get("layout_file").As<Napi::Function>();
   auto v = js_delegate.Call({
-      Napi::String::New(locator_ref_.Env(), get_category_name(location->category)), //
-      Napi::String::New(locator_ref_.Env(), location->group),                       //
-      Napi::String::New(locator_ref_.Env(), location->name),                        //
-      Napi::String::New(locator_ref_.Env(), get_mode_name(location->mode)),         //
-      Napi::String::New(locator_ref_.Env(), longfist::enums::get_layout_name(l)),   //
-      Napi::String::New(locator_ref_.Env(), name)                                   //
+      Napi::String::New(locator_ref_.Env(), get_category_name(location->category)),   //
+      Napi::String::New(locator_ref_.Env(), location->group),                               //
+      Napi::String::New(locator_ref_.Env(), location->name),                                //
+      Napi::String::New(locator_ref_.Env(), get_mode_name(location->mode)),           //
+      Napi::String::New(locator_ref_.Env(), longfist::enums::get_layout_name(layout)),//
+      Napi::String::New(locator_ref_.Env(), name)                                           //
   });
   return v.As<Napi::String>().Utf8Value();
 }
 
-std::string Locator::default_to_system_db(location_ptr location, const std::string &name) const {
+std::string Locator::default_to_system_db(const location_ptr &location, const std::string &name) const {
   throw yijinjing_error("not supported");
 }
 
-std::vector<uint32_t> Locator::list_page_id(location_ptr location, uint32_t dest_id) const {
+std::vector<uint32_t> Locator::list_page_id(const location_ptr &location, uint32_t dest_id) const {
   auto js_delegate = locator_ref_.Get("list_page_id").As<Napi::Function>();
   auto v = js_delegate.Call({
-      Napi::String::New(locator_ref_.Env(), get_category_name(location->category)), //
-      Napi::String::New(locator_ref_.Env(), location->group),                       //
-      Napi::String::New(locator_ref_.Env(), location->name),                        //
-      Napi::String::New(locator_ref_.Env(), get_mode_name(location->mode)),         //
-      Napi::Number::New(locator_ref_.Env(), dest_id)                                //
+      Napi::String::New(locator_ref_.Env(), get_category_name(location->category)),//
+      Napi::String::New(locator_ref_.Env(), location->group),                           //
+      Napi::String::New(locator_ref_.Env(), location->name),                            //
+      Napi::String::New(locator_ref_.Env(), get_mode_name(location->mode)),       //
+      Napi::Number::New(locator_ref_.Env(), dest_id)                                    //
   });
   auto r = v.As<Napi::Array>();
   std::vector<uint32_t> result;
@@ -118,13 +119,13 @@ std::vector<location_ptr> Locator::list_locations(const std::string &category, c
   return result;
 }
 
-std::vector<uint32_t> Locator::list_location_dest(location_ptr location) const {
+std::vector<uint32_t> Locator::list_location_dest(const location_ptr &location) const {
   std::vector<uint32_t> result;
   auto js_delegate = locator_ref_.Get("list_location_dest").As<Napi::Function>();
   auto v = js_delegate.Call({
       Napi::String::New(locator_ref_.Env(), get_category_name(location->category)), //
-      Napi::String::New(locator_ref_.Env(), location->group),                       //
-      Napi::String::New(locator_ref_.Env(), location->name),                        //
+      Napi::String::New(locator_ref_.Env(), location->group),                             //
+      Napi::String::New(locator_ref_.Env(), location->name),                              //
       Napi::String::New(locator_ref_.Env(), get_mode_name(location->mode))          //
   });
   auto r = v.As<Napi::Array>();
@@ -153,7 +154,7 @@ locator_ptr IODevice::GetLocator(const Napi::CallbackInfo &info, int index) {
   return std::dynamic_pointer_cast<locator>(std::make_shared<Locator>(info[index].As<Napi::Object>()));
 }
 
-locator_ptr IODevice::GetLocator(const Napi::Array locators, int index) {
+locator_ptr IODevice::GetLocator(Napi::Array locators, int index) {
   return std::dynamic_pointer_cast<locator>(std::make_shared<Locator>(locators.Get(index).As<Napi::Object>()));
 }
 

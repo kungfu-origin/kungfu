@@ -41,37 +41,37 @@ class PyLocator : public locator {
   using locator::locator;
 
   [[nodiscard]] bool has_env(const std::string &name) const override {
-    PYBIND11_OVERLOAD_PURE(bool, locator, has_env, name)
+    PYBIND11_OVERLOAD(bool, locator, has_env, name);
   }
 
   [[nodiscard]] std::string get_env(const std::string &name) const override {
-    PYBIND11_OVERLOAD_PURE(std::string, locator, get_env, name)
+    PYBIND11_OVERLOAD(std::string, locator, get_env, name);
   }
 
-  [[nodiscard]] std::string layout_dir(location_ptr location, layout l) const override {
-    PYBIND11_OVERLOAD_PURE(std::string, locator, layout_dir, location, l)
+  [[nodiscard]] std::string layout_dir(const location_ptr &location, layout l) const override {
+    PYBIND11_OVERLOAD(std::string, locator, layout_dir, location, l);
   }
 
-  [[nodiscard]] std::string layout_file(location_ptr location, layout l, const std::string &name) const override {
-    PYBIND11_OVERLOAD_PURE(std::string, locator, layout_file, location, l, name)
+  [[nodiscard]] std::string layout_file(const location_ptr &location, layout l, const std::string &name) const override {
+    PYBIND11_OVERLOAD(std::string, locator, layout_file, location, l, name);
   }
 
-  [[nodiscard]] std::string default_to_system_db(location_ptr location, const std::string &name) const override {
-    PYBIND11_OVERLOAD_PURE(std::string, locator, default_to_system_db, location, name)
+  [[nodiscard]] std::string default_to_system_db(const location_ptr &location, const std::string &name) const override {
+    PYBIND11_OVERLOAD(std::string, locator, default_to_system_db, location, name);
   }
 
-  [[nodiscard]] std::vector<uint32_t> list_page_id(location_ptr location, uint32_t dest_id) const override {
-    PYBIND11_OVERLOAD_PURE(std::vector<uint32_t>, locator, list_page_id, location, dest_id)
+  [[nodiscard]] std::vector<uint32_t> list_page_id(const location_ptr &location, uint32_t dest_id) const override {
+    PYBIND11_OVERLOAD(std::vector<uint32_t>, locator, list_page_id, location, dest_id);
   }
 
   [[nodiscard]] std::vector<location_ptr> list_locations(const std::string &category, const std::string &group,
                                                          const std::string &name,
                                                          const std::string &mode) const override {
-    PYBIND11_OVERLOAD_PURE(std::vector<location_ptr>, locator, list_locations, category, group, name, mode)
+    PYBIND11_OVERLOAD(std::vector<location_ptr>, locator, list_locations, category, group, name, mode);
   }
 
-  [[nodiscard]] std::vector<uint32_t> list_location_dest(location_ptr location) const override {
-    PYBIND11_OVERLOAD_PURE(std::vector<uint32_t>, locator, list_location_dest, location)
+  [[nodiscard]] std::vector<uint32_t> list_location_dest(const location_ptr &location) const override {
+    PYBIND11_OVERLOAD(std::vector<uint32_t>, locator, list_location_dest, location);
   }
 };
 
@@ -205,6 +205,7 @@ void bind(pybind11::module &&m) {
 
   py::class_<locator, PyLocator, locator_ptr>(m, "locator")
       .def(py::init())
+      .def(py::init<const std::string &>())
       .def("has_env", &locator::has_env)
       .def("get_env", &locator::get_env)
       .def("layout_dir", &locator::layout_dir)
