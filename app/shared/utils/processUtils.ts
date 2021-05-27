@@ -579,7 +579,10 @@ export const sendDataToDaemonByPm2 = (topic: string, data: any): Promise<any> =>
                 return pmid
             }
         })
-        .then((pmId: number): void => sendDataToProcessIdByPm2(topic, pmId, "kungfuDaemon", data))
+        .then((pmId: number | never): void => {
+            if (!pmId) return;
+            sendDataToProcessIdByPm2(topic, pmId, "kungfuDaemon", data)
+        })
 }
 
 function getKungfuDaemonPmId () {
