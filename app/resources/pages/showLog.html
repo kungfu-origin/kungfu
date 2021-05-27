@@ -310,20 +310,30 @@
         else $logContent.style.whiteSpace = 'nowrap';
     })
 
-   var findInPage = null;
+    var findInPage = null;
 
-    globalShortcut.register('CommandOrControl+F', () => {
-        console.log(111)
-        clearFinder();
-        findInPage = new FindInPage(remote.getCurrentWebContents(), {
-            preload: true
+    window.onload = () => {
+
+        console.log(666, globalShortcut.isRegistered('CommandOrControl+F'))
+
+        globalShortcut.register('CommandOrControl+F', () => {
+            console.log(111)
+            clearFinder();
+            findInPage = new FindInPage(remote.getCurrentWebContents(), {
+                preload: true
+            })
+            findInPage.openFindWindow();
+        })  
+
+        globalShortcut.register('ESC', function () {
+            clearFinder();
         })
-        findInPage.openFindWindow();
-    })  
+    }
 
-    globalShortcut.register('ESC', function () {
-        clearFinder();
-    })
+    window.onbeforeunload = () => {
+        globalShortcut.unregister('CommandOrControl+F')
+        globalShortcut.unregister('ESC')
+    }
 
     function clearFinder () {
         if (findInPage) {
@@ -332,6 +342,7 @@
             findInPage = null;
         }
     }
+
 
     </script>
 </html>
