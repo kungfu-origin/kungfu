@@ -108,14 +108,18 @@ _pm2.launchBus((err: Error, pm2_bus: any) => {
     pm2_bus.on('process:msg', (packet: any) => {
         const packetData = packet.data || {};
         const processData = packet.process || {};
-        const pm2Id = processData.pm_id;
-        const processName = processData.name;
-        const dataType = packetData.type;
+        const pm2Id = processData.pm_id || 0;
+        const processName = processData.name || '';
+        const dataType = packetData.type || '';
         const { 
             accountId, 
             ticker, 
             parentId, 
-        } = packetData.body || {};
+        } = packetData.body || {
+            accountId: '', 
+            ticker: '', 
+            parentId: BigInt(0), 
+        };
 
         switch (dataType) {
             case 'REQ_LEDGER_DATA':

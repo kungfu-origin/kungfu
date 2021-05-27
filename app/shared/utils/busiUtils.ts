@@ -633,6 +633,7 @@ export function checkAllMdProcess (tickers: TickerInTickerSet[], processStatus: 
 
 export function decodeBuffer (name: string[]) {
     name = name.filter(n => !!n);
+    //@ts-ignore
     const bufferFrom = Buffer.from(name);
     return isBufferGBK(bufferFrom) ? iconv.decode(bufferFrom, 'gbk') : iconv.decode(bufferFrom, 'utf8')
 }
