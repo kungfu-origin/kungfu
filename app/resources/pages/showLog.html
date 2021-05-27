@@ -149,7 +149,7 @@
 
             ::-webkit-scrollbar-thumb {
                 background: #2C345099;  
-            }
+            }FindInPage
 
             ::-webkit-scrollbar-corner {
                 background: transparent; 
@@ -313,6 +313,7 @@
    var findInPage = null;
 
     globalShortcut.register('CommandOrControl+F', () => {
+        console.log(111)
         clearFinder();
         findInPage = new FindInPage(remote.getCurrentWebContents(), {
             preload: true

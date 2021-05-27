@@ -41,3 +41,11 @@ export function clearJournal (mainWindow) {
 		mainWindow.focus()
 	}
 }
+
+
+export function openLogFile (mainWindow) {
+    if (mainWindow && mainWindow.webContents) {
+		mainWindow.webContents.send('main-process-messages', 'open-log')
+		mainWindow.focus()
+	}
+}

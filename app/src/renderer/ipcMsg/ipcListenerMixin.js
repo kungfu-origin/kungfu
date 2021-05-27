@@ -14,8 +14,7 @@ import recordBeforeQuitMixin from "@/assets/mixins/recordBeforeQuitMixin";
 import tickerSetMixin from '@/components/MarketFilter/js/tickerSetMixin';
 
 const { _pm2, sendDataToProcessIdByPm2 } = require('__gUtils/processUtils');
-
-const BrowserWindow = remote.BrowserWindow;
+const { dialog, BrowserWindow } = remote;
 
 //一直启动，无需remove listener
 export default {
@@ -144,11 +143,16 @@ export default {
                             })
                         break
                     case 'clear-journal':
-                        removeJournal(KF_HOME)
-                            .then(() => {
-                                this.$message.success('清理 journal 完成！')
-                            })
+                        localStorage.setItem("clearJournalDate", "")
+                        this.$message.success('清理 journal 完成，请重启应用！')
                         break
+                    case "open-log":
+                        dialog.showOpenDialog({
+                            properties: ['openFile']
+                        }, (logPath) => {
+                            if(!logPath || !logPath[0]) return;
+                            this.$showLog(logPath[0])
+                        })
 
                 }
             })

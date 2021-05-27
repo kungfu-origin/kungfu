@@ -9,7 +9,7 @@ import { logger } from '__gUtils/logUtils';
 import { platform } from '__gConfig/platformConfig';
 import { openUrl, showKungfuInfo, showQuitMessageBox } from './utils';
 import { KF_HOME, BASE_DB_DIR } from '__gConfig/pathConfig';
-import { openSettingDialog, clearJournal } from "./events";
+import { openSettingDialog, clearJournal, openLogFile } from "./events";
 
 const path = require('path');
 const { app, globalShortcut, BrowserWindow, Menu, shell } = electron
@@ -184,6 +184,7 @@ function setMenu() {
 			{ label: "打开功夫资源目录（KF_HOME）", accelerator: "CmdOrCtrl+Shift+H",  click: () => shell.showItemInFolder(KF_HOME) },
 			{ label: "打开功夫安装目录", accelerator: "CmdOrCtrl+Shift+A", click: () => shell.showItemInFolder(app.getAppPath()) },			
 			{ label: "打开功夫基础配置DB", accelerator: "CmdOrCtrl+Shift+B", click: () => shell.showItemInFolder(path.join(BASE_DB_DIR, 'config.db')) },			
+			{ label: "浏览日志文件", accelerator: "CmdOrCtrl+Shift+L", click: () => openLogFile(mainWindow) },			
 		]
 	},{
 		label: '运行',

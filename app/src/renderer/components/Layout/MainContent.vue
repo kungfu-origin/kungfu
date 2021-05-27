@@ -5,7 +5,7 @@
             <!-- 左侧边栏 -->
             <el-aside :width="'64px'" class="tr-aside" v-if="ifSideBar">
                 <div class="container-logo">
-                    <img width="64" height="50" src="@/assets/img/LOGO.svg"/>
+                    <img width="64" height="50" :src="LOGO"/>
                 </div>
                 <tr-menu>
                     <tr-menu-item
@@ -68,6 +68,7 @@ export default {
     },
 
     data() {
+        this.LOGO = require('../../assets/img/LOGO.svg');
         return {
             infoListVisiblity: false,
         }
