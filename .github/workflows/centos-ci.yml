@@ -11,8 +11,9 @@ jobs:
     runs-on: ubuntu-latest
     container: 'docker.io/kungfutrader/kungfu-builder-centos:latest'
     steps:
-    - uses: actions/checkout@v1
-    - run: |
+    - uses: actions/checkout@v2
+    - name: build
+      run: |
         yarn env-pypi
         yarn install
         yarn build
