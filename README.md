@@ -176,6 +176,7 @@ $HOME/.local/share/virtualenvs      # pipenv(unix) 存储的 Python 依赖
     * 增加在日志窗口 ctrl+f 查找
     * 修复ctp 请求持仓短时间重复发起的问题
     * 升级了kungfu依赖python版本3.7.5 -> 3.7.9
+    * 修复股票对成交数据中price的过滤，如果price <= 0, 则不加入整体计算流
 * 2.3.4:
     * 新增行情模块
     * 新增策略追踪功能
