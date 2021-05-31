@@ -1,20 +1,23 @@
 
 import { mapState } from 'vuex';
 import { ipcRenderer, remote } from 'electron';
+import moment from 'moment';
+import path from 'path';
 
-import { watcher, writeKungfuTimeValue, getTargetOrdersByParentId } from '__io/kungfu/watcher';
-import { kungfu } from '__io/kungfu/kungfuUtils';
+import { watcher, writeKungfuTimeValue, getTargetOrdersByParentId, flatternOrderTrades } from '__io/kungfu/watcher';
+import { kungfu, getKungfuDataByDateRange } from '__io/kungfu/kungfuUtils';
 import { getStrategyById, updateStrategyPath } from '__io/kungfu/strategy';
 import { aliveOrderStatusList } from 'kungfu-shared/config/tradingConfig';
-import { KF_HOME } from '__gConfig/pathConfig';
-import { removeJournal } from '__gUtils/fileUtils';
+import { ensureLedgerData } from '__gUtils/busiUtils';
+import { writeCSV } from '__gUtils/fileUtils';
+
 
 import makeOrderCoreMixin from '@/components/Base/makeOrder/js/makeOrderCoreMixin';
 import recordBeforeQuitMixin from "@/assets/mixins/recordBeforeQuitMixin";
 import tickerSetMixin from '@/components/MarketFilter/js/tickerSetMixin';
 
 const { _pm2, sendDataToProcessIdByPm2 } = require('__gUtils/processUtils');
-const { dialog, BrowserWindow } = remote;
+const { dialog, BrowserWindow, shell } = remote;
 
 //一直启动，无需remove listener
 export default {
@@ -24,6 +27,10 @@ export default {
     data () {
         this.BUS = null;
         return {
+            //导出全部历史
+            exportAllTradingDataByDateDateRangeDialogVisiblity: false,
+            exportAllTradingDataByDateDateRangeDialogLoading: false,
+  
             globalSettingDialogVisiblity: false
         }
     },
@@ -45,6 +52,47 @@ export default {
     },
 
     methods: {
+
+        handleConfirmDateRangeForExportAllTradingData (date) {
+            this.exportAllTradingDataByDateDateRangeDialogLoading = true;
+            return getKungfuDataByDateRange(date)
+                .then(kungfuData => {
+
+                    this.exportAllTradingDataByDateDateRangeDialogLoading = false;
+                    this.exportAllTradingDataByDateDateRangeDialogVisiblity = false;
+
+                    const orders = ensureLedgerData(kungfuData.Order, 'update_time'); 
+                    const ordersResolved = flatternOrderTrades(orders);
+                    const trades = ensureLedgerData(kungfuData.Order, 'trade_time');
+                    const tradesResolved = flatternOrderTrades(trades);
+                    const orderStat = ensureLedgerData(kungfuData.OrderStat, 'insert_time');
+                    const positions = ensureLedgerData(kungfuData.Position);
+                    const dateResolved = moment(date).format('YYYY-MM-DD');
+
+                    dialog.showOpenDialog({
+                        properties: ['openDirectory']
+                    }, targetFolder => {
+                        targetFolder = targetFolder[0];
+                        if (!targetFolder) return;
+                        const ordersFilename = path.join(targetFolder, `orders-${dateResolved}`);
+                        const tradesFilename = path.join(targetFolder, `trades-${dateResolved}`);
+                        const orderStatFilename = path.join(targetFolder, `orderStats-${dateResolved}`);
+                        const posFilename = path.join(targetFolder, `pos-${dateResolved}`);
+
+                        writeCSV(ordersFilename, ordersResolved)
+                        writeCSV(tradesFilename, tradesResolved)
+                        writeCSV(orderStatFilename, orderStat)
+                        writeCSV(posFilename, positions)
+
+                        shell.showItemInFolder(targetFolder)
+                        this.$message.success('导出成功！')
+                    })
+                })
+                .finally(() => {
+                    this.exportAllTradingDataByDateDateRangeDialogLoading = false;
+                    this.exportAllTradingDataByDateDateRangeDialogVisiblity = false;
+                })
+        },
 
         bindPMPCListener () {
             this.BUS && this.BUS.off();
@@ -127,7 +175,6 @@ export default {
                 })
             })
         },
-
         
         bindIPCListener () {
             ipcRenderer.removeAllListeners('main-process-messages')
@@ -153,6 +200,10 @@ export default {
                             if(!logPath || !logPath[0]) return;
                             this.$showLog(logPath[0])
                         })
+                        break;
+                    case "export-all-trading-data":
+                        //App.vue
+                        this.exportAllTradingDataByDateDateRangeDialogVisiblity = true;
 
                 }
             })

@@ -42,14 +42,23 @@
                 退出前保存数据中，请勿关闭
             </div>
         </el-dialog>
+
+        <date-picker-dialog 
+        @confirm="handleConfirmDateRangeForExportAllTradingData"
+        v-if="exportAllTradingDataByDateDateRangeDialogVisiblity"
+        :visible.sync="exportAllTradingDataByDateDateRangeDialogVisiblity"   
+        :loading="exportAllTradingDataByDateDateRangeDialogLoading" 
+        ></date-picker-dialog>
+
     </div>
 </template>
 <script>
 
 import { mapState } from 'vuex';
-import moment from "moment"
 
 import GlobalSettingDialog from '@/components/Base/GlobalSettingDialog';
+import DatePickerDialog from '@/components/Base/DatePickerDialog';
+
 import { buildMarketDataPipeByDaemon, buildTradingDataAccountPipeByDaemon, buildKungfuGlobalDataPipeByDaemon } from '@/ipcMsg/daemon';
 import { watcher } from '__io/kungfu/watcher';
 
@@ -65,10 +74,12 @@ export default {
 
     data() {
         this.kungfuGloablDataObserver = null;
+        
         return {
 
             globalSettingDialogVisiblity: false,
-
+            
+          
             loadingData: {
                 archive: false,
                 watcher: false,
@@ -78,6 +89,7 @@ export default {
     },
 
     components: {
+        DatePickerDialog,
         GlobalSettingDialog
     },
 
@@ -129,6 +141,7 @@ export default {
     },
 
     methods: {
+
         bindQuotesListener () {
             buildMarketDataPipeByDaemon().subscribe(data => {
                 this.$store.dispatch('setQuotes', Object.freeze(Object.values(data)))   

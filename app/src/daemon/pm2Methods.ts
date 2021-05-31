@@ -6,7 +6,7 @@ import {
     dealPos,
     dealQuote
 } from '__io/kungfu/watcher';
-import { ensureLeaderData } from '__gUtils/busiUtils';
+import { ensureLedgerData } from '__gUtils/busiUtils';
 const { sendDataToProcessIdByPm2 } = require('__gUtils/processUtils');
 
 export const resLedgerData = (parentId: string, pm2Id: number, accountId: string, ticker: string, processName: string) => {
@@ -14,9 +14,9 @@ export const resLedgerData = (parentId: string, pm2Id: number, accountId: string
 
     watcher.step();
     const ledger = watcher.ledger;
-    const quotes = ensureLeaderData(ledger.Quote.filter('instrument_id', ticker)).map((item: QuoteOriginData) => dealQuote(item));
+    const quotes = ensureLedgerData(ledger.Quote.filter('instrument_id', ticker)).map((item: QuoteOriginData) => dealQuote(item));
     const orders = getTargetOrdersByParentId(ledger.Order, parentId);
-    const positions = ensureLeaderData(ledger.Position).map((item: PosOriginData) => dealPos(item));
+    const positions = ensureLedgerData(ledger.Position).map((item: PosOriginData) => dealPos(item));
     const positionsResolved = transformTradingItemListToData(positions, 'account')[accountId] || [];
     
     sendDataToProcessIdByPm2("LEDGER_DATA", pm2Id, processName, { 
@@ -31,7 +31,7 @@ export const resQuoteData = (pm2Id: number, tickers: string, processName: string
     
     watcher.step();
     const ledger = watcher.ledger;
-    const quotes = ensureLeaderData(ledger.Quote)
+    const quotes = ensureLedgerData(ledger.Quote)
         .filter((quote: QuoteOriginData) => tickers.includes(`${quote.instrument_id}_${quote.exchange_id}`))
         .map((quote: QuoteOriginData) => dealQuote(quote));
 
@@ -43,7 +43,7 @@ export const resInstrumentInfo = (pm2Id: number, tickers: string, processName: s
 
     watcher.step();
     const ledger = watcher.ledger;
-    const instruments = ensureLeaderData(ledger.Instrument)
+    const instruments = ensureLedgerData(ledger.Instrument)
         .filter((item: InstrumentOriginData) => tickers.includes(`${item.instrument_id}_${item.exchange_id}`))
         
     sendDataToProcessIdByPm2('INSTRUMENT_DATA', pm2Id, processName, { instruments })
@@ -54,7 +54,7 @@ export const resPosData = (pm2Id: number, accountId: string, processName: string
 
     watcher.step();
     const ledger = watcher.ledger;
-    const positions = ensureLeaderData(ledger.Position).map((item: PosOriginData) => dealPos(item));
+    const positions = ensureLedgerData(ledger.Position).map((item: PosOriginData) => dealPos(item));
     const positionsResolved = transformTradingItemListToData(positions, 'account')[accountId] || [];
 
     sendDataToProcessIdByPm2("POS_DATA", pm2Id, processName, { 

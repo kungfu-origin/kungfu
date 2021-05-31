@@ -64,6 +64,8 @@ export default {
             })
         },
 
+        
+
         getIfSaveInstruments (newInstruments) {
             if (newInstruments.length !== this.oldInstruments.length) {
                 return true;

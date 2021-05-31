@@ -2,7 +2,7 @@ import fse from 'fs-extra';
 import { KF_RUNTIME_DIR, KF_CONFIG_PATH } from '__gConfig/pathConfig';
 import { setTimerPromiseTask } from '__gUtils/busiUtils';
 import { kungfu } from '__io/kungfu/kungfuUtils';
-import { toDecimal, ensureNum, ensureLeaderData, addTwoItemByKeyForReduce, avgTwoItemByKeyForReduce } from '__gUtils/busiUtils';
+import { toDecimal, ensureNum, ensureLedgerData, addTwoItemByKeyForReduce, avgTwoItemByKeyForReduce } from '__gUtils/busiUtils';
 import { OffsetName, OrderStatus, SideName, PosDirection, PriceType, HedgeFlag, InstrumentType, VolumeCondition, TimeCondition, allowShorted } from "kungfu-shared/config/tradingConfig";
 import { logger } from '__gUtils/logUtils';
 
@@ -77,6 +77,8 @@ function setImmediateIter (task: Function, count: number, cb: Function) {
         cb(count)
     } 
 }
+
+
 
 export const transformOrderTradeListToData = (list: OrderOriginData[] | TradeOriginData [], dealFunc: Function) => {
     let accountData: { [prop: string]: OrderData[] | TradeData[] } = {};
@@ -276,6 +278,29 @@ export const transformAssetItemListToData = (list: any[], type: string) => {
     return accountIdClientIdData
 }
 
+//用于导出所有order/trader，只按照account id过滤
+export const flatternOrderTrades = (list: any[]) => {
+    let orderTradeList: any[] = [];
+
+    list.kfForEach((item: any) => {
+        const { source, dest } = item;
+        const parent_id = item.parent_id === undefined ? item.parent_order_id : item.parent_id;
+
+        const clientId = resolveClientId(+dest, parent_id);
+        const accountId = resolveAccountId(+source, +dest, parent_id);
+        const sourceId = resolveSourceDest(+source, +dest).sourceGroup;
+    
+        orderTradeList.push({
+            ...item,
+            account_id: accountId,
+            client_id: clientId,
+            source_id: sourceId
+        })
+    })
+
+    return orderTradeList
+}
+
 
 export function decodeKungfuLocation(sourceOrDest: number): KungfuLocation {
     if (!sourceOrDest) return {
@@ -290,7 +315,7 @@ export function decodeKungfuLocation(sourceOrDest: number): KungfuLocation {
 }
 
 export function getTargetOrdersByParentId (Orders: any, parentId: string) {
-    return ensureLeaderData(Orders.filter('parent_id', BigInt(parentId))).map((item: OrderOriginData) => dealOrder(item))
+    return ensureLedgerData(Orders.filter('parent_id', BigInt(parentId))).map((item: OrderOriginData) => dealOrder(item))
 }
 
 // ========================== 交易数据处理 start ===========================
@@ -392,8 +417,6 @@ export const dealOrderInput = (item: OrderInputOriginData): OrderInputData => {
 
 export const dealOrder = (item: OrderOriginData): OrderData => {
     const { source, dest, instrument_type, insert_time, update_time, side, offset, hedge_flag, price_type } = item;
-    const sourceId =  resolveSourceDest(+source, +dest).sourceGroup;
-    const accountId = resolveAccountId(+source, +dest, item.parent_id);
     const errMsg = item.error_msg || OrderStatus[item.status];
   
     return {
@@ -440,8 +463,8 @@ export const dealOrder = (item: OrderOriginData): OrderData => {
         errorMsg: errMsg,
 
         clientId: resolveClientId(+dest, item.parent_id),
-        accountId: accountId,
-        sourceId: sourceId,
+        accountId: resolveAccountId(+source, +dest, item.parent_id),
+        sourceId: resolveSourceDest(+source, +dest).sourceGroup,
        
         source: source,
         dest: dest
@@ -451,9 +474,6 @@ export const dealOrder = (item: OrderOriginData): OrderData => {
 
 export const dealTrade = (item: TradeOriginData): TradeData => {
     const { source, dest, instrument_type, trade_time, side, offset, hedge_flag, parent_order_id } = item;
-    //这个update会用延迟统计里的，因为目前是交易所时间，需要本地时间
-    const sourceId =  resolveSourceDest(+source, +dest).sourceGroup;
-    const accountId = resolveAccountId(+source, +dest, parent_order_id);
 
     return {
         id: [item.account_id.toString(), item.trade_id.toString(), trade_time.toString()].join('_'),
@@ -479,8 +499,8 @@ export const dealTrade = (item: TradeOriginData): TradeData => {
         volume: Number(item.volume),
 
         clientId: resolveClientId(+dest, parent_order_id),
-        accountId: accountId,
-        sourceId: sourceId,
+        accountId: resolveAccountId(+source, +dest, parent_order_id),
+        sourceId: resolveSourceDest(+source, +dest).sourceGroup,
     
         source: source,
         dest: dest,

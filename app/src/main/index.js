@@ -9,7 +9,7 @@ import { logger } from '__gUtils/logUtils';
 import { platform } from '__gConfig/platformConfig';
 import { openUrl, showKungfuInfo, showQuitMessageBox } from './utils';
 import { KF_HOME, BASE_DB_DIR } from '__gConfig/pathConfig';
-import { openSettingDialog, clearJournal, openLogFile } from "./events";
+import { openSettingDialog, clearJournal, openLogFile, exportAllTradingData } from "./events";
 
 const path = require('path');
 const { app, globalShortcut, BrowserWindow, Menu, shell } = electron
@@ -155,8 +155,8 @@ function setMenu() {
     //添加快捷键
 	let applicationOptions = [
 		{ label: "关于功夫交易", click: () => showKungfuInfo()},
-		{ label: "设置", accelerator: "CmdOrCtrl+,", click: () => openSettingDialog(mainWindow)},
-		{ label: "关闭", accelerator: "CmdOrCtrl+W", click: () => BrowserWindow.getFocusedWindow().close()}
+		{ label: "设置", accelerator: "CommandOrControl+,", click: () => openSettingDialog(mainWindow)},
+		{ label: "关闭", accelerator: "CommandOrControl+W", click: () => BrowserWindow.getFocusedWindow().close()}
 	]
 
 	if(platform === 'mac') {
@@ -173,31 +173,32 @@ function setMenu() {
 		//此处必要，不然electron内使用复制粘贴会无效
 		label: "编辑",
 		submenu: [
-			{ label: "复制", accelerator: "CmdOrCtrl+C", selector: "copy:" },
-			{ label: "黏贴", accelerator: "CmdOrCtrl+V", selector: "paste:" },
-			{ label: "全选", accelerator: "CmdOrCtrl+A", role: "selectall" },
-			{ label: "撤销", accelerator: "CmdOrCtrl+Z", role: "undo" }
+			{ label: "复制", accelerator: "CommandOrControl+C", selector: "copy:" },
+			{ label: "黏贴", accelerator: "CommandOrControl+V", selector: "paste:" },
+			{ label: "全选", accelerator: "CommandOrControl+A", role: "selectall" },
+			{ label: "撤销", accelerator: "CommandOrControl+Z", role: "undo" }
 		]
 	},{
 		label: "文件",
 		submenu: [
-			{ label: "打开功夫资源目录（KF_HOME）", accelerator: "CmdOrCtrl+Shift+H",  click: () => shell.showItemInFolder(KF_HOME) },
-			{ label: "打开功夫安装目录", accelerator: "CmdOrCtrl+Shift+A", click: () => shell.showItemInFolder(app.getAppPath()) },			
-			{ label: "打开功夫基础配置DB", accelerator: "CmdOrCtrl+Shift+B", click: () => shell.showItemInFolder(path.join(BASE_DB_DIR, 'config.db')) },			
-			{ label: "浏览日志文件", accelerator: "CmdOrCtrl+Shift+L", click: () => openLogFile(mainWindow) },			
+			{ label: "打开功夫资源目录（KF_HOME）", click: () => shell.showItemInFolder(KF_HOME) },
+			{ label: "打开功夫安装目录", click: () => shell.showItemInFolder(app.getAppPath()) },			
+			{ label: "打开功夫基础配置DB", click: () => shell.showItemInFolder(path.join(BASE_DB_DIR, 'config.db')) },			
+			{ label: "浏览日志文件", click: () => openLogFile(mainWindow) },			
 		]
 	},{
 		label: '运行',
 		submenu: [
-			{ label: "清理journal", accelerator: "CmdOrCtrl+Shift+U", click: () => clearJournal(mainWindow)}
+			{ label: "清理journal", click: () => clearJournal(mainWindow)},
+			{ label: "导出所有交易数据", accelerator: "CommandOrControl+E", click: () => exportAllTradingData(mainWindow)}
 		]
 	},{
 		label: "帮助",
 		submenu: [
-			{ label: "官网", accelerator: "", click: () => openUrl("https://www.kungfu-trader.com/") },
-			{ label: "用户手册", accelerator: "", click: () => openUrl("https://www.kungfu-trader.com/manual/")},
-			{ label: "策略API文档", accelerator: "", click: () => openUrl("https://www.kungfu-trader.com/api-doc/") },
-			{ label: "Kungfu 论坛", accelerator: "", click: () => openUrl("https://www.kungfu-trader.com/community/") }
+			{ label: "官网", click: () => openUrl("https://www.kungfu-trader.com/") },
+			{ label: "用户手册", click: () => openUrl("https://www.kungfu-trader.com/manual/")},
+			{ label: "策略API文档", click: () => openUrl("https://www.kungfu-trader.com/api-doc/") },
+			{ label: "Kungfu 论坛", click: () => openUrl("https://www.kungfu-trader.com/community/") }
 		]
 	}];
 	

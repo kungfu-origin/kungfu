@@ -1,5 +1,6 @@
 
 import { KF_RUNTIME_DIR } from '__gConfig/pathConfig';
+import moment from 'moment';
 
 export const kungfu = require('kungfu-core').kungfu;
 export const longfist = kungfu.longfist;
@@ -95,3 +96,14 @@ export function encodeKungfuLocation(key: string, type: string): KungfuLocation 
 }
 
 
+export function getKungfuDataByDateRange (date: number | string) {
+    const from = moment(date).format('YYYY-MM-DD');
+    const to = moment(date).add(1, 'day').format('YYYY-MM-DD');
+    return new Promise(resolve => {
+        let timer = setTimeout(() => {
+            const kungfuData = history.selectPeriod(from, to);
+            resolve(kungfuData)
+            clearTimeout(timer);
+        }, 100)
+    })
+}

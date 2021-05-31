@@ -77,7 +77,7 @@ import OrderRecord from '@/components/Base/tradingData/OrderRecord';
 
 import { watcher, dealOrder } from '__io/kungfu/watcher';
 import { buildMarketDataPipeByDaemon } from '@/ipcMsg/daemon'; 
-import { ensureLeaderData } from '__gUtils/busiUtils';
+import { ensureLedgerData } from '__gUtils/busiUtils';
 import { buildOrderStatDataPipe, buildAllOrdersTradesDataPipe } from '__io/kungfu/tradingData';
 
 import accountStrategyMixins from '@/views/index/js/accountStrategyMixins';
@@ -146,7 +146,7 @@ export default {
             if (this.isHistoryData('order')) {
                 this.orders = this.getHistoryData('order')
             } else {
-                const orders = ensureLeaderData(watcher.ledger.Order, 'update_time').slice(0, 100)
+                const orders = ensureLedgerData(watcher.ledger.Order, 'update_time').slice(0, 100)
                 const ordersResolved = orders.map(item => Object.freeze(dealOrder(item)));
                 this.orders = Object.freeze(ordersResolved || []);
             }

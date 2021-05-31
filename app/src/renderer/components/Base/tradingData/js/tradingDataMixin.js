@@ -1,6 +1,6 @@
 import moment from 'moment';
 import { decodeKungfuLocation, transformOrderStatListToData, dealOrderStat } from '__io/kungfu/watcher';
-import { history } from '__io/kungfu/kungfuUtils';
+import { getKungfuDataByDateRange } from '__io/kungfu/kungfuUtils';
 import { writeCSV } from '__gUtils/fileUtils';
 import { getDefaultRenderCellClass, originOrderTradesFilterByDirection } from '__gUtils/busiUtils';
 
@@ -118,7 +118,6 @@ export default {
         handleConfirmDateRangeForHistory (date) {
             return this.getDataByDateRange(date)
                 .then(data => {
-                    this.dateRangeDialogVisiblityForHistory = false;
                     this.dateForHistory = moment(date).format('YYYY-MM-DD')
                     return data;
                 })
@@ -133,10 +132,8 @@ export default {
 
         //选择日期以及保存
         handleConfirmDateRangeForExport (date) {
-
             return this.getDataByDateRange(date)
                 .then(data => {
-                    this.dateRangeDialogVisiblityForExport = false;
                     return data;
                 })
                 .then(data => {
@@ -151,19 +148,15 @@ export default {
         },
 
         getDataByDateRange (date) {
-            const from = moment(date).format('YYYY-MM-DD');
-            const to = moment(date).add(1, 'day').format('YYYY-MM-DD');
             this.dateRangeExportLoading = true;
 
-            return new Promise((resolve) => {
-                let timer = setTimeout(() => {
-
-                    const kungfuData = history.selectPeriod(from, to);
+            return getKungfuDataByDateRange(date)
+                .then(kungfuData => {
                     const { instrumentId, directionOrigin } = this.currentTicker || {};
                     const targetList = this.getHistoryTargetListResolved(this.kungfuBoardType, kungfuData, this.moduleType, instrumentId);
                     const orderStats = kungfuData.OrderStat.list();
                     const orderStatByOrderId = transformOrderStatListToData(orderStats);
-                    const targetListAfterFilter = targetList
+                    return targetList
                         .filter(item => {
                             if (this.moduleType === 'account') {
                                 return this.getHistoryDataKeyForFilter('account', item) === this.currentId;
@@ -190,14 +183,16 @@ export default {
                                 type: item.type,
                                 uid_key: item.uid_key
                             })
-                        });
-                    
+                        });                    
+                })
+                .finally(() => {
                     this.dateRangeExportLoading = false;
-                    resolve(targetListAfterFilter)
-                    clearTimeout(timer)
-                }, 100)
-            })
+                    this.dateRangeDialogVisiblityForExport = false;
+                    this.dateRangeDialogVisiblityForHistory = false;
+                })
         },
+
+    
         
         getHistoryTargetListResolved (kungfuBoardType, kungfuData, moduleType = '' , instrumentId = '') {
             const kfDataTable = this.getHistoryTargetList(kungfuBoardType, kungfuData);

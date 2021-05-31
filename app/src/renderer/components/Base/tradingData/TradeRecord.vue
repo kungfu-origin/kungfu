@@ -49,7 +49,7 @@
 
 <script>
 
-import DatePickerDialog from '@/components/Base//DatePickerDialog';
+import DatePickerDialog from '@/components/Base/DatePickerDialog';
 
 import { dealOrderStat } from '__io/kungfu/watcher';
 import { tradesHeader } from '@/components/Base/tradingData/js/tableHeaderConfig';

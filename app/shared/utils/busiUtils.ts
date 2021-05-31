@@ -713,7 +713,7 @@ function buildListByLineNum(num: number){
     return new ListByNum(num)
 }
 
-export function ensureLeaderData (data: any, key = '') {
+export function ensureLedgerData (data: any, key = '') {
     if (!key) {
         return data ? data.list() : []
     }

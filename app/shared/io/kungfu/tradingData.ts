@@ -19,7 +19,7 @@ import {
     dealSnapshot,
 } from '__io/kungfu/watcher';
 
-import { setTimerPromiseTask, ensureLeaderData } from '__gUtils/busiUtils';
+import { setTimerPromiseTask, ensureLedgerData } from '__gUtils/busiUtils';
 
 
 const deamonDataSubject: any = new Subject();
@@ -45,20 +45,20 @@ const appDataSubject: any = new Subject();
             const ledgerData = watcher.ledger;
 
             //限制最大内存/cpu使用
-            const orderInputOrigins = ensureLeaderData(ledgerData.OrderInput, 'insert_time').slice(0, 1000);
-            const orderOrigins = ensureLeaderData(ledgerData.Order, 'update_time').slice(0, 1000);
-            const tradeOrigins = ensureLeaderData(ledgerData.Trade, 'trade_time').slice(0, 1000);
+            const orderInputOrigins = ensureLedgerData(ledgerData.OrderInput, 'insert_time').slice(0, 1000);
+            const orderOrigins = ensureLedgerData(ledgerData.Order, 'update_time').slice(0, 1000);
+            const tradeOrigins = ensureLedgerData(ledgerData.Trade, 'trade_time').slice(0, 1000);
 
             const accountStrategyOrderInputs = await transformOrderInputListToData(orderInputOrigins, dealOrderInput)
             const accountStrategyOrders = await transformOrderTradeListToData(orderOrigins, dealOrder);
             const accountStrategyTrades = await transformOrderTradeListToData(tradeOrigins, dealTrade);
 
-            const positions = ensureLeaderData(ledgerData.Position).map((item: PosOriginData) => dealPos(item));
+            const positions = ensureLedgerData(ledgerData.Position).map((item: PosOriginData) => dealPos(item));
             const positionsByTicker = transformTradingItemListToData(positions, 'ticker');
-            const assets = ensureLeaderData(ledgerData.Asset).map((item: AssetOriginData) => dealAsset(item));
-            const pnl = ensureLeaderData(ledgerData.AssetSnapshot, 'update_time').map((item: AssetSnapshotOriginData) => dealSnapshot(item));
-            const dailyAsset = ensureLeaderData(ledgerData.DailyAsset, 'trading_day').map((item: AssetSnapshotOriginData) => dealSnapshot(item));
-            const quotes = ensureLeaderData(ledgerData.Quote);
+            const assets = ensureLedgerData(ledgerData.Asset).map((item: AssetOriginData) => dealAsset(item));
+            const pnl = ensureLedgerData(ledgerData.AssetSnapshot, 'update_time').map((item: AssetSnapshotOriginData) => dealSnapshot(item));
+            const dailyAsset = ensureLedgerData(ledgerData.DailyAsset, 'trading_day').map((item: AssetSnapshotOriginData) => dealSnapshot(item));
+            const quotes = ensureLedgerData(ledgerData.Quote);
 
             const accountTradingDataPipeData = {
                 orders: accountStrategyOrders.account || {},
@@ -109,11 +109,11 @@ const appDataSubject: any = new Subject();
         return new Promise(resolve => {
             const stateData = watcher.state;
             const ledgerData = watcher.ledger;
-            const timeValueList = ensureLeaderData(stateData.TimeValue.filter('tag_c', 'task'), 'update_time').slice(0, 100)
-            const orderStat = ensureLeaderData(ledgerData.OrderStat, 'insert_time').slice(0, 1000);
+            const timeValueList = ensureLedgerData(stateData.TimeValue.filter('tag_c', 'task'), 'update_time').slice(0, 100)
+            const orderStat = ensureLedgerData(ledgerData.OrderStat, 'insert_time').slice(0, 1000);
             const orderStatResolved = transformOrderStatListToData(orderStat);  
 
-            const instruments = ensureLeaderData(ledgerData.Instrument);
+            const instruments = ensureLedgerData(ledgerData.Instrument);
             const instrumentsAfterFilter = instruments
                 .filter((item: InstrumentOriginData) => {
                     //普通股票 期货 股票期权 基金 科创板股票 指数

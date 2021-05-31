@@ -45,7 +45,7 @@ def post_stop(context):
 def on_quote(context, quote):
     # context.logger.info(f"quote: {quote}")
     side = Side.Buy
-    price = quote.ask_price[0] if side == Side.Buy else quote.bid_price[0]
+    price = quote.ask_price[0]
     price_type = random.choice([PriceType.Any, PriceType.Limit])
     context.insert_order(quote.instrument_id, Exchange.SSE, "15040900", price, 100, price_type, side)
 

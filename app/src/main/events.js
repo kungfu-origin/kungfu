@@ -16,7 +16,7 @@ export const reqRecordBeforeQuit = (mainWindow) => {
             clearTimeout(timer)
         }, 3000)
 
-        mainWindow.webContents.send('main-process-messages', 'record-before-quit')
+        sendMsgToMainWindow(mainWindow, 'record-before-quit')
         
         ipcMain.on('record-before-quit-done', () => {
             resolve(true)
@@ -29,23 +29,24 @@ export const reqRecordBeforeQuit = (mainWindow) => {
 
 //开启发送renderprocess 打开设置弹窗
 export function openSettingDialog (mainWindow) {
-	if (mainWindow && mainWindow.webContents) {
-		mainWindow.webContents.send('main-process-messages', 'open-setting-dialog')
-		mainWindow.focus()
-	}
+    sendMsgToMainWindow(mainWindow, 'open-setting-dialog')
 }
 
 export function clearJournal (mainWindow) {
-    if (mainWindow && mainWindow.webContents) {
-		mainWindow.webContents.send('main-process-messages', 'clear-journal')
-		mainWindow.focus()
-	}
+    sendMsgToMainWindow(mainWindow, 'clear-journal')
 }
 
-
 export function openLogFile (mainWindow) {
+    sendMsgToMainWindow(mainWindow, 'open-log')
+}
+
+export function exportAllTradingData (mainWindow) {
+    sendMsgToMainWindow(mainWindow, 'export-all-trading-data')
+}
+
+function sendMsgToMainWindow (mainWindow, msg) {
     if (mainWindow && mainWindow.webContents) {
-		mainWindow.webContents.send('main-process-messages', 'open-log')
+		mainWindow.webContents.send('main-process-messages', msg)
 		mainWindow.focus()
 	}
 }

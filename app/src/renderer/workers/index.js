@@ -5,5 +5,5 @@ import DealInstruments from 'worker-loader!@/assets/workers/dealInstruments.js';
 export default {
     calcMarketDataAvgVolumeWorker: new CalcMarketDataAvgVolumeWorker(),
     getLogWorker: new GetLogWorker(),
-    dealInstruments: new DealInstruments()
+    dealInstruments: new DealInstruments(),
 }
