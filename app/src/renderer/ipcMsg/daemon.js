@@ -43,20 +43,6 @@ export const buildTradingDataStrategyPipeByDaemon = () => {
         )
 }
 
-export const buildInstrumentsPipeByDaemon = () => {
-    return baseDaemonDataObserver
-        .pipe(
-            filter(packet => {
-                const { type } = packet || {};
-                return type === "DEAMON_INSTRUMENTS"
-            }),
-            map(packet => {
-                const { body } = packet || {};
-                return body.data
-            })
-        )
-}
-
 export const buildKungfuGlobalDataPipeByDaemon = () => {
     return baseDaemonDataObserver
         .pipe(

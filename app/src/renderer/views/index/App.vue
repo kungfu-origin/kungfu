@@ -50,7 +50,7 @@ import { mapState } from 'vuex';
 import moment from "moment"
 
 import GlobalSettingDialog from '@/components/Base/GlobalSettingDialog';
-import { buildMarketDataPipeByDaemon, buildInstrumentsPipeByDaemon, buildTradingDataAccountPipeByDaemon, buildKungfuGlobalDataPipeByDaemon } from '@/ipcMsg/daemon';
+import { buildMarketDataPipeByDaemon, buildTradingDataAccountPipeByDaemon, buildKungfuGlobalDataPipeByDaemon } from '@/ipcMsg/daemon';
 import { watcher } from '__io/kungfu/watcher';
 
 import ipcListenerMixin from '@/ipcMsg/ipcListenerMixin';
@@ -65,7 +65,6 @@ export default {
 
     data() {
         this.kungfuGloablDataObserver = null;
-        this.oldInstruments = Object.freeze(JSON.parse(localStorage.getItem('instruments') || "[]"));
         return {
 
             globalSettingDialogVisiblity: false,
@@ -98,7 +97,6 @@ export default {
 
         this.bindKungfuGlobalDataListener();
         this.bindTradingDataListener();
-        this.bindInstrumentsDataListener();
         this.bindQuotesListener();
 
         this.getWatcherStatus();
@@ -131,23 +129,6 @@ export default {
     },
 
     methods: {
-        bindInstrumentsDataListener () {
-            buildInstrumentsPipeByDaemon().subscribe(data => {
-                const instruments = data['instruments'] || [];
-
-                if (!instruments || !instruments.length) {
-                    localStorage.setItem('instrumentsSavedDate', '')
-                    return;
-                }
-                
-                if (this.getIfSaveInstruments(instruments || [])) {
-                    localStorage.setItem('instrumentsSavedDate', moment().format('YYYY-MM-DD-HH-mm'))
-                    localStorage.setItem('instruments', JSON.stringify(instruments))
-                    this.oldInstruments = instruments; //refresh old instruments
-                }
-            })
-        },
-
         bindQuotesListener () {
             buildMarketDataPipeByDaemon().subscribe(data => {
                 this.$store.dispatch('setQuotes', Object.freeze(Object.values(data)))   
@@ -161,21 +142,7 @@ export default {
             })
         },
 
-        getIfSaveInstruments (newInstruments) {
 
-            if (newInstruments.length !== this.oldInstruments.length) {
-                return true;
-            }
-
-            const instrumentsSavedDate = localStorage.getItem('instrumentsSavedDate')
-            if (!instrumentsSavedDate) {
-                return true
-            } else if (instrumentsSavedDate !== moment().format('YYYY-MM-DD-HH-mm')) {
-                return true 
-            } else {
-                return false
-            }
-        },
 
         removeLoadingMask () {
             if(document.getElementById('loading')) document.getElementById('loading').remove();

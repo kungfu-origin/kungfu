@@ -1,6 +1,5 @@
 import {
     buildTradingDataPipe,
-    buildInstrumentsPipe,
     buildMarketDataPipe,
     buildKungfuGlobalDataPipe,
 } from "__io/kungfu/tradingData";
@@ -42,20 +41,6 @@ buildTradingDataPipe('strategy').subscribe((data: any) => {
     })
 })
 
-
-buildInstrumentsPipe().subscribe((data: any) => {
-    //@ts-ignore
-    process.send({
-        type: "process:msg",
-        data: {
-            type: "DEAMON_INSTRUMENTS",
-            body: {
-                timestamp: new Date().getTime(),
-                data,
-            }
-        }
-    })
-})
 
 buildKungfuGlobalDataPipe().subscribe((data: any) => {
     //@ts-ignore
