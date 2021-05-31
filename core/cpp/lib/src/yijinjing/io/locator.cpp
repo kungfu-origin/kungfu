@@ -41,11 +41,12 @@ std::string locator::layout_dir(const location_ptr &location, es::layout layout)
   if (not fs::exists(dir)) {
     fs::create_directories(dir);
   }
-  return dir;
+  return dir.string();
 }
 
 std::string locator::layout_file(const location_ptr &location, es::layout layout, const std::string &name) const {
-  return fs::path(layout_dir(location, layout)) / fmt::format("{}.{}", name, es::get_layout_name(layout));
+  auto path = fs::path(layout_dir(location, layout)) / fmt::format("{}.{}", name, es::get_layout_name(layout));
+  return path.string();
 }
 
 std::string locator::default_to_system_db(const location_ptr &location, const std::string &name) const {
@@ -70,7 +71,7 @@ std::vector<uint32_t> locator::list_page_id(const location_ptr &location, uint32
   for (auto &it : fs::recursive_directory_iterator(dir)) {
     auto basename = it.path().stem();
     if (it.is_regular_file() and it.path().extension() == ".journal" and basename.stem() == dest_id_str) {
-      auto index = std::atoi(basename.extension().c_str() + 1);
+      auto index = std::atoi(basename.extension().string().c_str() + 1);
       result.push_back(index);
     }
   }

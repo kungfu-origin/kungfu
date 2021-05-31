@@ -9,7 +9,6 @@ on:
     branches:
       - release
       - 2.3
-      - filesystem
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a single job called "build"
@@ -23,7 +22,9 @@ jobs:
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
     - uses: actions/checkout@v2
     - name: Setup Node.js environment
-      uses: actions/setup-node@v1.4.4
+      uses: actions/setup-node@v2
+      with:
+        node-version: '12'
     - name: Setup python environment
       uses: actions/setup-python@v2
       with:
