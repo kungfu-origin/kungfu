@@ -58,20 +58,6 @@ const appDataSubject: any = new Subject();
             const assets = ensureLeaderData(ledgerData.Asset).map((item: AssetOriginData) => dealAsset(item));
             const pnl = ensureLeaderData(ledgerData.AssetSnapshot, 'update_time').map((item: AssetSnapshotOriginData) => dealSnapshot(item));
             const dailyAsset = ensureLeaderData(ledgerData.DailyAsset, 'trading_day').map((item: AssetSnapshotOriginData) => dealSnapshot(item));
-            // const instruments = ensureLeaderData(ledgerData.Instrument);
-            // const instrumentsAfterFilter = instruments
-            //     .filter((item: InstrumentOriginData) => {
-            //         //普通股票 期货 股票期权 基金 科创板股票 指数
-            //         if (item.instrument_type === 1) return true;
-            //         if (item.instrument_type === 2) return true;
-            //         if (item.instrument_type === 4) return true;
-            //         if (item.instrument_type === 5) return true;
-            //         if (item.instrument_type === 6) return true;
-            //         if (item.instrument_type === 7) return true;
-    
-            //         return false
-            //     });
-            // const instrumentsPipeData = resolveInstruments(instrumentsAfterFilter);
             const quotes = ensureLeaderData(ledgerData.Quote);
 
             const accountTradingDataPipeData = {

@@ -5,6 +5,6 @@ self.addEventListener('message', e => {
     const instrumentsResolved = resolveInstruments(instruments);
     self.postMessage({
         updateTime: new Date().getTime(),
-        instrumentsResolved
+        instruments: instrumentsResolved
     })
 })

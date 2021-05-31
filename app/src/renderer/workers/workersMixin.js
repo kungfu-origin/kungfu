@@ -38,18 +38,17 @@ export default {
 
             buildInstrumentsDataPipe().subscribe(data => {
                 const instruments = data['instruments'] || [];
-                console.log('instruments', instruments, '===')
 
                 if (!instruments || !instruments.length) {
                     localStorage.setItem('instrumentsSavedDate', '')
                     return;
                 }       
                 
-                if (this.getIfSaveInstruments(instruments || [])) {
+                if (this.getIfSaveInstruments(instruments)) {
                     if (!this.dealInstrumentController) {
                         this.dealInstrumentController = true;
                         Workers.dealInstruments.postMessage({
-                            instruments
+                            instruments: instruments
                         });
                     }
                 }
@@ -57,15 +56,12 @@ export default {
 
 
             Workers.dealInstruments.onmessage = debounce(function (event) {
-                console.log(event, '----')
+                const { instruments } = event.data || {};
+                localStorage.setItem('instrumentsSavedDate', moment().format('YYYY-MM-DD-HH-mm'))
+                localStorage.setItem('instruments', JSON.stringify(instruments || []))
+                this.oldInstruments = instruments || []; //refresh old instruments
                 this.dealInstrumentController = false;
             })
-
-            // localStorage.setItem('instrumentsSavedDate', moment().format('YYYY-MM-DD-HH-mm'))
-            // localStorage.setItem('instruments', JSON.stringify(instruments))
-            // this.oldInstruments = instruments; //refresh old instruments
-
-            
         },
 
         getIfSaveInstruments (newInstruments) {
