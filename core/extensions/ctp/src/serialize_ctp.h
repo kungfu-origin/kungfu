@@ -354,6 +354,30 @@ inline void to_json(nlohmann::json &j, const CThostFtdcInputOrderActionField &or
   j["OrderSysID"] = std::string(ori.OrderSysID);
 }
 
+inline void to_json(nlohmann::json &j, const CThostFtdcRspAuthenticateField& ori) {
+  j["BrokerID"] = std::string(ori.BrokerID);
+  j["UserID"] = std::string(ori.UserID);
+  j["UserProductInfo"] = std::string(ori.UserProductInfo);
+  j["AppID"] = std::string(ori.AppID);
+}
+
+inline void to_json(nlohmann::json &j, const CThostFtdcRspUserLoginField& ori) {
+  j["TradingDay"] = std::string(ori.TradingDay);
+  j["LoginTime"] = std::string(ori.LoginTime);
+  j["BrokerID"] = std::string(ori.BrokerID);
+  j["UserID"] = std::string(ori.UserID);
+  j["SystemName"] = std::string(ori.SystemName);
+  j["FrontID"] = ori.FrontID
+  j["SessionID"] = ori.SessionID;
+}
+
+inline void to_json(nlohmann::json &j, const CThostFtdcSettlementInfoConfirmField& ori) {
+  j["BrokerID"] = std::string(ori.BrokerID);
+  j["InvestorID"] = std::string(ori.InvestorID);
+  j["SettlementID"] = ori.SettlementID;
+  j["AccountID"] = std::string(ori.AccountID);
+}
+
 template <typename T> std::string to_string(const T &ori) {
   nlohmann::json j;
   to_json(j, ori);

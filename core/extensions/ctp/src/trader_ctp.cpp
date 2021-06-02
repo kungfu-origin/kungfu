@@ -135,7 +135,7 @@ void TraderCTP::OnRspAuthenticate(CThostFtdcRspAuthenticateField *pRspAuthentica
     return;
   }
 
-  SPDLOG_INFO("ATH RES pRspAuthenticateField{}, bIsLast {}", to_string(*pRspAuthenticateField), bIsLast);
+  SPDLOG_INFO("AUTH RES *pRspAuthenticateField {}, bIsLast {}", to_string(*pRspAuthenticateField), bIsLast);
 
   login();
 }
@@ -153,7 +153,7 @@ void TraderCTP::OnRspUserLogin(CThostFtdcRspUserLoginField *pRspUserLogin, CThos
 
   }
 
-  SPDLOG_INFO("LOGIN RES pRspUserLogin{}, bIsLast {}", to_string(*pRspUserLogin), bIsLast);
+  SPDLOG_INFO("LOGIN RES *pRspUserLogin {}, bIsLast {}", to_string(*pRspUserLogin), bIsLast);
 
   session_id_ = pRspUserLogin->SessionID;
   front_id_ = pRspUserLogin->FrontID;
@@ -177,7 +177,7 @@ void TraderCTP::OnRspSettlementInfoConfirm(CThostFtdcSettlementInfoConfirmField 
     return;
   }
 
-  SPDLOG_INFO("SETTLEMENT RES pSettlementInfoConfirm{}, bIsLast {}", to_string(*pSettlementInfoConfirm), bIsLast);
+  SPDLOG_INFO("SETTLEMENT RES *pSettlementInfoConfirm {}, bIsLast {}", to_string(*pSettlementInfoConfirm), bIsLast);
 
 }
 
@@ -281,6 +281,7 @@ void TraderCTP::OnRspQryTradingAccount(CThostFtdcTradingAccountField *pTradingAc
 
   if (pTradingAccount == nullptr) {
     SPDLOG_ERROR("ASSET RES pTradingAccount is nullptr");
+    return;
   }
 
   SPDLOG_INFO("ASSET RES *pTradingAccount {}, bIsLast {}", to_string(*pTradingAccount), bIsLast);
