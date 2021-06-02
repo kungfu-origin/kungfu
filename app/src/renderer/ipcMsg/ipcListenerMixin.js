@@ -58,8 +58,9 @@ export default {
             return getKungfuDataByDateRange(date)
                 .then(kungfuData => {
 
-                    if (kungfuData) {
-                        this.$message.warning("导出失败，请重试！")
+                    if (!kungfuData) {
+                        this.$message.warning("导出失败，请重试！");
+                        return;
                     }
 
                     this.exportAllTradingDataByDateDateRangeDialogLoading = false;
