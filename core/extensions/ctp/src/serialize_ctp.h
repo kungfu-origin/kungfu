@@ -367,7 +367,7 @@ inline void to_json(nlohmann::json &j, const CThostFtdcRspUserLoginField& ori) {
   j["BrokerID"] = std::string(ori.BrokerID);
   j["UserID"] = std::string(ori.UserID);
   j["SystemName"] = std::string(ori.SystemName);
-  j["FrontID"] = ori.FrontID
+  j["FrontID"] = ori.FrontID;
   j["SessionID"] = ori.SessionID;
 }
 
