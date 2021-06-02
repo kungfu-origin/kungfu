@@ -408,7 +408,6 @@ void TraderCTP::OnRspQryInstrument(CThostFtdcInstrumentField *pInstrument, CThos
     return;
   }
 
-  SPDLOG_INFO("INSTRUMENT RES *pInstrument {}, bIsLast {}", to_string(*pInstrument), bIsLast);
 
   auto writer = get_writer(location::PUBLIC);
   if (pInstrument->ProductClass == THOST_FTDC_PC_Futures) {
@@ -419,6 +418,7 @@ void TraderCTP::OnRspQryInstrument(CThostFtdcInstrumentField *pInstrument, CThos
   }
 
   if (bIsLast) {
+    SPDLOG_INFO("INSTRUMENT RES bIsLast {}", bIsLast);
     writer->mark(now(), InstrumentEnd::tag);
     SPDLOG_INFO("BrokerState::Ready");
     update_broker_state(BrokerState::Ready);
