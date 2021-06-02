@@ -63,7 +63,7 @@ export default {
 
                     const orders = ensureLedgerData(kungfuData.Order, 'update_time'); 
                     const ordersResolved = flatternOrderTrades(orders);
-                    const trades = ensureLedgerData(kungfuData.Order, 'trade_time');
+                    const trades = ensureLedgerData(kungfuData.Trade, 'trade_time');
                     const tradesResolved = flatternOrderTrades(trades);
                     const orderStat = ensureLedgerData(kungfuData.OrderStat, 'insert_time');
                     const positions = ensureLedgerData(kungfuData.Position);
