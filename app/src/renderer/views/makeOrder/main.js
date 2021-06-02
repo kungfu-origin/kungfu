@@ -4,7 +4,6 @@ import Vue from 'vue';
 import './setKungfuParamsOnWindow';
 import store from './store';
 import router from './routers';
-import * as utils from '__gUtils/busiUtils'
 import ElementUI from 'element-ui';
 import Components from '@/assets/components'
 import App from './App.vue';

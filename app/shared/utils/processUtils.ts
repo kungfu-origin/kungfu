@@ -187,6 +187,8 @@ export const startProcess = (options: Pm2Options, no_ext = false): Promise<objec
         "logDateFormat": "YYYY-MM-DD HH:mm:ss",
         "autorestart": options.autorestart || false,
         "maxRestarts": options.maxRestarts || 1,
+        "minUptime": 1000,
+        "restartDelay": 1000,
         "watch": options.watch || false,
         "force": options.force || false,
         "execMode": "fork",
