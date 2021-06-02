@@ -58,6 +58,10 @@ export default {
             return getKungfuDataByDateRange(date)
                 .then(kungfuData => {
 
+                    if (kungfuData) {
+                        this.$message.warning("导出失败，请重试！")
+                    }
+
                     this.exportAllTradingDataByDateDateRangeDialogLoading = false;
                     this.exportAllTradingDataByDateDateRangeDialogVisiblity = false;
 
@@ -72,8 +76,8 @@ export default {
                     dialog.showOpenDialog({
                         properties: ['openDirectory']
                     }, targetFolder => {
+                        if (!targetFolder || !targetFolder[0]) return;
                         targetFolder = targetFolder[0];
-                        if (!targetFolder) return;
                         const ordersFilename = path.join(targetFolder, `orders-${dateResolved}`);
                         const tradesFilename = path.join(targetFolder, `trades-${dateResolved}`);
                         const orderStatFilename = path.join(targetFolder, `orderStats-${dateResolved}`);
