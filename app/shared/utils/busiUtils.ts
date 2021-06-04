@@ -585,9 +585,8 @@ export const getDefaultRenderCellClass = (prop: string, item: any) => {
             else if (item.side === '卖') return 'green';
             break;
         case 'offset':
-            if (item.offset === '开仓') return 'red';
-            else if (item.offset === '平仓') return 'green';
-            break;
+            if (+item.offsetOrigin === 0) return 'red';
+            else return 'green';
         case 'statusName':
             if (+item.status === 4) return 'red';
             else if ([3, 5, 6].indexOf(+item.status) !== -1) return 'green';
