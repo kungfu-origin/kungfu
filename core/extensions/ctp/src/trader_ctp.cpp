@@ -343,7 +343,7 @@ void TraderCTP::OnRspQryInvestorPosition(CThostFtdcInvestorPositionField *pInves
   position.update_time = time::now_in_nano();
 
 
-  if (bIsLast) {
+  if (bIsLast && (long_position_map_.size() != 0 || short_position_map_.size() != 0)) {
     auto writer = get_writer(location::PUBLIC);
     for (const auto &kv : long_position_map_) {
       const auto &position = kv.second;
