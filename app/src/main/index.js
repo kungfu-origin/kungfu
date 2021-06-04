@@ -184,7 +184,7 @@ function setMenu() {
 			{ label: "打开功夫资源目录（KF_HOME）", click: () => shell.showItemInFolder(KF_HOME) },
 			{ label: "打开功夫安装目录", click: () => shell.showItemInFolder(app.getAppPath()) },			
 			{ label: "打开功夫基础配置DB", click: () => shell.showItemInFolder(path.join(BASE_DB_DIR, 'config.db')) },			
-			{ label: "浏览日志文件", click: () => openLogFile(mainWindow) },			
+			{ label: "浏览日志文件", accelerator: "CommandOrControl+L", click: () => openLogFile(mainWindow) },			
 		]
 	},{
 		label: '运行',
