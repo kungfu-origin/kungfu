@@ -150,7 +150,6 @@ void TraderCTP::OnRspUserLogin(CThostFtdcRspUserLoginField *pRspUserLogin, CThos
   if (pRspUserLogin == nullptr) {
     SPDLOG_ERROR("LOGIN RES pRspUserLogin is nullptr");
     return;
-
   }
 
   SPDLOG_INFO("LOGIN RES *pRspUserLogin {}, bIsLast {}", to_string(*pRspUserLogin), bIsLast);
@@ -303,45 +302,43 @@ void TraderCTP::OnRspQryInvestorPosition(CThostFtdcInvestorPositionField *pInves
   } 
   
   if (pInvestorPosition == nullptr) {
-    SPDLOG_ERROR("POS RES pInvestorPosition is nullptr");
-    return;
-  }
-
-  SPDLOG_INFO("POS RES *pInvestorPosition {}, bIsLast {}", to_string(*pInvestorPosition), bIsLast);
-  
-  auto direction = pInvestorPosition->PosiDirection == THOST_FTDC_PD_Long ? Direction::Long : Direction::Short;
-  auto &position_map = direction == Direction::Long ? long_position_map_ : short_position_map_;
-  if (position_map.find(pInvestorPosition->InstrumentID) == position_map.end()) {
-    Position position = {};
-    strncpy(position.trading_day, pInvestorPosition->TradingDay, DATE_LEN);
-    strncpy(position.instrument_id, pInvestorPosition->InstrumentID, INSTRUMENT_ID_LEN);
-    strncpy(position.exchange_id, pInvestorPosition->ExchangeID, EXCHANGE_ID_LEN);
-    strncpy(position.account_id, pInvestorPosition->InvestorID, ACCOUNT_ID_LEN);
-    strcpy(position.source_id, SOURCE_CTP);
-    position.holder_uid = get_io_device()->get_home()->uid;
-    position.direction = direction;
-    position.instrument_type = get_instrument_type(position.exchange_id, position.instrument_id);
-    position_map.emplace(pInvestorPosition->InstrumentID, position);
-  }
-  auto &position = position_map.at(pInvestorPosition->InstrumentID);
-  auto &inst_info = instrument_map_[pInvestorPosition->InstrumentID];
-  if (strcmp(pInvestorPosition->ExchangeID, EXCHANGE_SHFE) == 0) {
-    if (pInvestorPosition->YdPosition > 0 && pInvestorPosition->TodayPosition <= 0) {
-      position.yesterday_volume = pInvestorPosition->Position;
-    }
+    SPDLOG_ERROR("POS RES pInvestorPosition is nullptr, bIsLast {}", bIsLast);
   } else {
-    position.yesterday_volume = pInvestorPosition->Position - pInvestorPosition->TodayPosition;
+    SPDLOG_INFO("POS RES *pInvestorPosition {}, bIsLast {}", to_string(*pInvestorPosition), bIsLast);
+    
+    auto direction = pInvestorPosition->PosiDirection == THOST_FTDC_PD_Long ? Direction::Long : Direction::Short;
+    auto &position_map = direction == Direction::Long ? long_position_map_ : short_position_map_;
+    if (position_map.find(pInvestorPosition->InstrumentID) == position_map.end()) {
+      Position position = {};
+      strncpy(position.trading_day, pInvestorPosition->TradingDay, DATE_LEN);
+      strncpy(position.instrument_id, pInvestorPosition->InstrumentID, INSTRUMENT_ID_LEN);
+      strncpy(position.exchange_id, pInvestorPosition->ExchangeID, EXCHANGE_ID_LEN);
+      strncpy(position.account_id, pInvestorPosition->InvestorID, ACCOUNT_ID_LEN);
+      strcpy(position.source_id, SOURCE_CTP);
+      position.holder_uid = get_io_device()->get_home()->uid;
+      position.direction = direction;
+      position.instrument_type = get_instrument_type(position.exchange_id, position.instrument_id);
+      position_map.emplace(pInvestorPosition->InstrumentID, position);
+    }
+    auto &position = position_map.at(pInvestorPosition->InstrumentID);
+    auto &inst_info = instrument_map_[pInvestorPosition->InstrumentID];
+    if (strcmp(pInvestorPosition->ExchangeID, EXCHANGE_SHFE) == 0) {
+      if (pInvestorPosition->YdPosition > 0 && pInvestorPosition->TodayPosition <= 0) {
+        position.yesterday_volume = pInvestorPosition->Position;
+      }
+    } else {
+      position.yesterday_volume = pInvestorPosition->Position - pInvestorPosition->TodayPosition;
+    }
+    position.volume += pInvestorPosition->Position;
+    position.margin += pInvestorPosition->ExchangeMargin;
+    if (position.volume > 0 and inst_info.contract_multiplier > 0) {
+      double cost = inst_info.contract_multiplier * position.avg_open_price *
+                    double(position.volume - pInvestorPosition->Position);
+      position.avg_open_price =
+          (cost + pInvestorPosition->OpenCost) / double(inst_info.contract_multiplier * position.volume);
+    }
+    position.update_time = time::now_in_nano();
   }
-  position.volume += pInvestorPosition->Position;
-  position.margin += pInvestorPosition->ExchangeMargin;
-  if (position.volume > 0 and inst_info.contract_multiplier > 0) {
-    double cost = inst_info.contract_multiplier * position.avg_open_price *
-                  double(position.volume - pInvestorPosition->Position);
-    position.avg_open_price =
-        (cost + pInvestorPosition->OpenCost) / double(inst_info.contract_multiplier * position.volume);
-  }
-  position.update_time = time::now_in_nano();
-
 
   if (bIsLast && (long_position_map_.size() != 0 || short_position_map_.size() != 0)) {
     auto writer = get_writer(location::PUBLIC);
@@ -369,26 +366,25 @@ void TraderCTP::OnRspQryInvestorPositionDetail(CThostFtdcInvestorPositionDetailF
   } 
   
   if (pInvestorPositionDetail == nullptr) {
-    SPDLOG_ERROR("POS_DETAIL RES pInvestorPositionDetail is nullptr");
-    return;
-  }
+    SPDLOG_ERROR("POS_DETAIL RES pInvestorPositionDetail is nullptr, bIsLast {}", bIsLast);
+  } else {
+    SPDLOG_INFO("POS_DETAIL RES *pInvestorPositionDetail {}, bIsLast {}", to_string(*pInvestorPositionDetail), bIsLast);
 
-  SPDLOG_INFO("POS_DETAIL RES *pInvestorPositionDetail {}, bIsLast {}", to_string(*pInvestorPositionDetail), bIsLast);
-
-  auto writer = get_writer(location::PUBLIC);
-  if (pInvestorPositionDetail != nullptr) {
-    PositionDetail pos_detail = {};
-    from_ctp(*pInvestorPositionDetail, pos_detail);
-    pos_detail.update_time = time::now_in_nano();
-    if (inbound_trade_ids_.find(pInvestorPositionDetail->TradeID) != inbound_trade_ids_.end()) {
-      auto trade_id = inbound_trade_ids_.at(pInvestorPositionDetail->TradeID);
-      auto &trade = trades_.at(trade_id).data;
-      pos_detail.trade_id = trade.trade_id;
-      pos_detail.trade_time = trade.trade_time;
-    } else {
-      pos_detail.trade_id = writer->current_frame_uid();
+    auto writer = get_writer(location::PUBLIC);
+    if (pInvestorPositionDetail != nullptr) {
+      PositionDetail pos_detail = {};
+      from_ctp(*pInvestorPositionDetail, pos_detail);
+      pos_detail.update_time = time::now_in_nano();
+      if (inbound_trade_ids_.find(pInvestorPositionDetail->TradeID) != inbound_trade_ids_.end()) {
+        auto trade_id = inbound_trade_ids_.at(pInvestorPositionDetail->TradeID);
+        auto &trade = trades_.at(trade_id).data;
+        pos_detail.trade_id = trade.trade_id;
+        pos_detail.trade_time = trade.trade_time;
+      } else {
+        pos_detail.trade_id = writer->current_frame_uid();
+      }
+      writer->write(now(), pos_detail);
     }
-    writer->write(now(), pos_detail);
   }
 
   if (bIsLast) {
@@ -404,20 +400,19 @@ void TraderCTP::OnRspQryInstrument(CThostFtdcInstrumentField *pInstrument, CThos
   }
 
   if (pInstrument == nullptr) {
-    SPDLOG_ERROR("INSTRUMENT RES pInstrument is nullptr");
-    return;
-  }
-
-
-  auto writer = get_writer(location::PUBLIC);
-  if (pInstrument->ProductClass == THOST_FTDC_PC_Futures) {
-    Instrument &instrument = writer->open_data<Instrument>(0);
-    from_ctp(*pInstrument, instrument);
-    instrument_map_[pInstrument->InstrumentID] = instrument;
-    writer->close_data();
+    SPDLOG_ERROR("INSTRUMENT RES pInstrument is nullptr, bIsLast {}", bIsLast);
+  } else {
+    if (pInstrument->ProductClass == THOST_FTDC_PC_Futures) {
+      auto writer = get_writer(location::PUBLIC);
+      Instrument &instrument = writer->open_data<Instrument>(0);
+      from_ctp(*pInstrument, instrument);
+      instrument_map_[pInstrument->InstrumentID] = instrument;
+      writer->close_data();
+    }
   }
 
   if (bIsLast) {
+    auto writer = get_writer(location::PUBLIC);
     SPDLOG_INFO("INSTRUMENT RES bIsLast {}", bIsLast);
     writer->mark(now(), InstrumentEnd::tag);
     update_broker_state(BrokerState::Ready);
