@@ -369,7 +369,6 @@ void TraderCTP::OnRspQryInvestorPositionDetail(CThostFtdcInvestorPositionDetailF
     SPDLOG_ERROR("POS_DETAIL RES pInvestorPositionDetail is nullptr, bIsLast {}", bIsLast);
   } else {
     SPDLOG_INFO("POS_DETAIL RES *pInvestorPositionDetail {}, bIsLast {}", to_string(*pInvestorPositionDetail), bIsLast);
-
     auto writer = get_writer(location::PUBLIC);
     if (pInvestorPositionDetail != nullptr) {
       PositionDetail pos_detail = {};
@@ -412,8 +411,8 @@ void TraderCTP::OnRspQryInstrument(CThostFtdcInstrumentField *pInstrument, CThos
   }
 
   if (bIsLast) {
-    auto writer = get_writer(location::PUBLIC);
     SPDLOG_INFO("INSTRUMENT RES bIsLast {}", bIsLast);
+    auto writer = get_writer(location::PUBLIC);
     writer->mark(now(), InstrumentEnd::tag);
     update_broker_state(BrokerState::Ready);
     SPDLOG_INFO("BrokerState::Ready");
