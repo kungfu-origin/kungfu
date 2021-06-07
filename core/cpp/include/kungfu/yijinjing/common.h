@@ -71,9 +71,9 @@ FORWARD_DECLARE_PTR(location)
 FORWARD_DECLARE_PTR(locator)
 typedef std::unordered_map<uint32_t, location_ptr> location_map;
 
-class locator /*: public std::enable_shared_from_this<locator>*/ {
+class locator {
 public:
-  locator() = default;
+  locator();
 
   explicit locator(const std::string &root) : root_(root) {}
 

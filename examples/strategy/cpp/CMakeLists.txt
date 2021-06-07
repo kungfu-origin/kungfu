@@ -17,6 +17,19 @@ PROJECT(demo)
 
 ############################################################
 
+IF(APPLE)
+    SET(KF_SDK_HOME "/Applications/Kungfu.app/Contents/Resources/kfc")
+ENDIF()
+IF(UNIX AND NOT APPLE)
+    SET(KF_SDK_HOME "/opt/Kungfu/resources/kfc")
+ENDIF()
+IF (WIN32)
+    SET(KF_SDK_HOME "C:\\Program Files\\Kungfu\\resources\\kfc")
+ENDIF()
+MESSAGE("KF_SDK_HOME set to ${KF_SDK_HOME}")
+
+############################################################
+
 SET(CMAKE_CXX_STANDARD 17)
 
 if(UNIX)
@@ -31,6 +44,7 @@ if(UNIX AND NOT APPLE)
     SET(KFC_INSTALL_RPATH
             "$ORIGIN"
             "$ORIGIN/../../"
+            "${KF_SDK_HOME}"
             )
     SET(CMAKE_INSTALL_RPATH "${KFC_INSTALL_RPATH}")
 endif()
@@ -39,6 +53,7 @@ if(APPLE)
             "@executable_path/../Resources/kfc"
             "@loader_path"
             "@loader_path/../../"
+            "${KF_SDK_HOME}"
             )
     SET(CMAKE_INSTALL_RPATH "${KFC_INSTALL_RPATH}")
     SET(CMAKE_MACOSX_RPATH ON)
@@ -54,17 +69,6 @@ if(WIN32)
     ADD_COMPILE_DEFINITIONS(FMT_HEADER_ONLY)
 endif()
 ############################################################
-
-IF(APPLE)
-	SET(KF_SDK_HOME "/Applications/Kungfu.app/Contents/Resources/kfc")
-ENDIF()
-IF(UNIX AND NOT APPLE)
-	SET(KF_SDK_HOME "/opt/Kungfu/resources/kfc")
-ENDIF()
-IF (WIN32)
-    SET(KF_SDK_HOME "C:\\Program Files\\Kungfu\\resources\\kfc")
-ENDIF()
-MESSAGE("KF_SDK_HOME set to ${KF_SDK_HOME}")
 
 INCLUDE_DIRECTORIES("${KF_SDK_HOME}/include")
 LINK_DIRECTORIES("${KF_SDK_HOME}")
