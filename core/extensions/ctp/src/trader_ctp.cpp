@@ -118,9 +118,9 @@ void TraderCTP::OnFrontConnected() {
 }
 
 void TraderCTP::OnFrontDisconnected(int nReason) {
-  SPDLOG_ERROR("BrokerState::DisConnected");
-  update_broker_state(BrokerState::DisConnected);
   SPDLOG_ERROR("DISCONNECTED nReason[{}] {}", nReason, disconnected_reason(nReason));
+  update_broker_state(BrokerState::DisConnected);
+  SPDLOG_ERROR("BrokerState::DisConnected");
 }
 
 void TraderCTP::OnRspAuthenticate(CThostFtdcRspAuthenticateField *pRspAuthenticateField,
@@ -420,8 +420,8 @@ void TraderCTP::OnRspQryInstrument(CThostFtdcInstrumentField *pInstrument, CThos
   if (bIsLast) {
     SPDLOG_INFO("INSTRUMENT RES bIsLast {}", bIsLast);
     writer->mark(now(), InstrumentEnd::tag);
-    SPDLOG_INFO("BrokerState::Ready");
     update_broker_state(BrokerState::Ready);
+    SPDLOG_INFO("BrokerState::Ready");
   }
 }
 
