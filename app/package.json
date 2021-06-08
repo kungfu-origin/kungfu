@@ -154,6 +154,7 @@
     }
   },
   "dependencies": {
+    "@kungfu-trader/kungfu-core": "*",
     "electron-find": "^1.0.6",
     "fast-csv": "^2.5.0",
     "fkill": "^6.1.0",
@@ -161,7 +162,6 @@
     "gaze": "^1.1.3",
     "iconv-lite": "^0.6.2",
     "jschardet": "^2.3.0",
-    "kungfu-core": "*",
     "minimist": "^1.2.5",
     "moment": "^2.24.0",
     "pm2": "^4.5.6"

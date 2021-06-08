@@ -3,7 +3,7 @@ import { KF_RUNTIME_DIR, KF_CONFIG_PATH } from '__gConfig/pathConfig';
 import { setTimerPromiseTask } from '__gUtils/busiUtils';
 import { kungfu } from '__io/kungfu/kungfuUtils';
 import { toDecimal, ensureNum, ensureLedgerData, addTwoItemByKeyForReduce, avgTwoItemByKeyForReduce } from '__gUtils/busiUtils';
-import { OffsetName, OrderStatus, SideName, PosDirection, PriceType, HedgeFlag, InstrumentType, VolumeCondition, TimeCondition, allowShorted } from "kungfu-shared/config/tradingConfig";
+import { OffsetName, OrderStatus, SideName, PosDirection, PriceType, HedgeFlag, InstrumentType, VolumeCondition, TimeCondition, allowShorted } from "@kungfu-trader/kungfu-shared/config/tradingConfig";
 import { logger } from '__gUtils/logUtils';
 
 

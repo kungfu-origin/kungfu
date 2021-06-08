@@ -1,5 +1,5 @@
 import moment from 'moment';
-import { ExchangeIds, SideName, OffsetName } from 'kungfu-shared/config/tradingConfig';
+import { ExchangeIds, SideName, OffsetName } from '@kungfu-trader/kungfu-shared/config/tradingConfig';
 
 
 
