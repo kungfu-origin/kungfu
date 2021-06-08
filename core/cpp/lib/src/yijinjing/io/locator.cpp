@@ -40,7 +40,7 @@ std::string get_home() {
   auto root = fs::path(user_home) / "Library" / "Application Support";
 #elif __linux__
   auto user_home = std::getenv("HOME");
-  auto root = fs::path(xdg_config_home) / ".config";
+  auto root = fs::path(user_home) / ".config";
 #endif // _WINDOWS
   return (root / "kungfu" / "home" / "runtime").string();
 }
