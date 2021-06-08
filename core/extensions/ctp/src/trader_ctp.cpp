@@ -131,13 +131,14 @@ void TraderCTP::OnRspAuthenticate(CThostFtdcRspAuthenticateField *pRspAuthentica
   }
   
   if (pRspAuthenticateField == nullptr) {
-    SPDLOG_ERROR("AUTH RES pRspAuthenticateField is nullptr");
-    return;
+    SPDLOG_INFO("AUTH RES pRspAuthenticateField is nullptr, bIsLast {}", bIsLast);
+  } else {
+    SPDLOG_INFO("AUTH RES *pRspAuthenticateField {}, bIsLast {}", to_string(*pRspAuthenticateField), bIsLast);
   }
 
-  SPDLOG_INFO("AUTH RES *pRspAuthenticateField {}, bIsLast {}", to_string(*pRspAuthenticateField), bIsLast);
-
-  login();
+  if (bIsLast) {
+    login();
+  }
 }
 
 void TraderCTP::OnRspUserLogin(CThostFtdcRspUserLoginField *pRspUserLogin, CThostFtdcRspInfoField *pRspInfo,
@@ -148,17 +149,18 @@ void TraderCTP::OnRspUserLogin(CThostFtdcRspUserLoginField *pRspUserLogin, CThos
   }
 
   if (pRspUserLogin == nullptr) {
-    SPDLOG_ERROR("LOGIN RES pRspUserLogin is nullptr");
-    return;
+    SPDLOG_INFO("LOGIN RES pRspUserLogin is nullptr, bIsLast {}", bIsLast);
+  } else {
+    SPDLOG_INFO("LOGIN RES *pRspUserLogin {}, bIsLast {}", to_string(*pRspUserLogin), bIsLast);
+    session_id_ = pRspUserLogin->SessionID;
+    front_id_ = pRspUserLogin->FrontID;
+    order_ref_ = std::stoi(pRspUserLogin->MaxOrderRef);
+    trading_day_ = pRspUserLogin->TradingDay;
   }
 
-  SPDLOG_INFO("LOGIN RES *pRspUserLogin {}, bIsLast {}", to_string(*pRspUserLogin), bIsLast);
-
-  session_id_ = pRspUserLogin->SessionID;
-  front_id_ = pRspUserLogin->FrontID;
-  order_ref_ = std::stoi(pRspUserLogin->MaxOrderRef);
-  trading_day_ = pRspUserLogin->TradingDay;
-  req_settlement_confirm();
+  if (bIsLast) {
+    req_settlement_confirm();
+  }
 }
 
 void TraderCTP::OnRspUserLogout(CThostFtdcUserLogoutField *pUserLogout, CThostFtdcRspInfoField *pRspInfo,
@@ -172,12 +174,14 @@ void TraderCTP::OnRspSettlementInfoConfirm(CThostFtdcSettlementInfoConfirmField 
   }
 
   if (pSettlementInfoConfirm == nullptr) {
-    SPDLOG_ERROR("SETTLEMENT RES pSettlementInfoConfirm is nullptr");
-    return;
+    SPDLOG_INFO("SETTLEMENT RES pSettlementInfoConfirm is nullptr, bIsLast {}", bIsLast);
+  } else {
+    SPDLOG_INFO("SETTLEMENT RES *pSettlementInfoConfirm {}, bIsLast {}", to_string(*pSettlementInfoConfirm), bIsLast);
   }
 
-  SPDLOG_INFO("SETTLEMENT RES *pSettlementInfoConfirm {}, bIsLast {}", to_string(*pSettlementInfoConfirm), bIsLast);
-  req_qry_instrument();
+  if (bIsLast) {
+    req_qry_instrument();
+  }
 }
 
 void TraderCTP::OnRspOrderInsert(CThostFtdcInputOrderField *pInputOrder, CThostFtdcRspInfoField *pRspInfo,
@@ -279,12 +283,11 @@ void TraderCTP::OnRspQryTradingAccount(CThostFtdcTradingAccountField *pTradingAc
   }
 
   if (pTradingAccount == nullptr) {
-    SPDLOG_ERROR("ASSET RES pTradingAccount is nullptr");
+    SPDLOG_INFO("ASSET RES pTradingAccount is nullptr, bIsLast {}", bIsLast);
     return;
   }
 
   SPDLOG_INFO("ASSET RES *pTradingAccount {}, bIsLast {}", to_string(*pTradingAccount), bIsLast);
-
   auto writer = get_writer(location::PUBLIC);
   Asset account = {};
   strcpy(account.account_id, get_account_id().c_str());
@@ -302,10 +305,9 @@ void TraderCTP::OnRspQryInvestorPosition(CThostFtdcInvestorPositionField *pInves
   } 
   
   if (pInvestorPosition == nullptr) {
-    SPDLOG_ERROR("POS RES pInvestorPosition is nullptr, bIsLast {}", bIsLast);
+    SPDLOG_INFO("POS RES pInvestorPosition is nullptr, bIsLast {}", bIsLast);
   } else {
     SPDLOG_INFO("POS RES *pInvestorPosition {}, bIsLast {}", to_string(*pInvestorPosition), bIsLast);
-    
     auto direction = pInvestorPosition->PosiDirection == THOST_FTDC_PD_Long ? Direction::Long : Direction::Short;
     auto &position_map = direction == Direction::Long ? long_position_map_ : short_position_map_;
     if (position_map.find(pInvestorPosition->InstrumentID) == position_map.end()) {
@@ -366,7 +368,7 @@ void TraderCTP::OnRspQryInvestorPositionDetail(CThostFtdcInvestorPositionDetailF
   } 
   
   if (pInvestorPositionDetail == nullptr) {
-    SPDLOG_ERROR("POS_DETAIL RES pInvestorPositionDetail is nullptr, bIsLast {}", bIsLast);
+    SPDLOG_INFO("POS_DETAIL RES pInvestorPositionDetail is nullptr, bIsLast {}", bIsLast);
   } else {
     SPDLOG_INFO("POS_DETAIL RES *pInvestorPositionDetail {}, bIsLast {}", to_string(*pInvestorPositionDetail), bIsLast);
     auto writer = get_writer(location::PUBLIC);
@@ -399,15 +401,13 @@ void TraderCTP::OnRspQryInstrument(CThostFtdcInstrumentField *pInstrument, CThos
   }
 
   if (pInstrument == nullptr) {
-    SPDLOG_ERROR("INSTRUMENT RES pInstrument is nullptr, bIsLast {}", bIsLast);
-  } else {
-    if (pInstrument->ProductClass == THOST_FTDC_PC_Futures) {
+    SPDLOG_INFO("INSTRUMENT RES pInstrument is nullptr, bIsLast {}", bIsLast);
+  } else if (pInstrument->ProductClass == THOST_FTDC_PC_Futures) {
       auto writer = get_writer(location::PUBLIC);
       Instrument &instrument = writer->open_data<Instrument>(0);
       from_ctp(*pInstrument, instrument);
       instrument_map_[pInstrument->InstrumentID] = instrument;
       writer->close_data();
-    }
   }
 
   if (bIsLast) {
