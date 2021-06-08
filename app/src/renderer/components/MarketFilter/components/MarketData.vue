@@ -167,7 +167,7 @@
 import { mapGetters, mapState } from 'vuex';
 
 import { getIndexFromTargetTickers } from '__gUtils/busiUtils';
-import { ExchangeIds } from "kungfu-shared/config/tradingConfig";
+import { ExchangeIds } from "@kungfu-trader/kungfu-shared/config/tradingConfig";
 
 import tickerSetMixin from '@/components/MarketFilter/js/tickerSetMixin';
 import taskMixin from '@/components/Task/js/taskMixin';

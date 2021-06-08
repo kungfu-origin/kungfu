@@ -114,7 +114,7 @@ import { deleteProcess, buildProcessStatusWidthDetail } from '__gUtils/processUt
 import { removeFileFolder } from '__gUtils/fileUtils';
 import { buildProcessLogPath } from '__gConfig/pathConfig';
 import { switchTask } from '__io/actions/base';
-import { TaskTypeConfig } from 'kungfu-shared/config/tradingConfig';
+import { TaskTypeConfig } from '@kungfu-trader/kungfu-shared/config/tradingConfig';
 
 import baseMixin from '@/assets/mixins/baseMixin';
 import openLogMixin from '@/assets/mixins/openLogMixin';
