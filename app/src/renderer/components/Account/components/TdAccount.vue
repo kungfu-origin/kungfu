@@ -2,7 +2,7 @@
     <tr-dashboard title="">
         <div slot="dashboard-header">
             <tr-dashboard-header-item>
-                <tr-search-input v-model.trim="accountIdKey"></tr-search-input>
+                <tr-search-input v-model.trim="searchKeyword"></tr-search-input>
             </tr-dashboard-header-item>
             <tr-dashboard-header-item>
                 <el-button size="mini" @click="handleToggleKeepAllProcessRunning" :title="allProcessBtnTxt">{{ allProcessBtnTxt }}</el-button>
@@ -13,9 +13,9 @@
         </div>
         <div class="table-body accounts-table">
             <el-table
-                v-if="renderTable"
+                v-if="afterRender"
                 size="small"
-                :data="accountFilter"
+                :data="tableListAfterFilter"
                 height="100%"
                 @row-click="handleRowClick"
                 :row-class-name="handleSelectRow"
@@ -61,10 +61,10 @@
                     >
                     <template slot-scope="props">
                         <tr-status 
-                        v-if="$utils.ifProcessRunning(`td_${props.row.account_id}`, processStatus) && processStatus[`td_${props.row.account_id}`] === 'online'"
+                        v-if="ifProcessRunning(`td_${props.row.account_id}`, processStatus) && processStatus[`td_${props.row.account_id}`] === 'online'"
                         :value="(mdTdState[`td_${props.row.account_id}`] || {}).state"></tr-status>
                         <tr-status 
-                        v-else-if="$utils.ifProcessRunning(`td_${props.row.account_id}`, processStatus) && processStatus[`td_${props.row.account_id}`] === 'stopping'"
+                        v-else-if="ifProcessRunning(`td_${props.row.account_id}`, processStatus) && processStatus[`td_${props.row.account_id}`] === 'stopping'"
                         :value="processStatus[`td_${props.row.account_id}`]"></tr-status>
                         <tr-status v-else></tr-status>
                     </template>
@@ -77,7 +77,7 @@
                     <template slot-scope="props">
                         <span @click.stop>
                         <el-switch 
-                        :value="$utils.ifProcessRunning('td_' + props.row.account_id, processStatus)"
+                        :value="ifProcessRunning('td_' + props.row.account_id, processStatus)"
                         @change="handleTdSwitch($event, props.row)"></el-switch>
                         </span>
                     </template>
@@ -90,18 +90,10 @@
                     min-width="100"
                     >
                     <template slot-scope="props">
-                        <span 
-                        :class="{
-                            'tr-table-cell': true,
-                            'number': true,
-                            'nano': true,
-                            'color-red': calcCash(props.row, 'realizedPnl') > 0,
-                            'color-green': calcCash(props.row, 'realizedPnl') < 0,
-                        }"
-                        :key="`realized_pnl_${props.row.account_id}_${calcCash(props.row, 'realizedPnl')}`"                        
-                        >
-                        {{calcCash(props.row, 'realizedPnl') || '--'}}
-                        </span> 
+                        <tr-blink-num
+                        :theKey="`realized_pnl_${props.row.account_id}_${calcCash(props.row, 'realizedPnl')}`"                        
+                        :num="calcCash(props.row, 'realizedPnl') || '--'"
+                        ></tr-blink-num>
                     </template>
                 </el-table-column>
                 <el-table-column
@@ -112,18 +104,10 @@
                     min-width="110"
                     >
                     <template slot-scope="props">
-                        <span 
-                        :class="{
-                            'tr-table-cell': true,
-                            'number': true,
-                            'nano': true,
-                            'color-red': calcCash(props.row, 'unRealizedPnl') > 0,
-                            'color-green': calcCash(props.row, 'unRealizedPnl') < 0,
-                        }"
-                        :key="`unrealized_pnl_${props.row.account_id}_${calcCash(props.row, 'unRealizedPnl')}`"                        
-                        >
-                        {{calcCash(props.row, 'unRealizedPnl') || '--'}}
-                        </span> 
+                        <tr-blink-num
+                        :theKey="`unrealized_pnl_${props.row.account_id}_${calcCash(props.row, 'unRealizedPnl')}`"                        
+                        :num="calcCash(props.row, 'unRealizedPnl') || '--'"
+                        ></tr-blink-num>
                     </template>
                 </el-table-column>
                 <el-table-column
@@ -134,18 +118,10 @@
                     min-width="120"
                     >
                     <template slot-scope="props" >
-                        <span 
-                        :class="{
-                            'tr-table-cell': true,
-                            'number': true,
-                            'nano': true,
-                        }"
-                        :key="`marketValue_${props.row.account_id}_${calcCash(props.row, 'marketValue')}`"                        
-                        >
-                            <template>
-                                {{calcCash(props.row, 'marketValue') || '--'}}
-                            </template>  
-                        </span>          
+                        <tr-blink-num
+                        :theKey="`marketValue_${props.row.account_id}_${calcCash(props.row, 'marketValue')}`"                        
+                        :num="calcCash(props.row, 'marketValue') || '--'"
+                        ></tr-blink-num>         
                     </template>
                 </el-table-column>
                 <el-table-column
@@ -156,18 +132,10 @@
                     min-width="120"
                     >
                     <template slot-scope="props" >
-                        <span 
-                        :class="{
-                            'tr-table-cell': true,
-                            'number': true,
-                            'nano': true,
-                        }"
-                        :key="`margin_${props.row.account_id}_${calcCash(props.row, 'margin')}`"                        
-                        >
-                            <template>
-                                {{calcCash(props.row, 'margin') || '--'}}
-                            </template> 
-                        </span>          
+                        <tr-blink-num
+                        :theKey="`margin_${props.row.account_id}_${calcCash(props.row, 'margin')}`"                        
+                        :num="calcCash(props.row, 'margin') || '--'"
+                        ></tr-blink-num>         
                     </template>
                 </el-table-column>
                 <el-table-column
@@ -178,16 +146,10 @@
                     min-width="120"
                     >
                         <template slot-scope="props">
-                            <span
-                            :class="{
-                                'tr-table-cell': true,
-                                'number': true,
-                                'nano': true
-                            }"
-                            :key="`${props.row.account_id}_${calcCash(props.row, 'avail')}`"                        
-                            >
-                                {{calcCash(props.row, 'avail') || '--'}}                            
-                            </span>
+                            <tr-blink-num
+                            :theKey="`${props.row.account_id}_${calcCash(props.row, 'avail')}`"                        
+                            :num="calcCash(props.row, 'avail') || '--'"
+                            ></tr-blink-num>
                     </template>
                 </el-table-column>
                 <el-table-column
@@ -233,30 +195,26 @@ import { mapState } from 'vuex';
 import SetAccountDialog from './SetAccountDialog';
 import SetSourceDialog from './SetSourceDialog';
 
-import { debounce } from '__gUtils/busiUtils';
+import { ifProcessRunning, toDecimal } from '__gUtils/busiUtils';
 import { getTdList } from '__io/kungfu/account';
-import { TD_DIR } from '__gConfig/pathConfig';
-import { removeFileFolder } from "__gUtils/fileUtils";
+import { watcher } from '__io/kungfu/watcher';
 import { deleteTd, switchTd } from '__io/actions/account';
 import { loopToRunProcess } from '__gUtils/busiUtils';
-import { watcher } from '__io/kungfu/watcher';
 
+import baseMixin from '@/assets/mixins/baseMixin';
 import mdTdMixin from '../js/mdTdMixin';
-import openLogMixin from '@/assets/js/mixins/openLogMixin';
+import openLogMixin from '@/assets/mixins/openLogMixin';
 
-import path from 'path'
 export default {
     name: 'account',
 
-    mixins: [ mdTdMixin, openLogMixin ],
+    mixins: [ baseMixin, mdTdMixin, openLogMixin ],
 
     data() {
         this.tdmdType = 'td';
-
-        return {
-            accountIdKey: '',
-            accountIdSearchKeyDebounce: '',
-        }
+        this.searchFilterKey = 'account_id';
+        this.ifProcessRunning = ifProcessRunning;
+        return {}
     },
 
     components: {
@@ -277,16 +235,9 @@ export default {
             return this.currentAccount.account_id || ''
         },
 
-        //用来存放筛选完的列表
-        accountFilter() {
-            let accounts = []
-            if(!this.accountIdSearchKeyDebounce) return this.tdList;
-            return this.tdList.filter(a => (a.account_id.includes(this.accountIdSearchKeyDebounce)));
-        },
-
         allProcessRunning () {
              const notRunningList = this.tdList.filter(item => {
-                const isRunning = this.$utils.ifProcessRunning('td_' + item.account_id, this.processStatus)
+                const isRunning = ifProcessRunning('td_' + item.account_id, this.processStatus)
                 if (!isRunning) return true
                 else return false
             })
@@ -295,11 +246,11 @@ export default {
             return true
         },
     },
+
     watch: {
-        //防抖
-        accountIdKey: debounce(function (value) {
-            this.accountIdSearchKeyDebounce = value
-        }),
+        tdList (newTdList) {
+            this.tableList = newTdList
+        }
     },
 
     methods:{
@@ -309,7 +260,6 @@ export default {
             if(!this.judgeCondition(row)) return;
             const { account_id } = row
             //查看该账户下是否存在task中的td任务
-            const tdProcessId = `td_${account_id}`
             const accountId = account_id.toAccountId()
             this.$confirm(`删除账户${accountId}会删除所有相关信息，确认删除吗？`, '提示', {
                 confirmButtonText: '确 定',
@@ -349,19 +299,19 @@ export default {
         handleTdSwitch(value, account) {
             return switchTd(account, value).then(({ type, message }) => this.$message[type](message))
         },
-
+       
         switchAllProcess (targetStatus) {
             const promiseList = this.tdList
                 .filter(item => {
                     const id = item.account_id;
-                    const status = this.$utils.ifProcessRunning('td_' + item.account_id, this.processStatus)
+                    const status = ifProcessRunning('td_' + item.account_id, this.processStatus)
                     return status !== targetStatus
                 })
                 .map(item => {
                     return () => switchTd(item, targetStatus)
                 })
             
-            if (this.ifMasterLedgerRunning && watcher.isLive) {
+            if (this.ifMasterLedgerRunning && watcher.isLive()) {
                 return loopToRunProcess(promiseList)
             } else {
                 return Promise.resolve(false)
@@ -385,7 +335,7 @@ export default {
         judgeCondition(row) {
             const { account_id } = row
             //判断td是否开启，开启则无法删除
-            if(this.$utils.ifProcessRunning(`td_${account_id}`, this.processStatus)) {
+            if(ifProcessRunning(`td_${account_id}`, this.processStatus)) {
                 this.$message.warning('需先停止交易进程！')
                 return false
             }
@@ -394,13 +344,12 @@ export default {
 
         //是否为期货
         isFutureAccount(row) {
-            console.log(this.tdAccountSource)
             return (this.tdAccountSource[row.source_name] || {}).typeName == 'future'
         },
 
         //计算持仓盈亏
         calcCash(row, key){
-            return this.$utils.toDecimal((this.accountsAsset[row.account_id] || {})[key]) + ''
+            return toDecimal((this.accountsAsset[row.account_id] || {})[key]) + ''
         }
     }
 }

@@ -1,20 +1,11 @@
-/*
- * @Author: your name
- * @Date: 2020-04-24 16:36:28
- * @LastEditTime: 2020-05-28 17:12:25
- * @LastEditors: Please set LastEditors
- * @Description: In User Settings Edit
- * @FilePath: /kungfu/app/shared/utils/processUtils.ts
- */ 
+import fse from 'fs-extra';
 
 //@ts-ignore
 import * as taskkill from 'taskkill';
 
-import { KF_HOME, KUNGFU_ENGINE_PATH, KF_CONFIG_PATH, buildProcessLogPath } from '__gConfig/pathConfig';
+import { KF_HOME, KUNGFU_ENGINE_PATH, KF_CONFIG_PATH, APP_DIR, buildProcessLogPath } from '__gConfig/pathConfig';
 import { platform } from '__gConfig/platformConfig';
 import { logger } from '__gUtils/logUtils';
-import { readJsonSync } from '__gUtils/fileUtils';
-import { hackLaunchDaemon } from '__assets/hack';
 import { setTimerPromiseTask, delayMiliSeconds } from '__gUtils/busiUtils';
 import { getProcesses } from 'getprocesses';
 
@@ -23,7 +14,6 @@ const path = require('path');
 const numCPUs = require('os').cpus() ? require('os').cpus().length : 1;
 const fkill = require('fkill');
 const pm2 = require('pm2');
-pm2.Client.__proto__.launchDaemon = hackLaunchDaemon
 
 export const _pm2 = pm2;
 
@@ -92,7 +82,7 @@ export const killKfc = () => kfKill([kfc])
 
 export const killKungfu = () => kfKill(['kungfu'])
 
-export const killExtra = () => kfKill([kfc, 'pm2'])
+export const killExtra = () => kfKill([kfc, 'pm2', 'kungfuDaemon'])
 
 
 //=========================== pm2 manager =========================================
@@ -174,7 +164,7 @@ function getRocketParams(ifRocket: Boolean, considerCup = false) {
 }
 
 function buildArgs (args: string, considerCup = false): string {
-    const kfConfig: any = readJsonSync(KF_CONFIG_PATH) || {}
+    const kfConfig: any = fse.readJsonSync(KF_CONFIG_PATH) || {}
     const logLevel: string = ((kfConfig.log || {}).level) || '';
     const ifRocket = ((kfConfig.performance || {}).rocket) || false;
     const rocket = getRocketParams(ifRocket, considerCup);
@@ -195,12 +185,15 @@ export const startProcess = (options: Pm2Options, no_ext = false): Promise<objec
         "error": buildProcessLogPath(options.name),
         "mergeLogs": true,
         "logDateFormat": "YYYY-MM-DD HH:mm:ss",
-        "autorestart": false,
-        "maxRestarts": 1,
-        "watch": false,
-        "force": true,
+        "autorestart": options.autorestart || false,
+        "maxRestarts": options.maxRestarts || 1,
+        "minUptime": 1000,
+        "restartDelay": 1000,
+        "watch": options.watch || false,
+        "force": options.force || false,
         "execMode": "fork",
         "env": {
+            ...options.env,
             "KF_HOME": dealSpaceInPath(KF_HOME),
         },
         "killTimeout": 16000,
@@ -213,6 +206,7 @@ export const startProcess = (options: Pm2Options, no_ext = false): Promise<objec
             try {
                 pm2.start(optionsResolved, (err: any, apps: object): void => {
                     if (err) {
+                        console.error(err)
                         err = err.length ? err[0] : err;
                         logger.error('[startProcess]', JSON.stringify(optionsResolved), err)
                         reject(err);
@@ -294,6 +288,7 @@ export const stopProcess = (processName: string) => {
 
 //干掉守护进程
 export const killGodDaemon = () => {
+    logger.info('[Pm2 Kill GodDaemon]')
     return new Promise((resolve, reject) => {
         pm2Connect().then(() => {
             try {
@@ -335,6 +330,7 @@ export const startGetProcessStatus = (callback: Function) => {
 }
 
 async function pm2Delete (target: string): Promise<void> {
+    logger.info('[Pm2Delete] === ', target)
     return new Promise((resolve, reject) => {
         pm2Connect().then(() => {
             try{ 
@@ -360,14 +356,15 @@ async function pm2Delete (target: string): Promise<void> {
 
 export const startTask = (options: Pm2Options) => {    
     return startProcess({
-        script: 'index.js',
+        script: options.script || 'index.js',
         interpreter: process.execPath,
-        ...options
+        ...options,
+        force: true
     })
 }
 
 export const startStrategyProcess = async (name: string, strategyPath: string, pythonPath: string): Promise<object> => {
-    const kfConfig: any = readJsonSync(KF_CONFIG_PATH) || {}
+    const kfConfig: any = fse.readJsonSync(KF_CONFIG_PATH) || {}
     const ifRocket = ((kfConfig.performance || {}).rocket) || false;
     const logLevel: string = ((kfConfig.log || {}).level) || '';
     const rocket = getRocketParams(ifRocket, false)
@@ -434,6 +431,8 @@ export const startMd = (source: string): Promise<any> => {
     return startProcess({
         "name": `md_${source}`,
         "args": buildArgs(`md -s "${source}"`),
+        "maxRestarts": 3,
+        "autorestart": true,
     }).catch(err => logger.error('[startMd]', err))
 }
 
@@ -443,13 +442,15 @@ export const startTd = (accountId: string): Promise<any> => {
     return startProcess({
         "name": `td_${accountId}`,
         "args": buildArgs(`td -s "${source}" -a "${id}"`),
+        "maxRestarts": 3,
+        "autorestart": true,
     }).catch(err => logger.error('[startTd]', err))
 }
 
 //启动strategy
 export const startStrategy = (strategyId: string, strategyPath: string): Promise<any> => {
     strategyPath = dealSpaceInPath(strategyPath)
-    const kfSystemConfig: any = readJsonSync(KF_CONFIG_PATH)
+    const kfSystemConfig: any = fse.readJsonSync(KF_CONFIG_PATH)
     const ifLocalPython = (kfSystemConfig.strategy || {}).python || false;
     const pythonPath = (kfSystemConfig.strategy || {}).pythonPath || '';
 
@@ -479,6 +480,19 @@ export const startCustomProcess = (targetName: string, params: string): Promise<
     }).catch(err => logger.error(`[start${targetName}]`, err))
 }
 
+export const startDaemon = (): Promise<any> => {
+
+    return startProcess({
+        "name": "kungfuDaemon",
+        "args": "",
+        force: true,
+        watch: process.env.NODE_ENV === 'production' ? false : true,
+        script:  "daemon.js",
+        cwd: APP_DIR,
+        interpreter: process.execPath,
+    }).catch(err => logger.error('[startTd]', err))
+}
+
 
 // =============================== function ================================
 
@@ -493,29 +507,43 @@ function buildProcessStatus (pList: any[]): StringToStringObject {
     return processStatus
 }
 
-function buildProcessStatusWidthDetail (pList: any[]): StringToProcessStatusDetail {
-    let processStatus: any = {}
-        Object.freeze(pList).forEach(p => {
-            const { monit, pid, name, pm2_env } = p;
-            const status = pm2_env.status;
-            const created_at = pm2_env.created_at;
-            const cwd = pm2_env.cwd;
-            const pm_exec_path = (pm2_env.pm_exec_path || "").split('\/');
-            const script = pm2_env.script || pm_exec_path[pm_exec_path.length - 1]
-            const args = pm2_env.args;
+interface Pm2Detail {
+    status: string;
+    monit: boolean;
+    pid: number;
+    pm_id: number;
+    name: string;
+    created_at: string;
+    script: string;
+    cwd: string;
+    args: string[];
+}
 
-            processStatus[name] = {
-                status,
-                monit,
-                pid,
-                name,
-                created_at,
-                script,
-                cwd,
-                args
-            }
-        })
-        return processStatus
+export function buildProcessStatusWidthDetail (pList: any[]): StringToProcessStatusDetail {
+    let processStatus: StringToProcessStatusDetail = {};
+    Object.freeze(pList).forEach(p => {
+        const { monit, pid, name, pm2_env, pm_id } = p;
+        const status = pm2_env.status;
+        const created_at = pm2_env.created_at;
+        const cwd = pm2_env.cwd;
+        const pm_exec_path = (pm2_env.pm_exec_path || "").split('\/');
+        const script = pm2_env.script || pm_exec_path[pm_exec_path.length - 1]
+        const args = pm2_env.args;
+        
+        processStatus[name] = {
+            status,
+            monit,
+            pid,
+            pm_id,
+            name,
+            created_at,
+            script,
+            cwd,
+            args
+        }
+    })
+
+    return processStatus
 }
 
 //循环获取processStatus
@@ -531,10 +559,38 @@ function startGetProcessStatusByName (name: string, callback: Function) {
     return timer
 }
 
-const buildStartDatasetByDataSeriesIdOptions = (namespace: string, dataSeriesId: string): Pm2Options => {
-    return {
-        "name": namespace + dataSeriesId,
-        "args": ['data', 'get', '-n', dataSeriesId, '-s', 'kfa'].join(' ')
-    }
+export const sendDataToProcessIdByPm2 = (topic: string, pm2Id: number, processName: string, data: any): void => {
+    pm2.sendDataToProcessId({
+        type: 'process:msg',
+        data,
+        id: pm2Id,
+        topic: topic
+    }, (err: Error) => {
+        if (err) {
+            console.error(processName, err)
+        }
+    })
 }
 
+export const sendDataToDaemonByPm2 = (topic: string, data: any): Promise<any> => {
+    return getKungfuDaemonPmId()
+        .then(pmid => {
+            if (pmid === -1) {
+                return Promise.reject('KungfuDaemon not exsited！')
+            } else {
+                return pmid
+            }
+        })
+        .then((pmId: number): void => {
+            if (!pmId) return;
+            sendDataToProcessIdByPm2(topic, pmId, "kungfuDaemon", data)
+        })
+}
+
+function getKungfuDaemonPmId (): Promise<any> {
+    return listProcessStatus()
+        .then(({ processStatusWithDetail }) => {
+            const kungfuDaemonPrc: ProcessStatusDetail = processStatusWithDetail['kungfuDaemon'] || {};
+            return kungfuDaemonPrc.pm_id || -1;
+        })
+}

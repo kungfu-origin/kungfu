@@ -11,11 +11,6 @@
             color: $vi;
         }
     }
-    -moz-user-select:none;/*火狐*/
-    -webkit-user-select:none;/*webkit浏览器*/
-    -ms-user-select:none;/*IE10*/
-    -khtml-user-select:none;/*早期浏览器*/
-    user-select:none;
 }
 
 .mouse-over-del{
@@ -27,11 +22,6 @@
             color: $red;
         }
     }
-    -moz-user-select:none;/*火狐*/
-    -webkit-user-select:none;/*webkit浏览器*/
-    -ms-user-select:none;/*IE10*/
-    -khtml-user-select:none;/*早期浏览器*/
-    user-select:none;
 }
 
 .color-red{
@@ -43,6 +33,7 @@
 .color-blue{
     color:$blue;
 }
+
 .color-green{
     color:$green;
     i{
@@ -357,18 +348,17 @@ div
     vertical-align: bottom;
 }
 
-.user-select-none {
-    -moz-user-select:none !important; /*火狐*/
-    -webkit-user-select:none !important; /*webkit浏览器*/
-    -ms-user-select:none !important; /*IE10*/
-    -khtml-user-select:none !important; /*早期浏览器*/
-    user-select:none !important;
-}
-
-.flex-row.el-row {
+.auto-complete-instrument-ids__warp {
     display: flex;
+    justify-content: space-between;
+    padding-right: 16px;
+    box-sizing: border-box;
 
-    >.el-col {
-        flex: 1;
+    .auto-complete-instrument-id-item {
+
+        .ticker {
+            display: inline-block;
+            width: 50px;
+        }
     }
 }

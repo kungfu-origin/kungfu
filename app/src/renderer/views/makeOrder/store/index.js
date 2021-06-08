@@ -96,5 +96,12 @@ export default new Vuex.Store({
         setMdList ({ commit }, mdList) {
             commit('SET_MD_LIST', mdList)
         }
+    },
+
+    getters: {
+        
+        proMode () {
+            return false;
+        }
     }
 })

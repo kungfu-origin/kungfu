@@ -1,4 +1,3 @@
-import {toDecimal} from '__gUtils/busiUtils';
 export default {
     color: ['#53B9F8'],
     tooltip: {

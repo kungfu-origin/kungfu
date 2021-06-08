@@ -1,6 +1,6 @@
 {
   "name": "kungfu-cli",
-  "version": "2.3.0",
+  "version": "2.3.5",
   "description": "KungFu Trader Cli",
   "license": "Apache-2.0",
   "homepage": "https://github.com/taurusai/kungfu",
@@ -14,14 +14,14 @@
   },
   "main": "./dist/cli/index.js",
   "engines": {
-    "node": ">=10.15.0 <11.0.0"
+    "node": ">=12"
   },
   "scripts": {
     "postinstall": "cd ./src/assets/static/js/inquirer-path && yarn install && yarn compile",
     "clean": "rimraf ./dist/* ./build/*",
     "build": "node -v",
     "build-cli": "node ./.build/build.js && yarn run cp",
-    "build-win": " yarn run dist && pkg . -t=node10.17-win-x64 --output=build/ext/index",
+    "build-win": " yarn run dist && pkg . -t=node10.17-win-x64 --output=build/cli",
     "build-linux": " yarn run dist && pkg . -t=node10.17-linux-x64 --out-path=build/cli",
     "build-mac": " yarn run dist && pkg . -t=node10.17-macos-x64 --out-path=build/cli",
     "dev": "node .build/dev-cli.js",
@@ -74,7 +74,6 @@
     "babel-preset-stage-0": "^6.24.1",
     "babel-register": "^6.26.0",
     "babili-webpack-plugin": "^0.1.2",
-    "builder-util": "^21.2.0",
     "chai": "^4.2.0",
     "chai-as-promised": "^7.1.1",
     "chai-roughly": "^1.0.0",

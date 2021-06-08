@@ -52,7 +52,8 @@
         "from": "./resources",
         "to": "kungfu-resources",
         "filter": [
-          "config/*"
+          "config/*",
+          "key/*"
         ]
       },
       {
@@ -70,7 +71,7 @@
         ]
       }
     ],
-    "asar": true,
+    "asar": false, 
     "dmg": {
       "contents": [
         {

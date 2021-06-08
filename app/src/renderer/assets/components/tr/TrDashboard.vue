@@ -76,7 +76,7 @@ export default {
 .tr-dashboard-header{
     height: 36px;
     line-height: 36px;
-    padding: 0px 6px;
+    padding: 0px 6px 0 12px;
     overflow: hidden;
     box-sizing: border-box;
     display: flex;
@@ -86,7 +86,8 @@ export default {
         font-size: 12px;
         display: inline-block;
         float: none;
-        color: $icon;
+        color: #7d89b8;
+        font-weight: 500;
     }
     .header-item{
         display: inline-block;

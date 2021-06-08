@@ -104,7 +104,7 @@ protected:
 
   virtual void apply_buy(Book_ptr &book, const Trade &trade) {
     auto &position = book->get_position_for(trade);
-    if (position.volume + trade.volume > 0) {
+    if (position.volume + trade.volume > 0 && trade.price > 0) {
       position.avg_open_price = (position.avg_open_price * position.volume + trade.price * trade.volume) /
                                 (double)(position.volume + trade.volume);
     }

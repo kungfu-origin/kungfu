@@ -1,4 +1,4 @@
-import { mapState } from 'vuex';
+import { mapState, mapGetters } from 'vuex';
 
 import { kungfuCancelOrder, kungfuMakeOrder, kungfuSubscribeTicker } from '__io/kungfu/makeCancelOrder';
 import { decodeKungfuLocation } from '__io/kungfu/watcher';
@@ -19,6 +19,11 @@ export default {
             type: Object,
             default: () => ({})
         },
+
+        makeOrderByQuote: {
+            type: Object,
+            default: () => ({})
+        }
     },
 
     computed: {
@@ -27,13 +32,18 @@ export default {
             strategyList: state => state.STRATEGY.strategyList,
             tdList: state => state.ACCOUNT.tdList,
             accountsAsset: state => state.ACCOUNT.accountsAsset,
-            currentTicker: state => state.ACCOUNT.currentTicker || {}
+            currentTicker: state => state.ACCOUNT.currentTicker || {},
+            processStatus: state => state.BASE.processStatus || {}
         }),
+
+        ...mapGetters([
+            "proMode"
+        ]),
     },
 
     methods: {
         cancelOrder (moduleType, orderData, strategyId) {
-            const kungfuLocation = decodeKungfuLocation(orderData.source);
+            const kungfuLocation = decodeKungfuLocation(+orderData.source);
             const accountId = `${kungfuLocation.group}_${kungfuLocation.name}`;
             
             //撤单   
@@ -55,7 +65,15 @@ export default {
         },
 
         subscribeTicker (sourceName, exchangeId, ticker) {
-            return kungfuSubscribeTicker(sourceName, exchangeId, ticker)
+            if (checkAllMdProcess.call(this, [{ 
+                source: sourceName,
+                exchangeId,
+                instrumentId: ticker
+            }, this.processStatus])) {
+                return kungfuSubscribeTicker(sourceName, exchangeId, ticker)
+            } else {
+                return Promise.resolve(false)
+            }
         },
 
         init () {

@@ -3,21 +3,6 @@
 $size: 25px;
 $fontSize: 12px;
 
-.make-order-instrument-ids__warp {
-    display: flex;
-    justify-content: space-between;
-    padding-right: 16px;
-    box-sizing: border-box;
-
-    .make-order-instrument-id-item {
-
-        .ticker {
-            display: inline-block;
-            width: 50px;
-        }
-    }
-}
-
 .kf-make-order-window__body {
     padding: 0 6px 10px 10px;
     box-sizing: border-box;
@@ -126,6 +111,11 @@ $fontSize: 12px;
             word-break: break-word;
             word-wrap: unset;
             white-space: normal;
+
+            &.make-order-by-task-btn {
+                height: 120px;
+                margin-top: 6px;
+            }
         }
     }
 }

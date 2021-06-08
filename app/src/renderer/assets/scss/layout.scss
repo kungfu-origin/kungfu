@@ -151,28 +151,6 @@
 
 }
 
-.tr-table-cell{
-    display: inline-block;
-    width: 100%;
-    box-sizing: border-box;
-}
-
-.tr-table-cell.nano{
-    animation: nanoBlink 1.1s 1;
-}
-.tr-table-cell.nano.number.red{
-    animation: nanoRedBlink 1.1s 1;
-}
-.tr-table-cell.nano.number.green{
-    animation: nanoGreenBlink 1.1s 1;
-}
-.tr-table-cell.nano.number.color-red{
-    animation: nanoRedBlink 1.1s 1;
-}
-.tr-table-cell.nano.number.color-green{
-    animation: nanoGreenBlink 1.1s 1;
-}
-
 
 
 @keyframes nanoBlink {

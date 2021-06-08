@@ -18,6 +18,7 @@
 
 #include <csignal>
 #include <cstdarg>
+#include <filesystem>
 #include <rxcpp/rx.hpp>
 
 #include <kungfu/common.h>
@@ -72,28 +73,33 @@ typedef std::unordered_map<uint32_t, location_ptr> location_map;
 
 class locator {
 public:
-  locator() = default;
+  locator();
+
+  explicit locator(const std::string &root) : root_(root) {}
 
   virtual ~locator() = default;
 
-  [[nodiscard]] virtual bool has_env(const std::string &name) const = 0;
+  [[nodiscard]] virtual bool has_env(const std::string &name) const;
 
-  [[nodiscard]] virtual std::string get_env(const std::string &name) const = 0;
+  [[nodiscard]] virtual std::string get_env(const std::string &name) const;
 
-  [[nodiscard]] virtual std::string layout_dir(location_ptr location, longfist::enums::layout l) const = 0;
+  [[nodiscard]] virtual std::string layout_dir(const location_ptr &location, longfist::enums::layout layout) const;
 
-  [[nodiscard]] virtual std::string layout_file(location_ptr location, longfist::enums::layout l,
-                                                const std::string &name) const = 0;
+  [[nodiscard]] virtual std::string layout_file(const location_ptr &location, longfist::enums::layout layout,
+                                                const std::string &name) const;
 
-  [[nodiscard]] virtual std::string default_to_system_db(location_ptr location, const std::string &name) const = 0;
+  [[nodiscard]] virtual std::string default_to_system_db(const location_ptr &location, const std::string &name) const;
 
-  [[nodiscard]] virtual std::vector<uint32_t> list_page_id(location_ptr location, uint32_t dest_id) const = 0;
+  [[nodiscard]] virtual std::vector<uint32_t> list_page_id(const location_ptr &location, uint32_t dest_id) const;
 
   [[nodiscard]] virtual std::vector<location_ptr> list_locations(const std::string &category, const std::string &group,
                                                                  const std::string &name,
-                                                                 const std::string &mode) const = 0;
+                                                                 const std::string &mode) const;
 
-  [[nodiscard]] virtual std::vector<uint32_t> list_location_dest(location_ptr location) const = 0;
+  [[nodiscard]] virtual std::vector<uint32_t> list_location_dest(const location_ptr &location) const;
+
+private:
+  std::filesystem::path root_;
 };
 
 struct location : public std::enable_shared_from_this<location>, public longfist::types::Location {

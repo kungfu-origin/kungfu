@@ -1,9 +1,13 @@
 import fse from 'fs-extra';
+import iconv from 'iconv-lite';
+import jschardet from 'jschardet';
+import path from 'path';
 import readline from 'readline';
+
 import { EXTENSION_DIR } from '__gConfig/pathConfig';
 import { listDir } from '__gUtils/fileUtils';
+import { allowShorted } from "kungfu-shared/config/tradingConfig";
 
-const path = require("path");
 
 interface LogLineData {
     message: string;
@@ -32,9 +36,12 @@ interface SourceConfig {
     "config": {}
 }
 
-interface ExtensionJSON {
-    type: string,
-    config: SourceConfig
+interface DisplayConfig {
+    "type": string;
+    "align": string;
+    "label": string
+    "prop": string
+    "width": string
 }
 
 const KUNGFU_KEY_IN_PACKAGEJSON = 'kungfuConfig'
@@ -49,7 +56,9 @@ declare global {
 
     interface Array<T> {
         removeRepeat(): any;
-        kfForEach(cb: Function): any
+        kfForEach(cb: Function): any,
+        kfReverseForEach(cb: Function): any,
+        kfForEachAsync(cb: Function): any
     }
 }
 
@@ -87,11 +96,47 @@ Array.prototype.removeRepeat = function (): any {
 Array.prototype.kfForEach = function (cb: Function): any {
     if (!cb) return;
     const t = this;
-    let i = 0, len = t.length;
+    const len = t.length;
+    let i = 0;
+    
     while (i < len) {
-        cb.call(t, t[i], i)
-        i++
+        cb.call(t, t[i], i);
+        i++;
     }
+}
+
+Array.prototype.kfReverseForEach = function (cb: Function): any {
+    if (!cb) return;
+    const t = this;
+    let i = t.length;    
+    while (i--) {
+        cb.call(t, t[i], i);
+    }
+}
+
+Array.prototype.kfForEachAsync = kfForEachAsync;
+
+function setImmediateIter (list: Array<any>, i: number, len: number, cb: Function, fcb: Function) {
+    if (i < len) {
+        setImmediate(() => {
+            cb(list[i], i)
+            setImmediateIter(list, ++i, len, cb, fcb)
+        })
+    } else {
+        fcb()
+    } 
+}
+
+function kfForEachAsync (cb: Function) {
+    //@ts-ignore
+    const t = this;
+    const len = t.length;
+    return new Promise(resolve => {
+        setImmediateIter(t, 0, len, cb, () => {
+            resolve(true)
+        })
+    })
+   
 }
 
 export const delayMiliSeconds = (miliSeconds: number): Promise<void> => {
@@ -113,6 +158,7 @@ export const deepClone = <T>(obj: T): T => {
 //(数据，保留位数，结果乘几个10，类型)
 export const toDecimal = (num = 0, digit = 2, multiply = 0, type = 'round'): string => {
     if (num === null) num = 0;
+    if (num.toString() === "") return '';
     if (isNaN(num)) return ''; //如果为转换后为NaN,返回空
     //如果存在科学计数法的数据则返回不做处理
     if (`${num}`.includes('e')) return new Number(num).toExponential(2)
@@ -141,9 +187,8 @@ export const debounce = (fn: Function, interval = 300): Function => {
         const args: any = arguments;
         timeout && clearTimeout(timeout);
         timeout = null;
+        fn.apply(t, args);
         timeout = setTimeout(() => {
-            if(!timeout) return;
-            fn.apply(t, args);
             timeout && clearTimeout(timeout);
             timeout = null;
         }, interval);
@@ -153,12 +198,12 @@ export const debounce = (fn: Function, interval = 300): Function => {
 export const throttle = (fn: Function, interval = 300): Function => {
     let timer: NodeJS.Timer | null;
     return function(){
-        if(timer) return 
+        if (timer) return;
         //@ts-ignore
         const t: any = this;
         const args: any = arguments;
+        fn.apply(t, args);
         timer = setTimeout(() => {
-            fn.apply(t, args);
             timer && clearTimeout(timer)
             timer = null
         }, interval)
@@ -247,9 +292,9 @@ export const openVueWin = (htmlPath: string, routerPath: string, electronRemote:
  * 启动任务，利用electron多进程
  * @param  {} taskPath
  */
-export const buildTask = (taskPath: string, electronRemote: any, debugOptions = { width: 0, height: 0, show: false }) => {
+export const openPage = (taskPath: string, electronRemote: any, debugOptions = { width: 0, height: 0, show: false }) => {
     
-    const taskFullPath = `file://${path.join(__resources, 'tasks', taskPath + '.html')}`;
+    const taskPathResolved = `file://${path.join(__resources, 'pages', taskPath + '.html')}`;
     const BrowserWindow: any = electronRemote.BrowserWindow;
     const currentWindow: any = electronRemote.getCurrentWindow();
     
@@ -263,7 +308,7 @@ export const buildTask = (taskPath: string, electronRemote: any, debugOptions = 
 		    backgroundColor: '#161B2E',
         })
 
-        win.webContents.loadURL(taskFullPath)
+        win.webContents.loadURL(taskPathResolved)
         win.webContents.on('did-finish-load', () => { 
             if(!currentWindow || Object.keys(currentWindow).length == 0 ) {
                 reject(new Error('当前页面没有聚焦！'))
@@ -294,11 +339,24 @@ export const ifProcessRunning = (processId: string, processStatus: any): boolean
     return processStatus[processId] === 'online' || processStatus[processId] === 'stopping'
 }
 
+export const getMemCpu = (processId: string, processStatusWithDetail: any, type: string) => {
+    const processData = processStatusWithDetail[processId] || {};
+    const monit = processData.monit || {};    
+    if (type === 'cpu') {
+        return monit.cpu !== undefined ? Number(monit.cpu).toFixed(1) + '%' : '--';
+    } else if (type === 'memory') {
+        return monit.memory !== undefined ? Number(monit.memory / 1000000).toFixed(0) + "M" : '--';
+    } else {
+        return '--'
+    }
+}
+
 /**
  * 加法
  * @param  {Array} list
  */
 export const sum = (list: number[]): number => {
+    if (!list.length) return 0
     return list.reduce((accumlator, a) => (accumlator + +a))
 }
 
@@ -376,76 +434,10 @@ export const dealLogMessage = (line: string, searchKeyword?: string):any => {
     })
 }
 
-/**
- * 建立固定条数的list数据结构
- * @param  {number} num
- */
-
-function buildListByLineNum(num: number): any {
-    class ListByNum {
-        list: any[];
-        len: number;
-        num: number;
-        constructor(n: number) {
-            this.list = [];
-            this.len = 0;
-            this.num = n;
-        }
-        insert(item: object): void {
-            const t = this;
-            if(t.len >= t.num) t.list.shift();
-            else t.len++
-            t.list.push(item)
-        }
-    }
-    return new ListByNum(num)
-}
-
-/**
- * 通过文件获取log
- * @param  {path} logPath
- * @param  {string} searchKeyword
- */
-export const getLog = (logPath: string, searchKeyword?: string, dealLogMessageMethod = dealLogMessage): Promise<any> => {
-    const numList: NumList = buildListByLineNum(666);    
-    let logId: number = 0;            
-    return new Promise((resolve, reject) => {
-        fse.stat(logPath, (err: Error, stats: any) => {
-            if(err){
-                reject(err)
-                return;
-            }
-
-            const lineReader = readline.createInterface({
-                input: fse.createReadStream(logPath, {
-                    start: 0
-                })
-            })
-
-            lineReader.on('line', line => {
-                const messageData = dealLogMessageMethod(line, searchKeyword);
-
-                if(!messageData) return;
-                messageData.kfForEach((msg: LogMessageData): void => {
-                    if(!msg) return;
-                    logId++
-                    numList.insert({
-                        ...msg,
-                        id: logId
-                    })
-                })
-            })
-
-            lineReader.on('close', () => {
-                resolve(numList)
-            })
-        })
-    })
-}
-
 export const getExtensions = async (extDir: string): Promise<any> => {
+    if (!fse.existsSync(extDir)) return [];
     const files = await listDir(extDir);
-    const filesResolved = files.map((fp: string) => path.join(extDir, fp))
+    const filesResolved = (files || []).map((fp: string) => path.join(extDir, fp))
     const statFiles = await Promise.all(filesResolved.map((fp: string) => fse.stat(fp)))
     
     const afterFilterFiles = filesResolved.filter((fp: string, index: number) => {
@@ -478,14 +470,20 @@ export const getExtensionConfigs = async (extDir: string): Promise<any> => {
                 if(kungfuConfig) {
                     const type: string = kungfuConfig.type;
                     const uniKey: string | Array<string>= kungfuConfig.uniKey;
-                    const config: SourceConfig = kungfuConfig.config
+                    const subType: string = kungfuConfig.subType;
+                    const config: SourceConfig = kungfuConfig.config;
+                    const displayMode: string = kungfuConfig.displayMode || '';
+                    const displayConfig: DisplayConfig = kungfuConfig.displayConfig || {} 
                     return  {
                         type,
                         config,
                         uniKey,
+                        subType, 
                         key: kungfuConfig.key,
                         name: kungfuConfig.name,
-                        packageJSONPath: packageJSONPaths[index]
+                        packageJSONPath: packageJSONPaths[index],
+                        displayConfig,
+                        displayMode
                     }
                 }
             })
@@ -557,3 +555,217 @@ export const findTargetFromArray = ( list: any[], targetKey: string, targetValue
     }
     return null
 }
+
+export const getIndexFromTargetTickers = (tickerList: TickerInTickerSet[], ticker: TickerInTickerSet) => {
+    return tickerList.findIndex(item => {
+        if (item.exchangeId === ticker.exchangeId) {
+            if (item.instrumentId === ticker.instrumentId) {
+                return true;
+            }
+        }
+        return false;
+    })
+}  
+
+export const ensureNum = (num: number | bigint | string) => {
+    num = +(num.toString());
+    if (Number.isNaN(num)) return 0
+    if (!Number.isFinite(num)) return 0
+    if (num === 1.7976931348623157e+308) return 0
+    return +num
+}
+
+export const getDefaultRenderCellClass = (prop: string, item: any) => {
+    switch (prop) {
+        case 'selected':
+            if (item.selected === '✓') return 'green';
+            break;
+        case 'side':
+            if (item.side === '买') return 'red';
+            else if (item.side === '卖') return 'green';
+            break;
+        case 'offset':
+            if (+item.offsetOrigin === 0) return 'red';
+            else return 'green';
+        case 'statusName':
+            if (+item.status === 4) return 'red';
+            else if ([3, 5, 6].indexOf(+item.status) !== -1) return 'green';
+            else return 'gray';
+        case 'direction':
+            if (item.direction === '多') return 'red';
+            else if (item.direction === '空') return 'green';
+            break;
+        case 'clientId':
+        case 'accountId':
+            if ((item.clientId || '').toLowerCase().includes('手动')) return 'yellow';
+            if ((item.clientId || '').toLowerCase().includes('任务')) return 'blue';
+            break;
+    }
+
+    return ''
+}
+
+
+export function checkAllMdProcess (tickers: TickerInTickerSet[], processStatus: StringToStringObject) {
+    let mds: any = {};
+    tickers.forEach(item => {
+        mds[item.source] = true;
+    })
+
+    const unrunningSources = Object.keys(mds || {}).filter(source => {
+        const processId = `md_${source}`;
+        if (!ifProcessRunning(processId, processStatus)) {
+            return true
+        } else {
+            return false
+        }
+    })
+
+    if (unrunningSources.length) {
+        // @ts-ignore
+        this.$message.warning(`${unrunningSources.join(', ')} 行情进行未开启!`)
+        return false
+    } else {
+        return true
+    }
+}
+
+export function decodeBuffer (name: string[]) {
+    name = name.filter(n => !!n);
+    //@ts-ignore
+    const bufferFrom = Buffer.from(name);
+    return isBufferGBK(bufferFrom) ? iconv.decode(bufferFrom, 'gbk') : iconv.decode(bufferFrom, 'utf8')
+}
+
+export function isBufferGBK (bufferFrom: Buffer) {
+    return jschardet.detect(bufferFrom).encoding !== 'UTF-8'
+}
+
+export const resolveInstruments = (instruments: InstrumentOriginData[]) => {
+    return (instruments || []).map(item => {
+        const { instrument_id, product_id, exchange_id } = item;
+        const instrumentName = decodeBuffer(product_id)
+        return {
+            instrument_id,
+            instrument_name: instrumentName,
+            exchange_id,
+            id: `${instrument_id}${instrumentName}${exchange_id}`.toLowerCase()
+        }
+
+    })
+}
+
+export function getLog(logPath: string, searchKeyword: string, dealMessageFunc: Function){
+    const numList = buildListByLineNum(1000000000);    
+    let logId = 0;            
+    return new Promise((resolve, reject) => {
+        fse.stat(logPath, (err: Error) => {
+            if(err){
+                reject(err)
+                return;
+            }
+
+            const lineReader = readline.createInterface({
+                input: fse.createReadStream(logPath, {
+                    start: 0
+                })
+            })
+
+            lineReader.on('line', line => {
+                const messageData = dealMessageFunc(line, searchKeyword)
+                if(!messageData || !messageData.length) return;
+                messageData.forEach((msg: any) => {
+                    if(!msg) return;
+                    logId++
+                    numList.insert({
+                        ...msg,
+                        id: logId
+                    })
+                })
+            })
+
+            lineReader.on('close', () => {
+                resolve(numList)
+            })
+        })
+    })
+}
+
+//建立固定条数的list数据结构
+function buildListByLineNum(num: number){
+    function ListByNum(n: number){
+        //@ts-ignore
+        this.list = [];
+        //@ts-ignore
+        this.len = 0;
+        //@ts-ignore
+        this.num = n;
+    }
+
+    ListByNum.prototype.insert = function(item: any){
+        if(this.len >= this.num) this.list.shift();
+        else this.len++
+        this.list.push(item)
+    }
+
+    //@ts-ignore
+    return new ListByNum(num)
+}
+
+export function ensureLedgerData (data: any, key = '') {
+    if (!key) {
+        return data ? data.list() : []
+    }
+
+    return data ? data.sort(key) : []
+}
+
+export const originOrderTradesFilterByDirection = (direction: number, offset: number, side: number, instrumentType: number) => {
+    if (!allowShorted(+instrumentType)) {
+        return true;
+    }
+
+    // long
+    if (+direction === 0) {
+        if (+offset === 0) {
+            if (+side === 0) {
+                return true
+            }
+        } else {
+            if (+side === 1) {
+                return true
+            }
+        }
+    } else { //short
+        if (+offset === 0) {
+            if (+side === 1) {
+                return true;
+            }
+        } else {
+            if (+side === 0) {
+                return true;
+            }
+        }
+    } 
+
+    return false;
+}
+
+export const buildDictFromArray = (list: any[], key: string) => {
+    let data: { [prop: string]: any } = {};
+    const keys: string[] = key.split(",");
+    list.kfForEach((item: any) => {
+        const key: string = keys.map((k: string): string => (item[k] || "").toString()).join('_');
+        data[key] = item;
+    })
+    return data;
+}
+
+export const addTwoItemByKeyForReduce = (item1: any, item2: any, key: string) => {
+    return (+item1[key] || 0) + (+item2[key] || 0);
+}
+
+export const avgTwoItemByKeyForReduce = (item1: any, item2: any, key: string) => {
+    return addTwoItemByKeyForReduce(item1, item2, key) / 2;
+}
+

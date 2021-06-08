@@ -4,6 +4,7 @@ import TrNoData from './tr/TrNoData';
 import TableHeader from './tr/TableHeader';
 import TableHeaderItem from './tr/TableHeaderItem';
 import TrStatus from './tr/TrStatus';
+import TrBlinkNum from './tr/TrBlinkNum';
 import TrTabTop from './tr/TrTabTop.vue';
 import TrTabTopItem from './tr/TrTabTopItem.vue';
 import TrFooterItem from './tr/TrFooterIterm.vue';
@@ -15,13 +16,14 @@ import TrTable from './tr/TrTable.vue';
 import TrSearchInput from './tr/TrSearchInput.vue';
 import TrSettingDashboard from './tr/TrSettingDashboard.vue';
 
-import { buildTask } from '__gUtils/busiUtils';
+import { openPage } from '__gUtils/busiUtils';
 
 const components = [
     TrNoData,
     TableHeader,
     TableHeaderItem,
     TrStatus,
+    TrBlinkNum,
     TrTabTop,
     TrTabTopItem,
     TrFooterItem,
@@ -57,7 +59,7 @@ const saveFile = ({
 
 //显示log
 const showLog = (logPath) => {
-    buildTask(
+    openPage(
         'showLog', 
         remote,
         {
@@ -89,7 +91,7 @@ export default function (Vue) {
             Vue.prototype.$notify({
                 title: '错误',
                 message: message,
-                position: "bottom-right",
+                position: "top-right",
                 type: 'error',
                 duration: duration === 0 ? 0 : 4500
             })
@@ -98,7 +100,7 @@ export default function (Vue) {
             Vue.prototype.$notify({
                 title: '警告',
                 message: message,
-                position: "bottom-right",
+                position: "top-right",
                 type: 'warning'
             })
         },
@@ -106,7 +108,7 @@ export default function (Vue) {
             Vue.prototype.$notify({
                 title: '成功',
                 message: message,
-                position: "bottom-right",
+                position: "top-right",
                 type: 'success'
             })
         },
@@ -114,7 +116,7 @@ export default function (Vue) {
             Vue.prototype.$notify({
                 title: '启动中',
                 message: message,
-                position: "bottom-right",
+                position: "top-right",
                 type: 'info'
             })
         },
@@ -122,7 +124,7 @@ export default function (Vue) {
             Vue.prototype.$notify({
                 title: '消息',
                 message: message,
-                position: "bottom-right",
+                position: "top-right",
                 type: 'info'
             })
         }

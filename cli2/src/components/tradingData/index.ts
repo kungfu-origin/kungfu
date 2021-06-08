@@ -3,6 +3,7 @@ import orderTable from '@/assets/components/OrderTable';
 import tradeTable from '@/assets/components/TradeTable';
 import Dashboard from '@/assets/components/Dashboard';
 import MessageBox from '@/assets/components/MessageBox';
+import Loading from '@/assets/components/Loading';
 
 import { parseToString, TABLE_BASE_OPTIONS, DEFAULT_PADDING, dealNum } from '@/assets/scripts/utils';
 import { tradingDataObservale } from '@/assets/scripts/actions/tradingDataActions';
@@ -187,6 +188,11 @@ class TradingDataDashboard extends Dashboard {
         const t = this;
         t.boards.message = MessageBox(t.screen);
     }
+
+    initLoader() {
+        const t = this;
+        t.boards.loader = Loading(t.screen)
+    }
 	
 	bindEvent() {
 		const t = this;
@@ -206,7 +212,7 @@ class TradingDataDashboard extends Dashboard {
 
 		t.boards.processTable.key(['enter'], () => {
 			const selectedIndex: number = t.boards.processTable.selected;
-            switchProcess(t.globalData.processList[selectedIndex], t.boards.message)
+            switchProcess(t.globalData.processList[selectedIndex], t.boards.message, t.boards.loader)
 		});
 		
 		t.boards.cancelBtn.on('press', () => {
@@ -215,10 +221,10 @@ class TradingDataDashboard extends Dashboard {
 
 			if (this.type === 'account') {
 				kungfuCancelAllOrders(aliveOrders)
-					.then(() => t.boards.message.log(`Cancel all orders signal sending`, 2))
+					.then(() => t.boards.message.log(`Cancel all orders signal sending`, 3))
 			} else if (this.type === 'strategy') {
 				kungfuCancelAllOrders(aliveOrders, this.targetId)
-					.then(() => t.boards.message.log(`Cancel all orders signal sending`, 2))
+					.then(() => t.boards.message.log(`Cancel all orders signal sending`, 3))
 			}
 		})
 	}

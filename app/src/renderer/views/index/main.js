@@ -5,26 +5,25 @@ import Vue from 'vue';
 import './setKungfuParamsOnWindow';
 import store from '@/store';
 import router from './routers';
-import * as utils from '__gUtils/busiUtils'
+import * as utils from '__gUtils/busiUtils';
+import { removeJournal } from '__gUtils/fileUtils';
+import { KF_HOME } from '__gConfig/pathConfig';
+import { watcher } from '__io/kungfu/watcher';
 import ElementUI from 'element-ui';
-import Components from '@/assets/components'
-import { remote } from 'electron'
+import Components from '@/assets/components';
 
 import App from './App.vue';
 import '@/assets/iconfont/iconfont.js';
 import '@/assets/iconfont/iconfont.css';
 import '@/assets/scss/makeOrder.scss';
+import moment from 'moment';
 
 Vue.use(ElementUI)
+Vue.use(Components)
 
 Vue.config.productionTip = false
 Vue.store = Vue.prototype.$store = store
-Vue.utils = Vue.prototype.$utils = utils
-
 Vue.bus = Vue.prototype.$bus = new Vue();
-
-//tr 组件
-Vue.use(Components)
 
 
 new Vue({
@@ -34,10 +33,14 @@ new Vue({
 }).$mount('#app', true)
 
 
-const { startGetProcessStatus, startMaster, startLedger, startArchiveMakeTask, _pm2 } = require('__gUtils/processUtils');
+const { startGetProcessStatus, startMaster, startLedger, startDaemon, startArchiveMakeTask, _pm2 } = require('__gUtils/processUtils');
 
-startArchiveMakeTask((archiveStatus) => {
-    window.archiveStatus = archiveStatus
+
+beforeAll()
+.then(() => {
+    return startArchiveMakeTask((archiveStatus) => {
+        window.archiveStatus = archiveStatus
+    })
 })
 .then(() => startMaster(false))
 .catch(err => console.error(err.message))
@@ -51,18 +54,39 @@ startArchiveMakeTask((archiveStatus) => {
     utils.delayMiliSeconds(1000)
         .then(() => startLedger(false))
         .catch(err => console.error(err.message))
+
+    
+    //保证ui watcher已经启动
+    let timer = setInterval(() => {
+        if (watcher.isLive() && watcher.isStarted() && watcher.isUsable()) {
+            utils.delayMiliSeconds(1000)
+                .then(() => startDaemon())
+                .catch(err => console.error(err.message))
+            clearInterval(timer);
+        }
+
+    }, 100)
+
 })
 
 window.ELEC_WIN_MAP = new Set();
-
-const currentWin = remote.getCurrentWindow()
-currentWin.on('close', (e) => {
-    Array.from(window.ELEC_WIN_MAP).forEach(winId => {
-        const win = remote.BrowserWindow.fromId(winId)
-        win && win.close && win.close()
-    })
-})
-
 window.pm2 = _pm2;
 
 
+function beforeAll () {
+    if (process.env.NODE_ENV !== 'development') {
+        const clearJournalDate = localStorage.getItem('clearJournalDate');
+        const today = moment().format('YYYY-MM-DD');
+        console.log( localStorage.getItem('clearJournalDate'), today)
+        
+        if (clearJournalDate !== today) {
+            localStorage.setItem('clearJournalDate', today);
+            console.log( localStorage.getItem('clearJournalDate'), today)
+            return removeJournal(KF_HOME);
+        } else {
+            return Promise.resolve(true);
+        }
+    } else {
+        return Promise.resolve(true);
+    }
+}

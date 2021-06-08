@@ -1,49 +1,32 @@
-//
-// Created by Keren Dong on 2019-09-06.
-//
-
-#include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
-
 #include <kungfu/longfist/longfist.h>
 #include <kungfu/wingchun/strategy/context.h>
+#include <kungfu/wingchun/strategy/runner.h>
 #include <kungfu/wingchun/strategy/strategy.h>
 
-namespace py = pybind11;
-
-using namespace kungfu;
 using namespace kungfu::longfist::enums;
 using namespace kungfu::longfist::types;
-using namespace kungfu::wingchun;
 using namespace kungfu::wingchun::strategy;
+using namespace kungfu::yijinjing::data;
+using namespace kungfu::yijinjing::log;
 
 class DemoStrategy : public Strategy {
 public:
-  DemoStrategy(yijinjing::data::location_ptr home) {
-    yijinjing::log::copy_log_settings(home, "demo");
-  };
+  DemoStrategy() = default;
 
   void pre_start(Context_ptr &context) override {
-    SPDLOG_INFO("cpp demo pre start");
+    context->add_account("xtp", "15014990", 0);
+    context->subscribe("xtp", {"600548"}, {"SSE"});
   };
 
   void on_quote(Context_ptr &context, const Quote &quote) override {
-    SPDLOG_INFO("cpp demo on quote");
+    std::cout << quote.instrument_id.to_string() << std::endl;
   };
 };
 
-PYBIND11_MODULE(cpp_demo, m) {
-  py::class_<DemoStrategy, Strategy, std::shared_ptr<DemoStrategy>>(m,
-                                                                    "Strategy")
-      .def(py::init<yijinjing::data::location_ptr>())
-      .def("pre_start", &DemoStrategy::pre_start)
-      .def("post_start", &DemoStrategy::post_start)
-      .def("pre_stop", &DemoStrategy::pre_stop)
-      .def("post_stop", &DemoStrategy::post_stop)
-      .def("on_trading_day", &DemoStrategy::on_trading_day)
-      .def("on_quote", &DemoStrategy::on_quote)
-      .def("on_entrust", &DemoStrategy::on_entrust)
-      .def("on_transaction", &DemoStrategy::on_transaction)
-      .def("on_order", &DemoStrategy::on_order)
-      .def("on_trade", &DemoStrategy::on_trade);
+int main() {
+  Runner runner(std::make_shared<locator>(), "default", "testcpp", mode::LIVE,
+                false);
+  runner.add_strategy(std::make_shared<DemoStrategy>());
+  runner.run();
+  return 0;
 }

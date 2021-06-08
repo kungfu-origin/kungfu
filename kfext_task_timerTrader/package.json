@@ -31,6 +31,7 @@
   "bin": "./lib/index.js",
   "kungfuConfig": {
     "type": "task",
+    "subType": "trade",
     "key": "timerTrader",
     "name": "定时任务",
     "uniKey": [
@@ -91,6 +92,27 @@
         "required": true
       },
       {
+        "key": "priceMode",
+        "name": "价格",
+        "type": "select",
+        "options": [
+          {
+            "name": "对手价一档",
+            "value": 0
+          },
+          {
+            "name": "同方向一档",
+            "value": 1
+          },
+          {
+            "name": "最新价",
+            "value": 2
+          }
+        ],
+        "default": 1,
+        "required": true
+      },
+      {
         "key": "volume",
         "name": "数量",
         "type": "int",
@@ -139,6 +161,79 @@
         "required": false,
         "tip": "设置临界下单临界时间, 单位毫秒，时间默认1000毫秒",
         "default": 1000
+      }
+    ],
+    "displayConfig": [
+      {
+        "type": "text",
+        "label": "下单时间（本地）",
+        "prop": "updateTime",
+        "width": "120px"
+      },{
+        "type": "text",
+        "label": "下单时间（系统）",
+        "prop": "kungfuTimeNowStr",
+        "width": "120px"
+      },{
+        "type": "text",
+        "label": "标的",
+        "prop": "instrumentId",
+        "width": "100px"
+      },{
+        "type": "number",
+        "label": "最新价",
+        "prop": "lastPrice",
+        "width": "80px"
+      },{
+        "type": "number",
+        "label": "卖1价/量",
+        "prop": "ask1PriceVolume",
+        "width": "120px"
+      },{
+        "type": "number",
+        "label": "买1价/量",
+        "prop": "bid1PriceVolume",
+        "width": "120px"
+      },{
+        "type": "text",
+        "align": "right",
+        "label": "已成交/目标",
+        "prop": "volumeLefted",
+        "width": "100px"
+      },{
+        "type": "text",
+        "label": "",
+        "align": "center",
+        "prop": "side",
+        "width": "30px"
+      },{
+        "type": "text",
+        "align": "center",
+        "label": "",
+        "prop": "offset",
+        "width": "50px"
+      },{
+        "type": "number",
+        "label": "委托价",
+        "prop": "limitPrice",
+        "width": "80px"
+      },{
+        "type": "number",
+        "label": "下单量",
+        "prop": "volume",
+        "width": "60px"
+      },{
+        "type": "text",
+        "align": "right",
+        "label": "次数",
+        "prop": "count",
+        "width": "60px"
+      },{
+        "type": "text",
+        "align": "left",
+        "label": "账户",
+        "prop": "accountId",
+        "width": "110px"
       }
     ]
   }

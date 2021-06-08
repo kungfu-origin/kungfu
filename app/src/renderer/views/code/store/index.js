@@ -1,8 +1,8 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
+import fse from 'fs-extra';
 
 import { KF_CONFIG_PATH } from '__gConfig/pathConfig';
-import { readJsonSync, outputJsonSync } from '__gUtils/fileUtils';
 import { deepClone } from '__gUtils/busiUtils';
 
 Vue.use(Vuex)
@@ -122,7 +122,7 @@ export default new Vuex.Store({
 
         //common
         getKungfuConfig ({ dispatch }) {
-            const kfConfig = readJsonSync(KF_CONFIG_PATH)
+            const kfConfig = fse.readJsonSync(KF_CONFIG_PATH)
             dispatch('setKungfuConfig', kfConfig)
         },
 
@@ -135,7 +135,7 @@ export default new Vuex.Store({
         //common
         setKungfuConfigByKeys ({ commit, state }, kfConfig) {
             commit('SET_KF_CONFIG', kfConfig)  
-            outputJsonSync(KF_CONFIG_PATH, 
+            fse.outputJsonSync(KF_CONFIG_PATH, 
                 {
                     ...state.kfConfig,
                     ...kfConfig

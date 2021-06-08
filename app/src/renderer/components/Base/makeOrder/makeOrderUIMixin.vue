@@ -1,6 +1,6 @@
 
 <template>
-    <tr-dashboard :title="`下单 ${currentId}`">
+    <tr-dashboard :title="`下单 ${currentId || ''}`">
         <div slot="dashboard-header">
             <tr-dashboard-header-item>
                 <el-button size="mini" @click="clearData()" style="width: 50px;">重置</el-button>
@@ -29,7 +29,7 @@
                 </el-form-item>   
 
                 <el-form-item
-                label="代码"
+                label="标的"
                 prop="instrument_id"
                 :rules="[
                     { required: true, message: '不能为空！', trigger: 'input'},
@@ -38,17 +38,17 @@
                     ref="insturment-id-input"
                     v-model="makeOrderForm.instrument_id"
                     :fetch-suggestions="querySearch"
-                    placeholder="请输入代码名称"
+                    placeholder="请输入标的"
                     @blur="handleBlurInstrumentId"
                     @select="handleSelectInstrumentId"
                     >
                         <template v-slot="{ item }">
-                            <div class="make-order-instrument-ids__warp">
-                                <div class="make-order-instrument-id-item">
+                            <div class="auto-complete-instrument-ids__warp">
+                                <div class="auto-complete-instrument-id-item">
                                     <span class="ticker">{{ item.instrument_id }}</span>
                                     <span class="name">{{ item.instrument_name }}</span>
                                 </div>
-                                <div class="make-order-instrument-id-item">{{ (item.exchange_id || '').toUpperCase() }}</div>
+                                <div class="auto-complete-instrument-id-item">{{ (item.exchange_id || '').toUpperCase() }}</div>
                             </div>
                         </template>
                     </el-autocomplete>
@@ -181,7 +181,7 @@
                     </el-col>
                     <el-col :span="10">
                         <div class="make-order-line-info">
-                            <span>可下单手数</span>
+                            <span>可下单数量</span>
                             <span>{{ avaliableOrderVolume || '-' }}</span>
                         </div>
                     </el-col>
@@ -216,6 +216,7 @@
             </el-form>
             <div class="make-order-btns">
                 <el-button size="medium" @click="handleMakeOrder">下单</el-button>
+                <el-button v-if="rendererType === 'app' && proMode" size="medium" class="make-order-by-task-btn" @click="handleMakeOrderByTask">算法</el-button>
             </div>
         </div>
     </tr-dashboard>
@@ -230,7 +231,7 @@ import { deepClone } from '__gUtils/busiUtils';
 import { SourceTypeConfig, SideName, OffsetName, PriceType, HedgeFlag, ExchangeIds, InstrumentTypes, allowShorted } from '@kungfu-trader/kungfu-shared/config/tradingConfig';
 import { biggerThanZeroValidator } from '__assets/validator';
 
-import instrumentsMixin from '@/assets/js/mixins/instrumentsMixin';
+import instrumentsMixin from '@/assets/mixins/instrumentsMixin';
 
 Vue.use(Autocomplete)
 
@@ -248,7 +249,7 @@ export default {
         this.ExchangeIds = ExchangeIds;
 
         this.biggerThanZeroValidator = biggerThanZeroValidator;
-
+        this.rendererType = process.env.RENDERER_TYPE
 
         return {
 
@@ -355,14 +356,34 @@ export default {
     },
 
     watch: {
+        
+        makeOrderByQuote (newQuoteData) {
+            if (!Object.keys(newQuoteData || {}).length) return;
+
+            this.clearData(true);
+            
+            const { instrumentId, lastPrice, makeOrderPrice, makeOrderSide , exchangeId, instrumentType } = newQuoteData;
+            this.$set(this.makeOrderForm, 'instrument_id', instrumentId);
+            this.$set(this.makeOrderForm, 'exchange_id', exchangeId);
+            this.$set(this.makeOrderForm, 'limit_price', makeOrderPrice || lastPrice);
+            this.$set(this.makeOrderForm, 'instrument_type', instrumentType);
+
+            //只有点击order book后会触发
+            if (makeOrderSide !== undefined) {
+                this.$set(this.makeOrderForm, 'side', makeOrderSide);
+            }
+            
+            this.$refs['make-order-form'].validate()
+                .catch(err => {})
+        },
+
         makeOrderByPosData (newPosData) {
             
             if (!Object.keys(newPosData || {}).length) return;
+            
             this.clearData(true);
 
             const { instrumentId, lastPrice, totalVolume, directionOrigin, exchangeId, accountIdResolved, instrumentType } = newPosData;
-
-            console.log('[Make Order] last price', instrumentId, lastPrice)
 
             this.$set(this.makeOrderForm, 'instrument_id', instrumentId);
             this.$set(this.makeOrderForm, 'exchange_id', exchangeId);
@@ -388,6 +409,7 @@ export default {
             }
 
             this.$refs['make-order-form'].validate()
+                .catch(err => {})
         },
 
         'makeOrderForm.buyType' (val) {
@@ -442,6 +464,17 @@ export default {
     },
 
     methods: {
+
+        handleMakeOrderByTask () {
+            this.$bus.$emit('set-task', {
+                type: "trade", 
+                initData: {
+                    'exchangeId': this.makeOrderForm.exchange_id,
+                    'instrumentId': this.makeOrderForm.instrument_id,
+                    'account': this.currentAccountResolved
+                }
+            })
+        },
 
         handleBlurInstrumentId (e, item) {
             const value = e.target.value.trim();
@@ -585,3 +618,4 @@ function filterPriceType (PriceType) {
 
 
 </script>
+

@@ -31,16 +31,17 @@
 </template>
 
 <script>
+import fse from 'fs-extra'; 
 import { mapState } from 'vuex'
-import { debounce, throttle, throttleInsert, dealLogMessage, buildTask } from '__gUtils/busiUtils'
+import { debounce, throttle, throttleInsert, dealLogMessage } from '__gUtils/busiUtils'
 import { buildProcessLogPath } from '__gConfig/pathConfig';
 import { Tail } from 'tail';
-import { clearFileContent, addFileSync, existsSync } from '__gUtils/fileUtils';
+import { writeFile, addFileSync } from '__gUtils/fileUtils';
 import { ipcRenderer } from 'electron';
-import { platform } from '__gConfig/platformConfig';
-import { remote } from 'electron';
 
-import openLogMixin from '@/assets/js/mixins/openLogMixin';
+import Workers from '@/workers/index';
+
+import openLogMixin from '@/assets/mixins/openLogMixin';
 
 export default {
     name: 'log',
@@ -82,6 +83,7 @@ export default {
             },
         ];
         this.tailObserver = null;
+        this.logMaxLenLimit = 500;
         return {
             rendererTable: false,
             tableData: Object.freeze([]),
@@ -91,33 +93,33 @@ export default {
         }
     },
 
-    computed:{
+    computed: {
         ...mapState({
             processId: state => state.STRATEGY.currentStrategy.strategy_id
         }),
 
-        currentTitle() {
+        currentTitle () {
             return this.processId ? `${this.processId}` : ''
         },
 
-        logPath(){
+        logPath () {
             return buildProcessLogPath(this.processId);
         },
     },
 
     watch: {
-        searchKeyword: debounce(function(newVal){
+        searchKeyword: debounce(function () {
             this.resetData(true)
-            this.processId && this.init(this.processId, this.logPath, this.searchKeyword)
+            this.processId && this.init(this.logPath, this.searchKeyword)
         }),
 
-        processId: debounce(function(val){
+        processId: debounce(function (val) {
             this.resetData();
             if(!val) return;
             this.rendererTable = false;
             this.$nextTick().then(() => {
                 this.rendererTable = true;
-                this.init(this.processId, this.logPath)
+                this.init(this.logPath, this.searchKeyword)
             })
         }, 100),
 
@@ -126,28 +128,30 @@ export default {
         }
     },
 
-    mounted(){
+    mounted () {
         this.rendererTable = true;
         this.resetData();
-        this.processId && this.init(this.processId, this.logPath);
+        this.processId && this.init(this.logPath, this.searchKeyword)
+
+        this.bindGetLogWorkerListener();
     },
 
-    destroyed(){
+    destroyed () {
         this.resetData()
         ipcRenderer.removeAllListeners('res-strategy-log')
     },
 
     methods:{
         //清空
-        handleClearLog(){
+        handleClearLog () {
             this.$confirm('确认清空该日志？', '提示', {
                 confirmButtonText: '确 定',
                 cancelButtonText: '取 消',
             })
-            .then(() => clearFileContent(buildProcessLogPath(this.processId)))
+            .then(() => writeFile(buildProcessLogPath(this.processId), ''))
             .then(() => {
                 this.resetData();
-                this.processId && this.init(this.processId, this.logPath)
+                this.processId && this.init(this.logPath, this.searchKeyword)
                 this.$message.success('操作成功！')
             })
             .catch((err) => {
@@ -156,51 +160,46 @@ export default {
             })
         },
 
-        handleRefresh(){
+        handleRefresh () {
             this.resetData();
-            this.processId && this.init(this.processId, this.logPath, this.searchKeyword)
+            this.processId && this.init(this.logPath, this.searchKeyword)
         },
 
-        init: debounce(function(processId, logPath, searchKeyword){
+        bindGetLogWorkerListener () {
+            const self = this;
+            Workers.getLogWorker.onmessage = (event) => {
+                const {
+                    list,
+                    logPath,
+                    searchKeyword
+                } = event.data || [];
+
+                if (logPath !== this.logPath || searchKeyword !== this.searchKeyword) {
+                    return;
+                }
+
+                self.tableData = Object.freeze(list || [])
+                self.scrollToBottom();
+                self.startWatchingTail(self.processId, logPath, searchKeyword)
+            }
+        },
+
+        init: debounce(function (logPath, searchKeyword) {
             //文件不存在则创建
-            if(!existsSync(logPath)){
+            if(!fse.existsSync(logPath)){
                 this.tableData = Object.freeze([])
                 addFileSync('', logPath, 'file')
             }
 
-            this.getLogByTask(logPath, searchKeyword).then(logList => {
-                this.tableData = Object.freeze(logList)
-                this.scrollToBottom()
-            }).catch(err => {
-                this.tableData = Object.freeze([])
-            }).finally(() => {
-                this.startWatchingTail(processId, logPath, searchKeyword)
+            Workers.getLogWorker.postMessage({
+                logPath,
+                searchKeyword
             })
         }, 100),
 
-        getLogByTask(logPath, searchKeyword){
-            return new Promise((resolve, reject) => {
-                buildTask(
-                    'getStrategyLog', 
-                    remote,
-                ).then(({ win, curWinId }) => {
-                    win.webContents.send('get-strategy-log', {
-                        winId: curWinId,
-                        logPath,
-                        searchKeyword
-                    });
-                    ipcRenderer.on('res-strategy-log', function resLog(event, logs){
-                        resolve(Object.freeze(logs))
-                        ipcRenderer.removeAllListeners('res-strategy-log')
-                    })
-                }).catch(err => reject(err))
-            })
-        },
-
         //开始监听日志尾部
-        startWatchingTail(processId, logPath, searchKeyword){
+        startWatchingTail (processId, logPath, searchKeyword) {
             this.clearTailWatcher();
-            let logWaitList = [];
             let throttleInsertLog = throttleInsert(500)
             let throttleClearLog = throttle(() => {
                     const len = this.tableData.length
@@ -220,7 +219,7 @@ export default {
                 throttleInsertLog(logData).then(logList => {
                     if(!logList) return;
                     this.tableData = this.pushTableData(logList);
-                    if(this.ifScrollToBottom) this.scrollToBottom()
+                    if(this.ifScrollToBottom) this.scrollToBottom();
                 })
                 throttleClearLog()
             })(processId, searchKeyword))
@@ -232,8 +231,8 @@ export default {
         },
         
         //往日志列表里推送数据
-        pushTableData(itemList){
-            const tableData = this.tableData.slice(0);
+        pushTableData (itemList) {
+            let tableData = this.tableData.slice(0);
             itemList.kfForEach(item => {
                 this.logCount++;
                 if(!item || !item.message) return;
@@ -243,11 +242,18 @@ export default {
                     id: this.logCount
                 }))
             }) 
+
+            //最大log数
+            const len = tableData.length;
+            if (len > this.logMaxLenLimit) {
+                tableData = tableData.slice(len - 500, len)
+            }
+
             return Object.freeze(tableData)
         },
 
         //重置数据
-        resetData(ifSearchKeyword=false) {
+        resetData (ifSearchKeyword=false) {
             this.logCount = 10000;
             !ifSearchKeyword && (this.searchKeyword = '');
             this.clearTailWatcher();
@@ -255,7 +261,7 @@ export default {
             this.ifScrollToBottom = true;
         },
 
-        clearTailWatcher(){
+        clearTailWatcher () {
             if(this.tailObserver != null) this.tailObserver.unwatch();
             this.tailObserver = null;
             return true;
@@ -264,13 +270,14 @@ export default {
         //加载完数据
         scrollToBottom: throttle(function() {
             const $logTable = this.$refs['logTable'];
-            if(!$logTable) return;
-            this.$nextTick().then(() => { 
-                $logTable.triggerToBottom()
-            })
+            if(!$logTable) return
+            this.$nextTick()
+                .then(() => { 
+                    $logTable.triggerToBottom()
+                })
         }, 1000),
 
-        renderCellClass(prop, item){
+        renderCellClass (prop, item) {
             if(prop === 'type') {
                 return this.logColor[item.type] || ''
             }

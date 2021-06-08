@@ -4,6 +4,16 @@
         <tr-dashboard-header-item>
             <tr-search-input v-model.trim="searchKeyword"></tr-search-input>
         </tr-dashboard-header-item>
+        <tr-dashboard-header-item>
+            <el-tooltip
+                class="item"
+                effect="dark"
+                content="实时最多显示100条数据，更多数据请通过查询历史查看"
+                placement="right"
+            >
+                <i class="el-icon-question mouse-over"></i>
+            </el-tooltip>        
+        </tr-dashboard-header-item>
         <tr-dashboard-header-item v-if="!ifBacktest && !dateForHistory">
             <i class="el-icon-date mouse-over" title="历史" @click="dateRangeDialogVisiblityForHistory = true"></i>
         </tr-dashboard-header-item>
@@ -11,11 +21,8 @@
             <span>{{ dateForHistory }}</span>
             <i class="el-icon-close mouse-over" @click="handleClearHistory"></i>
         </tr-dashboard-header-item>
-        <tr-dashboard-header-item v-if="!ifBacktest">
+        <tr-dashboard-header-item>
             <i class="el-icon-download mouse-over" title="导出" @click="dateRangeDialogVisiblityForExport = true"></i>
-        </tr-dashboard-header-item>
-        <tr-dashboard-header-item v-else>
-            <i class="el-icon-s-platform mouse-over" title="关闭监控" @click="handleMonitTrades"></i>
         </tr-dashboard-header-item>
     </div>
     <tr-table
@@ -42,12 +49,12 @@
 
 <script>
 
-import DatePickerDialog from '@/components/Base//DatePickerDialog';
-import tradingDataMixin from '@/components/Base/tradingData/js/tradingDataMixin';
+import DatePickerDialog from '@/components/Base/DatePickerDialog';
 
-import { debounce } from "__gUtils/busiUtils";
-import { dealTrade } from "__io/kungfu/watcher";
+import { dealOrderStat } from '__io/kungfu/watcher';
 import { tradesHeader } from '@/components/Base/tradingData/js/tableHeaderConfig';
+
+import tradingDataMixin from '@/components/Base/tradingData/js/tradingDataMixin';
 
 export default {
     name: 'trades-record',
@@ -88,32 +95,33 @@ export default {
 
     methods:{
         dealTradeList (trades, { searchKeyword}) {
-            const t = this;
             let tradesAfterFilter = trades
                 .filter(item => {
                     if (searchKeyword.trim() === '') return true;
-                    const { trade_id, client_id, account_id, source_id, instrument_id } = item
-                    const strings = [ trade_id.toString(), client_id, account_id, source_id, instrument_id ].join('')
+                    const { tradeId, clientId, accountId, sourceId, instrumentId, orderId } = item
+                    const strings = [ tradeId, clientId, accountId, sourceId, instrumentId, orderId ].join('')
                     return strings.includes(searchKeyword) 
                 })
 
-            if (t.moduleType === 'strategy') {
+            if (this.moduleType === 'strategy') {
                 tradesAfterFilter = tradesAfterFilter
                     .filter(item => {
-                        return Number(item.trade_time) >= t.addTime 
+                        return Number(item.updateTimeNum) >= this.addTime 
                     })
             }
 
             tradesAfterFilter = tradesAfterFilter
                 .map(item => {
-                    let tradeData = dealTrade(item);
+                    let tradeData = { ...item };
                     let orderId = tradeData.orderId;
-                    const orderStatByOrderId = t.orderStat[orderId] || {}
-                    tradeData.update = !!t.tableData.length;
+                    const orderStatByOrderId = this.dateForHistory ? item : dealOrderStat(this.orderStat[orderId] || null);
+                    tradeData.update = !!this.tableData.length;
                     tradeData.latencyTrade = orderStatByOrderId.latencyTrade || '';
-                    const { updateTime, updateTimeMMDD } = tradeData
-                    tradeData.updateTime = !!orderStatByOrderId.tradeTimeNum ? orderStatByOrderId.tradeTime : updateTime
-                    tradeData.updateTimeMMDD = !!orderStatByOrderId.tradeTimeNum ? orderStatByOrderId.tradeTimeMMDD : updateTimeMMDD
+                    //ctp trade返回的是交易所时间（xtp是自己维护），所用orderState内时间代替
+                    const { updateTime, updateTimeNum, updateTimeMMDD } = tradeData
+                    tradeData.localUpdateTime = orderStatByOrderId.tradeTime
+                    tradeData.localUpdateTimeNum = orderStatByOrderId.tradeTimeNum
+                    tradeData.localUpdateTimeMMDD = orderStatByOrderId.tradeTimeMMDD
                     return Object.freeze(tradeData)
                 })
                 .sort((a, b) => (b.updateTimeNum - a.updateTimeNum))

@@ -8,12 +8,12 @@
                 <el-button size="mini" @click="handleAdd" title="添加" id="add-account-btn">添加</el-button>
             </tr-dashboard-header-item>
         </div>
-        <div class="md-source">
+        <div class="table-body md-table">
             <el-table
             size="small"
             :data="mdList"
             height="100%"
-            v-if="renderTable"
+            v-if="afterRender"
             >
                 <el-table-column
                     prop="source_name"
@@ -35,10 +35,10 @@
                     >
                     <template slot-scope="props">
                         <tr-status 
-                        v-if="$utils.ifProcessRunning(`md_${props.row.source_name}`, processStatus) && processStatus[`md_${props.row.source_name}`] === 'online'"
+                        v-if="ifProcessRunning(`md_${props.row.source_name}`, processStatus) && processStatus[`md_${props.row.source_name}`] === 'online'"
                         :value="(mdTdState[`md_${props.row.source_name}`] || {}).state"></tr-status>
                         <tr-status 
-                        v-else-if="$utils.ifProcessRunning(`md_${props.row.source_name}`, processStatus) && processStatus[`md_${props.row.source_name}`] === 'stopping'"
+                        v-else-if="ifProcessRunning(`md_${props.row.source_name}`, processStatus) && processStatus[`md_${props.row.source_name}`] === 'stopping'"
                         :value="processStatus[`md_${props.row.source_name}`]"></tr-status>
                         <tr-status v-else></tr-status>
                     </template>
@@ -49,7 +49,7 @@
                     >
                     <template slot-scope="props">
                         <span @click.stop>
-                            <el-switch :value="$utils.ifProcessRunning('md_' + props.row.source_name, processStatus)" @change="handleMdSwitch($event, props.row)"></el-switch>
+                            <el-switch :value="ifProcessRunning('md_' + props.row.source_name, processStatus)" @change="handleMdSwitch($event, props.row)"></el-switch>
                         </span>
                     </template>
                 </el-table-column>
@@ -94,26 +94,26 @@
 </template>
 
 <script>
-import path from 'path';
-import Vue from 'vue';
 import { mapState } from 'vuex';
 
 import SetAccountDialog from './SetAccountDialog';
 import SetSourceDialog from './SetSourceDialog';
 
 import { getMdList } from '__io/kungfu/account';
-import { switchMd, deleteMd } from '__io/actions/account';
-import { loopToRunProcess } from '__gUtils/busiUtils';
 import { watcher } from '__io/kungfu/watcher';
+import { switchMd, deleteMd } from '__io/actions/account';
+import { loopToRunProcess, ifProcessRunning } from '__gUtils/busiUtils';
 
+import baseMixin from '@/assets/mixins/baseMixin';
 import mdTdMixin from '../js/mdTdMixin';
-import openLogMixin from '@/assets/js/mixins/openLogMixin';
+import openLogMixin from '@/assets/mixins/openLogMixin';
 
 export default {
-    mixins: [ mdTdMixin, openLogMixin ],
+    mixins: [ baseMixin, mdTdMixin, openLogMixin ],
 
     data () {
         this.tdmdType = 'md';
+        this.ifProcessRunning = ifProcessRunning;
 
         return {
 
@@ -129,7 +129,7 @@ export default {
 
         allProcessRunning () {
             const notRunningList = this.mdList.filter(item => {
-                const isRunning = this.$utils.ifProcessRunning('md_' + item.source_name, this.processStatus)
+                const isRunning = ifProcessRunning('md_' + item.source_name, this.processStatus)
                 if (!isRunning) return true
                 else return false
             })
@@ -179,14 +179,14 @@ export default {
             const promiseList = this.mdList
                 .filter(item => {
                     const id = item.source_name;
-                    const status = this.$utils.ifProcessRunning('md_' + item.source_name, this.processStatus)
+                    const status = ifProcessRunning('md_' + item.source_name, this.processStatus)
                     return status !== targetStatus
                 })
                 .map(item => {
                     return () => switchMd(item, targetStatus)
                 })
 
-            if (this.ifMasterLedgerRunning && watcher.isLive) {
+            if (this.ifMasterLedgerRunning && watcher.isLive()) {
                 return loopToRunProcess(promiseList)
             } else {
                 return Promise.resolve(false)
@@ -197,7 +197,7 @@ export default {
         judgeCondition(row) {
             const { source_name } = row
             //判断td是否开启，开启则无法删除
-            if(this.$utils.ifProcessRunning(`md_${source_name}`, this.processStatus)) {
+            if(ifProcessRunning(`md_${source_name}`, this.processStatus)) {
                 this.$message.warning('需先停止行情源进程！')
                 return false
             }
@@ -220,7 +220,7 @@ export default {
 </script>
 <style lang="scss">
 @import '@/assets/scss/skin.scss';
-.md-source{
+.md-table{
    height: 100%;
 }
 

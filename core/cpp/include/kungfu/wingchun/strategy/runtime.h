@@ -126,7 +126,7 @@ protected:
   const yijinjing::data::location_ptr &find_md_location(const std::string &source);
 
 private:
-  broker::ManualClient broker_client_;
+  broker::PassiveClient broker_client_;
   book::Bookkeeper bookkeeper_;
   yijinjing::data::location_map md_locations_ = {};
   yijinjing::data::location_map td_locations_ = {};

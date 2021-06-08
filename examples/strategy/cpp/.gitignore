@@ -1,0 +1,67 @@
+### CMake template
+CMakeCache.txt
+CMakeFiles
+CMakeScripts
+Makefile
+cmake_install.cmake
+install_manifest.txt
+
+# OS files
+.DS_Store
+*.log
+
+# IDE related
+*.VC.*
+*.sln
+*.vcxproj*
+Debug/
+.vs/
+.vscode/
+.idea/
+.arcconfig
+*.flow
+
+# Build related
+cmake-build-debug/
+build/
+build-*/
+*.pyc
+
+# NPM related
+node_modules/
+*/node_modules/
+dist/
+*/dist/
+.project
+package-lock.json
+Pipfile.lock
+yarn.lock
+
+#js third part
+*/lib
+*/inquirer-path/lib/*
+*/inquirer-path/lib
+*/inquirer-path/node_modules/*
+*/_version.py
+
+# Python Distribution / packaging
+develop-eggs/
+downloads/
+eggs/
+.eggs/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+
+
+commit.sh

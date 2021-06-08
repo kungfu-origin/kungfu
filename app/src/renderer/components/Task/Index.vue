@@ -1,5 +1,5 @@
 <template>
-<tr-dashboard title="">
+<tr-dashboard :title="noTitle ? '' : '算法任务'">
     <div slot="dashboard-header">
         <tr-dashboard-header-item>
             <tr-search-input v-model.trim="searchKeyword"></tr-search-input>
@@ -14,14 +14,30 @@
         size="small"
         height="100%"
         v-if="afterRender"
+        @row-click="handleRowClick"
+        :row-class-name="handleSelectRow"
         >
             <el-table-column
                 prop="processId"
                 label="任务ID"
                 sortable
                 :show-overflow-tooltip="true"       
-                width="300px"  
+                min-width="270px"
                 >
+            </el-table-column>
+            <el-table-column
+                prop="subType"
+                label="类型"
+                sortable
+                :show-overflow-tooltip="true"       
+                >
+                <template slot-scope="props">
+                    <el-tag
+                        :type="(TaskTypeConfig[props.row.subType] || {}).color || ''" 
+                        >
+                            {{ (TaskTypeConfig[props.row.subType] || {}).name || props.row.subType }}
+                        </el-tag>                
+                    </template>
             </el-table-column>
             <el-table-column
                 label="状态"
@@ -30,11 +46,18 @@
             >
                 <template slot-scope="props">
                     <tr-status 
-                    v-if="$utils.ifProcessRunning(props.row.processId, processStatus)"
+                    v-if="ifProcessRunning(props.row.processId, processStatus)"
                     :value="props.row.processStatus"
                     ></tr-status>
                     <tr-status v-else></tr-status>
                 </template>
+            </el-table-column>
+            <el-table-column
+                label="执行时间"
+                sortable  
+                prop="createdAt"  
+                min-width="180px"
+            >
             </el-table-column>
             <el-table-column
                 label="进程"
@@ -42,22 +65,15 @@
             >
                 <template slot-scope="props">
                     <el-switch
-                    :value="$utils.ifProcessRunning(props.row.processId, processStatus)"
+                    :value="ifProcessRunning(props.row.processId, processStatus)"
                     @change="e => handleTaskSwitch(e, props.row)"
                     ></el-switch> 
                 </template>
             </el-table-column>
             <el-table-column
-                label="执行时间"
-                sortable  
-                prop="createdAt"  
-                width="150px"
-            >
-            </el-table-column>
-            <el-table-column
                 label="" 
-                width="120px"
                 align="right"
+                width="100px"
             >
                 <template slot-scope="props">
                     <span class="tr-oper" @click.stop="handleOpenLogFile(props.row.processId)"><i class="el-icon-document mouse-over" title="打开日志文件"></i></span>
@@ -74,7 +90,9 @@
         :value="setTaskInitData"
         :currentActiveConfigKey="setTaskInitKey"
         :method="setTaskMethod"
-        :configList="extConfigList"
+        :configList="taskExtConfigList"
+        :outsideAddTaskType="outsideAddTaskType"
+        :outsideAddTaskInitData="outsideAddTaskInitData"
         @confirm="handleConfirm"
     >
     </SetTaskDialog>
@@ -87,18 +105,19 @@
 import path from 'path';
 import moment from 'moment';
 import minimist from 'minimist';
-import { mapState } from 'vuex';
+import { mapGetters, mapState } from 'vuex';
 
 import SetTaskDialog from './SetTaskDialog';
 
-import { getExtensionConfigs, findTargetFromArray } from '__gUtils/busiUtils';
-import { deleteProcess } from '__gUtils/processUtils';
+import { findTargetFromArray, ifProcessRunning } from '__gUtils/busiUtils';
+import { deleteProcess, buildProcessStatusWidthDetail } from '__gUtils/processUtils';
 import { removeFileFolder } from '__gUtils/fileUtils';
-import { TASK_EXTENSION_DIR, buildProcessLogPath } from '__gConfig/pathConfig';
+import { buildProcessLogPath } from '__gConfig/pathConfig';
 import { switchTask } from '__io/actions/base';
+import { TaskTypeConfig } from 'kungfu-shared/config/tradingConfig';
 
-import baseMixin from '@/assets/js/mixins/baseMixin';
-import openLogMixin from '@/assets/js/mixins/openLogMixin';
+import baseMixin from '@/assets/mixins/baseMixin';
+import openLogMixin from '@/assets/mixins/openLogMixin';
 
 export default {
 
@@ -106,11 +125,21 @@ export default {
     
     mixins: [ baseMixin, openLogMixin ],
 
+    props: {
+
+        noTitle: {
+            type: Boolean,
+            default: true,
+        },
+    },
+
     components: {
         SetTaskDialog
     },
 
     data () {
+        this.ifProcessRunning = ifProcessRunning;
+        this.TaskTypeConfig = TaskTypeConfig;
 
         return {
             setTaskMethod: 'add',
@@ -119,32 +148,46 @@ export default {
             setTaskTarget: null,
             setTaskDialogVisiblity: false,
             searchFilterKey: 'processId',
-            extConfigList: [],
+            
+            //从外部传入，通过 bus.$emit
+            outsideAddTaskType: '',
+            outsideAddTaskInitData: {}
+            
             
         }
     },
 
     mounted () {
-       this.getExtensionConfigs()
+        this.$bus.$on('set-task', ({ type, initData }) => {
+            this.handleAddTaskFromOutSide(type, initData)
+        })
+    },
+
+    beforeDestroy () {
+        this.$bus.$off('set-task');
     },
 
     computed: {
         ...mapState({
+            taskExtConfigList: state => state.BASE.taskExtConfigList,
             processStatus: state => state.BASE.processStatus,
-            processStatusWithDetail: state => state.BASE.processStatusWithDetail
+            processStatusWithDetail: state => state.BASE.processStatusWithDetail,
+            currentTask: state => state.BASE.currentTask,
+            currentTaskId: state => (state.BASE.currentTask).name
         }),
+
+        ...mapGetters([
+            "taskExtMinimistConfig"
+        ])
     },
 
     watch: {
         processStatusWithDetail (newProcess) {
+
             this.tableList = Object.keys(newProcess || {})
                 .map(key => {
-                    return {
-                        processId: key,
-                        processStatus: newProcess[key].status,
-                        createdAt: newProcess[key].created_at ? moment(newProcess[key].created_at).format('YYYY-MM-DD HH:mm:ss') : '--',
-                        ...newProcess[key]
-                    }
+                    const targetProcess = newProcess[key];
+                    return this.buildTaskProcessItem(key, targetProcess)
                 })
                 .filter(({ processId }) => {
                     if (processId.includes('task')) {
@@ -152,30 +195,59 @@ export default {
                     }
                     return false
                 })
+
+            if (!this.tableList.length) {
+                this.$store.dispatch('setCurrentTask', {})
+            } else if (!this.currentTaskId) {
+                this.$store.dispatch('setCurrentTask', this.tableList[0])
+            }
         },
     },
 
     methods: {
 
+        //选中行的背景颜色
+        handleSelectRow(row) {
+            if(row.row.name == this.currentTaskId) {
+                return 'selected-bg'
+            }
+        },
+
+        handleRowClick (row) {
+            this.$store.dispatch('setCurrentTask', row)
+        },
+
+        handleAddTaskFromOutSide (type, initData) {
+            this.outsideAddTaskType = type;
+            this.outsideAddTaskInitData = initData;
+            this.setTaskMethod = 'add';
+            this.setTaskInitData = {};
+            this.setTaskInitKey = "";
+            this.setTaskTarget = null;
+            this.setTaskDialogVisiblity = true;
+        },
+
         handleAddTask () {
-            if (!this.extConfigList.length) {
-                this.$message.warning('暂无交易任务可选项！')
+            if (!this.taskExtConfigList.length) {
+                this.$message.warning('暂无算法任务可选项！')
                 return;
             }
 
+            this.outsideAddTaskType = '';
+            this.outsideAddTaskInitData = {};
             this.setTaskMethod = 'add';
             this.setTaskInitData = {};
-            this.setTaskInitKey = ""
-            this.setTaskTarget = null
+            this.setTaskInitKey = "";
+            this.setTaskTarget = null;
             this.setTaskDialogVisiblity = true;
         },
 
         handleOpenUpdateTaskDialog (data) {
+            this.outsideAddTaskType = '';
+            this.outsideAddTaskInitData = {};
             this.setTaskMethod = 'update';
-            //TODO 写活
-            const minimistConfig = this.getMinimistConfig()
-            this.setTaskInitData = minimist(data.args, minimistConfig)
-            this.setTaskInitKey = this.getTaskConfigKeyFromProcessId(data.processId)
+            this.setTaskInitData = minimist(data.args, this.taskExtMinimistConfig)
+            this.setTaskInitKey = this.setTaskInitData.configKey || '';
             this.setTaskTarget = data;
             this.setTaskDialogVisiblity = true;
         },
@@ -186,11 +258,13 @@ export default {
                 this.$message.error('配置信息不存在！')
                 return
             }
-            const extSettingData = JSON.parse(extSettingJSONString)
-            const { key, uniKey, packageJSONPath } = configInfo;
+            const extSettingData = JSON.parse(extSettingJSONString);
+
+            const { key, uniKey, packageJSONPath, subType } = configInfo;
             const processNameByUniKey = this.formUnikeyInProcessName(uniKey, extSettingData);
             const processName = 'task_' + key + '_' + processNameByUniKey;
             const args = this.formArgs(extSettingData);
+            const cwd = process.env.NODE_ENV === 'production' ? path.resolve(packageJSONPath, '..') : path.resolve(packageJSONPath, '..', 'lib');
 
             return this.preUpdate()
                 .then(res => {
@@ -198,7 +272,21 @@ export default {
                     return switchTask(true, {
                         name: processName,
                         args,
-                        cwd: process.env.NODE_ENV === 'production' ? path.resolve(packageJSONPath, '..') : path.resolve(packageJSONPath, '..', 'lib'),
+                        cwd
+                    })
+                    .then(apps => {
+                        const resolvedApps = buildProcessStatusWidthDetail(apps);
+                        //相当于模拟一个pmDetailData(通过pm2 start 返回的appdata跟pm2.list返回的不一致)
+                        const processWithDetail = { 
+                            ...Object.values(resolvedApps)[0] || {},
+                            args: args.split(' '),
+                            cwd,
+                            name: processName,
+                            subType,
+                            configKey
+                        };
+
+                        this.$store.dispatch('setCurrentTask', this.buildTaskProcessItem(processName, processWithDetail))
                     })
                 })
         },
@@ -206,8 +294,8 @@ export default {
         handleDeleteTask (data, update = false) {
             const { processId } = data;
             const tips = update 
-                ? `更新配置需停止并删除交易任务 ${processId}，确认停止并删除吗？`
-                : `确认停止并删除交易任务 ${processId} 吗？`
+                ? `更新配置需停止并删除算法任务 ${processId}，确认停止并删除吗？`
+                : `确认停止并删除算法任务 ${processId} 吗？`
 
             return this.$confirm(tips, '提示', {
                 confirmButtonText: '确 定',
@@ -225,39 +313,27 @@ export default {
             })
         },
 
+        buildTaskProcessItem (key, pmData) {
+            const argsConfig = minimist(pmData.args, this.taskExtMinimistConfig)
+
+            return {
+                processId: key,
+                processStatus: pmData.status,
+                createdAt: pmData.created_at ? moment(pmData.created_at).format('YYYY-MM-DD HH:mm:ss') : '--',
+                configKey: argsConfig.configKey,
+                subType: argsConfig.subType,
+                ...pmData
+            }
+        },
+
         handleTaskSwitch (e, data) {
             const { processId, args, cwd } = data;
+            console.log('switch task: ',processId, args, cwd)
             return switchTask(e, {
                 name: processId,
                 args: args.join(' '),
                 cwd
             })
-        },
-
-        getMinimistConfig () {
-            let minimistConfig = {
-                string: [],
-                boolean: [],
-            };
-            this.extConfigList.forEach(config => {
-                const c = config.config;
-                c.forEach(item => {
-                    const { key, type } = item;
-                    if (type === 'instrumentId') {
-                        if (!minimistConfig.string.includes(key)) {
-                            minimistConfig.string.push(key)                        
-                        }
-                    }
-
-                    if (type === 'bool') {
-                        if (!minimistConfig.boolean.includes(key)) {
-                            minimistConfig.boolean.push(key)
-                        }
-                    }
-                })
-            })
-
-            return minimistConfig
         },
 
         formUnikeyInProcessName (uniKey, form) {
@@ -277,25 +353,13 @@ export default {
         },
 
         getTargetConfigByKey (key) {
-            return findTargetFromArray(this.extConfigList, 'key', key)
+            return findTargetFromArray(this.taskExtConfigList, 'key', key)
         },
 
         formArgs (data) {
             return Object.keys(data || {})
                 .map(key => `--${key} ${data[key]}`)
                 .join(' ')
-        },
-
-        getTaskConfigKeyFromProcessId (processId) {
-            let processIdSplit = processId.split('_');
-            return processIdSplit[1]
-        },
-
-        getExtensionConfigs () {
-            return getExtensionConfigs(TASK_EXTENSION_DIR)
-                .then(exts => {
-                    this.extConfigList = Object.freeze(exts.filter(({ type }) => type === 'task'))
-                })
         },
     }
 

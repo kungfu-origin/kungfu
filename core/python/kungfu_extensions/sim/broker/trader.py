@@ -94,6 +94,8 @@ class TraderSim(wc.Trader):
                 trade.order_id = order.order_id
                 trade.volume = order.volume_traded
                 trade.price = order.limit_price
+                trade.side = order.side
+                trade.offset = order.offset
                 trade.instrument_id = order.instrument_id
                 trade.exchange_id = order.exchange_id
                 trade.trade_time = yjj.now_in_nano()

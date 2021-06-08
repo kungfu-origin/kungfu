@@ -1,16 +1,9 @@
 import path from 'path';
-import { addFileSync } from '__gUtils/fileUtils';
 import moment from 'moment';
 
-const KF_HOME_BASE_DIR_RESOLVE = (() => {
-    if ( process.env.APP_TYPE === 'cli' ) {
-        return require('__gConfig/cliKfHomePathConfig').KF_HOME_BASE_DIR_RESOLVE
-     } else if ( process.env.APP_TYPE === 'test' ) {
-        return require('__gConfig/cliKfHomePathConfig').KF_HOME_BASE_DIR_RESOLVE
-     } else {
-        return require('__gConfig/appKfHomePathConfig').KF_HOME_BASE_DIR_RESOLVE
-     }
-})()
+import { addFileSync } from '__gUtils/fileUtils';
+import { KF_HOME_BASE_DIR_RESOLVE } from '__gConfig/homePathConfig';
+
 
 addFileSync('', KF_HOME_BASE_DIR_RESOLVE, 'folder');
 export const KF_HOME_BASE_DIR = KF_HOME_BASE_DIR_RESOLVE;
@@ -26,6 +19,11 @@ addFileSync('', KF_RUNTIME_DIR, 'folder')
 //DATASET
 export const KF_DATASET_DIR = path.join(KF_HOME, 'dataset')
 addFileSync('', KF_DATASET_DIR, 'folder')
+
+//marketData in dataSet
+export const KF_DATASET_QUOTE_DIR = path.join(KF_HOME, 'dataset', 'quote')
+addFileSync('', KF_DATASET_QUOTE_DIR, 'folder')
+
 
 //system
 export const SYSTEM_DIR = path.join(KF_RUNTIME_DIR, 'system');
@@ -78,6 +76,8 @@ export const buildProcessLogPath = (processId: string) => {
 
 //================== config start =================================
 
+//process.resourcesPath 是一个容易出错的问题，需要每个调用pathconfig的进程都注册了这个值，不然报错
+
 export const KUNGFU_RESOURCES_DIR = process.env.NODE_ENV === 'production'
     ? path.join(process.resourcesPath, 'kungfu-resources')
     : path.join(__resources)
@@ -91,17 +91,29 @@ export const KF_CONFIG_PATH = path.join(KF_HOME, 'config', 'kfConfig.json')
 export const KF_TARADING_CONFIG_PATH = path.join(KF_HOME, 'config', 'kfTradingConfig.json')
 
 
-//================== config start =================================
+//================== config end =================================
+
+//================== json db start ================================
+
+export const KF_TICKER_SET_JSON_PATH = path.join(KF_HOME, 'config', 'tickerSets.json')
+addFileSync('', KF_TICKER_SET_JSON_PATH, 'file');
+
+//================== json db end ==================================
 
 
 export const KUNGFU_ENGINE_PATH = process.env.NODE_ENV === 'production' 
     ? process.resourcesPath
-    : path.join(__dirname, '..', '..', '..', 'core', 'build')
+    : path.resolve(path.join(__dirname, '..', '..', '..', 'core', 'build'))
 
 
 export const EXTENSION_DIR = path.join(KUNGFU_ENGINE_PATH, 'kfc', 'kungfu_extensions');
 
 export const TASK_EXTENSION_DIR = process.env.NODE_ENV === 'production'
     ? path.join(process.resourcesPath, 'kungfu-extensions')
-    : path.join(__dirname, '..', '..', '..')
-addFileSync('', TASK_EXTENSION_DIR, 'folder')
+    : path.join(__dirname, '..', '..', '..');
+
+
+export const APP_DIR = process.env.NODE_ENV === 'production'
+    ? path.resolve(path.join(process.resourcesPath, 'app', 'dist', 'app'))
+    : path.resolve(path.join(__dirname, '..','..', 'dist', 'app'));
+

@@ -26,6 +26,14 @@ struct ResumePolicy {
 /**
  * Always resume from the last unread frame, is intended to be used by system services that needs continuity.
  */
+struct StatelessResumePolicy : public ResumePolicy {
+  [[nodiscard]] int64_t get_resume_time(const yijinjing::practice::apprentice &app,
+                                        const longfist::types::Register &broker) const override;
+};
+
+/**
+ * Always resume from the last unread frame, is intended to be used by system services that needs continuity.
+ */
 struct ContinuousResumePolicy : public ResumePolicy {
   [[nodiscard]] int64_t get_resume_time(const yijinjing::practice::apprentice &app,
                                         const longfist::types::Register &broker) const override;
@@ -126,7 +134,7 @@ protected:
   [[nodiscard]] bool should_connect_strategy(const yijinjing::data::location_ptr &md_location) const override;
 
 private:
-  ContinuousResumePolicy resume_policy_ = {};
+  StatelessResumePolicy resume_policy_ = {};
 };
 
 /**
@@ -148,11 +156,11 @@ public:
 /**
  * Only connects brokers that has been explicitly added. It supports subscribe_all for MD that has such ability.
  */
-class ManualClient : public Client {
+class PassiveClient : public Client {
   typedef std::unordered_map<uint32_t, bool> EnrollmentMap;
 
 public:
-  explicit ManualClient(yijinjing::practice::apprentice &app);
+  explicit PassiveClient(yijinjing::practice::apprentice &app);
 
   [[nodiscard]] const ResumePolicy &get_resume_policy() const override;
 

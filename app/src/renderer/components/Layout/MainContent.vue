@@ -5,7 +5,7 @@
             <!-- 左侧边栏 -->
             <el-aside :width="'64px'" class="tr-aside" v-if="ifSideBar">
                 <div class="container-logo">
-                    <img width="64" height="50" src="@/assets/img/LOGO.svg"/>
+                    <img width="64" height="50" :src="LOGO"/>
                 </div>
                 <tr-menu>
                     <tr-menu-item
@@ -20,12 +20,12 @@
                         <i class="el-icon-s-order" ></i>
                         <template slot="title">策略</template>
                     </tr-menu-item>
-                    <!-- <tr-menu-item
-                    route="/data-management"
+                    <tr-menu-item
+                    route="/market-filter"
                     >
-                        <i class="el-icon-s-data" ></i>
-                        <template slot="title">数据</template>
-                    </tr-menu-item> -->
+                        <i class="el-icon-s-operation" ></i>
+                        <template slot="title">行情</template>
+                    </tr-menu-item>
                 </tr-menu>
             </el-aside>
             <el-main class="tr-main">
@@ -68,6 +68,7 @@ export default {
     },
 
     data() {
+        this.LOGO = require('../../assets/img/LOGO.svg');
         return {
             infoListVisiblity: false,
         }

@@ -17,6 +17,8 @@ namespace kungfu::wingchun::ctp {
 typedef std::unordered_map<std::string, longfist::types::Position> PositionMap;
 typedef std::unordered_map<std::string, longfist::types::Instrument> InstrumentMap;
 
+#define TIME_FORMAT "%Y-%m-%d %H:%M:%S"
+
 class TraderCTP : public CThostFtdcTraderSpi, public broker::Trader {
 public:
   TraderCTP(bool low_latency, yijinjing::data::locator_ptr locator, const std::string &account_id,

@@ -24,7 +24,7 @@ def pre_start(context):
     # context.hold_positions()
     context.log.info(f"is_book_held: {context.is_book_held()}, is_positions_mirrored: {context.is_positions_mirrored()}")
     context.log.info("pre start")
-    context.add_account(Source.XTP, "15040900", 100000000.0)
+    context.add_account(Source.XTP, "15014990", 100000000.0)
     context.subscribe(Source.XTP, ["600198", "600548"], Exchange.SSE)
     # context.subscribe(source, ["159901", "300030"], Exchange.SZE)
     # context.subscribe(Source.BAR, ["159901", "300030"], Exchange.SZE)
@@ -42,15 +42,10 @@ def post_stop(context):
     context.log.info('strategy down')
 
 
-def on_bar(context, bar):
-    context.log.info("[on_bar] {}".format(bar))
-
-
 def on_quote(context, quote):
     # context.logger.info(f"quote: {quote}")
-    side = random.choice([Side.Buy, Side.Sell])
     side = Side.Buy
-    price = quote.ask_price[0] if side == Side.Buy else quote.bid_price[0]
+    price = quote.ask_price[0]
     price_type = random.choice([PriceType.Any, PriceType.Limit])
     context.insert_order(quote.instrument_id, Exchange.SSE, "15040900", price, 100, price_type, side)
 

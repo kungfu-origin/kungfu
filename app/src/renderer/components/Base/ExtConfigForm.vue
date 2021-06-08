@@ -3,7 +3,7 @@
     ref="extForm"
     :label-width="labelWidth"
     :model="form"
-    class="ext-form"
+    class="kf-ext-form"
   >
     <el-form-item
       v-for="item of configList"
@@ -126,17 +126,14 @@
             :label="account.account_id.toAccountId()"
             :value="account.account_id"
           >
-            <span style="color: #fff">{{
-              account.account_id.toAccountId()
-            }}</span>
-            <el-tag :type="getAccountType(account.source_name).type">{{
-              (
-                SourceTypeConfig[
-                  getAccountType(account.source_name).typeName
-                ] || {}
-              ).name || ""
-            }}</el-tag>
-            <span style="float: right"
+            <span class="select-item-detail__item" style="color: #fff">
+              {{account.account_id.toAccountId()}}
+              <el-tag class="select-item-detail__item" :type="getAccountType(account.source_name).type">
+                {{(SourceTypeConfig[getAccountType(account.source_name).typeName] || {}).name || ""}}
+              </el-tag>
+            </span>
+           
+            <span class="select-item-detail__item" style="float: right"
               >可用：{{ getAvailCash(account.account_id) }}</span
             >
           </el-option>
@@ -154,8 +151,8 @@
             :label="source"
             :value="source"
           >
-            <span>{{ source }}</span>
-            <el-tag :type="mdAccountSource[source].type">{{
+            <span class="select-item-detail__item">{{ source }}</span>
+            <el-tag class="select-item-detail__item" :type="mdAccountSource[source].type">{{
               (SourceTypeConfig[mdAccountSource[source].typeName] || {}).name ||
               ""
             }}</el-tag>
@@ -180,7 +177,6 @@
           :disabled="isDisabled(item.key)"
           :class="item.key"
           size="mini"
-          ref="insturment-id-input"
           v-if="item.type === 'instrumentId'"
           v-model="form[item.key]"
           :fetch-suggestions="querySearch"
@@ -189,17 +185,58 @@
           "
         >
           <template v-slot="{ item }">
-            <div class="make-order-instrument-ids__warp">
-              <div class="make-order-instrument-id-item">
+            <div class="auto-complete-instrument-ids__warp">
+              <div class="auto-complete-instrument-id-item">
                 <span class="ticker">{{ item.instrument_id }}</span>
                 <span class="name">{{ item.instrument_name }}</span>
               </div>
-              <div class="make-order-instrument-id-item">
+              <div class="auto-complete-instrument-id-item">
                 {{ (item.exchange_id || "").toUpperCase() }}
               </div>
             </div>
           </template>
         </el-autocomplete>
+        <el-autocomplete
+          :disabled="isDisabled(item.key)"
+          :class="item.key"
+          size="mini"
+          v-if="item.type === 'instrumentIdInTickerSet'"
+          v-model="form[item.key]"
+          :fetch-suggestions="querySearchTickersInTickerSets"
+          @select="
+            (e) => handleSelectInstrumentId(item.key, item.exchangeIdKey, e)
+          "
+        >
+          <template v-slot="{ item }">
+            <div class="auto-complete-instrument-ids__warp">
+              <div class="auto-complete-instrument-id-item">
+                <span class="ticker">{{ item.instrument_id }}</span>
+                <span class="name">{{ item.instrument_name }}</span>
+              </div>
+              <div class="auto-complete-instrument-id-item">
+                {{ (item.exchange_id || "").toUpperCase() }}
+              </div>
+            </div>
+          </template>
+        </el-autocomplete>
+        <el-select 
+        :disabled="isDisabled(item.key)"
+        :class="item.key"
+        size="mini"
+        v-if="item.type === 'tickerSet'"
+        :value="form[item.key]"
+        @change="e => handleTickerSetInput(e, item)"
+        >
+          <el-option
+            v-for="item in tickerSets"
+            :key="item.name"
+            :label="item.name"
+            :value="item.name"
+          >
+            <span class="select-item-detail__item">{{ item.name }}</span>
+            <span class="select-item-detail__item">{{ (item.tickers || []).map(ticker => ticker.instrumentId).join(', ') }}</span>
+          </el-option>
+        </el-select>
       </el-col>
       <el-col :span="2" :offset="1" v-if="item.tip">
         <el-tooltip
@@ -221,7 +258,7 @@ import moment from "moment";
 import { mapState } from "vuex";
 import { Autocomplete } from "element-ui";
 
-import { deepClone } from "__gUtils/busiUtils";
+import { deepClone, findTargetFromArray } from "__gUtils/busiUtils";
 import {
   OffsetName,
   SideName,
@@ -229,12 +266,12 @@ import {
   ExchangeIds,
 } from "@kungfu-trader/kungfu-shared/config/tradingConfig";
 
-import instrumentsMixin from "@/assets/js/mixins/instrumentsMixin";
+import instrumentsMixin from "@/assets/mixins/instrumentsMixin";
 
 Vue.use(Autocomplete);
 
 export default {
-  mixins: [instrumentsMixin],
+  mixins: [ instrumentsMixin ],
 
   props: {
     configList: {
@@ -265,6 +302,7 @@ export default {
       type: Object,
       default: () => ({}),
     },
+
     method: {
       type: String,
       default: "add",
@@ -296,10 +334,11 @@ export default {
 
   computed: {
     ...mapState({
-      tdList: (state) => state.ACCOUNT.tdList || [],
-      tdAccountSource: (state) => state.BASE.tdAccountSource || {},
-      mdAccountSource: (state) => state.BASE.mdAccountSource || {},
-      accountsAsset: (state) => state.ACCOUNT.accountsAsset,
+      tdList: state => state.ACCOUNT.tdList || [],
+      tdAccountSource: state => state.BASE.tdAccountSource || {},
+      mdAccountSource: state => state.BASE.mdAccountSource || {},
+      accountsAsset: state => state.ACCOUNT.accountsAsset,
+      tickerSets: state => state.MARKET.tickerSets || []
     }),
   },
 
@@ -309,11 +348,23 @@ export default {
       handler(newVal) {
         this.$emit("input", newVal);
       },
-    }
+    },
   },
 
   methods: {
-    handleSelectInstrumentId(key, exchangeIdKey, item) {
+
+
+    handleTickerSetInput (e, item) {
+      this.$set(this.form, item.key, e)
+      const target = findTargetFromArray(this.tickerSets, 'name', e)
+
+      if (target) {
+        const tickers = target.tickers.map(ticker => `${ticker.instrumentId}_${ticker.exchangeId}`).join('=')
+        this.$set(this.form, item.tickersKey, tickers)
+      }
+    },
+
+    handleSelectInstrumentId (key, exchangeIdKey, item) {
       exchangeIdKey = exchangeIdKey || "exchangeId";
       const { instrument_id, exchange_id } = item;
       this.$set(this.form, key, instrument_id);
@@ -325,7 +376,7 @@ export default {
     },
 
     //日期必须要重写，不然有问题
-    handleChangeTimePicker(key) {
+    handleChangeTimePicker (key) {
       const theTime = this.form[key];
       let mt = moment(theTime);
       const date = mt.format("YYYYMMDD");
@@ -343,12 +394,12 @@ export default {
       this.$set(this.form, key, mt.valueOf());
     },
 
-    handleInputValue(key, e) {
+    handleInputValue (key, e) {
       this.$set(this.form, key, e);
     },
 
     //添加文件
-    handleSelectFile(targetKey) {
+    handleSelectFile (targetKey) {
       const dialog = remote.dialog;
       dialog.showOpenDialog(
         {
@@ -362,11 +413,11 @@ export default {
       );
     },
 
-    isDisabled(key) {
+    isDisabled (key) {
       return this.method === "update" && this.isUniKey(key);
     },
 
-    isUniKey(key) {
+    isUniKey (key) {
       if (typeof this.uniKey === "string") {
         return this.uniKey === key;
       } else {
@@ -375,32 +426,42 @@ export default {
     },
 
     //for paComponents
-    validate(cb) {
+    validate (cb) {
       this.$refs.extForm.validate(cb);
     },
 
-    initForm() {
-      this.configList.forEach((item) => {
-        const key = item.key;
-        const type = item.type;
-        const defaultVal = item.default;
-        if (this.form[key] === undefined || this.form[key] === "") {
-          if (type === "int") {
-            if (!+defaultVal) {
-              return;
+    initForm () {
+      this.configList
+        .forEach((item) => {
+          const key = item.key;
+          const type = item.type;
+          const defaultVal = item.default;
+
+          //用default初始化
+          if (this.form[key] === undefined || this.form[key] === "") {
+            if (type === "int") {
+              if (!+defaultVal) {
+                return;
+              }
+            }
+
+            if (item.default !== undefined) {
+              this.$set(this.form, key, item.default);
+            } else {
+              this.$set(this.form, key, "");
             }
           }
 
-          if (item.default !== undefined) {
-            this.$set(this.form, key, item.default);
-          } else {
-            this.$set(this.form, key, "");
+          //处理特殊 tickerSet
+          if (type === 'tickerSet' && item.tickersKey) {
+            if (this.form[key]) {
+              this.handleTickerSetInput(this.form[key], item)
+            }
           }
-        }
-      });
+        })
     },
 
-    resolvedSelectOrRatioOptions(item) {
+    resolvedSelectOrRatioOptions (item) {
       const options = item.options || item.data || [];
       if (typeof options !== "string" || !this.kungfuKeywordsData[options])
         return options;
@@ -413,7 +474,7 @@ export default {
       });
     },
 
-    buildValidators(item) {
+    buildValidators (item) {
       let validators = [];
 
       if (this.uniKey === item.key && this.method === "add") {
@@ -438,14 +499,14 @@ export default {
       return validators;
     },
 
-    getAvailCash(accountId) {
+    getAvailCash (accountId) {
       if (!accountId) return 0;
       const targetAccount = this.accountsAsset[accountId] || null;
       if (!targetAccount) return 0;
       return targetAccount.avail || 0;
     },
 
-    getAccountType(sourceName) {
+    getAccountType (sourceName) {
       return this.tdAccountSource[sourceName] || {};
     },
   },
@@ -453,28 +514,36 @@ export default {
 </script>
 
 <style lang="scss">
-.el-form {
-  &.ext-form {
-    .el-form-item {
-      margin-bottom: 10px;
 
-      &:last-child {
+.kf-ext-form {
+
+
+  .el-form {
+
+    &.ext-form {
+
+      .el-form-item {
         margin-bottom: 10px;
-      }
 
-      &.is-radio {
-        margin-bottom: 0;
-      }
+        &:last-child {
+          margin-bottom: 10px;
+        }
 
-      .el-radio {
-        margin-right: 18px;
-      }
+        &.is-radio {
+          margin-bottom: 0;
+        }
 
-      .el-radio__label {
-        font-size: 12px;
-        padding-left: 5px;
+        .el-radio {
+          margin-right: 18px;
+        }
+
+        .el-radio__label {
+          font-size: 12px;
+          padding-left: 5px;
+        }
       }
     }
   }
 }
+
 </style>
