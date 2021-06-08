@@ -40,13 +40,15 @@ export default {
                 const instruments = data['instruments'] || [];
 
                 if (!instruments || !instruments.length) {
-                    localStorage.setItem('instrumentsSavedDate', '')
+                    localStorage.setItem('instrumentsSavedDate', '');
                     return;
                 }       
                 
                 if (this.getIfSaveInstruments(instruments)) {
                     if (!this.dealInstrumentController) {
                         this.dealInstrumentController = true;
+                        console.time('DealInstruments')
+                        console.log("DealInstruments postMessage", instruments.length)
                         Workers.dealInstruments.postMessage({
                             instruments: instruments
                         });
@@ -57,6 +59,8 @@ export default {
 
             Workers.dealInstruments.onmessage = debounce(function (event) {
                 const { instruments } = event.data || {};
+                console.timeEnd('DealInstruments')
+                console.log("DealInstruments onmessage", instruments.length)
                 localStorage.setItem('instrumentsSavedDate', moment().format('YYYY-MM-DD-HH-mm'))
                 localStorage.setItem('instruments', JSON.stringify(instruments || []))
                 this.oldInstruments = instruments || []; //refresh old instruments
