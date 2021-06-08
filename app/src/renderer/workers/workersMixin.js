@@ -42,35 +42,35 @@ export default {
                 if (!instruments || !instruments.length) {
                     localStorage.setItem('instrumentsSavedDate', '');
                     return;
-                }       
+                }   
                 
-                if (this.getIfSaveInstruments(instruments)) {
-                    if (!this.dealInstrumentController) {
-                        this.dealInstrumentController = true;
-                        console.time('DealInstruments')
-                        console.log("DealInstruments postMessage", instruments.length)
-                        Workers.dealInstruments.postMessage({
-                            instruments: instruments
-                        });
-                    }
+                if (self.getIfSaveInstruments(instruments) && !self.dealInstrumentController) {
+                
+                    self.dealInstrumentController = true;
+                    console.time('DealInstruments')
+                    console.log("DealInstruments postMessage", instruments.length)
+                    Workers.dealInstruments.postMessage({
+                        instruments: instruments
+                    });
                 }
             })
 
 
-            Workers.dealInstruments.onmessage = debounce(function (event) {
+            Workers.dealInstruments.onmessage = event => {
                 const { instruments } = event.data || {};
                 console.timeEnd('DealInstruments')
                 console.log("DealInstruments onmessage", instruments.length)
-                localStorage.setItem('instrumentsSavedDate', moment().format('YYYY-MM-DD-HH-mm'))
+                localStorage.setItem('instrumentsSavedDate', moment().format('YYYY-MM-DD'))
                 localStorage.setItem('instruments', JSON.stringify(instruments || []))
-                this.oldInstruments = instruments || []; //refresh old instruments
-                this.dealInstrumentController = false;
-            })
+                self.oldInstruments = instruments || []; //refresh old instruments
+                self.dealInstrumentController = false;
+            }
         },
 
         
 
         getIfSaveInstruments (newInstruments) {
+
             if (newInstruments.length !== this.oldInstruments.length) {
                 return true;
             }
@@ -78,7 +78,7 @@ export default {
             const instrumentsSavedDate = localStorage.getItem('instrumentsSavedDate')
             if (!instrumentsSavedDate) {
                 return true
-            } else if (instrumentsSavedDate !== moment().format('YYYY-MM-DD-HH-mm')) {
+            } else if (instrumentsSavedDate !== moment().format('YYYY-MM-DD')) {
                 return true 
             } else {
                 return false
