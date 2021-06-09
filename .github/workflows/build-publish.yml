@@ -57,7 +57,7 @@ jobs:
 
       - name: Setup Kungfu environment
         run: |
-          pip3 install pipenv==2020.11.15
+          pip3 install pipenv==2021.5.29
           yarn install
         env:
           KF_SKIP_FALLBACK_BUILD: true
