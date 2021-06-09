@@ -49,6 +49,9 @@ export const switchProcess = (proc: any, messageBoard: any, loading: any) =>{
                     })
                     .catch((err: Error) => logger.error(err))
             } else if (proc.processId === 'ledger') {
+                
+                if (!!status) return;
+
                 loading.load(`${startOrStop} Ledger process`)
                 switchLedger(!status)
                     .then(() => {
@@ -187,7 +190,7 @@ export const processListObservable = () => combineLatest(
 
         return [
             {
-                process: "archive",
+                processId: "archive",
                 processName: colors.bold('_archive'),
                 typeName: colors.bgMagenta('Main'),
                 type: 'main',
