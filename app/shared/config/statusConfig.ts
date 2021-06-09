@@ -19,11 +19,12 @@ interface StatusConfig {
 }
 
 export const statusConfig: StatusConfig = { 
-    'online':    { name: isEnglish ? 'Running' : '运行中', color: 'bg-green', level: 1 },
-    'stopping':  { name: isEnglish ? 'Stopping' : '停止中', color: 'bg-gray', level: 0 },
-    'stopped':   { name: isEnglish ? 'Stopped' : '已停止', color: 'bg-gray', level: 0 },
-    'launching': { name: isEnglish ? 'Launching' : '启动中', color: 'bg-gray', level: 0 },
-    'errored':   { name: isEnglish ? 'Errored' : '错误', color: 'bg-red', level: -1 },
+    'online':           { name: isEnglish ? 'Running' : '运行中', color: 'bg-green', level: 1 },
+    'stopping':         { name: isEnglish ? 'Stopping' : '停止中', color: 'bg-gray', level: 0 },
+    'stopped':          { name: isEnglish ? 'Stopped' : '已停止', color: 'bg-gray', level: 0 },
+    'launching':        { name: isEnglish ? 'Launching' : '启动中', color: 'bg-gray', level: 0 },
+    'errored':          { name: isEnglish ? 'Errored' : '错误', color: 'bg-red', level: -1 },
+    'waiting restart':   { name: isEnglish ? 'Waiting' : '等待重启', color: 'bg-gray', level: 0 },
     '0':   { name: isEnglish ? 'Pending' : '等待中', color: 'bg-gray', level: 0 },
     '1':   { name: isEnglish ? 'Idle' : '无数据', color: 'bg-gray', level: 0 },
     '2':   { name: isEnglish ? 'Disconnected' : '已断开', color: 'bg-red', level: -1 },

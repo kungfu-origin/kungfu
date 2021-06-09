@@ -7,7 +7,9 @@
  * @FilePath: /kungfu/cli2/src/assets/scripts/actions/tradingDataActions.ts
  */ 
 import { buildTradingDataPipe } from '__io/kungfu/tradingData';
+import { watcher, transformOrderStatListToData } from '__io/kungfu/watcher';
 import { map } from 'rxjs/operators';
+import { ensureLedgerData } from '__gUtils/busiUtils';
 
 
 export const tradingDataObservale = (type: string, processId: string) => {
@@ -15,8 +17,10 @@ export const tradingDataObservale = (type: string, processId: string) => {
         map((data: any) => {
 
             const orders = data.orders[processId] || [];
-            const orderStat = data.orderStat;
-            const ordersResolve = dealOrdersFromWatcher(orders, orderStat);
+            const orderStat = ensureLedgerData(watcher.ledger.OrderStat, 'insert_time').slice(0, 1000);
+            const orderStatResolved = transformOrderStatListToData(orderStat);  
+
+            const ordersResolved = dealOrdersFromWatcher(orders, orderStatResolved);
 
             const trades = data.trades[processId] || [];
             const tradesResolve = dealTradesFromWathcer(trades);
@@ -27,7 +31,7 @@ export const tradingDataObservale = (type: string, processId: string) => {
             const assetsResolve = data.assets[processId] || [];
 
             return {
-                orders: ordersResolve,
+                orders: ordersResolved,
                 trades: tradesResolve,
                 positions: positionsResolve,
                 assets: assetsResolve

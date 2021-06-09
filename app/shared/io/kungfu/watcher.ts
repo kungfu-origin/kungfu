@@ -37,7 +37,7 @@ export const watcher: any = (() => {
 })()
 
 
-export const startGetKungfuWathcerStep = (interval = 500) => {
+export const startGetKungfuWatcherStep = (interval = 500) => {
     if (watcher.noWatcher) return;
     
     return setTimerPromiseTask(() => {

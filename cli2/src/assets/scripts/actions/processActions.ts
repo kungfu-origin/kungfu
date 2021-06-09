@@ -12,13 +12,14 @@ import { switchStrategy } from '__io/actions/strategy';
 
 import { getTdList, getMdList } from '__io/kungfu/account';
 import { getStrategyList } from '__io/kungfu/strategy';
+import { startGetKungfuWatcherStep } from '__io/kungfu/watcher';
 
 import { Observable, combineLatest } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-
 const colors = require('colors');
 
+startGetKungfuWatcherStep();
 
 export const switchProcess = (proc: any, messageBoard: any, loading: any) =>{
     const status = proc.status !== '--';
@@ -298,7 +299,6 @@ function preSwitchMain (status: boolean, messageBoard: any, loading: any) {
         loading && loading.load(`Start Archive, Please wait...`, 2);
         return startArchiveMakeTask()
             .then(() => {
-                console.log('---------')
                 loading && loading.stop();
                 return messageBoard.log(`Archive success!`, 2)
         })
