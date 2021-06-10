@@ -302,7 +302,7 @@ export const strategyListObservable = () => {
 function preSwitchMain (status: boolean, messageBoard: any, loading: any) {
     if (!status) {
         loading && loading.load(`Start Archive, Please wait...`, 2);
-        removeJournal(KF_HOME)
+        return removeJournal(KF_HOME)
             .then(() => startArchiveMakeTask())
             .then(() => {
                 loading && loading.stop();
