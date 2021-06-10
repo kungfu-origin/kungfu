@@ -3,8 +3,10 @@ import { dealStatus } from '@/assets/scripts/utils';
 
 import { watcher } from '__io/kungfu/watcher';
 import { setTimerPromiseTask } from '__gUtils/busiUtils';
-import { listProcessStatusWithDetail, startArchiveMakeTask } from '__gUtils/processUtils';
 import { logger } from '__gUtils/logUtils';
+import { removeJournal } from '__gUtils/fileUtils';
+import { listProcessStatusWithDetail, startArchiveMakeTask } from '__gUtils/processUtils';
+import { KF_HOME } from '__gConfig/pathConfig';
 
 import { switchMaster, switchLedger, switchCustomProcess } from '__io/actions/base';
 import { switchTd, switchMd } from '__io/actions/account';
@@ -37,7 +39,7 @@ export const switchProcess = (proc: any, messageBoard: any, loading: any) =>{
     switch(proc.type) {
         case 'main':
             if (proc.processId === 'master') {
-                //开启，要归档
+                //开启，要归档, cli 需要clearjournal
                 preSwitchMain(status, messageBoard, loading)
                     .then(() => {
                         loading.load(`${startOrStop} Master process`);
@@ -300,7 +302,8 @@ export const strategyListObservable = () => {
 function preSwitchMain (status: boolean, messageBoard: any, loading: any) {
     if (!status) {
         loading && loading.load(`Start Archive, Please wait...`, 2);
-        return startArchiveMakeTask()
+        removeJournal(KF_HOME)
+            .then(() => startArchiveMakeTask())
             .then(() => {
                 loading && loading.stop();
                 return messageBoard.log(`Archive success!`, 2)
