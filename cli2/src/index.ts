@@ -150,7 +150,7 @@ program
     })
 
 program
-    .command('clearlog')
+    .command('clearLog')
     .description('clear all logs (should do it often)')
     .action(() => {
         return removeFilesInFolder(LOG_DIR)

@@ -184,17 +184,15 @@ export const startProcess = (options: Pm2Options, no_ext = false): Promise<objec
         "output": buildProcessLogPath(options.name),
         "error": buildProcessLogPath(options.name),
         "mergeLogs": true,
-        "log_date_format": "YYYY-MM-DD HH:mm:ss",
+        "logDateFormat": "YYYY-MM-DD HH:mm:ss",
         "autorestart": options.autorestart || false,
-
-        "max_restarts": options.maxRestarts || 1,
-        "min_uptime": 300,
-        "restart_delay": 1000,
-        
+        "maxRestarts": options.maxRestarts || 1,
+        "minUptime": 300,
+        "restartDelay": 1000,
         "watch": options.watch || false,
         "force": options.force || false,
-        "exec_mode": "fork",
-        "kill_timeout": 16000,
+        "execMode": "fork",
+        "killTimeout": 16000,
         "env": {
             ...options.env,
             "KF_HOME": dealSpaceInPath(KF_HOME),
