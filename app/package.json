@@ -29,6 +29,7 @@
     "elec": "node .electron-builder/build.js",
     "prebuild": "yarn run clean && yarn run dist",
     "build": "yarn run elec && yarn run elec --pro",
+    "prebuild-cli": "yarn run clean && yarn run dist",
     "build-cli": "yarn run elec --cli"
   },
   "dependencies": {
