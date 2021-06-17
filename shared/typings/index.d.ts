@@ -509,7 +509,8 @@ interface AccountSettingItem {
     validator?: any[];
     tip?: string;
     data?: any[];
-    default?: any
+    default?: any;
+    risk?: boolean;
 }
 
 interface AccountSettingOrigin {
