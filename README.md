@@ -162,7 +162,8 @@ $HOME/.local/share/virtualenvs      # pipenv(unix) 存储的 Python 依赖
 
 
 # Version 版本
-
+* 2.3.6:
+    * 支持柜台风控设置
 * 2.3.5:
     * 增加数据通信进程，减小app渲染计算压力
     * 委托成交记录导出增加了精确时间字段
