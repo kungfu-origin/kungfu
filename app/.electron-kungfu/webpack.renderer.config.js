@@ -7,7 +7,6 @@ const { dependencies } = require('../package.json')
 const webpack = require('webpack')
 
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
 const OptimizeJsPlugin = require("optimize-js-plugin");
 const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;

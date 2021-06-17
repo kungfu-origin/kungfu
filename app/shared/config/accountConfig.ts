@@ -16,6 +16,8 @@ const dealValidator = (accountConfigItems: AccountSettingItem[]) => {
 export const getAccountSource = async (): Promise<StringToSource> => {
     let tdSources: Sources = {};
     let mdSources: Sources = {};
+    let riskSources: Sources = {};
+
     try {
         const configs = await getExtensionConfigs(EXTENSION_DIR);
         configs.forEach((c: any): void => {
@@ -25,10 +27,12 @@ export const getAccountSource = async (): Promise<StringToSource> => {
                 const typeName: string = config.type;
                 const type: string = (SourceTypeConfig[typeName] || {}).color || '';
         
-                let tdItemConfig: AccountSettingItem[] = deepClone(config.td_config || []); //不可以为 []
-                let mdItemConfig: AccountSettingItem[] = deepClone(config.md_config || []); //可以为 []
-                tdItemConfig = dealValidator(tdItemConfig);
+                let tdItemConfig: AccountSettingItem[] = deepClone(config.td_config.filter((configItem: AccountSettingItem) => !configItem.risk) || []);
+                let mdItemConfig: AccountSettingItem[] = deepClone(config.md_config || []);
+                let riskItemConfig: AccountSettingItem[] = deepClone(config.td_config.filter((configItem: AccountSettingItem) => configItem.risk) || []);
+                tdItemConfig = dealValidator(tdItemConfig); 
                 mdItemConfig = dealValidator(mdItemConfig);
+                riskItemConfig = dealValidator(riskItemConfig);
 
                 const tdAccountSetting: AccountSetting = {
                     ...config,
@@ -47,18 +51,29 @@ export const getAccountSource = async (): Promise<StringToSource> => {
                     key: config.key,
                     config: mdItemConfig
                 }
+                
+                const riskAccountSetting: AccountSetting = {
+                    ...config,
+                    source,
+                    type,
+                    typeName,
+                    key: config.key,
+                    config: riskItemConfig
+                }
 
-
-                if(config.td_config !== undefined) tdSources[source] = tdAccountSetting;
-                if(config.md_config !== undefined) mdSources[source] = mdAccoutSetting;
+                if (tdItemConfig.length) tdSources[source] = tdAccountSetting;
+                if (mdItemConfig.length) mdSources[source] = mdAccoutSetting;
+                if (riskItemConfig.length) riskSources[source] = riskAccountSetting;
             }
         })
     } catch (err) {
         tdSources = {}
         mdSources = {}
+        riskSources = {}
     }
     return {
         td: tdSources,
-        md: mdSources
+        md: mdSources,
+        risk: riskSources
     }
 }

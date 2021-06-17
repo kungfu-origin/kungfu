@@ -3,7 +3,7 @@
         <tr-dashboard title="" >
             <div slot="dashboard-header">
                 <tr-dashboard-header-item v-if="proMode">
-                    <span class="mouse-over" style="font-weight: 600; font-size: 11px" title="添加选股算法" @click="handleAddTask">选股</span>
+                    <span class="mouse-over text-icon" title="添加选股算法" @click="handleAddTask">选股</span>
                 </tr-dashboard-header-item>
                 <tr-dashboard-header-item>
                     <el-button size="mini" @click="handleAddTicker" title="添加">添加</el-button>

@@ -105,11 +105,11 @@ import { switchMd, deleteMd } from '__io/actions/account';
 import { loopToRunProcess, ifProcessRunning } from '__gUtils/busiUtils';
 
 import baseMixin from '@/assets/mixins/baseMixin';
-import mdTdMixin from '../js/mdTdMixin';
+import mdTdRiskMixin from '../js/mdTdRiskMixin';
 import openLogMixin from '@/assets/mixins/openLogMixin';
 
 export default {
-    mixins: [ baseMixin, mdTdMixin, openLogMixin ],
+    mixins: [ baseMixin, mdTdRiskMixin, openLogMixin ],
 
     data () {
         this.tdmdType = 'md';

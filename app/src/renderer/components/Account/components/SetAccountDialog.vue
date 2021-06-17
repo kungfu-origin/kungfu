@@ -1,7 +1,7 @@
 <template>
     <el-dialog 
     width="540px" 
-    :title=" (method == 'add' ? '添加' : '设置') + source + '柜台账户'"  
+    :title="resolveDialogName"  
     :visible="visible" 
     :close-on-click-modal="false"
     :close-on-press-escape="true"
@@ -95,6 +95,15 @@ export default {
         accountSourceKey () {
             return this.accountSourceConfig.key || ''
         },
+
+        resolveDialogName () {
+            if (this.type == 'risk') {
+                return `设置${this.source}风控`
+            } else {
+                const methodResolved = this.method == 'add' ? '添加' : '设置';
+                return `${methodResolved}${this.source}柜台账户`
+            }
+        },
     },
 
     methods:{
@@ -115,6 +124,7 @@ export default {
         getAddUpdateTarget () {
             if(this.type === 'td') return this.addUpdateTd();
             else if(this.type === 'md') return this.addUpdateMd();
+            else if (this.type === 'risk') return this.addUpdateRisk();
             else return Promise.resolve(true)
         },
 
@@ -125,6 +135,17 @@ export default {
             if(this.method == 'add') { //添加账户
                 return addTd(accountId, JSON.stringify(formValue))
             } else{ //编辑账户
+                return updateTdConfig(accountId, JSON.stringify(formValue))
+            }
+        },
+
+        addUpdateRisk () {
+            const accountId = `${this.source}_${this.postForm[this.accountSourceKey]}`;
+            const formValue = this.postForm || {};
+
+            if (this.method == 'add') {
+                return Promise.reject(new Error('risk setting no add set way!'))
+            } else {
                 return updateTdConfig(accountId, JSON.stringify(formValue))
             }
         },

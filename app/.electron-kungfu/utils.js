@@ -51,8 +51,8 @@ const getViewsConfig = () => {
   })
   .forEach(file => {
     entry[file] = path.join(__dirname, `../src/renderer/views/${file}/main.js`),
-    plugins.push(  new HtmlWebpackPlugin({
-      filename: 'index.html',
+    plugins.push( new HtmlWebpackPlugin({
+      filename: `${file}.html`,
       template: path.resolve(__dirname, '../src/index.ejs'),
       minify: {
         collapseWhitespace: true,
