@@ -6,14 +6,8 @@ import {
 
     dealGatewayStates, 
     transformTradingItemListToData, 
-    transformOrderTradeListToData,
-    transformOrderInputListToData, 
     transformOrderStatListToData, 
     transformAssetItemListToData,
-
-    dealOrderInput,
-    dealOrder,
-    dealTrade,
     dealPos,
     dealAsset,
     dealSnapshot,
@@ -41,18 +35,7 @@ const appDataSubject: any = new Subject();
     };
 
     setTimerPromiseTask(async () => {
-
             const ledgerData = watcher.ledger;
-
-            //限制最大内存/cpu使用
-            const orderInputOrigins = ensureLedgerData(ledgerData.OrderInput, 'insert_time').slice(0, 1000);
-            const orderOrigins = ensureLedgerData(ledgerData.Order, 'update_time').slice(0, 1000);
-            const tradeOrigins = ensureLedgerData(ledgerData.Trade, 'trade_time').slice(0, 1000);
-
-            const accountStrategyOrderInputs = await transformOrderInputListToData(orderInputOrigins, dealOrderInput)
-            const accountStrategyOrders = await transformOrderTradeListToData(orderOrigins, dealOrder);
-            const accountStrategyTrades = await transformOrderTradeListToData(tradeOrigins, dealTrade);
-
             const positions = ensureLedgerData(ledgerData.Position).map((item: PosOriginData) => dealPos(item));
             const positionsByTicker = transformTradingItemListToData(positions, 'ticker');
             const assets = ensureLedgerData(ledgerData.Asset).map((item: AssetOriginData) => dealAsset(item));
@@ -61,8 +44,6 @@ const appDataSubject: any = new Subject();
             const quotes = ensureLedgerData(ledgerData.Quote);
 
             const accountTradingDataPipeData = {
-                orders: accountStrategyOrders.account || {},
-                trades: accountStrategyTrades.account || {},
                 positions: transformTradingItemListToData(positions, 'account'),
                 positionsByTicker,
                 assets: transformAssetItemListToData(assets, 'account'),
@@ -71,9 +52,6 @@ const appDataSubject: any = new Subject();
             }
     
             const strategyTradingDataPipeData = {
-                orderInputs: accountStrategyOrderInputs.strategy || {},
-                orders: accountStrategyOrders.strategy || {},
-                trades: accountStrategyTrades.strategy || {},
                 positions: transformTradingItemListToData(positions, 'strategy'),
                 assets: transformAssetItemListToData(assets, 'strategy'),
                 pnl: transformTradingItemListToData(pnl, 'strategy'),
@@ -110,7 +88,7 @@ const appDataSubject: any = new Subject();
             const stateData = watcher.state;
             const ledgerData = watcher.ledger;
             const timeValueList = ensureLedgerData(stateData.TimeValue.filter('tag_c', 'task'), 'update_time').slice(0, 100)
-            const orderStat = ensureLedgerData(ledgerData.OrderStat, 'insert_time').slice(0, 1000);
+            const orderStat = ensureLedgerData(ledgerData.OrderStat).slice(0, 1000);
             const orderStatResolved = transformOrderStatListToData(orderStat);  
 
             const instruments = ensureLedgerData(ledgerData.Instrument);

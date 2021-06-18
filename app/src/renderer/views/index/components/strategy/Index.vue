@@ -125,6 +125,8 @@ import MainContent from '@/components/Layout/MainContent';
 
 import { buildTradingDataStrategyPipeByDaemon } from '@/ipcMsg/daemon';
 import { buildOrderStatDataPipe } from '__io/kungfu/tradingData';
+import { watcher, dealOrderInput, dealOrder, dealTrade } from '__io/kungfu/watcher';
+import { encodeKungfuLocation } from '__io/kungfu/kungfuUtils';
 
 import accountStrategyMixins from '@/views/index/js/accountStrategyMixins';
 
@@ -157,18 +159,36 @@ export default {
             if (this.isHistoryData('order')) {
                 this.orders = this.getHistoryData('order')
             } else {
-                const orders = data['orders'][this.strategyId];
+                const orders = watcher
+                    .ledger
+                    .Order
+                    .filter('dest', this.currentLocationUID)
+                    .sort('update_time')
+                    .slice(0, 100)
+                    .map(item => dealOrder(item));
                 this.orders = Object.freeze(orders || []);
             }
 
             if (this.isHistoryData('trade')) {
                 this.trades = this.getHistoryData('trade')
             } else {
-                const trades = data['trades'][this.strategyId];
+                const trades = watcher
+                    .ledger
+                    .Trade
+                    .filter('dest', this.currentLocationUID)
+                    .sort('trade_time')
+                    .slice(0, 100)
+                    .map(item => dealTrade(item));
                 this.trades = Object.freeze(trades || []);
             }
 
-            const orderInputs = data['orderInputs'][this.strategyId];
+            const orderInputs = watcher
+                    .ledger
+                    .OrderInput
+                    .filter('source', this.currentLocationUID) //order input is special
+                    .sort('insert_time')
+                    .slice(0, 100)
+                    .map(item => dealOrderInput(item));
             this.orderInputs = Object.freeze(orderInputs);
 
             const positions = data['positions'][this.strategyId];
@@ -193,7 +213,7 @@ export default {
         this.tradingDataPipe && this.tradingDataPipe.unsubscribe();
         this.orderStatPipe && this.orderStatPipe.unsubscribe();
     },
-   
+
     computed: {
         ...mapState({
             currentStrategy: state => state.STRATEGY.currentStrategy,
@@ -205,7 +225,12 @@ export default {
         
         addTime () {
             return this.currentStrategy.add_time
-        }
+        },
+
+        currentLocationUID () {
+            if (!this.strategyId) return 0;
+            return watcher.getLocationUID(encodeKungfuLocation(this.strategyId, 'strategy'));
+        },
     },
 
     components: {
@@ -213,6 +238,7 @@ export default {
         Pos, Log, Pnl,
         MainContent
     },
+   
 
     methods:{
         showCurrentIdInTabName (currentTabName, target) {
