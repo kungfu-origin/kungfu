@@ -90,6 +90,27 @@ Napi::Value Watcher::GetLocator(const Napi::CallbackInfo &info) {
   return std::dynamic_pointer_cast<Locator>(get_locator())->get_js_locator();
 }
 
+Napi::Value Watcher::GetLocation(const Napi::CallbackInfo &info) {
+  auto location = FindLocation(info);
+  if (not location) {
+    return Napi::Value();
+  }
+  auto locationObj = Napi::Object::New(info.Env());
+  locationObj.Set("category", Napi::String::New(info.Env(), get_category_name(location->category)));
+  locationObj.Set("group", Napi::String::New(info.Env(), location->group));
+  locationObj.Set("name", Napi::String::New(info.Env(), location->name));
+  locationObj.Set("mode", Napi::String::New(info.Env(), get_mode_name(location->mode)));
+  locationObj.Set("uname", Napi::String::New(info.Env(), location->uname));
+  locationObj.Set("uid", Napi::Number::New(info.Env(), location->uid));
+  locationObj.Set("locator", std::dynamic_pointer_cast<Locator>(location->locator)->get_js_locator());
+  return locationObj;
+}
+
+Napi::Value Watcher::GetLocationUID(const Napi::CallbackInfo &info) {
+  auto target_location = ExtractLocation(info, 0, get_locator());
+  return Napi::Number::New(info.Env(), target_location->uid);
+}
+
 Napi::Value Watcher::GetConfig(const Napi::CallbackInfo &info) { return config_ref_.Value(); }
 
 Napi::Value Watcher::GetHistory(const Napi::CallbackInfo &info) { return history_ref_.Value(); }
@@ -142,22 +163,6 @@ Napi::Value Watcher::RequestStop(const Napi::CallbackInfo &info) {
   auto app_location = ExtractLocation(info, 0, get_locator());
   get_writer(app_location->uid)->mark(now(), RequestStop::tag);
   return Napi::Value();
-}
-
-Napi::Value Watcher::GetLocation(const Napi::CallbackInfo &info) {
-  auto location = FindLocation(info);
-  if (not location) {
-    return Napi::Value();
-  }
-  auto locationObj = Napi::Object::New(info.Env());
-  locationObj.Set("category", Napi::String::New(info.Env(), get_category_name(location->category)));
-  locationObj.Set("group", Napi::String::New(info.Env(), location->group));
-  locationObj.Set("name", Napi::String::New(info.Env(), location->name));
-  locationObj.Set("mode", Napi::String::New(info.Env(), get_mode_name(location->mode)));
-  locationObj.Set("uname", Napi::String::New(info.Env(), location->uname));
-  locationObj.Set("uid", Napi::Number::New(info.Env(), location->uid));
-  locationObj.Set("locator", std::dynamic_pointer_cast<Locator>(location->locator)->get_js_locator());
-  return locationObj;
 }
 
 Napi::Value Watcher::PublishState(const Napi::CallbackInfo &info) {
@@ -230,6 +235,7 @@ void Watcher::Init(Napi::Env env, Napi::Object exports) {
                                         InstanceMethod("step", &Watcher::Step),                                   //
                                         InstanceMethod("requestStop", &Watcher::RequestStop),                     //
                                         InstanceMethod("getLocation", &Watcher::GetLocation),                     //
+                                        InstanceMethod("getLocationUID", &Watcher::GetLocationUID),               //
                                         InstanceMethod("publishState", &Watcher::PublishState),                   //
                                         InstanceMethod("isReadyToInteract", &Watcher::IsReadyToInteract),         //
                                         InstanceMethod("issueOrder", &Watcher::IssueOrder),                       //
