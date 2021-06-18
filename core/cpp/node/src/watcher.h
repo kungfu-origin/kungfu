@@ -29,6 +29,10 @@ public:
 
   Napi::Value GetLocator(const Napi::CallbackInfo &info);
 
+  Napi::Value GetLocation(const Napi::CallbackInfo &info);
+
+  Napi::Value GetLocationUID(const Napi::CallbackInfo &info);
+
   Napi::Value GetConfig(const Napi::CallbackInfo &info);
 
   Napi::Value GetHistory(const Napi::CallbackInfo &info);
@@ -56,8 +60,6 @@ public:
   Napi::Value Step(const Napi::CallbackInfo &info);
 
   Napi::Value RequestStop(const Napi::CallbackInfo &info);
-
-  Napi::Value GetLocation(const Napi::CallbackInfo &info);
 
   Napi::Value PublishState(const Napi::CallbackInfo &info);
 
