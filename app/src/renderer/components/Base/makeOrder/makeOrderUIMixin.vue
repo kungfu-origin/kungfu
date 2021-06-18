@@ -21,8 +21,10 @@
                             :key="account.account_id.toAccountId()"
                             :label="account.account_id.toAccountId()"
                             :value="account.account_id">
-                            <span style="color: #fff">{{account.account_id.toAccountId()}}</span>
-                            <el-tag :type="getAccountType(account.source_name).type">{{(SourceTypeConfig[getAccountType(account.source_name).typeName] || {}).name || ''}}</el-tag>
+                            <span>
+                                <span style="color: #fff">{{account.account_id.toAccountId()}}</span>
+                                <el-tag :type="getAccountType(account.source_name).type">{{(SourceTypeConfig[getAccountType(account.source_name).typeName] || {}).name || ''}}</el-tag>
+                            </span>
                             <span style="float: right">可用：{{getAvailCash(account.account_id)}}</span>
                         </el-option>
                     </el-select>

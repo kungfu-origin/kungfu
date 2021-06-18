@@ -7,7 +7,7 @@ import AddTickerDialog from '@/components/MarketFilter/components/AddTickerDialo
 import { checkAllMdProcess, findTargetFromArray, delayMiliSeconds, debounce } from '__gUtils/busiUtils';
 import { sendDataToDaemonByPm2 } from "__gUtils/processUtils";
 import { getTickerSets, addSetTickerSet, removeTickerSetByName } from '__io/actions/market';
-import { kungfuSubscribeTicker } from '__io/kungfu/makeCancelOrder';
+import { kungfuSubscribeInstrument } from '__io/kungfu/makeCancelOrder';
 import { watcher } from '__io/kungfu/watcher';
 
 export default {
@@ -143,7 +143,7 @@ export default {
         subscribeAllTickers (slience = true) {
             if (!watcher.isLive()) return;
             const tickers = this.flatternTickers || [];
-            this.subscribeTickers(tickers, slience)
+            this.subscribeTickers(tickers, slience);
             sendDataToDaemonByPm2('MAIN_RENDERER_SUBSCRIBED_TICKERS', tickers)
         },
 
@@ -169,7 +169,7 @@ export default {
             for (i; i < len; i++) {
                 const ticker = tickers[i];
                 const { instrumentId, source, exchangeId } = ticker;
-                kungfuSubscribeTicker(source, exchangeId, instrumentId)
+                kungfuSubscribeInstrument(source, exchangeId, instrumentId)
                 await delayMiliSeconds(300)
             }
 

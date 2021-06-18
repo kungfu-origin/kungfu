@@ -4,13 +4,13 @@
             <el-row style="height: 55%">
                 <el-col :span="14">
                     <el-tabs :value="currentAccountTabName" type="border-card" @tab-click="handleAccountTabClick">
-                        <el-tab-pane :lazy="true" label="账户列表" name="tdList">
+                        <el-tab-pane :lazy="true" :label="getCurrentAccountTabLabelName('tdList')" name="tdList">
                             <TdAccount></TdAccount>
                         </el-tab-pane>
-                        <el-tab-pane :lazy="true" label="行情源" name="mdList">
+                        <el-tab-pane :lazy="true" :label="getCurrentAccountTabLabelName('mdList')" name="mdList">
                             <MdAccount></MdAccount>
                         </el-tab-pane>
-                        <el-tab-pane :lazy="true" label="交易标的" name="tickerList">
+                        <el-tab-pane :lazy="true" :label="getCurrentAccountTabLabelName('holdInstruments')" name="holdInstruments">
                             <Pos 
                             :noTitle="true"
                             moduleType="acocunt"
@@ -19,7 +19,7 @@
                             @activeTicker="setCurrentTicker"
                             />
                         </el-tab-pane>
-                        <el-tab-pane :lazy="false" v-if="proMode" label="算法任务" name="tradingTask" >
+                        <el-tab-pane :lazy="false" v-if="proMode" :label="getCurrentAccountTabLabelName('tradingTask')" name="tradingTask" >
                             <Task :noTitle="true"></Task>
                         </el-tab-pane>
                     </el-tabs>
@@ -61,7 +61,7 @@
                 </el-col>
             </el-row>
             <el-row style="height: 45%">
-                <el-col :span="18">
+                <el-col :span="14">
                     <el-tabs v-model="currentOrdesTabName" type="border-card">
                         <el-tab-pane :lazy="true" :label="`全部委托 ${showCurrentIdInTabName(currentOrdesTabName, 'orders')}`" name="orders">
                             <OrderRecord
@@ -92,6 +92,12 @@
                         </el-tab-pane>
                     </el-tabs>
                 </el-col>
+                <el-col :span="4">
+                    <OrderBook
+                        :marketData="quoteData"
+                        @makeOrder="handleMakeOrderByOrderBook"
+                    ></OrderBook>
+                </el-col>
                 <el-col :span="6">
                     <MakeOrderDashboard
                         :currentId="currentId"
@@ -117,10 +123,11 @@ import Pnl from '@/components/Base/tradingData/pnl/Index';
 import MakeOrderDashboard from '@/components/Base/makeOrder/MakeOrderDashboard';
 import MainContent from '@/components/Layout/MainContent';
 import TaskRecord from '@/components/Task/TaskRecord';
+import OrderBook from '@/components/MarketFilter/components/OrderBook';
 
 import { watcher, transformPositionByTickerByMerge, dealOrder, dealTrade } from '__io/kungfu/watcher';
 import { originOrderTradesFilterByDirection } from '__gUtils/busiUtils';
-import { buildTradingDataAccountPipeByDaemon } from '@/ipcMsg/daemon';
+import { buildTradingDataAccountPipeByDaemon, buildMarketDataPipeByDaemon } from '@/ipcMsg/daemon';
 import { buildOrderStatDataPipe, buildAllOrdersTradesDataPipe } from '__io/kungfu/tradingData';
 
 import accountStrategyMixins from '@/views/index/js/accountStrategyMixins';
@@ -141,6 +148,7 @@ export default {
             positions: Object.freeze([]),
             positionsByTicker: Object.freeze([]),
             orderStat: Object.freeze({}),
+            quoteData: Object.freeze({}),
 
             currentOrdesTabName: "orders",
             currentTradesPnlTabNum: "trades",
@@ -154,7 +162,8 @@ export default {
         OrderRecord, TradeRecord,
         MakeOrderDashboard,
         MainContent,
-        TaskRecord
+        TaskRecord,
+        OrderBook
     },
 
     computed:{
@@ -172,7 +181,7 @@ export default {
         ]),
 
         currentTickerResolved () {
-            if (this.currentAccountTabName === 'tickerList') {
+            if (this.currentAccountTabName === 'holdInstruments') {
                 return this.currentTicker
             } else {
                 return null
@@ -187,7 +196,7 @@ export default {
         },
 
         moduleType () {
-            if (this.currentAccountTabName === 'tickerList') {
+            if (this.currentAccountTabName === 'holdInstruments') {
                 return 'ticker'
             } else {
                 return 'account'
@@ -203,7 +212,11 @@ export default {
         },
 
         currentTickerId () {
-            return `${this.currentTicker.instrumentId}_${this.currentTicker.directionOrigin}`
+            if (this.currentTicker.instrumentId) {
+                return `${this.currentTicker.instrumentId}_${this.currentTicker.directionOrigin}`
+            } else {
+                return ''
+            }
         },
 
         currentTaskIdInTab () {
@@ -234,8 +247,9 @@ export default {
             this.positionsByTicker = Object.freeze(transformPositionByTickerByMerge(positionsByTicker, 'account') || []);
             this.initSetCurrentTicker(this.positionsByTicker);
 
-            if (this.moduleType === 'ticker') {
-                const positionsByTickerForAccount = Object.values(positionsByTicker).filter(item => !!item.accountId && !item.clientId);
+            if (this.moduleType === 'ticker' && this.currentTickerId) {
+                const positionsByTickerForAccount = positionsByTicker[this.currentTickerId]
+                    .filter(item => (!!item.accountId && !item.clientId));
                 this.positions = Object.freeze(positionsByTickerForAccount)
             }
         })
@@ -244,6 +258,10 @@ export default {
             if (this.moduleType === 'ticker') {
                 this.dealTradingDataByTiker(data)
             }
+        })
+
+        this.marketDataPipe = buildMarketDataPipeByDaemon().subscribe(data => {
+            this.quoteData = Object.freeze(data);
         })
 
         
@@ -257,12 +275,30 @@ export default {
         this.tradingDataPipe && this.tradingDataPipe.unsubscribe();
         this.orderStatPipe && this.orderStatPipe.unsubscribe();
         this.allOrderTradesPipe && this.allOrderTradesPipe.unsubscribe();
+        this.marketDataPipe && this.marketDataPipe.unsubscribe();
     },
 
     methods: {
 
         handleAccountTabClick (tab) {
             this.$store.dispatch('setCurrentAccountTabName', tab.name)
+        },
+
+        getCurrentAccountTabLabelName (name) {
+            const isActive = this.currentAccountTabName === name;
+            const isHoldInstrumentActive = this.currentAccountTabName === 'holdInstruments';
+
+            switch (name) {
+                case "tdList":
+                    return isHoldInstrumentActive ? "账户列表" : `账户列表 ${this.currentId || ''}`;
+                case "mdList":
+                    return "行情源"
+                case "holdInstruments":
+                    return !isActive ? "持有标的" : `持有标的 ${(this.currentTickerResolved || {}).id || ''}`;
+                case "tradingTask":
+                    return !isActive ? "算法任务" : `算法任务 ${this.currentTaskId || ''}`;
+
+            }
         },
 
         showCurrentIdInTabName (currentTabName, target) {
@@ -325,7 +361,7 @@ export default {
         dealTradingDataByTiker () {
             const { instrumentId, directionOrigin } = this.currentTicker;
 
-            if (!instrumentId) {
+            if (!this.currentTickerId) {
                 this.orders = Object.freeze([]);
                 this.trades = Object.freeze([]);
                 this.positions = Object.freeze([]);

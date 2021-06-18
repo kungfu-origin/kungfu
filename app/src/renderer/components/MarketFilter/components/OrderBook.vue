@@ -1,10 +1,11 @@
 <template>
-    <tr-dashboard :title="`多档行情 ${instrumentId}`">
+    <tr-dashboard :title="`行情 ${instrumentId}`">
         <div class="kf-order-book__warp">
             <div class="ask__warp order-book-part__warp">
                 <div class="order-line" @click="handleSelectQuote(askPrices[9 - index], 0)" v-for="(item, index) in new Array(10)" :key="index">
-                    <span class="volume">{{ dealNum(askVolumes[9 - index]) }}</span>
+                    <span class="volume buy"></span>
                     <span class="price green">{{ dealNum(askPrices[9 - index]) }}</span>
+                    <span class="volume sell">{{ dealNum(askVolumes[9 - index]) }}</span>
                 </div>
             </div>
             <div class="last-price">
@@ -13,13 +14,15 @@
                     :className="{}"
                     :theKey="`${tickerId}_orderbook`"   
                     :num="lastPrice"
+                    :key="`${tickerId}_orderbook`"
                     >
                 </tr-blink-num>
             </div> 
             <div class="bid__warp order-book-part__warp">
                 <div class="order-line" @click="handleSelectQuote(bidPrices[index], 1)" v-for="(item, index) in new Array(10)" :key="index">
-                    <span class="volume">{{ dealNum(bidVolumes[index]) }}</span>
+                    <span class="volume buy">{{ dealNum(bidVolumes[index]) }}</span>
                     <span class="price red">{{ dealNum(bidPrices[index]) }}</span>
+                    <span class="volume sell"></span>
                 </div>
             </div>
         </div>
@@ -35,12 +38,24 @@ export default {
         marketData: {
             type: Object,
             default: () => ({})
-        },
+        }
+    },
 
-        tickerId: {
-            type: String,
-            default: ''
-        },
+    data () {
+
+        return {
+            tickerId: "",
+        }
+    },
+
+    mounted () {
+        this.$bus.$on('update:orderbook-tickerId', ({ instrumentId, exchangeId }) => {
+            this.tickerId = `${exchangeId}_${instrumentId}`
+        })
+    },
+
+    destroyed () {
+        this.$bus.$off('update:order-book-tickerId')
     },
 
     computed: {
@@ -120,7 +135,6 @@ export default {
         line-height: 48px;
         font-size: 24px;
         font-weight: 600;
-        padding: 0 10px;
         box-sizing: border-box;
         display: flex;
 
@@ -128,6 +142,7 @@ export default {
             font-size: 16px;
             display: inline-block;
             width: 60px;
+            padding-left: 10px;
         }
 
         span {
@@ -142,6 +157,9 @@ export default {
     }
 
     .price {
+        box-sizing: border-box;
+        padding-right: 10px;
+        justify-content: flex-end;
 
         &.red {
             color: $red;
@@ -152,24 +170,48 @@ export default {
         }
     }
 
+    .volume {
+        cursor: pointer;
+        box-sizing: border-box;
+
+        &.buy {
+            background: $red;
+            color: $white;
+            padding-right: 10px;
+            justify-content: flex-end;
+
+            &:hover {
+                background: $red1;
+            }
+        }
+
+        &.sell {
+            background: $green;
+            color: $white;
+            text-align: left !important;
+            justify-content: flex-start;
+            padding-left: 10px;
+
+             &:hover {
+                background: $green2;
+            }
+        }
+    }
+
     .order-line {
         flex: 1;
         display: flex;
-        padding: 0 10px;
         box-sizing: border-box;
 
         &:hover{
             background: $bg_light;
         }
 
-        span {
-            flex: 1;
-            color: $font;
-            height: 100%;
+        span.volume, span.price {
             display: flex;
-            text-align: right;
+            flex: 1;
+            height: 100%;
             align-items: center;
-            justify-content: flex-end;
             font-family: Consolas, Monaco, monospace,"Microsoft YaHei",sans-serif;
         }
     }

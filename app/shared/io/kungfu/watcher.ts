@@ -214,7 +214,7 @@ export const transformTradingItemListToData = (list: any[], type: string) => {
 
     } else if (type === 'quote') {
         list.kfForEach((item: any) => {
-            const instrumentId = `${item.exchangeId}_${item.instrumentId}_${item.sourceId}`;
+            const instrumentId = `${item.exchangeId}_${item.instrumentId}`;
             if (!instrumentId) return;
             data[instrumentId] = item;
         })

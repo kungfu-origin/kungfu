@@ -60,6 +60,10 @@ export default {
             })
         },
 
+        handleMakeOrderByOrderBook (data) {
+            console.log(data)
+        },
+
         buildMakeOrderWin () {
             //仅在strategy时创建窗口
             if (!window.makeOrderWin && this.moduleType === 'strategy') {

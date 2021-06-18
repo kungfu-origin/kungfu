@@ -62,7 +62,8 @@ export const getAccountSource = async (): Promise<StringToSource> => {
                 }
 
                 if (tdItemConfig.length) tdSources[source] = tdAccountSetting;
-                if (mdItemConfig.length) mdSources[source] = mdAccoutSetting;
+                //sim md_config 为 []
+                if (mdItemConfig.length || config.name === 'sim') mdSources[source] = mdAccoutSetting;
                 if (riskItemConfig.length) riskSources[source] = riskAccountSetting;
             }
         })
