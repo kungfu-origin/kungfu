@@ -10,6 +10,12 @@
                         <el-tab-pane :lazy="true" :label="getCurrentAccountTabLabelName('mdList')" name="mdList">
                             <MdAccount></MdAccount>
                         </el-tab-pane>
+                        <el-tab-pane :lazy="true" :label="getCurrentAccountTabLabelName('marketdata')" name="marketdata">
+                                <MarketData 
+                                :marketData="quoteData" 
+                                @clickQuote="handleClickQuote"
+                            ></MarketData>
+                        </el-tab-pane>
                         <el-tab-pane :lazy="true" :label="getCurrentAccountTabLabelName('holdInstruments')" name="holdInstruments">
                             <Pos 
                             :noTitle="true"
@@ -122,6 +128,7 @@ import MakeOrderDashboard from '@/components/Base/makeOrder/MakeOrderDashboard';
 import MainContent from '@/components/Layout/MainContent';
 import TaskRecord from '@/components/Task/TaskRecord';
 import OrderBook from '@/components/MarketFilter/components/OrderBook';
+import MarketData from '@/components/MarketFilter/components/MarketData';
 
 import { watcher, transformPositionByTickerByMerge, dealOrder, dealTrade } from '__io/kungfu/watcher';
 import { originOrderTradesFilterByDirection } from '__gUtils/busiUtils';
@@ -162,7 +169,8 @@ export default {
         MakeOrderDashboard,
         MainContent,
         TaskRecord,
-        OrderBook
+        OrderBook,
+        MarketData
     },
 
     computed:{
@@ -272,6 +280,10 @@ export default {
 
     methods: {
 
+        handleClickQuote (quote) {
+            console.log(quote)
+        },
+
         handleAccountTabClick (tab) {
             this.$store.dispatch('setCurrentAccountTabName', tab.name)
         },
@@ -285,6 +297,8 @@ export default {
                     return isHoldInstrumentActive ? "账户列表" : `账户列表 ${this.currentId || ''}`;
                 case "mdList":
                     return "行情源"
+                case "marketdata":
+                    return "行情订阅"
                 case "holdInstruments":
                     return !isActive ? "持有标的" : `持有标的 ${(this.currentTickerResolved || {}).id || ''}`;
                 case "tradingTask":

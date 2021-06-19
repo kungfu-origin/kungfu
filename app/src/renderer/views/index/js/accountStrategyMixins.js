@@ -73,9 +73,15 @@ export default {
             console.log(data)
         },
 
+        isMakeOrderWinIsDestroyed () {
+            if (!window.makeOrderWin) return true;
+            if (window.makeOrderWin.isDestroyed()) return true;
+            return false;
+        },
+
         buildMakeOrderWin (orderInput) {
             //仅在strategy时创建窗口
-            if (!window.makeOrderWin && this.moduleType === 'strategy') {
+            if ((!window.makeOrderWin || this.isMakeOrderWinIsDestroyed()) && this.moduleType === 'strategy') {
                 return openVueWin(
                     'makeOrder', 
                     `/make-order`, 
@@ -92,8 +98,8 @@ export default {
         },
 
         emitCurrentMakeOrderWinInfo (orderInput) {
-            if (!window.makeOrderWin) return;
-            
+            if (!window.makeOrderWin || this.isMakeOrderWinIsDestroyed()) return;
+
             window.makeOrderWin.webContents.send('init-make-order-win-info', {
                 moduleType: this.moduleType,
                 currentId: this.currentIdInAccountStrategyResolved,

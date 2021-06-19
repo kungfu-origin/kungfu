@@ -107,7 +107,8 @@ export default {
                 orderInput: {
                     ...this.quoteData,
                     side,
-                    lastPrice: price
+                    lastPrice: price,
+                    instrumentType: this.quoteData.instrumentTypeOrigin
                 }
             })
         },

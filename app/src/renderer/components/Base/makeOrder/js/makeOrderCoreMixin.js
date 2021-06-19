@@ -8,9 +8,9 @@ export default {
     computed: {
         ...mapState({
             tdAccountSource: state => state.BASE.tdAccountSource || {},
-            strategyList: state => state.STRATEGY.strategyList,
-            tdList: state => state.ACCOUNT.tdList,
-            accountsAsset: state => state.ACCOUNT.accountsAsset,          
+            strategyList: state => state.STRATEGY.strategyList || [],
+            tdList: state => state.ACCOUNT.tdList || [],
+            accountsAsset: state => state.ACCOUNT.accountsAsset || {},          
             processStatus: state => state.BASE.processStatus || {}
         })
     },
