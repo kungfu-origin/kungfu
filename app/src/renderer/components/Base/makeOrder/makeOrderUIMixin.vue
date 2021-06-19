@@ -227,7 +227,10 @@
 <script>
 
 import Vue from 'vue';
+import { mapGetters } from 'vuex';
+
 import { Autocomplete } from 'element-ui';
+import { ipcRenderer } from 'electron';
 
 import { deepClone } from '__gUtils/busiUtils';
 import { SourceTypeConfig, SideName, OffsetName, PriceType, HedgeFlag, ExchangeIds, InstrumentTypes, allowShorted } from 'kungfu-shared/config/tradingConfig';
@@ -254,6 +257,11 @@ export default {
         this.rendererType = process.env.RENDERER_TYPE
 
         return {
+            
+            //from event 
+            currentId: "",
+            moduleType: "",
+            orderInput: {},
 
             currentAccount: '', //except account
             makeOrderForm: {
@@ -274,10 +282,36 @@ export default {
     },
 
     mounted () {
-        this.init();
+        if (process.env.RENDERER_TYPE !== 'makeOrder') {
+            this.$bus.$on('update:make-order', makeOrderData => {
+                const { currentId, moduleType, orderInput } = makeOrderData || {};
+                this.orderInput = orderInput
+                this.currentId = currentId;
+                this.moduleType = moduleType
+            })
+        } else {
+            ipcRenderer.on('init-make-order-win-info', (event, info) => {
+                const { currentId, orderInput, moduleType } = info;                
+                this.currentId = currentId;
+                this.moduleType = moduleType;
+                this.orderInput = orderInput;
+            })
+        }
+
+    },
+
+    destroyed () {
+        if (process.env.RENDERER_TYPE !== 'makeOrder') {
+            this.$bus.$off('update:make-order')
+        }
     },
 
     computed: {
+
+
+        ...mapGetters([
+            "proMode"
+        ]),
 
         accountType() {
             const sourceName = this.currentSourceName || '';
@@ -286,16 +320,11 @@ export default {
         },
 
         allowShorted () {
-            if (this.moduleType === 'ticker') {
-                const instrumentType = this.currentTicker.instrumentType || 0;
-                if (allowShorted(instrumentType)) {
-                    return true
-                } else {
-                    return false
-                }
-            }
 
-            return (this.accountType || '').toLowerCase() === 'future'
+            const { instrumentType } = this.orderInput || {};
+
+            console.log("allowShorted", instrumentType, allowShorted(instrumentType))
+            return allowShorted(instrumentType)
         },
 
         currentAccountResolved () {
@@ -345,7 +374,7 @@ export default {
                     if (!+this.avaliableCash) return ''
                     return Math.floor(this.avaliableCash / price)
                 } else if (this.makeOrderForm.side === 1) { //卖
-                    const { instrumentId, totalVolume } = this.makeOrderByPosData;
+                    const { instrumentId, totalVolume } = this.orderInput;
                     if (instrumentId !== this.makeOrderForm.instrument_id) {
                         return ''
                     }
@@ -358,34 +387,14 @@ export default {
     },
 
     watch: {
-        
-        makeOrderByQuote (newQuoteData) {
-            if (!Object.keys(newQuoteData || {}).length) return;
 
-            this.clearData(true);
+        orderInput (newOrderInput) {
             
-            const { instrumentId, lastPrice, makeOrderPrice, makeOrderSide , exchangeId, instrumentType } = newQuoteData;
-            this.$set(this.makeOrderForm, 'instrument_id', instrumentId);
-            this.$set(this.makeOrderForm, 'exchange_id', exchangeId);
-            this.$set(this.makeOrderForm, 'limit_price', makeOrderPrice || lastPrice);
-            this.$set(this.makeOrderForm, 'instrument_type', instrumentType);
-
-            //只有点击order book后会触发
-            if (makeOrderSide !== undefined) {
-                this.$set(this.makeOrderForm, 'side', makeOrderSide);
-            }
-            
-            this.$refs['make-order-form'].validate()
-                .catch(err => {})
-        },
-
-        makeOrderByPosData (newPosData) {
-            
-            if (!Object.keys(newPosData || {}).length) return;
+            if (!Object.keys(newOrderInput || {}).length) return;
             
             this.clearData(true);
 
-            const { instrumentId, lastPrice, totalVolume, directionOrigin, exchangeId, accountIdResolved, instrumentType } = newPosData;
+            const { instrumentId, lastPrice, totalVolume, directionOrigin, side, exchangeId, accountIdResolved, instrumentType } = newOrderInput;
 
             this.$set(this.makeOrderForm, 'instrument_id', instrumentId);
             this.$set(this.makeOrderForm, 'exchange_id', exchangeId);
@@ -405,9 +414,15 @@ export default {
             }
             
             if (directionOrigin === 0) {
-                this.$set(this.makeOrderForm, 'side', 1)
+                this.$set(this.makeOrderForm, 'side', 1);
+                this.$set(this.makeOrderForm, 'offset', 0);
             } else if (directionOrigin === 1) {
-                this.$set(this.makeOrderForm, 'side', 0)
+                this.$set(this.makeOrderForm, 'side', 0);
+                this.$set(this.makeOrderForm, 'offset', 0);
+            }
+
+            if (side !== undefined && !Number.isNaN(+side)) {
+                this.$set(this.makeOrderForm, 'side', +side);
             }
 
             this.$refs['make-order-form'].validate()

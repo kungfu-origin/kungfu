@@ -27,7 +27,6 @@
                 <el-col :span="4">
                     <OrderBook
                         :marketData="quoteData"
-                        :tickerId="getTickerId(selectedQuote)"
                         @makeOrder="handleMakeOrderByOrderBook"
                     ></OrderBook>
                 </el-col>
@@ -50,11 +49,9 @@
                         </el-tab-pane>
                     </el-tabs>
                 </el-col>
+
                 <el-col :span="6">
-                    <MakeOrderDashboard
-                        :currentId="(selectedQuote || {}).instrumentId || ''"
-                        moduleType="ticker" 
-                        :makeOrderByQuote="selectedQuote"
+                    <MakeOrderDashboard    
                     ></MakeOrderDashboard>
                 </el-col>        
             </el-row>
@@ -169,10 +166,6 @@ export default {
     },
 
     methods: {
-
-        handleMakeOrderByOrderBook (quote) {
-            this.selectedQuote = Object.freeze(quote);
-        },
 
         handleClickQuote (quote) {
             this.selectedQuote = Object.freeze(quote);

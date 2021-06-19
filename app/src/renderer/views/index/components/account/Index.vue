@@ -95,14 +95,12 @@
                 <el-col :span="4">
                     <OrderBook
                         :marketData="quoteData"
-                        @makeOrder="handleMakeOrderByOrderBook"
+                        :currentId="currentId"
+                        :moduleType="moduleType"
                     ></OrderBook>
                 </el-col>
                 <el-col :span="6">
                     <MakeOrderDashboard
-                        :currentId="currentId"
-                        :moduleType="moduleType" 
-                        :makeOrderByPosData="makeOrderByPosData"
                     ></MakeOrderDashboard>
                 </el-col>
             </el-row>
@@ -244,8 +242,6 @@ export default {
     },
 
     mounted ( ) {
-        
-
         this.tradingDataPipe = buildTradingDataAccountPipeByDaemon().subscribe(data => {
             if (this.moduleType !== 'ticker') {
                 this.dealTradingData(data);

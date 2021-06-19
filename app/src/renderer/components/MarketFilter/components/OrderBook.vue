@@ -2,10 +2,10 @@
     <tr-dashboard :title="`行情 ${instrumentId}`">
         <div class="kf-order-book__warp">
             <div class="ask__warp order-book-part__warp">
-                <div class="order-line" @click="handleSelectQuote(askPrices[9 - index], 0)" v-for="(item, index) in new Array(10)" :key="index">
-                    <span class="volume buy"></span>
+                <div class="order-line" v-for="(item, index) in new Array(10)" :key="index">
+                    <span class="volume buy" @click.stop="handleMakeOrder(askPrices[9 - index], 0)"></span>
                     <span class="price green">{{ dealNum(askPrices[9 - index]) }}</span>
-                    <span class="volume sell">{{ dealNum(askVolumes[9 - index]) }}</span>
+                    <span class="volume sell" @click.stop="handleMakeOrder(askPrices[9 - index], 1)">{{ dealNum(askVolumes[9 - index]) }}</span>
                 </div>
             </div>
             <div class="last-price">
@@ -19,10 +19,10 @@
                 </tr-blink-num>
             </div> 
             <div class="bid__warp order-book-part__warp">
-                <div class="order-line" @click="handleSelectQuote(bidPrices[index], 1)" v-for="(item, index) in new Array(10)" :key="index">
-                    <span class="volume buy">{{ dealNum(bidVolumes[index]) }}</span>
+                <div class="order-line" v-for="(item, index) in new Array(10)" :key="index">
+                    <span class="volume buy" @click.stop="handleMakeOrder(bidPrices[index], 0)">{{ dealNum(bidVolumes[index]) }}</span>
                     <span class="price red">{{ dealNum(bidPrices[index]) }}</span>
-                    <span class="volume sell"></span>
+                    <span class="volume sell" @click.stop="handleMakeOrder(bidPrices[index], 1)"></span>
                 </div>
             </div>
         </div>
@@ -38,7 +38,11 @@ export default {
         marketData: {
             type: Object,
             default: () => ({})
-        }
+        },
+
+        moduleType: String,
+
+        currentId: String,
     },
 
     data () {
@@ -96,14 +100,16 @@ export default {
     },
 
     methods: {
-        handleSelectQuote (price, side) {
-            if (price && this.quoteData) {
-                this.$emit('makeOrder', {
+        handleMakeOrder (price, side) {
+            this.$bus.$emit('update:make-order', {
+                currentId: this.currentId,
+                moduleType: this.moduleType,
+                orderInput: {
                     ...this.quoteData,
-                    makeOrderPrice: price,
-                    makeOrderSide: side
-                })
-            }
+                    side,
+                    lastPrice: price
+                }
+            })
         },
 
         dealNum (num) {
