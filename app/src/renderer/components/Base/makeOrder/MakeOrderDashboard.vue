@@ -143,7 +143,7 @@
                     <el-col :span="10">
                         <div class="make-order-line-info">
                             <span>可用金额</span>
-                            <span>{{ avaliableCash || '-' }}</span>
+                            <span>{{ avaliableCash || '--' }}</span>
                         </div>
                     </el-col>
                 </el-row>
@@ -184,7 +184,7 @@
                     <el-col :span="10">
                         <div class="make-order-line-info">
                             <span>可下单数量</span>
-                            <span>{{ avaliableOrderVolume || '-' }}</span>
+                            <span>{{ avaliableOrderVolume }}</span>
                         </div>
                     </el-col>
                 </el-row>
@@ -211,7 +211,7 @@
                     <el-col :span="8">
                         <div class="make-order-line-info">
                             <span>下单手数</span>
-                            <span>{{ avaliableOrderVolume || '-' }}</span>
+                            <span>{{ avaliableOrderVolume }}</span>
                         </div>
                     </el-col>
                 </el-row>
@@ -309,7 +309,7 @@ export default {
 
     },
 
-    destroyed () {
+    beforeDestroy () {
         if (process.env.RENDERER_TYPE !== 'makeOrder') {
             this.$bus.$off('update:make-order')
         }
@@ -370,25 +370,26 @@ export default {
         avaliableOrderVolume () {
 
             if (this.makeOrderForm.buyType === 'price') {
-                return this.makeOrderForm.volume
+                return this.makeOrderForm.volume || 0
             }
 
             if (this.makeOrderForm.price_type === 0) {
                 if (this.makeOrderForm.side === 0) { //买
                     const price = +this.makeOrderForm.limit_price;
-                    if (!+price) return '';
-                    if (!+this.avaliableCash) return ''
+                    if (!+price) return 0;
+                    if (!+this.avaliableCash) return 0
+                    if (this.avaliableCash < 0) return 0
                     return Math.floor(this.avaliableCash / price)
                 } else if (this.makeOrderForm.side === 1) { //卖
                     const { instrumentId, totalVolume } = this.orderInput;
                     if (instrumentId !== this.makeOrderForm.instrument_id) {
-                        return ''
+                        return 0
                     }
-                    return totalVolume || ''
+                    return (totalVolume < 0 ? 0 : totalVolume) || ''
                 }                
             } 
 
-            return ''
+            return 0
         },
     },
 

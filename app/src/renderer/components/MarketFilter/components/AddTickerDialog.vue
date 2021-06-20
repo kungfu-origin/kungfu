@@ -7,8 +7,10 @@
         :close-on-press-escape="true"
         @close="handleClose"
         @keyup.enter.native="handleSubmitSetting"
+        :append-to-body="false"
+        :modal-append-to-body="false"
     >
-    <div class="ticker-dialog__warp">
+    <div class="add-ticker-dialog__warp">
         <el-form ref='tickerForm' :model="tickerForm" label-width="70px">
             <el-form-item
                 label="标的"
@@ -87,7 +89,7 @@
     </div>
             
     <div slot="footer" class="dialog-footer">
-        <el-button  size="mini" @click="handleClose">取 消</el-button>
+        <el-button  size="mini" @click="handleClose">关 闭</el-button>
         <el-button type="primary" size="mini" @click="handleSubmitSetting">确 定</el-button>
     </div>
 
@@ -162,6 +164,7 @@ export default {
         },
         
         handleClose () {
+
             this.$emit('update:visible', false);
         },
 
@@ -169,7 +172,6 @@ export default {
             this.$refs["tickerForm"].validate(valid => {
                 if (valid) {
                     this.$emit('confirm', deepClone(this.tickerForm))
-                    this.handleClose()
                 }
             })
         }

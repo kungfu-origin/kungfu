@@ -156,6 +156,22 @@ export default {
     mounted(){
         this.tradingDataPipe = buildTradingDataStrategyPipeByDaemon().subscribe(data => {
             
+            const positions = data['positions'][this.strategyId];
+            this.positions = Object.freeze(positions || []);
+  
+            const pnl = data['pnl'][this.strategyId];
+            this.pnl = Object.freeze(pnl || []);
+            const dailyPnl = data['dailyPnl'][this.strategyId];
+            this.dailyPnl = Object.freeze(dailyPnl || []);
+
+            const assets = data['assets'];
+            this.$store.dispatch('setStrategiesAsset', Object.freeze(assets));
+        });
+
+        this.orderStatPipe = buildOrderStatDataPipe().subscribe(data => {
+            const orderStat = data['orderStat'];
+            this.orderStat = Object.freeze(orderStat || {});
+
             if (this.isHistoryData('order')) {
                 this.orders = this.getHistoryData('order')
             } else {
@@ -182,30 +198,17 @@ export default {
                 this.trades = Object.freeze(trades || []);
             }
 
-            const orderInputs = watcher
-                    .ledger
-                    .OrderInput
-                    .filter('source', this.currentLocationUID) //order input is special
-                    .sort('insert_time')
-                    .slice(0, 100)
-                    .map(item => dealOrderInput(item));
-            this.orderInputs = Object.freeze(orderInputs);
-
-            const positions = data['positions'][this.strategyId];
-            this.positions = Object.freeze(positions || []);
-  
-            const pnl = data['pnl'][this.strategyId];
-            this.pnl = Object.freeze(pnl || []);
-            const dailyPnl = data['dailyPnl'][this.strategyId];
-            this.dailyPnl = Object.freeze(dailyPnl || []);
-
-            const assets = data['assets'];
-            this.$store.dispatch('setStrategiesAsset', Object.freeze(assets));
-        });
-
-        this.orderStatPipe = buildOrderStatDataPipe().subscribe(data => {
-            const orderStat = data['orderStat'];
-            this.orderStat = Object.freeze(orderStat || {});
+            //优化
+            if (this.currentStrategyDetailTab === 'orderMap') {
+                const orderInputs = watcher
+                        .ledger
+                        .OrderInput
+                        .filter('source', this.currentLocationUID) //order input is special
+                        .sort('insert_time')
+                        .slice(0, 100)
+                        .map(item => dealOrderInput(item));
+                this.orderInputs = Object.freeze(orderInputs);
+            }
         })
     },
 

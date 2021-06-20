@@ -58,8 +58,8 @@ export default {
         })
     },
 
-    destroyed () {
-        this.$bus.$off('update:order-book-tickerId')
+    beforeDestroy () {
+        this.$bus.$off('update:orderbook-tickerId')
     },
 
     computed: {

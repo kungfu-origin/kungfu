@@ -1,10 +1,8 @@
 
 import { mapGetters, mapState } from 'vuex';
 
-import AddSetTickerSetDialog from '@/components/MarketFilter/components/AddSetTickerSetDialog';
-import AddTickerDialog from '@/components/MarketFilter/components/AddTickerDialog';
 
-import { checkAllMdProcess, findTargetFromArray, delayMiliSeconds, debounce } from '__gUtils/busiUtils';
+import { checkAllMdProcess, getIndexFromTargetTickers, findTargetFromArray, delayMiliSeconds, debounce } from '__gUtils/busiUtils';
 import { sendDataToDaemonByPm2 } from "__gUtils/processUtils";
 import { getTickerSets, addSetTickerSet, removeTickerSetByName } from '__io/actions/market';
 import { kungfuSubscribeInstrument } from '__io/kungfu/makeCancelOrder';
@@ -21,18 +19,9 @@ export default {
         this.$bus.$off('mdTdStateReady');
     },
 
-    components: {
-        AddSetTickerSetDialog,
-        AddTickerDialog
-    },
-
     data () {
         return {
-            addSetTickerSetDialogMethod: '',
-            addSetTickerSetDialogVisiblity: false,
             setTickerSetDialogInput: {},
-
-            addTickerDialogVisiblity: false,
         }
     },
 
@@ -52,32 +41,20 @@ export default {
 
     methods: {
 
-        handleSetTickerSet (tickerSet) {
-            this.addSetTickerSetDialogMethod = 'set';
-            this.setTickerSetDialogInput = tickerSet;
-            this.addSetTickerSetDialogVisiblity = true;
-        },
-
         handleSetCurrentTickerSet(tickerSet) {
             this.$store.dispatch('setCurrentTickerSet', tickerSet)
         },
 
-        handleAddTicker () {
-            this.addTickerDialogVisiblity = true;
-        },
-
-        handleAddTickerSet () {
-            this.addSetTickerSetDialogMethod = 'add';
-            this.addSetTickerSetDialogVisiblity = true;
-        },
-
-        handleRemoveTickerSet (tickerSet) {
-            this.$confirm(`删除标的池 ${tickerSet.name} 会删除所有相关信息，确认删除吗？`, '提示', {confirmButtonText: '确 定', cancelButtonText: '取 消'})
+        handleRemoveTickerSet (tickerSet, replace = false) {
+            const confirmPromise = replace ? Promise.resolve(true) : this.$confirm(`删除标的池 ${tickerSet.name} 会删除所有相关信息，确认删除吗？`, '提示', {confirmButtonText: '确 定', cancelButtonText: '取 消'});
+            return confirmPromise
                 .then(() => {
                     return removeTickerSetByName(tickerSet.name)
                 })
                 .then(() => {
-                    this.$message.success('操作成功！')
+                    if (!replace) {
+                        this.$message.success('操作成功！')
+                    }
                 })
                 .then(() => {
                     this.getTickerSets()
@@ -86,7 +63,6 @@ export default {
                     if (err === 'cancel') return; 
                     this.$message.error(err.message)
                 })
-            
         },
 
         handleConfirmAddSetTickerSet (tickerSet) {    
@@ -100,11 +76,40 @@ export default {
                 })
         },
 
-        handleAddTickerConfirm (tickerData, inTickerSet = false) {
-            this.$bus.$emit('add-ticker-for-ticker-set', {
-                tickerData: Object.freeze(tickerData),
-                inTickerSet
+        handleAddTickerConfirm (tickerData, targetTickerSetName) {
+            if (!targetTickerSetName) return;
+            const targetTickerSet = findTargetFromArray(this.tickerSets, 'name', targetTickerSetName);
+            if (!targetTickerSet) return;
+            const { name, tickers } = targetTickerSet;
+            const targetIndex = getIndexFromTargetTickers(tickers || {}, tickerData)
+            let newTickers = tickers.slice(0);
+            
+            if (targetIndex === -1) {
+                newTickers.push(tickerData)
+            } else {
+                newTickers.splice(targetIndex, 1, tickerData)
+            }
+
+            this.handleConfirmAddSetTickerSet({
+                name,
+                tickers: newTickers
             })
+        },
+
+        handleDeleteTicker (ticker, targetTickerSet = null) {
+            if (!targetTickerSet) return;
+
+            const { name, tickers } = targetTickerSet;
+            const targetIndex = getIndexFromTargetTickers(tickers, ticker)
+
+            if (targetIndex !== -1) {
+                let targetTickers = tickers.slice(0)
+                targetTickers.splice(targetIndex, 1);
+                this.handleConfirmAddSetTickerSet({
+                    name, 
+                    tickers: targetTickers
+                })
+            }
         },
 
         handleMdTdStateChange () {
@@ -119,7 +124,7 @@ export default {
         getTickerSets () {
             return getTickerSets()
                 .then(res => {
-                    this.$store.dispatch('setTickerSets', res)
+                    this.$store.dispatch('setTickerSets', Object.freeze(res))
                     this.initUpdateCurrentTickerSet(res)
                 })
         },

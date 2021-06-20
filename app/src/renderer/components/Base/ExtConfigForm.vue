@@ -180,9 +180,7 @@
           v-if="item.type === 'instrumentId'"
           v-model="form[item.key]"
           :fetch-suggestions="querySearch"
-          @select="
-            (e) => handleSelectInstrumentId(item.key, item.exchangeIdKey, e)
-          "
+          @select="(e) => handleSelectInstrumentId(item.key, item.exchangeIdKey, e)"
         >
           <template v-slot="{ item }">
             <div class="auto-complete-instrument-ids__warp">

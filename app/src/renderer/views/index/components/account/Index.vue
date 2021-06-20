@@ -11,9 +11,10 @@
                             <MdAccount></MdAccount>
                         </el-tab-pane>
                         <el-tab-pane :lazy="true" :label="getCurrentAccountTabLabelName('marketdata')" name="marketdata">
-                                <MarketData 
-                                :marketData="quoteData" 
-                                @clickQuote="handleClickQuote"
+                            <MarketData 
+                            :currentId="currentId"
+                            :moduleType="moduleType"
+                            :marketData="quoteData" 
                             ></MarketData>
                         </el-tab-pane>
                         <el-tab-pane :lazy="true" :label="getCurrentAccountTabLabelName('holdInstruments')" name="holdInstruments">
@@ -129,6 +130,7 @@ import MainContent from '@/components/Layout/MainContent';
 import TaskRecord from '@/components/Task/TaskRecord';
 import OrderBook from '@/components/MarketFilter/components/OrderBook';
 import MarketData from '@/components/MarketFilter/components/MarketData';
+import AddTickerDialog from '@/components/MarketFilter/components/AddTickerDialog';
 
 import { watcher, transformPositionByTickerByMerge, dealOrder, dealTrade } from '__io/kungfu/watcher';
 import { originOrderTradesFilterByDirection } from '__gUtils/busiUtils';
@@ -170,7 +172,7 @@ export default {
         MainContent,
         TaskRecord,
         OrderBook,
-        MarketData
+        MarketData,
     },
 
     computed:{
@@ -279,10 +281,6 @@ export default {
     },
 
     methods: {
-
-        handleClickQuote (quote) {
-            console.log(quote)
-        },
 
         handleAccountTabClick (tab) {
             this.$store.dispatch('setCurrentAccountTabName', tab.name)
