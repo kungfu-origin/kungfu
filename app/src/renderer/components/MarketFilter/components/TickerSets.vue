@@ -65,6 +65,7 @@
                         width="80px"
                     >
                     <template slot-scope="props">
+                        <span class="tr-oper-edit" v-if="props.row.name !== 'editing'" ><i class=" el-icon-edit mouse-over" title="重命名" @click.stop="handleBlurEditingNewTickerSet(props.row)"></i></span>
                         <span class="tr-oper-delete" v-if="props.row.name !== 'editing'" ><i class=" el-icon-delete mouse-over" title="删除" @click.stop="handleRemoveTickerSet(props.row)"></i></span>
                     </template>
                     </el-table-column>
