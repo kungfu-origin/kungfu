@@ -2,17 +2,17 @@
 
     <tr-dashboard title="">
         <div slot="dashboard-header">
-            <tr-dashboard-header-item>
-                <tr-dashboard-header-item>
-                    <el-select class="dashboard-header-selector" :value="currentTaskId" @change="handleSetCurrentTask">
-                        <el-option 
-                            v-for="task in taskList" 
-                            :key="task.processId"    
-                            :label="task.processId"
-                            :value="task.processId">
-                        </el-option>
-                    </el-select>
-                </tr-dashboard-header-item>
+            <tr-dashboard-header-item width="270px">
+                <el-select class="dashboard-header-selector" :value="currentTaskId" @change="handleSetCurrentTask">
+                    <el-option 
+                        v-for="task in taskList" 
+                        :key="task.processId"    
+                        :value="task.processId">
+                        <span>{{ task.processId }}</span> 
+                        <tr-status :value="processStatus[task.processId]">
+                        </tr-status>
+                    </el-option>
+                </el-select>
             </tr-dashboard-header-item>
         </div>
         <tr-table

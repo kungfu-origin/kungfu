@@ -13,11 +13,6 @@ export default {
 
     mounted () {
         this.getTickerSets();
-        this.bindMdTdStateChangeEvent();
-    },
-
-    beforeDestroy() {
-        this.$bus.$off('mdTdStateReady');
     },
 
     data () {
@@ -37,7 +32,15 @@ export default {
 
         ...mapGetters([
             "flatternTickers"
-        ])
+        ]),
+
+        currentTickerSetTickersResolved () {
+            return this.currentTickerSetTickers
+                .slice(0)
+                .sort((ticker1, ticker2) => {
+                    return ticker1.instrumentId.localeCompare(ticker2.instrumentId)
+                })
+        }
     },
 
     methods: {
@@ -116,13 +119,11 @@ export default {
         },
 
         bindMdTdStateChangeEvent () {
-            const self = this;
-            this.$bus.$on('mdTdStateReady', debounce(function({ processId }) {
+            this.$bus.$on('mdTdStateReady', ({ processId }) => {
                 if (processId.includes('md')) {
-                    console.log('mdTdStateReady', 'md', processId)
-                    self.subscribeTickersByProcessId(processId)
+                    this.subscribeTickersByProcessId(processId)
                 }
-            }, 2000))
+            })
         },
 
         getTickerSets () {
@@ -168,7 +169,6 @@ export default {
             if (!watcher.isLive()) return;
             const tickers = this.flatternTickers || [];
             this.subscribeTickers(tickers, slience);
-            sendDataToDaemonByPm2('MAIN_RENDERER_SUBSCRIBED_TICKERS', tickers)
         },
 
         subscribeTickersInTickerSet (tickerSet, slience = true) {
@@ -181,7 +181,9 @@ export default {
         },
 
         subscribeTickers (tickers, slience = true) {
+            console.log("subscribeTickers", tickers.map(item => `${item.instrumentId}_${item.exchangeId}`))
             if (!watcher.isLive()) return;
+            sendDataToDaemonByPm2('MAIN_RENDERER_SUBSCRIBED_TICKERS', tickers)
             tickers.forEach(ticker => {
                 const { instrumentId, source, exchangeId } = ticker;
                 kungfuSubscribeInstrument(source, exchangeId, instrumentId)

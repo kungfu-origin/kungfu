@@ -112,6 +112,11 @@ export default {
         this.bindQuotesListener();
 
         this.getWatcherStatus();
+        this.bindMdTdStateChangeEvent();
+    },
+
+    beforeDestroy() {
+        this.$bus.$off('mdTdStateReady');
     },
 
     computed: {

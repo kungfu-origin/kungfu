@@ -27,7 +27,7 @@
             </div>
             <el-table
             size="small"
-            :data="currentTickerSetTickers || []"
+            :data="currentTickerSetTickersResolved || []"
             height="100%"
             @row-click="handleRowClick"
             >
@@ -273,7 +273,7 @@ export default {
                 moduleType: this.moduleType,
                 orderInput: {
                     ...quoteData,
-                    instrumentType: quoteData.instrumentTypeOrigin
+                    instrumentType: (quoteData || '').instrumentTypeOrigin || 0
                 }
             })
 

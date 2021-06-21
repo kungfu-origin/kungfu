@@ -113,7 +113,11 @@ export default {
             const editingTickerSetName = (this.editingTickerSet || {}).name || '';
             const target = findTargetFromArray(this.tickerSets, 'name', editingTickerSetName);
             if (target) {
-                return target.tickers || [];
+                return (target.tickers || [])
+                    .slice(0)
+                    .sort((ticker1, ticker2) => {
+                        return ticker1.instrumentId.localeCompare(ticker2.instrumentId)
+                    });
             } else {
                 return [];
             }

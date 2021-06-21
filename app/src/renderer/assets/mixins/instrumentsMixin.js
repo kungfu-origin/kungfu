@@ -53,7 +53,7 @@ export default {
         },
 
         getSearchTickersInTickerSets (queryString = '') {
-            return this.flatternTickers
+            const flatternTickers = this.flatternTickers
                 .filter((item => {
                     const { instrumentId, source, exchangeId } = item;
                     
@@ -67,6 +67,12 @@ export default {
                         exchange_id: exchangeId
                     }
                 })
+            let noRepeatTickers = {};
+            flatternTickers.forEach(ticker => {
+                noRepeatTickers[`${ticker.instrumentId}_${ticker.exchangeId}`] = ticker;
+            })
+
+            return Object.values(noRepeatTickers)
         }
     },
 }
