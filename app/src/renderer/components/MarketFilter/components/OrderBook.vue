@@ -30,6 +30,7 @@
 </template>
 
 <script>
+import { toDecimal } from '__gUtils/busiUtils'
 
 export default {
 
@@ -75,7 +76,8 @@ export default {
 
         askPrices () {
             if (!this.quoteData) return [];
-            return this.quoteData.askPrices || []
+            return (this.quoteData.askPrices || [])
+                .reduce(this.resolvePrices)
         },
 
         askVolumes () {
@@ -85,7 +87,9 @@ export default {
         
         bidPrices () {
             if (!this.quoteData) return [];
-            return this.quoteData.bidPrices || []
+            return (this.quoteData.bidPrices || [])
+                .reduce(this.resolvePrices)
+        
         },
 
         bidVolumes () {
@@ -113,9 +117,29 @@ export default {
             })
         },
 
+        resolvePrices (price1, price2) {
+            if (typeof price1 === 'object') {//1;
+                const len = price1.length || 0;
+                if (+price2 === 0 && len) {
+                    if (+price1[len - 1] !== 0) {
+                        return [ ...price1, toDecimal(+price1[len - 1] + 0.2, 3) ];
+                    }
+                }  
+                return [ ...price1, toDecimal(price2, 3) ]
+            } else {
+                if (+price2 === 0 && +price1 !== 0) {
+                    return [ toDecimal(+price1, 3), toDecimal(+price1 + 0.2, 3) ]
+                }
+                return [ toDecimal(+price1, 3), toDecimal(+price2, 3) ]
+            }
+        },
+
         dealNum (num) {
             if (num === undefined) {
                 return '--'
+            }
+            else if (+num === 0) {
+                return ''
             }
             else {
                 return num
@@ -166,7 +190,6 @@ export default {
     .price {
         box-sizing: border-box;
         padding-right: 10px;
-        justify-content: flex-end;
 
         &.red {
             color: $red;
@@ -185,7 +208,6 @@ export default {
             background: $red;
             color: $white;
             padding-right: 10px;
-            justify-content: flex-end;
 
             &:hover {
                 background: $red1;
@@ -196,8 +218,7 @@ export default {
             background: $green;
             color: $white;
             text-align: left !important;
-            justify-content: flex-start;
-            padding-left: 10px;
+            padding-right: 10px;
 
              &:hover {
                 background: $green2;
@@ -219,7 +240,12 @@ export default {
             flex: 1;
             height: 100%;
             align-items: center;
+            justify-content: flex-end;
             font-family: Consolas, Monaco, monospace,"Microsoft YaHei",sans-serif;
+        }
+
+        span.price {
+            flex: 2;
         }
     }
 

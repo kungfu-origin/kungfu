@@ -79,6 +79,7 @@
 import { findTargetFromArray } from '__gUtils/busiUtils';
 import baseMixin from '@/assets/mixins/baseMixin';
 import tickerSetMixin from '@/components/MarketFilter/js/tickerSetMixin';
+import { retry } from 'rxjs/operators';
 
 
 export default {
@@ -139,11 +140,11 @@ export default {
 
             const targetTicker = this.tableListAfterFilter[index] || {};
             const tmpTickerSetName = this.tmpTickerSetName;
-            this.tmpTickerSetName = "";      
+            this.tmpTickerSetName = "";  
+            
+            if (!targetTicker) return;
 
-            if (targetTicker.editingType !== 'new' && targetTicker.editingType !== 'rename') {
-                return
-            }
+            if (targetTicker.editingType !== 'new' && targetTicker.editingType !== 'rename') return;
 
             if (!tmpTickerSetName) {
                 if (this.targetTicker.editingType === 'rename') {

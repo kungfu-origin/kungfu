@@ -426,18 +426,23 @@ export default {
                 this.$set(this.makeOrderForm, 'side', +side);
             }
 
-            this.$refs['make-order-form'].validate()
-                .catch(() => {
-                    const $errordoms = document.querySelectorAll('.kf-make-order-window__body .el-form-item__error');
-                    if ($errordoms.length) {
-                        const $errorDom = $errordoms[0];
-                        const $paDom = $errorDom.parentElement;
-                        const $input = $paDom.getElementsByTagName('input');
-                        if ($input.length) {
-                            $input[0].focus();
-                        }
-                    }
+            this.$nextTick()
+                .then(() => {
+                    this.$refs['make-order-form'].validate()
+                        .catch(() => {
+                            const $errordoms = document.querySelectorAll('.kf-make-order-window__body .el-form-item__error');
+                            if ($errordoms.length) {
+                                const $errorDom = $errordoms[0];
+                                const $paDom = $errorDom.parentElement;
+                                const $input = $paDom.getElementsByTagName('input');
+                                if ($input.length) {
+                                    $input[0].focus();
+                                }
+                            }
+                        })
+
                 })
+            
         },
 
         'makeOrderForm.buyType' (val) {
@@ -609,10 +614,10 @@ export default {
         },
         
         clearData (exceptId=false) {
-            this.$emit('update:visible', false)
+            this.$emit('update:visible', false);
+
             if (!exceptId) {
                 this.$refs['make-order-form'].resetFields();
-                this.$refs['make-order-form'].clearValidate();
                 this.$set(this.makeOrderForm, 'instrument_id', '')
                 this.$set(this.makeOrderForm, 'name', '')
                 this.currentAccount = '';
@@ -629,7 +634,11 @@ export default {
             this.$set(this.makeOrderForm, 'price_type', 0)
             this.$set(this.makeOrderForm, 'hedge_flag', 0)
 
- 
+            return this.$nextTick()
+                .then(() => {
+                    this.$refs['make-order-form'].clearValidate();
+                })
+
         },
     }
 }
