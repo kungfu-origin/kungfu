@@ -37,8 +37,11 @@ import moment from 'moment';
 import { findTargetFromArray, getDefaultRenderCellClass } from '__gUtils/busiUtils';
 import { buildTaskDataPipe } from '__io/kungfu/tradingData'; //这个还是需要读watcher
 
+import taskMixin from './js/taskMixin';
 
 export default {
+
+    mixins: [ taskMixin ],
 
     data () {
 
@@ -61,30 +64,6 @@ export default {
     },
 
     computed: {
-        ...mapState({
-            taskExtConfigList: state => state.BASE.taskExtConfigList,
-            currentTask: state => state.BASE.currentTask,
-            currentTaskId: state => (state.BASE.currentTask).name,
-            processStatusWithDetail: state => state.BASE.processStatusWithDetail,
-        }),
-
-        ...mapGetters([
-            "taskExtMinimistConfig"
-        ]),
-
-        taskList () {
-            return Object.keys(this.processStatusWithDetail || {})
-                .map(key => {
-                    const targetProcess = this.processStatusWithDetail[key];
-                    return this.buildTaskProcessItem(key, targetProcess)
-                })
-                .filter(({ processId }) => {
-                    if (processId.includes('task')) {
-                        return true
-                    }
-                    return false
-                })
-        },
 
         currentConfigKey () {
             return minimist(this.currentTask.args || '', this.taskExtMinimistConfig).configKey || ''
