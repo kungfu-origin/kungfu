@@ -62,10 +62,10 @@
                     <el-table-column
                         label=""
                         align="right"
-                        width="80px"
+                        width="100px"
                     >
                     <template slot-scope="props">
-                        <span class="tr-oper-edit" v-if="props.row.name !== 'editing'" ><i class=" el-icon-edit mouse-over" title="重命名" @click.stop="handleBlurEditingNewTickerSet(props.row)"></i></span>
+                        <span class="tr-oper-edit" v-if="props.row.name !== 'editing'" ><i class=" el-icon-edit mouse-over" title="重命名" @click.stop="handleChangeName(props.row)"></i></span>
                         <span class="tr-oper-delete" v-if="props.row.name !== 'editing'" ><i class=" el-icon-delete mouse-over" title="删除" @click.stop="handleRemoveTickerSet(props.row)"></i></span>
                     </template>
                     </el-table-column>
@@ -131,10 +131,24 @@ export default {
     },
 
     methods: {
+        handleAddTickerSet () {
+            if (!findTargetFromArray(this.tableList, 'name', 'editing')) {
+                this.tableList.push({
+                    status: "editing",
+                    editingType: 'new'
+                })
+
+                this.focusInput()
+            }
+        },
+
         handleChangeName (row) {
             this.$set(row, 'status', 'editing');
             this.$set(row, 'editingType', 'rename');
             this.tmpTickerSetName = row.name;
+
+            this.focusInput();
+
         },
 
         handleBlurEditingNewTickerSet (index) {
@@ -143,8 +157,6 @@ export default {
             const tmpTickerSetName = this.tmpTickerSetName;
             this.tmpTickerSetName = "";  
             
-            if (!targetTicker) return;
-
             if (targetTicker.editingType !== 'new' && targetTicker.editingType !== 'rename') return;
 
             if (!tmpTickerSetName) {
@@ -177,9 +189,6 @@ export default {
             } 
             
             //rename
-            this.$set(targetTicker, 'status', '')
-            this.$set(targetTicker, 'editingType', '')
-
             const newTickerSet = {
                 name: tmpTickerSetName,
                 tickers: targetTicker.tickers || []
@@ -194,23 +203,10 @@ export default {
                         this.handleSetCurrentTickerSet(newTickerSet)
                     }
                 })
-        },
-
-        handleAddTickerSet () {
-            if (!findTargetFromArray(this.tableList, 'name', 'editing')) {
-                this.tableList.push({
-                    status: "editing",
-                    editingType: 'new'
+                .finally(() => {
+                    this.$set(targetTicker, 'status', '')
+                    this.$set(targetTicker, 'editingType', '')
                 })
-
-                this.$nextTick()
-                    .then(() => {
-                        const $elInput = this.$refs['editing-tickerset-input'];
-                        if ($elInput) {
-                            $elInput.$el.querySelectorAll('input')[0].focus();
-                        }
-                    })
-            }
         },
 
         handleClickRow (row) {
@@ -222,6 +218,16 @@ export default {
             if(row.row.name == (this.editingTickerSet || {}).name) {
                 return 'selected-bg'
             }
+        },
+
+        focusInput () {
+            return this.$nextTick()
+                .then(() => {
+                    const $elInput = this.$refs['editing-tickerset-input'];
+                    if ($elInput) {
+                        $elInput.$el.querySelectorAll('input')[0].focus();
+                    }
+                })
         },
 
         initEditingTickerSet () {

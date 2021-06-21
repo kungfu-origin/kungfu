@@ -70,7 +70,7 @@ const appDataSubject: any = new Subject();
 
             return true
 
-    }, 800)
+    }, 500)
 
 })();
 

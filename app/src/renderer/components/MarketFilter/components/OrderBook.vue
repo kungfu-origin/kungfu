@@ -77,7 +77,7 @@ export default {
         askPrices () {
             if (!this.quoteData) return [];
             return (this.quoteData.askPrices || [])
-                .reduce(this.resolvePrices)
+                .reduce(this.resolveAskPrices)
         },
 
         askVolumes () {
@@ -88,7 +88,7 @@ export default {
         bidPrices () {
             if (!this.quoteData) return [];
             return (this.quoteData.bidPrices || [])
-                .reduce(this.resolvePrices)
+                .reduce(this.resolveBidPrices)
         
         },
 
@@ -117,7 +117,7 @@ export default {
             })
         },
 
-        resolvePrices (price1, price2) {
+        resolveAskPrices (price1, price2) {
             if (typeof price1 === 'object') {//1;
                 const len = price1.length || 0;
                 if (+price2 === 0 && len) {
@@ -129,6 +129,25 @@ export default {
             } else {
                 if (+price2 === 0 && +price1 !== 0) {
                     return [ toDecimal(+price1, 3), toDecimal(+price1 + 0.2, 3) ]
+                }
+                return [ toDecimal(+price1, 3), toDecimal(+price2, 3) ]
+            }
+        },
+
+        resolveBidPrices (price1, price2) {
+            if (typeof price1 === 'object') {//1;
+                const len = price1.length || 0;
+                if (+price2 === 0 && len) {
+                    if (+price1[len - 1] !== 0) {
+                        const price1Resolved = +price1[len - 1] - 0.2 < 0 ? 0 : +price1[len - 1] - 0.2
+                        return [ ...price1, toDecimal(price1Resolved, 3) ];
+                    }
+                }  
+                return [ ...price1, toDecimal(price2, 3) ]
+            } else {
+                if (+price2 === 0 && +price1 !== 0) {
+                    const price1Resolved = +price1 - 0.2 < 0 ? 0 : +price1 - 0.2
+                    return [ toDecimal(+price1, 3), toDecimal(price1Resolved, 3) ]
                 }
                 return [ toDecimal(+price1, 3), toDecimal(+price2, 3) ]
             }

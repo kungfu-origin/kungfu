@@ -58,7 +58,9 @@ export default {
                     }
                 })
                 .then(() => {
-                    this.getTickerSets()
+                    if (!replace) {
+                        this.getTickerSets()
+                    }
                 })
                 .catch(err => {
                     if (err === 'cancel') return; 
@@ -151,12 +153,10 @@ export default {
 
         //通过md 订阅
         async subscribeTickersByProcessId (mdProcessId, slience = true) {
-            console.log("subscribeTickersByProcessId")
             const sourceName = mdProcessId.split("_")[1];
             if (!sourceName) return;
             const mdLocation = encodeKungfuLocation(sourceName, 'md');
             if (!watcher.isReadyToInteract(mdLocation)) {
-                console.log("watcher not isReadyToInteract", mdLocation)
                 await delayMiliSeconds(1000);
                 await this.subscribeTickersByProcessId(mdProcessId, slience);
             } else {
