@@ -175,16 +175,10 @@ var checkRequiredDataErrorLogged = false;
 combineLatestObserver
     .pipe(
         filter((data: BackWardTraderPipeData) => {
-            const { avgVolume, quotes, instruments } = data;
+            const { quotes, instruments } = data;
             const tickersNoIndex = TICKERS.filter((ticker: string) => !ticker.includes(index))
             
-            if (Object.keys(avgVolume).length === 0) {
-                if (!checkRequiredDataErrorLogged) {
-                    console.error(`[WARNING] 暂无历史均成交量信息信息，请检查`)
-                    checkRequiredDataErrorLogged = true;
-                }
-                return false;
-            } else if (!ensureTargetIncludesAllKeys(quotes, TICKERS)) {
+            if (!ensureTargetIncludesAllKeys(quotes, TICKERS)) {
                 if (!checkRequiredDataErrorLogged) {
                     console.log(Object.keys(quotes), TICKERS)
                     console.error(`[WARNING] 暂无行情信息，需保证已订阅${TICKERS}, 且MD进程开启`)
@@ -259,7 +253,7 @@ combineLatestObserver
 
             combinedInstrumentData[instrumentId_exchangeId] = {
                 name: instrumentId_exchangeId,
-                avg7Volume: avgVolume[instrumentId_exchangeId],
+                avg7Volume: avgVolume[instrumentId_exchangeId] || 0,
                 toExpireDate, 
                 expireDate,
                 bid1,
@@ -324,7 +318,7 @@ combineLatestObserver
                 const instrumentData: any = combinedInstrumentData[key];
                 recordTaskInfo({
                     ...instrumentData,
-                    selected: instrumentData.name === selectedInstrument
+                    selected: instrumentData.name === selectedInstrument && instrumentData.avg7Volume !== 0
                 }, argv)
                 
             })

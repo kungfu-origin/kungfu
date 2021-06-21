@@ -1,15 +1,30 @@
 <template>
+
     <tr-dashboard title="">
-            <tr-table
-            :data="taskRecords"
-            :schema="tableHeader"
-            :renderCellClass="renderCellClass"
-            :keyField="tableKeyField"
-            @dbclickRow="() => {}"
-            @clickCell="() => {}"
-            @rightClickRow="() => {}"
-            >
-            </tr-table>
+        <div slot="dashboard-header">
+            <tr-dashboard-header-item>
+                <tr-dashboard-header-item>
+                    <el-select class="dashboard-header-selector" :value="currentTaskId" @change="handleSetCurrentTask">
+                        <el-option 
+                            v-for="task in taskList" 
+                            :key="task.processId"    
+                            :label="task.processId"
+                            :value="task.processId">
+                        </el-option>
+                    </el-select>
+                </tr-dashboard-header-item>
+            </tr-dashboard-header-item>
+        </div>
+        <tr-table
+        :data="taskRecords"
+        :schema="tableHeader"
+        :renderCellClass="renderCellClass"
+        :keyField="tableKeyField"
+        @dbclickRow="() => {}"
+        @clickCell="() => {}"
+        @rightClickRow="() => {}"
+        >
+        </tr-table>
     </tr-dashboard>
 </template>
 
@@ -49,12 +64,27 @@ export default {
         ...mapState({
             taskExtConfigList: state => state.BASE.taskExtConfigList,
             currentTask: state => state.BASE.currentTask,
-            currentTaskId: state => (state.BASE.currentTask).name
+            currentTaskId: state => (state.BASE.currentTask).name,
+            processStatusWithDetail: state => state.BASE.processStatusWithDetail,
         }),
 
         ...mapGetters([
             "taskExtMinimistConfig"
         ]),
+
+        taskList () {
+            return Object.keys(this.processStatusWithDetail || {})
+                .map(key => {
+                    const targetProcess = this.processStatusWithDetail[key];
+                    return this.buildTaskProcessItem(key, targetProcess)
+                })
+                .filter(({ processId }) => {
+                    if (processId.includes('task')) {
+                        return true
+                    }
+                    return false
+                })
+        },
 
         currentConfigKey () {
             return minimist(this.currentTask.args || '', this.taskExtMinimistConfig).configKey || ''
@@ -92,6 +122,10 @@ export default {
     },
 
     methods: {
+
+        handleSetCurrentTask (taskId) {
+            this.$store.dispatch('setCurrentTask', this.processStatusWithDetail[taskId])
+        },
 
         dealTaskRecords (dataList) {
 

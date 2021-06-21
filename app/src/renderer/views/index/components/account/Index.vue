@@ -249,6 +249,10 @@ export default {
                 this.currentTradesPnlTabNum = 'trades'
             }
         },
+
+        currentTaskId () {
+            this.currentOrdesTabName = "taskDetail"
+        }
     },
 
     mounted ( ) {
