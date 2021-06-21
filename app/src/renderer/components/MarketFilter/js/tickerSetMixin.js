@@ -6,13 +6,14 @@ import { checkAllMdProcess, getIndexFromTargetTickers, findTargetFromArray, dela
 import { sendDataToDaemonByPm2 } from "__gUtils/processUtils";
 import { getTickerSets, addSetTickerSet, removeTickerSetByName } from '__io/actions/market';
 import { kungfuSubscribeInstrument } from '__io/kungfu/makeCancelOrder';
+import { encodeKungfuLocation } from '__io/kungfu/kungfuUtils';
 import { watcher } from '__io/kungfu/watcher';
 
 export default {
 
     mounted () {
         this.getTickerSets();
-        this.handleMdTdStateChange();
+        this.bindMdTdStateChangeEvent();
     },
 
     beforeDestroy() {
@@ -112,10 +113,11 @@ export default {
             }
         },
 
-        handleMdTdStateChange () {
+        bindMdTdStateChangeEvent () {
             const self = this;
             this.$bus.$on('mdTdStateReady', debounce(function({ processId }) {
                 if (processId.includes('md')) {
+                    console.log('mdTdStateReady', 'md', processId)
                     self.subscribeTickersByProcessId(processId)
                 }
             }, 2000))
@@ -138,10 +140,27 @@ export default {
                 } else {
                     if (currentTickerSetIndex !== -1) {
                         this.$store.dispatch('setCurrentTickerSet', tickerSets[currentTickerSetIndex])
+                    } else {
+                        this.$store.dispatch('setCurrentTickerSet', tickerSets[0])
                     }
                 }
             } else {
                 this.$store.dispatch('setCurrentTickerSet', null)
+            }
+        },
+
+        //通过md 订阅
+        async subscribeTickersByProcessId (mdProcessId, slience = true) {
+            console.log("subscribeTickersByProcessId")
+            const sourceName = mdProcessId.split("_")[1];
+            if (!sourceName) return;
+            const mdLocation = encodeKungfuLocation(sourceName, 'md');
+            if (!watcher.isReadyToInteract(mdLocation)) {
+                console.log("watcher not isReadyToInteract", mdLocation)
+                await delayMiliSeconds(1000);
+                await this.subscribeTickersByProcessId(mdProcessId, slience);
+            } else {
+                this.subscribeAllTickers(slience)                
             }
         },
 
@@ -152,14 +171,8 @@ export default {
             sendDataToDaemonByPm2('MAIN_RENDERER_SUBSCRIBED_TICKERS', tickers)
         },
 
-        //通过md 订阅
-        subscribeTickersByProcessId (mdProcessId, slience = true) {
-            this.subscribeAllTickers(slience)
-        },
-
         subscribeTickersInTickerSet (tickerSet, slience = true) {
             const target = findTargetFromArray(this.tickerSets, 'name', tickerSet)
-
             if (target) {
                 this.subscribeTickers(target.tickers, slience)
             } else {
@@ -167,16 +180,12 @@ export default {
             }
         },
 
-        async subscribeTickers (tickers, slience = true) {
+        subscribeTickers (tickers, slience = true) {
             if (!watcher.isLive()) return;
-
-            let i = 0, len = tickers.length;
-            for (i; i < len; i++) {
-                const ticker = tickers[i];
+            tickers.forEach(ticker => {
                 const { instrumentId, source, exchangeId } = ticker;
                 kungfuSubscribeInstrument(source, exchangeId, instrumentId)
-                await delayMiliSeconds(300)
-            }
+            })
 
             if (!slience) {
                 if (checkAllMdProcess.call(this, tickers, this.processStatus)) {
