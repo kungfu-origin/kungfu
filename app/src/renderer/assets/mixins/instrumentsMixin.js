@@ -55,9 +55,8 @@ export default {
         getSearchTickersInTickerSets (queryString = '') {
             const flatternTickers = this.flatternTickers
                 .filter((item => {
-                    const { instrumentId, source, exchangeId } = item;
-                    
-                    return `${instrumentId}${exchangeId}${source}`.includes(queryString)
+                    const { instrumentId, exchangeId } = item;
+                    return `${instrumentId}${exchangeId}`.toLowerCase().includes(queryString.toLowerCase())
                 }))
                 .map(item => {
                     const { instrumentId, exchangeId } = item;
@@ -69,7 +68,7 @@ export default {
                 })
             let noRepeatTickers = {};
             flatternTickers.forEach(ticker => {
-                noRepeatTickers[`${ticker.instrumentId}_${ticker.exchangeId}`] = ticker;
+                noRepeatTickers[`${ticker.instrument_id}_${ticker.exchange_id}`] = ticker;
             })
 
             return Object.values(noRepeatTickers)
