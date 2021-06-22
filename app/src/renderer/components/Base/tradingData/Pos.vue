@@ -28,7 +28,7 @@
 import tradingDataMixin from './js/tradingDataMixin';
 
 import { writeCSV } from '__gUtils/fileUtils';
-import { toDecimal } from '__gUtils/busiUtils';
+import { toDecimal, deepClone } from '__gUtils/busiUtils';
 import { posHeader } from '@/components/Base/tradingData/js/tableHeaderConfig';
 import { sendDataToDaemonByPm2 } from "__gUtils/processUtils";
 
@@ -71,10 +71,10 @@ export default {
 
     watch: {
         kungfuData (positions) {
-            const positionsResolve = this.dealPositionList(positions, this.searchKeyword) || {};
-            const dataList = positionsResolve.dataList || [];
+            const positionsResolved = this.dealPositionList(positions, this.searchKeyword) || {};
+            const dataList = positionsResolved.dataList || [];
             this.tableData = dataList;
-            this.dataByKey = positionsResolve.dataByKey || {};
+            this.dataByKey = positionsResolved.dataByKey || {};
 
             //订阅行情
             const subscribePosTickers = dataList.map(item => {
@@ -98,7 +98,7 @@ export default {
 
             //更新orderbook
             if (!this.hasInitOrderBook && this.tableData.length) {
-                this.$bus.$emit('update:orderbook-tickerId', {
+                this.$bus.$emit('orderbook-tickerId', {
                     instrumentId: this.tableData[0].instrumentId,
                     exchangeId: this.tableData[0].exchangeId
                 });
@@ -116,11 +116,14 @@ export default {
         handleClickCell (item) {
             if (this.isTickerModule) {
                 this.$emit('activeTicker', item)
+                //ticker mode need delete default accountId
+                let itemResolved = deepClone(item);
+                delete itemResolved.accountIdResolved;
+                this.$emit('makeOrder', itemResolved)
             } else {
                 this.$emit('makeOrder', item)
-            };
-
-            this.$bus.$emit('update:orderbook-tickerId', {
+            }
+            this.$bus.$emit('orderbook-tickerId', {
                 instrumentId: item.instrumentId,
                 exchangeId: item.exchangeId
             });

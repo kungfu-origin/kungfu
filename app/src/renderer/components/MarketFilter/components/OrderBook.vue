@@ -54,13 +54,13 @@ export default {
     },
 
     mounted () {
-        this.$bus.$on('update:orderbook-tickerId', ({ instrumentId, exchangeId }) => {
+        this.$bus.$on('orderbook-tickerId', ({ instrumentId, exchangeId }) => {
             this.tickerId = `${exchangeId}_${instrumentId}`
         })
     },
 
     beforeDestroy () {
-        this.$bus.$off('update:orderbook-tickerId')
+        this.$bus.$off('orderbook-tickerId')
     },
 
     computed: {

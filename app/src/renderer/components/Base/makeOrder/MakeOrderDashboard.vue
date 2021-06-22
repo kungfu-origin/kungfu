@@ -232,7 +232,7 @@ import { mapGetters } from 'vuex';
 import { Autocomplete } from 'element-ui';
 import { ipcRenderer } from 'electron';
 
-import { deepClone } from '__gUtils/busiUtils';
+import { deepClone, delayMiliSeconds } from '__gUtils/busiUtils';
 import { SourceTypeConfig, SideName, OffsetName, PriceType, HedgeFlag, ExchangeIds, InstrumentTypes, allowShorted } from 'kungfu-shared/config/tradingConfig';
 import { biggerThanZeroValidator } from '__assets/validator';
 
@@ -426,21 +426,24 @@ export default {
                 this.$set(this.makeOrderForm, 'side', +side);
             }
 
-            this.$nextTick()
+            delayMiliSeconds(300)
                 .then(() => {
+                    this.$refs['make-order-form'].clearValidate();
                     this.$refs['make-order-form'].validate()
                         .catch(() => {
-                            const $errordoms = document.querySelectorAll('.kf-make-order-window__body .el-form-item__error');
-                            if ($errordoms.length) {
-                                const $errorDom = $errordoms[0];
-                                const $paDom = $errorDom.parentElement;
-                                const $input = $paDom.getElementsByTagName('input');
-                                if ($input.length) {
-                                    $input[0].focus();
-                                }
-                            }
+                            this.$nextTick()
+                                .then(() => {
+                                    const $errordoms = document.querySelectorAll('.kf-make-order-window__body .el-form-item__error');
+                                    if ($errordoms.length) {
+                                        const $errorDom = $errordoms[0];
+                                        const $paDom = $errorDom.parentElement;
+                                        const $input = $paDom.getElementsByTagName('input');
+                                        if ($input.length) {
+                                            $input[0].focus();
+                                        }
+                                    }
+                            })
                         })
-
                 })
             
         },
@@ -539,6 +542,7 @@ export default {
         },
 
         handleMakeOrder () {
+            this.$refs['make-order-form'].clearValidate();
             this.$refs['make-order-form'].validate(valid => {
                 if(valid) {
 
@@ -634,11 +638,8 @@ export default {
             this.$set(this.makeOrderForm, 'price_type', 0)
             this.$set(this.makeOrderForm, 'hedge_flag', 0)
 
-            return this.$nextTick()
-                .then(() => {
-                    this.$refs['make-order-form'].clearValidate();
-                })
-
+            
+            this.$refs['make-order-form'].clearValidate();
         },
     }
 }

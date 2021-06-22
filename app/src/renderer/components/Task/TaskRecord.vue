@@ -21,7 +21,7 @@
         :renderCellClass="renderCellClass"
         :keyField="tableKeyField"
         @dbclickRow="() => {}"
-        @clickCell="() => {}"
+        @clickCell="(e, item) => handleClickCell(item)"
         @rightClickRow="() => {}"
         >
         </tr-table>
@@ -42,6 +42,11 @@ import taskMixin from './js/taskMixin';
 export default {
 
     mixins: [ taskMixin ],
+
+    props: {
+        moduleType: String,
+        currentId: String,
+    },
 
     data () {
 
@@ -101,6 +106,24 @@ export default {
     },
 
     methods: {
+
+        handleClickCell (item) {
+            if (item.instrumentId && item.exchangeId) {
+                this.$bus.$emit('orderbook-tickerId', {
+                    instrumentId: item.instrumentId,
+                    exchangeId: item.exchangeId
+                });
+
+                this.$bus.$emit('update:make-order', {
+                    currentId: this.currentId,
+                    moduleType: this.moduleType,
+                    orderInput: {
+                        instrumentId: item.instrumentId,
+                        exchangeId: item.exchangeId
+                    }
+                })
+            }
+        },
 
         handleSetCurrentTask (taskId) {
             this.$store.dispatch('setCurrentTask', this.processStatusWithDetail[taskId])

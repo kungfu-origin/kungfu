@@ -42,10 +42,9 @@ export default {
             orderInput = Object.freeze(orderInput)
             if (this.moduleType !== 'strategy') {
                 this.$bus.$emit('update:make-order', {
-                    currentId: this.currentIdInAccountStrategyResolved,
+                    currentId: this.currentIdInAccountStrategyResolved || '',
                     moduleType: this.moduleType,
                     orderInput
-                
                 })
             } else {
                 this.handleShowOrCloseMakeOrderDashboard(orderInput)

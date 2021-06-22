@@ -24,6 +24,7 @@
                             :kungfuData="positionsByTicker"
                             :currentTicker="currentTickerResolved"
                             @activeTicker="setCurrentTicker"
+                            @makeOrder="handleMakeOrderByPos"
                             />
                         </el-tab-pane>
                         <el-tab-pane :lazy="false" v-if="proMode" :label="getCurrentAccountTabLabelName('tradingTask')" name="tradingTask" >
@@ -95,7 +96,10 @@
                             />   
                         </el-tab-pane>
                         <el-tab-pane :lazy="true"  v-if="proMode" :label="`算法任务记录 ${currentTaskIdInTab}`" name="taskDetail">
-                            <TaskRecord></TaskRecord>
+                            <TaskRecord 
+                            :currentId="currentId"
+                            :moduleType="moduleType" 
+                            ></TaskRecord>
                         </el-tab-pane>
                     </el-tabs>
                 </el-col>
@@ -376,7 +380,7 @@ export default {
 
         dealTradingDataByTiker (data) {
 
-            if (!this.currentTickerId) {
+            if (!this.currentTickerId && !Object.keys(data['positionsByTicker'] || {}).length) {
                 this.orders = Object.freeze([]);
                 this.trades = Object.freeze([]);
                 this.positions = Object.freeze([]);

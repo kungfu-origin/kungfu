@@ -115,7 +115,9 @@ function getMakeOrderPrice (side: number, quote: QuoteData ) {
 export function recordTaskInfo (calculatedData: any, globalData: any) {
     const postData = {
         updateTime: +new Date().getTime(),
-        instrumentId: calculatedData.name,
+        instrumentId_exchangeId: calculatedData.name,
+        instrumentId: calculatedData.instrumentId,
+        exchangeId: calculatedData.exchangeId,
         instrumentPrice: calculatedData.instrumentPrice,
         indexId: calculatedData.indexId,
         indexPrice: calculatedData.indexP,

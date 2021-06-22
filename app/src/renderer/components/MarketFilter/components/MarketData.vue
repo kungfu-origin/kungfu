@@ -277,7 +277,7 @@ export default {
                 }
             })
 
-            this.$bus.$emit("update:orderbook-tickerId", {
+            this.$bus.$emit("orderbook-tickerId", {
                 instrumentId: quoteData.instrumentId,
                 exchangeId: quoteData.exchangeId
             })

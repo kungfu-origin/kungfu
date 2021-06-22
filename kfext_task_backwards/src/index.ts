@@ -253,6 +253,8 @@ combineLatestObserver
 
             combinedInstrumentData[instrumentId_exchangeId] = {
                 name: instrumentId_exchangeId,
+                instrumentId: quoteData.instrumentId,
+                exchangeId: quoteData.exchangeId,
                 avg7Volume: avgVolume[instrumentId_exchangeId] || 0,
                 toExpireDate, 
                 expireDate,

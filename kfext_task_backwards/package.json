@@ -99,7 +99,7 @@
       },{
         "type": "text",
         "label": "合约",
-        "prop": "instrumentId",
+        "prop": "instrumentId_exchangeId",
         "width": "100px",
         "key": true
       },{
