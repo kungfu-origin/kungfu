@@ -33,8 +33,9 @@
 import minimist from 'minimist';
 import moment from 'moment';
 
-import { findTargetFromArray, getDefaultRenderCellClass } from '__gUtils/busiUtils';
-import { buildTaskDataPipe } from '__io/kungfu/tradingData'; //这个还是需要读watcher
+import { findTargetFromArray, getDefaultRenderCellClass, ensureLedgerData } from '__gUtils/busiUtils';
+import { watcher } from '__io/kungfu/watcher';
+import { buildKungfuDataByAppPipe } from '__io/kungfu/tradingData'; //这个还是需要读watcher
 
 import taskMixin from './js/taskMixin';
 
@@ -56,14 +57,21 @@ export default {
     },
 
     mounted () {
-        this.taskDataPipe = buildTaskDataPipe()
-            .subscribe(data => {
-                const { timeValueList } = data;
+        this.taskDataPipe = buildKungfuDataByAppPipe()
+            .subscribe(() => {
+                const stateData = watcher.state;
+                const timeValueList = ensureLedgerData(
+                    stateData
+                        .TimeValue
+                        .filter('tag_c', 'task')
+                        .filter('tag_a', this.currentTaskId), 
+                    'update_time'
+                ).slice(0, 100)
                 this.taskRecords = this.dealTaskRecords(timeValueList);
             })
     },
 
-    destroyed () {
+    beforeDestroy () {
         this.taskDataPipe && this.taskDataPipe.unsubscribe();
     },
 
@@ -129,15 +137,8 @@ export default {
         },
 
         dealTaskRecords (dataList) {
-
             const dataListResolved = Object.freeze(
                 dataList
-                    .filter(record => {
-                        const { tag_a, tag_c } = record;
-                        if (tag_a !== this.currentTaskId) return false;
-                        if (tag_c !== 'task') return false;
-                        return true;
-                    })
                     .map(record => {
                         const value = JSON.parse(record.value || '{}');
                         return Object.freeze({

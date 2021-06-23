@@ -177,7 +177,8 @@ combineLatestObserver
         filter((data: BackWardTraderPipeData) => {
             const { quotes, instruments } = data;
             const tickersNoIndex = TICKERS.filter((ticker: string) => !ticker.includes(index))
-            
+            checkRequiredDataErrorLogged = false;
+
             if (!ensureTargetIncludesAllKeys(quotes, TICKERS)) {
                 if (!checkRequiredDataErrorLogged) {
                     console.log(Object.keys(quotes), TICKERS)
@@ -185,6 +186,7 @@ combineLatestObserver
                     checkRequiredDataErrorLogged = true;
                 }
                 return false;
+
             } else if (!ensureTargetIncludesAllKeys(instruments, tickersNoIndex)) {
                 if (!checkRequiredDataErrorLogged) {
                     console.log(Object.keys(instruments), tickersNoIndex)

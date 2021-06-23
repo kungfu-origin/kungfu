@@ -83,10 +83,7 @@ const appDataSubject: any = new Subject();
     }
     setTimerPromiseTask(() => {
         return new Promise(resolve => {
-            const stateData = watcher.state;
             const ledgerData = watcher.ledger;
-            const timeValueList = ensureLedgerData(stateData.TimeValue.filter('tag_c', 'task'), 'update_time').slice(0, 100)
-
             const instruments = ensureLedgerData(ledgerData.Instrument);
             const instrumentsAfterFilter = instruments
                 .filter((item: InstrumentOriginData) => {
@@ -103,7 +100,6 @@ const appDataSubject: any = new Subject();
 
 
             appDataSubject.next({
-                timeValueList: timeValueList,
                 instruments: instrumentsAfterFilter,
                 gatewayStates: dealGatewayStates(watcher.appStates)
             })
@@ -142,16 +138,6 @@ export const buildKungfuGlobalDataPipe = () => {
 
 export const buildKungfuDataByAppPipe = () => {
     return appDataSubject
-}
-
-export const buildTaskDataPipe = () => {
-    return appDataSubject.pipe(
-        map((data: any) => {
-            return {
-                timeValueList: data.timeValueList
-            };
-        })
-    )
 }
 
 export const buildGatewayStatePipe = () => {

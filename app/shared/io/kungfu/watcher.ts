@@ -66,19 +66,6 @@ export const writeKungfuTimeValue = (id: string, label: string, type: string, va
     watcher.publishState(data);
 }
 
-function setImmediateIter (task: Function, count: number, cb: Function) {
-
-    if (count >= 0) {
-        setImmediate(() => {
-            task(count)
-            setImmediateIter(task, count--, cb)
-        })
-    } else {
-        cb(count)
-    } 
-}
-
-
 
 export const transformOrderTradeListToData = (list: OrderOriginData[] | TradeOriginData [], dealFunc: Function) => {
     let accountData: { [prop: string]: OrderData[] | TradeData[] } = {};
