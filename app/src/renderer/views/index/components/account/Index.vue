@@ -134,13 +134,10 @@ import MainContent from '@/components/Layout/MainContent';
 import TaskRecord from '@/components/Task/TaskRecord';
 import OrderBook from '@/components/MarketFilter/components/OrderBook';
 import MarketData from '@/components/MarketFilter/components/MarketData';
-import AddTickerDialog from '@/components/MarketFilter/components/AddTickerDialog';
 
-import { watcher, transformPositionByTickerByMerge, dealOrder, dealTrade } from '__io/kungfu/watcher';
-import { originOrderTradesFilterByDirection } from '__gUtils/busiUtils';
+import { watcher, transformPositionByTickerByMerge, transformOrderStatListToData, getOrdersBySourceDestInstrumentId, getTradesBySourceDestInstrumentId, getOrderStatByDest, dealOrder, dealTrade } from '__io/kungfu/watcher';
 import { encodeKungfuLocation } from '__io/kungfu/kungfuUtils';
 import { buildTradingDataAccountPipeByDaemon, buildMarketDataPipeByDaemon } from '@/ipcMsg/daemon';
-import { buildOrderStatDataPipe, buildAllOrdersTradesDataPipe } from '__io/kungfu/tradingData';
 
 import accountStrategyMixins from '@/views/index/js/accountStrategyMixins';
 
@@ -274,12 +271,6 @@ export default {
         this.marketDataPipe = buildMarketDataPipeByDaemon().subscribe(data => {
             this.quoteData = Object.freeze(data);
         })
-
-        
-        this.orderStatPipe = buildOrderStatDataPipe().subscribe(data => {
-            const orderStat = data['orderStat'];
-            this.orderStat = Object.freeze(orderStat || {});
-        })
     },
 
     destroyed ( ) {
@@ -341,32 +332,25 @@ export default {
         },
 
         dealTradingData (data) {
+            const ledgerData = watcher.ledger;
 
             if (this.isHistoryData('order')) {
                 this.orders = this.getHistoryData('order')
             } else {
-                const orders = watcher
-                    .ledger
-                    .Order
-                    .filter('source', this.currentLocationUID)
-                    .sort('update_time')
-                    .slice(0, 100)
-                    .map(item => dealOrder(item));
+                const orders = getOrdersBySourceDestInstrumentId(ledgerData.Order, 'source', this.currentLocationUID)
                 this.orders = Object.freeze(orders || []);
             }
 
             if (this.isHistoryData('trade')) {
                 this.trades = this.getHistoryData('trade')
             } else {
-                const trades = watcher
-                    .ledger
-                    .Trade
-                    .filter('source', this.currentLocationUID)
-                    .sort('trade_time')
-                    .slice(0, 100)
-                    .map(item => dealTrade(item));
+                const trades = getTradesBySourceDestInstrumentId(ledgerData.Trade, 'source', this.currentLocationUID)
                 this.trades = Object.freeze(trades || []);
             }
+
+            const orderStat = getOrderStatByDest(ledgerData.OrderStat, 'dest', this.currentLocationUID)
+            const orderStatResolved = transformOrderStatListToData(orderStat);
+            this.orderStat = Object.freeze(orderStatResolved); 
       
             const positions = data['positions'][this.currentId];
             this.positions = Object.freeze(positions || []);
@@ -387,40 +371,26 @@ export default {
                 return 
             }
 
+            const ledgerData = watcher.ledger;
             const { instrumentId, directionOrigin } = this.currentTicker;
+
             if (this.isHistoryData('order')) {
                 this.orders = this.getHistoryData('order');
             } else {
-                this.orders = Object.freeze(
-                    watcher.ledger.Order
-                    .filter('instrument_id', instrumentId)
-                    .sort('update_time')
-                    .slice(0, 1000)
-                    .filter(item => {
-                        const { offset, side, instrument_type } = item;
-                        return originOrderTradesFilterByDirection(directionOrigin, offset, side, instrument_type);
-                    })
-                    .slice(0, 100)
-                    .map(item => Object.freeze(dealOrder(item)))
-                );
+                const orders = getOrdersBySourceDestInstrumentId(ledgerData.Order, 'instrument', instrumentId, directionOrigin);
+                this.orders = Object.freeze(orders || []);
             }
 
             if (this.isHistoryData('trade')) {
                 this.trades = this.getHistoryData('trade');
             } else {
-                this.trades = Object.freeze(
-                    watcher.ledger.Trade
-                    .filter('instrument_id', instrumentId)
-                    .sort('trade_time')
-                    .slice(0, 1000)
-                    .filter(item => {
-                        const { offset, side, instrument_type } = item;
-                        return originOrderTradesFilterByDirection(directionOrigin, offset, side, instrument_type);
-                    })
-                    .slice(0, 100)
-                    .map(item => Object.freeze(dealTrade(item)))
-                )
+                const trades = getTradesBySourceDestInstrumentId(ledgerData.Trade, 'instrument', instrumentId, directionOrigin);
+                this.trades = Object.freeze(trades || []);
             }
+
+            const orderStat = getOrderStatByDest(ledgerData.OrderStat);
+            const orderStatResolved = transformOrderStatListToData(orderStat);
+            this.orderStat = Object.freeze(orderStatResolved); 
 
             const positionsByTicker = data['positionsByTicker'] || {};
             this.positionsByTicker = Object.freeze(transformPositionByTickerByMerge(positionsByTicker, 'account') || []);

@@ -30,7 +30,6 @@
 
 <script>
 
-import { mapState, mapGetters } from 'vuex';
 import minimist from 'minimist';
 import moment from 'moment';
 

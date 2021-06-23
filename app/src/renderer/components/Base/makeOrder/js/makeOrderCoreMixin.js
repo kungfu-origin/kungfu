@@ -19,7 +19,7 @@ export default {
         cancelOrder (moduleType, orderData, strategyId) {
             const kungfuLocation = decodeKungfuLocation(+orderData.source);
             const accountId = `${kungfuLocation.group}_${kungfuLocation.name}`;
-            
+
             //撤单   
             if (moduleType === 'strategy') {
                 return kungfuCancelOrder( orderData.orderId, accountId, strategyId)

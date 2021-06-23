@@ -6,7 +6,6 @@ import {
 
     dealGatewayStates, 
     transformTradingItemListToData, 
-    transformOrderStatListToData, 
     transformAssetItemListToData,
     dealPos,
     dealAsset,
@@ -64,13 +63,12 @@ const appDataSubject: any = new Subject();
                 quotes,
                 globalPipeData: {
                     daemonIsLive: watcher.isLive(),
-                    gatewayStates: dealGatewayStates(watcher.appStates)
                 }
             })
 
             return true
 
-    }, 500)
+    }, 1000)
 
 })();
 
@@ -88,8 +86,6 @@ const appDataSubject: any = new Subject();
             const stateData = watcher.state;
             const ledgerData = watcher.ledger;
             const timeValueList = ensureLedgerData(stateData.TimeValue.filter('tag_c', 'task'), 'update_time').slice(0, 100)
-            const orderStat = ensureLedgerData(ledgerData.OrderStat).slice(0, 1000);
-            const orderStatResolved = transformOrderStatListToData(orderStat);  
 
             const instruments = ensureLedgerData(ledgerData.Instrument);
             const instrumentsAfterFilter = instruments
@@ -108,8 +104,8 @@ const appDataSubject: any = new Subject();
 
             appDataSubject.next({
                 timeValueList: timeValueList,
-                orderStat: orderStatResolved,
-                instruments: instrumentsAfterFilter
+                instruments: instrumentsAfterFilter,
+                gatewayStates: dealGatewayStates(watcher.appStates)
             })
 
             resolve(true)
@@ -144,6 +140,10 @@ export const buildKungfuGlobalDataPipe = () => {
     )
 }
 
+export const buildKungfuDataByAppPipe = () => {
+    return appDataSubject
+}
+
 export const buildTaskDataPipe = () => {
     return appDataSubject.pipe(
         map((data: any) => {
@@ -154,20 +154,12 @@ export const buildTaskDataPipe = () => {
     )
 }
 
-export const buildOrderStatDataPipe = () => {
+export const buildGatewayStatePipe = () => {
     return appDataSubject.pipe(
         map((data: any) => {
             return {
-                orderStat: data.orderStat
-            };
-        })
-    )
-}
-
-export const buildAllOrdersTradesDataPipe = () => {
-    return appDataSubject.pipe(
-        map(() => {
-            return {}
+                gatewayStates: data.gatewayStates
+            }
         })
     )
 }

@@ -111,7 +111,7 @@ import tradingDataMixin from '@/components/Base/tradingData/js/tradingDataMixin'
 export default {
     name: "orders",
    
-    mixins: [ tradingDataMixin, makeOrderMixin, makeOrderCoreMixin ],
+    mixins: [ tradingDataMixin, makeOrderCoreMixin, makeOrderMixin ],
 
     props: {
 

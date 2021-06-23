@@ -10,7 +10,7 @@ import Workers from '@/workers/index';
 export default {
 
     data () {
-        this.oldInstruments = Object.freeze(JSON.parse(localStorage.getItem('instruments') || "[]"));
+        this.oldInstrumentsLength = JSON.parse(localStorage.getItem('instruments') || "[]").length;
         this.dealInstrumentController = false;
         return {}
     },
@@ -62,7 +62,7 @@ export default {
                 console.log("DealInstruments onmessage", instruments.length)
                 localStorage.setItem('instrumentsSavedDate', moment().format('YYYY-MM-DD'))
                 localStorage.setItem('instruments', JSON.stringify(instruments || []))
-                self.oldInstruments = instruments || []; //refresh old instruments
+                self.oldInstrumentsLength = instruments.length || 0; //refresh old instruments
                 self.dealInstrumentController = false;
             }
         },
@@ -71,7 +71,7 @@ export default {
 
         getIfSaveInstruments (newInstruments) {
 
-            if (newInstruments.length !== this.oldInstruments.length) {
+            if (newInstruments.length !== this.oldInstrumentsLength) {
                 return true;
             }
 

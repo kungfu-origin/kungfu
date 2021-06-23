@@ -124,8 +124,8 @@ import Pnl from '@/components/Base/tradingData/pnl/Index';
 import MainContent from '@/components/Layout/MainContent';
 
 import { buildTradingDataStrategyPipeByDaemon } from '@/ipcMsg/daemon';
-import { buildOrderStatDataPipe } from '__io/kungfu/tradingData';
-import { watcher, dealOrderInput, dealOrder, dealTrade } from '__io/kungfu/watcher';
+import { buildKungfuDataByAppPipe } from '__io/kungfu/tradingData';
+import { watcher, transformOrderStatListToData, getOrderInputBySourceDest, getOrdersBySourceDestInstrumentId, getTradesBySourceDestInstrumentId, getOrderStatByDest, dealOrderInput, dealOrder, dealTrade } from '__io/kungfu/watcher';
 import { encodeKungfuLocation } from '__io/kungfu/kungfuUtils';
 
 import accountStrategyMixins from '@/views/index/js/accountStrategyMixins';
@@ -168,45 +168,31 @@ export default {
             this.$store.dispatch('setStrategiesAsset', Object.freeze(assets));
         });
 
-        this.orderStatPipe = buildOrderStatDataPipe().subscribe(data => {
-            const orderStat = data['orderStat'];
-            this.orderStat = Object.freeze(orderStat || {});
+        this.orderStatPipe = buildKungfuDataByAppPipe().subscribe(() => {
+            const ledgerData = watcher.ledger;
 
             if (this.isHistoryData('order')) {
                 this.orders = this.getHistoryData('order')
             } else {
-                const orders = watcher
-                    .ledger
-                    .Order
-                    .filter('dest', this.currentLocationUID)
-                    .sort('update_time')
-                    .slice(0, 100)
-                    .map(item => dealOrder(item));
+                const orders = getOrdersBySourceDestInstrumentId(ledgerData.Order, 'dest', this.currentLocationUID);
                 this.orders = Object.freeze(orders || []);
             }
 
             if (this.isHistoryData('trade')) {
                 this.trades = this.getHistoryData('trade')
             } else {
-                const trades = watcher
-                    .ledger
-                    .Trade
-                    .filter('dest', this.currentLocationUID)
-                    .sort('trade_time')
-                    .slice(0, 100)
-                    .map(item => dealTrade(item));
+                const trades = getTradesBySourceDestInstrumentId(ledgerData.Trade, 'dest', this.currentLocationUID);
                 this.trades = Object.freeze(trades || []);
             }
 
+            //策略不会产生 orderStat
+            const orderStat = getOrderStatByDest(ledgerData.OrderStat);
+            const orderStatResolved = transformOrderStatListToData(orderStat);
+            this.orderStat = Object.freeze(orderStatResolved);
+
             //优化
             if (this.currentStrategyDetailTab === 'orderMap') {
-                const orderInputs = watcher
-                        .ledger
-                        .OrderInput
-                        .filter('source', this.currentLocationUID) //order input is special
-                        .sort('insert_time')
-                        .slice(0, 100)
-                        .map(item => dealOrderInput(item));
+                const orderInputs = getOrderInputBySourceDest(ledgerData, 'source', this.currentLocationUID)
                 this.orderInputs = Object.freeze(orderInputs);
             }
         })
