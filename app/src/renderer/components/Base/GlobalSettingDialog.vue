@@ -214,17 +214,17 @@
 
 <script>
 import Vue from "vue";
+import fse from 'fs-extra';
 import { mapState } from "vuex";
 import { Collapse, CollapseItem } from "element-ui";
 
-import { readJsonSync, outputJsonSync } from "__gUtils/fileUtils";
 import { KUNGFU_RESOURCES_DIR } from "__gConfig/pathConfig";
 import { getSourceList, debounce, throttle } from "__gUtils/busiUtils";
 import { buildSystemConfig } from "__gConfig/systemConfig";
 import { switchCustomProcess } from "__io/actions/base";
 import { getKfCommission, setKfCommission } from '__io/kungfu/kungfuUtils';
 
-import openLogMixin from '@/assets/js/mixins/openLogMixin';
+import openLogMixin from '@/assets/mixins/openLogMixin';
 
 const { shell, dialog }  = require('electron').remote 
 const path = require("path");
@@ -320,8 +320,8 @@ export default {
 			const settingData = this.settingConfig[settingKey].value;
 			const outputPath = this.settingConfig[settingKey].outputPath;
 			this.$nextTick()
-				.then(() => outputJsonSync(outputPath, settingData || {}))
-				.then(() => readJsonSync(outputPath))
+				.then(() => fse.outputJsonSync(outputPath, settingData || {}))
+				.then(() => fse.readJsonSync(outputPath))
 				.then(config => {
 					if (!config) return;
 					this.$set(this.settingConfig[settingKey], "value", config);

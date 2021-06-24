@@ -15,8 +15,6 @@ import MainContent from '@/components/Layout/MainContentForCode'
 import { ipcEmitDataByName } from '@/ipcMsg/emitter';
 import { setTimeout } from 'timers';
 
-const { dialog } = require('electron').remote;
-
 export default {
     name: 'kungfu-code-editor',
     

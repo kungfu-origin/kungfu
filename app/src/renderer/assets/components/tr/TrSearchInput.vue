@@ -24,6 +24,7 @@ export default {
             default: ''
         }
     },
+
     data(){
         return {
             active: false,
@@ -31,31 +32,38 @@ export default {
         }
     },
 
+	watch: {
+
+		value (newVal, oldVal) {
+			if ( !newVal || !newVal.trim()) {
+				if (oldVal.trim() !== '') {
+					this.clearData();
+				}
+			}
+		}
+	},
+
     methods: {
         clearData(){
-            const t = this;
-            t.active = false;
-			t.searchKeyword = '' 
-			t.$emit('input', '')
+            this.active = false;
+			this.searchKeyword = '' 
+			this.$emit('input', '')
 		},
 
 		handleActive(){
-			const t = this;
-			t.active = true;
-			t.$nextTick().then(() => {
-				const $searchInput = t.$refs['search-input'].$el;
+			this.active = true;
+			this.$nextTick().then(() => {
+				const $searchInput = this.$refs['search-input'].$el;
 				$searchInput.querySelectorAll('input').forEach($input => $input.focus())
 			})
 		},
 		
 		handleInput(val){
-			const t = this;
-			t.$emit('input', val.trim())
+			this.$emit('input', val.trim())
 		},
 
 		handleBlur(){
-			const t = this;
-			if(!t.value) t.clearData();
+			if(!this.value) this.clearData();
 		}
     }
 }

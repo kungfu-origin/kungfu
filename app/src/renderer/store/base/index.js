@@ -1,7 +1,8 @@
 import Vue from 'vue';
+import fse from "fs-extra";
 import { getAccountSource } from '__gConfig/accountConfig';
-import { readJsonSync, outputJsonSync } from '__gUtils/fileUtils';
-import { KF_CONFIG_PATH } from '__gConfig/pathConfig';
+import { KF_CONFIG_PATH, TASK_EXTENSION_DIR } from '__gConfig/pathConfig';
+import { getExtensionConfigs } from '__gUtils/busiUtils';
 
 
 export default {
@@ -15,7 +16,12 @@ export default {
         processStatusWithDetail: {},
         tdAccountSource: {}, //账户柜台信息
         mdAccountSource: {}, //账户柜台信息
-        kfConfig: {} // kf 配置
+        kfConfig: {}, // kf 
+        
+        currentTask: {},
+        taskExtConfigList: [],
+
+        daemonIsLive: false
     },
 
     actions: {
@@ -45,7 +51,7 @@ export default {
         //部分更新kfConfig
         setKungfuConfigByKeys ({ commit, state }, kfConfig) {
             commit('SET_KF_CONFIG', kfConfig)  
-            outputJsonSync(KF_CONFIG_PATH, 
+            fse.outputJsonSync(KF_CONFIG_PATH, 
                 {
                     ...state.kfConfig,
                     ...kfConfig
@@ -64,15 +70,37 @@ export default {
 
         //初始化kungfu trader
         getKungfuConfig ({ dispatch }) {
-            const kfConfig = readJsonSync(KF_CONFIG_PATH)
+            const kfConfig = fse.readJsonSync(KF_CONFIG_PATH)
             dispatch('setKungfuConfig', kfConfig)
         },
+
+        setCurrentTask ({ commit }, currentTask) {
+            commit('SET_CURRENT_TASK', currentTask)
+        },
+
+        getExtensionConfigs ({ commit }) {
+            return getExtensionConfigs(TASK_EXTENSION_DIR)
+                .then(exts => {
+                    commit('SET_TASK_EXTENSION_CONFIGS', Object.freeze(exts.filter(({ type }) => type === 'task')))
+                })
+        },
+
+        setDaemonIsLive ({ commit }, daemonIsLive) {
+            commit("SET_DAEMON_IS_LIVE", daemonIsLive);
+        }
     },
 
     mutations: {
+        SET_DAEMON_IS_LIVE (state, daemonIsLive) {
+            state.daemonIsLive = daemonIsLive;
+        },
 
-        SET_TASKS (state, tasks) {
-            state.tasks = tasks
+        SET_TASK_EXTENSION_CONFIGS (state, taskExtConfigList) {
+            state.taskExtConfigList = taskExtConfigList
+        },
+
+        SET_CURRENT_TASK (state, task) {
+            state.currentTask = Object.freeze(task);
         },
         
         SET_PROCESS_STATUS (state, processStatus) {
@@ -99,6 +127,38 @@ export default {
     },
 
     getters: {
+
+        proMode (state) {
+            return !!(state.taskExtConfigList || []).length
+        },
+
+        taskExtMinimistConfig (state) {
+            const stringTypes = ['instrumentIdInTickerSet', 'tickerSet', 'instrumentId', 'account']
+            let minimistConfig = {
+                string: [],
+                boolean: [],
+            };
+            state.taskExtConfigList.forEach(config => {
+                const c = config.config;
+                c.forEach(item => {
+                    const { key, type } = item;
+                
+                    if (stringTypes.includes(type)) {
+                        if (!minimistConfig.string.includes(key)) {
+                            minimistConfig.string.push(key)                        
+                        }
+                    }
+
+                    if (type === 'bool') {
+                        if (!minimistConfig.boolean.includes(key)) {
+                            minimistConfig.boolean.push(key)
+                        }
+                    }
+                })
+            })
+
+            return minimistConfig
+        },
 
         ifMasterLedgerRunning (state) {
             const processStatus = state.processStatus || {};

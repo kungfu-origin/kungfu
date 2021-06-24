@@ -15,11 +15,5 @@ console.error = (log: string) => {
     console.log(`${colors.red('ERROR')} ${log}`)
 }
 
-if (process.env.NODE_ENV === 'production') {
-    //@ts-ignore
-    process.resourcesPath =  path.join(path.dirname(process.execPath), '..').replace(/\\/g, '\\\\')
-}
-
-
 export const { initConfig } = require('__assets/base')
 initConfig();

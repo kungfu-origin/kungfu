@@ -22,8 +22,8 @@ if (pro) {
     })
 
     baseConfig.extraResources.push({
-        "from": path.join(__dirname, '..', '..', 'kfext_task_backwardHedge', 'lib'),
-        "to": "kungfu-extensions/backward-hedge"
+        "from": path.join(__dirname, '..', '..', 'kfext_task_backwards', 'lib'),
+        "to": "kungfu-extensions/backwards"
     })
 }
 
@@ -35,6 +35,8 @@ if (target) {
         key: 'to',
         value: 'kfc'
     }])
+
+    
     
     if (targetIndex >= 0) {
         baseConfig.extraResources[targetIndex] = {
@@ -42,10 +44,9 @@ if (target) {
             "to": "kfc",
             "filter": [
                 "!**/btdata",
-                "!**/kungfu_extensions/tora",
-                "!**/kungfu_extensions/shengli",
-                "!**/kungfu_extensions/xtp"
-            ]
+                target.includes('xtp') ? "" : "!**/kungfu_extensions/xtp",
+                hasFuture(target) ? "!**/kungfu_extensions/ctp" : "",
+            ].filter(key => !!key)
         }
     }
 
@@ -56,10 +57,24 @@ if (target) {
         })
     }
 
+    if (target.includes('zhaos')) {
+        baseConfig.extraResources.push({
+            "from": path.join(__dirname, '..', '..', 'kfext_zhaos', 'build', 'dist'),
+            "to": "kfc/kungfu_extensions/zhaos",
+        })
+    }
+
     if (target.includes('shengli')) {
         baseConfig.extraResources.push({
             "from": path.join(__dirname, '..', '..', 'kfext_shengli', 'build', 'dist'),
             "to": "kfc/kungfu_extensions/shengli"
+        })
+    }
+
+    if (target.includes('rongh')) {
+        baseConfig.extraResources.push({
+            "from": path.join(__dirname, '..', '..', 'kfext_rongh', 'build', 'dist'),
+            "to": "kfc/kungfu_extensions/rongh"
         })
     }
 }
@@ -69,6 +84,12 @@ builder.build({
     config: baseConfig
 })
 
+
+function hasFuture (target) {
+    if (target.includes('zhaos')) return true;
+    if (target.includes('rongh')) return true;
+    return false
+}
 
 //conditions: { key: '', value: '' }
 function findConfigItemIndex (configList, conditions) {
@@ -86,7 +107,7 @@ function findConfigItemIndex (configList, conditions) {
 
 
 function resolveArtifactName (cli, pro, target) {
-    const buildTime = moment().format('MMDDHHMM')
+    const buildTime = moment().format('MMDDHHmm')
     const appType = cli ? 'cli' : 'app';
     const targetName = target || '';
     const appTypeResolvde = pro ? `${appType}-pro` : appType

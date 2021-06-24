@@ -86,6 +86,14 @@ let rendererConfig = {
         }
       },
       {
+        test: /\.worker\.js$/,
+        use: {
+          loader: 'worker-loader',
+          options: { inline: true, fallback: false }
+        },
+        exclude: /node_modules/
+      },
+      {
         test: /\.(png|jpe?g|gif|svg)(\?.*)?$/,
         use: {
           loader: 'url-loader',
@@ -218,7 +226,7 @@ if (process.env.NODE_ENV === 'production') {
     }),
     new webpack.DefinePlugin({
       'python_version': `"${pyVersion.toString()}"`,
-      'process.env.NODE_ENV': JSON.stringify('production'),
+      'process.env.NODE_ENV': '"production"',
       'process.env.APP_TYPE': '"renderer"',
     }),
     // new BundleAnalyzerPlugin({

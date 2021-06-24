@@ -15,6 +15,7 @@ yijinjing::data::location_ptr ExtractLocation(const Napi::CallbackInfo &info, in
                                               const yijinjing::data::locator_ptr &locator);
 
 class Locator : public yijinjing::data::locator, public std::enable_shared_from_this<Locator> {
+
 public:
   explicit Locator(const Napi::Object &locator_obj);
 
@@ -24,16 +25,16 @@ public:
 
   [[nodiscard]] std::string get_env(const std::string &name) const override;
 
-  [[nodiscard]] std::string layout_dir(yijinjing::data::location_ptr location,
-                                       longfist::enums::layout l) const override;
+  [[nodiscard]] std::string layout_dir(const yijinjing::data::location_ptr &location,
+                                       longfist::enums::layout layout) const override;
 
-  [[nodiscard]] std::string layout_file(yijinjing::data::location_ptr location, longfist::enums::layout l,
+  [[nodiscard]] std::string layout_file(const yijinjing::data::location_ptr &location, longfist::enums::layout layout,
                                         const std::string &name) const override;
 
-  [[nodiscard]] std::string default_to_system_db(yijinjing::data::location_ptr location,
+  [[nodiscard]] std::string default_to_system_db(const yijinjing::data::location_ptr &location,
                                                  const std::string &name) const override;
 
-  [[nodiscard]] std::vector<uint32_t> list_page_id(yijinjing::data::location_ptr location,
+  [[nodiscard]] std::vector<uint32_t> list_page_id(const yijinjing::data::location_ptr &location,
                                                    uint32_t dest_id) const override;
 
   [[nodiscard]] std::vector<yijinjing::data::location_ptr> list_locations(const std::string &category,
@@ -41,7 +42,7 @@ public:
                                                                           const std::string &name,
                                                                           const std::string &mode) const override;
 
-  [[nodiscard]] std::vector<uint32_t> list_location_dest(yijinjing::data::location_ptr location) const override;
+  [[nodiscard]] std::vector<uint32_t> list_location_dest(const yijinjing::data::location_ptr &location) const override;
 
   Napi::Object get_js_locator();
 
@@ -57,7 +58,7 @@ public:
 
   static yijinjing::data::locator_ptr GetLocator(const Napi::CallbackInfo &info, int index = 0);
 
-  static yijinjing::data::locator_ptr GetLocator(const Napi::Array locators, int index = 0);
+  static yijinjing::data::locator_ptr GetLocator(Napi::Array locators, int index = 0);
 
   static yijinjing::data::location_ptr GetLocation(const Napi::CallbackInfo &info);
 

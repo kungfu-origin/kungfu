@@ -3,13 +3,12 @@
         <ul class="tr-table-header tr-table-row ">
             <li 
             :class="[
-            'user-select-none',
-            'text-overflow', 
-            'tr-table-cell',
-            column.type === 'number' ? 'number' : '',
-            column.type === 'account-strategy' ? 'account-strategy' : '',
-            column.type === 'operation' ? 'oper' : '',
-            column.align === 'center' ? 'text-center' : ''
+                'text-overflow', 
+                'tr-table-cell',
+                column.type === 'number' ? 'number' : '',
+                column.type === 'account-strategy' ? 'account-strategy' : '',
+                column.type === 'operation' ? 'oper' : '',
+                column.align ? `text-${column.align}` : ''
             ]" 
             v-for="column in schema" 
             :key="column.prop" 
@@ -38,26 +37,35 @@
                     @dblclick="e => handleDbClickRow(e, item)"
                     @mousedown="e => handleMousedown(e, item)"
                     >
+                    <!-- if need blink, item.update need to be true -->
                         <li 
-                        :title="item[column.prop] || ''"
-                        :class="[
-                            renderCellClass(column.prop, item),                        
-                            'tr-table-cell', 
-                            'text-overflow',
-                            item.update ? 'update' : '',
-                            column.type === 'number' ? 'number' : '',
-                            column.type === 'account-strategy' ? 'account-strategy' : '',
-                            column.type === 'operation' ? 'oper' : '',
-                            column.align === 'center' ? 'text-center' : ''
-                        ]"
-                        v-for="column in schema" 
-                        :key="`${column.prop}_${item.id}_${item[column.prop]}`"       
-                        :style="{                             
-                            'max-width': getHeaderWidth(column)
-                        }"
-                        @click.stop="e => handleClickCell(e, item, column)"
+                            :title="item[column.prop] || ''"
+                            :class="[
+                                renderCellClass(column.prop, item),                        
+                                'tr-table-cell', 
+                                'text-overflow',
+                                item.update ? 'update' : '',
+                                column.type === 'number' ? 'number' : '',
+                                column.type === 'account-strategy' ? 'account-strategy' : '',
+                                column.type === 'operation' ? 'oper' : '',
+                                column.align ? `text-${column.align}` : ''
+                                
+                            ]"
+                            v-for="column in schema" 
+                            :key="`${column.prop}_${item[keyField]}`"       
+                            :style="{                             
+                                'max-width': getHeaderWidth(column)
+                            }"
+                            @click.stop="e => handleClickCell(e, item, column)"
                         >
-                            <template v-if="column.type !== 'operation'">
+                            <template v-if="column.type === 'number'">
+                                <tr-blink-num
+                                :theKey="`${column.prop}_${item[keyField]}_${item[column.prop]}`"   
+                                :num="item[column.prop]"
+                                >
+                                </tr-blink-num>                            
+                            </template>
+                            <template v-else-if="column.type !== 'operation'">
                                 {{item[column.prop]}}
                             </template>
                             <template v-else-if="column.type === 'operation'">
@@ -97,8 +105,11 @@
                             :style="{                             
                                 'max-width': getHeaderWidth(column)
                             }">
-                                <template v-if="column.type !== 'operation'">
+                                <template v-if="column.type !== 'operation' && !renderHtml">
                                     {{item[column.prop]}}
+                                </template>
+                                <template v-else-if="column.type !== 'operation' && renderHtml" >
+                                    <span class="tr-table-cell__html-render" v-html="item[column.prop]"></span>
                                 </template>
                                 <template v-else-if="column.type === 'operation'">
                                     <slot name="oper" v-bind:props="item"></slot>
@@ -114,9 +125,10 @@
 </template>
 <script>
 import Vue from 'vue';
-import VueVirtualScroller from 'vue-virtual-scroller'
 import 'vue-virtual-scroller/dist/vue-virtual-scroller.css'
-import {debounce, sum} from '__gUtils/busiUtils';
+
+import VueVirtualScroller from 'vue-virtual-scroller'
+import { debounce, sum } from '__gUtils/busiUtils';
 
 Vue.use(VueVirtualScroller)
 export default {
@@ -152,6 +164,11 @@ export default {
             }
         },
 
+        renderHtml: {
+            type: Boolean,
+            default: false
+        },
+
         keyField: {
             type: String,
             default: 'id'
@@ -175,22 +192,20 @@ export default {
 
     watch: {
         data(newVal) {
-            const t = this;
             if (newVal.length !== 0) {
-                t.$nextTick().then(() => t.show = true)
+                this.$nextTick().then(() => this.show = true)
             } else {
-                t.$nextTick().then(() => t.show = false)
+                this.$nextTick().then(() => this.show = false)
             }
         }
     },
 
     computed: {
         headerWidth(){
-            const t = this;
             let widths = []; //column use with
             let flexs = []; //column use flex
 
-            t.schema.forEach(item => {
+            this.schema.forEach(item => {
                 if(item.width !== undefined){
                     widths.push(item);
                 }else{
@@ -200,7 +215,7 @@ export default {
 
             //先减去 固定宽度集合，再算flex unit
             const flexWidthUnits  = sum(flexs.map(item => item.flex || 1))
-            const widthForFlex = t.bodyWidth - (widths.length ? t.$utils.sum(widths.map(item => parseFloat(item.width))) : 0)
+            const widthForFlex = this.bodyWidth - (widths.length ? sum(widths.map(item => parseFloat(item.width))) : 0)
             const unit = (widthForFlex - 16) / flexWidthUnits
             let headerWidthCollection = {};
             [...widths, ...flexs].forEach(item => {
@@ -211,12 +226,11 @@ export default {
     },
 
     mounted(){
-        const t = this;
-        t.calcBodyWidthHeight()
-        let $scrollerTable = t.$refs['tr-scroller-table'] || t.$refs['tr-dynamic-scroller-table'];
+        this.calcBodyWidthHeight()
+        let $scrollerTable = this.$refs['tr-scroller-table'] || this.$refs['tr-dynamic-scroller-table'];
         window.addEventListener('resize', debounce(e => {
-            t.calcBodyWidthHeight()
-                if(!$scrollerTable) $scrollerTable = t.$refs['tr-scroller-table'] || t.$refs['tr-dynamic-scroller-table'];
+            this.calcBodyWidthHeight()
+                if(!$scrollerTable) $scrollerTable = this.$refs['tr-scroller-table'] || this.$refs['tr-dynamic-scroller-table'];
                 $scrollerTable && $scrollerTable.forceUpdate && $scrollerTable.forceUpdate()              
         }, 300))
     },
@@ -242,9 +256,8 @@ export default {
         },
 
         triggerToBottom() {
-            const t = this;
-            t.$nextTick().then(() => {
-                const $scrollerTable = t.$refs['tr-scroller-table'] || t.$refs['tr-dynamic-scroller-table'];
+            return this.$nextTick().then(() => {
+                const $scrollerTable = this.$refs['tr-scroller-table'] || this.$refs['tr-dynamic-scroller-table'];
                 $scrollerTable && $scrollerTable.$el && ($scrollerTable.$el.scrollTop = 1000000000)
             })
         },
@@ -256,7 +269,6 @@ export default {
         },
 
         getHeaderWidth (column) {
-            const prop = column.prop;
             const headerWidthByCalc = this.headerWidth[column.prop];
             const columnWidth = column.width;
 
@@ -295,9 +307,22 @@ export default {
             line-height: 25px;
             display: inline-block;
             color: $font;
-        }
-        .tr-table-cell.number{
-            text-align: right;
+            
+            &.text-center {
+                text-align: center;
+            }
+
+            &.text-right {
+                text-align: right;
+            }
+
+            &.text-left {
+                text-align: left;
+            }
+
+            &.number{
+                text-align: right;
+            }
         }
     }
 
@@ -330,7 +355,7 @@ export default {
         }
 
         .account-strategy {
-            max-width: 100px !important;
+            max-width: 200px !important;
         }
     }
 
@@ -338,7 +363,7 @@ export default {
         background: $bg_light;
     }
 
-     .tr-table-cell{
+    .tr-table-cell{
         height: 20px;
         line-height: 20px;
         padding: 0 6px;
@@ -350,34 +375,52 @@ export default {
         font-family: Consolas,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New, monospace;
         user-select: text;
         text-align: left;
+
+        &.number {
+            text-align: right;
+        }
+
+        &.text-center {
+            text-align: center;
+        }
+
+        &.text-right {
+            text-align: right;
+        }
+
+        &.text-left {
+            text-align: left;
+        }
+
+        &.red{
+            color: $red;
+        }
+
+        &.green{
+            color: $green;
+        }
+
+        &.yellow{
+            color: $vi;
+        }
+
+        &.gray{
+            color: $font;
+        }
+
+        &.blue{
+            color: $blue;
+        }
+
+        &.update{
+            animation: nanoBlink 1.1s 1;
+        }
+
+        .tr-table-cell__html-render {
+            user-select: text;
+        }
     }
-    .tr-table-cell.number{
-        text-align: right;
-    }
-    .tr-table-cell.red{
-        color: $red;
-    }
-    .tr-table-cell.green{
-        color: $green;
-    }
-    .tr-table-cell.yellow{
-        color: $vi;
-    }
-    .tr-table-cell.gray{
-        color: $font;
-    }
-     .tr-table-cell.blue{
-        color: $blue;
-    }
-    .tr-table-cell.update{
-        animation: nanoBlink 1.1s 1;
-    }
-    .tr-table-cell.update.number.red{
-        animation: nanoRedBlink 1.1s 1;
-    }
-    .tr-table-cell.update.number.green{
-        animation: nanoGreenBlink 1.1s 1;
-    }
+
 
 
     .tr-table-body .tr-table-dynamic-scroller{
@@ -385,7 +428,7 @@ export default {
             .tr-table-cell{
                 height: auto;
                 line-height: 20px;
-                word-break: break-all;
+                word-break: break-word;
             }
         }
     }

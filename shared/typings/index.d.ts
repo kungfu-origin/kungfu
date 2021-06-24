@@ -65,12 +65,13 @@ interface ProcessStatusDetail {
         memory: bigint;
         cpu: number;
     },
-    pid: string,
-    name: string,
-    created_at: string,
-    script: string,
-    cwd: string,
-    args: string
+    pid: string;
+    pm_id: number;
+    name: string;
+    created_at: string;
+    script: string;
+    cwd: string;
+    args: string;
 }
 
 interface StringToProcessStatusDetail {
@@ -122,6 +123,64 @@ interface LogDataOrigin {
     process_id: number
 }
 
+interface OrderInputData {
+    id: string;
+
+    updateTime: string;
+    updateTimeMMDD: string;
+    updateTimeNum: number;
+    orderId: string;
+    parentId: string;
+
+    instrumentId: string;
+    instrumentType: string;
+    instrumentTypeOrigin: number;
+
+    exchangeId: string;
+    sourceId: string;
+    accountId: string;
+
+    limitPrice: string;
+    frozenPrice: string;
+    volume: string;
+
+    side: string;
+    sideOrigin: number;
+    offset: string;
+    offsetOrigin: number;
+    hedgeFlag: string;
+    hedgeFlagOrigin: number;
+    priceType: string;
+    priceTypeOrigin: number;
+
+    source: number;
+    dest: number;
+    
+}
+
+interface OrderInputOriginData {
+    order_id: bigint;
+    parent_id: bigint;
+    insert_time: bigint;
+
+    instrument_id: string;
+    exchange_id: string;
+    source_id: string;
+    account_id: string;
+    instrument_type: number;
+    limit_price: number;
+    frozen_price: number;
+    volume: bigint;
+    
+    side: number;
+    offset: number;
+    hedge_flag: number;
+    price_type: number;
+
+    source: number;
+    dest: number;
+}
+
 
 interface OrderData {
     id: string;
@@ -129,7 +188,6 @@ interface OrderData {
     updateTime: string;
     updateTimeMMDD: string;
     updateTimeNum: number;
-
     orderId: string;
     parentId: string;
 
@@ -169,19 +227,18 @@ interface OrderData {
     accountId: string;
     sourceId: string;
 
-    source: string;
-    dest: string;
+    source: number;
+    dest: number;
     
     latencySystem?: string | number;
     latencyNetwork?: string | number;
 }
 
-interface OrderInputData {
+interface OrderOriginData {    
+    parent_id: bigint;
+    order_id: bigint;
     update_time: bigint;
     insert_time: bigint;
-
-    order_id: bigint;
-    parent_id: bigint;
 
     instrument_id: string;
     instrument_type: number;
@@ -214,80 +271,196 @@ interface OrderInputData {
     account_id: string;
     source_id: string;
 
-    source: string;
-    dest: string;
+    source: number;
+    dest: number;
 }
 
 interface TradeData {
     id: string;
-    instrumentId: string;
     updateTime: string;
     updateTimeMMDD: string;
     updateTimeNum: number;
+    orderId: string;
+    parentOrderId: string;
+
+    instrumentId: string;
+    instrumentType: string;
+    instrumentTypeOrigin: number;
+    exchangeId: string;
+
     side: string;
+    sideOrigin: number;
     offset: string;
+    offsetOrigin: number;
+    hedgeFlag: string;
+    hedgeFlagOrigin: number;
+
     price: string;
     volume: number;
-    orderId: string;
+
     clientId: string;
     accountId: string;
     sourceId: string;
-    source: string;
+
+    source: number;
+    dest: number;
+    
+    tax: string;
+    commission: string;
 }
 
-interface TradeInputData {
+interface TradeOriginData {
+    trade_id: bigint;
+    order_id: bigint;
+    parent_order_id: bigint;
+    trade_time: bigint;
+  
+    instrument_id: string;
+    instrument_type: number;
+    exchange_id: string;
+
+    offset: number;
+    side: number;
+    hedge_flag: number;
+    
+    price: string;
+    volume: bigint;
+
     account_id: string;
     client_id: string;
     source_id: string;
-    trade_id: bigint;
-    order_id: bigint;
-    instrument_id: string;
-    trade_time: bigint;
-    offset: number;
-    side: number;
-    price: string;
-    volume: bigint;
-    source: string;
-    dest: string;
-    [propName: string]: any;
+    
+    source: number;
+    dest: number;
+    
+    tax: number;
+    commission: number;
 }
 
 interface PosData {
+    updateTime: string;
+    updateTimeMMDD: string;
+    updateTimeNum: number;
+
     id: string;
     instrumentId: string;
     instrumentType: number;
+    exchangeId: string;
+    
     direction: string;
     directionOrigin: number;
+    
     yesterdayVolume: number;
     todayVolume: number;
     totalVolume: number;
-    avgPrice: string;
-    lastPrice: string;
-    unRealizedPnl: string;
-    exchangeId: string;
+    
+    avgPrice: number;
+    lastPrice: number;
+    totalPrice: number;
+    totalMarketPrice: number;
+    unRealizedPnl: number;
+    
     accountId: string;
     sourceId: string;
     clientId: string;
     accountIdResolved: string;
+    ledgerCategory: number;
 }
 
-interface PosInputData {
+interface PosOriginData {
     instrument_id: string;
     instrument_type: number;
+    update_time: bigint;
+
     direction: number;
     yesterday_volume: bigint;
     unrealized_pnl: number,
     volume: bigint;
+    avg_open_price: number;
+    position_cost_price: number;
     last_price: number;
     margin: number;
     exchange_id: string;
     account_id: string;
     source_id: string;
     client_id: string;
-    [propName: string]: any;
+    ledger_category: number;
 }
 
-interface AssetInputData {
+interface AssetSnapshotData {
+    updateTime: string;
+    updateTimeMMDD: string;
+    updateTimeNum: number;
+    tradingDay: string;
+    ledgerCategory: number;
+
+    sourceId: string;
+    brokerId: string;
+    accountId: string;
+    clientId: string;
+
+    initialEquity: number; //期初权益
+    staticEquity: number;  //静态权益
+    dynamicEquity: number; //动态权益
+    realizedPnl: number; //累计收益
+    unrealizedPnl: number;
+    avail: number;        //可用资金
+    marketValue: number; //市值(股票)
+    margin: number; //保证金(期货)
+    accumulatedFee: number; //累计手续费
+    intradayFee: number;    //当日手续费
+    frozenCash: number;   //冻结资金(股票: 买入挂单资金), 期货: 冻结保证金+冻结手续费)
+    frozenMargin: number; //冻结保证金(期货)
+    frozenFee: number;    //冻结手续费(期货)
+    positionPnl: number; //持仓盈亏(期货)
+    closePnl: number;    //平仓盈亏(期货)
+}
+
+
+interface AssetSnapshotOriginData {
+    update_time: bigint;
+    trading_day: string;
+    ledger_category: number;
+
+    source_id: string;
+    broker_id: string;
+    account_id: string;
+    client_id: string;
+
+    initial_equity: number; //期初权益
+    static_equity: number;  //静态权益
+    dynamic_equity: number; //动态权益
+    realized_pnl: number; //累计收益
+    unrealized_pnl: number;
+    avail: number;        //可用资金
+    market_value: number; //市值(股票)
+    margin: number; //保证金(期货)
+    accumulated_fee: number; //累计手续费
+    intraday_fee: number;    //当日手续费
+    frozen_cash: number;   //冻结资金(股票: 买入挂单资金), 期货: 冻结保证金+冻结手续费)
+    frozen_margin: number; //冻结保证金(期货)
+    frozen_fee: number;    //冻结手续费(期货)
+    position_pnl: number; //持仓盈亏(期货)
+    close_pnl: number;    //平仓盈亏(期货)
+}
+
+interface AssetData {
+    accountIdResolved: string;
+    accountId: string;
+    sourceId: string;
+    clientId: string;
+    initialEquity: string;
+    staticEquity: string;
+    dynamicEquity: string;
+    realizedPnl: string;
+    unRealizedPnl: string;
+    avail: string;
+    marketValue: string;
+    margin: string;
+    ledgerCategory: number;
+}
+
+interface AssetOriginData {
     account_id: string;
     source_id: string;
     client_id: string;
@@ -302,42 +475,29 @@ interface AssetInputData {
     ledger_category: number;
 }
 
-interface AssetData {
-    accountId: string;
-    clientId: string;
-    initialEquity: string;
-    staticEquity: string;
-    dynamicEquity: string;
-    realizedPnl: string;
-    unRealizedPnl: string;
-    avail: string;
-    marketValue: string;
-    margin: string;
-}
-
-interface OrderStatInputData {
-    ack_time: bigint;
-    insert_time: bigint;
-    md_time: bigint;
-    trade_time: bigint;
-    order_id: bigint;
-    dest: string;
-    source: string
-}
-
 interface OrderStatData {
     ackTime: number;
     insertTime: number;
     mdTime: number;
     orderId: string;
-    dest: string;
-    source: string;
     latencySystem: string;
     latencyNetwork: string;
     latencyTrade: string;
     tradeTime: string;
     tradeTimeMMDD: string;
     tradeTimeNum: number;
+    source: number;
+    dest: number;
+}
+
+interface OrderStatOriginData {
+    ack_time: bigint;
+    insert_time: bigint;
+    md_time: bigint;
+    trade_time: bigint;
+    order_id: bigint;
+    source: number;
+    dest: number;
 }
 
 interface AccountSettingItem {
@@ -427,7 +587,7 @@ interface KungfuLocation {
     mode: string
 }
 
-interface QuoteDataInput {
+interface QuoteOriginData {
     close_price: number
     data_time: bigint
     exchange_id: string
@@ -449,24 +609,9 @@ interface QuoteDataInput {
     upper_limit_price: number
     volume: bigint
     ask_price: Array<number>
+    ask_volume: Array<BigInt>
     bid_price: Array<number>
-}
-
-interface InstrumentInputData {
-    contract_multiplier: number;
-    create_date: string;
-    delivery_month: number;
-    delivery_year: number;
-    exchange_id: string;
-    expire_date: string;
-    instrument_id: string;
-    instrument_type: number;
-    is_trading: boolean;
-    long_margin_ratio: number;
-    open_date: string;
-    price_tick: number;
-    product_id: string;
-    short_margin_ratio: number;
+    bid_volume: Array<BigInt>
 }
 
 interface QuoteData {
@@ -493,8 +638,27 @@ interface QuoteData {
     turnover: number
     upperLimitPrice: string
     volume: number,
-    askPrices: Array<number>,
-    bidPrices: Array<number>,
+    askPrices: Array<string>,
+    askVolumes: Array<string>,
+    bidPrices: Array<string>,
+    bidVolumes: Array<string>,
+}
+
+interface InstrumentOriginData {
+    contract_multiplier: number;
+    create_date: string;
+    delivery_month: number;
+    delivery_year: number;
+    exchange_id: string;
+    expire_date: string;
+    instrument_id: string;
+    instrument_type: number;
+    is_trading: boolean;
+    long_margin_ratio: number;
+    open_date: string;
+    price_tick: number;
+    product_id: string[];
+    short_margin_ratio: number;
 }
 
 interface Pm2Options {
@@ -502,5 +666,38 @@ interface Pm2Options {
     args: string;
     cwd?: string;
     script?: string;
-    interpreter?: string
+    interpreter?: string;
+    maxRestarts?: number;
+    autorestart?: boolean;
+    force?: boolean;
+    watch?: boolean;
+    env?: any;
+}
+
+interface TickerSet {
+    name: string;
+    config: TickerSet
+}
+
+interface TickerInTickerSet {
+    source: string;
+    exchangeId: string;
+    instrumentId: string;
+}
+
+interface TickerSet {
+    name: string;
+    tickers: TickerInTickerSet[]
+}
+
+interface stringToTickerSet {
+    [ propName: string ]: TickerSet;
+}
+
+interface StringToQuoteData {
+    [prop: string]: QuoteData
+}
+
+interface StringToPosData {
+    [prop: string]: PosData
 }

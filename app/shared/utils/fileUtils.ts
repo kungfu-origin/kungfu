@@ -41,21 +41,14 @@ interface FileInputData extends FileData {
 }
 
 
-export const listDir = (filePath: string): Promise<any[]> => {
-    return new Promise((resolve, reject) => {
+export const listDir = (filePath: string): Promise<void | string[]> => {
         fse.ensureDirSync(filePath)
-        fse.readdir(filePath, (err: Error, files: any[]) => {
-            if(err) {
-                reject(err)
-                return;
-            }
-            resolve(files)
-        })
-    })
+        return fse.readdir(filePath).catch(err => console.error(err))
 }
 
-export const statSync = (filePath: string): any => {
-    return fse.statSync(filePath)
+export const listDirSync = (filePath: string): void | string[] => {
+    fse.ensureDirSync(filePath)
+    return fse.readdirSync(filePath)
 }
 
 export const getTreeByFilePath = (strategy: FileData, fileTree: any): Promise<FileTreeByPath> => {
@@ -69,7 +62,7 @@ export const getTreeByFilePath = (strategy: FileData, fileTree: any): Promise<Fi
     const ignoreList = ['.git', '.DS_Store']
     return new Promise((resolve, reject) => {
         listDir(filePath).then(files => {
-            files.forEach((file: any) => {
+            (files || []).forEach((file: any) => {
                 if(ignoreList.includes(file)) return;
                 const fileDir: string = path.join(filePath, file);
                 const stats: any = fse.statSync(fileDir)
@@ -202,7 +195,8 @@ export const addFileSync = (parentDir = "", filename: string, type: string): voi
     let targetPath: string;
     if(!parentDir) targetPath = filename;
     else targetPath = path.join(parentDir, filename)
-    targetPath = path.normalize(targetPath)
+    targetPath = path.normalize(targetPath);
+    
     if(type === 'folder'){
         fse.ensureDirSync(targetPath)
     }else{
@@ -211,19 +205,10 @@ export const addFileSync = (parentDir = "", filename: string, type: string): voi
 }
 
 //更改文件名
-export const editFileFolderName = (oldPath: string, newPath: string): Promise<{}> => {
+export const editFileFolderName = (oldPath: string, newPath: string): Promise<void> => {
     oldPath = path.normalize(oldPath)
     newPath = path.normalize(newPath)
-    return new Promise((resolve, reject) => {
-        fse.rename(oldPath, newPath, (err: Error) => {
-            if(err){
-                console.error(err)
-                reject(err)
-                return
-            }
-            resolve({})
-        })
-    })
+    return fse.rename(oldPath, newPath)
 }
 
 
@@ -270,17 +255,8 @@ export const getCodeText = (targetPath: string): Promise<string> => {
 //写入文件
 export const writeFile = (filePath: string, data: string): Promise<void> => {
     filePath = path.normalize(filePath)
-    return new Promise((resolve, reject) => {
-        if(data === undefined) reject(new Error('input data is undefined!'))
-        fse.outputFile(filePath, data, (err: Error): void => {
-            if(err){
-                console.error(err)
-                reject(err)
-                return;
-            }
-            resolve()
-        })
-    })
+    if(data === undefined) throw new Error('input data is undefined!')
+    return fse.outputFile(filePath, data)
 }
 
 export const writeCSV = (filePath: string, data: any[]): Promise<void> => {
@@ -295,26 +271,39 @@ export const writeCSV = (filePath: string, data: any[]): Promise<void> => {
     
 }
 
-//清空文件内容
-export const clearFileContent = (filePath: string): Promise<any> => {
-    filePath = path.normalize(filePath)
-    return fse.outputFile(filePath, '')
-}
+export const removeJournal = (targetFolder: string) => {
+            
+    function iterator (folder: string) {
+        const items = listDirSync(folder)
 
+        if (!items) return;
+        
+        const folders = items.filter((f: string) => {
+            const stat = fse.statSync(path.join(folder, f))
 
+            if (stat.isDirectory()) return true;
+            return false;
+        })
 
-export const existsSync = (filePath: string): boolean => {
-    return fse.existsSync(filePath)
-}
+        const files = items.filter((f: string) => {
+            const stat = fse.statSync(path.join(folder, f))
 
-export const copySync = (fromPath: string, toPath: string): void => {
-    fse.copySync(fromPath, toPath)
-}
+            if (stat.isFile()) return true;
+            return false;
+        })                
 
-export const readJsonSync = (jsonPath: string): {} => {
-    return fse.readJsonSync(jsonPath)
-}
+        files.forEach((f: string) => {
+            if (f.includes('.journal')) {
+                fse.removeSync(path.join(folder, f))
+            }
+        })
 
-export const outputJsonSync = (jsonPath: string, json: {}): void => {
-    return fse.outputJsonSync(jsonPath, json)
+        folders.forEach((f: string) => {
+            iterator(path.join(folder, f))
+        })                
+    }  
+
+    iterator(targetFolder)
+
+    return Promise.resolve(true)
 }

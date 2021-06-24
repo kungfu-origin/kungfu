@@ -4,7 +4,16 @@
         <tr-dashboard-header-item>
             <tr-search-input v-model.trim="searchKeyword"></tr-search-input>
         </tr-dashboard-header-item>
-
+        <tr-dashboard-header-item>
+            <el-tooltip
+                class="item"
+                effect="dark"
+                content="实时最多显示100条数据，更多数据请通过查询历史查看"
+                placement="right"
+            >
+                <i class="el-icon-question mouse-over"></i>
+            </el-tooltip>        
+        </tr-dashboard-header-item>
         <tr-dashboard-header-item v-if="!dateForHistory">
             <i class="el-icon-date mouse-over" title="历史" @click="dateRangeDialogVisiblityForHistory = true"></i>
         </tr-dashboard-header-item>
@@ -90,8 +99,8 @@ import { mapState } from 'vuex';
 
 import DatePickerDialog from '@/components/Base/DatePickerDialog';
 
-import { dealOrder } from "__io/kungfu/watcher";
 import { kungfuCancelAllOrders } from '__io/kungfu/makeCancelOrder';
+import { dealOrderStat } from '__io/kungfu/watcher';
 import { aliveOrderStatusList } from '@kungfu-trader/kungfu-shared/config/tradingConfig';
 import { ordersHeader } from '@/components/Base/tradingData/js/tableHeaderConfig';
 
@@ -114,11 +123,6 @@ export default {
         orderStat: {
             type: Object,
             default: () => ({})
-        },
-
-        name: {
-            type: String,
-            default: ''
         },
 
         todayFinishPreSetting: {
@@ -190,7 +194,7 @@ export default {
             delete orderData.sourceId;
             delete orderData.status;
 
-            orderData.accountId = orderData.accountId.split('手动').join(' ')
+            orderData.accountId = orderData.accountId.split('手动').join(' ').split('任务').join(' ').trim()
             
             Object.keys(orderData || {}).forEach(key => {
                 const value = orderData[key];
@@ -252,8 +256,8 @@ export default {
             let ordersAfterFilter = orders
                 .filter(item => {
                     if (searchKeyword.trim() === '') return true;
-                    const { order_id, client_id, source_id, account_id, instrument_id } = item
-                    const strings = [ order_id.toString(), client_id, source_id, account_id, instrument_id ].join('')
+                    const { clientId, sourceId, accountId, instrumentId, orderId } = item
+                    const strings = [ clientId, sourceId, accountId, instrumentId, orderId ].join('')
                     return strings.includes(searchKeyword) 
                 });
             
@@ -265,22 +269,27 @@ export default {
             }
 
             if (this.moduleType === 'strategy') {
-                ordersAfterFilter = ordersAfterFilter.filter(item => Number(item.update_time) >= this.addTime )
+                ordersAfterFilter = ordersAfterFilter.filter(item => Number(item.updateTimeNum) >= this.addTime )
             }
 
             if (!ordersAfterFilter.length) return Object.freeze([]);
 
             ordersAfterFilter.kfForEach(item => {
-                let orderData = dealOrder(item);
+                let orderData = { ...item };
+                const orderId = orderData.orderId;
+                const orderStat = this.dateForHistory ? item : dealOrderStat(this.orderStat[orderId] || null);
                 orderData.update = true;
-                orderData.latencySystem = (this.orderStat[orderData.orderId] || {}).latencySystem || '';
-                orderData.latencyNetwork = (this.orderStat[orderData.orderId] || {}).latencyNetwork || '';
+                orderData.latencySystem = orderStat.latencySystem || '';
+                orderData.latencyNetwork = orderStat.latencyNetwork || '';
                 orderDataByKey[orderData.id] = Object.freeze(orderData);
             })
 
-            return Object.freeze(Object.values(orderDataByKey).sort((a, b) =>{
-                return  b.updateTimeNum - a.updateTimeNum
-            }))
+            const ordersResolved = Object.values(orderDataByKey)
+                .sort((a, b) =>{
+                    return  b.updateTimeNum - a.updateTimeNum
+                })
+
+            return Object.freeze(ordersResolved)
         }
     }
 }

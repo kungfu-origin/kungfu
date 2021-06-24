@@ -11,19 +11,16 @@ export default {
                 selectSource: false,
                 setAccount: false,
             },
-
-            renderTable: false,
         }
     },
 
     mounted () {
-        this.renderTable = true;
         this.getTableList();
     },
 
     computed: {
         ...mapState({
-            processStatus: state => state.BASE.processStatus || {}
+            processStatus: state => state.BASE.processStatus || {},
         }),
 
         ...mapGetters([

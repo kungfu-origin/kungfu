@@ -31,7 +31,7 @@ jobs:
       - name: Setup Node.js environment
         uses: actions/setup-node@v2
         with:
-          node-version: '10.15.0'
+          node-version: '12'
           registry-url: 'https://npm.pkg.github.com'
           scope: '@kungfu-trader'
 
@@ -42,7 +42,7 @@ jobs:
 
       - name: Setup Kungfu environment
         run: |
-          pip3 install pipenv==2020.11.15
+          pip3 install pipenv==2021.5.29
           yarn install
         env:
           KF_SKIP_FALLBACK_BUILD: true

@@ -34,7 +34,6 @@ import ExtConfigForm from '@/components/Base/ExtConfigForm';
 import { addTd, updateTdConfig, addMd, updateMdConfig } from '__io/kungfu/account';
 
 import { deepClone } from '__gUtils/busiUtils';
-import { remote } from 'electron';
 
 export default {
     name: 'set-account-dialog',

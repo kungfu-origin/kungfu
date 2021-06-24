@@ -1,7 +1,8 @@
 import moment from 'moment';
-import { decodeKungfuLocation } from '__io/kungfu/watcher';
-import { history } from '__io/kungfu/kungfuUtils';
+import { decodeKungfuLocation, transformOrderStatListToData, dealOrderStat } from '__io/kungfu/watcher';
+import { getKungfuDataByDateRange } from '__io/kungfu/kungfuUtils';
 import { writeCSV } from '__gUtils/fileUtils';
+import { getDefaultRenderCellClass, originOrderTradesFilterByDirection } from '__gUtils/busiUtils';
 
 export default {
     props: {
@@ -23,8 +24,7 @@ export default {
 
         kungfuData: {
             type: Array,
-            default: () => {
-            }
+            default: () => ([])
         },
 
         addTime: {
@@ -48,7 +48,7 @@ export default {
             rendererTable: false,
             searchKeyword: "",
             filter: {
-                id: '', //对id、代码id、策略id模糊查询
+                id: '', //对id、标的Id、策略Id模糊查询
             },
 
             dateRangeDialogVisiblityForExport: false,
@@ -75,10 +75,23 @@ export default {
         currentTitle () {
             return this.currentId ? `${this.currentId}` : ''
         },
+
+        currentIdResolved () {
+            if (this.moduleType === 'account') {
+                return this.currentId
+            } else if (this.moduleType === 'strategy') {
+                return this.currentId
+            } else if (this.moduleType === 'ticker') {
+                const { instrumentId, directionOrigin } = this.currentTicker || {};
+                return `${instrumentId}_${directionOrigin}`
+            } else {
+                return ''
+            }
+        }
     },
 
     watch: {
-        currentId() {
+        currentIdResolved() {
             this.resetData();
         }
     },
@@ -105,7 +118,6 @@ export default {
         handleConfirmDateRangeForHistory (date) {
             return this.getDataByDateRange(date)
                 .then(data => {
-                    this.dateRangeDialogVisiblityForHistory = false;
                     this.dateForHistory = moment(date).format('YYYY-MM-DD')
                     return data;
                 })
@@ -120,10 +132,8 @@ export default {
 
         //选择日期以及保存
         handleConfirmDateRangeForExport (date) {
-
             return this.getDataByDateRange(date)
                 .then(data => {
-                    this.dateRangeDialogVisiblityForExport = false;
                     return data;
                 })
                 .then(data => {
@@ -138,81 +148,105 @@ export default {
         },
 
         getDataByDateRange (date) {
-            const from = moment(date).format('YYYY-MM-DD');
-            const to = moment(date).add(1, 'day').format('YYYY-MM-DD');
             this.dateRangeExportLoading = true;
 
-            return new Promise((resolve) => {
-                let timer = setTimeout(() => {
-
-                    const kungfuData = history.selectPeriod(from, to)
-                    const targetList = this.kungfuBoardType === 'order' ? Object.values(kungfuData.Order) : Object.values(kungfuData.Trade)
-                    const kungfuIdKey = this.moduleType === 'account' ? 'source' : 'dest'
-                    
-                    const targetListAfterFilter = targetList.filter(item => {
-                        const locationKey = item[kungfuIdKey];
-                        const kungfuLocation = decodeKungfuLocation(locationKey);
-                        if (this.moduleType === 'account') {
-                            return `${kungfuLocation.group}_${kungfuLocation.name}` === this.currentId
-                        } else if (this.moduleType === 'strategy') {
-                            return kungfuLocation.name === this.currentId
-                        }
-
-                        return false
-                    })
-
+            return getKungfuDataByDateRange(date)
+                .then(kungfuData => {
+                    const { instrumentId, directionOrigin } = this.currentTicker || {};
+                    const targetList = this.getHistoryTargetListResolved(this.kungfuBoardType, kungfuData, this.moduleType, instrumentId);
+                    const orderStats = kungfuData.OrderStat.list();
+                    const orderStatByOrderId = transformOrderStatListToData(orderStats);
+                    return targetList
+                        .filter(item => {
+                            if (this.moduleType === 'account') {
+                                return this.getHistoryDataKeyForFilter('account', item) === this.currentId;
+                            } else if (this.moduleType === 'strategy') {
+                                return this.getHistoryDataKeyForFilter('strategy', item) === this.currentId;
+                            } else if (this.moduleType === 'all') {
+                                return true;
+                            } else if (this.moduleType === 'ticker') {
+                                const { offset, side, instrument_type } = item;
+                                return originOrderTradesFilterByDirection(directionOrigin, offset, side, instrument_type);
+                            }
+                        })
+                        .map(item => {
+                            //加上orderStat细节
+                            const orderId = item.order_id.toString();
+                            return Object.freeze({
+                                ...orderStatByOrderId[orderId],
+                                orderStats: dealOrderStat(orderStatByOrderId[orderId] || null),
+                                ...item,
+                                dest: item.dest,
+                                source: item.source,
+                                tag: item.tag,
+                                ts: item.ts,
+                                type: item.type,
+                                uid_key: item.uid_key
+                            })
+                        });                    
+                })
+                .finally(() => {
                     this.dateRangeExportLoading = false;
+                    this.dateRangeDialogVisiblityForExport = false;
+                    this.dateRangeDialogVisiblityForHistory = false;
+                })
+        },
 
-                    resolve(targetListAfterFilter)
-                    clearTimeout(timer)
-                }, 100)
-            })
+    
+        
+        getHistoryTargetListResolved (kungfuBoardType, kungfuData, moduleType = '' , instrumentId = '') {
+            const kfDataTable = this.getHistoryTargetList(kungfuBoardType, kungfuData);
+            const sortName = this.getHistoryTargetSortName(kungfuBoardType);
+            if (moduleType === 'ticker') {
+                return kfDataTable.filter('instrument_id', instrumentId).sort(sortName);
+            } else {
+                return kfDataTable.sort(sortName);
+            }
+        },
+
+        getHistoryTargetList (kungfuBoardType, kungfuData ) {
+            if (kungfuBoardType === 'order') {
+                return kungfuData.Order
+            } else if (kungfuBoardType === 'trade') {
+                return kungfuData.Trade
+            } else {
+                console.error('getHistoryTargetList type is not trade or order!')
+                return []
+            }
+        },
+
+        getHistoryTargetSortName (kungfuBoardType) {
+            if (kungfuBoardType === 'order') {
+                return 'update_time'
+            } else if (kungfuBoardType === 'trade') {
+                return 'trade_time'
+            } else {
+                return ''
+            }
+        },
+
+        getHistoryDataKeyForFilter (moduleType, item) {
+            if (moduleType === 'account') {
+                const kungfuLocation = decodeKungfuLocation(+item.source);
+                return `${kungfuLocation.group}_${kungfuLocation.name}`
+            } else if (moduleType === 'strategy') {
+                const kungfuLocation = decodeKungfuLocation(+item.dest);
+                return kungfuLocation.name
+            } else {
+                console.error('getHistoryDataKeyForFilter type is not account or strategy!')
+                return []
+            }
         },
 
         resetData() {
             this.searchKeyword = "";
             this.tableData = Object.freeze([]);
+            this.handleClearHistory();
             return true;
         },
 
         renderCellClass(prop, item) {   
-            switch (prop) {
-                case 'side':
-                    if (item.side === '买') return 'red';
-                    else if (item.side === '卖') return 'green';
-                    break;
-                case 'offset':
-                    if (item.offset === '开仓') return 'red';
-                    else if (item.offset === '平仓') return 'green';
-                    break;
-                case 'statusName':
-                    if (+item.status === 4) return 'red';
-                    else if ([3, 5, 6].indexOf(+item.status) !== -1) return 'green';
-                    else return 'gray';
-                case 'direction':
-                    if (item.direction === '多') return 'red';
-                    else if (item.direction === '空') return 'green';
-                    break;
-                case 'realizedPnl':
-                    if (+item.realizedPnl > 0) return 'red';
-                    else if (+item.realizedPnl < 0) return 'green';
-                    break;
-                case 'unRealizedPnl':
-                    if (+item.unRealizedPnl > 0) return 'red';
-                    else if (+item.unRealizedPnl < 0) return 'green';
-                    break;
-                case 'lastPrice':
-                    if (+item.lastPrice > +item.avgPrice) {
-                        return item.direction === '多' ? 'red' : 'green';
-                    } else if (+item.lastPrice < +item.avgPrice) {
-                        return item.direction === '多' ? 'green' : 'red';
-                    }
-                    break;
-                case 'clientId':
-                case 'accountId':
-                    if (item.clientId.toLowerCase().includes('手动')) return 'blue';
-                    break;
-            }
+            return getDefaultRenderCellClass(prop, item)
         }
     }
 }

@@ -155,26 +155,25 @@ void TraderXTP::OnQueryPosition(XTPQueryStkPositionRsp *position, XTPRI *error_i
   if (error_info != nullptr && error_info->error_id != 0) {
     SPDLOG_ERROR("error_id:{}, error_msg: {}, request_id: {}, last: {}", error_info->error_id, error_info->error_msg,
                  request_id, is_last);
+    return;
   }
-  if (error_info == nullptr || error_info->error_id == 0 || error_info->error_id == 11000350) {
-    auto writer = get_writer(0);
-    Position &stock_pos = writer->open_data<Position>(0);
-    if (error_info == nullptr || error_info->error_id == 0) {
-      from_xtp(*position, stock_pos);
-    }
-    strncpy(stock_pos.account_id, get_account_id().c_str(), ACCOUNT_ID_LEN);
-    strncpy(stock_pos.source_id, SOURCE_XTP, SOURCE_ID_LEN);
-    stock_pos.holder_uid = get_io_device()->get_home()->uid;
-    stock_pos.instrument_type = get_instrument_type(stock_pos.exchange_id, stock_pos.instrument_id);
-    stock_pos.direction = Direction::Long;
-    strncpy(stock_pos.trading_day, this->trading_day_.c_str(), DATE_LEN);
-    stock_pos.update_time = time::now_in_nano();
+  auto writer = get_writer(0);
+  Position &stock_pos = writer->open_data<Position>(0);
+  if (error_info == nullptr || error_info->error_id == 0) {
+    from_xtp(*position, stock_pos);
+  }
+  strncpy(stock_pos.account_id, get_account_id().c_str(), ACCOUNT_ID_LEN);
+  strncpy(stock_pos.source_id, SOURCE_XTP, SOURCE_ID_LEN);
+  stock_pos.holder_uid = get_io_device()->get_home()->uid;
+  stock_pos.instrument_type = get_instrument_type(stock_pos.exchange_id, stock_pos.instrument_id);
+  stock_pos.direction = Direction::Long;
+  strncpy(stock_pos.trading_day, this->trading_day_.c_str(), DATE_LEN);
+  stock_pos.update_time = time::now_in_nano();
+  writer->close_data();
+  if (is_last) {
+    PositionEnd &end = writer->open_data<PositionEnd>(0);
+    end.holder_uid = get_io_device()->get_home()->uid;
     writer->close_data();
-    if (is_last) {
-      PositionEnd &end = writer->open_data<PositionEnd>(0);
-      end.holder_uid = get_io_device()->get_home()->uid;
-      writer->close_data();
-    }
   }
 }
 

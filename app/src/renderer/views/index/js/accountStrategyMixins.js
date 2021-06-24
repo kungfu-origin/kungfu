@@ -1,5 +1,7 @@
 
-const remote = require('electron').remote
+const remote = require('electron').remote;
+import { openVueWin } from '__gUtils/busiUtils';
+import { dealOrder, dealTrade } from '__io/kungfu/watcher';
 
 export default {
 
@@ -7,6 +9,7 @@ export default {
 
         return {
             makeOrderByPosData: {},
+            historyData: {},
         }
     },
 
@@ -49,11 +52,18 @@ export default {
                     window.makeOrderWin && window.makeOrderWin.focus && window.makeOrderWin.focus();
                 })        
         },
+        
+        handleShowHistory ({ date, data, type }) {
+            this.$set(this.historyData, type, {
+                date,
+                data
+            })
+        },
 
         buildMakeOrderWin () {
             //仅在strategy时创建窗口
             if (!window.makeOrderWin && this.moduleType === 'strategy') {
-                return this.$utils.openVueWin(
+                return openVueWin(
                     'makeOrder', 
                     `/make-order`, 
                     remote, 
@@ -88,9 +98,40 @@ export default {
             window.makeOrderWin.on('close', () => {
                 window.makeOrderWin = null;
                 this.makeOrderByPosData = Object.freeze({})
+                this.makeOrderByQuote = Object.freeze({})
             })
         },
-        
-     
+
+        isHistoryData (type) {
+            if (type === 'order') {
+                return !!(this.historyData['order'] && ((this.historyData['order'] || {}).date))
+            } else if (type === 'trade') {
+                return !!(this.historyData['trade'] && ((this.historyData['trade'] || {}).date))
+            } else {
+                console.error('isHistoryData type is not trade or order!')
+                return false;
+            }
+        },
+
+        getHistoryData (type) {
+            if (type === 'order') {
+                return Object.freeze((this.historyData['order'].data || []).map(item => {
+                    return  Object.freeze({
+                        ...item.orderStats,
+                        ...dealOrder(item),
+                    })
+                }));
+            } else if (type === 'trade') {
+                return this.trades = Object.freeze((this.historyData['trade'].data || []).map(item => {
+                    return Object.freeze({
+                        ...item.orderStats,
+                        ...dealTrade(item),
+                    })
+                }));
+            } else {
+                console.error('getHistoryData type is not trade or order!')
+                return []
+            }
+        }        
     }
 }

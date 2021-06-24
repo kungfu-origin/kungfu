@@ -1,7 +1,7 @@
 {
   "name": "kungfu",
   "author": "taurus.ai",
-  "version": "2.3.2",
+  "version": "2.3.5",
   "description": "KungFu Trader",
   "license": "Apache-2.0",
   "private": true,
@@ -9,7 +9,7 @@
     "shared",
     "core",
     "kfext_task_timerTrader",
-    "kfext_task_backwardHedge",
+    "kfext_task_backwards",
     "cli2",
     "app" 
   ],

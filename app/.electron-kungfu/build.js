@@ -9,6 +9,7 @@ const Multispinner = require('multispinner')
 
 const mainConfig = require('./webpack.main.config')
 const rendererConfig = require('./webpack.renderer.config')
+const daemonConfig = require('./webpack.daemon.config')
 
 const doneLog = chalk.bgGreen.white(' DONE ') + ' '
 const errorLog = chalk.bgRed.white(' ERROR ') + ' '
@@ -20,7 +21,7 @@ build()
 function build () {
   greeting()
 
-  const tasks = ['main', 'renderer']
+  const tasks = ['main', 'renderer', 'daemon']
   const m = new Multispinner(tasks, {
     preText: 'building',
     postText: 'process'
@@ -51,6 +52,16 @@ function build () {
   }).catch(err => {
     m.error('renderer')
     console.log(`\n  ${errorLog}failed to build renderer process`)
+    console.error(`\n${err}\n`)
+    process.exit(1)
+  })
+
+  pack(daemonConfig).then(result => {
+    results += result + '\n\n'
+    m.success('daemon')
+  }).catch(err => {
+    m.error('daemon')
+    console.log(`\n  ${errorLog}failed to build daemon process`)
     console.error(`\n${err}\n`)
     process.exit(1)
   })

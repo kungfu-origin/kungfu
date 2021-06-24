@@ -1,30 +1,40 @@
-import { startCustomProcess, deleteProcess, killKfc, startMaster, startLedger, startTask, stopProcess } from '__gUtils/processUtils';
+import fse from 'fs-extra';
+import { startCustomProcess, deleteProcess, killKfc, killGodDaemon, killKungfu, killExtra, startMaster, startLedger, startDaemon, startTask, stopProcess } from '__gUtils/processUtils';
 import { delayMiliSeconds } from '__gUtils/busiUtils';
 import { buildCustomProcessConfig } from '__gConfig/systemConfig';
 import { KF_TARADING_CONFIG_PATH, KF_CONFIG_PATH } from '__gConfig/pathConfig';
-import { readJsonSync } from "__gUtils/fileUtils";
 
 export const switchMaster = async (status: boolean): Promise<any> => {
     if(!status){
         try {
             await deleteProcess('master');
             await killKfc()
+            await killExtra();
+            await killGodDaemon();
+            await killKungfu();
         } catch(err) {
             throw err
         }
+    } else {
+        try {
+            await startMaster(false)
+            await delayMiliSeconds(1000)
+            await startLedger(false)
+        } catch (err) {
+            throw err
+        } 
     } 
-    try {
-        await startMaster(false)
-        await delayMiliSeconds(1000)
-        await startLedger(false)
-    } catch (err) {
-        throw err
-    }
 }
+   
 
 export const switchLedger = (status: boolean): Promise<any> => {
     if(!status) return deleteProcess('ledger')   
     return startLedger(false)
+}
+
+export const switchDaemon = (status: boolean): Promise<any> => {
+    if (!status) return deleteProcess('kungfuDaemon');
+    return startDaemon()
 }
 
 export const switchCustomProcess = (status: boolean, targetName: string) => {
@@ -33,8 +43,8 @@ export const switchCustomProcess = (status: boolean, targetName: string) => {
     const customProcessConfig = buildCustomProcessConfig();
     const targetProcessConfig = customProcessConfig[targetName];
     if(!targetProcessConfig) throw new Error(`No ${targetName} in systemConfig systemTradingConfig or extensionConfig`)
-    const kfSystemConfig = readJsonSync(KF_CONFIG_PATH) || {};
-    const kfSystemTradingConfig = readJsonSync(KF_TARADING_CONFIG_PATH) || {};
+    const kfSystemConfig = fse.readJsonSync(KF_CONFIG_PATH) || {};
+    const kfSystemTradingConfig = fse.readJsonSync(KF_TARADING_CONFIG_PATH) || {};
     const systemConfigValData: any = {
         ...kfSystemConfig,
         ...kfSystemTradingConfig

@@ -21,10 +21,6 @@ TraderCTP::TraderCTP(bool low_latency, locator_ptr locator, const std::string &a
       request_id_(0), system_info_len_(0), api_(nullptr) {
     yijinjing::log::copy_log_settings(get_io_device()->get_home(), SOURCE_CTP);
     config_ = nlohmann::json::parse(json_config);
-
-//    memset(system_info_, 0, 344);
-//    CTP_GetSystemInfo(system_info_, system_info_len_);
-//    SPDLOG_INFO("SystemInfo len: {}", system_info_len_);
 }
 
 TraderCTP::~TraderCTP() {
@@ -35,27 +31,7 @@ TraderCTP::~TraderCTP() {
 
 void TraderCTP::on_trading_day(const event_ptr &event, int64_t daytime) {
   trading_day_ = yijinjing::time::strftime(daytime, KUNGFU_TRADING_DAY_FORMAT);
-  SPDLOG_INFO("set trading day to {}", trading_day_);
-}
-
-bool TraderCTP::req_account() {
-  SPDLOG_INFO("request account asset");
-  CThostFtdcQryTradingAccountField req = {};
-  strcpy(req.BrokerID, config_.broker_id.c_str());
-  strcpy(req.InvestorID, config_.account_id.c_str());
-  int rtn = api_->ReqQryTradingAccount(&req, ++request_id_);
-  return rtn == 0;
-}
-
-bool TraderCTP::req_position() {
-  SPDLOG_INFO("request account positions");
-  long_position_map_.clear();
-  short_position_map_.clear();
-  CThostFtdcQryInvestorPositionField req = {};
-  strcpy(req.BrokerID, config_.broker_id.c_str());
-  strcpy(req.InvestorID, config_.account_id.c_str());
-  int rtn = api_->ReqQryInvestorPosition(&req, ++request_id_);
-  return rtn == 0;
+  SPDLOG_INFO("TRADING DAY RES {}", trading_day_);
 }
 
 bool TraderCTP::insert_order(const event_ptr &event) {
@@ -137,33 +113,47 @@ bool TraderCTP::cancel_order(const event_ptr &event) {
 
 void TraderCTP::OnFrontConnected() {
     auto version = api_->GetApiVersion();
-    SPDLOG_INFO("connected, API version: {}", version);
+    SPDLOG_INFO("CONNECTED API version {}", version);
     req_auth();
 }
 
 void TraderCTP::OnFrontDisconnected(int nReason) {
+  SPDLOG_ERROR("DISCONNECTED nReason[{}] {}", nReason, disconnected_reason(nReason));
   update_broker_state(BrokerState::DisConnected);
-  SPDLOG_ERROR("disconnected [{}] {}", nReason, disconnected_reason(nReason));
+  SPDLOG_ERROR("BrokerState::DisConnected");
 }
 
 void TraderCTP::OnRspAuthenticate(CThostFtdcRspAuthenticateField *pRspAuthenticateField,
                                   CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
   if (pRspInfo != nullptr && pRspInfo->ErrorID != 0) {
-    SPDLOG_ERROR("failed to authenticate, ErrorId: {} ErrorMsg: {}", pRspInfo->ErrorID, gbk2utf8(pRspInfo->ErrorMsg));
+    SPDLOG_ERROR("AUTH RES error_id {}, error_msg {}", pRspInfo->ErrorID, gbk2utf8(pRspInfo->ErrorMsg));
     return;
   }
+  
+  if (pRspAuthenticateField == nullptr) {
+    SPDLOG_ERROR("AUTH RES pRspAuthenticateField is nullptr");
+    return;
+  }
+
+  SPDLOG_INFO("AUTH RES *pRspAuthenticateField {}, bIsLast {}", to_string(*pRspAuthenticateField), bIsLast);
+
   login();
 }
 
 void TraderCTP::OnRspUserLogin(CThostFtdcRspUserLoginField *pRspUserLogin, CThostFtdcRspInfoField *pRspInfo,
                                int nRequestID, bool bIsLast) {
   if (pRspInfo != nullptr && pRspInfo->ErrorID != 0) {
-    SPDLOG_ERROR("ErrorId) {} (ErrorMsg) {}", pRspInfo->ErrorID, gbk2utf8(pRspInfo->ErrorMsg));
+    SPDLOG_ERROR("LOGIN RES error_id {} error_msg {}", pRspInfo->ErrorID, gbk2utf8(pRspInfo->ErrorMsg));
     return;
   }
-  SPDLOG_INFO("login success, BrokerID: {} UserID: {} SystemName: {} TradingDay: {} FrontID: {} SessionID: {}",
-              pRspUserLogin->BrokerID, pRspUserLogin->UserID, pRspUserLogin->SystemName, pRspUserLogin->TradingDay,
-              pRspUserLogin->FrontID, pRspUserLogin->SessionID);
+
+  if (pRspUserLogin == nullptr) {
+    SPDLOG_ERROR("LOGIN RES pRspUserLogin is nullptr");
+    return;
+  }
+
+  SPDLOG_INFO("LOGIN RES *pRspUserLogin {}, bIsLast {}", to_string(*pRspUserLogin), bIsLast);
+
   session_id_ = pRspUserLogin->SessionID;
   front_id_ = pRspUserLogin->FrontID;
   order_ref_ = std::stoi(pRspUserLogin->MaxOrderRef);
@@ -177,9 +167,16 @@ void TraderCTP::OnRspUserLogout(CThostFtdcUserLogoutField *pUserLogout, CThostFt
 void TraderCTP::OnRspSettlementInfoConfirm(CThostFtdcSettlementInfoConfirmField *pSettlementInfoConfirm,
                                            CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
   if (pRspInfo != nullptr && pRspInfo->ErrorID != 0) {
-    SPDLOG_ERROR("failed confirm settlement info, ErrorId: {} ErrorMsg: {}", pRspInfo->ErrorID,
-                 gbk2utf8(pRspInfo->ErrorMsg));
+    SPDLOG_ERROR("SETTLEMENT RES error_id: {}, error_msg: {}", pRspInfo->ErrorID, gbk2utf8(pRspInfo->ErrorMsg));
+    return;
   }
+
+  if (pSettlementInfoConfirm == nullptr) {
+    SPDLOG_ERROR("SETTLEMENT RES pSettlementInfoConfirm is nullptr");
+    return;
+  }
+
+  SPDLOG_INFO("SETTLEMENT RES *pSettlementInfoConfirm {}, bIsLast {}", to_string(*pSettlementInfoConfirm), bIsLast);
   req_qry_instrument();
 }
 
@@ -248,33 +245,46 @@ void TraderCTP::OnRtnOrder(CThostFtdcOrderField *pOrder) {
 }
 
 void TraderCTP::OnRtnTrade(CThostFtdcTradeField *pTrade) {
-  SPDLOG_TRACE(to_string(*pTrade));
-  auto order_id = inbound_order_sysids_[pTrade->OrderSysID];
-  if (orders_.find(order_id) == orders_.end()) {
-    SPDLOG_ERROR("can't find order with OrderSysID: {}", pTrade->OrderSysID);
-    return;
+  if(pTrade->Price < 1 || pTrade->Price == 2.2250738585072014e-308 || pTrade->Price == 1.7976931348623158e+308 || pTrade->Volume == -2147483648 || pTrade->Volume == 2147483647){
+    SPDLOG_ERROR("Order Price too low, Not True pTrade->Price {}, *pTrade {}",pTrade->Price,to_string(*pTrade));
+
+  }else{
+    SPDLOG_TRACE(to_string(*pTrade));
+    auto order_id = inbound_order_sysids_[pTrade->OrderSysID];
+    if (orders_.find(order_id) == orders_.end()) {
+      SPDLOG_ERROR("can't find order with OrderSysID: {}", pTrade->OrderSysID);
+      return;
+    }
+    auto &order_state = orders_.at(order_id);
+    auto writer = get_writer(order_state.dest);
+    Trade &trade = writer->open_data<Trade>(0);
+    from_ctp(*pTrade, trade);
+    uint64_t trade_id = writer->current_frame_uid();
+    trade.trade_id = trade_id;
+    trade.order_id = order_state.data.order_id;
+    trade.parent_order_id = order_state.data.parent_id;
+    trade.trading_day = order_state.data.trading_day;
+    inbound_trade_ids_[pTrade->TradeID] = trade.uid();
+    trades_.emplace(trade.uid(), state<Trade>(order_state.source, order_state.dest, time::now_in_nano(), trade));
+    writer->close_data();
   }
-  auto &order_state = orders_.at(order_id);
-  auto writer = get_writer(order_state.dest);
-  Trade &trade = writer->open_data<Trade>(0);
-  from_ctp(*pTrade, trade);
-  uint64_t trade_id = writer->current_frame_uid();
-  trade.trade_id = trade_id;
-  trade.order_id = order_state.data.order_id;
-  trade.parent_order_id = order_state.data.parent_id;
-  trade.trading_day = order_state.data.trading_day;
-  inbound_trade_ids_[pTrade->TradeID] = trade.uid();
-  trades_.emplace(trade.uid(), state<Trade>(order_state.source, order_state.dest, time::now_in_nano(), trade));
-  writer->close_data();
+  
 }
 
 void TraderCTP::OnRspQryTradingAccount(CThostFtdcTradingAccountField *pTradingAccount, CThostFtdcRspInfoField *pRspInfo,
                                        int nRequestID, bool bIsLast) {
   if (pRspInfo != nullptr && pRspInfo->ErrorID != 0) {
-    SPDLOG_ERROR("(error_id) {} (error_msg) {}", pRspInfo->ErrorID, gbk2utf8(pRspInfo->ErrorMsg));
+    SPDLOG_ERROR("ASSET RES error_id {}, error_msg {}", pRspInfo->ErrorID, gbk2utf8(pRspInfo->ErrorMsg));
     return;
   }
-  SPDLOG_TRACE(to_string(*pTradingAccount));
+
+  if (pTradingAccount == nullptr) {
+    SPDLOG_ERROR("ASSET RES pTradingAccount is nullptr");
+    return;
+  }
+
+  SPDLOG_INFO("ASSET RES *pTradingAccount {}, bIsLast {}", to_string(*pTradingAccount), bIsLast);
+
   auto writer = get_writer(location::PUBLIC);
   Asset account = {};
   strcpy(account.account_id, get_account_id().c_str());
@@ -282,14 +292,20 @@ void TraderCTP::OnRspQryTradingAccount(CThostFtdcTradingAccountField *pTradingAc
   account.update_time = time::now_in_nano();
   account.holder_uid = get_io_device()->get_home()->uid;
   writer->write(now(), account);
-  req_position();
 }
 
 void TraderCTP::OnRspQryInvestorPosition(CThostFtdcInvestorPositionField *pInvestorPosition,
                                          CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
   if (pRspInfo != nullptr && pRspInfo->ErrorID != 0) {
-    SPDLOG_ERROR("(error_id) {} (error_msg) {}", pRspInfo->ErrorID, gbk2utf8(pRspInfo->ErrorMsg));
-  } else if (pInvestorPosition != nullptr) {
+    SPDLOG_ERROR("POS RES error_id {}, error_msg {}", pRspInfo->ErrorID, gbk2utf8(pRspInfo->ErrorMsg));
+    return;
+  } 
+  
+  if (pInvestorPosition == nullptr) {
+    SPDLOG_ERROR("POS RES pInvestorPosition is nullptr, bIsLast {}", bIsLast);
+  } else {
+    SPDLOG_INFO("POS RES *pInvestorPosition {}, bIsLast {}", to_string(*pInvestorPosition), bIsLast);
+    
     auto direction = pInvestorPosition->PosiDirection == THOST_FTDC_PD_Long ? Direction::Long : Direction::Short;
     auto &position_map = direction == Direction::Long ? long_position_map_ : short_position_map_;
     if (position_map.find(pInvestorPosition->InstrumentID) == position_map.end()) {
@@ -323,7 +339,8 @@ void TraderCTP::OnRspQryInvestorPosition(CThostFtdcInvestorPositionField *pInves
     }
     position.update_time = time::now_in_nano();
   }
-  if (bIsLast) {
+
+  if (bIsLast && (long_position_map_.size() != 0 || short_position_map_.size() != 0)) {
     auto writer = get_writer(location::PUBLIC);
     for (const auto &kv : long_position_map_) {
       const auto &position = kv.second;
@@ -344,8 +361,14 @@ void TraderCTP::OnRspQryInvestorPosition(CThostFtdcInvestorPositionField *pInves
 void TraderCTP::OnRspQryInvestorPositionDetail(CThostFtdcInvestorPositionDetailField *pInvestorPositionDetail,
                                                CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
   if (pRspInfo != nullptr && pRspInfo->ErrorID != 0) {
-    SPDLOG_ERROR("(error_id) {} (error_msg) {}", pRspInfo->ErrorID, gbk2utf8(pRspInfo->ErrorMsg));
+    SPDLOG_ERROR("POS_DETAIL RES error_id {}, error_msg {}", pRspInfo->ErrorID, gbk2utf8(pRspInfo->ErrorMsg));
+    return;
+  } 
+  
+  if (pInvestorPositionDetail == nullptr) {
+    SPDLOG_ERROR("POS_DETAIL RES pInvestorPositionDetail is nullptr, bIsLast {}", bIsLast);
   } else {
+    SPDLOG_INFO("POS_DETAIL RES *pInvestorPositionDetail {}, bIsLast {}", to_string(*pInvestorPositionDetail), bIsLast);
     auto writer = get_writer(location::PUBLIC);
     if (pInvestorPositionDetail != nullptr) {
       PositionDetail pos_detail = {};
@@ -362,6 +385,7 @@ void TraderCTP::OnRspQryInvestorPositionDetail(CThostFtdcInvestorPositionDetailF
       writer->write(now(), pos_detail);
     }
   }
+
   if (bIsLast) {
     get_writer(location::PUBLIC)->mark(now(), PositionDetailEnd::tag);
   }
@@ -370,19 +394,28 @@ void TraderCTP::OnRspQryInvestorPositionDetail(CThostFtdcInvestorPositionDetailF
 void TraderCTP::OnRspQryInstrument(CThostFtdcInstrumentField *pInstrument, CThostFtdcRspInfoField *pRspInfo,
                                    int nRequestID, bool bIsLast) {
   if (pRspInfo != nullptr && pRspInfo->ErrorID != 0) {
-    SPDLOG_ERROR("(error_id) {} (error_msg) {}", pRspInfo->ErrorID, gbk2utf8(pRspInfo->ErrorMsg));
+    SPDLOG_ERROR("INSTRUMENT RES error_id {}, error_msg {}", pRspInfo->ErrorID, gbk2utf8(pRspInfo->ErrorMsg));
     return;
   }
-  auto writer = get_writer(location::PUBLIC);
-  if (pInstrument->ProductClass == THOST_FTDC_PC_Futures) {
-    Instrument &instrument = writer->open_data<Instrument>(0);
-    from_ctp(*pInstrument, instrument);
-    instrument_map_[pInstrument->InstrumentID] = instrument;
-    writer->close_data();
+
+  if (pInstrument == nullptr) {
+    SPDLOG_ERROR("INSTRUMENT RES pInstrument is nullptr, bIsLast {}", bIsLast);
+  } else {
+    if (pInstrument->ProductClass == THOST_FTDC_PC_Futures) {
+      auto writer = get_writer(location::PUBLIC);
+      Instrument &instrument = writer->open_data<Instrument>(0);
+      from_ctp(*pInstrument, instrument);
+      instrument_map_[pInstrument->InstrumentID] = instrument;
+      writer->close_data();
+    }
   }
+
   if (bIsLast) {
+    SPDLOG_INFO("INSTRUMENT RES bIsLast {}", bIsLast);
+    auto writer = get_writer(location::PUBLIC);
     writer->mark(now(), InstrumentEnd::tag);
     update_broker_state(BrokerState::Ready);
+    SPDLOG_INFO("BrokerState::Ready");
   }
 }
 
@@ -403,25 +436,25 @@ bool TraderCTP::login() {
     strcpy(login_field.BrokerID, config_.broker_id.c_str());
     strcpy(login_field.UserID, config_.account_id.c_str());
     strcpy(login_field.Password, config_.password.c_str());
+    SPDLOG_INFO("LOGIN REQ");
+    std::this_thread::sleep_for(std::chrono::seconds(1));
     int rtn = api_->ReqUserLogin(&login_field, ++request_id_);
-    if (rtn != 0) {
-        SPDLOG_ERROR("failed to request login for UserID {} BrokerID {}, error id: {}", login_field.UserID,
-                     login_field.BrokerID, rtn);
-    }
+    SPDLOG_INFO("LOGIN REQ rtn {}", rtn);
     return rtn == 0;
 }
 
 bool TraderCTP::req_settlement_confirm() {
-  SPDLOG_INFO("request settlement confirm");
   CThostFtdcSettlementInfoConfirmField req = {};
   strcpy(req.InvestorID, config_.account_id.c_str());
   strcpy(req.BrokerID, config_.broker_id.c_str());
+  SPDLOG_INFO("SETTLEMENT REQ");
+  std::this_thread::sleep_for(std::chrono::seconds(1));
   int rtn = api_->ReqSettlementInfoConfirm(&req, ++request_id_);
+  SPDLOG_INFO("SETTLEMENT REQ rtn {}", rtn);
   return rtn == 0;
 }
 
 bool TraderCTP::req_auth() {
-    SPDLOG_INFO("request auth");
     struct CThostFtdcReqAuthenticateField req = {};
     strcpy(req.BrokerID, config_.broker_id.c_str());
     strcpy(req.UserID, config_.account_id.c_str());
@@ -430,26 +463,56 @@ bool TraderCTP::req_auth() {
     }
     strcpy(req.AppID, config_.app_id.c_str());
     strcpy(req.AuthCode, config_.auth_code.c_str());
+    SPDLOG_INFO("AUTH REQ");
+    std::this_thread::sleep_for(std::chrono::seconds(1));
     int rtn = this->api_->ReqAuthenticate(&req, ++request_id_);
-    if (rtn != 0) {
-        SPDLOG_ERROR("failed to req auth, error id = {}", rtn);
-    }
+    SPDLOG_INFO("AUTH REQ rtn {}", rtn);
     return rtn == 0;
 }
 
 bool TraderCTP::req_qry_instrument() {
-  SPDLOG_INFO("request instruments");
   CThostFtdcQryInstrumentField req = {};
+  SPDLOG_INFO("INSTRUMENT REQ");
+  std::this_thread::sleep_for(std::chrono::seconds(1));
   int rtn = api_->ReqQryInstrument(&req, ++request_id_);
+  SPDLOG_INFO("INSTRUMENT REQ rtn {}", rtn);
   return rtn == 0;
 }
 
+bool TraderCTP::req_account() {
+  CThostFtdcQryTradingAccountField req = {};
+  strcpy(req.BrokerID, config_.broker_id.c_str());
+  strcpy(req.InvestorID, config_.account_id.c_str());
+  SPDLOG_INFO("ASSET REQ");
+  std::this_thread::sleep_for(std::chrono::seconds(1));
+  int rtn = api_->ReqQryTradingAccount(&req, ++request_id_);
+  SPDLOG_INFO("ASSET REQ rtn {}", rtn);
+  return rtn == 0;
+}
+
+bool TraderCTP::req_position() {
+  long_position_map_.clear();
+  short_position_map_.clear();
+  CThostFtdcQryInvestorPositionField req = {};
+  strcpy(req.BrokerID, config_.broker_id.c_str());
+  strcpy(req.InvestorID, config_.account_id.c_str());
+  std::this_thread::sleep_for(std::chrono::seconds(1));
+  SPDLOG_INFO("POS REQ");
+  int rtn = api_->ReqQryInvestorPosition(&req, ++request_id_);
+  SPDLOG_INFO("POS REQ rtn {}", rtn);
+  return rtn == 0;
+}
+
+
 bool TraderCTP::req_position_detail() {
-  SPDLOG_INFO("request account positions detail");
+  SPDLOG_INFO("request account positions req_position_detail");
   CThostFtdcQryInvestorPositionDetailField req = {};
   strcpy(req.BrokerID, config_.broker_id.c_str());
   strcpy(req.InvestorID, config_.account_id.c_str());
+  SPDLOG_INFO("POS_DETAIL REQ");
+  std::this_thread::sleep_for(std::chrono::seconds(1));
   int rtn = api_->ReqQryInvestorPositionDetail(&req, ++request_id_);
+  SPDLOG_INFO("POS_DETAIL REQ rtn {}", rtn);
   return rtn == 0;
 }
 } // namespace kungfu::wingchun::ctp

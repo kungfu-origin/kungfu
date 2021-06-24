@@ -11,16 +11,21 @@
 
 // Set environment for development
 
+const { app, BrowserWindow } = require('electron');
+const os = require('os');
+
 // Install `electron-debug` with `devtron`
 require('electron-debug')()
 
 // Install `vue-devtools`
-require('electron').app.on('ready', () => {
+app.on('ready', () => {
   let installExtension = require('electron-devtools-installer')
   installExtension.default(installExtension.VUEJS_DEVTOOLS)
     .then(() => {})
     .catch(err => {
       console.log('Unable to install `vue-devtools`: \n', err)
+      global.__static = require('path').join(__dirname, '/static').replace(/\\/g, '\\');
+      BrowserWindow.addDevToolsExtension(`${os.homedir()}/Library/Application Support/Google/Chrome/Default/Extensions/nhdogjmejiglipccpnnnanhbledajbpd/5.3.4_0`);
     })
 })
 

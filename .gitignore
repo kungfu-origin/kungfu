@@ -43,6 +43,7 @@ yarn.lock
 */inquirer-path/lib
 */inquirer-path/node_modules/*
 */_version.py
+*/inquirer-path/yarn.lock
 
 # Python Distribution / packaging
 develop-eggs/

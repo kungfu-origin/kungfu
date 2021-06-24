@@ -15,17 +15,18 @@ import {
     buildTradeTaskVolumeOffset,
     getCurrentTimestamp,
     getCancelOrderBeforeLastStepControllerTime,
-    printQuote
+    printQuote,
+    recordTaskInfo
 } from './assets/utils';
 
 
 const argv = minimist(process.argv.slice(2), {
-    string: 'ticker',
-    boolean: 'lastSingularity',
+    string: ['ticker', 'accountId'],
+    boolean: [ 'lastSingularity' ],
 })
-const { ticker, side, offset, volume, steps, triggerTime, finishTime, exchangeId, parentId, accountId, lastSingularity, lastSingularityMilliSecond, maxLotByStep } = argv;
-const triggerTimeStr = moment(triggerTime).format('YYYYMMDD HH:mm:ss');
-const finishTimeStr = moment(finishTime).format('YYYYMMDD HH:mm:ss');
+const { ticker, side, offset, priceMode, volume, steps, triggerTime, finishTime, exchangeId, parentId, accountId, lastSingularity, lastSingularityMilliSecond, maxLotByStep } = argv;
+const triggerTimeStr = moment(triggerTime || '').format('YYYYMMDD HH:mm:ss');
+const finishTimeStr = moment(finishTime || '').format('YYYYMMDD HH:mm:ss');
 const LOOP_INTERVAL = Math.ceil((finishTime - triggerTime) / steps);
 const TICKER = ticker.toString().trim();
 const PARENT_ID = parentId; 
@@ -35,7 +36,13 @@ const TARGET_DIRECTION_CONT = makeOrderDirectionType(side, offset).dc;
 const OPERATION_NAME = makeOrderDirectionType(side, offset).n;
 const TARGET_VOLUME = volume;
 const LAST_STEP_COUNT = steps - 1;
-const LAST_SINGULARITY_SECOND = lastSingularity ? lastSingularityMilliSecond : 0
+const LAST_SINGULARITY_SECOND = lastSingularity ? lastSingularityMilliSecond : 0;
+
+const priceModeMap: any = {
+    0: "对手价一档",
+    1: "同方向一档",
+    2: "最新价"
+}
 
 console.log('==================== 交易信息 =======================')
 console.log('[ARGS]', process.argv.slice(2).join(','))
@@ -44,6 +51,7 @@ console.log('[开始时间]', triggerTime, triggerTimeStr)
 console.log('[结束时间]', finishTime, finishTimeStr)
 console.log('[执行间隔]', LOOP_INTERVAL, 'ms')
 console.log('[目标标的] ', TICKER)
+console.log('[报单价格]', priceModeMap[priceMode])
 console.log('===================================================')
 
 
@@ -195,8 +203,9 @@ var dealedTimeCount: number = -1000000000000;
 var dealedSecond: number | undefined = undefined;
 var lastestMakeOrdertimeStamp = 0;
 var targetPosData: any = null;
-var hasConsoledTotalFinished = false;
 var hasCancelBeforeLastStep = false;
+
+var hasConsoledQuoteError = false;
 
 combineLatestObserver
     .pipe(
@@ -236,20 +245,28 @@ combineLatestObserver
             const quote = quotes[TICKER];
 
             if (!quote) {
-                console.error(`[WARNING] 暂无${ticker}行情信息，需保证MD进程开启`)
+                if (!hasConsoledQuoteError) {
+                    console.error(`[WARNING] 暂无${ticker}行情信息，需保证MD进程开启`)
+                    hasConsoledQuoteError = true;
+                }
                 return false;
             }
 
+            hasConsoledQuoteError = false
+
             //制定全部交易计划
             const pos = (positions || {})[`${TICKER}_${TARGET_DIRECTION}`] || {};
+            const posCont = (positions || {})[`${TICKER}_${TARGET_DIRECTION_CONT}`] || {};
             if (!targetPosData) {
-                const { totalVolume } = pos;
+                const totalVolume = pos.totalVolume || 0;
+                const totalVolumeCount = posCont.totalVolume || 0;
                 targetPosData = buildTarget({ 
-                    offset,
-                    side,
+                    offset: +offset,
+                    side: +side,
                     ticker,
-                    totalVolume: totalVolume || 0,
-                    targetVolume: TARGET_VOLUME
+                    totalVolume: +totalVolume,
+                    totalVolumeCont: +totalVolumeCount,
+                    targetVolume: +TARGET_VOLUME
                 })
 
                 //依然没有
@@ -292,9 +309,10 @@ combineLatestObserver
             console.log(`[交易检查] ${timeCount + 1} / ${steps}, ${getCurrentTimestamp(true)} `)
             
             //判断是否可以交易, 如不能交易，先撤单
-            const aliveOrders = getAliveOrders(orders)
+            const aliveOrders = getAliveOrders(orders);
             if (aliveOrders.length) {
                 console.log(`[检查订单] 活动订单数量 ${aliveOrders.length} / ${orders.length}, 等待全部订单结束`)
+
                 reqCancelOrder(PARENT_ID)
 
                 //如果离最后截止时间小于50ms，也全部执行
@@ -319,6 +337,9 @@ combineLatestObserver
         //制定本次交易计划
         const instrumentType = quote.instrumentTypeOrigin;
         const unfinishedSteps = resolveUnfinishedSteps(steps - timeCount);
+
+
+
         const { total, thisStepVolume, currentVolume, currentYesVolume, currentTodayVolume, currentVolumeCont }  = calcVolumeThisStep(
             positions,
             TICKER,
@@ -328,16 +349,10 @@ combineLatestObserver
             targetPosData,
             unfinishedSteps,
             instrumentType
-        )
+        );
 
         if (+total === 0) {
-            if (!hasConsoledTotalFinished) {
-                console.log('================================================================')
-                console.log(`====================== 交易任务完成 ==============================`)
-                console.log('================================================================')
-                hasConsoledTotalFinished = true;
-            }
-        
+            handleFinished(quote, printQuote, 'taskDone')
             return false;
         }
 
@@ -368,10 +383,20 @@ combineLatestObserver
 
             if (+maxLotByStep > 0) {
                 splitMakeOrderStep(maxLotByStep, volume, (stepVolume: number) => {
-                    reqMakeOrder({ ...argv, offset, volume: stepVolume }, quote, unfinishedSteps)  
+                    const makeOrderData = reqMakeOrder({ ...argv, offset, volume: stepVolume }, quote, unfinishedSteps)  
+                    makeOrderData && recordTaskInfo(quote, makeOrderData, {
+                        ...argv,
+                        count: `${timeCount + 1}/${steps}`,
+                        volumeLefted: `${TARGET_VOLUME - total}/${TARGET_VOLUME}`,
+                    })
                 })
             } else {
-                reqMakeOrder({ ...argv, offset, volume }, quote, unfinishedSteps)  
+                const makeOrderData = reqMakeOrder({ ...argv, offset, volume }, quote, unfinishedSteps);
+                makeOrderData && recordTaskInfo({...quote}, makeOrderData, {
+                    ...argv,
+                    count: `${timeCount + 1}/${steps}`,
+                    volumeLefted: `${TARGET_VOLUME - total}/${TARGET_VOLUME}`,
+                })
             }
 
             console.log(`[下单时间] ${getCurrentTimestamp(true)}`)  
@@ -394,9 +419,15 @@ function resolveUnfinishedSteps (unfinishiedSteps: number) {
     return unfinishiedSteps
 }
 
-function handleFinished (quote: QuoteData, printQuote: Function) {
-    console.log(`====================== 时间截止，交易结束 ======================`)
-    console.log('[收盘]')
+function handleFinished (quote: QuoteData, printQuote: Function, type = "time") {
+    if (type === 'time') {
+        console.log(`====================== 时间截止，交易结束 ======================`)
+        console.log('[时间截止]')
+    } else if (type === 'taskDone') {
+        console.log(`====================== 目标完成，交易结束 ======================`)
+        console.log('[目标完成]')
+    }
+
     printQuote(quote)
     secondsCounterTimer && clearInterval(secondsCounterTimer)
     reqTradingDataTimer && clearInterval(reqTradingDataTimer)

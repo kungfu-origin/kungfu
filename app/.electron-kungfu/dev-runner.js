@@ -11,6 +11,8 @@ const webpackHotMiddleware = require('webpack-hot-middleware')
 
 const mainConfig = require('./webpack.main.config')
 const rendererConfig = require('./webpack.renderer.config')
+const daemonConfig = require('./webpack.daemon.config')
+
 
 let electronProcess = null
 let manualRestart = false
@@ -48,7 +50,7 @@ function startRenderer () {
     const compiler = webpack(rendererConfig)
     hotMiddleware = webpackHotMiddleware(compiler, { 
       log: false, 
-      heartbeat: 1000 
+      heartbeat: 3000 
     })
 
     compiler.plugin('compilation', compilation => {
@@ -67,6 +69,7 @@ function startRenderer () {
       {
         contentBase: path.join(__dirname, '../'),
         quiet: true,
+        hot: true, // <-- the fix!
         before (app, ctx) {
           app.use(hotMiddleware)
           ctx.middleware.waitUntilValid(() => {
@@ -111,6 +114,25 @@ function startMain () {
         }, 5000)
       }
 
+      resolve()
+    })
+  })
+}
+
+
+function startDaemon () {
+  return new Promise((resolve, reject) => {
+    daemonConfig.entry.daemon = [].concat(daemonConfig.entry.daemon)
+
+    const compiler = webpack(daemonConfig)
+
+    compiler.watch({}, (err, stats) => {
+      if (err) {
+        console.log(err)
+        return
+      }
+
+      logStats('Daemon', stats)
       resolve()
     })
   })
@@ -169,7 +191,7 @@ function greeting () {
 function init () {
   greeting()
 
-  Promise.all([startRenderer(), startMain()])
+  Promise.all([startRenderer(), startMain(), startDaemon()])
     .then(() => {
       startElectron()
     })
