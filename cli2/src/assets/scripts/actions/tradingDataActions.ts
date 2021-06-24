@@ -7,20 +7,20 @@
  * @FilePath: /kungfu/cli2/src/assets/scripts/actions/tradingDataActions.ts
  */ 
 import { map } from 'rxjs/operators';
-import { buildTradingDataPipe } from '__io/kungfu/tradingData';
-import { watcher, getOrdersBySourceDestInstrumentId, getTradesBySourceDestInstrumentId, getOrderStatByDest, transformOrderStatListToData } from '__io/kungfu/watcher';
+import { buildKungfuDataByAppPipe } from '__io/kungfu/tradingData';
+import { watcher, transformTradingItemListToData, transformAssetItemListToData, getOrdersBySourceDestInstrumentId, getTradesBySourceDestInstrumentId, getOrderStatByDest, transformOrderStatListToData, dealPos, dealAsset } from '__io/kungfu/watcher';
 import { encodeKungfuLocation } from '__io/kungfu/kungfuUtils';
+import { ensureLedgerData } from '__gUtils/busiUtils';
 
 
 export const tradingDataObservale = (type: string, processId: string) => {
     const sourceDest = getLocationUId(type, processId) 
-    return buildTradingDataPipe(type).pipe(
-        map((data: any) => {
+    return buildKungfuDataByAppPipe().pipe(
+        map(() => {
             const ledgerData = watcher.ledger;
 
-            const positions = data.positions[processId] || [];
-            const positionsResolved = dealPosFromWatcher(positions);
-            const assetsResolved = data.assets[processId] || [];
+            const positions = ensureLedgerData(ledgerData.Position).map((item: PosOriginData) => dealPos(item));
+            const assets = ensureLedgerData(ledgerData.Asset).map((item: AssetOriginData) => dealAsset(item));
 
 
             if (type === 'account') {
@@ -29,30 +29,35 @@ export const tradingDataObservale = (type: string, processId: string) => {
                 const orderStat = getOrderStatByDest(ledgerData.OrderStat, 'dest', sourceDest);
                 const orderStatResolved = transformOrderStatListToData(orderStat);  
                 const ordersResolved = dealOrdersFromWatcher(orders, orderStatResolved);
-                const tradesResolve = dealTradesFromWathcer(trades);
+                const tradesResolved = dealTradesFromWathcer(trades);
+                const positionsResolved = transformTradingItemListToData(positions, 'account')[processId] || [];
+                const assetsResolved = transformAssetItemListToData(assets, 'account')[processId] || [];
 
 
                 return {
                     orders: ordersResolved,
-                    trades: tradesResolve,
-                    positions: positionsResolved,
+                    trades: tradesResolved,
+                    positions: dealPosFromWatcher(positionsResolved),
                     assets: assetsResolved
                 }
+
             } else if (type === 'strategy') {
                 const orders = getOrdersBySourceDestInstrumentId(ledgerData.Order, 'dest', sourceDest);
                 const trades = getTradesBySourceDestInstrumentId(ledgerData.Trade, 'dest', sourceDest);
                 const orderStat = getOrderStatByDest(ledgerData.OrderStat);
                 const orderStatResolved = transformOrderStatListToData(orderStat);  
                 const ordersResolved = dealOrdersFromWatcher(orders, orderStatResolved);
-                const tradesResolve = dealTradesFromWathcer(trades);
-
+                const tradesResolved = dealTradesFromWathcer(trades);
+                const positionsResolved = transformTradingItemListToData(positions, 'strategy')[processId] || [];
+                const assetsResolved = transformAssetItemListToData(assets, 'strategy')[processId] || [];
 
                 return {
                     orders: ordersResolved,
-                    trades: tradesResolve,
+                    trades: tradesResolved,
                     positions: positionsResolved,
                     assets: assetsResolved
                 }
+
             } else {
 
                 return {
