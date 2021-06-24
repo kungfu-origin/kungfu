@@ -23,14 +23,12 @@ const appDataSubject: any = new Subject();
 
 (() => {
 
-    if (watcher.noWathcer) {
+    if (watcher.noWatcher) {
         return;
     };  
     
     if (process.env.APP_TYPE !== 'daemon') {
-        if (process.env.APP_TYPE !== 'cli') {
-            return;
-        };
+        return
     };
 
     setTimerPromiseTask(async () => {
@@ -74,13 +72,16 @@ const appDataSubject: any = new Subject();
 
 (() => {
 
-    if (watcher.noWathcer) {
+    if (watcher.noWatcher) {
         return;
     }
 
     if (process.env.RENDERER_TYPE !== 'app') {
-        return;
+        if (process.env.APP_TYPE !== 'cli') {
+            return;
+        };
     }
+
     setTimerPromiseTask(() => {
         return new Promise(resolve => {
             const ledgerData = watcher.ledger;

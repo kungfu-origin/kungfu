@@ -62,7 +62,7 @@ interface NormalObject {
 interface ProcessStatusDetail {
     status: string;
     monit: {
-        memory: bigint;
+        memory: number;
         cpu: number;
     },
     pid: string;
