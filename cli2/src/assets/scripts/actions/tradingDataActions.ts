@@ -6,40 +6,77 @@
  * @Description: In User Settings Edit
  * @FilePath: /kungfu/cli2/src/assets/scripts/actions/tradingDataActions.ts
  */ 
-import { buildTradingDataPipe } from '__io/kungfu/tradingData';
-import { watcher, transformOrderStatListToData } from '__io/kungfu/watcher';
 import { map } from 'rxjs/operators';
-import { ensureLedgerData } from '__gUtils/busiUtils';
+import { buildTradingDataPipe } from '__io/kungfu/tradingData';
+import { watcher, getOrdersBySourceDestInstrumentId, getTradesBySourceDestInstrumentId, getOrderStatByDest, transformOrderStatListToData } from '__io/kungfu/watcher';
+import { encodeKungfuLocation } from '__io/kungfu/kungfuUtils';
 
 
 export const tradingDataObservale = (type: string, processId: string) => {
+    const sourceDest = getLocationUId(type, processId) 
     return buildTradingDataPipe(type).pipe(
         map((data: any) => {
-
-            const orders = data.orders[processId] || [];
-            const orderStat = ensureLedgerData(watcher.ledger.OrderStat, 'insert_time').slice(0, 1000);
-            const orderStatResolved = transformOrderStatListToData(orderStat);  
-
-            const ordersResolved = dealOrdersFromWatcher(orders, orderStatResolved);
-
-            const trades = data.trades[processId] || [];
-            const tradesResolve = dealTradesFromWathcer(trades);
+            const ledgerData = watcher.ledger;
 
             const positions = data.positions[processId] || [];
-            const positionsResolve = dealPosFromWatcher(positions);
+            const positionsResolved = dealPosFromWatcher(positions);
+            const assetsResolved = data.assets[processId] || [];
 
-            const assetsResolve = data.assets[processId] || [];
 
-            return {
-                orders: ordersResolved,
-                trades: tradesResolve,
-                positions: positionsResolve,
-                assets: assetsResolve
+            if (type === 'account') {
+                const orders = getOrdersBySourceDestInstrumentId(ledgerData.Order, 'source', sourceDest);
+                const trades = getTradesBySourceDestInstrumentId(ledgerData.Trade, 'source', sourceDest);
+                const orderStat = getOrderStatByDest(ledgerData.OrderStat, 'dest', sourceDest);
+                const orderStatResolved = transformOrderStatListToData(orderStat);  
+                const ordersResolved = dealOrdersFromWatcher(orders, orderStatResolved);
+                const tradesResolve = dealTradesFromWathcer(trades);
+
+
+                return {
+                    orders: ordersResolved,
+                    trades: tradesResolve,
+                    positions: positionsResolved,
+                    assets: assetsResolved
+                }
+            } else if (type === 'strategy') {
+                const orders = getOrdersBySourceDestInstrumentId(ledgerData.Order, 'dest', sourceDest);
+                const trades = getTradesBySourceDestInstrumentId(ledgerData.Trade, 'dest', sourceDest);
+                const orderStat = getOrderStatByDest(ledgerData.OrderStat);
+                const orderStatResolved = transformOrderStatListToData(orderStat);  
+                const ordersResolved = dealOrdersFromWatcher(orders, orderStatResolved);
+                const tradesResolve = dealTradesFromWathcer(trades);
+
+
+                return {
+                    orders: ordersResolved,
+                    trades: tradesResolve,
+                    positions: positionsResolved,
+                    assets: assetsResolved
+                }
+            } else {
+
+                return {
+                    orders: [],
+                    trades: [],
+                    positions: {},
+                    assets: []
+                }
             }
         })
     )
 }
 
+
+function getLocationUId (type: string, currentId: string) {
+    if (type === 'account') {
+        return watcher.getLocationUId(encodeKungfuLocation(currentId.toAccountId(), 'td'));
+    } else if (type === 'strategy') {
+        return watcher.getLocationUId(encodeKungfuLocation(currentId, 'strategy'));
+    } else {
+        console.error('getLocationUId type is not account or strategy')
+        return 0
+    }
+}
 
 function dealOrdersFromWatcher (orders: OrderOriginData[], orderStat: { [prop: string]: OrderStatData }) {
     let orderDataByKey: { [propName: string]: OrderData } = {};
@@ -65,7 +102,7 @@ function dealTradesFromWathcer (trades: TradeData[]) {
     return trades.sort((a: TradeData, b: TradeData) => b.updateTimeNum - a.updateTimeNum)
 }
 
-function dealPosFromWatcher (positions: PosData[]) {
+function dealPosFromWatcher (positions: PosData[]): { [propName: string]: PosData } {
     let positionDataByKey: { [propName: string]: PosData } = {};
     
     positions

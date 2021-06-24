@@ -118,8 +118,8 @@ export const processStatusObservable = () => {
 }
 
 export const mdTdStateObservable = () => {
-    const { buildKungfuGlobalDataPipe } = require('__io/kungfu/tradingData');
-    return buildKungfuGlobalDataPipe().pipe(
+    const { buildGatewayStatePipe } = require('__io/kungfu/tradingData');
+    return buildGatewayStatePipe().pipe(
         map((item: any) => {
             let gatewayStatesData: StringToMdTdState = {};
             (item.gatewayStates || []).forEach((item: MdTdState) => {
