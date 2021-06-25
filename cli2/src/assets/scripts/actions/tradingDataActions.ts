@@ -8,13 +8,12 @@
  */ 
 import { map } from 'rxjs/operators';
 import { buildKungfuDataByAppPipe } from '__io/kungfu/tradingData';
-import { watcher, transformTradingItemListToData, transformAssetItemListToData, getOrdersBySourceDestInstrumentId, getTradesBySourceDestInstrumentId, getOrderStatByDest, transformOrderStatListToData, dealPos, dealAsset } from '__io/kungfu/watcher';
+import { watcher, transformTradingItemListToData, transformAssetItemListToData, getOrdersBySourceDestInstrumentId, getTradesBySourceDestInstrumentId, getOrderStatByDest, transformOrderStatListToData, dealPos, dealAsset, dealOrderStat } from '__io/kungfu/watcher';
 import { encodeKungfuLocation } from '__io/kungfu/kungfuUtils';
 import { ensureLedgerData } from '__gUtils/busiUtils';
 
-
 export const tradingDataObservale = (type: string, processId: string) => {
-    const sourceDest = getLocationUId(type, processId) 
+    const sourceDest = getLocationUID(type, processId) 
     return buildKungfuDataByAppPipe().pipe(
         map(() => {
             const ledgerData = watcher.ledger;
@@ -72,24 +71,27 @@ export const tradingDataObservale = (type: string, processId: string) => {
 }
 
 
-function getLocationUId (type: string, currentId: string) {
+function getLocationUID (type: string, currentId: string) {
     if (type === 'account') {
-        return watcher.getLocationUId(encodeKungfuLocation(currentId.toAccountId(), 'td'));
+        return watcher.getLocationUID(encodeKungfuLocation(currentId, 'td'));
     } else if (type === 'strategy') {
-        return watcher.getLocationUId(encodeKungfuLocation(currentId, 'strategy'));
+        return watcher.getLocationUID(encodeKungfuLocation(currentId, 'strategy'));
     } else {
-        console.error('getLocationUId type is not account or strategy')
+        console.error('getLocationUID type is not account or strategy')
         return 0
     }
 }
 
-function dealOrdersFromWatcher (orders: OrderOriginData[], orderStat: { [prop: string]: OrderStatData }) {
+function dealOrdersFromWatcher (orders: OrderOriginData[], orderStatOrigin: { [prop: string]: OrderStatOriginData }) {
     let orderDataByKey: { [propName: string]: OrderData } = {};
-    orders.kfForEach((item: OrderData) => {
-        const orderData = item;
-        const latencyData = orderStat[orderData.orderId] || {};
-        const latencySystem = latencyData.latencySystem || '';
-        const latencyNetwork = latencyData.latencyNetwork || '';
+    orders.kfForEach((orderData: OrderData) => {
+        const latencyData: any = orderStatOrigin[orderData.orderId] || null;
+        const orderStat = dealOrderStat(latencyData)
+
+        //@ts-ignore
+        const latencySystem = orderStat.latencySystem || '';
+        //@ts-ignore
+        const latencyNetwork = orderStat.latencyNetwork || '';
 
         orderDataByKey[orderData.id] = {
             ...orderData,
