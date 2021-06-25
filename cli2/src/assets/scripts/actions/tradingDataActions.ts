@@ -21,7 +21,6 @@ export const tradingDataObservale = (type: string, processId: string) => {
             const positions = ensureLedgerData(ledgerData.Position).map((item: PosOriginData) => dealPos(item));
             const assets = ensureLedgerData(ledgerData.Asset).map((item: AssetOriginData) => dealAsset(item));
 
-
             if (type === 'account') {
                 const orders = getOrdersBySourceDestInstrumentId(ledgerData.Order, 'source', sourceDest);
                 const trades = getTradesBySourceDestInstrumentId(ledgerData.Trade, 'source', sourceDest);
