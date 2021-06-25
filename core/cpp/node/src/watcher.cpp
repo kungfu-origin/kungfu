@@ -32,9 +32,16 @@ inline location_ptr GetWatcherLocation(const Napi::CallbackInfo &info) {
 
 inline bool GetBypassQuotes(const Napi::CallbackInfo &info) {
   if (not IsValid(info, 2, &Napi::Value::IsBoolean)) {
-    throw Napi::Error::New(info.Env(), "Invalid bypass argument");
+    throw Napi::Error::New(info.Env(), "Invalid bypassQuotes argument");
   }
   return info[2].As<Napi::Boolean>().Value();
+}
+
+inline bool GetBypassRestore(const Napi::CallbackInfo &info) {
+  if (not IsValid(info, 3, &Napi::Value::IsBoolean)) {
+    throw Napi::Error::New(info.Env(), "Invalid bypassQuotes argument");
+  }
+  return info[3].As<Napi::Boolean>().Value();
 }
 
 Watcher::Watcher(const Napi::CallbackInfo &info)
@@ -59,6 +66,10 @@ Watcher::Watcher(const Napi::CallbackInfo &info)
   bool sync_schema = not get_io_device()->is_usable();
   if (sync_schema) {
     config_store->profile_.setup();
+  }
+
+  if (GetBypassRestore(info)) {
+    return;
   }
 
   for (const auto &item : config_store->profile_.get_all(Location{})) {
