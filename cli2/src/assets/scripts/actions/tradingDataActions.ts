@@ -27,7 +27,7 @@ export const tradingDataObservale = (type: string, processId: string) => {
                 const orderStat = getOrderStatByDest(ledgerData.OrderStat, 'dest', sourceDest);
                 const orderStatResolved = transformOrderStatListToData(orderStat);  
                 const ordersResolved = dealOrdersFromWatcher(orders, orderStatResolved);
-                const tradesResolved = dealTradesFromWathcer(trades);
+                const tradesResolved = dealTradesFromWathcer(trades, orderStatResolved);
                 const positionsResolved = transformTradingItemListToData(positions, 'account')[processId] || [];
                 const assetsResolved = transformAssetItemListToData(assets, 'account')[processId] || [];
 
@@ -45,7 +45,7 @@ export const tradingDataObservale = (type: string, processId: string) => {
                 const orderStat = getOrderStatByDest(ledgerData.OrderStat);
                 const orderStatResolved = transformOrderStatListToData(orderStat);  
                 const ordersResolved = dealOrdersFromWatcher(orders, orderStatResolved);
-                const tradesResolved = dealTradesFromWathcer(trades);
+                const tradesResolved = dealTradesFromWathcer(trades, orderStatResolved);
                 const positionsResolved = transformTradingItemListToData(positions, 'strategy')[processId] || [];
                 const assetsResolved = transformAssetItemListToData(assets, 'strategy')[processId] || [];
 
@@ -81,31 +81,34 @@ function getLocationUID (type: string, currentId: string) {
     }
 }
 
-function dealOrdersFromWatcher (orders: OrderOriginData[], orderStatOrigin: { [prop: string]: OrderStatOriginData }) {
-    let orderDataByKey: { [propName: string]: OrderData } = {};
-    orders.kfForEach((orderData: OrderData) => {
+function dealOrdersFromWatcher (orders: OrderData[], orderStatOrigin: { [prop: string]: OrderStatOriginData }) {
+    return orders.map((orderData: OrderData) => {
         const latencyData: any = orderStatOrigin[orderData.orderId] || null;
-        const orderStat = dealOrderStat(latencyData)
-
+        const orderStat = dealOrderStat(latencyData);
         //@ts-ignore
-        const latencySystem = orderStat.latencySystem || '';
-        //@ts-ignore
-        const latencyNetwork = orderStat.latencyNetwork || '';
-
-        orderDataByKey[orderData.id] = {
+        const { latencySystem, latencyNetwork } = orderStat
+        return {
             ...orderData,
-            latencySystem,
-            latencyNetwork
-        };
-    })
+            latencySystem: latencySystem || '',
+            latencyNetwork: latencyNetwork || ''
+        }
 
-    return Object.freeze(Object.values(orderDataByKey).sort((a: OrderData, b: OrderData) =>{
-        return  b.updateTimeNum - a.updateTimeNum
-    }))
+    })
 }
 
-function dealTradesFromWathcer (trades: TradeData[]) {
-    return trades.sort((a: TradeData, b: TradeData) => b.updateTimeNum - a.updateTimeNum)
+function dealTradesFromWathcer (trades: TradeData[], orderStatOrigin: { [prop: string]: OrderStatOriginData }) {
+    return trades.map((tradeData: TradeData) => {
+        const latencyData: any = orderStatOrigin[tradeData.orderId] || null;
+        const orderStat = dealOrderStat(latencyData);
+        //@ts-ignore
+        const latencyTrade = orderStat.latencyTrade || '';
+
+        return {
+            ...tradeData,
+            latencyTrade
+
+        }
+    })
 }
 
 function dealPosFromWatcher (positions: PosData[]): { [propName: string]: PosData } {

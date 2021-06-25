@@ -12,9 +12,10 @@ class TradeTable extends Table {
 		super()
 		this.type = type;
 		this.headers = ['UpdateTime', 'Ticker', 'Side', 'Offset', 'Price', 'Volume', 
-			type === 'account' ? 'Strate' : 'AccountId '
+			type === 'account' ? 'Strate' : 'AccountId ',
+			"Trade LA"
 		]
-		this.columnWidth = [10, 0, 0, 0, 8, 6, 9];
+		this.columnWidth = [10, 0, 0, 0, 8, 6, 9, 10];
 	}
 
 	setItems(tradeDataList: TradeData[]) {
@@ -43,7 +44,8 @@ class TradeTable extends Table {
 					offset,
 					trade.price,
 					trade.volume,
-					last
+					last,
+					trade.latencyTrade
 				], 
 				calcuHeaderWidth(this.headers, this.columnWidth), 
 				t.pad
