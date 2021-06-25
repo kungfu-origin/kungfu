@@ -307,6 +307,8 @@ interface TradeData {
     
     tax: string;
     commission: string;
+
+    latencyTrade?: string | number;
 }
 
 interface TradeOriginData {

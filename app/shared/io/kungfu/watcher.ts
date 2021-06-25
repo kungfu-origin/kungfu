@@ -24,16 +24,16 @@ export const watcher: any = (() => {
     if (process.env.APP_TYPE === 'cli') {
         const windowType = process.env.CLI_WINDOW_TYPE || '';
         const id = [process.env.APP_TYPE, windowType].join('');
-        return kungfu.watcher(KF_RUNTIME_DIR, kungfu.formatStringToHashHex(id), bypassQuote);
+        return kungfu.watcher(KF_RUNTIME_DIR, kungfu.formatStringToHashHex(id), bypassQuote, true);
     }
 
     if (process.env.APP_TYPE === "daemon") {
-        return kungfu.watcher(KF_RUNTIME_DIR, kungfu.formatStringToHashHex('kungfu_daemon'), false);
+        return kungfu.watcher(KF_RUNTIME_DIR, kungfu.formatStringToHashHex('kungfu_daemon'), false, false);
     }
 
 
     const id = [process.env.APP_TYPE, process.env.RENDERER_TYPE].join('');
-    return kungfu.watcher(KF_RUNTIME_DIR, kungfu.formatStringToHashHex(id), true);
+    return kungfu.watcher(KF_RUNTIME_DIR, kungfu.formatStringToHashHex(id), true, true);
 })()
 
 
