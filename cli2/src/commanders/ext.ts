@@ -3,11 +3,11 @@ import { KUNGFU_ENGINE_PATH } from '__gConfig/pathConfig';
 import { platform } from '__gConfig/platformConfig';
 
 const path = require('path');
-const colors = require('colors');
 const os = require('os');
 const { execFile } = require('child_process');
 const inquirer = require( 'inquirer' );
 const { PathPrompt } = require('@/assets/static/js/inquirer-path/lib');
+
 inquirer.registerPrompt('autocomplete', require('inquirer-autocomplete-prompt'));
 inquirer.registerPrompt('path', PathPrompt);
 

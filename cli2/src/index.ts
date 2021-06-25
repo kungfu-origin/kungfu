@@ -9,6 +9,7 @@ import { addExtension, listExtension, removeExtension } from "@/commanders/ext";
 import { setSystemConfig } from '@/commanders/config';
 import { shutdown } from '@/commanders/shutdown';
 import { monitKill } from '@/commanders/monitKill';
+import { exportTradingDataPrompt } from '@/commanders/export';
 
 import { monitPrompt } from '@/components/index';
 import { removeFilesInFolder, removeJournal } from '__gUtils/fileUtils';
@@ -176,6 +177,21 @@ program
     })
 
 program
+    .command("export")
+    .description("Export all trading data by date")
+    .action(() => {
+        return exportTradingDataPrompt()
+            .then((output_path: string ) => {
+                console.success(`Export trading data to ${output_path} success`)
+            })
+            .catch((err: Error) => {
+                console.error(err)
+                process.exit(1)
+            })
+            .finally(() => process.exit(0))
+    })
+
+program
     .command('showdir <home|log|ledger|base>')
     .description('show the dir path of home or log or ledger or base')
     .action((target: string) => {
@@ -195,7 +211,7 @@ program
 
 program
     .on('command:*', function () {
-        console.error('Invalid command: %s\nSee --help for a list of available commands.', program.args.join(' '));
+        console.error(`Invalid command: ${program.args.join(' ')}\nSee --help for a list of available commands.`);
         process.exit(1);
     });
 
