@@ -345,7 +345,17 @@ export const getMemCpu = (processId: string, processStatusWithDetail: any, type:
     if (type === 'cpu') {
         return monit.cpu !== undefined ? Number(monit.cpu).toFixed(1) + '%' : '--';
     } else if (type === 'memory') {
-        return monit.memory !== undefined ? Number(monit.memory / 1000000).toFixed(0) + "M" : '--';
+        return monit.memory !== undefined ? Number(monit.memory / (1024 * 1024)).toFixed(0) + "M" : '--';
+    } else {
+        return '--'
+    }
+}
+
+export const resolveMemCpu = (monit: any, type: string) => {
+    if (type === 'cpu') {
+        return monit.cpu !== undefined ? Number(monit.cpu).toFixed(1) + '%' : '--';
+    } else if (type === 'memory') {
+        return monit.memory !== undefined ? Number(monit.memory / (1024 * 1024)).toFixed(0) + "M" : '--';
     } else {
         return '--'
     }
@@ -656,7 +666,7 @@ export const resolveInstruments = (instruments: InstrumentOriginData[]) => {
 }
 
 export function getLog(logPath: string, searchKeyword: string, dealMessageFunc: Function){
-    const numList = buildListByLineNum(1000000000);    
+    const numList = buildListByLineNum(100);    
     let logId = 0;            
     return new Promise((resolve, reject) => {
         fse.stat(logPath, (err: Error) => {

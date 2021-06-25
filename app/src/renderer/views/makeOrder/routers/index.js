@@ -1,6 +1,6 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
-import MakeOrderWindow from '@/views/makeOrder/components/MakeOrderWindow';
+import MakeOrderDashboard from '@/components/Base/makeOrder/MakeOrderDashboard';
 
 
 Vue.use(VueRouter)
@@ -11,7 +11,7 @@ export default new VueRouter({
         { 
             path: '/make-order', 
             name: 'MakeOrder', 
-            component: MakeOrderWindow 
+            component: MakeOrderDashboard 
         },
         { path: '*', redirect: '/make-order' }
     ]

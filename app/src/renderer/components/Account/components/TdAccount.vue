@@ -155,12 +155,13 @@
                 <el-table-column
                     label=""
                     align="right"
-                    min-width="120"
+                    min-width="160"
                 >
                     <template slot-scope="props">
                         <span class="tr-oper" @click.stop="handleOpenLogFile(`td_${props.row.account_id}`)"><i class="el-icon-document mouse-over" title="打开日志文件"></i></span>
-                        <span class="tr-oper" @click.stop="handleOpenUpdateAccountDialog(props.row)"><i class="el-icon-setting mouse-over" title="TD 设置"></i></span>
-                        <span :class="['tr-oper-delete', `delete-${props.row.account_id}`] " @click.stop="handleDeleteTd(props.row)"><i class=" el-icon-delete mouse-over" title="删除 TD"></i></span>
+                        <span class="tr-oper" @click.stop="handleOpenUpdateRiskSettingDialog(props.row)" v-if="getRiskConfig(props.row)"><i class="el-icon-umbrella mouse-over" title="风控设置"></i></span>
+                        <span class="tr-oper" @click.stop="handleOpenUpdateAccountDialog(props.row)"><i class="el-icon-setting mouse-over" title="账户设置"></i></span>
+                        <span :class="['tr-oper-delete', `delete-${props.row.account_id}`] " @click.stop="handleDeleteTd(props.row)"><i class=" el-icon-delete mouse-over" title="删除账户"></i></span>
                     </template>
                 </el-table-column>
             </el-table>
@@ -186,6 +187,20 @@
         type="td"
         />
 
+        <!-- 设置风控 -->
+        <SetAccountDialog
+        :value="accountForm"
+        v-if="visiblity.setRisk"
+        :visible.sync="visiblity.setRisk"
+        :method="method" 
+        :source="selectedSource"
+        :accountSource="riskAccountSource"
+        @successSubmitSetting="successSubmitSetting"
+        @refreshData="refreshData"
+        :mdTdList="tdList"
+        type="risk"
+        />
+
     </tr-dashboard>
 </template>
 
@@ -202,18 +217,20 @@ import { deleteTd, switchTd } from '__io/actions/account';
 import { loopToRunProcess } from '__gUtils/busiUtils';
 
 import baseMixin from '@/assets/mixins/baseMixin';
-import mdTdMixin from '../js/mdTdMixin';
+import mdTdRiskMixin from '../js/mdTdRiskMixin';
 import openLogMixin from '@/assets/mixins/openLogMixin';
 
 export default {
     name: 'account',
 
-    mixins: [ baseMixin, mdTdMixin, openLogMixin ],
+    mixins: [ baseMixin, mdTdRiskMixin, openLogMixin ],
 
-    data() {
+    data () {
         this.tdmdType = 'td';
         this.searchFilterKey = 'account_id';
         this.ifProcessRunning = ifProcessRunning;
+        this.accountSettingType = "td"
+
         return {}
     },
 
@@ -222,9 +239,10 @@ export default {
         SetSourceDialog
     },
 
-    computed:{
+    computed: {
         ...mapState({
             tdAccountSource: state => state.BASE.tdAccountSource || {},
+            riskAccountSource: state => state.BASE.riskAccountSource || {},
             mdTdState: state => state.ACCOUNT.mdTdState || {},
             accountsAsset: state => state.ACCOUNT.accountsAsset || {},
             tdList: state => state.ACCOUNT.tdList || [], 
@@ -256,7 +274,7 @@ export default {
     methods:{
        
         //删除账户信息
-        handleDeleteTd(row) {
+        handleDeleteTd (row) {
             if(!this.judgeCondition(row)) return;
             const { account_id } = row
             //查看该账户下是否存在task中的td任务
@@ -291,12 +309,12 @@ export default {
         },
 
         //当前行高亮
-        handleRowClick(row) {
+        handleRowClick (row) {
             this.$store.dispatch('setCurrentAccount', row)
         },
 
         //Td开关
-        handleTdSwitch(value, account) {
+        handleTdSwitch (value, account) {
             return switchTd(account, value).then(({ type, message }) => this.$message[type](message))
         },
        
@@ -319,7 +337,7 @@ export default {
         },
 
         //获取账户列表
-        getTableList() {
+        getTableList () {
             return getTdList()
                 .then(tdList => {
                     this.$store.dispatch('setTdList', tdList);
@@ -331,8 +349,12 @@ export default {
                 })
         },
 
+        getRiskConfig (row) {
+            return this.riskAccountSource[row.source_name]
+        },
+
         //删除前进行一些判断
-        judgeCondition(row) {
+        judgeCondition (row) {
             const { account_id } = row
             //判断td是否开启，开启则无法删除
             if(ifProcessRunning(`td_${account_id}`, this.processStatus)) {
@@ -343,12 +365,12 @@ export default {
         },
 
         //是否为期货
-        isFutureAccount(row) {
+        isFutureAccount (row) {
             return (this.tdAccountSource[row.source_name] || {}).typeName == 'future'
         },
 
         //计算持仓盈亏
-        calcCash(row, key){
+        calcCash (row, key){
             return toDecimal((this.accountsAsset[row.account_id] || {})[key]) + ''
         }
     }

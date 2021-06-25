@@ -3,14 +3,16 @@ import MessageBox from '@/assets/components/MessageBox';
 import Loading from '@/assets/components/Loading';
 import { DEFAULT_PADDING, TABLE_BASE_OPTIONS, parseToString } from '@/assets/scripts/utils';
 import { switchProcess, processListObservable } from '@/assets/scripts/actions/processActions';
-import { LogsAndWatcherConcatObservable } from '@/assets/scripts/actions/logActions';
-import { throttleInsert, debounce } from '__gUtils/busiUtils';
+import { getLogSubject, getLogInterval, splitStrByLength } from '@/assets/scripts/actions/logActions';
+import { debounce } from '__gUtils/busiUtils';
 import { logger } from '__gUtils/logUtils';
 
 
 const blessed = require('blessed');
+const moment = require('moment');
+const colors = require('colors');
 
-const WIDTH_LEFT_PANEL = 44;
+const WIDTH_LEFT_PANEL = 70;
 
 export class MonitorDashboard extends Dashboard {
     screen: any;
@@ -22,7 +24,7 @@ export class MonitorDashboard extends Dashboard {
         logList: any[]
     }
 
-    oldLogObservable: any;
+    oldGetLogIntervalTimer: any;
 
     constructor() {
         super()
@@ -40,7 +42,7 @@ export class MonitorDashboard extends Dashboard {
             logList: []
         }
 
-        this.oldLogObservable = null;
+        this.oldGetLogIntervalTimer = null;
 
         this.init();
     }
@@ -56,6 +58,7 @@ export class MonitorDashboard extends Dashboard {
 
         t.bindEvent();
         t.bindData();
+        t._bindLogMessage();
     }
 
 
@@ -129,18 +132,24 @@ export class MonitorDashboard extends Dashboard {
     bindData() {
         const t = this;
         processListObservable().subscribe((processList: any) => {
+
+
             //processList
             t.globalData.processList = processList;
-            const processListResolve = processList
-                .map((proc: ProcessListItem) => parseToString([
-                    proc.typeName,
-                    proc.processName,
-                    proc.statusName,
-                ], [5, 15, 10]))
-            t.boards.processList.setItems(processListResolve);
+            const processListResolved = processList
+                .map((proc: ProcessListItem) => {
+                    return parseToString([
+                        proc.typeName,
+                        proc.processName,
+                        proc.statusName,
+                        "Cpu " + proc.monit.cpu,
+                        "MEM " + proc.monit.memory
+                    ], [5, 15, 10, 10, 10])
+            })
+            t.boards.processList.setItems(processListResolved);
             t.screen.render();
 
-            if (t.oldLogObservable === null) {
+            if (t.oldGetLogIntervalTimer === null) {
                 const curProcessItem = processList[0]
                 t._getLogs(curProcessItem)
             }
@@ -190,44 +199,52 @@ export class MonitorDashboard extends Dashboard {
         if (!processItem) return;
         const t = this;
         const processId = processItem.processId;
-        const processIds = [processId];
-        const throttleInsertLogs = throttleInsert(800);
 
-        if (t.oldLogObservable) t.oldLogObservable.unsubscribe(); //unsubscribe the old
+        if (t.oldGetLogIntervalTimer) t.oldGetLogIntervalTimer.clearLoop(); //unsubscribe the old
         t.boards.mergedLogs.setItems([]) //clear
         t.boards.mergedLogs.setLabel(` Logs (${processId}) `)
-        t.boards.loader.load('Loading the logs, please wait...')
-        
-        const boardWidth = t.boards.mergedLogs.width;
+        t.globalData.logList = [];
+        t.boards.mergedLogs.setItems(t.globalData.logList)
+        t.oldGetLogIntervalTimer = getLogInterval(processId);        
+    }
 
-        t.oldLogObservable = LogsAndWatcherConcatObservable(processIds, boardWidth).subscribe((l: any) => {
+    _bindLogMessage () {
+        const t = this;
+        const boardWidth = this.boards.mergedLogs.width;
+        getLogSubject().subscribe((logList: any) => {
+            let list = logList.list || [];
+            let listResolved: any = []
 
-            t.boards.loader.stop()
+            list
+                .sort((a: any, b: any) => moment(a.updateTime).valueOf() - moment(b.updateTime).valueOf())
+                .forEach((l: any) => {
+                    const message = l.message;
+                    const isCritical = l.isCritical;
 
-            //obserable
-            if (typeof l === 'string') {
-                throttleInsertLogs(l).then((logList: string[] | boolean) => {
-                    if (!logList) return;
-                    t.globalData.logList = t.globalData.logList.concat(logList)
-                    const len = t.globalData.logList.length;
-                    t.globalData.logList = t.globalData.logList.slice(len < 2000 ? 0 : (len - 2000))
-                    t.boards.mergedLogs.setItems(t.globalData.logList)
+                    if (message.length < boardWidth) {
+                        listResolved.push(message)
+                    } else {
+                        splitStrByLength(message, boardWidth).forEach((splitLine: string) => {
+                            if (isCritical) {
+                                listResolved.push(colors.red(splitLine))
+                            } else {
+                                listResolved.push(splitLine)
+                            }
+                        })
+                    }
                 })
-                
-            } else {
-                //get 
-                t.globalData.logList = l;
-                t.boards.mergedLogs.setItems(t.globalData.logList)
-            }
+
+            //get   
+            t.globalData.logList = listResolved;
     
             if (!t.boards.mergedLogs.focused) {
+                t.boards.mergedLogs.setItems(t.globalData.logList)
                 t.boards.mergedLogs.select(t.globalData.logList.length - 1)
                 t.boards.mergedLogs.setScrollPerc(100)
             }
 
             t.screen.render();
-
-        })
+        })   
     }
 
 }

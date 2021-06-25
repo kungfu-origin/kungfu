@@ -10,6 +10,7 @@ export default {
             visiblity: {
                 selectSource: false,
                 setAccount: false,
+                setRisk: false,
             },
         }
     },
@@ -89,6 +90,13 @@ export default {
             this.accountForm = JSON.parse(row.config) 
             this.selectedSource = row.source_name
             this.visiblity.setAccount = true
+        },
+
+        handleOpenUpdateRiskSettingDialog (row) {
+            this.method = 'update'
+            this.accountForm = JSON.parse(row.config) 
+            this.selectedSource = row.source_name
+            this.visiblity.setRisk = true
         },
         
         //选择柜台

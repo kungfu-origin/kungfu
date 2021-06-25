@@ -3,15 +3,31 @@
         <tr-dashboard title="" >
             <div slot="dashboard-header">
                 <tr-dashboard-header-item v-if="proMode">
-                    <span class="mouse-over" style="font-weight: 600; font-size: 11px" title="添加选股算法" @click="handleAddTask">选股</span>
+                    <span class="mouse-over text-icon" title="添加选股算法" @click="handleAddTask">选股</span>
                 </tr-dashboard-header-item>
                 <tr-dashboard-header-item>
-                    <el-button size="mini" @click="handleAddTicker" title="添加">添加</el-button>
+                    <span class="mouse-over text-icon" title="订阅" @click="handleSubscribeAllTickers">订阅</span>
+                </tr-dashboard-header-item>
+                <tr-dashboard-header-item>
+                    <el-select class="dashboard-header-selector" :value="currentTickerSetName" @change="handleSetTickerSet">
+                        <el-option 
+                            v-for="tickerSet in tickerSets" 
+                            :key="tickerSet.name"    
+                            :label="`当前标的池：${tickerSet.name || ''}`"
+                            :value="tickerSet.name">
+                        </el-option>
+                    </el-select>
+                </tr-dashboard-header-item>
+                <tr-dashboard-header-item>
+                    <el-button size="mini" @click="tickerSetsManagerDialogVisiblity = true" title="设置标的池">设置标的池</el-button>
+                </tr-dashboard-header-item>
+                <tr-dashboard-header-item>
+                    <el-button size="mini" @click="handleAddTicker('marketdata')" title="添加">添加标的</el-button>
                 </tr-dashboard-header-item>
             </div>
             <el-table
             size="small"
-            :data="currentTickerSetTickers || []"
+            :data="currentTickerSetTickersResolved || []"
             height="100%"
             @row-click="handleRowClick"
             >
@@ -138,27 +154,24 @@
                     min-width="80"
                 >
                     <template slot-scope="props">
-                        <span class="tr-oper-delete" @click.stop="handleDeleteTicker(props.row)"><i class=" el-icon-delete mouse-over" title="删除标的"></i></span>
+                        <span class="tr-oper-delete" @click.stop="handleDeleteTicker(props.row, currentTickerSet)"><i class=" el-icon-delete mouse-over" title="删除标的"></i></span>
                     </template>
                 </el-table-column>
             </el-table>
         </tr-dashboard>
 
-
-        <AddSetTickerSetDialog
-            v-if="addSetTickerSetDialogVisiblity"
-            :visible.sync="addSetTickerSetDialogVisiblity"
-            @addTicker="handleAddTicker"
-            @confirm="handleConfirmAddSetTickerSet"
-            
-        ></AddSetTickerSetDialog>
-
         <AddTickerDialog
             v-if="addTickerDialogVisiblity"
             :visible.sync="addTickerDialogVisiblity"
-            @confirm="handleAddTickerConfirm"
+            @confirm="tickerData => handleAddTickerConfirm(tickerData, addTickerTargetTickerSetName)"
         >
         </AddTickerDialog>  
+
+        <TickerSetsManagerDialog
+            v-if="tickerSetsManagerDialogVisiblity"
+            :visible.sync="tickerSetsManagerDialogVisiblity"
+            @addTicker="editingTickerSet => handleAddTicker('tickerSetManager', editingTickerSet)"
+        ></TickerSetsManagerDialog>
     </div>
 </template>
 
@@ -166,12 +179,14 @@
 
 import { mapGetters, mapState } from 'vuex';
 
-import { getIndexFromTargetTickers } from '__gUtils/busiUtils';
+import { findTargetFromArray } from '__gUtils/busiUtils';
 import { ExchangeIds } from "@kungfu-trader/kungfu-shared/config/tradingConfig";
+
+import TickerSetsManagerDialog from '@/components/MarketFilter/components/TickerSetsManagerDialog';
+import AddTickerDialog from '@/components/MarketFilter/components/AddTickerDialog';
 
 import tickerSetMixin from '@/components/MarketFilter/js/tickerSetMixin';
 import taskMixin from '@/components/Task/js/taskMixin';
-
 
 export default {
 
@@ -182,12 +197,27 @@ export default {
         marketData: {
             type: Object,
             default: () => ({})
-        }
+        },
+
+        currentId: String,
+
+        moduleType: String
     },
 
     data () {
         this.ExchangeIds = ExchangeIds;
-        return {}
+        return {
+            addTickerDialogVisiblity: false,
+            addTickerType: '',
+            addTickerTargetTickerSetName: '',
+
+            tickerSetsManagerDialogVisiblity: false,
+        }
+    },
+
+    components: {
+        TickerSetsManagerDialog,
+        AddTickerDialog
     },
 
     computed: {
@@ -205,15 +235,27 @@ export default {
         }
     },
 
-    mounted () {
-        this.bindAddTickerToTickerSet();
-    },
-
-    beforeDestroy () {
-        this.$bus.$off('add-ticker-for-ticker-set');
-    },
-
     methods: {
+
+        handleAddTicker (type, targetTickerSet = null) {
+            const targetTickerSetResolved = Object.freeze(targetTickerSet || this.currentTickerSet);
+            if (targetTickerSetResolved === null || Object.keys(targetTickerSetResolved).length === 0) {
+                this.$message.warning('请先添加标的池！')
+                return;
+            }
+            this.addTickerType = type;
+            this.addTickerTargetTickerSetName = Object.freeze(targetTickerSet || this.currentTickerSet || {}).name || '';
+            this.addTickerDialogVisiblity = true;
+        },
+
+        handleSubscribeAllTickers () {
+            this.subscribeAllTickers(false)
+        },
+
+        handleSetTickerSet (tickerSetName) {
+            const targetOriginTickerSet = findTargetFromArray(this.tickerSets, 'name', tickerSetName)
+            this.handleSetCurrentTickerSet(targetOriginTickerSet)
+        },
 
         handleAddTask () {
             this.$bus.$emit('set-task', {
@@ -225,44 +267,19 @@ export default {
         },
 
         handleRowClick (row) {
-            this.$emit('clickQuote', this.getMarketData(row))
-        },
-        
-        handleAddTicker () {
-            this.addTickerDialogVisiblity = true;
-        },
-
-        handleDeleteTicker (ticker) {
-            const { name, tickers } = this.currentTickerSet;
-            const targetIndex = getIndexFromTargetTickers(tickers, ticker)
-
-            if (targetIndex !== -1) {
-                let targetTickers = tickers.slice(0)
-                targetTickers.splice(targetIndex, 1);
-                this.handleConfirmAddSetTickerSet({
-                    name, 
-                    tickers: targetTickers
-                })
-            }
-        },
-
-        bindAddTickerToTickerSet () {
-            this.$bus.$on('add-ticker-for-ticker-set', ({ tickerData, inTickerSet }) => {
-                if (inTickerSet) return;
-                const { name, tickers } = this.currentTickerSet;
-                const targetIndex = getIndexFromTargetTickers(tickers || {}, tickerData)
-                let newTickers = tickers.slice(0);
-                
-                if (targetIndex === -1) {
-                    newTickers.push(tickerData)
-                } else {
-                    newTickers.splice(targetIndex, 1, tickerData)
+            const quoteData = this.getMarketData(row);
+            this.$bus.$emit('update:make-order', {
+                currentId: this.currentId,
+                moduleType: this.moduleType,
+                orderInput: {
+                    ...quoteData,
+                    instrumentType: (quoteData || '').instrumentTypeOrigin || 0
                 }
+            })
 
-                this.handleConfirmAddSetTickerSet({
-                    name,
-                    tickers: newTickers
-                })
+            this.$bus.$emit("orderbook-tickerId", {
+                instrumentId: quoteData.instrumentId,
+                exchangeId: quoteData.exchangeId
             })
         },
 
@@ -276,10 +293,10 @@ export default {
         },
 
         getMarketData (tickerData) {
-            const { exchangeId, instrumentId, source } = tickerData;
-            const id = `${exchangeId}_${instrumentId}_${source}`;
+            const { exchangeId, instrumentId} = tickerData;
+            const id = `${exchangeId}_${instrumentId}`;
             const target = this.marketData[id] || null;
-            return target;
+            return Object.freeze(target);
         }
     }
 }

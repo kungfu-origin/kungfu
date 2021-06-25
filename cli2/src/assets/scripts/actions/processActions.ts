@@ -2,9 +2,11 @@
 import { dealStatus } from '@/assets/scripts/utils';
 
 import { watcher } from '__io/kungfu/watcher';
-import { setTimerPromiseTask } from '__gUtils/busiUtils';
-import { listProcessStatusWithDetail, startArchiveMakeTask } from '__gUtils/processUtils';
+import { setTimerPromiseTask, resolveMemCpu } from '__gUtils/busiUtils';
 import { logger } from '__gUtils/logUtils';
+import { removeJournal } from '__gUtils/fileUtils';
+import { listProcessStatusWithDetail, startArchiveMakeTask } from '__gUtils/processUtils';
+import { KF_HOME } from '__gConfig/pathConfig';
 
 import { switchMaster, switchLedger, switchCustomProcess } from '__io/actions/base';
 import { switchTd, switchMd } from '__io/actions/account';
@@ -12,13 +14,14 @@ import { switchStrategy } from '__io/actions/strategy';
 
 import { getTdList, getMdList } from '__io/kungfu/account';
 import { getStrategyList } from '__io/kungfu/strategy';
+import { startGetKungfuWatcherStep } from '__io/kungfu/watcher';
 
 import { Observable, combineLatest } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-
 const colors = require('colors');
 
+startGetKungfuWatcherStep();
 
 export const switchProcess = (proc: any, messageBoard: any, loading: any) =>{
     const status = proc.status !== '--';
@@ -36,7 +39,7 @@ export const switchProcess = (proc: any, messageBoard: any, loading: any) =>{
     switch(proc.type) {
         case 'main':
             if (proc.processId === 'master') {
-                //开启，要归档
+                //开启，要归档, cli 需要clearjournal
                 preSwitchMain(status, messageBoard, loading)
                     .then(() => {
                         loading.load(`${startOrStop} Master process`);
@@ -47,15 +50,8 @@ export const switchProcess = (proc: any, messageBoard: any, loading: any) =>{
                         return messageBoard.log(`${startOrStop} Master process success!`, 2)
                     })
                     .catch((err: Error) => logger.error(err))
-            } else if (proc.processId === 'ledger') {
-                loading.load(`${startOrStop} Ledger process`)
-                switchLedger(!status)
-                    .then(() => {
-                        loading.stop();
-                        return messageBoard.log(`${startOrStop} Ledger process success!`, 2)
-                    })
-                    .catch((err: Error) => logger.error(err))
-            }
+            } 
+
             break
         case 'md':
             loading.load(`${startOrStop} MD process`)
@@ -112,9 +108,10 @@ export const processStatusObservable = () => {
 }
 
 export const mdTdStateObservable = () => {
-    const { buildKungfuGlobalDataPipe } = require('__io/kungfu/tradingData');
-    return buildKungfuGlobalDataPipe().pipe(
+    const { buildGatewayStatePipe } = require('__io/kungfu/tradingData');
+    return buildGatewayStatePipe().pipe(
         map((item: any) => {
+            
             let gatewayStatesData: StringToMdTdState = {};
             (item.gatewayStates || []).forEach((item: MdTdState) => {
                 if (item.processId) {
@@ -186,7 +183,7 @@ export const processListObservable = () => combineLatest(
 
         return [
             {
-                process: "archive",
+                processId: "archive",
                 processName: colors.bold('_archive'),
                 typeName: colors.bgMagenta('Main'),
                 type: 'main',
@@ -245,13 +242,15 @@ function  buildStatusDefault(processStatus: ProcessStatusDetail | undefined) {
         }
     }
 
-    const memory = Number(BigInt((processStatus.monit || {}).memory || 0) / BigInt(1024 * 1024));
-    const cpu =  (processStatus.monit || {}).cpu || 0
+
+    const monit = processStatus.monit;
+    const cpu = resolveMemCpu(monit, 'cpu');
+    const memory = resolveMemCpu(monit, 'memory');
     return {
         status: processStatus.status,
         monit: {
-            cpu: cpu == 0 ? cpu : colors.green(cpu),
-            memory: memory == Number(0) ? memory : colors.green(memory)
+            cpu: monit.cpu == 0 ? monit.cpu + '%' : colors.green(cpu),
+            memory: monit.memory == 0 ? monit.memory + "M" : colors.green(memory)
         }
     }
 }
@@ -296,9 +295,9 @@ export const strategyListObservable = () => {
 function preSwitchMain (status: boolean, messageBoard: any, loading: any) {
     if (!status) {
         loading && loading.load(`Start Archive, Please wait...`, 2);
-        return startArchiveMakeTask()
+        return removeJournal(KF_HOME)
+            .then(() => startArchiveMakeTask())
             .then(() => {
-                console.log('---------')
                 loading && loading.stop();
                 return messageBoard.log(`Archive success!`, 2)
         })

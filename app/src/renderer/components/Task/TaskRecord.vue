@@ -1,29 +1,52 @@
 <template>
+
     <tr-dashboard title="">
-            <tr-table
-            :data="taskRecords"
-            :schema="tableHeader"
-            :renderCellClass="renderCellClass"
-            :keyField="tableKeyField"
-            @dbclickRow="() => {}"
-            @clickCell="() => {}"
-            @rightClickRow="() => {}"
-            >
-            </tr-table>
+        <div slot="dashboard-header">
+            <tr-dashboard-header-item width="270px">
+                <el-select class="dashboard-header-selector" :value="currentTaskId" @change="handleSetCurrentTask">
+                    <el-option 
+                        v-for="task in taskList" 
+                        :key="task.processId"    
+                        :value="task.processId">
+                        <span>{{ task.processId }}</span> 
+                        <tr-status :value="processStatus[task.processId]">
+                        </tr-status>
+                    </el-option>
+                </el-select>
+            </tr-dashboard-header-item>
+        </div>
+        <tr-table
+        :data="taskRecords"
+        :schema="tableHeader"
+        :renderCellClass="renderCellClass"
+        :keyField="tableKeyField"
+        @dbclickRow="() => {}"
+        @clickCell="(e, item) => handleClickCell(item)"
+        @rightClickRow="() => {}"
+        >
+        </tr-table>
     </tr-dashboard>
 </template>
 
 <script>
 
-import { mapState, mapGetters } from 'vuex';
 import minimist from 'minimist';
 import moment from 'moment';
 
-import { findTargetFromArray, getDefaultRenderCellClass } from '__gUtils/busiUtils';
-import { buildTaskDataPipe } from '__io/kungfu/tradingData'; //这个还是需要读watcher
+import { findTargetFromArray, getDefaultRenderCellClass, ensureLedgerData } from '__gUtils/busiUtils';
+import { watcher } from '__io/kungfu/watcher';
+import { buildKungfuDataByAppPipe } from '__io/kungfu/tradingData'; //这个还是需要读watcher
 
+import taskMixin from './js/taskMixin';
 
 export default {
+
+    mixins: [ taskMixin ],
+
+    props: {
+        moduleType: String,
+        currentId: String,
+    },
 
     data () {
 
@@ -34,27 +57,25 @@ export default {
     },
 
     mounted () {
-        this.taskDataPipe = buildTaskDataPipe()
-            .subscribe(data => {
-                const { timeValueList } = data;
+        this.taskDataPipe = buildKungfuDataByAppPipe()
+            .subscribe(() => {
+                const stateData = watcher.state;
+                const timeValueList = ensureLedgerData(
+                    stateData
+                        .TimeValue
+                        .filter('tag_c', 'task')
+                        .filter('tag_a', this.currentTaskId), 
+                    'update_time'
+                ).slice(0, 100)
                 this.taskRecords = this.dealTaskRecords(timeValueList);
             })
     },
 
-    destroyed () {
+    beforeDestroy () {
         this.taskDataPipe && this.taskDataPipe.unsubscribe();
     },
 
     computed: {
-        ...mapState({
-            taskExtConfigList: state => state.BASE.taskExtConfigList,
-            currentTask: state => state.BASE.currentTask,
-            currentTaskId: state => (state.BASE.currentTask).name
-        }),
-
-        ...mapGetters([
-            "taskExtMinimistConfig"
-        ]),
 
         currentConfigKey () {
             return minimist(this.currentTask.args || '', this.taskExtMinimistConfig).configKey || ''
@@ -93,16 +114,31 @@ export default {
 
     methods: {
 
-        dealTaskRecords (dataList) {
+        handleClickCell (item) {
+            if (item.instrumentId && item.exchangeId) {
+                this.$bus.$emit('orderbook-tickerId', {
+                    instrumentId: item.instrumentId,
+                    exchangeId: item.exchangeId
+                });
 
+                this.$bus.$emit('update:make-order', {
+                    currentId: this.currentId,
+                    moduleType: this.moduleType,
+                    orderInput: {
+                        instrumentId: item.instrumentId,
+                        exchangeId: item.exchangeId
+                    }
+                })
+            }
+        },
+
+        handleSetCurrentTask (taskId) {
+            this.$store.dispatch('setCurrentTask', this.processStatusWithDetail[taskId])
+        },
+
+        dealTaskRecords (dataList) {
             const dataListResolved = Object.freeze(
                 dataList
-                    .filter(record => {
-                        const { tag_a, tag_c } = record;
-                        if (tag_a !== this.currentTaskId) return false;
-                        if (tag_c !== 'task') return false;
-                        return true;
-                    })
                     .map(record => {
                         const value = JSON.parse(record.value || '{}');
                         return Object.freeze({

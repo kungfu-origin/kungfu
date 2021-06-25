@@ -7,20 +7,18 @@ const { dependencies } = require('../package.json')
 const webpack = require('webpack')
 
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
 const OptimizeJsPlugin = require("optimize-js-plugin");
 const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+
+const { getPythonVersion, getViewsConfig } = require('./utils');
+const viewsConfig = getViewsConfig();
 
 
 let rendererConfig = {
   devtool: '#cheap-module-eval-source-map',
 
-  entry: {
-    index: path.join(__dirname, '../src/renderer/views/index/main.js'),
-    code: path.join(__dirname, '../src/renderer/views/code/main.js'),
-    makeOrder: path.join(__dirname, '../src/renderer/views/makeOrder/main.js'),
-  },
+  entry: viewsConfig.entry,
 
   output: {
     filename: 'js/[name].js',
@@ -130,45 +128,7 @@ let rendererConfig = {
   },
 
   plugins: [
-    new HtmlWebpackPlugin({
-      filename: 'index.html',
-      template: path.resolve(__dirname, '../src/index.ejs'),
-      minify: {
-        collapseWhitespace: true,
-        removeAttributeQuotes: true,
-        removeComments: true
-      },
-      chunks: ['index'],
-      nodeModules: process.env.NODE_ENV !== 'production'
-        ? path.resolve(__dirname, '../node_modules')
-        : false
-    }),
-    new HtmlWebpackPlugin({
-      filename: 'code.html',
-      template: path.resolve(__dirname, '../src/index.ejs'),
-      minify: {
-        collapseWhitespace: true,
-        removeAttributeQuotes: true,
-        removeComments: true
-      },
-      chunks: ['code'],
-      nodeModules: process.env.NODE_ENV !== 'production'
-        ? path.resolve(__dirname, '../node_modules')
-        : false
-    }),
-    new HtmlWebpackPlugin({
-      filename: 'makeOrder.html',
-      template: path.resolve(__dirname, '../src/index.ejs'),
-      minify: {
-        collapseWhitespace: true,
-        removeAttributeQuotes: true,
-        removeComments: true
-      },
-      chunks: ['makeOrder'],
-      nodeModules: process.env.NODE_ENV !== 'production'
-        ? path.resolve(__dirname, '../node_modules')
-        : false
-    }),
+    ...viewsConfig.plugins,
 
     new ExtractTextPlugin({
       filename: `css/[name].css`,
@@ -197,7 +157,6 @@ let rendererConfig = {
   target: 'electron-renderer'
 }
 
-const { getPythonVersion } = require('./utils');
 const pyVersion = getPythonVersion() || '3'
 
 /**

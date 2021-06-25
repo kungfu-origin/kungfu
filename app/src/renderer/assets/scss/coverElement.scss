@@ -409,6 +409,18 @@ p.el-select-dropdown__empty{
         padding-bottom: 25px;
         box-sizing: border-box;
     }
+
+    .el-table__row {
+        cursor: pointer;
+
+        .el-input {
+
+            .el-input__inner {
+                height: 24px;
+                line-height: 24px;
+            }
+        }
+    }
 }
 //改变hover背景颜色
 .el-table--enable-row-hover .el-table__body tr:hover>td{

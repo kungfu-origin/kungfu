@@ -62,7 +62,7 @@ interface NormalObject {
 interface ProcessStatusDetail {
     status: string;
     monit: {
-        memory: bigint;
+        memory: number;
         cpu: number;
     },
     pid: string;
@@ -509,7 +509,8 @@ interface AccountSettingItem {
     validator?: any[];
     tip?: string;
     data?: any[];
-    default?: any
+    default?: any;
+    risk?: boolean;
 }
 
 interface AccountSettingOrigin {

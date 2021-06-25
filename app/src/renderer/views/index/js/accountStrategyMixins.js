@@ -8,7 +8,6 @@ export default {
     data () {
 
         return {
-            makeOrderByPosData: {},
             historyData: {},
         }
     },
@@ -39,15 +38,24 @@ export default {
 
     methods: {
 
-        handleMakeOrderByPos (item) {
-            this.makeOrderByPosData = Object.freeze(item);
-            this.$nextTick().then(() => this.handleShowOrCloseMakeOrderDashboard());
+        handleMakeOrderByPos (orderInput) {
+            orderInput = Object.freeze(orderInput)
+            if (this.moduleType !== 'strategy') {
+                this.$bus.$emit('update:make-order', {
+                    currentId: this.currentIdInAccountStrategyResolved || '',
+                    moduleType: this.moduleType,
+                    orderInput
+                })
+            } else {
+                this.handleShowOrCloseMakeOrderDashboard(orderInput)
+            }
+
         },
 
-        handleShowOrCloseMakeOrderDashboard () {
-            return this.buildMakeOrderWin()
+        handleShowOrCloseMakeOrderDashboard (orderInput) {
+            return this.buildMakeOrderWin(orderInput)
                 .then(() => {
-                    this.emitCurrentMakeOrderWinInfo();
+                    this.emitCurrentMakeOrderWinInfo(orderInput);
                     window.makeOrderWin && window.makeOrderWin.show && window.makeOrderWin.show();
                     window.makeOrderWin && window.makeOrderWin.focus && window.makeOrderWin.focus();
                 })        
@@ -60,9 +68,19 @@ export default {
             })
         },
 
-        buildMakeOrderWin () {
+        handleMakeOrderByOrderBook (data) {
+            console.log(data)
+        },
+
+        isMakeOrderWinIsDestroyed () {
+            if (!window.makeOrderWin) return true;
+            if (window.makeOrderWin.isDestroyed()) return true;
+            return false;
+        },
+
+        buildMakeOrderWin (orderInput) {
             //仅在strategy时创建窗口
-            if (!window.makeOrderWin && this.moduleType === 'strategy') {
+            if ((!window.makeOrderWin || this.isMakeOrderWinIsDestroyed()) && this.moduleType === 'strategy') {
                 return openVueWin(
                     'makeOrder', 
                     `/make-order`, 
@@ -71,34 +89,26 @@ export default {
                 ).then((win) => {
                     window.makeOrderWin = win;
                     window.makeOrderWin.setAlwaysOnTop(true);
-                    this.bindMakeOrderWinEvent();
+                    this.bindMakeOrderWinEvent(orderInput);
                 })
             } else {
                 return Promise.resolve(true)
             }
         },
 
-        emitCurrentMakeOrderWinInfo () {
-            if (!window.makeOrderWin) return;
-            
+        emitCurrentMakeOrderWinInfo (orderInput) {
+            if (!window.makeOrderWin || this.isMakeOrderWinIsDestroyed()) return;
+
             window.makeOrderWin.webContents.send('init-make-order-win-info', {
                 moduleType: this.moduleType,
                 currentId: this.currentIdInAccountStrategyResolved,
-                makeOrderByPosData: this.makeOrderByPosData,
-                currentTicker: this.currentTicker
+                orderInput,
             })
         },
 
-        bindMakeOrderWinEvent () {
-
+        bindMakeOrderWinEvent (orderInput) {
             window.makeOrderWin.on('show', () => {
-                this.emitCurrentMakeOrderWinInfo();
-            })
-            
-            window.makeOrderWin.on('close', () => {
-                window.makeOrderWin = null;
-                this.makeOrderByPosData = Object.freeze({})
-                this.makeOrderByQuote = Object.freeze({})
+                this.emitCurrentMakeOrderWinInfo(orderInput);
             })
         },
 

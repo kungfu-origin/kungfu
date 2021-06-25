@@ -60,6 +60,7 @@ import GlobalSettingDialog from '@/components/Base/GlobalSettingDialog';
 import DatePickerDialog from '@/components/Base/DatePickerDialog';
 
 import { buildMarketDataPipeByDaemon, buildTradingDataAccountPipeByDaemon, buildKungfuGlobalDataPipeByDaemon } from '@/ipcMsg/daemon';
+import { buildGatewayStatePipe } from '__io/kungfu/tradingData';
 import { watcher } from '__io/kungfu/watcher';
 
 import ipcListenerMixin from '@/ipcMsg/ipcListenerMixin';
@@ -112,6 +113,13 @@ export default {
         this.bindQuotesListener();
 
         this.getWatcherStatus();
+        this.bindMdTdStateChangeEvent();
+    },
+
+    beforeDestroy() {
+        this.$bus.$off('mdTdStateReady');
+        this.kungfuGatewayStateObserver && this.kungfuGatewayStateObserver.unsubscribe()
+        this.kungfuGloablDataObserver && this.kungfuGloablDataObserver.unsubscribe();
     },
 
     computed: {
@@ -181,14 +189,16 @@ export default {
 
         bindKungfuGlobalDataListener () {
             this.kungfuGloablDataObserver = buildKungfuGlobalDataPipeByDaemon().subscribe(data => {
-                
-                const gatewayStates = data["gatewayStates"] || [];
-                this.dealGatewayStates(gatewayStates);
-
                 //非常有必要，需要确保daemon进程watcherisLive
                 const daemonIsLive = data["daemonIsLive"] || false;
                 this.$store.dispatch("setDaemonIsLive", daemonIsLive)
                 
+            })
+
+            this.kungfuGatewayStateObserver = buildGatewayStatePipe().subscribe(data => {
+                const gatewayStates = data["gatewayStates"] || [];
+                this.dealGatewayStates(gatewayStates);
+
             })
         },
 

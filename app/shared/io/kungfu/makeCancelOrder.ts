@@ -13,7 +13,7 @@ interface MakeOrderData {
     hedge_flag: number
 }
 
-export const kungfuSubscribeTicker = (sourceName: string, exchangeId: string, ticker: string) => {
+export const kungfuSubscribeInstrument = (sourceName: string, exchangeId: string, ticker: string) => {
     if (!watcher.isLive()) {
         return Promise.reject(new Error(`Master 未连接！`))
     }

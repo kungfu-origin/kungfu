@@ -172,7 +172,7 @@ function buildArgs (args: string, considerCup = false): string {
 }
 
 export const startProcess = (options: Pm2Options, no_ext = false): Promise<object> => {
-    const extensionName = platform === 'win' ? '.exe' : ''
+    const extensionName = platform === 'win' ? '.exe' : '';
 
     let optionsResolved: any = {
         "name": options.name,
@@ -187,16 +187,16 @@ export const startProcess = (options: Pm2Options, no_ext = false): Promise<objec
         "logDateFormat": "YYYY-MM-DD HH:mm:ss",
         "autorestart": options.autorestart || false,
         "maxRestarts": options.maxRestarts || 1,
-        "minUptime": 1000,
+        "minUptime": 3600000, //该时间段内最大启动次数maxRestarts，如果超过则不重启，如果没超过，则一直重启
         "restartDelay": 1000,
         "watch": options.watch || false,
         "force": options.force || false,
         "execMode": "fork",
+        "killTimeout": 16000,
         "env": {
             ...options.env,
             "KF_HOME": dealSpaceInPath(KF_HOME),
         },
-        "killTimeout": 16000,
     };
 
     if (no_ext) optionsResolved['env']['KF_NO_EXT'] = 'on';

@@ -28,8 +28,9 @@
 import tradingDataMixin from './js/tradingDataMixin';
 
 import { writeCSV } from '__gUtils/fileUtils';
-import { toDecimal } from '__gUtils/busiUtils';
+import { toDecimal, deepClone } from '__gUtils/busiUtils';
 import { posHeader } from '@/components/Base/tradingData/js/tableHeaderConfig';
+import { sendDataToDaemonByPm2 } from "__gUtils/processUtils";
 
 export default {
     name: 'positions',
@@ -37,7 +38,6 @@ export default {
     mixins: [ tradingDataMixin ],
 
     props: {
-
         name: {
             type: String,
             default: ''
@@ -49,14 +49,16 @@ export default {
         }
     },
 
-    data() {
+    data () {
         return {
+            subscribedTickersStr: "",
+            hasInitOrderBook: false,
             tableData: Object.freeze([]),
             dataByKey: Object.freeze({})
         }
     },
 
-    computed:{
+    computed: {
         schema() {
             return posHeader(this.moduleType)
         },
@@ -69,21 +71,62 @@ export default {
 
     watch: {
         kungfuData (positions) {
-            const positionsResolve = this.dealPositionList(positions, this.searchKeyword) || {};
-            const dataList = positionsResolve.dataList || [];
+            const positionsResolved = this.dealPositionList(positions, this.searchKeyword) || {};
+            const dataList = positionsResolved.dataList || [];
             this.tableData = dataList;
-            this.dataByKey = positionsResolve.dataByKey || {};
+            this.dataByKey = positionsResolved.dataByKey || {};
+
+            //订阅行情
+            const subscribePosTickers = dataList.map(item => {
+                return {
+                    instrumentId: item.instrumentId,
+                    exchangeId: item.exchangeId,
+                    source: item.sourceId
+                }
+            })
+            const subscribedTickersStr = subscribePosTickers.slice(0)
+                .sort((item1, item2) => {
+                    const id1 = `${item1.instrumentId}_${item1.exchangeId}`;
+                    const id2 = `${item2.instrumentId}_${item2.exchangeId}`;
+                    return id1.localeCompare(id2);
+                })
+
+            if (this.subscribedTickersStr !== subscribedTickersStr) {
+                sendDataToDaemonByPm2('MAIN_RENDERER_SUBSCRIBED_TICKERS', subscribePosTickers)
+                this.subscribedTickersStr = subscribedTickersStr;
+            }
+
+            //更新orderbook
+            if (!this.hasInitOrderBook && this.tableData.length) {
+                this.$bus.$emit('orderbook-tickerId', {
+                    instrumentId: this.tableData[0].instrumentId,
+                    exchangeId: this.tableData[0].exchangeId
+                });
+                this.hasInitOrderBook = true;
+            }
+        },
+
+        currentId () {
+            this.hasInitOrderBook = false;
         }
     },
-    
-    methods:{
+
+    methods: {
 
         handleClickCell (item) {
             if (this.isTickerModule) {
                 this.$emit('activeTicker', item)
+                //ticker mode need delete default accountId
+                let itemResolved = deepClone(item);
+                delete itemResolved.accountIdResolved;
+                this.$emit('makeOrder', itemResolved)
             } else {
                 this.$emit('makeOrder', item)
             }
+            this.$bus.$emit('orderbook-tickerId', {
+                instrumentId: item.instrumentId,
+                exchangeId: item.exchangeId
+            });
         },
 
         handleExport () {
@@ -142,7 +185,7 @@ export default {
         },
 
         //拼接key值
-        getKey(data) {
+        getKey (data) {
             if (this.moduleType === 'ticker') {
                 return data.accountIdResolved
             }

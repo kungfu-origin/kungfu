@@ -173,7 +173,9 @@ export default {
                             //加上orderStat细节
                             const orderId = item.order_id.toString();
                             return Object.freeze({
+                                //for export
                                 ...orderStatByOrderId[orderId],
+                                //for trades/orders recoard components
                                 orderStats: dealOrderStat(orderStatByOrderId[orderId] || null),
                                 ...item,
                                 dest: item.dest,

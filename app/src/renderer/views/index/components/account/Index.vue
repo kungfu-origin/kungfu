@@ -4,22 +4,30 @@
             <el-row style="height: 55%">
                 <el-col :span="14">
                     <el-tabs :value="currentAccountTabName" type="border-card" @tab-click="handleAccountTabClick">
-                        <el-tab-pane :lazy="true" label="账户列表" name="tdList">
+                        <el-tab-pane :lazy="true" :label="getCurrentAccountTabLabelName('tdList')" name="tdList">
                             <TdAccount></TdAccount>
                         </el-tab-pane>
-                        <el-tab-pane :lazy="true" label="行情源" name="mdList">
+                        <el-tab-pane :lazy="true" :label="getCurrentAccountTabLabelName('mdList')" name="mdList">
                             <MdAccount></MdAccount>
                         </el-tab-pane>
-                        <el-tab-pane :lazy="true" label="交易标的" name="tickerList">
+                        <el-tab-pane :lazy="true" :label="getCurrentAccountTabLabelName('marketdata')" name="marketdata">
+                            <MarketData 
+                            :currentId="currentId"
+                            :moduleType="moduleType"
+                            :marketData="quoteData" 
+                            ></MarketData>
+                        </el-tab-pane>
+                        <el-tab-pane :lazy="true" :label="getCurrentAccountTabLabelName('holdInstruments')" name="holdInstruments">
                             <Pos 
                             :noTitle="true"
                             moduleType="acocunt"
                             :kungfuData="positionsByTicker"
                             :currentTicker="currentTickerResolved"
                             @activeTicker="setCurrentTicker"
+                            @makeOrder="handleMakeOrderByPos"
                             />
                         </el-tab-pane>
-                        <el-tab-pane :lazy="false" v-if="proMode" label="算法任务" name="tradingTask" >
+                        <el-tab-pane :lazy="false" v-if="proMode" :label="getCurrentAccountTabLabelName('tradingTask')" name="tradingTask" >
                             <Task :noTitle="true"></Task>
                         </el-tab-pane>
                     </el-tabs>
@@ -61,7 +69,7 @@
                 </el-col>
             </el-row>
             <el-row style="height: 45%">
-                <el-col :span="18">
+                <el-col :span="14">
                     <el-tabs v-model="currentOrdesTabName" type="border-card">
                         <el-tab-pane :lazy="true" :label="`全部委托 ${showCurrentIdInTabName(currentOrdesTabName, 'orders')}`" name="orders">
                             <OrderRecord
@@ -88,15 +96,22 @@
                             />   
                         </el-tab-pane>
                         <el-tab-pane :lazy="true"  v-if="proMode" :label="`算法任务记录 ${currentTaskIdInTab}`" name="taskDetail">
-                            <TaskRecord></TaskRecord>
+                            <TaskRecord 
+                            :currentId="currentId"
+                            :moduleType="moduleType" 
+                            ></TaskRecord>
                         </el-tab-pane>
                     </el-tabs>
                 </el-col>
+                <el-col :span="4">
+                    <OrderBook
+                        :marketData="quoteData"
+                        :currentId="currentId"
+                        :moduleType="moduleType"
+                    ></OrderBook>
+                </el-col>
                 <el-col :span="6">
                     <MakeOrderDashboard
-                        :currentId="currentId"
-                        :moduleType="moduleType" 
-                        :makeOrderByPosData="makeOrderByPosData"
                     ></MakeOrderDashboard>
                 </el-col>
             </el-row>
@@ -117,11 +132,12 @@ import Pnl from '@/components/Base/tradingData/pnl/Index';
 import MakeOrderDashboard from '@/components/Base/makeOrder/MakeOrderDashboard';
 import MainContent from '@/components/Layout/MainContent';
 import TaskRecord from '@/components/Task/TaskRecord';
+import OrderBook from '@/components/MarketFilter/components/OrderBook';
+import MarketData from '@/components/MarketFilter/components/MarketData';
 
-import { watcher, transformPositionByTickerByMerge, dealOrder, dealTrade } from '__io/kungfu/watcher';
-import { originOrderTradesFilterByDirection } from '__gUtils/busiUtils';
-import { buildTradingDataAccountPipeByDaemon } from '@/ipcMsg/daemon';
-import { buildOrderStatDataPipe, buildAllOrdersTradesDataPipe } from '__io/kungfu/tradingData';
+import { watcher, transformPositionByTickerByMerge, transformOrderStatListToData, getOrdersBySourceDestInstrumentId, getTradesBySourceDestInstrumentId, getOrderStatByDest } from '__io/kungfu/watcher';
+import { encodeKungfuLocation } from '__io/kungfu/kungfuUtils';
+import { buildTradingDataAccountPipeByDaemon, buildMarketDataPipeByDaemon } from '@/ipcMsg/daemon';
 
 import accountStrategyMixins from '@/views/index/js/accountStrategyMixins';
 
@@ -141,6 +157,7 @@ export default {
             positions: Object.freeze([]),
             positionsByTicker: Object.freeze([]),
             orderStat: Object.freeze({}),
+            quoteData: Object.freeze({}),
 
             currentOrdesTabName: "orders",
             currentTradesPnlTabNum: "trades",
@@ -154,7 +171,9 @@ export default {
         OrderRecord, TradeRecord,
         MakeOrderDashboard,
         MainContent,
-        TaskRecord
+        TaskRecord,
+        OrderBook,
+        MarketData,
     },
 
     computed:{
@@ -172,7 +191,7 @@ export default {
         ]),
 
         currentTickerResolved () {
-            if (this.currentAccountTabName === 'tickerList') {
+            if (this.currentAccountTabName === 'holdInstruments') {
                 return this.currentTicker
             } else {
                 return null
@@ -187,7 +206,7 @@ export default {
         },
 
         moduleType () {
-            if (this.currentAccountTabName === 'tickerList') {
+            if (this.currentAccountTabName === 'holdInstruments') {
                 return 'ticker'
             } else {
                 return 'account'
@@ -203,7 +222,16 @@ export default {
         },
 
         currentTickerId () {
-            return `${this.currentTicker.instrumentId}_${this.currentTicker.directionOrigin}`
+            if (this.currentTicker.instrumentId) {
+                return `${this.currentTicker.instrumentId}_${this.currentTicker.directionOrigin}`
+            } else {
+                return ''
+            }
+        },
+
+        currentLocationUID () {
+            if (!this.currentId) return 0;
+            return watcher.getLocationUID(encodeKungfuLocation(this.currentId, 'td'));
         },
 
         currentTaskIdInTab () {
@@ -222,47 +250,58 @@ export default {
                 this.currentTradesPnlTabNum = 'trades'
             }
         },
+
+        currentTaskId () {
+            this.currentOrdesTabName = "taskDetail"
+        }
     },
 
     mounted ( ) {
         this.tradingDataPipe = buildTradingDataAccountPipeByDaemon().subscribe(data => {
             if (this.moduleType !== 'ticker') {
                 this.dealTradingData(data);
-            }
-
-            const positionsByTicker = data['positionsByTicker'] || {};
-            this.positionsByTicker = Object.freeze(transformPositionByTickerByMerge(positionsByTicker, 'account') || []);
-            this.initSetCurrentTicker(this.positionsByTicker);
-
-            if (this.moduleType === 'ticker') {
-                const positionsByTickerForAccount = Object.values(positionsByTicker).filter(item => !!item.accountId && !item.clientId);
-                this.positions = Object.freeze(positionsByTickerForAccount)
-            }
-        })
-
-        this.allOrderTradesPipe = buildAllOrdersTradesDataPipe().subscribe(data => {
-            if (this.moduleType === 'ticker') {
+            } else {
                 this.dealTradingDataByTiker(data)
             }
+
+            const assets = data['assets'];
+            this.$store.dispatch('setAccountsAsset', Object.freeze(assets));
         })
 
-        
-        this.orderStatPipe = buildOrderStatDataPipe().subscribe(data => {
-            const orderStat = data['orderStat'];
-            this.orderStat = Object.freeze(orderStat || {});
+        this.marketDataPipe = buildMarketDataPipeByDaemon().subscribe(data => {
+            this.quoteData = Object.freeze(data);
         })
     },
 
     destroyed ( ) {
         this.tradingDataPipe && this.tradingDataPipe.unsubscribe();
         this.orderStatPipe && this.orderStatPipe.unsubscribe();
-        this.allOrderTradesPipe && this.allOrderTradesPipe.unsubscribe();
+        this.marketDataPipe && this.marketDataPipe.unsubscribe();
     },
 
     methods: {
 
         handleAccountTabClick (tab) {
             this.$store.dispatch('setCurrentAccountTabName', tab.name)
+        },
+
+        getCurrentAccountTabLabelName (name) {
+            const isActive = this.currentAccountTabName === name;
+            const isHoldInstrumentActive = this.currentAccountTabName === 'holdInstruments';
+
+            switch (name) {
+                case "tdList":
+                    return isHoldInstrumentActive ? "账户列表" : `账户列表 ${this.currentId || ''}`;
+                case "mdList":
+                    return "行情源"
+                case "marketdata":
+                    return "行情订阅"
+                case "holdInstruments":
+                    return !isActive ? "持有标的" : `持有标的 ${(this.currentTickerResolved || {}).id || ''}`;
+                case "tradingTask":
+                    return !isActive ? "算法任务" : `算法任务 ${this.currentTaskId || ''}`;
+
+            }
         },
 
         showCurrentIdInTabName (currentTabName, target) {
@@ -293,20 +332,25 @@ export default {
         },
 
         dealTradingData (data) {
+            const ledgerData = watcher.ledger;
 
             if (this.isHistoryData('order')) {
                 this.orders = this.getHistoryData('order')
             } else {
-                const orders = data['orders'][this.currentId];
+                const orders = getOrdersBySourceDestInstrumentId(ledgerData.Order, 'source', this.currentLocationUID)
                 this.orders = Object.freeze(orders || []);
             }
 
             if (this.isHistoryData('trade')) {
                 this.trades = this.getHistoryData('trade')
             } else {
-                const trades = data['trades'][this.currentId];
+                const trades = getTradesBySourceDestInstrumentId(ledgerData.Trade, 'source', this.currentLocationUID)
                 this.trades = Object.freeze(trades || []);
             }
+
+            const orderStat = getOrderStatByDest(ledgerData.OrderStat, 'dest', this.currentLocationUID)
+            const orderStatResolved = transformOrderStatListToData(orderStat);
+            this.orderStat = Object.freeze(orderStatResolved); 
       
             const positions = data['positions'][this.currentId];
             this.positions = Object.freeze(positions || []);
@@ -315,55 +359,47 @@ export default {
             this.pnl = Object.freeze(pnl || []);
             const dailyPnl = data['dailyPnl'][this.currentId];
             this.dailyPnl = Object.freeze(dailyPnl || []);
-
-            const assets = data['assets'];
-            this.$store.dispatch('setAccountsAsset', Object.freeze(assets));
-
         },
 
 
-        dealTradingDataByTiker () {
-            const { instrumentId, directionOrigin } = this.currentTicker;
+        dealTradingDataByTiker (data) {
 
-            if (!instrumentId) {
+            if (!this.currentTickerId && !Object.keys(data['positionsByTicker'] || {}).length) {
                 this.orders = Object.freeze([]);
                 this.trades = Object.freeze([]);
                 this.positions = Object.freeze([]);
                 return 
             }
 
+            const ledgerData = watcher.ledger;
+            const { instrumentId, directionOrigin } = this.currentTicker;
+
             if (this.isHistoryData('order')) {
                 this.orders = this.getHistoryData('order');
             } else {
-                this.orders = Object.freeze(
-                    watcher.ledger.Order
-                    .filter('instrument_id', instrumentId)
-                    .sort('update_time')
-                    .slice(0, 1000)
-                    .filter(item => {
-                        const { offset, side, instrument_type } = item;
-                        return originOrderTradesFilterByDirection(directionOrigin, offset, side, instrument_type);
-                    })
-                    .slice(0, 100)
-                    .map(item => Object.freeze(dealOrder(item)))
-                );
+                const orders = getOrdersBySourceDestInstrumentId(ledgerData.Order, 'instrument', instrumentId, directionOrigin);
+                this.orders = Object.freeze(orders || []);
             }
 
             if (this.isHistoryData('trade')) {
                 this.trades = this.getHistoryData('trade');
             } else {
-                this.trades = Object.freeze(
-                    watcher.ledger.Trade
-                    .filter('instrument_id', instrumentId)
-                    .sort('trade_time')
-                    .slice(0, 1000)
-                    .filter(item => {
-                        const { offset, side, instrument_type } = item;
-                        return originOrderTradesFilterByDirection(directionOrigin, offset, side, instrument_type);
-                    })
-                    .slice(0, 100)
-                    .map(item => Object.freeze(dealTrade(item)))
-                )
+                const trades = getTradesBySourceDestInstrumentId(ledgerData.Trade, 'instrument', instrumentId, directionOrigin);
+                this.trades = Object.freeze(trades || []);
+            }
+
+            const orderStat = getOrderStatByDest(ledgerData.OrderStat);
+            const orderStatResolved = transformOrderStatListToData(orderStat);
+            this.orderStat = Object.freeze(orderStatResolved); 
+
+            const positionsByTicker = data['positionsByTicker'] || {};
+            this.positionsByTicker = Object.freeze(transformPositionByTickerByMerge(positionsByTicker, 'account') || []);
+            this.initSetCurrentTicker(this.positionsByTicker);
+
+            if (this.moduleType === 'ticker' && this.currentTickerId) {
+                const positionsByTickerForAccount = positionsByTicker[this.currentTickerId]
+                    .filter(item => (!!item.accountId && !item.clientId));
+                this.positions = Object.freeze(positionsByTickerForAccount)
             }
 
         },

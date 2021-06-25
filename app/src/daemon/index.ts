@@ -4,13 +4,13 @@ import {
     buildKungfuGlobalDataPipe,
 } from "__io/kungfu/tradingData";
 
-import { startGetKungfuWathcerStep, transformTradingItemListToData, dealQuote } from '__io/kungfu/watcher';
+import { startGetKungfuWatcherStep, transformTradingItemListToData, dealQuote } from '__io/kungfu/watcher';
 
 import * as PM2_METHODS from './pm2Methods';
 
-startGetKungfuWathcerStep()
+startGetKungfuWatcherStep()
 
-var QuotesRequiredInApp: TickerInTickerSet[] = [];
+var QuotesRequiredInApp: {[prop: string]: TickerInTickerSet} = {};
 
 //daemon 要考虑的性能，daemon计算占用cpu/内存，传输序列化需要限制大小，同时避免在渲染进程做大量计算
 buildTradingDataPipe('account').subscribe((data: any) => {
@@ -59,11 +59,9 @@ buildKungfuGlobalDataPipe().subscribe((data: any) => {
 
 
 buildMarketDataPipe().subscribe((data: any) => {
-    const quotesAfterFilterKeys = QuotesRequiredInApp.map((item: TickerInTickerSet) => item.instrumentId)    
-    const quotesAfterFilter =  QuotesRequiredInApp ? data.filter((item: QuoteOriginData) => {
-        return quotesAfterFilterKeys.indexOf(item.instrument_id) !== -1;
-    }) : [];
-
+    const QuotesRequiredInAppList = Object.values(QuotesRequiredInApp || {})
+    const quotesAfterFilterKeys = QuotesRequiredInAppList.map((item: TickerInTickerSet) => item.instrumentId)    
+    const quotesAfterFilter =  QuotesRequiredInAppList.length ? data.filter((item: QuoteOriginData) => quotesAfterFilterKeys.indexOf(item.instrument_id) !== -1) : [];
     const quotesResolved = quotesAfterFilter.map((item: QuoteOriginData) => dealQuote(item));
 
     //@ts-ignore
@@ -129,7 +127,9 @@ process.on('message', (packet) => {
     if (type !== 'process:msg')  return;
     switch (topic) {
         case "MAIN_RENDERER_SUBSCRIBED_TICKERS":
-            QuotesRequiredInApp = data;
+            data.forEach((item: TickerInTickerSet) => {
+                QuotesRequiredInApp[`${item.instrumentId}_${item.exchangeId}`] = item;
+            });
             break;
     }
 })

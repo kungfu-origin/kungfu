@@ -9,6 +9,10 @@ export const ipcEmitDataByName = (name: string, postData?: any, interval?: numbe
     
     interval = interval || 5000;
 
+    if (!paWin) {
+        return Promise.reject(new Error("paWin is null!"))
+    }
+
     return new Promise(( resolve, reject ) => {
         paWin.webContents.send(`ipc-emit-${name}`, { 
             childWinId: currentWin.id, 
