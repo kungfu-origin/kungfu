@@ -1,0 +1,11 @@
+{
+  "version": "2.3.0",
+  "packages": [
+    "shared",
+    "core",
+    "kfext_task_timerTrader",
+    "kfext_task_backwards",
+    "cli2",
+    "app"
+  ]
+}

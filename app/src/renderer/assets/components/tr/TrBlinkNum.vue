@@ -74,6 +74,7 @@ export default {
     font-family: Consolas,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New, monospace;
     word-wrap: break-word;
     text-align: right;
+    transform: translateZ(1);
 
 
     &.green-color {

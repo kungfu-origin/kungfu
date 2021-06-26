@@ -124,7 +124,9 @@ import Pnl from '@/components/Base/tradingData/pnl/Index';
 import MainContent from '@/components/Layout/MainContent';
 
 import { buildTradingDataStrategyPipeByDaemon } from '@/ipcMsg/daemon';
-import { buildOrderStatDataPipe } from '__io/kungfu/tradingData';
+import { buildKungfuDataByAppPipe } from '__io/kungfu/tradingData';
+import { watcher, transformOrderStatListToData, getOrderInputBySourceDest, getOrdersBySourceDestInstrumentId, getTradesBySourceDestInstrumentId, getOrderStatByDest, dealOrderInput, dealOrder, dealTrade } from '__io/kungfu/watcher';
+import { encodeKungfuLocation } from '__io/kungfu/kungfuUtils';
 
 import accountStrategyMixins from '@/views/index/js/accountStrategyMixins';
 
@@ -154,23 +156,6 @@ export default {
     mounted(){
         this.tradingDataPipe = buildTradingDataStrategyPipeByDaemon().subscribe(data => {
             
-            if (this.isHistoryData('order')) {
-                this.orders = this.getHistoryData('order')
-            } else {
-                const orders = data['orders'][this.strategyId];
-                this.orders = Object.freeze(orders || []);
-            }
-
-            if (this.isHistoryData('trade')) {
-                this.trades = this.getHistoryData('trade')
-            } else {
-                const trades = data['trades'][this.strategyId];
-                this.trades = Object.freeze(trades || []);
-            }
-
-            const orderInputs = data['orderInputs'][this.strategyId];
-            this.orderInputs = Object.freeze(orderInputs);
-
             const positions = data['positions'][this.strategyId];
             this.positions = Object.freeze(positions || []);
   
@@ -183,9 +168,33 @@ export default {
             this.$store.dispatch('setStrategiesAsset', Object.freeze(assets));
         });
 
-        this.orderStatPipe = buildOrderStatDataPipe().subscribe(data => {
-            const orderStat = data['orderStat'];
-            this.orderStat = Object.freeze(orderStat || {});
+        this.orderStatPipe = buildKungfuDataByAppPipe().subscribe(() => {
+            const ledgerData = watcher.ledger;
+
+            if (this.isHistoryData('order')) {
+                this.orders = this.getHistoryData('order')
+            } else {
+                const orders = getOrdersBySourceDestInstrumentId(ledgerData.Order, 'dest', this.currentLocationUID);
+                this.orders = Object.freeze(orders || []);
+            }
+
+            if (this.isHistoryData('trade')) {
+                this.trades = this.getHistoryData('trade')
+            } else {
+                const trades = getTradesBySourceDestInstrumentId(ledgerData.Trade, 'dest', this.currentLocationUID);
+                this.trades = Object.freeze(trades || []);
+            }
+
+            //策略不会产生 orderStat
+            const orderStat = getOrderStatByDest(ledgerData.OrderStat);
+            const orderStatResolved = transformOrderStatListToData(orderStat);
+            this.orderStat = Object.freeze(orderStatResolved);
+
+            //优化
+            if (this.currentStrategyDetailTab === 'orderMap') {
+                const orderInputs = getOrderInputBySourceDest(ledgerData, 'source', this.currentLocationUID)
+                this.orderInputs = Object.freeze(orderInputs);
+            }
         })
     },
 
@@ -193,7 +202,7 @@ export default {
         this.tradingDataPipe && this.tradingDataPipe.unsubscribe();
         this.orderStatPipe && this.orderStatPipe.unsubscribe();
     },
-   
+
     computed: {
         ...mapState({
             currentStrategy: state => state.STRATEGY.currentStrategy,
@@ -205,7 +214,12 @@ export default {
         
         addTime () {
             return this.currentStrategy.add_time
-        }
+        },
+
+        currentLocationUID () {
+            if (!this.strategyId) return 0;
+            return watcher.getLocationUID(encodeKungfuLocation(this.strategyId, 'strategy'));
+        },
     },
 
     components: {
@@ -213,6 +227,7 @@ export default {
         Pos, Log, Pnl,
         MainContent
     },
+   
 
     methods:{
         showCurrentIdInTabName (currentTabName, target) {

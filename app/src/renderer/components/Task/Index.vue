@@ -103,9 +103,7 @@
 <script>
 
 import path from 'path';
-import moment from 'moment';
 import minimist from 'minimist';
-import { mapGetters, mapState } from 'vuex';
 
 import SetTaskDialog from './SetTaskDialog';
 
@@ -118,12 +116,13 @@ import { TaskTypeConfig } from '@kungfu-trader/kungfu-shared/config/tradingConfi
 
 import baseMixin from '@/assets/mixins/baseMixin';
 import openLogMixin from '@/assets/mixins/openLogMixin';
+import taskMixin from './js/taskMixin';
 
 export default {
 
     name: 'task',
     
-    mixins: [ baseMixin, openLogMixin ],
+    mixins: [ baseMixin, openLogMixin, taskMixin ],
 
     props: {
 
@@ -167,34 +166,11 @@ export default {
         this.$bus.$off('set-task');
     },
 
-    computed: {
-        ...mapState({
-            taskExtConfigList: state => state.BASE.taskExtConfigList,
-            processStatus: state => state.BASE.processStatus,
-            processStatusWithDetail: state => state.BASE.processStatusWithDetail,
-            currentTask: state => state.BASE.currentTask,
-            currentTaskId: state => (state.BASE.currentTask).name
-        }),
 
-        ...mapGetters([
-            "taskExtMinimistConfig"
-        ])
-    },
 
     watch: {
-        processStatusWithDetail (newProcess) {
-
-            this.tableList = Object.keys(newProcess || {})
-                .map(key => {
-                    const targetProcess = newProcess[key];
-                    return this.buildTaskProcessItem(key, targetProcess)
-                })
-                .filter(({ processId }) => {
-                    if (processId.includes('task')) {
-                        return true
-                    }
-                    return false
-                })
+        taskList (taskList) {
+            this.tableList = taskList;
 
             if (!this.tableList.length) {
                 this.$store.dispatch('setCurrentTask', {})
@@ -311,19 +287,6 @@ export default {
                 }
                 return false
             })
-        },
-
-        buildTaskProcessItem (key, pmData) {
-            const argsConfig = minimist(pmData.args, this.taskExtMinimistConfig)
-
-            return {
-                processId: key,
-                processStatus: pmData.status,
-                createdAt: pmData.created_at ? moment(pmData.created_at).format('YYYY-MM-DD HH:mm:ss') : '--',
-                configKey: argsConfig.configKey,
-                subType: argsConfig.subType,
-                ...pmData
-            }
         },
 
         handleTaskSwitch (e, data) {

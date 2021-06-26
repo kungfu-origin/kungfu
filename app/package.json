@@ -1,6 +1,6 @@
 {
   "name": "kungfu",
-  "version": "2.3.5",
+  "version": "2.3.6",
   "description": "KungFu Trader App",
   "license": "Apache-2.0",
   "homepage": "https://www.kungfu-trader.com",
@@ -24,6 +24,7 @@
     "elec": "node .electron-builder/build.js",
     "prebuild": "yarn run clean && yarn run dist",
     "build": "yarn run elec && yarn run elec --pro",
+    "prebuild-cli": "yarn run clean && yarn run dist",
     "build-cli": "yarn run elec --cli"
   },
   "build": {
@@ -197,7 +198,7 @@
     "del": "^3.0.0",
     "devtron": "^1.4.0",
     "electron": "4.2.11",
-    "electron-builder": "^22.3.2",
+    "electron-builder": "22.3.2",
     "electron-chromedriver": "^5.0.1",
     "electron-debug": "^1.4.0",
     "electron-devtools-installer": "^2.2.0",

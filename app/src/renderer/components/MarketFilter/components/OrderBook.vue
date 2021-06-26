@@ -1,10 +1,11 @@
 <template>
-    <tr-dashboard :title="`多档行情 ${instrumentId}`">
+    <tr-dashboard :title="`行情 ${instrumentId}`">
         <div class="kf-order-book__warp">
             <div class="ask__warp order-book-part__warp">
-                <div class="order-line" @click="handleSelectQuote(askPrices[9 - index], 0)" v-for="(item, index) in new Array(10)" :key="index">
-                    <span class="volume">{{ dealNum(askVolumes[9 - index]) }}</span>
+                <div class="order-line" v-for="(item, index) in new Array(10)" :key="index">
+                    <span class="volume buy" @click.stop="handleMakeOrder(askPrices[9 - index], 0)"></span>
                     <span class="price green">{{ dealNum(askPrices[9 - index]) }}</span>
+                    <span class="volume sell" @click.stop="handleMakeOrder(askPrices[9 - index], 1)">{{ dealNum(askVolumes[9 - index]) }}</span>
                 </div>
             </div>
             <div class="last-price">
@@ -13,13 +14,15 @@
                     :className="{}"
                     :theKey="`${tickerId}_orderbook`"   
                     :num="lastPrice"
+                    :key="`${tickerId}_orderbook`"
                     >
                 </tr-blink-num>
             </div> 
             <div class="bid__warp order-book-part__warp">
-                <div class="order-line" @click="handleSelectQuote(bidPrices[index], 1)" v-for="(item, index) in new Array(10)" :key="index">
-                    <span class="volume">{{ dealNum(bidVolumes[index]) }}</span>
+                <div class="order-line" v-for="(item, index) in new Array(10)" :key="index">
+                    <span class="volume buy" @click.stop="handleMakeOrder(bidPrices[index], 0)">{{ dealNum(bidVolumes[index]) }}</span>
                     <span class="price red">{{ dealNum(bidPrices[index]) }}</span>
+                    <span class="volume sell" @click.stop="handleMakeOrder(bidPrices[index], 1)"></span>
                 </div>
             </div>
         </div>
@@ -27,6 +30,7 @@
 </template>
 
 <script>
+import { toDecimal } from '__gUtils/busiUtils'
 
 export default {
 
@@ -37,10 +41,26 @@ export default {
             default: () => ({})
         },
 
-        tickerId: {
-            type: String,
-            default: ''
-        },
+        moduleType: String,
+
+        currentId: String,
+    },
+
+    data () {
+
+        return {
+            tickerId: "",
+        }
+    },
+
+    mounted () {
+        this.$bus.$on('orderbook-tickerId', ({ instrumentId, exchangeId }) => {
+            this.tickerId = `${exchangeId}_${instrumentId}`
+        })
+    },
+
+    beforeDestroy () {
+        this.$bus.$off('orderbook-tickerId')
     },
 
     computed: {
@@ -56,7 +76,8 @@ export default {
 
         askPrices () {
             if (!this.quoteData) return [];
-            return this.quoteData.askPrices || []
+            return (this.quoteData.askPrices || [])
+                .reduce(this.resolveAskPrices)
         },
 
         askVolumes () {
@@ -66,7 +87,9 @@ export default {
         
         bidPrices () {
             if (!this.quoteData) return [];
-            return this.quoteData.bidPrices || []
+            return (this.quoteData.bidPrices || [])
+                .reduce(this.resolveBidPrices)
+        
         },
 
         bidVolumes () {
@@ -81,19 +104,61 @@ export default {
     },
 
     methods: {
-        handleSelectQuote (price, side) {
-            if (price && this.quoteData) {
-                this.$emit('makeOrder', {
+        handleMakeOrder (price, side) {
+            this.$bus.$emit('update:make-order', {
+                currentId: this.currentId,
+                moduleType: this.moduleType,
+                orderInput: {
                     ...this.quoteData,
-                    makeOrderPrice: price,
-                    makeOrderSide: side
-                })
+                    side,
+                    lastPrice: price,
+                    instrumentType: this.quoteData.instrumentTypeOrigin
+                }
+            })
+        },
+
+        resolveAskPrices (price1, price2) {
+            if (typeof price1 === 'object') {//1;
+                const len = price1.length || 0;
+                if (+price2 === 0 && len) {
+                    if (+price1[len - 1] !== 0) {
+                        return [ ...price1, toDecimal(+price1[len - 1] + 0.2, 3) ];
+                    }
+                }  
+                return [ ...price1, toDecimal(price2, 3) ]
+            } else {
+                if (+price2 === 0 && +price1 !== 0) {
+                    return [ toDecimal(+price1, 3), toDecimal(+price1 + 0.2, 3) ]
+                }
+                return [ toDecimal(+price1, 3), toDecimal(+price2, 3) ]
+            }
+        },
+
+        resolveBidPrices (price1, price2) {
+            if (typeof price1 === 'object') {//1;
+                const len = price1.length || 0;
+                if (+price2 === 0 && len) {
+                    if (+price1[len - 1] !== 0) {
+                        const price1Resolved = +price1[len - 1] - 0.2 < 0 ? 0 : +price1[len - 1] - 0.2
+                        return [ ...price1, toDecimal(price1Resolved, 3) ];
+                    }
+                }  
+                return [ ...price1, toDecimal(price2, 3) ]
+            } else {
+                if (+price2 === 0 && +price1 !== 0) {
+                    const price1Resolved = +price1 - 0.2 < 0 ? 0 : +price1 - 0.2
+                    return [ toDecimal(+price1, 3), toDecimal(price1Resolved, 3) ]
+                }
+                return [ toDecimal(+price1, 3), toDecimal(+price2, 3) ]
             }
         },
 
         dealNum (num) {
             if (num === undefined) {
                 return '--'
+            }
+            else if (+num === 0) {
+                return ''
             }
             else {
                 return num
@@ -120,7 +185,6 @@ export default {
         line-height: 48px;
         font-size: 24px;
         font-weight: 600;
-        padding: 0 10px;
         box-sizing: border-box;
         display: flex;
 
@@ -128,6 +192,7 @@ export default {
             font-size: 16px;
             display: inline-block;
             width: 60px;
+            padding-left: 10px;
         }
 
         span {
@@ -142,6 +207,8 @@ export default {
     }
 
     .price {
+        box-sizing: border-box;
+        padding-right: 10px;
 
         &.red {
             color: $red;
@@ -152,25 +219,52 @@ export default {
         }
     }
 
+    .volume {
+        cursor: pointer;
+        box-sizing: border-box;
+
+        &.buy {
+            background: $red;
+            color: $white;
+            padding-right: 10px;
+
+            &:hover {
+                background: $red1;
+            }
+        }
+
+        &.sell {
+            background: $green;
+            color: $white;
+            text-align: left !important;
+            padding-right: 10px;
+
+             &:hover {
+                background: $green2;
+            }
+        }
+    }
+
     .order-line {
         flex: 1;
         display: flex;
-        padding: 0 10px;
         box-sizing: border-box;
 
         &:hover{
             background: $bg_light;
         }
 
-        span {
-            flex: 1;
-            color: $font;
-            height: 100%;
+        span.volume, span.price {
             display: flex;
-            text-align: right;
+            flex: 1;
+            height: 100%;
             align-items: center;
             justify-content: flex-end;
             font-family: Consolas, Monaco, monospace,"Microsoft YaHei",sans-serif;
+        }
+
+        span.price {
+            flex: 2;
         }
     }
 

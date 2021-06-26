@@ -60,8 +60,8 @@
                 >
                     <template slot-scope="props">
                         <span class="tr-oper" @click.stop="handleOpenLogFile(`md_${props.row.source_name}`)"><i class="el-icon-document mouse-over" title="打开日志"></i></span>
-                        <span class="tr-oper" @click.stop="handleOpenUpdateAccountDialog(props.row)"><i class="el-icon-setting mouse-over" title="MD 设置"></i></span>
-                        <span :class="['tr-oper-delete', `delete-${props.row.source_name}`] " @click.stop="handleDeleteMd(props.row)"><i class=" el-icon-delete mouse-over" title="删除 MD"></i></span>
+                        <span class="tr-oper" @click.stop="handleOpenUpdateAccountDialog(props.row)"><i class="el-icon-setting mouse-over" title="行情源设置"></i></span>
+                        <span :class="['tr-oper-delete', `delete-${props.row.source_name}`] " @click.stop="handleDeleteMd(props.row)"><i class=" el-icon-delete mouse-over" title="删除行情源"></i></span>
                     </template>
                 </el-table-column>
             </el-table>
@@ -105,11 +105,11 @@ import { switchMd, deleteMd } from '__io/actions/account';
 import { loopToRunProcess, ifProcessRunning } from '__gUtils/busiUtils';
 
 import baseMixin from '@/assets/mixins/baseMixin';
-import mdTdMixin from '../js/mdTdMixin';
+import mdTdRiskMixin from '../js/mdTdRiskMixin';
 import openLogMixin from '@/assets/mixins/openLogMixin';
 
 export default {
-    mixins: [ baseMixin, mdTdMixin, openLogMixin ],
+    mixins: [ baseMixin, mdTdRiskMixin, openLogMixin ],
 
     data () {
         this.tdmdType = 'md';

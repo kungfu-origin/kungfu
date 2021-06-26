@@ -107,6 +107,7 @@ export const calcuHeaderWidth = (target: string[], wish: any[]) => {
 
 export const dealStatus = (status: string | number) => {
 	if (status === '--') return status;
+	if (!statusConfig[status]) return status;
 	const name: string = statusConfig[status].name || '';
 	const level: number = statusConfig[status].level || 0;
 	if(level == 1) return colors.green(name);

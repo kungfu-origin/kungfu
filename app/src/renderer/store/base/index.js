@@ -16,6 +16,7 @@ export default {
         processStatusWithDetail: {},
         tdAccountSource: {}, //账户柜台信息
         mdAccountSource: {}, //账户柜台信息
+        riskAccountSource: {}, //账户风控信息
         kfConfig: {}, // kf 
         
         currentTask: {},
@@ -42,6 +43,10 @@ export default {
             commit('SET_MD_ACCOUNT_SOURCE', mdAccountSource)
         },
 
+        setRiskAccountSource ({ commit }, riskAccountSource) {
+            commit("SET_RISK_ACCOUNT_SOURCE", riskAccountSource)
+        },
+
         //初始化kfconfig
         setKungfuConfig ({ commit }, kfConfig) {
             commit('SET_KF_CONFIG', kfConfig)  
@@ -64,6 +69,7 @@ export default {
             .then(accountSource => {
                 dispatch('setTdAccountSource', accountSource.td)
                 dispatch('setMdAccountSource', accountSource.md)
+                dispatch('setRiskAccountSource', accountSource.risk)
                 return accountSource
             })
         },
@@ -117,6 +123,10 @@ export default {
         
         SET_MD_ACCOUNT_SOURCE (state, mdAccountSource) {
             state.mdAccountSource = mdAccountSource
+        },
+
+        SET_RISK_ACCOUNT_SOURCE (state, riskAccountSource) {
+            state.riskAccountSource = riskAccountSource
         },
         
         SET_KF_CONFIG (state, kfConfig) {

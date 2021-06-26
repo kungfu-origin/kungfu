@@ -78,7 +78,7 @@
     background: $gray;
 }
 .bg-green{
-    background: $green2;
+    background: $green;
 }
 
 .vertical_center {  // 垂直居中
@@ -361,4 +361,9 @@ div
             width: 50px;
         }
     }
+}
+
+.text-icon {
+    font-weight: 600; 
+    font-size: 11px;
 }

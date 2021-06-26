@@ -1,9 +1,9 @@
 import fse from 'fs-extra';
 import { KF_RUNTIME_DIR, KF_CONFIG_PATH } from '__gConfig/pathConfig';
-import { setTimerPromiseTask } from '__gUtils/busiUtils';
+import { setTimerPromiseTask, originOrderTradesFilterByDirection } from '__gUtils/busiUtils';
 import { kungfu } from '__io/kungfu/kungfuUtils';
 import { toDecimal, ensureNum, ensureLedgerData, addTwoItemByKeyForReduce, avgTwoItemByKeyForReduce } from '__gUtils/busiUtils';
-import { OffsetName, OrderStatus, SideName, PosDirection, PriceType, HedgeFlag, InstrumentType, VolumeCondition, TimeCondition, allowShorted } from "@kungfu-trader/kungfu-shared/config/tradingConfig";
+import { OffsetName, OrderStatus, SideName, PosDirection, PriceType, HedgeFlag, InstrumentType, VolumeCondition, TimeCondition } from "@kungfu-trader/kungfu-shared/config/tradingConfig";
 import { logger } from '__gUtils/logUtils';
 
 
@@ -24,20 +24,20 @@ export const watcher: any = (() => {
     if (process.env.APP_TYPE === 'cli') {
         const windowType = process.env.CLI_WINDOW_TYPE || '';
         const id = [process.env.APP_TYPE, windowType].join('');
-        return kungfu.watcher(KF_RUNTIME_DIR, kungfu.formatStringToHashHex(id), bypassQuote);
+        return kungfu.watcher(KF_RUNTIME_DIR, kungfu.formatStringToHashHex(id), bypassQuote, true);
     }
 
     if (process.env.APP_TYPE === "daemon") {
-        return kungfu.watcher(KF_RUNTIME_DIR, kungfu.formatStringToHashHex('kungfu_daemon'), false);
+        return kungfu.watcher(KF_RUNTIME_DIR, kungfu.formatStringToHashHex('kungfu_daemon'), false, false);
     }
 
 
     const id = [process.env.APP_TYPE, process.env.RENDERER_TYPE].join('');
-    return kungfu.watcher(KF_RUNTIME_DIR, kungfu.formatStringToHashHex(id), true);
+    return kungfu.watcher(KF_RUNTIME_DIR, kungfu.formatStringToHashHex(id), true, true);
 })()
 
 
-export const startGetKungfuWathcerStep = (interval = 500) => {
+export const startGetKungfuWatcherStep = (interval = 500) => {
     if (watcher.noWatcher) return;
     
     return setTimerPromiseTask(() => {
@@ -65,19 +65,6 @@ export const writeKungfuTimeValue = (id: string, label: string, type: string, va
     data.update_time = watcher.now();
     watcher.publishState(data);
 }
-
-function setImmediateIter (task: Function, count: number, cb: Function) {
-
-    if (count >= 0) {
-        setImmediate(() => {
-            task(count)
-            setImmediateIter(task, count--, cb)
-        })
-    } else {
-        cb(count)
-    } 
-}
-
 
 
 export const transformOrderTradeListToData = (list: OrderOriginData[] | TradeOriginData [], dealFunc: Function) => {
@@ -174,7 +161,7 @@ export const transformOrderInputListToData = (list: OrderInputOriginData[], deal
 export const transformOrderStatListToData = (list: OrderStatOriginData[]) => {
     let data: StringToAnyObject = {};
     list.kfReverseForEach((item: OrderStatOriginData) => {
-        data[item.order_id.toString()] = item;
+        data[item.order_id.toString()] = Object.freeze(item);
     })
     return data;
 }
@@ -214,7 +201,7 @@ export const transformTradingItemListToData = (list: any[], type: string) => {
 
     } else if (type === 'quote') {
         list.kfForEach((item: any) => {
-            const instrumentId = `${item.exchangeId}_${item.instrumentId}_${item.sourceId}`;
+            const instrumentId = `${item.exchangeId}_${item.instrumentId}`;
             if (!instrumentId) return;
             data[instrumentId] = item;
         })
@@ -301,6 +288,87 @@ export const flatternOrderTrades = (list: any[]) => {
     return orderTradeList
 }
 
+export const getOrderInputBySourceDest = (OrderInput: any, type: string, sourceDest: number) => {
+    if (type === 'source') {
+        return ensureLedgerData(OrderInput.filter('source', sourceDest), 'insert_time')
+            .slice(0, 100)
+            .map((item: OrderInputOriginData) => dealOrderInput(item))
+    } else if (type === 'dest') {
+        return ensureLedgerData(OrderInput.filter('dest', sourceDest), 'insert_time')
+            .slice(0, 100)
+            .map((item: OrderInputOriginData) => dealOrderInput(item))
+    } else {
+        console.error('getOrderInputBySourceDest type is not source or dest')
+        return []
+    }
+}
+
+export const getOrdersBySourceDestInstrumentId = (Order: any, type: string, sourceDestInstrumentId: number | string, directionOrigin?: number) => {
+    if (type === 'source') {
+        return ensureLedgerData(Order.filter('source', sourceDestInstrumentId), 'update_time')
+            .slice(0, 100)
+            .map((item: OrderOriginData) => dealOrder(item));
+    } else if (type === 'dest') {
+        return ensureLedgerData(Order.filter('dest', sourceDestInstrumentId), 'update_time')
+            .slice(0, 100)
+            .map((item: OrderOriginData) => dealOrder(item));
+    } else if (type === 'instrument') {
+        return ensureLedgerData(Order.filter('instrument_id', sourceDestInstrumentId), 'update_time')
+            .slice(0, 500)
+            .filter((item: OrderOriginData) => {
+                const { offset, side, instrument_type } = item;
+                if (directionOrigin) {
+                    return originOrderTradesFilterByDirection(directionOrigin, offset, side, instrument_type);
+                } else {
+                    return false
+                }
+            })
+            .slice(0, 100)
+            .map((item: OrderOriginData) => Object.freeze(dealOrder(item)))
+    } else {
+        console.error('getOrdersBySourceDestInstrumentId type is not source, dest or instrument')
+        return []
+    }
+}
+
+
+export const getTradesBySourceDestInstrumentId = (Trade: any, type: string, sourceDestInstrumentId: number | string, directionOrigin?: number) => {
+    if (type === 'source') {
+        return ensureLedgerData(Trade.filter('source', sourceDestInstrumentId), 'trade_time')
+            .slice(0, 100)
+            .map((item: TradeOriginData) => dealTrade(item));
+    } else if (type === 'dest') {
+        return ensureLedgerData(Trade.filter('dest', sourceDestInstrumentId), 'trade_time')
+            .slice(0, 100)
+            .map((item: TradeOriginData) => dealTrade(item));
+    } else if (type === 'instrument') {
+        return ensureLedgerData(Trade.filter('instrument_id', sourceDestInstrumentId), 'trade_time')
+            .slice(0, 1000)
+            .filter((item: OrderOriginData) => {
+                const { offset, side, instrument_type } = item;
+                if (directionOrigin) {
+                    return originOrderTradesFilterByDirection(directionOrigin, offset, side, instrument_type);
+                } else {
+                    return false
+                }
+            })
+            .slice(0, 100)
+            .map((item: TradeOriginData) => Object.freeze(dealTrade(item)))
+    } else {
+        console.error('getTradesBySourceDestInstrumentId type is not source, dest or instrument')
+        return []
+    }
+}
+
+export const getOrderStatByDest = (OrderStat: any, type?: string, dest?: number) => {
+    if (type === 'dest') {
+        return ensureLedgerData(OrderStat.filter('dest', dest), 'insert_time')
+            .slice(0, 500)
+    } else {
+        return ensureLedgerData(OrderStat, 'insert_time')
+            .slice(0, 500)
+    }
+}
 
 export function decodeKungfuLocation(sourceOrDest: number): KungfuLocation {
     if (!sourceOrDest) return {

@@ -6,14 +6,7 @@ import {
 
     dealGatewayStates, 
     transformTradingItemListToData, 
-    transformOrderTradeListToData,
-    transformOrderInputListToData, 
-    transformOrderStatListToData, 
     transformAssetItemListToData,
-
-    dealOrderInput,
-    dealOrder,
-    dealTrade,
     dealPos,
     dealAsset,
     dealSnapshot,
@@ -30,29 +23,16 @@ const appDataSubject: any = new Subject();
 
 (() => {
 
-    if (watcher.noWathcer) {
+    if (watcher.noWatcher) {
         return;
     };  
     
     if (process.env.APP_TYPE !== 'daemon') {
-        if (process.env.APP_TYPE !== 'cli') {
-            return;
-        };
+        return
     };
 
     setTimerPromiseTask(async () => {
-
             const ledgerData = watcher.ledger;
-
-            //限制最大内存/cpu使用
-            const orderInputOrigins = ensureLedgerData(ledgerData.OrderInput, 'insert_time').slice(0, 1000);
-            const orderOrigins = ensureLedgerData(ledgerData.Order, 'update_time').slice(0, 1000);
-            const tradeOrigins = ensureLedgerData(ledgerData.Trade, 'trade_time').slice(0, 1000);
-
-            const accountStrategyOrderInputs = await transformOrderInputListToData(orderInputOrigins, dealOrderInput)
-            const accountStrategyOrders = await transformOrderTradeListToData(orderOrigins, dealOrder);
-            const accountStrategyTrades = await transformOrderTradeListToData(tradeOrigins, dealTrade);
-
             const positions = ensureLedgerData(ledgerData.Position).map((item: PosOriginData) => dealPos(item));
             const positionsByTicker = transformTradingItemListToData(positions, 'ticker');
             const assets = ensureLedgerData(ledgerData.Asset).map((item: AssetOriginData) => dealAsset(item));
@@ -61,8 +41,6 @@ const appDataSubject: any = new Subject();
             const quotes = ensureLedgerData(ledgerData.Quote);
 
             const accountTradingDataPipeData = {
-                orders: accountStrategyOrders.account || {},
-                trades: accountStrategyTrades.account || {},
                 positions: transformTradingItemListToData(positions, 'account'),
                 positionsByTicker,
                 assets: transformAssetItemListToData(assets, 'account'),
@@ -71,9 +49,6 @@ const appDataSubject: any = new Subject();
             }
     
             const strategyTradingDataPipeData = {
-                orderInputs: accountStrategyOrderInputs.strategy || {},
-                orders: accountStrategyOrders.strategy || {},
-                trades: accountStrategyTrades.strategy || {},
                 positions: transformTradingItemListToData(positions, 'strategy'),
                 assets: transformAssetItemListToData(assets, 'strategy'),
                 pnl: transformTradingItemListToData(pnl, 'strategy'),
@@ -86,52 +61,52 @@ const appDataSubject: any = new Subject();
                 quotes,
                 globalPipeData: {
                     daemonIsLive: watcher.isLive(),
-                    gatewayStates: dealGatewayStates(watcher.appStates)
                 }
             })
 
             return true
 
-    }, 800)
+    }, 1000)
 
 })();
 
 (() => {
 
-    if (watcher.noWathcer) {
+    if (watcher.noWatcher) {
         return;
     }
 
     if (process.env.RENDERER_TYPE !== 'app') {
-        return;
+        if (process.env.APP_TYPE !== 'cli') {
+            return;
+        };
     }
+
     setTimerPromiseTask(() => {
         return new Promise(resolve => {
-            const stateData = watcher.state;
             const ledgerData = watcher.ledger;
-            const timeValueList = ensureLedgerData(stateData.TimeValue.filter('tag_c', 'task'), 'update_time').slice(0, 100)
-            const orderStat = ensureLedgerData(ledgerData.OrderStat, 'insert_time').slice(0, 1000);
-            const orderStatResolved = transformOrderStatListToData(orderStat);  
 
-            const instruments = ensureLedgerData(ledgerData.Instrument);
-            const instrumentsAfterFilter = instruments
-                .filter((item: InstrumentOriginData) => {
-                    //普通股票 期货 股票期权 基金 科创板股票 指数
-                    if (item.instrument_type === 1) return true;
-                    if (item.instrument_type === 2) return true;
-                    if (item.instrument_type === 4) return true;
-                    if (item.instrument_type === 5) return true;
-                    if (item.instrument_type === 6) return true;
-                    if (item.instrument_type === 7) return true;
-    
-                    return false
-                });
+            let instrumentsAfterFilter: InstrumentOriginData[] = []; 
+            if (process.env.APP_TYPE !== 'cli') {
+                const instruments = ensureLedgerData(ledgerData.Instrument);
+                instrumentsAfterFilter = instruments
+                    .filter((item: InstrumentOriginData) => {
+                        //普通股票 期货 股票期权 基金 科创板股票 指数
+                        if (item.instrument_type === 1) return true;
+                        if (item.instrument_type === 2) return true;
+                        if (item.instrument_type === 4) return true;
+                        if (item.instrument_type === 5) return true;
+                        if (item.instrument_type === 6) return true;
+                        if (item.instrument_type === 7) return true;
+        
+                        return false
+                    });
 
+            }
 
             appDataSubject.next({
-                timeValueList: timeValueList,
-                orderStat: orderStatResolved,
-                instruments: instrumentsAfterFilter
+                instruments: instrumentsAfterFilter,
+                gatewayStates: dealGatewayStates(watcher.appStates)
             })
 
             resolve(true)
@@ -166,30 +141,16 @@ export const buildKungfuGlobalDataPipe = () => {
     )
 }
 
-export const buildTaskDataPipe = () => {
+export const buildKungfuDataByAppPipe = () => {
+    return appDataSubject
+}
+
+export const buildGatewayStatePipe = () => {
     return appDataSubject.pipe(
         map((data: any) => {
             return {
-                timeValueList: data.timeValueList
-            };
-        })
-    )
-}
-
-export const buildOrderStatDataPipe = () => {
-    return appDataSubject.pipe(
-        map((data: any) => {
-            return {
-                orderStat: data.orderStat
-            };
-        })
-    )
-}
-
-export const buildAllOrdersTradesDataPipe = () => {
-    return appDataSubject.pipe(
-        map(() => {
-            return {}
+                gatewayStates: data.gatewayStates
+            }
         })
     )
 }

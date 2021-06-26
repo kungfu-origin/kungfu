@@ -1,19 +1,15 @@
 import logColor from '__gConfig/logColorConfig';
 import { buildProcessLogPath } from '__gConfig/pathConfig';
-import { addFileSync } from '__gUtils/fileUtils';
-import { getLog } from '__gUtils/busiUtils';
+
+import { getLog, setTimerPromiseTask } from '__gUtils/busiUtils';
 
 
-import { Observable, forkJoin, merge, concat } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Subject } from 'rxjs';
 
-
-const path = require('path');
-const { Tail } = require('tail');
 const moment = require('moment');
 const colors = require('colors');
+export const logSubject: any = new Subject();
 
-var logWather: any = null;
 
 // // =============================== logs start ==================================================
 
@@ -27,7 +23,7 @@ const dealUpdateTime = (updateTime: string): any => {
     else return updateTime
 }
 
-const dealLogMessage = (line: string, processId: string) => {
+const dealLogMessage = (line: string) => {
     let lineData: LogDataOrigin;
     try{
         lineData = JSON.parse(line);
@@ -47,7 +43,7 @@ const dealLogMessage = (line: string, processId: string) => {
 
         const msgList = message.split(']');
         const updateTime = msgList[0].slice(1)
-        const updateTimeResolve = `[${dealUpdateTime(updateTime)}]`
+        const updateTimeResolved = `[${dealUpdateTime(updateTime)}]`
         const typeResolve = `[${msgList[1].trim().slice(1).trim()}]`;
         
         let lastInfo = ''
@@ -57,7 +53,7 @@ const dealLogMessage = (line: string, processId: string) => {
             lastInfo = msgList.slice(2).join(']')
         }
 
-        const messageResolve = `${colors.cyan(updateTimeResolve)} ${typeResolve} ${lastInfo}`
+        const messageResolve = `${colors.cyan(updateTimeResolved)} ${typeResolve} ${lastInfo}`
 
         message = messageResolve
             .replace(/\[info\]/g, `[ ${colors[logColor.info]('info')}    ] `)
@@ -80,110 +76,20 @@ const dealLogMessage = (line: string, processId: string) => {
 }
 
 
-const getLogObservable = (pid: string) => {
+export const getLogInterval = (pid: string) => {
     const logPath = buildProcessLogPath(pid)
-    return new Observable(observer => {
-        getLog(logPath, '', (line: string) => dealLogMessage(line, pid))
-        .then((logList: any) => observer.next(logList))
-        .catch(() => observer.next({ list: [] }))
-        .finally(() => observer.complete())
-    })
+    return setTimerPromiseTask(() => {
+        return getLog(logPath, '', (line: string) => dealLogMessage(line))
+        .then((logList: any) => logSubject.next(logList))
+        .catch(() => logSubject.next({ list: [] }))
+    }, 2000)
 }
 
+export const getLogSubject = () => {
+    return logSubject
+} 
 
-export const getMergedLogsObservable = (processIds: string[], boardWidth: number) => {
-    return forkJoin(
-        ...processIds
-        .map((logPath: string) => getLogObservable(logPath))        
-    ).pipe(
-        map((list: any[]): any[] => {
-
-            let listResolved: any = []
-
-            list = list
-                .map((l: any) => l.list)
-                .reduce((a: any, b: any): any => a.concat(b))
-                .filter((l: any) => !!l)
-                .map((l: any) => {
-                    return l
-                })
-
-            if(list.length) {
-                list
-                .sort((a: any, b: any) => moment(a.updateTime).valueOf() - moment(b.updateTime).valueOf())
-                .map((l: any) => l)  
-                .forEach((l: any) => {
-                    const message = l.message;
-                    const isCritical = l.isCritical;
-
-                    if (message.length < boardWidth) {
-                        listResolved.push(message)
-                    } else {
-                        splitStrByLength(message, boardWidth).forEach(splitLine => {
-                            if (isCritical) {
-                                listResolved.push(colors.red(splitLine))
-                            } else {
-                                listResolved.push(splitLine)
-                            }
-                        })
-                    }
-                })
-                    
-            }       
-            return listResolved
-        })
-    )
-}
-
-const watchLogObservable = (processId: string, boardWidth: number) => {
-    logWather && (logWather.unwatch());
-    return new Observable(observer => {
-        const logPath = buildProcessLogPath(processId)
-        addFileSync('', logPath, 'file');
-        const watcher = new Tail(logPath, {
-            useWatchFile: true
-        });
-
-        logWather = watcher;
-        
-        watcher.watch();
-        watcher.on('line', (line: string) => {
-            const logList: any = dealLogMessage(line, processId);
-
-            logList.kfForEach((l: any) => {
-                if (l.message.length < boardWidth) {
-                    observer.next(l.message || '')                    
-                } else {
-                    splitStrByLength(l.message, boardWidth).forEach(m => {
-                        const isCritical = l.isCritical;
-
-                        if (isCritical) {
-                            observer.next(colors.red(m || ''))
-                        } else {
-                            observer.next(m || '')
-                        }
-                    })
-                }
-            })
-        })
-        watcher.on('error', () => watcher.unwatch())
-    })
-    
-}
-
-export const watchLogsObservable = (processIds: string[], boardWidth: number) => {
-    return merge(...processIds.map(pid => watchLogObservable(pid, boardWidth)))
-}
-
-export const LogsAndWatcherConcatObservable = (processIds: string[], boardWidth: number) => {
-    return concat(
-        getMergedLogsObservable(processIds, boardWidth),
-        watchLogsObservable(processIds, boardWidth)
-    )
-}
-
-
-function splitStrByLength (str: string, len: number): String[] {
+export function splitStrByLength (str: string, len: number): string[] {
 
     const strLen = str.length;
     const groupNum = Math.ceil(strLen / len);

@@ -49,7 +49,7 @@ export default {
                     .split(',')
                     .map(key => key.trim())
                     .forEach(key => {
-                        mergedVal += item[key]
+                        mergedVal += JSON.stringify(item[key] || '')
                     });
             
 

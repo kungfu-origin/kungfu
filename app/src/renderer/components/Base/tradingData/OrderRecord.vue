@@ -111,7 +111,7 @@ import tradingDataMixin from '@/components/Base/tradingData/js/tradingDataMixin'
 export default {
     name: "orders",
    
-    mixins: [ tradingDataMixin, makeOrderMixin, makeOrderCoreMixin ],
+    mixins: [ tradingDataMixin, makeOrderCoreMixin, makeOrderMixin ],
 
     props: {
 
@@ -171,12 +171,13 @@ export default {
 
     watch: {
         kungfuData (orders) {
-            const ordersResolve = this.dealOrderList(orders, {
+            if (this.adjustOrderInputVisibility) return;
+            const ordersResolved = this.dealOrderList(orders, {
                 searchKeyword: this.searchKeyword,
                 todayFinish: this.todayFinish
             });
 
-           this.tableData = ordersResolve;
+           this.tableData = ordersResolved;
         }
     },
 

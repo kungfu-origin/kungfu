@@ -15,6 +15,7 @@ const blessed = require('blessed');
 
 // 定义全局变量
 const WIDTH_LEFT_PANEL = 60;
+const WIDTH_PROCESS_PANEL = 46;
 
 class TradingDataDashboard extends Dashboard {
 	targetId: string;
@@ -50,6 +51,7 @@ class TradingDataDashboard extends Dashboard {
 		t.initTradeList();
 		t.initBoxInfo();
 		t.initMessage();
+		t.initLoader();
 		t.initCancelOrderBtn();
 		t.screen.render();
 		t.bindEvent();
@@ -67,7 +69,7 @@ class TradingDataDashboard extends Dashboard {
             left: '0',
             interactive: true,
 			mouse: false,			
-            width: 45,
+            width: WIDTH_PROCESS_PANEL,
             height: '40%',
             style: {
                 ...TABLE_BASE_OPTIONS.style,
@@ -88,10 +90,10 @@ class TradingDataDashboard extends Dashboard {
             parent: t.screen,
             padding: DEFAULT_PADDING,
             top: 0,
-            left: 45,
+            left: WIDTH_PROCESS_PANEL,
             interactive: true,
 			mouse: true,			
-            width: 100 - WIDTH_LEFT_PANEL + 5 + '%-45',
+            width: 100 - WIDTH_LEFT_PANEL + 5 + `%-${WIDTH_PROCESS_PANEL}`,
             height: '40%-3',
             style: {
                 ...TABLE_BASE_OPTIONS.style,
@@ -107,7 +109,7 @@ class TradingDataDashboard extends Dashboard {
 		t.boards.cancelBtn = blessed.button({
 			content: 'Cancel All Order',
             parent: t.screen,
-			width: 100 - WIDTH_LEFT_PANEL + 5 + '%-45',
+			width: 100 - WIDTH_LEFT_PANEL + 5 + `%-${WIDTH_PROCESS_PANEL}`,
             height: 3,
             left: 45,
 			top: '40%-3',
@@ -299,7 +301,7 @@ class TradingDataDashboard extends Dashboard {
                     proc.typeName,
                     proc.processName,
                     proc.statusName
-                ], [5, 15, 8]))
+                ], [5, 15, 10]))
             t.boards.processTable.setItems(processListResolve);
             t.screen.render();
         })

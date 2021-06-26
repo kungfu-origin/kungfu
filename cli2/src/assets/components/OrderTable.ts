@@ -17,8 +17,8 @@ class OrderTable extends Table {
 		this.type = type;
 		this.headers = ['UpdateTime', 'Ticker', 'Side', 'Offset', 'Price', 'Filled/Not', 'Status', 
 			type === 'account' ? 'Strate' : 'AccountId',
-			'System La',
-			'Network La'
+			'System LA',
+			'Network LA'
 		]    
 		this.columnWidth = [10, 0, 0, 0, 8, 12, 8, 9, 10, 10];
 		this.ordersList = []

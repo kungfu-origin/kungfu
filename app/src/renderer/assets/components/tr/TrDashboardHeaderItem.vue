@@ -41,6 +41,19 @@ export default {
             display: inline-block;
             font-size: 14px;
         }
+
+        .el-select.dashboard-header-selector {
+            height: 24px;
+
+            .el-input__inner {
+                height: 24px;
+                line-height: 24px;
+            }
+
+            .el-input__icon {
+                line-height: 24px;
+            }
+        }
     }
 </style>
 

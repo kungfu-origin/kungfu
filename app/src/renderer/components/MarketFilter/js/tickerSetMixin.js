@@ -1,38 +1,23 @@
 
 import { mapGetters, mapState } from 'vuex';
 
-import AddSetTickerSetDialog from '@/components/MarketFilter/components/AddSetTickerSetDialog';
-import AddTickerDialog from '@/components/MarketFilter/components/AddTickerDialog';
 
-import { checkAllMdProcess, findTargetFromArray, delayMiliSeconds, debounce } from '__gUtils/busiUtils';
+import { checkAllMdProcess, getIndexFromTargetTickers, findTargetFromArray, delayMiliSeconds, debounce } from '__gUtils/busiUtils';
 import { sendDataToDaemonByPm2 } from "__gUtils/processUtils";
 import { getTickerSets, addSetTickerSet, removeTickerSetByName } from '__io/actions/market';
-import { kungfuSubscribeTicker } from '__io/kungfu/makeCancelOrder';
+import { kungfuSubscribeInstrument } from '__io/kungfu/makeCancelOrder';
+import { encodeKungfuLocation } from '__io/kungfu/kungfuUtils';
 import { watcher } from '__io/kungfu/watcher';
 
 export default {
 
     mounted () {
         this.getTickerSets();
-        this.handleMdTdStateChange();
-    },
-
-    beforeDestroy() {
-        this.$bus.$off('mdTdStateReady');
-    },
-
-    components: {
-        AddSetTickerSetDialog,
-        AddTickerDialog
     },
 
     data () {
         return {
-            addSetTickerSetDialogMethod: '',
-            addSetTickerSetDialogVisiblity: false,
             setTickerSetDialogInput: {},
-
-            addTickerDialogVisiblity: false,
         }
     },
 
@@ -47,46 +32,43 @@ export default {
 
         ...mapGetters([
             "flatternTickers"
-        ])
+        ]),
+
+        currentTickerSetTickersResolved () {
+            return this.currentTickerSetTickers
+                .slice(0)
+                .sort((ticker1, ticker2) => {
+                    return ticker1.instrumentId.localeCompare(ticker2.instrumentId)
+                })
+        }
     },
 
     methods: {
-
-        handleSetTickerSet (tickerSet) {
-            this.addSetTickerSetDialogMethod = 'set';
-            this.setTickerSetDialogInput = tickerSet;
-            this.addSetTickerSetDialogVisiblity = true;
-        },
 
         handleSetCurrentTickerSet(tickerSet) {
             this.$store.dispatch('setCurrentTickerSet', tickerSet)
         },
 
-        handleAddTicker () {
-            this.addTickerDialogVisiblity = true;
-        },
-
-        handleAddTickerSet () {
-            this.addSetTickerSetDialogMethod = 'add';
-            this.addSetTickerSetDialogVisiblity = true;
-        },
-
-        handleRemoveTickerSet (tickerSet) {
-            this.$confirm(`删除标的池 ${tickerSet.name} 会删除所有相关信息，确认删除吗？`, '提示', {confirmButtonText: '确 定', cancelButtonText: '取 消'})
+        handleRemoveTickerSet (tickerSet, replace = false) {
+            const confirmPromise = replace ? Promise.resolve(true) : this.$confirm(`删除标的池 ${tickerSet.name} 会删除所有相关信息，确认删除吗？`, '提示', {confirmButtonText: '确 定', cancelButtonText: '取 消'});
+            return confirmPromise
                 .then(() => {
                     return removeTickerSetByName(tickerSet.name)
                 })
                 .then(() => {
-                    this.$message.success('操作成功！')
+                    if (!replace) {
+                        this.$message.success('操作成功！')
+                    }
                 })
                 .then(() => {
-                    this.getTickerSets()
+                    if (!replace) {
+                        this.getTickerSets()
+                    }
                 })
                 .catch(err => {
                     if (err === 'cancel') return; 
                     this.$message.error(err.message)
                 })
-            
         },
 
         handleConfirmAddSetTickerSet (tickerSet) {    
@@ -100,26 +82,54 @@ export default {
                 })
         },
 
-        handleAddTickerConfirm (tickerData, inTickerSet = false) {
-            this.$bus.$emit('add-ticker-for-ticker-set', {
-                tickerData: Object.freeze(tickerData),
-                inTickerSet
+        handleAddTickerConfirm (tickerData, targetTickerSetName) {
+            if (!targetTickerSetName) return;
+            const targetTickerSet = findTargetFromArray(this.tickerSets, 'name', targetTickerSetName);
+            if (!targetTickerSet) return;
+            const { name, tickers } = targetTickerSet;
+            const targetIndex = getIndexFromTargetTickers(tickers || {}, tickerData)
+            let newTickers = tickers.slice(0);
+            
+            if (targetIndex === -1) {
+                newTickers.push(tickerData)
+            } else {
+                newTickers.splice(targetIndex, 1, tickerData)
+            }
+
+            this.handleConfirmAddSetTickerSet({
+                name,
+                tickers: newTickers
             })
         },
 
-        handleMdTdStateChange () {
-            const self = this;
-            this.$bus.$on('mdTdStateReady', debounce(function({ processId }) {
+        handleDeleteTicker (ticker, targetTickerSet = null) {
+            if (!targetTickerSet) return;
+
+            const { name, tickers } = targetTickerSet;
+            const targetIndex = getIndexFromTargetTickers(tickers, ticker)
+
+            if (targetIndex !== -1) {
+                let targetTickers = tickers.slice(0)
+                targetTickers.splice(targetIndex, 1);
+                this.handleConfirmAddSetTickerSet({
+                    name, 
+                    tickers: targetTickers
+                })
+            }
+        },
+
+        bindMdTdStateChangeEvent () {
+            this.$bus.$on('mdTdStateReady', ({ processId }) => {
                 if (processId.includes('md')) {
-                    self.subscribeTickersByProcessId(processId)
+                    this.subscribeTickersByProcessId(processId)
                 }
-            }, 2000))
+            })
         },
 
         getTickerSets () {
             return getTickerSets()
                 .then(res => {
-                    this.$store.dispatch('setTickerSets', res)
+                    this.$store.dispatch('setTickerSets', Object.freeze(res))
                     this.initUpdateCurrentTickerSet(res)
                 })
         },
@@ -133,6 +143,8 @@ export default {
                 } else {
                     if (currentTickerSetIndex !== -1) {
                         this.$store.dispatch('setCurrentTickerSet', tickerSets[currentTickerSetIndex])
+                    } else {
+                        this.$store.dispatch('setCurrentTickerSet', tickerSets[0])
                     }
                 }
             } else {
@@ -140,21 +152,27 @@ export default {
             }
         },
 
+        //通过md 订阅
+        async subscribeTickersByProcessId (mdProcessId, slience = true) {
+            const sourceName = mdProcessId.split("_")[1];
+            if (!sourceName) return;
+            const mdLocation = encodeKungfuLocation(sourceName, 'md');
+            if (!watcher.isReadyToInteract(mdLocation)) {
+                await delayMiliSeconds(1000);
+                await this.subscribeTickersByProcessId(mdProcessId, slience);
+            } else {
+                this.subscribeAllTickers(slience)                
+            }
+        },
+
         subscribeAllTickers (slience = true) {
             if (!watcher.isLive()) return;
             const tickers = this.flatternTickers || [];
-            this.subscribeTickers(tickers, slience)
-            sendDataToDaemonByPm2('MAIN_RENDERER_SUBSCRIBED_TICKERS', tickers)
-        },
-
-        //通过md 订阅
-        subscribeTickersByProcessId (mdProcessId, slience = true) {
-            this.subscribeAllTickers(slience)
+            this.subscribeTickers(tickers, slience);
         },
 
         subscribeTickersInTickerSet (tickerSet, slience = true) {
             const target = findTargetFromArray(this.tickerSets, 'name', tickerSet)
-
             if (target) {
                 this.subscribeTickers(target.tickers, slience)
             } else {
@@ -162,16 +180,14 @@ export default {
             }
         },
 
-        async subscribeTickers (tickers, slience = true) {
+        subscribeTickers (tickers, slience = true) {
+            console.log("subscribeTickers", tickers.map(item => `${item.instrumentId}_${item.exchangeId}`))
             if (!watcher.isLive()) return;
-
-            let i = 0, len = tickers.length;
-            for (i; i < len; i++) {
-                const ticker = tickers[i];
+            sendDataToDaemonByPm2('MAIN_RENDERER_SUBSCRIBED_TICKERS', tickers)
+            tickers.forEach(ticker => {
                 const { instrumentId, source, exchangeId } = ticker;
-                kungfuSubscribeTicker(source, exchangeId, instrumentId)
-                await delayMiliSeconds(300)
-            }
+                kungfuSubscribeInstrument(source, exchangeId, instrumentId)
+            })
 
             if (!slience) {
                 if (checkAllMdProcess.call(this, tickers, this.processStatus)) {

@@ -187,7 +187,6 @@
     const path = require('path');
     const fse = require('fs-extra');
     const { ipcRenderer, shell, remote  } = require('electron');
-    const { globalShortcut } = remote;
     const { FindInPage } = require('electron-find');
     const BrowserWindow = require('electron').remote.BrowserWindow;
     const { getLog, debounce, clearFileContent } = require('./utils.js');
@@ -312,25 +311,21 @@
 
     var findInPage = null;
 
-    window.onload = () => {
-
-        globalShortcut.register('CommandOrControl+F', () => {
+    document.addEventListener('keydown',(e) => {
+        //ctrl+f
+        if (e && e.ctrlKey && e.keyCode === 70) {
             clearFinder();
             findInPage = new FindInPage(remote.getCurrentWebContents(), {
                 preload: true
             })
             findInPage.openFindWindow();
-        })  
+        }
 
-        globalShortcut.register('ESC', function () {
+        //esc
+        if (e && e.keyCode === 27) {
             clearFinder();
-        })
-    }
-
-    window.onbeforeunload = () => {
-        globalShortcut.unregister('CommandOrControl+F')
-        globalShortcut.unregister('ESC')
-    }
+        }
+    })
 
     function clearFinder () {
         if (findInPage) {
