@@ -6,7 +6,7 @@ on:
       confirm:
         description: 'Type confirm to update version'
         required: true
-        default: 'no'
+        default: 'cancel'
 
 jobs:
   build:
@@ -24,6 +24,6 @@ jobs:
 
       - name: Bump Version
         if: ${{ github.event.inputs.confirm  == 'confirm' }}
-        uses: kungfu-trader/action-update-version@v1.0.0
+        uses: kungfu-trader/action-bump-version@v1.0.0
         with:
           version-part: 'minor'

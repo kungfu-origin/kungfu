@@ -1,8 +1,7 @@
 {
   "name": "kungfu",
-  "author": "taurus.ai",
-  "version": "2.3.6",
-  "description": "KungFu Trader",
+  "author": "kungfu-origin",
+  "description": "Kungfu Trader Workspaces",
   "license": "Apache-2.0",
   "private": true,
   "workspaces": [
@@ -23,7 +22,10 @@
     "@mapbox/node-pre-gyp": "^1.0.0",
     "cross-env": "1.0.0",
     "cross-var": "1.0.0",
-    "node-gyp": "^7.1.0",
+    "node-gyp": "^7.1.0"
+  },
+  "devDependencies": {
+    "lerna": "^4.0.0",
     "wsrun": "^5.0.0"
   }
 }
