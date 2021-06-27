@@ -7,5 +7,10 @@
     "kfext_task_backwards",
     "cli2",
     "app"
-  ]
+  ],
+  "command": {
+    "version": {
+      "allowBranch": ["main", "dev/*"]
+    }
+  }
 }
