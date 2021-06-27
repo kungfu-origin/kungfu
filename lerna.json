@@ -10,7 +10,10 @@
   ],
   "command": {
     "version": {
-      "allowBranch": ["main", "dev/*"]
+      "allowBranch": [
+        "main",
+        "dev/**"
+      ]
     }
   }
 }
