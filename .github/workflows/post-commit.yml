@@ -1,4 +1,4 @@
-name: Post Commit - Build Test
+name: Post Commit
 
 on:
   push:
@@ -38,7 +38,7 @@ jobs:
       - name: Setup Python environment
         uses: actions/setup-python@v2
         with:
-          python-version: '3.7'
+          python-version: '3.8'
 
       - name: Setup Kungfu environment
         run: |

@@ -26,4 +26,4 @@ jobs:
         if: ${{ github.event.inputs.confirm  == 'confirm' }}
         uses: kungfu-trader/action-bump-version@v1.0.0
         with:
-          version-part: 'minor'
+          bump-keyword: 'preminor'
