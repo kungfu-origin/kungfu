@@ -17,7 +17,7 @@ const argv = require("yargs/yargs")(process.argv.slice(2))
     .command("set-source-urls", "Set source URLs from where to get prebuilt/packages", (yargs) => {
         yargs.option("name", {
             type: "string",
-            default: "kungfu",
+            default: "kungfu_node",
             describe: "name of the prebuilt"
         });
     }, (argv) => {
