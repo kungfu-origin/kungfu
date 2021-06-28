@@ -1,4 +1,4 @@
-name: Bump Version
+name: Admin - Bump Version
 
 on:
   workflow_dispatch:

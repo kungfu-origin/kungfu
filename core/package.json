@@ -28,9 +28,9 @@
   "binary": {
     "module_name": "kungfu_node",
     "module_path": "build/kfc",
-    "remote_path": "core/v{major}/v{version}",
+    "remote_path": "kungfu-core/v{major}/v{version}/{prerelease}",
     "package_name": "kfc-v{version}-{platform}-{arch}-{configuration}.tar.gz",
-    "host": "https://kungfu-prebuilt.s3.cn-north-1.amazonaws.com.cn"
+    "host": "https://kungfu-prebuilt.s3.cn-northwest-1.amazonaws.com.cn"
   },
   "scripts": {
     "preinstall": "node .build-tools/kf-config.js set-source-urls",

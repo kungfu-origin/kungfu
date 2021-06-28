@@ -1,4 +1,4 @@
-name: Build and Publish
+name: Post Pull Request - Publish
 
 on:
   workflow_dispatch:
