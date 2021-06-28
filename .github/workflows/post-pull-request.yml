@@ -23,11 +23,11 @@ jobs:
 
       - name: Get Build Matrix From JSON
         id: set-matrix
-        uses: kungfu-trader/action-build-matrix@v1.0.0
+        uses: kungfu-trader/action-build-matrix@v1
 
       - name: Check Packages Publishable
         id: check-packages
-        uses: kungfu-trader/action-check-packages@v1.0.0
+        uses: kungfu-trader/action-check-packages@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           overwrite: ${{ github.event.inputs.overwrite }}
@@ -151,7 +151,7 @@ jobs:
 
       - name: Clean Stale Packages
         if: ${{ needs.prepare.outputs.publishable  == 'true' }}
-        uses: kungfu-trader/action-clean-packages@v1.0.0
+        uses: kungfu-trader/action-clean-packages@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           action-path: ${{ github.action_path }}

@@ -15,7 +15,7 @@ jobs:
 
       - name: Get Build Matrix From JSON
         id: set-matrix
-        uses: kungfu-trader/action-build-matrix@v1.0.0
+        uses: kungfu-trader/action-build-matrix@v1
 
   build:
     needs: prepare
