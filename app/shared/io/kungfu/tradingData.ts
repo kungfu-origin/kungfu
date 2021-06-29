@@ -25,7 +25,9 @@ const appDataSubject: any = new Subject();
 
     if (watcher.noWatcher) {
         return;
-    };  
+    };
+    
+    console.log(process.env.APP_TYPE, '===')
     
     if (process.env.APP_TYPE !== 'daemon') {
         return
