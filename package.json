@@ -14,7 +14,7 @@
     "app" 
   ],
   "scripts": {
-    "license-sync": "git pull && git checkout license && git rebase dev && git push -f origin license && git checkout dev",
+    "license-sync": "git pull && git checkout license && git rebase dev/v2/v2.3 && git push -f origin license && git checkout dev/v2/v2.3",
     "postinstall": "yarn wsrun --serial install-deps",
     "build": "yarn run clean && yarn run env-electron && yarn wsrun --serial --fast-exit build",
     "build-cli": "yarn run clean && yarn run env-cli && yarn wsrun --serial --fast-exit build-cli",
