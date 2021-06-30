@@ -350,13 +350,15 @@ p.el-select-dropdown__empty{
 }
 
 .el-table{
+
     background: $bg_card;
 
     .el-table__empty-block {
         padding: 0 !important;
     }
 
-    .cell{
+    .cell {
+        user-select: text;
         transform: translateZ(0);
         white-space: nowrap;
         line-height: 26px;
@@ -610,6 +612,10 @@ p.el-select-dropdown__empty{
     border-color: $bg_card;
     vertical-align: middle;
 
+    div, span, p {
+        user-select: text;
+    }
+
 }
 
 /* Notification
@@ -657,6 +663,15 @@ p.el-select-dropdown__empty{
         border-top-color: $tab_header;
     }
 }
+
+.el-popper[x-placement^=right] .popper__arrow {
+    border-right-color: $tab_header;
+}
+
+.el-popper[x-placement^=right] .popper__arrow::after {
+    border-right-color: $tab_header;
+}
+
 .el-popper[x-placement^="top"] .popper__arrow{
     border-top-color: $tab_header;
 }

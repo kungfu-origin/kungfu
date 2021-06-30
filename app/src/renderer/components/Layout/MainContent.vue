@@ -25,8 +25,10 @@
                     <div class="setting-item" v-if="!isActivated" @click="handleLogin">
                         <i class="el-icon-user" ></i>
                     </div>
-                    <div class="setting-item" v-else>
-                        <img :src="photo" width="100%" height="100%" alt="">
+                    <div class="setting-item head-image" id="user-info-header" v-else @click="handleOpenMenu">
+                        <span slot="reference" class="kf-user-info-popover-entry">
+                            <img :src="photo" width="100%" height="100%" alt="">
+                        </span>
                     </div>
                     <div class="setting-item" @click="handleOpenGlobalSetting">
                         <i class="el-icon-setting"></i>
@@ -56,8 +58,12 @@
 <script>
 
 import { mapState } from 'vuex';
+import { remote } from 'electron'
 import EngineStatus from './components/EngineStatus';
 import CoreStatus from './components/CoreStatus';
+import { getAuthClient } from "@authing/vue-ui-components"
+
+const { Menu, getCurrentWindow } = remote;
 
 export default {
     name: 'main-content',
@@ -91,6 +97,33 @@ export default {
 
         photo () {
             return this.loginInfo.photo || false
+        },
+
+        registerSource () {
+            return this.loginInfo.registerSource || [];
+        },
+
+        name () {
+            return this.loginInfo.name || this.loginInfo.nickname || '';
+        },
+
+        email () {
+            return this.loginInfo.email || '';
+        },
+
+        phone () {
+            return this.loginInfo.phone || '';
+        },
+
+        showName () {
+            if (this.name) return this.name;
+
+            //email
+            if (this.loginInfo.registerSource.includes("basic:email")) {
+                return this.email
+            } else if (this.loginInfo.registerSource.includes("basic:phone-code")) {
+                return this.photo 
+            }
         }
     },
 
@@ -100,12 +133,55 @@ export default {
     },
 
     methods: {
+        handleOpenMenu () {
+            const template = [{
+		        label: `${this.showName}`,
+                submenu: [
+			        { label: "退出登录", click: () => this.handleLogout() }
+                ]
+            }]
+            const menu = Menu.buildFromTemplate(template);
+            this.getHeaderImageLocation()
+                .then(({ x, y }) => {
+                    return menu.popup({
+                        window: getCurrentWindow(),
+                        x,
+                        y
+                    })
+                })
+
+        },
+
+        handleLogout () {
+            return getAuthClient()
+                .logout()
+                .then(() => {
+                    this.$store.dispatch('setLoginInfo', {})
+                    this.$message.success('退出登陆成功！')
+                })
+                .catch(err => {
+                    this.$message.error(err.message || "退出登陆失败！")
+                })
+
+        },
+
         handleOpenGlobalSetting () {
             this.$bus.$emit('open-global-setting');
         },
 
         handleLogin () {
             this.$bus.$emit('open-authing-guard')
+        },
+
+        getHeaderImageLocation () {
+            const $headerImage = document.querySelector('#user-info-header');
+            const offsetY = $headerImage.offsetTop;
+            const offsetX = $headerImage.offsetLeft;
+
+            return Promise.resolve({
+                x: offsetX + 64, //64 is header image width
+                y: offsetY
+            })
         },
     }
 }
@@ -146,6 +222,19 @@ export default {
             text-align: center;
             font-size: 24px;
             cursor: pointer;
+
+            &.head-image {
+                text-align: center;
+
+                img {
+                    display: inline-block;
+                    width: 40px;
+                    height: 40px;
+                    line-height: 40px;
+                    border-radius: 50%;
+                    overflow: hidden;
+                }
+            }
         }
     }
     

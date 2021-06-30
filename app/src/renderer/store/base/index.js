@@ -98,6 +98,7 @@ export default {
         },
 
         setLoginInfo ({ commit }, loginInfo) {
+            localStorage.setItem('login_info', JSON.stringify(loginInfo));
             commit('SET_LOGIN_INFO', loginInfo)
         }
     },

@@ -50,7 +50,6 @@
     "@types/fs-extra": "^9.0.11",
     "@types/node": "^12.6.2",
     "add": "^2.0.6",
-    "authing-js-sdk": "^4.21.1",
     "aws-sdk": "^2.395.0",
     "babel-loader": "^7.1.1",
     "babel-plugin-component": "^1.1.1",
