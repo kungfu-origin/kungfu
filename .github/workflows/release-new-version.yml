@@ -1,14 +1,11 @@
-name: Post Pull Request
+name: Release - New Version
 
 on:
-  workflow_dispatch:
-    inputs:
-      overwrite:
-        description: 'Type true to overwrite packages'
-        required: true
-        default: 'false'
   pull_request:
+    types: [closed]
     branches:
+      - alpha/v*/v*
+      - release/v*/v*
       - main
 
 jobs:
@@ -16,21 +13,12 @@ jobs:
     runs-on: ubuntu-20.04
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
-      publishable: ${{ steps.check-packages.outputs.publishable }}
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-
       - name: Get Build Matrix From JSON
         id: set-matrix
         uses: kungfu-trader/action-build-matrix@v1
-
-      - name: Check Packages Publishable
-        id: check-packages
-        uses: kungfu-trader/action-check-packages@v1
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          overwrite: ${{ github.event.inputs.overwrite }}
 
   build:
     needs: prepare
@@ -54,6 +42,15 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: '3.8'
+
+      - name: Bump Version
+        if: ${{ github.event.pull_request.merged }}
+        uses: kungfu-trader/action-bump-version@v2.1.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          head-ref: ${{ github.head_ref}}
+          base-ref: ${{ github.base_ref }}
+          action: "bump"
 
       - name: Setup Kungfu environment
         run: |
@@ -105,24 +102,20 @@ jobs:
     container: 'docker.io/kungfutrader/kungfu-builder-centos:main'
     steps:
       - name: Checkout
-        if: ${{ needs.prepare.outputs.publishable  == 'true' }}
         uses: actions/checkout@v2
 
       - name: Setup NPM registry
-        if: ${{ needs.prepare.outputs.publishable  == 'true' }}
         uses: actions/setup-node@v2
         with:
           registry-url: 'https://npm.pkg.github.com'
           scope: '@kungfu-trader'
 
       - name: Download Artifacts
-        if: ${{ needs.prepare.outputs.publishable  == 'true' }}
         uses: actions/download-artifact@v2
         with:
           path: 'github-artifacts'
 
       - name: Configure AWS Crendentials (US)
-        if: ${{ needs.prepare.outputs.publishable  == 'true' }}
         uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-access-key-id: ${{ secrets.AWS_US_ACCESS_KEY_ID }}
@@ -136,7 +129,6 @@ jobs:
           artifacts-path: 'github-artifacts'
 
       - name: Configure AWS Crendentials (CN)
-        if: ${{ needs.prepare.outputs.publishable  == 'true' }}
         uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-access-key-id: ${{ secrets.AWS_CN_ACCESS_KEY_ID }}
@@ -144,20 +136,26 @@ jobs:
           aws-region: cn-northwest-1
 
       - name: Publish Prebuilt to AWS (CN)
-        if: ${{ needs.prepare.outputs.publishable  == 'true' }}
         uses: kungfu-trader/action-publish-prebuilt@main
         with:
           artifacts-path: 'github-artifacts'
 
       - name: Clean Stale Packages
-        if: ${{ needs.prepare.outputs.publishable  == 'true' }}
         uses: kungfu-trader/action-clean-packages@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           action-path: ${{ github.action_path }}
 
       - name: Publish to GitHub Packages
-        if: ${{ needs.prepare.outputs.publishable  == 'true' }}
         run: yarn publish-package
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push New Version
+        if: ${{ github.event.pull_request.merged }}
+        uses: kungfu-trader/action-bump-version@v2.1.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          head-ref: ${{ github.head_ref}}
+          base-ref: ${{ github.base_ref }}
+          action: "publish"

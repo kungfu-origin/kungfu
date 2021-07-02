@@ -1,0 +1,23 @@
+name: Admin - Bump Major Version
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type confirm to bump major version'
+        required: true
+        default: 'cancel'
+
+jobs:
+  bump:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Bump Version
+        if: ${{ github.event.inputs.confirm  == 'confirm' }}
+        uses: kungfu-trader/action-bump-version@v2.1.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          head-ref: main
+          base-ref: main

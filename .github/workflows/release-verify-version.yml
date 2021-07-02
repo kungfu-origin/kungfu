@@ -1,0 +1,23 @@
+name: Release - Verify Version
+on:
+  pull_request:
+    types: [opened]
+    branches:
+      - alpha/v*/v*
+      - release/v*/v*
+      - main
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Verify
+        uses: kungfu-trader/action-bump-version@v2.1.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          head-ref: ${{ github.head_ref}}
+          base-ref: ${{ github.base_ref }}
+          action: "verify"

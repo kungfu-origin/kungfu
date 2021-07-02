@@ -1,7 +1,9 @@
-name: Post Commit
+name: Build - Build Only
 
 on:
   push:
+    branches:
+      - dev/v*/v*
 
 jobs:
   prepare:
