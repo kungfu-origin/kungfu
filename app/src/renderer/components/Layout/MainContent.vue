@@ -65,6 +65,7 @@ import { getAuthClient } from "@authing/vue-ui-components"
 
 const { Menu, getCurrentWindow } = remote;
 
+
 export default {
     name: 'main-content',
     props: {

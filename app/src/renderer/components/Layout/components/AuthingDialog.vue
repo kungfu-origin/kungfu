@@ -15,6 +15,8 @@
         @register-error="handleError"
         @pwd-reset="handlePwdReset"
         @pwd-reset-error="handleError"
+        @pwd-email-send-error="handleError"
+        @pwd-phone-send-error="handleError"
         @close="handleClose"
         ></AuthingGuard>
     <!-- </div> -->
@@ -23,7 +25,6 @@
 <script>
 import { AuthingGuard, initAuthClient, GuardMode } from '@authing/vue-ui-components'
 import '@authing/vue-ui-components/lib/index.min.css'
-
 
 const AUTH_APPID = "60d974a92ad414330a2c6f8c";
 
@@ -47,9 +48,7 @@ export default {
         this.AUTH_APPID = AUTH_APPID;
         this.GuardMode = GuardMode;
 
-        return {
-
-        }
+        return {}
     },
 
     mounted () {
@@ -62,8 +61,8 @@ export default {
         handleLogin (res) {
             const loginInfo = Object.freeze(res);
             this.$store.dispatch('setLoginInfo', loginInfo)
+            this.$message.success('登陆成功！');   
             this.handleClose();
-            this.$message.success('登陆成功！')
         },
 
         handleRegister (res) {
@@ -92,14 +91,6 @@ export default {
 
 <style lang="scss">
 @import '@/assets/scss/skin.scss';
-
-// #authing_guard_container {
-//     position: fixed;
-//     left: 50%;
-//     top: 50%;
-//     transform: translateX(-50%) translateY(-50%);
-//     z-index: 101;
-// }
 
 .authing-ant-message {
     display: none;
@@ -163,6 +154,14 @@ export default {
 
 [class*=authing-].authing-guard-close-btn:hover {
     color: $vi;
+}
+
+[class*=authing-].authing-ant-spin-dot-spin {
+    color: $vi;
+}
+
+[class*=authing-].authing-ant-spin-dot-item {
+    background-color: $vi;
 }
 
 

@@ -41,7 +41,10 @@
         :loading="exportAllTradingDataByDateDateRangeDialogLoading" 
         ></date-picker-dialog>
 
-        <AuthDialog :visible.sync="authingGuardVisiblity"></AuthDialog>
+        <AuthDialog 
+            :visible.sync="authingGuardVisiblity" 
+            v-if="authingGuardVisiblity"
+        ></AuthDialog>
 
     </div>
 </template>
