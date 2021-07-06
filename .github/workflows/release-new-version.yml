@@ -150,5 +150,3 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           action: "postbuild"
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
