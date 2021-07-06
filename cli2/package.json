@@ -1,6 +1,6 @@
 {
   "name": "kungfu-cli",
-  "version": "2.3.6",
+  "version": "2.3.7",
   "description": "KungFu Trader Cli",
   "license": "Apache-2.0",
   "homepage": "https://github.com/taurusai/kungfu",
@@ -39,8 +39,8 @@
   },
   "dependencies": {
     "@babel/polyfill": "^7.2.5",
-    "@kungfu-trader/kungfu-core": "*",
-    "@kungfu-trader/kungfu-shared": "*",
+    "@kungfu-trader/kungfu-core": "^2.3.7",
+    "@kungfu-trader/kungfu-shared": "^2.3.7",
     "bindings": "^1.5.0",
     "blessed": "^0.1.81",
     "blessed-contrib": "^4.8.16",

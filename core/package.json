@@ -1,7 +1,7 @@
 {
   "name": "@kungfu-trader/kungfu-core",
   "author": "Kungfu Origin",
-  "version": "2.3.0",
+  "version": "2.3.7",
   "description": "Kungfu Core",
   "license": "Apache-2.0",
   "main": "node/index.js",
@@ -9,7 +9,7 @@
     "url": "https://github.com/kungfu-trader/kungfu.git"
   },
   "publishConfig": {
-    "registry":"https://npm.pkg.github.com"
+    "registry": "https://npm.pkg.github.com"
   },
   "bin": {
     "kf-info": ".build-tools/kf-info.js",

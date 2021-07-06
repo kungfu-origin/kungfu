@@ -1,19 +1,18 @@
 {
   "name": "@kungfu-trader/kungfu-shared",
   "author": "Kungfu Origin",
-  "version": "1.0.0",
+  "version": "2.3.7",
   "description": "Kungfu Shared",
   "license": "Apache-2.0",
   "repository": {
     "url": "https://github.com/kungfu-trader/kungfu.git"
   },
   "publishConfig": {
-    "registry":"https://npm.pkg.github.com"
+    "registry": "https://npm.pkg.github.com"
   },
   "main": "",
   "types": "typings/index.d.ts",
   "scripts": {
     "publish-package": "npm publish"
-  },
-  "dependencies": {}
+  }
 }
