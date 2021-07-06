@@ -12,7 +12,8 @@
     "version": {
       "allowBranch": [
         "main",
-        "dev/**"
+        "release/**",
+        "alpha/**"
       ]
     }
   }

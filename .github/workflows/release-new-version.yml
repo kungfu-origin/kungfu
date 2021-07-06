@@ -6,7 +6,6 @@ on:
     branches:
       - alpha/v*/v*
       - release/v*/v*
-      - main
 
 jobs:
   prepare:
@@ -22,6 +21,7 @@ jobs:
 
   build:
     needs: prepare
+    if: ${{ github.event.pull_request.merged }}
     strategy:
       matrix: ${{ fromJson(needs.prepare.outputs.matrix) }}
     runs-on: ${{ matrix.os }}
@@ -44,13 +44,10 @@ jobs:
           python-version: '3.8'
 
       - name: Bump Version
-        if: ${{ github.event.pull_request.merged }}
-        uses: kungfu-trader/action-bump-version@v2.1.0
+        uses: kungfu-trader/action-bump-version@v2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          head-ref: ${{ github.head_ref}}
-          base-ref: ${{ github.base_ref }}
-          action: "bump"
+          action: "prebuild"
 
       - name: Setup Kungfu environment
         run: |
@@ -98,6 +95,7 @@ jobs:
 
   publish:
     needs: [prepare, build]
+    if: ${{ github.event.pull_request.merged }}
     runs-on: ubuntu-20.04
     container: 'docker.io/kungfutrader/kungfu-builder-centos:main'
     steps:
@@ -109,6 +107,12 @@ jobs:
         with:
           registry-url: 'https://npm.pkg.github.com'
           scope: '@kungfu-trader'
+
+      - name: Bump Version
+        uses: kungfu-trader/action-bump-version@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          action: "prebuild"
 
       - name: Download Artifacts
         uses: actions/download-artifact@v2
@@ -140,22 +144,11 @@ jobs:
         with:
           artifacts-path: 'github-artifacts'
 
-      - name: Clean Stale Packages
-        uses: kungfu-trader/action-clean-packages@v1
+      - name: Publish New Version To GitHub
+        if: ${{ github.event.pull_request.merged }}
+        uses: kungfu-trader/action-bump-version@v2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          action-path: ${{ github.action_path }}
-
-      - name: Publish to GitHub Packages
-        run: yarn publish-package
+          action: "postbuild"
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Push New Version
-        if: ${{ github.event.pull_request.merged }}
-        uses: kungfu-trader/action-bump-version@v2.1.0
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          head-ref: ${{ github.head_ref}}
-          base-ref: ${{ github.base_ref }}
-          action: "publish"
