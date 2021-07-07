@@ -33,6 +33,7 @@ function createWindow () {
 		height: height > 1200 ? 1200 : height,
 		useContentSize: true,
 		webPreferences: {
+			webSecurity: false,
 			nodeIntegration: true,
 			nodeIntegrationInWorker: true
 		},

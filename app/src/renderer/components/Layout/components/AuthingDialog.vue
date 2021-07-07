@@ -23,17 +23,15 @@
 </template>
 
 <script>
-import { AuthingGuard, initAuthClient, GuardMode } from '@authing/vue-ui-components'
+import { AuthingGuard, GuardMode } from '@authing/vue-ui-components'
 import '@authing/vue-ui-components/lib/index.min.css'
+import AuthMixin from '@/components/Layout/js/AuthMixin';
 
-const AUTH_APPID = "60d974a92ad414330a2c6f8c";
-
-initAuthClient({
-    appId: AUTH_APPID,
-    appHost: 'https://kungfu.authing.cn',
-})
+const authGuard = require("@authing/vue-ui-components");
 
 export default {
+
+    mixins: [ AuthMixin ],
 
     components: {
         AuthingGuard
@@ -44,16 +42,9 @@ export default {
     },
 
     data () {
-
-        this.AUTH_APPID = AUTH_APPID;
         this.GuardMode = GuardMode;
 
         return {}
-    },
-
-    mounted () {
-        const loginInfo = JSON.parse(localStorage.getItem('login_info') || "{}");
-        this.$store.dispatch('setLoginInfo', Object.freeze(loginInfo));
     },
 
     methods: {
@@ -68,15 +59,16 @@ export default {
         handleRegister (res) {
             const loginInfo = Object.freeze(res);
             this.$store.dispatch('setLoginInfo', loginInfo);
-            this.handleClose();
             this.$message.success('注册成功！')
+            // this.handleClose();
         },
 
-        handlePwdReset (res) {
+        handlePwdReset () {
             this.$message.success("密码修改成功！")
         },
 
         handleError(err) {
+            console.log("Error from handleError")
             this.$store.dispatch('setLoginInfo', {})
             this.$message.error(err.message)
         },
@@ -92,9 +84,9 @@ export default {
 <style lang="scss">
 @import '@/assets/scss/skin.scss';
 
-.authing-ant-message {
-    display: none;
-}
+// .authing-ant-message {
+//     display: none;
+// }
 
 [class*=authing-].authing-guard-container {
     background: $bg_card !important;
@@ -164,5 +156,16 @@ export default {
     background-color: $vi;
 }
 
+[class*=authing-].authing-guard-complete-info-title {
+    color: $icon;
+}
+
+[class*=authing-].authing-ant-form-item-label>label {
+    color: $icon;
+}
+
+[class*=authing-].authing-guard-complete-info-msg {
+    color: $font;
+}
 
 </style>

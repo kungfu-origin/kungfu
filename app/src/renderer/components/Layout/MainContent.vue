@@ -59,15 +59,18 @@
 
 import { mapState } from 'vuex';
 import { remote } from 'electron'
-import EngineStatus from './components/EngineStatus';
-import CoreStatus from './components/CoreStatus';
-import { getAuthClient } from "@authing/vue-ui-components"
+import EngineStatus from '@/components/Layout/components/EngineStatus';
+import CoreStatus from '@/components/Layout/components/CoreStatus';
+import AuthMixin from '@/components/Layout/js/AuthMixin';
 
 const { Menu, getCurrentWindow } = remote;
 
 
 export default {
     name: 'main-content',
+
+    mixins: [ AuthMixin ],
+
     props: {
         ifSideBar: {
             type: Boolean,
@@ -87,13 +90,18 @@ export default {
         }
     },
 
+    mounted () {
+        this.initAuthToken();
+        this.checkAuthToken();
+    },
+
     computed: {
         ...mapState({
             loginInfo: state => state.BASE.loginInfo || {}
         }),
 
         isActivated () {
-            return this.loginInfo.status || false;
+            return this.loginInfo.status === "Activated" || false;
         },
 
         photo () {
@@ -138,7 +146,7 @@ export default {
             const template = [{
 		        label: `${this.showName}`,
                 submenu: [
-			        { label: "退出登录", click: () => this.handleLogout() }
+			        { label: "退出登录", click: () => this.authLogout() }
                 ]
             }]
             const menu = Menu.buildFromTemplate(template);
@@ -149,19 +157,6 @@ export default {
                         x,
                         y
                     })
-                })
-
-        },
-
-        handleLogout () {
-            return getAuthClient()
-                .logout()
-                .then(() => {
-                    this.$store.dispatch('setLoginInfo', {})
-                    this.$message.success('退出登陆成功！')
-                })
-                .catch(err => {
-                    this.$message.error(err.message || "退出登陆失败！")
                 })
 
         },
