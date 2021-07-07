@@ -12,8 +12,9 @@
         <div class="kf-login-info__warp">
             <div class="kf-login-info__header-content">
                 <div class="header-image__content">
-                    <div class="header-image__box">
+                    <div class="header-image__box" @click.stop="handleUploadHeadImage">
                         <img :src="this.photo" width="100%" height="100%" alt="">
+                        <div class="upload-head-image-btn">修改</div>
                     </div>
                 </div>
                 <div class="header-info__content">
@@ -130,6 +131,18 @@ export default {
     },
 
     methods: {
+        handleUploadHeadImage () {
+            return getAuthClient()
+                .uploadAvatar()
+                .then(loginInfo => {
+                    this.$store.dispatch("setLoginInfo", Object.freeze(loginInfo));
+                    this.$message.success("更新头像成功！");
+                })
+                .catch(err => {
+                    this.$message.error(err.message);
+                })
+        },
+
         handleCancel () {
             this.$emit("update:visible", false)
         },
@@ -201,6 +214,28 @@ export default {
                 height: 70px;
                 border-radius: 50%;
                 overflow: hidden;
+                position: relative;
+
+                &:hover {
+
+                    .upload-head-image-btn {
+                        display: block;
+                    }
+                }
+
+                .upload-head-image-btn {
+                    display: none;
+                    width: 100%;
+                    height: 20px;
+                    line-height: 20px;
+                    background: rgba($color: #000000, $alpha: 0.6);
+                    color: $white;
+                    font-size: 12px;
+                    text-align: center;
+                    position: absolute;
+                    left: 0;
+                    bottom: 0;
+                }
             }
         }
 
