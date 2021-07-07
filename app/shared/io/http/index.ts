@@ -1,5 +1,5 @@
 import axios from "axios";
-//@ts-ignore
+// @ts-ignore
 import httpAdapters from 'axios/lib/adapters/http';
 
 axios.defaults.adapter = httpAdapters;

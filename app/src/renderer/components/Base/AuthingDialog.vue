@@ -25,13 +25,11 @@
 <script>
 import { AuthingGuard, GuardMode } from '@authing/vue-ui-components'
 import '@authing/vue-ui-components/lib/index.min.css'
-import AuthMixin from '@/components/Layout/js/AuthMixin';
-
-const authGuard = require("@authing/vue-ui-components");
+import authMixin from '@/components/Base/js/authMixin';
 
 export default {
 
-    mixins: [ AuthMixin ],
+    mixins: [ authMixin ],
 
     components: {
         AuthingGuard
@@ -60,7 +58,7 @@ export default {
             const loginInfo = Object.freeze(res);
             this.$store.dispatch('setLoginInfo', loginInfo);
             this.$message.success('注册成功！')
-            // this.handleClose();
+            this.handleClose();
         },
 
         handlePwdReset () {

@@ -57,11 +57,10 @@
 
 <script>
 
-import { mapState } from 'vuex';
 import { remote } from 'electron'
 import EngineStatus from '@/components/Layout/components/EngineStatus';
 import CoreStatus from '@/components/Layout/components/CoreStatus';
-import AuthMixin from '@/components/Layout/js/AuthMixin';
+import authMixin from '@/components/Base/js/authMixin';
 
 const { Menu, getCurrentWindow } = remote;
 
@@ -69,7 +68,7 @@ const { Menu, getCurrentWindow } = remote;
 export default {
     name: 'main-content',
 
-    mixins: [ AuthMixin ],
+    mixins: [ authMixin ],
 
     props: {
         ifSideBar: {
@@ -90,52 +89,6 @@ export default {
         }
     },
 
-    mounted () {
-        this.initAuthToken();
-        this.checkAuthToken();
-    },
-
-    computed: {
-        ...mapState({
-            loginInfo: state => state.BASE.loginInfo || {}
-        }),
-
-        isActivated () {
-            return this.loginInfo.status === "Activated" || false;
-        },
-
-        photo () {
-            return this.loginInfo.photo || false
-        },
-
-        registerSource () {
-            return this.loginInfo.registerSource || [];
-        },
-
-        name () {
-            return this.loginInfo.name || this.loginInfo.nickname || '';
-        },
-
-        email () {
-            return this.loginInfo.email || '';
-        },
-
-        phone () {
-            return this.loginInfo.phone || '';
-        },
-
-        showName () {
-            if (this.name) return this.name;
-
-            //email
-            if (this.loginInfo.registerSource.includes("basic:email")) {
-                return this.email
-            } else if (this.loginInfo.registerSource.includes("basic:phone-code")) {
-                return this.photo 
-            }
-        }
-    },
-
     components: {
         EngineStatus,
 		CoreStatus,
@@ -146,6 +99,7 @@ export default {
             const template = [{
 		        label: `${this.showName}`,
                 submenu: [
+			        { label: "个人中心", click: () => this.openLoginInfoDialog() },
 			        { label: "退出登录", click: () => this.authLogout() }
                 ]
             }]

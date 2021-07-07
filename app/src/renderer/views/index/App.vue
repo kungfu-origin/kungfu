@@ -46,6 +46,13 @@
             v-if="authingGuardVisiblity"
         ></AuthDialog>
 
+        <LoginInfoDialog
+            :visible.sync="userInfoDialogVisiblity" 
+            v-if="userInfoDialogVisiblity"
+            :loginInfo="loginInfo"
+        >
+        </LoginInfoDialog>
+
     </div>
 </template>
 <script>
@@ -53,9 +60,10 @@
 import { mapState } from 'vuex';
 
 import GlobalSettingDialog from '@/components/Base/GlobalSettingDialog';
+import LoginInfoDialog from '@/components/Base/LoginInfoDialog';
 import DatePickerDialog from '@/components/Base/DatePickerDialog';
-import SystemPrepareDialog from '@/components/Layout/components/SystemPrepareDialog';
-import AuthDialog from '@/components/Layout/components/AuthingDialog';
+import AuthDialog from '@/components/Base/AuthingDialog';
+import SystemPrepareDialog from '@/components/Base/SystemPrepareDialog';
 
 import { buildMarketDataPipeByDaemon, buildTradingDataAccountPipeByDaemon, buildKungfuGlobalDataPipeByDaemon } from '@/ipcMsg/daemon';
 import { buildGatewayStatePipe } from '__io/kungfu/tradingData';
@@ -64,13 +72,14 @@ import { watcher } from '__io/kungfu/watcher';
 import ipcListenerMixin from '@/ipcMsg/ipcListenerMixin';
 import tickerSetMixin from '@/components/MarketFilter/js/tickerSetMixin';
 import workersMixin from '@/workers/workersMixin';
+import authMixin from '@/components/Base/js/authMixin';
 
 
 
 export default {
     name: 'app',
 
-    mixins: [ ipcListenerMixin, tickerSetMixin, workersMixin ],
+    mixins: [ ipcListenerMixin, tickerSetMixin, workersMixin, authMixin ],
 
     data() {
         this.kungfuGloablDataObserver = null;
@@ -79,6 +88,7 @@ export default {
 
             globalSettingDialogVisiblity: false,
             authingGuardVisiblity: false,
+            userInfoDialogVisiblity: false,
           
             loadingData: {
                 archive: false,
@@ -91,6 +101,7 @@ export default {
     components: {
         DatePickerDialog,
         GlobalSettingDialog,
+        LoginInfoDialog,
         SystemPrepareDialog,
         AuthDialog
     },
@@ -102,6 +113,9 @@ export default {
 
         this.removeLoadingMask();
         this.removeKeyDownEvent();
+
+        this.initAuthToken();
+        this.checkAuthToken();
 
         this.$store.dispatch('getTdMdList');
         this.$store.dispatch('getStrategyList');
@@ -128,6 +142,7 @@ export default {
         ...mapState({
             processStatus: state => state.BASE.processStatus || {},
             daemonIsLive: state => state.BASE.daemonIsLive || false,
+            loginInfo: state => state.BASE.loginInfo || {}
         }),
 
         watcherLoading () {
@@ -186,6 +201,10 @@ export default {
 
             this.$bus.$on('open-authing-guard', () => {
                 this.authingGuardVisiblity = true;
+            })
+
+            this.$bus.$on('open-login-info-dialog', () => {
+                this.userInfoDialogVisiblity = true;
             })
         },
 

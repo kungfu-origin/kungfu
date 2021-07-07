@@ -1,6 +1,6 @@
 <template>
 <el-dialog
-	custom-class="global-setting-dialog"
+	custom-class="kf-global-setting-dialog"
 	width="90%"
 	title="全局设置"
 	top="5vh"
@@ -233,7 +233,7 @@ Vue.use(Collapse);
 Vue.use(CollapseItem);
 
 export default {
-	name: "global-setting-dialog",
+	name: "kf-global-setting-dialog",
 
 	mixins: [ openLogMixin ],
 
@@ -360,10 +360,11 @@ export default {
 		},
 
 		setActiveMenu () {
+			const offsetTop = window.innerHeight * 5% + 55;
 			const $settingItems = Array().slice.call(document.querySelectorAll('.global-setting-item'));
 			const visibleItems = $settingItems.filter(settingItem => {
 				const visibleData = settingItem.getBoundingClientRect();
-				const top = visibleData.top - 145;
+				const top = visibleData.top - offsetTop; // 105 = 50(dialog offset top) + 55 (dialog header height)
 				if(top > 0) return true;
 				else return false;
 			})
@@ -417,7 +418,7 @@ export default {
 
 <style lang="scss">
 @import "@/assets/scss/skin.scss";
-.global-setting-dialog {
+.kf-global-setting-dialog {
 height: 88%;
 .el-dialog__body {
 	height: calc(100% - 55px);
