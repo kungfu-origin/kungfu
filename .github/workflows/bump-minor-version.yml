@@ -9,7 +9,8 @@ on:
 jobs:
   bump:
     if: ${{ github.event.pull_request.merged }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
+    container: 'docker.io/kungfutrader/kungfu-builder-centos:v1.0.1'
     steps:
       - name: Checkout
         uses: actions/checkout@v2
