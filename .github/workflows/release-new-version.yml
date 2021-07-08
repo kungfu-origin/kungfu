@@ -44,9 +44,9 @@ jobs:
           python-version: '3.8'
 
       - name: Bump Version
-        uses: kungfu-trader/action-bump-version@v2
+        uses: kungfu-trader/action-bump-version@v3
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.KUNGFU_GITHUB_TOKEN }}
           action: "prebuild"
 
       - name: Setup Kungfu environment
@@ -109,9 +109,9 @@ jobs:
           scope: '@kungfu-trader'
 
       - name: Bump Version
-        uses: kungfu-trader/action-bump-version@v2
+        uses: kungfu-trader/action-bump-version@v3
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.KUNGFU_GITHUB_TOKEN }}
           action: "prebuild"
 
       - name: Download Artifacts
@@ -146,7 +146,7 @@ jobs:
 
       - name: Publish New Version To GitHub
         if: ${{ github.event.pull_request.merged }}
-        uses: kungfu-trader/action-bump-version@v2
+        uses: kungfu-trader/action-bump-version@v3
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.KUNGFU_GITHUB_TOKEN }}
           action: "postbuild"

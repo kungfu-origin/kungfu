@@ -16,6 +16,6 @@ jobs:
 
       - name: Bump Version
         if: ${{ github.event.inputs.confirm  == 'confirm' }}
-        uses: kungfu-trader/action-bump-version@v2
+        uses: kungfu-trader/action-bump-version@v3
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.KUNGFU_GITHUB_TOKEN }}

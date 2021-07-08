@@ -3,8 +3,8 @@ on:
   pull_request:
     types: [opened]
     branches:
-      - alpha/v*/v*
-      - release/v*/v*
+      - alpha/*/*
+      - release/*/*
       - main
 
 jobs:
@@ -15,7 +15,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Verify
-        uses: kungfu-trader/action-bump-version@v2
+        uses: kungfu-trader/action-bump-version@v3
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           action: "verify"
