@@ -1,7 +1,7 @@
 {
   "name": "@kungfu-trader/kungfu-shared",
   "author": "Kungfu Origin",
-  "version": "2.3.7",
+  "version": "2.4.0-alpha.0",
   "description": "Kungfu Shared",
   "license": "Apache-2.0",
   "repository": {
