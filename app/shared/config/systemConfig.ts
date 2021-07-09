@@ -225,7 +225,7 @@ export const getSystemTradingConfig = (): { [propName: string]: SystemConfigItem
         {
           "key": "Futrue",
           "name": "期货",
-          "tip": "仅为期货手续费设置，股票手续费会自动读取，无需设置，设置完成后需重启Kungfu",
+          "tip": "仅为期货手续费设置，股票手续费会自动读取，无需设置，设置完成后需重启功夫交易系统",
           "type": SystemConfigChildItemTypeEnum.Table,
           "target": "commission",
           "unique_key": "row_id",

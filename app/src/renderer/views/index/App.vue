@@ -1,47 +1,38 @@
 <template>
     <div id="app">
         <router-view></router-view>
+
         <GlobalSettingDialog
             v-if="globalSettingDialogVisiblity"
             :visible.sync="globalSettingDialogVisiblity"
         >
         </GlobalSettingDialog>
 
-        <el-dialog
+        <SystemPrepareDialog
         title="系统提示"
-        class="system-prepare-dialog"
         :visible="watcherLoading"
-        :show-close="false"
-        :close-on-click-modal="false"
-        width="450px"
-        >
-            <div style="margin: 10px 0 20px">
-                <tr-status :value="loadingData.archive ? '100' : '3'" :hasText="false"></tr-status>
-                {{ loadingData.archive ? '功夫归档完成 ✓' : '功夫归档中...' }}
-            </div>
-            <div style="margin: 10px 0 20px">
-                <tr-status :value="loadingData.watcher ? '100' : '3'" :hasText="false"></tr-status>
-                {{ loadingData.watcher ? '功夫环境准备完成 ✓' : '功夫环境准备中...' }}
-            </div>
-            <div style="margin: 10px 0 20px">
-                <tr-status :value="loadingData.daemon ? '100' : '3'" :hasText="false"></tr-status>
-                {{ loadingData.daemon ? '功夫数据通信已建立 ✓' : '等待功夫数据通信建立...' }}
-            </div>
-        </el-dialog>
+        :status="[
+            { key: 'archive', status: loadingData.archive },
+            { key: 'watcher', status: loadingData.watcher },
+            { key: 'daemon', status: loadingData.daemon },
+        ]"
+        :tips="{
+            'archive': { done: '功夫归档完成 ✓',     loading: '功夫归档中...' },
+            'watcher': { done: '功夫环境准备完成 ✓',  loading: '功夫环境准备中...' },
+            'daemon':  { done: '功夫数据通信已建立 ✓', loading: '等待功夫数据通信建立...' },
+        }"
+        ></SystemPrepareDialog>
 
-        <el-dialog
+        <SystemPrepareDialog
         title="系统提示"
-        class="system-prepare-dialog"
-        :visible.sync="recordBeforeQuitLoading"
-        :show-close="false"
-        :close-on-click-modal="false"
-        width="450px"
-        >
-            <div style="margin: 10px 0 20px">
-                <tr-status :value="'3'" :hasText="false"></tr-status>
-                退出前保存数据中，请勿关闭
-            </div>
-        </el-dialog>
+        :visible="recordBeforeQuitLoading"
+        :status="[
+            { key: 'record', status: recordBeforeQuitLoading },
+        ]"
+        :tips="{
+            'record': { done: '保存数据完成 ✓',     loading: '退出前保存数据中，请勿关闭...' },
+        }"
+        ></SystemPrepareDialog>
 
         <date-picker-dialog 
         @confirm="handleConfirmDateRangeForExportAllTradingData"
@@ -50,6 +41,18 @@
         :loading="exportAllTradingDataByDateDateRangeDialogLoading" 
         ></date-picker-dialog>
 
+        <AuthDialog 
+            :visible.sync="authingGuardVisiblity" 
+            v-if="authingGuardVisiblity"
+        ></AuthDialog>
+
+        <LoginInfoDialog
+            :visible.sync="userInfoDialogVisiblity" 
+            v-if="userInfoDialogVisiblity"
+            :loginInfo="loginInfo"
+        >
+        </LoginInfoDialog>
+
     </div>
 </template>
 <script>
@@ -57,7 +60,10 @@
 import { mapState } from 'vuex';
 
 import GlobalSettingDialog from '@/components/Base/GlobalSettingDialog';
+import LoginInfoDialog from '@/components/Base/LoginInfoDialog';
 import DatePickerDialog from '@/components/Base/DatePickerDialog';
+import AuthDialog from '@/components/Base/AuthingDialog';
+import SystemPrepareDialog from '@/components/Base/SystemPrepareDialog';
 
 import { buildMarketDataPipeByDaemon, buildTradingDataAccountPipeByDaemon, buildKungfuGlobalDataPipeByDaemon } from '@/ipcMsg/daemon';
 import { buildGatewayStatePipe } from '__io/kungfu/tradingData';
@@ -66,12 +72,14 @@ import { watcher } from '__io/kungfu/watcher';
 import ipcListenerMixin from '@/ipcMsg/ipcListenerMixin';
 import tickerSetMixin from '@/components/MarketFilter/js/tickerSetMixin';
 import workersMixin from '@/workers/workersMixin';
+import authMixin from '@/components/Base/js/authMixin';
+
 
 
 export default {
     name: 'app',
 
-    mixins: [ ipcListenerMixin, tickerSetMixin, workersMixin ],
+    mixins: [ ipcListenerMixin, tickerSetMixin, workersMixin, authMixin ],
 
     data() {
         this.kungfuGloablDataObserver = null;
@@ -79,7 +87,8 @@ export default {
         return {
 
             globalSettingDialogVisiblity: false,
-            
+            authingGuardVisiblity: false,
+            userInfoDialogVisiblity: false,
           
             loadingData: {
                 archive: false,
@@ -91,7 +100,10 @@ export default {
 
     components: {
         DatePickerDialog,
-        GlobalSettingDialog
+        GlobalSettingDialog,
+        LoginInfoDialog,
+        SystemPrepareDialog,
+        AuthDialog
     },
 
     mounted(){
@@ -102,6 +114,9 @@ export default {
         this.removeLoadingMask();
         this.removeKeyDownEvent();
 
+        this.initAuthToken();
+        this.checkAuthToken();
+
         this.$store.dispatch('getTdMdList');
         this.$store.dispatch('getStrategyList');
         this.$store.dispatch('getAccountSourceConfig');
@@ -111,9 +126,10 @@ export default {
         this.bindKungfuGlobalDataListener();
         this.bindTradingDataListener();
         this.bindQuotesListener();
+        this.bindBusEvent();
+        this.bindMdTdStateChangeEvent();
 
         this.getWatcherStatus();
-        this.bindMdTdStateChangeEvent();
     },
 
     beforeDestroy() {
@@ -125,7 +141,8 @@ export default {
     computed: {
         ...mapState({
             processStatus: state => state.BASE.processStatus || {},
-            daemonIsLive: state => state.BASE.daemonIsLive || false
+            daemonIsLive: state => state.BASE.daemonIsLive || false,
+            loginInfo: state => state.BASE.loginInfo || {}
         }),
 
         watcherLoading () {
@@ -149,7 +166,6 @@ export default {
     },
 
     methods: {
-
         bindQuotesListener () {
             buildMarketDataPipeByDaemon().subscribe(data => {
                 this.$store.dispatch('setQuotes', Object.freeze(Object.values(data)))   
@@ -163,7 +179,34 @@ export default {
             })
         },
 
+        bindKungfuGlobalDataListener () {
+            this.kungfuGloablDataObserver = buildKungfuGlobalDataPipeByDaemon().subscribe(data => {
+                //非常有必要，需要确保daemon进程watcherisLive
+                const daemonIsLive = data["daemonIsLive"] || false;
+                this.$store.dispatch("setDaemonIsLive", daemonIsLive)
+                
+            })
 
+            this.kungfuGatewayStateObserver = buildGatewayStatePipe().subscribe(data => {
+                const gatewayStates = data["gatewayStates"] || [];
+                this.dealGatewayStates(gatewayStates);
+
+            })
+        },
+
+        bindBusEvent () {
+            this.$bus.$on('open-global-setting', () => {
+                this.globalSettingDialogVisiblity = true;
+            })
+
+            this.$bus.$on('open-authing-guard', () => {
+                this.authingGuardVisiblity = true;
+            })
+
+            this.$bus.$on('open-login-info-dialog', () => {
+                this.userInfoDialogVisiblity = true;
+            })
+        },
 
         removeLoadingMask () {
             if(document.getElementById('loading')) document.getElementById('loading').remove();
@@ -187,20 +230,7 @@ export default {
             }, 100)
         },
 
-        bindKungfuGlobalDataListener () {
-            this.kungfuGloablDataObserver = buildKungfuGlobalDataPipeByDaemon().subscribe(data => {
-                //非常有必要，需要确保daemon进程watcherisLive
-                const daemonIsLive = data["daemonIsLive"] || false;
-                this.$store.dispatch("setDaemonIsLive", daemonIsLive)
-                
-            })
-
-            this.kungfuGatewayStateObserver = buildGatewayStatePipe().subscribe(data => {
-                const gatewayStates = data["gatewayStates"] || [];
-                this.dealGatewayStates(gatewayStates);
-
-            })
-        },
+ 
 
         dealGatewayStates (gatewayStates) {
             gatewayStates.forEach(gatewayState => {
@@ -252,15 +282,12 @@ export default {
 
 <style lang="scss">
 @import '@/assets/scss/base.scss';
- #app{
-   height: 100%;
-   background: $login-bg;
- }
 
- .system-prepare-dialog {
-    .tr-dot-content {
-        margin-right: 5px;
-    }
- }
+#app{
+    height: 100%;
+    background: $login-bg;
+}
+
+
 
 </style>

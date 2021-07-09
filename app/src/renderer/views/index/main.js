@@ -17,6 +17,7 @@ import '@/assets/iconfont/iconfont.js';
 import '@/assets/iconfont/iconfont.css';
 import '@/assets/scss/makeOrder.scss';
 import moment from 'moment';
+import '__io/http/index';
 
 Vue.use(ElementUI)
 Vue.use(Components)

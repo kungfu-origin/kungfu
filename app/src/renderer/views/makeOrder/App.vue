@@ -53,10 +53,4 @@ export default {
    background: $login-bg;
  }
 
- .system-prepare-dialog {
-    .tr-dot-content {
-        margin-right: 5px;
-    }
- }
-
 </style>

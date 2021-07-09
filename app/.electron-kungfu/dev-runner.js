@@ -75,7 +75,10 @@ function startRenderer () {
           ctx.middleware.waitUntilValid(() => {
             resolve()
           })
-        }
+        },
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+        },
       }
     )
 

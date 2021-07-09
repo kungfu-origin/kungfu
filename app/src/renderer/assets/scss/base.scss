@@ -19,6 +19,7 @@ body {
     text-rendering: optimizelegibility;
     position: relative;
     overflow: hidden;
+    user-select: none;
 }
 body,html{
     height: 100%;
