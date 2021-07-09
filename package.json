@@ -15,7 +15,7 @@
   "scripts": {
     "build": "wsrun --serial --fast-exit --exclude-missing build",
     "build-cli": "wsrun --serial --fast-exit --exclude-missing build-cli",
-    "clean": "wsrun clean",
+    "clean": "wsrun clean"
   },
   "dependencies": {
     "@mapbox/node-pre-gyp": "^1.0.0",
