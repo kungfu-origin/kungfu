@@ -14,6 +14,7 @@
       :class="{ 'is-radio': item.type === 'radio' }"
     >
       <el-col :span="19">
+        <div class="readonly-box" v-if="item.type === 'readonly'">{{ form[item.key] || '-' }}</div>
         <el-input
           size="mini"
           :disabled="isDisabled(item.key)"
@@ -113,6 +114,14 @@
           }"
         >
         </el-time-picker>
+        <el-date-picker
+          size="mini"
+          :class="item.key"
+          v-if="item.type === 'date'"
+          v-model="form[item.key]"
+          type="date"
+          >
+        </el-date-picker>
         <el-select
           :disabled="isDisabled(item.key)"
           :class="item.key"

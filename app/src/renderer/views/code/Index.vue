@@ -1,5 +1,5 @@
 <template>
-<MainContent :ifSideBar="false">
+<MainContent>
     <div class="code-content">
         <FileTree :strategy="strategy" @updateStrategy="handleUpdateStrategy"></FileTree>
         <Editor ref='code-editor'></Editor>
