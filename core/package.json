@@ -22,7 +22,7 @@
     "arch": "x64",
     "pypi": "http://mirrors.aliyun.com/pypi/simple",
     "python_version": "3.7",
-    "node_version": "12.22.0",
+    "node_version": "10.15.0",
     "electron_version": "4.2.11"
   },
   "binary": {
