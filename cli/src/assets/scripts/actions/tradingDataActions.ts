@@ -4,7 +4,7 @@
  * @LastEditTime: 2020-05-25 12:46:34
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
- * @FilePath: /kungfu/cli2/src/assets/scripts/actions/tradingDataActions.ts
+ * @FilePath: /kungfu/cli/src/assets/scripts/actions/tradingDataActions.ts
  */ 
 import { map } from 'rxjs/operators';
 import { buildKungfuDataByAppPipe } from '__io/kungfu/tradingData';

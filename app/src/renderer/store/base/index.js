@@ -22,7 +22,9 @@ export default {
         currentTask: {},
         taskExtConfigList: [],
 
-        daemonIsLive: false
+        daemonIsLive: false,
+
+        loginInfo: Object.freeze({}),
     },
 
     actions: {
@@ -93,10 +95,20 @@ export default {
 
         setDaemonIsLive ({ commit }, daemonIsLive) {
             commit("SET_DAEMON_IS_LIVE", daemonIsLive);
+        },
+
+        setLoginInfo ({ commit }, loginInfo) {
+            localStorage.setItem('login_info', JSON.stringify(loginInfo));
+            localStorage.setItem('login_token', loginInfo.token || "");
+            commit('SET_LOGIN_INFO', loginInfo)
         }
     },
 
     mutations: {
+        SET_LOGIN_INFO (state, loginInfo) {
+            state.loginInfo = loginInfo;
+        },
+
         SET_DAEMON_IS_LIVE (state, daemonIsLive) {
             state.daemonIsLive = daemonIsLive;
         },

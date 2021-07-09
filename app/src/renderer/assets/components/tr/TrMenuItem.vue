@@ -24,6 +24,7 @@ export default {
             required: true
         }
     },
+
     data() {
         return {
 
@@ -86,7 +87,6 @@ export default {
         padding-top:4px;
         color:$font;
     }
-
 }
 .is-active{
     background:  $input_bg;

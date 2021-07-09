@@ -57,7 +57,7 @@
         ]
       },
       {
-        "from": "../cli2/build/cli",
+        "from": "../cli/build/cli",
         "to": "kungfu-cli",
         "filter": [
           "fsevents.node",

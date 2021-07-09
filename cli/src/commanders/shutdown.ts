@@ -4,7 +4,7 @@
  * @LastEditTime: 2020-06-16 20:27:36
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
- * @FilePath: /kungfu/cli2/src/commanders/shutdown.ts
+ * @FilePath: /kungfu/cli/src/commanders/shutdown.ts
  */ 
 
 import { killExtra, killGodDaemon, killKfc, kfKill } from '__gUtils/processUtils';

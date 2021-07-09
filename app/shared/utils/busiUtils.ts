@@ -265,7 +265,9 @@ export const openVueWin = (htmlPath: string, routerPath: string, electronRemote:
             backgroundColor: '#161B2E',
             parent: currentWindow,
             webPreferences: {
-                nodeIntegration: true
+                webSecurity: false,
+                nodeIntegration: true,
+			    nodeIntegrationInWorker: true
             },
             ...windowConfig
         });
@@ -302,7 +304,9 @@ export const openPage = (taskPath: string, electronRemote: any, debugOptions = {
         let win = new BrowserWindow({
             parent: currentWindow,
             webPreferences: {
-                nodeIntegration: true
+                webSecurity: false,
+                nodeIntegration: true,
+			    nodeIntegrationInWorker: true
             },
             ...debugOptions,
 		    backgroundColor: '#161B2E',

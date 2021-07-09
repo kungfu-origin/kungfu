@@ -48,11 +48,10 @@ export default {
 <style lang="scss">
 @import '@/assets/scss/skin.scss';
 .tr-menu{
-    position:absolute;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
     width: 100%;
-    top: calc(50% - 70px);
-    left: 50%;
-    // height: 50%;
-    transform: translateX(-50%) translateY(-50%);
+    justify-content: center;
 }
 </style>
