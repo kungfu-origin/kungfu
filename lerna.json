@@ -5,7 +5,7 @@
     "core",
     "kfext_task_timerTrader",
     "kfext_task_backwards",
-    "cli2",
+    "cli",
     "app"
   ],
   "command": {
