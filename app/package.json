@@ -1,6 +1,6 @@
 {
   "name": "kungfu",
-  "version": "2.4.0-alpha.0",
+  "version": "2.4.0-alpha.1",
   "description": "KungFu Trader App",
   "license": "Apache-2.0",
   "homepage": "https://www.kungfu-trader.com",
@@ -155,7 +155,7 @@
     }
   },
   "dependencies": {
-    "@kungfu-trader/kungfu-core": "^2.4.0-alpha.0",
+    "@kungfu-trader/kungfu-core": "^2.4.0-alpha.1",
     "electron-find": "^1.0.6",
     "fast-csv": "^2.5.0",
     "fkill": "^6.1.0",
