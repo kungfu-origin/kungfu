@@ -13,9 +13,11 @@
     "app"
   ],
   "scripts": {
-    "build": "wsrun --serial --fast-exit --exclude-missing build",
-    "build-cli": "wsrun --serial --fast-exit --exclude-missing build-cli",
-    "clean": "wsrun --serial clean",
+    "preinstall": "wsrun --serial --exclude-missing --fast-exit preinstall",
+    "postinstall": "wsrun --serial --exclude-missing --fast-exit postinstall",
+    "build": "wsrun --serial --exclude-missing --fast-exit build",
+    "build-cli": "wsrun --serial --exclude-missing --fast-exit build-cli",
+    "clean": "wsrun --serial --exclude-missing --fast-exit  clean",
     "rebuild": "yarn run clean && yarn run build"
   },
   "dependencies": {

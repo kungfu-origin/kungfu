@@ -29,6 +29,7 @@
   },
   "scripts": {
     "preinstall": "node .build/config.js set-source-urls",
+    "postinstall": "node .build/config.js show-source-urls",
     "prebuild": "node .build/config.js show-source-urls",
     "install": "yarn run setup",
     "setup": "cross-var node .build/node-pre-gyp.js --build-type $npm_package_config_buildtype install",

@@ -1,13 +1,9 @@
 {
   "name": "@kungfu-trader/kungfu-app",
+  "author": "Kungfu Origin",
   "version": "2.4.0-alpha.1",
-  "description": "KungFu Trader App",
+  "description": "Kungfu App",
   "license": "Apache-2.0",
-  "homepage": "https://www.kungfu-trader.com",
-  "author": {
-    "name": "taurus.ai",
-    "email": "info@taurus.ai"
-  },
   "env": [
     "USE_HARD_LINKS=false"
   ],
@@ -165,7 +161,6 @@
     "jschardet": "^2.3.0",
     "minimist": "^1.2.5",
     "moment": "^2.24.0",
-    "node-pre-gyp": "^0.17.0",
     "pm2": "^4.5.6"
   },
   "devDependencies": {

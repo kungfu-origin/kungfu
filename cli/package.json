@@ -1,17 +1,9 @@
 {
   "name": "@kungfu-trader/kungfu-cli",
+  "author": "Kungfu Origin",
   "version": "2.4.0-alpha.1",
-  "description": "KungFu Trader Cli",
+  "description": "Kungfu CLI",
   "license": "Apache-2.0",
-  "homepage": "https://github.com/taurusai/kungfu",
-  "author": {
-    "name": "taurus.ai",
-    "email": "info@taurus.ai"
-  },
-  "config": {
-    "pyver": "three",
-    "cmakejsopt": ""
-  },
   "main": "./dist/cli/index.js",
   "engines": {
     "node": ">=12"
