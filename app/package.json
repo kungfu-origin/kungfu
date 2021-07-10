@@ -1,5 +1,5 @@
 {
-  "name": "kungfu",
+  "name": "@kungfu-trader/kungfu-app",
   "version": "2.4.0-alpha.1",
   "description": "KungFu Trader App",
   "license": "Apache-2.0",
