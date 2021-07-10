@@ -46,7 +46,7 @@ jobs:
       - name: Bump Version
         uses: kungfu-trader/action-bump-version@v3
         with:
-          token: ${{ secrets.KUNGFU_GITHUB_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           action: "prebuild"
 
       - name: Setup Kungfu environment

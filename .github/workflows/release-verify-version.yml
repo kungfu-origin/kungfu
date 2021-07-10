@@ -17,6 +17,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
+      - name: Verify Version Before Build
+        uses: kungfu-trader/action-bump-version@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          action: "verify"
+
       - name: Get Build Matrix From JSON
         id: set-matrix
         uses: kungfu-trader/action-build-matrix@v1
@@ -75,7 +81,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Verify
+      - name: Verify Version After Build
         uses: kungfu-trader/action-bump-version@v3
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
