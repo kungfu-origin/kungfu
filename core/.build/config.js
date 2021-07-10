@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+const fs = require("fs");
+const path = require("path");
 const {spawnSync} = require("child_process");
 
 const PyPIConfigName = "@kungfu-trader/kungfu-core:pypi";
@@ -13,7 +15,7 @@ const PrebuiltHost_US = "https://kungfu-prebuilt.s3.us-east-1.amazonaws.com";
 
 const spawnOptsInherit = {shell: true, stdio: "inherit", windowsHide: true};
 
-const argv = require("yargs/yargs")(process.argv.slice(2))
+exports.argv = require("yargs/yargs")(process.argv.slice(2))
     .command("set-source-urls", "Set source URLs from where to get prebuilt/packages", (yargs) => {
         yargs.option("name", {
             type: "string",
@@ -46,6 +48,20 @@ const argv = require("yargs/yargs")(process.argv.slice(2))
         };
         show(PyPIConfigName);
         show(`${argv.name}_${PrebuiltConfigSuffix}`);
+    })
+    .command("dir", "Show kungfu core base directory", (yargs) => {
+    }, (argv) => {
+        console.log(fs.realpathSync(path.dirname(__dirname)));
+    })
+    .command("info", "Show kungfu core build info", (yargs) => {
+    }, (argv) => {
+        const buildinfoPath = path.join(path.dirname(__dirname), "build", "kfc", "kungfubuildinfo.json");
+        if (fs.existsSync(buildinfoPath)) {
+            const buildinfo = require(buildinfoPath);
+            console.log(buildinfo);
+        } else {
+            console.warn(`Info file missing, ${buildinfoPath} not exists`);
+        }
     })
     .demandCommand()
     .help()

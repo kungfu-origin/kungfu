@@ -1,4 +1,4 @@
-name: Release - Verify Version
+name: Release - Verify
 on:
   pull_request:
     types: [opened, reopened, synchronize]

@@ -23,7 +23,7 @@ function node_pre_gyp(cmd, argv, check=true) {
     run("yarn", yarn_cmd_arg, check);
 }
 
-const argv = require("yargs/yargs")(process.argv.slice(2))
+exports.argv = require("yargs/yargs")(process.argv.slice(2))
     .command("install", "install through node-pre-gyp", (yargs) => {
     }, (argv) => {
         const skipBuild = "KF_SKIP_FALLBACK_BUILD" in process.env;
