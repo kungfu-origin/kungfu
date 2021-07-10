@@ -1,7 +1,7 @@
 name: Release - Verify Version
 on:
   pull_request:
-    types: [opened]
+    types: [opened, reopened, synchronize]
     branches:
       - alpha/*/*
       - release/*/*
