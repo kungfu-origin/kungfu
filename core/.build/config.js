@@ -34,14 +34,16 @@ exports.argv = require("yargs/yargs")(process.argv.slice(2))
         };
         configure(PyPIConfigName, pypi);
         configure(hostConfigName, prebuiltHost);
+        spawnSync("npm", ["config", "ls"], spawnOptsInherit);
     })
     .command("show-source-urls", "Show source URLs from where to get prebuilt/packages", (yargs) => {
         yargs.option("name", {
             type: "string",
-            default: "kungfu",
+            default: "kungfu_node",
             describe: "name of the prebuilt"
         });
     }, (argv) => {
+        spawnSync("npm", ["config", "ls"], spawnOptsInherit);
         const show = (configName) => {
             process.stdout.write(`${configName} = `);
             spawnSync("npm", ["config", "get", configName], spawnOptsInherit);
