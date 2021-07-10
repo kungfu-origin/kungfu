@@ -30,7 +30,8 @@ exports.argv = require("yargs/yargs")(process.argv.slice(2))
         const configure = (key, value) => {
             const npmArgs = ["config", "set", key, value];
             console.log(`$ npm ${npmArgs.join(' ')}`);
-            spawnSync("npm", npmArgs);
+            const result = spawnSync("npm", npmArgs, spawnOptsInherit);
+            console.log(`\tstatus=${result.status}`);
         };
         configure(PyPIConfigName, pypi);
         configure(hostConfigName, prebuiltHost);
