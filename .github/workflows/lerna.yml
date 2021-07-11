@@ -5,7 +5,7 @@ on:
       - dev/v*/v*
 
 jobs:
-  bump:
+  lerna:
     runs-on: ubuntu-20.04
     container: 'docker.io/kungfutrader/kungfu-builder-centos:v1.0.1'
     env:
@@ -16,4 +16,5 @@ jobs:
 
       - name: Lerna
         run: |
+          npm config ls -l
           lerna publish from-package --preid alpha --yes
