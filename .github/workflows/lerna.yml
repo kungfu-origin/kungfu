@@ -1,0 +1,19 @@
+name: Test Lerna
+on:
+  push:
+    branches:
+      - dev/v*/v*
+
+jobs:
+  bump:
+    runs-on: ubuntu-20.04
+    container: 'docker.io/kungfutrader/kungfu-builder-centos:v1.0.1'
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.KUNGFU_GITHUB_TOKEN }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Lerna
+        run: |
+          lerna publish from-package --preid alpha --yes
