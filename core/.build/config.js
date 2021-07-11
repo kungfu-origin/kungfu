@@ -1,10 +1,12 @@
 #!/usr/bin/env node
 
 const fs = require("fs");
+const os = require("os");
 const path = require("path");
 const {spawnSync} = require("child_process");
 
 const PyPIConfigName = "@kungfu-trader/kungfu-core:pypi";
+const PrebuiltModuleName = "kungfu_node";
 const PrebuiltConfigSuffix = "binary_host_mirror"
 
 const PyPI_US = "https://pypi.python.org/simple";
@@ -13,17 +15,29 @@ const PyPI_CN = "http://mirrors.aliyun.com/pypi/simple";
 const PrebuiltHost_CN = "https://kungfu-prebuilt.s3.cn-northwest-1.amazonaws.com.cn";
 const PrebuiltHost_US = "https://kungfu-prebuilt.s3.us-east-1.amazonaws.com";
 
+const spawnOptsPipe = {shell: true, stdio: "pipe", windowsHide: true};
 const spawnOptsInherit = {shell: true, stdio: "inherit", windowsHide: true};
+
+function showSourceUrl(configName) {
+    const result = spawnSync("npm", ["config", "get", `"${configName}"`], spawnOptsPipe);
+    const output = result.output.filter(e => e && e.length > 0).toString().trimEnd();
+    console.log(`${configName} = ${output}`);
+}
+
+function showSourceUrls(prebuiltName) {
+    showSourceUrl(PyPIConfigName);
+    showSourceUrl(`${prebuiltName}_${PrebuiltConfigSuffix}`);
+}
 
 exports.argv = require("yargs/yargs")(process.argv.slice(2))
     .command("set-source-urls", "Set source URLs from where to get prebuilt/packages", (yargs) => {
         yargs.option("name", {
             type: "string",
-            default: "kungfu_node",
+            default: PrebuiltModuleName,
             describe: "name of the prebuilt"
         });
     }, (argv) => {
-        const buildingInUS = "GITHUB_WORKFLOW" in process.env;
+        const buildingInUS = "GITHUB_ACTION" in process.env;
         const hostConfigName = `${argv.name}_${PrebuiltConfigSuffix}`;
         const pypi = buildingInUS ? PyPI_US : PyPI_CN;
         const prebuiltHost = buildingInUS ? PrebuiltHost_US : PrebuiltHost_CN;
@@ -31,26 +45,23 @@ exports.argv = require("yargs/yargs")(process.argv.slice(2))
             const npmArgs = ["config", "set", key, value];
             console.log(`$ npm ${npmArgs.join(' ')}`);
             const result = spawnSync("npm", npmArgs, spawnOptsInherit);
-            console.log(`\tstatus=${result.status}`);
+            if (result.status !== 0) {
+                console.error(`Failed with status ${status}`);
+                process.exit(result.status);
+            }
         };
         configure(PyPIConfigName, pypi);
         configure(hostConfigName, prebuiltHost);
-        spawnSync("npm", ["config", "ls"], spawnOptsInherit);
+        showSourceUrls(argv.name);
     })
     .command("show-source-urls", "Show source URLs from where to get prebuilt/packages", (yargs) => {
         yargs.option("name", {
             type: "string",
-            default: "kungfu_node",
+            default: PrebuiltModuleName,
             describe: "name of the prebuilt"
         });
     }, (argv) => {
-        spawnSync("npm", ["config", "ls"], spawnOptsInherit);
-        const show = (configName) => {
-            process.stdout.write(`${configName} = `);
-            spawnSync("npm", ["config", "get", configName], spawnOptsInherit);
-        };
-        show(PyPIConfigName);
-        show(`${argv.name}_${PrebuiltConfigSuffix}`);
+        showSourceUrls(argv.name);
     })
     .command("dir", "Show kungfu core base directory", (yargs) => {
     }, (argv) => {
