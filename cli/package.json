@@ -1,7 +1,7 @@
 {
   "name": "@kungfu-trader/kungfu-cli",
   "author": "Kungfu Origin",
-  "version": "2.4.0-alpha.1",
+  "version": "2.4.0-alpha.2",
   "description": "Kungfu CLI",
   "license": "Apache-2.0",
   "main": "./dist/cli/index.js",
@@ -31,8 +31,8 @@
   },
   "dependencies": {
     "@babel/polyfill": "^7.2.5",
-    "@kungfu-trader/kungfu-core": "^2.4.0-alpha.1",
-    "@kungfu-trader/kungfu-shared": "^2.4.0-alpha.1",
+    "@kungfu-trader/kungfu-core": "^2.4.0-alpha.2",
+    "@kungfu-trader/kungfu-shared": "^2.4.0-alpha.2",
     "bindings": "^1.5.0",
     "blessed": "^0.1.81",
     "blessed-contrib": "^4.8.16",
