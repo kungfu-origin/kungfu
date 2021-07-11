@@ -129,7 +129,6 @@ jobs:
           aws-region: us-east-1
 
       - name: Publish Prebuilt to AWS (US)
-        if: ${{ needs.prepare.outputs.publishable  == 'true' }}
         uses: kungfu-trader/action-publish-prebuilt@main
         with:
           artifacts-path: 'github-artifacts'

@@ -22,5 +22,14 @@ jobs:
 
       - name: Lerna
         run: |
-          npm config ls -l
+          echo npm config ls
+          npm config ls
+          echo ----
+          echo .npmrc
+          touch .npmrc
+          cat .npmrc
+          echo ----
+          echo /__w/_temp/.npmrc
+          cat /__w/_temp/.npmrc
+          echo ----
           lerna publish from-package --preid alpha --yes
