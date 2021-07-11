@@ -1,6 +1,6 @@
 {
   "name": "kfext_task_timer-trader",
-  "version": "2.4.0-alpha.0",
+  "version": "2.4.0-alpha.1",
   "description": "",
   "main": "lib/index.js",
   "scripts": {
@@ -16,7 +16,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@kungfu-trader/kungfu-shared": "^2.4.0-alpha.0",
+    "@kungfu-trader/kungfu-shared": "^2.4.0-alpha.1",
     "minimist": "^1.2.5",
     "moment": "^2.29.1",
     "rxjs": "^6.6.3"

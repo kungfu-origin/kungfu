@@ -46,7 +46,7 @@ jobs:
       - name: Bump Version
         uses: kungfu-trader/action-bump-version@v3
         with:
-          token: ${{ secrets.KUNGFU_GITHUB_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           action: "prebuild"
 
       - name: Setup Kungfu environment
@@ -98,6 +98,8 @@ jobs:
     if: ${{ github.event.pull_request.merged }}
     runs-on: ubuntu-20.04
     container: 'docker.io/kungfutrader/kungfu-builder-centos:v1.0.1'
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.KUNGFU_GITHUB_TOKEN }}
     steps:
       - name: Checkout
         uses: actions/checkout@v2
