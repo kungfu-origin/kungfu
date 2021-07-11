@@ -14,6 +14,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
+      - name: Setup NPM registry
+        uses: actions/setup-node@v2
+        with:
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@kungfu-trader'
+
       - name: Lerna
         run: |
           npm config ls -l
