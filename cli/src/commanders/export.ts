@@ -2,7 +2,6 @@ import { statSync, ensureDirSync } from "fs-extra";
 import moment from "moment";
 import { getKungfuDataByDateRange } from '__io/kungfu/kungfuUtils';
 import { ensureLedgerData } from '__gUtils/busiUtils';
-import { flatternOrderTrades } from '__io/kungfu/watcher';
 import { writeCSV } from '__gUtils/fileUtils';
 
 const os = require('os');
@@ -50,6 +49,7 @@ const inputExportDateAndPath = async () => {
 }
 
 export const exportTradingDataPrompt = async () => {
+    const { flatternOrderTrades } = require('__io/kungfu/watcher');
     const { date, output_folder } = await inputExportDateAndPath();
 
     const outputPathResolved = path.join(output_folder, `kungfu-trading-data-${date}`);

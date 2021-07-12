@@ -7,13 +7,25 @@
  * @FilePath: /kungfu/cli/src/assets/scripts/actions/tradingDataActions.ts
  */ 
 import { map } from 'rxjs/operators';
-import { buildKungfuDataByAppPipe } from '__io/kungfu/tradingData';
-import { watcher, transformTradingItemListToData, transformAssetItemListToData, getOrdersBySourceDestInstrumentId, getTradesBySourceDestInstrumentId, getOrderStatByDest, transformOrderStatListToData, dealPos, dealAsset, dealOrderStat } from '__io/kungfu/watcher';
 import { encodeKungfuLocation } from '__io/kungfu/kungfuUtils';
 import { ensureLedgerData } from '__gUtils/busiUtils';
 
 export const tradingDataObservale = (type: string, processId: string) => {
-    const sourceDest = getLocationUID(type, processId) 
+    //has to be here, because of the watcher build needed to be after prompt select
+    const { buildKungfuDataByAppPipe } = require('__io/kungfu/tradingData');
+    const { watcher, 
+        transformTradingItemListToData, 
+        transformAssetItemListToData, 
+        getOrdersBySourceDestInstrumentId, 
+        getTradesBySourceDestInstrumentId, 
+        getOrderStatByDest, 
+        transformOrderStatListToData, 
+        dealPos, 
+        dealAsset, 
+        dealOrderStat 
+    } = require('__io/kungfu/watcher');
+
+    const sourceDest = getLocationUID(watcher, type, processId) 
     return buildKungfuDataByAppPipe().pipe(
         map(() => {
             const ledgerData = watcher.ledger;
@@ -26,11 +38,10 @@ export const tradingDataObservale = (type: string, processId: string) => {
                 const trades = getTradesBySourceDestInstrumentId(ledgerData.Trade, 'source', sourceDest);
                 const orderStat = getOrderStatByDest(ledgerData.OrderStat, 'dest', sourceDest);
                 const orderStatResolved = transformOrderStatListToData(orderStat);  
-                const ordersResolved = dealOrdersFromWatcher(orders, orderStatResolved);
-                const tradesResolved = dealTradesFromWathcer(trades, orderStatResolved);
+                const ordersResolved = dealOrdersFromWatcher(orders, orderStatResolved, dealOrderStat);
+                const tradesResolved = dealTradesFromWathcer(trades, orderStatResolved, dealOrderStat);
                 const positionsResolved = transformTradingItemListToData(positions, 'account')[processId] || [];
                 const assetsResolved = transformAssetItemListToData(assets, 'account')[processId] || [];
-
 
                 return {
                     orders: ordersResolved,
@@ -44,8 +55,8 @@ export const tradingDataObservale = (type: string, processId: string) => {
                 const trades = getTradesBySourceDestInstrumentId(ledgerData.Trade, 'dest', sourceDest);
                 const orderStat = getOrderStatByDest(ledgerData.OrderStat);
                 const orderStatResolved = transformOrderStatListToData(orderStat);  
-                const ordersResolved = dealOrdersFromWatcher(orders, orderStatResolved);
-                const tradesResolved = dealTradesFromWathcer(trades, orderStatResolved);
+                const ordersResolved = dealOrdersFromWatcher(orders, orderStatResolved, dealOrderStat);
+                const tradesResolved = dealTradesFromWathcer(trades, orderStatResolved, dealOrderStat);
                 const positionsResolved = transformTradingItemListToData(positions, 'strategy')[processId] || [];
                 const assetsResolved = transformAssetItemListToData(assets, 'strategy')[processId] || [];
 
@@ -70,7 +81,7 @@ export const tradingDataObservale = (type: string, processId: string) => {
 }
 
 
-function getLocationUID (type: string, currentId: string) {
+function getLocationUID (watcher: any, type: string, currentId: string) {
     if (type === 'account') {
         return watcher.getLocationUID(encodeKungfuLocation(currentId, 'td'));
     } else if (type === 'strategy') {
@@ -81,7 +92,7 @@ function getLocationUID (type: string, currentId: string) {
     }
 }
 
-function dealOrdersFromWatcher (orders: OrderData[], orderStatOrigin: { [prop: string]: OrderStatOriginData }) {
+function dealOrdersFromWatcher (orders: OrderData[], orderStatOrigin: { [prop: string]: OrderStatOriginData }, dealOrderStat: any) {
     return orders.map((orderData: OrderData) => {
         const latencyData: any = orderStatOrigin[orderData.orderId] || null;
         const orderStat = dealOrderStat(latencyData);
@@ -96,7 +107,7 @@ function dealOrdersFromWatcher (orders: OrderData[], orderStatOrigin: { [prop: s
     })
 }
 
-function dealTradesFromWathcer (trades: TradeData[], orderStatOrigin: { [prop: string]: OrderStatOriginData }) {
+function dealTradesFromWathcer (trades: TradeData[], orderStatOrigin: { [prop: string]: OrderStatOriginData }, dealOrderStat: any) {
     return trades.map((tradeData: TradeData) => {
         const latencyData: any = orderStatOrigin[tradeData.orderId] || null;
         const orderStat = dealOrderStat(latencyData);

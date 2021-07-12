@@ -24,14 +24,15 @@
       "!**/kungfu-core/*",
       "!**/kungfu-core/**/*",
       "!**/kungfu-core/**/**/*",
+      
       "**/kungfu-core/build/*/libkungfu.*",
-      "**/kungfu-core/build/*/kungfu.*",
       "**/kungfu-core/build/*/pykungfu*",
-      "**/kungfu-core/build/*/node_kungfu.node",
-      "**/kungfu-core/build/*/kungfubuildinfo.json",
+
+      "**/kungfu-core/build/*/kungfu_electron.node",
       "**/kungfu-core/node/*",
       "**/kungfu-core/node/**/*",
-      "**/kungfu-core/package.json"
+      "**/kungfu-core/package.json",
+      "**/kungfu-core/build/*/kungfubuildinfo.json"
     ],
     "extraResources": [
       {
@@ -60,14 +61,12 @@
         "from": "../cli/build/cli",
         "to": "kungfu-cli",
         "filter": [
-          "fsevents.node",
+          "kungfu_node.node",
           "kungfu-cli",
           "kungfu-cli.*",
-          "node_kungfu.node",
-          "kungfu.dll",
-          "kungfubuildinfo.json",
+          "libkungfu.*",
           "pykungfu*",
-          "libkungfu.*"
+          "kungfubuildinfo.json"
         ]
       }
     ],

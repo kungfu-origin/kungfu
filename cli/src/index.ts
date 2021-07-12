@@ -19,6 +19,7 @@ import { logger } from '__gUtils/logUtils';
 const CFonts = require('cfonts');
 const colors = require('colors');
 
+
 if(process.argv.length === 2 || process.argv[2] === '-h') {
     console.log(colors.green('Welcome to kungfu trader system'))
     CFonts.say('KungFu', {
@@ -46,6 +47,7 @@ program
     .command('monit [options]')
     .description('monitor all process with merged logs OR monitor one trading process (with -l)')
     .action((type: any, commander: any) => {
+
         if (commander.parent.kill) {
             return monitKill()
         }

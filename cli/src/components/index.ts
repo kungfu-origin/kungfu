@@ -3,10 +3,12 @@ const inquirer = require('inquirer');
 inquirer.registerPrompt('autocomplete', require('inquirer-autocomplete-prompt'));
 
 export const monitPrompt = async (list: boolean) => {  
-
     if(!list) {
-        process.env.CLI_WINDOW_TYPE = 'monit'
+        process.env.CLI_WINDOW_TYPE = 'monit';
         const monitor = require('@/components/monitor/index').default;
+        const { startGetKungfuWatcherStep } = require('__io/kungfu/watcher');
+        startGetKungfuWatcherStep();
+
         return monitor()
     };
     
@@ -39,7 +41,10 @@ export const monitPrompt = async (list: boolean) => {
     const type = processSplit[0].includes('strategy') ? 'strategy' : 'account';
     process.env.CLI_WINDOW_TYPE = ['monit', type, processId].join('_');
 
-    const tradingData = require('@/components/tradingData/index').default
+    const tradingData = require('@/components/tradingData/index').default;
+    const { startGetKungfuWatcherStep } = require('__io/kungfu/watcher');
+    startGetKungfuWatcherStep();
+
     return tradingData(processId, type)
 }
 

@@ -8,10 +8,10 @@ const baseConfig = fse.readJSONSync(path.join(__dirname, 'base.json'))
 
 
 const argv = minimist(process.argv, {
-    boolean: [ 'cli', 'pro' ],
+    boolean: [ 'pro' ],
     string: 'target'
 })
-const { cli, pro, target } = argv
+const { pro, target } = argv
 
 console.log('argv', argv)
 
@@ -79,7 +79,7 @@ if (target) {
     }
 }
 
-baseConfig.artifactName = resolveArtifactName(cli, pro, target)
+baseConfig.artifactName = resolveArtifactName(pro, target)
 builder.build({
     config: baseConfig
 })
@@ -106,13 +106,13 @@ function findConfigItemIndex (configList, conditions) {
 }
 
 
-function resolveArtifactName (cli, pro, target) {
+function resolveArtifactName (pro, target) {
     const buildTime = moment().format('MMDDHHmm')
-    const appType = cli ? 'cli' : 'app';
+    const appType = 'app';
     const targetName = target || '';
-    const appTypeResolvde = pro ? `${appType}-pro` : appType
+    const appTypeResolved = pro ? `${appType}-pro` : appType
 
-    const specialName = [ appTypeResolvde, targetName, buildTime ]
+    const specialName = [ appTypeResolved, targetName, buildTime ]
         .filter(n => !!n)
         .join('-')
 
