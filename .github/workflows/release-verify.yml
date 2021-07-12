@@ -50,6 +50,12 @@ jobs:
         with:
           python-version: '3.7'
 
+      - name: Bump Version
+        uses: kungfu-trader/action-bump-version@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          action: "prebuild"
+
       - name: Setup Kungfu environment
         run: |
           pip3 install pipenv==2021.5.29

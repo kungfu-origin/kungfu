@@ -7,8 +7,6 @@
   "workspaces": [
     "core",
     "shared",
-    "kfext_task_timerTrader",
-    "kfext_task_backwards",
     "cli",
     "app"
   ],

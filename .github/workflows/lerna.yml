@@ -20,16 +20,8 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
           scope: '@kungfu-trader'
 
-      - name: Lerna
-        run: |
-          echo npm config ls
-          npm config ls
-          echo ----
-          echo .npmrc
-          touch .npmrc
-          cat .npmrc
-          echo ----
-          echo /__w/_temp/.npmrc
-          cat /__w/_temp/.npmrc
-          echo ----
-          lerna publish from-package --preid alpha --yes
+      - name: Test Publish
+        uses: kungfu-trader/action-bump-version@v3
+        with:
+          token: ${{ secrets.KUNGFU_GITHUB_TOKEN }}
+          action: "publish"
