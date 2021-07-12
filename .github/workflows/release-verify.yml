@@ -1,9 +1,11 @@
-name: Build - Build Only
-
+name: Release - Verify
 on:
-  push:
+  pull_request:
+    types: [opened, reopened, synchronize]
     branches:
-      - dev/v*/v*
+      - alpha/*/*
+      - release/*/*
+      - main
 
 jobs:
   prepare:
@@ -14,6 +16,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+
+      - name: Verify Version Before Build
+        uses: kungfu-trader/action-bump-version@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          action: "verify"
 
       - name: Get Build Matrix From JSON
         id: set-matrix
@@ -42,6 +50,12 @@ jobs:
         with:
           python-version: '3.7'
 
+      - name: Bump Version
+        uses: kungfu-trader/action-bump-version@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          action: "prebuild"
+
       - name: Setup Kungfu environment
         run: |
           pip3 install pipenv==2021.5.29
@@ -66,11 +80,15 @@ jobs:
             core/build/*.txt
           if-no-files-found: ignore
 
-      - name: Upload Kungfu Installer
-        uses: actions/upload-artifact@v2
+  verify:
+    needs: [prepare, build]
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Verify Version After Build
+        uses: kungfu-trader/action-bump-version@v3
         with:
-          name: 'Kungfu-Installer-${{matrix.name}}-${{github.sha}}'
-          path: |
-            */build/app/*.*
-            !*/build/app/*.yml
-          if-no-files-found: ignore
+          token: ${{ secrets.GITHUB_TOKEN }}
+          action: "verify"

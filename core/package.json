@@ -1,7 +1,7 @@
 {
   "name": "@kungfu-trader/kungfu-core",
   "author": "Kungfu Origin",
-  "version": "2.4.0-alpha.0",
+  "version": "2.4.0-alpha.2",
   "description": "Kungfu Core",
   "license": "Apache-2.0",
   "main": "node/index.js",
@@ -10,11 +10,6 @@
   },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com"
-  },
-  "bin": {
-    "kf-info": ".build-tools/kf-info.js",
-    "kf-config": ".build-tools/kf-config.js",
-    "kf-make": ".build-tools/kf-make.js"
   },
   "config": {
     "buildtype": "Release",
@@ -33,14 +28,14 @@
     "host": "https://kungfu-prebuilt.s3.cn-northwest-1.amazonaws.com.cn"
   },
   "scripts": {
-    "preinstall": "node .build-tools/kf-config.js set-source-urls",
-    "prebuild": "node .build-tools/kf-config.js show-source-urls",
+    "preinstall": "node .build/config.js set-source-urls",
+    "postinstall": "node .build/config.js set-source-urls",
+    "prebuild": "node .build/config.js show-source-urls",
     "install": "yarn run setup",
-    "setup": "cross-var node .build-tools/node-pre-gyp.js --build-type $npm_package_config_buildtype install",
-    "build": "cross-var node .build-tools/node-pre-gyp.js --build-type $npm_package_config_buildtype build",
-    "package": "node .build-tools/node-pre-gyp.js package",
-    "publish-package": "npm publish",
-    "pipenv-js": "cross-var node .build-tools/pipenv.js --python $npm_package_config_python_version --pypi-mirror $npm_package_config_pypi",
+    "setup": "cross-var node .build/node-pre-gyp.js --build-type $npm_package_config_buildtype install",
+    "build": "cross-var node .build/node-pre-gyp.js --build-type $npm_package_config_buildtype build",
+    "package": "node .build/node-pre-gyp.js package",
+    "pipenv-js": "cross-var node .build/pipenv.js --python $npm_package_config_python_version --pypi-mirror $npm_package_config_pypi",
     "configure": "cross-var pipenv run conan install . -if build -s build_type=$npm_package_config_buildtype --build missing -o log_level=$npm_package_config_loglevel -o arch=$npm_package_config_arch  -o node_version=$npm_package_config_node_version -o electron_version=$npm_package_config_electron_version",
     "compile": "cross-var pipenv run conan build . -bf build -s build_type=$npm_package_config_buildtype",
     "freeze": "cross-var pipenv run conan package . -bf build -pf build/kfc -s build_type=$npm_package_config_buildtype",
@@ -56,11 +51,11 @@
     "glob": "^7.1.6",
     "nan": "^2.14.2",
     "node-addon-api": "^2.0.0",
-    "node-gyp": "^7.1.0",
-    "yargs": "^16.2.0",
-    "yarn": "*"
+    "yargs": "^16.2.0"
   },
   "devDependencies": {
-    "cmake-js": "^6.1.0"
+    "cmake-js": "^6.1.0",
+    "node-gyp": "^7.1.0",
+    "yarn": "*"
   }
 }

@@ -1,17 +1,9 @@
 {
-  "name": "kungfu-cli",
-  "version": "2.4.0-alpha.0",
-  "description": "KungFu Trader Cli",
+  "name": "@kungfu-trader/kungfu-cli",
+  "author": "Kungfu Origin",
+  "version": "2.4.0-alpha.2",
+  "description": "Kungfu CLI",
   "license": "Apache-2.0",
-  "homepage": "https://github.com/taurusai/kungfu",
-  "author": {
-    "name": "taurus.ai",
-    "email": "info@taurus.ai"
-  },
-  "config": {
-    "pyver": "three",
-    "cmakejsopt": ""
-  },
   "main": "./dist/cli/index.js",
   "engines": {
     "node": ">=12"
@@ -37,8 +29,8 @@
   },
   "dependencies": {
     "@babel/polyfill": "^7.2.5",
-    "@kungfu-trader/kungfu-core": "^2.4.0-alpha.0",
-    "@kungfu-trader/kungfu-shared": "^2.4.0-alpha.0",
+    "@kungfu-trader/kungfu-core": "^2.4.0-alpha.2",
+    "@kungfu-trader/kungfu-shared": "^2.4.0-alpha.2",
     "bindings": "^1.5.0",
     "blessed": "^0.1.81",
     "blessed-contrib": "^4.8.16",

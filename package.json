@@ -5,17 +5,17 @@
   "license": "Apache-2.0",
   "private": true,
   "workspaces": [
-    "shared",
     "core",
-    "kfext_task_timerTrader",
-    "kfext_task_backwards",
+    "shared",
     "cli",
-    "app" 
+    "app"
   ],
   "scripts": {
-    "build": "wsrun --serial --fast-exit --exclude-missing build",
-    "build-cli": "wsrun --serial --fast-exit --exclude-missing build-cli",
-    "clean": "wsrun clean"
+    "postinstall": "wsrun --serial --exclude-missing --fast-exit postinstall",
+    "build": "wsrun --serial --exclude-missing --fast-exit build",
+    "build-cli": "wsrun --serial --exclude-missing --fast-exit build-cli",
+    "clean": "wsrun --serial --exclude-missing --fast-exit  clean",
+    "rebuild": "yarn run clean && yarn run build"
   },
   "dependencies": {
     "@mapbox/node-pre-gyp": "^1.0.0",
