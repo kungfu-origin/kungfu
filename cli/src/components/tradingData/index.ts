@@ -9,6 +9,8 @@ import { parseToString, TABLE_BASE_OPTIONS, DEFAULT_PADDING, dealNum } from '@/a
 import { tradingDataObservale } from '@/assets/scripts/actions/tradingDataActions';
 import { switchProcess, processListObservable } from '@/assets/scripts/actions/processActions';
 import { kungfuCancelAllOrders } from '__io/kungfu/makeCancelOrder';
+import { dealOrder } from '__io/kungfu/watcher';
+import { deepClone } from '__gUtils/busiUtils';
 import { aliveOrderStatusList } from '@kungfu-trader/kungfu-shared/config/tradingConfig';
 
 const blessed = require('blessed');
@@ -218,29 +220,31 @@ class TradingDataDashboard extends Dashboard {
 		});
 		
 		t.boards.cancelBtn.on('press', () => {
-
-			const aliveOrders = this.orders.filter(item => aliveOrderStatusList.includes(+item.status))
+			const { watcher } = require('__io/kungfu/watcher');
+			const aliveOrders = watcher.ledger.Order.list().filter((item: OrderOriginData) => aliveOrderStatusList.includes(+item.status));
+			const aliveOrdersResoved = aliveOrders.map((item: OrderOriginData) => dealOrder(item));
 
 			if (this.type === 'account') {
-				kungfuCancelAllOrders(aliveOrders)
+				kungfuCancelAllOrders(aliveOrdersResoved)
 					.then(() => t.boards.message.log(`Cancel all orders signal sending`, 3))
 			} else if (this.type === 'strategy') {
-				kungfuCancelAllOrders(aliveOrders, this.targetId)
+				kungfuCancelAllOrders(aliveOrdersResoved, this.targetId)
 					.then(() => t.boards.message.log(`Cancel all orders signal sending`, 3))
 			}
 		})
 	}
 
 	freshAssets (assets: AssetData) {
+		let assetsCloned: any = deepClone(assets);
 
 		if (this.type === 'account') {
-			delete assets.clientId
+			delete assetsCloned.clientId
 		} else if (this.type === 'strategy') {
-			delete assets.accountId
+			delete assetsCloned.accountId
 		}
 
 		return Object
-			.entries(assets)
+			.entries(assetsCloned)
 			.map((kvPair: any[]) => {
 				let key = kvPair[0]
 				let val = kvPair[1]
