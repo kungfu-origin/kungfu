@@ -89,8 +89,9 @@ jobs:
         with:
           name: 'Kungfu-Prebuilt-${{matrix.name}}-${{github.sha}}'
           path: |
-            '*/build/stage/*/*/*.*'
+            '*/build/stage/*/*/*/*.*'
             !*/build/stage/**/*.yml
+            !*/build/stage/**/*.yaml
           if-no-files-found: ignore
 
   verify:
