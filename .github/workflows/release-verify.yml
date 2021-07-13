@@ -88,16 +88,9 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: 'Kungfu-Prebuilt-${{matrix.name}}-${{github.sha}}'
-          path: '*/build/stage/**'
-          if-no-files-found: ignore
-
-      - name: Upload Kungfu Installer
-        uses: actions/upload-artifact@v2
-        with:
-          name: 'Kungfu-Installer-${{matrix.name}}-${{github.sha}}'
           path: |
-            */build/app/*.*
-            !*/build/app/*.yml
+            '*/build/stage/*/*/*.*'
+            !*/build/stage/**/*.yml
           if-no-files-found: ignore
 
   verify:
