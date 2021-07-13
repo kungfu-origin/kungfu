@@ -1,6 +1,9 @@
 {
   "name": "@kungfu-trader/kungfu-app",
-  "author": "Kungfu Origin",
+  "author": {
+    "name": "Kungfu Origin",
+    "email": "info@kungfu.link"
+  },
   "version": "2.4.0-alpha.2",
   "description": "Kungfu App",
   "license": "Apache-2.0",
@@ -19,7 +22,7 @@
     "dist": "node --max_old_space_size=4096 .electron-kungfu/build.js",
     "elec": "node .electron-builder/build.js",
     "prebuild": "yarn run clean && yarn run dist",
-    "build": "yarn run elec && yarn run elec --pro",
+    "build": "yarn run elec",
     "prebuild-cli": "yarn run clean && yarn run dist",
     "build-cli": "yarn run elec --cli"
   },

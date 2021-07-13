@@ -10,27 +10,27 @@ on:
 jobs:
   prepare:
     runs-on: ubuntu-20.04
-    outputs:
-      matrix: ${{ steps.set-matrix.outputs.matrix }}
-      publishable: ${{ steps.check-packages.outputs.publishable }}
     steps:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Verify Version Before Build
+      - name: Set Pull Request Title
         uses: kungfu-trader/action-bump-version@v3
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           action: "verify"
 
-      - name: Get Build Matrix From JSON
-        id: set-matrix
-        uses: kungfu-trader/action-build-matrix@v1
-
   build:
     needs: prepare
     strategy:
-      matrix: ${{ fromJson(needs.prepare.outputs.matrix) }}
+      matrix:
+        include:
+          - os: ubuntu-20.04
+            name: "Linux"
+          - os: macos-10.15
+            name: "MacOS"
+          - os: windows-2019
+            name: "Windows"
     runs-on: ${{ matrix.os }}
     env:
       USE_HARD_LINKS: false
@@ -145,7 +145,7 @@ jobs:
           artifacts-path: 'github-artifacts'
           bucket-staging: 'kungfu-prebuilt-staging'
 
-      - name: Verify Version After Build
+      - name: Verify
         uses: kungfu-trader/action-bump-version@v3
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
