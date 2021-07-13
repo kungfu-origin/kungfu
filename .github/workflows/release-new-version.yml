@@ -8,93 +8,7 @@ on:
       - release/v*/v*
 
 jobs:
-  prepare:
-    runs-on: ubuntu-20.04
-    outputs:
-      matrix: ${{ steps.set-matrix.outputs.matrix }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-      - name: Get Build Matrix From JSON
-        id: set-matrix
-        uses: kungfu-trader/action-build-matrix@v1
-
-  build:
-    needs: prepare
-    if: ${{ github.event.pull_request.merged }}
-    strategy:
-      matrix: ${{ fromJson(needs.prepare.outputs.matrix) }}
-    runs-on: ${{ matrix.os }}
-    env:
-      USE_HARD_LINKS: false
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Setup Node.js environment
-        uses: actions/setup-node@v2
-        with:
-          node-version: '12'
-          registry-url: 'https://npm.pkg.github.com'
-          scope: '@kungfu-trader'
-
-      - name: Setup Python environment
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.7'
-
-      - name: Bump Version
-        uses: kungfu-trader/action-bump-version@v3
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          action: "prebuild"
-
-      - name: Setup Kungfu environment
-        run: |
-          pip3 install pipenv==2021.5.29
-          yarn install
-        env:
-          KF_SKIP_FALLBACK_BUILD: true
-
-      - name: Build Kungfu
-        run: yarn build
-
-      - name: Upload Kungfu Build Info
-        uses: actions/upload-artifact@v2
-        if: ${{ failure() }}
-        with:
-          # https://docs.github.com/en/actions/reference/context-and-expression-syntax-for-github-actions#github-context
-          name: 'Kungfu-Build-Info-${{matrix.name}}-${{github.actor}}-${{github.sha}}'
-          path: |
-            yarn.lock
-            core/Pipfile.lock
-            core/build/CMakeFiles/
-            core/build/kfc-conf/
-            core/build/*.txt
-          if-no-files-found: ignore
-
-      - name: Package Prebuilt
-        run: |
-          yarn workspace @kungfu-trader/kungfu-core run package
-
-      - name: Upload Prebuilt
-        uses: actions/upload-artifact@v2
-        with:
-          name: 'Kungfu-Prebuilt-${{matrix.name}}-${{github.sha}}'
-          path: '*/build/stage/**'
-          if-no-files-found: ignore
-
-      - name: Upload Kungfu Installer
-        uses: actions/upload-artifact@v2
-        with:
-          name: 'Kungfu-Installer-${{matrix.name}}-${{github.sha}}'
-          path: |
-            */build/app/*.*
-            !*/build/app/*.yml
-          if-no-files-found: ignore
-
-  publish:
-    needs: [prepare, build]
+  release:
     if: ${{ github.event.pull_request.merged }}
     runs-on: ubuntu-20.04
     container: 'docker.io/kungfutrader/kungfu-builder-centos:v1.0.1'
@@ -110,17 +24,6 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
           scope: '@kungfu-trader'
 
-      - name: Bump Version
-        uses: kungfu-trader/action-bump-version@v3
-        with:
-          token: ${{ secrets.KUNGFU_GITHUB_TOKEN }}
-          action: "prebuild"
-
-      - name: Download Artifacts
-        uses: actions/download-artifact@v2
-        with:
-          path: 'github-artifacts'
-
       - name: Configure AWS Crendentials (US)
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -129,9 +32,10 @@ jobs:
           aws-region: us-east-1
 
       - name: Publish Prebuilt to AWS (US)
-        uses: kungfu-trader/action-publish-prebuilt@main
+        uses: kungfu-trader/action-publish-prebuilt@v2
         with:
-          artifacts-path: 'github-artifacts'
+          bucket-staging: 'kungfu-prebuilt-staging'
+          bucket-release: 'kungfu-prebuilt'
 
       - name: Configure AWS Crendentials (CN)
         uses: aws-actions/configure-aws-credentials@v1
@@ -141,13 +45,13 @@ jobs:
           aws-region: cn-northwest-1
 
       - name: Publish Prebuilt to AWS (CN)
-        uses: kungfu-trader/action-publish-prebuilt@main
+        uses: kungfu-trader/action-publish-prebuilt@v2
         with:
-          artifacts-path: 'github-artifacts'
+          bucket-staging: 'kungfu-prebuilt-staging'
+          bucket-release: 'kungfu-prebuilt'
 
       - name: Publish New Version To GitHub
         if: ${{ github.event.pull_request.merged }}
         uses: kungfu-trader/action-bump-version@v3
         with:
           token: ${{ secrets.KUNGFU_GITHUB_TOKEN }}
-          action: "postbuild"

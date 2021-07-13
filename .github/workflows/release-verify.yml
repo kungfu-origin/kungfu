@@ -80,12 +80,64 @@ jobs:
             core/build/*.txt
           if-no-files-found: ignore
 
+      - name: Package Prebuilt
+        run: |
+          yarn package
+
+      - name: Upload Prebuilt
+        uses: actions/upload-artifact@v2
+        with:
+          name: 'Kungfu-Prebuilt-${{matrix.name}}-${{github.sha}}'
+          path: '*/build/stage/**'
+          if-no-files-found: ignore
+
+      - name: Upload Kungfu Installer
+        uses: actions/upload-artifact@v2
+        with:
+          name: 'Kungfu-Installer-${{matrix.name}}-${{github.sha}}'
+          path: |
+            */build/app/*.*
+            !*/build/app/*.yml
+          if-no-files-found: ignore
+
   verify:
     needs: [prepare, build]
     runs-on: ubuntu-20.04
+    container: 'docker.io/kungfutrader/kungfu-builder-centos:v1.0.1'
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+
+      - name: Download Artifacts
+        uses: actions/download-artifact@v2
+        with:
+          path: 'github-artifacts'
+
+      - name: Configure AWS Crendentials (US)
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_US_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_US_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Publish Prebuilt to AWS (US)
+        uses: kungfu-trader/action-publish-prebuilt@v2
+        with:
+          artifacts-path: 'github-artifacts'
+          bucket-staging: 'kungfu-prebuilt-staging'
+
+      - name: Configure AWS Crendentials (CN)
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_CN_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_CN_SECRET_ACCESS_KEY }}
+          aws-region: cn-northwest-1
+
+      - name: Publish Prebuilt to AWS (CN)
+        uses: kungfu-trader/action-publish-prebuilt@v2
+        with:
+          artifacts-path: 'github-artifacts'
+          bucket-staging: 'kungfu-prebuilt-staging'
 
       - name: Verify Version After Build
         uses: kungfu-trader/action-bump-version@v3

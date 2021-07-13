@@ -2,16 +2,17 @@ const builder = require('electron-builder');
 const fse = require('fs-extra');
 const path = require('path');
 const minimist = require('minimist');
-const moment = require('moment')
+const moment = require('moment');
+const semver = require('semver');
 
+const appConfig = fse.readJSONSync(path.join(path.dirname(__dirname), 'package.json'))
 const baseConfig = fse.readJSONSync(path.join(__dirname, 'base.json'))
 
-
 const argv = minimist(process.argv, {
-    boolean: [ 'pro' ],
+    boolean: ['pro'],
     string: 'target'
 })
-const { pro, target } = argv
+const {pro, target} = argv
 
 console.log('argv', argv)
 
@@ -31,13 +32,11 @@ if (target) {
     const targetIndex = findConfigItemIndex(baseConfig.extraResources, [{
         key: 'from',
         value: '../core/build/kfc',
-    },{
+    }, {
         key: 'to',
         value: 'kfc'
     }])
 
-    
-    
     if (targetIndex >= 0) {
         baseConfig.extraResources[targetIndex] = {
             "from": "../core/build/kfc",
@@ -79,40 +78,43 @@ if (target) {
     }
 }
 
+const version = semver.parse(appConfig.version);
+
+baseConfig.directories.output = path.join("build", "stage", "kungfu-app", `v${version.major}`, `v${version}`);
 baseConfig.artifactName = resolveArtifactName(pro, target)
 builder.build({
     config: baseConfig
 })
 
 
-function hasFuture (target) {
+function hasFuture(target) {
     if (target.includes('zhaos')) return true;
     if (target.includes('rongh')) return true;
     return false
 }
 
 //conditions: { key: '', value: '' }
-function findConfigItemIndex (configList, conditions) {
-    for(let i = 0; len = configList.length; i++) {
+function findConfigItemIndex(configList, conditions) {
+    for (let i = 0; len = configList.length; i++) {
         const item = configList[i];
         const matchList = conditions.filter(c => {
             if (item[c.key] === c.value) return true;
         })
 
         if (matchList.length === conditions.length) {
-            return i 
+            return i
         }
     }
 }
 
 
-function resolveArtifactName (pro, target) {
+function resolveArtifactName(pro, target) {
     const buildTime = moment().format('MMDDHHmm')
     const appType = 'app';
     const targetName = target || '';
     const appTypeResolved = pro ? `${appType}-pro` : appType
 
-    const specialName = [ appTypeResolved, targetName, buildTime ]
+    const specialName = [appTypeResolved, targetName, buildTime]
         .filter(n => !!n)
         .join('-')
 
