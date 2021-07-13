@@ -18,6 +18,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
+      - name: Bump Version
+        uses: kungfu-trader/action-bump-version@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          action: "prebuild"
+
       - name: Setup NPM registry
         uses: actions/setup-node@v2
         with:
@@ -55,3 +61,4 @@ jobs:
         uses: kungfu-trader/action-bump-version@v3
         with:
           token: ${{ secrets.KUNGFU_GITHUB_TOKEN }}
+          action: "postbuild"

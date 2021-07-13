@@ -108,6 +108,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
+      - name: Bump Version
+        uses: kungfu-trader/action-bump-version@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          action: "prebuild"
+
       - name: Download Artifacts
         uses: actions/download-artifact@v2
         with:
