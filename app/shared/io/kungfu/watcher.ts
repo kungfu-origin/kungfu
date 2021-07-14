@@ -6,7 +6,6 @@ import { toDecimal, ensureNum, ensureLedgerData, addTwoItemByKeyForReduce, avgTw
 import { OffsetName, OrderStatus, SideName, PosDirection, PriceType, HedgeFlag, InstrumentType, VolumeCondition, TimeCondition } from "@kungfu-trader/kungfu-shared/config/tradingConfig";
 import { logger } from '__gUtils/logUtils';
 
-
 export const watcher: any = (() => {
     const kfSystemConfig: any = fse.readJsonSync(KF_CONFIG_PATH)
     const bypassQuote = (kfSystemConfig.performance || {}).bypassQuote || false;

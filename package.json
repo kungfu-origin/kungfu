@@ -1,14 +1,12 @@
 {
   "name": "kungfu",
   "author": "kungfu-origin",
-  "description": "Kungfu Trader Workspaces",
+  "description": "Kungfu Workspaces",
   "license": "Apache-2.0",
   "private": true,
   "workspaces": [
     "core",
     "shared",
-    "kfext_task_timerTrader",
-    "kfext_task_backwards",
     "cli",
     "app"
   ],
@@ -16,7 +14,8 @@
     "postinstall": "wsrun --serial --exclude-missing --fast-exit postinstall",
     "build": "wsrun --serial --exclude-missing --fast-exit build",
     "build-cli": "wsrun --serial --exclude-missing --fast-exit build-cli",
-    "clean": "wsrun --serial --exclude-missing --fast-exit  clean",
+    "clean": "wsrun --serial --exclude-missing --fast-exit clean",
+    "package": "wsrun --serial --exclude-missing --fast-exit package",
     "rebuild": "yarn run clean && yarn run build"
   },
   "dependencies": {

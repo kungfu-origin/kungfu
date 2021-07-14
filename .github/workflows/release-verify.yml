@@ -10,27 +10,27 @@ on:
 jobs:
   prepare:
     runs-on: ubuntu-20.04
-    outputs:
-      matrix: ${{ steps.set-matrix.outputs.matrix }}
-      publishable: ${{ steps.check-packages.outputs.publishable }}
     steps:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Verify Version Before Build
+      - name: Set Pull Request Title
         uses: kungfu-trader/action-bump-version@v3
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           action: "verify"
 
-      - name: Get Build Matrix From JSON
-        id: set-matrix
-        uses: kungfu-trader/action-build-matrix@v1
-
   build:
     needs: prepare
     strategy:
-      matrix: ${{ fromJson(needs.prepare.outputs.matrix) }}
+      matrix:
+        include:
+          - os: ubuntu-20.04
+            name: "Linux"
+          - os: macos-10.15
+            name: "MacOS"
+          - os: windows-2019
+            name: "Windows"
     runs-on: ${{ matrix.os }}
     env:
       USE_HARD_LINKS: false
@@ -50,6 +50,12 @@ jobs:
         with:
           python-version: '3.7'
 
+      - name: Bump Version
+        uses: kungfu-trader/action-bump-version@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          action: "prebuild"
+
       - name: Setup Kungfu environment
         run: |
           pip3 install pipenv==2021.5.29
@@ -64,7 +70,6 @@ jobs:
         uses: actions/upload-artifact@v2
         if: ${{ failure() }}
         with:
-          # https://docs.github.com/en/actions/reference/context-and-expression-syntax-for-github-actions#github-context
           name: 'Kungfu-Build-Info-${{matrix.name}}-${{github.actor}}-${{github.sha}}'
           path: |
             yarn.lock
@@ -74,14 +79,67 @@ jobs:
             core/build/*.txt
           if-no-files-found: ignore
 
+      - name: Package Prebuilt
+        run: |
+          yarn package
+
+      - name: Upload Prebuilt
+        uses: actions/upload-artifact@v2
+        with:
+          # https://docs.github.com/en/actions/reference/context-and-expression-syntax-for-github-actions#github-context
+          name: 'Kungfu-Prebuilt-${{matrix.name}}-${{github.actor}}-${{github.sha}}'
+          path: |
+            */build/stage/*/v*/v*/*.*
+            !*/build/stage/**/*.yml
+            !*/build/stage/**/*.yaml
+          if-no-files-found: ignore
+
   verify:
     needs: [prepare, build]
     runs-on: ubuntu-20.04
+    container: 'docker.io/kungfutrader/kungfu-builder-centos:v1.0.1'
     steps:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Verify Version After Build
+      - name: Bump Version
+        uses: kungfu-trader/action-bump-version@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          action: "prebuild"
+
+      - name: Download Artifacts
+        uses: actions/download-artifact@v2
+        with:
+          path: 'github-artifacts'
+
+      - name: Configure AWS Crendentials (US)
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_US_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_US_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Publish Prebuilt to AWS (US)
+        uses: kungfu-trader/action-publish-prebuilt@v2
+        with:
+          artifacts-path: 'github-artifacts'
+          bucket-staging: 'kungfu-prebuilt-staging'
+
+      - name: Configure AWS Crendentials (CN)
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_CN_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_CN_SECRET_ACCESS_KEY }}
+          aws-region: cn-northwest-1
+
+      - name: Publish Prebuilt to AWS (CN)
+        uses: kungfu-trader/action-publish-prebuilt@v2
+        with:
+          artifacts-path: 'github-artifacts'
+          bucket-staging: 'kungfu-prebuilt-staging'
+
+      - name: Verify
         uses: kungfu-trader/action-bump-version@v3
         with:
           token: ${{ secrets.GITHUB_TOKEN }}

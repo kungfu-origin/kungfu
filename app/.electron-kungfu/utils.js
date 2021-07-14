@@ -40,7 +40,6 @@ const listDirSync = (filePath) => {
 
 const getViewsConfig = () => {
   const viewsPath = path.resolve(__dirname, "..", "src", "renderer", "views");
-  console.log(viewsPath)
   const files = listDirSync(viewsPath);
   let entry = {}, plugins = [];
   files

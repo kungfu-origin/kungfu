@@ -1,11 +1,3 @@
-### CMake template
-CMakeCache.txt
-CMakeFiles
-CMakeScripts
-Makefile
-cmake_install.cmake
-install_manifest.txt
-
 # OS files
 .DS_Store
 *.log
@@ -21,23 +13,26 @@ Debug/
 .arcconfig
 *.flow
 
-# Build related
+# CMake template
+CMakeCache.txt
+CMakeFiles
+CMakeScripts
+Makefile
+cmake_install.cmake
+install_manifest.txt
 cmake-build-debug/
 build/
 build-*/
-*.pyc
 
-# NPM related
+# Node related
+.npmrc
+yarn.lock
+package-lock.json
+.project
+dist/
 node_modules/
 */node_modules/
-dist/
 */dist/
-.project
-package-lock.json
-Pipfile.lock
-yarn.lock
-
-#js third part
 */lib
 */inquirer-path/lib/*
 */inquirer-path/lib
@@ -45,7 +40,11 @@ yarn.lock
 */_version.py
 */inquirer-path/yarn.lock
 
-# Python Distribution / packaging
+# Python related
+Pipfile.lock
+MANIFEST
+.installed.cfg
+__pycache__/
 develop-eggs/
 downloads/
 eggs/
@@ -56,13 +55,6 @@ var/
 wheels/
 pip-wheel-metadata/
 share/python-wheels/
+*.pyc
 *.egg-info/
-.installed.cfg
 *.egg
-MANIFEST
-
-# Byte-compiled / optimized / DLL files
-__pycache__/
-
-
-commit.sh

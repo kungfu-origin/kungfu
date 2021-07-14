@@ -1,31 +1,29 @@
 
 import { dealStatus } from '@/assets/scripts/utils';
 
-import { watcher } from '__io/kungfu/watcher';
+
 import { setTimerPromiseTask, resolveMemCpu } from '__gUtils/busiUtils';
 import { logger } from '__gUtils/logUtils';
 import { removeJournal } from '__gUtils/fileUtils';
 import { listProcessStatusWithDetail, startArchiveMakeTask } from '__gUtils/processUtils';
 import { KF_HOME } from '__gConfig/pathConfig';
 
-import { switchMaster, switchLedger, switchCustomProcess } from '__io/actions/base';
+import { switchMaster, switchCustomProcess } from '__io/actions/base';
 import { switchTd, switchMd } from '__io/actions/account';
 import { switchStrategy } from '__io/actions/strategy';
 
 import { getTdList, getMdList } from '__io/kungfu/account';
 import { getStrategyList } from '__io/kungfu/strategy';
-import { startGetKungfuWatcherStep } from '__io/kungfu/watcher';
 
 import { Observable, combineLatest } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 const colors = require('colors');
 
-startGetKungfuWatcherStep();
-
 export const switchProcess = (proc: any, messageBoard: any, loading: any) =>{
     const status = proc.status !== '--';
     const startOrStop = !!status ? 'Stop' : 'Start';
+    const { watcher } = require("__io/kungfu/watcher");
 
     if (!status) {
         if (proc.processId !== 'master') {

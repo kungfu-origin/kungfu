@@ -8,6 +8,7 @@ const node_bindings_path = prebuilt.find(config);
 const bindings_path = "electron" in process.versions ? node_bindings_path.replace("_node.", "_electron.") : node_bindings_path;
 const bindings = exports._bindings = require(bindings_path);
 
+
 const hex = function (n) {
     const ns = n.toString(16);
     return ns.length === 8 ? ns : Array(8 - ns.length).fill("0").reduce((a, b) => a + b) + ns;

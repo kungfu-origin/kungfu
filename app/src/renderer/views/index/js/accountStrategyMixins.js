@@ -68,10 +68,6 @@ export default {
             })
         },
 
-        handleMakeOrderByOrderBook (data) {
-            console.log(data)
-        },
-
         isMakeOrderWinIsDestroyed () {
             if (!window.makeOrderWin) return true;
             if (window.makeOrderWin.isDestroyed()) return true;

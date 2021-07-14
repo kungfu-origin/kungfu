@@ -1,7 +1,10 @@
 {
   "name": "@kungfu-trader/kungfu-app",
-  "author": "Kungfu Origin",
-  "version": "2.4.0-alpha.1",
+  "author": {
+    "name": "Kungfu Origin",
+    "email": "info@kungfu.link"
+  },
+  "version": "2.4.0-alpha.2",
   "description": "Kungfu App",
   "license": "Apache-2.0",
   "env": [
@@ -19,139 +22,12 @@
     "dist": "node --max_old_space_size=4096 .electron-kungfu/build.js",
     "elec": "node .electron-builder/build.js",
     "prebuild": "yarn run clean && yarn run dist",
-    "build": "yarn run elec && yarn run elec --pro",
+    "build": "yarn run elec",
     "prebuild-cli": "yarn run clean && yarn run dist",
     "build-cli": "yarn run elec --cli"
   },
-  "build": {
-    "productName": "Kungfu",
-    "artifactName": "${productName}-${buildVersion}-${os}-${arch}-${channel}.${ext}",
-    "generateUpdatesFilesForAllChannels": true,
-    "appId": "taurus.ai.KungFu.Trader",
-    "npmRebuild": false,
-    "directories": {
-      "output": "build/app"
-    },
-    "publish": [
-      {
-        "provider": "generic",
-        "url": "https://www.kungfu-trader.com"
-      }
-    ],
-    "files": [
-      "dist/app/**/*",
-      {
-        "from": ".",
-        "to": "dist/app",
-        "filter": [
-          "resources"
-        ]
-      },
-      "!**/kungfu-core/*",
-      "!**/kungfu-core/**/*",
-      "!**/kungfu-core/**/**/*",
-      "**/kungfu-core/build/kfc/kungfu_electron.node",
-      "**/kungfu-core/build/kfc/kungfubuildinfo.json",
-      "**/kungfu-core/node/*",
-      "**/kungfu-core/node/**/*",
-      "**/kungfu-core/package.json"
-    ],
-    "extraResources": [
-      {
-        "from": "../core/build/kfc",
-        "to": "kfc",
-        "filter": [
-          "!**/btdata",
-          "!*.node",
-          "!*.stamp"
-        ]
-      },
-      {
-        "from": "../core/build/python/dist",
-        "to": "kungfu-resources/python",
-        "filter": [
-          "kungfu-*-py3-*.whl"
-        ]
-      },
-      {
-        "from": "./resources",
-        "to": "kungfu-resources",
-        "filter": [
-          "config/*"
-        ]
-      },
-      {
-        "from": "../kfext_task_timerTrader/build/ext",
-        "to": "kungfu-extensions/timer-trader"
-      },
-      {
-        "from": "../cli/build/cli",
-        "to": "kungfu-cli",
-        "filter": [
-          "*.node",
-          "kungfu-cli",
-          "kungfu-cli.*",
-          "kungfu.*",
-          "libkungfu.*",
-          "pykungfu*",
-          "kungfubuildinfo.json"
-        ]
-      }
-    ],
-    "asar": false,
-    "dmg": {
-      "contents": [
-        {
-          "x": 410,
-          "y": 150,
-          "type": "link",
-          "path": "/Applications"
-        },
-        {
-          "x": 130,
-          "y": 150,
-          "type": "file"
-        }
-      ]
-    },
-    "mac": {
-      "icon": "./resources/logo/icon.icns",
-      "type": "distribution",
-      "target": [
-        "dmg"
-      ]
-    },
-    "win": {
-      "icon": "./resources/logo/icon.ico",
-      "target": [
-        {
-          "target": "nsis",
-          "arch": [
-            "x64"
-          ]
-        }
-      ]
-    },
-    "linux": {
-      "icon": "./resources/logo/icn.icns",
-      "target": [
-        "rpm",
-        "appimage"
-      ]
-    },
-    "nsis": {
-      "oneClick": false,
-      "allowElevation": true,
-      "allowToChangeInstallationDirectory": true,
-      "installerIcon": "./resources/logo/icon.ico",
-      "uninstallerIcon": "./resources/logo/icon.ico",
-      "installerHeaderIcon": "./resources/logo/icon.ico",
-      "createDesktopShortcut": true,
-      "createStartMenuShortcut": true
-    }
-  },
   "dependencies": {
-    "@kungfu-trader/kungfu-core": "^2.4.0-alpha.1",
+    "@kungfu-trader/kungfu-core": "^2.4.0-alpha.2",
     "electron-find": "^1.0.6",
     "fast-csv": "^2.5.0",
     "fkill": "^6.1.0",
@@ -225,6 +101,7 @@
     "sass": "^1.32.6",
     "sass-loader": "^7.2.0",
     "style-loader": "^0.21.0",
+    "semver": "^7.3.5",
     "tail": "^2.0.2",
     "taskkill": "^2.0.0",
     "ts-loader": "3.5.0",
