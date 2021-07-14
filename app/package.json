@@ -4,7 +4,7 @@
     "name": "Kungfu Origin",
     "email": "info@kungfu.link"
   },
-  "version": "2.4.0-alpha.2",
+  "version": "2.4.0-alpha.3",
   "description": "Kungfu App",
   "license": "Apache-2.0",
   "env": [
@@ -27,7 +27,7 @@
     "build-cli": "yarn run elec --cli"
   },
   "dependencies": {
-    "@kungfu-trader/kungfu-core": "^2.4.0-alpha.2",
+    "@kungfu-trader/kungfu-core": "^2.4.0-alpha.3",
     "electron-find": "^1.0.6",
     "fast-csv": "^2.5.0",
     "fkill": "^6.1.0",
@@ -100,8 +100,8 @@
     "rxjs": "^6.5.2",
     "sass": "^1.32.6",
     "sass-loader": "^7.2.0",
-    "style-loader": "^0.21.0",
     "semver": "^7.3.5",
+    "style-loader": "^0.21.0",
     "tail": "^2.0.2",
     "taskkill": "^2.0.0",
     "ts-loader": "3.5.0",
