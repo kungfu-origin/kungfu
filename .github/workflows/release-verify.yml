@@ -70,7 +70,6 @@ jobs:
         uses: actions/upload-artifact@v2
         if: ${{ failure() }}
         with:
-          # https://docs.github.com/en/actions/reference/context-and-expression-syntax-for-github-actions#github-context
           name: 'Kungfu-Build-Info-${{matrix.name}}-${{github.actor}}-${{github.sha}}'
           path: |
             yarn.lock
@@ -87,9 +86,10 @@ jobs:
       - name: Upload Prebuilt
         uses: actions/upload-artifact@v2
         with:
-          name: 'Kungfu-Prebuilt-${{matrix.name}}-${{github.sha}}'
+          # https://docs.github.com/en/actions/reference/context-and-expression-syntax-for-github-actions#github-context
+          name: 'Kungfu-Prebuilt-${{matrix.name}}-${{github.actor}}-${{github.sha}}'
           path: |
-            '*/build/stage/*/*/*/*.*'
+            */build/stage/*/v*/v*/*.*
             !*/build/stage/**/*.yml
             !*/build/stage/**/*.yaml
           if-no-files-found: ignore
