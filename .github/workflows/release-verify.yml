@@ -90,6 +90,7 @@ jobs:
           name: 'Kungfu-Prebuilt-${{matrix.name}}-${{github.actor}}-${{github.sha}}'
           path: |
             */build/stage/*/v*/v*/*.*
+            !*/build/stage/**/.*
             !*/build/stage/**/*.yml
             !*/build/stage/**/*.yaml
           if-no-files-found: ignore
@@ -123,8 +124,10 @@ jobs:
       - name: Publish Prebuilt to AWS (US)
         uses: kungfu-trader/action-publish-prebuilt@v2
         with:
+          token: ${{ secrets.GITHUB_TOKEN }}
           artifacts-path: 'github-artifacts'
           bucket-staging: 'kungfu-prebuilt-staging'
+          no-comment: 'true'
 
       - name: Configure AWS Crendentials (CN)
         uses: aws-actions/configure-aws-credentials@v1
@@ -136,6 +139,7 @@ jobs:
       - name: Publish Prebuilt to AWS (CN)
         uses: kungfu-trader/action-publish-prebuilt@v2
         with:
+          token: ${{ secrets.GITHUB_TOKEN }}
           artifacts-path: 'github-artifacts'
           bucket-staging: 'kungfu-prebuilt-staging'
 
