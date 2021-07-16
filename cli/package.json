@@ -5,6 +5,12 @@
   "description": "Kungfu CLI",
   "license": "Apache-2.0",
   "main": "./dist/cli/index.js",
+  "repository": {
+    "url": "https://github.com/kungfu-trader/kungfu.git"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
   "engines": {
     "node": ">=12"
   },
