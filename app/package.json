@@ -7,10 +7,16 @@
   "version": "2.4.0-alpha.3",
   "description": "Kungfu App",
   "license": "Apache-2.0",
+  "main": "./dist/app/main.js",
+  "repository": {
+    "url": "https://github.com/kungfu-trader/kungfu.git"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
   "env": [
     "USE_HARD_LINKS=false"
   ],
-  "main": "./dist/app/main.js",
   "engines": {
     "node": ">=12"
   },
