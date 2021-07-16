@@ -40,8 +40,10 @@ jobs:
       - name: Publish Prebuilt to AWS (US)
         uses: kungfu-trader/action-publish-prebuilt@v2
         with:
+          token: ${{ secrets.GITHUB_TOKEN }}
           bucket-staging: 'kungfu-prebuilt-staging'
           bucket-release: 'kungfu-prebuilt'
+          no-comment: 'true'
 
       - name: Configure AWS Crendentials (CN)
         uses: aws-actions/configure-aws-credentials@v1
@@ -53,6 +55,7 @@ jobs:
       - name: Publish Prebuilt to AWS (CN)
         uses: kungfu-trader/action-publish-prebuilt@v2
         with:
+          token: ${{ secrets.GITHUB_TOKEN }}
           bucket-staging: 'kungfu-prebuilt-staging'
           bucket-release: 'kungfu-prebuilt'
 
