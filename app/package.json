@@ -4,7 +4,7 @@
     "name": "Kungfu Origin",
     "email": "info@kungfu.link"
   },
-  "version": "2.4.0-alpha.3",
+  "version": "2.4.0-alpha.4",
   "description": "Kungfu App",
   "license": "Apache-2.0",
   "main": "./dist/app/main.js",
@@ -33,7 +33,7 @@
     "build-cli": "yarn run elec --cli"
   },
   "dependencies": {
-    "@kungfu-trader/kungfu-core": "^2.4.0-alpha.3",
+    "@kungfu-trader/kungfu-core": "^2.4.0-alpha.4",
     "electron-find": "^1.0.6",
     "fast-csv": "^2.5.0",
     "fkill": "^6.1.0",
