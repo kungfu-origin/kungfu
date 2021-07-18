@@ -164,7 +164,7 @@ function electronLog (data, color) {
   })
   if (/[0-9A-z]+/.test(log)) {
     console.log(
-      chalk[color].bold('┏ KungFu -------------------') +
+      chalk[color].bold('┏ KungFu ---------------------') +
       '\n\n' +
       log +
       chalk[color].bold('┗ ----------------------------') +

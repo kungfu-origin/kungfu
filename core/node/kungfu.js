@@ -2,7 +2,7 @@ const fse = require("fs-extra");
 const glob = require("glob");
 const path = require("path");
 
-const prebuilt = require("node-pre-gyp");
+const prebuilt = require("@mapbox/node-pre-gyp");
 const config = path.resolve(path.join(path.dirname(__dirname),"package.json"))
 const node_bindings_path = prebuilt.find(config);
 const bindings_path = "electron" in process.versions ? node_bindings_path.replace("_node.", "_electron.") : node_bindings_path;
