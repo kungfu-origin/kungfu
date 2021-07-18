@@ -59,10 +59,3 @@ INCLUDE_DIRECTORIES(cpp/include)
 
 ADD_SUBDIRECTORY(deps)
 ADD_SUBDIRECTORY(cpp)
-
-############################################################
-
-if (EXISTS "${PROJECT_SOURCE_DIR}/extensions")
-    SET(KF_EXTENSIONS_BUILD_DIR ${CMAKE_BINARY_DIR}/build_extensions)
-    ADD_SUBDIRECTORY(extensions)
-endif ()

@@ -1,0 +1,179 @@
+{
+  "name": "@kungfu-trader/kfx-xtp-demo",
+  "author": "Kungfu Trader",
+  "version": "2.4.0-alpha.4",
+  "description": "Kungfu Extension - XTP Demo",
+  "license": "Apache-2.0",
+  "repository": {
+    "url": "https://github.com/kungfu-trader/kungfu.git"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "dependencies": {
+    "@kungfu-trader/kungfu-sdk": "^2.4.0-alpha.4"
+  },
+  "kungfuDependencies": {
+    "xtp": "v1.1.18.13"
+  },
+  "kungfuBuild": {
+    "cpp": {
+      "target": "bind/python",
+      "links": [
+        "xtptraderapi",
+        "xtpquoteapi"
+      ]
+    }
+  },
+  "kungfuConfig": {
+    "key": "xtp",
+    "name": "XTP",
+    "executor": "kfc",
+    "config": {
+      "td": {
+        "type": "broker/td/stock",
+        "settings": [
+          {
+            "key": "account_name",
+            "name": "account_name",
+            "type": "str",
+            "tip": "请填写账户别名"
+          },
+          {
+            "key": "account_id",
+            "name": "account_id",
+            "type": "str",
+            "required": true,
+            "primary": true,
+            "tip": "请填写账户，例如:1504091",
+            "validator": [
+              "noUnderlineValidator"
+            ]
+          },
+          {
+            "key": "password",
+            "name": "password",
+            "type": "password",
+            "required": true,
+            "tip": "请填写密码，例如:123456",
+            "validator": [
+              "blankValidator"
+            ]
+          },
+          {
+            "key": "software_key",
+            "name": "software_key",
+            "type": "str",
+            "required": true,
+            "tip": "请填写，例如:b8aa7173bba3470e390d787219b2112"
+          },
+          {
+            "key": "td_ip",
+            "name": "td_ip",
+            "type": "str",
+            "required": true,
+            "tip": "请填写交易IP，例如:61.152.102.111"
+          },
+          {
+            "key": "td_port",
+            "name": "td_port",
+            "type": "int",
+            "required": true,
+            "tip": "请填写交易端口，例如:8601",
+            "validator": [
+              "intValidator"
+            ]
+          },
+          {
+            "key": "client_id",
+            "name": "client_id",
+            "type": "int",
+            "required": "@kungfu-trader/kungfu-sdk",
+            "tip": "请填写自定义多点登录ID 1-99整数,不同节点之间不要重复",
+            "validator": [
+              "o99Validator",
+              "intValidator"
+            ]
+          }
+        ]
+      },
+      "md": {
+        "type": "broker/md/stock",
+        "settings": [
+          {
+            "key": "account_id",
+            "name": "account_id",
+            "type": "str",
+            "required": true,
+            "tip": "请填写账户，例如:1504091"
+          },
+          {
+            "key": "password",
+            "name": "password",
+            "type": "password",
+            "required": true,
+            "tip": "请填写密码，例如:123456",
+            "validator": [
+              "blankValidator"
+            ]
+          },
+          {
+            "key": "md_ip",
+            "name": "md_ip",
+            "type": "str",
+            "required": true,
+            "tip": "请填写行情IP，例如:61.152.102.110"
+          },
+          {
+            "key": "md_port",
+            "name": "md_port",
+            "type": "int",
+            "required": true,
+            "tip": "请填写行情端口，例如:8602",
+            "validator": [
+              "intValidator"
+            ]
+          },
+          {
+            "key": "protocol",
+            "name": "protocol",
+            "type": "select",
+            "data": [
+              {
+                "value": "tcp",
+                "name": "tcp"
+              },
+              {
+                "value": "udp",
+                "name": "udp"
+              }
+            ],
+            "required": false,
+            "tip": "请选择 protocol, tcp or udp"
+          },
+          {
+            "key": "buffer_size",
+            "name": "buffer_size",
+            "type": "int",
+            "tip": "请填写 buffer size（mb）",
+            "validator": [
+              "intValidator"
+            ],
+            "required": false
+          },
+          {
+            "key": "client_id",
+            "name": "client_id",
+            "type": "int",
+            "required": true,
+            "validator": [
+              "o99Validator",
+              "intValidator"
+            ],
+            "tip": "请填写自定义多点登录ID 1-99整数,不同节点之间不要重复"
+          }
+        ]
+      }
+    }
+  }
+}

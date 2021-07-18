@@ -1,7 +1,9 @@
 {
   "version": "2.4.0-alpha.4",
   "packages": [
-    "framework/*"
+    "framework/*",
+    "developer/*",
+    "extensions/*"
   ],
   "command": {
     "version": {
