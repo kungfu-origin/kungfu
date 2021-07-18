@@ -5,10 +5,7 @@
   "license": "Apache-2.0",
   "private": true,
   "workspaces": [
-    "core",
-    "shared",
-    "cli",
-    "app"
+    "framework/*"
   ],
   "scripts": {
     "postinstall": "wsrun --serial --exclude-missing --fast-exit postinstall",

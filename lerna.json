@@ -1,10 +1,7 @@
 {
   "version": "2.4.0-alpha.4",
   "packages": [
-    "core",
-    "shared",
-    "cli",
-    "app"
+    "framework/*"
   ],
   "command": {
     "version": {
