@@ -2,10 +2,10 @@
 // Created by Keren Dong on 2020/4/4.
 //
 
-#include "accounting/future.hpp"
-#include "accounting/stock.hpp"
 #include "accounting/bond.hpp"
+#include "accounting/future.hpp"
 #include "accounting/repo.hpp"
+#include "accounting/stock.hpp"
 
 using namespace kungfu::wingchun;
 

@@ -19,7 +19,7 @@ function run(cmd, argv, check=true) {
 
 function node_pre_gyp(cmd, argv, check=true) {
     const build_type_arg = argv.buildType === "Debug" ? ["--debug"] : [];
-    const yarn_cmd_arg = ["node-pre-gyp", ...build_type_arg, ...cmd];
+    const yarn_cmd_arg = ["-s", "node-pre-gyp", ...build_type_arg, ...cmd];
     run("yarn", yarn_cmd_arg, check);
 }
 

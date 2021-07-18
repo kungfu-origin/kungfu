@@ -36,7 +36,6 @@ protected:
   std::unordered_map<std::string, longfist::types::Instrument> instruments_ = {};
 
 private:
-
   void update_instrument(longfist::types::Instrument instrument);
 };
 } // namespace kungfu::wingchun::broker

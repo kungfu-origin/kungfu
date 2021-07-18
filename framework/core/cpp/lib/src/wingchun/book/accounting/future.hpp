@@ -88,7 +88,8 @@ public:
     }
     auto &instrument = book->instruments.at(instrument_key);
     if (input.offset == Offset::Open) {
-      auto frozen_margin = instrument.contract_multiplier * input.frozen_price * input.volume * margin_ratio(instrument, position);
+      auto frozen_margin =
+          instrument.contract_multiplier * input.frozen_price * input.volume * margin_ratio(instrument, position);
       book->asset.avail -= frozen_margin;
       book->asset.frozen_cash += frozen_margin;
       book->asset.frozen_margin += frozen_margin;
@@ -174,7 +175,7 @@ public:
   }
 
 private:
-  void apply_open(Book_ptr &book, const Trade &trade) { 
+  void apply_open(Book_ptr &book, const Trade &trade) {
     auto &position = book->get_position_for(trade);
     auto &instrument = book->instruments.at(hash_instrument(trade.exchange_id, trade.instrument_id));
     auto margin = instrument.contract_multiplier * trade.price * trade.volume * margin_ratio(instrument, position);

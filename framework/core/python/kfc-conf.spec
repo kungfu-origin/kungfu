@@ -14,13 +14,11 @@ build_cpp_dir = os.path.abspath(os.path.join(build_dir, 'cpp'))
 build_deps_dir = os.path.abspath(os.path.join(build_dir, 'deps'))
 build_output_dir = os.path.join(build_dir, os.environ['CMAKE_BUILD_TYPE'])
 ext_dir = os.path.join(src_dir, 'kungfu_extensions')
-ext_output_dir = os.path.join(build_dir, 'build_extensions')
 
 datas = [
     (cmake_dir, 'cmake'),
     (build_output_dir + sep + '*', '.'),
     (ext_dir, 'kungfu_extensions'),
-    (ext_output_dir, 'kungfu_extensions'),
     (pybind_dir, 'pybind11'),
     (build_dir + sep + 'include', 'include')
 ]

@@ -35,7 +35,9 @@ class KungfuCoreConan(ConanFile):
         "fmt:header_only": "True",
         "spdlog:header_only": "True",
         "log_level": "info",
-        "arch": "x64"
+        "arch": "x64",
+        "node_version": "ANY",
+        "electron_version": "ANY"
     }
     cpp_files_extensions = ['.h', '.hpp', '.hxx', '.cpp', '.c', '.cc', '.cxx']
     conanfile_dir = os.path.dirname(os.path.realpath(__file__))

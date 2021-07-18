@@ -1,8 +1,8 @@
 [packages]
-conan = "==1.31"
-pywin32 = {version = "==227",sys_platform = "== 'win32'"}
-pyinstaller = "==4.2"
-click = "==7.1.1"
+conan = "==1.38"
+pywin32 = {version = "==301",sys_platform = "== 'win32'"}
+pyinstaller = "==4.4"
+click = "==8.0.1"
 tabulate = "==0.8.6"
 prompt_toolkit = "==1.0.14"
 PyInquirer = "==1.0.3"

@@ -4,7 +4,7 @@ import subprocess
 import platform
 
 argv = list(map(os.path.basename, sys.argv[1:]))  # strip leading path for gyp on windows
-cmd = ["yarn", *argv]
+cmd = ["yarn", "-s", *argv]
 
 sys.stdout.write(f"$ {' '.join(cmd)}\n")
 sys.stdout.flush()
