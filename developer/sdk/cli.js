@@ -6,7 +6,7 @@ const os = require("os");
 const treeify = require('treeify');
 const sdk = require("./index.js");
 
-const defaultLibSiteURL = "http://ex.libkungfu.cc";
+const defaultLibSiteURL = "http://external.libkungfu.cc";
 
 require("yargs/yargs")(process.argv.slice(2))
     .command("list", "List libs", (yargs) => {
