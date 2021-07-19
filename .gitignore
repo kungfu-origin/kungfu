@@ -25,7 +25,6 @@ build/
 build-*/
 
 # Node related
-.npmrc
 yarn.lock
 package-lock.json
 .project

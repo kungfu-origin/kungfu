@@ -23,8 +23,8 @@
   "scripts": {
     "clean": "rimraf ./dist/* ./build/*",
     "dev": "node .electron-kungfu/dev-runner.js",
-    "dist:main": "yarn -s webpack --config .electron-kungfu/webpack.main.config.js",
-    "dist:render": "yarn -s webpack --config .electron-kungfu/webpack.renderer.config.js",
+    "dist:main": "yarn webpack --config .electron-kungfu/webpack.main.config.js",
+    "dist:render": "yarn webpack --config .electron-kungfu/webpack.renderer.config.js",
     "dist": "node --max_old_space_size=4096 .electron-kungfu/build.js",
     "elec": "node .electron-builder/build.js",
     "prebuild": "yarn run clean && yarn run dist",
