@@ -89,10 +89,10 @@ jobs:
           # https://docs.github.com/en/actions/reference/context-and-expression-syntax-for-github-actions#github-context
           name: 'Kungfu-Prebuilt-${{matrix.name}}-${{github.actor}}-${{github.sha}}'
           path: |
-            */build/stage/*/v*/v*/*.*
-            !*/build/stage/**/.*
-            !*/build/stage/**/*.yml
-            !*/build/stage/**/*.yaml
+            **/build/stage/*/v*/v*/*.*
+            !**/build/stage/**/.*
+            !**/build/stage/**/*.yml
+            !**/build/stage/**/*.yaml
           if-no-files-found: ignore
 
   verify:

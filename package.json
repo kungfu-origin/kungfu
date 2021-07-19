@@ -11,12 +11,12 @@
   ],
   "scripts": {
     "foreach": "wsrun --serial --exclude-missing --fast-exit",
-    "postinstall": "yarn -s foreach postinstall",
-    "build": "yarn -s foreach build",
-    "build-cli": "yarn -s foreach build-cli",
-    "clean": "yarn -s foreach clean",
-    "package": "yarn -s foreach package",
-    "rebuild": "yarn run clean && yarn run build"
+    "postinstall": "yarn foreach postinstall",
+    "build": "yarn foreach build",
+    "build-cli": "yarn foreach build-cli",
+    "clean": "yarn foreach clean",
+    "package": "yarn foreach package",
+    "rebuild": "yarn clean && yarn build"
   },
   "dependencies": {
     "@mapbox/node-pre-gyp": "^1.0.0",
