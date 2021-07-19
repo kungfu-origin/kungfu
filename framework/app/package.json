@@ -1,7 +1,7 @@
 {
   "name": "@kungfu-trader/kungfu-app",
   "author": {
-    "name": "Kungfu Origin",
+    "name": "kungfu-trader",
     "email": "info@kungfu.link"
   },
   "version": "2.4.0-alpha.4",

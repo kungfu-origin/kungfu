@@ -1,6 +1,6 @@
 {
   "name": "@kungfu-trader/kungfu-sdk",
-  "author": "Kungfu Trader",
+  "author": "kungfu-trader",
   "version": "2.4.0-alpha.4",
   "description": "Libs and tools for developing Kungfu extensions",
   "license": "Apache-2.0",
