@@ -10,7 +10,12 @@
   "publishConfig": {
     "registry": "https://npm.pkg.github.com"
   },
-  "dependencies": {
+  "scripts": {
+    "postinstall": "kfs install",
+    "build": "kfs build",
+    "format": "clang-format --verbose -style=file -i src/cpp/*"
+  },
+  "devDependencies": {
     "@kungfu-trader/kungfu-sdk": "^2.4.0-alpha.4"
   },
   "kungfuDependencies": {

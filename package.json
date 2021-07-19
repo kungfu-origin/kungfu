@@ -15,8 +15,13 @@
     "build": "yarn foreach build",
     "build-cli": "yarn foreach build-cli",
     "clean": "yarn foreach clean",
+    "format": "yarn foreach format",
+    "lint": "eslint --ext .ts .",
     "package": "yarn foreach package",
-    "rebuild": "yarn clean && yarn build"
+    "rebuild": "yarn clean && yarn build",
+    "reformat": "prettier --write --parser typescript",
+    "reformat:ts": "yarn reformat \"(framework|developer|extensions)/**/node/*.ts?(x)\"",
+    "reformat:js": "yarn reformat \"(framework|developer|extensions)/**/node/*.js\""
   },
   "dependencies": {
     "@mapbox/node-pre-gyp": "^1.0.0",
@@ -25,6 +30,11 @@
     "node-gyp": "^7.1.0"
   },
   "devDependencies": {
+    "@ls-lint/ls-lint": "^1.9.2",
+    "@typescript-eslint/parser": "^3.10.1",
+    "eslint": "^7.14.0",
+    "prettier": "~2.0.5",
+    "prettier-eslint-cli": "^5.0.0",
     "lerna": "^4.0.0",
     "wsrun": "^5.0.0"
   }

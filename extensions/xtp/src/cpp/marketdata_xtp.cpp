@@ -116,7 +116,6 @@ void MarketDataXTP::OnQueryAllTickers(XTPQSI *ticker_info, XTPRI *error_info, bo
   Instrument &quote = get_writer(0)->open_data<Instrument>(0);
   from_xtp(ticker_info, quote);
   get_writer(0)->close_data();
-  
 }
 
 void MarketDataXTP::OnDepthMarketData(XTPMD *market_data, int64_t *bid1_qty, int32_t bid1_count, int32_t max_bid1_count,

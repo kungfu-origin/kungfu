@@ -15,7 +15,8 @@
     "kfs": "cli.js"
   },
   "scripts": {
-    "kfs": "node cli.js"
+    "kfs": "node cli.js",
+    "format": "prettier --write --parser typescript **/**.js"
   },
   "dependencies": {
     "archiver": "^5.3.0",

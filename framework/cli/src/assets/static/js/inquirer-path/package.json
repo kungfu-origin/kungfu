@@ -18,7 +18,7 @@
     "docs": "documentation build -c documentation.yml -f html -o docs src/**",
     "docs-watch": "documentation serve --watch -c documentation.yml -f html src/**",
     "docs-md": "documentation build -c documentation.yml -f md -o DOCUMENTATION.md src/**",
-    "prepublish": "npm run compile && npm run lint"
+    "prepublish": "npm run compile"
   },
   "dependencies": {
     "chalk": "^1.1.3",

@@ -40,7 +40,9 @@
     "compile": "cross-var pipenv run conan build . -bf build -s build_type=$npm_package_config_buildtype",
     "freeze": "cross-var pipenv run conan package . -bf build -pf build/kfc -s build_type=$npm_package_config_buildtype",
     "clean": "cmake-js clean",
-    "format": "pipenv run conan source .",
+    "format": "yarn format:cpp && yarn format:js",
+    "format:cpp": "pipenv run conan source .",
+    "format:js": "prettier --write --parser typescript \"(.build|node)/**.js\"",
     "dev": "pipenv run python python/dev_run.py",
     "test": "pipenv run python python/dev_test.py"
   },
