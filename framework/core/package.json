@@ -46,6 +46,9 @@
     "dev": "pipenv run python python/dev_run.py",
     "test": "pipenv run python python/dev_test.py"
   },
+  "bin": {
+    "kfc": "build/kfc/kfc"
+  },
   "dependencies": {
     "@mapbox/node-pre-gyp": "^1.0.0",
     "fs-extra": "^9.1.0",

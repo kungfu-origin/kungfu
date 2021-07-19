@@ -1,7 +1,4 @@
 import os
-import sys
-import pkgutil
-import traceback
 from kungfu.yijinjing.locator import Locator
 from kungfu.yijinjing.log import create_logger
 from pykungfu import longfist as lf
@@ -46,17 +43,3 @@ EXTENSION_REGISTRY_MD = ExtensionRegistry('MD')
 EXTENSION_REGISTRY_TD = ExtensionRegistry('TD')
 EXTENSION_REGISTRY_DATA = ExtensionRegistry('DATA')
 EXTENSIONS = {}
-
-extension_path = __path__
-__path__ = pkgutil.extend_path(__path__, __name__)
-if not os.getenv('KF_NO_EXT'):
-    for importer, modname, ispkg in pkgutil.iter_modules(path=__path__, prefix=__name__+'.'):
-        try:
-            __import__(modname)
-            ext_name = modname[len(__name__)+1:]
-            extension_path = importer.path
-            EXTENSIONS[ext_name] = extension_path
-            kfext_logger.info('Loaded extension %s', ext_name)
-        except:
-            exc_type, exc_obj, exc_tb = sys.exc_info()
-            kfext_logger.critical('Bad extension %s, %s %s', modname, exc_type, traceback.format_exception(exc_type, exc_obj, exc_tb))
