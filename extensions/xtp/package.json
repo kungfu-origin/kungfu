@@ -11,8 +11,6 @@
     "registry": "https://npm.pkg.github.com"
   },
   "scripts": {
-    "postinstall": "kfs install",
-    "build": "kfs build",
     "format": "clang-format --verbose -style=file -i src/cpp/*"
   },
   "devDependencies": {
