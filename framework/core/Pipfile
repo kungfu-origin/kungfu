@@ -9,7 +9,7 @@ psutil = "==5.8.0"
 sortedcontainers = "==2.1.0"
 recordclass = "==0.14.3"
 dotted_dict = "==1.1.2"
-wcwidth = "==0.2.2"
+wcwidth = "==0.2.5"
 tabulate = "==0.8.6"
 prompt_toolkit = "==1.0.14"
 PyInquirer = "==1.0.3"
@@ -17,10 +17,8 @@ pywin32 = {version = "==301",sys_platform = "== 'win32'"}
 #### Numeric related ##########################################################
 numpy = "==1.21.0"
 pandas = "==1.2.0"
-statsmodels = "==0.11.1"
-plotly = "==4.0.0"
+statsmodels = "==0.12.2"
+plotly = "==5.1.0"
 PyYAML = "==5.4"
 #### Legacy ###################################################################
-chinesecalendar = "==1.5.0"
-zhdate = "==0.1"
-###############################################################################
+chinesecalendar = "==1.5.1"
