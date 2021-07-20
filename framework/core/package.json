@@ -58,7 +58,7 @@
     "yargs": "^16.2.0"
   },
   "devDependencies": {
-    "cmake-js": "^6.1.0",
+    "cmake-js": "^6.2.0",
     "cross-var": "^1.1.0",
     "node-gyp": "^7.1.0",
     "yarn": "*"
