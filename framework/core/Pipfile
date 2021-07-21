@@ -1,25 +1,2 @@
 [packages]
-#### Build related ############################################################
-conan = "==1.38"
 poetry = "==1.1.7"
-pyinstaller = "==4.4"
-nuitka = "==0.6.16.2"
-#### Control related ##########################################################
-click = "==8.0.1"
-psutil = "==5.8.0"
-sortedcontainers = "==2.1.0"
-recordclass = "==0.14.3"
-dotted_dict = "==1.1.2"
-wcwidth = "==0.2.5"
-tabulate = "==0.8.6"
-prompt_toolkit = "==1.0.14"
-PyInquirer = "==1.0.3"
-pywin32 = {version = "==301",sys_platform = "== 'win32'"}
-#### Numeric related ##########################################################
-numpy = "==1.21.0"
-pandas = "==1.2.0"
-statsmodels = "==0.12.2"
-plotly = "==5.1.0"
-PyYAML = "==5.4"
-#### Legacy ###################################################################
-chinesecalendar = "==1.5.1"

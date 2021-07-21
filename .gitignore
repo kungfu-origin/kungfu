@@ -40,7 +40,6 @@ node_modules/
 */inquirer-path/yarn.lock
 
 # Python related
-Pipfile.lock
 MANIFEST
 .installed.cfg
 __pycache__/
