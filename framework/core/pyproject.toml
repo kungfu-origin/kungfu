@@ -2,7 +2,7 @@
 name = "kungfu"
 version = "2.4.0"
 description = ""
-authors = ["Keren DONG <keren.dong@kungfu.link>"]
+authors = ["Kungfu Trader <info@kungfu.link>"]
 
 [tool.poetry.dependencies]
 python = ">=3.7.1, <4.0"

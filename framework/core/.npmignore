@@ -1,7 +1,3 @@
 cmake-build-debug
 build
 node_modules
-
-Pipfile.lock
-package-lock.json
-yarn.lock

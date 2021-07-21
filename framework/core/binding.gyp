@@ -5,17 +5,56 @@
             "type": "none",
             "actions": [
                 {
-                    "action_name": "pipenv",
-                    "inputs": ["<(module_root_dir)/Pipfile"],
-                    "outputs": ["<(module_root_dir)/Pipfile.lock"],
-                    "action": ["python", ".build/yarn-run.py", "pipenv-js", "install"]
+                    "action_name": "lock",
+                    "inputs": [
+                        "<(module_root_dir)/Pipfile"
+                    ],
+                    "outputs": [
+                        "<(module_root_dir)/Pipfile.lock"
+                    ],
+                    "action": ["python", ".build/yarn-run.py", "pipenv", "lock"]
+                },
+                {
+                    "action_name": "install",
+                    "inputs": [
+                        "<(module_root_dir)/Pipfile.lock"
+                    ],
+                    "outputs": [
+                        "<(module_root_dir)/build/pipenv.target.mk"
+                    ],
+                    "action": ["python", ".build/yarn-run.py", "pipenv", "install"]
+                }
+            ]
+        },
+        {
+            "target_name": "poetry",
+            "type": "none",
+            "dependencies": ["pipenv"],
+            "actions": [
+                {
+                    "action_name": "lock",
+                    "inputs": [
+                        "<(module_root_dir)/pyproject.toml"
+                    ],
+                    "outputs": [
+                        "<(module_root_dir)/poetry.lock"
+                    ],
+                    "action": ["python", ".build/yarn-run.py", "poetry", "lock", "-n"]
+                },
+                {
+                    "action_name": "install",
+                    "inputs": ["<(module_root_dir)/poetry.lock"],
+                    "outputs": [
+                        "<(module_root_dir)/build/poetry.target.mk"
+                    ],
+                    "action": ["python", ".build/yarn-run.py", "poetry", "install", "-n"]
                 }
             ]
         },
         {
             "target_name": "conan",
             "type": "none",
-            "dependencies": ["pipenv"],
+            "dependencies": ["poetry"],
             "actions": [
                 {
                     "action_name": "configure",
@@ -49,6 +88,7 @@
                 {
                     "action_name": "freeze",
                     "inputs": [
+                        "<(module_root_dir)/poetry.lock",
                         "<(PRODUCT_DIR)/kungfubuildinfo.json",
                         "<!@(node -p \"require('glob').sync('python').join(' ');\")"
                     ],

@@ -1,9 +1,7 @@
+build
+cmake-build-debug
 node_modules
 
 **/build
 **/cmake-build-debug
 **/node_modules
-
-**/package-lock.json
-**/Pipfile.lock
-**/yarn.lock

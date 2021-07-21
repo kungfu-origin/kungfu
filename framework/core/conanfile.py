@@ -183,7 +183,7 @@ class KungfuCoreConan(ConanFile):
         debug_option = ['--debug'] if self.settings.build_type == 'Debug' else []
 
         return [
-            tools.which('yarn'),
+            tools.which('yarn'), '-s',
             'cmake-js',
             '--arch', str(self.options.arch),
             '--runtime', runtime,
@@ -208,7 +208,7 @@ class KungfuCoreConan(ConanFile):
 
     def __run_pyinstaller(self, build_type):
         with tools.chdir(os.path.pardir):
-            rc = psutil.Popen(['pipenv', 'run', 'pyinstaller', '--clean', '-y', '--distpath=build', 'python/kfc-conf.spec']).wait()
+            rc = psutil.Popen([tools.which('yarn'), '-s', 'pyinstaller', '--clean', '-y', '--distpath=build', 'python/kfc-conf.spec']).wait()
             if rc != 0:
                 self.output.error('PyInstaller failed')
                 sys.exit(rc)
