@@ -75,7 +75,7 @@
                         "<(module_root_dir)/conanfile.py",
                         "<!@(node -p \"require('glob').sync('**/CMakeLists.txt', {ignore:'build/**'}).join(' ');\")",
                         "<!@(node -p \"require('glob').sync('**/*.*(h|hpp|c|cc|cpp)', {ignore:'build/**'}).join(' ');\")",
-                        "<!@(node -p \"require('glob').sync('python').join(' ');\")"
+                        "<!@(node -p \"require('glob').sync('python/**/*.*(py|spec)').join(' ');\")"
                     ],
                     "outputs": ["<(module_path)/kungfubuildinfo.json"],
                     "action": ["python", ".build/yarn-run.py", "freeze"]
