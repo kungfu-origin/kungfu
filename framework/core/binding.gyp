@@ -5,23 +5,9 @@
             "type": "none",
             "actions": [
                 {
-                    "action_name": "lock",
-                    "inputs": [
-                        "<(module_root_dir)/Pipfile"
-                    ],
-                    "outputs": [
-                        "<(module_root_dir)/Pipfile.lock"
-                    ],
-                    "action": ["python", ".build/yarn-run.py", "pipenv", "lock"]
-                },
-                {
                     "action_name": "install",
-                    "inputs": [
-                        "<(module_root_dir)/Pipfile.lock"
-                    ],
-                    "outputs": [
-                        "<(module_root_dir)/build/pipenv.target.mk"
-                    ],
+                    "inputs": ["<(module_root_dir)/Pipfile"],
+                    "outputs": ["<(module_root_dir)/Pipfile.lock"],
                     "action": ["python", ".build/yarn-run.py", "pipenv", "install"]
                 }
             ]
@@ -32,22 +18,13 @@
             "dependencies": ["pipenv"],
             "actions": [
                 {
-                    "action_name": "lock",
+                    "action_name": "install",
                     "inputs": [
+                        "<(module_root_dir)/Pipfile",
                         "<(module_root_dir)/pyproject.toml"
                     ],
-                    "outputs": [
-                        "<(module_root_dir)/poetry.lock"
-                    ],
-                    "action": ["python", ".build/yarn-run.py", "poetry", "lock", "-n"]
-                },
-                {
-                    "action_name": "install",
-                    "inputs": ["<(module_root_dir)/poetry.lock"],
-                    "outputs": [
-                        "<(module_root_dir)/build/poetry.target.mk"
-                    ],
-                    "action": ["python", ".build/yarn-run.py", "poetry", "install", "-n"]
+                    "outputs": ["<(module_root_dir)/poetry.lock"],
+                    "action": ["python", ".build/yarn-run.py", "poetry", "install", "-n", "-q"]
                 }
             ]
         },
@@ -58,8 +35,12 @@
             "actions": [
                 {
                     "action_name": "configure",
-                    "inputs": ["<(module_root_dir)/conanfile.py"],
-                    "outputs": ["<(module_root_dir)/build/conanbuildinfo.cmake"],
+                    "inputs": [
+                        "<(module_root_dir)/Pipfile",
+                        "<(module_root_dir)/pyproject.toml",
+                        "<(module_root_dir)/conanfile.py"
+                    ],
+                    "outputs": ["<(module_root_dir)/build/conan.lock"],
                     "action": ["python", ".build/yarn-run.py", "configure"]
                 }
             ]
@@ -72,6 +53,7 @@
                 {
                     "action_name": "compile",
                     "inputs": [
+                        "<(module_root_dir)/conanfile.py",
                         "<!@(node -p \"require('glob').sync('**/CMakeLists.txt', {ignore:'build/**'}).join(' ');\")",
                         "<!@(node -p \"require('glob').sync('**/*.*(h|hpp|c|cc|cpp)', {ignore:'build/**'}).join(' ');\")"
                     ],
@@ -83,13 +65,16 @@
         {
             "target_name": "kfc",
             "type": "none",
-            "dependencies": ["<(module_name)"],
+            "dependencies": ["poetry", "<(module_name)"],
             "actions": [
                 {
                     "action_name": "freeze",
                     "inputs": [
-                        "<(module_root_dir)/poetry.lock",
-                        "<(PRODUCT_DIR)/kungfubuildinfo.json",
+                        "<(module_root_dir)/Pipfile",
+                        "<(module_root_dir)/pyproject.toml",
+                        "<(module_root_dir)/conanfile.py",
+                        "<!@(node -p \"require('glob').sync('**/CMakeLists.txt', {ignore:'build/**'}).join(' ');\")",
+                        "<!@(node -p \"require('glob').sync('**/*.*(h|hpp|c|cc|cpp)', {ignore:'build/**'}).join(' ');\")",
                         "<!@(node -p \"require('glob').sync('python').join(' ');\")"
                     ],
                     "outputs": ["<(module_path)/kungfubuildinfo.json"],

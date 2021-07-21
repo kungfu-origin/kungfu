@@ -47,6 +47,7 @@
     "poetry": "pipenv run python -m poetry",
     "pyinstaller": "pipenv run pyinstaller",
     "nuitka": "pipenv run python -m nuitka",
+    "touch": "node .build/touch.js",
     "dev": "pipenv run python python/dev_run.py",
     "test": "pipenv run python python/dev_test.py"
   },
