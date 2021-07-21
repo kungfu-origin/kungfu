@@ -29,14 +29,16 @@ class KungfuCoreConan(ConanFile):
     options = {
         "log_level": ["trace", "debug", "info", "warning", "error", "critical"],
         "arch": ["x64"],
+        "bundle": ["nuitka", "pyinstaller"],
         "node_version": "ANY",
-        "electron_version": "ANY",
+        "electron_version": "ANY"
     }
     default_options = {
         "fmt:header_only": "True",
         "spdlog:header_only": "True",
         "log_level": "info",
         "arch": "x64",
+        "bundle": "pyinstaller",
         "node_version": "ANY",
         "electron_version": "ANY",
     }
@@ -83,7 +85,11 @@ class KungfuCoreConan(ConanFile):
 
     def package(self):
         build_type = self.__get_build_type()
-        self.__run_pyinstaller(build_type)
+        bundle = {
+            "pyinstaller": self.__run_pyinstaller,
+            "nuitka": self.__run_nuitka
+        }
+        bundle[str(self.options.bundle)](build_type)
         self.__run_setuptools(build_type)
         self.__show_build_info(build_type)
 
@@ -193,7 +199,7 @@ class KungfuCoreConan(ConanFile):
             self.output.success(f"build version {build_version}")
 
     def __run_yarn(self, *args):
-        rc = psutil.Popen([tools.which("yarn"), "-s", *args]).wait()
+        rc = psutil.Popen([tools.which("yarn"), *args]).wait()
         if rc != 0:
             self.output.error(f"yarn {args} failed")
             sys.exit(rc)
@@ -224,8 +230,6 @@ class KungfuCoreConan(ConanFile):
 
         return (
             [
-                tools.which("yarn"),
-                "-s",
                 "cmake-js",
                 "--arch",
                 str(self.options.arch),
@@ -249,10 +253,7 @@ class KungfuCoreConan(ConanFile):
             if env_key.startswith("npm_") or env_key.startswith("NPM_")
         ]  # workaround for msvc
         tools.rmdir(self.build_extensions_dir)
-        rc = psutil.Popen(self.__build_cmake_js_cmd(cmd, runtime)).wait()
-        if rc != 0:
-            self.output.error(f"cmake-js {cmd} failed")
-            sys.exit(rc)
+        self.__run_yarn(*self.__build_cmake_js_cmd(cmd, runtime))
         self.output.success(f"cmake-js {cmd} done")
 
     def __run_build(self, build_type, runtime):
@@ -262,21 +263,25 @@ class KungfuCoreConan(ConanFile):
     def __run_pyinstaller(self, build_type):
         self.__run_yarn("touch", self.__get_build_info_path(build_type))
         with tools.chdir(path.pardir):
-            rc = psutil.Popen(
-                [
-                    tools.which("yarn"),
-                    "-s",
-                    "pyinstaller",
-                    "--clean",
-                    "-y",
-                    "--distpath=build",
-                    "python/kfc-conf.spec",
-                ]
-            ).wait()
-            if rc != 0:
-                self.output.error("PyInstaller failed")
-                sys.exit(rc)
+            self.__run_yarn(
+                "pyinstaller",
+                "--clean",
+                "-y",
+                "--distpath=build",
+                "python/kfc-conf.spec",
+            )
         self.output.success("PyInstaller done")
+
+    def __run_nuitka(self, build_type):
+        with tools.chdir(path.pardir):
+            self.__run_yarn("nuitka", "--output-dir=build", path.join("python", "kfc"))
+        kfc_dist_dir = path.join(self.build_dir, "kfc.dist")
+        shutil.copytree(
+            build_type, kfc_dist_dir
+        )
+        tools.rmdir(self.build_kfc_dir)
+        shutil.move(kfc_dist_dir, self.build_kfc_dir)
+        self.output.success("Nuitka done")
 
     def __run_setuptools(self, build_type):
         tools.rmdir(self.build_python_dir)

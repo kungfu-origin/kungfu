@@ -1,13 +1,10 @@
 #!/usr/bin/env node
 
-const fs = require('fs');
-const os = require('os');
+const fs = require('fs-extra');
 const path = require('path');
 const { spawnSync } = require('child_process');
 
-const PyPIConfigName = '@kungfu-trader/kungfu-core:pypi';
-const PrebuiltModuleName = 'kungfu_node';
-const PrebuiltConfigSuffix = 'binary_host_mirror';
+const PrebuiltHostConfigKey = 'kungfu_node_binary_host_mirror';
 
 const PyPI_US = 'https://pypi.python.org/simple';
 const PyPI_CN = 'http://mirrors.aliyun.com/pypi/simple';
@@ -18,62 +15,56 @@ const PrebuiltHost_US = 'https://kungfu-prebuilt.s3.us-east-1.amazonaws.com';
 const spawnOptsPipe = { shell: true, stdio: 'pipe', windowsHide: true };
 const spawnOptsInherit = { shell: true, stdio: 'inherit', windowsHide: true };
 
-function showSourceUrl(configName) {
-  const result = spawnSync('npm', ['config', 'get', `"${configName}"`], spawnOptsPipe);
-  const output = result.output
-    .filter((e) => e && e.length > 0)
+const packageJson = fs.readJsonSync(path.resolve(path.dirname(__dirname), 'package.json'));
+const projectName = packageJson.name;
+
+function showConfig(key, projectScope = true) {
+  const npmConfigKey = projectScope ? `${projectName}:${key}` : key;
+  const output = spawnSync('npm', ['config', 'get', npmConfigKey], spawnOptsPipe)
+    .output.filter((e) => e && e.length > 0)
     .toString()
     .trimEnd();
-  console.log(`${configName} = ${output}`);
+  const value = output === 'undefined' ? packageJson.config[key] : output;
+  console.log(`${npmConfigKey} = ${value}`);
 }
 
-function showSourceUrls(prebuiltName) {
-  showSourceUrl(PyPIConfigName);
-  showSourceUrl(`${prebuiltName}_${PrebuiltConfigSuffix}`);
+function showAllConfig() {
+  Object.keys(packageJson.config).map((key) => showConfig(key));
+  showConfig(PrebuiltHostConfigKey, false);
+}
+
+function npmCall(npmArgs) {
+  console.log(`$ npm ${npmArgs.join(' ')}`);
+  const result = spawnSync('npm', npmArgs, spawnOptsInherit);
+  if (result.status !== 0) {
+    console.error(`Failed with status ${status}`);
+    process.exit(result.status);
+  }
 }
 
 exports.argv = require('yargs/yargs')(process.argv.slice(2))
   .command(
-    'set-source-urls',
-    'Set source URLs from where to get prebuilt/packages',
-    (yargs) => {
-      yargs.option('name', {
-        type: 'string',
-        default: PrebuiltModuleName,
-        describe: 'name of the prebuilt',
-      });
-    },
+    'auto',
+    'Set npm configs automatically',
+    (yargs) => {},
     (argv) => {
-      const buildingInUS = 'GITHUB_ACTION' in process.env;
-      const hostConfigName = `${argv.name}_${PrebuiltConfigSuffix}`;
-      const pypi = buildingInUS ? PyPI_US : PyPI_CN;
-      const prebuiltHost = buildingInUS ? PrebuiltHost_US : PrebuiltHost_CN;
-      const configure = (key, value) => {
-        const npmArgs = ['config', 'set', key, value];
-        console.log(`$ npm ${npmArgs.join(' ')}`);
-        const result = spawnSync('npm', npmArgs, spawnOptsInherit);
-        if (result.status !== 0) {
-          console.error(`Failed with status ${status}`);
-          process.exit(result.status);
-        }
-      };
-      configure(PyPIConfigName, pypi);
-      configure(hostConfigName, prebuiltHost);
-      showSourceUrls(argv.name);
+      const githubActions = 'GITHUB_ACTIONS' in process.env;
+      const pypi = githubActions ? PyPI_US : PyPI_CN;
+      const prebuiltHost = githubActions ? PrebuiltHost_US : PrebuiltHost_CN;
+
+      const setConfig = (key, value) => githubActions && npmCall(['config', 'set', key, value]);
+      setConfig(`${projectName}:pypi`, pypi);
+      setConfig(PrebuiltHostConfigKey, prebuiltHost);
+
+      showAllConfig();
     },
   )
   .command(
-    'show-source-urls',
-    'Show source URLs from where to get prebuilt/packages',
-    (yargs) => {
-      yargs.option('name', {
-        type: 'string',
-        default: PrebuiltModuleName,
-        describe: 'name of the prebuilt',
-      });
-    },
+    'show',
+    'Show npm configs',
+    (yargs) => {},
     (argv) => {
-      showSourceUrls(argv.name);
+      showAllConfig();
     },
   )
   .command(

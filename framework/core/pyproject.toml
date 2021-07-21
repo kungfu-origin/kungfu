@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "kungfu"
 version = "2.4.0"
-description = ""
+description = "Kungfu Trader"
 authors = ["Kungfu Trader <info@kungfu.link>"]
 
 [tool.poetry.dependencies]

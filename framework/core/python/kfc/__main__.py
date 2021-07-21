@@ -2,15 +2,11 @@
 ###########################################################
 # nuitka-project: --standalone
 #
-# nuitka-project: --output-dir=../build
-# nuitka-project: --remove-output
-#
-# nuitka-project: --include-data-file=../build/kfc/*kungfu*.*=/
-#
 # nuitka-project: --assume-yes-for-downloads
 # nuitka-project: --prefer-source-code
 # nuitka-project: --python-flag=nosite
 # nuitka-project: --python-flag=no_warnings
+# nuitka-project: --remove-output
 # nuitka-project: --static-libpython=no
 #
 # nuitka-project: --warn-unusual-code

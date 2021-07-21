@@ -1,21 +1,5 @@
-const { spawnSync } = require('child_process');
-const fs = require('fs');
+const { run } = require('./lib.js');
 const glob = require('glob');
-const path = require('path');
-
-function run(cmd, argv, check = true) {
-  const real_cwd = fs.realpathSync(path.resolve(process.cwd()));
-  console.log(`$ ${cmd} ${argv.join(' ')}`);
-  const result = spawnSync(cmd, argv, {
-    shell: true,
-    stdio: 'inherit',
-    windowsHide: true,
-    cwd: real_cwd,
-  });
-  if (check && result.status !== 0) {
-    process.exit(result.status);
-  }
-}
 
 function node_pre_gyp(cmd, argv, check = true) {
   const build_type_arg = argv.buildType === 'Debug' ? ['--debug'] : [];

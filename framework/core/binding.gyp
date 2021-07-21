@@ -68,7 +68,7 @@
             "dependencies": ["poetry", "<(module_name)"],
             "actions": [
                 {
-                    "action_name": "freeze",
+                    "action_name": "bundle",
                     "inputs": [
                         "<(module_root_dir)/Pipfile",
                         "<(module_root_dir)/pyproject.toml",
@@ -78,7 +78,7 @@
                         "<!@(node -p \"require('glob').sync('python/**/*.*(py|spec)').join(' ');\")"
                     ],
                     "outputs": ["<(module_path)/kungfubuildinfo.json"],
-                    "action": ["python", ".build/yarn-run.py", "freeze"]
+                    "action": ["python", ".build/yarn-run.py", "bundle"]
                 }
             ]
         }
