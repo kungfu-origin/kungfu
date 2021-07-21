@@ -17,7 +17,9 @@ from pykungfu import wingchun as wc
 
 class Runner(wc.Runner):
     def __init__(self, ctx, mode):
-        wc.Runner.__init__(self, ctx.runtime_locator, ctx.group, ctx.name, mode, ctx.low_latency)
+        wc.Runner.__init__(
+            self, ctx.runtime_locator, ctx.group, ctx.name, mode, ctx.low_latency
+        )
         self.ctx = ctx
 
 
@@ -38,22 +40,33 @@ class Strategy(wc.Strategy):
         name_no_ext = os.path.split(os.path.basename(path))
         sys.path.append(os.path.relpath(strategy_dir))
         self._module = importlib.import_module(os.path.splitext(name_no_ext[1])[0])
-        self._pre_start = getattr(self._module, 'pre_start', lambda ctx: None)
-        self._post_start = getattr(self._module, 'post_start', lambda ctx: None)
-        self._pre_stop = getattr(self._module, 'pre_stop', lambda ctx: None)
-        self._post_stop = getattr(self._module, 'post_stop', lambda ctx: None)
-        self._on_trading_day = getattr(self._module, "on_trading_day", lambda ctx, trading_day: None)
+        self._pre_start = getattr(self._module, "pre_start", lambda ctx: None)
+        self._post_start = getattr(self._module, "post_start", lambda ctx: None)
+        self._pre_stop = getattr(self._module, "pre_stop", lambda ctx: None)
+        self._post_stop = getattr(self._module, "post_stop", lambda ctx: None)
+        self._on_trading_day = getattr(
+            self._module, "on_trading_day", lambda ctx, trading_day: None
+        )
         self._on_bar = getattr(self._module, "on_bar", lambda ctx, bar: None)
-        self._on_quote = getattr(self._module, 'on_quote', lambda ctx, quote: None)
-        self._on_top_of_book = getattr(self._module, 'on_top_of_book', lambda ctx, top_of_book: None)
-        self._on_entrust = getattr(self._module, 'on_entrust', lambda ctx, entrust: None)
-        self._on_transaction = getattr(self._module, "on_transaction", lambda ctx, transaction: None)
-        self._on_order = getattr(self._module, 'on_order', lambda ctx, order: None)
-        self._on_trade = getattr(self._module, 'on_trade', lambda ctx, trade: None)
-        self._on_order_action_error = getattr(self._module, 'on_order_action_error', lambda ctx, error: None)
+        self._on_quote = getattr(self._module, "on_quote", lambda ctx, quote: None)
+        self._on_top_of_book = getattr(
+            self._module, "on_top_of_book", lambda ctx, top_of_book: None
+        )
+        self._on_entrust = getattr(
+            self._module, "on_entrust", lambda ctx, entrust: None
+        )
+        self._on_transaction = getattr(
+            self._module, "on_transaction", lambda ctx, transaction: None
+        )
+        self._on_order = getattr(self._module, "on_order", lambda ctx, order: None)
+        self._on_trade = getattr(self._module, "on_trade", lambda ctx, trade: None)
+        self._on_order_action_error = getattr(
+            self._module, "on_order_action_error", lambda ctx, error: None
+        )
 
     def __call_proxy(self, func, *args):
         if inspect.iscoroutinefunction(func):
+
             async def wrap():
                 await func(*args)
                 self.ctx.loop._current = None
@@ -63,7 +76,13 @@ class Strategy(wc.Strategy):
             func(*args)
 
     def __init_book(self):
-        location = yjj.location(lf.enums.mode.LIVE, lf.enums.category.STRATEGY, self.ctx.group, self.ctx.name, self.ctx.runtime_locator)
+        location = yjj.location(
+            lf.enums.mode.LIVE,
+            lf.enums.category.STRATEGY,
+            self.ctx.group,
+            self.ctx.name,
+            self.ctx.runtime_locator,
+        )
         self.ctx.book = self.ctx.wc_context.bookkeeper.get_book(location.uid)
 
     def __add_timer(self, nanotime, callback):
@@ -82,14 +101,36 @@ class Strategy(wc.Strategy):
         self.ctx.wc_context.add_account(source, account, cash_limit)
 
     def __get_account_book(self, source, account):
-        location = yjj.location(lf.enums.mode.LIVE, lf.enums.category.TD, source, account, self.ctx.runtime_locator)
+        location = yjj.location(
+            lf.enums.mode.LIVE,
+            lf.enums.category.TD,
+            source,
+            account,
+            self.ctx.runtime_locator,
+        )
         return self.ctx.wc_context.bookkeeper.get_book(location.uid)
 
-    async def __async_insert_order(self, side, instrument_id, exchange_id, account_id, price, volume,
-                                   price_type=PriceType.Any, status_set=None):
+    async def __async_insert_order(
+        self,
+        side,
+        instrument_id,
+        exchange_id,
+        account_id,
+        price,
+        volume,
+        price_type=PriceType.Any,
+        status_set=None,
+    ):
         if status_set is None:
-            status_set = [OrderStatus.Filled, OrderStatus.PartialFilledActive, OrderStatus.Cancelled, OrderStatus.Error]
-        order_id = self.ctx.insert_order(instrument_id, exchange_id, account_id, price, volume, price_type, side)
+            status_set = [
+                OrderStatus.Filled,
+                OrderStatus.PartialFilledActive,
+                OrderStatus.Cancelled,
+                OrderStatus.Error,
+            ]
+        order_id = self.ctx.insert_order(
+            instrument_id, exchange_id, account_id, price, volume, price_type, side
+        )
         await AsyncOrderAction(self.ctx, order_id, status_set)
         return self.ctx.book.orders[order_id]
 

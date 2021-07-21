@@ -2,18 +2,16 @@ from setuptools import find_packages
 from setuptools import setup
 import json
 
-with open('kungfubuildinfo.json', 'r') as build_info_file:
+with open("kungfubuildinfo.json", "r") as build_info_file:
     build_info = json.load(build_info_file)
 
 setup(
     name="kungfu",
-    version=build_info['version'],
+    version=build_info["version"],
     author="Kungfu Origin",
     license="Apache-2.0",
-    packages=[''] + find_packages(exclude=["test"]),
-    package_data={
-        '': ['*.so', '*.dylib', '*.dll', '*.pyd', '*.json']
-    },
+    packages=[""] + find_packages(exclude=["test"]),
+    package_data={"": ["*.so", "*.dylib", "*.dll", "*.pyd", "*.json"]},
     include_package_data=True,
     install_requires=[
         "click~=8.0.1",
@@ -28,8 +26,8 @@ setup(
         "pandas~=1.2.0",
         "statsmodels~=0.12.2",
         "plotly~=5.1.0",
-        "chinesecalendar~=1.5.1"
+        "chinesecalendar~=1.5.1",
     ],
     entry_points={"console_scripts": ["kfc = kungfu.__main__:main"]},
-    has_ext_modules=lambda: True
+    has_ext_modules=lambda: True,
 )

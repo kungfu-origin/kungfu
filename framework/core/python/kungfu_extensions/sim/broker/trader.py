@@ -31,7 +31,13 @@ class TraderSim(wc.Trader):
         wc.Trader.__init__(self, low_latency, locator, "sim", account_id)
         config = json.loads(json_config)
         self.match_mode = config.get("match_mode", MatchMode.Custom)
-        self.logger = create_logger("sim_td", "info", yjj.location(lf.enums.mode.LIVE, lf.enums.category.TD, "sim", account_id, locator))
+        self.logger = create_logger(
+            "sim_td",
+            "info",
+            yjj.location(
+                lf.enums.mode.LIVE, lf.enums.category.TD, "sim", account_id, locator
+            ),
+        )
 
         self.ctx = DottedDict()
         self.ctx.orders = {}
@@ -42,8 +48,12 @@ class TraderSim(wc.Trader):
             name_no_ext = os.path.split(os.path.basename(path))
             sys.path.append(os.path.relpath(simulator_dir))
             impl = importlib.import_module(os.path.splitext(name_no_ext[1])[0])
-            self.ctx.insert_order = getattr(impl, 'insert_order', lambda ctx, event: False)
-            self.ctx.cancel_order = getattr(impl, "cancel_order", lambda ctx, event: False)
+            self.ctx.insert_order = getattr(
+                impl, "insert_order", lambda ctx, event: False
+            )
+            self.ctx.cancel_order = getattr(
+                impl, "cancel_order", lambda ctx, event: False
+            )
             self.ctx.req_account = getattr(impl, "req_account", lambda ctx: False)
             self.ctx.req_position = getattr(impl, "req_position", lambda ctx: False)
 
@@ -61,8 +71,14 @@ class TraderSim(wc.Trader):
             order.insert_time = event.gen_time
             order.update_time = event.gen_time
             order.trading_day = kft.strfnow("%Y%m%d")
-            min_vol = 100 if wc.utils.get_instrument_type(order_input.exchange_id,
-                                                          order_input.instrument_id) == lf.enums.InstrumentType.Stock else 1
+            min_vol = (
+                100
+                if wc.utils.get_instrument_type(
+                    order_input.exchange_id, order_input.instrument_id
+                )
+                == lf.enums.InstrumentType.Stock
+                else 1
+            )
             if order_input.volume < min_vol:
                 order.status = lf.enums.OrderStatus.Error
             elif self.match_mode == MatchMode.Reject:
@@ -73,12 +89,18 @@ class TraderSim(wc.Trader):
                 order.status = lf.enums.OrderStatus.Cancelled
             elif self.match_mode == MatchMode.PartialFillAndCancel:
                 order.volume_traded = min_vol
-                order.status = lf.enums.OrderStatus.Filled if order.volume_traded == order.volume \
+                order.status = (
+                    lf.enums.OrderStatus.Filled
+                    if order.volume_traded == order.volume
                     else lf.enums.OrderStatus.PartialFilledNotActive
+                )
             elif self.match_mode == MatchMode.PartialFill:
                 order.volume_traded = min_vol
-                order.status = lf.enums.OrderStatus.Filled if order.volume_traded == order.volume \
+                order.status = (
+                    lf.enums.OrderStatus.Filled
+                    if order.volume_traded == order.volume
                     else lf.enums.OrderStatus.PartialFilledActive
+                )
             elif self.match_mode == MatchMode.Fill:
                 order.volume_traded = order_input.volume
                 order.status = lf.enums.OrderStatus.Filled
@@ -111,8 +133,11 @@ class TraderSim(wc.Trader):
             if order_action.order_id in self.ctx.orders:
                 record = self.ctx.orders.pop(order_action.order_id)
                 order = record.order
-                order.status = lf.enums.OrderStatus.Cancelled if order.volume_traded == 0 \
+                order.status = (
+                    lf.enums.OrderStatus.Cancelled
+                    if order.volume_traded == 0
                     else lf.enums.OrderStatus.PartialFilledNotActive
+                )
                 writer.write(event.gen_time, order)
             return True
 

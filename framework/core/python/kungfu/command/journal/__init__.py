@@ -7,11 +7,19 @@ from kungfu.yijinjing.log import create_logger
 
 
 @kfc.group(help_priority=5)
-@click.option('-m', '--mode', default='*', type=click.Choice(kfj.MODES.keys()), help='mode')
-@click.option('-c', '--category', default='*', type=click.Choice(kfj.CATEGORIES.keys()), help='category')
-@click.option('-g', '--group', type=str, default='*', help='group')
-@click.option('-n', '--name', type=str, default='*', help='name')
-@click.help_option('-h', '--help')
+@click.option(
+    "-m", "--mode", default="*", type=click.Choice(kfj.MODES.keys()), help="mode"
+)
+@click.option(
+    "-c",
+    "--category",
+    default="*",
+    type=click.Choice(kfj.CATEGORIES.keys()),
+    help="category",
+)
+@click.option("-g", "--group", type=str, default="*", help="group")
+@click.option("-n", "--name", type=str, default="*", help="name")
+@click.help_option("-h", "--help")
 @click.pass_context
 def journal(ctx, mode, category, group, name):
     pass_ctx_from_root(ctx)
@@ -20,11 +28,13 @@ def journal(ctx, mode, category, group, name):
     ctx.category = category
     ctx.group = group
     ctx.name = name
-    ctx.location = yjj.location(kfj.MODES[mode], kfj.CATEGORIES[category], group, name, ctx.runtime_locator)
-    ctx.logger = create_logger('journal', ctx.log_level, ctx.console_location)
+    ctx.location = yjj.location(
+        kfj.MODES[mode], kfj.CATEGORIES[category], group, name, ctx.runtime_locator
+    )
+    ctx.logger = create_logger("journal", ctx.log_level, ctx.console_location)
 
     (ctx.console_width, ctx.console_height) = shutil.get_terminal_size((0, 0))
-    yjj.setup_log(ctx.console_location, 'journal')
+    yjj.setup_log(ctx.console_location, "journal")
 
 
 def pass_ctx_from_parent(ctx):

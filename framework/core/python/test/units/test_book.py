@@ -16,25 +16,45 @@ class TestStockPosition(unittest.TestCase):
     def setUp(self):
         self.ctx = DottedDict()
         osname = platform.system()
-        user_home = os.path.expanduser('~')
-        if osname == 'Linux':
-            xdg_config_home = os.getenv('XDG_CONFIG_HOME')
-            home = xdg_config_home if xdg_config_home else os.path.join(user_home, '.config')
-        if osname == 'Darwin':
-            home = os.path.join(user_home, 'Library', 'Application Support')
-        if osname == 'Windows':
-            home = os.getenv('APPDATA')
-        home = os.path.join(home, 'kungfu', 'app')
+        user_home = os.path.expanduser("~")
+        if osname == "Linux":
+            xdg_config_home = os.getenv("XDG_CONFIG_HOME")
+            home = (
+                xdg_config_home
+                if xdg_config_home
+                else os.path.join(user_home, ".config")
+            )
+        if osname == "Darwin":
+            home = os.path.join(user_home, "Library", "Application Support")
+        if osname == "Windows":
+            home = os.getenv("APPDATA")
+        home = os.path.join(home, "kungfu", "app")
         self.ctx.runtime_locator = Locator(home)
         self.ctx.name = "tester"
         self.ctx.log_level = "info"
         self.ctx.now = yjj.now_in_nano
         self.ctx.trading_day = datetime.datetime(2019, 11, 27).date()
-        self.ctx.util_location = yjj.location(lf.enums.mode.LIVE, lf.enums.category.SYSTEM, 'util', 'test', self.ctx.runtime_locator)
-        self.ctx.logger = create_logger('tester', self.ctx.log_level, self.ctx.util_location)
+        self.ctx.util_location = yjj.location(
+            lf.enums.mode.LIVE,
+            lf.enums.category.SYSTEM,
+            "util",
+            "test",
+            self.ctx.runtime_locator,
+        )
+        self.ctx.logger = create_logger(
+            "tester", self.ctx.log_level, self.ctx.util_location
+        )
 
     def test_buy(self):
-        location = kfj.make_location_from_dict(self.ctx, {"mode": "live", "category": "strategy", "group": "default", "name": "tester"})
+        location = kfj.make_location_from_dict(
+            self.ctx,
+            {
+                "mode": "live",
+                "category": "strategy",
+                "group": "default",
+                "name": "tester",
+            },
+        )
         book = AccountBook(self.ctx, location, avail=10000)
 
         event = DottedDict()
@@ -49,7 +69,7 @@ class TestStockPosition(unittest.TestCase):
         input.offset = lf.enums.Offset.Open
         input.price_type = lf.enums.PriceType.Limit
         book.on_order_input(event, input)
-        self.assertEqual(book.frozen_cash, 200 * 16.0, 'incorrect frozen cash')
+        self.assertEqual(book.frozen_cash, 200 * 16.0, "incorrect frozen cash")
         self.assertEqual(book.avail, 10000 - 200 * 16.0, "incorrect avail")
 
         event.gen_time = yjj.now_in_nano()
@@ -81,18 +101,36 @@ class TestStockPosition(unittest.TestCase):
 
         self.assertEqual(trade.commission, commission)
         self.assertEqual(trade.tax, tax)
-        self.assertEqual(book.frozen_cash, 0.0, 'incorrect frozen cash')
-        self.assertEqual(book.avail, 10000 - 200 * 16.0 - tax - commission, "incorrect avail")
+        self.assertEqual(book.frozen_cash, 0.0, "incorrect frozen cash")
+        self.assertEqual(
+            book.avail, 10000 - 200 * 16.0 - tax - commission, "incorrect avail"
+        )
         self.assertEqual(book.intraday_fee, tax + commission, "incorrect intraday fee")
-        self.assertEqual(book.accumulated_fee, tax + commission, "incorrect accumulated fee")
+        self.assertEqual(
+            book.accumulated_fee, tax + commission, "incorrect accumulated fee"
+        )
 
         position = book.get_position(instrument_id="600000", exchange_id="SSE")
         self.assertEqual(position.volume, 200, "incorrect volume")
         self.assertEqual(position.yesterday_volume, 0, "incorrect yesterday volume")
 
     def test_sell(self):
-        location = kfj.make_location_from_dict(self.ctx, {"mode": "live", "category": "strategy", "group": "default", "name": "tester"})
-        dct = {"instrument_id": "600000", "exchange_id": "SSE", "volume": 200, "yesterday_volume": 200, "direction": lf.enums.Direction.Long}
+        location = kfj.make_location_from_dict(
+            self.ctx,
+            {
+                "mode": "live",
+                "category": "strategy",
+                "group": "default",
+                "name": "tester",
+            },
+        )
+        dct = {
+            "instrument_id": "600000",
+            "exchange_id": "SSE",
+            "volume": 200,
+            "yesterday_volume": 200,
+            "direction": lf.enums.Direction.Long,
+        }
         book = AccountBook(self.ctx, location, avail=10000, positions=[dct])
 
         event = DottedDict()
@@ -107,7 +145,7 @@ class TestStockPosition(unittest.TestCase):
         input.offset = lf.enums.Offset.Open
         input.price_type = lf.enums.PriceType.Limit
         book.on_order_input(event, input)
-        self.assertEqual(book.frozen_cash, 0.0, 'incorrect frozen cash')
+        self.assertEqual(book.frozen_cash, 0.0, "incorrect frozen cash")
         self.assertEqual(book.avail, 10000, "incorrect avail")
         position = book.get_position(instrument_id="600000", exchange_id="SSE")
         self.assertEqual(position.frozen_total, 200)
@@ -140,18 +178,38 @@ class TestStockPosition(unittest.TestCase):
         commission = 5 if 200 * 16.0 * 0.0008 < 5 else 200 * 16.0 * 0.0008
         book.on_trade(event, trade)
 
-        self.assertEqual(book.frozen_cash, 0.0, 'incorrect frozen cash')
-        self.assertEqual(book.avail, 10000 - tax - commission + trade.volume * trade.price, "incorrect avail")
+        self.assertEqual(book.frozen_cash, 0.0, "incorrect frozen cash")
+        self.assertEqual(
+            book.avail,
+            10000 - tax - commission + trade.volume * trade.price,
+            "incorrect avail",
+        )
         self.assertEqual(book.intraday_fee, tax + commission, "incorrect intraday fee")
-        self.assertEqual(book.accumulated_fee, tax + commission, "incorrect accumulated fee")
+        self.assertEqual(
+            book.accumulated_fee, tax + commission, "incorrect accumulated fee"
+        )
 
         position = book.get_position(instrument_id="600000", exchange_id="SSE")
         self.assertEqual(position.volume, 0, "incorrect volume")
         self.assertEqual(position.yesterday_volume, 0, "incorrect yesterday volume")
 
     def test_sell_cancelled(self):
-        location = kfj.make_location_from_dict(self.ctx, {"mode": "live", "category": "strategy", "group": "default", "name": "tester"})
-        dct = {"instrument_id": "600000", "exchange_id": "SSE", "volume": 200, "yesterday_volume": 200, "direction": lf.enums.Direction.Long}
+        location = kfj.make_location_from_dict(
+            self.ctx,
+            {
+                "mode": "live",
+                "category": "strategy",
+                "group": "default",
+                "name": "tester",
+            },
+        )
+        dct = {
+            "instrument_id": "600000",
+            "exchange_id": "SSE",
+            "volume": 200,
+            "yesterday_volume": 200,
+            "direction": lf.enums.Direction.Long,
+        }
         book = AccountBook(self.ctx, location, avail=10000, positions=[dct])
 
         event = DottedDict()
@@ -166,7 +224,7 @@ class TestStockPosition(unittest.TestCase):
         input.offset = lf.enums.Offset.Open
         input.price_type = lf.enums.PriceType.Limit
         book.on_order_input(event, input)
-        self.assertEqual(book.frozen_cash, 0.0, 'incorrect frozen cash')
+        self.assertEqual(book.frozen_cash, 0.0, "incorrect frozen cash")
         self.assertEqual(book.avail, 10000, "incorrect avail")
         position = book.get_position(instrument_id="600000", exchange_id="SSE")
         self.assertEqual(position.frozen_total, 200)
@@ -205,7 +263,15 @@ class TestStockPosition(unittest.TestCase):
         self.assertEqual(position.frozen_total, 0)
 
     def test_buy_cancelled(self):
-        location = kfj.make_location_from_dict(self.ctx, {"mode": "live", "category": "strategy", "group": "default", "name": "tester"})
+        location = kfj.make_location_from_dict(
+            self.ctx,
+            {
+                "mode": "live",
+                "category": "strategy",
+                "group": "default",
+                "name": "tester",
+            },
+        )
         book = AccountBook(self.ctx, location, avail=10000)
 
         event = DottedDict()
@@ -220,7 +286,7 @@ class TestStockPosition(unittest.TestCase):
         input.offset = lf.enums.Offset.Open
         input.price_type = lf.enums.PriceType.Limit
         book.on_order_input(event, input)
-        self.assertEqual(book.frozen_cash, 200 * 16.0, 'incorrect frozen cash')
+        self.assertEqual(book.frozen_cash, 200 * 16.0, "incorrect frozen cash")
         self.assertEqual(book.avail, 10000 - 200 * 16.0, "incorrect avail")
 
         event.gen_time = yjj.now_in_nano()
@@ -239,7 +305,7 @@ class TestStockPosition(unittest.TestCase):
 
         book.on_order(event, order)
 
-        self.assertEqual(book.frozen_cash, 100 * 16.0, 'incorrect frozen cash')
+        self.assertEqual(book.frozen_cash, 100 * 16.0, "incorrect frozen cash")
         self.assertEqual(book.avail, 10000 - 100 * 16.0, "incorrect avail")
 
         event.gen_time = yjj.now_in_nano()
@@ -253,14 +319,24 @@ class TestStockPosition(unittest.TestCase):
         trade.side = lf.enums.Side.Buy
         trade.offset = lf.enums.Offset.Open
         tax = 0.0
-        commission = trade.volume * trade.price * 0.0008 if trade.volume * trade.price * 0.0008 > 5 else 5
+        commission = (
+            trade.volume * trade.price * 0.0008
+            if trade.volume * trade.price * 0.0008 > 5
+            else 5
+        )
 
         book.on_trade(event, trade)
 
-        self.assertEqual(book.frozen_cash, 0.0, 'incorrect frozen cash')
-        self.assertEqual(book.avail, 10000 - trade.price * trade.volume - tax - commission, "incorrect avail")
+        self.assertEqual(book.frozen_cash, 0.0, "incorrect frozen cash")
+        self.assertEqual(
+            book.avail,
+            10000 - trade.price * trade.volume - tax - commission,
+            "incorrect avail",
+        )
         self.assertEqual(book.intraday_fee, tax + commission, "incorrect intraday fee")
-        self.assertEqual(book.accumulated_fee, tax + commission, "incorrect accumulated fee")
+        self.assertEqual(
+            book.accumulated_fee, tax + commission, "incorrect accumulated fee"
+        )
 
         position = book.get_position(instrument_id="600000", exchange_id="SSE")
         self.assertEqual(position.volume, 100, "incorrect volume")
@@ -271,27 +347,56 @@ class TestFuturePosition(unittest.TestCase):
     def setUp(self):
         self.ctx = DottedDict()
         osname = platform.system()
-        user_home = os.path.expanduser('~')
-        if osname == 'Linux':
-            xdg_config_home = os.getenv('XDG_CONFIG_HOME')
-            home = xdg_config_home if xdg_config_home else os.path.join(user_home, '.config')
-        if osname == 'Darwin':
-            home = os.path.join(user_home, 'Library', 'Application Support')
-        if osname == 'Windows':
-            home = os.getenv('APPDATA')
-        home = os.path.join(home, 'kungfu', 'app')
+        user_home = os.path.expanduser("~")
+        if osname == "Linux":
+            xdg_config_home = os.getenv("XDG_CONFIG_HOME")
+            home = (
+                xdg_config_home
+                if xdg_config_home
+                else os.path.join(user_home, ".config")
+            )
+        if osname == "Darwin":
+            home = os.path.join(user_home, "Library", "Application Support")
+        if osname == "Windows":
+            home = os.getenv("APPDATA")
+        home = os.path.join(home, "kungfu", "app")
         self.ctx.runtime_locator = Locator(home)
         self.ctx.name = "tester"
         self.ctx.log_level = "info"
         self.ctx.now = yjj.now_in_nano
         self.ctx.trading_day = datetime.datetime(2019, 11, 27).date()
-        self.ctx.util_location = yjj.location(lf.enums.mode.LIVE, lf.enums.category.SYSTEM, 'util', 'test', self.ctx.runtime_locator)
-        self.ctx.logger = create_logger('tester', self.ctx.log_level, self.ctx.util_location)
-        self.ctx.get_inst_info = lambda instrument_id: {"contract_multiplier": 10, "long_margin_ratio": 0.1, "short_margin_ratio": 0.1}
-        self.ctx.get_commission_info = lambda instrument_id: {"mode": 0, "open_ratio": 0.000045, "close_ratio": 0.000045, "close_today_ratio": 0.0}
+        self.ctx.util_location = yjj.location(
+            lf.enums.mode.LIVE,
+            lf.enums.category.SYSTEM,
+            "util",
+            "test",
+            self.ctx.runtime_locator,
+        )
+        self.ctx.logger = create_logger(
+            "tester", self.ctx.log_level, self.ctx.util_location
+        )
+        self.ctx.get_inst_info = lambda instrument_id: {
+            "contract_multiplier": 10,
+            "long_margin_ratio": 0.1,
+            "short_margin_ratio": 0.1,
+        }
+        self.ctx.get_commission_info = lambda instrument_id: {
+            "mode": 0,
+            "open_ratio": 0.000045,
+            "close_ratio": 0.000045,
+            "close_today_ratio": 0.0,
+        }
 
     def test_open_long(self):
-        location = kfj.make_location_from_dict(self.ctx, {"mode": "live", "category": "strategy", "group": "default", "name": "tester"})
+        location = kfj.make_location_from_dict(
+            self.ctx,
+            {
+                "mode": "live",
+                "category": "strategy",
+                "group": "default",
+                "name": "tester",
+            },
+        )
         book = AccountBook(self.ctx, location, avail=10000)
         dt = datetime.datetime.now()
         try:
@@ -322,7 +427,7 @@ class TestFuturePosition(unittest.TestCase):
 
         margin = margin_ratio * contract_multiplier * input.volume * input.limit_price
         self.assertEqual(book.frozen_margin, margin)
-        self.assertEqual(book.frozen_cash, margin, 'incorrect frozen cash')
+        self.assertEqual(book.frozen_cash, margin, "incorrect frozen cash")
         self.assertEqual(book.avail, 10000 - margin, "incorrect avail")
 
         event.gen_time = yjj.now_in_nano()
@@ -349,18 +454,30 @@ class TestFuturePosition(unittest.TestCase):
         trade.side = lf.enums.Side.Buy
         trade.offset = lf.enums.Offset.Open
         book.on_trade(event, trade)
-        commission = open_commission_ratio * trade.volume * trade.price * contract_multiplier
+        commission = (
+            open_commission_ratio * trade.volume * trade.price * contract_multiplier
+        )
         tax = 0.0
         self.assertEqual(trade.tax, tax)
         self.assertEqual(trade.commission, commission)
         self.assertEqual(book.frozen_margin, 0.0)
-        self.assertEqual(book.frozen_cash, 0.0, 'incorrect frozen cash')
+        self.assertEqual(book.frozen_cash, 0.0, "incorrect frozen cash")
         self.assertEqual(book.intraday_fee, tax + commission)
         self.assertEqual(book.accumulated_fee, tax + commission)
-        self.assertEqual(book.avail, 10000 - margin - tax - commission, "incorrect avail")
+        self.assertEqual(
+            book.avail, 10000 - margin - tax - commission, "incorrect avail"
+        )
 
     def test_close_long(self):
-        location = kfj.make_location_from_dict(self.ctx, {"mode": "live", "category": "strategy", "group": "default", "name": "tester"})
+        location = kfj.make_location_from_dict(
+            self.ctx,
+            {
+                "mode": "live",
+                "category": "strategy",
+                "group": "default",
+                "name": "tester",
+            },
+        )
         dt = datetime.datetime.now()
         try:
             dt = dt.replace(month=dt.month + 1)
@@ -376,8 +493,14 @@ class TestFuturePosition(unittest.TestCase):
         close_commission_ratio = 0.000045
         close_today_commission_ratio = 0.0
 
-        dct = {"instrument_id": instrument_id, "exchange_id": exchange_id, "volume": 2, "yesterday_volume": 2,
-               "direction": lf.enums.Direction.Long, "margin": margin_ratio * contract_multiplier * 2 * 3980.0}
+        dct = {
+            "instrument_id": instrument_id,
+            "exchange_id": exchange_id,
+            "volume": 2,
+            "yesterday_volume": 2,
+            "direction": lf.enums.Direction.Long,
+            "margin": margin_ratio * contract_multiplier * 2 * 3980.0,
+        }
         book = AccountBook(self.ctx, location, avail=10000, positions=[dct])
 
         self.assertEqual(book.margin, margin_ratio * contract_multiplier * 2 * 3980.0)
@@ -395,7 +518,11 @@ class TestFuturePosition(unittest.TestCase):
         input.price_type = lf.enums.PriceType.Limit
         book.on_order_input(event, input)
 
-        position = book.get_position(instrument_id=instrument_id, exchange_id=exchange_id, direction=Direction.Long)
+        position = book.get_position(
+            instrument_id=instrument_id,
+            exchange_id=exchange_id,
+            direction=Direction.Long,
+        )
         self.assertEqual(position.frozen_total, 1)
         self.assertEqual(position.frozen_yesterday, 1)
 
@@ -424,17 +551,31 @@ class TestFuturePosition(unittest.TestCase):
         trade.offset = lf.enums.Offset.Close
         book.on_trade(event, trade)
         margin = trade.price * trade.volume * contract_multiplier * margin_ratio
-        commission = close_commission_ratio * trade.volume * trade.price * contract_multiplier
+        commission = (
+            close_commission_ratio * trade.volume * trade.price * contract_multiplier
+        )
         tax = 0.0
         self.assertEqual(trade.tax, tax)
         self.assertEqual(trade.commission, commission)
-        self.assertEqual(book.margin, margin_ratio * contract_multiplier * 2 * 3980.0 - margin)
+        self.assertEqual(
+            book.margin, margin_ratio * contract_multiplier * 2 * 3980.0 - margin
+        )
         self.assertEqual(book.intraday_fee, tax + commission)
         self.assertEqual(book.accumulated_fee, tax + commission)
-        self.assertEqual(book.avail, 10000 + margin - tax - commission, "incorrect avail")
+        self.assertEqual(
+            book.avail, 10000 + margin - tax - commission, "incorrect avail"
+        )
 
     def test_open_short(self):
-        location = kfj.make_location_from_dict(self.ctx, {"mode": "live", "category": "strategy", "group": "default", "name": "tester"})
+        location = kfj.make_location_from_dict(
+            self.ctx,
+            {
+                "mode": "live",
+                "category": "strategy",
+                "group": "default",
+                "name": "tester",
+            },
+        )
         book = AccountBook(self.ctx, location, avail=10000)
         dt = datetime.datetime.now()
         try:
@@ -465,7 +606,7 @@ class TestFuturePosition(unittest.TestCase):
 
         margin = margin_ratio * contract_multiplier * input.volume * input.limit_price
         self.assertEqual(book.frozen_margin, margin)
-        self.assertEqual(book.frozen_cash, margin, 'incorrect frozen cash')
+        self.assertEqual(book.frozen_cash, margin, "incorrect frozen cash")
         self.assertEqual(book.avail, 10000 - margin, "incorrect avail")
 
         event.gen_time = yjj.now_in_nano()
@@ -492,18 +633,30 @@ class TestFuturePosition(unittest.TestCase):
         trade.side = lf.enums.Side.Sell
         trade.offset = lf.enums.Offset.Open
         book.on_trade(event, trade)
-        commission = open_commission_ratio * trade.volume * trade.price * contract_multiplier
+        commission = (
+            open_commission_ratio * trade.volume * trade.price * contract_multiplier
+        )
         tax = 0.0
         self.assertEqual(trade.tax, tax)
         self.assertEqual(trade.commission, commission)
         self.assertEqual(book.frozen_margin, 0.0)
-        self.assertEqual(book.frozen_cash, 0.0, 'incorrect frozen cash')
+        self.assertEqual(book.frozen_cash, 0.0, "incorrect frozen cash")
         self.assertEqual(book.intraday_fee, tax + commission)
         self.assertEqual(book.accumulated_fee, tax + commission)
-        self.assertEqual(book.avail, 10000 - margin - tax - commission, "incorrect avail")
+        self.assertEqual(
+            book.avail, 10000 - margin - tax - commission, "incorrect avail"
+        )
 
     def test_close_short(self):
-        location = kfj.make_location_from_dict(self.ctx, {"mode": "live", "category": "strategy", "group": "default", "name": "tester"})
+        location = kfj.make_location_from_dict(
+            self.ctx,
+            {
+                "mode": "live",
+                "category": "strategy",
+                "group": "default",
+                "name": "tester",
+            },
+        )
         dt = datetime.datetime.now()
         try:
             dt = dt.replace(month=dt.month + 1)
@@ -519,8 +672,14 @@ class TestFuturePosition(unittest.TestCase):
         close_commission_ratio = 0.000045
         close_today_commission_ratio = 0.0
 
-        dct = {"instrument_id": instrument_id, "exchange_id": exchange_id, "volume": 2, "yesterday_volume": 2,
-               "direction": lf.enums.Direction.Short, "margin": margin_ratio * contract_multiplier * 2 * 3980.0}
+        dct = {
+            "instrument_id": instrument_id,
+            "exchange_id": exchange_id,
+            "volume": 2,
+            "yesterday_volume": 2,
+            "direction": lf.enums.Direction.Short,
+            "margin": margin_ratio * contract_multiplier * 2 * 3980.0,
+        }
         book = AccountBook(self.ctx, location, avail=10000, positions=[dct])
 
         self.assertEqual(book.margin, margin_ratio * contract_multiplier * 2 * 3980.0)
@@ -538,7 +697,11 @@ class TestFuturePosition(unittest.TestCase):
         input.price_type = lf.enums.PriceType.Limit
         book.on_order_input(event, input)
 
-        position = book.get_position(instrument_id=instrument_id, exchange_id=exchange_id, direction=Direction.Short)
+        position = book.get_position(
+            instrument_id=instrument_id,
+            exchange_id=exchange_id,
+            direction=Direction.Short,
+        )
         self.assertEqual(position.frozen_total, 1)
         self.assertEqual(position.frozen_yesterday, 1)
 
@@ -567,15 +730,21 @@ class TestFuturePosition(unittest.TestCase):
         trade.offset = lf.enums.Offset.Close
         book.on_trade(event, trade)
         margin = trade.price * trade.volume * contract_multiplier * margin_ratio
-        commission = close_commission_ratio * trade.volume * trade.price * contract_multiplier
+        commission = (
+            close_commission_ratio * trade.volume * trade.price * contract_multiplier
+        )
         tax = 0.0
         self.assertEqual(trade.tax, tax)
         self.assertEqual(trade.commission, commission)
-        self.assertEqual(book.margin, margin_ratio * contract_multiplier * 2 * 3980.0 - margin)
+        self.assertEqual(
+            book.margin, margin_ratio * contract_multiplier * 2 * 3980.0 - margin
+        )
         self.assertEqual(book.intraday_fee, tax + commission)
         self.assertEqual(book.accumulated_fee, tax + commission)
-        self.assertEqual(book.avail, 10000 + margin - tax - commission, "incorrect avail")
+        self.assertEqual(
+            book.avail, 10000 + margin - tax - commission, "incorrect avail"
+        )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

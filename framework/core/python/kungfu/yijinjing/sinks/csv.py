@@ -17,15 +17,19 @@ class CsvSink(yjj.sink):
         if frame.msg_type not in self.tagged_types:
             return
         data_type = self.tagged_types[frame.msg_type]
-        header = [m for m in vars(data_type) if not m.startswith('_')]
-        location_part = f'{lf.enums.get_category_name(location.category)}.{location.group}.{location.name}'
-        output = os.path.join(self.ctx.inbox_dir, f'{location_part}.{data_type.__name__}.csv')
+        header = [m for m in vars(data_type) if not m.startswith("_")]
+        location_part = f"{lf.enums.get_category_name(location.category)}.{location.group}.{location.name}"
+        output = os.path.join(
+            self.ctx.inbox_dir, f"{location_part}.{data_type.__name__}.csv"
+        )
         if output not in self.writers:
-            self.files[output] = open(output, 'w', newline='')
+            self.files[output] = open(output, "w", newline="")
             self.writers[output] = csv.writer(self.files[output])
-            self.writers[output].writerow(['gen_time'] + header)
+            self.writers[output].writerow(["gen_time"] + header)
         data = getattr(frame, data_type.__name__)()
-        self.writers[output].writerow([frame.gen_time] + [extract(data, m) for m in header])
+        self.writers[output].writerow(
+            [frame.gen_time] + [extract(data, m) for m in header]
+        )
 
     def close(self):
         [file.close() for file in self.files.values()]

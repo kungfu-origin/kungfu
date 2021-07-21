@@ -32,10 +32,22 @@ def run_tasks(*args, **kwargs):
 
 class Master(yjj.master):
     def __init__(self, ctx):
-        yjj.master.__init__(self, yjj.location(kfj.MODES['live'], kfj.CATEGORIES['system'], 'master', 'master', ctx.runtime_locator), ctx.low_latency)
+        yjj.master.__init__(
+            self,
+            yjj.location(
+                kfj.MODES["live"],
+                kfj.CATEGORIES["system"],
+                "master",
+                "master",
+                ctx.runtime_locator,
+            ),
+            ctx.low_latency,
+        )
         self.ctx = ctx
         self.ctx.master = self
-        self.ctx.logger = log.create_logger("master", ctx.log_level, self.io_device.home)
+        self.ctx.logger = log.create_logger(
+            "master", ctx.log_level, self.io_device.home
+        )
         self.ctx.apprentices = {}
 
         self.ctx.calendar = Calendar(ctx)
@@ -47,15 +59,19 @@ class Master(yjj.master):
         self.commissions = {}
         for commission in self.profile.get_all(lf.types.Commission()):
             self.commissions[commission.product_id] = commission
-        default_commissions.apply(lambda default: self.set_default_commission(default), 1)
+        default_commissions.apply(
+            lambda default: self.set_default_commission(default), 1
+        )
 
     def set_default_commission(self, default):
         if default.product_id not in self.commissions:
             commission = lf.types.Commission()
             commission.product_id = default.product_id
             commission.exchange_id = default.exchange_id
-            commission.instrument_type = lf.enums.InstrumentType(default['instrument_type'])
-            commission.mode = lf.enums.CommissionRateMode(default['mode'])
+            commission.instrument_type = lf.enums.InstrumentType(
+                default["instrument_type"]
+            )
+            commission.mode = lf.enums.CommissionRateMode(default["mode"])
             commission.open_ratio = default.open_ratio
             commission.close_ratio = default.close_ratio
             commission.close_today_ratio = default.close_today_ratio
@@ -69,20 +85,20 @@ class Master(yjj.master):
         pid = register_data.pid
         category = lf.enums.get_category_name(register_data.category)
         mode = lf.enums.get_mode_name(register_data.mode)
-        uname = f'{category}/{register_data.group}/{register_data.name}/{mode}'
-        self.ctx.logger.info(f'app {pid} {uname} checking in')
+        uname = f"{category}/{register_data.group}/{register_data.name}/{mode}"
+        self.ctx.logger.info(f"app {pid} {uname} checking in")
         if pid not in self.ctx.apprentices:
             try:
                 self.ctx.apprentices[pid] = {
-                    'process': psutil.Process(pid),
-                    'pid': pid,
-                    'uname': uname,
-                    'register': register_data
+                    "process": psutil.Process(pid),
+                    "pid": pid,
+                    "uname": uname,
+                    "register": register_data,
                 }
             except (psutil.AccessDenied, psutil.NoSuchProcess):
                 exc_type, exc_obj, exc_tb = sys.exc_info()
                 err_msg = traceback.format_exception(exc_type, exc_obj, exc_tb)
-                self.ctx.logger.error(f'app [{pid}] {uname} checkin failed: {err_msg}')
+                self.ctx.logger.error(f"app [{pid}] {uname} checkin failed: {err_msg}")
                 self.deregister_app(event.gen_time, register_data.location_uid)
 
     def on_interval_check(self, nanotime):
@@ -91,24 +107,30 @@ class Master(yjj.master):
         except RuntimeError:
             exc_type, exc_obj, exc_tb = sys.exc_info()
             err_msg = traceback.format_exception(exc_type, exc_obj, exc_tb)
-            self.ctx.logger.error('task error [%s] %s', exc_type, err_msg)
+            self.ctx.logger.error("task error [%s] %s", exc_type, err_msg)
 
     def on_exit(self):
         for app in self.get_live_processes():
-            self.ctx.logger.info(f'terminating apprentice {app["uname"]} pid {app["pid"]}')
-            self.deregister_app(yjj.now_in_nano(), app['register'].__uid__)
+            self.ctx.logger.info(
+                f'terminating apprentice {app["uname"]} pid {app["pid"]}'
+            )
+            self.deregister_app(yjj.now_in_nano(), app["register"].__uid__)
             try:
-                app['process'].terminate()
+                app["process"].terminate()
             except psutil.Error:
-                self.ctx.logger.error(f'failed to terminate apprentice {app["uname"]} pid {app["pid"]}')
+                self.ctx.logger.error(
+                    f'failed to terminate apprentice {app["uname"]} pid {app["pid"]}'
+                )
 
         count = 0
         time_to_wait = 10
         while count < time_to_wait:
             remaining = self.get_live_processes()
             if remaining:
-                names = list(map(lambda app: app['uname'], remaining))
-                self.ctx.logger.info(f'terminating apprentices, remaining {names}, count down {time_to_wait - count}s')
+                names = list(map(lambda app: app["uname"], remaining))
+                self.ctx.logger.info(
+                    f"terminating apprentices, remaining {names}, count down {time_to_wait - count}s"
+                )
                 time.sleep(1)
                 count = count + 1
             else:
@@ -117,23 +139,34 @@ class Master(yjj.master):
         for app in self.get_live_processes():
             self.ctx.logger.warn(f'killing apprentice {app["uname"]} pid {app["pid"]}')
             try:
-                app['process'].kill()
+                app["process"].kill()
             except psutil.Error:
-                self.ctx.logger.error(f'failed to kill apprentice {app["uname"]} pid {app["pid"]}')
+                self.ctx.logger.error(
+                    f'failed to kill apprentice {app["uname"]} pid {app["pid"]}'
+                )
 
-        self.ctx.logger.info('master cleaned up')
+        self.ctx.logger.info("master cleaned up")
 
     def is_live_process(self, pid):
-        return pid in self.ctx.apprentices and self.ctx.apprentices[pid]['process'].is_running()
+        return (
+            pid in self.ctx.apprentices
+            and self.ctx.apprentices[pid]["process"].is_running()
+        )
 
     def is_node_process(self, pid):
         if pid not in self.ctx.apprentices:
             return False
-        registry = self.ctx.apprentices[pid]['register']
-        return registry.category == lf.enums.category.SYSTEM and registry.group == 'node'
+        registry = self.ctx.apprentices[pid]["register"]
+        return (
+            registry.category == lf.enums.category.SYSTEM and registry.group == "node"
+        )
 
     def filter_live_process(self, pid):
-        return [self.ctx.apprentices[pid]] if self.is_live_process(pid) and not self.is_node_process(pid) else []
+        return (
+            [self.ctx.apprentices[pid]]
+            if self.is_live_process(pid) and not self.is_node_process(pid)
+            else []
+        )
 
     def get_live_processes(self):
         remaining = list(map(self.filter_live_process, self.ctx.apprentices))
@@ -143,10 +176,10 @@ class Master(yjj.master):
 @task
 def health_check(ctx):
     for pid in list(ctx.apprentices.keys()):
-        if not ctx.apprentices[pid]['process'].is_running():
+        if not ctx.apprentices[pid]["process"].is_running():
             app = ctx.apprentices[pid]
             ctx.logger.warn(f'cleaning up stale app {app["uname"]} with pid {pid}')
-            ctx.master.deregister_app(yjj.now_in_nano(), app['register'].__uid__)
+            ctx.master.deregister_app(yjj.now_in_nano(), app["register"].__uid__)
             del ctx.apprentices[pid]
 
 

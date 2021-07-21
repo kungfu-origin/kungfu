@@ -9,7 +9,7 @@ from kungfu.command.archive import archive, pass_ctx_from_parent
 @click.pass_context
 def list(ctx):
     pass_ctx_from_parent(ctx)
-    deque(map(print_archive, glob.glob(os.path.join(ctx.archive_dir, '*.zip'))))
+    deque(map(print_archive, glob.glob(os.path.join(ctx.archive_dir, "*.zip"))))
 
 
 def print_archive(archive_file):

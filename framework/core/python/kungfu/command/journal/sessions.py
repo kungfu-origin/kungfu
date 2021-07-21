@@ -9,25 +9,45 @@ from pykungfu import yijinjing as yjj
 
 
 @journal.command()
-@click.option('-s', '--sortby', default='begin_time',
-              type=click.Choice(['begin_time', 'end_time', 'duration', 'mode', 'category', 'group', 'name']),
-              help='sorting method')
-@click.option('-a', '--ascending', is_flag=True, help='sorted as ascending')
-@click.option('-f', '--tablefmt', default='simple',
-              type=click.Choice(['plain', 'simple', 'orgtbl', 'grid', 'fancy_grid', 'rst', 'textile']),
-              help='output format')
+@click.option(
+    "-s",
+    "--sortby",
+    default="begin_time",
+    type=click.Choice(
+        ["begin_time", "end_time", "duration", "mode", "category", "group", "name"]
+    ),
+    help="sorting method",
+)
+@click.option("-a", "--ascending", is_flag=True, help="sorted as ascending")
+@click.option(
+    "-f",
+    "--tablefmt",
+    default="simple",
+    type=click.Choice(
+        ["plain", "simple", "orgtbl", "grid", "fancy_grid", "rst", "textile"]
+    ),
+    help="output format",
+)
 @click.pass_context
 def sessions(ctx, sortby, ascending, tablefmt):
     pass_ctx_from_parent(ctx)
     all_sessions = kfj.find_sessions(ctx).sort_values(by=sortby, ascending=ascending)
-    all_sessions['begin_time'] = all_sessions['begin_time'].apply(lambda t: kft.strftime(t, kft.SESSION_DATETIME_FORMAT))
-    all_sessions['end_time'] = all_sessions['end_time'].apply(lambda t: kft.strftime(t, kft.SESSION_DATETIME_FORMAT))
-    all_sessions['duration'] = all_sessions['duration'].apply(lambda t: kft.strftime(t - kft.DURATION_TZ_ADJUST, kft.DURATION_FORMAT))
+    all_sessions["begin_time"] = all_sessions["begin_time"].apply(
+        lambda t: kft.strftime(t, kft.SESSION_DATETIME_FORMAT)
+    )
+    all_sessions["end_time"] = all_sessions["end_time"].apply(
+        lambda t: kft.strftime(t, kft.SESSION_DATETIME_FORMAT)
+    )
+    all_sessions["duration"] = all_sessions["duration"].apply(
+        lambda t: kft.strftime(t - kft.DURATION_TZ_ADJUST, kft.DURATION_FORMAT)
+    )
 
-    table = tabulate(all_sessions.values, headers=all_sessions.columns, tablefmt=tablefmt)
+    table = tabulate(
+        all_sessions.values, headers=all_sessions.columns, tablefmt=tablefmt
+    )
 
     (term_width, term_height) = shutil.get_terminal_size()
-    if term_height < len(all_sessions) + 2 and platform.system() != 'Windows':
+    if term_height < len(all_sessions) + 2 and platform.system() != "Windows":
         click.echo_via_pager(table)
     else:
         click.echo(table)

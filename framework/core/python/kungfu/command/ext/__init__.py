@@ -6,16 +6,16 @@ from kungfu.yijinjing.log import create_logger
 
 
 @kfc.group()
-@click.help_option('-h', '--help')
+@click.help_option("-h", "--help")
 @click.pass_context
 def ext(ctx):
     pass_ctx_from_root(ctx)
-    ctx.logger = create_logger('ext', ctx.log_level, ctx.console_location)
-    if not os.getenv('KF_NO_EXT'):
+    ctx.logger = create_logger("ext", ctx.log_level, ctx.console_location)
+    if not os.getenv("KF_NO_EXT"):
         pass
     else:
-        print('Extension disabled by KF_NO_EXT')
-        ctx.logger.warning('Trying to manage extension while disallowed by KF_NO_EXT')
+        print("Extension disabled by KF_NO_EXT")
+        ctx.logger.warning("Trying to manage extension while disallowed by KF_NO_EXT")
 
 
 def pass_ctx_from_parent(ctx):

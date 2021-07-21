@@ -6,17 +6,17 @@ from kungfu.yijinjing.time import *
 from pykungfu import longfist as lf
 from pykungfu import yijinjing as yjj
 
-LOG_MSG_FORMAT = '[%(nanotime)s] [%(loglevel)s] [%(process)6d/%(tid)-6d] [%(pathname)s:%(lineno)d#%(funcName)s] %(message)s'
-LOG_FILE_DATEEXT_FORMAT = '%Y-%m-%d'
+LOG_MSG_FORMAT = "[%(nanotime)s] [%(loglevel)s] [%(process)6d/%(tid)-6d] [%(pathname)s:%(lineno)d#%(funcName)s] %(message)s"
+LOG_FILE_DATEEXT_FORMAT = "%Y-%m-%d"
 
 LOG_LEVELS = {
-    'trace': logging.DEBUG,
-    'debug': logging.DEBUG,
-    'info': logging.INFO,
-    'warn': logging.WARNING,
-    'warning': logging.WARNING,
-    'error': logging.ERROR,
-    'critical': logging.CRITICAL,
+    "trace": logging.DEBUG,
+    "debug": logging.DEBUG,
+    "info": logging.INFO,
+    "warn": logging.WARNING,
+    "warning": logging.WARNING,
+    "error": logging.ERROR,
+    "critical": logging.CRITICAL,
 }
 
 
@@ -56,17 +56,17 @@ COLORS = {
     "warn": ansicolor.yellow + ansicolor.bold,
     "warning": ansicolor.yellow + ansicolor.bold,
     "error": ansicolor.red + ansicolor.bold,
-    "critical": ansicolor.bold + ansicolor.on_red
+    "critical": ansicolor.bold + ansicolor.on_red,
 }
 
 
 class KungfuFormatter(logging.Formatter):
     def format_level(self, levelname):
-        return '{:^8}'.format(levelname)
+        return "{:^8}".format(levelname)
 
     def format(self, record):
         record.loglevel = self.format_level(record.levelname.lower())
-        record.nanotime = strfnow(format='%m/%d %H:%M:%S.%N')
+        record.nanotime = strfnow(format="%m/%d %H:%M:%S.%N")
         record.tid = yjj.thread_id()
         return logging.Formatter.format(self, record)
 
@@ -75,7 +75,7 @@ class ColorFormatter(KungfuFormatter):
     def format_level(self, levelname):
         levelname_f = KungfuFormatter.format_level(self, levelname)
         if yjj.in_color_terminal():
-            return '{}{}{}'.format(COLORS[levelname], levelname_f, ansicolor.reset)
+            return "{}{}{}".format(COLORS[levelname], levelname_f, ansicolor.reset)
         else:
             return levelname_f
 
@@ -88,7 +88,9 @@ class UnixConsoleHandler(logging.StreamHandler):
 
 class WinConsoleHandler(logging.StreamHandler):
     def __init__(self):
-        logging.StreamHandler.__init__(self, open(sys.stdout.fileno(), mode='w', encoding='utf8'))
+        logging.StreamHandler.__init__(
+            self, open(sys.stdout.fileno(), mode="w", encoding="utf8")
+        )
         self.setFormatter(KungfuFormatter(LOG_MSG_FORMAT))
 
     def emit(self, record):
@@ -98,7 +100,9 @@ class WinConsoleHandler(logging.StreamHandler):
             if yjj.in_color_terminal():
                 stream.write(msg[:28])
                 self.flush()
-                yjj.color_print(record.levelname.lower(), '{:^8}'.format(record.levelname.lower()))
+                yjj.color_print(
+                    record.levelname.lower(), "{:^8}".format(record.levelname.lower())
+                )
                 stream.write(msg[36:])
                 stream.write(self.terminator)
                 self.flush()
@@ -115,14 +119,16 @@ def create_logger(name, level, location):
 
     if location is not None:
         log_dateext = strfnow(LOG_FILE_DATEEXT_FORMAT)
-        log_name = '{}_py_{}'.format(name, log_dateext)
+        log_name = "{}_py_{}".format(name, log_dateext)
         log_path = location.locator.layout_file(location, lf.enums.layout.LOG, log_name)
 
         file_handler = logging.FileHandler(log_path)
         file_handler.setFormatter(KungfuFormatter(LOG_MSG_FORMAT))
         logger.addHandler(file_handler)
 
-    console_handler = WinConsoleHandler() if platform.system() == 'Windows' else UnixConsoleHandler()
+    console_handler = (
+        WinConsoleHandler() if platform.system() == "Windows" else UnixConsoleHandler()
+    )
     logger.addHandler(console_handler)
 
     logger.setLevel(LOG_LEVELS[level])

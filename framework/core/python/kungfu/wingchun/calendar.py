@@ -32,5 +32,5 @@ class Calendar:
         try:
             return dt.isoweekday() <= 5 and is_workday(dt)
         except:
-            self.ctx.logger.error('failed to test is workday')
+            self.ctx.logger.error("failed to test is workday")
             return dt.isoweekday() <= 5

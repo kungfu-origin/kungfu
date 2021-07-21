@@ -6,7 +6,6 @@ from collections import deque
 
 
 class KungfuEventLoop(asyncio.AbstractEventLoop):
-
     def __init__(self, ctx, hero):
         self._time = 0
         self._running = False
@@ -27,7 +26,9 @@ class KungfuEventLoop(asyncio.AbstractEventLoop):
 
     def run_forever(self):
         self._running = True
-        self._ctx.logger.info('[{:08x}] {} running'.format(self._hero.home.uid, self._hero.home.uname))
+        self._ctx.logger.info(
+            "[{:08x}] {} running".format(self._hero.home.uid, self._hero.home.uname)
+        )
         while self._hero.live:
             self._hero.step()
 
@@ -56,7 +57,9 @@ class KungfuEventLoop(asyncio.AbstractEventLoop):
             if self._exception is not None:
                 raise self._exception
         self._hero.on_exit()
-        self._ctx.logger.info('[{:08x}] {} done'.format(self._hero.home.uid, self._hero.home.uname))
+        self._ctx.logger.info(
+            "[{:08x}] {} done".format(self._hero.home.uid, self._hero.home.uname)
+        )
 
     def _timer_handle_cancelled(self, handle):
         pass
@@ -77,7 +80,7 @@ class KungfuEventLoop(asyncio.AbstractEventLoop):
         pass
 
     def call_exception_handler(self, context):
-        self._exception = context.get('exception', None)
+        self._exception = context.get("exception", None)
 
     def call_soon(self, callback, *args, context=None):
         handle = asyncio.Handle(callback, args, self)
@@ -87,7 +90,9 @@ class KungfuEventLoop(asyncio.AbstractEventLoop):
     def call_later(self, delay, callback, *args, context=None):
         if delay < 0:
             raise Exception("Can't schedule in the past")
-        return self.call_at(self._hero.now() + delay * int(1e9), callback, args, context=context)
+        return self.call_at(
+            self._hero.now() + delay * int(1e9), callback, args, context=context
+        )
 
     def call_at(self, when, callback, *args, context=None):
         if when < self._hero.now():
@@ -133,25 +138,71 @@ class KungfuEventLoop(asyncio.AbstractEventLoop):
     async def getnameinfo(self, sockaddr, flags=0):
         raise NotImplementedError
 
-    async def create_connection(self, protocol_factory, host=None, port=None, *,
-                                ssl=None, family=0, proto=0, flags=0, sock=None, local_addr=None,
-                                server_hostname=None, ssl_handshake_timeout=None, happy_eyeballs_delay=None, interleave=None):
+    async def create_connection(
+        self,
+        protocol_factory,
+        host=None,
+        port=None,
+        *,
+        ssl=None,
+        family=0,
+        proto=0,
+        flags=0,
+        sock=None,
+        local_addr=None,
+        server_hostname=None,
+        ssl_handshake_timeout=None,
+        happy_eyeballs_delay=None,
+        interleave=None
+    ):
         raise NotImplementedError
 
-    async def create_server(self, protocol_factory, host=None, port=None, *,
-                            family=socket.AF_UNSPEC, flags=socket.AI_PASSIVE, sock=None, backlog=100,
-                            ssl=None, reuse_address=None, reuse_port=None, ssl_handshake_timeout=None, start_serving=True):
+    async def create_server(
+        self,
+        protocol_factory,
+        host=None,
+        port=None,
+        *,
+        family=socket.AF_UNSPEC,
+        flags=socket.AI_PASSIVE,
+        sock=None,
+        backlog=100,
+        ssl=None,
+        reuse_address=None,
+        reuse_port=None,
+        ssl_handshake_timeout=None,
+        start_serving=True
+    ):
         raise NotImplementedError
 
-    async def create_unix_connection(self, protocol_factory, path=None, *,
-                                     ssl=None, sock=None, server_hostname=None, ssl_handshake_timeout=None):
+    async def create_unix_connection(
+        self,
+        protocol_factory,
+        path=None,
+        *,
+        ssl=None,
+        sock=None,
+        server_hostname=None,
+        ssl_handshake_timeout=None
+    ):
         raise NotImplementedError
 
-    async def create_unix_server(self, protocol_factory, path=None, *,
-                                 sock=None, backlog=100, ssl=None, ssl_handshake_timeout=None, start_serving=True):
+    async def create_unix_server(
+        self,
+        protocol_factory,
+        path=None,
+        *,
+        sock=None,
+        backlog=100,
+        ssl=None,
+        ssl_handshake_timeout=None,
+        start_serving=True
+    ):
         raise NotImplementedError
 
-    async def connect_accepted_socket(self, protocol_factory, sock, *, ssl=None, ssl_handshake_timeout=None):
+    async def connect_accepted_socket(
+        self, protocol_factory, sock, *, ssl=None, ssl_handshake_timeout=None
+    ):
         raise NotImplementedError
 
     async def sendfile(self, transport, file, offset=0, count=None, *, fallback=True):
@@ -160,15 +211,32 @@ class KungfuEventLoop(asyncio.AbstractEventLoop):
     async def sock_sendfile(self, sock, file, offset=0, count=None, *, fallback=None):
         raise NotImplementedError
 
-    async def start_tls(self, transport, protocol, sslcontext, *,
-                        server_side=False, server_hostname=None, ssl_handshake_timeout=None):
+    async def start_tls(
+        self,
+        transport,
+        protocol,
+        sslcontext,
+        *,
+        server_side=False,
+        server_hostname=None,
+        ssl_handshake_timeout=None
+    ):
         raise NotImplementedError
 
-    async def create_datagram_endpoint(self, protocol_factory,
-                                       local_addr=None, remote_addr=None, *,
-                                       family=0, proto=0, flags=0,
-                                       reuse_address=None, reuse_port=None,
-                                       allow_broadcast=None, sock=None):
+    async def create_datagram_endpoint(
+        self,
+        protocol_factory,
+        local_addr=None,
+        remote_addr=None,
+        *,
+        family=0,
+        proto=0,
+        flags=0,
+        reuse_address=None,
+        reuse_port=None,
+        allow_broadcast=None,
+        sock=None
+    ):
         raise NotImplementedError
 
     async def connect_read_pipe(self, protocol_factory, pipe):
@@ -177,12 +245,27 @@ class KungfuEventLoop(asyncio.AbstractEventLoop):
     async def connect_write_pipe(self, protocol_factory, pipe):
         raise NotImplementedError
 
-    async def subprocess_shell(self, protocol_factory, cmd, *,
-                               stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, **kwargs):
+    async def subprocess_shell(
+        self,
+        protocol_factory,
+        cmd,
+        *,
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        **kwargs
+    ):
         raise NotImplementedError
 
-    async def subprocess_exec(self, protocol_factory, *args,
-                              stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, **kwargs):
+    async def subprocess_exec(
+        self,
+        protocol_factory,
+        *args,
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        **kwargs
+    ):
         raise NotImplementedError
 
     def add_reader(self, fd, callback, *args):

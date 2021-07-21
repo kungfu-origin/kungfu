@@ -17,17 +17,19 @@ def migrate(ctx):
 
 def migrate_to_2_3(ctx):
     if len(os.listdir(ctx.runtime_dir)) != 0:
-        print(f'runtime {ctx.runtime_dir} is not empty')
+        print(f"runtime {ctx.runtime_dir} is not empty")
 
     for category_value in lf.enums.category.__members__:
-        category_name = lf.enums.get_category_name(lf.enums.category.__members__[category_value])
+        category_name = lf.enums.get_category_name(
+            lf.enums.category.__members__[category_value]
+        )
         category_dir = os.path.join(ctx.home, category_name)
         if os.path.exists(category_dir):
             shutil.move(category_dir, ctx.runtime_dir)
 
-    search_path = os.path.join(ctx.runtime_dir, '*', '*', '*', '*', '*', '*.*')
+    search_path = os.path.join(ctx.runtime_dir, "*", "*", "*", "*", "*", "*.*")
     for file in glob.glob(search_path):
-        match = LAYOUT_LOCATION_PATTERN.match(file[len(ctx.runtime_dir) + 1:])
+        match = LAYOUT_LOCATION_PATTERN.match(file[len(ctx.runtime_dir) + 1 :])
         if match:
             category = match.group(1)
             group = match.group(2)

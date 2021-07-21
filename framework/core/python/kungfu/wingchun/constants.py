@@ -20,8 +20,8 @@ class Exchange:
 
 
 class Region:
-    CN = 'CN'
-    HK = 'HK'
+    CN = "CN"
+    HK = "HK"
 
 
 InstrumentType = lf.enums.InstrumentType
@@ -38,26 +38,35 @@ OrderActionFlag = lf.enums.OrderActionFlag
 LedgerCategory = lf.enums.LedgerCategory
 HedgeFlag = lf.enums.HedgeFlag
 CommissionRateMode = lf.enums.CommissionRateMode
-AllFinalOrderStatus = [OrderStatus.Filled, OrderStatus.Error, OrderStatus.PartialFilledNotActive, OrderStatus.Cancelled]
+AllFinalOrderStatus = [
+    OrderStatus.Filled,
+    OrderStatus.Error,
+    OrderStatus.PartialFilledNotActive,
+    OrderStatus.Cancelled,
+]
 
-InstrumentTypeInStockAccount = [InstrumentType.Stock,
-                                InstrumentType.Bond,
-                                InstrumentType.Fund,
-                                InstrumentType.StockOption,
-                                InstrumentType.TechStock,
-                                InstrumentType.Index,
-                                InstrumentType.Repo]
+InstrumentTypeInStockAccount = [
+    InstrumentType.Stock,
+    InstrumentType.Bond,
+    InstrumentType.Fund,
+    InstrumentType.StockOption,
+    InstrumentType.TechStock,
+    InstrumentType.Index,
+    InstrumentType.Repo,
+]
 
-ENUM_TYPES = [InstrumentType,
-              ExecType,
-              Side,
-              Offset,
-              BsFlag,
-              OrderStatus,
-              Direction,
-              PriceType,
-              VolumeCondition,
-              TimeCondition,
-              OrderActionFlag,
-              LedgerCategory,
-              HedgeFlag]
+ENUM_TYPES = [
+    InstrumentType,
+    ExecType,
+    Side,
+    Offset,
+    BsFlag,
+    OrderStatus,
+    Direction,
+    PriceType,
+    VolumeCondition,
+    TimeCondition,
+    OrderActionFlag,
+    LedgerCategory,
+    HedgeFlag,
+]

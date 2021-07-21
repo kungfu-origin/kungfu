@@ -5,13 +5,13 @@ from kungfu.yijinjing.log import create_logger
 
 
 @kfc.group(help_priority=5)
-@click.help_option('-h', '--help')
+@click.help_option("-h", "--help")
 @click.pass_context
 def data(ctx):
     pass_ctx_from_root(ctx)
     ctx.low_latency = False
-    ctx.logger = create_logger('data', ctx.log_level, ctx.console_location)
-    yjj.setup_log(ctx.console_location, 'data')
+    ctx.logger = create_logger("data", ctx.log_level, ctx.console_location)
+    yjj.setup_log(ctx.console_location, "data")
 
 
 def pass_ctx_from_parent(ctx):
