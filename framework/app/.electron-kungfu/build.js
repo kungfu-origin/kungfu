@@ -24,7 +24,8 @@ function build () {
   const tasks = ['main', 'renderer', 'daemon']
   const m = new Multispinner(tasks, {
     preText: 'building',
-    postText: 'process'
+    postText: 'process',
+    interval: process.env.GITHUB_ACTIONS ? 60000 : 100
   })
 
   let results = ''
