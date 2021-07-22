@@ -12,14 +12,14 @@
     "registry": "https://npm.pkg.github.com"
   },
   "config": {
+    "electron_version": "4.2.11",
+    "node_version": "10.15.0",
+    "python_version": "3.7",
     "arch": "x64",
     "buildtype": "Release",
-    "bundle": "pyinstaller",
     "loglevel": "trace",
-    "pypi": "https://mirrors.aliyun.com/pypi/simple",
-    "python_version": "3.7",
-    "electron_version": "4.2.11",
-    "node_version": "10.15.0"
+    "bundle": "pyinstaller",
+    "pypi": "https://mirrors.aliyun.com/pypi/simple"
   },
   "binary": {
     "module_name": "kungfu_node",

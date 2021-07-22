@@ -18,19 +18,28 @@ const spawnOptsInherit = { shell: true, stdio: 'inherit', windowsHide: true };
 const packageJson = fs.readJsonSync(path.resolve(path.dirname(__dirname), 'package.json'));
 const projectName = packageJson.name;
 
-function showConfig(key, projectScope = true) {
-  const npmConfigKey = projectScope ? `${projectName}:${key}` : key;
-  const output = spawnSync('npm', ['config', 'get', npmConfigKey], spawnOptsPipe)
+const scope = (npmConfigValue) => (npmConfigValue === 'undefined' ? '[package.json]' : '[user]');
+
+function getNpmConfigValue(key) {
+  return spawnSync('npm', ['config', 'get', key], spawnOptsPipe)
     .output.filter((e) => e && e.length > 0)
     .toString()
     .trimEnd();
-  const value = output === 'undefined' ? packageJson.config[key] : output;
-  console.log(`${npmConfigKey} = ${value}`);
+}
+
+function showProjectConfig(key) {
+  const npmConfigKey = `${projectName}:${key}`;
+  const npmConfigValue = getNpmConfigValue(npmConfigKey);
+  const value = npmConfigValue === 'undefined' ? packageJson.config[key] : npmConfigValue;
+  console.log(`${npmConfigKey} = ${value} ${scope(npmConfigValue)}`);
 }
 
 function showAllConfig() {
-  Object.keys(packageJson.config).map((key) => showConfig(key));
-  showConfig(PrebuiltHostConfigKey, false);
+  Object.keys(packageJson.config).map(showProjectConfig);
+
+  const hostConfigValue = getNpmConfigValue(PrebuiltHostConfigKey);
+  const value = hostConfigValue === 'undefined' ? packageJson.binary.host : hostConfigValue;
+  console.log(`${PrebuiltHostConfigKey} = ${value} ${scope(hostConfigValue)}`);
 }
 
 function npmCall(npmArgs) {
@@ -46,8 +55,8 @@ exports.argv = require('yargs/yargs')(process.argv.slice(2))
   .command(
     'auto',
     'Set npm configs automatically',
-    (yargs) => {},
-    (argv) => {
+    () => {},
+    () => {
       const githubActions = 'GITHUB_ACTIONS' in process.env;
       const pypi = githubActions ? PyPI_US : PyPI_CN;
       const prebuiltHost = githubActions ? PrebuiltHost_US : PrebuiltHost_CN;
@@ -62,24 +71,24 @@ exports.argv = require('yargs/yargs')(process.argv.slice(2))
   .command(
     'show',
     'Show npm configs',
-    (yargs) => {},
-    (argv) => {
+    () => {},
+    () => {
       showAllConfig();
     },
   )
   .command(
     'dir',
     'Show kungfu core base directory',
-    (yargs) => {},
-    (argv) => {
+    () => {},
+    () => {
       console.log(fs.realpathSync(path.dirname(__dirname)));
     },
   )
   .command(
     'info',
     'Show kungfu core build info',
-    (yargs) => {},
-    (argv) => {
+    () => {},
+    () => {
       const buildinfoPath = path.join(path.dirname(__dirname), 'build', 'kfc', 'kungfubuildinfo.json');
       if (fs.existsSync(buildinfoPath)) {
         const buildinfo = require(buildinfoPath);
