@@ -1,60 +1,34 @@
 # OS files
 .DS_Store
-*.log
 
 # IDE related
+.idea/
+.vs/
+.vscode/
+.arcconfig
+.project
 *.VC.*
 *.sln
 *.vcxproj*
-Debug/
-.vs/
-.vscode/
-.idea/
-.arcconfig
 *.flow
-
-# CMake template
-CMakeCache.txt
-CMakeFiles
-CMakeScripts
-Makefile
-cmake_install.cmake
-install_manifest.txt
-cmake-build-debug/
-build/
-build-*/
+*.log
 
 # Node related
-.npmrc
-yarn.lock
 package-lock.json
-.project
+yarn.lock
 dist/
 node_modules/
-*/node_modules/
-*/dist/
-*/lib
-*/inquirer-path/lib/*
-*/inquirer-path/lib
-*/inquirer-path/node_modules/*
-*/_version.py
-*/inquirer-path/yarn.lock
 
 # Python related
-Pipfile.lock
-MANIFEST
+.pdm.toml
 .installed.cfg
 __pycache__/
-develop-eggs/
-downloads/
-eggs/
-.eggs/
-parts/
-sdist/
-var/
-wheels/
-pip-wheel-metadata/
-share/python-wheels/
+__pypackages__/
 *.pyc
 *.egg-info/
 *.egg
+
+# Build related
+build/
+build-*/
+cmake-build-debug/

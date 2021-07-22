@@ -1,0 +1,32 @@
+{
+  "name": "@kungfu-trader/kungfu-sdk",
+  "author": "kungfu-trader",
+  "version": "2.4.0-alpha.4",
+  "description": "Libs and tools for developing Kungfu extensions",
+  "license": "Apache-2.0",
+  "main": "index.js",
+  "repository": {
+    "url": "https://github.com/kungfu-trader/kungfu-sdk.git"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "bin": {
+    "kfs": "cli.js"
+  },
+  "scripts": {
+    "kfs": "node cli.js",
+    "format": "prettier --write --parser typescript **/**.js"
+  },
+  "dependencies": {
+    "archiver": "^5.3.0",
+    "axios": "^0.21.1",
+    "cmake-js": "^6.1.0",
+    "ejs": "^3.1.6",
+    "fs-extra": "^9.1.0",
+    "glob": "^7.1.6",
+    "semver": "^7.3.5",
+    "treeify": "^1.1.0",
+    "yargs": "^16.2.0"
+  }
+}

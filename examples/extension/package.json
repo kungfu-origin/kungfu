@@ -1,6 +1,6 @@
 {
   "name": "kfextdemo",
-  "author": "taurus.ai",
+  "author": "kungfu-trader",
   "version": "1.0.0",
   "description": "KungFu Extension Demo",
   "license": "Apache-2.0",
@@ -11,9 +11,7 @@
     "postbuild": "copyfiles -f package.json build/dist && copyfiles -f build/Release/* build/dist && copyfiles -f build/Debug/* build/dist && cd build/dist && yarn pack"
   },
   "devDependencies": {
-    "cmake-js": "==6.0.0",
-    "copyfiles": "^2.1.0",
-    "cross-env": "^5.0.5",
-    "cross-var": "^1.1.0"
+    "cmake-js": "^6.2.0",
+    "copyfiles": "^2.4.0"
   }
 }

@@ -1,0 +1,7 @@
+build
+cmake-build-debug
+node_modules
+
+**/build
+**/cmake-build-debug
+**/node_modules
