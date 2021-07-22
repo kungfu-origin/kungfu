@@ -14,9 +14,6 @@
 *.log
 
 # Node related
-package-lock.json
-yarn.lock
-dist/
 node_modules/
 
 # Python related
@@ -32,3 +29,4 @@ __pypackages__/
 build/
 build-*/
 cmake-build-debug/
+dist/
