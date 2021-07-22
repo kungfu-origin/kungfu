@@ -8,7 +8,7 @@
                     "action_name": "install",
                     "inputs": ["<(module_root_dir)/Pipfile"],
                     "outputs": ["<(module_root_dir)/Pipfile.lock"],
-                    "action": ["python", ".build/yarn-run.py", "pipenv", "--clear", "install"]
+                    "action": ["python", ".build/yarn-run.py", "pipenv", "--bare", "install"]
                 }
             ]
         },

@@ -3,7 +3,7 @@ const path = require('path');
 const { spawnSync } = require('child_process');
 
 const argv = require('yargs/yargs')(process.argv.slice(2))
-  .option('clear', { type: 'boolean', default: false })
+  .option('bare', { type: 'boolean', default: false })
   .option('python')
   .option('pypi-mirror')
   .help().argv;
@@ -11,9 +11,10 @@ const argv = require('yargs/yargs')(process.argv.slice(2))
 const base_path = path.dirname(__dirname);
 const lock_path = path.join(base_path, 'Pipfile.lock');
 
-const python_opt = argv.clear && argv.python ? ['--python', argv.python] : [];
+const bare_opt = argv.bare ? ['--bare'] : [];
 const pypi_opt = argv.pypiMirror ? ['--pypi-mirror', argv.pypiMirror] : [];
-const pipenv_args = [...python_opt, ...pypi_opt, ...argv._];
+const python_opt = argv.bare && argv.python ? ['--python', argv.python] : [];
+const pipenv_args = [...bare_opt, ...pypi_opt, ...python_opt, ...argv._];
 
 console.log(`$ pipenv ${pipenv_args.join(' ')}`);
 
