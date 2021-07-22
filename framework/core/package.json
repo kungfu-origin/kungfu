@@ -59,7 +59,7 @@
     "kfc": "build/kfc/kfc"
   },
   "dependencies": {
-    "@mapbox/node-pre-gyp": "^1.0.0",
+    "@mapbox/node-pre-gyp": "^1.0.5",
     "fs-extra": "^9.1.0",
     "glob": "^7.1.6",
     "nan": "^2.14.2",
@@ -69,7 +69,8 @@
   "devDependencies": {
     "cmake-js": "^6.2.0",
     "cross-var": "^1.1.0",
+    "exit": "^0.1.2",
     "node-gyp": "^7.1.0",
-    "yarn": "*"
+    "yarn": "^1.22.0"
   }
 }
