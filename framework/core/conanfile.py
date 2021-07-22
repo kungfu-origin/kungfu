@@ -56,12 +56,6 @@ class KungfuCoreConan(ConanFile):
         """Performs clang-format on all C++ files"""
         if tools.which("clang-format") is not None:
             self.__clang_format(self.cpp_dir, self.cpp_files_extensions)
-            self.__clang_format(
-                path.join(self.ext_dir, "xtp", "src"), self.cpp_files_extensions
-            )
-            self.__clang_format(
-                path.join(self.ext_dir, "ctp", "src"), self.cpp_files_extensions
-            )
         else:
             self.output.warn("clang-format not installed")
 
@@ -107,12 +101,12 @@ class KungfuCoreConan(ConanFile):
 
     def __list_files(self, source_dir, extensions):
         found_files = []
-        for path, subdirs, files in os.walk(source_dir):
+        for folder, subdirs, files in os.walk(source_dir):
             for file in files:
                 extension = path.splitext(file)[1]
                 for ext in extensions:
                     if ext == extension:
-                        file_path = path.join(path, file)
+                        file_path = path.join(folder, file)
                         found_files.append(file_path)
         return found_files
 
