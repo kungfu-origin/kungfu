@@ -16,7 +16,7 @@
     "buildtype": "Release",
     "bundle": "pyinstaller",
     "loglevel": "trace",
-    "pypi": "http://mirrors.aliyun.com/pypi/simple",
+    "pypi": "https://mirrors.aliyun.com/pypi/simple",
     "python_version": "3.7",
     "electron_version": "4.2.11",
     "node_version": "10.15.0"

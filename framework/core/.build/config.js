@@ -7,7 +7,7 @@ const { spawnSync } = require('child_process');
 const PrebuiltHostConfigKey = 'kungfu_node_binary_host_mirror';
 
 const PyPI_US = 'https://pypi.python.org/simple';
-const PyPI_CN = 'http://mirrors.aliyun.com/pypi/simple';
+const PyPI_CN = 'https://mirrors.aliyun.com/pypi/simple';
 
 const PrebuiltHost_CN = 'https://kungfu-prebuilt.s3.cn-northwest-1.amazonaws.com.cn';
 const PrebuiltHost_US = 'https://kungfu-prebuilt.s3.us-east-1.amazonaws.com';
