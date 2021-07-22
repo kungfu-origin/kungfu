@@ -875,7 +875,7 @@
   resolved "https://registry.yarnpkg.com/@ls-lint/ls-lint/-/ls-lint-1.9.2.tgz#689f1f4c06072823a726802ba167340efcefe19c"
   integrity sha512-sugEjWjSSy9OHF6t1ZBLZCAROj52cZthB9dIePmzZzzMwmWwy3qAEMSdJheHeS1FOwDZI7Ipm1H/bWgzJNnSAw==
 
-"@mapbox/node-pre-gyp@^1.0.0", "@mapbox/node-pre-gyp@^1.0.5":
+"@mapbox/node-pre-gyp@^1.0.5":
   version "1.0.5"
   resolved "https://registry.yarnpkg.com/@mapbox/node-pre-gyp/-/node-pre-gyp-1.0.5.tgz#2a0b32fcb416fb3f2250fd24cb2a81421a4f5950"
   integrity sha512-4srsKPXWlIxp5Vbqz5uLfBN+du2fJChBoYn/f2h991WLdk7jUvcSk/McVLSv/X+xQIPI8eGD5GjrnygdyHnhPA==
@@ -1484,6 +1484,11 @@ add-stream@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/add-stream/-/add-stream-1.0.0.tgz#6a7990437ca736d5e1288db92bd3266d5f5cb2aa"
   integrity sha1-anmQQ3ynNtXhKI25K9MmbV9csqo=
+
+add-to-path@1.1.2:
+  version "1.1.2"
+  resolved "https://registry.yarnpkg.com/add-to-path/-/add-to-path-1.1.2.tgz#fe3dc73daa309c9fb93c4a6a336e7f69f4c68afc"
+  integrity sha1-/j3HPaownJ+5PEpqM25/afTGivw=
 
 add@^2.0.6:
   version "2.0.6"
@@ -4793,6 +4798,13 @@ cron@1.8.2, cron@^1.3:
   dependencies:
     moment-timezone "^0.5.x"
 
+cross-env@1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/cross-env/-/cross-env-1.0.0.tgz#98ad62c239831e85c0ae7db6d1457e0dfbf8f363"
+  integrity sha1-mK1iwjmDHoXArn220UV+Dfv482M=
+  dependencies:
+    add-to-path "1.1.2"
+
 cross-env@^5.0.5:
   version "5.2.1"
   resolved "https://registry.yarnpkg.com/cross-env/-/cross-env-5.2.1.tgz#b2c76c1ca7add66dc874d11798466094f551b34d"
@@ -4841,6 +4853,16 @@ cross-unzip@0.0.2:
   version "0.0.2"
   resolved "https://registry.yarnpkg.com/cross-unzip/-/cross-unzip-0.0.2.tgz#5183bc47a09559befcf98cc4657964999359372f"
   integrity sha1-UYO8R6CVWb78+YzEZXlkmZNZNy8=
+
+cross-var@1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/cross-var/-/cross-var-1.0.0.tgz#a0c89dea2627d30c10d9a99dcf551d67b434f5c5"
+  integrity sha1-oMid6iYn0wwQ2amdz1UdZ7Q09cU=
+  dependencies:
+    babel-preset-es2015 "^6.18.0"
+    babel-preset-stage-0 "^6.16.0"
+    babel-register "^6.18.0"
+    cross-spawn "^5.0.1"
 
 cross-var@^1.1.0:
   version "1.1.0"
