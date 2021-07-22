@@ -53,7 +53,7 @@
     "format": "yarn format:cpp && yarn format:js && yarn format:python",
     "format:cpp": "pipenv run conan source .",
     "format:js": "prettier --write --parser typescript \"(.build|node)/**.js\"",
-    "format:python": "pipenv run python -m black python"
+    "format:python": "pipenv run python -m black python *.py"
   },
   "bin": {
     "kfc": "build/kfc/kfc"

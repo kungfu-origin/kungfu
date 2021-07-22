@@ -31,7 +31,7 @@ class KungfuCoreConan(ConanFile):
         "arch": ["x64"],
         "bundle": ["nuitka", "pyinstaller"],
         "node_version": "ANY",
-        "electron_version": "ANY"
+        "electron_version": "ANY",
     }
     default_options = {
         "fmt:header_only": "True",
@@ -79,10 +79,7 @@ class KungfuCoreConan(ConanFile):
 
     def package(self):
         build_type = self.__get_build_type()
-        bundle = {
-            "pyinstaller": self.__run_pyinstaller,
-            "nuitka": self.__run_nuitka
-        }
+        bundle = {"pyinstaller": self.__run_pyinstaller, "nuitka": self.__run_nuitka}
         bundle[str(self.options.bundle)](build_type)
         self.__run_setuptools(build_type)
         self.__show_build_info(build_type)
@@ -270,9 +267,7 @@ class KungfuCoreConan(ConanFile):
         with tools.chdir(path.pardir):
             self.__run_yarn("nuitka", "--output-dir=build", path.join("python", "kfc"))
         kfc_dist_dir = path.join(self.build_dir, "kfc.dist")
-        shutil.copytree(
-            build_type, kfc_dist_dir
-        )
+        shutil.copytree(build_type, kfc_dist_dir)
         tools.rmdir(self.build_kfc_dir)
         shutil.move(kfc_dist_dir, self.build_kfc_dir)
         self.output.success("Nuitka done")
@@ -290,9 +285,7 @@ class KungfuCoreConan(ConanFile):
             path.join(os.pardir, "python", "kungfu_extensions"),
             path.join(self.build_python_dir, "kungfu_extensions"),
         )
-        shutil.copy2(
-            path.join(os.pardir, "python", "setup.py"), self.build_python_dir
-        )
+        shutil.copy2(path.join(os.pardir, "python", "setup.py"), self.build_python_dir)
 
         with tools.chdir("python"):
             rc = psutil.Popen(
