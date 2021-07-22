@@ -64,6 +64,7 @@ class KungfuCoreConan(ConanFile):
             self.settings.compiler.libcxx = "libstdc++"
 
     def generate(self):
+        """Updates mtime of lock files for node-gyp sake"""
         self.__touch_lockfiles()
 
     def build(self):
