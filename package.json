@@ -23,16 +23,18 @@
     "reformat:ts": "yarn reformat \"(framework|developer|extensions)/**/node/*.ts?(x)\"",
     "reformat:js": "yarn reformat \"(framework|developer|extensions)/**/node/*.js\""
   },
-  "devDependencies": {
+  "dependencies": {
     "@ls-lint/ls-lint": "^1.9.0",
     "@typescript-eslint/parser": "^3.10.0",
-    "@mapbox/node-pre-gyp": "^1.0.0",
     "eslint": "^7.14.0",
     "prettier": "^2.3.0",
     "prettier-eslint-cli": "^5.0.0",
-    "node-gyp": "^7.1.0",
     "lerna": "^4.0.0",
     "wsrun": "^5.0.0",
     "yarn": "^1.22.0"
+  },
+  "devDependencies": {
+    "cross-env": "1.0.0",
+    "cross-var": "1.0.0"
   }
 }
