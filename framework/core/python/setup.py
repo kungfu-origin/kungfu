@@ -14,6 +14,8 @@ setup(
     package_data={"": ["*.so", "*.dylib", "*.dll", "*.pyd", "*.json"]},
     include_package_data=True,
     install_requires=[
+        "black~=21.7b0",
+        "Nuitka~=0.6.16",
         "click~=8.0.1",
         "psutil~=5.8.0",
         "wcwidth~=0.2.5",

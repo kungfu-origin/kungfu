@@ -29,7 +29,7 @@ class KungfuCoreConan(ConanFile):
     options = {
         "log_level": ["trace", "debug", "info", "warning", "error", "critical"],
         "arch": ["x64"],
-        "bundle": ["nuitka", "pyinstaller"],
+        "bundler": ["nuitka", "pyinstaller"],
         "node_version": "ANY",
         "electron_version": "ANY",
     }
@@ -38,7 +38,7 @@ class KungfuCoreConan(ConanFile):
         "spdlog:header_only": "True",
         "log_level": "info",
         "arch": "x64",
-        "bundle": "pyinstaller",
+        "bundler": "pyinstaller",
         "node_version": "ANY",
         "electron_version": "ANY",
     }
@@ -81,7 +81,7 @@ class KungfuCoreConan(ConanFile):
     def package(self):
         build_type = self.__get_build_type()
         bundle = {"pyinstaller": self.__run_pyinstaller, "nuitka": self.__run_nuitka}
-        bundle[str(self.options.bundle)](build_type)
+        bundle[str(self.options.bundler)](build_type)
         self.__run_setuptools(build_type)
         self.__show_build_info(build_type)
 

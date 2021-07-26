@@ -9,8 +9,8 @@ const PrebuiltHostConfigKey = 'kungfu_node_binary_host_mirror';
 const PyPI_US = 'https://pypi.python.org/simple';
 const PyPI_CN = 'https://mirrors.aliyun.com/pypi/simple';
 
-const PrebuiltHost_CN = 'https://kungfu-prebuilt.s3.cn-northwest-1.amazonaws.com.cn';
-const PrebuiltHost_US = 'https://kungfu-prebuilt.s3.us-east-1.amazonaws.com';
+const PrebuiltHost_CN = 'https://prebuilt.libkungfu.cc';
+const PrebuiltHost_US = 'https://prebuilt.libkungfu.io';
 
 const spawnOptsPipe = { shell: true, stdio: 'pipe', windowsHide: true };
 const spawnOptsInherit = { shell: true, stdio: 'inherit', windowsHide: true };

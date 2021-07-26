@@ -1,5 +1,6 @@
 import re
-import os, shutil
+import os
+import shutil
 import tarfile
 import kungfu_extensions
 import click

@@ -79,8 +79,8 @@ def ensure_dir(ctx, name):
     "-H",
     "--home",
     type=str,
-    help="kungfu home folder, defaults to APPDATA/kungfu/app, where APPDATA defaults to %APPDATA% on windows, "
-    "~/.config or $XDG_CONFIG_HOME (if set) on linux, ~/Library/Application Support on mac",
+    help="kungfu home folder, defaults to APPDATA/kungfu/home/runtime, where APPDATA defaults to %APPDATA% on windows, "
+    "~/.config on linux, ~/Library/Application Support on mac",
 )
 @click.option(
     "-l",

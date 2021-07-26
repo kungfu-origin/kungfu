@@ -8,7 +8,6 @@
 '''
 import random
 from kungfu.wingchun.constants import *
-import pandas
 
 def test_timer(context, event):
     context.log.info('test timer')

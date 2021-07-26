@@ -11,6 +11,9 @@
   "publishConfig": {
     "registry": "https://npm.pkg.github.com"
   },
+  "bin": {
+    "kfc": "node/kfc.js"
+  },
   "config": {
     "electron_version": "4.2.11",
     "node_version": "10.15.0",
@@ -18,7 +21,7 @@
     "arch": "x64",
     "buildtype": "Release",
     "loglevel": "trace",
-    "bundle": "pyinstaller",
+    "bundler": "pyinstaller",
     "pypi": "https://mirrors.aliyun.com/pypi/simple"
   },
   "binary": {
@@ -26,7 +29,7 @@
     "module_path": "build/kfc",
     "remote_path": "kungfu-core/v{major}/v{version}",
     "package_name": "kfc-v{version}-{platform}-{arch}-{configuration}.tar.gz",
-    "host": "https://kungfu-prebuilt.s3.cn-northwest-1.amazonaws.com.cn"
+    "host": "https://prebuilt.libkungfu.cc"
   },
   "scripts": {
     "preinstall": "node .build/config.js auto",
@@ -35,7 +38,7 @@
     "setup": "cross-var node .build/node-pre-gyp.js --build-type $npm_package_config_buildtype install",
     "prebuild": "node .build/config.js show",
     "build": "cross-var node .build/node-pre-gyp.js --build-type $npm_package_config_buildtype build",
-    "configure": "cross-var pipenv run conan install . -if build -s build_type=$npm_package_config_buildtype --build missing -o log_level=$npm_package_config_loglevel -o arch=$npm_package_config_arch -o bundle=$npm_package_config_bundle  -o node_version=$npm_package_config_node_version -o electron_version=$npm_package_config_electron_version",
+    "configure": "cross-var pipenv run conan install . -if build -s build_type=$npm_package_config_buildtype --build missing -o log_level=$npm_package_config_loglevel -o arch=$npm_package_config_arch -o bundler=$npm_package_config_bundler  -o node_version=$npm_package_config_node_version -o electron_version=$npm_package_config_electron_version",
     "compile": "cross-var pipenv run conan build . -bf build -s build_type=$npm_package_config_buildtype",
     "bundle": "cross-var pipenv run conan package . -bf build -pf build/kfc -s build_type=$npm_package_config_buildtype",
     "bundle:pyinstaller": "npm config delete @kungfu-trader/kungfu-core:bundle && yarn configure && yarn bundle",
@@ -53,10 +56,8 @@
     "format": "yarn format:cpp && yarn format:js && yarn format:python",
     "format:cpp": "pipenv run conan source .",
     "format:js": "prettier --write --parser typescript \"(.build|node)/**.js\"",
-    "format:python": "pipenv run python -m black python *.py"
-  },
-  "bin": {
-    "kfc": "build/kfc/kfc"
+    "format:python": "pipenv run python -m black python *.py",
+    "kfc": "node node/kfc.js"
   },
   "dependencies": {
     "@mapbox/node-pre-gyp": "^1.0.5",

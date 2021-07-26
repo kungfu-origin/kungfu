@@ -1,6 +1,5 @@
 import glob
 import json
-import pandas
 
 from kungfu.yijinjing import *
 
@@ -66,6 +65,7 @@ def find_sessions(ctx):
     io_device = yjj.io_device(ctx.console_location)
     session_finder = yjj.session_finder(io_device)
     ctx.session_count = 1
+    import pandas
     sessions_df = pandas.DataFrame(
         columns=[
             "id",
@@ -163,6 +163,7 @@ def show_journal(ctx, session_id, io_type):
         master_cmd_location = make_location_from_dict(ctx, locations[master_cmd_uid])
         reader.join(master_cmd_location, io_device.home.uid, session["begin_time"])
 
+    import pandas
     journal_df = pandas.DataFrame(
         columns=[
             "gen_time",

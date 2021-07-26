@@ -59,9 +59,12 @@ class Master(yjj.master):
         self.commissions = {}
         for commission in self.profile.get_all(lf.types.Commission()):
             self.commissions[commission.product_id] = commission
-        default_commissions.apply(
-            lambda default: self.set_default_commission(default), 1
-        )
+        try:
+            default_commissions.apply(
+                lambda default: self.set_default_commission(default), 1
+            )
+        except RuntimeError:
+            self.ctx.logger.error(f'failed to load default commissions')
 
     def set_default_commission(self, default):
         if default.product_id not in self.commissions:

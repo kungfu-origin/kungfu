@@ -4,7 +4,9 @@ const os = require('os');
 const treeify = require('treeify');
 const sdk = require('./index.js');
 
-const defaultLibSiteURL = 'http://external.libkungfu.cc';
+const DefaultLibSiteURL_CN = 'http://external.libkungfu.cc';
+const DefaultLibSiteURL_US = 'https://external.libkungfu.io';
+const DefaultLibSiteURL = process.env.GITHUB_ACTIONS ? DefaultLibSiteURL_US : DefaultLibSiteURL_CN;
 
 exports.argv = require('yargs/yargs')(process.argv.slice(2))
   .command(
@@ -14,7 +16,7 @@ exports.argv = require('yargs/yargs')(process.argv.slice(2))
       yargs
         .option('url', {
           type: 'string',
-          default: defaultLibSiteURL,
+          default: DefaultLibSiteURL,
           describe: 'lib site URL',
         })
         .option('match-name', {
@@ -50,7 +52,7 @@ exports.argv = require('yargs/yargs')(process.argv.slice(2))
       yargs
         .option('url', {
           type: 'string',
-          default: defaultLibSiteURL,
+          default: DefaultLibSiteURL,
           describe: 'lib site URL',
         })
         .option('lib-name', {
