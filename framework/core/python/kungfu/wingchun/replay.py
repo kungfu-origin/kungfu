@@ -1,11 +1,13 @@
-import sys
 import click
+import kungfu
+import sys
+
 from tabulate import tabulate
 from kungfu.yijinjing import time as kft
 from kungfu.yijinjing import journal as kfj
 
-from pykungfu import longfist as lf
-from pykungfu import yijinjing as yjj
+lf = kungfu.__bindings__.longfist
+yjj = kungfu.__bindings__.yijinjing
 
 
 def setup(ctx, session_id, cmd, instance):

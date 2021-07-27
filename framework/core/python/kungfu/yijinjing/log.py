@@ -1,10 +1,11 @@
 import logging
+import kungfu
 import sys
 import platform
 from kungfu.yijinjing.time import *
 
-from pykungfu import longfist as lf
-from pykungfu import yijinjing as yjj
+lf = kungfu.__bindings__.longfist
+yjj = kungfu.__bindings__.yijinjing
 
 LOG_MSG_FORMAT = "[%(nanotime)s] [%(loglevel)s] [%(process)6d/%(tid)-6d] [%(pathname)s:%(lineno)d#%(funcName)s] %(message)s"
 LOG_FILE_DATEEXT_FORMAT = "%Y-%m-%d"

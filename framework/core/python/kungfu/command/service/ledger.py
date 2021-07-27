@@ -1,9 +1,12 @@
 import click
+import kungfu
+
 from kungfu.command import kfc, pass_ctx_from_parent
 from kungfu.wingchun.replay import setup
-from pykungfu import longfist as lf
-from pykungfu import yijinjing as yjj
-from pykungfu import wingchun as wc
+
+lf = kungfu.__bindings__.longfist
+wc = kungfu.__bindings__.wingchun
+yjj = kungfu.__bindings__.yijinjing
 
 
 @kfc.command(help_priority=2)

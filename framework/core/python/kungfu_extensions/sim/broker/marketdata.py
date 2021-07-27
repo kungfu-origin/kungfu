@@ -1,9 +1,13 @@
+import kungfu
+
 from collections import namedtuple
 from kungfu.yijinjing.log import create_logger
-from pykungfu import longfist as lf
-from pykungfu import yijinjing as yjj
-from pykungfu import wingchun as wc
 from . import mdmaker
+
+
+lf = kungfu.__bindings__.longfist
+wc = kungfu.__bindings__.wingchun
+yjj = kungfu.__bindings__.yijinjing
 
 MakerConfig = namedtuple(
     "MakerConfig", ["base", "bound", "samples", "variation", "randseed"]

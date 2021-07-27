@@ -1,11 +1,14 @@
 import csv
 import inspect
 import glob
+import kungfu
 import shutil
 import os
+
 from kungfu.yijinjing.locator import Locator
-from pykungfu import longfist as lf
-from pykungfu import yijinjing as yjj
+
+lf = kungfu.__bindings__.longfist
+yjj = kungfu.__bindings__.yijinjing
 
 
 class Adapter:

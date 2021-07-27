@@ -1,11 +1,14 @@
-from pykungfu import wingchun as pywingchun
-from kungfu.wingchun.constants import *
 import json
+import kungfu
 import re
 
-get_instrument_type = pywingchun.utils.get_instrument_type
-is_valid_price = pywingchun.utils.is_valid_price
-hash_instrument = pywingchun.utils.hash_instrument
+from kungfu.wingchun.constants import *
+
+wc = kungfu.__bindings__.wingchun
+
+get_instrument_type = wc.utils.get_instrument_type
+is_valid_price = wc.utils.is_valid_price
+hash_instrument = wc.utils.hash_instrument
 
 
 def is_final_status(order_status):

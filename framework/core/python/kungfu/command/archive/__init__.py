@@ -1,7 +1,11 @@
 import click
-from pykungfu import yijinjing as yjj
+import kungfu
+
 from kungfu.command import kfc, pass_ctx_from_parent as pass_ctx_from_root
 from kungfu.yijinjing.log import create_logger
+
+lf = kungfu.__bindings__.longfist
+yjj = kungfu.__bindings__.yijinjing
 
 
 @kfc.group(help_priority=6)

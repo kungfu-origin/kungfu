@@ -1,10 +1,12 @@
-import os
-import platform
 import click
-from kungfu import __version__
+import kungfu
+import platform
+import os
+
 from kungfu.yijinjing.locator import Locator
-from pykungfu import longfist as lf
-from pykungfu import yijinjing as yjj
+
+lf = kungfu.__bindings__.longfist
+yjj = kungfu.__bindings__.yijinjing
 
 DEFAULT_CMD_PRIORITY = 100
 
@@ -12,15 +14,16 @@ DEFAULT_CMD_PRIORITY = 100
 class SpecialHelpOrder(click.Group):
     def __init__(self, *args, **kwargs):
         self.help_priorities = {}
+        self.list_commands = self.list_commands_for_help
         super(SpecialHelpOrder, self).__init__(*args, **kwargs)
 
     def get_help(self, ctx):
-        self.list_commands = self.list_commands_for_help
         return super(SpecialHelpOrder, self).get_help(ctx)
 
     def list_commands_for_help(self, ctx):
         """reorder the list of commands when listing the help"""
         commands = super(SpecialHelpOrder, self).list_commands(ctx)
+        commands = filter(lambda command: self.help_priorities[command] > 0, commands)
         return (
             c[1]
             for c in sorted(
@@ -58,22 +61,6 @@ class SpecialHelpOrder(click.Group):
         return decorator
 
 
-def recursive_help(cmd, parent=None):
-    ctx = click.core.Context(cmd, info_name=cmd.name, parent=parent)
-    print(cmd.get_help(ctx))
-    print()
-    commands = getattr(cmd, "commands", {})
-    for sub in commands.values():
-        recursive_help(sub, ctx)
-
-
-def ensure_dir(ctx, name):
-    target = os.path.join(ctx.home, name)
-    if not os.path.exists(target):
-        os.makedirs(target)
-    return target
-
-
 @click.group(invoke_without_command=True, cls=SpecialHelpOrder)
 @click.option(
     "-H",
@@ -96,7 +83,7 @@ def ensure_dir(ctx, name):
     help="name for the process, defaults to command if not set",
 )
 @click.help_option("-h", "--help")
-@click.version_option(__version__, "-v", "--version", message="{}".format(__version__))
+@click.version_option(kungfu.__version__, "--version", message=kungfu.__version__)
 @click.pass_context
 def kfc(ctx, home, log_level, name):
     if not home:
@@ -117,6 +104,12 @@ def kfc(ctx, home, log_level, name):
 
     os.environ["KF_HOME"] = ctx.home = home
     os.environ["KF_LOG_LEVEL"] = ctx.log_level = log_level
+
+    def ensure_dir(ctx, name):
+        target = os.path.join(ctx.home, name)
+        if not os.path.exists(target):
+            os.makedirs(target)
+        return target
 
     ctx.runtime_dir = ensure_dir(ctx, "runtime")
     ctx.archive_dir = ensure_dir(ctx, "archive")

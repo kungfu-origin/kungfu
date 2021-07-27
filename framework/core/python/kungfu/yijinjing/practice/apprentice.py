@@ -1,9 +1,11 @@
+import kungfu
 import psutil
 import signal
-from pykungfu import yijinjing as yjj
 import kungfu.yijinjing.io as kfio
 import kungfu.yijinjing.journal as kfj
 from . import os_signal
+
+yjj = kungfu.__bindings__.yijinjing
 
 
 class Apprentice(yjj.apprentice):

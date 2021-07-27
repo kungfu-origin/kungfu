@@ -1,18 +1,19 @@
 import asyncio
-import os
-import sys
 import importlib
 import inspect
 import functools
-import kungfu.yijinjing.time as kft
+import kungfu
+import os
+import sys
 
+from kungfu.yijinjing import time as kft
 from kungfu.wingchun import constants
 from kungfu.wingchun import utils
 from kungfu.wingchun.constants import *
 
-from pykungfu import longfist as lf
-from pykungfu import yijinjing as yjj
-from pykungfu import wingchun as wc
+lf = kungfu.__bindings__.longfist
+wc = kungfu.__bindings__.wingchun
+yjj = kungfu.__bindings__.yijinjing
 
 
 class Runner(wc.Runner):

@@ -1,15 +1,18 @@
-import unittest
+import datetime
+import kungfu
 import os
 import platform
-import datetime
+import unittest
+
 from dotted_dict import DottedDict
-import kungfu.yijinjing.journal as kfj
+from kungfu.yijinjing import journal as kfj
 from kungfu.wingchun.book.book import AccountBook
 from kungfu.wingchun.constants import *
 from kungfu.yijinjing.locator import Locator
 from kungfu.yijinjing.log import create_logger
-from pykungfu import longfist as lf
-from pykungfu import yijinjing as yjj
+
+lf = kungfu.__bindings__.longfist
+yjj = kungfu.__bindings__.yijinjing
 
 
 class TestStockPosition(unittest.TestCase):

@@ -1,6 +1,10 @@
+import kungfu
+
 from kungfu.data.adapter import Adapter
 from kungfu.yijinjing.sinks.csv import open_csv_sink
-from pykungfu import yijinjing as yjj
+
+lf = kungfu.__bindings__.longfist
+yjj = kungfu.__bindings__.yijinjing
 
 
 class KfaAdapter(Adapter):

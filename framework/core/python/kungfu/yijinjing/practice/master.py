@@ -1,5 +1,6 @@
 import sys
 import time
+import kungfu
 import psutil
 import functools
 import traceback
@@ -9,8 +10,8 @@ from kungfu.yijinjing import log
 from kungfu.wingchun import default_commissions
 from kungfu.wingchun.calendar import Calendar
 
-from pykungfu import longfist as lf
-from pykungfu import yijinjing as yjj
+lf = kungfu.__bindings__.longfist
+yjj = kungfu.__bindings__.yijinjing
 
 SECOND_IN_NANO = int(1e9)
 TASKS = dict()
@@ -64,7 +65,7 @@ class Master(yjj.master):
                 lambda default: self.set_default_commission(default), 1
             )
         except RuntimeError:
-            self.ctx.logger.error(f'failed to load default commissions')
+            self.ctx.logger.error(f"failed to load default commissions")
 
     def set_default_commission(self, default):
         if default.product_id not in self.commissions:

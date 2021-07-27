@@ -1,9 +1,10 @@
 import click
+import kungfu
 from kungfu.command import kfc, pass_ctx_from_parent
 from kungfu_extensions import EXTENSION_REGISTRY_TD
 
-from pykungfu import longfist as lf
-from pykungfu import yijinjing as yjj
+lf = kungfu.__bindings__.longfist
+yjj = kungfu.__bindings__.yijinjing
 
 
 @kfc.command(help_priority=3)

@@ -1,21 +1,23 @@
-import json
 import datetime
+import http
+import json
+import kungfu
+import platform
+import os
 import time
 import unittest
-import os
-import platform
-import http
+
 from kungfu.yijinjing.locator import Locator
 from kungfu.yijinjing import msg as yjj_msg
 from kungfu.wingchun import msg
 from kungfu.wingchun.constants import *
 
-from pykungfu import longfist as lf
-from pykungfu import yijinjing as yjj
+lf = kungfu.__bindings__.longfist
+yjj = kungfu.__bindings__.yijinjing
 
 
 class LedgerClient:
-    def __init__(self, name="tester"):
+    def __init__(self):
         osname = platform.system()
         user_home = os.path.expanduser("~")
         if osname == "Linux":

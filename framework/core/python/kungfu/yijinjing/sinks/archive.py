@@ -1,7 +1,11 @@
+import kungfu
 import os
+
 from kungfu.yijinjing.time import DAY_IN_NANO
 from kungfu.yijinjing.locator import Locator
-from pykungfu import yijinjing as yjj
+
+lf = kungfu.__bindings__.longfist
+yjj = kungfu.__bindings__.yijinjing
 
 
 class ArchiveSink(yjj.sink):

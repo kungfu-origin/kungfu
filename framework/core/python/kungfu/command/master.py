@@ -1,6 +1,6 @@
 import click
 from kungfu.command import kfc, pass_ctx_from_parent
-from kungfu.practice.master import Master
+from kungfu.yijinjing.practice.master import Master
 
 
 @kfc.command(help_priority=1)

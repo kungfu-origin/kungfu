@@ -1,9 +1,13 @@
 import errno
 import glob
+import kungfu
+import os
 import shutil
+
 from kungfu.yijinjing import *
-from pykungfu import longfist as lf
-from pykungfu import yijinjing as yjj
+
+lf = kungfu.__bindings__.longfist
+yjj = kungfu.__bindings__.yijinjing
 
 
 class Locator(yjj.locator):

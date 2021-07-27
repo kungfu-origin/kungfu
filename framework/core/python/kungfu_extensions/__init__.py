@@ -1,8 +1,11 @@
+import kungfu
 import os
+
 from kungfu.yijinjing.locator import Locator
 from kungfu.yijinjing.log import create_logger
-from pykungfu import longfist as lf
-from pykungfu import yijinjing as yjj
+
+lf = kungfu.__bindings__.longfist
+yjj = kungfu.__bindings__.yijinjing
 
 
 kf_home = os.getenv("KF_HOME")

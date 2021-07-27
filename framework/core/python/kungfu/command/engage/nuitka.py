@@ -18,21 +18,22 @@ from kungfu.command.engage import engage, pass_ctx_from_parent
 def nuitka(ctx):
     pass_ctx_from_parent(ctx)
 
-    os.environ['PYTHONPATH'] = os.pathsep.join(sys.path)
+    os.environ["PYTHONPATH"] = os.pathsep.join(sys.path)
 
     sys.argv = [sys.argv[0], *ctx.args]
 
     def runDataComposer(source_dir):
-        data_composer_opts = [] if basename(sys.executable).startswith('kfc') else ['-m', 'kungfu']
+        data_composer_opts = (
+            [] if basename(sys.executable).startswith("kfc") else ["-m", "kungfu"]
+        )
         mapping = {
-            "NUITKA_PACKAGE_HOME": dirname(
-                abspath(sys.modules["nuitka"].__path__[0])
-            ),
+            "NUITKA_PACKAGE_HOME": dirname(abspath(sys.modules["nuitka"].__path__[0])),
             "PATH": os.environ["PATH"],
-            "PYTHONPATH": os.pathsep.join(sys.path)
+            "PYTHONPATH": os.pathsep.join(sys.path),
         }
 
         from nuitka.build import DataComposerInterface
+
         blob_filename = DataComposerInterface.getConstantBlobFilename(source_dir)
 
         with DataComposerInterface.withEnvironmentVarsOverriden(mapping):
@@ -40,7 +41,7 @@ def nuitka(ctx):
                 [
                     sys.executable,
                     *data_composer_opts,
-                    'engage',
+                    "engage",
                     "data-composer",
                     source_dir,
                     blob_filename,
@@ -52,18 +53,27 @@ def nuitka(ctx):
 
     def getSconsBinaryCall():
         import kungfu
-        import pykungfu
-        os.environ['PYTHONPATH'] = dirname(dirname(kungfu.__file__)) + os.pathsep + dirname(pykungfu.__file__)
-        scons_opts = [] if basename(sys.executable).startswith('kfc') else ['-m', 'kungfu']
-        return [sys.executable, *scons_opts, 'engage', 'scons']
+
+        os.environ["PYTHONPATH"] = (
+            dirname(dirname(kungfu.__file__))
+            + os.pathsep
+            + dirname(kungfu.__bindings__.__file__)
+        )
+        scons_opts = (
+            [] if basename(sys.executable).startswith("kfc") else ["-m", "kungfu"]
+        )
+        return [sys.executable, *scons_opts, "engage", "scons"]
 
     from nuitka import PythonVersions
+
     PythonVersions.isStaticallyLinkedPython = lambda: False
 
     from nuitka.build import DataComposerInterface
+
     DataComposerInterface.runDataComposer = runDataComposer
 
     from nuitka.build import SconsInterface
+
     SconsInterface._getSconsBinaryCall = getSconsBinaryCall
 
     from nuitka.plugins import Plugins
@@ -106,7 +116,7 @@ def nuitka(ctx):
         TensorflowPlugin,
         TkinterPlugin,
         TorchPlugin,
-        ZmqPlugin
+        ZmqPlugin,
     ]:
         plugin_classes = set(
             obj
@@ -140,13 +150,18 @@ def nuitka(ctx):
             )
 
         for plugin_class in plugin_classes:
-            Plugins.plugin_name2plugin_classes[plugin_class.plugin_name] = plugin_class, None
+            Plugins.plugin_name2plugin_classes[plugin_class.plugin_name] = (
+                plugin_class,
+                None,
+            )
 
     from nuitka import Options
+
     Options.parseArgs(will_reexec=False)
     Options.commentArgs()
 
     from nuitka import MainControl
+
     MainControl.main()
 
 
@@ -163,9 +178,11 @@ def data_composer(ctx):
     sys.argv = [sys.argv[0], *ctx.args]
 
     from nuitka import PythonVersions
+
     PythonVersions.isStaticallyLinkedPython = lambda: False
 
     from nuitka.tools.data_composer.DataComposer import main
+
     main()
 
 
@@ -182,21 +199,34 @@ def scons(ctx):
     sys.argv = [sys.argv[0], *ctx.args]
 
     from nuitka import Options
-    sys.path.append(os.path.join(os.path.dirname(Options.__file__), 'build', 'inline_copy', 'lib', 'scons-3.1.2'))
+
+    sys.path.append(
+        os.path.join(
+            os.path.dirname(Options.__file__),
+            "build",
+            "inline_copy",
+            "lib",
+            "scons-3.1.2",
+        )
+    )
 
     from nuitka import PythonVersions
+
     PythonVersions.isStaticallyLinkedPython = lambda: False
 
     from nuitka.build import SconsUtils
+
     originCreateEnvironment = SconsUtils.createEnvironment
 
     def createEnvironment(**kwargs):
-        import pykungfu
+        import kungfu
+
         env = originCreateEnvironment(**kwargs)
-        env.Append(LIBPATH=dirname(pykungfu.__file__))
+        env.Append(LIBPATH=dirname(kungfu.__bindings__.__file__))
         return env
 
     SconsUtils.createEnvironment = createEnvironment
 
     from SCons.Script import main
+
     main()

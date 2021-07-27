@@ -1,8 +1,11 @@
 import csv
+import kungfu
 import os
+
 from contextlib import contextmanager
-from pykungfu import longfist as lf
-from pykungfu import yijinjing as yjj
+
+lf = kungfu.__bindings__.longfist
+yjj = kungfu.__bindings__.yijinjing
 
 
 class CsvSink(yjj.sink):

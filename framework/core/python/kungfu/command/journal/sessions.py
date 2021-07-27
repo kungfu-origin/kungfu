@@ -1,11 +1,15 @@
-import platform
 import click
+import kungfu
+import platform
 import shutil
+
 from tabulate import tabulate
 from kungfu.yijinjing import time as kft
 from kungfu.yijinjing import journal as kfj
 from kungfu.command.journal import journal, pass_ctx_from_parent
-from pykungfu import yijinjing as yjj
+
+lf = kungfu.__bindings__.longfist
+yjj = kungfu.__bindings__.yijinjing
 
 
 @journal.command()

@@ -1,11 +1,12 @@
 import glob
 import json
+import kungfu
 
 from kungfu.yijinjing import *
 
-from pykungfu.longfist.types import *
-from pykungfu import longfist as lf
-from pykungfu import yijinjing as yjj
+lf = kungfu.__bindings__.longfist
+yjj = kungfu.__bindings__.yijinjing
+types = lf.types
 
 
 def collect_journal_locations(ctx):
@@ -66,6 +67,7 @@ def find_sessions(ctx):
     session_finder = yjj.session_finder(io_device)
     ctx.session_count = 1
     import pandas
+
     sessions_df = pandas.DataFrame(
         columns=[
             "id",
@@ -164,6 +166,7 @@ def show_journal(ctx, session_id, io_type):
         reader.join(master_cmd_location, io_device.home.uid, session["begin_time"])
 
     import pandas
+
     journal_df = pandas.DataFrame(
         columns=[
             "gen_time",
@@ -190,13 +193,15 @@ def show_journal(ctx, session_id, io_type):
             frame.data_length,
         ]
         if frame.dest == io_device.home.uid and (
-            frame.msg_type == RequestReadFrom.__tag__
-            or frame.msg_type == RequestReadFromPublic.__tag__
+            frame.msg_type == types.RequestReadFrom.__tag__
+            or frame.msg_type == types.RequestReadFromPublic.__tag__
         ):
             request = frame.RequestReadFrom()
             source_location = make_location_from_dict(ctx, locations[request.source_id])
             dest = (
-                io_device.home.uid if frame.msg_type == RequestReadFrom.__tag__ else 0
+                io_device.home.uid
+                if frame.msg_type == types.RequestReadFrom.__tag__
+                else 0
             )
             try:
                 reader.join(source_location, dest, request.from_time)
@@ -204,7 +209,10 @@ def show_journal(ctx, session_id, io_type):
                 ctx.logger.error(
                     f"failed to join journal {source_location.uname}/{dest}, exception: {err}"
                 )
-        if frame.dest == io_device.home.uid and frame.msg_type == Deregister.__tag__:
+        if (
+            frame.dest == io_device.home.uid
+            and frame.msg_type == types.Deregister.__tag__
+        ):
             loc = json.loads(frame.data_as_string())
             reader.disjoin(loc["uid"])
         reader.next()

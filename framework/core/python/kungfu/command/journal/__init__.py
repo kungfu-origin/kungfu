@@ -1,9 +1,12 @@
 import click
+import kungfu
 import shutil
+
 import kungfu.yijinjing.journal as kfj
-from pykungfu import yijinjing as yjj
 from kungfu.command import kfc, pass_ctx_from_parent as pass_ctx_from_root
 from kungfu.yijinjing.log import create_logger
+
+yjj = kungfu.__bindings__.yijinjing
 
 
 @kfc.group(help_priority=5)

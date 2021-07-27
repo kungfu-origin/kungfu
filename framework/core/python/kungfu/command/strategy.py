@@ -1,15 +1,16 @@
 import os
 import click
-from importlib import util
+import kungfu
+import importlib
 
 from kungfu.command import kfc, pass_ctx_from_parent
 from kungfu.wingchun.replay import setup
 from kungfu.wingchun.strategy import Runner, Strategy
 from kungfu.yijinjing.log import create_logger
-from kungfu.practice.coloop import KungfuEventLoop
+from kungfu.yijinjing.practice.coloop import KungfuEventLoop
 
-from pykungfu import longfist as lf
-from pykungfu import yijinjing as yjj
+lf = kungfu.__bindings__.longfist
+yjj = kungfu.__bindings__.yijinjing
 
 
 @kfc.command(help_priority=4)
@@ -45,8 +46,10 @@ def strategy(ctx, group, name, path, low_latency, replay, session_id):
     if path.endswith(".py"):
         ctx.strategy = Strategy(ctx)  # keep strategy alive for pybind11
     else:
-        spec = util.spec_from_file_location(os.path.basename(path).split(".")[0], path)
-        cpp = util.module_from_spec(spec)
+        spec = importlib.util.spec_from_file_location(
+            os.path.basename(path).split(".")[0], path
+        )
+        cpp = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(cpp)
         ctx.strategy = cpp.Strategy(ctx.location)
 

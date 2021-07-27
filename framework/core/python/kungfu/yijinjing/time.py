@@ -1,6 +1,10 @@
-from datetime import datetime, timedelta
+import kungfu
 import re
-from pykungfu import yijinjing as yjj
+
+from datetime import datetime, timedelta
+
+lf = kungfu.__bindings__.longfist
+yjj = kungfu.__bindings__.yijinjing
 
 DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S.%N"
 NANO_PER_SECOND = 1000000000

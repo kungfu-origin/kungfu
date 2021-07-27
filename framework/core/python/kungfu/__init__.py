@@ -16,12 +16,10 @@ limitations under the License.
 
 import os
 import json
-import pykungfu
+import pykungfu as __bindings__
 
 with open(
-    os.path.join(
-        os.path.dirname(os.path.abspath(pykungfu.__file__)), "kungfubuildinfo.json"
-    ),
+    os.path.join(os.path.dirname(__bindings__.__file__), "kungfubuildinfo.json"),
     "r",
 ) as build_info_file:
     __build_info__ = json.load(build_info_file)

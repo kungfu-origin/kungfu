@@ -472,4 +472,4 @@ try:
     )
 except ImportError:
     default_commissions = {}
-    print('failed to load default_commissions')
+    print("failed to load default_commissions")

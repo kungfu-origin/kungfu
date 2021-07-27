@@ -1,16 +1,17 @@
+import importlib
 import json
+import kungfu
 import os
 import sys
-import importlib
 
 from dotted_dict import DottedDict
 from collections import namedtuple
-
 from kungfu.yijinjing.log import create_logger
 from kungfu.yijinjing import time as kft
-from pykungfu import longfist as lf
-from pykungfu import yijinjing as yjj
-from pykungfu import wingchun as wc
+
+lf = kungfu.__bindings__.longfist
+wc = kungfu.__bindings__.wingchun
+yjj = kungfu.__bindings__.yijinjing
 
 
 class MatchMode:
