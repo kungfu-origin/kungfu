@@ -1,7 +1,11 @@
 import os
 import glob
+import nuitka
+import sys
 from PyInstaller.utils.hooks import collect_data_files, collect_submodules
 
+
+sys.path.append(os.path.join(os.path.dirname(nuitka.__file__), 'build', 'inline_copy', 'lib', 'scons-3.1.2'))
 
 sep = os.path.sep
 src_dir = os.path.abspath(os.path.join(os.path.curdir, 'python'))
@@ -49,7 +53,8 @@ hiddenimports = [
     "recordclass",
     "sortedcontainers",
     "dotted_dict",
-    "yaml"
+    "yaml",
+    "SCons"
 ]
 
 def extend_hiddenimports(pkg_name):
@@ -59,6 +64,11 @@ extend_hiddenimports('pkg_resources')
 extend_hiddenimports('numpy')
 extend_hiddenimports('pandas')
 extend_hiddenimports('plotly')
+extend_hiddenimports('nuitka.build')
+extend_hiddenimports('nuitka.plugins.standard')
+extend_hiddenimports('SCons')
+extend_hiddenimports('SCons.Platform')
+extend_hiddenimports('SCons.Tool')
 
 block_cipher = None
 a = Analysis(['kungfu' + os.path.sep + '__main__.py'],
