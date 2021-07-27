@@ -18,13 +18,21 @@
             "dependencies": ["pipenv"],
             "actions": [
                 {
+                    "action_name": "lock",
+                    "inputs": [
+                        "<(module_root_dir)/pyproject.toml"
+                    ],
+                    "outputs": ["<(module_root_dir)/poetry.lock"],
+                    "action": ["python", ".build/yarn-run.py", "poetry", "lock", "-n", "-q", "--no-update"]
+                },
+                {
                     "action_name": "install",
                     "inputs": [
                         "<(module_root_dir)/Pipfile",
                         "<(module_root_dir)/pyproject.toml"
                     ],
-                    "outputs": ["<(module_root_dir)/poetry.lock"],
-                    "action": ["python", ".build/yarn-run.py", "poetry", "install", "-n", "-q"]
+                    "outputs": ["<(module_root_dir)/conanfile.py"],
+                    "action": ["python", ".build/yarn-run.py", "poetry", "install", "-n", "-q", "--no-root"]
                 }
             ]
         },
