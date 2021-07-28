@@ -17,8 +17,8 @@ PROJECT(kungfu)
 
 ############################################################
 
-include(cmake/compiler.cmake)
-include(cmake/clion.cmake)
+include(.cmake/compiler.cmake)
+include(.cmake/clion.cmake)
 include(build/conanbuildinfo.cmake)
 conan_basic_setup(KEEP_RPATHS NO_OUTPUT_DIRS SKIP_STD SKIP_FPIC)
 
@@ -47,15 +47,15 @@ OPTION(NNG_ENABLE_NNGCAT "" OFF)
 
 ############################################################
 
-INCLUDE_DIRECTORIES(deps/hana-1.7.0/include)
-INCLUDE_DIRECTORIES(deps/json-3.9.1/include)
-INCLUDE_DIRECTORIES(deps/sqlite3-3.33.0/include)
-INCLUDE_DIRECTORIES(deps/sqlite_orm-1.6/include)
-INCLUDE_DIRECTORIES(deps/nng-1.5.1/include)
-INCLUDE_DIRECTORIES(deps/tabulate-1.0/include)
+INCLUDE_DIRECTORIES(.deps/hana-1.7.0/include)
+INCLUDE_DIRECTORIES(.deps/json-3.9.1/include)
+INCLUDE_DIRECTORIES(.deps/sqlite3-3.33.0/include)
+INCLUDE_DIRECTORIES(.deps/sqlite_orm-1.6/include)
+INCLUDE_DIRECTORIES(.deps/nng-1.5.1/include)
+INCLUDE_DIRECTORIES(.deps/tabulate-1.0/include)
 INCLUDE_DIRECTORIES(cpp/include)
 
 ############################################################
 
-ADD_SUBDIRECTORY(deps)
+ADD_SUBDIRECTORY(.deps)
 ADD_SUBDIRECTORY(cpp)

@@ -9,10 +9,10 @@ from kungfu.command import __all__ as commands
 import kungfu.command as kfc
 
 
-def main():
+def run():
     id(commands)
     kfc.execute()
 
 
 if __name__ == "__main__":
-    main()
+    run()

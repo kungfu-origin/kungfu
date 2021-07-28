@@ -8,7 +8,7 @@
                     "action_name": "install",
                     "inputs": ["<(module_root_dir)/Pipfile"],
                     "outputs": ["<(module_root_dir)/Pipfile.lock"],
-                    "action": ["python", ".build/yarn-run.py", "pipenv", "--bare", "install"]
+                    "action": ["python", ".gyp/gyp_action_pipenv.py"]
                 }
             ]
         },
@@ -18,21 +18,13 @@
             "dependencies": ["pipenv"],
             "actions": [
                 {
-                    "action_name": "lock",
-                    "inputs": [
-                        "<(module_root_dir)/pyproject.toml"
-                    ],
-                    "outputs": ["<(module_root_dir)/poetry.lock"],
-                    "action": ["python", ".build/yarn-run.py", "poetry", "lock", "-n", "-q", "--no-update"]
-                },
-                {
                     "action_name": "install",
                     "inputs": [
                         "<(module_root_dir)/Pipfile",
                         "<(module_root_dir)/pyproject.toml"
                     ],
-                    "outputs": ["<(module_root_dir)/conanfile.py"],
-                    "action": ["python", ".build/yarn-run.py", "poetry", "install", "-n", "-q", "--no-root"]
+                    "outputs": ["<(module_root_dir)/poetry.lock"],
+                    "action": ["python", ".gyp/gyp_action_poetry.py"]
                 }
             ]
         },
@@ -49,7 +41,7 @@
                         "<(module_root_dir)/conanfile.py"
                     ],
                     "outputs": ["<(module_root_dir)/build/conan.lock"],
-                    "action": ["python", ".build/yarn-run.py", "configure"]
+                    "action": ["python", ".gyp/gyp_action_yarn.py", "configure"]
                 }
             ]
         },
@@ -66,7 +58,7 @@
                         "<!@(node -p \"require('glob').sync('**/*.*(h|hpp|c|cc|cpp)', {ignore:'build/**'}).join(' ');\")"
                     ],
                     "outputs": ["<(PRODUCT_DIR)/kungfubuildinfo.json"],
-                    "action": ["python", ".build/yarn-run.py", "compile"]
+                    "action": ["python", ".gyp/gyp_action_yarn.py", "compile"]
                 }
             ]
         },
@@ -86,7 +78,7 @@
                         "<!@(node -p \"require('glob').sync('python/**/*.*(py|spec)').join(' ');\")"
                     ],
                     "outputs": ["<(module_path)/kungfubuildinfo.json"],
-                    "action": ["python", ".build/yarn-run.py", "bundle"]
+                    "action": ["python", ".gyp/gyp_action_yarn.py", "freeze"]
                 }
             ]
         }

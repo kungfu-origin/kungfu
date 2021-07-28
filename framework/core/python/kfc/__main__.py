@@ -37,6 +37,4 @@
 
 from kungfu import __main__ as origin
 
-
-if __name__ == "__main__":
-    origin.main()
+origin.run()
