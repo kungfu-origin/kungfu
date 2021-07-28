@@ -4,10 +4,10 @@ const glob = require('glob');
 const path = require('path');
 
 function node_pre_gyp(cmd, check = true) {
-  const build_type = process.env.npm_package_config_build_type;
-  const build_type_arg = build_type === 'Debug' ? ['--debug'] : [];
-  const yarn_cmd_arg = ['node-pre-gyp', ...build_type_arg, ...cmd];
-  run('yarn', yarn_cmd_arg, check);
+  const buildType = process.env.npm_package_config_build_type;
+  const buildTypeOpt = buildType === 'Debug' ? ['--debug'] : [];
+  const yarnArgs = ['node-pre-gyp', ...buildTypeOpt, ...cmd];
+  run('yarn', yarnArgs, check);
 }
 
 exports.argv = require('yargs/yargs')(process.argv.slice(2))
@@ -43,7 +43,7 @@ exports.argv = require('yargs/yargs')(process.argv.slice(2))
     (handler = () => {
       node_pre_gyp(['package']);
       const prebuilt = glob.sync(path.join('build', 'stage', '**', '*.tar.gz'))[0];
-      const wheel = glob.sync(path.join('dist', '*.whl'))[0];
+      const wheel = glob.sync(path.join('build', 'python', 'dist', '*.whl'))[0];
       if (prebuilt && wheel) {
         console.log(`$ cp ${wheel} ${path.dirname(prebuilt)}`);
         fs.copyFileSync(wheel, path.join(path.dirname(prebuilt), path.basename(wheel)));

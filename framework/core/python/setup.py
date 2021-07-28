@@ -8,7 +8,7 @@ with open("kungfubuildinfo.json", "r") as build_info_file:
 setup(
     name="kungfu",
     version=build_info["version"],
-    author="Kungfu Origin",
+    author="kungfu-trader",
     license="Apache-2.0",
     packages=[""] + find_packages(exclude=["test"]),
     package_data={"": ["*.so", "*.dylib", "*.dll", "*.pyd", "*.json"]},

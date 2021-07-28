@@ -1,4 +1,30 @@
 {
+    "variables": {
+        "pipenv_inputs": [
+            "<(module_root_dir)/Pipfile"
+        ],
+        "poetry_inputs": [
+            "<@(pipenv_inputs)",
+            "<(module_root_dir)/pyproject.toml"
+        ],
+        "conan_inputs": [
+            "<@(poetry_inputs)",
+            "<(module_root_dir)/conanfile.py"
+        ],
+        "module_inputs": [
+            "<(module_root_dir)/conanfile.py",
+            "<!@(node -p \"require('glob').sync('**/CMakeLists.txt', {ignore:'build/**'}).join(' ');\")",
+            "<!@(node -p \"require('glob').sync('**/*.*(h|hpp|c|cc|cpp)', {ignore:'build/**'}).join(' ');\")"
+        ],
+        "kfc_inputs": [
+            "<@(poetry_inputs)",
+            "<@(module_inputs)",
+            "<!@(node -p \"require('glob').sync('python/**/*.*(py|spec)').join(' ');\")"
+        ],
+        "wheel_inputs": [
+            "<@(kfc_inputs)"
+        ]
+    },
     "targets": [
         {
             "target_name": "pipenv",
@@ -6,7 +32,7 @@
             "actions": [
                 {
                     "action_name": "install",
-                    "inputs": ["<(module_root_dir)/Pipfile"],
+                    "inputs": ["<@(pipenv_inputs)"],
                     "outputs": ["<(module_root_dir)/Pipfile.lock"],
                     "action": ["python", ".gyp/gyp_action_pipenv.py"]
                 }
@@ -19,10 +45,7 @@
             "actions": [
                 {
                     "action_name": "install",
-                    "inputs": [
-                        "<(module_root_dir)/Pipfile",
-                        "<(module_root_dir)/pyproject.toml"
-                    ],
+                    "inputs": ["<@(poetry_inputs)"],
                     "outputs": ["<(module_root_dir)/poetry.lock"],
                     "action": ["python", ".gyp/gyp_action_poetry.py"]
                 }
@@ -35,11 +58,7 @@
             "actions": [
                 {
                     "action_name": "configure",
-                    "inputs": [
-                        "<(module_root_dir)/Pipfile",
-                        "<(module_root_dir)/pyproject.toml",
-                        "<(module_root_dir)/conanfile.py"
-                    ],
+                    "inputs": ["<@(conan_inputs)"],
                     "outputs": ["<(module_root_dir)/build/conan.lock"],
                     "action": ["python", ".gyp/gyp_action_yarn.py", "configure"]
                 }
@@ -52,31 +71,33 @@
             "actions": [
                 {
                     "action_name": "compile",
-                    "inputs": [
-                        "<(module_root_dir)/conanfile.py",
-                        "<!@(node -p \"require('glob').sync('**/CMakeLists.txt', {ignore:'build/**'}).join(' ');\")",
-                        "<!@(node -p \"require('glob').sync('**/*.*(h|hpp|c|cc|cpp)', {ignore:'build/**'}).join(' ');\")"
-                    ],
+                    "inputs": ["<@(module_inputs)"],
                     "outputs": ["<(PRODUCT_DIR)/kungfubuildinfo.json"],
                     "action": ["python", ".gyp/gyp_action_yarn.py", "compile"]
                 }
             ]
         },
         {
-            "target_name": "kfc",
+            "target_name": "wheel",
             "type": "none",
             "dependencies": ["poetry", "<(module_name)"],
             "actions": [
                 {
+                    "action_name": "wheel",
+                    "inputs": ["<@(wheel_inputs)"],
+                    "outputs": ["<(module_root_dir)/build/python/kungfubuildinfo.json"],
+                    "action": ["python", ".gyp/gyp_action_yarn.py", "wheel"]
+                }
+            ]
+        },
+        {
+            "target_name": "kfc",
+            "type": "none",
+            "dependencies": ["poetry", "<(module_name)", "wheel"],
+            "actions": [
+                {
                     "action_name": "bundle",
-                    "inputs": [
-                        "<(module_root_dir)/Pipfile",
-                        "<(module_root_dir)/pyproject.toml",
-                        "<(module_root_dir)/conanfile.py",
-                        "<!@(node -p \"require('glob').sync('**/CMakeLists.txt', {ignore:'build/**'}).join(' ');\")",
-                        "<!@(node -p \"require('glob').sync('**/*.*(h|hpp|c|cc|cpp)', {ignore:'build/**'}).join(' ');\")",
-                        "<!@(node -p \"require('glob').sync('python/**/*.*(py|spec)').join(' ');\")"
-                    ],
+                    "inputs": ["<@(kfc_inputs)"],
                     "outputs": ["<(module_path)/kungfubuildinfo.json"],
                     "action": ["python", ".gyp/gyp_action_yarn.py", "freeze"]
                 }

@@ -84,8 +84,7 @@ class KungfuCoreConan(ConanFile):
     def package(self):
         build_type = self.__get_build_type()
         self.__clean_kfc_dir()
-        freeze = {"pyinstaller": self.__run_pyinstaller, "nuitka": self.__run_nuitka}
-        freeze[str(self.options.freezer)](build_type)
+        self.__run_freeze(build_type)
         self.__show_build_info(build_type)
 
     def __get_build_type(self):
@@ -275,26 +274,6 @@ class KungfuCoreConan(ConanFile):
         shutil.move(kfc_dist_dir, self.kfc_dir)
         self.output.success("Nuitka done")
 
-    def __run_setuptools(self, build_type):
-        tools.rmdir(self.build_python_dir)
-        shutil.copytree(
-            build_type, self.build_python_dir, ignore=shutil.ignore_patterns("node*")
-        )
-        shutil.copytree(
-            path.join(os.pardir, "python", "kungfu"),
-            path.join(self.build_python_dir, "kungfu"),
-        )
-        shutil.copytree(
-            path.join(os.pardir, "python", "kungfu_extensions"),
-            path.join(self.build_python_dir, "kungfu_extensions"),
-        )
-        shutil.copy2(path.join(os.pardir, "python", "setup.py"), self.build_python_dir)
-
-        with tools.chdir("python"):
-            rc = psutil.Popen(
-                ["pipenv", "run", "python", "setup.py", "bdist_wheel"]
-            ).wait()
-            if rc != 0:
-                self.output.error("setuptools failed")
-                sys.exit(rc)
-        self.output.success("setuptools done")
+    def __run_freeze(self, build_type):
+        freeze = {"pyinstaller": self.__run_pyinstaller, "nuitka": self.__run_nuitka}
+        freeze[str(self.options.freezer)](build_type)
