@@ -53,42 +53,42 @@ function npmCall(npmArgs) {
 
 exports.argv = require('yargs/yargs')(process.argv.slice(2))
   .command(
-    'auto',
-    'Set npm configs automatically',
-    () => {},
-    () => {
+    (command = 'auto'),
+    (description = 'Set npm configs automatically'),
+    (builder = () => {}),
+    (handler = () => {
       const githubActions = 'GITHUB_ACTIONS' in process.env;
       const pypi = githubActions ? PyPI_US : PyPI_CN;
       const prebuiltHost = githubActions ? PrebuiltHost_US : PrebuiltHost_CN;
 
       const setConfig = (key, value) => githubActions && npmCall(['config', 'set', key, value]);
-      setConfig(`${projectName}:pypi`, pypi);
+      setConfig(`${projectName}:pypi_mirror`, pypi);
       setConfig(PrebuiltHostConfigKey, prebuiltHost);
 
       showAllConfig();
-    },
+    }),
   )
   .command(
-    'show',
-    'Show npm configs',
-    () => {},
-    () => {
+    (command = 'show'),
+    (description = 'Show npm configs'),
+    (builder = () => {}),
+    (handler = () => {
       showAllConfig();
-    },
+    }),
   )
   .command(
-    'dir',
-    'Show kungfu core base directory',
-    () => {},
-    () => {
+    (command = 'dir'),
+    (description = 'Show kungfu core base directory'),
+    (builder = () => {}),
+    (handler = () => {
       console.log(fs.realpathSync(path.dirname(__dirname)));
-    },
+    }),
   )
   .command(
-    'info',
-    'Show kungfu core build info',
-    () => {},
-    () => {
+    (command = 'info'),
+    (description = 'Show kungfu core build info'),
+    (builder = () => {}),
+    (handler = () => {
       const buildinfoPath = path.join(path.dirname(__dirname), 'build', 'kfc', 'kungfubuildinfo.json');
       if (fs.existsSync(buildinfoPath)) {
         const buildinfo = require(buildinfoPath);
@@ -96,7 +96,7 @@ exports.argv = require('yargs/yargs')(process.argv.slice(2))
       } else {
         console.warn(`Info file missing, ${buildinfoPath} not exists`);
       }
-    },
+    }),
   )
   .demandCommand()
   .help().argv;

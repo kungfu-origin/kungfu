@@ -86,8 +86,7 @@ class KungfuCoreConan(ConanFile):
         self.__clean_kfc_dir()
         freeze = {"pyinstaller": self.__run_pyinstaller, "nuitka": self.__run_nuitka}
         freeze[str(self.options.freezer)](build_type)
-        # self.__run_setuptools(build_type)
-        # self.__show_build_info(build_type)
+        self.__show_build_info(build_type)
 
     def __get_build_type(self):
         build_type = str(self.settings.build_type)

@@ -1,8 +1,12 @@
 [tool.poetry]
 name = "kungfu"
-version = "2.4.0"
-description = "Kungfu Trader"
+version = "2.4.0-alpha.4"
+description = "Kungfu Core Library"
+license = "Apache-2.0"
 authors = ["Kungfu Trader <info@kungfu.link>"]
+packages = [
+    { include = "kungfu", from = "python" },
+]
 
 [tool.poetry.dependencies]
 python = ">=3.7.1, <4.0"
