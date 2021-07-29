@@ -156,20 +156,10 @@ class KungfuCoreConan(ConanFile):
             self.output.info("Deleted kfc directory")
 
     def __gen_build_info(self, build_type):
-        now = datetime.datetime.now()
-        build_date = now.strftime("%Y%m%d%H%M%S")
-
         git = tools.Git()
-        git_revision = git.get_revision()[:8]
-
-        build_version = (
-            f"{self.version}.{build_date}.{git_revision}"
-            if tools.Version(self.version).prerelease
-            else self.version
-        )
-
+        now = datetime.datetime.now()
         build_info = {
-            "version": build_version,
+            "version": self.version,
             "pythonVersion": platform.python_version(),
             "git": {
                 "tag": git.get_tag(),

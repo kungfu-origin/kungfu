@@ -1,35 +1,43 @@
 [tool.poetry]
 name = "kungfu"
-version = "2.4.0"
+version = "0.0.0"
 description = "Kungfu Core Library"
 license = "Apache-2.0"
 authors = ["Kungfu Trader <info@kungfu.link>"]
+homepage = "https://www.kungfu-trader.com"
+repository = "https://github.com/kungfu-trader/kungfu.git"
 packages = [
     { include = "kungfu", from = "python" },
 ]
 
 [tool.poetry.dependencies]
 python = ">=3.7.1, <4.0"
-# Compiler
+
+#### Compiler #############################################
 black = "^21.7b0"
 Nuitka = "^0.6.16"
 pdm = "^1.7.0"
+poetry-core = "^1.0.0"
 scons = "^3.1.2"
-# Control
+
+#### Control ##############################################
 click = "^8.0.1"
 psutil = "^5.8.0"
 wcwidth = "^0.2.5"
 tabulate = "^0.8.9"
-# Data Structures
+
+#### Data Structures ######################################
 sortedcontainers = "^2.4.0"
 recordclass = "^0.14.3"
 dotted-dict = "^1.1.3"
-# Numeric
+
+#### Numeric ##############################################
 numpy = "^1.21.1"
 pandas = "^1.2.0"
 statsmodels = "^0.12.2"
 plotly = "^5.1.0"
-# Legacy
+
+#### Legacy ###############################################
 chinesecalendar = "^1.5.1"
 
 [tool.poetry.dev-dependencies]

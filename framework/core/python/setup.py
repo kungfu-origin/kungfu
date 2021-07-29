@@ -1,34 +1,28 @@
+import json
+
+from pathlib import Path
+from poetry.core.factory import Factory
+from poetry.core.masonry.builders.sdist import SdistBuilder
 from setuptools import find_packages
 from setuptools import setup
-import json
+
+package = Factory().create_poetry(Path(".").resolve()).package
+dependencies, extras = SdistBuilder.convert_dependencies(package, package.requires)
 
 with open("kungfubuildinfo.json", "r") as build_info_file:
     build_info = json.load(build_info_file)
 
 setup(
-    name="kungfu",
+    name=package.name,
     version=build_info["version"],
-    author="kungfu-trader",
-    license="Apache-2.0",
+    license=package.license.id,
+    author=package.authors,
+    url=package.homepage,
+    project_urls={"repository": package.repository_url},
     packages=[""] + find_packages(exclude=["test"]),
     package_data={"": ["*.so", "*.dylib", "*.dll", "*.pyd", "*.json"]},
     include_package_data=True,
-    install_requires=[
-        "black~=21.7b0",
-        "Nuitka~=0.6.16",
-        "click~=8.0.1",
-        "psutil~=5.8.0",
-        "wcwidth~=0.2.5",
-        "tabulate~=0.8.9",
-        "sortedcontainers~=2.4.0",
-        "recordclass~=0.14.3",
-        "dotted_dict~=1.1.3",
-        "numpy~=1.21.0",
-        "pandas~=1.2.0",
-        "statsmodels~=0.12.2",
-        "plotly~=5.1.0",
-        "chinesecalendar~=1.5.1",
-    ],
+    install_requires=dependencies,
     entry_points={"console_scripts": ["kfc = kungfu.__main__:main"]},
     has_ext_modules=lambda: True,
 )
