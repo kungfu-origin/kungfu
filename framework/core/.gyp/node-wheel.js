@@ -3,14 +3,13 @@ const path = require('path');
 const { spawnSync } = require('child_process');
 
 const buildType = process.env.npm_package_config_build_type;
-
 const srcDir = path.join('python');
 const buildDir = path.join('build', buildType);
 const wheelDir = path.join('build', 'python');
 
 fse.removeSync(wheelDir);
-fse.copySync(buildDir, wheelDir, { filter: p => !p.endsWith('.node') });
-fse.copySync(srcDir, wheelDir);
+fse.copySync(srcDir, wheelDir, { filter: (p) => !path.basename(p).startsWith('kfc.') });
+fse.copySync(buildDir, wheelDir, { filter: (p) => !path.basename(p).endsWith('.node') });
 
 const pipenv_args = ['run', 'python', 'setup.py', 'bdist_wheel'];
 

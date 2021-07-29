@@ -1,3 +1,5 @@
+# PyInstaller Settings
+###########################################################
 import glob
 import os
 

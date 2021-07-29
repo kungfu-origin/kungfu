@@ -257,7 +257,7 @@ class KungfuCoreConan(ConanFile):
 
     def __run_nuitka(self, build_type):
         with tools.chdir(path.pardir):
-            self.__run_yarn("nuitka", "--output-dir=build", path.join("python", "kfc"))
+            self.__run_yarn("nuitka", "--output-dir=build", path.join("python", "kfc.py"))
         kfc_dist_dir = path.join(self.build_dir, "kfc.dist")
         shutil.copytree(build_type, kfc_dist_dir)
         tools.rmdir(self.kfc_dir)
