@@ -24,8 +24,8 @@ STRING(REPLACE "\n" "" NODE_ADDON_API_DIR ${NODE_ADDON_API_DIR})
 STRING(REPLACE "\"" "" NODE_ADDON_API_DIR ${NODE_ADDON_API_DIR})
 INCLUDE_DIRECTORIES(${NODE_ADDON_API_DIR})
 
-MESSAGE("-- Include node-js headers from ${CMAKE_JS_INC}")
-MESSAGE("-- Include node-addon-api headers from ${NODE_ADDON_API_DIR}")
+MESSAGE(STATUS "Include node-js headers from [${CMAKE_JS_INC}]")
+MESSAGE(STATUS "Include node-addon-api headers from [${NODE_ADDON_API_DIR}]")
 
 ############################################################
 

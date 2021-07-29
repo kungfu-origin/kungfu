@@ -18,7 +18,7 @@ PROJECT(kungfu)
 ############################################################
 
 include(.cmake/compiler.cmake)
-include(.cmake/clion.cmake)
+include(.cmake/editor.cmake)
 include(build/conanbuildinfo.cmake)
 conan_basic_setup(KEEP_RPATHS NO_OUTPUT_DIRS SKIP_STD SKIP_FPIC)
 
