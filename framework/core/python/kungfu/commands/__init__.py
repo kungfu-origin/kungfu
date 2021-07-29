@@ -11,18 +11,18 @@ yjj = kungfu.__bindings__.yijinjing
 DEFAULT_CMD_PRIORITY = 100
 
 
-class SpecialHelpOrder(click.Group):
+class PrioritizedCommandGroup(click.Group):
     def __init__(self, *args, **kwargs):
         self.help_priorities = {}
         self.list_commands = self.list_commands_for_help
-        super(SpecialHelpOrder, self).__init__(*args, **kwargs)
+        super(PrioritizedCommandGroup, self).__init__(*args, **kwargs)
 
     def get_help(self, ctx):
-        return super(SpecialHelpOrder, self).get_help(ctx)
+        return super(PrioritizedCommandGroup, self).get_help(ctx)
 
     def list_commands_for_help(self, ctx):
         """reorder the list of commands when listing the help"""
-        commands = super(SpecialHelpOrder, self).list_commands(ctx)
+        commands = super(PrioritizedCommandGroup, self).list_commands(ctx)
         commands = filter(lambda command: self.help_priorities[command] > 0, commands)
         return (
             c[1]
@@ -40,7 +40,7 @@ class SpecialHelpOrder(click.Group):
         help_priorities = self.help_priorities
 
         def decorator(f):
-            group = super(SpecialHelpOrder, self).group(*args, **kwargs)(f)
+            group = super(PrioritizedCommandGroup, self).group(*args, **kwargs)(f)
             help_priorities[group.name] = help_priority
             return group
 
@@ -54,14 +54,14 @@ class SpecialHelpOrder(click.Group):
         help_priorities = self.help_priorities
 
         def decorator(f):
-            cmd = super(SpecialHelpOrder, self).command(*args, **kwargs)(f)
+            cmd = super(PrioritizedCommandGroup, self).command(*args, **kwargs)(f)
             help_priorities[cmd.name] = help_priority
             return cmd
 
         return decorator
 
 
-@click.group(invoke_without_command=True, cls=SpecialHelpOrder)
+@click.group(invoke_without_command=True, cls=PrioritizedCommandGroup)
 @click.option(
     "-H",
     "--home",
@@ -162,5 +162,5 @@ def pass_ctx_from_parent(ctx):
     ctx.name = ctx.parent.name
 
 
-def execute():
+def __run__():
     kfc(auto_envvar_prefix="KF")

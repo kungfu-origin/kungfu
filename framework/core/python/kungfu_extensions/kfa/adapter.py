@@ -1,6 +1,6 @@
 import kungfu
 
-from kungfu.data.adapter import Adapter
+from kungfu.yijinjing.data import Adapter
 from kungfu.yijinjing.sinks.csv import open_csv_sink
 
 lf = kungfu.__bindings__.longfist

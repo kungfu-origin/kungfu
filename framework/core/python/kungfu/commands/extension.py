@@ -1,15 +1,37 @@
-import re
+import click
+import kungfu_extensions
 import os
+import re
 import shutil
 import tarfile
-import kungfu_extensions
-import click
-from kungfu.command.ext import ext as kfext, pass_ctx_from_parent
-from runpy import run_path
+
 from kungfu import __version__ as kf_version
+from runpy import run_path
+
+from kungfu.commands import kfc, pass_ctx_from_parent as pass_ctx_from_root
+from kungfu.commands import PrioritizedCommandGroup
+from kungfu.yijinjing.log import create_logger
 
 
-@kfext.command(help="install extension")
+@kfc.group(cls=PrioritizedCommandGroup)
+@click.help_option("-h", "--help")
+@click.pass_context
+def extension(ctx):
+    pass_ctx_from_root(ctx)
+    ctx.logger = create_logger("ext", ctx.log_level, ctx.console_location)
+    if not os.getenv("KF_NO_EXT"):
+        pass
+    else:
+        print("Extension disabled by KF_NO_EXT")
+        ctx.logger.warning("Trying to manage extension while disallowed by KF_NO_EXT")
+
+
+def pass_ctx_from_parent(ctx):
+    pass_ctx_from_root(ctx)
+    ctx.logger = ctx.parent.logger
+
+
+@extension.command(help="install extension")
 @click.option("-f", "--file", required=True, help="KungFu extension file (tgz)")
 @click.pass_context
 def install(ctx, file):
@@ -50,3 +72,31 @@ def install(ctx, file):
     else:
         print("Bad extension filename", filename)
         ctx.logger.error("Invalid extension filename %s", file)
+
+
+@extension.command(help="uninstall extension")
+@click.option("-n", "--name", required=True, help="KungFu extension name")
+@click.pass_context
+def uninstall(ctx, name):
+    pass_ctx_from_parent(ctx)
+    install_path = os.path.join(kungfu_extensions.extension_path, name)
+    if os.path.exists(install_path):
+        shutil.rmtree(install_path)
+        ctx.parent.logger.info("Uninstalled extension %s", name)
+        click.echo("Uninstalled extension " + name)
+    else:
+        click.echo("Extension " + name + "not found")
+
+
+@extension.command(help="list extensions")
+@click.pass_context
+def list(ctx):
+    pass_ctx_from_parent(ctx)
+    click.echo("Installed extensions:")
+    for ext_name in kungfu_extensions.EXTENSIONS.keys():
+        ext_funcs = []
+        if kungfu_extensions.EXTENSION_REGISTRY_MD.has_extension(ext_name):
+            ext_funcs.append("md")
+        if kungfu_extensions.EXTENSION_REGISTRY_TD.has_extension(ext_name):
+            ext_funcs.append("td")
+        click.echo("%s %s" % (ext_name, ext_funcs))

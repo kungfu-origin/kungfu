@@ -14,9 +14,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-import os
 import json
+import os
 import pykungfu
+import sys
 
 with open(
     os.path.join(os.path.dirname(pykungfu.__file__), "kungfubuildinfo.json"),
@@ -26,3 +27,12 @@ with open(
 
 __version__ = __build_info__["version"]
 __bindings__ = pykungfu
+
+
+def export(fn):
+    mod = sys.modules[fn.__module__]
+    if hasattr(mod, "__all__"):
+        mod.__all__.append(fn.__name__)
+    else:
+        mod.__all__ = [fn.__name__]
+    return fn

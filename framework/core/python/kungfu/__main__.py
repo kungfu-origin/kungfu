@@ -5,14 +5,10 @@
 # KF_NO_EXT - disable extensions if set
 ###########################################################
 
-from kungfu.command import __all__ as commands
-import kungfu.command as kfc
-
-
-def run():
-    id(commands)
-    kfc.execute()
+from kungfu.commands import __list__ as commands
+from kungfu.commands import __run__ as run
 
 
 if __name__ == "__main__":
+    id(commands)
     run()

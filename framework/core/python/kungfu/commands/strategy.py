@@ -3,7 +3,8 @@ import click
 import kungfu
 import importlib
 
-from kungfu.command import kfc, pass_ctx_from_parent
+from kungfu.commands import kfc, pass_ctx_from_parent
+from kungfu.commands import PrioritizedCommandGroup
 from kungfu.wingchun.replay import setup
 from kungfu.wingchun.strategy import Runner, Strategy
 from kungfu.yijinjing.log import create_logger
@@ -13,7 +14,7 @@ lf = kungfu.__bindings__.longfist
 yjj = kungfu.__bindings__.yijinjing
 
 
-@kfc.command(help_priority=4)
+@kfc.command(cls=PrioritizedCommandGroup)
 @click.option("-g", "--group", type=str, default="default", help="group")
 @click.option("-n", "--name", type=str, required=True, help="name")
 @click.option("-p", "--path", type=str, required=True, help="path of strategy py file")

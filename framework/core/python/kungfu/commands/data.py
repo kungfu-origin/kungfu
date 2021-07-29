@@ -1,13 +1,15 @@
 import click
 import kungfu
 
-from kungfu.command import kfc, pass_ctx_from_parent as pass_ctx_from_root
+from kungfu.commands import kfc, pass_ctx_from_parent as pass_ctx_from_root
+from kungfu.commands import PrioritizedCommandGroup
 from kungfu.yijinjing.log import create_logger
+from kungfu_extensions import EXTENSION_REGISTRY_DATA
 
 yjj = kungfu.__bindings__.yijinjing
 
 
-@kfc.group(help_priority=5)
+@kfc.group(cls=PrioritizedCommandGroup)
 @click.help_option("-h", "--help")
 @click.pass_context
 def data(ctx):
@@ -29,3 +31,22 @@ def pass_ctx_from_parent(ctx):
     ctx.config_location = ctx.parent.config_location
     ctx.console_location = ctx.parent.console_location
     ctx.index_location = ctx.parent.index_location
+
+
+@data.command()
+@click.option(
+    "-s",
+    "--source",
+    required=True,
+    type=click.Choice(EXTENSION_REGISTRY_DATA.names()),
+    help="data source",
+)
+@click.option("-n", "--name", required=True, type=str, help="dataset name")
+@click.pass_context
+def get(ctx, source, name):
+    pass_ctx_from_parent(ctx)
+    # location = yjj.location(lf.enums.mode.DATA, lf.enums.category.MD, source, source, ctx.runtime_locator)
+    # ctx.config = yjj.profile(ctx.runtime_locator).get(location.to(lf.types.Config()))
+    ctx.dataset_name = name
+    ext = EXTENSION_REGISTRY_DATA.get_extension(source)(ctx)
+    ext.run()

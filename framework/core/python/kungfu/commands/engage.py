@@ -1,10 +1,27 @@
 import click
+import kungfu
 import os
 import sys
 import subprocess
 
 from os.path import abspath, basename, dirname
-from kungfu.command.engage import engage, pass_ctx_from_parent
+
+from kungfu.commands import kfc, pass_ctx_from_parent as pass_ctx_from_root
+from kungfu.commands import PrioritizedCommandGroup
+from kungfu.yijinjing.log import create_logger
+
+
+@kfc.group(cls=PrioritizedCommandGroup)
+@click.help_option("-h", "--help")
+@click.pass_context
+def engage(ctx):
+    pass_ctx_from_root(ctx)
+    ctx.logger = create_logger("engage", ctx.log_level, ctx.console_location)
+
+
+def pass_ctx_from_parent(ctx):
+    pass_ctx_from_root(ctx)
+    ctx.logger = ctx.parent.logger
 
 
 @engage.command(
@@ -19,7 +36,6 @@ def nuitka(ctx):
     pass_ctx_from_parent(ctx)
 
     os.environ["PYTHONPATH"] = os.pathsep.join(sys.path)
-
     sys.argv = [sys.argv[0], *ctx.args]
 
     def runDataComposer(source_dir):
@@ -31,11 +47,9 @@ def nuitka(ctx):
             "PATH": os.environ["PATH"],
             "PYTHONPATH": os.pathsep.join(sys.path),
         }
-
         from nuitka.build import DataComposerInterface
 
         blob_filename = DataComposerInterface.getConstantBlobFilename(source_dir)
-
         with DataComposerInterface.withEnvironmentVarsOverriden(mapping):
             subprocess.check_call(
                 [
@@ -48,12 +62,9 @@ def nuitka(ctx):
                 ],
                 shell=False,
             )
-
         return blob_filename
 
     def getSconsBinaryCall():
-        import kungfu
-
         os.environ["PYTHONPATH"] = (
             dirname(dirname(kungfu.__file__))
             + os.pathsep
@@ -181,9 +192,9 @@ def data_composer(ctx):
 
     PythonVersions.isStaticallyLinkedPython = lambda: False
 
-    from nuitka.tools.data_composer.DataComposer import main
+    from nuitka.tools.data_composer import DataComposer
 
-    main()
+    DataComposer.main()
 
 
 @engage.command(
@@ -198,18 +209,6 @@ def scons(ctx):
 
     sys.argv = [sys.argv[0], *ctx.args]
 
-    from nuitka import Options
-
-    sys.path.append(
-        os.path.join(
-            os.path.dirname(Options.__file__),
-            "build",
-            "inline_copy",
-            "lib",
-            "scons-3.1.2",
-        )
-    )
-
     from nuitka import PythonVersions
 
     PythonVersions.isStaticallyLinkedPython = lambda: False
@@ -219,14 +218,12 @@ def scons(ctx):
     originCreateEnvironment = SconsUtils.createEnvironment
 
     def createEnvironment(**kwargs):
-        import kungfu
-
         env = originCreateEnvironment(**kwargs)
         env.Append(LIBPATH=dirname(kungfu.__bindings__.__file__))
         return env
 
     SconsUtils.createEnvironment = createEnvironment
 
-    from SCons.Script import main
+    from SCons import Script
 
-    main()
+    Script.main()
