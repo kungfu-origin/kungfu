@@ -189,13 +189,15 @@ def trace(ctx, session_id, io_type):
 
 @journal.command()
 @click.option("-A", "--archive", is_flag=True, help="archive")
-@click.option("-D", "--dry_run", is_flag=True, help="dry run")
+@click.option("-D", "--dry", is_flag=True, help="dry run")
 @click.pass_context
-def clean(ctx, archive, dry_run):
+def clean(ctx, archive, dry):
     pass_ctx_from_parent(ctx)
-    search_path = os.path.join(ctx.home, "*", "*", "*", "journal", "*", "*.journal")
+    search_path = os.path.join(
+        ctx.runtime_dir, "*", "*", "*", "journal", "*", "*.journal"
+    )
     journal_files = glob.glob(search_path)
-    if dry_run:
+    if dry:
         for journal_file in journal_files:
             click.echo(f"rm {journal_file}")
         return

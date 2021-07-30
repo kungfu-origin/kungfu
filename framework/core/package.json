@@ -2,7 +2,7 @@
   "name": "@kungfu-trader/kungfu-core",
   "author": "kungfu-trader",
   "version": "2.4.0-alpha.4",
-  "description": "Kungfu Core",
+  "description": "Kungfu Core Library",
   "license": "Apache-2.0",
   "main": "node/index.js",
   "repository": {
@@ -52,7 +52,7 @@
     "format:cpp": "pipenv run conan source .",
     "format:python": "pipenv run python -m black python *.py",
     "format:js": "prettier --write --parser typescript \"(.gyp|node)/**.js\"",
-    "dev": "pipenv run python .dev-tools/kfc.py",
+    "dev": "pipenv run python .devtools/kfc.py",
     "kfc": "node node/kfc.js"
   },
   "dependencies": {

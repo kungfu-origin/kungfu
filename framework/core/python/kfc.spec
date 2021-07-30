@@ -1,34 +1,47 @@
 # PyInstaller Settings
 ###########################################################
+import blib2to3
 import glob
+import nuitka
 import os
+
+from os import path
+from os.path import abspath
+from os.path import dirname
+from os.path import curdir as cwd
 
 from PyInstaller.utils.hooks import collect_data_files
 from PyInstaller.utils.hooks import collect_submodules
 
-src_dir = os.path.abspath(os.path.join(os.path.curdir, "python"))
-cmake_dir = os.path.abspath(os.path.join(os.path.curdir, ".cmake"))
-deps_dir = os.path.abspath(os.path.join(os.path.curdir, ".deps"))
-cpp_dir = os.path.abspath(os.path.join(os.path.curdir, "cpp"))
-pybind_dir = os.path.abspath(os.path.join(deps_dir, "pybind11*"))
-build_dir = os.path.abspath(os.path.join(os.path.curdir, "build"))
-build_cpp_dir = os.path.abspath(os.path.join(build_dir, "cpp"))
-build_deps_dir = os.path.abspath(os.path.join(build_dir, "deps"))
-build_output_dir = os.path.join(build_dir, os.environ["CMAKE_BUILD_TYPE"])
-ext_dir = os.path.join(src_dir, "kungfu_extensions")
+cmake_dir = abspath(path.join(cwd, ".cmake"))
+
+deps_dir = abspath(path.join(cwd, ".deps"))
+dep_pybind11_dir = abspath(path.join(deps_dir, "pybind11*"))
+
+src_cpp_dir = abspath(path.join(cwd, "cpp"))
+src_python_dir = abspath(path.join(cwd, "python"))
+src_ext_dir = path.join(src_python_dir, "kungfu_extensions")
+
+build_dir = abspath(path.join(cwd, "build"))
+build_cpp_dir = abspath(path.join(build_dir, "cpp"))
+build_deps_dir = abspath(path.join(build_dir, "deps"))
+build_output_dir = path.join(build_dir, os.environ["CMAKE_BUILD_TYPE"])
+
+data_blib2to3_dir = path.join(dirname(blib2to3.__file__))
+data_nuitka_build_dir = path.join(dirname(nuitka.__file__), "build")
 
 
 def extend_datas(datas, src_dirs, build_dirs, packages):
     def add_include(datas, path):
         map(
             lambda include: datas.append((include, "include")),
-            glob.glob(os.path.join(path, "**", "include"), recursive=True),
+            glob.glob(path.join(path, "**", "include"), recursive=True),
         )
 
     def add_lib(datas, path):
         map(
             lambda lib: datas.append((lib, ".")),
-            glob.glob(os.path.join(path, "**", "*.lib"), recursive=True),
+            glob.glob(path.join(path, "**", "*.lib"), recursive=True),
         )
 
     map(add_include, src_dirs)
@@ -48,19 +61,29 @@ def extend_hiddenimports(hiddenimports):
 
 block_cipher = None
 a = Analysis(
-    [os.path.join("kungfu", "__main__.py")],
+    [path.join("kungfu", "__main__.py")],
     pathex=["python"],
     binaries=[],
     datas=extend_datas(
         [
             (cmake_dir, "cmake"),
-            (ext_dir, "kungfu_extensions"),
-            (pybind_dir, "pybind11"),
-            (os.path.join(build_output_dir, "*"), "."),
-            (os.path.join(build_dir, "include"), "include"),
+            (src_ext_dir, "kungfu_extensions"),
+            (dep_pybind11_dir, "pybind11"),
+            (path.join(build_output_dir, "*"), "."),
+            (path.join(build_dir, "include"), "include"),
+            (path.join(data_blib2to3_dir, "*.txt"), "blib2to3"),
+            (
+                path.join(data_nuitka_build_dir, "include"),
+                path.join("nuitka", "build", "include"),
+            ),
+            (
+                path.join(data_nuitka_build_dir, "static_src"),
+                path.join("nuitka", "build", "static_src"),
+            ),
+            (path.join(data_nuitka_build_dir, "*.scons"), path.join("nuitka", "build")),
         ],
         src_dirs=[
-            cpp_dir,
+            src_cpp_dir,
             deps_dir,
             build_deps_dir,
         ],
@@ -69,26 +92,21 @@ a = Analysis(
             build_deps_dir,
         ],
         packages=[
-            "nuitka",
             "plotly",
         ],
     ),
     hiddenimports=extend_hiddenimports(
         [
-            "nuitka.build",
-            "nuitka.plugins.standard",
-            "SCons",
-            "SCons.Platform",
-            "SCons.Tool",
             "pkg_resources",
+            "nuitka",
+            "SCons",
             "numpy",
             "pandas",
             "plotly",
-            "wcwidth",
+            "dotted_dict",
             "recordclass",
             "sortedcontainers",
-            "dotted_dict",
-            "yaml",
+            "wcwidth",
         ]
     ),
     excludes=[

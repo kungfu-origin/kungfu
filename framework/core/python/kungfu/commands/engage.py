@@ -11,7 +11,7 @@ from kungfu.commands import PrioritizedCommandGroup
 from kungfu.yijinjing.log import create_logger
 
 
-@kfc.group(cls=PrioritizedCommandGroup)
+@kfc.group(cls=PrioritizedCommandGroup, help_priority=-1)
 @click.help_option("-h", "--help")
 @click.pass_context
 def engage(ctx):
@@ -22,6 +22,23 @@ def engage(ctx):
 def pass_ctx_from_parent(ctx):
     pass_ctx_from_root(ctx)
     ctx.logger = ctx.parent.logger
+
+
+@engage.command(
+    help="Format python files with [Black](https://github.com/psf/black)",
+    context_settings=dict(
+        ignore_unknown_options=True,
+        allow_extra_args=True,
+    ),
+)
+@click.pass_context
+def black(ctx):
+    pass_ctx_from_parent(ctx)
+
+    sys.argv = [sys.argv[0], *ctx.args]
+    from black.__main__ import patched_main as main
+
+    main()
 
 
 @engage.command(
@@ -56,7 +73,7 @@ def nuitka(ctx):
                     sys.executable,
                     *data_composer_opts,
                     "engage",
-                    "data-composer",
+                    "nuitka-data-composer",
                     source_dir,
                     blob_filename,
                 ],
@@ -73,7 +90,7 @@ def nuitka(ctx):
         scons_opts = (
             [] if basename(sys.executable).startswith("kfc") else ["-m", "kungfu"]
         )
-        return [sys.executable, *scons_opts, "engage", "scons"]
+        return [sys.executable, *scons_opts, "engage", "nuitka-scons"]
 
     from nuitka import PythonVersions
 
@@ -171,9 +188,9 @@ def nuitka(ctx):
     Options.parseArgs(will_reexec=False)
     Options.commentArgs()
 
-    from nuitka import MainControl
+    from nuitka.MainControl import main
 
-    MainControl.main()
+    main()
 
 
 @engage.command(
@@ -181,9 +198,10 @@ def nuitka(ctx):
         ignore_unknown_options=True,
         allow_extra_args=True,
     ),
+    help_priority=-1,
 )
 @click.pass_context
-def data_composer(ctx):
+def nuitka_data_composer(ctx):
     pass_ctx_from_parent(ctx)
 
     sys.argv = [sys.argv[0], *ctx.args]
@@ -192,9 +210,9 @@ def data_composer(ctx):
 
     PythonVersions.isStaticallyLinkedPython = lambda: False
 
-    from nuitka.tools.data_composer import DataComposer
+    from nuitka.tools.data_composer.DataComposer import main
 
-    DataComposer.main()
+    main()
 
 
 @engage.command(
@@ -202,9 +220,10 @@ def data_composer(ctx):
         ignore_unknown_options=True,
         allow_extra_args=True,
     ),
+    help_priority=-1,
 )
 @click.pass_context
-def scons(ctx):
+def nuitka_scons(ctx):
     pass_ctx_from_parent(ctx)
 
     sys.argv = [sys.argv[0], *ctx.args]
@@ -224,6 +243,6 @@ def scons(ctx):
 
     SconsUtils.createEnvironment = createEnvironment
 
-    from SCons import Script
+    from SCons.Script import main
 
-    Script.main()
+    main()

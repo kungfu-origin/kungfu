@@ -1,17 +1,12 @@
 import click
 import kungfu
-import platform
 import os
-
-from kungfu.yijinjing.locator import Locator
-
-lf = kungfu.__bindings__.longfist
-yjj = kungfu.__bindings__.yijinjing
-
-DEFAULT_CMD_PRIORITY = 100
+import platform
 
 
 class PrioritizedCommandGroup(click.Group):
+    DEFAULT_PRIORITY = 100
+
     def __init__(self, *args, **kwargs):
         self.help_priorities = {}
         self.list_commands = self.list_commands_for_help
@@ -27,7 +22,7 @@ class PrioritizedCommandGroup(click.Group):
         return (
             c[1]
             for c in sorted(
-                (self.help_priorities.get(command, DEFAULT_CMD_PRIORITY), command)
+                (self.help_priorities.get(command, self.DEFAULT_PRIORITY), command)
                 for command in commands
             )
         )
@@ -36,7 +31,7 @@ class PrioritizedCommandGroup(click.Group):
         """Behaves the same as `click.Group.command()` except capture
         a priority for listing command names in help.
         """
-        help_priority = kwargs.pop("help_priority", DEFAULT_CMD_PRIORITY)
+        help_priority = kwargs.pop("help_priority", self.DEFAULT_PRIORITY)
         help_priorities = self.help_priorities
 
         def decorator(f):
@@ -50,7 +45,7 @@ class PrioritizedCommandGroup(click.Group):
         """Behaves the same as `click.Group.command()` except capture
         a priority for listing command names in help.
         """
-        help_priority = kwargs.pop("help_priority", DEFAULT_CMD_PRIORITY)
+        help_priority = kwargs.pop("help_priority", self.DEFAULT_PRIORITY)
         help_priorities = self.help_priorities
 
         def decorator(f):
@@ -82,10 +77,16 @@ class PrioritizedCommandGroup(click.Group):
     type=str,
     help="name for the process, defaults to command if not set",
 )
+@click.option(
+    "-c",
+    "--code",
+    type=str,
+    help="python code passed in as string",
+)
 @click.help_option("-h", "--help")
 @click.version_option(kungfu.__version__, "--version", message=kungfu.__version__)
 @click.pass_context
-def kfc(ctx, home, log_level, name):
+def kfc(ctx, home, log_level, name, code):
     if not home:
         osname = platform.system()
         user_home = os.path.expanduser("~")
@@ -116,6 +117,11 @@ def kfc(ctx, home, log_level, name):
     ctx.dataset_dir = ensure_dir(ctx, "dataset")
     ctx.inbox_dir = ensure_dir(ctx, "inbox")
 
+    from kungfu.yijinjing.locator import Locator
+
+    lf = kungfu.__bindings__.longfist
+    yjj = kungfu.__bindings__.yijinjing
+
     # have to keep locator alive from python side
     # https://github.com/pybind/pybind11/issues/1546
     ctx.runtime_locator = Locator(ctx.runtime_dir)
@@ -141,10 +147,14 @@ def kfc(ctx, home, log_level, name):
         ctx.runtime_locator,
     )
 
-    if ctx.invoked_subcommand is None:
+    ctx.name = name if name else ctx.invoked_subcommand
+
+    if code is not None:
+        exec(code)
+
+    if ctx.invoked_subcommand is None and code is None:
         click.echo(kfc.get_help(ctx))
-    else:
-        ctx.name = name if name else ctx.invoked_subcommand
+
     pass
 
 
@@ -162,5 +172,6 @@ def pass_ctx_from_parent(ctx):
     ctx.name = ctx.parent.name
 
 
-def __run__():
-    kfc(auto_envvar_prefix="KF")
+def __run__(**kwargs):
+    kwargs.pop("auto_envvar_prefix", None)
+    kfc(auto_envvar_prefix="KF", **kwargs)

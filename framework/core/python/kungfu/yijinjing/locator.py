@@ -11,9 +11,9 @@ yjj = kungfu.__bindings__.yijinjing
 
 
 class Locator(yjj.locator):
-    def __init__(self, home):
+    def __init__(self, root):
         yjj.locator.__init__(self)
-        self._home = home
+        self._root = root
 
     def has_env(self, name):
         return os.getenv(name) is not None
@@ -25,7 +25,7 @@ class Locator(yjj.locator):
         mode = lf.enums.get_mode_name(location.mode)
         category = lf.enums.get_category_name(location.category)
         p = os.path.join(
-            self._home,
+            self._root,
             category,
             location.group,
             location.name,
@@ -71,17 +71,17 @@ class Locator(yjj.locator):
                 hex(dest_id)[2:] + ".*.journal",
             )
         ):
-            match = JOURNAL_PAGE_PATTERN.match(journal[len(self._home) + 1 :])
+            match = JOURNAL_PAGE_PATTERN.match(journal[len(self._root) + 1 :])
             if match:
                 page_id = match.group(6)
                 page_ids.append(int(page_id))
         return page_ids
 
     def list_locations(self, category, group, name, mode):
-        search_path = os.path.join(self._home, category, group, name, "journal", mode)
+        search_path = os.path.join(self._root, category, group, name, "journal", mode)
         locations = []
         for journal in glob.glob(search_path):
-            match = JOURNAL_LOCATION_PATTERN.match(journal[len(self._home) + 1 :])
+            match = JOURNAL_LOCATION_PATTERN.match(journal[len(self._root) + 1 :])
             if match:
                 category = match.group(1)
                 group = match.group(2)
@@ -95,7 +95,7 @@ class Locator(yjj.locator):
 
     def list_location_dest(self, location):
         search_path = os.path.join(
-            self._home,
+            self._root,
             lf.enums.get_category_name(location.category),
             location.group,
             location.name,
@@ -105,7 +105,7 @@ class Locator(yjj.locator):
         )
         readers = {}
         for journal in glob.glob(search_path):
-            match = JOURNAL_PAGE_PATTERN.match(journal[len(self._home) + 1 :])
+            match = JOURNAL_PAGE_PATTERN.match(journal[len(self._root) + 1 :])
             if match:
                 dest = match.group(5)
                 page_id = match.group(6)

@@ -1,16 +1,18 @@
-import os
-import sys
 import json
 import atexit
-import psutil
-import shutil
 import getpass
+import os
+import psutil
 import pathlib
 import platform
 import datetime
+import shutil
 import subprocess
+import sys
+
 from conans import ConanFile
 from conans import tools
+from distutils import sysconfig
 from os import path
 
 with open(path.join("package.json"), "r") as package_json_file:
@@ -79,6 +81,13 @@ class KungfuCoreConan(ConanFile):
         self.__show_build_info(build_type)
 
     def imports(self):
+        python_inc_src = sysconfig.get_python_inc(plat_specific=True)
+        python_inc_dst = (
+            "include"
+            if path.basename(python_inc_src) == "include"
+            else path.join("include", path.basename(python_inc_src))
+        )
+        self.copy("*", src=python_inc_src, dst=python_inc_dst)
         self.copy("*", src="include", dst="include")
 
     def package(self):

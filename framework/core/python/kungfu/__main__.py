@@ -10,5 +10,4 @@ from kungfu.commands import __run__ as run
 
 
 if __name__ == "__main__":
-    id(commands)
-    run()
+    run(obj=commands)
