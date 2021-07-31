@@ -1,6 +1,7 @@
 const { spawnSync } = require('child_process');
 
 const argv = require('yargs/yargs')(process.argv.slice(2))
+  .parserConfiguration({ 'unknown-options-as-args': true })
   .option('bare', { type: 'boolean', default: false })
   .help().argv;
 

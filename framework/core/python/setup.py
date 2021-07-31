@@ -1,5 +1,6 @@
 import json
 
+from os import path
 from pathlib import Path
 from poetry.core.factory import Factory
 from poetry.core.masonry.builders.sdist import SdistBuilder
@@ -9,7 +10,8 @@ from setuptools import setup
 package = Factory().create_poetry(Path(".").resolve()).package
 dependencies, extras = SdistBuilder.convert_dependencies(package, package.requires)
 
-with open("kungfubuildinfo.json", "r") as build_info_file:
+build_info_path = path.join(path.dirname(__file__), "kungfubuildinfo.json")
+with open(build_info_path, "r") as build_info_file:
     build_info = json.load(build_info_file)
 
 setup(

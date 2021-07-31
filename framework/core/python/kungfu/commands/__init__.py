@@ -1,7 +1,9 @@
 import click
+import importlib
 import kungfu
 import os
 import platform
+import sys
 
 
 class PrioritizedCommandGroup(click.Group):
@@ -54,6 +56,20 @@ class PrioritizedCommandGroup(click.Group):
             return cmd
 
         return decorator
+
+
+def pass_ctx_from_parent(ctx):
+    ctx.home = ctx.parent.home
+    ctx.log_level = ctx.parent.log_level
+    ctx.runtime_dir = ctx.parent.runtime_dir
+    ctx.archive_dir = ctx.parent.archive_dir
+    ctx.dataset_dir = ctx.parent.dataset_dir
+    ctx.inbox_dir = ctx.parent.inbox_dir
+    ctx.runtime_locator = ctx.parent.runtime_locator
+    ctx.config_location = ctx.parent.config_location
+    ctx.console_location = ctx.parent.console_location
+    ctx.index_location = ctx.parent.index_location
+    ctx.name = ctx.parent.name
 
 
 @click.group(invoke_without_command=True, cls=PrioritizedCommandGroup)
@@ -158,20 +174,83 @@ def kfc(ctx, home, log_level, name, code):
     pass
 
 
-def pass_ctx_from_parent(ctx):
-    ctx.home = ctx.parent.home
-    ctx.log_level = ctx.parent.log_level
-    ctx.runtime_dir = ctx.parent.runtime_dir
-    ctx.archive_dir = ctx.parent.archive_dir
-    ctx.dataset_dir = ctx.parent.dataset_dir
-    ctx.inbox_dir = ctx.parent.inbox_dir
-    ctx.runtime_locator = ctx.parent.runtime_locator
-    ctx.config_location = ctx.parent.config_location
-    ctx.console_location = ctx.parent.console_location
-    ctx.index_location = ctx.parent.index_location
-    ctx.name = ctx.parent.name
+@click.command(
+    context_settings=dict(
+        allow_extra_args=True,
+        allow_interspersed_args=True,
+        ignore_unknown_options=True,
+    )
+)
+@click.option(
+    "-E",
+    "ignore_python_environment",
+    is_flag=True,
+    help="name for the process, defaults to command if not set",
+)
+@click.option(
+    "-c",
+    "code",
+    type=str,
+    help="program passed in as string (terminates option list)",
+)
+@click.option(
+    "-m",
+    "module",
+    type=str,
+    help="run library module as a script (terminates option list)",
+)
+@click.option(
+    "-s",
+    "ignore_user_site",
+    is_flag=True,
+    help="don't add user site directory to sys.path; also PYTHONNOUSERSITE",
+)
+@click.option(
+    "-S",
+    "ignore_import_site",
+    is_flag=True,
+    help="don't imply 'import site' on initialization",
+)
+@click.version_option(
+    platform.python_version(),
+    "-V",
+    "--version",
+    message=f"Python {platform.python_version()}",
+)
+@click.argument("argv", type=str, nargs=-1)
+def python(argv, **options):
+    __name__ = "__main__"
+
+    if options["code"]:
+        exec(options["code"])
+        return
+
+    if options["module"]:
+        module_name = options["module"]
+
+        sys.argv = [sys.executable, *argv]
+
+        main_name = "__main__"
+        module_main = importlib.import_module(f"{module_name}.{main_name}")
+        module_loader = module_main.__loader__
+        module_loader.name = module_main.__name__ = main_name
+        module_loader.exec_module(module_main)
+        return
+
+    if argv:
+        __file__ = os.path.abspath(argv[0])
+        sys.argv = [sys.executable, *argv[1:]]
+        with open(__file__, "r") as source:
+            code = "".join(source.readlines())
+        exec(code)
+        return
+
+    pass
 
 
 def __run__(**kwargs):
-    kwargs.pop("auto_envvar_prefix", None)
-    kfc(auto_envvar_prefix="KF", **kwargs)
+    if "KFC_AS_PYTHON" not in os.environ:
+        kwargs.pop("auto_envvar_prefix", None)
+        kfc(auto_envvar_prefix="KF", **kwargs)
+    else:
+        python()

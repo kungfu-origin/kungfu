@@ -1,5 +1,6 @@
 import click
 import kungfu
+import pkgutil
 import os
 import sys
 import subprocess
@@ -39,6 +40,89 @@ def black(ctx):
     from black.__main__ import patched_main as main
 
     main()
+
+
+@engage.command(
+    help="Manage python packages with [pdm](https://pdm.fming.dev)",
+    context_settings=dict(
+        ignore_unknown_options=True,
+        allow_extra_args=True,
+    ),
+)
+@click.pass_context
+def pdm(ctx):
+    pass_ctx_from_parent(ctx)
+
+    sys.argv = [sys.argv[0], *ctx.args]
+
+    from pdm import core
+
+    class Core(core.Core):
+        def __init__(self):
+            super().__init__()
+
+        def init_parser(self):
+            super().init_parser()
+            try:
+                from pdm.cli import commands
+
+                next(pkgutil.iter_modules(commands.__path__))
+            except StopIteration:
+                self.register_cmds()
+
+        def register_cmds(self):
+            from pdm.cli.commands import add
+            from pdm.cli.commands import build
+            from pdm.cli.commands import cache
+            from pdm.cli.commands import completion
+            from pdm.cli.commands import config
+            from pdm.cli.commands import export
+            from pdm.cli.commands import import_cmd
+            from pdm.cli.commands import info
+            from pdm.cli.commands import init
+            from pdm.cli.commands import install
+            from pdm.cli.commands import list
+            from pdm.cli.commands import lock
+            from pdm.cli.commands import plugin
+            from pdm.cli.commands import remove
+            from pdm.cli.commands import run
+            from pdm.cli.commands import search
+            from pdm.cli.commands import show
+            from pdm.cli.commands import sync
+            from pdm.cli.commands import update
+            from pdm.cli.commands import use
+
+            for module in [
+                add,
+                build,
+                cache,
+                completion,
+                config,
+                export,
+                import_cmd,
+                info,
+                init,
+                install,
+                list,
+                lock,
+                plugin,
+                remove,
+                run,
+                search,
+                show,
+                sync,
+                update,
+                use,
+            ]:
+                try:
+                    cmd = module.Command
+                except AttributeError:
+                    continue
+                name = cmd.name or module.__name__.split(".").pop()
+                core.register_command(cmd, name)
+
+    core = Core()
+    core.main()
 
 
 @engage.command(
