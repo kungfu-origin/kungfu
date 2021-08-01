@@ -1,8 +1,7 @@
 import click
 import kungfu
 
-from kungfu.commands import kfc, pass_ctx_from_parent
-from kungfu.commands import PrioritizedCommandGroup
+from kungfu.console.commands import kfc, PrioritizedCommandGroup
 from kungfu.yijinjing.practice.master import Master
 from kungfu.wingchun.replay import setup
 from kungfu_extensions import EXTENSION_REGISTRY_MD
@@ -16,14 +15,14 @@ yjj = kungfu.__bindings__.yijinjing
 @click.option("-x", "--low_latency", is_flag=True, help="run in low latency mode")
 @click.pass_context
 def service(ctx, low_latency):
-    pass_ctx_from_parent(ctx)
+    kfc.pass_ctx_from_parent(ctx)
 
 
 @service.command(help_priority=1)
 @click.option("-x", "--low_latency", is_flag=True, help="run in low latency mode")
 @click.pass_context
 def master(ctx, low_latency):
-    pass_ctx_from_parent(ctx)
+    kfc.pass_ctx_from_parent(ctx)
     ctx.low_latency = low_latency
     Master(ctx).run()
 
@@ -39,7 +38,7 @@ def master(ctx, low_latency):
 )
 @click.pass_context
 def ledger(ctx, low_latency, replay, session_id):
-    pass_ctx_from_parent(ctx)
+    kfc.pass_ctx_from_parent(ctx)
     ctx.low_latency = low_latency if not replay else True
     ctx.replay = replay
     ctx.category = lf.enums.category.SYSTEM
@@ -72,7 +71,7 @@ def ledger(ctx, low_latency, replay, session_id):
 )
 @click.pass_context
 def bar(ctx, source, time_interval, low_latency):
-    pass_ctx_from_parent(ctx)
+    kfc.pass_ctx_from_parent(ctx)
     ctx.mode = lf.enums.mode.LIVE
     args = {"source": source, "time_interval": time_interval}
     instance = wc.BarGenerator(

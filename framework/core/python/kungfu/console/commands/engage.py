@@ -7,8 +7,7 @@ import subprocess
 
 from os.path import abspath, basename, dirname
 
-from kungfu.commands import kfc, pass_ctx_from_parent as pass_ctx_from_root
-from kungfu.commands import PrioritizedCommandGroup
+from kungfu.console.commands import kfc, PrioritizedCommandGroup
 from kungfu.yijinjing.log import create_logger
 
 
@@ -16,12 +15,12 @@ from kungfu.yijinjing.log import create_logger
 @click.help_option("-h", "--help")
 @click.pass_context
 def engage(ctx):
-    pass_ctx_from_root(ctx)
+    kfc.pass_ctx_from_parent(ctx)
     ctx.logger = create_logger("engage", ctx.log_level, ctx.console_location)
 
 
 def pass_ctx_from_parent(ctx):
-    pass_ctx_from_root(ctx)
+    kfc.pass_ctx_from_parent(ctx)
     ctx.logger = ctx.parent.logger
 
 
@@ -121,6 +120,7 @@ def pdm(ctx):
                 name = cmd.name or module.__name__.split(".").pop()
                 core.register_command(cmd, name)
 
+    os.environ["KFC_AS_PYTHON"] = "on"
     core = Core()
     core.main()
 

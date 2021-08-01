@@ -1,8 +1,7 @@
 import click
 import kungfu
 
-from kungfu.commands import kfc, pass_ctx_from_parent
-from kungfu.commands import PrioritizedCommandGroup
+from kungfu.console.commands import kfc, PrioritizedCommandGroup
 from kungfu_extensions import EXTENSION_REGISTRY_MD
 from kungfu_extensions import EXTENSION_REGISTRY_TD
 
@@ -21,7 +20,7 @@ yjj = kungfu.__bindings__.yijinjing
 @click.option("-x", "--low_latency", is_flag=True, help="run in low latency mode")
 @click.pass_context
 def vendor(ctx, source, low_latency):
-    pass_ctx_from_parent(ctx)
+    kfc.pass_ctx_from_parent(ctx)
     config = yjj.location(
         lf.enums.mode.LIVE, lf.enums.category.MD, source, source, ctx.runtime_locator
     ).to(lf.types.Config())
@@ -42,7 +41,7 @@ def vendor(ctx, source, low_latency):
 )
 @click.pass_context
 def md(ctx, source, low_latency):
-    pass_ctx_from_parent(ctx)
+    kfc.pass_ctx_from_parent(ctx)
     config = yjj.location(
         lf.enums.mode.LIVE, lf.enums.category.MD, source, source, ctx.runtime_locator
     ).to(lf.types.Config())
@@ -65,7 +64,7 @@ def md(ctx, source, low_latency):
 @click.option("-x", "--low_latency", is_flag=True, help="run in low latency mode")
 @click.pass_context
 def td(ctx, source, account, low_latency):
-    pass_ctx_from_parent(ctx)
+    kfc.pass_ctx_from_parent(ctx)
     config = yjj.location(
         lf.enums.mode.LIVE, lf.enums.category.TD, source, account, ctx.runtime_locator
     ).to(lf.types.Config())

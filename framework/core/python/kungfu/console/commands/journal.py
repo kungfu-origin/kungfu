@@ -9,8 +9,7 @@ import zipfile
 from datetime import datetime, timedelta
 from tabulate import tabulate
 
-from kungfu.commands import kfc, pass_ctx_from_parent as pass_ctx_from_root
-from kungfu.commands import PrioritizedCommandGroup
+from kungfu.console.commands import kfc, PrioritizedCommandGroup
 from kungfu.yijinjing import journal as kfj
 from kungfu.yijinjing import time as kft
 from kungfu.yijinjing.log import create_logger
@@ -42,7 +41,7 @@ yjj = kungfu.__bindings__.yijinjing
 @click.help_option("-h", "--help")
 @click.pass_context
 def journal(ctx, mode, category, group, name):
-    pass_ctx_from_root(ctx)
+    kfc.pass_ctx_from_parent(ctx)
     ctx.low_latency = False
     ctx.mode = mode
     ctx.category = category
@@ -58,7 +57,7 @@ def journal(ctx, mode, category, group, name):
 
 
 def pass_ctx_from_parent(ctx):
-    pass_ctx_from_root(ctx)
+    kfc.pass_ctx_from_parent(ctx)
     ctx.logger = ctx.parent.logger
     ctx.low_latency = ctx.parent.low_latency
     ctx.mode = ctx.parent.mode

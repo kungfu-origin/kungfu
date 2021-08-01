@@ -7,8 +7,7 @@ import shutil
 
 from collections import deque
 
-from kungfu.commands import kfc, pass_ctx_from_parent as pass_ctx_from_root
-from kungfu.commands import PrioritizedCommandGroup
+from kungfu.console.commands import kfc, PrioritizedCommandGroup
 from kungfu.yijinjing import LOG_PATTERN, ARCHIVE_PREFIX
 from kungfu.yijinjing.log import create_logger
 from kungfu.yijinjing.locator import Locator
@@ -23,14 +22,14 @@ yjj = kungfu.__bindings__.yijinjing
 @click.help_option("-h", "--help")
 @click.pass_context
 def archive(ctx):
-    pass_ctx_from_root(ctx)
+    kfc.pass_ctx_from_parent(ctx)
     ctx.low_latency = False
     ctx.logger = create_logger("archive", ctx.log_level, ctx.console_location)
     yjj.setup_log(ctx.console_location, "archive")
 
 
 def pass_ctx_from_parent(ctx):
-    pass_ctx_from_root(ctx)
+    kfc.pass_ctx_from_parent(ctx)
     ctx.logger = ctx.parent.logger
     ctx.low_latency = ctx.parent.low_latency
     ctx.runtime_dir = ctx.parent.runtime_dir

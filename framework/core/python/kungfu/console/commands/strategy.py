@@ -3,8 +3,7 @@ import click
 import kungfu
 import importlib
 
-from kungfu.commands import kfc, pass_ctx_from_parent
-from kungfu.commands import PrioritizedCommandGroup
+from kungfu.console.commands import kfc, PrioritizedCommandGroup
 from kungfu.wingchun.replay import setup
 from kungfu.wingchun.strategy import Runner, Strategy
 from kungfu.yijinjing.log import create_logger
@@ -28,7 +27,7 @@ yjj = kungfu.__bindings__.yijinjing
 )
 @click.pass_context
 def strategy(ctx, group, name, path, low_latency, replay, session_id):
-    pass_ctx_from_parent(ctx)
+    kfc.pass_ctx_from_parent(ctx)
     ctx.group = group
     ctx.name = name
     ctx.path = path

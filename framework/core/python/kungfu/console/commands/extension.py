@@ -8,8 +8,7 @@ import tarfile
 from kungfu import __version__ as kf_version
 from runpy import run_path
 
-from kungfu.commands import kfc, pass_ctx_from_parent as pass_ctx_from_root
-from kungfu.commands import PrioritizedCommandGroup
+from kungfu.console.commands import kfc, PrioritizedCommandGroup
 from kungfu.yijinjing.log import create_logger
 
 
@@ -17,7 +16,7 @@ from kungfu.yijinjing.log import create_logger
 @click.help_option("-h", "--help")
 @click.pass_context
 def extension(ctx):
-    pass_ctx_from_root(ctx)
+    kfc.pass_ctx_from_parent(ctx)
     ctx.logger = create_logger("ext", ctx.log_level, ctx.console_location)
     if not os.getenv("KF_NO_EXT"):
         pass
@@ -27,7 +26,7 @@ def extension(ctx):
 
 
 def pass_ctx_from_parent(ctx):
-    pass_ctx_from_root(ctx)
+    kfc.pass_ctx_from_parent(ctx)
     ctx.logger = ctx.parent.logger
 
 
@@ -88,9 +87,9 @@ def uninstall(ctx, name):
         click.echo("Extension " + name + "not found")
 
 
-@extension.command(help="list extensions")
+@extension.command("list", help="list extensions")
 @click.pass_context
-def list(ctx):
+def list_cmd(ctx):
     pass_ctx_from_parent(ctx)
     click.echo("Installed extensions:")
     for ext_name in kungfu_extensions.EXTENSIONS.keys():
