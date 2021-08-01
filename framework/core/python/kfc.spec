@@ -1,58 +1,64 @@
 # PyInstaller Settings
-###########################################################
-import blib2to3
+###############################################################################
 import glob
-import nuitka
 import os
+import PyInstaller
 
-from os import path
-from os.path import abspath
-from os.path import dirname
-from os.path import curdir as cwd
-
-from pip._vendor import certifi
+from os.path import abspath, dirname, curdir as cwd, join as make_path
 
 from PyInstaller.building.api import COLLECT, EXE, PYZ
 from PyInstaller.building.build_main import Analysis
 from PyInstaller.utils.hooks import collect_data_files
 from PyInstaller.utils.hooks import collect_submodules
+###############################################################################
+# cmake includes
+cmake_dir = abspath(make_path(cwd, ".cmake"))
 
-cmake_dir = abspath(path.join(cwd, ".cmake"))
+# cpp dependencies
+deps_dir = abspath(make_path(cwd, ".deps"))
+dep_pybind11_dir = abspath(make_path(deps_dir, "pybind11*"))
 
-deps_dir = abspath(path.join(cwd, ".deps"))
-dep_pybind11_dir = abspath(path.join(deps_dir, "pybind11*"))
+# kungfu source files
+src_cpp_dir = abspath(make_path(cwd, "cpp"))
+src_python_dir = abspath(make_path(cwd, "python"))
+src_ext_dir = make_path(src_python_dir, "kungfu_extensions")
 
-src_cpp_dir = abspath(path.join(cwd, "cpp"))
-src_python_dir = abspath(path.join(cwd, "python"))
-src_ext_dir = path.join(src_python_dir, "kungfu_extensions")
+# kungfu build files
+build_dir = abspath(make_path(cwd, "build"))
+build_cpp_dir = abspath(make_path(build_dir, "cpp"))
+build_deps_dir = abspath(make_path(build_dir, "deps"))
+build_output_dir = make_path(build_dir, os.environ["CMAKE_BUILD_TYPE"])
 
-build_dir = abspath(path.join(cwd, "build"))
-build_cpp_dir = abspath(path.join(build_dir, "cpp"))
-build_deps_dir = abspath(path.join(build_dir, "deps"))
-build_output_dir = path.join(build_dir, os.environ["CMAKE_BUILD_TYPE"])
+# site path
+site_path = abspath(dirname(dirname(PyInstaller.__file__)))
 
-data_blib2to3 = path.join(dirname(blib2to3.__file__), "*.txt")
+# black requires
+data_blib2to3 = make_path(site_path, "blib2to3", "*.txt")
 
-data_pip_certifi = path.join(dirname(certifi.__file__), "*.pem")
+# pdm requires
+data_pdm_pep582 = make_path(site_path, "pdm", "pep582", "sitecustomize.py")
+data_pip_certifi = make_path(site_path, "pip", "_vendor", "certifi", "*.pem")
 
-nuitka_build_dst_dir = path.join("nuitka", "build")
-nuitka_build_src_dir = path.join(dirname(nuitka.__file__), "build")
-data_nuitka_include = path.join(nuitka_build_src_dir, "include")
-data_nuitka_static_src = path.join(nuitka_build_src_dir, "static_src")
-data_nuitka_scons = path.join(nuitka_build_src_dir, "*.scons")
+# nuitka requires
+nuitka_build_dst_dir = make_path("nuitka", "build")
+nuitka_build_src_dir = make_path(site_path, "nuitka", "build")
+data_nuitka_include = make_path(nuitka_build_src_dir, "include")
+data_nuitka_static_src = make_path(nuitka_build_src_dir, "static_src")
+data_nuitka_scons = make_path(nuitka_build_src_dir, "*.scons")
+###############################################################################
 
 
 def extend_datas(datas, src_dirs, build_dirs, packages):
     def add_include(datas, path):
         map(
             lambda include: datas.append((include, "include")),
-            glob.glob(path.join(path, "**", "include"), recursive=True),
+            glob.glob(make_path(path, "**", "include"), recursive=True),
         )
 
     def add_lib(datas, path):
         map(
             lambda lib: datas.append((lib, ".")),
-            glob.glob(path.join(path, "**", "*.lib"), recursive=True),
+            glob.glob(make_path(path, "**", "*.lib"), recursive=True),
         )
 
     map(add_include, src_dirs)
@@ -70,9 +76,10 @@ def extend_hiddenimports(hiddenimports):
     return hiddenimports
 
 
+###############################################################################
 block_cipher = None
 a = Analysis(
-    [path.join("kungfu", "__main__.py")],
+    [make_path("kungfu", "__main__.py")],
     pathex=["python"],
     binaries=[],
     datas=extend_datas(
@@ -80,12 +87,13 @@ a = Analysis(
             (cmake_dir, "cmake"),
             (src_ext_dir, "kungfu_extensions"),
             (dep_pybind11_dir, "pybind11"),
-            (path.join(build_output_dir, "*"), "."),
-            (path.join(build_dir, "include"), "include"),
+            (make_path(build_output_dir, "*"), "."),
+            (make_path(build_dir, "include"), "include"),
             (data_blib2to3, "blib2to3"),
-            (data_pip_certifi, path.join("pip", "_vendor", "certifi")),
-            (data_nuitka_include, path.join(nuitka_build_dst_dir, "include")),
-            (data_nuitka_static_src, path.join(nuitka_build_dst_dir, "static_src")),
+            (data_pdm_pep582, make_path("pdm", "pep582")),
+            (data_pip_certifi, make_path("pip", "_vendor", "certifi")),
+            (data_nuitka_include, make_path(nuitka_build_dst_dir, "include")),
+            (data_nuitka_static_src, make_path(nuitka_build_dst_dir, "static_src")),
             (data_nuitka_scons, nuitka_build_dst_dir),
         ],
         src_dirs=[
@@ -105,6 +113,7 @@ a = Analysis(
         [
             "pkg_resources",
             "pdm",
+            "shellingham",
             "nuitka",
             "SCons",
             "numpy",

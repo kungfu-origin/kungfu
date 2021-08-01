@@ -265,7 +265,7 @@ class KungfuCoreConan(ConanFile):
                     "--distpath=dist",
                     "--clean",
                     "--noconfirm",
-                    "python/kfc.spec",
+                    path.join("python", "kfc.spec"),
                 ]
             )
         self.output.success("PyInstaller done")
