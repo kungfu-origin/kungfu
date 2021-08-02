@@ -12,9 +12,12 @@ from kungfu.console.commands import kfc, PrioritizedCommandGroup
 from kungfu.yijinjing.log import create_logger
 
 
+extension_command_context = kfc.pass_context("logger")
+
+
 @kfc.group(cls=PrioritizedCommandGroup)
 @click.help_option("-h", "--help")
-@click.pass_context
+@kfc.pass_context()
 def extension(ctx):
     kfc.pass_ctx_from_parent(ctx)
     ctx.logger = create_logger("ext", ctx.log_level, ctx.console_location)
@@ -32,7 +35,7 @@ def pass_ctx_from_parent(ctx):
 
 @extension.command(help="install extension")
 @click.option("-f", "--file", required=True, help="KungFu extension file (tgz)")
-@click.pass_context
+@extension_command_context
 def install(ctx, file):
     pass_ctx_from_parent(ctx)
     filename = os.path.basename(file)
@@ -75,7 +78,7 @@ def install(ctx, file):
 
 @extension.command(help="uninstall extension")
 @click.option("-n", "--name", required=True, help="KungFu extension name")
-@click.pass_context
+@extension_command_context
 def uninstall(ctx, name):
     pass_ctx_from_parent(ctx)
     install_path = os.path.join(kungfu_extensions.extension_path, name)
@@ -88,7 +91,7 @@ def uninstall(ctx, name):
 
 
 @extension.command("list", help="list extensions")
-@click.pass_context
+@extension_command_context
 def list_cmd(ctx):
     pass_ctx_from_parent(ctx)
     click.echo("Installed extensions:")

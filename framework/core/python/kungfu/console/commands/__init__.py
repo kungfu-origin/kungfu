@@ -4,7 +4,9 @@ import platform
 import os
 import typing
 
-from click.decorators import F
+from click.decorators import F as CLI
+from click.globals import get_current_context
+from functools import update_wrapper
 
 
 def pick(**kwargs):
@@ -65,25 +67,29 @@ class PrioritizedCommandGroup(click.Group):
         return decorator
 
     @staticmethod
-    def pass_ctx_from_parent(ctx):
-        ctx.home = ctx.parent.home
-        ctx.log_level = ctx.parent.log_level
-        ctx.runtime_dir = ctx.parent.runtime_dir
-        ctx.archive_dir = ctx.parent.archive_dir
-        ctx.dataset_dir = ctx.parent.dataset_dir
-        ctx.inbox_dir = ctx.parent.inbox_dir
-        ctx.runtime_locator = ctx.parent.runtime_locator
-        ctx.config_location = ctx.parent.config_location
-        ctx.console_location = ctx.parent.console_location
-        ctx.index_location = ctx.parent.index_location
-        ctx.name = ctx.parent.name
+    def pass_context(*keys):
+        def copy_from_parent(f: CLI) -> CLI:
+            def new_func(*args, **kwargs):
+                ctx = get_current_context()
+                for key in [
+                    "name",
+                    "home",
+                    "log_level",
+                    "runtime_dir",
+                    "archive_dir",
+                    "dataset_dir",
+                    "inbox_dir",
+                    "runtime_locator",
+                    "config_location",
+                    "console_location",
+                    "index_location",
+                ] + list(keys):
+                    ctx.__dict__[key] = ctx.parent.__dict__[key]
+                return f(ctx, *args, **kwargs)
 
-    @staticmethod
-    def pass_context(f: F) -> F:
-        def new_func(ctx, *args, **kwargs):
-            return f(ctx, *args, **kwargs)
+            return update_wrapper(typing.cast(CLI, new_func), f)
 
-        return typing.cast(F, new_func)
+        return copy_from_parent
 
 
 @click.group("kfc", invoke_without_command=True, cls=PrioritizedCommandGroup)
@@ -91,7 +97,8 @@ class PrioritizedCommandGroup(click.Group):
     "-H",
     "--home",
     type=str,
-    help="kungfu home folder, defaults to APPDATA/kungfu/home/runtime, where APPDATA defaults to %APPDATA% on windows, "
+    help="kungfu home folder, defaults to APPDATA/kungfu/home/runtime, "
+    "where APPDATA defaults to %APPDATA% on windows, "
     "~/.config on linux, ~/Library/Application Support on mac",
 )
 @click.option(

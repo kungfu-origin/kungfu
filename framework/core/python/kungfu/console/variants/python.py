@@ -16,7 +16,8 @@ import sys
     "-b",
     "bytes_warn",
     count=True,
-    help="issue warnings about str(bytes_instance), str(bytearray_instance) and comparing bytes/bytearray with str. (-bb: issue errors)",
+    help="issue warnings about str(bytes_instance), str(bytearray_instance) "
+    "and comparing bytes/bytearray with str. (-bb: issue errors)",
 )
 @click.option(
     "-B",
@@ -58,7 +59,9 @@ import sys
     "-O",
     "optimize",
     count=True,
-    help="remove assert and __debug__-dependent statements; add .opt-1 before .pyc extension; also PYTHONOPTIMIZE=x",
+    help="remove assert and __debug__-dependent statements; "
+    "add .opt-1 before .pyc extension; "
+    "also PYTHONOPTIMIZE=x",
 )
 @click.option(
     "-s",
@@ -76,20 +79,23 @@ import sys
     "-u",
     "unbuffered",
     is_flag=True,
-    help="force the stdout and stderr streams to be unbuffered; this option has no effect on stdin; also PYTHONUNBUFFERED=x",
+    help="force the stdout and stderr streams to be unbuffered; "
+    "this option has no effect on stdin; also PYTHONUNBUFFERED=x",
 )
 @click.option(
     "-v",
     "verbose",
     count=True,
-    help="verbose (trace import statements); also PYTHONVERBOSE=x; can be supplied multiple times to increase verbosity",
+    help="verbose (trace import statements); also PYTHONVERBOSE=x; "
+    "can be supplied multiple times to increase verbosity",
 )
 @click.option(
     "-W",
     "warning",
     type=str,
     multiple=True,
-    help="warning control; arg is action:message:category:module:lineno; also PYTHONWARNINGS=arg",
+    help="warning control; arg is action:message:category:module:lineno; "
+    "also PYTHONWARNINGS=arg",
 )
 @click.option(
     "-x",

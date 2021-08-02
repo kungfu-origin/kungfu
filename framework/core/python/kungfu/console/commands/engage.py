@@ -12,17 +12,14 @@ from kungfu.console.variants import enable as enable_kfc_variant
 from kungfu.yijinjing.log import create_logger
 
 
+engage_command_context = kfc.pass_context("logger")
+
+
 @kfc.group(cls=PrioritizedCommandGroup, help_priority=-1)
 @click.help_option("-h", "--help")
-@click.pass_context
+@kfc.pass_context()
 def engage(ctx):
-    kfc.pass_ctx_from_parent(ctx)
     ctx.logger = create_logger("engage", ctx.log_level, ctx.console_location)
-
-
-def pass_ctx_from_parent(ctx):
-    kfc.pass_ctx_from_parent(ctx)
-    ctx.logger = ctx.parent.logger
 
 
 @engage.command(
@@ -32,10 +29,8 @@ def pass_ctx_from_parent(ctx):
         allow_extra_args=True,
     ),
 )
-@click.pass_context
+@engage_command_context
 def black(ctx):
-    pass_ctx_from_parent(ctx)
-
     sys.argv = [sys.argv[0], *ctx.args]
     from black.__main__ import patched_main as main
 
@@ -49,10 +44,8 @@ def black(ctx):
         allow_extra_args=True,
     ),
 )
-@click.pass_context
+@engage_command_context
 def pdm(ctx):
-    pass_ctx_from_parent(ctx)
-
     sys.argv = [sys.argv[0], *ctx.args]
 
     from pdm import core
@@ -133,10 +126,8 @@ def pdm(ctx):
         allow_extra_args=True,
     ),
 )
-@click.pass_context
+@engage_command_context
 def nuitka(ctx):
-    pass_ctx_from_parent(ctx)
-
     os.environ["PYTHONPATH"] = os.pathsep.join(sys.path)
     sys.argv = [sys.argv[0], *ctx.args]
 
@@ -285,10 +276,8 @@ def nuitka(ctx):
     ),
     help_priority=-1,
 )
-@click.pass_context
+@engage_command_context
 def nuitka_data_composer(ctx):
-    pass_ctx_from_parent(ctx)
-
     sys.argv = [sys.argv[0], *ctx.args]
 
     from nuitka import PythonVersions
@@ -307,10 +296,8 @@ def nuitka_data_composer(ctx):
     ),
     help_priority=-1,
 )
-@click.pass_context
+@engage_command_context
 def nuitka_scons(ctx):
-    pass_ctx_from_parent(ctx)
-
     sys.argv = [sys.argv[0], *ctx.args]
 
     from nuitka import PythonVersions

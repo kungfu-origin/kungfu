@@ -9,18 +9,19 @@ from kungfu_extensions import EXTENSION_REGISTRY_MD
 lf = kungfu.__bindings__.longfist
 wc = kungfu.__bindings__.wingchun
 yjj = kungfu.__bindings__.yijinjing
+service_command_context = kfc.pass_context()
 
 
 @kfc.group(cls=PrioritizedCommandGroup)
 @click.option("-x", "--low_latency", is_flag=True, help="run in low latency mode")
-@click.pass_context
+@kfc.pass_context()
 def service(ctx, low_latency):
     kfc.pass_ctx_from_parent(ctx)
 
 
 @service.command(help_priority=1)
 @click.option("-x", "--low_latency", is_flag=True, help="run in low latency mode")
-@click.pass_context
+@service_command_context
 def master(ctx, low_latency):
     kfc.pass_ctx_from_parent(ctx)
     ctx.low_latency = low_latency
@@ -36,7 +37,7 @@ def master(ctx, low_latency):
     type=int,
     help="replay session id, MUST be specified if replay is set",
 )
-@click.pass_context
+@service_command_context
 def ledger(ctx, low_latency, replay, session_id):
     kfc.pass_ctx_from_parent(ctx)
     ctx.low_latency = low_latency if not replay else True
@@ -69,7 +70,7 @@ def ledger(ctx, low_latency, replay, session_id):
     type=str,
     help="bar time interval, s/m/h/d, s=Second m=Minute h=Hour d=Day",
 )
-@click.pass_context
+@service_command_context
 def bar(ctx, source, time_interval, low_latency):
     kfc.pass_ctx_from_parent(ctx)
     ctx.mode = lf.enums.mode.LIVE

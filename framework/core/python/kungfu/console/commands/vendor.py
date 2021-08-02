@@ -7,6 +7,7 @@ from kungfu_extensions import EXTENSION_REGISTRY_TD
 
 lf = kungfu.__bindings__.longfist
 yjj = kungfu.__bindings__.yijinjing
+vendor_command_context = kfc.pass_context()
 
 
 @kfc.group(cls=PrioritizedCommandGroup)
@@ -18,7 +19,7 @@ yjj = kungfu.__bindings__.yijinjing
     help="data source",
 )
 @click.option("-x", "--low_latency", is_flag=True, help="run in low latency mode")
-@click.pass_context
+@kfc.pass_context()
 def vendor(ctx, source, low_latency):
     kfc.pass_ctx_from_parent(ctx)
     config = yjj.location(
@@ -39,7 +40,7 @@ def vendor(ctx, source, low_latency):
     type=click.Choice(EXTENSION_REGISTRY_MD.names()),
     help="data source",
 )
-@click.pass_context
+@vendor_command_context
 def md(ctx, source, low_latency):
     kfc.pass_ctx_from_parent(ctx)
     config = yjj.location(
@@ -62,7 +63,7 @@ def md(ctx, source, low_latency):
 )
 @click.option("-a", "--account", type=str, help="account")
 @click.option("-x", "--low_latency", is_flag=True, help="run in low latency mode")
-@click.pass_context
+@vendor_command_context
 def td(ctx, source, account, low_latency):
     kfc.pass_ctx_from_parent(ctx)
     config = yjj.location(
