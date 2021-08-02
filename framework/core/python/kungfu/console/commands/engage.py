@@ -8,6 +8,7 @@ import subprocess
 from os.path import abspath, basename, dirname
 
 from kungfu.console.commands import kfc, PrioritizedCommandGroup
+from kungfu.console.variants import enable as enable_kfc_variant
 from kungfu.yijinjing.log import create_logger
 
 
@@ -120,7 +121,7 @@ def pdm(ctx):
                 name = cmd.name or module.__name__.split(".").pop()
                 core.register_command(cmd, name)
 
-    os.environ["KFC_AS_PYTHON"] = "on"
+    enable_kfc_variant("python")
     core = Core()
     core.main()
 

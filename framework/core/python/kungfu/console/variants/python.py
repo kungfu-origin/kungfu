@@ -13,10 +13,16 @@ import sys
     )
 )
 @click.option(
-    "-E",
-    "ignore_python_environment",
+    "-b",
+    "bytes_warn",
+    count=True,
+    help="issue warnings about str(bytes_instance), str(bytearray_instance) and comparing bytes/bytearray with str. (-bb: issue errors)",
+)
+@click.option(
+    "-B",
+    "no_pyc",
     is_flag=True,
-    help="name for the process, defaults to command if not set",
+    help="don't write .pyc files on import; also PYTHONDONTWRITEBYTECODE=x",
 )
 @click.option(
     "-c",
@@ -25,10 +31,34 @@ import sys
     help="program passed in as string (terminates option list)",
 )
 @click.option(
+    "-d",
+    "debug_parser",
+    is_flag=True,
+    help="debug output from parser; also PYTHONDEBUG=x",
+)
+@click.option(
+    "-E",
+    "ignore_python_environment",
+    is_flag=True,
+    help="ignore PYTHON* environment variables (such as PYTHONPATH)",
+)
+@click.option(
+    "-I",
+    "isolated",
+    is_flag=True,
+    help="isolate Python from the user's environment (implies -E and -s)",
+)
+@click.option(
     "-m",
     "module",
     type=str,
     help="run library module as a script (terminates option list)",
+)
+@click.option(
+    "-O",
+    "optimize",
+    count=True,
+    help="remove assert and __debug__-dependent statements; add .opt-1 before .pyc extension; also PYTHONOPTIMIZE=x",
 )
 @click.option(
     "-s",
@@ -42,6 +72,38 @@ import sys
     is_flag=True,
     help="don't imply 'import site' on initialization",
 )
+@click.option(
+    "-u",
+    "unbuffered",
+    is_flag=True,
+    help="force the stdout and stderr streams to be unbuffered; this option has no effect on stdin; also PYTHONUNBUFFERED=x",
+)
+@click.option(
+    "-v",
+    "verbose",
+    count=True,
+    help="verbose (trace import statements); also PYTHONVERBOSE=x; can be supplied multiple times to increase verbosity",
+)
+@click.option(
+    "-W",
+    "warning",
+    type=str,
+    multiple=True,
+    help="warning control; arg is action:message:category:module:lineno; also PYTHONWARNINGS=arg",
+)
+@click.option(
+    "-x",
+    "skip_first_line",
+    is_flag=True,
+    help="skip first line of source, allowing use of non-Unix forms of #!cmd",
+)
+@click.option(
+    "-X",
+    "spec_option",
+    type=str,
+    multiple=True,
+    help="set implementation-specific option",
+)
 @click.help_option("-h", "--help")
 @click.version_option(
     platform.python_version(),
@@ -52,6 +114,18 @@ import sys
 @click.argument("argv", type=str, nargs=-1)
 def main(argv, **options):
     __name__ = "__main__"
+
+    if options["no_pyc"]:
+        os.environ["PYTHONDONTWRITEBYTECODE"] = "x"
+
+    if options["debug_parser"]:
+        os.environ["PYTHONDEBUG"] = "x"
+
+    if options["ignore_python_environment"] or options["isolated"]:
+        os.environ.pop("PYTHONPATH", None)
+
+    if options["ignore_user_site"] or options["isolated"]:
+        os.environ["PYTHONNOUSERSITE"] = "x"
 
     if options["code"]:
         exec(options["code"])
