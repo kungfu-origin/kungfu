@@ -2,6 +2,7 @@ cmake-build-debug/
 build/
 node_modules/
 
+pyproject.toml
 .pdm.toml
 __pycache__/
 __pypackages__/

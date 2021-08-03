@@ -1,9 +1,11 @@
 import click
+import json
 import kungfu
 import pkgutil
 import os
 import sys
 import subprocess
+import typing
 
 from os.path import abspath, basename, dirname
 
@@ -128,6 +130,64 @@ def pdm(ctx):
     config = project.Project(Core(), ".").project_config
     config["python.path"] = sys.executable  # make sure to use kfc as python interpreter
     core.main()
+
+
+@engage.command(
+    help="Sync settings from package.json to pyproject.toml",
+    context_settings=dict(
+        ignore_unknown_options=True,
+        allow_extra_args=True,
+    ),
+    help_priority=-1,
+)
+@engage_command_context
+def pdm_setup(ctx):
+    from pdm.core import Core
+    from pdm.formats.base import array_of_inline_tables, make_array, make_inline_table
+    from pdm.models.requirements import parse_requirement
+    from pdm.project.core import atoml, Project
+
+    with open("package.json", "r") as file:
+        package_json = json.load(file)
+    author = package_json["author"]
+    build_config = package_json.get("kungfuBuild", {})
+    python_config = build_config.get("python", {})
+    dependencies = python_config.get("dependencies", {})
+
+    pdm_project = Project(Core(), ".")
+    pdm_project.pyproject_file.touch()
+
+    def pdm_config_table(name):
+        pdm_config = pdm_project.pyproject
+        result = pdm_config[name] = pdm_config.get(name, atoml.table())
+        # Fix extra trailing newline
+        body = result.value.body
+        body.pop() if body and body[-1][0] is None else id(body)
+        return result
+
+    project = pdm_config_table("project")
+    project["name"] = package_json["name"].split("/").pop()
+    project["version"] = make_inline_table({"use_scm": True})
+    project["license"] = make_inline_table({"text": package_json["license"]})
+    project["authors"] = array_of_inline_tables(
+        [
+            {
+                "name": author["name"] if author is dict else author,
+                "email": author["email"] if author is dict else "",
+            }
+        ]
+    )
+    project["dynamic"] = make_array(["classifiers", "version"])
+    project["requires-python"] = f">={sys.version_info.major}.{sys.version_info.minor}"
+
+    build_system = pdm_config_table("build-system")
+    build_system["requires"] = make_array(["pdm-pep517"])
+    build_system["build-backend"] = "pdm.pep517.api"
+
+    pdm_project.add_dependencies(
+        requirements={k: parse_requirement(k + v) for k, v in dependencies.items()},
+        show_message=True,
+    )
 
 
 @engage.command(

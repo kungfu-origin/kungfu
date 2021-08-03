@@ -19,12 +19,12 @@
     "@kungfu-trader/kungfu-sdk": "^2.4.0-alpha.4"
   },
   "kungfuBuild": {
-    "cpp": {
-      "target": "bind/python",
-      "links": [
-        "xtptraderapi",
-        "xtpquoteapi"
-      ]
+    "python": {
+      "dependencies": {
+        "dotted_dict": "~=1.1.0",
+        "recordclass": "~=0.15.0",
+        "sortedcontainers": "~=2.4.0"
+      }
     }
   },
   "kungfuConfig": {

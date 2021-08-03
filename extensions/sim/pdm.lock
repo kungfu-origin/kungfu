@@ -15,7 +15,7 @@ summary = "Sorted Containers -- Sorted List, Sorted Dict, Sorted Set"
 
 [metadata]
 lock_version = "3.1"
-content_hash = "sha256:976a9a349575a6225d7f46f776fba628feebe1eda7a952a2755896e2b8eded04"
+content_hash = "sha256:79a27bc9f8897fc0f03a6ba678b02e8735f4a09b7fbcd81610d19f71b17967ae"
 
 [metadata.files]
 "dotted-dict 1.1.3" = [
