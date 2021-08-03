@@ -183,14 +183,6 @@ optional = false
 python-versions = "*"
 
 [[package]]
-name = "dotted-dict"
-version = "1.1.3"
-description = "dict object with support for addressing keys in dot notation."
-category = "main"
-optional = false
-python-versions = "*"
-
-[[package]]
 name = "fasteners"
 version = "0.16.3"
 description = "A python package that provides useful locks."
@@ -461,7 +453,7 @@ python-versions = ">=3.5"
 
 [[package]]
 name = "pyinstaller"
-version = "4.3"
+version = "4.5"
 description = "PyInstaller bundles a Python application and all its dependencies into a single package."
 category = "dev"
 optional = false
@@ -575,14 +567,6 @@ optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, !=3.5.*"
 
 [[package]]
-name = "recordclass"
-version = "0.14.3"
-description = "Mutable variants of tuple (mutabletuple) and collections.namedtuple (recordclass), which support assignments and more memory saving variants (dataobject, structclass, litelist, ...)."
-category = "main"
-optional = false
-python-versions = "*"
-
-[[package]]
 name = "regex"
 version = "2021.7.6"
 description = "Alternative regular expression module, to replace re."
@@ -656,14 +640,6 @@ description = "Python 2 and 3 compatibility utilities"
 category = "main"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*"
-
-[[package]]
-name = "sortedcontainers"
-version = "2.4.0"
-description = "Sorted Containers -- Sorted List, Sorted Dict, Sorted Set"
-category = "main"
-optional = false
-python-versions = "*"
 
 [[package]]
 name = "statsmodels"
@@ -760,14 +736,6 @@ secure = ["pyOpenSSL (>=0.14)", "cryptography (>=1.3.4)", "idna (>=2.0.0)", "cer
 socks = ["PySocks (>=1.5.6,!=1.5.7,<2.0)"]
 
 [[package]]
-name = "wcwidth"
-version = "0.2.5"
-description = "Measures the displayed width of unicode strings in a terminal"
-category = "main"
-optional = false
-python-versions = "*"
-
-[[package]]
 name = "zipp"
 version = "3.5.0"
 description = "Backport of pathlib-compatible object wrapper for zip files"
@@ -782,7 +750,7 @@ testing = ["pytest (>=4.6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytes
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.7.1, <4.0"
-content-hash = "53284c54ac078b3bc6896b504a87cf44a3ebaac72b38276a491e41e15375587a"
+content-hash = "048112c0ebcee8a77d5c4169eb96f86dcf98b209337cef04968eb3f3bb60c4a5"
 
 [metadata.files]
 altgraph = [
@@ -846,10 +814,6 @@ distlib = [
 distro = [
     {file = "distro-1.5.0-py2.py3-none-any.whl", hash = "sha256:df74eed763e18d10d0da624258524ae80486432cd17392d9c3d96f5e83cd2799"},
     {file = "distro-1.5.0.tar.gz", hash = "sha256:0e58756ae38fbd8fc3020d54badb8eae17c5b9dcbed388b17bb55b8a5928df92"},
-]
-dotted-dict = [
-    {file = "dotted_dict-1.1.3-py2.py3-none-any.whl", hash = "sha256:a78600ee63c6473581234249cc56263d472b31e812428e28f2217bbbbfb9df22"},
-    {file = "dotted_dict-1.1.3.tar.gz", hash = "sha256:f148a1c15598db8295551ed1555bd35b91dec49359bec7b4657e9b2f35526965"},
 ]
 fasteners = [
     {file = "fasteners-0.16.3-py2.py3-none-any.whl", hash = "sha256:8408e52656455977053871990bd25824d85803b9417aa348f10ba29ef0c751f7"},
@@ -1048,7 +1012,12 @@ pygments = [
     {file = "Pygments-2.9.0.tar.gz", hash = "sha256:a18f47b506a429f6f4b9df81bb02beab9ca21d0a5fee38ed15aef65f0545519f"},
 ]
 pyinstaller = [
-    {file = "pyinstaller-4.3.tar.gz", hash = "sha256:5ecf8bbc230d7298a796e52bb745b95eee12878d141f1645612c99246ecd23f2"},
+    {file = "pyinstaller-4.5-py3-none-macosx_10_13_universal2.whl", hash = "sha256:0129e5ea77c5eb6b2e0de8b1f7ec006238991ac712e3c0e877b995a289e4d8ea"},
+    {file = "pyinstaller-4.5-py3-none-manylinux2014_i686.whl", hash = "sha256:3228e1c7d823c5e786ee41194171e19fc985c4d6074610e4876479697a97b60f"},
+    {file = "pyinstaller-4.5-py3-none-manylinux2014_x86_64.whl", hash = "sha256:8b22656d2eaf5141c20afa3b98422cce17bf05ff9ef4fa8b232b47853b18e4b9"},
+    {file = "pyinstaller-4.5-py3-none-win32.whl", hash = "sha256:9d78452652a27a20a7126fdb93fe7abe731b82dc2a6c163a67fd98bd2a9c44f5"},
+    {file = "pyinstaller-4.5-py3-none-win_amd64.whl", hash = "sha256:df294f6579443924774e7c987deccca47a5f6386137972c8f3f31983db37a43e"},
+    {file = "pyinstaller-4.5.tar.gz", hash = "sha256:86f694faec78a08c3893aacef84b1a49cb53d4e2880559c6124beefd196a3a74"},
 ]
 pyinstaller-hooks-contrib = [
     {file = "pyinstaller-hooks-contrib-2021.2.tar.gz", hash = "sha256:7f5d0689b30da3092149fc536a835a94045ac8c9f0e6dfb23ac171890f5ea8f2"},
@@ -1112,19 +1081,6 @@ pyyaml = [
     {file = "PyYAML-5.4.1-cp39-cp39-win32.whl", hash = "sha256:49d4cdd9065b9b6e206d0595fee27a96b5dd22618e7520c33204a4a3239d5b10"},
     {file = "PyYAML-5.4.1-cp39-cp39-win_amd64.whl", hash = "sha256:c20cfa2d49991c8b4147af39859b167664f2ad4561704ee74c1de03318e898db"},
     {file = "PyYAML-5.4.1.tar.gz", hash = "sha256:607774cbba28732bfa802b54baa7484215f530991055bb562efbed5b2f20a45e"},
-]
-recordclass = [
-    {file = "recordclass-0.14.3-cp27-cp27m-win32.whl", hash = "sha256:016a70b9e1d93e184a065a23d9bd15387c154375a166fd8868db96f362d77d94"},
-    {file = "recordclass-0.14.3-cp27-cp27m-win_amd64.whl", hash = "sha256:c9941edde67077f95e83dfd69795b2bc6cff13e05ef537b4a57cddfb8fac55f9"},
-    {file = "recordclass-0.14.3-cp36-cp36m-win32.whl", hash = "sha256:867f94a6c96474e2b52d50359adbcd1eaf18202c11654b662022a700831dfb7d"},
-    {file = "recordclass-0.14.3-cp36-cp36m-win_amd64.whl", hash = "sha256:3ced6c8d7d34d573fd7f926b47b5cdb2875b986841f1464eb9d41777edb63f7e"},
-    {file = "recordclass-0.14.3-cp37-cp37m-win32.whl", hash = "sha256:2c7dd437b2d766954e0468bdd49e444f24fc82bb080f57a4901e3718c678fcf6"},
-    {file = "recordclass-0.14.3-cp37-cp37m-win_amd64.whl", hash = "sha256:3c885d6d92c3306846c36797a03712e7c9dea6cc01b61f45305a815c87ea5a0c"},
-    {file = "recordclass-0.14.3-cp38-cp38-win32.whl", hash = "sha256:b5c25065b5d2825122fd67ac43053033bd85c209b261264ca3e2460b8308336d"},
-    {file = "recordclass-0.14.3-cp38-cp38-win_amd64.whl", hash = "sha256:57ba80fe2b3fc61cd878b3cd90ca1445a48292baf5d154055d671dc76c521bc1"},
-    {file = "recordclass-0.14.3-cp39-cp39-win32.whl", hash = "sha256:8a99639842291349667133a0c4076b2e5e483c4628da342715072037902d5884"},
-    {file = "recordclass-0.14.3-cp39-cp39-win_amd64.whl", hash = "sha256:176af306e9b3a13a97b3e8e87228a2975f87173048ab5eafbd0ba9f2838cadb0"},
-    {file = "recordclass-0.14.3.tar.gz", hash = "sha256:f2a0a42ec1128be81e28b8ba82ef1a1dccc41efbec6ecf97866915649645222f"},
 ]
 regex = [
     {file = "regex-2021.7.6-cp36-cp36m-macosx_10_9_x86_64.whl", hash = "sha256:e6a1e5ca97d411a461041d057348e578dc344ecd2add3555aedba3b408c9f874"},
@@ -1210,10 +1166,6 @@ six = [
     {file = "six-1.15.0-py2.py3-none-any.whl", hash = "sha256:8b74bedcbbbaca38ff6d7491d76f2b06b3592611af620f8426e82dddb04a5ced"},
     {file = "six-1.15.0.tar.gz", hash = "sha256:30639c035cdb23534cd4aa2dd52c3bf48f06e5f4a941509c8bafd8ce11080259"},
 ]
-sortedcontainers = [
-    {file = "sortedcontainers-2.4.0-py2.py3-none-any.whl", hash = "sha256:a163dcaede0f1c021485e957a39245190e74249897e2ae4b2aa38595db237ee0"},
-    {file = "sortedcontainers-2.4.0.tar.gz", hash = "sha256:25caa5a06cc30b6b83d11423433f65d1f9d76c4c6a0c90e3379eaa43b9bfdb88"},
-]
 statsmodels = [
     {file = "statsmodels-0.12.2-cp36-cp36m-macosx_10_15_x86_64.whl", hash = "sha256:c1d98ce2072f5e772cbf91d05475490368da5d3ee4a3150062330c7b83221ceb"},
     {file = "statsmodels-0.12.2-cp36-cp36m-manylinux1_i686.whl", hash = "sha256:4184487e9c281acad3d0bda19445c69db292f0dbb18f25ebf56a7966a0a28eef"},
@@ -1293,10 +1245,6 @@ typing-extensions = [
 urllib3 = [
     {file = "urllib3-1.25.11-py2.py3-none-any.whl", hash = "sha256:f5321fbe4bf3fefa0efd0bfe7fb14e90909eb62a48ccda331726b4319897dd5e"},
     {file = "urllib3-1.25.11.tar.gz", hash = "sha256:8d7eaa5a82a1cac232164990f04874c594c9453ec55eef02eab885aa02fc17a2"},
-]
-wcwidth = [
-    {file = "wcwidth-0.2.5-py2.py3-none-any.whl", hash = "sha256:beb4802a9cebb9144e99086eff703a642a13d6a0052920003a230f3294bbe784"},
-    {file = "wcwidth-0.2.5.tar.gz", hash = "sha256:c4d647b99872929fdb7bdcaa4fbe7f01413ed3d98077df798530e5b04f116c83"},
 ]
 zipp = [
     {file = "zipp-3.5.0-py3-none-any.whl", hash = "sha256:957cfda87797e389580cb8b9e3870841ca991e2125350677b2ca83a0e99390a3"},

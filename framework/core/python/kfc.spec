@@ -36,6 +36,7 @@ site_path = abspath(dirname(dirname(PyInstaller.__file__)))
 data_blib2to3 = make_path(site_path, "blib2to3", "*.txt")
 
 # pdm requires
+data_pep517 = make_path(site_path, "pep517", "in_process", "_in_process.py")
 data_pdm_pep582 = make_path(site_path, "pdm", "pep582", "sitecustomize.py")
 data_pip_certifi = make_path(site_path, "pip", "_vendor", "certifi", "*.pem")
 
@@ -77,6 +78,7 @@ def extend_hiddenimports(hiddenimports):
 
 
 ###############################################################################
+name = "kfc"
 block_cipher = None
 a = Analysis(
     [make_path("kungfu", "__main__.py")],
@@ -90,6 +92,7 @@ a = Analysis(
             (make_path(build_output_dir, "*"), "."),
             (make_path(build_dir, "include"), "include"),
             (data_blib2to3, "blib2to3"),
+            (data_pep517, make_path("pep517", "in_process")),
             (data_pdm_pep582, make_path("pdm", "pep582")),
             (data_pip_certifi, make_path("pip", "_vendor", "certifi")),
             (data_nuitka_include, make_path(nuitka_build_dst_dir, "include")),
@@ -113,21 +116,18 @@ a = Analysis(
         [
             "pkg_resources",
             "pdm",
+            "pep517",
             "shellingham",
             "nuitka",
             "SCons",
+            "setuptools",
             "numpy",
             "pandas",
             "plotly",
-            "dotted_dict",
-            "recordclass",
-            "sortedcontainers",
-            "wcwidth",
             "pip.__main__",
         ]
     ),
     excludes=[
-        "kungfu_extensions",
         "matplotlib",
     ],
     hookspath=[],
@@ -138,10 +138,10 @@ pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
 exe = EXE(
     pyz,
     a.scripts,
-    name="kfc",
+    name=name,
     console=True,
     debug=False,
     exclude_binaries=True,
     strip=False,
 )
-coll = COLLECT(exe, a.binaries, a.zipfiles, a.datas, name="kfc", strip=False)
+coll = COLLECT(exe, a.binaries, a.zipfiles, a.datas, name=name, strip=False)

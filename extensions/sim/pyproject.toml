@@ -1,11 +1,15 @@
 [project]
-name = "kfx_vendor_xtp_demo"
+name = "kfx_vendor_sim"
 version = { use_scm = true }
 license = { text = "Apache-2.0" }
 authors = [
     { name = "Kungfu Trader", email = "info@kungfu.link" },
 ]
-dependencies = []
+dependencies = [
+    "dotted_dict >= 1.1.0",
+    "recordclass >= 0.14.0",
+    "sortedcontainers >= 2.4.0",
+]
 dynamic = ["classifiers", "version"]
 requires-python = ">=3.7"
 

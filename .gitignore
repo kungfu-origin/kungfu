@@ -18,7 +18,6 @@ node_modules/
 
 # Python related
 .pdm.toml
-.installed.cfg
 __pycache__/
 __pypackages__/
 *.pyc

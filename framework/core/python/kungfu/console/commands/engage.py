@@ -48,7 +48,7 @@ def black(ctx):
 def pdm(ctx):
     sys.argv = [sys.argv[0], *ctx.args]
 
-    from pdm import core
+    from pdm import core, project
 
     class Core(core.Core):
         def __init__(self):
@@ -61,61 +61,72 @@ def pdm(ctx):
 
                 next(pkgutil.iter_modules(commands.__path__))
             except StopIteration:
-                self.register_cmds()
+                register_pdm_commands()
 
-        def register_cmds(self):
-            from pdm.cli.commands import add
-            from pdm.cli.commands import build
-            from pdm.cli.commands import cache
-            from pdm.cli.commands import completion
-            from pdm.cli.commands import config
-            from pdm.cli.commands import export
-            from pdm.cli.commands import import_cmd
-            from pdm.cli.commands import info
-            from pdm.cli.commands import init
-            from pdm.cli.commands import install
-            from pdm.cli.commands import list
-            from pdm.cli.commands import lock
-            from pdm.cli.commands import plugin
-            from pdm.cli.commands import remove
-            from pdm.cli.commands import run
-            from pdm.cli.commands import search
-            from pdm.cli.commands import show
-            from pdm.cli.commands import sync
-            from pdm.cli.commands import update
-            from pdm.cli.commands import use
+    def register_pdm_commands():
+        from pdm.cli.commands import add
+        from pdm.cli.commands import build
+        from pdm.cli.commands import cache
+        from pdm.cli.commands import completion
+        from pdm.cli.commands import config
+        from pdm.cli.commands import export
+        from pdm.cli.commands import import_cmd
+        from pdm.cli.commands import info
+        from pdm.cli.commands import init
+        from pdm.cli.commands import install
+        from pdm.cli.commands import list
+        from pdm.cli.commands import lock
+        from pdm.cli.commands import plugin
+        from pdm.cli.commands import remove
+        from pdm.cli.commands import run
+        from pdm.cli.commands import search
+        from pdm.cli.commands import show
+        from pdm.cli.commands import sync
+        from pdm.cli.commands import update
+        from pdm.cli.commands import use
 
-            for module in [
-                add,
-                build,
-                cache,
-                completion,
-                config,
-                export,
-                import_cmd,
-                info,
-                init,
-                install,
-                list,
-                lock,
-                plugin,
-                remove,
-                run,
-                search,
-                show,
-                sync,
-                update,
-                use,
-            ]:
-                try:
-                    cmd = module.Command
-                except AttributeError:
-                    continue
-                name = cmd.name or module.__name__.split(".").pop()
-                core.register_command(cmd, name)
+        for module in [
+            add,
+            build,
+            cache,
+            completion,
+            config,
+            export,
+            import_cmd,
+            info,
+            init,
+            install,
+            list,
+            lock,
+            plugin,
+            remove,
+            run,
+            search,
+            show,
+            sync,
+            update,
+            use,
+        ]:
+            try:
+                cmd = module.Command
+            except AttributeError:
+                continue
+            name = cmd.name or module.__name__.split(".").pop()
+            core.register_command(cmd, name)
 
     enable_kfc_variant("python")
+
+    os.environ.update(
+        {
+            # "PDM_PYTHON": sys.executable,  # not working perfectly, have to manipulate .pdm.toml
+            "PDM_AUTO_GLOBAL": "1",
+            "PDM_USE_VENV": "0",
+        }
+    )
+
     core = Core()
+    config = project.Project(Core(), ".").project_config
+    config["python.path"] = sys.executable  # make sure to use kfc as python interpreter
     core.main()
 
 

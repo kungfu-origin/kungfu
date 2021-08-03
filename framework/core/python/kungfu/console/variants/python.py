@@ -1,8 +1,8 @@
 import click
-import importlib
-import platform
 import os
+import platform
 import sys
+import tokenize
 
 
 @click.command(
@@ -139,7 +139,7 @@ def main(argv, **options):
 
     if options["module"]:
         sys.argv = [sys.executable, *argv]
-        run_module(options["module"])
+        run_module(options["module"] + ".__main__")
         return
 
     if argv:
@@ -152,23 +152,21 @@ def main(argv, **options):
                 .replace(".py", "")
                 .replace(os.sep, ".")[1:]
             )
-            run_module(module_name, True)
+            run_module(module_name)
             return
-        with open(__file__, "r") as source:
-            code = "".join(source.readlines())
+        with tokenize.open(__file__) as source:
+            code = source.read()
         exec(code)
         return
 
     pass
 
 
-def run_module(module_name, is_single_file=False):
-    main_name = "__main__"
-    main_module = (
-        importlib.import_module(f"{module_name}.{main_name}")
-        if not is_single_file
-        else importlib.import_module(module_name)
-    )
-    main_loader = main_module.__loader__
-    main_loader.name = main_module.__name__ = main_name
+def run_module(module_name):
+    from importlib.util import find_spec, module_from_spec
+
+    main_spec = find_spec(module_name)
+    main_module = module_from_spec(main_spec)
+    main_loader = main_spec.loader
+    main_loader.name = main_module.__name__ = "__main__"
     main_loader.exec_module(main_module)
