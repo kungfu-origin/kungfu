@@ -138,8 +138,9 @@ def main(argv, **options):
         return
 
     if options["module"]:
-        sys.argv = [sys.executable, *argv]
-        run_module(options["module"] + ".__main__")
+        module_name = options["module"]
+        sys.argv = [module_name, *argv]
+        run_module(module_name + ".__main__")
         return
 
     if argv:

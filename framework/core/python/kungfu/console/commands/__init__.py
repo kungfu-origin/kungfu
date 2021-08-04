@@ -9,12 +9,6 @@ from click.globals import get_current_context
 from functools import update_wrapper
 
 
-def pick(**kwargs):
-    from . import __registry__ as commands
-
-    kfc(obj=commands, **kwargs)
-
-
 class PrioritizedCommandGroup(click.Group):
     DEFAULT_PRIORITY = 100
 
@@ -194,3 +188,9 @@ def kfc(ctx, home, log_level, name, code):
         click.echo(kfc.get_help(ctx))
 
     pass
+
+
+def main(**kwargs):
+    from . import __registry__ as commands
+
+    kfc(obj=commands, **kwargs)

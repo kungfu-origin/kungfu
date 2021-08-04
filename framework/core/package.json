@@ -53,7 +53,7 @@
     "nuitka": "pipenv run python -m nuitka",
     "format": "yarn format:cpp && yarn format:python && yarn format:js",
     "format:cpp": "pipenv run conan source .",
-    "format:python": "pipenv run python -m black python *.py",
+    "format:python": "pipenv run python -m black python .*/*.py */*.spec",
     "format:js": "prettier --write --parser typescript \"(.gyp|node)/**.js\"",
     "dev": "pipenv run python .devtools/kfc.py",
     "kfc": "node node/kfc.js"

@@ -10,6 +10,7 @@ from PyInstaller.building.api import COLLECT, EXE, PYZ
 from PyInstaller.building.build_main import Analysis
 from PyInstaller.utils.hooks import collect_data_files
 from PyInstaller.utils.hooks import collect_submodules
+
 ###############################################################################
 # cmake includes
 cmake_dir = abspath(make_path(cwd, ".cmake"))
@@ -68,12 +69,17 @@ def extend_datas(datas, src_dirs, build_dirs, packages):
     return datas
 
 
-def extend_hiddenimports(hiddenimports):
+def extend_hiddenimports(modules, executable_modules):
+    hiddenimports = list(modules)
+
     def is_valid(submodule):
         return submodule not in hiddenimports and "test" not in submodule
 
-    for pkg_name in list(hiddenimports):
+    for pkg_name in modules:
         hiddenimports.extend(filter(is_valid, collect_submodules(pkg_name)))
+    for pkg_name in executable_modules:
+        hiddenimports.append(f"{pkg_name}.__main__")
+
     return hiddenimports
 
 
@@ -81,8 +87,8 @@ def extend_hiddenimports(hiddenimports):
 name = "kfc"
 block_cipher = None
 a = Analysis(
-    [make_path("kungfu", "__main__.py")],
-    pathex=["python"],
+    scripts=["kfc.py"],
+    pathex=[],
     binaries=[],
     datas=extend_datas(
         [
@@ -113,7 +119,7 @@ a = Analysis(
         ],
     ),
     hiddenimports=extend_hiddenimports(
-        [
+        modules=[
             "pkg_resources",
             "pdm",
             "pep517",
@@ -124,8 +130,11 @@ a = Analysis(
             "numpy",
             "pandas",
             "plotly",
-            "pip.__main__",
-        ]
+        ],
+        executable_modules=[
+            "kungfu",
+            "pip",
+        ],
     ),
     excludes=[
         "matplotlib",

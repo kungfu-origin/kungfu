@@ -5,11 +5,11 @@
 # KF_NO_EXT - disable extensions if set
 ###########################################################
 
-from kungfu.console import commands, select, variants
+from kungfu.console import alternatives, select
 
 
 def run(**kwargs):
-    select(map(lambda mod: mod.pick, [variants, commands]), **kwargs)
+    select(alternatives(), **kwargs)
 
 
 if __name__ == "__main__":

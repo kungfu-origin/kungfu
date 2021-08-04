@@ -10,7 +10,8 @@ const result = spawnSync('kfc', process.argv.slice(2), {
   shell: process.platform === "win32",
   windowsHide: true,
   env: {
-    PATH: `${kfc_folder}${path.delimiter}${process.env.PATH}`,
+    ...process.env,
+    PATH: `${kfc_folder}${path.delimiter}${process.env.PATH}`
   },
 });
 

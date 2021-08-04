@@ -1,14 +1,15 @@
 from os import environ
 
 
+def disable():
+    [environ.pop(key, None) for key in environ.keys() if key.startswith("KFC_AS_")]
+
+
 def enable(variant: str):
-    for key in environ.keys():
-        if key.startswith("KFC_AS_"):
-            environ.pop(key, None)
     environ[f"KFC_AS_{variant.upper()}"] = "on"
 
 
-def pick(**kwargs):
+def main(**kwargs):
     from distutils.util import strtobool
     from .__registry__ import env
 

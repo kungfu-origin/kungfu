@@ -16,7 +16,7 @@ from kungfu.console.commands import (
     update_wrapper,
     typing,
 )
-from kungfu.console.variants import enable as enable_kfc_variant
+from kungfu.console import variants
 from kungfu.yijinjing.log import create_logger
 
 
@@ -202,7 +202,7 @@ def pdm(ctx):
                 name = cmd.name or module.__name__.split(".").pop()
                 self.register_command(cmd, name)
 
-    enable_kfc_variant("python")
+    variants.enable("python")
     os.environ.update(
         {
             "PDM_AUTO_GLOBAL": "1",
