@@ -1,26 +1,20 @@
 from os import environ
 
+ENV_VARIANT_KEY = "KFC_AS_VARIANT"
+
 
 def disable():
-    [environ.pop(key, None) for key in environ.keys() if key.startswith("KFC_AS_")]
+    environ.pop(ENV_VARIANT_KEY, None)
 
 
 def enable(variant: str):
-    environ[f"KFC_AS_{variant.upper()}"] = "on"
+    environ[ENV_VARIANT_KEY] = variant
 
 
 def main(**kwargs):
-    from distutils.util import strtobool
-    from .__registry__ import env
+    from .__registry__ import runners
 
-    def try_run(key):
-        if key in environ and bool(strtobool(environ[key])):
-            env[key](**kwargs)
-            return True
-        return False
+    variant = environ.get(ENV_VARIANT_KEY)
+    runner = runners.get(variant, lambda **x: False)
 
-    try:
-        next(k for k in env if try_run(k))
-        return True
-    except StopIteration:
-        return False
+    return runner(**kwargs) is not False

@@ -32,4 +32,4 @@
 
 from kungfu import __main__ as origin
 
-origin.run()
+origin.main()

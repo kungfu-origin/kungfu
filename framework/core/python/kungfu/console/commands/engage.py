@@ -6,7 +6,7 @@ import os
 import sys
 import subprocess
 
-from os.path import abspath, basename, dirname
+from os.path import abspath, dirname
 
 from kungfu.console.commands import (
     CLI,
@@ -202,13 +202,13 @@ def pdm(ctx):
                 name = cmd.name or module.__name__.split(".").pop()
                 self.register_command(cmd, name)
 
-    variants.enable("python")
     os.environ.update(
         {
             "PDM_AUTO_GLOBAL": "1",
             "PDM_USE_VENV": "0",
         }
     )
+    variants.enable("python")
     EngagedCore().main()
 
 
@@ -220,7 +220,12 @@ def engaged_nuitka_context(enable_plugins=True):
             EngagedNuitka.useEngagedCommands()
             EngagedNuitka.useEngagedEnvironment()
             enable_plugins and EngagedNuitka.loadPlugins()
-            os.environ["PYTHONPATH"] = os.pathsep.join(sys.path)
+            os.environ.update(
+                {
+                    "PYTHONPATH": os.pathsep.join(sys.path),
+                }
+            )
+            variants.enable("python")
             return reset_sys_argv(f)(*args, **kwargs)
 
         return update_wrapper(typing.cast(CLI, new_func), f)
@@ -287,9 +292,6 @@ class EngagedNuitka:
         from nuitka.build import DataComposerInterface, SconsInterface
 
         def runEngagedDataComposer(source_dir):
-            data_composer_opts = (
-                [] if basename(sys.executable).startswith("kfc") else ["-m", "kungfu"]
-            )
             mapping = {
                 "NUITKA_PACKAGE_HOME": dirname(
                     abspath(sys.modules["nuitka"].__path__[0])
@@ -302,7 +304,8 @@ class EngagedNuitka:
                 subprocess.check_call(
                     [
                         sys.executable,
-                        *data_composer_opts,
+                        "-m",
+                        "kungfu",
                         "engage",
                         "nuitka-data-composer",
                         source_dir,
@@ -318,10 +321,7 @@ class EngagedNuitka:
                 + os.pathsep
                 + dirname(kungfu.__bindings__.__file__)
             )
-            scons_opts = (
-                [] if basename(sys.executable).startswith("kfc") else ["-m", "kungfu"]
-            )
-            return [sys.executable, *scons_opts, "engage", "nuitka-scons"]
+            return [sys.executable, "-m", "kungfu", "engage", "nuitka-scons"]
 
         DataComposerInterface.runDataComposer = runEngagedDataComposer
         SconsInterface._getSconsBinaryCall = getEngagedSconsBinaryCall

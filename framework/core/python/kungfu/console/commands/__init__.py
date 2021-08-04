@@ -193,4 +193,4 @@ def kfc(ctx, home, log_level, name, code):
 def main(**kwargs):
     from . import __registry__ as commands
 
-    kfc(obj=commands, **kwargs)
+    return kfc(obj=commands, **kwargs) is not False
