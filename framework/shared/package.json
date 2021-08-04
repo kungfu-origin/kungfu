@@ -1,6 +1,9 @@
 {
   "name": "@kungfu-trader/kungfu-shared",
-  "author": "kungfu-trader",
+  "author": {
+    "name": "kungfu-trader",
+    "email": "info@kungfu.link"
+  },
   "version": "2.4.0-alpha.4",
   "description": "Kungfu Shared",
   "license": "Apache-2.0",

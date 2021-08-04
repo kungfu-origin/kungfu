@@ -1,6 +1,9 @@
 {
   "name": "@kungfu-trader/kfx-vendor-sim",
-  "author": "kungfu-trader",
+  "author": {
+    "name": "kungfu-trader",
+    "email": "info@kungfu.link"
+  },
   "version": "2.4.0-alpha.4",
   "description": "Kungfu Extension - SIM",
   "license": "Apache-2.0",

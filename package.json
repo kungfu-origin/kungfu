@@ -1,6 +1,9 @@
 {
   "name": "@kungfu-trader/kungfu-workspaces",
-  "author": "kungfu-trader",
+  "author": {
+    "name": "kungfu-trader",
+    "email": "info@kungfu.link"
+  },
   "description": "Kungfu Trader Workspaces",
   "license": "Apache-2.0",
   "private": true,

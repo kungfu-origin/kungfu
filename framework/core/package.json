@@ -1,6 +1,9 @@
 {
   "name": "@kungfu-trader/kungfu-core",
-  "author": "kungfu-trader",
+  "author": {
+    "name": "kungfu-trader",
+    "email": "info@kungfu.link"
+  },
   "version": "2.4.0-alpha.4",
   "description": "Kungfu Core Library",
   "license": "Apache-2.0",

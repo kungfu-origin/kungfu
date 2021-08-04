@@ -143,12 +143,13 @@ def pdm(ctx):
 @engage_command_context
 def pdm_setup(ctx):
     from pdm.core import Core
-    from pdm.formats.base import array_of_inline_tables, make_array, make_inline_table
+    from pdm.formats.base import array_of_inline_tables, make_inline_table
     from pdm.models.requirements import parse_requirement
     from pdm.project.core import atoml, Project
 
     with open("package.json", "r") as file:
         package_json = json.load(file)
+
     author = package_json["author"]
     build_config = package_json.get("kungfuBuild", {})
     python_config = build_config.get("python", {})
@@ -162,32 +163,34 @@ def pdm_setup(ctx):
         result = pdm_config[name] = pdm_config.get(name, atoml.table())
         # Fix extra trailing newline
         body = result.value.body
-        body.pop() if body and body[-1][0] is None else id(body)
+        body and body[-1][0] is None and body.pop()
         return result
 
     project = pdm_config_table("project")
-    project["name"] = package_json["name"].split("/").pop()
+    project["name"] = package_json.get("name", "").split("/").pop()
     project["version"] = make_inline_table({"use_scm": True})
-    project["license"] = make_inline_table({"text": package_json["license"]})
+    project["license"] = make_inline_table({"text": package_json.get("license", "")})
     project["authors"] = array_of_inline_tables(
         [
             {
-                "name": author["name"] if author is dict else author,
-                "email": author["email"] if author is dict else "",
+                "name": author["name"] if isinstance(author, dict) else author,
+                "email": author["email"] if isinstance(author, dict) else "",
             }
         ]
     )
-    project["dynamic"] = make_array(["classifiers", "version"])
-    project["requires-python"] = f">={sys.version_info.major}.{sys.version_info.minor}"
+    project["dynamic"] = ["classifiers", "version"]
+    project["requires-python"] = f"~={sys.version_info.major}.{sys.version_info.minor}"
+    project["dependencies"] = project.get("dependencies", [])
 
     build_system = pdm_config_table("build-system")
-    build_system["requires"] = make_array(["pdm-pep517"])
+    build_system["requires"] = ["pdm-pep517"]
     build_system["build-backend"] = "pdm.pep517.api"
 
-    pdm_project.add_dependencies(
+    dependencies and pdm_project.add_dependencies(
         requirements={k: parse_requirement(k + v) for k, v in dependencies.items()},
-        show_message=True,
+        show_message=False,
     )
+    pdm_project.write_pyproject()
 
 
 @engage.command(
