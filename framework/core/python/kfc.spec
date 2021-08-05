@@ -1,17 +1,32 @@
 # PyInstaller Settings
 ###############################################################################
 import glob
+import platform
 import os
 import PyInstaller
 
-from os.path import abspath, dirname, curdir as cwd, join as make_path
-
+from distutils import sysconfig
+from os.path import (
+    abspath,
+    basename,
+    dirname,
+    curdir as cwd,
+    join as make_path,
+)
 from PyInstaller.building.api import COLLECT, EXE, PYZ
 from PyInstaller.building.build_main import Analysis
 from PyInstaller.utils.hooks import collect_data_files
 from PyInstaller.utils.hooks import collect_submodules
 
 ###############################################################################
+# python dir
+python_inc = sysconfig.get_python_inc(plat_specific=True)
+python_dir = (
+    dirname(python_inc)
+    if basename(python_inc) == "include"
+    else dirname(dirname(python_inc))
+)
+
 # cmake includes
 cmake_dir = abspath(make_path(cwd, ".cmake"))
 
@@ -66,6 +81,9 @@ def extend_datas(datas, src_dirs, build_dirs, packages):
     map(add_include, src_dirs)
     map(add_lib, build_dirs)
     map(lambda pkg: datas.extend(collect_data_files(pkg)), packages)
+
+    if platform.system() == "Windows":
+        datas.append((make_path(python_dir, "libs"), "libs"))
     return datas
 
 

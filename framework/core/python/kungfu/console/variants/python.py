@@ -139,7 +139,8 @@ def main(argv, **options):
 
     if options["module"]:
         module_name = options["module"]
-        sys.argv = [module_name, *argv]
+        idx = sys.argv.index("-m")
+        sys.argv = [module_name, *sys.argv[idx + 2 :]]
         run_module(module_name + ".__main__")
         return
 
