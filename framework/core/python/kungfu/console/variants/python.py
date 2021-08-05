@@ -1,8 +1,11 @@
 import click
 import os
 import platform
+import re
 import sys
 import tokenize
+
+from kungfu.console import bridging
 
 
 @click.command(
@@ -139,9 +142,10 @@ def main(argv, **options):
 
     if options["module"]:
         module_name = options["module"]
-        idx = sys.argv.index("-m")
-        sys.argv = [module_name, *sys.argv[idx + 2 :]]
-        run_module(module_name + ".__main__")
+        matches = [i for i, arg in enumerate(sys.argv) if re.search("-.*m", arg)]
+        idx = matches[0] + 2
+        sys.argv = [module_name, *sys.argv[idx:]]
+        bridging.run_module_main(module_name)
         return
 
     if argv:
@@ -154,7 +158,7 @@ def main(argv, **options):
                 .replace(".py", "")
                 .replace(os.sep, ".")[1:]
             )
-            run_module(module_name)
+            bridging.run_module(module_name)
             return
         with tokenize.open(__file__) as source:
             code = source.read()
@@ -162,13 +166,3 @@ def main(argv, **options):
         return
 
     pass
-
-
-def run_module(module_name):
-    from importlib.util import find_spec, module_from_spec
-
-    main_spec = find_spec(module_name)
-    main_module = module_from_spec(main_spec)
-    main_loader = main_spec.loader
-    main_loader.name = main_module.__name__ = "__main__"
-    main_loader.exec_module(main_module)

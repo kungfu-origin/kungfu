@@ -138,7 +138,6 @@ a = Analysis(
     ),
     hiddenimports=extend_hiddenimports(
         modules=[
-            "pkg_resources",
             "pdm",
             "pep517",
             "shellingham",
@@ -148,6 +147,8 @@ a = Analysis(
             "numpy",
             "pandas",
             "plotly",
+            "pip._internal",
+            "pkg_resources",
         ],
         executable_modules=[
             "kungfu",
