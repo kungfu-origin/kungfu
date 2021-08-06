@@ -145,7 +145,7 @@ exports.install = async function (libSiteURL, libName, libVersion, platform = de
   const index = await axios.get(`${libSiteURL}/index.json`);
   const sourceLibs = index.data;
 
-  const findVersion = !libVersion || libVersion == '*';
+  const findVersion = !libVersion || libVersion === '*';
 
   if (libName in sourceLibs && findVersion) {
     libVersion = Object.keys(sourceLibs[libName]).sort().pop();

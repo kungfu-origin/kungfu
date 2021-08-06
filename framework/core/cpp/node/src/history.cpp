@@ -41,7 +41,7 @@ Napi::Value History::SelectPeriod(const Napi::CallbackInfo &info) {
   } catch (const std::exception &ex) {
     SPDLOG_ERROR("failed to select: {}", ex.what());
     yijinjing::util::print_stack_trace();
-    return Napi::Value();
+    return {};
   }
 }
 

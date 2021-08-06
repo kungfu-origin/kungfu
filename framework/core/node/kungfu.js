@@ -7,7 +7,12 @@ const config = path.resolve(path.join(path.dirname(__dirname), 'package.json'));
 const node_bindings_path = prebuilt.find(config);
 const bindings_path =
   'electron' in process.versions ? node_bindings_path.replace('_node.', '_electron.') : node_bindings_path;
-const bindings = (exports._bindings = require(bindings_path));
+const bindings = (() => {
+  const bindings = require(bindings_path);
+  bindings.pyExec(`import sys`);
+  bindings.pyExec(`sys.path.insert(0, "${path.dirname(bindings_path)}")`);
+  return bindings;
+})();
 
 const hex = function (n) {
   const ns = n.toString(16);
@@ -72,6 +77,8 @@ const locator = function (home) {
   };
 };
 
+exports._bindings = bindings;
+
 exports.longfist = bindings.longfist;
 
 exports.formatTime = bindings.formatTime;
@@ -79,6 +86,12 @@ exports.formatTime = bindings.formatTime;
 exports.formatStringToHashHex = bindings.formatStringToHashHex;
 
 exports.parseTime = bindings.parseTime;
+
+exports.pyExec = bindings.pyExec;
+
+exports.pyEval = bindings.pyEval;
+
+exports.pyEvalFile = bindings.pyEvalFile;
 
 exports.Assemble = function (arg) {
   if (Array.isArray(arg)) {

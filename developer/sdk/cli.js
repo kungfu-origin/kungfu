@@ -4,7 +4,7 @@ const os = require('os');
 const treeify = require('treeify');
 const sdk = require('./index.js');
 
-const DefaultLibSiteURL_CN = 'http://external.libkungfu.cc';
+const DefaultLibSiteURL_CN = 'https://external.libkungfu.cc';
 const DefaultLibSiteURL_US = 'https://external.libkungfu.io';
 const DefaultLibSiteURL = process.env.GITHUB_ACTIONS ? DefaultLibSiteURL_US : DefaultLibSiteURL_CN;
 

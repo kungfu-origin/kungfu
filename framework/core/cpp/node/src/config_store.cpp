@@ -38,7 +38,7 @@ Napi::Value ConfigStore::SetConfig(const Napi::CallbackInfo &info) {
     config.value = info[valueIndex].ToString().Utf8Value();
   }
   profile_.set(config);
-  return Napi::Value();
+  return {};
 }
 
 Napi::Value ConfigStore::GetConfig(const Napi::CallbackInfo &info) {
@@ -61,7 +61,7 @@ Napi::Value ConfigStore::GetAllConfig(const Napi::CallbackInfo &info) {
 
 Napi::Value ConfigStore::RemoveConfig(const Napi::CallbackInfo &info) {
   profile_.remove(profile_.get(getConfigFromJs(info, locator_)));
-  return Napi::Value();
+  return {};
 }
 
 void ConfigStore::Init(Napi::Env env, Napi::Object exports) {

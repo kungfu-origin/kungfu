@@ -104,7 +104,7 @@ Napi::Value Watcher::GetLocator(const Napi::CallbackInfo &info) {
 Napi::Value Watcher::GetLocation(const Napi::CallbackInfo &info) {
   auto location = FindLocation(info);
   if (not location) {
-    return Napi::Value();
+    return {};
   }
   auto locationObj = Napi::Object::New(info.Env());
   locationObj.Set("category", Napi::String::New(info.Env(), get_category_name(location->category)));
@@ -151,7 +151,7 @@ Napi::Value Watcher::IsStarted(const Napi::CallbackInfo &info) { return Napi::Bo
 Napi::Value Watcher::Setup(const Napi::CallbackInfo &info) {
   try {
     setup();
-    return Napi::Value();
+    return {};
   } catch (const std::exception &ex) {
     throw Napi::Error::New(info.Env(), fmt::format("setup failed: {}", ex.what()));
   } catch (...) {
@@ -162,7 +162,7 @@ Napi::Value Watcher::Setup(const Napi::CallbackInfo &info) {
 Napi::Value Watcher::Step(const Napi::CallbackInfo &info) {
   try {
     step();
-    return Napi::Value();
+    return {};
   } catch (const std::exception &ex) {
     throw Napi::Error::New(info.Env(), fmt::format("step failed: {}", ex.what()));
   } catch (...) {
@@ -173,14 +173,14 @@ Napi::Value Watcher::Step(const Napi::CallbackInfo &info) {
 Napi::Value Watcher::RequestStop(const Napi::CallbackInfo &info) {
   auto app_location = ExtractLocation(info, 0, get_locator());
   get_writer(app_location->uid)->mark(now(), RequestStop::tag);
-  return Napi::Value();
+  return {};
 }
 
 Napi::Value Watcher::PublishState(const Napi::CallbackInfo &info) {
   if (IsValid(info, 0, &Napi::Value::IsObject)) {
     publish(info[0].ToObject());
   }
-  return Napi::Value();
+  return {};
 }
 
 Napi::Value Watcher::IsReadyToInteract(const Napi::CallbackInfo &info) {

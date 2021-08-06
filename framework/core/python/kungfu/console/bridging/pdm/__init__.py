@@ -151,7 +151,6 @@ def main():
     variants.enable("python")
     os.environ.update(
         {
-            "PDM_AUTO_GLOBAL": "1",
             "PDM_USE_VENV": "0",
         }
     )

@@ -71,15 +71,6 @@ class KungfuCoreConan(ConanFile):
         """Updates mtime of lock files for node-gyp sake"""
         self.__touch_lockfile()
 
-    def build(self):
-        build_type = self.__get_build_type()
-        self.__clean_kfc_dir()
-        self.__clean_build_info(build_type)
-        self.__run_build(build_type, "node")
-        self.__run_build(build_type, "electron")
-        self.__gen_build_info(build_type)
-        self.__show_build_info(build_type)
-
     def imports(self):
         python_inc_src = sysconfig.get_python_inc(plat_specific=True)
         python_inc_dst = (
@@ -89,6 +80,14 @@ class KungfuCoreConan(ConanFile):
         )
         self.copy("*", src=python_inc_src, dst=python_inc_dst)
         self.copy("*", src="include", dst="include")
+
+    def build(self):
+        build_type = self.__get_build_type()
+        self.__clean_build_info(build_type)
+        self.__run_build(build_type, "node")
+        self.__run_build(build_type, "electron")
+        self.__gen_build_info(build_type)
+        self.__show_build_info(build_type)
 
     def package(self):
         build_type = self.__get_build_type()

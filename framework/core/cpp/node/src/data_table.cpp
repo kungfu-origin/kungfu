@@ -14,10 +14,10 @@ DataTable::DataTable(const Napi::CallbackInfo &info) : ObjectWrap(info) {}
 
 Napi::Value DataTable::Filter(const Napi::CallbackInfo &info) {
   if (info.Length() != 2) {
-    return Napi::Value();
+    return {};
   }
   if (not IsValid(info, 0, &Napi::Value::IsString)) {
-    return Napi::Value();
+    return {};
   }
   auto key = info[0].ToString().Utf8Value();
   auto result = constructor.New({info.This()});
@@ -44,7 +44,7 @@ Napi::Value DataTable::List(const Napi::CallbackInfo &info) {
 Napi::Value DataTable::Merge(const Napi::CallbackInfo &info) {
   for (int i = 0; i < info.Length(); i++) {
     if (not IsValid(info, i, &Napi::Value::IsObject)) {
-      return Napi::Value();
+      return {};
     }
   }
   auto result = constructor.New({info.This()});
@@ -66,10 +66,10 @@ Napi::Value DataTable::Merge(const Napi::CallbackInfo &info) {
 
 Napi::Value DataTable::Range(const Napi::CallbackInfo &info) {
   if (not IsValid(info, 0, &Napi::Value::IsString)) {
-    return Napi::Value();
+    return {};
   }
   if (not IsValid(info, 1)) {
-    return Napi::Value();
+    return {};
   }
   auto key = info[0].ToString().Utf8Value();
   auto result = constructor.New({info.This()});
@@ -114,7 +114,7 @@ Napi::Value DataTable::Range(const Napi::CallbackInfo &info) {
 
 Napi::Value DataTable::Sort(const Napi::CallbackInfo &info) {
   if (not IsValid(info, 0, &Napi::Value::IsString)) {
-    return Napi::Value();
+    return {};
   }
 
   auto key = info[0].ToString().Utf8Value();

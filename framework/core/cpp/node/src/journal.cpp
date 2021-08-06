@@ -97,7 +97,7 @@ Napi::Value Reader::CurrentFrame(const Napi::CallbackInfo &info) {
 
 Napi::Value Reader::SeekToTime(const Napi::CallbackInfo &info) {
   seek_to_time(GetTimestamp(info[0]));
-  return Napi::Value();
+  return {};
 }
 
 Napi::Value Reader::DataAvailable(const Napi::CallbackInfo &info) {
@@ -106,7 +106,7 @@ Napi::Value Reader::DataAvailable(const Napi::CallbackInfo &info) {
 
 Napi::Value Reader::Next(const Napi::CallbackInfo &info) {
   next();
-  return Napi::Value();
+  return {};
 }
 
 Napi::Value Reader::Join(const Napi::CallbackInfo &info) {
@@ -117,13 +117,13 @@ Napi::Value Reader::Join(const Napi::CallbackInfo &info) {
   uint32_t dest_id = info[4].As<Napi::Number>().Int32Value();
   auto from_time = GetTimestamp(info[5]);
   join(std::make_shared<location>(mode, category, group, name, io_device_->get_home()->locator), dest_id, from_time);
-  return Napi::Value();
+  return {};
 }
 
 Napi::Value Reader::Disjoin(const Napi::CallbackInfo &info) {
   uint32_t dest_id = info[0].As<Napi::Number>().Int32Value();
   disjoin(dest_id);
-  return Napi::Value();
+  return {};
 }
 
 void Reader::Init(Napi::Env env, Napi::Object exports) {
@@ -160,13 +160,13 @@ Napi::Value Assemble::CurrentFrame(const Napi::CallbackInfo &info) {
 
 Napi::Value Assemble::SeekToTime(const Napi::CallbackInfo &info) {
   if (not IsValid(info, 0, &Napi::Value::IsBigInt)) {
-    return Napi::Value();
+    return {};
   }
   auto time = GetBigInt(info, 0);
   for (auto &reader : readers_) {
     reader->seek_to_time(time);
   }
-  return Napi::Value();
+  return {};
 }
 
 Napi::Value Assemble::DataAvailable(const Napi::CallbackInfo &info) {
@@ -175,7 +175,7 @@ Napi::Value Assemble::DataAvailable(const Napi::CallbackInfo &info) {
 
 Napi::Value Assemble::Next(const Napi::CallbackInfo &info) {
   next();
-  return Napi::Value();
+  return {};
 }
 
 void Assemble::Init(Napi::Env env, Napi::Object exports) {

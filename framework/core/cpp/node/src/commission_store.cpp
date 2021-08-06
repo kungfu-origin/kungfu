@@ -18,7 +18,7 @@ CommissionStore::CommissionStore(const Napi::CallbackInfo &info)
 
 Napi::Value CommissionStore::SetCommission(const Napi::CallbackInfo &info) {
   profile_.set(ExtractCommission(info));
-  return Napi::Value();
+  return {};
 }
 
 Napi::Value CommissionStore::GetCommission(const Napi::CallbackInfo &info) {
@@ -64,7 +64,7 @@ Napi::Value CommissionStore::GetAllCommission(const Napi::CallbackInfo &info) {
 
 Napi::Value CommissionStore::RemoveCommission(const Napi::CallbackInfo &info) {
   profile_.remove(profile_.get(ExtractCommission(info)));
-  return Napi::Value();
+  return {};
 }
 
 void CommissionStore::Init(Napi::Env env, Napi::Object exports) {
