@@ -1,17 +1,17 @@
-AUX_SOURCE_DIRECTORY(src/yijinjing/cache SOURCE_FILES_YJJ_CACHE)
-AUX_SOURCE_DIRECTORY(src/yijinjing/journal SOURCE_FILES_YJJ_JOURNAL)
-AUX_SOURCE_DIRECTORY(src/yijinjing/index SOURCE_FILES_YJJ_INDEX)
-AUX_SOURCE_DIRECTORY(src/yijinjing/io SOURCE_FILES_YJJ_IO)
-AUX_SOURCE_DIRECTORY(src/yijinjing/util SOURCE_FILES_YJJ_UTIL)
-AUX_SOURCE_DIRECTORY(src/yijinjing/practice SOURCE_FILES_YJJ_PRACTICE)
+aux_source_directory(src/yijinjing/cache SOURCE_FILES_YJJ_CACHE)
+aux_source_directory(src/yijinjing/journal SOURCE_FILES_YJJ_JOURNAL)
+aux_source_directory(src/yijinjing/index SOURCE_FILES_YJJ_INDEX)
+aux_source_directory(src/yijinjing/io SOURCE_FILES_YJJ_IO)
+aux_source_directory(src/yijinjing/util SOURCE_FILES_YJJ_UTIL)
+aux_source_directory(src/yijinjing/practice SOURCE_FILES_YJJ_PRACTICE)
 
-AUX_SOURCE_DIRECTORY(src/wingchun/broker SOURCE_FILES_WC_BROKER)
-AUX_SOURCE_DIRECTORY(src/wingchun/service SOURCE_FILES_WC_SERVICE)
-AUX_SOURCE_DIRECTORY(src/wingchun/book SOURCE_FILES_WC_BOOK)
-AUX_SOURCE_DIRECTORY(src/wingchun/strategy SOURCE_FILES_WC_STRATEGY)
-AUX_SOURCE_DIRECTORY(src/wingchun/util SOURCE_FILES_WC_UTIL)
+aux_source_directory(src/wingchun/broker SOURCE_FILES_WC_BROKER)
+aux_source_directory(src/wingchun/service SOURCE_FILES_WC_SERVICE)
+aux_source_directory(src/wingchun/book SOURCE_FILES_WC_BOOK)
+aux_source_directory(src/wingchun/strategy SOURCE_FILES_WC_STRATEGY)
+aux_source_directory(src/wingchun/util SOURCE_FILES_WC_UTIL)
 
-ADD_LIBRARY(${PROJECT_NAME} SHARED
+add_library(${PROJECT_NAME} SHARED
         ${SOURCE_FILES_YJJ_CACHE}
         ${SOURCE_FILES_YJJ_JOURNAL}
         ${SOURCE_FILES_YJJ_INDEX}
@@ -23,5 +23,5 @@ ADD_LIBRARY(${PROJECT_NAME} SHARED
         ${SOURCE_FILES_WC_BOOK}
         ${SOURCE_FILES_WC_STRATEGY}
         ${SOURCE_FILES_WC_UTIL})
-SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX)
-TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${CONAN_LIBS} sqlite3 nng)
+set_target_properties(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX)
+target_link_libraries(${PROJECT_NAME} ${CONAN_LIBS} sqlite3 nng)

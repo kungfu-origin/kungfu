@@ -1,3 +1,3 @@
-ADD_SUBDIRECTORY(pybind11-2.7.0)
-ADD_SUBDIRECTORY(sqlite3-3.33.0)
-ADD_SUBDIRECTORY(nng-1.5.1)
+add_subdirectory(pybind11-2.7.0)
+add_subdirectory(sqlite3-3.33.0)
+add_subdirectory(nng-1.5.1)

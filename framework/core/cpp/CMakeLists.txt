@@ -1,4 +1,4 @@
-INCLUDE_DIRECTORIES(include)
-ADD_SUBDIRECTORY(lib)
-ADD_SUBDIRECTORY(pybind)
-ADD_SUBDIRECTORY(node)
+include_directories(include)
+add_subdirectory(lib)
+add_subdirectory(pybind)
+add_subdirectory(node)

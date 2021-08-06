@@ -1,8 +1,0 @@
-IF (KF_SDK_HOME)
-    INCLUDE("${KF_SDK_HOME}/cmake/compiler.cmake")
-    INCLUDE_DIRECTORIES("${KF_SDK_HOME}/include")
-    ADD_SUBDIRECTORY("${KF_SDK_HOME}/pybind11" "${PROJECT_BINARY_DIR}/pybind11")
-    LINK_DIRECTORIES("${KF_SDK_HOME}")
-ELSE (KF_SDK_HOME)
-    MESSAGE("Environment variable KF_SDK_HOME has not been set")
-ENDIF (KF_SDK_HOME)
