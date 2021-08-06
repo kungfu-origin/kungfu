@@ -64,7 +64,7 @@
     "glob": "^7.1.6",
     "nan": "^2.14.2",
     "node-addon-api": "^2.0.0",
-    "yargs": "^16.2.0"
+    "yargs": "^17.1.0"
   },
   "devDependencies": {
     "cmake-js": "^6.2.0",
