@@ -68,7 +68,7 @@
   },
   "devDependencies": {
     "cmake-js": "^6.2.0",
-    "node-gyp": "^7.1.0",
+    "node-gyp": "^8.1.0",
     "yarn": "^1.22.0"
   }
 }

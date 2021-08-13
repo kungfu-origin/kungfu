@@ -1,5 +1,6 @@
 {
   "variables": {
+    "gyp_dir": "<(module_root_dir)/.gyp",
     "pipenv_inputs": [
       "<(module_root_dir)/Pipfile"
     ],
@@ -40,7 +41,7 @@
           ],
           "action": [
             "python",
-            ".gyp/gyp_action_pipenv.py"
+            "<(gyp_dir)/gyp_action_pipenv.py"
           ]
         }
       ]
@@ -62,7 +63,7 @@
           ],
           "action": [
             "python",
-            ".gyp/gyp_action_poetry.py"
+            "<(gyp_dir)/gyp_action_poetry.py"
           ]
         }
       ]
@@ -84,7 +85,7 @@
           ],
           "action": [
             "python",
-            ".gyp/gyp_action_yarn.py",
+            "<(gyp_dir)/gyp_action_yarn.py",
             "configure"
           ]
         }
@@ -107,7 +108,7 @@
           ],
           "action": [
             "python",
-            ".gyp/gyp_action_yarn.py",
+            "<(gyp_dir)/gyp_action_yarn.py",
             "compile"
           ]
         }
@@ -131,7 +132,7 @@
           ],
           "action": [
             "python",
-            ".gyp/gyp_action_yarn.py",
+            "<(gyp_dir)/gyp_action_yarn.py",
             "wheel"
           ]
         }
@@ -154,7 +155,7 @@
           ],
           "action": [
             "python",
-            ".gyp/gyp_action_yarn.py",
+            "<(gyp_dir)/gyp_action_yarn.py",
             "freeze"
           ]
         }

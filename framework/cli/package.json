@@ -21,14 +21,15 @@
     "postinstall": "cd ./src/assets/static/js/inquirer-path && yarn install && yarn compile",
     "clean": "rimraf ./dist/* ./build/*",
     "build": "node ./.build/build.js && yarn run cp",
-    "build-win": " yarn run dist && pkg . -t=node10.17-win-x64 --output=build/cli",
-    "build-linux": " yarn run dist && pkg . -t=node10.17-linux-x64 --out-path=build/cli",
-    "build-mac": " yarn run dist && pkg . -t=node10.17-macos-x64 --out-path=build/cli",
+    "build-win": " yarn run dist && pkg . -t=node10-win-x64 --output=build/cli",
+    "build-linux": " yarn run dist && pkg . -t=node10-linux-x64 --out-path=build/cli",
+    "build-mac": " yarn run dist && pkg . -t=node10-macos-x64 --out-path=build/cli",
     "dev": "node .build/dev-cli.js",
     "cli": "node dist/cli/index",
     "dist": "cross-env NODE_ENV=production node --max_old_space_size=2048 ../../node_modules/webpack/bin/webpack.js --progress --colors --config .build/webpack.cli.config.js",
     "cp": "yarn run cp-node",
-    "cp-node": "copyfiles -a -f ../core/build/*/libkungfu.* ../core/build/*/pykungfu* ../core/build/*/*.node ../core/build/*/kungfubuildinfo.json ./build/cli"
+    "cp-node": "copyfiles -a -f ../core/build/*/libkungfu.* ../core/build/*/pykungfu* ../core/build/*/*.node ../core/build/*/kungfubuildinfo.json ./build/cli",
+    "freeze": "pkg -t=node10-macos-x64 --debug --out-path=build/cli dist/cli/index.js"
   },
   "bin": "./dist/cli/index.js",
   "pkg": {
@@ -96,7 +97,7 @@
     "multispinner": "^0.2.1",
     "node-loader": "^0.6.0",
     "optimize-js-plugin": "^0.0.4",
-    "pkg": "^4.4.0",
+    "pkg": "^5.3.0",
     "preload-webpack-plugin": "^2.3.0",
     "require-dir": "^1.0.0",
     "rimraf": "^2.6.3",
