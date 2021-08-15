@@ -2,8 +2,8 @@ import kungfu
 import os
 import re
 
-lf = kungfu.__bindings__.longfist
-yjj = kungfu.__bindings__.yijinjing
+lf = kungfu.__binding__.longfist
+yjj = kungfu.__binding__.yijinjing
 
 os_sep = re.escape(os.sep)
 

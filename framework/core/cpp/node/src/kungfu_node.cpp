@@ -37,6 +37,7 @@ using namespace kungfu::node;
 namespace py = pybind11;
 
 namespace kungfu::node {
+
 Napi::Value FormatTime(const Napi::CallbackInfo &info) {
   if (not IsValid(info, 0, &Napi::Value::IsBigInt)) {
     return {};
@@ -69,10 +70,19 @@ Napi::Value PyEval(const Napi::CallbackInfo &info) { PY_CALL(py::eval); }
 
 Napi::Value PyEvalFile(const Napi::CallbackInfo &info) { PY_CALL(py::eval_file); }
 
-Napi::Object InitAll(Napi::Env env, Napi::Object exports) {
-  static py::scoped_interpreter guard{};
+void SetupPythonInterpreter() {
+  static py::scoped_interpreter guard = {};
+}
 
+void ensure_python_interpreter() {
+  if (not Py_IsInitialized()) {
+    SetupPythonInterpreter();
+  }
+}
+
+Napi::Object InitAll(Napi::Env env, Napi::Object exports) {
   ensure_sqlite_initilize();
+  ensure_python_interpreter();
 
   Longfist::Init(env, exports);
   History::Init(env, exports);

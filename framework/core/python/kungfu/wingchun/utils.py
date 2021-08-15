@@ -4,7 +4,7 @@ import re
 
 from kungfu.wingchun.constants import *
 
-wc = kungfu.__bindings__.wingchun
+wc = kungfu.__binding__.wingchun
 
 get_instrument_type = wc.utils.get_instrument_type
 is_valid_price = wc.utils.is_valid_price

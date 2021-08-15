@@ -5,9 +5,9 @@ from kungfu.yijinjing.log import create_logger
 from . import mdmaker
 
 
-lf = kungfu.__bindings__.longfist
-wc = kungfu.__bindings__.wingchun
-yjj = kungfu.__bindings__.yijinjing
+lf = kungfu.__binding__.longfist
+wc = kungfu.__binding__.wingchun
+yjj = kungfu.__binding__.yijinjing
 
 MakerConfig = namedtuple(
     "MakerConfig", ["base", "bound", "samples", "variation", "randseed"]

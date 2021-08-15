@@ -7,8 +7,8 @@ import os
 
 from kungfu.yijinjing.locator import Locator
 
-lf = kungfu.__bindings__.longfist
-yjj = kungfu.__bindings__.yijinjing
+lf = kungfu.__binding__.longfist
+yjj = kungfu.__binding__.yijinjing
 
 
 class Adapter:

@@ -10,8 +10,8 @@ from kungfu.wingchun.strategy import Runner, Strategy
 from kungfu.yijinjing.log import create_logger
 from kungfu.yijinjing.practice.coloop import KungfuEventLoop
 
-lf = kungfu.__bindings__.longfist
-yjj = kungfu.__bindings__.yijinjing
+lf = kungfu.__binding__.longfist
+yjj = kungfu.__binding__.yijinjing
 strategy_command_context = kfc.pass_context(
     "replay", "category", "mode", "location", "logger", "runner", "loop"
 )

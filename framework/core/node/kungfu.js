@@ -4,14 +4,14 @@ const path = require('path');
 
 const prebuilt = require('@mapbox/node-pre-gyp');
 const config = path.resolve(path.join(path.dirname(__dirname), 'package.json'));
-const node_bindings_path = prebuilt.find(config);
-const bindings_path =
-  'electron' in process.versions ? node_bindings_path.replace('_node.', '_electron.') : node_bindings_path;
-const bindings = (() => {
-  const bindings = require(bindings_path);
-  bindings.pyExec(`import sys`);
-  bindings.pyExec(`sys.path.insert(0, "${path.dirname(bindings_path)}")`);
-  return bindings;
+const node_binding_path = prebuilt.find(config);
+const binding_path =
+  'electron' in process.versions ? node_binding_path.replace('_node.', '_electron.') : node_binding_path;
+const binding = (() => {
+  const binding = require(binding_path);
+  binding.pyExec(`import sys`);
+  binding.pyExec(`sys.path.insert(0, "${path.dirname(binding_path)}")`);
+  return binding;
 })();
 
 const hex = function (n) {
@@ -77,50 +77,50 @@ const locator = function (home) {
   };
 };
 
-exports._bindings = bindings;
+exports._binding = binding;
 
-exports.longfist = bindings.longfist;
+exports.longfist = binding.longfist;
 
-exports.formatTime = bindings.formatTime;
+exports.formatTime = binding.formatTime;
 
-exports.formatStringToHashHex = bindings.formatStringToHashHex;
+exports.formatStringToHashHex = binding.formatStringToHashHex;
 
-exports.parseTime = bindings.parseTime;
+exports.parseTime = binding.parseTime;
 
-exports.pyExec = bindings.pyExec;
+exports.pyExec = binding.pyExec;
 
-exports.pyEval = bindings.pyEval;
+exports.pyEval = binding.pyEval;
 
-exports.pyEvalFile = bindings.pyEvalFile;
+exports.pyEvalFile = binding.pyEvalFile;
 
 exports.Assemble = function (arg) {
   if (Array.isArray(arg)) {
-    return new bindings.Assemble(
+    return new binding.Assemble(
       arg.map(function (home) {
         return locator(home);
       }),
     );
   } else {
-    return new bindings.Assemble([locator(arg)]);
+    return new binding.Assemble([locator(arg)]);
   }
 };
 
 exports.IODevice = function (category, group, name, mode, home) {
-  return new bindings.IODevice(category, group, name, mode, locator(home));
+  return new binding.IODevice(category, group, name, mode, locator(home));
 };
 
 exports.History = function (home) {
-  return new bindings.History(locator(home));
+  return new binding.History(locator(home));
 };
 
 exports.ConfigStore = function (home) {
-  return new bindings.ConfigStore(locator(home));
+  return new binding.ConfigStore(locator(home));
 };
 
 exports.CommissionStore = function (home) {
-  return new bindings.CommissionStore(locator(home));
+  return new binding.CommissionStore(locator(home));
 };
 
 exports.watcher = function (home, name, bypassQuotes = false, bypassRestore = false) {
-  return new bindings.Watcher(locator(home), name, bypassQuotes, bypassRestore);
+  return new binding.Watcher(locator(home), name, bypassQuotes, bypassRestore);
 };

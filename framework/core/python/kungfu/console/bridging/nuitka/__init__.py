@@ -42,7 +42,7 @@ def useEngagedCommands():
         os.environ["PYTHONPATH"] = (
             dirname(dirname(kungfu.__file__))
             + os.pathsep
-            + dirname(kungfu.__bindings__.__file__)
+            + dirname(kungfu.__binding__.__file__)
         )
         return [sys.executable, "-m", "kungfu", "engage", "scons"]
 
@@ -58,7 +58,7 @@ def useEngagedEnvironment():
 
         def createEnvironment(**kwargs):
             env = origin(**kwargs)
-            env.Append(LIBPATH=dirname(kungfu.__bindings__.__file__))
+            env.Append(LIBPATH=dirname(kungfu.__binding__.__file__))
             return env
 
         return createEnvironment

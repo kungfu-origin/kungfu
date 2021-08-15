@@ -1,6 +1,6 @@
 import kungfu
 
-lf = kungfu.__bindings__.longfist
+lf = kungfu.__binding__.longfist
 
 
 class Source:

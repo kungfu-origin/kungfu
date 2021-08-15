@@ -7,9 +7,9 @@ from kungfu.yijinjing.practice.master import Master
 from kungfu.wingchun.replay import setup
 from kungfu_extensions import EXTENSION_REGISTRY_MD
 
-lf = kungfu.__bindings__.longfist
-wc = kungfu.__bindings__.wingchun
-yjj = kungfu.__bindings__.yijinjing
+lf = kungfu.__binding__.longfist
+wc = kungfu.__binding__.wingchun
+yjj = kungfu.__binding__.yijinjing
 service_command_context = kfc.pass_context("low_latency")
 
 

@@ -28,8 +28,8 @@ DURATION_TZ_ADJUST = int(
     timedelta(hours=datetime.fromtimestamp(0).hour).total_seconds() * 1e9
 )
 
-lf = kungfu.__bindings__.longfist
-yjj = kungfu.__bindings__.yijinjing
+lf = kungfu.__binding__.longfist
+yjj = kungfu.__binding__.yijinjing
 journal_command_context = kfc.pass_context(
     "logger", "location", "console_width", "console_height"
 )

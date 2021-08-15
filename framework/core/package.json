@@ -18,8 +18,8 @@
     "kfc": "node/kfc.js"
   },
   "config": {
-    "electron_version": "4.2.11",
-    "node_version": "10.15.0",
+    "electron_version": "13.1.7",
+    "node_version": "14.16.0",
     "python_version": "3.7",
     "arch": "x64",
     "build_type": "Release",
@@ -62,8 +62,8 @@
     "@mapbox/node-pre-gyp": "^1.0.5",
     "fs-extra": "^9.1.0",
     "glob": "^7.1.6",
-    "nan": "^2.14.2",
-    "node-addon-api": "^2.0.0",
+    "nan": "^2.15.0",
+    "node-addon-api": "^4.0.0",
     "yargs": "^17.1.0"
   },
   "devDependencies": {

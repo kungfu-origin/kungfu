@@ -3,8 +3,8 @@ import re
 
 from datetime import datetime, timedelta
 
-lf = kungfu.__bindings__.longfist
-yjj = kungfu.__bindings__.yijinjing
+lf = kungfu.__binding__.longfist
+yjj = kungfu.__binding__.yijinjing
 
 DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S.%N"
 NANO_PER_SECOND = 1000000000

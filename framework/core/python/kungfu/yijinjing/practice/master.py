@@ -10,8 +10,8 @@ from kungfu.yijinjing import log
 from kungfu.wingchun import default_commissions
 from kungfu.wingchun.calendar import Calendar
 
-lf = kungfu.__bindings__.longfist
-yjj = kungfu.__bindings__.yijinjing
+lf = kungfu.__binding__.longfist
+yjj = kungfu.__binding__.yijinjing
 
 SECOND_IN_NANO = int(1e9)
 TASKS = dict()

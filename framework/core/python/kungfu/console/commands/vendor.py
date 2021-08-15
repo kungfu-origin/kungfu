@@ -5,8 +5,8 @@ from kungfu.console.commands import kfc, PrioritizedCommandGroup
 from kungfu_extensions import EXTENSION_REGISTRY_MD
 from kungfu_extensions import EXTENSION_REGISTRY_TD
 
-lf = kungfu.__bindings__.longfist
-yjj = kungfu.__bindings__.yijinjing
+lf = kungfu.__binding__.longfist
+yjj = kungfu.__binding__.yijinjing
 vendor_command_context = kfc.pass_context()
 
 

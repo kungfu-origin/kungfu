@@ -151,8 +151,8 @@ def kfc(ctx, home, log_level, name, code):
 
     from kungfu.yijinjing.locator import Locator
 
-    lf = kungfu.__bindings__.longfist
-    yjj = kungfu.__bindings__.yijinjing
+    lf = kungfu.__binding__.longfist
+    yjj = kungfu.__binding__.yijinjing
 
     # have to keep locator alive from python side
     # https://github.com/pybind/pybind11/issues/1546

@@ -2,19 +2,12 @@ project(kungfu-node-addon)
 
 if (WIN32)
     set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS OFF)
-    add_compile_definitions(V8_DEPRECATION_WARNINGS=1)
-endif ()
-
-if (UNIX)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w")
-    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -w")
 endif ()
 
 ############################################################
-include_directories(${CMAKE_JS_INC})
 
-add_compile_definitions(NAPI_VERSION=3)
 add_compile_definitions(NAPI_EXPERIMENTAL)
+add_compile_definitions(NAPI_VERSION=7)
 
 execute_process(COMMAND node -p "require('node-addon-api').include"
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
@@ -22,10 +15,12 @@ execute_process(COMMAND node -p "require('node-addon-api').include"
         )
 string(REPLACE "\n" "" NODE_ADDON_API_DIR ${NODE_ADDON_API_DIR})
 string(REPLACE "\"" "" NODE_ADDON_API_DIR ${NODE_ADDON_API_DIR})
-include_directories(${NODE_ADDON_API_DIR})
 
-message(STATUS "Include node-js headers from [${CMAKE_JS_INC}]")
 message(STATUS "Include node-addon-api headers from [${NODE_ADDON_API_DIR}]")
+message(STATUS "Include node-js headers from [${CMAKE_JS_INC}]")
+
+include_directories(${NODE_ADDON_API_DIR})
+include_directories(${CMAKE_JS_INC})
 
 ############################################################
 

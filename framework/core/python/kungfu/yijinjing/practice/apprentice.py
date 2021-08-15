@@ -5,7 +5,7 @@ import kungfu.yijinjing.io as kfio
 import kungfu.yijinjing.journal as kfj
 from . import os_signal
 
-yjj = kungfu.__bindings__.yijinjing
+yjj = kungfu.__binding__.yijinjing
 
 
 class Apprentice(yjj.apprentice):

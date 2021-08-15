@@ -11,9 +11,9 @@ from kungfu.wingchun import constants
 from kungfu.wingchun import utils
 from kungfu.wingchun.constants import *
 
-lf = kungfu.__bindings__.longfist
-wc = kungfu.__bindings__.wingchun
-yjj = kungfu.__bindings__.yijinjing
+lf = kungfu.__binding__.longfist
+wc = kungfu.__binding__.wingchun
+yjj = kungfu.__binding__.yijinjing
 
 
 class Runner(wc.Runner):

@@ -6,8 +6,8 @@ from tabulate import tabulate
 from kungfu.yijinjing import time as kft
 from kungfu.yijinjing import journal as kfj
 
-lf = kungfu.__bindings__.longfist
-yjj = kungfu.__bindings__.yijinjing
+lf = kungfu.__binding__.longfist
+yjj = kungfu.__binding__.yijinjing
 
 
 def setup(ctx, session_id, cmd, instance):

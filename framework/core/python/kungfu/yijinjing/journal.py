@@ -4,8 +4,8 @@ import kungfu
 
 from kungfu.yijinjing import *
 
-lf = kungfu.__bindings__.longfist
-yjj = kungfu.__bindings__.yijinjing
+lf = kungfu.__binding__.longfist
+yjj = kungfu.__binding__.yijinjing
 types = lf.types
 
 
