@@ -4,11 +4,11 @@ const fs = require('fs-extra');
 const path = require('path');
 const { spawnSync } = require('child_process');
 
-const PrebuiltHostConfigKey = 'kungfu_node_binary_host_mirror';
-
 const PyPI_US = 'https://pypi.python.org/simple';
 const PyPI_CN = 'https://mirrors.aliyun.com/pypi/simple';
 
+const PrebuiltModules = ['@kungfu-trader/kungfu-core', '@kungfu-trader/libnode'];
+const PrebuiltHostConfig = 'binary_host_mirror';
 const PrebuiltHost_CN = 'https://prebuilt.libkungfu.cc';
 const PrebuiltHost_US = 'https://prebuilt.libkungfu.io';
 
@@ -19,6 +19,10 @@ const packageJson = fs.readJsonSync(path.resolve(path.dirname(__dirname), 'packa
 const projectName = packageJson.name;
 
 const scope = (npmConfigValue) => (npmConfigValue === 'undefined' ? '[package.json]' : '[user]');
+
+function getPackageJson(module) {
+  return fs.readJsonSync(require.resolve(`${module}/package.json`));
+}
 
 function getNpmConfigValue(key) {
   return spawnSync('npm', ['config', 'get', key], spawnOptsPipe)
@@ -31,15 +35,21 @@ function showProjectConfig(key) {
   const npmConfigKey = `${projectName}:${key}`;
   const npmConfigValue = getNpmConfigValue(npmConfigKey);
   const value = npmConfigValue === 'undefined' ? packageJson.config[key] : npmConfigValue;
-  console.log(`${npmConfigKey} = ${value} ${scope(npmConfigValue)}`);
+  console.log(`[config] ${npmConfigKey} = ${value} ${scope(npmConfigValue)}`);
+}
+
+function showPrebuiltHostConfig(module) {
+  const packageJson = getPackageJson(module);
+  const key = packageJson.binary.module_name;
+  const npmConfigKey = `${key}_${PrebuiltHostConfig}`;
+  const hostConfigValue = getNpmConfigValue(npmConfigKey);
+  const value = hostConfigValue === 'undefined' ? packageJson.binary.host : hostConfigValue;
+  console.log(`[binary] ${npmConfigKey} = ${value} ${scope(hostConfigValue)}`);
 }
 
 function showAllConfig() {
   Object.keys(packageJson.config).map(showProjectConfig);
-
-  const hostConfigValue = getNpmConfigValue(PrebuiltHostConfigKey);
-  const value = hostConfigValue === 'undefined' ? packageJson.binary.host : hostConfigValue;
-  console.log(`${PrebuiltHostConfigKey} = ${value} ${scope(hostConfigValue)}`);
+  PrebuiltModules.map(showPrebuiltHostConfig);
 }
 
 function npmCall(npmArgs) {
@@ -57,10 +67,11 @@ const cli = require('sywac')
       const githubActions = 'GITHUB_ACTIONS' in process.env;
       const pypi = githubActions ? PyPI_US : PyPI_CN;
       const prebuiltHost = githubActions ? PrebuiltHost_US : PrebuiltHost_CN;
-
       const setConfig = (key, value) => githubActions && npmCall(['config', 'set', key, value]);
+      const setPrebuiltHost = (module) => setConfig(getPackageJson(module).binary.module_name, prebuiltHost);
+
       setConfig(`${projectName}:pypi_mirror`, pypi);
-      setConfig(PrebuiltHostConfigKey, prebuiltHost);
+      PrebuiltModules.map(setPrebuiltHost);
 
       showAllConfig();
     },
