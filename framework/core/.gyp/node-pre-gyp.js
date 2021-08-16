@@ -10,45 +10,31 @@ function node_pre_gyp(cmd, check = true) {
   run('yarn', yarnArgs, check);
 }
 
-exports.argv = require('yargs/yargs')(process.argv.slice(2))
-  .command(
-    (command = 'install'),
-    (description = 'install through node-pre-gyp'),
-    (builder = () => {}),
-    (handler = () => {
-      const skipBuild = 'KF_SKIP_FALLBACK_BUILD' in process.env;
-      node_pre_gyp(skipBuild ? ['install'] : ['install', '--fallback-to-build'], !skipBuild);
-    }),
-  )
-  .command(
-    (command = 'build'),
-    (description = 'build from source'),
-    (builder = () => {}),
-    (handler = () => {
-      node_pre_gyp(['configure', 'build']);
-    }),
-  )
-  .command(
-    (command = 'rebuild'),
-    (description = 'rebuild from source'),
-    (builder = () => {}),
-    (handler = () => {
-      node_pre_gyp(['rebuild']);
-    }),
-  )
-  .command(
-    (command = 'package'),
-    (description = 'package binary'),
-    (builder = () => {}),
-    (handler = () => {
-      node_pre_gyp(['package']);
-      const prebuilt = glob.sync(path.join('build', 'stage', '**', '*.tar.gz'))[0];
-      const wheel = glob.sync(path.join('build', 'python', 'dist', '*.whl'))[0];
-      if (prebuilt && wheel) {
-        console.log(`$ cp ${wheel} ${path.dirname(prebuilt)}`);
-        fs.copyFileSync(wheel, path.join(path.dirname(prebuilt), path.basename(wheel)));
-      }
-    }),
-  )
-  .demandCommand()
-  .help().argv;
+const cli = require('sywac')
+  .command('install', () => {
+    const skipBuild = process.env.KF_SKIP_FALLBACK_BUILD;
+    node_pre_gyp(skipBuild ? ['install'] : ['install', '--fallback-to-build'], !skipBuild);
+  })
+  .command('build', () => node_pre_gyp(['configure', 'build']))
+  .command('clean', () => node_pre_gyp(['clean']))
+  .command('rebuild', () => node_pre_gyp(['rebuild']))
+  .command('package', () => {
+    node_pre_gyp(['package']);
+    const prebuilt = glob.sync(path.join('build', 'stage', '**', '*.tar.gz'))[0];
+    const wheel = glob.sync(path.join('build', 'python', 'dist', '*.whl'))[0];
+    if (prebuilt && wheel) {
+      console.log(`$ cp ${wheel} ${path.dirname(prebuilt)}`);
+      fs.copyFileSync(wheel, path.join(path.dirname(prebuilt), path.basename(wheel)));
+    }
+  })
+  .help('--help')
+  .version('--version')
+  .showHelpByDefault();
+
+module.exports = cli;
+
+async function main() {
+  await cli.parseAndExit();
+}
+
+if (require.main === module) main();

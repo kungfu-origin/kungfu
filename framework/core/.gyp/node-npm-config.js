@@ -51,12 +51,9 @@ function npmCall(npmArgs) {
   }
 }
 
-exports.argv = require('yargs/yargs')(process.argv.slice(2))
-  .command(
-    (command = 'auto'),
-    (description = 'Set npm configs automatically'),
-    (builder = () => {}),
-    (handler = () => {
+const cli = require('sywac')
+  .command('auto', {
+    run: () => {
       const githubActions = 'GITHUB_ACTIONS' in process.env;
       const pypi = githubActions ? PyPI_US : PyPI_CN;
       const prebuiltHost = githubActions ? PrebuiltHost_US : PrebuiltHost_CN;
@@ -66,37 +63,32 @@ exports.argv = require('yargs/yargs')(process.argv.slice(2))
       setConfig(PrebuiltHostConfigKey, prebuiltHost);
 
       showAllConfig();
-    }),
-  )
-  .command(
-    (command = 'show'),
-    (description = 'Show npm configs'),
-    (builder = () => {}),
-    (handler = () => {
-      showAllConfig();
-    }),
-  )
-  .command(
-    (command = 'dir'),
-    (description = 'Show kungfu core base directory'),
-    (builder = () => {}),
-    (handler = () => {
+    },
+  })
+  .command('show', { run: showAllConfig })
+  .command('dir', {
+    run: () => {
       console.log(fs.realpathSync(path.dirname(__dirname)));
-    }),
-  )
-  .command(
-    (command = 'info'),
-    (description = 'Show kungfu core build info'),
-    (builder = () => {}),
-    (handler = () => {
-      const buildinfoPath = path.join(path.dirname(__dirname), 'build', 'kfc', 'kungfubuildinfo.json');
-      if (fs.existsSync(buildinfoPath)) {
-        const buildinfo = require(buildinfoPath);
-        console.log(buildinfo);
+    },
+  })
+  .command('info', {
+    run: () => {
+      const buildInfoPath = path.join(path.dirname(__dirname), 'build', 'kfc', 'kungfubuildinfo.json');
+      if (fs.existsSync(buildInfoPath)) {
+        console.log(require(buildInfoPath));
       } else {
-        console.warn(`Info file missing, ${buildinfoPath} not exists`);
+        console.warn(`Info file missing, ${buildInfoPath} not exists`);
       }
-    }),
-  )
-  .demandCommand()
-  .help().argv;
+    },
+  })
+  .help('--help')
+  .version('--version')
+  .showHelpByDefault();
+
+module.exports = cli;
+
+async function main() {
+  await cli.parseAndExit();
+}
+
+if (require.main === module) main();

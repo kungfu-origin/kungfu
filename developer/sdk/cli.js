@@ -8,7 +8,7 @@ const DefaultLibSiteURL_CN = 'https://external.libkungfu.cc';
 const DefaultLibSiteURL_US = 'https://external.libkungfu.io';
 const DefaultLibSiteURL = process.env.GITHUB_ACTIONS ? DefaultLibSiteURL_US : DefaultLibSiteURL_CN;
 
-exports.argv = require('yargs/yargs')(process.argv.slice(2))
+exports.argv = require('yargs/yargs')
   .command(
     'list',
     'List libs',

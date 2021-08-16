@@ -38,6 +38,7 @@
     "preinstall": "node .gyp/node-npm-config.js auto",
     "install": "node .gyp/node-pre-gyp.js install",
     "postinstall": "node .gyp/node-npm-config.js auto",
+    "link-node": "node .gyp/node-link.js",
     "prebuild": "node .gyp/node-npm-config.js show",
     "build": "node .gyp/node-pre-gyp.js build",
     "rebuild": "node .gyp/node-pre-gyp.js rebuild",
@@ -64,7 +65,7 @@
     "glob": "^7.1.6",
     "nan": "^2.15.0",
     "node-addon-api": "^4.0.0",
-    "yargs": "^17.1.0"
+    "sywac": "^1.3.0"
   },
   "devDependencies": {
     "cmake-js": "^6.2.0",

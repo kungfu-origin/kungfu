@@ -115,11 +115,35 @@
       ]
     },
     {
+      "target_name": "node_link",
+      "type": "none",
+      "dependencies": [
+        "conan"
+      ],
+      "actions": [
+        {
+          "action_name": "link",
+          "inputs": [
+            "package.json"
+          ],
+          "outputs": [
+            "<(PRODUCT_DIR)/libnodebuildinfo.json"
+          ],
+          "action": [
+            "python",
+            "<(gyp_dir)/gyp_action_yarn.py",
+            "link-node"
+          ]
+        }
+      ]
+    },
+    {
       "target_name": "wheel",
       "type": "none",
       "dependencies": [
         "poetry",
-        "<(module_name)"
+        "<(module_name)",
+        "node_link"
       ],
       "actions": [
         {

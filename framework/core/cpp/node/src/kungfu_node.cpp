@@ -70,9 +70,7 @@ Napi::Value PyEval(const Napi::CallbackInfo &info) { PY_CALL(py::eval); }
 
 Napi::Value PyEvalFile(const Napi::CallbackInfo &info) { PY_CALL(py::eval_file); }
 
-void SetupPythonInterpreter() {
-  static py::scoped_interpreter guard = {};
-}
+void SetupPythonInterpreter() { static py::scoped_interpreter guard = {}; }
 
 void ensure_python_interpreter() {
   if (not Py_IsInitialized()) {
