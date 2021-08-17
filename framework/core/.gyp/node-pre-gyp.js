@@ -1,4 +1,4 @@
-const { run } = require('./node-lib.js');
+const { exitOnError, run } = require('./node-lib.js');
 const fs = require('fs');
 const glob = require('glob');
 const path = require('path');
@@ -37,4 +37,4 @@ async function main() {
   await cli.parseAndExit();
 }
 
-if (require.main === module) main();
+if (require.main === module) main().catch(exitOnError);

@@ -1,4 +1,4 @@
-const { getConfigValue, run } = require('./node-lib.js');
+const { exitOnError, getConfigValue, run } = require('./node-lib.js');
 const path = require('path');
 
 function conan(cmd) {
@@ -52,4 +52,4 @@ async function main() {
   await cli.parseAndExit();
 }
 
-if (require.main === module) main();
+if (require.main === module) main().catch(exitOnError);

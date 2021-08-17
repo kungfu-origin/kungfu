@@ -1,4 +1,4 @@
-const { spawnSync } = require('child_process');
+const { exitOnError, run } = require('./node-lib.js');
 
 const cli = require('sywac')
   // options
@@ -16,15 +16,7 @@ async function main() {
   const pypi_opt = ['--pypi-mirror', process.env.npm_package_config_pypi_mirror];
   const pipenv_args = [...bare_opt, ...python_opt, ...pypi_opt, ...argv._];
 
-  console.log(`$ pipenv ${pipenv_args.join(' ')}`);
-
-  const result = spawnSync('pipenv', pipenv_args, {
-    shell: true,
-    stdio: 'inherit',
-    windowsHide: true,
-  });
-
-  process.exit(result.status);
+  run('pipenv', pipenv_args);
 }
 
-if (require.main === module) main();
+if (require.main === module) main().catch(exitOnError);

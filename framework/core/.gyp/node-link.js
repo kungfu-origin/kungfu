@@ -5,7 +5,7 @@ const fse = require('fs-extra');
 const glob = require('glob');
 const path = require('path');
 
-async function main() {
+function main() {
   const buildType = getConfigValue('build_type');
   glob.sync(path.join(libnode.libpath, '*.*')).forEach((p) => {
     if (fs.lstatSync(p).isFile()) {

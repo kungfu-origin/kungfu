@@ -3,6 +3,10 @@ const fs = require('fs');
 const path = require('path');
 
 module.exports = {
+  exitOnError: function (error) {
+    console.error(error);
+    process.exit(-1);
+  },
   getConfigValue: function (name) {
     return process.env[`npm_package_config_${name}`];
   },

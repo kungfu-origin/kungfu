@@ -61,6 +61,7 @@
   },
   "dependencies": {
     "@mapbox/node-pre-gyp": "^1.0.5",
+    "@kungfu-trader/libnode": "14.16.0",
     "fs-extra": "^9.1.0",
     "glob": "^7.1.6",
     "nan": "^2.15.0",

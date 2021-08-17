@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+const { exitOnError } = require('./node-lib.js');
 const fs = require('fs-extra');
 const path = require('path');
 const { spawnSync } = require('child_process');
@@ -7,7 +8,7 @@ const { spawnSync } = require('child_process');
 const PyPI_US = 'https://pypi.python.org/simple';
 const PyPI_CN = 'https://mirrors.aliyun.com/pypi/simple';
 
-const PrebuiltModules = ['@kungfu-trader/kungfu-core', '@kungfu-trader/libnode'];
+const PrebuiltModules = { '@kungfu-trader/kungfu-core': 'kungfu_node', '@kungfu-trader/libnode': 'link_node' };
 const PrebuiltHostConfig = 'binary_host_mirror';
 const PrebuiltHost_CN = 'https://prebuilt.libkungfu.cc';
 const PrebuiltHost_US = 'https://prebuilt.libkungfu.io';
@@ -21,7 +22,11 @@ const projectName = packageJson.name;
 const scope = (npmConfigValue) => (npmConfigValue === 'undefined' ? '[package.json]' : '[user]');
 
 function getPackageJson(module) {
-  return fs.readJsonSync(require.resolve(`${module}/package.json`));
+  try {
+    return fs.readJsonSync(require.resolve(`${module}/package.json`));
+  } catch (e) {
+    return undefined;
+  }
 }
 
 function getNpmConfigValue(key) {
@@ -40,16 +45,16 @@ function showProjectConfig(key) {
 
 function showPrebuiltHostConfig(module) {
   const packageJson = getPackageJson(module);
-  const key = packageJson.binary.module_name;
+  const key = packageJson ? packageJson.binary.module_name : PrebuiltModules[module];
   const npmConfigKey = `${key}_${PrebuiltHostConfig}`;
   const hostConfigValue = getNpmConfigValue(npmConfigKey);
-  const value = hostConfigValue === 'undefined' ? packageJson.binary.host : hostConfigValue;
+  const value = hostConfigValue === 'undefined' && packageJson ? packageJson.binary.host : hostConfigValue;
   console.log(`[binary] ${npmConfigKey} = ${value} ${scope(hostConfigValue)}`);
 }
 
 function showAllConfig() {
   Object.keys(packageJson.config).map(showProjectConfig);
-  PrebuiltModules.map(showPrebuiltHostConfig);
+  Object.keys(PrebuiltModules).map(showPrebuiltHostConfig);
 }
 
 function npmCall(npmArgs) {
@@ -68,10 +73,10 @@ const cli = require('sywac')
       const pypi = githubActions ? PyPI_US : PyPI_CN;
       const prebuiltHost = githubActions ? PrebuiltHost_US : PrebuiltHost_CN;
       const setConfig = (key, value) => githubActions && npmCall(['config', 'set', key, value]);
-      const setPrebuiltHost = (module) => setConfig(getPackageJson(module).binary.module_name, prebuiltHost);
+      const setPrebuiltHost = (module) => setConfig(PrebuiltModules[module], prebuiltHost);
 
       setConfig(`${projectName}:pypi_mirror`, pypi);
-      PrebuiltModules.map(setPrebuiltHost);
+      Object.keys(PrebuiltModules).map(setPrebuiltHost);
 
       showAllConfig();
     },
@@ -84,7 +89,7 @@ const cli = require('sywac')
   })
   .command('info', {
     run: () => {
-      const buildInfoPath = path.join(path.dirname(__dirname), 'build', 'kfc', 'kungfubuildinfo.json');
+      const buildInfoPath = path.join(path.dirname(__dirname), 'dist', 'kfc', 'kungfubuildinfo.json');
       if (fs.existsSync(buildInfoPath)) {
         console.log(require(buildInfoPath));
       } else {
@@ -102,4 +107,4 @@ async function main() {
   await cli.parseAndExit();
 }
 
-if (require.main === module) main();
+if (require.main === module) main().catch(exitOnError);

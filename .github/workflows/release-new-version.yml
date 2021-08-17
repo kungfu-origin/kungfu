@@ -18,6 +18,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@kungfu-trader'
+
       - name: Bump Version
         uses: kungfu-trader/action-bump-version@v3
         with:
