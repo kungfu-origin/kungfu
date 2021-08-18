@@ -6,8 +6,8 @@ const path = require('path')
 log4js.configure({
     appenders: {
         app: {
-            type: 'file', 
-            filename: path.join(LOG_DIR, 'app.log')
+            type: 'file',
+            filename: path.resolve(LOG_DIR, 'app.log')
         }
     },
     categories: { default: { appenders: ['app'], level: 'info' } }

@@ -2,12 +2,14 @@
 
 process.env.BABEL_ENV = 'main'
 
+const commonConfig = require('./webpack.common.config');
 const path = require('path')
 const { dependencies } = require('../package.json')
 const webpack = require('webpack')
 const OptimizeJsPlugin = require("optimize-js-plugin");
 
 let daemonConfig = {
+  devtool: 'eval',
   entry: {
     daemon: path.join(__dirname, '../src/daemon/index.ts')
   },
@@ -30,6 +32,7 @@ let daemonConfig = {
         test: /\.node$/,
         use: 'node-loader'
       },
+      ...commonConfig.module.rules
     ]
   },
   node: {
@@ -46,12 +49,12 @@ let daemonConfig = {
   ],
   resolve: {
     alias: {
-      '__root': path.join(__dirname, '..'),
-      '@': path.join(__dirname, '../src/renderer'),
-      '__gUtils': path.join(__dirname, '../shared/utils'),
-      '__gConfig': path.join(__dirname, '../shared/config'),
-      '__io': path.join(__dirname, '../shared/io'),
-      '__assets': path.join(__dirname, '../shared/assets')
+      '__root': path.resolve(__dirname, '..'),
+      '@': path.resolve(__dirname, '../src/renderer'),
+      '__gUtils': path.resolve(__dirname, '../shared/utils'),
+      '__gConfig': path.resolve(__dirname, '../shared/config'),
+      '__io': path.resolve(__dirname, '../shared/io'),
+      '__assets': path.resolve(__dirname, '../shared/assets')
     },
     extensions: ['.js', '.ts', '.json', '.node']
   },
@@ -62,10 +65,10 @@ let daemonConfig = {
  * Adjust daemonConfig for development settings
  */
 if (process.env.NODE_ENV !== 'production') {
+  daemonConfig.mode = 'development';
   daemonConfig.plugins.push(
     new webpack.DefinePlugin({
       '__resources': `"${path.join(__dirname, '../resources').replace(/\\/g, '\\\\')}"`,
-      'process.env.NODE_ENV': '"development"',
       'process.env.APP_TYPE': '"daemon"',
     }),
   )
@@ -75,13 +78,13 @@ if (process.env.NODE_ENV !== 'production') {
  * Adjust daemonConfig for production settings
  */
 if (process.env.NODE_ENV === 'production') {
-  daemonConfig.devtool = ''
+  daemonConfig.mode = 'production';
+  daemonConfig.devtool = 'eval'
   daemonConfig.plugins.push(
     new OptimizeJsPlugin({
       sourceMap: false
     }),
     new webpack.DefinePlugin({
-      'process.env.NODE_ENV': '"production"',
       'process.env.APP_TYPE': '"daemon"',
     })
   )

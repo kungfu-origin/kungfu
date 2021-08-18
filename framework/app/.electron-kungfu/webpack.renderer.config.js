@@ -2,28 +2,33 @@
 
 process.env.BABEL_ENV = 'renderer'
 
+const commonConfig = require('./webpack.common.config');
 const path = require('path')
 const { dependencies } = require('../package.json')
 const webpack = require('webpack')
 
-const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const OptimizeJsPlugin = require("optimize-js-plugin");
 const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
-const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+const { VueLoaderPlugin } = require('vue-loader');
 
 const { getPythonVersion, getViewsConfig } = require('./utils');
+const pyVersion = getPythonVersion() || '3'
 const viewsConfig = getViewsConfig();
 
+const rootDir = path.dirname(__dirname);
+const IsProduction = process.env.NODE_ENV === 'production';
+const styleLoader = !IsProduction ? 'vue-style-loader' : MiniCssExtractPlugin.loader;
 
 let rendererConfig = {
-  devtool: '#cheap-module-eval-source-map',
+  devtool: 'eval-cheap-module-source-map',
 
   entry: viewsConfig.entry,
 
   output: {
     filename: 'js/[name].js',
     libraryTarget: 'commonjs2',
-    path: path.join(__dirname, '../dist/app')
+    path: path.join(rootDir, 'dist', 'app')
   },
   
   externals: [
@@ -33,32 +38,21 @@ let rendererConfig = {
   module: {
     rules: [
       { 
-        test: /\.css$/, 
-        use: ExtractTextPlugin.extract({ 
-          fallback: 'style-loader', 
-          use: [ 'css-loader' ],
-          publicPath: '../'
-        }) 
+        test: /\.css$/,
+        use: [styleLoader, "css-loader"],
       },
       {
         test: /\.scss$/,
-        use: ExtractTextPlugin.extract({
-          fallback: 'style-loader', 
-          use: ['css-loader', 'sass-loader']
-        }),
-      },
-      {
-        test: /\.html$/,
-        use: 'vue-html-loader'
+        use: [styleLoader, "css-loader", 'sass-loader'],
       },
       {
         test: /\.ts$/,
         use: 'ts-loader',
         include: [
-          path.resolve(__dirname, '..', 'resources'),
-          path.resolve(__dirname, '..', 'src'),
-          path.resolve(__dirname, '..', 'shared'),
-          path.resolve(__dirname, '..', '..', 'shared'),
+          path.resolve(rootDir, 'resources'),
+          path.resolve(rootDir, 'src'),
+          path.resolve(rootDir, 'shared'),
+          path.resolve(path.dirname(rootDir), 'shared'),
         ]
       },
       {
@@ -72,16 +66,7 @@ let rendererConfig = {
       },
       {
         test: /\.vue$/,
-        use: {
-          loader: 'vue-loader',
-          options: {
-            extractCSS: process.env.NODE_ENV === 'production',
-            loaders: {
-              sass: 'vue-style-loader!css-loader!sass-loader?indentedSyntax=1',
-              scss: 'vue-style-loader!css-loader!sass-loader'
-            }
-          }
-        }
+        use: 'vue-loader'
       },
       {
         test: /\.worker\.js$/,
@@ -95,7 +80,7 @@ let rendererConfig = {
         test: /\.(png|jpe?g|gif|svg)(\?.*)?$/,
         use: {
           loader: 'url-loader',
-          query: {
+          options: {
             limit: 10000,
             name: 'imgs/[name]--[folder].[ext]'
           }
@@ -113,24 +98,25 @@ let rendererConfig = {
         test: /\.(woff2?|eot|ttf|otf)(\?.*)?$/,
         use: {
           loader: 'file-loader',
-          query: {
+          options: {
             limit: 10000,
             name: 'fonts/[name]--[folder].[ext]'
           }
         }
-      }
+      },
+      ...commonConfig.module.rules
     ]
   },
 
   node: {
-    __dirname: process.env.NODE_ENV !== 'production',
-    __filename: process.env.NODE_ENV !== 'production'
+    __dirname: !IsProduction,
+    __filename: !IsProduction
   },
 
   plugins: [
     ...viewsConfig.plugins,
 
-    new ExtractTextPlugin({
+    new MiniCssExtractPlugin({
       filename: `css/[name].css`,
     }),
 
@@ -139,36 +125,34 @@ let rendererConfig = {
       languages: [
         'python', 'cpp', 'shell', 'json', 'yaml'
       ]
-    })
+    }),
+    new VueLoaderPlugin()
   ],
 
   resolve: {
     alias: {
-      '@': path.join(__dirname, '../src/renderer'),
-      '__gUtils': path.join(__dirname, '../shared/utils'),
-      '__gConfig': path.join(__dirname, '../shared/config'),
-      '__io': path.join(__dirname, '../shared/io'),
-      '__assets': path.join(__dirname, '../shared/assets'),
-      'vue$': 'vue/dist/vue.esm.js'
+      '@': path.resolve(rootDir, 'src', 'renderer'),
+      '__gUtils': path.resolve(rootDir, 'shared', 'utils'),
+      '__gConfig': path.resolve(rootDir, 'shared', 'config'),
+      '__io': path.resolve(rootDir, 'shared', 'io'),
+      '__assets': path.resolve(rootDir, 'shared', 'assets')
     },
     extensions: ['.js', '.ts', '.vue', '.json', '.css', '.node']
   },
 
-  target: 'electron-renderer'
+  target: 'electron-renderer',
 }
-
-const pyVersion = getPythonVersion() || '3'
 
 /**
  * Adjust rendererConfig for development settings
  */
-if (process.env.NODE_ENV !== 'production') {
+if (!IsProduction) {
+  rendererConfig.mode = 'development';
   rendererConfig.plugins.push(
     new webpack.HotModuleReplacementPlugin(),
     new webpack.DefinePlugin({
-      '__resources': `"${path.join(__dirname, '../resources').replace(/\\/g, '\\\\')}"`,
+      '__resources': `"${path.join(rootDir, 'resources').replace(/\\/g, '\\\\')}"`,
       'python_version': `"${pyVersion.toString()}"`,
-      'process.env.NODE_ENV': '"development"',
       'process.env.APP_TYPE': '"renderer"',
     }),
   )
@@ -177,20 +161,17 @@ if (process.env.NODE_ENV !== 'production') {
 /**
  * Adjust rendererConfig for production settings
  */
-if (process.env.NODE_ENV === 'production') {
-  rendererConfig.devtool = ''
+if (IsProduction) {
+  rendererConfig.mode = 'production';
+  rendererConfig.devtool = 'eval'
   rendererConfig.plugins.push(
     new OptimizeJsPlugin({
       sourceMap: false
     }),
     new webpack.DefinePlugin({
       'python_version': `"${pyVersion.toString()}"`,
-      'process.env.NODE_ENV': '"production"',
       'process.env.APP_TYPE': '"renderer"',
     }),
-    // new BundleAnalyzerPlugin({
-    //   analyzerMode: 'static',
-    // }),
   )
 }
 

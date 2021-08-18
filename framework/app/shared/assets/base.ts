@@ -2,7 +2,6 @@ import fse from 'fs-extra';
 import path from 'path';
 import { KF_HOME, KF_CONFIG_DEFAULT_PATH, KF_CONFIG_PATH, KF_TARADING_CONFIG_DEFAULT_PATH, KF_TARADING_CONFIG_PATH, KUNGFU_RESOURCES_DIR } from '__gConfig/pathConfig';
 import { addFileSync } from '__gUtils/fileUtils';
-import { logger } from '__gUtils/logUtils'
 
 export const initConfig = () => {
     if(!fse.existsSync(KF_CONFIG_PATH)) {

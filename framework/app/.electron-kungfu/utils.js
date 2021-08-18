@@ -2,8 +2,10 @@ const fs = require("fs");
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
+const rootDir = path.dirname(__dirname);
+
 const getCommitVersion = () => {
-  const gitDir = path.resolve(__dirname, '..', '..', '..', '.git')
+  const gitDir = path.resolve(rootDir, '..', '..', '.git')
   var gitCommitVersion = 'latest'
   try {
     var gitHEAD = fs.readFileSync(path.join(gitDir, 'HEAD'), 'utf-8').trim() // ref: refs/heads/develop
@@ -25,7 +27,7 @@ const getCommitVersion = () => {
 const getPythonVersion = () => {
   var pyVersion = "3";
   try {
-    var buildInfoRaw = fs.readFileSync(path.join(__dirname, '..', '..', 'core', 'build', 'kfc', 'kungfubuildinfo.json'), 'utf-8')
+    var buildInfoRaw = fs.readFileSync(path.join(path.dirname(rootDir), 'core', 'dist', 'kfc', 'kungfubuildinfo.json'), 'utf-8')
     var buildInfo = JSON.parse(buildInfoRaw);
     pyVersion = buildInfo.pythonVersion || "3"
   } catch (err) {
@@ -49,10 +51,10 @@ const getViewsConfig = () => {
     return stats.isDirectory();
   })
   .forEach(file => {
-    entry[file] = path.join(__dirname, `../src/renderer/views/${file}/main.js`),
+    entry[file] = path.join(rootDir, 'src', 'renderer', 'views', file, 'main.js'),
     plugins.push( new HtmlWebpackPlugin({
       filename: `${file}.html`,
-      template: path.resolve(__dirname, '../src/index.ejs'),
+      template: path.resolve(rootDir, 'src', 'index.ejs'),
       minify: {
         collapseWhitespace: true,
         removeAttributeQuotes: true,
@@ -60,7 +62,7 @@ const getViewsConfig = () => {
       },
       chunks: [file],
       nodeModules: process.env.NODE_ENV !== 'production'
-        ? path.resolve(__dirname, '../node_modules')
+        ? path.resolve(rootDir, 'node_modules')
         : false
     }))
   });

@@ -1,5 +1,3 @@
-
-
 /**
  * This file is used specifically and only for development. It installs
  * `electron-debug` & `vue-devtools`. There shouldn't be any need to
@@ -10,7 +8,6 @@
 /* eslint-disable */
 
 // Set environment for development
-
 const { app, BrowserWindow } = require('electron');
 const os = require('os');
 
@@ -25,7 +22,11 @@ app.on('ready', () => {
     .catch(err => {
       console.log('Unable to install `vue-devtools`: \n', err)
       global.__static = require('path').join(__dirname, '/static').replace(/\\/g, '\\');
-      BrowserWindow.addDevToolsExtension(`${os.homedir()}/Library/Application Support/Google/Chrome/Default/Extensions/nhdogjmejiglipccpnnnanhbledajbpd/5.3.4_0`);
+      const chromeData = `${os.homedir()}/Library/Application Support/Google/Chrome`;
+      const ext = `${chromeData}/Default/Extensions/nhdogjmejiglipccpnnnanhbledajbpd/5.3.4_0`;
+      if (fs.existsSync(ext)) {
+        BrowserWindow.addDevToolsExtension(ext);
+      }
     })
 })
 

@@ -13,10 +13,9 @@ const mainConfig = require('./webpack.main.config')
 const rendererConfig = require('./webpack.renderer.config')
 const daemonConfig = require('./webpack.daemon.config')
 
-
-let electronProcess = null
-let manualRestart = false
-let hotMiddleware
+let electronProcess = null;
+let hotMiddleware = null;
+let manualRestart = false;
 
 function logStats (proc, data) {
   let log = ''
@@ -53,16 +52,16 @@ function startRenderer () {
       heartbeat: 3000 
     })
 
-    compiler.plugin('compilation', compilation => {
-      compilation.plugin('html-webpack-plugin-after-emit', (data, cb) => {
-        hotMiddleware.publish({ action: 'reload' })
-        cb()
-      })
-    })
+    // compiler.plugin('compilation', compilation => {
+    //   compilation.plugin('html-webpack-plugin-after-emit', (data, cb) => {
+    //     hotMiddleware.publish({ action: 'reload' })
+    //     cb()
+    //   })
+    // })
 
-    compiler.plugin('done', stats => {
-      logStats('Renderer', stats)
-    })
+    // compiler.plugin('done', stats => {
+    //   logStats('Renderer', stats)
+    // })
 
     const server = new WebpackDevServer(
       compiler,
@@ -88,15 +87,15 @@ function startRenderer () {
 
 function startMain () {
   return new Promise((resolve, reject) => {
-    mainConfig.entry.main = [path.join(__dirname, '../src/main/index.dev.js')].concat(mainConfig.entry.main)
+    mainConfig.entry.main = [path.join(path.dirname(__dirname), 'src', 'main', 'index.dev.js')].concat(mainConfig.entry.main)
 
     const compiler = webpack(mainConfig)
 
-    compiler.plugin('watch-run', (compilation, done) => {
-      logStats('Main', chalk.white.bold('compiling...'))
-      hotMiddleware.publish({ action: 'compiling' })
-      done()
-    })
+    // compiler.plugin('watch-run', (compilation, done) => {
+    //   logStats('Main', chalk.white.bold('compiling...'))
+    //   hotMiddleware.publish({ action: 'compiling' })
+    //   done()
+    // })
 
     compiler.watch({}, (err, stats) => {
       if (err) {

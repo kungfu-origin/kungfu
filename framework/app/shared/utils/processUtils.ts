@@ -15,6 +15,8 @@ const numCPUs = require('os').cpus() ? require('os').cpus().length : 1;
 const fkill = require('fkill');
 const pm2 = require('pm2');
 
+require.main = require.main || pm2;
+
 export const _pm2 = pm2;
 
 //=========================== task kill =========================================
@@ -71,9 +73,12 @@ const linuxKill = async (tasks: string[]): Promise<any> => {
 }
 
 export const kfKill = (tasks: string[]): any => {
-    if (platform === 'mac') return macKill(tasks)
-    else if (platform === 'linux') return linuxKill(tasks)
-    else return winKill(tasks)
+    const killers: { [key: string]: any } = {
+        'mac': macKill,
+        'linux': linuxKill,
+        'win32': winKill,
+    };
+    return killers[platform](tasks);
 }
 
 const kfc = platform === 'win' ? 'kfc.exe' : 'kfc';
@@ -168,17 +173,17 @@ function buildArgs (args: string, considerCup = false): string {
     const logLevel: string = ((kfConfig.log || {}).level) || '';
     const ifRocket = ((kfConfig.performance || {}).rocket) || false;
     const rocket = getRocketParams(ifRocket, considerCup);
-    return [ logLevel, args, rocket ].join(' ')
+    return [ logLevel, args, rocket ].join(' ').trimEnd();
 }
 
 export const startProcess = (options: Pm2Options, no_ext = false): Promise<object> => {
-    const extensionName = platform === 'win' ? '.exe' : '';
+    const kfcScript = platform === 'win' ? 'kfc.exe' : 'kfc';
 
     let optionsResolved: any = {
         "name": options.name,
-        "args": options.args, //有问题
-        "cwd": options.cwd || path.join(KUNGFU_ENGINE_PATH, 'kfc'),
-        "script": options.script || `kfc${extensionName}`,
+        "args": options.args, //有问题吗？
+        "cwd": options.cwd || path.resolve?.(KUNGFU_ENGINE_PATH, 'kfc'),
+        "script": options.script || kfcScript,
         "interpreter": options.interpreter || 'none',
         "logType": "json",
         "output": buildProcessLogPath(options.name),
@@ -408,7 +413,7 @@ export const startMaster = async (force: boolean): Promise<any> => {
     }
     return startProcess({
         "name": processName,
-        "args": buildArgs('master', true)
+        "args": buildArgs('service master', true)
     }, true).catch(err => logger.error('[startMaster]', err))
 }
 
@@ -421,7 +426,7 @@ export const startLedger = async (force: boolean): Promise<any> => {
     if (!force && ledgerStatus.length === ledger.length && ledger.length !== 0) throw new Error('kungfu ledger 正在运行！')
     return startProcess({
         'name': processName,
-        'args': buildArgs('ledger', true)
+        'args': buildArgs('service ledger', true)
     }).catch(err => logger.error('[startLedger]', err))
 }
 
@@ -430,7 +435,7 @@ export const startLedger = async (force: boolean): Promise<any> => {
 export const startMd = (source: string): Promise<any> => {
     return startProcess({
         "name": `md_${source}`,
-        "args": buildArgs(`md -s "${source}"`),
+        "args": buildArgs(`vendor md -s "${source}"`),
         "maxRestarts": 3,
         "autorestart": true,
     }).catch(err => logger.error('[startMd]', err))
@@ -441,7 +446,7 @@ export const startTd = (accountId: string): Promise<any> => {
     const { source, id } = accountId.parseSourceAccountId();
     return startProcess({
         "name": `td_${accountId}`,
-        "args": buildArgs(`td -s "${source}" -a "${id}"`),
+        "args": buildArgs(`vendor td -s "${source}" -a "${id}"`),
         "maxRestarts": 3,
         "autorestart": true,
     }).catch(err => logger.error('[startTd]', err))
@@ -461,7 +466,7 @@ export const startStrategy = (strategyId: string, strategyPath: string): Promise
     } else {
         return startProcess({
             "name": strategyId,
-            "args": buildArgs(`strategy -n '${strategyId}' -p '${strategyPath}'`),
+            "args": buildArgs(`strategy run -n '${strategyId}' -p '${strategyPath}'`),
         }, false).catch(err => logger.error('[startStrategy]', err))
     }
 }
@@ -469,7 +474,7 @@ export const startStrategy = (strategyId: string, strategyPath: string): Promise
 export const startBar = (targetName: string, source: string, timeInterval: string): Promise<any> => {
     return startProcess({
         "name": targetName,
-        "args": buildArgs(`bar -s ${source} --time-interval ${timeInterval}`)
+        "args": buildArgs(`service bar -s ${source} --time-interval ${timeInterval}`)
     }).catch(err => logger.error('[startBar]', err))
 }
 

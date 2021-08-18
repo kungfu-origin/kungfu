@@ -103,8 +103,7 @@ addFileSync('', KF_TICKER_SET_JSON_PATH, 'file');
 
 export const KUNGFU_ENGINE_PATH = process.env.NODE_ENV === 'production' 
     ? process.resourcesPath
-    : path.resolve(path.join(__dirname, '..', '..', '..', 'core', 'build'))
-
+    : path.resolve(path.join(__dirname, '..', '..', '..', 'core', 'dist'))
 
 export const EXTENSION_DIR = path.join(KUNGFU_ENGINE_PATH, 'kfc', 'kungfu_extensions');
 

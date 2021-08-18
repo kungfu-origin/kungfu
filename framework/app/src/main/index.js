@@ -20,8 +20,8 @@ setMenu();
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
-var mainWindow = null;
-var allowQuit = false;
+let mainWindow = null;
+let allowQuit = false;
 function createWindow () {
 	// Create the browser window.
 	const electronScreen = electron.screen;    
@@ -33,9 +33,11 @@ function createWindow () {
 		height: height > 1200 ? 1200 : height,
 		useContentSize: true,
 		webPreferences: {
+			contextIsolation: false,
+			enableRemoteModule: true,
 			webSecurity: false,
 			nodeIntegration: true,
-			nodeIntegrationInWorker: true
+			nodeIntegrationInWorker: true,
 		},
 		backgroundColor: '#161B2E',
 	})
@@ -105,7 +107,7 @@ if(!gotTheLock) {
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-var appReady = false, killExtraFinished = false;
+let appReady = false, killExtraFinished = false;
 app.on('ready', () => {
 	appReady = true;
 	if(appReady && killExtraFinished) createWindow();
@@ -132,19 +134,19 @@ app.on('window-all-closed', function (e) {
 	app.quit()
 })
 
-app.on('activate', function () {
+app.on('activate', function() {
 // On macOS it's common to re-create a window in the app when the
 // dock icon is clicked and there are no other windows open.
-    if (mainWindow && mainWindow.isDestroyed()) createWindow()
-    else if(mainWindow && mainWindow.isVisible()) mainWindow.focus()
-    else mainWindow && mainWindow.show()
-})
+	if (mainWindow && mainWindow.isDestroyed()) createWindow();
+	else if (mainWindow && mainWindow.isVisible()) mainWindow.focus();
+	else mainWindow && mainWindow.show();
+});
 
 app.on('will-quit', (e) => {
 	if (allowQuit) {
 		globalShortcut.unregisterAll()
 		return
-	};	
+	}
 
 	e.preventDefault()
 })

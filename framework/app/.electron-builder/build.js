@@ -31,7 +31,7 @@ if (pro) {
 if (target) {
     const targetIndex = findConfigItemIndex(baseConfig.extraResources, [{
         key: 'from',
-        value: '../core/build/kfc',
+        value: '../core/dist/kfc',
     }, {
         key: 'to',
         value: 'kfc'
@@ -39,7 +39,7 @@ if (target) {
 
     if (targetIndex >= 0) {
         baseConfig.extraResources[targetIndex] = {
-            "from": "../core/build/kfc",
+            "from": "../core/dist/kfc",
             "to": "kfc",
             "filter": [
                 "!**/btdata",
