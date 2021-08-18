@@ -56,15 +56,6 @@ let rendererConfig = {
         ]
       },
       {
-        test: /\.js$/,
-        use: 'babel-loader',
-        exclude: /node_modules/
-      },
-      {
-        test: /\.node$/,
-        use: 'node-loader'
-      },
-      {
         test: /\.vue$/,
         use: 'vue-loader'
       },

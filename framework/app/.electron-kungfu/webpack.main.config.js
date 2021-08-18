@@ -25,18 +25,9 @@ let mainConfig = {
   module: {
     rules: [
       {
-        test: /\.js$/,
-        use: 'babel-loader',
-        exclude: /node_modules/
-      },
-      {
         test: /\.ts$/,
         use: 'ts-loader',
         exclude: /node_modules/
-      },
-      {
-        test: /\.node$/,
-        use: 'node-loader'
       },
       {
         test: /\.(png|jpe?g|gif|svg)(\?.*)?$/,
