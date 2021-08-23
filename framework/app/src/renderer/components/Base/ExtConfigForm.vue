@@ -271,7 +271,7 @@ import {
   SideName,
   SourceTypeConfig,
   ExchangeIds,
-} from "@kungfu-trader/kungfu-shared/config/tradingConfig";
+} from "@kungfu-trader/kungfu-uicc/config/tradingConfig";
 
 import instrumentsMixin from "@/assets/mixins/instrumentsMixin";
 

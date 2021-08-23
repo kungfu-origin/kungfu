@@ -2,7 +2,7 @@
     "resolveJsonModule": true,
     "module": "commonjs",
     "include": [
-        "../../node_modules/@kungfu-trader/kungfu-shared/**/*",
+        "../../node_modules/@kungfu-trader/kungfu-uicc/**/*",
         "../app/shared/**/*",
         "src/**/*",
         "src/*"

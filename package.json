@@ -10,13 +10,16 @@
   "workspaces": [
     "framework/*",
     "developer/*",
-    "extensions/*"
+    "extensions/*",
+    "installer"
   ],
+  "engines": {
+    "node": ">=14"
+  },
   "scripts": {
     "foreach": "wsrun --serial --exclude-missing --fast-exit",
     "postinstall": "yarn foreach postinstall",
     "build": "yarn foreach build",
-    "build-cli": "yarn foreach build-cli",
     "clean": "yarn foreach clean",
     "format": "yarn foreach format",
     "lint": "eslint --ext .ts .",
@@ -27,18 +30,18 @@
     "reformat:js": "yarn reformat \"(framework|developer|extensions)/**/node/*.js\""
   },
   "dependencies": {
-    "@ls-lint/ls-lint": "^1.9.0",
-    "@typescript-eslint/parser": "^4.29.0",
-    "eslint": "^7.14.0",
-    "prettier": "^2.3.0",
-    "prettier-eslint-cli": "^5.0.0",
     "lerna": "^4.0.0",
     "wsrun": "^5.0.0",
     "yarn": "^1.22.0"
   },
   "devDependencies": {
+    "@ls-lint/ls-lint": "^1.9.0",
+    "@typescript-eslint/parser": "^4.29.0",
     "cross-env": "1.0.0",
     "cross-var": "1.0.0",
-    "babel-upgrade": "^1.0.0"
+    "eslint": "^7.14.0",
+    "prettier": "^2.3.0",
+    "prettier-eslint-cli": "^5.0.0",
+    "typescript": "^4.3.5"
   }
 }

@@ -1,0 +1,45 @@
+{
+  "name": "@kungfu-trader/kungfu-uicc",
+  "author": {
+    "name": "kungfu-trader",
+    "email": "info@kungfu.link"
+  },
+  "version": "2.4.0-alpha.4",
+  "description": "Kungfu User Interface Common Components",
+  "license": "Apache-2.0",
+  "repository": {
+    "url": "https://github.com/kungfu-trader/kungfu.git"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "main": "",
+  "types": "typings/index.d.ts",
+  "dependencies": {
+    "add": "^2.0.6",
+    "aws-sdk": "^2.970.0",
+    "axios": "^0.21.1",
+    "cfonts": "^2.9.3",
+    "chai": "^4.2.0",
+    "chai-as-promised": "^7.1.1",
+    "chai-roughly": "^1.0.0",
+    "chalk": "^4.1.0",
+    "colors": "^1.4.0",
+    "fast-csv": "^2.5.0",
+    "fkill": "^7.2.0",
+    "fs-extra": "^10.0.0",
+    "gaze": "^1.1.0",
+    "jquery": "^3.6.0",
+    "getprocesses": "^1.1.1",
+    "log4js": "^6.3.0",
+    "mime": "^2.5.0",
+    "mocha": "^9.0.0",
+    "moment": "^2.24.0",
+    "pm2": "^5.1.0",
+    "rxjs": "^7.3.0",
+    "semver": "^7.3.5",
+    "tail": "^2.0.2",
+    "taskkill": "^2.0.0",
+    "typescript": "^4.3.5"
+  }
+}

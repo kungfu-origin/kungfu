@@ -6,7 +6,7 @@ import readline from 'readline';
 
 import { EXTENSION_DIR } from '__gConfig/pathConfig';
 import { listDir } from '__gUtils/fileUtils';
-import { allowShorted } from "@kungfu-trader/kungfu-shared/config/tradingConfig";
+import { allowShorted } from "@kungfu-trader/kungfu-uicc/config/tradingConfig";
 
 
 interface LogLineData {

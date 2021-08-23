@@ -78,7 +78,7 @@ let cliConfig = {
 }
 
 
-const { getPythonVersion } = require('../../app/.electron-kungfu/utils');
+const { getPythonVersion } = require('../../app/.webpack/utils');
 const pyVersion = getPythonVersion() || '3';
 
 /**

@@ -1,12 +1,11 @@
 'use strict'
 
 const chalk = require('chalk')
-const path = require('path')
 const { say } = require('cfonts')
 const webpack = require('webpack')
 const webpackHotMiddleware = require('webpack-hot-middleware')
 
-const cliConfig = require('./webpack.cli.config')
+const cliConfig = require('../.build/webpack.cli.config')
 
 let electronProcess = null
 let hotMiddleware
@@ -57,7 +56,7 @@ function startCli () {
       logStats('Main', stats)
 
       if (electronProcess && electronProcess.kill) {
-        manualRestart = true
+        let manualRestart = true
         process.kill(electronProcess.pid)
         electronProcess = null
         startElectron()

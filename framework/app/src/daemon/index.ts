@@ -121,7 +121,7 @@ _pm2.launchBus((err: Error, pm2_bus: any) => {
 })
 
 
-process.on('message', (packet) => {
+process.on('message', (packet: any) => {
     const { type, topic, data } = packet;        
     
     if (type !== 'process:msg')  return;

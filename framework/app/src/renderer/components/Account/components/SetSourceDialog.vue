@@ -32,7 +32,7 @@
 
 <script>
 
-import { SourceTypeConfig } from '@kungfu-trader/kungfu-shared/config/tradingConfig';
+import { SourceTypeConfig } from '@kungfu-trader/kungfu-uicc/config/tradingConfig';
 import { deepClone } from '__gUtils/busiUtils';
 
 export default {

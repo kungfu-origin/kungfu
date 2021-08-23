@@ -17,12 +17,6 @@ if (CLION)
             set("${OUTPUT_VARIABLE}" "${RESULT_STRING}" PARENT_SCOPE)
         endfunction(get_variable)
 
-        if (WIN32)
-            set(CMAKE_JS_CMD "./node_modules/.bin/cmake-js.cmd")
-        else ()
-            set(CMAKE_JS_CMD "./node_modules/.bin/cmake-js")
-        endif ()
-
         string(TOLOWER "${CMAKE_BUILD_TYPE}" CMAKE_BUILD_TYPE_LOWER)
         if (CMAKE_BUILD_TYPE_LOWER STREQUAL "debug")
             set(DEBUG_OPTION "--debug")
@@ -30,8 +24,9 @@ if (CLION)
             set(DEBUG_OPTION "")
         endif ()
 
-        exec_program(${CMAKE_JS_CMD} ${CMAKE_CURRENT_SOURCE_DIR}
-                ARGS --runtime ${NODE_RUNTIME} --runtime-version ${NODE_RUNTIMEVERSION} --arch ${NODE_ARCH} print-configure ${DEBUG_OPTION}
+        execute_process(
+                COMMAND yarn cmake-js --runtime ${NODE_RUNTIME} --runtime-version ${NODE_VERSION} --arch ${NODE_ARCH} print-configure ${DEBUG_OPTION}
+                WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
                 OUTPUT_VARIABLE CMAKE_JS_OUTPUT
                 )
 

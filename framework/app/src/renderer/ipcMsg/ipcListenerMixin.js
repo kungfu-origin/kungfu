@@ -7,7 +7,7 @@ import path from 'path';
 import { watcher, writeKungfuTimeValue, getTargetOrdersByParentId, flatternOrderTrades } from '__io/kungfu/watcher';
 import { kungfu, getKungfuDataByDateRange } from '__io/kungfu/kungfuUtils';
 import { getStrategyById, updateStrategyPath } from '__io/kungfu/strategy';
-import { aliveOrderStatusList } from '@kungfu-trader/kungfu-shared/config/tradingConfig';
+import { aliveOrderStatusList } from '@kungfu-trader/kungfu-uicc/config/tradingConfig';
 import { ensureLedgerData } from '__gUtils/busiUtils';
 import { writeCSV } from '__gUtils/fileUtils';
 

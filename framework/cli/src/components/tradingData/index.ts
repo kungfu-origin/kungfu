@@ -11,7 +11,7 @@ import { switchProcess, processListObservable } from '@/assets/scripts/actions/p
 import { kungfuCancelAllOrders } from '__io/kungfu/makeCancelOrder';
 import { dealOrder } from '__io/kungfu/watcher';
 import { deepClone } from '__gUtils/busiUtils';
-import { aliveOrderStatusList } from '@kungfu-trader/kungfu-shared/config/tradingConfig';
+import { aliveOrderStatusList } from '@kungfu-trader/kungfu-uicc/config/tradingConfig';
 
 const blessed = require('blessed');
 

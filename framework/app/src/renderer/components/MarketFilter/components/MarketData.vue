@@ -180,7 +180,7 @@
 import { mapGetters, mapState } from 'vuex';
 
 import { findTargetFromArray } from '__gUtils/busiUtils';
-import { ExchangeIds } from "@kungfu-trader/kungfu-shared/config/tradingConfig";
+import { ExchangeIds } from "@kungfu-trader/kungfu-uicc/config/tradingConfig";
 
 import TickerSetsManagerDialog from '@/components/MarketFilter/components/TickerSetsManagerDialog';
 import AddTickerDialog from '@/components/MarketFilter/components/AddTickerDialog';

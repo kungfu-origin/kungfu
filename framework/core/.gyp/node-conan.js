@@ -1,9 +1,17 @@
 const { exitOnError, getConfigValue, run } = require('./node-lib.js');
+const fse = require('fs-extra');
 const path = require('path');
 
 function conan(cmd) {
   const pipenv_args = ['run', 'conan', ...cmd];
   run('pipenv', pipenv_args);
+}
+
+function getNodeVersionOptions() {
+  const packageJson = fse.readJsonSync(path.resolve(path.dirname(__dirname), 'package.json'));
+  const nodeVersion = packageJson.dependencies['@kungfu-trader/libnode'];
+  const electronVersion = packageJson.dependencies['electron'];
+  return ['-o', `node_version=${nodeVersion}`, '-o', `electron_version=${electronVersion}`];
 }
 
 function makeConanSetting(name) {
@@ -19,14 +27,14 @@ function makeConanOption(name) {
 }
 
 function makeConanOptions(names) {
-  return names.map(makeConanOption).flat();
+  return names.map(makeConanOption).flat().concat(getNodeVersionOptions());
 }
 
 const cli = require('sywac')
   .command('install', {
     run: () => {
       const settings = makeConanSettings(['build_type']);
-      const options = makeConanOptions(['arch', 'log_level', 'freezer', 'node_version', 'electron_version']);
+      const options = makeConanOptions(['arch', 'log_level', 'freezer']);
       conan(['install', '.', '-if', 'build', '--build', 'missing', ...settings, ...options]);
     },
   })
