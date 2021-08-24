@@ -28,12 +28,8 @@ let daemonConfig = {
   plugins: [...commonConfig.plugins],
   resolve: {
     alias: {
-      __root: path.resolve(__dirname, '..'),
       '@': path.resolve(__dirname, '../src/renderer'),
-      __gUtils: path.resolve(__dirname, '../shared/utils'),
-      __gConfig: path.resolve(__dirname, '../shared/config'),
-      __io: path.resolve(__dirname, '../shared/io'),
-      __assets: path.resolve(__dirname, '../shared/assets'),
+      '@kungfu-trader/kungfu-uicc': path.dirname(require.resolve('@kungfu-trader/kungfu-uicc')),
     },
     extensions: ['.js', '.ts', '.json', '.node'],
   },

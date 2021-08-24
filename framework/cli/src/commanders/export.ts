@@ -1,13 +1,13 @@
 import { statSync, ensureDirSync } from "fs-extra";
 import moment from "moment";
-import { getKungfuDataByDateRange } from '__io/kungfu/kungfuUtils';
-import { ensureLedgerData } from '__gUtils/busiUtils';
-import { writeCSV } from '__gUtils/fileUtils';
+import { getKungfuDataByDateRange } from '@kungfu-trader/kungfu-uicc/io/kungfu/kungfuUtils';
+import { ensureLedgerData } from '@kungfu-trader/kungfu-uicc/utils/busiUtils';
+import { writeCSV } from '@kungfu-trader/kungfu-uicc/utils/fileUtils';
 
 const os = require('os');
 const path = require('path');
 const inquirer = require( 'inquirer' );
-const { PathPrompt } = require('@/assets/static/js/inquirer-path/lib');
+const { PathPrompt } = require('@kungfu-trader/kungfu-cli/assets/static/js/inquirer-path/lib');
 inquirer.registerPrompt('autocomplete', require('inquirer-autocomplete-prompt'));
 inquirer.registerPrompt('path', PathPrompt);
 
@@ -49,7 +49,7 @@ const inputExportDateAndPath = async () => {
 }
 
 export const exportTradingDataPrompt = async () => {
-    const { flatternOrderTrades } = require('__io/kungfu/watcher');
+    const { flatternOrderTrades } = require('@kungfu-trader/kungfu-uicc/io/kungfu/watcher');
     const { date, output_folder } = await inputExportDateAndPath();
 
     const outputPathResolved = path.join(output_folder, `kungfu-trading-data-${date}`);

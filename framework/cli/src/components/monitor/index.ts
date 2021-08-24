@@ -1,11 +1,11 @@
-import Dashboard from '@/assets/components/Dashboard';
-import MessageBox from '@/assets/components/MessageBox';
-import Loading from '@/assets/components/Loading';
-import { DEFAULT_PADDING, TABLE_BASE_OPTIONS, parseToString } from '@/assets/scripts/utils';
-import { switchProcess, processListObservable } from '@/assets/scripts/actions/processActions';
-import { getLogSubject, getLogInterval, splitStrByLength } from '@/assets/scripts/actions/logActions';
-import { debounce } from '__gUtils/busiUtils';
-import { logger } from '__gUtils/logUtils';
+import Dashboard from '@kungfu-trader/kungfu-cli/assets/components/Dashboard';
+import MessageBox from '@kungfu-trader/kungfu-cli/assets/components/MessageBox';
+import Loading from '@kungfu-trader/kungfu-cli/assets/components/Loading';
+import { DEFAULT_PADDING, TABLE_BASE_OPTIONS, parseToString } from '@kungfu-trader/kungfu-cli/assets/scripts/utils';
+import { switchProcess, processListObservable } from '@kungfu-trader/kungfu-cli/assets/scripts/actions/processActions';
+import { getLogSubject, getLogInterval, splitStrByLength } from '@kungfu-trader/kungfu-cli/assets/scripts/actions/logActions';
+import { debounce } from '@kungfu-trader/kungfu-uicc/utils/busiUtils';
+import { logger } from '@kungfu-trader/kungfu-uicc/utils/logUtils';
 
 
 const blessed = require('blessed');

@@ -1,6 +1,6 @@
-import { toDecimal } from '__gUtils/busiUtils';
-import { statusConfig } from '__gConfig/statusConfig';
-import { logger } from '__gUtils/logUtils';
+import { toDecimal } from '@kungfu-trader/kungfu-uicc/utils/busiUtils';
+import { statusConfig } from '@kungfu-trader/kungfu-uicc/config/statusConfig';
+import { logger } from '@kungfu-trader/kungfu-uicc/utils/logUtils';
 
 const colors = require('colors')
 

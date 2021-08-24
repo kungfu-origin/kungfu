@@ -1,7 +1,7 @@
 import { Subject } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
-const { _pm2 } = require('__gUtils/processUtils');
+const { _pm2 } = require('@kungfu-trader/kungfu-uicc/utils/processUtils');
 
 const baseDaemonDataObserver = new Subject();
 

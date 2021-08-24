@@ -210,11 +210,11 @@ import { mapState } from 'vuex';
 import SetAccountDialog from './SetAccountDialog';
 import SetSourceDialog from './SetSourceDialog';
 
-import { ifProcessRunning, toDecimal } from '__gUtils/busiUtils';
-import { getTdList } from '__io/kungfu/account';
-import { watcher } from '__io/kungfu/watcher';
-import { deleteTd, switchTd } from '__io/actions/account';
-import { loopToRunProcess } from '__gUtils/busiUtils';
+import { ifProcessRunning, toDecimal } from '@kungfu-trader/kungfu-uicc/utils/busiUtils';
+import { getTdList } from '@kungfu-trader/kungfu-uicc/io/kungfu/account';
+import { watcher } from '@kungfu-trader/kungfu-uicc/io/kungfu/watcher';
+import { deleteTd, switchTd } from '@kungfu-trader/kungfu-uicc/io/actions/account';
+import { loopToRunProcess } from '@kungfu-trader/kungfu-uicc/utils/busiUtils';
 
 import baseMixin from '@/assets/mixins/baseMixin';
 import mdTdRiskMixin from '../js/mdTdRiskMixin';

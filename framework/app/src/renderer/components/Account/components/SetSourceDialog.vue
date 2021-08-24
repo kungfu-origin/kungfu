@@ -33,7 +33,7 @@
 <script>
 
 import { SourceTypeConfig } from '@kungfu-trader/kungfu-uicc/config/tradingConfig';
-import { deepClone } from '__gUtils/busiUtils';
+import { deepClone } from '@kungfu-trader/kungfu-uicc/utils/busiUtils';
 
 export default {
     props: {

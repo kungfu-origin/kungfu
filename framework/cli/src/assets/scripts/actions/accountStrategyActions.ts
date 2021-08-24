@@ -1,6 +1,6 @@
-import { getTdList, getMdList } from '__io/kungfu/account';
-import { getStrategyList } from '__io/kungfu/strategy';
-import { parseToString } from '@/assets/scripts/utils';
+import { getTdList, getMdList } from '@kungfu-trader/kungfu-uicc/io/kungfu/account';
+import { getStrategyList } from '@kungfu-trader/kungfu-uicc/io/kungfu/strategy';
+import { parseToString } from '@kungfu-trader/kungfu-cli/assets/scripts/utils';
 
 const colors = require('colors');
 

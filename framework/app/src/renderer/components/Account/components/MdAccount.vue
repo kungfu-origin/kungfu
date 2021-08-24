@@ -99,10 +99,10 @@ import { mapState } from 'vuex';
 import SetAccountDialog from './SetAccountDialog';
 import SetSourceDialog from './SetSourceDialog';
 
-import { getMdList } from '__io/kungfu/account';
-import { watcher } from '__io/kungfu/watcher';
-import { switchMd, deleteMd } from '__io/actions/account';
-import { loopToRunProcess, ifProcessRunning } from '__gUtils/busiUtils';
+import { getMdList } from '@kungfu-trader/kungfu-uicc/io/kungfu/account';
+import { watcher } from '@kungfu-trader/kungfu-uicc/io/kungfu/watcher';
+import { switchMd, deleteMd } from '@kungfu-trader/kungfu-uicc/io/actions/account';
+import { loopToRunProcess, ifProcessRunning } from '@kungfu-trader/kungfu-uicc/utils/busiUtils';
 
 import baseMixin from '@/assets/mixins/baseMixin';
 import mdTdRiskMixin from '../js/mdTdRiskMixin';

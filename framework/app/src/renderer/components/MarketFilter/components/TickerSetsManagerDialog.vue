@@ -70,7 +70,7 @@
 <script>
 
 import { mapState } from 'vuex';
-import { findTargetFromArray } from '__gUtils/busiUtils';
+import { findTargetFromArray } from '@kungfu-trader/kungfu-uicc/utils/busiUtils';
 
 import TickerSets from '@/components/MarketFilter/components/TickerSets';
 import AddTickerDialog from '@/components/MarketFilter/components/AddTickerDialog';

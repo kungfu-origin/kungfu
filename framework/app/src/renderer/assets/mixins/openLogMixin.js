@@ -1,6 +1,6 @@
 
 import path from 'path';
-import { buildProcessLogPath } from '__gConfig/pathConfig';
+import { buildProcessLogPath } from '@kungfu-trader/kungfu-uicc/config/pathConfig';
 
 
 export default {

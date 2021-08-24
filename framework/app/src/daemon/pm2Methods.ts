@@ -5,9 +5,9 @@ import {
     getTargetOrdersByParentId,
     dealPos,
     dealQuote
-} from '__io/kungfu/watcher';
-import { ensureLedgerData } from '__gUtils/busiUtils';
-const { sendDataToProcessIdByPm2 } = require('__gUtils/processUtils');
+} from '@kungfu-trader/kungfu-uicc/io/kungfu/watcher';
+import { ensureLedgerData } from '@kungfu-trader/kungfu-uicc/utils/busiUtils';
+const { sendDataToProcessIdByPm2 } = require('@kungfu-trader/kungfu-uicc/utils/processUtils');
 
 export const resLedgerData = (parentId: string, pm2Id: number, accountId: string, ticker: string, processName: string) => {
     if (!watcher.isLive()) return;

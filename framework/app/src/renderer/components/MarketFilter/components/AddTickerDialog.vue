@@ -103,7 +103,7 @@ import { mapState } from 'vuex';
 import { Autocomplete } from "element-ui";
 
 import { SourceTypeConfig, ExchangeIds } from "@kungfu-trader/kungfu-uicc/config/tradingConfig";
-import { deepClone } from '__gUtils/busiUtils';
+import { deepClone } from '@kungfu-trader/kungfu-uicc/utils/busiUtils';
 
 import instrumentsMixin from "@/assets/mixins/instrumentsMixin";
 

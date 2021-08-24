@@ -232,9 +232,9 @@ import { mapGetters } from 'vuex';
 import { Autocomplete } from 'element-ui';
 import { ipcRenderer } from 'electron';
 
-import { deepClone, delayMiliSeconds } from '__gUtils/busiUtils';
+import { deepClone, delayMiliSeconds } from '@kungfu-trader/kungfu-uicc/utils/busiUtils';
 import { SourceTypeConfig, SideName, OffsetName, PriceType, HedgeFlag, ExchangeIds, InstrumentTypes, allowShorted } from '@kungfu-trader/kungfu-uicc/config/tradingConfig';
-import { biggerThanZeroValidator } from '__assets/validator';
+import { biggerThanZeroValidator } from '@kungfu-trader/kungfu-uicc/assets//validator';
 
 import instrumentsMixin from '@/assets/mixins/instrumentsMixin';
 import makeOrderMixin from '@/components/Base/makeOrder/js/makeOrderMixin';

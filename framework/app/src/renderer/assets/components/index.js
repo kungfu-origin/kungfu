@@ -16,7 +16,7 @@ import TrTable from './tr/TrTable.vue';
 import TrSearchInput from './tr/TrSearchInput.vue';
 import TrSettingDashboard from './tr/TrSettingDashboard.vue';
 
-import { openPage } from '__gUtils/busiUtils';
+import { openPage } from '@kungfu-trader/kungfu-uicc/utils/busiUtils';
 
 const components = [
     TrNoData,

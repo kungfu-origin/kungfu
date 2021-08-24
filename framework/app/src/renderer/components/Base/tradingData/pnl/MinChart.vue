@@ -12,7 +12,7 @@
 
 <script>
 import lineConfig from './config/lineEchart'
-import { toDecimal, deepClone } from '__gUtils/busiUtils';
+import { toDecimal, deepClone } from '@kungfu-trader/kungfu-uicc/utils/busiUtils';
 import echarts from '@/assets/js/static/echarts.min.js'
 
 

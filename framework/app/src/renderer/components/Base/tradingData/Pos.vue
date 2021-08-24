@@ -27,10 +27,10 @@
 
 import tradingDataMixin from './js/tradingDataMixin';
 
-import { writeCSV } from '__gUtils/fileUtils';
-import { toDecimal, deepClone } from '__gUtils/busiUtils';
+import { writeCSV } from '@kungfu-trader/kungfu-uicc/utils/fileUtils';
+import { toDecimal, deepClone } from '@kungfu-trader/kungfu-uicc/utils/busiUtils';
 import { posHeader } from '@/components/Base/tradingData/js/tableHeaderConfig';
-import { sendDataToDaemonByPm2 } from "__gUtils/processUtils";
+import { sendDataToDaemonByPm2 } from '@kungfu-trader/kungfu-uicc/utils/processUtils';
 
 export default {
     name: 'positions',

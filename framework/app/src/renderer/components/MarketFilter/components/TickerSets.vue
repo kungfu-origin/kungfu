@@ -77,7 +77,7 @@
 
 <script>
 
-import { findTargetFromArray } from '__gUtils/busiUtils';
+import { findTargetFromArray } from '@kungfu-trader/kungfu-uicc/utils/busiUtils';
 import baseMixin from '@/assets/mixins/baseMixin';
 import tickerSetMixin from '@/components/MarketFilter/js/tickerSetMixin';
 import { retry } from 'rxjs/operators';

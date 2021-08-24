@@ -4,19 +4,19 @@ import { ipcRenderer, remote } from 'electron';
 import moment from 'moment';
 import path from 'path';
 
-import { watcher, writeKungfuTimeValue, getTargetOrdersByParentId, flatternOrderTrades } from '__io/kungfu/watcher';
-import { kungfu, getKungfuDataByDateRange } from '__io/kungfu/kungfuUtils';
-import { getStrategyById, updateStrategyPath } from '__io/kungfu/strategy';
+import { watcher, writeKungfuTimeValue, getTargetOrdersByParentId, flatternOrderTrades } from '@kungfu-trader/kungfu-uicc/io/kungfu/watcher';
+import { kungfu, getKungfuDataByDateRange } from '@kungfu-trader/kungfu-uicc/io/kungfu/kungfuUtils';
+import { getStrategyById, updateStrategyPath } from '@kungfu-trader/kungfu-uicc/io/kungfu/strategy';
 import { aliveOrderStatusList } from '@kungfu-trader/kungfu-uicc/config/tradingConfig';
-import { ensureLedgerData } from '__gUtils/busiUtils';
-import { writeCSV } from '__gUtils/fileUtils';
+import { ensureLedgerData } from '@kungfu-trader/kungfu-uicc/utils/busiUtils';
+import { writeCSV } from '@kungfu-trader/kungfu-uicc/utils/fileUtils';
 
 
 import makeOrderCoreMixin from '@/components/Base/makeOrder/js/makeOrderCoreMixin';
 import recordBeforeQuitMixin from "@/assets/mixins/recordBeforeQuitMixin";
 import tickerSetMixin from '@/components/MarketFilter/js/tickerSetMixin';
 
-const { _pm2, sendDataToProcessIdByPm2 } = require('__gUtils/processUtils');
+const { _pm2, sendDataToProcessIdByPm2 } = require('@kungfu-trader/kungfu-uicc/utils/processUtils');
 const { dialog, BrowserWindow, shell } = remote;
 
 //一直启动，无需remove listener

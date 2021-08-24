@@ -6,7 +6,7 @@
 </template>
 
 <script>
-import { statusConfig } from '__gConfig/statusConfig';
+import { statusConfig } from '@kungfu-trader/kungfu-uicc/config/statusConfig';
 export default {
     name: 'tr-status',
     props: {

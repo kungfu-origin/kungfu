@@ -1,16 +1,16 @@
-import posTable from '@/assets/components/PosTable';
-import orderTable from '@/assets/components/OrderTable';
-import tradeTable from '@/assets/components/TradeTable';
-import Dashboard from '@/assets/components/Dashboard';
-import MessageBox from '@/assets/components/MessageBox';
-import Loading from '@/assets/components/Loading';
+import posTable from '@kungfu-trader/kungfu-cli/assets/components/PosTable';
+import orderTable from '@kungfu-trader/kungfu-cli/assets/components/OrderTable';
+import tradeTable from '@kungfu-trader/kungfu-cli/assets/components/TradeTable';
+import Dashboard from '@kungfu-trader/kungfu-cli/assets/components/Dashboard';
+import MessageBox from '@kungfu-trader/kungfu-cli/assets/components/MessageBox';
+import Loading from '@kungfu-trader/kungfu-cli/assets/components/Loading';
 
-import { parseToString, TABLE_BASE_OPTIONS, DEFAULT_PADDING, dealNum } from '@/assets/scripts/utils';
-import { tradingDataObservale } from '@/assets/scripts/actions/tradingDataActions';
-import { switchProcess, processListObservable } from '@/assets/scripts/actions/processActions';
-import { kungfuCancelAllOrders } from '__io/kungfu/makeCancelOrder';
-import { dealOrder } from '__io/kungfu/watcher';
-import { deepClone } from '__gUtils/busiUtils';
+import { parseToString, TABLE_BASE_OPTIONS, DEFAULT_PADDING, dealNum } from '@kungfu-trader/kungfu-cli/assets/scripts/utils';
+import { tradingDataObservale } from '@kungfu-trader/kungfu-cli/assets/scripts/actions/tradingDataActions';
+import { switchProcess, processListObservable } from '@kungfu-trader/kungfu-cli/assets/scripts/actions/processActions';
+import { kungfuCancelAllOrders } from '@kungfu-trader/kungfu-uicc/io/kungfu/makeCancelOrder';
+import { dealOrder } from '@kungfu-trader/kungfu-uicc/io/kungfu/watcher';
+import { deepClone } from '@kungfu-trader/kungfu-uicc/utils/busiUtils';
 import { aliveOrderStatusList } from '@kungfu-trader/kungfu-uicc/config/tradingConfig';
 
 const blessed = require('blessed');
@@ -220,7 +220,7 @@ class TradingDataDashboard extends Dashboard {
 		});
 		
 		t.boards.cancelBtn.on('press', () => {
-			const { watcher } = require('__io/kungfu/watcher');
+			const { watcher } = require('@kungfu-trader/kungfu-uicc/io/kungfu/watcher');
 			const aliveOrders = watcher.ledger.Order.list().filter((item: OrderOriginData) => aliveOrderStatusList.includes(+item.status));
 			const aliveOrdersResoved = aliveOrders.map((item: OrderOriginData) => dealOrder(item));
 

@@ -1,7 +1,7 @@
-import logColor from '__gConfig/logColorConfig';
-import { buildProcessLogPath } from '__gConfig/pathConfig';
+import logColor from '@kungfu-trader/kungfu-uicc/config/logColorConfig';
+import { buildProcessLogPath } from '@kungfu-trader/kungfu-uicc/config/pathConfig';
 
-import { getLog, setTimerPromiseTask } from '__gUtils/busiUtils';
+import { getLog, setTimerPromiseTask } from '@kungfu-trader/kungfu-uicc/utils/busiUtils';
 
 
 import { Subject } from 'rxjs';

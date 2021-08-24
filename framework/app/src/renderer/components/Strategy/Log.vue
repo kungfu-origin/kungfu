@@ -33,10 +33,10 @@
 <script>
 import fse from 'fs-extra'; 
 import { mapState } from 'vuex'
-import { debounce, throttle, throttleInsert, dealLogMessage } from '__gUtils/busiUtils'
-import { buildProcessLogPath } from '__gConfig/pathConfig';
+import { debounce, throttle, throttleInsert, dealLogMessage } from '@kungfu-trader/kungfu-uicc/utils/busiUtils'
+import { buildProcessLogPath } from '@kungfu-trader/kungfu-uicc/config/pathConfig';
 import { Tail } from 'tail';
-import { writeFile, addFileSync } from '__gUtils/fileUtils';
+import { writeFile, addFileSync } from '@kungfu-trader/kungfu-uicc/utils/fileUtils';
 import { ipcRenderer } from 'electron';
 
 import Workers from '@/workers/index';

@@ -1,6 +1,4 @@
-
 const colors = require('colors');
-
 
 declare global {
     interface Console {
@@ -16,5 +14,5 @@ console.error = (log: string) => {
     console.log(`${colors.red('ERROR')} ${log}`)
 }
 
-export const { initConfig } = require('__assets/base')
+export const { initConfig } = require('@kungfu-trader/kungfu-uicc/assets/base')
 initConfig();

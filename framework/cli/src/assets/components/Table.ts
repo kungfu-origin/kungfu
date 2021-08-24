@@ -1,5 +1,5 @@
-import { calcuHeaderWidth, parseToString, TABLE_BASE_OPTIONS } from '@/assets/scripts/utils';
-import { logger } from '__gUtils/logUtils';
+import { calcuHeaderWidth, parseToString, TABLE_BASE_OPTIONS } from '@kungfu-trader/kungfu-cli/assets/scripts/utils';
+import { logger } from '@kungfu-trader/kungfu-uicc/utils/logUtils';
 
 const blessed = require('blessed');
 const colors = require('colors');

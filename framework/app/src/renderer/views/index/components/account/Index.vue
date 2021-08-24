@@ -135,8 +135,8 @@ import TaskRecord from '@/components/Task/TaskRecord';
 import OrderBook from '@/components/MarketFilter/components/OrderBook';
 import MarketData from '@/components/MarketFilter/components/MarketData';
 
-import { watcher, transformPositionByTickerByMerge, transformOrderStatListToData, getOrdersBySourceDestInstrumentId, getTradesBySourceDestInstrumentId, getOrderStatByDest } from '__io/kungfu/watcher';
-import { encodeKungfuLocation } from '__io/kungfu/kungfuUtils';
+import { watcher, transformPositionByTickerByMerge, transformOrderStatListToData, getOrdersBySourceDestInstrumentId, getTradesBySourceDestInstrumentId, getOrderStatByDest } from '@kungfu-trader/kungfu-uicc/io/kungfu/watcher';
+import { encodeKungfuLocation } from '@kungfu-trader/kungfu-uicc/io/kungfu/kungfuUtils';
 import { buildTradingDataAccountPipeByDaemon, buildMarketDataPipeByDaemon } from '@/ipcMsg/daemon';
 
 import accountStrategyMixins from '@/views/index/js/accountStrategyMixins';

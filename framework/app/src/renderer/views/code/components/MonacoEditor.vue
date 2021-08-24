@@ -9,8 +9,8 @@ import * as monaco from "monaco-editor/esm/vs/editor/editor.main.js";
 
 import { keywordsList, kungfuFunctions, kungfuProperties, kungfuKeywords, pythonKeywords } from "../hint/monaco.python.hint";
 import { mapState } from "vuex";
-import * as CODE_UTILS from "__gUtils/fileUtils";
-import { delayMiliSeconds } from '__gUtils/busiUtils';
+import * as CODE_UTILS from '@kungfu-trader/kungfu-uicc/utils/fileUtils';
+import { delayMiliSeconds } from '@kungfu-trader/kungfu-uicc/utils/busiUtils';
 
 import languageJSON from '../config/iconFileConfig.json';
 import themeData from "../config/Monokai.json";

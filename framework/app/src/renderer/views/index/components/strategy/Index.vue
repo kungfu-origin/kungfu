@@ -124,9 +124,9 @@ import Pnl from '@/components/Base/tradingData/pnl/Index';
 import MainContent from '@/components/Layout/MainContent';
 
 import { buildTradingDataStrategyPipeByDaemon } from '@/ipcMsg/daemon';
-import { buildKungfuDataByAppPipe } from '__io/kungfu/tradingData';
-import { watcher, transformOrderStatListToData, getOrderInputBySourceDest, getOrdersBySourceDestInstrumentId, getTradesBySourceDestInstrumentId, getOrderStatByDest, dealOrderInput, dealOrder, dealTrade } from '__io/kungfu/watcher';
-import { encodeKungfuLocation } from '__io/kungfu/kungfuUtils';
+import { buildKungfuDataByAppPipe } from '@kungfu-trader/kungfu-uicc/io/kungfu/tradingData';
+import { watcher, transformOrderStatListToData, getOrderInputBySourceDest, getOrdersBySourceDestInstrumentId, getTradesBySourceDestInstrumentId, getOrderStatByDest, dealOrderInput, dealOrder, dealTrade } from '@kungfu-trader/kungfu-uicc/io/kungfu/watcher';
+import { encodeKungfuLocation } from '@kungfu-trader/kungfu-uicc/io/kungfu/kungfuUtils';
 
 import accountStrategyMixins from '@/views/index/js/accountStrategyMixins';
 

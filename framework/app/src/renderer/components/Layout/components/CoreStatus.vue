@@ -88,9 +88,9 @@
 </template>
 <script>
 import { mapState } from 'vuex';
-import { statusConfig } from '__gConfig/statusConfig';
-import { ifProcessRunning, getMemCpu } from '__gUtils/busiUtils';
-import { switchLedger, switchDaemon } from '__io/actions/base';
+import { statusConfig } from '@kungfu-trader/kungfu-uicc/config/statusConfig';
+import { ifProcessRunning, getMemCpu } from '@kungfu-trader/kungfu-uicc/utils/busiUtils';
+import { switchLedger, switchDaemon } from '@kungfu-trader/kungfu-uicc/io/actions/base';
 
 import openLogMixin from '@/assets/mixins/openLogMixin';
 

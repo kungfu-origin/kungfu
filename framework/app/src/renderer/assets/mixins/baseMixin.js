@@ -1,5 +1,5 @@
 import { mapState } from 'vuex';
-import { debounce } from '__gUtils/busiUtils';
+import { debounce } from '@kungfu-trader/kungfu-uicc/utils/busiUtils';
 
 export default {
 

@@ -56,7 +56,7 @@
 <script>
 import ExtConfigForm from '@/components/Base/ExtConfigForm';
 
-import { deepClone } from '__gUtils/busiUtils';
+import { deepClone } from '@kungfu-trader/kungfu-uicc/utils/busiUtils';
 import { getAuthClient } from "@authing/vue-ui-components"
 import loginInfoFormConfig from '@/components/Base/config/loginInfoFormConfig';
 

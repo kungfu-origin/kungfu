@@ -31,9 +31,9 @@
 
 import ExtConfigForm from '@/components/Base/ExtConfigForm';
 
-import { addTd, updateTdConfig, addMd, updateMdConfig } from '__io/kungfu/account';
+import { addTd, updateTdConfig, addMd, updateMdConfig } from '@kungfu-trader/kungfu-uicc/io/kungfu/account';
 
-import { deepClone } from '__gUtils/busiUtils';
+import { deepClone } from '@kungfu-trader/kungfu-uicc/utils/busiUtils';
 
 export default {
     name: 'set-account-dialog',

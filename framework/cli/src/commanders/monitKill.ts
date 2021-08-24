@@ -15,9 +15,9 @@
  * @FilePath: /kungfu/cli/src/commanders/shutdown.ts
  */ 
 
-import { kfKill } from '__gUtils/processUtils';
-import { SYSTEM_DIR } from '__gConfig/pathConfig';
-import { deleteNNFiles } from '@/commanders/shutdown';
+import { kfKill } from '@kungfu-trader/kungfu-uicc/utils/processUtils';
+import { SYSTEM_DIR } from '@kungfu-trader/kungfu-uicc/config/pathConfig';
+import { deleteNNFiles } from '@kungfu-trader/kungfu-cli/commanders/shutdown';
 
 
 

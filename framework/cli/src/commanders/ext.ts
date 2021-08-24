@@ -1,12 +1,12 @@
 
-import { KUNGFU_ENGINE_PATH } from '__gConfig/pathConfig';
-import { platform } from '__gConfig/platformConfig';
+import { KUNGFU_ENGINE_PATH } from '@kungfu-trader/kungfu-uicc/config/pathConfig';
+import { platform } from '@kungfu-trader/kungfu-uicc/config/platformConfig';
 
 const path = require('path');
 const os = require('os');
 const { execFile } = require('child_process');
 const inquirer = require( 'inquirer' );
-const { PathPrompt } = require('@/assets/static/js/inquirer-path/lib');
+const { PathPrompt } = require('@kungfu-trader/kungfu-cli/assets/static/js/inquirer-path/lib');
 
 inquirer.registerPrompt('autocomplete', require('inquirer-autocomplete-prompt'));
 inquirer.registerPrompt('path', PathPrompt);

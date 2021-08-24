@@ -5,10 +5,10 @@ import Vue from 'vue';
 import './setKungfuParamsOnWindow';
 import store from '@/store';
 import router from './routers';
-import * as utils from '__gUtils/busiUtils';
-import { removeJournal } from '__gUtils/fileUtils';
-import { KF_HOME } from '__gConfig/pathConfig';
-import { watcher } from '__io/kungfu/watcher';
+import * as utils from '@kungfu-trader/kungfu-uicc/utils/busiUtils';
+import { removeJournal } from '@kungfu-trader/kungfu-uicc/utils/fileUtils';
+import { KF_HOME } from '@kungfu-trader/kungfu-uicc/config/pathConfig';
+import { watcher } from '@kungfu-trader/kungfu-uicc/io/kungfu/watcher';
 import ElementUI from 'element-ui';
 import Components from '@/assets/components';
 
@@ -17,7 +17,7 @@ import '@/assets/iconfont/iconfont.js';
 import '@/assets/iconfont/iconfont.css';
 import '@/assets/scss/makeOrder.scss';
 import moment from 'moment';
-import '__io/http/index';
+import '@kungfu-trader/kungfu-uicc/io/http/index';
 
 Vue.use(ElementUI)
 Vue.use(Components)
@@ -34,7 +34,7 @@ new Vue({
 }).$mount('#app', true)
 
 
-const { startGetProcessStatus, startMaster, startLedger, startDaemon, startArchiveMakeTask, _pm2 } = require('__gUtils/processUtils');
+const { startGetProcessStatus, startMaster, startLedger, startDaemon, startArchiveMakeTask, _pm2 } = require('@kungfu-trader/kungfu-uicc/utils/processUtils');
 
 
 beforeAll()

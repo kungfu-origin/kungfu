@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 
-import { getAccountSource } from '__gConfig/accountConfig';
+import { getAccountSource } from '@kungfu-trader/kungfu-uicc/config/accountConfig';
 
 Vue.use(Vuex)
 

@@ -1,4 +1,4 @@
-import { delayMiliSeconds } from '__gUtils/busiUtils';
+import { delayMiliSeconds } from '@kungfu-trader/kungfu-uicc/utils/busiUtils';
 
 export default {
 

@@ -128,7 +128,7 @@ import Vue from 'vue';
 import 'vue-virtual-scroller/dist/vue-virtual-scroller.css'
 
 import VueVirtualScroller from 'vue-virtual-scroller'
-import { debounce, sum } from '__gUtils/busiUtils';
+import { debounce, sum } from '@kungfu-trader/kungfu-uicc/utils/busiUtils';
 
 Vue.use(VueVirtualScroller)
 export default {

@@ -1,13 +1,13 @@
-import { getAccountSource } from '__gConfig/accountConfig';
-import { requiredValidator, specialStrValidator, blankValidator, noZeroAtFirstValidator, noKeywordValidatorBuilder, chineseValidator } from '__assets/validator';
-import { getTdList, addMd, addTd, updateTdConfig, getExistedMdSources, updateMdConfig } from '__io/kungfu/account';
-import { getStrategyList, addStrategy, updateStrategyPath } from '__io/kungfu/strategy';
-import { parseSources, renderSelect, getQuestionInputType, getKungfuTypeFromString } from '@/assets/scripts/utils';
+import { getAccountSource } from '@kungfu-trader/kungfu-uicc/config/accountConfig';
+import { requiredValidator, specialStrValidator, blankValidator, noZeroAtFirstValidator, noKeywordValidatorBuilder, chineseValidator } from '@kungfu-trader/kungfu-uicc/assets/validator';
+import { getTdList, addMd, addTd, updateTdConfig, getExistedMdSources, updateMdConfig } from '@kungfu-trader/kungfu-uicc/io/kungfu/account';
+import { getStrategyList, addStrategy, updateStrategyPath } from '@kungfu-trader/kungfu-uicc/io/kungfu/strategy';
+import { parseSources, renderSelect, getQuestionInputType, getKungfuTypeFromString } from '@kungfu-trader/kungfu-cli/assets/scripts/utils';
 
 const os = require('os');
 const colors = require('colors');
 const inquirer = require( 'inquirer' );
-const { PathPrompt } = require('@/assets/static/js/inquirer-path/lib');
+const { PathPrompt } = require('@kungfu-trader/kungfu-cli/assets/static/js/inquirer-path/lib');
 inquirer.registerPrompt('autocomplete', require('inquirer-autocomplete-prompt'));
 inquirer.registerPrompt('path', PathPrompt);
 

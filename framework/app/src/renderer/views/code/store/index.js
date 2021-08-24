@@ -2,8 +2,8 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 import fse from 'fs-extra';
 
-import { KF_CONFIG_PATH } from '__gConfig/pathConfig';
-import { deepClone } from '__gUtils/busiUtils';
+import { KF_CONFIG_PATH } from '@kungfu-trader/kungfu-uicc/config/pathConfig';
+import { deepClone } from '@kungfu-trader/kungfu-uicc/utils/busiUtils';
 
 Vue.use(Vuex)
 

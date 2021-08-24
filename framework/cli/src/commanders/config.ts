@@ -1,7 +1,7 @@
-import { SystemConfigItem, SystemConfigChildNormalItem, mergeSystemConfigTogether, getValueByConfigItem, setValueByConfigItem } from '__gConfig/systemConfig';
-import { requiredValidator } from '__assets/validator';
-import { getQuestionInputType } from '@/assets/scripts/utils';
-import { getSourceList } from "__gUtils/busiUtils";
+import { SystemConfigItem, SystemConfigChildNormalItem, mergeSystemConfigTogether, getValueByConfigItem, setValueByConfigItem } from '@kungfu-trader/kungfu-uicc/config/systemConfig';
+import { requiredValidator } from '@kungfu-trader/kungfu-uicc/assets/validator';
+import { getQuestionInputType } from '@kungfu-trader/kungfu-cli/assets/scripts/utils';
+import { getSourceList } from "@kungfu-trader/kungfu-uicc/utils/busiUtils";
 
 const inquirer = require( 'inquirer' );
 

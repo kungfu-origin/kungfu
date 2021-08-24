@@ -14,9 +14,6 @@
   "publishConfig": {
     "registry": "https://npm.pkg.github.com"
   },
-  "engines": {
-    "node": ">=14"
-  },
   "bin": {
     "kfc": "js/kfc.js"
   },

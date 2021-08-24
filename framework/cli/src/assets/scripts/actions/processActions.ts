@@ -1,19 +1,19 @@
 
-import { dealStatus } from '@/assets/scripts/utils';
+import { dealStatus } from '@kungfu-trader/kungfu-cli/assets/scripts/utils';
 
 
-import { setTimerPromiseTask, resolveMemCpu } from '__gUtils/busiUtils';
-import { logger } from '__gUtils/logUtils';
-import { removeJournal } from '__gUtils/fileUtils';
-import { listProcessStatusWithDetail, startArchiveMakeTask } from '__gUtils/processUtils';
-import { KF_HOME } from '__gConfig/pathConfig';
+import { setTimerPromiseTask, resolveMemCpu } from '@kungfu-trader/kungfu-uicc/utils/busiUtils';
+import { logger } from '@kungfu-trader/kungfu-uicc/utils/logUtils';
+import { removeJournal } from '@kungfu-trader/kungfu-uicc/utils/fileUtils';
+import { listProcessStatusWithDetail, startArchiveMakeTask } from '@kungfu-trader/kungfu-uicc/utils/processUtils';
+import { KF_HOME } from '@kungfu-trader/kungfu-uicc/config/pathConfig';
 
-import { switchMaster, switchCustomProcess } from '__io/actions/base';
-import { switchTd, switchMd } from '__io/actions/account';
-import { switchStrategy } from '__io/actions/strategy';
+import { switchMaster, switchCustomProcess } from '@kungfu-trader/kungfu-uicc/io/actions/base';
+import { switchTd, switchMd } from '@kungfu-trader/kungfu-uicc/io/actions/account';
+import { switchStrategy } from '@kungfu-trader/kungfu-uicc/io/actions/strategy';
 
-import { getTdList, getMdList } from '__io/kungfu/account';
-import { getStrategyList } from '__io/kungfu/strategy';
+import { getTdList, getMdList } from '@kungfu-trader/kungfu-uicc/io/kungfu/account';
+import { getStrategyList } from '@kungfu-trader/kungfu-uicc/io/kungfu/strategy';
 
 import { Observable, combineLatest } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -23,7 +23,7 @@ const colors = require('colors');
 export const switchProcess = (proc: any, messageBoard: any, loading: any) =>{
     const status = proc.status !== '--';
     const startOrStop = !!status ? 'Stop' : 'Start';
-    const { watcher } = require("__io/kungfu/watcher");
+    const { watcher } = require("@kungfu-trader/kungfu-uicc/io/kungfu/watcher");
 
     if (!status) {
         if (proc.processId !== 'master') {
@@ -106,7 +106,7 @@ export const processStatusObservable = () => {
 }
 
 export const mdTdStateObservable = () => {
-    const { buildGatewayStatePipe } = require('__io/kungfu/tradingData');
+    const { buildGatewayStatePipe } = require('@kungfu-trader/kungfu-uicc/io/kungfu/tradingData');
     return buildGatewayStatePipe().pipe(
         map((item: any) => {
             

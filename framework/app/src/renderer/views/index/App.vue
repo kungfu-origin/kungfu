@@ -66,8 +66,8 @@ import AuthDialog from '@/components/Base/AuthingDialog';
 import SystemPrepareDialog from '@/components/Base/SystemPrepareDialog';
 
 import { buildMarketDataPipeByDaemon, buildTradingDataAccountPipeByDaemon, buildKungfuGlobalDataPipeByDaemon } from '@/ipcMsg/daemon';
-import { buildGatewayStatePipe } from '__io/kungfu/tradingData';
-import { watcher } from '__io/kungfu/watcher';
+import { buildGatewayStatePipe } from '@kungfu-trader/kungfu-uicc/io/kungfu/tradingData';
+import { watcher } from '@kungfu-trader/kungfu-uicc/io/kungfu/watcher';
 
 import ipcListenerMixin from '@/ipcMsg/ipcListenerMixin';
 import tickerSetMixin from '@/components/MarketFilter/js/tickerSetMixin';

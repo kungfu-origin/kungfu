@@ -1,8 +1,8 @@
 import Vue from 'vue';
 import fse from "fs-extra";
-import { getAccountSource } from '__gConfig/accountConfig';
-import { KF_CONFIG_PATH, TASK_EXTENSION_DIR } from '__gConfig/pathConfig';
-import { getExtensionConfigs } from '__gUtils/busiUtils';
+import { getAccountSource } from '@kungfu-trader/kungfu-uicc/config/accountConfig';
+import { KF_CONFIG_PATH, TASK_EXTENSION_DIR } from '@kungfu-trader/kungfu-uicc/config/pathConfig';
+import { getExtensionConfigs } from '@kungfu-trader/kungfu-uicc/utils/busiUtils';
 
 
 export default {

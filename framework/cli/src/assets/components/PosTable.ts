@@ -1,7 +1,8 @@
+// @ts-ignore
 import colors from 'colors';
 import Table from './Table';
-import { calcuHeaderWidth, parseToString, dealNum } from '@/assets/scripts/utils';
-import { toDecimal } from '__gUtils/busiUtils';
+import { calcuHeaderWidth, parseToString, dealNum } from '@kungfu-trader/kungfu-cli/assets/scripts/utils';
+import { toDecimal } from '@kungfu-trader/kungfu-uicc/utils/busiUtils';
 
 interface StringToPosData {
 	[propName: string]: PosData

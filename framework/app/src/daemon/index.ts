@@ -2,9 +2,9 @@ import {
     buildTradingDataPipe,
     buildMarketDataPipe,
     buildKungfuGlobalDataPipe,
-} from "__io/kungfu/tradingData";
+} from '@kungfu-trader/kungfu-uicc/io/kungfu/tradingData';
 
-import { startGetKungfuWatcherStep, transformTradingItemListToData, dealQuote } from '__io/kungfu/watcher';
+import { startGetKungfuWatcherStep, transformTradingItemListToData, dealQuote } from '@kungfu-trader/kungfu-uicc/io/kungfu/watcher';
 
 import * as PM2_METHODS from './pm2Methods';
 
@@ -80,7 +80,7 @@ buildMarketDataPipe().subscribe((data: any) => {
 
 
 
-const { _pm2 } = require('__gUtils/processUtils');
+const { _pm2 } = require('@kungfu-trader/kungfu-uicc/utils/processUtils');
 
 _pm2.launchBus((err: Error, pm2_bus: any) => {
 

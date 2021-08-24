@@ -192,12 +192,12 @@
 import { remote } from 'electron';
 import { mapState } from 'vuex';
 
-import { ifProcessRunning, toDecimal, openVueWin } from '__gUtils/busiUtils';
-import { encodeKungfuLocation } from '__io/kungfu/kungfuUtils';
-import { watcher } from '__io/kungfu/watcher';
-import * as STRATEGY_API from '__io/kungfu/strategy';
-import { switchStrategy } from '__io/actions/strategy';
-import { chineseValidator, specialStrValidator, noZeroAtFirstValidator, noKeywordValidatorBuilder } from '__assets/validator';
+import { ifProcessRunning, toDecimal, openVueWin } from '@kungfu-trader/kungfu-uicc/utils/busiUtils';
+import { encodeKungfuLocation } from '@kungfu-trader/kungfu-uicc/io/kungfu/kungfuUtils';
+import { watcher } from '@kungfu-trader/kungfu-uicc/io/kungfu/watcher';
+import * as STRATEGY_API from '@kungfu-trader/kungfu-uicc/io/kungfu/strategy';
+import { switchStrategy } from '@kungfu-trader/kungfu-uicc/io/actions/strategy';
+import { chineseValidator, specialStrValidator, noZeroAtFirstValidator, noKeywordValidatorBuilder } from '@kungfu-trader/kungfu-uicc/assets//validator';
 
 import baseMixin from '@/assets/mixins/baseMixin';
 

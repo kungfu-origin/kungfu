@@ -9,12 +9,13 @@
   "private": true,
   "workspaces": [
     "framework/*",
-    "developer/*",
     "extensions/*",
-    "installer"
+    "developer/*",
+    "artifact"
   ],
   "engines": {
-    "node": ">=14"
+    "node": ">=14",
+    "yarn": "^1.22.0"
   },
   "scripts": {
     "foreach": "wsrun --serial --exclude-missing --fast-exit",
@@ -31,17 +32,14 @@
   },
   "dependencies": {
     "lerna": "^4.0.0",
-    "wsrun": "^5.0.0",
-    "yarn": "^1.22.0"
+    "wsrun": "^5.0.0"
   },
   "devDependencies": {
     "@ls-lint/ls-lint": "^1.9.0",
     "@typescript-eslint/parser": "^4.29.0",
-    "cross-env": "1.0.0",
-    "cross-var": "1.0.0",
     "eslint": "^7.14.0",
     "prettier": "^2.3.0",
     "prettier-eslint-cli": "^5.0.0",
-    "typescript": "^4.3.5"
+    "typescript": "*"
   }
 }

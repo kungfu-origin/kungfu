@@ -1,4 +1,4 @@
-const { getLog, dealLogMessage } = require('__gUtils/busiUtils');
+const { getLog, dealLogMessage } = require('@kungfu-trader/kungfu-uicc/utils/busiUtils');
 
 self.addEventListener('message', (e) => {
     const { logPath, searchKeyword } = e.data || {}

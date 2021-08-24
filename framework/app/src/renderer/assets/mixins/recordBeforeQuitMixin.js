@@ -3,8 +3,8 @@ import moment from 'moment';
 import path from "path";
 import { mapGetters, mapState } from 'vuex';
 
-import { writeCSV } from '__gUtils/fileUtils';
-import { KF_DATASET_QUOTE_DIR } from '__gConfig/pathConfig';
+import { writeCSV } from '@kungfu-trader/kungfu-uicc/utils/fileUtils';
+import { KF_DATASET_QUOTE_DIR } from '@kungfu-trader/kungfu-uicc/config/pathConfig';
 
 export default {
 

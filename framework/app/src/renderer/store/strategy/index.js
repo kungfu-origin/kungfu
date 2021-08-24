@@ -1,5 +1,5 @@
-import { getStrategyList } from '__io/kungfu/strategy';
-import { deleteStrat } from '__io/actions/strategy';
+import { getStrategyList } from '@kungfu-trader/kungfu-uicc/io/kungfu/strategy';
+import { deleteStrat } from '@kungfu-trader/kungfu-uicc/io/actions/strategy';
 
 export default {
 

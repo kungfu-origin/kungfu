@@ -63,12 +63,8 @@ let mainConfig = {
   plugins: [...commonConfig.plugins],
   resolve: {
     alias: {
-      __root: rootDir,
       '@': path.resolve(rootDir, 'src', 'renderer'),
-      __gUtils: path.resolve(rootDir, 'shared', 'utils'),
-      __gConfig: path.resolve(rootDir, 'shared', 'config'),
-      __io: path.resolve(rootDir, 'shared', 'io'),
-      __assets: path.resolve(rootDir, 'shared', 'assets'),
+      '@kungfu-trader/kungfu-uicc': path.dirname(require.resolve('@kungfu-trader/kungfu-uicc')),
     },
     extensions: ['.js', '.ts', '.json', '.node'],
   },

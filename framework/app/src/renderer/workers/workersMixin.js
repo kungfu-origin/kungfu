@@ -1,9 +1,8 @@
-
 import moment from 'moment';
 
-import { debounce } from '__gUtils/busiUtils';
-import { KF_DATASET_QUOTE_DIR } from '__gConfig/pathConfig';
-import { buildInstrumentsDataPipe } from '__io/kungfu/tradingData';
+import { debounce } from '@kungfu-trader/kungfu-uicc/utils/busiUtils';
+import { KF_DATASET_QUOTE_DIR } from '@kungfu-trader/kungfu-uicc/config/pathConfig';
+import { buildInstrumentsDataPipe } from '@kungfu-trader/kungfu-uicc/io/kungfu/tradingData';
 
 import Workers from '@/workers/index';
 

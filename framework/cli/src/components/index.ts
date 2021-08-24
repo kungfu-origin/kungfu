@@ -1,12 +1,12 @@
-import { getAccountsStrategys, accountStrategyListStringify } from '@/assets/scripts/actions/accountStrategyActions';
+import { getAccountsStrategys, accountStrategyListStringify } from '@kungfu-trader/kungfu-cli/assets/scripts/actions/accountStrategyActions';
 const inquirer = require('inquirer');
 inquirer.registerPrompt('autocomplete', require('inquirer-autocomplete-prompt'));
 
 export const monitPrompt = async (list: boolean) => {  
     if(!list) {
         process.env.CLI_WINDOW_TYPE = 'monit';
-        const monitor = require('@/components/monitor/index').default;
-        const { startGetKungfuWatcherStep } = require('__io/kungfu/watcher');
+        const monitor = require('@kungfu-trader/kungfu-cli/components/monitor/index').default;
+        const { startGetKungfuWatcherStep } = require('@kungfu-trader/kungfu-uicc/io/kungfu/watcher');
         startGetKungfuWatcherStep();
 
         return monitor()
@@ -41,8 +41,8 @@ export const monitPrompt = async (list: boolean) => {
     const type = processSplit[0].includes('strategy') ? 'strategy' : 'account';
     process.env.CLI_WINDOW_TYPE = ['monit', type, processId].join('_');
 
-    const tradingData = require('@/components/tradingData/index').default;
-    const { startGetKungfuWatcherStep } = require('__io/kungfu/watcher');
+    const tradingData = require('@kungfu-trader/kungfu-cli/components/tradingData/index').default;
+    const { startGetKungfuWatcherStep } = require('@kungfu-trader/kungfu-uicc/io/kungfu/watcher');
     startGetKungfuWatcherStep();
 
     return tradingData(processId, type)

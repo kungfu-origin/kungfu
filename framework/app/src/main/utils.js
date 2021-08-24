@@ -1,13 +1,13 @@
 import electron from 'electron';
-import { KF_HOME, KUNGFU_ENGINE_PATH } from '__gConfig/pathConfig';
-import { killGodDaemon, killKfc, killKungfu } from '__gUtils/processUtils';
-import { platform } from '__gConfig/platformConfig';
-import { killExtra } from '__gUtils/processUtils';
+import { KF_HOME, KUNGFU_ENGINE_PATH } from '@kungfu-trader/kungfu-uicc/config/pathConfig';
+import { killGodDaemon, killKfc, killKungfu } from '@kungfu-trader/kungfu-uicc/utils/processUtils';
+import { platform } from '@kungfu-trader/kungfu-uicc/config/platformConfig';
+import { killExtra } from '@kungfu-trader/kungfu-uicc/utils/processUtils';
 import { reqRecordBeforeQuit } from "./events";
 
 const path = require('path');
 const { app, dialog } = electron
-const packageJSON = require('__root/package.json');
+const packageJSON = require('@kungfu-trader/kungfu-app/package.json');
 
 export function openUrl(url) {
 	electron.shell.openExternal(url)

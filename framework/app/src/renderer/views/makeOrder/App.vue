@@ -6,7 +6,7 @@
 <script>
 
 import { ipcEmitDataByName } from '@/ipcMsg/emitter';
-import { setTimerPromiseTask } from '__gUtils/busiUtils';
+import { setTimerPromiseTask } from '@kungfu-trader/kungfu-uicc/utils/busiUtils';
 
 export default {
     name: 'app',

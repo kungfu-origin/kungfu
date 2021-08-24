@@ -1,4 +1,4 @@
-import { DEFAULT_PADDING, TABLE_BASE_OPTIONS } from '@/assets/scripts/utils';
+import { DEFAULT_PADDING, TABLE_BASE_OPTIONS } from '@kungfu-trader/kungfu-cli/assets/scripts/utils';
 const blessed = require('blessed');
 
 class Dashboard {

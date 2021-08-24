@@ -107,11 +107,11 @@ import minimist from 'minimist';
 
 import SetTaskDialog from './SetTaskDialog';
 
-import { findTargetFromArray, ifProcessRunning } from '__gUtils/busiUtils';
-import { deleteProcess, buildProcessStatusWidthDetail } from '__gUtils/processUtils';
-import { removeFileFolder } from '__gUtils/fileUtils';
-import { buildProcessLogPath } from '__gConfig/pathConfig';
-import { switchTask } from '__io/actions/base';
+import { findTargetFromArray, ifProcessRunning } from '@kungfu-trader/kungfu-uicc/utils/busiUtils';
+import { deleteProcess, buildProcessStatusWidthDetail } from '@kungfu-trader/kungfu-uicc/utils/processUtils';
+import { removeFileFolder } from '@kungfu-trader/kungfu-uicc/utils/fileUtils';
+import { buildProcessLogPath } from '@kungfu-trader/kungfu-uicc/config/pathConfig';
+import { switchTask } from '@kungfu-trader/kungfu-uicc/io/actions/base';
 import { TaskTypeConfig } from '@kungfu-trader/kungfu-uicc/config/tradingConfig';
 
 import baseMixin from '@/assets/mixins/baseMixin';

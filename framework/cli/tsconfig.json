@@ -1,28 +1,32 @@
 {
+  "compilerOptions": {
+    "target": "es2015",
+    "module": "es2015",
+    "strict": true,
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
-    "module": "commonjs",
-    "include": [
-        "../../node_modules/@kungfu-trader/kungfu-uicc/**/*",
-        "../app/shared/**/*",
-        "src/**/*",
-        "src/*"
-    ],
     "typeRoots": [
-        "node_modules/@types",
-        "../app/shared/typings",
-        "./src/assets/typings"
+      "node_modules/@types",
+      "node_modules/@kungfu-trader/kungfu-uicc/typings",
+      "../../node_modules/@types",
+      "../../node_modules/@kungfu-trader/kungfu-uicc/typings",
+      "typings"
     ],
-    "exclude": [
-        "node_modules"
-    ],
-    "compilerOptions": {
-        // 与 Vue 的浏览器支持保持一致
-        "target": "es5",
-        // 这可以对 `this` 上的数据属性进行更严格的推断
-        "strict": true,
-        // 如果使用 webpack 2+ 或 rollup，可以利用 tree-shake:
-        "module": "es2015",
-        "moduleResolution": "node",
-        "esModuleInterop": true
+    "baseUrl": ".",
+    "paths": {
+      "@kungfu-trader/kungfu-cli/*": [
+        "src/*"
+      ],
+      "@kungfu-trader/kungfu-uicc/*": [
+        "node_modules/@kungfu-trader/kungfu-uicc/src/*",
+        "../uicc/src/*"
+      ]
     }
+  },
+  "exclude": [
+    "node_modules"
+  ]
 }

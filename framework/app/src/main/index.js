@@ -1,14 +1,13 @@
-
 // Modules to control application life and create native browser window
 import electron from 'electron';
 
 //base setting, init db
-import { initConfig, copyKungfuKey } from '__assets/base';
-import { killExtra } from '__gUtils/processUtils';
-import { logger } from '__gUtils/logUtils';
-import { platform } from '__gConfig/platformConfig';
+import { initConfig, copyKungfuKey } from '@kungfu-trader/kungfu-uicc/assets//base';
+import { killExtra } from '@kungfu-trader/kungfu-uicc/utils/processUtils';
+import { logger } from '@kungfu-trader/kungfu-uicc/utils/logUtils';
+import { platform } from '@kungfu-trader/kungfu-uicc/config/platformConfig';
 import { openUrl, showKungfuInfo, showQuitMessageBox } from './utils';
-import { KF_HOME, BASE_DB_DIR } from '__gConfig/pathConfig';
+import { KF_HOME, BASE_DB_DIR } from '@kungfu-trader/kungfu-uicc/config/pathConfig';
 import { openSettingDialog, clearJournal, openLogFile, exportAllTradingData } from "./events";
 
 const path = require('path');

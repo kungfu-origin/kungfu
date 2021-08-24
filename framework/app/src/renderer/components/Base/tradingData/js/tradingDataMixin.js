@@ -1,8 +1,8 @@
 import moment from 'moment';
-import { decodeKungfuLocation, transformOrderStatListToData, dealOrderStat } from '__io/kungfu/watcher';
-import { getKungfuDataByDateRange } from '__io/kungfu/kungfuUtils';
-import { writeCSV } from '__gUtils/fileUtils';
-import { getDefaultRenderCellClass, originOrderTradesFilterByDirection } from '__gUtils/busiUtils';
+import { decodeKungfuLocation, transformOrderStatListToData, dealOrderStat } from '@kungfu-trader/kungfu-uicc/io/kungfu/watcher';
+import { getKungfuDataByDateRange } from '@kungfu-trader/kungfu-uicc/io/kungfu/kungfuUtils';
+import { writeCSV } from '@kungfu-trader/kungfu-uicc/utils/fileUtils';
+import { getDefaultRenderCellClass, originOrderTradesFilterByDirection } from '@kungfu-trader/kungfu-uicc/utils/busiUtils';
 
 export default {
     props: {

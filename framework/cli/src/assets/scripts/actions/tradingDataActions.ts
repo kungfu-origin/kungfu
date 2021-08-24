@@ -7,12 +7,12 @@
  * @FilePath: /kungfu/cli/src/assets/scripts/actions/tradingDataActions.ts
  */ 
 import { map } from 'rxjs/operators';
-import { encodeKungfuLocation } from '__io/kungfu/kungfuUtils';
-import { ensureLedgerData } from '__gUtils/busiUtils';
+import { encodeKungfuLocation } from '@kungfu-trader/kungfu-uicc/io/kungfu/kungfuUtils';
+import { ensureLedgerData } from '@kungfu-trader/kungfu-uicc/utils/busiUtils';
 
 export const tradingDataObservale = (type: string, processId: string) => {
     //has to be here, because of the watcher build needed to be after prompt select
-    const { buildKungfuDataByAppPipe } = require('__io/kungfu/tradingData');
+    const { buildKungfuDataByAppPipe } = require('@kungfu-trader/kungfu-uicc/io/kungfu/tradingData');
     const { watcher, 
         transformTradingItemListToData, 
         transformAssetItemListToData, 
@@ -23,7 +23,7 @@ export const tradingDataObservale = (type: string, processId: string) => {
         dealPos, 
         dealAsset, 
         dealOrderStat 
-    } = require('__io/kungfu/watcher');
+    } = require('@kungfu-trader/kungfu-uicc/io/kungfu/watcher');
 
     const sourceDest = getLocationUID(watcher, type, processId) 
     return buildKungfuDataByAppPipe().pipe(

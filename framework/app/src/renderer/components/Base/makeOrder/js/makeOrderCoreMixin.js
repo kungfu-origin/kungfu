@@ -1,7 +1,7 @@
 import { mapState, mapGetters } from 'vuex';
 
-import { kungfuCancelOrder, kungfuMakeOrder, kungfuSubscribeInstrument } from '__io/kungfu/makeCancelOrder';
-import { decodeKungfuLocation } from '__io/kungfu/watcher';
+import { kungfuCancelOrder, kungfuMakeOrder, kungfuSubscribeInstrument } from '@kungfu-trader/kungfu-uicc/io/kungfu/makeCancelOrder';
+import { decodeKungfuLocation } from '@kungfu-trader/kungfu-uicc/io/kungfu/watcher';
 
 export default {
 

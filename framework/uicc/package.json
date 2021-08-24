@@ -13,8 +13,8 @@
   "publishConfig": {
     "registry": "https://npm.pkg.github.com"
   },
-  "main": "",
-  "types": "typings/index.d.ts",
+  "main": "src/index.ts",
+  "types": "typings/kungfu-uicc/index.d.ts",
   "dependencies": {
     "add": "^2.0.6",
     "aws-sdk": "^2.970.0",

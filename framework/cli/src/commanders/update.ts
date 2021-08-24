@@ -1,7 +1,7 @@
-import { accountConfigPrompt, addUpdateTdByPrompt, addUpdateMdByPrompt, addUpdateStrategyPrompt, filterAccountConfig } from '@/commanders/add';
-import { getAccountsStrategys, accountStrategyListStringify  } from '@/assets/scripts/actions/accountStrategyActions';
-import { getKungfuTypeFromString } from '@/assets/scripts/utils';
-import { getAccountSource } from '__gConfig/accountConfig';
+import { accountConfigPrompt, addUpdateTdByPrompt, addUpdateMdByPrompt, addUpdateStrategyPrompt, filterAccountConfig } from '@kungfu-trader/kungfu-cli/commanders/add';
+import { getAccountsStrategys, accountStrategyListStringify  } from '@kungfu-trader/kungfu-cli/assets/scripts/actions/accountStrategyActions';
+import { getKungfuTypeFromString } from '@kungfu-trader/kungfu-cli/assets/scripts/utils';
+import { getAccountSource } from '@kungfu-trader/kungfu-uicc/config/accountConfig';
 
 const inquirer = require('inquirer');
 

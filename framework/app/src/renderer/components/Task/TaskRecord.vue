@@ -33,9 +33,9 @@
 import minimist from 'minimist';
 import moment from 'moment';
 
-import { findTargetFromArray, getDefaultRenderCellClass, ensureLedgerData } from '__gUtils/busiUtils';
-import { watcher } from '__io/kungfu/watcher';
-import { buildKungfuDataByAppPipe } from '__io/kungfu/tradingData'; //这个还是需要读watcher
+import { findTargetFromArray, getDefaultRenderCellClass, ensureLedgerData } from '@kungfu-trader/kungfu-uicc/utils/busiUtils';
+import { watcher } from '@kungfu-trader/kungfu-uicc/io/kungfu/watcher';
+import { buildKungfuDataByAppPipe } from '@kungfu-trader/kungfu-uicc/io/kungfu/tradingData'; //这个还是需要读watcher
 
 import taskMixin from './js/taskMixin';
 

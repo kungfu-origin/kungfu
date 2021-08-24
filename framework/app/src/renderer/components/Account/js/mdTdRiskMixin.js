@@ -1,5 +1,5 @@
 import { mapGetters, mapState } from 'vuex';
-import { setTimerPromiseTask } from '__gUtils/busiUtils';
+import { setTimerPromiseTask } from '@kungfu-trader/kungfu-uicc/utils/busiUtils';
 
 export default {
     data () {

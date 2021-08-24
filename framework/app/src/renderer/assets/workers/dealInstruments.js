@@ -1,4 +1,4 @@
-import { resolveInstruments } from '__gUtils/busiUtils';
+import { resolveInstruments } from '@kungfu-trader/kungfu-uicc/utils/busiUtils';
 
 self.addEventListener('message', e => {
     const { instruments } = e.data || {};

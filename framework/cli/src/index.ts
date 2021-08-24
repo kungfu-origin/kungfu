@@ -1,20 +1,20 @@
 import './base';
 //@ts-ignore
 import { version } from '../package.json';
-import { addAccountStrategy, selectAccountOrStrategy } from '@/commanders/add';
-import { listAccountsStrategys } from '@/commanders/list';
-import { updateAccountStrategy } from '@/commanders/update';
-import { removeAccountStrategy } from '@/commanders/remove';
-import { addExtension, listExtension, removeExtension } from "@/commanders/ext";
-import { setSystemConfig } from '@/commanders/config';
-import { shutdown } from '@/commanders/shutdown';
-import { monitKill } from '@/commanders/monitKill';
-import { exportTradingDataPrompt } from '@/commanders/export';
+import { addAccountStrategy, selectAccountOrStrategy } from '@kungfu-trader/kungfu-cli/commanders/add';
+import { listAccountsStrategys } from '@kungfu-trader/kungfu-cli/commanders/list';
+import { updateAccountStrategy } from '@kungfu-trader/kungfu-cli/commanders/update';
+import { removeAccountStrategy } from '@kungfu-trader/kungfu-cli/commanders/remove';
+import { addExtension, listExtension, removeExtension } from '@kungfu-trader/kungfu-cli/commanders/ext';
+import { setSystemConfig } from '@kungfu-trader/kungfu-cli/commanders/config';
+import { shutdown } from '@kungfu-trader/kungfu-cli/commanders/shutdown';
+import { monitKill } from '@kungfu-trader/kungfu-cli/commanders/monitKill';
+import { exportTradingDataPrompt } from '@kungfu-trader/kungfu-cli/commanders/export';
 
-import { monitPrompt } from '@/components/index';
-import { removeFilesInFolder, removeJournal } from '__gUtils/fileUtils';
-import { LOG_DIR, BASE_DB_DIR, KF_HOME } from '__gConfig/pathConfig';
-import { logger } from '__gUtils/logUtils';
+import { monitPrompt } from '@kungfu-trader/kungfu-cli/components/index';
+import { removeFilesInFolder, removeJournal } from '@kungfu-trader/kungfu-uicc/utils/fileUtils';
+import { LOG_DIR, BASE_DB_DIR, KF_HOME } from '@kungfu-trader/kungfu-uicc/config/pathConfig';
+import { logger } from '@kungfu-trader/kungfu-uicc/utils/logUtils';
 
 const CFonts = require('cfonts');
 const colors = require('colors');

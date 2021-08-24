@@ -7,8 +7,8 @@
  * @FilePath: /kungfu/cli/src/commanders/shutdown.ts
  */ 
 
-import { killExtra, killGodDaemon, killKfc, kfKill } from '__gUtils/processUtils';
-import { KF_HOME } from '__gConfig/pathConfig';
+import { killExtra, killGodDaemon, killKfc, kfKill } from '@kungfu-trader/kungfu-uicc/utils/processUtils';
+import { KF_HOME } from '@kungfu-trader/kungfu-uicc/config/pathConfig';
 
 
 

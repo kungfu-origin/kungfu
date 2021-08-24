@@ -99,8 +99,8 @@ import { mapState } from 'vuex';
 
 import DatePickerDialog from '@/components/Base/DatePickerDialog';
 
-import { kungfuCancelAllOrders } from '__io/kungfu/makeCancelOrder';
-import { dealOrderStat } from '__io/kungfu/watcher';
+import { kungfuCancelAllOrders } from '@kungfu-trader/kungfu-uicc/io/kungfu/makeCancelOrder';
+import { dealOrderStat } from '@kungfu-trader/kungfu-uicc/io/kungfu/watcher';
 import { aliveOrderStatusList } from '@kungfu-trader/kungfu-uicc/config/tradingConfig';
 import { ordersHeader } from '@/components/Base/tradingData/js/tableHeaderConfig';
 

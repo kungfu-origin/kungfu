@@ -1,5 +1,5 @@
-import { getAccountsStrategys } from '@/assets/scripts/actions/accountStrategyActions';
-import { parseToString } from '@/assets/scripts/utils';
+import { getAccountsStrategys } from '@kungfu-trader/kungfu-cli/assets/scripts/actions/accountStrategyActions';
+import { parseToString } from '@kungfu-trader/kungfu-cli/assets/scripts/utils';
 
 const colors = require('colors');
 

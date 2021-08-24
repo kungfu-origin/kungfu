@@ -1,6 +1,6 @@
 
 import Vue from 'vue';
-import { getTdList, getMdList } from '__io/kungfu/account';
+import { getTdList, getMdList } from '@kungfu-trader/kungfu-uicc/io/kungfu/account';
 
 export default {
 

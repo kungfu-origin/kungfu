@@ -1,5 +1,5 @@
-import Table from '@/assets/components/Table';
-import { calcuHeaderWidth, parseToString } from "@/assets/scripts/utils";
+import Table from '@kungfu-trader/kungfu-cli/assets/components/Table';
+import { calcuHeaderWidth, parseToString } from '@kungfu-trader/kungfu-cli/assets/scripts/utils';
 import { aliveOrderStatusList } from '@kungfu-trader/kungfu-uicc/config/tradingConfig';
 const colors = require('colors/safe');
 

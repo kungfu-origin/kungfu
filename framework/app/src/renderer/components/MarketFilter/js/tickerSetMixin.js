@@ -2,12 +2,12 @@
 import { mapGetters, mapState } from 'vuex';
 
 
-import { checkAllMdProcess, getIndexFromTargetTickers, findTargetFromArray, delayMiliSeconds, debounce } from '__gUtils/busiUtils';
-import { sendDataToDaemonByPm2 } from "__gUtils/processUtils";
-import { getTickerSets, addSetTickerSet, removeTickerSetByName } from '__io/actions/market';
-import { kungfuSubscribeInstrument } from '__io/kungfu/makeCancelOrder';
-import { encodeKungfuLocation } from '__io/kungfu/kungfuUtils';
-import { watcher } from '__io/kungfu/watcher';
+import { checkAllMdProcess, getIndexFromTargetTickers, findTargetFromArray, delayMiliSeconds, debounce } from '@kungfu-trader/kungfu-uicc/utils/busiUtils';
+import { sendDataToDaemonByPm2 } from '@kungfu-trader/kungfu-uicc/utils/processUtils';
+import { getTickerSets, addSetTickerSet, removeTickerSetByName } from '@kungfu-trader/kungfu-uicc/io/actions/market';
+import { kungfuSubscribeInstrument } from '@kungfu-trader/kungfu-uicc/io/kungfu/makeCancelOrder';
+import { encodeKungfuLocation } from '@kungfu-trader/kungfu-uicc/io/kungfu/kungfuUtils';
+import { watcher } from '@kungfu-trader/kungfu-uicc/io/kungfu/watcher';
 
 export default {
 

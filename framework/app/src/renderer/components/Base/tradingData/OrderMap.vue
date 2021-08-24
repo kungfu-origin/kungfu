@@ -21,8 +21,8 @@
 
 import { mapState } from 'vuex';
 
-import { debounce, throttle } from '__gUtils/busiUtils'
-import { dealOrderStat } from '__io/kungfu/watcher';
+import { debounce, throttle } from '@kungfu-trader/kungfu-uicc/utils/busiUtils'
+import { dealOrderStat } from '@kungfu-trader/kungfu-uicc/io/kungfu/watcher';
 
 import baseMixin from '@/assets/mixins/baseMixin';
 

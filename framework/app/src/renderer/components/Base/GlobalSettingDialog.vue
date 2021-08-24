@@ -218,11 +218,11 @@ import fse from 'fs-extra';
 import { mapState } from "vuex";
 import { Collapse, CollapseItem } from "element-ui";
 
-import { KUNGFU_RESOURCES_DIR } from "__gConfig/pathConfig";
-import { getSourceList, debounce, throttle } from "__gUtils/busiUtils";
-import { buildSystemConfig } from "__gConfig/systemConfig";
-import { switchCustomProcess } from "__io/actions/base";
-import { getKfCommission, setKfCommission } from '__io/kungfu/kungfuUtils';
+import { KUNGFU_RESOURCES_DIR } from '@kungfu-trader/kungfu-uicc/config/pathConfig';
+import { getSourceList, debounce, throttle } from '@kungfu-trader/kungfu-uicc/utils/busiUtils';
+import { buildSystemConfig } from '@kungfu-trader/kungfu-uicc/config/systemConfig';
+import { switchCustomProcess } from '@kungfu-trader/kungfu-uicc/io/actions/base';
+import { getKfCommission, setKfCommission } from '@kungfu-trader/kungfu-uicc/io/kungfu/kungfuUtils';
 
 import openLogMixin from '@/assets/mixins/openLogMixin';
 

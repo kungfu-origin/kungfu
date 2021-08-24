@@ -1,7 +1,7 @@
-import { getAccountsStrategys, accountStrategyListStringify  } from '@/assets/scripts/actions/accountStrategyActions';
-import { getKungfuTypeFromString } from '@/assets/scripts/utils';
-import { deleteMd, deleteTd } from '__io/actions/account';
-import { deleteStrat } from '__io/actions/strategy';
+import { getAccountsStrategys, accountStrategyListStringify  } from '@kungfu-trader/kungfu-cli/assets/scripts/actions/accountStrategyActions';
+import { getKungfuTypeFromString } from '@kungfu-trader/kungfu-cli/assets/scripts/utils';
+import { deleteMd, deleteTd } from '@kungfu-trader/kungfu-uicc/io/actions/account';
+import { deleteStrat } from '@kungfu-trader/kungfu-uicc/io/actions/strategy';
 
 const colors = require('colors');
 const inquirer = require( 'inquirer' );

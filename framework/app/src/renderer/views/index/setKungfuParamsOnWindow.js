@@ -5,8 +5,8 @@ process.env.RENDERER_TYPE = 'app';
 
 
 // debug export
-const { kungfu, longfist, kungfuConfigStore, history } = require('__io/kungfu/kungfuUtils')
-const { watcher, startGetKungfuWatcherStep } = require('__io/kungfu/watcher');
+const { kungfu, longfist, kungfuConfigStore, history } = require('@kungfu-trader/kungfu-uicc/io/kungfu/kungfuUtils')
+const { watcher, startGetKungfuWatcherStep } = require('@kungfu-trader/kungfu-uicc/io/kungfu/watcher');
 
 window.watcher = watcher;
 window.longfist = longfist;

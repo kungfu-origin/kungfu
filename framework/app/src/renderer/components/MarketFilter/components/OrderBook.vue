@@ -30,7 +30,7 @@
 </template>
 
 <script>
-import { toDecimal } from '__gUtils/busiUtils'
+import { toDecimal } from '@kungfu-trader/kungfu-uicc/utils/busiUtils'
 
 export default {
 
