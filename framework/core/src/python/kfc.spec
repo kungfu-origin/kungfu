@@ -35,9 +35,8 @@ deps_dir = abspath(make_path(cwd, ".deps"))
 dep_pybind11_dir = abspath(make_path(deps_dir, "pybind11*"))
 
 # kungfu source files
-src_cpp_dir = abspath(make_path(cwd, "cpp"))
-src_python_dir = abspath(make_path(cwd, "python"))
-src_ext_dir = make_path(src_python_dir, "kungfu_extensions")
+src_cpp_dir = abspath(make_path(cwd, "src", "c++"))
+src_python_dir = abspath(make_path(cwd, "src", "python"))
 
 # kungfu build files
 build_dir = abspath(make_path(cwd, "build"))
@@ -111,7 +110,6 @@ a = Analysis(
     datas=extend_datas(
         [
             (cmake_dir, "cmake"),
-            (src_ext_dir, "kungfu_extensions"),
             (dep_pybind11_dir, "pybind11"),
             (make_path(build_output_dir, "*"), "."),
             (make_path(build_dir, "include"), "include"),

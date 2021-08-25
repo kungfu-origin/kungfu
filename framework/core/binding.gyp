@@ -20,7 +20,7 @@
     "wheel_inputs": [
       "<@(poetry_inputs)",
       "<@(module_inputs)",
-      "<!@(node -p \"require('glob').sync('python/**/*.*(py|spec)').join(' ');\")"
+      "<!@(node -p \"require('glob').sync('src/python/**/*.*(py|spec)').join(' ');\")"
     ],
     "kfc_inputs": [
       "<@(wheel_inputs)"

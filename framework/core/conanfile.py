@@ -47,7 +47,7 @@ class KungfuCoreConan(ConanFile):
     }
     cpp_files_extensions = [".h", ".hpp", ".hxx", ".cpp", ".c", ".cc", ".cxx"]
     conanfile_dir = path.dirname(path.realpath(__file__))
-    cpp_dir = path.join(conanfile_dir, "cpp")
+    cpp_dir = path.join(conanfile_dir, "src", "c++")
     ext_dir = path.join(conanfile_dir, "extensions")
     build_info_file = "kungfubuildinfo.json"
     build_dir = path.join(conanfile_dir, "build")
@@ -264,7 +264,7 @@ class KungfuCoreConan(ConanFile):
                     "--distpath=dist",
                     "--clean",
                     "--noconfirm",
-                    path.join("python", "kfc.spec"),
+                    path.join("src", "python", "kfc.spec"),
                 ]
             )
         self.output.success("PyInstaller done")
@@ -272,7 +272,7 @@ class KungfuCoreConan(ConanFile):
     def __run_nuitka(self, build_type):
         with tools.chdir(path.pardir):
             self.__run_yarn(
-                "nuitka", "--output-dir=build", path.join("python", "kfc.py")
+                "nuitka", "--output-dir=build", path.join("src", "python", "kfc.py")
             )
         kfc_dist_dir = path.join(self.build_dir, "kfc.dist")
         shutil.copytree(build_type, kfc_dist_dir)
