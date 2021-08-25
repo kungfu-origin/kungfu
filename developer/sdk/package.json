@@ -27,6 +27,6 @@
     "@kungfu-trader/kungfu-core": "^2.4.0-alpha.4",
     "@kungfu-trader/kungfu-toolchain": "^2.4.0-alpha.4",
     "archiver": "^5.3.0",
-    "axios": "^0.21.1"
+    "treeify": "^1.1.0"
   }
 }

@@ -9,9 +9,9 @@ function conan(cmd) {
 
 function getNodeVersionOptions() {
   const packageJson = fse.readJsonSync(path.resolve(path.dirname(__dirname), 'package.json'));
-  const nodeVersion = packageJson.dependencies['@kungfu-trader/libnode'];
   const electronVersion = packageJson.dependencies['electron'];
-  return ['-o', `node_version=${nodeVersion}`, '-o', `electron_version=${electronVersion}`];
+  const nodeVersion = packageJson.devDependencies['@kungfu-trader/libnode'];
+  return ['-o', `electron_version=${electronVersion}`, '-o', `node_version=${nodeVersion}`];
 }
 
 function makeConanSetting(name) {

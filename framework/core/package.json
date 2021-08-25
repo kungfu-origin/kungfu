@@ -7,7 +7,7 @@
   "version": "2.4.0-alpha.4",
   "description": "Kungfu Core Library",
   "license": "Apache-2.0",
-  "main": "src/node/index.js",
+  "main": "src/ecma/index.js",
   "repository": {
     "url": "https://github.com/kungfu-trader/kungfu.git"
   },
@@ -15,7 +15,7 @@
     "registry": "https://npm.pkg.github.com"
   },
   "bin": {
-    "kfc": "src/node/kfc.js"
+    "kfc": "src/ecma/kfc.js"
   },
   "config": {
     "arch": "x64",
@@ -55,12 +55,11 @@
     "format:python": "pipenv run python -m black python .*/*.py */*.spec",
     "format:js": "prettier --write --parser typescript \"(.gyp|node)/**.js\"",
     "dev": "pipenv run python .devtools/kfc.py",
-    "kfc": "node src/node/kfc.js"
+    "kfc": "node src/ecma/kfc.js"
   },
   "dependencies": {
-    "@kungfu-trader/libnode": "14.16.0",
     "@mapbox/node-pre-gyp": "^1.0.0",
-    "electron": "13.1.7",
+    "electron": "13.2.0",
     "fs-extra": "^10.0.0",
     "glob": "^7.1.0",
     "nan": "^2.15.0",
@@ -68,6 +67,7 @@
     "sywac": "^1.3.0"
   },
   "devDependencies": {
+    "@kungfu-trader/libnode": "14.16.0",
     "@kungfu-trader/kungfu-toolchain": "^2.4.0-alpha.4"
   }
 }

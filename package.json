@@ -14,7 +14,7 @@
     "artifact"
   ],
   "engines": {
-    "node": ">=14",
+    "node": ">=14 <15",
     "yarn": "^1.22.0"
   },
   "scripts": {
@@ -27,19 +27,25 @@
     "package": "yarn foreach package",
     "rebuild": "yarn clean && yarn build",
     "reformat": "prettier --write --parser typescript",
-    "reformat:ts": "yarn reformat \"(framework|developer|extensions)/**/node/*.ts?(x)\"",
-    "reformat:js": "yarn reformat \"(framework|developer|extensions)/**/node/*.js\""
+    "reformat:ts": "yarn reformat \"(framework|extensions|developer|artifact)/**/*.ts?(x)\"",
+    "reformat:js": "yarn reformat \"(framework|extensions|developer|artifact)/**/*.js\""
   },
   "dependencies": {
     "lerna": "^4.0.0",
     "wsrun": "^5.0.0"
   },
   "devDependencies": {
-    "@ls-lint/ls-lint": "^1.9.0",
     "@typescript-eslint/parser": "^4.29.0",
+    "@typescript-eslint/eslint-plugin": "^4.29.0",
     "eslint": "^7.14.0",
     "prettier": "^2.3.0",
-    "prettier-eslint-cli": "^5.0.0",
     "typescript": "*"
+  },
+  "resolutions": {
+    "axios": "^0.21.1",
+    "core-js": "^3.16.0",
+    "highlight.js": "^11.0.0",
+    "node-gyp": "^8.0.0",
+    "uuid": "^8.0.0"
   }
 }

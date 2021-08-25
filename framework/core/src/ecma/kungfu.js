@@ -9,7 +9,7 @@ const binding_path =
   'electron' in process.versions ? node_binding_path.replace('_node.', '_electron.') : node_binding_path;
 const binding = (() => {
   const binding = require(binding_path);
-  binding.pyExec(`import sys`);
+  binding.pyExec('import sys');
   binding.pyExec(`sys.path.insert(0, "${path.dirname(binding_path)}")`);
   return binding;
 })();
