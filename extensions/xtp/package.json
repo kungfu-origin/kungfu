@@ -17,7 +17,6 @@
     "format": "clang-format --verbose -style=file -i src/cpp/*"
   },
   "devDependencies": {
-    "@kungfu-trader/kungfu-core": "^2.4.0-alpha.4",
     "@kungfu-trader/kungfu-sdk": "^2.4.0-alpha.4"
   },
   "kungfuDependencies": {

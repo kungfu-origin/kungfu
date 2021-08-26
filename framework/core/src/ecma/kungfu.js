@@ -3,7 +3,7 @@ const glob = require('glob');
 const path = require('path');
 
 const prebuilt = require('@mapbox/node-pre-gyp');
-const config = path.resolve(path.join(path.dirname(__dirname), 'package.json'));
+const config = require.resolve('@kungfu-trader/kungfu-core/package.json');
 const node_binding_path = prebuilt.find(config);
 const binding_path =
   'electron' in process.versions ? node_binding_path.replace('_node.', '_electron.') : node_binding_path;

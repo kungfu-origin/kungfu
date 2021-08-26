@@ -16,6 +16,7 @@
   "main": "src/index.ts",
   "types": "typings/kungfu-uicc/index.d.ts",
   "dependencies": {
+    "@kungfu-trader/kungfu-core": "^2.4.0-alpha.4",
     "add": "^2.0.6",
     "aws-sdk": "^2.970.0",
     "axios": "^0.21.1",

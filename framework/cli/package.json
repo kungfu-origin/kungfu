@@ -22,7 +22,6 @@
     "cli": "node dist/cli/index.js"
   },
   "dependencies": {
-    "@kungfu-trader/kungfu-core": "^2.4.0-alpha.4",
     "@kungfu-trader/kungfu-uicc": "^2.4.0-alpha.4",
     "blessed": "^0.1.81",
     "blessed-contrib": "^4.10.0",

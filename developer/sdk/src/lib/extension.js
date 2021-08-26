@@ -109,6 +109,11 @@ function generateCMakeFiles(projectName, kungfuBuild) {
   );
 }
 
+const DefaultLibSiteURL_CN = 'https://external.libkungfu.cc';
+const DefaultLibSiteURL_US = 'https://external.libkungfu.io';
+
+exports.DefaultLibSiteURL = process.env.GITHUB_ACTIONS ? DefaultLibSiteURL_US : DefaultLibSiteURL_CN;
+
 exports.detectPlatform = detectPlatform;
 
 exports.list = async function (libSiteURL, matchName, matchVersion, listVersion = true, listPlatform = false) {

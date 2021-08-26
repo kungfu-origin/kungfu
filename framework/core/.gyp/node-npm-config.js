@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 
-const { exitOnError } = require('./node-lib.js');
 const fs = require('fs-extra');
 const path = require('path');
 const { spawnSync } = require('child_process');
@@ -66,45 +65,21 @@ function npmCall(npmArgs) {
   }
 }
 
-const cli = require('sywac')
-  .command('auto', {
-    run: () => {
-      const githubActions = 'GITHUB_ACTIONS' in process.env;
-      const pypi = githubActions ? PyPI_US : PyPI_CN;
-      const prebuiltHost = githubActions ? PrebuiltHost_US : PrebuiltHost_CN;
-      const setConfig = (key, value) => githubActions && npmCall(['config', 'set', key, value]);
-      const setPrebuiltHost = (module) => setConfig(PrebuiltModules[module], prebuiltHost);
+require('@kungfu-trader/kungfu-core').sywac(module, (cli) => {
+  cli
+    .command('show', { run: showAllConfig })
+    .command('auto', {
+      run: () => {
+        const githubActions = 'GITHUB_ACTIONS' in process.env;
+        const pypi = githubActions ? PyPI_US : PyPI_CN;
+        const prebuiltHost = githubActions ? PrebuiltHost_US : PrebuiltHost_CN;
+        const setConfig = (key, value) => githubActions && npmCall(['config', 'set', key, value]);
+        const setPrebuiltHost = (module) => setConfig(PrebuiltModules[module], prebuiltHost);
 
-      setConfig(`${projectName}:pypi_mirror`, pypi);
-      Object.keys(PrebuiltModules).map(setPrebuiltHost);
+        setConfig(`${projectName}:pypi_mirror`, pypi);
+        Object.keys(PrebuiltModules).map(setPrebuiltHost);
 
-      showAllConfig();
-    },
-  })
-  .command('show', { run: showAllConfig })
-  .command('dir', {
-    run: () => {
-      console.log(fs.realpathSync(path.dirname(__dirname)));
-    },
-  })
-  .command('info', {
-    run: () => {
-      const buildInfoPath = path.join(path.dirname(__dirname), 'dist', 'kfc', 'kungfubuildinfo.json');
-      if (fs.existsSync(buildInfoPath)) {
-        console.log(require(buildInfoPath));
-      } else {
-        console.warn(`Info file missing, ${buildInfoPath} not exists`);
-      }
-    },
-  })
-  .help('--help')
-  .version('--version')
-  .showHelpByDefault();
-
-module.exports = cli;
-
-async function main() {
-  await cli.parseAndExit();
-}
-
-if (require.main === module) main().catch(exitOnError);
+        showAllConfig();
+      },
+    });
+});

@@ -30,7 +30,6 @@
   },
   "dependencies": {
     "@authing/vue-ui-components": "^2.4.29",
-    "@kungfu-trader/kungfu-core": "^2.4.0-alpha.4",
     "@kungfu-trader/kungfu-uicc": "^2.4.0-alpha.4",
     "electron-find": "^1.0.0",
     "electron-updater": "^4.4.0",
