@@ -44,7 +44,6 @@
     "@vue/compiler-sfc": "^3.2.0",
     "babel-loader": "^8.2.0",
     "babel-plugin-component": "^1.1.0",
-    "babel-plugin-istanbul": "^4.1.0",
     "babel-preset-minify": "^0.5.0",
     "cmake-js": "^6.2.0",
     "compression-webpack-plugin": "^8.0.0",

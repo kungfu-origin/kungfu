@@ -45,6 +45,7 @@
     "axios": "^0.21.1",
     "core-js": "^3.16.0",
     "highlight.js": "^11.0.0",
+    "lodash.merge": "^4.6.2",
     "node-gyp": "^8.0.0",
     "uuid": "^8.0.0"
   }
