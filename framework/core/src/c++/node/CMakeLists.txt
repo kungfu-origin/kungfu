@@ -24,7 +24,7 @@ include_directories(${CMAKE_JS_INC})
 
 ############################################################
 
-aux_source_directory(. SOURCE_FILES_KUNGFU)
+aux_source_directory(addon SOURCE_FILES_KUNGFU)
 
 if (${NODE_RUNTIME} STREQUAL "node")
     set(ADDON_NAME "kungfu_node")
