@@ -33,7 +33,13 @@ module.exports = {
       });
   },
   run: async (argv) => {
-    const libs = await sdk.lib.extension.list(argv.url, argv.matchName, argv.matchVersion, argv.listVersion, argv.listPlatform);
+    const libs = await sdk.lib.extension.list(
+      argv.url,
+      argv.matchName,
+      argv.matchVersion,
+      argv.listVersion,
+      argv.listPlatform,
+    );
     console.log(treeify.asTree(libs, true));
   },
 };
