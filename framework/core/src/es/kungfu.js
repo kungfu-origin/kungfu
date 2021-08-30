@@ -2,12 +2,16 @@ const fse = require('fs-extra');
 const glob = require('glob');
 const path = require('path');
 
-const prebuilt = require('@mapbox/node-pre-gyp');
-const config = require.resolve('@kungfu-trader/kungfu-core/package.json');
-const node_binding_path = prebuilt.find(config);
-const binding_path =
-  'electron' in process.versions ? node_binding_path.replace('_node.', '_electron.') : node_binding_path;
 const binding = (() => {
+  const configPath = require.resolve('@kungfu-trader/kungfu-core/package.json');
+  const config = fse.readJsonSync(configPath);
+  const node_binding_path = path.resolve(
+    path.dirname(configPath),
+    config.binary.module_path,
+    `${config.binary.module_name}.node`
+  );
+  const binding_path =
+    'electron' in process.versions ? node_binding_path.replace('_node.', '_electron.') : node_binding_path;
   const binding = require(binding_path);
   binding.pyExec('import sys');
   binding.pyExec(`sys.path.insert(0, "${path.dirname(binding_path)}")`);

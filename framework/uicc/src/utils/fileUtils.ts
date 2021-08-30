@@ -1,5 +1,5 @@
 import fse from 'fs-extra';
-import csv from 'fast-csv';
+import * as csv from 'fast-csv';
 import { deepClone } from '@kungfu-trader/kungfu-uicc/utils/busiUtils';
 
 const path = require("path");

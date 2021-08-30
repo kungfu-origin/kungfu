@@ -30,9 +30,7 @@ if (target) {
     baseConfig.extraResources[targetIndex] = {
       from: '../core/dist/kfc',
       to: 'kfc',
-      filter: [
-        '!**/btdata',
-      ].filter((key) => !!key),
+      filter: ['!**/btdata'].filter((key) => !!key),
     };
   }
 }
