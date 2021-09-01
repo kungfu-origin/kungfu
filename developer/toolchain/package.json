@@ -7,7 +7,7 @@
   "version": "2.4.0-alpha.4",
   "description": "Toolchain for Kungfu Development (babel/cmake-js/node-gyp/webpack/yarn/etc).",
   "license": "Apache-2.0",
-  "main": "src/index.js",
+  "main": "package.json",
   "repository": {
     "url": "https://github.com/kungfu-trader/kungfu.git"
   },
@@ -41,6 +41,7 @@
     "@babel/preset-env": "^7.0.0",
     "@babel/register": "^7.0.0",
     "@types/node": "^14.17.0",
+    "@vercel/webpack-asset-relocator-loader": "^1.7.0",
     "@vue/compiler-sfc": "^3.2.0",
     "babel-loader": "^8.2.0",
     "babel-plugin-component": "^1.1.0",
@@ -49,7 +50,6 @@
     "compression-webpack-plugin": "^8.0.0",
     "copy-webpack-plugin": "^9.0.0",
     "css-loader": "^6.2.0",
-    "devtron": "^1.4.0",
     "electron-builder": "^22.11.0",
     "electron-chromedriver": "^13.0.0",
     "electron-debug": "^3.2.0",
@@ -75,7 +75,6 @@
     "webpack-bundle-analyzer": "^4.4.0",
     "webpack-cli": "^4.8.0",
     "webpack-dev-server": "^4.0.0",
-    "webpack-hot-middleware": "^2.25.0",
     "webpack-merge": "^5.8.0",
     "webpack-permissions-plugin": "^1.0.0",
     "worker-loader": "^3.0.0",

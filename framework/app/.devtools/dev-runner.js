@@ -7,14 +7,12 @@ const { say } = require('cfonts');
 const { spawn } = require('child_process');
 const webpack = require('webpack');
 const WebpackDevServer = require('webpack-dev-server');
-const webpackHotMiddleware = require('webpack-hot-middleware');
 
 const mainConfig = require('../.webpack/webpack.main.config');
 const rendererConfig = require('../.webpack/webpack.renderer.config');
 const daemonConfig = require('../.webpack/webpack.daemon.config');
 
 let electronProcess = null;
-let hotMiddleware = null;
 let manualRestart = false;
 
 function logStats(proc, data) {
@@ -44,15 +42,7 @@ function logStats(proc, data) {
 
 function startRenderer() {
   return new Promise((resolve, reject) => {
-    Object.keys(rendererConfig.entry || {}).forEach((key) => {
-      rendererConfig.entry[key] = [path.join(__dirname, 'dev-client')].concat(rendererConfig.entry[key]);
-    });
-
     const compiler = webpack(rendererConfig);
-    hotMiddleware = webpackHotMiddleware(compiler, {
-      log: false,
-      heartbeat: 3000,
-    });
 
     // compiler.plugin('compilation', compilation => {
     //   compilation.plugin('html-webpack-plugin-after-emit', (data, cb) => {
@@ -65,22 +55,17 @@ function startRenderer() {
     //   logStats('Renderer', stats)
     // })
 
-    const server = new WebpackDevServer(compiler, {
-      contentBase: path.join(__dirname, '../'),
-      quiet: true,
-      hot: true, // <-- the fix!
-      before(app, ctx) {
-        app.use(hotMiddleware);
-        ctx.middleware.waitUntilValid(() => {
-          resolve();
-        });
-      },
+    const opts = {
+      port: 9090,
+      static: path.join(__dirname, '../'),
+      hot: true,
       headers: {
         'Access-Control-Allow-Origin': '*',
       },
-    });
-
-    server.listen(9090);
+    };
+    const server = new WebpackDevServer(opts, compiler);
+    server.start();
+    resolve();
   });
 }
 

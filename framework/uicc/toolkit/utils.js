@@ -2,28 +2,22 @@ const fs = require('fs');
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
-const rootDir = path.dirname(__dirname);
-
-const getCommitVersion = () => {
-  const gitDir = path.resolve(rootDir, '..', '..', '.git');
+exports.getCommitVersion = () => {
   let gitCommitVersion = 'latest';
   try {
-    let gitHEAD = fs.readFileSync(path.join(gitDir, 'HEAD'), 'utf-8').trim(); // ref: refs/heads/develop
-    if ((gitHEAD || '').split(': ').length <= 1) {
-      gitCommitVersion = gitHEAD;
-    } else {
-      let ref = gitHEAD.split(': ')[1]; // refs/heads/develop
-      let develop = gitHEAD.split('/')[2]; // 环境：develop
-      let gitVersion = fs.readFileSync(path.join(gitDir, ref), 'utf-8').trim(); // git版本号，例如：6ceb0ab5059d01fd444cf4e78467cc2dd1184a66
-      gitCommitVersion = develop + ': ' + gitVersion;
-    }
+    let buildInfoRaw = fs.readFileSync(
+      require.resolve('@kungfu-trader/kungfu-core/dist/kfc/kungfubuildinfo.json'),
+      'utf-8',
+    );
+    let buildInfo = JSON.parse(buildInfoRaw);
+    gitCommitVersion = buildInfo.git.revision;
   } catch (err) {
     console.error(err);
   }
   return gitCommitVersion.toString();
 };
 
-const getPythonVersion = () => {
+exports.getPythonVersion = () => {
   let pyVersion = '3';
   try {
     let buildInfoRaw = fs.readFileSync(
@@ -38,14 +32,11 @@ const getPythonVersion = () => {
   return pyVersion;
 };
 
-const listDirSync = (filePath) => {
-  return fs.readdirSync(filePath);
-};
-
-const getViewsConfig = () => {
-  const appDir = path.dirname(require.resolve('@kungfu-trader/kungfu-app/package.json'));
+exports.getViewsConfig = () => {
+  const appConfigPath = require.resolve('@kungfu-trader/kungfu-app/package.json');
+  const appDir = path.dirname(appConfigPath);
   const viewsPath = path.resolve(appDir, 'src', 'renderer', 'views');
-  const files = listDirSync(viewsPath);
+  const files = fs.readdirSync(viewsPath);
   let entry = {},
     plugins = [];
   files
@@ -77,7 +68,4 @@ const getViewsConfig = () => {
   };
 };
 
-exports.getCommitVersion = getCommitVersion;
-exports.getPythonVersion = getPythonVersion;
-exports.getViewsConfig = getViewsConfig;
-exports.IsProduction = process.env.NODE_ENV === 'production';
+exports.isProduction = () => process.env.NODE_ENV === 'production';

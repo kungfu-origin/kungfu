@@ -24,9 +24,9 @@
     "dist:main": "yarn webpack-cli --config .webpack/webpack.main.config.js --stats-error-details",
     "dist:render": "yarn webpack-cli --config .webpack/webpack.renderer.config.js --stats-error-details",
     "dist": "node --max_old_space_size=4096 .webpack/build.js",
-    "prebuild": "yarn run clean && yarn run dist",
+    "prebuild1": "yarn run clean && yarn run dist",
     "build": "node .electron-builder/build.js",
-    "format": "prettier --write --parser typescript \"(.electron-*)/**.js\""
+    "format": "prettier --write --parser typescript \"(.*)/**.js\""
   },
   "dependencies": {
     "@authing/vue-ui-components": "^2.4.29",

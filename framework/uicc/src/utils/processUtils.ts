@@ -1,7 +1,6 @@
-import fse from 'fs-extra';
-
 //@ts-ignore
-import * as taskkill from 'taskkill';
+import fse from 'fs-extra';
+import path from 'path';
 
 import { KF_HOME, KUNGFU_ENGINE_PATH, KF_CONFIG_PATH, APP_DIR, buildProcessLogPath } from '@kungfu-trader/kungfu-uicc/config/pathConfig';
 import { platform } from '@kungfu-trader/kungfu-uicc/config/platformConfig';
@@ -10,10 +9,10 @@ import { setTimerPromiseTask, delayMiliSeconds } from '@kungfu-trader/kungfu-uic
 import { getProcesses } from 'getprocesses';
 
 
-const path = require('path');
 const numCPUs = require('os').cpus() ? require('os').cpus().length : 1;
 const fkill = require('fkill');
 const pm2 = require('pm2');
+const taskkill = require('taskkill');
 
 require.main = require.main || pm2;
 

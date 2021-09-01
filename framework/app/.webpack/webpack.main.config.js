@@ -2,28 +2,26 @@
 
 process.env.BABEL_ENV = 'main';
 
-const toolchain = require('@kungfu-trader/kungfu-toolchain');
+const toolkit = require('@kungfu-trader/kungfu-uicc/toolkit');
 const path = require('path');
 const webpack = require('webpack');
+const { merge } = require('webpack-merge');
 const { dependencies } = require('../package.json');
 
-const commonConfig = toolchain.webpack.config;
-const { getPythonVersion, getCommitVersion, IsProduction } = toolchain.utils;
+const rootDir = path.dirname(__dirname);
+const baseConfig = toolkit.webpack.makeConfig(rootDir, 'app');
+const { getPythonVersion, getCommitVersion, isProduction } = toolkit.utils;
 
 const gitCommitVersion = getCommitVersion() || 'latest';
 const pyVersion = getPythonVersion() || '3';
 
-const rootDir = path.dirname(__dirname);
-
-let mainConfig = {
-  devtool: 'eval',
+const webpackConfig = merge(baseConfig, {
   entry: {
     main: path.join(rootDir, 'src', 'main', 'index.js'),
   },
   externals: [...Object.keys(dependencies || {})],
   module: {
     rules: [
-      ...commonConfig.module.rules,
       {
         test: /\.(png|jpe?g|gif|svg)(\?.*)?$/,
         use: {
@@ -54,51 +52,33 @@ let mainConfig = {
       },
     ],
   },
-  node: commonConfig.node,
-  output: {
-    filename: '[name].js',
-    libraryTarget: 'commonjs2',
-    path: path.join(rootDir, 'dist', 'app'),
-  },
-  plugins: [...commonConfig.plugins],
   resolve: {
     alias: {
       '@': path.resolve(rootDir, 'src', 'renderer'),
-      '@kungfu-trader/kungfu-uicc': path.dirname(require.resolve('@kungfu-trader/kungfu-uicc')),
     },
-    extensions: ['.js', '.ts', '.json', '.node'],
   },
   target: 'electron-main',
+});
+
+const prodConfig = {
+  plugins: [
+    new webpack.DefinePlugin({
+      git_commit_version: `"${gitCommitVersion.toString()}"`,
+      python_version: `"${pyVersion.toString()}"`,
+      'process.env.APP_TYPE': '"main"',
+    }),
+  ],
 };
 
-/**
- * Adjust mainConfig for development settings
- */
-if (!IsProduction) {
-  mainConfig.mode = 'development';
-  mainConfig.plugins.push(
+const devConfig = {
+  plugins: [
     new webpack.DefinePlugin({
       git_commit_version: `"${gitCommitVersion.toString()}"`,
       python_version: `"${pyVersion.toString()}"`,
       'process.env.APP_TYPE': '"main"',
       __resources: `"${path.join(rootDir, 'resources').replace(/\\/g, '\\\\')}"`,
     }),
-  );
-}
+  ],
+};
 
-/**
- * Adjust mainConfig for production settings
- */
-if (IsProduction) {
-  mainConfig.mode = 'production';
-  mainConfig.devtool = 'eval';
-  mainConfig.plugins.push(
-    new webpack.DefinePlugin({
-      git_commit_version: `"${gitCommitVersion.toString()}"`,
-      python_version: `"${pyVersion.toString()}"`,
-      'process.env.APP_TYPE': '"main"',
-    }),
-  );
-}
-
-module.exports = mainConfig;
+module.exports = merge(webpackConfig, isProduction() ? prodConfig : devConfig);

@@ -2,13 +2,16 @@
 
 process.env.BABEL_ENV = 'main';
 
-const toolchain = require('@kungfu-trader/kungfu-toolchain');
+const toolkit = require('@kungfu-trader/kungfu-uicc/toolkit');
 const path = require('path');
 const webpack = require('webpack');
+const { merge } = require('webpack-merge');
 const { dependencies } = require('../package.json');
 
-const commonConfig = toolchain.webpack.config;
-const { getPythonVersion, getCommitVersion, IsProduction } = toolchain.utils;
+const appDir = path.dirname(require.resolve('@kungfu-trader/kungfu-app/package.json'));
+const rootDir = path.dirname(__dirname);
+const baseConfig = toolkit.webpack.makeConfig(rootDir, 'cli');
+const { getPythonVersion, isProduction } = toolkit.utils;
 
 const pyVersion = getPythonVersion() || '3';
 
@@ -21,62 +24,43 @@ Object.keys(dependencies || {})
     nodeModules[mod] = 'commonjs ' + mod;
   });
 
-let cliConfig = {
+const webpackConfig = merge(baseConfig, {
   entry: {
-    index: path.join(__dirname, '../src/index.ts'),
+    index: path.join(rootDir, 'src', 'index.ts'),
   },
   externals: {
     ...nodeModules,
   },
-  module: {
-    rules: [...commonConfig.module.rules],
-  },
-  node: commonConfig.node,
-  output: {
-    filename: '[name].js',
-    libraryTarget: 'commonjs2',
-    path: path.resolve(__dirname, '../dist/cli'),
-  },
-  plugins: [...commonConfig.plugins],
   resolve: {
     alias: {
-      '@kungfu-trader/kungfu-cli': path.resolve(__dirname, '../src'),
-      '@kungfu-trader/kungfu-uicc': path.dirname(require.resolve('@kungfu-trader/kungfu-uicc')),
+      '@kungfu-trader/kungfu-cli': path.resolve(rootDir, 'src'),
     },
     extensions: ['.ts', '.js', '.json', '.node'],
   },
   target: 'node',
-};
+});
 
-/**
- * Adjust cliConfig for development settings
- */
-if (!IsProduction) {
-  cliConfig.mode = 'development';
-  cliConfig.plugins.push(
-    new webpack.DefinePlugin({
-      '__resources': `"${path.join(__dirname, '../../app/resources').replace(/\\/g, '\\\\')}"`,
-      'process.env.NODE_ENV': '"development"',
-      'process.env.APP_TYPE': '"cli"',
-      'process.env.LANG_ENV': '"en"',
-      'python_version': `"${pyVersion.toString()}"`,
-    }),
-  );
-}
-
-/**
- * Adjust cliConfig for production settings
- */
-if (IsProduction) {
-  cliConfig.mode = 'production';
-  cliConfig.plugins.push(
+const prodConfig = {
+  plugins: [
     new webpack.DefinePlugin({
       'process.env.NODE_ENV': '"production"',
       'process.env.APP_TYPE': '"cli"',
       'process.env.LANG_ENV': '"en"',
       'python_version': `"${pyVersion.toString()}"`,
     }),
-  );
-}
+  ]
+};
 
-module.exports = cliConfig;
+const devConfig = {
+  plugins: [
+    new webpack.DefinePlugin({
+      '__resources': `"${path.join(appDir, 'resources').replace(/\\/g, '\\\\')}"`,
+      'process.env.NODE_ENV': '"development"',
+      'process.env.APP_TYPE': '"cli"',
+      'process.env.LANG_ENV': '"en"',
+      'python_version': `"${pyVersion.toString()}"`,
+    }),
+  ]
+};
+
+module.exports = merge(webpackConfig, isProduction() ? prodConfig : devConfig);

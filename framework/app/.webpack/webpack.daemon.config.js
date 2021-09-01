@@ -2,64 +2,44 @@
 
 process.env.BABEL_ENV = 'main';
 
-const toolchain = require('@kungfu-trader/kungfu-toolchain');
+const toolkit = require('@kungfu-trader/kungfu-uicc/toolkit');
 const path = require('path');
 const webpack = require('webpack');
+const { merge } = require('webpack-merge');
 const { dependencies } = require('../package.json');
 
-const commonConfig = toolchain.webpack.config;
-const { IsProduction } = toolchain.utils;
+const rootDir = path.dirname(__dirname);
+const baseConfig = toolkit.webpack.makeConfig(rootDir, 'app');
+const { isProduction } = toolkit.utils;
 
-let daemonConfig = {
-  devtool: 'eval',
+const webpackConfig = merge(baseConfig, {
   entry: {
-    daemon: path.join(__dirname, '../src/daemon/index.ts'),
+    daemon: path.join(rootDir, 'src', 'daemon', 'index.ts'),
   },
   externals: [...Object.keys(dependencies || {})],
-  module: {
-    rules: [...commonConfig.module.rules],
-  },
-  node: commonConfig.node,
-  output: {
-    filename: '[name].js',
-    libraryTarget: 'commonjs2',
-    path: path.join(__dirname, '../dist/app'),
-  },
-  plugins: [...commonConfig.plugins],
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, '../src/renderer'),
-      '@kungfu-trader/kungfu-uicc': path.dirname(require.resolve('@kungfu-trader/kungfu-uicc')),
+      '@': path.resolve(rootDir, 'src', 'renderer'),
     },
-    extensions: ['.js', '.ts', '.json', '.node'],
   },
   target: 'node',
+});
+
+const prodConfig = {
+  plugins: [
+    new webpack.DefinePlugin({
+      'process.env.APP_TYPE': '"daemon"',
+    }),
+  ],
 };
 
-/**
- * Adjust daemonConfig for development settings
- */
-if (!IsProduction) {
-  daemonConfig.mode = 'development';
-  daemonConfig.plugins.push(
+const devConfig = {
+  plugins: [
     new webpack.DefinePlugin({
-      __resources: `"${path.join(__dirname, '../resources').replace(/\\/g, '\\\\')}"`,
+      __resources: `"${path.join(rootDir, 'resources').replace(/\\/g, '\\\\')}"`,
       'process.env.APP_TYPE': '"daemon"',
     }),
-  );
-}
+  ],
+};
 
-/**
- * Adjust daemonConfig for production settings
- */
-if (IsProduction) {
-  daemonConfig.mode = 'production';
-  daemonConfig.devtool = 'eval';
-  daemonConfig.plugins.push(
-    new webpack.DefinePlugin({
-      'process.env.APP_TYPE': '"daemon"',
-    }),
-  );
-}
-
-module.exports = daemonConfig;
+module.exports = merge(webpackConfig, isProduction() ? prodConfig : devConfig);

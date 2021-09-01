@@ -2,36 +2,31 @@
 
 process.env.BABEL_ENV = 'renderer';
 
-const toolchain = require('@kungfu-trader/kungfu-toolchain');
+const toolkit = require('@kungfu-trader/kungfu-uicc/toolkit');
 const path = require('path');
 const webpack = require('webpack');
+const { merge } = require('webpack-merge');
 const { dependencies } = require('../package.json');
 
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
 const { VueLoaderPlugin } = require('vue-loader');
 
-const commonConfig = toolchain.webpack.config;
-const { getPythonVersion, getViewsConfig, IsProduction } = toolchain.utils;
+const rootDir = path.dirname(__dirname);
+const baseConfig = toolkit.webpack.makeConfig(rootDir, 'app');
+const { getPythonVersion, getViewsConfig, isProduction } = toolkit.utils;
 
 const pyVersion = getPythonVersion() || '3';
 const viewsConfig = getViewsConfig();
 
-const rootDir = path.dirname(__dirname);
-const styleLoader = !IsProduction ? 'vue-style-loader' : MiniCssExtractPlugin.loader;
+const styleLoader = !isProduction() ? 'vue-style-loader' : MiniCssExtractPlugin.loader;
 
-let rendererConfig = {
+const webpackConfig = merge(baseConfig, {
   devtool: 'eval-cheap-module-source-map',
   entry: viewsConfig.entry,
-  output: {
-    filename: 'js/[name].js',
-    libraryTarget: 'commonjs2',
-    path: path.join(rootDir, 'dist', 'app'),
-  },
   externals: [...Object.keys(dependencies || {})],
   module: {
     rules: [
-      ...commonConfig.module.rules,
       {
         test: /\.css$/,
         use: [styleLoader, 'css-loader'],
@@ -82,11 +77,8 @@ let rendererConfig = {
       },
     ],
   },
-  node: commonConfig.node,
   plugins: [
-    ...commonConfig.plugins,
     ...viewsConfig.plugins,
-
     new MiniCssExtractPlugin({
       filename: `css/[name].css`,
     }),
@@ -99,40 +91,29 @@ let rendererConfig = {
     alias: {
       '@': path.resolve(rootDir, 'src', 'renderer'),
       '@kungfu-trader/kungfu-app': path.resolve(rootDir, 'src', 'renderer'),
-      '@kungfu-trader/kungfu-uicc': path.dirname(require.resolve('@kungfu-trader/kungfu-uicc')),
     },
-    extensions: ['.js', '.ts', '.vue', '.json', '.css', '.node'],
   },
   target: 'electron-renderer',
+});
+
+const prodConfig = {
+  plugins: [
+    new webpack.DefinePlugin({
+      python_version: `"${pyVersion.toString()}"`,
+      'process.env.APP_TYPE': '"renderer"',
+    }),
+  ],
 };
 
-/**
- * Adjust rendererConfig for development settings
- */
-if (!IsProduction) {
-  rendererConfig.mode = 'development';
-  rendererConfig.plugins.push(
+const devConfig = {
+  plugins: [
     new webpack.HotModuleReplacementPlugin(),
     new webpack.DefinePlugin({
       __resources: `"${path.join(rootDir, 'resources').replace(/\\/g, '\\\\')}"`,
       python_version: `"${pyVersion.toString()}"`,
       'process.env.APP_TYPE': '"renderer"',
     }),
-  );
-}
+  ],
+};
 
-/**
- * Adjust rendererConfig for production settings
- */
-if (IsProduction) {
-  rendererConfig.mode = 'production';
-  rendererConfig.devtool = 'eval';
-  rendererConfig.plugins.push(
-    new webpack.DefinePlugin({
-      python_version: `"${pyVersion.toString()}"`,
-      'process.env.APP_TYPE': '"renderer"',
-    }),
-  );
-}
-
-module.exports = rendererConfig;
+module.exports = merge(webpackConfig, isProduction() ? prodConfig : devConfig);
