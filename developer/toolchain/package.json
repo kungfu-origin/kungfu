@@ -76,6 +76,7 @@
     "webpack-cli": "^4.8.0",
     "webpack-dev-server": "^4.0.0",
     "webpack-merge": "^5.8.0",
+    "webpack-node-externals": "^3.0.0",
     "webpack-permissions-plugin": "^1.0.0",
     "worker-loader": "^3.0.0",
     "yarn": "^1.22.0"

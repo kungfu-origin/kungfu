@@ -6,7 +6,6 @@ const toolkit = require('@kungfu-trader/kungfu-uicc/toolkit');
 const path = require('path');
 const webpack = require('webpack');
 const { merge } = require('webpack-merge');
-const { dependencies } = require('../package.json');
 
 const rootDir = path.dirname(__dirname);
 const baseConfig = toolkit.webpack.makeConfig(rootDir, 'app');
@@ -19,7 +18,6 @@ const webpackConfig = merge(baseConfig, {
   entry: {
     main: path.join(rootDir, 'src', 'main', 'index.js'),
   },
-  externals: [...Object.keys(dependencies || {})],
   module: {
     rules: [
       {

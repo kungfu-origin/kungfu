@@ -46,7 +46,7 @@ async function createWindow() {
   if (isDevelopment) {
     await mainWindow.loadURL('http://localhost:9090/index.html');
   } else {
-    await mainWindow.loadFile(path.join(__dirname, 'index.html'));
+    await mainWindow.loadFile(path.resolve(__dirname, 'index.html'));
   }
 
   // // Emitted when the window is closed.

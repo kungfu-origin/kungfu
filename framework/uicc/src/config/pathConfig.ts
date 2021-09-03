@@ -103,7 +103,9 @@ addFileSync('', KF_TICKER_SET_JSON_PATH, 'file');
 
 export const KUNGFU_ENGINE_PATH = process.env.NODE_ENV === 'production' 
     ? process.resourcesPath
-    : path.resolve(path.join(__dirname, '..', '..', '..', 'core', 'dist'))
+    : path.resolve(__dirname, '..', '..', '..', 'core', 'dist');
+
+export const KFC_DIR = path.resolve(KUNGFU_ENGINE_PATH, 'kfc')
 
 export const EXTENSION_DIR = path.join(KUNGFU_ENGINE_PATH, 'kfc', 'kungfu_extensions');
 
@@ -113,6 +115,9 @@ export const TASK_EXTENSION_DIR = process.env.NODE_ENV === 'production'
 
 
 export const APP_DIR = process.env.NODE_ENV === 'production'
-    ? path.resolve(path.join(process.resourcesPath, 'app', 'dist', 'app'))
-    : path.resolve(path.join(__dirname, '..','..', 'dist', 'app'));
+    ? path.resolve(process.resourcesPath, 'app', 'dist', 'app')
+    : path.resolve(process.cwd(), 'dist', 'app');
 
+process.kfcPath = path.resolve(KFC_DIR, process.platform === 'win32' ? 'kfc.exe' : 'kfc');
+process.env.PATH = KFC_DIR + path.delimiter + process.env.PATH;
+process.env.NODEJS_EXECUTABLE = process.kfcPath;

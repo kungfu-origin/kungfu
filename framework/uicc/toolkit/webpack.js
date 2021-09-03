@@ -1,12 +1,20 @@
 const { IgnorePlugin, NoEmitOnErrorsPlugin } = require('webpack');
+const nodeExternals = require('webpack-node-externals');
 const { isProduction } = require('./utils');
 const path = require("path");
 
 module.exports = {
   makeConfig: (rootDir, distName) => {
+    const production = isProduction();
     return {
       devtool: 'eval',
-      mode: isProduction() ? 'production' : 'development',
+      externals: [
+        nodeExternals({
+          allowlist: [/^@kungfu-trader/],
+          modulesDir: path.resolve(rootDir, 'node_modules')
+        })
+      ],
+      mode: production ? 'production' : 'development',
       module: {
         rules: [
           {
@@ -24,37 +32,53 @@ module.exports = {
             use: 'node-loader',
           },
           {
+            test: /\.js$/,
+            loader: 'string-replace-loader',
+            options: {
+              search: 'path.dirname(module.filename)',
+              replace: production ? 'path.dirname(__filename)' : '__dirname',
+            },
+          },
+          {
+            test: /InteractorClient\.js$/,
+            loader: 'string-replace-loader',
+            options: {
+              search: 'main.filename',
+              replace: "resolve('pm2/bin/pm2')",
+            },
+          },
+          {
+            test: /pm2\/lib\/Client\.js$/,
+            loader: 'string-replace-loader',
+            options: {
+              search: "interpreter = 'node'",
+              replace: "interpreter = which('kfc')",
+            },
+          },
+          {
+            test: /pm2\/lib\/Client\.js$/,
+            loader: 'string-replace-loader',
+            options: {
+              search: "which('node')",
+              replace: "which('kfc')",
+            },
+          },
+          {
             test: /\.(m?js|node)$/,
             parser: { amd: false },
             use: {
               loader: '@vercel/webpack-asset-relocator-loader',
               options: {
                 outputAssetBase: 'native_modules',
-                production: isProduction(),
+                production: production,
               },
-            },
-          },
-          {
-            test: /pm2\/lib\/Client\.js$/,
-            loader: 'string-replace-loader',
-            options: {
-              search: "'node'",
-              replace: "'kfc'",
-            },
-          },
-          {
-            test: /pm2\/lib\/Client\.js$/,
-            loader: 'string-replace-loader',
-            options: {
-              search: 'module.filename',
-              replace: '__filename',
             },
           },
         ],
       },
       node: {
-        __dirname: !isProduction(),
-        __filename: !isProduction(),
+        __dirname: !production,
+        __filename: !production,
       },
       output: {
         filename: '[name].js',

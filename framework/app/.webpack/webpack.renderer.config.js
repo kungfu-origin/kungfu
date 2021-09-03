@@ -6,7 +6,6 @@ const toolkit = require('@kungfu-trader/kungfu-uicc/toolkit');
 const path = require('path');
 const webpack = require('webpack');
 const { merge } = require('webpack-merge');
-const { dependencies } = require('../package.json');
 
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
@@ -24,7 +23,6 @@ const styleLoader = !isProduction() ? 'vue-style-loader' : MiniCssExtractPlugin.
 const webpackConfig = merge(baseConfig, {
   devtool: 'eval-cheap-module-source-map',
   entry: viewsConfig.entry,
-  externals: [...Object.keys(dependencies || {})],
   module: {
     rules: [
       {

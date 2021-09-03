@@ -12,6 +12,7 @@ import { getProcesses } from 'getprocesses';
 const numCPUs = require('os').cpus() ? require('os').cpus().length : 1;
 const fkill = require('fkill');
 const pm2 = require('pm2');
+const which = require('pm2/lib/tools/which');
 const taskkill = require('taskkill');
 
 require.main = require.main || pm2;
@@ -94,6 +95,7 @@ export const killExtra = () => kfKill([kfc, 'pm2', 'kungfuDaemon'])
 const pm2Connect = (): Promise<void> => {
     return new Promise((resolve, reject) => {
         try {
+            process.env.KFC_AS_VARIANT = 'node';
             pm2.connect(false, (err: any): void => {
                 if (err) {
                     err = err.length ? err[0] : err;
@@ -102,6 +104,7 @@ const pm2Connect = (): Promise<void> => {
                     reject(err);
                     process.exit(2);
                 }
+                process.env.KFC_AS_VARIANT = '';
                 resolve()
             })
         } catch (err) {
@@ -178,7 +181,7 @@ function buildArgs (args: string, considerCup = false): string {
 export const startProcess = (options: Pm2Options, no_ext = false): Promise<object> => {
     const kfcScript = platform === 'win' ? 'kfc.exe' : 'kfc';
 
-    let optionsResolved: any = {
+    const optionsResolved: any = {
         "name": options.name,
         "args": options.args, //有问题吗？
         "cwd": options.cwd || path.resolve?.(KUNGFU_ENGINE_PATH, 'kfc'),
@@ -493,7 +496,11 @@ export const startDaemon = (): Promise<any> => {
         watch: process.env.NODE_ENV === 'production' ? false : true,
         script:  "daemon.js",
         cwd: APP_DIR,
-        interpreter: process.execPath,
+        interpreter: which('kfc'),
+        env: {
+            ...process.env,
+            'KFC_AS_VARIANT': 'node'
+        }
     }).catch(err => logger.error('[startTd]', err))
 }
 
