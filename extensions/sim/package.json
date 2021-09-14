@@ -14,7 +14,7 @@
     "registry": "https://npm.pkg.github.com"
   },
   "scripts": {
-    "postinstall": "yarn kfc engage pdm install",
+    "build": "yarn kfc engage pdm install",
     "format": "yarn kfc engage black src/python *.py"
   },
   "devDependencies": {
