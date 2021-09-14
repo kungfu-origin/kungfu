@@ -32,19 +32,20 @@ module.exports = {
             use: 'node-loader',
           },
           {
-            test: /\.js$/,
-            loader: 'string-replace-loader',
-            options: {
-              search: 'path.dirname(module.filename)',
-              replace: production ? 'path.dirname(__filename)' : '__dirname',
-            },
-          },
-          {
-            test: /InteractorClient\.js$/,
+            test: /@pm2\/agent\/src\/InteractorClient\.js$/,
             loader: 'string-replace-loader',
             options: {
               search: 'main.filename',
               replace: "resolve('pm2/bin/pm2')",
+            },
+          },
+          {
+            test: /@pm2\/agent\/src\/InteractorClient\.js$/,
+            loader: 'string-replace-loader',
+            options: {
+              search: 'path.dirname(module.filename)',
+              replace:
+                production ? 'path.resolve(__dirname, "..", "..", "node_modules", "@pm2", "agent", "src")' : '__dirname',
             },
           },
           {
@@ -61,6 +62,15 @@ module.exports = {
             options: {
               search: "which('node')",
               replace: "which('kfc')",
+            },
+          },
+          {
+            test: /pm2\/lib\/Client\.js$/,
+            loader: 'string-replace-loader',
+            options: {
+              search: 'path.dirname(module.filename)',
+              replace:
+                production ? 'path.resolve(__dirname, "..", "..", "node_modules", "pm2", "lib")' : '__dirname',
             },
           },
           {

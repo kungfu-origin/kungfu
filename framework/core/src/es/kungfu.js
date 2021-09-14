@@ -6,12 +6,11 @@ const binding = (() => {
   const moduleName = '@kungfu-trader/kungfu-core';
   const config = require(`${moduleName}/package.json`);
   const binary = config.binary;
-  const node_binding = require.resolve(
-    `${moduleName}/${binary.module_path}/${binary.module_name}.node`
-  );
+  const kfcDir = process.env.KFC_DIR || `${moduleName}/${binary.module_path}`;
+  const node_binding = require.resolve(`${kfcDir}/${binary.module_name}.node`);
   const electron_binding = node_binding.replace('_node.', '_electron.');
-  const binding_path =
-    'electron' in process.versions ? electron_binding : node_binding;
+  const electron = 'electron' in process.versions;
+  const binding_path = electron ? electron_binding : node_binding;
   return require(binding_path);
 })();
 

@@ -24,8 +24,9 @@
     "dist:main": "yarn webpack-cli --config .webpack/webpack.main.config.js --stats-error-details",
     "dist:render": "yarn webpack-cli --config .webpack/webpack.renderer.config.js --stats-error-details",
     "dist": "node --max_old_space_size=4096 .webpack/build.js",
-    "prebuild1": "yarn run clean && yarn run dist",
+    "prebuild": "yarn run clean && yarn run dist",
     "build": "node .electron-builder/build.js",
+    "rebuild": "rm -rf build && yarn build",
     "format": "prettier --write --parser typescript \"(.*)/**.js\""
   },
   "dependencies": {

@@ -17,6 +17,7 @@ declare module NodeJS {
      
     interface Process {
         resourcesPath: string,
+        kfcDir: string,
         kfcPath: string,
     }
 }

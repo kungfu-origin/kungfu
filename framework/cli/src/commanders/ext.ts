@@ -1,5 +1,5 @@
 
-import { KUNGFU_ENGINE_PATH } from '@kungfu-trader/kungfu-uicc/config/pathConfig';
+import { KFC_PARENT_DIR } from '@kungfu-trader/kungfu-uicc/config/pathConfig';
 import { platform } from '@kungfu-trader/kungfu-uicc/config/platformConfig';
 
 const path = require('path');
@@ -36,11 +36,11 @@ const inquirerRemoveByName = async (extList: string[]) => {
 }
 
 const execKfcOfArgs = (args: string[]): Promise<string> => {
-    console.log(path.join(KUNGFU_ENGINE_PATH, 'kfc'))
+    console.log(path.join(KFC_PARENT_DIR, 'kfc'))
     return new Promise((resolve, reject) => {
         const kfcName = platform === 'win' ? 'kfc.exe' : 'kfc'
         execFile(
-            path.join(KUNGFU_ENGINE_PATH, 'kfc', kfcName),
+            path.join(KFC_PARENT_DIR, 'kfc', kfcName),
             args,
             { shell: true },
             (error: Error, stdout: string, stderr: string) => {

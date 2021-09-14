@@ -4,7 +4,6 @@ import moment from 'moment';
 import { addFileSync } from '@kungfu-trader/kungfu-uicc/utils/fileUtils';
 import { KF_HOME_BASE_DIR_RESOLVE } from '@kungfu-trader/kungfu-uicc/config/homePathConfig';
 
-
 addFileSync('', KF_HOME_BASE_DIR_RESOLVE, 'folder');
 export const KF_HOME_BASE_DIR = KF_HOME_BASE_DIR_RESOLVE;
 
@@ -63,12 +62,22 @@ export const buildGatewayPath = (gatewayName: string) => path.join(KF_RUNTIME_DI
 
 //================== others start =================================
 
+const production = process.env.NODE_ENV === 'production';
+
+// core main: src/es/index.js
+const coreModulePath = () => {
+    const coreMainPath = require.resolve('@kungfu-trader/kungfu-core');
+    console.log(`coreMainPath = ${coreMainPath}`);
+    const coreModule = path.resolve(path.dirname(coreMainPath), '..', '..');
+    console.log(`coreModulePath = ${coreModule}`);
+    return path.resolve(path.dirname(coreMainPath), '..', '..');
+}
+
 //获取进程日志地址
 export const buildProcessLogPath = (processId: string) => {
     const tmk = moment().format('YYYYMMDD')
     return path.join(LOG_DIR, tmk, `${processId}.log`)
 }
-
 
 
 //================== others end ===================================
@@ -78,7 +87,7 @@ export const buildProcessLogPath = (processId: string) => {
 
 //process.resourcesPath 是一个容易出错的问题，需要每个调用pathconfig的进程都注册了这个值，不然报错
 
-export const KUNGFU_RESOURCES_DIR = process.env.NODE_ENV === 'production'
+export const KUNGFU_RESOURCES_DIR = production
     ? path.join(process.resourcesPath, 'kungfu-resources')
     : path.join(__resources)
 
@@ -100,24 +109,28 @@ addFileSync('', KF_TICKER_SET_JSON_PATH, 'file');
 
 //================== json db end ==================================
 
-
-export const KUNGFU_ENGINE_PATH = process.env.NODE_ENV === 'production' 
+export const KFC_PARENT_DIR = production
     ? process.resourcesPath
-    : path.resolve(__dirname, '..', '..', '..', 'core', 'dist');
+    : path.join(coreModulePath(), 'dist');
 
-export const KFC_DIR = path.resolve(KUNGFU_ENGINE_PATH, 'kfc')
+export const KFC_DIR = process.env.KFC_DIR || path.join(KFC_PARENT_DIR, 'kfc');
 
-export const EXTENSION_DIR = path.join(KUNGFU_ENGINE_PATH, 'kfc', 'kungfu_extensions');
+export const KFC_EXECUTABLE = process.platform === 'win32' ? 'kfc.exe' : 'kfc';
 
-export const TASK_EXTENSION_DIR = process.env.NODE_ENV === 'production'
+console.log(`process.cwd = ${process.cwd()}`);
+console.log(`process.resourcesPath = ${process.resourcesPath}`);
+console.log(`KFC_PARENT_DIR = ${KFC_PARENT_DIR}`);
+
+export const EXTENSION_DIR = path.join(KFC_PARENT_DIR, 'kfc', 'kungfu_extensions');
+
+export const TASK_EXTENSION_DIR = production
     ? path.join(process.resourcesPath, 'kungfu-extensions')
     : path.join(__dirname, '..', '..', '..');
 
-
-export const APP_DIR = process.env.NODE_ENV === 'production'
+export const APP_DIR = production
     ? path.resolve(process.resourcesPath, 'app', 'dist', 'app')
     : path.resolve(process.cwd(), 'dist', 'app');
 
-process.kfcPath = path.resolve(KFC_DIR, process.platform === 'win32' ? 'kfc.exe' : 'kfc');
+process.env.NODEJS_EXECUTABLE = path.resolve(KFC_DIR, KFC_EXECUTABLE); // for pm2
 process.env.PATH = KFC_DIR + path.delimiter + process.env.PATH;
-process.env.NODEJS_EXECUTABLE = process.kfcPath;
+process.env.KFC_DIR = KFC_DIR;

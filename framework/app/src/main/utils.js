@@ -1,5 +1,5 @@
 import electron from 'electron';
-import { KF_HOME, KUNGFU_ENGINE_PATH } from '@kungfu-trader/kungfu-uicc/config/pathConfig';
+import { KF_HOME, KFC_PARENT_DIR } from '@kungfu-trader/kungfu-uicc/config/pathConfig';
 import { killGodDaemon, killKfc, killKungfu } from '@kungfu-trader/kungfu-uicc/utils/processUtils';
 import { platform } from '@kungfu-trader/kungfu-uicc/config/platformConfig';
 import { killExtra } from '@kungfu-trader/kungfu-uicc/utils/processUtils';
@@ -22,8 +22,8 @@ export function showKungfuInfo() {
     `python: ${python_version}\n` +
     `platform: ${platform} \n` +
     `kungfu_home: ${KF_HOME} \n` +
-    `kungfu_engine: ${path.resolve(KUNGFU_ENGINE_PATH, 'kfc')} \n` +
-    `kungfu_resources: ${path.resolve(KUNGFU_ENGINE_PATH)} \n` +
+    `kungfu_engine: ${path.resolve(KFC_PARENT_DIR, 'kfc')} \n` +
+    `kungfu_resources: ${path.resolve(KFC_PARENT_DIR)} \n` +
     `commit: ${git_commit_version}`;
   dialog.showMessageBox({
     type: 'info',

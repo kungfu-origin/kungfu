@@ -14,6 +14,7 @@
   ],
   "buildDependenciesFromSource": true,
   "npmRebuild": false,
+  "electronVersion": "13.2.0",
   "files": [
     "dist/app/**/*",
     {
@@ -23,20 +24,13 @@
         "resources"
       ]
     },
-    "!**/kungfu-core/*",
-    "!**/kungfu-core/**/*",
-    "!**/kungfu-core/**/**/*",
-    "**/kungfu-core/build/*/libkungfu.*",
-    "**/kungfu-core/build/*/pykungfu*",
-    "**/kungfu-core/build/*/kungfu_electron.node",
-    "**/kungfu-core/node/*",
-    "**/kungfu-core/node/**/*",
-    "**/kungfu-core/package.json",
-    "**/kungfu-core/build/*/kungfubuildinfo.json"
+    "!kungfu-core/",
+    "kungfu-core/package.json",
+    "kungfu-core/src/es"
   ],
   "extraResources": [
     {
-      "from": "../core/build/kfc",
+      "from": "../core/dist/kfc",
       "to": "kfc",
       "filter": [
         "!**/btdata"

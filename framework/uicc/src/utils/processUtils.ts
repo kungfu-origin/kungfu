@@ -2,11 +2,12 @@
 import fse from 'fs-extra';
 import path from 'path';
 
-import { KF_HOME, KUNGFU_ENGINE_PATH, KF_CONFIG_PATH, APP_DIR, buildProcessLogPath } from '@kungfu-trader/kungfu-uicc/config/pathConfig';
+import { KF_HOME, KFC_DIR, KF_CONFIG_PATH, APP_DIR, buildProcessLogPath } from '@kungfu-trader/kungfu-uicc/config/pathConfig';
 import { platform } from '@kungfu-trader/kungfu-uicc/config/platformConfig';
 import { logger } from '@kungfu-trader/kungfu-uicc/utils/logUtils';
 import { setTimerPromiseTask, delayMiliSeconds } from '@kungfu-trader/kungfu-uicc/utils/busiUtils';
 import { getProcesses } from 'getprocesses';
+import { getUserLocale } from 'get-user-locale';
 
 
 const numCPUs = require('os').cpus() ? require('os').cpus().length : 1;
@@ -14,6 +15,7 @@ const fkill = require('fkill');
 const pm2 = require('pm2');
 const which = require('pm2/lib/tools/which');
 const taskkill = require('taskkill');
+const locale = getUserLocale().replace(/-/g, '_');
 
 require.main = require.main || pm2;
 
@@ -184,7 +186,7 @@ export const startProcess = (options: Pm2Options, no_ext = false): Promise<objec
     const optionsResolved: any = {
         "name": options.name,
         "args": options.args, //有问题吗？
-        "cwd": options.cwd || path.resolve?.(KUNGFU_ENGINE_PATH, 'kfc'),
+        "cwd": options.cwd || path.join(KFC_DIR),
         "script": options.script || kfcScript,
         "interpreter": options.interpreter || 'none',
         "logType": "json",
@@ -203,6 +205,9 @@ export const startProcess = (options: Pm2Options, no_ext = false): Promise<objec
         "env": {
             ...options.env,
             "KF_HOME": dealSpaceInPath(KF_HOME),
+            "LANG": `${locale}.UTF-8`,
+            "PYTHONUTF8": "1",
+            "PYTHONIOENCODING": "utf8"
         },
     };
 
@@ -211,6 +216,8 @@ export const startProcess = (options: Pm2Options, no_ext = false): Promise<objec
     return new Promise((resolve, reject) => {
         pm2Connect().then(() => {
             try {
+                console.log(`>> pm2 start ${options.name}`);
+                console.log(optionsResolved);
                 pm2.start(optionsResolved, (err: any, apps: object): void => {
                     if (err) {
                         console.error(err)
@@ -490,12 +497,11 @@ export const startCustomProcess = (targetName: string, params: string): Promise<
 export const startDaemon = (): Promise<any> => {
 
     return startProcess({
-        "name": "kungfuDaemon",
-        "args": "",
+        name: "kungfuDaemon",
+        args: "",
         force: true,
-        watch: process.env.NODE_ENV === 'production' ? false : true,
-        script:  "daemon.js",
-        cwd: APP_DIR,
+        watch: process.env.NODE_ENV !== 'production',
+        script: path.resolve(APP_DIR, "daemon.js"),
         interpreter: which('kfc'),
         env: {
             ...process.env,
