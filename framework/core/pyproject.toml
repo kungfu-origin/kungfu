@@ -7,7 +7,7 @@ authors = ["Kungfu Trader <info@kungfu.link>"]
 homepage = "https://www.kungfu-trader.com"
 repository = "https://github.com/kungfu-trader/kungfu.git"
 packages = [
-    { include = "kungfu", from = "python" },
+    { include = "kungfu", from = "src/python" },
 ]
 
 [tool.poetry.dependencies]
