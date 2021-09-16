@@ -6,9 +6,6 @@ endif ()
 
 ############################################################
 
-add_compile_definitions(NAPI_EXPERIMENTAL)
-add_compile_definitions(NAPI_VERSION=7)
-
 execute_process(COMMAND node -p "require('node-addon-api').include"
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
         OUTPUT_VARIABLE NODE_ADDON_API_DIR
