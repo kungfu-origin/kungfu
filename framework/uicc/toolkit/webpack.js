@@ -32,7 +32,7 @@ module.exports = {
             use: 'node-loader',
           },
           {
-            test: /@pm2\/agent\/src\/InteractorClient\.js$/,
+            test: /@pm2.*InteractorClient\.js$/,
             loader: 'string-replace-loader',
             options: {
               search: 'main.filename',
@@ -40,7 +40,7 @@ module.exports = {
             },
           },
           {
-            test: /@pm2\/agent\/src\/InteractorClient\.js$/,
+            test: /@pm2.*InteractorClient\.js$/,
             loader: 'string-replace-loader',
             options: {
               search: 'path.dirname(module.filename)',
@@ -49,7 +49,7 @@ module.exports = {
             },
           },
           {
-            test: /pm2\/lib\/Client\.js$/,
+            test: /pm2.*Client\.js$/,
             loader: 'string-replace-loader',
             options: {
               search: "interpreter = 'node'",
@@ -57,7 +57,7 @@ module.exports = {
             },
           },
           {
-            test: /pm2\/lib\/Client\.js$/,
+            test: /pm2.*Client\.js$/,
             loader: 'string-replace-loader',
             options: {
               search: "which('node')",
@@ -65,7 +65,7 @@ module.exports = {
             },
           },
           {
-            test: /pm2\/lib\/Client\.js$/,
+            test: /pm2.*Client\.js$/,
             loader: 'string-replace-loader',
             options: {
               search: 'path.dirname(module.filename)',
@@ -130,8 +130,8 @@ module.exports = {
       },
       plugins: [
         new IgnorePlugin({ resourceRegExp: /deploy/, contextRegExp: /pm2-deploy$/ }),
-        new IgnorePlugin({ resourceRegExp: /pty.js/, contextRegExp: /blessed\/lib\/widgets$/ }),
-        new IgnorePlugin({ resourceRegExp: /term.js/, contextRegExp: /blessed\/lib\/widgets$/ }),
+        new IgnorePlugin({ resourceRegExp: /pty.js/, contextRegExp: /blessed.*widgets$/ }),
+        new IgnorePlugin({ resourceRegExp: /term.js/, contextRegExp: /blessed.*widgets$/ }),
         new NoEmitOnErrorsPlugin(),
       ],
       resolve: {
