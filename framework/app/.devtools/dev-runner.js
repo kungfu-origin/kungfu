@@ -47,27 +47,27 @@ function startRenderer() {
 
     const compiler = webpack(rendererConfig);
     hotMiddleware = webpackHotMiddleware(compiler, {
-      log: false,
+      log: true,
       heartbeat: 2500
     })
 
     compiler.hooks.afterEmit.tap('afterEmit', () => {
+      console.log("compiler.hooks afterEmit", '=====')
       hotMiddleware.publish({
         action: 'reload'
       })
     })
 
     compiler.hooks.done.tap('done', stats => {
+      console.log("compiler.hooks done", '=====')
       logStats('Renderer', stats)
     })
 
     const opts = {
       port: 9090,
       static: path.join(__dirname, '../'),
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-      }
     };
+
     const server = new WebpackDevServer(opts, compiler);
     server.start();
     resolve();
@@ -131,7 +131,7 @@ function startDaemon() {
 }
 
 function startElectron() {
-  electronProcess = spawn(electron, ['--inspect=5858', '--enable-logging', '.']);
+  electronProcess = spawn(electron, ['--inspect=5858', '--enable-logging', '--trace-warnings', '.']);
 
   electronProcess.stdout.on('data', (data) => {
     electronLog(data, 'blue');

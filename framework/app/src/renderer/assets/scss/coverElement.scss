@@ -352,13 +352,6 @@ p.el-select-dropdown__empty{
         }
     }
 
-    .el-table__header-wrapper {
-
-        .cell {
-            background: #000;
-        }
-    }
-
     .el-table__empty-block {
         padding: 0 !important;
     }
@@ -368,7 +361,7 @@ p.el-select-dropdown__empty{
         transform: translateZ(0);
         white-space: nowrap;
         line-height: 26px;
-        padding: 0 6px;
+        padding: 0 6px !important;
         font-family: Consolas, Monaco, monospace,"Microsoft YaHei",sans-serif;
     }
 
@@ -381,12 +374,12 @@ p.el-select-dropdown__empty{
         padding: 0;
     }
 
-    th{
+    th.el-table__cell{
         background: $tab_header; //头部的颜色
         color: $font;
     }
 
-    tr{
+    tr.el-table__row{
         background: $bg_card; //表格内容的背景
         color: $font_5;
     }
@@ -431,8 +424,8 @@ p.el-select-dropdown__empty{
     }
 
     //改变hover背景颜色
-    .el-table--enable-row-hover .el-table__body tr:hover>td{
-        background: $bg_light;
+    &.el-table--enable-row-hover .el-table__body tr:hover > td.el-table__cell {
+        background: $bg_light;        
     }
 }
 

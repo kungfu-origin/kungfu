@@ -112,14 +112,13 @@ function createWindow (reloadAfterCrashed = false) {
 		})
 	});
 
-	// MainWindow.webContents.on("render-process-gone", (event, details) => {
-	// 	logger.error("[MainWindow.webContents] crashed", new Date(), details);
-	// 	console.error("[MainWindow.webContents] crashed", new Date(), details);
-	// 	showCrashMessageBox().then((confirm) => {
-	// 		if (!confirm) return;
-	// 		createWindow(true);
-	// 	})
-	// })
+	MainWindow.webContents.on("render-process-gone", (event, details) => {
+		logger.error("[MainWindow.webContents] crashed", new Date(), details);
+		showCrashMessageBox().then((confirm) => {
+			if (!confirm) return;
+			createWindow(true);
+		})
+	})
 
 	MainWindow.webContents.on("unresponsive", () => {
 		logger.error("[MainWindow.webContents] unresponsive", new Date());
