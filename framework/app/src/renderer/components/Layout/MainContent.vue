@@ -57,12 +57,11 @@
 
 <script>
 
-import { remote } from 'electron'
 import EngineStatus from '@/components/Layout/components/EngineStatus';
 import CoreStatus from '@/components/Layout/components/CoreStatus';
 import authMixin from '@/components/Base/js/authMixin';
 
-const { Menu, getCurrentWindow } = remote;
+const { Menu, getCurrentWindow } = require("@electron/remote");
 
 
 export default {

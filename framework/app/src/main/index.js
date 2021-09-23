@@ -17,6 +17,8 @@ const { app, globalShortcut, BrowserWindow, Menu, shell } = electron
 initConfig();
 copyKungfuKey();
 setMenu();
+require('@electron/remote/main').initialize()
+
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -94,8 +96,6 @@ function createWindow (reloadAfterCrashed = false) {
 		}
 	})
 
-
-
 	MainWindow.on('crashed', () => {
 		logger.error('[MainWindow] crashed', new Date())
 		showCrashMessageBox().then((confirm) => {
@@ -112,13 +112,14 @@ function createWindow (reloadAfterCrashed = false) {
 		})
 	});
 
-	MainWindow.webContents.on("crashed", () => {
-		logger.error("[MainWindow.webContents] crashed", new Date());
-		showCrashMessageBox().then((confirm) => {
-			if (!confirm) return;
-			createWindow(true);
-		})
-	})
+	// MainWindow.webContents.on("render-process-gone", (event, details) => {
+	// 	logger.error("[MainWindow.webContents] crashed", new Date(), details);
+	// 	console.error("[MainWindow.webContents] crashed", new Date(), details);
+	// 	showCrashMessageBox().then((confirm) => {
+	// 		if (!confirm) return;
+	// 		createWindow(true);
+	// 	})
+	// })
 
 	MainWindow.webContents.on("unresponsive", () => {
 		logger.error("[MainWindow.webContents] unresponsive", new Date());

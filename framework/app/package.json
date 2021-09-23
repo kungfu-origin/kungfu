@@ -31,24 +31,24 @@
   },
   "dependencies": {
     "@authing/vue-ui-components": "^2.4.29",
+    "@electron/remote": "^2.0.1",
     "@kungfu-trader/kungfu-uicc": "^2.4.0-alpha.4",
     "electron-find": "^1.0.0",
     "electron-updater": "^4.4.0",
-    "iconv-lite": "^0.6.0",
-    "minimist": "^1.2.5",
-    "monaco-editor-webpack-plugin": "^4.1.0",
     "element-ui": "^2.15.0",
+    "iconv-lite": "^0.6.0",
+    "jschardet": "^2.3.0",
+    "minimist": "^1.2.5",
     "monaco-editor": "^0.27.0",
+    "monaco-editor-webpack-plugin": "^4.1.0",
     "vue": "^2.6.10",
-    "vuex": "^3.6.0",
     "vue-router": "^3.5.0",
     "vue-style-loader": "^4.1.0",
     "vue-template-compiler": "^2.6.10",
-    "jschardet": "^2.3.0",
-    "vue-virtual-scroller": "^1.0.10"
+    "vue-virtual-scroller": "^1.0.10",
+    "vuex": "^3.6.0"
   },
   "devDependencies": {
     "@kungfu-trader/kungfu-toolchain": "^2.4.0-alpha.4"
-
   }
 }

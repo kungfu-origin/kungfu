@@ -331,27 +331,33 @@ p.el-select-dropdown__empty{
 
 /* Table 
 -------------------------- */
-//size: mini:  small:30px  medium:
-.el-table--small{
-    th, td{
-        padding: 0px 0;
-    }
-    
-    //排序图标位置，原有的高度会将头部高度撑高
-    .caret-wrapper{
-        height: 23px;
-        .sort-caret.ascending{
-            top: 0px;
-        }
-        .sort-caret.descending{
-            bottom: 0px;
-        }
-    }
-}
-
 .el-table{
 
     background: $bg_card;
+
+    &.el-table--small{
+        th, td{
+            padding: 0px 0;
+        }
+        
+        //排序图标位置，原有的高度会将头部高度撑高
+        .caret-wrapper{
+            height: 23px;
+            .sort-caret.ascending{
+                top: 0px;
+            }
+            .sort-caret.descending{
+                bottom: 0px;
+            }
+        }
+    }
+
+    .el-table__header-wrapper {
+
+        .cell {
+            background: #000;
+        }
+    }
 
     .el-table__empty-block {
         padding: 0 !important;
@@ -423,11 +429,13 @@ p.el-select-dropdown__empty{
             }
         }
     }
+
+    //改变hover背景颜色
+    .el-table--enable-row-hover .el-table__body tr:hover>td{
+        background: $bg_light;
+    }
 }
-//改变hover背景颜色
-.el-table--enable-row-hover .el-table__body tr:hover>td{
-    background: $bg_light;
-}
+
 
 /* Collapse 
 -------------------------- */

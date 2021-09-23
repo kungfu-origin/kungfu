@@ -19,7 +19,7 @@ require('electron-debug')()
 
 // Install `vue-devtools`
 app.on('ready', () => {
-  const extPath = path.resolve(__dirname, '..', '..', 'vue-devtools');
+  const extPath = path.resolve(__dirname, '..', '..', '.devtools', 'vue-devtools');
   console.log(extPath)
   session.defaultSession.loadExtension(extPath);
 })

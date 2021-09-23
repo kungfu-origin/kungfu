@@ -264,7 +264,6 @@ import Vue from "vue";
 import moment from "moment";
 import { mapState } from "vuex";
 import { Autocomplete } from "element-ui";
-
 import { deepClone, findTargetFromArray } from "@kungfu-trader/kungfu-uicc/utils/busiUtils";
 import {
   OffsetName,
@@ -275,6 +274,7 @@ import {
 
 import instrumentsMixin from "@/assets/mixins/instrumentsMixin";
 
+const { dialog } = require("@electron/remote");
 Vue.use(Autocomplete);
 
 export default {
@@ -407,7 +407,6 @@ export default {
 
     //添加文件
     handleSelectFile (targetKey) {
-      const dialog = remote.dialog;
       dialog.showOpenDialog(
         {
           properties: ["openFile"],

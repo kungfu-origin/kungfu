@@ -24,7 +24,7 @@
     </div>
 </template>
 <script>
-import {mapState} from 'vuex';
+import { mapState } from 'vuex';
 import path from 'path';
 
 import FileNode from './FileNode';
@@ -76,7 +76,7 @@ export default {
     methods: {
         //绑定策略
         handleBindStrategyFolder(){
-            const dialog = require('electron').remote.dialog;
+            const { dialog } = require('@electron/remote');
             dialog.showOpenDialog({
                 properties: ['openFile']
             }, (strategyPath) => {

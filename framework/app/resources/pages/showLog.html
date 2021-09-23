@@ -188,7 +188,7 @@
     const fse = require('fs-extra');
     const { ipcRenderer, shell, remote  } = require('electron');
     const { FindInPage } = require('electron-find');
-    const BrowserWindow = require('electron').remote.BrowserWindow;
+    const BrowserWindow = require('@electron/remote').BrowserWindow;
     const { getLog, debounce, clearFileContent } = require('./utils.js');
     const gaze = require('gaze');
 

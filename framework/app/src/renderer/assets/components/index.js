@@ -1,4 +1,3 @@
-import { remote } from 'electron';
 
 import TrNoData from './tr/TrNoData';
 import TableHeader from './tr/TableHeader';
@@ -15,8 +14,10 @@ import TrDashboardHeaderItem from './tr/TrDashboardHeaderItem.vue';
 import TrTable from './tr/TrTable.vue';
 import TrSearchInput from './tr/TrSearchInput.vue';
 import TrSettingDashboard from './tr/TrSettingDashboard.vue';
-
 import { openPage } from '@kungfu-trader/kungfu-uicc/utils/busiUtils';
+
+const remote = require("@electron/remote");
+const { dialog } = remote;
 
 const components = [
     TrNoData,
@@ -37,7 +38,6 @@ const components = [
 ]
 
 //导出
-const { dialog } = require('electron').remote;
 const saveFile = ({
     title, filters
 }) => {

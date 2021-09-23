@@ -199,7 +199,6 @@
 
 </template>
 <script>
-import { remote } from 'electron';
 import { mapState } from 'vuex';
 
 import { ifProcessRunning, toDecimal, openVueWin } from '@kungfu-trader/kungfu-uicc/utils/busiUtils';
@@ -211,6 +210,11 @@ import { chineseValidator, specialStrValidator, noZeroAtFirstValidator, noKeywor
 
 import openLogMixin from '@/assets/mixins/openLogMixin';
 import baseMixin from '@/assets/mixins/baseMixin';
+
+
+const remote = require('@electron/remote')
+const { dialog } = remote;
+
 
 export default {
     mixins: [ baseMixin, openLogMixin ],
@@ -273,7 +277,6 @@ export default {
 
         //绑定策略路径
         handleBindStrategyFolder(){
-            const dialog = remote.dialog;
             dialog.showOpenDialog({
                 properties: ['openFile']
             }, (strategyPath) => {

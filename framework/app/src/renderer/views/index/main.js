@@ -5,7 +5,6 @@ import './setKungfuParamsOnWindow';
 import Vue from 'vue';
 import path from 'path';
 import fse from 'fs-extra';
-import { remote } from 'electron';
 import store from '@/store';
 import router from './routers';
 import { logger } from '@kungfu-trader/kungfu-uicc/utils/logUtils';
@@ -23,13 +22,14 @@ import '@/assets/iconfont/iconfont.css';
 import '@/assets/scss/makeOrder.scss';
 import '@kungfu-trader/kungfu-uicc/io/http/index';
 
+const remote = require("@electron/remote");
+
 Vue.use(ElementUI)
 Vue.use(Components)
 
 Vue.config.productionTip = false
 Vue.store = Vue.prototype.$store = store
 Vue.bus = Vue.prototype.$bus = new Vue();
-
 
 new Vue({
     router,

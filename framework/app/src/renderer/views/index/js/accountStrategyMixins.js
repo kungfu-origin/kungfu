@@ -1,7 +1,8 @@
 
-const remote = require('electron').remote;
 import { openVueWin } from '@kungfu-trader/kungfu-uicc/utils/busiUtils';
 import { dealOrder, dealTrade } from '@kungfu-trader/kungfu-uicc/io/kungfu/watcher';
+
+const remote = require("@electron/remote");
 
 export default {
 

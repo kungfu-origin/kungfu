@@ -1,7 +1,7 @@
-import { remote } from 'electron'
 import { logger } from '@kungfu-trader/kungfu-uicc/utils/logUtils';
-const { dialog } = remote;
 
+const remote = require('@electron/remote')
+const { dialog } = remote;
 
 process
     .on('unhandledRejection', (reason, p) => {

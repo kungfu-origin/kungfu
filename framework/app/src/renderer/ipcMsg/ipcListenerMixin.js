@@ -1,6 +1,6 @@
 
 import { mapState } from 'vuex';
-import { ipcRenderer, remote } from 'electron';
+import { ipcRenderer } from 'electron';
 import moment from 'moment';
 import path from 'path';
 
@@ -17,7 +17,7 @@ import recordBeforeQuitMixin from "@/assets/mixins/recordBeforeQuitMixin";
 import tickerSetMixin from '@/components/MarketFilter/js/tickerSetMixin';
 
 const { _pm2, sendDataToProcessIdByPm2 } = require('@kungfu-trader/kungfu-uicc/utils/processUtils');
-const { dialog, BrowserWindow, shell } = remote;
+const { BrowserWindow, shell, dialog } = require("@electron/remote");
 
 //一直启动，无需remove listener
 export default {

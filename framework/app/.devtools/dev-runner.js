@@ -7,6 +7,7 @@ const { say } = require('cfonts');
 const { spawn } = require('child_process');
 const webpack = require('webpack');
 const WebpackDevServer = require('webpack-dev-server');
+const webpackHotMiddleware = require('webpack-hot-middleware')
 
 const mainConfig = require('../.webpack/webpack.main.config');
 const rendererConfig = require('../.webpack/webpack.renderer.config');
@@ -14,6 +15,7 @@ const daemonConfig = require('../.webpack/webpack.daemon.config');
 
 let electronProcess = null;
 let manualRestart = false;
+var hotMiddleware;
 
 function logStats(proc, data) {
   let log = '';
@@ -42,25 +44,29 @@ function logStats(proc, data) {
 
 function startRenderer() {
   return new Promise((resolve, reject) => {
+
     const compiler = webpack(rendererConfig);
+    hotMiddleware = webpackHotMiddleware(compiler, {
+      log: false,
+      heartbeat: 2500
+    })
 
-    // compiler.plugin('compilation', compilation => {
-    //   compilation.plugin('html-webpack-plugin-after-emit', (data, cb) => {
-    //     hotMiddleware.publish({ action: 'reload' })
-    //     cb()
-    //   })
-    // })
+    compiler.hooks.afterEmit.tap('afterEmit', () => {
+      hotMiddleware.publish({
+        action: 'reload'
+      })
+    })
 
-    // compiler.plugin('done', stats => {
-    //   logStats('Renderer', stats)
-    // })
+    compiler.hooks.done.tap('done', stats => {
+      logStats('Renderer', stats)
+    })
 
     const opts = {
       port: 9090,
       static: path.join(__dirname, '../'),
       headers: {
         'Access-Control-Allow-Origin': '*',
-      },
+      }
     };
     const server = new WebpackDevServer(opts, compiler);
     server.start();
@@ -76,11 +82,11 @@ function startMain() {
 
     const compiler = webpack(mainConfig);
 
-    // compiler.plugin('watch-run', (compilation, done) => {
-    //   logStats('Main', chalk.white.bold('compiling...'))
-    //   hotMiddleware.publish({ action: 'compiling' })
-    //   done()
-    // })
+    compiler.hooks.watchRun.tapAsync('watch-run', (compilation, done) => {
+      logStats('Main', chalk.white.bold('compiling...'))
+      hotMiddleware && hotMiddleware.publish({ action: 'compiling' })
+      done()
+    })
 
     compiler.watch({}, (err, stats) => {
       if (err) {
@@ -125,7 +131,7 @@ function startDaemon() {
 }
 
 function startElectron() {
-  electronProcess = spawn(electron, ['--inspect=5858', '.']);
+  electronProcess = spawn(electron, ['--inspect=5858', '--enable-logging', '.']);
 
   electronProcess.stdout.on('data', (data) => {
     electronLog(data, 'blue');
