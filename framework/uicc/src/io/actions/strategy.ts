@@ -16,6 +16,7 @@ export const deleteStrat = (strategyId: string): Promise<any> => {
 
 
 export const switchStrategy = (strategyId: string, value: boolean): Promise<MessageData> => {
+
     if(!value){
         return deleteProcess(strategyId)
         .then((): MessageData => ({ type: 'success', message: '操作成功！' }))       

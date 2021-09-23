@@ -27,9 +27,9 @@ export const getAccountSource = async (): Promise<StringToSource> => {
                 const typeName: string = config.type;
                 const type: string = (SourceTypeConfig[typeName] || {}).color || '';
         
-                let tdItemConfig: AccountSettingItem[] = deepClone(config.td_config.filter((configItem: AccountSettingItem) => !configItem.risk) || []);
+                let tdItemConfig: AccountSettingItem[] = deepClone((config.td_config || []).filter((configItem: AccountSettingItem) => !configItem.risk) || []);
                 let mdItemConfig: AccountSettingItem[] = deepClone(config.md_config || []);
-                let riskItemConfig: AccountSettingItem[] = deepClone(config.td_config.filter((configItem: AccountSettingItem) => configItem.risk) || []);
+                let riskItemConfig: AccountSettingItem[] = deepClone((config.td_config || []).filter((configItem: AccountSettingItem) => configItem.risk) || []);
                 tdItemConfig = dealValidator(tdItemConfig); 
                 mdItemConfig = dealValidator(mdItemConfig);
                 riskItemConfig = dealValidator(riskItemConfig);

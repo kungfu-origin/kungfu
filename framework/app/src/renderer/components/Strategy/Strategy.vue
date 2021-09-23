@@ -1,13 +1,16 @@
 <template>
-<tr-dashboard title="策略">
+<tr-dashboard :title="title || '策略'">
     <div slot="dashboard-header">
         <tr-dashboard-header-item>
             <tr-search-input v-model.trim="searchKeyword"></tr-search-input>
         </tr-dashboard-header-item>
-        <tr-dashboard-header-item v-if="!value">
+        <tr-dashboard-header-item>
+            <i class="el-icon-refresh mouse-over" title="刷新" @click="handleRefresh"></i>
+        </tr-dashboard-header-item>
+        <tr-dashboard-header-item v-if="!value && !isAdmin">
             <i class="el-icon-monitor mouse-over" title="打开监控" @click="handleMonitStrategies"></i>
         </tr-dashboard-header-item>
-        <tr-dashboard-header-item v-else>
+        <tr-dashboard-header-item v-else-if="!isAdmin">
             <i class="el-icon-s-platform mouse-over" title="关闭监控" @click="handleMonitStrategies"></i>
         </tr-dashboard-header-item>
         <tr-dashboard-header-item>
@@ -34,6 +37,7 @@
                 label="状态"
                 sortable  
                 show-overflow-tooltip
+                v-if="!isAdmin"  
             >
                 <template slot-scope="props">
                     <tr-status 
@@ -43,9 +47,10 @@
                     <tr-status v-else></tr-status>
                 </template>
             </el-table-column>
-              <el-table-column
+            <el-table-column
                 label="进程"
-                sortable    
+                sortable  
+                v-if="!isAdmin"  
             >
                 <template slot-scope="props" v-if="props.row.strategy_id">
                     <el-switch
@@ -60,6 +65,7 @@
                 show-overflow-tooltip
                 align="right"
                 min-width="100"
+                v-if="!isAdmin"  
                 >
                 <template slot-scope="props">
                     <tr-blink-num
@@ -75,6 +81,7 @@
                 show-overflow-tooltip
                 align="right"
                 min-width="110"
+                v-if="!isAdmin"  
                 >
                 <template slot-scope="props">
                     <tr-blink-num
@@ -90,6 +97,7 @@
                 show-overflow-tooltip
                 align="right"
                 min-width="120"
+                v-if="!isAdmin"  
                 >
                 <template slot-scope="props" >
                     <tr-blink-num
@@ -105,6 +113,7 @@
                     show-overflow-tooltip
                     align="right"
                     min-width="120"
+                    v-if="!isAdmin"  
                     >
                         <template slot-scope="props" >
                             <tr-blink-num
@@ -123,13 +132,14 @@
             </el-table-column>
             <el-table-column
                 label="" 
-                width="120px"
+                width="160px"
                 align="right"
+                class-name="kf-table-config-column"
             >
                 <template slot-scope="props">
+                    <span class="tr-oper" @click.stop="handleOpenLogFile(props.row.strategy_id)"><i class="el-icon-document mouse-over" title="打开日志文件"></i></span>
                     <span class="tr-oper" @click.stop="handleSetStrategy(props.row)"><i class="mouse-over el-icon-setting"></i></span>
                     <span class="tr-oper" @click.stop="handleEditStrategy(props.row)"><i class="mouse-over el-icon-edit-outline"></i></span>
-                    <!-- <span class="tr-oper" @click.stop="handleStartAndBacktestWin(props.row)"><i class="mouse-over el-icon-refresh"></i></span> -->
                     <span class="tr-oper-delete" @click.stop="handleDeleteStrategy(props.row)"><i class="mouse-over el-icon-delete"></i></span>
                 </template>
             </el-table-column>
@@ -197,17 +207,23 @@ import { encodeKungfuLocation } from '@kungfu-trader/kungfu-uicc/io/kungfu/kungf
 import { watcher } from '@kungfu-trader/kungfu-uicc/io/kungfu/watcher';
 import * as STRATEGY_API from '@kungfu-trader/kungfu-uicc/io/kungfu/strategy';
 import { switchStrategy } from '@kungfu-trader/kungfu-uicc/io/actions/strategy';
-import { chineseValidator, specialStrValidator, noZeroAtFirstValidator, noKeywordValidatorBuilder } from '@kungfu-trader/kungfu-uicc/assets//validator';
+import { chineseValidator, specialStrValidator, noZeroAtFirstValidator, noKeywordValidatorBuilder } from '@kungfu-trader/kungfu-uicc/assets/validator';
 
+import openLogMixin from '@/assets/mixins/openLogMixin';
 import baseMixin from '@/assets/mixins/baseMixin';
 
 export default {
-    mixins: [ baseMixin ],
+    mixins: [ baseMixin, openLogMixin ],
 
     props: {
         value: {
             type: Boolean,
             default: false
+        },
+
+        title: {
+            type: String,
+            default: ""
         }
     },
 
@@ -219,6 +235,7 @@ export default {
         this.noKeywordValidatorBuilder = noKeywordValidatorBuilder;
         this.searchFilterKey = 'strategy_id';
         this.ifProcessRunning = ifProcessRunning;
+        this.isAdmin = process.env.RENDERER_TYPE === 'admin';
 
         return {
             setStrategyDialogVisiblity: false,
@@ -264,6 +281,13 @@ export default {
                 this.setStrategyForm.strategyPath = strategyPath[0];
                 this.$refs['setStrategyForm'].validate() //手动进行再次验证，因数据放在span中，改变数据后无法触发验证
             })
+        },
+
+        handleRefresh () {
+            this.getStrategyList()
+                .then(() => {
+                    this.$message.success("操作成功！")
+                })
         },
 
         //选中行的背景颜色
@@ -316,10 +340,6 @@ export default {
                 `/kungfuCodeEditor/${row.strategy_id}`, 
                 remote
             )
-        },
-
-        handleStartAndBacktestWin (row) {
-            openVueWin('backtest', `/${row.strategy_id}`, BrowserWindow)
         },
 
         //设置策略

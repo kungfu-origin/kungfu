@@ -53,9 +53,9 @@ export default {
 
     methods: {
 
-        handleConfirmDateRangeForExportAllTradingData (date) {
+        handleConfirmDateRangeForExportAllTradingData ({ date, dateType }) {
             this.exportAllTradingDataByDateDateRangeDialogLoading = true;
-            return getKungfuDataByDateRange(date)
+            return getKungfuDataByDateRange(date, dateType)
                 .then(kungfuData => {
 
                     if (!kungfuData) {
@@ -195,7 +195,7 @@ export default {
                             })
                         break
                     case 'clear-journal':
-                        localStorage.setItem("clearJournalDate", "")
+                        localStorage.setItem("clearJournalTradingDate", "")
                         this.$message.success('清理 journal 完成，请重启应用！')
                         break
                     case "open-log":

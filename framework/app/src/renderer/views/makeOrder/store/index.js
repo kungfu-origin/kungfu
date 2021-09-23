@@ -6,6 +6,7 @@ import { getAccountSource } from '@kungfu-trader/kungfu-uicc/config/accountConfi
 Vue.use(Vuex)
 
 export default new Vuex.Store({
+	strict: process.env.NODE_ENV === 'development',
 
 	state: {
         tdList: [],

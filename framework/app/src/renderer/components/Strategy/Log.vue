@@ -82,8 +82,10 @@ export default {
                 prop: 'message',
             },
         ];
+
         this.tailObserver = null;
         this.logMaxLenLimit = 500;
+        
         return {
             rendererTable: false,
             tableData: Object.freeze([]),
@@ -246,7 +248,7 @@ export default {
             //最大log数
             const len = tableData.length;
             if (len > this.logMaxLenLimit) {
-                tableData = tableData.slice(len - 500, len)
+                tableData = tableData.slice(len - 300, len)
             }
 
             return Object.freeze(tableData)

@@ -17,7 +17,9 @@
                         :value="buildState('master')"></tr-status>
                         <tr-status v-else></tr-status>
                     </span>
-                    <span class="core-process-item switch" v-if="NODE_ENV === 'development'"></span>
+                    <span class="core-process-item switch" v-if="NODE_ENV === 'development'">
+                        <el-switch  :value="ifProcessRunning('master', processStatus)" @change="handleMasterSwitch"></el-switch>
+                    </span>
                     <span class="core-process-item text-overflow monit">
                         CPU:{{ getMemCpu('master', processStatusWithDetail, 'cpu') }}
                     </span>
@@ -88,9 +90,9 @@
 </template>
 <script>
 import { mapState } from 'vuex';
-import { statusConfig } from '@kungfu-trader/kungfu-uicc/config/statusConfig';
+import { ProcessStatusConfig } from '@kungfu-trader/kungfu-uicc/config/tradingConfig';
 import { ifProcessRunning, getMemCpu } from '@kungfu-trader/kungfu-uicc/utils/busiUtils';
-import { switchLedger, switchDaemon } from '@kungfu-trader/kungfu-uicc/io/actions/base';
+import { switchMaster, switchLedger, switchDaemon } from '@kungfu-trader/kungfu-uicc/io/actions/base';
 
 import openLogMixin from '@/assets/mixins/openLogMixin';
 
@@ -99,8 +101,8 @@ export default {
 
     data () {
         let statusLevel = {};
-        Object.keys(statusConfig || {}).map(key => {
-            statusLevel[key] = statusConfig[key].level;
+        Object.keys(ProcessStatusConfig || {}).map(key => {
+            statusLevel[key] = ProcessStatusConfig[key].level;
         })
         this.nasterErrController = false;
         this.ledgerErrController = false;
@@ -160,6 +162,10 @@ export default {
     methods: {
         buildState(processId) {
             return this.processStatus[processId]
+        },
+
+        handleMasterSwitch (e) {
+            switchMaster(e)
         },
 
         handleLedgerSwitch (e) {

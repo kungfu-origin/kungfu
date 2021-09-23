@@ -38,9 +38,6 @@ export const getKungfuExts = () => {
     })
 }
 
-getKungfuExts();
-
-
 
 function getToken () {
     return localStorage.getItem("login_token") || ""

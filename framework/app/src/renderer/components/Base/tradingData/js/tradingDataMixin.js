@@ -115,8 +115,8 @@ export default {
             })
         },
 
-        handleConfirmDateRangeForHistory (date) {
-            return this.getDataByDateRange(date)
+        handleConfirmDateRangeForHistory ({ date, dateType }) {
+            return this.getDataByDateRange(date, dateType)
                 .then(data => {
                     this.dateForHistory = moment(date).format('YYYY-MM-DD')
                     return data;
@@ -131,8 +131,8 @@ export default {
         },
 
         //选择日期以及保存
-        handleConfirmDateRangeForExport (date) {
-            return this.getDataByDateRange(date)
+        handleConfirmDateRangeForExport ({ date, dateType}) {
+            return this.getDataByDateRange(date, dateType)
                 .then(data => {
                     return data;
                 })
@@ -147,10 +147,10 @@ export default {
                 })
         },
 
-        getDataByDateRange (date) {
+        getDataByDateRange (date, dateType) {
             this.dateRangeExportLoading = true;
 
-            return getKungfuDataByDateRange(date)
+            return getKungfuDataByDateRange(date, dateType)
                 .then(kungfuData => {
                     const { instrumentId, directionOrigin } = this.currentTicker || {};
                     const targetList = this.getHistoryTargetListResolved(this.kungfuBoardType, kungfuData, this.moduleType, instrumentId);
@@ -207,6 +207,11 @@ export default {
         },
 
         getHistoryTargetList (kungfuBoardType, kungfuData ) {
+
+            if (!kungfuData) {
+                return {}
+            }
+
             if (kungfuBoardType === 'order') {
                 return kungfuData.Order
             } else if (kungfuBoardType === 'trade') {

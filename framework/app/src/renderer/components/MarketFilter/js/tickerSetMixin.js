@@ -2,8 +2,8 @@
 import { mapGetters, mapState } from 'vuex';
 
 
-import { checkAllMdProcess, getIndexFromTargetTickers, findTargetFromArray, delayMiliSeconds, debounce } from '@kungfu-trader/kungfu-uicc/utils/busiUtils';
-import { sendDataToDaemonByPm2 } from '@kungfu-trader/kungfu-uicc/utils/processUtils';
+import { checkAllMdProcess, getIndexFromTargetTickers, findTargetFromArray, delayMilliSeconds, debounce } from '@kungfu-trader/kungfu-uicc/utils/busiUtils';
+import { sendDataToDaemonByPm2 } from "@kungfu-trader/kungfu-uicc/utils/processUtils";
 import { getTickerSets, addSetTickerSet, removeTickerSetByName } from '@kungfu-trader/kungfu-uicc/io/actions/market';
 import { kungfuSubscribeInstrument } from '@kungfu-trader/kungfu-uicc/io/kungfu/makeCancelOrder';
 import { encodeKungfuLocation } from '@kungfu-trader/kungfu-uicc/io/kungfu/kungfuUtils';
@@ -158,7 +158,7 @@ export default {
             if (!sourceName) return;
             const mdLocation = encodeKungfuLocation(sourceName, 'md');
             if (!watcher.isReadyToInteract(mdLocation)) {
-                await delayMiliSeconds(1000);
+                await delayMilliSeconds(1000);
                 await this.subscribeTickersByProcessId(mdProcessId, slience);
             } else {
                 this.subscribeAllTickers(slience)                
@@ -181,7 +181,6 @@ export default {
         },
 
         subscribeTickers (tickers, slience = true) {
-            console.log("subscribeTickers", tickers.map(item => `${item.instrumentId}_${item.exchangeId}`))
             if (!watcher.isLive()) return;
             sendDataToDaemonByPm2('MAIN_RENDERER_SUBSCRIBED_TICKERS', tickers)
             tickers.forEach(ticker => {

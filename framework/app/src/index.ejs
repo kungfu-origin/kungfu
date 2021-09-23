@@ -135,6 +135,7 @@
 	</div>
 	<div id="app"></div>
 	<script>
+		console.log('<%= process.env.NODE_ENV %>')
 		if ('<%= process.env.NODE_ENV %>' !== 'development') window.__resources = require('path').join(__dirname, '/resources').replace(/\\/g, '\\\\')
 	</script>
 </body>

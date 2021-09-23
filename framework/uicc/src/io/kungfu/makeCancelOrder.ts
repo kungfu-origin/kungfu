@@ -90,12 +90,12 @@ export const kungfuCancelOrder = (orderId: string, accountId: string, strategyId
     }
 }
 
-export const kungfuCancelAllOrders = (orderDataList: OrderData[], strategyId?: string) => {
+export const kungfuCancelAllOrders = (orderDataList: OrderOriginData[], strategyId?: string) => {
     if (!watcher.isLive()) {
         return Promise.reject(new Error(`Master 未连接！`))
     }
     
-    const promiseList = orderDataList.map((orderData:  OrderData) => {
+    const promiseList = orderDataList.map((orderData:  OrderOriginData) => {
         const kungfuLocation = decodeKungfuLocation(+orderData.source);
         const accountId = `${kungfuLocation.group}_${kungfuLocation.name}`;
         const accountLocation = encodeKungfuLocation(accountId, 'td');
@@ -104,7 +104,7 @@ export const kungfuCancelAllOrders = (orderDataList: OrderData[], strategyId?: s
             return Promise.resolve(false)
         }
 
-        const orderId = orderData.orderId;
+        const orderId = orderData.order_id;
         const orderAction = {
             ...longfist.OrderAction(),
             order_id: BigInt(orderId)

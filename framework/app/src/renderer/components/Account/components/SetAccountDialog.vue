@@ -16,7 +16,7 @@
             :configList="(accountSource[source] || {}).config || []"
             :uniKeyValidator="validateAccountId"
             :uniKey="accountSourceKey"
-            labelWidth="140px"
+            labelWidth="150px"
             :method="method"
         ></ExtConfigForm>
     
@@ -135,7 +135,7 @@ export default {
             if(this.method == 'add') { //添加账户
                 return addTd(accountId, JSON.stringify(formValue))
             } else{ //编辑账户
-                return updateTdConfig(accountId, JSON.stringify(formValue))
+                return updateTdConfig(accountId, JSON.stringify(formValue), 'td')
             }
         },
 
@@ -146,7 +146,7 @@ export default {
             if (this.method == 'add') {
                 return Promise.reject(new Error('risk setting no add set way!'))
             } else {
-                return updateTdConfig(accountId, JSON.stringify(formValue))
+                return updateTdConfig(accountId, JSON.stringify(formValue), 'risk')
             }
         },
 
@@ -180,7 +180,7 @@ export default {
 
             if(configItemList.length === 0) {
                 if(this.type === 'td') {
-                    this.$message.$error('账户配置出错！');
+                    this.$message.error('账户配置出错！');
                     this.close();
                 } else if(this.type === 'md') {
                     if(this.method === 'add') {

@@ -1,6 +1,6 @@
 import fse from 'fs-extra';
 import { startCustomProcess, deleteProcess, killKfc, killGodDaemon, killKungfu, killExtra, startMaster, startLedger, startDaemon, startTask, stopProcess } from '@kungfu-trader/kungfu-uicc/utils/processUtils';
-import { delayMiliSeconds } from '@kungfu-trader/kungfu-uicc/utils/busiUtils';
+import { delayMilliSeconds } from '@kungfu-trader/kungfu-uicc/utils/busiUtils';
 import { buildCustomProcessConfig } from '@kungfu-trader/kungfu-uicc/config/systemConfig';
 import { KF_TARADING_CONFIG_PATH, KF_CONFIG_PATH } from '@kungfu-trader/kungfu-uicc/config/pathConfig';
 
@@ -11,14 +11,16 @@ export const switchMaster = async (status: boolean): Promise<any> => {
             await killKfc()
             await killExtra();
             await killGodDaemon();
-            await killKungfu();
+            if (process.env.NODE_ENV === "production") {
+                await killKungfu();
+            }
         } catch(err) {
             throw err
         }
     } else {
         try {
             await startMaster(false)
-            await delayMiliSeconds(1000)
+            await delayMilliSeconds(1000)
             await startLedger(false)
         } catch (err) {
             throw err
@@ -28,7 +30,7 @@ export const switchMaster = async (status: boolean): Promise<any> => {
    
 
 export const switchLedger = (status: boolean): Promise<any> => {
-    if(!status) return deleteProcess('ledger')   
+    if (!status) return deleteProcess('ledger')   
     return startLedger(false)
 }
 
@@ -38,7 +40,7 @@ export const switchDaemon = (status: boolean): Promise<any> => {
 }
 
 export const switchCustomProcess = (status: boolean, targetName: string) => {
-    if(!status) return deleteProcess(targetName)
+    if (!status) return deleteProcess(targetName)
 
     const customProcessConfig = buildCustomProcessConfig();
     const targetProcessConfig = customProcessConfig[targetName];

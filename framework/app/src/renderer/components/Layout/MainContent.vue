@@ -22,14 +22,14 @@
                     </tr-menu-item>
                 </tr-menu>
                 <div class="tr-aside-bottom-settings">
-                    <div class="setting-item" v-if="!isActivated" @click="handleLogin">
+                    <!-- <div class="setting-item" v-if="!isActivated" @click="handleLogin">
                         <i class="el-icon-user" ></i>
                     </div>
-                    <div class="setting-item head-image" id="user-info-header" v-else @click="handleOpenMenu">
+                    <div class="-item head-image" id="user-info-header" v-else @click="handleOpenMenu">
                         <span slot="reference" class="kf-user-info-popover-entry">
                             <img :src="photo" width="100%" height="100%" alt="">
                         </span>
-                    </div>
+                    </div> -->
                     <div class="setting-item" @click="handleOpenGlobalSetting">
                         <i class="el-icon-setting"></i>
                     </div>

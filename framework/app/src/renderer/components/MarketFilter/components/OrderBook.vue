@@ -30,7 +30,10 @@
 </template>
 
 <script>
-import { toDecimal } from '@kungfu-trader/kungfu-uicc/utils/busiUtils'
+import { toDecimal } from '@kungfu-trader/kungfu-uicc/utils/busiUtils';
+
+const MIN_PRICE = 0.001;
+const MAX_VOUME = 1000000000;
 
 export default {
 
@@ -76,25 +79,50 @@ export default {
 
         askPrices () {
             if (!this.quoteData) return [];
+            const volumes = this.quoteData.askVolumes || [];
             return (this.quoteData.askPrices || [])
-                .reduce(this.resolveAskPrices)
+                .map((price, index) => {
+                    const volume = volumes[index] || 0;
+                    if (price < MIN_PRICE || volume > MAX_VOUME || volume <= 0) {
+                        return 0;
+                    }
+                    return price;
+                })
         },
 
         askVolumes () {
             if (!this.quoteData) return [];
-            return this.quoteData.askVolumes || []
+            return (this.quoteData.askVolumes || [])
+                .map(volume => {
+                    if (volume > MAX_VOUME || volume <= 0) {
+                        return 0;
+                    }
+                    return volume;
+                })
         },
         
         bidPrices () {
             if (!this.quoteData) return [];
+            const volumes = this.quoteData.bidVolumes || [];
             return (this.quoteData.bidPrices || [])
-                .reduce(this.resolveBidPrices)
-        
+                .map((price, index) => {
+                    const volume = volumes[index] || 0;
+                    if (price < MIN_PRICE || volume > MAX_VOUME || volume <= 0) {
+                        return 0;
+                    }
+                    return price;
+                })        
         },
 
         bidVolumes () {
             if (!this.quoteData) return [];
-            return this.quoteData.bidVolumes || []
+            return (this.quoteData.bidVolumes || [])
+                .map(volume => {
+                    if (volume > MAX_VOUME || volume <= 0) {
+                        return 0;
+                    }
+                    return volume;
+                })
         },
 
         lastPrice () {
@@ -111,46 +139,12 @@ export default {
                 orderInput: {
                     ...this.quoteData,
                     side,
+                    offset: +side === 0 ? 0 : 1,
                     lastPrice: price,
-                    instrumentType: this.quoteData.instrumentTypeOrigin
+                    instrumentType: this.quoteData.instrumentTypeOrigin,
+                    volume: 0
                 }
             })
-        },
-
-        resolveAskPrices (price1, price2) {
-            if (typeof price1 === 'object') {//1;
-                const len = price1.length || 0;
-                if (+price2 === 0 && len) {
-                    if (+price1[len - 1] !== 0) {
-                        return [ ...price1, toDecimal(+price1[len - 1] + 0.2, 3) ];
-                    }
-                }  
-                return [ ...price1, toDecimal(price2, 3) ]
-            } else {
-                if (+price2 === 0 && +price1 !== 0) {
-                    return [ toDecimal(+price1, 3), toDecimal(+price1 + 0.2, 3) ]
-                }
-                return [ toDecimal(+price1, 3), toDecimal(+price2, 3) ]
-            }
-        },
-
-        resolveBidPrices (price1, price2) {
-            if (typeof price1 === 'object') {//1;
-                const len = price1.length || 0;
-                if (+price2 === 0 && len) {
-                    if (+price1[len - 1] !== 0) {
-                        const price1Resolved = +price1[len - 1] - 0.2 < 0 ? 0 : +price1[len - 1] - 0.2
-                        return [ ...price1, toDecimal(price1Resolved, 3) ];
-                    }
-                }  
-                return [ ...price1, toDecimal(price2, 3) ]
-            } else {
-                if (+price2 === 0 && +price1 !== 0) {
-                    const price1Resolved = +price1 - 0.2 < 0 ? 0 : +price1 - 0.2
-                    return [ toDecimal(+price1, 3), toDecimal(price1Resolved, 3) ]
-                }
-                return [ toDecimal(+price1, 3), toDecimal(+price2, 3) ]
-            }
         },
 
         dealNum (num) {

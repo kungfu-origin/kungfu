@@ -62,7 +62,23 @@ export const OrderStatus: NumberToStringObject = {
     8: isEnglish ? 'Lost' : '丢失',
 }
 
-export const aliveOrderStatusList = [1, 2, 7]
+export const ProcessStatusConfig: ProcessStatusConfig = {
+    'online':           { name: isEnglish ? 'Running' : '运行中', color: 'bg-green', level: 1 },
+    'stopping':         { name: isEnglish ? 'Stopping' : '停止中', color: 'bg-gray', level: 0 },
+    'stopped':          { name: isEnglish ? 'Stopped' : '已停止', color: 'bg-gray', level: 0 },
+    'launching':        { name: isEnglish ? 'Launching' : '启动中', color: 'bg-gray', level: 0 },
+    'errored':          { name: isEnglish ? 'Errored' : '错误', color: 'bg-red', level: -1 },
+    'waiting restart':   { name: isEnglish ? 'Stopped' : '已停止', color: 'bg-gray', level: 0 },
+    '0':   { name: isEnglish ? 'Pending' : '等待中', color: 'bg-gray', level: 0 },
+    '1':   { name: isEnglish ? 'Idle' : '无数据', color: 'bg-gray', level: 0 },
+    '2':   { name: isEnglish ? 'Disconnected' : '已断开', color: 'bg-red', level: -1 },
+    '3':   { name: isEnglish ? 'Connected' : '已连接', color: 'tr-dot-wave', level: 0 },
+    '4':   { name: isEnglish ? 'LoggedIn' : '已登陆', color: 'bg-green', level: 1 },
+    '5':   { name: isEnglish ? 'LoginFailed' : '登录失败', color: 'bg-red', level: -1 },
+    '100': { name: isEnglish ? 'Ready' : '就绪',  color: 'bg-green', level: 1 }
+}
+
+export const aliveOrderStatusList = [1, 2, 7];
 
 export const SourceTypeConfig: SourceType = {
     'Stock': {

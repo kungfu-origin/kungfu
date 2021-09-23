@@ -1,0 +1,368 @@
+@charset 'utf-8';
+@import './skin.scss';
+
+.mouse-over{
+    color: $icon;
+    position: relative;
+    &:hover{
+        cursor: pointer;
+        color: $vi;
+        i{
+            color: $vi;
+        }
+    }
+}
+
+.mouse-over-del{
+    position: relative;
+    &:hover{
+        cursor: pointer;
+        color: $red;
+        i{
+            color: $red;
+        }
+    }
+}
+
+.color-red{
+    color:$red;
+    i{
+        color: $red !important;
+    }
+}
+.color-blue{
+    color:$blue;
+}
+
+.color-green{
+    color:$green;
+    i{
+        color: $green !important;
+    }
+}
+.color-orange{
+    color:$orange;
+}
+.color-gray{
+    color:$gray;
+    i{
+        color:$gray !important;
+    }
+}
+
+.color-vi{
+    color:$vi;
+}
+
+.color-font5{
+    color: $font_5;
+}
+
+.color-font{
+    color: $font;
+}
+
+.bg-red{
+    background: $red;
+    i{
+        color: $red !important;
+    }
+}
+.bg-blue{
+    background: $blue;
+}
+.bg-orange{
+    background: $orange;
+}
+.bg-gray{
+    background: $gray;
+}
+.bg-green{
+    background: $green;
+}
+
+.vertical_center {  // 垂直居中
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.horizontal_center { // 水平居中
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+}
+
+.absolute_center { // 水平&垂直居中
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.error{
+    color: $red;
+}
+
+.green{
+    color: $green;
+    i{
+        color: $green !important;
+    }
+}
+.red{
+    color: $red;
+    i{
+        color: $red !important;
+    }
+}
+
+.grey{
+    color: $grey;
+    i{
+        color: $grey !important;
+    }
+}
+
+.orange{
+    color: $orange;
+    i{
+        color: $orange !important;
+    }
+}
+
+
+.fl{
+    float: left;
+}
+.fr{
+    float: right;
+}
+
+// 策略列表 - C++图标颜色
+.tr-language-cpp {  
+    color: #9B4F96 !important;
+}
+// 策略列表 - Python图标颜色
+.tr-socialpython {
+    color: #879636 !important;
+}
+
+.text-overflow{
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.table-height{
+    height: calc(100% - 36px)
+}
+.table-body{
+    height: 100%;
+    font-size: 12px !important; 
+    span, div, p, i{
+        font-size: 12px !important;
+    }
+}
+
+/* dropdown中的选中的长度
+------------------------------- */
+
+.select-frame{
+    span{
+        display: inline-block;
+        vertical-align: middle;
+    }
+    .select-name{
+        max-width: 90px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        overflow: hidden;
+    }
+}
+
+
+/* dot
+------------------------------- */
+.tr-dot{
+    width: 6px;
+    height: 6px;
+    display: inline-block;
+    border-radius: 50%;
+    vertical-align: middle;
+    margin-right: 4px;
+}
+
+
+/* table中操作按钮的样式
+------------------------------- */
+.tr-oper{
+    padding-right:10px;
+    color: $font;
+    font-size: 12px;
+    i{
+        font-size: 12px !important;
+    }
+    &:hover{
+        color: $vi;
+        cursor: pointer;
+        i{
+            color: $vi;
+        }
+    }
+}
+.tr-oper-delete{
+    padding-right:10px;
+    color: $font;
+    font-size: 12px;
+    i{
+        font-size: 12px !important;
+    }
+    &:hover{
+        color: $red;
+        cursor: pointer;
+        i{
+            color: $red;            
+        }
+    }
+}
+
+/* 详情的时候样式，只有文字说明
+------------------------------- */
+.tr-row{
+    .el-row{
+        color: $font_5;
+        margin-bottom: 16px;
+        &:last-child{
+            margin-bottom: 0px;
+        }
+        .el-col{
+            
+            label{
+                float: right;
+                margin-right: 4px;
+                color: $font;
+            }
+
+        }
+    }
+    
+}
+
+.icon{
+    cursor: pointer;
+    color: $font;
+    position: relative;
+}
+.icon:hover {
+    color: $vi;
+}
+
+.no-padding{
+    padding: 0px !important;
+}
+
+/* 没有内容的card
+------------------------------- */
+.tr-card{
+    margin-bottom: 8px;
+    .el-card__header{
+        padding: 15px 16px 10px 16px;
+        border: none !important;
+        
+        div{
+            margin-left:16px;
+        }
+        .header-title{
+            width: calc(100% - 130px);
+            display: inline-block;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+    }
+    .el-card__body{
+        padding: 0px;
+    }
+}
+
+
+
+// /* 滚动条
+// -------------------------- */
+
+ // 滚动条整体部分
+
+.el-table,
+.handsontable,
+div
+{
+    
+    // 滚动条的轨道（里面装有Thumb）
+    ::-webkit-scrollbar-track{    
+        background: $bg_dark;
+    }
+    
+    // 滚动条的轨道的两端按钮，由于通过点击微调小方块的位置。
+    ::-webkit-scrollbar-button {
+        visibility: hidden;
+    }
+
+    // 滚动条整体部分
+    ::-webkit-scrollbar{
+        position: relative;
+        transition: all 0.2s ease 0s;
+        cursor: pointer;
+    }
+    ::-webkit-scrollbar:horizontal{
+        position: relative;
+        transition: all 0.2s ease 0s;
+        background: transparent; 
+        cursor: pointer;
+    }
+    // // /* 滚动条滑块 */
+    ::-webkit-scrollbar-thumb {
+        background: $bg_light2;  
+    }
+
+    ::-webkit-scrollbar-corner {
+        background: transparent; 
+    }
+ }
+
+
+
+.icon {
+    width: 1em;
+    height: 1em;
+    vertical-align: -0.15em;
+    fill: currentColor;
+    overflow: hidden;
+}
+
+
+.path-selection-in-dialog{
+    color: $icon;
+    max-width: 164px;
+    display: inline-block;
+    vertical-align: bottom;
+}
+
+.auto-complete-instrument-ids__warp {
+    display: flex;
+    justify-content: space-between;
+    padding-right: 16px;
+    box-sizing: border-box;
+
+    .auto-complete-instrument-id-item {
+
+        .ticker {
+            display: inline-block;
+            width: 50px;
+        }
+    }
+}
+
+.text-icon {
+    font-weight: 600; 
+    font-size: 11px;
+}

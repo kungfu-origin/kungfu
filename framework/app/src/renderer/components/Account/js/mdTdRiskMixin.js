@@ -2,6 +2,14 @@ import { mapGetters, mapState } from 'vuex';
 import { setTimerPromiseTask } from '@kungfu-trader/kungfu-uicc/utils/busiUtils';
 
 export default {
+    
+    props: {
+        title: {
+            type: String,
+            default: ""
+        }
+    },
+
     data () {
         return  {
             method: 'add',
@@ -79,6 +87,15 @@ export default {
 
         },
 
+        handleRefresh () {
+            if (this.getTableList) {
+                this.getTableList()
+                    .then(() => {
+                        this.$message.success("操作成功！")
+                    })
+            }
+        },
+
         //添加账户，打开选择柜台弹窗
         handleAdd () {
             this.visiblity.selectSource = true;
@@ -92,6 +109,7 @@ export default {
             this.visiblity.setAccount = true
         },
 
+        //risk
         handleOpenUpdateRiskSettingDialog (row) {
             this.method = 'update'
             this.accountForm = JSON.parse(row.config) 

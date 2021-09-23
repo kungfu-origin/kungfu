@@ -38,11 +38,11 @@ export default {
         },
 
         SET_TICKER_SETS (state, tickerSets) {
-            state.tickerSets = tickerSets
+            Vue.set(state, 'tickerSets', tickerSets)
         },
 
         SET_CURRENT_TICKER_SET (state, tickerSet) {
-            state.currentTickerSet = tickerSet
+            Vue.set(state, 'currentTickerSet', tickerSet)
         },
 
         SET_MARKET_AVG_VOLUME (state, { days, data }) {

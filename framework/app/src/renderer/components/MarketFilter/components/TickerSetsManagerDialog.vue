@@ -54,6 +54,7 @@
                                 label=""
                                 align="right"
                                 width="40px"
+                                class-name="kf-table-config-column"
                             >
                                 <template slot-scope="props">
                                     <span class="tr-oper-delete"><i class=" el-icon-delete mouse-over" title="删除" @click.stop="handleDeleteTicker(props.row, editingTickerSet)"></i></span>

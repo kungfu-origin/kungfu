@@ -37,7 +37,7 @@
     <!-- handleShowDetail -->
     <tr-table
     v-if="rendererTable"
-    :data="tableData"
+    :data="tableDataResolved"
     :schema="schema"
     :renderCellClass="renderCellClass"
     @dbclickRow="handleCancelOrder"
@@ -167,13 +167,25 @@ export default {
                 return `未完成委托 ${this.currentTitle}`
             }
         },
+
+        tableDataResolved () {
+            if (this.searchKeyword) {
+                return this.tableData.filter(item => {
+                    if (this.searchKeyword.trim() === '') return true;
+                    const { clientId, sourceId, accountId, instrumentId, orderId } = item
+                    const strings = [ clientId, sourceId, accountId, instrumentId, orderId ].join('')
+                    return strings.includes(this.searchKeyword) 
+                })
+            } else {
+                return this.tableData
+            }
+        }
     },
 
     watch: {
         kungfuData (orders) {
             if (this.adjustOrderInputVisibility) return;
             const ordersResolved = this.dealOrderList(orders, {
-                searchKeyword: this.searchKeyword,
                 todayFinish: this.todayFinish
             });
 
@@ -194,6 +206,7 @@ export default {
             delete orderData.update;
             delete orderData.sourceId;
             delete orderData.status;
+            delete orderData.instrumentTypeOrigin
 
             orderData.accountId = orderData.accountId.split('手动').join(' ').split('任务').join(' ').trim()
             
@@ -231,8 +244,7 @@ export default {
                 cancelButtonText: '取 消',
             })
             .then(() => {
-                
-                const orderDataList = this.tableData
+                const orderDataList = watcher.ledger.Order.list()
                     .filter(item => {
                             return aliveOrderStatusList.includes(+item.status)
                     })
@@ -252,15 +264,9 @@ export default {
         },
 
         //对返回的数据进行处理
-        dealOrderList (orders, { searchKeyword, todayFinish }) {
+        dealOrderList (orders, { todayFinish }) {
             let orderDataByKey = {};
-            let ordersAfterFilter = orders
-                .filter(item => {
-                    if (searchKeyword.trim() === '') return true;
-                    const { clientId, sourceId, accountId, instrumentId, orderId } = item
-                    const strings = [ clientId, sourceId, accountId, instrumentId, orderId ].join('')
-                    return strings.includes(searchKeyword) 
-                });
+            let ordersAfterFilter = orders;
             
             if (!todayFinish) {
                 ordersAfterFilter = ordersAfterFilter

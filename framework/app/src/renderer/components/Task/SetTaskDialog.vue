@@ -24,7 +24,7 @@
                     v-model="postFormList[index]"
                     :configList="item.config"
                     :uniKey="item.uniKey || ''"
-                    labelWidth="140px"
+                    labelWidth="150px"
                     :method="method"
                 ></ExtConfigForm>
             </el-tab-pane>
@@ -137,12 +137,12 @@ export default {
         handleSubmitSetting () {
             this.$refs.taskSettingForm[this.targetConfigIndex].validate(valid => {
                 if (valid) {
-                    const postData = this.postFormList[this.targetConfigIndex]
+                    const postData = this.postFormList[this.targetConfigIndex];
                     this.$emit('confirm', JSON.stringify({
                         ...postData,
                         parentId: BigInt(+moment().valueOf()).toString(),
                         configKey: this.activeTabName,
-                        subType: (this.configList[this.targetConfigIndex] || {}).subType || ''
+                        subType: (this.configListResolved[this.targetConfigIndex] || {}).subType || ''
                     }), this.activeTabName)
                     this.handleClose();
                 }

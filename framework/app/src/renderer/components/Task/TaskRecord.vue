@@ -2,7 +2,7 @@
 
     <tr-dashboard title="">
         <div slot="dashboard-header">
-            <tr-dashboard-header-item width="270px">
+            <tr-dashboard-header-item width="320px">
                 <el-select class="dashboard-header-selector" :value="currentTaskId" @change="handleSetCurrentTask">
                     <el-option 
                         v-for="task in taskList" 
@@ -126,7 +126,9 @@ export default {
                     moduleType: this.moduleType,
                     orderInput: {
                         instrumentId: item.instrumentId,
-                        exchangeId: item.exchangeId
+                        exchangeId: item.exchangeId,
+                        side: 0,
+                        offset: 0,
                     }
                 })
             }

@@ -2,7 +2,7 @@ import {
     buildTradingDataPipe,
     buildMarketDataPipe,
     buildKungfuGlobalDataPipe,
-} from '@kungfu-trader/kungfu-uicc/io/kungfu/tradingData';
+} from "@kungfu-trader/kungfu-uicc/io/kungfu/tradingData";
 
 import { startGetKungfuWatcherStep, transformTradingItemListToData, dealQuote } from '@kungfu-trader/kungfu-uicc/io/kungfu/watcher';
 
@@ -77,15 +77,12 @@ buildMarketDataPipe().subscribe((data: any) => {
     })
 })
 
-
-
-
+// other process to daemon
 const { _pm2 } = require('@kungfu-trader/kungfu-uicc/utils/processUtils');
-
 _pm2.launchBus((err: Error, pm2_bus: any) => {
 
     if (err) {
-        console.error(err)
+        console.error("pm2 launchBus Error", err)
     }
 
     pm2_bus.on('process:msg', (packet: any) => {
@@ -120,7 +117,7 @@ _pm2.launchBus((err: Error, pm2_bus: any) => {
     })
 })
 
-
+// app -> daemon
 process.on('message', (packet: any) => {
     const { type, topic, data } = packet;        
     

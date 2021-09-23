@@ -18,7 +18,7 @@
                     <el-select v-model.trim="makeOrderForm.name" @change="handleSelectAccount">
                         <el-option
                             v-for="account in tdList"
-                            :key="account.account_id.toAccountId()"
+                            :key="account.account_id"
                             :label="account.account_id.toAccountId()"
                             :value="account.account_id">
                             <span>
@@ -133,7 +133,7 @@
                             { validator: biggerThanZeroValidator, trigger: 'blur'}
                         ]">
                             <el-input-number
-                            :precision="3"
+                            :precision="4"
                             :step="0.001"
                             :controls="false"
                             placeholder="请输入价格"
@@ -232,9 +232,9 @@ import { mapGetters } from 'vuex';
 import { Autocomplete } from 'element-ui';
 import { ipcRenderer } from 'electron';
 
-import { deepClone, delayMiliSeconds } from '@kungfu-trader/kungfu-uicc/utils/busiUtils';
+import { deepClone, delayMilliSeconds } from '@kungfu-trader/kungfu-uicc/utils/busiUtils';
 import { SourceTypeConfig, SideName, OffsetName, PriceType, HedgeFlag, ExchangeIds, InstrumentTypes, allowShorted } from '@kungfu-trader/kungfu-uicc/config/tradingConfig';
-import { biggerThanZeroValidator } from '@kungfu-trader/kungfu-uicc/assets//validator';
+import { biggerThanZeroValidator } from '@kungfu-trader/kungfu-uicc/assets/validator';
 
 import instrumentsMixin from '@/assets/mixins/instrumentsMixin';
 import makeOrderMixin from '@/components/Base/makeOrder/js/makeOrderMixin';
@@ -399,34 +399,39 @@ export default {
             
             if (!Object.keys(newOrderInput || {}).length) return;
             
-            this.clearData(true);
+            const { instrumentId, exchangeId, accountIdResolved, lastPrice, volume, side, offset, instrumentType } = newOrderInput;
 
-            const { instrumentId, lastPrice, totalVolume, directionOrigin, side, exchangeId, accountIdResolved, instrumentType } = newOrderInput;
+            const isSameTicker = this.isSameTicker(exchangeId, instrumentId);
+            if (!isSameTicker) {
+                this.clearData(true);
+            }
+            
+            this.$set(this.makeOrderForm, 'instrument_id', instrumentId || '');
+            this.$set(this.makeOrderForm, 'exchange_id', exchangeId || '');
+            this.$set(this.makeOrderForm, 'limit_price', lastPrice || 0);
+            if (volume && !Number.isNaN(volume)) {
+                this.$set(this.makeOrderForm, 'volume', volume);
+            }
+            this.$set(this.makeOrderForm, 'instrument_type', instrumentType || 0);
 
-            this.$set(this.makeOrderForm, 'instrument_id', instrumentId);
-            this.$set(this.makeOrderForm, 'exchange_id', exchangeId);
-            this.$set(this.makeOrderForm, 'limit_price', lastPrice);
-            this.$set(this.makeOrderForm, 'volume', totalVolume);
-            this.$set(this.makeOrderForm, 'instrument_type', instrumentType);
+            if (side === undefined || Number.isNaN(+side)) {
+                console.error("OrderIput side is illegal", side);
+            } else {
+                this.$set(this.makeOrderForm, 'side', +side);
+            }
+
+            if (offset === undefined || Number.isNaN(+offset)) {
+                console.error("OrderIput offset is illegal", offset);
+            } else {
+                this.$set(this.makeOrderForm, 'offset', +offset);
+            }
 
             if (this.moduleType !== 'strategy') {
                 this.$set(this.makeOrderForm, 'name', accountIdResolved);
                 this.currentAccount = accountIdResolved
             }
-            
-            if (directionOrigin === 0) {
-                this.$set(this.makeOrderForm, 'side', 1);
-                this.$set(this.makeOrderForm, 'offset', 0);
-            } else if (directionOrigin === 1) {
-                this.$set(this.makeOrderForm, 'side', 0);
-                this.$set(this.makeOrderForm, 'offset', 0);
-            }
 
-            if (side !== undefined && !Number.isNaN(+side)) {
-                this.$set(this.makeOrderForm, 'side', +side);
-            }
-
-            delayMiliSeconds(300)
+            delayMilliSeconds(300)
                 .then(() => {
                     this.$refs['make-order-form'].clearValidate();
                     this.$refs['make-order-form'].validate()
@@ -590,6 +595,17 @@ export default {
             `
 
             return tips
+        },
+
+        isSameTicker (exchangeId, instrumentId) {
+            const { exchange_id, instrument_id } = this.makeOrderForm;
+            if (exchangeId === exchange_id) {
+                if (instrumentId === instrument_id) {
+                    return true;
+                }
+            }
+            
+            return false;
         },
 
         getInstrumentType (accountId) {

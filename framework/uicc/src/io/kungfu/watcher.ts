@@ -4,7 +4,6 @@ import { setTimerPromiseTask, originOrderTradesFilterByDirection } from '@kungfu
 import { kungfu } from '@kungfu-trader/kungfu-uicc/io/kungfu/kungfuUtils';
 import { toDecimal, ensureNum, ensureLedgerData, addTwoItemByKeyForReduce, avgTwoItemByKeyForReduce } from '@kungfu-trader/kungfu-uicc/utils/busiUtils';
 import { OffsetName, OrderStatus, SideName, PosDirection, PriceType, HedgeFlag, InstrumentType, VolumeCondition, TimeCondition } from "@kungfu-trader/kungfu-uicc/config/tradingConfig";
-import { logger } from '@kungfu-trader/kungfu-uicc/utils/logUtils';
 
 export const watcher: any = (() => {
     const kfSystemConfig: any = fse.readJsonSync(KF_CONFIG_PATH)
@@ -27,12 +26,16 @@ export const watcher: any = (() => {
     }
 
     if (process.env.APP_TYPE === "daemon") {
-        return kungfu.watcher(KF_RUNTIME_DIR, kungfu.formatStringToHashHex('kungfu_daemon'), false, false);
+        return kungfu.watcher(KF_RUNTIME_DIR, kungfu.formatStringToHashHex('kungfu_daemon'), false, true);
     }
 
+    if (process.env.RENDERER_TYPE === 'admin') {
+        return kungfu.watcher(KF_RUNTIME_DIR, kungfu.formatStringToHashHex("renderer_admin"), true, true);
+    }
 
     const id = [process.env.APP_TYPE, process.env.RENDERER_TYPE].join('');
-    return kungfu.watcher(KF_RUNTIME_DIR, kungfu.formatStringToHashHex(id), true, true);
+    const bypassRestore = process.env.RELOAD_AFTER_CRASHED ? true : false;
+    return kungfu.watcher(KF_RUNTIME_DIR, kungfu.formatStringToHashHex(id), true, bypassRestore);
 })()
 
 
@@ -160,7 +163,10 @@ export const transformOrderInputListToData = (list: OrderInputOriginData[], deal
 export const transformOrderStatListToData = (list: OrderStatOriginData[]) => {
     let data: StringToAnyObject = {};
     list.kfReverseForEach((item: OrderStatOriginData) => {
-        data[item.order_id.toString()] = Object.freeze(item);
+        //has to be freezed, to prevent orderstat update failed
+        data[item.order_id.toString()] = Object.freeze({
+            ...item
+        });
     })
     return data;
 }
@@ -410,13 +416,13 @@ function resolveAccountId(source: number, dest: number, parent_id: bigint): stri
     const name = sourceGroup + '_' + sourceName;
     let mark = ''
     if (destGroup === 'node') {
-        if (+parent_id.toString()) {
+        if (Number(parent_id)) {
             mark = '任务'
         } else {
             mark = '手动'
         }
     } else {
-        if (+parent_id.toString()) {
+        if (Number(parent_id)) {
             mark = '手动'
         }
     }
@@ -427,14 +433,14 @@ function resolveClientId(dest: number, parent_id: bigint): string {
     const kungfuLocation: KungfuLocation = decodeKungfuLocation(+dest) || {};
     if (!kungfuLocation) return '';
     if (kungfuLocation.group === 'node') {
-        if (+parent_id.toString()) {
+        if (Number(parent_id)) {
             return '任务'
         } else {
             return '手动'
         }
     } else {
-        if (+parent_id.toString()) {
-            return `${kungfuLocation.name} 手动`
+        if (Number(parent_id)) {
+            return `${kungfuLocation.name} 手动` //是因为策略模块手动下单的时候刻意插入用于区分
         } else {
             return kungfuLocation.name
         }
@@ -451,9 +457,9 @@ export const dealOrderInput = (item: OrderInputOriginData): OrderInputData => {
         id: item.order_id.toString(),
         orderId: item.order_id.toString(),
         parentId: item.parent_id.toString(),
-        updateTime: kungfu.formatTime(insert_time || BigInt(0), '%H:%M:%S.%N').slice(0, 12),
-        updateTimeMMDD: kungfu.formatTime(insert_time || BigInt(0), '%m/%d %H:%M:%S.%N').slice(0, 18),
-        updateTimeNum: +Number(insert_time || BigInt(0)),
+        updateTime: kungfu.formatTime(insert_time, '%H:%M:%S.%N').slice(0, 12),
+        updateTimeMMDD: kungfu.formatTime(insert_time, '%m/%d %H:%M:%S.%N').slice(0, 18),
+        updateTimeNum: +Number(insert_time),
 
         instrumentId: item.instrument_id,
         exchangeId: item.exchange_id,
@@ -461,8 +467,8 @@ export const dealOrderInput = (item: OrderInputOriginData): OrderInputData => {
         accountId: accountId,
         instrumentType: InstrumentType[instrument_type],
         instrumentTypeOrigin: instrument_type,
-        limitPrice: toDecimal(item.limit_price, 3) || '--',
-        frozenPrice: toDecimal(item.frozen_price, 3) || '--',
+        limitPrice: toDecimal(item.limit_price, 4) || '--',
+        frozenPrice: toDecimal(item.frozen_price, 4) || '--',
         volume: item.volume.toString(),
 
         side: SideName[side] ? SideName[side] : '--',
@@ -489,12 +495,13 @@ export const dealOrder = (item: OrderOriginData): OrderData => {
     return {
         id: item.order_id.toString(),
         //用订单写入时间
-        updateTime: kungfu.formatTime(update_time || insert_time || BigInt(0), '%H:%M:%S.%N').slice(0, 12),
-        updateTimeMMDD: kungfu.formatTime(update_time || insert_time || BigInt(0), '%m/%d %H:%M:%S.%N').slice(0, 18),
-        updateTimeNum: +Number(update_time || insert_time || BigInt(0)),
+        updateTime: kungfu.formatTime(update_time || insert_time, '%H:%M:%S.%N').slice(0, 12),
+        updateTimeMMDD: kungfu.formatTime(update_time || insert_time, '%m/%d %H:%M:%S.%N').slice(0, 18),
+        updateTimeNum: +Number(update_time || insert_time),
 
         orderId: item.order_id.toString(),
         parentId: item.parent_id.toString(),
+        tradingDay: item.trading_day.toString(),
         
         instrumentId: item.instrument_id,
         instrumentType: InstrumentType[instrument_type],
@@ -513,8 +520,8 @@ export const dealOrder = (item: OrderOriginData): OrderData => {
         volumeCondition: VolumeCondition[item.volume_condition],
         timeCondition: TimeCondition[item.time_condition],
 
-        limitPrice: toDecimal(item.limit_price, 3) || '--',
-        frozenPrice: toDecimal(item.frozen_price, 3) || '--',
+        limitPrice: toDecimal(item.limit_price, 4) || '--',
+        frozenPrice: toDecimal(item.frozen_price, 4) || '--',
         
         volume: item.volume.toString(),
         volumeTraded: item.volume_traded.toString() + "/" + item.volume.toString(),
@@ -544,11 +551,12 @@ export const dealTrade = (item: TradeOriginData): TradeData => {
 
     return {
         id: [item.account_id.toString(), item.trade_id.toString(), trade_time.toString()].join('_'),
-        updateTime: kungfu.formatTime(trade_time || BigInt(0), '%H:%M:%S.%N').slice(0, 12),
-        updateTimeMMDD: kungfu.formatTime(trade_time || BigInt(0), '%m/%d %H:%M:%S.%N').slice(0, 18),
-        updateTimeNum: +Number(trade_time || BigInt(0)),
+        updateTime: kungfu.formatTime(trade_time, '%H:%M:%S.%N').slice(0, 12),
+        updateTimeMMDD: kungfu.formatTime(trade_time, '%m/%d %H:%M:%S.%N').slice(0, 18),
+        updateTimeNum: +Number(trade_time),
         orderId: item.order_id.toString(),
         parentOrderId: parent_order_id.toString(),
+        tradingDay: item.trading_day.toString(),
 
         instrumentId: item.instrument_id,
         instrumentType: InstrumentType[instrument_type],
@@ -562,7 +570,7 @@ export const dealTrade = (item: TradeOriginData): TradeData => {
         hedgeFlag: HedgeFlag[hedge_flag] ? HedgeFlag[hedge_flag] : '--',
         hedgeFlagOrigin: hedge_flag,
 
-        price: toDecimal(+item.price, 3) || '--',
+        price: toDecimal(+item.price, 4) || '--',
         volume: Number(item.volume),
 
         clientId: resolveClientId(+dest, parent_order_id),
@@ -572,8 +580,8 @@ export const dealTrade = (item: TradeOriginData): TradeData => {
         source: source,
         dest: dest,
 
-        tax: toDecimal(+item.tax, 3) || '--',
-        commission: toDecimal(+item.commission, 3) || '--'
+        tax: toDecimal(+item.tax, 4) || '--',
+        commission: toDecimal(+item.commission, 4) || '--'
     }
 }
 
@@ -584,9 +592,9 @@ export const dealPos = (item: PosOriginData): PosData => {
     const direction: string = PosDirection[item.direction] || '--';
     const avgPrice: number = item.avg_open_price || item.position_cost_price || 0;
     return {
-        updateTime: kungfu.formatTime(update_time || BigInt(0), '%H:%M:%S.%N').slice(0, 12),
-        updateTimeMMDD: kungfu.formatTime(update_time || BigInt(0), '%m/%d %H:%M:%S.%N').slice(0, 18),
-        updateTimeNum: +Number(update_time || BigInt(0)),
+        updateTime: kungfu.formatTime(update_time, '%H:%M:%S.%N').slice(0, 12),
+        updateTimeMMDD: kungfu.formatTime(update_time, '%m/%d %H:%M:%S.%N').slice(0, 18),
+        updateTimeNum: +Number(update_time),
 
         id: item.instrument_id + direction,
         instrumentId: item.instrument_id,
@@ -638,9 +646,9 @@ export const dealAsset = (item: AssetOriginData): AssetData => {
 export const dealSnapshot = (item: AssetSnapshotOriginData): AssetSnapshotData => {
     const { update_time } = item;
     return {
-        updateTime: kungfu.formatTime(update_time || BigInt(0), '%H:%M'),
-        updateTimeMMDD: kungfu.formatTime(update_time || BigInt(0), '%m/%d'),
-        updateTimeNum: +Number(update_time || BigInt(0)),
+        updateTime: kungfu.formatTime(update_time, '%H:%M'),
+        updateTimeMMDD: kungfu.formatTime(update_time, '%m/%d'),
+        updateTimeNum: +Number(update_time),
         tradingDay: item.trading_day,
         ledgerCategory: item.ledger_category,
 
@@ -672,20 +680,20 @@ export const dealOrderStat = (item: OrderStatOriginData | null): OrderStatData |
     if (!item) return {};
 
     const { insert_time, ack_time, md_time, trade_time } = item;
-    const latencyTrade = (trade_time && ack_time) ? +toDecimal(Number((trade_time || BigInt(0)) - (ack_time || BigInt(0))) / 1000) : 0;
-    const latencyNetwork = (ack_time && insert_time) ? +toDecimal(Number((ack_time || BigInt(0)) - (insert_time || BigInt(0))) / 1000) : 0;
-    const latencySystem = (insert_time && md_time) ? +toDecimal(Number((insert_time || BigInt(0)) - (md_time || BigInt(0))) / 1000) : 0;
+    const latencyTrade = (trade_time && ack_time) ? +toDecimal(Number(trade_time - ack_time ) / 1000, 0) : 0;
+    const latencyNetwork = (ack_time && insert_time) ? +toDecimal(Number(ack_time - insert_time) / 1000, 0) : 0;
+    const latencySystem = (insert_time && md_time) ? +toDecimal(Number(insert_time - md_time) / 1000, 0) : 0;
 
     return {
-        ackTime: Number(ack_time || BigInt(0)),
-        insertTime: Number(insert_time || BigInt(0)),
-        mdTime: Number(md_time || BigInt(0)),
+        ackTime: Number(ack_time),
+        insertTime: Number(insert_time),
+        mdTime: Number(md_time),
         latencySystem: latencySystem > 0 ? latencySystem.toString() : '',
         latencyNetwork: latencyNetwork > 0 ? latencyNetwork.toString() : '',
         latencyTrade: latencyTrade > 0 ? latencyTrade.toString() : '',
-        tradeTime: kungfu.formatTime(trade_time || BigInt(0), '%H:%M:%S.%N').slice(0, 12),
-        tradeTimeMMDD: kungfu.formatTime(trade_time || BigInt(0), '%m/%d %H:%M:%S.%N').slice(0, 18),
-        tradeTimeNum: +Number(trade_time || BigInt(0)),
+        tradeTime: kungfu.formatTime(trade_time, '%H:%M:%S.%N').slice(0, 12),
+        tradeTimeMMDD: kungfu.formatTime(trade_time, '%m/%d %H:%M:%S.%N').slice(0, 18),
+        tradeTimeNum: +Number(trade_time),
 
         orderId: item.order_id.toString(),
         dest: item.dest,
@@ -732,26 +740,26 @@ export const dealQuote = (quote: QuoteOriginData): QuoteData => {
         instrumentType: InstrumentType[quote.instrument_type],
         instrumentTypeOrigin: quote.instrument_type,
 
-        highPrice: toDecimal(ensureNum(quote.high_price), 3),
-        closePrice: toDecimal(ensureNum(quote.close_price), 3),
-        lastPrice: toDecimal(ensureNum(quote.last_price), 3),
-        lowPrice: toDecimal(ensureNum(quote.low_price), 3),
-        lowerLimitPrice: toDecimal(ensureNum(quote.lower_limit_price), 3),
+        highPrice: toDecimal(ensureNum(quote.high_price), 4),
+        closePrice: toDecimal(ensureNum(quote.close_price), 4),
+        lastPrice: toDecimal(ensureNum(quote.last_price), 4),
+        lowPrice: toDecimal(ensureNum(quote.low_price), 4),
+        lowerLimitPrice: toDecimal(ensureNum(quote.lower_limit_price), 4),
         openInterest: ensureNum(quote.open_interest),
-        openPrice: toDecimal(ensureNum(quote.open_price), 3),
-        preClosePrice: toDecimal(ensureNum(quote.pre_close_price), 3),
+        openPrice: toDecimal(ensureNum(quote.open_price), 4),
+        preClosePrice: toDecimal(ensureNum(quote.pre_close_price), 4),
         preOpenInterest: ensureNum(quote.pre_open_interest),
-        preSettlementPrice: toDecimal(ensureNum(quote.pre_settlement_price), 3),
-        settlementPrice: toDecimal(ensureNum(quote.settlement_price), 3),
+        preSettlementPrice: toDecimal(ensureNum(quote.pre_settlement_price), 4),
+        settlementPrice: toDecimal(ensureNum(quote.settlement_price), 4),
  
 
         tradingDay: quote.trading_day,
         turnover: ensureNum(quote.turnover),
-        upperLimitPrice: toDecimal(ensureNum(quote.upper_limit_price), 3),
+        upperLimitPrice: toDecimal(ensureNum(quote.upper_limit_price), 4),
         volume: ensureNum(quote.volume),
-        askPrices: quote.ask_price.map((num: number) => toDecimal(ensureNum(num), 3)) || [],
+        askPrices: quote.ask_price.map((num: number) => toDecimal(ensureNum(num), 4)) || [],
         askVolumes: quote.ask_volume.map((num: BigInt) => num.toString()) || [],
-        bidPrices: quote.bid_price.map((num: number) => toDecimal(ensureNum(num), 3)) || [],
+        bidPrices: quote.bid_price.map((num: number) => toDecimal(ensureNum(num), 4)) || [],
         bidVolumes: quote.bid_volume.map((num: BigInt) => num.toString()) || [],
     }
        

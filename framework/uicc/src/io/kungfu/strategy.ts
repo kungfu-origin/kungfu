@@ -1,4 +1,7 @@
 import { getAllKfConfig, setKfConfig, getKfConfig, removeKfConfig } from '@kungfu-trader/kungfu-uicc/io/kungfu/kungfuUtils';
+import { logger } from '@kungfu-trader/kungfu-uicc/utils/logUtils';
+
+const USER = process.env.RENDERER_TYPE === 'admin' ? "ADMIN" : "";
 
 export const getStrategyList = (): Promise<Strategy[]> => {
     return new Promise(resolve => {
@@ -37,6 +40,7 @@ export const addStrategy = (strategyId: string, strategyPath: string) => {
             strategy_path: strategyPath,
             add_time: addTime
         }));
+        logger.info("Add Strategy", USER, strategyId, strategyPath);
         resolve(strategy)
     })
 }
@@ -44,6 +48,7 @@ export const addStrategy = (strategyId: string, strategyPath: string) => {
 export const deleteStrategy = (strategyId: string) => {
     return new Promise(resolve => {
         const strategy = removeKfConfig(strategyId, 'strategy');
+        logger.info("Delete Strategy", USER, strategyId);
         resolve(strategy)
     })
 }
@@ -60,6 +65,7 @@ export const updateStrategyPath = async (strategyId: string, strategyPath: strin
             strategy_path: strategyPath,
             add_time: addTime
         }));
+        logger.info("Update Strategy", USER, strategyId, strategyPath);
         resolve(strategy)
     })
 }

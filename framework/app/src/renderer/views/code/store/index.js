@@ -8,6 +8,7 @@ import { deepClone } from '@kungfu-trader/kungfu-uicc/utils/busiUtils';
 Vue.use(Vuex)
 
 export default new Vuex.Store({
+	strict: process.env.NODE_ENV === 'development',
 
 	state: {
         currentStrategy: '', //当前运行策略

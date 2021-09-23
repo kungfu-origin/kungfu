@@ -171,16 +171,12 @@ export default {
         this.orderStatPipe = buildKungfuDataByAppPipe().subscribe(() => {
             const ledgerData = watcher.ledger;
 
-            if (this.isHistoryData('order')) {
-                this.orders = this.getHistoryData('order')
-            } else {
+            if (!this.isHistoryDataOrder) {
                 const orders = getOrdersBySourceDestInstrumentId(ledgerData.Order, 'dest', this.currentLocationUID);
                 this.orders = Object.freeze(orders || []);
             }
 
-            if (this.isHistoryData('trade')) {
-                this.trades = this.getHistoryData('trade')
-            } else {
+            if (!this.isHistoryDataTrade) {
                 const trades = getTradesBySourceDestInstrumentId(ledgerData.Trade, 'dest', this.currentLocationUID);
                 this.trades = Object.freeze(trades || []);
             }
@@ -192,7 +188,7 @@ export default {
 
             //优化
             if (this.currentStrategyDetailTab === 'orderMap') {
-                const orderInputs = getOrderInputBySourceDest(ledgerData, 'source', this.currentLocationUID)
+                const orderInputs = getOrderInputBySourceDest(ledgerData.OrderInput, 'source', this.currentLocationUID)
                 this.orderInputs = Object.freeze(orderInputs);
             }
         })

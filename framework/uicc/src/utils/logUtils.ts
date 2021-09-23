@@ -1,13 +1,11 @@
 import * as log4js from 'log4js';
-import { LOG_DIR } from '@kungfu-trader/kungfu-uicc/config/pathConfig';
-
-const path = require('path')
+import { buildProcessLogPath } from '@kungfu-trader/kungfu-uicc/config/pathConfig';
 
 log4js.configure({
     appenders: {
         app: {
-            type: 'file',
-            filename: path.resolve(LOG_DIR, 'app.log')
+            type: 'file', 
+            filename: buildProcessLogPath("app")
         }
     },
     categories: { default: { appenders: ['app'], level: 'info' } }

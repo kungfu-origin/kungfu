@@ -1,10 +1,10 @@
 # Source: https://gitlab.kitware.com/cmake/community/-/wikis/FAQ#can-i-do-make-uninstall-with-cmake
 
-if(NOT EXISTS "@CMAKE_BINARY_DIR@/install_manifest.txt")
-  message(FATAL_ERROR "Cannot find install manifest: @CMAKE_BINARY_DIR@/install_manifest.txt")
+if(NOT EXISTS "@CMAKE_BINARY_DIR__root/install_manifest.txt")
+  message(FATAL_ERROR "Cannot find install manifest: @CMAKE_BINARY_DIR__root/install_manifest.txt")
 endif()
 
-file(READ "@CMAKE_BINARY_DIR@/install_manifest.txt" files)
+file(READ "@CMAKE_BINARY_DIR__root/install_manifest.txt" files)
 string(REGEX REPLACE "\n" ";" files "${files}")
 foreach(file ${files})
   message(STATUS "Uninstalling $ENV{DESTDIR}${file}")

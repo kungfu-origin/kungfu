@@ -95,9 +95,13 @@ export const KF_CONFIG_DEFAULT_PATH = path.join(KUNGFU_RESOURCES_DIR, 'config', 
 
 export const KF_TARADING_CONFIG_DEFAULT_PATH = path.join(KUNGFU_RESOURCES_DIR, 'config', 'kfTradingConfig.json')
 
+export const KF_ADMIN_PASSWORD_CONFIG_DEFAULT_PATH = path.join(KUNGFU_RESOURCES_DIR, 'config', 'adminPassword.json')
+
 export const KF_CONFIG_PATH = path.join(KF_HOME, 'config', 'kfConfig.json')
 
 export const KF_TARADING_CONFIG_PATH = path.join(KF_HOME, 'config', 'kfTradingConfig.json')
+
+export const KF_ADMIN_PASSWORD_CONFIG_PATH = path.join(KF_HOME, 'config', 'adminPassword.json')
 
 
 //================== config end =================================

@@ -1,7 +1,7 @@
 <template>
-     <el-dialog 
-    width="300px" 
-    title="选择日期"  
+    <el-dialog 
+    width="350px" 
+    title="选择交易日"  
     v-if="visible"
     :visible="visible" 
     :close-on-click-modal="false"
@@ -11,10 +11,28 @@
     >
         <el-form ref="date-range-form" label-width="90px" :model="form">
             <el-form-item
+            label="日期类型"
+            prop="dateType"
+            :rules="[
+                { required: true, message: '交易日不能为空！', trigger: 'blur' },
+            ]"
+            >
+            <el-radio-group v-model.trim="form.dateType" style="width: 100%">
+                <el-row>
+                    <el-col :span="24 / dateTypeOptions.length"  v-for="item in dateTypeOptions" :key="item.label">
+                        <el-radio :label="item.value">
+                            {{item.label}}
+                        </el-radio>
+                    </el-col>
+                </el-row>
+            </el-radio-group>
+            
+            </el-form-item>
+            <el-form-item
             label="选择日期"
             prop="date"
             :rules="[
-                { required: true, message: '日期范围不能为空！', trigger: 'blur' },
+                { required: true, message: '日期不能为空！', trigger: 'blur' },
             ]">
                 <el-date-picker
                     v-model.trim="form.date"
@@ -45,8 +63,12 @@ export default {
     },
 
     data(){
+
+        this.dateTypeOptions = [{ label: "按自然日", value: 0 }, { label: "按交易日", value: 1 }]
+
         return {
             form: {
+                dateType: 0,
                 date: ''
             }
         }
@@ -60,7 +82,10 @@ export default {
         handleSubmitSetting(){
             this.$refs['date-range-form'].validate(valid => {
                 if(valid) {
-                    this.$emit('confirm', this.form.date);
+                    this.$emit('confirm', {
+                        date: this.form.date,
+                        dateType: this.form.dateType
+                    });
                 }
             })
         },

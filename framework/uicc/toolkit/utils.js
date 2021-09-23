@@ -1,36 +1,30 @@
-const fs = require('fs');
+const fs = require('fs-extra');
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
-exports.getCommitVersion = () => {
-  let gitCommitVersion = 'latest';
+exports.getKungfuBuildInfo = () => {
   try {
-    let buildInfoRaw = fs.readFileSync(
+    const buildInfoRaw = fs.readFileSync(
       require.resolve('@kungfu-trader/kungfu-core/dist/kfc/kungfubuildinfo.json'),
       'utf-8',
     );
-    let buildInfo = JSON.parse(buildInfoRaw);
-    gitCommitVersion = buildInfo.git.revision;
+    const buildInfo = JSON.parse(buildInfoRaw);
+    const pyVersion = buildInfo.pythonVersion;
+    const gitCommitVersion = buildInfo.git.revision;
+    const buildTimeStamp = buildInfo.build.timestamp;
+    
+    return {
+      pyVersion,
+      gitCommitVersion,
+      buildTimeStamp
+    }
   } catch (err) {
     console.error(err);
+    throw err;
   }
-  return gitCommitVersion.toString();
-};
+}
 
-exports.getPythonVersion = () => {
-  let pyVersion = '3';
-  try {
-    let buildInfoRaw = fs.readFileSync(
-      require.resolve('@kungfu-trader/kungfu-core/dist/kfc/kungfubuildinfo.json'),
-      'utf-8',
-    );
-    let buildInfo = JSON.parse(buildInfoRaw);
-    pyVersion = buildInfo.pythonVersion || '3';
-  } catch (err) {
-    console.error(err);
-  }
-  return pyVersion;
-};
+
 
 exports.getViewsConfig = () => {
   const appConfigPath = require.resolve('@kungfu-trader/kungfu-app/package.json');

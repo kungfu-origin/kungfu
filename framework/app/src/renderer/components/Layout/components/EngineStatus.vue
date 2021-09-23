@@ -89,7 +89,7 @@
 </template>
 <script>
 import { mapState } from 'vuex';
-import { statusConfig } from '@kungfu-trader/kungfu-uicc/config/statusConfig';
+import { ProcessStatusConfig } from '@kungfu-trader/kungfu-uicc/config/tradingConfig';
 import { switchTd, switchMd } from '@kungfu-trader/kungfu-uicc/io/actions/account';
 import { ifProcessRunning, getMemCpu } from '@kungfu-trader/kungfu-uicc/utils/busiUtils';
 
@@ -100,8 +100,8 @@ export default {
 
     data () {
         let statusLevel = {};
-        Object.keys(statusConfig || {}).map(key => {
-            statusLevel[key] = statusConfig[key].level;
+        Object.keys(ProcessStatusConfig || {}).map(key => {
+            statusLevel[key] = ProcessStatusConfig[key].level;
         })
 
         this.ifProcessRunning = ifProcessRunning;

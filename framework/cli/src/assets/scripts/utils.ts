@@ -1,5 +1,5 @@
 import { toDecimal } from '@kungfu-trader/kungfu-uicc/utils/busiUtils';
-import { statusConfig } from '@kungfu-trader/kungfu-uicc/config/statusConfig';
+import { ProcessStatusConfig } from '@kungfu-trader/kungfu-uicc/config/tradingConfig';
 import { logger } from '@kungfu-trader/kungfu-uicc/utils/logUtils';
 
 const colors = require('colors')
@@ -107,9 +107,9 @@ export const calcuHeaderWidth = (target: string[], wish: any[]) => {
 
 export const dealStatus = (status: string | number) => {
 	if (status === '--') return status;
-	if (!statusConfig[status]) return status;
-	const name: string = statusConfig[status].name || '';
-	const level: number = statusConfig[status].level || 0;
+	if (!ProcessStatusConfig[status]) return status;
+	const name: string = ProcessStatusConfig[status].name || '';
+	const level: number = ProcessStatusConfig[status].level || 0;
 	if(level == 1) return colors.green(name);
 	else if(level == 0) return colors.white(name);
 	else if (level == -1) return colors.red(name);

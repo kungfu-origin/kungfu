@@ -1,8 +1,10 @@
+
 /* eslint-disable */
 import Vue from 'vue';
 import './setKungfuParamsOnWindow';
 import store from './store';
 import router from './routers';
+import * as utils from '@kungfu-trader/kungfu-uicc/utils/busiUtils'
 import ElementUI from 'element-ui';
 import Components from '@/assets/components'
 import App from './App.vue';

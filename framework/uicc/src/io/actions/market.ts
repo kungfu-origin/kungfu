@@ -9,10 +9,10 @@ export const getTickerSetsJSON = (): Promise<stringToTickerSet> => {
         })
 }
 
-export const getTickerSets = (): Promise<TickerSet[]> => {
+export const getTickerSets = (): Promise<readonly TickerSet[]> => {
     return getTickerSetsJSON()
         .then(res => {
-            return Object.values(res)
+            return Object.freeze(Object.values(res).map((item: TickerSet) => Object.freeze(item)))
         })
 }
 

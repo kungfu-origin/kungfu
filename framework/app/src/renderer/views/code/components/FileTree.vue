@@ -29,7 +29,7 @@ import path from 'path';
 
 import FileNode from './FileNode';
 
-import * as CODE_UTILS from '@kungfu-trader/kungfu-uicc/utils/fileUtils';
+import * as CODE_UTILS from "@kungfu-trader/kungfu-uicc/utils/fileUtils";
 import { ipcEmitDataByName } from '@/ipcMsg/emitter'
 
 export default {

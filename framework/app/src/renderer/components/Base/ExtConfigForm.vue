@@ -265,7 +265,7 @@ import moment from "moment";
 import { mapState } from "vuex";
 import { Autocomplete } from "element-ui";
 
-import { deepClone, findTargetFromArray } from '@kungfu-trader/kungfu-uicc/utils/busiUtils';
+import { deepClone, findTargetFromArray } from "@kungfu-trader/kungfu-uicc/utils/busiUtils";
 import {
   OffsetName,
   SideName,
@@ -296,7 +296,7 @@ export default {
 
     labelWidth: {
       type: String,
-      default: "80px",
+      default: "90px",
     },
 
     uniKey: {

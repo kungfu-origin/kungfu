@@ -6,7 +6,7 @@
 </template>
 
 <script>
-import { statusConfig } from '@kungfu-trader/kungfu-uicc/config/statusConfig';
+import { ProcessStatusConfig } from '@kungfu-trader/kungfu-uicc/config/tradingConfig';
 export default {
     name: 'tr-status',
     props: {
@@ -19,9 +19,9 @@ export default {
     data() {
         let processName = {};
         let processColor = {};
-        Object.keys(statusConfig || {}).map(key => {
-            processName[key] = statusConfig[key].name
-            processColor[key] = statusConfig[key].color
+        Object.keys(ProcessStatusConfig || {}).map(key => {
+            processName[key] = ProcessStatusConfig[key].name
+            processColor[key] = ProcessStatusConfig[key].color
 
         })
 

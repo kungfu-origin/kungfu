@@ -9,47 +9,14 @@ const { merge } = require('webpack-merge');
 
 const rootDir = path.dirname(__dirname);
 const baseConfig = toolkit.webpack.makeConfig(rootDir, 'app');
-const { getPythonVersion, getCommitVersion, isProduction } = toolkit.utils;
-
-const gitCommitVersion = getCommitVersion() || 'latest';
-const pyVersion = getPythonVersion() || '3';
+const { getKungfuBuildInfo, isProduction } = toolkit.utils;
+const { gitCommitVersion, pyVersion, buildTimeStamp } = getKungfuBuildInfo();
 
 const webpackConfig = merge(baseConfig, {
   entry: {
     main: path.join(rootDir, 'src', 'main', 'index.js'),
   },
-  module: {
-    rules: [
-      {
-        test: /\.(png|jpe?g|gif|svg)(\?.*)?$/,
-        use: {
-          loader: 'url-loader',
-          options: {
-            limit: 10000,
-            name: 'imgs/[name]--[folder].[ext]',
-          },
-        },
-      },
-      {
-        test: /\.(mp4|webm|ogg|mp3|wav|flac|aac)(\?.*)?$/,
-        loader: 'url-loader',
-        options: {
-          limit: 10000,
-          name: 'media/[name]--[folder].[ext]',
-        },
-      },
-      {
-        test: /\.(woff2?|eot|ttf|otf)(\?.*)?$/,
-        use: {
-          loader: 'file-loader',
-          options: {
-            limit: 10000,
-            name: 'fonts/[name]--[folder].[ext]',
-          },
-        },
-      },
-    ],
-  },
+
   resolve: {
     alias: {
       '@': path.resolve(rootDir, 'src', 'renderer'),
@@ -63,6 +30,7 @@ const prodConfig = {
     new webpack.DefinePlugin({
       git_commit_version: `"${gitCommitVersion.toString()}"`,
       python_version: `"${pyVersion.toString()}"`,
+      build_timestamp: `"${buildTimeStamp.toString()}"`,
       'process.env.APP_TYPE': '"main"',
     }),
   ],

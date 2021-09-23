@@ -3,6 +3,7 @@ import iconv from 'iconv-lite';
 import jschardet from 'jschardet';
 import path from 'path';
 import readline from 'readline';
+import moment from 'moment';
 
 import { EXTENSION_DIR } from '@kungfu-trader/kungfu-uicc/config/pathConfig';
 import { listDir } from '@kungfu-trader/kungfu-uicc/utils/fileUtils';
@@ -139,7 +140,7 @@ function kfForEachAsync (cb: Function) {
    
 }
 
-export const delayMiliSeconds = (miliSeconds: number): Promise<void> => {
+export const delayMilliSeconds = (miliSeconds: number): Promise<void> => {
     return new Promise(resolve => {
         let timer = setTimeout(() => {
             resolve()
@@ -267,7 +268,9 @@ export const openVueWin = (htmlPath: string, routerPath: string, electronRemote:
             webPreferences: {
                 webSecurity: false,
                 nodeIntegration: true,
-			    nodeIntegrationInWorker: true
+			    contextIsolation: false,
+			    nodeIntegrationInWorker: true,
+			    enableRemoteModule: true,
             },
             ...windowConfig
         });
@@ -306,7 +309,9 @@ export const openPage = (taskPath: string, electronRemote: any, debugOptions = {
             webPreferences: {
                 webSecurity: false,
                 nodeIntegration: true,
-			    nodeIntegrationInWorker: true
+			    contextIsolation: false,
+			    nodeIntegrationInWorker: true,
+			    enableRemoteModule: true, 
             },
             ...debugOptions,
 		    backgroundColor: '#161B2E',
@@ -556,7 +561,7 @@ export const loopToRunProcess = async (promiseFunc: Array<Function>, interval = 
             resList.push(err)
         }
         
-        await(delayMiliSeconds(interval))
+        await(delayMilliSeconds(interval))
     }
     return resList
 }
@@ -783,3 +788,28 @@ export const avgTwoItemByKeyForReduce = (item1: any, item2: any, key: string) =>
     return addTwoItemByKeyForReduce(item1, item2, key) / 2;
 }
 
+export const getTradingDate = (today = true) => {
+
+    if (today) {
+        return moment().format("YYYY-MM-DD");
+    }
+
+    const currentTimestamp = moment().valueOf();
+    const tradingDayTimestamp = +moment().set("hours", 15).set("minutes", 30).valueOf();
+
+    if (currentTimestamp > tradingDayTimestamp) {
+        return moment().add(1, 'day').format("YYYY-MM-DD");
+    } else {
+        return moment().format("YYYY-MM-DD");
+    }
+}
+
+export const hidePasswordByLogger = (config: string) => {
+    let configCopy = JSON.parse(config);
+    Object.keys(configCopy || {}).forEach((key: string) => {
+        if (key.includes('password')) {
+            configCopy[key] = "******";
+        }
+    })
+    return JSON.stringify(configCopy);
+}

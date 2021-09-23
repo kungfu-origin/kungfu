@@ -152,6 +152,7 @@
                     label=""
                     align="right"
                     min-width="80"
+                    class-name="kf-table-config-column"
                 >
                     <template slot-scope="props">
                         <span class="tr-oper-delete" @click.stop="handleDeleteTicker(props.row, currentTickerSet)"><i class=" el-icon-delete mouse-over" title="删除标的"></i></span>
@@ -267,13 +268,22 @@ export default {
         },
 
         handleRowClick (row) {
+            
+            if (!row || !row.instrumentId) {
+                this.$message.warning("请点击订阅")
+                return
+            }
+
             const quoteData = this.getMarketData(row);
             this.$bus.$emit('update:make-order', {
                 currentId: this.currentId,
                 moduleType: this.moduleType,
                 orderInput: {
                     ...quoteData,
-                    instrumentType: (quoteData || '').instrumentTypeOrigin || 0
+                    instrumentType: (quoteData || '').instrumentTypeOrigin || 0,
+                    offset: 0,
+                    side: 0,
+                    volume: 0
                 }
             })
 

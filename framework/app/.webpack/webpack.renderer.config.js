@@ -13,9 +13,9 @@ const { VueLoaderPlugin } = require('vue-loader');
 
 const rootDir = path.dirname(__dirname);
 const baseConfig = toolkit.webpack.makeConfig(rootDir, 'app');
-const { getPythonVersion, getViewsConfig, isProduction } = toolkit.utils;
+const { getKungfuBuildInfo, getViewsConfig, isProduction } = toolkit.utils;
 
-const pyVersion = getPythonVersion() || '3';
+const { pyVersion } = getKungfuBuildInfo();
 const viewsConfig = getViewsConfig();
 
 const styleLoader = !isProduction() ? 'vue-style-loader' : MiniCssExtractPlugin.loader;
@@ -27,11 +27,27 @@ const webpackConfig = merge(baseConfig, {
     rules: [
       {
         test: /\.css$/,
-        use: [styleLoader, 'css-loader'],
+        use: [
+          styleLoader, 
+          {
+            loader: 'css-loader',
+            options: {
+              esModule: false
+            }
+          }],
       },
       {
         test: /\.scss$/,
-        use: [styleLoader, 'css-loader', 'sass-loader'],
+        use: [
+          styleLoader, 
+          {
+            loader: 'css-loader',
+            options: {
+              esModule: false
+            }
+          },
+          'sass-loader'
+        ],
       },
       {
         test: /\.vue$/,
@@ -44,35 +60,7 @@ const webpackConfig = merge(baseConfig, {
           options: { inline: true, fallback: false },
         },
         exclude: /node_modules/,
-      },
-      {
-        test: /\.(png|jpe?g|gif|svg)(\?.*)?$/,
-        use: {
-          loader: 'url-loader',
-          options: {
-            limit: 10000,
-            name: 'imgs/[name]--[folder].[ext]',
-          },
-        },
-      },
-      {
-        test: /\.(mp4|webm|ogg|mp3|wav|flac|aac)(\?.*)?$/,
-        loader: 'url-loader',
-        options: {
-          limit: 10000,
-          name: 'media/[name]--[folder].[ext]',
-        },
-      },
-      {
-        test: /\.(woff2?|eot|ttf|otf)(\?.*)?$/,
-        use: {
-          loader: 'file-loader',
-          options: {
-            limit: 10000,
-            name: 'fonts/[name]--[folder].[ext]',
-          },
-        },
-      },
+      }
     ],
   },
   plugins: [

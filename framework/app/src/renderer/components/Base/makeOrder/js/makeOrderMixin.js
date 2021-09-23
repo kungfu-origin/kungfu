@@ -1,4 +1,4 @@
-import { delayMiliSeconds } from '@kungfu-trader/kungfu-uicc/utils/busiUtils';
+import { delayMilliSeconds } from '@kungfu-trader/kungfu-uicc/utils/busiUtils';
 
 export default {
 
@@ -105,7 +105,7 @@ export default {
 
             this.cancelOrder(this.moduleType, this.adjustOrderTargetData, this.currentId)
                 .then(() => this.$message.success('撤单指令已发送！'))
-                .then(() => delayMiliSeconds(1000))
+                .then(() => delayMilliSeconds(1000))
                 .then(() => this.makeOrder(
                     this.moduleType, 
                     this.adjustOrderForm, 

@@ -27,9 +27,10 @@
     </div>
     <tr-table
         v-if="rendererTable"
-        :data="tableData"
+        :data="tableDataResolved"
         :schema="schema"
         :renderCellClass="renderCellClass"
+        @rightClickRow="handleShowDetail"
     ></tr-table>
     <date-picker-dialog 
     @confirm="handleConfirmDateRangeForExport"
@@ -81,36 +82,71 @@ export default {
     computed:{
         schema(){
             return tradesHeader(this.dateForHistory, this.moduleType)
+        },
+
+        tableDataResolved () {
+            if (this.searchKeyword) {
+                return this.tableData.filter(item => {
+                    if (this.searchKeyword.trim() === '') return true;
+                    const { tradeId, clientId, accountId, sourceId, instrumentId, orderId } = item
+                    const strings = [ tradeId, clientId, accountId, sourceId, instrumentId, orderId ].join('')
+                    return strings.includes(this.searchKeyword) 
+                })
+            } else {
+                return this.tableData
+            }
         }
     },
 
     watch: {
         kungfuData (trades) {
-            const tradesResolve = this.dealTradeList(trades, {
-                searchKeyword: this.searchKeyword
-            })
-            this.tableData = tradesResolve
+            const tradesResolved = this.dealTradeList(trades)
+            this.tableData = tradesResolved
         }
     },
 
     methods:{
-        dealTradeList (trades, { searchKeyword}) {
-            let tradesAfterFilter = trades
-                .filter(item => {
-                    if (searchKeyword.trim() === '') return true;
-                    const { tradeId, clientId, accountId, sourceId, instrumentId, orderId } = item
-                    const strings = [ tradeId, clientId, accountId, sourceId, instrumentId, orderId ].join('')
-                    return strings.includes(searchKeyword) 
-                })
+        handleShowDetail (row) {
+            let tradeData = JSON.parse(JSON.stringify(row));
+            let orderMessage = "";
+
+            delete tradeData.id;
+            delete tradeData.source;
+            delete tradeData.dest;
+            delete tradeData.updateTimeNum;
+            delete tradeData.updateTime;
+            delete tradeData.update;
+            delete tradeData.sourceId;
+            delete tradeData.hedgeFlagOrigin;
+            delete tradeData.localUpdateTimeNum;
+            delete tradeData.localUpdateTimeMMDD;
+            delete tradeData.sideOrigin;
+            delete tradeData.instrumentTypeOrigin;
+
+            Object.keys(tradeData || {}).forEach(key => {
+                const value = tradeData[key];
+                orderMessage += `${key}: ${value} </br>`
+            })
+
+            this.$alert(orderMessage, `成交详情 ${tradeData.orderId}`, {
+                confirmButtonText: '确定',
+                dangerouslyUseHTMLString: true,
+                closeOnPressEscape: true,
+                callback: () => {}
+            });
+        },
+
+        dealTradeList (trades) {
+            let tradesResolved = trades;
 
             if (this.moduleType === 'strategy') {
-                tradesAfterFilter = tradesAfterFilter
+                tradesResolved = tradesResolved
                     .filter(item => {
                         return Number(item.updateTimeNum) >= this.addTime 
                     })
             }
 
-            tradesAfterFilter = tradesAfterFilter
+            tradesResolved = tradesResolved
                 .map(item => {
                     let tradeData = { ...item };
                     let orderId = tradeData.orderId;
@@ -125,7 +161,7 @@ export default {
                 })
                 .sort((a, b) => (b.updateTimeNum - a.updateTimeNum))
 
-            return Object.freeze(tradesAfterFilter || [])
+            return Object.freeze(tradesResolved || [])
         }
     }
 }

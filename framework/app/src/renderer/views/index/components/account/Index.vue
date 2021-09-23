@@ -251,13 +251,21 @@ export default {
             }
         },
 
+        currentId () {
+            this.updateMakeOrderDashboard();
+        },
+
         currentTaskId () {
             this.currentOrdesTabName = "taskDetail"
         }
     },
 
     mounted ( ) {
+   
+        this.updateMakeOrderDashboard();
+   
         this.tradingDataPipe = buildTradingDataAccountPipeByDaemon().subscribe(data => {
+
             if (this.moduleType !== 'ticker') {
                 this.dealTradingData(data);
             } else {
@@ -283,6 +291,14 @@ export default {
 
         handleAccountTabClick (tab) {
             this.$store.dispatch('setCurrentAccountTabName', tab.name)
+        },
+
+        updateMakeOrderDashboard () {
+            this.$bus.$emit("update:make-order", {
+                currentId: this.currentId,
+                moduleType: this.moduleType,
+                orderInput: {}
+            })
         },
 
         getCurrentAccountTabLabelName (name) {
@@ -334,16 +350,12 @@ export default {
         dealTradingData (data) {
             const ledgerData = watcher.ledger;
 
-            if (this.isHistoryData('order')) {
-                this.orders = this.getHistoryData('order')
-            } else {
+            if (!this.isHistoryDataOrder) {
                 const orders = getOrdersBySourceDestInstrumentId(ledgerData.Order, 'source', this.currentLocationUID)
                 this.orders = Object.freeze(orders || []);
             }
 
-            if (this.isHistoryData('trade')) {
-                this.trades = this.getHistoryData('trade')
-            } else {
+            if (!this.isHistoryDataTrade) {
                 const trades = getTradesBySourceDestInstrumentId(ledgerData.Trade, 'source', this.currentLocationUID)
                 this.trades = Object.freeze(trades || []);
             }
@@ -353,6 +365,7 @@ export default {
             this.orderStat = Object.freeze(orderStatResolved); 
       
             const positions = data['positions'][this.currentId];
+
             this.positions = Object.freeze(positions || []);
 
             const pnl = data['pnl'][this.currentId];
@@ -374,16 +387,12 @@ export default {
             const ledgerData = watcher.ledger;
             const { instrumentId, directionOrigin } = this.currentTicker;
 
-            if (this.isHistoryData('order')) {
-                this.orders = this.getHistoryData('order');
-            } else {
+            if (!this.isHistoryDataOrder) {
                 const orders = getOrdersBySourceDestInstrumentId(ledgerData.Order, 'instrument', instrumentId, directionOrigin);
                 this.orders = Object.freeze(orders || []);
             }
 
-            if (this.isHistoryData('trade')) {
-                this.trades = this.getHistoryData('trade');
-            } else {
+            if (!this.isHistoryDataTrade) {
                 const trades = getTradesBySourceDestInstrumentId(ledgerData.Trade, 'instrument', instrumentId, directionOrigin);
                 this.trades = Object.freeze(trades || []);
             }

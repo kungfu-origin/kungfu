@@ -74,6 +74,7 @@
                 label="" 
                 align="right"
                 width="100px"
+                class-name="kf-table-config-column"
             >
                 <template slot-scope="props">
                     <span class="tr-oper" @click.stop="handleOpenLogFile(props.row.processId)"><i class="el-icon-document mouse-over" title="打开日志文件"></i></span>
@@ -171,7 +172,6 @@ export default {
     watch: {
         taskList (taskList) {
             this.tableList = taskList;
-
             if (!this.tableList.length) {
                 this.$store.dispatch('setCurrentTask', {})
             } else if (!this.currentTaskId) {

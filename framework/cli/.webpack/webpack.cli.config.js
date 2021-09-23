@@ -11,9 +11,8 @@ const { dependencies } = require('../package.json');
 const appDir = path.dirname(require.resolve('@kungfu-trader/kungfu-app/package.json'));
 const rootDir = path.dirname(__dirname);
 const baseConfig = toolkit.webpack.makeConfig(rootDir, 'cli');
-const { getPythonVersion, isProduction } = toolkit.utils;
-
-const pyVersion = getPythonVersion() || '3';
+const { isProduction, getKungfuBuildInfo } = toolkit.utils;
+const { pyVersion } = getKungfuBuildInfo();
 
 const nodeModules = {};
 Object.keys(dependencies || {})

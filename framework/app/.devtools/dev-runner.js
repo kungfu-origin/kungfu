@@ -58,7 +58,6 @@ function startRenderer() {
     const opts = {
       port: 9090,
       static: path.join(__dirname, '../'),
-      hot: true,
       headers: {
         'Access-Control-Allow-Origin': '*',
       },

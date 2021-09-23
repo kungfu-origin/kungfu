@@ -1,6 +1,6 @@
 import fse from 'fs-extra';
 import path from 'path';
-import { KF_HOME, KF_CONFIG_DEFAULT_PATH, KF_CONFIG_PATH, KF_TARADING_CONFIG_DEFAULT_PATH, KF_TARADING_CONFIG_PATH, KUNGFU_RESOURCES_DIR } from '@kungfu-trader/kungfu-uicc/config/pathConfig';
+import { KF_HOME, KF_CONFIG_DEFAULT_PATH, KF_CONFIG_PATH, KF_TARADING_CONFIG_DEFAULT_PATH, KF_TARADING_CONFIG_PATH, KF_ADMIN_PASSWORD_CONFIG_DEFAULT_PATH, KF_ADMIN_PASSWORD_CONFIG_PATH, KUNGFU_RESOURCES_DIR } from '@kungfu-trader/kungfu-uicc/config/pathConfig';
 import { addFileSync } from '@kungfu-trader/kungfu-uicc/utils/fileUtils';
 
 export const initConfig = () => {
@@ -14,6 +14,12 @@ export const initConfig = () => {
         addFileSync('', KF_TARADING_CONFIG_PATH, 'file');
         const kfTradingConfigJSON = fse.readJsonSync(KF_TARADING_CONFIG_DEFAULT_PATH);
         fse.outputJsonSync(KF_TARADING_CONFIG_PATH, kfTradingConfigJSON)
+    }
+
+    if(!fse.existsSync(KF_ADMIN_PASSWORD_CONFIG_PATH)) {
+        addFileSync('', KF_ADMIN_PASSWORD_CONFIG_PATH, 'file');
+        const adminPasswordConfigJSON = fse.readJsonSync(KF_ADMIN_PASSWORD_CONFIG_DEFAULT_PATH);
+        fse.outputJsonSync(KF_ADMIN_PASSWORD_CONFIG_PATH, adminPasswordConfigJSON)
     }
 };
 
