@@ -7,7 +7,7 @@ module.exports = {
   makeConfig: (rootDir, distName) => {
     const production = isProduction();
     return {
-      devtool: 'eval',
+      devtool: 'eval-source-map',
       externals: [
         nodeExternals({
           allowlist: [/^@kungfu-trader/],
