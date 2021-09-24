@@ -9,7 +9,7 @@ export const reqRecordBeforeQuit = (mainWindow) => {
 
         //30s后强制关闭
         console.time('record before quit')
-        const timer = setTimeout(() => {
+        let timer = setTimeout(() => {
             resolve(false)
             console.timeEnd('record before quit');
             console.log("record before quit timeout");

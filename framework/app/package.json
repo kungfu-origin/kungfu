@@ -22,7 +22,7 @@
     "dev": "node .devtools/dev-runner.js",
     "dist:daemon": "yarn webpack-cli --config .webpack/webpack.daemon.config.js --stats-error-details",
     "dist:main": "yarn webpack-cli --config .webpack/webpack.main.config.js --stats-error-details",
-    "dist:render": "yarn webpack-cli --config .webpack/webpack.renderer.config.js --stats-error-details",
+    "dist:renderer": "yarn webpack-cli --config .webpack/webpack.renderer.config.js --stats-error-details",
     "dist": "node --max_old_space_size=4096 .webpack/build.js",
     "prebuild": "yarn run clean && yarn run dist",
     "build": "node .electron-builder/build.js",

@@ -39,7 +39,6 @@ new Vue({
 
 const { startGetProcessStatus, startMaster, startLedger, startDaemon, startArchiveMakeTask } = require('@kungfu-trader/kungfu-uicc/utils/processUtils');
 
-
 if (!+process.env.RELOAD_AFTER_CRASHED) {
     beforeAll()
     .then(() => {
@@ -157,4 +156,5 @@ window.admin = {
         return;
     }
 };
+
 

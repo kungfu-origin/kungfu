@@ -45,23 +45,28 @@ function logStats(proc, data) {
 function startRenderer() {
   return new Promise((resolve, reject) => {
 
+    // Object
+    //   .keys(rendererConfig.entry || {})
+    //   .forEach(key => {
+    //     rendererConfig.entry[key] = [path.join(__dirname, 'dev-client')].concat(rendererConfig.entry[key])
+    //   })
+
     const compiler = webpack(rendererConfig);
-    hotMiddleware = webpackHotMiddleware(compiler, {
-      log: true,
-      heartbeat: 2500
-    })
 
-    compiler.hooks.afterEmit.tap('afterEmit', () => {
-      console.log("compiler.hooks afterEmit", '=====')
-      hotMiddleware.publish({
-        action: 'reload'
-      })
-    })
+    // hotMiddleware = webpackHotMiddleware(compiler, {
+    //   log: false,
+    //   heartbeat: 2500
+    // })
 
-    compiler.hooks.done.tap('done', stats => {
-      console.log("compiler.hooks done", '=====')
-      logStats('Renderer', stats)
-    })
+    // compiler.hooks.afterEmit.tap('afterEmit', () => {
+    //   hotMiddleware.publish({
+    //     action: 'reload'
+    //   })
+    // })
+
+    // compiler.hooks.done.tap('done', stats => {
+    //   logStats('Renderer', stats)
+    // })
 
     const opts = {
       port: 9090,
@@ -82,11 +87,11 @@ function startMain() {
 
     const compiler = webpack(mainConfig);
 
-    compiler.hooks.watchRun.tapAsync('watch-run', (compilation, done) => {
-      logStats('Main', chalk.white.bold('compiling...'))
-      hotMiddleware && hotMiddleware.publish({ action: 'compiling' })
-      done()
-    })
+    // compiler.hooks.watchRun.tapAsync('watch-run', (compilation, done) => {
+    //   logStats('Main', chalk.white.bold('compiling...'))
+    //   hotMiddleware && hotMiddleware.publish({ action: 'compiling' })
+    //   done()
+    // })
 
     compiler.watch({}, (err, stats) => {
       if (err) {
