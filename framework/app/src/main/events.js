@@ -1,6 +1,7 @@
 const { ipcMain } = require('electron')
 
 export const reqRecordBeforeQuit = (mainWindow) => {
+    let recordBeforeQuiteTimeout = true;
     return new Promise(resolve => {
 	    if (!mainWindow || !mainWindow.webContents) {
             resolve(false)
@@ -10,9 +11,12 @@ export const reqRecordBeforeQuit = (mainWindow) => {
         //30s后强制关闭
         console.time('record before quit')
         let timer = setTimeout(() => {
-            resolve(false)
-            console.timeEnd('record before quit');
-            console.log("record before quit timeout");
+            resolve(false);
+            if (recordBeforeQuiteTimeout) {
+                console.timeEnd('record before quit');
+                console.log("record before quit timeout");
+            }
+            
             clearTimeout(timer)
         }, 3000)
 
@@ -22,6 +26,7 @@ export const reqRecordBeforeQuit = (mainWindow) => {
             resolve(true)
             if (!timer) return; // if timer has been cleared
             console.timeEnd('record before quit')
+            recordBeforeQuiteTimeout = false;
             clearTimeout(timer)
         })
     })

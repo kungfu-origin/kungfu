@@ -93,7 +93,6 @@ const prodConfig = {
 
 const devConfig = {
   plugins: [
-    new webpack.HotModuleReplacementPlugin(),
     new webpack.DefinePlugin({
       __resources: `"${path.join(rootDir, 'resources').replace(/\\/g, '\\\\')}"`,
       python_version: `"${pyVersion.toString()}"`,

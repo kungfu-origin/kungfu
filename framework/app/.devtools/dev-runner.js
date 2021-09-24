@@ -7,7 +7,6 @@ const { say } = require('cfonts');
 const { spawn } = require('child_process');
 const webpack = require('webpack');
 const WebpackDevServer = require('webpack-dev-server');
-const webpackHotMiddleware = require('webpack-hot-middleware')
 
 const mainConfig = require('../.webpack/webpack.main.config');
 const rendererConfig = require('../.webpack/webpack.renderer.config');
@@ -15,7 +14,6 @@ const daemonConfig = require('../.webpack/webpack.daemon.config');
 
 let electronProcess = null;
 let manualRestart = false;
-var hotMiddleware;
 
 function logStats(proc, data) {
   let log = '';
@@ -44,36 +42,13 @@ function logStats(proc, data) {
 
 function startRenderer() {
   return new Promise((resolve, reject) => {
-
-    // Object
-    //   .keys(rendererConfig.entry || {})
-    //   .forEach(key => {
-    //     rendererConfig.entry[key] = [path.join(__dirname, 'dev-client')].concat(rendererConfig.entry[key])
-    //   })
-
     const compiler = webpack(rendererConfig);
-
-    // hotMiddleware = webpackHotMiddleware(compiler, {
-    //   log: false,
-    //   heartbeat: 2500
-    // })
-
-    // compiler.hooks.afterEmit.tap('afterEmit', () => {
-    //   hotMiddleware.publish({
-    //     action: 'reload'
-    //   })
-    // })
-
-    // compiler.hooks.done.tap('done', stats => {
-    //   logStats('Renderer', stats)
-    // })
-
-    const opts = {
+    const server = new WebpackDevServer({
+      static: path.join(__dirname, '../resources'),
+      host: "0.0.0.0",
       port: 9090,
-      static: path.join(__dirname, '../'),
-    };
-
-    const server = new WebpackDevServer(opts, compiler);
+      hot: true,
+    }, compiler);
     server.start();
     resolve();
   });
@@ -86,13 +61,6 @@ function startMain() {
     );
 
     const compiler = webpack(mainConfig);
-
-    // compiler.hooks.watchRun.tapAsync('watch-run', (compilation, done) => {
-    //   logStats('Main', chalk.white.bold('compiling...'))
-    //   hotMiddleware && hotMiddleware.publish({ action: 'compiling' })
-    //   done()
-    // })
-
     compiler.watch({}, (err, stats) => {
       if (err) {
         console.log(err);

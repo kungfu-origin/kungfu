@@ -158,3 +158,6 @@ window.admin = {
 };
 
 
+if (module.hot) {
+    module.hot.accept();
+}

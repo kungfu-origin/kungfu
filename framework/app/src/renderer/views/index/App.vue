@@ -75,7 +75,6 @@ import workersMixin from '@/workers/workersMixin';
 import authMixin from '@/components/Base/js/authMixin';
 
 
-
 export default {
     name: 'app',
 

@@ -3,12 +3,7 @@
 const chalk = require('chalk')
 const { say } = require('cfonts')
 const webpack = require('webpack')
-const webpackHotMiddleware = require('webpack-hot-middleware')
-
 const cliConfig = require('../.build/webpack.cli.config')
-
-let electronProcess = null
-let hotMiddleware
 
 function logStats (proc, data) {
   let log = ''
@@ -36,17 +31,6 @@ function logStats (proc, data) {
 function startCli () {
   return new Promise((resolve, reject) => {
     const compiler = webpack(cliConfig)
-    hotMiddleware = webpackHotMiddleware(compiler, { 
-        log: false, 
-        heartbeat: 2500 
-      })
-
-    compiler.plugin('watch-run', (compilation, done) => {
-      logStats('Main', chalk.white.bold('compiling...'))
-      hotMiddleware.publish({ action: 'compiling' })
-      done()
-    })
-
     compiler.watch({}, (err, stats) => {
       if (err) {
         console.log(err)
@@ -54,19 +38,7 @@ function startCli () {
       }
 
       logStats('Main', stats)
-
-      if (electronProcess && electronProcess.kill) {
-        let manualRestart = true
-        process.kill(electronProcess.pid)
-        electronProcess = null
-        startElectron()
-
-        setTimeout(() => {
-          manualRestart = false
-        }, 5000)
-      }
-
-      resolve()
+      resolve(true)
     })
   })
 }

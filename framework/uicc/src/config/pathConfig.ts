@@ -135,6 +135,9 @@ export const APP_DIR = production
     ? path.resolve(process.resourcesPath, 'app', 'dist', 'app')
     : path.resolve(process.cwd(), 'dist', 'app');
 
+
 process.env.NODEJS_EXECUTABLE = path.resolve(KFC_DIR, KFC_EXECUTABLE); // for pm2
 process.env.PATH = KFC_DIR + path.delimiter + process.env.PATH;
 process.env.KFC_DIR = KFC_DIR;
+
+
