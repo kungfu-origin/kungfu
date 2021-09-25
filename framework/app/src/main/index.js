@@ -96,16 +96,9 @@ function createWindow (reloadAfterCrashed = false) {
 		}
 	})
 
-	MainWindow.on('crashed', () => {
-		logger.error('[MainWindow] crashed', new Date())
-		showCrashMessageBox().then((confirm) => {
-			if (!confirm) return;
-			createWindow(true);
-		})
-	});
-
 	MainWindow.on('unresponsive', () => {
 		logger.error('[MainWindow] unresponsive', new Date())
+		if (AllowQuit) return;
 		showCrashMessageBox().then((confirm) => {
 			if (!confirm) return;
 			createWindow(true);
@@ -114,6 +107,7 @@ function createWindow (reloadAfterCrashed = false) {
 
 	MainWindow.webContents.on("render-process-gone", (event, details) => {
 		logger.error("[MainWindow.webContents] crashed", new Date(), details);
+		if (AllowQuit) return;
 		showCrashMessageBox().then((confirm) => {
 			if (!confirm) return;
 			createWindow(true);
@@ -122,6 +116,7 @@ function createWindow (reloadAfterCrashed = false) {
 
 	MainWindow.webContents.on("unresponsive", () => {
 		logger.error("[MainWindow.webContents] unresponsive", new Date());
+		if (AllowQuit) return;
 		showCrashMessageBox().then((confirm) => {
 			if (!confirm) return;
 			createWindow(true);
