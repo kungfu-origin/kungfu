@@ -8,9 +8,9 @@ const { spawn } = require('child_process');
 const webpack = require('webpack');
 const WebpackDevServer = require('webpack-dev-server');
 
-const mainConfig = require('../.webpack/webpack.main.config');
-const rendererConfig = require('../.webpack/webpack.renderer.config');
-const daemonConfig = require('../.webpack/webpack.daemon.config');
+const mainConfig = require('../.webpack/webpack.main.config')(null, { mode: "development" });
+const rendererConfig = require('../.webpack/webpack.renderer.config')(null, { mode: "development" });
+const daemonConfig = require('../.webpack/webpack.daemon.config')(null, { mode: "development" });
 
 let electronProcess = null;
 let manualRestart = false;
@@ -44,22 +44,32 @@ function startRenderer() {
   return new Promise((resolve, reject) => {
     const compiler = webpack(rendererConfig);
     const server = new WebpackDevServer({
-      static: path.join(__dirname, '../resources'),
-      host: "0.0.0.0",
+      static: path.join(__dirname, '../'),
       port: 9090,
-      hot: true,
+      hot: "only",
+      compress: false
     }, compiler);
     server.start();
-    resolve();
+
+    compiler.watch({}, (err, stats) => {
+      if (err) {
+        console.log(err);
+        return;
+      }
+      
+      logStats('Renderer', stats);
+    })
+
+    compiler.hooks.done.tap("renderer-compile-done", stats => {
+      logStats('Renderer', "Compile-Done");
+      resolve();
+    })
   });
 }
 
 function startMain() {
   return new Promise((resolve, reject) => {
-    mainConfig.entry.main = [path.join(path.dirname(__dirname), 'src', 'main', 'index.dev.js')].concat(
-      mainConfig.entry.main,
-    );
-
+    mainConfig.entry.main = [path.resolve(path.dirname(__dirname), 'src', 'main', 'index.dev.js')].concat(mainConfig.entry.main);
     const compiler = webpack(mainConfig);
     compiler.watch({}, (err, stats) => {
       if (err) {
@@ -79,9 +89,12 @@ function startMain() {
           manualRestart = false;
         }, 5000);
       }
-
-      resolve();
     });
+
+    compiler.hooks.done.tap("main-compile-done", stats => {
+      logStats('Main', "Compile-Done");
+      resolve();
+    })
   });
 }
 
@@ -96,15 +109,30 @@ function startDaemon() {
         console.log(err);
         return;
       }
-
       logStats('Daemon', stats);
-      resolve();
     });
+
+    compiler.hooks.done.tap("daemon-compile-done", stats => {
+      logStats('Daemon', "Compile-Done");
+      resolve();
+    })
   });
 }
 
 function startElectron() {
-  electronProcess = spawn(electron, ['--inspect=5858', '--enable-logging', '--trace-warnings', '.']);
+  electronProcess = spawn(
+    electron, 
+    [
+      '--inspect=5858',
+      "--trace-warnings",
+      path.resolve('./dist/app/main.js')
+    ], 
+    {
+      env: {
+        ELECTRON_ENABLE_LOGGING: true,
+        ELECTRON_ENABLE_STACK_DUMPING: true
+      }
+    });
 
   electronProcess.stdout.on('data', (data) => {
     electronLog(data, 'blue');
@@ -114,6 +142,7 @@ function startElectron() {
   });
 
   electronProcess.on('close', () => {
+    electronLog("exit", 'blue');
     if (!manualRestart) process.exit();
   });
 }
@@ -155,8 +184,7 @@ function greeting() {
 
 function init() {
   greeting();
-
-  Promise.all([startRenderer(), startMain(), startDaemon()])
+  Promise.all([ startMain(), startRenderer(), startDaemon() ])
     .then(() => {
       startElectron();
     })

@@ -26,7 +26,7 @@ exports.getKungfuBuildInfo = () => {
 
 
 
-exports.getViewsConfig = () => {
+exports.getViewsConfig = (mode) => {
   const appConfigPath = require.resolve('@kungfu-trader/kungfu-app/package.json');
   const appDir = path.dirname(appConfigPath);
   const viewsPath = path.resolve(appDir, 'src', 'renderer', 'views');
@@ -51,7 +51,7 @@ exports.getViewsConfig = () => {
               removeComments: true,
             },
             chunks: [dir],
-            nodeModules: process.env.NODE_ENV !== 'production' ? path.resolve(appDir, 'node_modules') : false,
+            nodeModules: !this.isProduction(mode) ? path.resolve(appDir, 'node_modules') : false,
           }),
         );
     });
@@ -62,4 +62,4 @@ exports.getViewsConfig = () => {
   };
 };
 
-exports.isProduction = () => process.env.NODE_ENV === 'production';
+exports.isProduction = (mode) => mode === 'production';

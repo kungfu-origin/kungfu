@@ -13,8 +13,10 @@
 <script>
 import lineConfig from './config/lineEchart'
 import { toDecimal, deepClone } from '@kungfu-trader/kungfu-uicc/utils/busiUtils';
-import echarts from '@/assets/js/static/echarts.min.js'
+// import echarts from '@/assets/js/static/echarts.min.js'
+import * as echarts from '@/assets/js/static/echarts.min.js'
 
+console.log(echarts)
 
 export default {
     name: 'min-chart',
@@ -49,13 +51,13 @@ export default {
             showSymbol: false, //默认不显示原点，鼠标放上会显示
             areaStyle: {
                 normal: {
-                    color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
-                        offset: 0,
-                        color: 'rgba(30, 90, 130, 1)'
-                    }, {
-                        offset: 1,
-                        color: 'rgba(22, 27, 46, 0)'
-                    }])
+                    // color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
+                    //     offset: 0,
+                    //     color: 'rgba(30, 90, 130, 1)'
+                    // }, {
+                    //     offset: 1,
+                    //     color: 'rgba(22, 27, 46, 0)'
+                    // }])
                 }
             },
         };
@@ -97,14 +99,14 @@ export default {
     methods:{
 
         initChart (timeList=[], pnlDataList=[]) {
-            const dom = document.getElementById('min-chart');
-            if(!dom) return;
-            this.myChart = echarts.getInstanceByDom(dom)
-            if(this.myChart === undefined) this.myChart = echarts.init(dom);
-            let defaultConfig = deepClone(lineConfig)  
-            defaultConfig.xAxis.data = timeList
-            defaultConfig.series = { data: pnlDataList, ...this.echartsSeries }
-            this.myChart.setOption(defaultConfig)
+            // const dom = document.getElementById('min-chart');
+            // if(!dom) return;
+            // this.myChart = echarts.getInstanceByDom(dom)
+            // if(this.myChart === undefined) this.myChart = echarts.init(dom);
+            // let defaultConfig = deepClone(lineConfig)  
+            // defaultConfig.xAxis.data = timeList
+            // defaultConfig.series = { data: pnlDataList, ...this.echartsSeries }
+            // this.myChart.setOption(defaultConfig)
         },
 
         dealMinPnlList (minPnlList) {

@@ -19,7 +19,6 @@ copyKungfuKey();
 setMenu();
 require('@electron/remote/main').initialize()
 
-
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 var MainWindow = null;
@@ -27,7 +26,6 @@ var AllowQuit = false;
 var CrashedReloading = false;
 
 function createWindow (reloadAfterCrashed = false) {
-
 	if (reloadAfterCrashed) {
 		MainWindow && MainWindow.destroy();
 		CrashedReloading = true;
@@ -55,10 +53,9 @@ function createWindow (reloadAfterCrashed = false) {
 		backgroundColor: '#161B2E',
 	})
 
-
-
 	const isDevelopment = process.env.NODE_ENV === "development" 
 	// and load the index.html of the app.
+
 	if(isDevelopment){
 		MainWindow.loadURL('http://localhost:9090/index.html')
 	}else{
@@ -124,9 +121,8 @@ function createWindow (reloadAfterCrashed = false) {
 	})
 }
 
-
-//防止重开逻辑
-const gotTheLock = app.requestSingleInstanceLock()
+// 防止重开逻辑
+const gotTheLock = app.requestSingleInstanceLock();
 if(!gotTheLock) {
 	AllowQuit = true;
 	app.quit()
@@ -244,12 +240,14 @@ function setMenu() {
 }
 
 
-process.on('uncaughtException', err => {
-	console.log(err)
-    logger.error('[MASTER] Error caught in uncaughtException event:', err);
-});
+process
+	.on('uncaughtException', err => {
+		console.log(err)
+		logger.error('[MAIN] Error caught in uncaughtException event:', err);
+	})
+	.on('unhandledRejection', (err) => {
+		console.log(err)
+		logger.error('[MAIN] Error caught in unhandledRejection event:', err);
+	})
 
-process.stderr.on('data', err => {
-	console.log(err)
-    logger.error('[MASTER] Error caught in stderr event:', err);
-})
+

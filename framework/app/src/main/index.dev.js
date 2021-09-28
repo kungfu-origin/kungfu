@@ -18,9 +18,13 @@ const path = require("path");
 require('electron-debug')()
 
 // Install `vue-devtools`
-app.on('ready', () => {
-  const extPath = path.resolve(__dirname, '..', '..', '.devtools', 'vue-devtools');
-  session.defaultSession.loadExtension(extPath);
+app.on('ready', async () => {
+
+  // try {
+  //   await session.defaultSession.loadExtension("http://localhost:9091");
+  // } catch (err) {
+  //   console.error(err)
+  // }
 })
 
 

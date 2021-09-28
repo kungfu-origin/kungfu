@@ -8,23 +8,24 @@ const webpack = require('webpack');
 const { merge } = require('webpack-merge');
 
 const rootDir = path.dirname(__dirname);
-const baseConfig = toolkit.webpack.makeConfig(rootDir, 'app');
 const { isProduction } = toolkit.utils;
 
-const webpackConfig = merge(baseConfig, {
-  entry: {
-    daemon: path.join(rootDir, 'src', 'daemon', 'index.ts'),
-  },
-  externals: [
-    'bufferutil',
-    'utf-8-validate'
-  ],
-  resolve: {
-    alias: {
-      '@': path.resolve(rootDir, 'src', 'renderer'),
+const webpackConfig = (mode) => merge(
+  toolkit.webpack.makeConfig(mode, rootDir, 'app'), 
+  {
+    entry: {
+      daemon: path.join(rootDir, 'src', 'daemon', 'index.ts'),
     },
-  },
-  target: 'node',
+    externals: [
+      'bufferutil',
+      'utf-8-validate'
+    ],
+    resolve: {
+      alias: {
+        '@': path.resolve(rootDir, 'src', 'renderer'),
+      },
+    },
+    target: 'node',
 });
 
 const prodConfig = {
@@ -44,4 +45,7 @@ const devConfig = {
   ],
 };
 
-module.exports = merge(webpackConfig, isProduction() ? prodConfig : devConfig);
+module.exports = (env, argv) => {
+  const mode = argv.mode;
+  return merge(webpackConfig(mode), isProduction(mode) ? prodConfig : devConfig)
+};

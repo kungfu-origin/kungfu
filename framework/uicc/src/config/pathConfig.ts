@@ -124,6 +124,8 @@ export const KFC_EXECUTABLE = process.platform === 'win32' ? 'kfc.exe' : 'kfc';
 console.log(`process.cwd = ${process.cwd()}`);
 console.log(`process.resourcesPath = ${process.resourcesPath}`);
 console.log(`KFC_PARENT_DIR = ${KFC_PARENT_DIR}`);
+console.log(`KFC_DIR = ${KFC_DIR}`);
+
 
 export const EXTENSION_DIR = path.join(KFC_PARENT_DIR, 'kfc', 'kungfu_extensions');
 

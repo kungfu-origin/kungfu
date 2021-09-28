@@ -4,17 +4,24 @@ const { isProduction } = require('./utils');
 const path = require("path");
 
 module.exports = {
-  makeConfig: (rootDir, distName) => {
-    const production = isProduction();
+  makeConfig: (mode, rootDir, distName) => {
+    const production = isProduction(mode);
     return {
       devtool: 'eval-source-map',
       externals: [
+        "pm2",
         nodeExternals({
           allowlist: [/^@kungfu-trader/],
           modulesDir: path.resolve(rootDir, 'node_modules')
         })
       ],
       mode: production ? 'production' : 'development',
+      stats: {
+        errorDetails: true,
+      },
+      infrastructureLogging: {
+        level: 'error',
+      },
       module: {
         rules: [
           {
@@ -27,63 +34,63 @@ module.exports = {
             use: 'ts-loader',
             exclude: /node_modules/,
           },
+          // {
+          //   test: /@pm2.*InteractorClient\.js$/,
+          //   loader: 'string-replace-loader',
+          //   options: {
+          //     search: 'main.filename',
+          //     replace: "resolve('pm2/bin/pm2')",
+          //   },
+          // },
+          // {
+          //   test: /@pm2.*InteractorClient\.js$/,
+          //   loader: 'string-replace-loader',
+          //   options: {
+          //     search: 'path.dirname(module.filename)',
+          //     replace:
+          //       production ? 'path.resolve(__dirname, "..", "..", "node_modules", "@pm2", "agent", "src")' : '__dirname',
+          //   },
+          // },
+          // {
+          //   test: /pm2.*Client\.js$/,
+          //   loader: 'string-replace-loader',
+          //   options: {
+          //     search: "interpreter = 'node'",
+          //     replace: "interpreter = which('kfc')",
+          //   },
+          // },
+          // {
+          //   test: /pm2.*Client\.js$/,
+          //   loader: 'string-replace-loader',
+          //   options: {
+          //     search: "which('node')",
+          //     replace: "which('kfc')",
+          //   },
+          // },
+          // {
+          //   test: /pm2.*Client\.js$/,
+          //   loader: 'string-replace-loader',
+          //   options: {
+          //     search: 'path.dirname(module.filename)',
+          //     replace:
+          //       production ? 'path.resolve(__dirname, "..", "..", "node_modules", "pm2", "lib")' : '__dirname',
+          //   },
+          // },
           {
             test: /\.node$/,
             use: 'node-loader',
           },
-          {
-            test: /@pm2.*InteractorClient\.js$/,
-            loader: 'string-replace-loader',
-            options: {
-              search: 'main.filename',
-              replace: "resolve('pm2/bin/pm2')",
-            },
-          },
-          {
-            test: /@pm2.*InteractorClient\.js$/,
-            loader: 'string-replace-loader',
-            options: {
-              search: 'path.dirname(module.filename)',
-              replace:
-                production ? 'path.resolve(__dirname, "..", "..", "node_modules", "@pm2", "agent", "src")' : '__dirname',
-            },
-          },
-          {
-            test: /pm2.*Client\.js$/,
-            loader: 'string-replace-loader',
-            options: {
-              search: "interpreter = 'node'",
-              replace: "interpreter = which('kfc')",
-            },
-          },
-          {
-            test: /pm2.*Client\.js$/,
-            loader: 'string-replace-loader',
-            options: {
-              search: "which('node')",
-              replace: "which('kfc')",
-            },
-          },
-          {
-            test: /pm2.*Client\.js$/,
-            loader: 'string-replace-loader',
-            options: {
-              search: 'path.dirname(module.filename)',
-              replace:
-                production ? 'path.resolve(__dirname, "..", "..", "node_modules", "pm2", "lib")' : '__dirname',
-            },
-          },
-          {
-            test: /\.(m?js|node)$/,
-            parser: { amd: false },
-            use: {
-              loader: '@vercel/webpack-asset-relocator-loader',
-              options: {
-                outputAssetBase: 'native_modules',
-                production: production,
-              },
-            },
-          },
+          // {
+          //   test: /\.(m?js|node)$/,
+          //   parser: { amd: false },
+          //   use: {
+          //     loader: '@vercel/webpack-asset-relocator-loader',
+          //     options: {
+          //       outputAssetBase: 'native_modules',
+          //       production: production,
+          //     },
+          //   },
+          // },
           {
             test: /\.(png|jpe?g|gif|svg)(\?.*)?$/,
             use: {
@@ -124,14 +131,15 @@ module.exports = {
         __filename: !production,
       },
       output: {
+        globalObject: "this",
         filename: '[name].js',
         libraryTarget: 'commonjs2',
         path: path.join(rootDir, 'dist', distName),
       },
       plugins: [
-        new IgnorePlugin({ resourceRegExp: /deploy/, contextRegExp: /pm2-deploy$/ }),
-        new IgnorePlugin({ resourceRegExp: /pty.js/, contextRegExp: /blessed.*widgets$/ }),
-        new IgnorePlugin({ resourceRegExp: /term.js/, contextRegExp: /blessed.*widgets$/ }),
+        // new IgnorePlugin({ resourceRegExp: /deploy/, contextRegExp: /pm2-deploy$/ }),
+        // new IgnorePlugin({ resourceRegExp: /pty.js/, contextRegExp: /blessed.*widgets$/ }),
+        // new IgnorePlugin({ resourceRegExp: /term.js/, contextRegExp: /blessed.*widgets$/ }),
         new NoEmitOnErrorsPlugin(),
       ],
       resolve: {

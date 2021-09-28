@@ -37,7 +37,7 @@ function build() {
     process.exit();
   });
 
-  pack(mainConfig)
+  pack(mainConfig(null, {mode: "production"}))
     .then((result) => {
       results += result + '\n\n';
       m.success('main');
@@ -49,7 +49,7 @@ function build() {
       process.exit(1);
     });
 
-  pack(rendererConfig)
+  pack(rendererConfig(null, {mode: "production"}))
     .then((result) => {
       results += result + '\n\n';
       m.success('renderer');
@@ -61,7 +61,7 @@ function build() {
       process.exit(1);
     });
 
-  pack(daemonConfig)
+  pack(daemonConfig(null, {mode: "production"}))
     .then((result) => {
       results += result + '\n\n';
       m.success('daemon');

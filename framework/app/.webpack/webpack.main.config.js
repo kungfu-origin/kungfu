@@ -8,22 +8,24 @@ const webpack = require('webpack');
 const { merge } = require('webpack-merge');
 
 const rootDir = path.dirname(__dirname);
-const baseConfig = toolkit.webpack.makeConfig(rootDir, 'app');
 const { getKungfuBuildInfo, isProduction } = toolkit.utils;
 const { gitCommitVersion, pyVersion, buildTimeStamp } = getKungfuBuildInfo();
 
-const webpackConfig = merge(baseConfig, {
-  entry: {
-    main: path.join(rootDir, 'src', 'main', 'index.js'),
-  },
-
-  resolve: {
-    alias: {
-      '@': path.resolve(rootDir, 'src', 'renderer'),
+const webpackConfig = (mode) => merge(
+  toolkit.webpack.makeConfig(mode, rootDir, 'app'), 
+  {
+    entry: {
+      main: path.join(rootDir, 'src', 'main', 'index.js'),
     },
-  },
-  target: 'electron-main',
-});
+
+    resolve: {
+      alias: {
+        '@': path.resolve(rootDir, 'src', 'renderer'),
+      },
+    },
+    target: 'electron-main'
+  }
+);
 
 const prodConfig = {
   plugins: [
@@ -47,4 +49,7 @@ const devConfig = {
   ],
 };
 
-module.exports = merge(webpackConfig, isProduction() ? prodConfig : devConfig);
+module.exports = (env, argv) => {
+  const mode = argv.mode;
+  return merge(webpackConfig(mode), isProduction(mode) ? prodConfig : devConfig)
+};

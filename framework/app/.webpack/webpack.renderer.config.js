@@ -12,75 +12,81 @@ const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
 const { VueLoaderPlugin } = require('vue-loader');
 
 const rootDir = path.dirname(__dirname);
-const baseConfig = toolkit.webpack.makeConfig(rootDir, 'app');
 const { getKungfuBuildInfo, getViewsConfig, isProduction } = toolkit.utils;
 
 const { pyVersion } = getKungfuBuildInfo();
-const viewsConfig = getViewsConfig();
 
-const styleLoader = !isProduction() ? 'vue-style-loader' : MiniCssExtractPlugin.loader;
+const webpackConfig = (mode) => {
+  const styleLoader = isProduction(mode) ? MiniCssExtractPlugin.loader : "vue-style-loader"
+  const viewsConfig = getViewsConfig(mode);
 
-const webpackConfig = merge(baseConfig, {
-  devtool: 'eval-cheap-module-source-map',
-  entry: viewsConfig.entry,
-  module: {
-    rules: [
-      {
-        test: /\.css$/,
-        use: [
-          styleLoader, 
+  return merge(
+    toolkit.webpack.makeConfig(mode, rootDir, 'app'), 
+    {
+      entry: viewsConfig.entry,
+      module: {
+        rules: [
           {
-            loader: 'css-loader',
-            options: {
-              esModule: false
-            }
-          }],
-      },
-      {
-        test: /\.scss$/,
-        use: [
-          styleLoader, 
-          {
-            loader: 'css-loader',
-            options: {
-              esModule: false
-            }
+            test: /\.css$/,
+            use: [
+              styleLoader,
+              {
+                loader: 'css-loader',
+                options: {
+                  esModule: false
+                }
+              }],
           },
-          'sass-loader'
+          {
+            test: /\.scss$/,
+            use: [
+              styleLoader,
+              {
+                loader: 'css-loader',
+                options: {
+                  esModule: false
+                }
+              },
+              'sass-loader'
+            ],
+          },
+          {
+            test: /\.vue$/,
+            use: 'vue-loader',
+          },
+          {
+            test: /\.worker\.js$/,
+            use: {
+              loader: 'worker-loader',
+              options: { inline: true, fallback: false },
+            },
+            exclude: /node_modules/,
+          },
+          {
+            test: /\.html$/,
+            use: "html-loader"
+          }
         ],
-      },
-      {
-        test: /\.vue$/,
-        use: 'vue-loader',
-      },
-      {
-        test: /\.worker\.js$/,
-        use: {
-          loader: 'worker-loader',
-          options: { inline: true, fallback: false },
-        },
-        exclude: /node_modules/,
-      }
-    ],
-  },
-  plugins: [
-    ...viewsConfig.plugins,
-    new MiniCssExtractPlugin({
-      filename: `css/[name].css`,
-    }),
-    new MonacoWebpackPlugin({
-      languages: ['python', 'cpp', 'shell', 'json', 'yaml'],
-    }),
-    new VueLoaderPlugin(),
-  ],
-  resolve: {
-    alias: {
-      '@': path.resolve(rootDir, 'src', 'renderer'),
-      '@kungfu-trader/kungfu-app': path.resolve(rootDir, 'src', 'renderer'),
     },
-  },
-  target: 'electron-renderer',
-});
+    plugins: [
+      ...viewsConfig.plugins,
+      new MiniCssExtractPlugin({
+        filename: `css/[name].css`,
+      }),
+      new MonacoWebpackPlugin({
+        languages: ['python', 'cpp', 'shell', 'json', 'yaml'],
+      }),
+      new VueLoaderPlugin(),
+    ],
+    resolve: {
+      alias: {
+        '@': path.resolve(rootDir, 'src', 'renderer'),
+        '@kungfu-trader/kungfu-app': path.resolve(rootDir, 'src', 'renderer'),
+      },
+    },
+    target: 'electron-renderer',
+  })
+};
 
 const prodConfig = {
   plugins: [
@@ -101,4 +107,7 @@ const devConfig = {
   ],
 };
 
-module.exports = merge(webpackConfig, isProduction() ? prodConfig : devConfig);
+module.exports = (env, argv) => {
+  const mode = argv.mode;
+  return merge(webpackConfig(mode), isProduction(mode) ? prodConfig : devConfig)
+};

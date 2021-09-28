@@ -1,7 +1,7 @@
 const { ipcMain } = require('electron')
 
 export const reqRecordBeforeQuit = (mainWindow) => {
-    let recordBeforeQuiteTimeout = true;
+    var recordBeforeQuiteTimeout = true;
     return new Promise(resolve => {
 	    if (!mainWindow || !mainWindow.webContents) {
             resolve(false)
