@@ -43,7 +43,6 @@
     "@types/node": "^14.17.0",
     "@vercel/webpack-asset-relocator-loader": "^1.7.0",
     "@vue/compiler-sfc": "^3.2.0",
-    "@vue/devtools": "^5.3.4",
     "babel-loader": "^8.2.0",
     "babel-plugin-component": "^1.1.0",
     "babel-preset-minify": "^0.5.0",

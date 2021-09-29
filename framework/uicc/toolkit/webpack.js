@@ -13,7 +13,7 @@ module.exports = {
 
       externals: [
         "pm2",
-        "iconv-lite"
+        "iconv-lite",
       ],
       mode: production ? 'production' : 'development',
       stats: {

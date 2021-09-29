@@ -38,6 +38,7 @@ const devConfig = {
     new webpack.DefinePlugin({
       git_commit_version: `"${gitCommitVersion.toString()}"`,
       python_version: `"${pyVersion.toString()}"`,
+      build_timestamp: `"${buildTimeStamp.toString()}"`,
       'process.env.APP_TYPE': '"main"',
       __resources: `"${path.join(rootDir, 'resources').replace(/\\/g, '\\\\')}"`,
     }),

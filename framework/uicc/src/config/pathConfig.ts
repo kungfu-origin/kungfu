@@ -66,11 +66,11 @@ const production = process.env.NODE_ENV === 'production';
 
 // core main: src/es/index.js
 const coreModulePath = () => {
-    const coreMainPath = path.resolve(require.resolve('@kungfu-trader/kungfu-core'));
-    console.log(`coreMainPath = ${coreMainPath}`);
-    const coreModule = path.resolve(path.dirname(coreMainPath), '..', '..');
-    console.log(`coreModulePath = ${coreModule}`);
-    return path.resolve(path.dirname(coreMainPath), '..', '..');
+    if (process.env.NODE_ENV === 'development') {
+        return path.resolve('../', 'core')
+    } else {
+        return path.resolve('../', 'core')
+    }
 }
 
 
@@ -140,7 +140,11 @@ export const APP_DIR = production
 
 
 process.env.NODEJS_EXECUTABLE = path.resolve(KFC_DIR, KFC_EXECUTABLE); // for pm2
-// process.env.PATH = KFC_DIR + path.delimiter + process.env.PATH;
+
+// if (process.env.APP_TYPE === 'renderer') {
+//     process.env.PATH = KFC_DIR + path.delimiter + process.env.PATH;
+// }
+
 process.env.KFC_DIR = KFC_DIR;
 
 
