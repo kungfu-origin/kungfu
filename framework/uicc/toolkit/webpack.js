@@ -14,14 +14,6 @@ module.exports = {
       externals: [
         "pm2",
         "iconv-lite"
-      //   nodeExternals({
-      //     allowlist: [ /^iconv-lite/, /^pm2/, /^@pm2/ ],
-      //     modulesDir: path.resolve(rootDir, 'node_modules'),
-      //     additionalModuleDirs: [
-      //       path.resolve(rootDir, "../", "../", 'node_modules'),
-      //     ],
-      //   })
-        
       ],
       mode: production ? 'production' : 'development',
       stats: {

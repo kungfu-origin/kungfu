@@ -17,7 +17,8 @@ console.log(kungfu, KF_RUNTIME_DIR.replace(/\\/g, '\\\\'))
 const l = kungfu.locator(KF_RUNTIME_DIR);
 
 console.log(l)
+console.log(kungfu)
 
-console.log(kungfu.ConfigStore(KF_RUNTIME_DIR))
+// console.log(kungfu.ConfigStore(KF_RUNTIME_DIR))
 
 
