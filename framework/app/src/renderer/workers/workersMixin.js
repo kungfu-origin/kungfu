@@ -5,7 +5,7 @@ import { debounce } from '@kungfu-trader/kungfu-uicc/utils/busiUtils';
 import { KF_DATASET_QUOTE_DIR } from '@kungfu-trader/kungfu-uicc/config/pathConfig';
 import { buildInstrumentsDataPipe } from '@kungfu-trader/kungfu-uicc/io/kungfu/tradingData';
 
-import Workers from '@/workers/index';
+import Workers from '__renderer/workers/index';
 
 export default {
 

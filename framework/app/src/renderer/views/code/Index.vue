@@ -10,9 +10,9 @@
 
 import Editor from './components/MonacoEditor';
 import FileTree from './components/FileTree';
-import MainContent from '@/components/Layout/MainContentForCode'
+import MainContent from '__renderer/components/Layout/MainContentForCode'
 
-import { ipcEmitDataByName } from '@/ipcMsg/emitter';
+import { ipcEmitDataByName } from '__renderer/ipcMsg/emitter';
 import { setTimeout } from 'timers';
 
 export default {
@@ -80,7 +80,7 @@ export default {
 }
 </script>
 <style lang="scss">
-@import "@/assets/scss/skin.scss";
+@import "__renderer/assets/scss/skin.scss";
     .code-content{
         height: 100%;
         // background: $bg_card;

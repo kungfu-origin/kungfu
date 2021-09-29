@@ -5,12 +5,12 @@ import './setKungfuParamsOnWindow';
 import store from './store';
 import router from './routers';
 import ElementUI from 'element-ui';
-import Components from '@/assets/components'
+import Components from '__renderer/assets/components'
 import App from './App.vue';
 
-import '@/assets/iconfont/iconfont.js';
-import '@/assets/iconfont/iconfont.css';
-import '@/assets/scss/makeOrder.scss';
+import '__renderer/assets/iconfont/iconfont.js';
+import '__renderer/assets/iconfont/iconfont.css';
+import '__renderer/assets/scss/makeOrder.scss';
 
 Vue.use(ElementUI)
 

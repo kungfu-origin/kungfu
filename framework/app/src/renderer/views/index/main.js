@@ -5,7 +5,7 @@ import './setKungfuParamsOnWindow';
 import Vue from 'vue';
 import path from 'path';
 import fse from 'fs-extra';
-import store from '@/store';
+import store from '__renderer/store';
 import router from './routers';
 import { logger } from '@kungfu-trader/kungfu-uicc/utils/logUtils';
 import { delayMilliSeconds, openVueWin, getTradingDate } from '@kungfu-trader/kungfu-uicc/utils/busiUtils';
@@ -14,12 +14,12 @@ import { KF_HOME, KF_ADMIN_PASSWORD_CONFIG_PATH } from '@kungfu-trader/kungfu-ui
 import { watcher } from '@kungfu-trader/kungfu-uicc/io/kungfu/watcher';
 import { kungfu } from '@kungfu-trader/kungfu-uicc/io/kungfu/kungfuUtils';
 import ElementUI from 'element-ui';
-import Components from '@/assets/components';
+import Components from '__renderer/assets/components';
 
 import App from './App.vue';
-import '@/assets/iconfont/iconfont.js';
-import '@/assets/iconfont/iconfont.css';
-import '@/assets/scss/makeOrder.scss';
+import '__renderer/assets/iconfont/iconfont.js';
+import '__renderer/assets/iconfont/iconfont.css';
+import '__renderer/assets/scss/makeOrder.scss';
 import '@kungfu-trader/kungfu-uicc/io/http/index';
 
 const remote = require("@electron/remote");

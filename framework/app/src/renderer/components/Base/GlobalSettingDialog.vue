@@ -224,7 +224,7 @@ import { getSourceList, throttle } from "@kungfu-trader/kungfu-uicc/utils/busiUt
 import { buildSystemConfig } from "@kungfu-trader/kungfu-uicc/config/systemConfig";
 import { switchCustomProcess } from "@kungfu-trader/kungfu-uicc/io/actions/base";
 import { getKfCommission, setKfCommission } from '@kungfu-trader/kungfu-uicc/io/kungfu/kungfuUtils';
-import openLogMixin from '@/assets/mixins/openLogMixin';
+import openLogMixin from '__renderer/assets/mixins/openLogMixin';
 
 const { shell, dialog } = require("@electron/remote");
 
@@ -416,7 +416,7 @@ export default {
 </script>
 
 <style lang="scss">
-@import "@/assets/scss/skin.scss";
+@import "__renderer/assets/scss/skin.scss";
 .kf-global-setting-dialog {
 height: 88%;
 .el-dialog__body {

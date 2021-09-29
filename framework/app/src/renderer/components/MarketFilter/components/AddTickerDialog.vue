@@ -105,7 +105,7 @@ import { Autocomplete } from "element-ui";
 import { SourceTypeConfig, ExchangeIds } from "@kungfu-trader/kungfu-uicc/config/tradingConfig";
 import { deepClone } from '@kungfu-trader/kungfu-uicc/utils/busiUtils';
 
-import instrumentsMixin from "@/assets/mixins/instrumentsMixin";
+import instrumentsMixin from "__renderer/assets/mixins/instrumentsMixin";
 
 Vue.use(Autocomplete);
 

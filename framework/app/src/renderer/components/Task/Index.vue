@@ -115,8 +115,8 @@ import { buildProcessLogPath } from '@kungfu-trader/kungfu-uicc/config/pathConfi
 import { switchTask } from '@kungfu-trader/kungfu-uicc/io/actions/base';
 import { TaskTypeConfig } from '@kungfu-trader/kungfu-uicc/config/tradingConfig';
 
-import baseMixin from '@/assets/mixins/baseMixin';
-import openLogMixin from '@/assets/mixins/openLogMixin';
+import baseMixin from '__renderer/assets/mixins/baseMixin';
+import openLogMixin from '__renderer/assets/mixins/openLogMixin';
 import taskMixin from './js/taskMixin';
 
 export default {
@@ -329,7 +329,7 @@ export default {
 }
 </script>
 <style lang="scss">
-@import '@/assets/scss/skin.scss';
+@import '__renderer/assets/scss/skin.scss';
 
 
 </style>

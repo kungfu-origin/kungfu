@@ -39,7 +39,7 @@
 <script>
 
 import moment from 'moment';
-import ExtConfigForm from '@/components/Base/ExtConfigForm';
+import ExtConfigForm from '__renderer/components/Base/ExtConfigForm';
 
 export default {
 

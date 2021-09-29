@@ -79,8 +79,8 @@
 <script>
 
 import { findTargetFromArray } from '@kungfu-trader/kungfu-uicc/utils/busiUtils';
-import baseMixin from '@/assets/mixins/baseMixin';
-import tickerSetMixin from '@/components/MarketFilter/js/tickerSetMixin';
+import baseMixin from '__renderer/assets/mixins/baseMixin';
+import tickerSetMixin from '__renderer/components/MarketFilter/js/tickerSetMixin';
 
 
 export default {

@@ -57,9 +57,9 @@ function createWindow (reloadAfterCrashed = false) {
 	// and load the index.html of the app.
 
 	if(isDevelopment){
-		MainWindow.loadURL('http://localhost:9090/index.html')
+		MainWindow.loadURL('http://localhost:9090/test.html')
 	}else{
-		const filePath = path.join(__dirname, "index.html");
+		const filePath = path.join(__dirname, "test.html");
 		MainWindow.loadFile(filePath)
 	}
 

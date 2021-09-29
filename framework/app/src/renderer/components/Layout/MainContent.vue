@@ -57,9 +57,9 @@
 
 <script>
 
-import EngineStatus from '@/components/Layout/components/EngineStatus';
-import CoreStatus from '@/components/Layout/components/CoreStatus';
-import authMixin from '@/components/Base/js/authMixin';
+import EngineStatus from '__renderer/components/Layout/components/EngineStatus';
+import CoreStatus from '__renderer/components/Layout/components/CoreStatus';
+import authMixin from '__renderer/components/Base/js/authMixin';
 
 const { Menu, getCurrentWindow } = require("@electron/remote");
 
@@ -137,8 +137,8 @@ export default {
 </script>
 
 <style lang="scss">
-@import '@/assets/scss/layout.scss';
-@import '@/assets/scss/skin.scss';
+@import '__renderer/assets/scss/layout.scss';
+@import '__renderer/assets/scss/skin.scss';
 
 .kf-footer-popover{
     box-shadow: 0px 0px 30px $bg

@@ -27,7 +27,6 @@ export const reqRecordBeforeQuit = (mainWindow) => {
             if (!timer) return; // if timer has been cleared
             console.timeEnd('record before quit')
             recordBeforeQuiteTimeout = false;
-            clearTimeout(timer)
         })
     })
 } 

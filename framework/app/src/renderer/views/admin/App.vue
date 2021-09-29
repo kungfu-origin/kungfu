@@ -41,7 +41,7 @@ export default {
 </script>
 
 <style lang="scss">
-@import '@/assets/scss/base.scss';
+@import '__renderer/assets/scss/base.scss';
  #app{
    height: 100%;
    background: $bg;

@@ -122,24 +122,24 @@
 <script>
 import { mapGetters, mapState } from 'vuex'
 
-import TdAccount from '@/components/Account/components/TdAccount';
-import MdAccount from '@/components/Account//components/MdAccount';
-import Task from '@/components/Task/Index';
-import OrderRecord from '@/components/Base/tradingData/OrderRecord';
-import TradeRecord from '@/components/Base/tradingData/TradeRecord';
-import Pos from '@/components/Base/tradingData/Pos';
-import Pnl from '@/components/Base/tradingData/pnl/Index';
-import MakeOrderDashboard from '@/components/Base/makeOrder/MakeOrderDashboard';
-import MainContent from '@/components/Layout/MainContent';
-import TaskRecord from '@/components/Task/TaskRecord';
-import OrderBook from '@/components/MarketFilter/components/OrderBook';
-import MarketData from '@/components/MarketFilter/components/MarketData';
+import TdAccount from '__renderer/components/Account/components/TdAccount';
+import MdAccount from '__renderer/components/Account//components/MdAccount';
+import Task from '__renderer/components/Task/Index';
+import OrderRecord from '__renderer/components/Base/tradingData/OrderRecord';
+import TradeRecord from '__renderer/components/Base/tradingData/TradeRecord';
+import Pos from '__renderer/components/Base/tradingData/Pos';
+import Pnl from '__renderer/components/Base/tradingData/pnl/Index';
+import MakeOrderDashboard from '__renderer/components/Base/makeOrder/MakeOrderDashboard';
+import MainContent from '__renderer/components/Layout/MainContent';
+import TaskRecord from '__renderer/components/Task/TaskRecord';
+import OrderBook from '__renderer/components/MarketFilter/components/OrderBook';
+import MarketData from '__renderer/components/MarketFilter/components/MarketData';
 
 import { watcher, transformPositionByTickerByMerge, transformOrderStatListToData, getOrdersBySourceDestInstrumentId, getTradesBySourceDestInstrumentId, getOrderStatByDest } from '@kungfu-trader/kungfu-uicc/io/kungfu/watcher';
 import { encodeKungfuLocation } from '@kungfu-trader/kungfu-uicc/io/kungfu/kungfuUtils';
-import { buildTradingDataAccountPipeByDaemon, buildMarketDataPipeByDaemon } from '@/ipcMsg/daemon';
+import { buildTradingDataAccountPipeByDaemon, buildMarketDataPipeByDaemon } from '__renderer/ipcMsg/daemon';
 
-import accountStrategyMixins from '@/views/index/js/accountStrategyMixins';
+import accountStrategyMixins from '__renderer/views/index/js/accountStrategyMixins';
 
 export default {
     name: 'account',
@@ -418,7 +418,7 @@ export default {
 
 <style lang="scss" scoped>
 
-@import '@/assets/scss/skin.scss';
+@import '__renderer/assets/scss/skin.scss';
 
 .account-content{
     height: 100%;

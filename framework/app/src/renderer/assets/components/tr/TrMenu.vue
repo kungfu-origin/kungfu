@@ -46,7 +46,7 @@ export default {
 </script>
 
 <style lang="scss">
-@import '@/assets/scss/skin.scss';
+@import '__renderer/assets/scss/skin.scss';
 .tr-menu{
     display: flex;
     flex-direction: column;

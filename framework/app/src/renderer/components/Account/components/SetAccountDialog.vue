@@ -29,7 +29,7 @@
 
 <script>
 
-import ExtConfigForm from '@/components/Base/ExtConfigForm';
+import ExtConfigForm from '__renderer/components/Base/ExtConfigForm';
 
 import { addTd, updateTdConfig, addMd, updateMdConfig } from '@kungfu-trader/kungfu-uicc/io/kungfu/account';
 
@@ -223,7 +223,7 @@ export default {
 </script>
 
 <style lang="scss">
-@import '@/assets/scss/skin.scss';
+@import '__renderer/assets/scss/skin.scss';
 
 .path-selection-in-dialog.account-setting-path {
     width: 240px;

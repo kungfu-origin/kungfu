@@ -82,6 +82,9 @@ const locator = function (home) {
   };
 };
 
+
+exports.locator = locator;
+
 exports._binding = binding;
 
 exports.longfist = binding.longfist;

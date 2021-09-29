@@ -2,21 +2,30 @@ const { IgnorePlugin, NoEmitOnErrorsPlugin } = require('webpack');
 const nodeExternals = require('webpack-node-externals');
 const { isProduction } = require('./utils');
 const path = require("path");
+const { dependencies } = require('../package.json')
 
 module.exports = {
   makeConfig: (mode, rootDir, distName) => {
+
     const production = isProduction(mode);
     return {
       devtool: 'eval-source-map',
+
       externals: [
         "pm2",
-        nodeExternals({
-          allowlist: [/^@kungfu-trader/],
-          modulesDir: path.resolve(rootDir, 'node_modules')
-        })
+        "iconv-lite"
+      //   nodeExternals({
+      //     allowlist: [ /^iconv-lite/, /^pm2/, /^@pm2/ ],
+      //     modulesDir: path.resolve(rootDir, 'node_modules'),
+      //     additionalModuleDirs: [
+      //       path.resolve(rootDir, "../", "../", 'node_modules'),
+      //     ],
+      //   })
+        
       ],
       mode: production ? 'production' : 'development',
       stats: {
+        logging: "warn",
         errorDetails: true,
       },
       infrastructureLogging: {
@@ -80,17 +89,17 @@ module.exports = {
             test: /\.node$/,
             use: 'node-loader',
           },
-          // {
-          //   test: /\.(m?js|node)$/,
-          //   parser: { amd: false },
-          //   use: {
-          //     loader: '@vercel/webpack-asset-relocator-loader',
-          //     options: {
-          //       outputAssetBase: 'native_modules',
-          //       production: production,
-          //     },
-          //   },
-          // },
+          {
+            test: /\.(m?js|node)$/,
+            parser: { amd: false },
+            use: {
+              loader: '@vercel/webpack-asset-relocator-loader',
+              options: {
+                outputAssetBase: 'native_modules',
+                production: production,
+              },
+            },
+          },
           {
             test: /\.(png|jpe?g|gif|svg)(\?.*)?$/,
             use: {
@@ -144,7 +153,10 @@ module.exports = {
       ],
       resolve: {
         alias: {
-          '@kungfu-trader/kungfu-uicc': path.dirname(require.resolve('@kungfu-trader/kungfu-uicc')),
+          '__renderer': path.resolve(rootDir, 'src', 'renderer'),
+          '@kungfu-trader/kungfu-app': path.resolve(rootDir, 'src', 'renderer'),
+          '@kungfu-trader/kungfu-uicc': path.dirname(path.resolve(require.resolve('@kungfu-trader/kungfu-uicc'))),
+          '@kungfu-trader/kungfu-core': path.dirname(path.resolve(require.resolve('@kungfu-trader/kungfu-core'), '../../')),
         },
         extensions: ['.js', '.ts', '.vue', '.json', '.css', '.node'],
       },

@@ -78,12 +78,6 @@ const webpackConfig = (mode) => {
       }),
       new VueLoaderPlugin(),
     ],
-    resolve: {
-      alias: {
-        '@': path.resolve(rootDir, 'src', 'renderer'),
-        '@kungfu-trader/kungfu-app': path.resolve(rootDir, 'src', 'renderer'),
-      },
-    },
     target: 'electron-renderer',
   })
 };

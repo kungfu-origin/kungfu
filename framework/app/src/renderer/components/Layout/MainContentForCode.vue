@@ -56,8 +56,8 @@ export default {
 </script>
 
 <style lang="scss">
-@import '@/assets/scss/layout.scss';
-@import '@/assets/scss/skin.scss';
+@import '__renderer/assets/scss/layout.scss';
+@import '__renderer/assets/scss/skin.scss';
 
 .kf-footer-popover{
     box-shadow: 0px 0px 30px $bg

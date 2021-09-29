@@ -12,9 +12,9 @@ import { ensureLedgerData } from '@kungfu-trader/kungfu-uicc/utils/busiUtils';
 import { writeCSV } from '@kungfu-trader/kungfu-uicc/utils/fileUtils';
 
 
-import makeOrderCoreMixin from '@/components/Base/makeOrder/js/makeOrderCoreMixin';
-import recordBeforeQuitMixin from "@/assets/mixins/recordBeforeQuitMixin";
-import tickerSetMixin from '@/components/MarketFilter/js/tickerSetMixin';
+import makeOrderCoreMixin from '__renderer/components/Base/makeOrder/js/makeOrderCoreMixin';
+import recordBeforeQuitMixin from "__renderer/assets/mixins/recordBeforeQuitMixin";
+import tickerSetMixin from '__renderer/components/MarketFilter/js/tickerSetMixin';
 
 const { _pm2, sendDataToProcessIdByPm2 } = require('@kungfu-trader/kungfu-uicc/utils/processUtils');
 const { BrowserWindow, shell, dialog } = require("@electron/remote");

@@ -73,9 +73,9 @@
 import { mapState } from 'vuex';
 import { findTargetFromArray } from '@kungfu-trader/kungfu-uicc/utils/busiUtils';
 
-import TickerSets from '@/components/MarketFilter/components/TickerSets';
-import AddTickerDialog from '@/components/MarketFilter/components/AddTickerDialog';
-import tickerSetMixin from '@/components/MarketFilter/js/tickerSetMixin';
+import TickerSets from '__renderer/components/MarketFilter/components/TickerSets';
+import AddTickerDialog from '__renderer/components/MarketFilter/components/AddTickerDialog';
+import tickerSetMixin from '__renderer/components/MarketFilter/js/tickerSetMixin';
 
 
 export default {

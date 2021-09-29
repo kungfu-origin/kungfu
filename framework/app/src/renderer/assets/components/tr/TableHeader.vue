@@ -21,7 +21,7 @@ export default {
 }
 </script>
 <style lang="scss">
-@import '@/assets/scss/skin.scss';
+@import '__renderer/assets/scss/skin.scss';
     .table-header{
         height: $tabHeight;
         line-height: $tabHeight;

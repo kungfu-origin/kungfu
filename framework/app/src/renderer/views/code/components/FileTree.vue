@@ -30,7 +30,7 @@ import path from 'path';
 import FileNode from './FileNode';
 
 import * as CODE_UTILS from "@kungfu-trader/kungfu-uicc/utils/fileUtils";
-import { ipcEmitDataByName } from '@/ipcMsg/emitter'
+import { ipcEmitDataByName } from '__renderer/ipcMsg/emitter'
 
 export default {
     props: {
@@ -192,7 +192,7 @@ export default {
 
 
 <style lang="scss">
-@import '@/assets/scss/skin.scss';
+@import '__renderer/assets/scss/skin.scss';
 $fileTreeWidth: 300px;
 .file-tree{
     width: $fileTreeWidth;

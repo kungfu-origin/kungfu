@@ -227,9 +227,9 @@ import { watcher } from '@kungfu-trader/kungfu-uicc/io/kungfu/watcher';
 import { deleteTd, switchTd } from '@kungfu-trader/kungfu-uicc/io/actions/account';
 import { loopToRunProcess } from '@kungfu-trader/kungfu-uicc/utils/busiUtils';
 
-import baseMixin from '@/assets/mixins/baseMixin';
+import baseMixin from '__renderer/assets/mixins/baseMixin';
 import mdTdRiskMixin from '../js/mdTdRiskMixin';
-import openLogMixin from '@/assets/mixins/openLogMixin';
+import openLogMixin from '__renderer/assets/mixins/openLogMixin';
 
 export default {
     name: 'account',
@@ -390,7 +390,7 @@ export default {
 </script>
 
 <style lang="scss">
-@import '@/assets/scss/skin.scss';
+@import '__renderer/assets/scss/skin.scss';
 .table-list{
     .source-name {
         span.name {

@@ -50,12 +50,12 @@
 
 <script>
 
-import DatePickerDialog from '@/components/Base/DatePickerDialog';
+import DatePickerDialog from '__renderer/components/Base/DatePickerDialog';
 
 import { dealOrderStat } from '@kungfu-trader/kungfu-uicc/io/kungfu/watcher';
-import { tradesHeader } from '@/components/Base/tradingData/js/tableHeaderConfig';
+import { tradesHeader } from '__renderer/components/Base/tradingData/js/tableHeaderConfig';
 
-import tradingDataMixin from '@/components/Base/tradingData/js/tradingDataMixin';
+import tradingDataMixin from '__renderer/components/Base/tradingData/js/tradingDataMixin';
 
 export default {
     name: 'trades-record',

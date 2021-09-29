@@ -2,14 +2,14 @@
 /* eslint-disable */
 import Vue from 'vue';
 import './setKungfuParamsOnWindow';
-import store from '@/store';
+import store from '__renderer/store';
 import router from './routers';
 import ElementUI from 'element-ui';
-import Components from '@/assets/components'
+import Components from '__renderer/assets/components'
 import App from './App.vue';
 
-import '@/assets/iconfont/iconfont.js';
-import '@/assets/iconfont/iconfont.css';
+import '__renderer/assets/iconfont/iconfont.js';
+import '__renderer/assets/iconfont/iconfont.css';
 
 Vue.use(ElementUI)
 Vue.use(Components)

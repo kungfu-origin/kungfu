@@ -1,6 +1,6 @@
 import fse from 'fs-extra';
 import path from 'path';
-
+import os from "os";
 
 import { KF_HOME, KFC_DIR, KF_CONFIG_PATH, APP_DIR, buildProcessLogPath } from '@kungfu-trader/kungfu-uicc/config/pathConfig';
 import { platform } from '@kungfu-trader/kungfu-uicc/config/platformConfig';
@@ -9,18 +9,19 @@ import { setTimerPromiseTask, delayMilliSeconds } from '@kungfu-trader/kungfu-ui
 import { getProcesses } from 'getprocesses';
 import { getUserLocale } from 'get-user-locale';
 
+process.env.PM2_HOME = path.resolve(os.homedir(), ".pm2");
 
+console.log(process.env);
 
 const numCPUs = require('os').cpus() ? require('os').cpus().length : 1;
 const fkill = require('fkill');
+const taskkill = require("taskkill");
 const pm2 = require('pm2');
 const which = require("pm2/lib/tools/which");
-const taskkill = require("taskkill");
 const locale = getUserLocale().replace(/-/g, '_');
+export const _pm2 = pm2;
 
 require.main = require.main || pm2;
-
-export const _pm2 = pm2;
 
 //=========================== task kill =========================================
 export const findProcessByKeywords = (tasks: string[]): Promise<any> => {
@@ -51,13 +52,18 @@ const winKill = async (tasks: string[]): Promise<any> => {
     }
 }
 
-const macKill = (tasks: string[]): any => {
-    //@ts-ignore
-    return fkill(tasks, {
-        force: true,
-        silent: true,
-        ignoreCase: true
-    })
+const macKill = (tasks: string[]): Promise<any> => {
+    try {
+        //@ts-ignore
+        return fkill(tasks, {
+            force: true,
+            silent: true,
+            ignoreCase: true
+        })
+    } catch (err) {
+        throw err
+    }
+
 }
 
 const linuxKill = async (tasks: string[]): Promise<any> => {
@@ -95,7 +101,7 @@ export const killExtra = () => kfKill([kfc, 'pm2', 'kungfuDaemon'])
 const pm2Connect = (): Promise<void> => {
     return new Promise((resolve, reject) => {
         try {
-            process.env.KFC_AS_VARIANT = 'node';
+            // process.env.KFC_AS_VARIANT = 'node';
             pm2.connect(false, (err: any): void => {
                 if (err) {
                     err = err.length ? err[0] : err;
@@ -104,7 +110,7 @@ const pm2Connect = (): Promise<void> => {
                     reject(err);
                     process.exit(2);
                 }
-                process.env.KFC_AS_VARIANT = '';
+                // process.env.KFC_AS_VARIANT = '';
                 resolve()
             })
         } catch (err) {

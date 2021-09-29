@@ -66,12 +66,13 @@ const production = process.env.NODE_ENV === 'production';
 
 // core main: src/es/index.js
 const coreModulePath = () => {
-    const coreMainPath = require.resolve('@kungfu-trader/kungfu-core');
+    const coreMainPath = path.resolve(require.resolve('@kungfu-trader/kungfu-core'));
     console.log(`coreMainPath = ${coreMainPath}`);
     const coreModule = path.resolve(path.dirname(coreMainPath), '..', '..');
     console.log(`coreModulePath = ${coreModule}`);
     return path.resolve(path.dirname(coreMainPath), '..', '..');
 }
+
 
 //获取进程日志地址
 export const buildProcessLogPath = (processId: string) => {
@@ -139,7 +140,7 @@ export const APP_DIR = production
 
 
 process.env.NODEJS_EXECUTABLE = path.resolve(KFC_DIR, KFC_EXECUTABLE); // for pm2
-process.env.PATH = KFC_DIR + path.delimiter + process.env.PATH;
+// process.env.PATH = KFC_DIR + path.delimiter + process.env.PATH;
 process.env.KFC_DIR = KFC_DIR;
 
 

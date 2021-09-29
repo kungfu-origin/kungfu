@@ -13,8 +13,8 @@
 <script>
 import lineConfig from './config/lineEchart';
 import { toDecimal, deepClone } from '@kungfu-trader/kungfu-uicc/utils/busiUtils';
-// import echarts from '@/assets/js/static/echarts.min.js'
-import * as echarts from '@/assets/js/static/echarts.min.js'
+// import echarts from '__renderer/assets/js/static/echarts.min.js'
+import * as echarts from '__renderer/assets/js/static/echarts.min.js'
 console.log(echarts)
 
 export default {
@@ -152,7 +152,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '@/assets/scss/skin.scss';
+@import '__renderer/assets/scss/skin.scss';
 .day-chart{
     height: 100%;
     width: 100%;

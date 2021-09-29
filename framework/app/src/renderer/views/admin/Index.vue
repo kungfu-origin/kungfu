@@ -11,8 +11,8 @@
 
 <script>
 
-import TdAccount from '@/components/Account/components/TdAccount';
-import Strategy from '@/components/Strategy/Strategy';
+import TdAccount from '__renderer/components/Account/components/TdAccount';
+import Strategy from '__renderer/components/Strategy/Strategy';
 
 export default {
 
@@ -25,7 +25,7 @@ export default {
 </script>
 
 <style lang="scss">
-@import "@/assets/scss/skin.scss";
+@import "__renderer/assets/scss/skin.scss";
 
 .kf-admin-manager__warp {
     padding: 8px;

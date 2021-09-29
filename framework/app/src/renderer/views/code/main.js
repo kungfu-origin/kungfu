@@ -6,11 +6,11 @@ import store from './store';
 import router from './routers';
 import * as utils from '@kungfu-trader/kungfu-uicc/utils/busiUtils'
 import ElementUI from 'element-ui';
-import Components from '@/assets/components'
+import Components from '__renderer/assets/components'
 import App from './App.vue';
 
-import '@/assets/iconfont/iconfont.js';
-import '@/assets/iconfont/iconfont.css';
+import '__renderer/assets/iconfont/iconfont.js';
+import '__renderer/assets/iconfont/iconfont.css';
 import 'monaco-editor/min/vs/editor/editor.main.css';
 
 Vue.use(ElementUI)

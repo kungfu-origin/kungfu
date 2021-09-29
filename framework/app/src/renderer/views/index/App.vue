@@ -59,20 +59,20 @@
 
 import { mapState } from 'vuex';
 
-import GlobalSettingDialog from '@/components/Base/GlobalSettingDialog';
-import LoginInfoDialog from '@/components/Base/LoginInfoDialog';
-import DatePickerDialog from '@/components/Base/DatePickerDialog';
-import AuthDialog from '@/components/Base/AuthingDialog';
-import SystemPrepareDialog from '@/components/Base/SystemPrepareDialog';
+import GlobalSettingDialog from '__renderer/components/Base/GlobalSettingDialog';
+import LoginInfoDialog from '__renderer/components/Base/LoginInfoDialog';
+import DatePickerDialog from '__renderer/components/Base/DatePickerDialog';
+import AuthDialog from '__renderer/components/Base/AuthingDialog';
+import SystemPrepareDialog from '__renderer/components/Base/SystemPrepareDialog';
 
-import { buildMarketDataPipeByDaemon, buildTradingDataAccountPipeByDaemon, buildKungfuGlobalDataPipeByDaemon } from '@/ipcMsg/daemon';
+import { buildMarketDataPipeByDaemon, buildTradingDataAccountPipeByDaemon, buildKungfuGlobalDataPipeByDaemon } from '__renderer/ipcMsg/daemon';
 import { buildGatewayStatePipe } from '@kungfu-trader/kungfu-uicc/io/kungfu/tradingData';
 import { watcher } from '@kungfu-trader/kungfu-uicc/io/kungfu/watcher';
 
-import ipcListenerMixin from '@/ipcMsg/ipcListenerMixin';
-import tickerSetMixin from '@/components/MarketFilter/js/tickerSetMixin';
-import workersMixin from '@/workers/workersMixin';
-import authMixin from '@/components/Base/js/authMixin';
+import ipcListenerMixin from '__renderer/ipcMsg/ipcListenerMixin';
+import tickerSetMixin from '__renderer/components/MarketFilter/js/tickerSetMixin';
+import workersMixin from '__renderer/workers/workersMixin';
+import authMixin from '__renderer/components/Base/js/authMixin';
 
 
 export default {
@@ -279,7 +279,7 @@ export default {
 </script>
 
 <style lang="scss">
-@import '@/assets/scss/base.scss';
+@import '__renderer/assets/scss/base.scss';
 
 #app{
     height: 100%;

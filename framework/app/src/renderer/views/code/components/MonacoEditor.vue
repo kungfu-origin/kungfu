@@ -191,7 +191,7 @@ function pythonProvideCompletionItems (model, position, context, token) {
 
     const allCharList = allChars
         .replace(/\./g, ' ')
-        .replace(/@/g,  ' ')
+        .replace(/__renderer/g,  ' ')
         .replace(/"/g,  ' ')
         .replace(/'/g,  ' ')
         .replace(/:/g,  ' ')
@@ -216,7 +216,7 @@ function pythonProvideCompletionItems (model, position, context, token) {
 
 </script>
 <style lang="scss">
-@import "@/assets/scss/skin.scss";
+@import "__renderer/assets/scss/skin.scss";
 .code-editor {
     flex: 1;
     background: $bg_card;

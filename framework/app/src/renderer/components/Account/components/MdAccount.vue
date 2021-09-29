@@ -110,9 +110,9 @@ import { watcher } from '@kungfu-trader/kungfu-uicc/io/kungfu/watcher';
 import { switchMd, deleteMd } from '@kungfu-trader/kungfu-uicc/io/actions/account';
 import { loopToRunProcess, ifProcessRunning } from '@kungfu-trader/kungfu-uicc/utils/busiUtils';
 
-import baseMixin from '@/assets/mixins/baseMixin';
+import baseMixin from '__renderer/assets/mixins/baseMixin';
 import mdTdRiskMixin from '../js/mdTdRiskMixin';
-import openLogMixin from '@/assets/mixins/openLogMixin';
+import openLogMixin from '__renderer/assets/mixins/openLogMixin';
 
 export default {
     mixins: [ baseMixin, mdTdRiskMixin, openLogMixin ],
@@ -226,7 +226,7 @@ export default {
 }
 </script>
 <style lang="scss">
-@import '@/assets/scss/skin.scss';
+@import '__renderer/assets/scss/skin.scss';
 .md-table{
    height: 100%;
 }

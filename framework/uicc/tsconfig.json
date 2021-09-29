@@ -17,7 +17,7 @@
     "paths": {
       "@kungfu-trader/kungfu-uicc/*": [
         "*"
-      ]
+      ],
     }
   },
   "exclude": [

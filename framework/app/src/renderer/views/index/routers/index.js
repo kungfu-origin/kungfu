@@ -8,8 +8,8 @@
  */ 
 import Vue from 'vue';
 import VueRouter from 'vue-router';
-import Account from '@/views/index/components/account/Index';
-import Strategy from '@/views/index/components/strategy/Index';
+import Account from '__renderer/views/index/components/account/Index';
+import Strategy from '__renderer/views/index/components/strategy/Index';
 
 Vue.use(VueRouter)
 

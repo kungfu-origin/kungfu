@@ -66,7 +66,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '@/assets/scss/skin.scss';
+@import '__renderer/assets/scss/skin.scss';
 .tr-menu-item{
     padding: 12px 0;
     &:hover{

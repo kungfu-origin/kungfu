@@ -93,7 +93,7 @@ import { ProcessStatusConfig } from '@kungfu-trader/kungfu-uicc/config/tradingCo
 import { switchTd, switchMd } from '@kungfu-trader/kungfu-uicc/io/actions/account';
 import { ifProcessRunning, getMemCpu } from '@kungfu-trader/kungfu-uicc/utils/busiUtils';
 
-import openLogMixin from "@/assets/mixins/openLogMixin";
+import openLogMixin from "__renderer/assets/mixins/openLogMixin";
 
 export default {
     mixins: [ openLogMixin ],
@@ -189,7 +189,7 @@ export default {
 }
 </script>
 <style lang="scss">
-@import "@/assets/scss/skin.scss";
+@import "__renderer/assets/scss/skin.scss";
 
 .account-status-content{
     display: flex;

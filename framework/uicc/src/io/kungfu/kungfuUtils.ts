@@ -1,6 +1,5 @@
-
-import { KF_RUNTIME_DIR } from '@kungfu-trader/kungfu-uicc/config/pathConfig';
 import moment from 'moment';
+import { KF_RUNTIME_DIR } from '@kungfu-trader/kungfu-uicc/config/pathConfig';
 import { logger } from '@kungfu-trader/kungfu-uicc/utils/logUtils';
 
 export const kungfu = require('@kungfu-trader/kungfu-core').kungfu;

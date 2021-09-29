@@ -18,11 +18,6 @@ const webpackConfig = (mode) => merge(
       main: path.join(rootDir, 'src', 'main', 'index.js'),
     },
 
-    resolve: {
-      alias: {
-        '@': path.resolve(rootDir, 'src', 'renderer'),
-      },
-    },
     target: 'electron-main'
   }
 );

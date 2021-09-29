@@ -236,14 +236,14 @@ import { deepClone, delayMilliSeconds } from '@kungfu-trader/kungfu-uicc/utils/b
 import { SourceTypeConfig, SideName, OffsetName, PriceType, HedgeFlag, ExchangeIds, InstrumentTypes, allowShorted } from '@kungfu-trader/kungfu-uicc/config/tradingConfig';
 import { biggerThanZeroValidator } from '@kungfu-trader/kungfu-uicc/assets/validator';
 
-import instrumentsMixin from '@/assets/mixins/instrumentsMixin';
-import makeOrderMixin from '@/components/Base/makeOrder/js/makeOrderMixin';
+import instrumentsMixin from '__renderer/assets/mixins/instrumentsMixin';
+import makeOrderMixin from '__renderer/components/Base/makeOrder/js/makeOrderMixin';
 
 function getMakeOrderCoreMixin () {
     if (process.env.RENDERER_TYPE === 'makeOrder') {
-        return require('@/components/Base/makeOrder/js/makeOrderIPCMixin').default 
+        return require('__renderer/components/Base/makeOrder/js/makeOrderIPCMixin').default 
     } else {
-        return require('@/components/Base/makeOrder/js/makeOrderCoreMixin').default
+        return require('__renderer/components/Base/makeOrder/js/makeOrderCoreMixin').default
     }
 }
 

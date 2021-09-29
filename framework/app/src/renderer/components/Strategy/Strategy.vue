@@ -208,8 +208,8 @@ import * as STRATEGY_API from '@kungfu-trader/kungfu-uicc/io/kungfu/strategy';
 import { switchStrategy } from '@kungfu-trader/kungfu-uicc/io/actions/strategy';
 import { chineseValidator, specialStrValidator, noZeroAtFirstValidator, noKeywordValidatorBuilder } from '@kungfu-trader/kungfu-uicc/assets/validator';
 
-import openLogMixin from '@/assets/mixins/openLogMixin';
-import baseMixin from '@/assets/mixins/baseMixin';
+import openLogMixin from '__renderer/assets/mixins/openLogMixin';
+import baseMixin from '__renderer/assets/mixins/baseMixin';
 
 
 const remote = require('@electron/remote')
@@ -449,7 +449,7 @@ export default {
 }
 </script>
 <style lang="scss">
-@import '@/assets/scss/skin.scss';
+@import '__renderer/assets/scss/skin.scss';
 .strategy-mouse{
     &:hover{
         cursor: pointer;

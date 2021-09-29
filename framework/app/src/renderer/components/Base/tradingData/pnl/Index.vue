@@ -64,7 +64,7 @@ export default {
 
 <style lang="scss">
 
-@import '@/assets/scss/skin.scss';
+@import '__renderer/assets/scss/skin.scss';
 
 .pnl-header{
     font-size: 11px;

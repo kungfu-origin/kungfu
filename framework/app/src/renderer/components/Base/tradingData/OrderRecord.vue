@@ -97,16 +97,16 @@
 <script>
 import { mapState } from 'vuex';
 
-import DatePickerDialog from '@/components/Base/DatePickerDialog';
+import DatePickerDialog from '__renderer/components/Base/DatePickerDialog';
 
 import { kungfuCancelAllOrders } from '@kungfu-trader/kungfu-uicc/io/kungfu/makeCancelOrder';
 import { dealOrderStat } from '@kungfu-trader/kungfu-uicc/io/kungfu/watcher';
 import { aliveOrderStatusList } from '@kungfu-trader/kungfu-uicc/config/tradingConfig';
-import { ordersHeader } from '@/components/Base/tradingData/js/tableHeaderConfig';
+import { ordersHeader } from '__renderer/components/Base/tradingData/js/tableHeaderConfig';
 
-import makeOrderMixin from '@/components/Base/makeOrder/js/makeOrderMixin';
-import makeOrderCoreMixin from '@/components/Base/makeOrder/js/makeOrderCoreMixin';
-import tradingDataMixin from '@/components/Base/tradingData/js/tradingDataMixin';
+import makeOrderMixin from '__renderer/components/Base/makeOrder/js/makeOrderMixin';
+import makeOrderCoreMixin from '__renderer/components/Base/makeOrder/js/makeOrderCoreMixin';
+import tradingDataMixin from '__renderer/components/Base/tradingData/js/tradingDataMixin';
 
 export default {
     name: "orders",
@@ -304,7 +304,7 @@ export default {
 
 <style lang="scss">
 
-@import "@/assets/scss/skin.scss";
+@import "__renderer/assets/scss/skin.scss";
 
     .trading-day-header {
         font-size: 10px;

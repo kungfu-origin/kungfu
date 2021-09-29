@@ -272,7 +272,7 @@ import {
   ExchangeIds,
 } from "@kungfu-trader/kungfu-uicc/config/tradingConfig";
 
-import instrumentsMixin from "@/assets/mixins/instrumentsMixin";
+import instrumentsMixin from "__renderer/assets/mixins/instrumentsMixin";
 
 const { dialog } = require("@electron/remote");
 Vue.use(Autocomplete);

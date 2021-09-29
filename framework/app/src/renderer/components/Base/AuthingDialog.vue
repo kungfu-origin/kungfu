@@ -25,7 +25,7 @@
 <script>
 import { AuthingGuard, GuardMode } from '@authing/vue-ui-components'
 import '@authing/vue-ui-components/lib/index.min.css'
-import authMixin from '@/components/Base/js/authMixin';
+import authMixin from '__renderer/components/Base/js/authMixin';
 
 export default {
 
@@ -80,7 +80,7 @@ export default {
 </script>
 
 <style lang="scss">
-@import '@/assets/scss/skin.scss';
+@import '__renderer/assets/scss/skin.scss';
 
 // .authing-ant-message {
 //     display: none;

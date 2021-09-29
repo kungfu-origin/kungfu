@@ -1,7 +1,7 @@
 
 import { mapState, mapGetters } from 'vuex';
 
-import { ipcEmitDataByName } from '@/ipcMsg/emitter';
+import { ipcEmitDataByName } from '__renderer/ipcMsg/emitter';
 import { ipcRenderer } from 'electron';
 
 

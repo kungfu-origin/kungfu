@@ -1,6 +1,6 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
-import MakeOrderDashboard from '@/components/Base/makeOrder/MakeOrderDashboard';
+import MakeOrderDashboard from '__renderer/components/Base/makeOrder/MakeOrderDashboard';
 
 
 Vue.use(VueRouter)

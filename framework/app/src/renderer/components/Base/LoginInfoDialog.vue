@@ -54,11 +54,11 @@
 </template>
 
 <script>
-import ExtConfigForm from '@/components/Base/ExtConfigForm';
+import ExtConfigForm from '__renderer/components/Base/ExtConfigForm';
 
 import { deepClone } from '@kungfu-trader/kungfu-uicc/utils/busiUtils';
 import { getAuthClient } from "@authing/vue-ui-components"
-import loginInfoFormConfig from '@/components/Base/config/loginInfoFormConfig';
+import loginInfoFormConfig from '__renderer/components/Base/config/loginInfoFormConfig';
 
 
 export default {
@@ -195,7 +195,7 @@ export default {
 
 <style lang="scss">
 
-@import "@/assets/scss/skin.scss";
+@import "__renderer/assets/scss/skin.scss";
 
 .kf-login-info__warp {
     

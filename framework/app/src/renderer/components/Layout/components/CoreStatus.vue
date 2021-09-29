@@ -94,7 +94,7 @@ import { ProcessStatusConfig } from '@kungfu-trader/kungfu-uicc/config/tradingCo
 import { ifProcessRunning, getMemCpu } from '@kungfu-trader/kungfu-uicc/utils/busiUtils';
 import { switchMaster, switchLedger, switchDaemon } from '@kungfu-trader/kungfu-uicc/io/actions/base';
 
-import openLogMixin from '@/assets/mixins/openLogMixin';
+import openLogMixin from '__renderer/assets/mixins/openLogMixin';
 
 export default {
     mixins: [ openLogMixin ],
@@ -179,7 +179,7 @@ export default {
 }
 </script>
 <style lang="scss">
-@import "@/assets/scss/skin.scss";
+@import "__renderer/assets/scss/skin.scss";
 .core-status-popover{
     box-shadow: 0px 0px 30px $bg;
 }

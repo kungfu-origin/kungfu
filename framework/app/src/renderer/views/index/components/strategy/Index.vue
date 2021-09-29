@@ -114,21 +114,21 @@
 
 import { mapState } from 'vuex';
 
-import Strategy from '@/components/Strategy/Strategy';
-import Log from '@/components/Strategy/Log';
-import OrderRecord from '@/components/Base/tradingData/OrderRecord';
-import TradeRecord from '@/components/Base/tradingData/TradeRecord';
-import OrderMap from "@/components/Base/tradingData/OrderMap";
-import Pos from '@/components/Base/tradingData/Pos';
-import Pnl from '@/components/Base/tradingData/pnl/Index';
-import MainContent from '@/components/Layout/MainContent';
+import Strategy from '__renderer/components/Strategy/Strategy';
+import Log from '__renderer/components/Strategy/Log';
+import OrderRecord from '__renderer/components/Base/tradingData/OrderRecord';
+import TradeRecord from '__renderer/components/Base/tradingData/TradeRecord';
+import OrderMap from "__renderer/components/Base/tradingData/OrderMap";
+import Pos from '__renderer/components/Base/tradingData/Pos';
+import Pnl from '__renderer/components/Base/tradingData/pnl/Index';
+import MainContent from '__renderer/components/Layout/MainContent';
 
-import { buildTradingDataStrategyPipeByDaemon } from '@/ipcMsg/daemon';
+import { buildTradingDataStrategyPipeByDaemon } from '__renderer/ipcMsg/daemon';
 import { buildKungfuDataByAppPipe } from '@kungfu-trader/kungfu-uicc/io/kungfu/tradingData';
 import { watcher, transformOrderStatListToData, getOrderInputBySourceDest, getOrdersBySourceDestInstrumentId, getTradesBySourceDestInstrumentId, getOrderStatByDest, dealOrderInput, dealOrder, dealTrade } from '@kungfu-trader/kungfu-uicc/io/kungfu/watcher';
 import { encodeKungfuLocation } from '@kungfu-trader/kungfu-uicc/io/kungfu/kungfuUtils';
 
-import accountStrategyMixins from '@/views/index/js/accountStrategyMixins';
+import accountStrategyMixins from '__renderer/views/index/js/accountStrategyMixins';
 
 export default {
     mixins: [ accountStrategyMixins ],
@@ -233,7 +233,7 @@ export default {
 }
 </script>
 <style lang="scss">
-@import '@/assets/scss/skin.scss';
+@import '__renderer/assets/scss/skin.scss';
 .trader-content{
     height: 100%;
 }

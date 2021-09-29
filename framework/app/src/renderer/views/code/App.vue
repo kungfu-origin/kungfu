@@ -5,7 +5,7 @@
 </template>
 <script>
 
-import { ipcEmitDataByName } from '@/ipcMsg/emitter';
+import { ipcEmitDataByName } from '__renderer/ipcMsg/emitter';
 
 export default {
     name: 'app',
@@ -31,7 +31,7 @@ export default {
 </script>
 
 <style lang="scss">
-@import '@/assets/scss/base.scss';
+@import '__renderer/assets/scss/base.scss';
  #app{
    height: 100%;
    background: $login-bg;

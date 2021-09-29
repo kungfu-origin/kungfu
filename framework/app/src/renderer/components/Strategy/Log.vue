@@ -39,9 +39,9 @@ import { Tail } from 'tail';
 import { writeFile, addFileSync } from '@kungfu-trader/kungfu-uicc/utils/fileUtils';
 import { ipcRenderer } from 'electron';
 
-import Workers from '@/workers/index';
+import Workers from '__renderer/workers/index';
 
-import openLogMixin from '@/assets/mixins/openLogMixin';
+import openLogMixin from '__renderer/assets/mixins/openLogMixin';
 
 export default {
     name: 'log',

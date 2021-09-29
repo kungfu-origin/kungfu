@@ -47,7 +47,7 @@ function startRenderer() {
       static: path.join(__dirname, '../'),
       port: 9090,
       hot: "only",
-      compress: false
+      compress: false,
     }, compiler);
     server.start();
 
@@ -61,7 +61,6 @@ function startRenderer() {
     })
 
     compiler.hooks.done.tap("renderer-compile-done", stats => {
-      logStats('Renderer', "Compile-Done");
       resolve();
     })
   });
@@ -81,7 +80,7 @@ function startMain() {
 
       if (electronProcess && electronProcess.kill) {
         manualRestart = true;
-        process.kill(electronProcess.pid);
+        process.kill(electronProcess.pid, "SIGINT");
         electronProcess = null;
         startElectron();
 
@@ -92,7 +91,6 @@ function startMain() {
     });
 
     compiler.hooks.done.tap("main-compile-done", stats => {
-      logStats('Main', "Compile-Done");
       resolve();
     })
   });
@@ -113,7 +111,6 @@ function startDaemon() {
     });
 
     compiler.hooks.done.tap("daemon-compile-done", stats => {
-      logStats('Daemon', "Compile-Done");
       resolve();
     })
   });
@@ -143,7 +140,7 @@ function startElectron() {
 
   electronProcess.on('close', () => {
     electronLog("exit", 'blue');
-    if (!manualRestart) process.exit();
+    if (!manualRestart) process.exit(0);
   });
 }
 
