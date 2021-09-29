@@ -47,7 +47,9 @@ function startRenderer() {
       static: path.join(__dirname, '../'),
       port: 9090,
       hot: "only",
-      compress: false,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+      },
     }, compiler);
     server.start();
 
@@ -121,15 +123,16 @@ function startElectron() {
     electron, 
     [
       '--inspect=5858',
-      "--trace-warnings",
-      path.resolve('./dist/app/main.js')
+      // "--trace-warnings",
+      "."
     ], 
-    {
-      env: {
-        ELECTRON_ENABLE_LOGGING: true,
-        ELECTRON_ENABLE_STACK_DUMPING: true
-      }
-    });
+    // {
+    //   env: {
+    //     ELECTRON_ENABLE_LOGGING: true,
+    //     ELECTRON_ENABLE_STACK_DUMPING: true
+    //   }
+    // }
+    );
 
   electronProcess.stdout.on('data', (data) => {
     electronLog(data, 'blue');

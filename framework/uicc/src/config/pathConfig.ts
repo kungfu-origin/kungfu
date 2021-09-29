@@ -125,8 +125,9 @@ export const KFC_EXECUTABLE = process.platform === 'win32' ? 'kfc.exe' : 'kfc';
 console.log(`process.cwd = ${process.cwd()}`);
 console.log(`process.resourcesPath = ${process.resourcesPath}`);
 console.log(`KFC_PARENT_DIR = ${KFC_PARENT_DIR}`);
-console.log(`KFC_DIR = ${KFC_DIR}`);
-
+console.log(path.resolve(require.resolve("@kungfu-trader/kungfu-core")))
+console.log(KF_RUNTIME_DIR)
+console.log(process.env.NODE_ENV)
 
 export const EXTENSION_DIR = path.join(KFC_PARENT_DIR, 'kfc', 'kungfu_extensions');
 
@@ -141,9 +142,9 @@ export const APP_DIR = production
 
 process.env.NODEJS_EXECUTABLE = path.resolve(KFC_DIR, KFC_EXECUTABLE); // for pm2
 
-// if (process.env.APP_TYPE === 'renderer') {
-//     process.env.PATH = KFC_DIR + path.delimiter + process.env.PATH;
-// }
+
+// process.env.PATH = KFC_DIR + path.delimiter + process.env.PATH;
+
 
 process.env.KFC_DIR = KFC_DIR;
 

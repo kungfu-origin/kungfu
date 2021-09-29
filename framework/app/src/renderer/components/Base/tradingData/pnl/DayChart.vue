@@ -14,8 +14,8 @@
 import lineConfig from './config/lineEchart';
 import { toDecimal, deepClone } from '@kungfu-trader/kungfu-uicc/utils/busiUtils';
 // import echarts from '__renderer/assets/js/static/echarts.min.js'
-import * as echarts from '__renderer/assets/js/static/echarts.min.js'
-console.log(echarts)
+// import * as echarts from '__renderer/assets/js/static/echarts.min.js'
+// console.log(echarts)
 
 export default {
     name: 'day-chart',

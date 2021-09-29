@@ -22,7 +22,7 @@ const webpackConfig = (mode) => merge(
     ],
     resolve: {
       alias: {
-        '@': path.resolve(rootDir, 'src', 'renderer'),
+        '__renderer': path.resolve(rootDir, 'src', 'renderer'),
       },
     },
     target: 'node',
