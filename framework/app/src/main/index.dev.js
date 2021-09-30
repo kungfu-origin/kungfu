@@ -20,11 +20,11 @@ require('electron-debug')()
 // Install `vue-devtools`
 app.on('ready', async () => {
 
-  // try {
-  //   await session.defaultSession.loadExtension("http://localhost:9091");
-  // } catch (err) {
-  //   console.error(err)
-  // }
+  try {
+    await session.defaultSession.loadExtension(path.resolve('../../\.devtolls/vue-devtool'));
+  } catch (err) {
+    console.error(err)
+  }
 })
 
 

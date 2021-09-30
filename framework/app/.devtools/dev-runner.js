@@ -123,15 +123,11 @@ function startElectron() {
     electron, 
     [
       '--inspect=5858',
-      // "--trace-warnings",
+      "--trace-warnings",
+      "-enable-logging",
+
       "."
-    ], 
-    // {
-    //   env: {
-    //     ELECTRON_ENABLE_LOGGING: true,
-    //     ELECTRON_ENABLE_STACK_DUMPING: true
-    //   }
-    // }
+    ]
     );
 
   electronProcess.stdout.on('data', (data) => {
