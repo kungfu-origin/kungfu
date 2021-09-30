@@ -124,8 +124,8 @@ function startElectron() {
     [
       '--inspect=5858',
       "--trace-warnings",
+      "--trace-deprecation",
       "-enable-logging",
-
       "."
     ]
     );
