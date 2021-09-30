@@ -11,13 +11,10 @@ import { getUserLocale } from 'get-user-locale';
 
 process.env.PM2_HOME = path.resolve(os.homedir(), ".pm2");
 
-console.log(process.env);
-
 const numCPUs = require('os').cpus() ? require('os').cpus().length : 1;
 const fkill = require('fkill');
 const taskkill = require("taskkill");
 const pm2 = require('pm2');
-const which = require("pm2/lib/tools/which");
 const locale = getUserLocale().replace(/-/g, '_');
 export const _pm2 = pm2;
 
@@ -101,7 +98,6 @@ export const killExtra = () => kfKill([kfc, 'pm2', 'kungfuDaemon'])
 const pm2Connect = (): Promise<void> => {
     return new Promise((resolve, reject) => {
         try {
-            // process.env.KFC_AS_VARIANT = 'node';
             pm2.connect(false, (err: any): void => {
                 if (err) {
                     err = err.length ? err[0] : err;
@@ -110,7 +106,6 @@ const pm2Connect = (): Promise<void> => {
                     reject(err);
                     process.exit(2);
                 }
-                // process.env.KFC_AS_VARIANT = '';
                 resolve()
             })
         } catch (err) {
@@ -188,7 +183,7 @@ function buildArgs (args: string): string {
     return [ logLevel, args, rocket ].join(' ');
 }
 
-export const startProcess = (options: Pm2Options, no_ext = false): Promise<object> => {
+export const startProcess = (options: Pm2Options): Promise<object> => {
     const kfcScript = platform === 'win' ? 'kfc.exe' : 'kfc';
     let optionsResolved: Pm2Options = {
         "name": options.name,
@@ -217,8 +212,6 @@ export const startProcess = (options: Pm2Options, no_ext = false): Promise<objec
             "PYTHONIOENCODING": "utf8"
         },
     };
-
-    if (no_ext) optionsResolved['env']['KF_NO_EXT'] = 'on';
 
     return new Promise((resolve, reject) => {
         pm2Connect().then(() => {
@@ -417,8 +410,11 @@ export const startMaster = async (force: boolean): Promise<any> => {
     const args = buildArgs('service master');
     return startProcess({
         "name": processName,
-        args
-    }, true).catch(err => logger.error('[PM2] startProcess', processName, args, err))
+        args,
+        env: {
+            "KF_NO_EXT": "on"
+        }
+    }).catch(err => logger.error('[PM2] startProcess', processName, args, err))
 }
 
 //启动ledger
@@ -516,14 +512,11 @@ export const startCustomProcess = (targetName: string, params: string): Promise<
 }
 
 export const startDaemon = (): Promise<any> => {
-
     return startProcess({
         name: "kungfuDaemon",
-        args: "",
         force: true,
         watch: process.env.NODE_ENV !== 'production',
-        script: path.resolve(APP_DIR, "daemon.js"),
-        interpreter: which('kfc'),
+        args: path.resolve(APP_DIR, "daemon.js"),
         env: {
             ...process.env,
             'KFC_AS_VARIANT': 'node'

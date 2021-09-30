@@ -43,6 +43,8 @@
     "semver": "^7.3.5",
     "tail": "^2.0.2",
     "taskkill": "^2.0.0",
+    "minimist": "^1.2.5",
+    "jschardet": "^2.3.0",
     "typescript": "^4.3.5"
   }
 }

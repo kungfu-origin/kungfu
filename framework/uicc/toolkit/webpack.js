@@ -12,10 +12,8 @@ module.exports = {
       devtool: 'eval-source-map',
 
       externals: [
-        nodeExternals({
-          allowlist: [/^@kungfu-trader/],
-          modulesDir: path.resolve(rootDir, 'node_modules')
-        })
+        "pm2",
+        "iconv-lite"
       ],
       mode: production ? 'production' : 'development',
       stats: {
@@ -41,48 +39,48 @@ module.exports = {
             test: /\.node$/,
             use: 'node-loader',
           },
-          {
-            test: /@pm2.*InteractorClient\.js$/,
-            loader: 'string-replace-loader',
-            options: {
-              search: 'main.filename',
-              replace: "resolve('pm2/bin/pm2')",
-            },
-          },
-          {
-            test: /@pm2.*InteractorClient\.js$/,
-            loader: 'string-replace-loader',
-            options: {
-              search: 'path.dirname(module.filename)',
-              replace:
-                production ? 'path.resolve(__dirname, "..", "..", "node_modules", "@pm2", "agent", "src")' : '__dirname',
-            },
-          },
-          {
-            test: /pm2.*Client\.js$/,
-            loader: 'string-replace-loader',
-            options: {
-              search: "interpreter = 'node'",
-              replace: "interpreter = which('kfc')",
-            },
-          },
-          {
-            test: /pm2.*Client\.js$/,
-            loader: 'string-replace-loader',
-            options: {
-              search: "which('node')",
-              replace: "which('kfc')",
-            },
-          },
-          {
-            test: /pm2.*Client\.js$/,
-            loader: 'string-replace-loader',
-            options: {
-              search: 'path.dirname(module.filename)',
-              replace:
-                production ? 'path.resolve(__dirname, "..", "..", "node_modules", "pm2", "lib")' : '__dirname',
-            },
-          },
+          // {
+          //   test: /@pm2.*InteractorClient\.js$/,
+          //   loader: 'string-replace-loader',
+          //   options: {
+          //     search: 'main.filename',
+          //     replace: "resolve('pm2/bin/pm2')",
+          //   },
+          // },
+          // {
+          //   test: /@pm2.*InteractorClient\.js$/,
+          //   loader: 'string-replace-loader',
+          //   options: {
+          //     search: 'path.dirname(module.filename)',
+          //     replace:
+          //       production ? 'path.resolve(__dirname, "..", "..", "node_modules", "@pm2", "agent", "src")' : '__dirname',
+          //   },
+          // },
+          // {
+          //   test: /pm2.*Client\.js$/,
+          //   loader: 'string-replace-loader',
+          //   options: {
+          //     search: "interpreter = 'node'",
+          //     replace: "interpreter = which('kfc')",
+          //   },
+          // },
+          // {
+          //   test: /pm2.*Client\.js$/,
+          //   loader: 'string-replace-loader',
+          //   options: {
+          //     search: "which('node')",
+          //     replace: "which('kfc')",
+          //   },
+          // },
+          // {
+          //   test: /pm2.*Client\.js$/,
+          //   loader: 'string-replace-loader',
+          //   options: {
+          //     search: 'path.dirname(module.filename)',
+          //     replace:
+          //       production ? 'path.resolve(__dirname, "..", "..", "node_modules", "pm2", "lib")' : '__dirname',
+          //   },
+          // },
           {
             test: /\.(m?js|node)$/,
             parser: { amd: false },
@@ -140,9 +138,9 @@ module.exports = {
         path: path.join(rootDir, 'dist', distName),
       },
       plugins: [
-        new IgnorePlugin({ resourceRegExp: /deploy/, contextRegExp: /pm2-deploy$/ }),
-        new IgnorePlugin({ resourceRegExp: /pty.js/, contextRegExp: /blessed.*widgets$/ }),
-        new IgnorePlugin({ resourceRegExp: /term.js/, contextRegExp: /blessed.*widgets$/ }),
+        // new IgnorePlugin({ resourceRegExp: /deploy/, contextRegExp: /pm2-deploy$/ }),
+        // new IgnorePlugin({ resourceRegExp: /pty.js/, contextRegExp: /blessed.*widgets$/ }),
+        // new IgnorePlugin({ resourceRegExp: /term.js/, contextRegExp: /blessed.*widgets$/ }),
         new NoEmitOnErrorsPlugin(),
       ],
       resolve: {

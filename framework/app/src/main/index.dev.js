@@ -21,7 +21,8 @@ require('electron-debug')()
 app.on('ready', async () => {
 
   try {
-    await session.defaultSession.loadExtension(path.resolve('../../\.devtolls/vue-devtool'));
+    console.log("vue-devtool-path", path.resolve('./\.devtools/vue-devtool'))
+    await session.defaultSession.loadExtension(path.resolve('./\.devtools/vue-devtool'), { allowFileAccess: true });
   } catch (err) {
     console.error(err)
   }
