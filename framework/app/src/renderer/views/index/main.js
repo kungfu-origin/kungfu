@@ -64,7 +64,6 @@ if (!+process.env.RELOAD_AFTER_CRASHED) {
         let timer = setInterval(() => {
             if (watcher.isLive() && watcher.isStarted() && watcher.isUsable()) {
                 delayMilliSeconds(1000)
-                    .then(() => { console.log("start daemon") })
                     .then(() => startDaemon())
                     .catch(err => console.error(err.message))
                 clearInterval(timer);

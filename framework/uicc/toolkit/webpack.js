@@ -17,11 +17,11 @@ module.exports = {
       ],
       mode: production ? 'production' : 'development',
       stats: {
-        logging: "warn",
+        // logging: "warn",
         errorDetails: true,
       },
       infrastructureLogging: {
-        level: 'error',
+        // level: 'error',
       },
       module: {
         rules: [
