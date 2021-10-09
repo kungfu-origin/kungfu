@@ -7,6 +7,7 @@ import pathlib
 import platform
 import datetime
 import shutil
+import stat
 import subprocess
 import sys
 
@@ -160,7 +161,10 @@ class KungfuCoreConan(ConanFile):
 
     def __clean_kfc_dir(self):
         if path.exists(self.kfc_dir):
-            shutil.rmtree(self.kfc_dir)
+            def redo_with_write(redo_func, path, err):
+                os.chmod(path, stat.S_IWRITE)
+                redo_func(path)
+            shutil.rmtree(self.kfc_dir, onerror = redo_with_write)
             self.output.info("Deleted kfc directory")
 
     def __gen_build_info(self, build_type):
