@@ -19,3 +19,9 @@ message(STATUS "Include libnode headers from ${LIBNODE_INCLUDE_DIR}")
 
 include_directories(${LIBNODE_INCLUDE_DIR})
 link_directories(${LIBNODE_LIB_DIR})
+
+if (WIN32)
+    set(LIBNODE "libnode")
+else()
+    set(LIBNODE "node")
+endif()

@@ -2,6 +2,42 @@
 // Created by Keren Dong on 2019/12/25.
 //
 
+#ifdef _MSC_VER
+
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+
+#include <stdio.h>
+#include <windows.h>
+#include <delayimp.h>
+#include <string.h>
+#include <regex>
+
+static FARPROC WINAPI load_exe_hook(unsigned int event, DelayLoadInfo *info) {
+	HMODULE m;
+	if (event != dliNotePreLoadLibrary)
+		return NULL;
+
+	if (_stricmp(info->szDll, "NODE.EXE") != 0)
+		return NULL;
+  
+  char buf[1024];
+  auto length = GetModuleFileNameA(NULL, buf, sizeof(buf));
+  std::string main_exe_name(buf);
+  std::regex kfc_exe("kfc.exe");
+
+  auto name_end = buf + length - strlen("kfc.exe");
+  auto libnode_dll = std::regex_replace(main_exe_name, kfc_exe, "libnode.dll");
+
+	m = _stricmp(name_end, "kfc.exe") != 0 ? GetModuleHandle(NULL) : GetModuleHandleA(libnode_dll.c_str());
+	return (FARPROC)m;
+}
+
+decltype(__pfnDliNotifyHook2) __pfnDliNotifyHook2 = load_exe_hook;
+
+#endif // _MSC_VER
+
 #include <kungfu/yijinjing/io.h>
 #include <kungfu/yijinjing/util/util.h>
 

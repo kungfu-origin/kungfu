@@ -6,12 +6,16 @@ const binding = (() => {
   try {
     const moduleName = '@kungfu-trader/kungfu-core';
     const config = require(`${moduleName}/package.json`);
+
     const binary = config.binary;
+
     const kfcDir = process.env.KFC_DIR || `${moduleName}/${binary.module_path}`;
     const node_binding = require.resolve(`${kfcDir}/${binary.module_name}.node`);
     const electron_binding = node_binding.replace('_node.', '_electron.');
+
     const electron = 'electron' in process.versions;
     const binding_path = electron ? electron_binding : node_binding;
+
     return require(binding_path);
   } catch (e) {
     console.error(`Can not find kungfu node binding: ${e}`);
