@@ -1216,10 +1216,10 @@
     "@types/istanbul-reports" "^1.1.1"
     "@types/yargs" "^13.0.0"
 
-"@kungfu-trader/libnode@14.16.0":
-  version "14.16.0"
-  resolved "https://npm.pkg.github.com/download/@kungfu-trader/libnode/14.16.0/653eb98f3b4df1d00adb9f18248f8bc7d87509973b768cf7891207d17486f481#f3987816bed0d851fae2d625ac73e976ce662097"
-  integrity sha512-/I9iWjEg+Q9XpSyajWnZjfDyNBtR86EXKFSnuZHuAnIPUY6Grr0h9L4AnrQt0NaUMkjzQLeIMkgWnNTwcKk8SQ==
+"@kungfu-trader/libnode@14.18.0":
+  version "14.18.0"
+  resolved "https://registry.yarnpkg.com/@kungfu-trader/libnode/-/libnode-14.18.0.tgz#1e2262ba94c6f11547a53c09f6940ea00274d1dc"
+  integrity sha512-7yke5Bj749IWr4hm8BuPTGFTNZ0Ba9Y34/24LdZPUSLhv5CrRfuZAwnTCRW6Sb+5PHNXFTwfd1QW1VWtJHTVyA==
   dependencies:
     "@mapbox/node-pre-gyp" "^1.0.5"
     fs-extra "^9.1.0"
