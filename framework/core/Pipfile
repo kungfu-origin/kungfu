@@ -1,4 +1,4 @@
 # Use pipenv to make a virtualenv and ensure python version.
 # Then let poetry to manager dependencies.
 [packages]
-poetry = "==1.1.7"
+poetry = "==1.1.11"
