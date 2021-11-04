@@ -14,4 +14,6 @@ def run(cmd, exit_on_error=True):
     result = subprocess.run(cmd, check=True, shell=platform.system() == "Windows")
     if result.returncode != 0 and exit_on_error:
         sys.exit(result.returncode)
+    sys.stdout.write(os.linesep)
+    sys.stdout.flush()
     return result.returncode

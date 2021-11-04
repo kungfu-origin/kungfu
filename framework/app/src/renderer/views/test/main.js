@@ -7,7 +7,7 @@ new Vue({
     render: h => h(App)
 }).$mount('#app', true)
 
-const kungfu = require('@kungfu-trader/kungfu-core').kungfu;
+const kungfu = require('@kungfu-trader/kungfu-core').kungfu();
 const longfist = kungfu.longfist;
 const { KF_RUNTIME_DIR } = require('@kungfu-trader/kungfu-uicc/config/pathConfig');
 const path = require('path');

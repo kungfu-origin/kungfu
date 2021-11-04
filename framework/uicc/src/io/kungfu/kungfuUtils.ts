@@ -2,7 +2,7 @@ import moment from 'moment';
 import { KF_RUNTIME_DIR } from '@kungfu-trader/kungfu-uicc/config/pathConfig';
 import { logger } from '@kungfu-trader/kungfu-uicc/utils/logUtils';
 
-export const kungfu = require('@kungfu-trader/kungfu-core').kungfu;
+export const kungfu = require('@kungfu-trader/kungfu-core').kungfu();
 export const longfist = kungfu.longfist;
 export const kungfuConfigStore = kungfu.ConfigStore(KF_RUNTIME_DIR);
 export const commissionStore = kungfu.CommissionStore(KF_RUNTIME_DIR);
