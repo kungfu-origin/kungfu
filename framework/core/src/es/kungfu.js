@@ -10,11 +10,13 @@ const binding = (() => {
     const binary = config.binary;
 
     const kfcDir = process.env.KFC_DIR || `${moduleName}/${binary.module_path}`;
-    const node_binding = require.resolve(`${kfcDir}/${binary.module_name}.node`);
-    const electron_binding = node_binding.replace('_node.', '_electron.');
+    const nodeBinding = require.resolve(`${kfcDir}/${binary.module_name}.node`);
+    const electronBinding = nodeBinding.replace('_node.', '_electron.');
+    const kfcBinding = nodeBinding.replace('_node.', '_kfc.');
 
-    const electron = 'electron' in process.versions;
-    const binding_path = electron ? electron_binding : node_binding;
+    const isElectron = 'electron' in process.versions;
+    const isKfc = process.env.KFC_AS_VARIANT === 'node';
+    const binding_path = isElectron ? electronBinding : isKfc ? kfcBinding : nodeBinding;
 
     return require(binding_path);
   } catch (e) {
