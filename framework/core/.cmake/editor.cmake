@@ -1,6 +1,6 @@
 # to corporate clion with cmake-js:
 # https://github.com/cmake-js/cmake-js/issues/23
-if (CLION)
+if (EDITOR)
     function(parse_cmakejs_properties)
         function(get_variable INPUT_STRING VARIABLE_TO_SELECT OUTPUT_VARIABLE)
             set(SEARCH_STRING "${VARIABLE_TO_SELECT}=")
@@ -40,7 +40,7 @@ if (CLION)
             message(FATAL_ERROR "Failed to get CMAKE_JS_INC")
         endif ()
 
-        message(STATUS "Clion ready")
+        message(STATUS "Editor setup with CMAKE_JS_INC set to ${CMAKE_JS_INC}")
     endfunction(parse_cmakejs_properties)
 
     parse_cmakejs_properties()
