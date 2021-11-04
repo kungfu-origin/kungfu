@@ -23,12 +23,12 @@ include_directories(${CMAKE_JS_INC})
 
 aux_source_directory(binding SOURCE_FILES_KUNGFU)
 
-if (${NODE_RUNTIME} STREQUAL "node")
+if ("${NODE_RUNTIME}" STREQUAL "node")
     set(KF_NODE_BINDING_NAME "kungfu_node")
     message(STATUS "Building node bindings ${KF_NODE_BINDING_NAME}")
 endif ()
 
-if (${NODE_RUNTIME} STREQUAL "electron")
+if ("${NODE_RUNTIME}" STREQUAL "electron")
     set(KF_NODE_BINDING_NAME "kungfu_electron")
     message(STATUS "Building node bindings ${KF_NODE_BINDING_NAME}")
 endif ()

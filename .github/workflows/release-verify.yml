@@ -50,7 +50,7 @@ jobs:
       - name: Setup Python environment
         uses: actions/setup-python@v2
         with:
-          python-version: '3.7'
+          python-version: '3.9'
 
       - name: Bump Version
         uses: kungfu-trader/action-bump-version@v3
