@@ -54,9 +54,12 @@ include_directories(.deps/sqlite3-3.33.0/include)
 include_directories(.deps/sqlite_orm-1.6/include)
 include_directories(.deps/nng-1.5.1/include)
 include_directories(.deps/tabulate-1.0/include)
-include_directories(src/cpp/include)
+
+include_directories(src/include)
 
 ############################################################
 
 add_subdirectory(.deps)
-add_subdirectory(src/c++)
+add_subdirectory(src/libkungfu)
+add_subdirectory(src/bindings/python)
+add_subdirectory(src/bindings/node)

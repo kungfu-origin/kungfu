@@ -35,8 +35,8 @@ deps_dir = abspath(make_path(cwd, ".deps"))
 dep_pybind11_dir = abspath(make_path(deps_dir, "pybind11*"))
 
 # kungfu source files
-src_cpp_dir = abspath(make_path(cwd, "src", "c++"))
-src_python_dir = abspath(make_path(cwd, "src", "python"))
+src_dir = abspath(make_path(cwd, "src"))
+src_python_dir = abspath(make_path(src_dir, "python"))
 
 # kungfu build files
 build_dir = abspath(make_path(cwd, "build"))
@@ -122,7 +122,7 @@ a = Analysis(
             (data_nuitka_scons, nuitka_build_dst_dir),
         ],
         src_dirs=[
-            src_cpp_dir,
+            src_dir,
             deps_dir,
             build_deps_dir,
         ],

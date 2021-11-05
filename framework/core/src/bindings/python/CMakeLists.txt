@@ -1,4 +1,4 @@
-project(kungfu-python-bind)
+project(kungfu-python-binding)
 
 if (WIN32)
     set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS OFF)

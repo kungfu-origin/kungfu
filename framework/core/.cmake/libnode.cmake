@@ -1,5 +1,5 @@
 add_compile_definitions(NAPI_EXPERIMENTAL)
-add_compile_definitions(NAPI_VERSION=7)
+add_compile_definitions(NAPI_VERSION=8)
 
 execute_process(COMMAND node -p "require('@kungfu-trader/libnode').include"
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
