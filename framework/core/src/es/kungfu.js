@@ -14,9 +14,9 @@ const binding = (() => {
     const electronBinding = nodeBinding.replace('_node.', '_electron.');
     const kfcBinding = nodeBinding.replace('_node.', '_kfc.');
 
-    const isElectron = 'electron' in process.versions;
-    const isKfc = process.env.KFC_AS_VARIANT === 'node';
-    const binding_path = isElectron ? electronBinding : isKfc ? kfcBinding : nodeBinding;
+    const useElectron = 'electron' in process.versions;
+    const useKfc = process.platform === 'linux' && process.env.KFC_AS_VARIANT === 'node';
+    const binding_path = useElectron ? electronBinding : useKfc ? kfcBinding : nodeBinding;
 
     return require(binding_path);
   } catch (e) {
