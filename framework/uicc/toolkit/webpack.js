@@ -148,7 +148,7 @@ module.exports = {
           '__renderer': path.resolve(rootDir, 'src', 'renderer'),
           '@kungfu-trader/kungfu-app': path.resolve(rootDir, 'src', 'renderer'),
           '@kungfu-trader/kungfu-uicc': path.dirname(path.resolve(require.resolve('@kungfu-trader/kungfu-uicc'))),
-          '@kungfu-trader/kungfu-core': path.dirname(path.resolve(require.resolve('@kungfu-trader/kungfu-core'), '../../')),
+          '@kungfu-trader/kungfu-core': path.dirname(path.dirname(require.resolve('@kungfu-trader/kungfu-core'))),
         },
         extensions: ['.js', '.ts', '.vue', '.json', '.css', '.node'],
       },
