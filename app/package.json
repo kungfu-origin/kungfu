@@ -156,7 +156,7 @@
   },
   "devDependencies": {
     "@types/node": "^12.6.2",
-    "aws-sdk": "^2.395.0",
+    "aws-sdk": "^2.814.0",
     "babel-loader": "^7.1.1",
     "babel-plugin-component": "^1.1.1",
     "babel-plugin-istanbul": "^4.1.6",
