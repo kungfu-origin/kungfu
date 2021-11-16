@@ -7,7 +7,7 @@
   "version": "2.4.0-alpha.4",
   "description": "Kungfu App",
   "license": "Apache-2.0",
-  "main": "dist/app/main.js",
+  "main": "lib/index.js",
   "repository": {
     "url": "https://github.com/kungfu-trader/kungfu.git"
   },
@@ -20,11 +20,11 @@
   "scripts": {
     "clean": "rimraf ./dist/* ./build/*",
     "dev": "yarn run clean && node .devtools/dev-runner.js",
-    "dist:daemon": "../../node_modules/.bin/webpack --mode=production --config .webpack/webpack.daemon.config.js ",
-    "dist:main": "../../node_modules/.bin/webpack --mode=production --config .webpack/webpack.main.config.js ",
-    "dev:main": "../../node_modules/.bin/webpack --mode=development --config .webpack/webpack.main.config.js ",
-    "dist:renderer": "../../node_modules/.bin/webpack --mode=production --config .webpack/webpack.renderer.config.js ",
-    "dev:renderer": "../../node_modules/.bin/webpack --mode=development --config .webpack/webpack.renderer.config.js ",
+    "dist:daemon": "../../node_modules/.bin/webpack --mode=production --config lib/webpack/webpack.daemon.config.js ",
+    "dist:main": "../../node_modules/.bin/webpack --mode=production --config lib/webpack/webpack.main.config.js ",
+    "dev:main": "../../node_modules/.bin/webpack --mode=development --config lib/webpack/webpack.main.config.js ",
+    "dist:renderer": "../../node_modules/.bin/webpack --mode=production --config lib/webpack/webpack.renderer.config.js ",
+    "dev:renderer": "../../node_modules/.bin/webpack --mode=development --config lib/webpack/webpack.renderer.config.js ",
     "dist": "yarn run clean && node --max_old_space_size=4096 .webpack/build.js",
     "prebuild": "yarn run dist",
     "build": "node .electron-builder/build.js",
@@ -32,14 +32,15 @@
     "format": "prettier --write --parser typescript \"(.*)/**.js\""
   },
   "dependencies": {
-    "@kungfu-trader/kungfu-core": "^2.4.0-alpha.4",
-    "pm2": "^5.1.0",
-    "iconv-lite": "^0.6.0",
+    "@authing/vue-ui-components": "^2.4.29",
     "@electron/remote": "^2.0.1",
-    "electron-find": "^1.0.0"
-  },
-  "devDependencies": {
+    "@kungfu-trader/kungfu-uicc": "^2.4.0-alpha.4",
+    "@kungfu-trader/kungfu-core": "^2.4.0-alpha.4",
+    "electron-find": "^1.0.0",
     "electron-debug": "^3.2.0",
+    "element-ui": "^2.15.0",
+    "iconv-lite": "^0.6.0",
+    "pm2": "^5.1.0",
     "monaco-editor": "^0.27.0",
     "monaco-editor-webpack-plugin": "^4.1.0",
     "vue": "^2.6.10",
@@ -47,10 +48,9 @@
     "vue-style-loader": "^4.1.0",
     "vue-template-compiler": "^2.6.10",
     "vue-virtual-scroller": "^1.0.10",
-    "vuex": "^3.6.0",
-    "element-ui": "^2.15.0",
-    "@authing/vue-ui-components": "^2.4.29",
-    "@kungfu-trader/kungfu-uicc": "^2.4.0-alpha.4",
+    "vuex": "^3.6.0"
+  },
+  "devDependencies": {
     "@kungfu-trader/kungfu-toolchain": "^2.4.0-alpha.4"
   }
 }

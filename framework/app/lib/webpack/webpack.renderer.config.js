@@ -11,17 +11,17 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
 const { VueLoaderPlugin } = require('vue-loader');
 
-const rootDir = path.dirname(__dirname);
+const rootDir = path.dirname(path.dirname(__dirname));
 const { getKungfuBuildInfo, getViewsConfig, isProduction } = toolkit.utils;
 
 const { pyVersion } = getKungfuBuildInfo();
 
-const webpackConfig = (mode) => {
-  const styleLoader = isProduction(mode) ? MiniCssExtractPlugin.loader : "vue-style-loader"
-  const viewsConfig = getViewsConfig(mode);
+const webpackConfig = (argv) => {
+  const styleLoader = isProduction(argv) ? MiniCssExtractPlugin.loader : "vue-style-loader"
+  const viewsConfig = getViewsConfig(argv);
 
   return merge(
-    toolkit.webpack.makeConfig(mode, rootDir, 'app'), 
+    toolkit.webpack.makeConfig(argv),
     {
       entry: viewsConfig.entry,
       module: {
@@ -78,6 +78,12 @@ const webpackConfig = (mode) => {
       }),
       new VueLoaderPlugin(),
     ],
+    resolve: {
+      alias: {
+        '__renderer': path.resolve(rootDir, 'src', 'renderer'),
+        '@kungfu-trader/kungfu-app': path.resolve(rootDir, 'src', 'renderer'),
+      },
+    },
     target: 'electron-renderer',
   })
 };
@@ -101,7 +107,6 @@ const devConfig = {
   ],
 };
 
-module.exports = (env, argv) => {
-  const mode = argv.mode;
-  return merge(webpackConfig(mode), isProduction(mode) ? prodConfig : devConfig)
+module.exports = (argv) => {
+  return merge(webpackConfig(argv), isProduction(argv) ? prodConfig : devConfig)
 };

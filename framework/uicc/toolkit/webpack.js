@@ -1,16 +1,12 @@
-const { IgnorePlugin, NoEmitOnErrorsPlugin } = require('webpack');
-const nodeExternals = require('webpack-node-externals');
+const { NoEmitOnErrorsPlugin } = require('webpack');
 const { isProduction } = require('./utils');
 const path = require("path");
-const { dependencies } = require('../package.json')
 
 module.exports = {
-  makeConfig: (mode, rootDir, distName) => {
-
-    const production = isProduction(mode);
+  makeConfig: (argv) => {
+    const production = isProduction(argv.mode);
     return {
       devtool: 'eval-source-map',
-
       externals: [
         "pm2",
         "iconv-lite"
@@ -39,48 +35,6 @@ module.exports = {
             test: /\.node$/,
             use: 'node-loader',
           },
-          // {
-          //   test: /@pm2.*InteractorClient\.js$/,
-          //   loader: 'string-replace-loader',
-          //   options: {
-          //     search: 'main.filename',
-          //     replace: "resolve('pm2/bin/pm2')",
-          //   },
-          // },
-          // {
-          //   test: /@pm2.*InteractorClient\.js$/,
-          //   loader: 'string-replace-loader',
-          //   options: {
-          //     search: 'path.dirname(module.filename)',
-          //     replace:
-          //       production ? 'path.resolve(__dirname, "..", "..", "node_modules", "@pm2", "agent", "src")' : '__dirname',
-          //   },
-          // },
-          // {
-          //   test: /pm2.*Client\.js$/,
-          //   loader: 'string-replace-loader',
-          //   options: {
-          //     search: "interpreter = 'node'",
-          //     replace: "interpreter = which('kfc')",
-          //   },
-          // },
-          // {
-          //   test: /pm2.*Client\.js$/,
-          //   loader: 'string-replace-loader',
-          //   options: {
-          //     search: "which('node')",
-          //     replace: "which('kfc')",
-          //   },
-          // },
-          // {
-          //   test: /pm2.*Client\.js$/,
-          //   loader: 'string-replace-loader',
-          //   options: {
-          //     search: 'path.dirname(module.filename)',
-          //     replace:
-          //       production ? 'path.resolve(__dirname, "..", "..", "node_modules", "pm2", "lib")' : '__dirname',
-          //   },
-          // },
           {
             test: /\.(m?js|node)$/,
             parser: { amd: false },
@@ -135,18 +89,13 @@ module.exports = {
         globalObject: "this",
         filename: '[name].js',
         libraryTarget: 'commonjs2',
-        path: path.join(rootDir, 'dist', distName),
+        path: path.join(argv.distDir, argv.distName),
       },
       plugins: [
-        // new IgnorePlugin({ resourceRegExp: /deploy/, contextRegExp: /pm2-deploy$/ }),
-        // new IgnorePlugin({ resourceRegExp: /pty.js/, contextRegExp: /blessed.*widgets$/ }),
-        // new IgnorePlugin({ resourceRegExp: /term.js/, contextRegExp: /blessed.*widgets$/ }),
         new NoEmitOnErrorsPlugin(),
       ],
       resolve: {
         alias: {
-          '__renderer': path.resolve(rootDir, 'src', 'renderer'),
-          '@kungfu-trader/kungfu-app': path.resolve(rootDir, 'src', 'renderer'),
           '@kungfu-trader/kungfu-uicc': path.dirname(path.resolve(require.resolve('@kungfu-trader/kungfu-uicc'))),
           '@kungfu-trader/kungfu-core': path.dirname(path.dirname(require.resolve('@kungfu-trader/kungfu-core'))),
         },

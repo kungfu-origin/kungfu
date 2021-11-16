@@ -7,12 +7,12 @@ const path = require('path');
 const webpack = require('webpack');
 const { merge } = require('webpack-merge');
 
-const rootDir = path.dirname(__dirname);
+const rootDir = path.dirname(path.dirname(__dirname));
 const { getKungfuBuildInfo, isProduction } = toolkit.utils;
 const { gitCommitVersion, pyVersion, buildTimeStamp } = getKungfuBuildInfo();
 
-const webpackConfig = (mode) => merge(
-  toolkit.webpack.makeConfig(mode, rootDir, 'app'), 
+const webpackConfig = (argv) => merge(
+  toolkit.webpack.makeConfig(argv),
   {
     entry: {
       main: path.join(rootDir, 'src', 'main', 'index.js'),
@@ -45,7 +45,6 @@ const devConfig = {
   ],
 };
 
-module.exports = (env, argv) => {
-  const mode = argv.mode;
-  return merge(webpackConfig(mode), isProduction(mode) ? prodConfig : devConfig)
+module.exports = (argv) => {
+  return merge(webpackConfig(argv), isProduction(argv) ? prodConfig : devConfig)
 };

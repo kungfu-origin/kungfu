@@ -7,11 +7,11 @@ const path = require('path');
 const webpack = require('webpack');
 const { merge } = require('webpack-merge');
 
-const rootDir = path.dirname(__dirname);
+const rootDir = path.dirname(path.dirname(__dirname));
 const { isProduction } = toolkit.utils;
 
-const webpackConfig = (mode) => merge(
-  toolkit.webpack.makeConfig(mode, rootDir, 'app'), 
+const webpackConfig = (argv) => merge(
+  toolkit.webpack.makeConfig(argv),
   {
     entry: {
       daemon: path.join(rootDir, 'src', 'daemon', 'index.ts'),
@@ -45,7 +45,6 @@ const devConfig = {
   ],
 };
 
-module.exports = (env, argv) => {
-  const mode = argv.mode;
-  return merge(webpackConfig(mode), isProduction(mode) ? prodConfig : devConfig)
+module.exports = (argv) => {
+  return merge(webpackConfig(argv), isProduction(argv) ? prodConfig : devConfig)
 };

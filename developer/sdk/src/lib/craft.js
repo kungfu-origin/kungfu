@@ -1,5 +1,11 @@
+const path = require("path");
+const app = require('@kungfu-trader/kungfu-app');
+const distDir = path.join(process.cwd(), 'dist');
 
 exports.build = function() {
-  console.log('building kungfu app');
-  require('@kungfu-trader/kungfu-app');
+  app.webpack(distDir, 'app');
 };
+
+exports.dev = function() {
+  app.dev(distDir, 'app');
+}
