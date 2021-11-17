@@ -63,15 +63,7 @@ export const buildGatewayPath = (gatewayName: string) => path.join(KF_RUNTIME_DI
 //================== others start =================================
 
 const production = process.env.NODE_ENV === 'production';
-
-// core main: src/es/index.js
-const coreModulePath = () => {
-    if (process.env.NODE_ENV === 'development') {
-        return path.resolve('../', 'core')
-    } else {
-        return path.resolve('../', 'core')
-    }
-}
+const staticKfcDir = path.join('..', 'core', 'dist', 'kfc');
 
 
 //获取进程日志地址
@@ -116,7 +108,7 @@ addFileSync('', KF_TICKER_SET_JSON_PATH, 'file');
 
 export const KFC_PARENT_DIR = production
     ? process.resourcesPath
-    : path.join(coreModulePath(), 'dist');
+    : path.dirname(process.env.KFC_DIR || staticKfcDir);
 
 export const KFC_DIR = process.env.KFC_DIR || path.join(KFC_PARENT_DIR, 'kfc');
 

@@ -2,6 +2,8 @@
 
 const { say } = require('cfonts');
 const chalk = require('chalk');
+const fse = require('fs-extra');
+const path = require('path');
 const build = require('webpack');
 const Multispinner = require('multispinner');
 
@@ -54,8 +56,6 @@ const pack = (config) => new Promise((resolve, reject) => {
   });
 
 module.exports = (distDir, distName) => {
-  process.env.NODE_ENV = 'production';
-
   const argv = {
     mode: "production",
     distDir: distDir,
@@ -68,6 +68,12 @@ module.exports = (distDir, distName) => {
 
   const errorLog = chalk.bgRed.white(' ERROR ') + ' ';
   const okayLog = chalk.bgBlue.white(' OKAY ') + ' ';
+
+  const rootDir = path.dirname(path.dirname(__dirname));
+
+  fse.rmSync(distDir, { recursive: true });
+  process.chdir(rootDir);
+  process.env.NODE_ENV = 'production';
 
   greeting();
 

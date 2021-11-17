@@ -2,6 +2,7 @@
 
 const chalk = require('chalk');
 const electron = require('electron');
+const fse = require('fs-extra');
 const path = require('path');
 const { say } = require('cfonts');
 const { spawn } = require('child_process');
@@ -157,7 +158,10 @@ function startElectron(argv) {
       "--trace-deprecation",
       "-enable-logging",
       path.join(argv.distDir, argv.distName, 'main.js')
-    ]
+    ],
+    {
+      cwd: path.dirname(argv.distDir)
+    }
   );
 
   electronProcess.stdout.on('data', (data) => {
@@ -178,7 +182,16 @@ module.exports = (distDir, distName) => {
     distDir: distDir,
     distName: distName
   };
+
+  const rootDir = path.dirname(path.dirname(__dirname));
+  const coreDir = require.resolve('@kungfu-trader/kungfu-core');
+
+  fse.rmSync(distDir, { recursive: true });
+  process.chdir(rootDir);
+  process.env.KFC_DIR = path.resolve(coreDir, '..', '..', 'dist', 'kfc');
+
   greeting();
+
   Promise.all([startMain, startRenderer, startDaemon].map(f => f(argv)))
     .then(() => startElectron(argv))
     .catch(console.error);
