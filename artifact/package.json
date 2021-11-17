@@ -9,13 +9,11 @@
   "license": "Apache-2.0",
   "private": true,
   "main": "dist/app/main.js",
-  "env": [
-    "USE_HARD_LINKS=false"
-  ],
   "scripts": {
-    "clean": "rimraf ./dist/* ./build/*",
+    "clean": "rimraf build dist",
     "build": "yarn kfs craft build",
-    "format": "prettier --write --parser typescript \"(.electron-*)/**.js\""
+    "dev": "yarn kfs craft dev",
+    "format": "prettier --write --parser typescript \"**/**.js\""
   },
   "dependencies": {
     "@kungfu-trader/kfx-vendor-sim": "^2.4.0-alpha.4",

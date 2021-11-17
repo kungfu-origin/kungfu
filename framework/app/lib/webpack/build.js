@@ -55,7 +55,7 @@ const pack = (config) => new Promise((resolve, reject) => {
     });
   });
 
-module.exports = (distDir, distName) => {
+module.exports = (distDir, distName = 'app') => new Promise((resolve, reject) => {
   const argv = {
     mode: "production",
     distDir: distDir,
@@ -89,9 +89,11 @@ module.exports = (distDir, distName) => {
   spinner.on('success', () => {
     process.stdout.write('\x1B[2J\x1B[0f');
     console.log(`\n\n${results}`);
-    console.log(`${okayLog}take it away ${chalk.yellow('`kungfu-trader`')}\n`);
-    process.exit();
+    console.log(`${okayLog}webpack ${chalk.yellow('`done`')}\n`);
+    resolve();
   });
+
+  spinner.on('error', reject);
 
   pack(mainConfig(argv))
     .then((result) => {
@@ -128,4 +130,4 @@ module.exports = (distDir, distName) => {
       console.error(`\n${err}\n`);
       process.exit(1);
     });
-}
+});

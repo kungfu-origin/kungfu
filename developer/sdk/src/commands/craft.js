@@ -1,5 +1,6 @@
 module.exports = {
-  flags: 'c <subcommand>',
+  aliases: 'c',
+  flags: 'craft <subcommand>',
   ignore: '<subcommand>',
   desc: 'Craft Kungfu Artifact',
   setup: (cli) => cli.commandDirectory('craft'),

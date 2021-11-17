@@ -1,5 +1,8 @@
+const path = require("path");
+
 module.exports = {
-  dev: require('./dev/run'),
-  webpack: require('./webpack/build'),
-  electron: require('./electron/build')
+  runDev: require('./dev/run'),
+  webpackBuild: require('./webpack/build'),
+  electronBuild: require('./electron/build'),
+  defaultDistDir: path.join(path.dirname(__dirname), 'dist')
 }

@@ -176,7 +176,7 @@ function startElectron(argv) {
   });
 }
 
-module.exports = (distDir, distName) => {
+module.exports = (distDir, distName = 'app') => {
   const argv = {
     mode: "development",
     distDir: distDir,
