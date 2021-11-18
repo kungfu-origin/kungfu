@@ -55,7 +55,7 @@ const pack = (config) => new Promise((resolve, reject) => {
     });
   });
 
-module.exports = (distDir, distName = 'app') => new Promise((resolve, reject) => {
+const run = (distDir, distName = 'app') => new Promise((resolve, reject) => {
   const argv = {
     mode: "production",
     distDir: distDir,
@@ -131,3 +131,9 @@ module.exports = (distDir, distName = 'app') => new Promise((resolve, reject) =>
       process.exit(1);
     });
 });
+
+module.exports = run;
+
+if (require.main === module) {
+  run(require('@kungfu-trader/kungfu-app').defaultDistDir).catch(console.error);
+}

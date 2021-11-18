@@ -18,17 +18,9 @@
     "USE_HARD_LINKS=false"
   ],
   "scripts": {
-    "clean": "rimraf ./dist/* ./build/*",
-    "dev": "yarn run clean && node .devtools/dev-runner.js",
-    "dist:daemon": "../../node_modules/.bin/webpack --mode=production --config lib/webpack/webpack.daemon.config.js ",
-    "dist:main": "../../node_modules/.bin/webpack --mode=production --config lib/webpack/webpack.main.config.js ",
-    "dev:main": "../../node_modules/.bin/webpack --mode=development --config lib/webpack/webpack.main.config.js ",
-    "dist:renderer": "../../node_modules/.bin/webpack --mode=production --config lib/webpack/webpack.renderer.config.js ",
-    "dev:renderer": "../../node_modules/.bin/webpack --mode=development --config lib/webpack/webpack.renderer.config.js ",
-    "dist": "yarn run clean && node --max_old_space_size=4096 .webpack/build.js",
-    "prebuild": "yarn run dist",
-    "build": "node .electron-builder/build.js",
-    "rebuild": "rm -rf build && yarn build",
+    "clean": "rimraf build dist",
+    "build": "node --max_old_space_size=4096 lib/webpack/build.js",
+    "dev": "node --max_old_space_size=4096 lib/dev/run.js",
     "format": "prettier --write --parser typescript \"(.*)/**.js\""
   },
   "dependencies": {

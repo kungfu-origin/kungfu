@@ -176,13 +176,14 @@ function startElectron(argv) {
   });
 }
 
-module.exports = (distDir, distName = 'app') => {
+const run = (distDir, distName = 'app') => {
   const argv = {
     mode: "development",
     distDir: distDir,
     distName: distName
   };
 
+  const tasks = [startMain, startRenderer, startDaemon];
   const rootDir = path.dirname(path.dirname(__dirname));
   const coreDir = require.resolve('@kungfu-trader/kungfu-core');
 
@@ -192,7 +193,11 @@ module.exports = (distDir, distName = 'app') => {
 
   greeting();
 
-  Promise.all([startMain, startRenderer, startDaemon].map(f => f(argv)))
-    .then(() => startElectron(argv))
-    .catch(console.error);
+  return Promise.all(tasks.map(f => f(argv))).then(() => startElectron(argv));
+}
+
+module.exports = run;
+
+if (require.main === module) {
+  run(require('@kungfu-trader/kungfu-app').defaultDistDir).catch(console.error);
 }

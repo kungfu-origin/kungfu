@@ -29,7 +29,7 @@ function resolveArtifactName(pro, target) {
   return '${productName}-${buildVersion}-${os}-${arch}-${channel}' + `-${specialName}` + '.${ext}';
 }
 
-module.exports = (distDir, distName = 'app') => {
+const run = (distDir, distName = 'app') => {
   const pkgDir = path.dirname(distDir);
   const appConfig = fse.readJSONSync(path.join(pkgDir, 'package.json'));
   const baseConfig = fse.readJSONSync(path.join(__dirname, 'config.json'));
@@ -70,4 +70,10 @@ module.exports = (distDir, distName = 'app') => {
   return builder.build({
     config: baseConfig,
   });
+}
+
+module.exports = run;
+
+if (require.main === module) {
+  run(require('@kungfu-trader/kungfu-app').defaultDistDir).catch(console.error);
 }
