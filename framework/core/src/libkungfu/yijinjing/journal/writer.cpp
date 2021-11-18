@@ -24,14 +24,14 @@ constexpr uint32_t FRAME_ID_TRANC = 0x0000FFFF;
 
 writer::writer(const data::location_ptr &location, uint32_t dest_id, bool lazy, publisher_ptr publisher)
     : frame_id_base_(uint64_t(location->uid xor dest_id) << 32u), journal_(location, dest_id, true, lazy),
-      publisher_(std::move(publisher)), size_to_write_(0) {
+      publisher_(std::move(publisher)), size_to_write_(0), writer_start_time_32int_(time::nano_hashed(time::now_in_nano())) {
   journal_.seek_to_time(time::now_in_nano());
 }
 
 uint64_t writer::current_frame_uid() {
   uint32_t page_part = (journal_.page_->page_id_ << 16u) & PAGE_ID_TRANC;
   uint32_t frame_part = journal_.page_frame_nb_ & FRAME_ID_TRANC;
-  return frame_id_base_ | (page_part | frame_part);
+  return frame_id_base_ | ((page_part | frame_part) xor writer_start_time_32int_);
 }
 
 frame_ptr writer::open_frame(int64_t trigger_time, int32_t msg_type, uint32_t data_length) {
@@ -111,4 +111,5 @@ void writer::close_page(int64_t trigger_time) {
   last_page_frame.set_data_length(0);
   last_page->set_last_frame_position(last_page_frame.address() - last_page->address());
 }
+
 } // namespace kungfu::yijinjing::journal

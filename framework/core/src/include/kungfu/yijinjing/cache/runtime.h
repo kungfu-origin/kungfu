@@ -12,11 +12,13 @@ namespace kungfu::yijinjing::cache {
 class bank {
 public:
   template <typename DataType> void operator<<(const state<DataType> &state) {
-    state_map_[boost::hana::type_c<DataType>].emplace(state.data.uid(), state);
+    auto& target_map = state_map_[boost::hana::type_c<DataType>];
+    target_map.insert_or_assign(state.data.uid(), state);
   }
 
   template <typename DataType> void operator<<(const typed_event_ptr<DataType> &event) {
-    state_map_[boost::hana::type_c<DataType>].emplace(event->template data<DataType>().uid(), *event);
+    auto& target_map = state_map_[boost::hana::type_c<DataType>];
+    target_map.insert_or_assign(event->template data<DataType>().uid(), *event);
   }
 
   void operator>>(const yijinjing::journal::writer_ptr &writer) const {

@@ -39,7 +39,7 @@ inline bool GetBypassQuotes(const Napi::CallbackInfo &info) {
 
 inline bool GetBypassRestore(const Napi::CallbackInfo &info) {
   if (not IsValid(info, 3, &Napi::Value::IsBoolean)) {
-    throw Napi::Error::New(info.Env(), "Invalid bypassQuotes argument");
+    throw Napi::Error::New(info.Env(), "Invalid bypassRestore argument");
   }
   return info[3].As<Napi::Boolean>().Value();
 }
@@ -120,6 +120,13 @@ Napi::Value Watcher::GetLocation(const Napi::CallbackInfo &info) {
 Napi::Value Watcher::GetLocationUID(const Napi::CallbackInfo &info) {
   auto target_location = ExtractLocation(info, 0, get_locator());
   return Napi::Number::New(info.Env(), target_location->uid);
+}
+
+Napi::Value Watcher::GetInstrumentUID(const Napi::CallbackInfo& info) {
+  auto exchange_id = info[0].ToString().Utf8Value();
+  auto instrument_id = info[1].ToString().Utf8Value();
+  auto key = hash_instrument(exchange_id.c_str(), instrument_id.c_str());
+  return Napi::Number::New(info.Env(), key);
 }
 
 Napi::Value Watcher::GetConfig(const Napi::CallbackInfo &info) { return config_ref_.Value(); }
@@ -229,6 +236,18 @@ Napi::Value Watcher::RequestMarketData(const Napi::CallbackInfo &info) {
   strcpy(instrument_key.exchange_id, exchange_id.c_str());
   instrument_key.instrument_type = get_instrument_type(exchange_id, instrument_id);
   writer->write(now(), instrument_key);
+  subscribed_instruments_.emplace(key, instrument_key);
+
+  return Napi::Boolean::New(info.Env(), true);
+}
+
+Napi::Value Watcher::UpdateQuote(const Napi::CallbackInfo& info) {
+  for(auto& pair : quotes_bank_[boost::hana::type_c<Quote>]) {
+    auto& state = pair.second;
+    bookkeeper_.update_book(state.data);
+    UpdateBook(state.update_time, state.source, state.dest, state.data);
+    update_ledger(state.update_time, state.source, state.dest, state.data);      
+  }
 
   return Napi::Boolean::New(info.Env(), true);
 }
@@ -247,9 +266,11 @@ void Watcher::Init(Napi::Env env, Napi::Object exports) {
                                         InstanceMethod("requestStop", &Watcher::RequestStop),                     //
                                         InstanceMethod("getLocation", &Watcher::GetLocation),                     //
                                         InstanceMethod("getLocationUID", &Watcher::GetLocationUID),               //
+                                        InstanceMethod("getInstrumentUID", &Watcher::GetInstrumentUID),           //
                                         InstanceMethod("publishState", &Watcher::PublishState),                   //
                                         InstanceMethod("isReadyToInteract", &Watcher::IsReadyToInteract),         //
                                         InstanceMethod("issueOrder", &Watcher::IssueOrder),                       //
+                                        InstanceMethod("updateQuote", &Watcher::UpdateQuote),                     //
                                         InstanceMethod("cancelOrder", &Watcher::CancelOrder),                     //
                                         InstanceMethod("requestMarketData", &Watcher::RequestMarketData),         //
                                         InstanceAccessor("locator", &Watcher::GetLocator, &Watcher::NoSet),       //
@@ -276,10 +297,8 @@ void Watcher::on_start() {
   broker_client_.on_start(events_);
   bookkeeper_.on_start(events_);
   bookkeeper_.guard_positions();
-  bookkeeper_.set_bypass_quotes(bypass_quotes_);
 
-  events_ | bypass(this, bypass_quotes_) | $$(feed_state_data(event, update_ledger));
-  events_ | bypass(this, bypass_quotes_) | is(Quote::tag) | $$(UpdateBook(event, event->data<Quote>()));
+  events_ | bypass(this, bypass_quotes_) | $$(Feed(event));
   events_ | is(OrderInput::tag) | $$(UpdateBook(event, event->data<OrderInput>()));
   events_ | is(Order::tag) | $$(UpdateBook(event, event->data<Order>()));
   events_ | is(Trade::tag) | $$(UpdateBook(event, event->data<Trade>()));
@@ -290,6 +309,18 @@ void Watcher::on_start() {
   events_ | is(Deregister::tag) | $$(OnDeregister(event->gen_time(), event->data<Deregister>()));
   events_ | is(BrokerStateUpdate::tag) | $$(UpdateBrokerState(event->source(), event->data<BrokerStateUpdate>()));
   events_ | is(CacheReset::tag) | $$(reset_cache(event));
+}
+
+void Watcher::Feed(const event_ptr& event) {
+  if (Quote::tag == event->msg_type()) {
+    auto quote = event->data<Quote>();
+    auto uid = quote.uid();
+    if (subscribed_instruments_.find(uid) != subscribed_instruments_.end()) {
+      feed_state_data(event, quotes_bank_);
+    }
+  } else {
+    feed_state_data(event, update_ledger);
+  }
 }
 
 void Watcher::RestoreState(const location_ptr &state_location, int64_t from, int64_t to, bool sync_schema) {
@@ -380,16 +411,50 @@ void Watcher::UpdateBook(const event_ptr &event, const Quote &quote) {
   for (const auto &item : bookkeeper_.get_books()) {
     auto &book = item.second;
     auto holder_uid = book->asset.holder_uid;
+
     if (holder_uid == ledger_uid) {
       continue;
     }
-    if (book->has_long_position_for(quote)) {
+
+    bool has_long_position_for_quote = book->has_long_position_for(quote);
+    bool has_short_position_for_quote = book->has_short_position_for(quote);
+
+    if (has_long_position_for_quote) {
       UpdateBook(event, book->get_position_for(Direction::Long, quote));
     }
-    if (book->has_short_position_for(quote)) {
+    if (has_short_position_for_quote) {
       UpdateBook(event, book->get_position_for(Direction::Short, quote));
     }
-    update_ledger(event->gen_time(), ledger_uid, holder_uid, book->asset);
+
+    if (has_short_position_for_quote or has_long_position_for_quote) {
+      update_ledger(event->gen_time(), ledger_uid, holder_uid, book->asset);
+    }
+  }
+}
+
+void Watcher::UpdateBook(int64_t update_time, uint32_t source_id, uint32_t dest_id, const longfist::types::Quote& quote) {
+  auto ledger_uid = ledger_location_->uid;
+  for (const auto &item : bookkeeper_.get_books()) {
+    auto &book = item.second;
+    auto holder_uid = book->asset.holder_uid;
+
+    if (holder_uid == ledger_uid) {
+      continue;
+    }
+
+    bool has_long_position_for_quote = book->has_long_position_for(quote);
+    bool has_short_position_for_quote = book->has_short_position_for(quote);
+
+    if (has_long_position_for_quote) {
+      UpdateBook(update_time, source_id, dest_id, book->get_position_for(Direction::Long, quote));
+    }
+    if (has_short_position_for_quote) {
+      UpdateBook(update_time, source_id, dest_id, book->get_position_for(Direction::Short, quote));
+    }
+
+    if (has_short_position_for_quote or has_long_position_for_quote) {
+      update_ledger(update_time, ledger_uid, holder_uid, book->asset);
+    }
   }
 }
 
@@ -400,4 +465,13 @@ void Watcher::UpdateBook(const event_ptr &event, const Position &position) {
     update_ledger(event->gen_time(), event->source(), event->dest(), book_position);
   }
 }
+
+void Watcher::UpdateBook(int64_t update_time, uint32_t source_id, uint32_t dest_id, const longfist::types::Position& position) {
+  auto book = bookkeeper_.get_book(position.holder_uid);
+  auto &book_position = book->get_position_for(position.direction, position);
+  if (book_position.volume > 0 or book_position.direction == Direction::Long) {
+    update_ledger(update_time, source_id, dest_id, book_position);
+  }
+}
+
 } // namespace kungfu::node

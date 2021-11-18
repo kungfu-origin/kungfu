@@ -54,7 +54,7 @@ void Bookkeeper::on_start(const rx::connectable_observable<event_ptr> &events) {
   on_trading_day(app_.get_trading_day());
 
   events | is(Instrument::tag) | $$(update_instrument(event->data<Instrument>()));
-  events | is_own<Quote>(broker_client_) | bypass(&app_, bypass_quotes_) | $$(update_book(event, event->data<Quote>()));
+  events | is_own<Quote>(broker_client_) | $$(update_book(event, event->data<Quote>()));
   events | is(InstrumentKey::tag) | $$(update_book(event, event->data<InstrumentKey>()));
   events | is(OrderInput::tag) | $$(update_book<OrderInput>(event, &AccountingMethod::apply_order_input));
   events | is(Order::tag) | $$(update_book<Order>(event, &AccountingMethod::apply_order));
@@ -92,6 +92,9 @@ void Bookkeeper::restore(const cache::bank &state_bank) {
     auto &asset = state.data;
     auto book = get_book(asset.holder_uid);
     book->asset = asset;
+    
+    SPDLOG_INFO("[restore] avail {}", book->asset.avail);
+
     book->update(app_.now());
   }
 }
@@ -143,6 +146,28 @@ void Bookkeeper::update_book(const event_ptr &event, const Quote &quote) {
     }
     if (has_short_position) {
       book->get_position_for(Direction::Short, quote).update_time = event->gen_time();
+    }
+  }
+}
+
+void Bookkeeper::update_book(const Quote &quote) {
+  if (accounting_methods_.find(quote.instrument_type) == accounting_methods_.end()) {
+    return;
+  }
+  auto accounting_method = accounting_methods_.at(quote.instrument_type);
+  for (auto &item : books_) {
+    auto &book = item.second;
+    auto has_long_position = book->has_long_position_for(quote);
+    auto has_short_position = book->has_short_position_for(quote);
+    if (has_long_position or has_short_position) {
+      accounting_method->apply_quote(book, quote);
+      book->update(app_.now());
+    }
+    if (has_long_position) {
+      book->get_position_for(Direction::Long, quote).update_time = app_.now();
+    }
+    if (has_short_position) {
+      book->get_position_for(Direction::Short, quote).update_time = app_.now();
     }
   }
 }

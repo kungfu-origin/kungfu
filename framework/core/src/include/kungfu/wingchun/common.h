@@ -18,11 +18,14 @@
 
 #define EXCHANGE_SSE "SSE"
 #define EXCHANGE_SZE "SZE"
+#define EXCHANGE_BSE "BSE"
 #define EXCHANGE_SHFE "SHFE"
 #define EXCHANGE_DCE "DCE"
 #define EXCHANGE_CZCE "CZCE"
 #define EXCHANGE_CFFEX "CFFEX"
 #define EXCHANGE_INE "INE"
+#define EXCHANGE_BINANCE "BINANCE"
+#define EXCHANGE_HB "HB"
 
 #define SOURCE_SIM "sim"
 #define SOURCE_CTP "ctp"
@@ -99,13 +102,11 @@ inline bool is_final_status(const longfist::enums::OrderStatus &status) {
   }
 }
 
-inline bool is_convertible_bond(const std::string &instrument_id, const std::string &exchange_id) {
-  return ((string_equals_n(instrument_id, "123", 3) || string_equals_n(instrument_id, "128", 3) ||
+inline bool is_convertible_bond(const std::string& instrument_id, const std::string& exchange_id) {
+  return ((string_equals_n(instrument_id, "123", 3) || string_equals_n(instrument_id, "128", 3) || 
            string_equals_n(instrument_id, "117", 3) || string_equals_n(instrument_id, "127", 3) ||
-           string_equals_n(instrument_id, "125", 3) || string_equals_n(instrument_id, "126", 3)) &&
-          string_equals(exchange_id, EXCHANGE_SZE)) ||
-         ((string_equals_n(instrument_id, "110", 3) || string_equals_n(instrument_id, "113", 3)) &&
-          string_equals(exchange_id, EXCHANGE_SSE));
+           string_equals_n(instrument_id, "125", 3) || string_equals_n(instrument_id, "126", 3)) && string_equals(exchange_id, EXCHANGE_SZE)) ||
+         ((string_equals_n(instrument_id, "110", 3) || string_equals_n(instrument_id, "113", 3)) && string_equals(exchange_id, EXCHANGE_SSE)); 
 }
 
 inline bool is_repo(const std::string &instrument_id, const std::string &exchange_id) {
@@ -185,10 +186,15 @@ inline longfist::enums::InstrumentType get_instrument_type(const std::string &ex
       return longfist::enums::InstrumentType::Bond;
     }
     return longfist::enums::InstrumentType::Stock;
+  } else if (string_equals(exchange_id, EXCHANGE_BSE)) {
+    return longfist::enums::InstrumentType::Stock;
   } else if (string_equals(exchange_id, EXCHANGE_DCE) || string_equals(exchange_id, EXCHANGE_SHFE) ||
              string_equals(exchange_id, EXCHANGE_CFFEX) || string_equals(exchange_id, EXCHANGE_CZCE) ||
              string_equals(exchange_id, EXCHANGE_INE)) {
     return longfist::enums::InstrumentType::Future;
+  }
+  else if (string_equals(exchange_id, EXCHANGE_BINANCE) || string_equals(exchange_id, EXCHANGE_HB)) {
+      return longfist::enums::InstrumentType::Crypto;
   }
   SPDLOG_ERROR("invalid instrument type for exchange {} and instrument {}", exchange_id, instrument_id);
   return longfist::enums::InstrumentType::Unknown;
@@ -214,6 +220,8 @@ inline std::string str_from_instrument_type(longfist::enums::InstrumentType type
     return "Index";
   case longfist::enums::InstrumentType::Repo:
     return "Repo";
+  case longfist::enums::InstrumentType::Crypto:
+    return "Crypto";
   default:
     return "Unknown";
   }
@@ -279,34 +287,6 @@ inline std::string get_exchange_id_from_future_instrument_id(const std::string &
     return EXCHANGE_INE;
   } else {
     return "";
-  }
-}
-
-inline std::string get_exchange_id_from_stock_instrument_id(const std::string &instrument_id) {
-  int code = atoi(instrument_id.c_str());
-  int head3 = code / 1000;
-  switch (head3) {
-  case 001:
-  case 201:
-  case 100:
-  case 110:
-  case 120:
-  case 129:
-  case 310:
-  case 500:
-  case 600:
-  case 601:
-  case 700:
-  case 701:
-  case 710:
-  case 720:
-  case 730:
-  case 735:
-  case 737:
-  case 900:
-    return EXCHANGE_SSE;
-  default:
-    return EXCHANGE_SZE;
   }
 }
 

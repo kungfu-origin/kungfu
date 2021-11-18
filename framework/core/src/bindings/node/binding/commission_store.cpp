@@ -36,7 +36,6 @@ Napi::Value CommissionStore::SetAllCommission(const Napi::CallbackInfo &info) {
       for (int i = 0; i < args.Length(); i++) {
         Commission commission = {};
         get(args.Get(i).ToObject(), commission);
-        SPDLOG_INFO("got commission from node: {}", commission.to_string());
         commissions.push_back(commission);
       }
       profile_.remove_all<Commission>();

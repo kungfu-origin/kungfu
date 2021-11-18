@@ -32,6 +32,26 @@ Napi::Value DataTable::Filter(const Napi::CallbackInfo &info) {
   return result;
 }
 
+Napi::Value DataTable::NoFilter(const Napi::CallbackInfo &info) {
+  if (info.Length() != 2) {
+    return {};
+  }
+  if (not IsValid(info, 0, &Napi::Value::IsString)) {
+    return {};
+  }
+  auto key = info[0].ToString().Utf8Value();
+  auto result = constructor.New({info.This()});
+  auto names = Value().GetPropertyNames();
+  for (int i = 0; i < names.Length(); i++) {
+    auto name = names.Get(i);
+    auto data = Value().Get(name).ToObject();
+    if (data.Get(key) != info[1]) {
+      result.Set(name, data);
+    }
+  }
+  return result;
+}
+
 Napi::Value DataTable::List(const Napi::CallbackInfo &info) {
   auto names = Value().GetPropertyNames();
   auto result = Napi::Array::New(info.Env(), names.Length());
@@ -154,6 +174,7 @@ void DataTable::Init(Napi::Env env, Napi::Object exports) {
   Napi::Function func = DefineClass(env, "DataTable",
                                     {
                                         InstanceMethod("filter", &DataTable::Filter), //
+                                        InstanceMethod("nofilter", &DataTable::NoFilter), //
                                         InstanceMethod("list", &DataTable::List),     //
                                         InstanceMethod("merge", &DataTable::Merge),   //
                                         InstanceMethod("range", &DataTable::Range),   //

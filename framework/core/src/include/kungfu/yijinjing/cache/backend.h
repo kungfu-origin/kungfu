@@ -12,16 +12,19 @@
 #include <kungfu/yijinjing/time.h>
 
 namespace kungfu::yijinjing::cache {
-template <typename ValueType> std::enable_if_t<std::is_arithmetic_v<ValueType>, ValueType> make_default() { return 0; }
+template <typename ValueType> std::enable_if_t<std::is_arithmetic_v<ValueType>, ValueType> make_default() {
+  return 0;
+}
 
-template <typename ValueType> std::enable_if_t<std::is_enum_v<ValueType>, int> make_default() { return 0; }
+template <typename ValueType> std::enable_if_t<std::is_enum_v<ValueType>, int> make_default() {
+  return 0;
+}
 
 template <typename ValueType> std::enable_if_t<is_array_v<ValueType>, std::string> make_default() {
   return std::string();
 }
 
-template <typename ValueType>
-std::enable_if_t<not is_numeric_v<ValueType> and not is_array_v<ValueType>, ValueType> make_default() {
+template <typename ValueType> std::enable_if_t<not is_numeric_v<ValueType> and not is_array_v<ValueType>, ValueType> make_default() {
   return ValueType();
 }
 
@@ -113,6 +116,11 @@ public:
   template <typename DataType> void operator<<(const typed_event_ptr<DataType> &event) {
     ensure_storage(event->dest());
     storage_map_.at(event->dest())->replace(event->template data<DataType>());
+  }
+
+  template <typename DataType> void operator<<(const state<DataType> &s) {
+    ensure_storage(s.dest);
+    storage_map_.at(s.dest)->replace(s.data);
   }
 
   template <typename DataType> void operator-=(const typed_event_ptr<DataType> &event) {

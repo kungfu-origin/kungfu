@@ -51,12 +51,16 @@ private:
   int64_t last_check_;
   index::session_builder session_builder_;
   profile profile_;
+  yijinjing::cache::bank feed_bank_;
+
 
   std::unordered_map<uint32_t, uint32_t> app_cmd_locations_ = {};
   std::unordered_map<uint32_t, cache::shift> app_cache_shift_ = {};
   std::unordered_map<uint32_t, std::unordered_map<int32_t, timer_task>> timer_tasks_ = {};
 
   void handle_timer_tasks();
+
+  void handle_cached_feeds();
 
   void try_add_location(int64_t trigger_time, const data::location_ptr &app_location);
 

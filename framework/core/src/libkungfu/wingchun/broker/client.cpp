@@ -204,7 +204,7 @@ bool AutoClient::should_connect_strategy(const location_ptr &td_location) const 
 SilentAutoClient::SilentAutoClient(practice::apprentice &app) : AutoClient(app) {}
 
 bool SilentAutoClient::is_subscribed(const std::string &exchange_id, const std::string &instrument_id) const {
-  return true;
+  return false;
 }
 
 void SilentAutoClient::renew(int64_t trigger_time, const location_ptr &md_location) {}
@@ -220,7 +220,7 @@ bool PassiveClient::is_fully_subscribed(uint32_t md_location_uid) const {
 }
 
 void PassiveClient::subscribe(const location_ptr &md_location, const std::string &exchange_id,
-                              const std::string &instrument_id) {
+                             const std::string &instrument_id) {
   if (not is_fully_subscribed(md_location->uid)) {
     enrolled_md_locations_.emplace(md_location->uid, false);
   }

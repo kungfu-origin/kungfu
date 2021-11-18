@@ -97,7 +97,8 @@ enum class InstrumentType : int8_t {
   Fund,        //基金
   TechStock,   //科创板股票
   Index,       //指数
-  Repo         //回购
+  Repo,        //回购
+  Crypto       //数字货币
 };
 
 inline std::ostream &operator<<(std::ostream &os, InstrumentType t) { return os << int8_t(t); }

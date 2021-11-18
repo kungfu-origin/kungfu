@@ -21,6 +21,7 @@
 #include <sstream>
 
 #include <kungfu/yijinjing/time.h>
+#include <kungfu/common.h>
 
 using namespace std::chrono;
 
@@ -28,6 +29,10 @@ namespace kungfu::yijinjing {
 int64_t time::now_in_nano() {
   auto duration = steady_clock::now().time_since_epoch().count() - get_instance().base_.steady_clock_count;
   return get_instance().base_.system_clock_count + duration;
+}
+
+uint32_t time::nano_hashed(int64_t nano_time) {
+  return kungfu::hash_32((const unsigned char*)&nano_time, sizeof(nano_time));
 }
 
 int64_t time::next_minute(int64_t nanotime) {

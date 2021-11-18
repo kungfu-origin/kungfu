@@ -14,6 +14,7 @@
 #include <kungfu/wingchun/book/bookkeeper.h>
 #include <kungfu/wingchun/broker/client.h>
 #include <kungfu/yijinjing/practice/apprentice.h>
+#include <kungfu/yijinjing/cache/runtime.h>
 
 namespace kungfu::node {
 constexpr uint64_t ID_TRANC = 0x00000000FFFFFFFF;
@@ -32,6 +33,8 @@ public:
   Napi::Value GetLocation(const Napi::CallbackInfo &info);
 
   Napi::Value GetLocationUID(const Napi::CallbackInfo &info);
+
+  Napi::Value GetInstrumentUID(const Napi::CallbackInfo& info);
 
   Napi::Value GetConfig(const Napi::CallbackInfo &info);
 
@@ -71,6 +74,8 @@ public:
 
   Napi::Value RequestMarketData(const Napi::CallbackInfo &info);
 
+  Napi::Value UpdateQuote(const Napi::CallbackInfo& info);
+
   static void Init(Napi::Env env, Napi::Object exports);
 
 protected:
@@ -94,12 +99,16 @@ private:
   serialize::JsUpdateState update_ledger;
   serialize::JsPublishState publish;
   serialize::JsResetCache reset_cache;
+  yijinjing::cache::bank quotes_bank_;
+  std::unordered_map<uint32_t, longfist::types::InstrumentKey> subscribed_instruments_ = {};
 
   static constexpr auto bypass = [](yijinjing::practice::apprentice *app, bool bypass_quotes) {
     return rx::filter([=](const event_ptr &event) {
       return not(app->get_location(event->source())->category == longfist::enums::category::MD and bypass_quotes);
     });
   };
+
+  void Feed(const event_ptr& event);
 
   void RestoreState(const yijinjing::data::location_ptr &state_location, int64_t from, int64_t to, bool sync_schema);
 
@@ -119,7 +128,11 @@ private:
 
   void UpdateBook(const event_ptr &event, const longfist::types::Quote &quote);
 
+  void UpdateBook(int64_t update_time, uint32_t source_id, uint32_t dest_id, const longfist::types::Quote& quote);
+
   void UpdateBook(const event_ptr &event, const longfist::types::Position &position);
+
+  void UpdateBook(int64_t update_time, uint32_t source_id, uint32_t dest_id, const longfist::types::Position& position);
 
   template <typename TradingData> void UpdateBook(const event_ptr &event, const TradingData &data) {
     auto update = [&](uint32_t source, uint32_t dest) {

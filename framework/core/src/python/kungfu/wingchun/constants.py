@@ -1,6 +1,4 @@
-import kungfu
-
-lf = kungfu.__binding__.longfist
+from pykungfu import longfist as lf
 
 
 class Source:
@@ -9,6 +7,10 @@ class Source:
     CTP = "ctp"
     XTP = "xtp"
     OES = "oes"
+    TORA = "tora"
+    HUAR = "huar"
+    RONGH = "rongh"
+    
 
 
 class Exchange:
@@ -19,11 +21,12 @@ class Exchange:
     CZCE = "CZCE"
     CFFEX = "CFFEX"
     INE = "INE"
+    BSE = "BSE"
 
 
 class Region:
-    CN = "CN"
-    HK = "HK"
+    CN = 'CN'
+    HK = 'HK'
 
 
 InstrumentType = lf.enums.InstrumentType
@@ -40,35 +43,27 @@ OrderActionFlag = lf.enums.OrderActionFlag
 LedgerCategory = lf.enums.LedgerCategory
 HedgeFlag = lf.enums.HedgeFlag
 CommissionRateMode = lf.enums.CommissionRateMode
-AllFinalOrderStatus = [
-    OrderStatus.Filled,
-    OrderStatus.Error,
-    OrderStatus.PartialFilledNotActive,
-    OrderStatus.Cancelled,
-]
+AllFinalOrderStatus = [int(OrderStatus.Filled), int(OrderStatus.Error), int(OrderStatus.PartialFilledNotActive), int(OrderStatus.Cancelled)]
 
-InstrumentTypeInStockAccount = [
-    InstrumentType.Stock,
-    InstrumentType.Bond,
-    InstrumentType.Fund,
-    InstrumentType.StockOption,
-    InstrumentType.TechStock,
-    InstrumentType.Index,
-    InstrumentType.Repo,
-]
+InstrumentTypeInStockAccount = [InstrumentType.Stock,
+                                InstrumentType.Bond,
+                                InstrumentType.Fund,
+                                InstrumentType.StockOption,
+                                InstrumentType.TechStock,
+                                InstrumentType.Index,
+                                InstrumentType.Repo,
+                                InstrumentType.Crypto]
 
-ENUM_TYPES = [
-    InstrumentType,
-    ExecType,
-    Side,
-    Offset,
-    BsFlag,
-    OrderStatus,
-    Direction,
-    PriceType,
-    VolumeCondition,
-    TimeCondition,
-    OrderActionFlag,
-    LedgerCategory,
-    HedgeFlag,
-]
+ENUM_TYPES = [InstrumentType,
+              ExecType,
+              Side,
+              Offset,
+              BsFlag,
+              OrderStatus,
+              Direction,
+              PriceType,
+              VolumeCondition,
+              TimeCondition,
+              OrderActionFlag,
+              LedgerCategory,
+              HedgeFlag]

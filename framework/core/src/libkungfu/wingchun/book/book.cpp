@@ -35,10 +35,31 @@ bool Book::has_long_position(const char *exchange_id, const char *instrument_id)
   return long_positions.find(position_id) != long_positions.end();
 }
 
+bool Book::has_long_position_volume(const char* exchange_id, const char* instrument_id) const {
+  auto position_id = hash_instrument(exchange_id, instrument_id);
+  if (long_positions.find(position_id) == long_positions.end()) {
+    return false;
+  }
+
+  auto& position = long_positions.at(position_id);
+  return position.volume != 0;
+}
+
 bool Book::has_short_position(const char *exchange_id, const char *instrument_id) const {
   auto position_id = hash_instrument(exchange_id, instrument_id);
   return short_positions.find(position_id) != short_positions.end();
 }
+
+bool Book::has_short_position_volume(const char *exchange_id, const char *instrument_id) const {
+  auto position_id = hash_instrument(exchange_id, instrument_id);
+  if (short_positions.find(position_id) == short_positions.end()) {
+    return false;
+  }
+
+  auto& position = short_positions.at(position_id);
+  return position.volume != 0;
+}
+
 
 bool Book::has_position(const char *exchange_id, const char *instrument_id) const {
   return has_long_position(exchange_id, instrument_id) or has_short_position(exchange_id, instrument_id);

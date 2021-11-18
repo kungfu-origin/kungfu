@@ -42,37 +42,11 @@ public:
 
   void guard_positions();
 
-  void set_bypass_quotes(bool bypass_quotes) { bypass_quotes_ = bypass_quotes; }
-
-private:
-  yijinjing::practice::apprentice &app_;
-  broker::Client &broker_client_;
-
-  bool bypass_quotes_ = false;
-
-  bool positions_guarded_ = false;
-  CommissionMap commissions_ = {};
-  InstrumentMap instruments_ = {};
-  BookMap books_ = {};
-  AccountingMethodMap accounting_methods_ = {};
-
-  static constexpr auto bypass = [](yijinjing::practice::apprentice *app, bool bypass_quotes) {
-    return rx::filter([=](const event_ptr &event) {
-      return not(app->get_location(event->source())->category == longfist::enums::category::MD and bypass_quotes);
-    });
-  };
-
-  Book_ptr make_book(uint32_t location_uid);
-
-  void update_instrument(const longfist::types::Instrument &instrument);
-
   void update_book(const event_ptr &event, const longfist::types::InstrumentKey &instrument_key);
 
   void update_book(const event_ptr &event, const longfist::types::Quote &quote);
 
-  void try_update_asset(const longfist::types::Asset &asset);
-
-  void try_update_position(const longfist::types::Position &position);
+  void update_book(const longfist::types::Quote& quote);
 
   template <typename TradingData, typename ApplyMethod = void (AccountingMethod::*)(Book_ptr, const TradingData &)>
   void update_book(const event_ptr &event, ApplyMethod method) {
@@ -97,6 +71,31 @@ private:
     apply_and_update(source);
     apply_and_update(dest);
   }
+
+private:
+  yijinjing::practice::apprentice &app_;
+  broker::Client &broker_client_;
+
+  bool positions_guarded_ = false;
+  CommissionMap commissions_ = {};
+  InstrumentMap instruments_ = {};
+  BookMap books_ = {};
+  AccountingMethodMap accounting_methods_ = {};
+
+  static constexpr auto bypass = [](yijinjing::practice::apprentice *app, bool bypass_quotes) {
+    return rx::filter([=](const event_ptr &event) {
+      return not(app->get_location(event->source())->category == longfist::enums::category::MD and bypass_quotes);
+    });
+  };
+
+  Book_ptr make_book(uint32_t location_uid);
+
+  void update_instrument(const longfist::types::Instrument &instrument);
+
+
+  void try_update_asset(const longfist::types::Asset &asset);
+
+  void try_update_position(const longfist::types::Position &position);
 };
 } // namespace kungfu::wingchun::book
 #endif // WINGCHUN_BOOKKEEPER_H

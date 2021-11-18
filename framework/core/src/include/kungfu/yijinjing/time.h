@@ -56,6 +56,8 @@ public:
    */
   static int64_t now_in_nano();
 
+  static uint32_t nano_hashed(int64_t nano_time);
+
   /**
    * Given a timestamp, returns the start point of next minute.
    * @param nanotime timestamp in nano seconds
@@ -127,6 +129,7 @@ public:
    * @param steady_clock_count std::chrono::steady_clock nano seconds count
    */
   static void reset(int64_t system_clock_count, int64_t steady_clock_count);
+
 
 private:
   time_point_info base_;

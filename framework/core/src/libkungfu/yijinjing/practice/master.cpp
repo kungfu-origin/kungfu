@@ -139,6 +139,7 @@ void master::on_active() {
     last_check_ = now;
   }
   handle_timer_tasks();
+  handle_cached_feeds();
 }
 
 void master::require_cached_write_to(int64_t trigger_time, uint32_t source_id, uint32_t dest_id) {
@@ -167,6 +168,33 @@ void master::handle_timer_tasks() {
   }
 }
 
+void master::handle_cached_feeds() {
+  bool stored_controller = false;
+  boost::hana::for_each(StateDataTypes, [&](auto it) {
+      using DataType = typename decltype(+boost::hana::second(it))::type;
+      auto hana_type = boost::hana::type_c<DataType>;
+
+      using FeedMap = std::unordered_map<uint64_t, state<DataType>>;
+      auto& feed_map = const_cast<FeedMap&>(feed_bank_[hana_type]);
+
+      if (feed_map.size() != 0) {
+          auto iter = feed_map.begin();
+          while (iter != feed_map.end() and !stored_controller) {
+              auto s = iter->second;
+              auto source_id = s.source;
+
+              if (app_cache_shift_.find(source_id) != app_cache_shift_.end()) {
+                  app_cache_shift_.at(source_id) << s;
+                  iter = feed_map.erase(iter);
+                  stored_controller = true;
+              } else {
+                  iter++;
+              }
+          }
+      }
+  });
+}
+
 void master::try_add_location(int64_t trigger_time, const location_ptr &app_location) {
   if (not has_location(app_location->uid)) {
     profile_.set(dynamic_cast<Location &>(*app_location));
@@ -183,7 +211,8 @@ void master::feed(const event_ptr &event) {
   if (get_location(event->source())->category == category::MD) {
     return;
   }
-  feed_state_data(event, app_cache_shift_[event->source()]);
+
+  feed_state_data(event, feed_bank_);
   feed_profile_data(event, profile_);
 }
 
