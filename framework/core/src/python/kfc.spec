@@ -146,6 +146,7 @@ a = Analysis(
             "pandas",
             "plotly",
             "pip._internal",
+            "pip._vendor",
             "pkg_resources",
         ],
         executable_modules=[

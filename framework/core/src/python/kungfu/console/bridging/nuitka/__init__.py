@@ -164,11 +164,9 @@ def setup():
 
 
 def main():
-    from nuitka import (
-        MainControl,
-        Options,
-    )  # MUST load after all the hack have been set
-
+    from nuitka import Options # MUST load after all the hack have been set
     Options.parseArgs(will_reexec=False)
     Options.commentArgs()
+    
+    from nuitka import MainControl
     MainControl.main()
