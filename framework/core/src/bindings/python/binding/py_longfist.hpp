@@ -137,6 +137,7 @@ void bind(pybind11::module &&m) {
       .value("TechStock", InstrumentType::TechStock)
       .value("Index", InstrumentType::Index)
       .value("Repo", InstrumentType::Repo)
+      .value("Crypto", InstrumentType::Crypto)
       .export_values()
       .def("__eq__", [](const InstrumentType &a, int b) { return static_cast<int>(a) == b; });
 

@@ -53,8 +53,8 @@ function getPackageJson() {
   return JSON.parse(fse.readFileSync(packageJsonPath));
 }
 
-function hasCppSource(packageJson) {
-  return packageJson.kungfuBuild && packageJson.kungfuBuild.cpp;
+function hasSourceFor(packageJson, language) {
+  return packageJson.kungfuBuild && packageJson.kungfuBuild[language];
 }
 
 function getProjectName(packageJson) {
@@ -231,16 +231,21 @@ exports.clean = function (keepLibs = true) {
 
 exports.configure = function () {
   const packageJson = getPackageJson();
-  if (hasCppSource(packageJson)) {
+  if (hasSourceFor(packageJson, 'python')) {
+    spawnExec('yarn', ['kfc', 'engage', 'pdm', 'makeup']);
+    spawnExec('yarn', ['kfc', 'engage', 'pdm', 'install']);
+  }
+  if (hasSourceFor(packageJson, 'cpp')) {
     generateCMakeFiles(getProjectName(packageJson), packageJson.kungfuBuild);
   }
 };
 
 exports.build = function () {
-  if (!fse.existsSync(path.join('build', 'kungfu.cmake'))) {
-    exports.configure();
+  const packageJson = getPackageJson();
+  if (hasSourceFor(packageJson, 'python')) {
+    spawnExec('yarn', ['kfc', 'engage', 'nuitka', '--output-dir=build', 'src/python']);
   }
-  if (hasCppSource(getPackageJson())) {
+  if (hasSourceFor(packageJson, 'cpp')) {
     spawnExec('yarn', ['cmake-js', 'build']);
   }
 };

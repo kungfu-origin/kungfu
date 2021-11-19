@@ -14,8 +14,9 @@
     "registry": "https://npm.pkg.github.com"
   },
   "scripts": {
-    "build": "yarn kfc engage pdm install",
-    "format": "yarn kfc engage black src/python *.py"
+    "prebuild": "kfs extension configure",
+    "build": "kfs extension build",
+    "format": "kfc engage black src/python *.py"
   },
   "devDependencies": {
     "@kungfu-trader/kungfu-sdk": "^2.4.0-alpha.4"

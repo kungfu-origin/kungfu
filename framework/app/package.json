@@ -18,8 +18,6 @@
     "USE_HARD_LINKS=false"
   ],
   "scripts": {
-    "clean": "rimraf build dist",
-    "build": "node --max_old_space_size=4096 lib/webpack/build.js",
     "dev": "node --max_old_space_size=4096 lib/dev/run.js",
     "format": "prettier --write --parser typescript \"(.*)/**.js\""
   },
