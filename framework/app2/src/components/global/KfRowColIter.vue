@@ -10,14 +10,21 @@
             ></KfRowColIter>
         </template>
         <template v-if="boardInfo.contents">
-            <a-card
+            <a-tabs
                 size="small"
+                v-model:current="boardInfo.current"
                 style="height: 100%; width: 100%"
-                :bordered="false"
-                :tab-list="boardInfo.contents.map((item: string) => ({key: item, tab: item}))"
+                type="editable-card"
+                @edit="hanldeEdit"
             >
-            {{boardInfo.current || ""}}
-            </a-card>
+                <a-tab-pane
+                    v-for="content in contents"
+                    :key="content"
+                    :tab="content"
+                >
+                    {{ content }}
+                </a-tab-pane>
+            </a-tabs>
         </template>
     </KfDragRow>
     <KfDragCol v-else-if="boardInfo.direction === 'v'">
@@ -31,14 +38,21 @@
             ></KfRowColIter>
         </template>
         <template v-if="boardInfo.contents">
-            <a-card
+            <a-tabs
                 size="small"
+                v-model:current="boardInfo.current"
                 style="height: 100%; width: 100%"
-                :bordered="false"
-                :tab-list="boardInfo.contents.map((item: string) => ({key: item, tab: item}))"
+                type="editable-card"
+                @edit="hanldeEdit"
             >
-                {{boardInfo.current || ""}}
-            </a-card>
+                <a-tab-pane
+                    v-for="content in contents"
+                    :key="content"
+                    :tab="content"
+                >
+                    {{ content }}
+                </a-tab-pane>
+            </a-tabs>
         </template>
     </KfDragCol>
 </template>
@@ -82,6 +96,12 @@ export default defineComponent({
 
         contents(): string[] {
             return this.boardInfo.contents || [];
+        },
+    },
+
+    methods: {
+        hanldeEdit(e: MouseEvent) {
+            console.log(e);
         },
     },
 });

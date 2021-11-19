@@ -5,12 +5,16 @@ module.exports = {
     css: {
         modules: false,
         loaderOptions: {
-            less: {      
-                modifyVars: getThemeVariables({
-                    dark: true, // Enable dark mode
-                    'primary-color': '#FAAD14',
-                }),    
-                javascriptEnabled: true,
+            less: {  
+                lessOptions: {
+                    modifyVars: {
+                        ...getThemeVariables({
+                            dark: true, // Enable dark mode
+                        }),
+                        'primary-color': '#FAAD14',
+                    },    
+                    javascriptEnabled: true,
+                }
             }
         }
     },

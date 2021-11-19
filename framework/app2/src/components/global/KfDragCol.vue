@@ -104,9 +104,9 @@ export default defineComponent({
         border-right: 1px solid @border-color-base;
         cursor: col-resize;
         box-sizing: border-box;
+        z-index: 10;
 
         &:hover {
-            right: -2px;
             border-right: 5px solid @border-color-base;
         }
     }

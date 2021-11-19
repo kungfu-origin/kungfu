@@ -61,8 +61,23 @@ export default defineComponent({
                 4: {
                     id: 4,
                     direction: 'h',
-                    contents: ['4', '5', '6', '7', '8', '9', '14', '15', '16', '17'],
-                    current: '4'
+                    contents: [
+                        '4',
+                        '5',
+                        '6',
+                        '7',
+                        '8',
+                        '9',
+                        '14',
+                        '15',
+                        '16',
+                        '17',
+                        '18',
+                        '19',
+                        '20',
+                        '21',
+                    ],
+                    current: '4',
                 },
                 5: {
                     id: 5,
@@ -72,32 +87,38 @@ export default defineComponent({
                 6: {
                     id: 6,
                     direction: 'v',
-                    contents: ['6'],
+                    contents: ['6', '7'],
+                    current: '6',
                 },
                 7: {
                     id: 7,
                     direction: 'v',
-                    contents: ['7'],
+                    contents: ['7', '8'],
+                    current: '8',
                 },
                 8: {
                     id: 8,
                     direction: 'h',
-                    contents: ['8'],
+                    contents: ['8', '9'],
+                    current: '9',
                 },
                 9: {
                     id: 9,
                     direction: 'h',
                     contents: ['9'],
+                    current: '9',
                 },
                 10: {
                     id: 10,
                     direction: 'h',
                     contents: ['10'],
+                    current: '10',
                 },
                 11: {
                     id: 11,
                     direction: 'h',
                     contents: ['11'],
+                    current: '11',
                 },
             } as BoradsMap,
         };

@@ -1,4 +1,3 @@
-
 export interface BoardInfo {
     children?: number[];
     direction: string;
