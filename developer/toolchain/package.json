@@ -16,7 +16,7 @@
   },
   "engines": {
     "node": ">=14 <15",
-    "yarn": "^1.22.0"
+    "yarn": "^1.18.0"
   },
   "dependencies": {
     "@babel/core": "^7.0.0",
@@ -81,6 +81,6 @@
     "webpack-node-externals": "^3.0.0",
     "webpack-permissions-plugin": "^1.0.0",
     "worker-loader": "^3.0.0",
-    "yarn": "^1.22.0"
+    "yarn": "^1.18.0"
   }
 }

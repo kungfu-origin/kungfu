@@ -15,7 +15,7 @@
   ],
   "engines": {
     "node": ">=14 <15",
-    "yarn": "^1.22.0"
+    "yarn": "^1.18.0"
   },
   "scripts": {
     "foreach": "wsrun --serial --exclude-missing --fast-exit",

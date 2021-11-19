@@ -79,12 +79,14 @@ export default defineComponent({
     width: 100%;
     flex: 1;
     position: relative;
+    transform: translateZ(0);
 
     .kf-drag-col__content {
         display: flex;
         flex-direction: column;
         height: 100%;
         width: 100%;
+        justify-content: flex-start;
 
         > .kf-drag-row__warp:last-child {
             .resize-bar-horizontal {
@@ -99,13 +101,13 @@ export default defineComponent({
         top: 0;
         height: 100%;
         width: 5px;
-        border-right: 1px solid rgb(112, 107, 107);
+        border-right: 1px solid @border-color-base;
         cursor: col-resize;
         box-sizing: border-box;
 
         &:hover {
             right: -2px;
-            border-right: 5px solid gray;
+            border-right: 5px solid @border-color-base;
         }
     }
 }

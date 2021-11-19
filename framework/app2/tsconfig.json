@@ -14,7 +14,7 @@
     "types": [
       "webpack-env",
       "@types",
-      "@kungfu-trader/kungfu-uicc2/typings/kungfu-uicc2",
+      "@kungfu-trader/kungfu-uicc2/typings/kungfu-uicc2"
     ],
     "paths": {
       "@/*": [

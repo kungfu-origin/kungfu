@@ -79,6 +79,7 @@ export default defineComponent({
     width: 100%;
     flex: 1;
     position: relative;
+    transform: translateZ(0);
 
     .kf-drag-row__content {
         display: flex;
@@ -100,13 +101,13 @@ export default defineComponent({
         bottom: 0;
         height: 5px;
         width: 100%;
-        border-bottom: 1px solid rgb(112, 107, 107);
+        border-bottom: 1px solid @border-color-base;
         cursor: row-resize;
         box-sizing: border-box;
 
         &:hover {
             bottom: -2px;
-            border-bottom: 5px solid rgb(112, 107, 107);
+            border-bottom: 5px solid @border-color-base;
         }
     }
 }

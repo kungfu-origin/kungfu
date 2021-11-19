@@ -8,9 +8,9 @@ module.exports = {
             less: {      
                 modifyVars: getThemeVariables({
                     dark: true, // Enable dark mode
+                    'primary-color': '#FAAD14',
                 }),    
                 javascriptEnabled: true,
-                'primary-color': '#FAAD14',
             }
         }
     },
