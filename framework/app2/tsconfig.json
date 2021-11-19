@@ -12,7 +12,9 @@
     "sourceMap": true,
     "baseUrl": ".",
     "types": [
-      "webpack-env"
+      "webpack-env",
+      "@types",
+      "@kungfu-trader/kungfu-uicc2/typings/kungfu-uicc2",
     ],
     "paths": {
       "@/*": [

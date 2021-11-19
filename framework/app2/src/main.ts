@@ -1,6 +1,9 @@
-import { createApp } from 'vue'
-import App from './App.vue'
-import router from './router'
-import store from './store'
+import { createApp } from 'vue';
+import App from '@/App.vue';
+import router from '@/router';
+import store from '@/store';
+import { Layout } from 'ant-design-vue';
 
-createApp(App).use(store).use(router).mount('#app')
+import '@/assets/less/base.less';
+
+createApp(App).use(store).use(router).use(Layout).mount('#app');
