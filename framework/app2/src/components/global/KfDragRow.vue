@@ -1,5 +1,5 @@
 <template>
-    <div class="kf-drag-row__warp">
+    <div class="kf-drag-row__warp" :style="style">
         <div
             class="kf-drag-row__content"
             @mousedown="handleMouseDown"
@@ -13,11 +13,23 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from '@vue/runtime-core';
+import { defineComponent, PropType } from '@vue/runtime-core';
 
 const $body = document.body;
 export default defineComponent({
     name: 'KfDragRow',
+
+    props: {
+        style: {
+            type: String as PropType<string>,
+            default: '',
+        },
+
+        id: {
+            required: true,
+            type: Number as PropType<number>,
+        },
+    },
 
     data() {
         return {

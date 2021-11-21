@@ -1,18 +1,15 @@
 <template>
-    <KfDragRow v-if="boardInfo.direction === 'h'">
+    <KfDragRow :id="boardId" v-if="direction === 'h'" :style="style">
         <template
             v-for="childBoardId in boardInfo.children || []"
             :key="childBoardId"
         >
-            <KfRowColIter
-                :board-id="childBoardId"
-                :boards-map="boardsMap"
-            ></KfRowColIter>
+            <KfRowColIter :board-id="childBoardId"></KfRowColIter>
         </template>
         <template v-if="boardInfo.contents">
             <a-tabs
                 size="small"
-                v-model:current="boardInfo.current"
+                :activeKey="boardInfo.current"
                 style="height: 100%; width: 100%"
                 type="editable-card"
                 @edit="hanldeEdit"
@@ -27,20 +24,17 @@
             </a-tabs>
         </template>
     </KfDragRow>
-    <KfDragCol v-else-if="boardInfo.direction === 'v'">
+    <KfDragCol :id="boardId" v-else-if="direction === 'v'" :style="style">
         <template
             v-for="childBoardId in boardInfo.children || []"
             :key="childBoardId"
         >
-            <KfRowColIter
-                :board-id="childBoardId"
-                :boards-map="boardsMap"
-            ></KfRowColIter>
+            <KfRowColIter :board-id="childBoardId"></KfRowColIter>
         </template>
         <template v-if="boardInfo.contents">
             <a-tabs
                 size="small"
-                v-model:current="boardInfo.current"
+                :activeKey="boardInfo.current"
                 style="height: 100%; width: 100%"
                 type="editable-card"
                 @edit="hanldeEdit"
@@ -59,11 +53,13 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from '@vue/runtime-core';
+import { mapState } from 'pinia';
 
 import KfDragRow from '@/components/global/KfDragRow.vue';
 import KfDragCol from '@/components/global/KfDragCol.vue';
 
-import { BoardInfo, BoradsMap } from '@/components/global/typings/index';
+import { BoardInfo, BoardsMap } from '@/components/global/typings/index';
+import { useGlobalStore } from '@/store/global';
 
 export default defineComponent({
     name: 'KfRowColIter',
@@ -75,17 +71,16 @@ export default defineComponent({
 
     props: {
         boardId: {
-            type: Number,
+            type: Number as PropType<number>,
             default: 0,
-        },
-
-        boardsMap: {
-            type: Object as PropType<BoradsMap>,
-            default: () => ({ direction: 'h' } as BoradsMap),
         },
     },
 
     computed: {
+        ...mapState(useGlobalStore, {
+            boardsMap: (store): BoardsMap => store.boardsMap,
+        }),
+
         boardInfo(): BoardInfo {
             return this.boardsMap[this.boardId];
         },
@@ -96,6 +91,30 @@ export default defineComponent({
 
         contents(): string[] {
             return this.boardInfo.contents || [];
+        },
+
+        direction(): string {
+            return this.boardInfo.direction;
+        },
+
+        style(): string {
+            if (this.direction === 'v') {
+                if (this.boardInfo?.width) {
+                    return `width: ${this.boardInfo?.width}px; flex: unset;`;
+                } else {
+                    return `flex: 1;`;
+                }
+            }
+
+            if (this.direction === 'h') {
+                if (this.boardInfo?.height) {
+                    return `height: ${this.boardInfo?.height}px; flex: unset;`;
+                } else {
+                    return ``;
+                }
+            }
+
+            return '';
         },
     },
 

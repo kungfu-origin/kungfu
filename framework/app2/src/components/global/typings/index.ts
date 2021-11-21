@@ -1,10 +1,12 @@
 export interface BoardInfo {
     children?: number[];
-    direction: string;
+    direction: 'v' | 'h';
     contents?: string[];
     current?: string;
+    width?: number;
+    height?: number;
 }
 
-export interface BoradsMap {
+export interface BoardsMap {
     [prop: number]: BoardInfo;
 }
