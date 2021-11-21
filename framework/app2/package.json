@@ -10,7 +10,7 @@
         "fmt": "./node_modules/.bin/prettier -l --write 'src/**/*.{ts, js, vue, less, css}' --config ./.prettierrc.js"
     },
     "dependencies": {
-        "ant-design-vue": "^3.0.0-alpha.11",
+        "ant-design-vue": "^3.0.0-alpha.12",
         "core-js": "^3.6.5",
         "pinia": "^2.0.4",
         "vue": "^3.2.0",
@@ -19,12 +19,12 @@
     "devDependencies": {
         "@typescript-eslint/eslint-plugin": "^4.18.0",
         "@typescript-eslint/parser": "^4.18.0",
-        "@vue/cli-plugin-babel": "~4.5.0",
-        "@vue/cli-plugin-e2e-cypress": "~4.5.0",
-        "@vue/cli-plugin-eslint": "~4.5.0",
-        "@vue/cli-plugin-router": "~4.5.0",
-        "@vue/cli-plugin-typescript": "~4.5.0",
-        "@vue/cli-service": "~4.5.0",
+        "@vue/cli-plugin-babel": "^4.5.15",
+        "@vue/cli-plugin-e2e-cypress": "^4.5.15",
+        "@vue/cli-plugin-eslint": "^4.5.15",
+        "@vue/cli-plugin-router": "^4.5.15",
+        "@vue/cli-plugin-typescript": "^4.5.15",
+        "@vue/cli-service": "^4.5.15",
         "@vue/compiler-sfc": "^3.0.0",
         "@vue/eslint-config-prettier": "^6.0.0",
         "@vue/eslint-config-typescript": "^7.0.0",
@@ -35,6 +35,6 @@
         "less": "^4.1.2",
         "less-loader": "^6.0.0",
         "prettier": "^2.2.1",
-        "typescript": "~4.1.5"
+        "typescript": "^4.4.0"
     }
 }

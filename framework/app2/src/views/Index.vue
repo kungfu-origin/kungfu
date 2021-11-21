@@ -21,23 +21,28 @@ export default defineComponent({
     setup() {
         const boardsMap: BoardsMap = {
             0: {
+                paId: -1,
                 direction: 'h',
                 children: [1, 2, 3],
             },
             1: {
+                paId: 0,
                 direction: 'v',
                 children: [4, 5],
                 width: 400,
             },
             2: {
+                paId: 0,
                 direction: 'v',
                 children: [8, 9],
             },
             3: {
+                paId: 0,
                 direction: 'v',
                 children: [10, 11],
             },
             4: {
+                paId: 1,
                 direction: 'h',
                 contents: [
                     '4',
@@ -58,36 +63,43 @@ export default defineComponent({
                 current: '4',
             },
             5: {
+                paId: 1,
                 direction: 'h',
                 children: [6, 7],
             },
             6: {
+                paId: 5,
                 direction: 'v',
                 contents: ['6', '7'],
                 current: '6',
             },
             7: {
+                paId: 5,
                 direction: 'v',
                 contents: ['7', '8'],
                 current: '8',
             },
             8: {
+                paId: 2,
                 direction: 'h',
                 contents: ['8', '9'],
                 current: '9',
                 height: 300,
             },
             9: {
+                paId: 2,
                 direction: 'h',
                 contents: ['9'],
                 current: '9',
             },
             10: {
+                paId: 3,
                 direction: 'h',
                 contents: ['10'],
                 current: '10',
             },
             11: {
+                paId: 3,
                 direction: 'h',
                 contents: ['11'],
                 current: '11',

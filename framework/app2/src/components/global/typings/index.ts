@@ -1,12 +1,16 @@
+export type ContentId = string;
+export type BoardId = number;
+
 export interface BoardInfo {
+    paId: number;
     children?: number[];
     direction: 'v' | 'h';
-    contents?: string[];
-    current?: string;
+    contents?: ContentId[];
+    current?: ContentId;
     width?: number;
     height?: number;
 }
 
 export interface BoardsMap {
-    [prop: number]: BoardInfo;
+    [prop: BoardId]: BoardInfo;
 }

@@ -155,8 +155,8 @@ export default defineComponent({
         width: 100%;
         justify-content: flex-start;
 
-        > .kf-drag-col__warp:last-child {
-            .resize-bar-vertical {
+        > .kf-drag-col__warp:last-of-type {
+            > .resize-bar-vertical {
                 display: none;
             }
         }

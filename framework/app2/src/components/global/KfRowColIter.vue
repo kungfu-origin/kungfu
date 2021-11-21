@@ -13,6 +13,7 @@
                 style="height: 100%; width: 100%"
                 type="editable-card"
                 @edit="hanldeEdit"
+                @tabClick="handleClickTab"
             >
                 <a-tab-pane
                     v-for="content in contents"
@@ -38,6 +39,7 @@
                 style="height: 100%; width: 100%"
                 type="editable-card"
                 @edit="hanldeEdit"
+                @tabClick="handleClickTab"
             >
                 <a-tab-pane
                     v-for="content in contents"
@@ -53,7 +55,7 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from '@vue/runtime-core';
-import { mapState } from 'pinia';
+import { mapActions, mapState } from 'pinia';
 
 import KfDragRow from '@/components/global/KfDragRow.vue';
 import KfDragCol from '@/components/global/KfDragCol.vue';
@@ -99,8 +101,18 @@ export default defineComponent({
     },
 
     methods: {
-        hanldeEdit(e: MouseEvent) {
-            console.log(e);
+        ...mapActions(useGlobalStore, {
+            setBoardsMapAttrById: 'setBoardsMapAttrById',
+            removeBoardByContentId: 'removeBoardByContentId',
+        }),
+
+        hanldeEdit(targetContentId: BoardInfo['current']) {
+            const targetBoardId = this.boardId;
+            this.removeBoardByContentId(targetBoardId, targetContentId || '');
+        },
+
+        handleClickTab(e: BoardInfo['current']) {
+            this.setBoardsMapAttrById(this.boardId, 'current', e?.toString());
         },
     },
 });
