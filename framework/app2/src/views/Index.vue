@@ -95,7 +95,7 @@ export default defineComponent({
         };
 
         const globalStore = useGlobalStore();
-        globalStore.setBoardsMap(boardsMap);
+        globalStore.initBoardsMap(boardsMap);
     },
 
     components: {

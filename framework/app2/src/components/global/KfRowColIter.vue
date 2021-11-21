@@ -1,5 +1,5 @@
 <template>
-    <KfDragRow :id="boardId" v-if="direction === 'h'" :style="style">
+    <KfDragRow :id="boardId" v-if="direction === 'h'">
         <template
             v-for="childBoardId in boardInfo.children || []"
             :key="childBoardId"
@@ -24,7 +24,7 @@
             </a-tabs>
         </template>
     </KfDragRow>
-    <KfDragCol :id="boardId" v-else-if="direction === 'v'" :style="style">
+    <KfDragCol :id="boardId" v-else-if="direction === 'v'">
         <template
             v-for="childBoardId in boardInfo.children || []"
             :key="childBoardId"
@@ -95,26 +95,6 @@ export default defineComponent({
 
         direction(): string {
             return this.boardInfo.direction;
-        },
-
-        style(): string {
-            if (this.direction === 'v') {
-                if (this.boardInfo?.width) {
-                    return `width: ${this.boardInfo?.width}px; flex: unset;`;
-                } else {
-                    return `flex: 1;`;
-                }
-            }
-
-            if (this.direction === 'h') {
-                if (this.boardInfo?.height) {
-                    return `height: ${this.boardInfo?.height}px; flex: unset;`;
-                } else {
-                    return ``;
-                }
-            }
-
-            return '';
         },
     },
 

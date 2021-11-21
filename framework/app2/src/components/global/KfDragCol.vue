@@ -1,5 +1,5 @@
 <template>
-    <div class="kf-drag-col__warp" :style="style">
+    <div class="kf-drag-col__warp" :style="style" :board-id="id">
         <div
             class="kf-drag-col__content"
             @mousedown="handleMouseDown"
@@ -14,17 +14,15 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from '@vue/runtime-core';
+import { mapActions, mapState } from 'pinia';
 
-const $body = document.body;
+import { useGlobalStore } from '@/store/global';
+import { BoardInfo } from '@/components/global/typings';
+
 export default defineComponent({
     name: 'KfDragCol',
 
     props: {
-        style: {
-            type: String as PropType<string>,
-            default: '',
-        },
-
         id: {
             required: true,
             type: Number as PropType<number>,
@@ -33,23 +31,57 @@ export default defineComponent({
 
     data() {
         return {
-            $upRow: $body,
+            $upRow: undefined,
+            upBoardId: '',
             upRowHeight: 0,
-            $bottomRow: $body,
+            $bottomRow: undefined,
+            bottomBoardId: '',
             bottomRowHeight: 0,
             preY: 0,
+        } as {
+            $upRow: HTMLElement | undefined;
+            upBoardId: string;
+            upRowHeight: number;
+            $bottomRow: HTMLElement | undefined;
+            bottomBoardId: string;
+            bottomRowHeight: number;
+            preY: number;
         };
     },
 
+    computed: {
+        ...mapState(useGlobalStore, {
+            boardsMap: (store) => store.boardsMap,
+        }),
+
+        boardInfo(): BoardInfo {
+            return this.boardsMap[this.id];
+        },
+
+        style(): string {
+            if (this.boardInfo?.width) {
+                return `width: ${this.boardInfo?.width}px; flex: unset;`;
+            } else {
+                return `flex: 1;`;
+            }
+        },
+    },
+
     methods: {
+        ...mapActions(useGlobalStore, {
+            setBoardsMapAttrById: 'setBoardsMapAttrById',
+        }),
+
         handleMouseDown(e: MouseEvent) {
-            const target = e.target as HTMLBaseElement;
+            const target = e.target as HTMLElement;
 
             if (target.className === 'resize-bar-horizontal') {
-                this.$upRow = target.parentNode as HTMLBaseElement;
+                this.$upRow = target.parentNode as HTMLElement;
+                this.upBoardId = this.$upRow.getAttribute('board-id') || '';
                 this.upRowHeight = this.$upRow?.clientHeight || 0;
-                this.$bottomRow = target.parentNode
-                    ?.nextSibling as HTMLBaseElement;
+                this.$bottomRow = target.parentNode?.nextSibling as HTMLElement;
+                this.bottomBoardId =
+                    this.$bottomRow.getAttribute('board-id') || '';
                 this.bottomRowHeight = this.$bottomRow?.clientHeight || 0;
                 this.preY = e.y;
             }
@@ -59,25 +91,48 @@ export default defineComponent({
             const currentY: number = e.y;
             const deltaY = currentY - this.preY;
 
-            if (!this.$upRow || !this.$bottomRow) {
+            if (
+                !this.$upRow ||
+                !this.$bottomRow ||
+                !this.upBoardId ||
+                !this.bottomBoardId
+            ) {
                 return;
             }
 
-            if (this.$upRow != $body && this.$bottomRow != $body) {
-                this.upRowHeight += deltaY;
-                this.bottomRowHeight -= deltaY;
-                this.$upRow.style.height = this.upRowHeight + 'px';
-                this.$upRow.style.flex = 'unset';
-                this.$bottomRow.style.height = this.bottomRowHeight + 'px';
-                this.$bottomRow.style.flex = 'unset';
-                this.preY = currentY;
-            }
+            this.upRowHeight += deltaY;
+            this.bottomRowHeight -= deltaY;
+            this.$upRow.style.height = this.upRowHeight + 'px';
+            this.$upRow.style.flex = 'unset';
+            this.$bottomRow.style.height = this.bottomRowHeight + 'px';
+            this.$bottomRow.style.flex = 'unset';
+            this.preY = currentY;
         },
 
         hanleMouseUp() {
-            this.$upRow = $body;
+            if (
+                !this.$upRow ||
+                !this.$bottomRow ||
+                !this.upBoardId ||
+                !this.bottomBoardId
+            ) {
+                return;
+            }
+
+            this.setBoardsMapAttrById(
+                +this.upBoardId,
+                'height',
+                this.upRowHeight,
+            );
+            this.setBoardsMapAttrById(
+                +this.bottomBoardId,
+                'height',
+                this.bottomRowHeight,
+            );
+
+            this.$upRow = undefined;
             this.upRowHeight = 0;
-            this.$bottomRow = $body;
+            this.$bottomRow = undefined;
             this.bottomRowHeight = 0;
             this.preY = 0;
         },
