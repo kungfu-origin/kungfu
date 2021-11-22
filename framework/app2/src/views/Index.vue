@@ -12,7 +12,7 @@ import { defineComponent } from '@vue/runtime-core';
 import KfLayout from '@/components/global/KfLayout.vue';
 import KfRowColIter from '@/components/global/KfRowColIter.vue';
 
-import { BoardsMap } from '@/components/global/typings/index';
+import { BoardsMap, Direction } from '@/components/global/typings/index';
 import { useGlobalStore } from '@/store/global';
 
 export default defineComponent({
@@ -22,28 +22,27 @@ export default defineComponent({
         const boardsMap: BoardsMap = {
             0: {
                 paId: -1,
-                direction: 'h',
+                direction: Direction.h,
                 children: [1, 2, 3],
             },
             1: {
                 paId: 0,
-                direction: 'v',
+                direction: Direction.v,
                 children: [4, 5],
-                width: 400,
             },
             2: {
                 paId: 0,
-                direction: 'v',
+                direction: Direction.v,
                 children: [8, 9],
             },
             3: {
                 paId: 0,
-                direction: 'v',
+                direction: Direction.v,
                 children: [10, 11],
             },
             4: {
                 paId: 1,
-                direction: 'h',
+                direction: Direction.h,
                 contents: [
                     '4',
                     '5',
@@ -64,43 +63,43 @@ export default defineComponent({
             },
             5: {
                 paId: 1,
-                direction: 'h',
+                direction: Direction.h,
                 children: [6, 7],
             },
             6: {
                 paId: 5,
-                direction: 'v',
-                contents: ['6', '7'],
+                direction: Direction.v,
+                contents: ['6', '账户进程'],
                 current: '6',
             },
             7: {
                 paId: 5,
-                direction: 'v',
-                contents: ['7', '8'],
-                current: '8',
+                direction: Direction.v,
+                contents: ['7', '阿斯顿发空间', '10'],
+                current: '7',
             },
             8: {
                 paId: 2,
-                direction: 'h',
+                direction: Direction.h,
                 contents: ['8', '9'],
                 current: '9',
                 height: 300,
             },
             9: {
                 paId: 2,
-                direction: 'h',
+                direction: Direction.h,
                 contents: ['9'],
                 current: '9',
             },
             10: {
                 paId: 3,
-                direction: 'h',
+                direction: Direction.h,
                 contents: ['10'],
                 current: '10',
             },
             11: {
                 paId: 3,
-                direction: 'h',
+                direction: Direction.h,
                 contents: ['11'],
                 current: '11',
             },
@@ -121,5 +120,9 @@ export default defineComponent({
 .kf-index__warp {
     height: 100%;
     width: 100%;
+
+    .ant-layout-content > .kf-drag-row__warp {
+        height: 100%;
+    }
 }
 </style>

@@ -19,6 +19,16 @@ import { mapActions, mapState } from 'pinia';
 import { useGlobalStore } from '@/store/global';
 import { BoardInfo } from '@/components/global/typings';
 
+interface KfDragColData {
+    $upRow: HTMLElement | undefined;
+    upBoardId: string;
+    upRowHeight: number;
+    $bottomRow: HTMLElement | undefined;
+    bottomBoardId: string;
+    bottomRowHeight: number;
+    preY: number;
+}
+
 export default defineComponent({
     name: 'KfDragCol',
 
@@ -29,7 +39,7 @@ export default defineComponent({
         },
     },
 
-    data() {
+    data(): KfDragColData {
         return {
             $upRow: undefined,
             upBoardId: '',
@@ -38,14 +48,6 @@ export default defineComponent({
             bottomBoardId: '',
             bottomRowHeight: 0,
             preY: 0,
-        } as {
-            $upRow: HTMLElement | undefined;
-            upBoardId: string;
-            upRowHeight: number;
-            $bottomRow: HTMLElement | undefined;
-            bottomBoardId: string;
-            bottomRowHeight: number;
-            preY: number;
         };
     },
 
@@ -60,7 +62,11 @@ export default defineComponent({
 
         style(): string {
             if (this.boardInfo?.width) {
-                return `width: ${this.boardInfo?.width}px; flex: unset;`;
+                if (this.boardInfo?.width.toString().includes('%')) {
+                    return `width: ${this.boardInfo?.width}; flex: unset;`;
+                } else {
+                    return `width: ${this.boardInfo?.width}px; flex: unset;`;
+                }
             } else {
                 return `flex: 1;`;
             }
@@ -143,10 +149,10 @@ export default defineComponent({
 <style lang="less">
 .kf-drag-col__warp {
     height: 100%;
-    width: 100%;
     flex: 1;
     position: relative;
     transform: translateZ(0);
+    overflow: hidden;
 
     .kf-drag-col__content {
         display: flex;
@@ -155,8 +161,8 @@ export default defineComponent({
         width: 100%;
         justify-content: flex-start;
 
-        >.kf-drag-row__warp:last-of-type {
-            >.resize-bar-horizontal {
+        > .kf-drag-row__warp:last-of-type {
+            > .resize-bar-horizontal {
                 display: none;
             }
         }

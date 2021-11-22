@@ -19,6 +19,16 @@ import { mapActions, mapState } from 'pinia';
 import { useGlobalStore } from '@/store/global';
 import { BoardInfo } from '@/components/global/typings';
 
+interface KfDragRowData {
+    $leftCol: HTMLElement | undefined;
+    leftBoardId: string;
+    leftColWidth: number;
+    $rightCol: HTMLElement | undefined;
+    rightBoardId: string;
+    rightColWidth: number;
+    preX: number;
+}
+
 export default defineComponent({
     name: 'KfDragRow',
 
@@ -29,7 +39,7 @@ export default defineComponent({
         },
     },
 
-    data() {
+    data(): KfDragRowData {
         return {
             $leftCol: undefined,
             leftBoardId: '',
@@ -38,14 +48,6 @@ export default defineComponent({
             rightBoardId: '',
             rightColWidth: 0,
             preX: 0,
-        } as {
-            $leftCol: HTMLElement | undefined;
-            leftBoardId: string;
-            leftColWidth: number;
-            $rightCol: HTMLElement | undefined;
-            rightBoardId: string;
-            rightColWidth: number;
-            preX: number;
         };
     },
 
@@ -60,7 +62,11 @@ export default defineComponent({
 
         style(): string {
             if (this.boardInfo?.height) {
-                return `height: ${this.boardInfo?.height}px; flex: unset;`;
+                if (this.boardInfo?.height.toString().includes('%')) {
+                    return `height: ${this.boardInfo?.height}; flex: unset;`;
+                } else {
+                    return `height: ${this.boardInfo?.height}px; flex: unset;`;
+                }
             } else {
                 return ``;
             }
@@ -142,11 +148,11 @@ export default defineComponent({
 
 <style lang="less">
 .kf-drag-row__warp {
-    height: 100%;
     width: 100%;
     flex: 1;
     position: relative;
     transform: translateZ(0);
+    overflow: hidden;
 
     .kf-drag-row__content {
         display: flex;
