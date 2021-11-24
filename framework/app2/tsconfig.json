@@ -11,14 +11,13 @@
     "allowSyntheticDefaultImports": true,
     "sourceMap": true,
     "baseUrl": ".",
-    "types": [
-      "webpack-env",
-      "@types",
-      "@kungfu-trader/kungfu-uicc2/typings/kungfu-uicc2"
+    "types": [],
+    "typeRoots": [
+      "node_modules/@types"
     ],
     "paths": {
       "@/*": [
-        "src/*"
+        "src/renderer/*"
       ]
     },
     "lib": [

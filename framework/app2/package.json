@@ -3,20 +3,25 @@
     "version": "0.1.0",
     "private": true,
     "scripts": {
-        "serve": "vue-cli-service serve",
+        "serve:renderer": "vue-cli-service serve",
+        "serve:main": "node ./.build/webpack/dev.js",
+        "serve": "yarn run serve:renderer && yarn run serve:main",
         "build": "vue-cli-service build",
+        "build:main": "./node_modules/.bin/webpack --mode production ./.build/webpack/webpack.main.config.js",
         "test:e2e": "vue-cli-service test:e2e",
         "lint": "vue-cli-service lint",
-        "fmt": "./node_modules/.bin/prettier -l --write 'src/**/*.{ts, js, vue, less, css}' --config ./.prettierrc.js"
+        "fmt": "./node_modules/.bin/prettier -l --write './**/*.{ts, js, vue, less, css, json}' --config ./.prettierrc.js"
     },
     "dependencies": {
         "ant-design-vue": "^3.0.0-alpha.12",
         "core-js": "^3.6.5",
+        "electron": "^16.0.1",
         "pinia": "^2.0.4",
         "vue": "^3.2.0",
         "vue-router": "^4.0.0-0"
     },
     "devDependencies": {
+        "@types/electron": "^1.6.10",
         "@typescript-eslint/eslint-plugin": "^4.18.0",
         "@typescript-eslint/parser": "^4.18.0",
         "@vue/cli-plugin-babel": "^4.5.15",
@@ -35,6 +40,7 @@
         "less": "^4.1.2",
         "less-loader": "^6.0.0",
         "prettier": "^2.2.1",
-        "typescript": "^4.4.0"
+        "typescript": "^4.4.0",
+        "webpack": "^5.64.2"
     }
 }

@@ -19,9 +19,19 @@ module.exports = {
         }
     },
 
-    configureWebpack: (config) => {
-        config.resolve.alias['@'] = path.resolve(__dirname, 'src');
-        config.resolve.extensions = ['.js', '.ts', '.vue', '.json', '.css', '.less', '.node']
+    pages: {
+        index: {
+            entry: 'src/renderer/index/main.ts',
+            template: 'public/index.html',
+            filename: 'index.html',
+            title: '功夫交易系统'
+        }
+    },
 
+    configureWebpack: (config) => {
+
+        config.resolve.alias['@'] = path.resolve(__dirname, 'src/renderer');
+        config.resolve.extensions = ['.js', '.ts', '.vue', '.json', '.css', '.less', '.node']
+        // config.target = "electron-renderer"
     }
 }

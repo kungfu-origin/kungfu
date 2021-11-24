@@ -16,8 +16,8 @@
 import { defineComponent, PropType } from '@vue/runtime-core';
 import { mapActions, mapState } from 'pinia';
 
-import { useGlobalStore } from '@/store/global';
-import { BoardInfo } from '@/components/global/typings';
+import { useGlobalStore } from '@/index/store/global';
+import { BoardInfo } from '@/index/components/global/typings';
 
 interface KfDragRowData {
     $leftCol: HTMLElement | undefined;

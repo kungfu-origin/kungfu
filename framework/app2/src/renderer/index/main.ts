@@ -1,10 +1,10 @@
 import { createApp } from 'vue';
-import App from '@/App.vue';
-import router from '@/router';
-import store from '@/store';
+import App from '@/index/App.vue';
+import router from '@/index/router';
+import store from '@/index/store';
 import { Layout, Tabs, Button } from 'ant-design-vue';
 
-import '@/assets/less/base.less';
+import '@/index/assets/less/base.less';
 
 createApp(App)
     .use(store)

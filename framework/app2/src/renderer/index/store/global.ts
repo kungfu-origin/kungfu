@@ -8,7 +8,7 @@ import {
     BoardId,
     Direction,
     TargetDirectionClassName,
-} from '@/components/global/typings';
+} from '@/index/components/global/typings';
 
 interface GlobalState {
     boardsMap: BoardsMap;
