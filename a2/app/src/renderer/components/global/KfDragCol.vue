@@ -17,7 +17,7 @@ import { defineComponent, PropType } from '@vue/runtime-core';
 import { mapActions, mapState } from 'pinia';
 
 import { useGlobalStore } from '@renderer/index/store/global';
-import { BoardInfo } from '@renderer/index/components/global/typings';
+import { BoardInfo } from '@renderer/components/global/types/index';
 
 interface KfDragColData {
     $upRow: HTMLElement | undefined;
@@ -26,6 +26,7 @@ interface KfDragColData {
     $bottomRow: HTMLElement | undefined;
     bottomBoardId: string;
     bottomRowHeight: number;
+    paHeight: number;
     preY: number;
 }
 
@@ -47,6 +48,7 @@ export default defineComponent({
             $bottomRow: undefined,
             bottomBoardId: '',
             bottomRowHeight: 0,
+            paHeight: 0,
             preY: 0,
         };
     },
@@ -89,6 +91,7 @@ export default defineComponent({
                 this.bottomBoardId =
                     this.$bottomRow.getAttribute('board-id') || '';
                 this.bottomRowHeight = this.$bottomRow?.clientHeight || 0;
+                this.paHeight = this.$upRow.parentNode.clientHeight;
                 this.preY = e.y;
             }
         },
@@ -128,12 +131,15 @@ export default defineComponent({
             this.setBoardsMapAttrById(
                 +this.upBoardId,
                 'height',
-                this.upRowHeight,
+                Number((this.upRowHeight * 100) / this.paHeight).toFixed(3) +
+                    '%',
             );
             this.setBoardsMapAttrById(
                 +this.bottomBoardId,
                 'height',
-                this.bottomRowHeight,
+                Number((this.bottomRowHeight * 100) / this.paHeight).toFixed(
+                    3,
+                ) + '%',
             );
 
             this.$upRow = undefined;
@@ -174,13 +180,13 @@ export default defineComponent({
         top: 0;
         height: 100%;
         width: 5px;
-        border-right: 1px solid @border-color-base;
+        border-right: 8px solid #000;
         cursor: col-resize;
         box-sizing: border-box;
         z-index: 10;
 
         &:hover {
-            border-right: 5px solid @border-color-base;
+            border-right: 8px solid @border-color-base;
         }
     }
 }

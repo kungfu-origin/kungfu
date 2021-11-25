@@ -9,6 +9,7 @@
   "private": true,
   "workspaces": [
     "framework/*",
+    "a2/*",
     "extensions/*",
     "developer/*",
     "artifact"

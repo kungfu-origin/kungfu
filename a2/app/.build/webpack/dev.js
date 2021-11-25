@@ -170,7 +170,7 @@ const run = (distDir, distName = '') => {
     distName: distName
   };
 
-  const tasks = [startMain];
+  const tasks = [startRenderer, startMain];
   const rootDir = path.dirname(path.dirname(__dirname));
   const coreDir = require.resolve('@kungfu-trader/kungfu-core');
 

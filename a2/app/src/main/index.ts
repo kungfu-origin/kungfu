@@ -1,16 +1,39 @@
-import { BrowserWindow, screen, app, globalShortcut } from 'electron';
-import path from 'path';
-import { showQuitMessageBox, showCrashMessageBox } from '@main/utils';
-import { logger } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
-import { killKfc } from '@kungfu-trader/kungfu-js-api/utils/processUtils';
+import {
+    BrowserWindow,
+    screen,
+    app,
+    globalShortcut,
+    Menu,
+    MenuItemConstructorOptions,
+    shell,
+} from 'electron';
 import * as remoteMain from '@electron/remote/main';
-
-remoteMain.initialize();
+import path from 'path';
+import os from 'os';
+import {
+    showQuitMessageBox,
+    showCrashMessageBox,
+    showKungfuInfo,
+    openUrl,
+} from '@main/utils';
+import { kfLogger, logger } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
+import { killKfc } from '@kungfu-trader/kungfu-js-api/utils/processUtils';
+import {
+    clearJournal,
+    exportAllTradingData,
+    openLogFile,
+    openSettingDialog,
+} from './events';
+import { BASE_DB_DIR, KF_HOME } from '@root/../api/src/config/pathConfig';
 
 let MainWindow: BrowserWindow | null = null;
 let AllowQuit = false;
 let CrashedReloading = false;
 const isDev = process.env.NODE_ENV === 'development';
+const isMac = os.platform() === 'darwin';
+
+remoteMain.initialize();
+setMenu();
 
 function createWindow(reloadAfterCrashed = false) {
     if (reloadAfterCrashed) {
@@ -25,7 +48,6 @@ function createWindow(reloadAfterCrashed = false) {
         height: height > 1200 ? 1200 : height,
         useContentSize: true,
         webPreferences: {
-            webSecurity: false,
             nodeIntegration: true,
             nodeIntegrationInWorker: true,
             contextIsolation: false,
@@ -34,7 +56,7 @@ function createWindow(reloadAfterCrashed = false) {
                 reloadAfterCrashed ? 'reloadAfterCrashed' : '',
             ],
         },
-        backgroundColor: '#161B2E',
+        backgroundColor: '#000',
     });
 
     if (isDev) {
@@ -136,11 +158,13 @@ app.on('ready', () => {
 
 //一上来先把所有之前意外没关掉的 pm2/kfc 进程kill掉
 console.time('init clean');
-killKfc().finally(() => {
-    console.timeEnd('init clean');
-    killExtraFinished = true;
-    if (appReady && killExtraFinished) createWindow();
-});
+killKfc()
+    .catch((err) => kfLogger.error(err.message))
+    .finally(() => {
+        console.timeEnd('init clean');
+        killExtraFinished = true;
+        if (appReady && killExtraFinished) createWindow();
+    });
 
 // Quit when all windows are closed.
 app.on('window-all-closed', function () {
@@ -165,3 +189,144 @@ app.on('will-quit', (e) => {
 
     e.preventDefault();
 });
+
+// In this file you can include the rest of your app's specific main process
+// code. You can also put them in separate files and require them here.
+
+function setMenu() {
+    //添加快捷键
+    const applicationOptions = [
+        { label: '关于功夫交易', click: () => showKungfuInfo() },
+        {
+            label: '设置',
+            accelerator: 'CommandOrControl+,',
+            click: () => MainWindow && openSettingDialog(MainWindow),
+        },
+        {
+            label: '关闭',
+            accelerator: 'CommandOrControl+W',
+            click: () => {
+                const focusedWin = BrowserWindow.getFocusedWindow();
+                if (focusedWin) {
+                    focusedWin.close();
+                }
+            },
+        },
+    ];
+
+    if (isMac) {
+        applicationOptions.push({
+            label: '退出',
+            accelerator: 'Command+Q',
+            click: () => app.quit(),
+        });
+    }
+
+    const template: MenuItemConstructorOptions[] = [
+        {
+            label: '功夫',
+            submenu: applicationOptions,
+        },
+        {
+            //此处必要，不然electron内使用复制粘贴会无效
+            label: '编辑',
+            submenu: [
+                {
+                    label: '复制',
+                    accelerator: 'CommandOrControl+C',
+                    role: 'copy',
+                },
+                {
+                    label: '黏贴',
+                    accelerator: 'CommandOrControl+V',
+                    role: 'paste',
+                },
+                {
+                    label: '全选',
+                    accelerator: 'CommandOrControl+A',
+                    role: 'selectAll',
+                },
+                {
+                    label: '撤销',
+                    accelerator: 'CommandOrControl+Z',
+                    role: 'undo',
+                },
+            ],
+        },
+        {
+            label: '文件',
+            submenu: [
+                {
+                    label: '打开功夫资源目录（KF_HOME）',
+                    click: () => shell.showItemInFolder(KF_HOME),
+                },
+                {
+                    label: '打开功夫安装目录',
+                    click: () => shell.showItemInFolder(app.getAppPath()),
+                },
+                {
+                    label: '打开功夫基础配置DB',
+                    click: () =>
+                        shell.showItemInFolder(
+                            path.join(BASE_DB_DIR, 'config.db'),
+                        ),
+                },
+                {
+                    label: '浏览日志文件',
+                    accelerator: 'CommandOrControl+L',
+                    click: () => MainWindow && openLogFile(MainWindow),
+                },
+            ],
+        },
+        {
+            label: '运行',
+            submenu: [
+                {
+                    label: '清理journal',
+                    click: () => MainWindow && clearJournal(MainWindow),
+                },
+                {
+                    label: '导出所有交易数据',
+                    accelerator: 'CommandOrControl+E',
+                    click: () => MainWindow && exportAllTradingData(MainWindow),
+                },
+            ],
+        },
+        {
+            label: '帮助',
+            submenu: [
+                {
+                    label: '官网',
+                    click: () => openUrl('https://www.kungfu-trader.com/'),
+                },
+                {
+                    label: '用户手册',
+                    click: () =>
+                        openUrl('https://www.kungfu-trader.com/manual/'),
+                },
+                {
+                    label: '策略API文档',
+                    click: () =>
+                        openUrl('https://www.kungfu-trader.com/api-doc/'),
+                },
+                {
+                    label: 'Kungfu 论坛',
+                    click: () =>
+                        openUrl('https://www.kungfu-trader.com/community/'),
+                },
+            ],
+        },
+    ];
+
+    Menu.setApplicationMenu(Menu.buildFromTemplate(template));
+}
+
+process
+    .on('uncaughtException', (err) => {
+        console.log(err);
+        logger.error('[MASTER] Error caught in uncaughtException event:', err);
+    })
+    .on('unhandledRejection', (err) => {
+        console.log(err);
+        logger.error('[MASTER] Error caught in unhandledRejection event:', err);
+    });

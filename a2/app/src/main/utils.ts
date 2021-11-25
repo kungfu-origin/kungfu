@@ -21,7 +21,7 @@ import {
     KF_HOME,
 } from '@kungfu-trader/kungfu-js-api/config/pathConfig';
 
-const packageJSON = require('@root/package.json');
+import packageJSON from '@root/package.json';
 
 let BeforeQuitLoading = false;
 
@@ -49,7 +49,7 @@ export function showKungfuInfo(): void {
         detail: info,
         buttons: ['好的'],
         icon: nativeImage.createFromPath(
-            path.join(__resources, 'logo', 'icon.png'),
+            path.join(__resources, 'logo', 'logo.png'),
         ),
     });
 }
@@ -98,7 +98,7 @@ export function showQuitMessageBox(
                 message: '退出应用会结束所有交易进程，确认退出吗？',
                 buttons: ['确认', '取消'],
                 icon: nativeImage.createFromPath(
-                    path.join(__resources, 'logo', 'icon.png'),
+                    path.join(__resources, 'logo', 'logo.png'),
                 ),
             })
             .then(({ response }) => {
@@ -114,6 +114,7 @@ export function showQuitMessageBox(
                         });
                     });
                 } else {
+                    BeforeQuitLoading = false;
                     resolve(false);
                 }
             });
@@ -130,7 +131,7 @@ export function showCrashMessageBox(): Promise<boolean> {
             message: '功夫图形进程中断，该中断不会影响交易，是否重启图形进程？',
             buttons: ['确认', '取消'],
             icon: nativeImage.createFromPath(
-                path.join(__resources, 'logo', 'icon.png'),
+                path.join(__resources, 'logo', 'logo.png'),
             ),
         })
         .then(({ response }) => {

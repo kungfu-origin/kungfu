@@ -1,5 +1,10 @@
 <template>
-    <div class="kf-drag-row__warp" :style="style" :board-id="id">
+    <div
+        ref="kf-drag-row"
+        :class="'kf-drag-row__warp'"
+        :style="style"
+        :board-id="id"
+    >
         <div
             class="kf-drag-row__content"
             @mousedown="handleMouseDown"
@@ -8,7 +13,7 @@
         >
             <slot></slot>
         </div>
-        <div class="resize-bar-horizontal"></div>
+        <div v-if="id !== 0" class="resize-bar-horizontal"></div>
     </div>
 </template>
 
@@ -17,7 +22,7 @@ import { defineComponent, PropType } from '@vue/runtime-core';
 import { mapActions, mapState } from 'pinia';
 
 import { useGlobalStore } from '@renderer/index/store/global';
-import { BoardInfo } from '@renderer/index/components/global/typings';
+import { BoardInfo } from '@renderer/components/global/types/index';
 
 interface KfDragRowData {
     $leftCol: HTMLElement | undefined;
@@ -26,6 +31,7 @@ interface KfDragRowData {
     $rightCol: HTMLElement | undefined;
     rightBoardId: string;
     rightColWidth: number;
+    paWidth: number;
     preX: number;
 }
 
@@ -47,6 +53,7 @@ export default defineComponent({
             $rightCol: undefined,
             rightBoardId: '',
             rightColWidth: 0,
+            paWidth: 0,
             preX: 0,
         };
     },
@@ -89,6 +96,7 @@ export default defineComponent({
                 this.rightBoardId =
                     this.$rightCol.getAttribute('board-id') || '';
                 this.rightColWidth = this.$rightCol?.clientWidth || 0;
+                this.paWidth = this.$leftCol.parentNode.clientWidth;
                 this.preX = e.x;
             }
         },
@@ -125,15 +133,18 @@ export default defineComponent({
                 return;
             }
 
+            //to percent for prevention of window resize
             this.setBoardsMapAttrById(
                 +this.leftBoardId,
                 'width',
-                this.leftColWidth,
+                Number((this.leftColWidth * 100) / this.paWidth).toFixed(3) +
+                    '%',
             );
             this.setBoardsMapAttrById(
                 +this.rightBoardId,
                 'width',
-                this.rightColWidth,
+                Number((this.rightColWidth * 100) / this.paWidth).toFixed(3) +
+                    '%',
             );
 
             this.$leftCol = undefined;

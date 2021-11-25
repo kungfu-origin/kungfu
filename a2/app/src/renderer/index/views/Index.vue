@@ -9,13 +9,10 @@
 <script lang="ts">
 import { defineComponent } from '@vue/runtime-core';
 
-import KfLayout from '@renderer/index/components/global/KfLayout.vue';
-import KfRowColIter from '@renderer/index/components/global/KfRowColIter.vue';
+import KfLayout from '@renderer/components/global/KfLayout.vue';
+import KfRowColIter from '@renderer/components/global/KfRowColIter.vue';
 
-import {
-    BoardsMap,
-    Direction,
-} from '@renderer/index/components/global/typings/index';
+import { BoardsMap, Direction } from '@renderer/components/global/types/index';
 import { useGlobalStore } from '@renderer/index/store/global';
 
 export default defineComponent({
@@ -26,48 +23,29 @@ export default defineComponent({
             0: {
                 paId: -1,
                 direction: Direction.h,
-                children: [1, 2, 3],
+                children: [1, 2],
             },
             1: {
                 paId: 0,
                 direction: Direction.v,
                 children: [4, 5],
+                width: '60%',
             },
             2: {
                 paId: 0,
                 direction: Direction.v,
-                children: [8, 9],
-            },
-            3: {
-                paId: 0,
-                direction: Direction.v,
-                children: [10, 11],
+                children: [8, 9, 10],
             },
             4: {
                 paId: 1,
                 direction: Direction.h,
-                contents: [
-                    '4',
-                    '5',
-                    '6',
-                    '7',
-                    '8',
-                    '9',
-                    '14',
-                    '15',
-                    '16',
-                    '17',
-                    '18',
-                    '19',
-                    '20',
-                    '21',
-                ],
+                contents: ['4', '5', '6', '7'],
                 current: '4',
             },
             5: {
                 paId: 1,
                 direction: Direction.h,
-                children: [6, 7],
+                children: [6],
             },
             6: {
                 paId: 5,
@@ -75,36 +53,25 @@ export default defineComponent({
                 contents: ['6', '账户进程'],
                 current: '6',
             },
-            7: {
-                paId: 5,
-                direction: Direction.v,
-                contents: ['7', '阿斯顿发空间', '10'],
-                current: '7',
-            },
             8: {
                 paId: 2,
                 direction: Direction.h,
                 contents: ['8', '9'],
                 current: '9',
-                height: 300,
+                height: '33.33%',
             },
             9: {
                 paId: 2,
                 direction: Direction.h,
                 contents: ['9'],
                 current: '9',
+                height: '33.33%',
             },
             10: {
-                paId: 3,
+                paId: 2,
                 direction: Direction.h,
                 contents: ['10'],
                 current: '10',
-            },
-            11: {
-                paId: 3,
-                direction: Direction.h,
-                contents: ['11'],
-                current: '11',
             },
         };
 

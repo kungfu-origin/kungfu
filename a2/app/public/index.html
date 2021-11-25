@@ -11,12 +11,92 @@
         height: 100%;
         width: 100%;
       }
+
+      #loading{
+          background-color: #000;
+          height: 100%;
+          width: 100%;
+          position: fixed;
+          z-index: 1;
+          margin-top: 0px;
+          top: 0px;
+        }
+        #loading-center{
+          width: 100%;
+          height: 100%;
+          position: relative;
+        }
+        #loading-center-absolute {
+          position: absolute;
+          left: 50%;
+          top: 50%;
+          transform: translateX(-50%) translateY(-50%);
+          display: flex;
+          align-items: flex-end;
+        }
+        .object{
+          width: 8px;
+          height: 40px;
+          margin-right:5px;
+          background-color: #FAAD14;
+          -webkit-animation: animate 1s infinite;
+          animation: animate 1s infinite;
+          float: left;
+          transform-origin : 50% 100%;
+        }
+
+        .object:nth-child(6){
+          -webkit-animation-delay: 0.5s;
+          animation-delay: 0.5s;	
+        }
+        .object:nth-child(5){
+          -webkit-animation-delay: 0.4s;
+          animation-delay: 0.4s;
+        }
+        .object:nth-child(4){
+          -webkit-animation-delay: 0.3s;
+          animation-delay: 0.3s;		
+        }
+        .object:nth-child(3){
+          -webkit-animation-delay: 0.2s;
+          animation-delay: 0.2s;	
+        }
+        .object:nth-child(2){
+          -webkit-animation-delay: 0.1s;
+          animation-delay: 0.1s;
+        }	
+        @-webkit-keyframes animate {
+          50% {
+            -ms-transform: scaleY(0.5); 
+            -webkit-transform: scaleY(0.5);
+            transform: scaleY(0.5);
+          }
+        }
+        @keyframes animate {
+          50% {
+          -ms-transform: scaleY(0.5); 
+          -webkit-transform: scaleY(0.5);
+          transform: scaleY(0.5);
+        }
+		}
     </style>
   </head>
   <body>
     <noscript>
       <strong>We're sorry but <%= htmlWebpackPlugin.options.title %> doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
     </noscript>
+    <div id="loading">
+      <div id="loading-center">
+        <div id="loading-center-absolute">
+        <div class="object"></div>
+        <div class="object"></div>
+        <div class="object"></div>
+        <div class="object"></div>
+        <div class="object"></div>
+        <div class="object"></div>
+        </div>
+      </div>
+      </div>
     <div id="app"></div>
     <!-- built files will be auto injected -->
   </body>

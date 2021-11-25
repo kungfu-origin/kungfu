@@ -4,6 +4,23 @@
     </div>
 </template>
 
+<script lang="ts">
+import { defineComponent } from '@vue/runtime-core';
+export default defineComponent({
+    mounted() {
+        this.removeLoadingMask();
+    },
+
+    methods: {
+        removeLoadingMask() {
+            //remove loading mask
+            if (document.getElementById('loading'))
+                document.getElementById('loading').remove();
+        },
+    },
+});
+</script>
+
 <style lang="less">
 #app {
     width: 100%;

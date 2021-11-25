@@ -32,7 +32,9 @@
                             {{ content }}
                         </div>
                     </template>
-                    {{ content }}
+                    <a-card style="width: 100%; height: 100%">
+                        {{ content }}
+                    </a-card>
                 </a-tab-pane>
             </a-tabs>
         </template>
@@ -70,7 +72,9 @@
                             {{ content }}
                         </div>
                     </template>
-                    {{ content }}
+                    <a-card style="width: 100%; height: 100%">
+                        {{ content }}
+                    </a-card>
                 </a-tab-pane>
             </a-tabs>
         </template>
@@ -81,8 +85,8 @@
 import { defineComponent, PropType } from '@vue/runtime-core';
 import { mapActions, mapState } from 'pinia';
 
-import KfDragRow from '@renderer/index/components/global/KfDragRow.vue';
-import KfDragCol from '@renderer/index/components/global/KfDragCol.vue';
+import KfDragRow from '@renderer/components/global/KfDragRow.vue';
+import KfDragCol from '@renderer/components/global/KfDragCol.vue';
 
 import {
     BoardInfo,
@@ -91,7 +95,7 @@ import {
     ContentId,
     Direction,
     TargetDirectionClassName,
-} from '@renderer/index/components/global/typings/index';
+} from '@renderer/components/global/types/index';
 import { useGlobalStore } from '@renderer/index/store/global';
 
 interface KfRowColIterData {
@@ -260,6 +264,10 @@ export default defineComponent({
             display: none;
             transition: all 0.1s ease;
             background: @divider-color;
+        }
+
+        .ant-tabs-content.ant-tabs-content-top {
+            height: 100%;
         }
     }
 

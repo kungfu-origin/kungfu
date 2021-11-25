@@ -138,16 +138,16 @@ export const dealSpaceInPath = (pathname: string) => {
 };
 
 export const setTimerPromiseTask = (fn: Function, interval = 500) => {
-    var taskTimer: NodeJS.Timeout | null = null;
+    var taskTimer: null | NodeJS.Timeout = null;
     var clear = false;
     function timerPromiseTask(fn: Function, interval = 500) {
-        if (taskTimer) clearTimeout(taskTimer);
+        if (taskTimer) global.clearTimeout(taskTimer);
         fn().finally(() => {
             if (clear) {
-                if (taskTimer) clearTimeout(taskTimer);
+                if (taskTimer) global.clearTimeout(taskTimer);
                 return;
             }
-            taskTimer = setTimeout(() => {
+            taskTimer = global.setTimeout(() => {
                 timerPromiseTask(fn, interval);
             }, interval);
         });
@@ -156,7 +156,7 @@ export const setTimerPromiseTask = (fn: Function, interval = 500) => {
     return {
         clearLoop: function () {
             clear = true;
-            if (taskTimer) clearTimeout(taskTimer);
+            if (taskTimer != null) global.clearTimeout(taskTimer);
         },
     };
 };
