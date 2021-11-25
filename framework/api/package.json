@@ -1,0 +1,20 @@
+{
+  "name": "@kungfu-trader/kungfu-js-api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "lib/index.js",
+  "types": "types/index.d.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@kungfu-trader/kungfu-core": "^2.4.0-alpha.4",
+    "fkill": "^8.0.0",
+    "fs-extra": "^10.0.0",
+    "get-user-locale": "^1.4.0",
+    "log4js": "^6.3.0",
+    "pm2": "^5.1.2"
+  }
+}
