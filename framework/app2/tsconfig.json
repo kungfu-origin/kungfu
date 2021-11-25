@@ -13,11 +13,21 @@
     "baseUrl": ".",
     "types": [],
     "typeRoots": [
-      "node_modules/@types"
     ],
     "paths": {
-      "@/*": [
-        "src/renderer/*"
+      "@renderer/*": [
+        "src/renderer/*",
+      ],
+      "@main/*": [
+        "src/main/*"
+      ],
+      "@root/*": [
+        "./*"
+      ],
+      "@kungfu-trader/kungfu-js-api/*": [
+        "../api/src/*",
+        "node_modules/@kungfu-trader/kungfu-js-api/src/*",
+        "../../node_modules/@kungfu-trader/kungfu-js-api/src/*",
       ]
     },
     "lib": [
@@ -32,7 +42,8 @@
     "src/**/*.tsx",
     "src/**/*.vue",
     "tests/**/*.ts",
-    "tests/**/*.tsx"
+    "tests/**/*.tsx", 
+    "../../node_modules/@kungfu-trader/kungfu-js-api/types/*.ts",
   ],
   "exclude": [
     "node_modules"

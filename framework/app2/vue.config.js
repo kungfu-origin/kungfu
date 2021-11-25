@@ -3,7 +3,6 @@ const path = require("path");
 
 module.exports = {
     css: {
-        modules: false,
         loaderOptions: {
             less: {  
                 lessOptions: {
@@ -19,6 +18,10 @@ module.exports = {
         }
     },
 
+    devServer: {
+        port: '9090'
+    },
+
     pages: {
         index: {
             entry: 'src/renderer/index/main.ts',
@@ -30,8 +33,8 @@ module.exports = {
 
     configureWebpack: (config) => {
 
-        config.resolve.alias['@'] = path.resolve(__dirname, 'src/renderer');
+        config.resolve.alias['@renderer'] = path.resolve(__dirname, 'src/renderer');
         config.resolve.extensions = ['.js', '.ts', '.vue', '.json', '.css', '.less', '.node']
-        // config.target = "electron-renderer"
+        config.target = "electron-renderer"
     }
 }

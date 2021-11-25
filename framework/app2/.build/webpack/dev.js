@@ -8,6 +8,7 @@ const { say } = require('cfonts');
 const { spawn } = require('child_process');
 const webpack = require('webpack');
 
+let rendererProcess = null;
 let electronProcess = null;
 let manualRestart = false;
 
@@ -50,11 +51,55 @@ function logStats(proc, data) {
   console.log(log);
 }
 
+const electronLog = (data, color, type='Kungfu') => {
+    let log = '';
+    data = data.toString().split(/\r?\n/);
+    data.forEach((line) => {
+      log += `  ${line}\n`;
+    });
+    if (/[0-9A-z]+/.test(log)) {
+      console.log(
+        chalk[color].bold(`┏ ${type} ---------------------`) +
+        '\n\n' +
+        log +
+        chalk[color].bold('┗ ----------------------------') +
+        '\n',
+      );
+    }
+  };
+
+function startRenderer() {
+    return new Promise((resolve, reject) => {
+        const { spawn } = require('child_process');
+        rendererProcess = spawn('yarn run serve:renderer', [], {
+            shell: true,
+            detached: false,
+        })
+    
+        let outstr = ""
+    
+        rendererProcess.stdout.on('data', (data) => {
+            outstr += data.toString();
+            if (data.toString().includes("Network:")) {
+                resolve(true);
+                electronLog(outstr, 'yellow', 'Renderer')
+                outstr = ""
+            }
+        });
+        
+        rendererProcess.stderr.on('data', (data) => {
+            reject(new Error(data.toString()));
+            electronLog(outstr, 'red', 'Renderer')
+        });
+    })
+
+}
+
 function startMain(argv) {
   const mainConfig = require('./webpack.main.config')(argv);
-//   const rootDir = path.dirname(path.dirname(__dirname));
-//   const indexJs = path.resolve(rootDir, 'src', 'main', 'index.dev.js');
-//   mainConfig.entry.main = [indexJs].concat(mainConfig.entry.main);
+  const rootDir = path.dirname(path.dirname(__dirname));
+  const indexJs = path.resolve(rootDir, 'src', 'main', 'index.dev.ts');
+  mainConfig.entry.main = [indexJs].concat(mainConfig.entry.main);
 
   return new Promise((resolve, reject) => {
     const compiler = webpack(mainConfig);
@@ -68,7 +113,11 @@ function startMain(argv) {
         manualRestart = true;
         process.kill(electronProcess.pid, "SIGINT");
         electronProcess = null;
-        startElectron();
+        startElectron({
+            mode: "development",
+            distDir: path.resolve('./dist'),
+            distName: ''
+        });
         setTimeout(() => {
           manualRestart = false;
         }, 5000);
@@ -82,22 +131,6 @@ function startMain(argv) {
 }
 
 function startElectron(argv) {
-  const electronLog = (data, color) => {
-    let log = '';
-    data = data.toString().split(/\r?\n/);
-    data.forEach((line) => {
-      log += `  ${line}\n`;
-    });
-    if (/[0-9A-z]+/.test(log)) {
-      console.log(
-        chalk[color].bold('┏ KungFu ---------------------') +
-        '\n\n' +
-        log +
-        chalk[color].bold('┗ ----------------------------') +
-        '\n',
-      );
-    }
-  };
 
   electronProcess = spawn(
     electron,
@@ -109,7 +142,8 @@ function startElectron(argv) {
       path.join(argv.distDir, argv.distName, 'main.js')
     ],
     {
-      cwd: path.dirname(argv.distDir)
+      cwd: path.dirname(argv.distDir),
+      detached: false
     }
   );
 
@@ -121,7 +155,11 @@ function startElectron(argv) {
   });
   electronProcess.on('close', () => {
     electronLog("exit", 'blue');
-    if (!manualRestart) process.exit(0);
+    if (!manualRestart) {
+        rendererProcess && process.kill(rendererProcess.pid, 'SIGINT');
+        rendererProcess = true;
+        process.exit(0);
+    };
   });
 }
 
@@ -148,6 +186,7 @@ const run = (distDir, distName = '') => {
 module.exports = run;
 
 if (require.main === module) {
+    fse.ensureDirSync(path.resolve('./dist'))
     run(path.resolve('./dist')).catch(err => console.log(err));
 //   run(require('@kungfu-trader/kungfu-app2').defaultDistDir).catch(console.error);
 }

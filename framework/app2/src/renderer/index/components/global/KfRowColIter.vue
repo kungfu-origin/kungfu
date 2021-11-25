@@ -81,8 +81,8 @@
 import { defineComponent, PropType } from '@vue/runtime-core';
 import { mapActions, mapState } from 'pinia';
 
-import KfDragRow from '@/index/components/global/KfDragRow.vue';
-import KfDragCol from '@/index/components/global/KfDragCol.vue';
+import KfDragRow from '@renderer/index/components/global/KfDragRow.vue';
+import KfDragCol from '@renderer/index/components/global/KfDragCol.vue';
 
 import {
     BoardInfo,
@@ -91,8 +91,8 @@ import {
     ContentId,
     Direction,
     TargetDirectionClassName,
-} from '@/index/components/global/typings/index';
-import { useGlobalStore } from '@/index/store/global';
+} from '@renderer/index/components/global/typings/index';
+import { useGlobalStore } from '@renderer/index/store/global';
 
 interface KfRowColIterData {
     h: Direction;

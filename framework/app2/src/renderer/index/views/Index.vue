@@ -9,11 +9,14 @@
 <script lang="ts">
 import { defineComponent } from '@vue/runtime-core';
 
-import KfLayout from '@/index/components/global/KfLayout.vue';
-import KfRowColIter from '@/index/components/global/KfRowColIter.vue';
+import KfLayout from '@renderer/index/components/global/KfLayout.vue';
+import KfRowColIter from '@renderer/index/components/global/KfRowColIter.vue';
 
-import { BoardsMap, Direction } from '@/index/components/global/typings/index';
-import { useGlobalStore } from '@/index/store/global';
+import {
+    BoardsMap,
+    Direction,
+} from '@renderer/index/components/global/typings/index';
+import { useGlobalStore } from '@renderer/index/store/global';
 
 export default defineComponent({
     name: 'Index',
