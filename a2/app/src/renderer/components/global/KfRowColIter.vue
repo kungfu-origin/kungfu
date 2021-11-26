@@ -272,6 +272,10 @@ export default defineComponent({
         .ant-tabs-content.ant-tabs-content-top {
             height: 100%;
         }
+
+        * {
+            pointer-events: none;
+        }
     }
 
     &.drag-over-left {
