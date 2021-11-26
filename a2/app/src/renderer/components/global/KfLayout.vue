@@ -38,8 +38,6 @@
 import { defineComponent, reactive, toRefs } from '@vue/runtime-core';
 import { TeamOutlined, ThunderboltOutlined } from '@ant-design/icons-vue';
 
-import logo from '@renderer/assets/svg/LOGO.svg';
-
 export default defineComponent({
     components: {
         TeamOutlined,
@@ -53,7 +51,7 @@ export default defineComponent({
 
         return {
             ...toRefs(state),
-            logo,
+            logo: require('@renderer/assets/svg/LOGO.svg'),
         };
     },
 });

@@ -14,8 +14,8 @@ export default defineComponent({
     methods: {
         removeLoadingMask() {
             //remove loading mask
-            if (document.getElementById('loading'))
-                document.getElementById('loading').remove();
+            const $loadingMask = document.getElementById('loading');
+            if ($loadingMask) $loadingMask.remove();
         },
     },
 });

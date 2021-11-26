@@ -20,10 +20,10 @@ import { useGlobalStore } from '@renderer/index/store/global';
 import { BoardInfo } from '@renderer/components/global/types/index';
 
 interface KfDragColData {
-    $upRow: HTMLElement | undefined;
+    $upRow: HTMLElement | null;
     upBoardId: string;
     upRowHeight: number;
-    $bottomRow: HTMLElement | undefined;
+    $bottomRow: HTMLElement | null;
     bottomBoardId: string;
     bottomRowHeight: number;
     paHeight: number;
@@ -42,10 +42,10 @@ export default defineComponent({
 
     data(): KfDragColData {
         return {
-            $upRow: undefined,
+            $upRow: null,
             upBoardId: '',
             upRowHeight: 0,
-            $bottomRow: undefined,
+            $bottomRow: null,
             bottomBoardId: '',
             bottomRowHeight: 0,
             paHeight: 0,
@@ -84,14 +84,18 @@ export default defineComponent({
             const target = e.target as HTMLElement;
 
             if (target.className === 'resize-bar-horizontal') {
-                this.$upRow = target.parentNode as HTMLElement;
-                this.upBoardId = this.$upRow.getAttribute('board-id') || '';
+                this.$upRow = target.parentElement;
+                this.upBoardId = this.$upRow?.getAttribute('board-id') || '';
                 this.upRowHeight = this.$upRow?.clientHeight || 0;
-                this.$bottomRow = target.parentNode?.nextSibling as HTMLElement;
+                this.$bottomRow = target.parentElement
+                    ?.nextSibling as HTMLElement;
                 this.bottomBoardId =
-                    this.$bottomRow.getAttribute('board-id') || '';
+                    this.$bottomRow?.getAttribute('board-id') || '';
                 this.bottomRowHeight = this.$bottomRow?.clientHeight || 0;
-                this.paHeight = this.$upRow.parentNode.clientHeight;
+                const paElement = this.$upRow?.parentElement;
+                if (paElement) {
+                    this.paHeight = paElement?.clientHeight || 0;
+                }
                 this.preY = e.y;
             }
         },
@@ -131,21 +135,27 @@ export default defineComponent({
             this.setBoardsMapAttrById(
                 +this.upBoardId,
                 'height',
-                Number((this.upRowHeight * 100) / this.paHeight).toFixed(3) +
-                    '%',
+                this.paHeight
+                    ? Number((this.upRowHeight * 100) / this.paHeight).toFixed(
+                          3,
+                      ) + '%'
+                    : this.upRowHeight,
             );
             this.setBoardsMapAttrById(
                 +this.bottomBoardId,
                 'height',
-                Number((this.bottomRowHeight * 100) / this.paHeight).toFixed(
-                    3,
-                ) + '%',
+                this.paHeight
+                    ? Number(
+                          (this.bottomRowHeight * 100) / this.paHeight,
+                      ).toFixed(3) + '%'
+                    : 0,
             );
 
-            this.$upRow = undefined;
+            this.$upRow = null;
             this.upRowHeight = 0;
-            this.$bottomRow = undefined;
+            this.$bottomRow = null;
             this.bottomRowHeight = 0;
+            this.paHeight = 0;
             this.preY = 0;
         },
     },
@@ -179,14 +189,14 @@ export default defineComponent({
         right: 0;
         top: 0;
         height: 100%;
-        width: 5px;
-        border-right: 8px solid #000;
+        width: 8px;
+        border-right: 4px solid #000;
         cursor: col-resize;
         box-sizing: border-box;
         z-index: 10;
 
         &:hover {
-            border-right: 8px solid @border-color-base;
+            border-right: 4px solid @border-color-split;
         }
     }
 }

@@ -82,7 +82,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from '@vue/runtime-core';
+import { defineComponent, PropType, toRaw } from '@vue/runtime-core';
 import { mapActions, mapState } from 'pinia';
 
 import KfDragRow from '@renderer/components/global/KfDragRow.vue';
@@ -180,6 +180,8 @@ export default defineComponent({
             this.dragEnterBoxWidth34 = (width * 3) / 4;
             this.dragEnterBoxHeight14 = height / 4;
             this.dragEnterBoxHeight34 = (height * 3) / 4;
+
+            console.log(toRaw(this.$data));
         },
 
         handleDragOver(e: DragEvent) {
@@ -202,6 +204,7 @@ export default defineComponent({
 
         handleDragLeave() {
             this.classNameForTabDrag = TargetDirectionClassName.unset;
+            console.log(111);
         },
 
         handleDragEnd() {

@@ -25,10 +25,10 @@ import { useGlobalStore } from '@renderer/index/store/global';
 import { BoardInfo } from '@renderer/components/global/types/index';
 
 interface KfDragRowData {
-    $leftCol: HTMLElement | undefined;
+    $leftCol: HTMLElement | null;
     leftBoardId: string;
     leftColWidth: number;
-    $rightCol: HTMLElement | undefined;
+    $rightCol: HTMLElement | null;
     rightBoardId: string;
     rightColWidth: number;
     paWidth: number;
@@ -47,10 +47,10 @@ export default defineComponent({
 
     data(): KfDragRowData {
         return {
-            $leftCol: undefined,
+            $leftCol: null,
             leftBoardId: '',
             leftColWidth: 0,
-            $rightCol: undefined,
+            $rightCol: null,
             rightBoardId: '',
             rightColWidth: 0,
             paWidth: 0,
@@ -89,14 +89,19 @@ export default defineComponent({
             const target = e.target as HTMLElement;
 
             if (target.className === 'resize-bar-vertical') {
-                this.$leftCol = target.parentNode as HTMLElement;
-                this.leftBoardId = this.$leftCol.getAttribute('board-id') || '';
+                this.$leftCol = target.parentElement;
+                this.leftBoardId =
+                    this.$leftCol?.getAttribute('board-id') || '';
                 this.leftColWidth = this.$leftCol?.clientWidth || 0;
-                this.$rightCol = target.parentNode?.nextSibling as HTMLElement;
+                this.$rightCol = target.parentElement
+                    ?.nextSibling as HTMLElement;
                 this.rightBoardId =
-                    this.$rightCol.getAttribute('board-id') || '';
+                    this.$rightCol?.getAttribute('board-id') || '';
                 this.rightColWidth = this.$rightCol?.clientWidth || 0;
-                this.paWidth = this.$leftCol.parentNode.clientWidth;
+                const paElement = this.$leftCol?.parentElement;
+                if (paElement) {
+                    this.paWidth = paElement?.clientWidth;
+                }
                 this.preX = e.x;
             }
         },
@@ -147,9 +152,9 @@ export default defineComponent({
                     '%',
             );
 
-            this.$leftCol = undefined;
+            this.$leftCol = null;
             this.leftColWidth = 0;
-            this.$rightCol = undefined;
+            this.$rightCol = null;
             this.rightColWidth = 0;
             this.preX = 0;
         },
@@ -183,15 +188,15 @@ export default defineComponent({
         position: absolute;
         left: 0;
         bottom: 0;
-        height: 5px;
+        height: 8px;
         width: 100%;
-        border-bottom: 1px solid @border-color-base;
+        border-bottom: 4px solid #000;
         cursor: row-resize;
         box-sizing: border-box;
         z-index: 10;
 
         &:hover {
-            border-bottom: 5px solid @border-color-base;
+            border-bottom: 4px solid @border-color-split;
         }
     }
 }
