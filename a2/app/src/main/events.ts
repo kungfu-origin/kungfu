@@ -17,7 +17,7 @@ export function reqRecordBeforeQuit(
             console.timeEnd('record before quit');
             console.log('record before quit timeout');
             clearTimeout(timer);
-        }, 3000);
+        }, 500);
 
         sendMsgToMainWindow(mainWindow, 'record-before-quit');
 

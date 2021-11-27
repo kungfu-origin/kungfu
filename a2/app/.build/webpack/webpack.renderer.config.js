@@ -7,7 +7,6 @@ const path = require('path');
 const webpack = require('webpack');
 const { merge } = require('webpack-merge');
 
-const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
 const { VueLoaderPlugin } = require('vue-loader');
 const { getThemeVariables } = require('ant-design-vue/dist/theme');
@@ -16,9 +15,10 @@ const rootDir = path.dirname(path.dirname(__dirname));
 const { getKungfuBuildInfo, getPagesConfig, isProduction } = toolkit.utils;
 const { pyVersion } = getKungfuBuildInfo();
 
+
+
 const webpackConfig = (argv) => {
     const pagesConfig = getPagesConfig(argv);
-
     return merge(toolkit.webpack.makeConfig(argv), {
         entry: pagesConfig.entry,
         module: {
@@ -26,17 +26,17 @@ const webpackConfig = (argv) => {
                 {
                     test: /\.css$/,
                     use: [
+                        'style-loader',
                         'postcss-loader',
                         'css-loader',
-                        // MiniCssExtractPlugin.loader
                     ],
                 },
                 {
                     test: /\.less$/,
                     use: [
+                        'style-loader',
                         'postcss-loader',
                         'css-loader',
-                        // MiniCssExtractPlugin.loader,
                         {
                             loader: 'less-loader',
                             options: {
@@ -73,9 +73,6 @@ const webpackConfig = (argv) => {
         },
         plugins: [
             ...pagesConfig.plugins,
-            new MiniCssExtractPlugin({
-                filename: `css/[name].css`,
-            }),
             new MonacoWebpackPlugin({
                 languages: ['python', 'cpp', 'shell', 'json', 'yaml'],
             }),

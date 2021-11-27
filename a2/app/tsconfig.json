@@ -44,6 +44,7 @@
     "src/**/*.vue",
     "tests/**/*.ts",
     "tests/**/*.tsx", 
+    "node_modules/@kungfu-trader/kungfu-js-api/types/*.ts",
     "../../node_modules/@kungfu-trader/kungfu-js-api/types/*.ts",
   ],
   "exclude": [

@@ -22,6 +22,9 @@ export default defineComponent({
 </script>
 
 <style lang="less">
+@import '@renderer/assets/less/base.less';
+@import '@renderer/assets/less/coverAnt.less';
+
 #app {
     width: 100%;
     height: 100%;

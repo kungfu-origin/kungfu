@@ -95,7 +95,7 @@ import {
     ContentId,
     Direction,
     TargetDirectionClassName,
-} from '@renderer/components/global/types/index';
+} from '@renderer/types/index';
 import { useGlobalStore } from '@renderer/pages/index/store/global';
 
 interface KfRowColIterData {
