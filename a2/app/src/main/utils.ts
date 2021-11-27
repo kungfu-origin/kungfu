@@ -9,6 +9,7 @@ import path from 'path';
 import {
     killKfc,
     killKungfu,
+    killExtra,
     pm2Kill,
 } from '@kungfu-trader/kungfu-js-api/utils/processUtils';
 import {
@@ -65,7 +66,11 @@ function KillAll(): Promise<void> {
                         killKungfu()
                             .catch((err) => kfLogger.error(err.message))
                             .finally(() => {
-                                resolve();
+                                killExtra()
+                                    .catch((err) => kfLogger.error(err.message))
+                                    .finally(() => {
+                                        resolve();
+                                    });
                             });
                     });
             });

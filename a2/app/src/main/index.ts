@@ -16,8 +16,8 @@ import {
     showKungfuInfo,
     openUrl,
 } from '@main/utils';
-import { kfLogger, logger } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
-import { killKfc } from '@kungfu-trader/kungfu-js-api/utils/processUtils';
+import { kfLogger } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
+import { killExtra } from '@kungfu-trader/kungfu-js-api/utils/processUtils';
 import {
     clearJournal,
     exportAllTradingData,
@@ -98,7 +98,7 @@ function createWindow(reloadAfterCrashed = false) {
     });
 
     MainWindow.on('unresponsive', () => {
-        logger.error('[MainWindow] unresponsive', new Date());
+        kfLogger.error('[MainWindow] unresponsive ', +new Date());
         if (AllowQuit) return;
         showCrashMessageBox().then((confirm) => {
             if (!confirm) return;
@@ -107,7 +107,10 @@ function createWindow(reloadAfterCrashed = false) {
     });
 
     MainWindow.webContents.on('render-process-gone', (event, details) => {
-        logger.error('[MainWindow.webContents] crashed', new Date(), details);
+        kfLogger.error(
+            '[MainWindow.webContents] crashed' + new Date(),
+            details.toString(),
+        );
         if (AllowQuit) return;
         showCrashMessageBox().then((confirm) => {
             if (!confirm) return;
@@ -116,7 +119,7 @@ function createWindow(reloadAfterCrashed = false) {
     });
 
     MainWindow.webContents.on('unresponsive', () => {
-        logger.error('[MainWindow.webContents] unresponsive', new Date());
+        kfLogger.error('[MainWindow.webContents] unresponsive' + new Date());
         if (AllowQuit) return;
         showCrashMessageBox().then((confirm) => {
             if (!confirm) return;
@@ -158,7 +161,7 @@ app.on('ready', () => {
 
 //一上来先把所有之前意外没关掉的 pm2/kfc 进程kill掉
 console.time('init clean');
-killKfc()
+killExtra()
     .catch((err) => kfLogger.error(err.message))
     .finally(() => {
         console.timeEnd('init clean');
@@ -322,11 +325,15 @@ function setMenu() {
 }
 
 process
-    .on('uncaughtException', (err) => {
-        console.log(err);
-        logger.error('[MASTER] Error caught in uncaughtException event:', err);
+    .on('uncaughtException', (err: Error) => {
+        kfLogger.error(
+            '[MASTER] Error caught in uncaughtException event:',
+            err.message,
+        );
     })
-    .on('unhandledRejection', (err) => {
-        console.log(err);
-        logger.error('[MASTER] Error caught in unhandledRejection event:', err);
+    .on('unhandledRejection', (err: Error) => {
+        kfLogger.error(
+            '[MASTER] Error caught in unhandledRejection event:',
+            err.message,
+        );
     });

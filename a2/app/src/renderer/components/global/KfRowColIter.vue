@@ -96,7 +96,7 @@ import {
     Direction,
     TargetDirectionClassName,
 } from '@renderer/components/global/types/index';
-import { useGlobalStore } from '@renderer/index/store/global';
+import { useGlobalStore } from '@renderer/pages/index/store/global';
 
 interface KfRowColIterData {
     h: Direction;
@@ -180,8 +180,6 @@ export default defineComponent({
             this.dragEnterBoxWidth34 = (width * 3) / 4;
             this.dragEnterBoxHeight14 = height / 4;
             this.dragEnterBoxHeight34 = (height * 3) / 4;
-
-            console.log(toRaw(this.$data));
         },
 
         handleDragOver(e: DragEvent) {
@@ -204,7 +202,6 @@ export default defineComponent({
 
         handleDragLeave() {
             this.classNameForTabDrag = TargetDirectionClassName.unset;
-            console.log(111);
         },
 
         handleDragEnd() {

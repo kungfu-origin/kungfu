@@ -13,7 +13,7 @@ import KfLayout from '@renderer/components/global/KfLayout.vue';
 import KfRowColIter from '@renderer/components/global/KfRowColIter.vue';
 
 import { BoardsMap, Direction } from '@renderer/components/global/types/index';
-import { useGlobalStore } from '@renderer/index/store/global';
+import { useGlobalStore } from '@renderer/pages/index/store/global';
 
 export default defineComponent({
     name: 'Index',
