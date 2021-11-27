@@ -116,19 +116,19 @@ log4js.configure({
 export const logger = log4js.getLogger('app');
 
 export const kfLogger = {
-    info: (msg: string | number) => {
-        console.log('<KF_INFO>', msg);
-        logger.info('<KF_INFO>', msg);
+    info: (...args: Array<string | number>) => {
+        console.log('<KF_INFO>', args.join(' '));
+        logger.info('<KF_INFO>', args.join(' '));
     },
 
-    warn: (msg: string | number) => {
-        console.warn('<KF_INFO>', msg);
-        logger.warn('<KF_INFO>', msg);
+    warn: (...args: Array<string | number>) => {
+        console.warn('<KF_INFO>', args.join(' '));
+        logger.warn('<KF_INFO>', args.join(' '));
     },
 
-    error: (msg: string | number) => {
-        console.error('<KF_INFO>', msg);
-        logger.error('<KF_INFO>', msg);
+    error: (...args: Array<string | number>) => {
+        console.error('<KF_INFO>', args.join(' '));
+        logger.error('<KF_INFO>', args.join(' '));
     },
 };
 

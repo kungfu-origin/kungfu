@@ -51,10 +51,6 @@ const webpackConfig = (argv) => {
             ],
           },
           {
-            test: /\.vue$/,
-            use: 'vue-loader',
-          },
-          {
             test: /\.worker\.js$/,
             use: {
               loader: 'worker-loader',

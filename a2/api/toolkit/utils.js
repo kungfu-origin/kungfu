@@ -26,25 +26,25 @@ exports.getKungfuBuildInfo = () => {
 
 
 
-exports.getViewsConfig = (argv) => {
-  const appConfigPath = require.resolve('@kungfu-trader/kungfu-app/package.json');
+exports.getPagesConfig = (argv) => {
+  const appConfigPath = require.resolve('@kungfu-trader/kungfu-app2/package.json');
   const appDir = path.dirname(appConfigPath);
-  const viewsPath = path.resolve(appDir, 'src', 'renderer', 'views');
-  const files = fs.readdirSync(viewsPath);
+  const pagesPath = path.resolve(appDir, 'src', 'renderer', 'pages');
+  const files = fs.readdirSync(pagesPath);
   let entry = {},
     plugins = [];
   files
     .filter((file) => {
-      const filePath = path.join(viewsPath, file);
+      const filePath = path.join(pagesPath, file);
       const stats = fs.statSync(filePath);
       return stats.isDirectory();
     })
     .forEach((dir) => {
-      (entry[dir] = path.resolve(appDir, 'src', 'renderer', 'views', dir, 'main.js')),
+      (entry[dir] = path.resolve(appDir, 'src', 'renderer', 'pages', dir, 'main.ts')),
         plugins.push(
           new HtmlWebpackPlugin({
             filename: `${dir}.html`,
-            template: path.resolve(appDir, 'src', 'index.ejs'),
+            template: path.resolve(appDir, 'public', 'index.html'),
             minify: {
               collapseWhitespace: true,
               removeAttributeQuotes: true,

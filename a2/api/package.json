@@ -14,6 +14,7 @@
     "fkill": "^8.0.0",
     "fs-extra": "^10.0.0",
     "get-user-locale": "^1.4.0",
+    "getprocesses": "^1.1.1",
     "log4js": "^6.3.0",
     "pm2": "^5.1.2"
   }

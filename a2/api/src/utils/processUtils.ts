@@ -4,6 +4,7 @@ import os from 'os';
 import fkill from 'fkill';
 import pm2, { Proc, ProcessDescription, StartOptions } from 'pm2';
 import { getUserLocale } from 'get-user-locale';
+import getProcesses from 'getProcesses';
 
 import {
     kfLogger,
@@ -25,12 +26,29 @@ const isWin = os.platform() === 'win32';
 const isLinux = os.platform() === 'linux';
 const locale = getUserLocale().replace(/-/g, '_');
 
+export const findProcessByKeywords = (tasks: string[]): Promise<number[]> => {
+    const pIdList: number[] = [];
+    return getProcesses().then((processes) => {
+        processes.forEach((p) => {
+            const rawCommandLine = p.rawCommandLine;
+            tasks.forEach((task: string): void => {
+                if (rawCommandLine.includes(task)) {
+                    pIdList.push(+p.pid);
+                }
+            });
+        });
+        return pIdList;
+    });
+};
+
 export const forceKill = (tasks: string[]): Promise<void> => {
-    return fkill(tasks, {
-        force: true,
-        tree: isWin ? true : false,
-        ignoreCase: true,
-        silent: false,
+    return findProcessByKeywords(tasks).then((pids) => {
+        return fkill(pids, {
+            force: true,
+            tree: isWin ? true : false,
+            ignoreCase: true,
+            silent: process.env.NODE_ENV === 'development' ? true : false,
+        });
     });
 };
 
@@ -45,6 +63,8 @@ export const killKungfu = () => {
 
     return Promise.resolve(true);
 };
+
+export const killExtra = () => forceKill([kfcName, 'pm2']);
 
 //===================== pm2 start =======================
 
@@ -397,7 +417,7 @@ function buildProcessStatus(pList: ProcessDescription[]): Pm2ProcessStatusData {
     return processStatus;
 }
 
-function getRocketParams(args: string, ifRocket: Boolean) {
+function getRocketParams(args: string, ifRocket: boolean) {
     let rocket = ifRocket ? '-x' : '';
 
     if (numCPUs <= 4) {
