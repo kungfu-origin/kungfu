@@ -13,6 +13,7 @@ import {
 interface GlobalState {
     boardsMap: BoardsMap;
     dragedContentData: ContentData | null;
+    isBoardDragging: boolean;
 }
 
 export const useGlobalStore = defineStore('global', {
@@ -20,10 +21,15 @@ export const useGlobalStore = defineStore('global', {
         return {
             boardsMap: {},
             dragedContentData: null,
+            isBoardDragging: false,
         };
     },
 
     actions: {
+        markIsBoardDragging(status: boolean) {
+            this.isBoardDragging = status;
+        },
+
         initBoardsMap(boardsMap: BoardsMap) {
             this.boardsMap = boardsMap;
         },
@@ -103,6 +109,12 @@ export const useGlobalStore = defineStore('global', {
             const destBoard = this.boardsMap[destBoardId];
 
             if (!contentId || boardId === undefined) return;
+            if (
+                boardId === destBoardId &&
+                destBoard.contents &&
+                destBoard.contents.length === 1
+            )
+                return;
 
             this.removeBoardByContentId(boardId, contentId);
 

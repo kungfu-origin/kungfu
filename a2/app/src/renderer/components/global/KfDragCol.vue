@@ -13,17 +13,17 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from '@vue/runtime-core';
+import { defineComponent, PropType, reactive, toRefs } from 'vue';
 import { mapActions, mapState } from 'pinia';
 
 import { useGlobalStore } from '@renderer/pages/index/store/global';
 import { BoardInfo } from '@renderer/types/index';
 
 interface KfDragColData {
-    $upRow: HTMLElement | null;
+    upRow$: HTMLElement | null;
     upBoardId: string;
     upRowHeight: number;
-    $bottomRow: HTMLElement | null;
+    bottomRow$: HTMLElement | null;
     bottomBoardId: string;
     bottomRowHeight: number;
     paHeight: number;
@@ -40,16 +40,20 @@ export default defineComponent({
         },
     },
 
-    data(): KfDragColData {
-        return {
-            $upRow: null,
+    setup() {
+        const colData: KfDragColData = reactive({
+            upRow$: null,
             upBoardId: '',
             upRowHeight: 0,
-            $bottomRow: null,
+            bottomRow$: null,
             bottomBoardId: '',
             bottomRowHeight: 0,
             paHeight: 0,
             preY: 0,
+        });
+
+        return {
+            ...toRefs(colData),
         };
     },
 
@@ -84,15 +88,15 @@ export default defineComponent({
             const target = e.target as HTMLElement;
 
             if (target.className === 'resize-bar-horizontal') {
-                this.$upRow = target.parentElement;
-                this.upBoardId = this.$upRow?.getAttribute('board-id') || '';
-                this.upRowHeight = this.$upRow?.clientHeight || 0;
-                this.$bottomRow = target.parentElement
+                this.upRow$ = target.parentElement;
+                this.upBoardId = this.upRow$?.getAttribute('board-id') || '';
+                this.upRowHeight = this.upRow$?.clientHeight || 0;
+                this.bottomRow$ = target.parentElement
                     ?.nextSibling as HTMLElement;
                 this.bottomBoardId =
-                    this.$bottomRow?.getAttribute('board-id') || '';
-                this.bottomRowHeight = this.$bottomRow?.clientHeight || 0;
-                const paElement = this.$upRow?.parentElement;
+                    this.bottomRow$?.getAttribute('board-id') || '';
+                this.bottomRowHeight = this.bottomRow$?.clientHeight || 0;
+                const paElement = this.upRow$?.parentElement;
                 if (paElement) {
                     this.paHeight = paElement?.clientHeight || 0;
                 }
@@ -105,8 +109,8 @@ export default defineComponent({
             const deltaY = currentY - this.preY;
 
             if (
-                !this.$upRow ||
-                !this.$bottomRow ||
+                !this.upRow$ ||
+                !this.bottomRow$ ||
                 !this.upBoardId ||
                 !this.bottomBoardId
             ) {
@@ -115,17 +119,17 @@ export default defineComponent({
 
             this.upRowHeight += deltaY;
             this.bottomRowHeight -= deltaY;
-            this.$upRow.style.height = this.upRowHeight + 'px';
-            this.$upRow.style.flex = 'unset';
-            this.$bottomRow.style.height = this.bottomRowHeight + 'px';
-            this.$bottomRow.style.flex = 'unset';
+            this.upRow$.style.height = this.upRowHeight + 'px';
+            this.upRow$.style.flex = 'unset';
+            this.bottomRow$.style.height = this.bottomRowHeight + 'px';
+            this.bottomRow$.style.flex = 'unset';
             this.preY = currentY;
         },
 
         hanleMouseUp() {
             if (
-                !this.$upRow ||
-                !this.$bottomRow ||
+                !this.upRow$ ||
+                !this.bottomRow$ ||
                 !this.upBoardId ||
                 !this.bottomBoardId
             ) {
@@ -151,9 +155,9 @@ export default defineComponent({
                     : 0,
             );
 
-            this.$upRow = null;
+            this.upRow$ = null;
             this.upRowHeight = 0;
-            this.$bottomRow = null;
+            this.bottomRow$ = null;
             this.bottomRowHeight = 0;
             this.paHeight = 0;
             this.preY = 0;

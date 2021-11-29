@@ -24,7 +24,10 @@ import {
     openLogFile,
     openSettingDialog,
 } from './events';
-import { BASE_DB_DIR, KF_HOME } from '@root/../api/src/config/pathConfig';
+import {
+    BASE_DB_DIR,
+    KF_HOME,
+} from '@kungfu-trader/kungfu-js-api/config/pathConfig';
 
 let MainWindow: BrowserWindow | null = null;
 let AllowQuit = false;

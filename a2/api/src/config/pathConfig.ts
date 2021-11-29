@@ -72,10 +72,10 @@ export const buildProcessLogPath = (processId: string) => {
 
 //================== config start =================================
 
-//process.resourcesPath 是一个容易出错的问题，需要每个调用pathconfig的进程都注册了这个值，不然报错
+//global.__kfResourcesPath 是一个容易出错的问题，需要每个调用pathconfig的进程都注册了这个值，不然报错
 
 export const KUNGFU_RESOURCES_DIR = production
-    ? path.join(process.resourcesPath, 'kungfu-resources')
+    ? path.join(global.__kfResourcesPath, 'kungfu-resources')
     : path.join(__resources);
 
 export const KF_CONFIG_DEFAULT_PATH = path.join(
@@ -124,7 +124,7 @@ addFileSync('', KF_TICKER_SET_JSON_PATH, 'file');
 //================== json db end ==================================
 
 export const KFC_PARENT_DIR = production
-    ? process.resourcesPath
+    ? global.__kfResourcesPath
     : path.dirname(process.env.KFC_DIR || staticKfcDir);
 
 export const KFC_DIR = process.env.KFC_DIR || path.join(KFC_PARENT_DIR, 'kfc');
@@ -138,15 +138,15 @@ export const EXTENSION_DIR = path.join(
 );
 
 export const TASK_EXTENSION_DIR = production
-    ? path.join(process.resourcesPath, 'kungfu-extensions')
+    ? path.join(global.__kfResourcesPath, 'kungfu-extensions')
     : path.join(__dirname, '..', '..', '..');
 
 export const APP_DIR = production
-    ? path.resolve(process.resourcesPath, 'app', 'dist', 'app')
+    ? path.resolve(global.__kfResourcesPath, 'app', 'dist', 'app')
     : path.resolve(process.cwd(), 'dist', 'app');
 
 process.env.KFC_DIR = KFC_DIR;
 
 console.log(`process.cwd = ${process.cwd()}`);
-console.log(`process.resourcesPath = ${process.resourcesPath}`);
+console.log(`global.__kfResourcesPath = ${global.__kfResourcesPath}`);
 console.log(`KFC_PARENT_DIR = ${KFC_PARENT_DIR}`);

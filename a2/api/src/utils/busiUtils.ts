@@ -15,10 +15,10 @@ declare global {
     }
 
     interface Array<T> {
-        removeRepeat(): any;
-        kfForEach(cb: Function): any;
-        kfReverseForEach(cb: Function): any;
-        kfForEachAsync(cb: Function): any;
+        removeRepeat(): Array<T>;
+        kfForEach(cb: <T>(t: T, index: number) => void): void;
+        kfReverseForEach(cb: <T>(t: T, index: number) => void): void;
+        kfForEachAsync(cb: <T>(t: T, index: number) => void): void;
     }
 }
 
@@ -48,11 +48,11 @@ String.prototype.parseSourceAccountId = function (): SourceAccountId {
     }
 };
 
-Array.prototype.removeRepeat = function (): any {
+Array.prototype.removeRepeat = function () {
     return Array.from(new Set(this));
 };
 
-Array.prototype.kfForEach = function (cb: Function): any {
+Array.prototype.kfForEach = function (cb) {
     if (!cb) return;
     const t = this;
     const len = t.length;
@@ -64,7 +64,7 @@ Array.prototype.kfForEach = function (cb: Function): any {
     }
 };
 
-Array.prototype.kfReverseForEach = function (cb: Function): any {
+Array.prototype.kfReverseForEach = function (cb) {
     if (!cb) return;
     const t = this;
     let i = t.length;
@@ -73,10 +73,19 @@ Array.prototype.kfReverseForEach = function (cb: Function): any {
     }
 };
 
-Array.prototype.kfForEachAsync = kfForEachAsync;
+Array.prototype.kfForEachAsync = function (cb) {
+    if (!cb) return;
+    const t = this;
+    const len = t.length;
+    return new Promise((resolve) => {
+        setImmediateIter(t, 0, len, cb, () => {
+            resolve(true);
+        });
+    });
+};
 
-function setImmediateIter(
-    list: Array<any>,
+function setImmediateIter<T>(
+    list: Array<T>,
     i: number,
     len: number,
     cb: Function,
@@ -90,17 +99,6 @@ function setImmediateIter(
     } else {
         fcb();
     }
-}
-
-function kfForEachAsync(cb: Function) {
-    //@ts-ignore
-    const t = this;
-    const len = t.length;
-    return new Promise((resolve) => {
-        setImmediateIter(t, 0, len, cb, () => {
-            resolve(true);
-        });
-    });
 }
 
 log4js.configure({
@@ -191,14 +189,36 @@ export const delayMilliSeconds = (miliSeconds: number): Promise<void> => {
     });
 };
 
-export const findTargetFromArray = (
-    list: any[],
+export const findTargetFromArray = <T>(
+    list: Array<T>,
     targetKey: string,
     targetValue: string | number,
 ) => {
-    const targetList = list.filter((item) => item[targetKey] === targetValue);
+    const targetList = list.filter(
+        (item) => (item || {})[targetKey] === targetValue,
+    );
     if (targetList) {
         return targetList[0];
     }
     return null;
+};
+
+export const buildObjectFromArray = <T>(
+    list: Array<T>,
+    targetKey: number | string,
+    targetValueKey?: number | string,
+): { [prop: string | number]: T | T[keyof T] | undefined } => {
+    let dict: { [prop: number | string]: T | T[keyof T] | undefined } = {};
+    list.forEach((item) => {
+        const key: number | string = (item || {})[targetKey] || '';
+        if (key !== '' && key !== undefined) {
+            if (targetValueKey === undefined) {
+                dict[key] = item;
+            } else {
+                dict[key] = (item || {})[targetValueKey];
+            }
+        }
+    });
+
+    return dict;
 };

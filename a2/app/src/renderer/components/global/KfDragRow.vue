@@ -18,17 +18,17 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from '@vue/runtime-core';
+import { defineComponent, PropType, reactive, toRefs } from 'vue';
 import { mapActions, mapState } from 'pinia';
 
 import { useGlobalStore } from '@renderer/pages/index/store/global';
 import { BoardInfo } from '@renderer/types/index';
 
 interface KfDragRowData {
-    $leftCol: HTMLElement | null;
+    leftCol$: HTMLElement | null;
     leftBoardId: string;
     leftColWidth: number;
-    $rightCol: HTMLElement | null;
+    rightCol$: HTMLElement | null;
     rightBoardId: string;
     rightColWidth: number;
     paWidth: number;
@@ -45,16 +45,20 @@ export default defineComponent({
         },
     },
 
-    data(): KfDragRowData {
-        return {
-            $leftCol: null,
+    setup() {
+        const rowData: KfDragRowData = reactive({
+            leftCol$: null,
             leftBoardId: '',
             leftColWidth: 0,
-            $rightCol: null,
+            rightCol$: null,
             rightBoardId: '',
             rightColWidth: 0,
             paWidth: 0,
             preX: 0,
+        });
+
+        return {
+            ...toRefs(rowData),
         };
     },
 
@@ -89,16 +93,16 @@ export default defineComponent({
             const target = e.target as HTMLElement;
 
             if (target.className === 'resize-bar-vertical') {
-                this.$leftCol = target.parentElement;
+                this.leftCol$ = target.parentElement;
                 this.leftBoardId =
-                    this.$leftCol?.getAttribute('board-id') || '';
-                this.leftColWidth = this.$leftCol?.clientWidth || 0;
-                this.$rightCol = target.parentElement
+                    this.leftCol$?.getAttribute('board-id') || '';
+                this.leftColWidth = this.leftCol$?.clientWidth || 0;
+                this.rightCol$ = target.parentElement
                     ?.nextSibling as HTMLElement;
                 this.rightBoardId =
-                    this.$rightCol?.getAttribute('board-id') || '';
-                this.rightColWidth = this.$rightCol?.clientWidth || 0;
-                const paElement = this.$leftCol?.parentElement;
+                    this.rightCol$?.getAttribute('board-id') || '';
+                this.rightColWidth = this.rightCol$?.clientWidth || 0;
+                const paElement = this.leftCol$?.parentElement;
                 if (paElement) {
                     this.paWidth = paElement?.clientWidth;
                 }
@@ -111,8 +115,8 @@ export default defineComponent({
             const deltaX = currentX - this.preX;
 
             if (
-                !this.$leftCol ||
-                !this.$rightCol ||
+                !this.leftCol$ ||
+                !this.rightCol$ ||
                 !this.leftBoardId ||
                 !this.rightBoardId
             ) {
@@ -121,17 +125,17 @@ export default defineComponent({
 
             this.leftColWidth += deltaX;
             this.rightColWidth -= deltaX;
-            this.$leftCol.style.width = this.leftColWidth + 'px';
-            this.$leftCol.style.flex = 'unset';
-            this.$rightCol.style.width = this.rightColWidth + 'px';
-            this.$rightCol.style.flex = 'unset';
+            this.leftCol$.style.width = this.leftColWidth + 'px';
+            this.leftCol$.style.flex = 'unset';
+            this.rightCol$.style.width = this.rightColWidth + 'px';
+            this.rightCol$.style.flex = 'unset';
             this.preX = currentX;
         },
 
         hanleMouseUp() {
             if (
-                !this.$leftCol ||
-                !this.$rightCol ||
+                !this.leftCol$ ||
+                !this.rightCol$ ||
                 !this.leftBoardId ||
                 !this.rightBoardId
             ) {
@@ -152,9 +156,9 @@ export default defineComponent({
                     '%',
             );
 
-            this.$leftCol = null;
+            this.leftCol$ = null;
             this.leftColWidth = 0;
-            this.$rightCol = null;
+            this.rightCol$ = null;
             this.rightColWidth = 0;
             this.preX = 0;
         },

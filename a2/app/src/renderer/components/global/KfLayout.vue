@@ -35,7 +35,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, reactive, toRefs } from '@vue/runtime-core';
+import { defineComponent, reactive, toRefs } from 'vue';
 import { TeamOutlined, ThunderboltOutlined } from '@ant-design/icons-vue';
 
 export default defineComponent({

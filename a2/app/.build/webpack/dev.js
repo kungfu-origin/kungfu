@@ -10,7 +10,6 @@ const webpack = require('webpack');
 const WebpackDevServer = require('webpack-dev-server');
 const defaultDistDir = require('@kungfu-trader/kungfu-app2').defaultDistDir;
 
-let rendererProcess = null;
 let electronProcess = null;
 let manualRestart = false;
 
@@ -104,6 +103,27 @@ function startRenderer(argv) {
     });
 }
 
+
+function startComponents(argv) {
+    const componentsConfig = require('./webpack.components.config')(argv);
+    return new Promise((resolve, reject) => {
+        const compiler = webpack(componentsConfig);
+        compiler.watch({}, (err, stats) => {
+            if (err) {
+                console.log(err);
+                return;
+            }
+            
+            logStats('Components', stats);
+        });
+
+        compiler.hooks.done.tap('components-compile-done', (stats) => {
+            logStats('Components', stats);
+            resolve();
+        });
+    });
+}
+
 function startMain(argv) {
     const mainConfig = require('./webpack.main.config')(argv);
     const rootDir = path.dirname(path.dirname(__dirname));
@@ -166,21 +186,19 @@ function startElectron(argv) {
     electronProcess.on('close', () => {
         electronLog('exit', 'blue');
         if (!manualRestart) {
-            rendererProcess && process.kill(rendererProcess.pid, 'SIGINT');
-            rendererProcess = true;
             process.exit(0);
         }
     });
 }
 
-const run = (distDir, distName = '') => {
+const run = (distDir, distName = 'app') => {
     const argv = {
         mode: 'development',
         distDir: distDir,
         distName: distName,
     };
 
-    const tasks = [startRenderer, startMain];
+    const tasks = [startRenderer, startComponents, startMain];
     const rootDir = path.dirname(path.dirname(__dirname));
     const coreDir = require.resolve('@kungfu-trader/kungfu-core');
 

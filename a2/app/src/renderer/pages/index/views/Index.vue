@@ -7,7 +7,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from '@vue/runtime-core';
+import { defineComponent } from 'vue';
 
 import KfLayout from '@renderer/components/global/KfLayout.vue';
 import KfRowColIter from '@renderer/components/global/KfRowColIter.vue';
@@ -39,7 +39,7 @@ export default defineComponent({
             4: {
                 paId: 1,
                 direction: Direction.h,
-                contents: ['4', '5', '6', '7'],
+                contents: ['交易账户', '行情源'],
                 current: '4',
             },
             5: {
@@ -50,7 +50,7 @@ export default defineComponent({
             6: {
                 paId: 5,
                 direction: Direction.v,
-                contents: ['6', '账户进程'],
+                contents: ['策略进程'],
                 current: '6',
             },
             8: {
@@ -58,19 +58,17 @@ export default defineComponent({
                 direction: Direction.h,
                 contents: ['8', '9'],
                 current: '9',
-                height: '33.33%',
             },
             9: {
                 paId: 2,
                 direction: Direction.h,
                 contents: ['9'],
                 current: '9',
-                height: '33.33%',
             },
             10: {
                 paId: 2,
                 direction: Direction.h,
-                contents: ['10'],
+                contents: ['test3'],
                 current: '10',
             },
         };

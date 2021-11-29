@@ -9,7 +9,10 @@
         <template v-if="contents.length">
             <a-tabs
                 size="small"
-                :class="classNameForTabDrag"
+                :class="{
+                    [classNameForTabDrag]: true,
+                    'is-dragging': isBoardDragging,
+                }"
                 :activeKey="boardInfo.current"
                 style="height: 100%; width: 100%"
                 type="editable-card"
@@ -33,7 +36,15 @@
                         </div>
                     </template>
                     <a-card style="width: 100%; height: 100%">
-                        {{ content }}
+                        <component
+                            v-if="hasComponent(content)"
+                            :is="content"
+                            :id="content"
+                        ></component>
+                        <KfNoData
+                            v-else
+                            :txt="`${content} 组件不存在`"
+                        ></KfNoData>
                     </a-card>
                 </a-tab-pane>
             </a-tabs>
@@ -49,7 +60,10 @@
         <template v-if="contents.length">
             <a-tabs
                 size="small"
-                :class="classNameForTabDrag"
+                :class="{
+                    [classNameForTabDrag]: true,
+                    'is-dragging': isBoardDragging,
+                }"
                 :activeKey="boardInfo.current"
                 style="height: 100%; width: 100%"
                 type="editable-card"
@@ -73,7 +87,15 @@
                         </div>
                     </template>
                     <a-card style="width: 100%; height: 100%">
-                        {{ content }}
+                        <component
+                            v-if="hasComponent(content)"
+                            :is="content"
+                            :id="content"
+                        ></component>
+                        <KfNoData
+                            v-else
+                            :txt="`${content} 组件不存在`"
+                        ></KfNoData>
                     </a-card>
                 </a-tab-pane>
             </a-tabs>
@@ -82,11 +104,12 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, toRaw } from '@vue/runtime-core';
+import { defineComponent, PropType, reactive, toRefs } from 'vue';
 import { mapActions, mapState } from 'pinia';
 
 import KfDragRow from '@renderer/components/global/KfDragRow.vue';
 import KfDragCol from '@renderer/components/global/KfDragCol.vue';
+import KfNoData from '@renderer/components/global/KfNoData.vue';
 
 import {
     BoardInfo,
@@ -108,12 +131,19 @@ interface KfRowColIterData {
     dragEnterBoxHeight34: number;
 }
 
+declare module '@vue/runtime-core' {
+    interface ComponentCustomProperties {
+        $registedKfUIComponents: string[];
+    }
+}
+
 export default defineComponent({
     name: 'KfRowColIter',
 
     components: {
         KfDragCol,
         KfDragRow,
+        KfNoData,
     },
 
     props: {
@@ -123,8 +153,8 @@ export default defineComponent({
         },
     },
 
-    data(): KfRowColIterData {
-        return {
+    setup() {
+        const rowColIterData: KfRowColIterData = reactive({
             h: Direction.h,
             v: Direction.v,
             classNameForTabDrag: TargetDirectionClassName.unset,
@@ -132,6 +162,10 @@ export default defineComponent({
             dragEnterBoxWidth34: 0,
             dragEnterBoxHeight14: 0,
             dragEnterBoxHeight34: 0,
+        });
+
+        return {
+            ...toRefs(rowColIterData),
         };
     },
 
@@ -140,6 +174,7 @@ export default defineComponent({
             boardsMap: (store): BoardsMap => store.boardsMap,
             dragedContentData: (store): ContentData | null =>
                 store.dragedContentData,
+            isBoardDragging: (store): boolean => store.isBoardDragging,
         }),
 
         boardInfo(): BoardInfo {
@@ -165,10 +200,12 @@ export default defineComponent({
             removeBoardByContentId: 'removeBoardByContentId',
             setDragedContentData: 'setDragedContentData',
             afterDragMoveBoard: 'afterDragMoveBoard',
+            markIsBoardDragging: 'markIsBoardDragging',
         }),
 
         handleDragStart(contentId: ContentId) {
             this.setDragedContentData(this.boardId, contentId);
+            this.markIsBoardDragging(true);
         },
 
         handleDragEnter(e: DragEvent) {
@@ -206,6 +243,7 @@ export default defineComponent({
 
         handleDragEnd() {
             this.clearState();
+            this.markIsBoardDragging(false);
         },
 
         handleDrop() {
@@ -233,6 +271,10 @@ export default defineComponent({
             this.dragEnterBoxHeight14 = 0;
             this.dragEnterBoxHeight34 = 0;
             this.setDragedContentData(-1, '');
+        },
+
+        hasComponent(cname: string) {
+            return this.$registedKfUIComponents.includes(cname);
         },
     },
 });
@@ -268,10 +310,6 @@ export default defineComponent({
 
         .ant-tabs-content.ant-tabs-content-top {
             height: 100%;
-        }
-
-        * {
-            pointer-events: none;
         }
     }
 
@@ -331,6 +369,14 @@ export default defineComponent({
                 left: 0;
                 top: 0;
                 display: block;
+            }
+        }
+    }
+
+    &.is-dragging {
+        .ant-tabs-content-holder {
+            * {
+                pointer-events: none;
             }
         }
     }

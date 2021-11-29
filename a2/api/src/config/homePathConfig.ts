@@ -24,17 +24,20 @@ if (process.env.NODE_ENV !== 'development' && process.env.APP_TYPE === 'main') {
 }
 
 if (process.env.APP_TYPE === 'cli') {
-    //@ts-ignore
-    process.resourcesPath = path
+    global.__kfResourcesPath = path
         .join(path.dirname(process.execPath), '..')
         .replace(/\\/g, '\\\\');
 }
 
 if (process.env.APP_TYPE === 'daemon') {
-    //@ts-ignore
-    process.resourcesPath = path
+    global.__kfResourcesPath = path
         .join(__dirname, '..', '..', '..')
         .replace(/\\/g, '\\\\');
+}
+
+
+if (process.env.APP_TYPE === 'main' || process.env.APP_TYPE === 'renderer') {
+    global.__kfResourcesPath = process.resourcesPath
 }
 
 export const KF_HOME_BASE_DIR_RESOLVE: string = getHomePath();

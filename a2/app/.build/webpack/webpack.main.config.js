@@ -13,7 +13,7 @@ const { gitCommitVersion, pyVersion, buildTimeStamp } = getKungfuBuildInfo();
 
 const webpackConfig = (argv) =>
     merge(toolkit.webpack.makeConfig(argv), {
-        externals: ['fkill'],
+        externals: ['fkill', 'getProcesses', 'pm2'],
 
         entry: {
             main: path.join(rootDir, 'src', 'main', 'index.ts'),

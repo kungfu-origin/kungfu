@@ -6,5 +6,6 @@ declare const __build_timestamp: number;
 declare module NodeJS {
     interface Global {
         __resources: string;
+        __kfResourcesPath: string;
     }
 }
