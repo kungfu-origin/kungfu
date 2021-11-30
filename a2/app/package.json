@@ -12,10 +12,11 @@
     },
     "dependencies": {
         "@kungfu-trader/kungfu-js-api": "*",
-        "ant-design-vue": "^3.0.0-alpha.12",
+        "ant-design-vue": "^3.0.0-alpha.13",
         "core-js": "^3.6.5",
         "fs-extra": "^10.0.0",
         "pinia": "^2.0.4",
+        "rxjs": "^7.4.0",
         "vue": "^3.2.0",
         "vue-router": "^4.0.0-0"
     },

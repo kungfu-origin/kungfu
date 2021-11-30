@@ -15,12 +15,10 @@ const rootDir = path.dirname(path.dirname(__dirname));
 const { getKungfuBuildInfo, getPagesConfig, isProduction } = toolkit.utils;
 const { pyVersion } = getKungfuBuildInfo();
 
-
-
 const webpackConfig = (argv) => {
     const pagesConfig = getPagesConfig(argv);
     return merge(toolkit.webpack.makeConfig(argv), {
-        externals: ['fkill', 'getProcesses', 'pm2'],
+        externals: ['vue', 'fkill', 'getProcesses', 'pm2'],
 
         entry: pagesConfig.entry,
         module: {

@@ -1,8 +1,9 @@
 import { createApp, Component } from 'vue';
+import { Subject } from 'rxjs';
 import App from '@renderer/pages/index/App.vue';
 import router from '@renderer/pages/index/router';
 import store from '@renderer/pages/index/store';
-import { Layout, Tabs, Button, Menu, Card } from 'ant-design-vue';
+import { Layout, Tabs, Button, Menu, Card, Input, Table } from 'ant-design-vue';
 
 import '@kungfu-trader/kungfu-js-api/utils/processUtils';
 import { getUIComponents } from '@renderer/assets/js/uiUtils';
@@ -21,6 +22,9 @@ app.use(store)
     .use(Button)
     .use(Menu)
     .use(Card)
+    .use(Input)
+    .use(Table)
     .mount('#app');
 
 app.config.globalProperties.$registedKfUIComponents = Object.keys(uics);
+app.config.globalProperties.$bus = new Subject();

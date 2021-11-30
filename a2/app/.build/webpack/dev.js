@@ -103,7 +103,6 @@ function startRenderer(argv) {
     });
 }
 
-
 function startComponents(argv) {
     const componentsConfig = require('./webpack.components.config')(argv);
     return new Promise((resolve, reject) => {
@@ -113,7 +112,7 @@ function startComponents(argv) {
                 console.log(err);
                 return;
             }
-            
+
             logStats('Components', stats);
         });
 
@@ -145,8 +144,8 @@ function startMain(argv) {
                 electronProcess = null;
                 startElectron({
                     mode: 'development',
-                    distDir: defaultDistDir,
-                    distName: '',
+                    distDir: argv.distDir,
+                    distName: argv.distName,
                 });
                 setTimeout(() => {
                     manualRestart = false;

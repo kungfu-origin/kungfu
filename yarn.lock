@@ -3215,7 +3215,7 @@ ansicolors@~0.3.2:
   resolved "https://registry.yarnpkg.com/ansicolors/-/ansicolors-0.3.2.tgz#665597de86a9ffe3aa9bfbe6cae5c6ea426b4979"
   integrity sha1-ZlWX3oap/+Oqm/vmyuXG6kJrSXk=
 
-ant-design-vue@^3.0.0-alpha.12:
+ant-design-vue@^3.0.0-alpha.13:
   version "3.0.0-alpha.13"
   resolved "https://registry.yarnpkg.com/ant-design-vue/-/ant-design-vue-3.0.0-alpha.13.tgz#20641ff16928862b9c665238558bd6997e2db129"
   integrity sha512-qILjbNRHXz3vJJZtG45RTQTiAL97XXnr6BwOfOvDiILK6UqsaLWCerRxcF8uUnqtcbj/zQSCU1Yb0OLb7a/sHA==
@@ -11670,7 +11670,7 @@ rxjs@^6.4.0, rxjs@^6.6.0, rxjs@^6.6.2:
   dependencies:
     tslib "^1.9.0"
 
-rxjs@^7.3.0:
+rxjs@^7.3.0, rxjs@^7.4.0:
   version "7.4.0"
   resolved "https://registry.yarnpkg.com/rxjs/-/rxjs-7.4.0.tgz#a12a44d7eebf016f5ff2441b87f28c9a51cebc68"
   integrity sha512-7SQDi7xeTMCJpqViXh8gL/lebcwlp3d831F05+9B44A4B0WfsEwUQHR64gsH1kvJ+Ep/J9K2+n1hVl1CsGN23w==

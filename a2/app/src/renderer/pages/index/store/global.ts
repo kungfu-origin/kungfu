@@ -1,18 +1,13 @@
 import { defineStore } from 'pinia';
 import { toRaw } from 'vue';
 import {
-    BoardsMap,
-    BoardInfo,
-    ContentId,
-    ContentData,
-    BoardId,
-    Direction,
-    TargetDirectionClassName,
-} from '@renderer/types/index';
+    KfLayoutDirection,
+    KfLayoutTargetDirectionClassName,
+} from '@renderer/types/enums';
 
 interface GlobalState {
-    boardsMap: BoardsMap;
-    dragedContentData: ContentData | null;
+    boardsMap: KfLayout.BoardsMap;
+    dragedContentData: KfLayout.ContentData | null;
     isBoardDragging: boolean;
 }
 
@@ -30,27 +25,28 @@ export const useGlobalStore = defineStore('global', {
             this.isBoardDragging = status;
         },
 
-        initBoardsMap(boardsMap: BoardsMap) {
+        initBoardsMap(boardsMap: KfLayout.BoardsMap) {
             this.boardsMap = boardsMap;
         },
 
         setBoardsMapAttrById(
             id: number,
-            attrKey: keyof BoardInfo,
-            value: BoardInfo[keyof BoardInfo],
+            attrKey: keyof KfLayout.BoardInfo,
+            value: KfLayout.BoardInfo[keyof KfLayout.BoardInfo],
         ) {
             (<typeof value>this.boardsMap[id][attrKey]) = value;
         },
 
         removeBoardByContentId(targetBoardId: number, targetContentId: string) {
-            const targetBoard: BoardInfo = this.boardsMap[targetBoardId];
+            const targetBoard: KfLayout.BoardInfo =
+                this.boardsMap[targetBoardId];
             const contents = targetBoard?.contents;
             const targetIndex = contents?.indexOf(targetContentId);
 
             if (targetIndex === undefined) return;
             if (targetIndex === -1) return;
 
-            const removedItem: ContentId =
+            const removedItem: KfLayout.ContentId =
                 (contents?.splice(targetIndex, 1) || [])[0] || '';
 
             if (removedItem === targetBoard.current && contents?.length) {
@@ -78,7 +74,7 @@ export const useGlobalStore = defineStore('global', {
                 if (!children?.length) {
                     this.removeBoardByBoardId_(paId);
                 } else {
-                    children.forEach((childId: BoardId) => {
+                    children.forEach((childId: KfLayout.BoardId) => {
                         this.boardsMap[childId].width = 0;
                         this.boardsMap[childId].height = 0;
                     });
@@ -89,7 +85,10 @@ export const useGlobalStore = defineStore('global', {
             return;
         },
 
-        setDragedContentData(boardId: BoardId, contentId: ContentId) {
+        setDragedContentData(
+            boardId: KfLayout.BoardId,
+            contentId: KfLayout.ContentId,
+        ) {
             if (boardId === -1 && !contentId) {
                 this.dragedContentData = null;
             } else {
@@ -101,9 +100,9 @@ export const useGlobalStore = defineStore('global', {
         },
 
         afterDragMoveBoard(
-            dragedContentData: ContentData | null,
-            destBoardId: BoardId,
-            directionClassName: TargetDirectionClassName,
+            dragedContentData: KfLayout.ContentData | null,
+            destBoardId: KfLayout.BoardId,
+            directionClassName: KfLayoutTargetDirectionClassName,
         ) {
             const { boardId, contentId } = dragedContentData || {};
             const destBoard = this.boardsMap[destBoardId];
@@ -118,10 +117,14 @@ export const useGlobalStore = defineStore('global', {
 
             this.removeBoardByContentId(boardId, contentId);
 
-            if (directionClassName === TargetDirectionClassName.center) {
+            if (
+                directionClassName === KfLayoutTargetDirectionClassName.center
+            ) {
                 destBoard.contents?.push(contentId);
                 destBoard.current = contentId;
-            } else if (directionClassName != TargetDirectionClassName.unset) {
+            } else if (
+                directionClassName != KfLayoutTargetDirectionClassName.unset
+            ) {
                 this.dragMakeNewBoard_(
                     contentId,
                     destBoardId,
@@ -131,23 +134,25 @@ export const useGlobalStore = defineStore('global', {
         },
 
         dragMakeNewBoard_(
-            contentId: ContentId,
+            contentId: KfLayout.ContentId,
             destBoardId: number,
-            directionClassName: TargetDirectionClassName,
+            directionClassName: KfLayoutTargetDirectionClassName,
         ) {
             const destBoard = this.boardsMap[destBoardId];
             const destPaId: number = destBoard.paId;
-            const destDirection: Direction = destBoard.direction;
-            const newBoardId: BoardId = this.buildNewBoardId_();
-            const newBoardDirection: Direction =
-                directionClassName === TargetDirectionClassName.top ||
-                directionClassName === TargetDirectionClassName.bottom
-                    ? Direction.h
-                    : directionClassName === TargetDirectionClassName.left ||
-                      directionClassName === TargetDirectionClassName.right
-                    ? Direction.v
-                    : Direction.unset;
-            const newBoardInfo: BoardInfo = {
+            const destDirection: KfLayoutDirection = destBoard.direction;
+            const newBoardId: KfLayout.BoardId = this.buildNewBoardId_();
+            const newBoardDirection: KfLayoutDirection =
+                directionClassName === KfLayoutTargetDirectionClassName.top ||
+                directionClassName === KfLayoutTargetDirectionClassName.bottom
+                    ? KfLayoutDirection.h
+                    : directionClassName ===
+                          KfLayoutTargetDirectionClassName.left ||
+                      directionClassName ===
+                          KfLayoutTargetDirectionClassName.right
+                    ? KfLayoutDirection.v
+                    : KfLayoutDirection.unset;
+            const newBoardInfo: KfLayout.BoardInfo = {
                 paId: destPaId,
                 direction: newBoardDirection,
                 contents: [contentId],
@@ -164,8 +169,9 @@ export const useGlobalStore = defineStore('global', {
                 }
 
                 if (
-                    directionClassName === TargetDirectionClassName.top ||
-                    directionClassName === TargetDirectionClassName.left
+                    directionClassName ===
+                        KfLayoutTargetDirectionClassName.top ||
+                    directionClassName === KfLayoutTargetDirectionClassName.left
                 ) {
                     siblings?.splice(destIndex, 0, newBoardId);
                 } else {
@@ -173,7 +179,7 @@ export const useGlobalStore = defineStore('global', {
                 }
             } else {
                 newBoardInfo.paId = destBoardId;
-                const destBoardCopy: BoardInfo = {
+                const destBoardCopy: KfLayout.BoardInfo = {
                     ...toRaw(destBoard),
                     direction: newBoardDirection,
                     paId: destBoardId,
@@ -181,8 +187,9 @@ export const useGlobalStore = defineStore('global', {
 
                 const newDestBoardId = newBoardId + 1;
                 if (
-                    directionClassName === TargetDirectionClassName.top ||
-                    directionClassName === TargetDirectionClassName.left
+                    directionClassName ===
+                        KfLayoutTargetDirectionClassName.top ||
+                    directionClassName === KfLayoutTargetDirectionClassName.left
                 ) {
                     destBoard.children = [newBoardId, newDestBoardId];
                 } else {
@@ -196,7 +203,7 @@ export const useGlobalStore = defineStore('global', {
             this.boardsMap[newBoardId] = newBoardInfo;
         },
 
-        buildNewBoardId_(): BoardId {
+        buildNewBoardId_(): KfLayout.BoardId {
             const boardIds = Object.keys(this.boardsMap)
                 .map((key: string) => +key)
                 .sort((key1: number, key2: number) => key2 - key1);

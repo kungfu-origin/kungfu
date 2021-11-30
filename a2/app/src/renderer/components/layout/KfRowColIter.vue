@@ -106,35 +106,25 @@
 <script lang="ts">
 import { defineComponent, PropType, reactive, toRefs } from 'vue';
 import { mapActions, mapState } from 'pinia';
-
-import KfDragRow from '@renderer/components/global/KfDragRow.vue';
-import KfDragCol from '@renderer/components/global/KfDragCol.vue';
-import KfNoData from '@renderer/components/global/KfNoData.vue';
-
 import {
-    BoardInfo,
-    BoardsMap,
-    ContentData,
-    ContentId,
-    Direction,
-    TargetDirectionClassName,
-} from '@renderer/types/index';
+    KfLayoutDirection,
+    KfLayoutTargetDirectionClassName,
+} from '@renderer/types/enums';
+
+import KfDragRow from '@renderer/components/layout/KfDragRow.vue';
+import KfDragCol from '@renderer/components/layout/KfDragCol.vue';
+import KfNoData from '@renderer/components/public/KfNoData.vue';
+
 import { useGlobalStore } from '@renderer/pages/index/store/global';
 
 interface KfRowColIterData {
-    h: Direction;
-    v: Direction;
-    classNameForTabDrag: TargetDirectionClassName;
+    h: KfLayoutDirection;
+    v: KfLayoutDirection;
+    classNameForTabDrag: KfLayoutTargetDirectionClassName;
     dragEnterBoxWidth14: number;
     dragEnterBoxWidth34: number;
     dragEnterBoxHeight14: number;
     dragEnterBoxHeight34: number;
-}
-
-declare module '@vue/runtime-core' {
-    interface ComponentCustomProperties {
-        $registedKfUIComponents: string[];
-    }
 }
 
 export default defineComponent({
@@ -154,10 +144,10 @@ export default defineComponent({
     },
 
     setup() {
-        const rowColIterData: KfRowColIterData = reactive({
-            h: Direction.h,
-            v: Direction.v,
-            classNameForTabDrag: TargetDirectionClassName.unset,
+        const rowColIterData = reactive<KfRowColIterData>({
+            h: KfLayoutDirection.h,
+            v: KfLayoutDirection.v,
+            classNameForTabDrag: KfLayoutTargetDirectionClassName.unset,
             dragEnterBoxWidth14: 0,
             dragEnterBoxWidth34: 0,
             dragEnterBoxHeight14: 0,
@@ -171,13 +161,13 @@ export default defineComponent({
 
     computed: {
         ...mapState(useGlobalStore, {
-            boardsMap: (store): BoardsMap => store.boardsMap,
-            dragedContentData: (store): ContentData | null =>
+            boardsMap: (store): KfLayout.BoardsMap => store.boardsMap,
+            dragedContentData: (store): KfLayout.ContentData | null =>
                 store.dragedContentData,
             isBoardDragging: (store): boolean => store.isBoardDragging,
         }),
 
-        boardInfo(): BoardInfo {
+        boardInfo(): KfLayout.BoardInfo {
             return this.boardsMap[this.boardId];
         },
 
@@ -203,7 +193,7 @@ export default defineComponent({
             markIsBoardDragging: 'markIsBoardDragging',
         }),
 
-        handleDragStart(contentId: ContentId) {
+        handleDragStart(contentId: KfLayout.ContentId) {
             this.setDragedContentData(this.boardId, contentId);
             this.markIsBoardDragging(true);
         },
@@ -223,22 +213,26 @@ export default defineComponent({
             const { offsetX, offsetY } = e;
 
             if (offsetX < this.dragEnterBoxWidth14) {
-                this.classNameForTabDrag = TargetDirectionClassName.left;
+                this.classNameForTabDrag =
+                    KfLayoutTargetDirectionClassName.left;
             } else if (offsetX > this.dragEnterBoxWidth34) {
-                this.classNameForTabDrag = TargetDirectionClassName.right;
+                this.classNameForTabDrag =
+                    KfLayoutTargetDirectionClassName.right;
             } else if (offsetY < this.dragEnterBoxHeight14) {
-                this.classNameForTabDrag = TargetDirectionClassName.top;
+                this.classNameForTabDrag = KfLayoutTargetDirectionClassName.top;
             } else if (offsetY > this.dragEnterBoxHeight34) {
-                this.classNameForTabDrag = TargetDirectionClassName.bottom;
+                this.classNameForTabDrag =
+                    KfLayoutTargetDirectionClassName.bottom;
             } else {
-                this.classNameForTabDrag = TargetDirectionClassName.center;
+                this.classNameForTabDrag =
+                    KfLayoutTargetDirectionClassName.center;
             }
 
             e.preventDefault();
         },
 
         handleDragLeave() {
-            this.classNameForTabDrag = TargetDirectionClassName.unset;
+            this.classNameForTabDrag = KfLayoutTargetDirectionClassName.unset;
         },
 
         handleDragEnd() {
@@ -255,17 +249,17 @@ export default defineComponent({
             this.clearState();
         },
 
-        hanldeEdit(targetContentId: BoardInfo['current']) {
+        hanldeEdit(targetContentId: KfLayout.BoardInfo['current']) {
             const targetBoardId = this.boardId;
             this.removeBoardByContentId(targetBoardId, targetContentId || '');
         },
 
-        handleClickTab(e: BoardInfo['current']) {
+        handleClickTab(e: KfLayout.BoardInfo['current']) {
             this.setBoardsMapAttrById(this.boardId, 'current', e?.toString());
         },
 
         clearState() {
-            this.classNameForTabDrag = TargetDirectionClassName.unset;
+            this.classNameForTabDrag = KfLayoutTargetDirectionClassName.unset;
             this.dragEnterBoxWidth14 = 0;
             this.dragEnterBoxWidth34 = 0;
             this.dragEnterBoxHeight14 = 0;

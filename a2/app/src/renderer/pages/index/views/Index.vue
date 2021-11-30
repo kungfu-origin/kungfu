@@ -9,67 +9,61 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 
-import KfLayout from '@renderer/components/global/KfLayout.vue';
-import KfRowColIter from '@renderer/components/global/KfRowColIter.vue';
+import KfLayout from '@renderer/components/layout/KfLayout.vue';
+import KfRowColIter from '@renderer/components/layout/KfRowColIter.vue';
 
-import { BoardsMap, Direction } from '@renderer/types/index';
+import { KfLayoutDirection } from '@renderer/types/enums';
 import { useGlobalStore } from '@renderer/pages/index/store/global';
 
 export default defineComponent({
     name: 'Index',
 
     setup() {
-        const boardsMap: BoardsMap = {
+        const boardsMap: KfLayout.BoardsMap = {
             0: {
                 paId: -1,
-                direction: Direction.h,
+                direction: KfLayoutDirection.h,
                 children: [1, 2],
             },
             1: {
                 paId: 0,
-                direction: Direction.v,
+                direction: KfLayoutDirection.v,
                 children: [4, 5],
                 width: '60%',
             },
             2: {
                 paId: 0,
-                direction: Direction.v,
-                children: [8, 9, 10],
+                direction: KfLayoutDirection.v,
+                children: [8, 9],
             },
             4: {
                 paId: 1,
-                direction: Direction.h,
+                direction: KfLayoutDirection.h,
                 contents: ['交易账户', '行情源'],
                 current: '4',
             },
             5: {
                 paId: 1,
-                direction: Direction.h,
+                direction: KfLayoutDirection.h,
                 children: [6],
             },
             6: {
                 paId: 5,
-                direction: Direction.v,
+                direction: KfLayoutDirection.v,
                 contents: ['策略进程'],
                 current: '6',
             },
             8: {
                 paId: 2,
-                direction: Direction.h,
+                direction: KfLayoutDirection.h,
                 contents: ['8', '9'],
                 current: '9',
             },
             9: {
                 paId: 2,
-                direction: Direction.h,
+                direction: KfLayoutDirection.h,
                 contents: ['9'],
                 current: '9',
-            },
-            10: {
-                paId: 2,
-                direction: Direction.h,
-                contents: ['test3'],
-                current: '10',
             },
         };
 

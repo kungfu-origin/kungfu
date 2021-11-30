@@ -31,7 +31,7 @@ export default defineComponent({
     width: 100%;
     .kf-no-data__content {
         img {
-            height: 25%;
+            max-height: 20%;
             padding-top: 30px;
             filter: invert(0) sepia(0%) saturate(0%) hue-rotate(0)
                 brightness(30%) contrast(129%);

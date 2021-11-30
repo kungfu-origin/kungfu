@@ -1,7 +1,6 @@
 <template>
     <div class="app__warp">
         <router-view />
-        <test></test>
     </div>
 </template>
 
@@ -12,7 +11,9 @@ export default defineComponent({
     mounted() {
         this.removeLoadingMask();
 
-        console.log(this.$root?.$options.components, '--');
+        window.addEventListener('resize', () => {
+            this.$bus.next()
+        })
     },
 
     methods: {
@@ -27,6 +28,7 @@ export default defineComponent({
 
 <style lang="less">
 @import '@renderer/assets/less/base.less';
+@import '@renderer/assets/less/public.less';
 @import '@renderer/assets/less/coverAnt.less';
 
 #app {

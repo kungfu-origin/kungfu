@@ -17,7 +17,6 @@ import { defineComponent, PropType, reactive, toRefs } from 'vue';
 import { mapActions, mapState } from 'pinia';
 
 import { useGlobalStore } from '@renderer/pages/index/store/global';
-import { BoardInfo } from '@renderer/types/index';
 
 interface KfDragColData {
     upRow$: HTMLElement | null;
@@ -41,7 +40,7 @@ export default defineComponent({
     },
 
     setup() {
-        const colData: KfDragColData = reactive({
+        const colData = reactive<KfDragColData>({
             upRow$: null,
             upBoardId: '',
             upRowHeight: 0,
@@ -62,7 +61,7 @@ export default defineComponent({
             boardsMap: (store) => store.boardsMap,
         }),
 
-        boardInfo(): BoardInfo {
+        boardInfo(): KfLayout.BoardInfo {
             return this.boardsMap[this.id];
         },
 

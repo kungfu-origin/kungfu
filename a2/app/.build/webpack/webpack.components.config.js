@@ -19,6 +19,7 @@ const { pyVersion } = getKungfuBuildInfo();
 const webpackConfig = (argv) => {
     return merge(toolkit.webpack.makeConfig(argv), {
         devtool: "eval",
+        externals: ['vue'],
         entry: getComponentsConfig(argv),
         module: {
             rules: [
@@ -82,7 +83,7 @@ const webpackConfig = (argv) => {
         output: {
             globalObject: "this",
             filename: '[name].js',
-            libraryTarget: 'commonjs',
+            libraryTarget: 'commonjs2',
             path: path.join(argv.distDir, argv.distName, 'components'),
         },
         target: 'electron-renderer',
