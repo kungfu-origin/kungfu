@@ -78,7 +78,7 @@ function startRenderer(argv) {
             {
                 static: path.join(__dirname, '../'),
                 port: 9090,
-                hot: 'only',
+                hot: true,
                 headers: {
                     'Access-Control-Allow-Origin': '*',
                 },

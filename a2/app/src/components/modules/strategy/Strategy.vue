@@ -1,5 +1,5 @@
 <template>
-    <div class="kf-test__warp">222</div>
+    <div class="kf-test__warp"></div>
 </template>
 
 <script lang="ts">

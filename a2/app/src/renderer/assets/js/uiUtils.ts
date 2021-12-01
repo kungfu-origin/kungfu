@@ -3,6 +3,7 @@ import { Component } from 'vue';
 import path from 'path';
 import { APP_DIR } from '@kungfu-trader/kungfu-js-api/config/pathConfig';
 import { buildObjectFromArray } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
+import { StateStatusConfig } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
 
 export interface KfUIComponent {
     name: string;
@@ -43,4 +44,14 @@ export const getUIComponents = (): {
         'name',
         'component',
     );
+};
+
+console.log(StateStatusConfig);
+
+export const getStateStatusInfoByStatusType = (
+    statusType: string | number,
+): string => {
+    // return StateStatusConfig[statusType];
+    console.log(statusType);
+    return '';
 };

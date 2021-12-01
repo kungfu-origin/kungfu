@@ -3,7 +3,7 @@ import { toRaw } from 'vue';
 import {
     KfLayoutDirection,
     KfLayoutTargetDirectionClassName,
-} from '@renderer/types/enums';
+} from '@root/src/typings/enums';
 
 interface GlobalState {
     boardsMap: KfLayout.BoardsMap;

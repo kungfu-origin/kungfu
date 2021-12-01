@@ -14,22 +14,16 @@ const rootDir = path.dirname(path.dirname(__dirname));
 const { getKungfuBuildInfo, getComponentsConfig, isProduction } = toolkit.utils;
 const { pyVersion } = getKungfuBuildInfo();
 
-
-
 const webpackConfig = (argv) => {
     return merge(toolkit.webpack.makeConfig(argv), {
-        devtool: "eval",
+        devtool: 'eval',
         externals: ['vue'],
         entry: getComponentsConfig(argv),
         module: {
             rules: [
                 {
                     test: /\.css$/,
-                    use: [
-                        'style-loader',
-                        'postcss-loader',
-                        'css-loader',
-                    ],
+                    use: ['style-loader', 'postcss-loader', 'css-loader'],
                 },
                 {
                     test: /\.less$/,
@@ -71,17 +65,16 @@ const webpackConfig = (argv) => {
                 },
             ],
         },
-        plugins: [
-            new VueLoaderPlugin(),
-        ],
+        plugins: [new VueLoaderPlugin()],
         resolve: {
             alias: {
-                '@components': path.resolve(rootDir, 'src', 'components'),
+                '@root': rootDir,
                 '@renderer': path.resolve(rootDir, 'src', 'renderer'),
+                '@components': path.resolve(rootDir, 'src', 'components'),
             },
         },
         output: {
-            globalObject: "this",
+            globalObject: 'this',
             filename: '[name].js',
             libraryTarget: 'commonjs2',
             path: path.join(argv.distDir, argv.distName, 'components'),
@@ -115,22 +108,21 @@ const devConfig = {
     ],
 };
 
-module.exports = (argv) => {
+// module.exports = (argv) => {
+//     return merge(
+//         webpackConfig(argv),
+//         isProduction(argv) ? prodConfig : devConfig,
+//     );
+// };
+
+module.exports = () => {
+    const argv = {
+        mode: 'development',
+        distDir: path.join(__dirname, '../../dist'),
+        distName: 'app',
+    };
     return merge(
         webpackConfig(argv),
         isProduction(argv) ? prodConfig : devConfig,
     );
 };
-
-
-// module.exports = () => {
-//     const argv = {
-//         mode: 'development',
-//         distDir: path.join(__dirname, '../../dist'),
-//         distName: 'app'
-//     }
-//     return merge(
-//         webpackConfig(argv),
-//         isProduction(argv) ? prodConfig : devConfig,
-//     );
-// }

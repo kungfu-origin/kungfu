@@ -3,31 +3,41 @@
         <div class="kf-dashboard__header">
             <slot name="header"></slot>
         </div>
-        <div ref="body" class="kf-dashboard__body">
+        <div ref="kfDashboardBody" class="kf-dashboard__body">
             <slot></slot>
         </div>
     </div>
 </template>
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
+import { filter } from 'rxjs';
+import { defineComponent, nextTick } from 'vue';
 
 export default defineComponent({
     name: 'KfDashboard',
 
-    setup() {
-        return {
-            bodyHeight: ref(0),
-        };
+    mounted() {
+        nextTick().then(() => {
+            this.$emit('boardSizeChange', this.getBodyWidthHeight());
+        });
+
+        this.$bus
+            .pipe(filter((e: KfEvent) => e.tag === 'resize'))
+            .subscribe((e: KfEvent) => {
+                this.$emit('boardSizeChange', this.getBodyWidthHeight());
+            });
     },
 
-    mounted() {
-        this.bodyHeight = this.getBodyHeight();
-        this.$emit('bodyHeight', this.bodyHeight);
+    unmounted() {
+        this.$bus.unsubscribe();
     },
 
     methods: {
-        getBodyHeight(): number {
-            return (this.$refs['body'] as HTMLElement)?.clientHeight || 0;
+        getBodyWidthHeight(): { width: number; height: number } {
+            const dashboardBody = this.$refs['kfDashboardBody'] as HTMLElement;
+            return {
+                width: dashboardBody?.clientWidth || 0,
+                height: dashboardBody?.clientHeight || 0,
+            };
         },
     },
 });

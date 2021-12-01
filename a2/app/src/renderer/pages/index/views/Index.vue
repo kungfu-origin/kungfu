@@ -12,7 +12,7 @@ import { defineComponent } from 'vue';
 import KfLayout from '@renderer/components/layout/KfLayout.vue';
 import KfRowColIter from '@renderer/components/layout/KfRowColIter.vue';
 
-import { KfLayoutDirection } from '@renderer/types/enums';
+import { KfLayoutDirection } from '@root/src/typings/enums';
 import { useGlobalStore } from '@renderer/pages/index/store/global';
 
 export default defineComponent({

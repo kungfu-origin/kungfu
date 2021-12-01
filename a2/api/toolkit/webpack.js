@@ -13,7 +13,7 @@ module.exports = {
             module: {
                 rules: [
                     {
-                        test: /\.(t|j)s$/,
+                        test: /\.js$/,
                         exclude: /node_modules/,
                         use: [
                             {
@@ -22,9 +22,12 @@ module.exports = {
                         ],
                     },
                     {
-                        test: /\.(t|j)s$/,
+                        test: /\.ts$/,
                         exclude: /node_modules/,
                         use: [
+                            {
+                                loader: 'babel-loader',
+                            },
                             {
                                 loader: 'ts-loader',
                                 options: {
@@ -35,7 +38,7 @@ module.exports = {
                                     ),
                                     // 对应文件添加个.ts或.tsx后缀
                                     appendTsSuffixTo: [/\.vue$/],
-                                    // transpileOnly: true // 关闭类型检测，即值进行转译
+                                    transpileOnly: false, // 关闭类型检测，即值进行转译
                                 },
                             },
                         ],
@@ -115,7 +118,7 @@ module.exports = {
                             require.resolve('@kungfu-trader/kungfu-core'),
                         ),
                     ),
-                    '@kungfu-trader/kungfu-js-api': path.join(
+                    '@kungfu-trader/kungfu-js-api': path.resolve(
                         path.dirname(
                             path.dirname(
                                 require.resolve('@kungfu-trader/kungfu-js-api'),

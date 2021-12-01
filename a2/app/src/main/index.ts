@@ -11,7 +11,7 @@ import * as remoteMain from '@electron/remote/main';
 import path from 'path';
 import os from 'os';
 import {
-    showQuitMessageBox,
+    // showQuitMessageBox,
     showCrashMessageBox,
     showKungfuInfo,
     openUrl,
@@ -78,26 +78,30 @@ function createWindow(reloadAfterCrashed = false) {
     });
 
     MainWindow.on('close', (e) => {
-        if (CrashedReloading) {
-            return;
-        }
+        console.log(e);
+        AllowQuit = true;
+        return;
 
-        if (!AllowQuit) {
-            e.preventDefault();
-            if (MainWindow) {
-                showQuitMessageBox(MainWindow)
-                    .then((res) => {
-                        if (res) {
-                            AllowQuit = true;
-                        }
-                    })
-                    .catch((err) => {
-                        console.error(err);
-                    });
-            }
-        } else {
-            return;
-        }
+        // if (CrashedReloading) {
+        //     return;
+        // }
+
+        // if (!AllowQuit) {
+        //     e.preventDefault();
+        //     if (MainWindow) {
+        //         showQuitMessageBox(MainWindow)
+        //             .then((res) => {
+        //                 if (res) {
+        //                     AllowQuit = true;
+        //                 }
+        //             })
+        //             .catch((err) => {
+        //                 console.error(err);
+        //             });
+        //     }
+        // } else {
+        //     return;
+        // }
     });
 
     MainWindow.on('unresponsive', () => {

@@ -155,6 +155,10 @@ export default defineComponent({
                     '%',
             );
 
+            this.$bus.next({
+                tag: 'resize',
+            } as ResizeEvent);
+
             this.leftCol$ = null;
             this.leftColWidth = 0;
             this.rightCol$ = null;

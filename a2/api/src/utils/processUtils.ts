@@ -81,13 +81,14 @@ interface Pm2StartOptions extends StartOptions {
     autorestart?: boolean;
 }
 
-type ProcessStatus =
+export type ProcessStatus =
     | 'online'
     | 'stopping'
     | 'stopped'
     | 'launching'
     | 'errored'
     | 'one-launch-status';
+
 
 interface Pm2ProcessStatusData {
     [prop: string]: ProcessStatus | undefined;

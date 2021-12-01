@@ -1,19 +1,30 @@
 <template>
-    <div class="app__warp">
-        <router-view />
-    </div>
+    <a-config-provider :locale="zhCN">
+        <div class="app__warp">
+            <router-view />
+        </div>
+    </a-config-provider>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue';
+import zhCN from 'ant-design-vue/es/locale/zh_CN';
 
 export default defineComponent({
+    setup() {
+        return {
+            zhCN,
+        };
+    },
+
     mounted() {
         this.removeLoadingMask();
 
         window.addEventListener('resize', () => {
-            this.$bus.next()
-        })
+            this.$bus.next({
+                tag: 'resize',
+            } as ResizeEvent);
+        });
     },
 
     methods: {

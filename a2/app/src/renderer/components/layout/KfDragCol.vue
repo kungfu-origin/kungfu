@@ -154,6 +154,10 @@ export default defineComponent({
                     : 0,
             );
 
+            this.$bus.next({
+                tag: 'resize',
+            } as ResizeEvent);
+
             this.upRow$ = null;
             this.upRowHeight = 0;
             this.bottomRow$ = null;

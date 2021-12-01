@@ -109,7 +109,7 @@ import { mapActions, mapState } from 'pinia';
 import {
     KfLayoutDirection,
     KfLayoutTargetDirectionClassName,
-} from '@renderer/types/enums';
+} from '@root/src/typings/enums';
 
 import KfDragRow from '@renderer/components/layout/KfDragRow.vue';
 import KfDragCol from '@renderer/components/layout/KfDragCol.vue';
@@ -238,6 +238,9 @@ export default defineComponent({
         handleDragEnd() {
             this.clearState();
             this.markIsBoardDragging(false);
+            this.$bus.next({
+                tag: 'resize'
+            } as ResizeEvent)
         },
 
         handleDrop() {

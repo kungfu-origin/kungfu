@@ -13,8 +13,7 @@
     "sourceMap": true,
     "baseUrl": ".",
     "types": [],
-    "typeRoots": [
-    ],
+    "typeRoots": [],
     "paths": {
       "@kungfu-trader/kungfu-js-api/*": [
         "../api/src/*",
@@ -38,13 +37,13 @@
     ]
   },
   "include": [
-    "src/**/*.d.ts",
     "src/**/*.ts",
     "src/**/*.tsx",
     "src/**/*.vue",
     "tests/**/*.ts",
     "tests/**/*.tsx", 
-    "../../node_modules/@kungfu-trader/kungfu-js-api/src/typings/**/*.ts",
+    "../api/src/typings/*.d.ts",
+    "../../node_modules/@kungfu-trader/kungfu-js-api/src/typings/*.d.ts", 
   ],
   "exclude": [
     "node_modules"

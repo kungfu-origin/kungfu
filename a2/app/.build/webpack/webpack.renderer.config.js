@@ -81,6 +81,7 @@ const webpackConfig = (argv) => {
         ],
         resolve: {
             alias: {
+                '@root': rootDir,
                 '@renderer': path.resolve(rootDir, 'src', 'renderer'),
             },
         },
