@@ -171,8 +171,8 @@ export type KfConfigItemSupportedTypes =
     | 'direction' // select - number
     | 'priceType' // select - number
     | 'hedgeFlag' // select - number
-    | 'volumCondition' // select - number
-    | 'timeCodition' // select - number
+    | 'volumeCondition' // select - number
+    | 'timeCondition' // select - number
     | 'commissionMode' // select - number
     | 'instrumentType'; // select - number
 

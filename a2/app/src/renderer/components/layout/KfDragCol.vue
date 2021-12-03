@@ -132,6 +132,7 @@ export default defineComponent({
                 !this.upBoardId ||
                 !this.bottomBoardId
             ) {
+                this.clearState();
                 return;
             }
 
@@ -158,6 +159,10 @@ export default defineComponent({
                 tag: 'resize',
             } as ResizeEvent);
 
+            this.clearState();
+        },
+
+        clearState() {
             this.upRow$ = null;
             this.upRowHeight = 0;
             this.bottomRow$ = null;

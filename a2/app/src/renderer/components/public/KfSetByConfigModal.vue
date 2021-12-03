@@ -6,30 +6,52 @@
         @cancel="handleClose"
         @ok="handleConfirm"
     >
-        <a-form>
-            <a-form-item v-for="item in config?.settings" :key="item.key">
+        <a-form
+            :form="formData"
+            :label-col="{ span: 6 }"
+            :wrapper-col="{ span: 16 }"
+        >
+            <a-form-item
+                v-for="item in config?.settings"
+                :key="item.key"
+                :label="item.name"
+            >
                 <a-input v-if="item.type === 'str'"></a-input>
                 <a-input-password
                     v-if="item.type === 'password'"
                 ></a-input-password>
-                <a-input-number v-if="item.type === 'int'"></a-input-number>
+                <a-input-number
+                    v-if="item.type === 'int'"
+                    :precision="0"
+                    step="1"
+                ></a-input-number>
                 <a-input-number
                     v-if="item.type === 'float'"
+                    :precision="4"
                     step="0.0001"
                 ></a-input-number>
                 <a-input-number
                     v-if="item.type === 'percent'"
-                    step="0.0001"
+                    :precision="2"
+                    step="0.01"
                     :formatter="(value: number) => `${value}%`"
                     :parser="(value: string) => value.replace('%', '')"
                 ></a-input-number>
-                <a-select v-if="item.type === 'side'">
+                <a-select v-if="inputTypeToTradeConfig[item.type]">
+                    {{ item.type }}
                     <a-select-option
-                        v-for="key in Object.keys(Side)"
-                        :key="+key"
+                        v-for="key in Object.keys(
+                            inputTypeToTradeConfig[item.type],
+                        )"
+                        :key="key"
                         :value="key"
                     >
-                        {{ getKfTradeValueName(Side, +key) }}
+                        {{
+                            getKfTradeValueName(
+                                inputTypeToTradeConfig[item.type],
+                                key,
+                            )
+                        }}
                     </a-select-option>
                 </a-select>
                 <a-select v-if="item.type === 'select'">
@@ -41,6 +63,22 @@
                         {{ option.label }}
                     </a-select-option>
                 </a-select>
+
+                <div
+                    v-if="item.type === 'file'"
+                    class="kf-form-item__warp file"
+                >
+                    <span
+                        class="file-path"
+                        v-if="formData[item.key]"
+                        :title="formData[item.key] || ''"
+                    >
+                        {{ formData[item.key] }}
+                    </span>
+                    <a-button size="mini" @click="handleSelectFile(item.key)">
+                        <template #icon><DashOutlined /></template>
+                    </a-button>
+                </div>
             </a-form-item>
         </a-form>
     </a-modal>
@@ -48,26 +86,18 @@
 
 <script lang="ts">
 import { defineComponent, PropType, ref } from 'vue';
+import { DashOutlined } from '@ant-design/icons-vue';
 
 import { modalVisibleComposition } from '@renderer/assets/methods/uiUtils';
 import {
-    CommissionModeEnum,
-    DirectionEnum,
-    HedgeFlagEnum,
-    InstrumentTypeEnum,
     KfConfigValue,
-    KfSelectOption,
     KfTradeValueCommonData,
-    OffsetEnum,
-    PriceTypeEnum,
     SetKfConfigPayload,
-    SideEnum,
-    TimeConditionEnum,
-    VolumeConditionEnum,
 } from '@kungfu-trader/kungfu-js-api/typings';
 import {
     CommissionMode,
     Direction,
+    ExchangeIds,
     HedgeFlag,
     InstrumentType,
     Offset,
@@ -76,6 +106,7 @@ import {
     TimeCondition,
     VolumeCondition,
 } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
+import { dialog } from '@electron/remote';
 
 export default defineComponent({
     props: {
@@ -88,6 +119,10 @@ export default defineComponent({
             type: Object as PropType<SetKfConfigPayload>,
             default: () => ({} as SetKfConfigPayload),
         },
+    },
+
+    components: {
+        DashOutlined,
     },
 
     setup(props, context) {
@@ -113,8 +148,8 @@ export default defineComponent({
                 'direction', // select - number
                 'priceType', // select - number
                 'hedgeFlag', // select - number
-                'volumCondition', // select - number
-                'timeCodition', // select - number
+                'volumeCondition', // select - number
+                'timeCondition', // select - number
                 'commissionMode', // select - number
                 'instrumentType', // select - number
             ];
@@ -138,6 +173,24 @@ export default defineComponent({
             return formData;
         };
 
+        const inputTypeToTradeConfig: {
+            [prop: string]: Record<
+                string | number | symbol,
+                KfTradeValueCommonData
+            >;
+        } = {
+            exchange: ExchangeIds,
+            side: Side,
+            offset: Offset,
+            direction: Direction,
+            priceType: PriceType,
+            hedgeFlag: HedgeFlag,
+            volumeCondition: VolumeCondition,
+            timeCondition: TimeCondition,
+            commissionMode: CommissionMode,
+            instrumentType: InstrumentType,
+        };
+
         return {
             modalVisible,
             closeModal,
@@ -150,25 +203,7 @@ export default defineComponent({
 
             ...props.payload,
 
-            Side,
-            Offset,
-            Direction,
-            PriceType,
-            HedgeFlag,
-            VolumeCondition,
-            TimeCondition,
-            CommissionMode,
-            InstrumentType,
-
-            SideEnum,
-            OffsetEnum,
-            DirectionEnum,
-            PriceTypeEnum,
-            HedgeFlagEnum,
-            VolumeConditionEnum,
-            TimeConditionEnum,
-            CommissionModeEnum,
-            InstrumentTypeEnum,
+            inputTypeToTradeConfig,
         };
     },
 
@@ -189,9 +224,23 @@ export default defineComponent({
 
         getKfTradeValueName(
             data: Record<number | string | symbol, KfTradeValueCommonData>,
-            key: number,
+            key: number | string,
         ) {
             return data[key].name;
+        },
+
+        handleSelectFile(targetKey: string) {
+            dialog
+                .showOpenDialog({
+                    properties: ['openFile'],
+                })
+                .then((res) => {
+                    const { filePaths } = res;
+                    if (filePaths.length) {
+                        this.formData[targetKey] = filePaths[0];
+                        //     this.$refs.extForm.validateField(targetKey); //手动进行再次验证，因数据放在span中，改变数据后无法触发验证
+                    }
+                });
         },
     },
 });
@@ -201,6 +250,25 @@ export default defineComponent({
 .kf-set-by-config-modal {
     .source-id__txt {
         margin-right: 8px;
+    }
+
+    .kf-form-item__warp {
+        &.file {
+            display: flex;
+            justify-content: space-between;
+            align-items: top;
+
+            span.file-path {
+                flex: 1;
+                word-break: break-word;
+                padding-right: 20px;
+                box-sizing: border-box;
+            }
+
+            button {
+                width: 40px;
+            }
+        }
     }
 }
 </style>

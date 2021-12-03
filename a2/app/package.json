@@ -11,6 +11,7 @@
         "fmt": "./node_modules/.bin/prettier -l -w './**/*.{ts, js, vue, less, css, json, html, config.js}' --config ./.prettierrc.js"
     },
     "dependencies": {
+        "@electron/remote": "^2.0.1",
         "@kungfu-trader/kungfu-js-api": "*",
         "@surely-vue/table": "^2.0.2",
         "ant-design-vue": "^3.0.0-alpha.13",

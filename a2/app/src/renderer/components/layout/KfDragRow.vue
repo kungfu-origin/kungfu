@@ -138,6 +138,7 @@ export default defineComponent({
                 !this.leftBoardId ||
                 !this.rightBoardId
             ) {
+                this.clearState();
                 return;
             }
 
@@ -159,6 +160,10 @@ export default defineComponent({
                 tag: 'resize',
             } as ResizeEvent);
 
+            this.clearState();
+        },
+
+        clearState() {
             this.leftCol$ = null;
             this.leftColWidth = 0;
             this.rightCol$ = null;

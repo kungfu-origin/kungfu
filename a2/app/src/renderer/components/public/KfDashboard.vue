@@ -22,13 +22,9 @@ export default defineComponent({
 
         this.$bus
             .pipe(filter((e: KfEvent) => e.tag === 'resize'))
-            .subscribe((e: KfEvent) => {
+            .subscribe(() => {
                 this.$emit('boardSizeChange', this.getBodyWidthHeight());
             });
-    },
-
-    unmounted() {
-        this.$bus.unsubscribe();
     },
 
     methods: {
