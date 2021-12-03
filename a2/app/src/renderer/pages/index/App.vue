@@ -7,32 +7,35 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, getCurrentInstance, onMounted } from 'vue';
 import zhCN from 'ant-design-vue/es/locale/zh_CN';
 
 export default defineComponent({
     setup() {
+        const app = getCurrentInstance();
+        const removeLoadingMask = () => {
+            const $loadingMask = document.getElementById('loading');
+            if ($loadingMask) $loadingMask.remove();
+        };
+
+        onMounted(() => {
+            removeLoadingMask();
+            app?.proxy && app?.proxy.$useGlobalStore().setKfExtConfigs();
+            window.addEventListener('resize', () => {
+                app?.proxy &&
+                    app?.proxy.$bus.next({
+                        tag: 'resize',
+                    } as ResizeEvent);
+            });
+        });
+
         return {
             zhCN,
         };
     },
 
     mounted() {
-        this.removeLoadingMask();
-
-        window.addEventListener('resize', () => {
-            this.$bus.next({
-                tag: 'resize',
-            } as ResizeEvent);
-        });
-    },
-
-    methods: {
-        removeLoadingMask() {
-            //remove loading mask
-            const $loadingMask = document.getElementById('loading');
-            if ($loadingMask) $loadingMask.remove();
-        },
+        this.$useGlobalStore().setKfExtConfigs;
     },
 });
 </script>

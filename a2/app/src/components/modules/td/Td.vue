@@ -3,7 +3,13 @@
         <KfDashboard @boardSizeChange="handleBodySizeChange">
             <template v-slot:header>
                 <KfDashboardItem>
-                    <a-button size="small" type="primary">添加</a-button>
+                    <a-button
+                        size="small"
+                        type="primary"
+                        @click="handleOpenSetSourceDialog"
+                    >
+                        添加
+                    </a-button>
                 </KfDashboardItem>
                 <KfDashboardItem>
                     <a-button size="small">开启全部</a-button>
@@ -37,8 +43,8 @@
                             :status-name="
                                 getStateStatusName(
                                     getTdProcessId(
-                                        record[column.accountId],
-                                        record[column.sourceId],
+                                        column.accountId,
+                                        column.sourceId,
                                     ),
                                 )
                             "
@@ -49,7 +55,10 @@
                     </template>
                     <template v-else-if="column.dataIndex === 'actions'">
                         <div class="kf-table-actions__warp">
-                            <FileTextOutlined style="font-size: 12px" />
+                            <FileTextOutlined
+                                style="font-size: 12px"
+                                @click="handleOpenLog(record)"
+                            />
                             <SettingOutlined style="font-size: 12px" />
                             <DeleteOutlined style="font-size: 12px" />
                         </div>
@@ -57,11 +66,22 @@
                 </template>
             </a-table>
         </KfDashboard>
+        <KfSetSourceModal
+            v-if="setSourceModalVisible"
+            v-model:visible="setSourceModalVisible"
+            :sourceType="currentCategory"
+            @confirm="handleSelectedSource"
+        ></KfSetSourceModal>
+        <KfSetByConfigModal
+            v-if="setTdModalVisible"
+            v-model:visible="setTdModalVisible"
+            :payload="setTdConfigPayload"
+        ></KfSetByConfigModal>
     </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
+import { defineComponent, ref, toRaw } from 'vue';
 import {
     FileTextOutlined,
     SettingOutlined,
@@ -71,9 +91,14 @@ import {
 import KfDashboard from '@renderer/components/public/KfDashboard.vue';
 import KfDashboardItem from '@renderer/components/public/KfDashboardItem.vue';
 import KfStateStatus from '@renderer/components/public/KfStateStatus.vue';
+import KfSetSourceModal from '@renderer/components/public/KfSetSourceModal.vue';
+import KfSetByConfigModal from '@renderer/components/public/KfSetByConfigModal.vue';
 
 import {
-    StateStatusTypes,
+    KfCategoryEnum,
+    KfExtConfig,
+    SetKfConfigPayload,
+    StateStatusEnum,
     TdOptions,
 } from '@kungfu-trader/kungfu-js-api/typings';
 
@@ -84,6 +109,8 @@ export default defineComponent({
         KfDashboard,
         KfDashboardItem,
         KfStateStatus,
+        KfSetSourceModal,
+        KfSetByConfigModal,
         FileTextOutlined,
         SettingOutlined,
         DeleteOutlined,
@@ -105,7 +132,7 @@ export default defineComponent({
                 align: 'left',
                 sorter: true,
                 fixed: 'left',
-                width: 80,
+                width: 90,
             },
             {
                 title: '柜台',
@@ -171,7 +198,7 @@ export default defineComponent({
                 accountName: 'asd',
                 accountId: 'John Brown',
                 sourceId: '32',
-                stateStatus: StateStatusTypes.online,
+                stateStatus: StateStatusEnum.online,
                 processStatus: true,
                 realizedPnl: 90,
                 unrealizedPnl: 10000,
@@ -183,7 +210,7 @@ export default defineComponent({
                 accountName: 'asd',
                 accountId: 'John Brown',
                 sourceId: '32',
-                stateStatus: StateStatusTypes.online,
+                stateStatus: StateStatusEnum.online,
                 processStatus: true,
                 realizedPnl: 90,
                 unrealizedPnl: 10000,
@@ -195,7 +222,7 @@ export default defineComponent({
                 accountName: 'asd',
                 accountId: 'John Brown',
                 sourceId: '32',
-                stateStatus: StateStatusTypes.online,
+                stateStatus: StateStatusEnum.online,
                 processStatus: true,
                 realizedPnl: 90,
                 unrealizedPnl: 10000,
@@ -207,7 +234,7 @@ export default defineComponent({
                 accountName: 'asd',
                 accountId: 'John Brown',
                 sourceId: '32',
-                stateStatus: StateStatusTypes.online,
+                stateStatus: StateStatusEnum.online,
                 processStatus: true,
                 realizedPnl: 90,
                 unrealizedPnl: 10000,
@@ -219,7 +246,7 @@ export default defineComponent({
                 accountName: 'asd',
                 accountId: 'John Brown',
                 sourceId: '32',
-                stateStatus: StateStatusTypes.online,
+                stateStatus: StateStatusEnum.online,
                 processStatus: true,
                 realizedPnl: 90,
                 unrealizedPnl: 10000,
@@ -231,7 +258,7 @@ export default defineComponent({
                 accountName: 'asd',
                 accountId: 'John Brown',
                 sourceId: '32',
-                stateStatus: StateStatusTypes.online,
+                stateStatus: StateStatusEnum.online,
                 processStatus: true,
                 realizedPnl: 90,
                 unrealizedPnl: 10000,
@@ -243,7 +270,7 @@ export default defineComponent({
                 accountName: 'asd',
                 accountId: 'John Brown',
                 sourceId: '32',
-                stateStatus: StateStatusTypes.online,
+                stateStatus: StateStatusEnum.online,
                 processStatus: true,
                 realizedPnl: 90,
                 unrealizedPnl: 10000,
@@ -255,7 +282,7 @@ export default defineComponent({
                 accountName: 'asd',
                 accountId: 'John Brown',
                 sourceId: '32',
-                stateStatus: StateStatusTypes.online,
+                stateStatus: StateStatusEnum.online,
                 processStatus: true,
                 realizedPnl: 90,
                 unrealizedPnl: 10000,
@@ -267,7 +294,7 @@ export default defineComponent({
                 accountName: 'asd',
                 accountId: 'John Brown',
                 sourceId: '32',
-                stateStatus: StateStatusTypes.online,
+                stateStatus: StateStatusEnum.online,
                 processStatus: true,
                 realizedPnl: 90,
                 unrealizedPnl: 10000,
@@ -279,7 +306,7 @@ export default defineComponent({
                 accountName: 'asd',
                 accountId: 'John Brown',
                 sourceId: '32',
-                stateStatus: StateStatusTypes.online,
+                stateStatus: StateStatusEnum.online,
                 processStatus: true,
                 realizedPnl: 90,
                 unrealizedPnl: 10000,
@@ -291,7 +318,7 @@ export default defineComponent({
                 accountName: 'asd',
                 accountId: 'John Brown',
                 sourceId: '32',
-                stateStatus: StateStatusTypes.online,
+                stateStatus: StateStatusEnum.online,
                 processStatus: true,
                 realizedPnl: 90,
                 unrealizedPnl: 10000,
@@ -303,7 +330,7 @@ export default defineComponent({
                 accountName: 'asd',
                 accountId: 'John Brown',
                 sourceId: '32',
-                stateStatus: StateStatusTypes.online,
+                stateStatus: StateStatusEnum.online,
                 processStatus: true,
                 realizedPnl: 90,
                 unrealizedPnl: 10000,
@@ -315,7 +342,7 @@ export default defineComponent({
                 accountName: 'asd',
                 accountId: 'John Brown',
                 sourceId: '32',
-                stateStatus: StateStatusTypes.online,
+                stateStatus: StateStatusEnum.online,
                 processStatus: true,
                 realizedPnl: 90,
                 unrealizedPnl: 10000,
@@ -327,7 +354,7 @@ export default defineComponent({
                 accountName: 'asd',
                 accountId: 'John Brown',
                 sourceId: '32',
-                stateStatus: StateStatusTypes.online,
+                stateStatus: StateStatusEnum.online,
                 processStatus: true,
                 realizedPnl: 90,
                 unrealizedPnl: 10000,
@@ -339,7 +366,7 @@ export default defineComponent({
                 accountName: 'asd',
                 accountId: 'John Brown',
                 sourceId: '32',
-                stateStatus: StateStatusTypes.online,
+                stateStatus: StateStatusEnum.online,
                 processStatus: true,
                 realizedPnl: 90,
                 unrealizedPnl: 10000,
@@ -351,7 +378,7 @@ export default defineComponent({
                 accountName: 'asd',
                 accountId: 'John Brown',
                 sourceId: '32',
-                stateStatus: StateStatusTypes.online,
+                stateStatus: StateStatusEnum.online,
                 processStatus: true,
                 realizedPnl: 90,
                 unrealizedPnl: 10000,
@@ -363,7 +390,7 @@ export default defineComponent({
                 accountName: 'asd',
                 accountId: 'John Brown',
                 sourceId: '32',
-                stateStatus: StateStatusTypes.online,
+                stateStatus: StateStatusEnum.online,
                 processStatus: true,
                 realizedPnl: 90,
                 unrealizedPnl: 10000,
@@ -375,7 +402,7 @@ export default defineComponent({
                 accountName: 'asd',
                 accountId: 'John Brown',
                 sourceId: '32',
-                stateStatus: StateStatusTypes.online,
+                stateStatus: StateStatusEnum.online,
                 processStatus: true,
                 realizedPnl: 90,
                 unrealizedPnl: 10000,
@@ -387,7 +414,7 @@ export default defineComponent({
                 accountName: 'asd',
                 accountId: 'John Brown',
                 sourceId: '32',
-                stateStatus: StateStatusTypes.online,
+                stateStatus: StateStatusEnum.online,
                 processStatus: true,
                 realizedPnl: 90,
                 unrealizedPnl: 10000,
@@ -399,7 +426,7 @@ export default defineComponent({
                 accountName: 'asd',
                 accountId: 'John Brown',
                 sourceId: '32',
-                stateStatus: StateStatusTypes.online,
+                stateStatus: StateStatusEnum.online,
                 processStatus: true,
                 realizedPnl: 90,
                 unrealizedPnl: 10000,
@@ -411,7 +438,7 @@ export default defineComponent({
                 accountName: 'asd',
                 accountId: 'John Brown',
                 sourceId: '32',
-                stateStatus: StateStatusTypes.online,
+                stateStatus: StateStatusEnum.online,
                 processStatus: true,
                 realizedPnl: 90,
                 unrealizedPnl: 10000,
@@ -423,7 +450,7 @@ export default defineComponent({
                 accountName: 'asd',
                 accountId: 'John Brown',
                 sourceId: '32',
-                stateStatus: StateStatusTypes.online,
+                stateStatus: StateStatusEnum.online,
                 processStatus: true,
                 realizedPnl: 90,
                 unrealizedPnl: 10000,
@@ -435,7 +462,7 @@ export default defineComponent({
                 accountName: 'asd',
                 accountId: 'John Brown',
                 sourceId: '32',
-                stateStatus: StateStatusTypes.online,
+                stateStatus: StateStatusEnum.online,
                 processStatus: true,
                 realizedPnl: 90,
                 unrealizedPnl: 10000,
@@ -447,7 +474,7 @@ export default defineComponent({
                 accountName: 'asd',
                 accountId: 'John Brown',
                 sourceId: '32',
-                stateStatus: StateStatusTypes.online,
+                stateStatus: StateStatusEnum.online,
                 processStatus: true,
                 realizedPnl: 90,
                 unrealizedPnl: 10000,
@@ -459,7 +486,7 @@ export default defineComponent({
                 accountName: 'asd',
                 accountId: 'John Brown',
                 sourceId: '32',
-                stateStatus: StateStatusTypes.online,
+                stateStatus: StateStatusEnum.online,
                 processStatus: true,
                 realizedPnl: 90,
                 unrealizedPnl: 10000,
@@ -471,7 +498,7 @@ export default defineComponent({
                 accountName: 'asd',
                 accountId: 'John Brown',
                 sourceId: '32',
-                stateStatus: StateStatusTypes.online,
+                stateStatus: StateStatusEnum.online,
                 processStatus: true,
                 realizedPnl: 90,
                 unrealizedPnl: 10000,
@@ -483,7 +510,7 @@ export default defineComponent({
                 accountName: 'asd',
                 accountId: 'John Brown',
                 sourceId: '32',
-                stateStatus: StateStatusTypes.online,
+                stateStatus: StateStatusEnum.online,
                 processStatus: true,
                 realizedPnl: 90,
                 unrealizedPnl: 10000,
@@ -495,7 +522,7 @@ export default defineComponent({
                 accountName: 'asd----1-1-1-1-1-1',
                 accountId: 'John Brown',
                 sourceId: '32',
-                stateStatus: StateStatusTypes.online,
+                stateStatus: StateStatusEnum.online,
                 processStatus: true,
                 realizedPnl: 90,
                 unrealizedPnl: 10000,
@@ -509,15 +536,42 @@ export default defineComponent({
             searchKeyword: ref<string>(''),
             dashboardBodyHeight: ref<number>(0),
             dashboardBodyWidth: ref<number>(0),
-            tableHeight: ref<number>(0),
             columns,
             data,
+
+            setSourceModalVisible: ref<boolean>(false),
+            setTdModalVisible: ref<boolean>(false),
+            setTdConfigPayload: ref<SetKfConfigPayload>({
+                type: 'add',
+                title: '交易账户',
+                config: {} as KfExtConfig['config'][KfCategoryEnum],
+            }),
+
+            currentCategory: KfCategoryEnum.td,
         };
     },
 
-    mounted() {},
-
     methods: {
+        handleOpenLog(record: TdOptions) {
+            console.log(record);
+            this.$useGlobalStore().setKfExtConfigs();
+        },
+
+        handleSelectedSource(selectedSource: string) {
+            this.setTdModalVisible = true;
+            this.setTdConfigPayload.title = `${selectedSource} 交易账户`;
+            const extConfigs = this.$useGlobalStore().extConfigs;
+            const targetConfig =
+                extConfigs[this.currentCategory][selectedSource];
+
+            this.setTdConfigPayload.config = targetConfig;
+        },
+
+        handleOpenSetSourceDialog() {
+            this.setSourceModalVisible = true;
+            this.setTdConfigPayload.type = 'add';
+        },
+
         handleBodySizeChange({
             width,
             height,
@@ -542,8 +596,8 @@ export default defineComponent({
         },
 
         getStateStatusName(processId: string) {
-            console.log(processId);
-            return StateStatusTypes.launching;
+            processId;
+            return StateStatusEnum.launching;
         },
     },
 });

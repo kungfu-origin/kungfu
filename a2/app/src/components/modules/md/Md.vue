@@ -8,9 +8,7 @@ import { defineComponent } from 'vue';
 export default defineComponent({
     name: '行情源',
 
-    mounted() {
-        console.log(222222);
-    },
+    mounted() {},
 });
 </script>
 

@@ -8,9 +8,7 @@ import { defineComponent } from 'vue';
 export default defineComponent({
     name: '策略进程',
 
-    mounted() {
-        console.log(222222);
-    },
+    mounted() {},
 });
 </script>
 

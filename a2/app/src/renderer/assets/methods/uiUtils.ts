@@ -1,5 +1,5 @@
 import fs from 'fs-extra';
-import { Component } from 'vue';
+import { Component, SetupContext, Ref, ref, watch } from 'vue';
 import path from 'path';
 import { APP_DIR } from '@kungfu-trader/kungfu-js-api/config/pathConfig';
 import { buildObjectFromArray } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
@@ -46,12 +46,32 @@ export const getUIComponents = (): {
     );
 };
 
-console.log(StateStatusConfig);
-
 export const getStateStatusInfoByStatusType = (
     statusType: string | number,
 ): string => {
     // return StateStatusConfig[statusType];
-    console.log(statusType);
+    StateStatusConfig;
+    statusType;
     return '';
+};
+
+export const modalVisibleComposition = (
+    props: { visible: boolean },
+    context: SetupContext,
+): { modalVisible: Ref<boolean>; closeModal: () => void } => {
+    const modalVisible = ref<boolean>(props.visible);
+    watch(
+        () => props.visible,
+        (visible) => {
+            modalVisible.value = visible;
+        },
+    );
+    const closeModal = () => {
+        context.emit('update:visible', false);
+    };
+
+    return {
+        modalVisible,
+        closeModal,
+    };
 };

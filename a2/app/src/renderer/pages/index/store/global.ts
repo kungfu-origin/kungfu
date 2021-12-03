@@ -4,11 +4,14 @@ import {
     KfLayoutDirection,
     KfLayoutTargetDirectionClassName,
 } from '@root/src/typings/enums';
+import { KfExtConfigs } from '@kungfu-trader/kungfu-js-api/typings';
+import { getKfExtensionConfig } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 
 interface GlobalState {
     boardsMap: KfLayout.BoardsMap;
     dragedContentData: KfLayout.ContentData | null;
     isBoardDragging: boolean;
+    extConfigs: KfExtConfigs | { [prop: string]: unknown };
 }
 
 export const useGlobalStore = defineStore('global', {
@@ -17,10 +20,17 @@ export const useGlobalStore = defineStore('global', {
             boardsMap: {},
             dragedContentData: null,
             isBoardDragging: false,
+            extConfigs: toRaw({}),
         };
     },
 
     actions: {
+        setKfExtConfigs() {
+            return getKfExtensionConfig().then((kfExtConfigs: KfExtConfigs) => {
+                this.extConfigs = toRaw(kfExtConfigs);
+            });
+        },
+
         markIsBoardDragging(status: boolean) {
             this.isBoardDragging = status;
         },

@@ -67,8 +67,7 @@ export default defineComponent({
             },
         };
 
-        const globalStore = useGlobalStore();
-        globalStore.initBoardsMap(boardsMap);
+        useGlobalStore().initBoardsMap(boardsMap);
     },
 
     components: {

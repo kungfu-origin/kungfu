@@ -1,0 +1,40 @@
+{
+   "background": {
+      "persistent": false,
+      "scripts": [ "build/background.js" ]
+   },
+   "browser_action": {
+      "default_icon": {
+         "128": "icons/128-gray.png",
+         "16": "icons/16-gray.png",
+         "48": "icons/48-gray.png"
+      },
+      "default_popup": "popups/not-found.html",
+      "default_title": "Vue Devtools"
+   },
+   "content_scripts": [ {
+      "js": [ "build/hook.js" ],
+      "matches": [ "\u003Call_urls>" ],
+      "run_at": "document_start"
+   }, {
+      "js": [ "build/detector.js" ],
+      "matches": [ "\u003Call_urls>" ],
+      "run_at": "document_idle"
+   } ],
+   "content_security_policy": "script-src 'self' https://cdn.headwayapp.co; object-src 'self'",
+   "description": "Chrome and Firefox DevTools extension for debugging Vue.js applications.",
+   "devtools_page": "devtools-background.html",
+   "icons": {
+      "128": "icons/128-beta.png",
+      "16": "icons/16-beta.png",
+      "48": "icons/48-beta.png"
+   },
+   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAmhvQ/QlXgtm55lPiK81buwCs+w+ZXTxQ9vgdOiDIkPX2c+NXNDTv5JSnSAdZP3Ogbg1M6P2wXFlgd3X58fcK7c4IH/YySqtSliORgsUcgZIcTi3DIMk6lcCdzvc23zOCV/sKIIG9xBzcw+wJQkeg2E+XjPi8ZG9Gy7Q8PfQXeLqaX4NvasEx0suTPfunLKWMkg9cOU9pmq27uKMpWhiTL8ojm5+Z2KnjlHxnP57DnbtprrTjNsYTqIfJIv4DD1TH09Um3taL2J/SpEVBrvLvXh6l/SrjqVeDs2mFlFU/VmngXZnqJlRta4+aVFNures3fE5cR7poQe5GyC0oP8S/7wIDAQAB",
+   "manifest_version": 2,
+   "name": "Vue.js devtools",
+   "permissions": [ "\u003Call_urls>", "contextMenus", "storage" ],
+   "update_url": "https://clients2.google.com/service/update2/crx",
+   "version": "6.0.0.20",
+   "version_name": "6.0.0 beta 20",
+   "web_accessible_resources": [ "devtools.html", "devtools-background.html", "build/backend.js" ]
+}

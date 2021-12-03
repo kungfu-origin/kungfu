@@ -1,6 +1,16 @@
 import path from 'path';
 import log4js from 'log4js';
 import { buildProcessLogPath } from '@kungfu-trader/kungfu-js-api/config/pathConfig';
+import { InstrumentType } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
+import {
+    KfTradeValueCommonData,
+    InstrumentTypeEnum,
+    KfCategoryEnum,
+    KfCategoryTypes,
+    KfExtConfig,
+    KfExtConfigs,
+    SourceData,
+} from '@kungfu-trader/kungfu-js-api/typings';
 
 interface SourceAccountId {
     source: string;
@@ -221,4 +231,291 @@ export const buildObjectFromArray = <T>(
     });
 
     return dict;
+};
+
+export const getInstrumentTypeData = (
+    instrumentType: InstrumentTypeEnum,
+): KfTradeValueCommonData => {
+    return InstrumentType[instrumentType];
+};
+
+export const getKfExtensionConfig = (): Promise<
+    KfExtConfigs | Record<string, unknown>
+> => {
+    const getExtConfigList = (): Promise<KfExtConfig[]> =>
+        Promise.resolve([
+            {
+                key: 'sim',
+                name: 'SIM',
+                config: {
+                    td: {
+                        type: 'Simu',
+                        settings: [
+                            {
+                                key: 'account_id',
+                                name: 'account_id',
+                                type: 'str',
+                                errMsg: '请填写 account_id',
+                                required: true,
+                                primary: true,
+                                validator: ['noUnderlineValidator'],
+                            },
+                            {
+                                key: 'side',
+                                name: 'side',
+                                type: 'side',
+                                errMsg: '请填写 side',
+                                required: true,
+                                validator: ['noUnderlineValidator'],
+                            },
+                            {
+                                key: 'password',
+                                name: 'password',
+                                type: 'password',
+                                errMsg: '请填写 password',
+                                required: true,
+                                validator: ['noUnderlineValidator'],
+                            },
+                            {
+                                key: 'match_mode',
+                                name: 'match_mode',
+                                type: 'select',
+                                options: [
+                                    {
+                                        value: 'reject',
+                                        label: 'reject',
+                                    },
+                                    {
+                                        value: 'pend',
+                                        label: 'pend',
+                                    },
+                                    {
+                                        value: 'cancel',
+                                        label: 'cancel',
+                                    },
+                                    {
+                                        value: 'partialfillandcancel',
+                                        label: 'partialfillandcancel',
+                                    },
+                                    {
+                                        value: 'partialfill',
+                                        label: 'partialfill',
+                                    },
+                                    {
+                                        value: 'fill',
+                                        label: 'fill',
+                                    },
+                                ],
+                                errMsg: '请选择撮合模式',
+                                required: true,
+                            },
+                        ],
+                    },
+                },
+            },
+            {
+                key: 'xtp',
+                name: 'XTP',
+                config: {
+                    td: {
+                        type: ['Stock', 'TechStock', 'Bond'],
+                        settings: [
+                            {
+                                key: 'account_id',
+                                name: 'account_id',
+                                type: 'str',
+                                errMsg: '请填写账户 account_id',
+                                required: true,
+                                primary: true,
+                                validator: ['noUnderlineValidator'],
+                            },
+                            {
+                                key: 'match_mode',
+                                name: 'match_mode',
+                                type: 'select',
+                                options: [
+                                    {
+                                        value: 'reject',
+                                        label: 'reject',
+                                    },
+                                    {
+                                        value: 'pend',
+                                        label: 'pend',
+                                    },
+                                    {
+                                        value: 'cancel',
+                                        label: 'cancel',
+                                    },
+                                    {
+                                        value: 'partialfillandcancel',
+                                        label: 'partialfillandcancel',
+                                    },
+                                    {
+                                        value: 'partialfill',
+                                        label: 'partialfill',
+                                    },
+                                    {
+                                        value: 'fill',
+                                        label: 'fill',
+                                    },
+                                ],
+                                errMsg: '请选择撮合模式',
+                                required: true,
+                            },
+                        ],
+                    },
+                },
+            },
+            {
+                key: 'ctp',
+                name: 'CTP',
+                config: {
+                    td: {
+                        type: ['Future'],
+                        settings: [
+                            {
+                                key: 'account_id',
+                                name: 'account_id',
+                                type: 'str',
+                                errMsg: '请填写账户 account_id',
+                                required: true,
+                                primary: true,
+                                validator: ['noUnderlineValidator'],
+                            },
+                            {
+                                key: 'match_mode',
+                                name: 'match_mode',
+                                type: 'select',
+                                options: [
+                                    {
+                                        value: 'reject',
+                                        label: 'reject',
+                                    },
+                                    {
+                                        value: 'pend',
+                                        label: 'pend',
+                                    },
+                                    {
+                                        value: 'cancel',
+                                        label: 'cancel',
+                                    },
+                                    {
+                                        value: 'partialfillandcancel',
+                                        label: 'partialfillandcancel',
+                                    },
+                                    {
+                                        value: 'partialfill',
+                                        label: 'partialfill',
+                                    },
+                                    {
+                                        value: 'fill',
+                                        label: 'fill',
+                                    },
+                                ],
+                                errMsg: '请选择撮合模式',
+                                required: true,
+                            },
+                        ],
+                    },
+                    md: {
+                        type: ['Future'],
+                        settings: [
+                            {
+                                key: 'account_id',
+                                name: 'account_id',
+                                type: 'str',
+                                errMsg: '请填写账户 account_id',
+                                required: true,
+                                primary: true,
+                                validator: ['noUnderlineValidator'],
+                            },
+                            {
+                                key: 'match_mode',
+                                name: 'match_mode',
+                                type: 'select',
+                                options: [
+                                    {
+                                        value: 'reject',
+                                        label: 'reject',
+                                    },
+                                    {
+                                        value: 'pend',
+                                        label: 'pend',
+                                    },
+                                    {
+                                        value: 'cancel',
+                                        label: 'cancel',
+                                    },
+                                    {
+                                        value: 'partialfillandcancel',
+                                        label: 'partialfillandcancel',
+                                    },
+                                    {
+                                        value: 'partialfill',
+                                        label: 'partialfill',
+                                    },
+                                    {
+                                        value: 'fill',
+                                        label: 'fill',
+                                    },
+                                ],
+                                errMsg: '请选择撮合模式',
+                                required: true,
+                            },
+                        ],
+                    },
+                },
+            },
+        ]);
+
+    return getExtConfigList().then((kfExtConfigList: KfExtConfig[]) => {
+        return getKfExtensionConfigByCategory(kfExtConfigList);
+    });
+};
+
+function getKfExtensionConfigByCategory(
+    extConfigs: KfExtConfig[],
+): KfExtConfigs | Record<string, unknown> {
+    let configByCategory: KfExtConfigs | null = {};
+    extConfigs.forEach((extConfig: KfExtConfig) => {
+        const extKey = extConfig.key;
+        (Object.keys(extConfig['config']) as KfCategoryTypes[]).forEach(
+            (category: KfCategoryTypes) => {
+                if (configByCategory) {
+                    configByCategory[category] = {
+                        ...(configByCategory[category] || {}),
+                        [extKey]:
+                            extConfig['config'][category as KfCategoryEnum],
+                    };
+                }
+            },
+        );
+    });
+
+    return configByCategory;
+}
+
+export const getSourceDataList = (
+    extConfigs: KfExtConfigs,
+    sourceType: KfCategoryEnum,
+): SourceData[] => {
+    const target = extConfigs[sourceType];
+    return Object.keys(target || {})
+        .map((extKey: string) => {
+            const sourceInstrumentType = (target || {})[extKey]?.type;
+            if (sourceInstrumentType === undefined) {
+                return null;
+            }
+
+            const isTypeStr = typeof sourceInstrumentType === 'string';
+            return {
+                name: extKey,
+                type: isTypeStr
+                    ? [sourceInstrumentType]
+                    : [...sourceInstrumentType],
+            };
+        })
+        .filter(
+            (sourceData: SourceData | null) => !!sourceData,
+        ) as SourceData[];
 };

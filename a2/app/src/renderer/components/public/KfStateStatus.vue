@@ -3,23 +3,21 @@
         <div
             :class="[
                 'kf-dot',
-                stateStatusData.status?.color || '',
-                isWaveStatus(stateStatusData.status?.color)
-                    ? 'kf-dot-wave'
-                    : '',
+                stateStatusData?.color || '',
+                isWaveStatus(stateStatusData?.color) ? 'kf-dot-wave' : '',
             ]"
             v-if="stateStatusData"
         ></div>
-        {{ stateStatusData.status?.name || '--' }}
+        {{ stateStatusData?.name || '--' }}
     </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, reactive } from 'vue';
+import { defineComponent, PropType, ref } from 'vue';
 import {
-    StateStatusColorTypes,
-    StateStatusData,
-    StateStatusTypes,
+    AntInKungfuColor,
+    KfTradeValueCommonData,
+    StateStatusEnum,
 } from '@kungfu-trader/kungfu-js-api/typings/index';
 import { StateStatusConfig } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
 
@@ -27,34 +25,36 @@ export default defineComponent({
     name: 'KfStateStatus',
     props: {
         statusName: {
-            type: String as PropType<StateStatusTypes>,
+            type: String as PropType<StateStatusEnum>,
         },
     },
 
     setup(props) {
         const getStatusData = (
-            name: StateStatusTypes | undefined,
-        ): StateStatusData | undefined => {
+            name: StateStatusEnum | undefined,
+        ): KfTradeValueCommonData | undefined => {
             return name === undefined ? undefined : StateStatusConfig[name];
         };
         const statusName = props.statusName;
-        const stateStatusData: StateStatusData | undefined =
+        const stateStatusData: KfTradeValueCommonData | undefined =
             getStatusData(statusName);
 
         return {
-            stateStatusData: reactive({ status: stateStatusData }),
+            stateStatusData: ref<KfTradeValueCommonData | undefined>(
+                stateStatusData,
+            ),
             getStatusData,
         };
     },
 
     watch: {
         statusName(newName) {
-            this.stateStatusData.status = this.getStatusData(newName);
+            this.stateStatusData = this.getStatusData(newName);
         },
     },
 
     methods: {
-        isWaveStatus(statusColor: StateStatusColorTypes | undefined) {
+        isWaveStatus(statusColor: AntInKungfuColor | undefined) {
             if (statusColor === undefined) return false;
             if (statusColor === 'kf-color-error') return false;
             return true;
