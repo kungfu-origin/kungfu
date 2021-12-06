@@ -35,9 +35,8 @@ if (process.env.APP_TYPE === 'daemon') {
         .replace(/\\/g, '\\\\');
 }
 
-
 if (process.env.APP_TYPE === 'main' || process.env.APP_TYPE === 'renderer') {
-    global.__kfResourcesPath = process.resourcesPath
+    global.__kfResourcesPath = process.resourcesPath;
 }
 
 export const KF_HOME_BASE_DIR_RESOLVE: string = getHomePath();

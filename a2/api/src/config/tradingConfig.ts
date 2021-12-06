@@ -12,6 +12,7 @@ import {
     OffsetEnum,
     SideEnum,
     DirectionEnum,
+    KfCategoryEnum,
 } from '@kungfu-trader/kungfu-js-api/typings';
 
 export const StateStatusConfig: Record<
@@ -82,6 +83,11 @@ export const StateStatusConfig: Record<
         name: isEnglish ? 'Ready' : '就绪',
         color: 'kf-color-running',
         level: 1,
+    },
+    [StateStatusEnum.Unknown]: {
+        name: '--',
+        color: 'kf-color-waiting',
+        level: 0,
     },
 };
 
@@ -266,4 +272,11 @@ export const ExchangeIds: Record<string, KfTradeValueCommonData> = {
         name: isEnglish ? 'INE' : '能源中心',
         color: InstrumentType[InstrumentTypeEnum.Future].color,
     },
+};
+
+export const Category: Record<KfCategoryEnum, KfTradeValueCommonData> = {
+    [KfCategoryEnum.md]: { name: 'md' },
+    [KfCategoryEnum.td]: { name: 'td' },
+    [KfCategoryEnum.strategy]: { name: 'strategy' },
+    [KfCategoryEnum.system]: { name: 'system' },
 };

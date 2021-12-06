@@ -104,19 +104,10 @@ function createWindow(reloadAfterCrashed = false) {
         // }
     });
 
-    MainWindow.on('unresponsive', () => {
-        kfLogger.error('[MainWindow] unresponsive ', +new Date());
-        if (AllowQuit) return;
-        showCrashMessageBox().then((confirm) => {
-            if (!confirm) return;
-            createWindow(true);
-        });
-    });
-
     MainWindow.webContents.on('render-process-gone', (event, details) => {
         kfLogger.error(
             '[MainWindow.webContents] crashed' + new Date(),
-            details.toString(),
+            JSON.stringify(details),
         );
         if (AllowQuit) return;
         showCrashMessageBox().then((confirm) => {

@@ -1,5 +1,6 @@
 <template>
     <a-modal
+        :width="width"
         class="kf-set-by-config-modal"
         v-model:visible="modalVisible"
         :title="titleResolved"
@@ -7,28 +8,63 @@
         @ok="handleConfirm"
     >
         <a-form
-            :form="formData"
+            ref="formRef"
+            :model="formState"
             :label-col="{ span: 6 }"
             :wrapper-col="{ span: 16 }"
+            :colon="false"
+            :scrollToFirstError="true"
         >
             <a-form-item
                 v-for="item in config?.settings"
                 :key="item.key"
                 :label="item.name"
+                :name="item.key"
+                :required="item.required"
+                :rules="[
+                    {
+                        required: item.required,
+                        message: '该项为必填项',
+                        trigger: 'change',
+                    },
+                    ...(item.validator || [
+                        {
+                            validator: defaultValidator,
+                        },
+                    ]),
+                    ...(item.primary
+                        ? [
+                              {
+                                  validator: primaryKeyValidator,
+                                  trigger: 'change',
+                              },
+                          ]
+                        : []),
+                ]"
             >
-                <a-input v-if="item.type === 'str'"></a-input>
+                <a-input
+                    v-if="item.type === 'str'"
+                    v-model:value="formState[item.key]"
+                    :disabled="payload.type === 'update' && item.primary"
+                ></a-input>
                 <a-input-password
                     v-if="item.type === 'password'"
+                    v-model:value="formState[item.key]"
+                    :disabled="payload.type === 'update' && item.primary"
                 ></a-input-password>
                 <a-input-number
                     v-if="item.type === 'int'"
                     :precision="0"
                     step="1"
+                    v-model:value="formState[item.key]"
+                    :disabled="payload.type === 'update' && item.primary"
                 ></a-input-number>
                 <a-input-number
                     v-if="item.type === 'float'"
                     :precision="4"
                     step="0.0001"
+                    v-model:value="formState[item.key]"
+                    :disabled="payload.type === 'update' && item.primary"
                 ></a-input-number>
                 <a-input-number
                     v-if="item.type === 'percent'"
@@ -36,25 +72,56 @@
                     step="0.01"
                     :formatter="(value: number) => `${value}%`"
                     :parser="(value: string) => value.replace('%', '')"
+                    v-model:value="formState[item.key]"
+                    :disabled="payload.type === 'update' && item.primary"
                 ></a-input-number>
-                <a-select v-if="inputTypeToTradeConfig[item.type]">
+                <a-select
+                    v-if="numberEnumInputType[item.type]"
+                    v-model:value="formState[item.key]"
+                    :disabled="payload.type === 'update' && item.primary"
+                >
                     {{ item.type }}
                     <a-select-option
                         v-for="key in Object.keys(
-                            inputTypeToTradeConfig[item.type],
+                            numberEnumInputType[item.type],
+                        )"
+                        :key="key"
+                        :value="+key"
+                    >
+                        {{
+                            getKfTradeValueName(
+                                numberEnumInputType[item.type],
+                                key,
+                            )
+                        }}
+                    </a-select-option>
+                </a-select>
+                <a-select
+                    v-if="stringEnumInputType[item.type]"
+                    v-model:value="formState[item.key]"
+                    :disabled="payload.type === 'update' && item.primary"
+                >
+                    {{ item.type }}
+                    <a-select-option
+                        v-for="key in Object.keys(
+                            stringEnumInputType[item.type],
                         )"
                         :key="key"
                         :value="key"
                     >
                         {{
                             getKfTradeValueName(
-                                inputTypeToTradeConfig[item.type],
+                                stringEnumInputType[item.type],
                                 key,
                             )
                         }}
                     </a-select-option>
                 </a-select>
-                <a-select v-if="item.type === 'select'">
+                <a-select
+                    v-if="item.type === 'select'"
+                    v-model:value="formState[item.key]"
+                    :disabled="payload.type === 'update' && item.primary"
+                >
                     <a-select-option
                         v-for="option in item.options"
                         :key="option.value"
@@ -67,13 +134,14 @@
                 <div
                     v-if="item.type === 'file'"
                     class="kf-form-item__warp file"
+                    :disabled="payload.type === 'update' && item.primary"
                 >
                     <span
                         class="file-path"
-                        v-if="formData[item.key]"
-                        :title="formData[item.key] || ''"
+                        v-if="formState[item.key]"
+                        :title="(formState[item.key] || '').toString()"
                     >
-                        {{ formData[item.key] }}
+                        {{ formState[item.key] }}
                     </span>
                     <a-button size="mini" @click="handleSelectFile(item.key)">
                         <template #icon><DashOutlined /></template>
@@ -85,27 +153,22 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, ref } from 'vue';
+import { defineComponent, PropType, reactive, ref } from 'vue';
 import { DashOutlined } from '@ant-design/icons-vue';
 
-import { modalVisibleComposition } from '@renderer/assets/methods/uiUtils';
+import {
+    initFormDataByConfig,
+    modalVisibleComposition,
+    numberEnumInputType,
+    stringEnumInputType,
+} from '@renderer/assets/methods/uiUtils';
 import {
     KfConfigValue,
     KfTradeValueCommonData,
     SetKfConfigPayload,
+    StrategyData,
 } from '@kungfu-trader/kungfu-js-api/typings';
-import {
-    CommissionMode,
-    Direction,
-    ExchangeIds,
-    HedgeFlag,
-    InstrumentType,
-    Offset,
-    PriceType,
-    Side,
-    TimeCondition,
-    VolumeCondition,
-} from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
+
 import { dialog } from '@electron/remote';
 
 export default defineComponent({
@@ -119,6 +182,16 @@ export default defineComponent({
             type: Object as PropType<SetKfConfigPayload>,
             default: () => ({} as SetKfConfigPayload),
         },
+
+        width: {
+            type: Number,
+            default: 520,
+        },
+
+        primaryKeyCompareTarget: {
+            type: Array as PropType<string[]>,
+            default: [],
+        },
     },
 
     components: {
@@ -131,79 +204,37 @@ export default defineComponent({
             context,
         );
 
-        const initFormDataByConfig = (
-            config: SetKfConfigPayload['config'],
-            initValue?: Record<string, KfConfigValue>,
-        ): Record<string, KfConfigValue> => {
-            const settings = config?.settings;
-            if (!settings) return {};
+        const primaryKeys: string[] = (props.payload.config?.settings || [])
+            .filter((item) => item.primary)
+            .map((item) => item.key);
 
-            const booleanType = ['bool'];
-            const numberType = [
-                'int',
-                'float',
-                'percent',
-                'side', // select - number
-                'offset', // select - number
-                'direction', // select - number
-                'priceType', // select - number
-                'hedgeFlag', // select - number
-                'volumeCondition', // select - number
-                'timeCondition', // select - number
-                'commissionMode', // select - number
-                'instrumentType', // select - number
-            ];
-            const formData: Record<string, KfConfigValue> = {};
-            settings.forEach((item) => {
-                const type = item.type;
-                const isBoolean = booleanType.includes(type);
-                const isNumber = numberType.includes(type);
-
-                let defaultValue = item?.default;
-                if (defaultValue === undefined) {
-                    defaultValue = isBoolean ? false : isNumber ? 0 : '';
-                }
-                if ((initValue || {})[item.key] !== undefined) {
-                    defaultValue = (initValue || {})[item.key];
-                }
-
-                formData[item.key] = defaultValue;
-            });
-
-            return formData;
-        };
-
-        const inputTypeToTradeConfig: {
-            [prop: string]: Record<
-                string | number | symbol,
-                KfTradeValueCommonData
-            >;
-        } = {
-            exchange: ExchangeIds,
-            side: Side,
-            offset: Offset,
-            direction: Direction,
-            priceType: PriceType,
-            hedgeFlag: HedgeFlag,
-            volumeCondition: VolumeCondition,
-            timeCondition: TimeCondition,
-            commissionMode: CommissionMode,
-            instrumentType: InstrumentType,
-        };
+        const formState = reactive<Record<string, KfConfigValue>>(
+            initFormDataByConfig(props.payload.config, props.payload.initValue),
+        );
 
         return {
             modalVisible,
             closeModal,
-            formData: ref<Record<string, KfConfigValue>>(
-                initFormDataByConfig(
-                    props.payload.config,
-                    props.payload.initValue,
-                ),
-            ),
+
+            formRef: ref(),
+            formState,
 
             ...props.payload,
 
-            inputTypeToTradeConfig,
+            defaultValidator: () => Promise.resolve(),
+            primaryKeyValidator: (): Promise<void> => {
+                const combineValue: string = primaryKeys
+                    .map((key) => formState[key])
+                    .join('_');
+                if (props.primaryKeyCompareTarget.includes(combineValue)) {
+                    return Promise.reject(new Error(`${combineValue} 已存在`));
+                }
+
+                return Promise.resolve();
+            },
+
+            numberEnumInputType: numberEnumInputType,
+            stringEnumInputType: stringEnumInputType,
         };
     },
 
@@ -215,7 +246,18 @@ export default defineComponent({
 
     methods: {
         handleConfirm() {
-            this.closeModal();
+            this.formRef
+                .validate()
+                .then(() => {
+                    this.closeModal();
+                    this.$emit(
+                        'confirm',
+                        this.formState as unknown as StrategyData,
+                    );
+                })
+                .catch((err: Error) => {
+                    console.error(err);
+                });
         },
 
         handleClose() {
@@ -237,8 +279,8 @@ export default defineComponent({
                 .then((res) => {
                     const { filePaths } = res;
                     if (filePaths.length) {
-                        this.formData[targetKey] = filePaths[0];
-                        //     this.$refs.extForm.validateField(targetKey); //手动进行再次验证，因数据放在span中，改变数据后无法触发验证
+                        this.formState[targetKey] = filePaths[0];
+                        this.formRef.validateFields([targetKey]); //手动进行再次验证，因数据放在span中，改变数据后无法触发验证
                     }
                 });
         },

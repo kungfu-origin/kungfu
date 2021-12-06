@@ -13,7 +13,12 @@
                 :key="item.name"
                 v-for="item in sourceDataList"
                 value="1"
-                :style="radioStyle"
+                :style="{
+                    height: '36px',
+                    'line-height': '36px',
+                    'font-size': '16px',
+                    'min-width': '45%',
+                }"
             >
                 <span class="source-id__txt">{{ item.name }}</span>
                 <a-tag
@@ -39,15 +44,13 @@
 <script lang="ts">
 import {
     InstrumentTypeEnum,
-    KfCategoryEnum,
+    KfCategoryTypes,
     SourceData,
 } from '@kungfu-trader/kungfu-js-api/typings';
 import {
     defineComponent,
     ref,
     PropType,
-    onMounted,
-    getCurrentInstance,
 } from 'vue';
 
 import {
@@ -64,8 +67,8 @@ export default defineComponent({
         },
 
         sourceType: {
-            type: String as PropType<KfCategoryEnum.td | KfCategoryEnum.md>,
-            default: KfCategoryEnum.td,
+            type: String as PropType<KfCategoryTypes>,
+            default: 'td',
         },
     },
 
@@ -78,40 +81,27 @@ export default defineComponent({
             context,
         );
 
-        const radioStyle = {
-            height: '36px',
-            'line-height': '36px',
-            'font-size': '16px',
-            'min-width': '45%',
-        };
-
-        onMounted(() => {
-            const app = getCurrentInstance();
-            if (app?.proxy) {
-                const extConfigs = app.proxy.$useGlobalStore().extConfigs || {};
-                sourceDataList.value = getSourceDataList(
-                    extConfigs,
-                    props.sourceType,
-                );
-
-                if (selectedSource.value === '') {
-                    if (sourceDataList.value.length) {
-                        selectedSource.value = sourceDataList.value[0].name;
-                    }
-                }
-            }
-        });
-
         return {
             modalVisible,
             closeModal,
 
             selectedSource,
             sourceDataList,
-            radioStyle,
+
             getInstrumentTypeData,
             InstrumentTypeEnum,
         };
+    },
+
+    mounted() {
+        const extConfigs = this.$useGlobalStore().extConfigs || {};
+        this.sourceDataList = getSourceDataList(extConfigs, this.sourceType);
+
+        if (this.selectedSource === '') {
+            if (this.sourceDataList.length) {
+                this.selectedSource = this.sourceDataList[0].name;
+            }
+        }
     },
 
     methods: {

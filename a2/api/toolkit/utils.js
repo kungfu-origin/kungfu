@@ -45,7 +45,7 @@ exports.getPagesConfig = (argv) => {
         new HtmlWebpackPlugin({
           title: "功夫交易系统",
           filename: `${dir}.html`,
-          template: path.resolve(appDir, 'public', 'index.html'),
+          template: path.resolve(appDir, 'public', 'index.ejs'),
           minify: {
             collapseWhitespace: true,
             removeAttributeQuotes: true,

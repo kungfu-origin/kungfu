@@ -28,7 +28,7 @@ interface ResizeEvent {
 
 type KfEvent = ResizeEvent;
 
-type AntTableColumns = Array<{
+interface AntTableColumn {
     title: string;
     dataIndex: string;
     key?: string;
@@ -36,4 +36,6 @@ type AntTableColumns = Array<{
     sorter?: boolean;
     align?: string;
     fixed?: string;
-}>;
+}
+
+type AntTableColumns = Array<AntTableColumn>;

@@ -12,7 +12,7 @@
                     </a-button>
                 </KfDashboardItem>
                 <KfDashboardItem>
-                    <a-button size="small">开启全部</a-button>
+                    <a-switch></a-switch>
                 </KfDashboardItem>
                 <KfDashboardItem>
                     <a-input-search
@@ -26,17 +26,11 @@
             <a-table
                 ref="table"
                 :columns="columns"
-                :data-source="data"
+                :data-source="tdListResolved"
                 size="small"
                 :pagination="false"
                 :scroll="{ y: dashboardBodyHeight - 4, x: dashboardBodyWidth }"
             >
-                <template #headerCell="{ column }">
-                    <template v-if="column.key === 'name'">
-                        <span>Name</span>
-                    </template>
-                </template>
-
                 <template #bodyCell="{ column, record }">
                     <template v-if="column.dataIndex === 'stateStatus'">
                         <KfStateStatus
@@ -51,7 +45,7 @@
                         ></KfStateStatus>
                     </template>
                     <template v-else-if="column.dataIndex === 'processStatus'">
-                        <a-switch :checked="true"></a-switch>
+                        <a-switch size="small" :checked="true"></a-switch>
                     </template>
                     <template v-else-if="column.dataIndex === 'actions'">
                         <div class="kf-table-actions__warp">
@@ -69,7 +63,7 @@
         <KfSetSourceModal
             v-if="setSourceModalVisible"
             v-model:visible="setSourceModalVisible"
-            :sourceType="currentCategory"
+            sourceType="td"
             @confirm="handleSelectedSource"
         ></KfSetSourceModal>
         <KfSetByConfigModal
@@ -81,7 +75,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, toRaw } from 'vue';
+import { defineComponent, ref } from 'vue';
 import {
     FileTextOutlined,
     SettingOutlined,
@@ -95,12 +89,18 @@ import KfSetSourceModal from '@renderer/components/public/KfSetSourceModal.vue';
 import KfSetByConfigModal from '@renderer/components/public/KfSetByConfigModal.vue';
 
 import {
-    KfCategoryEnum,
+    KfCategoryTypes,
     KfExtConfig,
     SetKfConfigPayload,
     StateStatusEnum,
-    TdOptions,
+    TdRow,
+    KfConfig,
 } from '@kungfu-trader/kungfu-js-api/typings';
+import { mapState } from 'pinia';
+import { useGlobalStore } from '@renderer/pages/index/store/global';
+import { columns } from './config';
+
+import '@kungfu-trader/kungfu-js-api/kungfu/store';
 
 export default defineComponent({
     name: '交易账户',
@@ -117,442 +117,57 @@ export default defineComponent({
     },
 
     setup() {
-        const columns: AntTableColumns = [
-            {
-                title: '备注',
-                dataIndex: 'accountName',
-                align: 'left',
-                sorter: true,
-                fixed: 'left',
-                width: 80,
-            },
-            {
-                title: '账户',
-                dataIndex: 'accountId',
-                align: 'left',
-                sorter: true,
-                fixed: 'left',
-                width: 90,
-            },
-            {
-                title: '柜台',
-                dataIndex: 'sourceId',
-                align: 'left',
-                sorter: true,
-                fixed: 'left',
-                width: 60,
-            },
-            {
-                title: '状态',
-                dataIndex: 'stateStatus',
-                align: 'left',
-                sorter: true,
-                width: 80,
-            },
-            {
-                title: '进程',
-                dataIndex: 'processStatus',
-                align: 'center',
-                sorter: true,
-                width: 60,
-            },
-            {
-                title: '浮动盈亏',
-                dataIndex: 'unrealizedPnl',
-                align: 'right',
-                sorter: true,
-                width: 90,
-            },
-            {
-                title: '可用资金',
-                dataIndex: 'avail',
-                align: 'right',
-                sorter: true,
-                width: 90,
-            },
-            {
-                title: '市值',
-                dataIndex: 'marketValue',
-                align: 'right',
-                sorter: true,
-                width: 90,
-            },
-            {
-                title: '保证金',
-                dataIndex: 'margin',
-                align: 'right',
-                sorter: true,
-                width: 90,
-            },
-            {
-                title: '操作',
-                dataIndex: 'actions',
-                align: 'right',
-                width: 140,
-                fixed: 'right',
-            },
-        ];
-
-        const data: TdOptions[] = [
-            {
-                accountName: 'asd',
-                accountId: 'John Brown',
-                sourceId: '32',
-                stateStatus: StateStatusEnum.online,
-                processStatus: true,
-                realizedPnl: 90,
-                unrealizedPnl: 10000,
-                marketValue: 5345,
-                margin: 2432,
-                avail: 123,
-            },
-            {
-                accountName: 'asd',
-                accountId: 'John Brown',
-                sourceId: '32',
-                stateStatus: StateStatusEnum.online,
-                processStatus: true,
-                realizedPnl: 90,
-                unrealizedPnl: 10000,
-                marketValue: 5345,
-                margin: 2432,
-                avail: 123,
-            },
-            {
-                accountName: 'asd',
-                accountId: 'John Brown',
-                sourceId: '32',
-                stateStatus: StateStatusEnum.online,
-                processStatus: true,
-                realizedPnl: 90,
-                unrealizedPnl: 10000,
-                marketValue: 5345,
-                margin: 2432,
-                avail: 123,
-            },
-            {
-                accountName: 'asd',
-                accountId: 'John Brown',
-                sourceId: '32',
-                stateStatus: StateStatusEnum.online,
-                processStatus: true,
-                realizedPnl: 90,
-                unrealizedPnl: 10000,
-                marketValue: 5345,
-                margin: 2432,
-                avail: 123,
-            },
-            {
-                accountName: 'asd',
-                accountId: 'John Brown',
-                sourceId: '32',
-                stateStatus: StateStatusEnum.online,
-                processStatus: true,
-                realizedPnl: 90,
-                unrealizedPnl: 10000,
-                marketValue: 5345,
-                margin: 2432,
-                avail: 123,
-            },
-            {
-                accountName: 'asd',
-                accountId: 'John Brown',
-                sourceId: '32',
-                stateStatus: StateStatusEnum.online,
-                processStatus: true,
-                realizedPnl: 90,
-                unrealizedPnl: 10000,
-                marketValue: 5345,
-                margin: 2432,
-                avail: 123,
-            },
-            {
-                accountName: 'asd',
-                accountId: 'John Brown',
-                sourceId: '32',
-                stateStatus: StateStatusEnum.online,
-                processStatus: true,
-                realizedPnl: 90,
-                unrealizedPnl: 10000,
-                marketValue: 5345,
-                margin: 2432,
-                avail: 123,
-            },
-            {
-                accountName: 'asd',
-                accountId: 'John Brown',
-                sourceId: '32',
-                stateStatus: StateStatusEnum.online,
-                processStatus: true,
-                realizedPnl: 90,
-                unrealizedPnl: 10000,
-                marketValue: 5345,
-                margin: 2432,
-                avail: 123,
-            },
-            {
-                accountName: 'asd',
-                accountId: 'John Brown',
-                sourceId: '32',
-                stateStatus: StateStatusEnum.online,
-                processStatus: true,
-                realizedPnl: 90,
-                unrealizedPnl: 10000,
-                marketValue: 5345,
-                margin: 2432,
-                avail: 123,
-            },
-            {
-                accountName: 'asd',
-                accountId: 'John Brown',
-                sourceId: '32',
-                stateStatus: StateStatusEnum.online,
-                processStatus: true,
-                realizedPnl: 90,
-                unrealizedPnl: 10000,
-                marketValue: 5345,
-                margin: 2432,
-                avail: 123,
-            },
-            {
-                accountName: 'asd',
-                accountId: 'John Brown',
-                sourceId: '32',
-                stateStatus: StateStatusEnum.online,
-                processStatus: true,
-                realizedPnl: 90,
-                unrealizedPnl: 10000,
-                marketValue: 5345,
-                margin: 2432,
-                avail: 123,
-            },
-            {
-                accountName: 'asd',
-                accountId: 'John Brown',
-                sourceId: '32',
-                stateStatus: StateStatusEnum.online,
-                processStatus: true,
-                realizedPnl: 90,
-                unrealizedPnl: 10000,
-                marketValue: 5345,
-                margin: 2432,
-                avail: 123,
-            },
-            {
-                accountName: 'asd',
-                accountId: 'John Brown',
-                sourceId: '32',
-                stateStatus: StateStatusEnum.online,
-                processStatus: true,
-                realizedPnl: 90,
-                unrealizedPnl: 10000,
-                marketValue: 5345,
-                margin: 2432,
-                avail: 123,
-            },
-            {
-                accountName: 'asd',
-                accountId: 'John Brown',
-                sourceId: '32',
-                stateStatus: StateStatusEnum.online,
-                processStatus: true,
-                realizedPnl: 90,
-                unrealizedPnl: 10000,
-                marketValue: 5345,
-                margin: 2432,
-                avail: 123,
-            },
-            {
-                accountName: 'asd',
-                accountId: 'John Brown',
-                sourceId: '32',
-                stateStatus: StateStatusEnum.online,
-                processStatus: true,
-                realizedPnl: 90,
-                unrealizedPnl: 10000,
-                marketValue: 5345,
-                margin: 2432,
-                avail: 123,
-            },
-            {
-                accountName: 'asd',
-                accountId: 'John Brown',
-                sourceId: '32',
-                stateStatus: StateStatusEnum.online,
-                processStatus: true,
-                realizedPnl: 90,
-                unrealizedPnl: 10000,
-                marketValue: 5345,
-                margin: 2432,
-                avail: 123,
-            },
-            {
-                accountName: 'asd',
-                accountId: 'John Brown',
-                sourceId: '32',
-                stateStatus: StateStatusEnum.online,
-                processStatus: true,
-                realizedPnl: 90,
-                unrealizedPnl: 10000,
-                marketValue: 5345,
-                margin: 2432,
-                avail: 123,
-            },
-            {
-                accountName: 'asd',
-                accountId: 'John Brown',
-                sourceId: '32',
-                stateStatus: StateStatusEnum.online,
-                processStatus: true,
-                realizedPnl: 90,
-                unrealizedPnl: 10000,
-                marketValue: 5345,
-                margin: 2432,
-                avail: 123,
-            },
-            {
-                accountName: 'asd',
-                accountId: 'John Brown',
-                sourceId: '32',
-                stateStatus: StateStatusEnum.online,
-                processStatus: true,
-                realizedPnl: 90,
-                unrealizedPnl: 10000,
-                marketValue: 5345,
-                margin: 2432,
-                avail: 123,
-            },
-            {
-                accountName: 'asd',
-                accountId: 'John Brown',
-                sourceId: '32',
-                stateStatus: StateStatusEnum.online,
-                processStatus: true,
-                realizedPnl: 90,
-                unrealizedPnl: 10000,
-                marketValue: 5345,
-                margin: 2432,
-                avail: 123,
-            },
-            {
-                accountName: 'asd',
-                accountId: 'John Brown',
-                sourceId: '32',
-                stateStatus: StateStatusEnum.online,
-                processStatus: true,
-                realizedPnl: 90,
-                unrealizedPnl: 10000,
-                marketValue: 5345,
-                margin: 2432,
-                avail: 123,
-            },
-            {
-                accountName: 'asd',
-                accountId: 'John Brown',
-                sourceId: '32',
-                stateStatus: StateStatusEnum.online,
-                processStatus: true,
-                realizedPnl: 90,
-                unrealizedPnl: 10000,
-                marketValue: 5345,
-                margin: 2432,
-                avail: 123,
-            },
-            {
-                accountName: 'asd',
-                accountId: 'John Brown',
-                sourceId: '32',
-                stateStatus: StateStatusEnum.online,
-                processStatus: true,
-                realizedPnl: 90,
-                unrealizedPnl: 10000,
-                marketValue: 5345,
-                margin: 2432,
-                avail: 123,
-            },
-            {
-                accountName: 'asd',
-                accountId: 'John Brown',
-                sourceId: '32',
-                stateStatus: StateStatusEnum.online,
-                processStatus: true,
-                realizedPnl: 90,
-                unrealizedPnl: 10000,
-                marketValue: 5345,
-                margin: 2432,
-                avail: 123,
-            },
-            {
-                accountName: 'asd',
-                accountId: 'John Brown',
-                sourceId: '32',
-                stateStatus: StateStatusEnum.online,
-                processStatus: true,
-                realizedPnl: 90,
-                unrealizedPnl: 10000,
-                marketValue: 5345,
-                margin: 2432,
-                avail: 123,
-            },
-            {
-                accountName: 'asd',
-                accountId: 'John Brown',
-                sourceId: '32',
-                stateStatus: StateStatusEnum.online,
-                processStatus: true,
-                realizedPnl: 90,
-                unrealizedPnl: 10000,
-                marketValue: 5345,
-                margin: 2432,
-                avail: 123,
-            },
-            {
-                accountName: 'asd',
-                accountId: 'John Brown',
-                sourceId: '32',
-                stateStatus: StateStatusEnum.online,
-                processStatus: true,
-                realizedPnl: 90,
-                unrealizedPnl: 10000,
-                marketValue: 5345,
-                margin: 2432,
-                avail: 123,
-            },
-            {
-                accountName: 'asd----1-1-1-1-1-1',
-                accountId: 'John Brown',
-                sourceId: '32',
-                stateStatus: StateStatusEnum.online,
-                processStatus: true,
-                realizedPnl: 90,
-                unrealizedPnl: 10000,
-                marketValue: 5345,
-                margin: 2432,
-                avail: 123,
-            },
-        ];
-
         return {
             searchKeyword: ref<string>(''),
             dashboardBodyHeight: ref<number>(0),
             dashboardBodyWidth: ref<number>(0),
             columns,
-            data,
 
             setSourceModalVisible: ref<boolean>(false),
             setTdModalVisible: ref<boolean>(false),
             setTdConfigPayload: ref<SetKfConfigPayload>({
                 type: 'add',
                 title: '交易账户',
-                config: {} as KfExtConfig['config'][KfCategoryEnum],
+                config: {} as KfExtConfig['config'][KfCategoryTypes],
             }),
-
-            currentCategory: KfCategoryEnum.td,
         };
     },
 
+    computed: {
+        ...mapState(useGlobalStore, {
+            extConfigs: (store) => store.extConfigs,
+            tdList: (store) => store.tdList,
+        }),
+
+        tdListResolved(): TdRow[] {
+            if (!this.tdList.length) {
+                return [];
+            }
+
+            return this.tdList.map((item: KfConfig) => {
+                const configValue: Record<string, unknown> = JSON.parse(
+                    item.value || '{}',
+                );
+                return {
+                    accountName:
+                        (configValue?.account_name as string | undefined) ||
+                        item.name,
+                    accountId: item.name,
+                    sourceId: item.group,
+                    stateStatus: StateStatusEnum.Unknown,
+                    processStatus: false,
+                    realizedPnl: 0,
+                    unrealizedPnl: 0,
+                    marketValue: 0,
+                    margin: 0,
+                    avail: 0,
+                };
+            });
+        },
+    },
+
     methods: {
-        handleOpenLog(record: TdOptions) {
+        handleOpenLog(record: TdRow) {
             console.log(record);
             this.$useGlobalStore().setKfExtConfigs();
         },
@@ -560,9 +175,7 @@ export default defineComponent({
         handleSelectedSource(selectedSource: string) {
             this.setTdModalVisible = true;
             this.setTdConfigPayload.title = `${selectedSource} 交易账户`;
-            const extConfigs = this.$useGlobalStore().extConfigs;
-            const targetConfig =
-                extConfigs[this.currentCategory][selectedSource];
+            const targetConfig = (this.extConfigs['td'] || {})[selectedSource];
 
             this.setTdConfigPayload.config = targetConfig;
         },
@@ -589,8 +202,8 @@ export default defineComponent({
         },
 
         getTdProcessId(
-            sourceId: TdOptions['sourceId'],
-            accountId: TdOptions['accountId'],
+            sourceId: TdRow['sourceId'],
+            accountId: TdRow['accountId'],
         ): string {
             return `${sourceId}_${accountId}`;
         },

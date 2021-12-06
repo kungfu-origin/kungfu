@@ -1,9 +1,26 @@
 import fs from 'fs-extra';
-import { Component, SetupContext, Ref, ref, watch } from 'vue';
 import path from 'path';
+import { Component, SetupContext, Ref, ref, watch } from 'vue';
 import { APP_DIR } from '@kungfu-trader/kungfu-js-api/config/pathConfig';
 import { buildObjectFromArray } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
-import { StateStatusConfig } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
+import {
+    CommissionMode,
+    Direction,
+    ExchangeIds,
+    HedgeFlag,
+    InstrumentType,
+    Offset,
+    PriceType,
+    Side,
+    StateStatusConfig,
+    TimeCondition,
+    VolumeCondition,
+} from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
+import {
+    KfConfigValue,
+    KfTradeValueCommonData,
+    SetKfConfigPayload,
+} from '@kungfu-trader/kungfu-js-api/typings';
 
 export interface KfUIComponent {
     name: string;
@@ -74,4 +91,66 @@ export const modalVisibleComposition = (
         modalVisible,
         closeModal,
     };
+};
+
+export const initFormDataByConfig = (
+    config: SetKfConfigPayload['config'],
+    initValue?: Record<string, KfConfigValue>,
+): Record<string, KfConfigValue> => {
+    const settings = config?.settings;
+    if (!settings) return {};
+
+    const booleanType = ['bool'];
+    const numberType = [
+        'int',
+        'float',
+        'percent',
+        'side', // select - number
+        'offset', // select - number
+        'direction', // select - number
+        'priceType', // select - number
+        'hedgeFlag', // select - number
+        'volumeCondition', // select - number
+        'timeCondition', // select - number
+        'commissionMode', // select - number
+        'instrumentType', // select - number
+    ];
+    const formState: Record<string, KfConfigValue> = {};
+    settings.forEach((item) => {
+        const type = item.type;
+        const isBoolean = booleanType.includes(type);
+        const isNumber = numberType.includes(type);
+
+        let defaultValue = item?.default;
+        if (defaultValue === undefined) {
+            defaultValue = isBoolean ? false : isNumber ? 0 : '';
+        }
+        if ((initValue || {})[item.key] !== undefined) {
+            defaultValue = (initValue || {})[item.key];
+        }
+
+        formState[item.key] = defaultValue;
+    });
+
+    return formState;
+};
+
+export const numberEnumInputType: {
+    [prop: string]: Record<number, KfTradeValueCommonData>;
+} = {
+    side: Side,
+    offset: Offset,
+    direction: Direction,
+    priceType: PriceType,
+    hedgeFlag: HedgeFlag,
+    volumeCondition: VolumeCondition,
+    timeCondition: TimeCondition,
+    commissionMode: CommissionMode,
+    instrumentType: InstrumentType,
+};
+
+export const stringEnumInputType: {
+    [prop: string]: Record<string, KfTradeValueCommonData>;
+} = {
+    exchange: ExchangeIds,
 };

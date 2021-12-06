@@ -4,14 +4,18 @@ import {
     KfLayoutDirection,
     KfLayoutTargetDirectionClassName,
 } from '@root/src/typings/enums';
-import { KfExtConfigs } from '@kungfu-trader/kungfu-js-api/typings';
+import { KfConfig, KfExtConfigs } from '@kungfu-trader/kungfu-js-api/typings';
 import { getKfExtensionConfig } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
+import { getAllKfConfigList } from '@kungfu-trader/kungfu-js-api/actions';
 
 interface GlobalState {
     boardsMap: KfLayout.BoardsMap;
     dragedContentData: KfLayout.ContentData | null;
     isBoardDragging: boolean;
-    extConfigs: KfExtConfigs | { [prop: string]: unknown };
+    extConfigs: KfExtConfigs;
+    tdList: KfConfig[];
+    mdList: KfConfig[];
+    strategyList: KfConfig[];
 }
 
 export const useGlobalStore = defineStore('global', {
@@ -20,11 +24,24 @@ export const useGlobalStore = defineStore('global', {
             boardsMap: {},
             dragedContentData: null,
             isBoardDragging: false,
-            extConfigs: toRaw({}),
+            extConfigs: toRaw<KfExtConfigs>({}),
+
+            tdList: [],
+            mdList: [],
+            strategyList: [],
         };
     },
 
     actions: {
+        setKfConfigList() {
+            return getAllKfConfigList().then((res) => {
+                const { md, td, strategy } = res;
+                this.mdList = md;
+                this.tdList = td;
+                this.strategyList = strategy;
+            });
+        },
+
         setKfExtConfigs() {
             return getKfExtensionConfig().then((kfExtConfigs: KfExtConfigs) => {
                 this.extConfigs = toRaw(kfExtConfigs);

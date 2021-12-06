@@ -9,6 +9,7 @@
 <script lang="ts">
 import { defineComponent, getCurrentInstance, onMounted } from 'vue';
 import zhCN from 'ant-design-vue/es/locale/zh_CN';
+import { useGlobalStore } from './store/global';
 
 export default defineComponent({
     setup() {
@@ -18,9 +19,11 @@ export default defineComponent({
             if ($loadingMask) $loadingMask.remove();
         };
 
+        useGlobalStore().setKfConfigList();
+        useGlobalStore().setKfExtConfigs();
+
         onMounted(() => {
             removeLoadingMask();
-            app?.proxy && app?.proxy.$useGlobalStore().setKfExtConfigs();
             window.addEventListener('resize', () => {
                 app?.proxy &&
                     app?.proxy.$bus.next({

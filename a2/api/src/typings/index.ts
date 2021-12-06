@@ -18,6 +18,7 @@ export enum StateStatusEnum {
     LoggedIn = 4,
     LoginFailed = 5,
     Ready = 100,
+    Unknown = '',
 }
 
 export type AntInKungfuColor =
@@ -34,7 +35,7 @@ export type AntInKungfuColor =
     | 'kf-color-waiting'
     | 'kf-color-error';
 
-export interface TdOptions {
+export interface TdRow {
     accountName: string;
     accountId: string;
     sourceId: string;
@@ -45,6 +46,24 @@ export interface TdOptions {
     marketValue: number;
     margin: number;
     avail: number;
+}
+
+export interface MdRow {
+    sourceId: string;
+    stateStatus: StateStatusEnum;
+    processStatus: boolean;
+}
+
+export interface StrategyRow {
+    strategyId: string;
+    stateStatus: StateStatusEnum;
+    processStatus: boolean;
+    realizedPnl: number;
+    unrealizedPnl: number;
+    marketValue: number;
+    margin: number;
+    avail: number;
+    addTime: string;
 }
 
 export enum InstrumentTypeEnum {
@@ -195,6 +214,7 @@ export interface KfConfigItem {
     options?: KfSelectOption[];
     args?: Array<{ key: string | number; value: string | number }>; // process
     target?: string; // process
+    tip?: string;
 }
 
 export interface KfExtConfig {
@@ -210,22 +230,55 @@ export interface KfExtConfig {
 
 export type KfExtConfigs = {
     [key in KfCategoryTypes]?: {
-        [extKey: string]: KfExtConfig['config'][KfCategoryEnum];
+        [extKey: string]: KfExtConfig['config'][KfCategoryTypes];
     };
 };
 
 export interface SetKfConfigPayload {
     type: 'add' | 'update';
     title: string;
-    config: KfExtConfig['config'][KfCategoryEnum];
+    config: KfExtConfig['config'][KfCategoryTypes];
     initValue?: Record<string, KfConfigValue>;
 }
 
 export enum KfCategoryEnum {
-    td = 'td',
-    md = 'md',
-    strategy = 'strategy',
-    system = 'system',
+    md,
+    td,
+    strategy,
+    system,
+}
+
+export enum KfModeEnum {
+    LIVE,
+    DATA,
+    REPLAY,
+    BACKTEST,
 }
 
 export type KfCategoryTypes = keyof typeof KfCategoryEnum;
+
+interface KfLocationBase {
+    group: string;
+    name: string;
+}
+
+export type KfLocation = {
+    category: KfCategoryTypes;
+    mode: string;
+} & KfLocationBase;
+
+export type KfLocationOrigin = {
+    category: KfCategoryEnum;
+    mode: KfModeEnum;
+} & KfLocationBase;
+
+export type KfConfig = KfLocationOrigin & {
+    location_uid: number;
+    value: string;
+};
+
+export interface StrategyData {
+    strategy_id: string;
+    strategy_path: string;
+    add_time: number;
+}

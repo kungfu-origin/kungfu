@@ -5,7 +5,6 @@ import { InstrumentType } from '@kungfu-trader/kungfu-js-api/config/tradingConfi
 import {
     KfTradeValueCommonData,
     InstrumentTypeEnum,
-    KfCategoryEnum,
     KfCategoryTypes,
     KfExtConfig,
     KfExtConfigs,
@@ -146,7 +145,7 @@ export const dealSpaceInPath = (pathname: string) => {
 };
 
 export const setTimerPromiseTask = (fn: Function, interval = 500) => {
-    var taskTimer: null | NodeJS.Timeout = null;
+    var taskTimer: number | undefined = undefined;
     var clear = false;
     function timerPromiseTask(fn: Function, interval = 500) {
         if (taskTimer) global.clearTimeout(taskTimer);
@@ -155,7 +154,7 @@ export const setTimerPromiseTask = (fn: Function, interval = 500) => {
                 if (taskTimer) global.clearTimeout(taskTimer);
                 return;
             }
-            taskTimer = global.setTimeout(() => {
+            taskTimer = +global.setTimeout(() => {
                 timerPromiseTask(fn, interval);
             }, interval);
         });
@@ -591,8 +590,7 @@ function getKfExtensionConfigByCategory(
                 if (configByCategory) {
                     configByCategory[category] = {
                         ...(configByCategory[category] || {}),
-                        [extKey]:
-                            extConfig['config'][category as KfCategoryEnum],
+                        [extKey]: extConfig['config'][category],
                     };
                 }
             },
@@ -604,7 +602,7 @@ function getKfExtensionConfigByCategory(
 
 export const getSourceDataList = (
     extConfigs: KfExtConfigs,
-    sourceType: KfCategoryEnum,
+    sourceType: KfCategoryTypes,
 ): SourceData[] => {
     const target = extConfigs[sourceType];
     return Object.keys(target || {})
@@ -625,4 +623,14 @@ export const getSourceDataList = (
         .filter(
             (sourceData: SourceData | null) => !!sourceData,
         ) as SourceData[];
+};
+
+export const hidePasswordByLogger = (config: string) => {
+    let configCopy = JSON.parse(config);
+    Object.keys(configCopy || {}).forEach((key: string) => {
+        if (key.includes('password')) {
+            configCopy[key] = '******';
+        }
+    });
+    return JSON.stringify(configCopy);
 };

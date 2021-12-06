@@ -1,3 +1,4 @@
+import './setEnv';
 import { createApp, Component } from 'vue';
 import { Subject } from 'rxjs';
 import App from '@renderer/pages/index/App.vue';
@@ -21,25 +22,13 @@ import {
     Select,
 } from 'ant-design-vue';
 
-import '@kungfu-trader/kungfu-js-api/utils/processUtils';
 import { getUIComponents } from '@renderer/assets/methods/uiUtils';
 import { useGlobalStore } from '@renderer/pages/index/store/global';
 
 const app = createApp(App);
 
-app.use(store);
-
-const uics = getUIComponents();
-Object.keys(uics).forEach((key) => {
-    app.component(key, uics[key] as Component);
-});
-
-//this sort ensure $useGlobalStore can be get in mounted callback
-app.config.globalProperties.$registedKfUIComponents = Object.keys(uics);
-app.config.globalProperties.$bus = new Subject();
-app.config.globalProperties.$useGlobalStore = useGlobalStore;
-
-app.use(router)
+app.use(store)
+    .use(router)
     .use(Layout)
     .use(Tabs)
     .use(Button)
@@ -55,5 +44,15 @@ app.use(router)
     .use(InputNumber)
     .use(Select)
     .use(Form);
+
+const uics = getUIComponents();
+Object.keys(uics).forEach((key) => {
+    app.component(key, uics[key] as Component);
+});
+
+//this sort ensure $useGlobalStore can be get in mounted callback
+app.config.globalProperties.$registedKfUIComponents = Object.keys(uics);
+app.config.globalProperties.$bus = new Subject();
+app.config.globalProperties.$useGlobalStore = useGlobalStore;
 
 app.mount('#app');
