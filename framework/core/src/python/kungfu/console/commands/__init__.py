@@ -68,6 +68,7 @@ class PrioritizedCommandGroup(click.Group):
                 for key in [
                     "name",
                     "home",
+                    "extension_path",
                     "log_level",
                     "runtime_dir",
                     "archive_dir",
@@ -96,6 +97,12 @@ class PrioritizedCommandGroup(click.Group):
     "~/.config on linux, ~/Library/Application Support on mac",
 )
 @click.option(
+    "-X",
+    "--extension-path",
+    type=str,
+    help="where to find extensions",
+)
+@click.option(
     "-l",
     "--log_level",
     type=click.Choice(["trace", "debug", "info", "warning", "error", "critical"]),
@@ -117,7 +124,7 @@ class PrioritizedCommandGroup(click.Group):
 @click.help_option("-h", "--help")
 @click.version_option(kungfu.__version__, "--version", message=kungfu.__version__)
 @click.pass_context
-def kfc(ctx, home, log_level, name, code):
+def kfc(ctx, home, extension_path, log_level, name, code):
     if not home:
         osname = platform.system()
         user_home = os.path.expanduser("~")
@@ -135,6 +142,8 @@ def kfc(ctx, home, log_level, name, code):
             home = os.getenv("APPDATA", app_data)
         home = os.path.join(home, "kungfu", "home")
 
+    ctx.extension_path = extension_path
+
     os.environ["KF_HOME"] = ctx.home = home
     os.environ["KF_LOG_LEVEL"] = ctx.log_level = log_level
 
@@ -149,14 +158,12 @@ def kfc(ctx, home, log_level, name, code):
     ctx.dataset_dir = ensure_dir(ctx, "dataset")
     ctx.inbox_dir = ensure_dir(ctx, "inbox")
 
-    from kungfu.yijinjing.locator import Locator
-
     lf = kungfu.__binding__.longfist
     yjj = kungfu.__binding__.yijinjing
 
     # have to keep locator alive from python side
     # https://github.com/pybind/pybind11/issues/1546
-    ctx.runtime_locator = Locator(ctx.runtime_dir)
+    ctx.runtime_locator = yjj.locator(ctx.runtime_dir)
     ctx.config_location = yjj.location(
         lf.enums.mode.LIVE,
         lf.enums.category.SYSTEM,

@@ -34,10 +34,9 @@
   "kungfuConfig": {
     "key": "xtp",
     "name": "XTP",
-    "executor": "kfc",
     "config": {
       "td": {
-        "type": "broker/td/stock",
+        "type": ["stock"],
         "settings": [
           {
             "key": "account_name",

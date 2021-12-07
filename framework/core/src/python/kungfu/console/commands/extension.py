@@ -1,4 +1,5 @@
 import click
+import json
 import kungfu_extensions
 import os
 import re
@@ -31,6 +32,17 @@ def extension(ctx):
 def pass_ctx_from_parent(ctx):
     kfc.pass_ctx_from_parent(ctx)
     ctx.logger = ctx.parent.logger
+
+
+@extension.command(help="run extension")
+@click.option("-b", "--base", required=True, help="Base dir of the extension")
+@extension_command_context
+def run(ctx, base):
+    pass_ctx_from_parent(ctx)
+    with open(os.path.join(base, "package.json"), mode="r") as file:
+        package_json = json.load(file)
+    config = package_json.kungfuConfig
+
 
 
 @extension.command(help="install extension")
