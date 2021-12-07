@@ -41,6 +41,7 @@ def run(ctx, mode, category, group, name, low_latency, file):
     ctx.location = yjj.location(
         kfj.MODES[mode], kfj.CATEGORIES[category], group, name, ctx.runtime_locator
     )
+
     ctx.config = ctx.location.to(lf.types.Config())
     try:
         ctx.config = yjj.profile(ctx.runtime_locator).get(ctx.config)
@@ -48,7 +49,6 @@ def run(ctx, mode, category, group, name, low_latency, file):
         pass
 
     ctx.executors = ExecutorRegistry(ctx)
-    print(ctx.executors)
     ctx.executors[category][group][name](mode, low_latency)
 
 

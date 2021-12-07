@@ -246,18 +246,22 @@ exports.build = function () {
   if (hasSourceFor(packageJson, 'python')) {
     const srcDir = path.join('src', 'python', extensionName);
     spawnExec('yarn', ['kfc', 'engage', 'nuitka', '--module', '--output-dir=build', srcDir]);
-
-    const extDistDir = path.join('dist', extensionName);
-    fse.removeSync(extDistDir);
-    fse.ensureDirSync(extDistDir);
-    glob.sync(path.join('build', '*.so')).forEach(p => fse.move(p, path.join(extDistDir, path.basename(p))));
-
-    const packageJsonPath = path.join(process.cwd(), 'package.json');
-    fse.copyFile(packageJsonPath, path.join(extDistDir, 'package.json'));
   }
   if (hasSourceFor(packageJson, 'cpp')) {
     spawnExec('yarn', ['cmake-js', 'build']);
   }
+
+  const extDistDir = path.join('dist', extensionName);
+  fse.removeSync(extDistDir);
+  fse.ensureDirSync(extDistDir);
+  glob.sync(path.join('build', '*')).forEach(p => {
+    if (fse.lstatSync(p).isFile()) {
+      fse.move(p, path.join(extDistDir, path.basename(p)));
+    }
+  });
+
+  const packageJsonPath = path.join(process.cwd(), 'package.json');
+  fse.copyFile(packageJsonPath, path.join(extDistDir, 'package.json'));
 };
 
 exports.dist = function () {
