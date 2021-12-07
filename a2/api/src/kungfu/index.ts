@@ -3,7 +3,6 @@ import { KF_RUNTIME_DIR } from '@kungfu-trader/kungfu-js-api/config/pathConfig';
 import { kfLogger } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 
 const kf = kungfu();
-
 kfLogger.info('Load kungfu node');
 
 if (global.longfist === undefined) {

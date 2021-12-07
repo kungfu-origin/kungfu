@@ -35,37 +35,6 @@ export type AntInKungfuColor =
     | 'kf-color-waiting'
     | 'kf-color-error';
 
-export interface TdRow {
-    accountName: string;
-    accountId: string;
-    sourceId: string;
-    stateStatus: StateStatusEnum;
-    processStatus: boolean;
-    realizedPnl: number;
-    unrealizedPnl: number;
-    marketValue: number;
-    margin: number;
-    avail: number;
-}
-
-export interface MdRow {
-    sourceId: string;
-    stateStatus: StateStatusEnum;
-    processStatus: boolean;
-}
-
-export interface StrategyRow {
-    strategyId: string;
-    stateStatus: StateStatusEnum;
-    processStatus: boolean;
-    realizedPnl: number;
-    unrealizedPnl: number;
-    marketValue: number;
-    margin: number;
-    avail: number;
-    addTime: string;
-}
-
 export enum InstrumentTypeEnum {
     Unknown,
     Stock,

@@ -11,7 +11,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 
-import { modalVisibleComposition } from '@renderer/assets/methods/uiUtils';
+import { useModalVisible } from '@renderer/assets/methods/uiUtils';
 
 export default defineComponent({
     props: {
@@ -27,10 +27,7 @@ export default defineComponent({
     },
 
     setup(props, context) {
-        const { modalVisible, closeModal } = modalVisibleComposition(
-            props,
-            context,
-        );
+        const { modalVisible, closeModal } = useModalVisible(props, context);
 
         return {
             modalVisible,

@@ -93,7 +93,6 @@ import {
     KfExtConfig,
     SetKfConfigPayload,
     StateStatusEnum,
-    TdRow,
     KfConfig,
 } from '@kungfu-trader/kungfu-js-api/typings';
 import { mapState } from 'pinia';

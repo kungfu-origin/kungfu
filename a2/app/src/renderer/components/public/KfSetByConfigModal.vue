@@ -20,27 +20,30 @@
                 :key="item.key"
                 :label="item.name"
                 :name="item.key"
-                :required="item.required"
-                :rules="[
-                    {
-                        required: item.required,
-                        message: '该项为必填项',
-                        trigger: 'change',
-                    },
-                    ...(item.validator || [
-                        {
-                            validator: defaultValidator,
-                        },
-                    ]),
-                    ...(item.primary
-                        ? [
+                :rules="
+                    payload.type === 'update' && item.primary
+                        ? []
+                        : [
                               {
-                                  validator: primaryKeyValidator,
+                                  required: item.required,
+                                  message: '该项为必填项',
                                   trigger: 'change',
                               },
+                              ...(item.validator || [
+                                  {
+                                      validator: defaultValidator,
+                                  },
+                              ]),
+                              ...(item.primary
+                                  ? [
+                                        {
+                                            validator: primaryKeyValidator,
+                                            trigger: 'change',
+                                        },
+                                    ]
+                                  : []),
                           ]
-                        : []),
-                ]"
+                "
             >
                 <a-input
                     v-if="item.type === 'str'"
@@ -158,7 +161,7 @@ import { DashOutlined } from '@ant-design/icons-vue';
 
 import {
     initFormDataByConfig,
-    modalVisibleComposition,
+    useModalVisible,
     numberEnumInputType,
     stringEnumInputType,
 } from '@renderer/assets/methods/uiUtils';
@@ -199,10 +202,7 @@ export default defineComponent({
     },
 
     setup(props, context) {
-        const { modalVisible, closeModal } = modalVisibleComposition(
-            props,
-            context,
-        );
+        const { modalVisible, closeModal } = useModalVisible(props, context);
 
         const primaryKeys: string[] = (props.payload.config?.settings || [])
             .filter((item) => item.primary)
@@ -249,11 +249,13 @@ export default defineComponent({
             this.formRef
                 .validate()
                 .then(() => {
-                    this.closeModal();
                     this.$emit(
                         'confirm',
                         this.formState as unknown as StrategyData,
                     );
+                })
+                .then(() => {
+                    this.closeModal();
                 })
                 .catch((err: Error) => {
                     console.error(err);

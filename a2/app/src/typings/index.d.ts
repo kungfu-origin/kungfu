@@ -39,3 +39,35 @@ interface AntTableColumn {
 }
 
 type AntTableColumns = Array<AntTableColumn>;
+
+
+interface TdRow {
+    accountName: string;
+    accountId: string;
+    sourceId: string;
+    stateStatus: StateStatusEnum;
+    processStatus: boolean;
+    realizedPnl: number;
+    unrealizedPnl: number;
+    marketValue: number;
+    margin: number;
+    avail: number;
+}
+
+interface MdRow {
+    sourceId: string;
+    stateStatus: StateStatusEnum;
+    processStatus: boolean;
+}
+
+interface StrategyRow {
+    strategyId: string;
+    stateStatus: StateStatusEnum;
+    processStatus: boolean;
+    realizedPnl: number;
+    unrealizedPnl: number;
+    marketValue: number;
+    margin: number;
+    avail: number;
+    addTime: string;
+}

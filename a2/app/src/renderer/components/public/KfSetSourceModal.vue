@@ -47,17 +47,13 @@ import {
     KfCategoryTypes,
     SourceData,
 } from '@kungfu-trader/kungfu-js-api/typings';
-import {
-    defineComponent,
-    ref,
-    PropType,
-} from 'vue';
+import { defineComponent, ref, PropType } from 'vue';
 
 import {
     getInstrumentTypeData,
     getSourceDataList,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
-import { modalVisibleComposition } from '@renderer/assets/methods/uiUtils';
+import { useModalVisible } from '@renderer/assets/methods/uiUtils';
 
 export default defineComponent({
     props: {
@@ -76,10 +72,7 @@ export default defineComponent({
         const selectedSource = ref<string>('');
         const sourceDataList = ref<SourceData[]>([]);
 
-        const { modalVisible, closeModal } = modalVisibleComposition(
-            props,
-            context,
-        );
+        const { modalVisible, closeModal } = useModalVisible(props, context);
 
         return {
             modalVisible,

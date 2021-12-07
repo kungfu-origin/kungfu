@@ -1,6 +1,14 @@
 import fs from 'fs-extra';
 import path from 'path';
-import { Component, SetupContext, Ref, ref, watch } from 'vue';
+import {
+    Component,
+    ComputedRef,
+    SetupContext,
+    Ref,
+    ref,
+    watch,
+    computed,
+} from 'vue';
 import { APP_DIR } from '@kungfu-trader/kungfu-js-api/config/pathConfig';
 import { buildObjectFromArray } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import {
@@ -40,6 +48,11 @@ export const getUIComponents = (): {
         .map((file: string): KfUIComponent | null => {
             const fullpath = path.join(componentsDir, file);
             const uic = global.require(fullpath).default as Component;
+
+            if (!uic) {
+                return null;
+            }
+
             const { name } = uic;
             if (!name) {
                 console.error('no name property in components' + fullpath);
@@ -49,6 +62,7 @@ export const getUIComponents = (): {
             if (existedNames.includes(name)) {
                 console.error(`component name ${name} is existed, ${fullpath}`);
             }
+
             return {
                 name,
                 component: uic,
@@ -72,7 +86,7 @@ export const getStateStatusInfoByStatusType = (
     return '';
 };
 
-export const modalVisibleComposition = (
+export const useModalVisible = (
     props: { visible: boolean },
     context: SetupContext,
 ): { modalVisible: Ref<boolean>; closeModal: () => void } => {
@@ -85,11 +99,42 @@ export const modalVisibleComposition = (
     );
     const closeModal = () => {
         context.emit('update:visible', false);
+        context.emit('close');
     };
 
     return {
         modalVisible,
         closeModal,
+    };
+};
+
+export const useTableSearchInput = <T>(
+    targetList: Ref<T[]> | ComputedRef<T[]>,
+    keys: string[],
+): {
+    searchKeyword: Ref<string>;
+    tableData: ComputedRef<T[]>;
+} => {
+    const searchKeyword = ref<string>('');
+    const tableData = computed(() => {
+        return targetList.value.filter((item: T) => {
+            const combinedValue = keys
+                .map(
+                    (key: string) =>
+                        (
+                            (item as Record<string, unknown>)[key] as
+                                | string
+                                | number
+                        ).toString() || '',
+                )
+                .join('_');
+            return combinedValue.includes(searchKeyword.value);
+        });
+    });
+
+    return {
+        searchKeyword,
+        tableData,
     };
 };
 
