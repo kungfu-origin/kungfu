@@ -1,44 +1,37 @@
 <script setup lang="ts">
-import {
-    ref,
-    reactive,
-    computed,
-    ComputedRef,
-    onMounted,
-    getCurrentInstance,
-} from 'vue';
+import { ref, reactive, computed, onMounted, getCurrentInstance } from 'vue';
 import { storeToRefs } from 'pinia';
-
 import dayjs from 'dayjs';
-import {
-    FileTextOutlined,
-    SettingOutlined,
-    DeleteOutlined,
-} from '@ant-design/icons-vue';
 import { message, Modal } from 'ant-design-vue';
 
 import KfDashboard from '@renderer/components/public/KfDashboard.vue';
 import KfDashboardItem from '@renderer/components/public/KfDashboardItem.vue';
 import KfStateStatus from '@renderer/components/public/KfStateStatus.vue';
 import KfSetByConfigModal from '@renderer/components/public/KfSetByConfigModal.vue';
+import {
+    FileTextOutlined,
+    SettingOutlined,
+    DeleteOutlined,
+} from '@ant-design/icons-vue';
 
 import {
     KfConfig,
     KfCategoryTypes,
-    KfExtConfig,
+    KfExtOriginConfig,
     SetKfConfigPayload,
     StateStatusEnum,
     StrategyData,
+    KfLocation,
 } from '@kungfu-trader/kungfu-js-api/typings';
 
-import '@kungfu-trader/kungfu-js-api/kungfu/store';
-import {
-    addStrategy,
-    deleteStrategy,
-} from '@kungfu-trader/kungfu-js-api/actions';
 import { findTargetFromArray } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
-import { useTableSearchInput } from '@renderer/assets/methods/uiUtils';
+import {
+    useResetConfigModalPayload,
+    useTableSearchKeyword,
+    ensureRemoveLocation,
+} from '@renderer/assets/methods/uiUtils';
 import { columns } from './config';
+import { setKfConfig } from '@kungfu-trader/kungfu-js-api/kungfu/store';
 
 const app = getCurrentInstance();
 
@@ -49,17 +42,18 @@ const setStrategyModalVisible = ref<boolean>(false);
 const setStrategyConfigPayload = ref<SetKfConfigPayload>({
     type: 'add',
     title: '策略',
-    config: {} as KfExtConfig['config'][KfCategoryTypes],
+    config: {} as KfExtOriginConfig['config'][KfCategoryTypes],
 });
+const resetConfigModalPayload = useResetConfigModalPayload();
 
 const strategyList = reactive({
     value: ref<KfConfig[]>([]),
 });
-const strategyIdList: ComputedRef<string[]> = computed(() => {
-    return strategyList.value.map((item: KfConfig) => item.name);
+const strategyIdList = computed(() => {
+    return strategyList.value.map((item: KfConfig): string => item.name);
 });
-const strategyListResolved: ComputedRef<StrategyRow[]> = computed(() => {
-    return strategyList.value.map((item: KfConfig) => {
+const strategyListResolved = computed(() => {
+    return strategyList.value.map((item: KfConfig): StrategyRow => {
         const configValue = JSON.parse(item.value || '{}');
 
         return {
@@ -78,7 +72,7 @@ const strategyListResolved: ComputedRef<StrategyRow[]> = computed(() => {
     });
 });
 
-const { searchKeyword, tableData } = useTableSearchInput<StrategyRow>(
+const { searchKeyword, tableData } = useTableSearchKeyword<StrategyRow>(
     strategyListResolved,
     ['strategyId'],
 );
@@ -94,26 +88,19 @@ function handleOpenLog(record: StrategyRow) {
     console.log(record);
 }
 
+function handleCloseConfigModal() {
+    resetConfigModalPayload(setStrategyConfigPayload);
+}
+
 function handleRemoveStrategy(record: StrategyRow) {
-    const strategyId = record.strategyId;
-    return Modal.confirm({
-        title: `删除策略 ${strategyId}`,
-        content: `删除策略 ${strategyId} 所有数据，确认删除`,
-        okText: '确认',
-        cancelText: '取消',
-        onOk() {
-            return deleteStrategy(strategyId)
-                .then(() => {
-                    message.success('操作成功');
-                })
-                .then(() => {
-                    app?.proxy &&
-                        app?.proxy.$useGlobalStore().setKfConfigList();
-                })
-                .catch((err) => {
-                    message.error('操作失败', err.message);
-                });
-        },
+    const strategyLocation: KfLocation = {
+        category: 'strategy',
+        group: 'default',
+        name: record.strategyId,
+        mode: 'live',
+    };
+    ensureRemoveLocation(strategyLocation).then(() => {
+        app?.proxy && app?.proxy.$useGlobalStore().setKfConfigList();
     });
 }
 
@@ -124,9 +111,19 @@ function handleConfirmAddUpdateStrategy(strategyData: StrategyData) {
         okText: '确认',
         cancelText: '取消',
         onOk() {
-            return addStrategy(
-                strategyData.strategy_id,
-                strategyData.strategy_path,
+            const strategyLocation: KfLocation = {
+                category: 'strategy',
+                group: 'default',
+                name: strategyData.strategy_id,
+                mode: 'live',
+            };
+
+            return setKfConfig(
+                strategyLocation,
+                JSON.stringify({
+                    ...strategyData,
+                    add_time: +new Date().getTime() * Math.pow(10, 6),
+                }),
             )
                 .then(() => {
                     message.success('操作成功');
@@ -135,8 +132,8 @@ function handleConfirmAddUpdateStrategy(strategyData: StrategyData) {
                     app?.proxy &&
                         app?.proxy.$useGlobalStore().setKfConfigList();
                 })
-                .catch((err) => {
-                    message.error('操作失败', err.message);
+                .catch((err: Error) => {
+                    message.error('操作失败 ' + err.message);
                 });
         },
     });
@@ -197,21 +194,9 @@ function handleBodySizeChange({
     dashboardBodyWidth.value = width > 800 ? 800 : width;
 }
 
-function hanleOnSearch(e: string) {
-    console.log(e);
-}
-
 function getStateStatusName(processId: string) {
     processId;
     return StateStatusEnum.launching;
-}
-
-function handleCloseStrategyModal() {
-    setStrategyConfigPayload.value = {
-        type: 'add',
-        title: '策略',
-        config: {} as KfExtConfig['config'][KfCategoryTypes],
-    };
 }
 </script>
 
@@ -236,7 +221,6 @@ function handleCloseStrategyModal() {
                         v-model:value="searchKeyword"
                         placeholder="关键字"
                         style="width: 120px"
-                        @search="hanleOnSearch"
                     />
                 </KfDashboardItem>
             </template>
@@ -296,7 +280,7 @@ function handleCloseStrategyModal() {
             :payload="setStrategyConfigPayload"
             :primaryKeyCompareTarget="strategyIdList"
             @confirm="handleConfirmAddUpdateStrategy"
-            @close="handleCloseStrategyModal"
+            @close="handleCloseConfigModal"
         ></KfSetByConfigModal>
     </div>
 </template>

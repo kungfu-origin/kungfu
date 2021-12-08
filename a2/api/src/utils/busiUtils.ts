@@ -6,7 +6,7 @@ import {
     KfTradeValueCommonData,
     InstrumentTypeEnum,
     KfCategoryTypes,
-    KfExtConfig,
+    KfExtOriginConfig,
     KfExtConfigs,
     SourceData,
 } from '@kungfu-trader/kungfu-js-api/typings';
@@ -241,7 +241,7 @@ export const getInstrumentTypeData = (
 export const getKfExtensionConfig = (): Promise<
     KfExtConfigs | Record<string, unknown>
 > => {
-    const getExtConfigList = (): Promise<KfExtConfig[]> =>
+    const getExtConfigList = (): Promise<KfExtOriginConfig[]> =>
         Promise.resolve([
             {
                 key: 'sim',
@@ -574,16 +574,16 @@ export const getKfExtensionConfig = (): Promise<
             },
         ]);
 
-    return getExtConfigList().then((kfExtConfigList: KfExtConfig[]) => {
+    return getExtConfigList().then((kfExtConfigList: KfExtOriginConfig[]) => {
         return getKfExtensionConfigByCategory(kfExtConfigList);
     });
 };
 
 function getKfExtensionConfigByCategory(
-    extConfigs: KfExtConfig[],
+    extConfigs: KfExtOriginConfig[],
 ): KfExtConfigs | Record<string, unknown> {
     let configByCategory: KfExtConfigs | null = {};
-    extConfigs.forEach((extConfig: KfExtConfig) => {
+    extConfigs.forEach((extConfig: KfExtOriginConfig) => {
         const extKey = extConfig.key;
         (Object.keys(extConfig['config']) as KfCategoryTypes[]).forEach(
             (category: KfCategoryTypes) => {

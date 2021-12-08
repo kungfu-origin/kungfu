@@ -39,8 +39,8 @@ export default defineComponent({
             4: {
                 paId: 1,
                 direction: KfLayoutDirection.h,
-                contents: ['交易账户', '行情源'],
-                current: '4',
+                contents: ['交易账户'],
+                current: '交易账户',
             },
             5: {
                 paId: 1,
@@ -51,13 +51,13 @@ export default defineComponent({
                 paId: 5,
                 direction: KfLayoutDirection.v,
                 contents: ['策略进程'],
-                current: '6',
+                current: '策略进程',
             },
             8: {
                 paId: 2,
                 direction: KfLayoutDirection.h,
-                contents: ['8', '9'],
-                current: '9',
+                contents: ['8', '行情源'],
+                current: '行情源',
             },
             9: {
                 paId: 2,

@@ -4,7 +4,6 @@ export const columns: AntTableColumns = [
         dataIndex: 'sourceId',
         align: 'left',
         sorter: true,
-        fixed: 'left',
         width: 60,
     },
     {
@@ -26,6 +25,5 @@ export const columns: AntTableColumns = [
         dataIndex: 'actions',
         align: 'right',
         width: 140,
-        fixed: 'right',
     },
 ];

@@ -195,6 +195,11 @@ export default defineComponent({
             type: Array as PropType<string[]>,
             default: [],
         },
+
+        primaryKeyCompareExtra: {
+            type: String as PropType<string>,
+            default: '',
+        },
     },
 
     components: {
@@ -223,10 +228,15 @@ export default defineComponent({
 
             defaultValidator: () => Promise.resolve(),
             primaryKeyValidator: (): Promise<void> => {
-                const combineValue: string = primaryKeys
-                    .map((key) => formState[key])
-                    .join('_');
-                if (props.primaryKeyCompareTarget.includes(combineValue)) {
+                const combineValue: string = [
+                    props.primaryKeyCompareExtra || '',
+                    ...primaryKeys.map((key) => formState[key]),
+                ].join('_');
+                if (
+                    props.primaryKeyCompareTarget
+                        .map((item) => item.toLowerCase())
+                        .includes(combineValue.toLowerCase())
+                ) {
                     return Promise.reject(new Error(`${combineValue} 已存在`));
                 }
 

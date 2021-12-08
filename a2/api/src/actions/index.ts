@@ -1,7 +1,7 @@
+import path from 'path';
 import {
     getKfAllConfig,
     getKfConfigByName,
-    setKfConfig,
     removeKfConfig,
 } from '@kungfu-trader/kungfu-js-api/kungfu/store';
 import {
@@ -9,11 +9,14 @@ import {
     KfCategoryEnum,
     KfCategoryTypes,
     StrategyData,
+    KfLocation,
 } from '@kungfu-trader/kungfu-js-api/typings';
 import {
-    logger,
-    hidePasswordByLogger,
-} from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
+    KF_RUNTIME_DIR,
+    LOG_DIR,
+} from '@kungfu-trader/kungfu-js-api/config/pathConfig';
+import { pathExists, remove } from 'fs-extra';
+import { getProcessIdByKfLocation } from '@kungfu-trader/kungfu-js-api/kungfu/utils';
 
 export const getTdList = (): Promise<KfConfig[]> => {
     return getKfAllConfig().then((allConfig: KfConfig[]) => {
@@ -61,81 +64,50 @@ export const getAllKfConfigList = (): Promise<
 };
 
 export const getStrategyDataById = (
-    strategyId: string,
+    kfLocation: KfLocation,
 ): Promise<StrategyData> => {
-    return getKfConfigByName(strategyId, 'strategy').then(
-        (strategyConfig: KfConfig) => {
-            return {
-                ...JSON.parse(strategyConfig.value || '{}'),
-            } as StrategyData;
-        },
-    );
-};
-
-export const addTd = (accountId: string, config: string): Promise<void> => {
-    return new Promise((resolve) => {
-        setKfConfig(accountId, 'td', config);
-        logger.info(
-            'Add Trade Account',
-            accountId,
-            hidePasswordByLogger(config),
-        );
-        resolve();
+    return getKfConfigByName(kfLocation).then((strategyConfig: KfConfig) => {
+        return {
+            ...JSON.parse(strategyConfig.value || '{}'),
+        } as StrategyData;
     });
 };
 
-export const addMd = (sourceId: string, config: string): Promise<void> => {
-    return new Promise((resolve) => {
-        setKfConfig(sourceId, 'md', config);
-        logger.info(
-            'Add Market Source',
-            sourceId,
-            hidePasswordByLogger(config),
-        );
-        resolve();
-    });
-};
-
-export const addStrategy = (
-    strategyId: string,
-    strategyPath: string,
+export const deleteAllByKfLocation = (
+    kfLocation: KfLocation,
 ): Promise<void> => {
-    const addTime = +new Date().getTime() * Math.pow(10, 6);
-    return new Promise((resolve) => {
-        setKfConfig(
-            strategyId,
-            'strategy',
-            JSON.stringify({
-                strategy_id: strategyId,
-                strategy_path: strategyPath,
-                add_time: addTime,
-            } as StrategyData),
-        );
-        logger.info('Add Strategy', strategyId, strategyPath);
-        resolve();
-    });
+    return removeKfConfig(kfLocation)
+        .then(() => removeKfLocation(kfLocation))
+        .then(() => removeLog(kfLocation));
 };
 
-export const deleteTd = (accountId: string): Promise<void> => {
-    return new Promise((resolve) => {
-        removeKfConfig(accountId, 'td');
-        logger.info('Delete Trade Account', accountId);
-        resolve();
-    });
-};
+function removeKfLocation(kfLocation: KfLocation): Promise<void> {
+    const targetDir = path.resolve(
+        KF_RUNTIME_DIR,
+        kfLocation.category,
+        kfLocation.group,
+        kfLocation.name,
+    );
 
-export const deleteMd = (sourceId: string): Promise<void> => {
-    return new Promise((resolve) => {
-        removeKfConfig(sourceId, 'md');
-        logger.info('Delete Market Source', sourceId);
-        resolve();
-    });
-};
+    return pathExists(targetDir).then((isExisted: boolean) => {
+        if (isExisted) {
+            return remove(targetDir);
+        }
 
-export const deleteStrategy = (strategyId: string): Promise<void> => {
-    return new Promise((resolve) => {
-        removeKfConfig(strategyId, 'strategy');
-        logger.info('Delete Strategy', strategyId);
-        resolve();
+        console.warn(`Location Dir ${targetDir} is not existed`);
     });
-};
+}
+
+function removeLog(kfLocation: KfLocation): Promise<void> {
+    const logPath = path.resolve(
+        LOG_DIR,
+        `${getProcessIdByKfLocation(kfLocation)}.log`,
+    );
+    return pathExists(logPath).then((isExisted: boolean) => {
+        if (isExisted) {
+            return remove(logPath);
+        }
+
+        console.warn(`Log Path ${logPath} is not existed`);
+    });
+}

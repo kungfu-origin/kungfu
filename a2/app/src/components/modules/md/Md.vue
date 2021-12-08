@@ -87,7 +87,7 @@ import KfSetByConfigModal from '@renderer/components/public/KfSetByConfigModal.v
 
 import {
     KfCategoryTypes,
-    KfExtConfig,
+    KfExtOriginConfig,
     SetKfConfigPayload,
     StateStatusEnum,
     KfConfig,
@@ -95,8 +95,6 @@ import {
 import { mapState } from 'pinia';
 import { useGlobalStore } from '@renderer/pages/index/store/global';
 import { columns } from './config';
-
-import '@kungfu-trader/kungfu-js-api/kungfu/store';
 
 export default defineComponent({
     name: '行情源',
@@ -124,7 +122,7 @@ export default defineComponent({
             setMdConfigPayload: ref<SetKfConfigPayload>({
                 type: 'add',
                 title: '行情源',
-                config: {} as KfExtConfig['config'][KfCategoryTypes],
+                config: {} as KfExtOriginConfig['config'][KfCategoryTypes],
             }),
         };
     },

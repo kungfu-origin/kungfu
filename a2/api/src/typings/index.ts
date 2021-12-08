@@ -186,7 +186,7 @@ export interface KfConfigItem {
     tip?: string;
 }
 
-export interface KfExtConfig {
+export interface KfExtOriginConfig {
     key: string;
     name: string;
     config: {
@@ -199,14 +199,14 @@ export interface KfExtConfig {
 
 export type KfExtConfigs = {
     [key in KfCategoryTypes]?: {
-        [extKey: string]: KfExtConfig['config'][KfCategoryTypes];
+        [extKey: string]: KfExtOriginConfig['config'][KfCategoryTypes];
     };
 };
 
 export interface SetKfConfigPayload {
     type: 'add' | 'update';
     title: string;
-    config: KfExtConfig['config'][KfCategoryTypes];
+    config: KfExtOriginConfig['config'][KfCategoryTypes];
     initValue?: Record<string, KfConfigValue>;
 }
 

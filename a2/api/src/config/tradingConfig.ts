@@ -204,10 +204,12 @@ export const InstrumentType: Record<
     [InstrumentTypeEnum.Stock]: {
         name: isEnglish ? 'Stock' : '普通股票',
         color: 'orange',
+        level: 10,
     },
     [InstrumentTypeEnum.Future]: {
         name: isEnglish ? 'Future' : '期货',
         color: 'pink',
+        level: 10,
     },
     [InstrumentTypeEnum.Bond]: {
         name: isEnglish ? 'Bond' : '债券',
@@ -216,6 +218,7 @@ export const InstrumentType: Record<
     [InstrumentTypeEnum.StockOption]: {
         name: isEnglish ? 'StockOption' : '股票期权',
         color: 'blue',
+        level: 10,
     },
     [InstrumentTypeEnum.Fund]: {
         name: isEnglish ? 'Fund' : '基金',
@@ -236,6 +239,7 @@ export const InstrumentType: Record<
     [InstrumentTypeEnum.Simu]: {
         name: isEnglish ? 'Simu' : '模拟',
         color: 'green',
+        level: 10,
     },
 };
 

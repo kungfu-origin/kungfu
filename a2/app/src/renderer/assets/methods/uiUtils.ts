@@ -25,10 +25,22 @@ import {
     VolumeCondition,
 } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
 import {
+    InstrumentTypeEnum,
+    InstrumentTypes,
+    KfCategoryTypes,
     KfConfigValue,
+    KfExtOriginConfig,
+    KfExtConfigs,
     KfTradeValueCommonData,
     SetKfConfigPayload,
+    KfLocation,
 } from '@kungfu-trader/kungfu-js-api/typings';
+import { message, Modal } from 'ant-design-vue';
+import {
+    getCategoryName,
+    getIdByKfLocation,
+} from '@kungfu-trader/kungfu-js-api/kungfu/utils';
+import { deleteAllByKfLocation } from '@kungfu-trader/kungfu-js-api/actions';
 
 export interface KfUIComponent {
     name: string;
@@ -108,7 +120,17 @@ export const useModalVisible = (
     };
 };
 
-export const useTableSearchInput = <T>(
+export const useResetConfigModalPayload = () => {
+    return (targetPayload: Ref<SetKfConfigPayload>): void => {
+        targetPayload.value.title = '';
+        targetPayload.value.type = 'add';
+        targetPayload.value.config =
+            {} as KfExtOriginConfig['config'][KfCategoryTypes];
+        targetPayload.value.initValue = {};
+    };
+};
+
+export const useTableSearchKeyword = <T>(
     targetList: Ref<T[]> | ComputedRef<T[]>,
     keys: string[],
 ): {
@@ -198,4 +220,73 @@ export const stringEnumInputType: {
     [prop: string]: Record<string, KfTradeValueCommonData>;
 } = {
     exchange: ExchangeIds,
+};
+
+export const buildExtTypeMap = (
+    extConfigs: KfExtConfigs,
+    category: KfCategoryTypes,
+): Record<string, InstrumentTypes> => {
+    const extTypeMap: Record<string, InstrumentTypes> = {};
+    const targetCategoryConfig: Record<
+        string,
+        KfExtOriginConfig['config'][KfCategoryTypes]
+    > = extConfigs[category] || {};
+
+    Object.keys(targetCategoryConfig).forEach((extKey: string) => {
+        const configInKfExtConfig = targetCategoryConfig[extKey];
+        let types = configInKfExtConfig?.type || [];
+        if (typeof types === 'string') {
+            types = [types];
+        }
+
+        if (!types.length) {
+            extTypeMap[extKey] = 'Unknown';
+            return;
+        }
+
+        const primaryType = types.sort(
+            (type1: InstrumentTypes, type2: InstrumentTypes) => {
+                const level1 =
+                    (InstrumentType[InstrumentTypeEnum[type1]] || {}).level ||
+                    0;
+                const level2 =
+                    (InstrumentType[InstrumentTypeEnum[type2]] || {}).level ||
+                    0;
+                return level2 - level1;
+            },
+        )[0];
+
+        extTypeMap[extKey] = primaryType;
+    });
+
+    return extTypeMap;
+};
+
+export const ensureRemoveLocation = (kfLocation: KfLocation): Promise<void> => {
+    const categoryName = getCategoryName(kfLocation);
+    const id = getIdByKfLocation(kfLocation);
+    return new Promise((resolve) => {
+        Modal.confirm({
+            title: `删除${categoryName} ${id}`,
+            content: `删除${categoryName} ${id} 所有数据, 如果该${categoryName}进程正在运行, 也将停止进程, 确认删除`,
+            okText: '确认',
+            cancelText: '取消',
+            onOk() {
+                return deleteAllByKfLocation(kfLocation)
+                    .then(() => {
+                        message.success('操作成功');
+                    })
+                    .then(() => {
+                        resolve();
+                    })
+                    .catch((err) => {
+                        console.log(err);
+                        message.error('操作失败', err.message);
+                    });
+            },
+            onCancel() {
+                resolve();
+            },
+        });
+    });
 };
