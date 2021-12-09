@@ -1,6 +1,5 @@
-import {
-    KfLocation,
-} from '@kungfu-trader/kungfu-js-api/typings';
+import { KfCategory } from '../config/tradingConfig';
+import { KfLocation } from '../typings';
 
 export const getProcessIdByKfLocation = (kfLocation: KfLocation): string => {
     if (kfLocation.category === 'td') {
@@ -9,6 +8,8 @@ export const getProcessIdByKfLocation = (kfLocation: KfLocation): string => {
         return `${kfLocation.category}_${kfLocation.group}`;
     } else if (kfLocation.category === 'strategy') {
         return `${kfLocation.category}_${kfLocation.name}`;
+    } else if (kfLocation.category === 'system') {
+        return kfLocation.name;
     }
 
     throw new Error(`Category ${kfLocation.category} is illegal`);
@@ -27,12 +28,8 @@ export const getIdByKfLocation = (kfLocation: KfLocation): string => {
 };
 
 export const getCategoryName = (kfLocation: KfLocation): string => {
-    if (kfLocation.category === 'td') {
-        return '交易账户';
-    } else if (kfLocation.category === 'md') {
-        return '行情源';
-    } else if (kfLocation.category === 'strategy') {
-        return '策略';
+    if (KfCategory[kfLocation.category]) {
+        return KfCategory[kfLocation.category].name;
     }
 
     throw new Error(`Category ${kfLocation.category} is illegal`);

@@ -89,7 +89,6 @@ import {
     KfCategoryTypes,
     KfExtOriginConfig,
     SetKfConfigPayload,
-    StateStatusEnum,
     KfConfig,
 } from '@kungfu-trader/kungfu-js-api/typings';
 import { mapState } from 'pinia';
@@ -141,7 +140,7 @@ export default defineComponent({
             return this.mdList.map((item: KfConfig) => {
                 return {
                     sourceId: item.name,
-                    stateStatus: StateStatusEnum.Unknown,
+                    stateStatus: 'Unknown',
                     processStatus: false,
                 };
             });
@@ -189,7 +188,7 @@ export default defineComponent({
 
         getStateStatusName(processId: string) {
             processId;
-            return StateStatusEnum.launching;
+            return 'Unknown';
         },
     },
 });

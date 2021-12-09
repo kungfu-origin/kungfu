@@ -4,9 +4,13 @@ import {
     KfLayoutDirection,
     KfLayoutTargetDirectionClassName,
 } from '@root/src/typings/enums';
-import { KfConfig, KfExtConfigs } from '@kungfu-trader/kungfu-js-api/typings';
+import { KfExtConfigs, KfConfig } from '@kungfu-trader/kungfu-js-api/typings';
 import { getKfExtensionConfig } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { getAllKfConfigList } from '@kungfu-trader/kungfu-js-api/actions';
+import {
+    Pm2ProcessStatusDetailData,
+    Pm2ProcessStatusData,
+} from '@kungfu-trader/kungfu-js-api/utils/processUtils';
 
 interface GlobalState {
     boardsMap: KfLayout.BoardsMap;
@@ -16,6 +20,9 @@ interface GlobalState {
     tdList: KfConfig[];
     mdList: KfConfig[];
     strategyList: KfConfig[];
+
+    processStatus: Pm2ProcessStatusData;
+    processStatusWithDetail: Pm2ProcessStatusDetailData;
 }
 
 export const useGlobalStore = defineStore('global', {
@@ -29,10 +36,23 @@ export const useGlobalStore = defineStore('global', {
             tdList: [],
             mdList: [],
             strategyList: [],
+
+            processStatus: {},
+            processStatusWithDetail: {},
         };
     },
 
     actions: {
+        setProcessStatus(processStatus: Pm2ProcessStatusData) {
+            this.processStatus = toRaw(processStatus);
+        },
+
+        setProcessStatusWithDetail(
+            processStatusWithDetail: Pm2ProcessStatusDetailData,
+        ) {
+            this.processStatusWithDetail = toRaw(processStatusWithDetail);
+        },
+
         setKfConfigList() {
             return getAllKfConfigList().then((res) => {
                 const { md, td, strategy } = res;

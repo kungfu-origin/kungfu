@@ -1,75 +1,48 @@
 import path from 'path';
-import {
-    getKfAllConfig,
-    getKfConfigByName,
-    removeKfConfig,
-} from '@kungfu-trader/kungfu-js-api/kungfu/store';
+import { getKfAllConfig, removeKfConfig } from '../kungfu/store';
 import {
     KfConfig,
+    KfLocation,
+    KfModeTypes,
     KfCategoryEnum,
     KfCategoryTypes,
-    StrategyData,
-    KfLocation,
-} from '@kungfu-trader/kungfu-js-api/typings';
-import {
-    KF_RUNTIME_DIR,
-    LOG_DIR,
-} from '@kungfu-trader/kungfu-js-api/config/pathConfig';
+    KfModeEnum,
+    KfConfigOrigin,
+} from '../typings';
+import { KF_RUNTIME_DIR, LOG_DIR } from '../config/pathConfig';
 import { pathExists, remove } from 'fs-extra';
-import { getProcessIdByKfLocation } from '@kungfu-trader/kungfu-js-api/kungfu/utils';
-
-export const getTdList = (): Promise<KfConfig[]> => {
-    return getKfAllConfig().then((allConfig: KfConfig[]) => {
-        return allConfig.filter((config: KfConfig) => {
-            return config.category === KfCategoryEnum.td;
-        });
-    });
-};
-
-export const getMdList = (): Promise<KfConfig[]> => {
-    return getKfAllConfig().then((allConfig: KfConfig[]) => {
-        return allConfig.filter((config: KfConfig) => {
-            return config.category === KfCategoryEnum.md;
-        });
-    });
-};
-
-export const getStrategyList = (): Promise<KfConfig[]> => {
-    return getKfAllConfig().then((allConfig: KfConfig[]) => {
-        return allConfig.filter((config: KfConfig) => {
-            return config.category === KfCategoryEnum.strategy;
-        });
-    });
-};
+import { getProcessIdByKfLocation } from '../kungfu/utils';
 
 export const getAllKfConfigList = (): Promise<
     Record<KfCategoryTypes, KfConfig[]>
 > => {
-    return getKfAllConfig().then((allConfig: KfConfig[]) => {
+    return getKfAllConfig().then((allConfig: KfConfigOrigin[]) => {
+        const allConfigResolved = allConfig.map(
+            (config: KfConfigOrigin): KfConfig => {
+                return {
+                    ...config,
+                    category: KfCategoryEnum[
+                        config.category
+                    ] as KfCategoryTypes,
+                    mode: KfModeEnum[config.mode] as KfModeTypes,
+                };
+            },
+        );
+
         return {
-            md: allConfig.filter((config: KfConfig) => {
-                return config.category === KfCategoryEnum.md;
+            md: allConfigResolved.filter((config: KfConfig) => {
+                return config.category === 'md';
             }),
-            td: allConfig.filter((config: KfConfig) => {
-                return config.category === KfCategoryEnum.td;
+            td: allConfigResolved.filter((config: KfConfig) => {
+                return config.category === 'td';
             }),
-            strategy: allConfig.filter((config: KfConfig) => {
-                return config.category === KfCategoryEnum.strategy;
+            strategy: allConfigResolved.filter((config: KfConfig) => {
+                return config.category === 'strategy';
             }),
-            system: allConfig.filter((config: KfConfig) => {
-                return config.category === KfCategoryEnum.system;
+            system: allConfigResolved.filter((config: KfConfig) => {
+                return config.category === 'system';
             }),
         };
-    });
-};
-
-export const getStrategyDataById = (
-    kfLocation: KfLocation,
-): Promise<StrategyData> => {
-    return getKfConfigByName(kfLocation).then((strategyConfig: KfConfig) => {
-        return {
-            ...JSON.parse(strategyConfig.value || '{}'),
-        } as StrategyData;
     });
 };
 

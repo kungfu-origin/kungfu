@@ -1,8 +1,8 @@
 import path from 'path';
 import moment from 'moment';
 
-import { addFileSync } from '@kungfu-trader/kungfu-js-api/utils/fileUtils';
-import { KF_HOME_BASE_DIR_RESOLVE } from '@kungfu-trader/kungfu-js-api/config/homePathConfig';
+import { addFileSync } from '../utils/fileUtils';
+import { KF_HOME_BASE_DIR_RESOLVE } from '../config/homePathConfig';
 
 addFileSync('', KF_HOME_BASE_DIR_RESOLVE, 'folder');
 export const KF_HOME_BASE_DIR = KF_HOME_BASE_DIR_RESOLVE;

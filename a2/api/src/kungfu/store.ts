@@ -1,29 +1,14 @@
-import { configStore } from '@kungfu-trader/kungfu-js-api/kungfu';
-import { KfConfig, KfLocation } from '@kungfu-trader/kungfu-js-api/typings';
+import path from 'path';
+import { configStore } from '../kungfu';
+import { KfConfigOrigin, KfLocation } from '../typings';
 
-import {
-    kfLogger,
-    hidePasswordByLogger,
-} from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
+import { kfLogger, hidePasswordByLogger } from '../utils/busiUtils';
 
-type AllConfig = Record<string, KfConfig>;
+type AllConfig = Record<string, KfConfigOrigin>;
 
-export const getKfAllConfig = (): Promise<KfConfig[]> => {
-    kfLogger.info('Get ALL Kungfu Config');
+export const getKfAllConfig = (): Promise<KfConfigOrigin[]> => {
     return Promise.resolve(
         Object.values(configStore.getAllConfig() as AllConfig),
-    );
-};
-export const getKfConfigByName = (
-    kfLocation: KfLocation,
-): Promise<KfConfig> => {
-    return Promise.resolve(
-        configStore.getConfig(
-            kfLocation.category,
-            kfLocation.group,
-            kfLocation.name,
-            kfLocation.mode,
-        ),
     );
 };
 

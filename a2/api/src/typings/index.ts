@@ -1,16 +1,12 @@
+import { Pm2ProcessStatusTypes } from '../utils/processUtils';
+
 export interface KfTradeValueCommonData {
     name: string;
-    color?: AntInKungfuColor;
+    color?: AntInKungfuColorTypes;
     level?: number;
 }
 
-export enum StateStatusEnum {
-    online = 'online',
-    stopping = 'stopping',
-    stopped = 'stopped',
-    launching = 'launching',
-    errored = 'errored',
-    waitingrestart = 'waitingrestart',
+export enum BrokerStateStatusEnum {
     Pending = 0,
     Idle = 1,
     DisConnected = 2,
@@ -21,7 +17,11 @@ export enum StateStatusEnum {
     Unknown = '',
 }
 
-export type AntInKungfuColor =
+export type BrokerStateStatusTypes = keyof typeof BrokerStateStatusEnum;
+
+export type ProcessStatusTypes = Pm2ProcessStatusTypes | BrokerStateStatusTypes;
+
+export type AntInKungfuColorTypes =
     | 'default'
     | 'orange'
     | 'pink'
@@ -217,6 +217,8 @@ export enum KfCategoryEnum {
     system,
 }
 
+export type KfCategoryTypes = keyof typeof KfCategoryEnum;
+
 export enum KfModeEnum {
     LIVE,
     DATA,
@@ -224,7 +226,7 @@ export enum KfModeEnum {
     BACKTEST,
 }
 
-export type KfCategoryTypes = keyof typeof KfCategoryEnum;
+export type KfModeTypes = keyof typeof KfModeEnum;
 
 interface KfLocationBase {
     group: string;
@@ -233,7 +235,7 @@ interface KfLocationBase {
 
 export type KfLocation = {
     category: KfCategoryTypes;
-    mode: string;
+    mode: KfModeTypes;
 } & KfLocationBase;
 
 export type KfLocationOrigin = {
@@ -241,7 +243,12 @@ export type KfLocationOrigin = {
     mode: KfModeEnum;
 } & KfLocationBase;
 
-export type KfConfig = KfLocationOrigin & {
+export type KfConfigOrigin = KfLocationOrigin & {
+    location_uid: number;
+    value: string;
+};
+
+export type KfConfig = KfLocation & {
     location_uid: number;
     value: string;
 };

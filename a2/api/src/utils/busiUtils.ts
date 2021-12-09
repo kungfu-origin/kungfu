@@ -1,7 +1,9 @@
 import path from 'path';
+import dayjs from 'dayjs';
+import fse from 'fs-extra';
 import log4js from 'log4js';
-import { buildProcessLogPath } from '@kungfu-trader/kungfu-js-api/config/pathConfig';
-import { InstrumentType } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
+import { buildProcessLogPath } from '../config/pathConfig';
+import { InstrumentType } from '../config/tradingConfig';
 import {
     KfTradeValueCommonData,
     InstrumentTypeEnum,
@@ -9,7 +11,7 @@ import {
     KfExtOriginConfig,
     KfExtConfigs,
     SourceData,
-} from '@kungfu-trader/kungfu-js-api/typings';
+} from '../typings';
 
 interface SourceAccountId {
     source: string;
@@ -633,4 +635,63 @@ export const hidePasswordByLogger = (config: string) => {
         }
     });
     return JSON.stringify(configCopy);
+};
+
+export const getTradingDate = (today = true): string => {
+    if (today) {
+        return dayjs().format('YYYY-MM-DD');
+    }
+
+    const currentTimestamp = dayjs().valueOf();
+    const tradingDayTimestamp = +dayjs()
+        .set('hours', 15)
+        .set('minutes', 30)
+        .valueOf();
+
+    if (currentTimestamp > tradingDayTimestamp) {
+        return dayjs().add(1, 'day').format('YYYY-MM-DD');
+    } else {
+        return dayjs().format('YYYY-MM-DD');
+    }
+};
+
+export const listDirSync = (filePath: string): string[] => {
+    fse.ensureDirSync(filePath);
+    return fse.readdirSync(filePath);
+};
+
+export const removeJournal = (targetFolder: string): Promise<void> => {
+    function iterator(folder: string) {
+        const items = listDirSync(folder);
+
+        if (!items) return;
+
+        const folders = items.filter((f: string) => {
+            const stat = fse.statSync(path.join(folder, f));
+
+            if (stat.isDirectory()) return true;
+            return false;
+        });
+
+        const files = items.filter((f: string) => {
+            const stat = fse.statSync(path.join(folder, f));
+
+            if (stat.isFile()) return true;
+            return false;
+        });
+
+        files.forEach((f: string) => {
+            if (f.includes('.journal')) {
+                fse.removeSync(path.join(folder, f));
+            }
+        });
+
+        folders.forEach((f: string) => {
+            iterator(path.join(folder, f));
+        });
+    }
+
+    iterator(targetFolder);
+
+    return Promise.resolve();
 };

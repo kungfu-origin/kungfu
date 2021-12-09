@@ -6,55 +6,39 @@
                 stateStatusData?.color || '',
                 isWaveStatus(stateStatusData?.color) ? 'kf-dot-wave' : '',
             ]"
-            v-if="stateStatusData"
+            v-if="stateStatusData && (stateStatusData.level || 0) >= 1"
         ></div>
-        {{ stateStatusData?.name || '--' }}
+        {{
+            +(stateStatusData?.level || 0) === 0 ? '--' : stateStatusData?.name
+        }}
     </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, PropType, ref } from 'vue';
 import {
-    AntInKungfuColor,
+    AntInKungfuColorTypes,
     KfTradeValueCommonData,
-    StateStatusEnum,
+    ProcessStatusTypes,
 } from '@kungfu-trader/kungfu-js-api/typings/index';
-import { StateStatusConfig } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
+import { getStateStatusData } from '@renderer/assets/methods/uiUtils';
 
 export default defineComponent({
     name: 'KfStateStatus',
     props: {
         statusName: {
-            type: String as PropType<StateStatusEnum>,
+            type: String as PropType<ProcessStatusTypes>,
         },
     },
 
-    setup(props) {
-        const getStatusData = (
-            name: StateStatusEnum | undefined,
-        ): KfTradeValueCommonData | undefined => {
-            return name === undefined ? undefined : StateStatusConfig[name];
-        };
-        const statusName = props.statusName;
-        const stateStatusData: KfTradeValueCommonData | undefined =
-            getStatusData(statusName);
-
-        return {
-            stateStatusData: ref<KfTradeValueCommonData | undefined>(
-                stateStatusData,
-            ),
-            getStatusData,
-        };
-    },
-
-    watch: {
-        statusName(newName) {
-            this.stateStatusData = this.getStatusData(newName);
+    computed: {
+        stateStatusData(): KfTradeValueCommonData | undefined {
+            return getStateStatusData(this.statusName);
         },
     },
 
     methods: {
-        isWaveStatus(statusColor: AntInKungfuColor | undefined) {
+        isWaveStatus(statusColor: AntInKungfuColorTypes | undefined) {
             if (statusColor === undefined) return false;
             if (statusColor === 'kf-color-error') return false;
             return true;

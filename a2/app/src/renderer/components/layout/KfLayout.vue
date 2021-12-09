@@ -30,7 +30,9 @@
                 </a-layout-content>
             </a-layout>
         </a-layout>
-        <a-layout-footer></a-layout-footer>
+        <a-layout-footer>
+            <KfProcessStatusController></KfProcessStatusController>
+        </a-layout-footer>
     </a-layout>
 </template>
 
@@ -38,10 +40,13 @@
 import { defineComponent, reactive, toRefs } from 'vue';
 import { TeamOutlined, ThunderboltOutlined } from '@ant-design/icons-vue';
 
+import KfProcessStatusController from '@renderer/components/layout/KfProcessStatusController.vue';
+
 export default defineComponent({
     components: {
         TeamOutlined,
         ThunderboltOutlined,
+        KfProcessStatusController,
     },
 
     setup() {
@@ -111,7 +116,7 @@ export default defineComponent({
     .ant-layout-footer {
         height: @layout-footer-height;
         line-height: @layout-footer-height;
-        padding: 0;
+        padding: 0 8px 0 0;
     }
 }
 </style>

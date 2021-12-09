@@ -3,7 +3,6 @@ const isEnglish = false;
 import {
     KfTradeValueCommonData,
     InstrumentTypeEnum,
-    StateStatusEnum,
     HedgeFlagEnum,
     PriceTypeEnum,
     VolumeConditionEnum,
@@ -13,81 +12,114 @@ import {
     SideEnum,
     DirectionEnum,
     KfCategoryEnum,
-} from '@kungfu-trader/kungfu-js-api/typings';
+    ProcessStatusTypes,
+    KfCategoryTypes,
+    BrokerStateStatusTypes
+} from '../typings';
 
-export const StateStatusConfig: Record<
-    StateStatusEnum,
+import { Pm2ProcessStatusTypes } from '../utils/processUtils';
+
+export const Pm2ProcessStatus: Record<
+    Pm2ProcessStatusTypes,
     KfTradeValueCommonData
 > = {
-    [StateStatusEnum.online]: {
+    ['online']: {
         name: isEnglish ? 'Running' : '运行中',
         color: 'kf-color-running',
         level: 1,
     },
-    [StateStatusEnum.stopping]: {
+    ['stopping']: {
         name: isEnglish ? 'Stopping' : '停止中',
         color: 'kf-color-waiting',
-        level: 0,
+        level: 1,
     },
-    [StateStatusEnum.stopped]: {
+    ['stopped']: {
         name: isEnglish ? 'Stopped' : '已停止',
         color: 'kf-color-waiting',
         level: 0,
     },
-    [StateStatusEnum.launching]: {
+    ['launching']: {
         name: isEnglish ? 'Launching' : '启动中',
         color: 'kf-color-waiting',
-        level: 0,
+        level: 1,
     },
-    [StateStatusEnum.errored]: {
+    ['errored']: {
         name: isEnglish ? 'Errored' : '错误',
         color: 'kf-color-error',
         level: -1,
     },
-    [StateStatusEnum.waitingrestart]: {
+    ['waiting restart']: {
         name: isEnglish ? 'Stopped' : '待重启',
         color: 'kf-color-waiting',
         level: 0,
     },
-    [StateStatusEnum.Pending]: {
+    ['one-launch-status']: {
+        name: isEnglish ? 'Launching' : '启动中',
+        color: 'kf-color-waiting',
+        level: 1,
+    },
+};
+
+export const BrokerStateStatus: Record<BrokerStateStatusTypes, KfTradeValueCommonData> = {
+    ['Pending']: {
         name: isEnglish ? 'Pending' : '等待中',
         color: 'kf-color-waiting',
-        level: 0,
+        level: 1,
     },
-    [StateStatusEnum.Idle]: {
+    ['Idle']: {
         name: isEnglish ? 'Idle' : '无数据',
         color: 'kf-color-waiting',
-        level: 0,
+        level: 1,
     },
-    [StateStatusEnum.DisConnected]: {
+    ['DisConnected']: {
         name: isEnglish ? 'Disconnected' : '已断开',
         color: 'kf-color-error',
         level: -1,
     },
-    [StateStatusEnum.Connected]: {
+    ['Connected']: {
         name: isEnglish ? 'Connected' : '已连接',
         color: 'kf-color-waiting',
-        level: 0,
+        level: 1,
     },
-    [StateStatusEnum.LoggedIn]: {
+    ['LoggedIn']: {
         name: isEnglish ? 'LoggedIn' : '已登录',
         color: 'kf-color-waiting',
-        level: 0,
+        level: 1,
     },
-    [StateStatusEnum.LoginFailed]: {
+    ['LoginFailed']: {
         name: isEnglish ? 'LoginFailed' : '登录失败',
         color: 'kf-color-error',
         level: -1,
     },
-    [StateStatusEnum.Ready]: {
+    ['Ready']: {
         name: isEnglish ? 'Ready' : '就绪',
         color: 'kf-color-running',
-        level: 1,
+        level: 2,
     },
-    [StateStatusEnum.Unknown]: {
+    ['Unknown']: {
         name: '--',
         color: 'kf-color-waiting',
         level: 0,
+    },
+}
+
+export const StateStatus: Record<ProcessStatusTypes, KfTradeValueCommonData> = {
+    ...Pm2ProcessStatus,
+    ...BrokerStateStatus
+};
+
+export const KfCategory: Record<KfCategoryTypes, KfTradeValueCommonData> = {
+    ['system']: {
+        name: isEnglish ? 'System' : '系统服务',
+        color: 'red',
+        level: 100,
+    },
+    ['md']: { name: isEnglish ? 'Md' : '行情源', color: 'pink', level: 90 },
+    ['td']: { name: isEnglish ? 'Td' : '交易账户', color: 'blue', level: 80 },
+    ['strategy']: {
+        name: isEnglish ? 'Strategy' : '策略',
+        color: 'cyan',
+        level: 70,
     },
 };
 
@@ -208,12 +240,12 @@ export const InstrumentType: Record<
     },
     [InstrumentTypeEnum.Future]: {
         name: isEnglish ? 'Future' : '期货',
-        color: 'pink',
+        color: 'red',
         level: 10,
     },
     [InstrumentTypeEnum.Bond]: {
         name: isEnglish ? 'Bond' : '债券',
-        color: 'red',
+        color: 'pink',
     },
     [InstrumentTypeEnum.StockOption]: {
         name: isEnglish ? 'StockOption' : '股票期权',
@@ -226,7 +258,7 @@ export const InstrumentType: Record<
     },
     [InstrumentTypeEnum.TechStock]: {
         name: isEnglish ? 'TechStock' : '科创板股票',
-        color: 'orange',
+        color: 'blue',
     },
     [InstrumentTypeEnum.Index]: {
         name: isEnglish ? 'Index' : '指数',

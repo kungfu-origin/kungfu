@@ -17,11 +17,11 @@ import {
     KfCategoryTypes,
     KfExtOriginConfig,
     SetKfConfigPayload,
-    StateStatusEnum,
     KfConfig,
     KfExtConfigs,
     InstrumentTypeEnum,
     KfLocation,
+ProcessStatusTypes,
 } from '@kungfu-trader/kungfu-js-api/typings';
 import { InstrumentType } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
 
@@ -48,13 +48,13 @@ const setTdConfigPayload = ref<SetKfConfigPayload>({
 const resetConfigModalPayload = useResetConfigModalPayload();
 const currentSelectedSourceId = ref<string>('');
 
-const extConfigs = reactive({
-    value: ref<KfExtConfigs>({}),
+const extConfigs = reactive<{ value: KfExtConfigs }>({
+    value: {},
 });
 const extTypeMap = computed(() => buildExtTypeMap(extConfigs.value, 'td'));
 
 const tdList = reactive({
-    value: ref<KfConfig[]>([]),
+    value: [],
 });
 const tdIdList = computed(() => {
     return tdList.value.map(
@@ -72,7 +72,7 @@ const tdListResolved = computed(() => {
                 (configValue?.account_name as string | undefined) || item.name,
             accountId: item.name,
             sourceId: item.group,
-            stateStatus: StateStatusEnum.Unknown,
+            stateStatus: 'Unknown',
             processStatus: false,
             realizedPnl: 0,
             unrealizedPnl: 0,
@@ -132,9 +132,9 @@ function getTdProcessId(
     return `${sourceId}_${accountId}`;
 }
 
-function getStateStatusName(processId: string) {
+function getStateStatusName(processId: string): ProcessStatusTypes {
     processId;
-    return StateStatusEnum.launching;
+    return 'Unknown';
 }
 
 function handleCloseConfigModal() {
@@ -147,7 +147,7 @@ function handleRemoveTd(record: TdRow) {
         category: 'td',
         group: record.sourceId,
         name: record.accountId,
-        mode: 'live',
+        mode: 'LIVE',
     };
     ensureRemoveLocation(tdLocation).then(() => {
         app?.proxy && app?.proxy.$useGlobalStore().setKfConfigList();

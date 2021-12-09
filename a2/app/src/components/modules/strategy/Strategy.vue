@@ -19,7 +19,6 @@ import {
     KfCategoryTypes,
     KfExtOriginConfig,
     SetKfConfigPayload,
-    StateStatusEnum,
     StrategyData,
     KfLocation,
 } from '@kungfu-trader/kungfu-js-api/typings';
@@ -47,7 +46,7 @@ const setStrategyConfigPayload = ref<SetKfConfigPayload>({
 const resetConfigModalPayload = useResetConfigModalPayload();
 
 const strategyList = reactive({
-    value: ref<KfConfig[]>([]),
+    value: [],
 });
 const strategyIdList = computed(() => {
     return strategyList.value.map((item: KfConfig): string => item.name);
@@ -58,7 +57,7 @@ const strategyListResolved = computed(() => {
 
         return {
             strategyId: item.name,
-            stateStatus: StateStatusEnum.Unknown,
+            stateStatus: 'Unknown',
             processStatus: false,
             realizedPnl: 0,
             unrealizedPnl: 0,
@@ -97,7 +96,7 @@ function handleRemoveStrategy(record: StrategyRow) {
         category: 'strategy',
         group: 'default',
         name: record.strategyId,
-        mode: 'live',
+        mode: 'LIVE',
     };
     ensureRemoveLocation(strategyLocation).then(() => {
         app?.proxy && app?.proxy.$useGlobalStore().setKfConfigList();
@@ -115,7 +114,7 @@ function handleConfirmAddUpdateStrategy(strategyData: StrategyData) {
                 category: 'strategy',
                 group: 'default',
                 name: strategyData.strategy_id,
-                mode: 'live',
+                mode: 'LIVE',
             };
 
             return setKfConfig(
@@ -196,7 +195,7 @@ function handleBodySizeChange({
 
 function getStateStatusName(processId: string) {
     processId;
-    return StateStatusEnum.launching;
+    return 'Unknown';
 }
 </script>
 

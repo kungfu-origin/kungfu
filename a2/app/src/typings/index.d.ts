@@ -40,12 +40,11 @@ interface AntTableColumn {
 
 type AntTableColumns = Array<AntTableColumn>;
 
-
 interface TdRow {
     accountName: string;
     accountId: string;
     sourceId: string;
-    stateStatus: StateStatusEnum;
+    stateStatus: ProcessStatusTypes;
     processStatus: boolean;
     realizedPnl: number;
     unrealizedPnl: number;
@@ -56,13 +55,13 @@ interface TdRow {
 
 interface MdRow {
     sourceId: string;
-    stateStatus: StateStatusEnum;
+    stateStatus: ProcessStatusTypes;
     processStatus: boolean;
 }
 
 interface StrategyRow {
     strategyId: string;
-    stateStatus: StateStatusEnum;
+    stateStatus: ProcessStatusTypes;
     processStatus: boolean;
     realizedPnl: number;
     unrealizedPnl: number;

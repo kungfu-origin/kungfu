@@ -9,8 +9,16 @@ import {
     watch,
     computed,
 } from 'vue';
-import { APP_DIR } from '@kungfu-trader/kungfu-js-api/config/pathConfig';
-import { buildObjectFromArray } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
+import {
+    APP_DIR,
+    KF_HOME,
+} from '@kungfu-trader/kungfu-js-api/config/pathConfig';
+import {
+    buildObjectFromArray,
+    getTradingDate,
+    kfLogger,
+    removeJournal,
+} from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import {
     CommissionMode,
     Direction,
@@ -20,7 +28,7 @@ import {
     Offset,
     PriceType,
     Side,
-    StateStatusConfig,
+    StateStatus,
     TimeCondition,
     VolumeCondition,
 } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
@@ -34,6 +42,7 @@ import {
     KfTradeValueCommonData,
     SetKfConfigPayload,
     KfLocation,
+    ProcessStatusTypes,
 } from '@kungfu-trader/kungfu-js-api/typings';
 import { message, Modal } from 'ant-design-vue';
 import {
@@ -41,6 +50,7 @@ import {
     getIdByKfLocation,
 } from '@kungfu-trader/kungfu-js-api/kungfu/utils';
 import { deleteAllByKfLocation } from '@kungfu-trader/kungfu-js-api/actions';
+import { Pm2ProcessStatusData } from '@kungfu-trader/kungfu-js-api/utils/processUtils';
 
 export interface KfUIComponent {
     name: string;
@@ -92,8 +102,8 @@ export const getUIComponents = (): {
 export const getStateStatusInfoByStatusType = (
     statusType: string | number,
 ): string => {
-    // return StateStatusConfig[statusType];
-    StateStatusConfig;
+    // return StateStatus[statusType];
+    StateStatus;
     statusType;
     return '';
 };
@@ -289,4 +299,42 @@ export const ensureRemoveLocation = (kfLocation: KfLocation): Promise<void> => {
             },
         });
     });
+};
+
+export const beforeStartAll = (): Promise<void> => {
+    const clearJournalDateFromLocal = localStorage.getItem(
+        'clearJournalTradingDate',
+    );
+    const currentTradingDate = getTradingDate();
+    kfLogger.info(
+        'Lastest Clear Journal Trading Date: ',
+        clearJournalDateFromLocal || '',
+    );
+
+    if (currentTradingDate !== clearJournalDateFromLocal) {
+        localStorage.setItem('clearJournalTradingDate', currentTradingDate);
+        kfLogger.info('Clear Journal Trading Date: ', currentTradingDate);
+        return removeJournal(KF_HOME);
+    } else {
+        return Promise.resolve();
+    }
+};
+
+export const getStateStatusData = (
+    name: ProcessStatusTypes | undefined,
+): KfTradeValueCommonData | undefined => {
+    return name === undefined ? StateStatus['Unknown'] : StateStatus[name];
+};
+
+export const getIfProcessOnline = (
+    processStatusData: Pm2ProcessStatusData,
+    processId: string,
+): boolean => {
+    if (processStatusData[processId]) {
+        if (processStatusData[processId] === 'online') {
+            return true;
+        }
+    }
+
+    return false;
 };

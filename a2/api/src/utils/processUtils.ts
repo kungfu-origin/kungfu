@@ -11,14 +11,14 @@ import {
     dealSpaceInPath,
     setTimerPromiseTask,
     delayMilliSeconds,
-} from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
+} from '../utils/busiUtils';
 import {
     APP_DIR,
     buildProcessLogPath,
     KFC_DIR,
     KF_CONFIG_PATH,
     KF_HOME,
-} from '@kungfu-trader/kungfu-js-api/config/pathConfig';
+} from '../config/pathConfig';
 
 process.env.PM2_HOME = path.resolve(os.homedir(), '.pm2');
 const numCPUs = os.cpus() ? os.cpus().length : 1;
@@ -81,20 +81,20 @@ interface Pm2StartOptions extends StartOptions {
     autorestart?: boolean;
 }
 
-export type ProcessStatus =
+export type Pm2ProcessStatusTypes =
     | 'online'
     | 'stopping'
     | 'stopped'
     | 'launching'
     | 'errored'
+    | 'waiting restart'
     | 'one-launch-status';
 
-
-interface Pm2ProcessStatusData {
-    [prop: string]: ProcessStatus | undefined;
+export interface Pm2ProcessStatusData {
+    [prop: string]: Pm2ProcessStatusTypes | undefined;
 }
 
-interface Pm2ProcessDetailData {
+export interface Pm2ProcessStatusDetailData {
     [prop: string]: {
         monit: ProcessDescription['monit'];
         pid: ProcessDescription['pid'];
@@ -109,7 +109,7 @@ interface Pm2ProcessDetailData {
     };
 }
 
-interface Pm2Env {
+export interface Pm2Env {
     pm_cwd?: string;
     pm_out_log_path?: string;
     pm_err_log_path?: string;
@@ -117,7 +117,7 @@ interface Pm2Env {
     pm_uptime?: number;
     unstable_restarts?: number;
     restart_time?: number;
-    status?: ProcessStatus;
+    status?: Pm2ProcessStatusTypes;
     instances?: number | 'max';
     pm_exec_path?: string;
     created_at?: number;
@@ -323,7 +323,8 @@ export function startProcessGetStatusUntilStop(
             let timer = startGetProcessStatusByName(
                 options.name,
                 (res: any[]) => {
-                    const status = res[0]?.pm2_env?.status;
+                    const status = res[0]?.pm2_env
+                        ?.status as Pm2ProcessStatusTypes;
                     cb && cb(status);
                     if (status !== 'online') {
                         timer.clearLoop();
@@ -346,6 +347,9 @@ export const startGetProcessStatus = (callback: Function) => {
                         processStatusWithDetail: Object.freeze(
                             processStatusWithDetail || {},
                         ),
+                    } as {
+                        processStatus: Pm2ProcessStatusData;
+                        processStatusWithDetail: Pm2ProcessStatusDetailData;
                     });
                 }
             })
@@ -355,7 +359,7 @@ export const startGetProcessStatus = (callback: Function) => {
 
 export const listProcessStatus = (): Promise<{
     processStatus: Pm2ProcessStatusData;
-    processStatusWithDetail: Pm2ProcessDetailData;
+    processStatusWithDetail: Pm2ProcessStatusDetailData;
 }> => {
     return pm2List().then((pList: any[]) => {
         const processStatus = buildProcessStatus(pList);
@@ -365,7 +369,7 @@ export const listProcessStatus = (): Promise<{
 };
 
 export const listProcessStatusWithDetail =
-    (): Promise<Pm2ProcessDetailData> => {
+    (): Promise<Pm2ProcessStatusDetailData> => {
         return pm2List().then((pList: any[]) =>
             buildProcessStatusWidthDetail(pList),
         );
@@ -373,8 +377,8 @@ export const listProcessStatusWithDetail =
 
 export function buildProcessStatusWidthDetail(
     pList: ProcessDescription[],
-): Pm2ProcessDetailData {
-    let processStatus: Pm2ProcessDetailData = {};
+): Pm2ProcessStatusDetailData {
+    let processStatus: Pm2ProcessStatusDetailData = {};
     Object.freeze(pList).forEach((p) => {
         const { monit, pid, name, pm2_env, pm_id } = p;
         const status = pm2_env?.status;
@@ -410,7 +414,7 @@ function buildProcessStatus(pList: ProcessDescription[]): Pm2ProcessStatusData {
     let processStatus: Pm2ProcessStatusData = {};
     pList.forEach((p: ProcessDescription) => {
         const name: string | undefined = p?.name;
-        const status: ProcessStatus | undefined = p?.pm2_env?.status;
+        const status: Pm2ProcessStatusTypes | undefined = p?.pm2_env?.status;
         if (name) {
             processStatus[name] = status;
         }
@@ -470,13 +474,12 @@ export function startArchiveMakeTask(cb?: Function) {
     return startProcessGetStatusUntilStop(
         {
             name: 'archive',
-            args: buildArgs('archive make'),
+            args: buildArgs('journal archive'),
         },
         cb,
     );
 }
 
-//启动pageEngine
 export const startMaster = async (force = false): Promise<Proc | void> => {
     const processName = 'master';
 
@@ -492,7 +495,7 @@ export const startMaster = async (force = false): Promise<Proc | void> => {
     if (!force && isMasterAlive) {
         const err = new Error('kungfu master is alive');
         kfLogger.error(err.message);
-        throw err;
+        return Promise.reject(err);
     }
 
     return killKfc()
@@ -526,10 +529,10 @@ export const startLedger = async (force = false): Promise<Proc | void> => {
     if (!force && isLedgerAlive) {
         const err = new Error('kungfu ledger is alive');
         kfLogger.error(err.message);
-        throw err;
+        return Promise.reject(err);
     }
 
-    const args = buildArgs('ledger');
+    const args = buildArgs('service ledger');
     return startProcess({
         name: processName,
         args,
