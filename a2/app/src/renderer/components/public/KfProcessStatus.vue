@@ -15,16 +15,16 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, ref } from 'vue';
+import { defineComponent, PropType } from 'vue';
 import {
     AntInKungfuColorTypes,
     KfTradeValueCommonData,
     ProcessStatusTypes,
 } from '@kungfu-trader/kungfu-js-api/typings/index';
-import { getStateStatusData } from '@renderer/assets/methods/uiUtils';
+import { getStateStatusData } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 
 export default defineComponent({
-    name: 'KfStateStatus',
+    name: 'KfProcessStatus',
     props: {
         statusName: {
             type: String as PropType<ProcessStatusTypes>,

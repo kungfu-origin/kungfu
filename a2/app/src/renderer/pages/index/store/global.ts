@@ -21,7 +21,7 @@ interface GlobalState {
     mdList: KfConfig[];
     strategyList: KfConfig[];
 
-    processStatus: Pm2ProcessStatusData;
+    processStatusData: Pm2ProcessStatusData;
     processStatusWithDetail: Pm2ProcessStatusDetailData;
 }
 
@@ -37,14 +37,14 @@ export const useGlobalStore = defineStore('global', {
             mdList: [],
             strategyList: [],
 
-            processStatus: {},
+            processStatusData: {},
             processStatusWithDetail: {},
         };
     },
 
     actions: {
         setProcessStatus(processStatus: Pm2ProcessStatusData) {
-            this.processStatus = toRaw(processStatus);
+            this.processStatusData = toRaw(processStatus);
         },
 
         setProcessStatusWithDetail(

@@ -4,7 +4,7 @@ import { storeToRefs } from 'pinia';
 
 import KfDashboard from '@renderer/components/public/KfDashboard.vue';
 import KfDashboardItem from '@renderer/components/public/KfDashboardItem.vue';
-import KfStateStatus from '@renderer/components/public/KfStateStatus.vue';
+import KfProcessStatus from '@renderer/components/public/KfProcessStatus.vue';
 import KfSetSourceModal from '@renderer/components/public/KfSetSourceModal.vue';
 import KfSetByConfigModal from '@renderer/components/public/KfSetByConfigModal.vue';
 import {
@@ -18,19 +18,18 @@ import {
     KfExtOriginConfig,
     SetKfConfigPayload,
     KfConfig,
-    KfExtConfigs,
     InstrumentTypeEnum,
     KfLocation,
-ProcessStatusTypes,
+    ProcessStatusTypes,
 } from '@kungfu-trader/kungfu-js-api/typings';
 import { InstrumentType } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
 
 import { columns } from './config';
 import {
-    buildExtTypeMap,
     useResetConfigModalPayload,
     useTableSearchKeyword,
     ensureRemoveLocation,
+    getExtConfigsRelated,
 } from '@renderer/assets/methods/uiUtils';
 
 const app = getCurrentInstance();
@@ -48,10 +47,7 @@ const setTdConfigPayload = ref<SetKfConfigPayload>({
 const resetConfigModalPayload = useResetConfigModalPayload();
 const currentSelectedSourceId = ref<string>('');
 
-const extConfigs = reactive<{ value: KfExtConfigs }>({
-    value: {},
-});
-const extTypeMap = computed(() => buildExtTypeMap(extConfigs.value, 'td'));
+const { extConfigs, extTypeMap } = getExtConfigsRelated();
 
 const tdList = reactive({
     value: [],
@@ -92,7 +88,6 @@ onMounted(() => {
     if (app?.proxy) {
         const store = storeToRefs(app?.proxy.$useGlobalStore());
         tdList.value = store.tdList;
-        extConfigs.value = store.extConfigs;
     }
 });
 
@@ -197,7 +192,7 @@ function handleRemoveTd(record: TdRow) {
                     }"
                 >
                     <template v-if="column.dataIndex === 'stateStatus'">
-                        <KfStateStatus
+                        <KfProcessStatus
                             :status-name="
                                 getStateStatusName(
                                     getTdProcessId(
@@ -206,7 +201,7 @@ function handleRemoveTd(record: TdRow) {
                                     ),
                                 )
                             "
-                        ></KfStateStatus>
+                        ></KfProcessStatus>
                     </template>
                     <template v-else-if="column.dataIndex === 'sourceId'">
                         <a-tag
@@ -225,7 +220,7 @@ function handleRemoveTd(record: TdRow) {
                         <a-switch size="small" :checked="true"></a-switch>
                     </template>
                     <template v-else-if="column.dataIndex === 'actions'">
-                        <div class="kf-table-actions__warp">
+                        <div class="kf-actions__warp">
                             <FileTextOutlined
                                 style="font-size: 12px"
                                 @click="handleOpenLog(record)"

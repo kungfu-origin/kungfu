@@ -6,7 +6,7 @@ import { message, Modal } from 'ant-design-vue';
 
 import KfDashboard from '@renderer/components/public/KfDashboard.vue';
 import KfDashboardItem from '@renderer/components/public/KfDashboardItem.vue';
-import KfStateStatus from '@renderer/components/public/KfStateStatus.vue';
+import KfProcessStatus from '@renderer/components/public/KfProcessStatus.vue';
 import KfSetByConfigModal from '@renderer/components/public/KfSetByConfigModal.vue';
 import {
     FileTextOutlined,
@@ -241,15 +241,15 @@ function getStateStatusName(processId: string) {
                     }"
                 >
                     <template v-if="column.dataIndex === 'stateStatus'">
-                        <KfStateStatus
+                        <KfProcessStatus
                             :status-name="getStateStatusName(record.strategyId)"
-                        ></KfStateStatus>
+                        ></KfProcessStatus>
                     </template>
                     <template v-else-if="column.dataIndex === 'processStatus'">
                         <a-switch size="small" :checked="true"></a-switch>
                     </template>
                     <template v-else-if="column.dataIndex === 'actions'">
-                        <div class="kf-table-actions__warp">
+                        <div class="kf-actions__warp">
                             <FileTextOutlined
                                 style="font-size: 12px"
                                 @click="handleOpenLog(record)"

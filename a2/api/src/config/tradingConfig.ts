@@ -14,7 +14,7 @@ import {
     KfCategoryEnum,
     ProcessStatusTypes,
     KfCategoryTypes,
-    BrokerStateStatusTypes
+    BrokerStateStatusTypes,
 } from '../typings';
 
 import { Pm2ProcessStatusTypes } from '../utils/processUtils';
@@ -60,7 +60,10 @@ export const Pm2ProcessStatus: Record<
     },
 };
 
-export const BrokerStateStatus: Record<BrokerStateStatusTypes, KfTradeValueCommonData> = {
+export const BrokerStateStatus: Record<
+    BrokerStateStatusTypes,
+    KfTradeValueCommonData
+> = {
     ['Pending']: {
         name: isEnglish ? 'Pending' : '等待中',
         color: 'kf-color-waiting',
@@ -101,11 +104,11 @@ export const BrokerStateStatus: Record<BrokerStateStatusTypes, KfTradeValueCommo
         color: 'kf-color-waiting',
         level: 0,
     },
-}
+};
 
 export const StateStatus: Record<ProcessStatusTypes, KfTradeValueCommonData> = {
     ...Pm2ProcessStatus,
-    ...BrokerStateStatus
+    ...BrokerStateStatus,
 };
 
 export const KfCategory: Record<KfCategoryTypes, KfTradeValueCommonData> = {
@@ -315,4 +318,10 @@ export const Category: Record<KfCategoryEnum, KfTradeValueCommonData> = {
     [KfCategoryEnum.td]: { name: 'td' },
     [KfCategoryEnum.strategy]: { name: 'strategy' },
     [KfCategoryEnum.system]: { name: 'system' },
+};
+
+export const SystemProcessName: Record<string, KfTradeValueCommonData> = {
+    master: { name: '主控进程' },
+    ledger: { name: '计算服务' },
+    archive: { name: '归档服务' },
 };

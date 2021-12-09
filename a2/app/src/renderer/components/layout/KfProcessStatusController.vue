@@ -1,91 +1,32 @@
 <script lang="ts" setup>
 import { ClusterOutlined } from '@ant-design/icons-vue';
+import { KfCategoryTypes } from '@kungfu-trader/kungfu-js-api/typings';
+import KfProcessStatus from '@renderer/components/public/KfProcessStatus.vue';
+import { ref } from 'vue';
 import {
-    InstrumentTypeEnum,
-    KfCategoryTypes,
-    KfConfig,
-    KfExtConfigs,
-    KfLocation,
-    KfTradeValueCommonData,
-} from '@kungfu-trader/kungfu-js-api/typings';
-import KfStateStatus from '@renderer/components/public/KfStateStatus.vue';
-import { storeToRefs } from 'pinia';
-import { ref, reactive, computed, getCurrentInstance, onMounted } from 'vue';
-import {
-    InstrumentType,
     KfCategory,
+    SystemProcessName,
 } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
 import {
-    buildExtTypeMap,
-    getIfProcessOnline,
+    getExtConfigsRelated,
+    getInstrumentTypeColor,
+    getKfLocationData,
+    getProcessStatusDetailData,
+    handleSwitchProcessStatus,
 } from '@renderer/assets/methods/uiUtils';
 import { FileTextOutlined } from '@ant-design/icons-vue';
-import { Pm2ProcessStatusData } from '@kungfu-trader/kungfu-js-api/utils/processUtils';
-import { getProcessIdByKfLocation } from '@kungfu-trader/kungfu-js-api/kungfu/utils';
-
-const app = getCurrentInstance();
+import {
+    getIfProcessOnline,
+    getProcessIdByKfLocation,
+    getPropertyFromProcessStatusDetailDataByKfLocation,
+} from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 
 const processControllerBoardVisible = ref<boolean>(false);
 const categoryList: KfCategoryTypes[] = ['system', 'td', 'md', 'strategy'];
-
-const systemList: KfLocation[] = [
-    ...(process.env.NODE_ENV === 'development'
-        ? ([
-              {
-                  category: 'system',
-                  group: 'service',
-                  name: 'archive',
-                  mode: 'LIVE',
-              },
-          ] as KfLocation[])
-        : []),
-    {
-        category: 'system',
-        group: 'master',
-        name: 'master',
-        mode: 'LIVE',
-    },
-    {
-        category: 'system',
-        group: 'service',
-        name: 'ledger',
-        mode: 'LIVE',
-    },
-];
-
-const processData = ref<Record<KfCategoryTypes, KfLocation[]>>({
-    system: systemList,
-
-    md: [],
-    td: [],
-    strategy: [],
-});
-
-const extConfigs = reactive<{ value: KfExtConfigs }>({
-    value: {},
-});
-const extTypeMap = computed(() => buildExtTypeMap(extConfigs.value, 'td'));
-
-const systemProcessName: Record<string, KfTradeValueCommonData> = {
-    master: { name: '主控进程' },
-    ledger: { name: '计算服务' },
-    archive: { name: '归档服务' },
-};
-
-const processStatusData = reactive<{ value: Pm2ProcessStatusData }>({
-    value: {},
-});
-
-onMounted(() => {
-    if (app?.proxy) {
-        const store = storeToRefs(app?.proxy.$useGlobalStore());
-        processData.value.md = store.mdList as KfConfig[];
-        processData.value.td = store.tdList as KfConfig[];
-        processData.value.strategy = store.strategyList as KfConfig[];
-        extConfigs.value = store.extConfigs as KfExtConfigs;
-        processStatusData.value = store.processStatus as Pm2ProcessStatusData;
-    }
-});
+const allKfLocations = getKfLocationData();
+const { processStatusData, processStatusDetailData } =
+    getProcessStatusDetailData();
+const { extTypeMap } = getExtConfigsRelated();
 
 function handleOpenProcessControllerBoard() {
     processControllerBoardVisible.value = true;
@@ -102,6 +43,7 @@ function handleOpenProcessControllerBoard() {
 
         <a-drawer
             v-model:visible="processControllerBoardVisible"
+            :width="650"
             class="kf-process-status-controller-board__warp"
             title="控制中心"
             placement="right"
@@ -111,11 +53,11 @@ function handleOpenProcessControllerBoard() {
                 v-for="category in categoryList"
                 :key="category"
             >
-                <template v-if="processData[category].length">
+                <template v-if="allKfLocations[category].length">
                     <div class="kf-location-list">
                         <div
                             class="kf-location-item"
-                            v-for="location in processData[category]"
+                            v-for="location in allKfLocations[category]"
                         >
                             <div class="process-info">
                                 <div class="category info-item">
@@ -128,7 +70,7 @@ function handleOpenProcessControllerBoard() {
                                     v-if="location.category === 'system'"
                                 >
                                     {{
-                                        (systemProcessName[location.name] || {})
+                                        (SystemProcessName[location.name] || {})
                                             .name || ''
                                     }}
                                 </div>
@@ -142,11 +84,9 @@ function handleOpenProcessControllerBoard() {
                                             location.category === 'md'
                                         "
                                         :color="
-                                            InstrumentType[
-                                                InstrumentTypeEnum[
-                                                    extTypeMap[location.group]
-                                                ]
-                                            ].color
+                                            getInstrumentTypeColor(
+                                                extTypeMap[location.group],
+                                            )
                                         "
                                     >
                                         {{ location.group }}
@@ -157,15 +97,14 @@ function handleOpenProcessControllerBoard() {
                                     {{ location.name }}
                                 </div>
                                 <div class="state-status info-item">
-                                    <KfStateStatus
+                                    <KfProcessStatus
                                         :status-name="
-                                            processStatusData.value[
-                                                getProcessIdByKfLocation(
-                                                    location,
-                                                )
-                                            ] || 'Unknown'
+                                            getPropertyFromProcessStatusDetailDataByKfLocation(
+                                                processStatusDetailData.value,
+                                                location,
+                                            ).status
                                         "
-                                    ></KfStateStatus>
+                                    ></KfProcessStatus>
                                 </div>
                             </div>
                             <div class="switch">
@@ -177,9 +116,28 @@ function handleOpenProcessControllerBoard() {
                                             getProcessIdByKfLocation(location),
                                         )
                                     "
+                                    @click="(checked: boolean) => handleSwitchProcessStatus(checked, location)"
                                 ></a-switch>
                             </div>
-                            <div class="actions">
+                            <div class="cpu">
+                                CPU:
+                                {{
+                                    getPropertyFromProcessStatusDetailDataByKfLocation(
+                                        processStatusDetailData.value,
+                                        location,
+                                    ).cpu + '%'
+                                }}
+                            </div>
+                            <div class="memory">
+                                MEM:
+                                {{
+                                    getPropertyFromProcessStatusDetailDataByKfLocation(
+                                        processStatusDetailData.value,
+                                        location,
+                                    ).memory + 'M'
+                                }}
+                            </div>
+                            <div class="actions kf-actions__warp">
                                 <FileTextOutlined
                                     style="font-size: 14px"
                                 ></FileTextOutlined>
@@ -242,9 +200,9 @@ function handleOpenProcessControllerBoard() {
                         width: 70px;
                     }
 
-                    &.process-id {
-                        width: 100px;
-                    }
+                    // &.process-id {
+                    // width: 100px;
+                    // }
                 }
             }
 
@@ -252,8 +210,16 @@ function handleOpenProcessControllerBoard() {
                 width: 40px;
             }
 
+            .cpu {
+                width: 80px;
+            }
+
+            .memory {
+                width: 120px;
+            }
+
             .actions {
-                width: 20px;
+                width: 40px;
             }
         }
     }

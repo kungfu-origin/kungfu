@@ -11,7 +11,9 @@ import {
 } from '../typings';
 import { KF_RUNTIME_DIR, LOG_DIR } from '../config/pathConfig';
 import { pathExists, remove } from 'fs-extra';
-import { getProcessIdByKfLocation } from '../kungfu/utils';
+import { getProcessIdByKfLocation } from '../utils/busiUtils';
+import { deleteProcess, startLedger, startMaster } from '../utils/processUtils';
+import { Proc } from 'pm2';
 
 export const getAllKfConfigList = (): Promise<
     Record<KfCategoryTypes, KfConfig[]>
@@ -84,3 +86,25 @@ function removeLog(kfLocation: KfLocation): Promise<void> {
         console.warn(`Log Path ${logPath} is not existed`);
     });
 }
+
+export const switchKfLocation = (
+    kfLocation: KfLocation,
+    targetStatus: boolean,
+): Promise<void | Proc> => {
+    const processId = getProcessIdByKfLocation(kfLocation);
+
+    if (!targetStatus) {
+        return deleteProcess(processId);
+    }
+
+    switch (kfLocation.category) {
+        case 'system':
+            if (kfLocation.name === 'master') {
+                return startMaster(true);
+            } else if (kfLocation.name === 'ledger') {
+                return startLedger(true);
+            }
+        default:
+            return Promise.resolve();
+    }
+};

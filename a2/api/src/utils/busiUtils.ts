@@ -3,7 +3,11 @@ import dayjs from 'dayjs';
 import fse from 'fs-extra';
 import log4js from 'log4js';
 import { buildProcessLogPath } from '../config/pathConfig';
-import { InstrumentType } from '../config/tradingConfig';
+import {
+    InstrumentType,
+    KfCategory,
+    StateStatus,
+} from '../config/tradingConfig';
 import {
     KfTradeValueCommonData,
     InstrumentTypeEnum,
@@ -11,7 +15,15 @@ import {
     KfExtOriginConfig,
     KfExtConfigs,
     SourceData,
+    KfLocation,
+    ProcessStatusTypes,
+    InstrumentTypes,
 } from '../typings';
+import {
+    Pm2ProcessStatusData,
+    Pm2ProcessStatusDetail,
+    Pm2ProcessStatusDetailData,
+} from './processUtils';
 
 interface SourceAccountId {
     source: string;
@@ -694,4 +706,117 @@ export const removeJournal = (targetFolder: string): Promise<void> => {
     iterator(targetFolder);
 
     return Promise.resolve();
+};
+
+export const getProcessIdByKfLocation = (kfLocation: KfLocation): string => {
+    if (kfLocation.category === 'td') {
+        return `${kfLocation.category}_${kfLocation.group}_${kfLocation.name}`;
+    } else if (kfLocation.category === 'md') {
+        return `${kfLocation.category}_${kfLocation.group}`;
+    } else if (kfLocation.category === 'strategy') {
+        return `${kfLocation.category}_${kfLocation.name}`;
+    } else if (kfLocation.category === 'system') {
+        return kfLocation.name;
+    }
+
+    throw new Error(`Category ${kfLocation.category} is illegal`);
+};
+
+export const getIdByKfLocation = (kfLocation: KfLocation): string => {
+    if (kfLocation.category === 'td') {
+        return `${kfLocation.group}_${kfLocation.name}`;
+    } else if (kfLocation.category === 'md') {
+        return `${kfLocation.group}`;
+    } else if (kfLocation.category === 'strategy') {
+        return `${kfLocation.name}`;
+    }
+
+    throw new Error(`Category ${kfLocation.category} is illegal`);
+};
+
+export const getCategoryName = (kfLocation: KfLocation): string => {
+    if (KfCategory[kfLocation.category]) {
+        return KfCategory[kfLocation.category].name;
+    }
+
+    throw new Error(`Category ${kfLocation.category} is illegal`);
+};
+
+export const getStateStatusData = (
+    name: ProcessStatusTypes | undefined,
+): KfTradeValueCommonData | undefined => {
+    return name === undefined ? StateStatus['Unknown'] : StateStatus[name];
+};
+
+export const getIfProcessOnline = (
+    processStatusData: Pm2ProcessStatusData,
+    processId: string,
+): boolean => {
+    if (processStatusData[processId]) {
+        if (processStatusData[processId] === 'online') {
+            return true;
+        }
+    }
+
+    return false;
+};
+
+export const getPropertyFromProcessStatusDetailDataByKfLocation = (
+    processStatusDetailData: Pm2ProcessStatusDetailData,
+    kfLocation: KfLocation,
+): {
+    status: ProcessStatusTypes;
+    cpu: number;
+    memory: string;
+} => {
+    const processStatusDetail: Pm2ProcessStatusDetail =
+        processStatusDetailData[getProcessIdByKfLocation(kfLocation)] || {};
+    const status = processStatusDetail.status || 'Unknown';
+    const monit = processStatusDetail.monit || {};
+
+    return {
+        status,
+        cpu: monit.cpu || 0,
+        memory: Number((monit.memory || 0) / (1024 * 1024)).toFixed(2),
+    };
+};
+
+export const buildExtTypeMap = (
+    extConfigs: KfExtConfigs,
+    category: KfCategoryTypes,
+): Record<string, InstrumentTypes> => {
+    const extTypeMap: Record<string, InstrumentTypes> = {};
+    const targetCategoryConfig: Record<
+        string,
+        KfExtOriginConfig['config'][KfCategoryTypes]
+    > = extConfigs[category] || {};
+
+    Object.keys(targetCategoryConfig).forEach((extKey: string) => {
+        const configInKfExtConfig = targetCategoryConfig[extKey];
+        let types = configInKfExtConfig?.type || [];
+        if (typeof types === 'string') {
+            types = [types];
+        }
+
+        if (!types.length) {
+            extTypeMap[extKey] = 'Unknown';
+            return;
+        }
+
+        const primaryType = types.sort(
+            (type1: InstrumentTypes, type2: InstrumentTypes) => {
+                const level1 =
+                    (InstrumentType[InstrumentTypeEnum[type1]] || {}).level ||
+                    0;
+                const level2 =
+                    (InstrumentType[InstrumentTypeEnum[type2]] || {}).level ||
+                    0;
+                return level2 - level1;
+            },
+        )[0];
+
+        extTypeMap[extKey] = primaryType;
+    });
+
+    return extTypeMap;
 };

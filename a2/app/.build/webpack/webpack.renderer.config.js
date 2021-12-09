@@ -18,8 +18,7 @@ const { pyVersion } = getKungfuBuildInfo();
 const webpackConfig = (argv) => {
     const pagesConfig = getPagesConfig(argv);
     return merge(toolkit.webpack.makeConfig(argv), {
-        externals: ['vue', 'fkill', 'getProcesses', 'pm2'],
-
+        externals: ['vue'],
         entry: pagesConfig.entry,
         module: {
             rules: [

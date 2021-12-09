@@ -8,20 +8,20 @@
 #define WIN32_LEAN_AND_MEAN
 #endif
 
-#include <stdio.h>
-#include <windows.h>
 #include <delayimp.h>
-#include <string.h>
 #include <regex>
+#include <stdio.h>
+#include <string.h>
+#include <windows.h>
 
 static FARPROC WINAPI load_exe_hook(unsigned int event, DelayLoadInfo *info) {
-	HMODULE m;
-	if (event != dliNotePreLoadLibrary)
-		return NULL;
+  HMODULE m;
+  if (event != dliNotePreLoadLibrary)
+    return NULL;
 
-	if (_stricmp(info->szDll, "NODE.EXE") != 0)
-		return NULL;
-  
+  if (_stricmp(info->szDll, "NODE.EXE") != 0)
+    return NULL;
+
   char buf[1024];
   auto length = GetModuleFileNameA(NULL, buf, sizeof(buf));
   std::string main_exe_name(buf);
@@ -30,8 +30,8 @@ static FARPROC WINAPI load_exe_hook(unsigned int event, DelayLoadInfo *info) {
   auto name_end = buf + length - strlen("kfc.exe");
   auto libnode_dll = std::regex_replace(main_exe_name, kfc_exe, "libnode.dll");
 
-	m = _stricmp(name_end, "kfc.exe") != 0 ? GetModuleHandle(NULL) : GetModuleHandleA(libnode_dll.c_str());
-	return (FARPROC)m;
+  m = _stricmp(name_end, "kfc.exe") != 0 ? GetModuleHandle(NULL) : GetModuleHandleA(libnode_dll.c_str());
+  return (FARPROC)m;
 }
 
 decltype(__pfnDliNotifyHook2) __pfnDliNotifyHook2 = load_exe_hook;
@@ -85,9 +85,14 @@ Napi::Value ParseTime(const Napi::CallbackInfo &info) {
   return Napi::BigInt::New(info.Env(), time::strptime(time_string, format));
 }
 
-Napi::Object InitAll(Napi::Env env, Napi::Object exports) {
-  ensure_sqlite_initilize();
+void Shutdown(const Napi::CallbackInfo &info) {
+  ensure_sqlite_shutdown();
+  return;
+}
 
+Napi::Object InitAll(Napi::Env env, Napi::Object exports) {
+
+  ensure_sqlite_initilize();
   Longfist::Init(env, exports);
   History::Init(env, exports);
   ConfigStore::Init(env, exports);
@@ -98,11 +103,10 @@ Napi::Object InitAll(Napi::Env env, Napi::Object exports) {
   IODevice::Init(env, exports);
   DataTable::Init(env, exports);
   Watcher::Init(env, exports);
-
   exports.Set("formatTime", Napi::Function::New(env, FormatTime));
   exports.Set("formatStringToHashHex", Napi::Function::New(env, FormatStringToHashHex));
   exports.Set("parseTime", Napi::Function::New(env, ParseTime));
-
+  exports.Set("shutdown", Napi::Function::New(env, Shutdown));
   return exports;
 }
 } // namespace kungfu::node

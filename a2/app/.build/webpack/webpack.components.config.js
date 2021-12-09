@@ -16,7 +16,6 @@ const { pyVersion } = getKungfuBuildInfo();
 
 const webpackConfig = (argv) => {
     return merge(toolkit.webpack.makeConfig(argv), {
-        devtool: 'eval',
         externals: ['vue'],
         entry: getComponentsConfig(argv),
         module: {

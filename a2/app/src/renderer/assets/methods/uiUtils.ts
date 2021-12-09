@@ -5,15 +5,19 @@ import {
     ComputedRef,
     SetupContext,
     Ref,
+    reactive,
     ref,
     watch,
     computed,
+    getCurrentInstance,
+    onMounted,
 } from 'vue';
 import {
     APP_DIR,
     KF_HOME,
 } from '@kungfu-trader/kungfu-js-api/config/pathConfig';
 import {
+    buildExtTypeMap,
     buildObjectFromArray,
     getTradingDate,
     kfLogger,
@@ -42,15 +46,24 @@ import {
     KfTradeValueCommonData,
     SetKfConfigPayload,
     KfLocation,
-    ProcessStatusTypes,
+    AntInKungfuColorTypes,
+    KfConfig,
 } from '@kungfu-trader/kungfu-js-api/typings';
 import { message, Modal } from 'ant-design-vue';
 import {
     getCategoryName,
     getIdByKfLocation,
-} from '@kungfu-trader/kungfu-js-api/kungfu/utils';
-import { deleteAllByKfLocation } from '@kungfu-trader/kungfu-js-api/actions';
-import { Pm2ProcessStatusData } from '@kungfu-trader/kungfu-js-api/utils/processUtils';
+} from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
+import {
+    deleteAllByKfLocation,
+    switchKfLocation,
+} from '@kungfu-trader/kungfu-js-api/actions';
+import {
+    Pm2ProcessStatusData,
+    Pm2ProcessStatusDetailData,
+} from '@kungfu-trader/kungfu-js-api/utils/processUtils';
+import { Proc } from 'pm2';
+import { storeToRefs } from 'pinia';
 
 export interface KfUIComponent {
     name: string;
@@ -232,46 +245,6 @@ export const stringEnumInputType: {
     exchange: ExchangeIds,
 };
 
-export const buildExtTypeMap = (
-    extConfigs: KfExtConfigs,
-    category: KfCategoryTypes,
-): Record<string, InstrumentTypes> => {
-    const extTypeMap: Record<string, InstrumentTypes> = {};
-    const targetCategoryConfig: Record<
-        string,
-        KfExtOriginConfig['config'][KfCategoryTypes]
-    > = extConfigs[category] || {};
-
-    Object.keys(targetCategoryConfig).forEach((extKey: string) => {
-        const configInKfExtConfig = targetCategoryConfig[extKey];
-        let types = configInKfExtConfig?.type || [];
-        if (typeof types === 'string') {
-            types = [types];
-        }
-
-        if (!types.length) {
-            extTypeMap[extKey] = 'Unknown';
-            return;
-        }
-
-        const primaryType = types.sort(
-            (type1: InstrumentTypes, type2: InstrumentTypes) => {
-                const level1 =
-                    (InstrumentType[InstrumentTypeEnum[type1]] || {}).level ||
-                    0;
-                const level2 =
-                    (InstrumentType[InstrumentTypeEnum[type2]] || {}).level ||
-                    0;
-                return level2 - level1;
-            },
-        )[0];
-
-        extTypeMap[extKey] = primaryType;
-    });
-
-    return extTypeMap;
-};
-
 export const ensureRemoveLocation = (kfLocation: KfLocation): Promise<void> => {
     const categoryName = getCategoryName(kfLocation);
     const id = getIdByKfLocation(kfLocation);
@@ -320,21 +293,120 @@ export const beforeStartAll = (): Promise<void> => {
     }
 };
 
-export const getStateStatusData = (
-    name: ProcessStatusTypes | undefined,
-): KfTradeValueCommonData | undefined => {
-    return name === undefined ? StateStatus['Unknown'] : StateStatus[name];
+export const getInstrumentTypeColor = (
+    type: InstrumentTypes,
+): AntInKungfuColorTypes => {
+    return InstrumentType[InstrumentTypeEnum[type]].color || 'default';
 };
 
-export const getIfProcessOnline = (
-    processStatusData: Pm2ProcessStatusData,
-    processId: string,
-): boolean => {
-    if (processStatusData[processId]) {
-        if (processStatusData[processId] === 'online') {
-            return true;
-        }
-    }
+export const handleSwitchProcessStatus = (
+    checked: boolean,
+    kfLocation: KfLocation,
+): Promise<void | Proc> => {
+    return switchKfLocation(kfLocation, checked);
+};
 
-    return false;
+export const getExtConfigsRelated = (): {
+    extConfigs: { value: KfExtConfigs };
+    extTypeMap: ComputedRef<Record<string, InstrumentTypes>>;
+} => {
+    const extConfigs = reactive<{ value: KfExtConfigs }>({
+        value: {},
+    });
+    const extTypeMap = computed(() => buildExtTypeMap(extConfigs.value, 'td'));
+
+    onMounted(() => {
+        const app = getCurrentInstance();
+        if (app?.proxy) {
+            const store = storeToRefs(app?.proxy.$useGlobalStore());
+            extConfigs.value = store.extConfigs as KfExtConfigs;
+        }
+    });
+
+    return {
+        extConfigs,
+        extTypeMap,
+    };
+};
+
+export const getProcessStatusDetailData = (): {
+    processStatusData: {
+        value: Pm2ProcessStatusData;
+    };
+    processStatusDetailData: {
+        value: Pm2ProcessStatusDetailData;
+    };
+} => {
+    const processStatusDetailData = reactive<{
+        value: Pm2ProcessStatusDetailData;
+    }>({
+        value: {},
+    });
+
+    const processStatusData = reactive<{
+        value: Pm2ProcessStatusData;
+    }>({
+        value: {},
+    });
+
+    onMounted(() => {
+        const app = getCurrentInstance();
+        if (app?.proxy) {
+            const store = storeToRefs(app?.proxy.$useGlobalStore());
+            processStatusDetailData.value =
+                store.processStatusWithDetail as Pm2ProcessStatusDetailData;
+            processStatusData.value =
+                store.processStatusData as Pm2ProcessStatusData;
+        }
+    });
+
+    return {
+        processStatusData,
+        processStatusDetailData,
+    };
+};
+
+export const getKfLocationData = (): Record<KfCategoryTypes, KfLocation[]> => {
+    const kfLocationData: Record<KfCategoryTypes, KfLocation[]> = reactive({
+        system: [
+            ...(process.env.NODE_ENV === 'development'
+                ? ([
+                      {
+                          category: 'system',
+                          group: 'service',
+                          name: 'archive',
+                          mode: 'LIVE',
+                      },
+                  ] as KfLocation[])
+                : []),
+            {
+                category: 'system',
+                group: 'master',
+                name: 'master',
+                mode: 'LIVE',
+            },
+            {
+                category: 'system',
+                group: 'service',
+                name: 'ledger',
+                mode: 'LIVE',
+            },
+        ],
+
+        md: [],
+        td: [],
+        strategy: [],
+    });
+
+    onMounted(() => {
+        const app = getCurrentInstance();
+        if (app?.proxy) {
+            const store = storeToRefs(app?.proxy.$useGlobalStore());
+            kfLocationData.md = store.mdList as KfConfig[];
+            kfLocationData.td = store.tdList as KfConfig[];
+            kfLocationData.strategy = store.strategyList as KfConfig[];
+        }
+    });
+
+    return kfLocationData;
 };

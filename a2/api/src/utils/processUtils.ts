@@ -94,19 +94,21 @@ export interface Pm2ProcessStatusData {
     [prop: string]: Pm2ProcessStatusTypes | undefined;
 }
 
-export interface Pm2ProcessStatusDetailData {
-    [prop: string]: {
-        monit: ProcessDescription['monit'];
-        pid: ProcessDescription['pid'];
-        name: ProcessDescription['name'];
-        pm_id: ProcessDescription['pm_id'];
+export interface Pm2ProcessStatusDetail {
+    monit: ProcessDescription['monit'];
+    pid: ProcessDescription['pid'];
+    name: ProcessDescription['name'];
+    pm_id: ProcessDescription['pm_id'];
 
-        status: Pm2Env['status'];
-        created_at: Pm2Env['created_at'];
-        script: Pm2Env['script'];
-        cwd: Pm2Env['pm_cwd'];
-        args: Pm2Env['args'];
-    };
+    status: Pm2Env['status'];
+    created_at: Pm2Env['created_at'];
+    script: Pm2Env['script'];
+    cwd: Pm2Env['pm_cwd'];
+    args: Pm2Env['args'];
+}
+
+export interface Pm2ProcessStatusDetailData {
+    [prop: string]: Pm2ProcessStatusDetail;
 }
 
 export interface Pm2Env {
@@ -497,7 +499,6 @@ export const startMaster = async (force = false): Promise<Proc | void> => {
         kfLogger.error(err.message);
         return Promise.reject(err);
     }
-
     return killKfc()
         .finally(() => {
             const args = buildArgs('service master');

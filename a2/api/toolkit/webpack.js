@@ -8,7 +8,12 @@ module.exports = {
         const production = isProduction(argv.mode);
         return {
             devtool: 'eval-cheap-source-map',
-            externals: ['pm2', 'iconv-lite', '@kungfu-trader/kungfu-core'],
+            externals: [
+                'pm2',
+                'fkill',
+                'getProcesses',
+                '@kungfu-trader/kungfu-core',
+            ],
             mode: production ? 'production' : 'development',
             module: {
                 rules: [
