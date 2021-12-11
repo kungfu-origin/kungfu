@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted, getCurrentInstance } from 'vue';
-import { storeToRefs } from 'pinia';
+import { ref, computed, getCurrentInstance, toRefs } from 'vue';
 import dayjs from 'dayjs';
 import { message, Modal } from 'ant-design-vue';
 
@@ -28,7 +27,8 @@ import {
     useResetConfigModalPayload,
     useTableSearchKeyword,
     ensureRemoveLocation,
-} from '@renderer/assets/methods/uiUtils';
+    getAllKfConfigData,
+} from '@renderer/assets/methods/kfUiUtils';
 import { columns } from './config';
 import { setKfConfig } from '@kungfu-trader/kungfu-js-api/kungfu/store';
 
@@ -45,14 +45,12 @@ const setStrategyConfigPayload = ref<SetKfConfigPayload>({
 });
 const resetConfigModalPayload = useResetConfigModalPayload();
 
-const strategyList = reactive({
-    value: [],
-});
+const { strategy } = toRefs(getAllKfConfigData());
 const strategyIdList = computed(() => {
-    return strategyList.value.map((item: KfConfig): string => item.name);
+    return strategy.value.map((item: KfConfig): string => item.name);
 });
 const strategyListResolved = computed(() => {
-    return strategyList.value.map((item: KfConfig): StrategyRow => {
+    return strategy.value.map((item: KfConfig): StrategyRow => {
         const configValue = JSON.parse(item.value || '{}');
 
         return {
@@ -75,13 +73,6 @@ const { searchKeyword, tableData } = useTableSearchKeyword<StrategyRow>(
     strategyListResolved,
     ['strategyId'],
 );
-
-onMounted(() => {
-    if (app?.proxy) {
-        const store = app?.proxy.$useGlobalStore();
-        strategyList.value = storeToRefs(store).strategyList;
-    }
-});
 
 function handleOpenLog(record: StrategyRow) {
     console.log(record);
@@ -166,7 +157,7 @@ function handleOpenSetStrategyDialog(
     if (type === 'update' && (record as StrategyRow).strategyId) {
         const strategyId = (record as StrategyRow).strategyId;
         const strategyConfig = findTargetFromArray<KfConfig>(
-            strategyList.value,
+            strategy.value,
             'name',
             strategyId,
         );
@@ -204,6 +195,16 @@ function getStateStatusName(processId: string) {
         <KfDashboard @boardSizeChange="handleBodySizeChange">
             <template v-slot:header>
                 <KfDashboardItem>
+                    <a-input-search
+                        v-model:value="searchKeyword"
+                        placeholder="关键字"
+                        style="width: 120px"
+                    />
+                </KfDashboardItem>
+                <KfDashboardItem>
+                    <a-switch></a-switch>
+                </KfDashboardItem>
+                <KfDashboardItem>
                     <a-button
                         size="small"
                         type="primary"
@@ -211,16 +212,6 @@ function getStateStatusName(processId: string) {
                     >
                         添加
                     </a-button>
-                </KfDashboardItem>
-                <KfDashboardItem>
-                    <a-switch></a-switch>
-                </KfDashboardItem>
-                <KfDashboardItem>
-                    <a-input-search
-                        v-model:value="searchKeyword"
-                        placeholder="关键字"
-                        style="width: 120px"
-                    />
                 </KfDashboardItem>
             </template>
             <a-table

@@ -164,7 +164,7 @@ import {
     useModalVisible,
     numberEnumInputType,
     stringEnumInputType,
-} from '@renderer/assets/methods/uiUtils';
+} from '@renderer/assets/methods/kfUiUtils';
 import {
     KfConfigValue,
     KfTradeValueCommonData,

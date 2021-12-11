@@ -6,7 +6,7 @@ import {
 } from '@root/src/typings/enums';
 import { KfExtConfigs, KfConfig } from '@kungfu-trader/kungfu-js-api/typings';
 import { getKfExtensionConfig } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
-import { getAllKfConfigList } from '@kungfu-trader/kungfu-js-api/actions';
+import { getAllKfConfigOriginData } from '@kungfu-trader/kungfu-js-api/actions';
 import {
     Pm2ProcessStatusDetailData,
     Pm2ProcessStatusData,
@@ -54,7 +54,7 @@ export const useGlobalStore = defineStore('global', {
         },
 
         setKfConfigList() {
-            return getAllKfConfigList().then((res) => {
+            return getAllKfConfigOriginData().then((res) => {
                 const { md, td, strategy } = res;
                 this.mdList = md;
                 this.tdList = td;

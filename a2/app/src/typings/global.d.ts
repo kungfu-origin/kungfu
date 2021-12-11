@@ -6,18 +6,25 @@ declare module '@vue/runtime-core' {
     interface ComponentCustomProperties {
         $registedKfUIComponents: string[];
         $bus: Subject;
+        $tradingDataSubject: Subject<Watcher>;
         $useGlobalStore: StoreDefinition;
     }
 }
-
 declare global {
     interface Window {
         archiveStatus: Pm2ProcessStatusTypes;
+        watcher: Watcher | null;
     }
 
     namespace NodeJS {
         interface ProcessEnv {
-            RENDERER_TYPE: 'app' | 'admin' | 'makeOrder' | 'codeEditor';
+            APP_TYPE: 'cli' | 'dzxy' | 'renderer' | 'component' | 'main';
+            RENDERER_TYPE:
+                | 'app'
+                | 'admin'
+                | 'logview'
+                | 'makeOrder'
+                | 'codeEditor';
             RELOAD_AFTER_CRASHED: 'false' | 'true';
             ELECTRON_RUN_AS_NODE: 'false' | 'true';
         }

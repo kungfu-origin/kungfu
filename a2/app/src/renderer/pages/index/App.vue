@@ -10,14 +10,11 @@
 import { defineComponent, getCurrentInstance, onMounted } from 'vue';
 import zhCN from 'ant-design-vue/es/locale/zh_CN';
 import { useGlobalStore } from './store/global';
+import { removeLoadingMask } from '@renderer/assets/methods/pureUiUtils';
 
 export default defineComponent({
     setup() {
         const app = getCurrentInstance();
-        const removeLoadingMask = () => {
-            const $loadingMask = document.getElementById('loading');
-            if ($loadingMask) $loadingMask.remove();
-        };
 
         useGlobalStore().setKfConfigList();
         useGlobalStore().setKfExtConfigs();
@@ -55,7 +52,6 @@ export default defineComponent({
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-align: center;
-    color: #2c3e50;
 
     .app__warp {
         height: 100%;

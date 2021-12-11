@@ -3,6 +3,17 @@
         <KfDashboard @boardSizeChange="handleBodySizeChange">
             <template v-slot:header>
                 <KfDashboardItem>
+                    <a-input-search
+                        v-model:value="searchKeyword"
+                        placeholder="关键字"
+                        style="width: 120px"
+                        @search="hanleOnSearch"
+                    />
+                </KfDashboardItem>
+                <KfDashboardItem>
+                    <a-switch></a-switch>
+                </KfDashboardItem>
+                <KfDashboardItem>
                     <a-button
                         size="small"
                         type="primary"
@@ -10,17 +21,6 @@
                     >
                         添加
                     </a-button>
-                </KfDashboardItem>
-                <KfDashboardItem>
-                    <a-switch></a-switch>
-                </KfDashboardItem>
-                <KfDashboardItem>
-                    <a-input-search
-                        v-model:value="searchKeyword"
-                        placeholder="关键字"
-                        style="width: 120px"
-                        @search="hanleOnSearch"
-                    />
                 </KfDashboardItem>
             </template>
             <a-table

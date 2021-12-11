@@ -12,6 +12,8 @@ import {
     getCurrentInstance,
     onMounted,
 } from 'vue';
+import { message, Modal } from 'ant-design-vue';
+
 import {
     APP_DIR,
     KF_HOME,
@@ -22,6 +24,8 @@ import {
     getTradingDate,
     kfLogger,
     removeJournal,
+    getCategoryName,
+    getIdByKfLocation,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import {
     CommissionMode,
@@ -49,11 +53,6 @@ import {
     AntInKungfuColorTypes,
     KfConfig,
 } from '@kungfu-trader/kungfu-js-api/typings';
-import { message, Modal } from 'ant-design-vue';
-import {
-    getCategoryName,
-    getIdByKfLocation,
-} from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import {
     deleteAllByKfLocation,
     switchKfLocation,
@@ -64,6 +63,7 @@ import {
 } from '@kungfu-trader/kungfu-js-api/utils/processUtils';
 import { Proc } from 'pm2';
 import { storeToRefs } from 'pinia';
+import { BrowserWindow, getCurrentWindow } from '@electron/remote';
 
 export interface KfUIComponent {
     name: string;
@@ -303,7 +303,13 @@ export const handleSwitchProcessStatus = (
     checked: boolean,
     kfLocation: KfLocation,
 ): Promise<void | Proc> => {
-    return switchKfLocation(kfLocation, checked);
+    return switchKfLocation(kfLocation, checked)
+        .then(() => {
+            message.success('操作成功');
+        })
+        .catch((err: Error) => {
+            message.error(err.message || '操作失败');
+        });
 };
 
 export const getExtConfigsRelated = (): {
@@ -330,66 +336,60 @@ export const getExtConfigsRelated = (): {
 };
 
 export const getProcessStatusDetailData = (): {
-    processStatusData: {
-        value: Pm2ProcessStatusData;
-    };
-    processStatusDetailData: {
-        value: Pm2ProcessStatusDetailData;
-    };
+    processStatusData: Pm2ProcessStatusData;
+    processStatusDetailData: Pm2ProcessStatusDetailData;
 } => {
-    const processStatusDetailData = reactive<{
-        value: Pm2ProcessStatusDetailData;
-    }>({
-        value: {},
-    });
-
-    const processStatusData = reactive<{
-        value: Pm2ProcessStatusData;
-    }>({
-        value: {},
+    const allProcessStatusData = reactive({
+        processStatusData: {},
+        processStatusDetailData: {},
     });
 
     onMounted(() => {
         const app = getCurrentInstance();
         if (app?.proxy) {
-            const store = storeToRefs(app?.proxy.$useGlobalStore());
-            processStatusDetailData.value =
-                store.processStatusWithDetail as Pm2ProcessStatusDetailData;
-            processStatusData.value =
-                store.processStatusData as Pm2ProcessStatusData;
+            const { processStatusData, processStatusWithDetail } = storeToRefs(
+                app?.proxy.$useGlobalStore(),
+            );
+            allProcessStatusData.processStatusData =
+                processStatusData as Pm2ProcessStatusData;
+            allProcessStatusData.processStatusDetailData =
+                processStatusWithDetail as Pm2ProcessStatusDetailData;
         }
     });
 
-    return {
-        processStatusData,
-        processStatusDetailData,
-    };
+    return allProcessStatusData;
 };
 
-export const getKfLocationData = (): Record<KfCategoryTypes, KfLocation[]> => {
-    const kfLocationData: Record<KfCategoryTypes, KfLocation[]> = reactive({
+export const getAllKfConfigData = (): Record<KfCategoryTypes, KfConfig[]> => {
+    const allKfConfigData: Record<KfCategoryTypes, KfConfig[]> = reactive({
         system: [
             ...(process.env.NODE_ENV === 'development'
                 ? ([
                       {
+                          location_uid: 0,
                           category: 'system',
                           group: 'service',
                           name: 'archive',
                           mode: 'LIVE',
+                          value: '',
                       },
-                  ] as KfLocation[])
+                  ] as KfConfig[])
                 : []),
             {
+                location_uid: 0,
                 category: 'system',
                 group: 'master',
                 name: 'master',
                 mode: 'LIVE',
+                value: '',
             },
             {
+                location_uid: 0,
                 category: 'system',
                 group: 'service',
                 name: 'ledger',
                 mode: 'LIVE',
+                value: '',
             },
         ],
 
@@ -401,12 +401,85 @@ export const getKfLocationData = (): Record<KfCategoryTypes, KfLocation[]> => {
     onMounted(() => {
         const app = getCurrentInstance();
         if (app?.proxy) {
-            const store = storeToRefs(app?.proxy.$useGlobalStore());
-            kfLocationData.md = store.mdList as KfConfig[];
-            kfLocationData.td = store.tdList as KfConfig[];
-            kfLocationData.strategy = store.strategyList as KfConfig[];
+            const { mdList, tdList, strategyList } = storeToRefs(
+                app?.proxy.$useGlobalStore(),
+            );
+            allKfConfigData.md = mdList as KfConfig[];
+            allKfConfigData.td = tdList as KfConfig[];
+            allKfConfigData.strategy = strategyList as KfConfig[];
         }
     });
 
-    return kfLocationData;
+    return allKfConfigData;
+};
+
+/**
+ * 新建窗口
+ * @param  {string} htmlPath
+ */
+export const openNewBrowserWindow = (
+    name: string,
+    params: string,
+    windowConfig?: Electron.BrowserWindowConstructorOptions,
+): Promise<Electron.BrowserWindow> => {
+    const currentWindow = getCurrentWindow();
+
+    const modalPath =
+        process.env.NODE_ENV !== 'production'
+            ? `http://localhost:9090/${name}.html${params}`
+            : `file://${__dirname}/${name}.html${params}`;
+
+    return new Promise((resolve, reject) => {
+        const win = new BrowserWindow({
+            show: false,
+            ...(getNewWindowLocation() || {}),
+            width: 1080,
+            height: 766,
+            parent: currentWindow,
+            webPreferences: {
+                nodeIntegration: true,
+                nodeIntegrationInWorker: true,
+                contextIsolation: false,
+                enableRemoteModule: true,
+            },
+            ...windowConfig,
+        });
+
+        win.on('ready-to-show', function () {
+            win && win.show();
+            win && win.focus();
+        });
+
+        win.webContents.loadURL(modalPath);
+        win.webContents.on('did-finish-load', () => {
+            if (!currentWindow || Object.keys(currentWindow).length == 0) {
+                reject(new Error('当前页面没有聚焦'));
+                return;
+            }
+            resolve(win);
+        });
+    });
+};
+
+function getNewWindowLocation(): { x: number; y: number } | null {
+    const currentWindow = getCurrentWindow();
+    if (currentWindow) {
+        //如果上一步中有活动窗口，则根据当前活动窗口的右下方设置下一个窗口的坐标
+        const [currentWindowX, currentWindowY] = currentWindow.getPosition();
+        const x = currentWindowX + 10;
+        const y = currentWindowY + 10;
+
+        return {
+            x,
+            y,
+        };
+    }
+
+    return null;
+}
+
+export const openLogView = (
+    processId: string,
+): Promise<Electron.BrowserWindow> => {
+    return openNewBrowserWindow('logview', `?processId=${processId}`);
 };

@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted, getCurrentInstance } from 'vue';
-import { storeToRefs } from 'pinia';
+import { ref, computed, getCurrentInstance, toRefs } from 'vue';
 
 import KfDashboard from '@renderer/components/public/KfDashboard.vue';
 import KfDashboardItem from '@renderer/components/public/KfDashboardItem.vue';
@@ -30,7 +29,8 @@ import {
     useTableSearchKeyword,
     ensureRemoveLocation,
     getExtConfigsRelated,
-} from '@renderer/assets/methods/uiUtils';
+    getAllKfConfigData,
+} from '@renderer/assets/methods/kfUiUtils';
 
 const app = getCurrentInstance();
 
@@ -49,17 +49,16 @@ const currentSelectedSourceId = ref<string>('');
 
 const { extConfigs, extTypeMap } = getExtConfigsRelated();
 
-const tdList = reactive({
-    value: [],
-});
+const { td } = toRefs(getAllKfConfigData());
+
 const tdIdList = computed(() => {
-    return tdList.value.map(
+    return td.value.map(
         (item: KfConfig): string => `${item.group}_${item.name}`,
     );
 });
 
 const tdListResolved = computed(() => {
-    return tdList.value.map((item: KfConfig): TdRow => {
+    return td.value.map((item: KfConfig): TdRow => {
         const configValue: Record<string, unknown> = JSON.parse(
             item.value || '{}',
         );
@@ -83,13 +82,6 @@ const { searchKeyword, tableData } = useTableSearchKeyword<TdRow>(
     tdListResolved,
     ['sourceId', 'accountId'],
 );
-
-onMounted(() => {
-    if (app?.proxy) {
-        const store = storeToRefs(app?.proxy.$useGlobalStore());
-        tdList.value = store.tdList;
-    }
-});
 
 function handleOpenLog(record: TdRow) {
     console.log(record);
@@ -155,6 +147,16 @@ function handleRemoveTd(record: TdRow) {
         <KfDashboard @boardSizeChange="handleBodySizeChange">
             <template v-slot:header>
                 <KfDashboardItem>
+                    <a-input-search
+                        v-model:value="searchKeyword"
+                        placeholder="关键字"
+                        style="width: 120px"
+                    />
+                </KfDashboardItem>
+                <KfDashboardItem>
+                    <a-switch></a-switch>
+                </KfDashboardItem>
+                <KfDashboardItem>
                     <a-button
                         size="small"
                         type="primary"
@@ -162,16 +164,6 @@ function handleRemoveTd(record: TdRow) {
                     >
                         添加
                     </a-button>
-                </KfDashboardItem>
-                <KfDashboardItem>
-                    <a-switch></a-switch>
-                </KfDashboardItem>
-                <KfDashboardItem>
-                    <a-input-search
-                        v-model:value="searchKeyword"
-                        placeholder="关键字"
-                        style="width: 120px"
-                    />
                 </KfDashboardItem>
             </template>
             <a-table

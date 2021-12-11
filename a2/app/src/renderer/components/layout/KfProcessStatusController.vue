@@ -1,8 +1,11 @@
 <script lang="ts" setup>
 import { ClusterOutlined } from '@ant-design/icons-vue';
-import { KfCategoryTypes } from '@kungfu-trader/kungfu-js-api/typings';
+import {
+    KfCategoryTypes,
+    KfConfig,
+} from '@kungfu-trader/kungfu-js-api/typings';
 import KfProcessStatus from '@renderer/components/public/KfProcessStatus.vue';
-import { ref } from 'vue';
+import { ref, toRefs, watch } from 'vue';
 import {
     KfCategory,
     SystemProcessName,
@@ -10,26 +13,64 @@ import {
 import {
     getExtConfigsRelated,
     getInstrumentTypeColor,
-    getKfLocationData,
+    getAllKfConfigData,
     getProcessStatusDetailData,
     handleSwitchProcessStatus,
-} from '@renderer/assets/methods/uiUtils';
+    openLogView,
+} from '@renderer/assets/methods/kfUiUtils';
 import { FileTextOutlined } from '@ant-design/icons-vue';
 import {
     getIfProcessOnline,
     getProcessIdByKfLocation,
     getPropertyFromProcessStatusDetailDataByKfLocation,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
+import { message, notification } from 'ant-design-vue';
 
 const processControllerBoardVisible = ref<boolean>(false);
 const categoryList: KfCategoryTypes[] = ['system', 'td', 'md', 'strategy'];
-const allKfLocations = getKfLocationData();
-const { processStatusData, processStatusDetailData } =
-    getProcessStatusDetailData();
+const allKfConfigData = getAllKfConfigData();
+const { processStatusData, processStatusDetailData } = toRefs(
+    getProcessStatusDetailData(),
+);
 const { extTypeMap } = getExtConfigsRelated();
 
-function handleOpenProcessControllerBoard() {
+let hasAlertMasterStop = false;
+let hasAlertLedgerStop = false;
+
+watch(processStatusData, (newPSD, oldPSD) => {
+    if (newPSD.master !== 'online' && oldPSD.master === 'online') {
+        if (!hasAlertMasterStop) {
+            hasAlertMasterStop = true;
+            notification.error({
+                message: '主控进程 master 中断',
+                description:
+                    '主控进程负责策略进程间通信与资源配置, 请重启功夫交易系统',
+                duration: 10,
+            });
+        }
+    }
+
+    if (newPSD.ledger !== 'online' && oldPSD.ledger === 'online') {
+        if (!hasAlertLedgerStop) {
+            hasAlertLedgerStop = true;
+            notification.error({
+                message: '计算服务 ledger 中断',
+                description: '计算服务负责持仓跟资金计算, 请重启功夫交易系统',
+                duration: 10,
+            });
+        }
+    }
+});
+
+function handleOpenProcessControllerBoard(): void {
     processControllerBoardVisible.value = true;
+}
+
+function handleOpenLogview(config: KfConfig): Promise<Electron.BrowserWindow> {
+    const hideloading = message.loading('正在打开窗口');
+    return openLogView(getProcessIdByKfLocation(config)).finally(() => {
+        hideloading();
+    });
 }
 </script>
 
@@ -53,11 +94,11 @@ function handleOpenProcessControllerBoard() {
                 v-for="category in categoryList"
                 :key="category"
             >
-                <template v-if="allKfLocations[category].length">
-                    <div class="kf-location-list">
+                <template v-if="allKfConfigData[category].length">
+                    <div class="kf-config-list">
                         <div
-                            class="kf-location-item"
-                            v-for="location in allKfLocations[category]"
+                            class="kf-config-item"
+                            v-for="config in allKfConfigData[category]"
                         >
                             <div class="process-info">
                                 <div class="category info-item">
@@ -67,64 +108,64 @@ function handleOpenProcessControllerBoard() {
                                 </div>
                                 <div
                                     class="process-id info-item"
-                                    v-if="location.category === 'system'"
+                                    v-if="config.category === 'system'"
                                 >
                                     {{
-                                        (SystemProcessName[location.name] || {})
+                                        (SystemProcessName[config.name] || {})
                                             .name || ''
                                     }}
                                 </div>
                                 <div
                                     class="process-id info-item"
-                                    v-else-if="location.category !== 'strategy'"
+                                    v-else-if="config.category !== 'strategy'"
                                 >
                                     <a-tag
                                         v-if="
-                                            location.category === 'td' ||
-                                            location.category === 'md'
+                                            config.category === 'td' ||
+                                            config.category === 'md'
                                         "
                                         :color="
                                             getInstrumentTypeColor(
-                                                extTypeMap[location.group],
+                                                extTypeMap[config.group],
                                             )
                                         "
                                     >
-                                        {{ location.group }}
+                                        {{ config.group }}
                                     </a-tag>
-                                    {{ location.name }}
+                                    {{ config.name }}
                                 </div>
                                 <div class="process-id info-item" v-else>
-                                    {{ location.name }}
+                                    {{ config.name }}
                                 </div>
-                                <div class="state-status info-item">
-                                    <KfProcessStatus
-                                        :status-name="
-                                            getPropertyFromProcessStatusDetailDataByKfLocation(
-                                                processStatusDetailData.value,
-                                                location,
-                                            ).status
-                                        "
-                                    ></KfProcessStatus>
-                                </div>
+                            </div>
+                            <div class="state-status">
+                                <KfProcessStatus
+                                    :status-name="
+                                        getPropertyFromProcessStatusDetailDataByKfLocation(
+                                            processStatusDetailData,
+                                            config,
+                                        ).status
+                                    "
+                                ></KfProcessStatus>
                             </div>
                             <div class="switch">
                                 <a-switch
                                     size="small"
                                     :checked="
                                         getIfProcessOnline(
-                                            processStatusData.value,
-                                            getProcessIdByKfLocation(location),
+                                            processStatusData,
+                                            getProcessIdByKfLocation(config),
                                         )
                                     "
-                                    @click="(checked: boolean) => handleSwitchProcessStatus(checked, location)"
+                                    @click="(checked: boolean) => handleSwitchProcessStatus(checked, config)"
                                 ></a-switch>
                             </div>
                             <div class="cpu">
                                 CPU:
                                 {{
                                     getPropertyFromProcessStatusDetailDataByKfLocation(
-                                        processStatusDetailData.value,
-                                        location,
+                                        processStatusDetailData,
+                                        config,
                                     ).cpu + '%'
                                 }}
                             </div>
@@ -132,13 +173,14 @@ function handleOpenProcessControllerBoard() {
                                 MEM:
                                 {{
                                     getPropertyFromProcessStatusDetailDataByKfLocation(
-                                        processStatusDetailData.value,
-                                        location,
+                                        processStatusDetailData,
+                                        config,
                                     ).memory + 'M'
                                 }}
                             </div>
                             <div class="actions kf-actions__warp">
                                 <FileTextOutlined
+                                    @click="handleOpenLogview(config)"
                                     style="font-size: 14px"
                                 ></FileTextOutlined>
                             </div>
@@ -180,7 +222,7 @@ function handleOpenProcessControllerBoard() {
             padding-bottom: 8px;
         }
 
-        .kf-location-item {
+        .kf-config-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -199,11 +241,11 @@ function handleOpenProcessControllerBoard() {
                     &.category {
                         width: 70px;
                     }
-
-                    // &.process-id {
-                    // width: 100px;
-                    // }
                 }
+            }
+
+            .state-status {
+                width: 80px;
             }
 
             .switch {

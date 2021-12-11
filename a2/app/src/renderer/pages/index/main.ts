@@ -26,7 +26,7 @@ import {
 import {
     beforeStartAll,
     getUIComponents,
-} from '@renderer/assets/methods/uiUtils';
+} from '@renderer/assets/methods/kfUiUtils';
 import { useGlobalStore } from '@renderer/pages/index/store/global';
 import { delayMilliSeconds } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import {
@@ -38,6 +38,12 @@ import {
     startLedger,
     startMaster,
 } from '@kungfu-trader/kungfu-js-api/utils/processUtils';
+
+import {
+    startUpdateKungfuWatcherQuotes,
+    watcher,
+} from '@kungfu-trader/kungfu-js-api/kungfu/watcher';
+import { tradingDataSubject } from '@kungfu-trader/kungfu-js-api/kungfu/tradingData';
 
 const app = createApp(App);
 
@@ -68,6 +74,7 @@ app.use(store)
 //this sort ensure $useGlobalStore can be get in mounted callback
 app.config.globalProperties.$registedKfUIComponents = Object.keys(uics);
 app.config.globalProperties.$bus = new Subject();
+app.config.globalProperties.$tradingDataSubject = tradingDataSubject;
 app.config.globalProperties.$useGlobalStore = useGlobalStore;
 
 app.mount('#app');
@@ -117,3 +124,6 @@ if (process.env.RELOAD_AFTER_CRASHED === 'false') {
         },
     );
 }
+
+startUpdateKungfuWatcherQuotes(2000);
+window.watcher = watcher;

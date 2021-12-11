@@ -14,14 +14,18 @@
         "@electron/remote": "^2.0.1",
         "@kungfu-trader/kungfu-js-api": "*",
         "@surely-vue/table": "^2.0.2",
+        "add": "^2.0.6",
         "ant-design-vue": "^3.0.0-alpha.14",
         "core-js": "^3.6.5",
         "dayjs": "^1.10.7",
         "fs-extra": "^10.0.0",
         "pinia": "^2.0.4",
         "rxjs": "^7.4.0",
+        "tail": "^2.2.4",
         "vue": "^3.2.0",
-        "vue-router": "^4.0.0-0"
+        "vue-router": "^4.0.0-0",
+        "vue-virtual-scroller": "^2.0.0-alpha.1",
+        "yarn": "^1.22.17"
     },
     "devDependencies": {
         "@types/node": "^16.11.10",

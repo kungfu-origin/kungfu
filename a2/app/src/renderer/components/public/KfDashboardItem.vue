@@ -9,7 +9,6 @@ export default defineComponent({});
 </script>
 <style lang="less">
 .kf-dashboard-item__warp {
-    float: right;
     padding-left: 8px;
 
     .ant-btn.ant-btn-sm {

@@ -20,11 +20,13 @@ export default defineComponent({
             this.$emit('boardSizeChange', this.getBodyWidthHeight());
         });
 
-        this.$bus
-            .pipe(filter((e: KfEvent) => e.tag === 'resize'))
-            .subscribe(() => {
-                this.$emit('boardSizeChange', this.getBodyWidthHeight());
-            });
+        if (this.$bus) {
+            this.$bus
+                .pipe(filter((e: KfEvent) => e.tag === 'resize'))
+                .subscribe(() => {
+                    this.$emit('boardSizeChange', this.getBodyWidthHeight());
+                });
+        }
     },
 
     methods: {
@@ -52,6 +54,9 @@ export default defineComponent({
         height: 32px;
         line-height: 32px;
         margin-bottom: 4px;
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
     }
 
     .kf-dashboard__body {
