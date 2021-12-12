@@ -1,6 +1,8 @@
 const os = require('os');
 const path = require('path');
 
+declare const global: NodeJS.Global;
+
 const getHomePath = () => {
     switch (os.platform()) {
         case 'darwin':
@@ -29,7 +31,7 @@ if (process.env.APP_TYPE === 'cli') {
         .replace(/\\/g, '\\\\');
 }
 
-if (process.env.APP_TYPE === 'daemon') {
+if (process.env.APP_TYPE === 'dzxy') {
     global.__kfResourcesPath = path
         .join(__dirname, '..', '..', '..')
         .replace(/\\/g, '\\\\');

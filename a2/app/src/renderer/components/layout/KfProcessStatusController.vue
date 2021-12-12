@@ -15,9 +15,8 @@ import {
     getInstrumentTypeColor,
     getAllKfConfigData,
     getProcessStatusDetailData,
-    handleSwitchProcessStatus,
     openLogView,
-} from '@renderer/assets/methods/kfUiUtils';
+} from '@renderer/assets/methods/uiUtils';
 import { FileTextOutlined } from '@ant-design/icons-vue';
 import {
     getIfProcessOnline,
@@ -25,6 +24,7 @@ import {
     getPropertyFromProcessStatusDetailDataByKfLocation,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { message, notification } from 'ant-design-vue';
+import { handleSwitchProcessStatus } from '@renderer/assets/methods/actionsUtils';
 
 const processControllerBoardVisible = ref<boolean>(false);
 const categoryList: KfCategoryTypes[] = ['system', 'td', 'md', 'strategy'];

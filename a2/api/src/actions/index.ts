@@ -11,11 +11,15 @@ import {
 } from '../typings';
 import { KF_RUNTIME_DIR, LOG_DIR } from '../config/pathConfig';
 import { pathExists, remove } from 'fs-extra';
-import { getProcessIdByKfLocation } from '../utils/busiUtils';
+import {
+    getIdByKfLocation,
+    getProcessIdByKfLocation,
+} from '../utils/busiUtils';
 import { deleteProcess, startLedger, startMaster } from '../utils/processUtils';
 import { Proc } from 'pm2';
+import { watcher } from '../kungfu/watcher';
 
-export const getAllKfConfigList = (): Promise<
+export const getAllKfConfigOriginData = (): Promise<
     Record<KfCategoryTypes, KfConfig[]>
 > => {
     return getKfAllConfig().then((allConfig: KfConfigOrigin[]) => {
@@ -94,6 +98,13 @@ export const switchKfLocation = (
     const processId = getProcessIdByKfLocation(kfLocation);
 
     if (!targetStatus) {
+        if (kfLocation.category !== 'system') {
+            if (!watcher || !watcher.isReadyToInteract(kfLocation)) {
+                const processId = getProcessIdByKfLocation(kfLocation);
+                throw new Error(`${processId} 还未准备就绪, 请稍后重试`);
+            }
+        }
+
         return deleteProcess(processId);
     }
 

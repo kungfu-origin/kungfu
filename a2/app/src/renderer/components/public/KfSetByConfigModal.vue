@@ -161,10 +161,10 @@ import { DashOutlined } from '@ant-design/icons-vue';
 
 import {
     initFormDataByConfig,
-    useModalVisible,
     numberEnumInputType,
     stringEnumInputType,
-} from '@renderer/assets/methods/kfUiUtils';
+    useModalVisible,
+} from '@renderer/assets/methods/uiUtils';
 import {
     KfConfigValue,
     KfTradeValueCommonData,

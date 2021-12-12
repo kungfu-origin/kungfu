@@ -271,6 +271,11 @@ export const InstrumentType: Record<
         name: isEnglish ? 'Repo' : '回购',
         color: 'red',
     },
+    [InstrumentTypeEnum.Crypto]: {
+        name: isEnglish ? 'Crypto' : '数字货币',
+        color: 'blue',
+        level: 10,
+    },
     [InstrumentTypeEnum.Simu]: {
         name: isEnglish ? 'Simu' : '模拟',
         color: 'green',

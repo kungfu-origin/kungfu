@@ -23,10 +23,7 @@ import {
     Drawer,
 } from 'ant-design-vue';
 
-import {
-    beforeStartAll,
-    getUIComponents,
-} from '@renderer/assets/methods/kfUiUtils';
+import { beforeStartAll } from '@renderer/assets/methods/uiUtils';
 import { useGlobalStore } from '@renderer/pages/index/store/global';
 import { delayMilliSeconds } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import {
@@ -44,6 +41,7 @@ import {
     watcher,
 } from '@kungfu-trader/kungfu-js-api/kungfu/watcher';
 import { tradingDataSubject } from '@kungfu-trader/kungfu-js-api/kungfu/tradingData';
+import { getUIComponents } from '@renderer/assets/methods/uiUtils';
 
 const app = createApp(App);
 

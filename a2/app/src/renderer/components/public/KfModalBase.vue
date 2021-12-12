@@ -11,7 +11,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 
-import { useModalVisible } from '@renderer/assets/methods/kfUiUtils';
+import { useModalVisible } from '@renderer/assets/methods/uiUtils';
 
 export default defineComponent({
     props: {

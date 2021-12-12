@@ -35,6 +35,13 @@ export type AntInKungfuColorTypes =
     | 'kf-color-waiting'
     | 'kf-color-error';
 
+export enum LedgerCategoryEnum {
+    Account,
+    Strategy,
+}
+
+export type LedgerCategoryTypes = keyof typeof LedgerCategoryEnum;
+
 export enum InstrumentTypeEnum {
     Unknown,
     Stock,
@@ -45,6 +52,7 @@ export enum InstrumentTypeEnum {
     TechStock,
     Index,
     Repo,
+    Crypto, //数字货币
     Simu,
 }
 
@@ -134,6 +142,20 @@ export enum DirectionEnum {
 }
 
 export type DirectionTypes = keyof typeof DirectionEnum;
+
+export enum OrderStatusEnum {
+    Unknown,
+    Submitted,
+    Pending,
+    Cancelled,
+    Error,
+    Filled,
+    PartialFilledNotActive,
+    PartialFilledActive,
+    Lost,
+}
+
+export type OrderStatusTypes = keyof typeof OrderStatusEnum;
 
 export interface SourceData {
     name: string;

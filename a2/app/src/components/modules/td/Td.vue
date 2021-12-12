@@ -27,10 +27,10 @@ import { columns } from './config';
 import {
     useResetConfigModalPayload,
     useTableSearchKeyword,
-    ensureRemoveLocation,
     getExtConfigsRelated,
     getAllKfConfigData,
-} from '@renderer/assets/methods/kfUiUtils';
+} from '@renderer/assets/methods/uiUtils';
+import { ensureRemoveLocation } from '@renderer/assets/methods/actionsUtils';
 
 const app = getCurrentInstance();
 
@@ -50,7 +50,6 @@ const currentSelectedSourceId = ref<string>('');
 const { extConfigs, extTypeMap } = getExtConfigsRelated();
 
 const { td } = toRefs(getAllKfConfigData());
-
 const tdIdList = computed(() => {
     return td.value.map(
         (item: KfConfig): string => `${item.group}_${item.name}`,

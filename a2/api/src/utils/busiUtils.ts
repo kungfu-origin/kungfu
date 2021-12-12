@@ -1,7 +1,8 @@
 import path from 'path';
 import dayjs from 'dayjs';
-import fse from 'fs-extra';
+import fse, { Stats } from 'fs-extra';
 import log4js from 'log4js';
+import readline from 'readline';
 import { buildProcessLogPath } from '../config/pathConfig';
 import {
     InstrumentType,
@@ -18,6 +19,7 @@ import {
     KfLocation,
     ProcessStatusTypes,
     InstrumentTypes,
+    KfConfig,
 } from '../typings';
 import {
     Pm2ProcessStatusData,
@@ -708,7 +710,9 @@ export const removeJournal = (targetFolder: string): Promise<void> => {
     return Promise.resolve();
 };
 
-export const getProcessIdByKfLocation = (kfLocation: KfLocation): string => {
+export const getProcessIdByKfLocation = (
+    kfLocation: KfLocation | KfConfig,
+): string => {
     if (kfLocation.category === 'td') {
         return `${kfLocation.category}_${kfLocation.group}_${kfLocation.name}`;
     } else if (kfLocation.category === 'md') {
@@ -722,7 +726,9 @@ export const getProcessIdByKfLocation = (kfLocation: KfLocation): string => {
     throw new Error(`Category ${kfLocation.category} is illegal`);
 };
 
-export const getIdByKfLocation = (kfLocation: KfLocation): string => {
+export const getIdByKfLocation = (
+    kfLocation: KfLocation | KfConfig,
+): string => {
     if (kfLocation.category === 'td') {
         return `${kfLocation.group}_${kfLocation.name}`;
     } else if (kfLocation.category === 'md') {
@@ -734,7 +740,7 @@ export const getIdByKfLocation = (kfLocation: KfLocation): string => {
     throw new Error(`Category ${kfLocation.category} is illegal`);
 };
 
-export const getCategoryName = (kfLocation: KfLocation): string => {
+export const getCategoryName = (kfLocation: KfLocation | KfConfig): string => {
     if (KfCategory[kfLocation.category]) {
         return KfCategory[kfLocation.category].name;
     }
@@ -763,7 +769,7 @@ export const getIfProcessOnline = (
 
 export const getPropertyFromProcessStatusDetailDataByKfLocation = (
     processStatusDetailData: Pm2ProcessStatusDetailData,
-    kfLocation: KfLocation,
+    kfLocation: KfLocation | KfConfig,
 ): {
     status: ProcessStatusTypes;
     cpu: number;
@@ -819,4 +825,109 @@ export const buildExtTypeMap = (
     });
 
     return extTypeMap;
+};
+
+export const statTime = (name: string) => {
+    if (process.env.NODE_ENV !== 'production') {
+        console.time(name);
+    }
+};
+
+export const statTimeEnd = (name: string) => {
+    if (process.env.NODE_ENV !== 'production') {
+        console.timeEnd(name);
+    }
+};
+
+//建立固定条数的list数据结构
+export const buildListByLineLimit = <T>(num: number): KfNumList<T> => {
+    let list: Array<T> = [];
+    let len = 0;
+
+    return {
+        list,
+        insert: (item: T) => {
+            if (len >= num) list.shift();
+            list.push(item);
+        },
+    };
+};
+
+export function getLog({
+    logPath,
+    fromStart,
+    readFrom,
+    dealLogLineMethod,
+}: {
+    logPath: string;
+    fromStart?: boolean;
+    readFrom?: number;
+    dealLogLineMethod?: (line: string) => string;
+}): Promise<KfNumList<KfLogData>> {
+    return new Promise((resolve, reject) => {
+        fse.stat(logPath, (err: Error, res: Stats) => {
+            if (err) {
+                reject(err);
+                return;
+            }
+
+            const numList = buildListByLineLimit<KfLogData>(3000);
+            const size = res.size;
+            const limit = readFrom || 1024 * 1024;
+            const lineReader = readline.createInterface({
+                input: fse.createReadStream(logPath, {
+                    start: fromStart ? 0 : size > limit ? size - limit : 0,
+                }),
+            });
+
+            let logId = 0;
+            let notFirst = false;
+            lineReader.on('line', (line) => {
+                logId++;
+
+                if (!notFirst) {
+                    const date = line.slice(0, 19);
+                    if (dayjs(date).isValid()) {
+                        numList.insert({
+                            message: dealLogLineMethod
+                                ? dealLogLineMethod(line)
+                                : line,
+                            messageOrigin: line,
+                            messageForSearch: '',
+                            id: logId,
+                        });
+                    }
+
+                    notFirst = true; //the first line may be not completeness
+                } else {
+                    numList.insert({
+                        message: dealLogLineMethod
+                            ? dealLogLineMethod(line)
+                            : line,
+                        messageOrigin: line,
+                        messageForSearch: '',
+                        id: logId,
+                    });
+                }
+            });
+
+            lineReader.on('close', () => {
+                resolve(numList);
+            });
+        });
+    });
+}
+
+export const debounce = (fn: Function, delay = 300, immediate = false) => {
+    let timeout: number;
+    return (...args: any) => {
+        if (immediate && !timeout) {
+            fn(...args);
+        }
+        clearTimeout(timeout);
+
+        timeout = +setTimeout(() => {
+            fn(...args);
+        }, delay);
+    };
 };

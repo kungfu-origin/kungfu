@@ -12,7 +12,7 @@ import {
     getCurrentInstance,
     onMounted,
 } from 'vue';
-import { message, Modal } from 'ant-design-vue';
+import { message } from 'ant-design-vue';
 
 import {
     APP_DIR,
@@ -24,8 +24,6 @@ import {
     getTradingDate,
     kfLogger,
     removeJournal,
-    getCategoryName,
-    getIdByKfLocation,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import {
     CommissionMode,
@@ -49,21 +47,16 @@ import {
     KfExtConfigs,
     KfTradeValueCommonData,
     SetKfConfigPayload,
-    KfLocation,
     AntInKungfuColorTypes,
     KfConfig,
 } from '@kungfu-trader/kungfu-js-api/typings';
 import {
-    deleteAllByKfLocation,
-    switchKfLocation,
-} from '@kungfu-trader/kungfu-js-api/actions';
-import {
     Pm2ProcessStatusData,
     Pm2ProcessStatusDetailData,
 } from '@kungfu-trader/kungfu-js-api/utils/processUtils';
-import { Proc } from 'pm2';
 import { storeToRefs } from 'pinia';
 import { BrowserWindow, getCurrentWindow } from '@electron/remote';
+import { ipcRenderer } from 'electron';
 
 export interface KfUIComponent {
     name: string;
@@ -245,35 +238,6 @@ export const stringEnumInputType: {
     exchange: ExchangeIds,
 };
 
-export const ensureRemoveLocation = (kfLocation: KfLocation): Promise<void> => {
-    const categoryName = getCategoryName(kfLocation);
-    const id = getIdByKfLocation(kfLocation);
-    return new Promise((resolve) => {
-        Modal.confirm({
-            title: `删除${categoryName} ${id}`,
-            content: `删除${categoryName} ${id} 所有数据, 如果该${categoryName}进程正在运行, 也将停止进程, 确认删除`,
-            okText: '确认',
-            cancelText: '取消',
-            onOk() {
-                return deleteAllByKfLocation(kfLocation)
-                    .then(() => {
-                        message.success('操作成功');
-                    })
-                    .then(() => {
-                        resolve();
-                    })
-                    .catch((err) => {
-                        console.log(err);
-                        message.error('操作失败', err.message);
-                    });
-            },
-            onCancel() {
-                resolve();
-            },
-        });
-    });
-};
-
 export const beforeStartAll = (): Promise<void> => {
     const clearJournalDateFromLocal = localStorage.getItem(
         'clearJournalTradingDate',
@@ -297,19 +261,6 @@ export const getInstrumentTypeColor = (
     type: InstrumentTypes,
 ): AntInKungfuColorTypes => {
     return InstrumentType[InstrumentTypeEnum[type]].color || 'default';
-};
-
-export const handleSwitchProcessStatus = (
-    checked: boolean,
-    kfLocation: KfLocation,
-): Promise<void | Proc> => {
-    return switchKfLocation(kfLocation, checked)
-        .then(() => {
-            message.success('操作成功');
-        })
-        .catch((err: Error) => {
-            message.error(err.message || '操作失败');
-        });
 };
 
 export const getExtConfigsRelated = (): {
@@ -482,4 +433,36 @@ export const openLogView = (
     processId: string,
 ): Promise<Electron.BrowserWindow> => {
     return openNewBrowserWindow('logview', `?processId=${processId}`);
+};
+
+export const removeLoadingMask = (): void => {
+    const $loadingMask = document.getElementById('loading');
+    if ($loadingMask) $loadingMask.remove();
+};
+
+export const parseURIParams = (): Record<string, string> => {
+    const search = window.location.search;
+    const searchResolved = search.slice(search.indexOf('?') + 1);
+    const searchResolvedSplits = searchResolved.split('&');
+    const paramsData: Record<string, string> = {};
+    searchResolvedSplits.forEach((item: string) => {
+        const itemSplit = item.split('=');
+        if (itemSplit.length === 2) {
+            paramsData[itemSplit[0] || ''] = itemSplit[1] || '';
+        }
+    });
+
+    return paramsData;
+};
+
+export const useIpcListener = (): void => {
+    ipcRenderer.removeAllListeners('main-process-messages');
+    ipcRenderer.on('main-process-messages', (event, args) => {
+        switch (args) {
+            case 'clear-journal':
+                localStorage.setItem('clearJournalTradingDate', '');
+                message.success('清理 journal 完成，请重启应用');
+                break;
+        }
+    });
 };

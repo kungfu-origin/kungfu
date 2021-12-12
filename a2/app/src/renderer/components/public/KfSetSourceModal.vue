@@ -53,7 +53,7 @@ import {
     getInstrumentTypeData,
     getSourceDataList,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
-import { useModalVisible } from '@renderer/assets/methods/kfUiUtils';
+import { useModalVisible } from '@renderer/assets/methods/uiUtils';
 
 export default defineComponent({
     props: {

@@ -26,11 +26,11 @@ import { findTargetFromArray } from '@kungfu-trader/kungfu-js-api/utils/busiUtil
 import {
     useResetConfigModalPayload,
     useTableSearchKeyword,
-    ensureRemoveLocation,
     getAllKfConfigData,
-} from '@renderer/assets/methods/kfUiUtils';
+} from '@renderer/assets/methods/uiUtils';
 import { columns } from './config';
 import { setKfConfig } from '@kungfu-trader/kungfu-js-api/kungfu/store';
+import { ensureRemoveLocation } from '@renderer/assets/methods/actionsUtils';
 
 const app = getCurrentInstance();
 

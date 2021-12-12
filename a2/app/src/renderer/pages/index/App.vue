@@ -10,7 +10,21 @@
 import { defineComponent, getCurrentInstance, onMounted } from 'vue';
 import zhCN from 'ant-design-vue/es/locale/zh_CN';
 import { useGlobalStore } from './store/global';
-import { removeLoadingMask } from '@renderer/assets/methods/pureUiUtils';
+import { removeLoadingMask } from '@renderer/assets/methods/uiUtils';
+import { ipcRenderer } from 'electron';
+import { message } from 'ant-design-vue';
+
+const useIpcListener = (): void => {
+    ipcRenderer.removeAllListeners('main-process-messages');
+    ipcRenderer.on('main-process-messages', (event, args) => {
+        switch (args) {
+            case 'clear-journal':
+                localStorage.setItem('clearJournalTradingDate', '');
+                message.success('清理 journal 完成，请重启应用');
+                break;
+        }
+    });
+};
 
 export default defineComponent({
     setup() {
@@ -18,6 +32,7 @@ export default defineComponent({
 
         useGlobalStore().setKfConfigList();
         useGlobalStore().setKfExtConfigs();
+        useIpcListener();
 
         onMounted(() => {
             removeLoadingMask();
