@@ -839,30 +839,33 @@ export const statTimeEnd = (name: string) => {
     }
 };
 
-//建立固定条数的list数据结构
-export const buildListByLineLimit = <T>(num: number): KfNumList<T> => {
-    let list: Array<T> = [];
-    let len = 0;
+export class KfNumList<T> {
+    list: T[];
+    limit: number;
 
-    return {
-        list,
-        insert: (item: T) => {
-            if (len >= num) list.shift();
-            list.push(item);
-        },
-    };
-};
+    constructor(limit: number) {
+        this.list = [];
+        this.limit = limit;
+    }
+
+    insert(item: T) {
+        if (this.list.length >= this.limit) this.list.shift();
+        this.list.push(item);
+    }
+}
 
 export function getLog({
     logPath,
     fromStart,
     readFrom,
     dealLogLineMethod,
+    nLines,
 }: {
     logPath: string;
     fromStart?: boolean;
     readFrom?: number;
     dealLogLineMethod?: (line: string) => string;
+    nLines?: number;
 }): Promise<KfNumList<KfLogData>> {
     return new Promise((resolve, reject) => {
         fse.stat(logPath, (err: Error, res: Stats) => {
@@ -871,7 +874,7 @@ export function getLog({
                 return;
             }
 
-            const numList = buildListByLineLimit<KfLogData>(3000);
+            const numList = new KfNumList<KfLogData>(nLines || 3000);
             const size = res.size;
             const limit = readFrom || 1024 * 1024;
             const lineReader = readline.createInterface({

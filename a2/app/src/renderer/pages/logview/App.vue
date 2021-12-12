@@ -1,7 +1,15 @@
 <script setup lang="ts">
 import path from 'path';
 import { Tail } from 'tail';
-import { computed, nextTick, onMounted, ref, watch } from 'vue';
+import {
+    computed,
+    nextTick,
+    onMounted,
+    reactive,
+    ref,
+    toRef,
+    watch,
+} from 'vue';
 import { UpOutlined, DownOutlined } from '@ant-design/icons-vue';
 
 import {
@@ -10,14 +18,14 @@ import {
 } from '@renderer/assets/methods/uiUtils';
 import { LOG_DIR } from '@kungfu-trader/kungfu-js-api/config/pathConfig';
 import {
-    buildListByLineLimit,
     debounce,
     getLog,
+    KfNumList,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import dayjs from 'dayjs';
 import KfDashboard from '@renderer/components/public/KfDashboard.vue';
 import KfDashboardItem from '@renderer/components/public/KfDashboardItem.vue';
-import { ensureFileSync, remove } from 'fs-extra';
+import { ensureFileSync, outputFile } from 'fs-extra';
 import { message } from 'ant-design-vue';
 import { shell } from '@electron/remote';
 import { clipboard } from 'electron';
@@ -28,17 +36,18 @@ onMounted(() => {
     cleanSearchRelatedState();
 });
 
-const logList = ref<Array<KfLogData>>([]);
+const logList = reactive<KfNumList<KfLogData>>(new KfNumList(2000));
 const processId = ref<string>('');
 const initLogLoading = ref<boolean>(false);
 const logPath = ref<string>('');
 const scrollerTableRef = ref();
 const inputSearchRef = ref();
+var watchLogTail: Tail | null = null;
 
 initLogLoading.value = true;
 initLog()
     .then((numList: KfNumList<KfLogData>) => {
-        logList.value = numList.list;
+        logList.list = numList.list;
     })
     .finally(() => {
         initLogLoading.value = false;
@@ -65,21 +74,28 @@ function initLog(): Promise<KfNumList<KfLogData>> {
         });
     }
 
-    return Promise.resolve(buildListByLineLimit<KfLogData>(3000));
+    return Promise.resolve(new KfNumList<KfLogData>(2000));
 }
 
 function startTailFile(logPath: string) {
     ensureFileSync(logPath);
-    const tail = new Tail(logPath);
-    tail.on('line', (data) => {
-        console.log(data, '---');
+    watchLogTail && watchLogTail.unwatch();
+    watchLogTail = new Tail(logPath, {
+        follow: true,
     });
+    let newId = +new Date();
+    watchLogTail.on('line', (data) => {
+        logList.insert({
+            id: newId++,
+            message: dealLogMessage(data),
+            messageOrigin: data,
+            messageForSearch: '',
+        });
+        handleSwitchScrollToBottomChecked();
+    });
+    watchLogTail.watch();
 }
 
-// function triggerToBottom(): void {
-//     const $scrollerTable = this.$refs['tr-scroller-table'];
-//     // $scrollerTable && $scrollerTable.$el && ($scrollerTable.$el.scrollTop = 1000000000)
-// })
 const searchKeyword = ref<string>('');
 const searchKeywordReg = computed(() => {
     let reg = null;
@@ -94,6 +110,7 @@ const searchKeywordReg = computed(() => {
 const currentResultPointerIndex = ref<number>(0);
 const totalResultCount = ref<number>(0);
 var searchResultList: KfLogData[] = [];
+
 watch(
     searchKeywordReg,
     debounce(() => {
@@ -108,7 +125,7 @@ watch(
 
         let isFirst = true;
         searchResultList = [];
-        logList.value.forEach((item: KfLogData) => {
+        logList.list.forEach((item: KfLogData) => {
             if (item.message.indexOf(searchKeyword.value) !== -1) {
                 item.messageForSearch = setLogDataMessageForSearch(item);
 
@@ -144,7 +161,7 @@ watch(currentResultPointerIndex, (newIndex: number, oldIndex: number) => {
     const oldId = oldIndex ? searchResultList[oldIndex - 1].id : 0;
     const newId = searchResultList[newIndex - 1].id;
 
-    logList.value.forEach((logData: KfLogData, index: number) => {
+    logList.list.forEach((logData: KfLogData, index: number) => {
         if (logData.id === oldId && oldId !== 0) {
             logData.messageForSearch = setLogDataMessageForSearch(logData);
         }
@@ -175,16 +192,6 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
-function cleanSearchRelatedState() {
-    totalResultCount.value = 0;
-    currentResultPointerIndex.value = 0;
-    searchResultList = [];
-    logList.value.forEach((item: KfLogData) => {
-        item.messageForSearch = '';
-    });
-    clipboard.clear();
-}
-
 function setLogDataMessageForSearch(
     item: KfLogData,
     currentPointer = false,
@@ -208,7 +215,7 @@ function setLogDataMessageForSearch(
 }
 
 function srollToItemByIndexInLogList(index: number): void {
-    const id = logList.value[index].id;
+    const id = logList.list[index].id;
     const $item = document.getElementById(`log-item-${id}`);
     //vue-virtual-scroller 的scrollToItem方法有问题，以这种方法让搜索结果显示出来
     const indexResolved = index < 10 ? index : index - 5;
@@ -231,7 +238,9 @@ function srollToItemByIndexInLogList(index: number): void {
 
 const scrollToBottomChecked = ref<boolean>(false);
 function handleSwitchScrollToBottomChecked() {
-    scrollerTableRef.value.scrollToBottom(303);
+    if (scrollToBottomChecked.value) {
+        scrollerTableRef.value.scrollToBottom(303);
+    }
 }
 
 function handleToDownSearchResult(): void {
@@ -252,10 +261,12 @@ function handleToUpSearchResult(): void {
     }
 }
 
-function handleRemoveLog() {
-    return remove(logPath.value)
+function handleRemoveLog(): Promise<void> {
+    ensureFileSync(logPath.value);
+    return outputFile(logPath.value, '')
         .then(() => {
             message.success('操作成功');
+            resetLog();
         })
         .catch((err: Error) => {
             message.error(err.message || '操作失败');
@@ -277,6 +288,21 @@ function dealLogMessage(line: string): string {
         line = `<span class="critical">${line}</span>`;
     }
     return line;
+}
+
+function cleanSearchRelatedState() {
+    totalResultCount.value = 0;
+    currentResultPointerIndex.value = 0;
+    searchResultList = [];
+    logList.list.forEach((item: KfLogData) => {
+        item.messageForSearch = '';
+    });
+    clipboard.clear();
+}
+
+function resetLog() {
+    cleanSearchRelatedState();
+    logList.list = [];
 }
 </script>
 <template>
@@ -343,7 +369,7 @@ function dealLogMessage(line: string): string {
                     v-if="!initLogLoading"
                     ref="scrollerTableRef"
                     class="kf-table"
-                    :items="logList"
+                    :items="logList.list"
                     :min-item-size="36"
                     :simple-array="true"
                 >

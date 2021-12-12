@@ -390,14 +390,24 @@ interface KfLogData {
     messageForSearch: string;
 }
 
-interface KfNumList<T> {
-    list: Array<T>;
+class KfNumList<T> {
+    list: T[];
+    limit: number;
     insert(item: T): void;
 }
 
 declare module 'tail' {
     export class Tail {
-        constructor(filePath);
+        constructor(
+            filePath: string,
+            options: {
+                follow?: boolean;
+                fromBeginning?: boolean;
+                nLines?: boolean;
+            },
+        );
+        watch(): void;
+        unwatch(): void;
         on(type: 'line' | 'error', callback: (data: string) => void);
     }
 }
