@@ -1,28 +1,11 @@
 <script setup lang="ts">
-import path from 'path';
-import { Tail } from 'tail';
-import {
-    computed,
-    nextTick,
-    onMounted,
-    reactive,
-    ref,
-    toRef,
-    watch,
-} from 'vue';
+import { nextTick, onMounted, ref } from 'vue';
 import { UpOutlined, DownOutlined } from '@ant-design/icons-vue';
 
 import {
-    parseURIParams,
     removeLoadingMask,
+    setHtmlTitle,
 } from '@renderer/assets/methods/uiUtils';
-import { LOG_DIR } from '@kungfu-trader/kungfu-js-api/config/pathConfig';
-import {
-    debounce,
-    getLog,
-    KfNumList,
-} from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
-import dayjs from 'dayjs';
 import KfDashboard from '@renderer/components/public/KfDashboard.vue';
 import KfDashboardItem from '@renderer/components/public/KfDashboardItem.vue';
 import { ensureFileSync, outputFile } from 'fs-extra';
@@ -30,153 +13,61 @@ import { message } from 'ant-design-vue';
 import { shell } from '@electron/remote';
 import { clipboard } from 'electron';
 import { platform } from 'os';
+import {
+    getLogProcessId,
+    useLogInit,
+    useLogSearch,
+} from '@renderer/assets/methods/logUtils';
+
+const ProcessId = getLogProcessId();
+setHtmlTitle(`功夫交易系统 - ${ProcessId}.log`);
+
+const boardSize = ref<{ width: number; height: number }>({
+    width: 0,
+    height: 0,
+});
+
+const handleChangeBoardSize = ({
+    width,
+    height,
+}: {
+    width: number;
+    height: number;
+}) => {
+    boardSize.value.width = width;
+    boardSize.value.height = height;
+};
+
+const {
+    logList,
+    logPath,
+    scrollToBottomChecked,
+    scrollerTableRef,
+    scrollToBottom,
+    startTailLog,
+    clearLogState,
+} = useLogInit(ProcessId);
+
+startTailLog();
+
+const {
+    inputSearchRef,
+    searchKeyword,
+    currentResultPointerIndex,
+    totalResultCount,
+    clearLogSearchState,
+    handleToDownSearchResult,
+    handleToUpSearchResult,
+} = useLogSearch(logList, scrollerTableRef, boardSize);
 
 onMounted(() => {
     removeLoadingMask();
-    cleanSearchRelatedState();
-});
-
-const logList = reactive<KfNumList<KfLogData>>(new KfNumList(2000));
-const processId = ref<string>('');
-const initLogLoading = ref<boolean>(false);
-const logPath = ref<string>('');
-const scrollerTableRef = ref();
-const inputSearchRef = ref();
-var watchLogTail: Tail | null = null;
-
-initLogLoading.value = true;
-initLog()
-    .then((numList: KfNumList<KfLogData>) => {
-        logList.list = numList.list;
-    })
-    .finally(() => {
-        initLogLoading.value = false;
-        startTailFile(logPath.value);
-    });
-
-function initLog(): Promise<KfNumList<KfLogData>> {
-    processId.value = parseURIParams().processId || '';
-    if (processId.value) {
-        logPath.value = path.resolve(
-            LOG_DIR,
-            dayjs().format('YYYYMMDD'),
-            `${processId.value}.log`,
-        );
-
-        document.getElementsByTagName(
-            'title',
-        )[0].innerText = `功夫交易系统 - ${processId.value}.log`;
-
-        ensureFileSync(logPath.value);
-        return getLog({
-            logPath: logPath.value,
-            dealLogLineMethod: dealLogMessage,
-        });
-    }
-
-    return Promise.resolve(new KfNumList<KfLogData>(2000));
-}
-
-function startTailFile(logPath: string) {
-    ensureFileSync(logPath);
-    watchLogTail && watchLogTail.unwatch();
-    watchLogTail = new Tail(logPath, {
-        follow: true,
-    });
-    let newId = +new Date();
-    watchLogTail.on('line', (data) => {
-        logList.insert({
-            id: newId++,
-            message: dealLogMessage(data),
-            messageOrigin: data,
-            messageForSearch: '',
-        });
-        handleSwitchScrollToBottomChecked();
-    });
-    watchLogTail.watch();
-}
-
-const searchKeyword = ref<string>('');
-const searchKeywordReg = computed(() => {
-    let reg = null;
-    try {
-        reg = new RegExp(searchKeyword.value, 'g');
-    } catch (err) {
-        console.error(err);
-    }
-
-    return reg;
-});
-const currentResultPointerIndex = ref<number>(0);
-const totalResultCount = ref<number>(0);
-var searchResultList: KfLogData[] = [];
-
-watch(
-    searchKeywordReg,
-    debounce(() => {
-        //clean
-        if (
-            searchKeyword.value.trim() === '' ||
-            searchKeywordReg.value === null
-        ) {
-            cleanSearchRelatedState();
-            return;
-        }
-
-        let isFirst = true;
-        searchResultList = [];
-        logList.list.forEach((item: KfLogData) => {
-            if (item.message.indexOf(searchKeyword.value) !== -1) {
-                item.messageForSearch = setLogDataMessageForSearch(item);
-
-                if (isFirst) {
-                    item.messageForSearch = setLogDataMessageForSearch(
-                        item,
-                        true,
-                    );
-                    isFirst = false;
-                }
-
-                searchResultList.push(item);
-            } else {
-                item.messageForSearch = '';
-            }
-        });
-
-        const total = searchResultList.length;
-        totalResultCount.value = total;
-        if (total > 0) {
-            currentResultPointerIndex.value = 1;
-        } else {
-            currentResultPointerIndex.value = 0;
-        }
-    }),
-);
-
-watch(currentResultPointerIndex, (newIndex: number, oldIndex: number) => {
-    if (newIndex === 0) {
-        return;
-    }
-
-    const oldId = oldIndex ? searchResultList[oldIndex - 1].id : 0;
-    const newId = searchResultList[newIndex - 1].id;
-
-    logList.list.forEach((logData: KfLogData, index: number) => {
-        if (logData.id === oldId && oldId !== 0) {
-            logData.messageForSearch = setLogDataMessageForSearch(logData);
-        }
-
-        if (logData.id === newId) {
-            logData.messageForSearch = setLogDataMessageForSearch(
-                logData,
-                true,
-            );
-            srollToItemByIndexInLogList(index);
-        }
-    });
+    resetLog();
 });
 
 document.addEventListener('keydown', (e) => {
+    if (process.env.RENDERER_TYPE !== 'logview') return;
+
     const ctrlCmd = platform() === 'darwin' ? e.metaKey : e.ctrlKey;
     if (ctrlCmd && e.key === 'f') {
         searchKeyword.value = clipboard.readText();
@@ -192,78 +83,9 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
-function setLogDataMessageForSearch(
-    item: KfLogData,
-    currentPointer = false,
-): string {
-    if (searchKeywordReg.value === null) return '';
-    if (currentPointer) {
-        return dealLogMessage(
-            item.messageOrigin.replace(
-                searchKeywordReg.value,
-                `<font class="search-keyword current-search-pointer">${searchKeyword.value}</font>`,
-            ),
-        );
-    } else {
-        return dealLogMessage(
-            item.messageOrigin.replace(
-                searchKeywordReg.value,
-                `<font class="search-keyword">${searchKeyword.value}</font>`,
-            ),
-        );
-    }
-}
-
-function srollToItemByIndexInLogList(index: number): void {
-    const id = logList.list[index].id;
-    const $item = document.getElementById(`log-item-${id}`);
-    //vue-virtual-scroller 的scrollToItem方法有问题，以这种方法让搜索结果显示出来
-    const indexResolved = index < 10 ? index : index - 5;
-
-    if ($item) {
-        const rect = $item.getBoundingClientRect();
-        if (rect.top < 0) {
-            scrollerTableRef.value.scrollToItem(indexResolved);
-        } else {
-            const tableClientHeight =
-                document.getElementById('kf-log-table')?.clientHeight || 0;
-            if (tableClientHeight && tableClientHeight < rect.top) {
-                scrollerTableRef.value.scrollToItem(indexResolved);
-            }
-        }
-    } else {
-        scrollerTableRef.value.scrollToItem(indexResolved);
-    }
-}
-
-const scrollToBottomChecked = ref<boolean>(false);
-function handleSwitchScrollToBottomChecked() {
-    if (scrollToBottomChecked.value) {
-        scrollerTableRef.value.scrollToBottom(303);
-    }
-}
-
-function handleToDownSearchResult(): void {
-    if (totalResultCount.value === 0) return;
-    if (currentResultPointerIndex.value === totalResultCount.value) {
-        currentResultPointerIndex.value = 1;
-    } else {
-        currentResultPointerIndex.value++;
-    }
-}
-
-function handleToUpSearchResult(): void {
-    if (totalResultCount.value === 0) return;
-    if (currentResultPointerIndex.value === 1) {
-        currentResultPointerIndex.value = totalResultCount.value;
-    } else {
-        currentResultPointerIndex.value--;
-    }
-}
-
 function handleRemoveLog(): Promise<void> {
-    ensureFileSync(logPath.value);
-    return outputFile(logPath.value, '')
+    ensureFileSync(logPath);
+    return outputFile(logPath, '')
         .then(() => {
             message.success('操作成功');
             resetLog();
@@ -274,47 +96,24 @@ function handleRemoveLog(): Promise<void> {
 }
 
 function handleOpenFileLocation() {
-    return shell.showItemInFolder(logPath.value);
-}
-
-function dealLogMessage(line: string): string {
-    line = line
-        .replace(/warning/g, '<span class="warning"> warning </span>')
-        .replace(/ error /g, '<span class="error"> error </span>')
-        .replace(/ debug /g, '<span class="debug"> debug </span>')
-        .replace(/ trace /g, '<span class="trace"> trace </span>');
-
-    if (line.indexOf('critical') !== -1) {
-        line = `<span class="critical">${line}</span>`;
-    }
-    return line;
-}
-
-function cleanSearchRelatedState() {
-    totalResultCount.value = 0;
-    currentResultPointerIndex.value = 0;
-    searchResultList = [];
-    logList.list.forEach((item: KfLogData) => {
-        item.messageForSearch = '';
-    });
-    clipboard.clear();
+    return shell.showItemInFolder(logPath);
 }
 
 function resetLog() {
-    cleanSearchRelatedState();
-    logList.list = [];
+    clearLogState();
+    clearLogSearchState();
 }
 </script>
 <template>
     <a-layout>
         <div class="kf-log-view__warp">
-            <KfDashboard>
+            <KfDashboard @boardSizeChange="handleChangeBoardSize">
                 <template v-slot:header>
                     <KfDashboardItem>
                         <a-checkbox
                             size="small"
                             v-model:checked="scrollToBottomChecked"
-                            @change="handleSwitchScrollToBottomChecked"
+                            @change="scrollToBottom"
                         >
                             滚动到底部
                         </a-checkbox>
@@ -366,7 +165,6 @@ function resetLog() {
 
                 <DynamicScroller
                     id="kf-log-table"
-                    v-if="!initLogLoading"
                     ref="scrollerTableRef"
                     class="kf-table"
                     :items="logList.list"
@@ -391,8 +189,9 @@ function resetLog() {
                             :data-index="index"
                         >
                             <div
+                                :active="active"
+                                :id="`kf-log-item-${item.id}`"
                                 class="kf-log-line"
-                                :id="`log-item-${item.id}`"
                                 v-html="item.messageForSearch || item.message"
                             ></div>
                         </DynamicScrollerItem>

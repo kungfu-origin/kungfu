@@ -403,11 +403,12 @@ declare module 'tail' {
             options: {
                 follow?: boolean;
                 fromBeginning?: boolean;
-                nLines?: boolean;
+                nLines?: number;
             },
         );
         watch(): void;
         unwatch(): void;
-        on(type: 'line' | 'error', callback: (data: string) => void);
+        on(type: 'line', callback: (data: string) => void);
+        on(type: 'error', callback: (err: Error) => void);
     }
 }

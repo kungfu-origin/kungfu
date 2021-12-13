@@ -438,6 +438,10 @@ export const removeLoadingMask = (): void => {
     if ($loadingMask) $loadingMask.remove();
 };
 
+export const setHtmlTitle = (title: string): void => {
+    document.getElementsByTagName('title')[0].innerText = title;
+};
+
 export const parseURIParams = (): Record<string, string> => {
     const search = window.location.search;
     const searchResolved = search.slice(search.indexOf('?') + 1);
