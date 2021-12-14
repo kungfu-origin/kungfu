@@ -1,11 +1,14 @@
 <script lang="ts" setup>
-import { ClusterOutlined } from '@ant-design/icons-vue';
+import { ClusterOutlined, FileTextOutlined } from '@ant-design/icons-vue';
+import { message, notification } from 'ant-design-vue';
+
+import KfProcessStatus from '@renderer/components/public/KfProcessStatus.vue';
+
 import {
     KfCategoryTypes,
     KfConfig,
 } from '@kungfu-trader/kungfu-js-api/typings';
-import KfProcessStatus from '@renderer/components/public/KfProcessStatus.vue';
-import { ref, toRefs, watch } from 'vue';
+import { computed, ref, toRefs, watch } from 'vue';
 import {
     KfCategory,
     SystemProcessName,
@@ -17,14 +20,13 @@ import {
     getProcessStatusDetailData,
     openLogView,
 } from '@renderer/assets/methods/uiUtils';
-import { FileTextOutlined } from '@ant-design/icons-vue';
 import {
     getIfProcessOnline,
     getProcessIdByKfLocation,
     getPropertyFromProcessStatusDetailDataByKfLocation,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
-import { message, notification } from 'ant-design-vue';
 import { handleSwitchProcessStatus } from '@renderer/assets/methods/actionsUtils';
+import { Pm2ProcessStatusTypes } from '@kungfu-trader/kungfu-js-api/utils/processUtils';
 
 const processControllerBoardVisible = ref<boolean>(false);
 const categoryList: KfCategoryTypes[] = ['system', 'td', 'md', 'strategy'];
@@ -45,7 +47,8 @@ watch(processStatusData, (newPSD, oldPSD) => {
                 message: '主控进程 master 中断',
                 description:
                     '主控进程负责策略进程间通信与资源配置, 请重启功夫交易系统',
-                duration: 10,
+                duration: 8,
+                placement: 'bottomRight',
             });
         }
     }
@@ -56,10 +59,26 @@ watch(processStatusData, (newPSD, oldPSD) => {
             notification.error({
                 message: '计算服务 ledger 中断',
                 description: '计算服务负责持仓跟资金计算, 请重启功夫交易系统',
-                duration: 10,
+                duration: 8,
+                placement: 'bottomRight',
             });
         }
     }
+});
+
+const allStatusWell = computed(() => {
+    const processStatusWell =
+        (
+            Object.values(
+                processStatusData.value || {},
+            ) as Pm2ProcessStatusTypes[]
+        ).filter((status: Pm2ProcessStatusTypes) => status === 'errored')
+            .length === 0;
+
+    const masterIsLive = processStatusData.value['master'] === 'online';
+    const ledgerIsLive = processStatusData.value['ledger'] === 'online';
+
+    return processStatusWell && masterIsLive && ledgerIsLive;
 });
 
 function handleOpenProcessControllerBoard(): void {
@@ -76,7 +95,10 @@ function handleOpenLogview(config: KfConfig): Promise<Electron.BrowserWindow> {
 
 <template>
     <div
-        class="kf-process-status-controller__warp"
+        :class="{
+            'kf-process-status-controller__warp': true,
+            'some-process-error': !allStatusWell,
+        }"
         @click="handleOpenProcessControllerBoard"
     >
         <ClusterOutlined style="font-size: 14px; padding-right: 4px" />
@@ -202,6 +224,17 @@ function handleOpenLogview(config: KfConfig): Promise<Electron.BrowserWindow> {
     align-items: center;
     cursor: pointer;
 
+    &.some-process-error {
+        .title {
+            color: @red-7;
+            font-weight: bold;
+        }
+
+        .anticon {
+            color: @red-7;
+        }
+    }
+
     &:hover {
         background: @item-active-bg;
         color: @primary-color;
@@ -209,6 +242,12 @@ function handleOpenLogview(config: KfConfig): Promise<Electron.BrowserWindow> {
 
     .title {
         font-size: 12px;
+        font-weight: bold;
+        color: @primary-color;
+    }
+
+    .anticon {
+        color: @primary-color;
     }
 }
 

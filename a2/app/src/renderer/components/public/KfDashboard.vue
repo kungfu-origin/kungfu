@@ -22,7 +22,7 @@ export default defineComponent({
 
         if (this.$bus) {
             this.$bus
-                .pipe(filter((e: KfEvent) => e.tag === 'resize'))
+                .pipe(filter((e: KfBusEvent) => e.tag === 'resize'))
                 .subscribe(() => {
                     this.$emit('boardSizeChange', this.getBodyWidthHeight());
                 });

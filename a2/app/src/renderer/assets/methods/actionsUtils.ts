@@ -53,3 +53,7 @@ export const handleSwitchProcessStatus = (
             message.error(err.message || '操作失败');
         });
 };
+
+export const preQuitTasks = (): Promise<[]> => {
+    return Promise.all([]);
+};

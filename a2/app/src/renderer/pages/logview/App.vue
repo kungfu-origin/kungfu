@@ -256,7 +256,7 @@ function resetLog() {
         line-height: 1.5;
 
         .error {
-            color: @red-6;
+            color: @red-7;
             font-weight: bold;
         }
 
@@ -276,8 +276,8 @@ function resetLog() {
         }
 
         .critical {
-            color: @red-6;
-            font-weight: bolder;
+            color: @red-7;
+            font-weight: bold;
         }
 
         .search-keyword {

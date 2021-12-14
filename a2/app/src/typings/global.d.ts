@@ -12,7 +12,6 @@ declare module '@vue/runtime-core' {
 }
 declare global {
     interface Window {
-        archiveStatus: Pm2ProcessStatusTypes;
         watcher: Watcher | null;
     }
 

@@ -11,7 +11,7 @@ import * as remoteMain from '@electron/remote/main';
 import path from 'path';
 import os from 'os';
 import {
-    // showQuitMessageBox,
+    showQuitMessageBox,
     showCrashMessageBox,
     showKungfuInfo,
     openUrl,
@@ -78,30 +78,26 @@ function createWindow(reloadAfterCrashed = false) {
     });
 
     MainWindow.on('close', (e) => {
-        console.log(e);
-        AllowQuit = true;
-        return;
+        if (CrashedReloading) {
+            return;
+        }
 
-        // if (CrashedReloading) {
-        //     return;
-        // }
-
-        // if (!AllowQuit) {
-        //     e.preventDefault();
-        //     if (MainWindow) {
-        //         showQuitMessageBox(MainWindow)
-        //             .then((res) => {
-        //                 if (res) {
-        //                     AllowQuit = true;
-        //                 }
-        //             })
-        //             .catch((err) => {
-        //                 console.error(err);
-        //             });
-        //     }
-        // } else {
-        //     return;
-        // }
+        if (!AllowQuit) {
+            e.preventDefault();
+            if (MainWindow) {
+                showQuitMessageBox(MainWindow)
+                    .then((res) => {
+                        if (res) {
+                            AllowQuit = true;
+                        }
+                    })
+                    .catch((err) => {
+                        console.error(err);
+                    });
+            }
+        } else {
+            return;
+        }
     });
 
     MainWindow.webContents.on('render-process-gone', (event, details) => {
@@ -127,18 +123,20 @@ function createWindow(reloadAfterCrashed = false) {
 }
 
 // 防止重开逻辑
-const gotTheLock = app.requestSingleInstanceLock();
-if (!gotTheLock) {
-    AllowQuit = true;
-    app.quit();
-} else {
-    app.on('second-instance', () => {
-        console.log(123123123123123);
-        if (MainWindow) {
-            if (MainWindow.isMinimized()) MainWindow.restore();
-            MainWindow.focus();
-        }
-    });
+if (process.env.NODE_ENV !== 'development') {
+    const gotTheLock = app.requestSingleInstanceLock();
+    if (!gotTheLock) {
+        AllowQuit = true;
+        app.quit();
+    } else {
+        app.on('second-instance', () => {
+            console.log(' ======== Second-Instance ========');
+            if (MainWindow) {
+                if (MainWindow.isMinimized()) MainWindow.restore();
+                MainWindow.focus();
+            }
+        });
+    }
 }
 
 // This method will be called when Electron has finished

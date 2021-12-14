@@ -1,6 +1,5 @@
 import './setEnv';
 import { createApp, Component } from 'vue';
-import { Subject } from 'rxjs';
 import App from '@renderer/pages/index/App.vue';
 import router from '@renderer/pages/index/router';
 import store from '@renderer/pages/index/store';
@@ -42,6 +41,7 @@ import {
 } from '@kungfu-trader/kungfu-js-api/kungfu/watcher';
 import { tradingDataSubject } from '@kungfu-trader/kungfu-js-api/kungfu/tradingData';
 import { getUIComponents } from '@renderer/assets/methods/uiUtils';
+import bus from '@kungfu-trader/kungfu-js-api/utils/globalBus';
 
 const app = createApp(App);
 
@@ -71,7 +71,7 @@ app.use(store)
 
 //this sort ensure $useGlobalStore can be get in mounted callback
 app.config.globalProperties.$registedKfUIComponents = Object.keys(uics);
-app.config.globalProperties.$bus = new Subject();
+app.config.globalProperties.$bus = bus;
 app.config.globalProperties.$tradingDataSubject = tradingDataSubject;
 app.config.globalProperties.$useGlobalStore = useGlobalStore;
 
@@ -84,7 +84,11 @@ if (process.env.RELOAD_AFTER_CRASHED === 'false') {
         .then(() => {
             return startArchiveMakeTask(
                 (archiveStatus: Pm2ProcessStatusTypes) => {
-                    window.archiveStatus = archiveStatus;
+                    bus.next({
+                        tag: 'processStatus',
+                        name: 'archive',
+                        status: archiveStatus,
+                    });
                 },
             );
         })
@@ -110,7 +114,11 @@ if (process.env.RELOAD_AFTER_CRASHED === 'false') {
         });
 } else {
     // 崩溃后重开，跳过archive过程
-    window.archiveStatus = 'waiting restart';
+    bus.next({
+        tag: 'processStatus',
+        name: 'archive',
+        status: 'waiting restart',
+    });
     startGetProcessStatus(
         (res: {
             processStatus: Pm2ProcessStatusData;

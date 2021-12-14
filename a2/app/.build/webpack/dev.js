@@ -149,7 +149,7 @@ function startMain(argv) {
                 });
                 setTimeout(() => {
                     manualRestart = false;
-                }, 5000);
+                }, 20000);
             }
         });
 

@@ -30,6 +30,21 @@ export function dealLogMessage(line: string): string {
     if (line.indexOf('critical') !== -1) {
         line = `<span class="critical">${line}</span>`;
     }
+
+    if (line.indexOf('File') !== -1) {
+        if (line.indexOf('line') !== -1) {
+            line = `<span class="critical">${line}</span>`;
+        }
+    }
+
+    if (line.indexOf('Traceback') != -1) {
+        line = `<span class="critical">${line}</span>`;
+    }
+
+    if (line.indexOf('RuntimeError') != -1) {
+        line = `<span class="critical">${line}</span>`;
+    }
+
     return line;
 }
 

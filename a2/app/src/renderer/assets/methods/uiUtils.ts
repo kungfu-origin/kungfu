@@ -55,6 +55,9 @@ import {
 } from '@kungfu-trader/kungfu-js-api/utils/processUtils';
 import { storeToRefs } from 'pinia';
 import { BrowserWindow, getCurrentWindow } from '@electron/remote';
+import { ipcRenderer } from 'electron';
+import { message } from 'ant-design-vue';
+import bus from '@kungfu-trader/kungfu-js-api/utils/globalBus';
 
 export interface KfUIComponent {
     name: string;
@@ -455,4 +458,19 @@ export const parseURIParams = (): Record<string, string> => {
     });
 
     return paramsData;
+};
+
+export const useIpcListener = (): void => {
+    ipcRenderer.removeAllListeners('main-process-messages');
+    ipcRenderer.on('main-process-messages', (event, args) => {
+        bus.next({
+            tag: 'main',
+            name: args,
+        } as MainProcessEvent);
+    });
+};
+
+export const markClearJournal = (): void => {
+    localStorage.setItem('clearJournalTradingDate', '');
+    message.success('清理 journal 完成，请重启应用');
 };

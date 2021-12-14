@@ -21,13 +21,6 @@ namespace KfLayout {
         boardId: BoardId;
     }
 }
-
-interface ResizeEvent {
-    tag: 'resize';
-}
-
-type KfEvent = ResizeEvent;
-
 interface AntTableColumn {
     title: string;
     dataIndex: string;
