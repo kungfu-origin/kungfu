@@ -12,21 +12,49 @@
 #include <kungfu/yijinjing/practice/apprentice.h>
 
 namespace kungfu::wingchun::broker {
-class Broker : public yijinjing::practice::apprentice {
+
+FORWARD_DECLARE_PTR(BrokerVendor)
+FORWARD_DECLARE_PTR(BrokerService)
+
+class BrokerVendor : public yijinjing::practice::apprentice {
 public:
-  explicit Broker(yijinjing::data::location_ptr location, bool low_latency);
+  typedef yijinjing::data::locator_ptr locator_ptr;
+  typedef yijinjing::data::location_ptr location_ptr;
+  typedef longfist::enums::BrokerState BrokerState;
 
-  ~Broker() override = default;
-
-  std::string get_runtime_folder();
-
-  void update_broker_state(longfist::enums::BrokerState state);
+  BrokerVendor(location_ptr location, bool low_latency);
 
 protected:
   void on_start() override;
 
+  virtual BrokerService_ptr get_service() = 0;
+
 private:
-  volatile longfist::enums::BrokerState state_;
+  void notify_broker_state();
+};
+
+class BrokerService {
+public:
+  typedef longfist::enums::BrokerState BrokerState;
+
+  explicit BrokerService(BrokerVendor &vendor);
+
+  virtual ~BrokerService() = default;
+
+  virtual void on_start();
+
+  std::string get_runtime_folder();
+
+  BrokerState get_state();
+
+  void update_broker_state(BrokerState state);
+
+  [[nodiscard]] yijinjing::journal::writer_ptr get_writer(uint32_t dest_id) const;
+
+protected:
+  BrokerVendor &vendor_;
+
+  volatile BrokerState state_;
 };
 } // namespace kungfu::wingchun::broker
 

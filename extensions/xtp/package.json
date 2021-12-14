@@ -1,5 +1,5 @@
 {
-  "name": "@kungfu-trader/kfx-vendor-xtp-demo",
+  "name": "@kungfu-trader/kfx-xtp-demo",
   "author": {
     "name": "kungfu-trader",
     "email": "info@kungfu.link"
@@ -14,6 +14,10 @@
     "registry": "https://npm.pkg.github.com"
   },
   "scripts": {
+    "install": "kfs extension install",
+    "configure": "kfs extension configure",
+    "build": "kfs extension build",
+    "dev": "kfs craft dev",
     "format": "clang-format --verbose -style=file -i src/cpp/*"
   },
   "devDependencies": {

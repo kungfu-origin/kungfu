@@ -1,6 +1,10 @@
-def td(ctx):
-    print(f'sim td at {ctx.location}')
+from . import marketdata
+from . import trader
 
 
-def md(ctx):
-    print(f'sim md at {ctx.location}')
+def td(vendor):
+    return trader.TraderSim(vendor)
+
+
+def md(vendor):
+    return marketdata.MarketDataSim(vendor)

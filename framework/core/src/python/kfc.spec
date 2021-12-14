@@ -5,6 +5,7 @@ import platform
 import os
 import PyInstaller
 
+from collections import deque
 from distutils import sysconfig
 from os.path import (
     abspath,
@@ -65,21 +66,21 @@ data_nuitka_scons = make_path(nuitka_build_src_dir, "*.scons")
 
 
 def extend_datas(datas, src_dirs, build_dirs, packages):
-    def add_include(datas, path):
-        map(
+    def add_include(path):
+        deque(map(
             lambda include: datas.append((include, "include")),
             glob.glob(make_path(path, "**", "include"), recursive=True),
-        )
+        ))
 
-    def add_lib(datas, path):
-        map(
+    def add_lib(path):
+        deque(map(
             lambda lib: datas.append((lib, ".")),
             glob.glob(make_path(path, "**", "*.lib"), recursive=True),
-        )
+        ))
 
-    map(add_include, src_dirs)
-    map(add_lib, build_dirs)
-    map(lambda pkg: datas.extend(collect_data_files(pkg)), packages)
+    deque(map(add_include, src_dirs))
+    deque(map(add_lib, build_dirs))
+    deque(map(lambda pkg: datas.extend(collect_data_files(pkg)), packages))
 
     if platform.system() == "Windows":
         datas.append((make_path(python_dir, "libs"), "libs"))

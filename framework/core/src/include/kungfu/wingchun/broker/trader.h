@@ -12,22 +12,37 @@
 #include <kungfu/yijinjing/practice/apprentice.h>
 
 namespace kungfu::wingchun::broker {
-class Trader : public Broker {
+
+FORWARD_DECLARE_PTR(Trader)
+
+class TraderVendor : public BrokerVendor {
+public:
+  TraderVendor(locator_ptr locator, const std::string &group, const std::string &name, bool low_latency);
+
+  void setup(Trader_ptr service);
+
+protected:
+  void on_start() override;
+
+  BrokerService_ptr get_service() override;
+
+private:
+  Trader_ptr service_ = {};
+
+  void clean_orders();
+};
+
+class Trader : public BrokerService {
+  friend class TraderVendor;
+
 public:
   typedef std::unordered_map<uint64_t, state<longfist::types::Order>> OrderMap;
   typedef std::unordered_map<uint64_t, state<longfist::types::OrderAction>> OrderActionMap;
   typedef std::unordered_map<uint64_t, state<longfist::types::Trade>> TradeMap;
 
-  explicit Trader(bool low_latency, yijinjing::data::locator_ptr locator, const std::string &source,
-                  const std::string &account_id);
+  explicit Trader(BrokerVendor &vendor) : BrokerService(vendor){};
 
-  ~Trader() override = default;
-
-  void on_start() override;
-
-  const std::string &get_account_id() const { return account_id_; }
-
-  virtual longfist::enums::AccountType get_account_type() const = 0;
+  [[nodiscard]] virtual longfist::enums::AccountType get_account_type() const = 0;
 
   virtual bool insert_order(const event_ptr &event) = 0;
 
@@ -37,16 +52,12 @@ public:
 
   virtual bool req_account() = 0;
 
+  [[nodiscard]] const std::string &get_account_id() const;
+
 protected:
   OrderMap orders_ = {};
   OrderActionMap actions_ = {};
   TradeMap trades_ = {};
-
-private:
-  std::string source_;
-  std::string account_id_;
-
-  void clean_orders();
 };
 } // namespace kungfu::wingchun::broker
 

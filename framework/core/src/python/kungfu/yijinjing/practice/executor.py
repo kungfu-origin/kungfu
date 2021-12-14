@@ -5,12 +5,13 @@ import sys
 import types
 import kungfu
 
+from kungfu.console import site
 from kungfu.yijinjing import journal as kfj
 from kungfu.yijinjing.practice.master import Master
+from kungfu.yijinjing.practice.coloop import KungfuEventLoop
 
 from collections import deque
 from os import path
-
 
 lf = kungfu.__binding__.longfist
 wc = kungfu.__binding__.wingchun
@@ -85,20 +86,45 @@ class ExtensionLoader:
 
 
 class ExtensionExecutor:
+
     def __init__(self, ctx, loader):
         self.ctx = ctx
         self.loader = loader
+        self.runners = {
+            "md": self.run_market_data,
+            "td": self.run_trader,
+            "strategy": self.run_strategy
+        }
 
     def __call__(self, mode, low_latency):
+        self.runners[self.ctx.category]()
+
+    def run_broker_vendor(self, vendor_builder):
         ctx = self.ctx
         loader = self.loader
-        ctx.location = yjj.location(
-            kfj.MODES[mode], kfj.CATEGORIES[ctx.category], ctx.group, ctx.name, ctx.runtime_locator
-        )
+        site.setup(loader.extension_dir)
         sys.path.insert(0, loader.extension_dir)
         module = importlib.import_module(ctx.group)
-        executor = getattr(module, ctx.category)
-        executor(ctx)
+        vendor = vendor_builder(ctx.runtime_locator, ctx.group, ctx.name, ctx.low_latency)
+        service = getattr(module, ctx.category)(vendor)
+        print(service)
+        vendor.setup(service)
+        # vendor.run()
+        print('vendor setup')
+
+    def run_market_data(self):
+        self.run_broker_vendor(wc.MarketDataVendor)
+
+    def run_trader(self):
+        self.run_broker_vendor(wc.TraderVendor)
+
+    def run_strategy(self):
+        ctx = self.ctx
+        loader = self.loader
+        ctx.runner = wc.Runner(ctx, ctx.mode)
+        ctx.runner.addStrategy(strategy)
+        ctx.loop = KungfuEventLoop(ctx, ctx.runner)
+        ctx.loop.run_forever()
 
 
 class RegistryJSONEncoder(json.JSONEncoder):

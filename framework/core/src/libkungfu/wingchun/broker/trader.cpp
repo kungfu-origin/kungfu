@@ -13,23 +13,26 @@ using namespace kungfu::yijinjing;
 using namespace kungfu::yijinjing::data;
 
 namespace kungfu::wingchun::broker {
-Trader::Trader(bool low_latency, locator_ptr locator, const std::string &source, const std::string &account_id)
-    : Broker(location::make_shared(mode::LIVE, category::TD, source, account_id, std::move(locator)), low_latency),
-      source_(source), account_id_(account_id) {}
+TraderVendor::TraderVendor(locator_ptr locator, const std::string &group, const std::string &name, bool low_latency)
+    : BrokerVendor(location::make_shared(mode::LIVE, category::TD, group, name, std::move(locator)), low_latency) {}
 
-void Trader::on_start() {
-  Broker::on_start();
+void TraderVendor::setup(Trader_ptr service) { service_ = std::move(service); }
 
-  events_ | is(OrderInput::tag) | $$(insert_order(event));
-  events_ | is(OrderAction::tag) | $$(cancel_order(event));
-  events_ | is(AssetRequest::tag) | $$(req_account());
-  events_ | is(PositionRequest::tag) | $$(req_position());
+void TraderVendor::on_start() {
+  BrokerVendor::on_start();
+
+  events_ | is(OrderInput::tag) | $$(service_->insert_order(event));
+  events_ | is(OrderAction::tag) | $$(service_->cancel_order(event));
+  events_ | is(AssetRequest::tag) | $$(service_->req_account());
+  events_ | is(PositionRequest::tag) | $$(service_->req_position());
   events_ | is(ResetBookRequest::tag) | $$(get_writer(location::PUBLIC)->mark(now(), ResetBookRequest::tag));
 
   clean_orders();
 }
 
-void Trader::clean_orders() {
+BrokerService_ptr TraderVendor::get_service() { return service_; }
+
+void TraderVendor::clean_orders() {
   std::set<uint32_t> strategy_uids = {};
   auto master_cmd_writer = get_writer(get_master_commands_uid());
   for (auto &pair : state_bank_[boost::hana::type_c<Order>]) {
@@ -57,4 +60,6 @@ void Trader::clean_orders() {
     }
   }
 }
+
+const std::string &Trader::get_account_id() const { return vendor_.get_home()->name; }
 } // namespace kungfu::wingchun::broker

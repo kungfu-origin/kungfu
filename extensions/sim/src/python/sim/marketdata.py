@@ -15,8 +15,8 @@ MakerConfig = namedtuple(
 
 
 class MarketDataSim(wc.MarketData):
-    def __init__(self, low_latency, locator, config_json):
-        wc.MarketData.__init__(self, low_latency, locator, "sim")
+    def __init__(self, vendor):
+        wc.MarketData.__init__(self, vendor)
         self.config = MakerConfig(
             base=200.0, bound=1000, samples=1000, variation=4, randseed=6
         )
@@ -25,7 +25,7 @@ class MarketDataSim(wc.MarketData):
             "sim_md",
             "info",
             yjj.location(
-                lf.enums.mode.LIVE, lf.enums.category.MD, "sim", "sim", locator
+                lf.enums.mode.LIVE, lf.enums.category.MD, "sim", "sim", vendor.home.locator
             ),
         )
 

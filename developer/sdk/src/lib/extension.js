@@ -7,7 +7,8 @@ const os = require('os');
 const { spawnSync } = require('child_process');
 const { glob } = require('glob');
 
-const LibPathPattern = path.join(__dirname, 'build', 'libs', '*', '*');
+const sdkSrcDir = path.dirname(require.resolve("@kungfu-trader/kungfu-sdk"));
+const LibPathPattern = path.join(path.dirname(sdkSrcDir), 'build', 'libs', '*', '*');
 
 const spawnOptsShell = {
   shell: true,
@@ -58,7 +59,7 @@ function hasSourceFor(packageJson, language) {
 }
 
 function getProjectName(packageJson) {
-  return packageJson.name.replace('@kungfu-trader/', '').replace(/-/g, '_');
+  return packageJson.kungfuConfig.key;
 }
 
 function generateCMakeFiles(projectName, kungfuBuild) {
@@ -80,8 +81,9 @@ function generateCMakeFiles(projectName, kungfuBuild) {
   fse.ensureDirSync(buildDir);
 
   ejs.renderFile(
-    path.join(__dirname, 'templates', 'kungfu.cmake'),
+    require.resolve('@kungfu-trader/kungfu-sdk/templates/kungfu.cmake'),
     {
+      kfcDir: path.dirname(require.resolve("@kungfu-trader/kungfu-core/dist/kfc/kungfubuildinfo.json")),
       includes: glob.sync(path.join(LibPathPattern, 'include')),
       links: glob.sync(path.join(LibPathPattern, 'lib')),
       sources: cppSources,
@@ -99,7 +101,7 @@ function generateCMakeFiles(projectName, kungfuBuild) {
   }
 
   ejs.renderFile(
-    path.join(__dirname, 'templates', 'CMakeLists.txt'),
+    require.resolve('@kungfu-trader/kungfu-sdk/templates/CMakeLists.txt'),
     {
       projectName: projectName,
     },
@@ -243,25 +245,34 @@ exports.configure = function () {
 exports.build = function () {
   const packageJson = getPackageJson();
   const extensionName = packageJson.kungfuConfig.key;
+  const extDistDir = path.join('dist', extensionName);
+
   if (hasSourceFor(packageJson, 'python')) {
     const srcDir = path.join('src', 'python', extensionName);
-    spawnExec('yarn', ['kfc', 'engage', 'nuitka', '--module', '--output-dir=build', srcDir]);
+    spawnExec('yarn', [
+      'kfc',
+      'engage',
+      'nuitka',
+      '--module',
+      '--assume-yes-for-downloads',
+      '--remove-output',
+      '--no-pyi-file',
+      `--include-package=${extensionName}`,
+      `--output-dir=${extDistDir}`,
+      srcDir,
+    ]);
   }
   if (hasSourceFor(packageJson, 'cpp')) {
     spawnExec('yarn', ['cmake-js', 'build']);
   }
 
-  const extDistDir = path.join('dist', extensionName);
-  fse.removeSync(extDistDir);
-  fse.ensureDirSync(extDistDir);
-  glob.sync(path.join('build', '*')).forEach(p => {
-    if (fse.lstatSync(p).isFile()) {
-      fse.move(p, path.join(extDistDir, path.basename(p)));
-    }
-  });
-
   const packageJsonPath = path.join(process.cwd(), 'package.json');
   fse.copyFile(packageJsonPath, path.join(extDistDir, 'package.json'));
+
+  const pypackages = path.join('__pypackages__');
+  if (fse.existsSync(pypackages)) {
+    fse.copySync(pypackages, path.join(extDistDir, pypackages));
+  }
 };
 
 exports.dist = function () {

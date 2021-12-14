@@ -7,9 +7,8 @@
 #include "type_convert_xtp.h"
 
 namespace kungfu::wingchun::xtp {
-MarketDataXTP::MarketDataXTP(bool low_latency, yijinjing::data::locator_ptr locator, const std::string &json_config)
-    : MarketData(low_latency, std::move(locator), SOURCE_XTP), api_(nullptr) {
-  yijinjing::log::copy_log_settings(get_io_device()->get_home(), SOURCE_XTP);
+MarketDataXTP::MarketDataXTP(broker::BrokerVendor &vendor)
+    : MarketData(vendor), api_(nullptr) {
   config_ = nlohmann::json::parse(json_config);
   if (config_.client_id < 1 or config_.client_id > 99) {
     throw wingchun_error("client_id must between 1 and 99");
@@ -23,7 +22,6 @@ MarketDataXTP::~MarketDataXTP() {
 }
 
 void MarketDataXTP::on_start() {
-  MarketData::on_start();
   auto md_ip = config_.md_ip.c_str();
   auto account_id = config_.account_id.c_str();
   auto password = config_.password.c_str();

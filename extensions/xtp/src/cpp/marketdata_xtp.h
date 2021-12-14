@@ -16,7 +16,7 @@
 namespace kungfu::wingchun::xtp {
 class MarketDataXTP : public XTP::API::QuoteSpi, public broker::MarketData {
 public:
-  MarketDataXTP(bool low_latency, yijinjing::data::locator_ptr locator, const std::string &json_config);
+  explicit MarketDataXTP(broker::BrokerVendor &vendor);
 
   ~MarketDataXTP() override;
 
@@ -220,7 +220,7 @@ protected:
 
 private:
   MDConfiguration config_;
-  XTP::API::QuoteApi *api_;
+  XTP::API::QuoteApi *api_ {};
 
   bool subscribe(const std::vector<std::string> &instruments, const std::string &exchange_id);
 };

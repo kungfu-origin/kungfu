@@ -36,12 +36,12 @@ macro(kungfu_setup MODULE_NAME)
 
     add_compile_definitions(FMT_HEADER_ONLY)
 
-    include_directories("${KFC_DIR}/include")
+    include_directories("<%- kfcDir -%>/include")
     <%_ includes.forEach(dir => { _%>
     include_directories("<%= dir %>")
     <%_ }); _%>
 
-    link_directories("${KFC_DIR}")
+    link_directories("<%- kfcDir -%>")
     <%_ links.forEach((dir, i) => { _%>
     link_directories("<%= dir %>")
     <%_ }); _%>

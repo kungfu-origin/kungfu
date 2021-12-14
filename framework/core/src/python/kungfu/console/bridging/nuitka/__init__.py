@@ -3,7 +3,7 @@ import os
 import sys
 import subprocess
 
-from kungfu.console import variants
+from kungfu.console import site, variants
 from os.path import abspath, dirname
 
 
@@ -64,6 +64,12 @@ def useEngagedEnvironment():
         return createEnvironment
 
     SconsUtils.createEnvironment = withKungfuLib()
+
+
+def parseOptions():
+    from nuitka import Options
+    Options.parseArgs(will_reexec=False)
+    Options.commentArgs()
 
 
 def loadPlugins():
@@ -151,10 +157,10 @@ def loadPlugins():
 
 
 def setup():
+    site.setup()
     disableStaticallyLinkedPython()
     useEngagedCommands()
     useEngagedEnvironment()
-    loadPlugins()
     os.environ.update(
         {
             "PYTHONPATH": os.pathsep.join(sys.path),
@@ -164,9 +170,8 @@ def setup():
 
 
 def main():
-    from nuitka import Options # MUST load after all the hack have been set
-    Options.parseArgs(will_reexec=False)
-    Options.commentArgs()
-    
+    parseOptions()
+    loadPlugins()
+
     from nuitka import MainControl
     MainControl.main()
