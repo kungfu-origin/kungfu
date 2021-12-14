@@ -6,6 +6,7 @@ import {
     statTime,
     statTimeEnd,
 } from '../utils/busiUtils';
+import bus from '../utils/globalBus';
 
 export const watcher = ((): Watcher | null => {
     kfLogger.info(

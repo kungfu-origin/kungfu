@@ -4,10 +4,7 @@ import { message, notification } from 'ant-design-vue';
 
 import KfProcessStatus from '@renderer/components/public/KfProcessStatus.vue';
 
-import {
-    KfCategoryTypes,
-    KfConfig,
-} from '@kungfu-trader/kungfu-js-api/typings';
+import { KfCategoryTypes } from '@kungfu-trader/kungfu-js-api/typings';
 import { computed, ref, toRefs, watch } from 'vue';
 import {
     KfCategory,
@@ -19,6 +16,7 @@ import {
     getAllKfConfigData,
     getProcessStatusDetailData,
     openLogView,
+    handleOpenLogview,
 } from '@renderer/assets/methods/uiUtils';
 import {
     getIfProcessOnline,
@@ -83,13 +81,6 @@ const allStatusWell = computed(() => {
 
 function handleOpenProcessControllerBoard(): void {
     processControllerBoardVisible.value = true;
-}
-
-function handleOpenLogview(config: KfConfig): Promise<Electron.BrowserWindow> {
-    const hideloading = message.loading('正在打开窗口');
-    return openLogView(getProcessIdByKfLocation(config)).finally(() => {
-        hideloading();
-    });
 }
 </script>
 

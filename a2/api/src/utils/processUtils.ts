@@ -543,10 +543,10 @@ export const startLedger = async (force = false): Promise<Proc | void> => {
 };
 
 //启动md
-export const startMd = (source: string): Promise<Proc | void> => {
-    const args = buildArgs(`vendor md -s "${source}"`);
+export const startMd = (sourceId: string): Promise<Proc | void> => {
+    const args = buildArgs(`vendor md -s "${sourceId}"`);
     return startProcess({
-        name: `md_${source}`,
+        name: `md_${sourceId}`,
         args,
         max_restarts: 3,
         autorestart: true,
@@ -593,7 +593,7 @@ export const startStrategyProcess = async (
         .join('/');
 
     return startProcess({
-        name,
+        name: `strategy_${name}`,
         args,
         cwd: pythonFolder,
         script: pythonFile,
@@ -623,7 +623,7 @@ export const startStrategy = (
             `strategy -n '${strategyId}' -p '${strategyPath}'`,
         );
         return startProcess({
-            name: strategyId,
+            name: `strategy_${strategyId}`,
             args,
         }).catch((err) => {
             kfLogger.error(err.message);

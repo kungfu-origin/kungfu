@@ -16,26 +16,37 @@ import {
     KfCategoryTypes,
     KfExtOriginConfig,
     SetKfConfigPayload,
-    KfConfig,
     InstrumentTypeEnum,
-    KfLocation,
     ProcessStatusTypes,
 } from '@kungfu-trader/kungfu-js-api/typings';
+import type { KfConfig } from '@kungfu-trader/kungfu-js-api/typings';
 import { InstrumentType } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
 
 import { columns } from './config';
 import {
-    useResetConfigModalPayload,
     useTableSearchKeyword,
     getExtConfigsRelated,
     getAllKfConfigData,
+    getProcessStatusDetailData,
+    handleOpenLogview,
+    useDashboardBodySize,
 } from '@renderer/assets/methods/uiUtils';
-import { ensureRemoveLocation } from '@renderer/assets/methods/actionsUtils';
+import {
+    ensureRemoveLocation,
+    handleSwitchProcessStatus,
+} from '@renderer/assets/methods/actionsUtils';
+import {
+    getIfProcessOnline,
+    getProcessIdByKfLocation,
+} from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 
 const app = getCurrentInstance();
 
-const dashboardBodyHeight = ref<number>(0);
-const dashboardBodyWidth = ref<number>(0);
+interface TdProps {}
+defineProps<TdProps>();
+
+const { dashboardBodyHeight, dashboardBodyWidth, handleBodySizeChange } =
+    useDashboardBodySize();
 
 const setSourceModalVisible = ref<boolean>(false);
 const setTdModalVisible = ref<boolean>(false);
@@ -44,7 +55,6 @@ const setTdConfigPayload = ref<SetKfConfigPayload>({
     title: '交易账户',
     config: {} as KfExtOriginConfig['config'][KfCategoryTypes],
 });
-const resetConfigModalPayload = useResetConfigModalPayload();
 const currentSelectedSourceId = ref<string>('');
 
 const { extConfigs, extTypeMap } = getExtConfigsRelated();
@@ -56,35 +66,12 @@ const tdIdList = computed(() => {
     );
 });
 
-const tdListResolved = computed(() => {
-    return td.value.map((item: KfConfig): TdRow => {
-        const configValue: Record<string, unknown> = JSON.parse(
-            item.value || '{}',
-        );
-        return {
-            accountName:
-                (configValue?.account_name as string | undefined) || item.name,
-            accountId: item.name,
-            sourceId: item.group,
-            stateStatus: 'Unknown',
-            processStatus: false,
-            realizedPnl: 0,
-            unrealizedPnl: 0,
-            marketValue: 0,
-            margin: 0,
-            avail: 0,
-        };
-    });
-});
+const { searchKeyword, tableData } = useTableSearchKeyword<KfConfig>(td, [
+    'group',
+    'name',
+]);
 
-const { searchKeyword, tableData } = useTableSearchKeyword<TdRow>(
-    tdListResolved,
-    ['sourceId', 'accountId'],
-);
-
-function handleOpenLog(record: TdRow) {
-    console.log(record);
-}
+const { processStatusData } = toRefs(getProcessStatusDetailData());
 
 function handleSelectedSource(selectedSource: string) {
     setTdModalVisible.value = true;
@@ -99,43 +86,13 @@ function handleOpenSetSourceDialog() {
     setTdConfigPayload.value.type = 'add';
 }
 
-function handleBodySizeChange({
-    width,
-    height,
-}: {
-    width: number;
-    height: number;
-}) {
-    const tableHeaderHeight = 36;
-    dashboardBodyHeight.value = height - tableHeaderHeight;
-    dashboardBodyWidth.value = width > 800 ? 800 : width;
-}
-
-function getTdProcessId(
-    sourceId: TdRow['sourceId'],
-    accountId: TdRow['accountId'],
-): string {
-    return `${sourceId}_${accountId}`;
-}
-
 function getStateStatusName(processId: string): ProcessStatusTypes {
     processId;
     return 'Unknown';
 }
 
-function handleCloseConfigModal() {
-    resetConfigModalPayload(setTdConfigPayload);
-    currentSelectedSourceId.value = '';
-}
-
-function handleRemoveTd(record: TdRow) {
-    const tdLocation: KfLocation = {
-        category: 'td',
-        group: record.sourceId,
-        name: record.accountId,
-        mode: 'LIVE',
-    };
-    ensureRemoveLocation(tdLocation).then(() => {
+function handleRemoveTd(tdConfig: KfConfig) {
+    ensureRemoveLocation(tdConfig).then(() => {
         app?.proxy && app?.proxy.$useGlobalStore().setKfConfigList();
     });
 }
@@ -179,17 +136,17 @@ function handleRemoveTd(record: TdRow) {
                         record,
                     }: {
                         column: AntTableColumn,
-                        record: TdRow,
+                        record: KfConfig,
                     }"
                 >
-                    <template v-if="column.dataIndex === 'stateStatus'">
+                    <template v-if="column.dataIndex === 'accountName'">
+                        {{ JSON.parse(record.value).account_name || '--' }}
+                    </template>
+                    <template v-else-if="column.dataIndex === 'stateStatus'">
                         <KfProcessStatus
                             :status-name="
                                 getStateStatusName(
-                                    getTdProcessId(
-                                        record.accountId,
-                                        record.sourceId,
-                                    ),
+                                    getProcessIdByKfLocation(record),
                                 )
                             "
                         ></KfProcessStatus>
@@ -198,23 +155,30 @@ function handleRemoveTd(record: TdRow) {
                         <a-tag
                             :color="
                                 InstrumentType[
-                                    InstrumentTypeEnum[
-                                        extTypeMap[record.sourceId]
-                                    ]
+                                    InstrumentTypeEnum[extTypeMap[record.group]]
                                 ].color
                             "
                         >
-                            {{ record.sourceId }}
+                            {{ record.group }}
                         </a-tag>
                     </template>
                     <template v-else-if="column.dataIndex === 'processStatus'">
-                        <a-switch size="small" :checked="true"></a-switch>
+                        <a-switch
+                            size="small"
+                            :checked="
+                                getIfProcessOnline(
+                                    processStatusData,
+                                    getProcessIdByKfLocation(record),
+                                )
+                            "
+                            @click="(checked: boolean) => handleSwitchProcessStatus(checked, record)"
+                        ></a-switch>
                     </template>
                     <template v-else-if="column.dataIndex === 'actions'">
                         <div class="kf-actions__warp">
                             <FileTextOutlined
                                 style="font-size: 12px"
-                                @click="handleOpenLog(record)"
+                                @click="handleOpenLogview(record)"
                             />
                             <SettingOutlined style="font-size: 12px" />
                             <DeleteOutlined
@@ -238,7 +202,6 @@ function handleRemoveTd(record: TdRow) {
             :payload="setTdConfigPayload"
             :primaryKeyCompareTarget="tdIdList"
             :primaryKeyCompareExtra="currentSelectedSourceId"
-            @close="handleCloseConfigModal"
         ></KfSetByConfigModal>
     </div>
 </template>

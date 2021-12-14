@@ -117,7 +117,7 @@ export const KfCategory: Record<KfCategoryTypes, KfTradeValueCommonData> = {
         color: 'red',
         level: 100,
     },
-    ['md']: { name: isEnglish ? 'Md' : '行情源', color: 'pink', level: 90 },
+    ['md']: { name: isEnglish ? 'Md' : '行情源', color: 'orange', level: 90 },
     ['td']: { name: isEnglish ? 'Td' : '交易账户', color: 'blue', level: 80 },
     ['strategy']: {
         name: isEnglish ? 'Strategy' : '策略',

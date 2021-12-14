@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import { nextTick, onMounted, ref } from 'vue';
-import { UpOutlined, DownOutlined } from '@ant-design/icons-vue';
+import {
+    UpOutlined,
+    DownOutlined,
+    ReloadOutlined,
+} from '@ant-design/icons-vue';
 
 import {
     removeLoadingMask,
@@ -102,6 +106,7 @@ function handleOpenFileLocation() {
 function resetLog() {
     clearLogState();
     clearLogSearchState();
+    startTailLog();
 }
 </script>
 <template>
@@ -146,6 +151,12 @@ function resetLog() {
                                 />
                             </div>
                         </div>
+                    </KfDashboardItem>
+                    <KfDashboardItem>
+                        <reload-outlined
+                            class="kf-hover"
+                            style="font-size: 14px"
+                        />
                     </KfDashboardItem>
                     <KfDashboardItem>
                         <a-button size="small" @click="handleOpenFileLocation">

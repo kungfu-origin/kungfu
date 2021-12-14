@@ -31,13 +31,19 @@
                 :pagination="false"
                 :scroll="{ y: dashboardBodyHeight - 4, x: dashboardBodyWidth }"
             >
-                <template #bodyCell="{ column, record }">
+                <template
+                    #bodyCell="{
+                        column,
+                        record,
+                    }: {
+                        column: AntTableColumn,
+                        record: MdRow,
+                    }"
+                >
                     <template v-if="column.dataIndex === 'stateStatus'">
                         <KfProcessStatus
                             :status-name="
-                                getStateStatusName(
-                                    getMdProcessId(column.sourceId),
-                                )
+                                getStateStatusName(getMdProcessId(record))
                             "
                         ></KfProcessStatus>
                     </template>
@@ -94,6 +100,7 @@ import {
 import { mapState } from 'pinia';
 import { useGlobalStore } from '@renderer/pages/index/store/global';
 import { columns } from './config';
+import { useDashboardBodySize } from '@renderer/assets/methods/uiUtils';
 
 export default defineComponent({
     name: '行情源',
@@ -110,10 +117,18 @@ export default defineComponent({
     },
 
     setup() {
+        const {
+            dashboardBodyHeight,
+            dashboardBodyWidth,
+            handleBodySizeChange,
+        } = useDashboardBodySize();
+
         return {
+            dashboardBodyHeight,
+            dashboardBodyWidth,
+            handleBodySizeChange,
+
             searchKeyword: ref<string>(''),
-            dashboardBodyHeight: ref<number>(0),
-            dashboardBodyWidth: ref<number>(0),
             columns,
 
             setSourceModalVisible: ref<boolean>(false),
@@ -166,23 +181,12 @@ export default defineComponent({
             this.setMdConfigPayload.type = 'add';
         },
 
-        handleBodySizeChange({
-            width,
-            height,
-        }: {
-            width: number;
-            height: number;
-        }) {
-            const tableHeaderHeight = 36;
-            this.dashboardBodyHeight = height - tableHeaderHeight;
-            this.dashboardBodyWidth = width > 800 ? 800 : width;
-        },
-
         hanleOnSearch(e: string) {
             console.log(e);
         },
 
-        getMdProcessId(sourceId: MdRow['sourceId']): string {
+        getMdProcessId(record: MdRow): string {
+            const sourceId = record.sourceId;
             return `md_${sourceId}`;
         },
 

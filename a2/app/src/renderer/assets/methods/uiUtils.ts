@@ -19,6 +19,7 @@ import {
 import {
     buildExtTypeMap,
     buildObjectFromArray,
+    getProcessIdByKfLocation,
     getTradingDate,
     kfLogger,
     removeJournal,
@@ -41,7 +42,6 @@ import {
     InstrumentTypes,
     KfCategoryTypes,
     KfConfigValue,
-    KfExtOriginConfig,
     KfExtConfigs,
     KfTradeValueCommonData,
     SetKfConfigPayload,
@@ -137,16 +137,6 @@ export const useModalVisible = (
     };
 };
 
-export const useResetConfigModalPayload = () => {
-    return (targetPayload: Ref<SetKfConfigPayload>): void => {
-        targetPayload.value.title = '';
-        targetPayload.value.type = 'add';
-        targetPayload.value.config =
-            {} as KfExtOriginConfig['config'][KfCategoryTypes];
-        targetPayload.value.initValue = {};
-    };
-};
-
 export const useTableSearchKeyword = <T>(
     targetList: Ref<T[]> | ComputedRef<T[]>,
     keys: string[],
@@ -161,9 +151,9 @@ export const useTableSearchKeyword = <T>(
                 .map(
                     (key: string) =>
                         (
-                            (item as Record<string, unknown>)[key] as
+                            ((item as Record<string, unknown>)[key] as
                                 | string
-                                | number
+                                | number) || ''
                         ).toString() || '',
                 )
                 .join('_');
@@ -314,7 +304,7 @@ export const getProcessStatusDetailData = (): {
 
 export const getAllKfConfigData = (): Record<KfCategoryTypes, KfConfig[]> => {
     const allKfConfigData: Record<KfCategoryTypes, KfConfig[]> = reactive({
-        system: [
+        system: ref<KfConfig[]>([
             ...(process.env.NODE_ENV === 'development'
                 ? ([
                       {
@@ -343,7 +333,7 @@ export const getAllKfConfigData = (): Record<KfCategoryTypes, KfConfig[]> => {
                 mode: 'LIVE',
                 value: '',
             },
-        ],
+        ]),
 
         md: [],
         td: [],
@@ -356,6 +346,8 @@ export const getAllKfConfigData = (): Record<KfCategoryTypes, KfConfig[]> => {
             const { mdList, tdList, strategyList } = storeToRefs(
                 app?.proxy.$useGlobalStore(),
             );
+
+            console.log(mdList, tdList, strategyList);
             allKfConfigData.md = mdList as KfConfig[];
             allKfConfigData.td = tdList as KfConfig[];
             allKfConfigData.strategy = strategyList as KfConfig[];
@@ -383,7 +375,6 @@ export const openNewBrowserWindow = (
 
     return new Promise((resolve, reject) => {
         const win = new BrowserWindow({
-            show: false,
             ...(getNewWindowLocation() || {}),
             width: 1080,
             height: 766,
@@ -394,6 +385,7 @@ export const openNewBrowserWindow = (
                 contextIsolation: false,
                 enableRemoteModule: true,
             },
+            backgroundColor: '#000',
             ...windowConfig,
         });
 
@@ -473,4 +465,45 @@ export const useIpcListener = (): void => {
 export const markClearJournal = (): void => {
     localStorage.setItem('clearJournalTradingDate', '');
     message.success('清理 journal 完成，请重启应用');
+};
+
+export const handleOpenLogview = (
+    config: KfConfig,
+): Promise<Electron.BrowserWindow> => {
+    const hideloading = message.loading('正在打开窗口');
+    return openLogView(getProcessIdByKfLocation(config)).finally(() => {
+        hideloading();
+    });
+};
+
+export const useDashboardBodySize = (): {
+    dashboardBodyHeight: Ref;
+    dashboardBodyWidth: Ref;
+    handleBodySizeChange({
+        width,
+        height,
+    }: {
+        width: number;
+        height: number;
+    }): void;
+} => {
+    const dashboardBodyHeight = ref<number>(0);
+    const dashboardBodyWidth = ref<number>(0);
+    const handleBodySizeChange = ({
+        width,
+        height,
+    }: {
+        width: number;
+        height: number;
+    }) => {
+        const tableHeaderHeight = 36;
+        dashboardBodyHeight.value = height - tableHeaderHeight;
+        dashboardBodyWidth.value = width > 800 ? 800 : width;
+    };
+
+    return {
+        dashboardBodyHeight,
+        dashboardBodyWidth,
+        handleBodySizeChange,
+    };
 };

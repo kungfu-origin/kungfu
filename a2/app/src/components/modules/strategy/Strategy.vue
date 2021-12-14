@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { ref, computed, getCurrentInstance, toRefs } from 'vue';
-import dayjs from 'dayjs';
 import { message, Modal } from 'ant-design-vue';
 
 import KfDashboard from '@renderer/components/public/KfDashboard.vue';
@@ -14,28 +13,38 @@ import {
 } from '@ant-design/icons-vue';
 
 import {
-    KfConfig,
     KfCategoryTypes,
     KfExtOriginConfig,
     SetKfConfigPayload,
     StrategyData,
     KfLocation,
 } from '@kungfu-trader/kungfu-js-api/typings';
+import type { KfConfig } from '@kungfu-trader/kungfu-js-api/typings';
 
-import { findTargetFromArray } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import {
-    useResetConfigModalPayload,
     useTableSearchKeyword,
     getAllKfConfigData,
+    useDashboardBodySize,
+    handleOpenLogview,
+    getProcessStatusDetailData,
 } from '@renderer/assets/methods/uiUtils';
 import { columns } from './config';
 import { setKfConfig } from '@kungfu-trader/kungfu-js-api/kungfu/store';
-import { ensureRemoveLocation } from '@renderer/assets/methods/actionsUtils';
+import {
+    ensureRemoveLocation,
+    handleSwitchProcessStatus,
+} from '@renderer/assets/methods/actionsUtils';
+import {
+    getIfProcessOnline,
+    getProcessIdByKfLocation,
+} from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 
 const app = getCurrentInstance();
+interface StrategyProps {}
+defineProps<StrategyProps>();
 
-const dashboardBodyHeight = ref<number>(0);
-const dashboardBodyWidth = ref<number>(0);
+const { dashboardBodyHeight, dashboardBodyWidth, handleBodySizeChange } =
+    useDashboardBodySize();
 
 const setStrategyModalVisible = ref<boolean>(false);
 const setStrategyConfigPayload = ref<SetKfConfigPayload>({
@@ -43,53 +52,19 @@ const setStrategyConfigPayload = ref<SetKfConfigPayload>({
     title: '策略',
     config: {} as KfExtOriginConfig['config'][KfCategoryTypes],
 });
-const resetConfigModalPayload = useResetConfigModalPayload();
 
 const { strategy } = toRefs(getAllKfConfigData());
 const strategyIdList = computed(() => {
     return strategy.value.map((item: KfConfig): string => item.name);
 });
-const strategyListResolved = computed(() => {
-    return strategy.value.map((item: KfConfig): StrategyRow => {
-        const configValue = JSON.parse(item.value || '{}');
+const { searchKeyword, tableData } = useTableSearchKeyword<KfConfig>(strategy, [
+    'name',
+]);
 
-        return {
-            strategyId: item.name,
-            stateStatus: 'Unknown',
-            processStatus: false,
-            realizedPnl: 0,
-            unrealizedPnl: 0,
-            marketValue: 0,
-            margin: 0,
-            avail: 0,
-            addTime: dayjs(configValue.add_time / Math.pow(10, 6)).format(
-                'MM-DD HH:mm:ss',
-            ),
-        };
-    });
-});
+const { processStatusData } = toRefs(getProcessStatusDetailData());
 
-const { searchKeyword, tableData } = useTableSearchKeyword<StrategyRow>(
-    strategyListResolved,
-    ['strategyId'],
-);
-
-function handleOpenLog(record: StrategyRow) {
-    console.log(record);
-}
-
-function handleCloseConfigModal() {
-    resetConfigModalPayload(setStrategyConfigPayload);
-}
-
-function handleRemoveStrategy(record: StrategyRow) {
-    const strategyLocation: KfLocation = {
-        category: 'strategy',
-        group: 'default',
-        name: record.strategyId,
-        mode: 'LIVE',
-    };
-    ensureRemoveLocation(strategyLocation).then(() => {
+function handleRemoveStrategy(strategyConfig: KfConfig) {
+    ensureRemoveLocation(strategyConfig).then(() => {
         app?.proxy && app?.proxy.$useGlobalStore().setKfConfigList();
     });
 }
@@ -131,7 +106,7 @@ function handleConfirmAddUpdateStrategy(strategyData: StrategyData) {
 
 function handleOpenSetStrategyDialog(
     type: 'add' | 'update',
-    record?: StrategyRow,
+    strategyConfig?: KfConfig,
 ) {
     setStrategyConfigPayload.value.type = type;
     setStrategyConfigPayload.value.config = {
@@ -154,14 +129,7 @@ function handleOpenSetStrategyDialog(
         ],
     };
 
-    if (type === 'update' && (record as StrategyRow).strategyId) {
-        const strategyId = (record as StrategyRow).strategyId;
-        const strategyConfig = findTargetFromArray<KfConfig>(
-            strategy.value,
-            'name',
-            strategyId,
-        );
-
+    if (type === 'update') {
         if (strategyConfig) {
             setStrategyConfigPayload.value.initValue = JSON.parse(
                 strategyConfig.value,
@@ -170,23 +138,6 @@ function handleOpenSetStrategyDialog(
     }
 
     setStrategyModalVisible.value = true;
-}
-
-function handleBodySizeChange({
-    width,
-    height,
-}: {
-    width: number;
-    height: number;
-}) {
-    const tableHeaderHeight = 36;
-    dashboardBodyHeight.value = height - tableHeaderHeight;
-    dashboardBodyWidth.value = width > 800 ? 800 : width;
-}
-
-function getStateStatusName(processId: string) {
-    processId;
-    return 'Unknown';
 }
 </script>
 
@@ -228,22 +179,26 @@ function getStateStatusName(processId: string) {
                         record,
                     }: {
                         column: AntTableColumn,
-                        record: StrategyRow,
+                        record: KfConfig,
                     }"
                 >
-                    <template v-if="column.dataIndex === 'stateStatus'">
-                        <KfProcessStatus
-                            :status-name="getStateStatusName(record.strategyId)"
-                        ></KfProcessStatus>
-                    </template>
-                    <template v-else-if="column.dataIndex === 'processStatus'">
-                        <a-switch size="small" :checked="true"></a-switch>
+                    <template v-if="column.dataIndex === 'processStatus'">
+                        <a-switch
+                            size="small"
+                            :checked="
+                                getIfProcessOnline(
+                                    processStatusData,
+                                    getProcessIdByKfLocation(record),
+                                )
+                            "
+                            @click="(checked: boolean) => handleSwitchProcessStatus(checked, record)"
+                        ></a-switch>
                     </template>
                     <template v-else-if="column.dataIndex === 'actions'">
                         <div class="kf-actions__warp">
                             <FileTextOutlined
                                 style="font-size: 12px"
-                                @click="handleOpenLog(record)"
+                                @click="handleOpenLogview(record)"
                             />
                             <SettingOutlined
                                 style="font-size: 12px"
@@ -270,7 +225,6 @@ function getStateStatusName(processId: string) {
             :payload="setStrategyConfigPayload"
             :primaryKeyCompareTarget="strategyIdList"
             @confirm="handleConfirmAddUpdateStrategy"
-            @close="handleCloseConfigModal"
         ></KfSetByConfigModal>
     </div>
 </template>

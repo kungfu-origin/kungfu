@@ -1,13 +1,13 @@
 import path from 'path';
 import { getKfAllConfig, removeKfConfig } from '../kungfu/store';
 import {
-    KfConfig,
-    KfLocation,
     KfModeTypes,
     KfCategoryEnum,
     KfCategoryTypes,
     KfModeEnum,
+    KfConfig,
     KfConfigOrigin,
+    KfLocation,
 } from '../typings';
 import { KF_RUNTIME_DIR, LOG_DIR } from '../config/pathConfig';
 import { pathExists, remove } from 'fs-extra';
@@ -15,7 +15,14 @@ import {
     getIdByKfLocation,
     getProcessIdByKfLocation,
 } from '../utils/busiUtils';
-import { deleteProcess, startLedger, startMaster } from '../utils/processUtils';
+import {
+    deleteProcess,
+    startLedger,
+    startMaster,
+    startMd,
+    startStrategy,
+    startTd,
+} from '../utils/processUtils';
 import { Proc } from 'pm2';
 import { watcher } from '../kungfu/watcher';
 
@@ -92,7 +99,7 @@ function removeLog(kfLocation: KfLocation): Promise<void> {
 }
 
 export const switchKfLocation = (
-    kfLocation: KfLocation,
+    kfLocation: KfLocation | KfConfig,
     targetStatus: boolean,
 ): Promise<void | Proc> => {
     const processId = getProcessIdByKfLocation(kfLocation);
@@ -115,6 +122,20 @@ export const switchKfLocation = (
             } else if (kfLocation.name === 'ledger') {
                 return startLedger(true);
             }
+
+        case 'td':
+            return startTd(getIdByKfLocation(kfLocation));
+        case 'md':
+            return startMd(getIdByKfLocation(kfLocation));
+
+        case 'strategy':
+            const strategyPath =
+                JSON.parse((kfLocation as KfConfig)?.value || '{}')
+                    .strategy_path || '';
+            if (!strategyPath) {
+                throw new Error('Start Stratgy without strategy_path');
+            }
+            return startStrategy(getIdByKfLocation(kfLocation), strategyPath);
         default:
             return Promise.resolve();
     }

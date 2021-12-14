@@ -20,8 +20,10 @@
 }
 
 .kf-hover {
-    color: @primary-color;
-    cursor: pointer;
+    &:hover {
+        color: @primary-color;
+        cursor: pointer;
+    }
 }
 
 .keyframes(@name, @rules) {

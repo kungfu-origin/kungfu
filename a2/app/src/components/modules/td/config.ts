@@ -9,7 +9,7 @@ export const columns: AntTableColumns = [
     },
     {
         title: '账户',
-        dataIndex: 'accountId',
+        dataIndex: 'name',
         align: 'left',
         sorter: true,
         fixed: 'left',
@@ -17,7 +17,7 @@ export const columns: AntTableColumns = [
     },
     {
         title: '柜台',
-        dataIndex: 'sourceId',
+        dataIndex: 'group',
         align: 'left',
         sorter: true,
         fixed: 'left',

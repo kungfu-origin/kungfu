@@ -4,6 +4,7 @@
         class="kf-set-by-config-modal"
         v-model:visible="modalVisible"
         :title="titleResolved"
+        :destroyOnClose="true"
         @cancel="handleClose"
         @ok="handleConfirm"
     >

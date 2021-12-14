@@ -33,33 +33,25 @@ interface AntTableColumn {
 
 type AntTableColumns = Array<AntTableColumn>;
 
-interface TdRow {
-    accountName: string;
-    accountId: string;
-    sourceId: string;
-    stateStatus: ProcessStatusTypes;
-    processStatus: boolean;
-    realizedPnl: number;
-    unrealizedPnl: number;
-    marketValue: number;
-    margin: number;
-    avail: number;
-}
-
 interface MdRow {
     sourceId: string;
     stateStatus: ProcessStatusTypes;
     processStatus: boolean;
 }
 
-interface StrategyRow {
-    strategyId: string;
-    stateStatus: ProcessStatusTypes;
-    processStatus: boolean;
-    realizedPnl: number;
-    unrealizedPnl: number;
-    marketValue: number;
-    margin: number;
-    avail: number;
-    addTime: string;
+interface ResizeEvent {
+    tag: 'resize';
 }
+
+interface ProcessStatusChangeEvent {
+    tag: 'processStatus';
+    name: string;
+    status: Pm2ProcessStatusTypes;
+}
+
+interface MainProcessEvent {
+    tag: 'main';
+    name: string;
+}
+
+type KfBusEvent = ResizeEvent | ProcessStatusChangeEvent | MainProcessEvent;

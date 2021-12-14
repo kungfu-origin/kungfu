@@ -1,8 +1,7 @@
 import path from 'path';
 import dayjs from 'dayjs';
-import fse, { Stats } from 'fs-extra';
+import fse from 'fs-extra';
 import log4js from 'log4js';
-import readline from 'readline';
 import { buildProcessLogPath } from '../config/pathConfig';
 import {
     InstrumentType,
@@ -16,10 +15,10 @@ import {
     KfExtOriginConfig,
     KfExtConfigs,
     SourceData,
-    KfLocation,
     ProcessStatusTypes,
     InstrumentTypes,
     KfConfig,
+    KfLocation,
 } from '../typings';
 import {
     Pm2ProcessStatusData,
@@ -737,7 +736,7 @@ export const getIdByKfLocation = (
         return `${kfLocation.name}`;
     }
 
-    throw new Error(`Category ${kfLocation.category} is illegal`);
+    throw new Error(`Category ${kfLocation.category.toString()} is illegal`);
 };
 
 export const getCategoryName = (kfLocation: KfLocation | KfConfig): string => {

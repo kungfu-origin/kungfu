@@ -1,19 +1,11 @@
 export const columns: AntTableColumns = [
     {
         title: '策略ID',
-        dataIndex: 'strategyId',
+        dataIndex: 'name',
         align: 'left',
         sorter: true,
         fixed: 'left',
         width: 90,
-    },
-    {
-        title: '状态',
-        dataIndex: 'stateStatus',
-        align: 'left',
-        sorter: true,
-        fixed: 'left',
-        width: 80,
     },
     {
         title: '进程',

@@ -24,6 +24,7 @@ export type ProcessStatusTypes = Pm2ProcessStatusTypes | BrokerStateStatusTypes;
 export type AntInKungfuColorTypes =
     | 'default'
     | 'orange'
+    | 'yellow'
     | 'pink'
     | 'red'
     | 'blue'
@@ -238,7 +239,6 @@ export enum KfCategoryEnum {
     strategy,
     system,
 }
-
 export type KfCategoryTypes = keyof typeof KfCategoryEnum;
 
 export enum KfModeEnum {
@@ -250,7 +250,13 @@ export enum KfModeEnum {
 
 export type KfModeTypes = keyof typeof KfModeEnum;
 
-interface KfLocationBase {
+export interface StrategyData {
+    strategy_id: string;
+    strategy_path: string;
+    add_time: number;
+}
+
+export interface KfLocationBase {
     group: string;
     name: string;
 }
@@ -274,9 +280,3 @@ export type KfConfig = KfLocation & {
     location_uid: number;
     value: string;
 };
-
-export interface StrategyData {
-    strategy_id: string;
-    strategy_path: string;
-    add_time: number;
-}

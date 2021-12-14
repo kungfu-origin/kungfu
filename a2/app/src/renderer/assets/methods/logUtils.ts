@@ -20,6 +20,42 @@ export function preDealLogMessage(line: string): string {
     return line;
 }
 
+function isCriticalLog(line: string): boolean {
+    if (line.indexOf('critical') !== -1) {
+        return true;
+    }
+
+    if (line.indexOf('File') !== -1) {
+        if (line.indexOf('line') !== -1) {
+            return true;
+        }
+    }
+
+    if (line.indexOf('Traceback') != -1) {
+        return true;
+    }
+
+    if (line.indexOf('Error') != -1) {
+        return true;
+    }
+
+    if (line.indexOf('Try') != -1) {
+        if (line.indexOf('for help') != -1) {
+            return true;
+        }
+    }
+
+    if (line.indexOf('Usage') != -1) {
+        return true;
+    }
+
+    if (line.length <= 22) {
+        return true;
+    }
+
+    return false;
+}
+
 export function dealLogMessage(line: string): string {
     line = line
         .replace(/warning/g, '<span class="warning"> warning </span>')
@@ -27,22 +63,9 @@ export function dealLogMessage(line: string): string {
         .replace(/ debug /g, '<span class="debug"> debug </span>')
         .replace(/ trace /g, '<span class="trace"> trace </span>');
 
-    if (line.indexOf('critical') !== -1) {
+    if (isCriticalLog(line)) {
         line = `<span class="critical">${line}</span>`;
-    }
-
-    if (line.indexOf('File') !== -1) {
-        if (line.indexOf('line') !== -1) {
-            line = `<span class="critical">${line}</span>`;
-        }
-    }
-
-    if (line.indexOf('Traceback') != -1) {
-        line = `<span class="critical">${line}</span>`;
-    }
-
-    if (line.indexOf('RuntimeError') != -1) {
-        line = `<span class="critical">${line}</span>`;
+        return line;
     }
 
     return line;
