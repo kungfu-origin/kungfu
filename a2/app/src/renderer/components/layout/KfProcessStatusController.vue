@@ -170,7 +170,12 @@ function handleOpenProcessControllerBoard(): void {
                                             getProcessIdByKfLocation(config),
                                         )
                                     "
-                                    @click="(checked: boolean) => handleSwitchProcessStatus(checked, config)"
+                                    @click="
+                                        handleSwitchProcessStatus(
+                                            $event,
+                                            config,
+                                        )
+                                    "
                                 ></a-switch>
                             </div>
                             <div class="cpu">

@@ -1,7 +1,7 @@
 export const columns: AntTableColumns = [
     {
         title: '柜台',
-        dataIndex: 'sourceId',
+        dataIndex: 'name',
         align: 'left',
         sorter: true,
         width: 60,

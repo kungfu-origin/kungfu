@@ -16,12 +16,9 @@ import {
     KfCategoryTypes,
     KfExtOriginConfig,
     SetKfConfigPayload,
-    InstrumentTypeEnum,
     ProcessStatusTypes,
 } from '@kungfu-trader/kungfu-js-api/typings';
 import type { KfConfig } from '@kungfu-trader/kungfu-js-api/typings';
-import { InstrumentType } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
-
 import { columns } from './config';
 import {
     useTableSearchKeyword,
@@ -30,17 +27,17 @@ import {
     getProcessStatusDetailData,
     handleOpenLogview,
     useDashboardBodySize,
+    getExtColor,
 } from '@renderer/assets/methods/uiUtils';
 import {
-    ensureRemoveLocation,
+    handleRemoveKfConfig,
     handleSwitchProcessStatus,
+    useSwitchAllConfig,
 } from '@renderer/assets/methods/actionsUtils';
 import {
     getIfProcessOnline,
     getProcessIdByKfLocation,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
-
-const app = getCurrentInstance();
 
 interface TdProps {}
 defineProps<TdProps>();
@@ -66,12 +63,17 @@ const tdIdList = computed(() => {
     );
 });
 
+const { processStatusData } = toRefs(getProcessStatusDetailData());
+
+const { allProcessOnline, handleSwitchAllProcessStatus } = useSwitchAllConfig(
+    td,
+    processStatusData,
+);
+
 const { searchKeyword, tableData } = useTableSearchKeyword<KfConfig>(td, [
     'group',
     'name',
 ]);
-
-const { processStatusData } = toRefs(getProcessStatusDetailData());
 
 function handleSelectedSource(selectedSource: string) {
     setTdModalVisible.value = true;
@@ -90,12 +92,6 @@ function getStateStatusName(processId: string): ProcessStatusTypes {
     processId;
     return 'Unknown';
 }
-
-function handleRemoveTd(tdConfig: KfConfig) {
-    ensureRemoveLocation(tdConfig).then(() => {
-        app?.proxy && app?.proxy.$useGlobalStore().setKfConfigList();
-    });
-}
 </script>
 
 <template>
@@ -110,7 +106,10 @@ function handleRemoveTd(tdConfig: KfConfig) {
                     />
                 </KfDashboardItem>
                 <KfDashboardItem>
-                    <a-switch></a-switch>
+                    <a-switch
+                        :checked="allProcessOnline"
+                        @click="handleSwitchAllProcessStatus"
+                    ></a-switch>
                 </KfDashboardItem>
                 <KfDashboardItem>
                     <a-button
@@ -123,7 +122,6 @@ function handleRemoveTd(tdConfig: KfConfig) {
                 </KfDashboardItem>
             </template>
             <a-table
-                ref="table"
                 :columns="columns"
                 :data-source="tableData"
                 size="small"
@@ -151,14 +149,8 @@ function handleRemoveTd(tdConfig: KfConfig) {
                             "
                         ></KfProcessStatus>
                     </template>
-                    <template v-else-if="column.dataIndex === 'sourceId'">
-                        <a-tag
-                            :color="
-                                InstrumentType[
-                                    InstrumentTypeEnum[extTypeMap[record.group]]
-                                ].color
-                            "
-                        >
+                    <template v-else-if="column.dataIndex === 'group'">
+                        <a-tag :color="getExtColor(extTypeMap, record.group)">
                             {{ record.group }}
                         </a-tag>
                     </template>
@@ -171,7 +163,7 @@ function handleRemoveTd(tdConfig: KfConfig) {
                                     getProcessIdByKfLocation(record),
                                 )
                             "
-                            @click="(checked: boolean) => handleSwitchProcessStatus(checked, record)"
+                            @click="handleSwitchProcessStatus($event, record)"
                         ></a-switch>
                     </template>
                     <template v-else-if="column.dataIndex === 'actions'">
@@ -183,7 +175,7 @@ function handleRemoveTd(tdConfig: KfConfig) {
                             <SettingOutlined style="font-size: 12px" />
                             <DeleteOutlined
                                 style="font-size: 12px"
-                                @click="handleRemoveTd(record)"
+                                @click="handleRemoveKfConfig(record)"
                             />
                         </div>
                     </template>

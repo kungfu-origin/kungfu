@@ -49,6 +49,14 @@ function isCriticalLog(line: string): boolean {
         return true;
     }
 
+    if (line.indexOf('Failed to execute') != -1) {
+        return true;
+    }
+
+    if (line.indexOf('KeyboardInterrupt') != -1) {
+        return true;
+    }
+
     if (line.length <= 22) {
         return true;
     }

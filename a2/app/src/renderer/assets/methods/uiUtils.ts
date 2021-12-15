@@ -347,7 +347,6 @@ export const getAllKfConfigData = (): Record<KfCategoryTypes, KfConfig[]> => {
                 app?.proxy.$useGlobalStore(),
             );
 
-            console.log(mdList, tdList, strategyList);
             allKfConfigData.md = mdList as KfConfig[];
             allKfConfigData.td = tdList as KfConfig[];
             allKfConfigData.strategy = strategyList as KfConfig[];
@@ -506,4 +505,14 @@ export const useDashboardBodySize = (): {
         dashboardBodyWidth,
         handleBodySizeChange,
     };
+};
+
+export const getExtColor = (
+    extTypeMap: Record<string, InstrumentTypes>,
+    extTypeName: string,
+): AntInKungfuColorTypes => {
+    return (
+        InstrumentType[InstrumentTypeEnum[extTypeMap[extTypeName]]].color ||
+        'default'
+    );
 };

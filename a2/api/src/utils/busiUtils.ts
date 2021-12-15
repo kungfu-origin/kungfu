@@ -866,3 +866,7 @@ export const debounce = (fn: Function, delay = 300, immediate = false) => {
         }, delay);
     };
 };
+
+export const getConfigValue = (kfConfig: KfConfig) => {
+    return JSON.parse(kfConfig.value || '{}');
+};

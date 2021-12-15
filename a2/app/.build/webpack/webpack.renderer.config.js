@@ -7,7 +7,6 @@ const path = require('path');
 const webpack = require('webpack');
 const { merge } = require('webpack-merge');
 
-const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
 const { VueLoaderPlugin } = require('vue-loader');
 const { getThemeVariables } = require('ant-design-vue/dist/theme');
 
@@ -24,11 +23,7 @@ const webpackConfig = (argv) => {
             rules: [
                 {
                     test: /\.css$/,
-                    use: [
-                        'style-loader',
-                        'postcss-loader',
-                        'css-loader',
-                    ],
+                    use: ['style-loader', 'postcss-loader', 'css-loader'],
                 },
                 {
                     test: /\.less$/,
@@ -71,13 +66,7 @@ const webpackConfig = (argv) => {
                 },
             ],
         },
-        plugins: [
-            ...pagesConfig.plugins,
-            new MonacoWebpackPlugin({
-                languages: ['python', 'cpp', 'shell', 'json', 'yaml'],
-            }),
-            new VueLoaderPlugin(),
-        ],
+        plugins: [...pagesConfig.plugins, new VueLoaderPlugin()],
         resolve: {
             alias: {
                 '@root': rootDir,

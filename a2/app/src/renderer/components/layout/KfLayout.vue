@@ -1,3 +1,11 @@
+<script setup lang="ts">
+import { SlidersOutlined } from '@ant-design/icons-vue';
+import KfProcessStatusController from '@renderer/components/layout/KfProcessStatusController.vue';
+const logo = require('@renderer/assets/svg/LOGO.svg');
+
+interface LayoutProps {}
+defineProps<LayoutProps>();
+</script>
 <template>
     <a-layout>
         <a-layout>
@@ -8,19 +16,13 @@
                 <a-menu
                     mode="vertical"
                     style="width: 64px"
-                    v-model:selectedKeys="selectedKeys"
+                    :selectedKeys="['main']"
                 >
-                    <a-menu-item key="1">
+                    <a-menu-item key="main">
                         <template #icon>
-                            <TeamOutlined style="font-size: 16px" />
+                            <sliders-outlined style="font-size: 18px" />
                         </template>
-                        <span>账户</span>
-                    </a-menu-item>
-                    <a-menu-item key="2">
-                        <template #icon>
-                            <ThunderboltOutlined style="font-size: 16px" />
-                        </template>
-                        <span>策略</span>
+                        <span>主面板</span>
                     </a-menu-item>
                 </a-menu>
             </a-layout-sider>
@@ -35,32 +37,6 @@
         </a-layout-footer>
     </a-layout>
 </template>
-
-<script lang="ts">
-import { defineComponent, reactive, toRefs } from 'vue';
-import { TeamOutlined, ThunderboltOutlined } from '@ant-design/icons-vue';
-
-import KfProcessStatusController from '@renderer/components/layout/KfProcessStatusController.vue';
-
-export default defineComponent({
-    components: {
-        TeamOutlined,
-        ThunderboltOutlined,
-        KfProcessStatusController,
-    },
-
-    setup() {
-        const state = reactive({
-            selectedKeys: ['1'],
-        });
-
-        return {
-            ...toRefs(state),
-            logo: require('@renderer/assets/svg/LOGO.svg'),
-        };
-    },
-});
-</script>
 
 <style lang="less">
 @import '@renderer/assets/less/variables.less';

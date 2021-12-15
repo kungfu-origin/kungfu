@@ -1,84 +1,5 @@
-<template>
-    <div class="kf-md__warp kf-translateZ">
-        <KfDashboard @boardSizeChange="handleBodySizeChange">
-            <template v-slot:header>
-                <KfDashboardItem>
-                    <a-input-search
-                        v-model:value="searchKeyword"
-                        placeholder="关键字"
-                        style="width: 120px"
-                        @search="hanleOnSearch"
-                    />
-                </KfDashboardItem>
-                <KfDashboardItem>
-                    <a-switch></a-switch>
-                </KfDashboardItem>
-                <KfDashboardItem>
-                    <a-button
-                        size="small"
-                        type="primary"
-                        @click="handleOpenSetSourceDialog"
-                    >
-                        添加
-                    </a-button>
-                </KfDashboardItem>
-            </template>
-            <a-table
-                ref="table"
-                :columns="columns"
-                :data-source="mdListResolved"
-                size="small"
-                :pagination="false"
-                :scroll="{ y: dashboardBodyHeight - 4, x: dashboardBodyWidth }"
-            >
-                <template
-                    #bodyCell="{
-                        column,
-                        record,
-                    }: {
-                        column: AntTableColumn,
-                        record: MdRow,
-                    }"
-                >
-                    <template v-if="column.dataIndex === 'stateStatus'">
-                        <KfProcessStatus
-                            :status-name="
-                                getStateStatusName(getMdProcessId(record))
-                            "
-                        ></KfProcessStatus>
-                    </template>
-                    <template v-else-if="column.dataIndex === 'processStatus'">
-                        <a-switch size="small" :checked="true"></a-switch>
-                    </template>
-                    <template v-else-if="column.dataIndex === 'actions'">
-                        <div class="kf-actions__warp">
-                            <FileTextOutlined
-                                style="font-size: 12px"
-                                @click="handleOpenLog(record)"
-                            />
-                            <SettingOutlined style="font-size: 12px" />
-                            <DeleteOutlined style="font-size: 12px" />
-                        </div>
-                    </template>
-                </template>
-            </a-table>
-        </KfDashboard>
-        <KfSetSourceModal
-            v-if="setSourceModalVisible"
-            v-model:visible="setSourceModalVisible"
-            sourceType="md"
-            @confirm="handleSelectedSource"
-        ></KfSetSourceModal>
-        <KfSetByConfigModal
-            v-if="setMdModalVisible"
-            v-model:visible="setMdModalVisible"
-            :payload="setMdConfigPayload"
-        ></KfSetByConfigModal>
-    </div>
-</template>
-
-<script lang="ts">
-import { defineComponent, ref } from 'vue';
+<script setup lang="ts">
+import { computed, getCurrentInstance, ref, toRefs } from 'vue';
 import {
     FileTextOutlined,
     SettingOutlined,
@@ -94,108 +15,192 @@ import KfSetByConfigModal from '@renderer/components/public/KfSetByConfigModal.v
 import {
     KfCategoryTypes,
     KfExtOriginConfig,
+    ProcessStatusTypes,
     SetKfConfigPayload,
-    KfConfig,
 } from '@kungfu-trader/kungfu-js-api/typings';
-import { mapState } from 'pinia';
-import { useGlobalStore } from '@renderer/pages/index/store/global';
+import type { KfConfig } from '@kungfu-trader/kungfu-js-api/typings';
 import { columns } from './config';
-import { useDashboardBodySize } from '@renderer/assets/methods/uiUtils';
+import {
+    getAllKfConfigData,
+    getExtColor,
+    getExtConfigsRelated,
+    getProcessStatusDetailData,
+    handleOpenLogview,
+    useDashboardBodySize,
+    useTableSearchKeyword,
+} from '@renderer/assets/methods/uiUtils';
+import {
+    getIdByKfLocation,
+    getIfProcessOnline,
+    getProcessIdByKfLocation,
+} from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
+import {
+    handleRemoveKfConfig,
+    handleSwitchProcessStatus,
+    useSwitchAllConfig,
+} from '@renderer/assets/methods/actionsUtils';
 
-export default defineComponent({
-    name: '行情源',
+const app = getCurrentInstance();
 
-    components: {
-        KfDashboard,
-        KfDashboardItem,
-        KfProcessStatus,
-        KfSetSourceModal,
-        KfSetByConfigModal,
-        FileTextOutlined,
-        SettingOutlined,
-        DeleteOutlined,
-    },
+interface MdProps {}
+defineProps<MdProps>();
 
-    setup() {
-        const {
-            dashboardBodyHeight,
-            dashboardBodyWidth,
-            handleBodySizeChange,
-        } = useDashboardBodySize();
+const { dashboardBodyHeight, dashboardBodyWidth, handleBodySizeChange } =
+    useDashboardBodySize();
 
-        return {
-            dashboardBodyHeight,
-            dashboardBodyWidth,
-            handleBodySizeChange,
-
-            searchKeyword: ref<string>(''),
-            columns,
-
-            setSourceModalVisible: ref<boolean>(false),
-            setMdModalVisible: ref<boolean>(false),
-            setMdConfigPayload: ref<SetKfConfigPayload>({
-                type: 'add',
-                title: '行情源',
-                config: {} as KfExtOriginConfig['config'][KfCategoryTypes],
-            }),
-        };
-    },
-
-    computed: {
-        ...mapState(useGlobalStore, {
-            extConfigs: (store) => store.extConfigs,
-            mdList: (store) => store.mdList,
-        }),
-
-        mdListResolved(): MdRow[] {
-            if (!this.mdList.length) {
-                return [];
-            }
-
-            return this.mdList.map((item: KfConfig) => {
-                return {
-                    sourceId: item.name,
-                    stateStatus: 'Unknown',
-                    processStatus: false,
-                };
-            });
-        },
-    },
-
-    methods: {
-        handleOpenLog(record: MdRow) {
-            console.log(record);
-            this.$useGlobalStore().setKfExtConfigs();
-        },
-
-        handleSelectedSource(selectedSource: string) {
-            this.setMdModalVisible = true;
-            this.setMdConfigPayload.title = `${selectedSource} 行情源`;
-            const targetConfig = (this.extConfigs['md'] || {})[selectedSource];
-
-            this.setMdConfigPayload.config = targetConfig;
-        },
-
-        handleOpenSetSourceDialog() {
-            this.setSourceModalVisible = true;
-            this.setMdConfigPayload.type = 'add';
-        },
-
-        hanleOnSearch(e: string) {
-            console.log(e);
-        },
-
-        getMdProcessId(record: MdRow): string {
-            const sourceId = record.sourceId;
-            return `md_${sourceId}`;
-        },
-
-        getStateStatusName(processId: string) {
-            processId;
-            return 'Unknown';
-        },
-    },
+const setSourceModalVisible = ref<boolean>(false);
+const setMdModalVisible = ref<boolean>(false);
+const setMdConfigPayload = ref<SetKfConfigPayload>({
+    type: 'add',
+    title: '行情源',
+    config: {} as KfExtOriginConfig['config'][KfCategoryTypes],
 });
+const currentSelectedSourceId = ref<string>('');
+
+const { extConfigs, extTypeMap } = getExtConfigsRelated();
+
+const { md } = toRefs(getAllKfConfigData());
+const mdIdList = computed(() => {
+    return md.value.map((item: KfConfig): string => getIdByKfLocation(item));
+});
+
+const { processStatusData } = toRefs(getProcessStatusDetailData());
+
+const { allProcessOnline, handleSwitchAllProcessStatus } = useSwitchAllConfig(
+    md,
+    processStatusData,
+);
+
+const { searchKeyword, tableData } = useTableSearchKeyword<KfConfig>(md, [
+    'group',
+]);
+
+function handleSelectedSource(selectedSource: string) {
+    setMdModalVisible.value = true;
+    setMdConfigPayload.value.title = `${selectedSource} 行情源`;
+    const targetConfig = (extConfigs.value['md'] || {})[selectedSource];
+    setMdConfigPayload.value.config = targetConfig;
+    currentSelectedSourceId.value = selectedSource;
+}
+
+function handleOpenSetSourceDialog() {
+    setSourceModalVisible.value = true;
+    setMdConfigPayload.value.type = 'add';
+}
+
+function getStateStatusName(processId: string): ProcessStatusTypes {
+    processId;
+    return 'Unknown';
+}
+</script>
+<template>
+    <div class="kf-md__warp kf-translateZ">
+        <KfDashboard @boardSizeChange="handleBodySizeChange">
+            <template v-slot:header>
+                <KfDashboardItem>
+                    <a-input-search
+                        v-model:value="searchKeyword"
+                        placeholder="关键字"
+                        style="width: 120px"
+                    />
+                </KfDashboardItem>
+                <KfDashboardItem>
+                    <KfDashboardItem>
+                        <a-switch
+                            :checked="allProcessOnline"
+                            @click="handleSwitchAllProcessStatus"
+                        ></a-switch>
+                    </KfDashboardItem>
+                </KfDashboardItem>
+                <KfDashboardItem>
+                    <a-button
+                        size="small"
+                        type="primary"
+                        @click="handleOpenSetSourceDialog"
+                    >
+                        添加
+                    </a-button>
+                </KfDashboardItem>
+            </template>
+            <a-table
+                ref="table"
+                :columns="columns"
+                :data-source="tableData"
+                size="small"
+                :pagination="false"
+                :scroll="{ y: dashboardBodyHeight - 4, x: dashboardBodyWidth }"
+            >
+                <template
+                    #bodyCell="{
+                        column,
+                        record,
+                    }: {
+                        column: AntTableColumn,
+                        record: KfConfig,
+                    }"
+                >
+                    <template v-if="column.dataIndex === 'name'">
+                        <a-tag :color="getExtColor(extTypeMap, record.name)">
+                            {{ record.name }}
+                        </a-tag>
+                    </template>
+                    <template v-else-if="column.dataIndex === 'stateStatus'">
+                        <KfProcessStatus
+                            :status-name="
+                                getStateStatusName(
+                                    getProcessIdByKfLocation(record),
+                                )
+                            "
+                        ></KfProcessStatus>
+                    </template>
+                    <template v-else-if="column.dataIndex === 'processStatus'">
+                        <a-switch
+                            size="small"
+                            :checked="
+                                getIfProcessOnline(
+                                    processStatusData,
+                                    getProcessIdByKfLocation(record),
+                                )
+                            "
+                            @click="handleSwitchProcessStatus($event, record)"
+                        ></a-switch>
+                    </template>
+                    <template v-else-if="column.dataIndex === 'actions'">
+                        <div class="kf-actions__warp">
+                            <FileTextOutlined
+                                style="font-size: 12px"
+                                @click="handleOpenLogview(record)"
+                            />
+                            <SettingOutlined style="font-size: 12px" />
+                            <DeleteOutlined
+                                style="font-size: 12px"
+                                @click="handleRemoveKfConfig(record)"
+                            />
+                        </div>
+                    </template>
+                </template>
+            </a-table>
+        </KfDashboard>
+        <KfSetSourceModal
+            v-if="setSourceModalVisible"
+            v-model:visible="setSourceModalVisible"
+            sourceType="md"
+            @confirm="handleSelectedSource"
+        ></KfSetSourceModal>
+        <KfSetByConfigModal
+            v-if="setMdModalVisible"
+            v-model:visible="setMdModalVisible"
+            :payload="setMdConfigPayload"
+            :primaryKeyCompareTarget="mdIdList"
+            :primaryKeyCompareExtra="currentSelectedSourceId"
+        ></KfSetByConfigModal>
+    </div>
+</template>
+
+<script lang="ts">
+export default {
+    name: '行情源',
+};
 </script>
 
 <style lang="less">

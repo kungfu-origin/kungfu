@@ -45,11 +45,6 @@ import bus from '@kungfu-trader/kungfu-js-api/utils/globalBus';
 
 const app = createApp(App);
 
-const uics = getUIComponents();
-Object.keys(uics).forEach((key) => {
-    app.component(key, uics[key] as Component);
-});
-
 app.use(store)
     .use(router)
     .use(Layout)
@@ -68,6 +63,11 @@ app.use(store)
     .use(Select)
     .use(Drawer)
     .use(Form);
+
+const uics = getUIComponents();
+Object.keys(uics).forEach((key) => {
+    app.component(key, uics[key] as Component);
+});
 
 //this sort ensure $useGlobalStore can be get in mounted callback
 app.config.globalProperties.$registedKfUIComponents = Object.keys(uics);

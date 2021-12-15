@@ -4,7 +4,6 @@ import { message, Modal } from 'ant-design-vue';
 
 import KfDashboard from '@renderer/components/public/KfDashboard.vue';
 import KfDashboardItem from '@renderer/components/public/KfDashboardItem.vue';
-import KfProcessStatus from '@renderer/components/public/KfProcessStatus.vue';
 import KfSetByConfigModal from '@renderer/components/public/KfSetByConfigModal.vue';
 import {
     FileTextOutlined,
@@ -31,13 +30,16 @@ import {
 import { columns } from './config';
 import { setKfConfig } from '@kungfu-trader/kungfu-js-api/kungfu/store';
 import {
-    ensureRemoveLocation,
+    handleRemoveKfConfig,
     handleSwitchProcessStatus,
+    useSwitchAllConfig,
 } from '@renderer/assets/methods/actionsUtils';
 import {
+    getConfigValue,
     getIfProcessOnline,
     getProcessIdByKfLocation,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
+import path from 'path';
 
 const app = getCurrentInstance();
 interface StrategyProps {}
@@ -57,17 +59,17 @@ const { strategy } = toRefs(getAllKfConfigData());
 const strategyIdList = computed(() => {
     return strategy.value.map((item: KfConfig): string => item.name);
 });
-const { searchKeyword, tableData } = useTableSearchKeyword<KfConfig>(strategy, [
-    'name',
-]);
 
 const { processStatusData } = toRefs(getProcessStatusDetailData());
 
-function handleRemoveStrategy(strategyConfig: KfConfig) {
-    ensureRemoveLocation(strategyConfig).then(() => {
-        app?.proxy && app?.proxy.$useGlobalStore().setKfConfigList();
-    });
-}
+const { allProcessOnline, handleSwitchAllProcessStatus } = useSwitchAllConfig(
+    strategy,
+    processStatusData,
+);
+
+const { searchKeyword, tableData } = useTableSearchKeyword<KfConfig>(strategy, [
+    'name',
+]);
 
 function handleConfirmAddUpdateStrategy(strategyData: StrategyData) {
     return Modal.confirm({
@@ -139,6 +141,11 @@ function handleOpenSetStrategyDialog(
 
     setStrategyModalVisible.value = true;
 }
+
+function getStrategyPathShowName(kfConfig: KfConfig): string {
+    const strategyPath = getConfigValue(kfConfig).strategy_path || '';
+    return path.basename(strategyPath);
+}
 </script>
 
 <template>
@@ -153,7 +160,10 @@ function handleOpenSetStrategyDialog(
                     />
                 </KfDashboardItem>
                 <KfDashboardItem>
-                    <a-switch></a-switch>
+                    <a-switch
+                        :checked="allProcessOnline"
+                        @click="handleSwitchAllProcessStatus"
+                    ></a-switch>
                 </KfDashboardItem>
                 <KfDashboardItem>
                     <a-button
@@ -166,7 +176,6 @@ function handleOpenSetStrategyDialog(
                 </KfDashboardItem>
             </template>
             <a-table
-                ref="table"
                 :columns="columns"
                 :data-source="tableData"
                 size="small"
@@ -191,8 +200,11 @@ function handleOpenSetStrategyDialog(
                                     getProcessIdByKfLocation(record),
                                 )
                             "
-                            @click="(checked: boolean) => handleSwitchProcessStatus(checked, record)"
+                            @click="handleSwitchProcessStatus($event, record)"
                         ></a-switch>
+                    </template>
+                    <template v-else-if="column.dataIndex === 'strategyPath'">
+                        {{ getStrategyPathShowName(record) }}
                     </template>
                     <template v-else-if="column.dataIndex === 'actions'">
                         <div class="kf-actions__warp">
@@ -211,7 +223,7 @@ function handleOpenSetStrategyDialog(
                             />
                             <DeleteOutlined
                                 style="font-size: 12px"
-                                @click="handleRemoveStrategy(record)"
+                                @click="handleRemoveKfConfig(record)"
                             />
                         </div>
                     </template>

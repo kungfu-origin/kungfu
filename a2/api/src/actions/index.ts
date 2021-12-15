@@ -107,8 +107,10 @@ export const switchKfLocation = (
     if (!targetStatus) {
         if (kfLocation.category !== 'system') {
             if (!watcher || !watcher.isReadyToInteract(kfLocation)) {
-                const processId = getProcessIdByKfLocation(kfLocation);
-                throw new Error(`${processId} 还未准备就绪, 请稍后重试`);
+                const name = getIdByKfLocation(kfLocation);
+                return Promise.reject(
+                    new Error(`${name} 还未准备就绪, 请稍后重试`),
+                );
             }
         }
 

@@ -37,11 +37,11 @@ export const columns: AntTableColumns = [
         width: 90,
     },
     {
-        title: '修改时间',
-        dataIndex: 'addTime',
-        align: 'right',
+        title: '策略路径',
+        dataIndex: 'strategyPath',
+        align: 'left',
         sorter: true,
-        width: 140,
+        width: 160,
     },
     {
         title: '操作',

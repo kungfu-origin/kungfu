@@ -38,6 +38,7 @@ const webpackConfig = (argv) => {
                                         ...getThemeVariables({
                                             dark: true,
                                         }),
+                                        'font-size-base': '12px', // major text font size
                                         'primary-color': '#FAAD14',
                                     },
                                     javascriptEnabled: true,
@@ -107,19 +108,7 @@ const devConfig = {
     ],
 };
 
-// module.exports = (argv) => {
-//     return merge(
-//         webpackConfig(argv),
-//         isProduction(argv) ? prodConfig : devConfig,
-//     );
-// };
-
-module.exports = () => {
-    const argv = {
-        mode: 'development',
-        distDir: path.join(__dirname, '../../dist'),
-        distName: 'app',
-    };
+module.exports = (argv) => {
     return merge(
         webpackConfig(argv),
         isProduction(argv) ? prodConfig : devConfig,
