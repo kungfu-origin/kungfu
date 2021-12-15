@@ -28,6 +28,8 @@ void TraderVendor::on_start() {
   events_ | is(ResetBookRequest::tag) | $$(get_writer(location::PUBLIC)->mark(now(), ResetBookRequest::tag));
 
   clean_orders();
+
+  service_->on_start();
 }
 
 BrokerService_ptr TraderVendor::get_service() { return service_; }
