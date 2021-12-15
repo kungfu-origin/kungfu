@@ -14,7 +14,7 @@
     "registry": "https://npm.pkg.github.com"
   },
   "scripts": {
-    "configure": "kfs extension configure",
+    "postinstall": "kfs extension configure",
     "build": "kfs extension build",
     "dev": "kfs craft dev",
     "format": "kfc engage black src/python *.py"

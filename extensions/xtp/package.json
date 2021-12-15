@@ -15,7 +15,7 @@
   },
   "scripts": {
     "install": "kfs extension install",
-    "configure": "kfs extension configure",
+    "postinstall": "kfs extension configure",
     "build": "kfs extension build",
     "clean": "kfs extension clean",
     "dev": "kfs craft dev",
