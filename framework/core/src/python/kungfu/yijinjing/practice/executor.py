@@ -31,7 +31,8 @@ class ExecutorRegistry:
             "td": {},
             "strategy": {}
         }
-        deque(map(self.register_extensions, ctx.extension_path.split(path.pathsep)))
+        if ctx.extension_path:
+            deque(map(self.register_extensions, ctx.extension_path.split(path.pathsep)))
 
     def register_extensions(self, root):
         for child in os.listdir(root):
@@ -66,7 +67,7 @@ class MasterLoader(dict):
 class ServiceLoader(dict):
     def __init__(self, ctx):
         super().__init__()
-        self["ledger"] = lambda mode, low_latency: wc.Ledger(ctx).run()
+        self["ledger"] = lambda mode, low_latency: wc.Ledger(ctx.runtime_locator, kfj.MODES[ctx.mode], ctx.low_latency).run()
 
 
 class ExtensionLoader:
@@ -107,10 +108,8 @@ class ExtensionExecutor:
         module = importlib.import_module(ctx.group)
         vendor = vendor_builder(ctx.runtime_locator, ctx.group, ctx.name, ctx.low_latency)
         service = getattr(module, ctx.category)(vendor)
-        print(service)
         vendor.setup(service)
-        # vendor.run()
-        print('vendor setup')
+        vendor.run()
 
     def run_market_data(self):
         self.run_broker_vendor(wc.MarketDataVendor)
