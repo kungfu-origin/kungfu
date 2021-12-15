@@ -7,8 +7,9 @@ const os = require('os');
 const { spawnSync } = require('child_process');
 const { glob } = require('glob');
 
-const sdkSrcDir = path.dirname(require.resolve("@kungfu-trader/kungfu-sdk"));
-const LibPathPattern = path.join(path.dirname(sdkSrcDir), 'build', 'libs', '*', '*');
+const pypackages = '__pypackages__';
+const kungfulibs = '__kungfulibs__'
+const kungfuLibDirPattern = path.join(kungfulibs, '*', '*');
 
 const spawnOptsShell = {
   shell: true,
@@ -84,8 +85,8 @@ function generateCMakeFiles(projectName, kungfuBuild) {
     require.resolve('@kungfu-trader/kungfu-sdk/templates/kungfu.cmake'),
     {
       kfcDir: path.dirname(require.resolve("@kungfu-trader/kungfu-core/dist/kfc/kungfubuildinfo.json")),
-      includes: glob.sync(path.join(LibPathPattern, 'include')),
-      links: glob.sync(path.join(LibPathPattern, 'lib')),
+      includes: glob.sync(path.join(kungfuLibDirPattern, 'include')),
+      links: glob.sync(path.join(kungfuLibDirPattern, 'lib')),
       sources: cppSources,
       extraSource: extraSources[kungfuBuild.cpp.target],
       makeTarget: targetMakers[kungfuBuild.cpp.target],
@@ -118,15 +119,15 @@ exports.DefaultLibSiteURL = process.env.GITHUB_ACTIONS ? DefaultLibSiteURL_US : 
 
 exports.detectPlatform = detectPlatform;
 
-exports.list = async function (libSiteURL, matchName, matchVersion, listVersion = true, listPlatform = false) {
-  const getPlatformImplementations = function (targetLibVersion, sourceLibVersion) {
+exports.list = async (libSiteURL, matchName, matchVersion, listVersion = true, listPlatform = false) => {
+  const getPlatformImplementations = (targetLibVersion, sourceLibVersion) => {
     if ('lib' in sourceLibVersion) {
       for (const osName in sourceLibVersion['lib']) {
         targetLibVersion[osName] = {};
       }
     }
   };
-  const getLibVersions = function (targetLib, sourceLib) {
+  const getLibVersions = (targetLib, sourceLib) => {
     for (const libVersion in sourceLib) {
       if (!libVersion.match(matchVersion)) continue;
       targetLib[libVersion] = {};
@@ -148,7 +149,7 @@ exports.list = async function (libSiteURL, matchName, matchVersion, listVersion 
   return targetLibs;
 };
 
-exports.install = async function (libSiteURL, libName, libVersion, platform = detectPlatform(), arch = os.arch()) {
+exports.install = async (libSiteURL, libName, libVersion, platform = detectPlatform(), arch = os.arch()) => {
   const index = await axios.get(`${libSiteURL}/index.json`);
   const sourceLibs = index.data;
 
@@ -165,7 +166,7 @@ exports.install = async function (libSiteURL, libName, libVersion, platform = de
 
   const libInfo = sourceLibs[libName][libVersion];
 
-  const downloadFiles = async function (localDir, files, buildRemoteURL, onFinish) {
+  const downloadFiles = async (localDir, files, buildRemoteURL, onFinish) => {
     for (const file of files) {
       const remoteFileURL = buildRemoteURL(file);
       const localFilePath = path.join(localDir, file);
@@ -187,8 +188,8 @@ exports.install = async function (libSiteURL, libName, libVersion, platform = de
     }
   };
 
-  const buildDirPath = function (dir) {
-    const dirPath = path.join(__dirname, 'build', 'libs', libName, libVersion, dir);
+  const buildDirPath = (dir) => {
+    const dirPath = path.join(kungfulibs, libName, libVersion, dir);
     fse.ensureDirSync(dirPath);
     return dirPath;
   };
@@ -216,22 +217,23 @@ exports.install = async function (libSiteURL, libName, libVersion, platform = de
   );
 };
 
-exports.installBatch = async function (libSiteURL, platform = detectPlatform(), arch = os.arch()) {
+exports.installBatch = async (libSiteURL, platform = detectPlatform(), arch = os.arch()) => {
   const libs = getPackageJson().kungfuDependencies;
   for (const libName in libs) {
     await exports.install(libSiteURL, libName, libs[libName], platform, arch);
   }
 };
 
-exports.clean = function (keepLibs = true) {
+exports.clean = (keepLibs = true) => {
   fse.removeSync(path.join(process.cwd(), 'build'));
   if (!keepLibs) {
-    console.log(`Clean downloaded libs from ${path.join(__dirname, 'build', 'libs')}`);
-    fse.removeSync(path.join(__dirname, 'build', 'libs'));
+    const rm = (p) => fse.existsSync(p) && fse.removeSync(p);
+    rm(pypackages);
+    rm(kungfulibs);
   }
 };
 
-exports.configure = function () {
+exports.configure = () => {
   const packageJson = getPackageJson();
   if (hasSourceFor(packageJson, 'python')) {
     spawnExec('yarn', ['kfc', 'engage', 'pdm', 'makeup']);
@@ -242,10 +244,11 @@ exports.configure = function () {
   }
 };
 
-exports.build = function () {
+exports.build = () => {
   const packageJson = getPackageJson();
   const extensionName = packageJson.kungfuConfig.key;
-  const extDistDir = path.join('dist', extensionName);
+  const buildTargetDir = path.join('build', 'target');
+  const outputDir = path.join('dist', extensionName);
 
   if (hasSourceFor(packageJson, 'python')) {
     const srcDir = path.join('src', 'python', extensionName);
@@ -258,7 +261,7 @@ exports.build = function () {
       '--remove-output',
       '--no-pyi-file',
       `--include-package=${extensionName}`,
-      `--output-dir=${extDistDir}`,
+      `--output-dir=${outputDir}`,
       srcDir,
     ]);
   }
@@ -267,15 +270,28 @@ exports.build = function () {
   }
 
   const packageJsonPath = path.join(process.cwd(), 'package.json');
-  fse.copyFile(packageJsonPath, path.join(extDistDir, 'package.json'));
+  fse.copyFile(packageJsonPath, path.join(outputDir, 'package.json'));
 
-  const pypackages = path.join('__pypackages__');
+  const copyOutput = (pattern) => {
+    glob.sync(pattern).forEach(p => {
+      fse.copyFile(p, path.join(outputDir, path.basename(p)));
+    });
+  }
+
+  if (fse.existsSync(buildTargetDir)) {
+    copyOutput(path.join(buildTargetDir, '*'));
+  }
+
+  if (fse.existsSync(kungfulibs)) {
+    copyOutput(path.join(kungfuLibDirPattern, 'lib', '*'));
+  }
+
   if (fse.existsSync(pypackages)) {
-    fse.copySync(pypackages, path.join(extDistDir, pypackages));
+    fse.copySync(pypackages, path.join(outputDir, pypackages));
   }
 };
 
-exports.dist = function () {
+exports.dist = () => {
   const packageJson = getPackageJson();
   const projectName = getProjectName(packageJson);
   const archive = archiver('tar', { gzip: true });
@@ -292,7 +308,7 @@ exports.dist = function () {
 
   [
     ...findFiles(path.join(targetDir, '*')),
-    ...findFiles(path.join(LibPathPattern, 'lib', '**')),
+    ...findFiles(path.join(kungfuLibDirPattern, 'lib', '**')),
     path.join(process.cwd(), 'package.json'),
   ].forEach((f) => {
     archive.file(f, { name: path.basename(f) });

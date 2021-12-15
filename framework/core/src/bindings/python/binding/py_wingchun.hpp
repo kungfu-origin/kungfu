@@ -255,15 +255,23 @@ void bind(pybind11::module &&m) {
   py::class_<MarketData, PyMarketData, std::shared_ptr<MarketData>>(
       m, "MarketData")
       .def(py::init<BrokerVendor &>())
+      .def_property_readonly("state", &MarketData::get_state)
+      .def_property_readonly("runtime_folder", &MarketData::get_runtime_folder)
+      .def_property_readonly("config", &MarketData::get_config)
+      .def_property_readonly("home", &MarketData::get_home)
       .def("on_start", &MarketData::on_start)
+      .def("now", &MarketData::now)
       .def("get_writer", &MarketData::get_writer)
       .def("subscribe", &MarketData::subscribe)
       .def("subscribe_all", &MarketData::subscribe_all)
-      .def("unsubscribe", &MarketData::unsubscribe)
-      .def("on_start", &MarketData::on_start);
+      .def("unsubscribe", &MarketData::unsubscribe);
 
   py::class_<Trader, PyTrader, std::shared_ptr<Trader>>(m, "Trader")
       .def(py::init<BrokerVendor &>())
+      .def_property_readonly("state", &Trader::get_state)
+      .def_property_readonly("runtime_folder", &Trader::get_runtime_folder)
+      .def_property_readonly("config", &Trader::get_config)
+      .def_property_readonly("home", &Trader::get_home)
       .def("on_start", &Trader::on_start)
       .def("get_writer", &Trader::get_writer)
       .def("get_account_type", &Trader::get_account_type)

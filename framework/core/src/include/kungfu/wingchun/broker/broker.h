@@ -25,9 +25,9 @@ public:
   BrokerVendor(location_ptr location, bool low_latency);
 
 protected:
-  void on_start() override;
-
   virtual BrokerService_ptr get_service() = 0;
+
+  void on_start() override;
 
 private:
   void notify_broker_state();
@@ -43,13 +43,21 @@ public:
 
   virtual void on_start();
 
-  std::string get_runtime_folder();
+  virtual void on_trading_day(const event_ptr &event, int64_t daytime);
 
-  BrokerState get_state();
+  [[nodiscard]] int64_t now() const;
 
-  void update_broker_state(BrokerState state);
+  [[nodiscard]] BrokerState get_state();
+
+  [[nodiscard]] std::string get_runtime_folder();
+
+  [[nodiscard]] const std::string &get_config();
+
+  [[nodiscard]] const yijinjing::data::location_ptr &get_home() const;
 
   [[nodiscard]] yijinjing::journal::writer_ptr get_writer(uint32_t dest_id) const;
+
+  void update_broker_state(BrokerState state);
 
 protected:
   BrokerVendor &vendor_;

@@ -198,7 +198,6 @@ protected:
   void on_start() override;
 
 private:
-  TDConfiguration config_;
   XTP::API::TraderApi *api_ {};
   uint64_t session_id_;
   int request_id_;

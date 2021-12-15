@@ -17,6 +17,7 @@
     "install": "kfs extension install",
     "configure": "kfs extension configure",
     "build": "kfs extension build",
+    "clean": "kfs extension clean",
     "dev": "kfs craft dev",
     "format": "clang-format --verbose -style=file -i src/cpp/*"
   },

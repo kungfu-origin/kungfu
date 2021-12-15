@@ -34,7 +34,7 @@ class TraderSim(wc.Trader):
     def on_start(self):
         wc.Trader.on_start(self)
 
-        config = json.loads(json_config)
+        config = json.loads(self.config)
         self.match_mode = config.get("match_mode", MatchMode.Custom)
         self.logger = create_logger(
             "sim_td",

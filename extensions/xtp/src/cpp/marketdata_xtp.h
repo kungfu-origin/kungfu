@@ -219,7 +219,6 @@ protected:
   void on_start() override;
 
 private:
-  MDConfiguration config_;
   XTP::API::QuoteApi *api_ {};
 
   bool subscribe(const std::vector<std::string> &instruments, const std::string &exchange_id);

@@ -35,11 +35,25 @@ BrokerService::BrokerService(BrokerVendor &vendor) : vendor_(vendor), state_(Bro
 
 void BrokerService::on_start() {}
 
+void BrokerService::on_trading_day(const event_ptr &event, int64_t daytime) {}
+
+int64_t BrokerService::now() const { return vendor_.now(); }
+
+BrokerState BrokerService::get_state() { return state_; }
+
+const std::string &BrokerService::get_config() {
+  auto &config_map = vendor_.get_state_bank()[boost::hana::type_c<Config>];
+  auto &config_obj = config_map.at(vendor_.get_home_uid());
+  return config_obj.data.value;
+}
+
 std::string BrokerService::get_runtime_folder() {
   return vendor_.get_locator()->layout_dir(vendor_.get_home(), layout::LOG);
 }
 
-BrokerState BrokerService::get_state() { return state_; }
+const location_ptr &BrokerService::get_home() const { return vendor_.get_home(); }
+
+writer_ptr BrokerService::get_writer(uint32_t dest_id) const { return vendor_.get_writer(dest_id); }
 
 void BrokerService::update_broker_state(BrokerState state) {
   state_ = state;
@@ -48,6 +62,4 @@ void BrokerService::update_broker_state(BrokerState state) {
   update.state = state_;
   writer->close_data();
 }
-
-writer_ptr BrokerService::get_writer(uint32_t dest_id) const { return vendor_.get_writer(dest_id); }
 } // namespace kungfu::wingchun::broker

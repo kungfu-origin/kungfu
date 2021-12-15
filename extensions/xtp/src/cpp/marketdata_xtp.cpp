@@ -8,12 +8,7 @@
 
 namespace kungfu::wingchun::xtp {
 MarketDataXTP::MarketDataXTP(broker::BrokerVendor &vendor)
-    : MarketData(vendor), api_(nullptr) {
-  config_ = nlohmann::json::parse(json_config);
-  if (config_.client_id < 1 or config_.client_id > 99) {
-    throw wingchun_error("client_id must between 1 and 99");
-  }
-}
+    : MarketData(vendor), api_(nullptr) {}
 
 MarketDataXTP::~MarketDataXTP() {
   if (api_ != nullptr) {
@@ -22,21 +17,25 @@ MarketDataXTP::~MarketDataXTP() {
 }
 
 void MarketDataXTP::on_start() {
-  auto md_ip = config_.md_ip.c_str();
-  auto account_id = config_.account_id.c_str();
-  auto password = config_.password.c_str();
-  auto protocol_type = get_xtp_protocol_type(config_.protocol);
+  MDConfiguration config = nlohmann::json::parse(get_config());
+  if (config.client_id < 1 or config.client_id > 99) {
+    throw wingchun_error("client_id must between 1 and 99");
+  }
+  auto md_ip = config.md_ip.c_str();
+  auto account_id = config.account_id.c_str();
+  auto password = config.password.c_str();
+  auto protocol_type = get_xtp_protocol_type(config.protocol);
   std::string runtime_folder = get_runtime_folder();
-  SPDLOG_INFO("Connecting XTP MD for {} at {}://{}:{}", account_id, config_.protocol, md_ip, config_.md_port);
-  api_ = XTP::API::QuoteApi::CreateQuoteApi(config_.client_id, runtime_folder.c_str());
-  if (config_.protocol == "udp") {
-    api_->SetUDPBufferSize(config_.buffer_size);
+  SPDLOG_INFO("Connecting XTP MD for {} at {}://{}:{}", account_id, config.protocol, md_ip, config.md_port);
+  api_ = XTP::API::QuoteApi::CreateQuoteApi(config.client_id, runtime_folder.c_str());
+  if (config.protocol == "udp") {
+    api_->SetUDPBufferSize(config.buffer_size);
   }
   api_->RegisterSpi(this);
-  if (api_->Login(md_ip, config_.md_port, account_id, password, protocol_type) == 0) {
+  if (api_->Login(md_ip, config.md_port, account_id, password, protocol_type) == 0) {
     update_broker_state(BrokerState::LoggedIn);
     update_broker_state(BrokerState::Ready);
-    SPDLOG_INFO("login success! (account_id) {}", config_.account_id);
+    SPDLOG_INFO("login success! (account_id) {}", config.account_id);
     api_->QueryAllTickers(XTP_EXCHANGE_SH);
     api_->QueryAllTickers(XTP_EXCHANGE_SZ);
   } else {
