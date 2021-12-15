@@ -17,12 +17,15 @@
 node_modules/
 
 # Python related
-.pdm.toml
 __pycache__/
 __pypackages__/
+.pdm.toml
 *.pyc
 *.egg-info/
 *.egg
+
+# Kungfu related
+__kungfulibs__/
 
 # Build related
 build/

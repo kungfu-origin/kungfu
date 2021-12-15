@@ -34,7 +34,7 @@ static int64_t parse_time_interval(const std::string &s) {
 }
 
 BarGenerator::BarGenerator(const locator_ptr &locator, mode m, bool low_latency, const std::string &json_config)
-    : MarketData(low_latency, locator, "bar"), time_interval_(kungfu::yijinjing::time_unit::NANOSECONDS_PER_MINUTE) {
+    : MarketDataVendor(locator, "bar", "bar", low_latency), time_interval_(kungfu::yijinjing::time_unit::NANOSECONDS_PER_MINUTE) {
   log::copy_log_settings(get_home(), "bar");
   auto config = nlohmann::json::parse(json_config);
   auto source = config["source"];
@@ -45,8 +45,8 @@ BarGenerator::BarGenerator(const locator_ptr &locator, mode m, bool low_latency,
 }
 
 void BarGenerator::on_start() {
-  MarketData::on_start();
-  update_broker_state(BrokerState::Ready);
+  MarketDataVendor::on_start();
+  get_service()->update_broker_state(BrokerState::Ready);
 
   events_ | is(Register::tag) | $([&](const event_ptr &event) {
     auto register_data = event->data<Register>();
@@ -107,11 +107,4 @@ void BarGenerator::on_start() {
     }
   });
 }
-
-bool BarGenerator::subscribe(const std::vector<InstrumentKey> &instrument_keys) { return false; }
-
-bool BarGenerator::unsubscribe(const std::vector<InstrumentKey> &instrument_keys) { return false; }
-
-bool BarGenerator::subscribe_all() { return false; }
-
 } // namespace kungfu::wingchun::service

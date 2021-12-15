@@ -7,18 +7,12 @@
 #include <kungfu/wingchun/broker/marketdata.h>
 
 namespace kungfu::wingchun::service {
-class BarGenerator : public broker::MarketData {
+class BarGenerator : public broker::MarketDataVendor {
 public:
   BarGenerator(const yijinjing::data::locator_ptr &locator, longfist::enums::mode m, bool low_latency,
                const std::string &json_config);
 
   void on_start() override;
-
-  bool subscribe(const std::vector<longfist::types::InstrumentKey> &instrument_keys) override;
-
-  bool unsubscribe(const std::vector<longfist::types::InstrumentKey> &instrument_keys) override;
-
-  bool subscribe_all() override;
 
 private:
   int64_t time_interval_;

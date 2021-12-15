@@ -11,19 +11,25 @@ using namespace kungfu::yijinjing;
 using namespace kungfu::yijinjing::data;
 
 namespace kungfu::wingchun::broker {
-MarketData::MarketData(bool low_latency, locator_ptr locator, const std::string &source)
-    : Broker(location::make_shared(mode::LIVE, category::MD, source, source, std::move(locator)), low_latency) {}
+MarketDataVendor::MarketDataVendor(locator_ptr locator, const std::string &group, const std::string &name,
+                                 bool low_latency)
+    : BrokerVendor(location::make_shared(mode::LIVE, category::MD, group, name, std::move(locator)), low_latency) {}
 
-void MarketData::on_react() {
-  Broker::on_react();
-  events_ | is(Instrument::tag) | $$(update_instrument(event->data<Instrument>()));
+void MarketDataVendor::setup(MarketData_ptr service) { service_ = std::move(service); }
+
+void MarketDataVendor::on_react() {
+  BrokerVendor::on_react();
+  events_ | is(Instrument::tag) | $$(service_->update_instrument(event->data<Instrument>()));
 }
 
-void MarketData::on_start() {
-  Broker::on_start();
-  events_ | is(SubscribeAll::tag) | $$(subscribe_all());
-  events_ | is(InstrumentKey::tag) | $$(subscribe({event->data<InstrumentKey>()}));
+void MarketDataVendor::on_start() {
+  BrokerVendor::on_start();
+  events_ | is(SubscribeAll::tag) | $$(service_->subscribe_all());
+  events_ | is(InstrumentKey::tag) | $$(service_->subscribe({event->data<InstrumentKey>()}));
+  service_->on_start();
 }
+
+BrokerService_ptr MarketDataVendor::get_service() { return service_; }
 
 bool MarketData::has_instrument(const std::string &instrument_id) const {
   return instruments_.find(instrument_id) != instruments_.end();

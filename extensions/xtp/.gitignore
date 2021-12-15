@@ -2,10 +2,12 @@ cmake-build-debug/
 build/
 node_modules/
 
-pyproject.toml
-.pdm.toml
 __pycache__/
 __pypackages__/
+pyproject.toml
+.pdm.toml
 *.pyc
 *.egg-info/
 *.egg
+
+__kungfulibs__/

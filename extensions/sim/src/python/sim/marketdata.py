@@ -15,9 +15,9 @@ MakerConfig = namedtuple(
 
 
 class MarketDataSim(wc.MarketData):
-    def __init__(self, low_latency, locator, config_json):
-        wc.MarketData.__init__(self, low_latency, locator, "sim")
-        self.config = MakerConfig(
+    def __init__(self, vendor):
+        wc.MarketData.__init__(self, vendor)
+        self.config_obj = MakerConfig(
             base=200.0, bound=1000, samples=1000, variation=4, randseed=6
         )
         self.orderbooks = {}
@@ -25,7 +25,7 @@ class MarketDataSim(wc.MarketData):
             "sim_md",
             "info",
             yjj.location(
-                lf.enums.mode.LIVE, lf.enums.category.MD, "sim", "sim", locator
+                lf.enums.mode.LIVE, lf.enums.category.MD, "sim", "sim", vendor.home.locator
             ),
         )
 
@@ -61,7 +61,7 @@ class MarketDataSim(wc.MarketData):
                 mdmaker.Order(
                     secid=book.security,
                     side=mdmaker.Side.BUY,
-                    price=(self.config.base - delta),
+                    price=(self.config_obj.base - delta),
                     qty=1,
                 )
             )
@@ -69,7 +69,7 @@ class MarketDataSim(wc.MarketData):
                 mdmaker.Order(
                     secid=book.security,
                     side=mdmaker.Side.SELL,
-                    price=(self.config.base + delta),
+                    price=(self.config_obj.base + delta),
                     qty=1,
                 )
             )
@@ -78,7 +78,7 @@ class MarketDataSim(wc.MarketData):
 
     def update_orderbooks(self):
         for book in self.orderbooks.values():
-            order_generator = book.gen_orders(self.config)
+            order_generator = book.gen_orders(self.config_obj)
             for orders, mid in order_generator:
                 for order in orders:
                     instrument_id, exchange_id = order.secid.split(".")

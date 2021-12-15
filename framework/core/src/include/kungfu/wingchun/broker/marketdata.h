@@ -12,13 +12,31 @@
 #include <kungfu/yijinjing/practice/apprentice.h>
 
 namespace kungfu::wingchun::broker {
-class MarketData : public Broker {
-public:
-  explicit MarketData(bool low_latency, yijinjing::data::locator_ptr locator, const std::string &source);
 
-  ~MarketData() override = default;
+FORWARD_DECLARE_PTR(MarketData)
+
+class MarketDataVendor : public BrokerVendor {
+public:
+  MarketDataVendor(locator_ptr locator, const std::string &group, const std::string &name, bool low_latency);
+
+  void setup(MarketData_ptr service);
+
+protected:
+  void on_react() override;
 
   void on_start() override;
+
+  BrokerService_ptr get_service() override;
+
+private:
+  MarketData_ptr service_ = {};
+};
+
+class MarketData : public BrokerService {
+  friend class MarketDataVendor;
+
+public:
+  explicit MarketData(BrokerVendor &vendor) : BrokerService(vendor){};
 
   virtual bool subscribe(const std::vector<longfist::types::InstrumentKey> &instrument_keys) = 0;
 
@@ -27,16 +45,13 @@ public:
   virtual bool unsubscribe(const std::vector<longfist::types::InstrumentKey> &instrument_keys) = 0;
 
 protected:
-  void on_react() override;
+  [[nodiscard]] bool has_instrument(const std::string &instrument_id) const;
 
-  bool has_instrument(const std::string &instrument_id) const;
+  [[nodiscard]] const longfist::types::Instrument &get_instrument(const std::string &instrument_id) const;
 
-  const longfist::types::Instrument &get_instrument(const std::string &instrument_id) const;
+  void update_instrument(longfist::types::Instrument instrument);
 
   std::unordered_map<std::string, longfist::types::Instrument> instruments_ = {};
-
-private:
-  void update_instrument(longfist::types::Instrument instrument);
 };
 } // namespace kungfu::wingchun::broker
 

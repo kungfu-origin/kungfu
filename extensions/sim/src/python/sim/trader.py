@@ -28,9 +28,13 @@ OrderRecord = namedtuple("OrderRecord", ["source", "dest", "order"])
 
 
 class TraderSim(wc.Trader):
-    def __init__(self, low_latency, locator, account_id, json_config):
-        wc.Trader.__init__(self, low_latency, locator, "sim", account_id)
-        config = json.loads(json_config)
+    def __init__(self, vendor):
+        wc.Trader.__init__(self, vendor)
+
+    def on_start(self):
+        wc.Trader.on_start(self)
+
+        config = json.loads(self.config)
         self.match_mode = config.get("match_mode", MatchMode.Custom)
         self.logger = create_logger(
             "sim_td",
@@ -58,8 +62,6 @@ class TraderSim(wc.Trader):
             self.ctx.req_account = getattr(impl, "req_account", lambda ctx: False)
             self.ctx.req_position = getattr(impl, "req_position", lambda ctx: False)
 
-    def on_start(self):
-        wc.Trader.on_start(self)
         self.update_broker_state(lf.enums.BrokerState.Ready)
 
     def insert_order(self, event):

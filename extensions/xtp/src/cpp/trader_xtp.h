@@ -19,12 +19,11 @@ using namespace kungfu::longfist::types;
 
 class TraderXTP : public XTP::API::TraderSpi, public broker::Trader {
 public:
-  TraderXTP(bool low_latency, yijinjing::data::locator_ptr locator, const std::string &account_id,
-            const std::string &json_config);
+  explicit TraderXTP(broker::BrokerVendor &vendor);
 
   ~TraderXTP() override;
 
-  AccountType get_account_type() const override { return AccountType::Stock; }
+  [[nodiscard]] AccountType get_account_type() const override { return AccountType::Stock; }
 
   void on_trading_day(const event_ptr &event, int64_t daytime) override;
 
@@ -199,8 +198,7 @@ protected:
   void on_start() override;
 
 private:
-  TDConfiguration config_;
-  XTP::API::TraderApi *api_;
+  XTP::API::TraderApi *api_ {};
   uint64_t session_id_;
   int request_id_;
   std::string trading_day_;

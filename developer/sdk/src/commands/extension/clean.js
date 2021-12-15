@@ -4,7 +4,7 @@ module.exports = {
   flags: 'clean',
   desc: 'Clean kungfu extensions',
   setup: (cli) => {
-    yargs.option('keep-libs', {
+    cli.option('keep-libs', {
       type: 'boolean',
       desc: 'Keep downloaded lib files',
       defaultValue: true,

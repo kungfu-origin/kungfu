@@ -33,10 +33,22 @@ using namespace kungfu;
 using namespace kungfu::longfist;
 using namespace kungfu::longfist::types;
 using namespace kungfu::yijinjing;
+using namespace kungfu::yijinjing::data;
+using namespace kungfu::yijinjing::journal;
 using namespace kungfu::wingchun;
 using namespace kungfu::wingchun::book;
 using namespace kungfu::wingchun::broker;
 using namespace kungfu::wingchun::service;
+
+class PyBrokerVendor : public BrokerVendor {
+public:
+  using BrokerVendor::BrokerVendor;
+
+protected:
+  BrokerService_ptr get_service() override {
+    PYBIND11_OVERLOAD_PURE(BrokerService_ptr, BrokerVendor, get_service);
+  }
+};
 
 class PyMarketData : public MarketData {
 public:
@@ -59,7 +71,7 @@ class PyTrader : public Trader {
 public:
   using Trader::Trader;
 
-  AccountType get_account_type() const override {
+  [[nodiscard]] AccountType get_account_type() const override {
     PYBIND11_OVERLOAD_PURE(const AccountType, Trader, get_account_type, );
   }
 
@@ -235,37 +247,45 @@ void bind(pybind11::module &&m) {
       .def("set_accounting_method", &Bookkeeper::set_accounting_method)
       .def("on_trading_day", &Bookkeeper::on_trading_day);
 
-  py::class_<MarketData, PyMarketData, kungfu::yijinjing::practice::apprentice, std::shared_ptr<MarketData>>(
+  py::class_<BrokerVendor, PyBrokerVendor, std::shared_ptr<BrokerVendor>>(m, "BrokerVendor")
+      .def(py::init<location_ptr, bool>())
+      .def_property_readonly("home", &BrokerVendor::get_home)
+      .def("run", &BrokerVendor::run);
+
+  py::class_<MarketData, PyMarketData, std::shared_ptr<MarketData>>(
       m, "MarketData")
-      .def(py::init<bool, yijinjing::data::locator_ptr, const std::string &>())
-      .def_property_readonly("io_device", &MarketData::get_io_device)
+      .def(py::init<BrokerVendor &>())
+      .def_property_readonly("state", &MarketData::get_state)
+      .def_property_readonly("runtime_folder", &MarketData::get_runtime_folder)
+      .def_property_readonly("config", &MarketData::get_config)
+      .def_property_readonly("home", &MarketData::get_home)
+      .def("on_start", &MarketData::on_start)
+      .def("now", &MarketData::now)
+      .def("get_writer", &MarketData::get_writer)
       .def("subscribe", &MarketData::subscribe)
       .def("subscribe_all", &MarketData::subscribe_all)
-      .def("unsubscribe", &MarketData::unsubscribe)
-      .def("on_start", &MarketData::on_start)
-      .def("add_time_interval", &MarketData::add_time_interval)
-      .def("get_writer", &MarketData::get_writer)
-      .def("update_broker_state", &MarketData::update_broker_state)
-      .def("now", &MarketData::now)
-      .def("run", &MarketData::run)
-      .def("setup", &MarketData::setup)
-      .def("step", &MarketData::step);
+      .def("unsubscribe", &MarketData::unsubscribe);
 
-  py::class_<Trader, PyTrader, kungfu::yijinjing::practice::apprentice, std::shared_ptr<Trader>>(m, "Trader")
-      .def(py::init<bool, yijinjing::data::locator_ptr, const std::string &, const std::string &>())
-      .def_property_readonly("io_device", &Trader::get_io_device)
-      .def_property_readonly("trading_day", &Trader::get_trading_day)
-      .def("now", &Trader::now)
-      .def("get_location", &Trader::get_location)
-      .def("run", &Trader::run)
-      .def("setup", &Trader::setup)
-      .def("step", &Trader::step)
+  py::class_<Trader, PyTrader, std::shared_ptr<Trader>>(m, "Trader")
+      .def(py::init<BrokerVendor &>())
+      .def_property_readonly("state", &Trader::get_state)
+      .def_property_readonly("runtime_folder", &Trader::get_runtime_folder)
+      .def_property_readonly("config", &Trader::get_config)
+      .def_property_readonly("home", &Trader::get_home)
       .def("on_start", &Trader::on_start)
       .def("get_writer", &Trader::get_writer)
       .def("get_account_type", &Trader::get_account_type)
       .def("insert_order", &Trader::insert_order)
       .def("cancel_order", &Trader::cancel_order)
       .def("update_broker_state", &Trader::update_broker_state);
+
+  py::class_<MarketDataVendor, BrokerVendor, std::shared_ptr<MarketDataVendor>>(m, "MarketDataVendor")
+      .def(py::init<locator_ptr, const std::string &, const std::string &, bool>())
+      .def("setup", &MarketDataVendor::setup);
+
+  py::class_<TraderVendor, BrokerVendor, std::shared_ptr<TraderVendor>>(m, "TraderVendor")
+      .def(py::init<locator_ptr, const std::string &, const std::string &, bool>())
+      .def("setup", &TraderVendor::setup);
 
   py::class_<Ledger, kungfu::yijinjing::practice::apprentice, std::shared_ptr<Ledger>>(m, "Ledger")
       .def(py::init<yijinjing::data::locator_ptr, longfist::enums::mode, bool>())

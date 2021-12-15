@@ -15,20 +15,36 @@ using namespace kungfu::yijinjing;
 using namespace kungfu::yijinjing::data;
 
 namespace kungfu::wingchun::xtp {
-TraderXTP::TraderXTP(bool low_latency, locator_ptr locator, const std::string &account_id,
-                     const std::string &json_config)
-    : Trader(low_latency, std::move(locator), SOURCE_XTP, account_id), api_(nullptr), session_id_(0), request_id_(0),
-      trading_day_("") {
-  yijinjing::log::copy_log_settings(get_io_device()->get_home(), SOURCE_XTP);
-  config_ = nlohmann::json::parse(json_config);
-  if (config_.client_id < 1 or config_.client_id > 99) {
-    throw wingchun_error("client_id must between 1 and 99");
-  }
-}
+TraderXTP::TraderXTP(broker::BrokerVendor &vendor)
+    : Trader(vendor), session_id_(0), request_id_(0),
+      trading_day_("") {}
 
 TraderXTP::~TraderXTP() {
   if (api_ != nullptr) {
     api_->Release();
+  }
+}
+
+void TraderXTP::on_start() {
+  TDConfiguration config = nlohmann::json::parse(get_config());
+  if (config.client_id < 1 or config.client_id > 99) {
+    throw wingchun_error("client_id must between 1 and 99");
+  }
+  std::string runtime_folder = get_runtime_folder();
+  SPDLOG_INFO("Connecting XTP account {} with tcp://{}:{}", config.account_id, config.td_ip, config.td_port);
+  api_ = XTP::API::TraderApi::CreateTraderApi(config.client_id, runtime_folder.c_str());
+  api_->RegisterSpi(this);
+  api_->SubscribePublicTopic(XTP_TERT_QUICK);
+  api_->SetSoftwareVersion("1.1.0");
+  api_->SetSoftwareKey(config.software_key.c_str());
+  session_id_ = api_->Login(config.td_ip.c_str(), config.td_port, config.account_id.c_str(),
+                            config.password.c_str(), XTP_PROTOCOL_TCP);
+  if (session_id_ > 0) {
+    update_broker_state(BrokerState::Ready);
+    SPDLOG_INFO("Login successfully");
+  } else {
+    update_broker_state(BrokerState::LoginFailed);
+    SPDLOG_ERROR("Login failed [{}]: {}", api_->GetApiLastError()->error_id, api_->GetApiLastError()->error_msg);
   }
 }
 
@@ -164,7 +180,7 @@ void TraderXTP::OnQueryPosition(XTPQueryStkPositionRsp *position, XTPRI *error_i
   }
   strncpy(stock_pos.account_id, get_account_id().c_str(), ACCOUNT_ID_LEN);
   strncpy(stock_pos.source_id, SOURCE_XTP, SOURCE_ID_LEN);
-  stock_pos.holder_uid = get_io_device()->get_home()->uid;
+  stock_pos.holder_uid = get_home()->uid;
   stock_pos.instrument_type = get_instrument_type(stock_pos.exchange_id, stock_pos.instrument_id);
   stock_pos.direction = Direction::Long;
   strncpy(stock_pos.trading_day, this->trading_day_.c_str(), DATE_LEN);
@@ -172,7 +188,7 @@ void TraderXTP::OnQueryPosition(XTPQueryStkPositionRsp *position, XTPRI *error_i
   writer->close_data();
   if (is_last) {
     PositionEnd &end = writer->open_data<PositionEnd>(0);
-    end.holder_uid = get_io_device()->get_home()->uid;
+    end.holder_uid = get_home()->uid;
     writer->close_data();
   }
 }
@@ -192,29 +208,9 @@ void TraderXTP::OnQueryAsset(XTPQueryAssetRsp *asset, XTPRI *error_info, int req
     strncpy(account.account_id, get_account_id().c_str(), ACCOUNT_ID_LEN);
     strncpy(account.source_id, SOURCE_XTP, SOURCE_ID_LEN);
     strncpy(account.trading_day, this->trading_day_.c_str(), DATE_LEN);
-    account.holder_uid = get_io_device()->get_home()->uid;
+    account.holder_uid = get_home()->uid;
     account.update_time = time::now_in_nano();
     writer->close_data();
-  }
-}
-
-void TraderXTP::on_start() {
-  Trader::on_start();
-  std::string runtime_folder = get_runtime_folder();
-  SPDLOG_INFO("Connecting XTP account {} with tcp://{}:{}", config_.account_id, config_.td_ip, config_.td_port);
-  api_ = XTP::API::TraderApi::CreateTraderApi(config_.client_id, runtime_folder.c_str());
-  api_->RegisterSpi(this);
-  api_->SubscribePublicTopic(XTP_TERT_QUICK);
-  api_->SetSoftwareVersion("1.1.0");
-  api_->SetSoftwareKey(config_.software_key.c_str());
-  session_id_ = api_->Login(config_.td_ip.c_str(), config_.td_port, config_.account_id.c_str(),
-                            config_.password.c_str(), XTP_PROTOCOL_TCP);
-  if (session_id_ > 0) {
-    update_broker_state(BrokerState::Ready);
-    SPDLOG_INFO("Login successfully");
-  } else {
-    update_broker_state(BrokerState::LoginFailed);
-    SPDLOG_ERROR("Login failed [{}]: {}", api_->GetApiLastError()->error_id, api_->GetApiLastError()->error_msg);
   }
 }
 } // namespace kungfu::wingchun::xtp
