@@ -55,6 +55,14 @@ const location_ptr &BrokerService::get_home() const { return vendor_.get_home();
 
 writer_ptr BrokerService::get_writer(uint32_t dest_id) const { return vendor_.get_writer(dest_id); }
 
+void BrokerService::add_timer(int64_t nanotime, const std::function<void(const event_ptr &)> &callback) {
+  vendor_.add_timer(nanotime, callback);
+}
+
+void BrokerService::add_time_interval(int64_t nanotime, const std::function<void(const event_ptr &)> &callback) {
+  vendor_.add_time_interval(nanotime, callback);
+}
+
 void BrokerService::update_broker_state(BrokerState state) {
   state_ = state;
   auto writer = get_writer(location::PUBLIC);
