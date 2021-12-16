@@ -14,7 +14,7 @@
     "registry": "https://npm.pkg.github.com"
   },
   "scripts": {
-    "postinstall": "kfs extension configure",
+    "prebuild": "kfs extension configure",
     "build": "kfs extension build",
     "dev": "kfs craft dev",
     "format": "kfc engage black src/python *.py"
@@ -36,7 +36,7 @@
     "name": "SIM",
     "config": {
       "td": {
-        "type": ["stock", "future", "option"],
+        "type": "simu",
         "settings": [
           {
             "key": "account_id",
@@ -83,6 +83,9 @@
             "required": true
           }
         ]
+      },
+      "md": {
+        "type": "simu"
       }
     }
   }

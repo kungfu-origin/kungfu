@@ -142,7 +142,7 @@ def main(argv, **options):
 
     if options["module"]:
         module_name = options["module"]
-        matches = [i for i, arg in enumerate(sys.argv) if re.search("-.*m", arg)]
+        matches = [i for i, arg in enumerate(sys.argv) if re.search("^-.*m", arg)]
         idx = matches[0] + 2
         sys.argv = [module_name, *sys.argv[idx:]]
         bridging.run_module_main(module_name)

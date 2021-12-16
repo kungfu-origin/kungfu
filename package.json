@@ -9,10 +9,10 @@
   "private": true,
   "workspaces": [
     "framework/*",
-    "a2/*",
     "extensions/*",
     "developer/*",
-    "artifact"
+    "artifact",
+    "a2/*"
   ],
   "engines": {
     "node": ">=14 <15",

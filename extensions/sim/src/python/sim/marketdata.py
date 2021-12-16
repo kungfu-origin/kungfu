@@ -32,7 +32,6 @@ class MarketDataSim(wc.MarketData):
     def on_start(self):
         self.add_time_interval(500 * 1000 * 1000, lambda e: self.update_orderbooks())
         self.update_broker_state(lf.enums.BrokerState.Ready)
-        wc.MarketData.on_start(self)
 
     def quote_from_orderbook(self, ob):
         quote = lf.types.Quote()
