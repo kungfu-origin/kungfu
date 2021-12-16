@@ -16,8 +16,8 @@
     "format": "prettier --write --parser typescript \"**/**.js\""
   },
   "dependencies": {
-    "@kungfu-trader/kfx-vendor-sim": "^2.4.0-alpha.4",
-    "@kungfu-trader/kfx-vendor-xtp-demo": "^2.4.0-alpha.4"
+    "@kungfu-trader/kfx-sim": "^2.4.0-alpha.4",
+    "@kungfu-trader/kfx-xtp-demo": "^2.4.0-alpha.4"
   },
   "devDependencies": {
     "@kungfu-trader/kungfu-sdk": "^2.4.0-alpha.4"

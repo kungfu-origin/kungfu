@@ -9,6 +9,7 @@ import {
     FileTextOutlined,
     SettingOutlined,
     DeleteOutlined,
+    FormOutlined,
 } from '@ant-design/icons-vue';
 
 import {
@@ -40,6 +41,7 @@ import {
     getProcessIdByKfLocation,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import path from 'path';
+import { shell } from '@electron/remote';
 
 const app = getCurrentInstance();
 interface StrategyProps {}
@@ -146,6 +148,12 @@ function getStrategyPathShowName(kfConfig: KfConfig): string {
     const strategyPath = getConfigValue(kfConfig).strategy_path || '';
     return path.basename(strategyPath);
 }
+
+function handleOpenFile(kfConfig: KfConfig) {
+    const strategyPath = getConfigValue(kfConfig).strategy_path || '';
+    shell.openPath(strategyPath);
+    shell.beep();
+}
 </script>
 
 <template>
@@ -212,6 +220,10 @@ function getStrategyPathShowName(kfConfig: KfConfig): string {
                                 style="font-size: 12px"
                                 @click="handleOpenLogview(record)"
                             />
+                            <FormOutlined
+                                style="font-size: 12px"
+                                @click="handleOpenFile(record)"
+                            ></FormOutlined>
                             <SettingOutlined
                                 style="font-size: 12px"
                                 @click="
