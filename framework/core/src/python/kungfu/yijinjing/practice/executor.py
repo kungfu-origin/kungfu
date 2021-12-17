@@ -9,8 +9,10 @@ from kungfu.console import site
 from kungfu.yijinjing import journal as kfj
 from kungfu.yijinjing.practice.master import Master
 from kungfu.yijinjing.practice.coloop import KungfuEventLoop
+from kungfu.wingchun.strategy import Runner, Strategy
 
 from collections import deque
+from importlib.util import module_from_spec, spec_from_file_location
 from os import path
 
 lf = kungfu.__binding__.longfist
@@ -119,9 +121,9 @@ class ExtensionExecutor:
 
     def run_strategy(self):
         ctx = self.ctx
-        loader = self.loader
-        ctx.runner = wc.Runner(ctx, ctx.mode)
-        ctx.runner.addStrategy(strategy)
+        ctx.strategy = load_strategy(ctx, ctx.file)
+        ctx.runner = Runner(ctx, ctx.mode)
+        ctx.runner.addStrategy(ctx.strategy)
         ctx.loop = KungfuEventLoop(ctx, ctx.runner)
         ctx.loop.run_forever()
 
@@ -130,3 +132,13 @@ class RegistryJSONEncoder(json.JSONEncoder):
     def default(self, obj):
         test = isinstance(obj, ExtensionLoader) or isinstance(obj, types.FunctionType)
         return str(obj) if test else obj.__dict__
+
+
+def load_strategy(ctx, path):
+    if path.endswith(".py"):
+        return Strategy(ctx)  # keep strategy alive for pybind11
+    else:
+        spec = spec_from_file_location(os.path.basename(path).split(".")[0], path)
+        module_cpp = module_from_spec(spec)
+        spec.loader.exec_module(module_cpp)
+        return module_cpp.Strategy(ctx.location)

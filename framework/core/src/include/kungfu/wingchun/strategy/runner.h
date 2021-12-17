@@ -17,7 +17,7 @@ public:
 
   ~Runner() override = default;
 
-  RuntimeContext_ptr get_context() const;
+  [[nodiscard]] RuntimeContext_ptr get_context() const;
 
   void add_strategy(const Strategy_ptr &strategy);
 

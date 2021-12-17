@@ -37,21 +37,13 @@ def run(ctx, mode, category, group, name, low_latency, file):
     ctx.name = name
     ctx.low_latency = low_latency
     ctx.file = file
-    ctx.location = yjj.location(
-        kfj.MODES[mode], kfj.CATEGORIES[category], group, name, ctx.runtime_locator
-    )
 
-    ctx.config = ctx.location.to(lf.types.Config())
-    try:
-        ctx.config = yjj.profile(ctx.runtime_locator).get(ctx.config)
-    except:
-        pass
-
-    ctx.executors = ExecutorRegistry(ctx)
-    ctx.executors[category][group][name](mode, low_latency)
+    registry = ExecutorRegistry(ctx)
+    registry[category][group][name](mode, low_latency)
 
 
 @kfc.command(cls=PrioritizedCommandGroup, help_priority=-1)
+@kfc.pass_context()
 def service(ctx):
     pass
 

@@ -6,7 +6,6 @@ import sys
 
 from dotted_dict import DottedDict
 from collections import namedtuple
-from kungfu.yijinjing.log import create_logger
 from kungfu.yijinjing import time as kft
 
 lf = kungfu.__binding__.longfist
