@@ -35,10 +35,7 @@ import {
     startMaster,
 } from '@kungfu-trader/kungfu-js-api/utils/processUtils';
 
-import {
-    startUpdateKungfuWatcherQuotes,
-    watcher,
-} from '@kungfu-trader/kungfu-js-api/kungfu/watcher';
+import { watcher } from '@kungfu-trader/kungfu-js-api/kungfu/watcher';
 import { tradingDataSubject } from '@kungfu-trader/kungfu-js-api/kungfu/tradingData';
 import { getUIComponents } from '@renderer/assets/methods/uiUtils';
 import bus from '@kungfu-trader/kungfu-js-api/utils/globalBus';
@@ -131,5 +128,4 @@ if (process.env.RELOAD_AFTER_CRASHED === 'false') {
     );
 }
 
-startUpdateKungfuWatcherQuotes(2000);
 window.watcher = watcher;

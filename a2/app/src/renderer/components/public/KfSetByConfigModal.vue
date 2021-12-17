@@ -1,3 +1,134 @@
+<script setup lang="ts">
+import { computed, getCurrentInstance, reactive, ref } from 'vue';
+import { DashOutlined } from '@ant-design/icons-vue';
+
+import {
+    initFormDataByConfig,
+    numberEnumInputType,
+    stringEnumInputType,
+    useModalVisible,
+} from '@renderer/assets/methods/uiUtils';
+import {
+    KfConfigValue,
+    KfTradeValueCommonData,
+    SetKfConfigPayload,
+} from '@kungfu-trader/kungfu-js-api/typings';
+
+import { dialog } from '@electron/remote';
+import { buildIdByKeysFromKfConfigSettings } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
+
+const props = withDefaults(
+    defineProps<{
+        visible: boolean;
+        payload: SetKfConfigPayload;
+        width?: number;
+        primaryKeyCompareTarget: string[];
+        primaryKeyCompareExtra: string;
+    }>(),
+    {
+        visible: false,
+        payload: () => ({} as SetKfConfigPayload),
+        width: 520,
+        primaryKeyCompareTarget: () => [],
+        primaryKeyCompareExtra: '',
+    },
+);
+
+defineEmits<{
+    (
+        e: 'confirm',
+        formState: Record<string, KfConfigValue>,
+        idByPrimaryKeys: string,
+        changeType: ModalChangeType,
+    ): void;
+    (e: 'update:visible', visible: boolean): void;
+    (e: 'close'): void;
+}>();
+
+const app = getCurrentInstance();
+const { modalVisible, closeModal } = useModalVisible(props);
+const formRef = ref();
+const formState = reactive<Record<string, KfConfigValue>>(
+    initFormDataByConfig(props.payload.config, props.payload.initValue),
+);
+
+const primaryKeys: string[] = (props.payload.config?.settings || [])
+    .filter((item) => item.primary)
+    .map((item) => item.key);
+
+const titleResolved = computed(() => {
+    return `${props.payload.type === 'add' ? '添加' : '设置'} ${
+        props.payload.title
+    }`;
+});
+
+const defaultValidator = () => Promise.resolve();
+const primaryKeyValidator = (): Promise<void> => {
+    const combineValue: string = [
+        props.primaryKeyCompareExtra || '',
+        ...primaryKeys.map((key) => formState[key]),
+    ].join('_');
+    if (
+        props.primaryKeyCompareTarget
+            .map((item) => item.toLowerCase())
+            .includes(combineValue.toLowerCase())
+    ) {
+        return Promise.reject(new Error(`${combineValue} 已存在`));
+    }
+
+    return Promise.resolve();
+};
+
+function handleConfirm() {
+    formRef.value
+        .validate()
+        .then(() => {
+            const idByPrimaryKeys = buildIdByKeysFromKfConfigSettings(
+                formState,
+                primaryKeys,
+            );
+
+            app &&
+                app.emit(
+                    'confirm',
+                    formState,
+                    idByPrimaryKeys,
+                    props.payload.type,
+                );
+        })
+        .then(() => {
+            closeModal();
+        })
+        .catch((err: Error) => {
+            console.error(err);
+        });
+}
+
+function handleClose() {
+    closeModal();
+}
+
+function getKfTradeValueName(
+    data: Record<number | string | symbol, KfTradeValueCommonData>,
+    key: number | string,
+) {
+    return data[key].name;
+}
+
+function handleSelectFile(targetKey: string) {
+    dialog
+        .showOpenDialog({
+            properties: ['openFile'],
+        })
+        .then((res) => {
+            const { filePaths } = res;
+            if (filePaths.length) {
+                formState[targetKey] = filePaths[0];
+                formRef.value.validateFields([targetKey]); //手动进行再次验证，因数据放在span中，改变数据后无法触发验证
+            }
+        });
+}
+</script>
 <template>
     <a-modal
         :width="width"
@@ -17,7 +148,7 @@
             :scrollToFirstError="true"
         >
             <a-form-item
-                v-for="item in config?.settings"
+                v-for="item in payload.config?.settings"
                 :key="item.key"
                 :label="item.name"
                 :name="item.key"
@@ -155,151 +286,6 @@
         </a-form>
     </a-modal>
 </template>
-
-<script lang="ts">
-import { defineComponent, PropType, reactive, ref } from 'vue';
-import { DashOutlined } from '@ant-design/icons-vue';
-
-import {
-    initFormDataByConfig,
-    numberEnumInputType,
-    stringEnumInputType,
-    useModalVisible,
-} from '@renderer/assets/methods/uiUtils';
-import {
-    KfConfigValue,
-    KfTradeValueCommonData,
-    SetKfConfigPayload,
-    StrategyData,
-} from '@kungfu-trader/kungfu-js-api/typings';
-
-import { dialog } from '@electron/remote';
-
-export default defineComponent({
-    props: {
-        visible: {
-            type: Boolean as PropType<boolean>,
-            default: false,
-        },
-
-        payload: {
-            type: Object as PropType<SetKfConfigPayload>,
-            default: () => ({} as SetKfConfigPayload),
-        },
-
-        width: {
-            type: Number,
-            default: 520,
-        },
-
-        primaryKeyCompareTarget: {
-            type: Array as PropType<string[]>,
-            default: [],
-        },
-
-        primaryKeyCompareExtra: {
-            type: String as PropType<string>,
-            default: '',
-        },
-    },
-
-    components: {
-        DashOutlined,
-    },
-
-    setup(props, context) {
-        const { modalVisible, closeModal } = useModalVisible(props, context);
-
-        const primaryKeys: string[] = (props.payload.config?.settings || [])
-            .filter((item) => item.primary)
-            .map((item) => item.key);
-
-        const formState = reactive<Record<string, KfConfigValue>>(
-            initFormDataByConfig(props.payload.config, props.payload.initValue),
-        );
-
-        return {
-            modalVisible,
-            closeModal,
-
-            formRef: ref(),
-            formState,
-
-            ...props.payload,
-
-            defaultValidator: () => Promise.resolve(),
-            primaryKeyValidator: (): Promise<void> => {
-                const combineValue: string = [
-                    props.primaryKeyCompareExtra || '',
-                    ...primaryKeys.map((key) => formState[key]),
-                ].join('_');
-                if (
-                    props.primaryKeyCompareTarget
-                        .map((item) => item.toLowerCase())
-                        .includes(combineValue.toLowerCase())
-                ) {
-                    return Promise.reject(new Error(`${combineValue} 已存在`));
-                }
-
-                return Promise.resolve();
-            },
-
-            numberEnumInputType: numberEnumInputType,
-            stringEnumInputType: stringEnumInputType,
-        };
-    },
-
-    computed: {
-        titleResolved() {
-            return `${this.type === 'add' ? '添加' : '设置'} ${this.title}`;
-        },
-    },
-
-    methods: {
-        handleConfirm() {
-            this.formRef
-                .validate()
-                .then(() => {
-                    this.$emit(
-                        'confirm',
-                        this.formState as unknown as StrategyData,
-                    );
-                })
-                .then(() => {
-                    this.closeModal();
-                })
-                .catch((err: Error) => {
-                    console.error(err);
-                });
-        },
-
-        handleClose() {
-            this.closeModal();
-        },
-
-        getKfTradeValueName(
-            data: Record<number | string | symbol, KfTradeValueCommonData>,
-            key: number | string,
-        ) {
-            return data[key].name;
-        },
-
-        handleSelectFile(targetKey: string) {
-            dialog
-                .showOpenDialog({
-                    properties: ['openFile'],
-                })
-                .then((res) => {
-                    const { filePaths } = res;
-                    if (filePaths.length) {
-                        this.formState[targetKey] = filePaths[0];
-                        this.formRef.validateFields([targetKey]); //手动进行再次验证，因数据放在span中，改变数据后无法触发验证
-                    }
-                });
-        },
-    },
-});
-</script>
 
 <style lang="less">
 .kf-set-by-config-modal {

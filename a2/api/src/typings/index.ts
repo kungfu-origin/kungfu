@@ -14,7 +14,6 @@ export enum BrokerStateStatusEnum {
     LoggedIn = 4,
     LoginFailed = 5,
     Ready = 100,
-    Unknown = '',
 }
 
 export type BrokerStateStatusTypes = keyof typeof BrokerStateStatusEnum;
@@ -44,17 +43,18 @@ export enum LedgerCategoryEnum {
 export type LedgerCategoryTypes = keyof typeof LedgerCategoryEnum;
 
 export enum InstrumentTypeEnum {
-    Unknown,
-    Stock,
-    Future,
-    Bond,
-    StockOption,
-    Fund,
-    TechStock,
-    Index,
-    Repo,
-    Crypto, //数字货币
-    Simu,
+    unknown,
+    stock,
+    future,
+    bond,
+    stockoption,
+    fund,
+    techstock,
+    index,
+    repo,
+    crypto,
+    cryptofuture,
+    simu,
 }
 
 export type InstrumentTypes = keyof typeof InstrumentTypeEnum;
@@ -204,6 +204,7 @@ export interface KfConfigItem {
     primary?: boolean;
     validator?: string[];
     options?: KfSelectOption[];
+    data?: KfSelectOption[];
     args?: Array<{ key: string | number; value: string | number }>; // process
     target?: string; // process
     tip?: string;
@@ -227,7 +228,7 @@ export type KfExtConfigs = {
 };
 
 export interface SetKfConfigPayload {
-    type: 'add' | 'update';
+    type: ModalChangeType;
     title: string;
     config: KfExtOriginConfig['config'][KfCategoryTypes];
     initValue?: Record<string, KfConfigValue>;
@@ -249,12 +250,6 @@ export enum KfModeEnum {
 }
 
 export type KfModeTypes = keyof typeof KfModeEnum;
-
-export interface StrategyData {
-    strategy_id: string;
-    strategy_path: string;
-    add_time: number;
-}
 
 export interface KfLocationBase {
     group: string;

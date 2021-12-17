@@ -4,3 +4,4 @@ process.env.RENDERER_TYPE = 'app';
 process.env.RELOAD_AFTER_CRASHED = process.argv.includes('reloadAfterCrashed')
     ? 'true'
     : 'false';
+console.log('RELOAD_AFTER_CRASHED', process.env.RELOAD_AFTER_CRASHED);

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, getCurrentInstance, toRefs } from 'vue';
+import { ref, computed, toRefs } from 'vue';
 
 import KfDashboard from '@renderer/components/public/KfDashboard.vue';
 import KfDashboardItem from '@renderer/components/public/KfDashboardItem.vue';
@@ -16,28 +16,33 @@ import {
     KfCategoryTypes,
     KfExtOriginConfig,
     SetKfConfigPayload,
-    ProcessStatusTypes,
 } from '@kungfu-trader/kungfu-js-api/typings';
-import type { KfConfig } from '@kungfu-trader/kungfu-js-api/typings';
+import type {
+    KfConfig,
+    KfConfigValue,
+} from '@kungfu-trader/kungfu-js-api/typings';
 import { columns } from './config';
 import {
     useTableSearchKeyword,
-    getExtConfigsRelated,
+    useExtConfigsRelated,
     getAllKfConfigData,
     getProcessStatusDetailData,
     handleOpenLogview,
     useDashboardBodySize,
-    getExtColor,
+    getInstrumentTypeColor,
+    useAppStates,
 } from '@renderer/assets/methods/uiUtils';
 import {
-    handleRemoveKfConfig,
+    useAddUpdateRemoveKfConfig,
     handleSwitchProcessStatus,
     useSwitchAllConfig,
 } from '@renderer/assets/methods/actionsUtils';
 import {
+    getAppStateStatusName,
     getIfProcessOnline,
     getProcessIdByKfLocation,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
+import { message } from 'ant-design-vue';
 
 interface TdProps {}
 defineProps<TdProps>();
@@ -52,45 +57,57 @@ const setTdConfigPayload = ref<SetKfConfigPayload>({
     title: '交易账户',
     config: {} as KfExtOriginConfig['config'][KfCategoryTypes],
 });
+
 const currentSelectedSourceId = ref<string>('');
-
-const { extConfigs, extTypeMap } = getExtConfigsRelated();
-
+const { extConfigs, extTypeMap } = useExtConfigsRelated();
 const { td } = toRefs(getAllKfConfigData());
 const tdIdList = computed(() => {
     return td.value.map(
         (item: KfConfig): string => `${item.group}_${item.name}`,
     );
 });
-
 const { processStatusData } = toRefs(getProcessStatusDetailData());
-
+const appStates = useAppStates();
 const { allProcessOnline, handleSwitchAllProcessStatus } = useSwitchAllConfig(
     td,
     processStatusData,
 );
-
 const { searchKeyword, tableData } = useTableSearchKeyword<KfConfig>(td, [
     'group',
     'name',
 ]);
 
-function handleSelectedSource(selectedSource: string) {
-    setTdModalVisible.value = true;
-    setTdConfigPayload.value.title = `${selectedSource} 交易账户`;
-    const targetConfig = (extConfigs.value['td'] || {})[selectedSource];
-    setTdConfigPayload.value.config = targetConfig;
+const { handleConfirmAddUpdateKfConfig, handleRemoveKfConfig } =
+    useAddUpdateRemoveKfConfig();
+
+function handleOpenSetTdDialog(
+    type = 'add' as ModalChangeType,
+    selectedSource: string,
+    tdConfig?: KfConfig,
+) {
     currentSelectedSourceId.value = selectedSource;
+    setTdConfigPayload.value.type = type;
+    setTdConfigPayload.value.title = `${selectedSource} 交易账户`;
+    setTdConfigPayload.value.config = (extConfigs.value['td'] || {})[
+        selectedSource
+    ];
+
+    if (type === 'update') {
+        if (tdConfig) {
+            setTdConfigPayload.value.initValue = JSON.parse(tdConfig.value);
+        }
+    }
+
+    if (!setTdConfigPayload.value.config?.settings?.length) {
+        message.error(`配置项不存在, 请检查 ${selectedSource} package.json`);
+        return;
+    }
+
+    setTdModalVisible.value = true;
 }
 
 function handleOpenSetSourceDialog() {
     setSourceModalVisible.value = true;
-    setTdConfigPayload.value.type = 'add';
-}
-
-function getStateStatusName(processId: string): ProcessStatusTypes {
-    processId;
-    return 'Unknown';
 }
 </script>
 
@@ -142,15 +159,21 @@ function getStateStatusName(processId: string): ProcessStatusTypes {
                     </template>
                     <template v-else-if="column.dataIndex === 'stateStatus'">
                         <KfProcessStatus
-                            :status-name="
-                                getStateStatusName(
-                                    getProcessIdByKfLocation(record),
+                            :statusName="
+                                getAppStateStatusName(
+                                    record,
+                                    processStatusData,
+                                    appStates.value,
                                 )
                             "
                         ></KfProcessStatus>
                     </template>
                     <template v-else-if="column.dataIndex === 'group'">
-                        <a-tag :color="getExtColor(extTypeMap, record.group)">
+                        <a-tag
+                            :color="
+                                getInstrumentTypeColor(extTypeMap[record.group])
+                            "
+                        >
                             {{ record.group }}
                         </a-tag>
                     </template>
@@ -172,7 +195,16 @@ function getStateStatusName(processId: string): ProcessStatusTypes {
                                 style="font-size: 12px"
                                 @click="handleOpenLogview(record)"
                             />
-                            <SettingOutlined style="font-size: 12px" />
+                            <SettingOutlined
+                                style="font-size: 12px"
+                                @click="
+                                    handleOpenSetTdDialog(
+                                        'update',
+                                        record.group,
+                                        record,
+                                    )
+                                "
+                            />
                             <DeleteOutlined
                                 style="font-size: 12px"
                                 @click="handleRemoveKfConfig(record)"
@@ -186,7 +218,7 @@ function getStateStatusName(processId: string): ProcessStatusTypes {
             v-if="setSourceModalVisible"
             v-model:visible="setSourceModalVisible"
             sourceType="td"
-            @confirm="handleSelectedSource"
+            @confirm="(sourceId: string) => handleOpenSetTdDialog('add', sourceId)"
         ></KfSetSourceModal>
         <KfSetByConfigModal
             v-if="setTdModalVisible"
@@ -194,6 +226,16 @@ function getStateStatusName(processId: string): ProcessStatusTypes {
             :payload="setTdConfigPayload"
             :primaryKeyCompareTarget="tdIdList"
             :primaryKeyCompareExtra="currentSelectedSourceId"
+            @confirm="
+                (formState: Record<string, KfConfigValue>, idByKeys: string, changeType: ModalChangeType) =>
+                    handleConfirmAddUpdateKfConfig(
+                        formState,
+                        idByKeys,
+                        changeType,
+                        'td',
+                        currentSelectedSourceId,
+                    )
+            "
         ></KfSetByConfigModal>
     </div>
 </template>

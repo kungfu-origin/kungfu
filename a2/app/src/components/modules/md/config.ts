@@ -25,5 +25,6 @@ export const columns: AntTableColumns = [
         dataIndex: 'actions',
         align: 'right',
         width: 140,
+        fixed: 'right',
     },
 ];

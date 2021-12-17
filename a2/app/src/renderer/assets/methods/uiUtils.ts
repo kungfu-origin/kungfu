@@ -3,7 +3,6 @@ import path from 'path';
 import {
     Component,
     ComputedRef,
-    SetupContext,
     Ref,
     reactive,
     ref,
@@ -19,6 +18,7 @@ import {
 import {
     buildExtTypeMap,
     buildObjectFromArray,
+    getInstrumentTypeData,
     getProcessIdByKfLocation,
     getTradingDate,
     kfLogger,
@@ -33,12 +33,10 @@ import {
     Offset,
     PriceType,
     Side,
-    StateStatus,
     TimeCondition,
     VolumeCondition,
 } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
 import {
-    InstrumentTypeEnum,
     InstrumentTypes,
     KfCategoryTypes,
     KfConfigValue,
@@ -47,6 +45,7 @@ import {
     SetKfConfigPayload,
     AntInKungfuColorTypes,
     KfConfig,
+    BrokerStateStatusTypes,
 } from '@kungfu-trader/kungfu-js-api/typings';
 
 import {
@@ -106,19 +105,10 @@ export const getUIComponents = (): {
     );
 };
 
-export const getStateStatusInfoByStatusType = (
-    statusType: string | number,
-): string => {
-    // return StateStatus[statusType];
-    StateStatus;
-    statusType;
-    return '';
-};
-
-export const useModalVisible = (
-    props: { visible: boolean },
-    context: SetupContext,
-): { modalVisible: Ref<boolean>; closeModal: () => void } => {
+export const useModalVisible = (props: {
+    visible: boolean;
+}): { modalVisible: Ref<boolean>; closeModal: () => void } => {
+    const app = getCurrentInstance();
     const modalVisible = ref<boolean>(props.visible);
     watch(
         () => props.visible,
@@ -127,8 +117,8 @@ export const useModalVisible = (
         },
     );
     const closeModal = () => {
-        context.emit('update:visible', false);
-        context.emit('close');
+        app && app.emit('update:visible', false);
+        app && app.emit('close');
     };
 
     return {
@@ -251,20 +241,20 @@ export const beforeStartAll = (): Promise<void> => {
 export const getInstrumentTypeColor = (
     type: InstrumentTypes,
 ): AntInKungfuColorTypes => {
-    return InstrumentType[InstrumentTypeEnum[type]].color || 'default';
+    return getInstrumentTypeData(type).color || 'default';
 };
 
-export const getExtConfigsRelated = (): {
+export const useExtConfigsRelated = (): {
     extConfigs: { value: KfExtConfigs };
     extTypeMap: ComputedRef<Record<string, InstrumentTypes>>;
 } => {
+    const app = getCurrentInstance();
     const extConfigs = reactive<{ value: KfExtConfigs }>({
         value: {},
     });
     const extTypeMap = computed(() => buildExtTypeMap(extConfigs.value, 'td'));
 
     onMounted(() => {
-        const app = getCurrentInstance();
         if (app?.proxy) {
             const store = storeToRefs(app?.proxy.$useGlobalStore());
             extConfigs.value = store.extConfigs as KfExtConfigs;
@@ -281,13 +271,13 @@ export const getProcessStatusDetailData = (): {
     processStatusData: Pm2ProcessStatusData;
     processStatusDetailData: Pm2ProcessStatusDetailData;
 } => {
+    const app = getCurrentInstance();
     const allProcessStatusData = reactive({
         processStatusData: {},
         processStatusDetailData: {},
     });
 
     onMounted(() => {
-        const app = getCurrentInstance();
         if (app?.proxy) {
             const { processStatusData, processStatusWithDetail } = storeToRefs(
                 app?.proxy.$useGlobalStore(),
@@ -303,6 +293,7 @@ export const getProcessStatusDetailData = (): {
 };
 
 export const getAllKfConfigData = (): Record<KfCategoryTypes, KfConfig[]> => {
+    const app = getCurrentInstance();
     const allKfConfigData: Record<KfCategoryTypes, KfConfig[]> = reactive({
         system: ref<KfConfig[]>([
             ...(process.env.NODE_ENV === 'development'
@@ -341,7 +332,6 @@ export const getAllKfConfigData = (): Record<KfCategoryTypes, KfConfig[]> => {
     });
 
     onMounted(() => {
-        const app = getCurrentInstance();
         if (app?.proxy) {
             const { mdList, tdList, strategyList } = storeToRefs(
                 app?.proxy.$useGlobalStore(),
@@ -507,12 +497,27 @@ export const useDashboardBodySize = (): {
     };
 };
 
-export const getExtColor = (
-    extTypeMap: Record<string, InstrumentTypes>,
-    extTypeName: string,
-): AntInKungfuColorTypes => {
-    return (
-        InstrumentType[InstrumentTypeEnum[extTypeMap[extTypeName]]].color ||
-        'default'
-    );
+export const useAppStates = (): {
+    value: Record<string, BrokerStateStatusTypes | undefined>;
+} => {
+    const appStatesResolved = reactive<{
+        value: Record<string, BrokerStateStatusTypes | undefined>;
+    }>({
+        value: {},
+    });
+    const app = getCurrentInstance();
+
+    onMounted(() => {
+        if (app?.proxy) {
+            const { appStates } = storeToRefs(app?.proxy.$useGlobalStore());
+            appStatesResolved.value = appStates;
+        }
+    });
+
+    return appStatesResolved;
+};
+
+export const getKfLocationUID = (kfConfig: KfConfig): string => {
+    if (!window.watcher) return '';
+    return window.watcher?.getLocationUID(kfConfig);
 };

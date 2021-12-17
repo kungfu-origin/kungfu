@@ -57,24 +57,20 @@ function isCriticalLog(line: string): boolean {
         return true;
     }
 
-    if (line.length <= 22) {
-        return true;
-    }
-
     return false;
 }
 
 export function dealLogMessage(line: string): string {
+    if (isCriticalLog(line)) {
+        line = `<span class="critical">${line}</span>`;
+        return line;
+    }
+
     line = line
         .replace(/warning/g, '<span class="warning"> warning </span>')
         .replace(/ error /g, '<span class="error"> error </span>')
         .replace(/ debug /g, '<span class="debug"> debug </span>')
         .replace(/ trace /g, '<span class="trace"> trace </span>');
-
-    if (isCriticalLog(line)) {
-        line = `<span class="critical">${line}</span>`;
-        return line;
-    }
 
     return line;
 }

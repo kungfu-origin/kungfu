@@ -27,7 +27,7 @@ export default defineComponent({
     name: 'KfProcessStatus',
     props: {
         statusName: {
-            type: String as PropType<ProcessStatusTypes>,
+            type: String as PropType<ProcessStatusTypes | undefined>,
         },
     },
 

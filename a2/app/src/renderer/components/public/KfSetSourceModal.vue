@@ -1,9 +1,77 @@
+<script setup lang="ts">
+import {
+    InstrumentTypeEnum,
+    KfCategoryTypes,
+    SourceData,
+} from '@kungfu-trader/kungfu-js-api/typings';
+import {
+    defineComponent,
+    ref,
+    PropType,
+    onMounted,
+    computed,
+    getCurrentInstance,
+} from 'vue';
+
+import {
+    getInstrumentTypeData,
+    getSourceDataList,
+} from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
+import {
+    useExtConfigsRelated,
+    useModalVisible,
+} from '@renderer/assets/methods/uiUtils';
+
+const props = withDefaults(
+    defineProps<{
+        visible: boolean;
+        sourceType: KfCategoryTypes;
+    }>(),
+    {
+        visible: false,
+        sourceType: 'td',
+    },
+);
+
+defineEmits<{
+    (e: 'confirm', sourceId: string): void;
+    (e: 'update:visible', visible: boolean): void;
+    (e: 'close'): void;
+}>();
+
+const app = getCurrentInstance();
+const { extConfigs } = useExtConfigsRelated();
+const selectedSource = ref<string>('');
+const sourceDataList = computed(() => {
+    return getSourceDataList(extConfigs.value, props.sourceType);
+});
+
+const { modalVisible, closeModal } = useModalVisible(props);
+
+onMounted(() => {
+    if (selectedSource.value === '') {
+        if (sourceDataList.value.length) {
+            selectedSource.value = sourceDataList.value[0].name;
+        }
+    }
+});
+
+function handleConfirm() {
+    app && app.emit('confirm', selectedSource.value);
+    closeModal();
+}
+
+function handleClose() {
+    closeModal();
+}
+</script>
 <template>
     <a-modal
         class="kf-set-source-modal"
         :width="480"
         v-model:visible="modalVisible"
         title="选择柜台API"
+        :destroyOnClose="true"
         @cancel="handleClose"
         @ok="handleConfirm"
     >
@@ -24,92 +92,14 @@
                 <a-tag
                     v-for="(sourceInstrumentType, index) in item.type"
                     :key="index"
-                    :color="
-                        getInstrumentTypeData(
-                            InstrumentTypeEnum[sourceInstrumentType],
-                        ).color
-                    "
+                    :color="getInstrumentTypeData(sourceInstrumentType).color"
                 >
-                    {{
-                        getInstrumentTypeData(
-                            InstrumentTypeEnum[sourceInstrumentType],
-                        ).name
-                    }}
+                    {{ getInstrumentTypeData(sourceInstrumentType).name }}
                 </a-tag>
             </a-radio>
         </a-radio-group>
     </a-modal>
 </template>
-
-<script lang="ts">
-import {
-    InstrumentTypeEnum,
-    KfCategoryTypes,
-    SourceData,
-} from '@kungfu-trader/kungfu-js-api/typings';
-import { defineComponent, ref, PropType } from 'vue';
-
-import {
-    getInstrumentTypeData,
-    getSourceDataList,
-} from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
-import { useModalVisible } from '@renderer/assets/methods/uiUtils';
-
-export default defineComponent({
-    props: {
-        visible: {
-            type: Boolean,
-            default: false,
-        },
-
-        sourceType: {
-            type: String as PropType<KfCategoryTypes>,
-            default: 'td',
-        },
-    },
-
-    setup(props, context) {
-        const selectedSource = ref<string>('');
-        const sourceDataList = ref<SourceData[]>([]);
-
-        const { modalVisible, closeModal } = useModalVisible(props, context);
-
-        return {
-            modalVisible,
-            closeModal,
-
-            selectedSource,
-            sourceDataList,
-
-            getInstrumentTypeData,
-            InstrumentTypeEnum,
-        };
-    },
-
-    mounted() {
-        const extConfigs = this.$useGlobalStore().extConfigs || {};
-        this.sourceDataList = getSourceDataList(extConfigs, this.sourceType);
-
-        if (this.selectedSource === '') {
-            if (this.sourceDataList.length) {
-                this.selectedSource = this.sourceDataList[0].name;
-            }
-        }
-    },
-
-    methods: {
-        handleConfirm() {
-            this.$emit('confirm', this.selectedSource);
-            this.closeModal();
-        },
-
-        handleClose() {
-            this.closeModal();
-        },
-    },
-});
-</script>
-
 <style lang="less">
 .kf-set-source-modal {
     .source-id__txt {

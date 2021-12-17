@@ -4,7 +4,6 @@ export const columns: AntTableColumns = [
         dataIndex: 'name',
         align: 'left',
         sorter: true,
-        fixed: 'left',
         width: 90,
     },
     {
@@ -12,7 +11,6 @@ export const columns: AntTableColumns = [
         dataIndex: 'processStatus',
         align: 'center',
         sorter: true,
-        fixed: 'left',
         width: 60,
     },
     {

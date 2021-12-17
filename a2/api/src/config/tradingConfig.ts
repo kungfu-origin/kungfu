@@ -13,7 +13,6 @@ import {
     DirectionEnum,
     KfCategoryEnum,
     ProcessStatusTypes,
-    KfCategoryTypes,
     BrokerStateStatusTypes,
 } from '../typings';
 
@@ -99,27 +98,33 @@ export const BrokerStateStatus: Record<
         color: 'kf-color-running',
         level: 2,
     },
-    ['Unknown']: {
-        name: '--',
-        color: 'kf-color-waiting',
-        level: 0,
-    },
 };
 
-export const StateStatus: Record<ProcessStatusTypes, KfTradeValueCommonData> = {
+export const AppStateStatus: Record<
+    ProcessStatusTypes,
+    KfTradeValueCommonData
+> = {
     ...Pm2ProcessStatus,
     ...BrokerStateStatus,
 };
 
-export const KfCategory: Record<KfCategoryTypes, KfTradeValueCommonData> = {
-    ['system']: {
+export const KfCategory: Record<KfCategoryEnum, KfTradeValueCommonData> = {
+    [KfCategoryEnum.system]: {
         name: isEnglish ? 'System' : '系统服务',
         color: 'red',
         level: 100,
     },
-    ['md']: { name: isEnglish ? 'Md' : '行情源', color: 'orange', level: 90 },
-    ['td']: { name: isEnglish ? 'Td' : '交易账户', color: 'blue', level: 80 },
-    ['strategy']: {
+    [KfCategoryEnum.md]: {
+        name: isEnglish ? 'Md' : '行情源',
+        color: 'orange',
+        level: 90,
+    },
+    [KfCategoryEnum.td]: {
+        name: isEnglish ? 'Td' : '交易账户',
+        color: 'blue',
+        level: 80,
+    },
+    [KfCategoryEnum.strategy]: {
         name: isEnglish ? 'Strategy' : '策略',
         color: 'cyan',
         level: 70,
@@ -232,52 +237,57 @@ export const InstrumentType: Record<
     InstrumentTypeEnum,
     KfTradeValueCommonData
 > = {
-    [InstrumentTypeEnum.Unknown]: {
+    [InstrumentTypeEnum.unknown]: {
         name: isEnglish ? 'Unknown' : '未知',
         color: 'default',
     },
-    [InstrumentTypeEnum.Stock]: {
+    [InstrumentTypeEnum.stock]: {
         name: isEnglish ? 'Stock' : '普通股票',
         color: 'orange',
         level: 10,
     },
-    [InstrumentTypeEnum.Future]: {
+    [InstrumentTypeEnum.future]: {
         name: isEnglish ? 'Future' : '期货',
         color: 'red',
         level: 10,
     },
-    [InstrumentTypeEnum.Bond]: {
+    [InstrumentTypeEnum.bond]: {
         name: isEnglish ? 'Bond' : '债券',
         color: 'pink',
     },
-    [InstrumentTypeEnum.StockOption]: {
+    [InstrumentTypeEnum.stockoption]: {
         name: isEnglish ? 'StockOption' : '股票期权',
         color: 'blue',
         level: 10,
     },
-    [InstrumentTypeEnum.Fund]: {
+    [InstrumentTypeEnum.fund]: {
         name: isEnglish ? 'Fund' : '基金',
         color: 'purple',
     },
-    [InstrumentTypeEnum.TechStock]: {
+    [InstrumentTypeEnum.techstock]: {
         name: isEnglish ? 'TechStock' : '科创板股票',
         color: 'blue',
     },
-    [InstrumentTypeEnum.Index]: {
+    [InstrumentTypeEnum.index]: {
         name: isEnglish ? 'Index' : '指数',
         color: 'purple',
     },
-    [InstrumentTypeEnum.Repo]: {
+    [InstrumentTypeEnum.repo]: {
         name: isEnglish ? 'Repo' : '回购',
         color: 'red',
     },
-    [InstrumentTypeEnum.Crypto]: {
+    [InstrumentTypeEnum.crypto]: {
         name: isEnglish ? 'Crypto' : '数字货币',
         color: 'blue',
         level: 10,
     },
-    [InstrumentTypeEnum.Simu]: {
-        name: isEnglish ? 'Simu' : '模拟',
+    [InstrumentTypeEnum.cryptofuture]: {
+        name: isEnglish ? 'CryptoFuture' : '数字货币合约',
+        color: 'blue',
+        level: 10,
+    },
+    [InstrumentTypeEnum.simu]: {
+        name: isEnglish ? 'KungFuSimu' : '功夫模拟',
         color: 'green',
         level: 10,
     },
@@ -286,43 +296,36 @@ export const InstrumentType: Record<
 export const ExchangeIds: Record<string, KfTradeValueCommonData> = {
     SSE: {
         name: isEnglish ? 'SSE' : '上交所',
-        color: InstrumentType[InstrumentTypeEnum.Stock].color,
+        color: InstrumentType[InstrumentTypeEnum.stock].color,
     },
     SZE: {
         name: isEnglish ? 'SZE' : '深交所',
-        color: InstrumentType[InstrumentTypeEnum.Stock].color,
+        color: InstrumentType[InstrumentTypeEnum.stock].color,
     },
     BSE: {
         name: isEnglish ? 'BSE' : '北交所',
-        color: InstrumentType[InstrumentTypeEnum.Stock].color,
+        color: InstrumentType[InstrumentTypeEnum.stock].color,
     },
     SHFE: {
         name: isEnglish ? 'SHFE' : '上期所',
-        color: InstrumentType[InstrumentTypeEnum.Future].color,
+        color: InstrumentType[InstrumentTypeEnum.future].color,
     },
     DCE: {
         name: isEnglish ? 'DCE' : '大商所',
-        color: InstrumentType[InstrumentTypeEnum.Future].color,
+        color: InstrumentType[InstrumentTypeEnum.future].color,
     },
     CZCE: {
         name: isEnglish ? 'CZCE' : '郑商所',
-        color: InstrumentType[InstrumentTypeEnum.Future].color,
+        color: InstrumentType[InstrumentTypeEnum.future].color,
     },
     CFFEX: {
         name: isEnglish ? 'CFFEX' : '中金所',
-        color: InstrumentType[InstrumentTypeEnum.Future].color,
+        color: InstrumentType[InstrumentTypeEnum.future].color,
     },
     INE: {
         name: isEnglish ? 'INE' : '能源中心',
-        color: InstrumentType[InstrumentTypeEnum.Future].color,
+        color: InstrumentType[InstrumentTypeEnum.future].color,
     },
-};
-
-export const Category: Record<KfCategoryEnum, KfTradeValueCommonData> = {
-    [KfCategoryEnum.md]: { name: 'md' },
-    [KfCategoryEnum.td]: { name: 'td' },
-    [KfCategoryEnum.strategy]: { name: 'strategy' },
-    [KfCategoryEnum.system]: { name: 'system' },
 };
 
 export const SystemProcessName: Record<string, KfTradeValueCommonData> = {

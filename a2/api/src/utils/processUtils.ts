@@ -11,10 +11,12 @@ import {
     dealSpaceInPath,
     setTimerPromiseTask,
     delayMilliSeconds,
+    flattenExtensionModuleDirs,
 } from '../utils/busiUtils';
 import {
     APP_DIR,
     buildProcessLogPath,
+    EXTENSION_DIR,
     KFC_DIR,
     KF_CONFIG_PATH,
     KF_HOME,
@@ -501,7 +503,7 @@ export const startMaster = async (force = false): Promise<Proc | void> => {
     }
     return killKfc()
         .finally(() => {
-            const args = buildArgs('service master');
+            const args = buildArgs('run -c system -g master -n master');
             return startProcess({
                 name: processName,
                 args,
@@ -533,7 +535,7 @@ export const startLedger = async (force = false): Promise<Proc | void> => {
         return Promise.reject(err);
     }
 
-    const args = buildArgs('service ledger');
+    const args = buildArgs('run -c system -g service -n ledger');
     return startProcess({
         name: processName,
         args,
@@ -543,8 +545,13 @@ export const startLedger = async (force = false): Promise<Proc | void> => {
 };
 
 //启动md
-export const startMd = (sourceId: string): Promise<Proc | void> => {
-    const args = buildArgs(`vendor md -s "${sourceId}"`);
+export const startMd = async (sourceId: string): Promise<Proc | void> => {
+    const extDirs = await flattenExtensionModuleDirs([EXTENSION_DIR]);
+    const args = buildArgs(
+        `-X ${extDirs
+            .map((dir) => path.dirname(dir))
+            .join(':')} run -c md -g "${sourceId}" -n "${sourceId}"`,
+    );
     return startProcess({
         name: `md_${sourceId}`,
         args,
@@ -556,9 +563,14 @@ export const startMd = (sourceId: string): Promise<Proc | void> => {
 };
 
 //启动td
-export const startTd = (accountId: string): Promise<Proc | void> => {
+export const startTd = async (accountId: string): Promise<Proc | void> => {
+    const extDirs = await flattenExtensionModuleDirs([EXTENSION_DIR]);
     const { source, id } = accountId.parseSourceAccountId();
-    const args = buildArgs(`vendor td -s "${source}" -a "${id}"`);
+    const args = buildArgs(
+        `-X ${extDirs
+            .map((dir) => path.dirname(dir))
+            .join(':')} run -c td -g "${source}" -n "${id}"`,
+    );
     return startProcess({
         name: `td_${accountId}`,
         args,

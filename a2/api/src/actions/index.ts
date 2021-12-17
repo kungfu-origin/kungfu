@@ -11,20 +11,7 @@ import {
 } from '../typings';
 import { KF_RUNTIME_DIR, LOG_DIR } from '../config/pathConfig';
 import { pathExists, remove } from 'fs-extra';
-import {
-    getIdByKfLocation,
-    getProcessIdByKfLocation,
-} from '../utils/busiUtils';
-import {
-    deleteProcess,
-    startLedger,
-    startMaster,
-    startMd,
-    startStrategy,
-    startTd,
-} from '../utils/processUtils';
-import { Proc } from 'pm2';
-import { watcher } from '../kungfu/watcher';
+import { getProcessIdByKfLocation } from '../utils/busiUtils';
 
 export const getAllKfConfigOriginData = (): Promise<
     Record<KfCategoryTypes, KfConfig[]>
@@ -97,48 +84,3 @@ function removeLog(kfLocation: KfLocation): Promise<void> {
         console.warn(`Log Path ${logPath} is not existed`);
     });
 }
-
-export const switchKfLocation = (
-    kfLocation: KfLocation | KfConfig,
-    targetStatus: boolean,
-): Promise<void | Proc> => {
-    const processId = getProcessIdByKfLocation(kfLocation);
-
-    if (!targetStatus) {
-        if (kfLocation.category !== 'system') {
-            if (!watcher || !watcher.isReadyToInteract(kfLocation)) {
-                const name = getIdByKfLocation(kfLocation);
-                return Promise.reject(
-                    new Error(`${name} 还未准备就绪, 请稍后重试`),
-                );
-            }
-        }
-
-        return deleteProcess(processId);
-    }
-
-    switch (kfLocation.category) {
-        case 'system':
-            if (kfLocation.name === 'master') {
-                return startMaster(true);
-            } else if (kfLocation.name === 'ledger') {
-                return startLedger(true);
-            }
-
-        case 'td':
-            return startTd(getIdByKfLocation(kfLocation));
-        case 'md':
-            return startMd(getIdByKfLocation(kfLocation));
-
-        case 'strategy':
-            const strategyPath =
-                JSON.parse((kfLocation as KfConfig)?.value || '{}')
-                    .strategy_path || '';
-            if (!strategyPath) {
-                throw new Error('Start Stratgy without strategy_path');
-            }
-            return startStrategy(getIdByKfLocation(kfLocation), strategyPath);
-        default:
-            return Promise.resolve();
-    }
-};

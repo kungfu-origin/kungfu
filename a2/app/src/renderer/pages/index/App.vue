@@ -11,10 +11,13 @@ import {
 import bus from '@kungfu-trader/kungfu-js-api/utils/globalBus';
 import { preQuitTasks } from '@renderer/assets/methods/actionsUtils';
 import { ipcRenderer } from 'electron';
-import { watcher } from '@kungfu-trader/kungfu-js-api/kungfu/watcher';
-
+import {
+    dealAppStates,
+    watcher,
+} from '@kungfu-trader/kungfu-js-api/kungfu/watcher';
+import { tradingDataSubject } from '@kungfu-trader/kungfu-js-api/kungfu/tradingData';
+import { useGlobalStore } from './store/global';
 const app = getCurrentInstance();
-useIpcListener();
 
 const preStartSystemLoadingData = reactive<Record<string, 'loading' | 'done'>>({
     archive: 'loading',
@@ -53,11 +56,6 @@ onMounted(() => {
                 tag: 'resize',
             } as ResizeEvent);
     });
-
-    if (app?.proxy) {
-        app?.proxy.$useGlobalStore().setKfConfigList();
-        app?.proxy.$useGlobalStore().setKfExtConfigs();
-    }
 });
 
 const timer = setInterval(() => {
@@ -69,6 +67,7 @@ const timer = setInterval(() => {
     }
 }, 500);
 
+useIpcListener();
 bus.subscribe((data: KfBusEvent) => {
     if (data.tag === 'processStatus') {
         if (data.name && data.name === 'archive') {
@@ -78,10 +77,10 @@ bus.subscribe((data: KfBusEvent) => {
     }
 
     if (data.tag === 'main') {
-        console.log(data.name);
         switch (data.name) {
             case 'clear-journal':
                 markClearJournal();
+                break;
             case 'record-before-quit':
                 preQuitSystemLoadingData.record = 'loading';
                 preQuitTasks().finally(() => {
@@ -98,6 +97,14 @@ bus.subscribe((data: KfBusEvent) => {
         }
     }
 });
+
+const store = useGlobalStore();
+tradingDataSubject.subscribe((watcher: Watcher) => {
+    const appStates = dealAppStates(watcher.appStates);
+    store.setAppStates(appStates);
+});
+store.setKfConfigList();
+store.setKfExtConfigs();
 </script>
 
 <template>

@@ -1,12 +1,18 @@
 import { kf } from './index';
 import { KF_RUNTIME_DIR } from '../config/pathConfig';
 import {
+    getProcessIdByKfLocation,
     kfLogger,
     setTimerPromiseTask,
     statTime,
     statTimeEnd,
 } from '../utils/busiUtils';
-import bus from '../utils/globalBus';
+import {
+    BrokerStateStatusEnum,
+    BrokerStateStatusTypes,
+    KfConfig,
+    KfLocation,
+} from '../typings';
 
 export const watcher = ((): Watcher | null => {
     kfLogger.info(
@@ -30,6 +36,7 @@ export const watcher = ((): Watcher | null => {
         process.env.RENDERER_TYPE || '',
     ].join('');
     const bypassRestore = process.env.RELOAD_AFTER_CRASHED ? true : false;
+
     return kf.watcher(
         KF_RUNTIME_DIR,
         kf.formatStringToHashHex(id),
@@ -111,4 +118,29 @@ export const startUpdateKungfuWatcherQuotes = (interval = 2000) => {
             }
         });
     }, interval);
+};
+
+export const dealAppStates = (
+    appStates: Record<string, BrokerStateStatusEnum>,
+): Record<string, BrokerStateStatusTypes | undefined> => {
+    const appStatesResolved: Record<
+        string,
+        BrokerStateStatusTypes | undefined
+    > = {};
+
+    if (!watcher) {
+        return appStatesResolved;
+    }
+
+    Object.keys(appStates).forEach((key: string) => {
+        const kfLocation = watcher.getLocation(key);
+        if (!kfLocation) return;
+
+        appStatesResolved[getProcessIdByKfLocation(kfLocation)] =
+            BrokerStateStatusEnum[appStates[key]] as
+                | BrokerStateStatusTypes
+                | undefined;
+    });
+
+    return appStatesResolved;
 };

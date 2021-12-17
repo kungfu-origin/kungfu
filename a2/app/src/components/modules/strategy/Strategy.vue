@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, getCurrentInstance, toRefs } from 'vue';
-import { message, Modal } from 'ant-design-vue';
+import { ref, computed, toRefs } from 'vue';
 
 import KfDashboard from '@renderer/components/public/KfDashboard.vue';
 import KfDashboardItem from '@renderer/components/public/KfDashboardItem.vue';
@@ -16,10 +15,11 @@ import {
     KfCategoryTypes,
     KfExtOriginConfig,
     SetKfConfigPayload,
-    StrategyData,
-    KfLocation,
 } from '@kungfu-trader/kungfu-js-api/typings';
-import type { KfConfig } from '@kungfu-trader/kungfu-js-api/typings';
+import type {
+    KfConfig,
+    KfConfigValue,
+} from '@kungfu-trader/kungfu-js-api/typings';
 
 import {
     useTableSearchKeyword,
@@ -29,10 +29,9 @@ import {
     getProcessStatusDetailData,
 } from '@renderer/assets/methods/uiUtils';
 import { columns } from './config';
-import { setKfConfig } from '@kungfu-trader/kungfu-js-api/kungfu/store';
 import {
-    handleRemoveKfConfig,
     handleSwitchProcessStatus,
+    useAddUpdateRemoveKfConfig,
     useSwitchAllConfig,
 } from '@renderer/assets/methods/actionsUtils';
 import {
@@ -43,7 +42,6 @@ import {
 import path from 'path';
 import { shell } from '@electron/remote';
 
-const app = getCurrentInstance();
 interface StrategyProps {}
 defineProps<StrategyProps>();
 
@@ -61,55 +59,20 @@ const { strategy } = toRefs(getAllKfConfigData());
 const strategyIdList = computed(() => {
     return strategy.value.map((item: KfConfig): string => item.name);
 });
-
 const { processStatusData } = toRefs(getProcessStatusDetailData());
-
 const { allProcessOnline, handleSwitchAllProcessStatus } = useSwitchAllConfig(
     strategy,
     processStatusData,
 );
-
 const { searchKeyword, tableData } = useTableSearchKeyword<KfConfig>(strategy, [
     'name',
 ]);
 
-function handleConfirmAddUpdateStrategy(strategyData: StrategyData) {
-    return Modal.confirm({
-        title: `添加策略 ${strategyData.strategy_id}`,
-        content: `策略ID 添加成功后不可更改, 确认添加策略 ${strategyData.strategy_id}`,
-        okText: '确认',
-        cancelText: '取消',
-        onOk() {
-            const strategyLocation: KfLocation = {
-                category: 'strategy',
-                group: 'default',
-                name: strategyData.strategy_id,
-                mode: 'LIVE',
-            };
-
-            return setKfConfig(
-                strategyLocation,
-                JSON.stringify({
-                    ...strategyData,
-                    add_time: +new Date().getTime() * Math.pow(10, 6),
-                }),
-            )
-                .then(() => {
-                    message.success('操作成功');
-                })
-                .then(() => {
-                    app?.proxy &&
-                        app?.proxy.$useGlobalStore().setKfConfigList();
-                })
-                .catch((err: Error) => {
-                    message.error('操作失败 ' + err.message);
-                });
-        },
-    });
-}
+const { handleConfirmAddUpdateKfConfig, handleRemoveKfConfig } =
+    useAddUpdateRemoveKfConfig();
 
 function handleOpenSetStrategyDialog(
-    type: 'add' | 'update',
+    type: ModalChangeType,
     strategyConfig?: KfConfig,
 ) {
     setStrategyConfigPayload.value.type = type;
@@ -152,7 +115,6 @@ function getStrategyPathShowName(kfConfig: KfConfig): string {
 function handleOpenFile(kfConfig: KfConfig) {
     const strategyPath = getConfigValue(kfConfig).strategy_path || '';
     shell.openPath(strategyPath);
-    shell.beep();
 }
 </script>
 
@@ -248,7 +210,16 @@ function handleOpenFile(kfConfig: KfConfig) {
             v-model:visible="setStrategyModalVisible"
             :payload="setStrategyConfigPayload"
             :primaryKeyCompareTarget="strategyIdList"
-            @confirm="handleConfirmAddUpdateStrategy"
+            @confirm="
+                (formState: Record<string, KfConfigValue>, idByKeys: string, changeType: ModalChangeType) =>
+                    handleConfirmAddUpdateKfConfig(
+                        formState,
+                        idByKeys,
+                        changeType,
+                        'strategy',
+                        'default',
+                    )
+            "
         ></KfSetByConfigModal>
     </div>
 </template>

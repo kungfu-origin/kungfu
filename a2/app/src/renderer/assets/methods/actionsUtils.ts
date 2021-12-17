@@ -1,12 +1,16 @@
+import { deleteAllByKfLocation } from '@kungfu-trader/kungfu-js-api/actions';
+import { setKfConfig } from '@kungfu-trader/kungfu-js-api/kungfu/store';
 import {
-    deleteAllByKfLocation,
-    switchKfLocation,
-} from '@kungfu-trader/kungfu-js-api/actions';
-import { KfConfig, KfLocation } from '@kungfu-trader/kungfu-js-api/typings';
+    KfCategoryTypes,
+    KfConfig,
+    KfConfigValue,
+    KfLocation,
+} from '@kungfu-trader/kungfu-js-api/typings';
 import {
-    getCategoryName,
+    getCategoryData,
     getIdByKfLocation,
     getProcessIdByKfLocation,
+    switchKfLocation,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { Pm2ProcessStatusData } from '@kungfu-trader/kungfu-js-api/utils/processUtils';
 import { message, Modal } from 'ant-design-vue';
@@ -16,7 +20,7 @@ import { computed, ComputedRef, getCurrentInstance, Ref } from 'vue';
 export const ensureRemoveLocation = (
     kfLocation: KfLocation | KfConfig,
 ): Promise<void> => {
-    const categoryName = getCategoryName(kfLocation);
+    const categoryName = getCategoryData(kfLocation.category).name;
     const id = getIdByKfLocation(kfLocation);
     return new Promise((resolve) => {
         Modal.confirm({
@@ -48,7 +52,7 @@ export const handleSwitchProcessStatus = (
     checked: boolean,
     kfLocation: KfLocation | KfConfig,
 ): Promise<void | Proc> => {
-    return switchKfLocation(kfLocation, checked)
+    return switchKfLocation(window.watcher, kfLocation, checked)
         .then(() => {
             message.success('操作成功');
         })
@@ -77,7 +81,10 @@ export const useSwitchAllConfig = (
                 return processStatusData.value[processId] === 'online';
             },
         ).length;
-        if (onlineItemsCount === kfConfigs.value.length) {
+        if (
+            onlineItemsCount === kfConfigs.value.length &&
+            kfConfigs.value.length !== 0
+        ) {
             return true;
         } else {
             return false;
@@ -88,7 +95,7 @@ export const useSwitchAllConfig = (
         return Promise.all(
             kfConfigs.value.map(
                 (item: KfConfig | KfLocation): Promise<void | Proc> => {
-                    return switchKfLocation(item, checked);
+                    return switchKfLocation(window.watcher, item, checked);
                 },
             ),
         )
@@ -106,9 +113,82 @@ export const useSwitchAllConfig = (
     };
 };
 
-export const handleRemoveKfConfig = (kfConfig: KfConfig): Promise<void> => {
-    return ensureRemoveLocation(kfConfig).then(() => {
-        const app = getCurrentInstance();
-        app?.proxy && app?.proxy.$useGlobalStore().setKfConfigList();
-    });
+export const useAddUpdateRemoveKfConfig = (): {
+    handleRemoveKfConfig: (kfConfig: KfConfig) => Promise<void>;
+    handleConfirmAddUpdateKfConfig: (
+        formData: Record<string, KfConfigValue>,
+        idByKey: string,
+        changeType: ModalChangeType,
+        category: KfCategoryTypes,
+        group: string,
+    ) => Promise<void>;
+} => {
+    const app = getCurrentInstance();
+
+    const handleRemoveKfConfig = (kfConfig: KfConfig): Promise<void> => {
+        return ensureRemoveLocation(kfConfig).then(() => {
+            app?.proxy && app?.proxy.$useGlobalStore().setKfConfigList();
+        });
+    };
+
+    const handleConfirmAddUpdateKfConfig = (
+        formData: Record<string, KfConfigValue>,
+        idByKey: string,
+        changeType: ModalChangeType,
+        category: KfCategoryTypes,
+        group: string,
+    ): Promise<void> => {
+        const changeTypename = changeType === 'add' ? '添加' : '设置';
+        const categoryName = getCategoryData(category).name;
+
+        const context =
+            changeType === 'add'
+                ? `${categoryName}ID系统唯一, ${changeTypename}成功后不可更改, 确认${changeTypename} ${idByKey}`
+                : `确认${changeTypename} ${idByKey} 相关配置`;
+        return new Promise((resolve) => {
+            Modal.confirm({
+                title: `${changeTypename}${categoryName} ${idByKey}`,
+                content: context,
+                okText: '确认',
+                cancelText: '取消',
+                onOk() {
+                    const kfLocation: KfLocation = {
+                        category: category,
+                        group: group,
+                        name: idByKey.toString(),
+                        mode: 'LIVE',
+                    };
+
+                    return setKfConfig(
+                        kfLocation,
+                        JSON.stringify({
+                            ...formData,
+                            add_time: +new Date().getTime() * Math.pow(10, 6),
+                        }),
+                    )
+                        .then(() => {
+                            message.success('操作成功');
+                        })
+                        .then(() => {
+                            app?.proxy &&
+                                app?.proxy.$useGlobalStore().setKfConfigList();
+                        })
+                        .catch((err: Error) => {
+                            message.error('操作失败 ' + err.message);
+                        })
+                        .finally(() => {
+                            resolve();
+                        });
+                },
+                onCancel() {
+                    resolve();
+                },
+            });
+        });
+    };
+
+    return {
+        handleRemoveKfConfig,
+        handleConfirmAddUpdateKfConfig,
+    };
 };

@@ -4,7 +4,11 @@ import {
     KfLayoutDirection,
     KfLayoutTargetDirectionClassName,
 } from '@root/src/typings/enums';
-import { KfExtConfigs, KfConfig } from '@kungfu-trader/kungfu-js-api/typings';
+import {
+    KfExtConfigs,
+    KfConfig,
+    BrokerStateStatusTypes,
+} from '@kungfu-trader/kungfu-js-api/typings';
 import { getKfExtensionConfig } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { getAllKfConfigOriginData } from '@kungfu-trader/kungfu-js-api/actions';
 import {
@@ -21,6 +25,7 @@ interface GlobalState {
     mdList: KfConfig[];
     strategyList: KfConfig[];
 
+    appStates: Record<string, BrokerStateStatusTypes | undefined>;
     processStatusData: Pm2ProcessStatusData;
     processStatusWithDetail: Pm2ProcessStatusDetailData;
 }
@@ -37,12 +42,19 @@ export const useGlobalStore = defineStore('global', {
             mdList: [],
             strategyList: [],
 
+            appStates: {},
             processStatusData: {},
             processStatusWithDetail: {},
         };
     },
 
     actions: {
+        setAppStates(
+            appStates: Record<string, BrokerStateStatusTypes | undefined>,
+        ) {
+            this.appStates = appStates;
+        },
+
         setProcessStatus(processStatus: Pm2ProcessStatusData) {
             this.processStatusData = toRaw(processStatus);
         },

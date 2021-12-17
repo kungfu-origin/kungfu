@@ -6,19 +6,16 @@ import KfProcessStatus from '@renderer/components/public/KfProcessStatus.vue';
 
 import { KfCategoryTypes } from '@kungfu-trader/kungfu-js-api/typings';
 import { computed, ref, toRefs, watch } from 'vue';
+import { SystemProcessName } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
 import {
-    KfCategory,
-    SystemProcessName,
-} from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
-import {
-    getExtConfigsRelated,
+    useExtConfigsRelated,
     getInstrumentTypeColor,
     getAllKfConfigData,
     getProcessStatusDetailData,
-    openLogView,
     handleOpenLogview,
 } from '@renderer/assets/methods/uiUtils';
 import {
+    getCategoryData,
     getIfProcessOnline,
     getProcessIdByKfLocation,
     getPropertyFromProcessStatusDetailDataByKfLocation,
@@ -32,7 +29,7 @@ const allKfConfigData = getAllKfConfigData();
 const { processStatusData, processStatusDetailData } = toRefs(
     getProcessStatusDetailData(),
 );
-const { extTypeMap } = getExtConfigsRelated();
+const { extTypeMap } = useExtConfigsRelated();
 
 let hasAlertMasterStop = false;
 let hasAlertLedgerStop = false;
@@ -115,8 +112,16 @@ function handleOpenProcessControllerBoard(): void {
                         >
                             <div class="process-info">
                                 <div class="category info-item">
-                                    <a-tag :color="KfCategory[category].color">
-                                        {{ KfCategory[category].name }}
+                                    <a-tag
+                                        :color="
+                                            getCategoryData(config.category)
+                                                .color
+                                        "
+                                    >
+                                        {{
+                                            getCategoryData(config.category)
+                                                .name
+                                        }}
                                     </a-tag>
                                 </div>
                                 <div
@@ -153,7 +158,7 @@ function handleOpenProcessControllerBoard(): void {
                             </div>
                             <div class="state-status">
                                 <KfProcessStatus
-                                    :status-name="
+                                    :statusName="
                                         getPropertyFromProcessStatusDetailDataByKfLocation(
                                             processStatusDetailData,
                                             config,

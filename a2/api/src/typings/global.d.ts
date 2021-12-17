@@ -366,6 +366,8 @@ interface Watcher {
     step(): boolean;
     updateQuote(): void;
     isReadyToInteract(kfLocation: KfLocation | KfConfig): boolean;
+    getLocationUID(kfLocation: KfLocation | KfConfig): string;
+    getLocation(hashedKey: string): KfLocation;
 }
 
 declare module '@kungfu-trader/kungfu-core' {
@@ -412,3 +414,5 @@ declare module 'tail' {
         on(type: 'error', callback: (err: Error) => void);
     }
 }
+
+declare type ModalChangeType = 'add' | 'update';

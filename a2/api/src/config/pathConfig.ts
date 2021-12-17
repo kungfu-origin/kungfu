@@ -17,33 +17,9 @@ addFileSync('', KF_HOME, 'folder');
 export const KF_RUNTIME_DIR = path.join(KF_HOME, 'runtime');
 addFileSync('', KF_RUNTIME_DIR, 'folder');
 
-//DATASET
-export const KF_DATASET_DIR = path.join(KF_HOME, 'dataset');
-addFileSync('', KF_DATASET_DIR, 'folder');
-
-//marketData in dataSet
-export const KF_DATASET_QUOTE_DIR = path.join(KF_HOME, 'dataset', 'quote');
-addFileSync('', KF_DATASET_QUOTE_DIR, 'folder');
-
 //system
 export const SYSTEM_DIR = path.join(KF_RUNTIME_DIR, 'system');
 addFileSync('', SYSTEM_DIR, 'folder');
-
-//strategy
-export const STRATEGY_DIR = path.join(KF_RUNTIME_DIR, 'strategy');
-addFileSync('', STRATEGY_DIR, 'folder');
-
-//td
-export const TD_DIR = path.join(KF_RUNTIME_DIR, 'td');
-addFileSync('', TD_DIR, 'folder');
-
-//md
-export const MD_DIR = path.join(KF_RUNTIME_DIR, 'md');
-addFileSync('', MD_DIR, 'folder');
-
-//ledger
-export const LEDGER_DIR = path.join(SYSTEM_DIR, 'service', 'ledger');
-addFileSync('', LEDGER_DIR, 'folder');
 
 //log
 export const LOG_DIR = path.join(KF_HOME, 'logview');
@@ -53,11 +29,6 @@ addFileSync('', LOG_DIR, 'folder');
 
 //BASE_DB_DIR strategys, accounts, tasks
 export const BASE_DB_DIR = path.join(SYSTEM_DIR, 'etc', 'kungfu', 'db', 'live');
-
-//================= account related start ==========================
-//gateway
-export const buildGatewayPath = (gatewayName: string) =>
-    path.join(KF_RUNTIME_DIR, ...gatewayName.split('_'));
 
 //================== others start =================================
 
@@ -133,11 +104,9 @@ export const KFC_DIR = process.env.KFC_DIR || path.join(KFC_PARENT_DIR, 'kfc');
 
 export const KFC_EXECUTABLE = process.platform === 'win32' ? 'kfc.exe' : 'kfc';
 
-export const EXTENSION_DIR = path.join(
-    KFC_PARENT_DIR,
-    'kfc',
-    'kungfu_extensions',
-);
+export const EXTENSION_DIR = production
+    ? ''
+    : path.resolve(KFC_PARENT_DIR, '..', '..', '..', 'extensions');
 
 export const TASK_EXTENSION_DIR = production
     ? path.join(global.__kfResourcesPath, 'kungfu-extensions')
@@ -152,3 +121,12 @@ process.env.KFC_DIR = KFC_DIR;
 console.log(`process.cwd = ${process.cwd()}`);
 console.log(`global.__kfResourcesPath = ${global.__kfResourcesPath}`);
 console.log(`KFC_PARENT_DIR = ${KFC_PARENT_DIR}`);
+console.log(`EXTENSION_DIR = ${EXTENSION_DIR}`);
+
+//DATASET
+export const KF_DATASET_DIR = path.join(KF_HOME, 'dataset');
+addFileSync('', KF_DATASET_DIR, 'folder');
+
+//marketData in dataSet
+export const KF_DATASET_QUOTE_DIR = path.join(KF_HOME, 'dataset', 'quote');
+addFileSync('', KF_DATASET_QUOTE_DIR, 'folder');

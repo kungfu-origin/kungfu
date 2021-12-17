@@ -1,12 +1,12 @@
 import path from 'path';
 import dayjs from 'dayjs';
-import fse from 'fs-extra';
+import fse, { Stats } from 'fs-extra';
 import log4js from 'log4js';
-import { buildProcessLogPath } from '../config/pathConfig';
+import { buildProcessLogPath, EXTENSION_DIR } from '../config/pathConfig';
 import {
     InstrumentType,
     KfCategory,
-    StateStatus,
+    AppStateStatus,
 } from '../config/tradingConfig';
 import {
     KfTradeValueCommonData,
@@ -19,12 +19,22 @@ import {
     InstrumentTypes,
     KfConfig,
     KfLocation,
+    KfConfigValue,
+    KfCategoryEnum,
+    BrokerStateStatusTypes,
 } from '../typings';
 import {
+    deleteProcess,
     Pm2ProcessStatusData,
     Pm2ProcessStatusDetail,
     Pm2ProcessStatusDetailData,
+    startLedger,
+    startMaster,
+    startMd,
+    startStrategy,
+    startTd,
 } from './processUtils';
+import { Proc } from 'pm2';
 
 interface SourceAccountId {
     source: string;
@@ -248,364 +258,141 @@ export const buildObjectFromArray = <T>(
 };
 
 export const getInstrumentTypeData = (
-    instrumentType: InstrumentTypeEnum,
+    instrumentType: InstrumentTypes,
 ): KfTradeValueCommonData => {
-    return InstrumentType[instrumentType];
+    return InstrumentType[
+        InstrumentTypeEnum[instrumentType] || InstrumentTypeEnum.unknown
+    ];
 };
 
-export const getKfExtensionConfig = (): Promise<
-    KfExtConfigs | Record<string, unknown>
-> => {
-    const getExtConfigList = (): Promise<KfExtOriginConfig[]> =>
-        Promise.resolve([
-            {
-                key: 'sim',
-                name: 'SIM',
-                config: {
-                    td: {
-                        type: 'Simu',
-                        settings: [
-                            {
-                                key: 'str',
-                                name: 'str',
-                                type: 'str',
-                                errMsg: '请填写 str',
-                                required: true,
-                                primary: true,
-                                validator: ['noUnderlineValidator'],
-                            },
-                            {
-                                key: 'int',
-                                name: 'int',
-                                type: 'int',
-                                errMsg: '请填写 int',
-                                required: true,
-                                primary: true,
-                                validator: ['noUnderlineValidator'],
-                            },
-                            {
-                                key: 'float',
-                                name: 'float',
-                                type: 'float',
-                                errMsg: '请填写 float',
-                                required: true,
-                                primary: true,
-                                validator: ['noUnderlineValidator'],
-                            },
-                            {
-                                key: 'percent',
-                                name: 'percent',
-                                type: 'percent',
-                                errMsg: '请填写 percent',
-                                required: true,
-                                primary: true,
-                                validator: ['noUnderlineValidator'],
-                            },
-                            {
-                                key: 'side',
-                                name: 'side',
-                                type: 'side',
-                                errMsg: '请填写 side',
-                                required: true,
-                                validator: ['noUnderlineValidator'],
-                            },
-                            {
-                                key: 'offset',
-                                name: 'offset',
-                                type: 'offset',
-                                errMsg: '请填写 offset',
-                                required: true,
-                                validator: ['noUnderlineValidator'],
-                            },
-                            {
-                                key: 'direction',
-                                name: 'direction',
-                                type: 'direction',
-                                errMsg: '请填写 direction',
-                                required: true,
-                                validator: ['noUnderlineValidator'],
-                            },
-                            {
-                                key: 'priceType',
-                                name: 'priceType',
-                                type: 'priceType',
-                                errMsg: '请填写 priceType',
-                                required: true,
-                                validator: ['noUnderlineValidator'],
-                            },
+export const getCategoryData = (
+    category: KfCategoryTypes,
+): KfTradeValueCommonData => {
+    if (KfCategory[KfCategoryEnum[category]]) {
+        return KfCategory[KfCategoryEnum[category]];
+    }
 
-                            {
-                                key: 'hedgeFlag',
-                                name: 'hedgeFlag',
-                                type: 'hedgeFlag',
-                                errMsg: '请填写 hedgeFlag',
-                                required: true,
-                                validator: ['noUnderlineValidator'],
-                            },
-                            {
-                                key: 'volumeCondition',
-                                name: 'volumeCondition',
-                                type: 'volumeCondition',
-                                errMsg: '请填写 volumeCondition',
-                                required: true,
-                                validator: ['noUnderlineValidator'],
-                            },
-                            {
-                                key: 'timeCondition',
-                                name: 'timeCondition',
-                                type: 'timeCondition',
-                                errMsg: '请填写 timeCondition',
-                                required: true,
-                                validator: ['noUnderlineValidator'],
-                            },
-                            {
-                                key: 'commissionMode',
-                                name: 'commissionMode',
-                                type: 'commissionMode',
-                                errMsg: '请填写 commissionMode',
-                                required: true,
-                                validator: ['noUnderlineValidator'],
-                            },
-                            {
-                                key: 'instrumentType',
-                                name: 'instrumentType',
-                                type: 'instrumentType',
-                                errMsg: '请填写 instrumentType',
-                                required: true,
-                                validator: ['noUnderlineValidator'],
-                            },
-                            {
-                                key: 'password',
-                                name: 'password',
-                                type: 'password',
-                                errMsg: '请填写 password',
-                                required: true,
-                                validator: ['noUnderlineValidator'],
-                            },
-                            {
-                                key: 'match_mode',
-                                name: 'match_mode',
-                                type: 'select',
-                                options: [
-                                    {
-                                        value: 'reject',
-                                        label: 'reject',
-                                    },
-                                    {
-                                        value: 'pend',
-                                        label: 'pend',
-                                    },
-                                    {
-                                        value: 'cancel',
-                                        label: 'cancel',
-                                    },
-                                    {
-                                        value: 'partialfillandcancel',
-                                        label: 'partialfillandcancel',
-                                    },
-                                    {
-                                        value: 'partialfill',
-                                        label: 'partialfill',
-                                    },
-                                    {
-                                        value: 'fill',
-                                        label: 'fill',
-                                    },
-                                ],
-                                errMsg: '请选择撮合模式',
-                                required: true,
-                            },
-                            {
-                                key: 'exchange',
-                                name: 'exchange',
-                                type: 'exchange',
-                                errMsg: '请填写 exchange',
-                                required: true,
-                                validator: ['noUnderlineValidator'],
-                            },
-                            {
-                                key: 'file',
-                                name: 'file',
-                                type: 'file',
-                                errMsg: '请填写 file',
-                                required: true,
-                            },
-                        ],
-                    },
-                },
-            },
-            {
-                key: 'xtp',
-                name: 'XTP',
-                config: {
-                    td: {
-                        type: ['Stock', 'TechStock', 'Bond'],
-                        settings: [
-                            {
-                                key: 'account_id',
-                                name: 'account_id',
-                                type: 'str',
-                                errMsg: '请填写账户 account_id',
-                                required: true,
-                                primary: true,
-                                validator: ['noUnderlineValidator'],
-                            },
-                            {
-                                key: 'match_mode',
-                                name: 'match_mode',
-                                type: 'select',
-                                options: [
-                                    {
-                                        value: 'reject',
-                                        label: 'reject',
-                                    },
-                                    {
-                                        value: 'pend',
-                                        label: 'pend',
-                                    },
-                                    {
-                                        value: 'cancel',
-                                        label: 'cancel',
-                                    },
-                                    {
-                                        value: 'partialfillandcancel',
-                                        label: 'partialfillandcancel',
-                                    },
-                                    {
-                                        value: 'partialfill',
-                                        label: 'partialfill',
-                                    },
-                                    {
-                                        value: 'fill',
-                                        label: 'fill',
-                                    },
-                                ],
-                                errMsg: '请选择撮合模式',
-                                required: true,
-                            },
-                        ],
-                    },
-                },
-            },
-            {
-                key: 'ctp',
-                name: 'CTP',
-                config: {
-                    td: {
-                        type: ['Future'],
-                        settings: [
-                            {
-                                key: 'account_id',
-                                name: 'account_id',
-                                type: 'str',
-                                errMsg: '请填写账户 account_id',
-                                required: true,
-                                primary: true,
-                                validator: ['noUnderlineValidator'],
-                            },
-                            {
-                                key: 'match_mode',
-                                name: 'match_mode',
-                                type: 'select',
-                                options: [
-                                    {
-                                        value: 'reject',
-                                        label: 'reject',
-                                    },
-                                    {
-                                        value: 'pend',
-                                        label: 'pend',
-                                    },
-                                    {
-                                        value: 'cancel',
-                                        label: 'cancel',
-                                    },
-                                    {
-                                        value: 'partialfillandcancel',
-                                        label: 'partialfillandcancel',
-                                    },
-                                    {
-                                        value: 'partialfill',
-                                        label: 'partialfill',
-                                    },
-                                    {
-                                        value: 'fill',
-                                        label: 'fill',
-                                    },
-                                ],
-                                errMsg: '请选择撮合模式',
-                                required: true,
-                            },
-                        ],
-                    },
-                    md: {
-                        type: ['Future'],
-                        settings: [
-                            {
-                                key: 'account_id',
-                                name: 'account_id',
-                                type: 'str',
-                                errMsg: '请填写账户 account_id',
-                                required: true,
-                                primary: true,
-                                validator: ['noUnderlineValidator'],
-                            },
-                            {
-                                key: 'match_mode',
-                                name: 'match_mode',
-                                type: 'select',
-                                options: [
-                                    {
-                                        value: 'reject',
-                                        label: 'reject',
-                                    },
-                                    {
-                                        value: 'pend',
-                                        label: 'pend',
-                                    },
-                                    {
-                                        value: 'cancel',
-                                        label: 'cancel',
-                                    },
-                                    {
-                                        value: 'partialfillandcancel',
-                                        label: 'partialfillandcancel',
-                                    },
-                                    {
-                                        value: 'partialfill',
-                                        label: 'partialfill',
-                                    },
-                                    {
-                                        value: 'fill',
-                                        label: 'fill',
-                                    },
-                                ],
-                                errMsg: '请选择撮合模式',
-                                required: true,
-                            },
-                        ],
-                    },
-                },
-            },
-        ]);
+    throw new Error(`Category ${category} is illegal`);
+};
 
-    return getExtConfigList().then((kfExtConfigList: KfExtOriginConfig[]) => {
-        return getKfExtensionConfigByCategory(kfExtConfigList);
+const getChildFileStat = async (
+    dirname: string,
+): Promise<Array<{ childFilePath: string; stat: Stats }>> => {
+    fse.ensureDirSync(dirname);
+    const cDirs = await fse.readdir(dirname);
+    const statsDatas: Array<{ childFilePath: string; stat: Stats }> =
+        await Promise.all(
+            cDirs.map((cDir: string) => {
+                const childFilePath = path.join(dirname, cDir);
+                return fse.stat(childFilePath).then((stat: Stats) => {
+                    return {
+                        childFilePath,
+                        stat,
+                    };
+                });
+            }),
+        );
+
+    return statsDatas;
+};
+
+export const flattenExtensionModuleDirs = async (
+    extensionDirs: string[],
+): Promise<string[]> => {
+    let extensionModuleDirs: string[] = [];
+
+    const statsList = await Promise.all(
+        extensionDirs.map((dirname: string) => {
+            return getChildFileStat(dirname);
+        }),
+    );
+
+    let i = 0,
+        len = statsList.length;
+    for (i = 0; i < len; i++) {
+        const statsDatas = statsList[i];
+        for (let r = 0; r < statsDatas.length; r++) {
+            const statsData = statsDatas[r];
+            const { childFilePath, stat } = statsData;
+            if (stat.isDirectory()) {
+                if (
+                    process.env.NODE_ENV === 'production' ||
+                    childFilePath.includes('dist')
+                ) {
+                    if (
+                        fse.pathExistsSync(
+                            path.join(childFilePath, 'package.json'),
+                        )
+                    ) {
+                        extensionModuleDirs.push(childFilePath);
+                    }
+                } else {
+                    const extModules = await flattenExtensionModuleDirs([
+                        path.join(childFilePath, 'dist'),
+                    ]);
+                    extensionModuleDirs =
+                        extensionModuleDirs.concat(extModules);
+                }
+            }
+        }
+    }
+
+    return extensionModuleDirs;
+};
+
+const getKfExtConfigList = async (): Promise<KfExtOriginConfig[]> => {
+    const extModuleDirs = await flattenExtensionModuleDirs([EXTENSION_DIR]);
+    const packageJSONPaths = extModuleDirs.map((item) =>
+        path.join(item, 'package.json'),
+    );
+    return await Promise.all(
+        packageJSONPaths.map((item) => {
+            return fse.readJSON(item);
+        }),
+    ).then((jsonList: { kungfuConfig?: KfExtOriginConfig }[]) => {
+        return jsonList
+            .map((json): KfExtOriginConfig | null => {
+                return (json['kungfuConfig'] as KfExtOriginConfig) || null;
+            })
+            .filter(
+                (config: KfExtOriginConfig | null): boolean => !!config,
+            ) as KfExtOriginConfig[];
     });
 };
 
-function getKfExtensionConfigByCategory(
+const resolveInstrumentTypesInExtType = (
+    types: InstrumentTypes | InstrumentTypes[],
+): InstrumentTypes[] => {
+    if (typeof types === 'string') {
+        types = [types.toLowerCase() as InstrumentTypes];
+        return types;
+    }
+
+    if (!types.length) {
+        return ['unknown'];
+    }
+
+    return types.map((type) => type.toLowerCase()) as InstrumentTypes[];
+};
+
+const getKfExtensionConfigByCategory = (
     extConfigs: KfExtOriginConfig[],
-): KfExtConfigs | Record<string, unknown> {
-    let configByCategory: KfExtConfigs | null = {};
+): KfExtConfigs | Record<string, unknown> => {
+    let configByCategory: KfExtConfigs = {};
     extConfigs.forEach((extConfig: KfExtOriginConfig) => {
         const extKey = extConfig.key;
         (Object.keys(extConfig['config']) as KfCategoryTypes[]).forEach(
             (category: KfCategoryTypes) => {
                 if (configByCategory) {
+                    const configOfCategory = extConfig['config'][category];
                     configByCategory[category] = {
                         ...(configByCategory[category] || {}),
-                        [extKey]: extConfig['config'][category],
+                        [extKey]: {
+                            type: resolveInstrumentTypesInExtType(
+                                configOfCategory?.type || [],
+                            ),
+                            settings: configOfCategory?.settings || [],
+                        },
                     };
                 }
             },
@@ -613,7 +400,73 @@ function getKfExtensionConfigByCategory(
     });
 
     return configByCategory;
-}
+};
+
+export const getKfExtensionConfig = async (): Promise<
+    KfExtConfigs | Record<string, unknown>
+> => {
+    const kfExtConfigList = await getKfExtConfigList();
+    return getKfExtensionConfigByCategory(kfExtConfigList);
+};
+
+export const buildExtTypeMap = (
+    extConfigs: KfExtConfigs,
+    category: KfCategoryTypes,
+): Record<string, InstrumentTypes> => {
+    const extTypeMap: Record<string, InstrumentTypes> = {};
+    const targetCategoryConfig: Record<
+        string,
+        KfExtOriginConfig['config'][KfCategoryTypes]
+    > = extConfigs[category] || {};
+
+    Object.keys(targetCategoryConfig).forEach((extKey: string) => {
+        const configInKfExtConfig = targetCategoryConfig[extKey];
+        const types = resolveInstrumentTypesInExtType(
+            configInKfExtConfig?.type || [],
+        );
+
+        if (!types.length) {
+            extTypeMap[extKey] = 'unknown';
+            return;
+        }
+
+        const primaryType = types.sort(
+            (type1: InstrumentTypes, type2: InstrumentTypes) => {
+                const level1 =
+                    (
+                        InstrumentType[
+                            InstrumentTypeEnum[type1] ||
+                                InstrumentTypeEnum.unknown
+                        ] || {}
+                    ).level || 0;
+                const level2 =
+                    (
+                        InstrumentType[
+                            InstrumentTypeEnum[type2] ||
+                                InstrumentTypeEnum.unknown
+                        ] || {}
+                    ).level || 0;
+                return level2 - level1;
+            },
+        )[0];
+
+        extTypeMap[extKey] = primaryType;
+    });
+
+    return extTypeMap;
+};
+
+export const statTime = (name: string) => {
+    if (process.env.NODE_ENV !== 'production') {
+        console.time(name);
+    }
+};
+
+export const statTimeEnd = (name: string) => {
+    if (process.env.NODE_ENV !== 'production') {
+        console.timeEnd(name);
+    }
+};
 
 export const getSourceDataList = (
     extConfigs: KfExtConfigs,
@@ -739,18 +592,10 @@ export const getIdByKfLocation = (
     throw new Error(`Category ${kfLocation.category.toString()} is illegal`);
 };
 
-export const getCategoryName = (kfLocation: KfLocation | KfConfig): string => {
-    if (KfCategory[kfLocation.category]) {
-        return KfCategory[kfLocation.category].name;
-    }
-
-    throw new Error(`Category ${kfLocation.category} is illegal`);
-};
-
 export const getStateStatusData = (
     name: ProcessStatusTypes | undefined,
 ): KfTradeValueCommonData | undefined => {
-    return name === undefined ? StateStatus['Unknown'] : StateStatus[name];
+    return name === undefined ? undefined : AppStateStatus[name];
 };
 
 export const getIfProcessOnline = (
@@ -766,17 +611,37 @@ export const getIfProcessOnline = (
     return false;
 };
 
+export const getAppStateStatusName = (
+    kfConfig: KfConfig,
+    processStatusData: Pm2ProcessStatusData,
+    appStates: Record<string, BrokerStateStatusTypes | undefined>,
+): ProcessStatusTypes | undefined => {
+    const processId = getProcessIdByKfLocation(kfConfig);
+
+    if (!processStatusData[processId]) {
+        return undefined;
+    }
+
+    if (appStates[processId]) {
+        return appStates[processId];
+    }
+
+    const processStatus = processStatusData[processId];
+    return processStatus;
+};
+
+//TOOD
 export const getPropertyFromProcessStatusDetailDataByKfLocation = (
     processStatusDetailData: Pm2ProcessStatusDetailData,
     kfLocation: KfLocation | KfConfig,
 ): {
-    status: ProcessStatusTypes;
+    status: ProcessStatusTypes | undefined;
     cpu: number;
     memory: string;
 } => {
     const processStatusDetail: Pm2ProcessStatusDetail =
         processStatusDetailData[getProcessIdByKfLocation(kfLocation)] || {};
-    const status = processStatusDetail.status || 'Unknown';
+    const status = processStatusDetail.status;
     const monit = processStatusDetail.monit || {};
 
     return {
@@ -784,58 +649,6 @@ export const getPropertyFromProcessStatusDetailDataByKfLocation = (
         cpu: monit.cpu || 0,
         memory: Number((monit.memory || 0) / (1024 * 1024)).toFixed(2),
     };
-};
-
-export const buildExtTypeMap = (
-    extConfigs: KfExtConfigs,
-    category: KfCategoryTypes,
-): Record<string, InstrumentTypes> => {
-    const extTypeMap: Record<string, InstrumentTypes> = {};
-    const targetCategoryConfig: Record<
-        string,
-        KfExtOriginConfig['config'][KfCategoryTypes]
-    > = extConfigs[category] || {};
-
-    Object.keys(targetCategoryConfig).forEach((extKey: string) => {
-        const configInKfExtConfig = targetCategoryConfig[extKey];
-        let types = configInKfExtConfig?.type || [];
-        if (typeof types === 'string') {
-            types = [types];
-        }
-
-        if (!types.length) {
-            extTypeMap[extKey] = 'Unknown';
-            return;
-        }
-
-        const primaryType = types.sort(
-            (type1: InstrumentTypes, type2: InstrumentTypes) => {
-                const level1 =
-                    (InstrumentType[InstrumentTypeEnum[type1]] || {}).level ||
-                    0;
-                const level2 =
-                    (InstrumentType[InstrumentTypeEnum[type2]] || {}).level ||
-                    0;
-                return level2 - level1;
-            },
-        )[0];
-
-        extTypeMap[extKey] = primaryType;
-    });
-
-    return extTypeMap;
-};
-
-export const statTime = (name: string) => {
-    if (process.env.NODE_ENV !== 'production') {
-        console.time(name);
-    }
-};
-
-export const statTimeEnd = (name: string) => {
-    if (process.env.NODE_ENV !== 'production') {
-        console.timeEnd(name);
-    }
 };
 
 export class KfNumList<T> {
@@ -869,4 +682,59 @@ export const debounce = (fn: Function, delay = 300, immediate = false) => {
 
 export const getConfigValue = (kfConfig: KfConfig) => {
     return JSON.parse(kfConfig.value || '{}');
+};
+
+export const buildIdByKeysFromKfConfigSettings = (
+    kfConfigSetting: Record<string, KfConfigValue>,
+    keys: string[],
+) => {
+    return keys
+        .map((key) => kfConfigSetting[key])
+        .filter((value) => value !== undefined)
+        .join('_');
+};
+
+export const switchKfLocation = (
+    watcher: Watcher | null,
+    kfLocation: KfLocation | KfConfig,
+    targetStatus: boolean,
+): Promise<void | Proc> => {
+    const processId = getProcessIdByKfLocation(kfLocation);
+
+    if (!targetStatus) {
+        if (kfLocation.category !== 'system') {
+            if (watcher && !watcher.isReadyToInteract(kfLocation)) {
+                return Promise.reject(
+                    new Error(`${processId} 还未准备就绪, 请稍后重试`),
+                );
+            }
+        }
+
+        return deleteProcess(processId);
+    }
+
+    switch (kfLocation.category) {
+        case 'system':
+            if (kfLocation.name === 'master') {
+                return startMaster(true);
+            } else if (kfLocation.name === 'ledger') {
+                return startLedger(true);
+            }
+
+        case 'td':
+            return startTd(getIdByKfLocation(kfLocation));
+        case 'md':
+            return startMd(getIdByKfLocation(kfLocation));
+
+        case 'strategy':
+            const strategyPath =
+                JSON.parse((kfLocation as KfConfig)?.value || '{}')
+                    .strategy_path || '';
+            if (!strategyPath) {
+                throw new Error('Start Stratgy without strategy_path');
+            }
+            return startStrategy(getIdByKfLocation(kfLocation), strategyPath);
+        default:
+            return Promise.resolve();
+    }
 };
