@@ -262,6 +262,9 @@ void bind(pybind11::module &&m) {
       .def("on_start", &MarketData::on_start)
       .def("now", &MarketData::now)
       .def("get_writer", &MarketData::get_writer)
+      .def("add_timer", &MarketData::add_timer)
+      .def("add_time_interval", &MarketData::add_time_interval)
+      .def("update_broker_state", &MarketData::update_broker_state)
       .def("subscribe", &MarketData::subscribe)
       .def("subscribe_all", &MarketData::subscribe_all)
       .def("unsubscribe", &MarketData::unsubscribe);
@@ -273,11 +276,14 @@ void bind(pybind11::module &&m) {
       .def_property_readonly("config", &Trader::get_config)
       .def_property_readonly("home", &Trader::get_home)
       .def("on_start", &Trader::on_start)
+      .def("now", &Trader::now)
       .def("get_writer", &Trader::get_writer)
       .def("get_account_type", &Trader::get_account_type)
+      .def("add_timer", &Trader::add_timer)
+      .def("add_time_interval", &Trader::add_time_interval)
+      .def("update_broker_state", &Trader::update_broker_state)
       .def("insert_order", &Trader::insert_order)
-      .def("cancel_order", &Trader::cancel_order)
-      .def("update_broker_state", &Trader::update_broker_state);
+      .def("cancel_order", &Trader::cancel_order);
 
   py::class_<MarketDataVendor, BrokerVendor, std::shared_ptr<MarketDataVendor>>(m, "MarketDataVendor")
       .def(py::init<locator_ptr, const std::string &, const std::string &, bool>())

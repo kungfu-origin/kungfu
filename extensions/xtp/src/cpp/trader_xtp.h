@@ -5,13 +5,8 @@
 #ifndef KUNGFU_XTP_EXT_TRADER_H
 #define KUNGFU_XTP_EXT_TRADER_H
 
-#include <kungfu/common.h>
-#include <kungfu/longfist/longfist.h>
 #include <kungfu/wingchun/broker/trader.h>
-#include <kungfu/yijinjing/common.h>
-
-#include "common.h"
-#include "xtp_trader_api.h"
+#include <xtp_trader_api.h>
 
 namespace kungfu::wingchun::xtp {
 using namespace kungfu::longfist;

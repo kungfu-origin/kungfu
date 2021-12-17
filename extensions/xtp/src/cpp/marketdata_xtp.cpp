@@ -2,11 +2,33 @@
 // Created by qlu on 2019/2/11.
 //
 
+#include "type_convert.h"
 #include "marketdata_xtp.h"
-#include "serialize_xtp.h"
-#include "type_convert_xtp.h"
 
 namespace kungfu::wingchun::xtp {
+struct MDConfiguration {
+  int client_id;
+  std::string account_id;
+  std::string password;
+  std::string md_ip;
+  int md_port;
+  std::string protocol;
+  int buffer_size;
+};
+
+void from_json(const nlohmann::json &j, MDConfiguration &c) {
+  j.at("client_id").get_to(c.client_id);
+  j.at("account_id").get_to(c.account_id);
+  j.at("password").get_to(c.password);
+  j.at("md_ip").get_to(c.md_ip);
+  j.at("md_port").get_to(c.md_port);
+  c.protocol = j.value("protocol", "tcp");
+  if (c.protocol != "udp") {
+    c.protocol = "tcp";
+  }
+  c.buffer_size = j.value("buffer_size", 64);
+}
+
 MarketDataXTP::MarketDataXTP(broker::BrokerVendor &vendor)
     : MarketData(vendor), api_(nullptr) {}
 

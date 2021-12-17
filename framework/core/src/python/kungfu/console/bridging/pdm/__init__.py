@@ -81,6 +81,11 @@ class MakeupCommand(BaseCommand):
 
 class BridgingCore(Core):
     def __init__(self):
+        try:
+            from importlib import metadata
+            metadata.version('pdm')
+        except:
+            pass
         super().__init__()
 
     def init_parser(self):

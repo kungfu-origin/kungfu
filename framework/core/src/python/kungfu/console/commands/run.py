@@ -7,7 +7,6 @@ from kungfu.yijinjing import journal as kfj
 from kungfu.yijinjing.practice.executor import ExecutorRegistry
 from kungfu.yijinjing.practice.master import Master
 from kungfu.wingchun.replay import setup
-from kungfu_extensions import EXTENSION_REGISTRY_MD
 
 lf = kungfu.__binding__.longfist
 wc = kungfu.__binding__.wingchun
@@ -15,7 +14,7 @@ yjj = kungfu.__binding__.yijinjing
 service_command_context = kfc.pass_context("low_latency")
 
 
-@kfc.command()
+@kfc.command(help_priority=1)
 @click.option(
     "-m", "--mode", default="live", type=click.Choice(kfj.MODES.keys()), help="mode"
 )
@@ -52,7 +51,7 @@ def run(ctx, mode, category, group, name, low_latency, file):
     ctx.executors[category][group][name](mode, low_latency)
 
 
-@kfc.command(cls=PrioritizedCommandGroup)
+@kfc.command(cls=PrioritizedCommandGroup, help_priority=-1)
 def service(ctx):
     pass
 
@@ -92,7 +91,6 @@ def ledger(ctx, replay, session_id):
     "-s",
     "--source",
     required=True,
-    type=click.Choice(EXTENSION_REGISTRY_MD.names()),
     help="data source",
 )
 @click.option(

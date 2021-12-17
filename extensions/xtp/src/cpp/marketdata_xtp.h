@@ -5,13 +5,8 @@
 #ifndef KUNGFU_XTP_EXT_MARKET_DATA_H
 #define KUNGFU_XTP_EXT_MARKET_DATA_H
 
-#include <kungfu/common.h>
-#include <kungfu/longfist/longfist.h>
 #include <kungfu/wingchun/broker/marketdata.h>
-#include <kungfu/yijinjing/common.h>
-
-#include "common.h"
-#include "xtp_quote_api.h"
+#include <xtp_quote_api.h>
 
 namespace kungfu::wingchun::xtp {
 class MarketDataXTP : public XTP::API::QuoteSpi, public broker::MarketData {

@@ -57,6 +57,10 @@ public:
 
   [[nodiscard]] yijinjing::journal::writer_ptr get_writer(uint32_t dest_id) const;
 
+  void add_timer(int64_t nanotime, const std::function<void(const event_ptr &)> &callback);
+
+  void add_time_interval(int64_t nanotime, const std::function<void(const event_ptr &)> &callback);
+
   void update_broker_state(BrokerState state);
 
 protected:
