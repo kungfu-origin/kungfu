@@ -23,7 +23,6 @@ strategy_command_context = kfc.pass_context(
 @click.option("-x", "--low_latency", is_flag=True, help="run in low latency mode")
 @kfc.pass_context()
 def strategy(ctx, group, name, low_latency):
-    kfc.pass_ctx_from_parent(ctx)
     ctx.group = group
     ctx.name = name
     ctx.low_latency = low_latency if not replay else True

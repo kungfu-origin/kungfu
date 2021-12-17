@@ -7,6 +7,7 @@ import kungfu
 
 from kungfu.console import site
 from kungfu.yijinjing import journal as kfj
+from kungfu.yijinjing.log import create_logger
 from kungfu.yijinjing.practice.master import Master
 from kungfu.yijinjing.practice.coloop import KungfuEventLoop
 from kungfu.wingchun.strategy import Runner, Strategy
@@ -31,7 +32,9 @@ class ExecutorRegistry:
             },
             "md": {},
             "td": {},
-            "strategy": {}
+            "strategy": {
+                "default": ExtensionLoader(self.ctx, None, None)
+            }
         }
         if ctx.extension_path:
             deque(map(self.register_extensions, ctx.extension_path.split(path.pathsep)))
@@ -121,9 +124,13 @@ class ExtensionExecutor:
 
     def run_strategy(self):
         ctx = self.ctx
-        ctx.strategy = load_strategy(ctx, ctx.file)
-        ctx.runner = Runner(ctx, ctx.mode)
-        ctx.runner.addStrategy(ctx.strategy)
+        ctx.location = yjj.location(
+            kfj.MODES[ctx.mode], lf.enums.category.STRATEGY, ctx.group, ctx.name, ctx.runtime_locator
+        )
+        ctx.logger = create_logger(ctx.name, ctx.log_level, ctx.location)
+        ctx.strategy = load_strategy(ctx, ctx.path)
+        ctx.runner = Runner(ctx, kfj.MODES[ctx.mode])
+        ctx.runner.add_strategy(ctx.strategy)
         ctx.loop = KungfuEventLoop(ctx, ctx.runner)
         ctx.loop.run_forever()
 

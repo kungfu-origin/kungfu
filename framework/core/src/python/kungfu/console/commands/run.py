@@ -28,15 +28,15 @@ service_command_context = kfc.pass_context("low_latency")
 @click.option("-g", "--group", type=str, default="*", help="group")
 @click.option("-n", "--name", type=str, default="*", help="name")
 @click.option("-x", "--low-latency", is_flag=True, help="run in low latency mode")
-@click.argument("file", type=str, required=False)
+@click.argument("path", type=str, required=False)
 @kfc.pass_context()
-def run(ctx, mode, category, group, name, low_latency, file):
+def run(ctx, mode, category, group, name, low_latency, path):
     ctx.mode = mode
     ctx.category = category
     ctx.group = group
     ctx.name = name
     ctx.low_latency = low_latency
-    ctx.file = file
+    ctx.path = path
 
     registry = ExecutorRegistry(ctx)
     registry[category][group][name](mode, low_latency)
