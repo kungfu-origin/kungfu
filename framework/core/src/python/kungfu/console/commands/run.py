@@ -28,30 +28,22 @@ service_command_context = kfc.pass_context("low_latency")
 @click.option("-g", "--group", type=str, default="*", help="group")
 @click.option("-n", "--name", type=str, default="*", help="name")
 @click.option("-x", "--low-latency", is_flag=True, help="run in low latency mode")
-@click.argument("file", type=str, required=False)
+@click.argument("path", type=str, required=False)
 @kfc.pass_context()
-def run(ctx, mode, category, group, name, low_latency, file):
+def run(ctx, mode, category, group, name, low_latency, path):
     ctx.mode = mode
     ctx.category = category
     ctx.group = group
     ctx.name = name
     ctx.low_latency = low_latency
-    ctx.file = file
-    ctx.location = yjj.location(
-        kfj.MODES[mode], kfj.CATEGORIES[category], group, name, ctx.runtime_locator
-    )
+    ctx.path = path
 
-    ctx.config = ctx.location.to(lf.types.Config())
-    try:
-        ctx.config = yjj.profile(ctx.runtime_locator).get(ctx.config)
-    except:
-        pass
-
-    ctx.executors = ExecutorRegistry(ctx)
-    ctx.executors[category][group][name](mode, low_latency)
+    registry = ExecutorRegistry(ctx)
+    registry[category][group][name](mode, low_latency)
 
 
 @kfc.command(cls=PrioritizedCommandGroup, help_priority=-1)
+@kfc.pass_context()
 def service(ctx):
     pass
 

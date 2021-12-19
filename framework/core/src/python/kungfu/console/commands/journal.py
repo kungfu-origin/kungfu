@@ -35,7 +35,7 @@ journal_command_context = kfc.pass_context(
 )
 
 
-@kfc.group(cls=PrioritizedCommandGroup)
+@kfc.group(cls=PrioritizedCommandGroup, help_priority=2)
 @click.option(
     "-m", "--mode", default="*", type=click.Choice(kfj.MODES.keys()), help="mode"
 )

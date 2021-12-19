@@ -115,16 +115,10 @@ class PrioritizedCommandGroup(click.Group):
     type=str,
     help="name for the process, defaults to command if not set",
 )
-@click.option(
-    "-c",
-    "--code",
-    type=str,
-    help="python code passed in as string",
-)
 @click.help_option("-h", "--help")
 @click.version_option(kungfu.__version__, "--version", message=kungfu.__version__)
 @click.pass_context
-def kfc(ctx, home, extension_path, log_level, name, code):
+def kfc(ctx, home, extension_path, log_level, name):
     if not home:
         osname = platform.system()
         user_home = os.path.expanduser("~")
@@ -188,10 +182,7 @@ def kfc(ctx, home, extension_path, log_level, name, code):
 
     ctx.name = name if name else ctx.invoked_subcommand
 
-    if code is not None:
-        exec(code)
-
-    if ctx.invoked_subcommand is None and code is None:
+    if ctx.invoked_subcommand is None:
         click.echo(kfc.get_help(ctx))
 
     pass
