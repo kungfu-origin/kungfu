@@ -7,6 +7,13 @@ export const columns: AntTableColumns = [
         width: 90,
     },
     {
+        title: '策略文件',
+        dataIndex: 'strategyFile',
+        align: 'left',
+        sorter: true,
+        width: 120,
+    },
+    {
         title: '进程',
         dataIndex: 'processStatus',
         align: 'center',
@@ -34,13 +41,7 @@ export const columns: AntTableColumns = [
         sorter: true,
         width: 90,
     },
-    {
-        title: '策略路径',
-        dataIndex: 'strategyPath',
-        align: 'left',
-        sorter: true,
-        width: 160,
-    },
+
     {
         title: '操作',
         dataIndex: 'actions',

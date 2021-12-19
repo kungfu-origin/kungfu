@@ -10,6 +10,7 @@ import {
     computed,
     getCurrentInstance,
     onMounted,
+    toRefs,
 } from 'vue';
 import {
     APP_DIR,
@@ -18,6 +19,7 @@ import {
 import {
     buildExtTypeMap,
     buildObjectFromArray,
+    getAppStateStatusName,
     getInstrumentTypeData,
     getProcessIdByKfLocation,
     getTradingDate,
@@ -42,10 +44,12 @@ import {
     KfConfigValue,
     KfExtConfigs,
     KfTradeValueCommonData,
-    SetKfConfigPayload,
     AntInKungfuColorTypes,
     KfConfig,
     BrokerStateStatusTypes,
+    KfLocation,
+    ProcessStatusTypes,
+    KfConfigItem,
 } from '@kungfu-trader/kungfu-js-api/typings';
 
 import {
@@ -158,11 +162,10 @@ export const useTableSearchKeyword = <T>(
 };
 
 export const initFormDataByConfig = (
-    config: SetKfConfigPayload['config'],
+    configSettings: KfConfigItem[],
     initValue?: Record<string, KfConfigValue>,
 ): Record<string, KfConfigValue> => {
-    const settings = config?.settings;
-    if (!settings) return {};
+    if (!configSettings) return {};
 
     const booleanType = ['bool'];
     const numberType = [
@@ -180,7 +183,7 @@ export const initFormDataByConfig = (
         'instrumentType', // select - number
     ];
     const formState: Record<string, KfConfigValue> = {};
-    settings.forEach((item) => {
+    configSettings.forEach((item) => {
         const type = item.type;
         const isBoolean = booleanType.includes(type);
         const isNumber = numberType.includes(type);
@@ -267,29 +270,57 @@ export const useExtConfigsRelated = (): {
     };
 };
 
-export const getProcessStatusDetailData = (): {
-    processStatusData: Pm2ProcessStatusData;
-    processStatusDetailData: Pm2ProcessStatusDetailData;
+export const useProcessStatusDetailData = (): {
+    processStatusData: Ref<Pm2ProcessStatusData>;
+    processStatusDetailData: Ref<Pm2ProcessStatusDetailData>;
+    appStates: Ref<Record<string, BrokerStateStatusTypes>>;
+    getProcessStatusName(
+        kfConfig: KfConfig | KfLocation,
+    ): ProcessStatusTypes | undefined;
 } => {
     const app = getCurrentInstance();
-    const allProcessStatusData = reactive({
+    const allProcessStatusData = reactive<{
+        processStatusData: Pm2ProcessStatusData;
+        processStatusDetailData: Pm2ProcessStatusDetailData;
+        appStates: Record<string, BrokerStateStatusTypes>;
+    }>({
         processStatusData: {},
         processStatusDetailData: {},
+        appStates: {},
     });
 
     onMounted(() => {
         if (app?.proxy) {
-            const { processStatusData, processStatusWithDetail } = storeToRefs(
-                app?.proxy.$useGlobalStore(),
-            );
+            const { processStatusData, processStatusWithDetail, appStates } =
+                storeToRefs(app?.proxy.$useGlobalStore());
             allProcessStatusData.processStatusData =
                 processStatusData as Pm2ProcessStatusData;
             allProcessStatusData.processStatusDetailData =
                 processStatusWithDetail as Pm2ProcessStatusDetailData;
+            allProcessStatusData.appStates = appStates as Record<
+                string,
+                BrokerStateStatusTypes
+            >;
         }
     });
 
-    return allProcessStatusData;
+    const getProcessStatusName = (kfConfig: KfConfig | KfLocation) => {
+        return getAppStateStatusName(
+            kfConfig,
+            allProcessStatusData.processStatusData,
+            allProcessStatusData.appStates,
+        );
+    };
+
+    const { processStatusData, processStatusDetailData, appStates } =
+        toRefs(allProcessStatusData);
+
+    return {
+        processStatusData,
+        processStatusDetailData,
+        appStates,
+        getProcessStatusName,
+    };
 };
 
 export const getAllKfConfigData = (): Record<KfCategoryTypes, KfConfig[]> => {
@@ -497,24 +528,34 @@ export const useDashboardBodySize = (): {
     };
 };
 
-export const useAppStates = (): {
-    value: Record<string, BrokerStateStatusTypes | undefined>;
+export const useAssets = (): {
+    assets: { value: Record<string, Asset> };
+    getAssetsByKfConfig(
+        kfLocation: KfLocation,
+    ): Asset | Record<string, unknown>;
 } => {
-    const appStatesResolved = reactive<{
-        value: Record<string, BrokerStateStatusTypes | undefined>;
-    }>({
+    const assetsResolved = reactive<{ value: Record<string, Asset> }>({
         value: {},
     });
+
     const app = getCurrentInstance();
 
     onMounted(() => {
         if (app?.proxy) {
-            const { appStates } = storeToRefs(app?.proxy.$useGlobalStore());
-            appStatesResolved.value = appStates;
+            const { assets } = storeToRefs(app?.proxy.$useGlobalStore());
+            assetsResolved.value = assets;
         }
     });
 
-    return appStatesResolved;
+    const getAssetsByKfConfig = (kfConfig: KfConfig | KfLocation) => {
+        const processId = getProcessIdByKfLocation(kfConfig);
+        return assetsResolved.value[processId] || {};
+    };
+
+    return {
+        assets: assetsResolved,
+        getAssetsByKfConfig,
+    };
 };
 
 export const getKfLocationUID = (kfConfig: KfConfig): string => {

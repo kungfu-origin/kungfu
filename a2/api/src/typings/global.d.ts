@@ -28,6 +28,7 @@ interface ConfigStore {
 }
 
 interface DataTable<T> extends T {
+    [prop: string]: T;
     filter(key: string, value: string | number | bigint): DataTable<T>;
     sort(key: string): T[];
 }
@@ -367,7 +368,7 @@ interface Watcher {
     updateQuote(): void;
     isReadyToInteract(kfLocation: KfLocation | KfConfig): boolean;
     getLocationUID(kfLocation: KfLocation | KfConfig): string;
-    getLocation(hashedKey: string): KfLocation;
+    getLocation(hashedKey: string | number): KfLocation;
 }
 
 declare module '@kungfu-trader/kungfu-core' {

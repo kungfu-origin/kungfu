@@ -11,7 +11,7 @@ import {
     useExtConfigsRelated,
     getInstrumentTypeColor,
     getAllKfConfigData,
-    getProcessStatusDetailData,
+    useProcessStatusDetailData,
     handleOpenLogview,
 } from '@renderer/assets/methods/uiUtils';
 import {
@@ -26,9 +26,8 @@ import { Pm2ProcessStatusTypes } from '@kungfu-trader/kungfu-js-api/utils/proces
 const processControllerBoardVisible = ref<boolean>(false);
 const categoryList: KfCategoryTypes[] = ['system', 'td', 'md', 'strategy'];
 const allKfConfigData = getAllKfConfigData();
-const { processStatusData, processStatusDetailData } = toRefs(
-    getProcessStatusDetailData(),
-);
+const { processStatusData, processStatusDetailData, getProcessStatusName } =
+    useProcessStatusDetailData();
 const { extTypeMap } = useExtConfigsRelated();
 
 let hasAlertMasterStop = false;
@@ -158,12 +157,7 @@ function handleOpenProcessControllerBoard(): void {
                             </div>
                             <div class="state-status">
                                 <KfProcessStatus
-                                    :statusName="
-                                        getPropertyFromProcessStatusDetailDataByKfLocation(
-                                            processStatusDetailData,
-                                            config,
-                                        ).status
-                                    "
+                                    :statusName="getProcessStatusName(config)"
                                 ></KfProcessStatus>
                             </div>
                             <div class="switch">
@@ -227,12 +221,12 @@ function handleOpenProcessControllerBoard(): void {
 
     &.some-process-error {
         .title {
-            color: @red-7;
+            color: @red-6;
             font-weight: bold;
         }
 
         .anticon {
-            color: @red-7;
+            color: @red-6;
         }
     }
 

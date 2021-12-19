@@ -26,14 +26,12 @@ import {
     getAllKfConfigData,
     getInstrumentTypeColor,
     useExtConfigsRelated,
-    getProcessStatusDetailData,
+    useProcessStatusDetailData,
     handleOpenLogview,
     useDashboardBodySize,
     useTableSearchKeyword,
-    useAppStates,
 } from '@renderer/assets/methods/uiUtils';
 import {
-    getAppStateStatusName,
     getIdByKfLocation,
     getIfProcessOnline,
     getProcessIdByKfLocation,
@@ -64,8 +62,8 @@ const { md } = toRefs(getAllKfConfigData());
 const mdIdList = computed(() => {
     return md.value.map((item: KfConfig): string => getIdByKfLocation(item));
 });
-const { processStatusData } = toRefs(getProcessStatusDetailData());
-const appStates = useAppStates();
+const { processStatusData, getProcessStatusName } =
+    useProcessStatusDetailData();
 const { allProcessOnline, handleSwitchAllProcessStatus } = useSwitchAllConfig(
     md,
     processStatusData,
@@ -171,13 +169,7 @@ function handleOpenSetSourceDialog() {
                     </template>
                     <template v-else-if="column.dataIndex === 'stateStatus'">
                         <KfProcessStatus
-                            :statusName="
-                                getAppStateStatusName(
-                                    record,
-                                    processStatusData,
-                                    appStates.value,
-                                )
-                            "
+                            :statusName="getProcessStatusName(record)"
                         ></KfProcessStatus>
                     </template>
                     <template v-else-if="column.dataIndex === 'processStatus'">
@@ -227,8 +219,8 @@ function handleOpenSetSourceDialog() {
             v-if="setMdModalVisible"
             v-model:visible="setMdModalVisible"
             :payload="setMdConfigPayload"
-            :primaryKeyCompareTarget="mdIdList"
-            :primaryKeyCompareExtra="currentSelectedSourceId"
+            :primaryKeyAvoidRepeatCompareTarget="mdIdList"
+            :primaryKeyAvoidRepeatCompareExtra="currentSelectedSourceId"
             @confirm="
                 (formState: Record<string, KfConfigValue>, idByKeys: string, changeType: ModalChangeType) =>
                     handleConfirmAddUpdateKfConfig(

@@ -23,11 +23,11 @@
         "rxjs": "^7.4.0",
         "tail": "^2.2.4",
         "vue": "^3.2.26",
-        "vue-router": "^4.0.0-0",
         "vue-virtual-scroller": "^2.0.0-alpha.1",
         "yarn": "^1.22.17"
     },
     "devDependencies": {
+        "vue-router": "^4.0.0-0",
         "@types/node": "^16.11.10",
         "@vue/cli-plugin-babel": "^5.0.0-rc.1",
         "@vue/eslint-config-prettier": "^6.0.0",

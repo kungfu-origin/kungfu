@@ -267,7 +267,7 @@ function resetLog() {
         line-height: 1.5;
 
         .error {
-            color: @red-7;
+            color: @red-6;
             font-weight: bold;
         }
 
@@ -287,7 +287,7 @@ function resetLog() {
         }
 
         .critical {
-            color: @red-7;
+            color: @red-6;
             font-weight: bold;
         }
 

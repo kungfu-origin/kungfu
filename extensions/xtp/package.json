@@ -98,7 +98,7 @@
             "key": "client_id",
             "name": "client_id",
             "type": "int",
-            "required": "@kungfu-trader/kungfu-sdk",
+            "required": true,
             "tip": "请填写自定义多点登录ID 1-99整数,不同节点之间不要重复",
             "validator": [
               "o99Validator",

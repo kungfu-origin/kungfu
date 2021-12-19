@@ -53,30 +53,30 @@
             "key": "match_mode",
             "name": "match_mode",
             "type": "select",
-            "data": [
+            "options": [
               {
                 "value": "reject",
-                "name": "reject"
+                "label": "reject"
               },
               {
                 "value": "pend",
-                "name": "pend"
+                "label": "pend"
               },
               {
                 "value": "cancel",
-                "name": "cancel"
+                "label": "cancel"
               },
               {
                 "value": "partialfillandcancel",
-                "name": "partialfillandcancel"
+                "label": "partialfillandcancel"
               },
               {
                 "value": "partialfill",
-                "name": "partialfill"
+                "label": "partialfill"
               },
               {
                 "value": "fill",
-                "name": "fill"
+                "label": "fill"
               }
             ],
             "errMsg": "请选择撮合模式",

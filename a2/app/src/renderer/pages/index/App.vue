@@ -13,6 +13,7 @@ import { preQuitTasks } from '@renderer/assets/methods/actionsUtils';
 import { ipcRenderer } from 'electron';
 import {
     dealAppStates,
+    dealAssetsByHolderUID,
     watcher,
 } from '@kungfu-trader/kungfu-js-api/kungfu/watcher';
 import { tradingDataSubject } from '@kungfu-trader/kungfu-js-api/kungfu/tradingData';
@@ -102,6 +103,8 @@ const store = useGlobalStore();
 tradingDataSubject.subscribe((watcher: Watcher) => {
     const appStates = dealAppStates(watcher.appStates);
     store.setAppStates(appStates);
+    const assets = dealAssetsByHolderUID(watcher.ledger.Asset);
+    store.setAssets(assets);
 });
 store.setKfConfigList();
 store.setKfExtConfigs();

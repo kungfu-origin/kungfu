@@ -22,6 +22,7 @@ import {
     KfConfigValue,
     KfCategoryEnum,
     BrokerStateStatusTypes,
+    KfConfigItem,
 } from '../typings';
 import {
     deleteProcess,
@@ -612,9 +613,9 @@ export const getIfProcessOnline = (
 };
 
 export const getAppStateStatusName = (
-    kfConfig: KfConfig,
+    kfConfig: KfConfig | KfLocation,
     processStatusData: Pm2ProcessStatusData,
-    appStates: Record<string, BrokerStateStatusTypes | undefined>,
+    appStates: Record<string, BrokerStateStatusTypes>,
 ): ProcessStatusTypes | undefined => {
     const processId = getProcessIdByKfLocation(kfConfig);
 
@@ -737,4 +738,11 @@ export const switchKfLocation = (
         default:
             return Promise.resolve();
     }
+};
+
+export const dealKfNumber = (
+    preNumber: bigint | number | undefined | unknown,
+): string | number | bigint | unknown => {
+    if (preNumber === undefined) return '--';
+    return preNumber;
 };

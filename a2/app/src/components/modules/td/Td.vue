@@ -26,11 +26,11 @@ import {
     useTableSearchKeyword,
     useExtConfigsRelated,
     getAllKfConfigData,
-    getProcessStatusDetailData,
+    useProcessStatusDetailData,
     handleOpenLogview,
     useDashboardBodySize,
     getInstrumentTypeColor,
-    useAppStates,
+    useAssets,
 } from '@renderer/assets/methods/uiUtils';
 import {
     useAddUpdateRemoveKfConfig,
@@ -38,7 +38,7 @@ import {
     useSwitchAllConfig,
 } from '@renderer/assets/methods/actionsUtils';
 import {
-    getAppStateStatusName,
+    dealKfNumber,
     getIfProcessOnline,
     getProcessIdByKfLocation,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
@@ -66,8 +66,8 @@ const tdIdList = computed(() => {
         (item: KfConfig): string => `${item.group}_${item.name}`,
     );
 });
-const { processStatusData } = toRefs(getProcessStatusDetailData());
-const appStates = useAppStates();
+const { processStatusData, getProcessStatusName } =
+    useProcessStatusDetailData();
 const { allProcessOnline, handleSwitchAllProcessStatus } = useSwitchAllConfig(
     td,
     processStatusData,
@@ -76,6 +76,7 @@ const { searchKeyword, tableData } = useTableSearchKeyword<KfConfig>(td, [
     'group',
     'name',
 ]);
+const { getAssetsByKfConfig } = useAssets();
 
 const { handleConfirmAddUpdateKfConfig, handleRemoveKfConfig } =
     useAddUpdateRemoveKfConfig();
@@ -159,13 +160,7 @@ function handleOpenSetSourceDialog() {
                     </template>
                     <template v-else-if="column.dataIndex === 'stateStatus'">
                         <KfProcessStatus
-                            :statusName="
-                                getAppStateStatusName(
-                                    record,
-                                    processStatusData,
-                                    appStates.value,
-                                )
-                            "
+                            :statusName="getProcessStatusName(record)"
                         ></KfProcessStatus>
                     </template>
                     <template v-else-if="column.dataIndex === 'group'">
@@ -188,6 +183,26 @@ function handleOpenSetSourceDialog() {
                             "
                             @click="handleSwitchProcessStatus($event, record)"
                         ></a-switch>
+                    </template>
+                    <template v-else-if="column.dataIndex === 'unrealizedPnl'">
+                        {{
+                            dealKfNumber(
+                                getAssetsByKfConfig(record).unrealized_pnl,
+                            )
+                        }}
+                    </template>
+                    <template v-else-if="column.dataIndex === 'avail'">
+                        {{ dealKfNumber(getAssetsByKfConfig(record).avail) }}
+                    </template>
+                    <template v-else-if="column.dataIndex === 'marketValue'">
+                        {{
+                            dealKfNumber(
+                                getAssetsByKfConfig(record).market_value,
+                            )
+                        }}
+                    </template>
+                    <template v-else-if="column.dataIndex === 'margin'">
+                        {{ dealKfNumber(getAssetsByKfConfig(record).margin) }}
                     </template>
                     <template v-else-if="column.dataIndex === 'actions'">
                         <div class="kf-actions__warp">
@@ -224,8 +239,8 @@ function handleOpenSetSourceDialog() {
             v-if="setTdModalVisible"
             v-model:visible="setTdModalVisible"
             :payload="setTdConfigPayload"
-            :primaryKeyCompareTarget="tdIdList"
-            :primaryKeyCompareExtra="currentSelectedSourceId"
+            :primaryKeyAvoidRepeatCompareTarget="tdIdList"
+            :primaryKeyAvoidRepeatCompareExtra="currentSelectedSourceId"
             @confirm="
                 (formState: Record<string, KfConfigValue>, idByKeys: string, changeType: ModalChangeType) =>
                     handleConfirmAddUpdateKfConfig(

@@ -26,7 +26,7 @@ import {
     getAllKfConfigData,
     useDashboardBodySize,
     handleOpenLogview,
-    getProcessStatusDetailData,
+    useProcessStatusDetailData,
 } from '@renderer/assets/methods/uiUtils';
 import { columns } from './config';
 import {
@@ -59,7 +59,7 @@ const { strategy } = toRefs(getAllKfConfigData());
 const strategyIdList = computed(() => {
     return strategy.value.map((item: KfConfig): string => item.name);
 });
-const { processStatusData } = toRefs(getProcessStatusDetailData());
+const { processStatusData } = useProcessStatusDetailData();
 const { allProcessOnline, handleSwitchAllProcessStatus } = useSwitchAllConfig(
     strategy,
     processStatusData,
@@ -161,7 +161,10 @@ function handleOpenFile(kfConfig: KfConfig) {
                         record: KfConfig,
                     }"
                 >
-                    <template v-if="column.dataIndex === 'processStatus'">
+                    <template v-if="column.dataIndex === 'strategyFile'">
+                        {{ getStrategyPathShowName(record) }}
+                    </template>
+                    <template v-else-if="column.dataIndex === 'processStatus'">
                         <a-switch
                             size="small"
                             :checked="
@@ -172,9 +175,6 @@ function handleOpenFile(kfConfig: KfConfig) {
                             "
                             @click="handleSwitchProcessStatus($event, record)"
                         ></a-switch>
-                    </template>
-                    <template v-else-if="column.dataIndex === 'strategyPath'">
-                        {{ getStrategyPathShowName(record) }}
                     </template>
                     <template v-else-if="column.dataIndex === 'actions'">
                         <div class="kf-actions__warp">
@@ -209,7 +209,7 @@ function handleOpenFile(kfConfig: KfConfig) {
             :width="420"
             v-model:visible="setStrategyModalVisible"
             :payload="setStrategyConfigPayload"
-            :primaryKeyCompareTarget="strategyIdList"
+            :primaryKeyAvoidRepeatCompareTarget="strategyIdList"
             @confirm="
                 (formState: Record<string, KfConfigValue>, idByKeys: string, changeType: ModalChangeType) =>
                     handleConfirmAddUpdateKfConfig(

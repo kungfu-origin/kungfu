@@ -25,9 +25,11 @@ interface GlobalState {
     mdList: KfConfig[];
     strategyList: KfConfig[];
 
-    appStates: Record<string, BrokerStateStatusTypes | undefined>;
     processStatusData: Pm2ProcessStatusData;
     processStatusWithDetail: Pm2ProcessStatusDetailData;
+
+    appStates: Record<string, BrokerStateStatusTypes>;
+    assets: Record<string, Asset>;
 }
 
 export const useGlobalStore = defineStore('global', {
@@ -42,17 +44,21 @@ export const useGlobalStore = defineStore('global', {
             mdList: [],
             strategyList: [],
 
-            appStates: {},
             processStatusData: {},
             processStatusWithDetail: {},
+
+            appStates: {},
+            assets: {},
         };
     },
 
     actions: {
-        setAppStates(
-            appStates: Record<string, BrokerStateStatusTypes | undefined>,
-        ) {
+        setAppStates(appStates: Record<string, BrokerStateStatusTypes>) {
             this.appStates = appStates;
+        },
+
+        setAssets(assets: Record<string, Asset>) {
+            this.assets = assets;
         },
 
         setProcessStatus(processStatus: Pm2ProcessStatusData) {
