@@ -24,10 +24,15 @@ import {
     openLogFile,
     openSettingDialog,
 } from './events';
+
 import {
     BASE_DB_DIR,
     KF_HOME,
 } from '@kungfu-trader/kungfu-js-api/config/pathConfig';
+import {
+    initKfConfig,
+    ensureKungfuKey,
+} from '@kungfu-trader/kungfu-js-api/config';
 
 let MainWindow: BrowserWindow | null = null;
 let AllowQuit = false;
@@ -37,6 +42,8 @@ const isMac = os.platform() === 'darwin';
 
 remoteMain.initialize();
 setMenu();
+initKfConfig();
+ensureKungfuKey();
 
 function createWindow(reloadAfterCrashed = false) {
     if (reloadAfterCrashed) {

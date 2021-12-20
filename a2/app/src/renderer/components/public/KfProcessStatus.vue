@@ -6,7 +6,7 @@
                 stateStatusData?.color || '',
                 isWaveStatus(stateStatusData?.color) ? 'kf-dot-wave' : '',
             ]"
-            v-if="stateStatusData && (stateStatusData.level || 0) >= 1"
+            v-if="stateStatusData && (stateStatusData.level || 0) >= -1"
         ></div>
         {{
             +(stateStatusData?.level || 0) === 0 ? '--' : stateStatusData?.name

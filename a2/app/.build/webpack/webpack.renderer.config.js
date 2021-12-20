@@ -82,7 +82,7 @@ const prodConfig = {
         new webpack.DefinePlugin({
             __VUE_OPTIONS_API__: true,
             __VUE_PROD_DEVTOOLS__: true,
-            python_version: `"${pyVersion.toString()}"`,
+            __python_version: `"${pyVersion.toString()}"`,
             'process.env.APP_TYPE': '"renderer"',
         }),
     ],
@@ -96,7 +96,7 @@ const devConfig = {
             __resources: `"${path
                 .join(rootDir, 'public')
                 .replace(/\\/g, '\\\\')}"`,
-            python_version: `"${pyVersion.toString()}"`,
+            __python_version: `"${pyVersion.toString()}"`,
             'process.env.APP_TYPE': '"renderer"',
         }),
     ],

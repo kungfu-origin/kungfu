@@ -215,7 +215,7 @@ export interface KfExtOriginConfig {
     name: string;
     config: {
         [key in KfCategoryTypes]?: {
-            type: Array<InstrumentTypes> | InstrumentTypes;
+            type?: Array<InstrumentTypes> | InstrumentTypes;
             settings: KfConfigItem[];
         };
     };

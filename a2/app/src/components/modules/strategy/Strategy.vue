@@ -27,6 +27,7 @@ import {
     useDashboardBodySize,
     handleOpenLogview,
     useProcessStatusDetailData,
+    useAssets,
 } from '@renderer/assets/methods/uiUtils';
 import { columns } from './config';
 import {
@@ -35,6 +36,7 @@ import {
     useSwitchAllConfig,
 } from '@renderer/assets/methods/actionsUtils';
 import {
+    dealKfNumber,
     getConfigValue,
     getIfProcessOnline,
     getProcessIdByKfLocation,
@@ -67,6 +69,7 @@ const { allProcessOnline, handleSwitchAllProcessStatus } = useSwitchAllConfig(
 const { searchKeyword, tableData } = useTableSearchKeyword<KfConfig>(strategy, [
     'name',
 ]);
+const { getAssetsByKfConfig } = useAssets();
 
 const { handleConfirmAddUpdateKfConfig, handleRemoveKfConfig } =
     useAddUpdateRemoveKfConfig();
@@ -175,6 +178,26 @@ function handleOpenFile(kfConfig: KfConfig) {
                             "
                             @click="handleSwitchProcessStatus($event, record)"
                         ></a-switch>
+                    </template>
+                    <template v-else-if="column.dataIndex === 'unrealizedPnl'">
+                        {{
+                            dealKfNumber(
+                                getAssetsByKfConfig(record).unrealized_pnl,
+                            )
+                        }}
+                    </template>
+                    <template v-else-if="column.dataIndex === 'avail'">
+                        {{ dealKfNumber(getAssetsByKfConfig(record).avail) }}
+                    </template>
+                    <template v-else-if="column.dataIndex === 'marketValue'">
+                        {{
+                            dealKfNumber(
+                                getAssetsByKfConfig(record).market_value,
+                            )
+                        }}
+                    </template>
+                    <template v-else-if="column.dataIndex === 'margin'">
+                        {{ dealKfNumber(getAssetsByKfConfig(record).margin) }}
                     </template>
                     <template v-else-if="column.dataIndex === 'actions'">
                         <div class="kf-actions__warp">

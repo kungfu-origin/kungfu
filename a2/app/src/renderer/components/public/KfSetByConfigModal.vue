@@ -10,7 +10,7 @@ import {
 } from '@kungfu-trader/kungfu-js-api/typings';
 
 import { buildIdByKeysFromKfConfigSettings } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
-import KfConfigForm from '@renderer/components/public/KfConfigForm.vue';
+import KfConfigSettingsForm from '@renderer/components/public/KfConfigSettingsForm.vue';
 
 const props = withDefaults(
     defineProps<{
@@ -41,7 +41,7 @@ defineEmits<{
 }>();
 
 const app = getCurrentInstance();
-const { modalVisible, closeModal } = useModalVisible(props);
+const { modalVisible, closeModal } = useModalVisible(props.visible);
 const formRef = ref();
 const formState = reactive<Record<string, KfConfigValue>>(
     initFormDataByConfig(
@@ -84,10 +84,6 @@ function handleConfirm() {
             console.error(err);
         });
 }
-
-function handleClose() {
-    closeModal();
-}
 </script>
 <template>
     <a-modal
@@ -96,10 +92,10 @@ function handleClose() {
         v-model:visible="modalVisible"
         :title="titleResolved"
         :destroyOnClose="true"
-        @cancel="handleClose"
+        @cancel="closeModal"
         @ok="handleConfirm"
     >
-        <KfConfigForm
+        <KfConfigSettingsForm
             ref="formRef"
             v-model:formState="formState"
             :configSettings="payload.config?.settings || []"
@@ -110,7 +106,7 @@ function handleClose() {
             :primaryKeyAvoidRepeatCompareExtra="
                 primaryKeyAvoidRepeatCompareExtra
             "
-        ></KfConfigForm>
+        ></KfConfigSettingsForm>
     </a-modal>
 </template>
 

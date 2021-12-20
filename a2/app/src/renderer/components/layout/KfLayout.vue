@@ -1,10 +1,15 @@
 <script setup lang="ts">
-import { SlidersOutlined } from '@ant-design/icons-vue';
+import { SlidersOutlined, SettingOutlined } from '@ant-design/icons-vue';
+
 import KfProcessStatusController from '@renderer/components/layout/KfProcessStatusController.vue';
+import { ref } from 'vue';
+import KfGlobalSettingModal from '../public/KfGlobalSettingModal.vue';
 const logo = require('@renderer/assets/svg/LOGO.svg');
 
 interface LayoutProps {}
 defineProps<LayoutProps>();
+
+const globalSettingModalVisible = ref<boolean>(false);
 </script>
 <template>
     <a-layout>
@@ -20,11 +25,20 @@ defineProps<LayoutProps>();
                 >
                     <a-menu-item key="main">
                         <template #icon>
-                            <sliders-outlined style="font-size: 18px" />
+                            <sliders-outlined style="font-size: 24px" />
                         </template>
                         <span>主面板</span>
                     </a-menu-item>
                 </a-menu>
+                <div
+                    class="kf-global-setting-btn"
+                    @click="globalSettingModalVisible = true"
+                >
+                    <setting-outlined
+                        class="kf-hover"
+                        style="font-size: 24px"
+                    />
+                </div>
             </a-layout-sider>
             <a-layout style="padding: 0px 8px 0 8px; box-sizing: border-box">
                 <a-layout-content>
@@ -35,6 +49,10 @@ defineProps<LayoutProps>();
         <a-layout-footer>
             <KfProcessStatusController></KfProcessStatusController>
         </a-layout-footer>
+        <KfGlobalSettingModal
+            v-if="globalSettingModalVisible"
+            v-model:visible="globalSettingModalVisible"
+        ></KfGlobalSettingModal>
     </a-layout>
 </template>
 
@@ -45,6 +63,9 @@ defineProps<LayoutProps>();
 
     .ant-layout-sider {
         .ant-layout-sider-children {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
             position: relative;
 
             .kf-header-logo {
@@ -85,6 +106,13 @@ defineProps<LayoutProps>();
                         margin-left: 0;
                     }
                 }
+            }
+
+            .kf-global-setting-btn {
+                width: 100%;
+                height: 64px;
+                line-height: 64px;
+                text-align: center;
             }
         }
     }

@@ -632,7 +632,7 @@ export const startStrategy = (
             );
     } else {
         const args = buildArgs(
-            `strategy -n '${strategyId}' -p '${strategyPath}'`,
+            `run -c strategy -g default -n '${strategyId}' '${strategyPath}'`,
         );
         return startProcess({
             name: `strategy_${strategyId}`,

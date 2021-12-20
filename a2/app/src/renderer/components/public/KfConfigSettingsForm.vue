@@ -19,6 +19,8 @@ const props = withDefaults(
         changeType: ModalChangeType;
         primaryKeyAvoidRepeatCompareExtra?: string;
         primaryKeyAvoidRepeatCompareTarget?: string[];
+        layout?: 'horizontal' | 'vertical' | 'inline';
+        labelAlign?: 'right' | 'left';
     }>(),
     {
         formState: () => ({}),
@@ -26,6 +28,8 @@ const props = withDefaults(
         changeType: 'add',
         primaryKeyAvoidRepeatCompareTarget: () => [],
         primaryKeyAvoidRepeatCompareExtra: '',
+        layout: 'horizontal',
+        labelAlign: 'right',
     },
 );
 
@@ -115,8 +119,10 @@ defineExpose({
         :model="formState"
         :label-col="{ span: 6 }"
         :wrapper-col="{ span: 16 }"
+        :labelAlign="labelAlign"
         :colon="false"
         :scrollToFirstError="true"
+        :layout="layout"
     >
         <a-form-item
             v-for="item in configSettings"
@@ -124,6 +130,7 @@ defineExpose({
             :label="item.name"
             :name="item.key"
             :required="item.required"
+            :extra="item.tip"
             :rules="
                 changeType === 'update' && item.primary
                     ? []
@@ -131,7 +138,7 @@ defineExpose({
                           {
                               required: item.required,
                               type: getValidatorType(item.type),
-                              message: '该项为必填项',
+                              message: item.errMsg || '该项为必填项',
                               trigger: 'blur',
                           },
                           ...(item.primary
@@ -222,20 +229,23 @@ defineExpose({
                     {{ option.label }}
                 </a-select-option>
             </a-select>
-
+            <a-switch
+                v-else-if="item.type === 'bool'"
+                v-model:checked="formState[item.key]"
+            ></a-switch>
             <div
                 v-else-if="item.type === 'file'"
                 class="kf-form-item__warp file"
                 :disabled="changeType === 'update' && item.primary"
             >
                 <span
-                    class="file-path"
                     v-if="formState[item.key]"
+                    class="file-path"
                     :title="(formState[item.key] || '').toString()"
                 >
                     {{ formState[item.key] }}
                 </span>
-                <a-button size="mini" @click="handleSelectFile(item.key)">
+                <a-button size="small" @click="handleSelectFile(item.key)">
                     <template #icon><DashOutlined /></template>
                 </a-button>
             </div>
@@ -249,6 +259,7 @@ defineExpose({
             display: flex;
             justify-content: space-between;
             align-items: top;
+            padding-bottom: 4px;
 
             span.file-path {
                 flex: 1;

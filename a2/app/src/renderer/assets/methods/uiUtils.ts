@@ -6,7 +6,6 @@ import {
     Ref,
     reactive,
     ref,
-    watch,
     computed,
     getCurrentInstance,
     onMounted,
@@ -109,17 +108,12 @@ export const getUIComponents = (): {
     );
 };
 
-export const useModalVisible = (props: {
-    visible: boolean;
-}): { modalVisible: Ref<boolean>; closeModal: () => void } => {
+export const useModalVisible = (
+    visible: boolean,
+): { modalVisible: Ref<boolean>; closeModal: () => void } => {
     const app = getCurrentInstance();
-    const modalVisible = ref<boolean>(props.visible);
-    watch(
-        () => props.visible,
-        (visible) => {
-            modalVisible.value = visible;
-        },
-    );
+    const modalVisible = ref<boolean>(visible);
+
     const closeModal = () => {
         app && app.emit('update:visible', false);
         app && app.emit('close');

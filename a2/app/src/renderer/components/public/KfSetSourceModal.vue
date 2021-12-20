@@ -46,7 +46,7 @@ const sourceDataList = computed(() => {
     return getSourceDataList(extConfigs.value, props.sourceType);
 });
 
-const { modalVisible, closeModal } = useModalVisible(props);
+const { modalVisible, closeModal } = useModalVisible(props.visible);
 
 onMounted(() => {
     if (selectedSource.value === '') {
@@ -60,10 +60,6 @@ function handleConfirm() {
     app && app.emit('confirm', selectedSource.value);
     closeModal();
 }
-
-function handleClose() {
-    closeModal();
-}
 </script>
 <template>
     <a-modal
@@ -72,7 +68,7 @@ function handleClose() {
         v-model:visible="modalVisible"
         title="选择柜台API"
         :destroyOnClose="true"
-        @cancel="handleClose"
+        @cancel="closeModal"
         @ok="handleConfirm"
     >
         <a-radio-group v-model:value="selectedSource">
