@@ -49,16 +49,16 @@ const primaryKeys: string[] = (props.configSettings || [])
     .filter((item) => item.primary)
     .map((item) => item.key);
 
-function getValidatorType(type: string): 'integer' | 'float' | 'string' {
+function getValidatorType(type: string): 'number' | 'string' {
     const intTypes: string[] = [
         'int',
         ...Object.keys(numberEnumInputType || {}),
     ];
     const floatTypes: string[] = ['float', 'percent'];
     if (intTypes.includes(type)) {
-        return 'integer';
+        return 'number';
     } else if (floatTypes.includes(type)) {
-        return 'float';
+        return 'number';
     } else {
         return 'string';
     }
@@ -129,22 +129,32 @@ defineExpose({
             :key="item.key"
             :label="item.name"
             :name="item.key"
-            :required="item.required"
             :extra="item.tip"
             :rules="
                 changeType === 'update' && item.primary
                     ? []
                     : [
-                          {
-                              required: item.required,
-                              type: getValidatorType(item.type),
-                              message: item.errMsg || '该项为必填项',
-                              trigger: 'blur',
-                          },
+                          ...(item.required
+                              ? [
+                                    {
+                                        required: item.required,
+                                        type: getValidatorType(item.type),
+                                        message: item.errMsg || '该项为必填项',
+                                        trigger: 'blur',
+                                    },
+                                ]
+                              : [
+                                    {
+                                        required: false,
+                                        type: getValidatorType(item.type),
+                                        trigger: 'blur',
+                                    },
+                                ]),
                           ...(item.primary
                               ? [
                                     {
                                         validator: primaryKeyValidator,
+                                        type: getValidatorType(item.type),
                                         trigger: 'change',
                                     },
                                 ]
@@ -154,7 +164,6 @@ defineExpose({
         >
             <a-input
                 v-if="item.type === 'str'"
-                :formatter="(value: number) => +value"
                 v-model:value="formState[item.key]"
                 :disabled="changeType === 'update' && item.primary"
             ></a-input>
@@ -165,6 +174,7 @@ defineExpose({
             ></a-input-password>
             <a-input-number
                 v-else-if="item.type === 'int'"
+                :formatter="(value: number) => +value"
                 v-model:value="formState[item.key]"
                 :disabled="changeType === 'update' && item.primary"
             ></a-input-number>

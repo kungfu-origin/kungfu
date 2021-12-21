@@ -19,6 +19,7 @@ import {
     buildExtTypeMap,
     buildObjectFromArray,
     getAppStateStatusName,
+    getIdByKfLocation,
     getInstrumentTypeData,
     getProcessIdByKfLocation,
     getTradingDate,
@@ -155,7 +156,7 @@ export const useTableSearchKeyword = <T>(
     };
 };
 
-export const initFormDataByConfig = (
+export const initFormStateByConfig = (
     configSettings: KfConfigItem[],
     initValue?: Record<string, KfConfigValue>,
 ): Record<string, KfConfigValue> => {
@@ -177,6 +178,16 @@ export const initFormDataByConfig = (
         'instrumentType', // select - number
     ];
     const formState: Record<string, KfConfigValue> = {};
+    // const rules: Record<
+    //     string,
+    //     {
+    //         required?: boolean;
+    //         type?: 'string' | number;
+    //         message?: string;
+    //         trigger?: 'change' | 'blur';
+    //     }
+    // > = {};
+
     configSettings.forEach((item) => {
         const type = item.type;
         const isBoolean = booleanType.includes(type);
@@ -317,7 +328,7 @@ export const useProcessStatusDetailData = (): {
     };
 };
 
-export const getAllKfConfigData = (): Record<KfCategoryTypes, KfConfig[]> => {
+export const useAllKfConfigData = (): Record<KfCategoryTypes, KfConfig[]> => {
     const app = getCurrentInstance();
     const allKfConfigData: Record<KfCategoryTypes, KfConfig[]> = reactive({
         system: ref<KfConfig[]>([
@@ -369,6 +380,72 @@ export const getAllKfConfigData = (): Record<KfCategoryTypes, KfConfig[]> => {
     });
 
     return allKfConfigData;
+};
+
+export const useCurrentGlobalKfLocation = (): {
+    currentGlobalKfLocation: {
+        value: KfConfig | KfLocation | null;
+    };
+    setCurrentGlobalKfLocation(kfConfig: KfConfig): void;
+    dealRowClassName(kfConfig: KfConfig): string;
+    customRow(kfConfig: KfConfig): {
+        onClick(): void;
+    };
+} => {
+    const app = getCurrentInstance();
+    const currentKfLocation = reactive<{
+        value: KfConfig | KfLocation | null;
+    }>({
+        value: null,
+    });
+
+    onMounted(() => {
+        if (app?.proxy) {
+            const { currentGlobalKfLocation } = storeToRefs(
+                app?.proxy.$useGlobalStore(),
+            );
+
+            currentKfLocation.value = currentGlobalKfLocation as
+                | KfConfig
+                | KfLocation
+                | null;
+        }
+    });
+
+    const setCurrentGlobalKfLocation = (kfLocation: KfConfig) => {
+        if (app?.proxy) {
+            app?.proxy
+                ?.$useGlobalStore()
+                .setCurrentGlobalKfLocation(kfLocation);
+        }
+    };
+
+    const dealRowClassName = (record: KfConfig): string => {
+        if (currentKfLocation.value === null) return '';
+        if (
+            getIdByKfLocation(record) ===
+            getIdByKfLocation(currentKfLocation.value)
+        ) {
+            return 'current-global-kfLocation';
+        }
+
+        return '';
+    };
+
+    const customRow = (record: KfConfig) => {
+        return {
+            onClick: () => {
+                setCurrentGlobalKfLocation(record);
+            },
+        };
+    };
+
+    return {
+        currentGlobalKfLocation: currentKfLocation,
+        setCurrentGlobalKfLocation,
+        dealRowClassName,
+        customRow,
+    };
 };
 
 /**

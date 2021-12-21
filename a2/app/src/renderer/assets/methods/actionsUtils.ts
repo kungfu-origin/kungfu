@@ -116,9 +116,11 @@ export const useSwitchAllConfig = (
 export const useAddUpdateRemoveKfConfig = (): {
     handleRemoveKfConfig: (kfConfig: KfConfig) => Promise<void>;
     handleConfirmAddUpdateKfConfig: (
-        formData: Record<string, KfConfigValue>,
-        idByKey: string,
-        changeType: ModalChangeType,
+        data: {
+            formState: Record<string, KfConfigValue>;
+            idByPrimaryKeys: string;
+            changeType: ModalChangeType;
+        },
         category: KfCategoryTypes,
         group: string,
     ) => Promise<void>;
@@ -132,22 +134,26 @@ export const useAddUpdateRemoveKfConfig = (): {
     };
 
     const handleConfirmAddUpdateKfConfig = (
-        formData: Record<string, KfConfigValue>,
-        idByKey: string,
-        changeType: ModalChangeType,
+        data: {
+            formState: Record<string, KfConfigValue>;
+            idByPrimaryKeys: string;
+            changeType: ModalChangeType;
+        },
         category: KfCategoryTypes,
         group: string,
     ): Promise<void> => {
+        const { formState, idByPrimaryKeys, changeType } = data;
+
         const changeTypename = changeType === 'add' ? '添加' : '设置';
         const categoryName = getCategoryData(category).name;
 
         const context =
             changeType === 'add'
-                ? `${categoryName}ID系统唯一, ${changeTypename}成功后不可更改, 确认${changeTypename} ${idByKey}`
-                : `确认${changeTypename} ${idByKey} 相关配置`;
+                ? `${categoryName}ID系统唯一, ${changeTypename}成功后不可更改, 确认${changeTypename} ${idByPrimaryKeys}`
+                : `确认${changeTypename} ${idByPrimaryKeys} 相关配置`;
         return new Promise((resolve) => {
             Modal.confirm({
-                title: `${changeTypename}${categoryName} ${idByKey}`,
+                title: `${changeTypename}${categoryName} ${idByPrimaryKeys}`,
                 content: context,
                 okText: '确认',
                 cancelText: '取消',
@@ -155,14 +161,14 @@ export const useAddUpdateRemoveKfConfig = (): {
                     const kfLocation: KfLocation = {
                         category: category,
                         group: group,
-                        name: idByKey.toString(),
+                        name: idByPrimaryKeys.toString(),
                         mode: 'LIVE',
                     };
 
                     return setKfConfig(
                         kfLocation,
                         JSON.stringify({
-                            ...formData,
+                            ...formState,
                             add_time: +new Date().getTime() * Math.pow(10, 6),
                         }),
                     )

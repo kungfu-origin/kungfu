@@ -7,6 +7,7 @@ import {
     InstrumentType,
     KfCategory,
     AppStateStatus,
+    Pm2ProcessStatus,
 } from '../config/tradingConfig';
 import {
     KfTradeValueCommonData,
@@ -599,12 +600,13 @@ export const getStateStatusData = (
     return name === undefined ? undefined : AppStateStatus[name];
 };
 
-export const getIfProcessOnline = (
+export const getIfProcessRunning = (
     processStatusData: Pm2ProcessStatusData,
     processId: string,
 ): boolean => {
-    if (processStatusData[processId]) {
-        if (processStatusData[processId] === 'online') {
+    const statusName = processStatusData[processId] || '';
+    if (statusName) {
+        if ((Pm2ProcessStatus[statusName].level || 0) > 0) {
             return true;
         }
     }
@@ -704,6 +706,7 @@ export const switchKfLocation = (
 
     if (!targetStatus) {
         if (kfLocation.category !== 'system') {
+            console.log(watcher);
             if (watcher && !watcher.isReadyToInteract(kfLocation)) {
                 return Promise.reject(
                     new Error(`${processId} 还未准备就绪, 请稍后重试`),
@@ -740,9 +743,38 @@ export const switchKfLocation = (
     }
 };
 
-export const dealKfNumber = (
+const dealKfNumber = (
     preNumber: bigint | number | undefined | unknown,
 ): string | number | bigint | unknown => {
     if (preNumber === undefined) return '--';
     return preNumber;
+};
+
+export const dealKfPrice = (
+    preNumber: bigint | number | undefined | unknown,
+): string => {
+    const afterNumber = dealKfNumber(preNumber);
+
+    if (afterNumber === '--') {
+        return afterNumber;
+    }
+
+    return Number(afterNumber).toFixed(4);
+};
+
+export const dealAssetPrice = (
+    preNumber: bigint | number | undefined | unknown,
+): string => {
+    const afterNumber = dealKfNumber(preNumber);
+
+    if (afterNumber === '--') {
+        return afterNumber;
+    }
+
+    return Number(afterNumber).toFixed(2);
+};
+
+export const sum = (list: number[]): number => {
+    if (!list.length) return 0;
+    return list.reduce((accumlator, a) => accumlator + +a);
 };

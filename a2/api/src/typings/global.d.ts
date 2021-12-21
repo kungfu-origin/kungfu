@@ -30,7 +30,9 @@ interface ConfigStore {
 interface DataTable<T> extends T {
     [prop: string]: T;
     filter(key: string, value: string | number | bigint): DataTable<T>;
+    nofilter(key: string, value: string | number | bigint): DataTable<T>;
     sort(key: string): T[];
+    list(): T[];
 }
 
 interface Asset {
@@ -354,6 +356,21 @@ interface TradingData {
     TimeValue: DataTable<TimeValue>;
     Trade: DataTable<Trade>;
 }
+
+type TradingDataTypes =
+    | Asset
+    | AssetSnapshot
+    | Bar
+    | DailyAsset
+    | Instrument
+    | Order
+    | OrderInput
+    | OrderStat
+    | Position
+    | Quote
+    | TimeValue
+    | Trade
+    | Trade;
 
 interface Watcher {
     appStates: Record<string, BrokerStateStatusEnum>;

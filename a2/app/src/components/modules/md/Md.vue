@@ -23,17 +23,17 @@ import type {
 } from '@kungfu-trader/kungfu-js-api/typings';
 import { columns } from './config';
 import {
-    getAllKfConfigData,
     getInstrumentTypeColor,
     useExtConfigsRelated,
     useProcessStatusDetailData,
     handleOpenLogview,
     useDashboardBodySize,
     useTableSearchKeyword,
+    useAllKfConfigData,
 } from '@renderer/assets/methods/uiUtils';
 import {
     getIdByKfLocation,
-    getIfProcessOnline,
+    getIfProcessRunning,
     getProcessIdByKfLocation,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import {
@@ -58,7 +58,7 @@ const setMdConfigPayload = ref<SetKfConfigPayload>({
 const currentSelectedSourceId = ref<string>('');
 
 const { extConfigs, extTypeMap } = useExtConfigsRelated();
-const { md } = toRefs(getAllKfConfigData());
+const { md } = toRefs(useAllKfConfigData());
 const mdIdList = computed(() => {
     return md.value.map((item: KfConfig): string => getIdByKfLocation(item));
 });
@@ -96,9 +96,11 @@ function handleOpenSetMdDialog(
 
     if (!setMdConfigPayload.value.config?.settings?.length) {
         handleConfirmAddUpdateKfConfig(
-            {},
-            selectedSource,
-            type,
+            {
+                formState: {} as Record<string, KfConfigValue>,
+                idByPrimaryKeys: selectedSource,
+                changeType: type,
+            },
             'md',
             selectedSource,
         );
@@ -148,6 +150,7 @@ function handleOpenSetSourceDialog() {
                 size="small"
                 :pagination="false"
                 :scroll="{ y: dashboardBodyHeight - 4, x: dashboardBodyWidth }"
+                emptyText="暂无数据"
             >
                 <template
                     #bodyCell="{
@@ -176,7 +179,7 @@ function handleOpenSetSourceDialog() {
                         <a-switch
                             size="small"
                             :checked="
-                                getIfProcessOnline(
+                                getIfProcessRunning(
                                     processStatusData,
                                     getProcessIdByKfLocation(record),
                                 )
@@ -213,7 +216,7 @@ function handleOpenSetSourceDialog() {
             v-if="setSourceModalVisible"
             v-model:visible="setSourceModalVisible"
             sourceType="md"
-            @confirm="(sourceId: string) => handleOpenSetMdDialog('add', sourceId)"
+            @confirm="handleOpenSetMdDialog('add', $event)"
         ></KfSetSourceModal>
         <KfSetByConfigModal
             v-if="setMdModalVisible"
@@ -222,14 +225,11 @@ function handleOpenSetSourceDialog() {
             :primaryKeyAvoidRepeatCompareTarget="mdIdList"
             :primaryKeyAvoidRepeatCompareExtra="currentSelectedSourceId"
             @confirm="
-                (formState: Record<string, KfConfigValue>, idByKeys: string, changeType: ModalChangeType) =>
-                    handleConfirmAddUpdateKfConfig(
-                        formState,
-                        currentSelectedSourceId,
-                        changeType,
-                        'md',
-                        currentSelectedSourceId,
-                    )
+                handleConfirmAddUpdateKfConfig(
+                    $event,
+                    'md',
+                    currentSelectedSourceId,
+                )
             "
         ></KfSetByConfigModal>
     </div>

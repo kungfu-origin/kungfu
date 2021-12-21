@@ -40,6 +40,11 @@ import { tradingDataSubject } from '@kungfu-trader/kungfu-js-api/kungfu/tradingD
 import { getUIComponents } from '@renderer/assets/methods/uiUtils';
 import bus from '@kungfu-trader/kungfu-js-api/utils/globalBus';
 
+import VueVirtualScroller from 'vue-virtual-scroller';
+import 'vue-virtual-scroller/dist/vue-virtual-scroller.css';
+
+console.log(VueVirtualScroller);
+
 const app = createApp(App);
 
 app.use(store)
@@ -59,7 +64,8 @@ app.use(store)
     .use(InputNumber)
     .use(Select)
     .use(Drawer)
-    .use(Form);
+    .use(Form)
+    .use(VueVirtualScroller);
 
 const uics = getUIComponents();
 Object.keys(uics).forEach((key) => {

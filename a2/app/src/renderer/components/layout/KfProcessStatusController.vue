@@ -10,13 +10,13 @@ import { SystemProcessName } from '@kungfu-trader/kungfu-js-api/config/tradingCo
 import {
     useExtConfigsRelated,
     getInstrumentTypeColor,
-    getAllKfConfigData,
+    useAllKfConfigData,
     useProcessStatusDetailData,
     handleOpenLogview,
 } from '@renderer/assets/methods/uiUtils';
 import {
     getCategoryData,
-    getIfProcessOnline,
+    getIfProcessRunning,
     getProcessIdByKfLocation,
     getPropertyFromProcessStatusDetailDataByKfLocation,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
@@ -25,7 +25,7 @@ import { Pm2ProcessStatusTypes } from '@kungfu-trader/kungfu-js-api/utils/proces
 
 const processControllerBoardVisible = ref<boolean>(false);
 const categoryList: KfCategoryTypes[] = ['system', 'td', 'md', 'strategy'];
-const allKfConfigData = getAllKfConfigData();
+const allKfConfigData = useAllKfConfigData();
 const { processStatusData, processStatusDetailData, getProcessStatusName } =
     useProcessStatusDetailData();
 const { extTypeMap } = useExtConfigsRelated();
@@ -164,7 +164,7 @@ function handleOpenProcessControllerBoard(): void {
                                 <a-switch
                                     size="small"
                                     :checked="
-                                        getIfProcessOnline(
+                                        getIfProcessRunning(
                                             processStatusData,
                                             getProcessIdByKfLocation(config),
                                         )

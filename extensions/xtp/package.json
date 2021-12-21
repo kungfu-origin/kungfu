@@ -108,7 +108,7 @@
         ]
       },
       "md": {
-        "type": "broker/md/stock",
+        "type": ["stock"],
         "settings": [
           {
             "key": "account_id",
@@ -148,14 +148,14 @@
             "key": "protocol",
             "name": "protocol",
             "type": "select",
-            "data": [
+            "options": [
               {
                 "value": "tcp",
-                "name": "tcp"
+                "label": "tcp"
               },
               {
                 "value": "udp",
-                "name": "udp"
+                "label": "udp"
               }
             ],
             "required": false,

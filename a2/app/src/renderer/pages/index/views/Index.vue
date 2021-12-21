@@ -28,13 +28,13 @@ export default defineComponent({
             1: {
                 paId: 0,
                 direction: KfLayoutDirection.v,
-                children: [4, 5],
+                children: [4, 5, 6],
                 width: '60%',
             },
             2: {
                 paId: 0,
                 direction: KfLayoutDirection.v,
-                children: [8, 9],
+                children: [8, 9, 10],
             },
             4: {
                 paId: 1,
@@ -45,25 +45,43 @@ export default defineComponent({
             5: {
                 paId: 1,
                 direction: KfLayoutDirection.h,
-                children: [6],
-            },
-            6: {
-                paId: 5,
-                direction: KfLayoutDirection.v,
                 contents: ['策略进程'],
                 current: '策略进程',
+            },
+            6: {
+                paId: 1,
+                direction: KfLayoutDirection.v,
+                contents: ['委托记录', '成交记录'],
+                current: '委托记录',
             },
             8: {
                 paId: 2,
                 direction: KfLayoutDirection.h,
-                contents: ['8', '行情源'],
+                contents: ['行情源'],
                 current: '行情源',
             },
             9: {
                 paId: 2,
                 direction: KfLayoutDirection.h,
-                contents: ['9'],
-                current: '9',
+                contents: ['持仓'],
+                current: '持仓',
+            },
+            10: {
+                paId: 2,
+                direction: KfLayoutDirection.h,
+                children: [11, 12],
+            },
+            11: {
+                paId: 10,
+                direction: KfLayoutDirection.v,
+                contents: ['深度行情'],
+                current: '深度行情',
+            },
+            12: {
+                paId: 10,
+                direction: KfLayoutDirection.v,
+                contents: ['下单面板'],
+                current: '下单面板',
             },
         };
 

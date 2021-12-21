@@ -55,3 +55,19 @@ interface MainProcessEvent {
 }
 
 type KfBusEvent = ResizeEvent | ProcessStatusChangeEvent | MainProcessEvent;
+
+interface KfTradingDataTableHeaderConfig {
+    name: string;
+    dataIndex: string;
+    width?: number;
+    flex?: number;
+    type:
+        | 'number'
+        | 'string'
+        | 'nanoTime'
+        | 'exchange'
+        | 'offset'
+        | 'side'
+        | 'priceType'
+        | 'direction';
+}

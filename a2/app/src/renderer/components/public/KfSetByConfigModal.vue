@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, getCurrentInstance, reactive, ref } from 'vue';
 import {
-    initFormDataByConfig,
+    initFormStateByConfig,
     useModalVisible,
 } from '@renderer/assets/methods/uiUtils';
 import {
@@ -32,9 +32,11 @@ const props = withDefaults(
 defineEmits<{
     (
         e: 'confirm',
-        formState: Record<string, KfConfigValue>,
-        idByPrimaryKeys: string,
-        changeType: ModalChangeType,
+        data: {
+            formState: Record<string, KfConfigValue>;
+            idByPrimaryKeys: string;
+            changeType: ModalChangeType;
+        },
     ): void;
     (e: 'update:visible', visible: boolean): void;
     (e: 'close'): void;
@@ -44,7 +46,7 @@ const app = getCurrentInstance();
 const { modalVisible, closeModal } = useModalVisible(props.visible);
 const formRef = ref();
 const formState = reactive<Record<string, KfConfigValue>>(
-    initFormDataByConfig(
+    initFormStateByConfig(
         props.payload.config?.settings || [],
         props.payload.initValue,
     ),
@@ -70,12 +72,11 @@ function handleConfirm() {
             );
 
             app &&
-                app.emit(
-                    'confirm',
+                app.emit('confirm', {
                     formState,
                     idByPrimaryKeys,
-                    props.payload.type,
-                );
+                    changeType: props.payload.type,
+                });
         })
         .then(() => {
             closeModal();

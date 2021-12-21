@@ -23,11 +23,12 @@ import type {
 
 import {
     useTableSearchKeyword,
-    getAllKfConfigData,
+    useAllKfConfigData,
     useDashboardBodySize,
     handleOpenLogview,
     useProcessStatusDetailData,
     useAssets,
+    useCurrentGlobalKfLocation,
 } from '@renderer/assets/methods/uiUtils';
 import { columns } from './config';
 import {
@@ -36,9 +37,9 @@ import {
     useSwitchAllConfig,
 } from '@renderer/assets/methods/actionsUtils';
 import {
-    dealKfNumber,
+    dealAssetPrice,
     getConfigValue,
-    getIfProcessOnline,
+    getIfProcessRunning,
     getProcessIdByKfLocation,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import path from 'path';
@@ -57,10 +58,13 @@ const setStrategyConfigPayload = ref<SetKfConfigPayload>({
     config: {} as KfExtOriginConfig['config'][KfCategoryTypes],
 });
 
-const { strategy } = toRefs(getAllKfConfigData());
+const { strategy } = toRefs(useAllKfConfigData());
 const strategyIdList = computed(() => {
     return strategy.value.map((item: KfConfig): string => item.name);
 });
+
+const { dealRowClassName, customRow } = useCurrentGlobalKfLocation();
+
 const { processStatusData } = useProcessStatusDetailData();
 const { allProcessOnline, handleSwitchAllProcessStatus } = useSwitchAllConfig(
     strategy,
@@ -154,6 +158,9 @@ function handleOpenFile(kfConfig: KfConfig) {
                 size="small"
                 :pagination="false"
                 :scroll="{ y: dashboardBodyHeight - 4, x: dashboardBodyWidth }"
+                :rowClassName="dealRowClassName"
+                :customRow="customRow"
+                emptyText="暂无数据"
             >
                 <template
                     #bodyCell="{
@@ -171,7 +178,7 @@ function handleOpenFile(kfConfig: KfConfig) {
                         <a-switch
                             size="small"
                             :checked="
-                                getIfProcessOnline(
+                                getIfProcessRunning(
                                     processStatusData,
                                     getProcessIdByKfLocation(record),
                                 )
@@ -181,23 +188,23 @@ function handleOpenFile(kfConfig: KfConfig) {
                     </template>
                     <template v-else-if="column.dataIndex === 'unrealizedPnl'">
                         {{
-                            dealKfNumber(
+                            dealAssetPrice(
                                 getAssetsByKfConfig(record).unrealized_pnl,
                             )
                         }}
                     </template>
                     <template v-else-if="column.dataIndex === 'avail'">
-                        {{ dealKfNumber(getAssetsByKfConfig(record).avail) }}
+                        {{ dealAssetPrice(getAssetsByKfConfig(record).avail) }}
                     </template>
                     <template v-else-if="column.dataIndex === 'marketValue'">
                         {{
-                            dealKfNumber(
+                            dealAssetPrice(
                                 getAssetsByKfConfig(record).market_value,
                             )
                         }}
                     </template>
                     <template v-else-if="column.dataIndex === 'margin'">
-                        {{ dealKfNumber(getAssetsByKfConfig(record).margin) }}
+                        {{ dealAssetPrice(getAssetsByKfConfig(record).margin) }}
                     </template>
                     <template v-else-if="column.dataIndex === 'actions'">
                         <div class="kf-actions__warp">
@@ -234,14 +241,7 @@ function handleOpenFile(kfConfig: KfConfig) {
             :payload="setStrategyConfigPayload"
             :primaryKeyAvoidRepeatCompareTarget="strategyIdList"
             @confirm="
-                (formState: Record<string, KfConfigValue>, idByKeys: string, changeType: ModalChangeType) =>
-                    handleConfirmAddUpdateKfConfig(
-                        formState,
-                        idByKeys,
-                        changeType,
-                        'strategy',
-                        'default',
-                    )
+                handleConfirmAddUpdateKfConfig($event, 'strategy', 'default')
             "
         ></KfSetByConfigModal>
     </div>

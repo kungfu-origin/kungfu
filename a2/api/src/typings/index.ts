@@ -36,8 +36,8 @@ export type AntInKungfuColorTypes =
     | 'kf-color-error';
 
 export enum LedgerCategoryEnum {
-    Account,
-    Strategy,
+    td = 0,
+    strategy = 1,
 }
 
 export type LedgerCategoryTypes = keyof typeof LedgerCategoryEnum;

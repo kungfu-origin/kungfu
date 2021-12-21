@@ -7,7 +7,7 @@ import {
 } from '@kungfu-trader/kungfu-js-api/config/globalSettings';
 import { KfConfigValue } from '@kungfu-trader/kungfu-js-api/typings';
 import {
-    initFormDataByConfig,
+    initFormStateByConfig,
     useModalVisible,
 } from '@renderer/assets/methods/uiUtils';
 import { reactive } from 'vue';
@@ -42,7 +42,7 @@ function initGlobalSettingsFromStates(
 ) {
     const states: Record<string, Record<string, KfConfigValue>> = {};
     configs.forEach((item) => {
-        states[item.key] = initFormDataByConfig(
+        states[item.key] = initFormStateByConfig(
             item.config,
             initValue[item.key] || {},
         );

@@ -8,8 +8,13 @@ import {
     KfExtConfigs,
     KfConfig,
     BrokerStateStatusTypes,
+    KfLocation,
+    KfCategoryTypes,
 } from '@kungfu-trader/kungfu-js-api/typings';
-import { getKfExtensionConfig } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
+import {
+    getIdByKfLocation,
+    getKfExtensionConfig,
+} from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { getAllKfConfigOriginData } from '@kungfu-trader/kungfu-js-api/actions';
 import {
     Pm2ProcessStatusDetailData,
@@ -30,6 +35,8 @@ interface GlobalState {
 
     appStates: Record<string, BrokerStateStatusTypes>;
     assets: Record<string, Asset>;
+
+    currentGlobalKfLocation: KfLocation | KfConfig | null;
 }
 
 export const useGlobalStore = defineStore('global', {
@@ -49,10 +56,16 @@ export const useGlobalStore = defineStore('global', {
 
             appStates: {},
             assets: {},
+
+            currentGlobalKfLocation: null,
         };
     },
 
     actions: {
+        setCurrentGlobalKfLocation(kfLocation: KfLocation | KfConfig | null) {
+            this.currentGlobalKfLocation = kfLocation;
+        },
+
         setAppStates(appStates: Record<string, BrokerStateStatusTypes>) {
             this.appStates = appStates;
         },
@@ -77,7 +90,64 @@ export const useGlobalStore = defineStore('global', {
                 this.mdList = md;
                 this.tdList = td;
                 this.strategyList = strategy;
+
+                if (this.currentGlobalKfLocation === null) {
+                    if (td.length) {
+                        this.setCurrentGlobalKfLocation(td[0]);
+                        return;
+                    }
+                } else if (!this.checkCurrentGlobalKfLocationExisted()) {
+                    if (this.currentGlobalKfLocation?.category === 'td') {
+                        if (this.tdList.length) {
+                            this.setCurrentGlobalKfLocation(td[0]);
+                            return;
+                        }
+                    } else if (
+                        this.currentGlobalKfLocation?.category === 'strategy'
+                    ) {
+                        if (this.strategyList.length) {
+                            this.setCurrentGlobalKfLocation(strategy[0]);
+                            return;
+                        }
+                    }
+                }
+
+                this.setCurrentGlobalKfLocation(null);
             });
+        },
+
+        checkCurrentGlobalKfLocationExisted() {
+            if (this.currentGlobalKfLocation === null) {
+                return false;
+            }
+
+            const categoryToKfConfigsMap: Record<KfCategoryTypes, KfConfig[]> =
+                {
+                    td: this.tdList,
+                    md: this.mdList,
+                    strategy: this.strategyList,
+                    system: [],
+                };
+
+            const targetKfConfigs: KfConfig[] =
+                categoryToKfConfigsMap[this.currentGlobalKfLocation.category];
+            if (!targetKfConfigs || !targetKfConfigs.length) {
+                return false;
+            }
+
+            const afterFilter: KfConfig[] = targetKfConfigs.filter((item) => {
+                if (
+                    this.currentGlobalKfLocation &&
+                    getIdByKfLocation(item) ===
+                        getIdByKfLocation(this.currentGlobalKfLocation)
+                ) {
+                    return true;
+                }
+
+                return false;
+            });
+
+            return afterFilter.length > 0;
         },
 
         setKfExtConfigs() {

@@ -25,12 +25,13 @@ import { columns } from './config';
 import {
     useTableSearchKeyword,
     useExtConfigsRelated,
-    getAllKfConfigData,
+    useAllKfConfigData,
     useProcessStatusDetailData,
     handleOpenLogview,
     useDashboardBodySize,
     getInstrumentTypeColor,
     useAssets,
+    useCurrentGlobalKfLocation,
 } from '@renderer/assets/methods/uiUtils';
 import {
     useAddUpdateRemoveKfConfig,
@@ -38,8 +39,8 @@ import {
     useSwitchAllConfig,
 } from '@renderer/assets/methods/actionsUtils';
 import {
-    dealKfNumber,
-    getIfProcessOnline,
+    dealAssetPrice,
+    getIfProcessRunning,
     getProcessIdByKfLocation,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { message } from 'ant-design-vue';
@@ -60,12 +61,14 @@ const setTdConfigPayload = ref<SetKfConfigPayload>({
 
 const currentSelectedSourceId = ref<string>('');
 const { extConfigs, extTypeMap } = useExtConfigsRelated();
-const { td } = toRefs(getAllKfConfigData());
+const { td } = toRefs(useAllKfConfigData());
 const tdIdList = computed(() => {
     return td.value.map(
         (item: KfConfig): string => `${item.group}_${item.name}`,
     );
 });
+const { dealRowClassName, customRow } = useCurrentGlobalKfLocation();
+
 const { processStatusData, getProcessStatusName } =
     useProcessStatusDetailData();
 const { allProcessOnline, handleSwitchAllProcessStatus } = useSwitchAllConfig(
@@ -145,6 +148,9 @@ function handleOpenSetSourceDialog() {
                 size="small"
                 :pagination="false"
                 :scroll="{ y: dashboardBodyHeight - 4, x: dashboardBodyWidth }"
+                :rowClassName="dealRowClassName"
+                :customRow="customRow"
+                emptyText="暂无数据"
             >
                 <template
                     #bodyCell="{
@@ -158,12 +164,7 @@ function handleOpenSetSourceDialog() {
                     <template v-if="column.dataIndex === 'accountName'">
                         {{ JSON.parse(record.value).account_name || '--' }}
                     </template>
-                    <template v-else-if="column.dataIndex === 'stateStatus'">
-                        <KfProcessStatus
-                            :statusName="getProcessStatusName(record)"
-                        ></KfProcessStatus>
-                    </template>
-                    <template v-else-if="column.dataIndex === 'group'">
+                    <template v-else-if="column.dataIndex === 'name'">
                         <a-tag
                             :color="
                                 getInstrumentTypeColor(extTypeMap[record.group])
@@ -171,12 +172,18 @@ function handleOpenSetSourceDialog() {
                         >
                             {{ record.group }}
                         </a-tag>
+                        {{ record.name }}
+                    </template>
+                    <template v-else-if="column.dataIndex === 'stateStatus'">
+                        <KfProcessStatus
+                            :statusName="getProcessStatusName(record)"
+                        ></KfProcessStatus>
                     </template>
                     <template v-else-if="column.dataIndex === 'processStatus'">
                         <a-switch
                             size="small"
                             :checked="
-                                getIfProcessOnline(
+                                getIfProcessRunning(
                                     processStatusData,
                                     getProcessIdByKfLocation(record),
                                 )
@@ -186,23 +193,23 @@ function handleOpenSetSourceDialog() {
                     </template>
                     <template v-else-if="column.dataIndex === 'unrealizedPnl'">
                         {{
-                            dealKfNumber(
+                            dealAssetPrice(
                                 getAssetsByKfConfig(record).unrealized_pnl,
                             )
                         }}
                     </template>
                     <template v-else-if="column.dataIndex === 'avail'">
-                        {{ dealKfNumber(getAssetsByKfConfig(record).avail) }}
+                        {{ dealAssetPrice(getAssetsByKfConfig(record).avail) }}
                     </template>
                     <template v-else-if="column.dataIndex === 'marketValue'">
                         {{
-                            dealKfNumber(
+                            dealAssetPrice(
                                 getAssetsByKfConfig(record).market_value,
                             )
                         }}
                     </template>
                     <template v-else-if="column.dataIndex === 'margin'">
-                        {{ dealKfNumber(getAssetsByKfConfig(record).margin) }}
+                        {{ dealAssetPrice(getAssetsByKfConfig(record).margin) }}
                     </template>
                     <template v-else-if="column.dataIndex === 'actions'">
                         <div class="kf-actions__warp">
@@ -233,7 +240,7 @@ function handleOpenSetSourceDialog() {
             v-if="setSourceModalVisible"
             v-model:visible="setSourceModalVisible"
             sourceType="td"
-            @confirm="(sourceId: string) => handleOpenSetTdDialog('add', sourceId)"
+            @confirm="handleOpenSetTdDialog('add', $event)"
         ></KfSetSourceModal>
         <KfSetByConfigModal
             v-if="setTdModalVisible"
@@ -242,14 +249,11 @@ function handleOpenSetSourceDialog() {
             :primaryKeyAvoidRepeatCompareTarget="tdIdList"
             :primaryKeyAvoidRepeatCompareExtra="currentSelectedSourceId"
             @confirm="
-                (formState: Record<string, KfConfigValue>, idByKeys: string, changeType: ModalChangeType) =>
-                    handleConfirmAddUpdateKfConfig(
-                        formState,
-                        idByKeys,
-                        changeType,
-                        'td',
-                        currentSelectedSourceId,
-                    )
+                handleConfirmAddUpdateKfConfig(
+                    $event,
+                    'td',
+                    currentSelectedSourceId,
+                )
             "
         ></KfSetByConfigModal>
     </div>
