@@ -1,18 +1,18 @@
 export const columns: AntTableColumns = [
     {
-        title: '备注',
-        dataIndex: 'accountName',
-        align: 'left',
-        sorter: true,
-        width: 80,
-        fixed: 'left',
-    },
-    {
         title: '账户',
         dataIndex: 'name',
         align: 'left',
         sorter: true,
         width: 160,
+        fixed: 'left',
+    },
+    {
+        title: '备注',
+        dataIndex: 'accountName',
+        align: 'left',
+        sorter: true,
+        width: 80,
         fixed: 'left',
     },
     {

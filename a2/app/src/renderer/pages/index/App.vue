@@ -84,7 +84,7 @@ bus.subscribe((data: KfBusEvent) => {
                 break;
             case 'record-before-quit':
                 preQuitSystemLoadingData.record = 'loading';
-                preQuitTasks().finally(() => {
+                preQuitTasks([saveBoardsMap()]).finally(() => {
                     ipcRenderer.send('record-before-quit-done');
                     preQuitSystemLoadingData.record = 'done';
                 });
@@ -108,6 +108,15 @@ tradingDataSubject.subscribe((watcher: Watcher) => {
 });
 store.setKfConfigList();
 store.setKfExtConfigs();
+
+function saveBoardsMap(): Promise<void> {
+    if (app?.proxy) {
+        const { boardsMap } = app?.proxy.$useGlobalStore();
+        localStorage.setItem('boardsMap', JSON.stringify(boardsMap));
+        return Promise.resolve();
+    }
+    return Promise.resolve();
+}
 </script>
 
 <template>

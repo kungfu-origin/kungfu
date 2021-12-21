@@ -61,8 +61,8 @@ export const handleSwitchProcessStatus = (
         });
 };
 
-export const preQuitTasks = (): Promise<[]> => {
-    return Promise.all([]).then(() => {
+export const preQuitTasks = (tasks: Promise<void>[]): Promise<[]> => {
+    return Promise.all(tasks).then(() => {
         return [];
     });
 };

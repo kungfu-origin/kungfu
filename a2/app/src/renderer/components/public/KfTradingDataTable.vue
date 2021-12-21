@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { sum } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
+import { Empty } from 'ant-design-vue';
 import { filter } from 'rxjs';
 import { computed, getCurrentInstance, onMounted, ref } from 'vue';
 
@@ -35,7 +36,7 @@ defineEmits<{
 }>();
 
 const app = getCurrentInstance();
-const kfScrollerTableRef = ref();
+const simpleImage = Empty.PRESENTED_IMAGE_SIMPLE;
 const kfScrollerTableBodyRef = ref();
 const kfScrollerTableWidth = ref(0);
 let clickTimer: number | undefined;
@@ -68,19 +69,6 @@ const headerWidth = computed(() => {
     return headerWidthCollection;
 });
 
-onMounted(() => {
-    calcBodyWidthHeight();
-
-    if (app?.proxy) {
-        app?.proxy.$bus
-            .pipe(filter((e: KfBusEvent) => e.tag === 'resize'))
-            .subscribe(() => {
-                console.log(kfScrollerTableRef.value);
-                // kfScrollerTableRef.value.forceUpdate();
-            });
-    }
-});
-
 function getHeaderWidth(column: KfTradingDataTableHeaderConfig) {
     const headerWidthByCalc = headerWidth.value[column.dataIndex];
     const columnWidth = column.width;
@@ -90,11 +78,6 @@ function getHeaderWidth(column: KfTradingDataTableHeaderConfig) {
     } else {
         return headerWidthByCalc;
     }
-}
-
-function calcBodyWidthHeight() {
-    if (!kfScrollerTableBodyRef.value) return;
-    kfScrollerTableWidth.value = kfScrollerTableBodyRef.value.clientWidth;
 }
 
 function handleDbClickRow(e: MouseEvent, row: TradingDataItem) {
@@ -125,7 +108,7 @@ function handleMousedown(e: MouseEvent, row: TradingDataItem) {
         </ul>
         <div class="kf-table-body" ref="kfScrollerTableBodyRef">
             <RecycleScroller
-                ref="kfScrollerTableRef"
+                v-if="dataSource && dataSource.length"
                 class="kf-table-scroller"
                 :items="dataSource"
                 :item-size="26"
@@ -158,6 +141,7 @@ function handleMousedown(e: MouseEvent, row: TradingDataItem) {
                     </ul>
                 </template>
             </RecycleScroller>
+            <a-empty v-else :image="simpleImage"></a-empty>
         </div>
     </div>
 </template>
@@ -168,6 +152,19 @@ function handleMousedown(e: MouseEvent, row: TradingDataItem) {
     height: 100%;
     position: relative;
 
+    .ant-empty {
+        height: auto;
+        margin-top: 48px;
+
+        .ant-empty-image {
+            height: auto;
+        }
+
+        .ant-empty-description {
+            color: @input-placeholder-color;
+        }
+    }
+
     .kf-table-header {
         display: flex;
         flex-direction: row;
@@ -177,6 +174,7 @@ function handleMousedown(e: MouseEvent, row: TradingDataItem) {
         background: @table-header-bg;
         white-space: nowrap;
         box-sizing: border-box;
+        margin-bottom: 4px;
 
         .kf-table-cell {
             height: 32px;
@@ -201,6 +199,10 @@ function handleMousedown(e: MouseEvent, row: TradingDataItem) {
     .kf-table-body {
         width: 100%;
         transform: translateZ(0);
+        position: absolute;
+        top: 36px;
+        height: calc(100% - 36px);
+
         .kf-table-scroller {
             height: 100%;
             width: 100%;

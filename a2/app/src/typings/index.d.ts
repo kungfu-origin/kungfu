@@ -61,13 +61,15 @@ interface KfTradingDataTableHeaderConfig {
     dataIndex: string;
     width?: number;
     flex?: number;
-    type:
+    type?:
         | 'number'
         | 'string'
+        | 'source'
         | 'nanoTime'
         | 'exchange'
         | 'offset'
         | 'side'
         | 'priceType'
-        | 'direction';
+        | 'direction'
+        | 'actions';
 }

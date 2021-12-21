@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import {
-    DirectionEnum,
     LedgerCategoryEnum,
     LedgerCategoryTypes,
 } from '@kungfu-trader/kungfu-js-api/typings';
 import {
     dealKfPrice,
     dealAssetPrice,
+    dealDirection,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import {
     useCurrentGlobalKfLocation,
@@ -18,14 +18,15 @@ import KfTradingDataTable from '@renderer/components/public/KfTradingDataTable.v
 import { HistoryOutlined } from '@ant-design/icons-vue';
 
 import { getCurrentInstance, onMounted, ref, toRaw } from 'vue';
-import { Direction } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
+import { columns } from './config';
 
 const app = getCurrentInstance();
 
 const pos = ref<Position[]>([]);
 const { searchKeyword, tableData } = useTableSearchKeyword<Position>(pos, [
-    'group',
-    'name',
+    'instrument_id',
+    'exchange_id',
+    'direction',
 ]);
 
 const { currentGlobalKfLocation } = useCurrentGlobalKfLocation();
@@ -57,61 +58,6 @@ onMounted(() => {
         });
     }
 });
-
-const columns: KfTradingDataTableHeaderConfig[] = [
-    {
-        type: 'string',
-        name: '代码',
-        dataIndex: 'instrument_id',
-        width: 120,
-    },
-    {
-        type: 'number',
-        name: '昨',
-        dataIndex: 'yesterday_volume',
-        flex: 1,
-    },
-    {
-        type: 'number',
-        name: '今',
-        dataIndex: 'today_volume',
-        flex: 1,
-    },
-    {
-        type: 'number',
-        name: '总',
-        dataIndex: 'volume',
-        flex: 1,
-    },
-    {
-        type: 'number',
-        name: '开仓均价',
-        dataIndex: 'avg_open_price',
-        flex: 1.2,
-    },
-    {
-        type: 'number',
-        name: '总成本',
-        dataIndex: 'total_price',
-        flex: 1.5,
-    },
-    {
-        type: 'number',
-        name: '总市值',
-        dataIndex: 'total_market_price',
-        flex: 1.5,
-    },
-    {
-        type: 'number',
-        name: '浮动盈亏',
-        dataIndex: 'unrealized_pnl',
-        flex: 1.5,
-    },
-];
-
-function getDirectionName(direction: DirectionEnum) {
-    return Direction[direction].name;
-}
 </script>
 <template>
     <div class="kf-position__warp">
@@ -131,7 +77,7 @@ function getDirectionName(direction: DirectionEnum) {
             <KfTradingDataTable
                 :columns="columns"
                 :dataSource="tableData"
-                keyField="instrument_id"
+                keyField="uid_key"
             >
                 <template
                     v-slot:default="{
@@ -145,8 +91,8 @@ function getDirectionName(direction: DirectionEnum) {
                     <template v-if="column.dataIndex === 'instrument_id'">
                         {{ item.instrument_id }}
                         {{ item.exchange_id }}
-                        <span>
-                            {{ getDirectionName(item.direction) }}
+                        <span :class="dealDirection(item.direction).color">
+                            {{ dealDirection(item.direction).name }}
                         </span>
                     </template>
                     <template v-else-if="column.dataIndex === 'today_volume'">

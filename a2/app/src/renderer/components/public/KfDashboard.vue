@@ -1,6 +1,7 @@
 <template>
     <div class="kf-dashboard__warp kf-translateZ">
         <div class="kf-dashboard__header">
+            <div class="title">{{ title }}</div>
             <slot name="header"></slot>
         </div>
         <div ref="kfDashboardBody" class="kf-dashboard__body">
@@ -9,11 +10,18 @@
     </div>
 </template>
 <script lang="ts">
+import { defineComponent, nextTick, PropType } from 'vue';
 import { filter } from 'rxjs';
-import { defineComponent, nextTick } from 'vue';
 
 export default defineComponent({
     name: 'KfDashboard',
+
+    props: {
+        title: {
+            type: String as PropType<string>,
+            default: '',
+        },
+    },
 
     mounted() {
         nextTick().then(() => {

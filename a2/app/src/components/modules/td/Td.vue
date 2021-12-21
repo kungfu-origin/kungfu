@@ -161,10 +161,7 @@ function handleOpenSetSourceDialog() {
                         record: KfConfig,
                     }"
                 >
-                    <template v-if="column.dataIndex === 'accountName'">
-                        {{ JSON.parse(record.value).account_name || '--' }}
-                    </template>
-                    <template v-else-if="column.dataIndex === 'name'">
+                    <template v-if="column.dataIndex === 'name'">
                         <a-tag
                             :color="
                                 getInstrumentTypeColor(extTypeMap[record.group])
@@ -173,6 +170,9 @@ function handleOpenSetSourceDialog() {
                             {{ record.group }}
                         </a-tag>
                         {{ record.name }}
+                    </template>
+                    <template v-else-if="column.dataIndex === 'accountName'">
+                        {{ JSON.parse(record.value).account_name || '--' }}
                     </template>
                     <template v-else-if="column.dataIndex === 'stateStatus'">
                         <KfProcessStatus
