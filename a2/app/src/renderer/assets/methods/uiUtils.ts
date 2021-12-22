@@ -18,6 +18,7 @@ import {
 import {
     buildExtTypeMap,
     buildObjectFromArray,
+    dealCategory,
     getAppStateStatusName,
     getIdByKfLocation,
     getInstrumentTypeData,
@@ -386,6 +387,7 @@ export const useCurrentGlobalKfLocation = (): {
     currentGlobalKfLocation: {
         value: KfConfig | KfLocation | null;
     };
+    currentCategoryData: ComputedRef<KfTradeValueCommonData | null>;
     setCurrentGlobalKfLocation(kfConfig: KfConfig): void;
     dealRowClassName(kfConfig: KfConfig): string;
     customRow(kfConfig: KfConfig): {
@@ -440,8 +442,17 @@ export const useCurrentGlobalKfLocation = (): {
         };
     };
 
+    const currentCategoryData = computed(() => {
+        if (!currentKfLocation.value) {
+            return null;
+        }
+
+        return dealCategory(currentKfLocation.value.category);
+    });
+
     return {
         currentGlobalKfLocation: currentKfLocation,
+        currentCategoryData,
         setCurrentGlobalKfLocation,
         dealRowClassName,
         customRow,

@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import {
     dealKfPrice,
-    dealAssetPrice,
     dealSide,
     dealOffset,
     dealOrderStatus,
     dealLocationUID,
+    getIdByKfLocation,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import {
     useCurrentGlobalKfLocation,
@@ -18,10 +18,6 @@ import { HistoryOutlined } from '@ant-design/icons-vue';
 
 import { computed, getCurrentInstance, onMounted, ref, toRaw } from 'vue';
 import { getColumns } from './config';
-import {
-    Offset,
-    Side,
-} from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
 import { dealKfTime } from '@kungfu-trader/kungfu-js-api/kungfu';
 
 const app = getCurrentInstance();
@@ -33,7 +29,8 @@ const { searchKeyword, tableData } = useTableSearchKeyword<Order>(orders, [
     'exchange_id',
 ]);
 
-const { currentGlobalKfLocation } = useCurrentGlobalKfLocation();
+const { currentGlobalKfLocation, currentCategoryData } =
+    useCurrentGlobalKfLocation();
 
 const columns = computed(() => {
     if (currentGlobalKfLocation.value === null) {
@@ -70,12 +67,12 @@ onMounted(() => {
                 currentGlobalKfLocation.value,
             );
 
-            orders.value = watcher.ledger.Order.filter(
+            const ordersResolved = watcher.ledger.Order.filter(
                 orderFilterKey.value,
                 currentUID,
-            )
-                .sort('update_time')
-                .slice(0, 100);
+            );
+
+            orders.value = toRaw(ordersResolved.sort('update_time'));
         });
     }
 });
@@ -87,6 +84,22 @@ function dealLocationUIDResolved(uid: number): string {
 <template>
     <div class="kf-orders__warp">
         <KfDashboard>
+            <template v-slot:title>
+                <span v-if="currentGlobalKfLocation.value">
+                    <a-tag
+                        v-if="currentCategoryData"
+                        :color="currentCategoryData.color"
+                    >
+                        {{ currentCategoryData.name }}
+                    </a-tag>
+                    <span class="name" v-if="currentGlobalKfLocation.value">
+                        {{
+                            getIdByKfLocation(currentGlobalKfLocation.value) ||
+                            ''
+                        }}
+                    </span>
+                </span>
+            </template>
             <template v-slot:header>
                 <KfDashboardItem>
                     <a-input-search
@@ -125,6 +138,9 @@ function dealLocationUIDResolved(uid: number): string {
                         <span :class="dealOffset(item.offset).color">
                             {{ dealOffset(item.offset).name }}
                         </span>
+                    </template>
+                    <template v-else-if="column.dataIndex === 'limit_price'">
+                        {{ dealKfPrice(item.limit_price) }}
                     </template>
                     <template v-else-if="column.dataIndex === 'volume_traded'">
                         {{ item.volume_traded }} / {{ item.volume }}

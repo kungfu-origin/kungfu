@@ -14,6 +14,7 @@ import {
     KfCategoryEnum,
     ProcessStatusTypes,
     BrokerStateStatusTypes,
+    OrderStatusEnum,
 } from '../typings';
 
 import { Pm2ProcessStatusTypes } from '../utils/processUtils';
@@ -132,47 +133,115 @@ export const KfCategory: Record<KfCategoryEnum, KfTradeValueCommonData> = {
 };
 
 export const Offset: Record<OffsetEnum, KfTradeValueCommonData> = {
-    [OffsetEnum.Open]: { name: isEnglish ? 'Open' : '开' },
-    [OffsetEnum.Close]: { name: isEnglish ? 'Close' : '平' },
-    [OffsetEnum.CloseToday]: { name: isEnglish ? 'CloseToday' : '平今' },
-    [OffsetEnum.CloseYest]: { name: isEnglish ? 'CloseYest' : '平昨' },
+    [OffsetEnum.Open]: { name: isEnglish ? 'Open' : '开', color: 'red' },
+    [OffsetEnum.Close]: { name: isEnglish ? 'Close' : '平', color: 'green' },
+    [OffsetEnum.CloseToday]: {
+        name: isEnglish ? 'CloseToday' : '平今',
+        color: 'green',
+    },
+    [OffsetEnum.CloseYest]: {
+        name: isEnglish ? 'CloseYest' : '平昨',
+        color: 'green',
+    },
 };
 
 export const Side: Record<SideEnum, KfTradeValueCommonData> = {
-    [SideEnum.Buy]: { name: isEnglish ? 'Buy' : '买' },
-    [SideEnum.Sell]: { name: isEnglish ? 'Sell' : '卖' },
-    [SideEnum.Lock]: { name: isEnglish ? 'Lock' : '锁仓' },
-    [SideEnum.Unlock]: { name: isEnglish ? 'Unlock' : '解锁' },
-    [SideEnum.Exec]: { name: isEnglish ? 'Exec' : '行权' },
-    [SideEnum.Drop]: { name: isEnglish ? 'Drop' : '放弃行权' },
-    [SideEnum.Purchase]: { name: isEnglish ? 'Purchase' : '申购' },
-    [SideEnum.Redemption]: { name: isEnglish ? 'Redemption' : '赎回' },
-    [SideEnum.Split]: { name: isEnglish ? 'Split' : '拆分' },
-    [SideEnum.Merge]: { name: isEnglish ? 'Merge' : '合并' },
-    [SideEnum.MarginTrade]: { name: isEnglish ? 'MarginTrade' : '融资买入' },
-    [SideEnum.ShortSell]: { name: isEnglish ? 'ShortSell' : '融券卖出' },
-    [SideEnum.RepayMargin]: { name: isEnglish ? 'RepayMargin' : '卖券还款' },
-    [SideEnum.RepayStock]: { name: isEnglish ? 'RepayStock' : '买券还券' },
+    [SideEnum.Buy]: { name: isEnglish ? 'Buy' : '买', color: 'red' },
+    [SideEnum.Sell]: { name: isEnglish ? 'Sell' : '卖', color: 'green' },
+    [SideEnum.Lock]: { name: isEnglish ? 'Lock' : '锁仓', color: 'orange' },
+    [SideEnum.Unlock]: { name: isEnglish ? 'Unlock' : '解锁', color: 'blue' },
+    [SideEnum.Exec]: { name: isEnglish ? 'Exec' : '行权', color: 'blue' },
+    [SideEnum.Drop]: { name: isEnglish ? 'Drop' : '放弃行权', color: 'green' },
+    [SideEnum.Purchase]: {
+        name: isEnglish ? 'Purchase' : '申购',
+        color: 'cyan',
+    },
+    [SideEnum.Redemption]: {
+        name: isEnglish ? 'Redemption' : '赎回',
+        color: 'pink',
+    },
+    [SideEnum.Split]: { name: isEnglish ? 'Split' : '拆分', color: 'red' },
+    [SideEnum.Merge]: { name: isEnglish ? 'Merge' : '合并', color: 'green' },
+    [SideEnum.MarginTrade]: {
+        name: isEnglish ? 'MarginTrade' : '融资买入',
+        color: 'red',
+    },
+    [SideEnum.ShortSell]: {
+        name: isEnglish ? 'ShortSell' : '融券卖出',
+        color: 'green',
+    },
+    [SideEnum.RepayMargin]: {
+        name: isEnglish ? 'RepayMargin' : '卖券还款',
+        color: 'green',
+    },
+    [SideEnum.RepayStock]: {
+        name: isEnglish ? 'RepayStock' : '买券还券',
+        color: 'red',
+    },
     [SideEnum.CashRepayMargin]: {
         name: isEnglish ? 'CashRepayMargin' : '现金还款',
+        color: 'orange',
     },
     [SideEnum.StockRepayStock]: {
         name: isEnglish ? 'StockRepayStock' : '现券还券',
+        color: 'blue',
     },
     [SideEnum.SurplusStockTransfer]: {
         name: isEnglish ? 'SurplusStockTransfer' : '余券划转',
+        color: 'blue',
     },
     [SideEnum.GuaranteeStockTransferIn]: {
         name: isEnglish ? 'GuaranteeStockTransferIn' : '担保品转入',
+        color: 'red',
     },
     [SideEnum.GuaranteeStockTransferOut]: {
         name: isEnglish ? 'GuaranteeStockTransferOut' : '担保品转出',
+        color: 'green',
+    },
+};
+
+export const OrderStatus: Record<OrderStatusEnum, KfTradeValueCommonData> = {
+    [OrderStatusEnum.Unknown]: {
+        name: isEnglish ? 'Unknown' : '未知',
+        color: 'default',
+    },
+    [OrderStatusEnum.Submitted]: {
+        name: isEnglish ? 'Submitted' : '已提交',
+        color: 'default',
+    },
+    [OrderStatusEnum.Pending]: {
+        name: isEnglish ? 'Pending' : '等待中',
+        color: 'default',
+    },
+    [OrderStatusEnum.Cancelled]: {
+        name: isEnglish ? 'Cancelled' : '已撤单',
+        color: 'default',
+    },
+    [OrderStatusEnum.Error]: {
+        name: isEnglish ? 'Error' : '错误',
+        color: 'red',
+    },
+    [OrderStatusEnum.Filled]: {
+        name: isEnglish ? 'Filled' : '已成交',
+        color: 'green',
+    },
+    [OrderStatusEnum.PartialFilledNotActive]: {
+        name: isEnglish ? 'PartialFilledNotActive' : '部分撤单',
+        color: 'green',
+    },
+    [OrderStatusEnum.PartialFilledActive]: {
+        name: isEnglish ? 'PartialFilledActive' : '正在交易',
+        color: 'default',
+    },
+    [OrderStatusEnum.Lost]: {
+        name: isEnglish ? 'Lost' : '丢失',
+        color: 'default',
     },
 };
 
 export const Direction: Record<DirectionEnum, KfTradeValueCommonData> = {
-    [DirectionEnum.Long]: { name: isEnglish ? 'Long' : '多' },
-    [DirectionEnum.Short]: { name: isEnglish ? 'Short' : '空' },
+    [DirectionEnum.Long]: { name: isEnglish ? 'Long' : '多', color: 'red' },
+    [DirectionEnum.Short]: { name: isEnglish ? 'Short' : '空', color: 'green' },
 };
 
 export const PriceType: Record<PriceTypeEnum, KfTradeValueCommonData> = {

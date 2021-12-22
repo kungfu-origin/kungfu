@@ -17,10 +17,7 @@ import {
     KfExtOriginConfig,
     SetKfConfigPayload,
 } from '@kungfu-trader/kungfu-js-api/typings';
-import type {
-    KfConfig,
-    KfConfigValue,
-} from '@kungfu-trader/kungfu-js-api/typings';
+import type { KfConfig } from '@kungfu-trader/kungfu-js-api/typings';
 import { columns } from './config';
 import {
     useTableSearchKeyword,

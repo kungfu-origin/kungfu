@@ -1,12 +1,9 @@
 <script setup lang="ts">
 import {
-    LedgerCategoryEnum,
-    LedgerCategoryTypes,
-} from '@kungfu-trader/kungfu-js-api/typings';
-import {
     dealKfPrice,
-    dealAssetPrice,
-    dealDirection,
+    dealSide,
+    dealOffset,
+    dealLocationUID,
     getIdByKfLocation,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import {
@@ -18,20 +15,46 @@ import KfDashboardItem from '@renderer/components/public/KfDashboardItem.vue';
 import KfTradingDataTable from '@renderer/components/public/KfTradingDataTable.vue';
 import { HistoryOutlined } from '@ant-design/icons-vue';
 
-import { getCurrentInstance, onMounted, ref, toRaw } from 'vue';
-import { columns } from './config';
+import { computed, getCurrentInstance, onMounted, ref, toRaw } from 'vue';
+import { getColumns } from './config';
+import { dealKfTime } from '@kungfu-trader/kungfu-js-api/kungfu';
 
 const app = getCurrentInstance();
 
-const pos = ref<Position[]>([]);
-const { searchKeyword, tableData } = useTableSearchKeyword<Position>(pos, [
+const trades = ref<Trade[]>([]);
+const { searchKeyword, tableData } = useTableSearchKeyword<Trade>(trades, [
+    'order_id',
+    'trade_id',
     'instrument_id',
     'exchange_id',
-    'direction',
 ]);
 
 const { currentGlobalKfLocation, currentCategoryData } =
     useCurrentGlobalKfLocation();
+
+const columns = computed(() => {
+    if (currentGlobalKfLocation.value === null) {
+        return getColumns('td');
+    }
+
+    const { category } = currentGlobalKfLocation.value;
+    return getColumns(category);
+});
+
+const tradeFilterKey = computed(() => {
+    if (currentGlobalKfLocation.value === null) {
+        return '';
+    }
+
+    const { category } = currentGlobalKfLocation.value;
+    if (category === 'td') {
+        return 'source';
+    } else if (category === 'strategy') {
+        return 'dest';
+    }
+
+    return '';
+});
 
 onMounted(() => {
     if (app?.proxy) {
@@ -39,30 +62,27 @@ onMounted(() => {
             if (currentGlobalKfLocation.value === null) {
                 return;
             }
-            const { category, group, name } = currentGlobalKfLocation.value;
-            const ledgerCategory =
-                LedgerCategoryEnum[category as LedgerCategoryTypes];
-            const positions = watcher.ledger.Position.nofilter(
-                'volume',
-                BigInt(0),
-            ).filter('ledger_category', ledgerCategory);
 
-            const positionsResolved =
-                ledgerCategory === 0
-                    ? positions
-                          .filter('source_id', group)
-                          .filter('account_id', name)
-                    : positions.filter('client_id', name);
-
-            pos.value = toRaw(
-                positionsResolved.sort('instrument_id').reverse(),
+            const currentUID = watcher.getLocationUID(
+                currentGlobalKfLocation.value,
             );
+
+            const tradesResolved = watcher.ledger.Trade.filter(
+                tradeFilterKey.value,
+                currentUID,
+            );
+
+            trades.value = toRaw(tradesResolved.sort('update_time'));
         });
     }
 });
+
+function dealLocationUIDResolved(uid: number): string {
+    return dealLocationUID(window.watcher, uid);
+}
 </script>
 <template>
-    <div class="kf-position__warp">
+    <div class="kf-trades__warp">
         <KfDashboard>
             <template v-slot:title>
                 <span v-if="currentGlobalKfLocation.value">
@@ -95,48 +115,40 @@ onMounted(() => {
             <KfTradingDataTable
                 :columns="columns"
                 :dataSource="tableData"
-                keyField="uid_key"
+                keyField="trade_id"
             >
                 <template
                     v-slot:default="{
                         item,
                         column,
                     }: {
-                        item: Position,
+                        item: Trade,
                         column: KfTradingDataTableHeaderConfig,
                     }"
                 >
-                    <template v-if="column.dataIndex === 'instrument_id'">
-                        {{ item.instrument_id }}
-                        {{ item.exchange_id }}
-                        <span :class="dealDirection(item.direction).color">
-                            {{ dealDirection(item.direction).name }}
+                    <template v-if="column.dataIndex === 'trade_time'">
+                        {{ dealKfTime(item.trade_time) }}
+                    </template>
+                    <template v-else-if="column.dataIndex === 'side'">
+                        <span :class="dealSide(item.side).color">
+                            {{ dealSide(item.side).name }}
                         </span>
                     </template>
-                    <template v-else-if="column.dataIndex === 'today_volume'">
-                        {{ item.volume - item.yesterday_volume }}
+                    <template v-else-if="column.dataIndex === 'offset'">
+                        <span :class="dealOffset(item.offset).color">
+                            {{ dealOffset(item.offset).name }}
+                        </span>
                     </template>
-                    <template v-else-if="column.dataIndex === 'avg_open_price'">
-                        {{ dealKfPrice(item.avg_open_price) }}
-                    </template>
-                    <template v-else-if="column.dataIndex === 'total_price'">
-                        {{
-                            dealAssetPrice(
-                                item.avg_open_price * Number(item.volume),
-                            )
-                        }}
+                    <template v-else-if="column.dataIndex === 'price'">
+                        {{ dealKfPrice(item.price) }}
                     </template>
                     <template
-                        v-else-if="column.dataIndex === 'total_market_price'"
+                        v-else-if="
+                            column.dataIndex === 'source' ||
+                            column.dataIndex === 'dest'
+                        "
                     >
-                        {{
-                            dealAssetPrice(
-                                item.last_price * Number(item.volume),
-                            )
-                        }}
-                    </template>
-                    <template v-else-if="column.dataIndex === 'unrealized_pnl'">
-                        {{ dealAssetPrice(item.unrealized_pnl) }}
+                        {{ dealLocationUIDResolved(item[column.dataIndex]) }}
                     </template>
                 </template>
             </KfTradingDataTable>
@@ -145,11 +157,11 @@ onMounted(() => {
 </template>
 <script lang="ts">
 export default {
-    name: '持仓',
+    name: '成交记录',
 };
 </script>
 <style lang="less">
-.kf-position__warp {
+.kf-trades__warp {
     width: 100%;
     height: 100%;
 

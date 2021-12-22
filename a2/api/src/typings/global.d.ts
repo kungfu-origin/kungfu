@@ -200,6 +200,9 @@ interface Order {
     price_type: PriceTypeEnum; //价格类型
     volume_condition: VolumeConditionEnum; //成交量类型
     time_condition: TimeConditionEnum; //成交时间类型
+
+    source: number;
+    dest: number;
 }
 
 interface OrderInput {
@@ -226,6 +229,9 @@ interface OrderInput {
 
     parent_id: bigint; //母订单ID
     insert_time: bigint; //写入时间
+
+    source: number;
+    dest: number;
 }
 
 interface OrderStat {
@@ -235,6 +241,9 @@ interface OrderStat {
     insert_time: bigint;
     ack_time: bigint;
     trade_time: bigint;
+
+    source: number;
+    dest: number;
 }
 
 interface Position {
@@ -340,6 +349,9 @@ interface Trade {
 
     tax: number; //税
     commission: number; //手续费
+
+    source: number;
+    dest: number;
 }
 
 interface TradingData {
@@ -400,6 +412,7 @@ declare module '@kungfu-trader/kungfu-core' {
         ): Watcher | null;
         shutdown(): void;
         formatStringToHashHex(id: string): string;
+        formatTime(nano: bigint, format: string): string;
     };
 }
 

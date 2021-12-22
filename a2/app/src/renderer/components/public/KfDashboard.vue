@@ -1,8 +1,12 @@
 <template>
     <div class="kf-dashboard__warp kf-translateZ">
         <div class="kf-dashboard__header">
-            <div class="title">{{ title }}</div>
-            <slot name="header"></slot>
+            <div class="title">
+                <slot name="title"></slot>
+            </div>
+            <div class="header-actions">
+                <slot name="header"></slot>
+            </div>
         </div>
         <div ref="kfDashboardBody" class="kf-dashboard__body">
             <slot></slot>
@@ -63,8 +67,26 @@ export default defineComponent({
         line-height: 32px;
         margin-bottom: 4px;
         display: flex;
-        justify-content: flex-end;
+        justify-content: space-between;
         align-items: center;
+
+        .title {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+
+            .name {
+                font-size: 14px;
+                font-weight: bold;
+                color: @white;
+            }
+        }
+
+        .header-actions {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+        }
     }
 
     .kf-dashboard__body {

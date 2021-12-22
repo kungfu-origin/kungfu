@@ -1,6 +1,6 @@
 import path from 'path';
 import dayjs from 'dayjs';
-import fse, { Stats } from 'fs-extra';
+import fse, { Stats, watch } from 'fs-extra';
 import log4js from 'log4js';
 import { buildProcessLogPath, EXTENSION_DIR } from '../config/pathConfig';
 import {
@@ -8,6 +8,10 @@ import {
     KfCategory,
     AppStateStatus,
     Pm2ProcessStatus,
+    Side,
+    Offset,
+    Direction,
+    OrderStatus,
 } from '../config/tradingConfig';
 import {
     KfTradeValueCommonData,
@@ -23,7 +27,10 @@ import {
     KfConfigValue,
     KfCategoryEnum,
     BrokerStateStatusTypes,
-    KfConfigItem,
+    SideEnum,
+    OffsetEnum,
+    DirectionEnum,
+    OrderStatusEnum,
 } from '../typings';
 import {
     deleteProcess,
@@ -706,7 +713,6 @@ export const switchKfLocation = (
 
     if (!targetStatus) {
         if (kfLocation.category !== 'system') {
-            console.log(watcher);
             if (watcher && !watcher.isReadyToInteract(kfLocation)) {
                 return Promise.reject(
                     new Error(`${processId} 还未准备就绪, 请稍后重试`),
@@ -777,4 +783,48 @@ export const dealAssetPrice = (
 export const sum = (list: number[]): number => {
     if (!list.length) return 0;
     return list.reduce((accumlator, a) => accumlator + +a);
+};
+
+export const dealSide = (side: SideEnum): KfTradeValueCommonData => {
+    return Side[side];
+};
+
+export const dealOffset = (offset: OffsetEnum): KfTradeValueCommonData => {
+    return Offset[offset];
+};
+
+export const dealDirection = (
+    direction: DirectionEnum,
+): KfTradeValueCommonData => {
+    return Direction[direction];
+};
+
+export const dealOrderStatus = (
+    status: OrderStatusEnum,
+    errorMsg?: string,
+): KfTradeValueCommonData => {
+    return {
+        ...OrderStatus[status],
+        ...(+status === OrderStatusEnum.Error && errorMsg
+            ? {
+                  name: errorMsg,
+              }
+            : {}),
+    };
+};
+
+export const dealCategory = (category: KfCategoryTypes) => {
+    return KfCategory[KfCategoryEnum[category]];
+};
+
+export const dealLocationUID = (
+    watcher: Watcher | null,
+    uid: number,
+): string => {
+    if (!watch) {
+        return '--';
+    }
+
+    const kfLocation = watcher?.getLocation(uid);
+    return getIdByKfLocation(kfLocation);
 };

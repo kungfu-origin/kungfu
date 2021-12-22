@@ -5,8 +5,14 @@ export const getColumns = (
 ): KfTradingDataTableHeaderConfig[] => [
     {
         type: 'string',
-        name: '委托更新时间',
-        dataIndex: 'update_time',
+        name: '柜台成交时间',
+        dataIndex: 'trade_time',
+        width: 120,
+    },
+    {
+        type: 'string',
+        name: '功夫系统时间',
+        dataIndex: 'kf_time',
         width: 120,
     },
     {
@@ -29,41 +35,24 @@ export const getColumns = (
     },
     {
         type: 'number',
-        name: '委托价',
-        dataIndex: 'limit_price',
-        width: 120,
-    },
-    {
-        type: 'string',
-        name: '已成交/全部',
-        dataIndex: 'volume_traded',
-        width: 80,
-    },
-    {
-        type: 'string',
-        name: '订单状态',
-        dataIndex: 'status',
+        name: '成交价',
+        dataIndex: 'price',
         width: 120,
     },
     {
         type: 'number',
-        name: '系统延迟μs',
-        dataIndex: 'latencySystem',
-        width: 90,
+        name: '成交量',
+        dataIndex: 'volume',
+        width: 60,
     },
     {
         type: 'number',
-        name: '网络延迟μs',
-        dataIndex: 'latencyNetwork',
+        name: '成交延迟(μs)',
+        dataIndex: 'latencyTrade',
         width: 90,
     },
     {
         name: moduleType == 'td' ? '下单源' : '目标账户',
         dataIndex: moduleType == 'td' ? 'dest' : 'source',
-    },
-    {
-        name: '操作',
-        dataIndex: 'actions',
-        width: 60,
     },
 ];
