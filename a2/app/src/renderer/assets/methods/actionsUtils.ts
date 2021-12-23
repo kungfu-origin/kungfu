@@ -282,17 +282,22 @@ export const useDealExportHistoryTradingData = (): {
                 if (data.tag === 'export') {
                     exportEventData.value = data;
 
-                    if (exportEventData.value.tradingDataType !== 'Order') {
-                        if (exportEventData.value.tradingDataType !== 'Trade') {
+                    if (exportEventData.value.tradingDataType !== 'all') {
+                        if (exportEventData.value.tradingDataType !== 'Order') {
                             if (
                                 exportEventData.value.tradingDataType !==
-                                'OrderInput'
+                                'Trade'
                             ) {
-                                handleConfirmExportDate({
-                                    date: dayjs().format(),
-                                    dateType: HistoryDateEnum.naturalDate,
-                                });
-                                return;
+                                if (
+                                    exportEventData.value.tradingDataType !==
+                                    'OrderInput'
+                                ) {
+                                    handleConfirmExportDate({
+                                        date: dayjs().format(),
+                                        dateType: HistoryDateEnum.naturalDate,
+                                    });
+                                    return;
+                                }
                             }
                         }
                     }
