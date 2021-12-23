@@ -5,7 +5,7 @@ import { Pm2ProcessStatusTypes } from '@kungfu-trader/kungfu-js-api/utils/proces
 declare module '@vue/runtime-core' {
     interface ComponentCustomProperties {
         $registedKfUIComponents: string[];
-        $bus: Subject;
+        $bus: Subject<KfBusEvent>;
         $tradingDataSubject: Subject<Watcher>;
         $useGlobalStore: StoreDefinition;
     }

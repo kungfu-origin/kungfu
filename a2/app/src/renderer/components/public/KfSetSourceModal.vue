@@ -1,17 +1,6 @@
 <script setup lang="ts">
-import {
-    InstrumentTypeEnum,
-    KfCategoryTypes,
-    SourceData,
-} from '@kungfu-trader/kungfu-js-api/typings';
-import {
-    defineComponent,
-    ref,
-    PropType,
-    onMounted,
-    computed,
-    getCurrentInstance,
-} from 'vue';
+import { KfCategoryTypes } from '@kungfu-trader/kungfu-js-api/typings';
+import { ref, onMounted, computed, getCurrentInstance } from 'vue';
 
 import {
     getInstrumentTypeData,

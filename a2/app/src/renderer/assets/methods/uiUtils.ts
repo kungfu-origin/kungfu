@@ -179,16 +179,6 @@ export const initFormStateByConfig = (
         'instrumentType', // select - number
     ];
     const formState: Record<string, KfConfigValue> = {};
-    // const rules: Record<
-    //     string,
-    //     {
-    //         required?: boolean;
-    //         type?: 'string' | number;
-    //         message?: string;
-    //         trigger?: 'change' | 'blur';
-    //     }
-    // > = {};
-
     configSettings.forEach((item) => {
         const type = item.type;
         const isBoolean = booleanType.includes(type);
@@ -383,11 +373,14 @@ export const useAllKfConfigData = (): Record<KfCategoryTypes, KfConfig[]> => {
     return allKfConfigData;
 };
 
-export const useCurrentGlobalKfLocation = (): {
+export const useCurrentGlobalKfLocation = (
+    watcher: Watcher | null,
+): {
     currentGlobalKfLocation: {
         value: KfConfig | KfLocation | null;
     };
     currentCategoryData: ComputedRef<KfTradeValueCommonData | null>;
+    currentUID: ComputedRef<string>;
     setCurrentGlobalKfLocation(kfConfig: KfConfig): void;
     dealRowClassName(kfConfig: KfConfig): string;
     customRow(kfConfig: KfConfig): {
@@ -450,9 +443,17 @@ export const useCurrentGlobalKfLocation = (): {
         return dealCategory(currentKfLocation.value.category);
     });
 
+    const currentUID = computed(() => {
+        if (!watcher) {
+            return '';
+        }
+        return watcher.getLocationUID(currentKfLocation.value);
+    });
+
     return {
         currentGlobalKfLocation: currentKfLocation,
         currentCategoryData,
+        currentUID,
         setCurrentGlobalKfLocation,
         dealRowClassName,
         customRow,
@@ -643,4 +644,34 @@ export const useAssets = (): {
 export const getKfLocationUID = (kfConfig: KfConfig): string => {
     if (!window.watcher) return '';
     return window.watcher?.getLocationUID(kfConfig);
+};
+
+export const useDownloadHistoryTradingData = (): {
+    handleDownload: (
+        tradingDataType: TradingDataTypeName | 'all',
+        currentLocation: KfLocation | KfConfig | null,
+    ) => void;
+} => {
+    const app = getCurrentInstance();
+
+    const handleDownload = (
+        tradingDataType: TradingDataTypeName | 'all',
+        currentLocation: KfLocation | KfConfig | null,
+    ): void => {
+        if (!currentLocation) {
+            return;
+        }
+
+        if (app?.proxy) {
+            app?.proxy.$bus.next({
+                tag: 'download',
+                tradingDataType,
+                currentLocation,
+            } as DownloadTradingDataEvent);
+        }
+    };
+
+    return {
+        handleDownload,
+    };
 };

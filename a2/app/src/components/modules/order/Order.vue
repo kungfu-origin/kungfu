@@ -6,19 +6,41 @@ import {
     dealOrderStatus,
     dealLocationUID,
     getIdByKfLocation,
+    delayMilliSeconds,
+    dealTradingData,
+    getTradingDataSortKey,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import {
     useCurrentGlobalKfLocation,
+    useDownloadHistoryTradingData,
     useTableSearchKeyword,
 } from '@renderer/assets/methods/uiUtils';
 import KfDashboard from '@renderer/components/public/KfDashboard.vue';
 import KfDashboardItem from '@renderer/components/public/KfDashboardItem.vue';
 import KfTradingDataTable from '@renderer/components/public/KfTradingDataTable.vue';
-import { HistoryOutlined } from '@ant-design/icons-vue';
+import {
+    DownloadOutlined,
+    LoadingOutlined,
+    CloseSquareOutlined,
+} from '@ant-design/icons-vue';
 
-import { computed, getCurrentInstance, onMounted, ref, toRaw } from 'vue';
+import {
+    computed,
+    getCurrentInstance,
+    onMounted,
+    ref,
+    toRaw,
+    watch,
+} from 'vue';
 import { getColumns } from './config';
-import { dealKfTime } from '@kungfu-trader/kungfu-js-api/kungfu';
+import {
+    dealKfTime,
+    dealOrderStat,
+    getKungfuDataByDateRange,
+} from '@kungfu-trader/kungfu-js-api/kungfu';
+import type { Dayjs } from 'dayjs';
+import { UnfinishedOrderStatus } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
+import { OrderStatusEnum } from '@kungfu-trader/kungfu-js-api/typings';
 
 const app = getCurrentInstance();
 
@@ -28,57 +50,99 @@ const { searchKeyword, tableData } = useTableSearchKeyword<Order>(orders, [
     'instrument_id',
     'exchange_id',
 ]);
+const unfinishedOrder = ref<boolean>(false);
+const historyDate = ref<Dayjs>();
+const historyDataLoading = ref<boolean>();
+var Ledger: TradingData | undefined = window.watcher?.ledger;
 
-const { currentGlobalKfLocation, currentCategoryData } =
-    useCurrentGlobalKfLocation();
+const { currentGlobalKfLocation, currentCategoryData, currentUID } =
+    useCurrentGlobalKfLocation(window.watcher);
+
+const { handleDownload } = useDownloadHistoryTradingData();
 
 const columns = computed(() => {
     if (currentGlobalKfLocation.value === null) {
-        return getColumns('td');
+        return getColumns('td', !!historyDate.value);
     }
 
     const { category } = currentGlobalKfLocation.value;
-    return getColumns(category);
-});
-
-const orderFilterKey = computed(() => {
-    if (currentGlobalKfLocation.value === null) {
-        return '';
-    }
-
-    const { category } = currentGlobalKfLocation.value;
-    if (category === 'td') {
-        return 'source';
-    } else if (category === 'strategy') {
-        return 'dest';
-    }
-
-    return '';
+    return getColumns(category, !!historyDate.value);
 });
 
 onMounted(() => {
     if (app?.proxy) {
         app.proxy.$tradingDataSubject.subscribe((watcher: Watcher) => {
+            if (historyDate.value) {
+                return;
+            }
+
             if (currentGlobalKfLocation.value === null) {
                 return;
             }
 
-            const currentUID = watcher.getLocationUID(
+            Ledger = watcher.ledger;
+            const ordersResolved = (dealTradingData(
+                watcher,
+                Ledger,
+                'Order',
                 currentGlobalKfLocation.value,
-            );
+            ) || []) as Order[];
 
-            const ordersResolved = watcher.ledger.Order.filter(
-                orderFilterKey.value,
-                currentUID,
-            );
+            if (unfinishedOrder.value) {
+                orders.value = toRaw(
+                    ordersResolved
+                        .slice(0, 100)
+                        .filter((item) => !isFinishedOrderStatus(item.status)),
+                );
+                return;
+            }
 
-            orders.value = toRaw(ordersResolved.sort('update_time'));
+            orders.value = toRaw(ordersResolved.slice(0, 100));
         });
     }
 });
 
+watch(currentGlobalKfLocation, () => {
+    historyDate.value = undefined;
+    orders.value = [];
+});
+
+watch(historyDate, async (newDate) => {
+    if (!newDate) {
+        Ledger = window.watcher?.ledger;
+        return;
+    }
+
+    if (currentGlobalKfLocation.value === null) {
+        return;
+    }
+
+    orders.value = [];
+    historyDataLoading.value = true;
+    await delayMilliSeconds(500);
+    const tradingData = await getKungfuDataByDateRange(newDate.format());
+    Ledger = tradingData as TradingData;
+    const historyOrders = (dealTradingData(
+        window.watcher,
+        Ledger,
+        'Order',
+        currentGlobalKfLocation.value,
+    ) || []) as Order[];
+
+    orders.value = toRaw(historyOrders);
+    historyDataLoading.value = false;
+});
+
+function isFinishedOrderStatus(orderStatus: OrderStatusEnum): boolean {
+    return UnfinishedOrderStatus.indexOf(orderStatus) === -1;
+}
+
 function dealLocationUIDResolved(uid: number): string {
     return dealLocationUID(window.watcher, uid);
+}
+
+function dealOrderStatResolved(orderUKey: string) {
+    return dealOrderStat(Ledger, orderUKey);
 }
 </script>
 <template>
@@ -102,6 +166,11 @@ function dealLocationUIDResolved(uid: number): string {
             </template>
             <template v-slot:header>
                 <KfDashboardItem>
+                    <a-checkbox size="small" v-model:checked="unfinishedOrder">
+                        未完成委托
+                    </a-checkbox>
+                </KfDashboardItem>
+                <KfDashboardItem>
                     <a-input-search
                         v-model:value="searchKeyword"
                         placeholder="关键字"
@@ -109,13 +178,37 @@ function dealLocationUIDResolved(uid: number): string {
                     />
                 </KfDashboardItem>
                 <KfDashboardItem>
-                    <HistoryOutlined style="font-size: 14px" />
+                    <a-date-picker v-model:value="historyDate">
+                        <template v-if="historyDataLoading" #suffixIcon>
+                            <LoadingOutlined />
+                        </template>
+                    </a-date-picker>
+                </KfDashboardItem>
+                <KfDashboardItem>
+                    <a-button
+                        size="small"
+                        @click="
+                            handleDownload(
+                                'Order',
+                                currentGlobalKfLocation.value,
+                            )
+                        "
+                    >
+                        <template #icon>
+                            <DownloadOutlined style="font-size: 14px" />
+                        </template>
+                    </a-button>
+                </KfDashboardItem>
+                <KfDashboardItem>
+                    <a-button size="small" type="primary" danger>
+                        全部撤单
+                    </a-button>
                 </KfDashboardItem>
             </template>
             <KfTradingDataTable
                 :columns="columns"
                 :dataSource="tableData"
-                keyField="order_id"
+                keyField="uid_key"
             >
                 <template
                     v-slot:default="{
@@ -127,15 +220,15 @@ function dealLocationUIDResolved(uid: number): string {
                     }"
                 >
                     <template v-if="column.dataIndex === 'update_time'">
-                        {{ dealKfTime(item.update_time) }}
+                        {{ dealKfTime(item.update_time, !!historyDate) }}
                     </template>
                     <template v-else-if="column.dataIndex === 'side'">
-                        <span :class="dealSide(item.side).color">
+                        <span :class="`color-${dealSide(item.side).color}`">
                             {{ dealSide(item.side).name }}
                         </span>
                     </template>
                     <template v-else-if="column.dataIndex === 'offset'">
-                        <span :class="dealOffset(item.offset).color">
+                        <span :class="`color-${dealOffset(item.offset).color}`">
                             {{ dealOffset(item.offset).name }}
                         </span>
                     </template>
@@ -147,16 +240,26 @@ function dealLocationUIDResolved(uid: number): string {
                     </template>
                     <template v-else-if="column.dataIndex === 'status'">
                         <span
-                            :class="
+                            :class="`color-${
                                 dealOrderStatus(item.status, item.error_msg)
                                     .color
-                            "
+                            }`"
                         >
                             {{
                                 dealOrderStatus(item.status, item.error_msg)
                                     .name
                             }}
                         </span>
+                    </template>
+                    <template v-else-if="column.dataIndex === 'latency_system'">
+                        {{ dealOrderStatResolved(item.uid_key)?.latencySystem }}
+                    </template>
+                    <template
+                        v-else-if="column.dataIndex === 'latency_network'"
+                    >
+                        {{
+                            dealOrderStatResolved(item.uid_key)?.latencyNetwork
+                        }}
                     </template>
                     <template
                         v-else-if="
@@ -165,6 +268,11 @@ function dealLocationUIDResolved(uid: number): string {
                         "
                     >
                         {{ dealLocationUIDResolved(item[column.dataIndex]) }}
+                    </template>
+                    <template v-else-if="column.dataIndex === 'actions'">
+                        <CloseSquareOutlined
+                            v-if="!isFinishedOrderStatus(item.status)"
+                        />
                     </template>
                 </template>
             </KfTradingDataTable>

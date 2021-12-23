@@ -64,7 +64,9 @@ const tdIdList = computed(() => {
         (item: KfConfig): string => `${item.group}_${item.name}`,
     );
 });
-const { dealRowClassName, customRow } = useCurrentGlobalKfLocation();
+const { dealRowClassName, customRow } = useCurrentGlobalKfLocation(
+    window.watcher,
+);
 
 const { processStatusData, getProcessStatusName } =
     useProcessStatusDetailData();

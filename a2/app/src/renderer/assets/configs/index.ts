@@ -1,5 +1,3 @@
-import { KfLayoutDirection } from '@root/src/typings/enums';
-
 export const defaultBoardsMap: KfLayout.BoardsMap = {
     '0': { paId: -1, direction: 'h', children: [1, 2] },
     '1': { paId: 0, direction: 'v', children: [4, 5, 6], width: '55.054%' },

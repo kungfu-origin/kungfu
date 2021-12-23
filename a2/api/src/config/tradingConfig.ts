@@ -239,6 +239,12 @@ export const OrderStatus: Record<OrderStatusEnum, KfTradeValueCommonData> = {
     },
 };
 
+export const UnfinishedOrderStatus = [
+    OrderStatusEnum.Pending,
+    OrderStatusEnum.Submitted,
+    OrderStatusEnum.PartialFilledActive,
+];
+
 export const Direction: Record<DirectionEnum, KfTradeValueCommonData> = {
     [DirectionEnum.Long]: { name: isEnglish ? 'Long' : '多', color: 'red' },
     [DirectionEnum.Short]: { name: isEnglish ? 'Short' : '空', color: 'green' },

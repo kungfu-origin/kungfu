@@ -2,18 +2,19 @@ import { KfCategoryTypes } from '@kungfu-trader/kungfu-js-api/typings';
 
 export const getColumns = (
     moduleType: KfCategoryTypes,
+    isHistory = false,
 ): KfTradingDataTableHeaderConfig[] => [
     {
         type: 'string',
-        name: '柜台成交时间',
+        name: '成交时间',
         dataIndex: 'trade_time',
-        width: 120,
+        width: isHistory ? 140 : 100,
     },
     {
         type: 'string',
-        name: '功夫系统时间',
+        name: '系统时间',
         dataIndex: 'kf_time',
-        width: 120,
+        width: isHistory ? 140 : 100,
     },
     {
         type: 'string',
@@ -48,7 +49,7 @@ export const getColumns = (
     {
         type: 'number',
         name: '成交延迟(μs)',
-        dataIndex: 'latencyTrade',
+        dataIndex: 'latency_trade',
         width: 90,
     },
     {

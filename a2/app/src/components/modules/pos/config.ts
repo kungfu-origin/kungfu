@@ -3,7 +3,13 @@ export const columns: KfTradingDataTableHeaderConfig[] = [
         type: 'string',
         name: '代码',
         dataIndex: 'instrument_id',
-        width: 140,
+        width: 100,
+    },
+    {
+        type: 'string',
+        name: '',
+        dataIndex: 'direction',
+        width: 40,
     },
     {
         type: 'number',

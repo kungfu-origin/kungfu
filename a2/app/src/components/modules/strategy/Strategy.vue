@@ -63,7 +63,7 @@ const strategyIdList = computed(() => {
     return strategy.value.map((item: KfConfig): string => item.name);
 });
 
-const { dealRowClassName, customRow } = useCurrentGlobalKfLocation();
+const { dealRowClassName, customRow } = useCurrentGlobalKfLocation(window.watcher);
 
 const { processStatusData } = useProcessStatusDetailData();
 const { allProcessOnline, handleSwitchAllProcessStatus } = useSwitchAllConfig(

@@ -153,10 +153,14 @@ function resetLog() {
                         </div>
                     </KfDashboardItem>
                     <KfDashboardItem>
-                        <reload-outlined
-                            class="kf-hover"
-                            style="font-size: 14px"
-                        />
+                        <a-button size="small">
+                            <template #icon>
+                                <ReloadOutlined
+                                    class="kf-hover"
+                                    style="font-size: 14px"
+                                />
+                            </template>
+                        </a-button>
                     </KfDashboardItem>
                     <KfDashboardItem>
                         <a-button size="small" @click="handleOpenFileLocation">
@@ -216,6 +220,7 @@ function resetLog() {
 <style lang="less">
 @import '@renderer/assets/less/base.less';
 @import '@renderer/assets/less/public.less';
+@import '@renderer/assets/less/coverAnt.less';
 
 #app {
     width: 100%;
@@ -268,7 +273,7 @@ function resetLog() {
         line-height: 1.5;
 
         .error {
-            color: @red-6;
+            color: @red-7;
             font-weight: bold;
         }
 
@@ -288,7 +293,7 @@ function resetLog() {
         }
 
         .critical {
-            color: @red-6;
+            color: @red-7;
             font-weight: bold;
         }
 

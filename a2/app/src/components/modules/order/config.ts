@@ -2,12 +2,13 @@ import { KfCategoryTypes } from '@kungfu-trader/kungfu-js-api/typings';
 
 export const getColumns = (
     moduleType: KfCategoryTypes,
+    isHistory = false,
 ): KfTradingDataTableHeaderConfig[] => [
     {
         type: 'string',
-        name: '委托更新时间',
+        name: '更新时间',
         dataIndex: 'update_time',
-        width: 120,
+        width: isHistory ? 140 : 100,
     },
     {
         type: 'string',
@@ -37,7 +38,7 @@ export const getColumns = (
         type: 'string',
         name: '已成交/全部',
         dataIndex: 'volume_traded',
-        width: 80,
+        width: 120,
     },
     {
         type: 'string',
@@ -48,22 +49,26 @@ export const getColumns = (
     {
         type: 'number',
         name: '系统延迟μs',
-        dataIndex: 'latencySystem',
+        dataIndex: 'latency_system',
         width: 90,
     },
     {
         type: 'number',
         name: '网络延迟μs',
-        dataIndex: 'latencyNetwork',
+        dataIndex: 'latency_network',
         width: 90,
     },
     {
         name: moduleType == 'td' ? '下单源' : '目标账户',
         dataIndex: moduleType == 'td' ? 'dest' : 'source',
     },
-    {
-        name: '操作',
-        dataIndex: 'actions',
-        width: 60,
-    },
+    ...(isHistory
+        ? []
+        : [
+              {
+                  name: '',
+                  dataIndex: 'actions',
+                  width: 60,
+              },
+          ]),
 ];

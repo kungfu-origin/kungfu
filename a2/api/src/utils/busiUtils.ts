@@ -1,6 +1,6 @@
 import path from 'path';
 import dayjs from 'dayjs';
-import fse, { Stats, watch } from 'fs-extra';
+import fse, { Stats } from 'fs-extra';
 import log4js from 'log4js';
 import { buildProcessLogPath, EXTENSION_DIR } from '../config/pathConfig';
 import {
@@ -31,6 +31,8 @@ import {
     OffsetEnum,
     DirectionEnum,
     OrderStatusEnum,
+    LedgerCategoryEnum,
+    LedgerCategoryTypes,
 } from '../typings';
 import {
     deleteProcess,
@@ -632,6 +634,10 @@ export const getAppStateStatusName = (
         return undefined;
     }
 
+    if (!getIfProcessRunning(processStatusData, processId)) {
+        return undefined;
+    }
+
     if (appStates[processId]) {
         return appStates[processId];
     }
@@ -821,10 +827,113 @@ export const dealLocationUID = (
     watcher: Watcher | null,
     uid: number,
 ): string => {
-    if (!watch) {
+    if (!watcher) {
         return '--';
     }
 
     const kfLocation = watcher?.getLocation(uid);
     return getIdByKfLocation(kfLocation);
+};
+
+export const getOrderTradeFilterKey = (category: KfCategoryTypes): string => {
+    if (category === 'td') {
+        return 'source';
+    } else if (category === 'strategy') {
+        return 'dest';
+    }
+
+    return '';
+};
+
+export const getTradingDataSortKey = (
+    typename: TradingDataTypeName,
+): string => {
+    if (typename === 'Order') {
+        return 'update_time';
+    } else if (typename === 'Trade') {
+        return 'trade_time';
+    } else if (typename === 'OrderInput') {
+        return 'insert_time';
+    } else if (typename === 'Position') {
+        return 'instrument_id';
+    }
+
+    return '';
+};
+
+export const getLedgerCategory = (category: KfCategoryTypes): 0 | 1 => {
+    if (category !== 'td' && category !== 'strategy') {
+        //TODO  instruments
+        return LedgerCategoryEnum['td'];
+    }
+
+    return LedgerCategoryEnum[category as LedgerCategoryTypes];
+};
+
+export const filterLedgerResult = <T>(
+    dataTable: DataTable<T>,
+    tradingDataTypeName: TradingDataTypeName,
+    kfLocation: KfLocation | KfConfig,
+    sortKey?: string,
+): T[] => {
+    const { category, group, name } = kfLocation;
+    const ledgerCategory = getLedgerCategory(category);
+    let dataTableResolved = dataTable.filter('ledger_category', ledgerCategory);
+
+    if (tradingDataTypeName === 'Position') {
+        dataTableResolved = dataTableResolved.nofilter('volume', BigInt(0));
+    }
+
+    if (ledgerCategory === 0) {
+        dataTableResolved = dataTableResolved
+            .filter('source_id', group)
+            .filter('account_id', name);
+    } else if (ledgerCategory === 1) {
+        dataTableResolved = dataTableResolved.filter('client_id', name);
+    }
+
+    if (sortKey) {
+        return dataTableResolved.sort(sortKey);
+    }
+
+    return dataTableResolved.list();
+};
+
+export const dealTradingData = (
+    watcher: Watcher | null,
+    tradingData: TradingData,
+    tradingDataTypeName: TradingDataTypeName,
+    kfLocation: KfLocation | KfConfig,
+): TradingDataNameToType[TradingDataTypeName][] => {
+    if (!watcher) {
+        throw new Error('dealTradingData no watcher');
+    }
+
+    const currentUID = watcher.getLocationUID(kfLocation);
+    const orderTradeFilterKey = getOrderTradeFilterKey(kfLocation.category);
+    const sortKey = getTradingDataSortKey(tradingDataTypeName);
+
+    if (
+        tradingDataTypeName === 'Order' ||
+        tradingDataTypeName === 'Trade' ||
+        tradingDataTypeName === 'OrderInput'
+    ) {
+        const historyDatas = tradingData[tradingDataTypeName].filter(
+            orderTradeFilterKey,
+            currentUID,
+        );
+
+        if (sortKey) {
+            return historyDatas.sort(sortKey);
+        } else {
+            return historyDatas.list();
+        }
+    }
+
+    return filterLedgerResult<TradingDataNameToType[TradingDataTypeName]>(
+        tradingData[tradingDataTypeName],
+        tradingDataTypeName,
+        kfLocation,
+        sortKey,
+    );
 };

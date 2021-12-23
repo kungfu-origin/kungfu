@@ -54,7 +54,17 @@ interface MainProcessEvent {
     name: string;
 }
 
-type KfBusEvent = ResizeEvent | ProcessStatusChangeEvent | MainProcessEvent;
+interface DownloadTradingDataEvent {
+    tag: 'download';
+    tradingDataType: TradingDataTypeName | 'all';
+    currentLocation: KfLocation | KfConfig;
+}
+
+type KfBusEvent =
+    | ResizeEvent
+    | ProcessStatusChangeEvent
+    | MainProcessEvent
+    | DownloadTradingDataEvent;
 
 interface KfTradingDataTableHeaderConfig {
     name: string;

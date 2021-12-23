@@ -1,22 +1,20 @@
 <script setup lang="ts">
 import {
-    LedgerCategoryEnum,
-    LedgerCategoryTypes,
-} from '@kungfu-trader/kungfu-js-api/typings';
-import {
     dealKfPrice,
     dealAssetPrice,
     dealDirection,
     getIdByKfLocation,
+    dealTradingData,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import {
     useCurrentGlobalKfLocation,
+    useDownloadHistoryTradingData,
     useTableSearchKeyword,
 } from '@renderer/assets/methods/uiUtils';
 import KfDashboard from '@renderer/components/public/KfDashboard.vue';
 import KfDashboardItem from '@renderer/components/public/KfDashboardItem.vue';
 import KfTradingDataTable from '@renderer/components/public/KfTradingDataTable.vue';
-import { HistoryOutlined } from '@ant-design/icons-vue';
+import { DownloadOutlined } from '@ant-design/icons-vue';
 
 import { getCurrentInstance, onMounted, ref, toRaw } from 'vue';
 import { columns } from './config';
@@ -31,7 +29,9 @@ const { searchKeyword, tableData } = useTableSearchKeyword<Position>(pos, [
 ]);
 
 const { currentGlobalKfLocation, currentCategoryData } =
-    useCurrentGlobalKfLocation();
+    useCurrentGlobalKfLocation(window.watcher);
+
+const { handleDownload } = useDownloadHistoryTradingData();
 
 onMounted(() => {
     if (app?.proxy) {
@@ -39,24 +39,15 @@ onMounted(() => {
             if (currentGlobalKfLocation.value === null) {
                 return;
             }
-            const { category, group, name } = currentGlobalKfLocation.value;
-            const ledgerCategory =
-                LedgerCategoryEnum[category as LedgerCategoryTypes];
-            const positions = watcher.ledger.Position.nofilter(
-                'volume',
-                BigInt(0),
-            ).filter('ledger_category', ledgerCategory);
 
-            const positionsResolved =
-                ledgerCategory === 0
-                    ? positions
-                          .filter('source_id', group)
-                          .filter('account_id', name)
-                    : positions.filter('client_id', name);
+            const positions = (dealTradingData(
+                window.watcher,
+                watcher.ledger,
+                'Position',
+                currentGlobalKfLocation.value,
+            ) || []) as Position[];
 
-            pos.value = toRaw(
-                positionsResolved.sort('instrument_id').reverse(),
-            );
+            pos.value = toRaw(positions.reverse());
         });
     }
 });
@@ -89,7 +80,19 @@ onMounted(() => {
                     />
                 </KfDashboardItem>
                 <KfDashboardItem>
-                    <HistoryOutlined style="font-size: 14px" />
+                    <a-button
+                        size="small"
+                        @click="
+                            handleDownload(
+                                'Position',
+                                currentGlobalKfLocation.value,
+                            )
+                        "
+                    >
+                        <template #icon>
+                            <DownloadOutlined style="font-size: 14px" />
+                        </template>
+                    </a-button>
                 </KfDashboardItem>
             </template>
             <KfTradingDataTable
@@ -109,7 +112,13 @@ onMounted(() => {
                     <template v-if="column.dataIndex === 'instrument_id'">
                         {{ item.instrument_id }}
                         {{ item.exchange_id }}
-                        <span :class="dealDirection(item.direction).color">
+                    </template>
+                    <template v-else-if="column.dataIndex === 'direction'">
+                        <span
+                            :class="`color-${
+                                dealDirection(item.direction).color
+                            }`"
+                        >
                             {{ dealDirection(item.direction).name }}
                         </span>
                     </template>

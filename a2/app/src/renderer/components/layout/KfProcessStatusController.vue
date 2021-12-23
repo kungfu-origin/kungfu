@@ -26,8 +26,12 @@ import { Pm2ProcessStatusTypes } from '@kungfu-trader/kungfu-js-api/utils/proces
 const processControllerBoardVisible = ref<boolean>(false);
 const categoryList: KfCategoryTypes[] = ['system', 'td', 'md', 'strategy'];
 const allKfConfigData = useAllKfConfigData();
-const { processStatusData, processStatusDetailData, getProcessStatusName } =
-    useProcessStatusDetailData();
+const {
+    appStates,
+    processStatusData,
+    processStatusDetailData,
+    getProcessStatusName,
+} = useProcessStatusDetailData();
 const { extTypeMap } = useExtConfigsRelated();
 
 let hasAlertMasterStop = false;
@@ -58,6 +62,22 @@ watch(processStatusData, (newPSD, oldPSD) => {
             });
         }
     }
+});
+
+watch(appStates, (newAppStates, oldAppStates) => {
+    Object.keys(newAppStates || {}).forEach((key: string) => {
+        const newState = newAppStates[key];
+        const oldState = oldAppStates[key];
+
+        if (newState !== 'DisConnected' && oldState === 'DisConnected') {
+            notification.warning({
+                message: `${key} 已断开`,
+                description: `${key} 已断开跟柜台之间连接, 会导致交易中断, 请检查`,
+                duration: 8,
+                placement: 'bottomRight',
+            });
+        }
+    });
 });
 
 const allStatusWell = computed(() => {
@@ -221,12 +241,12 @@ function handleOpenProcessControllerBoard(): void {
 
     &.some-process-error {
         .title {
-            color: @red-6;
+            color: @red-7;
             font-weight: bold;
         }
 
         .anticon {
-            color: @red-6;
+            color: @red-7;
         }
     }
 

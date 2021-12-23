@@ -27,8 +27,8 @@ interface ConfigStore {
     ): void;
 }
 
-interface DataTable<T> extends T {
-    [prop: string]: T;
+interface DataTable<T> {
+    [hashed: string]: T;
     filter(key: string, value: string | number | bigint): DataTable<T>;
     nofilter(key: string, value: string | number | bigint): DataTable<T>;
     sort(key: string): T[];
@@ -61,7 +61,7 @@ interface Asset {
     frozen_margin: number; //冻结保证金(期货)
     frozen_fee: number; //冻结手续费(期货)
     position_pnl: number; //持仓盈亏(期货)
-    close_pn: number; //平仓盈亏(期货)
+    close_pnl: number; //平仓盈亏(期货)
 }
 
 interface AssetSnapshot {
@@ -203,6 +203,7 @@ interface Order {
 
     source: number;
     dest: number;
+    uid_key: string;
 }
 
 interface OrderInput {
@@ -232,6 +233,7 @@ interface OrderInput {
 
     source: number;
     dest: number;
+    uid_key: string;
 }
 
 interface OrderStat {
@@ -244,6 +246,7 @@ interface OrderStat {
 
     source: number;
     dest: number;
+    uid_key: string;
 }
 
 interface Position {
@@ -281,6 +284,8 @@ interface Position {
     close_pnl: number; //平仓盈亏(期货)
     realized_pnl: number; //已实现盈亏
     unrealized_pnl: number; //未实现盈亏
+
+    uid_key: string;
 }
 
 interface Quote {
@@ -352,6 +357,7 @@ interface Trade {
 
     source: number;
     dest: number;
+    uid_key: string;
 }
 
 interface TradingData {
@@ -369,6 +375,22 @@ interface TradingData {
     Trade: DataTable<Trade>;
 }
 
+interface TradingDataNameToType {
+    Asset: Asset;
+    AssetSnapshot: AssetSnapshot;
+    Bar: Bar;
+    DailyAsset: DailyAsset;
+    Instrument: Instrument;
+    Order: Order;
+    OrderInput: OrderInput;
+    OrderStat: OrderStat;
+    Position: Position;
+    Quote: Quote;
+    TimeValue: TimeValue;
+    Trade: Trade;
+    Trade: Trade;
+}
+
 type TradingDataTypes =
     | Asset
     | AssetSnapshot
@@ -384,6 +406,7 @@ type TradingDataTypes =
     | Trade
     | Trade;
 
+type TradingDataTypeName = keyof TradingData;
 interface Watcher {
     appStates: Record<string, BrokerStateStatusEnum>;
     ledger: TradingData;
@@ -400,10 +423,15 @@ interface Watcher {
     getLocation(hashedKey: string | number): KfLocation;
 }
 
+interface HistoryStore {
+    selectPeriod(from: string, to: string): TradingData;
+}
+
 declare module '@kungfu-trader/kungfu-core' {
     export function kungfu(): {
         longfist: any;
         ConfigStore(kfHome: string): ConfigStore;
+        History(kfHome: string): HistoryStore;
         watcher(
             kfHome: string,
             hashedId: string,

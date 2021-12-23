@@ -1,6 +1,7 @@
 import { deleteAllByKfLocation } from '@kungfu-trader/kungfu-js-api/actions';
 import { setKfConfig } from '@kungfu-trader/kungfu-js-api/kungfu/store';
 import {
+    HistoryDateEnum,
     KfCategoryTypes,
     KfConfig,
     KfConfigValue,
@@ -15,7 +16,14 @@ import {
 import { Pm2ProcessStatusData } from '@kungfu-trader/kungfu-js-api/utils/processUtils';
 import { message, Modal } from 'ant-design-vue';
 import { Proc } from 'pm2';
-import { computed, ComputedRef, getCurrentInstance, Ref } from 'vue';
+import {
+    computed,
+    ComputedRef,
+    getCurrentInstance,
+    onMounted,
+    ref,
+    Ref,
+} from 'vue';
 
 export const ensureRemoveLocation = (
     kfLocation: KfLocation | KfConfig,
@@ -196,5 +204,43 @@ export const useAddUpdateRemoveKfConfig = (): {
     return {
         handleRemoveKfConfig,
         handleConfirmAddUpdateKfConfig,
+    };
+};
+
+export const useDealDownloadHistoryTradingData = (): {
+    downloadDateModalVisible: Ref<boolean>;
+    downloadEventData: Ref<DownloadTradingDataEvent | undefined>;
+    handleConfirmDownloadDate(formSate: {
+        date: string;
+        dateType: HistoryDateEnum;
+    }): void;
+} => {
+    const app = getCurrentInstance();
+    const downloadDateModalVisible = ref<boolean>(false);
+    const downloadEventData = ref<DownloadTradingDataEvent>();
+
+    onMounted(() => {
+        if (app?.proxy) {
+            app.proxy.$bus.subscribe((data: KfBusEvent) => {
+                if (data.tag === 'download') {
+                    console.log(data);
+                    downloadDateModalVisible.value = true;
+                    downloadEventData.value = data;
+                }
+            });
+        }
+    });
+
+    const handleConfirmDownloadDate = (formState: {
+        date: string;
+        dateType: HistoryDateEnum;
+    }): void => {
+        console.log(formState, downloadEventData.value);
+    };
+
+    return {
+        downloadDateModalVisible,
+        downloadEventData,
+        handleConfirmDownloadDate,
     };
 };

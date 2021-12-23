@@ -9,7 +9,10 @@ import {
     useIpcListener,
 } from '@renderer/assets/methods/uiUtils';
 import bus from '@kungfu-trader/kungfu-js-api/utils/globalBus';
-import { preQuitTasks } from '@renderer/assets/methods/actionsUtils';
+import {
+    preQuitTasks,
+    useDealDownloadHistoryTradingData,
+} from '@renderer/assets/methods/actionsUtils';
 import { ipcRenderer } from 'electron';
 import {
     dealAppStates,
@@ -18,6 +21,8 @@ import {
 } from '@kungfu-trader/kungfu-js-api/kungfu/watcher';
 import { tradingDataSubject } from '@kungfu-trader/kungfu-js-api/kungfu/tradingData';
 import { useGlobalStore } from './store/global';
+import KfDownloadDateModal from '@renderer/components/layout/KfDownloadDateModal.vue';
+
 const app = getCurrentInstance();
 
 const preStartSystemLoadingData = reactive<Record<string, 'loading' | 'done'>>({
@@ -47,6 +52,9 @@ const preQuitSystemLoading = computed(() => {
         ).length > 0
     );
 });
+
+const { downloadDateModalVisible, handleConfirmDownloadDate } =
+    useDealDownloadHistoryTradingData();
 
 onMounted(() => {
     removeLoadingMask();
@@ -160,6 +168,11 @@ function saveBoardsMap(): Promise<void> {
                 },
             }"
         ></KfSystemPrepareModal>
+        <KfDownloadDateModal
+            v-if="downloadDateModalVisible"
+            v-model:visible="downloadDateModalVisible"
+            @confirm="handleConfirmDownloadDate"
+        ></KfDownloadDateModal>
     </a-config-provider>
 </template>
 

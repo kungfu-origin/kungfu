@@ -30,7 +30,6 @@ export type AntInKungfuColorTypes =
     | 'purple'
     | 'cyan'
     | 'green'
-    | 'red'
     | 'kf-color-running'
     | 'kf-color-waiting'
     | 'kf-color-error';
@@ -275,3 +274,8 @@ export type KfConfig = KfLocation & {
     location_uid: number;
     value: string;
 };
+
+export enum HistoryDateEnum {
+    naturalDate,
+    tradingDate,
+}
