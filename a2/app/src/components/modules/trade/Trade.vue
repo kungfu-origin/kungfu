@@ -30,7 +30,7 @@ import { getColumns } from './config';
 import {
     dealKfTime,
     dealOrderStat,
-    getKungfuDataByDateRange,
+    getKungfuHistoryData,
 } from '@kungfu-trader/kungfu-js-api/kungfu';
 import type { Dayjs } from 'dayjs';
 
@@ -103,15 +103,15 @@ watch(historyDate, async (newDate) => {
     trades.value = [];
     historyDataLoading.value = true;
     await delayMilliSeconds(500);
-    const tradingData = await getKungfuDataByDateRange(newDate.format());
-    Ledger = tradingData as TradingData;
-    const historyTrades = (dealTradingData(
+    const { tradingData, historyDatas } = await getKungfuHistoryData(
         window.watcher,
-        Ledger,
+        newDate.format(),
+        0,
         'Trade',
         currentGlobalKfLocation.value,
-    ) || []) as Trade[];
-    trades.value = toRaw(historyTrades);
+    );
+    Ledger = tradingData;
+    trades.value = toRaw(historyDatas as Trade[]);
     historyDataLoading.value = false;
 });
 

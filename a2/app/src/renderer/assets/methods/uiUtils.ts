@@ -649,25 +649,25 @@ export const getKfLocationUID = (kfConfig: KfConfig): string => {
 export const useDownloadHistoryTradingData = (): {
     handleDownload: (
         tradingDataType: TradingDataTypeName | 'all',
-        currentLocation: KfLocation | KfConfig | null,
+        currentKfLocation: KfLocation | KfConfig | null,
     ) => void;
 } => {
     const app = getCurrentInstance();
 
     const handleDownload = (
         tradingDataType: TradingDataTypeName | 'all',
-        currentLocation: KfLocation | KfConfig | null,
+        currentKfLocation: KfLocation | KfConfig | null,
     ): void => {
-        if (!currentLocation) {
+        if (!currentKfLocation) {
             return;
         }
 
         if (app?.proxy) {
             app?.proxy.$bus.next({
-                tag: 'download',
+                tag: 'export',
                 tradingDataType,
-                currentLocation,
-            } as DownloadTradingDataEvent);
+                currentKfLocation,
+            } as ExportTradingDataEvent);
         }
     };
 

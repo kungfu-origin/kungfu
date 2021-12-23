@@ -1,5 +1,6 @@
 import path from 'path';
 import fse from 'fs-extra';
+import * as csv from '@fast-csv/format';
 
 //添加文件
 export const addFileSync = (
@@ -17,4 +18,18 @@ export const addFileSync = (
     } else {
         fse.ensureFileSync(targetPath);
     }
+};
+
+export const writeCSV = (
+    filePath: string,
+    data: TradingDataTypes[],
+): Promise<void> => {
+    filePath = path.normalize(filePath);
+    return new Promise((resolve) => {
+        csv.writeToPath(filePath, data, {
+            headers: true,
+        }).on('finish', function () {
+            resolve();
+        });
+    });
 };

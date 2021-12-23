@@ -140,22 +140,37 @@ export const getKungfuHistoryData = (
     watcher: Watcher | null,
     date: string,
     dateType: HistoryDateEnum,
-    tradingDataTypeName: TradingDataTypeName,
+    tradingDataTypeName: TradingDataTypeName | 'all',
     kfLocation?: KfLocation | KfConfig,
-) => {
+): Promise<{
+    tradingData: TradingData;
+    historyDatas: TradingDataTypes[];
+}> => {
     return getKungfuDataByDateRange(date, dateType).then(
         (tradingData: TradingData | Record<string, unknown>) => {
-            if (!kfLocation) {
-                //all
-                return;
+            if (tradingDataTypeName === 'all') {
+                return {
+                    tradingData: tradingData as TradingData,
+                    historyDatas: [],
+                };
             }
 
-            return dealTradingData(
-                watcher,
-                tradingData as TradingData,
-                tradingDataTypeName,
-                kfLocation,
-            );
+            if (!kfLocation) {
+                return {
+                    tradingData: tradingData as TradingData,
+                    historyDatas: [],
+                };
+            }
+
+            return {
+                tradingData: tradingData as TradingData,
+                historyDatas: dealTradingData(
+                    watcher,
+                    tradingData as TradingData,
+                    tradingDataTypeName,
+                    kfLocation,
+                ),
+            };
         },
     );
 };

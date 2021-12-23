@@ -23,6 +23,7 @@ import {
     Empty,
     DatePicker,
     Checkbox,
+    Spin,
 } from 'ant-design-vue';
 
 import { beforeStartAll } from '@renderer/assets/methods/uiUtils';
@@ -69,6 +70,7 @@ app.use(store)
     .use(Empty)
     .use(DatePicker)
     .use(Checkbox)
+    .use(Spin)
     .use(VueVirtualScroller);
 
 const uics = getUIComponents();

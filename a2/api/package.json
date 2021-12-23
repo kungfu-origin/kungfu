@@ -10,6 +10,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@fast-csv/format": "^4.3.5",
     "@kungfu-trader/kungfu-core": "^2.4.0-alpha.4",
     "fkill": "^8.0.0",
     "fs-extra": "^10.0.0",

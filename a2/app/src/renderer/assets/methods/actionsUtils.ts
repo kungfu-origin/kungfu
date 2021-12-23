@@ -1,4 +1,7 @@
+import os from 'os';
+import { dialog } from '@electron/remote';
 import { deleteAllByKfLocation } from '@kungfu-trader/kungfu-js-api/actions';
+import { getKungfuHistoryData } from '@kungfu-trader/kungfu-js-api/kungfu';
 import { setKfConfig } from '@kungfu-trader/kungfu-js-api/kungfu/store';
 import {
     HistoryDateEnum,
@@ -13,8 +16,10 @@ import {
     getProcessIdByKfLocation,
     switchKfLocation,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
+import { writeCSV } from '@kungfu-trader/kungfu-js-api/utils/fileUtils';
 import { Pm2ProcessStatusData } from '@kungfu-trader/kungfu-js-api/utils/processUtils';
 import { message, Modal } from 'ant-design-vue';
+import path from 'path';
 import { Proc } from 'pm2';
 import {
     computed,
@@ -24,6 +29,7 @@ import {
     ref,
     Ref,
 } from 'vue';
+import dayjs from 'dayjs';
 
 export const ensureRemoveLocation = (
     kfLocation: KfLocation | KfConfig,
@@ -45,7 +51,6 @@ export const ensureRemoveLocation = (
                         resolve();
                     })
                     .catch((err) => {
-                        console.log(err);
                         message.error('操作失败', err.message);
                     });
             },
@@ -207,40 +212,101 @@ export const useAddUpdateRemoveKfConfig = (): {
     };
 };
 
-export const useDealDownloadHistoryTradingData = (): {
-    downloadDateModalVisible: Ref<boolean>;
-    downloadEventData: Ref<DownloadTradingDataEvent | undefined>;
-    handleConfirmDownloadDate(formSate: {
+export const useDealExportHistoryTradingData = (): {
+    exportDateModalVisible: Ref<boolean>;
+    exportDataLoading: Ref<boolean>;
+    exportEventData: Ref<ExportTradingDataEvent | undefined>;
+    handleConfirmExportDate(formSate: {
         date: string;
         dateType: HistoryDateEnum;
     }): void;
 } => {
     const app = getCurrentInstance();
-    const downloadDateModalVisible = ref<boolean>(false);
-    const downloadEventData = ref<DownloadTradingDataEvent>();
+    const exportDateModalVisible = ref<boolean>(false);
+    const exportEventData = ref<ExportTradingDataEvent>();
+    const exportDataLoading = ref<boolean>(false);
+
+    const handleConfirmExportDate = async (formState: {
+        date: string;
+        dateType: HistoryDateEnum;
+    }): Promise<void> => {
+        if (!exportEventData.value) {
+            throw new Error('exportEventData is undefined');
+        }
+
+        const { currentKfLocation, tradingDataType } = exportEventData.value;
+        if (!currentKfLocation) {
+            return;
+        }
+
+        exportDataLoading.value = true;
+        const { date, dateType } = formState;
+        const { historyDatas } = await getKungfuHistoryData(
+            window.watcher,
+            date,
+            dateType,
+            tradingDataType,
+            currentKfLocation,
+        );
+        exportDataLoading.value = false;
+
+        const processId = getProcessIdByKfLocation(currentKfLocation);
+        const filename: string = await dialog
+            .showSaveDialog({
+                title: '保存文件',
+                defaultPath: path.join(
+                    os.homedir(),
+                    `${processId}-${tradingDataType}.csv`,
+                ),
+                filters: [
+                    {
+                        name: 'csv',
+                        extensions: ['csv'],
+                    },
+                ],
+            })
+            .then(({ filePath }) => {
+                return filePath || '';
+            });
+
+        if (!filename) {
+            return Promise.resolve();
+        }
+
+        return writeCSV(filename, historyDatas);
+    };
 
     onMounted(() => {
         if (app?.proxy) {
             app.proxy.$bus.subscribe((data: KfBusEvent) => {
-                if (data.tag === 'download') {
-                    console.log(data);
-                    downloadDateModalVisible.value = true;
-                    downloadEventData.value = data;
+                if (data.tag === 'export') {
+                    exportEventData.value = data;
+
+                    if (exportEventData.value.tradingDataType !== 'Order') {
+                        if (exportEventData.value.tradingDataType !== 'Trade') {
+                            if (
+                                exportEventData.value.tradingDataType !==
+                                'OrderInput'
+                            ) {
+                                handleConfirmExportDate({
+                                    date: dayjs().format(),
+                                    dateType: HistoryDateEnum.naturalDate,
+                                });
+                                return;
+                            }
+                        }
+                    }
+
+                    exportDateModalVisible.value = true;
                 }
             });
         }
     });
 
-    const handleConfirmDownloadDate = (formState: {
-        date: string;
-        dateType: HistoryDateEnum;
-    }): void => {
-        console.log(formState, downloadEventData.value);
-    };
-
     return {
-        downloadDateModalVisible,
-        downloadEventData,
-        handleConfirmDownloadDate,
+        exportDateModalVisible,
+        exportDataLoading,
+        exportEventData,
+        handleConfirmExportDate,
     };
 };

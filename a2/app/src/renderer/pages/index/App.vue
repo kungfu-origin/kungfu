@@ -11,7 +11,7 @@ import {
 import bus from '@kungfu-trader/kungfu-js-api/utils/globalBus';
 import {
     preQuitTasks,
-    useDealDownloadHistoryTradingData,
+    useDealExportHistoryTradingData,
 } from '@renderer/assets/methods/actionsUtils';
 import { ipcRenderer } from 'electron';
 import {
@@ -21,7 +21,7 @@ import {
 } from '@kungfu-trader/kungfu-js-api/kungfu/watcher';
 import { tradingDataSubject } from '@kungfu-trader/kungfu-js-api/kungfu/tradingData';
 import { useGlobalStore } from './store/global';
-import KfDownloadDateModal from '@renderer/components/layout/KfDownloadDateModal.vue';
+import KfDownloadDateModal from '@renderer/components/layout/KfHistoryDateModal.vue';
 
 const app = getCurrentInstance();
 
@@ -53,8 +53,8 @@ const preQuitSystemLoading = computed(() => {
     );
 });
 
-const { downloadDateModalVisible, handleConfirmDownloadDate } =
-    useDealDownloadHistoryTradingData();
+const { exportDateModalVisible, exportDataLoading, handleConfirmExportDate } =
+    useDealExportHistoryTradingData();
 
 onMounted(() => {
     removeLoadingMask();
@@ -169,10 +169,11 @@ function saveBoardsMap(): Promise<void> {
             }"
         ></KfSystemPrepareModal>
         <KfDownloadDateModal
-            v-if="downloadDateModalVisible"
-            v-model:visible="downloadDateModalVisible"
-            @confirm="handleConfirmDownloadDate"
+            v-if="exportDateModalVisible"
+            v-model:visible="exportDateModalVisible"
+            @confirm="handleConfirmExportDate"
         ></KfDownloadDateModal>
+        <a-spin v-if="exportDataLoading" :spinning="exportDataLoading"></a-spin>
     </a-config-provider>
 </template>
 

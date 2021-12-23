@@ -2,6 +2,7 @@
 import { HistoryDateEnum } from '@kungfu-trader/kungfu-js-api/typings';
 import { useModalVisible } from '@renderer/assets/methods/uiUtils';
 import type { Dayjs } from 'dayjs';
+import dayjs from 'dayjs';
 import { getCurrentInstance, reactive, ref } from 'vue';
 
 const app = getCurrentInstance();
@@ -25,21 +26,17 @@ defineEmits<{
 }>();
 
 const { modalVisible, closeModal } = useModalVisible(props.visible);
-
 const formState = reactive({
-    date: ref<Dayjs>(),
+    date: ref<Dayjs | string>(dayjs().format()),
     dateType: HistoryDateEnum.naturalDate,
 });
 
 const formRef = ref();
-
 function handleConfirm() {
-    formRef.value
+    return formRef.value
         .validate()
         .then(() => {
             app && app.emit('confirm', formState);
-        })
-        .then(() => {
             closeModal();
         })
         .catch((err: Error) => {
@@ -49,7 +46,7 @@ function handleConfirm() {
 </script>
 <template>
     <a-modal
-        class="kf-download-date-modal"
+        class="kf-export-date-modal"
         :width="320"
         v-model:visible="modalVisible"
         title="选择日期"

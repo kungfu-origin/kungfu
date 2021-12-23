@@ -54,17 +54,17 @@ interface MainProcessEvent {
     name: string;
 }
 
-interface DownloadTradingDataEvent {
-    tag: 'download';
+interface ExportTradingDataEvent {
+    tag: 'export';
     tradingDataType: TradingDataTypeName | 'all';
-    currentLocation: KfLocation | KfConfig;
+    currentKfLocation?: KfLocation | KfConfig | undefined;
 }
 
 type KfBusEvent =
     | ResizeEvent
     | ProcessStatusChangeEvent
     | MainProcessEvent
-    | DownloadTradingDataEvent;
+    | ExportTradingDataEvent;
 
 interface KfTradingDataTableHeaderConfig {
     name: string;
