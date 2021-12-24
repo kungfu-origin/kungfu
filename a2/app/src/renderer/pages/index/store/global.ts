@@ -243,12 +243,15 @@ export const useGlobalStore = defineStore('global', {
             const destBoard = this.boardsMap[destBoardId];
 
             if (!contentId || boardId === undefined) return;
+
+            //to self
             if (
                 boardId === destBoardId &&
                 destBoard.contents &&
                 destBoard.contents.length === 1
-            )
+            ) {
                 return;
+            }
 
             this.removeBoardByContentId(boardId, contentId);
 
@@ -277,6 +280,7 @@ export const useGlobalStore = defineStore('global', {
             const destPaId: number = destBoard.paId;
             const destDirection: KfLayoutDirection = destBoard.direction;
             const newBoardId: KfLayout.BoardId = this.buildNewBoardId_();
+
             const newBoardDirection: KfLayoutDirection =
                 directionClassName === KfLayoutTargetDirectionClassName.top ||
                 directionClassName === KfLayoutTargetDirectionClassName.bottom
@@ -308,8 +312,10 @@ export const useGlobalStore = defineStore('global', {
                         KfLayoutTargetDirectionClassName.top ||
                     directionClassName === KfLayoutTargetDirectionClassName.left
                 ) {
+                    //TODO重新计算高度宽度
                     siblings?.splice(destIndex, 0, newBoardId);
                 } else {
+                    //TODO重新计算高度宽度
                     siblings?.splice(destIndex + 1, 0, newBoardId);
                 }
             } else {
@@ -326,14 +332,19 @@ export const useGlobalStore = defineStore('global', {
                         KfLayoutTargetDirectionClassName.top ||
                     directionClassName === KfLayoutTargetDirectionClassName.left
                 ) {
+                    //TODO重新计算高度宽度
                     destBoard.children = [newBoardId, newDestBoardId];
                 } else {
+                    //TODO重新计算高度宽度
                     destBoard.children = [newDestBoardId, newBoardId];
                 }
                 delete destBoard.contents;
                 delete destBoard.current;
                 this.boardsMap[newDestBoardId] = destBoardCopy;
             }
+
+            destBoard.width && delete destBoard.width;
+            destBoard.height && delete destBoard.height;
 
             this.boardsMap[newBoardId] = newBoardInfo;
         },
