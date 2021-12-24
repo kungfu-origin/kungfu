@@ -221,6 +221,7 @@ function resetLog() {
 @import '@renderer/assets/less/base.less';
 @import '@renderer/assets/less/public.less';
 @import '@renderer/assets/less/coverAnt.less';
+@import '@renderer/assets/less/variables.less';
 
 #app {
     width: 100%;
@@ -273,7 +274,7 @@ function resetLog() {
         line-height: 1.5;
 
         .error {
-            color: @red-7;
+            color: lighten(@red2-base, 10%);
             font-weight: bold;
         }
 
@@ -288,12 +289,12 @@ function resetLog() {
         }
 
         .trace {
-            color: @green-6;
+            color: @green2-base;
             font-weight: bold;
         }
 
         .critical {
-            color: @red-7;
+            color: lighten(@red2-base, 10%);
             font-weight: bold;
         }
 

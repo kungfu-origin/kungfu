@@ -763,6 +763,10 @@ const dealKfNumber = (
     preNumber: bigint | number | undefined | unknown,
 ): string | number | bigint | unknown => {
     if (preNumber === undefined) return '--';
+
+    if (Number.isNaN(Number(preNumber))) {
+        return '--';
+    }
     return preNumber;
 };
 

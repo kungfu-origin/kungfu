@@ -1,3 +1,5 @@
+@import '@renderer/assets/less/variables.less';
+
 .kf-translateZ {
     position: relative;
     transform: translateZ(0);
@@ -105,7 +107,7 @@
     }
 
     &.kf-color-error {
-        background: @red-7;
+        background: @red-6;
     }
 
     &.kf-dot-wave {
@@ -155,7 +157,7 @@
     color: @pink-6;
 }
 .color-red {
-    color: @red-7;
+    color: lighten(@red2-base, 10%);
 }
 .color-blue {
     color: @blue-6;
@@ -167,5 +169,60 @@
     color: @cyan-6;
 }
 .color-green {
-    color: @green-6;
+    color: @green2-base;
 }
+
+.keyframes (@prefix,@name,@content) when (@prefix=def) {
+    @keyframes @name {
+        @content();
+    }
+}
+.keyframes (@prefix,@name,@content) when (@prefix=moz) {
+    @-moz-keyframes @name {
+        @content();
+    }
+}
+.keyframes (@prefix,@name,@content) when (@prefix=o) {
+    @-o-keyframes @name {
+        @content();
+    }
+}
+.keyframes (@prefix,@name,@content) when (@prefix=webkit) {
+    @-webkit-keyframes @name {
+        @content();
+    }
+}
+.keyframes (@prefix,@name,@content) when (@prefix=all) {
+    .keyframes(moz,@name,@content);
+    .keyframes(o,@name,@content);
+    .keyframes(webkit,@name,@content);
+    .keyframes(def,@name,@content);
+}
+
+.keyframes(all, nanoRedBlink, {
+        0% {
+            background: none;
+        }
+        50% {
+            background: @red-6;
+            color: #fff;
+        }
+        100% {
+            background: none;
+        }
+    }
+);
+
+.keyframes(all, nanoGreenBlink, {
+        0% {
+            background: none;
+        }
+        50% {
+            background: @green-6;
+            color: #fff;
+        }
+        100% {
+            background: none;
+        }
+    }
+);

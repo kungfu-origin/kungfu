@@ -154,11 +154,11 @@ export const Side: Record<SideEnum, KfTradeValueCommonData> = {
     [SideEnum.Drop]: { name: isEnglish ? 'Drop' : '放弃行权', color: 'green' },
     [SideEnum.Purchase]: {
         name: isEnglish ? 'Purchase' : '申购',
-        color: 'cyan',
+        color: 'red',
     },
     [SideEnum.Redemption]: {
         name: isEnglish ? 'Redemption' : '赎回',
-        color: 'pink',
+        color: 'green',
     },
     [SideEnum.Split]: { name: isEnglish ? 'Split' : '拆分', color: 'red' },
     [SideEnum.Merge]: { name: isEnglish ? 'Merge' : '合并', color: 'green' },

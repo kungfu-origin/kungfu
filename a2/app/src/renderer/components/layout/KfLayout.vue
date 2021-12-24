@@ -58,6 +58,7 @@ const globalSettingModalVisible = ref<boolean>(false);
 
 <style lang="less">
 @import '@renderer/assets/less/variables.less';
+
 .ant-layout {
     height: 100%;
 

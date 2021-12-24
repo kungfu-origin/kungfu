@@ -18,6 +18,7 @@ import { DownloadOutlined } from '@ant-design/icons-vue';
 
 import { getCurrentInstance, onMounted, ref, toRaw } from 'vue';
 import { columns } from './config';
+import KfBlinkNum from '@renderer/components/public/KfBlinkNum.vue';
 
 const app = getCurrentInstance();
 
@@ -55,8 +56,8 @@ onMounted(() => {
 <template>
     <div class="kf-position__warp">
         <KfDashboard>
-            <template v-slot:title>
-                <span v-if="currentGlobalKfLocation.value">
+            <template v-slot:title v-if="currentGlobalKfLocation.value">
+                <span>
                     <a-tag
                         v-if="currentCategoryData"
                         :color="currentCategoryData.color"
@@ -122,30 +123,50 @@ onMounted(() => {
                             {{ dealDirection(item.direction).name }}
                         </span>
                     </template>
+                    <template
+                        v-else-if="column.dataIndex === 'yesterday_volume'"
+                    >
+                        <KfBlinkNum
+                            :num="Number(item.yesterday_volume)"
+                        ></KfBlinkNum>
+                    </template>
                     <template v-else-if="column.dataIndex === 'today_volume'">
-                        {{ item.volume - item.yesterday_volume }}
+                        <KfBlinkNum
+                            :num="Number(item.volume - item.yesterday_volume)"
+                        ></KfBlinkNum>
+                    </template>
+                    <template v-else-if="column.dataIndex === 'volume'">
+                        <KfBlinkNum :num="Number(item.volume)"></KfBlinkNum>
                     </template>
                     <template v-else-if="column.dataIndex === 'avg_open_price'">
-                        {{ dealKfPrice(item.avg_open_price) }}
+                        <KfBlinkNum
+                            :num="dealKfPrice(item.avg_open_price)"
+                        ></KfBlinkNum>
                     </template>
                     <template v-else-if="column.dataIndex === 'total_price'">
-                        {{
-                            dealAssetPrice(
-                                item.avg_open_price * Number(item.volume),
-                            )
-                        }}
+                        <KfBlinkNum
+                            :num="
+                                dealAssetPrice(
+                                    item.avg_open_price * Number(item.volume),
+                                )
+                            "
+                        ></KfBlinkNum>
                     </template>
                     <template
                         v-else-if="column.dataIndex === 'total_market_price'"
                     >
-                        {{
-                            dealAssetPrice(
-                                item.last_price * Number(item.volume),
-                            )
-                        }}
+                        <KfBlinkNum
+                            :num="
+                                dealAssetPrice(
+                                    item.last_price * Number(item.volume),
+                                )
+                            "
+                        ></KfBlinkNum>
                     </template>
                     <template v-else-if="column.dataIndex === 'unrealized_pnl'">
-                        {{ dealAssetPrice(item.unrealized_pnl) }}
+                        <KfBlinkNum
+                            :num="dealAssetPrice(item.unrealized_pnl)"
+                        ></KfBlinkNum>
                     </template>
                 </template>
             </KfTradingDataTable>

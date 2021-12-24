@@ -16,10 +16,7 @@ import {
     KfExtOriginConfig,
     SetKfConfigPayload,
 } from '@kungfu-trader/kungfu-js-api/typings';
-import type {
-    KfConfig,
-    KfConfigValue,
-} from '@kungfu-trader/kungfu-js-api/typings';
+import type { KfConfig } from '@kungfu-trader/kungfu-js-api/typings';
 
 import {
     useTableSearchKeyword,
@@ -44,6 +41,7 @@ import {
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import path from 'path';
 import { shell } from '@electron/remote';
+import KfBlinkNum from '@renderer/components/public/KfBlinkNum.vue';
 
 interface StrategyProps {}
 defineProps<StrategyProps>();
@@ -63,7 +61,9 @@ const strategyIdList = computed(() => {
     return strategy.value.map((item: KfConfig): string => item.name);
 });
 
-const { dealRowClassName, customRow } = useCurrentGlobalKfLocation(window.watcher);
+const { dealRowClassName, customRow } = useCurrentGlobalKfLocation(
+    window.watcher,
+);
 
 const { processStatusData } = useProcessStatusDetailData();
 const { allProcessOnline, handleSwitchAllProcessStatus } = useSwitchAllConfig(
@@ -187,21 +187,31 @@ function handleOpenFile(kfConfig: KfConfig) {
                         ></a-switch>
                     </template>
                     <template v-else-if="column.dataIndex === 'unrealizedPnl'">
-                        {{
-                            dealAssetPrice(
-                                getAssetsByKfConfig(record).unrealized_pnl,
-                            )
-                        }}
+                        <KfBlinkNum
+                            :num="
+                                dealAssetPrice(
+                                    getAssetsByKfConfig(record).unrealized_pnl,
+                                )
+                            "
+                        ></KfBlinkNum>
                     </template>
                     <template v-else-if="column.dataIndex === 'avail'">
-                        {{ dealAssetPrice(getAssetsByKfConfig(record).avail) }}
+                        <KfBlinkNum
+                            :num="
+                                dealAssetPrice(
+                                    getAssetsByKfConfig(record).avail,
+                                )
+                            "
+                        ></KfBlinkNum>
                     </template>
                     <template v-else-if="column.dataIndex === 'marketValue'">
-                        {{
-                            dealAssetPrice(
-                                getAssetsByKfConfig(record).market_value,
-                            )
-                        }}
+                        <KfBlinkNum
+                            :num="
+                                dealAssetPrice(
+                                    getAssetsByKfConfig(record).market_value,
+                                )
+                            "
+                        ></KfBlinkNum>
                     </template>
                     <template v-else-if="column.dataIndex === 'margin'">
                         {{ dealAssetPrice(getAssetsByKfConfig(record).margin) }}

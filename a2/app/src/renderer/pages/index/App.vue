@@ -183,9 +183,9 @@ function saveBoardsMap(): Promise<void> {
 </template>
 
 <style lang="less">
+@import '@renderer/assets/less/coverAnt.less';
 @import '@renderer/assets/less/base.less';
 @import '@renderer/assets/less/public.less';
-@import '@renderer/assets/less/coverAnt.less';
 
 #app {
     width: 100%;

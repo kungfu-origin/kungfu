@@ -21,7 +21,7 @@ import KfTradingDataTable from '@renderer/components/public/KfTradingDataTable.v
 import {
     DownloadOutlined,
     LoadingOutlined,
-    CloseSquareOutlined,
+    CloseOutlined,
 } from '@ant-design/icons-vue';
 
 import {
@@ -147,8 +147,8 @@ function dealOrderStatResolved(orderUKey: string) {
 <template>
     <div class="kf-orders__warp">
         <KfDashboard>
-            <template v-slot:title>
-                <span v-if="currentGlobalKfLocation.value">
+            <template v-slot:title v-if="currentGlobalKfLocation.value">
+                <span>
                     <a-tag
                         v-if="currentCategoryData"
                         :color="currentCategoryData.color"
@@ -269,7 +269,8 @@ function dealOrderStatResolved(orderUKey: string) {
                         {{ dealLocationUIDResolved(item[column.dataIndex]) }}
                     </template>
                     <template v-else-if="column.dataIndex === 'actions'">
-                        <CloseSquareOutlined
+                        <CloseOutlined
+                            class="kf-hover"
                             v-if="!isFinishedOrderStatus(item.status)"
                         />
                     </template>

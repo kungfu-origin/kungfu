@@ -223,6 +223,7 @@ function handleOpenProcessControllerBoard(): void {
 
 <style lang="less">
 @import '@renderer/assets/less/variables.less';
+
 .kf-process-status-controller__warp {
     float: right;
     height: 100%;
@@ -233,12 +234,12 @@ function handleOpenProcessControllerBoard(): void {
 
     &.some-process-error {
         .title {
-            color: @red-7;
+            color: lighten(@red2-base, 10%);
             font-weight: bold;
         }
 
         .anticon {
-            color: @red-7;
+            color: lighten(@red2-base, 10%);
         }
     }
 

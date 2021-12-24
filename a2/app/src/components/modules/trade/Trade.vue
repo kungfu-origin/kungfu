@@ -127,8 +127,8 @@ function dealOrderStatResolved(order_id: bigint) {
 <template>
     <div class="kf-trades__warp">
         <KfDashboard>
-            <template v-slot:title>
-                <span v-if="currentGlobalKfLocation.value">
+            <template v-slot:title v-if="currentGlobalKfLocation.value">
+                <span>
                     <a-tag
                         v-if="currentCategoryData"
                         :color="currentCategoryData.color"

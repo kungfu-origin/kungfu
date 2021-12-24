@@ -230,6 +230,7 @@ function handleMousedown(e: MouseEvent, row: TradingDataItem) {
         font-size: 12px;
         user-select: text;
         text-align: left;
+        position: relative;
 
         &.number {
             text-align: right;

@@ -41,6 +41,10 @@ const webpackConfig = (argv) => {
                                         }),
                                         'font-size-base': '12px', // major text font size
                                         'primary-color': '#FAAD14',
+                                        'red-base': '#d65453',
+                                        'green-base': '#17b07f',
+                                        'red2-base': '#f21717',
+                                        'green2-base': '#15de9e',
                                     },
                                     javascriptEnabled: true,
                                 },
