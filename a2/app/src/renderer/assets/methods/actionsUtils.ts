@@ -1,7 +1,10 @@
 import os from 'os';
-import { dialog } from '@electron/remote';
+import { dialog, shell } from '@electron/remote';
 import { deleteAllByKfLocation } from '@kungfu-trader/kungfu-js-api/actions';
-import { getKungfuHistoryData } from '@kungfu-trader/kungfu-js-api/kungfu';
+import {
+    dealTradingDataItem,
+    getKungfuHistoryData,
+} from '@kungfu-trader/kungfu-js-api/kungfu';
 import { setKfConfig } from '@kungfu-trader/kungfu-js-api/kungfu/store';
 import {
     HistoryDateEnum,
@@ -30,6 +33,7 @@ import {
     Ref,
 } from 'vue';
 import dayjs from 'dayjs';
+import { Row } from '@fast-csv/format';
 
 export const ensureRemoveLocation = (
     kfLocation: KfLocation | KfConfig,
@@ -226,6 +230,10 @@ export const useDealExportHistoryTradingData = (): {
     const exportEventData = ref<ExportTradingDataEvent>();
     const exportDataLoading = ref<boolean>(false);
 
+    const dealTradingDataItemResolved = (item: TradingDataTypes): Row => {
+        return dealTradingDataItem(item, window.watcher) as Row;
+    };
+
     const handleConfirmExportDate = async (formState: {
         date: string;
         dateType: HistoryDateEnum;
@@ -235,12 +243,69 @@ export const useDealExportHistoryTradingData = (): {
         }
 
         const { currentKfLocation, tradingDataType } = exportEventData.value;
+        const { date, dateType } = formState;
+        const dateResolved = dayjs(date).format('YYYYMMDD');
+
+        if (tradingDataType === 'all') {
+            const { tradingData } = await getKungfuHistoryData(
+                window.watcher,
+                date,
+                dateType,
+                tradingDataType,
+            );
+            const orders = tradingData.Order.sort('update_time');
+            const trades = tradingData.Trade.sort('trade_time');
+            const orderStat = tradingData.OrderStat.sort('insert_time');
+            const positions = tradingData.Trade.list();
+
+            const { filePaths } = await dialog.showOpenDialog({
+                properties: ['openDirectory'],
+            });
+
+            if (!filePaths) {
+                return;
+            }
+
+            const targetFolder = filePaths[0];
+
+            const ordersFilename = path.join(
+                targetFolder,
+                `orders-${dateResolved}`,
+            );
+            const tradesFilename = path.join(
+                targetFolder,
+                `trades-${dateResolved}`,
+            );
+            const orderStatFilename = path.join(
+                targetFolder,
+                `orderStats-${dateResolved}`,
+            );
+            const posFilename = path.join(targetFolder, `pos-${dateResolved}`);
+
+            return Promise.all([
+                writeCSV(ordersFilename, orders, dealTradingDataItemResolved),
+                writeCSV(tradesFilename, trades, dealTradingDataItemResolved),
+                writeCSV(
+                    orderStatFilename,
+                    orderStat,
+                    dealTradingDataItemResolved,
+                ),
+                writeCSV(posFilename, positions, dealTradingDataItemResolved),
+            ])
+                .then(() => {
+                    shell.showItemInFolder(ordersFilename);
+                    message.success('操作成功');
+                })
+                .catch((err: Error) => {
+                    message.error(err.message);
+                });
+        }
+
         if (!currentKfLocation) {
             return;
         }
 
         exportDataLoading.value = true;
-        const { date, dateType } = formState;
         const { historyDatas } = await getKungfuHistoryData(
             window.watcher,
             date,
@@ -256,7 +321,7 @@ export const useDealExportHistoryTradingData = (): {
                 title: '保存文件',
                 defaultPath: path.join(
                     os.homedir(),
-                    `${processId}-${tradingDataType}.csv`,
+                    `${processId}-${tradingDataType}-${dateResolved}.csv`,
                 ),
                 filters: [
                     {
@@ -273,7 +338,14 @@ export const useDealExportHistoryTradingData = (): {
             return Promise.resolve();
         }
 
-        return writeCSV(filename, historyDatas);
+        return writeCSV(filename, historyDatas, dealTradingDataItemResolved)
+            .then(() => {
+                shell.showItemInFolder(filename);
+                message.success('操作成功');
+            })
+            .catch((err: Error) => {
+                message.error(err.message);
+            });
     };
 
     onMounted(() => {

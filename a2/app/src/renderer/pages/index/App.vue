@@ -103,6 +103,11 @@ bus.subscribe((data: KfBusEvent) => {
             case 'clear-process-before-quit-end':
                 preQuitSystemLoadingData.quit = 'done';
                 break;
+            case 'export-all-trading-data':
+                bus.next({
+                    tag: 'export',
+                    tradingDataType: 'all',
+                } as ExportTradingDataEvent);
         }
     }
 });

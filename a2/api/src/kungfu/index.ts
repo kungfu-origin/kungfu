@@ -2,6 +2,13 @@ import dayjs from 'dayjs';
 import { kungfu } from '@kungfu-trader/kungfu-core';
 import { KF_RUNTIME_DIR } from '../config/pathConfig';
 import {
+    dealDirection,
+    dealHedgeFlag,
+    dealInstrumentType,
+    dealLocationUID,
+    dealOffset,
+    dealOrderStatus,
+    dealSide,
     dealTradingData,
     filterLedgerResult,
     getOrderTradeFilterKey,
@@ -65,6 +72,57 @@ export const dealOrderStat = (
         latencyTrade,
         trade_time: orderStat.trade_time,
     };
+};
+
+export const dealTradingDataItem = (
+    item: TradingDataTypes,
+    watcher: Watcher | null,
+) => {
+    const itemResolved = { ...item } as Record<string, unknown>;
+    if ('trade_time' in item) {
+        itemResolved.trade_time = dealKfTime(item.trade_time, true);
+    }
+    if ('insert_time' in item) {
+        itemResolved.insert_time = dealKfTime(item.insert_time, true);
+    }
+    if ('update_time' in item) {
+        itemResolved.update_time = dealKfTime(item.update_time, true);
+    }
+    if ('direction' in item) {
+        itemResolved.direction = dealDirection(item.direction).name;
+    }
+    if ('side' in item) {
+        itemResolved.side = dealSide(item.side).name;
+    }
+    if ('offset' in item) {
+        itemResolved.offset = dealOffset(item.offset).name;
+    }
+    if ('status' in item && 'error_msg' in item) {
+        itemResolved.status = dealOrderStatus(
+            item.status,
+            item.error_msg || '',
+        );
+    }
+    if ('instrument_type' in item) {
+        itemResolved.instrument_type = dealInstrumentType(
+            item.instrument_type,
+        ).name;
+    }
+
+    if ('hedge_flag' in item) {
+        itemResolved.hedge_flag = dealHedgeFlag(item.hedge_flag).name;
+    }
+    if ('source' in item && watcher) {
+        itemResolved.source = dealLocationUID(watcher, item.source);
+    }
+    if ('dest' in item && watcher) {
+        itemResolved.dest = dealLocationUID(watcher, item.dest);
+    }
+    if ('holder_uid' in item && watcher) {
+        itemResolved.holder_uid = dealLocationUID(watcher, item.holder_uid);
+    }
+
+    return itemResolved;
 };
 
 export const getKungfuDataByDateRange = (

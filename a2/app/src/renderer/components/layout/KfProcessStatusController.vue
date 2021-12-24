@@ -80,19 +80,11 @@ watch(appStates, (newAppStates, oldAppStates) => {
     });
 });
 
-const allStatusWell = computed(() => {
-    const processStatusWell =
-        (
-            Object.values(
-                processStatusData.value || {},
-            ) as Pm2ProcessStatusTypes[]
-        ).filter((status: Pm2ProcessStatusTypes) => status === 'errored')
-            .length === 0;
-
+const mainStatusWell = computed(() => {
     const masterIsLive = processStatusData.value['master'] === 'online';
     const ledgerIsLive = processStatusData.value['ledger'] === 'online';
 
-    return processStatusWell && masterIsLive && ledgerIsLive;
+    return masterIsLive && ledgerIsLive;
 });
 
 function handleOpenProcessControllerBoard(): void {
@@ -104,7 +96,7 @@ function handleOpenProcessControllerBoard(): void {
     <div
         :class="{
             'kf-process-status-controller__warp': true,
-            'some-process-error': !allStatusWell,
+            'some-process-error': !mainStatusWell,
         }"
         @click="handleOpenProcessControllerBoard"
     >

@@ -12,6 +12,7 @@ import {
     Offset,
     Direction,
     OrderStatus,
+    HedgeFlag,
 } from '../config/tradingConfig';
 import {
     KfTradeValueCommonData,
@@ -33,6 +34,7 @@ import {
     OrderStatusEnum,
     LedgerCategoryEnum,
     LedgerCategoryTypes,
+    HedgeFlagEnum,
 } from '../typings';
 import {
     deleteProcess,
@@ -598,9 +600,11 @@ export const getIdByKfLocation = (
         return `${kfLocation.group}`;
     } else if (kfLocation.category === 'strategy') {
         return `${kfLocation.name}`;
+    } else if (kfLocation.category === 'system') {
+        return `${kfLocation.group}_${kfLocation.name}`;
     }
 
-    throw new Error(`Category ${kfLocation.category.toString()} is illegal`);
+    throw new Error(`Category ${kfLocation.category} is illegal`);
 };
 
 export const getStateStatusData = (
@@ -819,7 +823,19 @@ export const dealOrderStatus = (
     };
 };
 
-export const dealCategory = (category: KfCategoryTypes) => {
+export const dealInstrumentType = (instrumentType: InstrumentTypeEnum) => {
+    return InstrumentType[instrumentType];
+};
+
+export const dealHedgeFlag = (
+    hedgeFlag: HedgeFlagEnum,
+): KfTradeValueCommonData => {
+    return HedgeFlag[hedgeFlag];
+};
+
+export const dealCategory = (
+    category: KfCategoryTypes,
+): KfTradeValueCommonData => {
     return KfCategory[KfCategoryEnum[category]];
 };
 
