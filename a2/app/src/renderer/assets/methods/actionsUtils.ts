@@ -179,7 +179,7 @@ export const useAddUpdateRemoveKfConfig = (): {
                         category: category,
                         group: group,
                         name: idByPrimaryKeys.toString(),
-                        mode: 'LIVE',
+                        mode: 'live',
                     };
 
                     return setKfConfig(

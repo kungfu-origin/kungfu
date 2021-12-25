@@ -4,15 +4,8 @@ import {
     getProcessIdByKfLocation,
     kfLogger,
     setTimerPromiseTask,
-    statTime,
-    statTimeEnd,
 } from '../utils/busiUtils';
-import {
-    BrokerStateStatusEnum,
-    BrokerStateStatusTypes,
-    KfConfig,
-    KfLocation,
-} from '../typings';
+import { BrokerStateStatusEnum, BrokerStateStatusTypes } from '../typings';
 
 export const watcher = ((): Watcher | null => {
     kfLogger.info(

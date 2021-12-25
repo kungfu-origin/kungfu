@@ -330,7 +330,7 @@ export const useAllKfConfigData = (): Record<KfCategoryTypes, KfConfig[]> => {
                           category: 'system',
                           group: 'service',
                           name: 'archive',
-                          mode: 'LIVE',
+                          mode: 'live',
                           value: '',
                       },
                   ] as KfConfig[])
@@ -340,7 +340,7 @@ export const useAllKfConfigData = (): Record<KfCategoryTypes, KfConfig[]> => {
                 category: 'system',
                 group: 'master',
                 name: 'master',
-                mode: 'LIVE',
+                mode: 'live',
                 value: '',
             },
             {
@@ -348,7 +348,7 @@ export const useAllKfConfigData = (): Record<KfCategoryTypes, KfConfig[]> => {
                 category: 'system',
                 group: 'service',
                 name: 'ledger',
-                mode: 'LIVE',
+                mode: 'live',
                 value: '',
             },
         ]),

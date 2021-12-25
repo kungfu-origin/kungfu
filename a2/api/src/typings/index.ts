@@ -242,10 +242,10 @@ export enum KfCategoryEnum {
 export type KfCategoryTypes = keyof typeof KfCategoryEnum;
 
 export enum KfModeEnum {
-    LIVE,
-    DATA,
-    REPLAY,
-    BACKTEST,
+    live,
+    data,
+    replay,
+    backtest,
 }
 
 export type KfModeTypes = keyof typeof KfModeEnum;

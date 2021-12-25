@@ -10,9 +10,8 @@ import {
     dealOrderStatus,
     dealSide,
     dealTradingData,
-    filterLedgerResult,
+    getIdByKfLocation,
     getOrderTradeFilterKey,
-    getTradingDataSortKey,
     kfLogger,
 } from '../utils/busiUtils';
 import { HistoryDateEnum, KfConfig, KfLocation } from '../typings';
@@ -22,6 +21,7 @@ kfLogger.info('Load kungfu node');
 
 export const configStore = kf.ConfigStore(KF_RUNTIME_DIR);
 export const history = kf.History(KF_RUNTIME_DIR);
+export const longfist = kf.longfist;
 
 export const dealKfTime = (nano: bigint, date = false): string => {
     if (nano === BigInt(0)) {
@@ -32,46 +32,6 @@ export const dealKfTime = (nano: bigint, date = false): string => {
         return kf.formatTime(nano, '%m/%d %H:%M:%S');
     }
     return kf.formatTime(nano, '%H:%M:%S');
-};
-
-export const dealOrderStat = (
-    ledger: TradingData | undefined,
-    orderUKey: string,
-): {
-    latencySystem: string;
-    latencyNetwork: string;
-    latencyTrade: string;
-    trade_time: bigint;
-} | null => {
-    if (!ledger) {
-        return null;
-    }
-
-    const orderStat = ledger.OrderStat[orderUKey];
-    if (!orderStat) {
-        return null;
-    }
-
-    const { insert_time, ack_time, md_time, trade_time } = orderStat;
-    const latencyTrade =
-        trade_time && ack_time
-            ? Number(Number(trade_time - ack_time) / 1000).toFixed(0)
-            : '--';
-    const latencyNetwork =
-        ack_time && insert_time
-            ? Number(Number(ack_time - insert_time) / 1000).toFixed(0)
-            : '--';
-    const latencySystem =
-        insert_time && md_time
-            ? Number(Number(insert_time - md_time) / 1000).toFixed(0)
-            : '--';
-
-    return {
-        latencySystem,
-        latencyNetwork,
-        latencyTrade,
-        trade_time: orderStat.trade_time,
-    };
 };
 
 export const dealTradingDataItem = (
@@ -231,4 +191,124 @@ export const getKungfuHistoryData = (
             };
         },
     );
+};
+
+export const kfRequestMarketData = (
+    watcher: Watcher | null,
+    sourceId: string,
+    exchangeId: string,
+    instrumentId: string,
+): Promise<void> => {
+    if (!watcher) {
+        return Promise.reject(new Error(`Watcher 不存在`));
+    }
+
+    if (!watcher.isLive()) {
+        return Promise.reject(new Error(`Master 进程未连接`));
+    }
+
+    const mdLocation: KfLocation = {
+        category: 'md',
+        group: sourceId,
+        name: sourceId,
+        mode: 'live',
+    };
+
+    if (!watcher.isReadyToInteract(mdLocation)) {
+        if (process.env.NODE_ENV === 'development') {
+            console.log(mdLocation, 'is not ready');
+        }
+        return Promise.reject(new Error(`行情源 ${sourceId} 未就绪`));
+    }
+
+    return Promise.resolve(
+        watcher.requestMarketData(mdLocation, exchangeId, instrumentId),
+    );
+};
+
+export const kfCancelOrder = (
+    watcher: Watcher | null,
+    orderId: bigint,
+    tdLocation: KfLocation,
+    strategyLocation?: KfLocation,
+): Promise<void> => {
+    if (!watcher) {
+        return Promise.reject(new Error(`Watcher 不存在`));
+    }
+
+    if (!watcher.isLive()) {
+        return Promise.reject(new Error(`Master 未连接`));
+    }
+
+    if (!watcher.isReadyToInteract(tdLocation)) {
+        const accountId = getIdByKfLocation(tdLocation);
+        return Promise.reject(new Error(`交易账户 ${accountId} 未就绪`));
+    }
+
+    const orderAction: OrderAction = {
+        ...longfist.OrderAction(),
+        order_id: orderId,
+    };
+
+    if (strategyLocation) {
+        return Promise.resolve(
+            watcher.cancelOrder(orderAction, tdLocation, strategyLocation),
+        );
+    } else {
+        return Promise.resolve(watcher.cancelOrder(orderAction, tdLocation));
+    }
+};
+
+export const kfCancelAllOrders = (
+    watcher: Watcher | null,
+    kfLocation: KfLocation,
+): Promise<void[]> => {
+    if (!watcher) {
+        return Promise.reject(new Error(`Watcher 不存在`));
+    }
+
+    if (!watcher.isLive()) {
+        return Promise.reject(new Error(`Master 未连接`));
+    }
+
+    if (kfLocation.category !== 'td' && kfLocation.category !== 'strategy') {
+        return Promise.reject(new Error(`Category 错误 仅支持td strategy`));
+    }
+
+    if (
+        kfLocation.category === 'td' &&
+        !watcher.isReadyToInteract(kfLocation)
+    ) {
+        const accountId = getIdByKfLocation(kfLocation);
+        return Promise.reject(new Error(`交易账户 ${accountId} 未就绪`));
+    }
+
+    const filterKey = getOrderTradeFilterKey(kfLocation.category);
+    const orders = watcher.ledger.Order.filter(
+        filterKey,
+        watcher.getLocationUID(kfLocation),
+    ).list();
+    const cancelOrderTasks = orders.map((item: Order): Promise<void> => {
+        const orderAction: OrderAction = {
+            ...longfist.OrderAction(),
+            order_id: item.order_id,
+        };
+        if (kfLocation.category === 'td') {
+            return Promise.resolve(
+                watcher.cancelOrder(orderAction, kfLocation),
+            );
+        } else if (kfLocation.category === 'strategy') {
+            return Promise.resolve(
+                watcher.cancelOrder(
+                    orderAction,
+                    watcher.getLocation(item.source),
+                    kfLocation,
+                ),
+            );
+        } else {
+            return Promise.resolve();
+        }
+    });
+
+    return Promise.all(cancelOrderTasks);
 };

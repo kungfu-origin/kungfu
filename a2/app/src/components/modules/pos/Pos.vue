@@ -127,16 +127,22 @@ onMounted(() => {
                         v-else-if="column.dataIndex === 'yesterday_volume'"
                     >
                         <KfBlinkNum
-                            :num="Number(item.yesterday_volume)"
+                            :num="Number(item.yesterday_volume).toFixed(0)"
                         ></KfBlinkNum>
                     </template>
                     <template v-else-if="column.dataIndex === 'today_volume'">
                         <KfBlinkNum
-                            :num="Number(item.volume - item.yesterday_volume)"
+                            :num="
+                                Number(
+                                    item.volume - item.yesterday_volume,
+                                ).toFixed(0)
+                            "
                         ></KfBlinkNum>
                     </template>
                     <template v-else-if="column.dataIndex === 'volume'">
-                        <KfBlinkNum :num="Number(item.volume)"></KfBlinkNum>
+                        <KfBlinkNum
+                            :num="Number(item.volume).toFixed(0)"
+                        ></KfBlinkNum>
                     </template>
                     <template v-else-if="column.dataIndex === 'avg_open_price'">
                         <KfBlinkNum

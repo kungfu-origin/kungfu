@@ -249,6 +249,19 @@ interface OrderStat {
     uid_key: string;
 }
 
+enum OrderActionFlagEnum {
+    Cancel,
+}
+
+interface OrderAction {
+    order_id: bigint;
+    order_action_id: bigint;
+    action_flag: OrderActionFlagEnum;
+    price: number;
+    volume: number;
+    insert_time: bigint;
+}
+
 interface Position {
     update_time: bigint; //更新时间
     trading_day: string; //交易日
@@ -403,10 +416,10 @@ type TradingDataTypes =
     | Position
     | Quote
     | TimeValue
-    | Trade
     | Trade;
 
 type TradingDataTypeName = keyof TradingData;
+
 interface Watcher {
     appStates: Record<string, BrokerStateStatusEnum>;
     ledger: TradingData;
@@ -421,10 +434,36 @@ interface Watcher {
     isReadyToInteract(kfLocation: KfLocation | KfConfig): boolean;
     getLocationUID(kfLocation: KfLocation | KfConfig): string;
     getLocation(hashedKey: string | number): KfLocation;
+    requestMarketData(
+        kfLocation: KfLocation,
+        exchangeId: string,
+        instrumentId: string,
+    ): void;
+    cancelOrder(
+        orderAction: OrderAction,
+        tdLocation: KfLocation,
+        strategyLocation?: KfLocation,
+    ): void;
 }
 
 interface HistoryStore {
     selectPeriod(from: string, to: string): TradingData;
+}
+
+interface Longfist {
+    Asset(): Asset;
+    AssetSnapshot(): AssetSnapshot;
+    Bar(): Bar;
+    DailyAsset(): DailyAsset;
+    Instrument(): Instrument;
+    Order(): Order;
+    OrderInput(): OrderInput;
+    OrderAction(): OrderAction;
+    OrderStat(): OrderStat;
+    Position(): Position;
+    Quote(): Quote;
+    TimeValue(): TimeValue;
+    Trade(): Trade;
 }
 
 declare module '@kungfu-trader/kungfu-core' {
@@ -432,11 +471,12 @@ declare module '@kungfu-trader/kungfu-core' {
         longfist: any;
         ConfigStore(kfHome: string): ConfigStore;
         History(kfHome: string): HistoryStore;
+        longfist: Longfist;
         watcher(
             kfHome: string,
             hashedId: string,
-            bypassQuote = false,
-            bypassRestore = false,
+            bypassQuote?: boolean,
+            bypassRestore?: boolean,
         ): Watcher | null;
         shutdown(): void;
         formatStringToHashHex(id: string): string;

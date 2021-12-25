@@ -843,6 +843,46 @@ export const dealCategory = (
     return KfCategory[KfCategoryEnum[category]];
 };
 
+export const dealOrderStat = (
+    ledger: TradingData | undefined,
+    orderUKey: string,
+): {
+    latencySystem: string;
+    latencyNetwork: string;
+    latencyTrade: string;
+    trade_time: bigint;
+} | null => {
+    if (!ledger) {
+        return null;
+    }
+
+    const orderStat = ledger.OrderStat[orderUKey];
+    if (!orderStat) {
+        return null;
+    }
+
+    const { insert_time, ack_time, md_time, trade_time } = orderStat;
+    const latencyTrade =
+        trade_time && ack_time
+            ? Number(Number(trade_time - ack_time) / 1000).toFixed(0)
+            : '--';
+    const latencyNetwork =
+        ack_time && insert_time
+            ? Number(Number(ack_time - insert_time) / 1000).toFixed(0)
+            : '--';
+    const latencySystem =
+        insert_time && md_time
+            ? Number(Number(insert_time - md_time) / 1000).toFixed(0)
+            : '--';
+
+    return {
+        latencySystem,
+        latencyNetwork,
+        latencyTrade,
+        trade_time: orderStat.trade_time,
+    };
+};
+
 export const dealLocationUID = (
     watcher: Watcher | null,
     uid: number,
@@ -938,15 +978,15 @@ export const dealTradingData = (
         tradingDataTypeName === 'Trade' ||
         tradingDataTypeName === 'OrderInput'
     ) {
-        const historyDatas = tradingData[tradingDataTypeName].filter(
+        const afterFilterDatas = tradingData[tradingDataTypeName].filter(
             orderTradeFilterKey,
             currentUID,
         );
 
         if (sortKey) {
-            return historyDatas.sort(sortKey);
+            return afterFilterDatas.sort(sortKey);
         } else {
-            return historyDatas.list();
+            return afterFilterDatas.list();
         }
     }
 

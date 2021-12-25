@@ -6,6 +6,7 @@ import sys
 
 from dotted_dict import DottedDict
 from collections import namedtuple
+from kungfu.yijinjing.log import create_logger
 from kungfu.yijinjing import time as kft
 
 lf = kungfu.__binding__.longfist
@@ -33,6 +34,7 @@ class TraderSim(wc.Trader):
     def on_start(self):
         config = json.loads(self.config)
         self.match_mode = config.get("match_mode", MatchMode.Custom)
+
         self.ctx = DottedDict()
         self.ctx.orders = {}
 
@@ -100,6 +102,8 @@ class TraderSim(wc.Trader):
                 raise Exception("invalid match mode {}".format(self.match_mode))
             order.volume_left = order.volume - order.volume_traded
             writer.write(event.gen_time, order)
+            self.ctx.orders[order.order_id] = order
+
             if order.volume_traded > 0:
                 trade = lf.types.Trade()
                 trade.trade_id = writer.current_frame_uid()
@@ -111,9 +115,11 @@ class TraderSim(wc.Trader):
                 trade.side = order.side
                 trade.offset = order.offset
                 trade.instrument_id = order.instrument_id
+                trade.instrument_type = order.instrument_type
                 trade.exchange_id = order.exchange_id
                 trade.trade_time = yjj.now_in_nano()
                 writer.write(event.gen_time, trade)
+
             return True
 
     def cancel_order(self, event):
@@ -123,8 +129,7 @@ class TraderSim(wc.Trader):
             writer = self.get_writer(event.source)
             order_action = event.OrderAction()
             if order_action.order_id in self.ctx.orders:
-                record = self.ctx.orders.pop(order_action.order_id)
-                order = record.order
+                order = self.ctx.orders.pop(order_action.order_id)
                 order.status = (
                     lf.enums.OrderStatus.Cancelled
                     if order.volume_traded == 0

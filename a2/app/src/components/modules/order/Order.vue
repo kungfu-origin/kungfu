@@ -8,7 +8,8 @@ import {
     getIdByKfLocation,
     delayMilliSeconds,
     dealTradingData,
-    getTradingDataSortKey,
+    dealOrderStat,
+    getCategoryData,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import {
     useCurrentGlobalKfLocation,
@@ -35,12 +36,14 @@ import {
 import { getColumns } from './config';
 import {
     dealKfTime,
-    dealOrderStat,
     getKungfuHistoryData,
+    kfCancelAllOrders,
+    kfCancelOrder,
 } from '@kungfu-trader/kungfu-js-api/kungfu';
 import type { Dayjs } from 'dayjs';
 import { UnfinishedOrderStatus } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
 import { OrderStatusEnum } from '@kungfu-trader/kungfu-js-api/typings';
+import { message, Modal } from 'ant-design-vue';
 
 const app = getCurrentInstance();
 
@@ -140,8 +143,81 @@ function dealLocationUIDResolved(uid: number): string {
     return dealLocationUID(window.watcher, uid);
 }
 
-function dealOrderStatResolved(orderUKey: string) {
+function dealOrderStatResolved(orderUKey: string): {
+    latencySystem: string;
+    latencyNetwork: string;
+    latencyTrade: string;
+    trade_time: bigint;
+} | null {
     return dealOrderStat(Ledger, orderUKey);
+}
+
+function handleCancelOrder(order: Order): void {
+    const orderId = order.order_id;
+
+    if (!currentGlobalKfLocation.value || !window.watcher) {
+        message.error('操作失败');
+        return;
+    }
+
+    if (currentGlobalKfLocation.value.category === 'strategy') {
+        const tdLocation = window.watcher.getLocation(order.source);
+        kfCancelOrder(
+            window.watcher,
+            orderId,
+            tdLocation,
+            currentGlobalKfLocation.value,
+        )
+            .then(() => {
+                message.success('操作成功');
+            })
+            .catch(() => {
+                message.error('操作失败');
+            });
+    } else if (currentGlobalKfLocation.value.category === 'td') {
+        kfCancelOrder(window.watcher, orderId, currentGlobalKfLocation.value)
+            .then(() => {
+                message.success('操作成功');
+            })
+            .catch(() => {
+                message.error('操作失败');
+            });
+    }
+}
+
+function handleCancelAllOrders(): void {
+    if (!currentGlobalKfLocation.value || !window.watcher) {
+        message.error('操作失败');
+        return;
+    }
+
+    const categoryName = getCategoryData(
+        currentGlobalKfLocation.value.category,
+    ).name;
+    const name = getIdByKfLocation(currentGlobalKfLocation.value);
+
+    Modal.confirm({
+        title: '确认全部撤单',
+        content: `确认 ${categoryName} ${name} 全部撤单`,
+        okText: '确认',
+        cancelText: '取消',
+        onOk() {
+            if (!currentGlobalKfLocation.value || !window.watcher) {
+                return;
+            }
+
+            return kfCancelAllOrders(
+                window.watcher,
+                currentGlobalKfLocation.value,
+            )
+                .then(() => {
+                    message.success('操作成功');
+                })
+                .catch((err) => {
+                    message.error('操作失败', err.message);
+                });
+        },
+    });
 }
 </script>
 <template>
@@ -199,7 +275,12 @@ function dealOrderStatResolved(orderUKey: string) {
                     </a-button>
                 </KfDashboardItem>
                 <KfDashboardItem>
-                    <a-button size="small" type="primary" danger>
+                    <a-button
+                        size="small"
+                        type="primary"
+                        danger
+                        @click="handleCancelAllOrders"
+                    >
                         全部撤单
                     </a-button>
                 </KfDashboardItem>
@@ -251,13 +332,17 @@ function dealOrderStatResolved(orderUKey: string) {
                         </span>
                     </template>
                     <template v-else-if="column.dataIndex === 'latency_system'">
-                        {{ dealOrderStatResolved(item.uid_key)?.latencySystem }}
+                        {{
+                            dealOrderStatResolved(item.uid_key)
+                                ?.latencySystem || '--'
+                        }}
                     </template>
                     <template
                         v-else-if="column.dataIndex === 'latency_network'"
                     >
                         {{
-                            dealOrderStatResolved(item.uid_key)?.latencyNetwork
+                            dealOrderStatResolved(item.uid_key)
+                                ?.latencyNetwork || '--'
                         }}
                     </template>
                     <template
@@ -271,6 +356,7 @@ function dealOrderStatResolved(orderUKey: string) {
                     <template v-else-if="column.dataIndex === 'actions'">
                         <CloseOutlined
                             class="kf-hover"
+                            @click="handleCancelOrder(item)"
                             v-if="!isFinishedOrderStatus(item.status)"
                         />
                     </template>

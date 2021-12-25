@@ -7,6 +7,7 @@ import {
     getIdByKfLocation,
     delayMilliSeconds,
     dealTradingData,
+    dealOrderStat,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import {
     useCurrentGlobalKfLocation,
@@ -29,7 +30,6 @@ import {
 import { getColumns } from './config';
 import {
     dealKfTime,
-    dealOrderStat,
     getKungfuHistoryData,
 } from '@kungfu-trader/kungfu-js-api/kungfu';
 import type { Dayjs } from 'dayjs';
@@ -119,7 +119,12 @@ function dealLocationUIDResolved(uid: number): string {
     return dealLocationUID(window.watcher, uid);
 }
 
-function dealOrderStatResolved(order_id: bigint) {
+function dealOrderStatResolved(order_id: bigint): {
+    latencySystem: string;
+    latencyNetwork: string;
+    latencyTrade: string;
+    trade_time: bigint;
+} | null {
     const orderUKey = order_id.toString(16).padStart(16, '0');
     return dealOrderStat(Ledger, orderUKey);
 }
@@ -215,7 +220,8 @@ function dealOrderStatResolved(order_id: bigint) {
                     </template>
                     <template v-else-if="column.dataIndex === 'latency_trade'">
                         {{
-                            dealOrderStatResolved(item.order_id)?.latencyNetwork
+                            dealOrderStatResolved(item.order_id)
+                                ?.latencyNetwork || '--'
                         }}
                     </template>
                     <template
