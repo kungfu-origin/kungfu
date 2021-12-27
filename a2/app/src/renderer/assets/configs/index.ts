@@ -1,27 +1,21 @@
 export const defaultBoardsMap: KfLayout.BoardsMap = {
     '0': { paId: -1, direction: 'h', children: [1, 2] },
-    '1': { paId: 0, direction: 'v', children: [4, 5, 6], width: '55.054%' },
+    '1': { paId: 0, direction: 'v', children: [4, 5], width: '55.054%' },
     '2': { paId: 0, direction: 'v', children: [8, 9, 10], width: '44.946%' },
     '4': {
         paId: 1,
         direction: 'h',
         contents: ['交易账户'],
         current: '交易账户',
-        height: '34.044%',
+        height: '23.294%',
+        width: 0,
     },
     '5': {
         paId: 1,
         direction: 'h',
-        contents: ['策略进程'],
-        current: '策略进程',
-        height: '18.601%',
-    },
-    '6': {
-        paId: 1,
-        direction: 'v',
-        contents: ['委托记录', '成交记录'],
-        current: '委托记录',
-        height: '47.355%',
+        children: [14, 13],
+        width: 0,
+        height: '76.706%',
     },
     '8': {
         paId: 2,
@@ -51,6 +45,28 @@ export const defaultBoardsMap: KfLayout.BoardsMap = {
         contents: ['下单面板'],
         current: '下单面板',
         width: '58.424%',
+    },
+    '13': {
+        paId: 5,
+        direction: 'v',
+        contents: ['行情订阅'],
+        current: '行情订阅',
+        width: '32.824%',
+    },
+    '14': { paId: 5, direction: 'v', width: '67.176%', children: [16, 15] },
+    '15': {
+        paId: 14,
+        direction: 'h',
+        contents: ['委托记录', '成交记录'],
+        current: '委托记录',
+        width: 0,
+        height: 0,
+    },
+    '16': {
+        paId: 14,
+        direction: 'h',
+        contents: ['策略进程'],
+        current: '策略进程',
     },
 };
 

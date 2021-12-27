@@ -200,15 +200,6 @@ function handleOpenSetSourceDialog() {
                             "
                         ></KfBlinkNum>
                     </template>
-                    <template v-else-if="column.dataIndex === 'avail'">
-                        <KfBlinkNum
-                            :num="
-                                dealAssetPrice(
-                                    getAssetsByKfConfig(record).avail,
-                                )
-                            "
-                        ></KfBlinkNum>
-                    </template>
                     <template v-else-if="column.dataIndex === 'marketValue'">
                         <KfBlinkNum
                             :num="
@@ -223,6 +214,15 @@ function handleOpenSetSourceDialog() {
                             :num="
                                 dealAssetPrice(
                                     getAssetsByKfConfig(record).margin,
+                                )
+                            "
+                        ></KfBlinkNum>
+                    </template>
+                    <template v-else-if="column.dataIndex === 'avail'">
+                        <KfBlinkNum
+                            :num="
+                                dealAssetPrice(
+                                    getAssetsByKfConfig(record).avail,
                                 )
                             "
                         ></KfBlinkNum>

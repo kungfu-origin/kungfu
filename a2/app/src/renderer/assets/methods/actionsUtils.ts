@@ -1,4 +1,5 @@
 import os from 'os';
+import fse from 'fs-extra';
 import { dialog, shell } from '@electron/remote';
 import { deleteAllByKfLocation } from '@kungfu-trader/kungfu-js-api/actions';
 import {
@@ -34,6 +35,7 @@ import {
 } from 'vue';
 import dayjs from 'dayjs';
 import { Row } from '@fast-csv/format';
+import { KF_SUBSCRIBED_INSTRUMENTS_JSON_PATH } from '@kungfu-trader/kungfu-js-api/config/pathConfig';
 
 export const ensureRemoveLocation = (
     kfLocation: KfLocation | KfConfig,
@@ -386,4 +388,48 @@ export const useDealExportHistoryTradingData = (): {
         exportEventData,
         handleConfirmExportDate,
     };
+};
+
+export const getSubscribedInstruments = async (): Promise<
+    InstrumentResolved[]
+> => {
+    return fse.readFile(KF_SUBSCRIBED_INSTRUMENTS_JSON_PATH).then((res) => {
+        const str = Buffer.from(res).toString();
+        return JSON.parse(str || '[]');
+    });
+};
+
+export const addSubscribeInstruments = async (
+    instruments: InstrumentResolved[],
+): Promise<void> => {
+    const oldInstruments = await getSubscribedInstruments();
+    return fse.outputJSON(KF_SUBSCRIBED_INSTRUMENTS_JSON_PATH, [
+        ...oldInstruments,
+        ...instruments,
+    ]);
+};
+
+export const removeSubscribeInstruments = async (
+    instrument: InstrumentResolved,
+): Promise<void> => {
+    const oldInstruments = await getSubscribedInstruments();
+    const removeTargetIndex = oldInstruments.findIndex((item) => {
+        if (item.instrumentId === instrument.instrumentId) {
+            if (item.exchangeId === instrument.exchangeId) {
+                return true;
+            }
+        }
+        return false;
+    });
+
+    if (removeTargetIndex === -1) {
+        return Promise.reject(
+            new Error(
+                `未找到 ${instrument.exchangeId}_${instrument.instrumentId} `,
+            ),
+        );
+    }
+
+    oldInstruments.splice(removeTargetIndex, 1);
+    return fse.outputJSON(KF_SUBSCRIBED_INSTRUMENTS_JSON_PATH, oldInstruments);
 };

@@ -39,13 +39,6 @@ export const columns: AntTableColumns = [
         width: 110,
     },
     {
-        title: '可用资金',
-        dataIndex: 'avail',
-        align: 'right',
-        sorter: true,
-        width: 110,
-    },
-    {
         title: '市值',
         dataIndex: 'marketValue',
         align: 'right',
@@ -55,6 +48,13 @@ export const columns: AntTableColumns = [
     {
         title: '保证金',
         dataIndex: 'margin',
+        align: 'right',
+        sorter: true,
+        width: 110,
+    },
+    {
+        title: '可用资金',
+        dataIndex: 'avail',
         align: 'right',
         sorter: true,
         width: 110,

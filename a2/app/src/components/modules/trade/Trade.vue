@@ -17,7 +17,11 @@ import {
 import KfDashboard from '@renderer/components/public/KfDashboard.vue';
 import KfDashboardItem from '@renderer/components/public/KfDashboardItem.vue';
 import KfTradingDataTable from '@renderer/components/public/KfTradingDataTable.vue';
-import { DownloadOutlined, LoadingOutlined } from '@ant-design/icons-vue';
+import {
+    DownloadOutlined,
+    LoadingOutlined,
+    CalendarOutlined,
+} from '@ant-design/icons-vue';
 
 import {
     computed,
@@ -132,8 +136,8 @@ function dealOrderStatResolved(order_id: bigint): {
 <template>
     <div class="kf-trades__warp">
         <KfDashboard>
-            <template v-slot:title v-if="currentGlobalKfLocation.value">
-                <span>
+            <template v-slot:title>
+                <span v-if="currentGlobalKfLocation.value">
                     <a-tag
                         v-if="currentCategoryData"
                         :color="currentCategoryData.color"
@@ -158,8 +162,9 @@ function dealOrderStatResolved(order_id: bigint): {
                 </KfDashboardItem>
                 <KfDashboardItem>
                     <a-date-picker v-model:value="historyDate">
-                        <template v-if="historyDataLoading" #suffixIcon>
-                            <LoadingOutlined />
+                        <template #suffixIcon>
+                            <LoadingOutlined v-if="historyDataLoading" />
+                            <CalendarOutlined v-else />
                         </template>
                     </a-date-picker>
                 </KfDashboardItem>

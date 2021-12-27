@@ -56,8 +56,8 @@ onMounted(() => {
 <template>
     <div class="kf-position__warp">
         <KfDashboard>
-            <template v-slot:title v-if="currentGlobalKfLocation.value">
-                <span>
+            <template v-slot:title>
+                <span v-if="currentGlobalKfLocation.value">
                     <a-tag
                         v-if="currentCategoryData"
                         :color="currentCategoryData.color"

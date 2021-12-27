@@ -167,7 +167,7 @@ function handleOpenSetSourceDialog() {
                                 getInstrumentTypeColor(extTypeMap[record.name])
                             "
                         >
-                            {{ record.name }}
+                            {{ record.group }}
                         </a-tag>
                     </template>
                     <template v-else-if="column.dataIndex === 'stateStatus'">
@@ -226,7 +226,7 @@ function handleOpenSetSourceDialog() {
             :primaryKeyAvoidRepeatCompareExtra="currentSelectedSourceId"
             @confirm="
                 handleConfirmAddUpdateKfConfig(
-                    $event,
+                    { ...$event, idByPrimaryKeys: currentSelectedSourceId },
                     'md',
                     currentSelectedSourceId,
                 )

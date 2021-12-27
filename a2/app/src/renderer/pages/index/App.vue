@@ -4,6 +4,7 @@ import KfSystemPrepareModal from '@renderer/components/public/KfSystemPrepareMod
 
 import zhCN from 'ant-design-vue/es/locale/zh_CN';
 import {
+    getIfSaveInstruments,
     markClearJournal,
     removeLoadingMask,
     useIpcListener,
@@ -22,6 +23,10 @@ import {
 import { tradingDataSubject } from '@kungfu-trader/kungfu-js-api/kungfu/tradingData';
 import { useGlobalStore } from './store/global';
 import KfDownloadDateModal from '@renderer/components/layout/KfHistoryDateModal.vue';
+import { throttleTime } from 'rxjs';
+import { kfRequestMarketData } from '@kungfu-trader/kungfu-js-api/kungfu';
+import workers from '@renderer/assets/workers';
+import dayjs from 'dayjs';
 
 const app = getCurrentInstance();
 
@@ -119,8 +124,88 @@ tradingDataSubject.subscribe((watcher: Watcher) => {
     const assets = dealAssetsByHolderUID(watcher.ledger.Asset);
     store.setAssets(assets);
 });
+
+const subscribedInstruments: Record<string, boolean> = {};
+tradingDataSubject.pipe(throttleTime(3000)).subscribe((watcher: Watcher) => {
+    const bigint0 = BigInt(0);
+    const positions = watcher.ledger.Position.filter('ledger_category', 0)
+        .nofilter('volume', bigint0)
+        .list()
+        .map(
+            (item: Position): InstrumentForSub => ({
+                uidKey: item.uid_key,
+                exchangeId: item.exchange_id,
+                instrumentId: item.instrument_id,
+                instrumentType: item.instrument_type,
+                mdLocation: watcher.getLocation(item.holder_uid),
+            }),
+        );
+
+    positions.forEach((item) => {
+        if (subscribedInstruments[item.uidKey]) {
+            return;
+        }
+        kfRequestMarketData(
+            watcher,
+            item.exchangeId,
+            item.instrumentId,
+            item.mdLocation,
+        );
+        subscribedInstruments[item.uidKey] = true;
+    });
+});
+
+const dealInstrumentController = ref<boolean>(false);
+const oldInstruments: InstrumentResolved[] = JSON.parse(
+    localStorage.getItem('instruments') || '[]',
+);
+const oldInstrumentsLength = ref<number>(oldInstruments.length || 0);
+tradingDataSubject.pipe(throttleTime(5000)).subscribe((watcher: Watcher) => {
+    const instruments = watcher.ledger.Instrument.list();
+    if (!instruments || !instruments.length) {
+        localStorage.setItem('instrumentsSavedDate', '');
+        return;
+    }
+
+    if (
+        getIfSaveInstruments(instruments, oldInstrumentsLength.value) &&
+        !dealInstrumentController.value
+    ) {
+        dealInstrumentController.value = true;
+        console.time('DealInstruments');
+        console.log('DealInstruments postMessage', instruments.length);
+        instruments.forEach((item: Instrument) => {
+            item.ukey = item.uid_key;
+        });
+        workers.dealInstruments.postMessage({
+            instruments: instruments,
+        });
+    }
+});
+
+if (oldInstrumentsLength.value) {
+    store.setInstruments(oldInstruments);
+}
+
+workers.dealInstruments.onmessage = (event: {
+    data: { instruments: InstrumentResolved[] };
+}) => {
+    const { instruments } = event.data || {};
+    console.timeEnd('DealInstruments');
+    console.log('DealInstruments onmessage', instruments.length);
+    localStorage.setItem('instrumentsSavedDate', dayjs().format('YYYY-MM-DD'));
+    localStorage.setItem('instruments', JSON.stringify(instruments || []));
+    oldInstrumentsLength.value = instruments.length || 0; //refresh old instruments
+    dealInstrumentController.value = false;
+    if (instruments.length) {
+        console.log(instruments[0], '---');
+        store.setInstruments(instruments);
+    }
+};
+
 store.setKfConfigList();
 store.setKfExtConfigs();
+store.setSubscribedInstruments();
 
 function saveBoardsMap(): Promise<void> {
     if (app?.proxy) {

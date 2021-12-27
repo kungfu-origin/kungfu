@@ -195,9 +195,9 @@ export const getKungfuHistoryData = (
 
 export const kfRequestMarketData = (
     watcher: Watcher | null,
-    sourceId: string,
     exchangeId: string,
     instrumentId: string,
+    mdLocation: KfLocation | KfConfig,
 ): Promise<void> => {
     if (!watcher) {
         return Promise.reject(new Error(`Watcher 不存在`));
@@ -207,17 +207,8 @@ export const kfRequestMarketData = (
         return Promise.reject(new Error(`Master 进程未连接`));
     }
 
-    const mdLocation: KfLocation = {
-        category: 'md',
-        group: sourceId,
-        name: sourceId,
-        mode: 'live',
-    };
-
     if (!watcher.isReadyToInteract(mdLocation)) {
-        if (process.env.NODE_ENV === 'development') {
-            console.log(mdLocation, 'is not ready');
-        }
+        const sourceId = getIdByKfLocation(mdLocation);
         return Promise.reject(new Error(`行情源 ${sourceId} 未就绪`));
     }
 
@@ -229,8 +220,8 @@ export const kfRequestMarketData = (
 export const kfCancelOrder = (
     watcher: Watcher | null,
     orderId: bigint,
-    tdLocation: KfLocation,
-    strategyLocation?: KfLocation,
+    tdLocation: KfLocation | KfConfig,
+    strategyLocation?: KfLocation | KfConfig,
 ): Promise<void> => {
     if (!watcher) {
         return Promise.reject(new Error(`Watcher 不存在`));
@@ -261,7 +252,7 @@ export const kfCancelOrder = (
 
 export const kfCancelAllOrders = (
     watcher: Watcher | null,
-    kfLocation: KfLocation,
+    kfLocation: KfLocation | KfConfig,
 ): Promise<void[]> => {
     if (!watcher) {
         return Promise.reject(new Error(`Watcher 不存在`));

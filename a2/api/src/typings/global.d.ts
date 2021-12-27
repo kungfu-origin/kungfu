@@ -162,6 +162,9 @@ interface Instrument {
 
     long_margin_ratio: number; //多头保证金率
     short_margin_ratio: number; //空头保证金率
+
+    uid_key: string;
+    ukey: string;
 }
 
 interface Order {
@@ -466,22 +469,24 @@ interface Longfist {
     Trade(): Trade;
 }
 
+interface Kungfu {
+    longfist: any;
+    ConfigStore(kfHome: string): ConfigStore;
+    History(kfHome: string): HistoryStore;
+    longfist: Longfist;
+    watcher(
+        kfHome: string,
+        hashedId: string,
+        bypassQuote?: boolean,
+        bypassRestore?: boolean,
+    ): Watcher | null;
+    shutdown(): void;
+    formatStringToHashHex(id: string): string;
+    formatTime(nano: bigint, format: string): string;
+}
+
 declare module '@kungfu-trader/kungfu-core' {
-    export function kungfu(): {
-        longfist: any;
-        ConfigStore(kfHome: string): ConfigStore;
-        History(kfHome: string): HistoryStore;
-        longfist: Longfist;
-        watcher(
-            kfHome: string,
-            hashedId: string,
-            bypassQuote?: boolean,
-            bypassRestore?: boolean,
-        ): Watcher | null;
-        shutdown(): void;
-        formatStringToHashHex(id: string): string;
-        formatTime(nano: bigint, format: string): string;
-    };
+    export function kungfu(): Kungfu;
 }
 
 interface KfLogData {
@@ -515,3 +520,20 @@ declare module 'tail' {
 }
 
 declare type ModalChangeType = 'add' | 'update';
+
+interface InstrumentForSub {
+    uidKey: string;
+    exchangeId: string;
+    instrumentId: string;
+    instrumentType: InstrumentTypeEnum;
+    mdLocation: KfLocation;
+}
+
+interface InstrumentResolved {
+    instrumentId: string;
+    instrumentType: InstrumentTypeEnum;
+    instrumentName: string;
+    exchangeId: string;
+    id: string;
+    ukey: string;
+}

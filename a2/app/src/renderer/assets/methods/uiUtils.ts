@@ -62,6 +62,7 @@ import { BrowserWindow, getCurrentWindow } from '@electron/remote';
 import { ipcRenderer } from 'electron';
 import { message } from 'ant-design-vue';
 import bus from '@kungfu-trader/kungfu-js-api/utils/globalBus';
+import dayjs from 'dayjs';
 
 export interface KfUIComponent {
     name: string;
@@ -673,5 +674,55 @@ export const useDownloadHistoryTradingData = (): {
 
     return {
         handleDownload,
+    };
+};
+
+export const getIfSaveInstruments = (
+    newInstruments: Instrument[],
+    oldInstrumentsLength: number,
+): boolean => {
+    if (newInstruments.length !== oldInstrumentsLength) {
+        return true;
+    }
+
+    const instrumentsSavedDate = localStorage.getItem('instrumentsSavedDate');
+    if (!instrumentsSavedDate) {
+        return true;
+    } else if (instrumentsSavedDate !== dayjs().format('YYYY-MM-DD')) {
+        return true;
+    } else {
+        return false;
+    }
+};
+
+export const useInstruments = (): {
+    instruments: { value: InstrumentResolved[] };
+    subscribedInstruments: { value: InstrumentResolved[] };
+} => {
+    const app = getCurrentInstance();
+    const instrumentsResolved = reactive<{ value: InstrumentResolved[] }>({
+        value: [],
+    });
+
+    const subscribedInstrumentsResolved = reactive<{
+        value: InstrumentResolved[];
+    }>({
+        value: [],
+    });
+
+    onMounted(() => {
+        if (app?.proxy) {
+            const { instruments, subscribedInstruments } = storeToRefs(
+                app?.proxy.$useGlobalStore(),
+            );
+            instrumentsResolved.value = instruments as InstrumentResolved[];
+            subscribedInstrumentsResolved.value =
+                subscribedInstruments as InstrumentResolved[];
+        }
+    });
+
+    return {
+        instruments: instrumentsResolved,
+        subscribedInstruments: subscribedInstrumentsResolved,
     };
 };

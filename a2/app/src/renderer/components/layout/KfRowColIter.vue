@@ -37,7 +37,10 @@
                     </template>
                     <a-card style="width: 100%; height: 100%">
                         <component
-                            v-if="hasComponent(content)"
+                            v-if="
+                                hasComponent(content) &&
+                                content === boardInfo.current
+                            "
                             :is="content"
                             :id="content"
                         ></component>
@@ -88,7 +91,10 @@
                     </template>
                     <a-card style="width: 100%; height: 100%">
                         <component
-                            v-if="hasComponent(content)"
+                            v-if="
+                                hasComponent(content) &&
+                                content === boardInfo.current
+                            "
                             :is="content"
                             :id="content"
                         ></component>

@@ -33,12 +33,6 @@ interface AntTableColumn {
 
 type AntTableColumns = Array<AntTableColumn>;
 
-interface MdRow {
-    sourceId: string;
-    stateStatus: ProcessStatusTypes;
-    processStatus: boolean;
-}
-
 interface ResizeEvent {
     tag: 'resize';
 }
@@ -54,6 +48,11 @@ interface MainProcessEvent {
     name: string;
 }
 
+interface TradingDataUpdateEvent {
+    tag: 'tradingDataUpdate';
+    tradingDataType: TradingDataTypeName;
+}
+
 interface ExportTradingDataEvent {
     tag: 'export';
     tradingDataType: TradingDataTypeName | 'all';
@@ -64,6 +63,7 @@ type KfBusEvent =
     | ResizeEvent
     | ProcessStatusChangeEvent
     | MainProcessEvent
+    | TradingDataUpdateEvent
     | ExportTradingDataEvent;
 
 interface KfTradingDataTableHeaderConfig {
@@ -82,4 +82,12 @@ interface KfTradingDataTableHeaderConfig {
         | 'priceType'
         | 'direction'
         | 'actions';
+}
+
+declare module 'worker-loader!*' {
+    class WebpackWorker extends Worker {
+        constructor();
+    }
+
+    export = WebpackWorker;
 }

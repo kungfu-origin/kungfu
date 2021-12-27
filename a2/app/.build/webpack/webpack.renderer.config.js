@@ -57,7 +57,7 @@ const webpackConfig = (argv) => {
                     use: 'vue-loader',
                 },
                 {
-                    test: /\.worker\.js$/,
+                    test: /\.worker\.ts$/,
                     use: {
                         loader: 'worker-loader',
                         options: { inline: true, fallback: false },

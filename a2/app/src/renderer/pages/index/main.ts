@@ -1,5 +1,5 @@
 import './setEnv';
-import { createApp, Component } from 'vue';
+import { createApp } from 'vue';
 import App from '@renderer/pages/index/App.vue';
 import router from '@renderer/pages/index/router';
 import store from '@renderer/pages/index/store';
@@ -24,6 +24,7 @@ import {
     DatePicker,
     Checkbox,
     Spin,
+    Skeleton,
 } from 'ant-design-vue';
 
 import { beforeStartAll } from '@renderer/assets/methods/uiUtils';
@@ -41,11 +42,12 @@ import {
 
 import { watcher } from '@kungfu-trader/kungfu-js-api/kungfu/watcher';
 import { tradingDataSubject } from '@kungfu-trader/kungfu-js-api/kungfu/tradingData';
-import { getUIComponents } from '@renderer/assets/methods/uiUtils';
 import bus from '@kungfu-trader/kungfu-js-api/utils/globalBus';
 
 import VueVirtualScroller from 'vue-virtual-scroller';
 import 'vue-virtual-scroller/dist/vue-virtual-scroller.css';
+import { useComponenets } from './useComponents';
+import { kf } from '@kungfu-trader/kungfu-js-api/kungfu';
 
 const app = createApp(App);
 
@@ -71,15 +73,12 @@ app.use(store)
     .use(DatePicker)
     .use(Checkbox)
     .use(Spin)
+    .use(Skeleton)
     .use(VueVirtualScroller);
 
-const uics = getUIComponents();
-Object.keys(uics).forEach((key) => {
-    app.component(key, uics[key] as Component);
-});
+useComponenets(app);
 
 //this sort ensure $useGlobalStore can be get in mounted callback
-app.config.globalProperties.$registedKfUIComponents = Object.keys(uics);
 app.config.globalProperties.$bus = bus;
 app.config.globalProperties.$tradingDataSubject = tradingDataSubject;
 app.config.globalProperties.$useGlobalStore = useGlobalStore;
@@ -141,3 +140,4 @@ if (process.env.RELOAD_AFTER_CRASHED === 'false') {
 }
 
 window.watcher = watcher;
+window.kungfu = kf;

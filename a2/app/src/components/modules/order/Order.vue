@@ -23,6 +23,7 @@ import {
     DownloadOutlined,
     LoadingOutlined,
     CloseOutlined,
+    CalendarOutlined,
 } from '@ant-design/icons-vue';
 
 import {
@@ -223,8 +224,8 @@ function handleCancelAllOrders(): void {
 <template>
     <div class="kf-orders__warp">
         <KfDashboard>
-            <template v-slot:title v-if="currentGlobalKfLocation.value">
-                <span>
+            <template v-slot:title>
+                <span v-if="currentGlobalKfLocation.value">
                     <a-tag
                         v-if="currentCategoryData"
                         :color="currentCategoryData.color"
@@ -254,8 +255,9 @@ function handleCancelAllOrders(): void {
                 </KfDashboardItem>
                 <KfDashboardItem>
                     <a-date-picker v-model:value="historyDate">
-                        <template v-if="historyDataLoading" #suffixIcon>
-                            <LoadingOutlined />
+                        <template #suffixIcon>
+                            <LoadingOutlined v-if="historyDataLoading" />
+                            <CalendarOutlined v-else />
                         </template>
                     </a-date-picker>
                 </KfDashboardItem>

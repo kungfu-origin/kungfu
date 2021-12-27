@@ -87,12 +87,12 @@ export const KF_ADMIN_PASSWORD_CONFIG_PATH = path.join(
 
 //================== json db start ================================
 
-export const KF_TICKER_SET_JSON_PATH = path.join(
+export const KF_SUBSCRIBED_INSTRUMENTS_JSON_PATH = path.join(
     KF_HOME,
     'config',
-    'tickerSets.json',
+    'subscribedInstruments.json',
 );
-addFileSync('', KF_TICKER_SET_JSON_PATH, 'file');
+addFileSync('', KF_SUBSCRIBED_INSTRUMENTS_JSON_PATH, 'file');
 
 //================== json db end ==================================
 

@@ -69,10 +69,14 @@ watch(appStates, (newAppStates, oldAppStates) => {
         const newState = newAppStates[key];
         const oldState = oldAppStates[key];
 
-        if (newState !== 'DisConnected' && oldState === 'DisConnected') {
+        if (
+            newState === 'DisConnected' &&
+            oldState !== 'DisConnected' &&
+            processStatusData.value[key] === 'online'
+        ) {
             notification.warning({
                 message: `${key} 已断开`,
-                description: `${key} 已断开跟柜台之间连接, 会导致交易中断, 请检查`,
+                description: `${key} 已断开, 可能会导致交易中断, 请检查`,
                 duration: 8,
                 placement: 'bottomRight',
             });

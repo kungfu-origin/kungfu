@@ -13,6 +13,7 @@ declare module '@vue/runtime-core' {
 declare global {
     interface Window {
         watcher: Watcher | null;
+        kungfu: Kungfu;
     }
 
     namespace NodeJS {

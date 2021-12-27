@@ -20,6 +20,7 @@ import {
     Pm2ProcessStatusDetailData,
     Pm2ProcessStatusData,
 } from '@kungfu-trader/kungfu-js-api/utils/processUtils';
+import { getSubscribedInstruments } from '@renderer/assets/methods/actionsUtils';
 
 interface GlobalState {
     boardsMap: KfLayout.BoardsMap;
@@ -35,6 +36,8 @@ interface GlobalState {
 
     appStates: Record<string, BrokerStateStatusTypes>;
     assets: Record<string, Asset>;
+    instruments: InstrumentResolved[];
+    subscribedInstruments: InstrumentResolved[];
 
     currentGlobalKfLocation: KfLocation | KfConfig | null;
 }
@@ -56,12 +59,24 @@ export const useGlobalStore = defineStore('global', {
 
             appStates: {},
             assets: {},
+            instruments: [],
+            subscribedInstruments: [],
 
             currentGlobalKfLocation: null,
         };
     },
 
     actions: {
+        setSubscribedInstruments() {
+            getSubscribedInstruments().then((instruments) => {
+                this.subscribedInstruments = toRaw(instruments);
+            });
+        },
+
+        setInstruments(instruments: InstrumentResolved[]) {
+            this.instruments = toRaw(instruments);
+        },
+
         setCurrentGlobalKfLocation(kfLocation: KfLocation | KfConfig | null) {
             this.currentGlobalKfLocation = kfLocation;
         },
@@ -312,10 +327,8 @@ export const useGlobalStore = defineStore('global', {
                         KfLayoutTargetDirectionClassName.top ||
                     directionClassName === KfLayoutTargetDirectionClassName.left
                 ) {
-                    //TODO重新计算高度宽度
                     siblings?.splice(destIndex, 0, newBoardId);
                 } else {
-                    //TODO重新计算高度宽度
                     siblings?.splice(destIndex + 1, 0, newBoardId);
                 }
             } else {
@@ -324,6 +337,8 @@ export const useGlobalStore = defineStore('global', {
                     ...toRaw(destBoard),
                     direction: newBoardDirection,
                     paId: destBoardId,
+                    width: undefined,
+                    height: undefined,
                 };
 
                 const newDestBoardId = newBoardId + 1;
@@ -332,14 +347,13 @@ export const useGlobalStore = defineStore('global', {
                         KfLayoutTargetDirectionClassName.top ||
                     directionClassName === KfLayoutTargetDirectionClassName.left
                 ) {
-                    //TODO重新计算高度宽度
                     destBoard.children = [newBoardId, newDestBoardId];
                 } else {
-                    //TODO重新计算高度宽度
                     destBoard.children = [newDestBoardId, newBoardId];
                 }
                 delete destBoard.contents;
                 delete destBoard.current;
+
                 this.boardsMap[newDestBoardId] = destBoardCopy;
             }
 

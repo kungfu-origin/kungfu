@@ -135,7 +135,9 @@ function handleMousedown(e: MouseEvent, row: TradingDataItem) {
                             }"
                         >
                             <slot :item="item" :column="column">
-                                {{ item[column.dataIndex as keyof TradingDataItem] }}
+                                <span>
+                                    {{ item[column.dataIndex as keyof TradingDataItem] }}
+                                </span>
                             </slot>
                         </li>
                     </ul>
