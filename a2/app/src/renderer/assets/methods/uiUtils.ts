@@ -22,12 +22,14 @@ import {
     getAppStateStatusName,
     getIdByKfLocation,
     getInstrumentTypeData,
+    getMdTdKfLocationByProcessId,
     getProcessIdByKfLocation,
     getTradingDate,
     kfLogger,
     removeJournal,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import {
+    AbleSubscribeInstrumentTypesBySourceType,
     CommissionMode,
     Direction,
     ExchangeIds,
@@ -60,6 +62,7 @@ import { ipcRenderer } from 'electron';
 import { message } from 'ant-design-vue';
 import bus from '@kungfu-trader/kungfu-js-api/utils/globalBus';
 import dayjs from 'dayjs';
+import { kfRequestMarketData } from '@kungfu-trader/kungfu-js-api/kungfu';
 
 export interface KfUIComponent {
     name: string;
@@ -244,12 +247,16 @@ export const getInstrumentTypeColor = (
 export const useExtConfigsRelated = (): {
     extConfigs: { value: KfExtConfigs };
     extTypeMap: ComputedRef<Record<string, InstrumentTypes>>;
+    mdExtTypeMap: ComputedRef<Record<string, InstrumentTypes>>;
 } => {
     const app = getCurrentInstance();
     const extConfigs = reactive<{ value: KfExtConfigs }>({
         value: {},
     });
     const extTypeMap = computed(() => buildExtTypeMap(extConfigs.value, 'td'));
+    const mdExtTypeMap = computed(() =>
+        buildExtTypeMap(extConfigs.value, 'md'),
+    );
 
     onMounted(() => {
         if (app?.proxy) {
@@ -261,6 +268,7 @@ export const useExtConfigsRelated = (): {
     return {
         extConfigs,
         extTypeMap,
+        mdExtTypeMap,
     };
 };
 
@@ -700,6 +708,19 @@ export const getIfSaveInstruments = (
 export const useInstruments = (): {
     instruments: { value: InstrumentResolved[] };
     subscribedInstruments: { value: InstrumentResolved[] };
+    subscribeAllInstrumentByMdProcessId(
+        processId: string,
+        processStatus: Pm2ProcessStatusData,
+        appStates: Record<string, BrokerStateStatusTypes>,
+        mdExtTypeMap: Record<string, InstrumentTypes>,
+        instrumentsForSubscribe: InstrumentResolved[],
+    ): void;
+    subscribeAllInstrumentByAppStates(
+        processStatus: Pm2ProcessStatusData,
+        appStates: Record<string, BrokerStateStatusTypes>,
+        mdExtTypeMap: Record<string, InstrumentTypes>,
+        instrumentsForSubscribe: InstrumentResolved[],
+    ): void;
 } => {
     const app = getCurrentInstance();
     const instrumentsResolved = reactive<{ value: InstrumentResolved[] }>({
@@ -723,8 +744,100 @@ export const useInstruments = (): {
         }
     });
 
+    const subscribeAllInstrumentByMdProcessId = (
+        processId: string,
+        processStatus: Pm2ProcessStatusData,
+        appStates: Record<string, BrokerStateStatusTypes>,
+        mdExtTypeMap: Record<string, InstrumentTypes>,
+        instrumentsForSubscribe: InstrumentResolved[],
+    ): void => {
+        if (appStates[processId] === 'Ready') {
+            if (processStatus[processId] === 'online') {
+                if (processId.indexOf('md_') === 0) {
+                    const mdLocation = getMdTdKfLocationByProcessId(processId);
+                    if (mdLocation && mdLocation.category === 'md') {
+                        const sourceId = mdLocation.group;
+                        const sourceType = mdExtTypeMap[sourceId];
+                        const ableSubscribedInstrumentTypes =
+                            AbleSubscribeInstrumentTypesBySourceType[
+                                sourceType
+                            ];
+
+                        instrumentsForSubscribe.forEach((item) => {
+                            if (
+                                ableSubscribedInstrumentTypes.includes(
+                                    +item.instrumentType,
+                                )
+                            ) {
+                                kfRequestMarketData(
+                                    window.watcher,
+                                    item.exchangeId,
+                                    item.instrumentId,
+                                    mdLocation,
+                                );
+                            }
+                        });
+                    }
+                }
+            }
+        }
+    };
+
+    const subscribeAllInstrumentByAppStates = (
+        processStatus: Pm2ProcessStatusData,
+        appStates: Record<string, BrokerStateStatusTypes>,
+        mdExtTypeMap: Record<string, InstrumentTypes>,
+        instrumentsForSubscribe: InstrumentResolved[],
+    ) => {
+        Object.keys(appStates || {}).forEach((processId) => {
+            subscribeAllInstrumentByMdProcessId(
+                processId,
+                processStatus,
+                appStates,
+                mdExtTypeMap,
+                instrumentsForSubscribe,
+            );
+        });
+    };
+
     return {
         instruments: instrumentsResolved,
         subscribedInstruments: subscribedInstrumentsResolved,
+        subscribeAllInstrumentByMdProcessId,
+        subscribeAllInstrumentByAppStates,
+    };
+};
+
+export const useQuote = (): {
+    quotes: { value: DataTable<Quote> | Record<string, unknown> };
+    getQuoteByInstrument(instrument: InstrumentResolved): Quote | null;
+} => {
+    const quotes = reactive<{
+        value: DataTable<Quote> | Record<string, unknown>;
+    }>({
+        value: {},
+    });
+    const app = getCurrentInstance();
+
+    onMounted(() => {
+        if (app?.proxy) {
+            app.proxy.$tradingDataSubject.subscribe((watcher: Watcher) => {
+                quotes.value = toRefs(watcher.ledger.Quote);
+                console.log(quotes.value, '--');
+            });
+        }
+    });
+
+    const getQuoteByInstrument = (
+        instrument: InstrumentResolved,
+    ): Quote | null => {
+        const { ukey } = instrument;
+        const quote = quotes.value[ukey] as Quote | undefined;
+        return quote || null;
+    };
+
+    return {
+        quotes,
+        getQuoteByInstrument,
     };
 };

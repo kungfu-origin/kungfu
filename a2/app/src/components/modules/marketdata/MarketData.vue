@@ -5,8 +5,9 @@ import KfDashboardItem from '@renderer/components/public/KfDashboardItem.vue';
 import {
     useDashboardBodySize,
     useInstruments,
+    useQuote,
 } from '@renderer/assets/methods/uiUtils';
-import { computed, getCurrentInstance, nextTick, ref } from 'vue';
+import { computed, getCurrentInstance, nextTick, ref, watch } from 'vue';
 import { getColumns } from './config';
 import { ExchangeIds } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
 import {
@@ -16,6 +17,7 @@ import {
 import { InstrumentTypeEnum } from '@kungfu-trader/kungfu-js-api/typings';
 import { StarFilled } from '@ant-design/icons-vue';
 import { message } from 'ant-design-vue';
+import { dealKfPrice } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 
 interface MarketDataProps {}
 defineProps<MarketDataProps>();
@@ -34,6 +36,11 @@ const columns = computed(() => {
 const { instruments, subscribedInstruments } = useInstruments();
 const options = ref<{ value: string; label: string }[]>([]);
 const searchResults = ref<string[]>([]);
+const { quotes, getQuoteByInstrument } = useQuote();
+
+watch(quotes, (newval, oldval) => {
+    console.log(newval, oldval, '===');
+});
 
 function handleSearchInstruments(val: string) {
     options.value = instruments.value
@@ -101,6 +108,22 @@ function handleConfirmRemoveInstrument(instrument: InstrumentResolved) {
             message.error(err.message || '操作失败');
         });
 }
+
+function getLastPricePercent(instrument: InstrumentResolved): string {
+    const quote = getQuoteByInstrument(instrument);
+
+    if (!quote) {
+        return '--';
+    }
+
+    const { open_price, last_price } = quote;
+    if (!open_price || !last_price) {
+        return '--';
+    }
+
+    const percent = (last_price - open_price) / open_price;
+    return Number(percent * 100).toFixed(2) + '%';
+}
 </script>
 <template>
     <div class="kf-market-data__warp">
@@ -149,6 +172,21 @@ function handleConfirmRemoveInstrument(instrument: InstrumentResolved) {
                                 <span>
                                     {{ ExchangeIds[record.exchangeId].name }}
                                 </span>
+                            </div>
+                        </div>
+                    </template>
+                    <template v-else-if="column.dataIndex === 'lastPrice'">
+                        <div class="last-price-content">
+                            <div class="price">
+                                {{
+                                    dealKfPrice(
+                                        getQuoteByInstrument(record)
+                                            ?.last_price,
+                                    )
+                                }}
+                            </div>
+                            <div class="percent">
+                                {{ getLastPricePercent(record) }}
                             </div>
                         </div>
                     </template>

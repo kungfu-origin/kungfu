@@ -1,5 +1,12 @@
 <script setup lang="ts">
-import { computed, getCurrentInstance, onMounted, reactive, ref } from 'vue';
+import {
+    computed,
+    getCurrentInstance,
+    onMounted,
+    reactive,
+    ref,
+    watch,
+} from 'vue';
 import KfSystemPrepareModal from '@renderer/components/public/KfSystemPrepareModal.vue';
 
 import zhCN from 'ant-design-vue/es/locale/zh_CN';
@@ -7,7 +14,10 @@ import {
     getIfSaveInstruments,
     markClearJournal,
     removeLoadingMask,
+    useExtConfigsRelated,
+    useInstruments,
     useIpcListener,
+    useProcessStatusDetailData,
 } from '@renderer/assets/methods/uiUtils';
 import bus from '@kungfu-trader/kungfu-js-api/utils/globalBus';
 import {
@@ -27,6 +37,8 @@ import { throttleTime } from 'rxjs';
 import { kfRequestMarketData } from '@kungfu-trader/kungfu-js-api/kungfu';
 import workers from '@renderer/assets/workers';
 import dayjs from 'dayjs';
+import { AbleSubscribeInstrumentTypesBySourceType } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
+import { storeToRefs } from 'pinia';
 
 const app = getCurrentInstance();
 
@@ -125,7 +137,7 @@ tradingDataSubject.subscribe((watcher: Watcher) => {
     store.setAssets(assets);
 });
 
-const subscribedInstruments: Record<string, boolean> = {};
+const subscribedInstrumentsForPos: Record<string, boolean> = {};
 tradingDataSubject.pipe(throttleTime(3000)).subscribe((watcher: Watcher) => {
     const bigint0 = BigInt(0);
     const positions = watcher.ledger.Position.filter('ledger_category', 0)
@@ -142,7 +154,7 @@ tradingDataSubject.pipe(throttleTime(3000)).subscribe((watcher: Watcher) => {
         );
 
     positions.forEach((item) => {
-        if (subscribedInstruments[item.uidKey]) {
+        if (subscribedInstrumentsForPos[item.uidKey]) {
             return;
         }
         kfRequestMarketData(
@@ -151,7 +163,7 @@ tradingDataSubject.pipe(throttleTime(3000)).subscribe((watcher: Watcher) => {
             item.instrumentId,
             item.mdLocation,
         );
-        subscribedInstruments[item.uidKey] = true;
+        subscribedInstrumentsForPos[item.uidKey] = true;
     });
 });
 
@@ -198,7 +210,6 @@ workers.dealInstruments.onmessage = (event: {
     oldInstrumentsLength.value = instruments.length || 0; //refresh old instruments
     dealInstrumentController.value = false;
     if (instruments.length) {
-        console.log(instruments[0], '---');
         store.setInstruments(instruments);
     }
 };
@@ -206,6 +217,34 @@ workers.dealInstruments.onmessage = (event: {
 store.setKfConfigList();
 store.setKfExtConfigs();
 store.setSubscribedInstruments();
+
+const { appStates, processStatusData } = useProcessStatusDetailData();
+const { mdExtTypeMap } = useExtConfigsRelated();
+const { subscribedInstruments, subscribeAllInstrumentByMdProcessId } =
+    useInstruments();
+
+//subscribe instruments
+watch(appStates, (newAppStates, oldAppStates) => {
+    Object.keys(newAppStates || {}).forEach((processId: string) => {
+        const newState = newAppStates[processId];
+        const oldState = oldAppStates[processId];
+
+        if (
+            newState === 'Ready' &&
+            oldState !== 'Ready' &&
+            processStatusData.value[processId] === 'online' &&
+            processId.includes('md_')
+        ) {
+            subscribeAllInstrumentByMdProcessId(
+                processId,
+                processStatusData.value,
+                appStates.value,
+                mdExtTypeMap.value,
+                subscribedInstruments.value,
+            );
+        }
+    });
+});
 
 function saveBoardsMap(): Promise<void> {
     if (app?.proxy) {

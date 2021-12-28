@@ -10,6 +10,8 @@ export default defineComponent({});
 <style lang="less">
 .kf-dashboard-item__warp {
     padding-left: 8px;
+    white-space: nowrap;
+    flex-wrap: wrap;
 
     .ant-btn.ant-btn-sm {
         height: 28px;

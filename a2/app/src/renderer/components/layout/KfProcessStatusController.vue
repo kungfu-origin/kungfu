@@ -1,10 +1,10 @@
 <script lang="ts" setup>
 import { ClusterOutlined, FileTextOutlined } from '@ant-design/icons-vue';
-import { message, notification } from 'ant-design-vue';
+import { notification } from 'ant-design-vue';
 
 import KfProcessStatus from '@renderer/components/public/KfProcessStatus.vue';
 
-import { computed, ref, toRefs, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { SystemProcessName } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
 import {
     useExtConfigsRelated,
@@ -20,7 +20,7 @@ import {
     getPropertyFromProcessStatusDetailDataByKfLocation,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { handleSwitchProcessStatus } from '@renderer/assets/methods/actionsUtils';
-import { Pm2ProcessStatusTypes } from '@kungfu-trader/kungfu-js-api/utils/processUtils';
+import { useGlobalStore } from '@renderer/pages/index/store/global';
 
 const processControllerBoardVisible = ref<boolean>(false);
 const categoryList: KfCategoryTypes[] = ['system', 'td', 'md', 'strategy'];
@@ -31,7 +31,7 @@ const {
     processStatusDetailData,
     getProcessStatusName,
 } = useProcessStatusDetailData();
-const { extTypeMap } = useExtConfigsRelated();
+const { extTypeMap, mdExtTypeMap } = useExtConfigsRelated();
 
 let hasAlertMasterStop = false;
 let hasAlertLedgerStop = false;
@@ -158,7 +158,8 @@ function handleOpenProcessControllerBoard(): void {
                                         "
                                         :color="
                                             getInstrumentTypeColor(
-                                                extTypeMap[config.group],
+                                                extTypeMap[config.group] ||
+                                                    mdExtTypeMap[config.group],
                                             )
                                         "
                                     >
