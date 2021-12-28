@@ -13,14 +13,10 @@ import KfSetSourceModal from '@renderer/components/public/KfSetSourceModal.vue';
 import KfSetByConfigModal from '@renderer/components/public/KfSetByConfigModal.vue';
 
 import {
-    KfCategoryTypes,
     KfExtOriginConfig,
     SetKfConfigPayload,
 } from '@kungfu-trader/kungfu-js-api/typings';
-import type {
-    KfConfig,
-    KfConfigValue,
-} from '@kungfu-trader/kungfu-js-api/typings';
+import type { KfConfigValue } from '@kungfu-trader/kungfu-js-api/typings';
 import { columns } from './config';
 import {
     getInstrumentTypeColor,

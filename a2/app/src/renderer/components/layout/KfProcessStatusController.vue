@@ -4,7 +4,6 @@ import { message, notification } from 'ant-design-vue';
 
 import KfProcessStatus from '@renderer/components/public/KfProcessStatus.vue';
 
-import { KfCategoryTypes } from '@kungfu-trader/kungfu-js-api/typings';
 import { computed, ref, toRefs, watch } from 'vue';
 import { SystemProcessName } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
 import {

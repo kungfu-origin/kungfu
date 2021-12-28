@@ -1,5 +1,3 @@
-import { KfCategoryTypes } from '@kungfu-trader/kungfu-js-api/typings';
-
 export const getColumns = (
     moduleType: KfCategoryTypes,
     isHistory = false,

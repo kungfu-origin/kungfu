@@ -537,3 +537,46 @@ interface InstrumentResolved {
     id: string;
     ukey: string;
 }
+
+enum KfCategoryEnum {
+    md,
+    td,
+    strategy,
+    system,
+}
+
+type KfCategoryTypes = keyof typeof KfCategoryEnum;
+
+enum KfModeEnum {
+    live,
+    data,
+    replay,
+    backtest,
+}
+
+type KfModeTypes = keyof typeof KfModeEnum;
+
+interface KfLocationBase {
+    group: string;
+    name: string;
+}
+
+type KfLocation = {
+    category: KfCategoryTypes;
+    mode: KfModeTypes;
+} & KfLocationBase;
+
+type KfLocationOrigin = {
+    category: KfCategoryEnum;
+    mode: KfModeEnum;
+} & KfLocationBase;
+
+type KfConfigOrigin = KfLocationOrigin & {
+    location_uid: number;
+    value: string;
+};
+
+type KfConfig = KfLocation & {
+    location_uid: number;
+    value: string;
+};

@@ -41,14 +41,11 @@ import {
 } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
 import {
     InstrumentTypes,
-    KfCategoryTypes,
     KfConfigValue,
     KfExtConfigs,
     KfTradeValueCommonData,
     AntInKungfuColorTypes,
-    KfConfig,
     BrokerStateStatusTypes,
-    KfLocation,
     ProcessStatusTypes,
     KfConfigItem,
 } from '@kungfu-trader/kungfu-js-api/typings';
@@ -448,6 +445,11 @@ export const useCurrentGlobalKfLocation = (
         if (!watcher) {
             return '';
         }
+
+        if (!currentKfLocation.value) {
+            return '';
+        }
+
         return watcher.getLocationUID(currentKfLocation.value);
     });
 

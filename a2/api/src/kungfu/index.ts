@@ -14,7 +14,7 @@ import {
     getOrderTradeFilterKey,
     kfLogger,
 } from '../utils/busiUtils';
-import { HistoryDateEnum, KfConfig, KfLocation } from '../typings';
+import { HistoryDateEnum } from '../typings';
 
 export const kf = kungfu();
 kfLogger.info('Load kungfu node');

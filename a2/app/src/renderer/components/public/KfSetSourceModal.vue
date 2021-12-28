@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { KfCategoryTypes } from '@kungfu-trader/kungfu-js-api/typings';
 import { ref, onMounted, computed, getCurrentInstance } from 'vue';
 
 import {

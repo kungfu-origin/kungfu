@@ -6,10 +6,7 @@ import {
 } from '@root/src/typings/enums';
 import {
     KfExtConfigs,
-    KfConfig,
     BrokerStateStatusTypes,
-    KfLocation,
-    KfCategoryTypes,
 } from '@kungfu-trader/kungfu-js-api/typings';
 import {
     getIdByKfLocation,

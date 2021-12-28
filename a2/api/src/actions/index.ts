@@ -1,14 +1,6 @@
 import path from 'path';
 import { getKfAllConfig, removeKfConfig } from '../kungfu/store';
-import {
-    KfModeTypes,
-    KfCategoryEnum,
-    KfCategoryTypes,
-    KfModeEnum,
-    KfConfig,
-    KfConfigOrigin,
-    KfLocation,
-} from '../typings';
+import { KfCategoryEnum, KfModeEnum } from '../typings';
 import { KF_RUNTIME_DIR, LOG_DIR } from '../config/pathConfig';
 import { pathExists, remove } from 'fs-extra';
 import { getProcessIdByKfLocation } from '../utils/busiUtils';

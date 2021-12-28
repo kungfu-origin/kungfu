@@ -239,7 +239,6 @@ export enum KfCategoryEnum {
     strategy,
     system,
 }
-export type KfCategoryTypes = keyof typeof KfCategoryEnum;
 
 export enum KfModeEnum {
     live,
@@ -247,33 +246,6 @@ export enum KfModeEnum {
     replay,
     backtest,
 }
-
-export type KfModeTypes = keyof typeof KfModeEnum;
-
-export interface KfLocationBase {
-    group: string;
-    name: string;
-}
-
-export type KfLocation = {
-    category: KfCategoryTypes;
-    mode: KfModeTypes;
-} & KfLocationBase;
-
-export type KfLocationOrigin = {
-    category: KfCategoryEnum;
-    mode: KfModeEnum;
-} & KfLocationBase;
-
-export type KfConfigOrigin = KfLocationOrigin & {
-    location_uid: number;
-    value: string;
-};
-
-export type KfConfig = KfLocation & {
-    location_uid: number;
-    value: string;
-};
 
 export enum HistoryDateEnum {
     naturalDate,

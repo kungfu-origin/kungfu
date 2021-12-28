@@ -9,10 +9,7 @@ import {
 import { setKfConfig } from '@kungfu-trader/kungfu-js-api/kungfu/store';
 import {
     HistoryDateEnum,
-    KfCategoryTypes,
-    KfConfig,
     KfConfigValue,
-    KfLocation,
 } from '@kungfu-trader/kungfu-js-api/typings';
 import {
     getCategoryData,

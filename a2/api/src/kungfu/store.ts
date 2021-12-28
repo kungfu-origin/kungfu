@@ -1,6 +1,4 @@
-import path from 'path';
 import { configStore } from '../kungfu';
-import { KfConfigOrigin, KfLocation } from '../typings';
 
 import { kfLogger, hidePasswordByLogger } from '../utils/busiUtils';
 
