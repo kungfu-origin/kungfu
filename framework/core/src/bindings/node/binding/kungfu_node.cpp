@@ -59,21 +59,28 @@ using namespace kungfu::node;
 
 namespace kungfu::node {
 
+uint32_t Hash32(const Napi::CallbackInfo &info) {
+  if (not IsValid(info, 0, &Napi::Value::IsString)) {
+    throw Napi::Error::New(info.Env(), "Invalid argument");
+  }
+  auto arg = info[0].ToString().Utf8Value();
+  return hash_32((const unsigned char *)(arg.c_str()), arg.length());
+}
+
+Napi::Value Hash(const Napi::CallbackInfo &info) {
+  return Napi::Number::New(info.Env(), Hash32(info));
+}
+
+Napi::Value FormatStringToHashHex(const Napi::CallbackInfo &info) {
+  return Napi::String::New(info.Env(), fmt::format("{:08x}", Hash32(info)));
+}
+
 Napi::Value FormatTime(const Napi::CallbackInfo &info) {
   if (not IsValid(info, 0, &Napi::Value::IsBigInt)) {
     return {};
   }
   auto format = IsValid(info, 1, &Napi::Value::IsString) ? info[1].ToString().Utf8Value() : KUNGFU_DATETIME_FORMAT;
   return Napi::String::New(info.Env(), time::strftime(GetBigInt(info, 0), format));
-}
-
-Napi::Value FormatStringToHashHex(const Napi::CallbackInfo &info) {
-  if (not IsValid(info, 0, &Napi::Value::IsString)) {
-    throw Napi::Error::New(info.Env(), "Invalid argument");
-  }
-  auto arg = info[0].ToString().Utf8Value();
-  uint32_t hash = hash_32((const unsigned char *)(arg.c_str()), arg.length());
-  return Napi::String::New(info.Env(), fmt::format("{:08x}", hash));
 }
 
 Napi::Value ParseTime(const Napi::CallbackInfo &info) {
@@ -87,7 +94,6 @@ Napi::Value ParseTime(const Napi::CallbackInfo &info) {
 
 void Shutdown(const Napi::CallbackInfo &info) {
   ensure_sqlite_shutdown();
-  return;
 }
 
 Napi::Object InitAll(Napi::Env env, Napi::Object exports) {
@@ -103,8 +109,9 @@ Napi::Object InitAll(Napi::Env env, Napi::Object exports) {
   IODevice::Init(env, exports);
   DataTable::Init(env, exports);
   Watcher::Init(env, exports);
-  exports.Set("formatTime", Napi::Function::New(env, FormatTime));
+  exports.Set("hash", Napi::Function::New(env, Hash));
   exports.Set("formatStringToHashHex", Napi::Function::New(env, FormatStringToHashHex));
+  exports.Set("formatTime", Napi::Function::New(env, FormatTime));
   exports.Set("parseTime", Napi::Function::New(env, ParseTime));
   exports.Set("shutdown", Napi::Function::New(env, Shutdown));
   return exports;
