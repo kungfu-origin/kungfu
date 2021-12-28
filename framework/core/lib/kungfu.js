@@ -88,6 +88,7 @@ module.exports = function () {
   return {
     _binding: binding,
     longfist: binding.longfist,
+    hash: binding.hash,
     formatTime: binding.formatTime,
     formatStringToHashHex: binding.formatStringToHashHex,
     parseTime: binding.parseTime,
