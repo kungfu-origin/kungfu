@@ -32,6 +32,7 @@ export const useComponenets = (app: App<Element>): void => {
             () => import('@root/src/components/modules/md/Md.vue'),
         ),
     );
+
     app.component(
         '策略进程',
         defineAsyncComponent(
@@ -49,6 +50,14 @@ export const useComponenets = (app: App<Element>): void => {
         ),
     );
 
+    app.component(
+        '深度行情',
+        defineAsyncComponent(
+            () =>
+                import('@root/src/components/modules/orderBook/OrderBook.vue'),
+        ),
+    );
+
     app.config.globalProperties.$registedKfUIComponents = [
         '持仓',
         '委托记录',
@@ -57,6 +66,7 @@ export const useComponenets = (app: App<Element>): void => {
         '行情源',
         '策略进程',
         '行情订阅',
+        '深度行情',
     ];
 
     // if (process.env.NODE_ENV === 'production') {

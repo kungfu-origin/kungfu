@@ -59,11 +59,17 @@ interface ExportTradingDataEvent {
     currentKfLocation?: KfLocation | KfConfig | undefined;
 }
 
+interface TriggerOrderBook {
+    tag: 'orderbook';
+    instrument: InstrumentResolved;
+}
+
 type KfBusEvent =
     | ResizeEvent
     | ProcessStatusChangeEvent
     | MainProcessEvent
     | TradingDataUpdateEvent
+    | TriggerOrderBook
     | ExportTradingDataEvent;
 
 interface KfTradingDataTableHeaderConfig {

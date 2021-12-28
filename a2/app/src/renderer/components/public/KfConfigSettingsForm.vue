@@ -240,6 +240,7 @@ defineExpose({
                 </a-select-option>
             </a-select>
             <a-switch
+                size="small"
                 v-else-if="item.type === 'bool'"
                 v-model:checked="formState[item.key]"
             ></a-switch>

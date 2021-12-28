@@ -37,11 +37,11 @@ import { throttleTime } from 'rxjs';
 import { kfRequestMarketData } from '@kungfu-trader/kungfu-js-api/kungfu';
 import workers from '@renderer/assets/workers';
 import dayjs from 'dayjs';
-import { AbleSubscribeInstrumentTypesBySourceType } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
-import { storeToRefs } from 'pinia';
+import { defaultBoardsMap } from '@renderer/assets/configs';
+import { message } from 'ant-design-vue';
 
 const app = getCurrentInstance();
-
+const store = useGlobalStore();
 const preStartSystemLoadingData = reactive<Record<string, 'loading' | 'done'>>({
     archive: 'loading',
     watcher: 'loading',
@@ -107,6 +107,10 @@ bus.subscribe((data: KfBusEvent) => {
             case 'clear-journal':
                 markClearJournal();
                 break;
+            case 'reset-main-dashboard':
+                store.initBoardsMap(defaultBoardsMap);
+                message.success('操作成功');
+                break;
             case 'record-before-quit':
                 preQuitSystemLoadingData.record = 'loading';
                 preQuitTasks([saveBoardsMap()]).finally(() => {
@@ -129,7 +133,6 @@ bus.subscribe((data: KfBusEvent) => {
     }
 });
 
-const store = useGlobalStore();
 tradingDataSubject.subscribe((watcher: Watcher) => {
     const appStates = dealAppStates(watcher.appStates);
     store.setAppStates(appStates);

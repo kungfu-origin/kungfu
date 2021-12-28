@@ -3,15 +3,39 @@ export const getColumns = (smallMode = false): AntTableColumns => [
         title: '标的',
         dataIndex: 'instrumentId',
         align: 'left',
-        sorter: true,
         width: 80,
     },
+    ...(smallMode
+        ? []
+        : [
+              {
+                  title: '开盘价',
+                  dataIndex: 'open_price',
+                  align: 'right',
+                  sorter: true,
+                  width: 80,
+              },
+              {
+                  title: '最低价',
+                  dataIndex: 'low_price',
+                  align: 'right',
+                  sorter: true,
+                  width: 80,
+              },
+              {
+                  title: '最高价',
+                  dataIndex: 'high_price',
+                  align: 'right',
+                  sorter: true,
+                  width: 80,
+              },
+          ]),
     {
         title: '最新价',
         dataIndex: 'lastPrice',
-        align: 'center',
+        align: 'right',
         sorter: true,
-        width: 60,
+        width: 80,
     },
     ...(smallMode
         ? []
@@ -19,7 +43,7 @@ export const getColumns = (smallMode = false): AntTableColumns => [
               {
                   title: '成交量',
                   dataIndex: 'volume',
-                  align: 'center',
+                  align: 'right',
                   sorter: true,
                   width: 60,
               },
@@ -28,7 +52,7 @@ export const getColumns = (smallMode = false): AntTableColumns => [
         title: '操作',
         dataIndex: 'actions',
         align: 'right',
-        width: 30,
+        width: 40,
         fixed: 'right',
     },
 ];

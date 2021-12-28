@@ -1,11 +1,15 @@
 <script setup lang="ts">
 import KfDashboard from '@renderer/components/public/KfDashboard.vue';
 import KfDashboardItem from '@renderer/components/public/KfDashboardItem.vue';
+import KfBlinkNum from '@renderer/components/public/KfBlinkNum.vue';
 
 import {
     useDashboardBodySize,
+    useExtConfigsRelated,
     useInstruments,
+    useProcessStatusDetailData,
     useQuote,
+    useTriggerOrderBook,
 } from '@renderer/assets/methods/uiUtils';
 import { computed, getCurrentInstance, nextTick, ref, watch } from 'vue';
 import { getColumns } from './config';
@@ -17,7 +21,10 @@ import {
 import { InstrumentTypeEnum } from '@kungfu-trader/kungfu-js-api/typings';
 import { StarFilled } from '@ant-design/icons-vue';
 import { message } from 'ant-design-vue';
-import { dealKfPrice } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
+import {
+    dealAssetPrice,
+    dealKfNumber,
+} from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 
 interface MarketDataProps {}
 defineProps<MarketDataProps>();
@@ -33,14 +40,18 @@ const columns = computed(() => {
     return getColumns(false);
 });
 
-const { instruments, subscribedInstruments } = useInstruments();
+const {
+    instruments,
+    subscribedInstruments,
+    subscribeAllInstrumentByAppStates,
+} = useInstruments();
+const { appStates, processStatusData } = useProcessStatusDetailData();
+const { mdExtTypeMap } = useExtConfigsRelated();
+
 const options = ref<{ value: string; label: string }[]>([]);
 const searchResults = ref<string[]>([]);
-const { quotes, getQuoteByInstrument } = useQuote();
-
-watch(quotes, (newval, oldval) => {
-    console.log(newval, oldval, '===');
-});
+const { getQuoteByInstrument, getLastPricePercent } = useQuote();
+const { customRow } = useTriggerOrderBook();
 
 function handleSearchInstruments(val: string) {
     options.value = instruments.value
@@ -90,6 +101,14 @@ function handleConfirmAddInstrument(val: string[]): Promise<void> {
             }
         })
         .then(() => {
+            subscribeAllInstrumentByAppStates(
+                processStatusData.value,
+                appStates.value,
+                mdExtTypeMap.value,
+                instruments,
+            );
+        })
+        .then(() => {
             message.success('操作成功');
         });
 }
@@ -107,22 +126,6 @@ function handleConfirmRemoveInstrument(instrument: InstrumentResolved) {
         .catch((err) => {
             message.error(err.message || '操作失败');
         });
-}
-
-function getLastPricePercent(instrument: InstrumentResolved): string {
-    const quote = getQuoteByInstrument(instrument);
-
-    if (!quote) {
-        return '--';
-    }
-
-    const { open_price, last_price } = quote;
-    if (!open_price || !last_price) {
-        return '--';
-    }
-
-    const percent = (last_price - open_price) / open_price;
-    return Number(percent * 100).toFixed(2) + '%';
 }
 </script>
 <template>
@@ -153,6 +156,7 @@ function getLastPricePercent(instrument: InstrumentResolved): string {
                 size="small"
                 :pagination="false"
                 :scroll="{ y: dashboardBodyHeight - 4, x: dashboardBodyWidth }"
+                :customRow="customRow"
                 emptyText="暂无数据"
             >
                 <template
@@ -175,20 +179,49 @@ function getLastPricePercent(instrument: InstrumentResolved): string {
                             </div>
                         </div>
                     </template>
+                    <template v-else-if="column.dataIndex === 'open_price'">
+                        {{
+                            dealAssetPrice(
+                                getQuoteByInstrument(record)?.open_price,
+                            )
+                        }}
+                    </template>
+                    <template v-else-if="column.dataIndex === 'low_price'">
+                        {{
+                            dealAssetPrice(
+                                getQuoteByInstrument(record)?.low_price,
+                            )
+                        }}
+                    </template>
+                    <template v-else-if="column.dataIndex === 'high_price'">
+                        {{
+                            dealAssetPrice(
+                                getQuoteByInstrument(record)?.high_price,
+                            )
+                        }}
+                    </template>
+
                     <template v-else-if="column.dataIndex === 'lastPrice'">
                         <div class="last-price-content">
                             <div class="price">
                                 {{
-                                    dealKfPrice(
+                                    dealAssetPrice(
                                         getQuoteByInstrument(record)
                                             ?.last_price,
                                     )
                                 }}
                             </div>
                             <div class="percent">
-                                {{ getLastPricePercent(record) }}
+                                <KfBlinkNum
+                                    blink-type="color"
+                                    mode="compare-zero"
+                                    :num="getLastPricePercent(record)"
+                                ></KfBlinkNum>
                             </div>
                         </div>
+                    </template>
+                    <template v-else-if="column.dataIndex === 'volume'">
+                        {{ dealKfNumber(getQuoteByInstrument(record)?.volume) }}
                     </template>
                     <template v-else-if="column.dataIndex === 'actions'">
                         <div class="kf-actions__warp">
@@ -222,6 +255,26 @@ export default {
             span {
                 font-size: 10px;
                 padding-right: 6px;
+            }
+        }
+    }
+
+    .last-price-content {
+        .price {
+            font-size: 12px;
+        }
+
+        .percent {
+            font-size: 10px;
+        }
+
+        .percent {
+            position: relative;
+            height: 18px;
+            width: 100%;
+
+            .kf-blink-num {
+                padding: 0;
             }
         }
     }

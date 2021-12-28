@@ -1,7 +1,7 @@
 export const defaultBoardsMap: KfLayout.BoardsMap = {
     '0': { paId: -1, direction: 'h', children: [1, 2] },
-    '1': { paId: 0, direction: 'v', children: [4, 5], width: '55.054%' },
-    '2': { paId: 0, direction: 'v', children: [8, 9, 10], width: '44.946%' },
+    '1': { paId: 0, direction: 'v', children: [4, 5], width: '60.326%' },
+    '2': { paId: 0, direction: 'v', children: [8, 9, 10], width: '39.674%' },
     '4': {
         paId: 1,
         direction: 'h',
@@ -37,23 +37,23 @@ export const defaultBoardsMap: KfLayout.BoardsMap = {
         direction: 'v',
         contents: ['深度行情'],
         current: '深度行情',
-        width: '41.576%',
+        width: '43.279%',
     },
     '12': {
         paId: 10,
         direction: 'v',
         contents: ['下单面板'],
         current: '下单面板',
-        width: '58.424%',
+        width: '56.721%',
     },
     '13': {
         paId: 5,
         direction: 'v',
         contents: ['行情订阅'],
         current: '行情订阅',
-        width: '32.824%',
+        width: '27.945%',
     },
-    '14': { paId: 5, direction: 'v', width: '67.176%', children: [16, 15] },
+    '14': { paId: 5, direction: 'v', width: '72.055%', children: [16, 15] },
     '15': {
         paId: 14,
         direction: 'h',

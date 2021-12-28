@@ -23,6 +23,7 @@ import {
     exportAllTradingData,
     openLogFile,
     openSettingDialog,
+    resetMainDashboard,
 } from './events';
 
 import {
@@ -291,6 +292,10 @@ function setMenu() {
                 {
                     label: '清理journal',
                     click: () => MainWindow && clearJournal(MainWindow),
+                },
+                {
+                    label: '重置主面板',
+                    click: () => MainWindow && resetMainDashboard(MainWindow),
                 },
                 {
                     label: '导出所有交易数据',

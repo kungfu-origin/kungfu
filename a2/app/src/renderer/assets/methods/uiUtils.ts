@@ -10,6 +10,7 @@ import {
     getCurrentInstance,
     onMounted,
     toRefs,
+    toRaw,
 } from 'vue';
 import {
     APP_DIR,
@@ -60,7 +61,6 @@ import { storeToRefs } from 'pinia';
 import { BrowserWindow, getCurrentWindow } from '@electron/remote';
 import { ipcRenderer } from 'electron';
 import { message } from 'ant-design-vue';
-import bus from '@kungfu-trader/kungfu-js-api/utils/globalBus';
 import dayjs from 'dayjs';
 import { kfRequestMarketData } from '@kungfu-trader/kungfu-js-api/kungfu';
 
@@ -567,12 +567,15 @@ export const parseURIParams = (): Record<string, string> => {
 };
 
 export const useIpcListener = (): void => {
+    const app = getCurrentInstance();
     ipcRenderer.removeAllListeners('main-process-messages');
     ipcRenderer.on('main-process-messages', (event, args) => {
-        bus.next({
-            tag: 'main',
-            name: args,
-        } as MainProcessEvent);
+        if (app?.proxy) {
+            app?.proxy.$bus.next({
+                tag: 'main',
+                name: args,
+            } as MainProcessEvent);
+        }
     });
 };
 
@@ -809,35 +812,96 @@ export const useInstruments = (): {
 };
 
 export const useQuote = (): {
-    quotes: { value: DataTable<Quote> | Record<string, unknown> };
-    getQuoteByInstrument(instrument: InstrumentResolved): Quote | null;
+    quotes: Ref<Record<string, Quote>>;
+    getQuoteByInstrument(
+        instrument: InstrumentResolved | undefined,
+    ): Quote | null;
+    getLastPricePercent(instrument: InstrumentResolved | undefined): string;
 } => {
-    const quotes = reactive<{
-        value: DataTable<Quote> | Record<string, unknown>;
-    }>({
-        value: {},
-    });
+    const quotes = ref<Record<string, Quote>>({});
     const app = getCurrentInstance();
 
     onMounted(() => {
         if (app?.proxy) {
             app.proxy.$tradingDataSubject.subscribe((watcher: Watcher) => {
-                quotes.value = toRefs(watcher.ledger.Quote);
-                console.log(quotes.value, '--');
+                quotes.value = toRaw({ ...watcher.ledger.Quote });
             });
         }
     });
 
     const getQuoteByInstrument = (
-        instrument: InstrumentResolved,
+        instrument: InstrumentResolved | undefined,
     ): Quote | null => {
+        if (!instrument) {
+            return null;
+        }
+
         const { ukey } = instrument;
         const quote = quotes.value[ukey] as Quote | undefined;
         return quote || null;
     };
 
+    const getLastPricePercent = (instrument: InstrumentResolved): string => {
+        const quote = getQuoteByInstrument(instrument);
+
+        if (!quote) {
+            return '--';
+        }
+
+        const { open_price, last_price } = quote;
+        if (!open_price || !last_price) {
+            return '--';
+        }
+
+        const percent = (last_price - open_price) / open_price;
+        return Number(percent * 100).toFixed(2) + '%';
+    };
+
     return {
         quotes,
         getQuoteByInstrument,
+        getLastPricePercent,
+    };
+};
+
+export const useTriggerOrderBook = (): {
+    currentInstrument: Ref<InstrumentResolved | undefined>;
+    customRow(instrument: InstrumentResolved): { onClick(): void };
+    triggerOrderBook(instrument: InstrumentResolved): void;
+} => {
+    const app = getCurrentInstance();
+    const currentInstrument = ref<InstrumentResolved | undefined>();
+
+    const triggerOrderBook = (instrument: InstrumentResolved) => {
+        if (app?.proxy) {
+            app?.proxy.$bus.next({
+                tag: 'orderbook',
+                instrument,
+            });
+        }
+    };
+
+    const customRow = (record: InstrumentResolved) => {
+        return {
+            onClick: () => {
+                triggerOrderBook(record);
+            },
+        };
+    };
+
+    onMounted(() => {
+        if (app?.proxy) {
+            app.proxy.$bus.subscribe((data: KfBusEvent) => {
+                if (data.tag === 'orderbook') {
+                    currentInstrument.value = data.instrument;
+                }
+            });
+        }
+    });
+
+    return {
+        currentInstrument,
+        customRow,
+        triggerOrderBook,
     };
 };

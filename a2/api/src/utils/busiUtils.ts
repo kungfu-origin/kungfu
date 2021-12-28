@@ -588,6 +588,34 @@ export const getProcessIdByKfLocation = (
     throw new Error(`Category ${kfLocation.category} is illegal`);
 };
 
+export const getMdTdKfLocationByProcessId = (
+    processId: string,
+): KfLocation | null => {
+    if (processId.indexOf('td_') === 0) {
+        if (processId.split('_').length === 3) {
+            const [category, group, name] = processId.split('_');
+            return {
+                category: category as KfCategoryTypes,
+                group,
+                name,
+                mode: 'live',
+            };
+        }
+    } else if (processId.indexOf('md_') === 0) {
+        if (processId.split('_').length === 2) {
+            const [category, group] = processId.split('_');
+            return {
+                category: category as KfCategoryTypes,
+                group,
+                name: group,
+                mode: 'live',
+            };
+        }
+    }
+
+    return null;
+};
+
 export const getIdByKfLocation = (
     kfLocation: KfLocation | KfConfig,
 ): string => {
@@ -756,10 +784,11 @@ export const switchKfLocation = (
     }
 };
 
-const dealKfNumber = (
+export const dealKfNumber = (
     preNumber: bigint | number | undefined | unknown,
 ): string | number | bigint | unknown => {
     if (preNumber === undefined) return '--';
+    if (preNumber === null) return '--';
 
     if (Number.isNaN(Number(preNumber))) {
         return '--';
@@ -768,7 +797,7 @@ const dealKfNumber = (
 };
 
 export const dealKfPrice = (
-    preNumber: bigint | number | undefined | unknown,
+    preNumber: bigint | number | undefined | null | unknown,
 ): string => {
     const afterNumber = dealKfNumber(preNumber);
 

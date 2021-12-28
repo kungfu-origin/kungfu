@@ -15,6 +15,7 @@ import {
     ProcessStatusTypes,
     BrokerStateStatusTypes,
     OrderStatusEnum,
+    InstrumentTypes,
 } from '../typings';
 
 import { Pm2ProcessStatusTypes } from '../utils/processUtils';
@@ -366,6 +367,53 @@ export const InstrumentType: Record<
         color: 'green',
         level: 10,
     },
+};
+
+export const AbleSubscribeInstrumentTypesBySourceType: Record<
+    InstrumentTypes,
+    InstrumentTypeEnum[]
+> = {
+    unknown: [InstrumentTypeEnum.unknown],
+
+    stock: [
+        InstrumentTypeEnum.stock,
+        InstrumentTypeEnum.bond,
+        InstrumentTypeEnum.fund,
+        InstrumentTypeEnum.techstock,
+        InstrumentTypeEnum.index,
+        InstrumentTypeEnum.repo,
+    ],
+
+    future: [InstrumentTypeEnum.future],
+
+    bond: [InstrumentTypeEnum.bond],
+
+    stockoption: [InstrumentTypeEnum.stockoption],
+
+    fund: [InstrumentTypeEnum.fund],
+
+    techstock: [InstrumentTypeEnum.techstock],
+
+    index: [InstrumentTypeEnum.index],
+
+    repo: [InstrumentTypeEnum.repo],
+
+    crypto: [InstrumentTypeEnum.crypto],
+
+    cryptofuture: [InstrumentTypeEnum.cryptofuture],
+
+    simu: [
+        InstrumentTypeEnum.stock,
+        InstrumentTypeEnum.future,
+        InstrumentTypeEnum.bond,
+        InstrumentTypeEnum.stockoption,
+        InstrumentTypeEnum.fund,
+        InstrumentTypeEnum.techstock,
+        InstrumentTypeEnum.index,
+        InstrumentTypeEnum.repo,
+        InstrumentTypeEnum.crypto,
+        InstrumentTypeEnum.cryptofuture,
+    ],
 };
 
 export const ExchangeIds: Record<string, KfTradeValueCommonData> = {

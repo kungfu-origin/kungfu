@@ -46,6 +46,10 @@ export function clearJournal(mainWindow: BrowserWindow): void {
     sendMsgToMainWindow(mainWindow, 'clear-journal');
 }
 
+export function resetMainDashboard(mainWindow: BrowserWindow): void {
+    sendMsgToMainWindow(mainWindow, 'reset-main-dashboard');
+}
+
 export function openLogFile(mainWindow: BrowserWindow): void {
     sendMsgToMainWindow(mainWindow, 'open-log');
 }
