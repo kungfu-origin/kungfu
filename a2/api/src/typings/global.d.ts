@@ -483,6 +483,7 @@ interface Kungfu {
     shutdown(): void;
     formatStringToHashHex(id: string): string;
     formatTime(nano: bigint, format: string): string;
+    hash(str: string): string;
 }
 
 declare module '@kungfu-trader/kungfu-core' {

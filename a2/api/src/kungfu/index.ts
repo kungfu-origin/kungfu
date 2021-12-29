@@ -303,3 +303,12 @@ export const kfCancelAllOrders = (
 
     return Promise.all(cancelOrderTasks);
 };
+
+export const hashInstrumentUKey = (
+    instrumentId: string,
+    exchangeId: string,
+): string => {
+    return (BigInt(kf.hash(instrumentId)) ^ BigInt(kf.hash(exchangeId)))
+        .toString(16)
+        .padStart(16, '0');
+};

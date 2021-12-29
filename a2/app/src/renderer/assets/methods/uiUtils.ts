@@ -694,7 +694,10 @@ export const getIfSaveInstruments = (
     newInstruments: Instrument[],
     oldInstrumentsLength: number,
 ): boolean => {
-    if (newInstruments.length !== oldInstrumentsLength) {
+    if (
+        newInstruments.length !== 0 &&
+        newInstruments.length !== oldInstrumentsLength
+    ) {
         return true;
     }
 

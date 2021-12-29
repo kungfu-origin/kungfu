@@ -5,11 +5,14 @@ import {
     dealDirection,
     getIdByKfLocation,
     dealTradingData,
+    findTargetFromArray,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import {
     useCurrentGlobalKfLocation,
     useDownloadHistoryTradingData,
+    useInstruments,
     useTableSearchKeyword,
+    useTriggerOrderBook,
 } from '@renderer/assets/methods/uiUtils';
 import KfDashboard from '@renderer/components/public/KfDashboard.vue';
 import KfDashboardItem from '@renderer/components/public/KfDashboardItem.vue';
@@ -19,20 +22,20 @@ import { DownloadOutlined } from '@ant-design/icons-vue';
 import { getCurrentInstance, onMounted, ref, toRaw } from 'vue';
 import { columns } from './config';
 import KfBlinkNum from '@renderer/components/public/KfBlinkNum.vue';
+import { hashInstrumentUKey, kf } from '@kungfu-trader/kungfu-js-api/kungfu';
 
 const app = getCurrentInstance();
-
 const pos = ref<Position[]>([]);
 const { searchKeyword, tableData } = useTableSearchKeyword<Position>(pos, [
     'instrument_id',
     'exchange_id',
     'direction',
 ]);
-
 const { currentGlobalKfLocation, currentCategoryData } =
     useCurrentGlobalKfLocation(window.watcher);
-
 const { handleDownload } = useDownloadHistoryTradingData();
+const { triggerOrderBook } = useTriggerOrderBook();
+const { instruments } = useInstruments();
 
 onMounted(() => {
     if (app?.proxy) {
@@ -52,6 +55,30 @@ onMounted(() => {
         });
     }
 });
+
+function handleClickRow({ row }: { row: Position }) {
+    const { instrument_id, instrument_type, exchange_id } = row;
+    const ukey = hashInstrumentUKey(instrument_id, exchange_id);
+    const instrumnet: InstrumentResolved | null =
+        findTargetFromArray<InstrumentResolved>(
+            instruments.value,
+            'ukey',
+            ukey,
+        );
+    const instrumentName = instrumnet?.instrumentName || '';
+    const ensuredInstrument: InstrumentResolved = {
+        exchangeId: exchange_id,
+        instrumentId: instrument_id,
+        instrumentType: instrument_type,
+        instrumentName,
+        ukey,
+        id: `${instrument_id}_${instrumentName}_${exchange_id}`.toLowerCase(),
+    };
+
+    console.log(ensuredInstrument);
+
+    triggerOrderBook(ensuredInstrument);
+}
 </script>
 <template>
     <div class="kf-position__warp">
@@ -100,6 +127,7 @@ onMounted(() => {
                 :columns="columns"
                 :dataSource="tableData"
                 keyField="uid_key"
+                @clickRow="handleClickRow"
             >
                 <template
                     v-slot:default="{

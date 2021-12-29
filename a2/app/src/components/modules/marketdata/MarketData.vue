@@ -67,6 +67,16 @@ function handleSearchInstruments(val: string) {
         }));
 }
 
+function handleSubscribeAll() {
+    subscribeAllInstrumentByAppStates(
+        processStatusData.value,
+        appStates.value,
+        mdExtTypeMap.value,
+        subscribedInstruments.value,
+    );
+    message.success('操作成功');
+}
+
 function handleConfirmAddInstrument(val: string[]): Promise<void> {
     nextTick().then(() => {
         searchResults.value = [];
@@ -147,7 +157,9 @@ function handleConfirmRemoveInstrument(instrument: InstrumentResolved) {
                     ></a-select>
                 </KfDashboardItem>
                 <KfDashboardItem>
-                    <a-button size="small">订</a-button>
+                    <a-button size="small" @click="handleSubscribeAll">
+                        订
+                    </a-button>
                 </KfDashboardItem>
             </template>
             <a-table

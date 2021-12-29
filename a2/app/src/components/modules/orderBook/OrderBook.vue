@@ -129,7 +129,7 @@ const bidVolume = computed(() => {
     width: 100%;
     display: flex;
     flex-direction: column;
-    padding: 0 8px;
+    padding: 8px 8px;
 
     .level-book {
         flex: 1;
@@ -157,6 +157,7 @@ const bidVolume = computed(() => {
             }
 
             .volume {
+                color: #fff;
                 cursor: pointer;
 
                 &.buy {
@@ -179,20 +180,21 @@ const bidVolume = computed(() => {
     }
 
     .instrument-info {
-        height: 60px;
         display: flex;
         align-items: center;
+        padding: 8px 0px;
 
         .info-item {
             flex: 1;
-            height: 50px;
 
             &.info {
                 text-align: left;
+                flex: 1.5;
             }
 
             &.price {
                 text-align: right;
+                height: 45px;
             }
 
             .main {

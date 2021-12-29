@@ -21,6 +21,7 @@ const props = withDefaults(
 
 defineEmits<{
     (e: 'dbclickRow', data: { event: MouseEvent; row: TradingDataItem }): void;
+    (e: 'clickRow', data: { event: MouseEvent; row: TradingDataItem }): void;
     (
         e: 'clickCell',
         data: {
@@ -90,6 +91,10 @@ function handleMousedown(e: MouseEvent, row: TradingDataItem) {
         app && app.emit('rightClickRow', { event: e, row });
     }
 }
+
+function handleClickRow(e: MouseEvent, row: TradingDataItem) {
+    app && app.emit('clickRow', { event: e, row });
+}
 </script>
 <template>
     <div class="kf-table">
@@ -118,6 +123,7 @@ function handleMousedown(e: MouseEvent, row: TradingDataItem) {
                 <template v-slot="{ item }">
                     <ul
                         class="kf-table-row"
+                        @click="(e) => handleClickRow(e, item)"
                         @dblclick="(e) => handleDbClickRow(e, item)"
                         @mousedown="(e) => handleMousedown(e, item)"
                     >
