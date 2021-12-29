@@ -369,6 +369,14 @@ export const InstrumentType: Record<
     },
 };
 
+export const ShotableInstrumentTypes = [
+    InstrumentTypeEnum.unknown,
+    InstrumentTypeEnum.future,
+    InstrumentTypeEnum.stockoption,
+    InstrumentTypeEnum.cryptofuture,
+    InstrumentTypeEnum.simu,
+];
+
 export const AbleSubscribeInstrumentTypesBySourceType: Record<
     InstrumentTypes,
     InstrumentTypeEnum[]

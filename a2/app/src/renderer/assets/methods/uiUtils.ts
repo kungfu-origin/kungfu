@@ -38,7 +38,6 @@ import {
     InstrumentType,
     Offset,
     PriceType,
-    Side,
     TimeCondition,
     VolumeCondition,
 } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
@@ -199,23 +198,31 @@ export const initFormStateByConfig = (
     return formState;
 };
 
-export const numberEnumInputType: {
-    [prop: string]: Record<number, KfTradeValueCommonData>;
-} = {
-    side: Side,
+export const numberEnumRadioType: Record<
+    string,
+    Record<number, KfTradeValueCommonData>
+> = {
     offset: Offset,
-    direction: Direction,
-    priceType: PriceType,
     hedgeFlag: HedgeFlag,
+    direction: Direction,
     volumeCondition: VolumeCondition,
     timeCondition: TimeCondition,
     commissionMode: CommissionMode,
+};
+
+export const numberEnumSelectType: Record<
+    string,
+    Record<number, KfTradeValueCommonData>
+> = {
+    // side: Side,
+    priceType: PriceType,
     instrumentType: InstrumentType,
 };
 
-export const stringEnumInputType: {
-    [prop: string]: Record<string, KfTradeValueCommonData>;
-} = {
+export const stringEnumSelectType: Record<
+    string,
+    Record<string, KfTradeValueCommonData>
+> = {
     exchange: ExchangeIds,
 };
 

@@ -58,6 +58,16 @@ export const useComponenets = (app: App<Element>): void => {
         ),
     );
 
+    app.component(
+        '下单面板',
+        defineAsyncComponent(
+            () =>
+                import(
+                    '@root/src/components/modules/makeOrder/MakeOrderDashboard.vue'
+                ),
+        ),
+    );
+
     app.config.globalProperties.$registedKfUIComponents = [
         '持仓',
         '委托记录',
@@ -67,6 +77,7 @@ export const useComponenets = (app: App<Element>): void => {
         '策略进程',
         '行情订阅',
         '深度行情',
+        '下单面板',
     ];
 
     // if (process.env.NODE_ENV === 'production') {

@@ -59,7 +59,7 @@ const historyDate = ref<Dayjs>();
 const historyDataLoading = ref<boolean>();
 var Ledger: TradingData | undefined = window.watcher?.ledger;
 
-const { currentGlobalKfLocation, currentCategoryData, currentUID } =
+const { currentGlobalKfLocation, currentCategoryData } =
     useCurrentGlobalKfLocation(window.watcher);
 
 const { handleDownload } = useDownloadHistoryTradingData();

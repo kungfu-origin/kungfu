@@ -158,7 +158,7 @@ function handleConfirmRemoveInstrument(instrument: InstrumentResolved) {
                 </KfDashboardItem>
                 <KfDashboardItem>
                     <a-button size="small" @click="handleSubscribeAll">
-                        订
+                        订阅
                     </a-button>
                 </KfDashboardItem>
             </template>

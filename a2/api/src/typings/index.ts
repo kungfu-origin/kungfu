@@ -184,7 +184,9 @@ export type KfConfigItemSupportedTypes =
     | 'volumeCondition' // select - number
     | 'timeCondition' // select - number
     | 'commissionMode' // select - number
-    | 'instrumentType'; // select - number
+    | 'instrumentType' // select - number
+    | 'instrument'
+    | 'td';
 
 export type KfConfigValue = string | number | boolean;
 

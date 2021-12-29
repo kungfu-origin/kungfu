@@ -260,7 +260,7 @@ function saveBoardsMap(): Promise<void> {
 </script>
 
 <template>
-    <a-config-provider :locale="zhCN">
+    <a-config-provider :locale="zhCN" :autoInsertSpaceInButton="false">
         <div class="app__warp">
             <router-view />
         </div>
@@ -321,7 +321,6 @@ function saveBoardsMap(): Promise<void> {
         DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    text-align: center;
 
     .app__warp {
         height: 100%;
