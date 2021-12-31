@@ -9,22 +9,25 @@ import {
     useInstruments,
     useProcessStatusDetailData,
     useQuote,
-    useTriggerOrderBook,
+    useTriggeMakeOrder,
 } from '@renderer/assets/methods/uiUtils';
-import { computed, getCurrentInstance, nextTick, ref, watch } from 'vue';
+import { computed, getCurrentInstance } from 'vue';
 import { getColumns } from './config';
 import { ExchangeIds } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
 import {
     addSubscribeInstruments,
     removeSubscribeInstruments,
 } from '@renderer/assets/methods/actionsUtils';
-import { InstrumentTypeEnum } from '@kungfu-trader/kungfu-js-api/typings';
-import { StarFilled } from '@ant-design/icons-vue';
+import { StarFilled, PlusOutlined } from '@ant-design/icons-vue';
 import { message } from 'ant-design-vue';
 import {
     dealAssetPrice,
     dealKfNumber,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
+import {
+    OffsetEnum,
+    SideEnum,
+} from '@kungfu-trader/kungfu-js-api/typings/enums';
 
 interface MarketDataProps {}
 defineProps<MarketDataProps>();
@@ -41,33 +44,21 @@ const columns = computed(() => {
 });
 
 const {
-    instruments,
     subscribedInstruments,
     subscribeAllInstrumentByAppStates,
+    searchInstrumentResult,
+    searchInstrumnetOptions,
+    handleSearchInstrument,
+    handleConfirmSearchInstrumentResult,
+    transformSearchInstrumentResultToInstrument,
 } = useInstruments();
 const { appStates, processStatusData } = useProcessStatusDetailData();
 const { mdExtTypeMap } = useExtConfigsRelated();
 
-const options = ref<{ value: string; label: string }[]>([]);
-const searchResults = ref<string[]>([]);
 const { getQuoteByInstrument, getLastPricePercent } = useQuote();
-const { customRow } = useTriggerOrderBook();
+const { customRow, triggeOrderBook, triggeMakeOrder } = useTriggeMakeOrder();
 
-function handleSearchInstruments(val: string) {
-    options.value = instruments.value
-        .filter((item) => {
-            return item.id.includes(val);
-        })
-        .slice(0, 20)
-        .map((item) => ({
-            value: `${item.exchangeId}_${item.instrumentId}_${item.instrumentType}_${item.ukey}_${item.instrumentName}`,
-            label: `${item.instrumentId} ${item.instrumentName} ${
-                ExchangeIds[item.exchangeId.toUpperCase()].name
-            }`,
-        }));
-}
-
-function handleSubscribeAll() {
+function handleSubscribeAll(): void {
     subscribeAllInstrumentByAppStates(
         processStatusData.value,
         appStates.value,
@@ -77,53 +68,37 @@ function handleSubscribeAll() {
     message.success('操作成功');
 }
 
-function handleConfirmAddInstrument(val: string[]): Promise<void> {
-    nextTick().then(() => {
-        searchResults.value = [];
-    });
+function handleConfirmAddInstrumentCallback(val: string): Promise<void> {
+    const instrumentResolved = transformSearchInstrumentResultToInstrument(val);
 
-    const instruments: InstrumentResolved[] = val
-        .map((ins): InstrumentResolved | null => {
-            const pair = ins.split('_');
-            if (pair.length !== 5) return null;
-            const [
-                exchangeId,
-                instrumentId,
-                instrumentType,
-                ukey,
-                instrumentName,
-            ] = pair;
-            return {
-                exchangeId,
-                instrumentId,
-                instrumentType: +instrumentType as InstrumentTypeEnum,
-                instrumentName,
-                id: `${instrumentId}_${instrumentName}_${exchangeId}`.toLowerCase(),
-                ukey,
-            };
-        })
-        .filter((ins) => !!ins) as InstrumentResolved[];
+    if (!instrumentResolved) {
+        return Promise.reject(new Error('标的错误')).catch((err) => {
+            message.error(err);
+        });
+    }
 
-    return addSubscribeInstruments(instruments)
+    return addSubscribeInstruments([instrumentResolved])
         .then(() => {
             if (app?.proxy) {
                 app.proxy.$useGlobalStore().setSubscribedInstruments();
             }
         })
-        .then(() => {
+        .then(() =>
             subscribeAllInstrumentByAppStates(
                 processStatusData.value,
                 appStates.value,
                 mdExtTypeMap.value,
-                instruments,
-            );
-        })
+                [instrumentResolved],
+            ),
+        )
         .then(() => {
             message.success('操作成功');
         });
 }
 
-function handleConfirmRemoveInstrument(instrument: InstrumentResolved) {
+function handleConfirmRemoveInstrument(
+    instrument: KungfuApi.InstrumentResolved,
+) {
     return removeSubscribeInstruments(instrument)
         .then(() => {
             if (app?.proxy) {
@@ -137,6 +112,16 @@ function handleConfirmRemoveInstrument(instrument: InstrumentResolved) {
             message.error(err.message || '操作失败');
         });
 }
+
+function triggeOrderBookMakeOrder(instrument: KungfuApi.InstrumentResolved) {
+    triggeOrderBook(instrument);
+    triggeMakeOrder(instrument, {
+        side: SideEnum.Buy,
+        offset: OffsetEnum.Open,
+        volume: 0,
+        price: getQuoteByInstrument(instrument)?.last_price || 0,
+    });
+}
 </script>
 <template>
     <div class="kf-market-data__warp">
@@ -145,16 +130,23 @@ function handleConfirmRemoveInstrument(instrument: InstrumentResolved) {
                 <KfDashboardItem>
                     <a-select
                         show-search
-                        v-model:value="searchResults"
-                        mode="multiple"
-                        :autoClearSearchValue="true"
+                        v-model:value="searchInstrumentResult"
                         placeholder="添加自选"
-                        style="width: 200px"
+                        style="min-width: 100px"
                         :filter-option="false"
-                        :options="options"
-                        @search="handleSearchInstruments"
-                        @change="handleConfirmAddInstrument"
-                    ></a-select>
+                        :options="searchInstrumnetOptions"
+                        @search="handleSearchInstrument"
+                        @change="
+                            handleConfirmSearchInstrumentResult(
+                                $event,
+                                handleConfirmAddInstrumentCallback,
+                            )
+                        "
+                    >
+                        <template #suffixIcon>
+                            <PlusOutlined />
+                        </template>
+                    </a-select>
                 </KfDashboardItem>
                 <KfDashboardItem>
                     <a-button size="small" @click="handleSubscribeAll">
@@ -168,7 +160,7 @@ function handleConfirmRemoveInstrument(instrument: InstrumentResolved) {
                 size="small"
                 :pagination="false"
                 :scroll="{ y: dashboardBodyHeight - 4, x: dashboardBodyWidth }"
-                :customRow="customRow"
+                :customRow="(record: KungfuApi.InstrumentResolved) => customRow(record, triggeOrderBookMakeOrder)"
                 emptyText="暂无数据"
             >
                 <template
@@ -177,7 +169,7 @@ function handleConfirmRemoveInstrument(instrument: InstrumentResolved) {
                         record,
                     }: {
                         column: AntTableColumn,
-                        record: InstrumentResolved,
+                        record: KungfuApi.InstrumentResolved,
                     }"
                 >
                     <template v-if="column.dataIndex === 'instrumentId'">
@@ -216,12 +208,15 @@ function handleConfirmRemoveInstrument(instrument: InstrumentResolved) {
                     <template v-else-if="column.dataIndex === 'lastPrice'">
                         <div class="last-price-content">
                             <div class="price">
-                                {{
-                                    dealAssetPrice(
-                                        getQuoteByInstrument(record)
-                                            ?.last_price,
-                                    )
-                                }}
+                                <KfBlinkNum
+                                    blink-type="color"
+                                    :num="
+                                        dealAssetPrice(
+                                            getQuoteByInstrument(record)
+                                                ?.last_price,
+                                        )
+                                    "
+                                ></KfBlinkNum>
                             </div>
                             <div class="percent">
                                 <KfBlinkNum
@@ -239,7 +234,9 @@ function handleConfirmRemoveInstrument(instrument: InstrumentResolved) {
                         <div class="kf-actions__warp">
                             <StarFilled
                                 style="color: #faad14"
-                                @click="handleConfirmRemoveInstrument(record)"
+                                @click.stop="
+                                    handleConfirmRemoveInstrument(record)
+                                "
                             />
                         </div>
                     </template>
@@ -280,6 +277,7 @@ export default {
             font-size: 10px;
         }
 
+        .price,
         .percent {
             position: relative;
             height: 18px;

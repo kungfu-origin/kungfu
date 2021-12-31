@@ -12,10 +12,7 @@ import {
     DeleteOutlined,
 } from '@ant-design/icons-vue';
 
-import {
-    KfExtOriginConfig,
-    SetKfConfigPayload,
-} from '@kungfu-trader/kungfu-js-api/typings';
+import { KfCategoryTypes } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import { columns } from './config';
 import {
     useTableSearchKeyword,
@@ -49,10 +46,10 @@ const { dashboardBodyHeight, dashboardBodyWidth, handleBodySizeChange } =
 
 const setSourceModalVisible = ref<boolean>(false);
 const setTdModalVisible = ref<boolean>(false);
-const setTdConfigPayload = ref<SetKfConfigPayload>({
+const setTdConfigPayload = ref<KungfuApi.SetKfConfigPayload>({
     type: 'add',
     title: '交易账户',
-    config: {} as KfExtOriginConfig['config'][KfCategoryTypes],
+    config: {} as KungfuApi.KfExtOriginConfig['config'][KfCategoryTypes],
 });
 
 const currentSelectedSourceId = ref<string>('');
@@ -60,7 +57,7 @@ const { extConfigs, extTypeMap } = useExtConfigsRelated();
 const { td } = toRefs(useAllKfConfigData());
 const tdIdList = computed(() => {
     return td.value.map(
-        (item: KfConfig): string => `${item.group}_${item.name}`,
+        (item: KungfuApi.KfConfig): string => `${item.group}_${item.name}`,
     );
 });
 const { dealRowClassName, customRow } = useCurrentGlobalKfLocation(
@@ -73,19 +70,19 @@ const { allProcessOnline, handleSwitchAllProcessStatus } = useSwitchAllConfig(
     td,
     processStatusData,
 );
-const { searchKeyword, tableData } = useTableSearchKeyword<KfConfig>(td, [
-    'group',
-    'name',
-]);
+const { searchKeyword, tableData } = useTableSearchKeyword<KungfuApi.KfConfig>(
+    td,
+    ['group', 'name'],
+);
 const { getAssetsByKfConfig } = useAssets();
 
 const { handleConfirmAddUpdateKfConfig, handleRemoveKfConfig } =
     useAddUpdateRemoveKfConfig();
 
 function handleOpenSetTdDialog(
-    type = 'add' as ModalChangeType,
+    type = 'add' as KungfuApi.ModalChangeType,
     selectedSource: string,
-    tdConfig?: KfConfig,
+    tdConfig?: KungfuApi.KfConfig,
 ) {
     currentSelectedSourceId.value = selectedSource;
     setTdConfigPayload.value.type = type;
@@ -156,7 +153,7 @@ function handleOpenSetSourceDialog() {
                         record,
                     }: {
                         column: AntTableColumn,
-                        record: KfConfig,
+                        record: KungfuApi.KfConfig,
                     }"
                 >
                     <template v-if="column.dataIndex === 'name'">

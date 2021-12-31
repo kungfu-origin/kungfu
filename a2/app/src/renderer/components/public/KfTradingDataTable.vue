@@ -1,10 +1,9 @@
 <script lang="ts" setup>
 import { sum } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { Empty } from 'ant-design-vue';
-import { filter } from 'rxjs';
-import { computed, getCurrentInstance, onMounted, ref } from 'vue';
+import { computed, getCurrentInstance, ref } from 'vue';
 
-type TradingDataItem = Position | Order | Trade;
+type TradingDataItem = KungfuApi.Position | KungfuApi.Order | KungfuApi.Trade;
 
 const props = withDefaults(
     defineProps<{

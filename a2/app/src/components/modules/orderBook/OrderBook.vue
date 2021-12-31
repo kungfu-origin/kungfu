@@ -4,17 +4,14 @@ import {
     dealKfNumber,
     dealKfPrice,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
-import {
-    useQuote,
-    useTriggerOrderBook,
-} from '@renderer/assets/methods/uiUtils';
+import { useQuote, useTriggeMakeOrder } from '@renderer/assets/methods/uiUtils';
 import { computed } from 'vue';
 import KfBlinkNum from '@renderer/components/public/KfBlinkNum.vue';
 
 interface OrderBookProps {}
 defineProps<OrderBookProps>();
 
-const { currentInstrument } = useTriggerOrderBook();
+const { currentInstrument } = useTriggeMakeOrder();
 const { getQuoteByInstrument, getLastPricePercent } = useQuote();
 
 const quoteData = computed(() => {

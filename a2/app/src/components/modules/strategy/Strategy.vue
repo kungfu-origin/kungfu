@@ -11,10 +11,7 @@ import {
     FormOutlined,
 } from '@ant-design/icons-vue';
 
-import {
-    KfExtOriginConfig,
-    SetKfConfigPayload,
-} from '@kungfu-trader/kungfu-js-api/typings';
+import { KfCategoryTypes } from '@kungfu-trader/kungfu-js-api/typings/enums';
 
 import {
     useTableSearchKeyword,
@@ -48,15 +45,15 @@ const { dashboardBodyHeight, dashboardBodyWidth, handleBodySizeChange } =
     useDashboardBodySize();
 
 const setStrategyModalVisible = ref<boolean>(false);
-const setStrategyConfigPayload = ref<SetKfConfigPayload>({
+const setStrategyConfigPayload = ref<KungfuApi.SetKfConfigPayload>({
     type: 'add',
     title: '策略',
-    config: {} as KfExtOriginConfig['config'][KfCategoryTypes],
+    config: {} as KungfuApi.KfExtOriginConfig['config'][KfCategoryTypes],
 });
 
 const { strategy } = toRefs(useAllKfConfigData());
 const strategyIdList = computed(() => {
-    return strategy.value.map((item: KfConfig): string => item.name);
+    return strategy.value.map((item: KungfuApi.KfConfig): string => item.name);
 });
 
 const { dealRowClassName, customRow } = useCurrentGlobalKfLocation(
@@ -68,17 +65,18 @@ const { allProcessOnline, handleSwitchAllProcessStatus } = useSwitchAllConfig(
     strategy,
     processStatusData,
 );
-const { searchKeyword, tableData } = useTableSearchKeyword<KfConfig>(strategy, [
-    'name',
-]);
+const { searchKeyword, tableData } = useTableSearchKeyword<KungfuApi.KfConfig>(
+    strategy,
+    ['name'],
+);
 const { getAssetsByKfConfig } = useAssets();
 
 const { handleConfirmAddUpdateKfConfig, handleRemoveKfConfig } =
     useAddUpdateRemoveKfConfig();
 
 function handleOpenSetStrategyDialog(
-    type: ModalChangeType,
-    strategyConfig?: KfConfig,
+    type: KungfuApi.ModalChangeType,
+    strategyConfig?: KungfuApi.KfConfig,
 ) {
     setStrategyConfigPayload.value.type = type;
     setStrategyConfigPayload.value.config = {
@@ -112,12 +110,12 @@ function handleOpenSetStrategyDialog(
     setStrategyModalVisible.value = true;
 }
 
-function getStrategyPathShowName(kfConfig: KfConfig): string {
+function getStrategyPathShowName(kfConfig: KungfuApi.KfConfig): string {
     const strategyPath = getConfigValue(kfConfig).strategy_path || '';
     return path.basename(strategyPath);
 }
 
-function handleOpenFile(kfConfig: KfConfig) {
+function handleOpenFile(kfConfig: KungfuApi.KfConfig) {
     const strategyPath = getConfigValue(kfConfig).strategy_path || '';
     shell.openPath(strategyPath);
 }
@@ -166,7 +164,7 @@ function handleOpenFile(kfConfig: KfConfig) {
                         record,
                     }: {
                         column: AntTableColumn,
-                        record: KfConfig,
+                        record: KungfuApi.KfConfig,
                     }"
                 >
                     <template v-if="column.dataIndex === 'strategyFile'">

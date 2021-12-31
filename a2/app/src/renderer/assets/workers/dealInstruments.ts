@@ -14,8 +14,8 @@ function isBufferGBK(bufferFrom: Buffer) {
 }
 
 const resolveInstruments = (
-    instruments: Instrument[],
-): InstrumentResolved[] => {
+    instruments: KungfuApi.Instrument[],
+): KungfuApi.InstrumentResolved[] => {
     return (instruments || []).map((item) => {
         const {
             instrument_id,

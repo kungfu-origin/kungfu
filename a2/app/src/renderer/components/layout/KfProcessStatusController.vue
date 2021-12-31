@@ -20,7 +20,7 @@ import {
     getPropertyFromProcessStatusDetailDataByKfLocation,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { handleSwitchProcessStatus } from '@renderer/assets/methods/actionsUtils';
-import { useGlobalStore } from '@renderer/pages/index/store/global';
+import { KfCategoryTypes } from '@kungfu-trader/kungfu-js-api/typings/enums';
 
 const processControllerBoardVisible = ref<boolean>(false);
 const categoryList: KfCategoryTypes[] = ['system', 'td', 'md', 'strategy'];

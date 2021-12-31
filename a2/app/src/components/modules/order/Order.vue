@@ -43,21 +43,20 @@ import {
 } from '@kungfu-trader/kungfu-js-api/kungfu';
 import type { Dayjs } from 'dayjs';
 import { UnfinishedOrderStatus } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
-import { OrderStatusEnum } from '@kungfu-trader/kungfu-js-api/typings';
+import { OrderStatusEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import { message, Modal } from 'ant-design-vue';
 
 const app = getCurrentInstance();
 
-const orders = ref<Order[]>([]);
-const { searchKeyword, tableData } = useTableSearchKeyword<Order>(orders, [
-    'order_id',
-    'instrument_id',
-    'exchange_id',
-]);
+const orders = ref<KungfuApi.Order[]>([]);
+const { searchKeyword, tableData } = useTableSearchKeyword<KungfuApi.Order>(
+    orders,
+    ['order_id', 'instrument_id', 'exchange_id'],
+);
 const unfinishedOrder = ref<boolean>(false);
 const historyDate = ref<Dayjs>();
 const historyDataLoading = ref<boolean>();
-var Ledger: TradingData | undefined = window.watcher?.ledger;
+var Ledger: KungfuApi.TradingData | undefined = window.watcher?.ledger;
 
 const { currentGlobalKfLocation, currentCategoryData } =
     useCurrentGlobalKfLocation(window.watcher);
@@ -75,34 +74,38 @@ const columns = computed(() => {
 
 onMounted(() => {
     if (app?.proxy) {
-        app.proxy.$tradingDataSubject.subscribe((watcher: Watcher) => {
-            if (historyDate.value) {
-                return;
-            }
+        app.proxy.$tradingDataSubject.subscribe(
+            (watcher: KungfuApi.Watcher) => {
+                if (historyDate.value) {
+                    return;
+                }
 
-            if (currentGlobalKfLocation.value === null) {
-                return;
-            }
+                if (currentGlobalKfLocation.value === null) {
+                    return;
+                }
 
-            Ledger = watcher.ledger;
-            const ordersResolved = (dealTradingData(
-                watcher,
-                Ledger,
-                'Order',
-                currentGlobalKfLocation.value,
-            ) || []) as Order[];
+                Ledger = watcher.ledger;
+                const ordersResolved = (dealTradingData(
+                    watcher,
+                    Ledger,
+                    'Order',
+                    currentGlobalKfLocation.value,
+                ) || []) as KungfuApi.Order[];
 
-            if (unfinishedOrder.value) {
-                orders.value = toRaw(
-                    ordersResolved
-                        .slice(0, 100)
-                        .filter((item) => !isFinishedOrderStatus(item.status)),
-                );
-                return;
-            }
+                if (unfinishedOrder.value) {
+                    orders.value = toRaw(
+                        ordersResolved
+                            .slice(0, 100)
+                            .filter(
+                                (item) => !isFinishedOrderStatus(item.status),
+                            ),
+                    );
+                    return;
+                }
 
-            orders.value = toRaw(ordersResolved.slice(0, 100));
-        });
+                orders.value = toRaw(ordersResolved.slice(0, 100));
+            },
+        );
     }
 });
 
@@ -132,7 +135,7 @@ watch(historyDate, async (newDate) => {
         currentGlobalKfLocation.value,
     );
     Ledger = tradingData;
-    orders.value = toRaw(historyDatas as Order[]);
+    orders.value = toRaw(historyDatas as KungfuApi.Order[]);
     historyDataLoading.value = false;
 });
 
@@ -153,7 +156,7 @@ function dealOrderStatResolved(orderUKey: string): {
     return dealOrderStat(Ledger, orderUKey);
 }
 
-function handleCancelOrder(order: Order): void {
+function handleCancelOrder(order: KungfuApi.Order): void {
     const orderId = order.order_id;
 
     if (!currentGlobalKfLocation.value || !window.watcher) {
@@ -297,7 +300,7 @@ function handleCancelAllOrders(): void {
                         item,
                         column,
                     }: {
-                        item: Order,
+                        item: KungfuApi.Order,
                         column: KfTradingDataTableHeaderConfig,
                     }"
                 >

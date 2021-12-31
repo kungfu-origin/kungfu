@@ -5,10 +5,6 @@ import {
     KfLayoutTargetDirectionClassName,
 } from '@root/src/typings/enums';
 import {
-    KfExtConfigs,
-    BrokerStateStatusTypes,
-} from '@kungfu-trader/kungfu-js-api/typings';
-import {
     getIdByKfLocation,
     getKfExtensionConfig,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
@@ -18,25 +14,29 @@ import {
     Pm2ProcessStatusData,
 } from '@kungfu-trader/kungfu-js-api/utils/processUtils';
 import { getSubscribedInstruments } from '@renderer/assets/methods/actionsUtils';
+import {
+    BrokerStateStatusTypes,
+    KfCategoryTypes,
+} from '@kungfu-trader/kungfu-js-api/typings/enums';
 
 interface GlobalState {
     boardsMap: KfLayout.BoardsMap;
     dragedContentData: KfLayout.ContentData | null;
     isBoardDragging: boolean;
-    extConfigs: KfExtConfigs;
-    tdList: KfConfig[];
-    mdList: KfConfig[];
-    strategyList: KfConfig[];
+    extConfigs: KungfuApi.KfExtConfigs;
+    tdList: KungfuApi.KfConfig[];
+    mdList: KungfuApi.KfConfig[];
+    strategyList: KungfuApi.KfConfig[];
 
     processStatusData: Pm2ProcessStatusData;
     processStatusWithDetail: Pm2ProcessStatusDetailData;
 
     appStates: Record<string, BrokerStateStatusTypes>;
-    assets: Record<string, Asset>;
-    instruments: InstrumentResolved[];
-    subscribedInstruments: InstrumentResolved[];
+    assets: Record<string, KungfuApi.Asset>;
+    instruments: KungfuApi.InstrumentResolved[];
+    subscribedInstruments: KungfuApi.InstrumentResolved[];
 
-    currentGlobalKfLocation: KfLocation | KfConfig | null;
+    currentGlobalKfLocation: KungfuApi.KfLocation | KungfuApi.KfConfig | null;
 }
 
 export const useGlobalStore = defineStore('global', {
@@ -45,7 +45,7 @@ export const useGlobalStore = defineStore('global', {
             boardsMap: {},
             dragedContentData: null,
             isBoardDragging: false,
-            extConfigs: toRaw<KfExtConfigs>({}),
+            extConfigs: toRaw<KungfuApi.KfExtConfigs>({}),
 
             tdList: [],
             mdList: [],
@@ -70,11 +70,13 @@ export const useGlobalStore = defineStore('global', {
             });
         },
 
-        setInstruments(instruments: InstrumentResolved[]) {
+        setInstruments(instruments: KungfuApi.InstrumentResolved[]) {
             this.instruments = toRaw(instruments);
         },
 
-        setCurrentGlobalKfLocation(kfLocation: KfLocation | KfConfig | null) {
+        setCurrentGlobalKfLocation(
+            kfLocation: KungfuApi.KfLocation | KungfuApi.KfConfig | null,
+        ) {
             this.currentGlobalKfLocation = kfLocation;
         },
 
@@ -82,7 +84,7 @@ export const useGlobalStore = defineStore('global', {
             this.appStates = appStates;
         },
 
-        setAssets(assets: Record<string, Asset>) {
+        setAssets(assets: Record<string, KungfuApi.Asset>) {
             this.assets = assets;
         },
 
@@ -133,39 +135,47 @@ export const useGlobalStore = defineStore('global', {
                 return false;
             }
 
-            const categoryToKfConfigsMap: Record<KfCategoryTypes, KfConfig[]> =
-                {
-                    td: this.tdList,
-                    md: this.mdList,
-                    strategy: this.strategyList,
-                    system: [],
-                };
+            const categoryToKfConfigsMap: Record<
+                KfCategoryTypes,
+                KungfuApi.KfConfig[]
+            > = {
+                td: this.tdList,
+                md: this.mdList,
+                strategy: this.strategyList,
+                system: [],
+            };
 
-            const targetKfConfigs: KfConfig[] =
-                categoryToKfConfigsMap[this.currentGlobalKfLocation.category];
+            const targetKfConfigs: KungfuApi.KfConfig[] =
+                categoryToKfConfigsMap[
+                    this.currentGlobalKfLocation.category as KfCategoryTypes
+                ];
             if (!targetKfConfigs || !targetKfConfigs.length) {
                 return false;
             }
 
-            const afterFilter: KfConfig[] = targetKfConfigs.filter((item) => {
-                if (
-                    this.currentGlobalKfLocation &&
-                    getIdByKfLocation(item) ===
-                        getIdByKfLocation(this.currentGlobalKfLocation)
-                ) {
-                    return true;
-                }
+            const afterFilter: KungfuApi.KfConfig[] = targetKfConfigs.filter(
+                (item) => {
+                    if (
+                        this.currentGlobalKfLocation &&
+                        getIdByKfLocation(item) ===
+                            getIdByKfLocation(this.currentGlobalKfLocation)
+                    ) {
+                        return true;
+                    }
 
-                return false;
-            });
+                    return false;
+                },
+            );
 
             return afterFilter.length > 0;
         },
 
         setKfExtConfigs() {
-            return getKfExtensionConfig().then((kfExtConfigs: KfExtConfigs) => {
-                this.extConfigs = toRaw(kfExtConfigs);
-            });
+            return getKfExtensionConfig().then(
+                (kfExtConfigs: KungfuApi.KfExtConfigs) => {
+                    this.extConfigs = toRaw(kfExtConfigs);
+                },
+            );
         },
 
         markIsBoardDragging(status: boolean) {

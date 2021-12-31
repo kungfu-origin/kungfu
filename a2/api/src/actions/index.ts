@@ -1,16 +1,21 @@
 import path from 'path';
 import { getKfAllConfig, removeKfConfig } from '../kungfu/store';
-import { KfCategoryEnum, KfModeEnum } from '../typings';
+import {
+    KfCategoryEnum,
+    KfCategoryTypes,
+    KfModeEnum,
+    KfModeTypes,
+} from '../typings/enums';
 import { KF_RUNTIME_DIR, LOG_DIR } from '../config/pathConfig';
 import { pathExists, remove } from 'fs-extra';
 import { getProcessIdByKfLocation } from '../utils/busiUtils';
 
 export const getAllKfConfigOriginData = (): Promise<
-    Record<KfCategoryTypes, KfConfig[]>
+    Record<KfCategoryTypes, KungfuApi.KfConfig[]>
 > => {
-    return getKfAllConfig().then((allConfig: KfConfigOrigin[]) => {
+    return getKfAllConfig().then((allConfig: KungfuApi.KfConfigOrigin[]) => {
         const allConfigResolved = allConfig.map(
-            (config: KfConfigOrigin): KfConfig => {
+            (config: KungfuApi.KfConfigOrigin): KungfuApi.KfConfig => {
                 return {
                     ...config,
                     category: KfCategoryEnum[
@@ -22,16 +27,16 @@ export const getAllKfConfigOriginData = (): Promise<
         );
 
         return {
-            md: allConfigResolved.filter((config: KfConfig) => {
+            md: allConfigResolved.filter((config: KungfuApi.KfConfig) => {
                 return config.category === 'md';
             }),
-            td: allConfigResolved.filter((config: KfConfig) => {
+            td: allConfigResolved.filter((config: KungfuApi.KfConfig) => {
                 return config.category === 'td';
             }),
-            strategy: allConfigResolved.filter((config: KfConfig) => {
+            strategy: allConfigResolved.filter((config: KungfuApi.KfConfig) => {
                 return config.category === 'strategy';
             }),
-            system: allConfigResolved.filter((config: KfConfig) => {
+            system: allConfigResolved.filter((config: KungfuApi.KfConfig) => {
                 return config.category === 'system';
             }),
         };
@@ -39,14 +44,14 @@ export const getAllKfConfigOriginData = (): Promise<
 };
 
 export const deleteAllByKfLocation = (
-    kfLocation: KfLocation,
+    kfLocation: KungfuApi.KfLocation,
 ): Promise<void> => {
     return removeKfConfig(kfLocation)
         .then(() => removeKfLocation(kfLocation))
         .then(() => removeLog(kfLocation));
 };
 
-function removeKfLocation(kfLocation: KfLocation): Promise<void> {
+function removeKfLocation(kfLocation: KungfuApi.KfLocation): Promise<void> {
     const targetDir = path.resolve(
         KF_RUNTIME_DIR,
         kfLocation.category,
@@ -63,7 +68,7 @@ function removeKfLocation(kfLocation: KfLocation): Promise<void> {
     });
 }
 
-function removeLog(kfLocation: KfLocation): Promise<void> {
+function removeLog(kfLocation: KungfuApi.KfLocation): Promise<void> {
     const logPath = path.resolve(
         LOG_DIR,
         `${getProcessIdByKfLocation(kfLocation)}.log`,

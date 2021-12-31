@@ -1,8 +1,9 @@
 const isEnglish = false;
 
 import {
-    KfTradeValueCommonData,
     InstrumentTypeEnum,
+    InstrumentTypes,
+    ProcessStatusTypes,
     HedgeFlagEnum,
     PriceTypeEnum,
     VolumeConditionEnum,
@@ -12,17 +13,15 @@ import {
     SideEnum,
     DirectionEnum,
     KfCategoryEnum,
-    ProcessStatusTypes,
-    BrokerStateStatusTypes,
     OrderStatusEnum,
-    InstrumentTypes,
-} from '../typings';
+    BrokerStateStatusTypes,
+} from '../typings/enums';
 
 import { Pm2ProcessStatusTypes } from '../utils/processUtils';
 
 export const Pm2ProcessStatus: Record<
     Pm2ProcessStatusTypes,
-    KfTradeValueCommonData
+    KungfuApi.KfTradeValueCommonData
 > = {
     ['online']: {
         name: isEnglish ? 'Running' : '运行中',
@@ -63,7 +62,7 @@ export const Pm2ProcessStatus: Record<
 
 export const BrokerStateStatus: Record<
     BrokerStateStatusTypes,
-    KfTradeValueCommonData
+    KungfuApi.KfTradeValueCommonData
 > = {
     ['Pending']: {
         name: isEnglish ? 'Pending' : '等待中',
@@ -104,13 +103,16 @@ export const BrokerStateStatus: Record<
 
 export const AppStateStatus: Record<
     ProcessStatusTypes,
-    KfTradeValueCommonData
+    KungfuApi.KfTradeValueCommonData
 > = {
     ...Pm2ProcessStatus,
     ...BrokerStateStatus,
 };
 
-export const KfCategory: Record<KfCategoryEnum, KfTradeValueCommonData> = {
+export const KfCategory: Record<
+    KfCategoryEnum,
+    KungfuApi.KfTradeValueCommonData
+> = {
     [KfCategoryEnum.system]: {
         name: isEnglish ? 'System' : '系统服务',
         color: 'red',
@@ -133,7 +135,7 @@ export const KfCategory: Record<KfCategoryEnum, KfTradeValueCommonData> = {
     },
 };
 
-export const Offset: Record<OffsetEnum, KfTradeValueCommonData> = {
+export const Offset: Record<OffsetEnum, KungfuApi.KfTradeValueCommonData> = {
     [OffsetEnum.Open]: { name: isEnglish ? 'Open' : '开', color: 'red' },
     [OffsetEnum.Close]: { name: isEnglish ? 'Close' : '平', color: 'green' },
     [OffsetEnum.CloseToday]: {
@@ -146,7 +148,7 @@ export const Offset: Record<OffsetEnum, KfTradeValueCommonData> = {
     },
 };
 
-export const Side: Record<SideEnum, KfTradeValueCommonData> = {
+export const Side: Record<SideEnum, KungfuApi.KfTradeValueCommonData> = {
     [SideEnum.Buy]: { name: isEnglish ? 'Buy' : '买', color: 'red' },
     [SideEnum.Sell]: { name: isEnglish ? 'Sell' : '卖', color: 'green' },
     [SideEnum.Lock]: { name: isEnglish ? 'Lock' : '锁仓', color: 'orange' },
@@ -201,7 +203,10 @@ export const Side: Record<SideEnum, KfTradeValueCommonData> = {
     },
 };
 
-export const OrderStatus: Record<OrderStatusEnum, KfTradeValueCommonData> = {
+export const OrderStatus: Record<
+    OrderStatusEnum,
+    KungfuApi.KfTradeValueCommonData
+> = {
     [OrderStatusEnum.Unknown]: {
         name: isEnglish ? 'Unknown' : '未知',
         color: 'default',
@@ -246,12 +251,18 @@ export const UnfinishedOrderStatus = [
     OrderStatusEnum.PartialFilledActive,
 ];
 
-export const Direction: Record<DirectionEnum, KfTradeValueCommonData> = {
+export const Direction: Record<
+    DirectionEnum,
+    KungfuApi.KfTradeValueCommonData
+> = {
     [DirectionEnum.Long]: { name: isEnglish ? 'Long' : '多', color: 'red' },
     [DirectionEnum.Short]: { name: isEnglish ? 'Short' : '空', color: 'green' },
 };
 
-export const PriceType: Record<PriceTypeEnum, KfTradeValueCommonData> = {
+export const PriceType: Record<
+    PriceTypeEnum,
+    KungfuApi.KfTradeValueCommonData
+> = {
     [PriceTypeEnum.Limit]: { name: isEnglish ? 'Limit' : '[Limit] 限价' },
     [PriceTypeEnum.Market]: { name: isEnglish ? 'Market' : '[Any] 市价' },
     [PriceTypeEnum.FakBest5]: {
@@ -278,7 +289,10 @@ export const PriceType: Record<PriceTypeEnum, KfTradeValueCommonData> = {
     [PriceTypeEnum.Unknown]: { name: isEnglish ? 'UnKnown' : '未知' },
 };
 
-export const HedgeFlag: Record<HedgeFlagEnum, KfTradeValueCommonData> = {
+export const HedgeFlag: Record<
+    HedgeFlagEnum,
+    KungfuApi.KfTradeValueCommonData
+> = {
     [HedgeFlagEnum.Speculation]: { name: isEnglish ? 'Speculation' : '投机' },
     [HedgeFlagEnum.Arbitrage]: { name: isEnglish ? 'Arbitrage' : '套利' },
     [HedgeFlagEnum.Hedge]: { name: isEnglish ? 'Hedge' : '套保' },
@@ -287,23 +301,25 @@ export const HedgeFlag: Record<HedgeFlagEnum, KfTradeValueCommonData> = {
 
 export const VolumeCondition: Record<
     VolumeConditionEnum,
-    KfTradeValueCommonData
+    KungfuApi.KfTradeValueCommonData
 > = {
     [VolumeConditionEnum.Any]: { name: isEnglish ? 'Any' : '任意' },
     [VolumeConditionEnum.Min]: { name: isEnglish ? 'Min' : '最小' },
     [VolumeConditionEnum.All]: { name: isEnglish ? 'All' : '全部' },
 };
 
-export const TimeCondition: Record<TimeConditionEnum, KfTradeValueCommonData> =
-    {
-        [TimeConditionEnum.IOC]: { name: isEnglish ? 'IOC' : 'IOC' },
-        [TimeConditionEnum.GFD]: { name: isEnglish ? 'GFD' : 'GFD' },
-        [TimeConditionEnum.GTC]: { name: isEnglish ? 'GTC' : 'GTC' },
-    };
+export const TimeCondition: Record<
+    TimeConditionEnum,
+    KungfuApi.KfTradeValueCommonData
+> = {
+    [TimeConditionEnum.IOC]: { name: isEnglish ? 'IOC' : 'IOC' },
+    [TimeConditionEnum.GFD]: { name: isEnglish ? 'GFD' : 'GFD' },
+    [TimeConditionEnum.GTC]: { name: isEnglish ? 'GTC' : 'GTC' },
+};
 
 export const CommissionMode: Record<
     CommissionModeEnum,
-    KfTradeValueCommonData
+    KungfuApi.KfTradeValueCommonData
 > = {
     [CommissionModeEnum.ByAmount]: { name: isEnglish ? 'ByAmount' : '按金额' },
     [CommissionModeEnum.ByVolume]: { name: isEnglish ? 'ByVolume' : '按手数' },
@@ -311,7 +327,7 @@ export const CommissionMode: Record<
 
 export const InstrumentType: Record<
     InstrumentTypeEnum,
-    KfTradeValueCommonData
+    KungfuApi.KfTradeValueCommonData
 > = {
     [InstrumentTypeEnum.unknown]: {
         name: isEnglish ? 'Unknown' : '未知',
@@ -370,7 +386,6 @@ export const InstrumentType: Record<
 };
 
 export const ShotableInstrumentTypes = [
-    InstrumentTypeEnum.unknown,
     InstrumentTypeEnum.future,
     InstrumentTypeEnum.stockoption,
     InstrumentTypeEnum.cryptofuture,
@@ -424,7 +439,7 @@ export const AbleSubscribeInstrumentTypesBySourceType: Record<
     ],
 };
 
-export const ExchangeIds: Record<string, KfTradeValueCommonData> = {
+export const ExchangeIds: Record<string, KungfuApi.KfTradeValueCommonData> = {
     SSE: {
         name: isEnglish ? 'SSE' : '上交所',
         color: InstrumentType[InstrumentTypeEnum.stock].color,
@@ -459,7 +474,10 @@ export const ExchangeIds: Record<string, KfTradeValueCommonData> = {
     },
 };
 
-export const SystemProcessName: Record<string, KfTradeValueCommonData> = {
+export const SystemProcessName: Record<
+    string,
+    KungfuApi.KfTradeValueCommonData
+> = {
     master: { name: '主控进程' },
     ledger: { name: '计算服务' },
     archive: { name: '归档服务' },

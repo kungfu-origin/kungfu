@@ -11,6 +11,7 @@ import {
     onMounted,
     toRefs,
     toRaw,
+    nextTick,
 } from 'vue';
 import {
     APP_DIR,
@@ -38,19 +39,10 @@ import {
     InstrumentType,
     Offset,
     PriceType,
+    Side,
     TimeCondition,
     VolumeCondition,
 } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
-import {
-    InstrumentTypes,
-    KfConfigValue,
-    KfExtConfigs,
-    KfTradeValueCommonData,
-    AntInKungfuColorTypes,
-    BrokerStateStatusTypes,
-    ProcessStatusTypes,
-    KfConfigItem,
-} from '@kungfu-trader/kungfu-js-api/typings';
 
 import {
     Pm2ProcessStatusData,
@@ -62,6 +54,14 @@ import { ipcRenderer } from 'electron';
 import { message } from 'ant-design-vue';
 import dayjs from 'dayjs';
 import { kfRequestMarketData } from '@kungfu-trader/kungfu-js-api/kungfu';
+import {
+    InstrumentTypes,
+    BrokerStateStatusTypes,
+    KfCategoryTypes,
+    ProcessStatusTypes,
+    InstrumentTypeEnum,
+} from '@kungfu-trader/kungfu-js-api/typings/enums';
+import { callbackify } from 'util';
 
 export interface KfUIComponent {
     name: string;
@@ -158,9 +158,9 @@ export const useTableSearchKeyword = <T>(
 };
 
 export const initFormStateByConfig = (
-    configSettings: KfConfigItem[],
-    initValue?: Record<string, KfConfigValue>,
-): Record<string, KfConfigValue> => {
+    configSettings: KungfuApi.KfConfigItem[],
+    initValue?: Record<string, KungfuApi.KfConfigValue>,
+): Record<string, KungfuApi.KfConfigValue> => {
     if (!configSettings) return {};
 
     const booleanType = ['bool'];
@@ -178,7 +178,7 @@ export const initFormStateByConfig = (
         'commissionMode', // select - number
         'instrumentType', // select - number
     ];
-    const formState: Record<string, KfConfigValue> = {};
+    const formState: Record<string, KungfuApi.KfConfigValue> = {};
     configSettings.forEach((item) => {
         const type = item.type;
         const isBoolean = booleanType.includes(type);
@@ -200,7 +200,7 @@ export const initFormStateByConfig = (
 
 export const numberEnumRadioType: Record<
     string,
-    Record<number, KfTradeValueCommonData>
+    Record<number, KungfuApi.KfTradeValueCommonData>
 > = {
     offset: Offset,
     hedgeFlag: HedgeFlag,
@@ -212,16 +212,16 @@ export const numberEnumRadioType: Record<
 
 export const numberEnumSelectType: Record<
     string,
-    Record<number, KfTradeValueCommonData>
+    Record<number, KungfuApi.KfTradeValueCommonData>
 > = {
-    // side: Side,
+    side: Side,
     priceType: PriceType,
     instrumentType: InstrumentType,
 };
 
 export const stringEnumSelectType: Record<
     string,
-    Record<string, KfTradeValueCommonData>
+    Record<string, KungfuApi.KfTradeValueCommonData>
 > = {
     exchange: ExchangeIds,
 };
@@ -247,17 +247,17 @@ export const beforeStartAll = (): Promise<void> => {
 
 export const getInstrumentTypeColor = (
     type: InstrumentTypes,
-): AntInKungfuColorTypes => {
+): KungfuApi.AntInKungfuColorTypes => {
     return getInstrumentTypeData(type).color || 'default';
 };
 
 export const useExtConfigsRelated = (): {
-    extConfigs: { value: KfExtConfigs };
+    extConfigs: { value: KungfuApi.KfExtConfigs };
     extTypeMap: ComputedRef<Record<string, InstrumentTypes>>;
     mdExtTypeMap: ComputedRef<Record<string, InstrumentTypes>>;
 } => {
     const app = getCurrentInstance();
-    const extConfigs = reactive<{ value: KfExtConfigs }>({
+    const extConfigs = reactive<{ value: KungfuApi.KfExtConfigs }>({
         value: {},
     });
     const extTypeMap = computed(() => buildExtTypeMap(extConfigs.value, 'td'));
@@ -268,7 +268,7 @@ export const useExtConfigsRelated = (): {
     onMounted(() => {
         if (app?.proxy) {
             const store = storeToRefs(app?.proxy.$useGlobalStore());
-            extConfigs.value = store.extConfigs as KfExtConfigs;
+            extConfigs.value = store.extConfigs as KungfuApi.KfExtConfigs;
         }
     });
 
@@ -284,7 +284,7 @@ export const useProcessStatusDetailData = (): {
     processStatusDetailData: Ref<Pm2ProcessStatusDetailData>;
     appStates: Ref<Record<string, BrokerStateStatusTypes>>;
     getProcessStatusName(
-        kfConfig: KfConfig | KfLocation,
+        kfConfig: KungfuApi.KfConfig | KungfuApi.KfLocation,
     ): ProcessStatusTypes | undefined;
 } => {
     const app = getCurrentInstance();
@@ -313,7 +313,9 @@ export const useProcessStatusDetailData = (): {
         }
     });
 
-    const getProcessStatusName = (kfConfig: KfConfig | KfLocation) => {
+    const getProcessStatusName = (
+        kfConfig: KungfuApi.KfConfig | KungfuApi.KfLocation,
+    ) => {
         return getAppStateStatusName(
             kfConfig,
             allProcessStatusData.processStatusData,
@@ -332,44 +334,48 @@ export const useProcessStatusDetailData = (): {
     };
 };
 
-export const useAllKfConfigData = (): Record<KfCategoryTypes, KfConfig[]> => {
+export const useAllKfConfigData = (): Record<
+    KfCategoryTypes,
+    KungfuApi.KfConfig[]
+> => {
     const app = getCurrentInstance();
-    const allKfConfigData: Record<KfCategoryTypes, KfConfig[]> = reactive({
-        system: ref<KfConfig[]>([
-            ...(process.env.NODE_ENV === 'development'
-                ? ([
-                      {
-                          location_uid: 0,
-                          category: 'system',
-                          group: 'service',
-                          name: 'archive',
-                          mode: 'live',
-                          value: '',
-                      },
-                  ] as KfConfig[])
-                : []),
-            {
-                location_uid: 0,
-                category: 'system',
-                group: 'master',
-                name: 'master',
-                mode: 'live',
-                value: '',
-            },
-            {
-                location_uid: 0,
-                category: 'system',
-                group: 'service',
-                name: 'ledger',
-                mode: 'live',
-                value: '',
-            },
-        ]),
+    const allKfConfigData: Record<KfCategoryTypes, KungfuApi.KfConfig[]> =
+        reactive({
+            system: ref<KungfuApi.KfConfig[]>([
+                ...(process.env.NODE_ENV === 'development'
+                    ? ([
+                          {
+                              location_uid: 0,
+                              category: 'system',
+                              group: 'service',
+                              name: 'archive',
+                              mode: 'live',
+                              value: '',
+                          },
+                      ] as KungfuApi.KfConfig[])
+                    : []),
+                {
+                    location_uid: 0,
+                    category: 'system',
+                    group: 'master',
+                    name: 'master',
+                    mode: 'live',
+                    value: '',
+                },
+                {
+                    location_uid: 0,
+                    category: 'system',
+                    group: 'service',
+                    name: 'ledger',
+                    mode: 'live',
+                    value: '',
+                },
+            ]),
 
-        md: [],
-        td: [],
-        strategy: [],
-    });
+            md: [],
+            td: [],
+            strategy: [],
+        });
 
     onMounted(() => {
         if (app?.proxy) {
@@ -377,9 +383,9 @@ export const useAllKfConfigData = (): Record<KfCategoryTypes, KfConfig[]> => {
                 app?.proxy.$useGlobalStore(),
             );
 
-            allKfConfigData.md = mdList as KfConfig[];
-            allKfConfigData.td = tdList as KfConfig[];
-            allKfConfigData.strategy = strategyList as KfConfig[];
+            allKfConfigData.md = mdList as KungfuApi.KfConfig[];
+            allKfConfigData.td = tdList as KungfuApi.KfConfig[];
+            allKfConfigData.strategy = strategyList as KungfuApi.KfConfig[];
         }
     });
 
@@ -387,22 +393,22 @@ export const useAllKfConfigData = (): Record<KfCategoryTypes, KfConfig[]> => {
 };
 
 export const useCurrentGlobalKfLocation = (
-    watcher: Watcher | null,
+    watcher: KungfuApi.Watcher | null,
 ): {
     currentGlobalKfLocation: {
-        value: KfConfig | KfLocation | null;
+        value: KungfuApi.KfConfig | KungfuApi.KfLocation | null;
     };
-    currentCategoryData: ComputedRef<KfTradeValueCommonData | null>;
+    currentCategoryData: ComputedRef<KungfuApi.KfTradeValueCommonData | null>;
     currentUID: ComputedRef<string>;
-    setCurrentGlobalKfLocation(kfConfig: KfConfig): void;
-    dealRowClassName(kfConfig: KfConfig): string;
-    customRow(kfConfig: KfConfig): {
+    setCurrentGlobalKfLocation(kfConfig: KungfuApi.KfConfig): void;
+    dealRowClassName(kfConfig: KungfuApi.KfConfig): string;
+    customRow(kfConfig: KungfuApi.KfConfig): {
         onClick(): void;
     };
 } => {
     const app = getCurrentInstance();
     const currentKfLocation = reactive<{
-        value: KfConfig | KfLocation | null;
+        value: KungfuApi.KfConfig | KungfuApi.KfLocation | null;
     }>({
         value: null,
     });
@@ -414,13 +420,13 @@ export const useCurrentGlobalKfLocation = (
             );
 
             currentKfLocation.value = currentGlobalKfLocation as
-                | KfConfig
-                | KfLocation
+                | KungfuApi.KfConfig
+                | KungfuApi.KfLocation
                 | null;
         }
     });
 
-    const setCurrentGlobalKfLocation = (kfLocation: KfConfig) => {
+    const setCurrentGlobalKfLocation = (kfLocation: KungfuApi.KfConfig) => {
         if (app?.proxy) {
             app?.proxy
                 ?.$useGlobalStore()
@@ -428,7 +434,7 @@ export const useCurrentGlobalKfLocation = (
         }
     };
 
-    const dealRowClassName = (record: KfConfig): string => {
+    const dealRowClassName = (record: KungfuApi.KfConfig): string => {
         if (currentKfLocation.value === null) return '';
         if (
             getIdByKfLocation(record) ===
@@ -440,7 +446,7 @@ export const useCurrentGlobalKfLocation = (
         return '';
     };
 
-    const customRow = (record: KfConfig) => {
+    const customRow = (record: KungfuApi.KfConfig) => {
         return {
             onClick: () => {
                 setCurrentGlobalKfLocation(record);
@@ -592,7 +598,7 @@ export const markClearJournal = (): void => {
 };
 
 export const handleOpenLogview = (
-    config: KfConfig,
+    config: KungfuApi.KfConfig,
 ): Promise<Electron.BrowserWindow> => {
     const hideloading = message.loading('正在打开窗口');
     return openLogView(getProcessIdByKfLocation(config)).finally(() => {
@@ -633,14 +639,16 @@ export const useDashboardBodySize = (): {
 };
 
 export const useAssets = (): {
-    assets: { value: Record<string, Asset> };
+    assets: { value: Record<string, KungfuApi.Asset> };
     getAssetsByKfConfig(
-        kfLocation: KfLocation,
-    ): Asset | Record<string, unknown>;
+        kfLocation: KungfuApi.KfLocation,
+    ): KungfuApi.Asset | Record<string, unknown>;
 } => {
-    const assetsResolved = reactive<{ value: Record<string, Asset> }>({
-        value: {},
-    });
+    const assetsResolved = reactive<{ value: Record<string, KungfuApi.Asset> }>(
+        {
+            value: {},
+        },
+    );
 
     const app = getCurrentInstance();
 
@@ -651,7 +659,9 @@ export const useAssets = (): {
         }
     });
 
-    const getAssetsByKfConfig = (kfConfig: KfConfig | KfLocation) => {
+    const getAssetsByKfConfig = (
+        kfConfig: KungfuApi.KfConfig | KungfuApi.KfLocation,
+    ) => {
         const processId = getProcessIdByKfLocation(kfConfig);
         return assetsResolved.value[processId] || {};
     };
@@ -662,22 +672,22 @@ export const useAssets = (): {
     };
 };
 
-export const getKfLocationUID = (kfConfig: KfConfig): string => {
+export const getKfLocationUID = (kfConfig: KungfuApi.KfConfig): string => {
     if (!window.watcher) return '';
     return window.watcher?.getLocationUID(kfConfig);
 };
 
 export const useDownloadHistoryTradingData = (): {
     handleDownload: (
-        tradingDataType: TradingDataTypeName | 'all',
-        currentKfLocation: KfLocation | KfConfig | null,
+        tradingDataType: KungfuApi.TradingDataTypeName | 'all',
+        currentKfLocation: KungfuApi.KfLocation | KungfuApi.KfConfig | null,
     ) => void;
 } => {
     const app = getCurrentInstance();
 
     const handleDownload = (
-        tradingDataType: TradingDataTypeName | 'all',
-        currentKfLocation: KfLocation | KfConfig | null,
+        tradingDataType: KungfuApi.TradingDataTypeName | 'all',
+        currentKfLocation: KungfuApi.KfLocation | KungfuApi.KfConfig | null,
     ): void => {
         if (!currentKfLocation) {
             return;
@@ -698,7 +708,7 @@ export const useDownloadHistoryTradingData = (): {
 };
 
 export const getIfSaveInstruments = (
-    newInstruments: Instrument[],
+    newInstruments: KungfuApi.Instrument[],
     oldInstrumentsLength: number,
 ): boolean => {
     if (
@@ -719,29 +729,42 @@ export const getIfSaveInstruments = (
 };
 
 export const useInstruments = (): {
-    instruments: { value: InstrumentResolved[] };
-    subscribedInstruments: { value: InstrumentResolved[] };
+    instruments: { value: KungfuApi.InstrumentResolved[] };
+    subscribedInstruments: { value: KungfuApi.InstrumentResolved[] };
     subscribeAllInstrumentByMdProcessId(
         processId: string,
         processStatus: Pm2ProcessStatusData,
         appStates: Record<string, BrokerStateStatusTypes>,
         mdExtTypeMap: Record<string, InstrumentTypes>,
-        instrumentsForSubscribe: InstrumentResolved[],
+        instrumentsForSubscribe: KungfuApi.InstrumentResolved[],
     ): void;
     subscribeAllInstrumentByAppStates(
         processStatus: Pm2ProcessStatusData,
         appStates: Record<string, BrokerStateStatusTypes>,
         mdExtTypeMap: Record<string, InstrumentTypes>,
-        instrumentsForSubscribe: InstrumentResolved[],
+        instrumentsForSubscribe: KungfuApi.InstrumentResolved[],
     ): void;
+
+    searchInstrumentResult: Ref<string | undefined>;
+    searchInstrumnetOptions: Ref<{ value: string; label: string }[]>;
+    transformSearchInstrumentResultToInstrument(
+        instrument: string,
+    ): KungfuApi.InstrumentResolved | null;
+    handleSearchInstrument: (value: string) => void;
+    handleConfirmSearchInstrumentResult: (
+        value: string,
+        callback?: (value: string) => void,
+    ) => void;
 } => {
     const app = getCurrentInstance();
-    const instrumentsResolved = reactive<{ value: InstrumentResolved[] }>({
+    const instrumentsResolved = reactive<{
+        value: KungfuApi.InstrumentResolved[];
+    }>({
         value: [],
     });
 
     const subscribedInstrumentsResolved = reactive<{
-        value: InstrumentResolved[];
+        value: KungfuApi.InstrumentResolved[];
     }>({
         value: [],
     });
@@ -751,9 +774,10 @@ export const useInstruments = (): {
             const { instruments, subscribedInstruments } = storeToRefs(
                 app?.proxy.$useGlobalStore(),
             );
-            instrumentsResolved.value = instruments as InstrumentResolved[];
+            instrumentsResolved.value =
+                instruments as KungfuApi.InstrumentResolved[];
             subscribedInstrumentsResolved.value =
-                subscribedInstruments as InstrumentResolved[];
+                subscribedInstruments as KungfuApi.InstrumentResolved[];
         }
     });
 
@@ -762,7 +786,7 @@ export const useInstruments = (): {
         processStatus: Pm2ProcessStatusData,
         appStates: Record<string, BrokerStateStatusTypes>,
         mdExtTypeMap: Record<string, InstrumentTypes>,
-        instrumentsForSubscribe: InstrumentResolved[],
+        instrumentsForSubscribe: KungfuApi.InstrumentResolved[],
     ): void => {
         if (appStates[processId] === 'Ready') {
             if (processStatus[processId] === 'online') {
@@ -800,7 +824,7 @@ export const useInstruments = (): {
         processStatus: Pm2ProcessStatusData,
         appStates: Record<string, BrokerStateStatusTypes>,
         mdExtTypeMap: Record<string, InstrumentTypes>,
-        instrumentsForSubscribe: InstrumentResolved[],
+        instrumentsForSubscribe: KungfuApi.InstrumentResolved[],
     ) => {
         Object.keys(appStates || {}).forEach((processId) => {
             subscribeAllInstrumentByMdProcessId(
@@ -813,45 +837,101 @@ export const useInstruments = (): {
         });
     };
 
+    const searchInstrumentResult = ref<string | undefined>(undefined);
+    const searchInstrumnetOptions = ref<{ value: string; label: string }[]>([]);
+
+    const handleSearchInstrument = (val: string): void => {
+        searchInstrumnetOptions.value = instrumentsResolved.value
+            .filter((item) => {
+                return item.id.includes(val);
+            })
+            .slice(0, 20)
+            .map((item) => ({
+                value: `${item.exchangeId}_${item.instrumentId}_${item.instrumentType}_${item.ukey}_${item.instrumentName}`,
+                label: `${item.instrumentId} ${item.instrumentName} ${
+                    ExchangeIds[item.exchangeId.toUpperCase()].name
+                }`,
+            }));
+    };
+
+    const handleConfirmSearchInstrumentResult = (
+        value: string,
+        callback?: (value: string) => void,
+    ) => {
+        nextTick().then(() => {
+            searchInstrumentResult.value = undefined;
+        });
+        callback && callback(value);
+    };
+
+    const transformSearchInstrumentResultToInstrument = (
+        instrumentStr: string,
+    ): KungfuApi.InstrumentResolved | null => {
+        const pair = instrumentStr.split('_');
+        if (pair.length !== 5) return null;
+        const [exchangeId, instrumentId, instrumentType, ukey, instrumentName] =
+            pair;
+        return {
+            exchangeId,
+            instrumentId,
+            instrumentType: +instrumentType as InstrumentTypeEnum,
+            instrumentName,
+            id: `${instrumentId}_${instrumentName}_${exchangeId}`.toLowerCase(),
+            ukey,
+        };
+    };
+
     return {
         instruments: instrumentsResolved,
         subscribedInstruments: subscribedInstrumentsResolved,
         subscribeAllInstrumentByMdProcessId,
         subscribeAllInstrumentByAppStates,
+
+        searchInstrumentResult,
+        searchInstrumnetOptions,
+        transformSearchInstrumentResultToInstrument,
+        handleSearchInstrument,
+        handleConfirmSearchInstrumentResult,
     };
 };
 
 export const useQuote = (): {
-    quotes: Ref<Record<string, Quote>>;
+    quotes: Ref<Record<string, KungfuApi.Quote>>;
     getQuoteByInstrument(
-        instrument: InstrumentResolved | undefined,
-    ): Quote | null;
-    getLastPricePercent(instrument: InstrumentResolved | undefined): string;
+        instrument: KungfuApi.InstrumentResolved | undefined,
+    ): KungfuApi.Quote | null;
+    getLastPricePercent(
+        instrument: KungfuApi.InstrumentResolved | undefined,
+    ): string;
 } => {
-    const quotes = ref<Record<string, Quote>>({});
+    const quotes = ref<Record<string, KungfuApi.Quote>>({});
     const app = getCurrentInstance();
 
     onMounted(() => {
         if (app?.proxy) {
-            app.proxy.$tradingDataSubject.subscribe((watcher: Watcher) => {
-                quotes.value = toRaw({ ...watcher.ledger.Quote });
-            });
+            app.proxy.$tradingDataSubject.subscribe(
+                (watcher: KungfuApi.Watcher) => {
+                    quotes.value = toRaw({ ...watcher.ledger.Quote });
+                },
+            );
         }
     });
 
     const getQuoteByInstrument = (
-        instrument: InstrumentResolved | undefined,
-    ): Quote | null => {
+        instrument: KungfuApi.InstrumentResolved | undefined,
+    ): KungfuApi.Quote | null => {
         if (!instrument) {
             return null;
         }
 
         const { ukey } = instrument;
-        const quote = quotes.value[ukey] as Quote | undefined;
+        const quote = quotes.value[ukey] as KungfuApi.Quote | undefined;
         return quote || null;
     };
 
-    const getLastPricePercent = (instrument: InstrumentResolved): string => {
+    const getLastPricePercent = (
+        instrument: KungfuApi.InstrumentResolved,
+    ): string => {
         const quote = getQuoteByInstrument(instrument);
 
         if (!quote) {
@@ -874,15 +954,22 @@ export const useQuote = (): {
     };
 };
 
-export const useTriggerOrderBook = (): {
-    currentInstrument: Ref<InstrumentResolved | undefined>;
-    customRow(instrument: InstrumentResolved): { onClick(): void };
-    triggerOrderBook(instrument: InstrumentResolved): void;
+export const useTriggeMakeOrder = (): {
+    currentInstrument: Ref<KungfuApi.InstrumentResolved | undefined>;
+    customRow(
+        instrument: KungfuApi.InstrumentResolved,
+        callback: (instrument: KungfuApi.InstrumentResolved) => void,
+    ): { onClick(): void };
+    triggeOrderBook(instrument: KungfuApi.InstrumentResolved): void;
+    triggeMakeOrder(
+        instrument: KungfuApi.InstrumentResolved,
+        extraOrderInput: ExtraOrderInput,
+    ): void;
 } => {
     const app = getCurrentInstance();
-    const currentInstrument = ref<InstrumentResolved | undefined>();
+    const currentInstrument = ref<KungfuApi.InstrumentResolved | undefined>();
 
-    const triggerOrderBook = (instrument: InstrumentResolved) => {
+    const triggeOrderBook = (instrument: KungfuApi.InstrumentResolved) => {
         if (app?.proxy) {
             app?.proxy.$bus.next({
                 tag: 'orderbook',
@@ -891,10 +978,28 @@ export const useTriggerOrderBook = (): {
         }
     };
 
-    const customRow = (record: InstrumentResolved) => {
+    const triggeMakeOrder = (
+        instrument: KungfuApi.InstrumentResolved,
+        extraOrderInput: ExtraOrderInput,
+    ) => {
+        if (app?.proxy) {
+            app?.proxy.$bus.next({
+                tag: 'makeOrder',
+                instrument: {
+                    ...instrument,
+                    ...(extraOrderInput || {}),
+                },
+            });
+        }
+    };
+
+    const customRow = (
+        record: KungfuApi.InstrumentResolved,
+        callback: (instrument: KungfuApi.InstrumentResolved) => void,
+    ) => {
         return {
             onClick: () => {
-                triggerOrderBook(record);
+                callback(record);
             },
         };
     };
@@ -912,6 +1017,7 @@ export const useTriggerOrderBook = (): {
     return {
         currentInstrument,
         customRow,
-        triggerOrderBook,
+        triggeOrderBook,
+        triggeMakeOrder,
     };
 };

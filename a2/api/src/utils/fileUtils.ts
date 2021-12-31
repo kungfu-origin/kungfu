@@ -23,8 +23,8 @@ export const addFileSync = (
 
 export const writeCSV = (
     filePath: string,
-    data: TradingDataTypes[],
-    transform = (row: TradingDataTypes) => row as Row,
+    data: KungfuApi.TradingDataTypes[],
+    transform = (row: KungfuApi.TradingDataTypes) => row as Row,
 ): Promise<void> => {
     filePath = path.normalize(filePath);
     return new Promise((resolve, reject) => {

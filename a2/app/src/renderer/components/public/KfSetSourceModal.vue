@@ -9,6 +9,7 @@ import {
     useExtConfigsRelated,
     useModalVisible,
 } from '@renderer/assets/methods/uiUtils';
+import { KfCategoryTypes } from '@kungfu-trader/kungfu-js-api/typings/enums';
 
 const props = withDefaults(
     defineProps<{

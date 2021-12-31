@@ -1,5 +1,4 @@
 import fse from 'fs-extra';
-import { KfConfigItem, KfConfigValue } from '../typings';
 import { KF_CONFIG_PATH } from './pathConfig';
 
 const isEnglish = false;
@@ -7,7 +6,7 @@ const isEnglish = false;
 export interface KfSystemConfig {
     key: string;
     name: string;
-    config: KfConfigItem[];
+    config: KungfuApi.KfConfigItem[];
 }
 
 export const getKfGlobalSettings = (): KfSystemConfig[] => [
@@ -89,7 +88,7 @@ export const getKfGlobalSettingsValue = () => {
 };
 
 export const setKfGlobalSettingsValue = (
-    value: Record<string, Record<string, KfConfigValue>>,
+    value: Record<string, Record<string, KungfuApi.KfConfigValue>>,
 ) => {
     return fse.writeJSONSync(KF_CONFIG_PATH, value);
 };

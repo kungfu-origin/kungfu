@@ -1,11 +1,5 @@
 import { Pm2ProcessStatusTypes } from '../utils/processUtils';
 
-export interface KfTradeValueCommonData {
-    name: string;
-    color?: AntInKungfuColorTypes;
-    level?: number;
-}
-
 export enum BrokerStateStatusEnum {
     Pending = 0,
     Idle = 1,
@@ -19,20 +13,6 @@ export enum BrokerStateStatusEnum {
 export type BrokerStateStatusTypes = keyof typeof BrokerStateStatusEnum;
 
 export type ProcessStatusTypes = Pm2ProcessStatusTypes | BrokerStateStatusTypes;
-
-export type AntInKungfuColorTypes =
-    | 'default'
-    | 'orange'
-    | 'yellow'
-    | 'pink'
-    | 'red'
-    | 'blue'
-    | 'purple'
-    | 'cyan'
-    | 'green'
-    | 'kf-color-running'
-    | 'kf-color-waiting'
-    | 'kf-color-error';
 
 export enum LedgerCategoryEnum {
     td = 0,
@@ -157,90 +137,14 @@ export enum OrderStatusEnum {
 
 export type OrderStatusTypes = keyof typeof OrderStatusEnum;
 
-export interface SourceData {
-    name: string;
-    type: InstrumentTypes[];
-}
-
-export type KfConfigItemSupportedTypes =
-    | 'str'
-    | 'password'
-    | 'file' // string
-    | 'process'
-    | 'instrumentId' // search input
-    | 'account' // select - string
-    | 'source' // select - string
-    | 'exchange' // select - string
-    | 'select'
-    | 'bool'
-    | 'int'
-    | 'float'
-    | 'percent'
-    | 'side' // select - number
-    | 'offset' // select - number
-    | 'direction' // select - number
-    | 'priceType' // select - number
-    | 'hedgeFlag' // select - number
-    | 'volumeCondition' // select - number
-    | 'timeCondition' // select - number
-    | 'commissionMode' // select - number
-    | 'instrumentType' // select - number
-    | 'instrument'
-    | 'td';
-
-export type KfConfigValue = string | number | boolean;
-
-export interface KfSelectOption {
-    value: string | number;
-    label: string | number;
-}
-
-export interface KfConfigItem {
-    key: string;
-    name: string;
-    type: KfConfigItemSupportedTypes;
-    errMsg?: string;
-    default?: KfConfigValue;
-    required?: boolean;
-    primary?: boolean;
-    validator?: string[];
-    options?: KfSelectOption[];
-    data?: KfSelectOption[];
-    args?: Array<{ key: string | number; value: string | number }>; // process
-    target?: string; // process
-    tip?: string;
-}
-
-export interface KfExtOriginConfig {
-    key: string;
-    name: string;
-    config: {
-        [key in KfCategoryTypes]?: {
-            type?: Array<InstrumentTypes> | InstrumentTypes;
-            settings: KfConfigItem[];
-        };
-    };
-}
-
-export type KfExtConfigs = {
-    [key in KfCategoryTypes]?: {
-        [extKey: string]: KfExtOriginConfig['config'][KfCategoryTypes];
-    };
-};
-
-export interface SetKfConfigPayload {
-    type: ModalChangeType;
-    title: string;
-    config: KfExtOriginConfig['config'][KfCategoryTypes];
-    initValue?: Record<string, KfConfigValue>;
-}
-
 export enum KfCategoryEnum {
     md,
     td,
     strategy,
     system,
 }
+
+export type KfCategoryTypes = keyof typeof KfCategoryEnum;
 
 export enum KfModeEnum {
     live,
@@ -249,7 +153,13 @@ export enum KfModeEnum {
     backtest,
 }
 
+export type KfModeTypes = keyof typeof KfModeEnum;
+
 export enum HistoryDateEnum {
     naturalDate,
     tradingDate,
+}
+
+export enum OrderActionFlagEnum {
+    Cancel,
 }

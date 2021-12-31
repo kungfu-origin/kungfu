@@ -1,3 +1,5 @@
+import { KfCategoryTypes } from '@kungfu-trader/kungfu-js-api/typings/enums';
+
 export const getColumns = (
     moduleType: KfCategoryTypes,
     isHistory = false,

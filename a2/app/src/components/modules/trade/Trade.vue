@@ -40,16 +40,14 @@ import type { Dayjs } from 'dayjs';
 
 const app = getCurrentInstance();
 
-const trades = ref<Trade[]>([]);
-const { searchKeyword, tableData } = useTableSearchKeyword<Trade>(trades, [
-    'order_id',
-    'trade_id',
-    'instrument_id',
-    'exchange_id',
-]);
+const trades = ref<KungfuApi.Trade[]>([]);
+const { searchKeyword, tableData } = useTableSearchKeyword<KungfuApi.Trade>(
+    trades,
+    ['order_id', 'trade_id', 'instrument_id', 'exchange_id'],
+);
 const historyDate = ref<Dayjs>();
 const historyDataLoading = ref<boolean>();
-var Ledger: TradingData | undefined = window.watcher?.ledger;
+var Ledger: KungfuApi.TradingData | undefined = window.watcher?.ledger;
 
 const { currentGlobalKfLocation, currentCategoryData, currentUID } =
     useCurrentGlobalKfLocation(window.watcher);
@@ -67,25 +65,27 @@ const columns = computed(() => {
 
 onMounted(() => {
     if (app?.proxy) {
-        app.proxy.$tradingDataSubject.subscribe((watcher: Watcher) => {
-            if (historyDate.value) {
-                return;
-            }
+        app.proxy.$tradingDataSubject.subscribe(
+            (watcher: KungfuApi.Watcher) => {
+                if (historyDate.value) {
+                    return;
+                }
 
-            if (currentGlobalKfLocation.value === null) {
-                return;
-            }
+                if (currentGlobalKfLocation.value === null) {
+                    return;
+                }
 
-            Ledger = watcher.ledger;
-            const tradesResolved = (dealTradingData(
-                watcher,
-                Ledger,
-                'Trade',
-                currentGlobalKfLocation.value,
-            ) || []) as Trade[];
+                Ledger = watcher.ledger;
+                const tradesResolved = (dealTradingData(
+                    watcher,
+                    Ledger,
+                    'Trade',
+                    currentGlobalKfLocation.value,
+                ) || []) as KungfuApi.Trade[];
 
-            trades.value = toRaw(tradesResolved.slice(0, 100));
-        });
+                trades.value = toRaw(tradesResolved.slice(0, 100));
+            },
+        );
     }
 });
 
@@ -115,7 +115,7 @@ watch(historyDate, async (newDate) => {
         currentGlobalKfLocation.value,
     );
     Ledger = tradingData;
-    trades.value = toRaw(historyDatas as Trade[]);
+    trades.value = toRaw(historyDatas as KungfuApi.Trade[]);
     historyDataLoading.value = false;
 });
 
@@ -194,7 +194,7 @@ function dealOrderStatResolved(order_id: bigint): {
                         item,
                         column,
                     }: {
-                        item: Trade,
+                        item: KungfuApi.Trade,
                         column: KfTradingDataTableHeaderConfig,
                     }"
                 >

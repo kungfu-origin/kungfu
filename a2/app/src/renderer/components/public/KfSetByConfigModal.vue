@@ -4,10 +4,6 @@ import {
     initFormStateByConfig,
     useModalVisible,
 } from '@renderer/assets/methods/uiUtils';
-import {
-    KfConfigValue,
-    SetKfConfigPayload,
-} from '@kungfu-trader/kungfu-js-api/typings';
 
 import { buildIdByKeysFromKfConfigSettings } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import KfConfigSettingsForm from '@renderer/components/public/KfConfigSettingsForm.vue';
@@ -15,14 +11,14 @@ import KfConfigSettingsForm from '@renderer/components/public/KfConfigSettingsFo
 const props = withDefaults(
     defineProps<{
         visible: boolean;
-        payload: SetKfConfigPayload;
+        payload: KungfuApi.SetKfConfigPayload;
         width?: number;
         primaryKeyAvoidRepeatCompareExtra?: string;
         primaryKeyAvoidRepeatCompareTarget?: string[];
     }>(),
     {
         visible: false,
-        payload: () => ({} as SetKfConfigPayload),
+        payload: () => ({} as KungfuApi.SetKfConfigPayload),
         width: 520,
         primaryKeyAvoidRepeatCompareTarget: () => [],
         primaryKeyAvoidRepeatCompareExtra: '',
@@ -33,9 +29,9 @@ defineEmits<{
     (
         e: 'confirm',
         data: {
-            formState: Record<string, KfConfigValue>;
+            formState: Record<string, KungfuApi.KfConfigValue>;
             idByPrimaryKeys: string;
-            changeType: ModalChangeType;
+            changeType: KungfuApi.ModalChangeType;
         },
     ): void;
     (e: 'update:visible', visible: boolean): void;
@@ -45,7 +41,7 @@ defineEmits<{
 const app = getCurrentInstance();
 const { modalVisible, closeModal } = useModalVisible(props.visible);
 const formRef = ref();
-const formState = reactive<Record<string, KfConfigValue>>(
+const formState = reactive<Record<string, KungfuApi.KfConfigValue>>(
     initFormStateByConfig(
         props.payload.config?.settings || [],
         props.payload.initValue,

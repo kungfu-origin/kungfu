@@ -133,7 +133,7 @@ bus.subscribe((data: KfBusEvent) => {
     }
 });
 
-tradingDataSubject.subscribe((watcher: Watcher) => {
+tradingDataSubject.subscribe((watcher: KungfuApi.Watcher) => {
     const appStates = dealAppStates(watcher.appStates);
     store.setAppStates(appStates);
     const assets = dealAssetsByHolderUID(watcher.ledger.Asset);
@@ -141,69 +141,73 @@ tradingDataSubject.subscribe((watcher: Watcher) => {
 });
 
 const subscribedInstrumentsForPos: Record<string, boolean> = {};
-tradingDataSubject.pipe(throttleTime(3000)).subscribe((watcher: Watcher) => {
-    const bigint0 = BigInt(0);
-    const positions = watcher.ledger.Position.filter('ledger_category', 0)
-        .nofilter('volume', bigint0)
-        .list()
-        .map(
-            (item: Position): InstrumentForSub => ({
-                uidKey: item.uid_key,
-                exchangeId: item.exchange_id,
-                instrumentId: item.instrument_id,
-                instrumentType: item.instrument_type,
-                mdLocation: watcher.getLocation(item.holder_uid),
-            }),
-        );
+tradingDataSubject
+    .pipe(throttleTime(3000))
+    .subscribe((watcher: KungfuApi.Watcher) => {
+        const bigint0 = BigInt(0);
+        const positions = watcher.ledger.Position.filter('ledger_category', 0)
+            .nofilter('volume', bigint0)
+            .list()
+            .map(
+                (item: KungfuApi.Position): KungfuApi.InstrumentForSub => ({
+                    uidKey: item.uid_key,
+                    exchangeId: item.exchange_id,
+                    instrumentId: item.instrument_id,
+                    instrumentType: item.instrument_type,
+                    mdLocation: watcher.getLocation(item.holder_uid),
+                }),
+            );
 
-    positions.forEach((item) => {
-        if (subscribedInstrumentsForPos[item.uidKey]) {
-            return;
-        }
-        kfRequestMarketData(
-            watcher,
-            item.exchangeId,
-            item.instrumentId,
-            item.mdLocation,
-        );
-        subscribedInstrumentsForPos[item.uidKey] = true;
+        positions.forEach((item) => {
+            if (subscribedInstrumentsForPos[item.uidKey]) {
+                return;
+            }
+            kfRequestMarketData(
+                watcher,
+                item.exchangeId,
+                item.instrumentId,
+                item.mdLocation,
+            );
+            subscribedInstrumentsForPos[item.uidKey] = true;
+        });
     });
-});
 
 const dealInstrumentController = ref<boolean>(false);
-const oldInstruments: InstrumentResolved[] = JSON.parse(
+const oldInstruments: KungfuApi.InstrumentResolved[] = JSON.parse(
     localStorage.getItem('instruments') || '[]',
 );
 const oldInstrumentsLength = ref<number>(oldInstruments.length || 0);
-tradingDataSubject.pipe(throttleTime(5000)).subscribe((watcher: Watcher) => {
-    const instruments = watcher.ledger.Instrument.list();
-    if (!instruments || !instruments.length) {
-        localStorage.setItem('instrumentsSavedDate', '');
-        return;
-    }
+tradingDataSubject
+    .pipe(throttleTime(5000))
+    .subscribe((watcher: KungfuApi.Watcher) => {
+        const instruments = watcher.ledger.Instrument.list();
+        if (!instruments || !instruments.length) {
+            localStorage.setItem('instrumentsSavedDate', '');
+            return;
+        }
 
-    if (
-        getIfSaveInstruments(instruments, oldInstrumentsLength.value) &&
-        !dealInstrumentController.value
-    ) {
-        dealInstrumentController.value = true;
-        console.time('DealInstruments');
-        console.log('DealInstruments postMessage', instruments.length);
-        instruments.forEach((item: Instrument) => {
-            item.ukey = item.uid_key;
-        });
-        workers.dealInstruments.postMessage({
-            instruments: instruments,
-        });
-    }
-});
+        if (
+            getIfSaveInstruments(instruments, oldInstrumentsLength.value) &&
+            !dealInstrumentController.value
+        ) {
+            dealInstrumentController.value = true;
+            console.time('DealInstruments');
+            console.log('DealInstruments postMessage', instruments.length);
+            instruments.forEach((item: KungfuApi.Instrument) => {
+                item.ukey = item.uid_key;
+            });
+            workers.dealInstruments.postMessage({
+                instruments: instruments,
+            });
+        }
+    });
 
 if (oldInstrumentsLength.value) {
     store.setInstruments(oldInstruments);
 }
 
 workers.dealInstruments.onmessage = (event: {
-    data: { instruments: InstrumentResolved[] };
+    data: { instruments: KungfuApi.InstrumentResolved[] };
 }) => {
     const { instruments } = event.data || {};
     console.timeEnd('DealInstruments');

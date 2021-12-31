@@ -2,28 +2,29 @@
 import { dialog } from '@electron/remote';
 import { DashOutlined } from '@ant-design/icons-vue';
 import {
-    KfConfigItem,
-    KfConfigValue,
-    KfTradeValueCommonData,
     PriceTypeEnum,
     SideEnum,
-} from '@kungfu-trader/kungfu-js-api/typings';
+} from '@kungfu-trader/kungfu-js-api/typings/enums';
 import {
     numberEnumRadioType,
     numberEnumSelectType,
     stringEnumSelectType,
+    useAllKfConfigData,
+    useInstruments,
 } from '@renderer/assets/methods/uiUtils';
-import { getCurrentInstance, reactive, ref, watch } from 'vue';
+import { getCurrentInstance, reactive, ref, toRefs, watch } from 'vue';
 import {
     PriceType,
     Side,
 } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
+import { getIdByKfLocation } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
+import { RuleObject } from 'ant-design-vue/lib/form';
 
 const props = withDefaults(
     defineProps<{
-        formState: Record<string, KfConfigValue>;
-        configSettings: KfConfigItem[];
-        changeType: ModalChangeType;
+        formState: Record<string, KungfuApi.KfConfigValue>;
+        configSettings: KungfuApi.KfConfigItem[];
+        changeType: KungfuApi.ModalChangeType;
         primaryKeyAvoidRepeatCompareExtra?: string;
         primaryKeyAvoidRepeatCompareTarget?: string[];
         layout?: 'horizontal' | 'vertical' | 'inline';
@@ -45,7 +46,10 @@ const props = withDefaults(
 );
 
 defineEmits<{
-    (e: 'update:formState', formState: Record<string, KfConfigValue>): void;
+    (
+        e: 'update:formState',
+        formState: Record<string, KungfuApi.KfConfigValue>,
+    ): void;
 }>();
 
 const app = getCurrentInstance();
@@ -59,6 +63,13 @@ watch(formState, (newVal) => {
 const primaryKeys: string[] = (props.configSettings || [])
     .filter((item) => item.primary)
     .map((item) => item.key);
+
+const {
+    searchInstrumnetOptions,
+    handleSearchInstrument,
+    transformSearchInstrumentResultToInstrument,
+} = useInstruments();
+const { td } = toRefs(useAllKfConfigData());
 
 function getValidatorType(type: string): 'number' | 'string' {
     const intTypes: string[] = [
@@ -74,6 +85,11 @@ function getValidatorType(type: string): 'number' | 'string' {
     } else {
         return 'string';
     }
+}
+
+function isNumberInputType(type: string): boolean {
+    const numberInputTypes: string[] = ['int', 'float', 'percent'];
+    return numberInputTypes.includes(type);
 }
 
 function primaryKeyValidator(): Promise<void> {
@@ -95,8 +111,35 @@ function primaryKeyValidator(): Promise<void> {
     return Promise.resolve();
 }
 
+function noZeroValidator(_rule: RuleObject, value: number): Promise<void> {
+    console.log(value, '---');
+    if (Number.isNaN(+value)) {
+        return Promise.reject(new Error(`请输入非零数字`));
+    }
+
+    if (+value === 0) {
+        return Promise.reject(new Error(`请输入非零数字`));
+    }
+
+    return Promise.resolve();
+}
+
+function instrumnetValidator(_rule: RuleObject, value: string): Promise<void> {
+    if (!value) {
+        return Promise.resolve();
+    }
+
+    const instrumentResolved =
+        transformSearchInstrumentResultToInstrument(value);
+    if (!instrumentResolved) {
+        return Promise.reject(new Error('标的错误'));
+    }
+
+    return Promise.resolve();
+}
+
 function getKfTradeValueName(
-    data: Record<number | string | symbol, KfTradeValueCommonData>,
+    data: Record<number | string | symbol, KungfuApi.KfTradeValueCommonData>,
     key: number | string,
 ): string {
     return data[key].name;
@@ -119,6 +162,7 @@ function handleSelectFile(targetKey: string) {
 function validate(): Promise<void> {
     return formRef.value.validate();
 }
+
 defineExpose({
     validate,
 });
@@ -161,10 +205,29 @@ defineExpose({
                                         trigger: 'blur',
                                     },
                                 ]),
+                          ...(item.required && isNumberInputType(item.type)
+                              ? [
+                                    {
+                                        validator: noZeroValidator,
+                                        type: getValidatorType(item.type),
+                                        trigger: 'blur',
+                                    },
+                                ]
+                              : []),
                           ...(item.primary
                               ? [
                                     {
                                         validator: primaryKeyValidator,
+                                        type: getValidatorType(item.type),
+                                        trigger: 'change',
+                                    },
+                                ]
+                              : []),
+
+                          ...(item.type === 'instrument'
+                              ? [
+                                    {
+                                        validator: instrumnetValidator,
                                         type: getValidatorType(item.type),
                                         trigger: 'change',
                                     },
@@ -209,27 +272,13 @@ defineExpose({
                 v-else-if="item.type === 'side'"
                 v-model:value="formState[item.key]"
                 :name="item.key"
+                :disabled="changeType === 'update' && item.primary"
             >
                 <a-radio
                     v-for="key in Object.keys(Side).slice(0, 2)"
                     :value="+key"
                 >
                     {{ Side[(+key) as SideEnum ].name }}
-                </a-radio>
-            </a-radio-group>
-            <a-radio-group
-                v-else-if="numberEnumRadioType[item.type]"
-                v-model:value="formState[item.key]"
-                :name="item.key"
-                :disabled="changeType === 'update' && item.primary"
-            >
-                <a-radio
-                    v-for="key in Object.keys(numberEnumRadioType[item.type])"
-                    :value="+key"
-                >
-                    {{
-                        getKfTradeValueName(numberEnumRadioType[item.type], key)
-                    }}
                 </a-radio>
             </a-radio-group>
             <a-select
@@ -245,6 +294,21 @@ defineExpose({
                     {{ PriceType[+key as PriceTypeEnum].name }}
                 </a-select-option>
             </a-select>
+            <a-radio-group
+                v-else-if="numberEnumRadioType[item.type]"
+                v-model:value="formState[item.key]"
+                :name="item.key"
+                :disabled="changeType === 'update' && item.primary"
+            >
+                <a-radio
+                    v-for="key in Object.keys(numberEnumRadioType[item.type])"
+                    :value="+key"
+                >
+                    {{
+                        getKfTradeValueName(numberEnumRadioType[item.type], key)
+                    }}
+                </a-radio>
+            </a-radio-group>
             <a-select
                 v-else-if="numberEnumSelectType[item.type]"
                 v-model:value="formState[item.key]"
@@ -264,7 +328,6 @@ defineExpose({
                     }}
                 </a-select-option>
             </a-select>
-
             <a-select
                 v-else-if="stringEnumSelectType[item.type]"
                 v-model:value="formState[item.key]"
@@ -295,6 +358,28 @@ defineExpose({
                     :value="option.value"
                 >
                     {{ option.label }}
+                </a-select-option>
+            </a-select>
+            <a-select
+                v-else-if="item.type === 'instrument'"
+                :disabled="changeType === 'update' && item.primary"
+                show-search
+                v-model:value="formState[item.key]"
+                :filter-option="false"
+                :options="searchInstrumnetOptions"
+                @search="handleSearchInstrument"
+            ></a-select>
+            <a-select
+                v-else-if="item.type === 'td'"
+                v-model:value="formState[item.key]"
+                :disabled="changeType === 'update' && item.primary"
+            >
+                <a-select-option
+                    v-for="config in td"
+                    :key="getIdByKfLocation(config)"
+                    :value="getIdByKfLocation(config)"
+                >
+                    {{ getIdByKfLocation(config) }}
                 </a-select-option>
             </a-select>
             <a-switch

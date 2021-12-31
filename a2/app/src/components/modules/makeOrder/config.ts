@@ -1,20 +1,20 @@
 import { ShotableInstrumentTypes } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
 import {
     InstrumentTypeEnum,
-    KfConfigItem,
-} from '@kungfu-trader/kungfu-js-api/typings';
+    KfCategoryTypes,
+} from '@kungfu-trader/kungfu-js-api/typings/enums';
 
 export const getConfigSettings = (
     category?: KfCategoryTypes,
     instrumentTypeEnum?: InstrumentTypeEnum,
-): KfConfigItem[] => {
+): KungfuApi.KfConfigItem[] => {
     const shotable = instrumentTypeEnum
-        ? false
-        : ShotableInstrumentTypes.includes(
+        ? ShotableInstrumentTypes.includes(
               instrumentTypeEnum || InstrumentTypeEnum.unknown,
-          );
+          )
+        : false;
 
-    const defaultSettings: KfConfigItem[] = [
+    const defaultSettings: KungfuApi.KfConfigItem[] = [
         category === 'td'
             ? null
             : {
@@ -73,7 +73,7 @@ export const getConfigSettings = (
             type: 'int',
             required: true,
         },
-    ].filter((item) => !!item) as KfConfigItem[];
+    ].filter((item) => !!item) as KungfuApi.KfConfigItem[];
 
     return defaultSettings;
 };

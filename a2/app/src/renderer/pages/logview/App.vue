@@ -192,7 +192,7 @@ function resetLog() {
                             index,
                             active,
                         }: {
-                            item: KfLogData,
+                            item: KungfuApi.KfLogData,
                             index: number,
                             active: boolean,
                         }"

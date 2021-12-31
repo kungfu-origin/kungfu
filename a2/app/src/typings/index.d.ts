@@ -59,9 +59,21 @@ interface ExportTradingDataEvent {
     currentKfLocation?: KfLocation | KfConfig | undefined;
 }
 
-interface TriggerOrderBook {
+interface TriggeOrderBook {
     tag: 'orderbook';
     instrument: InstrumentResolved;
+}
+
+interface ExtraOrderInput {
+    side: SideEnum;
+    offset: OffsetEnum;
+    volume: number | bigint;
+    price: number;
+}
+
+interface TriggeMakeOrder {
+    tag: 'makeOrder';
+    instrument: InstrumentResolved & ExtraOrderInput;
 }
 
 type KfBusEvent =
@@ -69,7 +81,8 @@ type KfBusEvent =
     | ProcessStatusChangeEvent
     | MainProcessEvent
     | TradingDataUpdateEvent
-    | TriggerOrderBook
+    | TriggeOrderBook
+    | TriggeMakeOrder
     | ExportTradingDataEvent;
 
 interface KfTradingDataTableHeaderConfig {

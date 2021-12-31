@@ -12,11 +12,6 @@ import KfProcessStatus from '@renderer/components/public/KfProcessStatus.vue';
 import KfSetSourceModal from '@renderer/components/public/KfSetSourceModal.vue';
 import KfSetByConfigModal from '@renderer/components/public/KfSetByConfigModal.vue';
 
-import {
-    KfExtOriginConfig,
-    SetKfConfigPayload,
-} from '@kungfu-trader/kungfu-js-api/typings';
-import type { KfConfigValue } from '@kungfu-trader/kungfu-js-api/typings';
 import { columns } from './config';
 import {
     getInstrumentTypeColor,
@@ -37,6 +32,7 @@ import {
     useAddUpdateRemoveKfConfig,
     useSwitchAllConfig,
 } from '@renderer/assets/methods/actionsUtils';
+import { KfCategoryTypes } from '@kungfu-trader/kungfu-js-api/typings/enums';
 
 interface MdProps {}
 defineProps<MdProps>();
@@ -46,17 +42,19 @@ const { dashboardBodyHeight, dashboardBodyWidth, handleBodySizeChange } =
 
 const setSourceModalVisible = ref<boolean>(false);
 const setMdModalVisible = ref<boolean>(false);
-const setMdConfigPayload = ref<SetKfConfigPayload>({
+const setMdConfigPayload = ref<KungfuApi.SetKfConfigPayload>({
     type: 'add',
     title: '行情源',
-    config: {} as KfExtOriginConfig['config'][KfCategoryTypes],
+    config: {} as KungfuApi.KfExtOriginConfig['config'][KfCategoryTypes],
 });
 const currentSelectedSourceId = ref<string>('');
 
 const { extConfigs, extTypeMap } = useExtConfigsRelated();
 const { md } = toRefs(useAllKfConfigData());
 const mdIdList = computed(() => {
-    return md.value.map((item: KfConfig): string => getIdByKfLocation(item));
+    return md.value.map((item: KungfuApi.KfConfig): string =>
+        getIdByKfLocation(item),
+    );
 });
 const { processStatusData, getProcessStatusName } =
     useProcessStatusDetailData();
@@ -65,17 +63,18 @@ const { allProcessOnline, handleSwitchAllProcessStatus } = useSwitchAllConfig(
     processStatusData,
 );
 
-const { searchKeyword, tableData } = useTableSearchKeyword<KfConfig>(md, [
-    'group',
-]);
+const { searchKeyword, tableData } = useTableSearchKeyword<KungfuApi.KfConfig>(
+    md,
+    ['group'],
+);
 
 const { handleConfirmAddUpdateKfConfig, handleRemoveKfConfig } =
     useAddUpdateRemoveKfConfig();
 
 function handleOpenSetMdDialog(
-    type = 'add' as ModalChangeType,
+    type = 'add' as KungfuApi.ModalChangeType,
     selectedSource: string,
-    mdConfig?: KfConfig,
+    mdConfig?: KungfuApi.KfConfig,
 ) {
     currentSelectedSourceId.value = selectedSource;
     setMdConfigPayload.value.type = type;
@@ -93,7 +92,7 @@ function handleOpenSetMdDialog(
     if (!setMdConfigPayload.value.config?.settings?.length) {
         handleConfirmAddUpdateKfConfig(
             {
-                formState: {} as Record<string, KfConfigValue>,
+                formState: {} as Record<string, KungfuApi.KfConfigValue>,
                 idByPrimaryKeys: selectedSource,
                 changeType: type,
             },
@@ -154,7 +153,7 @@ function handleOpenSetSourceDialog() {
                         record,
                     }: {
                         column: AntTableColumn,
-                        record: KfConfig,
+                        record: KungfuApi.KfConfig,
                     }"
                 >
                     <template v-if="column.dataIndex === 'name'">

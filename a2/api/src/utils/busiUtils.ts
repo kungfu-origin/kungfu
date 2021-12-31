@@ -15,24 +15,20 @@ import {
     HedgeFlag,
 } from '../config/tradingConfig';
 import {
-    KfTradeValueCommonData,
-    InstrumentTypeEnum,
-    KfExtOriginConfig,
-    KfExtConfigs,
-    SourceData,
-    ProcessStatusTypes,
-    InstrumentTypes,
-    KfConfigValue,
     KfCategoryEnum,
-    BrokerStateStatusTypes,
-    SideEnum,
-    OffsetEnum,
     DirectionEnum,
     OrderStatusEnum,
     LedgerCategoryEnum,
-    LedgerCategoryTypes,
+    InstrumentTypeEnum,
+    SideEnum,
+    OffsetEnum,
     HedgeFlagEnum,
-} from '../typings';
+    InstrumentTypes,
+    KfCategoryTypes,
+    LedgerCategoryTypes,
+    ProcessStatusTypes,
+    BrokerStateStatusTypes,
+} from '../typings/enums';
 import {
     deleteProcess,
     Pm2ProcessStatusData,
@@ -49,6 +45,11 @@ import { Proc } from 'pm2';
 interface SourceAccountId {
     source: string;
     id: string;
+}
+
+interface SourceData {
+    name: string;
+    type: InstrumentTypes[];
 }
 
 declare global {
@@ -269,15 +270,16 @@ export const buildObjectFromArray = <T>(
 
 export const getInstrumentTypeData = (
     instrumentType: InstrumentTypes,
-): KfTradeValueCommonData => {
+): KungfuApi.KfTradeValueCommonData => {
     return InstrumentType[
-        InstrumentTypeEnum[instrumentType] || InstrumentTypeEnum.unknown
+        (InstrumentTypeEnum[instrumentType] as InstrumentTypeEnum) ||
+            InstrumentTypeEnum.unknown
     ];
 };
 
 export const getCategoryData = (
     category: KfCategoryTypes,
-): KfTradeValueCommonData => {
+): KungfuApi.KfTradeValueCommonData => {
     if (KfCategory[KfCategoryEnum[category]]) {
         return KfCategory[KfCategoryEnum[category]];
     }
@@ -350,7 +352,7 @@ export const flattenExtensionModuleDirs = async (
     return extensionModuleDirs;
 };
 
-const getKfExtConfigList = async (): Promise<KfExtOriginConfig[]> => {
+const getKfExtConfigList = async (): Promise<KungfuApi.KfExtOriginConfig[]> => {
     const extModuleDirs = await flattenExtensionModuleDirs([EXTENSION_DIR]);
     const packageJSONPaths = extModuleDirs.map((item) =>
         path.join(item, 'package.json'),
@@ -359,14 +361,18 @@ const getKfExtConfigList = async (): Promise<KfExtOriginConfig[]> => {
         packageJSONPaths.map((item) => {
             return fse.readJSON(item);
         }),
-    ).then((jsonList: { kungfuConfig?: KfExtOriginConfig }[]) => {
+    ).then((jsonList: { kungfuConfig?: KungfuApi.KfExtOriginConfig }[]) => {
         return jsonList
-            .map((json): KfExtOriginConfig | null => {
-                return (json['kungfuConfig'] as KfExtOriginConfig) || null;
+            .map((json): KungfuApi.KfExtOriginConfig | null => {
+                return (
+                    (json['kungfuConfig'] as KungfuApi.KfExtOriginConfig) ||
+                    null
+                );
             })
             .filter(
-                (config: KfExtOriginConfig | null): boolean => !!config,
-            ) as KfExtOriginConfig[];
+                (config: KungfuApi.KfExtOriginConfig | null): boolean =>
+                    !!config,
+            ) as KungfuApi.KfExtOriginConfig[];
     });
 };
 
@@ -386,10 +392,10 @@ const resolveInstrumentTypesInExtType = (
 };
 
 const getKfExtensionConfigByCategory = (
-    extConfigs: KfExtOriginConfig[],
-): KfExtConfigs | Record<string, unknown> => {
-    let configByCategory: KfExtConfigs = {};
-    extConfigs.forEach((extConfig: KfExtOriginConfig) => {
+    extConfigs: KungfuApi.KfExtOriginConfig[],
+): KungfuApi.KfExtConfigs => {
+    let configByCategory: KungfuApi.KfExtConfigs = {};
+    extConfigs.forEach((extConfig: KungfuApi.KfExtOriginConfig) => {
         const extKey = extConfig.key;
         (Object.keys(extConfig['config']) as KfCategoryTypes[]).forEach(
             (category: KfCategoryTypes) => {
@@ -412,21 +418,20 @@ const getKfExtensionConfigByCategory = (
     return configByCategory;
 };
 
-export const getKfExtensionConfig = async (): Promise<
-    KfExtConfigs | Record<string, unknown>
-> => {
-    const kfExtConfigList = await getKfExtConfigList();
-    return getKfExtensionConfigByCategory(kfExtConfigList);
-};
+export const getKfExtensionConfig =
+    async (): Promise<KungfuApi.KfExtConfigs> => {
+        const kfExtConfigList = await getKfExtConfigList();
+        return getKfExtensionConfigByCategory(kfExtConfigList);
+    };
 
 export const buildExtTypeMap = (
-    extConfigs: KfExtConfigs,
+    extConfigs: KungfuApi.KfExtConfigs,
     category: KfCategoryTypes,
 ): Record<string, InstrumentTypes> => {
     const extTypeMap: Record<string, InstrumentTypes> = {};
     const targetCategoryConfig: Record<
         string,
-        KfExtOriginConfig['config'][KfCategoryTypes]
+        KungfuApi.KfExtOriginConfig['config'][KfCategoryTypes]
     > = extConfigs[category] || {};
 
     Object.keys(targetCategoryConfig).forEach((extKey: string) => {
@@ -479,7 +484,7 @@ export const statTimeEnd = (name: string) => {
 };
 
 export const getSourceDataList = (
-    extConfigs: KfExtConfigs,
+    extConfigs: KungfuApi.KfExtConfigs,
     sourceType: KfCategoryTypes,
 ): SourceData[] => {
     const target = extConfigs[sourceType];
@@ -573,7 +578,7 @@ export const removeJournal = (targetFolder: string): Promise<void> => {
 };
 
 export const getProcessIdByKfLocation = (
-    kfLocation: KfLocation | KfConfig,
+    kfLocation: KungfuApi.KfLocation | KungfuApi.KfConfig,
 ): string => {
     if (kfLocation.category === 'td') {
         return `${kfLocation.category}_${kfLocation.group}_${kfLocation.name}`;
@@ -590,7 +595,7 @@ export const getProcessIdByKfLocation = (
 
 export const getMdTdKfLocationByProcessId = (
     processId: string,
-): KfLocation | null => {
+): KungfuApi.KfLocation | null => {
     if (processId.indexOf('td_') === 0) {
         if (processId.split('_').length === 3) {
             const [category, group, name] = processId.split('_');
@@ -617,7 +622,7 @@ export const getMdTdKfLocationByProcessId = (
 };
 
 export const getIdByKfLocation = (
-    kfLocation: KfLocation | KfConfig,
+    kfLocation: KungfuApi.KfLocation | KungfuApi.KfConfig,
 ): string => {
     if (kfLocation.category === 'td') {
         return `${kfLocation.group}_${kfLocation.name}`;
@@ -634,7 +639,7 @@ export const getIdByKfLocation = (
 
 export const getStateStatusData = (
     name: ProcessStatusTypes | undefined,
-): KfTradeValueCommonData | undefined => {
+): KungfuApi.KfTradeValueCommonData | undefined => {
     return name === undefined ? undefined : AppStateStatus[name];
 };
 
@@ -653,7 +658,7 @@ export const getIfProcessRunning = (
 };
 
 export const getAppStateStatusName = (
-    kfConfig: KfConfig | KfLocation,
+    kfConfig: KungfuApi.KfConfig | KungfuApi.KfLocation,
     processStatusData: Pm2ProcessStatusData,
     appStates: Record<string, BrokerStateStatusTypes>,
 ): ProcessStatusTypes | undefined => {
@@ -678,7 +683,7 @@ export const getAppStateStatusName = (
 //TOOD
 export const getPropertyFromProcessStatusDetailDataByKfLocation = (
     processStatusDetailData: Pm2ProcessStatusDetailData,
-    kfLocation: KfLocation | KfConfig,
+    kfLocation: KungfuApi.KfLocation | KungfuApi.KfConfig,
 ): {
     status: ProcessStatusTypes | undefined;
     cpu: number;
@@ -725,12 +730,12 @@ export const debounce = (fn: Function, delay = 300, immediate = false) => {
     };
 };
 
-export const getConfigValue = (kfConfig: KfConfig) => {
+export const getConfigValue = (kfConfig: KungfuApi.KfConfig) => {
     return JSON.parse(kfConfig.value || '{}');
 };
 
 export const buildIdByKeysFromKfConfigSettings = (
-    kfConfigSetting: Record<string, KfConfigValue>,
+    kfConfigSetting: Record<string, KungfuApi.KfConfigValue>,
     keys: string[],
 ) => {
     return keys
@@ -740,8 +745,8 @@ export const buildIdByKeysFromKfConfigSettings = (
 };
 
 export const switchKfLocation = (
-    watcher: Watcher | null,
-    kfLocation: KfLocation | KfConfig,
+    watcher: KungfuApi.Watcher | null,
+    kfLocation: KungfuApi.KfLocation | KungfuApi.KfConfig,
     targetStatus: boolean,
 ): Promise<void | Proc> => {
     const processId = getProcessIdByKfLocation(kfLocation);
@@ -773,7 +778,7 @@ export const switchKfLocation = (
 
         case 'strategy':
             const strategyPath =
-                JSON.parse((kfLocation as KfConfig)?.value || '{}')
+                JSON.parse((kfLocation as KungfuApi.KfConfig)?.value || '{}')
                     .strategy_path || '';
             if (!strategyPath) {
                 throw new Error('Start Stratgy without strategy_path');
@@ -825,24 +830,26 @@ export const sum = (list: number[]): number => {
     return list.reduce((accumlator, a) => accumlator + +a);
 };
 
-export const dealSide = (side: SideEnum): KfTradeValueCommonData => {
+export const dealSide = (side: SideEnum): KungfuApi.KfTradeValueCommonData => {
     return Side[side];
 };
 
-export const dealOffset = (offset: OffsetEnum): KfTradeValueCommonData => {
+export const dealOffset = (
+    offset: OffsetEnum,
+): KungfuApi.KfTradeValueCommonData => {
     return Offset[offset];
 };
 
 export const dealDirection = (
     direction: DirectionEnum,
-): KfTradeValueCommonData => {
+): KungfuApi.KfTradeValueCommonData => {
     return Direction[direction];
 };
 
 export const dealOrderStatus = (
     status: OrderStatusEnum,
     errorMsg?: string,
-): KfTradeValueCommonData => {
+): KungfuApi.KfTradeValueCommonData => {
     return {
         ...OrderStatus[status],
         ...(+status === OrderStatusEnum.Error && errorMsg
@@ -859,18 +866,18 @@ export const dealInstrumentType = (instrumentType: InstrumentTypeEnum) => {
 
 export const dealHedgeFlag = (
     hedgeFlag: HedgeFlagEnum,
-): KfTradeValueCommonData => {
+): KungfuApi.KfTradeValueCommonData => {
     return HedgeFlag[hedgeFlag];
 };
 
 export const dealCategory = (
     category: KfCategoryTypes,
-): KfTradeValueCommonData => {
+): KungfuApi.KfTradeValueCommonData => {
     return KfCategory[KfCategoryEnum[category]];
 };
 
 export const dealOrderStat = (
-    ledger: TradingData | undefined,
+    ledger: KungfuApi.TradingData | undefined,
     orderUKey: string,
 ): {
     latencySystem: string;
@@ -910,7 +917,7 @@ export const dealOrderStat = (
 };
 
 export const dealLocationUID = (
-    watcher: Watcher | null,
+    watcher: KungfuApi.Watcher | null,
     uid: number,
 ): string => {
     if (!watcher) {
@@ -932,7 +939,7 @@ export const getOrderTradeFilterKey = (category: KfCategoryTypes): string => {
 };
 
 export const getTradingDataSortKey = (
-    typename: TradingDataTypeName,
+    typename: KungfuApi.TradingDataTypeName,
 ): string => {
     if (typename === 'Order') {
         return 'update_time';
@@ -957,9 +964,9 @@ export const getLedgerCategory = (category: KfCategoryTypes): 0 | 1 => {
 };
 
 export const filterLedgerResult = <T>(
-    dataTable: DataTable<T>,
-    tradingDataTypeName: TradingDataTypeName,
-    kfLocation: KfLocation | KfConfig,
+    dataTable: KungfuApi.DataTable<T>,
+    tradingDataTypeName: KungfuApi.TradingDataTypeName,
+    kfLocation: KungfuApi.KfLocation | KungfuApi.KfConfig,
     sortKey?: string,
 ): T[] => {
     const { category, group, name } = kfLocation;
@@ -986,11 +993,11 @@ export const filterLedgerResult = <T>(
 };
 
 export const dealTradingData = (
-    watcher: Watcher | null,
-    tradingData: TradingData,
-    tradingDataTypeName: TradingDataTypeName,
-    kfLocation: KfLocation | KfConfig,
-): TradingDataNameToType[TradingDataTypeName][] => {
+    watcher: KungfuApi.Watcher | null,
+    tradingData: KungfuApi.TradingData,
+    tradingDataTypeName: KungfuApi.TradingDataTypeName,
+    kfLocation: KungfuApi.KfLocation | KungfuApi.KfConfig,
+): KungfuApi.TradingDataNameToType[KungfuApi.TradingDataTypeName][] => {
     if (!watcher) {
         throw new Error('dealTradingData no watcher');
     }
@@ -1016,7 +1023,9 @@ export const dealTradingData = (
         }
     }
 
-    return filterLedgerResult<TradingDataNameToType[TradingDataTypeName]>(
+    return filterLedgerResult<
+        KungfuApi.TradingDataNameToType[KungfuApi.TradingDataTypeName]
+    >(
         tradingData[tradingDataTypeName],
         tradingDataTypeName,
         kfLocation,

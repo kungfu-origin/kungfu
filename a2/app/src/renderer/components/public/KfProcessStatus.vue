@@ -16,12 +16,8 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
-import {
-    AntInKungfuColorTypes,
-    KfTradeValueCommonData,
-    ProcessStatusTypes,
-} from '@kungfu-trader/kungfu-js-api/typings/index';
 import { getStateStatusData } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
+import { ProcessStatusTypes } from '@kungfu-trader/kungfu-js-api/typings/enums';
 
 export default defineComponent({
     name: 'KfProcessStatus',
@@ -32,13 +28,13 @@ export default defineComponent({
     },
 
     computed: {
-        stateStatusData(): KfTradeValueCommonData | undefined {
+        stateStatusData(): KungfuApi.KfTradeValueCommonData | undefined {
             return getStateStatusData(this.statusName);
         },
     },
 
     methods: {
-        isWaveStatus(statusColor: AntInKungfuColorTypes | undefined) {
+        isWaveStatus(statusColor: KungfuApi.AntInKungfuColorTypes | undefined) {
             if (statusColor === undefined) return false;
             if (statusColor === 'kf-color-error') return false;
             return true;

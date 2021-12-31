@@ -5,9 +5,12 @@ import {
     kfLogger,
     setTimerPromiseTask,
 } from '../utils/busiUtils';
-import { BrokerStateStatusEnum, BrokerStateStatusTypes } from '../typings';
+import {
+    BrokerStateStatusEnum,
+    BrokerStateStatusTypes,
+} from '../typings/enums';
 
-export const watcher = ((): Watcher | null => {
+export const watcher = ((): KungfuApi.Watcher | null => {
     kfLogger.info(
         'Init Watcher',
         'APP_TYPE',
@@ -40,7 +43,7 @@ export const watcher = ((): Watcher | null => {
 
 export const startGetKungfuWatcherStep = (
     interval = 1000,
-    callback: (watcher: Watcher) => void,
+    callback: (watcher: KungfuApi.Watcher) => void,
 ) => {
     if (watcher === null) return;
 
@@ -135,15 +138,15 @@ export const dealAppStates = (
 };
 
 export const dealAssetsByHolderUID = (
-    assets: DataTable<Asset>,
-): Record<string, Asset> => {
-    const assetsResolved: Record<string, Asset> = {};
+    assets: KungfuApi.DataTable<KungfuApi.Asset>,
+): Record<string, KungfuApi.Asset> => {
+    const assetsResolved: Record<string, KungfuApi.Asset> = {};
 
     if (!watcher) {
         return assetsResolved;
     }
 
-    Object.values(assets).forEach((asset: Asset) => {
+    Object.values(assets).forEach((asset: KungfuApi.Asset) => {
         const { holder_uid } = asset;
         const kfLocation = watcher.getLocation(holder_uid);
         const processId = getProcessIdByKfLocation(kfLocation);

@@ -46,7 +46,7 @@
                         ></component>
                         <KfNoData
                             v-else
-                            :txt="`${content} 组件不存在`"
+                            :txt="`${content} 组件错误`"
                         ></KfNoData>
                     </a-card>
                 </a-tab-pane>
@@ -100,7 +100,7 @@
                         ></component>
                         <KfNoData
                             v-else
-                            :txt="`${content} 组件不存在`"
+                            :txt="`${content} 组件错误`"
                         ></KfNoData>
                     </a-card>
                 </a-tab-pane>

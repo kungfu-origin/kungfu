@@ -2,16 +2,16 @@ import { configStore } from '../kungfu';
 
 import { kfLogger, hidePasswordByLogger } from '../utils/busiUtils';
 
-type AllConfig = Record<string, KfConfigOrigin>;
+type AllConfig = Record<string, KungfuApi.KfConfigOrigin>;
 
-export const getKfAllConfig = (): Promise<KfConfigOrigin[]> => {
+export const getKfAllConfig = (): Promise<KungfuApi.KfConfigOrigin[]> => {
     return Promise.resolve(
         Object.values(configStore.getAllConfig() as AllConfig),
     );
 };
 
 export const setKfConfig = (
-    kfLocation: KfLocation,
+    kfLocation: KungfuApi.KfLocation,
     configValue: string,
 ): Promise<void> => {
     const configForLog = hidePasswordByLogger(configValue);
@@ -29,7 +29,9 @@ export const setKfConfig = (
     );
 };
 
-export const removeKfConfig = (kfLocation: KfLocation): Promise<void> => {
+export const removeKfConfig = (
+    kfLocation: KungfuApi.KfLocation,
+): Promise<void> => {
     kfLogger.info(
         `Remove Kungfu Config ${kfLocation.category} ${kfLocation.group} ${kfLocation.name}`,
     );

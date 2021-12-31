@@ -5,7 +5,6 @@ import {
     KfSystemConfig,
     setKfGlobalSettingsValue,
 } from '@kungfu-trader/kungfu-js-api/config/globalSettings';
-import { KfConfigValue } from '@kungfu-trader/kungfu-js-api/typings';
 import {
     initFormStateByConfig,
     useModalVisible,
@@ -38,9 +37,9 @@ const globalSettingsFromStates = reactive(
 
 function initGlobalSettingsFromStates(
     configs: KfSystemConfig[],
-    initValue: Record<string, Record<string, KfConfigValue>>,
+    initValue: Record<string, Record<string, KungfuApi.KfConfigValue>>,
 ) {
-    const states: Record<string, Record<string, KfConfigValue>> = {};
+    const states: Record<string, Record<string, KungfuApi.KfConfigValue>> = {};
     configs.forEach((item) => {
         states[item.key] = initFormStateByConfig(
             item.config,

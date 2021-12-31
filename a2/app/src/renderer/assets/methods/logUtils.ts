@@ -79,7 +79,7 @@ export const useLogInit = (
     processId: string,
     nLines = 2000,
 ): {
-    logList: KfNumList<KfLogData>;
+    logList: KungfuApi.KfNumList<KungfuApi.KfLogData>;
     logPath: string;
     scrollToBottomChecked: Ref<boolean>;
     scrollerTableRef: Ref;
@@ -88,7 +88,9 @@ export const useLogInit = (
     clearLogState: () => void;
 } => {
     let LogTail: Tail | null = null;
-    const logList = reactive<KfNumList<KfLogData>>(new KfNumList(2000));
+    const logList = reactive<KungfuApi.KfNumList<KungfuApi.KfLogData>>(
+        new KfNumList(2000),
+    );
     const scrollerTableRef = ref();
     const scrollToBottomChecked = ref<boolean>(false);
     const logPath = path.resolve(
@@ -148,7 +150,7 @@ export const useLogInit = (
 };
 
 export const useLogSearch = (
-    logList: KfNumList<KfLogData>,
+    logList: KungfuApi.KfNumList<KungfuApi.KfLogData>,
     scrollerTableRef: Ref,
     contentSize: Ref<{
         width: number;
@@ -178,10 +180,10 @@ export const useLogSearch = (
 
     const currentResultPointerIndex = ref<number>(0);
     const totalResultCount = ref<number>(0);
-    const searchLogResults: KfLogData[] = [];
+    const searchLogResults: KungfuApi.KfLogData[] = [];
 
     const clearLogSearchState = (): void => {
-        logList.list.forEach((logData: KfLogData) => {
+        logList.list.forEach((logData: KungfuApi.KfLogData) => {
             logData.messageForSearch = '';
         });
         searchLogResults.length = 0;
@@ -191,7 +193,7 @@ export const useLogSearch = (
     };
 
     const setLogDataMessageForSearch = (
-        item: KfLogData,
+        item: KungfuApi.KfLogData,
         currentPointer = false,
     ): string => {
         if (searchKeywordReg.value === null) return '';
@@ -295,7 +297,7 @@ export const useLogSearch = (
             currentResultPointerIndex.value = 0;
             totalResultCount.value = 0;
             nextTick().then(() => {
-                logList.list.forEach((item: KfLogData) => {
+                logList.list.forEach((item: KungfuApi.KfLogData) => {
                     if (item.message.indexOf(searchKeyword.value) !== -1) {
                         item.messageForSearch =
                             setLogDataMessageForSearch(item);
@@ -318,7 +320,7 @@ export const useLogSearch = (
         const oldId = oldIndex ? searchLogResults[oldIndex - 1].id : 0;
         const newId = searchLogResults[newIndex - 1].id;
 
-        logList.list.forEach((logData: KfLogData) => {
+        logList.list.forEach((logData: KungfuApi.KfLogData) => {
             if (logData.id === oldId && oldId !== 0) {
                 logData.messageForSearch = setLogDataMessageForSearch(logData);
             }

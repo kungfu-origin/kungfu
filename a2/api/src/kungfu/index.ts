@@ -14,7 +14,7 @@ import {
     getOrderTradeFilterKey,
     kfLogger,
 } from '../utils/busiUtils';
-import { HistoryDateEnum } from '../typings';
+import { HistoryDateEnum } from '../typings/enums';
 
 export const kf = kungfu();
 kfLogger.info('Load kungfu node');
@@ -35,8 +35,8 @@ export const dealKfTime = (nano: bigint, date = false): string => {
 };
 
 export const dealTradingDataItem = (
-    item: TradingDataTypes,
-    watcher: Watcher | null,
+    item: KungfuApi.TradingDataTypes,
+    watcher: KungfuApi.Watcher | null,
 ) => {
     const itemResolved = { ...item } as Record<string, unknown>;
     if ('trade_time' in item) {
@@ -88,14 +88,14 @@ export const dealTradingDataItem = (
 export const getKungfuDataByDateRange = (
     date: number | string,
     dateType = HistoryDateEnum.naturalDate, //0 natural date, 1 tradingDate
-): Promise<TradingData | Record<string, unknown>> => {
+): Promise<KungfuApi.TradingData | Record<string, unknown>> => {
     const tradingDay = dayjs(date).format('YYYYMMDD');
     const from = dayjs(date).format('YYYY-MM-DD');
     const to = dayjs(date).add(1, 'day').format('YYYY-MM-DD');
     const yesFrom = dayjs(date).add(-1, 'day').format('YYYY-MM-DD');
     const fridayFrom = dayjs(date).add(-3, 'day').format('YYYY-MM-DD');
     const fridayTo = dayjs(date).add(-2, 'day').format('YYYY-MM-DD');
-    const dataTypeForHistory: TradingDataTypeName[] = [
+    const dataTypeForHistory: KungfuApi.TradingDataTypeName[] = [
         'Order',
         'Trade',
         'OrderStat',
@@ -114,7 +114,9 @@ export const getKungfuDataByDateRange = (
                     fridayFrom,
                     fridayTo,
                 );
-                const historyData: TradingData | Record<string, unknown> = {};
+                const historyData:
+                    | KungfuApi.TradingData
+                    | Record<string, unknown> = {};
                 dataTypeForHistory.forEach((key) => {
                     if (
                         key === 'Order' ||
@@ -137,9 +139,13 @@ export const getKungfuDataByDateRange = (
                         );
                     } else {
                         historyData[key] = Object.assign(
-                            kungfuDataFriday[key as keyof TradingData],
-                            kungfuDataYesterday[key as keyof TradingData],
-                            kungfuDataToday[key as keyof TradingData],
+                            kungfuDataFriday[
+                                key as keyof KungfuApi.TradingData
+                            ],
+                            kungfuDataYesterday[
+                                key as keyof KungfuApi.TradingData
+                            ],
+                            kungfuDataToday[key as keyof KungfuApi.TradingData],
                         );
                     }
                 });
@@ -155,36 +161,36 @@ export const getKungfuDataByDateRange = (
 };
 
 export const getKungfuHistoryData = (
-    watcher: Watcher | null,
+    watcher: KungfuApi.Watcher | null,
     date: string,
     dateType: HistoryDateEnum,
-    tradingDataTypeName: TradingDataTypeName | 'all',
-    kfLocation?: KfLocation | KfConfig,
+    tradingDataTypeName: KungfuApi.TradingDataTypeName | 'all',
+    kfLocation?: KungfuApi.KfLocation | KungfuApi.KfConfig,
 ): Promise<{
-    tradingData: TradingData;
-    historyDatas: TradingDataTypes[];
+    tradingData: KungfuApi.TradingData;
+    historyDatas: KungfuApi.TradingDataTypes[];
 }> => {
     return getKungfuDataByDateRange(date, dateType).then(
-        (tradingData: TradingData | Record<string, unknown>) => {
+        (tradingData: KungfuApi.TradingData | Record<string, unknown>) => {
             if (tradingDataTypeName === 'all') {
                 return {
-                    tradingData: tradingData as TradingData,
+                    tradingData: tradingData as KungfuApi.TradingData,
                     historyDatas: [],
                 };
             }
 
             if (!kfLocation) {
                 return {
-                    tradingData: tradingData as TradingData,
+                    tradingData: tradingData as KungfuApi.TradingData,
                     historyDatas: [],
                 };
             }
 
             return {
-                tradingData: tradingData as TradingData,
+                tradingData: tradingData as KungfuApi.TradingData,
                 historyDatas: dealTradingData(
                     watcher,
-                    tradingData as TradingData,
+                    tradingData as KungfuApi.TradingData,
                     tradingDataTypeName,
                     kfLocation,
                 ),
@@ -194,13 +200,13 @@ export const getKungfuHistoryData = (
 };
 
 export const kfRequestMarketData = (
-    watcher: Watcher | null,
+    watcher: KungfuApi.Watcher | null,
     exchangeId: string,
     instrumentId: string,
-    mdLocation: KfLocation | KfConfig,
+    mdLocation: KungfuApi.KfLocation | KungfuApi.KfConfig,
 ): Promise<void> => {
     if (!watcher) {
-        return Promise.reject(new Error(`Watcher 不存在`));
+        return Promise.reject(new Error(`Watcher 错误`));
     }
 
     if (!watcher.isLive()) {
@@ -218,13 +224,13 @@ export const kfRequestMarketData = (
 };
 
 export const kfCancelOrder = (
-    watcher: Watcher | null,
+    watcher: KungfuApi.Watcher | null,
     orderId: bigint,
-    tdLocation: KfLocation | KfConfig,
-    strategyLocation?: KfLocation | KfConfig,
+    tdLocation: KungfuApi.KfLocation | KungfuApi.KfConfig,
+    strategyLocation?: KungfuApi.KfLocation | KungfuApi.KfConfig,
 ): Promise<void> => {
     if (!watcher) {
-        return Promise.reject(new Error(`Watcher 不存在`));
+        return Promise.reject(new Error(`Watcher 错误`));
     }
 
     if (!watcher.isLive()) {
@@ -236,7 +242,7 @@ export const kfCancelOrder = (
         return Promise.reject(new Error(`交易账户 ${accountId} 未就绪`));
     }
 
-    const orderAction: OrderAction = {
+    const orderAction: KungfuApi.OrderAction = {
         ...longfist.OrderAction(),
         order_id: orderId,
     };
@@ -251,11 +257,11 @@ export const kfCancelOrder = (
 };
 
 export const kfCancelAllOrders = (
-    watcher: Watcher | null,
-    kfLocation: KfLocation | KfConfig,
+    watcher: KungfuApi.Watcher | null,
+    kfLocation: KungfuApi.KfLocation | KungfuApi.KfConfig,
 ): Promise<void[]> => {
     if (!watcher) {
-        return Promise.reject(new Error(`Watcher 不存在`));
+        return Promise.reject(new Error(`Watcher 错误`));
     }
 
     if (!watcher.isLive()) {
@@ -279,29 +285,77 @@ export const kfCancelAllOrders = (
         filterKey,
         watcher.getLocationUID(kfLocation),
     ).list();
-    const cancelOrderTasks = orders.map((item: Order): Promise<void> => {
-        const orderAction: OrderAction = {
-            ...longfist.OrderAction(),
-            order_id: item.order_id,
-        };
-        if (kfLocation.category === 'td') {
-            return Promise.resolve(
-                watcher.cancelOrder(orderAction, kfLocation),
-            );
-        } else if (kfLocation.category === 'strategy') {
-            return Promise.resolve(
-                watcher.cancelOrder(
-                    orderAction,
-                    watcher.getLocation(item.source),
-                    kfLocation,
-                ),
-            );
-        } else {
-            return Promise.resolve();
-        }
-    });
+    const cancelOrderTasks = orders.map(
+        (item: KungfuApi.Order): Promise<void> => {
+            const orderAction: KungfuApi.OrderAction = {
+                ...longfist.OrderAction(),
+                order_id: item.order_id,
+            };
+            if (kfLocation.category === 'td') {
+                return Promise.resolve(
+                    watcher.cancelOrder(orderAction, kfLocation),
+                );
+            } else if (kfLocation.category === 'strategy') {
+                return Promise.resolve(
+                    watcher.cancelOrder(
+                        orderAction,
+                        watcher.getLocation(item.source),
+                        kfLocation,
+                    ),
+                );
+            } else {
+                return Promise.resolve();
+            }
+        },
+    );
 
     return Promise.all(cancelOrderTasks);
+};
+
+export const kfMakeOrder = (
+    watcher: KungfuApi.Watcher | null,
+    makeOrderInput: KungfuApi.MakeOrderInput,
+    tdLocation: KungfuApi.KfLocation,
+    strategyLocation?: KungfuApi.KfLocation,
+): Promise<void> => {
+    if (!watcher) {
+        return Promise.reject(new Error('Watcher 错误'));
+    }
+
+    if (!watcher.isLive()) {
+        return Promise.reject(new Error(`Master 未连接`));
+    }
+
+    if (!watcher.isReadyToInteract(tdLocation)) {
+        const accountId = getIdByKfLocation(tdLocation);
+        return Promise.reject(new Error(`交易账户 ${accountId} 未就绪`));
+    }
+
+    const now = watcher.now();
+    const orderInput: KungfuApi.OrderInput = {
+        ...longfist.OrderInput(),
+        ...makeOrderInput,
+        limit_price: makeOrderInput.limit_price || 0,
+        frozen_price: makeOrderInput.limit_price || 0,
+        volume: BigInt(makeOrderInput.volume),
+        insert_time: now,
+    };
+
+    if (strategyLocation) {
+        //设置orderInput的parentid，来标记该order为策略手动下单
+        return Promise.resolve(
+            watcher.issueOrder(
+                {
+                    ...orderInput,
+                    parent_id: now,
+                },
+                tdLocation,
+                strategyLocation,
+            ),
+        );
+    } else {
+        return Promise.resolve(watcher.issueOrder(orderInput, tdLocation));
+    }
 };
 
 export const hashInstrumentUKey = (

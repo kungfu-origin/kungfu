@@ -9,8 +9,8 @@ import {
 import { setKfConfig } from '@kungfu-trader/kungfu-js-api/kungfu/store';
 import {
     HistoryDateEnum,
-    KfConfigValue,
-} from '@kungfu-trader/kungfu-js-api/typings';
+    KfCategoryTypes,
+} from '@kungfu-trader/kungfu-js-api/typings/enums';
 import {
     getCategoryData,
     getIdByKfLocation,
@@ -35,7 +35,7 @@ import { Row } from '@fast-csv/format';
 import { KF_SUBSCRIBED_INSTRUMENTS_JSON_PATH } from '@kungfu-trader/kungfu-js-api/config/pathConfig';
 
 export const ensureRemoveLocation = (
-    kfLocation: KfLocation | KfConfig,
+    kfLocation: KungfuApi.KfLocation | KungfuApi.KfConfig,
 ): Promise<void> => {
     const categoryName = getCategoryData(kfLocation.category).name;
     const id = getIdByKfLocation(kfLocation);
@@ -66,7 +66,7 @@ export const ensureRemoveLocation = (
 
 export const handleSwitchProcessStatus = (
     checked: boolean,
-    kfLocation: KfLocation | KfConfig,
+    kfLocation: KungfuApi.KfLocation | KungfuApi.KfConfig,
 ): Promise<void | Proc> => {
     return switchKfLocation(window.watcher, kfLocation, checked)
         .then(() => {
@@ -84,7 +84,7 @@ export const preQuitTasks = (tasks: Promise<void>[]): Promise<[]> => {
 };
 
 export const useSwitchAllConfig = (
-    kfConfigs: Ref<KfConfig[]> | Ref<KfLocation[]>,
+    kfConfigs: Ref<KungfuApi.KfConfig[]> | Ref<KungfuApi.KfLocation[]>,
     processStatusData: Ref<Pm2ProcessStatusData>,
 ): {
     allProcessOnline: ComputedRef<boolean>;
@@ -92,7 +92,7 @@ export const useSwitchAllConfig = (
 } => {
     const allProcessOnline = computed(() => {
         const onlineItemsCount: number = kfConfigs.value.filter(
-            (item: KfConfig | KfLocation): boolean => {
+            (item: KungfuApi.KfConfig | KungfuApi.KfLocation): boolean => {
                 const processId = getProcessIdByKfLocation(item);
                 return processStatusData.value[processId] === 'online';
             },
@@ -110,7 +110,9 @@ export const useSwitchAllConfig = (
     const handleSwitchAllProcessStatus = (checked: boolean): Promise<void> => {
         return Promise.all(
             kfConfigs.value.map(
-                (item: KfConfig | KfLocation): Promise<void | Proc> => {
+                (
+                    item: KungfuApi.KfConfig | KungfuApi.KfLocation,
+                ): Promise<void | Proc> => {
                     return switchKfLocation(window.watcher, item, checked);
                 },
             ),
@@ -130,12 +132,12 @@ export const useSwitchAllConfig = (
 };
 
 export const useAddUpdateRemoveKfConfig = (): {
-    handleRemoveKfConfig: (kfConfig: KfConfig) => Promise<void>;
+    handleRemoveKfConfig: (kfConfig: KungfuApi.KfConfig) => Promise<void>;
     handleConfirmAddUpdateKfConfig: (
         data: {
-            formState: Record<string, KfConfigValue>;
+            formState: Record<string, KungfuApi.KfConfigValue>;
             idByPrimaryKeys: string;
-            changeType: ModalChangeType;
+            changeType: KungfuApi.ModalChangeType;
         },
         category: KfCategoryTypes,
         group: string,
@@ -143,7 +145,9 @@ export const useAddUpdateRemoveKfConfig = (): {
 } => {
     const app = getCurrentInstance();
 
-    const handleRemoveKfConfig = (kfConfig: KfConfig): Promise<void> => {
+    const handleRemoveKfConfig = (
+        kfConfig: KungfuApi.KfConfig,
+    ): Promise<void> => {
         return ensureRemoveLocation(kfConfig).then(() => {
             app?.proxy && app?.proxy.$useGlobalStore().setKfConfigList();
         });
@@ -151,9 +155,9 @@ export const useAddUpdateRemoveKfConfig = (): {
 
     const handleConfirmAddUpdateKfConfig = (
         data: {
-            formState: Record<string, KfConfigValue>;
+            formState: Record<string, KungfuApi.KfConfigValue>;
             idByPrimaryKeys: string;
-            changeType: ModalChangeType;
+            changeType: KungfuApi.ModalChangeType;
         },
         category: KfCategoryTypes,
         group: string,
@@ -174,7 +178,7 @@ export const useAddUpdateRemoveKfConfig = (): {
                 okText: '确认',
                 cancelText: '取消',
                 onOk() {
-                    const kfLocation: KfLocation = {
+                    const kfLocation: KungfuApi.KfLocation = {
                         category: category,
                         group: group,
                         name: idByPrimaryKeys.toString(),
@@ -229,7 +233,9 @@ export const useDealExportHistoryTradingData = (): {
     const exportEventData = ref<ExportTradingDataEvent>();
     const exportDataLoading = ref<boolean>(false);
 
-    const dealTradingDataItemResolved = (item: TradingDataTypes): Row => {
+    const dealTradingDataItemResolved = (
+        item: KungfuApi.TradingDataTypes,
+    ): Row => {
         return dealTradingDataItem(item, window.watcher) as Row;
     };
 
@@ -388,7 +394,7 @@ export const useDealExportHistoryTradingData = (): {
 };
 
 export const getSubscribedInstruments = async (): Promise<
-    InstrumentResolved[]
+    KungfuApi.InstrumentResolved[]
 > => {
     return fse.readFile(KF_SUBSCRIBED_INSTRUMENTS_JSON_PATH).then((res) => {
         const str = Buffer.from(res).toString();
@@ -397,7 +403,7 @@ export const getSubscribedInstruments = async (): Promise<
 };
 
 export const addSubscribeInstruments = async (
-    instruments: InstrumentResolved[],
+    instruments: KungfuApi.InstrumentResolved[],
 ): Promise<void> => {
     const oldInstruments = await getSubscribedInstruments();
     return fse.outputJSON(KF_SUBSCRIBED_INSTRUMENTS_JSON_PATH, [
@@ -407,7 +413,7 @@ export const addSubscribeInstruments = async (
 };
 
 export const removeSubscribeInstruments = async (
-    instrument: InstrumentResolved,
+    instrument: KungfuApi.InstrumentResolved,
 ): Promise<void> => {
     const oldInstruments = await getSubscribedInstruments();
     const removeTargetIndex = oldInstruments.findIndex((item) => {

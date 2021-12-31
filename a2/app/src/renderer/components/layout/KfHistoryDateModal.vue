@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { HistoryDateEnum } from '@kungfu-trader/kungfu-js-api/typings';
+import { HistoryDateEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import { useModalVisible } from '@renderer/assets/methods/uiUtils';
 import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';

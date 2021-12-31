@@ -12,7 +12,7 @@ import {
     useDownloadHistoryTradingData,
     useInstruments,
     useTableSearchKeyword,
-    useTriggerOrderBook,
+    useTriggeMakeOrder,
 } from '@renderer/assets/methods/uiUtils';
 import KfDashboard from '@renderer/components/public/KfDashboard.vue';
 import KfDashboardItem from '@renderer/components/public/KfDashboardItem.vue';
@@ -23,50 +23,56 @@ import { getCurrentInstance, onMounted, ref, toRaw } from 'vue';
 import { columns } from './config';
 import KfBlinkNum from '@renderer/components/public/KfBlinkNum.vue';
 import { hashInstrumentUKey, kf } from '@kungfu-trader/kungfu-js-api/kungfu';
+import {
+    OffsetEnum,
+    SideEnum,
+} from '@kungfu-trader/kungfu-js-api/typings/enums';
+import { Offset } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
 
 const app = getCurrentInstance();
-const pos = ref<Position[]>([]);
-const { searchKeyword, tableData } = useTableSearchKeyword<Position>(pos, [
-    'instrument_id',
-    'exchange_id',
-    'direction',
-]);
+const pos = ref<KungfuApi.Position[]>([]);
+const { searchKeyword, tableData } = useTableSearchKeyword<KungfuApi.Position>(
+    pos,
+    ['instrument_id', 'exchange_id', 'direction'],
+);
 const { currentGlobalKfLocation, currentCategoryData } =
     useCurrentGlobalKfLocation(window.watcher);
 const { handleDownload } = useDownloadHistoryTradingData();
-const { triggerOrderBook } = useTriggerOrderBook();
+const { triggeOrderBook, triggeMakeOrder } = useTriggeMakeOrder();
 const { instruments } = useInstruments();
 
 onMounted(() => {
     if (app?.proxy) {
-        app.proxy.$tradingDataSubject.subscribe((watcher: Watcher) => {
-            if (currentGlobalKfLocation.value === null) {
-                return;
-            }
+        app.proxy.$tradingDataSubject.subscribe(
+            (watcher: KungfuApi.Watcher) => {
+                if (currentGlobalKfLocation.value === null) {
+                    return;
+                }
 
-            const positions = (dealTradingData(
-                window.watcher,
-                watcher.ledger,
-                'Position',
-                currentGlobalKfLocation.value,
-            ) || []) as Position[];
+                const positions = (dealTradingData(
+                    window.watcher,
+                    watcher.ledger,
+                    'Position',
+                    currentGlobalKfLocation.value,
+                ) || []) as KungfuApi.Position[];
 
-            pos.value = toRaw(positions.reverse());
-        });
+                pos.value = toRaw(positions.reverse());
+            },
+        );
     }
 });
 
-function handleClickRow({ row }: { row: Position }) {
+function handleClickRow({ row }: { row: KungfuApi.Position }) {
     const { instrument_id, instrument_type, exchange_id } = row;
     const ukey = hashInstrumentUKey(instrument_id, exchange_id);
-    const instrumnet: InstrumentResolved | null =
-        findTargetFromArray<InstrumentResolved>(
+    const instrumnet: KungfuApi.InstrumentResolved | null =
+        findTargetFromArray<KungfuApi.InstrumentResolved>(
             instruments.value,
             'ukey',
             ukey,
         );
     const instrumentName = instrumnet?.instrumentName || '';
-    const ensuredInstrument: InstrumentResolved = {
+    const ensuredInstrument: KungfuApi.InstrumentResolved = {
         exchangeId: exchange_id,
         instrumentId: instrument_id,
         instrumentType: instrument_type,
@@ -75,9 +81,21 @@ function handleClickRow({ row }: { row: Position }) {
         id: `${instrument_id}_${instrumentName}_${exchange_id}`.toLowerCase(),
     };
 
-    console.log(ensuredInstrument);
+    triggeOrderBook(ensuredInstrument);
+    const extraOrderInput: ExtraOrderInput = {
+        side: row.direction === 0 ? SideEnum.Sell : SideEnum.Buy,
+        offset:
+            row.yesterday_volume !== BigInt(0)
+                ? OffsetEnum.CloseYest
+                : OffsetEnum.CloseToday,
+        volume:
+            row.yesterday_volume !== BigInt(0)
+                ? row.yesterday_volume
+                : row.volume - row.yesterday_volume,
 
-    triggerOrderBook(ensuredInstrument);
+        price: row.last_price || 0,
+    };
+    triggeMakeOrder(ensuredInstrument, extraOrderInput);
 }
 </script>
 <template>
@@ -134,7 +152,7 @@ function handleClickRow({ row }: { row: Position }) {
                         item,
                         column,
                     }: {
-                        item: Position,
+                        item: KungfuApi.Position,
                         column: KfTradingDataTableHeaderConfig,
                     }"
                 >
