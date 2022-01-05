@@ -51,17 +51,20 @@ const historyDate = ref<Dayjs>();
 const historyDataLoading = ref<boolean>();
 var Ledger: KungfuApi.TradingData | undefined = window.watcher?.ledger;
 
-const { currentGlobalKfLocation, currentCategoryData, currentUID } =
-    useCurrentGlobalKfLocation(window.watcher);
+const {
+    currentGlobalKfLocation,
+    currentCategoryData,
+    getCurrentGlobalKfLocationId,
+} = useCurrentGlobalKfLocation(window.watcher);
 
 const { handleDownload } = useDownloadHistoryTradingData();
 
 const columns = computed(() => {
-    if (currentGlobalKfLocation.value === null) {
+    if (currentGlobalKfLocation.data === null) {
         return getColumns('td', !!historyDate.value);
     }
 
-    const { category } = currentGlobalKfLocation.value;
+    const { category } = currentGlobalKfLocation.data;
     return getColumns(category, !!historyDate.value);
 });
 
@@ -73,7 +76,7 @@ onMounted(() => {
                     return;
                 }
 
-                if (currentGlobalKfLocation.value === null) {
+                if (currentGlobalKfLocation.data === null) {
                     return;
                 }
 
@@ -82,7 +85,7 @@ onMounted(() => {
                     watcher,
                     Ledger,
                     'Trade',
-                    currentGlobalKfLocation.value,
+                    currentGlobalKfLocation.data,
                 ) || []) as KungfuApi.Trade[];
 
                 trades.value = toRaw(tradesResolved.slice(0, 100));
@@ -102,7 +105,7 @@ watch(historyDate, async (newDate) => {
         return;
     }
 
-    if (currentGlobalKfLocation.value === null) {
+    if (currentGlobalKfLocation.data === null) {
         return;
     }
 
@@ -114,7 +117,7 @@ watch(historyDate, async (newDate) => {
         newDate.format(),
         0,
         'Trade',
-        currentGlobalKfLocation.value,
+        currentGlobalKfLocation.data,
     );
     Ledger = tradingData;
     trades.value = toRaw(historyDatas as KungfuApi.Trade[]);
@@ -160,17 +163,18 @@ function handleShowTradingDataDetail({
     <div class="kf-trades__warp">
         <KfDashboard>
             <template v-slot:title>
-                <span v-if="currentGlobalKfLocation.value">
+                <span v-if="currentGlobalKfLocation.data">
                     <a-tag
                         v-if="currentCategoryData"
-                        :color="currentCategoryData.color"
+                        :color="currentCategoryData?.color || 'default'"
                     >
-                        {{ currentCategoryData.name }}
+                        {{ currentCategoryData?.name }}
                     </a-tag>
-                    <span class="name" v-if="currentGlobalKfLocation.value">
+                    <span class="name" v-if="currentGlobalKfLocation.data">
                         {{
-                            getIdByKfLocation(currentGlobalKfLocation.value) ||
-                            ''
+                            getCurrentGlobalKfLocationId(
+                                currentGlobalKfLocation.data,
+                            )
                         }}
                     </span>
                 </span>
@@ -197,7 +201,7 @@ function handleShowTradingDataDetail({
                         @click="
                             handleDownload(
                                 'Trade',
-                                currentGlobalKfLocation.value,
+                                currentGlobalKfLocation.data,
                             )
                         "
                     >

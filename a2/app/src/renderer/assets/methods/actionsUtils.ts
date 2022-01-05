@@ -481,8 +481,8 @@ export const showTradingDataDetail = (
 };
 
 export const useInstruments = (): {
-    instruments: { value: KungfuApi.InstrumentResolved[] };
-    subscribedInstruments: { value: KungfuApi.InstrumentResolved[] };
+    instruments: { data: KungfuApi.InstrumentResolved[] };
+    subscribedInstruments: { data: KungfuApi.InstrumentResolved[] };
     subscribeAllInstrumentByMdProcessId(
         processId: string,
         processStatus: Pm2ProcessStatusData,
@@ -510,15 +510,15 @@ export const useInstruments = (): {
 } => {
     const app = getCurrentInstance();
     const instrumentsResolved = reactive<{
-        value: KungfuApi.InstrumentResolved[];
+        data: KungfuApi.InstrumentResolved[];
     }>({
-        value: [],
+        data: [],
     });
 
     const subscribedInstrumentsResolved = reactive<{
-        value: KungfuApi.InstrumentResolved[];
+        data: KungfuApi.InstrumentResolved[];
     }>({
-        value: [],
+        data: [],
     });
 
     onMounted(() => {
@@ -526,9 +526,9 @@ export const useInstruments = (): {
             const { instruments, subscribedInstruments } = storeToRefs(
                 app?.proxy.$useGlobalStore(),
             );
-            instrumentsResolved.value =
+            instrumentsResolved.data =
                 instruments as KungfuApi.InstrumentResolved[];
-            subscribedInstrumentsResolved.value =
+            subscribedInstrumentsResolved.data =
                 subscribedInstruments as KungfuApi.InstrumentResolved[];
         }
     });
@@ -593,7 +593,7 @@ export const useInstruments = (): {
     const searchInstrumnetOptions = ref<{ value: string; label: string }[]>([]);
 
     const handleSearchInstrument = (val: string): void => {
-        searchInstrumnetOptions.value = instrumentsResolved.value
+        searchInstrumnetOptions.value = instrumentsResolved.data
             .filter((item) => {
                 return item.id.includes(val);
             })

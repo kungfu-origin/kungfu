@@ -252,23 +252,21 @@ export const getInstrumentTypeColor = (
 };
 
 export const useExtConfigsRelated = (): {
-    extConfigs: { value: KungfuApi.KfExtConfigs };
+    extConfigs: { data: KungfuApi.KfExtConfigs };
     extTypeMap: ComputedRef<Record<string, InstrumentTypes>>;
     mdExtTypeMap: ComputedRef<Record<string, InstrumentTypes>>;
 } => {
     const app = getCurrentInstance();
-    const extConfigs = reactive<{ value: KungfuApi.KfExtConfigs }>({
-        value: {},
+    const extConfigs = reactive<{ data: KungfuApi.KfExtConfigs }>({
+        data: {},
     });
-    const extTypeMap = computed(() => buildExtTypeMap(extConfigs.value, 'td'));
-    const mdExtTypeMap = computed(() =>
-        buildExtTypeMap(extConfigs.value, 'md'),
-    );
+    const extTypeMap = computed(() => buildExtTypeMap(extConfigs.data, 'td'));
+    const mdExtTypeMap = computed(() => buildExtTypeMap(extConfigs.data, 'md'));
 
     onMounted(() => {
         if (app?.proxy) {
             const store = storeToRefs(app?.proxy.$useGlobalStore());
-            extConfigs.value = store.extConfigs as KungfuApi.KfExtConfigs;
+            extConfigs.data = store.extConfigs as KungfuApi.KfExtConfigs;
         }
     });
 
@@ -396,7 +394,7 @@ export const useCurrentGlobalKfLocation = (
     watcher: KungfuApi.Watcher | null,
 ): {
     currentGlobalKfLocation: {
-        value: KungfuApi.KfConfig | KungfuApi.KfLocation | null;
+        data: KungfuApi.KfConfig | KungfuApi.KfLocation | null;
     };
     currentCategoryData: ComputedRef<KungfuApi.KfTradeValueCommonData | null>;
     currentUID: ComputedRef<string>;
@@ -405,12 +403,15 @@ export const useCurrentGlobalKfLocation = (
     customRow(kfConfig: KungfuApi.KfConfig): {
         onClick(): void;
     };
+    getCurrentGlobalKfLocationId(
+        kfConfig: KungfuApi.KfLocation | KungfuApi.KfConfig | null,
+    ): string;
 } => {
     const app = getCurrentInstance();
     const currentKfLocation = reactive<{
-        value: KungfuApi.KfConfig | KungfuApi.KfLocation | null;
+        data: KungfuApi.KfConfig | KungfuApi.KfLocation | null;
     }>({
-        value: null,
+        data: null,
     });
 
     onMounted(() => {
@@ -419,7 +420,7 @@ export const useCurrentGlobalKfLocation = (
                 app?.proxy.$useGlobalStore(),
             );
 
-            currentKfLocation.value = currentGlobalKfLocation as
+            currentKfLocation.data = currentGlobalKfLocation as
                 | KungfuApi.KfConfig
                 | KungfuApi.KfLocation
                 | null;
@@ -435,10 +436,10 @@ export const useCurrentGlobalKfLocation = (
     };
 
     const dealRowClassName = (record: KungfuApi.KfConfig): string => {
-        if (currentKfLocation.value === null) return '';
+        if (currentKfLocation.data === null) return '';
         if (
             getIdByKfLocation(record) ===
-            getIdByKfLocation(currentKfLocation.value)
+            getIdByKfLocation(currentKfLocation.data)
         ) {
             return 'current-global-kfLocation';
         }
@@ -455,11 +456,11 @@ export const useCurrentGlobalKfLocation = (
     };
 
     const currentCategoryData = computed(() => {
-        if (!currentKfLocation.value) {
+        if (!currentKfLocation.data) {
             return null;
         }
 
-        return dealCategory(currentKfLocation.value.category);
+        return dealCategory(currentKfLocation.data.category);
     });
 
     const currentUID = computed(() => {
@@ -467,12 +468,22 @@ export const useCurrentGlobalKfLocation = (
             return '';
         }
 
-        if (!currentKfLocation.value) {
+        if (!currentKfLocation.data) {
             return '';
         }
 
-        return watcher.getLocationUID(currentKfLocation.value);
+        return watcher.getLocationUID(currentKfLocation.data);
     });
+
+    const getCurrentGlobalKfLocationId = (
+        kfConfig: KungfuApi.KfLocation | KungfuApi.KfConfig | null,
+    ): string => {
+        if (!kfConfig) {
+            return '';
+        }
+
+        return getIdByKfLocation(kfConfig) || '';
+    };
 
     return {
         currentGlobalKfLocation: currentKfLocation,
@@ -481,6 +492,7 @@ export const useCurrentGlobalKfLocation = (
         setCurrentGlobalKfLocation,
         dealRowClassName,
         customRow,
+        getCurrentGlobalKfLocationId,
     };
 };
 
@@ -639,23 +651,21 @@ export const useDashboardBodySize = (): {
 };
 
 export const useAssets = (): {
-    assets: { value: Record<string, KungfuApi.Asset> };
+    assets: { data: Record<string, KungfuApi.Asset> };
     getAssetsByKfConfig(
         kfLocation: KungfuApi.KfLocation | KungfuApi.KfConfig,
     ): KungfuApi.Asset;
 } => {
-    const assetsResolved = reactive<{ value: Record<string, KungfuApi.Asset> }>(
-        {
-            value: {},
-        },
-    );
+    const assetsResolved = reactive<{ data: Record<string, KungfuApi.Asset> }>({
+        data: {},
+    });
 
     const app = getCurrentInstance();
 
     onMounted(() => {
         if (app?.proxy) {
             const { assets } = storeToRefs(app?.proxy.$useGlobalStore());
-            assetsResolved.value = assets;
+            assetsResolved.data = assets;
         }
     });
 
@@ -663,7 +673,7 @@ export const useAssets = (): {
         kfConfig: KungfuApi.KfConfig | KungfuApi.KfLocation,
     ): KungfuApi.Asset => {
         const processId = getProcessIdByKfLocation(kfConfig);
-        return assetsResolved.value[processId] || {};
+        return assetsResolved.data[processId] || {};
     };
 
     return {

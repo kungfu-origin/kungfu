@@ -60,17 +60,20 @@ const historyDate = ref<Dayjs>();
 const historyDataLoading = ref<boolean>();
 var Ledger: KungfuApi.TradingData | undefined = window.watcher?.ledger;
 
-const { currentGlobalKfLocation, currentCategoryData } =
-    useCurrentGlobalKfLocation(window.watcher);
+const {
+    currentGlobalKfLocation,
+    currentCategoryData,
+    getCurrentGlobalKfLocationId,
+} = useCurrentGlobalKfLocation(window.watcher);
 
 const { handleDownload } = useDownloadHistoryTradingData();
 
 const columns = computed(() => {
-    if (currentGlobalKfLocation.value === null) {
+    if (currentGlobalKfLocation.data === null) {
         return getColumns('td', !!historyDate.value);
     }
 
-    const { category } = currentGlobalKfLocation.value;
+    const { category } = currentGlobalKfLocation.data;
     return getColumns(category, !!historyDate.value);
 });
 
@@ -82,7 +85,7 @@ onMounted(() => {
                     return;
                 }
 
-                if (currentGlobalKfLocation.value === null) {
+                if (currentGlobalKfLocation.data === null) {
                     return;
                 }
 
@@ -91,7 +94,7 @@ onMounted(() => {
                     watcher,
                     Ledger,
                     'Order',
-                    currentGlobalKfLocation.value,
+                    currentGlobalKfLocation.data,
                 ) || []) as KungfuApi.Order[];
 
                 if (unfinishedOrder.value) {
@@ -122,7 +125,7 @@ watch(historyDate, async (newDate) => {
         return;
     }
 
-    if (currentGlobalKfLocation.value === null) {
+    if (currentGlobalKfLocation.data === null) {
         return;
     }
 
@@ -134,7 +137,7 @@ watch(historyDate, async (newDate) => {
         newDate.format(),
         0,
         'Order',
-        currentGlobalKfLocation.value,
+        currentGlobalKfLocation.data,
     );
     Ledger = tradingData;
     orders.value = toRaw(historyDatas as KungfuApi.Order[]);
@@ -173,18 +176,18 @@ function dealOrderStatResolved(orderUKey: string): {
 function handleCancelOrder(order: KungfuApi.Order): void {
     const orderId = order.order_id;
 
-    if (!currentGlobalKfLocation.value || !window.watcher) {
+    if (!currentGlobalKfLocation.data || !window.watcher) {
         message.error('操作失败');
         return;
     }
 
-    if (currentGlobalKfLocation.value.category === 'strategy') {
+    if (currentGlobalKfLocation.data.category === 'strategy') {
         const tdLocation = window.watcher.getLocation(order.source);
         kfCancelOrder(
             window.watcher,
             orderId,
             tdLocation,
-            currentGlobalKfLocation.value,
+            currentGlobalKfLocation.data,
         )
             .then(() => {
                 message.success('操作成功');
@@ -192,8 +195,8 @@ function handleCancelOrder(order: KungfuApi.Order): void {
             .catch(() => {
                 message.error('操作失败');
             });
-    } else if (currentGlobalKfLocation.value.category === 'td') {
-        kfCancelOrder(window.watcher, orderId, currentGlobalKfLocation.value)
+    } else if (currentGlobalKfLocation.data.category === 'td') {
+        kfCancelOrder(window.watcher, orderId, currentGlobalKfLocation.data)
             .then(() => {
                 message.success('操作成功');
             })
@@ -204,15 +207,15 @@ function handleCancelOrder(order: KungfuApi.Order): void {
 }
 
 function handleCancelAllOrders(): void {
-    if (!currentGlobalKfLocation.value || !window.watcher) {
+    if (!currentGlobalKfLocation.data || !window.watcher) {
         message.error('操作失败');
         return;
     }
 
     const categoryName = getCategoryData(
-        currentGlobalKfLocation.value.category,
+        currentGlobalKfLocation.data.category,
     ).name;
-    const name = getIdByKfLocation(currentGlobalKfLocation.value);
+    const name = getIdByKfLocation(currentGlobalKfLocation.data);
 
     Modal.confirm({
         title: '确认全部撤单',
@@ -220,13 +223,13 @@ function handleCancelAllOrders(): void {
         okText: '确认',
         cancelText: '取消',
         onOk() {
-            if (!currentGlobalKfLocation.value || !window.watcher) {
+            if (!currentGlobalKfLocation.data || !window.watcher) {
                 return;
             }
 
             return kfCancelAllOrders(
                 window.watcher,
-                currentGlobalKfLocation.value,
+                currentGlobalKfLocation.data,
             )
                 .then(() => {
                     message.success('操作成功');
@@ -254,17 +257,18 @@ resolveAccountId;
     <div class="kf-orders__warp">
         <KfDashboard>
             <template v-slot:title>
-                <span v-if="currentGlobalKfLocation.value">
+                <span v-if="currentGlobalKfLocation.data">
                     <a-tag
                         v-if="currentCategoryData"
-                        :color="currentCategoryData.color"
+                        :color="currentCategoryData?.color || 'default'"
                     >
-                        {{ currentCategoryData.name }}
+                        {{ currentCategoryData?.name }}
                     </a-tag>
-                    <span class="name" v-if="currentGlobalKfLocation.value">
+                    <span class="name" v-if="currentGlobalKfLocation.data">
                         {{
-                            getIdByKfLocation(currentGlobalKfLocation.value) ||
-                            ''
+                            getCurrentGlobalKfLocationId(
+                                currentGlobalKfLocation.data,
+                            )
                         }}
                     </span>
                 </span>
@@ -296,7 +300,7 @@ resolveAccountId;
                         @click="
                             handleDownload(
                                 'Order',
-                                currentGlobalKfLocation.value,
+                                currentGlobalKfLocation.data,
                             )
                         "
                     >

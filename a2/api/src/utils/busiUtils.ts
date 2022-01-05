@@ -741,11 +741,11 @@ export const getConfigValue = (kfConfig: KungfuApi.KfConfig) => {
 };
 
 export const buildIdByKeysFromKfConfigSettings = (
-    kfConfigSetting: Record<string, KungfuApi.KfConfigValue>,
+    kfConfigState: Record<string, KungfuApi.KfConfigValue>,
     keys: string[],
 ) => {
     return keys
-        .map((key) => kfConfigSetting[key])
+        .map((key) => kfConfigState[key])
         .filter((value) => value !== undefined)
         .join('_');
 };

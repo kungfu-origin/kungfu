@@ -231,6 +231,14 @@ function clearValidate(): void {
     return formRef.value.clearValidate();
 }
 
+function formatterPercentNumber(value: number) {
+    return `${value}%`;
+}
+
+function parserPercentString(value: string) {
+    return value.replace('%', '');
+}
+
 defineExpose({
     validate,
     clearValidate,
@@ -317,7 +325,6 @@ defineExpose({
             ></a-input-password>
             <a-input-number
                 v-else-if="item.type === 'int'"
-                :formatter="(value: number) => +value"
                 v-model:value="formState[item.key]"
                 :disabled="changeType === 'update' && item.primary"
             ></a-input-number>
@@ -332,8 +339,8 @@ defineExpose({
                 v-else-if="item.type === 'percent'"
                 :precision="2"
                 step="0.01"
-                :formatter="(value: number) => `${value}%`"
-                :parser="(value: string) => value.replace('%', '')"
+                :formatter="formatterPercentNumber"
+                :parser="parserPercentString"
                 v-model:value="formState[item.key]"
                 :disabled="changeType === 'update' && item.primary"
             ></a-input-number>

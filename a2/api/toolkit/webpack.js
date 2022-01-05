@@ -7,7 +7,7 @@ module.exports = {
     makeConfig: (argv) => {
         const production = isProduction(argv.mode);
         return {
-            devtool: 'eval-cheap-source-map',
+            devtool: 'eval-source-map',
             externals: [
                 'pm2',
                 'fkill',

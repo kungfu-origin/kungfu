@@ -32,7 +32,7 @@ const app = getCurrentInstance();
 const { extConfigs } = useExtConfigsRelated();
 const selectedSource = ref<string>('');
 const sourceDataList = computed(() => {
-    return getSourceDataList(extConfigs.value, props.sourceType);
+    return getSourceDataList(extConfigs.data, props.sourceType);
 });
 
 const { modalVisible, closeModal } = useModalVisible(props.visible);

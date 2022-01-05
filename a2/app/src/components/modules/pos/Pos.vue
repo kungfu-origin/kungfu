@@ -34,8 +34,11 @@ const { searchKeyword, tableData } = useTableSearchKeyword<KungfuApi.Position>(
     pos,
     ['instrument_id', 'exchange_id', 'direction'],
 );
-const { currentGlobalKfLocation, currentCategoryData } =
-    useCurrentGlobalKfLocation(window.watcher);
+const {
+    currentGlobalKfLocation,
+    currentCategoryData,
+    getCurrentGlobalKfLocationId,
+} = useCurrentGlobalKfLocation(window.watcher);
 const { handleDownload } = useDownloadHistoryTradingData();
 const { triggerOrderBook, triggerMakeOrder } = useTriggerMakeOrder();
 const { instruments } = useInstruments();
@@ -44,7 +47,7 @@ onMounted(() => {
     if (app?.proxy) {
         app.proxy.$tradingDataSubject.subscribe(
             (watcher: KungfuApi.Watcher) => {
-                if (currentGlobalKfLocation.value === null) {
+                if (currentGlobalKfLocation.data === null) {
                     return;
                 }
 
@@ -52,7 +55,7 @@ onMounted(() => {
                     window.watcher,
                     watcher.ledger,
                     'Position',
-                    currentGlobalKfLocation.value,
+                    currentGlobalKfLocation.data,
                 ) || []) as KungfuApi.Position[];
 
                 pos.value = toRaw(positions.reverse());
@@ -70,7 +73,7 @@ function handleClickRow(data: {
     const ukey = hashInstrumentUKey(instrument_id, exchange_id);
     const instrumnet: KungfuApi.InstrumentResolved | null =
         findTargetFromArray<KungfuApi.InstrumentResolved>(
-            instruments.value,
+            instruments.data,
             'ukey',
             ukey,
         );
@@ -105,17 +108,18 @@ function handleClickRow(data: {
     <div class="kf-position__warp">
         <KfDashboard>
             <template v-slot:title>
-                <span v-if="currentGlobalKfLocation.value">
+                <span v-if="currentGlobalKfLocation.data">
                     <a-tag
                         v-if="currentCategoryData"
-                        :color="currentCategoryData.color"
+                        :color="currentCategoryData?.color || 'default'"
                     >
-                        {{ currentCategoryData.name }}
+                        {{ currentCategoryData?.name }}
                     </a-tag>
-                    <span class="name" v-if="currentGlobalKfLocation.value">
+                    <span class="name" v-if="currentGlobalKfLocation.data">
                         {{
-                            getIdByKfLocation(currentGlobalKfLocation.value) ||
-                            ''
+                            getCurrentGlobalKfLocationId(
+                                currentGlobalKfLocation.data,
+                            )
                         }}
                     </span>
                 </span>
@@ -134,7 +138,7 @@ function handleClickRow(data: {
                         @click="
                             handleDownload(
                                 'Position',
-                                currentGlobalKfLocation.value,
+                                currentGlobalKfLocation.data,
                             )
                         "
                     >

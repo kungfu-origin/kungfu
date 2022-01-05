@@ -84,8 +84,8 @@ const webpackConfig = (argv) => {
 const prodConfig = {
     plugins: [
         new webpack.DefinePlugin({
-            __VUE_OPTIONS_API__: true,
-            __VUE_PROD_DEVTOOLS__: true,
+            // __VUE_OPTIONS_API__: true,
+            // __VUE_PROD_DEVTOOLS__: true,
             __python_version: `"${pyVersion.toString()}"`,
             'process.env.APP_TYPE': '"renderer"',
         }),
@@ -95,8 +95,8 @@ const prodConfig = {
 const devConfig = {
     plugins: [
         new webpack.DefinePlugin({
-            __VUE_OPTIONS_API__: true,
-            __VUE_PROD_DEVTOOLS__: false,
+            // __VUE_OPTIONS_API__: true,
+            // __VUE_PROD_DEVTOOLS__: true,
             __resources: `"${path
                 .join(rootDir, 'public')
                 .replace(/\\/g, '\\\\')}"`,

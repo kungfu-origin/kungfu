@@ -215,5 +215,6 @@ const run = (distDir, distName = 'app') => {
 module.exports = run;
 
 if (require.main === module) {
+    fse.ensureDirSync(defaultDistDir);
     run(defaultDistDir).catch(console.error);
 }

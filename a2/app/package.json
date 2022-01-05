@@ -13,7 +13,6 @@
     "dependencies": {
         "@electron/remote": "^2.0.1",
         "@kungfu-trader/kungfu-js-api": "*",
-        "@vue/compiler-sfc": "^3.2.26",
         "add": "^2.0.6",
         "ant-design-vue": "^3.0.0-alpha.16",
         "core-js": "^3.6.5",
@@ -29,6 +28,7 @@
         "yarn": "^1.22.17"
     },
     "devDependencies": {
+        "@vue/compiler-sfc": "^3.2.26",
         "@types/node": "^16.11.10",
         "@vue/cli-plugin-babel": "^5.0.0-rc.1",
         "@vue/eslint-config-prettier": "^6.0.0",

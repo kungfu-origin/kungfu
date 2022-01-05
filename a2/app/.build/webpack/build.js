@@ -4,8 +4,9 @@ const { say } = require('cfonts');
 const chalk = require('chalk');
 const fse = require('fs-extra');
 const path = require('path');
-const build = require('webpack');
+const webpack = require('webpack');
 const Multispinner = require('multispinner');
+const defaultDistDir = require('@kungfu-trader/kungfu-app2').defaultDistDir;
 
 function greeting() {
     const isCI = process.env.CI || false;
@@ -27,7 +28,7 @@ function greeting() {
 
 const pack = (config) =>
     new Promise((resolve, reject) => {
-        build(config, (err, stats) => {
+        webpack(config, (err, stats) => {
             if (err) {
                 reject(err.stack || err);
             } else if (stats.hasErrors()) {
@@ -140,8 +141,6 @@ const run = (distDir, distName = 'app') =>
 module.exports = run;
 
 if (require.main === module) {
-    fse.ensureDirSync(require('@kungfu-trader/kungfu-app2').defaultDistDir);
-    run(require('@kungfu-trader/kungfu-app2').defaultDistDir).catch(
-        console.error,
-    );
+    fse.ensureDirSync(defaultDistDir);
+    run(defaultDistDir).catch(console.error);
 }

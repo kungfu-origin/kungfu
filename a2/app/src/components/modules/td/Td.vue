@@ -95,7 +95,7 @@ function handleOpenSetTdDialog(
     currentSelectedSourceId.value = selectedSource;
     setTdConfigPayload.value.type = type;
     setTdConfigPayload.value.title = `${selectedSource} 交易账户`;
-    setTdConfigPayload.value.config = (extConfigs.value['td'] || {})[
+    setTdConfigPayload.value.config = (extConfigs.data['td'] || {})[
         selectedSource
     ];
     setTdConfigPayload.value.initValue = undefined;

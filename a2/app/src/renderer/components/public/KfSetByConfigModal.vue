@@ -41,7 +41,7 @@ defineEmits<{
 const app = getCurrentInstance();
 const { modalVisible, closeModal } = useModalVisible(props.visible);
 const formRef = ref();
-const formState = reactive<Record<string, KungfuApi.KfConfigValue>>(
+const formState = ref<Record<string, KungfuApi.KfConfigValue>>(
     initFormStateByConfig(
         props.payload.config?.settings || [],
         props.payload.initValue,
@@ -63,13 +63,13 @@ function handleConfirm() {
                 .map((item) => item.key);
 
             const idByPrimaryKeys = buildIdByKeysFromKfConfigSettings(
-                formState,
+                formState.value,
                 primaryKeys,
             );
 
             app &&
                 app.emit('confirm', {
-                    formState,
+                    formState: formState.value,
                     idByPrimaryKeys,
                     changeType: props.payload.type,
                 });

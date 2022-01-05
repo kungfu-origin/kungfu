@@ -4,7 +4,6 @@ import {
     getCurrentInstance,
     nextTick,
     onMounted,
-    reactive,
     ref,
     watch,
 } from 'vue';
@@ -33,7 +32,7 @@ interface MakeOrderProps {}
 defineProps<MakeOrderProps>();
 
 const app = getCurrentInstance();
-const formState = reactive(initFormStateByConfig(getConfigSettings(), {}));
+const formState = ref(initFormStateByConfig(getConfigSettings(), {}));
 const formRef = ref();
 const {
     subscribeAllInstrumentByAppStates,
@@ -43,23 +42,26 @@ const { appStates, processStatusData } = useProcessStatusDetailData();
 const { mdExtTypeMap } = useExtConfigsRelated();
 const { triggerOrderBook } = useTriggerMakeOrder();
 
-const { currentGlobalKfLocation, currentCategoryData } =
-    useCurrentGlobalKfLocation(window.watcher);
+const {
+    currentGlobalKfLocation,
+    currentCategoryData,
+    getCurrentGlobalKfLocationId,
+} = useCurrentGlobalKfLocation(window.watcher);
 
 const makeOrderInstrumentType = ref<InstrumentTypeEnum>(
     InstrumentTypeEnum.unknown,
 );
 
 const configSettings = computed(() => {
-    if (!currentGlobalKfLocation.value) {
+    if (!currentGlobalKfLocation.data) {
         return getConfigSettings();
     }
 
-    const { category } = currentGlobalKfLocation.value;
+    const { category } = currentGlobalKfLocation.data;
     return getConfigSettings(
         category,
         makeOrderInstrumentType.value,
-        +formState.price_type,
+        +formState.value.price_type,
     );
 });
 
@@ -75,12 +77,12 @@ onMounted(() => {
                     (data as TriggerMakeOrder).orderInput,
                 );
 
-                formState.instrument = instrumentValue;
-                formState.offset = +offset;
-                formState.side = +side;
-                formState.volume = +Number(volume).toFixed(0);
-                formState.price = +Number(price).toFixed(4);
-                formState.instrument_type = +instrumentType;
+                formState.value.instrument = instrumentValue;
+                formState.value.offset = +offset;
+                formState.value.side = +side;
+                formState.value.volume = +Number(volume).toFixed(0);
+                formState.value.price = +Number(price).toFixed(4);
+                formState.value.instrument_type = +instrumentType;
             }
 
             if (data.tag === 'orderBookUpdate') {
@@ -92,25 +94,25 @@ onMounted(() => {
                     (data as TiggerOrderBookUpdate).orderInput,
                 );
 
-                if (!formState.instrument) {
-                    formState.instrument = instrumentValue;
-                    formState.instrument_type = +instrumentType;
+                if (!formState.value.instrument) {
+                    formState.value.instrument = instrumentValue;
+                    formState.value.instrument_type = +instrumentType;
                 }
                 if (+price !== 0) {
-                    formState.price = +Number(price).toFixed(4);
+                    formState.value.price = +Number(price).toFixed(4);
                 }
                 if (BigInt(volume) !== BigInt(0)) {
-                    formState.volume = +Number(volume).toFixed(0);
+                    formState.value.volume = +Number(volume).toFixed(0);
                 }
 
-                formState.side = +side;
+                formState.value.side = +side;
             }
         });
     }
 });
 
 watch(
-    () => formState.instrument,
+    () => formState.value.instrument,
     (newVal) => {
         const instrumentResolved = transformSearchInstrumentResultToInstrument(
             newVal.toString(),
@@ -135,7 +137,7 @@ watch(
 function handleResetMakeOrderForm() {
     const initFormState = initFormStateByConfig(configSettings.value, {});
     Object.keys(initFormState).forEach((key) => {
-        formState[key] = initFormState[key];
+        formState.value[key] = initFormState[key];
     });
     nextTick().then(() => {
         formRef.value.clearValidate();
@@ -146,7 +148,7 @@ function handleMakeOrder() {
     formRef.value
         .validate()
         .then(() => {
-            const instrument = formState.instrument.toString();
+            const instrument = formState.value.instrument.toString();
             const instrumnetResolved =
                 transformSearchInstrumentResultToInstrument(instrument);
 
@@ -166,7 +168,7 @@ function handleMakeOrder() {
                 side,
                 offset,
                 hedge_flag,
-            } = formState;
+            } = formState.value;
 
             const makeOrderInput: KungfuApi.MakeOrderInput = {
                 instrument_id: instrumentId,
@@ -180,20 +182,20 @@ function handleMakeOrder() {
                 hedge_flag: +(hedge_flag || 0),
             };
 
-            if (!currentGlobalKfLocation.value) {
+            if (!currentGlobalKfLocation.data) {
                 message.error('当前 Location 错误');
                 return;
             }
 
-            if (currentGlobalKfLocation.value.category === 'td') {
+            if (currentGlobalKfLocation.data.category === 'td') {
                 kfMakeOrder(
                     window.watcher,
                     makeOrderInput,
-                    currentGlobalKfLocation.value,
+                    currentGlobalKfLocation.data,
                 ).catch((err) => {
                     message.error(err);
                 });
-            } else if (currentGlobalKfLocation.value.category === 'strategy') {
+            } else if (currentGlobalKfLocation.data.category === 'strategy') {
                 const tdLocation = getMdTdKfLocationByProcessId(
                     `td_${account_id}`,
                 );
@@ -205,7 +207,7 @@ function handleMakeOrder() {
                     window.watcher,
                     makeOrderInput,
                     tdLocation,
-                    currentGlobalKfLocation.value,
+                    currentGlobalKfLocation.data,
                 ).catch((err) => {
                     message.error(err);
                 });
@@ -222,17 +224,18 @@ function handleMakeOrder() {
     <div class="kf-make-order-dashboard__warp">
         <KfDashboard>
             <template v-slot:title>
-                <span v-if="currentGlobalKfLocation.value">
+                <span v-if="currentGlobalKfLocation.data">
                     <a-tag
                         v-if="currentCategoryData"
-                        :color="currentCategoryData.color"
+                        :color="currentCategoryData?.color || 'default'"
                     >
-                        {{ currentCategoryData.name }}
+                        {{ currentCategoryData?.name }}
                     </a-tag>
-                    <span class="name" v-if="currentGlobalKfLocation.value">
+                    <span class="name" v-if="currentGlobalKfLocation.data">
                         {{
-                            getIdByKfLocation(currentGlobalKfLocation.value) ||
-                            ''
+                            getCurrentGlobalKfLocationId(
+                                currentGlobalKfLocation.data,
+                            )
                         }}
                     </span>
                 </span>

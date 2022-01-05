@@ -78,7 +78,7 @@ function handleOpenSetMdDialog(
     currentSelectedSourceId.value = selectedSource;
     setMdConfigPayload.value.type = type;
     setMdConfigPayload.value.title = `${selectedSource} 行情源`;
-    setMdConfigPayload.value.config = (extConfigs.value['md'] || {})[
+    setMdConfigPayload.value.config = (extConfigs.data['md'] || {})[
         selectedSource
     ];
     setMdConfigPayload.value.initValue = undefined;

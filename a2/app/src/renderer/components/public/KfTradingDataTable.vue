@@ -118,12 +118,12 @@ function handleMousedown(e: MouseEvent, row: TradingDataItem) {
                 :key-field="keyField"
                 :buffer="100"
             >
-                <template v-slot="{ item }">
+                <template v-slot="{ item }: { item: any }">
                     <ul
                         class="kf-table-row"
-                        @click="(e) => handleClickRow(e, item)"
-                        @dblclick="(e) => handleDbClickRow(e, item)"
-                        @mousedown="(e) => handleMousedown(e, item)"
+                        @click="handleClickRow($event, item)"
+                        @dblclick="handleDbClickRow($event, item)"
+                        @mousedown="handleMousedown($event, item)"
                     >
                         <li
                             v-for="column in columns"

@@ -247,7 +247,7 @@ watch(appStates, (newAppStates, oldAppStates) => {
                 processStatusData.value,
                 appStates.value,
                 mdExtTypeMap.value,
-                subscribedInstruments.value,
+                subscribedInstruments.data,
             );
         }
     });
