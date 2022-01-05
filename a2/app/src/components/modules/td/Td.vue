@@ -41,8 +41,7 @@ import KfBlinkNum from '@renderer/components/public/KfBlinkNum.vue';
 interface TdProps {}
 defineProps<TdProps>();
 
-const { dashboardBodyHeight, dashboardBodyWidth, handleBodySizeChange } =
-    useDashboardBodySize();
+const { dashboardBodyHeight, handleBodySizeChange } = useDashboardBodySize();
 
 const setSourceModalVisible = ref<boolean>(false);
 const setTdModalVisible = ref<boolean>(false);
@@ -99,6 +98,7 @@ function handleOpenSetTdDialog(
     setTdConfigPayload.value.config = (extConfigs.value['td'] || {})[
         selectedSource
     ];
+    setTdConfigPayload.value.initValue = undefined;
 
     if (type === 'update') {
         if (tdConfig) {
@@ -151,7 +151,7 @@ function handleOpenSetSourceDialog() {
                 :data-source="tableData"
                 size="small"
                 :pagination="false"
-                :scroll="{ y: dashboardBodyHeight - 4, x: dashboardBodyWidth }"
+                :scroll="{ y: dashboardBodyHeight - 4 }"
                 :rowClassName="dealRowClassName"
                 :customRow="customRow"
                 emptyText="暂无数据"

@@ -175,16 +175,16 @@ function handleMousedown(e: MouseEvent, row: TradingDataItem) {
         display: flex;
         flex-direction: row;
         justify-content: flex-start;
-        height: 32px;
-        line-height: 32px;
+        height: 36px;
+        line-height: 36px;
         background: @table-header-bg;
         white-space: nowrap;
         box-sizing: border-box;
         margin-bottom: 4px;
 
         .kf-table-cell {
-            height: 32px;
-            line-height: 32px;
+            height: 36px;
+            line-height: 36px;
             display: inline-block;
             user-select: none;
             position: relative;

@@ -90,6 +90,7 @@ export default defineComponent({
     }
 
     .kf-dashboard__body {
+        width: 100%;
         flex: 1;
         overflow: hidden;
 

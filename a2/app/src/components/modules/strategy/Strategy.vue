@@ -41,8 +41,7 @@ import KfBlinkNum from '@renderer/components/public/KfBlinkNum.vue';
 interface StrategyProps {}
 defineProps<StrategyProps>();
 
-const { dashboardBodyHeight, dashboardBodyWidth, handleBodySizeChange } =
-    useDashboardBodySize();
+const { dashboardBodyHeight, handleBodySizeChange } = useDashboardBodySize();
 
 const setStrategyModalVisible = ref<boolean>(false);
 const setStrategyConfigPayload = ref<KungfuApi.SetKfConfigPayload>({
@@ -107,6 +106,7 @@ function handleOpenSetStrategyDialog(
             },
         ],
     };
+    setStrategyConfigPayload.value.initValue = undefined;
 
     if (type === 'update') {
         if (strategyConfig) {
@@ -162,9 +162,10 @@ function handleOpenFile(kfConfig: KungfuApi.KfConfig) {
                 :data-source="tableData"
                 size="small"
                 :pagination="false"
-                :scroll="{ y: dashboardBodyHeight - 4, x: dashboardBodyWidth }"
+                :scroll="{ y: dashboardBodyHeight - 4 }"
                 :rowClassName="dealRowClassName"
                 :customRow="customRow"
+                :defaultExpandAllRows="true"
                 emptyText="暂无数据"
             >
                 <template

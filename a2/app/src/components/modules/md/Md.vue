@@ -37,8 +37,7 @@ import { KfCategoryTypes } from '@kungfu-trader/kungfu-js-api/typings/enums';
 interface MdProps {}
 defineProps<MdProps>();
 
-const { dashboardBodyHeight, dashboardBodyWidth, handleBodySizeChange } =
-    useDashboardBodySize();
+const { dashboardBodyHeight, handleBodySizeChange } = useDashboardBodySize();
 
 const setSourceModalVisible = ref<boolean>(false);
 const setMdModalVisible = ref<boolean>(false);
@@ -82,6 +81,7 @@ function handleOpenSetMdDialog(
     setMdConfigPayload.value.config = (extConfigs.value['md'] || {})[
         selectedSource
     ];
+    setMdConfigPayload.value.initValue = undefined;
 
     if (type === 'update') {
         if (mdConfig) {
@@ -144,7 +144,7 @@ function handleOpenSetSourceDialog() {
                 :data-source="tableData"
                 size="small"
                 :pagination="false"
-                :scroll="{ y: dashboardBodyHeight - 4, x: dashboardBodyWidth }"
+                :scroll="{ y: dashboardBodyHeight - 4 }"
                 emptyText="暂无数据"
             >
                 <template

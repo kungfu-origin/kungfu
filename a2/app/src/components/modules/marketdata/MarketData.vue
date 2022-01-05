@@ -163,7 +163,7 @@ function handleClickRow(row: KungfuApi.InstrumentResolved) {
                 :data-source="subscribedInstruments.value"
                 size="small"
                 :pagination="false"
-                :scroll="{ y: dashboardBodyHeight - 4, x: dashboardBodyWidth }"
+                :scroll="{ y: dashboardBodyHeight - 4 }"
                 :customRow="handleClickRow"
                 emptyText="暂无数据"
             >

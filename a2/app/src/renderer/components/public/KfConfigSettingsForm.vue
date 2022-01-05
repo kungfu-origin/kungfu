@@ -125,7 +125,10 @@ function isNumberInputType(type: string): boolean {
     return numberInputTypes.includes(type);
 }
 
-function primaryKeyValidator(): Promise<void> {
+const SpecialWordsReg = new RegExp(
+    "[`~!@#$^&*()=|{}':;',\\[\\].<>《》/?~！@#￥……&*（）——|{}【】‘；：”“'。，、？]",
+);
+function primaryKeyValidator(_rule: RuleObject, value: string): Promise<void> {
     const combineValue: string = [
         props.primaryKeyAvoidRepeatCompareExtra || '',
         ...primaryKeys.map((key) => formState[key]),
@@ -139,6 +142,14 @@ function primaryKeyValidator(): Promise<void> {
             .includes(combineValue.toLowerCase())
     ) {
         return Promise.reject(new Error(`${combineValue} 已存在`));
+    }
+
+    if (SpecialWordsReg.test(value)) {
+        return Promise.reject(new Error(`不能含有特殊字符`));
+    }
+
+    if (value.includes('_')) {
+        return Promise.reject(new Error(`不能含有下划线`));
     }
 
     return Promise.resolve();
