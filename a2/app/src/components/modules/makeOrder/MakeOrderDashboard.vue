@@ -1,5 +1,13 @@
 <script setup lang="ts">
-import { computed, reactive, ref, watch } from 'vue';
+import {
+    computed,
+    getCurrentInstance,
+    nextTick,
+    onMounted,
+    reactive,
+    ref,
+    watch,
+} from 'vue';
 import KfDashboard from '@renderer/components/public/KfDashboard.vue';
 import KfDashboardItem from '@renderer/components/public/KfDashboardItem.vue';
 import KfConfigSettingsForm from '@renderer/components/public/KfConfigSettingsForm.vue';
@@ -8,33 +16,23 @@ import {
     getMdTdKfLocationByProcessId,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import {
+    buildInstrumentSelectOptionValue,
     initFormStateByConfig,
     useCurrentGlobalKfLocation,
     useExtConfigsRelated,
-    useInstruments,
     useProcessStatusDetailData,
-    useTriggeMakeOrder,
+    useTriggerMakeOrder,
 } from '@renderer/assets/methods/uiUtils';
 import { getConfigSettings } from './config';
 import { message } from 'ant-design-vue';
 import { kfMakeOrder } from '@kungfu-trader/kungfu-js-api/kungfu';
 import { InstrumentTypeEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';
+import { useInstruments } from '@renderer/assets/methods/actionsUtils';
 
 interface MakeOrderProps {}
 defineProps<MakeOrderProps>();
 
-const makeOrderInstrumentType = ref<InstrumentTypeEnum>(
-    InstrumentTypeEnum.unknown,
-);
-const configSettings = computed(() => {
-    if (!currentGlobalKfLocation.value) {
-        return getConfigSettings();
-    }
-
-    const { category } = currentGlobalKfLocation.value;
-    return getConfigSettings(category, makeOrderInstrumentType.value);
-});
-
+const app = getCurrentInstance();
 const formState = reactive(initFormStateByConfig(getConfigSettings(), {}));
 const formRef = ref();
 const {
@@ -43,10 +41,73 @@ const {
 } = useInstruments();
 const { appStates, processStatusData } = useProcessStatusDetailData();
 const { mdExtTypeMap } = useExtConfigsRelated();
-const { triggeOrderBook } = useTriggeMakeOrder();
+const { triggerOrderBook } = useTriggerMakeOrder();
 
 const { currentGlobalKfLocation, currentCategoryData } =
     useCurrentGlobalKfLocation(window.watcher);
+
+const makeOrderInstrumentType = ref<InstrumentTypeEnum>(
+    InstrumentTypeEnum.unknown,
+);
+
+const configSettings = computed(() => {
+    if (!currentGlobalKfLocation.value) {
+        return getConfigSettings();
+    }
+
+    const { category } = currentGlobalKfLocation.value;
+    return getConfigSettings(
+        category,
+        makeOrderInstrumentType.value,
+        +formState.price_type,
+    );
+});
+
+onMounted(() => {
+    if (app?.proxy) {
+        app.proxy.$bus.subscribe((data: KfBusEvent) => {
+            if (data.tag === 'makeOrder') {
+                const { offset, side, volume, price, instrumentType } = (
+                    data as TriggerMakeOrder
+                ).orderInput;
+
+                const instrumentValue = buildInstrumentSelectOptionValue(
+                    (data as TriggerMakeOrder).orderInput,
+                );
+
+                formState.instrument = instrumentValue;
+                formState.offset = +offset;
+                formState.side = +side;
+                formState.volume = +Number(volume).toFixed(0);
+                formState.price = +Number(price).toFixed(4);
+                formState.instrument_type = +instrumentType;
+            }
+
+            if (data.tag === 'orderBookUpdate') {
+                const { side, price, volume, instrumentType } = (
+                    data as TiggerOrderBookUpdate
+                ).orderInput;
+
+                const instrumentValue = buildInstrumentSelectOptionValue(
+                    (data as TiggerOrderBookUpdate).orderInput,
+                );
+
+                if (!formState.instrument) {
+                    formState.instrument = instrumentValue;
+                    formState.instrument_type = +instrumentType;
+                }
+                if (+price !== 0) {
+                    formState.price = +Number(price).toFixed(4);
+                }
+                if (BigInt(volume) !== BigInt(0)) {
+                    formState.volume = +Number(volume).toFixed(0);
+                }
+
+                formState.side = +side;
+            }
+        });
+    }
+});
 
 watch(
     () => formState.instrument,
@@ -66,10 +127,20 @@ watch(
             [instrumentResolved],
         );
 
-        triggeOrderBook(instrumentResolved);
+        triggerOrderBook(instrumentResolved);
         makeOrderInstrumentType.value = instrumentResolved.instrumentType;
     },
 );
+
+function handleResetMakeOrderForm() {
+    const initFormState = initFormStateByConfig(configSettings.value, {});
+    Object.keys(initFormState).forEach((key) => {
+        formState[key] = initFormState[key];
+    });
+    nextTick().then(() => {
+        formRef.value.clearValidate();
+    });
+}
 
 function handleMakeOrder() {
     formRef.value
@@ -168,7 +239,9 @@ function handleMakeOrder() {
             </template>
             <template v-slot:header>
                 <KfDashboardItem>
-                    <a-button size="small">重置</a-button>
+                    <a-button size="small" @click="handleResetMakeOrderForm">
+                        重置
+                    </a-button>
                 </KfDashboardItem>
             </template>
             <div class="make-order__warp">
@@ -178,16 +251,12 @@ function handleMakeOrder() {
                         v-model:formState="formState"
                         :configSettings="configSettings"
                         changeType="add"
-                        :label-col="4"
-                        :wrapper-col="18"
+                        :label-col="5"
+                        :wrapper-col="14"
                     ></KfConfigSettingsForm>
                 </div>
                 <div class="make-order-btns">
-                    <a-button
-                        size="small"
-                        type="primary"
-                        @click="handleMakeOrder"
-                    >
+                    <a-button size="small" @click="handleMakeOrder">
                         下单
                     </a-button>
                 </div>

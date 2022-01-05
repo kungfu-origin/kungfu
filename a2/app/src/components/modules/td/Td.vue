@@ -13,7 +13,7 @@ import {
 } from '@ant-design/icons-vue';
 
 import { KfCategoryTypes } from '@kungfu-trader/kungfu-js-api/typings/enums';
-import { columns } from './config';
+import { getColumns } from './config';
 import {
     useTableSearchKeyword,
     useExtConfigsRelated,
@@ -78,6 +78,15 @@ const { getAssetsByKfConfig } = useAssets();
 
 const { handleConfirmAddUpdateKfConfig, handleRemoveKfConfig } =
     useAddUpdateRemoveKfConfig();
+
+const columns = getColumns((dataIndex) => {
+    return (a: KungfuApi.KfConfig, b: KungfuApi.KfConfig) => {
+        return (
+            (getAssetsByKfConfig(a)[dataIndex as keyof KungfuApi.Asset] || 0) -
+            (getAssetsByKfConfig(b)[dataIndex as keyof KungfuApi.Asset] || 0)
+        );
+    };
+});
 
 function handleOpenSetTdDialog(
     type = 'add' as KungfuApi.ModalChangeType,

@@ -13,6 +13,9 @@ import {
     Direction,
     OrderStatus,
     HedgeFlag,
+    PriceType,
+    TimeCondition,
+    VolumeCondition,
 } from '../config/tradingConfig';
 import {
     KfCategoryEnum,
@@ -28,6 +31,10 @@ import {
     LedgerCategoryTypes,
     ProcessStatusTypes,
     BrokerStateStatusTypes,
+    PriceTypeEnum,
+    TimeConditionEnum,
+    VolumeConditionEnum,
+    MakeOrderByWatcherEnum,
 } from '../typings/enums';
 import {
     deleteProcess,
@@ -680,7 +687,6 @@ export const getAppStateStatusName = (
     return processStatus;
 };
 
-//TOOD
 export const getPropertyFromProcessStatusDetailDataByKfLocation = (
     processStatusDetailData: Pm2ProcessStatusDetailData,
     kfLocation: KungfuApi.KfLocation | KungfuApi.KfConfig,
@@ -860,7 +866,27 @@ export const dealOrderStatus = (
     };
 };
 
-export const dealInstrumentType = (instrumentType: InstrumentTypeEnum) => {
+export const dealPriceType = (
+    priceType: PriceTypeEnum,
+): KungfuApi.KfTradeValueCommonData => {
+    return PriceType[priceType];
+};
+
+export const dealTimeCondition = (
+    timeCondition: TimeConditionEnum,
+): KungfuApi.KfTradeValueCommonData => {
+    return TimeCondition[timeCondition];
+};
+
+export const dealVolumeCondition = (
+    volumeCondition: VolumeConditionEnum,
+): KungfuApi.KfTradeValueCommonData => {
+    return VolumeCondition[volumeCondition];
+};
+
+export const dealInstrumentType = (
+    instrumentType: InstrumentTypeEnum,
+): KungfuApi.KfTradeValueCommonData => {
     return InstrumentType[instrumentType];
 };
 
@@ -925,7 +951,70 @@ export const dealLocationUID = (
     }
 
     const kfLocation = watcher?.getLocation(uid);
+    if (!kfLocation) return '';
     return getIdByKfLocation(kfLocation);
+};
+
+export const resolveAccountId = (
+    watcher: KungfuApi.Watcher | null,
+    source: number,
+    dest: number,
+    parent_id: bigint,
+): KungfuApi.KfTradeValueCommonData => {
+    if (!watcher) return { color: 'default', name: '--' };
+
+    const accountId = dealLocationUID(watcher, source);
+    const destLocation: KungfuApi.KfLocation = watcher.getLocation(dest);
+
+    if (parent_id === BigInt(MakeOrderByWatcherEnum.Manual)) {
+        return {
+            color: 'yellow',
+            name: `${accountId} 手动`,
+        };
+    }
+
+    if (destLocation && destLocation.group === 'node') {
+        if (parent_id !== BigInt(0)) {
+            return {
+                color: 'blue',
+                name: `${accountId} 任务`,
+            };
+        }
+    }
+
+    return {
+        color: 'text',
+        name: accountId,
+    };
+};
+
+export const resolveClientId = (
+    watcher: KungfuApi.Watcher | null,
+    dest: number,
+    parent_id: bigint,
+): KungfuApi.KfTradeValueCommonData => {
+    if (!watcher) return { color: 'default', name: '--' };
+
+    if (dest === 0) {
+        return { color: 'default', name: '系统外' };
+    }
+
+    const destLocation: KungfuApi.KfLocation = watcher.getLocation(dest);
+    if (!destLocation) return { color: 'default', name: '--' };
+
+    if (destLocation.group === 'node') {
+        if (parent_id !== BigInt(0)) {
+            return { color: 'blue', name: '任务' };
+        } else {
+            return { color: 'yellow', name: '手动' };
+        }
+    } else {
+        if (parent_id !== BigInt(0)) {
+            return { color: 'yellow', name: `${destLocation.name} 手动` }; //是因为策略模块手动下单的时候刻意插入用于区分
+        } else {
+            return { color: 'text', name: destLocation.name };
+        }
+    }
 };
 
 export const getOrderTradeFilterKey = (category: KfCategoryTypes): string => {

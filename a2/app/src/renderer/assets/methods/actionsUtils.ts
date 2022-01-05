@@ -5,15 +5,20 @@ import { deleteAllByKfLocation } from '@kungfu-trader/kungfu-js-api/actions';
 import {
     dealTradingDataItem,
     getKungfuHistoryData,
+    kfRequestMarketData,
 } from '@kungfu-trader/kungfu-js-api/kungfu';
 import { setKfConfig } from '@kungfu-trader/kungfu-js-api/kungfu/store';
 import {
+    BrokerStateStatusTypes,
     HistoryDateEnum,
+    InstrumentTypeEnum,
+    InstrumentTypes,
     KfCategoryTypes,
 } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import {
     getCategoryData,
     getIdByKfLocation,
+    getMdTdKfLocationByProcessId,
     getProcessIdByKfLocation,
     switchKfLocation,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
@@ -26,13 +31,22 @@ import {
     computed,
     ComputedRef,
     getCurrentInstance,
+    h,
+    nextTick,
     onMounted,
+    reactive,
     ref,
     Ref,
 } from 'vue';
 import dayjs from 'dayjs';
 import { Row } from '@fast-csv/format';
 import { KF_SUBSCRIBED_INSTRUMENTS_JSON_PATH } from '@kungfu-trader/kungfu-js-api/config/pathConfig';
+import { AbleSubscribeInstrumentTypesBySourceType } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
+import {
+    buildInstrumentSelectOptionLabel,
+    buildInstrumentSelectOptionValue,
+} from './uiUtils';
+import { storeToRefs } from 'pinia';
 
 export const ensureRemoveLocation = (
     kfLocation: KungfuApi.KfLocation | KungfuApi.KfConfig,
@@ -435,4 +449,198 @@ export const removeSubscribeInstruments = async (
 
     oldInstruments.splice(removeTargetIndex, 1);
     return fse.outputJSON(KF_SUBSCRIBED_INSTRUMENTS_JSON_PATH, oldInstruments);
+};
+
+export const showTradingDataDetail = (
+    item: KungfuApi.TradingDataTypes,
+    typename: string,
+): void => {
+    const dataResolved = dealTradingDataItem(item, window.watcher);
+    const vnode = Object.keys(dataResolved || {})
+        .filter((key) => {
+            return dataResolved[key] !== '';
+        })
+        .map((key) =>
+            h('div', { class: 'trading-data-detail-row' }, [
+                h('span', { class: 'label' }, `${key}`),
+                h('span', { class: 'value' }, `${dataResolved[key]}`),
+            ]),
+        );
+    Modal.confirm({
+        title: `${typename} 详情`,
+        content: h(
+            'div',
+            {
+                class: 'trading-data-detail__warp',
+            },
+            vnode,
+        ),
+        okText: '确认',
+        cancelText: '',
+    });
+};
+
+export const useInstruments = (): {
+    instruments: { value: KungfuApi.InstrumentResolved[] };
+    subscribedInstruments: { value: KungfuApi.InstrumentResolved[] };
+    subscribeAllInstrumentByMdProcessId(
+        processId: string,
+        processStatus: Pm2ProcessStatusData,
+        appStates: Record<string, BrokerStateStatusTypes>,
+        mdExtTypeMap: Record<string, InstrumentTypes>,
+        instrumentsForSubscribe: KungfuApi.InstrumentResolved[],
+    ): void;
+    subscribeAllInstrumentByAppStates(
+        processStatus: Pm2ProcessStatusData,
+        appStates: Record<string, BrokerStateStatusTypes>,
+        mdExtTypeMap: Record<string, InstrumentTypes>,
+        instrumentsForSubscribe: KungfuApi.InstrumentResolved[],
+    ): void;
+
+    searchInstrumentResult: Ref<string | undefined>;
+    searchInstrumnetOptions: Ref<{ value: string; label: string }[]>;
+    transformSearchInstrumentResultToInstrument(
+        instrument: string,
+    ): KungfuApi.InstrumentResolved | null;
+    handleSearchInstrument: (value: string) => void;
+    handleConfirmSearchInstrumentResult: (
+        value: string,
+        callback?: (value: string) => void,
+    ) => void;
+} => {
+    const app = getCurrentInstance();
+    const instrumentsResolved = reactive<{
+        value: KungfuApi.InstrumentResolved[];
+    }>({
+        value: [],
+    });
+
+    const subscribedInstrumentsResolved = reactive<{
+        value: KungfuApi.InstrumentResolved[];
+    }>({
+        value: [],
+    });
+
+    onMounted(() => {
+        if (app?.proxy) {
+            const { instruments, subscribedInstruments } = storeToRefs(
+                app?.proxy.$useGlobalStore(),
+            );
+            instrumentsResolved.value =
+                instruments as KungfuApi.InstrumentResolved[];
+            subscribedInstrumentsResolved.value =
+                subscribedInstruments as KungfuApi.InstrumentResolved[];
+        }
+    });
+
+    const subscribeAllInstrumentByMdProcessId = (
+        processId: string,
+        processStatus: Pm2ProcessStatusData,
+        appStates: Record<string, BrokerStateStatusTypes>,
+        mdExtTypeMap: Record<string, InstrumentTypes>,
+        instrumentsForSubscribe: KungfuApi.InstrumentResolved[],
+    ): void => {
+        if (appStates[processId] === 'Ready') {
+            if (processStatus[processId] === 'online') {
+                if (processId.indexOf('md_') === 0) {
+                    const mdLocation = getMdTdKfLocationByProcessId(processId);
+                    if (mdLocation && mdLocation.category === 'md') {
+                        const sourceId = mdLocation.group;
+                        const sourceType = mdExtTypeMap[sourceId];
+                        const ableSubscribedInstrumentTypes =
+                            AbleSubscribeInstrumentTypesBySourceType[
+                                sourceType
+                            ];
+
+                        instrumentsForSubscribe.forEach((item) => {
+                            if (
+                                ableSubscribedInstrumentTypes.includes(
+                                    +item.instrumentType,
+                                )
+                            ) {
+                                kfRequestMarketData(
+                                    window.watcher,
+                                    item.exchangeId,
+                                    item.instrumentId,
+                                    mdLocation,
+                                );
+                            }
+                        });
+                    }
+                }
+            }
+        }
+    };
+
+    const subscribeAllInstrumentByAppStates = (
+        processStatus: Pm2ProcessStatusData,
+        appStates: Record<string, BrokerStateStatusTypes>,
+        mdExtTypeMap: Record<string, InstrumentTypes>,
+        instrumentsForSubscribe: KungfuApi.InstrumentResolved[],
+    ) => {
+        Object.keys(appStates || {}).forEach((processId) => {
+            subscribeAllInstrumentByMdProcessId(
+                processId,
+                processStatus,
+                appStates,
+                mdExtTypeMap,
+                instrumentsForSubscribe,
+            );
+        });
+    };
+
+    const searchInstrumentResult = ref<string | undefined>(undefined);
+    const searchInstrumnetOptions = ref<{ value: string; label: string }[]>([]);
+
+    const handleSearchInstrument = (val: string): void => {
+        searchInstrumnetOptions.value = instrumentsResolved.value
+            .filter((item) => {
+                return item.id.includes(val);
+            })
+            .slice(0, 20)
+            .map((item) => ({
+                value: buildInstrumentSelectOptionValue(item),
+                label: buildInstrumentSelectOptionLabel(item),
+            }));
+    };
+
+    const handleConfirmSearchInstrumentResult = (
+        value: string,
+        callback?: (value: string) => void,
+    ) => {
+        nextTick().then(() => {
+            searchInstrumentResult.value = undefined;
+        });
+        callback && callback(value);
+    };
+
+    const transformSearchInstrumentResultToInstrument = (
+        instrumentStr: string,
+    ): KungfuApi.InstrumentResolved | null => {
+        const pair = instrumentStr.split('_');
+        if (pair.length !== 5) return null;
+        const [exchangeId, instrumentId, instrumentType, ukey, instrumentName] =
+            pair;
+        return {
+            exchangeId,
+            instrumentId,
+            instrumentType: +instrumentType as InstrumentTypeEnum,
+            instrumentName,
+            id: `${instrumentId}_${instrumentName}_${exchangeId}`.toLowerCase(),
+            ukey,
+        };
+    };
+
+    return {
+        instruments: instrumentsResolved,
+        subscribedInstruments: subscribedInstrumentsResolved,
+        subscribeAllInstrumentByMdProcessId,
+        subscribeAllInstrumentByAppStates,
+
+        searchInstrumentResult,
+        searchInstrumnetOptions,
+        transformSearchInstrumentResultToInstrument,
+        handleSearchInstrument,
+        handleConfirmSearchInstrumentResult,
+    };
 };

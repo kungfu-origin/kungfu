@@ -3,8 +3,6 @@ import { sum } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { Empty } from 'ant-design-vue';
 import { computed, getCurrentInstance, ref } from 'vue';
 
-type TradingDataItem = KungfuApi.Position | KungfuApi.Order | KungfuApi.Trade;
-
 const props = withDefaults(
     defineProps<{
         dataSource: TradingDataItem[];
@@ -80,6 +78,11 @@ function getHeaderWidth(column: KfTradingDataTableHeaderConfig) {
     }
 }
 
+function handleClickRow(e: MouseEvent, row: TradingDataItem) {
+    app && app.emit('clickRow', { event: e, row });
+    clickTimer && clearTimeout(clickTimer);
+}
+
 function handleDbClickRow(e: MouseEvent, row: TradingDataItem) {
     app && app.emit('dbclickRow', { event: e, row });
     clickTimer && clearTimeout(clickTimer);
@@ -89,10 +92,6 @@ function handleMousedown(e: MouseEvent, row: TradingDataItem) {
     if (e.button === 2) {
         app && app.emit('rightClickRow', { event: e, row });
     }
-}
-
-function handleClickRow(e: MouseEvent, row: TradingDataItem) {
-    app && app.emit('clickRow', { event: e, row });
 }
 </script>
 <template>

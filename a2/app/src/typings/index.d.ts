@@ -26,7 +26,7 @@ interface AntTableColumn {
     dataIndex: string;
     key?: string;
     width?: number | string;
-    sorter?: boolean;
+    sorter?: boolean | { compare: (a: any, b: any) => number };
     align?: string;
     fixed?: string;
 }
@@ -66,14 +66,19 @@ interface TriggeOrderBook {
 
 interface ExtraOrderInput {
     side: SideEnum;
-    offset: OffsetEnum;
+    offset?: OffsetEnum;
     volume: number | bigint;
     price: number;
 }
 
-interface TriggeMakeOrder {
+interface TiggerOrderBookUpdate {
+    tag: 'orderBookUpdate';
+    orderInput: InstrumentResolved | ExtraOrderInput;
+}
+
+interface TriggerMakeOrder {
     tag: 'makeOrder';
-    instrument: InstrumentResolved & ExtraOrderInput;
+    orderInput: InstrumentResolved | ExtraOrderInput;
 }
 
 type KfBusEvent =
@@ -82,9 +87,11 @@ type KfBusEvent =
     | MainProcessEvent
     | TradingDataUpdateEvent
     | TriggeOrderBook
-    | TriggeMakeOrder
+    | TiggerOrderBookUpdate
+    | TriggerMakeOrder
     | ExportTradingDataEvent;
 
+type TradingDataItem = KungfuApi.Position | KungfuApi.Order | KungfuApi.Trade;
 interface KfTradingDataTableHeaderConfig {
     name: string;
     dataIndex: string;

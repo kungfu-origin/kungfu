@@ -4,22 +4,37 @@ import {
     dealKfNumber,
     dealKfPrice,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
-import { useQuote, useTriggeMakeOrder } from '@renderer/assets/methods/uiUtils';
-import { computed } from 'vue';
+import {
+    useQuote,
+    useTriggerMakeOrder,
+} from '@renderer/assets/methods/uiUtils';
+import { computed, getCurrentInstance, onMounted, ref } from 'vue';
 import KfBlinkNum from '@renderer/components/public/KfBlinkNum.vue';
+import { SideEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';
 
 interface OrderBookProps {}
 defineProps<OrderBookProps>();
 
-const { currentInstrument } = useTriggeMakeOrder();
+const currentInstrument = ref<KungfuApi.InstrumentResolved | undefined>();
 const { getQuoteByInstrument, getLastPricePercent } = useQuote();
-
+const { triggerOrderBookUpdate } = useTriggerMakeOrder();
+const app = getCurrentInstance();
 const quoteData = computed(() => {
     if (!currentInstrument.value) {
         return null;
     }
 
     return getQuoteByInstrument(currentInstrument.value);
+});
+
+onMounted(() => {
+    if (app?.proxy) {
+        app.proxy.$bus.subscribe((data: KfBusEvent) => {
+            if (data.tag === 'orderbook') {
+                currentInstrument.value = data.instrument;
+            }
+        });
+    }
 });
 
 const askPrices = computed(() => {
@@ -53,6 +68,36 @@ const bidVolume = computed(() => {
 
     return quoteData.value.bid_volume;
 });
+
+function handleTriggerBuyOrderBookPriceVolume(
+    price: number,
+    volume: number | bigint,
+) {
+    if (!currentInstrument.value) {
+        return;
+    }
+
+    triggerOrderBookUpdate(currentInstrument.value, {
+        side: SideEnum.Buy,
+        price,
+        volume: BigInt(volume),
+    });
+}
+
+function handleTriggerSellOrderBookPriceVolume(
+    price: number,
+    volume: number | bigint,
+) {
+    if (!currentInstrument.value) {
+        return;
+    }
+
+    triggerOrderBookUpdate(currentInstrument.value, {
+        side: SideEnum.Sell,
+        price,
+        volume: BigInt(volume),
+    });
+}
 </script>
 <template>
     <div class="kf-order-book__warp">
@@ -61,10 +106,27 @@ const bidVolume = computed(() => {
                 class="level-row"
                 v-for="(item, index) in Array(10)"
                 :key="index"
+                @click=""
             >
-                <div class="buy volume"></div>
+                <div
+                    class="buy volume"
+                    @click="
+                        handleTriggerBuyOrderBookPriceVolume(
+                            askPrices[9 - index],
+                            0,
+                        )
+                    "
+                ></div>
                 <div class="price">{{ dealKfPrice(askPrices[9 - index]) }}</div>
-                <div class="sell volume">
+                <div
+                    class="sell volume"
+                    @click="
+                        handleTriggerSellOrderBookPriceVolume(
+                            askPrices[9 - index],
+                            askVolume[9 - index],
+                        )
+                    "
+                >
                     {{ dealKfNumber(askVolume[9 - index]) }}
                 </div>
             </div>
@@ -110,11 +172,27 @@ const bidVolume = computed(() => {
                 v-for="(item, index) in Array(10)"
                 :key="index"
             >
-                <div class="buy volume">
+                <div
+                    class="buy volume"
+                    @click="
+                        handleTriggerBuyOrderBookPriceVolume(
+                            bidPrices[index],
+                            bidVolume[index],
+                        )
+                    "
+                >
                     {{ dealKfNumber(bidVolume[index]) }}
                 </div>
                 <div class="price">{{ dealKfPrice(bidPrices[index]) }}</div>
-                <div class="sell volume"></div>
+                <div
+                    class="sell volume"
+                    @click="
+                        handleTriggerSellOrderBookPriceVolume(
+                            bidPrices[index],
+                            0,
+                        )
+                    "
+                ></div>
             </div>
         </div>
     </div>
@@ -127,6 +205,7 @@ const bidVolume = computed(() => {
     display: flex;
     flex-direction: column;
     padding: 8px 8px;
+    overflow: auto;
 
     .level-book {
         flex: 1;

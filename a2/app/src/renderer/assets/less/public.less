@@ -171,6 +171,12 @@
 .color-green {
     color: @green2-base;
 }
+.color-gray {
+    color: @text-color-secondary;
+}
+.color-text {
+    color: @text-color;
+}
 
 .keyframes (@prefix,@name,@content) when (@prefix=def) {
     @keyframes @name {
@@ -256,4 +262,21 @@
 .ant-btn-dangerous.ant-btn-primary {
     background: @red-6;
     border-color: @red-6;
+}
+
+.trading-data-detail__warp {
+    user-select: text;
+
+    .trading-data-detail-row {
+        .label,
+        .value {
+            display: inline-block;
+            font-size: 12px;
+        }
+
+        .label {
+            color: @text-color-secondary;
+            padding-right: 8px;
+        }
+    }
 }

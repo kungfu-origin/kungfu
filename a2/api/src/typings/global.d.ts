@@ -68,9 +68,11 @@ declare namespace KungfuApi {
         | 'pink'
         | 'red'
         | 'blue'
+        | 'gray'
         | 'purple'
         | 'cyan'
         | 'green'
+        | 'text'
         | 'kf-color-running'
         | 'kf-color-waiting'
         | 'kf-color-error';
@@ -87,6 +89,7 @@ declare namespace KungfuApi {
         | 'str'
         | 'password'
         | 'file' // string
+        | 'folder'
         | 'process'
         | 'instrumentId' // search input
         | 'account' // select - string
@@ -109,7 +112,13 @@ declare namespace KungfuApi {
         | 'instrument'
         | 'td';
 
-    export type KfConfigValue = string | number | boolean;
+    export type KfConfigValue =
+        | string
+        | number
+        | boolean
+        | string[]
+        | number[]
+        | boolean[];
 
     export interface KfSelectOption {
         value: string | number;
@@ -592,6 +601,17 @@ declare namespace KungfuApi {
 
     export type TradingDataTypeName = keyof TradingData;
 
+    export interface Commission {
+        product_id: string;
+        exchange_id: string;
+        instrument_type: InstrumentTypeEnum;
+        mode: CommissionModeEnum;
+        open_ratio: number;
+        close_ratio: number;
+        close_today_ratio: number;
+        min_commission: number;
+    }
+
     export interface Watcher {
         appStates: Record<string, BrokerStateStatusEnum>;
         ledger: TradingData;
@@ -628,6 +648,11 @@ declare namespace KungfuApi {
         selectPeriod(from: string, to: string): TradingData;
     }
 
+    export interface CommissionStore {
+        getAllCommission(): Commission[];
+        setAllCommission(commissions: Commission[]): boolean;
+    }
+
     export interface Longfist {
         Asset(): Asset;
         AssetSnapshot(): AssetSnapshot;
@@ -642,10 +667,12 @@ declare namespace KungfuApi {
         Quote(): Quote;
         TimeValue(): TimeValue;
         Trade(): Trade;
+        Commission(): Commission;
     }
 
     export interface Kungfu {
         ConfigStore(kfHome: string): ConfigStore;
+        CommissionStore(kfHome: string): CommissionStore;
         History(kfHome: string): HistoryStore;
         longfist: Longfist;
         watcher(

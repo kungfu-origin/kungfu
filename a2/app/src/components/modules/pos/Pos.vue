@@ -10,9 +10,8 @@ import {
 import {
     useCurrentGlobalKfLocation,
     useDownloadHistoryTradingData,
-    useInstruments,
     useTableSearchKeyword,
-    useTriggeMakeOrder,
+    useTriggerMakeOrder,
 } from '@renderer/assets/methods/uiUtils';
 import KfDashboard from '@renderer/components/public/KfDashboard.vue';
 import KfDashboardItem from '@renderer/components/public/KfDashboardItem.vue';
@@ -27,7 +26,7 @@ import {
     OffsetEnum,
     SideEnum,
 } from '@kungfu-trader/kungfu-js-api/typings/enums';
-import { Offset } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
+import { useInstruments } from '@renderer/assets/methods/actionsUtils';
 
 const app = getCurrentInstance();
 const pos = ref<KungfuApi.Position[]>([]);
@@ -38,7 +37,7 @@ const { searchKeyword, tableData } = useTableSearchKeyword<KungfuApi.Position>(
 const { currentGlobalKfLocation, currentCategoryData } =
     useCurrentGlobalKfLocation(window.watcher);
 const { handleDownload } = useDownloadHistoryTradingData();
-const { triggeOrderBook, triggeMakeOrder } = useTriggeMakeOrder();
+const { triggerOrderBook, triggerMakeOrder } = useTriggerMakeOrder();
 const { instruments } = useInstruments();
 
 onMounted(() => {
@@ -62,7 +61,11 @@ onMounted(() => {
     }
 });
 
-function handleClickRow({ row }: { row: KungfuApi.Position }) {
+function handleClickRow(data: {
+    event: MouseEvent;
+    row: KungfuApi.Position | KungfuApi.Order | KungfuApi.Trade;
+}) {
+    const row = data.row as KungfuApi.Position;
     const { instrument_id, instrument_type, exchange_id } = row;
     const ukey = hashInstrumentUKey(instrument_id, exchange_id);
     const instrumnet: KungfuApi.InstrumentResolved | null =
@@ -81,7 +84,7 @@ function handleClickRow({ row }: { row: KungfuApi.Position }) {
         id: `${instrument_id}_${instrumentName}_${exchange_id}`.toLowerCase(),
     };
 
-    triggeOrderBook(ensuredInstrument);
+    triggerOrderBook(ensuredInstrument);
     const extraOrderInput: ExtraOrderInput = {
         side: row.direction === 0 ? SideEnum.Sell : SideEnum.Buy,
         offset:
@@ -95,7 +98,7 @@ function handleClickRow({ row }: { row: KungfuApi.Position }) {
 
         price: row.last_price || 0,
     };
-    triggeMakeOrder(ensuredInstrument, extraOrderInput);
+    triggerMakeOrder(ensuredInstrument, extraOrderInput);
 }
 </script>
 <template>

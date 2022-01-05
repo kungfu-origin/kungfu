@@ -1,4 +1,8 @@
-export const columns: AntTableColumns = [
+export const getColumns = (
+    sorter: (
+        dataIndex: string,
+    ) => (a: KungfuApi.KfConfig, b: KungfuApi.KfConfig) => number,
+): AntTableColumns => [
     {
         title: '账户',
         dataIndex: 'name',
@@ -31,28 +35,36 @@ export const columns: AntTableColumns = [
         title: '浮动盈亏',
         dataIndex: 'unrealizedPnl',
         align: 'right',
-        sorter: true,
+        sorter: {
+            compare: sorter('unrealized_pnl'),
+        },
         width: 110,
     },
     {
         title: '市值',
         dataIndex: 'marketValue',
         align: 'right',
-        sorter: true,
+        sorter: {
+            compare: sorter('market_value'),
+        },
         width: 110,
     },
     {
         title: '保证金',
         dataIndex: 'margin',
         align: 'right',
-        sorter: true,
+        sorter: {
+            compare: sorter('margin'),
+        },
         width: 110,
     },
     {
         title: '可用资金',
         dataIndex: 'avail',
         align: 'right',
-        sorter: true,
+        sorter: {
+            compare: sorter('avail'),
+        },
         width: 110,
     },
     {

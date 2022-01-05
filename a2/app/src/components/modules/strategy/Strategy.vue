@@ -22,7 +22,7 @@ import {
     useAssets,
     useCurrentGlobalKfLocation,
 } from '@renderer/assets/methods/uiUtils';
-import { columns } from './config';
+import { getColumns } from './config';
 import {
     handleSwitchProcessStatus,
     useAddUpdateRemoveKfConfig,
@@ -73,6 +73,15 @@ const { getAssetsByKfConfig } = useAssets();
 
 const { handleConfirmAddUpdateKfConfig, handleRemoveKfConfig } =
     useAddUpdateRemoveKfConfig();
+
+const columns = getColumns((dataIndex) => {
+    return (a: KungfuApi.KfConfig, b: KungfuApi.KfConfig) => {
+        return (
+            (getAssetsByKfConfig(a)[dataIndex as keyof KungfuApi.Asset] || 0) -
+            (getAssetsByKfConfig(b)[dataIndex as keyof KungfuApi.Asset] || 0)
+        );
+    };
+});
 
 function handleOpenSetStrategyDialog(
     type: KungfuApi.ModalChangeType,
@@ -191,15 +200,6 @@ function handleOpenFile(kfConfig: KungfuApi.KfConfig) {
                             "
                         ></KfBlinkNum>
                     </template>
-                    <template v-else-if="column.dataIndex === 'avail'">
-                        <KfBlinkNum
-                            :num="
-                                dealAssetPrice(
-                                    getAssetsByKfConfig(record).avail,
-                                )
-                            "
-                        ></KfBlinkNum>
-                    </template>
                     <template v-else-if="column.dataIndex === 'marketValue'">
                         <KfBlinkNum
                             :num="
@@ -208,9 +208,6 @@ function handleOpenFile(kfConfig: KungfuApi.KfConfig) {
                                 )
                             "
                         ></KfBlinkNum>
-                    </template>
-                    <template v-else-if="column.dataIndex === 'margin'">
-                        {{ dealAssetPrice(getAssetsByKfConfig(record).margin) }}
                     </template>
                     <template v-else-if="column.dataIndex === 'actions'">
                         <div class="kf-actions__warp">

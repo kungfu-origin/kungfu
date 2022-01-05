@@ -4,12 +4,13 @@ import {
     dealSide,
     dealOffset,
     dealOrderStatus,
-    dealLocationUID,
     getIdByKfLocation,
     delayMilliSeconds,
     dealTradingData,
     dealOrderStat,
     getCategoryData,
+    resolveAccountId,
+    resolveClientId,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import {
     useCurrentGlobalKfLocation,
@@ -45,6 +46,7 @@ import type { Dayjs } from 'dayjs';
 import { UnfinishedOrderStatus } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
 import { OrderStatusEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import { message, Modal } from 'ant-design-vue';
+import { showTradingDataDetail } from '@renderer/assets/methods/actionsUtils';
 
 const app = getCurrentInstance();
 
@@ -143,8 +145,20 @@ function isFinishedOrderStatus(orderStatus: OrderStatusEnum): boolean {
     return UnfinishedOrderStatus.indexOf(orderStatus) === -1;
 }
 
-function dealLocationUIDResolved(uid: number): string {
-    return dealLocationUID(window.watcher, uid);
+function dealLocationUIDResolved(
+    item: KungfuApi.Order,
+    dataIndex: string,
+): KungfuApi.KfTradeValueCommonData {
+    if (dataIndex === 'source') {
+        return resolveAccountId(
+            window.watcher,
+            item.source,
+            item.dest,
+            item.parent_id,
+        );
+    } else {
+        return resolveClientId(window.watcher, item.dest, item.parent_id);
+    }
 }
 
 function dealOrderStatResolved(orderUKey: string): {
@@ -223,6 +237,18 @@ function handleCancelAllOrders(): void {
         },
     });
 }
+
+function handleShowTradingDataDetail({
+    row,
+}: {
+    event: MouseEvent;
+    row: TradingDataItem;
+}) {
+    showTradingDataDetail(row as KungfuApi.Order, '委托');
+}
+
+resolveClientId;
+resolveAccountId;
 </script>
 <template>
     <div class="kf-orders__warp">
@@ -294,6 +320,7 @@ function handleCancelAllOrders(): void {
                 :columns="columns"
                 :dataSource="tableData"
                 keyField="uid_key"
+                @rightClickRow="handleShowTradingDataDetail"
             >
                 <template
                     v-slot:default="{
@@ -356,7 +383,21 @@ function handleCancelAllOrders(): void {
                             column.dataIndex === 'dest'
                         "
                     >
-                        {{ dealLocationUIDResolved(item[column.dataIndex]) }}
+                        <span
+                            :class="[
+                                `color-${
+                                    dealLocationUIDResolved(
+                                        item,
+                                        column.dataIndex,
+                                    ).color
+                                }`,
+                            ]"
+                        >
+                            {{
+                                dealLocationUIDResolved(item, column.dataIndex)
+                                    .name
+                            }}
+                        </span>
                     </template>
                     <template v-else-if="column.dataIndex === 'actions'">
                         <CloseOutlined

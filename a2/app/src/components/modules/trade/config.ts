@@ -8,13 +8,13 @@ export const getColumns = (
         type: 'string',
         name: '成交时间',
         dataIndex: 'trade_time',
-        width: isHistory ? 140 : 100,
+        width: isHistory ? 180 : 120,
     },
     {
         type: 'string',
         name: '系统时间',
         dataIndex: 'kf_time',
-        width: isHistory ? 140 : 100,
+        width: isHistory ? 180 : 120,
     },
     {
         type: 'string',

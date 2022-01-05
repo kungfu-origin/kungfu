@@ -8,19 +8,25 @@ import {
     dealLocationUID,
     dealOffset,
     dealOrderStatus,
+    dealPriceType,
     dealSide,
+    dealTimeCondition,
     dealTradingData,
+    dealVolumeCondition,
     getIdByKfLocation,
     getOrderTradeFilterKey,
     kfLogger,
+    resolveAccountId,
+    resolveClientId,
 } from '../utils/busiUtils';
-import { HistoryDateEnum } from '../typings/enums';
+import { HistoryDateEnum, MakeOrderByWatcherEnum } from '../typings/enums';
 
 export const kf = kungfu();
 kfLogger.info('Load kungfu node');
 
 export const configStore = kf.ConfigStore(KF_RUNTIME_DIR);
 export const history = kf.History(KF_RUNTIME_DIR);
+export const commissionStore = kf.CommissionStore(KF_RUNTIME_DIR);
 export const longfist = kf.longfist;
 
 export const dealKfTime = (nano: bigint, date = false): string => {
@@ -29,9 +35,9 @@ export const dealKfTime = (nano: bigint, date = false): string => {
     }
 
     if (date) {
-        return kf.formatTime(nano, '%m/%d %H:%M:%S');
+        return kf.formatTime(nano, '%m/%d %H:%M:%S.%N').slice(0, 18);
     }
-    return kf.formatTime(nano, '%H:%M:%S');
+    return kf.formatTime(nano, '%H:%M:%S.%N').slice(0, 12);
 };
 
 export const dealTradingDataItem = (
@@ -57,26 +63,65 @@ export const dealTradingDataItem = (
     if ('offset' in item) {
         itemResolved.offset = dealOffset(item.offset).name;
     }
-    if ('status' in item && 'error_msg' in item) {
+    if ('status' in item) {
         itemResolved.status = dealOrderStatus(
             item.status,
             item.error_msg || '',
-        );
+        ).name;
     }
+    if ('price_type' in item) {
+        itemResolved.price_type = dealPriceType(item.price_type).name;
+    }
+
+    if ('volume_condition' in item) {
+        itemResolved.volume_condition = dealVolumeCondition(
+            item.volume_condition,
+        ).name;
+    }
+
+    if ('time_condition' in item) {
+        itemResolved.time_condition = dealTimeCondition(
+            item.time_condition,
+        ).name;
+    }
+
     if ('instrument_type' in item) {
         itemResolved.instrument_type = dealInstrumentType(
             item.instrument_type,
         ).name;
     }
-
     if ('hedge_flag' in item) {
         itemResolved.hedge_flag = dealHedgeFlag(item.hedge_flag).name;
     }
-    if ('source' in item && watcher) {
-        itemResolved.source = dealLocationUID(watcher, item.source);
+    if ('source' in item && watcher && 'parent_id' in item) {
+        itemResolved.source = resolveAccountId(
+            watcher,
+            item.source,
+            item.dest,
+            item.parent_id,
+        ).name;
     }
-    if ('dest' in item && watcher) {
-        itemResolved.dest = dealLocationUID(watcher, item.dest);
+    if ('dest' in item && watcher && 'parent_id' in item) {
+        itemResolved.dest = resolveClientId(
+            watcher,
+            item.dest,
+            item.parent_id,
+        ).name;
+    }
+    if ('source' in item && watcher && 'parent_order_id' in item) {
+        itemResolved.source = resolveAccountId(
+            watcher,
+            item.source,
+            item.dest,
+            item.parent_order_id,
+        ).name;
+    }
+    if ('dest' in item && watcher && 'parent_order_id' in item) {
+        itemResolved.dest = resolveClientId(
+            watcher,
+            item.dest,
+            item.parent_order_id,
+        ).name;
     }
     if ('holder_uid' in item && watcher) {
         itemResolved.holder_uid = dealLocationUID(watcher, item.holder_uid);
@@ -347,7 +392,7 @@ export const kfMakeOrder = (
             watcher.issueOrder(
                 {
                     ...orderInput,
-                    parent_id: now,
+                    parent_id: BigInt(MakeOrderByWatcherEnum.Manual),
                 },
                 tdLocation,
                 strategyLocation,

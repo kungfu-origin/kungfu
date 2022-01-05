@@ -1,5 +1,5 @@
 import fse from 'fs-extra';
-import { KF_CONFIG_PATH } from './pathConfig';
+import { KF_CONFIG_PATH, EXTENSION_DIR } from './pathConfig';
 
 const isEnglish = false;
 
@@ -10,6 +10,36 @@ export interface KfSystemConfig {
 }
 
 export const getKfGlobalSettings = (): KfSystemConfig[] => [
+    {
+        key: 'system',
+        name: isEnglish ? 'System' : '系统',
+        config: [
+            {
+                key: 'extPaths',
+                name: isEnglish ? 'Extension Paths' : '系统插件路径',
+                tip: isEnglish
+                    ? 'System extensions path setting'
+                    : '系统插件包含柜台, 任务插件等, 如有额外的插件, 可设置对应插件路径',
+                default: [EXTENSION_DIR],
+                type: 'folder',
+            },
+            {
+                key: 'logLevel',
+                name: isEnglish ? 'Log level' : '全局日志级别',
+                tip: isEnglish ? 'For all log' : '对系统内所有日志级别的设置',
+                type: 'select',
+                options: [
+                    { value: '-l trace', label: 'TRACE' },
+                    { value: '-l debug', label: 'DEBUG' },
+                    { value: '-l info', label: 'INFO' },
+                    { value: '-l warning', label: 'WARN' },
+                    { value: '-l error', label: 'ERROR' },
+                    { value: '-l critical', label: 'CRITICAL' },
+                ],
+                default: '-l info',
+            },
+        ],
+    },
     {
         key: '性能',
         name: isEnglish ? 'Performance' : '性能',
@@ -57,27 +87,6 @@ export const getKfGlobalSettings = (): KfSystemConfig[] => [
                     : '功夫将会以选择的python路径运行策略，同时需要保证 kungfu*.whl 已经通过 pip安装',
                 default: '',
                 type: 'file',
-            },
-        ],
-    },
-    {
-        key: 'log',
-        name: isEnglish ? 'Log' : '日志',
-        config: [
-            {
-                key: 'level',
-                name: isEnglish ? 'Log level' : '全局日志级别',
-                tip: isEnglish ? 'For all log' : '对系统内所有日志级别的设置',
-                type: 'select',
-                options: [
-                    { value: '-l trace', label: 'TRACE' },
-                    { value: '-l debug', label: 'DEBUG' },
-                    { value: '-l info', label: 'INFO' },
-                    { value: '-l warning', label: 'WARN' },
-                    { value: '-l error', label: 'ERROR' },
-                    { value: '-l critical', label: 'CRITICAL' },
-                ],
-                default: '-l info',
             },
         ],
     },

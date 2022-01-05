@@ -15,7 +15,6 @@ import {
     markClearJournal,
     removeLoadingMask,
     useExtConfigsRelated,
-    useInstruments,
     useIpcListener,
     useProcessStatusDetailData,
 } from '@renderer/assets/methods/uiUtils';
@@ -23,6 +22,7 @@ import bus from '@kungfu-trader/kungfu-js-api/utils/globalBus';
 import {
     preQuitTasks,
     useDealExportHistoryTradingData,
+    useInstruments,
 } from '@renderer/assets/methods/actionsUtils';
 import { ipcRenderer } from 'electron';
 import {

@@ -1,24 +1,33 @@
 <script setup lang="ts">
 import { dialog } from '@electron/remote';
-import { DashOutlined } from '@ant-design/icons-vue';
+import { DashOutlined, CloseOutlined } from '@ant-design/icons-vue';
 import {
     PriceTypeEnum,
     SideEnum,
 } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import {
+    buildInstrumentSelectOptionLabel,
+    buildInstrumentSelectOptionValue,
     numberEnumRadioType,
     numberEnumSelectType,
     stringEnumSelectType,
     useAllKfConfigData,
-    useInstruments,
 } from '@renderer/assets/methods/uiUtils';
-import { getCurrentInstance, reactive, ref, toRefs, watch } from 'vue';
+import {
+    getCurrentInstance,
+    nextTick,
+    reactive,
+    ref,
+    toRefs,
+    watch,
+} from 'vue';
 import {
     PriceType,
     Side,
 } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
 import { getIdByKfLocation } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { RuleObject } from 'ant-design-vue/lib/form';
+import { useInstruments } from '@renderer/assets/methods/actionsUtils';
 
 const props = withDefaults(
     defineProps<{
@@ -71,7 +80,29 @@ const {
 } = useInstruments();
 const { td } = toRefs(useAllKfConfigData());
 
-function getValidatorType(type: string): 'number' | 'string' {
+watch(
+    () => formState.instrument,
+    (newVal) => {
+        nextTick().then(() => {
+            const instrumentResolved: KungfuApi.InstrumentResolved | null =
+                transformSearchInstrumentResultToInstrument(newVal.toString());
+
+            if (!instrumentResolved) {
+                formState.instrument = '';
+                return;
+            }
+
+            searchInstrumnetOptions.value = [
+                {
+                    value: buildInstrumentSelectOptionValue(instrumentResolved),
+                    label: buildInstrumentSelectOptionLabel(instrumentResolved),
+                },
+            ];
+        });
+    },
+);
+
+function getValidatorType(type: string): 'number' | 'string' | 'array' {
     const intTypes: string[] = [
         'int',
         ...Object.keys(numberEnumSelectType || {}),
@@ -82,6 +113,8 @@ function getValidatorType(type: string): 'number' | 'string' {
         return 'number';
     } else if (floatTypes.includes(type)) {
         return 'number';
+    } else if (type === 'folder') {
+        return 'array';
     } else {
         return 'string';
     }
@@ -112,7 +145,6 @@ function primaryKeyValidator(): Promise<void> {
 }
 
 function noZeroValidator(_rule: RuleObject, value: number): Promise<void> {
-    console.log(value, '---');
     if (Number.isNaN(+value)) {
         return Promise.reject(new Error(`请输入非零数字`));
     }
@@ -145,7 +177,7 @@ function getKfTradeValueName(
     return data[key].name;
 }
 
-function handleSelectFile(targetKey: string) {
+function handleSelectFile(targetKey: string): void {
     dialog
         .showOpenDialog({
             properties: ['openFile'],
@@ -159,12 +191,38 @@ function handleSelectFile(targetKey: string) {
         });
 }
 
+function handleSelectFiles(targetKey: string): void {
+    dialog
+        .showOpenDialog({
+            properties: ['openDirectory'],
+        })
+        .then((res) => {
+            const { filePaths } = res;
+            if (filePaths.length) {
+                (formState[targetKey] as string[]).push(filePaths[0]);
+                formRef.value.validateFields([targetKey]); //手动进行再次验证，因数据放在span中，改变数据后无法触发验证
+            }
+        });
+}
+
+function handleRemoveFile(key: string, filename: string): void {
+    const index = (formState[key] as string[]).indexOf(filename);
+    if (index !== -1) {
+        (formState[key] as string[]).splice(index, 1);
+    }
+}
+
 function validate(): Promise<void> {
     return formRef.value.validate();
 }
 
+function clearValidate(): void {
+    return formRef.value.clearValidate();
+}
+
 defineExpose({
     validate,
+    clearValidate,
 });
 </script>
 <template>
@@ -392,16 +450,38 @@ defineExpose({
                 class="kf-form-item__warp file"
                 :disabled="changeType === 'update' && item.primary"
             >
-                <span
+                <a-button size="small" @click="handleSelectFile(item.key)">
+                    <template #icon><DashOutlined /></template>
+                </a-button>
+                <div
                     v-if="formState[item.key]"
                     class="file-path"
                     :title="(formState[item.key] || '').toString()"
                 >
-                    {{ formState[item.key] }}
-                </span>
-                <a-button size="small" @click="handleSelectFile(item.key)">
+                    <span class="name">{{ formState[item.key] }}</span>
+                </div>
+            </div>
+            <div
+                v-else-if="item.type === 'folder'"
+                class="kf-form-item__warp file"
+                :disabled="changeType === 'update' && item.primary"
+            >
+                <a-button size="small" @click="handleSelectFiles(item.key)">
                     <template #icon><DashOutlined /></template>
                 </a-button>
+                <div
+                    v-if="formState[item.key]"
+                    class="file-path"
+                    v-for="file in formState[item.key] as string[] || []"
+                    :title="file"
+                >
+                    <span class="name">{{ file }}</span>
+                    <close-outlined
+                        v-if="!(item.default as string[]).includes(file)"
+                        class="kf-hover"
+                        @click="handleRemoveFile(item.key, file)"
+                    />
+                </div>
             </div>
         </a-form-item>
     </a-form>
@@ -410,16 +490,17 @@ defineExpose({
 .kf-config-form {
     .kf-form-item__warp {
         &.file {
-            display: flex;
-            justify-content: space-between;
-            align-items: top;
             padding-bottom: 4px;
 
-            span.file-path {
-                flex: 1;
+            div.file-path {
                 word-break: break-word;
-                padding-right: 20px;
+                margin-top: 8px;
                 box-sizing: border-box;
+
+                .name {
+                    padding-right: 16px;
+                    box-sizing: border-box;
+                }
             }
 
             button {

@@ -3,11 +3,12 @@ import {
     dealKfPrice,
     dealSide,
     dealOffset,
-    dealLocationUID,
     getIdByKfLocation,
     delayMilliSeconds,
     dealTradingData,
     dealOrderStat,
+    resolveAccountId,
+    resolveClientId,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import {
     useCurrentGlobalKfLocation,
@@ -37,6 +38,7 @@ import {
     getKungfuHistoryData,
 } from '@kungfu-trader/kungfu-js-api/kungfu';
 import type { Dayjs } from 'dayjs';
+import { showTradingDataDetail } from '@renderer/assets/methods/actionsUtils';
 
 const app = getCurrentInstance();
 
@@ -119,8 +121,20 @@ watch(historyDate, async (newDate) => {
     historyDataLoading.value = false;
 });
 
-function dealLocationUIDResolved(uid: number): string {
-    return dealLocationUID(window.watcher, uid);
+function dealLocationUIDResolved(
+    item: KungfuApi.Trade,
+    dataIndex: string,
+): KungfuApi.KfTradeValueCommonData {
+    if (dataIndex === 'source') {
+        return resolveAccountId(
+            window.watcher,
+            item.source,
+            item.dest,
+            item.parent_order_id,
+        );
+    } else {
+        return resolveClientId(window.watcher, item.dest, item.parent_order_id);
+    }
 }
 
 function dealOrderStatResolved(order_id: bigint): {
@@ -131,6 +145,15 @@ function dealOrderStatResolved(order_id: bigint): {
 } | null {
     const orderUKey = order_id.toString(16).padStart(16, '0');
     return dealOrderStat(Ledger, orderUKey);
+}
+
+function handleShowTradingDataDetail({
+    row,
+}: {
+    event: MouseEvent;
+    row: TradingDataItem;
+}) {
+    showTradingDataDetail(row as KungfuApi.Trade, '成交');
 }
 </script>
 <template>
@@ -188,6 +211,7 @@ function dealOrderStatResolved(order_id: bigint): {
                 :columns="columns"
                 :dataSource="tableData"
                 keyField="trade_id"
+                @rightClickRow="handleShowTradingDataDetail"
             >
                 <template
                     v-slot:default="{
@@ -235,7 +259,21 @@ function dealOrderStatResolved(order_id: bigint): {
                             column.dataIndex === 'dest'
                         "
                     >
-                        {{ dealLocationUIDResolved(item[column.dataIndex]) }}
+                        <span
+                            :class="[
+                                `color-${
+                                    dealLocationUIDResolved(
+                                        item,
+                                        column.dataIndex,
+                                    ).color
+                                }`,
+                            ]"
+                        >
+                            {{
+                                dealLocationUIDResolved(item, column.dataIndex)
+                                    .name
+                            }}
+                        </span>
                     </template>
                 </template>
             </KfTradingDataTable>

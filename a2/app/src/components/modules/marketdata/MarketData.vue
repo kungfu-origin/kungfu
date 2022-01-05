@@ -6,10 +6,9 @@ import KfBlinkNum from '@renderer/components/public/KfBlinkNum.vue';
 import {
     useDashboardBodySize,
     useExtConfigsRelated,
-    useInstruments,
     useProcessStatusDetailData,
     useQuote,
-    useTriggeMakeOrder,
+    useTriggerMakeOrder,
 } from '@renderer/assets/methods/uiUtils';
 import { computed, getCurrentInstance } from 'vue';
 import { getColumns } from './config';
@@ -17,6 +16,7 @@ import { ExchangeIds } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
 import {
     addSubscribeInstruments,
     removeSubscribeInstruments,
+    useInstruments,
 } from '@renderer/assets/methods/actionsUtils';
 import { StarFilled, PlusOutlined } from '@ant-design/icons-vue';
 import { message } from 'ant-design-vue';
@@ -56,7 +56,7 @@ const { appStates, processStatusData } = useProcessStatusDetailData();
 const { mdExtTypeMap } = useExtConfigsRelated();
 
 const { getQuoteByInstrument, getLastPricePercent } = useQuote();
-const { customRow, triggeOrderBook, triggeMakeOrder } = useTriggeMakeOrder();
+const { customRow, triggerOrderBook, triggerMakeOrder } = useTriggerMakeOrder();
 
 function handleSubscribeAll(): void {
     subscribeAllInstrumentByAppStates(
@@ -114,13 +114,17 @@ function handleConfirmRemoveInstrument(
 }
 
 function triggeOrderBookMakeOrder(instrument: KungfuApi.InstrumentResolved) {
-    triggeOrderBook(instrument);
-    triggeMakeOrder(instrument, {
+    triggerOrderBook(instrument);
+    triggerMakeOrder(instrument, {
         side: SideEnum.Buy,
         offset: OffsetEnum.Open,
         volume: 0,
         price: getQuoteByInstrument(instrument)?.last_price || 0,
     });
+}
+
+function handleClickRow(row: KungfuApi.InstrumentResolved) {
+    return customRow(row, triggeOrderBookMakeOrder);
 }
 </script>
 <template>
@@ -160,7 +164,7 @@ function triggeOrderBookMakeOrder(instrument: KungfuApi.InstrumentResolved) {
                 size="small"
                 :pagination="false"
                 :scroll="{ y: dashboardBodyHeight - 4, x: dashboardBodyWidth }"
-                :customRow="(record: KungfuApi.InstrumentResolved) => customRow(record, triggeOrderBookMakeOrder)"
+                :customRow="handleClickRow"
                 emptyText="暂无数据"
             >
                 <template

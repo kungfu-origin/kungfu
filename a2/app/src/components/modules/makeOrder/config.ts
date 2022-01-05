@@ -2,11 +2,13 @@ import { ShotableInstrumentTypes } from '@kungfu-trader/kungfu-js-api/config/tra
 import {
     InstrumentTypeEnum,
     KfCategoryTypes,
+    PriceTypeEnum,
 } from '@kungfu-trader/kungfu-js-api/typings/enums';
 
 export const getConfigSettings = (
     category?: KfCategoryTypes,
     instrumentTypeEnum?: InstrumentTypeEnum,
+    priceType?: PriceTypeEnum,
 ): KungfuApi.KfConfigItem[] => {
     const shotable = instrumentTypeEnum
         ? ShotableInstrumentTypes.includes(
@@ -63,9 +65,9 @@ export const getConfigSettings = (
         },
         {
             key: 'price',
-            name: '价格',
+            name: priceType === PriceTypeEnum.Limit ? '价格' : '保护价格',
             type: 'float',
-            required: true,
+            required: priceType === PriceTypeEnum.Limit ? true : false,
         },
         {
             key: 'volume',

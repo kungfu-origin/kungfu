@@ -129,7 +129,7 @@ export interface Pm2Env {
     args?: StartOptions['args'];
 }
 
-export const pm2Cconnect = (): Promise<void> => {
+export const pm2Connect = (): Promise<void> => {
     return new Promise((resolve, reject) => {
         pm2.connect((err: Error) => {
             if (err) {
@@ -146,14 +146,16 @@ export const pm2Cconnect = (): Promise<void> => {
 
 export const pm2List = (): Promise<ProcessDescription[]> => {
     return new Promise((resolve, reject) => {
-        pm2.list((err: Error, pList: ProcessDescription[]) => {
-            if (err) {
-                kfLogger.error(err.message);
-                reject(err);
-                return;
-            }
+        pm2Connect().then(() => {
+            pm2.list((err: Error, pList: ProcessDescription[]) => {
+                if (err) {
+                    kfLogger.error(err.message);
+                    reject(err);
+                    return;
+                }
 
-            resolve(pList);
+                resolve(pList);
+            });
         });
     });
 };
@@ -162,21 +164,26 @@ export const pm2Describe = (
     processId: string,
 ): Promise<ProcessDescription[]> => {
     return new Promise((resolve, reject) => {
-        pm2.describe(processId, (err: Error, pList: ProcessDescription[]) => {
-            if (err) {
-                kfLogger.error(err.message);
-                reject(err);
-                return;
-            }
+        pm2Connect().then(() => {
+            pm2.describe(
+                processId,
+                (err: Error, pList: ProcessDescription[]) => {
+                    if (err) {
+                        kfLogger.error(err.message);
+                        reject(err);
+                        return;
+                    }
 
-            resolve(pList);
+                    resolve(pList);
+                },
+            );
         });
     });
 };
 
 const pm2Start = (options: Pm2StartOptions): Promise<Proc> => {
     return new Promise((resolve, reject) => {
-        pm2Cconnect()
+        pm2Connect()
             .then(() => {
                 pm2.start(options, (err: Error, proc: Proc) => {
                     if (err) {
@@ -197,7 +204,7 @@ const pm2Start = (options: Pm2StartOptions): Promise<Proc> => {
 
 const pm2Stop = (processId: string): Promise<void> => {
     return new Promise((resolve, reject) => {
-        pm2Cconnect()
+        pm2Connect()
             .then(() => {
                 pm2.stop(processId, (err: Error) => {
                     if (err) {
@@ -218,7 +225,7 @@ const pm2Stop = (processId: string): Promise<void> => {
 
 const pm2Delete = (processId: string): Promise<void> => {
     return new Promise((resolve, reject) => {
-        pm2Cconnect()
+        pm2Connect()
             .then(() => {
                 pm2.delete(processId, (err: Error) => {
                     if (err) {
@@ -239,18 +246,21 @@ const pm2Delete = (processId: string): Promise<void> => {
 
 export const pm2Kill = (): Promise<void> => {
     return new Promise((resolve, reject) => {
-        pm2.kill((err: Error, res: pm2.KillResponse) => {
-            if (err) {
-                kfLogger.error(err.message);
-                reject(err);
-                return;
-            }
+        pm2Connect().then(() => {
+            pm2.kill((err: Error, res: pm2.KillResponse) => {
+                pm2.disconnect();
+                if (err) {
+                    kfLogger.error(err.message);
+                    reject(err);
+                    return;
+                }
 
-            if (res.success) {
-                resolve();
-            } else {
-                reject(new Error('pm2Kill res.success not true'));
-            }
+                if (res.success) {
+                    resolve();
+                } else {
+                    reject(new Error('pm2Kill res.success not true'));
+                }
+            });
         });
     });
 };
@@ -258,7 +268,7 @@ export const pm2Kill = (): Promise<void> => {
 export const pm2KillGodDaemon = (): Promise<void> => {
     kfLogger.info('Kill Pm2 God Daemon');
     return new Promise((resolve, reject) => {
-        pm2Cconnect()
+        pm2Connect()
             .then(() => {
                 pm2.killDaemon((err: Error) => {
                     pm2.disconnect();
@@ -448,6 +458,13 @@ function buildArgs(args: string): string {
     return [logLevel, args, rocket].join(' ');
 }
 
+function getExtDirs(): string[] {
+    const kfConfig: any = fse.readJsonSync(KF_CONFIG_PATH) || {};
+    const extPaths: string[] = ((kfConfig.system || {})
+        .extPaths as string[]) || [EXTENSION_DIR];
+    return extPaths;
+}
+
 //循环获取processStatus
 function startGetProcessStatusByName(name: string, callback: Function) {
     const timer = setTimerPromiseTask(() => {
@@ -546,7 +563,7 @@ export const startLedger = async (force = false): Promise<Proc | void> => {
 
 //启动md
 export const startMd = async (sourceId: string): Promise<Proc | void> => {
-    const extDirs = await flattenExtensionModuleDirs([EXTENSION_DIR]);
+    const extDirs = await flattenExtensionModuleDirs([...getExtDirs()]);
     const args = buildArgs(
         `-X ${extDirs
             .map((dir) => path.dirname(dir))
@@ -564,7 +581,7 @@ export const startMd = async (sourceId: string): Promise<Proc | void> => {
 
 //启动td
 export const startTd = async (accountId: string): Promise<Proc | void> => {
-    const extDirs = await flattenExtensionModuleDirs([EXTENSION_DIR]);
+    const extDirs = await flattenExtensionModuleDirs([...getExtDirs()]);
     const { source, id } = accountId.parseSourceAccountId();
     const args = buildArgs(
         `-X ${extDirs

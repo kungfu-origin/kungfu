@@ -8,7 +8,7 @@ export const getColumns = (
         type: 'string',
         name: '更新时间',
         dataIndex: 'update_time',
-        width: isHistory ? 140 : 100,
+        width: isHistory ? 180 : 120,
     },
     {
         type: 'string',
