@@ -1,0 +1,10 @@
+diff --git a/node_modules/fkill/index.js b/node_modules/fkill/index.js
+index 3b4c579..1d65749 100644
+--- a/node_modules/fkill/index.js
++++ b/node_modules/fkill/index.js
+@@ -1,4 +1,4 @@
+-import process from 'node:process';
++import process from 'process';
+ import taskkill from 'taskkill';
+ import execa from 'execa';
+ import AggregateError from 'aggregate-error';
