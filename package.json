@@ -7,13 +7,14 @@
   "description": "Kungfu Trader Workspaces",
   "license": "Apache-2.0",
   "private": true,
-  "workspaces": [
-    "framework/*",
-    "extensions/*",
-    "developer/*",
-    "artifact",
-    "a2/*"
-  ],
+  "workspaces": {
+    "packages": [
+      "framework/*",
+      "extensions/*",
+      "developer/*",
+      "artifact"
+    ]
+  },
   "engines": {
     "node": ">=14 <15",
     "yarn": "^1.18.0"

@@ -15,5 +15,5 @@ exports.build = async () => {
 };
 
 exports.dev = () => {
-  return app.runDev(ensureDir('build'));
+  return app.runDev(ensureDir('dist'));
 };
