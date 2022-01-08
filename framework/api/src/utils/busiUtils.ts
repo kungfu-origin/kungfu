@@ -259,20 +259,18 @@ export const buildObjectFromArray = <T>(
     list: Array<T>,
     targetKey: number | string,
     targetValueKey?: number | string,
-): { [prop: string | number]: T | T[keyof T] | undefined } => {
-    let dict: { [prop: number | string]: T | T[keyof T] | undefined } = {};
-    list.forEach((item) => {
-        const key: number | string = (item || {})[targetKey] || '';
+): Record<string | number, T | T[keyof T] | undefined> => {
+    return list.reduce((item1, item2) => {
+        const key: number | string | symbol = (item2 || {})[targetKey] || '';
         if (key !== '' && key !== undefined) {
             if (targetValueKey === undefined) {
-                dict[key] = item;
+                item1[key] = item2;
             } else {
-                dict[key] = (item || {})[targetValueKey];
+                item1[key] = (item2 || {})[targetValueKey];
             }
         }
-    });
-
-    return dict;
+        return item1;
+    }, {} as Record<string | number, T | T[keyof T] | undefined>);
 };
 
 export const getInstrumentTypeData = (

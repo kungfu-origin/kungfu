@@ -9,9 +9,18 @@ const ensureDir = (dirName) => {
 };
 
 exports.build = async () => {
+  await this.dist();
+  await this.elec();
+};
+
+exports.dist = async () => {
   const distDir = ensureDir('dist');
   await app.webpackBuild(distDir);
-  await app.electronBuild(distDir);
+};
+
+exports.elec = async () => {
+  const buildDir = ensureDir('build');
+  await app.electronBuild(buildDir);
 };
 
 exports.dev = () => {

@@ -1,6 +1,7 @@
 const path = require('path');
 const fse = require('fs-extra');
 const semver = require('semver');
+const findWorkspaceRoot = require('find-yarn-workspace-root');
 const {
     getAppDir,
     getKfcDir,
@@ -13,7 +14,28 @@ const coreDir = getCoreDir();
 const coreJSON = fse.readJSONSync(path.join(coreDir, 'package.json'));
 const version = semver.parse(coreJSON.version);
 
-console.log(appDir, coreDir, kfcDir);
+const packageJSON = fse.readJSONSync(
+    path.resolve(process.cwd(), 'package.json'),
+);
+
+const extdirs = Object.keys(packageJSON.dependencies || {})
+    .map((name) => {
+        const jsonPath = require.resolve(name + '/package.json');
+        const json = fse.readJSONSync(jsonPath);
+        if (json.kungfuConfig) {
+            return path.dirname(jsonPath);
+        }
+
+        return null;
+    })
+    .filter((fullpath) => !!fullpath);
+
+const extras = extdirs.map((fullpath) => {
+    return {
+        from: path.resolve(fullpath, 'dist'),
+        to: 'kungfu-extensions',
+    };
+});
 
 module.exports = {
     productName: 'Kungfu',
@@ -21,6 +43,7 @@ module.exports = {
         '${productName}-${buildVersion}-${os}-${arch}-${channel}.${ext}',
     generateUpdatesFilesForAllChannels: true,
     appId: 'Kungfu.Origin.KungFu.Trader',
+    electronVersion: '13.2.0',
     directories: {
         output: path.join(
             'build',
@@ -39,15 +62,15 @@ module.exports = {
     npmRebuild: false,
     files: [
         'dist/app/**/*',
-        {
-            from: appDir,
-            to: 'dist/app',
-            filter: ['public'],
-        },
+        '!**/@kungfu-trader/kfx-*/**/*',
         '!**/@kungfu-trader/kungfu-core/*',
         '!**/@kungfu-trader/kungfu-core/**/*',
         '**/@kungfu-trader/kungfu-core/lib/*',
         '**/@kungfu-trader/kungfu-core/*.json',
+        '!**/@kungfu-trader/kungfu-app/*',
+        '!**/@kungfu-trader/kungfu-app/**/*',
+        '!**/@kungfu-trader/kungfu-js-api/*',
+        '!**/@kungfu-trader/kungfu-js-api/**/*',
     ],
     extraResources: [
         {
@@ -61,10 +84,26 @@ module.exports = {
             filter: ['*.whl'],
         },
         {
+            from: appDir,
+            to: 'app/dist/app',
+            filter: ['public/*', 'public/logo'],
+        },
+        {
+            from: appDir,
+            to: 'app',
+            filter: ['lib/*'],
+        },
+        {
             from: `${appDir}/public`,
             to: 'kungfu-resources',
             filter: ['config/*', 'key/*'],
         },
+        {
+            from: `${appDir}/.build/electron`,
+            to: 'app',
+            filter: ['**/package.json'],
+        },
+        ...extras,
     ],
     asar: false,
     dmg: {

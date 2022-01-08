@@ -4,15 +4,6 @@ const minimist = require('minimist');
 const moment = require('moment');
 const baseConfig = require('./config');
 
-const argv = minimist(process.argv, {
-    boolean: ['cli', 'pro'],
-    string: 'target',
-});
-const { cli, pro, target } = argv;
-
-console.log('argv', argv);
-
-//conditions: { key: '', value: '' }
 function findConfigItemIndex(configList, conditions) {
     for (let i = 0; (len = configList.length); i++) {
         const item = configList[i];
@@ -46,6 +37,14 @@ function resolveArtifactName(cli, pro, target) {
 const run = (distDir) => {
     const pkgDir = path.dirname(distDir);
     process.chdir(pkgDir);
+
+    const argv = minimist(process.argv, {
+        boolean: ['pro'],
+        string: 'target',
+    });
+    const { pro, target } = argv;
+
+    console.log('argv', argv);
 
     if (target) {
         const targetIndex = findConfigItemIndex(baseConfig.extraResources, [

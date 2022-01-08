@@ -104,24 +104,14 @@ export const KFC_DIR = process.env.KFC_DIR || path.join(KFC_PARENT_DIR, 'kfc');
 export const KFC_EXECUTABLE = process.platform === 'win32' ? 'kfc.exe' : 'kfc';
 
 export const EXTENSION_DIR = production
-    ? path.join(KFC_DIR, 'kungfu_extensions')
-    : path.resolve(KFC_PARENT_DIR, '..', '..', '..', 'extensions');
-
-export const TASK_EXTENSION_DIR = production
     ? path.join(global.__kfResourcesPath, 'kungfu-extensions')
-    : path.join(__dirname, '..', '..', '..');
+    : path.resolve(KFC_PARENT_DIR, '..', '..', '..', 'extensions');
 
 export const APP_DIR = production
     ? path.resolve(global.__kfResourcesPath, 'app', 'dist', 'app')
     : path.resolve(process.cwd(), 'dist', 'app');
 
 process.env.KFC_DIR = KFC_DIR;
-
-console.log(`process.cwd = ${process.cwd()}`);
-console.log(`__kfResourcesPath = ${global.__kfResourcesPath}`);
-console.log(`__resources = ${global.__resources}`);
-console.log(`KFC_DIR = ${KFC_DIR}`);
-console.log(`EXTENSION_DIR = ${EXTENSION_DIR}`);
 
 //DATASET
 export const KF_DATASET_DIR = path.join(KF_HOME, 'dataset');
@@ -130,3 +120,9 @@ addFileSync('', KF_DATASET_DIR, 'folder');
 //marketData in dataSet
 export const KF_DATASET_QUOTE_DIR = path.join(KF_HOME, 'dataset', 'quote');
 addFileSync('', KF_DATASET_QUOTE_DIR, 'folder');
+
+console.log(`process.cwd = ${process.cwd()}`);
+console.log(`__kfResourcesPath = ${global.__kfResourcesPath}`);
+console.log(`__resources = ${global.__resources}`);
+console.log(`KFC_DIR = ${KFC_DIR}`);
+console.log(`EXTENSION_DIR = ${EXTENSION_DIR}`);

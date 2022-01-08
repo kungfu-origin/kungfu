@@ -75,6 +75,11 @@ export const getBoardsMap = (): KfLayout.BoardsMap | null => {
     if (!data) {
         return null;
     } else {
-        return JSON.parse(data) as KfLayout.BoardsMap;
+        const storedBoardsMap = JSON.parse(data) as KfLayout.BoardsMap;
+        if (!Object.keys(storedBoardsMap).length) {
+            return null;
+        }
+
+        return storedBoardsMap;
     }
 };

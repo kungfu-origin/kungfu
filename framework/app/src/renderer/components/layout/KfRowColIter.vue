@@ -174,7 +174,7 @@ export default defineComponent({
         }),
 
         boardInfo(): KfLayout.BoardInfo {
-            return this.boardsMap[this.boardId];
+            return this.boardsMap[this.boardId] || {};
         },
 
         children(): number[] {
@@ -186,7 +186,7 @@ export default defineComponent({
         },
 
         direction(): string {
-            return this.boardInfo.direction;
+            return this.boardInfo.direction || '';
         },
     },
 

@@ -131,7 +131,7 @@ function startComponents(argv) {
 
 function startMain(argv) {
     const mainConfig = require('./webpack.main.config')(argv);
-    const appDir = getAppDir()
+    const appDir = getAppDir();
     const indexJs = path.resolve(appDir, 'src', 'main', 'index.dev.ts');
     mainConfig.entry.main = [indexJs].concat(mainConfig.entry.main);
 
@@ -197,6 +197,13 @@ function startElectron(argv) {
 }
 
 const run = (distDir, distName = 'app') => {
+    const appDir = getAppDir();
+    const kfcDir = getKfcDir();
+    process.chdir(appDir);
+    process.env.KFC_DIR = kfcDir;
+
+    greeting();
+
     const argv = {
         mode: 'development',
         distDir: distDir,
@@ -204,13 +211,6 @@ const run = (distDir, distName = 'app') => {
     };
 
     const tasks = [startRenderer, startMain];
-    const appDir = getAppDir();
-    const kfcDir = getKfcDir();
-
-    process.chdir(appDir);
-    process.env.KFC_DIR = kfcDir;
-
-    greeting();
 
     return Promise.all(tasks.map((f) => f(argv))).then(() =>
         startElectron(argv),

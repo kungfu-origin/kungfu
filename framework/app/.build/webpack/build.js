@@ -3,7 +3,6 @@
 const { say } = require('cfonts');
 const chalk = require('chalk');
 const fse = require('fs-extra');
-const path = require('path');
 const webpack = require('webpack');
 const Multispinner = require('multispinner');
 const {
@@ -60,8 +59,13 @@ const pack = (config) =>
         });
     });
 
-const run = (distDir, distName = 'app') =>
-    new Promise((resolve, reject) => {
+const run = (distDir, distName = 'app') => {
+    fse.rmSync(distDir, { recursive: true });
+    const appDir = getAppDir();
+    process.chdir(appDir);
+    greeting();
+
+    return new Promise((resolve, reject) => {
         const argv = {
             mode: 'production',
             distDir: distDir,
@@ -73,14 +77,6 @@ const run = (distDir, distName = 'app') =>
 
         const errorLog = chalk.bgRed.white(' ERROR ') + ' ';
         const okayLog = chalk.bgBlue.white(' OKAY ') + ' ';
-
-        const appDir = getAppDir();
-
-        fse.rmSync(distDir, { recursive: true });
-        process.chdir(appDir);
-        process.env.NODE_ENV = 'production';
-
-        greeting();
 
         const tasks = ['main', 'renderer'];
         const spinner = new Multispinner(tasks, {
@@ -124,6 +120,7 @@ const run = (distDir, distName = 'app') =>
                 process.exit(1);
             });
     });
+};
 
 module.exports = run;
 
