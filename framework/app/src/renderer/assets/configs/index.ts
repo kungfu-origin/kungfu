@@ -42,7 +42,7 @@ export const defaultBoardsMap: KfLayout.BoardsMap = {
     '12': {
         paId: 10,
         direction: 'v',
-        contents: ['下单面板'],
+        contents: ['下单面板', '期货套利'],
         current: '下单面板',
         width: '56.721%',
     },

@@ -16,6 +16,7 @@ import { ExchangeIds } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
 import {
     addSubscribeInstruments,
     removeSubscribeInstruments,
+    transformSearchInstrumentResultToInstrument,
     useInstruments,
 } from '@renderer/assets/methods/actionsUtils';
 import { StarFilled, PlusOutlined } from '@ant-design/icons-vue';
@@ -50,7 +51,6 @@ const {
     searchInstrumnetOptions,
     handleSearchInstrument,
     handleConfirmSearchInstrumentResult,
-    transformSearchInstrumentResultToInstrument,
 } = useInstruments();
 const { appStates, processStatusData } = useProcessStatusDetailData();
 const { mdExtTypeMap } = useExtConfigsRelated();
@@ -73,7 +73,7 @@ function handleConfirmAddInstrumentCallback(val: string): Promise<void> {
 
     if (!instrumentResolved) {
         return Promise.reject(new Error('标的错误')).catch((err) => {
-            message.error(err);
+            message.error(err.message);
         });
     }
 

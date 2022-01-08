@@ -14,7 +14,7 @@ export const getColumns = (
         type: 'string',
         name: '代码',
         dataIndex: 'instrument_id',
-        width: 60,
+        width: 80,
     },
     {
         type: 'string',

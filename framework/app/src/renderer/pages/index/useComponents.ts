@@ -68,6 +68,16 @@ export const useComponenets = (app: App<Element>): void => {
         ),
     );
 
+    app.component(
+        '期货套利',
+        defineAsyncComponent(
+            () =>
+                import(
+                    '@root/src/components/modules/futureArbitrage/FutureArbitrage.vue'
+                ),
+        ),
+    );
+
     app.config.globalProperties.$registedKfUIComponents = [
         '持仓',
         '委托记录',
@@ -78,6 +88,7 @@ export const useComponenets = (app: App<Element>): void => {
         '行情订阅',
         '深度行情',
         '下单面板',
+        '期货套利',
     ];
 
     // if (process.env.NODE_ENV === 'production') {

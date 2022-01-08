@@ -15,6 +15,7 @@ import {
     KfCategoryEnum,
     OrderStatusEnum,
     BrokerStateStatusTypes,
+    FutureArbitrageCodeEnum,
 } from '../typings/enums';
 
 import { Pm2ProcessStatusTypes } from '../utils/processUtils';
@@ -471,6 +472,24 @@ export const ExchangeIds: Record<string, KungfuApi.KfTradeValueCommonData> = {
     INE: {
         name: isEnglish ? 'INE' : '能源中心',
         color: InstrumentType[InstrumentTypeEnum.future].color,
+    },
+};
+
+export const FutureArbitrageCodes: Record<
+    FutureArbitrageCodeEnum,
+    KungfuApi.KfTradeValueCommonData
+> = {
+    [FutureArbitrageCodeEnum.SP]: {
+        name: isEnglish ? 'SP' : '郑商所 跨期 SP',
+    },
+    [FutureArbitrageCodeEnum.SPC]: {
+        name: isEnglish ? 'SPC' : '郑商所 跨品种 SPC',
+    },
+    [FutureArbitrageCodeEnum.SPD]: {
+        name: isEnglish ? 'SPD' : '大商所 跨期 SPD',
+    },
+    [FutureArbitrageCodeEnum.IPS]: {
+        name: isEnglish ? 'IPS' : '大商所 跨品种 IPS',
     },
 };
 

@@ -16,7 +16,6 @@
     "types": "./src/typings/index.d.ts",
     "main": "./lib/index.js",
     "scripts": {
-        "postinstall": "electron-builder install-app-deps",
         "serve": "node ./.build/webpack/dev.js",
         "dist": "node ./.build/webpack/build.js",
         "elec": "node ./.build/electron/build.js",
@@ -25,7 +24,7 @@
         "build": "yarn run elec",
         "test:e2e": "vue-cli-service test:e2e",
         "lint": "vue-cli-service lint",
-        "fmt": "./node_modules/.bin/prettier -l -w './**/*.{ts, js, vue, less, css, json, html}' --config ./.prettierrc.js"
+        "fmt": "prettier -l -w './**/*.{ts, js, vue, less, css, json, html}' --config ./.prettierrc.js"
     },
     "dependencies": {
         "iconv-lite": "^0.6.3",

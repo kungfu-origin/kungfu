@@ -168,3 +168,10 @@ export enum MakeOrderByWatcherEnum {
     Manual = 101,
     Task = 102,
 }
+
+export enum FutureArbitrageCodeEnum {
+    SP = 'SP',
+    SPC = 'SPC',
+    SPD = 'SPD',
+    IPS = 'IPS',
+}

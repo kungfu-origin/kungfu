@@ -32,6 +32,7 @@ import {
     CommissionMode,
     Direction,
     ExchangeIds,
+    FutureArbitrageCodes,
     HedgeFlag,
     InstrumentType,
     Offset,
@@ -224,6 +225,7 @@ export const stringEnumSelectType: Record<
     Record<string, KungfuApi.KfTradeValueCommonData>
 > = {
     exchange: ExchangeIds,
+    futureArbitrageCode: FutureArbitrageCodes,
 };
 
 export const beforeStartAll = (): Promise<void> => {

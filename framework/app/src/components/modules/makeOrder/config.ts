@@ -1,8 +1,11 @@
 import { ShotableInstrumentTypes } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
 import {
+    HedgeFlagEnum,
     InstrumentTypeEnum,
     KfCategoryTypes,
+    OffsetEnum,
     PriceTypeEnum,
+    SideEnum,
 } from '@kungfu-trader/kungfu-js-api/typings/enums';
 
 export const getConfigSettings = (
@@ -35,7 +38,7 @@ export const getConfigSettings = (
             key: 'side',
             name: '买卖',
             type: 'side',
-            default: 0,
+            default: SideEnum.Buy,
             required: true,
         },
         ...(shotable
@@ -44,14 +47,14 @@ export const getConfigSettings = (
                       key: 'offset',
                       name: '开平',
                       type: 'offset',
-                      default: 0,
+                      default: OffsetEnum.Open,
                       required: true,
                   },
                   {
                       key: 'hedge_flag',
                       name: '套保',
                       type: 'hedgeFlag',
-                      default: 0,
+                      default: HedgeFlagEnum.Speculation,
                       required: true,
                   },
               ]
@@ -60,7 +63,7 @@ export const getConfigSettings = (
             key: 'price_type',
             name: '方式',
             type: 'priceType',
-            default: 0,
+            default: PriceTypeEnum.Limit,
             required: true,
         },
         {

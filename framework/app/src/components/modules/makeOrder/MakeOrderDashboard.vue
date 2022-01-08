@@ -10,10 +10,7 @@ import {
 import KfDashboard from '@renderer/components/public/KfDashboard.vue';
 import KfDashboardItem from '@renderer/components/public/KfDashboardItem.vue';
 import KfConfigSettingsForm from '@renderer/components/public/KfConfigSettingsForm.vue';
-import {
-    getIdByKfLocation,
-    getMdTdKfLocationByProcessId,
-} from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
+import { getMdTdKfLocationByProcessId } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import {
     buildInstrumentSelectOptionValue,
     initFormStateByConfig,
@@ -26,7 +23,10 @@ import { getConfigSettings } from './config';
 import { message } from 'ant-design-vue';
 import { kfMakeOrder } from '@kungfu-trader/kungfu-js-api/kungfu';
 import { InstrumentTypeEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';
-import { useInstruments } from '@renderer/assets/methods/actionsUtils';
+import {
+    transformSearchInstrumentResultToInstrument,
+    useInstruments,
+} from '@renderer/assets/methods/actionsUtils';
 
 interface MakeOrderProps {}
 defineProps<MakeOrderProps>();
@@ -34,10 +34,7 @@ defineProps<MakeOrderProps>();
 const app = getCurrentInstance();
 const formState = ref(initFormStateByConfig(getConfigSettings(), {}));
 const formRef = ref();
-const {
-    subscribeAllInstrumentByAppStates,
-    transformSearchInstrumentResultToInstrument,
-} = useInstruments();
+const { subscribeAllInstrumentByAppStates } = useInstruments();
 const { appStates, processStatusData } = useProcessStatusDetailData();
 const { mdExtTypeMap } = useExtConfigsRelated();
 const { triggerOrderBook } = useTriggerMakeOrder();
@@ -153,7 +150,7 @@ function handleMakeOrder() {
                 transformSearchInstrumentResultToInstrument(instrument);
 
             if (!instrumnetResolved) {
-                message.error('标的信息错误');
+                message.error('标的错误');
                 return;
             }
 
@@ -193,7 +190,7 @@ function handleMakeOrder() {
                     makeOrderInput,
                     currentGlobalKfLocation.data,
                 ).catch((err) => {
-                    message.error(err);
+                    message.error(err.message);
                 });
             } else if (currentGlobalKfLocation.data.category === 'strategy') {
                 const tdLocation = getMdTdKfLocationByProcessId(
@@ -209,10 +206,10 @@ function handleMakeOrder() {
                     tdLocation,
                     currentGlobalKfLocation.data,
                 ).catch((err) => {
-                    message.error(err);
+                    message.error(err.message);
                 });
             } else {
-                message.error('当前 Location 类型错误');
+                message.error('当前 Location Category 错误');
             }
         })
         .catch((err: Error) => {

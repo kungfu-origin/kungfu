@@ -17,6 +17,7 @@ import {
     getCurrentInstance,
     nextTick,
     reactive,
+    Ref,
     ref,
     toRefs,
     watch,
@@ -27,7 +28,10 @@ import {
 } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
 import { getIdByKfLocation } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { RuleObject } from 'ant-design-vue/lib/form';
-import { useInstruments } from '@renderer/assets/methods/actionsUtils';
+import {
+    transformSearchInstrumentResultToInstrument,
+    useInstruments,
+} from '@renderer/assets/methods/actionsUtils';
 
 const props = withDefaults(
     defineProps<{
@@ -40,6 +44,17 @@ const props = withDefaults(
         labelAlign?: 'right' | 'left';
         labelCol?: number;
         wrapperCol?: number;
+        rules?: Record<
+            string,
+            {
+                type?: string;
+                validator: (
+                    _rule: RuleObject,
+                    value: number | string,
+                ) => Promise<void>;
+                trigger: string;
+            }
+        >;
     }>(),
     {
         formState: () => ({}),
@@ -51,6 +66,7 @@ const props = withDefaults(
         labelAlign: 'right',
         labelCol: 6,
         wrapperCol: 16,
+        rules: () => ({}),
     },
 );
 
@@ -65,42 +81,68 @@ const app = getCurrentInstance();
 const formRef = ref();
 const formState = reactive(props.formState);
 
-watch(formState, (newVal) => {
-    app && app.emit('update:formState', newVal);
-});
-
 const primaryKeys: string[] = (props.configSettings || [])
     .filter((item) => item.primary)
     .map((item) => item.key);
 
-const {
-    searchInstrumnetOptions,
-    handleSearchInstrument,
-    transformSearchInstrumentResultToInstrument,
-} = useInstruments();
 const { td } = toRefs(useAllKfConfigData());
 
-watch(
-    () => formState.instrument,
-    (newVal) => {
-        nextTick().then(() => {
-            const instrumentResolved: KungfuApi.InstrumentResolved | null =
-                transformSearchInstrumentResultToInstrument(newVal.toString());
+const instrumentKeys = props.configSettings
+    .filter((item) => item.type === 'instrument')
+    .map((item) => item.key);
 
-            if (!instrumentResolved) {
-                formState.instrument = '';
-                return;
-            }
+type InstrumentsSearchRelated = Record<
+    string,
+    {
+        searchInstrumnetOptions: Ref<{ label: string; value: string }[]>;
+        handleSearchInstrument: (value: string) => void;
+    }
+>;
 
-            searchInstrumnetOptions.value = [
-                {
-                    value: buildInstrumentSelectOptionValue(instrumentResolved),
-                    label: buildInstrumentSelectOptionLabel(instrumentResolved),
-                },
-            ];
-        });
+const instrumentsSearchRelated = instrumentKeys.reduce(
+    (item1: InstrumentsSearchRelated, key: string) => {
+        const { searchInstrumnetOptions, handleSearchInstrument } =
+            useInstruments();
+        item1[key] = {
+            searchInstrumnetOptions: searchInstrumnetOptions,
+            handleSearchInstrument,
+        };
+        return item1;
     },
+    {} as InstrumentsSearchRelated,
 );
+
+instrumentKeys.forEach((key) => {
+    watch(
+        () => formState[key],
+        (newVal) => {
+            nextTick().then(() => {
+                const instrumentResolved: KungfuApi.InstrumentResolved | null =
+                    transformSearchInstrumentResultToInstrument(
+                        newVal.toString(),
+                    );
+                if (!instrumentResolved) {
+                    formState.instrument = '';
+                    return;
+                }
+                instrumentsSearchRelated[key].searchInstrumnetOptions.value = [
+                    {
+                        value: buildInstrumentSelectOptionValue(
+                            instrumentResolved,
+                        ),
+                        label: buildInstrumentSelectOptionLabel(
+                            instrumentResolved,
+                        ),
+                    },
+                ];
+            });
+        },
+    );
+});
+
+watch(formState, (newVal) => {
+    app && app.emit('update:formState', newVal);
+});
 
 function getValidatorType(type: string): 'number' | 'string' | 'array' {
     const intTypes: string[] = [
@@ -266,13 +308,21 @@ defineExpose({
                 changeType === 'update' && item.primary
                     ? []
                     : [
+                          ...(rules[item.key]
+                              ? [
+                                    {
+                                        type: getValidatorType(item.type),
+                                        ...rules[item.key],
+                                    },
+                                ]
+                              : []),
                           ...(item.required
                               ? [
                                     {
                                         required: item.required,
                                         type: getValidatorType(item.type),
                                         message: item.errMsg || '该项为必填项',
-                                        trigger: 'blur',
+                                        trigger: 'change',
                                     },
                                 ]
                               : [
@@ -442,8 +492,13 @@ defineExpose({
                 show-search
                 v-model:value="formState[item.key]"
                 :filter-option="false"
-                :options="searchInstrumnetOptions"
-                @search="handleSearchInstrument"
+                :options="
+                    instrumentsSearchRelated[item.key].searchInstrumnetOptions
+                        .value
+                "
+                @search="
+                    instrumentsSearchRelated[item.key].handleSearchInstrument
+                "
             ></a-select>
             <a-select
                 v-else-if="item.type === 'td'"

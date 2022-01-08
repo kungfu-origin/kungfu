@@ -499,9 +499,6 @@ export const useInstruments = (): {
 
     searchInstrumentResult: Ref<string | undefined>;
     searchInstrumnetOptions: Ref<{ value: string; label: string }[]>;
-    transformSearchInstrumentResultToInstrument(
-        instrument: string,
-    ): KungfuApi.InstrumentResolved | null;
     handleSearchInstrument: (value: string) => void;
     handleConfirmSearchInstrumentResult: (
         value: string,
@@ -614,23 +611,6 @@ export const useInstruments = (): {
         callback && callback(value);
     };
 
-    const transformSearchInstrumentResultToInstrument = (
-        instrumentStr: string,
-    ): KungfuApi.InstrumentResolved | null => {
-        const pair = instrumentStr.split('_');
-        if (pair.length !== 5) return null;
-        const [exchangeId, instrumentId, instrumentType, ukey, instrumentName] =
-            pair;
-        return {
-            exchangeId,
-            instrumentId,
-            instrumentType: +instrumentType as InstrumentTypeEnum,
-            instrumentName,
-            id: `${instrumentId}_${instrumentName}_${exchangeId}`.toLowerCase(),
-            ukey,
-        };
-    };
-
     return {
         instruments: instrumentsResolved,
         subscribedInstruments: subscribedInstrumentsResolved,
@@ -639,8 +619,24 @@ export const useInstruments = (): {
 
         searchInstrumentResult,
         searchInstrumnetOptions,
-        transformSearchInstrumentResultToInstrument,
         handleSearchInstrument,
         handleConfirmSearchInstrumentResult,
+    };
+};
+
+export const transformSearchInstrumentResultToInstrument = (
+    instrumentStr: string,
+): KungfuApi.InstrumentResolved | null => {
+    const pair = instrumentStr.split('_');
+    if (pair.length !== 5) return null;
+    const [exchangeId, instrumentId, instrumentType, ukey, instrumentName] =
+        pair;
+    return {
+        exchangeId,
+        instrumentId,
+        instrumentType: +instrumentType as InstrumentTypeEnum,
+        instrumentName,
+        id: `${instrumentId}_${instrumentName}_${exchangeId}`.toLowerCase(),
+        ukey,
     };
 };
