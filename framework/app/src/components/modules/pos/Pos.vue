@@ -3,7 +3,6 @@ import {
     dealKfPrice,
     dealAssetPrice,
     dealDirection,
-    getIdByKfLocation,
     dealTradingData,
     findTargetFromArray,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
@@ -21,7 +20,7 @@ import { DownloadOutlined } from '@ant-design/icons-vue';
 import { getCurrentInstance, onMounted, ref, toRaw } from 'vue';
 import { columns } from './config';
 import KfBlinkNum from '@renderer/components/public/KfBlinkNum.vue';
-import { hashInstrumentUKey, kf } from '@kungfu-trader/kungfu-js-api/kungfu';
+import { hashInstrumentUKey } from '@kungfu-trader/kungfu-js-api/kungfu';
 import {
     OffsetEnum,
     SideEnum,

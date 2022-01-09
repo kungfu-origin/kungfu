@@ -50,13 +50,14 @@ import { storeToRefs } from 'pinia';
 import { BrowserWindow, getCurrentWindow } from '@electron/remote';
 import { ipcRenderer } from 'electron';
 import { message } from 'ant-design-vue';
-import dayjs from 'dayjs';
 import {
     InstrumentTypes,
     BrokerStateStatusTypes,
     KfCategoryTypes,
     ProcessStatusTypes,
 } from '@kungfu-trader/kungfu-js-api/typings/enums';
+import workers from '@renderer/assets/workers';
+import { throttleTime } from 'rxjs';
 
 export interface KfUIComponent {
     name: string;
@@ -719,27 +720,6 @@ export const useDownloadHistoryTradingData = (): {
     };
 };
 
-export const getIfSaveInstruments = (
-    newInstruments: KungfuApi.Instrument[],
-    oldInstrumentsLength: number,
-): boolean => {
-    if (
-        newInstruments.length !== 0 &&
-        newInstruments.length !== oldInstrumentsLength
-    ) {
-        return true;
-    }
-
-    const instrumentsSavedDate = localStorage.getItem('instrumentsSavedDate');
-    if (!instrumentsSavedDate) {
-        return true;
-    } else if (instrumentsSavedDate !== dayjs().format('YYYY-MM-DD')) {
-        return true;
-    } else {
-        return false;
-    }
-};
-
 export const buildInstrumentSelectOptionValue = (
     instrument: KungfuApi.InstrumentResolved,
 ): string => {
@@ -885,5 +865,61 @@ export const useTriggerMakeOrder = (): {
         triggerOrderBook,
         triggerOrderBookUpdate,
         triggerMakeOrder,
+    };
+};
+
+export const useDealInstruments = (): void => {
+    const app = getCurrentInstance();
+    const dealInstrumentController = ref<boolean>(false);
+    const existedInstrumentsLength = ref<number>(0);
+    const dealedInstrumentsLength = ref<number>(0);
+
+    onMounted(() => {
+        if (app?.proxy) {
+            dealInstrumentController.value = true;
+            workers.dealInstruments.postMessage({
+                tag: 'req_instruments',
+            });
+
+            app.proxy.$tradingDataSubject
+                .pipe(throttleTime(5000))
+                .subscribe((watcher: KungfuApi.Watcher) => {
+                    const instruments = watcher.ledger.Instrument.list();
+                    const instrumentsLength = instruments.length;
+                    if (!instruments || !instrumentsLength) {
+                        return;
+                    }
+
+                    if (
+                        !dealInstrumentController.value &&
+                        instrumentsLength > dealedInstrumentsLength.value
+                    ) {
+                        dealInstrumentController.value = true;
+                        dealedInstrumentsLength.value = instrumentsLength;
+                        instruments.forEach((item: KungfuApi.Instrument) => {
+                            item.ukey = item.uid_key;
+                        });
+                        workers.dealInstruments.postMessage({
+                            tag: 'req_dealInstruments',
+                            instruments: instruments,
+                        });
+                    }
+                });
+        }
+    });
+
+    workers.dealInstruments.onmessage = (event: {
+        data: { tag: string; instruments: KungfuApi.InstrumentResolved[] };
+    }) => {
+        const { instruments } = event.data || {};
+
+        console.log('DealInstruments onmessage', instruments.length);
+        dealInstrumentController.value = false;
+        if (instruments.length) {
+            existedInstrumentsLength.value = instruments.length || 0; //refresh old instruments
+            if (app?.proxy) {
+                app?.proxy.$useGlobalStore().setInstruments(instruments);
+            }
+        }
     };
 };

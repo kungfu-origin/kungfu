@@ -32,6 +32,7 @@ import {
 } from '@kungfu-trader/kungfu-js-api/config/pathConfig';
 import {
     initKfConfig,
+    initKfDefaultInstruments,
     ensureKungfuKey,
 } from '@kungfu-trader/kungfu-js-api/config';
 
@@ -44,6 +45,7 @@ const isMac = os.platform() === 'darwin';
 remoteMain.initialize();
 setMenu();
 initKfConfig();
+initKfDefaultInstruments();
 ensureKungfuKey();
 
 function createWindow(reloadAfterCrashed = false) {

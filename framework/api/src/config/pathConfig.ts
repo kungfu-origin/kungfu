@@ -56,35 +56,19 @@ export const KF_CONFIG_DEFAULT_PATH = path.join(
     'kfConfig.json',
 );
 
-export const KF_TARADING_CONFIG_DEFAULT_PATH = path.join(
-    KUNGFU_RESOURCES_DIR,
-    'config',
-    'kfTradingConfig.json',
-);
-
-export const KF_ADMIN_PASSWORD_CONFIG_DEFAULT_PATH = path.join(
-    KUNGFU_RESOURCES_DIR,
-    'config',
-    'adminPassword.json',
-);
-
 export const KF_CONFIG_PATH = path.join(KF_HOME, 'config', 'kfConfig.json');
 
-export const KF_TARADING_CONFIG_PATH = path.join(
-    KF_HOME,
+export const KF_INSTRUMENTS_DEFAULT_PATH = path.join(
+    KUNGFU_RESOURCES_DIR,
     'config',
-    'kfTradingConfig.json',
+    'defaultInstruments.json',
 );
 
-export const KF_ADMIN_PASSWORD_CONFIG_PATH = path.join(
+export const KF_INSTRUMENTS_PATH = path.join(
     KF_HOME,
     'config',
-    'adminPassword.json',
+    'defaultInstruments.json',
 );
-
-//================== config end =================================
-
-//================== json db start ================================
 
 export const KF_SUBSCRIBED_INSTRUMENTS_JSON_PATH = path.join(
     KF_HOME,
@@ -93,8 +77,9 @@ export const KF_SUBSCRIBED_INSTRUMENTS_JSON_PATH = path.join(
 );
 addFileSync('', KF_SUBSCRIBED_INSTRUMENTS_JSON_PATH, 'file');
 
-//================== json db end ==================================
+//================== config end ===================================
 
+//================== kfc start ====================================
 export const KFC_PARENT_DIR = production
     ? global.__kfResourcesPath
     : path.dirname(process.env.KFC_DIR || staticKfcDir);
@@ -112,14 +97,7 @@ export const APP_DIR = production
     : path.resolve(process.cwd(), 'dist', 'app');
 
 process.env.KFC_DIR = KFC_DIR;
-
-//DATASET
-export const KF_DATASET_DIR = path.join(KF_HOME, 'dataset');
-addFileSync('', KF_DATASET_DIR, 'folder');
-
-//marketData in dataSet
-export const KF_DATASET_QUOTE_DIR = path.join(KF_HOME, 'dataset', 'quote');
-addFileSync('', KF_DATASET_QUOTE_DIR, 'folder');
+//================== kfc end ======================================
 
 console.log(`process.cwd = ${process.cwd()}`);
 console.log(`__kfResourcesPath = ${global.__kfResourcesPath}`);

@@ -1,5 +1,7 @@
+import fse from 'fs-extra';
 import jschardet from 'jschardet';
 import iconv from 'iconv-lite';
+import { KF_INSTRUMENTS_PATH } from '@kungfu-trader/kungfu-js-api/config/pathConfig';
 
 function decodeBuffer(name: number[]) {
     name = name.filter((n) => !!n);
@@ -13,10 +15,13 @@ function isBufferGBK(bufferFrom: Buffer) {
     return jschardet.detect(bufferFrom).encoding !== 'UTF-8';
 }
 
+type InstrumentResolvedData = Record<string, KungfuApi.InstrumentResolved>;
+
 const resolveInstruments = (
+    existedInstruments: InstrumentResolvedData,
     instruments: KungfuApi.Instrument[],
-): KungfuApi.InstrumentResolved[] => {
-    return (instruments || []).map((item) => {
+): InstrumentResolvedData => {
+    return (instruments || []).reduce((existedData, item) => {
         const {
             instrument_id,
             instrument_type,
@@ -25,7 +30,7 @@ const resolveInstruments = (
             ukey,
         } = item;
         const instrumentName = decodeBuffer(product_id);
-        return {
+        const newInstrument: KungfuApi.InstrumentResolved = {
             instrumentId: instrument_id,
             instrumentType: instrument_type,
             instrumentName: instrumentName,
@@ -33,14 +38,34 @@ const resolveInstruments = (
             id: `${instrument_id}_${instrumentName}_${exchange_id}`.toLowerCase(),
             ukey,
         };
-    });
+        existedData[ukey] = newInstrument;
+        return existedData;
+    }, existedInstruments);
 };
 
 self.addEventListener('message', (e) => {
-    const { instruments } = e.data || {};
-    const instrumentsResolved = resolveInstruments(instruments);
-    self.postMessage({
-        updateTime: new Date().getTime(),
-        instruments: instrumentsResolved,
-    });
+    const { instruments, tag } = e.data || {};
+
+    if (tag === 'req_dealInstruments') {
+        const existedInstruments: InstrumentResolvedData =
+            fse.readJSONSync(KF_INSTRUMENTS_PATH);
+        const newInstruments: InstrumentResolvedData = resolveInstruments(
+            existedInstruments,
+            instruments,
+        );
+        fse.outputFileSync(KF_INSTRUMENTS_PATH, JSON.stringify(newInstruments));
+        self.postMessage({
+            updateTime: new Date().getTime(),
+            instruments: Object.values(newInstruments),
+        });
+    }
+
+    if (tag === 'req_instruments') {
+        const instruments: InstrumentResolvedData =
+            fse.readJSONSync(KF_INSTRUMENTS_PATH);
+        self.postMessage({
+            updateTime: new Date().getTime(),
+            instruments: Object.values(instruments),
+        });
+    }
 });

@@ -37,6 +37,7 @@ import {
     reactive,
     ref,
     Ref,
+    watch,
 } from 'vue';
 import dayjs from 'dayjs';
 import { Row } from '@fast-csv/format';
@@ -45,8 +46,12 @@ import { AbleSubscribeInstrumentTypesBySourceType } from '@kungfu-trader/kungfu-
 import {
     buildInstrumentSelectOptionLabel,
     buildInstrumentSelectOptionValue,
+    useExtConfigsRelated,
+    useProcessStatusDetailData,
 } from './uiUtils';
 import { storeToRefs } from 'pinia';
+import { ipcRenderer } from 'electron';
+import { throttleTime } from 'rxjs';
 
 export const ensureRemoveLocation = (
     kfLocation: KungfuApi.KfLocation | KungfuApi.KfConfig,
@@ -639,4 +644,171 @@ export const transformSearchInstrumentResultToInstrument = (
         id: `${instrumentId}_${instrumentName}_${exchangeId}`.toLowerCase(),
         ukey,
     };
+};
+
+export const usePreStartAndQuitApp = (): {
+    preStartSystemLoadingData: Record<string, 'loading' | 'done'>;
+    preStartSystemLoading: ComputedRef<boolean>;
+    preQuitSystemLoadingData: Record<string, 'loading' | 'done' | undefined>;
+    preQuitSystemLoading: ComputedRef<boolean>;
+} => {
+    const app = getCurrentInstance();
+    const preStartSystemLoadingData = reactive<
+        Record<string, 'loading' | 'done'>
+    >({
+        archive: 'loading',
+        watcher: 'loading',
+    });
+
+    const preQuitSystemLoadingData = reactive<
+        Record<string, 'loading' | 'done' | undefined>
+    >({
+        record: undefined,
+        quit: undefined,
+    });
+
+    const preStartSystemLoading = computed(() => {
+        return (
+            Object.values(preStartSystemLoadingData).filter(
+                (item: string) => item !== 'done',
+            ).length > 0
+        );
+    });
+
+    const preQuitSystemLoading = computed(() => {
+        return (
+            Object.values(preQuitSystemLoadingData).filter(
+                (item: string | undefined) => item !== undefined,
+            ).length > 0
+        );
+    });
+
+    const timer = setInterval(() => {
+        if (window.watcher?.isLive()) {
+            preStartSystemLoadingData.watcher = 'done';
+            clearInterval(timer);
+        } else {
+            preStartSystemLoadingData.watcher = 'loading';
+        }
+    }, 500);
+
+    const saveBoardsMap = (): Promise<void> => {
+        if (app?.proxy) {
+            const { boardsMap } = app?.proxy.$useGlobalStore();
+            localStorage.setItem('boardsMap', JSON.stringify(boardsMap));
+            return Promise.resolve();
+        }
+        return Promise.resolve();
+    };
+
+    onMounted(() => {
+        if (app?.proxy) {
+            app?.proxy.$bus.subscribe((data: KfBusEvent) => {
+                if (data.tag === 'processStatus') {
+                    if (data.name && data.name === 'archive') {
+                        preStartSystemLoadingData.archive =
+                            data.status === 'online' ? 'loading' : 'done';
+                    }
+                }
+
+                if (data.tag === 'main') {
+                    switch (data.name) {
+                        case 'record-before-quit':
+                            preQuitSystemLoadingData.record = 'loading';
+                            preQuitTasks([saveBoardsMap()]).finally(() => {
+                                ipcRenderer.send('record-before-quit-done');
+                                preQuitSystemLoadingData.record = 'done';
+                            });
+                            break;
+                        case 'clear-process-before-quit-start':
+                            preQuitSystemLoadingData.quit = 'loading';
+                            break;
+                        case 'clear-process-before-quit-end':
+                            preQuitSystemLoadingData.quit = 'done';
+                            break;
+                    }
+                }
+            });
+        }
+    });
+
+    return {
+        preStartSystemLoadingData,
+        preStartSystemLoading,
+        preQuitSystemLoadingData,
+        preQuitSystemLoading,
+    };
+};
+
+export const useSubscibeInstrumentAtEntry = (): void => {
+    const app = getCurrentInstance();
+    const subscribedInstrumentsForPos: Record<string, boolean> = {};
+
+    onMounted(() => {
+        if (app?.proxy) {
+            app.proxy.$tradingDataSubject
+                .pipe(throttleTime(3000))
+                .subscribe((watcher: KungfuApi.Watcher) => {
+                    const bigint0 = BigInt(0);
+                    const positions = watcher.ledger.Position.filter(
+                        'ledger_category',
+                        0,
+                    )
+                        .nofilter('volume', bigint0)
+                        .list()
+                        .map(
+                            (
+                                item: KungfuApi.Position,
+                            ): KungfuApi.InstrumentForSub => ({
+                                uidKey: item.uid_key,
+                                exchangeId: item.exchange_id,
+                                instrumentId: item.instrument_id,
+                                instrumentType: item.instrument_type,
+                                mdLocation: watcher.getLocation(
+                                    item.holder_uid,
+                                ),
+                            }),
+                        );
+
+                    positions.forEach((item) => {
+                        if (subscribedInstrumentsForPos[item.uidKey]) {
+                            return;
+                        }
+                        kfRequestMarketData(
+                            watcher,
+                            item.exchangeId,
+                            item.instrumentId,
+                            item.mdLocation,
+                        );
+                        subscribedInstrumentsForPos[item.uidKey] = true;
+                    });
+                });
+        }
+    });
+
+    const { appStates, processStatusData } = useProcessStatusDetailData();
+    const { mdExtTypeMap } = useExtConfigsRelated();
+    const { subscribedInstruments, subscribeAllInstrumentByMdProcessId } =
+        useInstruments();
+    watch(appStates, (newAppStates, oldAppStates) => {
+        Object.keys(newAppStates || {}).forEach((processId: string) => {
+            const newState = newAppStates[processId];
+            const oldState = oldAppStates[processId];
+
+            if (
+                newState === 'Ready' &&
+                oldState !== 'Ready' &&
+                processStatusData.value[processId] === 'online' &&
+                processId.includes('md_')
+            ) {
+                subscribeAllInstrumentByMdProcessId(
+                    processId,
+                    processStatusData.value,
+                    appStates.value,
+                    mdExtTypeMap.value,
+                    subscribedInstruments.data,
+                );
+            }
+        });
+    });
 };
