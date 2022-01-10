@@ -12,8 +12,7 @@ import { RuleObject } from 'ant-design-vue/lib/form';
 import { transformSearchInstrumentResultToInstrument } from '@renderer/assets/methods/actionsUtils';
 import { FutureArbitrageCodeEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import { message } from 'ant-design-vue';
-import { kfMakeOrder } from '@kungfu-trader/kungfu-js-api/kungfu';
-import { getMdTdKfLocationByProcessId } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
+import { makeOrderByOrderInput } from '@kungfu-trader/kungfu-js-api/kungfu';
 
 interface MakeOrderProps {}
 defineProps<MakeOrderProps>();
@@ -93,79 +92,70 @@ function handleResetMakeOrderForm() {
 }
 
 function handleMakeOrder() {
-    formRef.value.validate().then(() => {
-        const instrumentA = formState.value.instrument_A.toString();
-        const instrumentB = formState.value.instrument_B.toString();
-        const instrumnetResolved_A =
-            transformSearchInstrumentResultToInstrument(instrumentA);
-        const instrumnetResolved_B =
-            transformSearchInstrumentResultToInstrument(instrumentB);
+    formRef.value
+        .validate()
+        .then(() => {
+            const instrumentA = formState.value.instrument_A.toString();
+            const instrumentB = formState.value.instrument_B.toString();
+            const instrumnetResolved_A =
+                transformSearchInstrumentResultToInstrument(instrumentA);
+            const instrumnetResolved_B =
+                transformSearchInstrumentResultToInstrument(instrumentB);
 
-        if (!instrumnetResolved_A || !instrumnetResolved_B) {
-            message.error('标的错误');
-            return;
-        }
-
-        const { exchangeId, instrumentType } = instrumnetResolved_A;
-
-        const {
-            account_id,
-            future_arbitrage_code,
-            limit_price,
-            volume,
-            price_type,
-            side,
-            offset,
-            hedge_flag,
-        } = formState.value;
-
-        const instrumentId = `${future_arbitrage_code} ${instrumnetResolved_A.instrumentId}&${instrumnetResolved_B.instrumentId}`;
-
-        const makeOrderInput: KungfuApi.MakeOrderInput = {
-            instrument_id: instrumentId,
-            instrument_type: +instrumentType,
-            exchange_id: exchangeId,
-            limit_price: +limit_price,
-            volume: +volume,
-            price_type: +price_type,
-            side: +side,
-            offset: +(offset !== undefined ? offset : +side === 0 ? 0 : 1),
-            hedge_flag: +(hedge_flag || 0),
-        };
-
-        console.log(makeOrderInput);
-
-        if (!currentGlobalKfLocation.data) {
-            message.error('当前 Location 错误');
-            return;
-        }
-
-        if (currentGlobalKfLocation.data.category === 'td') {
-            kfMakeOrder(
-                window.watcher,
-                makeOrderInput,
-                currentGlobalKfLocation.data,
-            ).catch((err) => {
-                message.error(err.message);
-            });
-        } else if (currentGlobalKfLocation.data.category === 'strategy') {
-            const tdLocation = getMdTdKfLocationByProcessId(`td_${account_id}`);
-            if (!tdLocation) {
-                message.error('下单账户信息错误');
+            if (!instrumnetResolved_A || !instrumnetResolved_B) {
+                message.error('标的错误');
                 return;
             }
-            kfMakeOrder(
+
+            const { exchangeId, instrumentType } = instrumnetResolved_A;
+
+            const {
+                account_id,
+                future_arbitrage_code,
+                limit_price,
+                volume,
+                price_type,
+                side,
+                offset,
+                hedge_flag,
+            } = formState.value;
+
+            const instrumentId = `${future_arbitrage_code} ${instrumnetResolved_A.instrumentId}&${instrumnetResolved_B.instrumentId}`;
+            const makeOrderInput: KungfuApi.MakeOrderInput = {
+                instrument_id: instrumentId,
+                instrument_type: +instrumentType,
+                exchange_id: exchangeId,
+                limit_price: +limit_price,
+                volume: +volume,
+                price_type: +price_type,
+                side: +side,
+                offset: +(offset !== undefined ? offset : +side === 0 ? 0 : 1),
+                hedge_flag: +(hedge_flag || 0),
+            };
+
+            if (!currentGlobalKfLocation.data) {
+                message.error('当前 Location 错误');
+                return;
+            }
+
+            makeOrderByOrderInput(
                 window.watcher,
                 makeOrderInput,
-                tdLocation,
                 currentGlobalKfLocation.data,
-            ).catch((err) => {
-                message.error(err.message);
-            });
-        } else {
-            message.error('当前 Location Category 错误');
-        }
-    });
+                account_id.toString(),
+            )
+                .then((rtn) => {
+                    if (!rtn) {
+                        console.warn('From kfPluginLocation');
+                    }
+                })
+                .catch((err) => {
+                    message.error(err.message);
+                });
+        })
+        .catch((err: Error) => {
+            console.error(err);
+        });
 }
 </script>
 <template>

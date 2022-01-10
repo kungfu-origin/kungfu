@@ -278,13 +278,6 @@ function handleOpenSetSourceDialog() {
         ></KfSetByConfigModal>
     </div>
 </template>
-
-<script lang="ts">
-export default {
-    name: '交易账户',
-};
-</script>
-
 <style lang="less">
 .kf-td__warp {
     height: 100%;

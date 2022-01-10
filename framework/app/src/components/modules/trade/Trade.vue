@@ -27,6 +27,7 @@ import {
 import {
     computed,
     getCurrentInstance,
+    onBeforeUnmount,
     onMounted,
     ref,
     toRaw,
@@ -70,7 +71,7 @@ const columns = computed(() => {
 
 onMounted(() => {
     if (app?.proxy) {
-        app.proxy.$tradingDataSubject.subscribe(
+        const subscription = app.proxy.$tradingDataSubject.subscribe(
             (watcher: KungfuApi.Watcher) => {
                 if (historyDate.value) {
                     return;
@@ -91,6 +92,10 @@ onMounted(() => {
                 trades.value = toRaw(tradesResolved.slice(0, 100));
             },
         );
+
+        onBeforeUnmount(() => {
+            subscription.unsubscribe();
+        });
     }
 });
 
@@ -160,7 +165,7 @@ function handleShowTradingDataDetail({
 }
 </script>
 <template>
-    <div class="kf-trades__warp">
+    <div class="kf-trades__warp kf-translateZ">
         <KfDashboard>
             <template v-slot:title>
                 <span v-if="currentGlobalKfLocation.data">
@@ -284,11 +289,6 @@ function handleShowTradingDataDetail({
         </KfDashboard>
     </div>
 </template>
-<script lang="ts">
-export default {
-    name: '成交记录',
-};
-</script>
 <style lang="less">
 .kf-trades__warp {
     width: 100%;

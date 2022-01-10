@@ -8,24 +8,36 @@ export const useComponenets = (app: App<Element>): void => {
             () => import('@root/src/components/modules/pos/Pos.vue'),
         ),
     );
+
+    app.component(
+        '持仓汇总',
+        defineAsyncComponent(
+            () =>
+                import('@root/src/components/modules/posGlobal/PosGlobal.vue'),
+        ),
+    );
+
     app.component(
         '委托记录',
         defineAsyncComponent(
             () => import('@root/src/components/modules/order/Order.vue'),
         ),
     );
+
     app.component(
         '成交记录',
         defineAsyncComponent(
             () => import('@root/src/components/modules/trade/Trade.vue'),
         ),
     );
+
     app.component(
         '交易账户',
         defineAsyncComponent(
             () => import('@root/src/components/modules/td/Td.vue'),
         ),
     );
+
     app.component(
         '行情源',
         defineAsyncComponent(
@@ -69,7 +81,7 @@ export const useComponenets = (app: App<Element>): void => {
     );
 
     app.component(
-        '期货套利',
+        '套利指令',
         defineAsyncComponent(
             () =>
                 import(
@@ -80,6 +92,7 @@ export const useComponenets = (app: App<Element>): void => {
 
     app.config.globalProperties.$registedKfUIComponents = [
         '持仓',
+        '持仓汇总',
         '委托记录',
         '成交记录',
         '交易账户',
@@ -88,7 +101,7 @@ export const useComponenets = (app: App<Element>): void => {
         '行情订阅',
         '深度行情',
         '下单面板',
-        '期货套利',
+        '套利指令',
     ];
 
     // if (process.env.NODE_ENV === 'production') {

@@ -728,6 +728,12 @@ declare namespace KungfuApi {
         location_uid: number;
         value: string;
     };
+
+    export interface KfPluginLocation {
+        category: string;
+        group: string;
+        name: string;
+    }
 }
 
 declare module '@kungfu-trader/kungfu-core' {

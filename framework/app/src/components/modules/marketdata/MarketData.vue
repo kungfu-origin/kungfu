@@ -249,11 +249,6 @@ function handleClickRow(row: KungfuApi.InstrumentResolved) {
         </KfDashboard>
     </div>
 </template>
-<script lang="ts">
-export default {
-    name: '行情订阅',
-};
-</script>
 <style lang="less">
 .kf-market-data__warp {
     height: 100%;

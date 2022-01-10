@@ -229,13 +229,6 @@ function handleOpenSetSourceDialog() {
         ></KfSetByConfigModal>
     </div>
 </template>
-
-<script lang="ts">
-export default {
-    name: '行情源',
-};
-</script>
-
 <style lang="less">
 .kf-md__warp {
     height: 100%;

@@ -33,6 +33,7 @@ import {
     getCurrentInstance,
     h,
     nextTick,
+    onBeforeUnmount,
     onMounted,
     reactive,
     ref,
@@ -111,7 +112,7 @@ export const useSwitchAllConfig = (
 } => {
     const allProcessOnline = computed(() => {
         const onlineItemsCount: number = kfConfigs.value.filter(
-            (item: KungfuApi.KfConfig | KungfuApi.KfLocation): boolean => {
+            (item: KungfuApi.KfLocation | KungfuApi.KfConfig): boolean => {
                 const processId = getProcessIdByKfLocation(item);
                 return processStatusData.value[processId] === 'online';
             },
@@ -130,7 +131,7 @@ export const useSwitchAllConfig = (
         return Promise.all(
             kfConfigs.value.map(
                 (
-                    item: KungfuApi.KfConfig | KungfuApi.KfLocation,
+                    item: KungfuApi.KfLocation | KungfuApi.KfConfig,
                 ): Promise<void | Proc> => {
                     return switchKfLocation(window.watcher, item, checked);
                 },
@@ -374,33 +375,41 @@ export const useDealExportHistoryTradingData = (): {
 
     onMounted(() => {
         if (app?.proxy) {
-            app.proxy.$bus.subscribe((data: KfBusEvent) => {
-                if (data.tag === 'export') {
-                    exportEventData.value = data;
+            const subscription = app.proxy.$bus.subscribe(
+                (data: KfBusEvent) => {
+                    if (data.tag === 'export') {
+                        exportEventData.value = data;
 
-                    if (exportEventData.value.tradingDataType !== 'all') {
-                        if (exportEventData.value.tradingDataType !== 'Order') {
+                        if (exportEventData.value.tradingDataType !== 'all') {
                             if (
                                 exportEventData.value.tradingDataType !==
-                                'Trade'
+                                'Order'
                             ) {
                                 if (
                                     exportEventData.value.tradingDataType !==
-                                    'OrderInput'
+                                    'Trade'
                                 ) {
-                                    handleConfirmExportDate({
-                                        date: dayjs().format(),
-                                        dateType: HistoryDateEnum.naturalDate,
-                                    });
-                                    return;
+                                    if (
+                                        exportEventData.value
+                                            .tradingDataType !== 'OrderInput'
+                                    ) {
+                                        handleConfirmExportDate({
+                                            date: dayjs().format(),
+                                            dateType:
+                                                HistoryDateEnum.naturalDate,
+                                        });
+                                        return;
+                                    }
                                 }
                             }
                         }
-                    }
 
-                    exportDateModalVisible.value = true;
-                }
-            });
+                        exportDateModalVisible.value = true;
+                    }
+                },
+            );
+
+            subscription.unsubscribe();
         }
     });
 
@@ -703,31 +712,37 @@ export const usePreStartAndQuitApp = (): {
 
     onMounted(() => {
         if (app?.proxy) {
-            app?.proxy.$bus.subscribe((data: KfBusEvent) => {
-                if (data.tag === 'processStatus') {
-                    if (data.name && data.name === 'archive') {
-                        preStartSystemLoadingData.archive =
-                            data.status === 'online' ? 'loading' : 'done';
+            const subscription = app?.proxy.$bus.subscribe(
+                (data: KfBusEvent) => {
+                    if (data.tag === 'processStatus') {
+                        if (data.name && data.name === 'archive') {
+                            preStartSystemLoadingData.archive =
+                                data.status === 'online' ? 'loading' : 'done';
+                        }
                     }
-                }
 
-                if (data.tag === 'main') {
-                    switch (data.name) {
-                        case 'record-before-quit':
-                            preQuitSystemLoadingData.record = 'loading';
-                            preQuitTasks([saveBoardsMap()]).finally(() => {
-                                ipcRenderer.send('record-before-quit-done');
-                                preQuitSystemLoadingData.record = 'done';
-                            });
-                            break;
-                        case 'clear-process-before-quit-start':
-                            preQuitSystemLoadingData.quit = 'loading';
-                            break;
-                        case 'clear-process-before-quit-end':
-                            preQuitSystemLoadingData.quit = 'done';
-                            break;
+                    if (data.tag === 'main') {
+                        switch (data.name) {
+                            case 'record-before-quit':
+                                preQuitSystemLoadingData.record = 'loading';
+                                preQuitTasks([saveBoardsMap()]).finally(() => {
+                                    ipcRenderer.send('record-before-quit-done');
+                                    preQuitSystemLoadingData.record = 'done';
+                                });
+                                break;
+                            case 'clear-process-before-quit-start':
+                                preQuitSystemLoadingData.quit = 'loading';
+                                break;
+                            case 'clear-process-before-quit-end':
+                                preQuitSystemLoadingData.quit = 'done';
+                                break;
+                        }
                     }
-                }
+                },
+            );
+
+            onBeforeUnmount(() => {
+                subscription.unsubscribe();
             });
         }
     });
@@ -746,7 +761,7 @@ export const useSubscibeInstrumentAtEntry = (): void => {
 
     onMounted(() => {
         if (app?.proxy) {
-            app.proxy.$tradingDataSubject
+            const subscription = app.proxy.$tradingDataSubject
                 .pipe(throttleTime(3000))
                 .subscribe((watcher: KungfuApi.Watcher) => {
                     const bigint0 = BigInt(0);
@@ -783,6 +798,10 @@ export const useSubscibeInstrumentAtEntry = (): void => {
                         subscribedInstrumentsForPos[item.uidKey] = true;
                     });
                 });
+
+            onBeforeUnmount(() => {
+                subscription.unsubscribe();
+            });
         }
     });
 

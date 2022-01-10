@@ -11,6 +11,7 @@ import {
     onMounted,
     toRefs,
     toRaw,
+    onBeforeUnmount,
 } from 'vue';
 import {
     APP_DIR,
@@ -285,7 +286,7 @@ export const useProcessStatusDetailData = (): {
     processStatusDetailData: Ref<Pm2ProcessStatusDetailData>;
     appStates: Ref<Record<string, BrokerStateStatusTypes>>;
     getProcessStatusName(
-        kfConfig: KungfuApi.KfConfig | KungfuApi.KfLocation,
+        kfConfig: KungfuApi.KfLocation | KungfuApi.KfConfig,
     ): ProcessStatusTypes | undefined;
 } => {
     const app = getCurrentInstance();
@@ -315,7 +316,7 @@ export const useProcessStatusDetailData = (): {
     });
 
     const getProcessStatusName = (
-        kfConfig: KungfuApi.KfConfig | KungfuApi.KfLocation,
+        kfConfig: KungfuApi.KfLocation | KungfuApi.KfConfig,
     ) => {
         return getAppStateStatusName(
             kfConfig,
@@ -397,13 +398,17 @@ export const useCurrentGlobalKfLocation = (
     watcher: KungfuApi.Watcher | null,
 ): {
     currentGlobalKfLocation: {
-        data: KungfuApi.KfConfig | KungfuApi.KfLocation | null;
+        data: KungfuApi.KfLocation | KungfuApi.KfConfig | null;
     };
     currentCategoryData: ComputedRef<KungfuApi.KfTradeValueCommonData | null>;
     currentUID: ComputedRef<string>;
-    setCurrentGlobalKfLocation(kfConfig: KungfuApi.KfConfig): void;
-    dealRowClassName(kfConfig: KungfuApi.KfConfig): string;
-    customRow(kfConfig: KungfuApi.KfConfig): {
+    setCurrentGlobalKfLocation(
+        kfConfig: KungfuApi.KfLocation | KungfuApi.KfConfig,
+    ): void;
+    dealRowClassName(
+        kfConfig: KungfuApi.KfLocation | KungfuApi.KfConfig,
+    ): string;
+    customRow(kfConfig: KungfuApi.KfLocation | KungfuApi.KfConfig): {
         onClick(): void;
     };
     getCurrentGlobalKfLocationId(
@@ -412,7 +417,7 @@ export const useCurrentGlobalKfLocation = (
 } => {
     const app = getCurrentInstance();
     const currentKfLocation = reactive<{
-        data: KungfuApi.KfConfig | KungfuApi.KfLocation | null;
+        data: KungfuApi.KfLocation | KungfuApi.KfConfig | null;
     }>({
         data: null,
     });
@@ -424,13 +429,15 @@ export const useCurrentGlobalKfLocation = (
             );
 
             currentKfLocation.data = currentGlobalKfLocation as
-                | KungfuApi.KfConfig
                 | KungfuApi.KfLocation
+                | KungfuApi.KfConfig
                 | null;
         }
     });
 
-    const setCurrentGlobalKfLocation = (kfLocation: KungfuApi.KfConfig) => {
+    const setCurrentGlobalKfLocation = (
+        kfLocation: KungfuApi.KfLocation | KungfuApi.KfConfig,
+    ) => {
         if (app?.proxy) {
             app?.proxy
                 ?.$useGlobalStore()
@@ -438,7 +445,9 @@ export const useCurrentGlobalKfLocation = (
         }
     };
 
-    const dealRowClassName = (record: KungfuApi.KfConfig): string => {
+    const dealRowClassName = (
+        record: KungfuApi.KfLocation | KungfuApi.KfConfig,
+    ): string => {
         if (currentKfLocation.data === null) return '';
         if (
             getIdByKfLocation(record) ===
@@ -450,7 +459,7 @@ export const useCurrentGlobalKfLocation = (
         return '';
     };
 
-    const customRow = (record: KungfuApi.KfConfig) => {
+    const customRow = (record: KungfuApi.KfLocation | KungfuApi.KfConfig) => {
         return {
             onClick: () => {
                 setCurrentGlobalKfLocation(record);
@@ -673,7 +682,7 @@ export const useAssets = (): {
     });
 
     const getAssetsByKfConfig = (
-        kfConfig: KungfuApi.KfConfig | KungfuApi.KfLocation,
+        kfConfig: KungfuApi.KfLocation | KungfuApi.KfConfig,
     ): KungfuApi.Asset => {
         const processId = getProcessIdByKfLocation(kfConfig);
         return assetsResolved.data[processId] || {};
@@ -748,11 +757,15 @@ export const useQuote = (): {
 
     onMounted(() => {
         if (app?.proxy) {
-            app.proxy.$tradingDataSubject.subscribe(
+            const subscription = app.proxy.$tradingDataSubject.subscribe(
                 (watcher: KungfuApi.Watcher) => {
                     quotes.value = toRaw({ ...watcher.ledger.Quote });
                 },
             );
+
+            onBeforeUnmount(() => {
+                subscription.unsubscribe();
+            });
         }
     });
 
@@ -881,7 +894,7 @@ export const useDealInstruments = (): void => {
                 tag: 'req_instruments',
             });
 
-            app.proxy.$tradingDataSubject
+            const subscription = app.proxy.$tradingDataSubject
                 .pipe(throttleTime(5000))
                 .subscribe((watcher: KungfuApi.Watcher) => {
                     const instruments = watcher.ledger.Instrument.list();
@@ -905,6 +918,10 @@ export const useDealInstruments = (): void => {
                         });
                     }
                 });
+
+            onBeforeUnmount(() => {
+                subscription.unsubscribe();
+            });
         }
     });
 

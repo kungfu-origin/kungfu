@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { getCurrentInstance, onMounted } from 'vue';
+import { getCurrentInstance, onBeforeUnmount, onMounted } from 'vue';
 import KfSystemPrepareModal from '@renderer/components/public/KfSystemPrepareModal.vue';
 
 import zhCN from 'ant-design-vue/es/locale/zh_CN';
@@ -41,7 +41,8 @@ const { exportDateModalVisible, exportDataLoading, handleConfirmExportDate } =
     useDealExportHistoryTradingData();
 
 useIpcListener();
-bus.subscribe((data: KfBusEvent) => {
+
+const busSubscription = bus.subscribe((data: KfBusEvent) => {
     if (data.tag === 'main') {
         switch (data.name) {
             case 'clear-journal':
@@ -60,11 +61,18 @@ bus.subscribe((data: KfBusEvent) => {
     }
 });
 
-tradingDataSubject.subscribe((watcher: KungfuApi.Watcher) => {
-    const appStates = dealAppStates(watcher.appStates);
-    store.setAppStates(appStates);
-    const assets = dealAssetsByHolderUID(watcher.ledger.Asset);
-    store.setAssets(assets);
+const tradingDataSubscription = tradingDataSubject.subscribe(
+    (watcher: KungfuApi.Watcher) => {
+        const appStates = dealAppStates(watcher.appStates);
+        store.setAppStates(appStates);
+        const assets = dealAssetsByHolderUID(watcher.ledger.Asset);
+        store.setAssets(assets);
+    },
+);
+
+onBeforeUnmount(() => {
+    tradingDataSubscription.unsubscribe();
+    busSubscription.unsubscribe();
 });
 
 store.setKfConfigList();

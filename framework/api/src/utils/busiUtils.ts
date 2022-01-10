@@ -663,7 +663,7 @@ export const getIfProcessRunning = (
 };
 
 export const getAppStateStatusName = (
-    kfConfig: KungfuApi.KfConfig | KungfuApi.KfLocation,
+    kfConfig: KungfuApi.KfLocation | KungfuApi.KfConfig,
     processStatusData: Pm2ProcessStatusData,
     appStates: Record<string, BrokerStateStatusTypes>,
 ): ProcessStatusTypes | undefined => {
@@ -1086,7 +1086,7 @@ export const dealTradingData = (
     kfLocation: KungfuApi.KfLocation | KungfuApi.KfConfig,
 ): KungfuApi.TradingDataNameToType[KungfuApi.TradingDataTypeName][] => {
     if (!watcher) {
-        throw new Error('dealTradingData no watcher');
+        throw new Error('Watcher 错误');
     }
 
     const currentUID = watcher.getLocationUID(kfLocation);

@@ -27,9 +27,9 @@
         "fmt": "prettier -l -w './**/*.{ts, js, vue, less, css, json, html}' --config ./.prettierrc.js"
     },
     "dependencies": {
+        "@kungfu-trader/kungfu-js-api": "^2.4.0-alpha.4",
         "iconv-lite": "^0.6.3",
-        "jschardet": "^3.0.0",
-        "@kungfu-trader/kungfu-js-api": "^2.4.0-alpha.4"
+        "jschardet": "^3.0.0"
     },
     "devDependencies": {
         "@electron/remote": "^2.0.1",
@@ -44,6 +44,7 @@
         "fs-extra": "^10.0.0",
         "minimist": "^1.2.5",
         "pinia": "^2.0.9",
+        "rxjs": "^7.5.1",
         "tail": "^2.2.4",
         "vue": "^3.2.26",
         "vue-virtual-scroller": "^2.0.0-alpha.1"

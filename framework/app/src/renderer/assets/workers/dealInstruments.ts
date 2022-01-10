@@ -53,7 +53,12 @@ self.addEventListener('message', (e) => {
             existedInstruments,
             instruments,
         );
-        fse.outputFileSync(KF_INSTRUMENTS_PATH, JSON.stringify(newInstruments));
+
+        if (!Object.keys(newInstruments || {}).length) {
+            return;
+        }
+
+        fse.outputJSONSync(KF_INSTRUMENTS_PATH, newInstruments);
         self.postMessage({
             updateTime: new Date().getTime(),
             instruments: Object.values(newInstruments),

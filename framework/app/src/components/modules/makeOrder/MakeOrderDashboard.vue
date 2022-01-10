@@ -3,6 +3,7 @@ import {
     computed,
     getCurrentInstance,
     nextTick,
+    onBeforeUnmount,
     onMounted,
     ref,
     watch,
@@ -10,7 +11,6 @@ import {
 import KfDashboard from '@renderer/components/public/KfDashboard.vue';
 import KfDashboardItem from '@renderer/components/public/KfDashboardItem.vue';
 import KfConfigSettingsForm from '@renderer/components/public/KfConfigSettingsForm.vue';
-import { getMdTdKfLocationByProcessId } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import {
     buildInstrumentSelectOptionValue,
     initFormStateByConfig,
@@ -21,7 +21,7 @@ import {
 } from '@renderer/assets/methods/uiUtils';
 import { getConfigSettings } from './config';
 import { message } from 'ant-design-vue';
-import { kfMakeOrder } from '@kungfu-trader/kungfu-js-api/kungfu';
+import { makeOrderByOrderInput } from '@kungfu-trader/kungfu-js-api/kungfu';
 import { InstrumentTypeEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import {
     transformSearchInstrumentResultToInstrument,
@@ -64,7 +64,7 @@ const configSettings = computed(() => {
 
 onMounted(() => {
     if (app?.proxy) {
-        app.proxy.$bus.subscribe((data: KfBusEvent) => {
+        const subscription = app.proxy.$bus.subscribe((data: KfBusEvent) => {
             if (data.tag === 'makeOrder') {
                 const { offset, side, volume, price, instrumentType } = (
                     data as TriggerMakeOrder
@@ -104,6 +104,10 @@ onMounted(() => {
 
                 formState.value.side = +side;
             }
+        });
+
+        onBeforeUnmount(() => {
+            subscription.unsubscribe;
         });
     }
 });
@@ -184,33 +188,20 @@ function handleMakeOrder() {
                 return;
             }
 
-            if (currentGlobalKfLocation.data.category === 'td') {
-                kfMakeOrder(
-                    window.watcher,
-                    makeOrderInput,
-                    currentGlobalKfLocation.data,
-                ).catch((err) => {
+            makeOrderByOrderInput(
+                window.watcher,
+                makeOrderInput,
+                currentGlobalKfLocation.data,
+                account_id.toString(),
+            )
+                .then((rtn) => {
+                    if (!rtn) {
+                        console.warn('From kfPluginLocation');
+                    }
+                })
+                .catch((err) => {
                     message.error(err.message);
                 });
-            } else if (currentGlobalKfLocation.data.category === 'strategy') {
-                const tdLocation = getMdTdKfLocationByProcessId(
-                    `td_${account_id}`,
-                );
-                if (!tdLocation) {
-                    message.error('下单账户信息错误');
-                    return;
-                }
-                kfMakeOrder(
-                    window.watcher,
-                    makeOrderInput,
-                    tdLocation,
-                    currentGlobalKfLocation.data,
-                ).catch((err) => {
-                    message.error(err.message);
-                });
-            } else {
-                message.error('当前 Location Category 错误');
-            }
         })
         .catch((err: Error) => {
             console.error(err);

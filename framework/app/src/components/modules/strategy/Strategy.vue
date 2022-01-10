@@ -250,13 +250,6 @@ function handleOpenFile(kfConfig: KungfuApi.KfConfig) {
         ></KfSetByConfigModal>
     </div>
 </template>
-
-<script lang="ts">
-export default {
-    name: '策略进程',
-};
-</script>
-
 <style lang="less">
 .kf-strategy__warp {
     height: 100%;

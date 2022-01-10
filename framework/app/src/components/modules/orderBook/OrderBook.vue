@@ -8,7 +8,13 @@ import {
     useQuote,
     useTriggerMakeOrder,
 } from '@renderer/assets/methods/uiUtils';
-import { computed, getCurrentInstance, onMounted, ref } from 'vue';
+import {
+    computed,
+    getCurrentInstance,
+    onBeforeUnmount,
+    onMounted,
+    ref,
+} from 'vue';
 import KfBlinkNum from '@renderer/components/public/KfBlinkNum.vue';
 import { SideEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';
 
@@ -29,10 +35,14 @@ const quoteData = computed(() => {
 
 onMounted(() => {
     if (app?.proxy) {
-        app.proxy.$bus.subscribe((data: KfBusEvent) => {
+        const subscription = app.proxy.$bus.subscribe((data: KfBusEvent) => {
             if (data.tag === 'orderbook') {
                 currentInstrument.value = data.instrument;
             }
+        });
+
+        onBeforeUnmount(() => {
+            subscription.unsubscribe();
         });
     }
 });

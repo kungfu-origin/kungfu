@@ -14,6 +14,7 @@ import {
     dealTradingData,
     dealVolumeCondition,
     getIdByKfLocation,
+    getMdTdKfLocationByProcessId,
     getOrderTradeFilterKey,
     kfLogger,
     resolveAccountId,
@@ -401,6 +402,47 @@ export const kfMakeOrder = (
     } else {
         return Promise.resolve(watcher.issueOrder(orderInput, tdLocation));
     }
+};
+
+export const makeOrderByOrderInput = (
+    watcher: KungfuApi.Watcher | null,
+    orderInput: KungfuApi.MakeOrderInput,
+    kfLocation: KungfuApi.KfLocation,
+    accountId: string,
+): Promise<boolean> => {
+    return new Promise((resolve, reject) => {
+        if (!watcher) {
+            reject(new Error(`Watcher 错误`));
+            return;
+        }
+
+        if (kfLocation.category === 'td') {
+            kfMakeOrder(window.watcher, orderInput, kfLocation)
+                .then(() => {
+                    resolve(true);
+                })
+                .catch((err) => {
+                    reject(err);
+                });
+        } else if (kfLocation.category === 'strategy') {
+            const tdLocation = getMdTdKfLocationByProcessId(
+                `td_${accountId || ''}`,
+            );
+            if (!tdLocation) {
+                reject(new Error('下单账户信息错误'));
+                return;
+            }
+            kfMakeOrder(window.watcher, orderInput, tdLocation, kfLocation)
+                .then(() => {
+                    resolve(true);
+                })
+                .catch((err) => {
+                    reject(err);
+                });
+        } else {
+            resolve(false);
+        }
+    });
 };
 
 export const hashInstrumentUKey = (

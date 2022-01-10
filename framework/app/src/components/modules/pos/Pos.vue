@@ -17,7 +17,13 @@ import KfDashboardItem from '@renderer/components/public/KfDashboardItem.vue';
 import KfTradingDataTable from '@renderer/components/public/KfTradingDataTable.vue';
 import { DownloadOutlined } from '@ant-design/icons-vue';
 
-import { getCurrentInstance, onMounted, ref, toRaw } from 'vue';
+import {
+    getCurrentInstance,
+    onBeforeUnmount,
+    onMounted,
+    ref,
+    toRaw,
+} from 'vue';
 import { columns } from './config';
 import KfBlinkNum from '@renderer/components/public/KfBlinkNum.vue';
 import { hashInstrumentUKey } from '@kungfu-trader/kungfu-js-api/kungfu';
@@ -44,14 +50,14 @@ const { instruments } = useInstruments();
 
 onMounted(() => {
     if (app?.proxy) {
-        app.proxy.$tradingDataSubject.subscribe(
+        const subscription = app.proxy.$tradingDataSubject.subscribe(
             (watcher: KungfuApi.Watcher) => {
                 if (currentGlobalKfLocation.data === null) {
                     return;
                 }
 
                 const positions = (dealTradingData(
-                    window.watcher,
+                    watcher,
                     watcher.ledger,
                     'Position',
                     currentGlobalKfLocation.data,
@@ -60,6 +66,10 @@ onMounted(() => {
                 pos.value = toRaw(positions.reverse());
             },
         );
+
+        onBeforeUnmount(() => {
+            subscription.unsubscribe();
+        });
     }
 });
 
@@ -104,7 +114,7 @@ function handleClickRow(data: {
 }
 </script>
 <template>
-    <div class="kf-position__warp">
+    <div class="kf-position__warp kf-translateZ">
         <KfDashboard>
             <template v-slot:title>
                 <span v-if="currentGlobalKfLocation.data">
@@ -223,6 +233,7 @@ function handleClickRow(data: {
                     </template>
                     <template v-else-if="column.dataIndex === 'unrealized_pnl'">
                         <KfBlinkNum
+                            mode="compare-zero"
                             :num="dealAssetPrice(item.unrealized_pnl)"
                         ></KfBlinkNum>
                     </template>
@@ -231,11 +242,6 @@ function handleClickRow(data: {
         </KfDashboard>
     </div>
 </template>
-<script lang="ts">
-export default {
-    name: '持仓',
-};
-</script>
 <style lang="less">
 .kf-position__warp {
     width: 100%;
