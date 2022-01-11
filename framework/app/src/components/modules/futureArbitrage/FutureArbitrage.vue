@@ -143,15 +143,9 @@ function handleMakeOrder() {
                 makeOrderInput,
                 currentGlobalKfLocation.data,
                 account_id.toString(),
-            )
-                .then((rtn) => {
-                    if (!rtn) {
-                        console.warn('From kfPluginLocation');
-                    }
-                })
-                .catch((err) => {
-                    message.error(err.message);
-                });
+            ).catch((err) => {
+                message.error(err.message);
+            });
         })
         .catch((err: Error) => {
             console.error(err);

@@ -14,7 +14,7 @@
     </div>
 </template>
 <script lang="ts">
-import { defineComponent, nextTick, PropType } from 'vue';
+import { defineComponent, nextTick, onBeforeUnmount, PropType } from 'vue';
 import { filter } from 'rxjs';
 
 export default defineComponent({
@@ -33,11 +33,15 @@ export default defineComponent({
         });
 
         if (this.$bus) {
-            this.$bus
+            const subscription = this.$bus
                 .pipe(filter((e: KfBusEvent) => e.tag === 'resize'))
                 .subscribe(() => {
                     this.$emit('boardSizeChange', this.getBodyWidthHeight());
                 });
+
+            onBeforeUnmount(() => {
+                subscription.unsubscribe();
+            });
         }
     },
 

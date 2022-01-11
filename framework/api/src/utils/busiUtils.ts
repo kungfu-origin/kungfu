@@ -282,16 +282,6 @@ export const getInstrumentTypeData = (
     ];
 };
 
-export const getCategoryData = (
-    category: KfCategoryTypes,
-): KungfuApi.KfTradeValueCommonData => {
-    if (KfCategory[KfCategoryEnum[category]]) {
-        return KfCategory[KfCategoryEnum[category]];
-    }
-
-    throw new Error(`Category ${category} is illegal`);
-};
-
 const getChildFileStat = async (
     dirname: string,
 ): Promise<Array<{ childFilePath: string; stat: Stats }>> => {
@@ -593,9 +583,9 @@ export const getProcessIdByKfLocation = (
         return `${kfLocation.category}_${kfLocation.name}`;
     } else if (kfLocation.category === 'system') {
         return kfLocation.name;
+    } else {
+        return `${kfLocation.category}_${kfLocation.group}_${kfLocation.name}`;
     }
-
-    throw new Error(`Category ${kfLocation.category} is illegal`);
 };
 
 export const getMdTdKfLocationByProcessId = (
@@ -627,7 +617,10 @@ export const getMdTdKfLocationByProcessId = (
 };
 
 export const getIdByKfLocation = (
-    kfLocation: KungfuApi.KfLocation | KungfuApi.KfConfig,
+    kfLocation:
+        | KungfuApi.KfLocation
+        | KungfuApi.KfConfig
+        | KungfuApi.KfExtraLocation,
 ): string => {
     if (kfLocation.category === 'td') {
         return `${kfLocation.group}_${kfLocation.name}`;
@@ -637,9 +630,9 @@ export const getIdByKfLocation = (
         return `${kfLocation.name}`;
     } else if (kfLocation.category === 'system') {
         return `${kfLocation.group}_${kfLocation.name}`;
+    } else {
+        return `${kfLocation.group}_${kfLocation.name}`;
     }
-
-    throw new Error(`Category ${kfLocation.category} is illegal`);
 };
 
 export const getStateStatusData = (
@@ -894,10 +887,21 @@ export const dealHedgeFlag = (
     return HedgeFlag[hedgeFlag];
 };
 
-export const dealCategory = (
+export const getKfCategoryData = (
     category: KfCategoryTypes,
 ): KungfuApi.KfTradeValueCommonData => {
-    return KfCategory[KfCategoryEnum[category]];
+    if (KfCategory[KfCategoryEnum[category]]) {
+        return KfCategory[KfCategoryEnum[category]];
+    }
+
+    throw new Error(`Category ${category} is illegal`);
+};
+
+export const dealCategory = (
+    category: KfCategoryTypes,
+    extraCategory: Record<string, KungfuApi.KfTradeValueCommonData>,
+): KungfuApi.KfTradeValueCommonData => {
+    return KfCategory[KfCategoryEnum[category]] || extraCategory[category];
 };
 
 export const dealOrderStat = (
@@ -1043,8 +1047,7 @@ export const getTradingDataSortKey = (
 
 export const getLedgerCategory = (category: KfCategoryTypes): 0 | 1 => {
     if (category !== 'td' && category !== 'strategy') {
-        //TODO  instruments
-        return LedgerCategoryEnum['td'];
+        return LedgerCategoryEnum.td;
     }
 
     return LedgerCategoryEnum[category as LedgerCategoryTypes];
@@ -1058,7 +1061,11 @@ export const filterLedgerResult = <T>(
 ): T[] => {
     const { category, group, name } = kfLocation;
     const ledgerCategory = getLedgerCategory(category);
-    let dataTableResolved = dataTable.filter('ledger_category', ledgerCategory);
+    let dataTableResolved = dataTable;
+
+    if (ledgerCategory) {
+        dataTableResolved = dataTable.filter('ledger_category', ledgerCategory);
+    }
 
     if (tradingDataTypeName === 'Position') {
         dataTableResolved = dataTableResolved.nofilter('volume', BigInt(0));
@@ -1118,4 +1125,14 @@ export const dealTradingData = (
         kfLocation,
         sortKey,
     );
+};
+
+export const isTdStrategyCategory = (category: string) => {
+    if (category !== 'td') {
+        if (category !== 'strategy') {
+            return false;
+        }
+    }
+
+    return true;
 };

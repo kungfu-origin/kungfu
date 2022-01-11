@@ -1,4 +1,9 @@
-export const columns: KfTradingDataTableHeaderConfig[] = [
+import { KfCategoryTypes } from '@kungfu-trader/kungfu-js-api/typings/enums';
+import { isTdStrategyCategory } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
+
+export const getColumns = (
+    category: KfCategoryTypes,
+): KfTradingDataTableHeaderConfig[] => [
     {
         type: 'string',
         name: '代码',
@@ -43,14 +48,17 @@ export const columns: KfTradingDataTableHeaderConfig[] = [
     },
     {
         type: 'number',
-        name: '总市值',
-        dataIndex: 'total_market_price',
-        flex: 1.5,
-    },
-    {
-        type: 'number',
         name: '浮动盈亏',
         dataIndex: 'unrealized_pnl',
         flex: 1.5,
     },
+    ...(isTdStrategyCategory(category)
+        ? []
+        : [
+              {
+                  name: '持有账户',
+                  dataIndex: 'holder_uid',
+                  flex: 1,
+              },
+          ]),
 ];

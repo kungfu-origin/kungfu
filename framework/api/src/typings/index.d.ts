@@ -729,7 +729,7 @@ declare namespace KungfuApi {
         value: string;
     };
 
-    export interface KfPluginLocation {
+    export interface KfExtraLocation {
         category: string;
         group: string;
         name: string;

@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import {
+    useCurrentGlobalKfLocation,
     useDashboardBodySize,
     useTableSearchKeyword,
+    useTriggerMakeOrder,
 } from '@renderer/assets/methods/uiUtils';
 import {
     getCurrentInstance,
@@ -13,13 +15,21 @@ import {
 import KfDashboard from '@renderer/components/public/KfDashboard.vue';
 import KfDashboardItem from '@renderer/components/public/KfDashboardItem.vue';
 import KfBlinkNum from '@renderer/components/public/KfBlinkNum.vue';
-import { columns } from './config';
+import { categoryRegisterConfig, columns } from './config';
 import {
     dealAssetPrice,
     dealDirection,
     dealKfPrice,
+    findTargetFromArray,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
-import { LedgerCategoryEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';
+import {
+    LedgerCategoryEnum,
+    OffsetEnum,
+    SideEnum,
+} from '@kungfu-trader/kungfu-js-api/typings/enums';
+import { ExchangeIds } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
+import { hashInstrumentUKey } from '@kungfu-trader/kungfu-js-api/kungfu';
+import { useInstruments } from '@renderer/assets/methods/actionsUtils';
 
 interface PositionGlobalProps {}
 defineProps<PositionGlobalProps>();
@@ -32,16 +42,21 @@ const { searchKeyword, tableData } = useTableSearchKeyword<KungfuApi.Position>(
     ['instrument_id', 'exchange_id', 'direction'],
 );
 
+const { dealRowClassName, setCurrentGlobalKfLocation } =
+    useCurrentGlobalKfLocation(window.watcher);
+const { instruments } = useInstruments();
+const { triggerOrderBook, triggerMakeOrder } = useTriggerMakeOrder();
+
 onMounted(() => {
     if (app?.proxy) {
         const subscription = app.proxy.$tradingDataSubject.subscribe(
             (watcher: KungfuApi.Watcher) => {
-                const now = new Date().getTime();
-                console.log(now, '-----');
-                const positions = watcher.ledger.Position.filter(
-                    'ledger_category',
-                    LedgerCategoryEnum.td,
-                ).list();
+                const positions = watcher.ledger.Position.nofilter(
+                    'volume',
+                    BigInt(0),
+                )
+                    .filter('ledger_category', LedgerCategoryEnum.td)
+                    .list();
                 pos.value = toRaw(buildGlobalPositions(positions));
             },
         );
@@ -49,6 +64,8 @@ onMounted(() => {
         onBeforeUnmount(() => {
             subscription.unsubscribe();
         });
+
+        app.proxy.$globalCategoryRegister.register(categoryRegisterConfig);
     }
 });
 
@@ -58,7 +75,7 @@ function buildGlobalPositions(
     positions: KungfuApi.Position[],
 ): KungfuApi.Position[] {
     const posStatData: PosStat = positions.reduce((posStat, pos) => {
-        const id = `${pos.exchange_id}_${pos.instrument_id}`;
+        const id = `${pos.exchange_id}_${pos.instrument_id}_${pos.direction}`;
         if (!posStat[id]) {
             posStat[id] = pos;
         } else {
@@ -86,6 +103,67 @@ function buildGlobalPositions(
         return id1.localeCompare(id2);
     });
 }
+
+function dealRowClassNameResolved(record: KungfuApi.Position) {
+    const locationResolved: KungfuApi.KfExtraLocation = {
+        category: categoryRegisterConfig.name,
+        group: record.exchange_id,
+        name: record.instrument_id,
+    };
+
+    return dealRowClassName(locationResolved);
+}
+
+function customRowResolved(record: KungfuApi.Position) {
+    const locationResolved: KungfuApi.KfExtraLocation = {
+        category: categoryRegisterConfig.name,
+        group: record.exchange_id,
+        name: record.instrument_id,
+    };
+
+    return {
+        onClick: () => {
+            setCurrentGlobalKfLocation(locationResolved);
+            tiggerOrderBookAndMakeOrder(record);
+        },
+    };
+}
+
+function tiggerOrderBookAndMakeOrder(record: KungfuApi.Position) {
+    const { instrument_id, instrument_type, exchange_id } = record;
+    const ukey = hashInstrumentUKey(instrument_id, exchange_id);
+    const instrumnet: KungfuApi.InstrumentResolved | null =
+        findTargetFromArray<KungfuApi.InstrumentResolved>(
+            instruments.data,
+            'ukey',
+            ukey,
+        );
+    const instrumentName = instrumnet?.instrumentName || '';
+    const ensuredInstrument: KungfuApi.InstrumentResolved = {
+        exchangeId: exchange_id,
+        instrumentId: instrument_id,
+        instrumentType: instrument_type,
+        instrumentName,
+        ukey,
+        id: `${instrument_id}_${instrumentName}_${exchange_id}`.toLowerCase(),
+    };
+
+    triggerOrderBook(ensuredInstrument);
+    const extraOrderInput: ExtraOrderInput = {
+        side: record.direction === 0 ? SideEnum.Sell : SideEnum.Buy,
+        offset:
+            record.yesterday_volume !== BigInt(0)
+                ? OffsetEnum.CloseYest
+                : OffsetEnum.CloseToday,
+        volume:
+            record.yesterday_volume !== BigInt(0)
+                ? record.yesterday_volume
+                : record.volume - record.yesterday_volume,
+
+        price: record.last_price || 0,
+    };
+    triggerMakeOrder(ensuredInstrument, extraOrderInput);
+}
 </script>
 <template>
     <div class="kf-position-global__warp kf-translateZ">
@@ -105,6 +183,8 @@ function buildGlobalPositions(
                 size="small"
                 :pagination="false"
                 :scroll="{ y: dashboardBodyHeight - 4 }"
+                :rowClassName="dealRowClassNameResolved"
+                :customRow="customRowResolved"
                 emptyText="暂无数据"
             >
                 <template
@@ -118,7 +198,7 @@ function buildGlobalPositions(
                 >
                     <template v-if="column.dataIndex === 'instrument_id'">
                         {{ record.instrument_id }}
-                        {{ record.exchange_id }}
+                        {{ ExchangeIds[record.exchange_id].name }}
                     </template>
                     <template v-else-if="column.dataIndex === 'direction'">
                         <span

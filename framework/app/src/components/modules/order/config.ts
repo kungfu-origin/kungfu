@@ -1,7 +1,8 @@
 import { KfCategoryTypes } from '@kungfu-trader/kungfu-js-api/typings/enums';
+import { isTdStrategyCategory } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 
 export const getColumns = (
-    moduleType: KfCategoryTypes,
+    category: KfCategoryTypes,
     isHistory = false,
 ): KfTradingDataTableHeaderConfig[] => [
     {
@@ -59,9 +60,19 @@ export const getColumns = (
         width: 90,
     },
     {
-        name: moduleType == 'td' ? '下单源' : '目标账户',
-        dataIndex: moduleType == 'td' ? 'dest' : 'source',
+        name: category == 'td' ? '下单源' : '目标账户',
+        dataIndex: category == 'td' ? 'dest' : 'source',
+        flex: 1,
     },
+    ...(isTdStrategyCategory(category)
+        ? []
+        : [
+              {
+                  name: '下单源',
+                  dataIndex: 'dest',
+                  flex: 1,
+              },
+          ]),
     ...(isHistory
         ? []
         : [

@@ -69,6 +69,7 @@ interface ExtraOrderInput {
     offset?: OffsetEnum;
     volume: number | bigint;
     price: number;
+    accountId?: string;
 }
 
 interface TiggerOrderBookUpdate {

@@ -5,8 +5,8 @@ import {
 } from './watcher';
 export const tradingDataSubject = new Subject<KungfuApi.Watcher>();
 
-startGetKungfuWatcherStep(1000, (watcher) => {
+startGetKungfuWatcherStep(2000, (watcher) => {
     tradingDataSubject.next(watcher);
 });
 
-startUpdateKungfuWatcherQuotes(2000);
+startUpdateKungfuWatcherQuotes(3000);

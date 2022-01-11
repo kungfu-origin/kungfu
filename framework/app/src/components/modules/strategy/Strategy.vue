@@ -189,11 +189,12 @@ function handleOpenFile(kfConfig: KungfuApi.KfConfig) {
                                     getProcessIdByKfLocation(record),
                                 )
                             "
-                            @click="handleSwitchProcessStatus($event, record)"
+                            @click="(checked: boolean, Event: MouseEvent) => handleSwitchProcessStatus(checked, Event, record)"
                         ></a-switch>
                     </template>
                     <template v-else-if="column.dataIndex === 'unrealizedPnl'">
                         <KfBlinkNum
+                            mode="compare-zero"
                             :num="
                                 dealAssetPrice(
                                     getAssetsByKfConfig(record).unrealized_pnl,
@@ -214,15 +215,15 @@ function handleOpenFile(kfConfig: KungfuApi.KfConfig) {
                         <div class="kf-actions__warp">
                             <FileTextOutlined
                                 style="font-size: 12px"
-                                @click="handleOpenLogview(record)"
+                                @click.stop="handleOpenLogview(record)"
                             />
                             <FormOutlined
                                 style="font-size: 12px"
-                                @click="handleOpenFile(record)"
+                                @click.stop="handleOpenFile(record)"
                             ></FormOutlined>
                             <SettingOutlined
                                 style="font-size: 12px"
-                                @click="
+                                @click.stop="
                                     handleOpenSetStrategyDialog(
                                         'update',
                                         record,
@@ -231,7 +232,7 @@ function handleOpenFile(kfConfig: KungfuApi.KfConfig) {
                             />
                             <DeleteOutlined
                                 style="font-size: 12px"
-                                @click="handleRemoveKfConfig(record)"
+                                @click.stop="handleRemoveKfConfig(record)"
                             />
                         </div>
                     </template>

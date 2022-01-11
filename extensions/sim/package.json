@@ -56,27 +56,27 @@
             "options": [
               {
                 "value": "reject",
-                "label": "reject"
+                "label": "Reject"
               },
               {
                 "value": "pend",
-                "label": "pend"
+                "label": "Pend"
               },
               {
                 "value": "cancel",
-                "label": "cancel"
+                "label": "Cancel"
               },
               {
                 "value": "partialfillandcancel",
-                "label": "partialfillandcancel"
+                "label": "PartialFillAndCancel"
               },
               {
                 "value": "partialfill",
-                "label": "partialfill"
+                "label": "PartialFillAndPending"
               },
               {
                 "value": "fill",
-                "label": "fill"
+                "label": "Fill"
               }
             ],
             "errMsg": "请选择撮合模式",

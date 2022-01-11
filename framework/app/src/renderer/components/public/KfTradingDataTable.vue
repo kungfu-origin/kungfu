@@ -1,7 +1,14 @@
 <script lang="ts" setup>
 import { sum } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { Empty } from 'ant-design-vue';
-import { computed, getCurrentInstance, ref } from 'vue';
+import { filter } from 'rxjs';
+import {
+    computed,
+    getCurrentInstance,
+    onBeforeMount,
+    onMounted,
+    ref,
+} from 'vue';
 
 const props = withDefaults(
     defineProps<{
@@ -65,6 +72,27 @@ const headerWidth = computed(() => {
     });
 
     return headerWidthCollection;
+});
+
+onMounted(() => {
+    if (kfScrollerTableBodyRef.value) {
+        kfScrollerTableWidth.value = kfScrollerTableBodyRef.value.clientWidth;
+    }
+
+    if (app?.proxy) {
+        const subscription = app?.proxy.$bus
+            .pipe(filter((e: KfBusEvent) => e.tag === 'resize'))
+            .subscribe(() => {
+                if (kfScrollerTableBodyRef.value) {
+                    kfScrollerTableWidth.value =
+                        kfScrollerTableBodyRef.value.clientWidth;
+                }
+            });
+
+        onBeforeMount(() => {
+            subscription.unsubscribe();
+        });
+    }
 });
 
 function getHeaderWidth(column: KfTradingDataTableHeaderConfig) {

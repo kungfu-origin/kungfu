@@ -3,12 +3,12 @@ import {
     dealKfPrice,
     dealSide,
     dealOffset,
-    getIdByKfLocation,
     delayMilliSeconds,
     dealTradingData,
     dealOrderStat,
     resolveAccountId,
     resolveClientId,
+    isTdStrategyCategory,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import {
     useCurrentGlobalKfLocation,
@@ -40,6 +40,7 @@ import {
 } from '@kungfu-trader/kungfu-js-api/kungfu';
 import type { Dayjs } from 'dayjs';
 import { showTradingDataDetail } from '@renderer/assets/methods/actionsUtils';
+import { useExtraCategory } from '@renderer/assets/methods/uiExtUtils';
 
 const app = getCurrentInstance();
 
@@ -59,6 +60,7 @@ const {
 } = useCurrentGlobalKfLocation(window.watcher);
 
 const { handleDownload } = useDownloadHistoryTradingData();
+const { getExtraCategoryData } = useExtraCategory();
 
 const columns = computed(() => {
     if (currentGlobalKfLocation.data === null) {
@@ -82,12 +84,20 @@ onMounted(() => {
                 }
 
                 Ledger = watcher.ledger;
-                const tradesResolved = (dealTradingData(
-                    watcher,
-                    Ledger,
-                    'Trade',
-                    currentGlobalKfLocation.data,
-                ) || []) as KungfuApi.Trade[];
+                const tradesResolved = isTdStrategyCategory(
+                    currentGlobalKfLocation.data.category,
+                )
+                    ? ((dealTradingData(
+                          watcher,
+                          Ledger,
+                          'Trade',
+                          currentGlobalKfLocation.data,
+                      ) || []) as KungfuApi.Trade[])
+                    : (getExtraCategoryData(
+                          Ledger.Trade,
+                          currentGlobalKfLocation.data,
+                          'trade',
+                      ) as KungfuApi.Trade[]);
 
                 trades.value = toRaw(tradesResolved.slice(0, 100));
             },
@@ -125,7 +135,15 @@ watch(historyDate, async (newDate) => {
         currentGlobalKfLocation.data,
     );
     Ledger = tradingData;
-    trades.value = toRaw(historyDatas as KungfuApi.Trade[]);
+
+    trades.value = isTdStrategyCategory(currentGlobalKfLocation.data.category)
+        ? toRaw(historyDatas as KungfuApi.Trade[])
+        : (getExtraCategoryData(
+              Ledger.Trade,
+              currentGlobalKfLocation.data,
+              'trade',
+              true,
+          ) as KungfuApi.Trade[]);
     historyDataLoading.value = false;
 });
 

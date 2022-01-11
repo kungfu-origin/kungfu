@@ -8,9 +8,11 @@ import {
     delayMilliSeconds,
     dealTradingData,
     dealOrderStat,
-    getCategoryData,
     resolveAccountId,
     resolveClientId,
+    isTdStrategyCategory,
+    getOrderTradeFilterKey,
+    dealCategory,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import {
     useCurrentGlobalKfLocation,
@@ -48,6 +50,7 @@ import { UnfinishedOrderStatus } from '@kungfu-trader/kungfu-js-api/config/tradi
 import { OrderStatusEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import { message, Modal } from 'ant-design-vue';
 import { showTradingDataDetail } from '@renderer/assets/methods/actionsUtils';
+import { useExtraCategory } from '@renderer/assets/methods/uiExtUtils';
 
 const app = getCurrentInstance();
 
@@ -68,6 +71,7 @@ const {
 } = useCurrentGlobalKfLocation(window.watcher);
 
 const { handleDownload } = useDownloadHistoryTradingData();
+const { getExtraCategoryData } = useExtraCategory();
 
 const columns = computed(() => {
     if (currentGlobalKfLocation.data === null) {
@@ -91,12 +95,20 @@ onMounted(() => {
                 }
 
                 Ledger = watcher.ledger;
-                const ordersResolved = (dealTradingData(
-                    watcher,
-                    Ledger,
-                    'Order',
-                    currentGlobalKfLocation.data,
-                ) || []) as KungfuApi.Order[];
+                const ordersResolved = isTdStrategyCategory(
+                    currentGlobalKfLocation.data.category,
+                )
+                    ? ((dealTradingData(
+                          watcher,
+                          Ledger,
+                          'Order',
+                          currentGlobalKfLocation.data,
+                      ) || []) as KungfuApi.Order[])
+                    : (getExtraCategoryData(
+                          Ledger.Order,
+                          currentGlobalKfLocation.data,
+                          'order',
+                      ) as KungfuApi.Order[]);
 
                 if (unfinishedOrder.value) {
                     orders.value = toRaw(
@@ -145,7 +157,14 @@ watch(historyDate, async (newDate) => {
         currentGlobalKfLocation.data,
     );
     Ledger = tradingData;
-    orders.value = toRaw(historyDatas as KungfuApi.Order[]);
+    orders.value = isTdStrategyCategory(currentGlobalKfLocation.data.category)
+        ? toRaw(historyDatas as KungfuApi.Order[])
+        : (getExtraCategoryData(
+              Ledger.Order,
+              currentGlobalKfLocation.data,
+              'order',
+              true,
+          ) as KungfuApi.Order[]);
     historyDataLoading.value = false;
 });
 
@@ -186,8 +205,8 @@ function handleCancelOrder(order: KungfuApi.Order): void {
         return;
     }
 
+    const tdLocation = window.watcher.getLocation(order.source);
     if (currentGlobalKfLocation.data.category === 'strategy') {
-        const tdLocation = window.watcher.getLocation(order.source);
         kfCancelOrder(
             window.watcher,
             orderId,
@@ -200,8 +219,8 @@ function handleCancelOrder(order: KungfuApi.Order): void {
             .catch(() => {
                 message.error('操作失败');
             });
-    } else if (currentGlobalKfLocation.data.category === 'td') {
-        kfCancelOrder(window.watcher, orderId, currentGlobalKfLocation.data)
+    } else {
+        kfCancelOrder(window.watcher, orderId, tdLocation)
             .then(() => {
                 message.success('操作成功');
             })
@@ -217,8 +236,11 @@ function handleCancelAllOrders(): void {
         return;
     }
 
-    const categoryName = getCategoryData(
+    const extraCategory: Record<string, KungfuApi.KfTradeValueCommonData> =
+        app?.proxy ? app?.proxy.$globalCategoryRegister.getExtraCategory() : {};
+    const categoryName = dealCategory(
         currentGlobalKfLocation.data.category,
+        extraCategory,
     ).name;
     const name = getIdByKfLocation(currentGlobalKfLocation.data);
 
@@ -232,18 +254,41 @@ function handleCancelAllOrders(): void {
                 return;
             }
 
+            const orders = getTargetCancelOrders();
             return kfCancelAllOrders(
                 window.watcher,
+                orders,
                 currentGlobalKfLocation.data,
             )
                 .then(() => {
                     message.success('操作成功');
                 })
                 .catch((err) => {
-                    message.error('操作失败', err.message);
+                    message.error(err.message);
                 });
         },
     });
+}
+
+function getTargetCancelOrders(): KungfuApi.Order[] {
+    if (!currentGlobalKfLocation.data || !window.watcher) {
+        return [];
+    }
+    if (isTdStrategyCategory(currentGlobalKfLocation.data?.category)) {
+        const filterKey = getOrderTradeFilterKey(
+            currentGlobalKfLocation.data.category,
+        );
+        return window.watcher.ledger.Order.filter(
+            filterKey,
+            window.watcher.getLocationUID(currentGlobalKfLocation.data),
+        ).list();
+    }
+
+    return getExtraCategoryData(
+        window.watcher.ledger.Order,
+        currentGlobalKfLocation.data,
+        'order',
+    ) as KungfuApi.Order[];
 }
 
 function handleShowTradingDataDetail({

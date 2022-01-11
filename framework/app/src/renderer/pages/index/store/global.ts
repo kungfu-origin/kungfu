@@ -36,7 +36,11 @@ interface GlobalState {
     instruments: KungfuApi.InstrumentResolved[];
     subscribedInstruments: KungfuApi.InstrumentResolved[];
 
-    currentGlobalKfLocation: KungfuApi.KfLocation | KungfuApi.KfConfig | null;
+    currentGlobalKfLocation:
+        | KungfuApi.KfLocation
+        | KungfuApi.KfConfig
+        | KungfuApi.KfExtraLocation
+        | null;
 }
 
 export const useGlobalStore = defineStore('global', {
@@ -75,7 +79,11 @@ export const useGlobalStore = defineStore('global', {
         },
 
         setCurrentGlobalKfLocation(
-            kfLocation: KungfuApi.KfLocation | KungfuApi.KfConfig | null,
+            kfLocation:
+                | KungfuApi.KfLocation
+                | KungfuApi.KfConfig
+                | KungfuApi.KfExtraLocation
+                | null,
         ) {
             this.currentGlobalKfLocation = kfLocation;
         },

@@ -403,12 +403,23 @@ export const useCurrentGlobalKfLocation = (
     currentCategoryData: ComputedRef<KungfuApi.KfTradeValueCommonData | null>;
     currentUID: ComputedRef<string>;
     setCurrentGlobalKfLocation(
-        kfConfig: KungfuApi.KfLocation | KungfuApi.KfConfig,
+        kfConfig:
+            | KungfuApi.KfLocation
+            | KungfuApi.KfConfig
+            | KungfuApi.KfExtraLocation,
     ): void;
     dealRowClassName(
-        kfConfig: KungfuApi.KfLocation | KungfuApi.KfConfig,
+        kfConfig:
+            | KungfuApi.KfLocation
+            | KungfuApi.KfConfig
+            | KungfuApi.KfExtraLocation,
     ): string;
-    customRow(kfConfig: KungfuApi.KfLocation | KungfuApi.KfConfig): {
+    customRow(
+        kfConfig:
+            | KungfuApi.KfLocation
+            | KungfuApi.KfConfig
+            | KungfuApi.KfExtraLocation,
+    ): {
         onClick(): void;
     };
     getCurrentGlobalKfLocationId(
@@ -436,7 +447,10 @@ export const useCurrentGlobalKfLocation = (
     });
 
     const setCurrentGlobalKfLocation = (
-        kfLocation: KungfuApi.KfLocation | KungfuApi.KfConfig,
+        kfLocation:
+            | KungfuApi.KfLocation
+            | KungfuApi.KfConfig
+            | KungfuApi.KfExtraLocation,
     ) => {
         if (app?.proxy) {
             app?.proxy
@@ -446,9 +460,13 @@ export const useCurrentGlobalKfLocation = (
     };
 
     const dealRowClassName = (
-        record: KungfuApi.KfLocation | KungfuApi.KfConfig,
+        record:
+            | KungfuApi.KfLocation
+            | KungfuApi.KfConfig
+            | KungfuApi.KfExtraLocation,
     ): string => {
         if (currentKfLocation.data === null) return '';
+
         if (
             getIdByKfLocation(record) ===
             getIdByKfLocation(currentKfLocation.data)
@@ -459,7 +477,12 @@ export const useCurrentGlobalKfLocation = (
         return '';
     };
 
-    const customRow = (record: KungfuApi.KfLocation | KungfuApi.KfConfig) => {
+    const customRow = (
+        record:
+            | KungfuApi.KfLocation
+            | KungfuApi.KfConfig
+            | KungfuApi.KfExtraLocation,
+    ) => {
         return {
             onClick: () => {
                 setCurrentGlobalKfLocation(record);
@@ -472,7 +495,12 @@ export const useCurrentGlobalKfLocation = (
             return null;
         }
 
-        return dealCategory(currentKfLocation.data.category);
+        const extraCategory: Record<string, KungfuApi.KfTradeValueCommonData> =
+            app?.proxy
+                ? app?.proxy.$globalCategoryRegister.getExtraCategory()
+                : {};
+
+        return dealCategory(currentKfLocation.data.category, extraCategory);
     });
 
     const currentUID = computed(() => {

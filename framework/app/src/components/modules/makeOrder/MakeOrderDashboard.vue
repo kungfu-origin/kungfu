@@ -66,9 +66,14 @@ onMounted(() => {
     if (app?.proxy) {
         const subscription = app.proxy.$bus.subscribe((data: KfBusEvent) => {
             if (data.tag === 'makeOrder') {
-                const { offset, side, volume, price, instrumentType } = (
-                    data as TriggerMakeOrder
-                ).orderInput;
+                const {
+                    offset,
+                    side,
+                    volume,
+                    price,
+                    instrumentType,
+                    accountId,
+                } = (data as TriggerMakeOrder).orderInput;
 
                 const instrumentValue = buildInstrumentSelectOptionValue(
                     (data as TriggerMakeOrder).orderInput,
@@ -80,6 +85,10 @@ onMounted(() => {
                 formState.value.volume = +Number(volume).toFixed(0);
                 formState.value.price = +Number(price).toFixed(4);
                 formState.value.instrument_type = +instrumentType;
+
+                if (accountId) {
+                    formState.value.account_id = accountId;
+                }
             }
 
             if (data.tag === 'orderBookUpdate') {
@@ -193,21 +202,16 @@ function handleMakeOrder() {
                 makeOrderInput,
                 currentGlobalKfLocation.data,
                 account_id.toString(),
-            )
-                .then((rtn) => {
-                    if (!rtn) {
-                        console.warn('From kfPluginLocation');
-                    }
-                })
-                .catch((err) => {
-                    message.error(err.message);
-                });
+            ).catch((err) => {
+                message.error(err.message);
+            });
         })
         .catch((err: Error) => {
             console.error(err);
         });
 }
 </script>
+
 <template>
     <div class="kf-make-order-dashboard__warp">
         <KfDashboard>

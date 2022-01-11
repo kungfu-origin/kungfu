@@ -48,6 +48,7 @@ import VueVirtualScroller from 'vue-virtual-scroller';
 import 'vue-virtual-scroller/dist/vue-virtual-scroller.css';
 import { useComponenets } from './useComponents';
 import { kf } from '@kungfu-trader/kungfu-js-api/kungfu';
+import { GlobalCategoryRegister } from '@renderer/assets/methods/uiExtUtils';
 
 const app = createApp(App);
 
@@ -82,6 +83,8 @@ useComponenets(app);
 app.config.globalProperties.$bus = bus;
 app.config.globalProperties.$tradingDataSubject = tradingDataSubject;
 app.config.globalProperties.$useGlobalStore = useGlobalStore;
+app.config.globalProperties.$globalCategoryRegister =
+    new GlobalCategoryRegister();
 
 app.mount('#app');
 

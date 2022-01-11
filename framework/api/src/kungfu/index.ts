@@ -304,6 +304,7 @@ export const kfCancelOrder = (
 
 export const kfCancelAllOrders = (
     watcher: KungfuApi.Watcher | null,
+    orders: KungfuApi.Order[],
     kfLocation: KungfuApi.KfLocation | KungfuApi.KfConfig,
 ): Promise<void[]> => {
     if (!watcher) {
@@ -314,10 +315,6 @@ export const kfCancelAllOrders = (
         return Promise.reject(new Error(`Master 未连接`));
     }
 
-    if (kfLocation.category !== 'td' && kfLocation.category !== 'strategy') {
-        return Promise.reject(new Error(`Category 错误 仅支持td strategy`));
-    }
-
     if (
         kfLocation.category === 'td' &&
         !watcher.isReadyToInteract(kfLocation)
@@ -326,11 +323,6 @@ export const kfCancelAllOrders = (
         return Promise.reject(new Error(`交易账户 ${accountId} 未就绪`));
     }
 
-    const filterKey = getOrderTradeFilterKey(kfLocation.category);
-    const orders = watcher.ledger.Order.filter(
-        filterKey,
-        watcher.getLocationUID(kfLocation),
-    ).list();
     const cancelOrderTasks = orders.map(
         (item: KungfuApi.Order): Promise<void> => {
             const orderAction: KungfuApi.OrderAction = {
@@ -350,7 +342,12 @@ export const kfCancelAllOrders = (
                     ),
                 );
             } else {
-                return Promise.resolve();
+                return Promise.resolve(
+                    watcher.cancelOrder(
+                        orderAction,
+                        watcher.getLocation(item.source),
+                    ),
+                );
             }
         },
     );
@@ -409,7 +406,7 @@ export const makeOrderByOrderInput = (
     orderInput: KungfuApi.MakeOrderInput,
     kfLocation: KungfuApi.KfLocation,
     accountId: string,
-): Promise<boolean> => {
+): Promise<void> => {
     return new Promise((resolve, reject) => {
         if (!watcher) {
             reject(new Error(`Watcher 错误`));
@@ -417,13 +414,9 @@ export const makeOrderByOrderInput = (
         }
 
         if (kfLocation.category === 'td') {
-            kfMakeOrder(window.watcher, orderInput, kfLocation)
-                .then(() => {
-                    resolve(true);
-                })
-                .catch((err) => {
-                    reject(err);
-                });
+            kfMakeOrder(window.watcher, orderInput, kfLocation).catch((err) => {
+                reject(err);
+            });
         } else if (kfLocation.category === 'strategy') {
             const tdLocation = getMdTdKfLocationByProcessId(
                 `td_${accountId || ''}`,
@@ -432,15 +425,25 @@ export const makeOrderByOrderInput = (
                 reject(new Error('下单账户信息错误'));
                 return;
             }
-            kfMakeOrder(window.watcher, orderInput, tdLocation, kfLocation)
-                .then(() => {
-                    resolve(true);
-                })
-                .catch((err) => {
-                    reject(err);
-                });
+            kfMakeOrder(
+                window.watcher,
+                orderInput,
+                tdLocation,
+                kfLocation,
+            ).catch((err) => {
+                reject(err);
+            });
         } else {
-            resolve(false);
+            const tdLocation = getMdTdKfLocationByProcessId(
+                `td_${accountId || ''}`,
+            );
+            if (!tdLocation) {
+                reject(new Error('下单账户信息错误'));
+                return;
+            }
+            kfMakeOrder(window.watcher, orderInput, tdLocation).catch((err) => {
+                reject(err);
+            });
         }
     });
 };

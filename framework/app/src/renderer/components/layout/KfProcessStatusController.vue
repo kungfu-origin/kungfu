@@ -14,7 +14,7 @@ import {
     handleOpenLogview,
 } from '@renderer/assets/methods/uiUtils';
 import {
-    getCategoryData,
+    getKfCategoryData,
     getIfProcessRunning,
     getProcessIdByKfLocation,
     getPropertyFromProcessStatusDetailDataByKfLocation,
@@ -128,12 +128,12 @@ function handleOpenProcessControllerBoard(): void {
                                 <div class="category info-item">
                                     <a-tag
                                         :color="
-                                            getCategoryData(config.category)
+                                            getKfCategoryData(config.category)
                                                 .color
                                         "
                                     >
                                         {{
-                                            getCategoryData(config.category)
+                                            getKfCategoryData(config.category)
                                                 .name
                                         }}
                                     </a-tag>
@@ -186,8 +186,10 @@ function handleOpenProcessControllerBoard(): void {
                                         )
                                     "
                                     @click="
+                                    (checked: boolean, Event: MouseEvent) => 
                                         handleSwitchProcessStatus(
-                                            $event,
+                                            checked,
+                                            Event,
                                             config,
                                         )
                                     "

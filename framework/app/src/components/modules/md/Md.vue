@@ -179,18 +179,18 @@ function handleOpenSetSourceDialog() {
                                     getProcessIdByKfLocation(record),
                                 )
                             "
-                            @click="handleSwitchProcessStatus($event, record)"
+                            @click="(checked: boolean, Event: MouseEvent) => handleSwitchProcessStatus(checked, Event, record)"
                         ></a-switch>
                     </template>
                     <template v-else-if="column.dataIndex === 'actions'">
                         <div class="kf-actions__warp">
                             <FileTextOutlined
                                 style="font-size: 12px"
-                                @click="handleOpenLogview(record)"
+                                @click.stop="handleOpenLogview(record)"
                             />
                             <SettingOutlined
                                 style="font-size: 12px"
-                                @click="
+                                @click.stop="
                                     handleOpenSetMdDialog(
                                         'update',
                                         record.group,
@@ -200,7 +200,7 @@ function handleOpenSetSourceDialog() {
                             />
                             <DeleteOutlined
                                 style="font-size: 12px"
-                                @click="handleRemoveKfConfig(record)"
+                                @click.stop="handleRemoveKfConfig(record)"
                             />
                         </div>
                     </template>

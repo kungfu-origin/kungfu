@@ -16,10 +16,11 @@ import {
     KfCategoryTypes,
 } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import {
-    getCategoryData,
+    getKfCategoryData,
     getIdByKfLocation,
     getMdTdKfLocationByProcessId,
     getProcessIdByKfLocation,
+    isTdStrategyCategory,
     switchKfLocation,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { writeCSV } from '@kungfu-trader/kungfu-js-api/utils/fileUtils';
@@ -53,11 +54,13 @@ import {
 import { storeToRefs } from 'pinia';
 import { ipcRenderer } from 'electron';
 import { throttleTime } from 'rxjs';
+import { useExtraCategory } from './uiExtUtils';
+import { group } from 'console';
 
 export const ensureRemoveLocation = (
     kfLocation: KungfuApi.KfLocation | KungfuApi.KfConfig,
 ): Promise<void> => {
-    const categoryName = getCategoryData(kfLocation.category).name;
+    const categoryName = getKfCategoryData(kfLocation.category).name;
     const id = getIdByKfLocation(kfLocation);
     return new Promise((resolve) => {
         Modal.confirm({
@@ -86,8 +89,10 @@ export const ensureRemoveLocation = (
 
 export const handleSwitchProcessStatus = (
     checked: boolean,
+    mouseEvent: MouseEvent,
     kfLocation: KungfuApi.KfLocation | KungfuApi.KfConfig,
 ): Promise<void | Proc> => {
+    mouseEvent.stopPropagation();
     return switchKfLocation(window.watcher, kfLocation, checked)
         .then(() => {
             message.success('操作成功');
@@ -185,7 +190,7 @@ export const useAddUpdateRemoveKfConfig = (): {
         const { formState, idByPrimaryKeys, changeType } = data;
 
         const changeTypename = changeType === 'add' ? '添加' : '设置';
-        const categoryName = getCategoryData(category).name;
+        const categoryName = getKfCategoryData(category).name;
 
         const context =
             changeType === 'add'
@@ -252,6 +257,7 @@ export const useDealExportHistoryTradingData = (): {
     const exportDateModalVisible = ref<boolean>(false);
     const exportEventData = ref<ExportTradingDataEvent>();
     const exportDataLoading = ref<boolean>(false);
+    const { getExtraCategoryData } = useExtraCategory();
 
     const dealTradingDataItemResolved = (
         item: KungfuApi.TradingDataTypes,
@@ -267,7 +273,8 @@ export const useDealExportHistoryTradingData = (): {
             throw new Error('exportEventData is undefined');
         }
 
-        const { currentKfLocation, tradingDataType } = exportEventData.value;
+        const { currentKfLocation, tradingDataType } =
+            exportEventData.value || ({} as ExportTradingDataEvent);
         const { date, dateType } = formState;
         const dateResolved = dayjs(date).format('YYYYMMDD');
 
@@ -331,7 +338,7 @@ export const useDealExportHistoryTradingData = (): {
         }
 
         exportDataLoading.value = true;
-        const { historyDatas } = await getKungfuHistoryData(
+        const { tradingData, historyDatas } = await getKungfuHistoryData(
             window.watcher,
             date,
             dateType,
@@ -363,7 +370,23 @@ export const useDealExportHistoryTradingData = (): {
             return Promise.resolve();
         }
 
-        return writeCSV(filename, historyDatas, dealTradingDataItemResolved)
+        console.log(tradingData, tradingDataType);
+
+        const exportDatas = isTdStrategyCategory(currentKfLocation.category)
+            ? historyDatas
+            : getExtraCategoryData(
+                  tradingData[
+                      tradingDataType as KungfuApi.TradingDataTypeName
+                  ] as
+                      | KungfuApi.DataTable<KungfuApi.Order>
+                      | KungfuApi.DataTable<KungfuApi.Trade>
+                      | KungfuApi.DataTable<KungfuApi.Position>,
+                  currentKfLocation,
+                  tradingDataType.toLowerCase(),
+                  true,
+              );
+
+        return writeCSV(filename, exportDatas, dealTradingDataItemResolved)
             .then(() => {
                 shell.showItemInFolder(filename);
                 message.success('操作成功');
@@ -409,7 +432,9 @@ export const useDealExportHistoryTradingData = (): {
                 },
             );
 
-            subscription.unsubscribe();
+            onBeforeUnmount(() => {
+                subscription.unsubscribe();
+            });
         }
     });
 
@@ -789,11 +814,20 @@ export const useSubscibeInstrumentAtEntry = (): void => {
                         if (subscribedInstrumentsForPos[item.uidKey]) {
                             return;
                         }
+
+                        const { group } = item.mdLocation;
+                        const mdLocationResolved: KungfuApi.KfLocation = {
+                            category: 'md',
+                            group,
+                            name: group,
+                            mode: 'LIVE',
+                        };
+
                         kfRequestMarketData(
                             watcher,
                             item.exchangeId,
                             item.instrumentId,
-                            item.mdLocation,
+                            mdLocationResolved,
                         );
                         subscribedInstrumentsForPos[item.uidKey] = true;
                     });
