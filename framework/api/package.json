@@ -3,7 +3,7 @@
   "author": {
     "name": "kungfu-trader",
     "email": "info@kungfu.link"
-},
+  },
   "version": "2.4.0-alpha.4",
   "description": "",
   "main": "lib/index.js",
@@ -18,14 +18,14 @@
     "@kungfu-trader/kungfu-core": "^2.4.0-alpha.4",
     "fkill": "7.2.1",
     "get-user-locale": "^1.4.0",
-    "getprocesses": "^1.1.1",
     "log4js": "^6.3.0",
-    "pm2": "^5.1.2"
+    "pm2": "^5.1.2",
+    "ps-list": "7.2.0"
   },
   "devDependencies": {
-    "fs-extra": "^10.0.0",
-    "rxjs": "^7.4.0",
     "dayjs": "^1.10.7",
-    "patch-package": "^6.4.7"
+    "fs-extra": "^10.0.0",
+    "patch-package": "^6.4.7",
+    "rxjs": "^7.4.0"
   }
 }

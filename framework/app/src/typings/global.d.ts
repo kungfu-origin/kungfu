@@ -2,6 +2,7 @@ import { Subject } from 'rxjs';
 import { StoreDefinition } from 'pinia';
 import { Pm2ProcessStatusTypes } from '@kungfu-trader/kungfu-js-api/utils/processUtils';
 import { GlobalCategoryRegister } from '@renderer/assets/methods/uiExtUtils';
+import { ProcessDescriptor } from 'ps-list';
 
 declare module '@vue/runtime-core' {
     interface ComponentCustomProperties {

@@ -10,7 +10,7 @@ import {
     killKfc,
     killKungfu,
     killExtra,
-    pm2Kill,
+    pm2KillGodDaemon,
 } from '@kungfu-trader/kungfu-js-api/utils/processUtils';
 import {
     delayMilliSeconds,
@@ -58,7 +58,7 @@ export function showKungfuInfo(): void {
 
 function KillAll(): Promise<void> {
     return new Promise((resolve) => {
-        pm2Kill()
+        pm2KillGodDaemon()
             .catch((err) => kfLogger.error(err.message))
             .finally(() => {
                 killKfc()

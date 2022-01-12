@@ -4,7 +4,7 @@ import os from 'os';
 import fkill from 'fkill';
 import pm2, { Proc, ProcessDescription, StartOptions } from 'pm2';
 import { getUserLocale } from 'get-user-locale';
-import getProcesses from 'getProcesses';
+import psList, { ProcessDescriptor } from 'ps-list';
 
 import {
     kfLogger,
@@ -29,22 +29,22 @@ const isLinux = os.platform() === 'linux';
 const locale = getUserLocale().replace(/-/g, '_');
 
 export const findProcessByKeywords = (tasks: string[]): Promise<number[]> => {
-    const pIdList: number[] = [];
-    return getProcesses().then((processes) => {
-        processes.forEach((p) => {
-            const rawCommandLine = p.rawCommandLine;
-            tasks.forEach((task: string): void => {
-                if (rawCommandLine.includes(task)) {
-                    pIdList.push(+p.pid);
-                }
-            });
-        });
-        return pIdList;
+    return psList().then((processes: ProcessDescriptor[]) => {
+        return processes
+            .filter((item) => {
+                const name = item.name;
+                const afterFiler = tasks.filter((task) =>
+                    name.toLowerCase().includes(task.toLowerCase()),
+                );
+                return afterFiler.length;
+            })
+            .map((item) => item.pid);
     });
 };
 
 export const forceKill = (tasks: string[]): Promise<void> => {
     return findProcessByKeywords(tasks).then((pids) => {
+        console.log('forceKill', tasks, pids);
         return fkill(pids, {
             force: true,
             tree: isWin ? true : false,
@@ -134,7 +134,6 @@ export const pm2Connect = (): Promise<void> => {
         pm2.connect((err: Error) => {
             if (err) {
                 kfLogger.error(err.message);
-                pm2.disconnect();
                 reject(err);
                 return;
             }
@@ -268,25 +267,22 @@ export const pm2Kill = (): Promise<void> => {
 export const pm2KillGodDaemon = (): Promise<void> => {
     kfLogger.info('Kill Pm2 God Daemon');
     return new Promise((resolve, reject) => {
-        pm2Connect()
-            .then(() => {
-                pm2.killDaemon((err: Error) => {
-                    pm2.disconnect();
-                    if (err) {
-                        kfLogger.error(err.message);
-                        reject(err);
-                        return;
-                    }
+        pm2Connect().then(() => {
+            // the doc said required disconnect, but if use the disconnect, the daemon won't quit
+            pm2.killDaemon((err: Error) => {
+                if (err) {
+                    kfLogger.error(err.message);
+                    reject(err);
+                    return;
+                }
 
-                    resolve();
-                });
-            })
-            .catch((err: Error) => {
-                kfLogger.error(err.message);
-                reject(err);
+                resolve();
             });
+        });
     });
 };
+
+export const pm2Disconnect = pm2.disconnect;
 
 export const startProcess = (
     options: Pm2StartOptions,
