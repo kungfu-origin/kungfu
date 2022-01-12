@@ -36,9 +36,11 @@ class MarketDataSim(wc.MarketData):
     def quote_from_orderbook(self, ob):
         quote = lf.types.Quote()
         instrument_id, exchange_id = ob.security.split(".")
+
         quote.data_time = self.now()
         quote.instrument_id = instrument_id
         quote.exchange_id = exchange_id
+        quote.instrument_type = wc.utils.get_instrument_type(exchange_id, instrument_id)
         quote.ask_price = [
             ob.offer_price(i) for i in range(0, min(10, ob.depth_offers()))
         ]
@@ -73,7 +75,6 @@ class MarketDataSim(wc.MarketData):
                 )
             )
         self.orderbooks[instrument_key] = book
-        self.logger.info(f"init order book for {instrument_id}@{exchange_id}")
 
     def update_orderbooks(self):
         for book in self.orderbooks.values():

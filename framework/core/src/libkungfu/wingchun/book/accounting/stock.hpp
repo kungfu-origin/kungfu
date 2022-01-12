@@ -42,6 +42,7 @@ public:
     if (is_valid_price(quote.close_price)) {
       position.close_price = quote.close_price;
     }
+
     if (is_valid_price(quote.last_price)) {
       position.last_price = quote.last_price;
     }

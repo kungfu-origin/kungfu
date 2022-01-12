@@ -37,13 +37,8 @@ export const columns: AntTableColumns = [
         align: 'right',
     },
     {
-        title: '总成本',
-        dataIndex: 'total_price',
-        align: 'right',
-    },
-    {
-        title: '总市值',
-        dataIndex: 'total_market_price',
+        title: '最新价',
+        dataIndex: 'last_price',
         align: 'right',
     },
     {

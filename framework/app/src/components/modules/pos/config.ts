@@ -8,7 +8,7 @@ export const getColumns = (
         type: 'string',
         name: '代码',
         dataIndex: 'instrument_id',
-        width: 100,
+        width: 120,
     },
     {
         type: 'string',
@@ -42,8 +42,8 @@ export const getColumns = (
     },
     {
         type: 'number',
-        name: '总成本',
-        dataIndex: 'total_price',
+        name: '最新价',
+        dataIndex: 'last_price',
         flex: 1.5,
     },
     {

@@ -1063,7 +1063,7 @@ export const filterLedgerResult = <T>(
     const ledgerCategory = getLedgerCategory(category);
     let dataTableResolved = dataTable;
 
-    if (ledgerCategory) {
+    if (ledgerCategory !== undefined) {
         dataTableResolved = dataTable.filter('ledger_category', ledgerCategory);
     }
 

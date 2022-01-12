@@ -208,8 +208,8 @@ function dealLocationUIDResolved(holderUID: number): string {
                     }"
                 >
                     <template v-if="column.dataIndex === 'instrument_id'">
-                        {{ item.instrument_id }}
                         {{ ExchangeIds[item.exchange_id].name }}
+                        {{ item.instrument_id }}
                     </template>
                     <template v-else-if="column.dataIndex === 'direction'">
                         <span
@@ -246,24 +246,9 @@ function dealLocationUIDResolved(holderUID: number): string {
                             :num="dealKfPrice(item.avg_open_price)"
                         ></KfBlinkNum>
                     </template>
-                    <template v-else-if="column.dataIndex === 'total_price'">
+                    <template v-else-if="column.dataIndex === 'last_price'">
                         <KfBlinkNum
-                            :num="
-                                dealAssetPrice(
-                                    item.avg_open_price * Number(item.volume),
-                                )
-                            "
-                        ></KfBlinkNum>
-                    </template>
-                    <template
-                        v-else-if="column.dataIndex === 'total_market_price'"
-                    >
-                        <KfBlinkNum
-                            :num="
-                                dealAssetPrice(
-                                    item.last_price * Number(item.volume),
-                                )
-                            "
+                            :num="dealKfPrice(item.last_price)"
                         ></KfBlinkNum>
                     </template>
                     <template v-else-if="column.dataIndex === 'unrealized_pnl'">

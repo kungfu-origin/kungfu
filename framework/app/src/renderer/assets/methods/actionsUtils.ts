@@ -14,6 +14,7 @@ import {
     InstrumentTypeEnum,
     InstrumentTypes,
     KfCategoryTypes,
+    LedgerCategoryEnum,
 } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import {
     getKfCategoryData,
@@ -55,7 +56,6 @@ import { storeToRefs } from 'pinia';
 import { ipcRenderer } from 'electron';
 import { throttleTime } from 'rxjs';
 import { useExtraCategory } from './uiExtUtils';
-import { group } from 'console';
 
 export const ensureRemoveLocation = (
     kfLocation: KungfuApi.KfLocation | KungfuApi.KfConfig,
@@ -854,12 +854,24 @@ export const useSubscibeInstrumentAtEntry = (): void => {
                 processStatusData.value[processId] === 'online' &&
                 processId.includes('md_')
             ) {
+                const positions: KungfuApi.InstrumentResolved[] =
+                    window.watcher.ledger.Position.nofilter('volume', BigInt(0))
+                        .filter('ledger_category', LedgerCategoryEnum.td)
+                        .list()
+                        .map((item: KungfuApi.Position) => ({
+                            instrumentId: item.instrument_id,
+                            instrumentName: '',
+                            exchangeId: item.exchange_id,
+                            instrumentType: item.instrument_type,
+                            ukey: item.uid_key,
+                            id: item.uid_key,
+                        }));
                 subscribeAllInstrumentByMdProcessId(
                     processId,
                     processStatusData.value,
                     appStates.value,
                     mdExtTypeMap.value,
-                    subscribedInstruments.data,
+                    [...subscribedInstruments.data, ...positions],
                 );
             }
         });

@@ -92,7 +92,7 @@ void Bookkeeper::restore(const cache::bank &state_bank) {
     auto &asset = state.data;
     auto book = get_book(asset.holder_uid);
     book->asset = asset;
-    
+
     SPDLOG_INFO("[restore] avail {}", book->asset.avail);
 
     book->update(app_.now());
@@ -159,6 +159,7 @@ void Bookkeeper::update_book(const Quote &quote) {
     auto &book = item.second;
     auto has_long_position = book->has_long_position_for(quote);
     auto has_short_position = book->has_short_position_for(quote);
+
     if (has_long_position or has_short_position) {
       accounting_method->apply_quote(book, quote);
       book->update(app_.now());

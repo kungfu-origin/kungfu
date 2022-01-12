@@ -197,8 +197,8 @@ function tiggerOrderBookAndMakeOrder(record: KungfuApi.Position) {
                     }"
                 >
                     <template v-if="column.dataIndex === 'instrument_id'">
-                        {{ record.instrument_id }}
                         {{ ExchangeIds[record.exchange_id].name }}
+                        {{ record.instrument_id }}
                     </template>
                     <template v-else-if="column.dataIndex === 'direction'">
                         <span
@@ -235,25 +235,9 @@ function tiggerOrderBookAndMakeOrder(record: KungfuApi.Position) {
                             :num="dealKfPrice(record.avg_open_price)"
                         ></KfBlinkNum>
                     </template>
-                    <template v-else-if="column.dataIndex === 'total_price'">
+                    <template v-else-if="column.dataIndex === 'last_price'">
                         <KfBlinkNum
-                            :num="
-                                dealAssetPrice(
-                                    record.avg_open_price *
-                                        Number(record.volume),
-                                )
-                            "
-                        ></KfBlinkNum>
-                    </template>
-                    <template
-                        v-else-if="column.dataIndex === 'total_market_price'"
-                    >
-                        <KfBlinkNum
-                            :num="
-                                dealAssetPrice(
-                                    record.last_price * Number(record.volume),
-                                )
-                            "
+                            :num="dealKfPrice(record.last_price)"
                         ></KfBlinkNum>
                     </template>
                     <template v-else-if="column.dataIndex === 'unrealized_pnl'">
