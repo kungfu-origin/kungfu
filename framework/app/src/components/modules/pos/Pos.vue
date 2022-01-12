@@ -103,7 +103,8 @@ watch(currentGlobalKfLocation, () => {
 
 function handleClickRow(data: {
     event: MouseEvent;
-    row: KungfuApi.Position | KungfuApi.Order | KungfuApi.Trade;
+    row: TradingDataItem;
+    column: KfTradingDataTableHeaderConfig;
 }) {
     const row = data.row as KungfuApi.Position;
     const { instrument_id, instrument_type, exchange_id } = row;
@@ -196,7 +197,7 @@ function dealLocationUIDResolved(holderUID: number): string {
                 :columns="columns"
                 :dataSource="tableData"
                 keyField="uid_key"
-                @clickRow="handleClickRow"
+                @clickCell="handleClickRow"
             >
                 <template
                     v-slot:default="{

@@ -13,10 +13,12 @@ import {
     isTdStrategyCategory,
     getOrderTradeFilterKey,
     dealCategory,
+    getProcessIdByKfLocation,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import {
     useCurrentGlobalKfLocation,
     useDownloadHistoryTradingData,
+    useProcessStatusDetailData,
     useTableSearchKeyword,
 } from '@renderer/assets/methods/uiUtils';
 import KfDashboard from '@renderer/components/public/KfDashboard.vue';
@@ -32,8 +34,10 @@ import {
 import {
     computed,
     getCurrentInstance,
+    nextTick,
     onBeforeUnmount,
     onMounted,
+    reactive,
     ref,
     toRaw,
     watch,
@@ -44,6 +48,7 @@ import {
     getKungfuHistoryData,
     kfCancelAllOrders,
     kfCancelOrder,
+    makeOrderByOrderInput,
 } from '@kungfu-trader/kungfu-js-api/kungfu';
 import type { Dayjs } from 'dayjs';
 import { UnfinishedOrderStatus } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
@@ -54,6 +59,7 @@ import { useExtraCategory } from '@renderer/assets/methods/uiExtUtils';
 
 const app = getCurrentInstance();
 
+const { processStatusData } = useProcessStatusDetailData();
 const orders = ref<KungfuApi.Order[]>([]);
 const { searchKeyword, tableData } = useTableSearchKeyword<KungfuApi.Order>(
     orders,
@@ -72,6 +78,7 @@ const {
 
 const { handleDownload } = useDownloadHistoryTradingData();
 const { getExtraCategoryData } = useExtraCategory();
+const adjustOrderMaskVisible = ref(false);
 
 const columns = computed(() => {
     if (currentGlobalKfLocation.data === null) {
@@ -91,6 +98,10 @@ onMounted(() => {
                 }
 
                 if (currentGlobalKfLocation.data === null) {
+                    return;
+                }
+
+                if (adjustOrderMaskVisible.value) {
                     return;
                 }
 
@@ -169,7 +180,7 @@ watch(historyDate, async (newDate) => {
 });
 
 function isFinishedOrderStatus(orderStatus: OrderStatusEnum): boolean {
-    return UnfinishedOrderStatus.indexOf(orderStatus) === -1;
+    return !UnfinishedOrderStatus.includes(orderStatus);
 }
 
 function dealLocationUIDResolved(
@@ -198,35 +209,38 @@ function dealOrderStatResolved(orderUKey: string): {
 }
 
 function handleCancelOrder(order: KungfuApi.Order): void {
-    const orderId = order.order_id;
-
     if (!currentGlobalKfLocation.data || !window.watcher) {
         message.error('操作失败');
         return;
     }
 
+    if (!testOrderSourceIsOnline(order)) {
+        return;
+    }
+
+    kfCancelOrderResovled(order, currentGlobalKfLocation.data)
+        .then(() => {
+            message.success('操作成功');
+        })
+        .catch(() => {
+            message.error('操作失败');
+        });
+}
+
+function kfCancelOrderResovled(
+    order: KungfuApi.Order,
+    kfLocation: KungfuApi.KfLocation | KungfuApi.KfConfig,
+): Promise<void> {
     const tdLocation = window.watcher.getLocation(order.source);
-    if (currentGlobalKfLocation.data.category === 'strategy') {
-        kfCancelOrder(
+    if (kfLocation.category === 'strategy') {
+        return kfCancelOrder(
             window.watcher,
-            orderId,
+            order.order_id,
             tdLocation,
-            currentGlobalKfLocation.data,
-        )
-            .then(() => {
-                message.success('操作成功');
-            })
-            .catch(() => {
-                message.error('操作失败');
-            });
+            kfLocation,
+        );
     } else {
-        kfCancelOrder(window.watcher, orderId, tdLocation)
-            .then(() => {
-                message.success('操作成功');
-            })
-            .catch(() => {
-                message.error('操作失败');
-            });
+        return kfCancelOrder(window.watcher, order.order_id, tdLocation);
     }
 }
 
@@ -300,8 +314,129 @@ function handleShowTradingDataDetail({
     showTradingDataDetail(row as KungfuApi.Order, '委托');
 }
 
-resolveClientId;
-resolveAccountId;
+const adjustOrderConfig = reactive({
+    clientWidth: 0,
+    clientHeight: 0,
+    offsetLeft: 0,
+    offsetTop: 0,
+});
+const adjustOrderForm = ref<{ price: number; volume: number }>({
+    price: 0,
+    volume: 0,
+});
+const adjustOrder = ref<KungfuApi.Order | null>(null);
+const tableRef = ref();
+
+function handleAdjustOrder(data: {
+    event: MouseEvent;
+    row: TradingDataItem;
+    column: KfTradingDataTableHeaderConfig;
+}): void {
+    const { event, row, column } = data;
+    const order = row as KungfuApi.Order;
+    const target = event.target as HTMLElement | null;
+
+    if (column.dataIndex !== 'limit_price') {
+        if (column.dataIndex !== 'volume_traded') {
+            return;
+        }
+    }
+
+    if (!currentGlobalKfLocation.data || !window.watcher) {
+        return;
+    }
+
+    if (!testOrderSourceIsOnline(order)) {
+        return;
+    }
+
+    if (target) {
+        adjustOrderMaskVisible.value = true;
+        const rectData = target.getBoundingClientRect();
+        const tableRectData = tableRef.value.getBoundingClientRect();
+        const deltaTop = rectData.top - tableRectData.top;
+        adjustOrderConfig.clientWidth = target.clientWidth;
+        adjustOrderConfig.clientHeight = target.clientHeight;
+        adjustOrderConfig.offsetTop = deltaTop; //header height
+
+        if (column.dataIndex === 'limit_price') {
+            adjustOrderConfig.offsetLeft = target.offsetLeft;
+        } else {
+            adjustOrderConfig.offsetLeft =
+                target.offsetLeft - target.clientWidth;
+        }
+
+        adjustOrderForm.value.price = order.limit_price;
+        adjustOrderForm.value.volume = +Number(order.volume_left);
+        adjustOrder.value = order;
+    }
+}
+
+function handleClickAdjustOrderMask(): void {
+    const kfLocation = currentGlobalKfLocation.data;
+    if (!kfLocation) {
+        message.error('当前 Location 错误');
+        adjustOrderMaskVisible.value = false;
+        return;
+    }
+
+    const order = adjustOrder.value;
+    if (!order) {
+        adjustOrderMaskVisible.value = false;
+        return;
+    }
+
+    kfCancelOrderResovled(order, kfLocation)
+        .then(() => {
+            const makeOrderInput: KungfuApi.MakeOrderInput = {
+                instrument_id: order.instrument_id,
+                instrument_type: order.instrument_type,
+                exchange_id: order.exchange_id,
+                limit_price: +adjustOrderForm.value.price,
+                volume: +adjustOrderForm.value.volume,
+                price_type: +order.price_type,
+                side: +order.side,
+                offset: +order.offset,
+                hedge_flag: +order.hedge_flag,
+            };
+
+            return makeOrderByOrderInput(
+                window.watcher,
+                makeOrderInput,
+                kfLocation,
+                getIdByKfLocation(window.watcher.getLocation(order.source)),
+            );
+        })
+        .then(() => {
+            message.success('操作成功');
+        })
+        .catch((err) => {
+            message.error(err.message);
+        })
+        .finally(() => {
+            adjustOrderMaskVisible.value = false;
+        });
+}
+
+function testOrderSourceIsOnline(order: KungfuApi.Order) {
+    if (!window.watcher) {
+        return false;
+    }
+
+    const { source, status } = order;
+    const tdLocation = window.watcher.getLocation(source);
+    const processId = getProcessIdByKfLocation(tdLocation);
+    if (processStatusData.value[processId] !== 'online') {
+        message.error(`请先启动 ${processId} 交易进程`);
+        return false;
+    }
+
+    if (isFinishedOrderStatus(status)) {
+        return false;
+    }
+
+    return true;
+}
 </script>
 <template>
     <div class="kf-orders__warp kf-translateZ">
@@ -370,98 +505,153 @@ resolveAccountId;
                     </a-button>
                 </KfDashboardItem>
             </template>
-            <KfTradingDataTable
-                :columns="columns"
-                :dataSource="tableData"
-                keyField="uid_key"
-                @rightClickRow="handleShowTradingDataDetail"
-            >
-                <template
-                    v-slot:default="{
-                        item,
-                        column,
-                    }: {
-                        item: KungfuApi.Order,
-                        column: KfTradingDataTableHeaderConfig,
-                    }"
+            <div class="kf-table__warp" ref="tableRef">
+                <div
+                    class="kf-adjust-order-mask__warp"
+                    v-if="adjustOrderMaskVisible"
                 >
-                    <template v-if="column.dataIndex === 'update_time'">
-                        {{ dealKfTime(item.update_time, !!historyDate) }}
-                    </template>
-                    <template v-else-if="column.dataIndex === 'side'">
-                        <span :class="`color-${dealSide(item.side).color}`">
-                            {{ dealSide(item.side).name }}
-                        </span>
-                    </template>
-                    <template v-else-if="column.dataIndex === 'offset'">
-                        <span :class="`color-${dealOffset(item.offset).color}`">
-                            {{ dealOffset(item.offset).name }}
-                        </span>
-                    </template>
-                    <template v-else-if="column.dataIndex === 'limit_price'">
-                        {{ dealKfPrice(item.limit_price) }}
-                    </template>
-                    <template v-else-if="column.dataIndex === 'volume_traded'">
-                        {{ item.volume_traded }} / {{ item.volume }}
-                    </template>
-                    <template v-else-if="column.dataIndex === 'status'">
-                        <span
-                            :class="`color-${
-                                dealOrderStatus(item.status, item.error_msg)
-                                    .color
-                            }`"
+                    <div
+                        class="kf-adjust-order-mask"
+                        @click.stop="handleClickAdjustOrderMask"
+                    ></div>
+                    <a-input-number
+                        v-if="adjustOrderConfig.clientWidth !== 0"
+                        class="adjust-order-item price"
+                        :style="{
+                            width: adjustOrderConfig.clientWidth + 'px',
+                            height: adjustOrderConfig.clientHeight + 'px',
+                            top: adjustOrderConfig.offsetTop + 'px',
+                            left: adjustOrderConfig.offsetLeft + 'px',
+                        }"
+                        v-model:value="adjustOrderForm.price"
+                    ></a-input-number>
+                    <a-input-number
+                        v-if="adjustOrderConfig.clientWidth !== 0"
+                        class="adjust-order-item order"
+                        :style="{
+                            width: adjustOrderConfig.clientWidth + 'px',
+                            height: adjustOrderConfig.clientHeight + 'px',
+                            top: adjustOrderConfig.offsetTop + 'px',
+                            left:
+                                adjustOrderConfig.offsetLeft +
+                                adjustOrderConfig.clientWidth +
+                                'px',
+                        }"
+                        v-model:value="adjustOrderForm.volume"
+                    ></a-input-number>
+                </div>
+                <KfTradingDataTable
+                    :columns="columns"
+                    :dataSource="tableData"
+                    keyField="uid_key"
+                    @clickCell="handleAdjustOrder"
+                    @rightClickRow="handleShowTradingDataDetail"
+                >
+                    <template
+                        v-slot:default="{
+                            item,
+                            column,
+                        }: {
+                            item: KungfuApi.Order,
+                            column: KfTradingDataTableHeaderConfig,
+                        }"
+                    >
+                        <template v-if="column.dataIndex === 'update_time'">
+                            {{ dealKfTime(item.update_time, !!historyDate) }}
+                        </template>
+                        <template v-else-if="column.dataIndex === 'side'">
+                            <span :class="`color-${dealSide(item.side).color}`">
+                                {{ dealSide(item.side).name }}
+                            </span>
+                        </template>
+                        <template v-else-if="column.dataIndex === 'offset'">
+                            <span
+                                :class="`color-${
+                                    dealOffset(item.offset).color
+                                }`"
+                            >
+                                {{ dealOffset(item.offset).name }}
+                            </span>
+                        </template>
+                        <template
+                            v-else-if="column.dataIndex === 'limit_price'"
+                        >
+                            {{ dealKfPrice(item.limit_price) }}
+                        </template>
+                        <template
+                            v-else-if="column.dataIndex === 'volume_traded'"
+                        >
+                            {{ item.volume_traded }} / {{ item.volume }}
+                        </template>
+                        <template v-else-if="column.dataIndex === 'status'">
+                            <span
+                                :class="`color-${
+                                    dealOrderStatus(item.status, item.error_msg)
+                                        .color
+                                }`"
+                            >
+                                {{
+                                    dealOrderStatus(item.status, item.error_msg)
+                                        .name
+                                }}
+                            </span>
+                        </template>
+                        <template
+                            v-else-if="column.dataIndex === 'latency_system'"
                         >
                             {{
-                                dealOrderStatus(item.status, item.error_msg)
-                                    .name
+                                dealOrderStatResolved(item.uid_key)
+                                    ?.latencySystem || '--'
                             }}
-                        </span>
-                    </template>
-                    <template v-else-if="column.dataIndex === 'latency_system'">
-                        {{
-                            dealOrderStatResolved(item.uid_key)
-                                ?.latencySystem || '--'
-                        }}
-                    </template>
-                    <template
-                        v-else-if="column.dataIndex === 'latency_network'"
-                    >
-                        {{
-                            dealOrderStatResolved(item.uid_key)
-                                ?.latencyNetwork || '--'
-                        }}
-                    </template>
-                    <template
-                        v-else-if="
-                            column.dataIndex === 'source' ||
-                            column.dataIndex === 'dest'
-                        "
-                    >
-                        <span
-                            :class="[
-                                `color-${
+                        </template>
+                        <template
+                            v-else-if="column.dataIndex === 'latency_network'"
+                        >
+                            {{
+                                dealOrderStatResolved(item.uid_key)
+                                    ?.latencyNetwork || '--'
+                            }}
+                        </template>
+                        <template
+                            v-else-if="
+                                column.dataIndex === 'source' ||
+                                column.dataIndex === 'dest'
+                            "
+                        >
+                            <span
+                                :title="
                                     dealLocationUIDResolved(
                                         item,
                                         column.dataIndex,
-                                    ).color
-                                }`,
-                            ]"
-                        >
-                            {{
-                                dealLocationUIDResolved(item, column.dataIndex)
-                                    .name
-                            }}
-                        </span>
+                                    ).name
+                                "
+                                :class="[
+                                    `color-${
+                                        dealLocationUIDResolved(
+                                            item,
+                                            column.dataIndex,
+                                        ).color
+                                    }`,
+                                ]"
+                            >
+                                {{
+                                    dealLocationUIDResolved(
+                                        item,
+                                        column.dataIndex,
+                                    ).name
+                                }}
+                            </span>
+                        </template>
+                        <template v-else-if="column.dataIndex === 'actions'">
+                            <CloseOutlined
+                                class="kf-hover"
+                                @click="handleCancelOrder(item)"
+                                v-if="!isFinishedOrderStatus(item.status)"
+                            />
+                        </template>
                     </template>
-                    <template v-else-if="column.dataIndex === 'actions'">
-                        <CloseOutlined
-                            class="kf-hover"
-                            @click="handleCancelOrder(item)"
-                            v-if="!isFinishedOrderStatus(item.status)"
-                        />
-                    </template>
-                </template>
-            </KfTradingDataTable>
+                </KfTradingDataTable>
+            </div>
         </KfDashboard>
     </div>
 </template>
@@ -473,10 +663,44 @@ resolveAccountId;
     .kf-table__warp {
         width: 100%;
         height: 100%;
+        position: relative;
 
         .kf-trading-data-table {
             width: 100%;
             height: 100%;
+        }
+
+        .kf-adjust-order-mask__warp {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            left: 0;
+            top: 0;
+            z-index: 100;
+
+            .kf-adjust-order-mask {
+                position: absolute;
+                width: 100%;
+                height: 100%;
+                left: 0;
+                top: 0;
+                z-index: 100;
+                background: rgba(0, 0, 0, 0.45);
+            }
+
+            .adjust-order-item {
+                position: absolute;
+                z-index: 101;
+                background: #141414;
+
+                .ant-input-number-input-wrap {
+                    height: 100%;
+
+                    .ant-input-number-input {
+                        height: 100%;
+                    }
+                }
+            }
         }
     }
 }

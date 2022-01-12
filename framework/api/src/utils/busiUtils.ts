@@ -970,7 +970,7 @@ export const resolveAccountId = (
 
     if (parent_id === BigInt(MakeOrderByWatcherEnum.Manual)) {
         return {
-            color: 'yellow',
+            color: 'orange',
             name: `${accountId} 手动`,
         };
     }
@@ -1008,11 +1008,11 @@ export const resolveClientId = (
         if (parent_id !== BigInt(0)) {
             return { color: 'blue', name: '任务' };
         } else {
-            return { color: 'yellow', name: '手动' };
+            return { color: 'orange', name: '手动' };
         }
     } else {
         if (parent_id !== BigInt(0)) {
-            return { color: 'yellow', name: `${destLocation.name} 手动` }; //是因为策略模块手动下单的时候刻意插入用于区分
+            return { color: 'orange', name: `${destLocation.name} 手动` }; //是因为策略模块手动下单的时候刻意插入用于区分
         } else {
             return { color: 'text', name: destLocation.name };
         }

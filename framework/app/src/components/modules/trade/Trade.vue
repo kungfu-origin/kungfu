@@ -287,6 +287,10 @@ function handleShowTradingDataDetail({
                         "
                     >
                         <span
+                            :title="
+                                dealLocationUIDResolved(item, column.dataIndex)
+                                    .name
+                            "
                             :class="[
                                 `color-${
                                     dealLocationUIDResolved(

@@ -9,7 +9,7 @@ export const getColumns = (
         type: 'string',
         name: '更新时间',
         dataIndex: 'update_time',
-        width: isHistory ? 180 : 120,
+        width: isHistory ? 160 : 120,
     },
     {
         type: 'string',
@@ -36,7 +36,7 @@ export const getColumns = (
         width: 120,
     },
     {
-        type: 'string',
+        type: 'number',
         name: '已成交/全部',
         dataIndex: 'volume_traded',
         width: 120,

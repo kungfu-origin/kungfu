@@ -25,7 +25,14 @@ const props = withDefaults(
 
 defineEmits<{
     (e: 'dbclickRow', data: { event: MouseEvent; row: TradingDataItem }): void;
-    (e: 'clickRow', data: { event: MouseEvent; row: TradingDataItem }): void;
+    (
+        e: 'clickCell',
+        data: {
+            event: MouseEvent;
+            row: TradingDataItem;
+            column: KfTradingDataTableHeaderConfig;
+        },
+    ): void;
     (
         e: 'clickCell',
         data: {
@@ -106,14 +113,20 @@ function getHeaderWidth(column: KfTradingDataTableHeaderConfig) {
     }
 }
 
-function handleClickRow(e: MouseEvent, row: TradingDataItem) {
-    app && app.emit('clickRow', { event: e, row });
-    clickTimer && clearTimeout(clickTimer);
-}
-
 function handleDbClickRow(e: MouseEvent, row: TradingDataItem) {
     app && app.emit('dbclickRow', { event: e, row });
     clickTimer && clearTimeout(clickTimer);
+}
+
+function handleClickCell(
+    e: MouseEvent,
+    row: TradingDataItem,
+    column: KfTradingDataTableHeaderConfig,
+) {
+    clickTimer && clearTimeout(clickTimer);
+    clickTimer = +setTimeout(() => {
+        app && app.emit('clickCell', { event: e, row, column });
+    }, 300);
 }
 
 function handleMousedown(e: MouseEvent, row: TradingDataItem) {
@@ -149,13 +162,11 @@ function handleMousedown(e: MouseEvent, row: TradingDataItem) {
                 <template v-slot="{ item }: { item: any }">
                     <ul
                         class="kf-table-row"
-                        @click="handleClickRow($event, item)"
                         @dblclick="handleDbClickRow($event, item)"
                         @mousedown="handleMousedown($event, item)"
                     >
                         <li
                             v-for="column in columns"
-                            :title="item[column.dataIndex as keyof TradingDataItem] || ''"
                             :class="[
                                 'text-overflow',
                                 'kf-table-cell',
@@ -165,6 +176,7 @@ function handleMousedown(e: MouseEvent, row: TradingDataItem) {
                             :style="{
                                 'max-width': getHeaderWidth(column),
                             }"
+                            @click.stop="handleClickCell($event, item, column)"
                         >
                             <slot :item="item" :column="column">
                                 <span>

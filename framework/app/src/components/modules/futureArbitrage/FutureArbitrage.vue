@@ -6,6 +6,7 @@ import KfConfigSettingsForm from '@renderer/components/public/KfConfigSettingsFo
 import {
     initFormStateByConfig,
     useCurrentGlobalKfLocation,
+    useProcessStatusDetailData,
 } from '@renderer/assets/methods/uiUtils';
 import { getConfigSettings } from './config';
 import { RuleObject } from 'ant-design-vue/lib/form';
@@ -13,12 +14,14 @@ import { transformSearchInstrumentResultToInstrument } from '@renderer/assets/me
 import { FutureArbitrageCodeEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import { message } from 'ant-design-vue';
 import { makeOrderByOrderInput } from '@kungfu-trader/kungfu-js-api/kungfu';
+import { getProcessIdByKfLocation } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 
 interface MakeOrderProps {}
 defineProps<MakeOrderProps>();
 
 const formState = ref(initFormStateByConfig(getConfigSettings(), {}));
 const formRef = ref();
+const { processStatusData } = useProcessStatusDetailData();
 
 const {
     currentGlobalKfLocation,
@@ -135,6 +138,16 @@ function handleMakeOrder() {
 
             if (!currentGlobalKfLocation.data) {
                 message.error('当前 Location 错误');
+                return;
+            }
+
+            const tdProcessId =
+                currentGlobalKfLocation.data.category === 'td'
+                    ? getProcessIdByKfLocation(currentGlobalKfLocation.data)
+                    : `td_${account_id.toString()}`;
+
+            if (processStatusData.value[tdProcessId] !== 'online') {
+                message.error(`请先启动 ${tdProcessId} 交易进程`);
                 return;
             }
 

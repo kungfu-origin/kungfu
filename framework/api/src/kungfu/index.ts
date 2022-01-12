@@ -414,9 +414,13 @@ export const makeOrderByOrderInput = (
         }
 
         if (kfLocation.category === 'td') {
-            kfMakeOrder(window.watcher, orderInput, kfLocation).catch((err) => {
-                reject(err);
-            });
+            kfMakeOrder(window.watcher, orderInput, kfLocation)
+                .then(() => {
+                    resolve();
+                })
+                .catch((err) => {
+                    reject(err);
+                });
         } else if (kfLocation.category === 'strategy') {
             const tdLocation = getMdTdKfLocationByProcessId(
                 `td_${accountId || ''}`,
@@ -425,14 +429,13 @@ export const makeOrderByOrderInput = (
                 reject(new Error('下单账户信息错误'));
                 return;
             }
-            kfMakeOrder(
-                window.watcher,
-                orderInput,
-                tdLocation,
-                kfLocation,
-            ).catch((err) => {
-                reject(err);
-            });
+            kfMakeOrder(window.watcher, orderInput, tdLocation, kfLocation)
+                .then(() => {
+                    resolve();
+                })
+                .catch((err) => {
+                    reject(err);
+                });
         } else {
             const tdLocation = getMdTdKfLocationByProcessId(
                 `td_${accountId || ''}`,
@@ -441,9 +444,13 @@ export const makeOrderByOrderInput = (
                 reject(new Error('下单账户信息错误'));
                 return;
             }
-            kfMakeOrder(window.watcher, orderInput, tdLocation).catch((err) => {
-                reject(err);
-            });
+            kfMakeOrder(window.watcher, orderInput, tdLocation)
+                .then(() => {
+                    resolve();
+                })
+                .catch((err) => {
+                    reject(err);
+                });
         }
     });
 };

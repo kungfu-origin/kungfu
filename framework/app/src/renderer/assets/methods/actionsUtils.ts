@@ -370,8 +370,6 @@ export const useDealExportHistoryTradingData = (): {
             return Promise.resolve();
         }
 
-        console.log(tradingData, tradingDataType);
-
         const exportDatas = isTdStrategyCategory(currentKfLocation.category)
             ? historyDatas
             : getExtraCategoryData(

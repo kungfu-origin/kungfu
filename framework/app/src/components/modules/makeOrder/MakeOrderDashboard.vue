@@ -27,12 +27,18 @@ import {
     transformSearchInstrumentResultToInstrument,
     useInstruments,
 } from '@renderer/assets/methods/actionsUtils';
+import { getProcessIdByKfLocation } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 
 interface MakeOrderProps {}
 defineProps<MakeOrderProps>();
 
 const app = getCurrentInstance();
-const formState = ref(initFormStateByConfig(getConfigSettings(), {}));
+const formState = ref(
+    initFormStateByConfig(
+        getConfigSettings('td', InstrumentTypeEnum.future),
+        {},
+    ),
+);
 const formRef = ref();
 const { subscribeAllInstrumentByAppStates } = useInstruments();
 const { appStates, processStatusData } = useProcessStatusDetailData();
@@ -192,8 +198,18 @@ function handleMakeOrder() {
                 hedge_flag: +(hedge_flag || 0),
             };
 
-            if (!currentGlobalKfLocation.data) {
+            if (!currentGlobalKfLocation.data || !window.watcher) {
                 message.error('当前 Location 错误');
+                return;
+            }
+
+            const tdProcessId =
+                currentGlobalKfLocation.data.category === 'td'
+                    ? getProcessIdByKfLocation(currentGlobalKfLocation.data)
+                    : `td_${account_id.toString()}`;
+
+            if (processStatusData.value[tdProcessId] !== 'online') {
+                message.error(`请先启动 ${tdProcessId} 交易进程`);
                 return;
             }
 
