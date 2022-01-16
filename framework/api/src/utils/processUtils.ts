@@ -270,6 +270,7 @@ export const pm2KillGodDaemon = (): Promise<void> => {
         pm2Connect().then(() => {
             // the doc said required disconnect, but if use the disconnect, the daemon won't quit
             pm2.killDaemon((err: Error) => {
+                pm2.disconnect();
                 if (err) {
                     kfLogger.error(err.message);
                     reject(err);
@@ -448,9 +449,10 @@ function getRocketParams(args: string, ifRocket: boolean) {
 
 function buildArgs(args: string): string {
     const kfConfig: any = fse.readJsonSync(KF_CONFIG_PATH) || {};
-    const logLevel: string = (kfConfig.log || {}).level || '';
+    const logLevel: string = (kfConfig.system || {}).logLevel || '';
     const ifRocket = (kfConfig.performance || {}).rocket || false;
     const rocket = getRocketParams(args, ifRocket);
+    console.log([logLevel, args, rocket].join(' '), kfConfig);
     return [logLevel, args, rocket].join(' ');
 }
 
