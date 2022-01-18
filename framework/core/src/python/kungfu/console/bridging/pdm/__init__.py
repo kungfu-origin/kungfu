@@ -1,4 +1,3 @@
-import atoml
 import json
 import os
 import pkgutil
@@ -11,7 +10,7 @@ from pdm.core import Core
 from pdm.cli.commands.base import BaseCommand
 from pdm.formats.base import array_of_inline_tables, make_inline_table
 from pdm.models.requirements import parse_requirement
-from pdm.project.core import Project
+from pdm.project.core import tomlkit, Project
 
 
 class MakeupCommand(BaseCommand):
@@ -20,7 +19,7 @@ class MakeupCommand(BaseCommand):
     @staticmethod
     def pdm_config_table(pdm_project, name):
         pdm_config = pdm_project.pyproject
-        result = pdm_config[name] = pdm_config.get(name, atoml.table())
+        result = pdm_config[name] = pdm_config.get(name, tomlkit.table())
         # Fix extra trailing newline
         body = result.value.body
         body and body[-1][0] is None and body.pop()
