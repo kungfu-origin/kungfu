@@ -7,9 +7,6 @@ import {
     getIdByKfLocation,
     delayMilliSeconds,
     dealTradingData,
-    dealOrderStat,
-    resolveAccountId,
-    resolveClientId,
     isTdStrategyCategory,
     getOrderTradeFilterKey,
     dealCategory,
@@ -34,7 +31,6 @@ import {
 import {
     computed,
     getCurrentInstance,
-    nextTick,
     onBeforeUnmount,
     onMounted,
     reactive,
@@ -44,7 +40,7 @@ import {
 } from 'vue';
 import { getColumns } from './config';
 import {
-    dealKfTime,
+    dealOrder,
     getKungfuHistoryData,
     kfCancelAllOrders,
     kfCancelOrder,
@@ -60,15 +56,18 @@ import { useExtraCategory } from '@renderer/assets/methods/uiExtUtils';
 const app = getCurrentInstance();
 
 const { processStatusData } = useProcessStatusDetailData();
-const orders = ref<KungfuApi.Order[]>([]);
-const { searchKeyword, tableData } = useTableSearchKeyword<KungfuApi.Order>(
-    orders,
-    ['order_id', 'instrument_id', 'exchange_id'],
-);
+const orders = ref<KungfuApi.OrderResolved[]>([]);
+const { searchKeyword, tableData } =
+    useTableSearchKeyword<KungfuApi.OrderResolved>(orders, [
+        'order_id',
+        'instrument_id',
+        'exchange_id',
+        'source_uname',
+        'dest_uname',
+    ]);
 const unfinishedOrder = ref<boolean>(false);
 const historyDate = ref<Dayjs>();
 const historyDataLoading = ref<boolean>();
-var Ledger: KungfuApi.TradingData | undefined = window.watcher?.ledger;
 
 const {
     currentGlobalKfLocation,
@@ -105,18 +104,17 @@ onMounted(() => {
                     return;
                 }
 
-                Ledger = watcher.ledger;
                 const ordersResolved = isTdStrategyCategory(
                     currentGlobalKfLocation.data.category,
                 )
                     ? ((dealTradingData(
                           watcher,
-                          Ledger,
+                          watcher.ledger,
                           'Order',
                           currentGlobalKfLocation.data,
                       ) || []) as KungfuApi.Order[])
                     : (getExtraCategoryData(
-                          Ledger.Order,
+                          watcher.ledger.Order,
                           currentGlobalKfLocation.data,
                           'order',
                       ) as KungfuApi.Order[]);
@@ -127,12 +125,33 @@ onMounted(() => {
                             .slice(0, 100)
                             .filter(
                                 (item) => !isFinishedOrderStatus(item.status),
+                            )
+                            .map((item) =>
+                                toRaw(
+                                    dealOrder(
+                                        watcher,
+                                        item,
+                                        watcher.ledger.OrderStat,
+                                    ),
+                                ),
                             ),
                     );
                     return;
                 }
 
-                orders.value = toRaw(ordersResolved.slice(0, 100));
+                orders.value = toRaw(
+                    ordersResolved
+                        .slice(0, 100)
+                        .map((item) =>
+                            toRaw(
+                                dealOrder(
+                                    watcher,
+                                    item,
+                                    watcher.ledger.OrderStat,
+                                ),
+                            ),
+                        ),
+                );
             },
         );
 
@@ -149,7 +168,6 @@ watch(currentGlobalKfLocation, () => {
 
 watch(historyDate, async (newDate) => {
     if (!newDate) {
-        Ledger = window.watcher?.ledger;
         return;
     }
 
@@ -167,15 +185,20 @@ watch(historyDate, async (newDate) => {
         'Order',
         currentGlobalKfLocation.data,
     );
-    Ledger = tradingData;
-    orders.value = isTdStrategyCategory(currentGlobalKfLocation.data.category)
+    const orderResolved = isTdStrategyCategory(
+        currentGlobalKfLocation.data.category,
+    )
         ? toRaw(historyDatas as KungfuApi.Order[])
         : (getExtraCategoryData(
-              Ledger.Order,
+              tradingData.Order,
               currentGlobalKfLocation.data,
               'order',
-              true,
           ) as KungfuApi.Order[]);
+    orders.value = toRaw(
+        orderResolved.map((item) =>
+            toRaw(dealOrder(window.watcher, item, tradingData.OrderStat, true)),
+        ),
+    );
     historyDataLoading.value = false;
 });
 
@@ -183,32 +206,7 @@ function isFinishedOrderStatus(orderStatus: OrderStatusEnum): boolean {
     return !UnfinishedOrderStatus.includes(orderStatus);
 }
 
-function dealLocationUIDResolved(
-    item: KungfuApi.Order,
-    dataIndex: string,
-): KungfuApi.KfTradeValueCommonData {
-    if (dataIndex === 'source') {
-        return resolveAccountId(
-            window.watcher,
-            item.source,
-            item.dest,
-            item.parent_id,
-        );
-    } else {
-        return resolveClientId(window.watcher, item.dest, item.parent_id);
-    }
-}
-
-function dealOrderStatResolved(orderUKey: string): {
-    latencySystem: string;
-    latencyNetwork: string;
-    latencyTrade: string;
-    trade_time: bigint;
-} | null {
-    return dealOrderStat(Ledger, orderUKey);
-}
-
-function handleCancelOrder(order: KungfuApi.Order): void {
+function handleCancelOrder(order: KungfuApi.OrderResolved): void {
     if (!currentGlobalKfLocation.data || !window.watcher) {
         message.error('操作失败');
         return;
@@ -228,7 +226,7 @@ function handleCancelOrder(order: KungfuApi.Order): void {
 }
 
 function kfCancelOrderResovled(
-    order: KungfuApi.Order,
+    order: KungfuApi.OrderResolved,
     kfLocation: KungfuApi.KfLocation | KungfuApi.KfConfig,
 ): Promise<void> {
     const tdLocation = window.watcher.getLocation(order.source);
@@ -284,7 +282,7 @@ function handleCancelAllOrders(): void {
     });
 }
 
-function getTargetCancelOrders(): KungfuApi.Order[] {
+function getTargetCancelOrders(): KungfuApi.OrderResolved[] {
     if (!currentGlobalKfLocation.data || !window.watcher) {
         return [];
     }
@@ -302,7 +300,7 @@ function getTargetCancelOrders(): KungfuApi.Order[] {
         window.watcher.ledger.Order,
         currentGlobalKfLocation.data,
         'order',
-    ) as KungfuApi.Order[];
+    ) as KungfuApi.OrderResolved[];
 }
 
 function handleShowTradingDataDetail({
@@ -311,7 +309,7 @@ function handleShowTradingDataDetail({
     event: MouseEvent;
     row: TradingDataItem;
 }) {
-    showTradingDataDetail(row as KungfuApi.Order, '委托');
+    showTradingDataDetail(row as KungfuApi.OrderResolved, '委托');
 }
 
 const adjustOrderConfig = reactive({
@@ -324,7 +322,7 @@ const adjustOrderForm = ref<{ price: number; volume: number }>({
     price: 0,
     volume: 0,
 });
-const adjustOrder = ref<KungfuApi.Order | null>(null);
+const adjustOrder = ref<KungfuApi.OrderResolved | null>(null);
 const tableRef = ref();
 
 function handleAdjustOrder(data: {
@@ -333,7 +331,7 @@ function handleAdjustOrder(data: {
     column: KfTradingDataTableHeaderConfig;
 }): void {
     const { event, row, column } = data;
-    const order = row as KungfuApi.Order;
+    const order = row as KungfuApi.OrderResolved;
     const target = event.target as HTMLElement | null;
 
     if (column.dataIndex !== 'limit_price') {
@@ -418,7 +416,7 @@ function handleClickAdjustOrderMask(): void {
         });
 }
 
-function testOrderSourceIsOnline(order: KungfuApi.Order) {
+function testOrderSourceIsOnline(order: KungfuApi.OrderResolved) {
     if (!window.watcher) {
         return false;
     }
@@ -472,7 +470,10 @@ function testOrderSourceIsOnline(order: KungfuApi.Order) {
                     />
                 </KfDashboardItem>
                 <KfDashboardItem>
-                    <a-date-picker v-model:value="historyDate">
+                    <a-date-picker
+                        v-model:value="historyDate"
+                        :disabled="historyDataLoading"
+                    >
                         <template #suffixIcon>
                             <LoadingOutlined v-if="historyDataLoading" />
                             <CalendarOutlined v-else />
@@ -552,12 +553,12 @@ function testOrderSourceIsOnline(order: KungfuApi.Order) {
                             item,
                             column,
                         }: {
-                            item: KungfuApi.Order,
+                            item: KungfuApi.OrderResolved,
                             column: KfTradingDataTableHeaderConfig,
                         }"
                     >
                         <template v-if="column.dataIndex === 'update_time'">
-                            {{ dealKfTime(item.update_time, !!historyDate) }}
+                            {{ item.update_time_resolved }}
                         </template>
                         <template v-else-if="column.dataIndex === 'side'">
                             <span :class="`color-${dealSide(item.side).color}`">
@@ -599,47 +600,29 @@ function testOrderSourceIsOnline(order: KungfuApi.Order) {
                         <template
                             v-else-if="column.dataIndex === 'latency_system'"
                         >
-                            {{
-                                dealOrderStatResolved(item.uid_key)
-                                    ?.latencySystem || '--'
-                            }}
+                            {{ item.latency_system }}
                         </template>
                         <template
                             v-else-if="column.dataIndex === 'latency_network'"
                         >
-                            {{
-                                dealOrderStatResolved(item.uid_key)
-                                    ?.latencyNetwork || '--'
-                            }}
+                            {{ item.latency_network }}
                         </template>
-                        <template
-                            v-else-if="
-                                column.dataIndex === 'source' ||
-                                column.dataIndex === 'dest'
-                            "
-                        >
+                        <template v-else-if="column.dataIndex === 'source'">
                             <span
-                                :title="
-                                    dealLocationUIDResolved(
-                                        item,
-                                        column.dataIndex,
-                                    ).name
-                                "
                                 :class="[
-                                    `color-${
-                                        dealLocationUIDResolved(
-                                            item,
-                                            column.dataIndex,
-                                        ).color
-                                    }`,
+                                    `color-${item.source_resolved_data.color}`,
                                 ]"
                             >
-                                {{
-                                    dealLocationUIDResolved(
-                                        item,
-                                        column.dataIndex,
-                                    ).name
-                                }}
+                                {{ item.source_uname }}
+                            </span>
+                        </template>
+                        <template v-else-if="column.dataIndex === 'dest'">
+                            <span
+                                :class="[
+                                    `color-${item.dest_resolved_data.color}`,
+                                ]"
+                            >
+                                {{ item.dest_uname }}
                             </span>
                         </template>
                         <template v-else-if="column.dataIndex === 'actions'">

@@ -1,5 +1,4 @@
 import os from 'os';
-import fse from 'fs-extra';
 import { dialog, shell } from '@electron/remote';
 import { deleteAllByKfLocation } from '@kungfu-trader/kungfu-js-api/actions';
 import {
@@ -44,7 +43,6 @@ import {
 } from 'vue';
 import dayjs from 'dayjs';
 import { Row } from '@fast-csv/format';
-import { KF_SUBSCRIBED_INSTRUMENTS_JSON_PATH } from '@kungfu-trader/kungfu-js-api/config/pathConfig';
 import { AbleSubscribeInstrumentTypesBySourceType } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
 import {
     buildInstrumentSelectOptionLabel,
@@ -157,7 +155,9 @@ export const useSwitchAllConfig = (
 };
 
 export const useAddUpdateRemoveKfConfig = (): {
-    handleRemoveKfConfig: (kfConfig: KungfuApi.KfConfig) => Promise<void>;
+    handleRemoveKfConfig: (
+        kfConfig: KungfuApi.KfConfig | KungfuApi.KfLocation,
+    ) => Promise<void>;
     handleConfirmAddUpdateKfConfig: (
         data: {
             formState: Record<string, KungfuApi.KfConfigValue>;
@@ -171,7 +171,7 @@ export const useAddUpdateRemoveKfConfig = (): {
     const app = getCurrentInstance();
 
     const handleRemoveKfConfig = (
-        kfConfig: KungfuApi.KfConfig,
+        kfConfig: KungfuApi.KfConfig | KungfuApi.KfLocation,
     ): Promise<void> => {
         return ensureRemoveLocation(kfConfig).then(() => {
             app?.proxy && app?.proxy.$useGlobalStore().setKfConfigList();
@@ -381,7 +381,6 @@ export const useDealExportHistoryTradingData = (): {
                       | KungfuApi.DataTable<KungfuApi.Position>,
                   currentKfLocation,
                   tradingDataType.toLowerCase(),
-                  true,
               );
 
         return writeCSV(filename, exportDatas, dealTradingDataItemResolved)
@@ -442,50 +441,6 @@ export const useDealExportHistoryTradingData = (): {
         exportEventData,
         handleConfirmExportDate,
     };
-};
-
-export const getSubscribedInstruments = async (): Promise<
-    KungfuApi.InstrumentResolved[]
-> => {
-    return fse.readFile(KF_SUBSCRIBED_INSTRUMENTS_JSON_PATH).then((res) => {
-        const str = Buffer.from(res).toString();
-        return JSON.parse(str || '[]');
-    });
-};
-
-export const addSubscribeInstruments = async (
-    instruments: KungfuApi.InstrumentResolved[],
-): Promise<void> => {
-    const oldInstruments = await getSubscribedInstruments();
-    return fse.outputJSON(KF_SUBSCRIBED_INSTRUMENTS_JSON_PATH, [
-        ...oldInstruments,
-        ...instruments,
-    ]);
-};
-
-export const removeSubscribeInstruments = async (
-    instrument: KungfuApi.InstrumentResolved,
-): Promise<void> => {
-    const oldInstruments = await getSubscribedInstruments();
-    const removeTargetIndex = oldInstruments.findIndex((item) => {
-        if (item.instrumentId === instrument.instrumentId) {
-            if (item.exchangeId === instrument.exchangeId) {
-                return true;
-            }
-        }
-        return false;
-    });
-
-    if (removeTargetIndex === -1) {
-        return Promise.reject(
-            new Error(
-                `未找到 ${instrument.exchangeId}_${instrument.instrumentId} `,
-            ),
-        );
-    }
-
-    oldInstruments.splice(removeTargetIndex, 1);
-    return fse.outputJSON(KF_SUBSCRIBED_INSTRUMENTS_JSON_PATH, oldInstruments);
 };
 
 export const showTradingDataDetail = (

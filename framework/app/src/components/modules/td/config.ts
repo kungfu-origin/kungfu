@@ -4,10 +4,10 @@ export const getColumns = (
     ) => (a: KungfuApi.KfConfig, b: KungfuApi.KfConfig) => number,
 ): AntTableColumns => [
     {
-        title: '账户',
+        title: '账户(组)',
         dataIndex: 'name',
         align: 'left',
-        width: 160,
+        width: 180,
         fixed: 'left',
     },
     {

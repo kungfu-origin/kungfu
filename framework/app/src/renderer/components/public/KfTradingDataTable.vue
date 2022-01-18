@@ -1,6 +1,8 @@
 <script lang="ts" setup>
 import { sum } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { Empty } from 'ant-design-vue';
+import { CaretUpOutlined, CaretDownOutlined } from '@ant-design/icons-vue';
+
 import { filter } from 'rxjs';
 import {
     computed,
@@ -8,6 +10,7 @@ import {
     onBeforeMount,
     onMounted,
     ref,
+    toRaw,
 } from 'vue';
 
 const props = withDefaults(
@@ -134,27 +137,100 @@ function handleMousedown(e: MouseEvent, row: TradingDataItem) {
         app && app.emit('rightClickRow', { event: e, row });
     }
 }
+
+const currentSorterIndex = ref<string>('');
+const currentSorterOrder = ref<'' | 'ascend' | 'descend'>('');
+let currentSorterFunction: ((a: any, b: any) => number) | undefined = undefined;
+const dataSourceResolved = computed(() => {
+    if (
+        currentSorterIndex.value &&
+        currentSorterFunction &&
+        currentSorterOrder.value !== ''
+    ) {
+        if (currentSorterOrder.value === 'ascend') {
+            return props.dataSource.slice(0).sort(currentSorterFunction);
+        } else {
+            return props.dataSource
+                .slice(0)
+                .sort(currentSorterFunction)
+                .reverse();
+        }
+    }
+    return props.dataSource;
+});
+
+function handleSort(
+    dataIndex: string,
+    sorter: undefined | ((a: any, b: any) => number),
+) {
+    if (!sorter || !dataIndex) {
+        return;
+    }
+
+    currentSorterFunction = sorter;
+
+    if (currentSorterIndex.value) {
+        if (dataIndex === currentSorterIndex.value) {
+            if (currentSorterOrder.value === '') {
+                currentSorterOrder.value = 'ascend';
+            } else if (currentSorterOrder.value === 'ascend') {
+                currentSorterOrder.value = 'descend';
+            } else {
+                currentSorterOrder.value = '';
+            }
+        } else {
+            currentSorterIndex.value = dataIndex;
+            currentSorterOrder.value = 'ascend';
+        }
+    } else {
+        currentSorterIndex.value = dataIndex;
+        currentSorterOrder.value = 'ascend';
+    }
+}
 </script>
 <template>
     <div class="kf-table">
         <ul class="kf-table-header kf-table-row">
             <li
                 v-for="column in columns"
-                :class="['text-overflow', 'kf-table-cell', column.type]"
+                :class="['kf-table-cell', column.type]"
                 :key="column.dataIndex"
                 :title="column.name"
                 :style="{
                     'max-width': getHeaderWidth(column),
                 }"
+                @click.stop="handleSort(column.dataIndex, column.sorter)"
             >
-                {{ column.name }}
+                <span class="name text-overflow">{{ column.name }}</span>
+                <span class="sort-btn" v-if="column.sorter">
+                    <CaretUpOutlined
+                        style="color: #bfbfbf; font-size: 11px"
+                        :class="{
+                            active:
+                                column.dataIndex === currentSorterIndex &&
+                                currentSorterOrder === 'descend',
+                        }"
+                    ></CaretUpOutlined>
+                    <CaretDownOutlined
+                        style="
+                            color: #bfbfbf;
+                            font-size: 11px;
+                            margin-top: -1px;
+                        "
+                        :class="{
+                            active:
+                                column.dataIndex === currentSorterIndex &&
+                                currentSorterOrder === 'ascend',
+                        }"
+                    ></CaretDownOutlined>
+                </span>
             </li>
         </ul>
         <div class="kf-table-body" ref="kfScrollerTableBodyRef">
             <RecycleScroller
-                v-if="dataSource && dataSource.length"
+                v-if="dataSourceResolved && dataSourceResolved.length"
                 class="kf-table-scroller"
-                :items="dataSource"
+                :items="dataSourceResolved"
                 :item-size="26"
                 :key-field="keyField"
                 :buffer="100"
@@ -177,6 +253,7 @@ function handleMousedown(e: MouseEvent, row: TradingDataItem) {
                                 'max-width': getHeaderWidth(column),
                             }"
                             @click.stop="handleClickCell($event, item, column)"
+                            :title="item[column.dataIndex]"
                         >
                             <slot :item="item" :column="column">
                                 <span>
@@ -225,9 +302,31 @@ function handleMousedown(e: MouseEvent, row: TradingDataItem) {
         .kf-table-cell {
             height: 36px;
             line-height: 36px;
-            display: inline-block;
+            display: flex;
             user-select: none;
             position: relative;
+
+            .name {
+                flex: 1;
+            }
+
+            .sort-btn {
+                transition: color 0.3s;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+
+                .anticon {
+                    &.active {
+                        color: @primary-color !important;
+                    }
+
+                    &.anticon-caret-down {
+                        margin-top: -3px !important;
+                    }
+                }
+            }
 
             &::after {
                 content: '';

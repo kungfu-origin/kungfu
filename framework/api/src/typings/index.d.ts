@@ -30,34 +30,22 @@ declare module 'tail' {
 declare namespace KungfuApi {
     import {
         BrokerStateStatusEnum,
-        BrokerStateStatusTypes,
         InstrumentTypeEnum,
         InstrumentTypes,
         PriceTypeEnum,
-        PriceTypes,
         SideEnum,
-        SideTypes,
         OffsetEnum,
-        OffsetTypes,
         HedgeFlagEnum,
-        HedgeFlagTypes,
         LedgerCategoryEnum,
-        LedgerCategoryTypes,
         VolumeConditionEnum,
-        VolumeConditionTypes,
         TimeConditionEnum,
-        TimeConditionTypes,
         CommissionModeEnum,
-        CommissionModeTypes,
         DirectionEnum,
-        DirectionTypes,
         OrderStatusEnum,
-        OrderStatusTypes,
         KfCategoryEnum,
         KfCategoryTypes,
         KfModeEnum,
         KfModeTypes,
-        HistoryDateEnum,
         OrderActionFlagEnum,
     } from './enums';
 
@@ -391,6 +379,16 @@ declare namespace KungfuApi {
         uid_key: string;
     }
 
+    export interface OrderResolved extends Order {
+        source_resolved_data: KungfuApi.KfTradeValueCommonData;
+        dest_resolved_data: KungfuApi.KfTradeValueCommonData;
+        source_uname: string;
+        dest_uname: string;
+        update_time_resolved: string;
+        latency_system: string;
+        latency_network: string;
+    }
+
     export interface OrderInput {
         order_id: bigint; //订单ID
 
@@ -554,6 +552,16 @@ declare namespace KungfuApi {
         uid_key: string;
     }
 
+    export interface TradeResolved extends Trade {
+        source_resolved_data: KungfuApi.KfTradeValueCommonData;
+        dest_resolved_data: KungfuApi.KfTradeValueCommonData;
+        source_uname: string;
+        dest_uname: string;
+        trade_time_resolved: string;
+        kf_time_resovlved: string;
+        latency_trade: string;
+    }
+
     export interface TradingData {
         Asset: DataTable<Asset>;
         AssetSnapshot: DataTable<AssetSnapshot>;
@@ -581,7 +589,6 @@ declare namespace KungfuApi {
         Position: Position;
         Quote: Quote;
         TimeValue: TimeValue;
-        Trade: Trade;
         Trade: Trade;
     }
 
@@ -709,30 +716,31 @@ declare namespace KungfuApi {
         name: string;
     }
 
-    export type KfLocation = {
+    export interface KfLocation extends KfLocationBase {
         category: KfCategoryTypes;
         mode: KfModeTypes;
-    } & KfLocationBase;
+    }
 
-    export type KfLocationOrigin = {
+    export interface KfLocationOrigin extends KfLocationBase {
         category: KfCategoryEnum;
         mode: KfModeEnum;
-    } & KfLocationBase;
+    }
 
-    export type KfConfigOrigin = KfLocationOrigin & {
+    export interface KfConfigOrigin extends KfLocationOrigin {
         location_uid: number;
         value: string;
-    };
+    }
 
-    export type KfConfig = KfLocation & {
+    export interface KfConfig extends KfLocation {
         location_uid: number;
         value: string;
-    };
+    }
 
-    export interface KfExtraLocation {
+    export interface KfExtraLocation extends KfLocation {
         category: string;
         group: string;
         name: string;
+        children?: any[];
     }
 }
 

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, toRefs } from 'vue';
+import { ref, computed, toRefs, getCurrentInstance, reactive } from 'vue';
 
 import KfDashboard from '@renderer/components/public/KfDashboard.vue';
 import KfDashboardItem from '@renderer/components/public/KfDashboardItem.vue';
@@ -24,6 +24,7 @@ import {
     getInstrumentTypeColor,
     useAssets,
     useCurrentGlobalKfLocation,
+    useTdGroups,
 } from '@renderer/assets/methods/uiUtils';
 import {
     useAddUpdateRemoveKfConfig,
@@ -35,14 +36,19 @@ import {
     getIfProcessRunning,
     getProcessIdByKfLocation,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
-import { message } from 'ant-design-vue';
+import { message, Modal } from 'ant-design-vue';
 import KfBlinkNum from '@renderer/components/public/KfBlinkNum.vue';
+import {
+    addTdGroup,
+    removeTdGroup,
+} from '@kungfu-trader/kungfu-js-api/actions';
 
 interface TdProps {}
 defineProps<TdProps>();
 
 const { dashboardBodyHeight, handleBodySizeChange } = useDashboardBodySize();
 
+const app = getCurrentInstance();
 const setSourceModalVisible = ref<boolean>(false);
 const setTdModalVisible = ref<boolean>(false);
 const setTdConfigPayload = ref<KungfuApi.SetKfConfigPayload>({
@@ -69,12 +75,55 @@ const { allProcessOnline, handleSwitchAllProcessStatus } = useSwitchAllConfig(
     td,
     processStatusData,
 );
-const { searchKeyword, tableData } = useTableSearchKeyword<KungfuApi.KfConfig>(
-    td,
-    ['group', 'name'],
-);
-const { getAssetsByKfConfig } = useAssets();
 
+const setTdGroupModalVisble = ref<boolean>(false);
+const tdGroup = useTdGroups();
+const tdGroupNames = computed(() => {
+    return tdGroup.data.map((item) => item.name);
+});
+const setTdGroupConfigPayload = ref<KungfuApi.SetKfConfigPayload>({
+    type: 'add',
+    title: '账户组',
+    config: {} as KungfuApi.KfExtOriginConfig['config'][KfCategoryTypes],
+});
+
+const { searchKeyword, tableData } = useTableSearchKeyword<
+    KungfuApi.KfConfig | KungfuApi.KfExtraLocation
+>(td, ['group', 'name']);
+
+const tableDataResolved = computed(() => {
+    const tdGroupResolved: Record<string, KungfuApi.KfExtraLocation> = {};
+    const tdResolved: KungfuApi.KfConfig[] = [];
+    const markIndexToTdGroup: Record<string, KungfuApi.KfExtraLocation> = {};
+    [...tdGroup.data, ...tableData.value].forEach((item) => {
+        if ('children' in item) {
+            markIndexToTdGroup[item.name] = { ...item };
+            tdGroupResolved[item.name] = {
+                ...item,
+                children: [],
+            };
+            return;
+        }
+
+        const accountId = `${item.group}_${item.name}`;
+        const targetGroupNames = Object.keys(markIndexToTdGroup).filter(
+            (name) => {
+                const tdGroup = markIndexToTdGroup[name];
+                return (tdGroup.children || []).includes(accountId);
+            },
+        );
+        if (targetGroupNames.length) {
+            const targetGroupName = targetGroupNames[0];
+            tdGroupResolved[targetGroupName].children?.push(item);
+            return;
+        }
+
+        tdResolved.push(item as KungfuApi.KfConfig);
+    });
+    return [...Object.values(tdGroupResolved), ...tdResolved];
+});
+
+const { getAssetsByKfConfig, getAssetsByTdGroup } = useAssets();
 const { handleConfirmAddUpdateKfConfig, handleRemoveKfConfig } =
     useAddUpdateRemoveKfConfig();
 
@@ -117,6 +166,88 @@ function handleOpenSetTdDialog(
 function handleOpenSetSourceDialog() {
     setSourceModalVisible.value = true;
 }
+
+function handleOpenSetTdGroupDialog(type: KungfuApi.ModalChangeType) {
+    setTdGroupConfigPayload.value.type = type;
+    setTdGroupConfigPayload.value.config = {
+        type: [],
+        settings: [
+            {
+                key: 'td_group_name',
+                name: '账户组名称',
+                type: 'str',
+                primary: true,
+                required: true,
+                tip: '需保证该账户组名称唯一',
+            },
+        ],
+    };
+    setTdGroupConfigPayload.value.initValue = undefined;
+    setTdGroupModalVisble.value = true;
+}
+
+function handleConfirmAddUpdateTdGroup(
+    formState: Record<string, KungfuApi.KfConfigValue>,
+) {
+    const { td_group_name } = formState;
+    const newTdGroup: KungfuApi.KfExtraLocation = {
+        category: 'tdGroup',
+        group: 'group',
+        name: td_group_name.toString(),
+        mode: 'LIVE',
+        children: [],
+    };
+
+    return addTdGroup(newTdGroup)
+        .then(() => {
+            if (app?.proxy) {
+                app.proxy.$useGlobalStore().setTdGroups();
+            }
+        })
+        .then(() => {
+            message.success('操作成功');
+        })
+        .catch((err) => {
+            message.error(err.message || '操作失败');
+        });
+}
+
+function handleRemoveTdGroup(item: KungfuApi.KfExtraLocation) {
+    Modal.confirm({
+        title: `删除账户组 ${item.name}`,
+        content: `删除账户组 ${item.name}, 不会影响改账户组下账户进程, 确认删除`,
+        okText: '确认',
+        cancelText: '取消',
+        onOk() {
+            return removeTdGroup(item.name)
+                .then(() => {
+                    if (app?.proxy) {
+                        app.proxy.$useGlobalStore().setTdGroups();
+                    }
+                })
+                .then(() => {
+                    message.success('操作成功');
+                })
+                .catch((err) => {
+                    message.error(err.message || '操作失败');
+                });
+        },
+    });
+}
+
+function customRowResolved(
+    item: KungfuApi.KfConfig | KungfuApi.KfExtraLocation,
+) {
+    return {
+        ...customRow(item),
+        onDragStart: () => {
+            console.log(111);
+        },
+        onDragEnd: () => {
+            console.log(222);
+        },
+    };
+}
 </script>
 
 <template>
@@ -139,6 +270,14 @@ function handleOpenSetSourceDialog() {
                 <KfDashboardItem>
                     <a-button
                         size="small"
+                        @click="handleOpenSetTdGroupDialog('add')"
+                    >
+                        添加分组
+                    </a-button>
+                </KfDashboardItem>
+                <KfDashboardItem>
+                    <a-button
+                        size="small"
                         type="primary"
                         @click="handleOpenSetSourceDialog"
                     >
@@ -148,12 +287,12 @@ function handleOpenSetSourceDialog() {
             </template>
             <a-table
                 :columns="columns"
-                :data-source="tableData"
+                :data-source="tableDataResolved"
                 size="small"
                 :pagination="false"
                 :scroll="{ y: dashboardBodyHeight - 4 }"
                 :rowClassName="dealRowClassName"
-                :customRow="customRow"
+                :customRow="customRowResolved"
                 emptyText="暂无数据"
             >
                 <template
@@ -162,10 +301,15 @@ function handleOpenSetSourceDialog() {
                         record,
                     }: {
                         column: AntTableColumn,
-                        record: KungfuApi.KfConfig,
+                        record: KungfuApi.KfConfig | KungfuApi.KfExtraLocation,
                     }"
                 >
-                    <template v-if="column.dataIndex === 'name'">
+                    <template
+                        v-if="
+                            column.dataIndex === 'name' &&
+                            record.category === 'td'
+                        "
+                    >
                         <a-tag
                             :color="
                                 getInstrumentTypeColor(extTypeMap[record.group])
@@ -175,16 +319,36 @@ function handleOpenSetSourceDialog() {
                         </a-tag>
                         {{ record.name }}
                     </template>
-                    <template v-else-if="column.dataIndex === 'accountName'">
-                        {{ JSON.parse(record.value).account_name || '--' }}
+                    <template
+                        v-else-if="
+                            column.dataIndex === 'name' &&
+                            record.category === 'tdGroup'
+                        "
+                    >
+                        <a-tag color="#FAAD14">账户组</a-tag>
+                        {{ record.name }}
                     </template>
+                    <template
+                        v-else-if="
+                            column.dataIndex === 'accountName' &&
+                            record.category === 'td'
+                        "
+                    >
+                        {{
+                            JSON.parse('value' in record ? record.value : '{}')
+                                .account_name || '--'
+                        }}
+                    </template>
+
                     <template v-else-if="column.dataIndex === 'stateStatus'">
                         <KfProcessStatus
+                            v-if="record.category === 'td'"
                             :statusName="getProcessStatusName(record)"
                         ></KfProcessStatus>
                     </template>
                     <template v-else-if="column.dataIndex === 'processStatus'">
                         <a-switch
+                            v-if="record.category === 'td'"
                             size="small"
                             :checked="
                                 getIfProcessRunning(
@@ -199,6 +363,7 @@ function handleOpenSetSourceDialog() {
                     </template>
                     <template v-else-if="column.dataIndex === 'unrealizedPnl'">
                         <KfBlinkNum
+                            v-if="record.category === 'td'"
                             mode="compare-zero"
                             :num="
                                 dealAssetPrice(
@@ -206,41 +371,79 @@ function handleOpenSetSourceDialog() {
                                 )
                             "
                         ></KfBlinkNum>
+                        <KfBlinkNum
+                            v-else-if="record.category === 'tdGroup'"
+                            mode="compare-zero"
+                            :num="
+                                dealAssetPrice(
+                                    getAssetsByTdGroup(record).unrealized_pnl,
+                                )
+                            "
+                        ></KfBlinkNum>
                     </template>
                     <template v-else-if="column.dataIndex === 'marketValue'">
                         <KfBlinkNum
+                            v-if="record.category === 'td'"
                             :num="
                                 dealAssetPrice(
                                     getAssetsByKfConfig(record).market_value,
                                 )
                             "
                         ></KfBlinkNum>
+                        <KfBlinkNum
+                            v-else-if="record.category === 'tdGroup'"
+                            :num="
+                                dealAssetPrice(
+                                    getAssetsByTdGroup(record).market_value,
+                                )
+                            "
+                        ></KfBlinkNum>
                     </template>
                     <template v-else-if="column.dataIndex === 'margin'">
                         <KfBlinkNum
+                            v-if="record.category === 'td'"
                             :num="
                                 dealAssetPrice(
                                     getAssetsByKfConfig(record).margin,
                                 )
                             "
                         ></KfBlinkNum>
+                        <KfBlinkNum
+                            v-else-if="record.category === 'tdGroup'"
+                            :num="
+                                dealAssetPrice(
+                                    getAssetsByTdGroup(record).margin,
+                                )
+                            "
+                        ></KfBlinkNum>
                     </template>
                     <template v-else-if="column.dataIndex === 'avail'">
                         <KfBlinkNum
+                            v-if="record.category === 'td'"
                             :num="
                                 dealAssetPrice(
                                     getAssetsByKfConfig(record).avail,
                                 )
                             "
                         ></KfBlinkNum>
+                        <KfBlinkNum
+                            v-else-if="record.category === 'tdGroup'"
+                            :num="
+                                dealAssetPrice(getAssetsByTdGroup(record).avail)
+                            "
+                        ></KfBlinkNum>
                     </template>
                     <template v-else-if="column.dataIndex === 'actions'">
-                        <div class="kf-actions__warp">
+                        <div
+                            class="kf-actions__warp"
+                            v-if="record.category === 'td'"
+                        >
                             <FileTextOutlined
                                 style="font-size: 12px"
                                 @click.stop="handleOpenLogview(record)"
                             />
                             <SettingOutlined
+                                v-if="'value' in record"
                                 style="font-size: 12px"
                                 @click.stop="
                                     handleOpenSetTdDialog(
@@ -253,6 +456,15 @@ function handleOpenSetSourceDialog() {
                             <DeleteOutlined
                                 style="font-size: 12px"
                                 @click.stop="handleRemoveKfConfig(record)"
+                            />
+                        </div>
+                        <div
+                            class="kf-actions__warp"
+                            v-if="record.category === 'tdGroup'"
+                        >
+                            <DeleteOutlined
+                                style="font-size: 12px"
+                                @click.stop="handleRemoveTdGroup(record)"
                             />
                         </div>
                     </template>
@@ -277,6 +489,15 @@ function handleOpenSetSourceDialog() {
                     'td',
                     currentSelectedSourceId,
                 )
+            "
+        ></KfSetByConfigModal>
+        <KfSetByConfigModal
+            v-if="setTdGroupModalVisble"
+            v-model:visible="setTdGroupModalVisble"
+            :payload="setTdGroupConfigPayload"
+            :primaryKeyAvoidRepeatCompareTarget="tdGroupNames"
+            @confirm="
+                ({ formState }) => handleConfirmAddUpdateTdGroup(formState)
             "
         ></KfSetByConfigModal>
     </div>

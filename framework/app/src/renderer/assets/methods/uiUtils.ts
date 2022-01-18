@@ -54,8 +54,8 @@ import { message } from 'ant-design-vue';
 import {
     InstrumentTypes,
     BrokerStateStatusTypes,
-    KfCategoryTypes,
     ProcessStatusTypes,
+    KfCategoryTypes,
 } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import workers from '@renderer/assets/workers';
 import { throttleTime } from 'rxjs';
@@ -133,19 +133,21 @@ export const useTableSearchKeyword = <T>(
 } => {
     const searchKeyword = ref<string>('');
     const tableData = computed(() => {
-        return targetList.value.filter((item: T) => {
-            const combinedValue = keys
-                .map(
-                    (key: string) =>
-                        (
-                            ((item as Record<string, unknown>)[key] as
-                                | string
-                                | number) || ''
-                        ).toString() || '',
-                )
-                .join('_');
-            return combinedValue.includes(searchKeyword.value);
-        });
+        return targetList.value
+            .filter((item: T) => {
+                const combinedValue = keys
+                    .map(
+                        (key: string) =>
+                            (
+                                ((item as Record<string, unknown>)[key] as
+                                    | string
+                                    | number) || ''
+                            ).toString() || '',
+                    )
+                    .join('_');
+                return combinedValue.includes(searchKeyword.value);
+            })
+            .map((item) => toRaw(item));
     });
 
     return {
@@ -392,6 +394,22 @@ export const useAllKfConfigData = (): Record<
     });
 
     return allKfConfigData;
+};
+
+export const useTdGroups = (): { data: KungfuApi.KfExtraLocation[] } => {
+    const app = getCurrentInstance();
+    const tdGroups = reactive<{ data: KungfuApi.KfExtraLocation[] }>({
+        data: [],
+    });
+
+    onMounted(() => {
+        if (app?.proxy) {
+            const { tdGroupList } = storeToRefs(app?.proxy.$useGlobalStore());
+            tdGroups.data = tdGroupList as KungfuApi.KfExtraLocation[];
+        }
+    });
+
+    return tdGroups;
 };
 
 export const useCurrentGlobalKfLocation = (
@@ -650,8 +668,8 @@ export const markClearJournal = (): void => {
 };
 
 export const handleOpenLogview = (
-    config: KungfuApi.KfConfig,
-): Promise<Electron.BrowserWindow> => {
+    config: KungfuApi.KfConfig | KungfuApi.KfLocation,
+): Promise<Electron.BrowserWindow | void> => {
     const hideloading = message.loading('正在打开窗口');
     return openLogView(getProcessIdByKfLocation(config)).finally(() => {
         hideloading();
@@ -695,6 +713,7 @@ export const useAssets = (): {
     getAssetsByKfConfig(
         kfLocation: KungfuApi.KfLocation | KungfuApi.KfConfig,
     ): KungfuApi.Asset;
+    getAssetsByTdGroup(tdGroup: KungfuApi.KfExtraLocation): KungfuApi.Asset;
 } => {
     const assetsResolved = reactive<{ data: Record<string, KungfuApi.Asset> }>({
         data: {},
@@ -713,12 +732,34 @@ export const useAssets = (): {
         kfConfig: KungfuApi.KfLocation | KungfuApi.KfConfig,
     ): KungfuApi.Asset => {
         const processId = getProcessIdByKfLocation(kfConfig);
-        return assetsResolved.data[processId] || {};
+        return assetsResolved.data[processId] || ({} as KungfuApi.Asset);
+    };
+
+    const getAssetsByTdGroup = (
+        tdGroup: KungfuApi.KfExtraLocation,
+    ): KungfuApi.Asset => {
+        const children = (tdGroup.children || []) as KungfuApi.KfConfig[];
+        const assetsList = children
+            .map((item) => getAssetsByKfConfig(item))
+            .filter((item) => Object.keys(item).length);
+
+        return assetsList.reduce((allAssets, asset) => {
+            return {
+                ...allAssets,
+                unrealized_pnl:
+                    (allAssets.unrealized_pnl || 0) + asset.unrealized_pnl,
+                market_value:
+                    (allAssets.market_value || 0) + asset.market_value,
+                margin: (allAssets.margin || 0) + asset.margin,
+                avail: (allAssets.avail || 0) + asset.avail,
+            };
+        }, {} as KungfuApi.Asset);
     };
 
     return {
         assets: assetsResolved,
         getAssetsByKfConfig,
+        getAssetsByTdGroup,
     };
 };
 

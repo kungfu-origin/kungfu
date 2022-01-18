@@ -62,14 +62,6 @@ export const categoryRegisterConfig: CategoryRegisterProps = {
                 .filter('instrument_id', name)
                 .sort('update_time');
         },
-
-        historyGetter(orders, kfLocation: KungfuApi.KfExtraLocation) {
-            const { group, name } = kfLocation;
-            return orders
-                .filter('exchange_id', group)
-                .filter('instrument_id', name)
-                .sort('update_time');
-        },
     },
     trade: {
         getter(trades, kfLocation: KungfuApi.KfExtraLocation) {
@@ -79,28 +71,9 @@ export const categoryRegisterConfig: CategoryRegisterProps = {
                 .filter('instrument_id', name)
                 .sort('trade_time');
         },
-
-        historyGetter(trades, kfLocation: KungfuApi.KfExtraLocation) {
-            const { group, name } = kfLocation;
-            return trades
-                .filter('exchange_id', group)
-                .filter('instrument_id', name)
-                .sort('trade_time');
-        },
     },
     position: {
         getter(position, kfLocation: KungfuApi.KfExtraLocation) {
-            const { group, name } = kfLocation;
-            return position
-                .nofilter('volume', BigInt(0))
-                .filter('ledger_category', LedgerCategoryEnum.td)
-                .filter('exchange_id', group)
-                .filter('instrument_id', name)
-                .sort('instrument_id')
-                .reverse();
-        },
-
-        historyGetter(position, kfLocation: KungfuApi.KfExtraLocation) {
             const { group, name } = kfLocation;
             return position
                 .nofilter('volume', BigInt(0))

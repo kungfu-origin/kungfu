@@ -8,12 +8,15 @@ import {
     getIdByKfLocation,
     getKfExtensionConfig,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
-import { getAllKfConfigOriginData } from '@kungfu-trader/kungfu-js-api/actions';
+import {
+    getAllKfConfigOriginData,
+    getSubscribedInstruments,
+    getTdGroups,
+} from '@kungfu-trader/kungfu-js-api/actions';
 import {
     Pm2ProcessStatusDetailData,
     Pm2ProcessStatusData,
 } from '@kungfu-trader/kungfu-js-api/utils/processUtils';
-import { getSubscribedInstruments } from '@renderer/assets/methods/actionsUtils';
 import {
     BrokerStateStatusTypes,
     KfCategoryTypes,
@@ -25,6 +28,7 @@ interface GlobalState {
     isBoardDragging: boolean;
     extConfigs: KungfuApi.KfExtConfigs;
     tdList: KungfuApi.KfConfig[];
+    tdGroupList: KungfuApi.KfExtraLocation[];
     mdList: KungfuApi.KfConfig[];
     strategyList: KungfuApi.KfConfig[];
 
@@ -52,6 +56,7 @@ export const useGlobalStore = defineStore('global', {
             extConfigs: toRaw<KungfuApi.KfExtConfigs>({}),
 
             tdList: [],
+            tdGroupList: [],
             mdList: [],
             strategyList: [],
 
@@ -68,6 +73,12 @@ export const useGlobalStore = defineStore('global', {
     },
 
     actions: {
+        setTdGroups() {
+            getTdGroups().then((tdGroups) => {
+                this.tdGroupList = tdGroups;
+            });
+        },
+
         setSubscribedInstruments() {
             getSubscribedInstruments().then((instruments) => {
                 this.subscribedInstruments = toRaw(instruments);

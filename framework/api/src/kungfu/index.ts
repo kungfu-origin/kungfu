@@ -7,6 +7,7 @@ import {
     dealInstrumentType,
     dealLocationUID,
     dealOffset,
+    dealOrderStat,
     dealOrderStatus,
     dealPriceType,
     dealSide,
@@ -462,4 +463,77 @@ export const hashInstrumentUKey = (
     return (BigInt(kf.hash(instrumentId)) ^ BigInt(kf.hash(exchangeId)))
         .toString(16)
         .padStart(16, '0');
+};
+
+export const dealOrder = (
+    watcher: KungfuApi.Watcher,
+    order: KungfuApi.Order,
+    orderStats: KungfuApi.DataTable<KungfuApi.OrderStat>,
+    isHistory = false,
+): KungfuApi.OrderResolved => {
+    const sourceResolvedData = resolveAccountId(
+        watcher,
+        order.source,
+        order.dest,
+        order.parent_id,
+    );
+    const destResolvedData = resolveClientId(
+        watcher,
+        order.dest,
+        order.parent_id,
+    );
+    const latencyData = dealOrderStat(orderStats, order.uid_key) || {
+        latencySystem: '--',
+        latencyNetwork: '--',
+    };
+    return {
+        ...order,
+        source: order.source,
+        dest: order.dest,
+        source_resolved_data: sourceResolvedData,
+        dest_resolved_data: destResolvedData,
+        source_uname: sourceResolvedData.name,
+        dest_uname: destResolvedData.name,
+        update_time_resolved: dealKfTime(order.update_time, isHistory),
+        uid_key: order.uid_key,
+        latency_system: latencyData.latencySystem,
+        latency_network: latencyData.latencyNetwork,
+    };
+};
+
+export const dealTrade = (
+    watcher: KungfuApi.Watcher,
+    trade: KungfuApi.Trade,
+    orderStats: KungfuApi.DataTable<KungfuApi.OrderStat>,
+    isHistory = false,
+): KungfuApi.TradeResolved => {
+    const sourceResolvedData = resolveAccountId(
+        watcher,
+        trade.source,
+        trade.dest,
+        trade.parent_order_id,
+    );
+    const destResolvedData = resolveClientId(
+        watcher,
+        trade.dest,
+        trade.parent_order_id,
+    );
+    const orderUKey = trade.order_id.toString(16).padStart(16, '0');
+    const latencyData = dealOrderStat(orderStats, orderUKey) || {
+        latencyTrade: '--',
+        trade_time: BigInt(0),
+    };
+    return {
+        ...trade,
+        source: trade.source,
+        dest: trade.dest,
+        source_resolved_data: sourceResolvedData,
+        dest_resolved_data: destResolvedData,
+        source_uname: sourceResolvedData.name,
+        dest_uname: destResolvedData.name,
+        trade_time_resolved: dealKfTime(trade.trade_time, isHistory),
+        kf_time_resovlved: dealKfTime(latencyData.trade_time, isHistory),
+        uid_key: trade.uid_key,
+        latency_trade: latencyData.latencyTrade,
+    };
 };

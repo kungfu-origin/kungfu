@@ -14,8 +14,6 @@ import { computed, getCurrentInstance } from 'vue';
 import { getColumns } from './config';
 import { ExchangeIds } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
 import {
-    addSubscribeInstruments,
-    removeSubscribeInstruments,
     transformSearchInstrumentResultToInstrument,
     useInstruments,
 } from '@renderer/assets/methods/actionsUtils';
@@ -29,6 +27,10 @@ import {
     OffsetEnum,
     SideEnum,
 } from '@kungfu-trader/kungfu-js-api/typings/enums';
+import {
+    addSubscribeInstruments,
+    removeSubscribeInstruments,
+} from '@kungfu-trader/kungfu-js-api/actions';
 
 interface MarketDataProps {}
 defineProps<MarketDataProps>();

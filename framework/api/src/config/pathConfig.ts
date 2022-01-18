@@ -77,6 +77,13 @@ export const KF_SUBSCRIBED_INSTRUMENTS_JSON_PATH = path.join(
 );
 addFileSync('', KF_SUBSCRIBED_INSTRUMENTS_JSON_PATH, 'file');
 
+export const KF_TD_GROUP_JSON_PATH = path.join(
+    KF_HOME,
+    'config',
+    'tdGroups.json',
+);
+addFileSync('', KF_TD_GROUP_JSON_PATH, 'file');
+
 //================== config end ===================================
 
 //================== kfc start ====================================

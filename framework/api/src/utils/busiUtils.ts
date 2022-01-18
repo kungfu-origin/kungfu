@@ -687,7 +687,8 @@ export const getPropertyFromProcessStatusDetailDataByKfLocation = (
     memory: string;
 } => {
     const processStatusDetail: Pm2ProcessStatusDetail =
-        processStatusDetailData[getProcessIdByKfLocation(kfLocation)] || {};
+        processStatusDetailData[getProcessIdByKfLocation(kfLocation)] ||
+        ({} as Pm2ProcessStatusDetail);
     const status = processStatusDetail.status;
     const monit = processStatusDetail.monit || {};
 
@@ -905,7 +906,7 @@ export const dealCategory = (
 };
 
 export const dealOrderStat = (
-    ledger: KungfuApi.TradingData | undefined,
+    orderStats: KungfuApi.DataTable<KungfuApi.OrderStat>,
     orderUKey: string,
 ): {
     latencySystem: string;
@@ -913,11 +914,7 @@ export const dealOrderStat = (
     latencyTrade: string;
     trade_time: bigint;
 } | null => {
-    if (!ledger) {
-        return null;
-    }
-
-    const orderStat = ledger.OrderStat[orderUKey];
+    const orderStat = orderStats[orderUKey];
     if (!orderStat) {
         return null;
     }

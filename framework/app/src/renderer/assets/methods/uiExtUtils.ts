@@ -9,10 +9,6 @@ export interface CategoryRegisterProps {
             orders: KungfuApi.DataTable<KungfuApi.Order>,
             kfLocation: KungfuApi.KfExtraLocation,
         ) => KungfuApi.Order[];
-        historyGetter: (
-            orders: KungfuApi.DataTable<KungfuApi.Order>,
-            kfLocation: KungfuApi.KfExtraLocation,
-        ) => KungfuApi.Order[];
     };
 
     trade?: {
@@ -20,19 +16,10 @@ export interface CategoryRegisterProps {
             trades: KungfuApi.DataTable<KungfuApi.Trade>,
             kfLocation: KungfuApi.KfExtraLocation,
         ) => KungfuApi.Trade[];
-        historyGetter: (
-            trades: KungfuApi.DataTable<KungfuApi.Trade>,
-            kfLocation: KungfuApi.KfExtraLocation,
-        ) => KungfuApi.Trade[];
     };
     position?: {
         getter: (
             positions: KungfuApi.DataTable<KungfuApi.Position>,
-            kfLocation: KungfuApi.KfExtraLocation,
-        ) => KungfuApi.Position[];
-
-        historyGetter?: (
-            trades: KungfuApi.DataTable<KungfuApi.Position>,
             kfLocation: KungfuApi.KfExtraLocation,
         ) => KungfuApi.Position[];
     };
@@ -73,8 +60,7 @@ export const useExtraCategory = (): {
             | KungfuApi.DataTable<KungfuApi.Position>,
         kfLocation: KungfuApi.KfExtraLocation,
         type: 'order' | 'trade' | 'position',
-        isHistory?: boolean,
-    ) => KungfuApi.Order[] | KungfuApi.Trade[] | KungfuApi.Position[];
+    ) => TradingDataItem[];
 } => {
     const app = getCurrentInstance();
 
@@ -85,23 +71,19 @@ export const useExtraCategory = (): {
             | KungfuApi.DataTable<KungfuApi.Position>,
         kfLocation: KungfuApi.KfExtraLocation,
         type: 'order' | 'trade' | 'position',
-        isHistory = false,
-    ): KungfuApi.Order[] | KungfuApi.Trade[] | KungfuApi.Position[] => {
+    ): TradingDataItem[] => {
         if (app?.proxy) {
             const targetCategories =
                 app?.proxy?.$globalCategoryRegister?.globalRegisterdCategories[
                     kfLocation.category
-                ] || {};
+                ] || ({} as CategoryRegisterProps);
 
-            const defaultFunc = () => [];
+            const defaultFunc = () => [] as TradingDataItem[];
             const defaulFuncData = {
                 getter: defaultFunc,
-                historyGetter: defaultFunc,
             };
             const dealDataFuncData = targetCategories[type] || defaulFuncData;
-            const dealDataFunc = !isHistory
-                ? dealDataFuncData.getter || defaultFunc
-                : dealDataFuncData.historyGetter || defaultFunc;
+            const dealDataFunc = dealDataFuncData.getter;
 
             return dealDataFunc(
                 source as KungfuApi.DataTable<KungfuApi.Order> &

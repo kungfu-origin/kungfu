@@ -452,7 +452,6 @@ function buildArgs(args: string): string {
     const logLevel: string = (kfConfig.system || {}).logLevel || '';
     const ifRocket = (kfConfig.performance || {}).rocket || false;
     const rocket = getRocketParams(args, ifRocket);
-    console.log([logLevel, args, rocket].join(' '), kfConfig);
     return [logLevel, args, rocket].join(' ');
 }
 

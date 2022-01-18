@@ -5,9 +5,6 @@ import {
     dealOffset,
     delayMilliSeconds,
     dealTradingData,
-    dealOrderStat,
-    resolveAccountId,
-    resolveClientId,
     isTdStrategyCategory,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import {
@@ -35,7 +32,7 @@ import {
 } from 'vue';
 import { getColumns } from './config';
 import {
-    dealKfTime,
+    dealTrade,
     getKungfuHistoryData,
 } from '@kungfu-trader/kungfu-js-api/kungfu';
 import type { Dayjs } from 'dayjs';
@@ -44,14 +41,18 @@ import { useExtraCategory } from '@renderer/assets/methods/uiExtUtils';
 
 const app = getCurrentInstance();
 
-const trades = ref<KungfuApi.Trade[]>([]);
-const { searchKeyword, tableData } = useTableSearchKeyword<KungfuApi.Trade>(
-    trades,
-    ['order_id', 'trade_id', 'instrument_id', 'exchange_id'],
-);
+const trades = ref<KungfuApi.TradeResolved[]>([]);
+const { searchKeyword, tableData } =
+    useTableSearchKeyword<KungfuApi.TradeResolved>(trades, [
+        'order_id',
+        'trade_id',
+        'instrument_id',
+        'exchange_id',
+        'source_uname',
+        'dest_uname',
+    ]);
 const historyDate = ref<Dayjs>();
 const historyDataLoading = ref<boolean>();
-var Ledger: KungfuApi.TradingData | undefined = window.watcher?.ledger;
 
 const {
     currentGlobalKfLocation,
@@ -83,23 +84,34 @@ onMounted(() => {
                     return;
                 }
 
-                Ledger = watcher.ledger;
                 const tradesResolved = isTdStrategyCategory(
                     currentGlobalKfLocation.data.category,
                 )
                     ? ((dealTradingData(
                           watcher,
-                          Ledger,
+                          watcher.ledger,
                           'Trade',
                           currentGlobalKfLocation.data,
                       ) || []) as KungfuApi.Trade[])
                     : (getExtraCategoryData(
-                          Ledger.Trade,
+                          watcher.ledger.Trade,
                           currentGlobalKfLocation.data,
                           'trade',
                       ) as KungfuApi.Trade[]);
 
-                trades.value = toRaw(tradesResolved.slice(0, 100));
+                trades.value = toRaw(
+                    tradesResolved
+                        .slice(0, 100)
+                        .map((item) =>
+                            toRaw(
+                                dealTrade(
+                                    watcher,
+                                    item,
+                                    watcher.ledger.OrderStat,
+                                ),
+                            ),
+                        ),
+                );
             },
         );
 
@@ -116,7 +128,6 @@ watch(currentGlobalKfLocation, () => {
 
 watch(historyDate, async (newDate) => {
     if (!newDate) {
-        Ledger = window.watcher?.ledger;
         return;
     }
 
@@ -134,44 +145,24 @@ watch(historyDate, async (newDate) => {
         'Trade',
         currentGlobalKfLocation.data,
     );
-    Ledger = tradingData;
 
-    trades.value = isTdStrategyCategory(currentGlobalKfLocation.data.category)
+    const tradesResolved = isTdStrategyCategory(
+        currentGlobalKfLocation.data.category,
+    )
         ? toRaw(historyDatas as KungfuApi.Trade[])
         : (getExtraCategoryData(
-              Ledger.Trade,
+              tradingData.Trade,
               currentGlobalKfLocation.data,
               'trade',
-              true,
           ) as KungfuApi.Trade[]);
+
+    trades.value = toRaw(
+        tradesResolved.map((item) =>
+            toRaw(dealTrade(window.watcher, item, tradingData.OrderStat, true)),
+        ),
+    );
     historyDataLoading.value = false;
 });
-
-function dealLocationUIDResolved(
-    item: KungfuApi.Trade,
-    dataIndex: string,
-): KungfuApi.KfTradeValueCommonData {
-    if (dataIndex === 'source') {
-        return resolveAccountId(
-            window.watcher,
-            item.source,
-            item.dest,
-            item.parent_order_id,
-        );
-    } else {
-        return resolveClientId(window.watcher, item.dest, item.parent_order_id);
-    }
-}
-
-function dealOrderStatResolved(order_id: bigint): {
-    latencySystem: string;
-    latencyNetwork: string;
-    latencyTrade: string;
-    trade_time: bigint;
-} | null {
-    const orderUKey = order_id.toString(16).padStart(16, '0');
-    return dealOrderStat(Ledger, orderUKey);
-}
 
 function handleShowTradingDataDetail({
     row,
@@ -179,7 +170,7 @@ function handleShowTradingDataDetail({
     event: MouseEvent;
     row: TradingDataItem;
 }) {
-    showTradingDataDetail(row as KungfuApi.Trade, '成交');
+    showTradingDataDetail(row as KungfuApi.TradeResolved, '成交');
 }
 </script>
 <template>
@@ -211,7 +202,10 @@ function handleShowTradingDataDetail({
                     />
                 </KfDashboardItem>
                 <KfDashboardItem>
-                    <a-date-picker v-model:value="historyDate">
+                    <a-date-picker
+                        v-model:value="historyDate"
+                        :disabled="historyDataLoading"
+                    >
                         <template #suffixIcon>
                             <LoadingOutlined v-if="historyDataLoading" />
                             <CalendarOutlined v-else />
@@ -245,21 +239,15 @@ function handleShowTradingDataDetail({
                         item,
                         column,
                     }: {
-                        item: KungfuApi.Trade,
+                        item: KungfuApi.TradeResolved,
                         column: KfTradingDataTableHeaderConfig,
                     }"
                 >
                     <template v-if="column.dataIndex === 'trade_time'">
-                        {{ dealKfTime(item.trade_time, !!historyDate) }}
+                        {{ item.trade_time_resolved }}
                     </template>
                     <template v-else-if="column.dataIndex === 'kf_time'">
-                        {{
-                            dealKfTime(
-                                dealOrderStatResolved(item.order_id)
-                                    ?.trade_time || BigInt(0),
-                                !!historyDate,
-                            )
-                        }}
+                        {{ item.kf_time_resovlved }}
                     </template>
                     <template v-else-if="column.dataIndex === 'side'">
                         <span :class="`color-${dealSide(item.side).color}`">
@@ -275,35 +263,22 @@ function handleShowTradingDataDetail({
                         {{ dealKfPrice(item.price) }}
                     </template>
                     <template v-else-if="column.dataIndex === 'latency_trade'">
-                        {{
-                            dealOrderStatResolved(item.order_id)
-                                ?.latencyNetwork || '--'
-                        }}
+                        {{ item.latency_trade }}
                     </template>
-                    <template
-                        v-else-if="
-                            column.dataIndex === 'source' ||
-                            column.dataIndex === 'dest'
-                        "
-                    >
+                    <template v-else-if="column.dataIndex === 'source'">
                         <span
-                            :title="
-                                dealLocationUIDResolved(item, column.dataIndex)
-                                    .name
-                            "
                             :class="[
-                                `color-${
-                                    dealLocationUIDResolved(
-                                        item,
-                                        column.dataIndex,
-                                    ).color
-                                }`,
+                                `color-${item.source_resolved_data.color}`,
                             ]"
                         >
-                            {{
-                                dealLocationUIDResolved(item, column.dataIndex)
-                                    .name
-                            }}
+                            {{ item.source_uname }}
+                        </span>
+                    </template>
+                    <template v-else-if="column.dataIndex === 'dest'">
+                        <span
+                            :class="[`color-${item.dest_resolved_data.color}`]"
+                        >
+                            {{ item.dest_uname }}
                         </span>
                     </template>
                 </template>

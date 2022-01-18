@@ -109,6 +109,7 @@ interface KfTradingDataTableHeaderConfig {
         | 'priceType'
         | 'direction'
         | 'actions';
+    sorter?: (a: any, b: any) => number;
 }
 
 declare module 'worker-loader!*' {
