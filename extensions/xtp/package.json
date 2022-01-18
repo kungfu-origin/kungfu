@@ -14,7 +14,7 @@
     "registry": "https://npm.pkg.github.com"
   },
   "scripts": {
-    "install": "kfs extension install",
+    "setup": "kfs extension install",
     "prebuild": "kfs extension configure",
     "build": "kfs extension build",
     "clean": "kfs extension clean",

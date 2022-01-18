@@ -218,9 +218,16 @@ exports.install = async (libSiteURL, libName, libVersion, platform = detectPlatf
 };
 
 exports.installBatch = async (libSiteURL, platform = detectPlatform(), arch = os.arch()) => {
-  const libs = getPackageJson().kungfuDependencies;
-  for (const libName in libs) {
-    await exports.install(libSiteURL, libName, libs[libName], platform, arch);
+  const packageJson = getPackageJson();
+  if ('kungfuDependencies' in packageJson) {
+    const libs = packageJson.kungfuDependencies;
+    for (const libName in libs) {
+      await exports.install(libSiteURL, libName, libs[libName], platform, arch);
+    }
+  }
+  if (hasSourceFor(packageJson, 'python')) {
+    spawnExec('yarn', ['kfc', 'engage', 'pdm', 'makeup']);
+    spawnExec('yarn', ['kfc', 'engage', 'pdm', 'install']);
   }
 };
 
@@ -235,10 +242,6 @@ exports.clean = (keepLibs = true) => {
 
 exports.configure = () => {
   const packageJson = getPackageJson();
-  if (hasSourceFor(packageJson, 'python')) {
-    spawnExec('yarn', ['kfc', 'engage', 'pdm', 'makeup']);
-    spawnExec('yarn', ['kfc', 'engage', 'pdm', 'install']);
-  }
   if (hasSourceFor(packageJson, 'cpp')) {
     generateCMakeFiles(getProjectName(packageJson), packageJson.kungfuBuild);
   }

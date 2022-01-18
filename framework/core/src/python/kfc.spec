@@ -53,6 +53,7 @@ data_blib2to3 = make_path(site_path, "blib2to3", "*.txt")
 
 # pdm requires
 data_pep517 = make_path(site_path, "pep517", "in_process", "_in_process.py")
+data_pdm_models = make_path(site_path, "pdm", "models", "*.json")
 data_pdm_pep582 = make_path(site_path, "pdm", "pep582", "sitecustomize.py")
 data_pip_certifi = make_path(site_path, "pip", "_vendor", "certifi", "*.pem")
 
@@ -116,6 +117,7 @@ a = Analysis(
             (make_path(build_dir, "include"), "include"),
             (data_blib2to3, "blib2to3"),
             (data_pep517, make_path("pep517", "in_process")),
+            (data_pdm_models, make_path("pdm", "models")),
             (data_pdm_pep582, make_path("pdm", "pep582")),
             (data_pip_certifi, make_path("pip", "_vendor", "certifi")),
             (data_nuitka_include, make_path(nuitka_build_dst_dir, "include")),
