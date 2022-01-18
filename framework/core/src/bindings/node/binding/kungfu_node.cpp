@@ -8,11 +8,11 @@
 #define WIN32_LEAN_AND_MEAN
 #endif
 
-#include <delayimp.h>
 #include <regex>
 #include <stdio.h>
 #include <string.h>
 #include <windows.h>
+#include <delayimp.h>
 
 static FARPROC WINAPI load_exe_hook(unsigned int event, DelayLoadInfo *info) {
   HMODULE m;

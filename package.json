@@ -21,7 +21,7 @@
   },
   "scripts": {
     "foreach": "wsrun --serial --exclude-missing --fast-exit",
-    "postinstall": "yarn foreach postinstall",
+    "postinstall": "yarn foreach setup",
     "build": "yarn foreach build",
     "clean": "yarn foreach clean",
     "format": "yarn foreach format",
