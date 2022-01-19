@@ -1,3 +1,6 @@
+import { LedgerCategoryEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';
+import { KfCategoryRegisterProps } from '@renderer/assets/methods/uiExtraLocationUtils';
+
 export const getColumns = (
     sorter: (
         dataIndex: string,
@@ -75,3 +78,46 @@ export const getColumns = (
         fixed: 'right',
     },
 ];
+
+export const categoryRegisterConfig: KfCategoryRegisterProps = {
+    name: 'tdGroup',
+    commonData: {
+        name: '账户分组',
+        color: '#FAAD14',
+    },
+    order: {
+        getter(orders, kfLocation: KungfuApi.KfExtraLocation) {
+            const { children } = kfLocation;
+            const tdList = (children || []) as KungfuApi.KfConfig[];
+            const locationUids = tdList.map((item) => item.location_uid);
+            return orders.sort('update_time').filter((item) => {
+                return locationUids.indexOf(item.source) !== -1;
+            });
+        },
+    },
+    trade: {
+        getter(trades, kfLocation: KungfuApi.KfExtraLocation) {
+            const { children } = kfLocation;
+            const tdList = (children || []) as KungfuApi.KfConfig[];
+            const locationUids = tdList.map((item) => item.location_uid);
+            return trades.sort('trade_time').filter((item) => {
+                return locationUids.indexOf(item.source) !== -1;
+            });
+        },
+    },
+    position: {
+        getter(position, kfLocation: KungfuApi.KfExtraLocation) {
+            const { children } = kfLocation;
+            const tdList = (children || []) as KungfuApi.KfConfig[];
+            const locationUids = tdList.map((item) => item.location_uid);
+            return position
+                .nofilter('volume', BigInt(0))
+                .filter('ledger_category', LedgerCategoryEnum.td)
+                .sort('instrument_id')
+                .reverse()
+                .filter((item) => {
+                    return locationUids.indexOf(item.holder_uid) !== -1;
+                });
+        },
+    },
+};

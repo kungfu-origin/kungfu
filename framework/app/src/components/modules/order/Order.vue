@@ -51,7 +51,7 @@ import { UnfinishedOrderStatus } from '@kungfu-trader/kungfu-js-api/config/tradi
 import { OrderStatusEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import { message, Modal } from 'ant-design-vue';
 import { showTradingDataDetail } from '@renderer/assets/methods/actionsUtils';
-import { useExtraCategory } from '@renderer/assets/methods/uiExtUtils';
+import { useExtraCategory } from '@renderer/assets/methods/uiExtraLocationUtils';
 
 const app = getCurrentInstance();
 

@@ -1,5 +1,5 @@
 import { LedgerCategoryEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';
-import { CategoryRegisterProps } from '@renderer/assets/methods/uiExtUtils';
+import { KfCategoryRegisterProps } from '@renderer/assets/methods/uiExtraLocationUtils';
 
 export const columns: AntTableColumns = [
     {
@@ -48,7 +48,7 @@ export const columns: AntTableColumns = [
     },
 ];
 
-export const categoryRegisterConfig: CategoryRegisterProps = {
+export const categoryRegisterConfig: KfCategoryRegisterProps = {
     name: 'globalPos',
     commonData: {
         name: '持仓汇总',

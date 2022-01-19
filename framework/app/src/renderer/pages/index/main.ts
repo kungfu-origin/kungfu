@@ -25,6 +25,7 @@ import {
     Checkbox,
     Spin,
     Skeleton,
+    Tree,
 } from 'ant-design-vue';
 
 import { beforeStartAll } from '@renderer/assets/methods/uiUtils';
@@ -48,7 +49,7 @@ import VueVirtualScroller from 'vue-virtual-scroller';
 import 'vue-virtual-scroller/dist/vue-virtual-scroller.css';
 import { useComponenets } from './useComponents';
 import { kf } from '@kungfu-trader/kungfu-js-api/kungfu';
-import { GlobalCategoryRegister } from '@renderer/assets/methods/uiExtUtils';
+import { GlobalCategoryRegister } from '@renderer/assets/methods/uiExtraLocationUtils';
 
 const app = createApp(App);
 
@@ -75,6 +76,7 @@ app.use(store)
     .use(Checkbox)
     .use(Spin)
     .use(Skeleton)
+    .use(Tree)
     .use(VueVirtualScroller);
 
 useComponenets(app);

@@ -54,7 +54,7 @@ const titleResolved = computed(() => {
     }`;
 });
 
-function handleConfirm() {
+function handleConfirm(): void {
     formRef.value
         .validate()
         .then(() => {

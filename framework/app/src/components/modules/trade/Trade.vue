@@ -37,7 +37,7 @@ import {
 } from '@kungfu-trader/kungfu-js-api/kungfu';
 import type { Dayjs } from 'dayjs';
 import { showTradingDataDetail } from '@renderer/assets/methods/actionsUtils';
-import { useExtraCategory } from '@renderer/assets/methods/uiExtUtils';
+import { useExtraCategory } from '@renderer/assets/methods/uiExtraLocationUtils';
 
 const app = getCurrentInstance();
 

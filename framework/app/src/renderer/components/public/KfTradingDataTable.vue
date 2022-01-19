@@ -74,14 +74,12 @@ const headerWidth = computed(() => {
         (widths.length ? sum(widths.map((item) => item.width || 0)) : 0);
     const unit = widthForFlex / flexWidthUnits;
 
-    let headerWidthCollection: Record<string, string | number> = {};
-    [...widths, ...flexs].forEach((item) => {
-        headerWidthCollection[item.dataIndex] = item.width
+    return [...widths, ...flexs].reduce((collection, item) => {
+        collection[item.dataIndex] = item.width
             ? item.width + 'px'
             : unit * (item.flex || 1) + 'px';
-    });
-
-    return headerWidthCollection;
+        return collection;
+    }, {} as Record<string, string>);
 });
 
 onMounted(() => {
@@ -105,18 +103,18 @@ onMounted(() => {
     }
 });
 
-function getHeaderWidth(column: KfTradingDataTableHeaderConfig) {
+function getHeaderWidth(column: KfTradingDataTableHeaderConfig): string {
     const headerWidthByCalc = headerWidth.value[column.dataIndex];
-    const columnWidth = column.width;
+    const columnWidth = +column.width;
 
-    if (headerWidthByCalc <= 0 || !headerWidthByCalc) {
-        return columnWidth;
+    if (parseInt(headerWidthByCalc) <= 0 || !headerWidthByCalc) {
+        return columnWidth + 'px';
     } else {
-        return headerWidthByCalc;
+        return headerWidthByCalc.toString();
     }
 }
 
-function handleDbClickRow(e: MouseEvent, row: TradingDataItem) {
+function handleDbClickRow(e: MouseEvent, row: TradingDataItem): void {
     app && app.emit('dbclickRow', { event: e, row });
     clickTimer && clearTimeout(clickTimer);
 }
@@ -125,14 +123,14 @@ function handleClickCell(
     e: MouseEvent,
     row: TradingDataItem,
     column: KfTradingDataTableHeaderConfig,
-) {
+): void {
     clickTimer && clearTimeout(clickTimer);
     clickTimer = +setTimeout(() => {
         app && app.emit('clickCell', { event: e, row, column });
     }, 300);
 }
 
-function handleMousedown(e: MouseEvent, row: TradingDataItem) {
+function handleMousedown(e: MouseEvent, row: TradingDataItem): void {
     if (e.button === 2) {
         app && app.emit('rightClickRow', { event: e, row });
     }
@@ -162,7 +160,7 @@ const dataSourceResolved = computed(() => {
 function handleSort(
     dataIndex: string,
     sorter: undefined | ((a: any, b: any) => number),
-) {
+): void {
     if (!sorter || !dataIndex) {
         return;
     }

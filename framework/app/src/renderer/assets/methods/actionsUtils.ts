@@ -53,7 +53,7 @@ import {
 import { storeToRefs } from 'pinia';
 import { ipcRenderer } from 'electron';
 import { throttleTime } from 'rxjs';
-import { useExtraCategory } from './uiExtUtils';
+import { useExtraCategory } from './uiExtraLocationUtils';
 
 export const ensureRemoveLocation = (
     kfLocation: KungfuApi.KfLocation | KungfuApi.KfConfig,

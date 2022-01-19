@@ -1,6 +1,6 @@
 import { getCurrentInstance } from 'vue';
 
-export interface CategoryRegisterProps {
+export interface KfCategoryRegisterProps {
     name: string;
     commonData: KungfuApi.KfTradeValueCommonData;
 
@@ -26,15 +26,16 @@ export interface CategoryRegisterProps {
 }
 
 export class GlobalCategoryRegister {
-    globalRegisterdCategories: Record<string, CategoryRegisterProps>;
+    globalRegisterdCategories: Record<string, KfCategoryRegisterProps>;
 
     constructor() {
         this.globalRegisterdCategories = {};
     }
 
-    register(props: CategoryRegisterProps): void {
+    register(props: KfCategoryRegisterProps): void {
         if (this.globalRegisterdCategories[props.name]) {
             console.warn(`${props.name} has been registed`);
+            return;
         }
 
         this.globalRegisterdCategories[props.name] = props;
@@ -76,7 +77,7 @@ export const useExtraCategory = (): {
             const targetCategories =
                 app?.proxy?.$globalCategoryRegister?.globalRegisterdCategories[
                     kfLocation.category
-                ] || ({} as CategoryRegisterProps);
+                ] || ({} as KfCategoryRegisterProps);
 
             const defaultFunc = () => [] as TradingDataItem[];
             const defaulFuncData = {

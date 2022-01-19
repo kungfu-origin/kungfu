@@ -1,5 +1,12 @@
 <script setup lang="ts">
-import { ref, computed, toRefs, getCurrentInstance, reactive } from 'vue';
+import {
+    ref,
+    computed,
+    toRefs,
+    getCurrentInstance,
+    reactive,
+    onMounted,
+} from 'vue';
 
 import KfDashboard from '@renderer/components/public/KfDashboard.vue';
 import KfDashboardItem from '@renderer/components/public/KfDashboardItem.vue';
@@ -13,7 +20,7 @@ import {
 } from '@ant-design/icons-vue';
 
 import { KfCategoryTypes } from '@kungfu-trader/kungfu-js-api/typings/enums';
-import { getColumns } from './config';
+import { categoryRegisterConfig, getColumns } from './config';
 import {
     useTableSearchKeyword,
     useExtConfigsRelated,
@@ -42,6 +49,7 @@ import {
     addTdGroup,
     removeTdGroup,
 } from '@kungfu-trader/kungfu-js-api/actions';
+import SetTdGroupModal from './SetTdGroupModal.vue';
 
 interface TdProps {}
 defineProps<TdProps>();
@@ -76,12 +84,13 @@ const { allProcessOnline, handleSwitchAllProcessStatus } = useSwitchAllConfig(
     processStatusData,
 );
 
+const addTdGroupModalVisble = ref<boolean>(false);
 const setTdGroupModalVisble = ref<boolean>(false);
 const tdGroup = useTdGroups();
 const tdGroupNames = computed(() => {
     return tdGroup.data.map((item) => item.name);
 });
-const setTdGroupConfigPayload = ref<KungfuApi.SetKfConfigPayload>({
+const addTdGroupConfigPayload = ref<KungfuApi.SetKfConfigPayload>({
     type: 'add',
     title: '账户组',
     config: {} as KungfuApi.KfExtOriginConfig['config'][KfCategoryTypes],
@@ -94,21 +103,22 @@ const { searchKeyword, tableData } = useTableSearchKeyword<
 const tableDataResolved = computed(() => {
     const tdGroupResolved: Record<string, KungfuApi.KfExtraLocation> = {};
     const tdResolved: KungfuApi.KfConfig[] = [];
-    const markIndexToTdGroup: Record<string, KungfuApi.KfExtraLocation> = {};
+    const markedNameToTdGroup: Record<string, KungfuApi.KfExtraLocation> = {};
     [...tdGroup.data, ...tableData.value].forEach((item) => {
         if ('children' in item) {
-            markIndexToTdGroup[item.name] = { ...item };
+            markedNameToTdGroup[item.name] = { ...item };
             tdGroupResolved[item.name] = {
                 ...item,
+                key: item.name,
                 children: [],
             };
             return;
         }
 
         const accountId = `${item.group}_${item.name}`;
-        const targetGroupNames = Object.keys(markIndexToTdGroup).filter(
+        const targetGroupNames = Object.keys(markedNameToTdGroup).filter(
             (name) => {
-                const tdGroup = markIndexToTdGroup[name];
+                const tdGroup = markedNameToTdGroup[name];
                 return (tdGroup.children || []).includes(accountId);
             },
         );
@@ -134,6 +144,12 @@ const columns = getColumns((dataIndex) => {
             (getAssetsByKfConfig(b)[dataIndex as keyof KungfuApi.Asset] || 0)
         );
     };
+});
+
+onMounted(() => {
+    if (app?.proxy) {
+        app.proxy.$globalCategoryRegister.register(categoryRegisterConfig);
+    }
 });
 
 function handleOpenSetTdDialog(
@@ -167,9 +183,9 @@ function handleOpenSetSourceDialog() {
     setSourceModalVisible.value = true;
 }
 
-function handleOpenSetTdGroupDialog(type: KungfuApi.ModalChangeType) {
-    setTdGroupConfigPayload.value.type = type;
-    setTdGroupConfigPayload.value.config = {
+function handleOpenAddTdGroupDialog(type: KungfuApi.ModalChangeType) {
+    addTdGroupConfigPayload.value.type = type;
+    addTdGroupConfigPayload.value.config = {
         type: [],
         settings: [
             {
@@ -182,8 +198,8 @@ function handleOpenSetTdGroupDialog(type: KungfuApi.ModalChangeType) {
             },
         ],
     };
-    setTdGroupConfigPayload.value.initValue = undefined;
-    setTdGroupModalVisble.value = true;
+    addTdGroupConfigPayload.value.initValue = undefined;
+    addTdGroupModalVisble.value = true;
 }
 
 function handleConfirmAddUpdateTdGroup(
@@ -234,20 +250,6 @@ function handleRemoveTdGroup(item: KungfuApi.KfExtraLocation) {
         },
     });
 }
-
-function customRowResolved(
-    item: KungfuApi.KfConfig | KungfuApi.KfExtraLocation,
-) {
-    return {
-        ...customRow(item),
-        onDragStart: () => {
-            console.log(111);
-        },
-        onDragEnd: () => {
-            console.log(222);
-        },
-    };
-}
 </script>
 
 <template>
@@ -270,7 +272,7 @@ function customRowResolved(
                 <KfDashboardItem>
                     <a-button
                         size="small"
-                        @click="handleOpenSetTdGroupDialog('add')"
+                        @click="handleOpenAddTdGroupDialog('add')"
                     >
                         添加分组
                     </a-button>
@@ -286,13 +288,15 @@ function customRowResolved(
                 </KfDashboardItem>
             </template>
             <a-table
+                v-if="tableDataResolved.length"
                 :columns="columns"
                 :data-source="tableDataResolved"
                 size="small"
                 :pagination="false"
                 :scroll="{ y: dashboardBodyHeight - 4 }"
                 :rowClassName="dealRowClassName"
-                :customRow="customRowResolved"
+                :customRow="customRow"
+                :defaultExpandAllRows="true"
                 emptyText="暂无数据"
             >
                 <template
@@ -335,7 +339,7 @@ function customRowResolved(
                         "
                     >
                         {{
-                            JSON.parse('value' in record ? record.value : '{}')
+                            JSON.parse((record as KungfuApi.KfConfig).value)
                                 .account_name || '--'
                         }}
                     </template>
@@ -443,13 +447,12 @@ function customRowResolved(
                                 @click.stop="handleOpenLogview(record)"
                             />
                             <SettingOutlined
-                                v-if="'value' in record"
                                 style="font-size: 12px"
                                 @click.stop="
                                     handleOpenSetTdDialog(
                                         'update',
                                         record.group,
-                                        record,
+                                        record as KungfuApi.KfConfig,
                                     )
                                 "
                             />
@@ -462,6 +465,10 @@ function customRowResolved(
                             class="kf-actions__warp"
                             v-if="record.category === 'tdGroup'"
                         >
+                            <SettingOutlined
+                                style="font-size: 12px"
+                                @click.stop="setTdGroupModalVisble = true"
+                            />
                             <DeleteOutlined
                                 style="font-size: 12px"
                                 @click.stop="handleRemoveTdGroup(record)"
@@ -492,14 +499,18 @@ function customRowResolved(
             "
         ></KfSetByConfigModal>
         <KfSetByConfigModal
-            v-if="setTdGroupModalVisble"
-            v-model:visible="setTdGroupModalVisble"
-            :payload="setTdGroupConfigPayload"
+            v-if="addTdGroupModalVisble"
+            v-model:visible="addTdGroupModalVisble"
+            :payload="addTdGroupConfigPayload"
             :primaryKeyAvoidRepeatCompareTarget="tdGroupNames"
             @confirm="
                 ({ formState }) => handleConfirmAddUpdateTdGroup(formState)
             "
         ></KfSetByConfigModal>
+        <SetTdGroupModal
+            v-if="setTdGroupModalVisble"
+            v-model:visible="setTdGroupModalVisble"
+        ></SetTdGroupModal>
     </div>
 </template>
 <style lang="less">

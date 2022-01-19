@@ -61,6 +61,7 @@ declare namespace KungfuApi {
         | 'cyan'
         | 'green'
         | 'text'
+        | '#FAAD14'
         | 'kf-color-running'
         | 'kf-color-waiting'
         | 'kf-color-error';
@@ -740,7 +741,7 @@ declare namespace KungfuApi {
         category: string;
         group: string;
         name: string;
-        children?: any[];
+        [prop: string]: any;
     }
 }
 

@@ -64,6 +64,9 @@ declare global {
         toAccountId(): string;
         parseSourceAccountId(): SourceAccountId;
         toSourceName(): string;
+        toKfCategory(): string;
+        toKfGroup(): string;
+        toKfName(): string;
     }
 
     interface Array<T> {
@@ -85,6 +88,24 @@ String.prototype.toAccountId = function (): string {
 String.prototype.toSourceName = function (): string {
     if (this.indexOf('_') === -1) return this.toString();
     return this.split('_')[0];
+};
+
+String.prototype.toKfCategory = function (): string {
+    if (this.indexOf('_') === -1) return this.toString();
+    if (this.split('_').length !== 3) return this.toString();
+    return this.split('_')[0];
+};
+
+String.prototype.toKfGroup = function (): string {
+    if (this.indexOf('_') === -1) return this.toString();
+    if (this.split('_').length !== 3) return this.toString();
+    return this.split('_')[1];
+};
+
+String.prototype.toKfName = function (): string {
+    if (this.indexOf('_') === -1) return this.toString();
+    if (this.split('_').length !== 3) return this.toString();
+    return this.split('_')[2];
 };
 
 String.prototype.parseSourceAccountId = function (): SourceAccountId {

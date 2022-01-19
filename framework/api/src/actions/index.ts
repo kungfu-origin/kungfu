@@ -146,7 +146,7 @@ export const addTdGroup = async (
     return fse.outputJSON(KF_TD_GROUP_JSON_PATH, [...oldTdGroups, tdGroup]);
 };
 
-export const removeTdGroup = async (tdGroupName: string) => {
+export const removeTdGroup = async (tdGroupName: string): Promise<void> => {
     const oldTdGroups = await getTdGroups();
     const removeTargetIndex = oldTdGroups.findIndex((item) => {
         return item.name === tdGroupName;
@@ -158,4 +158,8 @@ export const removeTdGroup = async (tdGroupName: string) => {
 
     oldTdGroups.splice(removeTargetIndex, 1);
     return fse.outputJSON(KF_TD_GROUP_JSON_PATH, oldTdGroups);
+};
+
+export const setTdGroup = (tdGroups: KungfuApi.KfExtraLocation[]) => {
+    return fse.outputJSON(KF_TD_GROUP_JSON_PATH, tdGroups);
 };

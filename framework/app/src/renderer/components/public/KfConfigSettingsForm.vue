@@ -180,7 +180,7 @@ function primaryKeyValidator(_rule: RuleObject, value: string): Promise<void> {
 
     if (
         props.primaryKeyAvoidRepeatCompareTarget
-            .map((item) => item.toLowerCase())
+            .map((item): string => item.toLowerCase())
             .includes(combineValue.toLowerCase())
     ) {
         return Promise.reject(new Error(`${combineValue} 已存在`));
@@ -273,11 +273,11 @@ function clearValidate(): void {
     return formRef.value.clearValidate();
 }
 
-function formatterPercentNumber(value: number) {
+function formatterPercentNumber(value: number): string {
     return `${value}%`;
 }
 
-function parserPercentString(value: string) {
+function parserPercentString(value: string): string {
     return value.replace('%', '');
 }
 

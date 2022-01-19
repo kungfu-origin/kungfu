@@ -37,7 +37,7 @@ import {
 } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import { useInstruments } from '@renderer/assets/methods/actionsUtils';
 import { ExchangeIds } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
-import { useExtraCategory } from '@renderer/assets/methods/uiExtUtils';
+import { useExtraCategory } from '@renderer/assets/methods/uiExtraLocationUtils';
 
 const app = getCurrentInstance();
 const pos = ref<KungfuApi.Position[]>([]);
