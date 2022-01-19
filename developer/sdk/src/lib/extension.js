@@ -84,7 +84,7 @@ function generateCMakeFiles(projectName, kungfuBuild) {
   ejs.renderFile(
     require.resolve('@kungfu-trader/kungfu-sdk/templates/kungfu.cmake'),
     {
-      kfcDir: path.dirname(require.resolve("@kungfu-trader/kungfu-core/dist/kfc/kungfubuildinfo.json")),
+      kfcDir: path.dirname(require.resolve("@kungfu-trader/kungfu-core/dist/kfc/kungfubuildinfo.json")).replace(/\\/g, '/'),
       includes: glob.sync(path.join(kungfuLibDirPattern, 'include')),
       links: glob.sync(path.join(kungfuLibDirPattern, 'lib')),
       sources: cppSources,
@@ -252,6 +252,8 @@ exports.build = () => {
   const extensionName = packageJson.kungfuConfig.key;
   const buildTargetDir = path.join('build', 'target');
   const outputDir = path.join('dist', extensionName);
+
+  fse.ensureDirSync(outputDir);
 
   if (hasSourceFor(packageJson, 'python')) {
     const srcDir = path.join('src', 'python', extensionName);

@@ -15,7 +15,7 @@
 cmake_minimum_required(VERSION 3.15)
 project(kungfu)
 
-############################################################
+##########################################################################
 
 include(.cmake/editor.cmake)
 include(.cmake/compiler.cmake)
@@ -23,7 +23,7 @@ include(.cmake/libnode.cmake)
 include(build/conanbuildinfo.cmake)
 conan_basic_setup(KEEP_RPATHS NO_OUTPUT_DIRS SKIP_STD SKIP_FPIC)
 
-############################################################
+##########################################################################
 
 add_compile_definitions(HAVE_USLEEP=1)
 
@@ -40,13 +40,13 @@ add_compile_definitions(SQLITE_ENABLE_DBSTAT_VTAB)
 add_compile_definitions(SQLITE_MAX_MMAP_SIZE=134217728)
 add_compile_definitions(SQLITE_DEFAULT_MMAP_SIZE=1048576)
 
-############################################################
+##########################################################################
 
 option(NNG_TESTS "" OFF)
 option(NNG_TOOLS "" OFF)
 option(NNG_ENABLE_NNGCAT "" OFF)
 
-############################################################
+##########################################################################
 
 include_directories(.deps/hana-1.7.0/include)
 include_directories(.deps/json-3.9.1/include)
@@ -57,7 +57,12 @@ include_directories(.deps/tabulate-1.0/include)
 
 include_directories(src/include)
 
-############################################################
+##########################################################################
+
+# set for libkungfu reference
+set(KUNGFU_BUILD_DIR ${CMAKE_BINARY_DIR})
+
+##########################################################################
 
 add_subdirectory(.deps)
 add_subdirectory(src/libkungfu)
