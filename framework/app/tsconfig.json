@@ -18,35 +18,22 @@
     "paths": {
       "@kungfu-trader/kungfu-js-api/*": [
         "../api/src/*",
-        "../../node_modules/@kungfu-trader/kungfu-js-api/src/*",
+        "../../node_modules/@kungfu-trader/kungfu-js-api/src/*"
       ],
-      "@renderer/*": [
-        "src/renderer/*",
-      ],
-      "@main/*": [
-        "src/main/*"
-      ],
-      "@root/*": [
-        "./*"
-      ],
+      "@renderer/*": ["src/renderer/*"],
+      "@main/*": ["src/main/*"],
+      "@root/*": ["./*"]
     },
-    "lib": [
-      "esnext",
-      "dom",
-      "dom.iterable",
-      "scripthost"
-    ]
+    "lib": ["esnext", "dom", "dom.iterable", "scripthost"]
   },
   "include": [
     "src/**/*.ts",
     "src/**/*.tsx",
     "src/**/*.vue",
     "tests/**/*.ts",
-    "tests/**/*.tsx", 
+    "tests/**/*.tsx",
     "../api/src/typings/*.d.ts",
-    "../../node_modules/@kungfu-trader/kungfu-js-api/src/typings/*.d.ts", 
+    "../../node_modules/@kungfu-trader/kungfu-js-api/src/typings/*.d.ts"
   ],
-  "exclude": [
-    "node_modules"
-  ]
+  "exclude": ["node_modules"]
 }

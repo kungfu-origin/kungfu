@@ -3,8 +3,8 @@ const path = require('path');
 const appDir = getAppDir();
 
 module.exports = {
-    runDev: require('../.build/webpack/dev.js'),
-    webpackBuild: require('../.build/webpack/build.js'),
-    electronBuild: require('../.build/electron/build.js'),
-    defaultDistDir: path.join(appDir, 'dist'),
+  runDev: require('./webpack/dev.js'),
+  webpackBuild: require('./webpack/build.js'),
+  electronBuild: require('./electron/build.js'),
+  defaultDistDir: path.join(appDir, 'dist'),
 };

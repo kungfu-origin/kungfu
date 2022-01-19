@@ -1,53 +1,52 @@
 {
-    "name": "@kungfu-trader/kungfu-app",
-    "author": {
-        "name": "kungfu-trader",
-        "email": "info@kungfu.link"
-    },
-    "version": "2.4.0-alpha.4",
-    "description": "Kungfu Core Library",
-    "license": "Apache-2.0",
-    "repository": {
-        "url": "https://github.com/kungfu-trader/kungfu.git"
-    },
-    "publishConfig": {
-        "registry": "https://npm.pkg.github.com"
-    },
-    "types": "./src/typings/index.d.ts",
-    "main": "./lib/index.js",
-    "scripts": {
-        "serve": "node ./.build/webpack/dev.js",
-        "dist": "node ./.build/webpack/build.js",
-        "elec": "node ./.build/electron/build.js",
-        "clean": "rimraf ./dist/* ./build/*",
-        "prebuild": "yarn run fmt && yarn run dist",
-        "build": "yarn run elec",
-        "test:e2e": "vue-cli-service test:e2e",
-        "lint": "vue-cli-service lint",
-        "fmt": "prettier -l -w './**/*.{ts, js, vue, less, css, json, html}' --config ./.prettierrc.js"
-    },
-    "dependencies": {
-        "@kungfu-trader/kungfu-js-api": "^2.4.0-alpha.4",
-        "iconv-lite": "^0.6.3",
-        "jschardet": "^3.0.0"
-    },
-    "devDependencies": {
-        "@electron/remote": "^2.0.1",
-        "@kungfu-trader/kungfu-toolchain": "^2.4.0-alpha.4",
-        "ant-design-vue": "^3.0.0-beta.5",
-        "core-js": "^3.6.5",
-        "dayjs": "^1.10.7",
-        "electron": "13.2.0",
-        "electron-builder": "^22.14.5",
-        "electron-debug": "^3.2.0",
-        "fast-stats": "^0.0.6",
-        "find-yarn-workspace-root": "^2.0.0",
-        "fs-extra": "^10.0.0",
-        "minimist": "^1.2.5",
-        "pinia": "^2.0.9",
-        "rxjs": "^7.5.1",
-        "tail": "^2.2.4",
-        "vue": "^3.2.26",
-        "vue-virtual-scroller": "^2.0.0-alpha.1"
-    }
+  "name": "@kungfu-trader/kungfu-app",
+  "author": {
+    "name": "kungfu-trader",
+    "email": "info@kungfu.link"
+  },
+  "version": "2.4.0-alpha.4",
+  "description": "Kungfu Core Library",
+  "license": "Apache-2.0",
+  "repository": {
+    "url": "https://github.com/kungfu-trader/kungfu.git"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "types": "src/typings/index.d.ts",
+  "main": "lib/index.js",
+  "scripts": {
+    "serve": "node lib/webpack/dev.js",
+    "dist": "node lib/webpack/build.js",
+    "elec": "node lib/electron/build.js",
+    "clean": "rimraf build dist",
+    "build": "yarn format",
+    "test:build": "yarn run dist && yarn run elec",
+    "test:e2e": "vue-cli-service test:e2e",
+    "lint": "vue-cli-service lint",
+    "format": "prettier -l -w --config .prettierrc.js ."
+  },
+  "dependencies": {
+    "@kungfu-trader/kungfu-js-api": "^2.4.0-alpha.4",
+    "iconv-lite": "^0.6.3",
+    "jschardet": "^3.0.0"
+  },
+  "devDependencies": {
+    "@electron/remote": "^2.0.1",
+    "@kungfu-trader/kungfu-toolchain": "^2.4.0-alpha.4",
+    "ant-design-vue": "^3.0.0-beta.5",
+    "core-js": "^3.6.5",
+    "dayjs": "^1.10.7",
+    "electron": "13.2.0",
+    "electron-builder": "^22.14.5",
+    "electron-debug": "^3.2.0",
+    "find-yarn-workspace-root": "^2.0.0",
+    "fs-extra": "^10.0.0",
+    "minimist": "^1.2.5",
+    "pinia": "^2.0.9",
+    "rxjs": "^7.5.1",
+    "tail": "^2.2.4",
+    "vue": "^3.2.26",
+    "vue-virtual-scroller": "^2.0.0-alpha.1"
+  }
 }

@@ -1,11 +1,4 @@
 module.exports = {
-  presets: [
-    '@vue/cli-plugin-babel/preset'
-  ],
-  plugins: [
-    [
-      'import',
-      { libraryName: 'ant-design-vue', style: true },
-    ]
-  ]
-}
+  presets: ['@vue/cli-plugin-babel/preset'],
+  plugins: [['import', { libraryName: 'ant-design-vue', style: true }]],
+};
