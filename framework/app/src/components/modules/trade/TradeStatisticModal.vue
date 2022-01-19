@@ -1,9 +1,7 @@
 <script setup lang="ts">
-import { UnfinishedOrderStatus } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
 import { useModalVisible } from '@renderer/assets/methods/uiUtils';
 import { computed } from 'vue';
 import { Stats } from 'fast-stats';
-import { OrderStatusEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import {
     dealOffset,
     dealSide,
@@ -14,13 +12,13 @@ import { Dayjs } from 'dayjs';
 const props = withDefaults(
     defineProps<{
         visible: boolean;
-        orders: KungfuApi.OrderResolved[];
+        trades: KungfuApi.TradeResolved[];
         historyDate?: Dayjs;
     }>(),
     {
         visible: false,
-        orders: () => [],
-        historyDate: () => null,
+        trades: () => [],
+        historyDate: null,
     },
 );
 
@@ -30,36 +28,16 @@ defineEmits<{
 }>();
 
 const { modalVisible, closeModal } = useModalVisible(props.visible);
-const cancelRatioMean = computed(() => {
-    const ordersForStatistic = props.orders.slice(0);
-    const cancelRatioBuckets = ordersForStatistic
-        .filter((item) => {
-            return (
-                item.status === OrderStatusEnum.Cancelled ||
-                item.status === OrderStatusEnum.PartialFilledNotActive
-            );
-        })
-        .map((item) => {
-            return +Number(item.volume_left) / +Number(item.volume);
-        });
 
-    if (!cancelRatioBuckets.length) {
-        return '--';
-    }
-
-    const stats = new Stats().push(...cancelRatioBuckets);
-    return stats.amean().toFixed(2);
-});
-
-const systemLatencyStats = computed(() => {
-    const ordersForStatistic = props.orders.slice(0);
-    const systemLatencyBuckets = ordersForStatistic
+const tradeLatencyStats = computed(() => {
+    const tradesForStatistic = props.trades.slice(0);
+    const tradeLatencyBuckets = tradesForStatistic
         .filter(
-            (item) => +item.latency_system > 0 && item.latency_system !== '--',
+            (item) => +item.latency_trade > 0 && item.latency_trade !== '--',
         )
-        .map((item) => +item.latency_system);
+        .map((item) => +item.latency_trade);
 
-    if (!systemLatencyBuckets.length) {
+    if (!tradeLatencyBuckets.length) {
         return {
             mean: '--',
             min: '--',
@@ -67,33 +45,7 @@ const systemLatencyStats = computed(() => {
         };
     }
 
-    const stats = new Stats().push(...systemLatencyBuckets);
-    const range = stats.range();
-    return {
-        mean: stats.amean().toFixed(2),
-        min: range[0],
-        max: range[1],
-    };
-});
-
-const networkLatencyStats = computed(() => {
-    const ordersForStatistic = props.orders.slice(0);
-    const networkLatencyBuckets = ordersForStatistic
-        .filter(
-            (item) =>
-                +item.latency_network > 0 && item.latency_network !== '--',
-        )
-        .map((item) => +item.latency_network);
-
-    if (!networkLatencyBuckets.length) {
-        return {
-            mean: '--',
-            min: '--',
-            max: '--',
-        };
-    }
-
-    const stats = new Stats().push(...networkLatencyBuckets);
+    const stats = new Stats().push(...tradeLatencyBuckets);
     const range = stats.range();
     return {
         mean: stats.amean().toFixed(2),
@@ -103,40 +55,36 @@ const networkLatencyStats = computed(() => {
 });
 
 const priceVolumeStats = computed(() => {
-    const ordersForStatistic = props.orders
+    const tradesForStatistic = props.trades
         .slice(0)
-        .filter((item) => item.limit_price > 0);
+        .filter((item) => item.price > 0);
     const priceVolumeData: Record<
         string,
         {
             price: number[];
             volume: number[];
-            volumeTraded: number[];
         }
-    > = ordersForStatistic.reduce(
+    > = tradesForStatistic.reduce(
         (
             priceVolumeData: Record<
                 string,
                 {
                     price: number[];
                     volume: number[];
-                    volumeTraded: number[];
                 }
             >,
-            order: KungfuApi.OrderResolved,
+            trade: KungfuApi.TradeResolved,
         ) => {
-            const id = `${order.instrument_id}_${order.exchange_id}_${order.side}_${order.offset}`;
+            const id = `${trade.instrument_id}_${trade.exchange_id}_${trade.side}_${trade.offset}`;
             if (!priceVolumeData[id]) {
                 priceVolumeData[id] = {
                     price: [],
                     volume: [],
-                    volumeTraded: [],
                 };
             }
 
-            priceVolumeData[id].price.push(order.limit_price);
-            priceVolumeData[id].volume.push(+Number(order.volume));
-            priceVolumeData[id].volumeTraded.push(+Number(order.volume_traded));
+            priceVolumeData[id].price.push(trade.price);
+            priceVolumeData[id].volume.push(+Number(trade.volume));
             return priceVolumeData;
         },
         {} as Record<
@@ -161,9 +109,6 @@ const priceVolumeStats = computed(() => {
         const [instrumentId, exchangeId, side, offset] = id.split('_');
         const priceStats = new Stats().push(...priceVolumeData[id].price);
         const volumeSum = priceVolumeData[id].volume.reduce((a, b) => a + b);
-        const volumeTradedSum = priceVolumeData[id].volumeTraded.reduce(
-            (a, b) => a + b,
-        );
         const range = priceStats.range();
         return {
             instrumentId_exchangeId: `${instrumentId}_${exchangeId}`,
@@ -172,7 +117,7 @@ const priceVolumeStats = computed(() => {
             mean: priceStats.amean().toFixed(2),
             min: range[0].toFixed(2),
             max: range[1].toFixed(2),
-            volume: `${volumeTradedSum} / ${volumeSum}`,
+            volume: volumeSum.toString(),
         };
     });
 
@@ -182,11 +127,11 @@ const priceVolumeStats = computed(() => {
 <template>
     <a-modal
         :width="720"
-        class="kf-order-statistic-modal"
+        class="kf-trade-statistic-modal"
         v-model:visible="modalVisible"
-        :title="`委托统计 ${
+        :title="`成交统计 ${
             !!historyDate
-                ? historyDate.format('YYYY-MM-DD')
+                ? historyDate.format('YYYY-MM-DD HH:mm:ss')
                 : '实时(最新100条数据)'
         }`"
         :destroyOnClose="true"
@@ -196,13 +141,13 @@ const priceVolumeStats = computed(() => {
         <a-row style="margin-bottom: 30px">
             <a-col>
                 <a-statistic
-                    title="统计委托数量"
-                    :value="orders.length"
+                    title="统计成交数量"
+                    :value="trades.length"
                 ></a-statistic>
             </a-col>
         </a-row>
         <a-row style="margin-bottom: 30px" class="limit-price-stats-row">
-            <div class="title">委托价统计</div>
+            <div class="title">成交价统计</div>
             <a-table
                 v-if="priceVolumeStats"
                 size="small"
@@ -224,59 +169,30 @@ const priceVolumeStats = computed(() => {
                 </template>
             </a-table>
         </a-row>
-
-        <a-row style="margin-bottom: 30px">
-            <a-col>
-                <a-statistic
-                    title="平均撤单比 (仅统计 部成部撤 和 全部撤单)"
-                    :value="cancelRatioMean"
-                ></a-statistic>
-            </a-col>
-        </a-row>
         <a-row style="margin-bottom: 30px">
             <a-col :span="8">
                 <a-statistic
-                    title="平均系统延迟(μs)"
-                    :value="systemLatencyStats.mean"
+                    title="平均成交延迟(μs)"
+                    :value="tradeLatencyStats.mean"
                 ></a-statistic>
             </a-col>
             <a-col :span="8">
                 <a-statistic
-                    title="最小系统延迟(μs)"
-                    :value="systemLatencyStats.min"
+                    title="最小成交延迟(μs)"
+                    :value="tradeLatencyStats.min"
                 ></a-statistic>
             </a-col>
             <a-col :span="8">
                 <a-statistic
-                    title="最大系统延迟(μs)"
-                    :value="systemLatencyStats.max"
-                ></a-statistic>
-            </a-col>
-        </a-row>
-        <a-row style="margin-bottom: 30px">
-            <a-col :span="8">
-                <a-statistic
-                    title="平均网络延迟(μs)"
-                    :value="networkLatencyStats.mean"
-                ></a-statistic>
-            </a-col>
-            <a-col :span="8">
-                <a-statistic
-                    title="最小网络延迟(μs)"
-                    :value="networkLatencyStats.min"
-                ></a-statistic>
-            </a-col>
-            <a-col :span="8">
-                <a-statistic
-                    title="最大网络延迟(μs)"
-                    :value="networkLatencyStats.max"
+                    title="最大成交延迟(μs)"
+                    :value="tradeLatencyStats.max"
                 ></a-statistic>
             </a-col>
         </a-row>
     </a-modal>
 </template>
 <style lang="less">
-.kf-order-statistic-modal {
+.kf-trade-statistic-modal {
     .limit-price-stats-row {
         flex-direction: column;
         .title {

@@ -121,4 +121,8 @@ export const statisColums: AntTableColumns = [
         title: '最低委托价',
         dataIndex: 'min',
     },
+    {
+        title: '成交量(已完成/全部)',
+        dataIndex: 'volume',
+    },
 ];

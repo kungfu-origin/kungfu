@@ -19,6 +19,7 @@ import {
     DownloadOutlined,
     LoadingOutlined,
     CalendarOutlined,
+    PieChartOutlined,
 } from '@ant-design/icons-vue';
 
 import {
@@ -38,6 +39,7 @@ import {
 import type { Dayjs } from 'dayjs';
 import { showTradingDataDetail } from '@renderer/assets/methods/actionsUtils';
 import { useExtraCategory } from '@renderer/assets/methods/uiExtraLocationUtils';
+import TradeStatisticModal from './TradeStatisticModal.vue';
 
 const app = getCurrentInstance();
 
@@ -62,6 +64,7 @@ const {
 
 const { handleDownload } = useDownloadHistoryTradingData();
 const { getExtraCategoryData } = useExtraCategory();
+const statisticModalVisible = ref<boolean>(false);
 
 const columns = computed(() => {
     if (currentGlobalKfLocation.data === null) {
@@ -215,6 +218,18 @@ function handleShowTradingDataDetail({
                 <KfDashboardItem>
                     <a-button
                         size="small"
+                        @click="statisticModalVisible = true"
+                    >
+                        <template #icon>
+                            <PieChartOutlined
+                                style="font-size: 14px"
+                            ></PieChartOutlined>
+                        </template>
+                    </a-button>
+                </KfDashboardItem>
+                <KfDashboardItem>
+                    <a-button
+                        size="small"
                         @click="
                             handleDownload(
                                 'Trade',
@@ -284,6 +299,12 @@ function handleShowTradingDataDetail({
                 </template>
             </KfTradingDataTable>
         </KfDashboard>
+        <TradeStatisticModal
+            v-if="statisticModalVisible"
+            v-model:visible="statisticModalVisible"
+            :trades="tableData"
+            :historyDate="historyDate"
+        ></TradeStatisticModal>
     </div>
 </template>
 <style lang="less">
