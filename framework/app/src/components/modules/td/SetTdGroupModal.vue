@@ -20,6 +20,11 @@ const props = withDefaults(
     },
 );
 
+defineEmits<{
+    (e: 'update:visible', visible: boolean): void;
+    (e: 'close'): void;
+}>();
+
 const app = getCurrentInstance();
 const { modalVisible, closeModal } = useModalVisible(props.visible);
 const { extTypeMap } = useExtConfigsRelated();

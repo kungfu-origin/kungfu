@@ -15,6 +15,15 @@ export const getColumns = (
         dataIndex: 'instrument_id',
         width: 120,
     },
+    ...(isTdStrategyCategory(category)
+        ? []
+        : [
+              {
+                  name: '持有账户',
+                  dataIndex: 'holder_uid',
+                  width: 120,
+              },
+          ]),
     {
         type: 'string',
         name: '',
@@ -67,13 +76,4 @@ export const getColumns = (
         flex: 1.5,
         sorter: buildSorter('unrealized_pnl'),
     },
-    ...(isTdStrategyCategory(category)
-        ? []
-        : [
-              {
-                  name: '持有账户',
-                  dataIndex: 'holder_uid',
-                  flex: 1,
-              },
-          ]),
 ];

@@ -26,6 +26,7 @@ import {
     LoadingOutlined,
     CloseOutlined,
     CalendarOutlined,
+    PieChartOutlined,
 } from '@ant-design/icons-vue';
 
 import {
@@ -52,6 +53,7 @@ import { OrderStatusEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import { message, Modal } from 'ant-design-vue';
 import { showTradingDataDetail } from '@renderer/assets/methods/actionsUtils';
 import { useExtraCategory } from '@renderer/assets/methods/uiExtraLocationUtils';
+import StatisticModal from './OrderStatisticModal.vue';
 
 const app = getCurrentInstance();
 
@@ -78,6 +80,7 @@ const {
 const { handleDownload } = useDownloadHistoryTradingData();
 const { getExtraCategoryData } = useExtraCategory();
 const adjustOrderMaskVisible = ref(false);
+const statisticModalVisible = ref<boolean>(false);
 
 const columns = computed(() => {
     if (currentGlobalKfLocation.data === null) {
@@ -483,6 +486,18 @@ function testOrderSourceIsOnline(order: KungfuApi.OrderResolved) {
                 <KfDashboardItem>
                     <a-button
                         size="small"
+                        @click="statisticModalVisible = true"
+                    >
+                        <template #icon>
+                            <PieChartOutlined
+                                style="font-size: 14px"
+                            ></PieChartOutlined>
+                        </template>
+                    </a-button>
+                </KfDashboardItem>
+                <KfDashboardItem>
+                    <a-button
+                        size="small"
                         @click="
                             handleDownload(
                                 'Order',
@@ -636,6 +651,12 @@ function testOrderSourceIsOnline(order: KungfuApi.OrderResolved) {
                 </KfTradingDataTable>
             </div>
         </KfDashboard>
+        <StatisticModal
+            v-if="statisticModalVisible"
+            v-model:visible="statisticModalVisible"
+            :orders="tableData"
+            :isHistroy="!!historyDate"
+        ></StatisticModal>
     </div>
 </template>
 <style lang="less">

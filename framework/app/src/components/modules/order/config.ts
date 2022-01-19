@@ -95,3 +95,30 @@ export const getColumns = (
               },
           ]),
 ];
+
+export const statisColums: AntTableColumns = [
+    {
+        title: '标的',
+        dataIndex: 'instrumentId_exchangeId',
+    },
+    {
+        title: '',
+        dataIndex: 'side',
+    },
+    {
+        title: '',
+        dataIndex: 'offset',
+    },
+    {
+        title: '委托均价',
+        dataIndex: 'mean',
+    },
+    {
+        title: '最高委托价',
+        dataIndex: 'max',
+    },
+    {
+        title: '最低委托价',
+        dataIndex: 'min',
+    },
+];

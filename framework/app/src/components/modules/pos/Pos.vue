@@ -43,7 +43,14 @@ const app = getCurrentInstance();
 const pos = ref<KungfuApi.Position[]>([]);
 const { searchKeyword, tableData } = useTableSearchKeyword<KungfuApi.Position>(
     pos,
-    ['instrument_id', 'exchange_id', 'direction'],
+    [
+        'instrument_id',
+        'exchange_id',
+        'direction',
+        'source_id',
+        'account_id',
+        'client_id',
+    ],
 );
 const {
     currentGlobalKfLocation,

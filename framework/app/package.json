@@ -40,6 +40,7 @@
         "electron": "13.2.0",
         "electron-builder": "^22.14.5",
         "electron-debug": "^3.2.0",
+        "fast-stats": "^0.0.6",
         "find-yarn-workspace-root": "^2.0.0",
         "fs-extra": "^10.0.0",
         "minimist": "^1.2.5",

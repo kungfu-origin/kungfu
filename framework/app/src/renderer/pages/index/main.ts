@@ -26,6 +26,9 @@ import {
     Spin,
     Skeleton,
     Tree,
+    Statistic,
+    Row,
+    Col,
 } from 'ant-design-vue';
 
 import { beforeStartAll } from '@renderer/assets/methods/uiUtils';
@@ -57,6 +60,8 @@ app.use(store)
     .use(router)
     .use(Layout)
     .use(Tabs)
+    .use(Row)
+    .use(Col)
     .use(Button)
     .use(Menu)
     .use(Card)
@@ -77,6 +82,7 @@ app.use(store)
     .use(Spin)
     .use(Skeleton)
     .use(Tree)
+    .use(Statistic)
     .use(VueVirtualScroller);
 
 useComponenets(app);
