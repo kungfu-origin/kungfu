@@ -8,7 +8,8 @@ const run = (distDir) => {
 
   console.log(`pwd: ${pkgDir}`);
 
-  baseConfig.artifactName = "${productName}-${buildVersion}-${os}-${arch}-${channel}.${ext}";
+  baseConfig.artifactName =
+    '${productName}-${buildVersion}-${os}-${arch}-${channel}.${ext}';
 
   return electronBuilder.build({
     config: baseConfig,

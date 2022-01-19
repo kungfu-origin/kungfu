@@ -4,20 +4,20 @@ import KfSystemPrepareModal from '@renderer/components/public/KfSystemPrepareMod
 
 import zhCN from 'ant-design-vue/es/locale/zh_CN';
 import {
-    markClearJournal,
-    removeLoadingMask,
-    useDealInstruments,
-    useIpcListener,
+  markClearJournal,
+  removeLoadingMask,
+  useDealInstruments,
+  useIpcListener,
 } from '@renderer/assets/methods/uiUtils';
 import bus from '@kungfu-trader/kungfu-js-api/utils/globalBus';
 import {
-    useDealExportHistoryTradingData,
-    usePreStartAndQuitApp,
-    useSubscibeInstrumentAtEntry,
+  useDealExportHistoryTradingData,
+  usePreStartAndQuitApp,
+  useSubscibeInstrumentAtEntry,
 } from '@renderer/assets/methods/actionsUtils';
 import {
-    dealAppStates,
-    dealAssetsByHolderUID,
+  dealAppStates,
+  dealAssetsByHolderUID,
 } from '@kungfu-trader/kungfu-js-api/kungfu/watcher';
 import { tradingDataSubject } from '@kungfu-trader/kungfu-js-api/kungfu/tradingData';
 import { useGlobalStore } from './store/global';
@@ -29,50 +29,50 @@ const app = getCurrentInstance();
 const store = useGlobalStore();
 
 const {
-    preStartSystemLoadingData,
-    preStartSystemLoading,
-    preQuitSystemLoadingData,
-    preQuitSystemLoading,
+  preStartSystemLoadingData,
+  preStartSystemLoading,
+  preQuitSystemLoadingData,
+  preQuitSystemLoading,
 } = usePreStartAndQuitApp();
 useDealInstruments();
 useSubscibeInstrumentAtEntry();
 
 const { exportDateModalVisible, exportDataLoading, handleConfirmExportDate } =
-    useDealExportHistoryTradingData();
+  useDealExportHistoryTradingData();
 
 useIpcListener();
 
 const busSubscription = bus.subscribe((data: KfBusEvent) => {
-    if (data.tag === 'main') {
-        switch (data.name) {
-            case 'clear-journal':
-                markClearJournal();
-                break;
-            case 'reset-main-dashboard':
-                store.initBoardsMap(defaultBoardsMap);
-                message.success('操作成功');
-                break;
-            case 'export-all-trading-data':
-                bus.next({
-                    tag: 'export',
-                    tradingDataType: 'all',
-                } as ExportTradingDataEvent);
-        }
+  if (data.tag === 'main') {
+    switch (data.name) {
+      case 'clear-journal':
+        markClearJournal();
+        break;
+      case 'reset-main-dashboard':
+        store.initBoardsMap(defaultBoardsMap);
+        message.success('操作成功');
+        break;
+      case 'export-all-trading-data':
+        bus.next({
+          tag: 'export',
+          tradingDataType: 'all',
+        } as ExportTradingDataEvent);
     }
+  }
 });
 
 const tradingDataSubscription = tradingDataSubject.subscribe(
-    (watcher: KungfuApi.Watcher) => {
-        const appStates = dealAppStates(watcher.appStates);
-        store.setAppStates(appStates);
-        const assets = dealAssetsByHolderUID(watcher.ledger.Asset);
-        store.setAssets(assets);
-    },
+  (watcher: KungfuApi.Watcher) => {
+    const appStates = dealAppStates(watcher.appStates);
+    store.setAppStates(appStates);
+    const assets = dealAssetsByHolderUID(watcher.ledger.Asset);
+    store.setAssets(assets);
+  },
 );
 
 onBeforeUnmount(() => {
-    tradingDataSubscription.unsubscribe();
-    busSubscription.unsubscribe();
+  tradingDataSubscription.unsubscribe();
+  busSubscription.unsubscribe();
 });
 
 store.setKfConfigList();
@@ -81,65 +81,65 @@ store.setKfExtConfigs();
 store.setSubscribedInstruments();
 
 onMounted(() => {
-    removeLoadingMask();
+  removeLoadingMask();
 
-    window.addEventListener('resize', () => {
-        app?.proxy &&
-            app?.proxy.$bus.next({
-                tag: 'resize',
-            } as ResizeEvent);
-    });
+  window.addEventListener('resize', () => {
+    app?.proxy &&
+      app?.proxy.$bus.next({
+        tag: 'resize',
+      } as ResizeEvent);
+  });
 });
 </script>
 
 <template>
-    <a-config-provider :locale="zhCN" :autoInsertSpaceInButton="false">
-        <div class="app__warp">
-            <router-view />
-        </div>
-        <KfSystemPrepareModal
-            title="系统提示"
-            :visible="preStartSystemLoading"
-            :status="[
-                { key: 'archive', status: preStartSystemLoadingData.archive },
-                { key: 'watcher', status: preStartSystemLoadingData.watcher },
-            ]"
-            :txt="{
-                archive: { done: '功夫归档完成 ✓', loading: '功夫归档中...' },
-                watcher: {
-                    done: '功夫环境准备完成 ✓',
-                    loading: '功夫环境准备中...',
-                },
-            }"
-        ></KfSystemPrepareModal>
-        <KfSystemPrepareModal
-            title="系统提示"
-            :visible="preQuitSystemLoading"
-            :status="[
-                {
-                    key: 'record',
-                    status: preQuitSystemLoadingData.record,
-                },
-                {
-                    key: 'quit',
-                    status: preQuitSystemLoadingData.quit,
-                },
-            ]"
-            :txt="{
-                record: { done: '保存数据完成 ✓', loading: '保存数据中...' },
-                quit: {
-                    done: '结束所有交易进程 ✓',
-                    loading: '结束交易进程中，请勿关闭...',
-                },
-            }"
-        ></KfSystemPrepareModal>
-        <KfDownloadDateModal
-            v-if="exportDateModalVisible"
-            v-model:visible="exportDateModalVisible"
-            @confirm="handleConfirmExportDate"
-        ></KfDownloadDateModal>
-        <a-spin v-if="exportDataLoading" :spinning="exportDataLoading"></a-spin>
-    </a-config-provider>
+  <a-config-provider :locale="zhCN" :autoInsertSpaceInButton="false">
+    <div class="app__warp">
+      <router-view />
+    </div>
+    <KfSystemPrepareModal
+      title="系统提示"
+      :visible="preStartSystemLoading"
+      :status="[
+        { key: 'archive', status: preStartSystemLoadingData.archive },
+        { key: 'watcher', status: preStartSystemLoadingData.watcher },
+      ]"
+      :txt="{
+        archive: { done: '功夫归档完成 ✓', loading: '功夫归档中...' },
+        watcher: {
+          done: '功夫环境准备完成 ✓',
+          loading: '功夫环境准备中...',
+        },
+      }"
+    ></KfSystemPrepareModal>
+    <KfSystemPrepareModal
+      title="系统提示"
+      :visible="preQuitSystemLoading"
+      :status="[
+        {
+          key: 'record',
+          status: preQuitSystemLoadingData.record,
+        },
+        {
+          key: 'quit',
+          status: preQuitSystemLoadingData.quit,
+        },
+      ]"
+      :txt="{
+        record: { done: '保存数据完成 ✓', loading: '保存数据中...' },
+        quit: {
+          done: '结束所有交易进程 ✓',
+          loading: '结束交易进程中，请勿关闭...',
+        },
+      }"
+    ></KfSystemPrepareModal>
+    <KfDownloadDateModal
+      v-if="exportDateModalVisible"
+      v-model:visible="exportDateModalVisible"
+      @confirm="handleConfirmExportDate"
+    ></KfDownloadDateModal>
+    <a-spin v-if="exportDataLoading" :spinning="exportDataLoading"></a-spin>
+  </a-config-provider>
 </template>
 
 <style lang="less">
@@ -148,16 +148,16 @@ onMounted(() => {
 @import '@renderer/assets/less/public.less';
 
 #app {
-    width: 100%;
-    height: 100%;
-    font-family: Consolas, Monaco, Lucida Console, Liberation Mono,
-        DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+  width: 100%;
+  height: 100%;
+  font-family: Consolas, Monaco, Lucida Console, Liberation Mono,
+    DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 
-    .app__warp {
-        height: 100%;
-        width: 100%;
-    }
+  .app__warp {
+    height: 100%;
+    width: 100%;
+  }
 }
 </style>

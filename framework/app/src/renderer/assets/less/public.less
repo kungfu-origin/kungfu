@@ -1,53 +1,53 @@
 @import '@renderer/assets/less/variables.less';
 
 .kf-translateZ {
-    position: relative;
-    transform: translateZ(0);
+  position: relative;
+  transform: translateZ(0);
 }
 
 .kf-actions__warp {
-    .anticon {
-        margin-left: 16px;
+  .anticon {
+    margin-left: 16px;
 
-        &:hover {
-            color: @primary-color;
-            cursor: pointer;
-        }
+    &:hover {
+      color: @primary-color;
+      cursor: pointer;
     }
+  }
 }
 
 .kf-table {
-    height: 100%;
-    width: 100%;
+  height: 100%;
+  width: 100%;
 }
 
 .kf-hover {
-    &:hover {
-        color: @primary-color;
-        cursor: pointer;
-    }
+  &:hover {
+    color: @primary-color;
+    cursor: pointer;
+  }
 }
 
 .keyframes(@name, @rules) {
-    @-webkit-keyframes @name {
-        @rules();
-    }
+  @-webkit-keyframes @name {
+    @rules();
+  }
 
-    @-moz-keyframes @name {
-        @rules();
-    }
+  @-moz-keyframes @name {
+    @rules();
+  }
 
-    @-ms-keyframes @name {
-        @rules();
-    }
+  @-ms-keyframes @name {
+    @rules();
+  }
 
-    @-o-keyframes @name {
-        @rules();
-    }
+  @-o-keyframes @name {
+    @rules();
+  }
 
-    @keyframes @name {
-        @rules();
-    }
+  @keyframes @name {
+    @rules();
+  }
 }
 
 .keyframes(KfStatusRunning, {
@@ -77,132 +77,132 @@
 });
 
 .kf-dot {
-    width: 6px;
-    height: 6px;
-    display: inline-block;
-    border-radius: 50%;
-    vertical-align: middle;
-    margin-right: 4px;
+  width: 6px;
+  height: 6px;
+  display: inline-block;
+  border-radius: 50%;
+  vertical-align: middle;
+  margin-right: 4px;
 
-    &.kf-color-running {
-        background: @primary-color;
-
-        &.kf-dot-wave {
-            &::after {
-                border: 1px solid @primary-color;
-                animation: KfStatusRunning 1s infinite ease-in-out;
-            }
-        }
-    }
-
-    &.kf-color-waiting {
-        background: fade(@white, 50%);
-
-        &.kf-dot-wave {
-            &::after {
-                border: 1px solid fade(@white, 50%);
-                animation: KfStatusWaiting 1s infinite ease-in-out;
-            }
-        }
-    }
-
-    &.kf-color-error {
-        background: @red-6;
-    }
+  &.kf-color-running {
+    background: @primary-color;
 
     &.kf-dot-wave {
-        position: relative;
-
-        &::after {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translateY(-50%) translateX(-50%);
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            content: '';
-        }
+      &::after {
+        border: 1px solid @primary-color;
+        animation: KfStatusRunning 1s infinite ease-in-out;
+      }
     }
+  }
+
+  &.kf-color-waiting {
+    background: fade(@white, 50%);
+
+    &.kf-dot-wave {
+      &::after {
+        border: 1px solid fade(@white, 50%);
+        animation: KfStatusWaiting 1s infinite ease-in-out;
+      }
+    }
+  }
+
+  &.kf-color-error {
+    background: @red-6;
+  }
+
+  &.kf-dot-wave {
+    position: relative;
+
+    &::after {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translateY(-50%) translateX(-50%);
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      content: '';
+    }
+  }
 }
 
 .text-overflow {
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
 }
 
 .text-right {
-    text-align: right;
+  text-align: right;
 }
 
 .text-center {
-    text-align: center;
+  text-align: center;
 }
 
 .text-left {
-    text-align: left;
+  text-align: left;
 }
 
 .color-default {
-    color: fade(@white, 50%);
+  color: fade(@white, 50%);
 }
 .color-orange {
-    color: @orange-6;
+  color: @orange-6;
 }
 .color-yellow {
-    color: @yellow-6;
+  color: @yellow-6;
 }
 .color-pink {
-    color: @pink-6;
+  color: @pink-6;
 }
 .color-red {
-    color: lighten(@red2-base, 10%);
+  color: lighten(@red2-base, 10%);
 }
 .color-blue {
-    color: @blue-6;
+  color: @blue-6;
 }
 .color-purple {
-    color: @purple-6;
+  color: @purple-6;
 }
 .color-cyan {
-    color: @cyan-6;
+  color: @cyan-6;
 }
 .color-green {
-    color: @green2-base;
+  color: @green2-base;
 }
 .color-gray {
-    color: @text-color-secondary;
+  color: @text-color-secondary;
 }
 .color-text {
-    color: @text-color;
+  color: @text-color;
 }
 
 .keyframes (@prefix,@name,@content) when (@prefix=def) {
-    @keyframes @name {
-        @content();
-    }
+  @keyframes @name {
+    @content();
+  }
 }
 .keyframes (@prefix,@name,@content) when (@prefix=moz) {
-    @-moz-keyframes @name {
-        @content();
-    }
+  @-moz-keyframes @name {
+    @content();
+  }
 }
 .keyframes (@prefix,@name,@content) when (@prefix=o) {
-    @-o-keyframes @name {
-        @content();
-    }
+  @-o-keyframes @name {
+    @content();
+  }
 }
 .keyframes (@prefix,@name,@content) when (@prefix=webkit) {
-    @-webkit-keyframes @name {
-        @content();
-    }
+  @-webkit-keyframes @name {
+    @content();
+  }
 }
 .keyframes (@prefix,@name,@content) when (@prefix=all) {
-    .keyframes(moz,@name,@content);
-    .keyframes(o,@name,@content);
-    .keyframes(webkit,@name,@content);
-    .keyframes(def,@name,@content);
+  .keyframes(moz,@name,@content);
+  .keyframes(o,@name,@content);
+  .keyframes(webkit,@name,@content);
+  .keyframes(def,@name,@content);
 }
 
 .keyframes(all, nanoRedBlink, {
@@ -260,23 +260,23 @@
 );
 
 .ant-btn-dangerous.ant-btn-primary {
-    background: @red-6;
-    border-color: @red-6;
+  background: @red-6;
+  border-color: @red-6;
 }
 
 .trading-data-detail__warp {
-    user-select: text;
+  user-select: text;
 
-    .trading-data-detail-row {
-        .label,
-        .value {
-            display: inline-block;
-            font-size: 12px;
-        }
-
-        .label {
-            color: @text-color-secondary;
-            padding-right: 8px;
-        }
+  .trading-data-detail-row {
+    .label,
+    .value {
+      display: inline-block;
+      font-size: 12px;
     }
+
+    .label {
+      color: @text-color-secondary;
+      padding-right: 8px;
+    }
+  }
 }

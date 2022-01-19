@@ -1,9 +1,9 @@
 <template>
-    <div class="kf-index__warp">
-        <KfLayout>
-            <KfRowColIter :board-id="0"></KfRowColIter>
-        </KfLayout>
-    </div>
+  <div class="kf-index__warp">
+    <KfLayout>
+      <KfRowColIter :board-id="0"></KfRowColIter>
+    </KfLayout>
+  </div>
 </template>
 
 <script lang="ts">
@@ -16,30 +16,29 @@ import { useGlobalStore } from '@renderer/pages/index/store/global';
 import { defaultBoardsMap, getBoardsMap } from '@renderer/assets/configs';
 
 export default defineComponent({
-    name: 'Index',
+  name: 'Index',
 
-    setup() {
-        const boardsMap: KfLayout.BoardsMap =
-            getBoardsMap() || defaultBoardsMap;
+  setup() {
+    const boardsMap: KfLayout.BoardsMap = getBoardsMap() || defaultBoardsMap;
 
-        const store = useGlobalStore();
-        store.initBoardsMap(boardsMap);
-    },
+    const store = useGlobalStore();
+    store.initBoardsMap(boardsMap);
+  },
 
-    components: {
-        KfLayout,
-        KfRowColIter,
-    },
+  components: {
+    KfLayout,
+    KfRowColIter,
+  },
 });
 </script>
 
 <style lang="less">
 .kf-index__warp {
-    height: 100%;
-    width: 100%;
+  height: 100%;
+  width: 100%;
 
-    .ant-layout-content > .kf-drag-row__warp {
-        height: 100%;
-    }
+  .ant-layout-content > .kf-drag-row__warp {
+    height: 100%;
+  }
 }
 </style>
