@@ -4,44 +4,44 @@ import App from '@renderer/pages/index/App.vue';
 import router from '@renderer/pages/index/router';
 import store from '@renderer/pages/index/store';
 import {
-    Layout,
-    Tabs,
-    Button,
-    Menu,
-    Card,
-    Input,
-    Table,
-    Switch,
-    ConfigProvider,
-    Modal,
-    Radio,
-    Tag,
-    Form,
-    InputNumber,
-    Select,
-    Drawer,
-    Empty,
-    DatePicker,
-    Checkbox,
-    Spin,
-    Skeleton,
-    Tree,
-    Statistic,
-    Row,
-    Col,
+  Layout,
+  Tabs,
+  Button,
+  Menu,
+  Card,
+  Input,
+  Table,
+  Switch,
+  ConfigProvider,
+  Modal,
+  Radio,
+  Tag,
+  Form,
+  InputNumber,
+  Select,
+  Drawer,
+  Empty,
+  DatePicker,
+  Checkbox,
+  Spin,
+  Skeleton,
+  Tree,
+  Statistic,
+  Row,
+  Col,
 } from 'ant-design-vue';
 
 import { beforeStartAll } from '@renderer/assets/methods/uiUtils';
 import { useGlobalStore } from '@renderer/pages/index/store/global';
 import { delayMilliSeconds } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import {
-    Pm2ProcessStatusDetailData,
-    Pm2ProcessStatusData,
-    Pm2ProcessStatusTypes,
-    startArchiveMakeTask,
-    startGetProcessStatus,
-    startLedger,
-    startMaster,
+  Pm2ProcessStatusDetailData,
+  Pm2ProcessStatusData,
+  Pm2ProcessStatusTypes,
+  startArchiveMakeTask,
+  startGetProcessStatus,
+  startLedger,
+  startMaster,
 } from '@kungfu-trader/kungfu-js-api/utils/processUtils';
 
 import { watcher } from '@kungfu-trader/kungfu-js-api/kungfu/watcher';
@@ -56,34 +56,35 @@ import { GlobalCategoryRegister } from '@renderer/assets/methods/uiExtraLocation
 
 const app = createApp(App);
 
-app.use(store)
-    .use(router)
-    .use(Layout)
-    .use(Tabs)
-    .use(Row)
-    .use(Col)
-    .use(Button)
-    .use(Menu)
-    .use(Card)
-    .use(Input)
-    .use(Table)
-    .use(Switch)
-    .use(ConfigProvider)
-    .use(Modal)
-    .use(Radio)
-    .use(Tag)
-    .use(InputNumber)
-    .use(Select)
-    .use(Drawer)
-    .use(Form)
-    .use(Empty)
-    .use(DatePicker)
-    .use(Checkbox)
-    .use(Spin)
-    .use(Skeleton)
-    .use(Tree)
-    .use(Statistic)
-    .use(VueVirtualScroller);
+app
+  .use(store)
+  .use(router)
+  .use(Layout)
+  .use(Tabs)
+  .use(Row)
+  .use(Col)
+  .use(Button)
+  .use(Menu)
+  .use(Card)
+  .use(Input)
+  .use(Table)
+  .use(Switch)
+  .use(ConfigProvider)
+  .use(Modal)
+  .use(Radio)
+  .use(Tag)
+  .use(InputNumber)
+  .use(Select)
+  .use(Drawer)
+  .use(Form)
+  .use(Empty)
+  .use(DatePicker)
+  .use(Checkbox)
+  .use(Spin)
+  .use(Skeleton)
+  .use(Tree)
+  .use(Statistic)
+  .use(VueVirtualScroller);
 
 useComponenets(app);
 
@@ -92,62 +93,58 @@ app.config.globalProperties.$bus = bus;
 app.config.globalProperties.$tradingDataSubject = tradingDataSubject;
 app.config.globalProperties.$useGlobalStore = useGlobalStore;
 app.config.globalProperties.$globalCategoryRegister =
-    new GlobalCategoryRegister();
+  new GlobalCategoryRegister();
 
 app.mount('#app');
 
 const globalStore = useGlobalStore();
 
 if (process.env.RELOAD_AFTER_CRASHED === 'false') {
-    beforeStartAll()
-        .then(() => {
-            return startArchiveMakeTask(
-                (archiveStatus: Pm2ProcessStatusTypes) => {
-                    bus.next({
-                        tag: 'processStatus',
-                        name: 'archive',
-                        status: archiveStatus,
-                    });
-                },
-            );
-        })
-        .then(() => startMaster(false))
-        .catch((err) => console.error(err.message))
-        .finally(() => {
-            startGetProcessStatus(
-                (res: {
-                    processStatus: Pm2ProcessStatusData;
-                    processStatusWithDetail: Pm2ProcessStatusDetailData;
-                }) => {
-                    const { processStatus, processStatusWithDetail } = res;
-                    globalStore.setProcessStatus(processStatus);
-                    globalStore.setProcessStatusWithDetail(
-                        processStatusWithDetail,
-                    );
-                },
-            );
-
-            delayMilliSeconds(1000)
-                .then(() => startLedger(false))
-                .catch((err) => console.error(err.message));
+  beforeStartAll()
+    .then(() => {
+      return startArchiveMakeTask((archiveStatus: Pm2ProcessStatusTypes) => {
+        bus.next({
+          tag: 'processStatus',
+          name: 'archive',
+          status: archiveStatus,
         });
-} else {
-    // 崩溃后重开，跳过archive过程
-    bus.next({
-        tag: 'processStatus',
-        name: 'archive',
-        status: 'waiting restart',
-    });
-    startGetProcessStatus(
+      });
+    })
+    .then(() => startMaster(false))
+    .catch((err) => console.error(err.message))
+    .finally(() => {
+      startGetProcessStatus(
         (res: {
-            processStatus: Pm2ProcessStatusData;
-            processStatusWithDetail: Pm2ProcessStatusDetailData;
+          processStatus: Pm2ProcessStatusData;
+          processStatusWithDetail: Pm2ProcessStatusDetailData;
         }) => {
-            const { processStatus, processStatusWithDetail } = res;
-            globalStore.setProcessStatus(processStatus);
-            globalStore.setProcessStatusWithDetail(processStatusWithDetail);
+          const { processStatus, processStatusWithDetail } = res;
+          globalStore.setProcessStatus(processStatus);
+          globalStore.setProcessStatusWithDetail(processStatusWithDetail);
         },
-    );
+      );
+
+      delayMilliSeconds(1000)
+        .then(() => startLedger(false))
+        .catch((err) => console.error(err.message));
+    });
+} else {
+  // 崩溃后重开，跳过archive过程
+  bus.next({
+    tag: 'processStatus',
+    name: 'archive',
+    status: 'waiting restart',
+  });
+  startGetProcessStatus(
+    (res: {
+      processStatus: Pm2ProcessStatusData;
+      processStatusWithDetail: Pm2ProcessStatusDetailData;
+    }) => {
+      const { processStatus, processStatusWithDetail } = res;
+      globalStore.setProcessStatus(processStatus);
+      globalStore.setProcessStatusWithDetail(processStatusWithDetail);
+    },
+  );
 }
 
 window.watcher = watcher;
