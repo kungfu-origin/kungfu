@@ -60,7 +60,7 @@ export const ensureRemoveLocation = (
 ): Promise<void> => {
   const categoryName = getKfCategoryData(kfLocation.category).name;
   const id = getIdByKfLocation(kfLocation);
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     Modal.confirm({
       title: `删除${categoryName} ${id}`,
       content: `删除${categoryName} ${id} 所有数据, 如果该${categoryName}进程正在运行, 也将停止进程, 确认删除`,
@@ -79,7 +79,7 @@ export const ensureRemoveLocation = (
           });
       },
       onCancel() {
-        resolve();
+        reject(new Error('Ensure remove location cancel'));
       },
     });
   });

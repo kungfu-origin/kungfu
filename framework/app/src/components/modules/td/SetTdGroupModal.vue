@@ -3,6 +3,7 @@ import { setTdGroup } from '@kungfu-trader/kungfu-js-api/actions';
 import { getIdByKfLocation } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import {
   getInstrumentTypeColor,
+  isInTdGroup,
   useAllKfConfigData,
   useExtConfigsRelated,
   useModalVisible,
@@ -91,21 +92,6 @@ function isGroup(node: DataNode): KungfuApi.KfExtraLocation | null {
   }
 }
 
-function isInGroup(node: DataNode): KungfuApi.KfExtraLocation | null {
-  const accountId = getIdByKfLocation(
-    node as unknown as KungfuApi.KfExtraLocation,
-  );
-  const targetGroups = tdGroup.data.filter((item) => {
-    return item.children.includes(accountId);
-  });
-
-  if (targetGroups.length) {
-    return targetGroups[0];
-  } else {
-    return null;
-  }
-}
-
 function handleDrop(info: AntTreeNodeDropEvent) {
   const { dragNode, node, dropPosition, dropToGap } = info;
 
@@ -113,10 +99,10 @@ function handleDrop(info: AntTreeNodeDropEvent) {
     return;
   }
 
-  const oldGroup = isInGroup(dragNode);
   const targetAccountId = getIdByKfLocation(
     dragNode as unknown as KungfuApi.KfExtraLocation,
   );
+  const oldGroup = isInTdGroup(tdGroup.data, targetAccountId);
 
   if (oldGroup) {
     const oldTargetIndex = oldGroup.children.indexOf(targetAccountId);
@@ -133,7 +119,10 @@ function handleDrop(info: AntTreeNodeDropEvent) {
     }
   }
 
-  const newGroup = isInGroup(node);
+  const destAccountId = getIdByKfLocation(
+    node as unknown as KungfuApi.KfExtraLocation,
+  );
+  const newGroup = isInTdGroup(tdGroup.data, destAccountId);
   if (newGroup) {
     newGroup.children.push(targetAccountId);
   }

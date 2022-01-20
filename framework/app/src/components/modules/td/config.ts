@@ -11,6 +11,7 @@ export const getColumns = (
     dataIndex: 'name',
     align: 'left',
     width: 180,
+    minWidth: 180,
     fixed: 'left',
   },
   {

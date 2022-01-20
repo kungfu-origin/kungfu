@@ -74,7 +74,7 @@ export const useGlobalStore = defineStore('global', {
 
   actions: {
     setTdGroups() {
-      getTdGroups().then((tdGroups) => {
+      return getTdGroups().then((tdGroups) => {
         this.tdGroupList = tdGroups;
       });
     },

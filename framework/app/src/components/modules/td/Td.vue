@@ -6,6 +6,7 @@ import {
   getCurrentInstance,
   reactive,
   onMounted,
+  toRaw,
 } from 'vue';
 
 import KfDashboard from '@renderer/components/public/KfDashboard.vue';
@@ -32,6 +33,7 @@ import {
   useAssets,
   useCurrentGlobalKfLocation,
   useTdGroups,
+  isInTdGroup,
 } from '@renderer/assets/methods/uiUtils';
 import {
   useAddUpdateRemoveKfConfig,
@@ -40,6 +42,7 @@ import {
 } from '@renderer/assets/methods/actionsUtils';
 import {
   dealAssetPrice,
+  getIdByKfLocation,
   getIfProcessRunning,
   getProcessIdByKfLocation,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
@@ -48,6 +51,7 @@ import KfBlinkNum from '@renderer/components/public/KfBlinkNum.vue';
 import {
   addTdGroup,
   removeTdGroup,
+  setTdGroup,
 } from '@kungfu-trader/kungfu-js-api/actions';
 import SetTdGroupModal from './SetTdGroupModal.vue';
 
@@ -84,6 +88,7 @@ const { allProcessOnline, handleSwitchAllProcessStatus } = useSwitchAllConfig(
   processStatusData,
 );
 
+const tdGroupDataLoaded = ref<boolean>(false);
 const addTdGroupModalVisble = ref<boolean>(false);
 const setTdGroupModalVisble = ref<boolean>(false);
 const tdGroup = useTdGroups();
@@ -147,6 +152,12 @@ const columns = getColumns((dataIndex) => {
 onMounted(() => {
   if (app?.proxy) {
     app.proxy.$globalCategoryRegister.register(categoryRegisterConfig);
+    app.proxy
+      .$useGlobalStore()
+      .setTdGroups()
+      .then(() => {
+        tdGroupDataLoaded.value = true;
+      });
   }
 });
 
@@ -248,6 +259,22 @@ function handleRemoveTdGroup(item: KungfuApi.KfExtraLocation) {
     },
   });
 }
+
+function handleRemoveTd(item: KungfuApi.KfConfig) {
+  handleRemoveKfConfig(item).then(() => {
+    const accountId = getIdByKfLocation(item);
+    const oldGroup = isInTdGroup(tdGroup.data, accountId);
+    if (oldGroup) {
+      const index = oldGroup.children?.indexOf(accountId);
+      oldGroup.children.splice(index, 1);
+      setTdGroup(toRaw(tdGroup.data)).then(() => {
+        if (app?.proxy) {
+          app?.proxy.$useGlobalStore().setTdGroups();
+        }
+      });
+    }
+  });
+}
 </script>
 
 <template>
@@ -283,7 +310,8 @@ function handleRemoveTdGroup(item: KungfuApi.KfExtraLocation) {
         </KfDashboardItem>
       </template>
       <a-table
-        v-if="tableDataResolved.length"
+        v-if="tdGroupDataLoaded"
+        class="kf-ant-table"
         :columns="columns"
         :data-source="tableDataResolved"
         size="small"
@@ -411,7 +439,7 @@ function handleRemoveTdGroup(item: KungfuApi.KfExtraLocation) {
               />
               <DeleteOutlined
                 style="font-size: 12px"
-                @click.stop="handleRemoveKfConfig(record)"
+                @click.stop="handleRemoveTd(record)"
               />
             </div>
             <div class="kf-actions__warp" v-if="record.category === 'tdGroup'">

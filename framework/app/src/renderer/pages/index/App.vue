@@ -76,7 +76,6 @@ onBeforeUnmount(() => {
 });
 
 store.setKfConfigList();
-store.setTdGroups();
 store.setKfExtConfigs();
 store.setSubscribedInstruments();
 
