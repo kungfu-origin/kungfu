@@ -98,7 +98,9 @@ std::vector<uint32_t> locator::list_page_id(const location_ptr &location, uint32
   return result;
 }
 
-static constexpr auto g = [](const std::string &pattern) { return fmt::format("({})", pattern); };
+static constexpr auto w = [](const std::string &pattern) { return pattern == "*" ? ".*" : pattern; };
+
+static constexpr auto g = [](const std::string &pattern) { return fmt::format("({})", w(pattern)); };
 
 std::vector<location_ptr> locator::list_locations(const std::string &category, const std::string &group,
                                                   const std::string &name, const std::string &mode) const {
