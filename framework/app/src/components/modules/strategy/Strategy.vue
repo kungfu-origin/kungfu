@@ -158,6 +158,7 @@ function handleOpenFile(kfConfig: KungfuApi.KfConfig) {
         </KfDashboardItem>
       </template>
       <a-table
+        class="kf-ant-table"
         :columns="columns"
         :data-source="tableData"
         size="small"

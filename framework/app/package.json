@@ -35,7 +35,7 @@
   "devDependencies": {
     "@electron/remote": "^2.0.1",
     "@kungfu-trader/kungfu-toolchain": "^2.4.0-alpha.4",
-    "ant-design-vue": "^3.0.0-beta.5",
+    "ant-design-vue": "^3.0.0-beta.7",
     "core-js": "^3.6.5",
     "dayjs": "^1.10.7",
     "electron": "13.2.0",

@@ -139,6 +139,7 @@ function handleOpenSetSourceDialog() {
         </KfDashboardItem>
       </template>
       <a-table
+        class="kf-ant-table"
         ref="table"
         :columns="columns"
         :data-source="tableData"

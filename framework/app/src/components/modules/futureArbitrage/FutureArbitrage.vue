@@ -221,7 +221,7 @@ function handleMakeOrder() {
       flex: 1;
       height: 100%;
       padding-top: 16px;
-      overflow-y: auto;
+      overflow-y: overlay;
 
       .ant-form-item {
         margin-bottom: 16px;

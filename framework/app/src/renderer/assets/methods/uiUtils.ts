@@ -1001,3 +1001,18 @@ export const useDealInstruments = (): void => {
     }
   };
 };
+
+export const isInTdGroup = (
+  tdGroup: KungfuApi.KfExtraLocation[],
+  accountId: string,
+): KungfuApi.KfExtraLocation | null => {
+  const targetGroups = tdGroup.filter((item) => {
+    return item.children?.includes(accountId);
+  });
+
+  if (targetGroups.length) {
+    return targetGroups[0];
+  } else {
+    return null;
+  }
+};

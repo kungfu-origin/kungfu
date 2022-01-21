@@ -159,6 +159,7 @@ function handleClickRow(row: KungfuApi.InstrumentResolved) {
         </KfDashboardItem>
       </template>
       <a-table
+        class="kf-ant-table"
         :columns="columns"
         :data-source="subscribedInstruments.data"
         size="small"

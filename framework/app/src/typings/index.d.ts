@@ -26,6 +26,7 @@ interface AntTableColumn {
   dataIndex: string;
   key?: string;
   width?: number | string;
+  minWidth?: number | string;
   sorter?: boolean | { compare: (a: any, b: any) => number };
   align?: string;
   fixed?: string;

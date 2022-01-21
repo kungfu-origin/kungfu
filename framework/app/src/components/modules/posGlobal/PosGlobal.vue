@@ -177,6 +177,7 @@ function tiggerOrderBookAndMakeOrder(record: KungfuApi.Position) {
         </KfDashboardItem>
       </template>
       <a-table
+        class="kf-ant-table"
         :columns="columns"
         :data-source="tableData"
         size="small"
