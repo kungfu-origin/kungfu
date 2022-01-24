@@ -98,14 +98,17 @@ std::vector<uint32_t> locator::list_page_id(const location_ptr &location, uint32
   return result;
 }
 
-static constexpr auto g = [](const std::string &pattern) { return fmt::format("({})", pattern); };
+static constexpr auto w = [](const std::string &pattern) { return pattern == "*" ? ".*" : pattern; };
+
+static constexpr auto g = [](const std::string &pattern) { return fmt::format("({})", w(pattern)); };
 
 std::vector<location_ptr> locator::list_locations(const std::string &category, const std::string &group,
                                                   const std::string &name, const std::string &mode) const {
   fs::path search_path = root_ / g(category) / g(group) / g(name) / "journal" / g(mode);
-  std::smatch match;
-  std::regex search_regex(search_path.string());
+  std::string pattern = std::regex_replace(search_path.string(), std::regex("\\\\"), "\\\\");
+  std::regex search_regex(pattern);
   std::vector<location_ptr> result = {};
+  std::smatch match;
   for (auto &it : fs::recursive_directory_iterator(root_)) {
     auto path = it.path().string();
     if (it.is_directory() and std::regex_match(path, match, search_regex)) {
