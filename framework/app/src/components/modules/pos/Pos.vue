@@ -30,7 +30,10 @@ import {
 } from 'vue';
 import { getColumns } from './config';
 import KfBlinkNum from '@renderer/components/public/KfBlinkNum.vue';
-import { hashInstrumentUKey } from '@kungfu-trader/kungfu-js-api/kungfu';
+import {
+  dealPosition,
+  hashInstrumentUKey,
+} from '@kungfu-trader/kungfu-js-api/kungfu';
 import {
   OffsetEnum,
   SideEnum,
@@ -94,7 +97,9 @@ onMounted(() => {
               'position',
             ) as KungfuApi.Position[]);
 
-        pos.value = toRaw(positions.reverse());
+        pos.value = toRaw(
+          positions.reverse().map((item) => dealPosition(watcher, item)),
+        );
       },
     );
 
@@ -206,11 +211,7 @@ function dealLocationUIDResolved(holderUID: number): string {
             column: KfTradingDataTableHeaderConfig,
           }"
         >
-          <template v-if="column.dataIndex === 'instrument_id'">
-            {{ ExchangeIds[item.exchange_id].name }}
-            {{ item.instrument_id }}
-          </template>
-          <template v-else-if="column.dataIndex === 'direction'">
+          <template v-if="column.dataIndex === 'direction'">
             <span :class="`color-${dealDirection(item.direction).color}`">
               {{ dealDirection(item.direction).name }}
             </span>
@@ -239,9 +240,6 @@ function dealLocationUIDResolved(holderUID: number): string {
               mode="compare-zero"
               :num="dealAssetPrice(item.unrealized_pnl)"
             ></KfBlinkNum>
-          </template>
-          <template v-else-if="column.dataIndex === 'holder_uid'">
-            {{ dealLocationUIDResolved(item.holder_uid) }}
           </template>
         </template>
       </KfTradingDataTable>

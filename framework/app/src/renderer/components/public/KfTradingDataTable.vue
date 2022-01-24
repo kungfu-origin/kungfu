@@ -184,7 +184,7 @@ function handleSort(
     <ul class="kf-table-header kf-table-row">
       <li
         v-for="column in columns"
-        :class="['kf-table-cell', column.type]"
+        :class="['text-overflow', 'kf-table-cell', column.type]"
         :key="column.dataIndex"
         :title="column.name"
         :style="{
@@ -288,6 +288,10 @@ function handleSort(
       display: flex;
       user-select: none;
       position: relative;
+
+      .kf-table-row:hover {
+        background: @table-header-bg;
+      }
 
       .name {
         flex: 1;

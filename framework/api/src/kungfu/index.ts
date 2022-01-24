@@ -22,6 +22,7 @@ import {
     resolveClientId,
 } from '../utils/busiUtils';
 import { HistoryDateEnum, MakeOrderByWatcherEnum } from '../typings/enums';
+import { ExchangeIds } from '../config/tradingConfig';
 
 export const kf = kungfu();
 kfLogger.info('Load kungfu node');
@@ -490,12 +491,12 @@ export const dealOrder = (
         ...order,
         source: order.source,
         dest: order.dest,
+        uid_key: order.uid_key,
         source_resolved_data: sourceResolvedData,
         dest_resolved_data: destResolvedData,
         source_uname: sourceResolvedData.name,
         dest_uname: destResolvedData.name,
         update_time_resolved: dealKfTime(order.update_time, isHistory),
-        uid_key: order.uid_key,
         latency_system: latencyData.latencySystem,
         latency_network: latencyData.latencyNetwork,
     };
@@ -527,13 +528,27 @@ export const dealTrade = (
         ...trade,
         source: trade.source,
         dest: trade.dest,
+        uid_key: trade.uid_key,
         source_resolved_data: sourceResolvedData,
         dest_resolved_data: destResolvedData,
         source_uname: sourceResolvedData.name,
         dest_uname: destResolvedData.name,
         trade_time_resolved: dealKfTime(trade.trade_time, isHistory),
         kf_time_resovlved: dealKfTime(latencyData.trade_time, isHistory),
-        uid_key: trade.uid_key,
         latency_trade: latencyData.latencyTrade,
+    };
+};
+
+export const dealPosition = (
+    watcher: KungfuApi.Watcher,
+    pos: KungfuApi.Position,
+): KungfuApi.PositionResolved => {
+    return {
+        ...pos,
+        uid_key: pos.uid_key,
+        account_id_resolved: `${pos.source_id}_${pos.account_id}`,
+        instrument_id_resolved: `${pos.instrument_id} ${
+            ExchangeIds[pos.exchange_id].name
+        }`,
     };
 };

@@ -13,14 +13,14 @@ export const getColumns = (
   {
     type: 'string',
     name: '成交时间',
-    dataIndex: 'trade_time',
+    dataIndex: 'trade_time_resolved',
     width: isHistory ? 160 : 120,
     sorter: buildSorter('trade_time'),
   },
   {
     type: 'string',
     name: '系统时间',
-    dataIndex: 'kf_time',
+    dataIndex: 'kf_time_resovlved',
     width: isHistory ? 160 : 120,
     sorter: buildSorter('trade_time'),
   },
@@ -66,7 +66,7 @@ export const getColumns = (
   },
   {
     name: category == 'td' ? '下单源' : '目标账户',
-    dataIndex: category == 'td' ? 'dest' : 'source',
+    dataIndex: category == 'td' ? 'dest_uname' : 'source_uname',
     flex: 1,
   },
   ...(isTdStrategyCategory(category)
@@ -74,7 +74,7 @@ export const getColumns = (
     : [
         {
           name: '下单源',
-          dataIndex: 'dest',
+          dataIndex: 'dest_uname',
           flex: 1,
         },
       ]),

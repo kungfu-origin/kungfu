@@ -8,6 +8,7 @@ export const columns: AntTableColumns = [
     align: 'left',
     width: 120,
     fixed: 'left',
+    minWidth: 120,
   },
   {
     title: '',
@@ -15,36 +16,44 @@ export const columns: AntTableColumns = [
     width: 40,
     align: 'left',
     fixed: 'left',
+    minWidth: 40,
   },
   {
     title: '昨',
     dataIndex: 'yesterday_volume',
     align: 'right',
+    width: 80,
   },
   {
     title: '今',
     dataIndex: 'today_volume',
     align: 'right',
+    width: 80,
   },
   {
     title: '总',
     dataIndex: 'volume',
     align: 'right',
+    width: 80,
   },
   {
     title: '开仓均价',
     dataIndex: 'avg_open_price',
     align: 'right',
+    width: 110,
   },
   {
     title: '最新价',
     dataIndex: 'last_price',
     align: 'right',
+    width: 110,
   },
   {
     title: '浮动盈亏',
     dataIndex: 'unrealized_pnl',
     align: 'right',
+    width: 110,
+    fixed: 'right',
   },
 ];
 

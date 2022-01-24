@@ -13,7 +13,7 @@ export const getColumns = (
   {
     type: 'string',
     name: '更新时间',
-    dataIndex: 'update_time',
+    dataIndex: 'update_time_resolved',
     width: isHistory ? 160 : 120,
     sorter: buildSorter('update_time'),
   },
@@ -73,7 +73,7 @@ export const getColumns = (
   },
   {
     name: category == 'td' ? '下单源' : '目标账户',
-    dataIndex: category == 'td' ? 'dest' : 'source',
+    dataIndex: category == 'td' ? 'dest_uname' : 'source_uname',
     flex: 1,
   },
   ...(isTdStrategyCategory(category)
@@ -81,7 +81,7 @@ export const getColumns = (
     : [
         {
           name: '下单源',
-          dataIndex: 'dest',
+          dataIndex: 'dest_uname',
           flex: 1,
         },
       ]),

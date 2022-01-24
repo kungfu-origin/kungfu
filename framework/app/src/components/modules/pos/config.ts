@@ -12,7 +12,7 @@ export const getColumns = (
   {
     type: 'string',
     name: '代码',
-    dataIndex: 'instrument_id',
+    dataIndex: 'instrument_id_resolved',
     width: 120,
   },
   ...(isTdStrategyCategory(category)
@@ -20,7 +20,7 @@ export const getColumns = (
     : [
         {
           name: '持有账户',
-          dataIndex: 'holder_uid',
+          dataIndex: 'account_id_resolved',
           width: 120,
         },
       ]),

@@ -197,8 +197,8 @@ function tiggerOrderBookAndMakeOrder(record: KungfuApi.Position) {
           }"
         >
           <template v-if="column.dataIndex === 'instrument_id'">
-            {{ ExchangeIds[record.exchange_id].name }}
             {{ record.instrument_id }}
+            {{ ExchangeIds[record.exchange_id].name }}
           </template>
           <template v-else-if="column.dataIndex === 'direction'">
             <span :class="`color-${dealDirection(record.direction).color}`">

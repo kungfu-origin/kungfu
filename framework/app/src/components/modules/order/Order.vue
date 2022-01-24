@@ -540,10 +540,7 @@ function testOrderSourceIsOnline(order: KungfuApi.OrderResolved) {
               column: KfTradingDataTableHeaderConfig,
             }"
           >
-            <template v-if="column.dataIndex === 'update_time'">
-              {{ item.update_time_resolved }}
-            </template>
-            <template v-else-if="column.dataIndex === 'side'">
+            <template v-if="column.dataIndex === 'side'">
               <span :class="`color-${dealSide(item.side).color}`">
                 {{ dealSide(item.side).name }}
               </span>
@@ -568,18 +565,12 @@ function testOrderSourceIsOnline(order: KungfuApi.OrderResolved) {
                 {{ dealOrderStatus(item.status, item.error_msg).name }}
               </span>
             </template>
-            <template v-else-if="column.dataIndex === 'latency_system'">
-              {{ item.latency_system }}
-            </template>
-            <template v-else-if="column.dataIndex === 'latency_network'">
-              {{ item.latency_network }}
-            </template>
-            <template v-else-if="column.dataIndex === 'source'">
+            <template v-else-if="column.dataIndex === 'source_uname'">
               <span :class="[`color-${item.source_resolved_data.color}`]">
                 {{ item.source_uname }}
               </span>
             </template>
-            <template v-else-if="column.dataIndex === 'dest'">
+            <template v-else-if="column.dataIndex === 'dest_uname'">
               <span :class="[`color-${item.dest_resolved_data.color}`]">
                 {{ item.dest_uname }}
               </span>

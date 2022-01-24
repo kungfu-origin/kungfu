@@ -481,6 +481,11 @@ declare namespace KungfuApi {
         uid_key: string;
     }
 
+    export interface PositionResolved extends Position {
+        account_id_resolved: string;
+        instrument_id_resolved: string;
+    }
+
     export interface Quote {
         source_id: string; //柜台ID
         trading_day: string; //交易日
