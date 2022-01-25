@@ -10,7 +10,8 @@
   "types": "./src/typings/index.d.ts",
   "scripts": {
     "patch": "./node_modules/.bin/patch-package",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "format": "prettier -l -w --config .prettierrc.js ."
   },
   "license": "Apache-2.0",
   "dependencies": {

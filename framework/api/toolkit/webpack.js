@@ -4,136 +4,123 @@ const cwdDir = process.cwd();
 const { isProduction } = require('./utils');
 
 module.exports = {
-    makeConfig: (argv) => {
-        const production = isProduction(argv);
-        return {
-            devtool: 'eval-source-map',
-            mode: production ? 'production' : 'development',
-            module: {
-                rules: [
-                    {
-                        test: /\.js$/,
-                        exclude: /node_modules/,
-                        use: [
-                            {
-                                loader: 'babel-loader',
-                            },
-                        ],
-                    },
-                    {
-                        test: /\.ts$/,
-                        exclude: /node_modules/,
-                        use: [
-                            {
-                                loader: 'babel-loader',
-                            },
-                            {
-                                loader: 'ts-loader',
-                                options: {
-                                    // 指定特定的ts编译配置，为了区分脚本的ts配置
-                                    configFile: path.resolve(
-                                        cwdDir,
-                                        'tsconfig.json',
-                                    ),
-                                    // 对应文件添加个.ts或.tsx后缀
-                                    appendTsSuffixTo: [/\.vue$/],
-                                    transpileOnly: false, // 关闭类型检测，即值进行转译
-                                },
-                            },
-                        ],
-                    },
-                    {
-                        test: /\.node$/,
-                        use: 'node-loader',
-                    },
-                    {
-                        test: /\.(m?js|node)$/,
-                        parser: { amd: false },
-                        use: {
-                            loader: '@vercel/webpack-asset-relocator-loader',
-                            options: {
-                                outputAssetBase: 'native_modules',
-                                production: production,
-                            },
-                        },
-                    },
-                    {
-                        test: /\.(png|jpe?g|gif|svg)(\?.*)?$/,
-                        use: {
-                            loader: 'url-loader',
-                            options: {
-                                limit: 10000,
-                                name: 'imgs/[name]--[folder].[ext]',
-                                esModule: false,
-                            },
-                        },
-                    },
-                    {
-                        test: /\.(mp4|webm|ogg|mp3|wav|flac|aac)(\?.*)?$/,
-                        use: {
-                            loader: 'url-loder',
-                            options: {
-                                limit: 10000,
-                                name: 'media/[name]--[folder].[ext]',
-                                esModule: false,
-                            },
-                        },
-                    },
-                    {
-                        test: /\.(woff2?|eot|ttf|otf)(\?.*)?$/,
-                        use: {
-                            loader: 'file-loader',
-                            options: {
-                                limit: 10000,
-                                name: 'fonts/[name]--[folder].[ext]',
-                                esModule: false,
-                            },
-                        },
-                    },
-                ],
-            },
-            node: {
-                __dirname: !production,
-                __filename: !production,
-            },
-            output: {
-                globalObject: 'this',
-                filename: '[name].js',
-                path: path.join(argv.distDir, argv.distName),
-                library: {
-                    type: 'commonjs2',
-                },
-            },
-            plugins: [
-                new ESLintPlugin({
-                    fix: true /* 自动帮助修复 */,
-                    extensions: ['js', 'json', 'ts', 'json', 'css', 'less'],
-                    exclude: 'node_modules',
-                    failOnWarning: production ? false : true,
-                }),
+  makeConfig: (argv) => {
+    const production = isProduction(argv);
+    return {
+      devtool: 'eval-source-map',
+      mode: production ? 'production' : 'development',
+      module: {
+        rules: [
+          {
+            test: /\.js$/,
+            exclude: /node_modules/,
+            use: [
+              {
+                loader: 'babel-loader',
+              },
             ],
-            resolve: {
-                alias: {
-                    '@kungfu-trader/kungfu-js-api': path.resolve(
-                        path.dirname(
-                            path.dirname(
-                                require.resolve('@kungfu-trader/kungfu-js-api'),
-                            ),
-                        ),
-                        'src',
-                    ),
+          },
+          {
+            test: /\.ts$/,
+            exclude: /node_modules/,
+            use: [
+              {
+                loader: 'babel-loader',
+              },
+              {
+                loader: 'ts-loader',
+                options: {
+                  // 指定特定的ts编译配置，为了区分脚本的ts配置
+                  configFile: path.resolve(cwdDir, 'tsconfig.json'),
+                  // 对应文件添加个.ts或.tsx后缀
+                  appendTsSuffixTo: [/\.vue$/],
+                  transpileOnly: false, // 关闭类型检测，即值进行转译
                 },
-
-                extensions: [
-                    '.js',
-                    '.ts',
-                    '.d.ts',
-                    '.vue',
-                    '.json',
-                    '.css',
-                    '.node',
-                ],
+              },
+            ],
+          },
+          {
+            test: /\.node$/,
+            use: 'node-loader',
+          },
+          {
+            test: /\.(m?js|node)$/,
+            parser: { amd: false },
+            use: {
+              loader: '@vercel/webpack-asset-relocator-loader',
+              options: {
+                outputAssetBase: 'native_modules',
+                production: production,
+              },
             },
-        };
-    },
+          },
+          {
+            test: /\.(png|jpe?g|gif|svg)(\?.*)?$/,
+            use: {
+              loader: 'url-loader',
+              options: {
+                limit: 10000,
+                name: 'imgs/[name]--[folder].[ext]',
+                esModule: false,
+              },
+            },
+          },
+          {
+            test: /\.(mp4|webm|ogg|mp3|wav|flac|aac)(\?.*)?$/,
+            use: {
+              loader: 'url-loder',
+              options: {
+                limit: 10000,
+                name: 'media/[name]--[folder].[ext]',
+                esModule: false,
+              },
+            },
+          },
+          {
+            test: /\.(woff2?|eot|ttf|otf)(\?.*)?$/,
+            use: {
+              loader: 'file-loader',
+              options: {
+                limit: 10000,
+                name: 'fonts/[name]--[folder].[ext]',
+                esModule: false,
+              },
+            },
+          },
+        ],
+      },
+      node: {
+        __dirname: !production,
+        __filename: !production,
+      },
+      output: {
+        globalObject: 'this',
+        filename: '[name].js',
+        path: path.join(argv.distDir, argv.distName),
+        library: {
+          type: 'commonjs2',
+        },
+      },
+      plugins: [
+        new ESLintPlugin({
+          fix: true /* 自动帮助修复 */,
+          extensions: ['js', 'json', 'ts', 'json', 'css', 'less'],
+          exclude: 'node_modules',
+          failOnWarning: production ? false : true,
+        }),
+      ],
+      resolve: {
+        alias: {
+          '@kungfu-trader/kungfu-js-api': path.resolve(
+            path.dirname(
+              path.dirname(require.resolve('@kungfu-trader/kungfu-js-api')),
+            ),
+            'src',
+          ),
+        },
+
+        extensions: ['.js', '.ts', '.d.ts', '.vue', '.json', '.css', '.node'],
+      },
+    };
+  },
 };
