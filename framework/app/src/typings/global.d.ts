@@ -24,7 +24,8 @@ declare global {
       APP_TYPE: 'cli' | 'dzxy' | 'renderer' | 'component' | 'main';
       RENDERER_TYPE: 'app' | 'admin' | 'logview' | 'makeOrder' | 'codeEditor';
       RELOAD_AFTER_CRASHED: 'false' | 'true';
-      ELECTRON_RUN_AS_NODE: 'false' | 'true';
+      ELECTRON_RUN_AS_NODE: Boolean;
+      ELECTRON_ENABLE_STACK_DUMPING: Boolean;
     }
   }
 }
