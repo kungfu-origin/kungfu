@@ -102,6 +102,7 @@ const globalStore = useGlobalStore();
 if (process.env.RELOAD_AFTER_CRASHED === 'false') {
   beforeStartAll()
     .then(() => {
+      console.log(111);
       return startArchiveMakeTask((archiveStatus: Pm2ProcessStatusTypes) => {
         bus.next({
           tag: 'processStatus',

@@ -145,16 +145,14 @@ export const pm2Connect = (): Promise<void> => {
 
 export const pm2List = (): Promise<ProcessDescription[]> => {
     return new Promise((resolve, reject) => {
-        pm2Connect().then(() => {
-            pm2.list((err: Error, pList: ProcessDescription[]) => {
-                if (err) {
-                    kfLogger.error(err.message);
-                    reject(err);
-                    return;
-                }
+        pm2.list((err: Error, pList: ProcessDescription[]) => {
+            if (err) {
+                kfLogger.error(err.message);
+                reject(err);
+                return;
+            }
 
-                resolve(pList);
-            });
+            resolve(pList);
         });
     });
 };
@@ -163,19 +161,15 @@ export const pm2Describe = (
     processId: string,
 ): Promise<ProcessDescription[]> => {
     return new Promise((resolve, reject) => {
-        pm2Connect().then(() => {
-            pm2.describe(
-                processId,
-                (err: Error, pList: ProcessDescription[]) => {
-                    if (err) {
-                        kfLogger.error(err.message);
-                        reject(err);
-                        return;
-                    }
+        //此处无需connect，不然windows会卡死
+        pm2.describe(processId, (err: Error, pList: ProcessDescription[]) => {
+            if (err) {
+                kfLogger.error(err.message);
+                reject(err);
+                return;
+            }
 
-                    resolve(pList);
-                },
-            );
+            resolve(pList);
         });
     });
 };
