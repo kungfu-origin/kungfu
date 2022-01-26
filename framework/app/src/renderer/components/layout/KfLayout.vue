@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { SlidersOutlined, SettingOutlined } from '@ant-design/icons-vue';
-
+import bus from '@kungfu-trader/kungfu-js-api/utils/globalBus';
 import KfProcessStatusController from '@renderer/components/layout/KfProcessStatusController.vue';
-import { ref } from 'vue';
+import { onUnmounted, ref } from 'vue';
 import KfGlobalSettingModal from '../public/KfGlobalSettingModal.vue';
 const logo = require('@renderer/assets/svg/LOGO.svg');
 
@@ -10,6 +10,19 @@ interface LayoutProps {}
 defineProps<LayoutProps>();
 
 const globalSettingModalVisible = ref<boolean>(false);
+
+const busSubscription = bus.subscribe((data: KfBusEvent) => {
+  if (data.tag === 'main') {
+    switch (data.name) {
+      case 'open-setting-dialog':
+        globalSettingModalVisible.value = true;
+    }
+  }
+});
+
+onUnmounted(() => {
+  busSubscription.unsubscribe();
+});
 </script>
 <template>
   <a-layout>

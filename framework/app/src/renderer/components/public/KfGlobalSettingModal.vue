@@ -232,7 +232,8 @@ function handleAddCommission() {
   .body-content {
     .ant-tabs-content {
       .ant-tabs-tabpane {
-        padding-left: 48px;
+        padding-left: 28px;
+        box-sizing: border-box;
 
         .search-input {
           display: flex;
@@ -279,7 +280,7 @@ function handleAddCommission() {
 
     .ant-tabs-content-holder {
       max-height: 680px;
-      overflow: auto;
+      overflow-y: overlay;
     }
   }
 }

@@ -194,7 +194,7 @@ function handleTriggerSellOrderBookPriceVolume(
   display: flex;
   flex-direction: column;
   padding: 8px 8px;
-  overflow: auto;
+  overflow-y: overlay;
 
   .level-book {
     flex: 1;

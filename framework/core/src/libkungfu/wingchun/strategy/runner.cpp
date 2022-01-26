@@ -33,7 +33,22 @@ void Runner::on_trading_day(const event_ptr &event, int64_t daytime) {
   invoke(&Strategy::on_trading_day, daytime);
 }
 
-void Runner::on_react() { context_ = make_context(); }
+void Runner::on_react() {
+  context_ = make_context();
+  events_ | is(Channel::tag) | $$(inspect_channel(event));
+}
+
+void Runner::inspect_channel(const event_ptr &event) {
+  auto channel = event->data<Channel>();
+  if (has_location(channel.source_id) and has_location(channel.dest_id)) {
+    auto source_location = get_location(channel.source_id);
+    auto dest_location = get_location(channel.dest_id);
+    if (ledger_location_.uid == channel.source_id and dest_location->category == category::TD and
+        context_->get_broker_client().should_connect_td(dest_location)) {
+      reader_->join(source_location, channel.dest_id, event->gen_time());
+    }
+  }
+}
 
 void Runner::on_start() {
   enable(*context_);
@@ -62,7 +77,8 @@ void Runner::post_start() {
   events_ | is(Order::tag) | $$(invoke(&Strategy::on_order, event->data<Order>()));
   events_ | is(Trade::tag) | $$(invoke(&Strategy::on_trade, event->data<Trade>()));
   events_ | is(Entrust::tag) | $$(invoke(&Strategy::on_entrust, event->data<Entrust>()));
-  events_ | is(Transaction::tag) | $$(invoke(&Strategy::on_transaction, event->data<Transaction>()));
+  events_ | is_own<Transaction>(context_->get_broker_client()) |
+      $$(invoke(&Strategy::on_transaction, event->data<Transaction>()));
   events_ | is(OrderActionError::tag) | $$(invoke(&Strategy::on_order_action_error, event->data<OrderActionError>()));
 
   invoke(&Strategy::post_start);

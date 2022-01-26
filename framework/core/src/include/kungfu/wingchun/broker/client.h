@@ -89,14 +89,14 @@ public:
 
   virtual void on_start(const rx::connectable_observable<event_ptr> &events);
 
-protected:
-  yijinjing::practice::apprentice &app_;
-
   [[nodiscard]] virtual bool should_connect_md(const yijinjing::data::location_ptr &md_location) const = 0;
 
   [[nodiscard]] virtual bool should_connect_td(const yijinjing::data::location_ptr &md_location) const = 0;
 
   [[nodiscard]] virtual bool should_connect_strategy(const yijinjing::data::location_ptr &md_location) const = 0;
+
+protected:
+  yijinjing::practice::apprentice &app_;
 
 private:
   BrokerStateMap broker_states_ = {};
