@@ -439,7 +439,7 @@ function handleRemoveTd(item: KungfuApi.KfConfig) {
               />
               <DeleteOutlined
                 style="font-size: 12px"
-                @click.stop="handleRemoveTd(record)"
+                @click.stop="handleRemoveTd(record as KungfuApi.KfConfig)"
               />
             </div>
             <div class="kf-actions__warp" v-if="record.category === 'tdGroup'">
