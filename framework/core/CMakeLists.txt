@@ -49,11 +49,11 @@ option(NNG_ENABLE_NNGCAT "" OFF)
 ##########################################################################
 
 include_directories(.deps/hana-1.7.0/include)
-include_directories(.deps/json-3.9.1/include)
+include_directories(.deps/json-3.10.5/include)
 include_directories(.deps/sqlite3-3.33.0/include)
-include_directories(.deps/sqlite_orm-1.6/include)
-include_directories(.deps/nng-1.5.1/include)
-include_directories(.deps/tabulate-1.0/include)
+include_directories(.deps/sqlite_orm-1.7.1/include)
+include_directories(.deps/nng-1.5.2/include)
+include_directories(.deps/tabulate-1.4/include)
 
 include_directories(src/include)
 
