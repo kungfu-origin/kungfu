@@ -11,7 +11,15 @@ import {
   useModalVisible,
   useTableSearchKeyword,
 } from '@renderer/assets/methods/uiUtils';
-import { computed, ComputedRef, onMounted, reactive, ref, toRefs } from 'vue';
+import {
+  computed,
+  ComputedRef,
+  onMounted,
+  onUnmounted,
+  reactive,
+  ref,
+  toRefs,
+} from 'vue';
 import KfConfigSettingsForm from './KfConfigSettingsForm.vue';
 import {
   getKfCommission,
@@ -120,6 +128,23 @@ onMounted(() => {
   });
 });
 
+onUnmounted(() => {
+  setKfGlobalSettingsValue(globalSettingsFromStates);
+  setKfCommission(commissions.value);
+  setScheduleTasks({
+    active: scheduleTask.active || false,
+    tasks: (scheduleTask.tasks || [])
+      .filter((item) => !!item.processId)
+      .map((item) => ({
+        hour: dayjs(item.timeValue, 'HH:mm:ss').hour().toString(),
+        minute: dayjs(item.timeValue, 'HH:mm:ss').minute().toString(),
+        second: dayjs(item.timeValue, 'HH:mm:ss').second().toString(),
+        mode: item.mode,
+        processId: item.processId,
+      })),
+  });
+});
+
 const globalSettingsFromStates = reactive(
   initGlobalSettingsFromStates(kfGlobalSettings, kfGlobalSettingsValue),
 );
@@ -136,24 +161,6 @@ function initGlobalSettingsFromStates(
     );
   });
   return states;
-}
-
-function handleCloseGlobalSetting() {
-  setKfGlobalSettingsValue(globalSettingsFromStates);
-  setKfCommission(commissions.value);
-  setScheduleTasks({
-    active: scheduleTask.active || false,
-    tasks: (scheduleTask.tasks || [])
-      .filter((item) => !!item.processId)
-      .map((item) => ({
-        hour: dayjs(item.timeValue, 'HH:mm:ss').hour().toString(),
-        minute: dayjs(item.timeValue, 'HH:mm:ss').minute().toString(),
-        second: dayjs(item.timeValue, 'HH:mm:ss').second().toString(),
-        mode: item.mode,
-        processId: item.processId,
-      })),
-  });
-  closeModal();
 }
 
 function handleRemoveCommission(commission: KungfuApi.Commission) {
@@ -196,7 +203,7 @@ function handleRemoveScheduleTask(index: number) {
     v-model:visible="modalVisible"
     title="全局设置"
     :destoryOnClose="true"
-    @cancel="handleCloseGlobalSetting"
+    @cancel="closeModal"
     :footer="null"
   >
     <div class="kf-global-settings-modal__content">

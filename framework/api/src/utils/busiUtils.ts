@@ -64,6 +64,7 @@ declare global {
     toAccountId(): string;
     parseSourceAccountId(): SourceAccountId;
     toSourceName(): string;
+    toStrategyId(): string;
     toKfCategory(): string;
     toKfGroup(): string;
     toKfName(): string;
@@ -79,15 +80,25 @@ declare global {
 
 export {};
 
-//因为accountid都是source_accountID,需要截取掉柜台名称
+//for td processId
 String.prototype.toAccountId = function (): string {
   if (this.indexOf('_') === -1) return this.toString();
+  if (this.split('_').length !== 3) return this.toString();
   return this.split('_').slice(1).join('_');
 };
 
+//for md processId
 String.prototype.toSourceName = function (): string {
   if (this.indexOf('_') === -1) return this.toString();
-  return this.split('_')[0];
+  if (this.split('_').length !== 2) return this.toString();
+  return this.split('_')[1];
+};
+
+//for strategy processId
+String.prototype.toStrategyId = function (): string {
+  if (this.indexOf('_') === -1) return this.toString();
+  if (this.split('_').length !== 2) return this.toString();
+  return this.split('_')[1];
 };
 
 String.prototype.toKfCategory = function (): string {

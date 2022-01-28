@@ -128,6 +128,8 @@ export const useGlobalStore = defineStore('global', {
           if (td.length) {
             this.setCurrentGlobalKfLocation(td[0]);
             return;
+          } else if (strategy.length) {
+            this.setCurrentGlobalKfLocation(strategy[0]);
           }
         } else if (!this.checkCurrentGlobalKfLocationExisted()) {
           if (this.currentGlobalKfLocation?.category === 'td') {
