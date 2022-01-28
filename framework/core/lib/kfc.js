@@ -1,12 +1,9 @@
 #!/usr/bin/env node
 
-const path = require('path');
-const { spawnSync } = require('child_process');
+const { spawnSync, exec } = require('child_process');
+const executable = require('./executable.js');
 
-const kfcDir = path.resolve(__dirname, '..', 'dist', 'kfc');
-const kfcBin = path.resolve(kfcDir, process.platform === 'win32' ? 'kfc.exe' : 'kfc');
-
-const result = spawnSync(kfcBin, process.argv.slice(2), {
+const result = spawnSync(executable, process.argv.slice(2), {
   stdio: 'inherit',
   windowsHide: true,
 });
