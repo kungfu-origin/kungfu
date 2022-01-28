@@ -7,10 +7,11 @@ import {
 } from '@kungfu-trader/kungfu-js-api/config/globalSettings';
 import {
   initFormStateByConfig,
+  useAllKfConfigData,
   useModalVisible,
   useTableSearchKeyword,
 } from '@renderer/assets/methods/uiUtils';
-import { onMounted, reactive, ref } from 'vue';
+import { computed, ComputedRef, onMounted, reactive, ref, toRefs } from 'vue';
 import KfConfigSettingsForm from './KfConfigSettingsForm.vue';
 import {
   getKfCommission,
@@ -19,10 +20,31 @@ import {
 import {
   CommissionMode,
   ExchangeIds,
+  KfCategory,
 } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
-import { CommissionModeEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';
+import {
+  CommissionModeEnum,
+  KfCategoryEnum,
+} from '@kungfu-trader/kungfu-js-api/typings/enums';
 import { DeleteOutlined } from '@ant-design/icons-vue';
 import { longfist } from '@kungfu-trader/kungfu-js-api/kungfu';
+import {
+  getScheduleTasks,
+  setScheduleTasks,
+} from '@kungfu-trader/kungfu-js-api/actions';
+import { getProcessIdByKfLocation } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
+import dayjs, { Dayjs } from 'dayjs';
+import {
+  coreForScheduleTasksOptions,
+  modeForCoreScheduleTasksOptions,
+  modeForScheduleTasksOptions,
+} from '@renderer/assets/configs';
+
+interface ScheduleTaskFormItem {
+  timeValue: Dayjs;
+  mode: KungfuApi.ScheduleTaskMode;
+  processId: string;
+}
 
 const props = withDefaults(
   defineProps<{
@@ -44,9 +66,57 @@ const { modalVisible, closeModal } = useModalVisible(props.visible);
 const commissions = ref<KungfuApi.Commission[]>([]);
 const { searchKeyword, tableData } =
   useTableSearchKeyword<KungfuApi.Commission>(commissions, ['product_id']);
+
+const { td, md, strategy } = toRefs(useAllKfConfigData());
+
+const kfConfigForScheduleTasksOptions: ComputedRef<
+  Array<{ label: string; value: string; category: string }>
+> = computed(() => {
+  return [...td.value, ...md.value, ...strategy.value].map((item) => ({
+    label: getProcessIdByKfLocation(item),
+    value: getProcessIdByKfLocation(item),
+    category: item.category,
+  }));
+});
+
+const scheduleTask = reactive<{
+  active?: boolean;
+  tasks?: ScheduleTaskFormItem[];
+}>({});
+
 onMounted(() => {
   getKfCommission().then((res) => {
     commissions.value = res;
+  });
+
+  getScheduleTasks().then((res) => {
+    scheduleTask.active = !!res.active;
+    scheduleTask.tasks = !res.tasks
+      ? [
+          {
+            processId: 'core',
+            mode: 'restart',
+            timeValue: dayjs('08:00:00', 'HH:mm:ss'),
+          },
+          {
+            processId: 'core',
+            mode: 'restart',
+            timeValue: dayjs('20:00:00', 'HH:mm:ss'),
+          },
+        ]
+      : (res.tasks || [])
+          .sort((item1, item2) =>
+            item1.processId.localeCompare(item2.processId),
+          )
+          .map((item) => {
+            return {
+              ...item,
+              timeValue: dayjs(
+                `${item.hour}:${item.minute}:${item.second}`,
+                'HH:mm:ss',
+              ),
+            };
+          });
   });
 });
 
@@ -71,6 +141,18 @@ function initGlobalSettingsFromStates(
 function handleCloseGlobalSetting() {
   setKfGlobalSettingsValue(globalSettingsFromStates);
   setKfCommission(commissions.value);
+  setScheduleTasks({
+    active: scheduleTask.active || false,
+    tasks: (scheduleTask.tasks || [])
+      .filter((item) => !!item.processId)
+      .map((item) => ({
+        hour: dayjs(item.timeValue, 'HH:mm:ss').hour().toString(),
+        minute: dayjs(item.timeValue, 'HH:mm:ss').minute().toString(),
+        second: dayjs(item.timeValue, 'HH:mm:ss').second().toString(),
+        mode: item.mode,
+        processId: item.processId,
+      })),
+  });
   closeModal();
 }
 
@@ -93,6 +175,18 @@ function handleRemoveCommission(commission: KungfuApi.Commission) {
 function handleAddCommission() {
   const newCommission = longfist.Commission();
   commissions.value.unshift(newCommission);
+}
+
+function handleAddScheduleTask() {
+  scheduleTask.tasks.push({
+    processId: '',
+    mode: 'start',
+    timeValue: dayjs(),
+  });
+}
+
+function handleRemoveScheduleTask(index: number) {
+  scheduleTask.tasks.splice(index, 1);
 }
 </script>
 <template>
@@ -136,9 +230,7 @@ function handleAddCommission() {
                   size="large"
                   style="width: 480px"
                 />
-                <a-button type="primary" @click="handleAddCommission">
-                  添加
-                </a-button>
+                <a-button @click="handleAddCommission">添加</a-button>
               </div>
               <div class="commission-setting-row" v-for="item in tableData">
                 <div class="commission-setting-item">
@@ -213,8 +305,94 @@ function handleAddCommission() {
                 <div class="commission-setting-item">
                   <delete-outlined
                     class="kf-hover"
+                    style="font-size: 14px"
                     @click="handleRemoveCommission(item)"
                   />
+                </div>
+              </div>
+            </a-tab-pane>
+            <a-tab-pane key="schedule" tab="定时起停">
+              <div class="global-setting-item">
+                <div class="label" title="使用定时起停">使用定时起停</div>
+                <div class="value">
+                  <a-switch
+                    size="small"
+                    v-model:checked="scheduleTask.active"
+                  ></a-switch>
+                </div>
+              </div>
+              <div class="global-setting-item">
+                <div class="label">定时起停列表</div>
+                <a-button
+                  style="margin-bottom: 16px"
+                  @click="handleAddScheduleTask"
+                >
+                  添加定时
+                </a-button>
+                <div
+                  class="value schedule-setting__warp"
+                  v-for="(task, index) in scheduleTask.tasks"
+                >
+                  <a-row>
+                    <a-col>
+                      <div class="title">目标进程</div>
+                      <a-select
+                        style="width: 220px"
+                        v-model:value="task.processId"
+                        :disabled="task.processId === 'core'"
+                        option-label-prop="label"
+                      >
+                        <a-select-option
+                          v-for="item in task.processId === 'core'
+                            ? coreForScheduleTasksOptions
+                            : kfConfigForScheduleTasksOptions"
+                          :value="item.value"
+                          :label="item.label"
+                        >
+                          <a-tag
+                            :color="
+                              KfCategory[KfCategoryEnum[item.category]].color
+                            "
+                          >
+                            {{ KfCategory[KfCategoryEnum[item.category]].name }}
+                          </a-tag>
+                          {{ item.label }}
+                        </a-select-option>
+                      </a-select>
+                    </a-col>
+                    <a-col>
+                      <div class="title">方式</div>
+                      <a-select
+                        style="width: 120px"
+                        v-model:value="task.mode"
+                        :disabled="task.processId === 'core'"
+                      >
+                        <a-select-option
+                          v-for="item in task.processId === 'core'
+                            ? modeForCoreScheduleTasksOptions
+                            : modeForScheduleTasksOptions"
+                          :value="item.value"
+                        >
+                          {{ item.label }}
+                        </a-select-option>
+                      </a-select>
+                    </a-col>
+                    <a-col>
+                      <div class="title">每日时间</div>
+                      <a-time-picker
+                        style="width: 120px"
+                        v-model:value="task.timeValue"
+                      ></a-time-picker>
+                    </a-col>
+                    <a-col v-if="task.processId !== 'core'">
+                      <div class="title"></div>
+                      <delete-outlined
+                        class="kf-hover"
+                        style="font-size: 14px"
+                        @click="handleRemoveScheduleTask(index)"
+                      />
+                    </a-col>
+                  </a-row>
                 </div>
               </div>
             </a-tab-pane>
@@ -247,6 +425,11 @@ function handleAddCommission() {
           }
         }
 
+        .ant-form-item-label > label,
+        .global-setting-item .label {
+          font-size: 14px;
+        }
+
         .commission-setting-row {
           display: flex;
           justify-content: space-around;
@@ -271,6 +454,37 @@ function handleAddCommission() {
 
               &.exchange-id {
                 width: 80px;
+              }
+            }
+          }
+        }
+
+        .global-setting-item {
+          margin-bottom: 28px;
+
+          .label {
+            padding-bottom: 8px;
+            font-size: 18px;
+          }
+
+          .value {
+            &.schedule-setting__warp {
+              .ant-row {
+                margin-bottom: 10px;
+
+                .ant-col {
+                  display: flex;
+                  align-items: center;
+                  margin-right: 20px;
+                }
+              }
+
+              .title {
+                font-size: 12px;
+                color: rgba(255, 255, 255, 0.45);
+                margin-bottom: 4px;
+                margin-right: 8px;
+                padding-left: 11px;
               }
             }
           }

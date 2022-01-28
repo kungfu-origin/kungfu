@@ -29,6 +29,7 @@ import {
   Statistic,
   Row,
   Col,
+  TimePicker,
 } from 'ant-design-vue';
 
 import { beforeStartAll } from '@renderer/assets/methods/uiUtils';
@@ -79,6 +80,7 @@ app
   .use(Form)
   .use(Empty)
   .use(DatePicker)
+  .use(TimePicker)
   .use(Checkbox)
   .use(Spin)
   .use(Skeleton)

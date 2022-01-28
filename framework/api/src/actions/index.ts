@@ -9,6 +9,7 @@ import {
 } from '../typings/enums';
 import {
   KF_RUNTIME_DIR,
+  KF_SCHEDULE_TASKS_JSON_PATH,
   KF_SUBSCRIBED_INSTRUMENTS_JSON_PATH,
   KF_TD_GROUP_JSON_PATH,
   LOG_DIR,
@@ -160,4 +161,21 @@ export const removeTdGroup = async (tdGroupName: string): Promise<void> => {
 
 export const setTdGroup = (tdGroups: KungfuApi.KfExtraLocation[]) => {
   return fse.outputJSON(KF_TD_GROUP_JSON_PATH, tdGroups);
+};
+
+export const getScheduleTasks = async (): Promise<{
+  active?: boolean;
+  tasks?: KungfuApi.ScheduleTask[];
+}> => {
+  return fse.readFile(KF_SCHEDULE_TASKS_JSON_PATH).then((res) => {
+    const str = Buffer.from(res).toString();
+    return JSON.parse(str || '{}');
+  });
+};
+
+export const setScheduleTasks = async (tasksConfig: {
+  active: boolean;
+  tasks: KungfuApi.ScheduleTask[];
+}): Promise<void> => {
+  return fse.outputJSON(KF_SCHEDULE_TASKS_JSON_PATH, tasksConfig);
 };

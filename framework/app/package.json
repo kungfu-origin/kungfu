@@ -45,6 +45,7 @@
     "find-yarn-workspace-root": "^2.0.0",
     "fs-extra": "^10.0.0",
     "minimist": "^1.2.5",
+    "node-schedule": "^2.1.0",
     "pinia": "^2.0.9",
     "rxjs": "^7.5.1",
     "tail": "^2.2.4",

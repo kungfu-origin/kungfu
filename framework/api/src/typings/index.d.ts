@@ -748,6 +748,16 @@ declare namespace KungfuApi {
     name: string;
     [prop: string]: any;
   }
+
+  export type ScheduleTaskMode = 'restart' | 'start' | 'stop';
+
+  export interface ScheduleTask {
+    hour: string;
+    minute: string;
+    second: string;
+    mode: ScheduleTaskMode;
+    processId: string;
+  }
 }
 
 declare module '@kungfu-trader/kungfu-core' {

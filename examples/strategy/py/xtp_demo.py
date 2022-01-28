@@ -1,11 +1,3 @@
-'''
-@Author: your name
-@Date: 2020-06-10 13:39:46
-@LastEditTime: 2020-06-10 17:57:44
-@LastEditors: your name
-@Description: In User Settings Edit
-@FilePath: /ucbet/Users/zhangyizhi/Project/kungfu/examples/strategy/py/xtp_demo.py
-'''
 import random
 from kungfu.wingchun.constants import *
 

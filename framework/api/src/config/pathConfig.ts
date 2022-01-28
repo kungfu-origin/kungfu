@@ -84,6 +84,13 @@ export const KF_TD_GROUP_JSON_PATH = path.join(
 );
 addFileSync('', KF_TD_GROUP_JSON_PATH, 'file');
 
+export const KF_SCHEDULE_TASKS_JSON_PATH = path.join(
+  KF_HOME,
+  'config',
+  'scheduleTasks.json',
+);
+addFileSync('', KF_SCHEDULE_TASKS_JSON_PATH, 'file');
+
 //================== config end ===================================
 
 //================== kfc start ====================================

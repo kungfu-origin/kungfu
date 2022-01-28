@@ -1,3 +1,5 @@
+import { KfCategoryTypes } from '@kungfu-trader/kungfu-js-api/typings/enums';
+
 export const defaultBoardsMap: KfLayout.BoardsMap = {
   '0': { paId: -1, direction: 'h', children: [1, 2] },
   '1': { paId: 0, direction: 'v', children: [4, 5], width: '64.620%' },
@@ -83,3 +85,47 @@ export const getBoardsMap = (): KfLayout.BoardsMap | null => {
     return storedBoardsMap;
   }
 };
+
+export const coreForScheduleTasksOptions: Array<{
+  label: string;
+  value: string;
+  category: KfCategoryTypes;
+}> = [
+  {
+    label: '主控进程',
+    value: 'core',
+    category: 'system',
+  },
+];
+
+export const modeForScheduleTasksOptions: Array<{
+  label: string;
+  value: KungfuApi.ScheduleTaskMode;
+}> = [
+  {
+    label: '启动',
+    value: 'start',
+  },
+  {
+    label: '停止',
+    value: 'stop',
+  },
+];
+
+export const modeForCoreScheduleTasksOptions: Array<{
+  label: string;
+  value: KungfuApi.ScheduleTaskMode;
+}> = [
+  {
+    label: '重启',
+    value: 'restart',
+  },
+  {
+    label: '启动',
+    value: 'start',
+  },
+  {
+    label: '停止',
+    value: 'stop',
+  },
+];

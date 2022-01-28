@@ -39,6 +39,7 @@ import {
 let MainWindow: BrowserWindow | null = null;
 let AllowQuit = false;
 let CrashedReloading = false;
+let SecheduleReloading = false;
 const isDev = process.env.NODE_ENV === 'development';
 const isMac = os.platform() === 'darwin';
 
@@ -48,10 +49,15 @@ initKfConfig();
 initKfDefaultInstruments();
 ensureKungfuKey();
 
-function createWindow(reloadAfterCrashed = false) {
+function createWindow(reloadAfterCrashed = false, reloadBySchedule = false) {
   if (reloadAfterCrashed) {
     MainWindow && MainWindow.destroy();
     CrashedReloading = true;
+  }
+
+  if (reloadBySchedule) {
+    MainWindow && MainWindow.destroy();
+    SecheduleReloading = true;
   }
 
   const { width, height } = screen.getPrimaryDisplay().size;
@@ -65,7 +71,10 @@ function createWindow(reloadAfterCrashed = false) {
       nodeIntegrationInWorker: true,
       contextIsolation: false,
       enableRemoteModule: true,
-      additionalArguments: [reloadAfterCrashed ? 'reloadAfterCrashed' : ''],
+      additionalArguments: [
+        reloadAfterCrashed ? 'reloadAfterCrashed' : '',
+        reloadBySchedule ? 'reloadBySchedule' : '',
+      ],
     },
     backgroundColor: '#000',
   });
@@ -83,10 +92,14 @@ function createWindow(reloadAfterCrashed = false) {
     if (reloadAfterCrashed) {
       CrashedReloading = false;
     }
+
+    if (reloadBySchedule) {
+      SecheduleReloading = false;
+    }
   });
 
   MainWindow.on('close', (e) => {
-    if (CrashedReloading) {
+    if (CrashedReloading || SecheduleReloading) {
       return;
     }
 
@@ -341,3 +354,16 @@ process
       err.message,
     );
   });
+
+// const rule = new schedule.RecurrenceRule();
+// rule.second = 50;
+// schedule.scheduleJob(rule, function () {
+//   console.log('The answer to life, the universe, and everything!');
+//   pm2Kill().finally(() => {
+//     pm2KillGodDaemon().finally(() => {
+//       console.log('clear all pm2 process');
+//       removeJournal(KF_HOME);
+//       createWindow(false, true);
+//     });
+//   });
+// });
