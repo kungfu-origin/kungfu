@@ -56,7 +56,7 @@ jobs:
 
       - name: Install pipenv
         if: matrix.name != 'Linux'
-        run: pip3 install pipenv==2021.5.29
+        run: pip3 install pipenv==2022.1.8
 
       - name: Bump Version
         uses: kungfu-trader/action-bump-version@v3
