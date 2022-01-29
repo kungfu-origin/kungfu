@@ -6,6 +6,7 @@ import {
   Menu,
   MenuItemConstructorOptions,
   shell,
+  ipcMain,
 } from 'electron';
 import * as remoteMain from '@electron/remote/main';
 import path from 'path';
@@ -15,21 +16,10 @@ import {
   showCrashMessageBox,
   showKungfuInfo,
   openUrl,
+  registerScheduleTasks,
 } from '@main/utils';
-import {
-  findTargetFromArray,
-  kfLogger,
-  removeJournal,
-} from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
-import {
-  deleteProcess,
-  killExtra,
-  pm2Kill,
-  pm2KillGodDaemon,
-  startMd,
-  startStrategy,
-  startTd,
-} from '@kungfu-trader/kungfu-js-api/utils/processUtils';
+import { kfLogger } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
+import { killExtra } from '@kungfu-trader/kungfu-js-api/utils/processUtils';
 import {
   clearJournal,
   exportAllTradingData,
@@ -47,11 +37,6 @@ import {
   initKfDefaultInstruments,
   ensureKungfuKey,
 } from '@kungfu-trader/kungfu-js-api/config';
-import {
-  getAllKfConfigOriginData,
-  getScheduleTasks,
-} from '@kungfu-trader/kungfu-js-api/actions';
-import schedule from 'node-schedule';
 
 let MainWindow: BrowserWindow | null = null;
 let AllowQuit = false;
@@ -372,99 +357,7 @@ process
     );
   });
 
-(async () => {
-  await schedule.gracefulShutdown();
-  const scheduleTasks = await getScheduleTasks();
-  const allKfConfig = await getAllKfConfigOriginData();
-  const { strategy } = allKfConfig;
-
-  const { active, tasks } = scheduleTasks;
-  if (!active || !tasks) return;
-
-  tasks
-    .filter((item) => item.processId === 'core')
-    .forEach((item) => {
-      const rule = new schedule.RecurrenceRule();
-      rule.hour = item.hour;
-      rule.minute = item.minute;
-      rule.second = item.second;
-
-      schedule.scheduleJob(rule, () => {
-        console.log('May the force be with you -- Yoda');
-        pm2Kill().finally(() => {
-          pm2KillGodDaemon().finally(() => {
-            kfLogger.info('Core restarted, pm2 killed all');
-            removeJournal(KF_HOME);
-            createWindow(false, true);
-          });
-        });
-      });
-    });
-
-  tasks
-    .filter((item) => item.processId.indexOf('td_') === 0)
-    .forEach((item) => {
-      const rule = new schedule.RecurrenceRule();
-      rule.hour = item.hour;
-      rule.minute = item.minute;
-      rule.second = item.second;
-      const accountId = item.processId.toAccountId();
-      if (item.mode === 'start') {
-        schedule.scheduleJob(rule, () => {
-          return startTd(accountId);
-        });
-      } else {
-        schedule.scheduleJob(rule, () => {
-          return deleteProcess(item.processId);
-        });
-      }
-    });
-
-  tasks
-    .filter((item) => item.processId.indexOf('md_') === 0)
-    .forEach((item) => {
-      const rule = new schedule.RecurrenceRule();
-      rule.hour = item.hour;
-      rule.minute = item.minute;
-      rule.second = item.second;
-      const sourceName = item.processId.toSourceName();
-      if (item.mode === 'start') {
-        schedule.scheduleJob(rule, () => {
-          startMd(sourceName);
-        });
-      } else {
-        schedule.scheduleJob(rule, () => {
-          deleteProcess(item.processId);
-        });
-      }
-    });
-
-  tasks
-    .filter((item) => item.processId.indexOf('strategy_') === 0)
-    .forEach((item) => {
-      const rule = new schedule.RecurrenceRule();
-      rule.hour = item.hour;
-      rule.minute = item.minute;
-      rule.second = item.second;
-      const strategyId = item.processId.toStrategyId();
-      const targetStrategy: KungfuApi.KfConfig =
-        findTargetFromArray<KungfuApi.KfConfig>(strategy, 'name', strategyId);
-
-      if (!targetStrategy) {
-        return;
-      }
-
-      const strategyPath =
-        JSON.parse(targetStrategy?.value || '{}').strategy_path || '';
-
-      if (item.mode === 'start') {
-        schedule.scheduleJob(rule, () => {
-          startStrategy(strategyId, strategyPath);
-        });
-      } else {
-        schedule.scheduleJob(rule, () => {
-          deleteProcess(item.processId);
-        });
-      }
-    });
-})();
+registerScheduleTasks(createWindow);
+ipcMain.on('schedule-setting-refresh', () => {
+  registerScheduleTasks(createWindow);
+});

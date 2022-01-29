@@ -12,16 +12,28 @@ import {
   killExtra,
   pm2KillGodDaemon,
   pm2Kill,
+  deleteProcess,
+  startTd,
+  startMd,
+  startStrategy,
 } from '@kungfu-trader/kungfu-js-api/utils/processUtils';
 import {
   delayMilliSeconds,
+  findTargetFromArray,
+  getProcessIdByKfLocation,
   kfLogger,
+  removeJournal,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import {
   KFC_DIR,
   KFC_PARENT_DIR,
   KF_HOME,
 } from '@kungfu-trader/kungfu-js-api/config/pathConfig';
+import {
+  getAllKfConfigOriginData,
+  getScheduleTasks,
+} from '@kungfu-trader/kungfu-js-api/actions';
+import schedule from 'node-schedule';
 
 import packageJSON from '@root/package.json';
 declare const global: NodeJS.Global;
@@ -153,3 +165,127 @@ export function showCrashMessageBox(): Promise<boolean> {
       }
     });
 }
+
+export const registerScheduleTasks = async (
+  createWindowFunc: (
+    reloadAfterCrashed: boolean,
+    reloadBySchedule: boolean,
+  ) => void,
+) => {
+  await schedule.gracefulShutdown();
+  const scheduleTasks = await getScheduleTasks();
+  const allKfConfig = await getAllKfConfigOriginData();
+  const { td, md, strategy } = allKfConfig;
+
+  const { active, tasks } = scheduleTasks;
+  if (!active || !tasks) return;
+
+  const tasksResolved = Object.values(
+    scheduleTasks.tasks.reduce((avoidRepeatTasks, task) => {
+      const id = `${task.processId}_${
+        task.mode
+      }_${+task.hour}_${+task.minute}_${+task.second}`;
+      avoidRepeatTasks[id] = task;
+      return avoidRepeatTasks;
+    }, {} as Record<string, KungfuApi.ScheduleTask>),
+  );
+
+  tasksResolved
+    .filter((item) => item.processId === 'core')
+    .forEach((item) => {
+      const rule = new schedule.RecurrenceRule();
+      rule.hour = item.hour;
+      rule.minute = item.minute;
+      rule.second = item.second;
+
+      schedule.scheduleJob(rule, () => {
+        console.log('May the Force be with you -- Yoda');
+        pm2Kill().finally(() => {
+          pm2KillGodDaemon().finally(() => {
+            kfLogger.info('Core restarted, pm2 killed all');
+            removeJournal(KF_HOME);
+            createWindowFunc(false, true);
+          });
+        });
+      });
+    });
+
+  tasksResolved
+    .filter((item) => item.processId.indexOf('td_') === 0)
+    .forEach((item) => {
+      const rule = new schedule.RecurrenceRule();
+      rule.hour = item.hour;
+      rule.minute = item.minute;
+      rule.second = item.second;
+
+      const tdProcessIds = td.map((item) => getProcessIdByKfLocation(item));
+      if (!tdProcessIds.includes(item.processId)) {
+        return;
+      }
+
+      const accountId = item.processId.toAccountId();
+      if (item.mode === 'start') {
+        schedule.scheduleJob(rule, () => {
+          return startTd(accountId);
+        });
+      } else {
+        schedule.scheduleJob(rule, () => {
+          return deleteProcess(item.processId);
+        });
+      }
+    });
+
+  tasksResolved
+    .filter((item) => item.processId.indexOf('md_') === 0)
+    .forEach((item) => {
+      const rule = new schedule.RecurrenceRule();
+      rule.hour = item.hour;
+      rule.minute = item.minute;
+      rule.second = item.second;
+
+      const mdProcessIds = md.map((item) => getProcessIdByKfLocation(item));
+      if (!mdProcessIds.includes(item.processId)) {
+        return;
+      }
+
+      const sourceName = item.processId.toSourceName();
+      if (item.mode === 'start') {
+        schedule.scheduleJob(rule, () => {
+          startMd(sourceName);
+        });
+      } else {
+        schedule.scheduleJob(rule, () => {
+          deleteProcess(item.processId);
+        });
+      }
+    });
+
+  tasksResolved
+    .filter((item) => item.processId.indexOf('strategy_') === 0)
+    .forEach((item) => {
+      const rule = new schedule.RecurrenceRule();
+      rule.hour = item.hour;
+      rule.minute = item.minute;
+      rule.second = item.second;
+      const strategyId = item.processId.toStrategyId();
+      const targetStrategy: KungfuApi.KfConfig =
+        findTargetFromArray<KungfuApi.KfConfig>(strategy, 'name', strategyId);
+
+      if (!targetStrategy) {
+        return;
+      }
+
+      const strategyPath =
+        JSON.parse(targetStrategy?.value || '{}').strategy_path || '';
+
+      if (item.mode === 'start') {
+        schedule.scheduleJob(rule, () => {
+          startStrategy(strategyId, strategyPath);
+        });
+      } else {
+        schedule.scheduleJob(rule, () => {
+          deleteProcess(item.processId);
+        });
+      }
+    });
+};

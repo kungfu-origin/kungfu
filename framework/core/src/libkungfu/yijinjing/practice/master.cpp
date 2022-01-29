@@ -171,27 +171,27 @@ void master::handle_timer_tasks() {
 void master::handle_cached_feeds() {
   bool stored_controller = false;
   boost::hana::for_each(StateDataTypes, [&](auto it) {
-      using DataType = typename decltype(+boost::hana::second(it))::type;
-      auto hana_type = boost::hana::type_c<DataType>;
+    using DataType = typename decltype(+boost::hana::second(it))::type;
+    auto hana_type = boost::hana::type_c<DataType>;
 
-      using FeedMap = std::unordered_map<uint64_t, state<DataType>>;
-      auto& feed_map = const_cast<FeedMap&>(feed_bank_[hana_type]);
+    using FeedMap = std::unordered_map<uint64_t, state<DataType>>;
+    auto &feed_map = const_cast<FeedMap &>(feed_bank_[hana_type]);
 
-      if (feed_map.size() != 0) {
-          auto iter = feed_map.begin();
-          while (iter != feed_map.end() and !stored_controller) {
-              auto s = iter->second;
-              auto source_id = s.source;
+    if (feed_map.size() != 0) {
+      auto iter = feed_map.begin();
+      while (iter != feed_map.end() and !stored_controller) {
+        auto s = iter->second;
+        auto source_id = s.source;
 
-              if (app_cache_shift_.find(source_id) != app_cache_shift_.end()) {
-                  app_cache_shift_.at(source_id) << s;
-                  iter = feed_map.erase(iter);
-                  stored_controller = true;
-              } else {
-                  iter++;
-              }
-          }
+        if (app_cache_shift_.find(source_id) != app_cache_shift_.end()) {
+          app_cache_shift_.at(source_id) << s;
+          iter = feed_map.erase(iter);
+          stored_controller = true;
+        } else {
+          iter++;
+        }
       }
+    }
   });
 }
 
@@ -216,10 +216,7 @@ void master::feed(const event_ptr &event) {
   feed_profile_data(event, profile_);
 }
 
-void master::pong(const event_ptr &event) {
-  get_io_device()->get_publisher()->publish("{}");
-  SPDLOG_INFO("pong");
-}
+void master::pong(const event_ptr &event) { get_io_device()->get_publisher()->publish("{}"); }
 
 void master::on_cache_reset(const event_ptr &event) {
   auto msg_type = event->data<CacheReset>().msg_type;

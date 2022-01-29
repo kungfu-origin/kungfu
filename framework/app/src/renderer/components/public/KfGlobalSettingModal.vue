@@ -47,6 +47,7 @@ import {
   modeForCoreScheduleTasksOptions,
   modeForScheduleTasksOptions,
 } from '@renderer/assets/configs';
+import { ipcRenderer } from 'electron';
 
 interface ScheduleTaskFormItem {
   timeValue: Dayjs;
@@ -142,6 +143,8 @@ onUnmounted(() => {
         mode: item.mode,
         processId: item.processId,
       })),
+  }).then(() => {
+    ipcRenderer.send('schedule-setting-refresh');
   });
 });
 
