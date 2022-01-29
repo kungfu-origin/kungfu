@@ -11,7 +11,7 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-python = ">=3.9.0, <3.11"
+python = "~3.9"
 
 #### Compiler #############################################
 black = "^21.12b0"
@@ -35,8 +35,8 @@ plotly = "^5.4.0"
 chinesecalendar = "^1.6.0"
 
 [tool.poetry.dev-dependencies]
-conan = "^1.43.0"
-pyinstaller = "^4.7"
+conan = "^1.44.0"
+pyinstaller = "^4.8"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
