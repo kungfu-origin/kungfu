@@ -136,7 +136,7 @@ module.exports = {
     ],
   },
   linux: {
-    icon: `${appDir}/public/logo/icn.icns`,
+    icon: `${appDir}/public/logo/icon.icns`,
     target: ['rpm', 'appimage'],
   },
   nsis: {
