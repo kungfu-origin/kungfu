@@ -425,7 +425,7 @@ template <typename DataType> struct state {
 
   state(uint32_t s, uint32_t d, int64_t t, const DataType &data) : source(s), dest(d), update_time(t), data(data) {}
 
-  state& operator=(const state<DataType>& s) {
+  state &operator=(const state<DataType> &s) {
     source = s.source;
     dest = s.dest;
     update_time = s.update_time;
@@ -433,13 +433,13 @@ template <typename DataType> struct state {
     return *this;
   }
 
-  state& operator=(const event_ptr& event) {
+  state &operator=(const event_ptr &event) {
     source = event->source();
     dest = event->dest();
     update_time = event->gen_time();
     data = event->data<DataType>();
     return *this;
-  } 
+  }
 };
 } // namespace kungfu
 

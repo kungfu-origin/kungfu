@@ -8,9 +8,9 @@ from os.path import dirname
 def find_version(pipfile, package):
     mark = f"{package}="
     for line in pipfile:
-        s = line.strip().replace(' ', '')
+        s = line.strip().replace(" ", "")
         if s.startswith(mark) and "==" in s:
-            return package + s.replace(mark, '').replace('"', '')
+            return package + s.replace(mark, "").replace('"', "")
     raise NameError(f"No valid semver found for {package} in Pipfile")
 
 

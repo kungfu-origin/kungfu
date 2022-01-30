@@ -68,6 +68,7 @@ def useEngagedEnvironment():
 
 def parseOptions():
     from nuitka import Options
+
     Options.parseArgs(will_reexec=False)
     Options.commentArgs()
 
@@ -174,4 +175,5 @@ def main():
     loadPlugins()
 
     from nuitka import MainControl
+
     MainControl.main()

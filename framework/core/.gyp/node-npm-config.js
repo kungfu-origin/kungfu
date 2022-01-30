@@ -66,20 +66,18 @@ function npmCall(npmArgs) {
 }
 
 require('@kungfu-trader/kungfu-core').sywac(module, (cli) => {
-  cli
-    .command('show', { run: showAllConfig })
-    .command('auto', {
-      run: () => {
-        const githubActions = 'GITHUB_ACTIONS' in process.env;
-        const pypi = githubActions ? PyPI_US : PyPI_CN;
-        const prebuiltHost = githubActions ? PrebuiltHost_US : PrebuiltHost_CN;
-        const setConfig = (key, value) => githubActions && npmCall(['config', 'set', key, value]);
-        const setPrebuiltHost = (module) => setConfig(PrebuiltModules[module], prebuiltHost);
+  cli.command('show', { run: showAllConfig }).command('auto', {
+    run: () => {
+      const githubActions = 'GITHUB_ACTIONS' in process.env;
+      const pypi = githubActions ? PyPI_US : PyPI_CN;
+      const prebuiltHost = githubActions ? PrebuiltHost_US : PrebuiltHost_CN;
+      const setConfig = (key, value) => githubActions && npmCall(['config', 'set', key, value]);
+      const setPrebuiltHost = (module) => setConfig(PrebuiltModules[module], prebuiltHost);
 
-        setConfig(`${projectName}:pypi_mirror`, pypi);
-        Object.keys(PrebuiltModules).map(setPrebuiltHost);
+      setConfig(`${projectName}:pypi_mirror`, pypi);
+      Object.keys(PrebuiltModules).map(setPrebuiltHost);
 
-        showAllConfig();
-      },
-    });
+      showAllConfig();
+    },
+  });
 });

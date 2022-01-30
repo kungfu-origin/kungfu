@@ -10,7 +10,6 @@ class Source:
     TORA = "tora"
     HUAR = "huar"
     RONGH = "rongh"
-    
 
 
 class Exchange:
@@ -25,8 +24,8 @@ class Exchange:
 
 
 class Region:
-    CN = 'CN'
-    HK = 'HK'
+    CN = "CN"
+    HK = "HK"
 
 
 InstrumentType = lf.enums.InstrumentType
@@ -43,27 +42,36 @@ OrderActionFlag = lf.enums.OrderActionFlag
 LedgerCategory = lf.enums.LedgerCategory
 HedgeFlag = lf.enums.HedgeFlag
 CommissionRateMode = lf.enums.CommissionRateMode
-AllFinalOrderStatus = [int(OrderStatus.Filled), int(OrderStatus.Error), int(OrderStatus.PartialFilledNotActive), int(OrderStatus.Cancelled)]
+AllFinalOrderStatus = [
+    int(OrderStatus.Filled),
+    int(OrderStatus.Error),
+    int(OrderStatus.PartialFilledNotActive),
+    int(OrderStatus.Cancelled),
+]
 
-InstrumentTypeInStockAccount = [InstrumentType.Stock,
-                                InstrumentType.Bond,
-                                InstrumentType.Fund,
-                                InstrumentType.StockOption,
-                                InstrumentType.TechStock,
-                                InstrumentType.Index,
-                                InstrumentType.Repo,
-                                InstrumentType.Crypto]
+InstrumentTypeInStockAccount = [
+    InstrumentType.Stock,
+    InstrumentType.Bond,
+    InstrumentType.Fund,
+    InstrumentType.StockOption,
+    InstrumentType.TechStock,
+    InstrumentType.Index,
+    InstrumentType.Repo,
+    InstrumentType.Crypto,
+]
 
-ENUM_TYPES = [InstrumentType,
-              ExecType,
-              Side,
-              Offset,
-              BsFlag,
-              OrderStatus,
-              Direction,
-              PriceType,
-              VolumeCondition,
-              TimeCondition,
-              OrderActionFlag,
-              LedgerCategory,
-              HedgeFlag]
+ENUM_TYPES = [
+    InstrumentType,
+    ExecType,
+    Side,
+    Offset,
+    BsFlag,
+    OrderStatus,
+    Direction,
+    PriceType,
+    VolumeCondition,
+    TimeCondition,
+    OrderActionFlag,
+    LedgerCategory,
+    HedgeFlag,
+]

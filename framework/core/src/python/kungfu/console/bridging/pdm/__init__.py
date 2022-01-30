@@ -83,7 +83,8 @@ class BridgingCore(Core):
     def __init__(self):
         try:
             from importlib import metadata
-            metadata.version('pdm')
+
+            metadata.version("pdm")
         except:
             pass
         super().__init__()

@@ -16,13 +16,11 @@
   "types": "src/typings/index.d.ts",
   "main": "lib/index.js",
   "scripts": {
-    "serve": "yarn run dev",
+    "clean": "rimraf build dist",
     "dev": "node lib/webpack/dev.js",
     "make:webpack": "node lib/webpack/build.js",
     "make:electron": "node lib/electron/build.js",
     "make": "yarn run make:webpack && yarn run make:electron",
-    "build": "yarn format",
-    "clean": "rimraf build dist",
     "test:e2e": "vue-cli-service test:e2e",
     "lint": "vue-cli-service lint",
     "format": "prettier -l -w --config .prettierrc.js ."

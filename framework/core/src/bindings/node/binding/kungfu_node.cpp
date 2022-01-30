@@ -8,11 +8,11 @@
 #define WIN32_LEAN_AND_MEAN
 #endif
 
+#include <delayimp.h>
 #include <regex>
 #include <stdio.h>
 #include <string.h>
 #include <windows.h>
-#include <delayimp.h>
 
 static FARPROC WINAPI load_exe_hook(unsigned int event, DelayLoadInfo *info) {
   HMODULE m;
@@ -67,9 +67,7 @@ uint32_t Hash32(const Napi::CallbackInfo &info) {
   return hash_32((const unsigned char *)(arg.c_str()), arg.length());
 }
 
-Napi::Value Hash(const Napi::CallbackInfo &info) {
-  return Napi::Number::New(info.Env(), Hash32(info));
-}
+Napi::Value Hash(const Napi::CallbackInfo &info) { return Napi::Number::New(info.Env(), Hash32(info)); }
 
 Napi::Value FormatStringToHashHex(const Napi::CallbackInfo &info) {
   return Napi::String::New(info.Env(), fmt::format("{:08x}", Hash32(info)));
@@ -92,9 +90,7 @@ Napi::Value ParseTime(const Napi::CallbackInfo &info) {
   return Napi::BigInt::New(info.Env(), time::strptime(time_string, format));
 }
 
-void Shutdown(const Napi::CallbackInfo &info) {
-  ensure_sqlite_shutdown();
-}
+void Shutdown(const Napi::CallbackInfo &info) { ensure_sqlite_shutdown(); }
 
 Napi::Object InitAll(Napi::Env env, Napi::Object exports) {
 

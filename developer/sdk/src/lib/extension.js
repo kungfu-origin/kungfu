@@ -6,9 +6,11 @@ const path = require('path');
 const os = require('os');
 const { spawnSync } = require('child_process');
 const { glob } = require('glob');
+const { promisify } = require('util');
+const { finished } = require('stream');
 
 const pypackages = '__pypackages__';
-const kungfulibs = '__kungfulibs__'
+const kungfulibs = '__kungfulibs__';
 const kungfuLibDirPattern = path.join(kungfulibs, '*', '*');
 
 const spawnOptsShell = {
@@ -84,7 +86,9 @@ function generateCMakeFiles(projectName, kungfuBuild) {
   ejs.renderFile(
     require.resolve('@kungfu-trader/kungfu-sdk/templates/kungfu.cmake'),
     {
-      kfcDir: path.dirname(require.resolve("@kungfu-trader/kungfu-core/dist/kfc/kungfubuildinfo.json")).replace(/\\/g, '/'),
+      kfcDir: path
+        .dirname(require.resolve('@kungfu-trader/kungfu-core/dist/kfc/kungfubuildinfo.json'))
+        .replace(/\\/g, '/'),
       includes: glob.sync(path.join(kungfuLibDirPattern, 'include')),
       links: glob.sync(path.join(kungfuLibDirPattern, 'lib')),
       sources: cppSources,
@@ -149,7 +153,7 @@ exports.list = async (libSiteURL, matchName, matchVersion, listVersion = true, l
   return targetLibs;
 };
 
-exports.install = async (libSiteURL, libName, libVersion, platform = detectPlatform(), arch = os.arch()) => {
+exports.installSingleLib = async (libSiteURL, libName, libVersion, platform = detectPlatform(), arch = os.arch()) => {
   const index = await axios.get(`${libSiteURL}/index.json`);
   const sourceLibs = index.data;
 
@@ -175,16 +179,17 @@ exports.install = async (libSiteURL, libName, libVersion, platform = detectPlatf
       fse.ensureDirSync(path.dirname(localFilePath));
 
       const writer = fse.createWriteStream(localFilePath);
+      writer.on('finish', () => onFinish(localFilePath));
+      writer.on('error', () => console.error(`-- Failed to download ${remoteFileURL}`));
+
       const response = await axios({
         url: remoteFileURL,
         method: 'GET',
         responseType: 'stream',
       });
-
-      writer.on('finish', () => onFinish(localFilePath));
-      writer.on('error', () => console.error(`-- Failed to download ${remoteFileURL}`));
-
       response.data.pipe(writer);
+
+      await promisify(finished)(writer);
     }
   };
 
@@ -222,7 +227,7 @@ exports.installBatch = async (libSiteURL, platform = detectPlatform(), arch = os
   if ('kungfuDependencies' in packageJson) {
     const libs = packageJson.kungfuDependencies;
     for (const libName in libs) {
-      await exports.install(libSiteURL, libName, libs[libName], platform, arch);
+      await this.installSingleLib(libSiteURL, libName, libs[libName], platform, arch);
     }
   }
   if (hasSourceFor(packageJson, 'python')) {
@@ -233,6 +238,7 @@ exports.installBatch = async (libSiteURL, platform = detectPlatform(), arch = os
 
 exports.clean = (keepLibs = true) => {
   fse.removeSync(path.join(process.cwd(), 'build'));
+  fse.removeSync(path.join(process.cwd(), 'dist'));
   if (!keepLibs) {
     const rm = (p) => fse.existsSync(p) && fse.removeSync(p);
     rm(pypackages);
@@ -272,20 +278,17 @@ exports.build = () => {
   }
 
   if (hasSourceFor(packageJson, 'cpp')) {
-    spawnExec('yarn', [
-      'cmake-js',
-      'build',
-    ]);
+    spawnExec('yarn', ['cmake-js', 'build']);
   }
 
   const packageJsonPath = path.join(process.cwd(), 'package.json');
   fse.copyFile(packageJsonPath, path.join(outputDir, 'package.json'));
 
   const copyOutput = (pattern) => {
-    glob.sync(pattern).forEach(p => {
+    glob.sync(pattern).forEach((p) => {
       fse.copyFile(p, path.join(outputDir, path.basename(p)));
     });
-  }
+  };
 
   if (fse.existsSync(buildTargetDir)) {
     copyOutput(path.join(buildTargetDir, '*'));

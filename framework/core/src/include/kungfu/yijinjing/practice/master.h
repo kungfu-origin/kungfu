@@ -53,7 +53,6 @@ private:
   profile profile_;
   yijinjing::cache::bank feed_bank_;
 
-
   std::unordered_map<uint32_t, uint32_t> app_cmd_locations_ = {};
   std::unordered_map<uint32_t, cache::shift> app_cache_shift_ = {};
   std::unordered_map<uint32_t, std::unordered_map<int32_t, timer_task>> timer_tasks_ = {};

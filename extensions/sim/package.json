@@ -14,11 +14,8 @@
     "registry": "https://npm.pkg.github.com"
   },
   "scripts": {
-    "setup": "kfs extension install",
-    "prebuild": "kfs extension configure",
-    "build": "kfs extension build",
-    "dev": "kfs craft dev",
-    "format": "kfc engage black src/python *.py"
+    "build": "kfs extension roast",
+    "clean": "kfs extension clean"
   },
   "devDependencies": {
     "@kungfu-trader/kungfu-sdk": "^2.4.0-alpha.4"

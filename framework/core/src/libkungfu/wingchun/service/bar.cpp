@@ -34,7 +34,8 @@ static int64_t parse_time_interval(const std::string &s) {
 }
 
 BarGenerator::BarGenerator(const locator_ptr &locator, mode m, bool low_latency, const std::string &json_config)
-    : MarketDataVendor(locator, "bar", "bar", low_latency), time_interval_(kungfu::yijinjing::time_unit::NANOSECONDS_PER_MINUTE) {
+    : MarketDataVendor(locator, "bar", "bar", low_latency),
+      time_interval_(kungfu::yijinjing::time_unit::NANOSECONDS_PER_MINUTE) {
   log::copy_log_settings(get_home(), "bar");
   auto config = nlohmann::json::parse(json_config);
   auto source = config["source"];

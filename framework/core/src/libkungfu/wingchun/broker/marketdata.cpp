@@ -12,7 +12,7 @@ using namespace kungfu::yijinjing::data;
 
 namespace kungfu::wingchun::broker {
 MarketDataVendor::MarketDataVendor(locator_ptr locator, const std::string &group, const std::string &name,
-                                 bool low_latency)
+                                   bool low_latency)
     : BrokerVendor(location::make_shared(mode::LIVE, category::MD, group, name, std::move(locator)), low_latency) {}
 
 void MarketDataVendor::setup(MarketData_ptr service) { service_ = std::move(service); }

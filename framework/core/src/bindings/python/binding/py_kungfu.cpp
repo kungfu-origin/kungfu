@@ -15,8 +15,8 @@
 
 #include "py_libnode.hpp"
 #include "py_longfist.hpp"
-#include "py_yijinjing.hpp"
 #include "py_wingchun.hpp"
+#include "py_yijinjing.hpp"
 
 namespace py = pybind11;
 

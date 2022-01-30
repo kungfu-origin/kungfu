@@ -65,7 +65,7 @@ jobs:
           action: "prebuild"
 
       - name: Setup Kungfu environment
-        run: yarn install --pure-lockfile
+        run: yarn install --frozen-lockfile
         env:
           KF_SKIP_FALLBACK_BUILD: true
 

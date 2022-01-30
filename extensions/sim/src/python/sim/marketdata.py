@@ -25,7 +25,11 @@ class MarketDataSim(wc.MarketData):
             "sim_md",
             "info",
             yjj.location(
-                lf.enums.mode.LIVE, lf.enums.category.MD, "sim", "sim", vendor.home.locator
+                lf.enums.mode.LIVE,
+                lf.enums.category.MD,
+                "sim",
+                "sim",
+                vendor.home.locator,
             ),
         )
 

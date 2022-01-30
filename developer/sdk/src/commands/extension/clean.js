@@ -7,7 +7,7 @@ module.exports = {
     cli.option('keep-libs', {
       type: 'boolean',
       desc: 'Keep downloaded lib files',
-      defaultValue: true,
+      defaultValue: false,
     });
   },
   run: (argv) => {

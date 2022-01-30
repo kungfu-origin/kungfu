@@ -102,11 +102,13 @@ inline bool is_final_status(const longfist::enums::OrderStatus &status) {
   }
 }
 
-inline bool is_convertible_bond(const std::string& instrument_id, const std::string& exchange_id) {
-  return ((string_equals_n(instrument_id, "123", 3) || string_equals_n(instrument_id, "128", 3) || 
+inline bool is_convertible_bond(const std::string &instrument_id, const std::string &exchange_id) {
+  return ((string_equals_n(instrument_id, "123", 3) || string_equals_n(instrument_id, "128", 3) ||
            string_equals_n(instrument_id, "117", 3) || string_equals_n(instrument_id, "127", 3) ||
-           string_equals_n(instrument_id, "125", 3) || string_equals_n(instrument_id, "126", 3)) && string_equals(exchange_id, EXCHANGE_SZE)) ||
-         ((string_equals_n(instrument_id, "110", 3) || string_equals_n(instrument_id, "113", 3)) && string_equals(exchange_id, EXCHANGE_SSE)); 
+           string_equals_n(instrument_id, "125", 3) || string_equals_n(instrument_id, "126", 3)) &&
+          string_equals(exchange_id, EXCHANGE_SZE)) ||
+         ((string_equals_n(instrument_id, "110", 3) || string_equals_n(instrument_id, "113", 3)) &&
+          string_equals(exchange_id, EXCHANGE_SSE));
 }
 
 inline bool is_repo(const std::string &instrument_id, const std::string &exchange_id) {
@@ -192,9 +194,8 @@ inline longfist::enums::InstrumentType get_instrument_type(const std::string &ex
              string_equals(exchange_id, EXCHANGE_CFFEX) || string_equals(exchange_id, EXCHANGE_CZCE) ||
              string_equals(exchange_id, EXCHANGE_INE)) {
     return longfist::enums::InstrumentType::Future;
-  }
-  else if (string_equals(exchange_id, EXCHANGE_BINANCE) || string_equals(exchange_id, EXCHANGE_HB)) {
-      return longfist::enums::InstrumentType::Crypto;
+  } else if (string_equals(exchange_id, EXCHANGE_BINANCE) || string_equals(exchange_id, EXCHANGE_HB)) {
+    return longfist::enums::InstrumentType::Crypto;
   }
   SPDLOG_ERROR("invalid instrument type for exchange {} and instrument {}", exchange_id, instrument_id);
   return longfist::enums::InstrumentType::Unknown;

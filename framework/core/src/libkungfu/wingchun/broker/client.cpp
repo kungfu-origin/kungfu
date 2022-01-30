@@ -220,7 +220,7 @@ bool PassiveClient::is_fully_subscribed(uint32_t md_location_uid) const {
 }
 
 void PassiveClient::subscribe(const location_ptr &md_location, const std::string &exchange_id,
-                             const std::string &instrument_id) {
+                              const std::string &instrument_id) {
   if (not is_fully_subscribed(md_location->uid)) {
     enrolled_md_locations_.emplace(md_location->uid, false);
   }

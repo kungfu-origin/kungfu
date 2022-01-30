@@ -50,11 +50,11 @@ struct Book {
   void ensure_position(const longfist::types::InstrumentKey &instrument_key);
 
   [[nodiscard]] bool has_long_position(const char *exchange_id, const char *instrument_id) const;
-  
+
   [[nodiscard]] bool has_long_position_volume(const char *exchange_id, const char *instrument_id) const;
 
   [[nodiscard]] bool has_short_position(const char *exchange_id, const char *instrument_id) const;
-  
+
   [[nodiscard]] bool has_short_position_volume(const char *exchange_id, const char *instrument_id) const;
 
   [[nodiscard]] bool has_position(const char *exchange_id, const char *instrument_id) const;
@@ -97,9 +97,9 @@ struct Book {
 
   void replace(const longfist::types::Trade &trade);
 
-  const InstrumentMap& get_instruments() const { return instruments; }
+  const InstrumentMap &get_instruments() const { return instruments; }
 
-  const CommissionMap& get_commissions() const { return commissions; }
+  const CommissionMap &get_commissions() const { return commissions; }
 };
 } // namespace kungfu::wingchun::book
 

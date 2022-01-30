@@ -130,7 +130,6 @@ public:
    */
   static void reset(int64_t system_clock_count, int64_t steady_clock_count);
 
-
 private:
   time_point_info base_;
   time();

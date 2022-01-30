@@ -48,7 +48,7 @@ class KungfuCoreConan(ConanFile):
     }
     cpp_files_extensions = [".h", ".hpp", ".hxx", ".cpp", ".c", ".cc", ".cxx"]
     conanfile_dir = path.dirname(path.realpath(__file__))
-    cpp_dir = path.join(conanfile_dir, "src", "c++")
+    src_dir = path.join(conanfile_dir, "src")
     ext_dir = path.join(conanfile_dir, "extensions")
     build_info_file = "kungfubuildinfo.json"
     build_dir = path.join(conanfile_dir, "build")
@@ -60,7 +60,7 @@ class KungfuCoreConan(ConanFile):
     def source(self):
         """Performs clang-format on all C++ files"""
         if tools.which("clang-format") is not None:
-            self.__clang_format(self.cpp_dir, self.cpp_files_extensions)
+            self.__clang_format(self.src_dir, self.cpp_files_extensions)
         else:
             self.output.warn("clang-format not installed")
 
@@ -161,10 +161,12 @@ class KungfuCoreConan(ConanFile):
 
     def __clean_kfc_dir(self):
         if path.exists(self.kfc_dir):
+
             def redo_with_write(redo_func, path, err):
                 os.chmod(path, stat.S_IWRITE)
                 redo_func(path)
-            shutil.rmtree(self.kfc_dir, onerror = redo_with_write)
+
+            shutil.rmtree(self.kfc_dir, onerror=redo_with_write)
             self.output.info("Deleted kfc directory")
 
     def __gen_build_info(self, build_type):

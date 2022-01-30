@@ -22,19 +22,13 @@ yjj = kungfu.__binding__.yijinjing
 
 
 class ExecutorRegistry:
-
     def __init__(self, ctx):
         self.ctx = ctx
         self.executors = {
-            "system": {
-                "master": MasterLoader(ctx),
-                "service": ServiceLoader(ctx)
-            },
+            "system": {"master": MasterLoader(ctx), "service": ServiceLoader(ctx)},
             "md": {},
             "td": {},
-            "strategy": {
-                "default": ExtensionLoader(self.ctx, None, None)
-            }
+            "strategy": {"default": ExtensionLoader(self.ctx, None, None)},
         }
         if ctx.extension_path:
             deque(map(self.register_extensions, ctx.extension_path.split(path.pathsep)))
@@ -42,7 +36,7 @@ class ExecutorRegistry:
     def register_extensions(self, root):
         for child in os.listdir(root):
             extension_dir = path.abspath(path.join(root, child))
-            config_path = path.join(extension_dir, 'package.json')
+            config_path = path.join(extension_dir, "package.json")
             if path.exists(config_path):
                 with open(config_path, "r") as config_file:
                     config = json.load(config_file)
@@ -51,7 +45,9 @@ class ExecutorRegistry:
                         for category in config["kungfuConfig"]["config"]:
                             if category not in kfj.CATEGORIES:
                                 raise RuntimeError(f"Unsupported category {category}")
-                            self.executors[category][group] = ExtensionLoader(self.ctx, extension_dir, config)
+                            self.executors[category][group] = ExtensionLoader(
+                                self.ctx, extension_dir, config
+                            )
 
     def __getitem__(self, category):
         return self.executors[category]
@@ -72,7 +68,9 @@ class MasterLoader(dict):
 class ServiceLoader(dict):
     def __init__(self, ctx):
         super().__init__()
-        self["ledger"] = lambda mode, low_latency: wc.Ledger(ctx.runtime_locator, kfj.MODES[ctx.mode], ctx.low_latency).run()
+        self["ledger"] = lambda mode, low_latency: wc.Ledger(
+            ctx.runtime_locator, kfj.MODES[ctx.mode], ctx.low_latency
+        ).run()
 
 
 class ExtensionLoader:
@@ -92,14 +90,13 @@ class ExtensionLoader:
 
 
 class ExtensionExecutor:
-
     def __init__(self, ctx, loader):
         self.ctx = ctx
         self.loader = loader
         self.runners = {
             "md": self.run_market_data,
             "td": self.run_trader,
-            "strategy": self.run_strategy
+            "strategy": self.run_strategy,
         }
 
     def __call__(self, mode, low_latency):
@@ -111,7 +108,9 @@ class ExtensionExecutor:
         site.setup(loader.extension_dir)
         sys.path.insert(0, loader.extension_dir)
         module = importlib.import_module(ctx.group)
-        vendor = vendor_builder(ctx.runtime_locator, ctx.group, ctx.name, ctx.low_latency)
+        vendor = vendor_builder(
+            ctx.runtime_locator, ctx.group, ctx.name, ctx.low_latency
+        )
         service = getattr(module, ctx.category)(vendor)
         vendor.setup(service)
         vendor.run()
@@ -125,7 +124,11 @@ class ExtensionExecutor:
     def run_strategy(self):
         ctx = self.ctx
         ctx.location = yjj.location(
-            kfj.MODES[ctx.mode], lf.enums.category.STRATEGY, ctx.group, ctx.name, ctx.runtime_locator
+            kfj.MODES[ctx.mode],
+            lf.enums.category.STRATEGY,
+            ctx.group,
+            ctx.name,
+            ctx.runtime_locator,
         )
         ctx.logger = create_logger(ctx.name, ctx.log_level, ctx.location)
         ctx.strategy = load_strategy(ctx, ctx.path)

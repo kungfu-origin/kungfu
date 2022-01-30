@@ -4,7 +4,7 @@ import sys
 from os.path import abspath, dirname
 
 base_dir = dirname(abspath(dirname(__file__)))
-python_dir = os.path.join(base_dir, 'src', "python")
+python_dir = os.path.join(base_dir, "src", "python")
 kfc_dir = os.path.join(base_dir, "dist", "kfc")
 build_info_file = os.path.join(kfc_dir, "kungfubuildinfo.json")
 

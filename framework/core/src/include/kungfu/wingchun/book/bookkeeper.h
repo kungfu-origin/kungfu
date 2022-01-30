@@ -46,7 +46,7 @@ public:
 
   void update_book(const event_ptr &event, const longfist::types::Quote &quote);
 
-  void update_book(const longfist::types::Quote& quote);
+  void update_book(const longfist::types::Quote &quote);
 
   template <typename TradingData, typename ApplyMethod = void (AccountingMethod::*)(Book_ptr, const TradingData &)>
   void update_book(const event_ptr &event, ApplyMethod method) {
@@ -91,7 +91,6 @@ private:
   Book_ptr make_book(uint32_t location_uid);
 
   void update_instrument(const longfist::types::Instrument &instrument);
-
 
   void try_update_asset(const longfist::types::Asset &asset);
 

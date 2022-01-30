@@ -1,5 +1,6 @@
 {
   "name": "@kungfu-trader/kungfu-workspaces",
+  "homepage": "https://www.kungfu-trader.com",
   "author": {
     "name": "kungfu-trader",
     "email": "info@kungfu.link"
@@ -21,16 +22,12 @@
   },
   "scripts": {
     "foreach": "wsrun --serial --exclude-missing --fast-exit",
-    "postinstall": "yarn foreach setup",
+    "format": "wsrun --serial --exclude-missing format",
+    "prebuild": "yarn install --frozen-lockfile && yarn format",
     "build": "yarn foreach build",
     "clean": "yarn foreach clean",
-    "format": "yarn foreach format",
-    "lint": "eslint --ext .ts .",
-    "package": "yarn foreach package",
     "rebuild": "yarn clean && yarn build",
-    "reformat": "prettier --write --parser typescript",
-    "reformat:ts": "yarn reformat \"(framework|extensions|developer|artifact)/**/*.ts?(x)\"",
-    "reformat:js": "yarn reformat \"(framework|extensions|developer|artifact)/**/*.js\""
+    "package": "yarn foreach package"
   },
   "dependencies": {
     "lerna": "^4.0.0",

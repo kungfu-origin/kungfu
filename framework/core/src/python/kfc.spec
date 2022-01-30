@@ -69,16 +69,20 @@ data_nuitka_scons = make_path(nuitka_build_src_dir, "*.scons")
 
 def extend_datas(datas, src_dirs, build_dirs, packages):
     def add_include(path):
-        deque(map(
-            lambda include: datas.append((include, "include")),
-            glob.glob(make_path(path, "**", "include"), recursive=True),
-        ))
+        deque(
+            map(
+                lambda include: datas.append((include, "include")),
+                glob.glob(make_path(path, "**", "include"), recursive=True),
+            )
+        )
 
     def add_lib(path):
-        deque(map(
-            lambda lib: datas.append((lib, ".")),
-            glob.glob(make_path(path, "**", "*.lib"), recursive=True),
-        ))
+        deque(
+            map(
+                lambda lib: datas.append((lib, ".")),
+                glob.glob(make_path(path, "**", "*.lib"), recursive=True),
+            )
+        )
 
     deque(map(add_include, src_dirs))
     deque(map(add_lib, build_dirs))
@@ -141,6 +145,7 @@ a = Analysis(
     ),
     hiddenimports=extend_hiddenimports(
         modules=[
+            "black",
             "pip._internal",
             "pip._vendor",
             "pkg_resources",

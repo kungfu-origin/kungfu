@@ -45,9 +45,7 @@ public:
   using BrokerVendor::BrokerVendor;
 
 protected:
-  BrokerService_ptr get_service() override {
-    PYBIND11_OVERLOAD_PURE(BrokerService_ptr, BrokerVendor, get_service);
-  }
+  BrokerService_ptr get_service() override { PYBIND11_OVERLOAD_PURE(BrokerService_ptr, BrokerVendor, get_service); }
 };
 
 class PyMarketData : public MarketData {
@@ -252,8 +250,7 @@ void bind(pybind11::module &&m) {
       .def_property_readonly("home", &BrokerVendor::get_home)
       .def("run", &BrokerVendor::run);
 
-  py::class_<MarketData, PyMarketData, std::shared_ptr<MarketData>>(
-      m, "MarketData")
+  py::class_<MarketData, PyMarketData, std::shared_ptr<MarketData>>(m, "MarketData")
       .def(py::init<BrokerVendor &>())
       .def_property_readonly("state", &MarketData::get_state)
       .def_property_readonly("runtime_folder", &MarketData::get_runtime_folder)

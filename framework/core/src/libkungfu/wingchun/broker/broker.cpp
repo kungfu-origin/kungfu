@@ -17,8 +17,7 @@ using namespace kungfu::yijinjing::data;
 using namespace kungfu::yijinjing::journal;
 
 namespace kungfu::wingchun::broker {
-BrokerVendor::BrokerVendor(location_ptr location, bool low_latency)
-    : apprentice(std::move(location), low_latency) {
+BrokerVendor::BrokerVendor(location_ptr location, bool low_latency) : apprentice(std::move(location), low_latency) {
   log::copy_log_settings(get_home(), get_home()->name);
 }
 

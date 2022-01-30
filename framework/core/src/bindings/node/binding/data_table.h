@@ -16,7 +16,7 @@ public:
 
   Napi::Value Filter(const Napi::CallbackInfo &info);
 
-  Napi::Value NoFilter(const Napi::CallbackInfo& info);
+  Napi::Value NoFilter(const Napi::CallbackInfo &info);
 
   Napi::Value List(const Napi::CallbackInfo &info);
 
