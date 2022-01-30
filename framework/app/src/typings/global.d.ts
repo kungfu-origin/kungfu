@@ -1,8 +1,6 @@
 import { Subject } from 'rxjs';
 import { StoreDefinition } from 'pinia';
-import { Pm2ProcessStatusTypes } from '@kungfu-trader/kungfu-js-api/utils/processUtils';
 import { GlobalCategoryRegister } from '@renderer/assets/methods/uiExtraLocationUtils';
-import { ProcessDescriptor } from 'ps-list';
 
 declare module '@vue/runtime-core' {
   interface ComponentCustomProperties {
@@ -24,8 +22,8 @@ declare global {
       APP_TYPE: 'cli' | 'dzxy' | 'renderer' | 'component' | 'main';
       RENDERER_TYPE: 'app' | 'admin' | 'logview' | 'makeOrder' | 'codeEditor';
       RELOAD_AFTER_CRASHED: 'false' | 'true';
-      ELECTRON_RUN_AS_NODE: Boolean;
-      ELECTRON_ENABLE_STACK_DUMPING: Boolean;
+      ELECTRON_RUN_AS_NODE: boolean;
+      ELECTRON_ENABLE_STACK_DUMPING: boolean;
     }
   }
 }

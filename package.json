@@ -21,24 +21,30 @@
     "yarn": "^1.18.0"
   },
   "scripts": {
+    "dev": "yarn workspace @kungfu-trader/kungfu-artifact dev",
     "foreach": "wsrun --serial --exclude-missing --fast-exit",
     "format": "wsrun --serial --exclude-missing format",
-    "prebuild": "yarn install --frozen-lockfile && yarn format",
+    "prebuild": "yarn sync && yarn format",
     "build": "yarn foreach build",
     "clean": "yarn foreach clean",
+    "package": "yarn foreach package",
     "rebuild": "yarn clean && yarn build",
-    "dev": "yarn workspace @kungfu-trader/kungfu-artifact dev",
-    "package": "yarn foreach package"
+    "sync": "cross-env KF_SKIP_FALLBACK_BUILD=true yarn install --frozen-lockfile"
   },
   "dependencies": {
     "lerna": "^4.0.0",
-    "wsrun": "^5.0.0"
+    "wsrun": "^5.2.0"
+  },
+  "devDependencies": {
+    "cross-env": "^7.0.0"
   },
   "resolutions": {
+    "ansi-regex": "^5.0.1",
     "axios": "^0.21.1",
-    "core-js": "^3.16.0",
+    "core-js": "^3.20.0",
     "highlight.js": "^11.0.0",
     "lodash.merge": "^4.6.2",
+    "node-fetch": "^2.6.7",
     "node-gyp": "^8.0.0",
     "uuid": "^7.0.0"
   }

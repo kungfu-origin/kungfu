@@ -21,8 +21,7 @@
     "make:webpack": "node lib/webpack/build.js",
     "make:electron": "node lib/electron/build.js",
     "make": "yarn run make:webpack && yarn run make:electron",
-    "test:e2e": "vue-cli-service test:e2e",
-    "lint": "vue-cli-service lint",
+    "lint": "eslint src",
     "format": "prettier -l -w --config ../../.prettierrc.js ."
   },
   "dependencies": {
@@ -33,10 +32,11 @@
   "devDependencies": {
     "@electron/remote": "^2.0.1",
     "@kungfu-trader/kungfu-toolchain": "^2.4.0-alpha.4",
+    "@vue/compiler-sfc": "^3.1.0",
     "ant-design-vue": "^3.0.0-beta.7",
-    "core-js": "^3.6.5",
+    "core-js": "^3.20.0",
     "dayjs": "^1.10.7",
-    "electron": "13.2.0",
+    "electron": "13.6.8",
     "electron-builder": "^22.14.5",
     "electron-debug": "^3.2.0",
     "fast-stats": "^0.0.6",
@@ -48,6 +48,7 @@
     "rxjs": "^7.5.1",
     "tail": "^2.2.4",
     "vue": "^3.2.26",
-    "vue-virtual-scroller": "^2.0.0-alpha.1"
+    "vue-virtual-scroller": "^2.0.0-alpha.1",
+    "vue-router": "^4.0.0"
   }
 }

@@ -649,8 +649,9 @@ export const usePreStartAndQuitApp = (): {
   }, 500);
 
   const saveBoardsMap = (): Promise<void> => {
-    if (app?.proxy) {
-      const { boardsMap } = app?.proxy.$useGlobalStore();
+    const proxy = app?.proxy;
+    if (proxy) {
+      const { boardsMap } = proxy.$useGlobalStore();
       localStorage.setItem('boardsMap', JSON.stringify(boardsMap));
       return Promise.resolve();
     }
