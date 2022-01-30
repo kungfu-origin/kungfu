@@ -23,7 +23,7 @@
     "make": "yarn run make:webpack && yarn run make:electron",
     "test:e2e": "vue-cli-service test:e2e",
     "lint": "vue-cli-service lint",
-    "format": "prettier -l -w --config .prettierrc.js ."
+    "format": "prettier -l -w --config ../../.prettierrc.js ."
   },
   "dependencies": {
     "@kungfu-trader/kungfu-js-api": "^2.4.0-alpha.4",

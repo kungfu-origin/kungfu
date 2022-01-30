@@ -11,7 +11,7 @@
   "scripts": {
     "patch": "./node_modules/.bin/patch-package",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "format": "prettier -l -w --config .prettierrc.js ."
+    "format": "prettier -l -w --config ../../.prettierrc.js ."
   },
   "license": "Apache-2.0",
   "dependencies": {

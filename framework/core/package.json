@@ -53,7 +53,7 @@
     "format": "yarn format:cpp && yarn format:python && yarn format:js",
     "format:cpp": "pipenv run conan source .",
     "format:python": "pipenv run python -m black src src/*/*.spec .*/*.py",
-    "format:js": "prettier --write --parser typescript \"(.gyp|lib)/**.js\"",
+    "format:js": "prettier -l -w --config ../../.prettierrc.js \"(.gyp|lib)/**.js\"",
     "dev": "pipenv run python .devtools/kfc.py",
     "kfc": "node lib/kfc.js"
   },
