@@ -27,7 +27,6 @@
     "prebuild": "yarn sync && yarn format",
     "build": "yarn foreach build",
     "clean": "yarn foreach clean",
-    "make": "yarn foreach build",
     "package": "yarn foreach package",
     "rebuild": "yarn clean && yarn build",
     "sync": "yarn install --audit --frozen-lockfile --ignore-scripts"

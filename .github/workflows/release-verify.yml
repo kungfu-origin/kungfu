@@ -70,7 +70,8 @@ jobs:
           KF_SKIP_FALLBACK_BUILD: true
 
       - name: Build Kungfu
-        run: yarn make
+        # skip prebuild script to not format code
+        run: yarn foreach build
 
       - name: Upload Kungfu Build Info
         uses: actions/upload-artifact@v2
