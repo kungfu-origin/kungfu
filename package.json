@@ -30,14 +30,11 @@
     "make": "yarn foreach build",
     "package": "yarn foreach package",
     "rebuild": "yarn clean && yarn build",
-    "sync": "cross-env KF_SKIP_FALLBACK_BUILD=true yarn install --frozen-lockfile"
+    "sync": "yarn install --audit --frozen-lockfile --ignore-scripts"
   },
   "dependencies": {
     "lerna": "^4.0.0",
     "wsrun": "^5.2.0"
-  },
-  "devDependencies": {
-    "cross-env": "^7.0.0"
   },
   "resolutions": {
     "ansi-regex": "^5.0.1",
