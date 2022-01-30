@@ -78,7 +78,9 @@ function generateCMakeFiles(projectName, kungfuBuild) {
   const cppSources = [kungfuBuild.cpp.src || ['src/cpp']].flat();
 
   const cppLinksOpt = kungfuBuild.cpp.links || [];
-  const cppLinks = Array.isArray(cppLinksOpt) ? cppLinksOpt : cppLinksOpt[detectPlatform()];
+  const cppLinks = Array.isArray(cppLinksOpt)
+    ? cppLinksOpt
+    : cppLinksOpt[detectPlatform()];
 
   const buildDir = path.join(process.cwd(), 'build');
   fse.ensureDirSync(buildDir);
@@ -87,7 +89,11 @@ function generateCMakeFiles(projectName, kungfuBuild) {
     require.resolve('@kungfu-trader/kungfu-sdk/templates/kungfu.cmake'),
     {
       kfcDir: path
-        .dirname(require.resolve('@kungfu-trader/kungfu-core/dist/kfc/kungfubuildinfo.json'))
+        .dirname(
+          require.resolve(
+            '@kungfu-trader/kungfu-core/dist/kfc/kungfubuildinfo.json',
+          ),
+        )
         .replace(/\\/g, '/'),
       includes: glob.sync(path.join(kungfuLibDirPattern, 'include')),
       links: glob.sync(path.join(kungfuLibDirPattern, 'lib')),
@@ -97,7 +103,8 @@ function generateCMakeFiles(projectName, kungfuBuild) {
       targetLinks: cppLinks.join(' '),
     },
     (err, str) => {
-      logError(err) || fse.writeFileSync(path.join(buildDir, 'kungfu.cmake'), str);
+      logError(err) ||
+        fse.writeFileSync(path.join(buildDir, 'kungfu.cmake'), str);
     },
   );
 
@@ -111,7 +118,8 @@ function generateCMakeFiles(projectName, kungfuBuild) {
       projectName: projectName,
     },
     (err, str) => {
-      logError(err) || fse.writeFileSync(path.join(process.cwd(), 'CMakeLists.txt'), str);
+      logError(err) ||
+        fse.writeFileSync(path.join(process.cwd(), 'CMakeLists.txt'), str);
     },
   );
 }
@@ -119,11 +127,19 @@ function generateCMakeFiles(projectName, kungfuBuild) {
 const DefaultLibSiteURL_CN = 'https://external.libkungfu.cc';
 const DefaultLibSiteURL_US = 'https://external.libkungfu.io';
 
-exports.DefaultLibSiteURL = process.env.GITHUB_ACTIONS ? DefaultLibSiteURL_US : DefaultLibSiteURL_CN;
+exports.DefaultLibSiteURL = process.env.GITHUB_ACTIONS
+  ? DefaultLibSiteURL_US
+  : DefaultLibSiteURL_CN;
 
 exports.detectPlatform = detectPlatform;
 
-exports.list = async (libSiteURL, matchName, matchVersion, listVersion = true, listPlatform = false) => {
+exports.list = async (
+  libSiteURL,
+  matchName,
+  matchVersion,
+  listVersion = true,
+  listPlatform = false,
+) => {
   const getPlatformImplementations = (targetLibVersion, sourceLibVersion) => {
     if ('lib' in sourceLibVersion) {
       for (const osName in sourceLibVersion['lib']) {
@@ -136,7 +152,10 @@ exports.list = async (libSiteURL, matchName, matchVersion, listVersion = true, l
       if (!libVersion.match(matchVersion)) continue;
       targetLib[libVersion] = {};
       if (listPlatform) {
-        getPlatformImplementations(targetLib[libVersion], sourceLib[libVersion]);
+        getPlatformImplementations(
+          targetLib[libVersion],
+          sourceLib[libVersion],
+        );
       }
     }
   };
@@ -153,7 +172,13 @@ exports.list = async (libSiteURL, matchName, matchVersion, listVersion = true, l
   return targetLibs;
 };
 
-exports.installSingleLib = async (libSiteURL, libName, libVersion, platform = detectPlatform(), arch = os.arch()) => {
+exports.installSingleLib = async (
+  libSiteURL,
+  libName,
+  libVersion,
+  platform = detectPlatform(),
+  arch = os.arch(),
+) => {
   const index = await axios.get(`${libSiteURL}/index.json`);
   const sourceLibs = index.data;
 
@@ -180,7 +205,9 @@ exports.installSingleLib = async (libSiteURL, libName, libVersion, platform = de
 
       const writer = fse.createWriteStream(localFilePath);
       writer.on('finish', () => onFinish(localFilePath));
-      writer.on('error', () => console.error(`-- Failed to download ${remoteFileURL}`));
+      writer.on('error', () =>
+        console.error(`-- Failed to download ${remoteFileURL}`),
+      );
 
       const response = await axios({
         url: remoteFileURL,
@@ -217,17 +244,28 @@ exports.installSingleLib = async (libSiteURL, libName, libVersion, platform = de
   await downloadFiles(
     binDir,
     libInfo.lib[platform][arch],
-    (file) => `${libSiteURL}/${libName}/${libVersion}/lib/${platform}/${arch}/${file}`,
+    (file) =>
+      `${libSiteURL}/${libName}/${libVersion}/lib/${platform}/${arch}/${file}`,
     (localFilePath) => fse.chmodSync(localFilePath, '0755'),
   );
 };
 
-exports.installBatch = async (libSiteURL, platform = detectPlatform(), arch = os.arch()) => {
+exports.installBatch = async (
+  libSiteURL,
+  platform = detectPlatform(),
+  arch = os.arch(),
+) => {
   const packageJson = getPackageJson();
   if ('kungfuDependencies' in packageJson) {
     const libs = packageJson.kungfuDependencies;
     for (const libName in libs) {
-      await this.installSingleLib(libSiteURL, libName, libs[libName], platform, arch);
+      await this.installSingleLib(
+        libSiteURL,
+        libName,
+        libs[libName],
+        platform,
+        arch,
+      );
     }
   }
   if (hasSourceFor(packageJson, 'python')) {

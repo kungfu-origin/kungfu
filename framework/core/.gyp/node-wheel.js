@@ -8,8 +8,12 @@ const buildDir = path.join('build', buildType);
 const wheelDir = path.join('build', 'python');
 
 fse.removeSync(wheelDir);
-fse.copySync(srcDir, wheelDir, { filter: (p) => !path.basename(p).startsWith('kfc.') });
-fse.copySync(buildDir, wheelDir, { filter: (p) => !path.basename(p).endsWith('.node') });
+fse.copySync(srcDir, wheelDir, {
+  filter: (p) => !path.basename(p).startsWith('kfc.'),
+});
+fse.copySync(buildDir, wheelDir, {
+  filter: (p) => !path.basename(p).endsWith('.node'),
+});
 
 const pipenv_args = ['run', 'python', 'setup.py', 'bdist_wheel'];
 

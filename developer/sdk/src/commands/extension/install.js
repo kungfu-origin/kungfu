@@ -34,7 +34,13 @@ module.exports = {
   },
   run: async (argv) => {
     if (argv.libName) {
-      await sdk.lib.extension.install(argv.url, argv.libName, argv.libVersion, argv.os, argv.arch);
+      await sdk.lib.extension.install(
+        argv.url,
+        argv.libName,
+        argv.libVersion,
+        argv.os,
+        argv.arch,
+      );
     } else {
       await sdk.lib.extension.installBatch(argv.url, argv.os, argv.arch);
     }

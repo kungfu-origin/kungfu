@@ -8,10 +8,17 @@ function conan(cmd) {
 }
 
 function getNodeVersionOptions() {
-  const packageJson = fse.readJsonSync(path.resolve(path.dirname(__dirname), 'package.json'));
+  const packageJson = fse.readJsonSync(
+    path.resolve(path.dirname(__dirname), 'package.json'),
+  );
   const electronVersion = packageJson.dependencies['electron'];
   const nodeVersion = packageJson.devDependencies['@kungfu-trader/libnode'];
-  return ['-o', `electron_version=${electronVersion}`, '-o', `node_version=${nodeVersion}`];
+  return [
+    '-o',
+    `electron_version=${electronVersion}`,
+    '-o',
+    `node_version=${nodeVersion}`,
+  ];
 }
 
 function makeConanSetting(name) {
@@ -35,7 +42,16 @@ const cli = require('sywac')
     run: () => {
       const settings = makeConanSettings(['build_type']);
       const options = makeConanOptions(['arch', 'log_level', 'freezer']);
-      conan(['install', '.', '-if', 'build', '--build', 'missing', ...settings, ...options]);
+      conan([
+        'install',
+        '.',
+        '-if',
+        'build',
+        '--build',
+        'missing',
+        ...settings,
+        ...options,
+      ]);
     },
   })
   .command('build', {
@@ -47,7 +63,15 @@ const cli = require('sywac')
   .command('package', {
     run: () => {
       const conanSettings = makeConanSettings(['build_type']);
-      conan(['package', '.', '-bf', 'build', '-pf', path.join('dist', 'kfc'), ...conanSettings]);
+      conan([
+        'package',
+        '.',
+        '-bf',
+        'build',
+        '-pf',
+        path.join('dist', 'kfc'),
+        ...conanSettings,
+      ]);
     },
   })
   .help('--help')

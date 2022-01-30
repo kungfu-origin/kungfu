@@ -5,7 +5,8 @@ module.exports = function (module, setup, opts = {}) {
     opts.tolerant || process.exit(-1);
   };
   setup(cli);
-  opts.silent || cli.help('-h, --help').version('-v, --version').showHelpByDefault();
+  opts.silent ||
+    cli.help('-h, --help').version('-v, --version').showHelpByDefault();
   require.main === module && cli.parseAndExit().catch(errorHandler);
   return cli;
 };
