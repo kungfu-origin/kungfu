@@ -171,7 +171,7 @@ export const registerScheduleTasks = async (
     reloadAfterCrashed: boolean,
     reloadBySchedule: boolean,
   ) => void,
-) => {
+): Promise<boolean> => {
   await schedule.gracefulShutdown();
   const scheduleTasks = await getScheduleTasks();
   const allKfConfig = await getAllKfConfigOriginData();
@@ -288,4 +288,6 @@ export const registerScheduleTasks = async (
         });
       }
     });
+
+  return true;
 };

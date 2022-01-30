@@ -27,18 +27,12 @@
     "build": "yarn foreach build",
     "clean": "yarn foreach clean",
     "rebuild": "yarn clean && yarn build",
+    "dev": "yarn workspace @kungfu-trader/kungfu-artifact dev",
     "package": "yarn foreach package"
   },
   "dependencies": {
     "lerna": "^4.0.0",
     "wsrun": "^5.0.0"
-  },
-  "devDependencies": {
-    "@typescript-eslint/parser": "^4.29.0",
-    "@typescript-eslint/eslint-plugin": "^4.29.0",
-    "eslint": "^7.14.0",
-    "prettier": "^2.3.0",
-    "typescript": "~4.4.0"
   },
   "resolutions": {
     "axios": "^0.21.1",
