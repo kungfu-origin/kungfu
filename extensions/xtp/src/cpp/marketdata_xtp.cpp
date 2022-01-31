@@ -2,19 +2,35 @@
 // Created by qlu on 2019/2/11.
 //
 
+#include "type_convert.h"
 #include "marketdata_xtp.h"
-#include "serialize_xtp.h"
-#include "type_convert_xtp.h"
 
 namespace kungfu::wingchun::xtp {
-MarketDataXTP::MarketDataXTP(bool low_latency, yijinjing::data::locator_ptr locator, const std::string &json_config)
-    : MarketData(low_latency, std::move(locator), SOURCE_XTP), api_(nullptr) {
-  yijinjing::log::copy_log_settings(get_io_device()->get_home(), SOURCE_XTP);
-  config_ = nlohmann::json::parse(json_config);
-  if (config_.client_id < 1 or config_.client_id > 99) {
-    throw wingchun_error("client_id must between 1 and 99");
+struct MDConfiguration {
+  int client_id;
+  std::string account_id;
+  std::string password;
+  std::string md_ip;
+  int md_port;
+  std::string protocol;
+  int buffer_size;
+};
+
+void from_json(const nlohmann::json &j, MDConfiguration &c) {
+  j.at("client_id").get_to(c.client_id);
+  j.at("account_id").get_to(c.account_id);
+  j.at("password").get_to(c.password);
+  j.at("md_ip").get_to(c.md_ip);
+  j.at("md_port").get_to(c.md_port);
+  c.protocol = j.value("protocol", "tcp");
+  if (c.protocol != "udp") {
+    c.protocol = "tcp";
   }
+  c.buffer_size = j.value("buffer_size", 64);
 }
+
+MarketDataXTP::MarketDataXTP(broker::BrokerVendor &vendor)
+    : MarketData(vendor), api_(nullptr) {}
 
 MarketDataXTP::~MarketDataXTP() {
   if (api_ != nullptr) {
@@ -23,22 +39,25 @@ MarketDataXTP::~MarketDataXTP() {
 }
 
 void MarketDataXTP::on_start() {
-  MarketData::on_start();
-  auto md_ip = config_.md_ip.c_str();
-  auto account_id = config_.account_id.c_str();
-  auto password = config_.password.c_str();
-  auto protocol_type = get_xtp_protocol_type(config_.protocol);
+  MDConfiguration config = nlohmann::json::parse(get_config());
+  if (config.client_id < 1 or config.client_id > 99) {
+    throw wingchun_error("client_id must between 1 and 99");
+  }
+  auto md_ip = config.md_ip.c_str();
+  auto account_id = config.account_id.c_str();
+  auto password = config.password.c_str();
+  auto protocol_type = get_xtp_protocol_type(config.protocol);
   std::string runtime_folder = get_runtime_folder();
-  SPDLOG_INFO("Connecting XTP MD for {} at {}://{}:{}", account_id, config_.protocol, md_ip, config_.md_port);
-  api_ = XTP::API::QuoteApi::CreateQuoteApi(config_.client_id, runtime_folder.c_str());
-  if (config_.protocol == "udp") {
-    api_->SetUDPBufferSize(config_.buffer_size);
+  SPDLOG_INFO("Connecting XTP MD for {} at {}://{}:{}", account_id, config.protocol, md_ip, config.md_port);
+  api_ = XTP::API::QuoteApi::CreateQuoteApi(config.client_id, runtime_folder.c_str());
+  if (config.protocol == "udp") {
+    api_->SetUDPBufferSize(config.buffer_size);
   }
   api_->RegisterSpi(this);
-  if (api_->Login(md_ip, config_.md_port, account_id, password, protocol_type) == 0) {
+  if (api_->Login(md_ip, config.md_port, account_id, password, protocol_type) == 0) {
     update_broker_state(BrokerState::LoggedIn);
     update_broker_state(BrokerState::Ready);
-    SPDLOG_INFO("login success! (account_id) {}", config_.account_id);
+    SPDLOG_INFO("login success! (account_id) {}", config.account_id);
     api_->QueryAllTickers(XTP_EXCHANGE_SH);
     api_->QueryAllTickers(XTP_EXCHANGE_SZ);
   } else {

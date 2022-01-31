@@ -11,12 +11,18 @@ jobs:
   release:
     if: ${{ github.event.pull_request.merged }}
     runs-on: ubuntu-20.04
-    container: 'docker.io/kungfutrader/kungfu-builder-centos:v1.0.1'
     env:
       NODE_AUTH_TOKEN: ${{ secrets.KUNGFU_GITHUB_TOKEN }}
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@kungfu-trader'
 
       - name: Bump Version
         uses: kungfu-trader/action-bump-version@v3

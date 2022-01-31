@@ -1,0 +1,90 @@
+{
+  "name": "@kungfu-trader/kfx-sim",
+  "author": {
+    "name": "kungfu-trader",
+    "email": "info@kungfu.link"
+  },
+  "version": "2.4.0-alpha.4",
+  "description": "Kungfu Extension - SIM",
+  "license": "Apache-2.0",
+  "repository": {
+    "url": "https://github.com/kungfu-trader/kungfu.git"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "scripts": {
+    "build": "kfs extension roast",
+    "clean": "kfs extension clean"
+  },
+  "devDependencies": {
+    "@kungfu-trader/kungfu-sdk": "^2.4.0-alpha.4"
+  },
+  "kungfuBuild": {
+    "python": {
+      "dependencies": {
+        "dotted_dict": "~=1.1.0",
+        "recordclass": "~=0.17.0",
+        "sortedcontainers": "~=2.4.0"
+      }
+    }
+  },
+  "kungfuConfig": {
+    "key": "sim",
+    "name": "SIM",
+    "config": {
+      "td": {
+        "type": "simu",
+        "settings": [
+          {
+            "key": "account_id",
+            "name": "account_id",
+            "type": "str",
+            "errMsg": "请填写账户 account_id",
+            "required": true,
+            "primary": true,
+            "validator": [
+              "noUnderlineValidator"
+            ]
+          },
+          {
+            "key": "match_mode",
+            "name": "match_mode",
+            "type": "select",
+            "options": [
+              {
+                "value": "reject",
+                "label": "Reject"
+              },
+              {
+                "value": "pend",
+                "label": "Pend"
+              },
+              {
+                "value": "cancel",
+                "label": "Cancel"
+              },
+              {
+                "value": "partialfillandcancel",
+                "label": "PartialFillAndCancel"
+              },
+              {
+                "value": "partialfill",
+                "label": "PartialFillAndPending"
+              },
+              {
+                "value": "fill",
+                "label": "Fill"
+              }
+            ],
+            "errMsg": "请选择撮合模式",
+            "required": true
+          }
+        ]
+      },
+      "md": {
+        "type": "simu"
+      }
+    }
+  }
+}

@@ -1,0 +1,67 @@
+{
+  "name": "@kungfu-trader/kungfu-toolchain",
+  "author": {
+    "name": "kungfu-trader",
+    "email": "info@kungfu.link"
+  },
+  "version": "2.4.0-alpha.4",
+  "description": "Toolchain for Kungfu Development (babel/cmake-js/node-gyp/webpack/yarn/etc).",
+  "license": "Apache-2.0",
+  "main": "package.json",
+  "repository": {
+    "url": "https://github.com/kungfu-trader/kungfu.git"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "engines": {
+    "node": ">=14 <15",
+    "yarn": "^1.18.0"
+  },
+  "dependencies": {
+    "@babel/core": "^7.0.0",
+    "@types/node": "^16.11.10",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "@vercel/webpack-asset-relocator-loader": "^1.7.0",
+    "@vue/cli-plugin-babel": "^5.0.0-0",
+    "@vue/compiler-sfc": "^3.1.0",
+    "@vue/eslint-config-prettier": "^6.0.0",
+    "@vue/eslint-config-typescript": "^9.1.0",
+    "add": "^2.0.6",
+    "babel-loader": "^8.2.3",
+    "babel-plugin-import": "^1.13.3",
+    "cfonts": "^2.10.0",
+    "css-loader": "^6.5.1",
+    "eslint": "^8.0.0",
+    "eslint-plugin-prettier": "^3.3.1",
+    "eslint-plugin-vue": "^8.4.0",
+    "eslint-webpack-plugin": "^3.1.1",
+    "file-loader": "^6.2.0",
+    "html-webpack-plugin": "^5.5.0",
+    "less": "^4.1.2",
+    "less-loader": "^6.0.0",
+    "multispinner": "^0.2.1",
+    "node-loader": "^2.0.0",
+    "postcss": "^8.4.3",
+    "postcss-loader": "^6.2.0",
+    "prettier": "^2.2.1",
+    "rimraf": "^3.0.2",
+    "semver": "^7.3.5",
+    "style-loader": "^3.3.1",
+    "ts-loader": "^9.2.6",
+    "typescript": "~4.4.0",
+    "url-loader": "^4.1.1",
+    "vue": "^3.0.0",
+    "vue-loader": "^17.0.0",
+    "webpack": "^5.64.2",
+    "webpack-dev-server": "^4.6.0",
+    "webpack-merge": "^5.8.0",
+    "worker-loader": "^3.0.8",
+    "yarn": "^1.18.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.8.0",
+    "eslint-plugin-vue": "^8.4.0"
+  }
+}

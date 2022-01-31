@@ -2,10 +2,15 @@ const NodeGlobals = ['module', 'require'];
 
 module.exports = {
     root: true,
-    parser: '@typescript-eslint/parser',
-    parserOptions: {
-        sourceType: 'module',
-    },
+    "parser": "@typescript-eslint/parser",
+    "plugins": [
+        "@typescript-eslint"
+    ],
+    "extends": [
+        "eslint:recommended",
+        "plugin:@typescript-eslint/eslint-recommended",
+        "plugin:@typescript-eslint/recommended"
+    ],
     rules: {
         'no-unused-vars': [
             'error',

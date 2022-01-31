@@ -1,4 +1,8 @@
 # Use pipenv to make a virtualenv and ensure python version.
-# Then let poetry to manager dependencies.
+# Then let poetry to manage the other dependencies.
+
 [packages]
-poetry = "==1.1.7"
+poetry = "==1.1.12"
+pip = "==21.3.1"
+setuptools = "==59.8.0"
+wheel = "==0.37.1"

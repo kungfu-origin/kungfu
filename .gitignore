@@ -14,21 +14,21 @@
 *.log
 
 # Node related
-package-lock.json
-yarn.lock
-dist/
 node_modules/
 
 # Python related
-.pdm.toml
-.installed.cfg
 __pycache__/
 __pypackages__/
+.pdm.toml
 *.pyc
 *.egg-info/
 *.egg
+
+# Kungfu related
+__kungfulibs__/
 
 # Build related
 build/
 build-*/
 cmake-build-debug/
+dist/

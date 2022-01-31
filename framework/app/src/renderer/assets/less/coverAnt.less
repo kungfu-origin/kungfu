@@ -1,0 +1,67 @@
+.ant-card {
+  .ant-card-body {
+    height: 100%;
+    padding: 0;
+    box-sizing: border-box;
+  }
+}
+
+.ant-table-wrapper {
+  &.kf-ant-table {
+    height: 100%;
+
+    .ant-spin-nested-loading {
+      height: 100%;
+
+      .ant-spin-container {
+        height: 100%;
+
+        .ant-table {
+          height: 100%;
+
+          .ant-table-container {
+            height: 100%;
+
+            .ant-table-body {
+              height: calc(100% - 35px);
+              overflow-y: overlay !important;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+.ant-table-tbody {
+  overflow-y: overlay;
+  overflow-x: overlay;
+
+  & > tr > td {
+    border: none;
+    cursor: pointer;
+  }
+
+  & > tr.ant-table-row.current-global-kfLocation > td {
+    background: @tooltip-bg;
+  }
+
+  .ant-table-thead
+    th.ant-table-column-has-sorters.ant-table-cell-fix-left:hover,
+  .ant-table-thead
+    th.ant-table-column-has-sorters.ant-table-cell-fix-right:hover {
+    background: @table-header-filter-active-bg;
+  }
+}
+
+.ant-spin.ant-spin-spinning {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}

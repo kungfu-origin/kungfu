@@ -1,0 +1,5 @@
+{
+  "performance": { "rocket": false, "bypassQuote": false },
+  "strategy": { "python": false },
+  "system": { "logLevel": "-l info" }
+}

@@ -5,18 +5,13 @@
 #ifndef KUNGFU_XTP_EXT_MARKET_DATA_H
 #define KUNGFU_XTP_EXT_MARKET_DATA_H
 
-#include <kungfu/common.h>
-#include <kungfu/longfist/longfist.h>
 #include <kungfu/wingchun/broker/marketdata.h>
-#include <kungfu/yijinjing/common.h>
-
-#include "common.h"
-#include "xtp_quote_api.h"
+#include <xtp_quote_api.h>
 
 namespace kungfu::wingchun::xtp {
 class MarketDataXTP : public XTP::API::QuoteSpi, public broker::MarketData {
 public:
-  MarketDataXTP(bool low_latency, yijinjing::data::locator_ptr locator, const std::string &json_config);
+  explicit MarketDataXTP(broker::BrokerVendor &vendor);
 
   ~MarketDataXTP() override;
 
@@ -219,8 +214,7 @@ protected:
   void on_start() override;
 
 private:
-  MDConfiguration config_;
-  XTP::API::QuoteApi *api_;
+  XTP::API::QuoteApi *api_ {};
 
   bool subscribe(const std::vector<std::string> &instruments, const std::string &exchange_id);
 };

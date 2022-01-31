@@ -1,76 +1,74 @@
 {
   "name": "@kungfu-trader/kungfu-core",
-  "author": "kungfu-trader",
+  "author": {
+    "name": "kungfu-trader",
+    "email": "info@kungfu.link"
+  },
   "version": "2.4.0-alpha.4",
-  "description": "Kungfu Core",
+  "description": "Kungfu Core Library",
   "license": "Apache-2.0",
-  "main": "node/index.js",
+  "main": "lib/index.js",
   "repository": {
     "url": "https://github.com/kungfu-trader/kungfu.git"
   },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com"
   },
+  "bin": {
+    "kfc": "lib/kfc.js"
+  },
   "config": {
-    "electron_version": "4.2.11",
-    "node_version": "10.15.0",
-    "python_version": "3.7",
     "arch": "x64",
-    "buildtype": "Release",
-    "loglevel": "trace",
-    "bundle": "pyinstaller",
-    "pypi": "https://mirrors.aliyun.com/pypi/simple"
+    "build_type": "Release",
+    "log_level": "trace",
+    "python_version": "3.9",
+    "freezer": "pyinstaller",
+    "pypi_mirror": "https://mirrors.aliyun.com/pypi/simple"
   },
   "binary": {
     "module_name": "kungfu_node",
-    "module_path": "build/kfc",
+    "module_path": "dist/kfc",
     "remote_path": "kungfu-core/v{major}/v{version}",
     "package_name": "kfc-v{version}-{platform}-{arch}-{configuration}.tar.gz",
-    "host": "https://kungfu-prebuilt.s3.cn-northwest-1.amazonaws.com.cn"
+    "host": "https://prebuilt.libkungfu.cc"
   },
   "scripts": {
-    "preinstall": "node .build/config.js auto",
-    "install": "yarn run setup",
-    "postinstall": "node .build/config.js auto",
-    "setup": "cross-var node .build/node-pre-gyp.js --build-type $npm_package_config_buildtype install",
-    "prebuild": "node .build/config.js show",
-    "build": "cross-var node .build/node-pre-gyp.js --build-type $npm_package_config_buildtype build",
-    "configure": "cross-var pipenv run conan install . -if build -s build_type=$npm_package_config_buildtype --build missing -o log_level=$npm_package_config_loglevel -o arch=$npm_package_config_arch -o bundle=$npm_package_config_bundle  -o node_version=$npm_package_config_node_version -o electron_version=$npm_package_config_electron_version",
-    "compile": "cross-var pipenv run conan build . -bf build -s build_type=$npm_package_config_buildtype",
-    "bundle": "cross-var pipenv run conan package . -bf build -pf build/kfc -s build_type=$npm_package_config_buildtype",
-    "bundle:pyinstaller": "npm config delete @kungfu-trader/kungfu-core:bundle && yarn configure && yarn bundle",
-    "bundle:nuitka": "npm config set @kungfu-trader/kungfu-core:bundle nuitka && yarn configure && yarn bundle",
-    "package": "node .build/node-pre-gyp.js package",
+    "preinstall": "node .gyp/node-npm-config.js auto",
+    "install": "node .gyp/node-pre-gyp.js install",
+    "postinstall": "node .gyp/node-npm-config.js auto",
+    "link-node": "node .gyp/node-link.js",
+    "prebuild": "node .gyp/node-npm-config.js show",
+    "build": "node .gyp/node-pre-gyp.js build",
+    "rebuild": "node .gyp/node-pre-gyp.js rebuild",
+    "configure": "node .gyp/node-conan.js install",
+    "compile": "node .gyp/node-conan.js build",
+    "freeze": "node .gyp/node-conan.js package",
+    "wheel": "node .gyp/node-wheel.js",
+    "package": "node .gyp/node-pre-gyp.js package",
     "clean": "cmake-js clean",
-    "pipenv": "cross-var node .build/pipenv.js --python $npm_package_config_python_version --pypi-mirror $npm_package_config_pypi",
+    "pipenv": "node .gyp/node-pipenv.js",
     "poetry": "pipenv run python -m poetry",
     "pyinstaller": "pipenv run pyinstaller",
     "nuitka": "pipenv run python -m nuitka",
-    "touch": "node .build/touch.js",
-    "dev": "pipenv run python python/dev_run.py",
-    "test": "pipenv run python python/dev_test.py",
-    "rebuild": "yarn clean && yarn build",
-    "format": "yarn format:cpp && yarn format:js && yarn format:python",
+    "format": "yarn format:cpp && yarn format:python && yarn format:js",
     "format:cpp": "pipenv run conan source .",
-    "format:js": "prettier --write --parser typescript \"(.build|node)/**.js\"",
-    "format:python": "pipenv run python -m black python *.py"
-  },
-  "bin": {
-    "kfc": "build/kfc/kfc"
+    "format:python": "pipenv run python -m black src src/*/*.spec .*/*.py",
+    "format:js": "prettier -l -w --config ../../.prettierrc.js \"(.gyp|lib)/**.js\"",
+    "dev": "pipenv run python .devtools/kfc.py",
+    "kfc": "node lib/kfc.js"
   },
   "dependencies": {
-    "@mapbox/node-pre-gyp": "^1.0.5",
-    "fs-extra": "^9.1.0",
-    "glob": "^7.1.6",
-    "nan": "^2.14.2",
-    "node-addon-api": "^2.0.0",
-    "yargs": "^16.2.0"
+    "@mapbox/node-pre-gyp": "^1.0.0",
+    "electron": "13.6.8",
+    "fs-extra": "^10.0.0",
+    "glob": "^7.1.0",
+    "nan": "^2.15.0",
+    "node-addon-api": "^4.0.0",
+    "sywac": "^1.3.0"
   },
   "devDependencies": {
-    "cmake-js": "^6.2.0",
-    "cross-var": "^1.1.0",
-    "exit": "^0.1.2",
-    "node-gyp": "^7.1.0",
-    "yarn": "^1.22.0"
+    "@kungfu-trader/kungfu-toolchain": "^2.4.0-alpha.4",
+    "@kungfu-trader/libnode": "14.18.0",
+    "cmake-js": "^6.3.0"
   }
 }

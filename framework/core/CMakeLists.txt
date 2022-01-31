@@ -1,4 +1,4 @@
-# Copyright [2019] [taurus.ai]
+# Copyright [www.kungfu-trader.com]
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,50 +12,59 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-CMAKE_MINIMUM_REQUIRED(VERSION 3.15)
-PROJECT(kungfu)
+cmake_minimum_required(VERSION 3.15)
+project(kungfu)
 
-############################################################
+##########################################################################
 
-include(cmake/compiler.cmake)
-include(cmake/clion.cmake)
+include(.cmake/editor.cmake)
+include(.cmake/compiler.cmake)
+include(.cmake/libnode.cmake)
 include(build/conanbuildinfo.cmake)
 conan_basic_setup(KEEP_RPATHS NO_OUTPUT_DIRS SKIP_STD SKIP_FPIC)
 
-############################################################
+##########################################################################
 
-ADD_COMPILE_DEFINITIONS(HAVE_USLEEP=1)
+add_compile_definitions(HAVE_USLEEP=1)
 
-ADD_COMPILE_DEFINITIONS(SPDLOG_ACTIVE_LEVEL=${SPDLOG_LOG_LEVEL_COMPILE})
-ADD_COMPILE_DEFINITIONS(SPDLOG_NO_NAME)
-ADD_COMPILE_DEFINITIONS(SPDLOG_NO_ATOMIC_LEVELS)
+add_compile_definitions(SPDLOG_ACTIVE_LEVEL=${SPDLOG_LOG_LEVEL_COMPILE})
+add_compile_definitions(SPDLOG_NO_NAME)
+add_compile_definitions(SPDLOG_NO_ATOMIC_LEVELS)
 
-ADD_COMPILE_DEFINITIONS(SQLITE_ENABLE_COLUMN_METADATA)
-ADD_COMPILE_DEFINITIONS(SQLITE_ENABLE_JSON1)
-ADD_COMPILE_DEFINITIONS(SQLITE_ENABLE_SESSION)
-ADD_COMPILE_DEFINITIONS(SQLITE_ENABLE_PREUPDATE_HOOK)
-ADD_COMPILE_DEFINITIONS(SQLITE_ENABLE_DBSTAT_VTAB)
+add_compile_definitions(SQLITE_ENABLE_COLUMN_METADATA)
+add_compile_definitions(SQLITE_ENABLE_JSON1)
+add_compile_definitions(SQLITE_ENABLE_SESSION)
+add_compile_definitions(SQLITE_ENABLE_PREUPDATE_HOOK)
+add_compile_definitions(SQLITE_ENABLE_DBSTAT_VTAB)
 
-ADD_COMPILE_DEFINITIONS(SQLITE_MAX_MMAP_SIZE=134217728)
-ADD_COMPILE_DEFINITIONS(SQLITE_DEFAULT_MMAP_SIZE=1048576)
+add_compile_definitions(SQLITE_MAX_MMAP_SIZE=134217728)
+add_compile_definitions(SQLITE_DEFAULT_MMAP_SIZE=1048576)
 
-############################################################
+##########################################################################
 
-OPTION(NNG_TESTS "" OFF)
-OPTION(NNG_TOOLS "" OFF)
-OPTION(NNG_ENABLE_NNGCAT "" OFF)
+option(NNG_TESTS "" OFF)
+option(NNG_TOOLS "" OFF)
+option(NNG_ENABLE_NNGCAT "" OFF)
 
-############################################################
+##########################################################################
 
-INCLUDE_DIRECTORIES(deps/hana-1.7.0/include)
-INCLUDE_DIRECTORIES(deps/json-3.9.1/include)
-INCLUDE_DIRECTORIES(deps/sqlite3-3.33.0/include)
-INCLUDE_DIRECTORIES(deps/sqlite_orm-1.6/include)
-INCLUDE_DIRECTORIES(deps/nng-1.5.1/include)
-INCLUDE_DIRECTORIES(deps/tabulate-1.0/include)
-INCLUDE_DIRECTORIES(cpp/include)
+include_directories(.deps/hana-1.7.0/include)
+include_directories(.deps/json-3.10.5/include)
+include_directories(.deps/sqlite3-3.33.0/include)
+include_directories(.deps/sqlite_orm-1.7.1/include)
+include_directories(.deps/nng-1.5.2/include)
+include_directories(.deps/tabulate-1.4/include)
 
-############################################################
+include_directories(src/include)
 
-ADD_SUBDIRECTORY(deps)
-ADD_SUBDIRECTORY(cpp)
+##########################################################################
+
+# set for libkungfu reference
+set(KUNGFU_BUILD_DIR ${CMAKE_BINARY_DIR})
+
+##########################################################################
+
+add_subdirectory(.deps)
+add_subdirectory(src/libkungfu)
+add_subdirectory(src/bindings/python)
+add_subdirectory(src/bindings/node)

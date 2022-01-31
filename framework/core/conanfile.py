@@ -1,15 +1,19 @@
-import os
-import sys
 import json
 import atexit
-import psutil
-import shutil
 import getpass
+import os
+import psutil
+import pathlib
 import platform
 import datetime
+import shutil
+import stat
 import subprocess
+import sys
+
 from conans import ConanFile
 from conans import tools
+from distutils import sysconfig
 from os import path
 
 with open(path.join("package.json"), "r") as package_json_file:
@@ -23,13 +27,13 @@ class KungfuCoreConan(ConanFile):
     requires = [
         "fmt/6.1.2",
         "spdlog/1.5.0",
-        "rxcpp/4.1.0@bincrafters/stable",
+        "rxcpp/4.1.0",
     ]
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "log_level": ["trace", "debug", "info", "warning", "error", "critical"],
         "arch": ["x64"],
-        "bundle": ["nuitka", "pyinstaller"],
+        "freezer": ["nuitka", "pyinstaller"],
         "node_version": "ANY",
         "electron_version": "ANY",
     }
@@ -38,24 +42,25 @@ class KungfuCoreConan(ConanFile):
         "spdlog:header_only": "True",
         "log_level": "info",
         "arch": "x64",
-        "bundle": "pyinstaller",
+        "freezer": "pyinstaller",
         "node_version": "ANY",
         "electron_version": "ANY",
     }
     cpp_files_extensions = [".h", ".hpp", ".hxx", ".cpp", ".c", ".cc", ".cxx"]
     conanfile_dir = path.dirname(path.realpath(__file__))
-    cpp_dir = path.join(conanfile_dir, "cpp")
+    src_dir = path.join(conanfile_dir, "src")
     ext_dir = path.join(conanfile_dir, "extensions")
+    build_info_file = "kungfubuildinfo.json"
     build_dir = path.join(conanfile_dir, "build")
     build_python_dir = path.join(build_dir, "python")
     build_extensions_dir = path.join(build_dir, "build_extensions")
-    build_kfc_dir = path.join(build_dir, "kfc")
-    build_info_file = "kungfubuildinfo.json"
+    dist_dir = path.join(conanfile_dir, "dist")
+    kfc_dir = path.join(dist_dir, "kfc")
 
     def source(self):
         """Performs clang-format on all C++ files"""
         if tools.which("clang-format") is not None:
-            self.__clang_format(self.cpp_dir, self.cpp_files_extensions)
+            self.__clang_format(self.src_dir, self.cpp_files_extensions)
         else:
             self.output.warn("clang-format not installed")
 
@@ -64,7 +69,18 @@ class KungfuCoreConan(ConanFile):
             self.settings.compiler.libcxx = "libstdc++"
 
     def generate(self):
-        self.__touch_lockfiles()
+        """Updates mtime of lock files for node-gyp sake"""
+        self.__touch_lockfile()
+
+    def imports(self):
+        python_inc_src = sysconfig.get_python_inc(plat_specific=True)
+        python_inc_dst = (
+            "include"
+            if path.basename(python_inc_src) == "include"
+            else path.join("include", path.basename(python_inc_src))
+        )
+        self.copy("*", src=python_inc_src, dst=python_inc_dst)
+        self.copy("*", src="include", dst="include")
 
     def build(self):
         build_type = self.__get_build_type()
@@ -74,14 +90,10 @@ class KungfuCoreConan(ConanFile):
         self.__gen_build_info(build_type)
         self.__show_build_info(build_type)
 
-    def imports(self):
-        self.copy("*", src="include", dst="include")
-
     def package(self):
         build_type = self.__get_build_type()
-        bundle = {"pyinstaller": self.__run_pyinstaller, "nuitka": self.__run_nuitka}
-        bundle[str(self.options.bundle)](build_type)
-        self.__run_setuptools(build_type)
+        self.__clean_kfc_dir()
+        self.__run_freeze(build_type)
         self.__show_build_info(build_type)
 
     def __get_build_type(self):
@@ -134,10 +146,9 @@ class KungfuCoreConan(ConanFile):
                 self.output.error(" ".join(process.cmdline()))
                 process.kill()
 
-    def __touch_lockfiles(self):
-        self.__run_yarn("touch", "Pipfile.lock")
-        self.__run_yarn("touch", "poetry.lock")
-        self.__run_yarn("touch", path.join(self.build_dir, "conan.lock"))
+    def __touch_lockfile(self):
+        conan_lock = path.join(self.build_dir, "conan.lock")
+        pathlib.Path(conan_lock).touch()
 
     def __get_build_info_path(self, build_type):
         return path.join(self.build_dir, build_type, self.build_info_file)
@@ -147,25 +158,22 @@ class KungfuCoreConan(ConanFile):
         if path.exists(build_info_path):
             os.remove(build_info_path)
             self.output.info("Deleted kungfubuildinfo.json")
-        if path.exists(self.build_kfc_dir):
-            shutil.rmtree(self.build_kfc_dir)
+
+    def __clean_kfc_dir(self):
+        if path.exists(self.kfc_dir):
+
+            def redo_with_write(redo_func, path, err):
+                os.chmod(path, stat.S_IWRITE)
+                redo_func(path)
+
+            shutil.rmtree(self.kfc_dir, onerror=redo_with_write)
             self.output.info("Deleted kfc directory")
 
     def __gen_build_info(self, build_type):
-        now = datetime.datetime.now()
-        build_date = now.strftime("%Y%m%d%H%M%S")
-
         git = tools.Git()
-        git_revision = git.get_revision()[:8]
-
-        build_version = (
-            f"{self.version}.{build_date}.{git_revision}"
-            if tools.Version(self.version).prerelease
-            else self.version
-        )
-
+        now = datetime.datetime.now()
         build_info = {
-            "version": build_version,
+            "version": self.version,
             "pythonVersion": platform.python_version(),
             "git": {
                 "tag": git.get_tag(),
@@ -252,46 +260,32 @@ class KungfuCoreConan(ConanFile):
         self.__run_cmake_js(build_type, "build", runtime)
 
     def __run_pyinstaller(self, build_type):
-        self.__run_yarn("touch", self.__get_build_info_path(build_type))
+        pathlib.Path(self.__get_build_info_path(build_type)).touch()
         with tools.chdir(path.pardir):
-            self.__run_yarn(
-                "pyinstaller",
-                "--clean",
-                "-y",
-                "--distpath=build",
-                "python/kfc-conf.spec",
+            from PyInstaller import __main__ as freezer
+
+            freezer.run(
+                [
+                    "--workpath=build",
+                    "--distpath=dist",
+                    "--clean",
+                    "--noconfirm",
+                    path.join("src", "python", "kfc.spec"),
+                ]
             )
         self.output.success("PyInstaller done")
 
     def __run_nuitka(self, build_type):
         with tools.chdir(path.pardir):
-            self.__run_yarn("nuitka", "--output-dir=build", path.join("python", "kfc"))
+            self.__run_yarn(
+                "nuitka", "--output-dir=build", path.join("src", "python", "kfc.py")
+            )
         kfc_dist_dir = path.join(self.build_dir, "kfc.dist")
         shutil.copytree(build_type, kfc_dist_dir)
-        tools.rmdir(self.build_kfc_dir)
-        shutil.move(kfc_dist_dir, self.build_kfc_dir)
+        tools.rmdir(self.kfc_dir)
+        shutil.move(kfc_dist_dir, self.kfc_dir)
         self.output.success("Nuitka done")
 
-    def __run_setuptools(self, build_type):
-        tools.rmdir(self.build_python_dir)
-        shutil.copytree(
-            build_type, self.build_python_dir, ignore=shutil.ignore_patterns("node*")
-        )
-        shutil.copytree(
-            path.join(os.pardir, "python", "kungfu"),
-            path.join(self.build_python_dir, "kungfu"),
-        )
-        shutil.copytree(
-            path.join(os.pardir, "python", "kungfu_extensions"),
-            path.join(self.build_python_dir, "kungfu_extensions"),
-        )
-        shutil.copy2(path.join(os.pardir, "python", "setup.py"), self.build_python_dir)
-
-        with tools.chdir("python"):
-            rc = psutil.Popen(
-                ["pipenv", "run", "python", "setup.py", "bdist_wheel"]
-            ).wait()
-            if rc != 0:
-                self.output.error("setuptools failed")
-                sys.exit(rc)
-        self.output.success("setuptools done")
+    def __run_freeze(self, build_type):
+        freeze = {"pyinstaller": self.__run_pyinstaller, "nuitka": self.__run_nuitka}
+        freeze[str(self.options.freezer)](build_type)

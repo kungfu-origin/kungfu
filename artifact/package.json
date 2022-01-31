@@ -1,0 +1,26 @@
+{
+  "name": "@kungfu-trader/kungfu-artifact",
+  "homepage": "https://www.kungfu-trader.com",
+  "author": {
+    "name": "kungfu-trader",
+    "email": "info@kungfu.link"
+  },
+  "version": "2.4.0-alpha.4",
+  "description": "Kungfu Trader Artifact",
+  "license": "Apache-2.0",
+  "private": true,
+  "main": "dist/app/main.js",
+  "scripts": {
+    "build": "yarn kfs craft build",
+    "clean": "yarn kfs craft clean",
+    "dev": "yarn kfs craft dev"
+  },
+  "dependencies": {
+    "@kungfu-trader/kungfu-app": "^2.4.0-alpha.4",
+    "@kungfu-trader/kfx-sim": "^2.4.0-alpha.4",
+    "@kungfu-trader/kfx-xtp-demo": "^2.4.0-alpha.4"
+  },
+  "devDependencies": {
+    "@kungfu-trader/kungfu-sdk": "^2.4.0-alpha.4"
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "name": "@kungfu-trader/kungfu-js-api",
+  "author": {
+    "name": "kungfu-trader",
+    "email": "info@kungfu.link"
+  },
+  "version": "2.4.0-alpha.4",
+  "description": "",
+  "main": "lib/index.js",
+  "types": "./src/typings/index.d.ts",
+  "scripts": {
+    "patch": "./node_modules/.bin/patch-package",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "format": "prettier -l -w --config ../../.prettierrc.js ."
+  },
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@fast-csv/format": "^4.3.5",
+    "@kungfu-trader/kungfu-core": "^2.4.0-alpha.4",
+    "fkill": "7.2.1",
+    "get-user-locale": "^1.4.0",
+    "log4js": "^6.4.0",
+    "pm2": "^5.1.2",
+    "ps-list": "7.2.0"
+  },
+  "devDependencies": {
+    "dayjs": "^1.10.7",
+    "fs-extra": "^10.0.0",
+    "patch-package": "^6.4.7",
+    "rxjs": "^7.4.0"
+  }
+}

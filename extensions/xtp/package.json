@@ -1,6 +1,9 @@
 {
   "name": "@kungfu-trader/kfx-xtp-demo",
-  "author": "kungfu-trader",
+  "author": {
+    "name": "kungfu-trader",
+    "email": "info@kungfu.link"
+  },
   "version": "2.4.0-alpha.4",
   "description": "Kungfu Extension - XTP Demo",
   "license": "Apache-2.0",
@@ -11,7 +14,8 @@
     "registry": "https://npm.pkg.github.com"
   },
   "scripts": {
-    "format": "clang-format --verbose -style=file -i src/cpp/*"
+    "build": "kfs extension roast",
+    "clean": "kfs extension clean"
   },
   "devDependencies": {
     "@kungfu-trader/kungfu-sdk": "^2.4.0-alpha.4"
@@ -31,10 +35,9 @@
   "kungfuConfig": {
     "key": "xtp",
     "name": "XTP",
-    "executor": "kfc",
     "config": {
       "td": {
-        "type": "broker/td/stock",
+        "type": ["stock"],
         "settings": [
           {
             "key": "account_name",
@@ -91,7 +94,7 @@
             "key": "client_id",
             "name": "client_id",
             "type": "int",
-            "required": "@kungfu-trader/kungfu-sdk",
+            "required": true,
             "tip": "请填写自定义多点登录ID 1-99整数,不同节点之间不要重复",
             "validator": [
               "o99Validator",
@@ -101,7 +104,7 @@
         ]
       },
       "md": {
-        "type": "broker/md/stock",
+        "type": ["stock"],
         "settings": [
           {
             "key": "account_id",
@@ -141,14 +144,14 @@
             "key": "protocol",
             "name": "protocol",
             "type": "select",
-            "data": [
+            "options": [
               {
                 "value": "tcp",
-                "name": "tcp"
+                "label": "tcp"
               },
               {
                 "value": "udp",
-                "name": "udp"
+                "label": "udp"
               }
             ],
             "required": false,

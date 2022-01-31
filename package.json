@@ -1,40 +1,48 @@
 {
   "name": "@kungfu-trader/kungfu-workspaces",
-  "author": "kungfu-trader",
+  "homepage": "https://www.kungfu-trader.com",
+  "author": {
+    "name": "kungfu-trader",
+    "email": "info@kungfu.link"
+  },
   "description": "Kungfu Trader Workspaces",
   "license": "Apache-2.0",
   "private": true,
-  "workspaces": [
-    "framework/*",
-    "developer/*",
-    "extensions/*"
-  ],
+  "workspaces": {
+    "packages": [
+      "framework/*",
+      "extensions/*",
+      "developer/*",
+      "artifact"
+    ]
+  },
+  "engines": {
+    "node": ">=14 <15",
+    "yarn": "^1.18.0"
+  },
   "scripts": {
+    "dev": "yarn workspace @kungfu-trader/kungfu-artifact dev",
     "foreach": "wsrun --serial --exclude-missing --fast-exit",
-    "postinstall": "yarn foreach postinstall",
+    "format": "wsrun --serial --exclude-missing format",
+    "prebuild": "yarn sync && yarn format",
     "build": "yarn foreach build",
-    "build-cli": "yarn foreach build-cli",
     "clean": "yarn foreach clean",
-    "format": "yarn foreach format",
-    "lint": "eslint --ext .ts .",
     "package": "yarn foreach package",
     "rebuild": "yarn clean && yarn build",
-    "reformat": "prettier --write --parser typescript",
-    "reformat:ts": "yarn reformat \"(framework|developer|extensions)/**/node/*.ts?(x)\"",
-    "reformat:js": "yarn reformat \"(framework|developer|extensions)/**/node/*.js\""
+    "sync": "yarn install --audit --frozen-lockfile --ignore-scripts"
   },
   "dependencies": {
-    "@ls-lint/ls-lint": "^1.9.0",
-    "@typescript-eslint/parser": "^3.10.0",
-    "eslint": "^7.14.0",
-    "prettier": "^2.3.0",
-    "prettier-eslint-cli": "^5.0.0",
     "lerna": "^4.0.0",
-    "wsrun": "^5.0.0",
-    "yarn": "^1.22.0"
+    "wsrun": "^5.2.0"
   },
-  "devDependencies": {
-    "cross-env": "1.0.0",
-    "cross-var": "1.0.0"
+  "resolutions": {
+    "ansi-regex": "^5.0.1",
+    "axios": "^0.21.1",
+    "core-js": "^3.20.0",
+    "highlight.js": "^11.0.0",
+    "lodash.merge": "^4.6.2",
+    "node-fetch": "^2.6.7",
+    "node-gyp": "^8.0.0",
+    "uuid": "^7.0.0"
   }
 }
