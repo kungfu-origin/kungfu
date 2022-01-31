@@ -44,7 +44,6 @@ export const findProcessByKeywords = (tasks: string[]): Promise<number[]> => {
 
 export const forceKill = (tasks: string[]): Promise<void> => {
   return findProcessByKeywords(tasks).then((pids) => {
-    console.log('forceKill', tasks, pids);
     return fkill(pids, {
       force: true,
       tree: isWin ? true : false,

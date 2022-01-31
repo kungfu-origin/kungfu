@@ -112,9 +112,3 @@ export const APP_DIR = production
 
 process.env.KFC_DIR = KFC_DIR;
 //================== kfc end ======================================
-
-console.log(`process.cwd = ${process.cwd()}`);
-console.log(`__kfResourcesPath = ${global.__kfResourcesPath}`);
-console.log(`__resources = ${global.__resources}`);
-console.log(`KFC_DIR = ${KFC_DIR}`);
-console.log(`EXTENSION_DIR = ${EXTENSION_DIR}`);
