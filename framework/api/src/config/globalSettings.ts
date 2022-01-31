@@ -1,5 +1,5 @@
 import fse from 'fs-extra';
-import { KF_CONFIG_PATH, EXTENSION_DIR } from './pathConfig';
+import { KF_CONFIG_PATH, EXTENSION_DIRS } from './pathConfig';
 
 const isEnglish = false;
 
@@ -20,7 +20,7 @@ export const getKfGlobalSettings = (): KfSystemConfig[] => [
         tip: isEnglish
           ? 'System extensions path setting'
           : '系统插件包含柜台, 任务插件等, 如有额外的插件, 可设置对应插件路径',
-        default: [EXTENSION_DIR],
+        default: EXTENSION_DIRS,
         type: 'folder',
       },
       {

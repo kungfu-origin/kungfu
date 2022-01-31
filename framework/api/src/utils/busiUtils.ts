@@ -2,7 +2,7 @@ import path from 'path';
 import dayjs from 'dayjs';
 import fse, { Stats } from 'fs-extra';
 import log4js from 'log4js';
-import { buildProcessLogPath, EXTENSION_DIR } from '../config/pathConfig';
+import { buildProcessLogPath, EXTENSION_DIRS } from '../config/pathConfig';
 import {
   InstrumentType,
   KfCategory,
@@ -375,7 +375,7 @@ export const flattenExtensionModuleDirs = async (
 };
 
 const getKfExtConfigList = async (): Promise<KungfuApi.KfExtOriginConfig[]> => {
-  const extModuleDirs = await flattenExtensionModuleDirs([EXTENSION_DIR]);
+  const extModuleDirs = await flattenExtensionModuleDirs(EXTENSION_DIRS);
   const packageJSONPaths = extModuleDirs.map((item) =>
     path.join(item, 'package.json'),
   );

@@ -1,7 +1,7 @@
 const path = require('path');
 const fse = require('fs-extra');
 const semver = require('semver');
-const findWorkspaceRoot = require('find-yarn-workspace-root');
+const coreConfig = require('@kungfu-trader/kungfu-core/package.json');
 const {
   getAppDir,
   getKfcDir,
@@ -43,7 +43,7 @@ module.exports = {
     '${productName}-${buildVersion}-${os}-${arch}-${channel}.${ext}',
   generateUpdatesFilesForAllChannels: true,
   appId: 'Kungfu.Origin.KungFu.Trader',
-  electronVersion: '13.2.0',
+  electronVersion: coreConfig.dependencies.electron,
   directories: {
     output: path.join(
       'build',

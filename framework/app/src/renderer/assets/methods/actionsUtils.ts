@@ -490,9 +490,10 @@ export const useInstruments = (): {
       const { instruments, subscribedInstruments } = storeToRefs(
         app?.proxy.$useGlobalStore(),
       );
-      instrumentsResolved.data = instruments as KungfuApi.InstrumentResolved[];
+      instrumentsResolved.data =
+        instruments as unknown as KungfuApi.InstrumentResolved[];
       subscribedInstrumentsResolved.data =
-        subscribedInstruments as KungfuApi.InstrumentResolved[];
+        subscribedInstruments as unknown as KungfuApi.InstrumentResolved[];
     }
   });
 

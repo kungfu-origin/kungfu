@@ -16,10 +16,6 @@
       "artifact"
     ]
   },
-  "engines": {
-    "node": ">=14 <15",
-    "yarn": "^1.18.0"
-  },
   "scripts": {
     "dev": "yarn workspace @kungfu-trader/kungfu-artifact dev",
     "foreach": "wsrun --serial --exclude-missing --fast-exit",
