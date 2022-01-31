@@ -16,7 +16,7 @@ import {
 import {
   APP_DIR,
   buildProcessLogPath,
-  EXTENSION_DIR,
+  EXTENSION_DIRS,
   KFC_DIR,
   KF_CONFIG_PATH,
   KF_HOME,
@@ -444,10 +444,7 @@ function buildArgs(args: string): string {
 
 function getExtDirs(): string[] {
   const kfConfig: any = fse.readJsonSync(KF_CONFIG_PATH) || {};
-  const extPaths: string[] = ((kfConfig.system || {}).extPaths as string[]) || [
-    EXTENSION_DIR,
-  ];
-  return extPaths;
+  return ((kfConfig.system || {}).extPaths as string[]) || EXTENSION_DIRS;
 }
 
 //循环获取processStatus
