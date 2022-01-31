@@ -19,7 +19,7 @@ require('@kungfu-trader/kungfu-core').sywac(module, (cli) => {
 
   cli
     .command('install', () => {
-      const fallbackBuild = process.env.KF_INSTALL_FALLBACK_BUILD;
+      const fallbackBuild = process.env.KF_INSTALL_FALLBACK_BUILD === 'true';
       node_pre_gyp(
         fallbackBuild ? ['install', '--fallback-to-build'] : ['install'],
         fallbackBuild,
