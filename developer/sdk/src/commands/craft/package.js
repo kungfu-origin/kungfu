@@ -1,10 +1,10 @@
 const sdk = require('@kungfu-trader/kungfu-sdk');
 
 module.exports = {
-  flags: 'dist',
-  desc: 'Dist kungfu extensions',
+  flags: 'package',
+  desc: 'Package kungfu artifact',
   setup: () => {},
   run: () => {
-    sdk.lib.extension.dist();
+    sdk.lib.craft.package();
   },
 };

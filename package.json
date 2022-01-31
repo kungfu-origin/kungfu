@@ -29,7 +29,7 @@
     "clean": "yarn foreach clean",
     "package": "yarn foreach package",
     "rebuild": "yarn clean && yarn build",
-    "sync": "yarn install --audit --frozen-lockfile --ignore-scripts"
+    "sync": "yarn install --audit --frozen-lockfile"
   },
   "dependencies": {
     "lerna": "^4.0.0",

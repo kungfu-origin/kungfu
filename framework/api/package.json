@@ -5,23 +5,28 @@
     "email": "info@kungfu.link"
   },
   "version": "2.4.0-alpha.4",
-  "description": "",
-  "main": "lib/index.js",
+  "description": "Kungfu Javascript/Typescript API",
+  "license": "Apache-2.0",
+  "repository": {
+    "url": "https://github.com/kungfu-trader/kungfu.git"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
   "types": "./src/typings/index.d.ts",
+  "main": "lib/index.js",
   "scripts": {
-    "patch": "./node_modules/.bin/patch-package",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "patch": "yarn patch-package",
     "format": "prettier -l -w --config ../../.prettierrc.js ."
   },
-  "license": "Apache-2.0",
   "dependencies": {
     "@fast-csv/format": "^4.3.5",
     "@kungfu-trader/kungfu-core": "^2.4.0-alpha.4",
-    "fkill": "7.2.1",
+    "fkill": "~7.2",
     "get-user-locale": "^1.4.0",
     "log4js": "^6.4.0",
     "pm2": "^5.1.2",
-    "ps-list": "7.2.0"
+    "ps-list": "~7.2"
   },
   "devDependencies": {
     "dayjs": "^1.10.7",

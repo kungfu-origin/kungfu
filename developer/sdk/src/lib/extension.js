@@ -341,7 +341,7 @@ exports.build = () => {
   }
 };
 
-exports.dist = () => {
+exports.package = () => {
   const packageJson = getPackageJson();
   const projectName = getProjectName(packageJson);
   const archive = archiver('tar', { gzip: true });

@@ -66,8 +66,6 @@ jobs:
 
       - name: Setup Kungfu environment
         run: yarn install --frozen-lockfile
-        env:
-          KF_SKIP_FALLBACK_BUILD: true
 
       - name: Build Kungfu
         # skip prebuild script to not format code
@@ -86,9 +84,8 @@ jobs:
             core/build/*.txt
           if-no-files-found: ignore
 
-      - name: Package Prebuilt
-        run: |
-          yarn package
+      - name: Package Kungfu Artifacts
+        run: yarn package
 
       - name: Upload Prebuilt
         uses: actions/upload-artifact@v2
@@ -100,7 +97,6 @@ jobs:
             !**/build/stage/**/.*
             !**/build/stage/**/*.yml
             !**/build/stage/**/*.yaml
-          if-no-files-found: ignore
 
   verify:
     needs: [prepare, build]

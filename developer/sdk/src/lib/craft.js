@@ -8,20 +8,14 @@ const ensureDir = (cwd, dirName) => {
   return distDir;
 };
 
-const runWebpackBuild = async (cwd) => {
-  const distDir = ensureDir(cwd, 'dist');
+exports.build = async () => {
+  const distDir = ensureDir(process.cwd(), 'dist');
   await app.webpackBuild(distDir);
 };
 
-const runElectronBuild = async (cwd) => {
-  const buildDir = ensureDir(cwd, 'build');
+exports.package = async () => {
+  const buildDir = ensureDir(process.cwd(), 'build');
   await app.electronBuild(buildDir);
-};
-
-exports.build = async () => {
-  const cwd = process.cwd();
-  await runWebpackBuild(cwd);
-  await runElectronBuild(cwd);
 };
 
 exports.dev = () => {
