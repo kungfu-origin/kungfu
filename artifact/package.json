@@ -12,6 +12,7 @@
   "main": "dist/app/main.js",
   "scripts": {
     "build": "yarn kfs craft build",
+    "package": "yarn kfs craft package",
     "clean": "yarn kfs craft clean",
     "dev": "yarn kfs craft dev"
   },

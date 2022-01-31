@@ -7,16 +7,22 @@ require('@kungfu-trader/kungfu-core').sywac(module, (cli) => {
   const node_pre_gyp = (cmd, check = true) => {
     const buildType = process.env.npm_package_config_build_type;
     const buildTypeOpt = buildType === 'Debug' ? ['--debug'] : [];
-    const yarnArgs = ['node-pre-gyp', ...buildTypeOpt, ...cmd];
+    const yarnArgs = [
+      'run',
+      '--silent',
+      'node-pre-gyp',
+      ...buildTypeOpt,
+      ...cmd,
+    ];
     run('yarn', yarnArgs, check);
   };
 
   cli
     .command('install', () => {
-      const skipBuild = process.env.KF_SKIP_FALLBACK_BUILD;
+      const fallbackBuild = process.env.KF_INSTALL_FALLBACK_BUILD;
       node_pre_gyp(
-        skipBuild ? ['install'] : ['install', '--fallback-to-build'],
-        !skipBuild,
+        fallbackBuild ? ['install', '--fallback-to-build'] : ['install'],
+        fallbackBuild,
       );
     })
     .command('build', () => node_pre_gyp(['configure', 'build']))
