@@ -6,8 +6,6 @@ const run = (distDir) => {
   const pkgDir = path.dirname(distDir);
   process.chdir(pkgDir);
 
-  console.log(`pwd: ${pkgDir}`);
-
   baseConfig.artifactName =
     '${productName}-${buildVersion}-${os}-${arch}-${channel}.${ext}';
 
