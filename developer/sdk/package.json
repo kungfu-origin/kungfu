@@ -15,10 +15,10 @@
     "registry": "https://npm.pkg.github.com"
   },
   "bin": {
-    "kfs": "src/cli.js"
+    "kfs": "src/kfs.js"
   },
   "scripts": {
-    "kfs": "node src/cli.js",
+    "kfs": "node src/kfs.js",
     "format": "prettier -l -w --config ../../.prettierrc.js src"
   },
   "dependencies": {

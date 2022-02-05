@@ -13,8 +13,16 @@
   "publishConfig": {
     "registry": "https://npm.pkg.github.com"
   },
+  "binary": {
+    "module_name": "kfx-xtp-demo",
+    "module_path": "dist/xtp",
+    "remote_path": "{module_name}/v{major}/v{version}",
+    "package_name": "{module_name}-v{version}-{platform}-{arch}-{configuration}.tar.gz",
+    "host": "https://prebuilt.libkungfu.cc"
+  },
   "scripts": {
-    "build": "kfs extension roast",
+    "install": "kfs extension install",
+    "build": "kfs extension build",
     "clean": "kfs extension clean"
   },
   "devDependencies": {

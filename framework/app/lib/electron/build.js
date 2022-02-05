@@ -1,16 +1,24 @@
-const path = require('path');
-
 const run = (distDir) => {
   const electronBuilder = require('electron-builder');
+  const path = require('path');
   const baseConfig = require('./config');
-  const pkgDir = path.dirname(distDir);
-  process.chdir(pkgDir);
-
-  baseConfig.artifactName =
-    '${productName}-${buildVersion}-${os}-${arch}-${channel}.${ext}';
-
+  const appConfig = {
+    productName: 'Kungfu',
+    artifactName:
+      '${productName}-${buildVersion}-${os}-${arch}-${channel}.${ext}',
+    directories: {
+      output: path.join(
+        'build',
+        'stage',
+        'kungfu',
+        `v${version.major}`,
+        `v${version}`,
+      ),
+    },
+  };
+  process.chdir(path.dirname(distDir));
   return electronBuilder.build({
-    config: baseConfig,
+    config: { ...baseConfig, ...appConfig },
   });
 };
 

@@ -86,7 +86,7 @@ function generateCMakeFiles(projectName, kungfuBuild) {
   fse.ensureDirSync(buildDir);
 
   ejs.renderFile(
-    require.resolve('@kungfu-trader/kungfu-sdk/templates/kungfu.cmake'),
+    require.resolve('@kungfu-trader/kungfu-sdk/templates/cmake/kungfu.cmake'),
     {
       kfcDir: path
         .dirname(
@@ -113,7 +113,7 @@ function generateCMakeFiles(projectName, kungfuBuild) {
   }
 
   ejs.renderFile(
-    require.resolve('@kungfu-trader/kungfu-sdk/templates/CMakeLists.txt'),
+    require.resolve('@kungfu-trader/kungfu-sdk/templates/cmake/CMakeLists.txt'),
     {
       projectName: projectName,
     },
@@ -291,7 +291,7 @@ exports.configure = () => {
   }
 };
 
-exports.build = () => {
+exports.compile = () => {
   const packageJson = getPackageJson();
   const extensionName = packageJson.kungfuConfig.key;
   const buildTargetDir = path.join('build', 'target');
@@ -316,7 +316,7 @@ exports.build = () => {
   }
 
   if (hasSourceFor(packageJson, 'cpp')) {
-    spawnExec('yarn', ['cmake-js', 'build']);
+    spawnExec('yarn', ['cmake-js', 'compile']);
   }
 
   const packageJsonPath = path.join(process.cwd(), 'package.json');

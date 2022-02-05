@@ -11,7 +11,7 @@ jobs:
   bump:
     if: ${{ github.event.inputs.confirm  == 'confirm' }}
     runs-on: ubuntu-20.04
-    container: 'docker.io/kungfutrader/kungfu-builder-centos:v1.0.1'
+    container: 'docker.io/kungfutrader/kungfu-builder-centos:v1.1.2'
     steps:
       - name: Checkout
         uses: actions/checkout@v2

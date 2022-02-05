@@ -36,7 +36,7 @@ chinesecalendar = "^1.6.0"
 
 [tool.poetry.dev-dependencies]
 conan = "^1.44.0"
-pyinstaller = "^4.8"
+pyinstaller = "^4.9"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

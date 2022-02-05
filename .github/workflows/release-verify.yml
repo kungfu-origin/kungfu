@@ -10,6 +10,7 @@ on:
 jobs:
   prepare:
     runs-on: ubuntu-20.04
+    container: 'docker.io/kungfutrader/kungfu-builder-centos:v1.1.2'
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -27,7 +28,7 @@ jobs:
         include:
           - os: ubuntu-20.04
             name: "Linux"
-            container: 'docker.io/kungfutrader/kungfu-builder-centos:v1.1.1'
+            container: 'docker.io/kungfutrader/kungfu-builder-centos:v1.1.2'
           - os: macos-11
             name: "MacOS"
           - os: windows-2019
@@ -101,7 +102,7 @@ jobs:
   verify:
     needs: [prepare, build]
     runs-on: ubuntu-20.04
-    container: 'docker.io/kungfutrader/kungfu-builder-centos:v1.1.1'
+    container: 'docker.io/kungfutrader/kungfu-builder-centos:v1.1.2'
     steps:
       - name: Checkout
         uses: actions/checkout@v2

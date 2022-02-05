@@ -13,14 +13,20 @@
   "publishConfig": {
     "registry": "https://npm.pkg.github.com"
   },
+  "binary": {
+    "module_name": "kungfu-app",
+    "module_path": "dist/app",
+    "remote_path": "{module_name}/v{major}/v{version}",
+    "package_name": "{module_name}-v{version}-{platform}-{arch}-{configuration}.tar.gz",
+    "host": "https://prebuilt.libkungfu.cc"
+  },
   "types": "src/typings/index.d.ts",
   "main": "lib/index.js",
   "scripts": {
+    "build": "node lib/webpack/build.js",
+    "install": "node .gyp/node-pre-gyp.js install",
+    "package": "node .gyp/node-pre-gyp.js package",
     "clean": "rimraf build dist",
-    "dev": "node lib/webpack/dev.js",
-    "make:webpack": "node lib/webpack/build.js",
-    "make:electron": "node lib/electron/build.js",
-    "make": "yarn run make:webpack && yarn run make:electron",
     "lint": "eslint src",
     "format": "prettier -l -w --config ../../.prettierrc.js ."
   },

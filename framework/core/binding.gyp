@@ -17,6 +17,9 @@
       "<!@(node -p \"require('glob').sync('**/CMakeLists.txt', {ignore:'build/**'}).join(' ');\")",
       "<!@(node -p \"require('glob').sync('**/*.*(h|hpp|c|cc|cpp)', {ignore:'build/**'}).join(' ');\")"
     ],
+    "drone_inputs": [
+      "<!@(node -p \"require('glob').sync('src/bindings/drone/**/*.cpp').join(' ');\")"
+    ],
     "wheel_inputs": [
       "<@(poetry_inputs)",
       "<@(module_inputs)",

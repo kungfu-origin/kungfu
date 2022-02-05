@@ -1,0 +1,25 @@
+const sdk = require('@kungfu-trader/kungfu-sdk');
+
+module.exports = {
+  flags: 'configure',
+  desc: 'Configure kungfu oriented project',
+  setup: (cli) => {
+    cli
+      .option('write-package-json', {
+        type: 'boolean',
+        desc: 'write back to package.json',
+        defaultValue: false,
+      })
+      .option('write-workflows', {
+        type: 'boolean',
+        desc: 'write back to workflows',
+        defaultValue: true,
+      });
+  },
+  run: (argv) => {
+    sdk.lib.project.configure(
+      argv['write-package-json'],
+      argv['write-workflows'],
+    );
+  },
+};
