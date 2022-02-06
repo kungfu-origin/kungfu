@@ -5,6 +5,6 @@ module.exports = {
   desc: 'Install kungfu oriented project',
   setup: () => {},
   run: () => {
-    sdk.lib.project.install();
+    sdk.lib.prebuilt.install();
   },
 };

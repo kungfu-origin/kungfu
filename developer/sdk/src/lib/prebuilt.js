@@ -3,7 +3,7 @@ const fse = require('fs-extra');
 const path = require('path');
 
 exports.install = () => {
-  require('@kungfu-trader/kungfu-core').project('install');
+  require('@kungfu-trader/kungfu-core').prebuilt('install');
 };
 
 exports.configure = (writePackageJson = false, writeWorkflows = true) => {
@@ -28,5 +28,5 @@ exports.configure = (writePackageJson = false, writeWorkflows = true) => {
 };
 
 exports.package = () => {
-  require('@kungfu-trader/kungfu-core').project('package');
+  require('@kungfu-trader/kungfu-core').prebuilt('package');
 };

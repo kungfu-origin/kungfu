@@ -17,7 +17,7 @@ module.exports = {
       });
   },
   run: (argv) => {
-    sdk.lib.project.configure(
+    sdk.lib.prebuilt.configure(
       argv['write-package-json'],
       argv['write-workflows'],
     );

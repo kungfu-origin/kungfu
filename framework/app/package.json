@@ -5,7 +5,7 @@
     "email": "info@kungfu.link"
   },
   "version": "2.4.0-alpha.6",
-  "description": "Kungfu Core Library",
+  "description": "Kungfu App Framework",
   "license": "Apache-2.0",
   "repository": {
     "url": "https://github.com/kungfu-trader/kungfu.git"
@@ -25,8 +25,8 @@
   "scripts": {
     "build": "node lib/webpack/build.js",
     "clean": "rimraf build dist",
-    "install": "node -p \"require('@kungfu-trader/kungfu-core').project('install')\"",
-    "package": "node -p \"require('@kungfu-trader/kungfu-core').project('package')\"",
+    "install": "node -p \"require('@kungfu-trader/kungfu-core').prebuilt('install')\"",
+    "package": "node -p \"require('@kungfu-trader/kungfu-core').prebuilt('package')\"",
     "lint": "eslint src",
     "format": "prettier -l -w --config ../../.prettierrc.js ."
   },

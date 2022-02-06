@@ -17,13 +17,17 @@ class MakeupCommand(BaseCommand):
     """Make up pyproject.toml according to settings in package.json"""
 
     @staticmethod
+    def trim(toml_table):
+        # Fix extra trailing newline
+        body = toml_table.value.body
+        body and body[-1] and body[-1][0] is None and body.pop()
+        return toml_table
+
+    @staticmethod
     def pdm_config_table(pdm_project, name):
         pdm_config = pdm_project.pyproject
-        result = pdm_config[name] = pdm_config.get(name, tomlkit.table())
-        # Fix extra trailing newline
-        body = result.value.body
-        body and body[-1][0] is None and body.pop()
-        return result
+        pdm_config[name] = pdm_config.get(name, tomlkit.table())
+        return MakeupCommand.trim(pdm_config[name])
 
     def add_arguments(self, parser) -> None:
         parser.add_argument(
@@ -50,7 +54,6 @@ class MakeupCommand(BaseCommand):
 
         project = self.pdm_config_table(pdm_project, "project")
         project["name"] = package_json.get("name", "").split("/").pop()
-        project["version"] = make_inline_table({"use_scm": True})
         project["license"] = make_inline_table(
             {"text": package_json.get("license", "")}
         )
@@ -62,11 +65,15 @@ class MakeupCommand(BaseCommand):
                 }
             ]
         )
-        project["dynamic"] = ["classifiers", "version"]
+        project["dynamic"] = ["version"]
         project[
             "requires-python"
         ] = f"~={sys.version_info.major}.{sys.version_info.minor}"
         project["dependencies"] = project.get("dependencies", [])
+
+        tool = self.pdm_config_table(pdm_project, "tool")
+        tool["pdm"] = self.trim(tool.get("pdm", tomlkit.table()))
+        tool["pdm"]["version"] = make_inline_table({"use_scm": True})
 
         build_system = self.pdm_config_table(pdm_project, "build-system")
         build_system["requires"] = ["pdm-pep517"]
