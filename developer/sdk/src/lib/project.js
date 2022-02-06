@@ -1,8 +1,9 @@
 const path = require('path');
 
 exports.install = () => {
-  const cli = require('@kungfu-trader/kungfu-core/.gyp/node-pre-gyp');
-  cli.parseAndExit().catch(console.error);
+  require('@kungfu-trader/kungfu-core/.gyp/node-pre-gyp')
+    .parseAndExit()
+    .catch(console.error);
 };
 
 exports.configure = (writePackageJson = false, writeWorkflows = true) => {
