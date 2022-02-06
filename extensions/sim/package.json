@@ -21,8 +21,9 @@
     "host": "https://prebuilt.libkungfu.cc"
   },
   "scripts": {
-    "install": "kfs extension install",
     "build": "kfs extension build",
+    "install": "node .gyp/node-pre-gyp.js install",
+    "package": "node .gyp/node-pre-gyp.js package",
     "clean": "kfs extension clean"
   },
   "devDependencies": {

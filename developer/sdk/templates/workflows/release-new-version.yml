@@ -10,7 +10,7 @@ on:
 jobs:
   release:
     if: ${{ github.event.pull_request.merged }}
-    uses: kungfu-trader/workflows/.github/workflows/release-new-version.yml@v1
+    uses: kungfu-trader/workflows/.github/workflows/.release-new-version.yml@v1
     secrets:
       KUNGFU_GITHUB_TOKEN: ${{ secrets.KUNGFU_GITHUB_TOKEN }}
       AWS_US_ACCESS_KEY_ID: ${{ secrets.AWS_US_ACCESS_KEY_ID }}
