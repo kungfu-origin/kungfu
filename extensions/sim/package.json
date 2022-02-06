@@ -7,6 +7,7 @@
   "version": "2.4.0-alpha.6",
   "description": "Kungfu Extension - SIM",
   "license": "Apache-2.0",
+  "main": "package.json",
   "repository": {
     "url": "https://github.com/kungfu-trader/kungfu.git"
   },
