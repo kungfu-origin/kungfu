@@ -10,6 +10,9 @@
   "license": "Apache-2.0",
   "private": true,
   "main": "dist/app/main.js",
+  "kungfuCraft": {
+    "productName": "Kungfu"
+  },
   "scripts": {
     "build": "yarn kfs craft build",
     "package": "yarn kfs craft package",

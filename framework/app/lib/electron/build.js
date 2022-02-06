@@ -1,24 +1,29 @@
 const run = (distDir) => {
   const electronBuilder = require('electron-builder');
   const path = require('path');
+  const semver = require('semver');
   const baseConfig = require('./config');
+  const cwd = path.dirname(distDir);
+  const packageJson = require(`${path.join(cwd, 'package.json')}`);
+  const version = semver.parse(packageJson.version);
+  const craftName = packageJson.name.replace(/@.*\//g, '');
+  const craftConfig = packageJson.kungfuCraft || { productName: 'Kungfu'};
   const appConfig = {
-    productName: 'Kungfu',
     artifactName:
       '${productName}-${buildVersion}-${os}-${arch}-${channel}.${ext}',
     directories: {
       output: path.join(
         'build',
         'stage',
-        'kungfu',
+        craftName,
         `v${version.major}`,
         `v${version}`,
       ),
-    },
+    }
   };
-  process.chdir(path.dirname(distDir));
+  process.chdir(cwd);
   return electronBuilder.build({
-    config: { ...baseConfig, ...appConfig },
+    config: { ...baseConfig, ...craftConfig, ...appConfig },
   });
 };
 
