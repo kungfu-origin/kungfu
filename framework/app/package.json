@@ -24,9 +24,9 @@
   "main": "lib/index.js",
   "scripts": {
     "build": "node lib/webpack/build.js",
+    "clean": "rimraf build dist",
     "install": "node -p \"require('@kungfu-trader/kungfu-core').project('install')\"",
     "package": "node -p \"require('@kungfu-trader/kungfu-core').project('package')\"",
-    "clean": "rimraf build dist",
     "lint": "eslint src",
     "format": "prettier -l -w --config ../../.prettierrc.js ."
   },

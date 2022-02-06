@@ -11,7 +11,6 @@ const WebpackDevServer = require('webpack-dev-server');
 const {
   getAppDefaultDistDir,
   getAppDir,
-  getCoreDir,
   getKfcDir,
 } = require('@kungfu-trader/kungfu-js-api/toolkit/utils');
 const defaultDistDir = getAppDefaultDistDir();
@@ -78,7 +77,7 @@ const electronLog = (data, color, type = 'Kungfu') => {
 };
 
 function startRenderer(argv) {
-  const rendererConfig = require('./webpack.renderer.config')(argv);
+  const rendererConfig = require('../webpack/webpack.renderer.config')(argv);
   return new Promise((resolve, reject) => {
     const compiler = webpack(rendererConfig);
     const server = new WebpackDevServer(
@@ -111,7 +110,9 @@ function startRenderer(argv) {
 }
 
 function startComponents(argv) {
-  const componentsConfig = require('./webpack.components.config')(argv);
+  const componentsConfig = require('../webpack/webpack.components.config')(
+    argv,
+  );
   return new Promise((resolve, reject) => {
     const compiler = webpack(componentsConfig);
     compiler.watch({}, (err, stats) => {
@@ -131,7 +132,7 @@ function startComponents(argv) {
 }
 
 function startMain(argv) {
-  const mainConfig = require('./webpack.main.config')(argv);
+  const mainConfig = require('../webpack/webpack.main.config')(argv);
   const appDir = getAppDir();
   const indexJs = path.resolve(appDir, 'src', 'main', 'index.dev.ts');
   mainConfig.entry.main = [indexJs].concat(mainConfig.entry.main);
@@ -167,6 +168,14 @@ function startMain(argv) {
   });
 }
 
+function copyWebpackDist(argv) {
+  const srcDir = path.join(getAppDir(), 'dist', 'app');
+  const targetDir = path.join(argv.distDir, argv.distName);
+  logStats('Builder', `copy from ${srcDir} to ${targetDir}`);
+  fse.removeSync(targetDir);
+  fse.copySync(srcDir, targetDir, {});
+}
+
 function startElectron(argv) {
   electronProcess = spawn(
     electron,
@@ -197,7 +206,7 @@ function startElectron(argv) {
   });
 }
 
-const run = (distDir, distName = 'app') => {
+const run = (distDir, distName = 'app', withWebpack) => {
   const appDir = getAppDir();
   const kfcDir = getKfcDir();
   process.chdir(appDir);
@@ -211,7 +220,7 @@ const run = (distDir, distName = 'app') => {
     distName: distName,
   };
 
-  const tasks = [startRenderer, startMain];
+  const tasks = withWebpack ? [startRenderer, startMain] : [copyWebpackDist];
 
   return Promise.all(tasks.map((f) => f(argv))).then(() => startElectron(argv));
 };

@@ -2,9 +2,9 @@ const sdk = require('@kungfu-trader/kungfu-sdk');
 
 module.exports = {
   flags: 'package',
-  desc: 'Package kungfu extensions',
+  desc: 'Package kungfu project',
   setup: () => {},
   run: () => {
-    sdk.lib.extension.package();
+    sdk.lib.project.package();
   },
 };

@@ -4,7 +4,7 @@ module.exports = {
   flags: 'package',
   desc: 'Package kungfu artifact',
   setup: () => {},
-  run: () => {
-    sdk.lib.craft.package();
+  run: async () => {
+    await sdk.lib.craft.package();
   },
 };

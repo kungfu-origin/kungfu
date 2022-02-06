@@ -24,8 +24,6 @@
   "dependencies": {
     "@kungfu-trader/kungfu-app": "^2.4.0-alpha.6",
     "@kungfu-trader/kungfu-core": "^2.4.0-alpha.6",
-    "@kungfu-trader/kungfu-toolchain": "^2.4.0-alpha.6",
-    "archiver": "^5.3.0",
-    "treeify": "^1.1.0"
+    "@kungfu-trader/kungfu-toolchain": "^2.4.0-alpha.6"
   }
 }

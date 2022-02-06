@@ -1,18 +1,32 @@
+const findWorkspaceRoot = require('find-yarn-workspace-root');
+const fse = require('fs-extra');
 const path = require('path');
 
 exports.install = () => {
-  require('@kungfu-trader/kungfu-core/.gyp/node-pre-gyp')
-    .parseAndExit()
-    .catch(console.error);
+  require('@kungfu-trader/kungfu-core').project('install');
 };
 
 exports.configure = (writePackageJson = false, writeWorkflows = true) => {
-  const config = require(path.join(process.cwd(), 'package.json'));
+  const packageJsonPath = path.join(process.cwd(), 'package.json');
+  const packageJson = require(packageJsonPath);
   if (writePackageJson) {
-    console.log('> writing package.json');
-    console.log(JSON.stringify(config, null, 2));
+    console.log('> write package.json');
+    fse.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2));
   }
   if (writeWorkflows) {
-    console.log('> writing workflows');
+    console.log('> write workflows');
+    const projectDir = findWorkspaceRoot() || process.cwd();
+    const srcDir = path.dirname(
+      require.resolve(
+        '@kungfu-trader/kungfu-sdk/templates/workflows/bump-major-version.yml',
+      ),
+    );
+    const targetDir = path.join(projectDir, '.github', 'workflows');
+    fse.mkdirSync(path.dirname(targetDir), { recursive: true });
+    fse.copySync(srcDir, targetDir, { overwrite: true });
   }
+};
+
+exports.package = () => {
+  require('@kungfu-trader/kungfu-core').project('package');
 };

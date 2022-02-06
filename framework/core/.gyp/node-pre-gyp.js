@@ -7,13 +7,7 @@ module.exports = require('@kungfu-trader/kungfu-core').sywac(module, (cli) => {
   const node_pre_gyp = (cmd, check = true) => {
     const buildType = process.env.npm_package_config_build_type;
     const buildTypeOpt = buildType === 'Debug' ? ['--debug'] : [];
-    const yarnArgs = [
-      'run',
-      '--silent',
-      'node-pre-gyp',
-      ...buildTypeOpt,
-      ...cmd,
-    ];
+    const yarnArgs = ['run', '-s', 'node-pre-gyp', ...buildTypeOpt, ...cmd];
     run('yarn', yarnArgs, check);
   };
 

@@ -23,9 +23,9 @@
   },
   "scripts": {
     "build": "kfs extension build",
+    "clean": "kfs extension clean",
     "install": "node -p \"require('@kungfu-trader/kungfu-core').project('install')\"",
-    "package": "kfs project package",
-    "clean": "kfs extension clean"
+    "package": "kfs project package"
   },
   "devDependencies": {
     "@kungfu-trader/kungfu-sdk": "^2.4.0-alpha.6"

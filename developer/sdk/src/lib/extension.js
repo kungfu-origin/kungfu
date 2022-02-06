@@ -1,4 +1,3 @@
-const archiver = require('archiver');
 const axios = require('axios');
 const ejs = require('ejs');
 const fse = require('fs-extra');
@@ -339,32 +338,10 @@ exports.compile = () => {
   if (fse.existsSync(pypackages)) {
     fse.copySync(pypackages, path.join(outputDir, pypackages));
   }
-};
 
-exports.package = () => {
-  const packageJson = getPackageJson();
-  const projectName = getProjectName(packageJson);
-  const archive = archiver('tar', { gzip: true });
-  const buildDir = path.join(process.cwd(), 'build');
-  const targetDir = path.join(buildDir, 'target');
-  const distDir = path.join(buildDir, 'dist');
-  const distFile = path.join(distDir, `${projectName}.tgz`);
-
-  fse.removeSync(distDir);
-  fse.ensureDirSync(distDir);
-
-  const isFile = (p) => fse.lstatSync(p).isFile();
-  const findFiles = (p) => glob.sync(p).filter(isFile);
-
-  [
-    ...findFiles(path.join(targetDir, '*')),
-    ...findFiles(path.join(kungfuLibDirPattern, 'lib', '**')),
-    path.join(process.cwd(), 'package.json'),
-  ].forEach((f) => {
-    archive.file(f, { name: path.basename(f) });
-  });
-
-  archive.pipe(fse.createWriteStream(distFile));
-  archive.on('error', logError);
-  archive.finalize();
+  fse.copySync(
+    require.resolve('@kungfu-trader/kungfu-core/dist/kfc/drone.node'),
+    path.join(outputDir, `${packageJson.binary.module_name}.node`),
+    {},
+  );
 };
