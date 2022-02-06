@@ -22,8 +22,8 @@
   },
   "scripts": {
     "build": "kfs extension build",
-    "install": "node .gyp/node-pre-gyp.js install",
-    "package": "node .gyp/node-pre-gyp.js package",
+    "install": "node -p \"require('@kungfu-trader/kungfu-core').project('install')\"",
+    "package": "kfs project package",
     "clean": "kfs extension clean"
   },
   "devDependencies": {

@@ -22,5 +22,6 @@ module.exports = {
     if (check && result.status !== 0) {
       process.exit(result.status);
     }
+    return result;
   },
 };

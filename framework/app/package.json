@@ -24,8 +24,8 @@
   "main": "lib/index.js",
   "scripts": {
     "build": "node lib/webpack/build.js",
-    "install": "node .gyp/node-pre-gyp.js install",
-    "package": "node .gyp/node-pre-gyp.js package",
+    "install": "node -p \"require('@kungfu-trader/kungfu-core').project('install')\"",
+    "package": "node -p \"require('@kungfu-trader/kungfu-core').project('package')\"",
     "clean": "rimraf build dist",
     "lint": "eslint src",
     "format": "prettier -l -w --config ../../.prettierrc.js ."
