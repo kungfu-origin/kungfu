@@ -4,7 +4,7 @@
     "name": "kungfu-trader",
     "email": "info@kungfu.link"
   },
-  "version": "2.4.0-alpha.6",
+  "version": "2.4.0-alpha.7",
   "description": "Kungfu App Framework",
   "license": "Apache-2.0",
   "repository": {
@@ -25,19 +25,19 @@
   "scripts": {
     "build": "node lib/webpack/build.js",
     "clean": "rimraf build dist",
-    "install": "node -p \"require('@kungfu-trader/kungfu-core').prebuilt('install')\"",
-    "package": "node -p \"require('@kungfu-trader/kungfu-core').prebuilt('package')\"",
+    "install": "node -e \"require('@kungfu-trader/kungfu-core').prebuilt('install')\"",
+    "package": "node -e \"require('@kungfu-trader/kungfu-core').prebuilt('package')\"",
     "lint": "eslint src",
     "format": "prettier -l -w --config ../../.prettierrc.js ."
   },
   "dependencies": {
-    "@kungfu-trader/kungfu-js-api": "^2.4.0-alpha.6",
+    "@kungfu-trader/kungfu-js-api": "^2.4.0-alpha.7",
     "iconv-lite": "^0.6.3",
     "jschardet": "^3.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.0.0",
-    "@kungfu-trader/kungfu-toolchain": "^2.4.0-alpha.6",
+    "@kungfu-trader/kungfu-toolchain": "^2.4.0-alpha.7",
     "babel-loader": "^8.0.0",
     "electron": "^13.0.0",
     "fs-extra": "^10.0.0",
