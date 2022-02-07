@@ -26,8 +26,9 @@ psutil = "^5.8.0"
 tabulate = "^0.8.9"
 
 #### Numeric ##############################################
-numpy = "^1.21.0"
-pandas = "^1.3.0"
+numpy = "^1.22.0"
+pandas = "^1.4.0"
+scipy = ">=1.7 <1.8"
 statsmodels = "^0.12.2"
 plotly = "^5.4.0"
 
@@ -35,8 +36,8 @@ plotly = "^5.4.0"
 chinesecalendar = "^1.6.0"
 
 [tool.poetry.dev-dependencies]
-conan = "^1.44.0"
-pyinstaller = "^4.8"
+conan = "^1.45.0"
+pyinstaller = "^4.9"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

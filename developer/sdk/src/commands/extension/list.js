@@ -35,10 +35,10 @@ module.exports = {
   run: async (argv) => {
     const libs = await sdk.lib.extension.list(
       argv.url,
-      argv.matchName,
-      argv.matchVersion,
-      argv.listVersion,
-      argv.listPlatform,
+      argv['match-name'],
+      argv['match-version'],
+      argv['list-version'],
+      argv['list-platform'],
     );
     console.log(treeify.asTree(libs, true));
   },

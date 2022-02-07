@@ -1,0 +1,15 @@
+name: Admin - Bump Major Version
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type confirm to bump major version'
+        required: true
+        default: 'cancel'
+
+jobs:
+  bump:
+    if: ${{ github.event.inputs.confirm  == 'confirm' }}
+    uses: kungfu-trader/workflows/.github/workflows/.bump-major-version.yml@v1
+    secrets:
+      KUNGFU_GITHUB_TOKEN: ${{ secrets.KUNGFU_GITHUB_TOKEN }}

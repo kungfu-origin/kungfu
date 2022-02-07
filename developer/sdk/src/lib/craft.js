@@ -1,16 +1,19 @@
-const fs = require('fs');
+const fse = require('fs-extra');
 const path = require('path');
 const app = require('@kungfu-trader/kungfu-app');
 
-const ensureDir = (cwd, dirName) => {
-  const distDir = path.join(cwd, dirName);
-  fs.mkdirSync(distDir, { recursive: true });
-  return distDir;
+const ensureDir = (cwd, ...dirNames) => {
+  const targetDir = path.join(cwd, ...dirNames);
+  fse.mkdirSync(targetDir, { recursive: true });
+  return targetDir;
 };
 
-exports.build = async () => {
-  const distDir = ensureDir(process.cwd(), 'dist');
-  await app.webpackBuild(distDir);
+exports.build = () => {
+  const appDrone = '@kungfu-trader/kungfu-app/dist/app/kungfu-app.node';
+  const srcDir = path.dirname(require.resolve(appDrone));
+  const targetDir = ensureDir(process.cwd(), 'dist', 'app');
+  fse.removeSync(targetDir);
+  fse.copySync(srcDir, targetDir);
 };
 
 exports.package = async () => {
@@ -18,7 +21,6 @@ exports.package = async () => {
   await app.electronBuild(buildDir);
 };
 
-exports.dev = () => {
-  const cwd = process.cwd();
-  return app.runDev(ensureDir(cwd, 'dist'));
+exports.dev = (withWebpack) => {
+  app.devRun(ensureDir(process.cwd(), 'dist'), 'app', withWebpack);
 };

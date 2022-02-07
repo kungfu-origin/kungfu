@@ -1,4 +1,4 @@
 module.exports = {
-  cli: require('./cli'),
+  cli: () => require('./kfs'),
   lib: require('./lib'),
 };

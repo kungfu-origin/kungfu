@@ -1,5 +1,6 @@
 module.exports = {
-  executable: require('./executable.js'),
-  kungfu: require('./kungfu.js'),
-  sywac: require('./sywac.js'),
+  executable: require('./executable'),
+  kungfu: require('./kungfu'),
+  sywac: require('./sywac'),
+  prebuilt: require('./prebuilt'),
 };

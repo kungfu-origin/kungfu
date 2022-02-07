@@ -2,9 +2,9 @@ const sdk = require('@kungfu-trader/kungfu-sdk');
 
 module.exports = {
   flags: 'package',
-  desc: 'Package kungfu artifact',
+  desc: 'Package kungfu project',
   setup: () => {},
-  run: async () => {
-    await sdk.lib.craft.package();
+  run: () => {
+    sdk.lib.prebuilt.package();
   },
 };

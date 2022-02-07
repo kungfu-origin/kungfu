@@ -1,0 +1,14 @@
+name: Admin - Bump Minor Version
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - main
+      - release/*/lts
+
+jobs:
+  bump:
+    if: ${{ github.event.pull_request.merged }}
+    uses: kungfu-trader/workflows/.github/workflows/.bump-minor-version.yml@v1
+    secrets:
+      KUNGFU_GITHUB_TOKEN: ${{ secrets.KUNGFU_GITHUB_TOKEN }}

@@ -21,25 +21,35 @@ service_command_context = kfc.pass_context("low_latency")
 @click.option(
     "-c",
     "--category",
-    default="strategy",
     type=click.Choice(kfj.CATEGORIES.keys()),
     help="category",
 )
-@click.option("-g", "--group", type=str, default="*", help="group")
-@click.option("-n", "--name", type=str, default="*", help="name")
+@click.option("-g", "--group", type=str, help="group")
+@click.option("-n", "--name", type=str, help="name")
 @click.option("-x", "--low-latency", is_flag=True, help="run in low latency mode")
-@click.argument("path", type=str, required=False)
+@click.argument("reference", type=str, required=False)
 @kfc.pass_context()
-def run(ctx, mode, category, group, name, low_latency, path):
+def run(ctx, mode, category, group, name, low_latency, reference):
     ctx.mode = mode
     ctx.category = category
     ctx.group = group
     ctx.name = name
     ctx.low_latency = low_latency
-    ctx.path = path
+    ctx.path = reference
 
     registry = ExecutorRegistry(ctx)
-    registry[category][group][name](mode, low_latency)
+
+    cheatsheet = {
+        "master": registry["system"]["master"]["master"],
+        "ledger": registry["system"]["service"]["ledger"],
+    }
+
+    if not category and not reference:
+        click.echo(run.get_help(ctx))
+    elif reference:
+        cheatsheet[reference](mode, low_latency)
+    else:
+        registry[category][group][name](mode, low_latency)
 
 
 @kfc.command(cls=PrioritizedCommandGroup, help_priority=-1)

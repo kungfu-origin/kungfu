@@ -4,7 +4,7 @@
     "name": "kungfu-trader",
     "email": "info@kungfu.link"
   },
-  "version": "2.4.0-alpha.5",
+  "version": "2.4.0-alpha.6",
   "description": "SDK for developing Kungfu Applications",
   "license": "Apache-2.0",
   "main": "src/index.js",
@@ -15,17 +15,15 @@
     "registry": "https://npm.pkg.github.com"
   },
   "bin": {
-    "kfs": "src/cli.js"
+    "kfs": "src/kfs.js"
   },
   "scripts": {
-    "kfs": "node src/cli.js",
+    "kfs": "node src/kfs.js",
     "format": "prettier -l -w --config ../../.prettierrc.js src"
   },
   "dependencies": {
-    "@kungfu-trader/kungfu-app": "^2.4.0-alpha.5",
-    "@kungfu-trader/kungfu-core": "^2.4.0-alpha.5",
-    "@kungfu-trader/kungfu-toolchain": "^2.4.0-alpha.5",
-    "archiver": "^5.3.0",
-    "treeify": "^1.1.0"
+    "@kungfu-trader/kungfu-app": "^2.4.0-alpha.6",
+    "@kungfu-trader/kungfu-core": "^2.4.0-alpha.6",
+    "@kungfu-trader/kungfu-toolchain": "^2.4.0-alpha.6"
   }
 }

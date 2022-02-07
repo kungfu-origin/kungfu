@@ -116,4 +116,4 @@ Napi::Object InitAll(Napi::Env env, Napi::Object exports) {
 }
 } // namespace kungfu::node
 
-NODE_API_MODULE(addon, InitAll)
+NODE_API_MODULE(kungfu, InitAll)

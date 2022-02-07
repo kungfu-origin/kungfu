@@ -1,0 +1,18 @@
+name: Release - Verify
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+    branches:
+      - alpha/*/*
+      - release/*/*
+      - main
+
+jobs:
+  verify:
+    uses: kungfu-trader/workflows/.github/workflows/.release-verify.yml@v1
+    secrets:
+      KUNGFU_GITHUB_TOKEN: ${{ secrets.KUNGFU_GITHUB_TOKEN }}
+      AWS_US_ACCESS_KEY_ID: ${{ secrets.AWS_US_ACCESS_KEY_ID }}
+      AWS_US_SECRET_ACCESS_KEY: ${{ secrets.AWS_US_SECRET_ACCESS_KEY }}
+      AWS_CN_ACCESS_KEY_ID: ${{ secrets.AWS_CN_ACCESS_KEY_ID }}
+      AWS_CN_SECRET_ACCESS_KEY: ${{ secrets.AWS_CN_SECRET_ACCESS_KEY }}

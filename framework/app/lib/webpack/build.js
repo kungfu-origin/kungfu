@@ -3,13 +3,13 @@
 const { say } = require('cfonts');
 const chalk = require('chalk');
 const fse = require('fs-extra');
+const path = require('path');
 const webpack = require('webpack');
 const Multispinner = require('multispinner');
 const {
   getAppDefaultDistDir,
   getAppDir,
 } = require('@kungfu-trader/kungfu-js-api/toolkit/utils');
-const defaultDistDir = getAppDefaultDistDir();
 
 function greeting() {
   const isCI = process.env.CI || false;
@@ -88,6 +88,12 @@ const run = (distDir, distName = 'app') => {
     let results = '';
 
     spinner.on('success', () => {
+      const config = require('@kungfu-trader/kungfu-app/package.json');
+      fse.copySync(
+        require.resolve('@kungfu-trader/kungfu-core/dist/kfc/drone.node'),
+        path.join(distDir, distName, `${config.binary.module_name}.node`),
+        {},
+      );
       process.stdout.write('\x1B[2J\x1B[0f');
       console.log(`\n\n${results}`);
       console.log(`${okayLog}webpack ${chalk.yellow('`done`')}\n`);
@@ -125,6 +131,7 @@ const run = (distDir, distName = 'app') => {
 module.exports = run;
 
 if (require.main === module) {
+  const defaultDistDir = getAppDefaultDistDir();
   fse.ensureDirSync(defaultDistDir);
   run(defaultDistDir).catch(console.error);
 }

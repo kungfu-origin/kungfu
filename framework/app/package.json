@@ -4,8 +4,8 @@
     "name": "kungfu-trader",
     "email": "info@kungfu.link"
   },
-  "version": "2.4.0-alpha.5",
-  "description": "Kungfu Core Library",
+  "version": "2.4.0-alpha.6",
+  "description": "Kungfu App Framework",
   "license": "Apache-2.0",
   "repository": {
     "url": "https://github.com/kungfu-trader/kungfu.git"
@@ -13,25 +13,31 @@
   "publishConfig": {
     "registry": "https://npm.pkg.github.com"
   },
+  "binary": {
+    "module_name": "kungfu-app",
+    "module_path": "dist/app",
+    "remote_path": "{module_name}/v{major}/v{version}",
+    "package_name": "{module_name}-v{version}-{platform}-{arch}-{configuration}.tar.gz",
+    "host": "https://prebuilt.libkungfu.cc"
+  },
   "types": "src/typings/index.d.ts",
   "main": "lib/index.js",
   "scripts": {
+    "build": "node lib/webpack/build.js",
     "clean": "rimraf build dist",
-    "dev": "node lib/webpack/dev.js",
-    "make:webpack": "node lib/webpack/build.js",
-    "make:electron": "node lib/electron/build.js",
-    "make": "yarn run make:webpack && yarn run make:electron",
+    "install": "node -p \"require('@kungfu-trader/kungfu-core').prebuilt('install')\"",
+    "package": "node -p \"require('@kungfu-trader/kungfu-core').prebuilt('package')\"",
     "lint": "eslint src",
     "format": "prettier -l -w --config ../../.prettierrc.js ."
   },
   "dependencies": {
-    "@kungfu-trader/kungfu-js-api": "^2.4.0-alpha.5",
+    "@kungfu-trader/kungfu-js-api": "^2.4.0-alpha.6",
     "iconv-lite": "^0.6.3",
     "jschardet": "^3.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.0.0",
-    "@kungfu-trader/kungfu-toolchain": "^2.4.0-alpha.5",
+    "@kungfu-trader/kungfu-toolchain": "^2.4.0-alpha.6",
     "babel-loader": "^8.0.0",
     "electron": "^13.0.0",
     "fs-extra": "^10.0.0",

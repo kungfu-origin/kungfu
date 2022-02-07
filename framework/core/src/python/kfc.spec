@@ -41,8 +41,8 @@ src_python_dir = abspath(make_path(src_dir, "python"))
 
 # kungfu build files
 build_dir = abspath(make_path(cwd, "build"))
-build_cpp_dir = abspath(make_path(build_dir, "cpp"))
-build_deps_dir = abspath(make_path(build_dir, "deps"))
+build_cpp_dir = abspath(make_path(build_dir, "src"))
+build_deps_dir = abspath(make_path(build_dir, ".deps"))
 build_output_dir = make_path(build_dir, os.environ["CMAKE_BUILD_TYPE"])
 
 # site path

@@ -1,7 +1,6 @@
 const path = require('path');
 const fse = require('fs-extra');
-const semver = require('semver');
-const coreConfig = require('@kungfu-trader/kungfu-core/package.json');
+const kungfuCore = require('@kungfu-trader/kungfu-core/package.json');
 const {
   getAppDir,
   getKfcDir,
@@ -11,8 +10,6 @@ const {
 const appDir = getAppDir();
 const kfcDir = getKfcDir();
 const coreDir = getCoreDir();
-const coreJSON = fse.readJSONSync(path.join(coreDir, 'package.json'));
-const version = semver.parse(coreJSON.version);
 
 const packageJSON = fse.readJSONSync(
   path.resolve(process.cwd(), 'package.json'),
@@ -25,7 +22,6 @@ const extdirs = Object.keys(packageJSON.dependencies || {})
     if (json.kungfuConfig) {
       return path.dirname(jsonPath);
     }
-
     return null;
   })
   .filter((fullpath) => !!fullpath);
@@ -38,25 +34,13 @@ const extras = extdirs.map((fullpath) => {
 });
 
 module.exports = {
-  productName: 'Kungfu',
-  artifactName:
-    '${productName}-${buildVersion}-${os}-${arch}-${channel}.${ext}',
   generateUpdatesFilesForAllChannels: true,
   appId: 'Kungfu.Origin.KungFu.Trader',
-  electronVersion: coreConfig.dependencies.electron,
-  directories: {
-    output: path.join(
-      'build',
-      'stage',
-      'kungfu',
-      `v${version.major}`,
-      `v${version}`,
-    ),
-  },
+  electronVersion: kungfuCore.dependencies.electron,
   publish: [
     {
       provider: 'generic',
-      url: 'http://taurusai.com/kungfu',
+      url: 'https://www.kungfu-trader.com',
     },
   ],
   npmRebuild: false,
