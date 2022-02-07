@@ -1,4 +1,5 @@
 import os from 'os';
+import fse from 'fs-extra';
 import { app, BrowserWindow, dialog, nativeImage, shell } from 'electron';
 import {
   reqRecordBeforeQuit,
@@ -25,6 +26,7 @@ import {
   removeJournal,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import {
+  BASE_DB_DIR,
   KFC_DIR,
   KFC_PARENT_DIR,
   KF_HOME,
@@ -172,13 +174,17 @@ export const registerScheduleTasks = async (
     reloadBySchedule: boolean,
   ) => void,
 ): Promise<boolean> => {
+  if (!fse.pathExistsSync(path.join(BASE_DB_DIR, 'config.db'))) {
+    return false;
+  }
+
   await schedule.gracefulShutdown();
   const scheduleTasks = await getScheduleTasks();
   const allKfConfig = await getAllKfConfigOriginData();
   const { td, md, strategy } = allKfConfig;
 
   const { active, tasks } = scheduleTasks;
-  if (!active || !tasks) return;
+  if (!active || !tasks) return false;
 
   const tasksResolved = Object.values(
     scheduleTasks.tasks.reduce((avoidRepeatTasks, task) => {

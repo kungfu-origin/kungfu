@@ -29,7 +29,12 @@ void JsRestoreState::operator()(int64_t from, int64_t to, bool sync_schema) {
     boost::hana::for_each(StateDataTypes, [&](auto it) {
       using DataType = typename decltype(+boost::hana::second(it))::type;
       for (const auto &data : cache::time_spec<DataType>::get_all(storage, from, to)) {
-        set(data, state_, source, dest, now);
+        try {
+          set(data, state_, source, dest, now);
+        } catch (const std::exception &e) {
+          SPDLOG_ERROR("Unexpected exception by operator() set {}", e.what());
+          continue;
+        }
       }
     });
   }

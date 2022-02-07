@@ -16,7 +16,6 @@ import {
   dealVolumeCondition,
   getIdByKfLocation,
   getMdTdKfLocationByProcessId,
-  getOrderTradeFilterKey,
   kfLogger,
   resolveAccountId,
   resolveClientId,

@@ -1102,12 +1102,17 @@ export const filterLedgerResult = <T>(
 
 export const dealTradingData = (
   watcher: KungfuApi.Watcher | null,
-  tradingData: KungfuApi.TradingData,
+  tradingData: KungfuApi.TradingData | undefined,
   tradingDataTypeName: KungfuApi.TradingDataTypeName,
   kfLocation: KungfuApi.KfLocation | KungfuApi.KfConfig,
 ): KungfuApi.TradingDataNameToType[KungfuApi.TradingDataTypeName][] => {
   if (!watcher) {
     throw new Error('Watcher 错误');
+  }
+
+  if (!tradingData) {
+    console.error('ledger is undefined');
+    return [];
   }
 
   const currentUID = watcher.getLocationUID(kfLocation);
