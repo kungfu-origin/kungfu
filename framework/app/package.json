@@ -25,8 +25,8 @@
   "scripts": {
     "build": "node lib/webpack/build.js",
     "clean": "rimraf build dist",
-    "install": "node -p \"require('@kungfu-trader/kungfu-core').prebuilt('install')\"",
-    "package": "node -p \"require('@kungfu-trader/kungfu-core').prebuilt('package')\"",
+    "install": "node -e \"require('@kungfu-trader/kungfu-core').prebuilt('install')\"",
+    "package": "node -e \"require('@kungfu-trader/kungfu-core').prebuilt('package')\"",
     "lint": "eslint src",
     "format": "prettier -l -w --config ../../.prettierrc.js ."
   },
