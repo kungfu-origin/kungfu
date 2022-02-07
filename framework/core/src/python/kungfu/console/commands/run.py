@@ -46,7 +46,7 @@ def run(ctx, mode, category, group, name, low_latency, reference):
 
     if not category and not reference:
         click.echo(run.get_help(ctx))
-    elif reference:
+    elif reference in cheatsheet:
         cheatsheet[reference](mode, low_latency)
     else:
         registry[category][group][name](mode, low_latency)
