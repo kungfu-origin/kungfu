@@ -2,10 +2,6 @@ const findWorkspaceRoot = require('find-yarn-workspace-root');
 const fse = require('fs-extra');
 const path = require('path');
 
-exports.install = () => {
-  require('@kungfu-trader/kungfu-core').prebuilt('install');
-};
-
 exports.configure = (writePackageJson = false, writeWorkflows = true) => {
   const packageJsonPath = path.join(process.cwd(), 'package.json');
   const packageJson = require(packageJsonPath);

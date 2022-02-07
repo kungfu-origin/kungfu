@@ -2,7 +2,7 @@ const sdk = require('@kungfu-trader/kungfu-sdk');
 
 module.exports = {
   flags: 'configure',
-  desc: 'Configure kungfu oriented project',
+  desc: 'Configure kungfu prebuilt',
   setup: (cli) => {
     cli
       .option('write-package-json', {

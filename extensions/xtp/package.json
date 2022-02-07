@@ -4,7 +4,7 @@
     "name": "kungfu-trader",
     "email": "info@kungfu.link"
   },
-  "version": "2.4.0-alpha.7",
+  "version": "2.4.0-alpha.8",
   "description": "Kungfu Extension - XTP Demo",
   "license": "Apache-2.0",
   "main": "package.json",
@@ -24,11 +24,14 @@
   "scripts": {
     "build": "kfs extension build",
     "clean": "kfs extension clean",
-    "install": "node -p \"require('@kungfu-trader/kungfu-core').prebuilt('install')\"",
+    "install": "node -e \"require('@kungfu-trader/kungfu-core').prebuilt('install')\"",
     "package": "kfs prebuilt package"
   },
+  "dependencies": {
+    "@kungfu-trader/kungfu-core": "^2.4.0-alpha.8"
+  },
   "devDependencies": {
-    "@kungfu-trader/kungfu-sdk": "^2.4.0-alpha.7"
+    "@kungfu-trader/kungfu-sdk": "^2.4.0-alpha.8"
   },
   "kungfuDependencies": {
     "xtp": "v1.1.18.13"
