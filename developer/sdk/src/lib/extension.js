@@ -315,7 +315,7 @@ exports.compile = () => {
   }
 
   if (hasSourceFor(packageJson, 'cpp')) {
-    spawnExec('yarn', ['cmake-js', 'compile']);
+    spawnExec('yarn', ['cmake-js', 'build']);
   }
 
   const packageJsonPath = path.join(process.cwd(), 'package.json');
