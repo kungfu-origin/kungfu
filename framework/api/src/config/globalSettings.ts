@@ -49,7 +49,7 @@ export const getKfGlobalSettings = (): KfSystemConfig[] => [
         name: isEnglish ? 'Open Rocket Model' : '开启极速模式',
         tip: isEnglish
           ? 'Use CPU 100%, restart is required'
-          : '开启极速模式会极大的降低系统延迟，并会使 CPU 使用效率达到100%，开启后请重启功夫交易系统',
+          : '开启极速模式会极大的降低系统延迟, 并会使 CPU 使用效率达到100%, 开启后请重启功夫交易系统',
         default: false,
         type: 'bool',
       },
@@ -58,7 +58,7 @@ export const getKfGlobalSettings = (): KfSystemConfig[] => [
         name: isEnglish ? 'Close Quote Listener' : '跳过行情计算',
         tip: isEnglish
           ? 'Close Quote Listener'
-          : '在订阅一定数量（上千）支Ticker时，由行情推送触发pnl计算会导致性能问题，开启后会掉过行情计算',
+          : '在订阅一定数量(上千)支Ticker时, 由行情推送触发pnl计算会导致性能问题, 开启后会掉过行情计算',
         default: false,
         type: 'bool',
       },
@@ -73,7 +73,7 @@ export const getKfGlobalSettings = (): KfSystemConfig[] => [
         name: isEnglish ? 'Use Local Python' : '使用本地python',
         tip: isEnglish
           ? `Pip3 install kungfu*.whl, local python require ${__python_version}`
-          : `使用本地python启动策略，需要 pip3 install kungfu*.whl，本地 python3 版本需为 ${__python_version}，开启后需重启策略`,
+          : `使用本地python启动策略, 需要 pip3 install kungfu*.whl, 本地 python3 版本需为 ${__python_version}, 开启后需重启策略`,
         default: false,
         type: 'bool',
       },
@@ -82,7 +82,7 @@ export const getKfGlobalSettings = (): KfSystemConfig[] => [
         name: isEnglish ? 'Select Local Python Path' : '选择本地 Python 路径',
         tip: isEnglish
           ? 'local python path is required to be selected, and kungfu*.whl should be installed in this path'
-          : '功夫将会以选择的python路径运行策略，同时需要保证 kungfu*.whl 已经通过 pip安装',
+          : '功夫将会以选择的python路径运行策略, 同时需要保证 kungfu*.whl 已经通过 pip安装',
         default: '',
         type: 'file',
       },

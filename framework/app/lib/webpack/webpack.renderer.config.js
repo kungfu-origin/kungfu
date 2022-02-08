@@ -2,6 +2,7 @@
 
 const toolkit = require('@kungfu-trader/kungfu-js-api/toolkit');
 const path = require('path');
+const CopyPlugin = require('copy-webpack-plugin');
 
 const webpack = require('webpack');
 const { merge } = require('webpack-merge');
@@ -73,7 +74,24 @@ const webpackConfig = (argv) => {
         },
       ],
     },
-    plugins: [...pagesConfig.plugins, new VueLoaderPlugin()],
+    plugins: [
+      ...pagesConfig.plugins,
+      new VueLoaderPlugin(),
+      new CopyPlugin({
+        patterns: [
+          {
+            from: path.join(appDir, 'public') + '/**/*',
+            to: path.join(argv.distDir, argv.distName, 'kungfu-resources'),
+            filter: (resourcePath) => {
+              if (resourcePath.includes('devtools/vue-devtool')) {
+                return false;
+              }
+              return true;
+            },
+          },
+        ],
+      }),
+    ],
     resolve: {
       alias: {
         '@root': appDir,

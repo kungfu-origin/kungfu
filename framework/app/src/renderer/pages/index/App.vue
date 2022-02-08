@@ -128,7 +128,7 @@ onMounted(() => {
         record: { done: '保存数据完成 ✓', loading: '保存数据中...' },
         quit: {
           done: '结束所有交易进程 ✓',
-          loading: '结束交易进程中，请勿关闭...',
+          loading: '结束交易进程中, 请勿关闭...',
         },
       }"
     ></KfSystemPrepareModal>

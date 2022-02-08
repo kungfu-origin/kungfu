@@ -412,12 +412,11 @@ const resolveInstrumentTypesInExtType = (
 const getKfExtensionConfigByCategory = (
   extConfigs: KungfuApi.KfExtOriginConfig[],
 ): KungfuApi.KfExtConfigs => {
-  let configByCategory: KungfuApi.KfExtConfigs = {};
-  extConfigs.forEach((extConfig: KungfuApi.KfExtOriginConfig) => {
-    const extKey = extConfig.key;
-    (Object.keys(extConfig['config']) as KfCategoryTypes[]).forEach(
-      (category: KfCategoryTypes) => {
-        if (configByCategory) {
+  return extConfigs.reduce(
+    (configByCategory, extConfig: KungfuApi.KfExtOriginConfig) => {
+      const extKey = extConfig.key;
+      (Object.keys(extConfig['config']) as KfCategoryTypes[]).forEach(
+        (category: KfCategoryTypes) => {
           const configOfCategory = extConfig['config'][category];
           configByCategory[category] = {
             ...(configByCategory[category] || {}),
@@ -428,12 +427,12 @@ const getKfExtensionConfigByCategory = (
               settings: configOfCategory?.settings || [],
             },
           };
-        }
-      },
-    );
-  });
-
-  return configByCategory;
+        },
+      );
+      return configByCategory;
+    },
+    {} as KungfuApi.KfExtConfigs,
+  );
 };
 
 export const getKfExtensionConfig =

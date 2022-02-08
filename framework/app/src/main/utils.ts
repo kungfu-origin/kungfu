@@ -120,7 +120,7 @@ export function showQuitMessageBox(
         title: '提示',
         defaultId: 0,
         cancelId: 1,
-        message: '退出应用会结束所有交易进程，确认退出吗？',
+        message: '退出应用会结束所有交易进程, 确认退出吗?',
         buttons: ['确认', '取消'],
         icon: nativeImage.createFromPath(
           path.join(global.__resources, 'logo', 'logo.png'),
@@ -153,7 +153,7 @@ export function showCrashMessageBox(): Promise<boolean> {
       title: '提示',
       defaultId: 0,
       cancelId: 1,
-      message: '功夫图形进程中断，该中断不会影响交易，是否重启图形进程？',
+      message: '功夫图形进程中断, 该中断不会影响交易, 是否重启图形进程？',
       buttons: ['确认', '取消'],
       icon: nativeImage.createFromPath(
         path.join(global.__resources, 'logo', 'logo.png'),

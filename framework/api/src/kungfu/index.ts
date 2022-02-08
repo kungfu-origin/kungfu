@@ -354,7 +354,7 @@ export const kfMakeOrder = (
   };
 
   if (strategyLocation) {
-    //设置orderInput的parentid，来标记该order为策略手动下单
+    //设置orderInput的parentid, 来标记该order为策略手动下单
     return Promise.resolve(
       watcher.issueOrder(
         {

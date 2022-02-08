@@ -45,7 +45,7 @@ export const buildProcessLogPath = (processId: string) => {
 
 //================== config start =================================
 
-//global.__kfResourcesPath 是一个容易出错的问题，需要每个调用pathconfig的进程都注册了这个值，不然报错
+//global.__kfResourcesPath 是一个容易出错的问题, 需要每个调用pathconfig的进程都注册了这个值, 不然报错
 export const KUNGFU_RESOURCES_DIR = production
   ? path.join(global.__kfResourcesPath, 'kungfu-resources')
   : path.join(global.__resources);
@@ -93,6 +93,8 @@ addFileSync('', KF_SCHEDULE_TASKS_JSON_PATH, 'file');
 
 //================== config end ===================================
 
+console.log('global.__kfResourcesPath)', global.__kfResourcesPath);
+
 //================== kfc start ====================================
 export const KFC_PARENT_DIR = production
   ? global.__kfResourcesPath
@@ -107,7 +109,7 @@ export const EXTENSION_DIRS = production
   : [
       path.resolve(KFC_PARENT_DIR, '..', '..', '..', 'extensions'),
       path.resolve('node_modules', '@kungfu-trader'),
-      'node_modules',
+      path.resolve('node_modules'),
     ];
 
 export const APP_DIR = production

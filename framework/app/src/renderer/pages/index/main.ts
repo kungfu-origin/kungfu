@@ -131,7 +131,7 @@ if (process.env.RELOAD_AFTER_CRASHED === 'false') {
         .catch((err) => console.error(err.message));
     });
 } else {
-  // 崩溃后重开，跳过archive过程
+  // 崩溃后重开, 跳过archive过程
   bus.next({
     tag: 'processStatus',
     name: 'archive',
