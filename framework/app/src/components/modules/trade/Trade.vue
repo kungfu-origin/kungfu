@@ -40,6 +40,7 @@ import type { Dayjs } from 'dayjs';
 import { showTradingDataDetail } from '@renderer/assets/methods/actionsUtils';
 import { useExtraCategory } from '@renderer/assets/methods/uiExtraLocationUtils';
 import TradeStatisticModal from './TradeStatisticModal.vue';
+import { HistoryDateEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';
 
 const app = getCurrentInstance();
 
@@ -138,7 +139,7 @@ watch(historyDate, async (newDate) => {
   const { tradingData, historyDatas } = await getKungfuHistoryData(
     window.watcher,
     newDate.format(),
-    0,
+    HistoryDateEnum.naturalDate,
     'Trade',
     currentGlobalKfLocation.data,
   );

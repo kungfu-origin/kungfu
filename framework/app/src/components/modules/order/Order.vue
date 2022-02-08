@@ -49,7 +49,10 @@ import {
 } from '@kungfu-trader/kungfu-js-api/kungfu';
 import type { Dayjs } from 'dayjs';
 import { UnfinishedOrderStatus } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
-import { OrderStatusEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';
+import {
+  HistoryDateEnum,
+  OrderStatusEnum,
+} from '@kungfu-trader/kungfu-js-api/typings/enums';
 import { message, Modal } from 'ant-design-vue';
 import { showTradingDataDetail } from '@renderer/assets/methods/actionsUtils';
 import { useExtraCategory } from '@renderer/assets/methods/uiExtraLocationUtils';
@@ -170,7 +173,7 @@ watch(historyDate, async (newDate) => {
   const { tradingData, historyDatas } = await getKungfuHistoryData(
     window.watcher,
     newDate.format(),
-    0,
+    HistoryDateEnum.naturalDate,
     'Order',
     currentGlobalKfLocation.data,
   );

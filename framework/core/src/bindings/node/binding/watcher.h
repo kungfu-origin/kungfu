@@ -74,7 +74,7 @@ public:
 
   Napi::Value RequestMarketData(const Napi::CallbackInfo &info);
 
-  Napi::Value UpdateQuote(const Napi::CallbackInfo &info);
+  void UpdateQuote(const Napi::CallbackInfo &info);
 
   static void Init(Napi::Env env, Napi::Object exports);
 

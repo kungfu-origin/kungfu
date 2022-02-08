@@ -184,7 +184,13 @@ void master::handle_cached_feeds() {
         auto source_id = s.source;
 
         if (app_cache_shift_.find(source_id) != app_cache_shift_.end()) {
-          app_cache_shift_.at(source_id) << s;
+          try {
+            app_cache_shift_.at(source_id) << s;
+          } catch (const std::exception &e) {
+            SPDLOG_ERROR("Unexpected exception by storage << {}", e.what());
+            continue;
+          }
+
           iter = feed_map.erase(iter);
           stored_controller = true;
         } else {

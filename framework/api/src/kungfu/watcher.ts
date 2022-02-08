@@ -4,6 +4,8 @@ import {
   getProcessIdByKfLocation,
   kfLogger,
   setTimerPromiseTask,
+  statTime,
+  statTimeEnd,
 } from '../utils/busiUtils';
 import {
   BrokerStateStatusEnum,
@@ -57,10 +59,10 @@ export const startGetKungfuWatcherStep = (
         if (process.env.APP_TYPE == 'renderer') {
           window.requestIdleCallback(
             () => {
-              // statTime('step');
+              statTime('step');
               watcher.step();
               callback(watcher);
-              // statTimeEnd('step');
+              statTimeEnd('step');
               resolve(true);
             },
             { timeout: 5000 },
@@ -82,18 +84,13 @@ export const startUpdateKungfuWatcherQuotes = (interval = 2000) => {
 
   return setTimerPromiseTask(() => {
     return new Promise((resolve) => {
-      if (!watcher.isLive() || !watcher.isStarted() || !watcher.isUsable()) {
-        resolve(false);
-        return;
-      }
-
       if (watcher.isLive()) {
         if (process.env.APP_TYPE == 'renderer') {
           window.requestIdleCallback(
             () => {
-              // statTime('update Quote');
+              statTime('update Quote');
               watcher.updateQuote();
-              // statTimeEnd('update Quote');
+              statTimeEnd('update Quote');
               resolve(true);
             },
             { timeout: 5000 },
@@ -102,6 +99,8 @@ export const startUpdateKungfuWatcherQuotes = (interval = 2000) => {
           watcher.updateQuote();
           resolve(true);
         }
+      } else {
+        resolve(false);
       }
     });
   }, interval);
