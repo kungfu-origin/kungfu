@@ -568,7 +568,7 @@ export const startTd = async (accountId: string): Promise<Proc | void> => {
   const args = buildArgs(
     `-X ${extDirs
       .map((dir) => path.dirname(dir))
-      .join(':')} run -c td -g "${source}" -n "${id}"`,
+      .join(path.delimiter)} run -c td -g "${source}" -n "${id}"`,
   );
   return startProcess({
     name: `td_${accountId}`,
