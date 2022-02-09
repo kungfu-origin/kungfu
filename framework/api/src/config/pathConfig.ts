@@ -93,8 +93,6 @@ addFileSync('', KF_SCHEDULE_TASKS_JSON_PATH, 'file');
 
 //================== config end ===================================
 
-console.log('global.__kfResourcesPath)', global.__kfResourcesPath);
-
 //================== kfc start ====================================
 export const KFC_PARENT_DIR = production
   ? global.__kfResourcesPath
@@ -109,7 +107,7 @@ export const EXTENSION_DIRS = production
   : [
       path.resolve(KFC_PARENT_DIR, '..', '..', '..', 'extensions'),
       path.resolve('node_modules', '@kungfu-trader'),
-      path.resolve('node_modules'),
+      path.resolve('dist'),
     ];
 
 export const APP_DIR = production
