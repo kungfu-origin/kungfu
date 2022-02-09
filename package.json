@@ -39,6 +39,7 @@
     "lodash.merge": "^4.6.2",
     "node-fetch": "^2.6.7",
     "node-gyp": "^8.0.0",
+    "rxjs": "^7.5.0",
     "uuid": "^7.0.0"
   }
 }
