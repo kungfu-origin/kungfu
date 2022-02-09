@@ -66,7 +66,7 @@ jobs:
           action: "prebuild"
 
       - name: Setup Kungfu environment
-        run: yarn install --frozen-lockfile
+        run: yarn --network-timeout=1000000 install --frozen-lockfile
 
       - name: Build Kungfu
         # skip prebuild script to not format code
