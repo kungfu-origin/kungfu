@@ -86,7 +86,7 @@ const webpackConfig = (argv) => {
             ),
             to: path.join(argv.distDir, argv.distName),
             filter: (resourcePath) => {
-              if (resourcePath.includes('devtools/vue-devtool')) {
+              if (resourcePath.includes('vue-devtool')) {
                 return false;
               }
               return true;
