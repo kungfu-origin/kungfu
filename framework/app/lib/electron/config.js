@@ -1,31 +1,16 @@
 const path = require('path');
-const fse = require('fs-extra');
 const kungfuCore = require('@kungfu-trader/kungfu-core/package.json');
 const {
   getAppDir,
   getKfcDir,
   getCoreDir,
+  getExtensionDirs,
 } = require('@kungfu-trader/kungfu-js-api/toolkit/utils');
 
 const appDir = getAppDir();
 const kfcDir = getKfcDir();
 const coreDir = getCoreDir();
-
-const packageJSON = fse.readJSONSync(
-  path.resolve(process.cwd(), 'package.json'),
-);
-
-const extdirs = Object.keys(packageJSON.dependencies || {})
-  .map((name) => {
-    const jsonPath = require.resolve(name + '/package.json');
-    const json = fse.readJSONSync(jsonPath);
-    if (json.kungfuConfig) {
-      return path.dirname(jsonPath);
-    }
-    return null;
-  })
-  .filter((fullpath) => !!fullpath);
-
+const extdirs = getExtensionDirs();
 const extras = extdirs.map((fullpath) => {
   return {
     from: path.resolve(fullpath, 'dist'),
@@ -64,7 +49,7 @@ module.exports = {
     },
     {
       from: `${coreDir}/build/python/dist`,
-      to: 'kungfu-resources/python',
+      to: 'app/dist/app/public/python',
       filter: ['*.whl'],
     },
     {
@@ -76,11 +61,6 @@ module.exports = {
       from: appDir,
       to: 'app',
       filter: ['lib/*'],
-    },
-    {
-      from: `${appDir}/public`,
-      to: 'kungfu-resources',
-      filter: ['config/*', 'key/*'],
     },
     {
       from: `${appDir}/lib/electron`,

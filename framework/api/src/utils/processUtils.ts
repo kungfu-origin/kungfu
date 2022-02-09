@@ -160,7 +160,7 @@ export const pm2Describe = (
   processId: string,
 ): Promise<ProcessDescription[]> => {
   return new Promise((resolve, reject) => {
-    //此处无需connect，不然windows会卡死
+    //此处无需connect, 不然windows会卡死
     pm2.describe(processId, (err: Error, pList: ProcessDescription[]) => {
       if (err) {
         kfLogger.error(err.message);
@@ -294,7 +294,7 @@ export const startProcess = (
     log_date_format: 'YYYY-MM-DD HH:mm:ss',
     autorestart: options.autorestart || false,
     max_restarts: options.max_restarts || 1,
-    min_uptime: 3600000, //该时间段内最大启动次数max_restarts，如果超过则不重启，如果没超过，则一直重启
+    min_uptime: 3600000, //该时间段内最大启动次数max_restarts, 如果超过则不重启, 如果没超过, 则一直重启
     restart_delay: 1000,
     watch: options.watch || false,
     force: options.force || false,

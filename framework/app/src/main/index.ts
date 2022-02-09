@@ -251,7 +251,7 @@ function setMenu() {
       submenu: applicationOptions,
     },
     {
-      //此处必要，不然electron内使用复制粘贴会无效
+      //此处必要, 不然electron内使用复制粘贴会无效
       label: '编辑',
       submenu: [
         {

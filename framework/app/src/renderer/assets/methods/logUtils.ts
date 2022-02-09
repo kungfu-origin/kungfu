@@ -67,6 +67,7 @@ export function dealLogMessage(line: string): string {
   }
 
   line = line
+    .replace(/ info /g, '<span class="info"> info </span>')
     .replace(/warning/g, '<span class="warning"> warning </span>')
     .replace(/ error /g, '<span class="error"> error </span>')
     .replace(/ debug /g, '<span class="debug"> debug </span>')

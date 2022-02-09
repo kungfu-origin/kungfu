@@ -159,7 +159,7 @@ function isNumberInputType(type: string): boolean {
 }
 
 const SpecialWordsReg = new RegExp(
-  "[`~!@#$^&*()=|{}':;',\\[\\].<>《》/?~！@#￥……&*（）——|{}【】‘；：”“'。，、？]",
+  "[`~!@#$^&*()=|{}':;',\\[\\].<>《》/?~！@#￥……&*（）——|{}【】‘；：”“'。, 、？]",
 );
 function primaryKeyValidator(_rule: RuleObject, value: string): Promise<void> {
   const combineValue: string = [
@@ -229,7 +229,7 @@ function handleSelectFile(targetKey: string): void {
       const { filePaths } = res;
       if (filePaths.length) {
         formState[targetKey] = filePaths[0];
-        formRef.value.validateFields([targetKey]); //手动进行再次验证，因数据放在span中，改变数据后无法触发验证
+        formRef.value.validateFields([targetKey]); //手动进行再次验证, 因数据放在span中, 改变数据后无法触发验证
       }
     });
 }
@@ -243,7 +243,7 @@ function handleSelectFiles(targetKey: string): void {
       const { filePaths } = res;
       if (filePaths.length) {
         (formState[targetKey] as string[]).push(filePaths[0]);
-        formRef.value.validateFields([targetKey]); //手动进行再次验证，因数据放在span中，改变数据后无法触发验证
+        formRef.value.validateFields([targetKey]); //手动进行再次验证, 因数据放在span中, 改变数据后无法触发验证
       }
     });
 }

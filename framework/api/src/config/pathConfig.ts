@@ -45,10 +45,8 @@ export const buildProcessLogPath = (processId: string) => {
 
 //================== config start =================================
 
-//global.__kfResourcesPath 是一个容易出错的问题，需要每个调用pathconfig的进程都注册了这个值，不然报错
-export const KUNGFU_RESOURCES_DIR = production
-  ? path.join(global.__kfResourcesPath, 'kungfu-resources')
-  : path.join(global.__resources);
+//global.__kfResourcesPath 是一个容易出错的问题, 需要每个调用pathconfig的进程都注册了这个值, 不然报错
+export const KUNGFU_RESOURCES_DIR = global.__resources;
 
 export const KF_CONFIG_DEFAULT_PATH = path.join(
   KUNGFU_RESOURCES_DIR,
@@ -102,12 +100,14 @@ export const KFC_DIR = process.env.KFC_DIR || path.join(KFC_PARENT_DIR, 'kfc');
 
 export const KFC_EXECUTABLE = process.platform === 'win32' ? 'kfc.exe' : 'kfc';
 
-export const EXTENSION_DIRS = production
+export const EXTENSION_DIRS: string[] = process.env.EXTENSION_DIRS
+  ? process.env.EXTENSION_DIRS.split(',')
+  : production
   ? [path.join(global.__kfResourcesPath, 'kungfu-extensions')]
   : [
       path.resolve(KFC_PARENT_DIR, '..', '..', '..', 'extensions'),
       path.resolve('node_modules', '@kungfu-trader'),
-      'node_modules',
+      path.resolve('dist'),
     ];
 
 export const APP_DIR = production

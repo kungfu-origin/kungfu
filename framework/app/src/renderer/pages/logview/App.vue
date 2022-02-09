@@ -272,13 +272,18 @@ function resetLog() {
       font-weight: bold;
     }
 
+    .info {
+      color: @green2-base;
+      font-weight: bold;
+    }
+
     .warning {
       color: @orange-6;
       font-weight: bold;
     }
 
     .trace {
-      color: @green2-base;
+      color: @cyan-6;
       font-weight: bold;
     }
 

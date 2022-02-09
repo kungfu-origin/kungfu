@@ -4,6 +4,8 @@ import {
   getProcessIdByKfLocation,
   kfLogger,
   setTimerPromiseTask,
+  // statTime,
+  // statTimeEnd,
 } from '../utils/busiUtils';
 import {
   BrokerStateStatusEnum,
@@ -82,11 +84,6 @@ export const startUpdateKungfuWatcherQuotes = (interval = 2000) => {
 
   return setTimerPromiseTask(() => {
     return new Promise((resolve) => {
-      if (!watcher.isLive() || !watcher.isStarted() || !watcher.isUsable()) {
-        resolve(false);
-        return;
-      }
-
       if (watcher.isLive()) {
         if (process.env.APP_TYPE == 'renderer') {
           window.requestIdleCallback(
@@ -102,6 +99,8 @@ export const startUpdateKungfuWatcherQuotes = (interval = 2000) => {
           watcher.updateQuote();
           resolve(true);
         }
+      } else {
+        resolve(false);
       }
     });
   }, interval);

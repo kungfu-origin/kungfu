@@ -600,7 +600,7 @@ export const openNewBrowserWindow = (
 function getNewWindowLocation(): { x: number; y: number } | null {
   const currentWindow = getCurrentWindow();
   if (currentWindow) {
-    //如果上一步中有活动窗口，则根据当前活动窗口的右下方设置下一个窗口的坐标
+    //如果上一步中有活动窗口, 则根据当前活动窗口的右下方设置下一个窗口的坐标
     const [currentWindowX, currentWindowY] = currentWindow.getPosition();
     const x = currentWindowX + 10;
     const y = currentWindowY + 10;
@@ -659,7 +659,7 @@ export const useIpcListener = (): void => {
 
 export const markClearJournal = (): void => {
   localStorage.setItem('clearJournalTradingDate', '');
-  message.success('清理 journal 完成，请重启应用');
+  message.success('清理 journal 完成, 请重启应用');
 };
 
 export const handleOpenLogview = (

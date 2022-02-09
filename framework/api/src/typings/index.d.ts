@@ -354,7 +354,7 @@ declare namespace KungfuApi {
     instrument_type: InstrumentTypeEnum; //合约类型
 
     limit_price: number; //价格
-    frozen_price: number; //冻结价格，市价单冻结价格为0
+    frozen_price: number; //冻结价格, 市价单冻结价格为0
 
     volume: bigint; //数量
     volume_traded: bigint; //成交数量

@@ -12,6 +12,7 @@ const {
   getAppDefaultDistDir,
   getAppDir,
   getKfcDir,
+  getExtensionDirs,
 } = require('@kungfu-trader/kungfu-js-api/toolkit/utils');
 const defaultDistDir = getAppDefaultDistDir();
 
@@ -209,10 +210,11 @@ function startElectron(argv) {
 const run = (distDir, distName = 'app', withWebpack) => {
   const appDir = getAppDir();
   const kfcDir = getKfcDir();
+  const extdirs = getExtensionDirs();
+
   process.chdir(appDir);
   process.env.KFC_DIR = kfcDir;
-
-  greeting();
+  process.env.EXTENSION_DIRS = [distDir, ...extdirs].join(',');
 
   const argv = {
     mode: 'development',
