@@ -360,6 +360,11 @@ export const flattenExtensionModuleDirs = async (
         ) {
           if (fse.pathExistsSync(path.join(childFilePath, 'package.json'))) {
             extensionModuleDirs.push(childFilePath);
+          } else {
+            const extModules = await flattenExtensionModuleDirs([
+              childFilePath,
+            ]);
+            extensionModuleDirs = extensionModuleDirs.concat(extModules);
           }
         } else {
           const extModules = await flattenExtensionModuleDirs([

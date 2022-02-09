@@ -21,9 +21,7 @@ const getHomePath = () => {
 
 if (process.env.NODE_ENV === 'development') {
   global.__resources = `${__resources}`;
-}
-
-if (process.env.NODE_ENV !== 'development' && process.env.APP_TYPE === 'main') {
+} else {
   global.__resources = path.join(__dirname, '/public').replace(/\\/g, '\\\\');
 }
 

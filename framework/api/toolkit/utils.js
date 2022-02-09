@@ -129,3 +129,22 @@ exports.getKfcDir = () => {
 };
 
 exports.isProduction = (argv) => argv.mode === 'production';
+
+exports.getExtensionDirs = () => {
+  const packageJSON = fs.readJSONSync(
+    path.resolve(process.cwd(), 'package.json'),
+  );
+
+  const extdirs = Object.keys(packageJSON.dependencies || {})
+    .map((name) => {
+      const jsonPath = require.resolve(name + '/package.json');
+      const json = fs.readJSONSync(jsonPath);
+      if (json.kungfuConfig) {
+        return path.dirname(jsonPath);
+      }
+      return null;
+    })
+    .filter((fullpath) => !!fullpath);
+
+  return extdirs;
+};

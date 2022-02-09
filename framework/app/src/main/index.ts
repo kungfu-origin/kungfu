@@ -101,8 +101,6 @@ function createWindow(reloadAfterCrashed = false, reloadBySchedule = false) {
   });
 
   MainWindow.on('close', (e) => {
-    console.log(CrashedReloading, SecheduleReloading, AllowQuit, '=========');
-
     if (CrashedReloading || SecheduleReloading) {
       return;
     }
