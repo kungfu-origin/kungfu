@@ -80,7 +80,10 @@ const webpackConfig = (argv) => {
       new CopyPlugin({
         patterns: [
           {
-            from: path.join(appDir, 'public') + '/**/*',
+            from: path.posix.join(
+              path.join(appDir, 'public').replace(/\\/g, '/'),
+              '**/*',
+            ),
             to: path.join(argv.distDir, argv.distName),
             filter: (resourcePath) => {
               if (resourcePath.includes('devtools/vue-devtool')) {
