@@ -184,7 +184,7 @@ function startElectron(argv) {
       '--inspect=5858',
       '--trace-warnings',
       '--trace-deprecation',
-      '--enable-logging',
+      // '--enable-logging', windows上会出现cmd弹窗
       path.join(argv.distDir, argv.distName, 'main.js'),
     ],
     {
@@ -214,7 +214,7 @@ const run = (distDir, distName = 'app', withWebpack) => {
 
   process.chdir(appDir);
   process.env.KFC_DIR = kfcDir;
-  process.env.EXTENSION_DIRS = [distDir, ...extdirs].join(',');
+  process.env.EXTENSION_DIRS = [distDir, ...extdirs].join(path.delimiter);
 
   const argv = {
     mode: 'development',
