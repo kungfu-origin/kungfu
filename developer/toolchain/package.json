@@ -4,7 +4,7 @@
     "name": "kungfu-trader",
     "email": "info@kungfu.link"
   },
-  "version": "2.4.0-alpha.8",
+  "version": "2.4.0-alpha.9",
   "description": "Toolchain for Kungfu Development (babel/cmake-js/node-gyp/webpack/yarn/etc).",
   "license": "Apache-2.0",
   "main": "package.json",
@@ -35,8 +35,8 @@
     "babel-loader": "^8.0.0",
     "babel-plugin-import": "^1.13.3",
     "cfonts": "^2.10.0",
-    "copy-webpack-plugin": "^10.2.4",
     "cmake-js": "^6.3.0",
+    "copy-webpack-plugin": "^10.2.4",
     "core-js": "^3.20.0",
     "css-loader": "^6.5.0",
     "dayjs": "^1.10.7",

@@ -549,7 +549,7 @@ export const startMd = async (sourceId: string): Promise<Proc | void> => {
   const args = buildArgs(
     `-X ${extDirs
       .map((dir) => path.dirname(dir))
-      .join(':')} run -c md -g "${sourceId}" -n "${sourceId}"`,
+      .join(path.delimiter)} run -c md -g "${sourceId}" -n "${sourceId}"`,
   );
   return startProcess({
     name: `md_${sourceId}`,
@@ -568,7 +568,7 @@ export const startTd = async (accountId: string): Promise<Proc | void> => {
   const args = buildArgs(
     `-X ${extDirs
       .map((dir) => path.dirname(dir))
-      .join(':')} run -c td -g "${source}" -n "${id}"`,
+      .join(path.delimiter)} run -c td -g "${source}" -n "${id}"`,
   );
   return startProcess({
     name: `td_${accountId}`,

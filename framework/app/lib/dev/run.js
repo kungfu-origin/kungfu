@@ -184,7 +184,7 @@ function startElectron(argv) {
       '--inspect=5858',
       '--trace-warnings',
       '--trace-deprecation',
-      // '--enable-logging',
+      '--enable-logging',
       path.join(argv.distDir, argv.distName, 'main.js'),
     ],
     {
