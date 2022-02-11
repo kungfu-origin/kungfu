@@ -425,6 +425,9 @@ export const showTradingDataDetail = (
   const dataResolved = dealTradingDataItem(item, window.watcher);
   const vnode = Object.keys(dataResolved || {})
     .filter((key) => {
+      if (dataResolved[key].toString() === '[object Object]') {
+        return false;
+      }
       return dataResolved[key] !== '';
     })
     .map((key) =>
