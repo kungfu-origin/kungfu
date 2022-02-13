@@ -189,7 +189,7 @@ static constexpr auto instanceof
 template <typename... Ts>
 static constexpr auto event_filter_any = [](auto member) {
   return [=](Ts... arg) {
-    using T = std::result_of_t<decltype(member)(event *)>;
+    using T = std::invoke_result_t<decltype(member), event *>;
     type_check<T, Ts...>(arg...);
     auto args = boost::hana::make_tuple(arg...);
     return filter([=](const event_ptr &event) {

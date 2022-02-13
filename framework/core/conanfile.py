@@ -27,7 +27,7 @@ class KungfuCoreConan(ConanFile):
     requires = [
         "fmt/6.1.2",
         "spdlog/1.5.0",
-        "rxcpp/4.1.0",
+        "rxcpp/4.1.1",
     ]
     settings = "os", "compiler", "build_type", "arch"
     options = {
