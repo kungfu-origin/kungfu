@@ -111,7 +111,7 @@ $ yarn
 $ yarn build
 ```
 
-编译结果输出在 app/build 目录下，例如在 MacOSX 系统上，最终的可执行文件输出在 app/build/mac/Kungfu.Trader.app。
+编译结果输出在 artifact/build 目录下，例如在 MacOSX 系统上，最终的可执行文件输出在 app/build/stage/v2/.../mac/Kungfu.Trader.app。
 
 遇到编译问题需要完整的重新编译时，执行以下命令清理临时文件：
 ```
@@ -120,7 +120,7 @@ $ yarn clean
 
 #### 选择编译模式
 
-功夫默认编译为 Release 模式（-D[CMAKE_BUILD_TYPE](https://cmake.org/cmake/help/v3.12/variable/CMAKE_BUILD_TYPE.html)="Release")，如果希望以 Debug 模式编译，需要执行以下命令：
+功夫默认编译为 Release 模式（-D[CMAKE_BUILD_TYPE](https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html)="Release")，如果希望以 Debug 模式编译，需要执行以下命令：
 ```
 $ npm config set @kungfu-trader/kungfu-core:build_type "Debug"
 ```
