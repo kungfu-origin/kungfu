@@ -9,14 +9,6 @@ on:
 
 jobs:
   bump:
-    if: ${{ github.event.inputs.confirm  == 'confirm' }}
-    runs-on: ubuntu-20.04
-    container: 'docker.io/kungfutrader/kungfu-builder-centos:v1.1.2'
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Bump Version
-        uses: kungfu-trader/action-bump-version@v3
-        with:
-          token: ${{ secrets.KUNGFU_GITHUB_TOKEN }}
+    uses: kungfu-trader/workflows/.github/workflows/.bump-major-version.yml@v1
+    secrets:
+      GITHUB_PUSH_TOKEN: ${{ secrets.KUNGFU_GITHUB_TOKEN }}

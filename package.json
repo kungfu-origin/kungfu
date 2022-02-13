@@ -25,7 +25,7 @@
     "clean": "yarn foreach clean",
     "package": "yarn foreach package",
     "rebuild": "yarn clean && yarn build",
-    "sync": "yarn install --audit --frozen-lockfile"
+    "sync": "yarn install --audit --frozen-lockfile --network-timeout=1000000"
   },
   "dependencies": {
     "lerna": "^4.0.0",

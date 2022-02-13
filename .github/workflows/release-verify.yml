@@ -8,154 +8,17 @@ on:
       - main
 
 jobs:
-  prepare:
-    runs-on: ubuntu-20.04
-    container: 'docker.io/kungfutrader/kungfu-builder-centos:v1.1.2'
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Set Pull Request Title
-        uses: kungfu-trader/action-bump-version@v3
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          action: "verify"
-
-  build:
-    needs: prepare
-    strategy:
-      matrix:
-        include:
-          - os: ubuntu-20.04
-            name: "Linux"
-            container: 'docker.io/kungfutrader/kungfu-builder-centos:v1.1.2'
-          - os: macos-11
-            name: "MacOS"
-          - os: windows-2019
-            name: "Windows"
-    runs-on: ${{ matrix.os }}
-    container: ${{ matrix.container }}
-    env:
-      USE_HARD_LINKS: false
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Setup Node.js environment
-        if: matrix.name != 'Linux'
-        uses: actions/setup-node@v2
-        with:
-          node-version: '14'
-          registry-url: 'https://npm.pkg.github.com'
-          scope: '@kungfu-trader'
-
-      - name: Setup Python environment
-        if: matrix.name != 'Linux'
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.9'
-
-      - name: Install pipenv
-        if: matrix.name != 'Linux'
-        run: pip3 install pipenv==2022.1.8
-
-      - name: Bump Version
-        uses: kungfu-trader/action-bump-version@v3
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          action: "prebuild"
-
-      - name: Setup Kungfu environment
-        run: yarn --network-timeout=1000000 install --frozen-lockfile
-
-      - name: Build Kungfu
-        # skip prebuild script to not format code
-        run: yarn foreach build
-
-      - name: Upload Kungfu Build Info
-        uses: actions/upload-artifact@v2
-        if: ${{ failure() }}
-        with:
-          name: 'Kungfu-Build-Info-${{matrix.name}}-${{github.actor}}-${{github.sha}}'
-          path: |
-            yarn.lock
-            core/Pipfile.lock
-            core/build/CMakeFiles/
-            core/build/kfc-conf/
-            core/build/*.txt
-          if-no-files-found: ignore
-
-      - name: Package Kungfu Artifacts
-        run: yarn package
-
-      - name: Upload Prebuilt
-        uses: actions/upload-artifact@v2
-        with:
-          # https://docs.github.com/en/actions/reference/context-and-expression-syntax-for-github-actions#github-context
-          name: 'Kungfu-Prebuilt-${{matrix.name}}-${{github.actor}}-${{github.sha}}'
-          path: |
-            **/build/stage/*/v*/v*/*.*
-            !**/build/stage/**/.*
-            !**/build/stage/**/*.yml
-            !**/build/stage/**/*.yaml
-
+  try:
+    uses: kungfu-trader/workflows/.github/workflows/.release-verify.yml@v1.0-alpha
+    secrets:
+      AWS_CI_ACCESS_KEY_ID: ${{ secrets.AWS_US_ACCESS_KEY_ID }}
+      AWS_CI_SECRET_ACCESS_KEY: ${{ secrets.AWS_US_SECRET_ACCESS_KEY }}
+      AWS_USER_ACCESS_KEY_ID: ${{ secrets.AWS_CN_ACCESS_KEY_ID }}
+      AWS_USER_SECRET_ACCESS_KEY: ${{ secrets.AWS_CN_SECRET_ACCESS_KEY }}
+  
   verify:
-    needs: [prepare, build]
+    needs: try
     runs-on: ubuntu-20.04
-    container: 'docker.io/kungfutrader/kungfu-builder-centos:v1.1.2'
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Setup Node.js environment
-        uses: actions/setup-node@v2
-        with:
-          node-version: '14'
-          registry-url: 'https://npm.pkg.github.com'
-          scope: '@kungfu-trader'
-
-      - name: Bump Version
-        uses: kungfu-trader/action-bump-version@v3
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          action: "prebuild"
-
-      - name: Download Artifacts
-        uses: actions/download-artifact@v2
-        with:
-          path: 'github-artifacts'
-
-      - name: Configure AWS Crendentials (US)
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_US_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_US_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
-
-      - name: Publish Prebuilt to AWS (US)
-        uses: kungfu-trader/action-publish-prebuilt@v2
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          artifacts-path: 'github-artifacts'
-          bucket-staging: 'kungfu-prebuilt-staging'
-          no-comment: 'true'
-
-      - name: Configure AWS Crendentials (CN)
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_CN_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_CN_SECRET_ACCESS_KEY }}
-          aws-region: cn-northwest-1
-
-      - name: Publish Prebuilt to AWS (CN)
-        uses: kungfu-trader/action-publish-prebuilt@v2
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          artifacts-path: 'github-artifacts'
-          bucket-staging: 'kungfu-prebuilt-staging'
-
-      - name: Verify
-        uses: kungfu-trader/action-bump-version@v3
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          action: "verify"
+      - name: report
+        run: echo verified
