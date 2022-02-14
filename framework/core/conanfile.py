@@ -25,8 +25,8 @@ class KungfuCoreConan(ConanFile):
     version = package_json["version"]
     generators = "cmake"
     requires = [
-        "fmt/6.1.2",
-        "spdlog/1.5.0",
+        "fmt/8.1.1",
+        "spdlog/1.9.2",
         "rxcpp/4.1.1",
     ]
     settings = "os", "compiler", "build_type", "arch"
