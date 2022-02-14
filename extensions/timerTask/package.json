@@ -1,0 +1,153 @@
+{
+  "name": "@kungfu-trader/kfx-timer-task",
+  "author": {
+    "name": "kungfu-trader",
+    "email": "info@kungfu.link"
+  },
+  "version": "2.4.0-alpha.8",
+  "description": "Kungfu Extension - TIMER TASK",
+  "license": "Apache-2.0",
+  "main": "package.json",
+  "repository": {
+    "url": "https://github.com/kungfu-trader/kungfu.git"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "binary": {
+    "module_name": "kfx-timer-task",
+    "module_path": "dist/timertask",
+    "remote_path": "{module_name}/v{major}/v{version}",
+    "package_name": "{module_name}-v{version}-{platform}-{arch}-{configuration}.tar.gz",
+    "host": "https://prebuilt.libkungfu.cc"
+  },
+  "scripts": {
+    "build": "kfs extension build",
+    "clean": "kfs extension clean",
+    "install": "node -e \"require('@kungfu-trader/kungfu-core').prebuilt('install')\"",
+    "package": "kfs prebuilt package"
+  },
+  "dependencies": {
+    "@kungfu-trader/kungfu-core": "^2.4.0-alpha.10"
+  },
+  "devDependencies": {
+    "@kungfu-trader/kungfu-sdk": "^2.4.0-alpha.10"
+  },
+  "kungfuBuild": {
+    "python": {
+      "dependencies": {
+        "dotted_dict": "~=1.1.0",
+        "recordclass": "~=0.17.0",
+        "sortedcontainers": "~=2.4.0"
+      }
+    }
+  },
+  "kungfuConfig": {
+    "key": "timertask",
+    "name": "定时下单",
+    "config": {
+      "strategy": {
+        "type": "trade",
+        "settings": [
+          {
+            "key": "accountId",
+            "name": "账户",
+            "type": "account",
+            "required": true
+          },
+          {
+            "key": "ticker",
+            "name": "标的",
+            "type": "instrumentId",
+            "required": true
+          },
+          {
+            "key": "side",
+            "name": "买卖",
+            "type": "side",
+            "default": 0,
+            "required": true
+          },
+          {
+            "key": "offset",
+            "name": "开平",
+            "type": "offset",
+            "default": 0,
+            "required": true
+          },
+          {
+            "key": "priceMode",
+            "name": "价格",
+            "type": "select",
+            "options": [
+              {
+                "label": "对手价一档",
+                "value": 0
+              },
+              {
+                "label": "同方向一档",
+                "value": 1
+              },
+              {
+                "label": "最新价",
+                "value": 2
+              }
+            ],
+            "default": 1,
+            "required": true
+          },
+          {
+            "key": "volume",
+            "name": "数量",
+            "type": "int",
+            "required": true
+          },
+          {
+            "key": "triggerTime",
+            "name": "触发时间",
+            "type": "timePicker",
+            "required": true
+          },
+          {
+            "key": "finishTime",
+            "name": "结束时间",
+            "type": "timePicker",
+            "laterThan": "triggerTime",
+            "required": true
+          },
+          {
+            "key": "steps",
+            "name": "总次数",
+            "type": "int",
+            "tip": "将以总次数均分总时长, 建议保证每步间隔不能太短(>500ms)",
+            "required": true
+          },
+          {
+            "key": "maxLotByStep",
+            "name": "单次最大手数",
+            "type": "int",
+            "tip": "各个交易所不同, 默认100",
+            "required": true,
+            "default": 100
+          },
+          {
+            "key": "lastSingularity",
+            "name": "临界下单",
+            "type": "bool",
+            "required": false,
+            "tip": "开启后最后一步下单操作会在结束时间前执行, 默认1000毫秒",
+            "default": true
+          },
+          {
+            "key": "lastSingularityMilliSecond",
+            "name": "临界下单时间",
+            "type": "int",
+            "required": false,
+            "tip": "设置临界下单临界时间, 单位毫秒, 时间默认1000毫秒",
+            "default": 1000
+          }
+        ]
+      }
+    }
+  }
+}

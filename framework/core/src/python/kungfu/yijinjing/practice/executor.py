@@ -147,6 +147,8 @@ class RegistryJSONEncoder(json.JSONEncoder):
 def load_strategy(ctx, path):
     if path.endswith(".py"):
         return Strategy(ctx)  # keep strategy alive for pybind11
+    elif ctx.group != "default":
+        return Strategy(ctx)
     else:
         spec = spec_from_file_location(os.path.basename(path).split(".")[0], path)
         module_cpp = module_from_spec(spec)
