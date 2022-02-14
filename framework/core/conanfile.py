@@ -29,7 +29,6 @@ class KungfuCoreConan(ConanFile):
         "hana/1.7.0",
         "nlohmann_json/3.10.5",
         "nng/1.5.2",
-        "pybind11/2.9.1",
         "rxcpp/4.1.1",
         "sqlite3/3.36.0",
         "sqlite_orm/1.7",
