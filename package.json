@@ -20,7 +20,7 @@
     "dev": "yarn workspace @kungfu-trader/artifact-kungfu dev",
     "foreach": "wsrun --serial --exclude-missing --fast-exit",
     "format": "wsrun --serial --exclude-missing format",
-    "prebuild": "yarn sync && yarn format",
+    "prebuild": "node .prebuild.js",
     "build": "yarn foreach build",
     "clean": "yarn foreach clean",
     "package": "yarn foreach package",

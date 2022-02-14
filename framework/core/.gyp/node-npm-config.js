@@ -80,7 +80,7 @@ function npmCall(npmArgs) {
 require('@kungfu-trader/kungfu-core').sywac(module, (cli) => {
   cli.command('show', { run: showAllConfig }).command('auto', {
     run: () => {
-      const githubActions = 'GITHUB_ACTIONS' in process.env;
+      const githubActions = process.env.CI && process.env.GITHUB_ACTIONS;
       const pypi = githubActions ? PyPI_US : PyPI_CN;
       const prebuiltHost = githubActions ? PrebuiltHost_US : PrebuiltHost_CN;
       const setConfig = (key, value) =>

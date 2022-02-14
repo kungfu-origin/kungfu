@@ -9,66 +9,10 @@ on:
 
 jobs:
   release:
-    if: ${{ github.event.pull_request.merged }}
-    runs-on: ubuntu-20.04
-    container: 'docker.io/kungfutrader/kungfu-builder-centos:v1.1.2'
-    env:
-      NODE_AUTH_TOKEN: ${{ secrets.KUNGFU_GITHUB_TOKEN }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Setup Node.js environment
-        uses: actions/setup-node@v2
-        with:
-          node-version: '14'
-          registry-url: 'https://npm.pkg.github.com'
-          scope: '@kungfu-trader'
-
-      - name: Bump Version
-        uses: kungfu-trader/action-bump-version@v3
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          action: "prebuild"
-
-      - name: Setup NPM registry
-        uses: actions/setup-node@v2
-        with:
-          registry-url: 'https://npm.pkg.github.com'
-          scope: '@kungfu-trader'
-
-      - name: Configure AWS Crendentials (US)
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_US_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_US_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
-
-      - name: Publish Prebuilt to AWS (US)
-        uses: kungfu-trader/action-publish-prebuilt@v2
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          bucket-staging: 'kungfu-prebuilt-staging'
-          bucket-release: 'kungfu-prebuilt'
-          no-comment: 'true'
-
-      - name: Configure AWS Crendentials (CN)
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_CN_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_CN_SECRET_ACCESS_KEY }}
-          aws-region: cn-northwest-1
-
-      - name: Publish Prebuilt to AWS (CN)
-        uses: kungfu-trader/action-publish-prebuilt@v2
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          bucket-staging: 'kungfu-prebuilt-staging'
-          bucket-release: 'kungfu-prebuilt'
-
-      - name: Publish New Version To GitHub
-        if: ${{ github.event.pull_request.merged }}
-        uses: kungfu-trader/action-bump-version@v3
-        with:
-          token: ${{ secrets.KUNGFU_GITHUB_TOKEN }}
-          action: "postbuild"
+    uses: kungfu-trader/workflows/.github/workflows/.release-new-version.yml@v1.0-alpha
+    secrets:
+      GITHUB_PUSH_TOKEN: ${{ secrets.KUNGFU_GITHUB_TOKEN }}
+      AWS_CI_ACCESS_KEY_ID: ${{ secrets.AWS_US_ACCESS_KEY_ID }}
+      AWS_CI_SECRET_ACCESS_KEY: ${{ secrets.AWS_US_SECRET_ACCESS_KEY }}
+      AWS_USER_ACCESS_KEY_ID: ${{ secrets.AWS_CN_ACCESS_KEY_ID }}
+      AWS_USER_SECRET_ACCESS_KEY: ${{ secrets.AWS_CN_SECRET_ACCESS_KEY }}
