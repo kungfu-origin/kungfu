@@ -48,7 +48,6 @@ option(NNG_ENABLE_NNGCAT "" OFF)
 
 ##########################################################################
 
-include_directories(.deps/hana-1.7.0/include)
 include_directories(src/include)
 
 ##########################################################################

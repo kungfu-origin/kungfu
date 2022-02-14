@@ -26,6 +26,7 @@ class KungfuCoreConan(ConanFile):
     generators = "cmake"
     requires = [
         "fmt/8.1.1",
+        "hana/1.7.0",
         "nlohmann_json/3.10.5",
         "nng/1.5.2",
         "pybind11/2.9.1",
