@@ -24,9 +24,15 @@ if (EDITOR)
       set(DEBUG_OPTION "")
     endif ()
 
+    if (WIN32)
+      set(YARN "yarn.cmd")
+    else()
+      set(YARN "yarn")
+    endif()
+
     execute_process(
       COMMAND
-      yarn cmake-js --runtime ${NODE_RUNTIME} --runtime-version ${NODE_VERSION} --arch ${NODE_ARCH} print-configure ${DEBUG_OPTION}
+      ${YARN} run -s cmake-js --runtime ${NODE_RUNTIME} --runtime-version ${NODE_VERSION} --arch ${NODE_ARCH} print-configure ${DEBUG_OPTION}
       WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
       OUTPUT_VARIABLE CMAKE_JS_OUTPUT
     )

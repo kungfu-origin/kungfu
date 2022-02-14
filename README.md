@@ -34,12 +34,12 @@ Apache License 2.0
 # Setup 编译及运行环境
 
 功夫的编译依赖以下工具：
-支持 C++17 的编译器
-Node.js (>=10.15.0 <11.0.0)
-yarn
+支持 C++20 的编译器
+cmake (>=3.15)
+Node.js 14.x
+yarn 1.x
 Python 3
 pipenv
-cmake (>3.15)
 
 功夫编译依赖 [Node.js](https://nodejs.org)，建议预先进行如下设置加速依赖包的下载：
 ```
@@ -54,8 +54,8 @@ npm config set npm_config_disturl=https://npm.taobao.org/mirrors/atom-shell
 #### MacOSX
 
 ```
-brew install git cmake node@10
-npm install -g yarn electron-builder
+brew install git cmake node@14
+npm install -g yarn
 pip install pipenv
 ```
 
@@ -75,26 +75,27 @@ sudo ln -s /usr/local/Cellar/openssl/1.0.2s/lib/libcrypto.1.0.0.dylib libcrypto.
 下载并安装 [git](https://git-scm.com/download/win)，[Python 3](https://www.python.org/downloads/windows/)，[CMake](https://cmake.org/install/)，[Node.js LTS 10.16.0](https://nodejs.org/en/download/) 并添加相应路径至 %PATH% 环境变量。
 
 ```
-C:\> npm install -g yarn electron-builder
+C:\> npm install -g yarn
 C:\> pip install pipenv
 ```
 
 #### Linux
 
-确保编译器支持 C++ 17，例如对于 CentOS 7，升级 gcc 到 9.x：
+确保编译器支持 C++ 20，例如对于 CentOS 7，升级 gcc 到 10.x：
 ```
 yum install -y centos-release-scl
 yum-config-manager --enable centos-sclo-rh-testing
 yum-config-manager --enable centos-sclo-sclo-testing
-yum install -y devtoolset-9
-echo "source /opt/rh/devtoolset-9/enable" >> /etc/profile
+yum install -y devtoolset-10
+echo "source /opt/rh/devtoolset-10/enable" >> /etc/profile
 source /etc/profile
 ```
 
 安装 cmake3 及 nodejs
 ```
 $ # install rpm-build cmake3 node.js pipenv
-$ yum install -y rpm-build centos-release-scl rh-nodejs10
+$ curl -sSL https://rpm.nodesource.com/setup_14.x | bash -
+$ yum install -y rpm-build centos-release-scl nodejs
 $ pip3 install pipenv --index http://mirrors.aliyun.com/pypi/simple --trusted-host mirrors.aliyun.com
 ```
 
@@ -104,13 +105,13 @@ $ pip3 install pipenv --index http://mirrors.aliyun.com/pypi/simple --trusted-ho
 
 获取代码并编译：
 ```
-$ git clone https://github.com/taurusai/kungfu
+$ git clone https://github.com/kungfu-origin/kungfu
 $ cd kungfu
 $ yarn
 $ yarn build
 ```
 
-编译结果输出在 app/build 目录下，例如在 MacOSX 系统上，最终的可执行文件输出在 app/build/mac/Kungfu.Trader.app。
+编译结果输出在 artifact/build 目录下，例如在 MacOSX 系统上，最终的可执行文件输出在 app/build/stage/v2/.../mac/Kungfu.Trader.app。
 
 遇到编译问题需要完整的重新编译时，执行以下命令清理临时文件：
 ```
@@ -119,14 +120,14 @@ $ yarn clean
 
 #### 选择编译模式
 
-功夫默认编译为 Release 模式（-D[CMAKE_BUILD_TYPE](https://cmake.org/cmake/help/v3.12/variable/CMAKE_BUILD_TYPE.html)="Release")，如果希望以 Debug 模式编译，需要执行以下命令：
+功夫默认编译为 Release 模式（-D[CMAKE_BUILD_TYPE](https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html)="Release")，如果希望以 Debug 模式编译，需要执行以下命令：
 ```
-$ npm config set @kungfu-trader/kungfu-core:buildtype "Debug"
+$ npm config set @kungfu-trader/kungfu-core:build_type "Debug"
 ```
 
 执行以下命令恢复 Release 模式：
 ```
-$ npm config set @kungfu-trader/kungfu-core:buildtype "Release"
+$ npm config set @kungfu-trader/kungfu-core:build_type "Release"
 ```
 
 切换编译模式后，需要执行以下命令重新生成配置文件：

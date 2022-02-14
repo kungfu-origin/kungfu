@@ -27,7 +27,7 @@ class KungfuCoreConan(ConanFile):
     requires = [
         "fmt/6.1.2",
         "spdlog/1.5.0",
-        "rxcpp/4.1.0",
+        "rxcpp/4.1.1",
     ]
     settings = "os", "compiler", "build_type", "arch"
     options = {
@@ -266,11 +266,11 @@ class KungfuCoreConan(ConanFile):
 
             freezer.run(
                 [
-                    "--workpath=build",
-                    "--distpath=dist",
+                    f"--workpath={path.join('.', 'build')}",
+                    f"--distpath={path.join('.', 'dist')}",
                     "--clean",
                     "--noconfirm",
-                    path.join("src", "python", "kfc.spec"),
+                    path.join(".", "src", "python", "kfc.spec"),
                 ]
             )
         self.output.success("PyInstaller done")

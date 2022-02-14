@@ -38,7 +38,7 @@ class ExecutorRegistry:
             extension_dir = path.abspath(path.join(root, child))
             config_path = path.join(extension_dir, "package.json")
             if path.exists(config_path):
-                with open(config_path, "r") as config_file:
+                with open(config_path, mode="r", encoding="utf8") as config_file:
                     config = json.load(config_file)
                     if "kungfuConfig" in config:
                         group = config["kungfuConfig"]["key"]

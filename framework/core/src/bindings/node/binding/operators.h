@@ -31,7 +31,7 @@ public:
     boost::hana::for_each(boost::hana::accessors<DataType>(), [&](auto it) {
       auto name = boost::hana::first(it);
       auto accessor = boost::hana::second(it);
-      using ValueType = std::decay_t<std::result_of_t<decltype(accessor)(const DataType &)>>;
+      using ValueType = std::decay_t<std::invoke_result_t<decltype(accessor), const DataType &>>;
       InitValue<ValueType>(object, name.c_str());
     });
     return object;
@@ -205,7 +205,7 @@ public:
     boost::hana::for_each(boost::hana::accessors<DataType>(), [&, this](auto it) {
       auto name = boost::hana::first(it);
       auto accessor = boost::hana::second(it);
-      using ValueType = std::decay_t<std::result_of_t<decltype(accessor)(const DataType &)>>;
+      using ValueType = std::decay_t<std::invoke_result_t<decltype(accessor), const DataType &>>;
       Get(const_cast<ValueType &>(accessor(data)), name.c_str(), object);
     });
   }
