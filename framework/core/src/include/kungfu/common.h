@@ -15,12 +15,19 @@
 
 #include <fmt/format.h>
 #include <nlohmann/json.hpp>
-
-// cope with spdlog-1.5.0@conan-center
-#undef SPDLOG_COMPILED_LIB
-#undef SPDLOG_HEADER_ONLY
 #include <spdlog/spdlog.h>
 
+//------------------------------------------------------------------------
+// workaround for using c++20 with hana-1.7.0@conan-center
+#if defined(_WINDOWS) && (_MSVC_LANG > 201704L)
+namespace std {
+  template<typename T> struct is_literal_type {};
+}
+#endif
+//------------------------------------------------------------------------
+
+//------------------------------------------------------------------------
+// workaround for using hana string literals
 #ifdef __linux__
 #define BOOST_HANA_CONFIG_ENABLE_STRING_UDL
 #include <boost/hana.hpp>
@@ -30,7 +37,10 @@ using namespace boost::hana::literals;
 #include <boost/hana.hpp>
 #define HANA_STR(STR) BOOST_HANA_STRING(STR)
 #endif
+//------------------------------------------------------------------------
 
+//------------------------------------------------------------------------
+// pack struct for fixing data length in journal
 #ifdef _WINDOWS
 #define strcpy(dest, src) strcpy_s(dest, sizeof(dest), src)
 #define strncpy(dest, src, max_length) strncpy_s(dest, sizeof(dest), src, max_length)
@@ -42,6 +52,7 @@ using namespace boost::hana::literals;
 #define KF_PACK_TYPE_BEGIN
 #define KF_PACK_TYPE_END __attribute__((packed));
 #endif
+//------------------------------------------------------------------------
 
 #define KF_DEFINE_DATA_TYPE(NAME, TAG, PRIMARY_KEYS, TIMESTAMP_KEY, ...)                                               \
   struct NAME : public kungfu::data<NAME> {                                                                            \

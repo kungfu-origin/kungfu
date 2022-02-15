@@ -48,13 +48,6 @@ option(NNG_ENABLE_NNGCAT "" OFF)
 
 ##########################################################################
 
-include_directories(.deps/hana-1.7.0/include)
-include_directories(.deps/json-3.10.5/include)
-include_directories(.deps/sqlite3-3.33.0/include)
-include_directories(.deps/sqlite_orm-1.7.1/include)
-include_directories(.deps/nng-1.5.2/include)
-include_directories(.deps/tabulate-1.4/include)
-
 include_directories(src/include)
 
 ##########################################################################
@@ -63,8 +56,7 @@ include_directories(src/include)
 set(KUNGFU_BUILD_DIR ${CMAKE_BINARY_DIR})
 
 ##########################################################################
-
-add_subdirectory(.deps)
+add_subdirectory(.deps/pybind11-2.9.0)
 add_subdirectory(src/libkungfu)
 add_subdirectory(src/bindings/python)
 add_subdirectory(src/bindings/node)
