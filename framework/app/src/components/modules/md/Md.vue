@@ -32,7 +32,7 @@ import {
   useAddUpdateRemoveKfConfig,
   useSwitchAllConfig,
 } from '@renderer/assets/methods/actionsUtils';
-import { KfCategoryTypes } from '@kungfu-trader/kungfu-js-api/typings/enums';
+import { message } from 'ant-design-vue';
 
 interface MdProps {}
 defineProps<MdProps>();
@@ -78,6 +78,11 @@ function handleOpenSetMdDialog(
   const extConfig: KungfuApi.KfExtConfig = (extConfigs.data['md'] || {})[
     selectedSource
   ];
+
+  if (!extConfig) {
+    message.error(`${selectedSource} 柜台插件不存在`);
+    return;
+  }
 
   currentSelectedSourceId.value = selectedSource;
   setMdConfigPayload.value.type = type;

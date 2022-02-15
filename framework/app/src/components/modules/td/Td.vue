@@ -168,6 +168,11 @@ function handleOpenSetTdModal(
     selectedSource
   ];
 
+  if (!extConfig) {
+    message.error(`${selectedSource} 柜台插件不存在`);
+    return;
+  }
+
   currentSelectedSourceId.value = selectedSource;
   setTdConfigPayload.value.type = type;
   setTdConfigPayload.value.title = `${selectedSource} 交易账户`;

@@ -53,6 +53,7 @@ const props = withDefaults(
         trigger: string;
       }
     >;
+    primaryKeyUnderline?: boolean;
   }>(),
   {
     formState: () => ({}),
@@ -65,6 +66,7 @@ const props = withDefaults(
     labelCol: 6,
     wrapperCol: 16,
     rules: () => ({}),
+    primaryKeyUnderline: false,
   },
 );
 
@@ -184,6 +186,10 @@ function primaryKeyValidator(_rule: RuleObject, value: string): Promise<void> {
 
   if (SpecialWordsReg.test(value)) {
     return Promise.reject(new Error(`不能含有特殊字符`));
+  }
+
+  if (value.toString().includes('_') && !props.primaryKeyUnderline) {
+    return Promise.reject(new Error(`不能含有下划线`));
   }
 
   return Promise.resolve();

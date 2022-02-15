@@ -721,7 +721,7 @@ export const useSubscibeInstrumentAtEntry = (): void => {
               category: 'md',
               group,
               name: group,
-              mode: 'LIVE',
+              mode: 'live',
             };
 
             kfRequestMarketData(

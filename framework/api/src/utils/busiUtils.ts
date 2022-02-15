@@ -649,6 +649,22 @@ export const getMdTdKfLocationByProcessId = (
   return null;
 };
 
+export const getTaskKfLocationByProcessId = (
+  processId: string,
+): KungfuApi.KfLocation | null => {
+  if (processId.indexOf('strategy_') === 0) {
+    const [category, group] = processId.split('_');
+    return {
+      category: category as KfCategoryTypes,
+      group,
+      name: processId.split('_').slice(2).join('_'),
+      mode: 'live',
+    };
+  }
+
+  return null;
+};
+
 export const getIdByKfLocation = (
   kfLocation:
     | KungfuApi.KfLocation
@@ -773,23 +789,6 @@ export const buildIdByKeysFromKfConfigSettings = (
     .map((key) => kfConfigState[key])
     .filter((value) => value !== undefined)
     .join('_');
-};
-
-export const graceKillProcess = (
-  watcher: KungfuApi.Watcher | null,
-  kfLocation: KungfuApi.KfConfig | KungfuApi.KfLocation,
-  processStatusData: Pm2ProcessStatusData,
-): Promise<void> => {
-  const processId = getProcessIdByKfLocation(kfLocation);
-  if (getIfProcessRunning(processStatusData, processId)) {
-    if (watcher && !watcher.isReadyToInteract(kfLocation)) {
-      return Promise.reject(new Error(`${processId} 还未准备就绪, 请稍后重试`));
-    }
-
-    return deleteProcess(processId);
-  }
-
-  return Promise.resolve();
 };
 
 export const switchKfLocation = (
@@ -1216,24 +1215,27 @@ export const dealKfConfigValueByType = (
     case 'instrument':
       const instrumentResolved =
         transformSearchInstrumentResultToInstrument(value);
+      if (!instrumentResolved) {
+        return value;
+      }
       const { exchangeId, instrumentId } = instrumentResolved;
       return `${exchangeId}_${instrumentId}`;
     case 'side':
-      return dealSide(value).name;
+      return dealSide(+value).name;
     case 'offset':
-      return dealOffset(value).name;
+      return dealOffset(+value).name;
     case 'direction':
-      return dealDirection(value).name;
+      return dealDirection(+value).name;
     case 'instrumentType':
-      return dealInstrumentType(value).name;
+      return dealInstrumentType(+value).name;
     case 'priceType':
-      return dealPriceType(value).name;
+      return dealPriceType(+value).name;
     case 'hedgeFlag':
-      return dealHedgeFlag(value).name;
+      return dealHedgeFlag(+value).name;
     case 'volumeCondition':
-      return dealVolumeCondition(value).name;
+      return dealVolumeCondition(+value).name;
     case 'timeCondition':
-      return dealTimeCondition(value).name;
+      return dealTimeCondition(+value).name;
     default:
       return value;
   }

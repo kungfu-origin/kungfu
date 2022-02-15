@@ -13,6 +13,7 @@ import {
   delayMilliSeconds,
   flattenExtensionModuleDirs,
   getProcessIdByKfLocation,
+  getIfProcessRunning,
 } from '../utils/busiUtils';
 import {
   APP_DIR,
@@ -315,7 +316,41 @@ export const startProcess = (
 
 export const stopProcess = pm2Stop;
 
+export const graceStopProcess = (
+  watcher: KungfuApi.Watcher | null,
+  kfLocation: KungfuApi.KfConfig | KungfuApi.KfLocation,
+  processStatusData: Pm2ProcessStatusData,
+): Promise<void> => {
+  const processId = getProcessIdByKfLocation(kfLocation);
+  if (getIfProcessRunning(processStatusData, processId)) {
+    if (watcher && !watcher.isReadyToInteract(kfLocation)) {
+      return Promise.reject(new Error(`${processId} 还未准备就绪, 请稍后重试`));
+    }
+
+    return stopProcess(processId);
+  }
+
+  return Promise.resolve();
+};
+
 export const deleteProcess = pm2Delete;
+
+export const graceDeleteProcess = (
+  watcher: KungfuApi.Watcher | null,
+  kfLocation: KungfuApi.KfConfig | KungfuApi.KfLocation,
+  processStatusData: Pm2ProcessStatusData,
+): Promise<void> => {
+  const processId = getProcessIdByKfLocation(kfLocation);
+  if (getIfProcessRunning(processStatusData, processId)) {
+    if (watcher && !watcher.isReadyToInteract(kfLocation)) {
+      return Promise.reject(new Error(`${processId} 还未准备就绪, 请稍后重试`));
+    }
+
+    return deleteProcess(processId);
+  }
+
+  return Promise.resolve();
+};
 
 export function startProcessGetStatusUntilStop(
   options: Pm2StartOptions,
@@ -377,32 +412,34 @@ export const listProcessStatusWithDetail =
 export function buildProcessStatusWidthDetail(
   pList: ProcessDescription[],
 ): Pm2ProcessStatusDetailData {
-  let processStatus: Pm2ProcessStatusDetailData = {};
-  Object.freeze(pList).forEach((p) => {
-    const { monit, pid, name, pm2_env, pm_id } = p;
-    const status = pm2_env?.status;
-    const created_at = (pm2_env as Pm2Env)?.created_at;
-    const cwd = pm2_env?.pm_cwd;
-    const pm_exec_path = (pm2_env?.pm_exec_path || '').split('/');
-    const script =
-      (pm2_env as Pm2Env).script || pm_exec_path[pm_exec_path.length - 1];
-    const args = (pm2_env as Pm2Env).args;
+  return pList.reduce(
+    (processStatus: Pm2ProcessStatusDetailData, p: ProcessDescription) => {
+      const { monit, pid, name, pm2_env, pm_id } = p;
+      const status = pm2_env?.status;
+      const created_at = (pm2_env as Pm2Env)?.created_at;
+      const cwd = pm2_env?.pm_cwd;
+      const pm_exec_path = (pm2_env?.pm_exec_path || '').split('/');
+      const script =
+        (pm2_env as Pm2Env).script || pm_exec_path[pm_exec_path.length - 1];
+      const args = (pm2_env as Pm2Env).args;
 
-    if (!name) return;
-    processStatus[name] = {
-      monit,
-      pid,
-      name,
-      pm_id,
-      status,
-      created_at,
-      script,
-      cwd,
-      args,
-    };
-  });
+      if (!name) return processStatus;
 
-  return processStatus;
+      processStatus[name] = {
+        monit,
+        pid,
+        name,
+        pm_id,
+        status,
+        created_at,
+        script,
+        cwd,
+        args,
+      };
+      return processStatus;
+    },
+    {} as Pm2ProcessStatusDetailData,
+  );
 }
 
 //===================== pm2 end =========================

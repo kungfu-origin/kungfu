@@ -1,9 +1,9 @@
 export const columns: AntTableColumns = [
   {
     title: '任务ID',
-    dataIndex: 'processId',
+    dataIndex: 'name',
     align: 'left',
-    width: 160,
+    width: 120,
     fixed: 'left',
   },
   {
@@ -14,10 +14,10 @@ export const columns: AntTableColumns = [
     fixed: 'left',
   },
   {
-    title: '类型',
-    dataIndex: 'type',
+    title: '参数',
+    dataIndex: 'args',
     align: 'left',
-    width: 80,
+    width: 280,
   },
   {
     title: '操作',

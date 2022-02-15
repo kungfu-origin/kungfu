@@ -3,27 +3,34 @@ import {
   useDashboardBodySize,
   useExtConfigsRelated,
   useProcessStatusDetailData,
+  useTableSearchKeyword,
 } from '@renderer/assets/methods/uiUtils';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
+import minimist from 'minimist';
 
 import KfDashboard from '@renderer/components/public/KfDashboard.vue';
 import KfDashboardItem from '@renderer/components/public/KfDashboardItem.vue';
 import KfSetExtensionModal from '@renderer/components/public/KfSetExtensionModal.vue';
 import KfSetByConfigModal from '@renderer/components/public/KfSetByConfigModal.vue';
+import {
+  FileTextOutlined,
+  SettingOutlined,
+  DeleteOutlined,
+} from '@ant-design/icons-vue';
 
 import { columns } from './config';
 import { message } from 'ant-design-vue';
 import path from 'path';
 import {
   dealKfConfigValueByType,
-  getPrimaryKeyFromKfConfigItem,
-  getProcessIdByKfLocation,
-  graceKillProcess,
-  switchKfLocation,
+  getIfProcessRunning,
+  getTaskKfLocationByProcessId,
   transformSearchInstrumentResultToInstrument,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import {
-  deleteProcess,
+  graceDeleteProcess,
+  graceStopProcess,
+  Pm2ProcessStatusDetail,
   startTask,
 } from '@kungfu-trader/kungfu-js-api/utils/processUtils';
 import {
@@ -33,7 +40,8 @@ import {
 
 const { extConfigs } = useExtConfigsRelated();
 const { dashboardBodyHeight, handleBodySizeChange } = useDashboardBodySize();
-const { processStatusData } = useProcessStatusDetailData();
+const { processStatusData, processStatusDetailData } =
+  useProcessStatusDetailData();
 
 const setExtensionModalVisible = ref<boolean>(false);
 const setTaskModalVisible = ref<boolean>(false);
@@ -43,6 +51,30 @@ const setTaskConfigPayload = ref<KungfuApi.SetKfConfigPayload>({
   title: '交易任务',
   config: {} as KungfuApi.KfExtConfig,
 });
+
+const taskTypeKeys = computed(() => {
+  return Object.keys(extConfigs.data['strategy'] || {});
+});
+
+const taskList = computed(() => {
+  const taskCGs = taskTypeKeys.value.map((item) => {
+    return `strategy_${item}`;
+  });
+
+  return Object.keys(processStatusDetailData.value)
+    .filter((processId) => {
+      return (
+        taskCGs.findIndex((cg) => {
+          return processId.indexOf(cg) === 0;
+        }) !== -1
+      );
+    })
+    .map((processId) => processStatusDetailData.value[processId])
+    .sort((a, b) => b.name.localeCompare(a.name));
+});
+
+const { searchKeyword, tableData } =
+  useTableSearchKeyword<Pm2ProcessStatusDetail>(taskList, ['name', 'args']);
 
 function handleOpenSetTaskDialog() {
   setExtensionModalVisible.value = true;
@@ -56,6 +88,11 @@ function handleOpenSetTaskModal(
   const extConfig: KungfuApi.KfExtConfig = (extConfigs.data['strategy'] || {})[
     selectedExtKey
   ];
+
+  if (!extConfig) {
+    message.error(`${selectedExtKey} 交易任务插件不存在`);
+    return;
+  }
 
   currentSelectedExtKey.value = selectedExtKey;
   setTaskConfigPayload.value.type = type;
@@ -79,6 +116,49 @@ function handleOpenSetTaskModal(
   setTaskModalVisible.value = true;
 }
 
+function handleSwitchProcessStatusResolved(
+  checked: boolean,
+  event: MouseEvent,
+  record: Pm2ProcessStatusDetail,
+) {
+  event.stopPropagation();
+
+  const taskLocation = getTaskKfLocationByProcessId(record.name);
+  if (!taskLocation) {
+    message.error(`${record.name} 不是合法交易任务进程ID`);
+    return;
+  }
+
+  if (!checked) {
+    return graceStopProcess(
+      window.watcher,
+      taskLocation,
+      processStatusData.value,
+    );
+  }
+
+  const extKey = taskLocation.group;
+  const extConfig: KungfuApi.KfExtConfig = (extConfigs.data['strategy'] || {})[
+    extKey
+  ];
+
+  if (!extConfig) {
+    message.error(`${extKey} 交易任务插件不存在`);
+    return;
+  }
+
+  if (!extConfig.extPath) {
+    message.error(`配置项不存在, 请检查 ${extConfig?.name} .so`);
+    return;
+  }
+
+  const soPath = path.join(extConfig.extPath, extKey);
+  const args = minimist(record.args as string[])['a'] || '';
+  return startTask(taskLocation, soPath, args).catch((err: Error) =>
+    message.error(err.message),
+  );
+}
+
 function handleConfirmAddUpdateTask(
   data: {
     formState: Record<string, KungfuApi.KfConfigValue>;
@@ -88,46 +168,40 @@ function handleConfirmAddUpdateTask(
   extKey: string,
 ) {
   const { formState } = data;
-  const extConfig: KungfuApi.KfExtConfig = (extConfigs.data['strategy'] || {})[
-    extKey
-  ];
-  const args: string = buildArgs(extConfig.settings, formState);
-
   const taskLocation: KungfuApi.KfLocation = {
     category: 'strategy',
     group: extKey,
-    name: getTaskPrimaryKey(
-      formState,
-      getPrimaryKeyFromKfConfigItem(extConfig.settings),
-    ),
+    name: new Date().getTime().toString(),
     mode: 'LIVE',
   };
+
+  const extConfig: KungfuApi.KfExtConfig = (extConfigs.data['strategy'] || {})[
+    extKey
+  ];
+
+  if (!extConfig) {
+    message.error(`${extKey} 交易任务插件不存在`);
+    return;
+  }
 
   if (!extConfig.extPath) {
     message.error(`配置项不存在, 请检查 ${extConfig?.name} .so`);
     return;
   }
 
+  const args: string = buildArgs(extConfig.settings, formState);
   const soPath = path.join(extConfig.extPath, extKey);
   return preStartTask(taskLocation)
     .then(() => startTask(taskLocation, soPath, args))
     .catch((err: Error) => message.error(err.message));
 }
 
-function getTaskPrimaryKey(
-  formState: Record<string, KungfuApi.KfConfigValue>,
-  configItems: KungfuApi.KfConfigItem[],
-) {
-  return configItems
-    .filter((item) => {
-      return formState[item.key] !== undefined;
-    })
-    .map((item) => dealKfConfigValueByType(item.type, formState[item.key]))
-    .join('-');
-}
-
 function preStartTask(taskLocation: KungfuApi.KfLocation) {
-  return graceKillProcess(window.watcher, taskLocation, processStatusData.value)
+  return graceDeleteProcess(
+    window.watcher,
+    taskLocation,
+    processStatusData.value,
+  )
     .then(() => removeKfLocation(taskLocation))
     .then(() => removeLog(taskLocation));
 }
@@ -152,19 +226,50 @@ function buildArgs(
     })
     .join(path.delimiter);
 }
+
+function dealArgs(record: Pm2ProcessStatusDetail) {
+  const taskKfLocation = getTaskKfLocationByProcessId(record.name);
+  const taskArgs = minimist(record.args as string[])['a'] || '';
+  if (!taskKfLocation) {
+    return taskArgs.split(path.delimiter).join(' ');
+  }
+
+  const extConfig: KungfuApi.KfExtConfig = (extConfigs.data['strategy'] || {})[
+    taskKfLocation.group
+  ];
+  if (!extConfig || !extConfig.settings) {
+    return taskArgs.split(path.delimiter).join(' ');
+  }
+
+  const data = getDataByArgs(taskArgs);
+  return extConfig.settings
+    .filter((item) => item.primary && data[item.key] !== undefined)
+    .map((item) => {
+      return dealKfConfigValueByType(item.type, data[item.key]);
+    })
+    .join(' ');
+}
+
+function getDataByArgs(taskArgs: string): Record<string, string> {
+  return taskArgs.split(path.delimiter).reduce((data, pair) => {
+    const [key, value] = pair.split('=');
+    data[key] = value;
+    return data;
+  }, {} as Record<string, string>);
+}
 </script>
 
 <template>
   <div class="kf-task-strategy__wrap kf-translateZ">
     <KfDashboard @boardSizeChange="handleBodySizeChange">
       <template v-slot:header>
-        <!-- <KfDashboardItem>
+        <KfDashboardItem>
           <a-input-search
             v-model:value="searchKeyword"
             placeholder="关键字"
             style="width: 120px"
           />
-        </KfDashboardItem> -->
+        </KfDashboardItem>
         <KfDashboardItem>
           <a-button
             size="small"
@@ -178,13 +283,33 @@ function buildArgs(
       <a-table
         class="kf-ant-table"
         :columns="columns"
-        :data-source="[]"
+        :data-source="tableData"
         size="small"
         :pagination="false"
         :scroll="{ y: dashboardBodyHeight - 4 }"
         :defaultExpandAllRows="true"
         emptyText="暂无数据"
-      ></a-table>
+      >
+        <template #bodyCell="{ column, record }">
+          <template v-if="column.dataIndex === 'processStatus'">
+            <a-switch
+              size="small"
+              :checked="getIfProcessRunning(processStatusData, record.name)"
+              @click="(checked: boolean, Event: MouseEvent) => handleSwitchProcessStatusResolved(checked, Event, record)"
+            ></a-switch>
+          </template>
+          <template v-if="column.dataIndex === 'args'">
+            {{ dealArgs(record) }}
+          </template>
+          <template v-else-if="column.dataIndex === 'actions'">
+            <div class="kf-actions__warp">
+              <FileTextOutlined style="font-size: 12px" />
+              <SettingOutlined style="font-size: 12px" />
+              <DeleteOutlined style="font-size: 12px" />
+            </div>
+          </template>
+        </template>
+      </a-table>
     </KfDashboard>
     <KfSetExtensionModal
       v-if="setExtensionModalVisible"
@@ -196,8 +321,7 @@ function buildArgs(
       v-if="setTaskModalVisible"
       v-model:visible="setTaskModalVisible"
       :payload="setTaskConfigPayload"
-      :primaryKeyAvoidRepeatCompareTarget="[]"
-      :primaryKeyAvoidRepeatCompareExtra="currentSelectedExtKey"
+      :primaryKeyUnderline="true"
       @confirm="handleConfirmAddUpdateTask($event, currentSelectedExtKey)"
     ></KfSetByConfigModal>
   </div>
