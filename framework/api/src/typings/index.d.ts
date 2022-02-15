@@ -48,6 +48,7 @@ declare namespace KungfuApi {
     KfModeTypes,
     OrderActionFlagEnum,
   } from './enums';
+  import { Dayjs } from 'dayjs';
 
   export type AntInKungfuColorTypes =
     | 'default'
@@ -78,7 +79,8 @@ declare namespace KungfuApi {
     | 'str'
     | 'password'
     | 'file' // string
-    | 'folder'
+    | 'folder' // string
+    | 'timePicker' //string
     | 'process'
     | 'instrumentId' // search input
     | 'account' // select - string
@@ -107,7 +109,8 @@ declare namespace KungfuApi {
     | boolean
     | string[]
     | number[]
-    | boolean[];
+    | boolean[]
+    | Dayjs;
 
   export interface KfSelectOption {
     value: string | number;
@@ -133,6 +136,7 @@ declare namespace KungfuApi {
   export interface KfExtOriginConfig {
     key: string;
     name: string;
+    extPath: string;
     config: {
       [key in KfCategoryTypes]?: {
         type?: Array<InstrumentTypes> | InstrumentTypes;
@@ -141,16 +145,23 @@ declare namespace KungfuApi {
     };
   }
 
+  interface KfExtConfig {
+    name: string;
+    extPath?: string;
+    type?: Array<InstrumentTypes> | InstrumentTypes;
+    settings: KfConfigItem[];
+  }
+
   export type KfExtConfigs = {
     [key in KfCategoryTypes]?: {
-      [extKey: string]: KfExtOriginConfig['config'][KfCategoryTypes];
+      [extKey: string]: KfExtConfig;
     };
   };
 
   export interface SetKfConfigPayload {
     type: KungfuApi.ModalChangeType;
     title: string;
-    config: KfExtOriginConfig['config'][KfCategoryTypes];
+    config: KfExtConfig;
     initValue?: Record<string, KfConfigValue>;
   }
 

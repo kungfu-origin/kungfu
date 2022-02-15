@@ -67,7 +67,7 @@ export const defaultBoardsMap: KfLayout.BoardsMap = {
   '16': {
     paId: 14,
     direction: 'h',
-    contents: ['策略进程', '持仓汇总'],
+    contents: ['策略进程', '交易任务', '持仓汇总'],
     current: '策略进程',
   },
 };

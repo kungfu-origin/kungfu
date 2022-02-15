@@ -12,6 +12,7 @@ import {
   setTimerPromiseTask,
   delayMilliSeconds,
   flattenExtensionModuleDirs,
+  getProcessIdByKfLocation,
 } from '../utils/busiUtils';
 import {
   APP_DIR,
@@ -442,11 +443,6 @@ function buildArgs(args: string): string {
   return [logLevel, args, rocket].join(' ');
 }
 
-function getExtDirs(): string[] {
-  const kfConfig: any = fse.readJsonSync(KF_CONFIG_PATH) || {};
-  return ((kfConfig.system || {}).extPaths as string[]) || EXTENSION_DIRS;
-}
-
 //循环获取processStatus
 function startGetProcessStatusByName(name: string, callback: Function) {
   const timer = setTimerPromiseTask(() => {
@@ -463,15 +459,6 @@ function startGetProcessStatusByName(name: string, callback: Function) {
 //===================== utils end =======================
 
 //================ business related start ===============
-
-export const startTask = (options: Pm2StartOptions) => {
-  return startProcess({
-    script: options.script || 'index.js',
-    interpreter: process.execPath,
-    ...options,
-    force: true,
-  });
-};
 
 export function startArchiveMakeTask(cb?: Function) {
   return startProcessGetStatusUntilStop(
@@ -545,7 +532,7 @@ export const startLedger = async (force = false): Promise<Proc | void> => {
 
 //启动md
 export const startMd = async (sourceId: string): Promise<Proc | void> => {
-  const extDirs = await flattenExtensionModuleDirs([...getExtDirs()]);
+  const extDirs = await flattenExtensionModuleDirs(EXTENSION_DIRS);
   const args = buildArgs(
     `-X ${extDirs
       .map((dir) => path.dirname(dir))
@@ -563,7 +550,7 @@ export const startMd = async (sourceId: string): Promise<Proc | void> => {
 
 //启动td
 export const startTd = async (accountId: string): Promise<Proc | void> => {
-  const extDirs = await flattenExtensionModuleDirs([...getExtDirs()]);
+  const extDirs = await flattenExtensionModuleDirs(EXTENSION_DIRS);
   const { source, id } = accountId.parseSourceAccountId();
   const args = buildArgs(
     `-X ${extDirs
@@ -575,6 +562,28 @@ export const startTd = async (accountId: string): Promise<Proc | void> => {
     args,
     max_restarts: 3,
     autorestart: true,
+  }).catch((err) => {
+    kfLogger.error(err.message);
+  });
+};
+
+export const startTask = async (
+  taskLocation: KungfuApi.KfLocation | KungfuApi.KfConfig,
+  soPath: string,
+  args: string,
+): Promise<Proc | void> => {
+  const extDirs = await flattenExtensionModuleDirs(EXTENSION_DIRS);
+  const argsResolved: string = buildArgs(
+    `-X ${extDirs
+      .map((dir) => path.dirname(dir))
+      .join(path.delimiter)} run -c strategy -g "${taskLocation.group}" -n "${
+      taskLocation.name
+    }" ${soPath} -a ${args}`,
+  );
+
+  return startProcess({
+    name: getProcessIdByKfLocation(taskLocation),
+    args: argsResolved,
   }).catch((err) => {
     kfLogger.error(err.message);
   });

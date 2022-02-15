@@ -10,6 +10,7 @@ dependencies = [
     "dotted-dict~=1.1.0",
     "recordclass~=0.17.0",
     "sortedcontainers~=2.4.0",
+    "argparse~=1.4.0",
 ]
 [tool]
 [tool.pdm]

@@ -54,8 +54,10 @@ interface SourceAccountId {
   id: string;
 }
 
-interface SourceData {
+interface ExtensionData {
   name: string;
+  key: string;
+  extPath: string;
   type: InstrumentTypes[];
 }
 
@@ -386,16 +388,17 @@ const getKfExtConfigList = async (): Promise<KungfuApi.KfExtOriginConfig[]> => {
   );
   return await Promise.all(
     packageJSONPaths.map((item) => {
-      return fse.readJSON(item);
+      return fse.readJSON(item).then((jsonConfig) => {
+        return {
+          ...(jsonConfig.kungfuConfig || {}),
+          extPath: path.dirname(item),
+        };
+      });
     }),
-  ).then((jsonList: { kungfuConfig?: KungfuApi.KfExtOriginConfig }[]) => {
-    return jsonList
-      .map((json): KungfuApi.KfExtOriginConfig | null => {
-        return (json['kungfuConfig'] as KungfuApi.KfExtOriginConfig) || null;
-      })
-      .filter(
-        (config: KungfuApi.KfExtOriginConfig | null): boolean => !!config,
-      ) as KungfuApi.KfExtOriginConfig[];
+  ).then((configList: KungfuApi.KfExtOriginConfig[]) => {
+    return configList.filter(
+      (config: KungfuApi.KfExtOriginConfig | null): boolean => !!config,
+    );
   });
 };
 
@@ -420,12 +423,16 @@ const getKfExtensionConfigByCategory = (
   return extConfigs.reduce(
     (configByCategory, extConfig: KungfuApi.KfExtOriginConfig) => {
       const extKey = extConfig.key;
+      const extName = extConfig.name;
+      const extPath = extConfig.extPath;
       (Object.keys(extConfig['config']) as KfCategoryTypes[]).forEach(
         (category: KfCategoryTypes) => {
           const configOfCategory = extConfig['config'][category];
           configByCategory[category] = {
             ...(configByCategory[category] || {}),
             [extKey]: {
+              name: extName,
+              extPath,
               type: resolveInstrumentTypesInExtType(
                 configOfCategory?.type || [],
               ),
@@ -451,10 +458,8 @@ export const buildExtTypeMap = (
   category: KfCategoryTypes,
 ): Record<string, InstrumentTypes> => {
   const extTypeMap: Record<string, InstrumentTypes> = {};
-  const targetCategoryConfig: Record<
-    string,
-    KungfuApi.KfExtOriginConfig['config'][KfCategoryTypes]
-  > = extConfigs[category] || {};
+  const targetCategoryConfig: Record<string, KungfuApi.KfExtConfig> =
+    extConfigs[category] || {};
 
   Object.keys(targetCategoryConfig).forEach((extKey: string) => {
     const configInKfExtConfig = targetCategoryConfig[extKey];
@@ -503,25 +508,28 @@ export const statTimeEnd = (name: string) => {
   }
 };
 
-export const getSourceDataList = (
+export const getExtConfigList = (
   extConfigs: KungfuApi.KfExtConfigs,
-  sourceType: KfCategoryTypes,
-): SourceData[] => {
-  const target = extConfigs[sourceType];
+  extensionType: KfCategoryTypes,
+): ExtensionData[] => {
+  const target = extConfigs[extensionType];
   return Object.keys(target || {})
     .map((extKey: string) => {
       const sourceInstrumentType = (target || {})[extKey]?.type;
+
       if (sourceInstrumentType === undefined) {
         return null;
       }
 
       const isTypeStr = typeof sourceInstrumentType === 'string';
       return {
-        name: extKey,
+        key: extKey,
+        name: (target || {})[extKey]?.name || extKey,
+        extPath: (target || {})[extKey]?.extPath || '',
         type: isTypeStr ? [sourceInstrumentType] : [...sourceInstrumentType],
       };
     })
-    .filter((sourceData: SourceData | null) => !!sourceData) as SourceData[];
+    .filter((extData: ExtensionData | null) => !!extData) as ExtensionData[];
 };
 
 export const hidePasswordByLogger = (config: string) => {
@@ -601,7 +609,11 @@ export const getProcessIdByKfLocation = (
   } else if (kfLocation.category === 'md') {
     return `${kfLocation.category}_${kfLocation.group}`;
   } else if (kfLocation.category === 'strategy') {
-    return `${kfLocation.category}_${kfLocation.name}`;
+    if (kfLocation.group === 'default') {
+      return `${kfLocation.category}_${kfLocation.name}`;
+    } else {
+      return `${kfLocation.category}_${kfLocation.group}_${kfLocation.name}`;
+    }
   } else if (kfLocation.category === 'system') {
     return kfLocation.name;
   } else {
@@ -761,6 +773,23 @@ export const buildIdByKeysFromKfConfigSettings = (
     .map((key) => kfConfigState[key])
     .filter((value) => value !== undefined)
     .join('_');
+};
+
+export const graceKillProcess = (
+  watcher: KungfuApi.Watcher | null,
+  kfLocation: KungfuApi.KfConfig | KungfuApi.KfLocation,
+  processStatusData: Pm2ProcessStatusData,
+): Promise<void> => {
+  const processId = getProcessIdByKfLocation(kfLocation);
+  if (getIfProcessRunning(processStatusData, processId)) {
+    if (watcher && !watcher.isReadyToInteract(kfLocation)) {
+      return Promise.reject(new Error(`${processId} 还未准备就绪, 请稍后重试`));
+    }
+
+    return deleteProcess(processId);
+  }
+
+  return Promise.resolve();
 };
 
 export const switchKfLocation = (
@@ -1145,7 +1174,7 @@ export const dealTradingData = (
   >(tradingData[tradingDataTypeName], tradingDataTypeName, kfLocation, sortKey);
 };
 
-export const isTdStrategyCategory = (category: string) => {
+export const isTdStrategyCategory = (category: string): boolean => {
   if (category !== 'td') {
     if (category !== 'strategy') {
       return false;
@@ -1153,4 +1182,59 @@ export const isTdStrategyCategory = (category: string) => {
   }
 
   return true;
+};
+
+export const getPrimaryKeyFromKfConfigItem = (
+  settings: KungfuApi.KfConfigItem[],
+): KungfuApi.KfConfigItem[] => {
+  return settings.filter((item) => {
+    return !!item.primary;
+  });
+};
+
+export const transformSearchInstrumentResultToInstrument = (
+  instrumentStr: string,
+): KungfuApi.InstrumentResolved | null => {
+  const pair = instrumentStr.split('_');
+  if (pair.length !== 5) return null;
+  const [exchangeId, instrumentId, instrumentType, ukey, instrumentName] = pair;
+  return {
+    exchangeId,
+    instrumentId,
+    instrumentType: +instrumentType as InstrumentTypeEnum,
+    instrumentName,
+    id: `${instrumentId}_${instrumentName}_${exchangeId}`.toLowerCase(),
+    ukey,
+  };
+};
+
+export const dealKfConfigValueByType = (
+  type: KungfuApi.KfConfigItemSupportedTypes,
+  value: KungfuApi.KfConfigValue,
+): string => {
+  switch (type) {
+    case 'instrument':
+      const instrumentResolved =
+        transformSearchInstrumentResultToInstrument(value);
+      const { exchangeId, instrumentId } = instrumentResolved;
+      return `${exchangeId}_${instrumentId}`;
+    case 'side':
+      return dealSide(value).name;
+    case 'offset':
+      return dealOffset(value).name;
+    case 'direction':
+      return dealDirection(value).name;
+    case 'instrumentType':
+      return dealInstrumentType(value).name;
+    case 'priceType':
+      return dealPriceType(value).name;
+    case 'hedgeFlag':
+      return dealHedgeFlag(value).name;
+    case 'volumeCondition':
+      return dealVolumeCondition(value).name;
+    case 'timeCondition':
+      return dealTimeCondition(value).name;
+    default:
+      return value;
+  }
 };

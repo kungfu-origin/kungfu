@@ -3,7 +3,7 @@ import { ref, onMounted, computed, getCurrentInstance } from 'vue';
 
 import {
   getInstrumentTypeData,
-  getSourceDataList,
+  getExtConfigList,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import {
   useExtConfigsRelated,
@@ -14,11 +14,11 @@ import { KfCategoryTypes } from '@kungfu-trader/kungfu-js-api/typings/enums';
 const props = withDefaults(
   defineProps<{
     visible: boolean;
-    sourceType: KfCategoryTypes;
+    extensionType: KfCategoryTypes;
   }>(),
   {
     visible: false,
-    sourceType: 'td',
+    extensionType: 'td',
   },
 );
 
@@ -30,23 +30,33 @@ defineEmits<{
 
 const app = getCurrentInstance();
 const { extConfigs } = useExtConfigsRelated();
-const selectedSource = ref<string>('');
-const sourceDataList = computed(() => {
-  return getSourceDataList(extConfigs.data, props.sourceType);
+const selectedExtension = ref<string>('');
+const availExtensionList = computed(() => {
+  return getExtConfigList(extConfigs.data, props.extensionType);
 });
 
 const { modalVisible, closeModal } = useModalVisible(props.visible);
 
+const modalTitle = computed(() => {
+  if (props.extensionType === 'td' || props.extensionType === 'md') {
+    return '选择柜台API';
+  } else if (props.extensionType === 'strategy') {
+    return '选择交易任务';
+  } else {
+    return '选择插件类型';
+  }
+});
+
 onMounted(() => {
-  if (selectedSource.value === '') {
-    if (sourceDataList.value.length) {
-      selectedSource.value = sourceDataList.value[0].name;
+  if (selectedExtension.value === '') {
+    if (availExtensionList.value.length) {
+      selectedExtension.value = availExtensionList.value[0].key;
     }
   }
 });
 
 function handleConfirm() {
-  app && app.emit('confirm', selectedSource.value);
+  app && app.emit('confirm', selectedExtension.value);
   closeModal();
 }
 </script>
@@ -55,17 +65,16 @@ function handleConfirm() {
     class="kf-set-source-modal"
     :width="480"
     v-model:visible="modalVisible"
-    title="选择柜台API"
+    :title="modalTitle"
     :destroyOnClose="true"
     @cancel="closeModal"
     @ok="handleConfirm"
   >
-    <a-radio-group v-model:value="selectedSource">
+    <a-radio-group v-model:value="selectedExtension">
       <a-radio
-        :value="item.name"
-        :key="item.name"
-        v-for="item in sourceDataList"
-        value="1"
+        :value="item.key"
+        :key="item.key"
+        v-for="item in availExtensionList"
         :style="{
           height: '36px',
           'line-height': '36px',
@@ -75,6 +84,7 @@ function handleConfirm() {
       >
         <span class="source-id__txt">{{ item.name }}</span>
         <a-tag
+          v-if="extensionType === 'td' || extensionType === 'md'"
           v-for="(sourceInstrumentType, index) in item.type"
           :key="index"
           :color="getInstrumentTypeData(sourceInstrumentType).color"

@@ -38,7 +38,8 @@
       "dependencies": {
         "dotted_dict": "~=1.1.0",
         "recordclass": "~=0.17.0",
-        "sortedcontainers": "~=2.4.0"
+        "sortedcontainers": "~=2.4.0",
+        "argparse": "~=1.4.0"
       }
     }
   },
@@ -52,28 +53,32 @@
           {
             "key": "accountId",
             "name": "账户",
-            "type": "account",
-            "required": true
+            "type": "td",
+            "required": true,
+            "primary": true
           },
           {
             "key": "ticker",
             "name": "标的",
-            "type": "instrumentId",
-            "required": true
+            "type": "instrument",
+            "required": true,
+            "primary": true
           },
           {
             "key": "side",
             "name": "买卖",
             "type": "side",
             "default": 0,
-            "required": true
+            "required": true,
+            "primary": true
           },
           {
             "key": "offset",
             "name": "开平",
             "type": "offset",
             "default": 0,
-            "required": true
+            "required": true,
+            "primary": true
           },
           {
             "key": "priceMode",
@@ -82,18 +87,18 @@
             "options": [
               {
                 "label": "对手价一档",
-                "value": 0
+                "value": "0"
               },
               {
                 "label": "同方向一档",
-                "value": 1
+                "value": "1"
               },
               {
                 "label": "最新价",
-                "value": 2
+                "value": "2"
               }
             ],
-            "default": 1,
+            "default": "1",
             "required": true
           },
           {
@@ -120,6 +125,7 @@
             "name": "总次数",
             "type": "int",
             "tip": "将以总次数均分总时长, 建议保证每步间隔不能太短(>500ms)",
+            "default": 10,
             "required": true
           },
           {
@@ -144,7 +150,7 @@
             "type": "int",
             "required": false,
             "tip": "设置临界下单临界时间, 单位毫秒, 时间默认1000毫秒",
-            "default": 1000
+            "default": 200
           }
         ]
       }

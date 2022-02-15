@@ -10,7 +10,6 @@ import { setKfConfig } from '@kungfu-trader/kungfu-js-api/kungfu/store';
 import {
   BrokerStateStatusTypes,
   HistoryDateEnum,
-  InstrumentTypeEnum,
   InstrumentTypes,
   KfCategoryTypes,
   LedgerCategoryEnum,
@@ -587,22 +586,6 @@ export const useInstruments = (): {
     searchInstrumnetOptions,
     handleSearchInstrument,
     handleConfirmSearchInstrumentResult,
-  };
-};
-
-export const transformSearchInstrumentResultToInstrument = (
-  instrumentStr: string,
-): KungfuApi.InstrumentResolved | null => {
-  const pair = instrumentStr.split('_');
-  if (pair.length !== 5) return null;
-  const [exchangeId, instrumentId, instrumentType, ukey, instrumentName] = pair;
-  return {
-    exchangeId,
-    instrumentId,
-    instrumentType: +instrumentType as InstrumentTypeEnum,
-    instrumentName,
-    id: `${instrumentId}_${instrumentName}_${exchangeId}`.toLowerCase(),
-    ukey,
   };
 };
 

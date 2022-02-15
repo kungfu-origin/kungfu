@@ -9,7 +9,7 @@ import {
 import KfDashboard from '@renderer/components/public/KfDashboard.vue';
 import KfDashboardItem from '@renderer/components/public/KfDashboardItem.vue';
 import KfProcessStatus from '@renderer/components/public/KfProcessStatus.vue';
-import KfSetSourceModal from '@renderer/components/public/KfSetSourceModal.vue';
+import KfSetExtensionModal from '@renderer/components/public/KfSetExtensionModal.vue';
 import KfSetByConfigModal from '@renderer/components/public/KfSetByConfigModal.vue';
 
 import { columns } from './config';
@@ -44,7 +44,7 @@ const setMdModalVisible = ref<boolean>(false);
 const setMdConfigPayload = ref<KungfuApi.SetKfConfigPayload>({
   type: 'add',
   title: '行情源',
-  config: {} as KungfuApi.KfExtOriginConfig['config'][KfCategoryTypes],
+  config: {} as KungfuApi.KfExtConfig,
 });
 const currentSelectedSourceId = ref<string>('');
 
@@ -75,12 +75,14 @@ function handleOpenSetMdDialog(
   selectedSource: string,
   mdConfig?: KungfuApi.KfConfig,
 ) {
+  const extConfig: KungfuApi.KfExtConfig = (extConfigs.data['md'] || {})[
+    selectedSource
+  ];
+
   currentSelectedSourceId.value = selectedSource;
   setMdConfigPayload.value.type = type;
   setMdConfigPayload.value.title = `${selectedSource} 行情源`;
-  setMdConfigPayload.value.config = (extConfigs.data['md'] || {})[
-    selectedSource
-  ];
+  setMdConfigPayload.value.config = extConfig;
   setMdConfigPayload.value.initValue = undefined;
 
   if (type === 'update') {
@@ -89,7 +91,7 @@ function handleOpenSetMdDialog(
     }
   }
 
-  if (!setMdConfigPayload.value.config?.settings?.length) {
+  if (!extConfig?.settings?.length) {
     handleConfirmAddUpdateKfConfig(
       {
         formState: {} as Record<string, KungfuApi.KfConfigValue>,
@@ -200,12 +202,12 @@ function handleOpenSetSourceDialog() {
         </template>
       </a-table>
     </KfDashboard>
-    <KfSetSourceModal
+    <KfSetExtensionModal
       v-if="setSourceModalVisible"
       v-model:visible="setSourceModalVisible"
-      sourceType="md"
+      extensionType="md"
       @confirm="handleOpenSetMdDialog('add', $event)"
-    ></KfSetSourceModal>
+    ></KfSetExtensionModal>
     <KfSetByConfigModal
       v-if="setMdModalVisible"
       v-model:visible="setMdModalVisible"

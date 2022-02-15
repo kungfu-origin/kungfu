@@ -59,6 +59,7 @@ import {
 } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import workers from '@renderer/assets/workers';
 import { throttleTime } from 'rxjs';
+import dayjs from 'dayjs';
 
 export interface KfUIComponent {
   name: string;
@@ -190,7 +191,13 @@ export const initFormStateByConfig = (
     }
 
     if (defaultValue === undefined) {
-      defaultValue = isBoolean ? false : isNumber ? 0 : '';
+      defaultValue = isBoolean
+        ? false
+        : isNumber
+        ? 0
+        : type === 'timePicker'
+        ? dayjs().valueOf().toString()
+        : '';
     }
     if ((initValue || {})[item.key] !== undefined) {
       defaultValue = (initValue || {})[item.key];

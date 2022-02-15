@@ -10,11 +10,10 @@ import {
 } from '@renderer/assets/methods/uiUtils';
 import { getConfigSettings } from './config';
 import { RuleObject } from 'ant-design-vue/lib/form';
-import { transformSearchInstrumentResultToInstrument } from '@renderer/assets/methods/actionsUtils';
 import { FutureArbitrageCodeEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import { message } from 'ant-design-vue';
 import { makeOrderByOrderInput } from '@kungfu-trader/kungfu-js-api/kungfu';
-import { getProcessIdByKfLocation } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
+import { getProcessIdByKfLocation, transformSearchInstrumentResultToInstrument } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 
 interface MakeOrderProps {}
 defineProps<MakeOrderProps>();

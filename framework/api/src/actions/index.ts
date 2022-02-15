@@ -56,7 +56,9 @@ export const deleteAllByKfLocation = (
     .then(() => removeLog(kfLocation));
 };
 
-function removeKfLocation(kfLocation: KungfuApi.KfLocation): Promise<void> {
+export function removeKfLocation(
+  kfLocation: KungfuApi.KfLocation,
+): Promise<void> {
   const targetDir = path.resolve(
     KF_RUNTIME_DIR,
     kfLocation.category,
@@ -73,7 +75,7 @@ function removeKfLocation(kfLocation: KungfuApi.KfLocation): Promise<void> {
   });
 }
 
-function removeLog(kfLocation: KungfuApi.KfLocation): Promise<void> {
+export function removeLog(kfLocation: KungfuApi.KfLocation): Promise<void> {
   const logPath = path.resolve(
     LOG_DIR,
     `${getProcessIdByKfLocation(kfLocation)}.log`,

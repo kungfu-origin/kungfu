@@ -24,10 +24,9 @@ import { message } from 'ant-design-vue';
 import { makeOrderByOrderInput } from '@kungfu-trader/kungfu-js-api/kungfu';
 import { InstrumentTypeEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import {
-  transformSearchInstrumentResultToInstrument,
   useInstruments,
 } from '@renderer/assets/methods/actionsUtils';
-import { getProcessIdByKfLocation } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
+import { getProcessIdByKfLocation, transformSearchInstrumentResultToInstrument } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 
 interface MakeOrderProps {}
 defineProps<MakeOrderProps>();

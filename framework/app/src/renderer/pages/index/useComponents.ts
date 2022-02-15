@@ -52,6 +52,13 @@ export const useComponenets = (app: App<Element>): void => {
   );
 
   app.component(
+    '交易任务',
+    defineAsyncComponent(
+      () => import('@root/src/components/modules/tradingTask/TradingTask.vue'),
+    ),
+  );
+
+  app.component(
     '行情订阅',
     defineAsyncComponent(
       () => import('@root/src/components/modules/marketdata/MarketData.vue'),
@@ -91,6 +98,7 @@ export const useComponenets = (app: App<Element>): void => {
     '交易账户',
     '行情源',
     '策略进程',
+    '交易任务',
     '行情订阅',
     '深度行情',
     '下单面板',
