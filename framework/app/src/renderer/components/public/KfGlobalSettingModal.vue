@@ -332,7 +332,7 @@ function handleRemoveScheduleTask(index: number) {
                 </div>
               </div>
               <div class="global-setting-item">
-                <div class="label">定时起停列表</div>
+                <div class="label">定时起停任务列表</div>
                 <a-button
                   style="margin-bottom: 16px"
                   @click="handleAddScheduleTask"

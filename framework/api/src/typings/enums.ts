@@ -146,6 +146,8 @@ export enum KfCategoryEnum {
 
 export type KfCategoryTypes = keyof typeof KfCategoryEnum;
 
+export type KfUIExtLocatorTypes = 'sidebar' | 'sidebarfooter';
+
 export enum KfModeEnum {
   live,
   data,

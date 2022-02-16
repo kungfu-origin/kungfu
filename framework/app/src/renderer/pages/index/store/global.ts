@@ -21,6 +21,7 @@ import {
   BrokerStateStatusTypes,
   KfCategoryTypes,
 } from '@kungfu-trader/kungfu-js-api/typings/enums';
+import bus from '@kungfu-trader/kungfu-js-api/utils/globalBus';
 
 interface GlobalState {
   boardsMap: KfLayout.BoardsMap;
@@ -76,6 +77,10 @@ export const useGlobalStore = defineStore('global', {
     setTdGroups() {
       return getTdGroups().then((tdGroups) => {
         this.tdGroupList = tdGroups;
+        bus.next({
+          tag: 'update:tdGroup',
+          tdGroups: this.tdGroupList,
+        });
       });
     },
 
@@ -123,6 +128,21 @@ export const useGlobalStore = defineStore('global', {
         this.mdList = md;
         this.tdList = td;
         this.strategyList = strategy;
+
+        bus.next({
+          tag: 'update:td',
+          tds: td,
+        });
+
+        bus.next({
+          tag: 'update:md',
+          mds: md,
+        });
+
+        bus.next({
+          tag: 'update:strategy',
+          strategys: strategy,
+        });
 
         if (this.currentGlobalKfLocation === null) {
           if (td.length) {

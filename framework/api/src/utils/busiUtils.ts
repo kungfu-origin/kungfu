@@ -425,7 +425,7 @@ const getKfExtensionConfigByCategory = (
       const extKey = extConfig.key;
       const extName = extConfig.name;
       const extPath = extConfig.extPath;
-      (Object.keys(extConfig['config']) as KfCategoryTypes[]).forEach(
+      (Object.keys(extConfig['config'] || {}) as KfCategoryTypes[]).forEach(
         (category: KfCategoryTypes) => {
           const configOfCategory = extConfig['config'][category];
           configByCategory[category] = {

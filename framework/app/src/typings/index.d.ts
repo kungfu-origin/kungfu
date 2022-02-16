@@ -67,15 +67,7 @@ interface TriggeOrderBook {
   instrument: InstrumentResolved;
 }
 
-interface ExtraOrderInput {
-  side: SideEnum;
-  offset?: OffsetEnum;
-  volume: number | bigint;
-  price: number;
-  accountId?: string;
-}
-
-interface TiggerOrderBookUpdate {
+interface TriggerOrderBookUpdate {
   tag: 'orderBookUpdate';
   orderInput: InstrumentResolved | ExtraOrderInput;
 }
@@ -85,15 +77,47 @@ interface TriggerMakeOrder {
   orderInput: InstrumentResolved | ExtraOrderInput;
 }
 
+interface TriggerUpdateTdGroup {
+  tag: 'update:tdGroup';
+  tdGroups: KungfuApi.KfExtraLocation[];
+}
+
+interface TriggerUpdateTd {
+  tag: 'update:td';
+  tds: KungfuApi.KfConfig[];
+}
+
+interface TriggerUpdateMd {
+  tag: 'update:md';
+  mds: KungfuApi.KfConfig[];
+}
+
+interface TriggerUpdateStrategy {
+  tag: 'update:strategy';
+  strategys: KungfuApi.KfConfig[];
+}
+
 type KfBusEvent =
   | ResizeEvent
   | ProcessStatusChangeEvent
   | MainProcessEvent
   | TradingDataUpdateEvent
   | TriggeOrderBook
-  | TiggerOrderBookUpdate
+  | TriggerOrderBookUpdate
   | TriggerMakeOrder
+  | TriggerUpdateTdGroup
+  | TriggerUpdateTd
+  | TriggerUpdateMd
+  | TriggerUpdateStrategy
   | ExportTradingDataEvent;
+
+interface ExtraOrderInput {
+  side: SideEnum;
+  offset?: OffsetEnum;
+  volume: number | bigint;
+  price: number;
+  accountId?: string;
+}
 
 type TradingDataItem = KungfuApi.Position | KungfuApi.Order | KungfuApi.Trade;
 interface KfTradingDataTableHeaderConfig {
