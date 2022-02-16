@@ -203,6 +203,17 @@ export const initFormStateByConfig = (
       defaultValue = (initValue || {})[item.key];
     }
 
+    if (booleanType.includes(type)) {
+      defaultValue =
+        defaultValue === 'true'
+          ? true
+          : defaultValue === 'false'
+          ? false
+          : !!defaultValue;
+    } else if (numberType.includes(type)) {
+      defaultValue = +defaultValue;
+    }
+
     formState[item.key] = defaultValue;
   });
 

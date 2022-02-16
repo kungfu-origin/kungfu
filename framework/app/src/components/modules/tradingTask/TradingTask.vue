@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import {
+  handleOpenLogview,
   useDashboardBodySize,
   useExtConfigsRelated,
   useProcessStatusDetailData,
@@ -19,7 +20,7 @@ import {
 } from '@ant-design/icons-vue';
 
 import { columns } from './config';
-import { message } from 'ant-design-vue';
+import { message, Modal } from 'ant-design-vue';
 import path from 'path';
 import {
   dealKfConfigValueByType,
@@ -83,7 +84,7 @@ function handleOpenSetTaskDialog() {
 function handleOpenSetTaskModal(
   type = 'add' as KungfuApi.ModalChangeType,
   selectedExtKey: string,
-  taskConfig?: KungfuApi.KfConfig,
+  taskConfig?: Record<string, KungfuApi.KfConfigValue>,
 ) {
   const extConfig: KungfuApi.KfExtConfig = (extConfigs.data['strategy'] || {})[
     selectedExtKey
@@ -102,7 +103,7 @@ function handleOpenSetTaskModal(
 
   if (type === 'update') {
     if (taskConfig) {
-      setTaskConfigPayload.value.initValue = JSON.parse(taskConfig.value);
+      setTaskConfigPayload.value.initValue = taskConfig;
     }
   }
 
@@ -134,7 +135,13 @@ function handleSwitchProcessStatusResolved(
       window.watcher,
       taskLocation,
       processStatusData.value,
-    );
+    )
+      .then(() => {
+        message.success('操作成功');
+      })
+      .catch((err: Error) => {
+        message.error(err.message || '操作失败');
+      });
   }
 
   const extKey = taskLocation.group;
@@ -154,9 +161,14 @@ function handleSwitchProcessStatusResolved(
 
   const soPath = path.join(extConfig.extPath, extKey);
   const args = minimist(record.args as string[])['a'] || '';
-  return startTask(taskLocation, soPath, args).catch((err: Error) =>
-    message.error(err.message),
-  );
+  return startTask(taskLocation, soPath, args)
+    .catch((err: Error) => message.error(err.message))
+    .then(() => {
+      message.success('操作成功');
+    })
+    .catch((err: Error) => {
+      message.error(err.message || '操作失败');
+    });
 }
 
 function handleConfirmAddUpdateTask(
@@ -189,14 +201,44 @@ function handleConfirmAddUpdateTask(
     return;
   }
 
-  const args: string = buildArgs(extConfig.settings, formState);
+  const args: string = toArgs(extConfig.settings, formState);
   const soPath = path.join(extConfig.extPath, extKey);
-  return preStartTask(taskLocation)
+  return ensureRemoveTask(taskLocation)
     .then(() => startTask(taskLocation, soPath, args))
-    .catch((err: Error) => message.error(err.message));
+    .then(() => {
+      message.success('操作成功');
+    })
+    .catch((err: Error) => message.error(err.message || '操作失败'));
 }
 
-function preStartTask(taskLocation: KungfuApi.KfLocation) {
+function handleOpenLogviewResolved(record: Pm2ProcessStatusDetail) {
+  const taskLocation = getTaskKfLocationByProcessId(record.name);
+  if (!taskLocation) {
+    message.error(`${record.name} 不是合法交易任务进程ID`);
+    return;
+  }
+  handleOpenLogview(taskLocation);
+}
+
+function handleRemoveTask(record: Pm2ProcessStatusDetail) {
+  const taskLocation = getTaskKfLocationByProcessId(record.name);
+  if (!taskLocation) {
+    message.error(`${record.name} 不是合法交易任务进程ID`);
+    return;
+  }
+
+  Modal.confirm({
+    title: `删除交易任务 ${record.name}`,
+    content: `删除交易任务 ${record.name}, 所有数据, 如果该交易任务正在运行, 也将停止进程, 确认删除`,
+    okText: '确认',
+    cancelText: '取消',
+    onOk() {
+      return ensureRemoveTask(taskLocation);
+    },
+  });
+}
+
+function ensureRemoveTask(taskLocation: KungfuApi.KfLocation) {
   return graceDeleteProcess(
     window.watcher,
     taskLocation,
@@ -206,7 +248,7 @@ function preStartTask(taskLocation: KungfuApi.KfLocation) {
     .then(() => removeLog(taskLocation));
 }
 
-function buildArgs(
+function toArgs(
   settings: KungfuApi.KfConfigItem[],
   formState: Record<string, KungfuApi.KfConfigValue>,
 ) {
@@ -219,6 +261,11 @@ function buildArgs(
         const instrumentResolved = transformSearchInstrumentResultToInstrument(
           formState[item.key],
         );
+
+        if (!instrumentResolved) {
+          return `${item.key}=${formState[item.key]}`;
+        }
+
         const { exchangeId, instrumentId } = instrumentResolved;
         return `${item.key}=${exchangeId}_${instrumentId}`;
       }
@@ -227,7 +274,13 @@ function buildArgs(
     .join(path.delimiter);
 }
 
-function dealArgs(record: Pm2ProcessStatusDetail) {
+function fromArgs(args: string[]): Record<string, KungfuApi.KfConfigValue> {
+  const taskArgs = minimist(args)['a'] || '';
+  const data = getDataByArgs(taskArgs);
+  return data;
+}
+
+function dealArgs(record: Pm2ProcessStatusDetail): string {
   const taskKfLocation = getTaskKfLocationByProcessId(record.name);
   const taskArgs = minimist(record.args as string[])['a'] || '';
   if (!taskKfLocation) {
@@ -303,9 +356,24 @@ function getDataByArgs(taskArgs: string): Record<string, string> {
           </template>
           <template v-else-if="column.dataIndex === 'actions'">
             <div class="kf-actions__warp">
-              <FileTextOutlined style="font-size: 12px" />
-              <SettingOutlined style="font-size: 12px" />
-              <DeleteOutlined style="font-size: 12px" />
+              <FileTextOutlined
+                style="font-size: 12px"
+                @click.stop="handleOpenLogviewResolved(record)"
+              />
+              <SettingOutlined
+                style="font-size: 12px"
+                @click.stop="
+                  handleOpenSetTaskModal(
+                    'update',
+                    getTaskKfLocationByProcessId(record.name)?.group,
+                    fromArgs(record.args),
+                  )
+                "
+              />
+              <DeleteOutlined
+                style="font-size: 12px"
+                @click.stop="handleRemoveTask(record)"
+              />
             </div>
           </template>
         </template>
