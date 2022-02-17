@@ -342,6 +342,8 @@ export const flattenExtensionModuleDirs = async (
 ): Promise<string[]> => {
   let extensionModuleDirs: string[] = [];
 
+  console.log('flattenExtensionModuleDirs ============ ', extensionDirs);
+
   const statsList = await Promise.all(
     extensionDirs.map((dirname: string) => {
       return getChildFileStat(dirname);
@@ -386,9 +388,12 @@ const getKfExtConfigList = async (): Promise<KungfuApi.KfExtOriginConfig[]> => {
   const packageJSONPaths = extModuleDirs.map((item) =>
     path.join(item, 'package.json'),
   );
+  console.log('packageJSONPaths', packageJSONPaths);
   return await Promise.all(
     packageJSONPaths.map((item) => {
+      console.log('readjson item', item);
       return fse.readJSON(item).then((jsonConfig) => {
+        console.log(jsonConfig);
         return {
           ...(jsonConfig.kungfuConfig || {}),
           extPath: path.dirname(item),
@@ -481,6 +486,7 @@ export const getKfExtensionConfig =
 export const getKfUIExtensionConfig =
   async (): Promise<KungfuApi.KfUIExtConfigs> => {
     const kfExtConfigList = await getKfExtConfigList();
+    console.log('kfExtConfigList', kfExtConfigList);
     return getKfUIExtensionConfigByExtKey(kfExtConfigList);
   };
 
