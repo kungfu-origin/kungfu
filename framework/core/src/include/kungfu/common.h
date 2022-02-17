@@ -21,8 +21,8 @@
 // workaround for using c++20 with hana-1.7.0@conan-center
 #if defined(_WINDOWS) && (_MSVC_LANG > 201704L)
 namespace std {
-  template<typename T> struct is_literal_type {};
-}
+template <typename T> struct is_literal_type {};
+} // namespace std
 #endif
 //------------------------------------------------------------------------
 
