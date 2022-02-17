@@ -420,8 +420,9 @@ const resolveInstrumentTypesInExtType = (
 const getKfExtensionConfigByCategory = (
   extConfigs: KungfuApi.KfExtOriginConfig[],
 ): KungfuApi.KfExtConfigs => {
-  return extConfigs.reduce(
-    (configByCategory, extConfig: KungfuApi.KfExtOriginConfig) => {
+  return extConfigs
+    .filter((item) => !!item.config)
+    .reduce((configByCategory, extConfig: KungfuApi.KfExtOriginConfig) => {
       const extKey = extConfig.key;
       const extName = extConfig.name;
       const extPath = extConfig.extPath;
@@ -442,15 +443,45 @@ const getKfExtensionConfigByCategory = (
         },
       );
       return configByCategory;
-    },
-    {} as KungfuApi.KfExtConfigs,
-  );
+    }, {} as KungfuApi.KfExtConfigs);
+};
+
+const getKfUIExtensionConfigByExtKey = (
+  extConfigs: KungfuApi.KfExtOriginConfig[],
+) => {
+  return extConfigs
+    .filter((item) => !!item.ui_config)
+    .reduce((configByExtraKey, extConfig) => {
+      const extKey = extConfig.key;
+      const extName = extConfig.name;
+      const extPath = extConfig.extPath;
+      const uiConfig = extConfig['ui_config'];
+      const { position } = uiConfig;
+
+      if (!position) {
+        return configByExtraKey;
+      }
+
+      configByExtraKey[extKey] = {
+        name: extName,
+        extPath,
+        position,
+      };
+      return configByExtraKey;
+    }, {} as KungfuApi.KfUIExtConfigs);
+  2;
 };
 
 export const getKfExtensionConfig =
   async (): Promise<KungfuApi.KfExtConfigs> => {
     const kfExtConfigList = await getKfExtConfigList();
     return getKfExtensionConfigByCategory(kfExtConfigList);
+  };
+
+export const getKfUIExtensionConfig =
+  async (): Promise<KungfuApi.KfUIExtConfigs> => {
+    const kfExtConfigList = await getKfExtConfigList();
+    return getKfUIExtensionConfigByExtKey(kfExtConfigList);
   };
 
 export const buildExtTypeMap = (

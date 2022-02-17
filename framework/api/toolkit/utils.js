@@ -151,3 +151,9 @@ exports.getExtensionDirs = (pro = false) => {
 
   return extdirs;
 };
+
+exports.getKungfuConfigKey = () => {
+  return require(path.join(process.cwd(), 'package.json'))['kungfuConfig'][
+    'key'
+  ];
+};

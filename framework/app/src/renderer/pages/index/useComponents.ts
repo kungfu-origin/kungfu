@@ -1,5 +1,6 @@
 // import { getUIComponents } from '@renderer/assets/methods/uiUtils';
 import { App, defineAsyncComponent } from 'vue';
+// import { getKfUIExtensionConfig } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 
 export const useComponenets = (app: App<Element>): void => {
   app.component(
@@ -113,3 +114,7 @@ export const useComponenets = (app: App<Element>): void => {
   //     app.config.globalProperties.$registedKfUIComponents = Object.keys(uics);
   // }
 };
+
+// getKfUIExtensionConfig().then((res) => {
+//   console.log(res, '===222222==');
+// });

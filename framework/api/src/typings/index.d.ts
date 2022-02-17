@@ -44,6 +44,7 @@ declare namespace KungfuApi {
     OrderStatusEnum,
     KfCategoryEnum,
     KfCategoryTypes,
+    KfUIExtLocatorTypes,
     KfModeEnum,
     KfModeTypes,
     OrderActionFlagEnum,
@@ -137,7 +138,10 @@ declare namespace KungfuApi {
     key: string;
     name: string;
     extPath: string;
-    config: {
+    ui_config?: {
+      position: KfUIExtLocatorTypes;
+    };
+    config?: {
       [key in KfCategoryTypes]?: {
         type?: Array<InstrumentTypes> | InstrumentTypes;
         settings: KfConfigItem[];
@@ -152,11 +156,20 @@ declare namespace KungfuApi {
     settings: KfConfigItem[];
   }
 
-  export type KfExtConfigs = {
+  export interface KfExtConfigs {
     [key in KfCategoryTypes]?: {
       [extKey: string]: KfExtConfig;
     };
-  };
+  }
+
+  export type KfUIExtConfigs = Record<
+    string,
+    {
+      name: string;
+      extPath: string;
+      position: KfUIExtLocatorTypes;
+    }
+  >;
 
   export interface SetKfConfigPayload {
     type: KungfuApi.ModalChangeType;

@@ -36,14 +36,12 @@
     "jschardet": "^3.0.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.0.0",
     "@kungfu-trader/kungfu-toolchain": "^2.4.0-alpha.11",
     "babel-loader": "^8.0.0",
     "electron": "^13.0.0",
     "fs-extra": "^10.0.0",
     "minimist": "^1.2.5",
     "pinia": "^2.0.0",
-    "vue": "^3.0.0",
-    "webpack": "^5.0.0"
+    "vue": "^3.0.0"
   }
 }

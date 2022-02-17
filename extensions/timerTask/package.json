@@ -4,7 +4,7 @@
     "name": "kungfu-trader",
     "email": "info@kungfu.link"
   },
-  "version": "2.4.0-alpha.8",
+  "version": "2.4.0-alpha.11",
   "description": "Kungfu Extension - TIMER TASK",
   "license": "Apache-2.0",
   "main": "package.json",
@@ -26,9 +26,6 @@
     "clean": "kfs extension clean",
     "install": "node -e \"require('@kungfu-trader/kungfu-core').prebuilt('install')\"",
     "package": "kfs prebuilt package"
-  },
-  "dependencies": {
-    "@kungfu-trader/kungfu-core": "^2.4.0-alpha.10"
   },
   "devDependencies": {
     "@kungfu-trader/kungfu-sdk": "^2.4.0-alpha.10"

@@ -110,28 +110,6 @@ function startRenderer(argv) {
   });
 }
 
-function startComponents(argv) {
-  const componentsConfig = require('../webpack/webpack.components.config')(
-    argv,
-  );
-  return new Promise((resolve, reject) => {
-    const compiler = webpack(componentsConfig);
-    compiler.watch({}, (err, stats) => {
-      if (err) {
-        console.log(err);
-        return;
-      }
-
-      logStats('Components', stats);
-    });
-
-    compiler.hooks.done.tap('components-compile-done', (stats) => {
-      logStats('Components', stats);
-      resolve();
-    });
-  });
-}
-
 function startMain(argv) {
   const mainConfig = require('../webpack/webpack.main.config')(argv);
   const appDir = getAppDir();
@@ -208,11 +186,18 @@ function startElectron(argv) {
 }
 
 const run = (distDir, distName = 'app', withWebpack) => {
+  greeting();
+
   const appDir = getAppDir();
+  if (withWebpack) {
+    process.chdir(appDir);
+  } else {
+    process.chdir(process.cwd());
+  }
+
   const kfcDir = getKfcDir();
   const extdirs = getExtensionDirs();
 
-  process.chdir(appDir);
   process.env.KFC_DIR = kfcDir;
   process.env.EXTENSION_DIRS = [distDir, ...extdirs].join(path.delimiter);
 
