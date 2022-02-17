@@ -319,7 +319,7 @@ export const getInstrumentTypeData = (
 const getChildFileStat = async (
   dirname: string,
 ): Promise<Array<{ childFilePath: string; stat: Stats }>> => {
-  if (!fse.pathExistsSync(dirname)) {
+  if (!(await fse.pathExists(dirname))) {
     return [];
   }
 

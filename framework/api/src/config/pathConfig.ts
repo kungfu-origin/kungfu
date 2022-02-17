@@ -111,6 +111,8 @@ export const EXTENSION_DIRS: string[] = production
       path.resolve('dist'),
     ];
 
+console.log('EXTENSION_DIRS', EXTENSION_DIRS, process.env.NODE_ENV);
+
 export const APP_DIR = production
   ? path.resolve(global.__kfResourcesPath, 'app', 'dist', 'app')
   : path.resolve(process.cwd(), 'dist', 'app');
