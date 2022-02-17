@@ -86,7 +86,10 @@ require('@kungfu-trader/kungfu-core').sywac(module, (cli) => {
       const setConfig = (key, value) =>
         githubActions && npmCall(['config', 'set', key, value]);
       const setPrebuiltHost = (module) =>
-        setConfig(PrebuiltModules[module], prebuiltHost);
+        setConfig(
+          `${PrebuiltModules[module]}_${PrebuiltHostConfig}`,
+          prebuiltHost,
+        );
 
       setConfig(`${projectName}:pypi_mirror`, pypi);
       Object.keys(PrebuiltModules).map(setPrebuiltHost);
