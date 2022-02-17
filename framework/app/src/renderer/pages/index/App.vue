@@ -77,6 +77,7 @@ onBeforeUnmount(() => {
 
 store.setKfConfigList();
 store.setKfExtConfigs();
+store.setKfUIExtConfigs();
 store.setSubscribedInstruments();
 
 onMounted(() => {

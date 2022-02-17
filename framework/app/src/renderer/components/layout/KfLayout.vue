@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { SlidersOutlined, SettingOutlined } from '@ant-design/icons-vue';
 import bus from '@kungfu-trader/kungfu-js-api/utils/globalBus';
+import { useExtConfigsRelated } from '@renderer/assets/methods/uiUtils';
 import KfProcessStatusController from '@renderer/components/layout/KfProcessStatusController.vue';
-import { onUnmounted, ref } from 'vue';
+import { computed, onUnmounted, ref } from 'vue';
 import KfGlobalSettingModal from '../public/KfGlobalSettingModal.vue';
 const logo = require('@renderer/assets/svg/LOGO.svg');
 
@@ -18,6 +19,13 @@ const busSubscription = bus.subscribe((data: KfBusEvent) => {
         globalSettingModalVisible.value = true;
     }
   }
+});
+
+const { uiExtConfigs } = useExtConfigsRelated();
+const sidebarFooterComponentKeys = computed(() => {
+  return Object.keys(uiExtConfigs.data).filter(
+    (key) => uiExtConfigs.data[key].position === 'sidebar_footer',
+  );
 });
 
 onUnmounted(() => {
@@ -39,11 +47,19 @@ onUnmounted(() => {
             <span>主面板</span>
           </a-menu-item>
         </a-menu>
-        <div
-          class="kf-global-setting-btn"
-          @click="globalSettingModalVisible = true"
-        >
-          <setting-outlined class="kf-hover" style="font-size: 24px" />
+        <div class="kf-sidebar-footer__warp">
+          <div
+            class="kf-sidebar-footer-btn__warp"
+            v-for="key in sidebarFooterComponentKeys"
+          >
+            <component :is="key"></component>
+          </div>
+          <div
+            class="kf-sidebar-footer-btn__warp"
+            @click="globalSettingModalVisible = true"
+          >
+            <setting-outlined class="kf-hover" style="font-size: 24px" />
+          </div>
         </div>
       </a-layout-sider>
       <a-layout style="padding: 0px 8px 0 8px; box-sizing: border-box">
@@ -115,11 +131,13 @@ onUnmounted(() => {
         }
       }
 
-      .kf-global-setting-btn {
-        width: 100%;
-        height: 64px;
-        line-height: 64px;
-        text-align: center;
+      .kf-sidebar-footer__warp {
+        .kf-sidebar-footer-btn__warp {
+          width: 100%;
+          height: 56px;
+          line-height: 56px;
+          text-align: center;
+        }
       }
     }
   }

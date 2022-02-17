@@ -1,6 +1,6 @@
-// import { getUIComponents } from '@renderer/assets/methods/uiUtils';
-import { App, defineAsyncComponent } from 'vue';
-// import { getKfUIExtensionConfig } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
+import { getKfUIExtensionConfig } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
+import { getUIComponents } from '@renderer/assets/methods/uiUtils';
+import { App, Component, defineAsyncComponent } from 'vue';
 
 export const useComponenets = (app: App<Element>): void => {
   app.component(
@@ -106,15 +106,13 @@ export const useComponenets = (app: App<Element>): void => {
     '套利指令',
   ];
 
-  // if (process.env.NODE_ENV === 'production') {
-  //     const uics = getUIComponents();
-  //     Object.keys(uics).forEach((key) => {
-  //         app.component(key, uics[key] as Component);
-  //     });
-  //     app.config.globalProperties.$registedKfUIComponents = Object.keys(uics);
-  // }
+  getKfUIExtensionConfig()
+    .then((configs) => getUIComponents(configs))
+    .then((components) => {
+      components
+        .filter((item) => item.component)
+        .forEach((item) => {
+          app.component(item.key, item.component as Component);
+        });
+    });
 };
-
-// getKfUIExtensionConfig().then((res) => {
-//   console.log(res, '===222222==');
-// });

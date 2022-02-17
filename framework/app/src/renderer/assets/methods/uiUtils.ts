@@ -1,5 +1,3 @@
-import fs from 'fs-extra';
-import path from 'path';
 import {
   Component,
   ComputedRef,
@@ -13,13 +11,9 @@ import {
   toRaw,
   onBeforeUnmount,
 } from 'vue';
-import {
-  APP_DIR,
-  KF_HOME,
-} from '@kungfu-trader/kungfu-js-api/config/pathConfig';
+import { KF_HOME } from '@kungfu-trader/kungfu-js-api/config/pathConfig';
 import {
   buildExtTypeMap,
-  buildObjectFromArray,
   dealCategory,
   getAppStateStatusName,
   getIdByKfLocation,
@@ -60,52 +54,24 @@ import {
 import workers from '@renderer/assets/workers';
 import { throttleTime } from 'rxjs';
 import dayjs from 'dayjs';
-
-export interface KfUIComponent {
-  name: string;
-  component: Component;
-}
+import path from 'path';
 
 // this utils file is only for ui components
-export const getUIComponents = (): {
-  [prop: string]: KfUIComponent[keyof KfUIComponent] | null | undefined;
-  [prop: number]: KfUIComponent[keyof KfUIComponent] | null | undefined;
-} => {
-  const componentsDir = path.join(APP_DIR, 'components');
-  const files = fs.readdirSync(componentsDir);
-  const jsFiles = files.filter((file) => file.includes('.js'));
-  const existedNames: string[] = [];
-  const uicList = jsFiles
-    .map((file: string): KfUIComponent | null => {
-      const fullpath = path.join(componentsDir, file);
-      const uic = global.require(fullpath).default as Component;
-
-      if (!uic) {
-        return null;
-      }
-
-      const { name } = uic;
-      if (!name) {
-        console.error('no name property in components' + fullpath);
-        return null;
-      }
-
-      if (existedNames.includes(name)) {
-        console.error(`component name ${name} is existed, ${fullpath}`);
-      }
-
-      return {
-        name,
-        component: uic,
-      };
-    })
-    .filter((item: KfUIComponent | null) => !!item);
-
-  return buildObjectFromArray<KfUIComponent | null>(
-    uicList,
-    'name',
-    'component',
-  );
+export const getUIComponents = (
+  kfUiExtConfigs: KungfuApi.KfUIExtConfigs,
+): {
+  key: string;
+  component: Component | null;
+}[] => {
+  return Object.keys(kfUiExtConfigs).map((key) => {
+    const cc = global.require(
+      path.join(kfUiExtConfigs[key].extPath, 'index.js'),
+    ).default;
+    return {
+      key,
+      component: cc.component || null,
+    };
+  });
 };
 
 export const useModalVisible = (
@@ -276,11 +242,15 @@ export const getInstrumentTypeColor = (
 
 export const useExtConfigsRelated = (): {
   extConfigs: { data: KungfuApi.KfExtConfigs };
+  uiExtConfigs: { data: KungfuApi.KfUIExtConfigs };
   extTypeMap: ComputedRef<Record<string, InstrumentTypes>>;
   mdExtTypeMap: ComputedRef<Record<string, InstrumentTypes>>;
 } => {
   const app = getCurrentInstance();
   const extConfigs = reactive<{ data: KungfuApi.KfExtConfigs }>({
+    data: {},
+  });
+  const uiExtConfigs = reactive<{ data: KungfuApi.KfUIExtConfigs }>({
     data: {},
   });
   const extTypeMap = computed(() => buildExtTypeMap(extConfigs.data, 'td'));
@@ -290,11 +260,14 @@ export const useExtConfigsRelated = (): {
     if (app?.proxy) {
       const store = storeToRefs(app?.proxy.$useGlobalStore());
       extConfigs.data = store.extConfigs as unknown as KungfuApi.KfExtConfigs;
+      uiExtConfigs.data =
+        store.uiExtConfigs as unknown as KungfuApi.KfUIExtConfigs;
     }
   });
 
   return {
     extConfigs,
+    uiExtConfigs,
     extTypeMap,
     mdExtTypeMap,
   };

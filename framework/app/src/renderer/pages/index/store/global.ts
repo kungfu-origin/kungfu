@@ -7,6 +7,7 @@ import {
 import {
   getIdByKfLocation,
   getKfExtensionConfig,
+  getKfUIExtensionConfig,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import {
   getAllKfConfigOriginData,
@@ -28,6 +29,7 @@ interface GlobalState {
   dragedContentData: KfLayout.ContentData | null;
   isBoardDragging: boolean;
   extConfigs: KungfuApi.KfExtConfigs;
+  uiExtConfigs: KungfuApi.KfUIExtConfigs;
   tdList: KungfuApi.KfConfig[];
   tdGroupList: KungfuApi.KfExtraLocation[];
   mdList: KungfuApi.KfConfig[];
@@ -55,6 +57,7 @@ export const useGlobalStore = defineStore('global', {
       dragedContentData: null,
       isBoardDragging: false,
       extConfigs: toRaw<KungfuApi.KfExtConfigs>({}),
+      uiExtConfigs: toRaw<KungfuApi.KfUIExtConfigs>({}),
 
       tdList: [],
       tdGroupList: [],
@@ -213,6 +216,14 @@ export const useGlobalStore = defineStore('global', {
       return getKfExtensionConfig().then(
         (kfExtConfigs: KungfuApi.KfExtConfigs) => {
           this.extConfigs = toRaw(kfExtConfigs);
+        },
+      );
+    },
+
+    setKfUIExtConfigs() {
+      return getKfUIExtensionConfig().then(
+        (KfExtConfig: KungfuApi.KfUIExtConfigs) => {
+          this.uiExtConfigs = toRaw(KfExtConfig);
         },
       );
     },
