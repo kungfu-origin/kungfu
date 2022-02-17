@@ -199,6 +199,7 @@ const run = (distDir, distName = 'app', withWebpack) => {
   const extdirs = getExtensionDirs();
 
   process.env.KFC_DIR = kfcDir;
+  process.env.KFC_DEV = true;
   process.env.EXTENSION_DIRS = [distDir, ...extdirs].join(path.delimiter);
 
   const argv = {

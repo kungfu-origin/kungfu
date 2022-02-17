@@ -1,6 +1,7 @@
 import { getKfUIExtensionConfig } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { getUIComponents } from '@renderer/assets/methods/uiUtils';
 import { App, Component, defineAsyncComponent } from 'vue';
+import { useGlobalStore } from './store/global';
 
 export const useComponenets = (app: App<Element>): void => {
   app.component(
@@ -114,5 +115,8 @@ export const useComponenets = (app: App<Element>): void => {
         .forEach((item) => {
           app.component(item.key, item.component as Component);
         });
+    })
+    .then(() => {
+      useGlobalStore().setKfUIExtConfigs();
     });
 };
