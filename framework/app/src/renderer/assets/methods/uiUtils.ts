@@ -9,7 +9,7 @@ import {
   toRefs,
   toRaw,
   onBeforeUnmount,
-  Plugin,
+  Component,
 } from 'vue';
 import { KF_HOME } from '@kungfu-trader/kungfu-js-api/config/pathConfig';
 import {
@@ -61,15 +61,15 @@ export const getUIComponents = (
   kfUiExtConfigs: KungfuApi.KfUIExtConfigs,
 ): {
   key: string;
-  install: Plugin['install'];
+  component: Component;
 }[] => {
   return Object.keys(kfUiExtConfigs).map((key) => {
     const cc = global.require(
       path.join(kfUiExtConfigs[key].extPath, 'index.js'),
-    ).default as Plugin;
+    ).default as Component;
     return {
       key,
-      install: cc.install || null,
+      component: cc,
     };
   });
 };

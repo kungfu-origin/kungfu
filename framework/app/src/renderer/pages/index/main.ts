@@ -96,6 +96,7 @@ app.config.globalProperties.$globalCategoryRegister =
   new GlobalCategoryRegister();
 
 useComponenets(app);
+
 app.mount('#app');
 
 const globalStore = useGlobalStore();

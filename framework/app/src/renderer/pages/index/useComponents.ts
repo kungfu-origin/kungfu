@@ -1,3 +1,4 @@
+// import { getUIComponents } from '@renderer/assets/methods/uiUtils';
 import { getUIComponents } from '@renderer/assets/methods/uiUtils';
 import { App, defineAsyncComponent } from 'vue';
 import { useGlobalStore } from './store/global';
@@ -110,14 +111,14 @@ export const useComponenets = (app: App<Element>): Promise<void> => {
     .setKfUIExtConfigs()
     .then((configs) => getUIComponents(configs))
     .then((components) => {
-      components
-        .filter((item) => item.install)
-        .forEach((item) => {
-          console.log('register ui plugin', item);
-          app.use(item);
-        });
+      components.forEach((item) => {
+        console.log('register ui plugin', item);
+        app.component(item.key, item.component);
+      });
     })
     .then(() => {
       useGlobalStore().setKfUIExtConfigs();
     });
+
+  return;
 };

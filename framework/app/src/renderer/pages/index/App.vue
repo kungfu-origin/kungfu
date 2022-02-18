@@ -78,6 +78,7 @@ onBeforeUnmount(() => {
 store.setKfConfigList();
 store.setKfExtConfigs();
 store.setSubscribedInstruments();
+store.setKfUIExtConfigs();
 
 onMounted(() => {
   removeLoadingMask();

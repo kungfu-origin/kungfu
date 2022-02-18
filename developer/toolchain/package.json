@@ -19,7 +19,6 @@
     "yarn": "^1.18.0"
   },
   "dependencies": {
-    "@babel/core": "^7.0.0",
     "@electron/remote": "^2.0.0",
     "@rushstack/eslint-patch": "^1.1.0",
     "@types/node": "^17.0.0",
@@ -31,7 +30,6 @@
     "@vue/eslint-config-prettier": "^7.0.0",
     "@vue/eslint-config-typescript": "^10.0.0",
     "add": "^2.0.6",
-    "ant-design-vue": "^3.0.0-beta.8",
     "babel-loader": "^8.0.0",
     "babel-plugin-import": "^1.13.3",
     "cfonts": "^2.10.0",
@@ -69,7 +67,6 @@
     "ts-loader": "^9.2.6",
     "typescript": "~4.4.0",
     "url-loader": "^4.1.1",
-    "vue": "^3.2.31",
     "vue-loader": "^17.0.0",
     "vue-router": "^4.0.0",
     "vue-virtual-scroller": "^2.0.0-0",
