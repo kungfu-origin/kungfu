@@ -1,5 +1,4 @@
 import {
-  Component,
   ComputedRef,
   Ref,
   reactive,
@@ -10,6 +9,7 @@ import {
   toRefs,
   toRaw,
   onBeforeUnmount,
+  Plugin,
 } from 'vue';
 import { KF_HOME } from '@kungfu-trader/kungfu-js-api/config/pathConfig';
 import {
@@ -61,15 +61,15 @@ export const getUIComponents = (
   kfUiExtConfigs: KungfuApi.KfUIExtConfigs,
 ): {
   key: string;
-  component: Component | null;
+  install: Plugin['install'];
 }[] => {
   return Object.keys(kfUiExtConfigs).map((key) => {
     const cc = global.require(
       path.join(kfUiExtConfigs[key].extPath, 'index.js'),
-    ).default;
+    ).default as Plugin;
     return {
       key,
-      component: cc.component || null,
+      install: cc.install || null,
     };
   });
 };

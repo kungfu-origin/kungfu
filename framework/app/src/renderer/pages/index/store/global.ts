@@ -224,6 +224,7 @@ export const useGlobalStore = defineStore('global', {
       return getKfUIExtensionConfig().then(
         (KfExtConfig: KungfuApi.KfUIExtConfigs) => {
           this.uiExtConfigs = toRaw(KfExtConfig);
+          return KfExtConfig;
         },
       );
     },

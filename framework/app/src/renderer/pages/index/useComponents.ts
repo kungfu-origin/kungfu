@@ -1,9 +1,8 @@
-import { getKfUIExtensionConfig } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { getUIComponents } from '@renderer/assets/methods/uiUtils';
-import { App, Component, defineAsyncComponent } from 'vue';
+import { App, defineAsyncComponent } from 'vue';
 import { useGlobalStore } from './store/global';
 
-export const useComponenets = (app: App<Element>): void => {
+export const useComponenets = (app: App<Element>): Promise<void> => {
   app.component(
     '持仓',
     defineAsyncComponent(
@@ -107,13 +106,15 @@ export const useComponenets = (app: App<Element>): void => {
     '套利指令',
   ];
 
-  getKfUIExtensionConfig()
+  return useGlobalStore()
+    .setKfUIExtConfigs()
     .then((configs) => getUIComponents(configs))
     .then((components) => {
       components
-        .filter((item) => item.component)
+        .filter((item) => item.install)
         .forEach((item) => {
-          app.component(item.key, item.component as Component);
+          console.log('register ui plugin', item);
+          app.use(item);
         });
     })
     .then(() => {
