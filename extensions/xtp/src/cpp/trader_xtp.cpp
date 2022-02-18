@@ -92,7 +92,7 @@ bool TraderXTP::insert_order(const event_ptr &event) {
   orders_.emplace(order.uid(), state<Order>(event->dest(), event->source(), nano, order));
   writer->close_data();
   if (not success) {
-    SPDLOG_ERROR("fail to insert order {}, error id {}, {}", to_string(xtp_input), order.error_id, order.error_msg);
+    SPDLOG_ERROR("fail to insert order {}, error id {}, {}", to_string(xtp_input), (int)order.error_id, order.error_msg);
   }
   return success;
 }

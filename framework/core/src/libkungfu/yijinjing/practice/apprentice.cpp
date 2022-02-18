@@ -133,9 +133,7 @@ void apprentice::react() {
     self_register_event | rx::timeout(seconds(180), observe_on_new_thread()) |
         $(
             [&](const event_ptr &event) {
-              // once registered this subscriber finished, no worry for performance.
-              // timeout happens on new thread, can not subscribe journal reader here
-              // TODO find a better approach to timeout (use timestamp in journal rather than rx scheduler)
+              // this subscriber will quit when register is done, no worry for performance.
             },
             [&](std::exception_ptr e) {
               try {
