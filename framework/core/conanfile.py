@@ -30,7 +30,7 @@ class KungfuCoreConan(ConanFile):
         "nlohmann_json/3.10.5",
         "nng/1.5.2",
         "rxcpp/4.1.1",
-        "sqlite3/3.36.0",
+        "sqlite3/3.37.2",
         "sqlite_orm/1.7",
         "spdlog/1.9.2",
         "tabulate/1.4",
@@ -46,6 +46,8 @@ class KungfuCoreConan(ConanFile):
     default_options = {
         "fmt:header_only": "True",
         "spdlog:header_only": "True",
+        "sqlite3:enable_json1": "True",
+        "nng:http": "False",
         "log_level": "info",
         "arch": "x64",
         "freezer": "pyinstaller",
