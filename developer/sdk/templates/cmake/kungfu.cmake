@@ -1,5 +1,7 @@
 macro(kungfu_setup MODULE_NAME)
   include(<%- kfcDir -%>/cmake/compiler.cmake)
+  
+  add_compile_definitions(FMT_HEADER_ONLY)
 
   include_directories("<%- kfcDir -%>/include")
   <%_ includes.forEach(dir => { _%>
