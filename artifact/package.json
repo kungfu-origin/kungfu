@@ -25,7 +25,6 @@
     "@kungfu-trader/kungfu-app": "^2.4.0-alpha.11"
   },
   "devDependencies": {
-    "@kungfu-trader/kungfu-sdk": "^2.4.0-alpha.11",
-    "@kungfu-trader/db-connector": "1.0.0"
+    "@kungfu-trader/kungfu-sdk": "^2.4.0-alpha.11"
   }
 }
