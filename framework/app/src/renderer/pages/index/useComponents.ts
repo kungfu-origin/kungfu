@@ -112,7 +112,6 @@ export const useComponenets = (app: App<Element>): Promise<void> => {
     .then((configs) => getUIComponents(configs))
     .then((components) => {
       components.forEach((item) => {
-        console.log('register ui plugin', item);
         app.component(item.key, item.component);
       });
     })

@@ -137,6 +137,14 @@ onUnmounted(() => {
           height: 56px;
           line-height: 56px;
           text-align: center;
+
+          .anticon {
+            font-size: 24px;
+            &:hover {
+              color: @primary-color;
+              cursor: pointer;
+            }
+          }
         }
       }
     }
