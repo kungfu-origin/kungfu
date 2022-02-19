@@ -11,8 +11,6 @@ import {
   FormOutlined,
 } from '@ant-design/icons-vue';
 
-import { KfCategoryTypes } from '@kungfu-trader/kungfu-js-api/typings/enums';
-
 import {
   useTableSearchKeyword,
   useAllKfConfigData,
@@ -47,7 +45,7 @@ const setStrategyModalVisible = ref<boolean>(false);
 const setStrategyConfigPayload = ref<KungfuApi.SetKfConfigPayload>({
   type: 'add',
   title: '策略',
-  config: {} as KungfuApi.KfExtOriginConfig['config'][KfCategoryTypes],
+  config: {} as KungfuApi.KfExtConfig,
 });
 
 const { strategy } = toRefs(useAllKfConfigData());
@@ -89,6 +87,7 @@ function handleOpenSetStrategyDialog(
   setStrategyConfigPayload.value.type = type;
   setStrategyConfigPayload.value.config = {
     type: [],
+    name: '策略',
     settings: [
       {
         key: 'strategy_id',

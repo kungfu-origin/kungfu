@@ -13,15 +13,13 @@ import {
 import { computed, getCurrentInstance } from 'vue';
 import { getColumns } from './config';
 import { ExchangeIds } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
-import {
-  transformSearchInstrumentResultToInstrument,
-  useInstruments,
-} from '@renderer/assets/methods/actionsUtils';
+import { useInstruments } from '@renderer/assets/methods/actionsUtils';
 import { StarFilled, PlusOutlined } from '@ant-design/icons-vue';
 import { message } from 'ant-design-vue';
 import {
   dealAssetPrice,
   dealKfNumber,
+  transformSearchInstrumentResultToInstrument,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import {
   OffsetEnum,

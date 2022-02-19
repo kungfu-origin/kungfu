@@ -92,9 +92,6 @@ void Bookkeeper::restore(const cache::bank &state_bank) {
     auto &asset = state.data;
     auto book = get_book(asset.holder_uid);
     book->asset = asset;
-
-    SPDLOG_INFO("[restore] avail {}", book->asset.avail);
-
     book->update(app_.now());
   }
 }

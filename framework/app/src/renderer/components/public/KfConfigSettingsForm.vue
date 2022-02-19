@@ -26,12 +26,13 @@ import {
   PriceType,
   Side,
 } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
-import { getIdByKfLocation } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
-import { RuleObject } from 'ant-design-vue/lib/form';
 import {
+  getIdByKfLocation,
   transformSearchInstrumentResultToInstrument,
-  useInstruments,
-} from '@renderer/assets/methods/actionsUtils';
+} from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
+import { RuleObject } from 'ant-design-vue/lib/form';
+import { useInstruments } from '@renderer/assets/methods/actionsUtils';
+import dayjs, { Dayjs } from 'dayjs';
 
 const props = withDefaults(
   defineProps<{
@@ -52,6 +53,7 @@ const props = withDefaults(
         trigger: string;
       }
     >;
+    primaryKeyUnderline?: boolean;
   }>(),
   {
     formState: () => ({}),
@@ -64,6 +66,7 @@ const props = withDefaults(
     labelCol: 6,
     wrapperCol: 16,
     rules: () => ({}),
+    primaryKeyUnderline: false,
   },
 );
 
@@ -135,7 +138,9 @@ watch(formState, (newVal) => {
   app && app.emit('update:formState', newVal);
 });
 
-function getValidatorType(type: string): 'number' | 'string' | 'array' {
+function getValidatorType(
+  type: string,
+): 'number' | 'string' | 'array' | 'boolean' {
   const intTypes: string[] = [
     'int',
     ...Object.keys(numberEnumSelectType || {}),
@@ -148,6 +153,8 @@ function getValidatorType(type: string): 'number' | 'string' | 'array' {
     return 'number';
   } else if (type === 'folder') {
     return 'array';
+  } else if (type === 'bool') {
+    return 'boolean';
   } else {
     return 'string';
   }
@@ -181,7 +188,7 @@ function primaryKeyValidator(_rule: RuleObject, value: string): Promise<void> {
     return Promise.reject(new Error(`不能含有特殊字符`));
   }
 
-  if (value.includes('_')) {
+  if (value.toString().includes('_') && !props.primaryKeyUnderline) {
     return Promise.reject(new Error(`不能含有下划线`));
   }
 
@@ -253,6 +260,10 @@ function handleRemoveFile(key: string, filename: string): void {
   if (index !== -1) {
     (formState[key] as string[]).splice(index, 1);
   }
+}
+
+function handleTimePickerChange(date: Dayjs, key: string) {
+  formState[key] = dayjs(date).format('YYYY-MM-DD HH:mm:ss');
 }
 
 function validate(): Promise<void> {
@@ -528,6 +539,12 @@ defineExpose({
           />
         </div>
       </div>
+      <a-time-picker
+        v-else-if="item.type === 'timePicker'"
+        :disabled="changeType === 'update' && item.primary"
+        :value="dayjs(+formState[item.key] || dayjs())"
+        @change="handleTimePickerChange($event, item.key)"
+      ></a-time-picker>
     </a-form-item>
   </a-form>
 </template>

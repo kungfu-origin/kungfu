@@ -13,6 +13,7 @@ const props = withDefaults(
     visible: boolean;
     payload: KungfuApi.SetKfConfigPayload;
     width?: number;
+    primaryKeyUnderline?: boolean;
     primaryKeyAvoidRepeatCompareExtra?: string;
     primaryKeyAvoidRepeatCompareTarget?: string[];
   }>(),
@@ -20,6 +21,7 @@ const props = withDefaults(
     visible: false,
     payload: () => ({} as KungfuApi.SetKfConfigPayload),
     width: 520,
+    primaryKeyUnderline: false,
     primaryKeyAvoidRepeatCompareTarget: () => [],
     primaryKeyAvoidRepeatCompareExtra: '',
   },
@@ -97,6 +99,7 @@ function handleConfirm(): void {
       v-model:formState="formState"
       :configSettings="payload.config?.settings || []"
       :changeType="payload.type"
+      :primaryKeyUnderline="primaryKeyUnderline"
       :primaryKeyAvoidRepeatCompareTarget="primaryKeyAvoidRepeatCompareTarget"
       :primaryKeyAvoidRepeatCompareExtra="primaryKeyAvoidRepeatCompareExtra"
     ></KfConfigSettingsForm>

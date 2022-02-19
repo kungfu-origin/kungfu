@@ -7,6 +7,7 @@ import {
 import {
   getIdByKfLocation,
   getKfExtensionConfig,
+  getKfUIExtensionConfig,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import {
   getAllKfConfigOriginData,
@@ -21,12 +22,14 @@ import {
   BrokerStateStatusTypes,
   KfCategoryTypes,
 } from '@kungfu-trader/kungfu-js-api/typings/enums';
+import bus from '@kungfu-trader/kungfu-js-api/utils/globalBus';
 
 interface GlobalState {
   boardsMap: KfLayout.BoardsMap;
   dragedContentData: KfLayout.ContentData | null;
   isBoardDragging: boolean;
   extConfigs: KungfuApi.KfExtConfigs;
+  uiExtConfigs: KungfuApi.KfUIExtConfigs;
   tdList: KungfuApi.KfConfig[];
   tdGroupList: KungfuApi.KfExtraLocation[];
   mdList: KungfuApi.KfConfig[];
@@ -54,6 +57,7 @@ export const useGlobalStore = defineStore('global', {
       dragedContentData: null,
       isBoardDragging: false,
       extConfigs: toRaw<KungfuApi.KfExtConfigs>({}),
+      uiExtConfigs: toRaw<KungfuApi.KfUIExtConfigs>({}),
 
       tdList: [],
       tdGroupList: [],
@@ -76,6 +80,10 @@ export const useGlobalStore = defineStore('global', {
     setTdGroups() {
       return getTdGroups().then((tdGroups) => {
         this.tdGroupList = tdGroups;
+        bus.next({
+          tag: 'update:tdGroup',
+          tdGroups: this.tdGroupList,
+        });
       });
     },
 
@@ -123,6 +131,21 @@ export const useGlobalStore = defineStore('global', {
         this.mdList = md;
         this.tdList = td;
         this.strategyList = strategy;
+
+        bus.next({
+          tag: 'update:td',
+          tds: td,
+        });
+
+        bus.next({
+          tag: 'update:md',
+          mds: md,
+        });
+
+        bus.next({
+          tag: 'update:strategy',
+          strategys: strategy,
+        });
 
         if (this.currentGlobalKfLocation === null) {
           if (td.length) {
@@ -193,6 +216,15 @@ export const useGlobalStore = defineStore('global', {
       return getKfExtensionConfig().then(
         (kfExtConfigs: KungfuApi.KfExtConfigs) => {
           this.extConfigs = toRaw(kfExtConfigs);
+        },
+      );
+    },
+
+    setKfUIExtConfigs() {
+      return getKfUIExtensionConfig().then(
+        (KfExtConfig: KungfuApi.KfUIExtConfigs) => {
+          this.uiExtConfigs = toRaw(KfExtConfig);
+          return KfExtConfig;
         },
       );
     },

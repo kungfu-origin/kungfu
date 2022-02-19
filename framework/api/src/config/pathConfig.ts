@@ -100,15 +100,18 @@ export const KFC_DIR = process.env.KFC_DIR || path.join(KFC_PARENT_DIR, 'kfc');
 
 export const KFC_EXECUTABLE = process.platform === 'win32' ? 'kfc.exe' : 'kfc';
 
-export const EXTENSION_DIRS: string[] = process.env.EXTENSION_DIRS
-  ? process.env.EXTENSION_DIRS.split(path.delimiter)
-  : production
-  ? [path.join(global.__kfResourcesPath, 'kungfu-extensions')]
+export const EXTENSION_DIRS: string[] = production
+  ? [
+      path.join(global.__kfResourcesPath, 'kungfu-extensions'),
+      ...(process.env.EXTENSION_DIRS.split(path.delimiter) || []),
+    ]
   : [
       path.resolve(KFC_PARENT_DIR, '..', '..', '..', 'extensions'),
       path.resolve('node_modules', '@kungfu-trader'),
       path.resolve('dist'),
     ];
+
+console.log('EXTENSION_DIRS', EXTENSION_DIRS, process.env.NODE_ENV);
 
 export const APP_DIR = production
   ? path.resolve(global.__kfResourcesPath, 'app', 'dist', 'app')

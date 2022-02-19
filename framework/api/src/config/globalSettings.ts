@@ -15,15 +15,6 @@ export const getKfGlobalSettings = (): KfSystemConfig[] => [
     name: isEnglish ? 'System' : '系统',
     config: [
       {
-        key: 'extPaths',
-        name: isEnglish ? 'Extension Paths' : '系统插件路径',
-        tip: isEnglish
-          ? 'System extensions path setting'
-          : '系统插件包含柜台, 任务插件等, 如有额外的插件, 可设置对应插件路径',
-        default: EXTENSION_DIRS,
-        type: 'folder',
-      },
-      {
         key: 'logLevel',
         name: isEnglish ? 'Log level' : '全局日志级别',
         tip: isEnglish ? 'For all log' : '对系统内所有日志级别的设置',

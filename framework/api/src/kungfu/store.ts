@@ -1,5 +1,4 @@
 import { configStore } from '../kungfu';
-
 import { kfLogger, hidePasswordByLogger } from '../utils/busiUtils';
 
 type AllConfig = Record<string, KungfuApi.KfConfigOrigin>;

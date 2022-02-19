@@ -45,7 +45,7 @@ export const defaultBoardsMap: KfLayout.BoardsMap = {
     paId: 10,
     direction: 'v',
     contents: ['下单面板', '套利指令'],
-    current: '套利指令',
+    current: '下单面板',
     width: '56.721%',
   },
   '13': {
@@ -53,9 +53,9 @@ export const defaultBoardsMap: KfLayout.BoardsMap = {
     direction: 'v',
     contents: ['行情订阅'],
     current: '行情订阅',
-    width: '19.344%',
+    width: '23.045%',
   },
-  '14': { paId: 5, direction: 'v', width: '80.656%', children: [16, 15] },
+  '14': { paId: 5, direction: 'v', width: '76.955%', children: [16, 15] },
   '15': {
     paId: 14,
     direction: 'h',
@@ -67,7 +67,7 @@ export const defaultBoardsMap: KfLayout.BoardsMap = {
   '16': {
     paId: 14,
     direction: 'h',
-    contents: ['策略进程', '持仓汇总'],
+    contents: ['策略进程', '交易任务', '持仓汇总'],
     current: '策略进程',
   },
 };

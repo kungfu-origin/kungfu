@@ -4,7 +4,6 @@ import {
   computed,
   toRefs,
   getCurrentInstance,
-  reactive,
   onMounted,
   toRaw,
 } from 'vue';
@@ -12,7 +11,7 @@ import {
 import KfDashboard from '@renderer/components/public/KfDashboard.vue';
 import KfDashboardItem from '@renderer/components/public/KfDashboardItem.vue';
 import KfProcessStatus from '@renderer/components/public/KfProcessStatus.vue';
-import KfSetSourceModal from '@renderer/components/public/KfSetSourceModal.vue';
+import KfSetExtensionModal from '@renderer/components/public/KfSetExtensionModal.vue';
 import KfSetByConfigModal from '@renderer/components/public/KfSetByConfigModal.vue';
 import {
   FileTextOutlined,
@@ -20,7 +19,6 @@ import {
   DeleteOutlined,
 } from '@ant-design/icons-vue';
 
-import { KfCategoryTypes } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import { categoryRegisterConfig, getColumns } from './config';
 import {
   useTableSearchKeyword,
@@ -66,7 +64,7 @@ const setTdModalVisible = ref<boolean>(false);
 const setTdConfigPayload = ref<KungfuApi.SetKfConfigPayload>({
   type: 'add',
   title: '交易账户',
-  config: {} as KungfuApi.KfExtOriginConfig['config'][KfCategoryTypes],
+  config: {} as KungfuApi.KfExtConfig,
 });
 
 const currentSelectedSourceId = ref<string>('');
@@ -98,7 +96,7 @@ const tdGroupNames = computed(() => {
 const addTdGroupConfigPayload = ref<KungfuApi.SetKfConfigPayload>({
   type: 'add',
   title: '账户组',
-  config: {} as KungfuApi.KfExtOriginConfig['config'][KfCategoryTypes],
+  config: {} as KungfuApi.KfExtConfig,
 });
 
 const { searchKeyword, tableData } = useTableSearchKeyword<
@@ -161,17 +159,24 @@ onMounted(() => {
   }
 });
 
-function handleOpenSetTdDialog(
+function handleOpenSetTdModal(
   type = 'add' as KungfuApi.ModalChangeType,
   selectedSource: string,
   tdConfig?: KungfuApi.KfConfig,
 ) {
+  const extConfig: KungfuApi.KfExtConfig = (extConfigs.data['td'] || {})[
+    selectedSource
+  ];
+
+  if (!extConfig) {
+    message.error(`${selectedSource} 柜台插件不存在`);
+    return;
+  }
+
   currentSelectedSourceId.value = selectedSource;
   setTdConfigPayload.value.type = type;
   setTdConfigPayload.value.title = `${selectedSource} 交易账户`;
-  setTdConfigPayload.value.config = (extConfigs.data['td'] || {})[
-    selectedSource
-  ];
+  setTdConfigPayload.value.config = extConfig;
   setTdConfigPayload.value.initValue = undefined;
 
   if (type === 'update') {
@@ -180,8 +185,10 @@ function handleOpenSetTdDialog(
     }
   }
 
-  if (!setTdConfigPayload.value.config?.settings?.length) {
-    message.error(`配置项不存在, 请检查 ${selectedSource} package.json`);
+  if (!extConfig?.settings?.length) {
+    message.error(
+      `配置项不存在, 请检查 ${extConfig?.name || selectedSource} package.json`,
+    );
     return;
   }
 
@@ -196,6 +203,7 @@ function handleOpenAddTdGroupDialog(type: KungfuApi.ModalChangeType) {
   addTdGroupConfigPayload.value.type = type;
   addTdGroupConfigPayload.value.config = {
     type: [],
+    name: '账户分组',
     settings: [
       {
         key: 'td_group_name',
@@ -430,7 +438,7 @@ function handleRemoveTd(item: KungfuApi.KfConfig) {
               <SettingOutlined
                 style="font-size: 12px"
                 @click.stop="
-                                    handleOpenSetTdDialog(
+                                    handleOpenSetTdModal(
                                         'update',
                                         record.group,
                                         record as KungfuApi.KfConfig,
@@ -456,12 +464,12 @@ function handleRemoveTd(item: KungfuApi.KfConfig) {
         </template>
       </a-table>
     </KfDashboard>
-    <KfSetSourceModal
+    <KfSetExtensionModal
       v-if="setSourceModalVisible"
       v-model:visible="setSourceModalVisible"
-      sourceType="td"
-      @confirm="handleOpenSetTdDialog('add', $event)"
-    ></KfSetSourceModal>
+      extensionType="td"
+      @confirm="handleOpenSetTdModal('add', $event)"
+    ></KfSetExtensionModal>
     <KfSetByConfigModal
       v-if="setTdModalVisible"
       v-model:visible="setTdModalVisible"

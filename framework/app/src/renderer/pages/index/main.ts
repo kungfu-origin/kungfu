@@ -88,14 +88,14 @@ app
   .use(Statistic)
   .use(VueVirtualScroller);
 
-useComponenets(app);
-
 //this sort ensure $useGlobalStore can be get in mounted callback
 app.config.globalProperties.$bus = bus;
 app.config.globalProperties.$tradingDataSubject = tradingDataSubject;
 app.config.globalProperties.$useGlobalStore = useGlobalStore;
 app.config.globalProperties.$globalCategoryRegister =
   new GlobalCategoryRegister();
+
+useComponenets(app);
 
 app.mount('#app');
 

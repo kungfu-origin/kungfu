@@ -12,6 +12,8 @@ import {
   setTimerPromiseTask,
   delayMilliSeconds,
   flattenExtensionModuleDirs,
+  getProcessIdByKfLocation,
+  getIfProcessRunning,
 } from '../utils/busiUtils';
 import {
   APP_DIR,
@@ -314,7 +316,41 @@ export const startProcess = (
 
 export const stopProcess = pm2Stop;
 
+export const graceStopProcess = (
+  watcher: KungfuApi.Watcher | null,
+  kfLocation: KungfuApi.KfConfig | KungfuApi.KfLocation,
+  processStatusData: Pm2ProcessStatusData,
+): Promise<void> => {
+  const processId = getProcessIdByKfLocation(kfLocation);
+  if (getIfProcessRunning(processStatusData, processId)) {
+    if (watcher && !watcher.isReadyToInteract(kfLocation)) {
+      return Promise.reject(new Error(`${processId} 还未准备就绪, 请稍后重试`));
+    }
+
+    return stopProcess(processId);
+  }
+
+  return Promise.resolve();
+};
+
 export const deleteProcess = pm2Delete;
+
+export const graceDeleteProcess = (
+  watcher: KungfuApi.Watcher | null,
+  kfLocation: KungfuApi.KfConfig | KungfuApi.KfLocation,
+  processStatusData: Pm2ProcessStatusData,
+): Promise<void> => {
+  const processId = getProcessIdByKfLocation(kfLocation);
+  if (getIfProcessRunning(processStatusData, processId)) {
+    if (watcher && !watcher.isReadyToInteract(kfLocation)) {
+      return Promise.reject(new Error(`${processId} 还未准备就绪, 请稍后重试`));
+    }
+
+    return deleteProcess(processId);
+  }
+
+  return Promise.resolve();
+};
 
 export function startProcessGetStatusUntilStop(
   options: Pm2StartOptions,
@@ -376,32 +412,34 @@ export const listProcessStatusWithDetail =
 export function buildProcessStatusWidthDetail(
   pList: ProcessDescription[],
 ): Pm2ProcessStatusDetailData {
-  let processStatus: Pm2ProcessStatusDetailData = {};
-  Object.freeze(pList).forEach((p) => {
-    const { monit, pid, name, pm2_env, pm_id } = p;
-    const status = pm2_env?.status;
-    const created_at = (pm2_env as Pm2Env)?.created_at;
-    const cwd = pm2_env?.pm_cwd;
-    const pm_exec_path = (pm2_env?.pm_exec_path || '').split('/');
-    const script =
-      (pm2_env as Pm2Env).script || pm_exec_path[pm_exec_path.length - 1];
-    const args = (pm2_env as Pm2Env).args;
+  return pList.reduce(
+    (processStatus: Pm2ProcessStatusDetailData, p: ProcessDescription) => {
+      const { monit, pid, name, pm2_env, pm_id } = p;
+      const status = pm2_env?.status;
+      const created_at = (pm2_env as Pm2Env)?.created_at;
+      const cwd = pm2_env?.pm_cwd;
+      const pm_exec_path = (pm2_env?.pm_exec_path || '').split('/');
+      const script =
+        (pm2_env as Pm2Env).script || pm_exec_path[pm_exec_path.length - 1];
+      const args = (pm2_env as Pm2Env).args;
 
-    if (!name) return;
-    processStatus[name] = {
-      monit,
-      pid,
-      name,
-      pm_id,
-      status,
-      created_at,
-      script,
-      cwd,
-      args,
-    };
-  });
+      if (!name) return processStatus;
 
-  return processStatus;
+      processStatus[name] = {
+        monit,
+        pid,
+        name,
+        pm_id,
+        status,
+        created_at,
+        script,
+        cwd,
+        args,
+      };
+      return processStatus;
+    },
+    {} as Pm2ProcessStatusDetailData,
+  );
 }
 
 //===================== pm2 end =========================
@@ -442,11 +480,6 @@ function buildArgs(args: string): string {
   return [logLevel, args, rocket].join(' ');
 }
 
-function getExtDirs(): string[] {
-  const kfConfig: any = fse.readJsonSync(KF_CONFIG_PATH) || {};
-  return ((kfConfig.system || {}).extPaths as string[]) || EXTENSION_DIRS;
-}
-
 //循环获取processStatus
 function startGetProcessStatusByName(name: string, callback: Function) {
   const timer = setTimerPromiseTask(() => {
@@ -463,15 +496,6 @@ function startGetProcessStatusByName(name: string, callback: Function) {
 //===================== utils end =======================
 
 //================ business related start ===============
-
-export const startTask = (options: Pm2StartOptions) => {
-  return startProcess({
-    script: options.script || 'index.js',
-    interpreter: process.execPath,
-    ...options,
-    force: true,
-  });
-};
 
 export function startArchiveMakeTask(cb?: Function) {
   return startProcessGetStatusUntilStop(
@@ -545,7 +569,7 @@ export const startLedger = async (force = false): Promise<Proc | void> => {
 
 //启动md
 export const startMd = async (sourceId: string): Promise<Proc | void> => {
-  const extDirs = await flattenExtensionModuleDirs([...getExtDirs()]);
+  const extDirs = await flattenExtensionModuleDirs(EXTENSION_DIRS);
   const args = buildArgs(
     `-X ${extDirs
       .map((dir) => path.dirname(dir))
@@ -563,7 +587,7 @@ export const startMd = async (sourceId: string): Promise<Proc | void> => {
 
 //启动td
 export const startTd = async (accountId: string): Promise<Proc | void> => {
-  const extDirs = await flattenExtensionModuleDirs([...getExtDirs()]);
+  const extDirs = await flattenExtensionModuleDirs(EXTENSION_DIRS);
   const { source, id } = accountId.parseSourceAccountId();
   const args = buildArgs(
     `-X ${extDirs
@@ -575,6 +599,28 @@ export const startTd = async (accountId: string): Promise<Proc | void> => {
     args,
     max_restarts: 3,
     autorestart: true,
+  }).catch((err) => {
+    kfLogger.error(err.message);
+  });
+};
+
+export const startTask = async (
+  taskLocation: KungfuApi.KfLocation | KungfuApi.KfConfig,
+  soPath: string,
+  args: string,
+): Promise<Proc | void> => {
+  const extDirs = await flattenExtensionModuleDirs(EXTENSION_DIRS);
+  const argsResolved: string = buildArgs(
+    `-X ${extDirs
+      .map((dir) => path.dirname(dir))
+      .join(path.delimiter)} run -c strategy -g "${taskLocation.group}" -n "${
+      taskLocation.name
+    }" ${soPath} -a ${args}`,
+  );
+
+  return startProcess({
+    name: getProcessIdByKfLocation(taskLocation),
+    args: argsResolved,
   }).catch((err) => {
     kfLogger.error(err.message);
   });

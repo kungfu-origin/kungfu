@@ -23,11 +23,11 @@ import { getConfigSettings } from './config';
 import { message } from 'ant-design-vue';
 import { makeOrderByOrderInput } from '@kungfu-trader/kungfu-js-api/kungfu';
 import { InstrumentTypeEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';
+import { useInstruments } from '@renderer/assets/methods/actionsUtils';
 import {
+  getProcessIdByKfLocation,
   transformSearchInstrumentResultToInstrument,
-  useInstruments,
-} from '@renderer/assets/methods/actionsUtils';
-import { getProcessIdByKfLocation } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
+} from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 
 interface MakeOrderProps {}
 defineProps<MakeOrderProps>();
@@ -91,11 +91,11 @@ onMounted(() => {
 
       if (data.tag === 'orderBookUpdate') {
         const { side, price, volume, instrumentType } = (
-          data as TiggerOrderBookUpdate
+          data as TriggerOrderBookUpdate
         ).orderInput;
 
         const instrumentValue = buildInstrumentSelectOptionValue(
-          (data as TiggerOrderBookUpdate).orderInput,
+          (data as TriggerOrderBookUpdate).orderInput,
         );
 
         if (!formState.value.instrument) {

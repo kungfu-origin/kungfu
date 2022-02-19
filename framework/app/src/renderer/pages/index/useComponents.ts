@@ -1,7 +1,9 @@
 // import { getUIComponents } from '@renderer/assets/methods/uiUtils';
+import { getUIComponents } from '@renderer/assets/methods/uiUtils';
 import { App, defineAsyncComponent } from 'vue';
+import { useGlobalStore } from './store/global';
 
-export const useComponenets = (app: App<Element>): void => {
+export const useComponenets = (app: App<Element>): Promise<void> => {
   app.component(
     '持仓',
     defineAsyncComponent(
@@ -52,6 +54,13 @@ export const useComponenets = (app: App<Element>): void => {
   );
 
   app.component(
+    '交易任务',
+    defineAsyncComponent(
+      () => import('@root/src/components/modules/tradingTask/TradingTask.vue'),
+    ),
+  );
+
+  app.component(
     '行情订阅',
     defineAsyncComponent(
       () => import('@root/src/components/modules/marketdata/MarketData.vue'),
@@ -91,17 +100,24 @@ export const useComponenets = (app: App<Element>): void => {
     '交易账户',
     '行情源',
     '策略进程',
+    '交易任务',
     '行情订阅',
     '深度行情',
     '下单面板',
     '套利指令',
   ];
 
-  // if (process.env.NODE_ENV === 'production') {
-  //     const uics = getUIComponents();
-  //     Object.keys(uics).forEach((key) => {
-  //         app.component(key, uics[key] as Component);
-  //     });
-  //     app.config.globalProperties.$registedKfUIComponents = Object.keys(uics);
-  // }
+  return useGlobalStore()
+    .setKfUIExtConfigs()
+    .then((configs) => getUIComponents(configs))
+    .then((components) => {
+      components.forEach((item) => {
+        app.component(item.key, item.component);
+      });
+    })
+    .then(() => {
+      useGlobalStore().setKfUIExtConfigs();
+    });
+
+  return;
 };
