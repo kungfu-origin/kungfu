@@ -18,7 +18,6 @@
     "paths": {
       "@kungfu-trader/kungfu-js-api/*": [
         "../api/src/*",
-        "node_modules/@kungfu-trader/kungfu-js-api/src/*"
       ],
       "@kungfu-trader/kungfu-app/*": ["./*"]
     },
@@ -30,8 +29,7 @@
     "src/**/*.vue",
     "tests/**/*.ts",
     "tests/**/*.tsx",
-    "../api/src/typings/*.d.ts",
-    "node_modules/@kungfu-trader/kungfu-js-api/src/typings/*.d.ts"
+    "../api/src/**/*.ts",
   ],
   "exclude": ["node_modules"]
 }
