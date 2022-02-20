@@ -95,11 +95,6 @@ const webpackConfig = (argv) => {
         ],
       }),
     ],
-    resolve: {
-      alias: {
-        '@kungfu-trader/kungfu-app': appDir,
-      },
-    },
     target: 'electron-renderer',
   });
 };

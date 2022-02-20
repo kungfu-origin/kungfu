@@ -142,7 +142,9 @@ export const useComponenets = (app: App<Element>): Promise<void> => {
       });
     })
     .then(() => {
-      useGlobalStore().setKfUIExtConfigs();
+      return useGlobalStore().setKfUIExtConfigs();
+    })
+    .then(() => {
       useGlobalStore().setKfConfigList();
       useGlobalStore().setKfExtConfigs();
     });

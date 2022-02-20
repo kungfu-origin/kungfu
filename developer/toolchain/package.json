@@ -19,6 +19,10 @@
     "yarn": "^1.18.0"
   },
   "dependencies": {
+    "@babel/plugin-proposal-class-properties": "^7.16.7",
+    "@babel/plugin-proposal-object-rest-spread": "^7.17.3",
+    "@babel/preset-env": "^7.16.11",
+    "@babel/preset-typescript": "^7.16.7",
     "@electron/remote": "^2.0.0",
     "@rushstack/eslint-patch": "^1.1.0",
     "@types/node": "^17.0.0",

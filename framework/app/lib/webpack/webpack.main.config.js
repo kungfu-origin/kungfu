@@ -20,12 +20,6 @@ const webpackConfig = (argv) =>
     entry: {
       main: path.join(appDir, 'src', 'main', 'index.ts'),
     },
-
-    resolve: {
-      alias: {
-        '@kungfu-trader/kungfu-app': appDir,
-      },
-    },
     target: 'electron-main',
   });
 

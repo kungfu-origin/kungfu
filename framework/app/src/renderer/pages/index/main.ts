@@ -46,7 +46,10 @@ import {
 } from '@kungfu-trader/kungfu-js-api/utils/processUtils';
 
 import { watcher } from '@kungfu-trader/kungfu-js-api/kungfu/watcher';
-import { tradingDataSubject } from '@kungfu-trader/kungfu-js-api/kungfu/tradingData';
+import {
+  tradingDataSubject,
+  triggerStartStep,
+} from '@kungfu-trader/kungfu-js-api/kungfu/tradingData';
 import bus from '@kungfu-trader/kungfu-js-api/utils/globalBus';
 
 import VueVirtualScroller from 'vue-virtual-scroller';
@@ -151,3 +154,4 @@ if (process.env.RELOAD_AFTER_CRASHED === 'false') {
 
 window.watcher = watcher;
 window.kungfu = kf;
+triggerStartStep();
