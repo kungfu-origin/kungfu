@@ -10,7 +10,7 @@ import {
   useAllKfConfigData,
   useModalVisible,
   useTableSearchKeyword,
-} from '@renderer/assets/methods/uiUtils';
+} from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import {
   computed,
   ComputedRef,
@@ -46,7 +46,7 @@ import {
   coreForScheduleTasksOptions,
   modeForCoreScheduleTasksOptions,
   modeForScheduleTasksOptions,
-} from '@renderer/assets/configs';
+} from '@kungfu-trader/kungfu-app/src/renderer/assets/configs';
 import { ipcRenderer } from 'electron';
 
 interface ScheduleTaskFormItem {

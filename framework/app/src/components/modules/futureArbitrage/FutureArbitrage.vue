@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { computed, nextTick, ref } from 'vue';
-import KfDashboard from '@renderer/components/public/KfDashboard.vue';
-import KfDashboardItem from '@renderer/components/public/KfDashboardItem.vue';
-import KfConfigSettingsForm from '@renderer/components/public/KfConfigSettingsForm.vue';
+import KfDashboard from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfDashboard.vue';
+import KfDashboardItem from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfDashboardItem.vue';
+import KfConfigSettingsForm from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfConfigSettingsForm.vue';
 import {
   initFormStateByConfig,
   useCurrentGlobalKfLocation,
   useProcessStatusDetailData,
-} from '@renderer/assets/methods/uiUtils';
+} from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import { getConfigSettings } from './config';
 import { RuleObject } from 'ant-design-vue/lib/form';
 import { FutureArbitrageCodeEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';

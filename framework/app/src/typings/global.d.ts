@@ -1,6 +1,6 @@
 import { Subject } from 'rxjs';
 import { StoreDefinition } from 'pinia';
-import { GlobalCategoryRegister } from '@renderer/assets/methods/uiExtraLocationUtils';
+import { GlobalCategoryRegister } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiExtraLocationUtils';
 
 declare module '@vue/runtime-core' {
   interface ComponentCustomProperties {

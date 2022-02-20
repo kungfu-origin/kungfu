@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { getCurrentInstance, onBeforeUnmount, onMounted } from 'vue';
-import KfSystemPrepareModal from '@renderer/components/public/KfSystemPrepareModal.vue';
+import KfSystemPrepareModal from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfSystemPrepareModal.vue';
 
 import zhCN from 'ant-design-vue/es/locale/zh_CN';
 import {
@@ -8,21 +8,21 @@ import {
   removeLoadingMask,
   useDealInstruments,
   useIpcListener,
-} from '@renderer/assets/methods/uiUtils';
+} from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import bus from '@kungfu-trader/kungfu-js-api/utils/globalBus';
 import {
   useDealExportHistoryTradingData,
   usePreStartAndQuitApp,
   useSubscibeInstrumentAtEntry,
-} from '@renderer/assets/methods/actionsUtils';
+} from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
 import {
   dealAppStates,
   dealAssetsByHolderUID,
 } from '@kungfu-trader/kungfu-js-api/kungfu/watcher';
 import { tradingDataSubject } from '@kungfu-trader/kungfu-js-api/kungfu/tradingData';
 import { useGlobalStore } from './store/global';
-import KfDownloadDateModal from '@renderer/components/layout/KfHistoryDateModal.vue';
-import { defaultBoardsMap } from '@renderer/assets/configs';
+import KfDownloadDateModal from '@kungfu-trader/kungfu-app/src/renderer/components/layout/KfHistoryDateModal.vue';
+import { defaultBoardsMap } from '@kungfu-trader/kungfu-app/src/renderer/assets/configs';
 import { message } from 'ant-design-vue';
 
 const app = getCurrentInstance();
@@ -78,7 +78,6 @@ onBeforeUnmount(() => {
 store.setKfConfigList();
 store.setKfExtConfigs();
 store.setSubscribedInstruments();
-store.setKfUIExtConfigs();
 
 onMounted(() => {
   removeLoadingMask();
@@ -143,9 +142,9 @@ onMounted(() => {
 </template>
 
 <style lang="less">
-@import '@renderer/assets/less/coverAnt.less';
-@import '@renderer/assets/less/base.less';
-@import '@renderer/assets/less/public.less';
+@import '@kungfu-trader/kungfu-app/src/renderer/assets/less/coverAnt.less';
+@import '@kungfu-trader/kungfu-app/src/renderer/assets/less/base.less';
+@import '@kungfu-trader/kungfu-app/src/renderer/assets/less/public.less';
 
 #app {
   width: 100%;

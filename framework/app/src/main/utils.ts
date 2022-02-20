@@ -37,7 +37,7 @@ import {
 } from '@kungfu-trader/kungfu-js-api/actions';
 import schedule from 'node-schedule';
 
-import packageJSON from '@root/package.json';
+import packageJSON from '@kungfu-trader/kungfu-app/package.json';
 declare const global: NodeJS.Global;
 
 let BeforeQuitLoading = false;

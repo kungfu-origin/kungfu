@@ -1,8 +1,8 @@
 import './setEnv';
 import { createApp } from 'vue';
-import App from '@renderer/pages/index/App.vue';
-import router from '@renderer/pages/index/router';
-import store from '@renderer/pages/index/store';
+import App from '@kungfu-trader/kungfu-app/src/renderer/pages/index/App.vue';
+import router from '@kungfu-trader/kungfu-app/src/renderer/pages/index/router';
+import store from '@kungfu-trader/kungfu-app/src/renderer/pages/index/store';
 import {
   Layout,
   Tabs,
@@ -32,8 +32,8 @@ import {
   TimePicker,
 } from 'ant-design-vue';
 
-import { beforeStartAll } from '@renderer/assets/methods/uiUtils';
-import { useGlobalStore } from '@renderer/pages/index/store/global';
+import { beforeStartAll } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
+import { useGlobalStore } from '@kungfu-trader/kungfu-app/src/renderer/pages/index/store/global';
 import { delayMilliSeconds } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import {
   Pm2ProcessStatusDetailData,
@@ -53,7 +53,7 @@ import VueVirtualScroller from 'vue-virtual-scroller';
 import 'vue-virtual-scroller/dist/vue-virtual-scroller.css';
 import { useComponenets } from './useComponents';
 import { kf } from '@kungfu-trader/kungfu-js-api/kungfu';
-import { GlobalCategoryRegister } from '@renderer/assets/methods/uiExtraLocationUtils';
+import { GlobalCategoryRegister } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiExtraLocationUtils';
 
 const app = createApp(App);
 

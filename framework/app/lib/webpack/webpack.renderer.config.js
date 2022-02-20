@@ -97,8 +97,7 @@ const webpackConfig = (argv) => {
     ],
     resolve: {
       alias: {
-        '@root': appDir,
-        '@renderer': path.resolve(appDir, 'src', 'renderer'),
+        '@kungfu-trader/kungfu-app': appDir,
       },
     },
     target: 'electron-renderer',

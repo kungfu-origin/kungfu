@@ -19,7 +19,7 @@ export default defineComponent({
 
   setup() {
     return {
-      logo: require('@renderer/assets/svg/LOGO.svg'),
+      logo: require('@kungfu-trader/kungfu-app/src/renderer/assets/svg/LOGO.svg'),
     };
   },
 });

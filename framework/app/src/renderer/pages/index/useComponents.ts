@@ -1,5 +1,5 @@
-// import { getUIComponents } from '@renderer/assets/methods/uiUtils';
-import { getUIComponents } from '@renderer/assets/methods/uiUtils';
+// import { getUIComponents } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
+import { getUIComponents } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import { App, defineAsyncComponent } from 'vue';
 import { useGlobalStore } from './store/global';
 
@@ -7,70 +7,94 @@ export const useComponenets = (app: App<Element>): Promise<void> => {
   app.component(
     '持仓',
     defineAsyncComponent(
-      () => import('@root/src/components/modules/pos/Pos.vue'),
+      () =>
+        import('@kungfu-trader/kungfu-app/src/components/modules/pos/Pos.vue'),
     ),
   );
 
   app.component(
     '持仓汇总',
     defineAsyncComponent(
-      () => import('@root/src/components/modules/posGlobal/PosGlobal.vue'),
+      () =>
+        import(
+          '@kungfu-trader/kungfu-app/src/components/modules/posGlobal/PosGlobal.vue'
+        ),
     ),
   );
 
   app.component(
     '委托记录',
     defineAsyncComponent(
-      () => import('@root/src/components/modules/order/Order.vue'),
+      () =>
+        import(
+          '@kungfu-trader/kungfu-app/src/components/modules/order/Order.vue'
+        ),
     ),
   );
 
   app.component(
     '成交记录',
     defineAsyncComponent(
-      () => import('@root/src/components/modules/trade/Trade.vue'),
+      () =>
+        import(
+          '@kungfu-trader/kungfu-app/src/components/modules/trade/Trade.vue'
+        ),
     ),
   );
 
   app.component(
     '交易账户',
     defineAsyncComponent(
-      () => import('@root/src/components/modules/td/Td.vue'),
+      () =>
+        import('@kungfu-trader/kungfu-app/src/components/modules/td/Td.vue'),
     ),
   );
 
   app.component(
     '行情源',
     defineAsyncComponent(
-      () => import('@root/src/components/modules/md/Md.vue'),
+      () =>
+        import('@kungfu-trader/kungfu-app/src/components/modules/md/Md.vue'),
     ),
   );
 
   app.component(
     '策略进程',
     defineAsyncComponent(
-      () => import('@root/src/components/modules/strategy/Strategy.vue'),
+      () =>
+        import(
+          '@kungfu-trader/kungfu-app/src/components/modules/strategy/Strategy.vue'
+        ),
     ),
   );
 
   app.component(
     '交易任务',
     defineAsyncComponent(
-      () => import('@root/src/components/modules/tradingTask/TradingTask.vue'),
+      () =>
+        import(
+          '@kungfu-trader/kungfu-app/src/components/modules/tradingTask/TradingTask.vue'
+        ),
     ),
   );
 
   app.component(
     '行情订阅',
     defineAsyncComponent(
-      () => import('@root/src/components/modules/marketdata/MarketData.vue'),
+      () =>
+        import(
+          '@kungfu-trader/kungfu-app/src/components/modules/marketdata/MarketData.vue'
+        ),
     ),
   );
 
   app.component(
     '深度行情',
     defineAsyncComponent(
-      () => import('@root/src/components/modules/orderBook/OrderBook.vue'),
+      () =>
+        import(
+          '@kungfu-trader/kungfu-app/src/components/modules/orderBook/OrderBook.vue'
+        ),
     ),
   );
 
@@ -78,7 +102,9 @@ export const useComponenets = (app: App<Element>): Promise<void> => {
     '下单面板',
     defineAsyncComponent(
       () =>
-        import('@root/src/components/modules/makeOrder/MakeOrderDashboard.vue'),
+        import(
+          '@kungfu-trader/kungfu-app/src/components/modules/makeOrder/MakeOrderDashboard.vue'
+        ),
     ),
   );
 
@@ -87,7 +113,7 @@ export const useComponenets = (app: App<Element>): Promise<void> => {
     defineAsyncComponent(
       () =>
         import(
-          '@root/src/components/modules/futureArbitrage/FutureArbitrage.vue'
+          '@kungfu-trader/kungfu-app/src/components/modules/futureArbitrage/FutureArbitrage.vue'
         ),
     ),
   );
@@ -117,6 +143,8 @@ export const useComponenets = (app: App<Element>): Promise<void> => {
     })
     .then(() => {
       useGlobalStore().setKfUIExtConfigs();
+      useGlobalStore().setKfConfigList();
+      useGlobalStore().setKfExtConfigs();
     });
 
   return;

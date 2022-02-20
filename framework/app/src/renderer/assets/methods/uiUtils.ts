@@ -51,7 +51,7 @@ import {
   ProcessStatusTypes,
   KfCategoryTypes,
 } from '@kungfu-trader/kungfu-js-api/typings/enums';
-import workers from '@renderer/assets/workers';
+import workers from '@kungfu-trader/kungfu-app/src/renderer/assets/workers';
 import { throttleTime } from 'rxjs';
 import dayjs from 'dayjs';
 import path from 'path';

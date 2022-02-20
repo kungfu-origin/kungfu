@@ -3,7 +3,7 @@ import { toRaw } from 'vue';
 import {
   KfLayoutDirection,
   KfLayoutTargetDirectionClassName,
-} from '@root/src/typings/enums';
+} from '@kungfu-trader/kungfu-app/src/typings/enums';
 import {
   getIdByKfLocation,
   getKfExtensionConfig,

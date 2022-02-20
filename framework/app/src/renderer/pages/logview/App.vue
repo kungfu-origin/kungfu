@@ -9,9 +9,9 @@ import {
 import {
   removeLoadingMask,
   setHtmlTitle,
-} from '@renderer/assets/methods/uiUtils';
-import KfDashboard from '@renderer/components/public/KfDashboard.vue';
-import KfDashboardItem from '@renderer/components/public/KfDashboardItem.vue';
+} from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
+import KfDashboard from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfDashboard.vue';
+import KfDashboardItem from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfDashboardItem.vue';
 import { ensureFileSync, outputFile } from 'fs-extra';
 import { message } from 'ant-design-vue';
 import { shell } from '@electron/remote';
@@ -21,7 +21,7 @@ import {
   getLogProcessId,
   useLogInit,
   useLogSearch,
-} from '@renderer/assets/methods/logUtils';
+} from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/logUtils';
 
 const ProcessId = getLogProcessId();
 setHtmlTitle(`功夫交易系统 - ${ProcessId}.log`);
@@ -207,10 +207,10 @@ function resetLog() {
 </template>
 
 <style lang="less">
-@import '@renderer/assets/less/base.less';
-@import '@renderer/assets/less/public.less';
-@import '@renderer/assets/less/coverAnt.less';
-@import '@renderer/assets/less/variables.less';
+@import '@kungfu-trader/kungfu-app/src/renderer/assets/less/base.less';
+@import '@kungfu-trader/kungfu-app/src/renderer/assets/less/public.less';
+@import '@kungfu-trader/kungfu-app/src/renderer/assets/less/coverAnt.less';
+@import '@kungfu-trader/kungfu-app/src/renderer/assets/less/variables.less';
 
 #app {
   width: 100%;

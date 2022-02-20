@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import KfDashboard from '@renderer/components/public/KfDashboard.vue';
-import KfDashboardItem from '@renderer/components/public/KfDashboardItem.vue';
-import KfBlinkNum from '@renderer/components/public/KfBlinkNum.vue';
+import KfDashboard from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfDashboard.vue';
+import KfDashboardItem from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfDashboardItem.vue';
+import KfBlinkNum from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfBlinkNum.vue';
 
 import {
   useDashboardBodySize,
@@ -9,11 +9,11 @@ import {
   useProcessStatusDetailData,
   useQuote,
   useTriggerMakeOrder,
-} from '@renderer/assets/methods/uiUtils';
+} from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import { computed, getCurrentInstance } from 'vue';
 import { getColumns } from './config';
 import { ExchangeIds } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
-import { useInstruments } from '@renderer/assets/methods/actionsUtils';
+import { useInstruments } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
 import { StarFilled, PlusOutlined } from '@ant-design/icons-vue';
 import { message } from 'ant-design-vue';
 import {

@@ -6,11 +6,11 @@ import {
   DeleteOutlined,
 } from '@ant-design/icons-vue';
 
-import KfDashboard from '@renderer/components/public/KfDashboard.vue';
-import KfDashboardItem from '@renderer/components/public/KfDashboardItem.vue';
-import KfProcessStatus from '@renderer/components/public/KfProcessStatus.vue';
-import KfSetExtensionModal from '@renderer/components/public/KfSetExtensionModal.vue';
-import KfSetByConfigModal from '@renderer/components/public/KfSetByConfigModal.vue';
+import KfDashboard from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfDashboard.vue';
+import KfDashboardItem from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfDashboardItem.vue';
+import KfProcessStatus from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfProcessStatus.vue';
+import KfSetExtensionModal from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfSetExtensionModal.vue';
+import KfSetByConfigModal from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfSetByConfigModal.vue';
 
 import { columns } from './config';
 import {
@@ -21,7 +21,7 @@ import {
   useDashboardBodySize,
   useTableSearchKeyword,
   useAllKfConfigData,
-} from '@renderer/assets/methods/uiUtils';
+} from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import {
   getIdByKfLocation,
   getIfProcessRunning,
@@ -31,7 +31,7 @@ import {
   handleSwitchProcessStatus,
   useAddUpdateRemoveKfConfig,
   useSwitchAllConfig,
-} from '@renderer/assets/methods/actionsUtils';
+} from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
 import { message } from 'ant-design-vue';
 
 interface MdProps {}

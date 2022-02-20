@@ -2,7 +2,7 @@
 import { ClusterOutlined, FileTextOutlined } from '@ant-design/icons-vue';
 import { notification } from 'ant-design-vue';
 
-import KfProcessStatus from '@renderer/components/public/KfProcessStatus.vue';
+import KfProcessStatus from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfProcessStatus.vue';
 
 import { computed, ref, watch } from 'vue';
 import { SystemProcessName } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
@@ -12,14 +12,14 @@ import {
   useAllKfConfigData,
   useProcessStatusDetailData,
   handleOpenLogview,
-} from '@renderer/assets/methods/uiUtils';
+} from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import {
   getKfCategoryData,
   getIfProcessRunning,
   getProcessIdByKfLocation,
   getPropertyFromProcessStatusDetailDataByKfLocation,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
-import { handleSwitchProcessStatus } from '@renderer/assets/methods/actionsUtils';
+import { handleSwitchProcessStatus } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
 import { KfCategoryTypes } from '@kungfu-trader/kungfu-js-api/typings/enums';
 
 const processControllerBoardVisible = ref<boolean>(false);
@@ -212,7 +212,7 @@ function handleOpenProcessControllerBoard(): void {
 </template>
 
 <style lang="less">
-@import '@renderer/assets/less/variables.less';
+@import '@kungfu-trader/kungfu-app/src/renderer/assets/less/variables.less';
 
 .kf-process-status-controller__warp {
   float: right;

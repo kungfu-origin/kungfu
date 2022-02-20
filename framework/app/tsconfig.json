@@ -20,9 +20,7 @@
         "../api/src/*",
         "node_modules/@kungfu-trader/kungfu-js-api/src/*"
       ],
-      "@renderer/*": ["src/renderer/*"],
-      "@main/*": ["src/main/*"],
-      "@root/*": ["./*"]
+      "@kungfu-trader/kungfu-app/*": ["./*"]
     },
     "lib": ["esnext", "dom", "dom.iterable", "scripthost"]
   },

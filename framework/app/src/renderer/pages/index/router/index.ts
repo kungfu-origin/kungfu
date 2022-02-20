@@ -1,5 +1,5 @@
 import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router';
-import Index from '@renderer/pages/index/views/Index.vue';
+import Index from '@kungfu-trader/kungfu-app/src/renderer/pages/index/views/Index.vue';
 
 const routes: Array<RouteRecordRaw> = [
   {

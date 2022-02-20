@@ -23,8 +23,7 @@ const webpackConfig = (argv) =>
 
     resolve: {
       alias: {
-        '@root': appDir,
-        '@main': path.resolve(appDir, 'src', 'main'),
+        '@kungfu-trader/kungfu-app': appDir,
       },
     },
     target: 'electron-main',

@@ -7,7 +7,7 @@ import {
 import {
   useQuote,
   useTriggerMakeOrder,
-} from '@renderer/assets/methods/uiUtils';
+} from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import {
   computed,
   getCurrentInstance,
@@ -15,7 +15,7 @@ import {
   onMounted,
   ref,
 } from 'vue';
-import KfBlinkNum from '@renderer/components/public/KfBlinkNum.vue';
+import KfBlinkNum from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfBlinkNum.vue';
 import { SideEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';
 
 interface OrderBookProps {}

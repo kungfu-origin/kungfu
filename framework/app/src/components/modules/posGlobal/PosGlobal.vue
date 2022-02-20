@@ -4,7 +4,7 @@ import {
   useDashboardBodySize,
   useTableSearchKeyword,
   useTriggerMakeOrder,
-} from '@renderer/assets/methods/uiUtils';
+} from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import {
   getCurrentInstance,
   onBeforeUnmount,
@@ -12,9 +12,9 @@ import {
   ref,
   toRaw,
 } from 'vue';
-import KfDashboard from '@renderer/components/public/KfDashboard.vue';
-import KfDashboardItem from '@renderer/components/public/KfDashboardItem.vue';
-import KfBlinkNum from '@renderer/components/public/KfBlinkNum.vue';
+import KfDashboard from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfDashboard.vue';
+import KfDashboardItem from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfDashboardItem.vue';
+import KfBlinkNum from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfBlinkNum.vue';
 import { categoryRegisterConfig, columns } from './config';
 import {
   dealAssetPrice,
@@ -29,7 +29,7 @@ import {
 } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import { ExchangeIds } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
 import { hashInstrumentUKey } from '@kungfu-trader/kungfu-js-api/kungfu';
-import { useInstruments } from '@renderer/assets/methods/actionsUtils';
+import { useInstruments } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
 
 interface PositionGlobalProps {}
 defineProps<PositionGlobalProps>();

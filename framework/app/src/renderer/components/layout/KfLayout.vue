@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { SlidersOutlined, SettingOutlined } from '@ant-design/icons-vue';
 import bus from '@kungfu-trader/kungfu-js-api/utils/globalBus';
-import { useExtConfigsRelated } from '@renderer/assets/methods/uiUtils';
-import KfProcessStatusController from '@renderer/components/layout/KfProcessStatusController.vue';
+import { useExtConfigsRelated } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
+import KfProcessStatusController from '@kungfu-trader/kungfu-app/src/renderer/components/layout/KfProcessStatusController.vue';
 import { computed, onUnmounted, ref } from 'vue';
 import KfGlobalSettingModal from '../public/KfGlobalSettingModal.vue';
-const logo = require('@renderer/assets/svg/LOGO.svg');
+const logo = require('@kungfu-trader/kungfu-app/src/renderer/assets/svg/LOGO.svg');
 
 interface LayoutProps {}
 defineProps<LayoutProps>();
@@ -79,7 +79,7 @@ onUnmounted(() => {
 </template>
 
 <style lang="less">
-@import '@renderer/assets/less/variables.less';
+@import '@kungfu-trader/kungfu-app/src/renderer/assets/less/variables.less';
 
 .ant-layout {
   height: 100%;
