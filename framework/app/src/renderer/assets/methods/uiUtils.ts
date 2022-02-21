@@ -50,6 +50,7 @@ import {
   BrokerStateStatusTypes,
   ProcessStatusTypes,
   KfCategoryTypes,
+  KfUIExtLocatorTypes,
 } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import { throttleTime } from 'rxjs';
 import dayjs from 'dayjs';
@@ -61,15 +62,25 @@ export const getUIComponents = (
   kfUiExtConfigs: KungfuApi.KfUIExtConfigs,
 ): {
   key: string;
-  component: Component;
+  name: string;
+  position: KfUIExtLocatorTypes;
+  cData: Record<string, Component>;
 }[] => {
   return Object.keys(kfUiExtConfigs).map((key) => {
-    const cc = global.require(
-      path.join(kfUiExtConfigs[key].extPath, 'index.js'),
-    ).default as Component;
+    const config = kfUiExtConfigs[key];
+    const { extPath, position, components, name } = config;
     return {
       key,
-      component: cc,
+      name,
+      position,
+      cData: Object.keys(components || {}).reduce((cData, cName) => {
+        return {
+          ...cData,
+          [`${key}-${cName}`]: global.require(
+            path.join(extPath, components[cName]),
+          ).default as Component,
+        };
+      }, {} as Record<string, Component>),
     };
   });
 };

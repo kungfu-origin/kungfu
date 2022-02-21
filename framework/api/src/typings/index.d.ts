@@ -144,6 +144,14 @@ declare namespace KungfuApi {
     extPath: string;
     ui_config?: {
       position: KfUIExtLocatorTypes;
+      components?:
+        | {
+            index: string;
+          }
+        | {
+            entry: string;
+            page: string;
+          };
     };
     config?: {
       [key in KfCategoryTypes]?: {
@@ -172,6 +180,14 @@ declare namespace KungfuApi {
       name: string;
       extPath: string;
       position: KfUIExtLocatorTypes;
+      components:
+        | {
+            index: string;
+          }
+        | {
+            entry: string;
+            page: string;
+          };
     }
   >;
 

@@ -2,7 +2,7 @@
 import { SlidersOutlined, SettingOutlined } from '@ant-design/icons-vue';
 import { useExtConfigsRelated } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import KfProcessStatusController from '@kungfu-trader/kungfu-app/src/renderer/components/layout/KfProcessStatusController.vue';
-import { computed, onUnmounted, ref } from 'vue';
+import { computed, getCurrentInstance, onUnmounted, ref } from 'vue';
 import globalBus from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/globalBus';
 import KfGlobalSettingModal from '../public/KfGlobalSettingModal.vue';
 const logo = require('@kungfu-trader/kungfu-app/src/renderer/assets/svg/LOGO.svg');
@@ -10,7 +10,9 @@ const logo = require('@kungfu-trader/kungfu-app/src/renderer/assets/svg/LOGO.svg
 interface LayoutProps {}
 defineProps<LayoutProps>();
 
+const app = getCurrentInstance();
 const globalSettingModalVisible = ref<boolean>(false);
+const menuSelectedKeys = ref<string[]>(['main']);
 
 const busSubscription = globalBus.subscribe((data: KfBusEvent) => {
   if (data.tag === 'main') {
@@ -28,9 +30,26 @@ const sidebarFooterComponentKeys = computed(() => {
   );
 });
 
+const sidebarComponentConfigs = computed(() => {
+  return Object.keys(uiExtConfigs.data)
+    .filter((key) => uiExtConfigs.data[key].position === 'sidebar')
+    .map((key) => {
+      return {
+        ...uiExtConfigs.data[key],
+        key,
+      };
+    });
+});
+
 onUnmounted(() => {
   busSubscription.unsubscribe();
 });
+
+function handleToPage(pathname: string) {
+  if (app.proxy) {
+    app.proxy.$router.push(pathname);
+  }
+}
 </script>
 <template>
   <a-layout>
@@ -39,12 +58,26 @@ onUnmounted(() => {
         <div class="kf-header-logo">
           <img :src="logo" />
         </div>
-        <a-menu mode="vertical" style="width: 64px" :selectedKeys="['main']">
-          <a-menu-item key="main">
+        <a-menu
+          mode="vertical"
+          style="width: 64px"
+          v-model:selectedKeys="menuSelectedKeys"
+        >
+          <a-menu-item key="main" @click="handleToPage('/')">
             <template #icon>
               <sliders-outlined style="font-size: 24px" />
             </template>
             <span>主面板</span>
+          </a-menu-item>
+          <a-menu-item
+            v-for="config in sidebarComponentConfigs"
+            :key="config.key"
+            @click="handleToPage(`/${config.key}`)"
+          >
+            <template #icon>
+              <component :is="config.key"></component>
+            </template>
+            <span>{{ config.name }}</span>
           </a-menu-item>
         </a-menu>
         <div class="kf-sidebar-footer__warp">

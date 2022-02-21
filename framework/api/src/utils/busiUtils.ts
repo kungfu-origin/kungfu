@@ -450,7 +450,7 @@ const getKfExtensionConfigByCategory = (
 
 const getKfUIExtensionConfigByExtKey = (
   extConfigs: KungfuApi.KfExtOriginConfig[],
-) => {
+): KungfuApi.KfUIExtConfigs => {
   return extConfigs
     .filter((item) => !!item.ui_config)
     .reduce((configByExtraKey, extConfig) => {
@@ -458,7 +458,7 @@ const getKfUIExtensionConfigByExtKey = (
       const extName = extConfig.name;
       const extPath = extConfig.extPath;
       const uiConfig = extConfig['ui_config'];
-      const { position } = uiConfig;
+      const { position, components } = uiConfig;
 
       if (!position) {
         return configByExtraKey;
@@ -468,6 +468,9 @@ const getKfUIExtensionConfigByExtKey = (
         name: extName,
         extPath,
         position,
+        components: components || {
+          index: 'index.js',
+        },
       };
       return configByExtraKey;
     }, {} as KungfuApi.KfUIExtConfigs);

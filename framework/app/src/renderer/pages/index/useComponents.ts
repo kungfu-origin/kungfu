@@ -1,9 +1,12 @@
-// import { getUIComponents } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import { getUIComponents } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import { App, defineAsyncComponent } from 'vue';
+import { Router } from 'vue-router';
 import { useGlobalStore } from './store/global';
 
-export const useComponenets = (app: App<Element>): Promise<void> => {
+export const useComponenets = (
+  app: App<Element>,
+  router: Router,
+): Promise<void> => {
   app.component(
     '持仓',
     defineAsyncComponent(
@@ -137,8 +140,20 @@ export const useComponenets = (app: App<Element>): Promise<void> => {
     .setKfUIExtConfigs()
     .then((configs) => getUIComponents(configs))
     .then((components) => {
-      components.forEach((item) => {
-        app.component(item.key, item.component);
+      components.forEach(({ cData, position, key }) => {
+        console.log(cData, position, key);
+        switch (position) {
+          case 'sidebar':
+            app.component(key, cData[`${key}-entry`]);
+            router.addRoute({
+              path: `/${key}`,
+              name: key,
+              component: cData[`${key}-page`],
+            });
+            break;
+          default:
+            app.component(key, cData[`${key}-index`]);
+        }
       });
     })
     .then(() => {
