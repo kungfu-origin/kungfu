@@ -1273,3 +1273,13 @@ export const dealKfConfigValueByType = (
       return value;
   }
 };
+
+export const booleanProcessEnv = (val: string): boolean => {
+  if (val === 'true') {
+    return true;
+  } else if (val === 'false') {
+    return false;
+  } else {
+    return !!val;
+  }
+};
