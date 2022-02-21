@@ -1,20 +1,30 @@
 import { Subject } from 'rxjs';
 import { StoreDefinition } from 'pinia';
-import { GlobalCategoryRegister } from '@renderer/assets/methods/uiExtraLocationUtils';
+import { GlobalCategoryRegister } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiExtraLocationUtils';
 
 declare module '@vue/runtime-core' {
   interface ComponentCustomProperties {
     $registedKfUIComponents: string[];
-    $bus: Subject<KfBusEvent>;
+    $globalBus: Subject<KfBusEvent>;
     $tradingDataSubject: Subject<Watcher>;
     $useGlobalStore: StoreDefinition;
     $globalCategoryRegister: GlobalCategoryRegister;
   }
 }
+
+declare module 'worker-loader!*' {
+  class WebpackWorker extends Worker {
+    constructor();
+  }
+
+  export default WebpackWorker;
+}
+
 declare global {
   interface Window {
     watcher: Watcher | null;
     kungfu: Kungfu;
+    workers: Record<string, WebpackWorker>;
   }
 
   namespace NodeJS {

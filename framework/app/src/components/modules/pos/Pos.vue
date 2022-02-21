@@ -13,10 +13,10 @@ import {
   useDownloadHistoryTradingData,
   useTableSearchKeyword,
   useTriggerMakeOrder,
-} from '@renderer/assets/methods/uiUtils';
-import KfDashboard from '@renderer/components/public/KfDashboard.vue';
-import KfDashboardItem from '@renderer/components/public/KfDashboardItem.vue';
-import KfTradingDataTable from '@renderer/components/public/KfTradingDataTable.vue';
+} from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
+import KfDashboard from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfDashboard.vue';
+import KfDashboardItem from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfDashboardItem.vue';
+import KfTradingDataTable from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfTradingDataTable.vue';
 import { DownloadOutlined } from '@ant-design/icons-vue';
 
 import {
@@ -29,7 +29,7 @@ import {
   watch,
 } from 'vue';
 import { getColumns } from './config';
-import KfBlinkNum from '@renderer/components/public/KfBlinkNum.vue';
+import KfBlinkNum from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfBlinkNum.vue';
 import {
   dealPosition,
   hashInstrumentUKey,
@@ -38,9 +38,9 @@ import {
   OffsetEnum,
   SideEnum,
 } from '@kungfu-trader/kungfu-js-api/typings/enums';
-import { useInstruments } from '@renderer/assets/methods/actionsUtils';
+import { useInstruments } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
 import { ExchangeIds } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
-import { useExtraCategory } from '@renderer/assets/methods/uiExtraLocationUtils';
+import { useExtraCategory } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiExtraLocationUtils';
 
 const app = getCurrentInstance();
 const pos = ref<KungfuApi.Position[]>([]);

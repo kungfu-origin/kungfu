@@ -12,7 +12,7 @@ import {
   numberEnumSelectType,
   stringEnumSelectType,
   useAllKfConfigData,
-} from '@renderer/assets/methods/uiUtils';
+} from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import {
   getCurrentInstance,
   nextTick,
@@ -31,14 +31,14 @@ import {
   transformSearchInstrumentResultToInstrument,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { RuleObject } from 'ant-design-vue/lib/form';
-import { useInstruments } from '@renderer/assets/methods/actionsUtils';
+import { useInstruments } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
 import dayjs, { Dayjs } from 'dayjs';
 
 const props = withDefaults(
   defineProps<{
     formState: Record<string, KungfuApi.KfConfigValue>;
     configSettings: KungfuApi.KfConfigItem[];
-    changeType: KungfuApi.ModalChangeType;
+    changeType?: KungfuApi.ModalChangeType;
     primaryKeyAvoidRepeatCompareExtra?: string;
     primaryKeyAvoidRepeatCompareTarget?: string[];
     layout?: 'horizontal' | 'vertical' | 'inline';

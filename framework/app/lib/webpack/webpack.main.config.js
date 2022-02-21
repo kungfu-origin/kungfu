@@ -20,13 +20,6 @@ const webpackConfig = (argv) =>
     entry: {
       main: path.join(appDir, 'src', 'main', 'index.ts'),
     },
-
-    resolve: {
-      alias: {
-        '@root': appDir,
-        '@main': path.resolve(appDir, 'src', 'main'),
-      },
-    },
     target: 'electron-main',
   });
 

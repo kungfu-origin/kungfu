@@ -8,7 +8,7 @@ import {
   useExtConfigsRelated,
   useModalVisible,
   useTdGroups,
-} from '@renderer/assets/methods/uiUtils';
+} from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import { AntTreeNodeDropEvent, DataNode } from 'ant-design-vue/lib/tree';
 import { computed, ComputedRef, getCurrentInstance, toRaw, toRefs } from 'vue';
 

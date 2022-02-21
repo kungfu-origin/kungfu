@@ -8,9 +8,9 @@ import {
   ref,
   watch,
 } from 'vue';
-import KfDashboard from '@renderer/components/public/KfDashboard.vue';
-import KfDashboardItem from '@renderer/components/public/KfDashboardItem.vue';
-import KfConfigSettingsForm from '@renderer/components/public/KfConfigSettingsForm.vue';
+import KfDashboard from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfDashboard.vue';
+import KfDashboardItem from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfDashboardItem.vue';
+import KfConfigSettingsForm from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfConfigSettingsForm.vue';
 import {
   buildInstrumentSelectOptionValue,
   initFormStateByConfig,
@@ -18,12 +18,12 @@ import {
   useExtConfigsRelated,
   useProcessStatusDetailData,
   useTriggerMakeOrder,
-} from '@renderer/assets/methods/uiUtils';
+} from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import { getConfigSettings } from './config';
 import { message } from 'ant-design-vue';
 import { makeOrderByOrderInput } from '@kungfu-trader/kungfu-js-api/kungfu';
 import { InstrumentTypeEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';
-import { useInstruments } from '@renderer/assets/methods/actionsUtils';
+import { useInstruments } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
 import {
   getProcessIdByKfLocation,
   transformSearchInstrumentResultToInstrument,
@@ -67,7 +67,7 @@ const configSettings = computed(() => {
 
 onMounted(() => {
   if (app?.proxy) {
-    const subscription = app.proxy.$bus.subscribe((data: KfBusEvent) => {
+    const subscription = app.proxy.$globalBus.subscribe((data: KfBusEvent) => {
       if (data.tag === 'makeOrder') {
         const { offset, side, volume, price, instrumentType, accountId } = (
           data as TriggerMakeOrder

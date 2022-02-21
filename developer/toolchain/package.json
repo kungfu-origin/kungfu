@@ -4,7 +4,7 @@
     "name": "kungfu-trader",
     "email": "info@kungfu.link"
   },
-  "version": "2.4.0-alpha.11",
+  "version": "2.4.0-alpha.12",
   "description": "Toolchain for Kungfu Development (babel/cmake-js/node-gyp/webpack/yarn/etc).",
   "license": "Apache-2.0",
   "main": "package.json",
@@ -19,6 +19,10 @@
     "yarn": "^1.18.0"
   },
   "dependencies": {
+    "@babel/plugin-proposal-class-properties": "^7.16.7",
+    "@babel/plugin-proposal-object-rest-spread": "^7.17.3",
+    "@babel/preset-env": "^7.16.11",
+    "@babel/preset-typescript": "^7.16.7",
     "@electron/remote": "^2.0.0",
     "@rushstack/eslint-patch": "^1.1.0",
     "@types/node": "^17.0.0",
@@ -59,7 +63,6 @@
     "postcss-loader": "^6.2.0",
     "prettier": "^2.5.0",
     "rimraf": "^3.0.0",
-    "rxjs": "^7.5.0",
     "semver": "^7.3.5",
     "style-loader": "^3.3.1",
     "tail": "^2.2.4",
@@ -70,7 +73,7 @@
     "vue-loader": "^17.0.0",
     "vue-router": "^4.0.0",
     "vue-virtual-scroller": "^2.0.0-0",
-    "webpack": "^5.67.0",
+    "webpack": "^5.69.1",
     "webpack-cli": "^4.9.2",
     "webpack-dev-server": "^4.7.0",
     "webpack-merge": "^5.8.0",

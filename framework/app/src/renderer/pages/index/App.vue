@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { getCurrentInstance, onBeforeUnmount, onMounted } from 'vue';
-import KfSystemPrepareModal from '@renderer/components/public/KfSystemPrepareModal.vue';
+import KfSystemPrepareModal from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfSystemPrepareModal.vue';
 
 import zhCN from 'ant-design-vue/es/locale/zh_CN';
 import {
@@ -8,22 +8,22 @@ import {
   removeLoadingMask,
   useDealInstruments,
   useIpcListener,
-} from '@renderer/assets/methods/uiUtils';
-import bus from '@kungfu-trader/kungfu-js-api/utils/globalBus';
+} from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import {
   useDealExportHistoryTradingData,
   usePreStartAndQuitApp,
   useSubscibeInstrumentAtEntry,
-} from '@renderer/assets/methods/actionsUtils';
+} from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
 import {
   dealAppStates,
   dealAssetsByHolderUID,
 } from '@kungfu-trader/kungfu-js-api/kungfu/watcher';
-import { tradingDataSubject } from '@kungfu-trader/kungfu-js-api/kungfu/tradingData';
 import { useGlobalStore } from './store/global';
-import KfDownloadDateModal from '@renderer/components/layout/KfHistoryDateModal.vue';
-import { defaultBoardsMap } from '@renderer/assets/configs';
+import KfDownloadDateModal from '@kungfu-trader/kungfu-app/src/renderer/components/layout/KfHistoryDateModal.vue';
+import { defaultBoardsMap } from '@kungfu-trader/kungfu-app/src/renderer/assets/configs';
 import { message } from 'ant-design-vue';
+import globalBus from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/globalBus';
+import { tradingDataSubject } from '@kungfu-trader/kungfu-js-api/kungfu/tradingData';
 
 const app = getCurrentInstance();
 const store = useGlobalStore();
@@ -42,7 +42,7 @@ const { exportDateModalVisible, exportDataLoading, handleConfirmExportDate } =
 
 useIpcListener();
 
-const busSubscription = bus.subscribe((data: KfBusEvent) => {
+const busSubscription = globalBus.subscribe((data: KfBusEvent) => {
   if (data.tag === 'main') {
     switch (data.name) {
       case 'clear-journal':
@@ -53,7 +53,7 @@ const busSubscription = bus.subscribe((data: KfBusEvent) => {
         message.success('操作成功');
         break;
       case 'export-all-trading-data':
-        bus.next({
+        globalBus.next({
           tag: 'export',
           tradingDataType: 'all',
         } as ExportTradingDataEvent);
@@ -78,14 +78,13 @@ onBeforeUnmount(() => {
 store.setKfConfigList();
 store.setKfExtConfigs();
 store.setSubscribedInstruments();
-store.setKfUIExtConfigs();
 
 onMounted(() => {
   removeLoadingMask();
 
   window.addEventListener('resize', () => {
     app?.proxy &&
-      app?.proxy.$bus.next({
+      app?.proxy.$globalBus.next({
         tag: 'resize',
       } as ResizeEvent);
   });
@@ -143,9 +142,9 @@ onMounted(() => {
 </template>
 
 <style lang="less">
-@import '@renderer/assets/less/coverAnt.less';
-@import '@renderer/assets/less/base.less';
-@import '@renderer/assets/less/public.less';
+@import '@kungfu-trader/kungfu-app/src/renderer/assets/less/coverAnt.less';
+@import '@kungfu-trader/kungfu-app/src/renderer/assets/less/base.less';
+@import '@kungfu-trader/kungfu-app/src/renderer/assets/less/public.less';
 
 #app {
   width: 100%;

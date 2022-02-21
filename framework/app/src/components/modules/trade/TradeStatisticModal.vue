@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useModalVisible } from '@renderer/assets/methods/uiUtils';
+import { useModalVisible } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import { computed } from 'vue';
 import { Stats } from 'fast-stats';
 import {

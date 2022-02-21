@@ -16,7 +16,7 @@
 import { defineComponent, PropType, reactive, toRefs } from 'vue';
 import { mapActions, mapState } from 'pinia';
 
-import { useGlobalStore } from '@renderer/pages/index/store/global';
+import { useGlobalStore } from '@kungfu-trader/kungfu-app/src/renderer/pages/index/store/global';
 
 interface KfDragColData {
   upRow$: HTMLElement | null;
@@ -40,7 +40,16 @@ export default defineComponent({
   },
 
   setup() {
-    const colData = reactive<KfDragColData>({
+    const colData = reactive<{
+      upRow$: HTMLElement | null;
+      upBoardId: string;
+      upRowHeight: number;
+      bottomRow$: HTMLElement | null;
+      bottomBoardId: string;
+      bottomRowHeight: number;
+      paHeight: number;
+      preY: number;
+    }>({
       upRow$: null,
       upBoardId: '',
       upRowHeight: 0,
@@ -150,7 +159,7 @@ export default defineComponent({
           : 0,
       );
 
-      this.$bus.next({
+      this.$globalBus.next({
         tag: 'resize',
       } as ResizeEvent);
 

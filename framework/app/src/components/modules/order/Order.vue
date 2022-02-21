@@ -17,10 +17,10 @@ import {
   useDownloadHistoryTradingData,
   useProcessStatusDetailData,
   useTableSearchKeyword,
-} from '@renderer/assets/methods/uiUtils';
-import KfDashboard from '@renderer/components/public/KfDashboard.vue';
-import KfDashboardItem from '@renderer/components/public/KfDashboardItem.vue';
-import KfTradingDataTable from '@renderer/components/public/KfTradingDataTable.vue';
+} from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
+import KfDashboard from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfDashboard.vue';
+import KfDashboardItem from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfDashboardItem.vue';
+import KfTradingDataTable from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfTradingDataTable.vue';
 import {
   DownloadOutlined,
   LoadingOutlined,
@@ -54,8 +54,8 @@ import {
   OrderStatusEnum,
 } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import { message, Modal } from 'ant-design-vue';
-import { showTradingDataDetail } from '@renderer/assets/methods/actionsUtils';
-import { useExtraCategory } from '@renderer/assets/methods/uiExtraLocationUtils';
+import { showTradingDataDetail } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
+import { useExtraCategory } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiExtraLocationUtils';
 import StatisticModal from './OrderStatisticModal.vue';
 
 const app = getCurrentInstance();

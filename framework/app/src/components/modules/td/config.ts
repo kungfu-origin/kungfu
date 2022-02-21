@@ -1,5 +1,5 @@
 import { LedgerCategoryEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';
-import { KfCategoryRegisterProps } from '@renderer/assets/methods/uiExtraLocationUtils';
+import { KfCategoryRegisterProps } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiExtraLocationUtils';
 
 export const getColumns = (
   sorter: (

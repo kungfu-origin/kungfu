@@ -9,11 +9,14 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 
-import KfLayout from '@renderer/components/layout/KfLayout.vue';
-import KfRowColIter from '@renderer/components/layout/KfRowColIter.vue';
+import KfLayout from '@kungfu-trader/kungfu-app/src/renderer/components/layout/KfLayout.vue';
+import KfRowColIter from '@kungfu-trader/kungfu-app/src/renderer/components/layout/KfRowColIter.vue';
 
-import { useGlobalStore } from '@renderer/pages/index/store/global';
-import { defaultBoardsMap, getBoardsMap } from '@renderer/assets/configs';
+import { useGlobalStore } from '@kungfu-trader/kungfu-app/src/renderer/pages/index/store/global';
+import {
+  defaultBoardsMap,
+  getBoardsMap,
+} from '@kungfu-trader/kungfu-app/src/renderer/assets/configs';
 
 export default defineComponent({
   name: 'Index',

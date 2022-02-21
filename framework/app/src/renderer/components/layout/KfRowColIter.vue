@@ -103,13 +103,13 @@ import { mapActions, mapState } from 'pinia';
 import {
   KfLayoutDirection,
   KfLayoutTargetDirectionClassName,
-} from '@root/src/typings/enums';
+} from '@kungfu-trader/kungfu-app/src/typings/enums';
 
-import KfDragRow from '@renderer/components/layout/KfDragRow.vue';
-import KfDragCol from '@renderer/components/layout/KfDragCol.vue';
-import KfNoData from '@renderer/components/public/KfNoData.vue';
+import KfDragRow from '@kungfu-trader/kungfu-app/src/renderer/components/layout/KfDragRow.vue';
+import KfDragCol from '@kungfu-trader/kungfu-app/src/renderer/components/layout/KfDragCol.vue';
+import KfNoData from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfNoData.vue';
 
-import { useGlobalStore } from '@renderer/pages/index/store/global';
+import { useGlobalStore } from '@kungfu-trader/kungfu-app/src/renderer/pages/index/store/global';
 
 interface KfRowColIterData {
   h: KfLayoutDirection;
@@ -228,7 +228,7 @@ export default defineComponent({
     handleDragEnd() {
       this.clearState();
       this.markIsBoardDragging(false);
-      this.$bus.next({
+      this.$globalBus.next({
         tag: 'resize',
       } as ResizeEvent);
     },

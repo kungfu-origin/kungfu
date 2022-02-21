@@ -8,6 +8,10 @@ declare module NodeJS {
     __resources: string;
     __kfResourcesPath: string;
   }
+
+  interface Process {
+    resourcesPath: string;
+  }
 }
 
 declare module 'tail' {

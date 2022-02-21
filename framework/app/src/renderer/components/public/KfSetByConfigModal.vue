@@ -3,10 +3,10 @@ import { computed, getCurrentInstance, reactive, ref } from 'vue';
 import {
   initFormStateByConfig,
   useModalVisible,
-} from '@renderer/assets/methods/uiUtils';
+} from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 
 import { buildIdByKeysFromKfConfigSettings } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
-import KfConfigSettingsForm from '@renderer/components/public/KfConfigSettingsForm.vue';
+import KfConfigSettingsForm from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfConfigSettingsForm.vue';
 
 const props = withDefaults(
   defineProps<{

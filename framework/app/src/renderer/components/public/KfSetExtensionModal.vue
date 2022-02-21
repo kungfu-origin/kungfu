@@ -8,7 +8,7 @@ import {
 import {
   useExtConfigsRelated,
   useModalVisible,
-} from '@renderer/assets/methods/uiUtils';
+} from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import { KfCategoryTypes } from '@kungfu-trader/kungfu-js-api/typings/enums';
 
 const props = withDefaults(

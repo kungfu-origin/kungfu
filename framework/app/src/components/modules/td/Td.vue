@@ -8,11 +8,11 @@ import {
   toRaw,
 } from 'vue';
 
-import KfDashboard from '@renderer/components/public/KfDashboard.vue';
-import KfDashboardItem from '@renderer/components/public/KfDashboardItem.vue';
-import KfProcessStatus from '@renderer/components/public/KfProcessStatus.vue';
-import KfSetExtensionModal from '@renderer/components/public/KfSetExtensionModal.vue';
-import KfSetByConfigModal from '@renderer/components/public/KfSetByConfigModal.vue';
+import KfDashboard from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfDashboard.vue';
+import KfDashboardItem from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfDashboardItem.vue';
+import KfProcessStatus from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfProcessStatus.vue';
+import KfSetExtensionModal from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfSetExtensionModal.vue';
+import KfSetByConfigModal from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfSetByConfigModal.vue';
 import {
   FileTextOutlined,
   SettingOutlined,
@@ -32,12 +32,12 @@ import {
   useCurrentGlobalKfLocation,
   useTdGroups,
   isInTdGroup,
-} from '@renderer/assets/methods/uiUtils';
+} from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import {
   useAddUpdateRemoveKfConfig,
   handleSwitchProcessStatus,
   useSwitchAllConfig,
-} from '@renderer/assets/methods/actionsUtils';
+} from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
 import {
   dealAssetPrice,
   getIdByKfLocation,
@@ -45,7 +45,7 @@ import {
   getProcessIdByKfLocation,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { message, Modal } from 'ant-design-vue';
-import KfBlinkNum from '@renderer/components/public/KfBlinkNum.vue';
+import KfBlinkNum from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfBlinkNum.vue';
 import {
   addTdGroup,
   removeTdGroup,

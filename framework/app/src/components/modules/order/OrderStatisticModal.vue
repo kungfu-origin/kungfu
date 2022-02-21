@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { UnfinishedOrderStatus } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
-import { useModalVisible } from '@renderer/assets/methods/uiUtils';
+import { useModalVisible } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import { computed } from 'vue';
 import { Stats } from 'fast-stats';
 import { OrderStatusEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';

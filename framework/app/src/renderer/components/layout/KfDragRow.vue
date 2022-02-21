@@ -21,7 +21,7 @@
 import { defineComponent, PropType, reactive, toRefs } from 'vue';
 import { mapActions, mapState } from 'pinia';
 
-import { useGlobalStore } from '@renderer/pages/index/store/global';
+import { useGlobalStore } from '@kungfu-trader/kungfu-app/src/renderer/pages/index/store/global';
 
 interface KfDragRowData {
   leftCol$: HTMLElement | null;
@@ -151,7 +151,7 @@ export default defineComponent({
         Number((this.rightColWidth * 100) / this.paWidth).toFixed(3) + '%',
       );
 
-      this.$bus.next({
+      this.$globalBus.next({
         tag: 'resize',
       } as ResizeEvent);
 

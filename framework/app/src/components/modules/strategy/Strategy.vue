@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { ref, computed, toRefs } from 'vue';
 
-import KfDashboard from '@renderer/components/public/KfDashboard.vue';
-import KfDashboardItem from '@renderer/components/public/KfDashboardItem.vue';
-import KfSetByConfigModal from '@renderer/components/public/KfSetByConfigModal.vue';
+import KfDashboard from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfDashboard.vue';
+import KfDashboardItem from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfDashboardItem.vue';
+import KfSetByConfigModal from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfSetByConfigModal.vue';
 import {
   FileTextOutlined,
   SettingOutlined,
@@ -19,13 +19,13 @@ import {
   useProcessStatusDetailData,
   useAssets,
   useCurrentGlobalKfLocation,
-} from '@renderer/assets/methods/uiUtils';
+} from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import { getColumns } from './config';
 import {
   handleSwitchProcessStatus,
   useAddUpdateRemoveKfConfig,
   useSwitchAllConfig,
-} from '@renderer/assets/methods/actionsUtils';
+} from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
 import {
   dealAssetPrice,
   getConfigValue,
@@ -34,7 +34,7 @@ import {
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import path from 'path';
 import { shell } from '@electron/remote';
-import KfBlinkNum from '@renderer/components/public/KfBlinkNum.vue';
+import KfBlinkNum from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfBlinkNum.vue';
 
 interface StrategyProps {}
 defineProps<StrategyProps>();

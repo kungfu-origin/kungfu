@@ -95,12 +95,6 @@ const webpackConfig = (argv) => {
         ],
       }),
     ],
-    resolve: {
-      alias: {
-        '@root': appDir,
-        '@renderer': path.resolve(appDir, 'src', 'renderer'),
-      },
-    },
     target: 'electron-renderer',
   });
 };

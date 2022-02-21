@@ -5,14 +5,14 @@ import {
   useExtConfigsRelated,
   useProcessStatusDetailData,
   useTableSearchKeyword,
-} from '@renderer/assets/methods/uiUtils';
+} from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import { computed, ref } from 'vue';
 import minimist from 'minimist';
 
-import KfDashboard from '@renderer/components/public/KfDashboard.vue';
-import KfDashboardItem from '@renderer/components/public/KfDashboardItem.vue';
-import KfSetExtensionModal from '@renderer/components/public/KfSetExtensionModal.vue';
-import KfSetByConfigModal from '@renderer/components/public/KfSetByConfigModal.vue';
+import KfDashboard from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfDashboard.vue';
+import KfDashboardItem from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfDashboardItem.vue';
+import KfSetExtensionModal from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfSetExtensionModal.vue';
+import KfSetByConfigModal from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfSetByConfigModal.vue';
 import {
   FileTextOutlined,
   SettingOutlined,

@@ -1,7 +1,8 @@
 const path = require('path');
 const ESLintPlugin = require('eslint-webpack-plugin');
 const cwdDir = process.cwd();
-const { isProduction } = require('./utils');
+const { isProduction, getAppDir } = require('./utils');
+const appDir = getAppDir();
 
 module.exports = {
   makeConfig: (argv) => {
@@ -117,6 +118,7 @@ module.exports = {
             ),
             'src',
           ),
+          '@kungfu-trader/kungfu-app': appDir,
         },
 
         extensions: ['.js', '.ts', '.d.ts', '.vue', '.json', '.css', '.node'],

@@ -90,11 +90,16 @@ exports.getWebpackExternals = () => {
   const apiPackageJSONPath = require.resolve(
     '@kungfu-trader/kungfu-js-api/package.json',
   );
+  const currentPackageJSONPath = path.join(process.cwd(), 'package.json');
   const appPackageJSON = fs.readJSONSync(appPackageJSONPath);
   const apiPackageJSON = fs.readJSONSync(apiPackageJSONPath);
+  const currentPackageJSON = fs.pathExistsSync(currentPackageJSONPath)
+    ? fs.readJSONSync(currentPackageJSONPath)
+    : {};
   return [
     ...Object.keys(appPackageJSON.dependencies),
     ...Object.keys(apiPackageJSON.dependencies),
+    ...Object.keys(currentPackageJSON.dependencies || {}),
   ].filter((item) => !item.includes('kungfu-js-api'));
 };
 
