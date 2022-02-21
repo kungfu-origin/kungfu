@@ -151,7 +151,7 @@ export default defineComponent({
         Number((this.rightColWidth * 100) / this.paWidth).toFixed(3) + '%',
       );
 
-      this.$bus.next({
+      this.$globalBus.next({
         tag: 'resize',
       } as ResizeEvent);
 

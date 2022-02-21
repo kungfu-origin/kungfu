@@ -381,27 +381,29 @@ export const useDealExportHistoryTradingData = (): {
 
   onMounted(() => {
     if (app?.proxy) {
-      const subscription = app.proxy.$bus.subscribe((data: KfBusEvent) => {
-        if (data.tag === 'export') {
-          exportEventData.value = data;
+      const subscription = app.proxy.$globalBus.subscribe(
+        (data: KfBusEvent) => {
+          if (data.tag === 'export') {
+            exportEventData.value = data;
 
-          if (exportEventData.value.tradingDataType !== 'all') {
-            if (exportEventData.value.tradingDataType !== 'Order') {
-              if (exportEventData.value.tradingDataType !== 'Trade') {
-                if (exportEventData.value.tradingDataType !== 'OrderInput') {
-                  handleConfirmExportDate({
-                    date: dayjs().format(),
-                    dateType: HistoryDateEnum.naturalDate,
-                  });
-                  return;
+            if (exportEventData.value.tradingDataType !== 'all') {
+              if (exportEventData.value.tradingDataType !== 'Order') {
+                if (exportEventData.value.tradingDataType !== 'Trade') {
+                  if (exportEventData.value.tradingDataType !== 'OrderInput') {
+                    handleConfirmExportDate({
+                      date: dayjs().format(),
+                      dateType: HistoryDateEnum.naturalDate,
+                    });
+                    return;
+                  }
                 }
               }
             }
-          }
 
-          exportDateModalVisible.value = true;
-        }
-      });
+            exportDateModalVisible.value = true;
+          }
+        },
+      );
 
       onBeforeUnmount(() => {
         subscription.unsubscribe();
@@ -647,32 +649,34 @@ export const usePreStartAndQuitApp = (): {
 
   onMounted(() => {
     if (app?.proxy) {
-      const subscription = app?.proxy.$bus.subscribe((data: KfBusEvent) => {
-        if (data.tag === 'processStatus') {
-          if (data.name && data.name === 'archive') {
-            preStartSystemLoadingData.archive =
-              data.status === 'online' ? 'loading' : 'done';
+      const subscription = app?.proxy.$globalBus.subscribe(
+        (data: KfBusEvent) => {
+          if (data.tag === 'processStatus') {
+            if (data.name && data.name === 'archive') {
+              preStartSystemLoadingData.archive =
+                data.status === 'online' ? 'loading' : 'done';
+            }
           }
-        }
 
-        if (data.tag === 'main') {
-          switch (data.name) {
-            case 'record-before-quit':
-              preQuitSystemLoadingData.record = 'loading';
-              preQuitTasks([saveBoardsMap()]).finally(() => {
-                ipcRenderer.send('record-before-quit-done');
-                preQuitSystemLoadingData.record = 'done';
-              });
-              break;
-            case 'clear-process-before-quit-start':
-              preQuitSystemLoadingData.quit = 'loading';
-              break;
-            case 'clear-process-before-quit-end':
-              preQuitSystemLoadingData.quit = 'done';
-              break;
+          if (data.tag === 'main') {
+            switch (data.name) {
+              case 'record-before-quit':
+                preQuitSystemLoadingData.record = 'loading';
+                preQuitTasks([saveBoardsMap()]).finally(() => {
+                  ipcRenderer.send('record-before-quit-done');
+                  preQuitSystemLoadingData.record = 'done';
+                });
+                break;
+              case 'clear-process-before-quit-start':
+                preQuitSystemLoadingData.quit = 'loading';
+                break;
+              case 'clear-process-before-quit-end':
+                preQuitSystemLoadingData.quit = 'done';
+                break;
+            }
           }
-        }
-      });
+        },
+      );
 
       onBeforeUnmount(() => {
         subscription.unsubscribe();

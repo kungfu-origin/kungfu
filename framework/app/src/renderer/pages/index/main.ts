@@ -1,4 +1,5 @@
 import './setEnv';
+import './injectWindow';
 import { createApp } from 'vue';
 import App from '@kungfu-trader/kungfu-app/src/renderer/pages/index/App.vue';
 import router from '@kungfu-trader/kungfu-app/src/renderer/pages/index/router';
@@ -45,18 +46,16 @@ import {
   startMaster,
 } from '@kungfu-trader/kungfu-js-api/utils/processUtils';
 
-import { watcher } from '@kungfu-trader/kungfu-js-api/kungfu/watcher';
 import {
   tradingDataSubject,
   triggerStartStep,
 } from '@kungfu-trader/kungfu-js-api/kungfu/tradingData';
-import bus from '@kungfu-trader/kungfu-js-api/utils/globalBus';
 
 import VueVirtualScroller from 'vue-virtual-scroller';
 import 'vue-virtual-scroller/dist/vue-virtual-scroller.css';
 import { useComponenets } from './useComponents';
-import { kf } from '@kungfu-trader/kungfu-js-api/kungfu';
 import { GlobalCategoryRegister } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiExtraLocationUtils';
+import globalBus from '../../assets/methods/globalBus';
 
 const app = createApp(App);
 
@@ -92,7 +91,7 @@ app
   .use(VueVirtualScroller);
 
 //this sort ensure $useGlobalStore can be get in mounted callback
-app.config.globalProperties.$bus = bus;
+app.config.globalProperties.$globalBus = globalBus;
 app.config.globalProperties.$tradingDataSubject = tradingDataSubject;
 app.config.globalProperties.$useGlobalStore = useGlobalStore;
 app.config.globalProperties.$globalCategoryRegister =
@@ -108,7 +107,7 @@ if (process.env.RELOAD_AFTER_CRASHED === 'false') {
   beforeStartAll()
     .then(() => {
       return startArchiveMakeTask((archiveStatus: Pm2ProcessStatusTypes) => {
-        bus.next({
+        globalBus.next({
           tag: 'processStatus',
           name: 'archive',
           status: archiveStatus,
@@ -135,7 +134,7 @@ if (process.env.RELOAD_AFTER_CRASHED === 'false') {
     });
 } else {
   // 崩溃后重开, 跳过archive过程
-  bus.next({
+  globalBus.next({
     tag: 'processStatus',
     name: 'archive',
     status: 'waiting restart',
@@ -152,6 +151,4 @@ if (process.env.RELOAD_AFTER_CRASHED === 'false') {
   );
 }
 
-window.watcher = watcher;
-window.kungfu = kf;
 triggerStartStep();

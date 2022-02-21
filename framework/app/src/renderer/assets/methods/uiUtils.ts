@@ -51,10 +51,10 @@ import {
   ProcessStatusTypes,
   KfCategoryTypes,
 } from '@kungfu-trader/kungfu-js-api/typings/enums';
-import workers from '@kungfu-trader/kungfu-app/src/renderer/assets/workers';
 import { throttleTime } from 'rxjs';
 import dayjs from 'dayjs';
 import path from 'path';
+import { tradingDataSubject } from '@kungfu-trader/kungfu-js-api/kungfu/tradingData';
 
 // this utils file is only for ui components
 export const getUIComponents = (
@@ -640,7 +640,7 @@ export const useIpcListener = (): void => {
   ipcRenderer.removeAllListeners('main-process-messages');
   ipcRenderer.on('main-process-messages', (event, args) => {
     if (app?.proxy) {
-      app?.proxy.$bus.next({
+      app?.proxy.$globalBus.next({
         tag: 'main',
         name: args,
       } as MainProcessEvent);
@@ -772,7 +772,7 @@ export const useDownloadHistoryTradingData = (): {
     }
 
     if (app?.proxy) {
-      app?.proxy.$bus.next({
+      app?.proxy.$globalBus.next({
         tag: 'export',
         tradingDataType,
         currentKfLocation,
@@ -881,7 +881,7 @@ export const useTriggerMakeOrder = (): {
 
   const triggerOrderBook = (instrument: KungfuApi.InstrumentResolved) => {
     if (app?.proxy) {
-      app?.proxy.$bus.next({
+      app?.proxy.$globalBus.next({
         tag: 'orderbook',
         instrument,
       });
@@ -893,7 +893,7 @@ export const useTriggerMakeOrder = (): {
     extraOrderInput: ExtraOrderInput,
   ) => {
     if (app?.proxy) {
-      app?.proxy.$bus.next({
+      app?.proxy.$globalBus.next({
         tag: 'orderBookUpdate',
         orderInput: {
           ...instrument,
@@ -908,7 +908,7 @@ export const useTriggerMakeOrder = (): {
     extraOrderInput: ExtraOrderInput,
   ) => {
     if (app?.proxy) {
-      app?.proxy.$bus.next({
+      app?.proxy.$globalBus.next({
         tag: 'makeOrder',
         orderInput: {
           ...instrument,
@@ -946,11 +946,11 @@ export const useDealInstruments = (): void => {
   onMounted(() => {
     if (app?.proxy) {
       dealInstrumentController.value = true;
-      workers.dealInstruments.postMessage({
+      window.workers.dealInstruments.postMessage({
         tag: 'req_instruments',
       });
 
-      const subscription = app.proxy.$tradingDataSubject
+      const subscription = tradingDataSubject
         .pipe(throttleTime(5000))
         .subscribe((watcher: KungfuApi.Watcher) => {
           const instruments = watcher.ledger.Instrument.list();
@@ -968,7 +968,7 @@ export const useDealInstruments = (): void => {
             instruments.forEach((item: KungfuApi.Instrument) => {
               item.ukey = item.uid_key;
             });
-            workers.dealInstruments.postMessage({
+            window.workers.dealInstruments.postMessage({
               tag: 'req_dealInstruments',
               instruments: instruments,
             });
@@ -981,7 +981,7 @@ export const useDealInstruments = (): void => {
     }
   });
 
-  workers.dealInstruments.onmessage = (event: {
+  window.workers.dealInstruments.onmessage = (event: {
     data: { tag: string; instruments: KungfuApi.InstrumentResolved[] };
   }) => {
     const { instruments } = event.data || {};

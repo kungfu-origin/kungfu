@@ -38,7 +38,7 @@ const props = withDefaults(
   defineProps<{
     formState: Record<string, KungfuApi.KfConfigValue>;
     configSettings: KungfuApi.KfConfigItem[];
-    changeType: KungfuApi.ModalChangeType;
+    changeType?: KungfuApi.ModalChangeType;
     primaryKeyAvoidRepeatCompareExtra?: string;
     primaryKeyAvoidRepeatCompareTarget?: string[];
     layout?: 'horizontal' | 'vertical' | 'inline';

@@ -2,7 +2,6 @@
 import { sum } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { Empty } from 'ant-design-vue';
 import { CaretUpOutlined, CaretDownOutlined } from '@ant-design/icons-vue';
-
 import { filter } from 'rxjs';
 import {
   computed,
@@ -10,7 +9,6 @@ import {
   onBeforeMount,
   onMounted,
   ref,
-  toRaw,
 } from 'vue';
 
 const props = withDefaults(
@@ -85,7 +83,7 @@ onMounted(() => {
   }
 
   if (app?.proxy) {
-    const subscription = app?.proxy.$bus
+    const subscription = app?.proxy.$globalBus
       .pipe(filter((e: KfBusEvent) => e.tag === 'resize'))
       .subscribe(() => {
         if (kfScrollerTableBodyRef.value) {

@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { SlidersOutlined, SettingOutlined } from '@ant-design/icons-vue';
-import bus from '@kungfu-trader/kungfu-js-api/utils/globalBus';
 import { useExtConfigsRelated } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import KfProcessStatusController from '@kungfu-trader/kungfu-app/src/renderer/components/layout/KfProcessStatusController.vue';
 import { computed, onUnmounted, ref } from 'vue';
+import globalBus from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/globalBus';
 import KfGlobalSettingModal from '../public/KfGlobalSettingModal.vue';
 const logo = require('@kungfu-trader/kungfu-app/src/renderer/assets/svg/LOGO.svg');
 
@@ -12,7 +12,7 @@ defineProps<LayoutProps>();
 
 const globalSettingModalVisible = ref<boolean>(false);
 
-const busSubscription = bus.subscribe((data: KfBusEvent) => {
+const busSubscription = globalBus.subscribe((data: KfBusEvent) => {
   if (data.tag === 'main') {
     switch (data.name) {
       case 'open-setting-dialog':

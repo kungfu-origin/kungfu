@@ -32,8 +32,8 @@ export default defineComponent({
       this.$emit('boardSizeChange', this.getBodyWidthHeight());
     });
 
-    if (this.$bus) {
-      const subscription = this.$bus
+    if (this.$globalBus) {
+      const subscription = this.$globalBus
         .pipe(filter((e: KfBusEvent) => e.tag === 'resize'))
         .subscribe(() => {
           this.$emit('boardSizeChange', this.getBodyWidthHeight());

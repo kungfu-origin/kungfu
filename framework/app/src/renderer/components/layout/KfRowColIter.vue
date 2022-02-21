@@ -228,7 +228,7 @@ export default defineComponent({
     handleDragEnd() {
       this.clearState();
       this.markIsBoardDragging(false);
-      this.$bus.next({
+      this.$globalBus.next({
         tag: 'resize',
       } as ResizeEvent);
     },

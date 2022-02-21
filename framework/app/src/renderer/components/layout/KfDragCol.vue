@@ -40,7 +40,16 @@ export default defineComponent({
   },
 
   setup() {
-    const colData = reactive<KfDragColData>({
+    const colData = reactive<{
+      upRow$: HTMLElement | null;
+      upBoardId: string;
+      upRowHeight: number;
+      bottomRow$: HTMLElement | null;
+      bottomBoardId: string;
+      bottomRowHeight: number;
+      paHeight: number;
+      preY: number;
+    }>({
       upRow$: null,
       upBoardId: '',
       upRowHeight: 0,
@@ -150,7 +159,7 @@ export default defineComponent({
           : 0,
       );
 
-      this.$bus.next({
+      this.$globalBus.next({
         tag: 'resize',
       } as ResizeEvent);
 
