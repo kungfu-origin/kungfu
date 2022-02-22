@@ -121,27 +121,11 @@ export const useComponenets = (
     ),
   );
 
-  app.config.globalProperties.$registedKfUIComponents = [
-    '持仓',
-    '持仓汇总',
-    '委托记录',
-    '成交记录',
-    '交易账户',
-    '行情源',
-    '策略进程',
-    '交易任务',
-    '行情订阅',
-    '深度行情',
-    '下单面板',
-    '套利指令',
-  ];
-
   return useGlobalStore()
     .setKfUIExtConfigs()
     .then((configs) => getUIComponents(configs))
     .then((components) => {
       components.forEach(({ cData, position, key }) => {
-        console.log(cData, position, key);
         switch (position) {
           case 'sidebar':
             app.component(key, cData[`${key}-entry`]);

@@ -596,6 +596,7 @@ export const usePreStartAndQuitApp = (): {
   preStartSystemLoading: ComputedRef<boolean>;
   preQuitSystemLoadingData: Record<string, 'loading' | 'done' | undefined>;
   preQuitSystemLoading: ComputedRef<boolean>;
+  saveBoardsMap: () => Promise<void>;
 } => {
   const app = getCurrentInstance();
   const preStartSystemLoadingData = reactive<
@@ -641,7 +642,9 @@ export const usePreStartAndQuitApp = (): {
     const proxy = app?.proxy;
     if (proxy) {
       const { boardsMap } = proxy.$useGlobalStore();
-      localStorage.setItem('boardsMap', JSON.stringify(boardsMap));
+      if (proxy.$route.path === '/') {
+        localStorage.setItem('indexBoardsMap', JSON.stringify(boardsMap));
+      }
       return Promise.resolve();
     }
     return Promise.resolve();
@@ -689,6 +692,7 @@ export const usePreStartAndQuitApp = (): {
     preStartSystemLoading,
     preQuitSystemLoadingData,
     preQuitSystemLoading,
+    saveBoardsMap,
   };
 };
 

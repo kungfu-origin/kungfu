@@ -24,10 +24,15 @@ const busSubscription = globalBus.subscribe((data: KfBusEvent) => {
 });
 
 const { uiExtConfigs } = useExtConfigsRelated();
-const sidebarFooterComponentKeys = computed(() => {
-  return Object.keys(uiExtConfigs.data).filter(
-    (key) => uiExtConfigs.data[key].position === 'sidebar_footer',
-  );
+const sidebarFooterComponentConfigs = computed(() => {
+  return Object.keys(uiExtConfigs.data)
+    .filter((key) => uiExtConfigs.data[key].position === 'sidebar_footer')
+    .map((key) => {
+      return {
+        ...uiExtConfigs.data[key],
+        key,
+      };
+    });
 });
 
 const sidebarComponentConfigs = computed(() => {
@@ -83,9 +88,10 @@ function handleToPage(pathname: string) {
         <div class="kf-sidebar-footer__warp">
           <div
             class="kf-sidebar-footer-btn__warp"
-            v-for="key in sidebarFooterComponentKeys"
+            v-for="config in sidebarFooterComponentConfigs"
+            :title="config.name"
           >
-            <component :is="key"></component>
+            <component :is="config.key"></component>
           </div>
           <div
             class="kf-sidebar-footer-btn__warp"

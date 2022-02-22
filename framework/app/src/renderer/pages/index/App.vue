@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { getCurrentInstance, onBeforeUnmount, onMounted } from 'vue';
 import KfSystemPrepareModal from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfSystemPrepareModal.vue';
+import KfLayoutVue from '@kungfu-trader/kungfu-app/src/renderer/components/layout/KfLayout.vue';
 
 import zhCN from 'ant-design-vue/es/locale/zh_CN';
 import {
@@ -94,7 +95,9 @@ onMounted(() => {
 <template>
   <a-config-provider :locale="zhCN" :autoInsertSpaceInButton="false">
     <div class="app__warp">
-      <router-view />
+      <KfLayoutVue>
+        <router-view />
+      </KfLayoutVue>
     </div>
     <KfSystemPrepareModal
       title="系统提示"
