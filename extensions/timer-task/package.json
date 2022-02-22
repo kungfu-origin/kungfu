@@ -1,5 +1,5 @@
 {
-  "name": "@kungfu-trader/kfx-timer-task",
+  "name": "@kungfu-trader/timer-task",
   "author": {
     "name": "kungfu-trader",
     "email": "info@kungfu.link"
@@ -41,7 +41,7 @@
     }
   },
   "kungfuConfig": {
-    "key": "timertask",
+    "key": "timer-task",
     "name": "定时下单",
     "config": {
       "strategy": {
