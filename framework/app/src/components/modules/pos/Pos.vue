@@ -38,8 +38,10 @@ import {
   OffsetEnum,
   SideEnum,
 } from '@kungfu-trader/kungfu-js-api/typings/enums';
-import { useInstruments } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
-import { ExchangeIds } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
+import {
+  getInstrumentByInstrumentPair,
+  useInstruments,
+} from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
 import { useExtraCategory } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiExtraLocationUtils';
 
 const app = getCurrentInstance();
@@ -120,22 +122,15 @@ function handleClickRow(data: {
 }) {
   const row = data.row as KungfuApi.Position;
   const { instrument_id, instrument_type, exchange_id } = row;
-  const ukey = hashInstrumentUKey(instrument_id, exchange_id);
-  const instrumnet: KungfuApi.InstrumentResolved | null =
-    findTargetFromArray<KungfuApi.InstrumentResolved>(
+  const ensuredInstrument: KungfuApi.InstrumentResolved =
+    getInstrumentByInstrumentPair(
+      {
+        instrument_id,
+        instrument_type,
+        exchange_id,
+      },
       instruments.data,
-      'ukey',
-      ukey,
     );
-  const instrumentName = instrumnet?.instrumentName || '';
-  const ensuredInstrument: KungfuApi.InstrumentResolved = {
-    exchangeId: exchange_id,
-    instrumentId: instrument_id,
-    instrumentType: instrument_type,
-    instrumentName,
-    ukey,
-    id: `${instrument_id}_${instrumentName}_${exchange_id}`.toLowerCase(),
-  };
 
   triggerOrderBook(ensuredInstrument);
   const extraOrderInput: ExtraOrderInput = {

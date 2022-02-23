@@ -92,7 +92,10 @@ const { td } = toRefs(useAllKfConfigData());
 
 const instrumentKeys = props.configSettings
   .filter((item) => item.type === 'instrument' || item.type === 'instruments')
-  .map((item) => item.key);
+  .reduce((data, setting) => {
+    data[setting.key.toString()] = setting.type as 'instrument' | 'instruments';
+    return data;
+  }, {} as Record<string, 'instrument' | 'instruments'>);
 
 type InstrumentsSearchRelated = Record<
   string,
@@ -102,10 +105,15 @@ type InstrumentsSearchRelated = Record<
   }
 >;
 
-const instrumentsSearchRelated = instrumentKeys.reduce(
+const instrumentsSearchRelated = Object.keys(instrumentKeys).reduce(
   (item1: InstrumentsSearchRelated, key: string) => {
     const { searchInstrumnetOptions, handleSearchInstrument } =
       useInstruments();
+    searchInstrumnetOptions.value = makeSearchOptionFormInstruments(
+      key,
+      instrumentKeys[key],
+      formState[key],
+    );
     item1[key] = {
       searchInstrumnetOptions: searchInstrumnetOptions,
       handleSearchInstrument,
@@ -115,23 +123,13 @@ const instrumentsSearchRelated = instrumentKeys.reduce(
   {} as InstrumentsSearchRelated,
 );
 
-instrumentKeys.forEach((key) => {
+Object.keys(instrumentKeys).forEach((key) => {
   watch(
     () => formState[key],
     (newVal) => {
       nextTick().then(() => {
-        const instrumentResolved: KungfuApi.InstrumentResolved | null =
-          transformSearchInstrumentResultToInstrument(newVal.toString());
-        if (!instrumentResolved) {
-          formState.instrument = '';
-          return;
-        }
-        instrumentsSearchRelated[key].searchInstrumnetOptions.value = [
-          {
-            value: buildInstrumentSelectOptionValue(instrumentResolved),
-            label: buildInstrumentSelectOptionLabel(instrumentResolved),
-          },
-        ];
+        instrumentsSearchRelated[key].searchInstrumnetOptions.value =
+          makeSearchOptionFormInstruments(key, instrumentKeys[key], newVal);
       });
     },
   );
@@ -152,6 +150,48 @@ function getValidatorType(
     return 'boolean';
   } else {
     return 'string';
+  }
+}
+
+function makeSearchOptionFormInstruments(
+  key: string,
+  type: 'instrument' | 'instruments',
+  value: string | string[],
+): { value: string; label: string }[] {
+  const valResolved = resolveInstrumentValue(type, value);
+  const instrumentResolveds: Array<KungfuApi.InstrumentResolved> = valResolved
+    .map((item) => {
+      return transformSearchInstrumentResultToInstrument(item.toString());
+    })
+    .filter((item) => !!item);
+
+  if (!instrumentResolveds.length) {
+    if (type === 'instruments') {
+      formState[key] = [];
+    } else {
+      formState[key] = '';
+    }
+  }
+
+  return [
+    ...instrumentResolveds.map((item) => ({
+      value: buildInstrumentSelectOptionValue(item),
+      label: buildInstrumentSelectOptionLabel(item),
+    })),
+  ];
+}
+
+function resolveInstrumentValue(
+  type: 'instrument' | 'instruments',
+  value: string | string[],
+): string[] {
+  if (type === 'instruments') {
+    return value as string[];
+  }
+  if (type === 'instrument') {
+    return [value as string];
+  } else {
+    return [];
   }
 }
 
