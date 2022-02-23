@@ -133,70 +133,6 @@ export const useTableSearchKeyword = <T>(
   };
 };
 
-export const initFormStateByConfig = (
-  configSettings: KungfuApi.KfConfigItem[],
-  initValue?: Record<string, KungfuApi.KfConfigValue>,
-): Record<string, KungfuApi.KfConfigValue> => {
-  if (!configSettings) return {};
-
-  const booleanType = ['bool'];
-  const numberType = [
-    'int',
-    'float',
-    'percent',
-    'side', // select - number
-    'offset', // select - number
-    'direction', // select - number
-    'priceType', // select - number
-    'hedgeFlag', // select - number
-    'volumeCondition', // select - number
-    'timeCondition', // select - number
-    'commissionMode', // select - number
-    'instrumentType', // select - number
-  ];
-  const formState: Record<string, KungfuApi.KfConfigValue> = {};
-  configSettings.forEach((item) => {
-    const type = item.type;
-    const isBoolean = booleanType.includes(type);
-    const isNumber = numberType.includes(type);
-
-    let defaultValue;
-    if (typeof item?.default === 'object') {
-      defaultValue = JSON.parse(JSON.stringify(item?.default));
-    } else {
-      defaultValue = item?.default;
-    }
-
-    if (defaultValue === undefined) {
-      defaultValue = isBoolean
-        ? false
-        : isNumber
-        ? 0
-        : type === 'timePicker'
-        ? dayjs().valueOf().toString()
-        : '';
-    }
-    if ((initValue || {})[item.key] !== undefined) {
-      defaultValue = (initValue || {})[item.key];
-    }
-
-    if (booleanType.includes(type)) {
-      defaultValue =
-        defaultValue === 'true'
-          ? true
-          : defaultValue === 'false'
-          ? false
-          : !!defaultValue;
-    } else if (numberType.includes(type)) {
-      defaultValue = +defaultValue;
-    }
-
-    formState[item.key] = defaultValue;
-  });
-
-  return formState;
-};
-
 export const numberEnumRadioType: Record<
   string,
   Record<number, KungfuApi.KfTradeValueCommonData>
@@ -224,6 +160,69 @@ export const stringEnumSelectType: Record<
 > = {
   exchange: ExchangeIds,
   futureArbitrageCode: FutureArbitrageCodes,
+};
+
+export const KfConfigValueNumberType = [
+  'int',
+  'float',
+  'percent',
+  ...Object.keys(numberEnumSelectType || {}),
+  ...Object.keys(numberEnumRadioType || {}),
+];
+
+export const KfConfigValueBooleanType = ['bool'];
+
+export const KfConfigValueArrayType = ['folder', 'instruments'];
+
+export const initFormStateByConfig = (
+  configSettings: KungfuApi.KfConfigItem[],
+  initValue?: Record<string, KungfuApi.KfConfigValue>,
+): Record<string, KungfuApi.KfConfigValue> => {
+  if (!configSettings) return {};
+  const formState: Record<string, KungfuApi.KfConfigValue> = {};
+  configSettings.forEach((item) => {
+    const type = item.type;
+    const isBoolean = KfConfigValueBooleanType.includes(type);
+    const isNumber = KfConfigValueNumberType.includes(type);
+    const isArray = KfConfigValueArrayType.includes(type);
+
+    let defaultValue;
+    if (typeof item?.default === 'object') {
+      defaultValue = JSON.parse(JSON.stringify(item?.default));
+    } else {
+      defaultValue = item?.default;
+    }
+
+    if (defaultValue === undefined) {
+      defaultValue = isBoolean
+        ? false
+        : isNumber
+        ? 0
+        : type === 'timePicker'
+        ? dayjs().valueOf().toString()
+        : isArray
+        ? []
+        : '';
+    }
+    if ((initValue || {})[item.key] !== undefined) {
+      defaultValue = (initValue || {})[item.key];
+    }
+
+    if (KfConfigValueBooleanType.includes(type)) {
+      defaultValue =
+        defaultValue === 'true'
+          ? true
+          : defaultValue === 'false'
+          ? false
+          : !!defaultValue;
+    } else if (KfConfigValueNumberType.includes(type)) {
+      defaultValue = +defaultValue;
+    }
+
+    formState[item.key] = defaultValue;
+  });
+
+  return formState;
 };
 
 export const beforeStartAll = (): Promise<void> => {

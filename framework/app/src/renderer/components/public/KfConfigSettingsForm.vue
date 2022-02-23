@@ -12,6 +12,9 @@ import {
   numberEnumSelectType,
   stringEnumSelectType,
   useAllKfConfigData,
+  KfConfigValueNumberType,
+  KfConfigValueArrayType,
+  KfConfigValueBooleanType,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import {
   getCurrentInstance,
@@ -88,7 +91,7 @@ const primaryKeys: string[] = (props.configSettings || [])
 const { td } = toRefs(useAllKfConfigData());
 
 const instrumentKeys = props.configSettings
-  .filter((item) => item.type === 'instrument')
+  .filter((item) => item.type === 'instrument' || item.type === 'instruments')
   .map((item) => item.key);
 
 type InstrumentsSearchRelated = Record<
@@ -141,19 +144,11 @@ watch(formState, (newVal) => {
 function getValidatorType(
   type: string,
 ): 'number' | 'string' | 'array' | 'boolean' {
-  const intTypes: string[] = [
-    'int',
-    ...Object.keys(numberEnumSelectType || {}),
-    ...Object.keys(numberEnumRadioType || {}),
-  ];
-  const floatTypes: string[] = ['float', 'percent'];
-  if (intTypes.includes(type)) {
+  if (KfConfigValueNumberType.includes(type)) {
     return 'number';
-  } else if (floatTypes.includes(type)) {
-    return 'number';
-  } else if (type === 'folder') {
+  } else if (KfConfigValueArrayType.includes(type)) {
     return 'array';
-  } else if (type === 'bool') {
+  } else if (KfConfigValueBooleanType.includes(type)) {
     return 'boolean';
   } else {
     return 'string';
@@ -475,6 +470,18 @@ defineExpose({
       <a-select
         v-else-if="item.type === 'instrument'"
         :disabled="changeType === 'update' && item.primary"
+        show-search
+        v-model:value="formState[item.key]"
+        :filter-option="false"
+        :options="
+          instrumentsSearchRelated[item.key].searchInstrumnetOptions.value
+        "
+        @search="instrumentsSearchRelated[item.key].handleSearchInstrument"
+      ></a-select>
+      <a-select
+        v-else-if="item.type === 'instruments'"
+        :disabled="changeType === 'update' && item.primary"
+        mode="multiple"
         show-search
         v-model:value="formState[item.key]"
         :filter-option="false"

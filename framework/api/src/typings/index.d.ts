@@ -87,7 +87,6 @@ declare namespace KungfuApi {
     | 'folder' // string
     | 'timePicker' //string
     | 'process'
-    | 'instrumentId' // search input
     | 'account' // select - string
     | 'source' // select - string
     | 'exchange' // select - string
@@ -106,6 +105,7 @@ declare namespace KungfuApi {
     | 'commissionMode' // select - number
     | 'instrumentType' // select - number
     | 'instrument'
+    | 'instruments'
     | 'td';
 
   export type KfConfigValue =
