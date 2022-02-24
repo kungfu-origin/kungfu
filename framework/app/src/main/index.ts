@@ -81,6 +81,8 @@ function createWindow(reloadAfterCrashed = false, reloadBySchedule = false) {
     backgroundColor: '#000',
   });
 
+  console.log('isDev', isDev, '====');
+
   if (isDev) {
     MainWindow.loadURL('http://localhost:9090/index.html');
   } else {

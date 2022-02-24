@@ -11,7 +11,6 @@ import {
   killKfc,
   killKungfu,
   killExtra,
-  pm2KillGodDaemon,
   pm2Kill,
   deleteProcess,
   startTd,
@@ -76,20 +75,16 @@ function KillAll(): Promise<void> {
     pm2Kill()
       .catch((err) => kfLogger.error(err.message))
       .finally(() => {
-        pm2KillGodDaemon()
+        killKfc()
           .catch((err) => kfLogger.error(err.message))
           .finally(() => {
-            killKfc()
+            killKungfu()
               .catch((err) => kfLogger.error(err.message))
               .finally(() => {
-                killKungfu()
+                killExtra()
                   .catch((err) => kfLogger.error(err.message))
                   .finally(() => {
-                    killExtra()
-                      .catch((err) => kfLogger.error(err.message))
-                      .finally(() => {
-                        resolve();
-                      });
+                    resolve();
                   });
               });
           });
@@ -207,11 +202,9 @@ export const registerScheduleTasks = async (
       schedule.scheduleJob(rule, () => {
         console.log('May the Force be with you -- Yoda');
         pm2Kill().finally(() => {
-          pm2KillGodDaemon().finally(() => {
-            kfLogger.info('Core restarted, pm2 killed all');
-            removeJournal(KF_HOME);
-            createWindowFunc(false, true);
-          });
+          kfLogger.info('Core restarted, pm2 killed all');
+          removeJournal(KF_HOME);
+          createWindowFunc(false, true);
         });
       });
     });
