@@ -7,7 +7,8 @@ import { Row } from '@fast-csv/format';
 export const addFileSync = (
   parentDir = '',
   filename: string,
-  type: string,
+  type: 'folder' | 'file',
+  content?: string,
 ): void => {
   let targetPath: string;
   if (!parentDir) targetPath = filename;
@@ -18,6 +19,9 @@ export const addFileSync = (
     fse.ensureDirSync(targetPath);
   } else {
     fse.ensureFileSync(targetPath);
+    if (content) {
+      fse.writeFileSync(targetPath, content);
+    }
   }
 };
 
