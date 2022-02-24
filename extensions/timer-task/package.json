@@ -16,7 +16,7 @@
   },
   "binary": {
     "module_name": "kfx-timer-task",
-    "module_path": "dist/timer-task",
+    "module_path": "dist/timertask",
     "remote_path": "{module_name}/v{major}/v{version}",
     "package_name": "{module_name}-v{version}-{platform}-{arch}-{configuration}.tar.gz",
     "host": "https://prebuilt.libkungfu.cc"
@@ -41,7 +41,7 @@
     }
   },
   "kungfuConfig": {
-    "key": "timer-task",
+    "key": "timertask",
     "name": "定时下单",
     "config": {
       "strategy": {

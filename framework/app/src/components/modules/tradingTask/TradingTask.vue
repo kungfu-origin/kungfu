@@ -245,7 +245,10 @@ function ensureRemoveTask(taskLocation: KungfuApi.KfLocation) {
     processStatusData.value,
   )
     .then(() => removeKfLocation(taskLocation))
-    .then(() => removeLog(taskLocation));
+    .then(() => removeLog(taskLocation))
+    .catch((err) => {
+      console.error(err);
+    });
 }
 
 function toArgs(
