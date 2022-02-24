@@ -4,12 +4,14 @@ import { deleteAllByKfLocation } from '@kungfu-trader/kungfu-js-api/actions';
 import {
   dealTradingDataItem,
   getKungfuHistoryData,
+  hashInstrumentUKey,
   kfRequestMarketData,
 } from '@kungfu-trader/kungfu-js-api/kungfu';
 import { setKfConfig } from '@kungfu-trader/kungfu-js-api/kungfu/store';
 import {
   BrokerStateStatusTypes,
   HistoryDateEnum,
+  InstrumentTypeEnum,
   InstrumentTypes,
   KfCategoryTypes,
   LedgerCategoryEnum,
@@ -21,6 +23,7 @@ import {
   getProcessIdByKfLocation,
   isTdStrategyCategory,
   switchKfLocation,
+  findTargetFromArray,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { writeCSV } from '@kungfu-trader/kungfu-js-api/utils/fileUtils';
 import { Pm2ProcessStatusData } from '@kungfu-trader/kungfu-js-api/utils/processUtils';
@@ -596,6 +599,7 @@ export const usePreStartAndQuitApp = (): {
   preStartSystemLoading: ComputedRef<boolean>;
   preQuitSystemLoadingData: Record<string, 'loading' | 'done' | undefined>;
   preQuitSystemLoading: ComputedRef<boolean>;
+  saveBoardsMap: () => Promise<void>;
 } => {
   const app = getCurrentInstance();
   const preStartSystemLoadingData = reactive<
@@ -641,7 +645,9 @@ export const usePreStartAndQuitApp = (): {
     const proxy = app?.proxy;
     if (proxy) {
       const { boardsMap } = proxy.$useGlobalStore();
-      localStorage.setItem('boardsMap', JSON.stringify(boardsMap));
+      if (proxy.$route.path === '/') {
+        localStorage.setItem('indexBoardsMap', JSON.stringify(boardsMap));
+      }
       return Promise.resolve();
     }
     return Promise.resolve();
@@ -689,6 +695,7 @@ export const usePreStartAndQuitApp = (): {
     preStartSystemLoading,
     preQuitSystemLoadingData,
     preQuitSystemLoading,
+    saveBoardsMap,
   };
 };
 
@@ -781,4 +788,32 @@ export const useSubscibeInstrumentAtEntry = (): void => {
       }
     });
   });
+};
+
+export const getInstrumentByInstrumentPair = (
+  instrumentPair: {
+    instrument_id: string;
+    instrument_type: InstrumentTypeEnum;
+    exchange_id: string;
+  },
+  instruments: KungfuApi.InstrumentResolved[],
+): KungfuApi.InstrumentResolved => {
+  const { instrument_id, instrument_type, exchange_id } = instrumentPair;
+  const ukey = hashInstrumentUKey(instrument_id, exchange_id);
+  const targetInstrumnet: KungfuApi.InstrumentResolved | null =
+    findTargetFromArray<KungfuApi.InstrumentResolved>(
+      instruments,
+      'ukey',
+      ukey,
+    );
+  const instrumentName = targetInstrumnet?.instrumentName || '';
+  const instrumentType = targetInstrumnet?.instrumentType;
+  return {
+    exchangeId: exchange_id,
+    instrumentId: instrument_id,
+    instrumentType: instrumentType || instrument_type,
+    instrumentName,
+    ukey,
+    id: `${instrument_id}_${instrumentName}_${exchange_id}`.toLowerCase(),
+  };
 };

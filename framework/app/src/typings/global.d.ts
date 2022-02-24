@@ -4,7 +4,6 @@ import { GlobalCategoryRegister } from '@kungfu-trader/kungfu-app/src/renderer/a
 
 declare module '@vue/runtime-core' {
   interface ComponentCustomProperties {
-    $registedKfUIComponents: string[];
     $globalBus: Subject<KfBusEvent>;
     $tradingDataSubject: Subject<Watcher>;
     $useGlobalStore: StoreDefinition;

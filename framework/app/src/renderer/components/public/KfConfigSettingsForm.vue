@@ -12,6 +12,9 @@ import {
   numberEnumSelectType,
   stringEnumSelectType,
   useAllKfConfigData,
+  KfConfigValueNumberType,
+  KfConfigValueArrayType,
+  KfConfigValueBooleanType,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import {
   getCurrentInstance,
@@ -88,8 +91,11 @@ const primaryKeys: string[] = (props.configSettings || [])
 const { td } = toRefs(useAllKfConfigData());
 
 const instrumentKeys = props.configSettings
-  .filter((item) => item.type === 'instrument')
-  .map((item) => item.key);
+  .filter((item) => item.type === 'instrument' || item.type === 'instruments')
+  .reduce((data, setting) => {
+    data[setting.key.toString()] = setting.type as 'instrument' | 'instruments';
+    return data;
+  }, {} as Record<string, 'instrument' | 'instruments'>);
 
 type InstrumentsSearchRelated = Record<
   string,
@@ -99,10 +105,15 @@ type InstrumentsSearchRelated = Record<
   }
 >;
 
-const instrumentsSearchRelated = instrumentKeys.reduce(
+const instrumentsSearchRelated = Object.keys(instrumentKeys).reduce(
   (item1: InstrumentsSearchRelated, key: string) => {
     const { searchInstrumnetOptions, handleSearchInstrument } =
       useInstruments();
+    searchInstrumnetOptions.value = makeSearchOptionFormInstruments(
+      key,
+      instrumentKeys[key],
+      formState[key],
+    );
     item1[key] = {
       searchInstrumnetOptions: searchInstrumnetOptions,
       handleSearchInstrument,
@@ -112,23 +123,13 @@ const instrumentsSearchRelated = instrumentKeys.reduce(
   {} as InstrumentsSearchRelated,
 );
 
-instrumentKeys.forEach((key) => {
+Object.keys(instrumentKeys).forEach((key) => {
   watch(
     () => formState[key],
     (newVal) => {
       nextTick().then(() => {
-        const instrumentResolved: KungfuApi.InstrumentResolved | null =
-          transformSearchInstrumentResultToInstrument(newVal.toString());
-        if (!instrumentResolved) {
-          formState.instrument = '';
-          return;
-        }
-        instrumentsSearchRelated[key].searchInstrumnetOptions.value = [
-          {
-            value: buildInstrumentSelectOptionValue(instrumentResolved),
-            label: buildInstrumentSelectOptionLabel(instrumentResolved),
-          },
-        ];
+        instrumentsSearchRelated[key].searchInstrumnetOptions.value =
+          makeSearchOptionFormInstruments(key, instrumentKeys[key], newVal);
       });
     },
   );
@@ -141,22 +142,56 @@ watch(formState, (newVal) => {
 function getValidatorType(
   type: string,
 ): 'number' | 'string' | 'array' | 'boolean' {
-  const intTypes: string[] = [
-    'int',
-    ...Object.keys(numberEnumSelectType || {}),
-    ...Object.keys(numberEnumRadioType || {}),
-  ];
-  const floatTypes: string[] = ['float', 'percent'];
-  if (intTypes.includes(type)) {
+  if (KfConfigValueNumberType.includes(type)) {
     return 'number';
-  } else if (floatTypes.includes(type)) {
-    return 'number';
-  } else if (type === 'folder') {
+  } else if (KfConfigValueArrayType.includes(type)) {
     return 'array';
-  } else if (type === 'bool') {
+  } else if (KfConfigValueBooleanType.includes(type)) {
     return 'boolean';
   } else {
     return 'string';
+  }
+}
+
+function makeSearchOptionFormInstruments(
+  key: string,
+  type: 'instrument' | 'instruments',
+  value: string | string[],
+): { value: string; label: string }[] {
+  const valResolved = resolveInstrumentValue(type, value);
+  const instrumentResolveds: Array<KungfuApi.InstrumentResolved> = valResolved
+    .map((item) => {
+      return transformSearchInstrumentResultToInstrument(item.toString());
+    })
+    .filter((item) => !!item);
+
+  if (!instrumentResolveds.length) {
+    if (type === 'instruments') {
+      formState[key] = [];
+    } else {
+      formState[key] = '';
+    }
+  }
+
+  return [
+    ...instrumentResolveds.map((item) => ({
+      value: buildInstrumentSelectOptionValue(item),
+      label: buildInstrumentSelectOptionLabel(item),
+    })),
+  ];
+}
+
+function resolveInstrumentValue(
+  type: 'instrument' | 'instruments',
+  value: string | string[],
+): string[] {
+  if (type === 'instruments') {
+    return value as string[];
+  }
+  if (type === 'instrument') {
+    return [value as string];
+  } else {
+    return [];
   }
 }
 
@@ -475,6 +510,18 @@ defineExpose({
       <a-select
         v-else-if="item.type === 'instrument'"
         :disabled="changeType === 'update' && item.primary"
+        show-search
+        v-model:value="formState[item.key]"
+        :filter-option="false"
+        :options="
+          instrumentsSearchRelated[item.key].searchInstrumnetOptions.value
+        "
+        @search="instrumentsSearchRelated[item.key].handleSearchInstrument"
+      ></a-select>
+      <a-select
+        v-else-if="item.type === 'instruments'"
+        :disabled="changeType === 'update' && item.primary"
+        mode="multiple"
         show-search
         v-model:value="formState[item.key]"
         :filter-option="false"

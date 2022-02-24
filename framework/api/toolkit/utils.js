@@ -135,14 +135,14 @@ exports.getKfcDir = () => {
 
 exports.isProduction = (argv) => argv.mode === 'production';
 
-exports.getExtensionDirs = (pro = false) => {
+exports.getExtensionDirs = (production = false) => {
   const packageJSON = fs.readJSONSync(
     path.resolve(process.cwd(), 'package.json'),
   );
 
   const extdirs = [
     ...Object.keys(packageJSON.dependencies || {}),
-    ...(pro ? [] : Object.keys(packageJSON.devDependencies || {})),
+    ...(production ? [] : Object.keys(packageJSON.devDependencies || {})),
   ]
     .map((name) => {
       const jsonPath = require.resolve(name + '/package.json');

@@ -239,22 +239,21 @@ const pm2Delete = (processId: string): Promise<void> => {
 };
 
 export const pm2Kill = (): Promise<void> => {
+  kfLogger.info('Pm2 Kill All');
   return new Promise((resolve, reject) => {
-    pm2Connect().then(() => {
-      pm2.kill((err: Error, res: pm2.KillResponse) => {
-        pm2.disconnect();
-        if (err) {
-          kfLogger.error(err.message);
-          reject(err);
-          return;
-        }
+    pm2.kill((err: Error, res: pm2.KillResponse) => {
+      pm2.disconnect();
+      if (err) {
+        kfLogger.error(err.message);
+        reject(err);
+        return;
+      }
 
-        if (res.success) {
-          resolve();
-        } else {
-          reject(new Error('pm2Kill res.success not true'));
-        }
-      });
+      if (res.success) {
+        resolve();
+      } else {
+        reject(new Error('pm2Kill res.success not true'));
+      }
     });
   });
 };

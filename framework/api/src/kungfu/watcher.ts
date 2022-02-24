@@ -1,6 +1,7 @@
 import { kf } from './index';
 import { KF_RUNTIME_DIR } from '../config/pathConfig';
 import {
+  booleanProcessEnv,
   getProcessIdByKfLocation,
   kfLogger,
   setTimerPromiseTask,
@@ -32,7 +33,7 @@ export const watcher = ((): KungfuApi.Watcher | null => {
   const id = [process.env.APP_TYPE || '', process.env.RENDERER_TYPE || ''].join(
     '',
   );
-  const bypassRestore = process.env.RELOAD_AFTER_CRASHED ? true : false;
+  const bypassRestore = booleanProcessEnv(process.env.RELOAD_AFTER_CRASHED);
 
   return kf.watcher(
     KF_RUNTIME_DIR,

@@ -87,7 +87,6 @@ declare namespace KungfuApi {
     | 'folder' // string
     | 'timePicker' //string
     | 'process'
-    | 'instrumentId' // search input
     | 'account' // select - string
     | 'source' // select - string
     | 'exchange' // select - string
@@ -106,6 +105,7 @@ declare namespace KungfuApi {
     | 'commissionMode' // select - number
     | 'instrumentType' // select - number
     | 'instrument'
+    | 'instruments'
     | 'td';
 
   export type KfConfigValue =
@@ -144,6 +144,14 @@ declare namespace KungfuApi {
     extPath: string;
     ui_config?: {
       position: KfUIExtLocatorTypes;
+      components?:
+        | {
+            index: string;
+          }
+        | {
+            entry: string;
+            page: string;
+          };
     };
     config?: {
       [key in KfCategoryTypes]?: {
@@ -172,6 +180,14 @@ declare namespace KungfuApi {
       name: string;
       extPath: string;
       position: KfUIExtLocatorTypes;
+      components:
+        | {
+            index: string;
+          }
+        | {
+            entry: string;
+            page: string;
+          };
     }
   >;
 

@@ -72,18 +72,17 @@ export const defaultBoardsMap: KfLayout.BoardsMap = {
   },
 };
 
-export const getBoardsMap = (): KfLayout.BoardsMap | null => {
-  const data = localStorage.getItem('boardsMap');
+export const getIndexBoardsMap = (): KfLayout.BoardsMap | null => {
+  const data = localStorage.getItem('indexBoardsMap');
   if (!data) {
     return null;
-  } else {
-    const storedBoardsMap = JSON.parse(data) as KfLayout.BoardsMap;
-    if (!Object.keys(storedBoardsMap).length) {
-      return null;
-    }
-
-    return storedBoardsMap;
   }
+  const storedBoardsMap = JSON.parse(data) as KfLayout.BoardsMap;
+  if (!Object.keys(storedBoardsMap).length) {
+    return null;
+  }
+
+  return storedBoardsMap;
 };
 
 export const coreForScheduleTasksOptions: Array<{

@@ -261,7 +261,7 @@ export default defineComponent({
     },
 
     hasComponent(cname: string) {
-      return this.$registedKfUIComponents.includes(cname);
+      return !!this._.appContext.components[cname];
     },
   },
 });
