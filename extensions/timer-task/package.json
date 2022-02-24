@@ -1,5 +1,5 @@
 {
-  "name": "@kungfu-trader/timer-task",
+  "name": "@kungfu-trader/kfx-timer-task",
   "author": {
     "name": "kungfu-trader",
     "email": "info@kungfu.link"
@@ -16,7 +16,7 @@
   },
   "binary": {
     "module_name": "kfx-timer-task",
-    "module_path": "dist/timertask",
+    "module_path": "dist/timer-task",
     "remote_path": "{module_name}/v{major}/v{version}",
     "package_name": "{module_name}-v{version}-{platform}-{arch}-{configuration}.tar.gz",
     "host": "https://prebuilt.libkungfu.cc"
