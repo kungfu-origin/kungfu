@@ -4,10 +4,7 @@ import {
   dealKfNumber,
   dealKfPrice,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
-import {
-  useQuote,
-  useTriggerMakeOrder,
-} from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
+import { useTriggerMakeOrder } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import {
   computed,
   getCurrentInstance,
@@ -17,6 +14,7 @@ import {
 } from 'vue';
 import KfBlinkNum from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfBlinkNum.vue';
 import { SideEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';
+import { useQuote } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
 
 interface OrderBookProps {}
 defineProps<OrderBookProps>();

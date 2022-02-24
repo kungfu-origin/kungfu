@@ -41,6 +41,7 @@ import {
   reactive,
   ref,
   Ref,
+  toRaw,
   watch,
 } from 'vue';
 import dayjs from 'dayjs';
@@ -56,6 +57,7 @@ import { storeToRefs } from 'pinia';
 import { ipcRenderer } from 'electron';
 import { throttleTime } from 'rxjs';
 import { useExtraCategory } from './uiExtraLocationUtils';
+import { tradingDataSubject } from '@kungfu-trader/kungfu-js-api/kungfu/tradingData';
 
 export const ensureRemoveLocation = (
   kfLocation: KungfuApi.KfLocation | KungfuApi.KfConfig,
@@ -815,5 +817,128 @@ export const getInstrumentByInstrumentPair = (
     instrumentName,
     ukey,
     id: `${instrument_id}_${instrumentName}_${exchange_id}`.toLowerCase(),
+  };
+};
+
+export const useQuote = (): {
+  quotes: Ref<Record<string, KungfuApi.Quote>>;
+  getQuoteByInstrument(
+    instrument: KungfuApi.InstrumentResolved | undefined,
+  ): KungfuApi.Quote | null;
+  getLastPricePercent(
+    instrument: KungfuApi.InstrumentResolved | undefined,
+  ): string;
+} => {
+  const quotes = ref<Record<string, KungfuApi.Quote>>({});
+  const app = getCurrentInstance();
+
+  onMounted(() => {
+    if (app?.proxy) {
+      const subscription = app.proxy.$tradingDataSubject.subscribe(
+        (watcher: KungfuApi.Watcher) => {
+          quotes.value = toRaw({ ...watcher.ledger.Quote });
+        },
+      );
+
+      onBeforeUnmount(() => {
+        subscription.unsubscribe();
+      });
+    }
+  });
+
+  const getQuoteByInstrument = (
+    instrument: KungfuApi.InstrumentResolved | undefined,
+  ): KungfuApi.Quote | null => {
+    if (!instrument) {
+      return null;
+    }
+
+    const { ukey } = instrument;
+    const quote = quotes.value[ukey] as KungfuApi.Quote | undefined;
+    return quote || null;
+  };
+
+  const getLastPricePercent = (
+    instrument: KungfuApi.InstrumentResolved,
+  ): string => {
+    const quote = getQuoteByInstrument(instrument);
+
+    if (!quote) {
+      return '--';
+    }
+
+    const { open_price, last_price } = quote;
+    if (!open_price || !last_price) {
+      return '--';
+    }
+
+    const percent = (last_price - open_price) / open_price;
+    return Number(percent * 100).toFixed(2) + '%';
+  };
+
+  return {
+    quotes,
+    getQuoteByInstrument,
+    getLastPricePercent,
+  };
+};
+
+export const useDealInstruments = (): void => {
+  const app = getCurrentInstance();
+  const dealInstrumentController = ref<boolean>(false);
+  const existedInstrumentsLength = ref<number>(0);
+  const dealedInstrumentsLength = ref<number>(0);
+
+  onMounted(() => {
+    if (app?.proxy) {
+      dealInstrumentController.value = true;
+      window.workers.dealInstruments.postMessage({
+        tag: 'req_instruments',
+      });
+
+      const subscription = tradingDataSubject
+        .pipe(throttleTime(5000))
+        .subscribe((watcher: KungfuApi.Watcher) => {
+          const instruments = watcher.ledger.Instrument.list();
+          const instrumentsLength = instruments.length;
+          if (!instruments || !instrumentsLength) {
+            return;
+          }
+
+          if (
+            !dealInstrumentController.value &&
+            instrumentsLength > dealedInstrumentsLength.value
+          ) {
+            dealInstrumentController.value = true;
+            dealedInstrumentsLength.value = instrumentsLength;
+            instruments.forEach((item: KungfuApi.Instrument) => {
+              item.ukey = item.uid_key;
+            });
+            window.workers.dealInstruments.postMessage({
+              tag: 'req_dealInstruments',
+              instruments: instruments,
+            });
+          }
+        });
+
+      onBeforeUnmount(() => {
+        subscription.unsubscribe();
+      });
+    }
+  });
+
+  window.workers.dealInstruments.onmessage = (event: {
+    data: { tag: string; instruments: KungfuApi.InstrumentResolved[] };
+  }) => {
+    const { instruments } = event.data || {};
+
+    console.log('DealInstruments onmessage', instruments.length);
+    dealInstrumentController.value = false;
+    if (instruments.length) {
+      existedInstrumentsLength.value = instruments.length || 0; //refresh old instruments
+      if (app?.proxy) {
+        app?.proxy.$useGlobalStore().setInstruments(instruments);
+      }
+    }
   };
 };

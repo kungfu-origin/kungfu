@@ -7,11 +7,11 @@ import zhCN from 'ant-design-vue/es/locale/zh_CN';
 import {
   markClearJournal,
   removeLoadingMask,
-  useDealInstruments,
   useIpcListener,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import {
   useDealExportHistoryTradingData,
+  useDealInstruments,
   usePreStartAndQuitApp,
   useSubscibeInstrumentAtEntry,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
@@ -35,7 +35,8 @@ const {
   preQuitSystemLoadingData,
   preQuitSystemLoading,
 } = usePreStartAndQuitApp();
-useDealInstruments();
+
+useDealInstruments;
 useSubscibeInstrumentAtEntry();
 
 const { exportDateModalVisible, exportDataLoading, handleConfirmExportDate } =

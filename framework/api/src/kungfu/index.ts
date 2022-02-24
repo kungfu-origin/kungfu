@@ -23,6 +23,10 @@ import {
 import { HistoryDateEnum, MakeOrderByWatcherEnum } from '../typings/enums';
 import { ExchangeIds } from '../config/tradingConfig';
 
+if (process.env.RENDERER_TYPE === 'logview') {
+  throw new Error('test');
+}
+
 export const kf = kungfu();
 kfLogger.info('Load kungfu node');
 
