@@ -71,14 +71,6 @@ export const killExtra = () => forceKill([kfcName, 'pm2']);
 
 //===================== pm2 start =======================
 
-declare module 'pm2' {
-  type KillResponse = {
-    success: boolean;
-  };
-  type KillErrCallBack = (err: Error, response: KillResponse) => void;
-  function kill(errorback: KillErrCallBack): void;
-}
-
 interface Pm2StartOptions extends StartOptions {
   name: string;
   autorestart?: boolean;
@@ -238,23 +230,34 @@ const pm2Delete = (processId: string): Promise<void> => {
   });
 };
 
+declare module 'pm2' {
+  function kill(cb: (err: Error, res: { success: boolean }) => void): void;
+}
+
 export const pm2Kill = (): Promise<void> => {
   kfLogger.info('Pm2 Kill All');
   return new Promise((resolve, reject) => {
-    pm2.kill((err: Error, res: pm2.KillResponse) => {
-      pm2.disconnect();
-      if (err) {
-        kfLogger.error(err.message);
-        reject(err);
-        return;
-      }
+    pm2.kill(
+      (
+        err: Error,
+        res: {
+          success: boolean;
+        },
+      ) => {
+        pm2.disconnect();
+        if (err) {
+          kfLogger.error(err.message);
+          reject(err);
+          return;
+        }
 
-      if (res.success) {
-        resolve();
-      } else {
-        reject(new Error('pm2Kill res.success not true'));
-      }
-    });
+        if (res.success) {
+          resolve();
+        } else {
+          reject(new Error('pm2Kill res.success not true'));
+        }
+      },
+    );
   });
 };
 
