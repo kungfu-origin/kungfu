@@ -12,34 +12,38 @@ module.exports = {
       mode: production ? 'production' : 'development',
       module: {
         rules: [
-          {
-            test: /\.js$/,
-            exclude: /node_modules/,
-            use: [
-              {
-                loader: 'babel-loader',
-              },
-            ],
-          },
-          {
-            test: /\.ts$/,
-            exclude: /node_modules/,
-            use: [
-              {
-                loader: 'babel-loader',
-              },
-              {
-                loader: 'ts-loader',
-                options: {
-                  // 指定特定的ts编译配置, 为了区分脚本的ts配置
-                  configFile: path.resolve(cwdDir, 'tsconfig.json'),
-                  // 对应文件添加个.ts或.tsx后缀
-                  appendTsSuffixTo: [/\.vue$/],
-                  transpileOnly: false, // 关闭类型检测, 即值进行转译
+          ...(argv.passTJSLoader
+            ? []
+            : [
+                {
+                  test: /\.(t|j)s$/,
+                  exclude: /node_modules/,
+                  use: [
+                    {
+                      loader: 'babel-loader',
+                    },
+                  ],
                 },
-              },
-            ],
-          },
+                {
+                  test: /\.(t|j)s$/,
+                  exclude: /node_modules/,
+                  use: [
+                    {
+                      loader: 'ts-loader',
+                      options: {
+                        // 指定特定的ts编译配置，为了区分脚本的ts配置
+                        configFile: path.resolve(
+                          process.cwd(),
+                          'tsconfig.json',
+                        ),
+                        // 对应文件添加个.ts或.tsx后缀
+                        appendTsSuffixTo: [/\.vue$/],
+                        transpileOnly: true, // 关闭类型检测，即值进行转译
+                      },
+                    },
+                  ],
+                },
+              ]),
           {
             test: /\.node$/,
             use: 'node-loader',
