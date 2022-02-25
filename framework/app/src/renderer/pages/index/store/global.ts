@@ -235,6 +235,28 @@ export const useGlobalStore = defineStore('global', {
       (<typeof value>this.boardsMap[id][attrKey]) = value;
     },
 
+    addBoardByContentId(
+      targetBoardId: number,
+      targetContentId: string,
+    ): Promise<void> {
+      const targetBoard: KfLayout.BoardInfo = this.boardsMap[targetBoardId];
+      const contents = targetBoard?.contents;
+      const targetIndex = contents?.indexOf(targetContentId);
+
+      if (contents === undefined) {
+        return Promise.reject();
+      } else if (targetIndex === undefined) {
+        return Promise.reject();
+      } else if (targetIndex !== -1) {
+        return Promise.reject();
+      }
+
+      contents.push(targetContentId);
+      targetBoard.current = targetContentId;
+
+      return Promise.resolve();
+    },
+
     removeBoardByContentId(targetBoardId: number, targetContentId: string) {
       const targetBoard: KfLayout.BoardInfo = this.boardsMap[targetBoardId];
       const contents = targetBoard?.contents;

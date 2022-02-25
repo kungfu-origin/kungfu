@@ -1,11 +1,22 @@
 <template>
   <div class="kf-index__warp">
-    <KfRowColIter :board-id="0"></KfRowColIter>
+    <KfRowColIter :board-id="0" :closable="true"></KfRowColIter>
+    <KfAddBoardModalVue
+      v-if="addBoardModalVisible"
+      v-model:visible="addBoardModalVisible"
+      :targetBoardId="addBoardTargetBoardId"
+    ></KfAddBoardModalVue>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, onBeforeUnmount } from 'vue';
+import {
+  defineComponent,
+  getCurrentInstance,
+  onBeforeUnmount,
+  onMounted,
+  ref,
+} from 'vue';
 
 import KfRowColIter from '@kungfu-trader/kungfu-app/src/renderer/components/layout/KfRowColIter.vue';
 
@@ -14,7 +25,8 @@ import {
   defaultBoardsMap,
   getIndexBoardsMap,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/configs';
-import { usePreStartAndQuitApp } from '../../../assets/methods/actionsUtils';
+import { usePreStartAndQuitApp } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
+import KfAddBoardModalVue from '../../../components/public/KfAddBoardModal.vue';
 
 export default defineComponent({
   name: 'Index',
@@ -26,14 +38,41 @@ export default defineComponent({
     const store = useGlobalStore();
     store.initBoardsMap(boardsMap);
 
+    const addBoardModalVisible = ref<boolean>(false);
+    const addBoardTargetBoardId = ref<number>(-1);
+
     const { saveBoardsMap } = usePreStartAndQuitApp();
     onBeforeUnmount(() => {
       saveBoardsMap();
     });
+
+    const app = getCurrentInstance();
+    onMounted(() => {
+      if (app?.proxy) {
+        const subscription = app.proxy.$globalBus.subscribe(
+          (data: KfBusEvent) => {
+            if (data.tag === 'addBoard') {
+              addBoardModalVisible.value = true;
+              addBoardTargetBoardId.value = data.boardId;
+            }
+          },
+        );
+
+        onBeforeUnmount(() => {
+          subscription.unsubscribe();
+        });
+      }
+    });
+
+    return {
+      addBoardModalVisible,
+      addBoardTargetBoardId,
+    };
   },
 
   components: {
     KfRowColIter,
+    KfAddBoardModalVue,
   },
 });
 </script>
