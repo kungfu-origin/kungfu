@@ -2,7 +2,13 @@
 import { SlidersOutlined, SettingOutlined } from '@ant-design/icons-vue';
 import { useExtConfigsRelated } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import KfProcessStatusController from '@kungfu-trader/kungfu-app/src/renderer/components/layout/KfProcessStatusController.vue';
-import { computed, getCurrentInstance, onUnmounted, ref } from 'vue';
+import {
+  computed,
+  getCurrentInstance,
+  onBeforeUnmount,
+  onUnmounted,
+  ref,
+} from 'vue';
 import globalBus from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/globalBus';
 import KfGlobalSettingModal from '../public/KfGlobalSettingModal.vue';
 const logo = require('@kungfu-trader/kungfu-app/src/renderer/assets/svg/LOGO.svg');
@@ -13,15 +19,6 @@ defineProps<LayoutProps>();
 const app = getCurrentInstance();
 const globalSettingModalVisible = ref<boolean>(false);
 const menuSelectedKeys = ref<string[]>(['main']);
-
-const busSubscription = globalBus.subscribe((data: KfBusEvent) => {
-  if (data.tag === 'main') {
-    switch (data.name) {
-      case 'open-setting-dialog':
-        globalSettingModalVisible.value = true;
-    }
-  }
-});
 
 const { uiExtConfigs } = useExtConfigsRelated();
 const sidebarFooterComponentConfigs = computed(() => {
@@ -47,7 +44,22 @@ const sidebarComponentConfigs = computed(() => {
 });
 
 onUnmounted(() => {
-  busSubscription.unsubscribe();
+  if (app?.proxy) {
+    const busSubscription = app.proxy.$globalBus.subscribe(
+      (data: KfBusEvent) => {
+        if (data.tag === 'main') {
+          switch (data.name) {
+            case 'open-setting-dialog':
+              globalSettingModalVisible.value = true;
+          }
+        }
+      },
+    );
+
+    onBeforeUnmount(() => {
+      busSubscription.unsubscribe();
+    });
+  }
 });
 
 function handleToPage(pathname: string) {

@@ -44,21 +44,6 @@ const { exportDateModalVisible, exportDataLoading, handleConfirmExportDate } =
 
 useIpcListener();
 
-const busSubscription = globalBus.subscribe((data: KfBusEvent) => {
-  if (data.tag === 'main') {
-    switch (data.name) {
-      case 'clear-journal':
-        markClearJournal();
-        break;
-      case 'export-all-trading-data':
-        globalBus.next({
-          tag: 'export',
-          tradingDataType: 'all',
-        } as ExportTradingDataEvent);
-    }
-  }
-});
-
 const tradingDataSubscription = tradingDataSubject.subscribe(
   (watcher: KungfuApi.Watcher) => {
     const appStates = dealAppStates(watcher.appStates);
@@ -68,17 +53,36 @@ const tradingDataSubscription = tradingDataSubject.subscribe(
   },
 );
 
-onBeforeUnmount(() => {
-  tradingDataSubscription.unsubscribe();
-  busSubscription.unsubscribe();
-});
-
 store.setKfConfigList();
 store.setKfExtConfigs();
 store.setSubscribedInstruments();
 
 onMounted(() => {
   removeLoadingMask();
+
+  if (app?.proxy) {
+    const busSubscription = app.proxy.$globalBus.subscribe(
+      (data: KfBusEvent) => {
+        if (data.tag === 'main') {
+          switch (data.name) {
+            case 'clear-journal':
+              markClearJournal();
+              break;
+            case 'export-all-trading-data':
+              app.proxy.$globalBus.next({
+                tag: 'export',
+                tradingDataType: 'all',
+              } as ExportTradingDataEvent);
+          }
+        }
+
+        onBeforeUnmount(() => {
+          tradingDataSubscription.unsubscribe();
+          busSubscription.unsubscribe();
+        });
+      },
+    );
+  }
 
   window.addEventListener('resize', () => {
     app?.proxy &&
