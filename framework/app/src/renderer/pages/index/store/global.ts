@@ -147,28 +147,18 @@ export const useGlobalStore = defineStore('global', {
           strategys: strategy,
         });
 
-        if (this.currentGlobalKfLocation === null) {
+        if (
+          this.currentGlobalKfLocation === null ||
+          !this.checkCurrentGlobalKfLocationExisted()
+        ) {
           if (td.length) {
             this.setCurrentGlobalKfLocation(td[0]);
-            return;
           } else if (strategy.length) {
             this.setCurrentGlobalKfLocation(strategy[0]);
-          }
-        } else if (!this.checkCurrentGlobalKfLocationExisted()) {
-          if (this.currentGlobalKfLocation?.category === 'td') {
-            if (this.tdList.length) {
-              this.setCurrentGlobalKfLocation(td[0]);
-              return;
-            }
-          } else if (this.currentGlobalKfLocation?.category === 'strategy') {
-            if (this.strategyList.length) {
-              this.setCurrentGlobalKfLocation(strategy[0]);
-              return;
-            }
+          } else {
+            this.setCurrentGlobalKfLocation(null);
           }
         }
-
-        this.setCurrentGlobalKfLocation(null);
       });
     },
 
