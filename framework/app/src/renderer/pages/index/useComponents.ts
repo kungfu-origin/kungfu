@@ -140,7 +140,7 @@ export const useComponenets = (
     .setKfUIExtConfigs()
     .then((configs) => getUIComponents(configs))
     .then((components) => {
-      components.forEach(({ cData, position, key }) => {
+      components.forEach(({ cData, position, key, name }) => {
         switch (position) {
           case 'sidebar':
             app.component(key, cData[`${key}-entry`]);
@@ -149,6 +149,14 @@ export const useComponenets = (
               name: key,
               component: cData[`${key}-page`],
             });
+            break;
+          case 'board':
+            app.component(name, cData[`${key}-index`]);
+            if (
+              app.config.globalProperties.$availKfBoards.indexOf(name) === -1
+            ) {
+              app.config.globalProperties.$availKfBoards.push(name);
+            }
             break;
           default:
             app.component(key, cData[`${key}-index`]);
