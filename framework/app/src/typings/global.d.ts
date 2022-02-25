@@ -8,6 +8,7 @@ declare module '@vue/runtime-core' {
     $tradingDataSubject: Subject<Watcher>;
     $useGlobalStore: StoreDefinition;
     $globalCategoryRegister: GlobalCategoryRegister;
+    $availKfBoards: string[];
   }
 }
 

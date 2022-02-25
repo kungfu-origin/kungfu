@@ -97,6 +97,11 @@ interface TriggerUpdateStrategy {
   strategys: KungfuApi.KfConfig[];
 }
 
+interface TriggerAddBoard {
+  tag: 'addBoard';
+  boardId: number;
+}
+
 type KfBusEvent =
   | ResizeEvent
   | ProcessStatusChangeEvent
@@ -109,6 +114,7 @@ type KfBusEvent =
   | TriggerUpdateTd
   | TriggerUpdateMd
   | TriggerUpdateStrategy
+  | TriggerAddBoard
   | ExportTradingDataEvent;
 
 interface ExtraOrderInput {

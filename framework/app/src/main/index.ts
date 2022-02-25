@@ -280,7 +280,7 @@ function setMenu() {
       label: '文件',
       submenu: [
         {
-          label: '打开功夫资源目录（KF_HOME）',
+          label: '打开功夫资源目录 (KF_HOME)',
           click: () => shell.showItemInFolder(KF_HOME),
         },
         {

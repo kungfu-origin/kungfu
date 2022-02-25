@@ -121,11 +121,26 @@ export const useComponenets = (
     ),
   );
 
+  app.config.globalProperties.$availKfBoards = [
+    '持仓',
+    '持仓汇总',
+    '委托记录',
+    '成交记录',
+    '交易账户',
+    '行情源',
+    '策略进程',
+    '交易任务',
+    '行情订阅',
+    '深度行情',
+    '下单面板',
+    '套利指令',
+  ];
+
   return useGlobalStore()
     .setKfUIExtConfigs()
     .then((configs) => getUIComponents(configs))
     .then((components) => {
-      components.forEach(({ cData, position, key }) => {
+      components.forEach(({ cData, position, key, name }) => {
         switch (position) {
           case 'sidebar':
             app.component(key, cData[`${key}-entry`]);
@@ -134,6 +149,14 @@ export const useComponenets = (
               name: key,
               component: cData[`${key}-page`],
             });
+            break;
+          case 'board':
+            app.component(name, cData[`${key}-index`]);
+            if (
+              app.config.globalProperties.$availKfBoards.indexOf(name) === -1
+            ) {
+              app.config.globalProperties.$availKfBoards.push(name);
+            }
             break;
           default:
             app.component(key, cData[`${key}-index`]);
@@ -147,6 +170,4 @@ export const useComponenets = (
       useGlobalStore().setKfConfigList();
       useGlobalStore().setKfExtConfigs();
     });
-
-  return;
 };

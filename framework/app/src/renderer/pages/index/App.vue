@@ -7,11 +7,11 @@ import zhCN from 'ant-design-vue/es/locale/zh_CN';
 import {
   markClearJournal,
   removeLoadingMask,
-  useDealInstruments,
   useIpcListener,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import {
   useDealExportHistoryTradingData,
+  useDealInstruments,
   usePreStartAndQuitApp,
   useSubscibeInstrumentAtEntry,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
@@ -35,32 +35,14 @@ const {
   preQuitSystemLoadingData,
   preQuitSystemLoading,
 } = usePreStartAndQuitApp();
-useDealInstruments();
+
+useDealInstruments;
 useSubscibeInstrumentAtEntry();
 
 const { exportDateModalVisible, exportDataLoading, handleConfirmExportDate } =
   useDealExportHistoryTradingData();
 
 useIpcListener();
-
-const busSubscription = globalBus.subscribe((data: KfBusEvent) => {
-  if (data.tag === 'main') {
-    switch (data.name) {
-      case 'clear-journal':
-        markClearJournal();
-        break;
-      case 'reset-main-dashboard':
-        store.initBoardsMap(defaultBoardsMap);
-        message.success('操作成功');
-        break;
-      case 'export-all-trading-data':
-        globalBus.next({
-          tag: 'export',
-          tradingDataType: 'all',
-        } as ExportTradingDataEvent);
-    }
-  }
-});
 
 const tradingDataSubscription = tradingDataSubject.subscribe(
   (watcher: KungfuApi.Watcher) => {
@@ -71,17 +53,36 @@ const tradingDataSubscription = tradingDataSubject.subscribe(
   },
 );
 
-onBeforeUnmount(() => {
-  tradingDataSubscription.unsubscribe();
-  busSubscription.unsubscribe();
-});
-
 store.setKfConfigList();
 store.setKfExtConfigs();
 store.setSubscribedInstruments();
 
 onMounted(() => {
   removeLoadingMask();
+
+  if (app?.proxy) {
+    const busSubscription = app.proxy.$globalBus.subscribe(
+      (data: KfBusEvent) => {
+        if (data.tag === 'main') {
+          switch (data.name) {
+            case 'clear-journal':
+              markClearJournal();
+              break;
+            case 'export-all-trading-data':
+              app.proxy.$globalBus.next({
+                tag: 'export',
+                tradingDataType: 'all',
+              } as ExportTradingDataEvent);
+          }
+        }
+
+        onBeforeUnmount(() => {
+          tradingDataSubscription.unsubscribe();
+          busSubscription.unsubscribe();
+        });
+      },
+    );
+  }
 
   window.addEventListener('resize', () => {
     app?.proxy &&

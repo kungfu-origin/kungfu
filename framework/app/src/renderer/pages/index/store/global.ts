@@ -147,28 +147,18 @@ export const useGlobalStore = defineStore('global', {
           strategys: strategy,
         });
 
-        if (this.currentGlobalKfLocation === null) {
+        if (
+          this.currentGlobalKfLocation === null ||
+          !this.checkCurrentGlobalKfLocationExisted()
+        ) {
           if (td.length) {
             this.setCurrentGlobalKfLocation(td[0]);
-            return;
           } else if (strategy.length) {
             this.setCurrentGlobalKfLocation(strategy[0]);
-          }
-        } else if (!this.checkCurrentGlobalKfLocationExisted()) {
-          if (this.currentGlobalKfLocation?.category === 'td') {
-            if (this.tdList.length) {
-              this.setCurrentGlobalKfLocation(td[0]);
-              return;
-            }
-          } else if (this.currentGlobalKfLocation?.category === 'strategy') {
-            if (this.strategyList.length) {
-              this.setCurrentGlobalKfLocation(strategy[0]);
-              return;
-            }
+          } else {
+            this.setCurrentGlobalKfLocation(null);
           }
         }
-
-        this.setCurrentGlobalKfLocation(null);
       });
     },
 
@@ -243,6 +233,28 @@ export const useGlobalStore = defineStore('global', {
       value: KfLayout.BoardInfo[keyof KfLayout.BoardInfo],
     ) {
       (<typeof value>this.boardsMap[id][attrKey]) = value;
+    },
+
+    addBoardByContentId(
+      targetBoardId: number,
+      targetContentId: string,
+    ): Promise<void> {
+      const targetBoard: KfLayout.BoardInfo = this.boardsMap[targetBoardId];
+      const contents = targetBoard?.contents;
+      const targetIndex = contents?.indexOf(targetContentId);
+
+      if (contents === undefined) {
+        return Promise.reject();
+      } else if (targetIndex === undefined) {
+        return Promise.reject();
+      } else if (targetIndex !== -1) {
+        return Promise.reject();
+      }
+
+      contents.push(targetContentId);
+      targetBoard.current = targetContentId;
+
+      return Promise.resolve();
     },
 
     removeBoardByContentId(targetBoardId: number, targetContentId: string) {

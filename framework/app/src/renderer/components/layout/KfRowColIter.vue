@@ -4,7 +4,10 @@
       v-for="childBoardId in boardInfo.children || []"
       :key="childBoardId"
     >
-      <KfRowColIter :board-id="childBoardId"></KfRowColIter>
+      <KfRowColIter
+        :board-id="childBoardId"
+        :closable="closable"
+      ></KfRowColIter>
     </template>
     <template v-if="contents.length">
       <a-tabs
@@ -15,9 +18,9 @@
         }"
         :activeKey="boardInfo.current"
         style="height: 100%; width: 100%"
-        type="card"
+        :type="closable ? 'editable-card' : 'card'"
         :tabBarStyle="{ margin: 0 }"
-        @edit="hanldeEdit"
+        @edit="(targetKey, action) => hanldeEdit(boardId, targetKey, action)"
         @tabClick="handleClickTab"
         @dragenter="handleDragEnter"
         @dragover="handleDragOver"
@@ -52,7 +55,10 @@
       v-for="childBoardId in boardInfo.children || []"
       :key="childBoardId"
     >
-      <KfRowColIter :board-id="childBoardId"></KfRowColIter>
+      <KfRowColIter
+        :board-id="childBoardId"
+        :closable="closable"
+      ></KfRowColIter>
     </template>
     <template v-if="contents.length">
       <a-tabs
@@ -63,9 +69,9 @@
         }"
         :activeKey="boardInfo.current"
         style="height: 100%; width: 100%"
-        type="card"
+        :type="closable ? 'editable-card' : 'card'"
         :tabBarStyle="{ margin: 0 }"
-        @edit="hanldeEdit"
+        @edit="(targetKey, action) => hanldeEdit(boardId, targetKey, action)"
         @tabClick="handleClickTab"
         @dragenter="handleDragEnter"
         @dragover="handleDragOver"
@@ -134,6 +140,11 @@ export default defineComponent({
     boardId: {
       type: Number as PropType<number>,
       default: 0,
+    },
+
+    closable: {
+      type: Boolean as PropType<boolean>,
+      default: false,
     },
   },
 
@@ -242,9 +253,20 @@ export default defineComponent({
       this.clearState();
     },
 
-    hanldeEdit(targetContentId: KfLayout.BoardInfo['current']) {
-      const targetBoardId = this.boardId;
-      this.removeBoardByContentId(targetBoardId, targetContentId || '');
+    hanldeEdit(
+      boardId: number,
+      targetContentId: KfLayout.BoardInfo['current'] | MouseEvent,
+      action: 'add' | 'remove',
+    ) {
+      if (action === 'remove') {
+        const targetBoardId = this.boardId;
+        this.removeBoardByContentId(targetBoardId, targetContentId || '');
+      } else {
+        this.$globalBus.next({
+          tag: 'addBoard',
+          boardId,
+        });
+      }
     },
 
     handleClickTab(e: KfLayout.BoardInfo['current']) {
