@@ -50,10 +50,6 @@ const busSubscription = globalBus.subscribe((data: KfBusEvent) => {
       case 'clear-journal':
         markClearJournal();
         break;
-      case 'reset-main-dashboard':
-        store.initBoardsMap(defaultBoardsMap);
-        message.success('操作成功');
-        break;
       case 'export-all-trading-data':
         globalBus.next({
           tag: 'export',
