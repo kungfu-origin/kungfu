@@ -9,7 +9,6 @@ import {
   onUnmounted,
   ref,
 } from 'vue';
-import globalBus from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/globalBus';
 import KfGlobalSettingModal from '../public/KfGlobalSettingModal.vue';
 const logo = require('@kungfu-trader/kungfu-app/src/renderer/assets/svg/LOGO.svg');
 

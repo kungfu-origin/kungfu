@@ -21,9 +21,6 @@ import {
 } from '@kungfu-trader/kungfu-js-api/kungfu/watcher';
 import { useGlobalStore } from './store/global';
 import KfDownloadDateModal from '@kungfu-trader/kungfu-app/src/renderer/components/layout/KfHistoryDateModal.vue';
-import { defaultBoardsMap } from '@kungfu-trader/kungfu-app/src/renderer/assets/configs';
-import { message } from 'ant-design-vue';
-import globalBus from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/globalBus';
 import { tradingDataSubject } from '@kungfu-trader/kungfu-js-api/kungfu/tradingData';
 
 const app = getCurrentInstance();
