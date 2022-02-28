@@ -9,7 +9,7 @@ import {
   onUnmounted,
   ref,
 } from 'vue';
-import globalBus from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/globalBus';
+import globalBus from '../../assets/methods/globalBus';
 import KfGlobalSettingModal from '../public/KfGlobalSettingModal.vue';
 const logo = require('@kungfu-trader/kungfu-app/src/renderer/assets/svg/LOGO.svg');
 
@@ -43,23 +43,17 @@ const sidebarComponentConfigs = computed(() => {
     });
 });
 
-onUnmounted(() => {
-  if (app?.proxy) {
-    const busSubscription = app.proxy.$globalBus.subscribe(
-      (data: KfBusEvent) => {
-        if (data.tag === 'main') {
-          switch (data.name) {
-            case 'open-setting-dialog':
-              globalSettingModalVisible.value = true;
-          }
-        }
-      },
-    );
-
-    onBeforeUnmount(() => {
-      busSubscription.unsubscribe();
-    });
+const busSubscription = globalBus.subscribe((data: KfBusEvent) => {
+  if (data.tag === 'main') {
+    switch (data.name) {
+      case 'open-setting-dialog':
+        globalSettingModalVisible.value = true;
+    }
   }
+});
+
+onBeforeUnmount(() => {
+  busSubscription.unsubscribe();
 });
 
 function handleToPage(pathname: string) {

@@ -114,7 +114,7 @@ onMounted(() => {
     });
 
     onBeforeUnmount(() => {
-      subscription.unsubscribe;
+      subscription.unsubscribe();
     });
   }
 });

@@ -10,13 +10,7 @@
 </template>
 
 <script lang="ts">
-import {
-  defineComponent,
-  getCurrentInstance,
-  onBeforeUnmount,
-  onMounted,
-  ref,
-} from 'vue';
+import { defineComponent, onBeforeUnmount, ref } from 'vue';
 
 import KfRowColIter from '@kungfu-trader/kungfu-app/src/renderer/components/layout/KfRowColIter.vue';
 
@@ -28,6 +22,7 @@ import {
 import { usePreStartAndQuitApp } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
 import KfAddBoardModalVue from '../../../components/public/KfAddBoardModal.vue';
 import { message } from 'ant-design-vue';
+import globalBus from '../../../assets/methods/globalBus';
 
 export default defineComponent({
   name: 'Index',
@@ -42,34 +37,24 @@ export default defineComponent({
     const addBoardModalVisible = ref<boolean>(false);
     const addBoardTargetBoardId = ref<number>(-1);
 
-    const { saveBoardsMap } = usePreStartAndQuitApp();
-    onBeforeUnmount(() => {
-      saveBoardsMap();
+    const subscription = globalBus.subscribe((data: KfBusEvent) => {
+      if (data.tag === 'addBoard') {
+        addBoardModalVisible.value = true;
+        addBoardTargetBoardId.value = data.boardId;
+      }
+
+      if (data.tag === 'main') {
+        if (data.name === 'reset-main-dashboard') {
+          store.initBoardsMap(defaultBoardsMap);
+          message.success('操作成功');
+        }
+      }
     });
 
-    const app = getCurrentInstance();
-    onMounted(() => {
-      if (app?.proxy) {
-        const subscription = app.proxy.$globalBus.subscribe(
-          (data: KfBusEvent) => {
-            if (data.tag === 'addBoard') {
-              addBoardModalVisible.value = true;
-              addBoardTargetBoardId.value = data.boardId;
-            }
-
-            if (data.tag === 'main') {
-              if (data.name === 'reset-main-dashboard') {
-                store.initBoardsMap(defaultBoardsMap);
-                message.success('操作成功');
-              }
-            }
-          },
-        );
-
-        onBeforeUnmount(() => {
-          subscription.unsubscribe();
-        });
-      }
+    const { saveBoardsMap } = usePreStartAndQuitApp();
+    onBeforeUnmount(() => {
+      subscription.unsubscribe();
+      saveBoardsMap();
     });
 
     return {
