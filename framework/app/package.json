@@ -38,10 +38,10 @@
     "jschardet": "^3.0.0",
     "pinia": "^2.0.0",
     "rxjs": "^7.5.0",
-    "vue": "^3.2.31",
-    "vue-router": "^4.0.0"
+    "vue": "^3.2.31"
   },
   "devDependencies": {
+    "vue-router": "^4.0.0",
     "@babel/core": "^7.0.0",
     "@kungfu-trader/kungfu-toolchain": "^2.4.0-alpha.15",
     "babel-loader": "^8.0.0",
