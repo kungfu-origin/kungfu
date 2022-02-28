@@ -224,7 +224,7 @@ export const useGlobalStore = defineStore('global', {
     },
 
     initBoardsMap(boardsMap: KfLayout.BoardsMap) {
-      this.boardsMap = boardsMap;
+      this.boardsMap = JSON.parse(JSON.stringify(boardsMap));
     },
 
     setBoardsMapAttrById(
