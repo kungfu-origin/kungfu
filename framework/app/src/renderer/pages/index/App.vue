@@ -34,7 +34,7 @@ const {
   preQuitSystemLoading,
 } = usePreStartAndQuitApp();
 
-useDealInstruments;
+useDealInstruments();
 useSubscibeInstrumentAtEntry();
 
 const { exportDateModalVisible, exportDataLoading, handleConfirmExportDate } =

@@ -14,7 +14,7 @@ const extdirs = getExtensionDirs(true);
 const extras = extdirs.map((fullpath) => {
   return {
     from: path.resolve(fullpath, 'dist'),
-    to: 'kungfu-extensions',
+    to: 'app/kungfu-extensions',
   };
 });
 
