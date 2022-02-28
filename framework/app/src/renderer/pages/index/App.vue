@@ -22,6 +22,7 @@ import {
 import { useGlobalStore } from './store/global';
 import KfDownloadDateModal from '@kungfu-trader/kungfu-app/src/renderer/components/layout/KfHistoryDateModal.vue';
 import { tradingDataSubject } from '@kungfu-trader/kungfu-js-api/kungfu/tradingData';
+import globalBus from '../../assets/methods/globalBus';
 
 const app = getCurrentInstance();
 const store = useGlobalStore();
@@ -54,32 +55,23 @@ store.setKfConfigList();
 store.setKfExtConfigs();
 store.setSubscribedInstruments();
 
+const busSubscription = globalBus.subscribe((data: KfBusEvent) => {
+  if (data.tag === 'main') {
+    switch (data.name) {
+      case 'clear-journal':
+        markClearJournal();
+        break;
+      case 'export-all-trading-data':
+        globalBus.next({
+          tag: 'export',
+          tradingDataType: 'all',
+        } as ExportTradingDataEvent);
+    }
+  }
+});
+
 onMounted(() => {
   removeLoadingMask();
-
-  if (app?.proxy) {
-    const busSubscription = app.proxy.$globalBus.subscribe(
-      (data: KfBusEvent) => {
-        if (data.tag === 'main') {
-          switch (data.name) {
-            case 'clear-journal':
-              markClearJournal();
-              break;
-            case 'export-all-trading-data':
-              app.proxy.$globalBus.next({
-                tag: 'export',
-                tradingDataType: 'all',
-              } as ExportTradingDataEvent);
-          }
-        }
-
-        onBeforeUnmount(() => {
-          tradingDataSubscription.unsubscribe();
-          busSubscription.unsubscribe();
-        });
-      },
-    );
-  }
 
   window.addEventListener('resize', () => {
     app?.proxy &&
@@ -87,6 +79,11 @@ onMounted(() => {
         tag: 'resize',
       } as ResizeEvent);
   });
+});
+
+onBeforeUnmount(() => {
+  tradingDataSubscription.unsubscribe();
+  busSubscription.unsubscribe();
 });
 </script>
 

@@ -647,9 +647,7 @@ export const usePreStartAndQuitApp = (): {
     const proxy = app?.proxy;
     if (proxy) {
       const { boardsMap } = proxy.$useGlobalStore();
-      if (proxy.$route.path === '/') {
-        localStorage.setItem('indexBoardsMap', JSON.stringify(boardsMap));
-      }
+      localStorage.setItem('indexBoardsMap', JSON.stringify(boardsMap));
       return Promise.resolve();
     }
     return Promise.resolve();
@@ -670,7 +668,7 @@ export const usePreStartAndQuitApp = (): {
             switch (data.name) {
               case 'record-before-quit':
                 preQuitSystemLoadingData.record = 'loading';
-                preQuitTasks([saveBoardsMap()]).finally(() => {
+                preQuitTasks([]).finally(() => {
                   ipcRenderer.send('record-before-quit-done');
                   preQuitSystemLoadingData.record = 'done';
                 });
