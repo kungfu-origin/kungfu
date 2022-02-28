@@ -43,10 +43,6 @@ export default defineComponent({
     const addBoardTargetBoardId = ref<number>(-1);
 
     const { saveBoardsMap } = usePreStartAndQuitApp();
-    onBeforeUnmount(() => {
-      saveBoardsMap();
-    });
-
     const app = getCurrentInstance();
     onMounted(() => {
       if (app?.proxy) {
@@ -68,6 +64,7 @@ export default defineComponent({
 
         onBeforeUnmount(() => {
           subscription.unsubscribe();
+          saveBoardsMap();
         });
       }
     });
