@@ -260,18 +260,6 @@ function toArgs(
       return formState[item.key] !== undefined;
     })
     .map((item) => {
-      if (item.type === 'instrument') {
-        const instrumentResolved = transformSearchInstrumentResultToInstrument(
-          formState[item.key],
-        );
-
-        if (!instrumentResolved) {
-          return `${item.key}=${formState[item.key]}`;
-        }
-
-        const { exchangeId, instrumentId } = instrumentResolved;
-        return `${item.key}=${exchangeId}_${instrumentId}`;
-      }
       return `${item.key}=${formState[item.key]}`;
     })
     .join(path.delimiter);
