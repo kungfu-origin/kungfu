@@ -2,6 +2,7 @@ import fse from 'fs-extra';
 import jschardet from 'jschardet';
 import iconv from 'iconv-lite';
 import { KF_INSTRUMENTS_PATH } from '@kungfu-trader/kungfu-js-api/config/pathConfig';
+import { InstrumentTypeEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';
 
 function decodeBuffer(name: number[]) {
   name = name.filter((n) => !!n);
@@ -24,13 +25,21 @@ const resolveInstruments = (
   return (instruments || []).reduce((existedData, item) => {
     const { instrument_id, instrument_type, product_id, exchange_id, ukey } =
       item;
+    const oldInstrument = existedData[ukey] || null;
     const instrumentName = decodeBuffer(product_id);
+    const instrumentNameResolved =
+      instrumentName || oldInstrument?.instrumentName || '';
+    const instrumentType =
+      instrument_type ||
+      oldInstrument?.instrumentType ||
+      InstrumentTypeEnum.unknown;
+
     const newInstrument: KungfuApi.InstrumentResolved = {
       instrumentId: instrument_id,
-      instrumentType: instrument_type,
-      instrumentName: instrumentName,
+      instrumentType,
+      instrumentName: instrumentNameResolved,
       exchangeId: exchange_id,
-      id: `${instrument_id}_${instrumentName}_${exchange_id}`.toLowerCase(),
+      id: `${instrument_id}_${instrumentNameResolved}_${exchange_id}`.toLowerCase(),
       ukey,
     };
     existedData[ukey] = newInstrument;

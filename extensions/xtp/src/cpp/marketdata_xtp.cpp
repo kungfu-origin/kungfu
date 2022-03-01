@@ -2,8 +2,8 @@
 // Created by qlu on 2019/2/11.
 //
 
-#include "type_convert.h"
 #include "marketdata_xtp.h"
+#include "type_convert.h"
 
 namespace kungfu::wingchun::xtp {
 struct MDConfiguration {
@@ -29,8 +29,7 @@ void from_json(const nlohmann::json &j, MDConfiguration &c) {
   c.buffer_size = j.value("buffer_size", 64);
 }
 
-MarketDataXTP::MarketDataXTP(broker::BrokerVendor &vendor)
-    : MarketData(vendor), api_(nullptr) {}
+MarketDataXTP::MarketDataXTP(broker::BrokerVendor &vendor) : MarketData(vendor), api_(nullptr) {}
 
 MarketDataXTP::~MarketDataXTP() {
   if (api_ != nullptr) {
@@ -58,8 +57,12 @@ void MarketDataXTP::on_start() {
     update_broker_state(BrokerState::LoggedIn);
     update_broker_state(BrokerState::Ready);
     SPDLOG_INFO("login success! (account_id) {}", config.account_id);
-    api_->QueryAllTickers(XTP_EXCHANGE_SH);
-    api_->QueryAllTickers(XTP_EXCHANGE_SZ);
+    int n_ret_sh = api_->QueryAllTickers(XTP_EXCHANGE_SH);
+    int n_ret_sz = api_->QueryAllTickers(XTP_EXCHANGE_SZ);
+    int n_ret_all = api_->QueryAllTickersPriceInfo();
+    SPDLOG_INFO(
+        "QueryAllTickers(XTP_EXCHANGE_SH) : {} , QueryAllTickers(XTP_EXCHANGE_SZ) : {} , QueryAllTickersPriceInfo :{}",
+        n_ret_sh, n_ret_sz, n_ret_all);
   } else {
     update_broker_state(BrokerState::LoginFailed);
     SPDLOG_ERROR("failed to login, [{}] {}", api_->GetApiLastError()->error_id, api_->GetApiLastError()->error_msg);
@@ -132,8 +135,40 @@ void MarketDataXTP::OnSubscribeAllTickByTick(XTP_EXCHANGE_TYPE exchange_id, XTPR
 }
 
 void MarketDataXTP::OnQueryAllTickers(XTPQSI *ticker_info, XTPRI *error_info, bool is_last) {
-  Instrument &quote = get_writer(0)->open_data<Instrument>(0);
-  from_xtp(ticker_info, quote);
+  if (nullptr != error_info && error_info->error_id != 0) {
+    SPDLOG_ERROR("error_id : {} , error_msg : {}", error_info->error_id, error_info->error_msg);
+    return;
+  }
+
+  if (nullptr == ticker_info) {
+    SPDLOG_ERROR("ticker_info is nullptr");
+    return;
+  }
+
+  Instrument &instrument = get_writer(0)->open_data<Instrument>(0);
+  from_xtp(ticker_info, instrument);
+  get_writer(0)->close_data();
+}
+
+void MarketDataXTP::OnQueryTickersPriceInfo(XTPTPI *ticker_info, XTPRI *error_info, bool is_last) {
+  if (nullptr != error_info && error_info->error_id != 0) {
+    SPDLOG_INFO("error_id : {} , error_msg : {}", error_info->error_id, error_info->error_msg);
+    return;
+  }
+
+  if (nullptr == ticker_info) {
+    SPDLOG_ERROR("ticker_info is nullptr");
+    return;
+  }
+
+  Instrument &instrument = get_writer(0)->open_data<Instrument>(0);
+  instrument.instrument_type = InstrumentType::Stock;
+  strcpy(instrument.instrument_id, ticker_info->ticker);
+  if (ticker_info->exchange_id == 1) {
+    instrument.exchange_id = EXCHANGE_SSE;
+  } else if (ticker_info->exchange_id == 2) {
+    instrument.exchange_id = EXCHANGE_SZE;
+  }
   get_writer(0)->close_data();
 }
 
