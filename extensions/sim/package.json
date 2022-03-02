@@ -55,10 +55,7 @@
             "type": "str",
             "errMsg": "请填写账户 account_id",
             "required": true,
-            "primary": true,
-            "validator": [
-              "noUnderlineValidator"
-            ]
+            "primary": true
           },
           {
             "key": "match_mode",

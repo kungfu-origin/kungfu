@@ -22,6 +22,7 @@ import {
   reactive,
   Ref,
   ref,
+  toRaw,
   toRefs,
   watch,
 } from 'vue';
@@ -255,6 +256,24 @@ function instrumnetValidator(_rule: RuleObject, value: string): Promise<void> {
   return Promise.resolve();
 }
 
+function instrumnetsValidator(
+  _rule: RuleObject,
+  value: string[],
+): Promise<void> {
+  if (!value) {
+    return Promise.resolve();
+  }
+
+  const instrumentResolved = value.filter(
+    (instrument) => !transformSearchInstrumentResultToInstrument(instrument),
+  );
+  if (instrumentResolved.length) {
+    return Promise.reject(new Error('标的错误'));
+  }
+
+  return Promise.resolve();
+}
+
 function getKfTradeValueName(
   data: Record<number | string | symbol, KungfuApi.KfTradeValueCommonData>,
   key: number | string,
@@ -299,6 +318,21 @@ function handleRemoveFile(key: string, filename: string): void {
 
 function handleTimePickerChange(date: Dayjs, key: string) {
   formState[key] = dayjs(date).format('YYYY-MM-DD HH:mm:ss');
+}
+
+function handleInstrumentSelected(val: string, key: string) {
+  if (!formState[key].includes(val)) {
+    formState[key].push(val);
+    formRef.value.validateFields([key]); //手动进行再次验证, 因数据放在span中, 改变数据后无法触发验证
+  }
+}
+
+function handleInstrumentDeselected(val: string, key: string) {
+  const index = formState[key].indexOf(val);
+  if (index !== -1) {
+    formState[key].splice(index, 1);
+    formRef.value.validateFields([key]); //手动进行再次验证, 因数据放在span中, 改变数据后无法触发验证
+  }
 }
 
 function validate(): Promise<void> {
@@ -358,7 +392,7 @@ defineExpose({
                       required: item.required,
                       type: getValidatorType(item.type),
                       message: item.errMsg || '该项为必填项',
-                      trigger: 'change',
+                      trigger: 'blur',
                     },
                   ]
                 : [
@@ -391,6 +425,16 @@ defineExpose({
                 ? [
                     {
                       validator: instrumnetValidator,
+                      type: getValidatorType(item.type),
+                      trigger: 'change',
+                    },
+                  ]
+                : []),
+
+              ...(item.type === 'instruments'
+                ? [
+                    {
+                      validator: instrumnetsValidator,
                       type: getValidatorType(item.type),
                       trigger: 'change',
                     },
@@ -523,12 +567,14 @@ defineExpose({
         :disabled="changeType === 'update' && item.primary"
         mode="multiple"
         show-search
-        v-model:value="formState[item.key]"
+        :value="formState[item.key]"
         :filter-option="false"
         :options="
           instrumentsSearchRelated[item.key].searchInstrumnetOptions.value
         "
         @search="instrumentsSearchRelated[item.key].handleSearchInstrument"
+        @select="handleInstrumentSelected($event, item.key)"
+        @deselect="handleInstrumentDeselected($event, item.key)"
       ></a-select>
       <a-select
         v-else-if="item.type === 'td'"
@@ -590,7 +636,7 @@ defineExpose({
         v-else-if="item.type === 'timePicker'"
         :disabled="changeType === 'update' && item.primary"
         :value="dayjs(+formState[item.key] || dayjs())"
-        @change="handleTimePickerChange($event, item.key)"
+        @change="handleTimePickerChange($event as unknown as Dayjs, item.key)"
       ></a-time-picker>
     </a-form-item>
   </a-form>

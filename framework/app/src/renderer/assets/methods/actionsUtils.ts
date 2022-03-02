@@ -564,7 +564,7 @@ export const useInstruments = (): {
   const handleSearchInstrument = (val: string): void => {
     searchInstrumnetOptions.value = instrumentsResolved.data
       .filter((item) => {
-        return item.id.includes(val);
+        return !!val && item.id.includes(val);
       })
       .slice(0, 20)
       .map((item) => ({
