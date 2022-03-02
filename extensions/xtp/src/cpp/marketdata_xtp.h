@@ -160,7 +160,7 @@ public:
   ///@param error_info
   ///查询合约的最新价格信息时发生错误时返回的错误信息，当error_info为空，或者error_info.error_id为0时，表明没有错误
   ///@param is_last 是否此次查询的最后一个应答，当为最后一个的时候为true，如果为false，表示还有其他后续消息响应
-  void OnQueryTickersPriceInfo(XTPTPI *ticker_info, XTPRI *error_info, bool is_last) override{};
+  void OnQueryTickersPriceInfo(XTPTPI *ticker_info, XTPRI *error_info, bool is_last) override;
 
   ///订阅全市场的期权行情应答
   ///@param exchange_id
@@ -214,7 +214,7 @@ protected:
   void on_start() override;
 
 private:
-  XTP::API::QuoteApi *api_ {};
+  XTP::API::QuoteApi *api_{};
 
   bool subscribe(const std::vector<std::string> &instruments, const std::string &exchange_id);
 };
