@@ -4,7 +4,7 @@
     "name": "kungfu-trader",
     "email": "info@kungfu.link"
   },
-  "version": "2.4.0-alpha.17",
+  "version": "2.4.0-alpha.18",
   "description": "Kungfu Extension - XTP Demo",
   "license": "Apache-2.0",
   "main": "package.json",
@@ -28,10 +28,10 @@
     "package": "kfs prebuilt package"
   },
   "dependencies": {
-    "@kungfu-trader/kungfu-core": "^2.4.0-alpha.17"
+    "@kungfu-trader/kungfu-core": "^2.4.0-alpha.18"
   },
   "devDependencies": {
-    "@kungfu-trader/kungfu-sdk": "^2.4.0-alpha.17"
+    "@kungfu-trader/kungfu-sdk": "^2.4.0-alpha.18"
   },
   "kungfuDependencies": {
     "xtp": "v1.1.18.13"
@@ -66,55 +66,42 @@
             "type": "str",
             "required": true,
             "primary": true,
-            "tip": "请填写账户，例如:1504091",
-            "validator": [
-              "noUnderlineValidator"
-            ]
+            "tip": "请填写账户, 例如:1504091"
           },
           {
             "key": "password",
             "name": "password",
             "type": "password",
             "required": true,
-            "tip": "请填写密码，例如:123456",
-            "validator": [
-              "blankValidator"
-            ]
+            "tip": "请填写密码, 例如:123456"
           },
           {
             "key": "software_key",
             "name": "software_key",
             "type": "str",
             "required": true,
-            "tip": "请填写，例如:b8aa7173bba3470e390d787219b2112"
+            "tip": "请填写, 例如:b8aa7173bba3470e390d787219b2112"
           },
           {
             "key": "td_ip",
             "name": "td_ip",
             "type": "str",
             "required": true,
-            "tip": "请填写交易IP，例如:61.152.102.111"
+            "tip": "请填写交易IP, 例如:61.152.102.111"
           },
           {
             "key": "td_port",
             "name": "td_port",
             "type": "int",
             "required": true,
-            "tip": "请填写交易端口，例如:8601",
-            "validator": [
-              "intValidator"
-            ]
+            "tip": "请填写交易端口, 例如:8601"
           },
           {
             "key": "client_id",
             "name": "client_id",
             "type": "int",
             "required": true,
-            "tip": "请填写自定义多点登录ID 1-99整数,不同节点之间不要重复",
-            "validator": [
-              "o99Validator",
-              "intValidator"
-            ]
+            "tip": "请填写自定义多点登录ID 1-99整数,不同节点之间不要重复"
           }
         ]
       },
@@ -128,34 +115,28 @@
             "name": "account_id",
             "type": "str",
             "required": true,
-            "tip": "请填写账户，例如:1504091"
+            "tip": "请填写账户, 例如:1504091"
           },
           {
             "key": "password",
             "name": "password",
             "type": "password",
             "required": true,
-            "tip": "请填写密码，例如:123456",
-            "validator": [
-              "blankValidator"
-            ]
+            "tip": "请填写密码, 例如:123456"
           },
           {
             "key": "md_ip",
             "name": "md_ip",
             "type": "str",
             "required": true,
-            "tip": "请填写行情IP，例如:61.152.102.110"
+            "tip": "请填写行情IP, 例如:61.152.102.110"
           },
           {
             "key": "md_port",
             "name": "md_port",
             "type": "int",
             "required": true,
-            "tip": "请填写行情端口，例如:8602",
-            "validator": [
-              "intValidator"
-            ]
+            "tip": "请填写行情端口, 例如:8602"
           },
           {
             "key": "protocol",
@@ -178,10 +159,7 @@
             "key": "buffer_size",
             "name": "buffer_size",
             "type": "int",
-            "tip": "请填写 buffer size（mb）",
-            "validator": [
-              "intValidator"
-            ],
+            "tip": "请填写 buffer size(mb)",
             "required": false
           },
           {
@@ -189,10 +167,6 @@
             "name": "client_id",
             "type": "int",
             "required": true,
-            "validator": [
-              "o99Validator",
-              "intValidator"
-            ],
             "tip": "请填写自定义多点登录ID 1-99整数,不同节点之间不要重复"
           }
         ]
