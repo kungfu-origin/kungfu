@@ -53,10 +53,14 @@ export function showKungfuInfo(): void {
     `electron: ${electronVersion} \n` +
     `python: ${__python_version}\n` +
     `platform: ${os.platform()} \n` +
+    ' \n' +
     `kungfu_home: ${KF_HOME} \n` +
+    ' \n' +
     `kungfu_engine: ${KFC_DIR} \n` +
+    ' \n' +
     `kungfu_resources: ${KFC_PARENT_DIR} \n` +
-    `commit: ${__git_commit_version}` +
+    ' \n' +
+    `commit: ${__git_commit_version} \n` +
     `build_time: ${__build_timestamp}`;
   dialog.showMessageBox({
     type: 'info',

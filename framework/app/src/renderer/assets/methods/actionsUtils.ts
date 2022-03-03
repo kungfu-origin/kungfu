@@ -890,7 +890,6 @@ export const useDealInstruments = (): void => {
   onMounted(() => {
     if (app?.proxy) {
       dealInstrumentController.value = true;
-      console.log(window.workers.dealInstruments);
       window.workers.dealInstruments.postMessage({
         tag: 'req_instruments',
       });

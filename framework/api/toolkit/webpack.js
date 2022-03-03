@@ -1,6 +1,5 @@
 const path = require('path');
 const ESLintPlugin = require('eslint-webpack-plugin');
-const cwdDir = process.cwd();
 const { isProduction, getAppDir } = require('./utils');
 const appDir = getAppDir();
 

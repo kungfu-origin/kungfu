@@ -1,0 +1,48 @@
+{
+  "name": "@kungfu-trader/kungfu-cli",
+  "author": {
+    "name": "kungfu-trader",
+    "email": "info@kungfu.link"
+  },
+  "version": "2.4.0-alpha.19",
+  "description": "Kungfu App Framework",
+  "license": "Apache-2.0",
+  "repository": {
+    "url": "https://github.com/kungfu-trader/kungfu.git"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "binary": {
+    "module_name": "kungfu-cli",
+    "module_path": "dist/cli",
+    "remote_path": "{module_name}/v{major}/v{version}",
+    "package_name": "{module_name}-v{version}-{platform}-{arch}-{configuration}.tar.gz",
+    "host": "https://prebuilt.libkungfu.cc"
+  },
+  "types": "src/typings/index.d.ts",
+  "main": "lib/index.js",
+  "scripts": {
+    "cli": "node dist/cli/index.js",
+    "dev": "node lib/dev/run.js",
+    "build": "node lib/webpack/build.js",
+    "clean": "rimraf build dist",
+    "install": "node -e \"require('@kungfu-trader/kungfu-core').prebuilt('install')\"",
+    "package": "node -e \"require('@kungfu-trader/kungfu-core').prebuilt('package')\"",
+    "lint": "eslint src",
+    "format": "prettier -l -w --config ../../.prettierrc.js ."
+  },
+  "dependencies": {
+    "@kungfu-trader/kungfu-js-api": "^2.4.0-alpha.19",
+    "core-js": "^3.20.0",
+    "rxjs": "^7.5.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.0.0",
+    "@kungfu-trader/kungfu-toolchain": "^2.4.0-alpha.19",
+    "babel-loader": "^8.0.0",
+    "babel-plugin-syntax-dynamic-import": "^6.18.0",
+    "fs-extra": "^10.0.0",
+    "minimist": "^1.2.5"  
+  }
+}

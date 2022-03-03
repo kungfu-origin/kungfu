@@ -7,9 +7,11 @@ const { merge } = require('webpack-merge');
 const {
   getWebpackExternals,
   getAppDir,
+  getCliDir,
 } = require('@kungfu-trader/kungfu-js-api/toolkit/utils');
 
 const appDir = getAppDir();
+const cliDir = getCliDir();
 const { getKungfuBuildInfo, isProduction } = toolkit.utils;
 const { gitCommitVersion, pyVersion, buildTimeStamp } = getKungfuBuildInfo();
 
@@ -17,9 +19,9 @@ const webpackConfig = (argv) =>
   merge(toolkit.webpack.makeConfig(argv), {
     externals: getWebpackExternals(),
     entry: {
-      main: path.join(appDir, 'src', 'main', 'index.ts'),
+      index: path.join(cliDir, 'src', 'index.ts'),
     },
-    target: 'electron-main',
+    target: 'node',
   });
 
 const prodConfig = {
@@ -27,8 +29,8 @@ const prodConfig = {
     new webpack.DefinePlugin({
       __git_commit_version: `"${gitCommitVersion.toString()}"`,
       __python_version: `"${pyVersion.toString()}"`,
+      'process.env.APP_TYPE': '"cli"',
       __build_timestamp: `"${buildTimeStamp.toString()}"`,
-      'process.env.APP_TYPE': '"main"',
       __resources: '',
     }),
   ],
@@ -39,8 +41,8 @@ const devConfig = {
     new webpack.DefinePlugin({
       __git_commit_version: `"${gitCommitVersion.toString()}"`,
       __python_version: `"${pyVersion.toString()}"`,
+      'process.env.APP_TYPE': '"cli"',
       __build_timestamp: `"${buildTimeStamp.toString()}"`,
-      'process.env.APP_TYPE': '"main"',
       __resources: `"${path.join(appDir, 'public').replace(/\\/g, '\\\\')}"`,
     }),
   ],
