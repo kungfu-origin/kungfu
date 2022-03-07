@@ -68,7 +68,7 @@ const setTdConfigPayload = ref<KungfuApi.SetKfConfigPayload>({
 });
 
 const currentSelectedSourceId = ref<string>('');
-const { extConfigs, extTypeMap } = useExtConfigsRelated();
+const { extConfigs, tdExtTypeMap } = useExtConfigsRelated();
 const { td } = toRefs(useAllKfConfigData());
 const tdIdList = computed(() => {
   return td.value.map(
@@ -342,7 +342,7 @@ function handleRemoveTd(item: KungfuApi.KfConfig) {
           <template
             v-if="column.dataIndex === 'name' && record.category === 'td'"
           >
-            <a-tag :color="getInstrumentTypeColor(extTypeMap[record.group])">
+            <a-tag :color="getInstrumentTypeColor(tdExtTypeMap[record.group])">
               {{ record.group }}
             </a-tag>
             {{ record.name }}

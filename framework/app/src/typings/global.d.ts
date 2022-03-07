@@ -29,6 +29,7 @@ declare global {
 
   namespace NodeJS {
     interface ProcessEnv {
+      LANG_ENV: 'en' | undefined;
       APP_TYPE: 'cli' | 'dzxy' | 'renderer' | 'component' | 'main';
       RENDERER_TYPE: 'app' | 'admin' | 'logview' | 'makeOrder' | 'codeEditor';
       RELOAD_AFTER_CRASHED: 'false' | 'true';

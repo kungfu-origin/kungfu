@@ -6,7 +6,6 @@ import {
   setKfGlobalSettingsValue,
 } from '@kungfu-trader/kungfu-js-api/config/globalSettings';
 import {
-  initFormStateByConfig,
   useAllKfConfigData,
   useModalVisible,
   useTableSearchKeyword,
@@ -40,7 +39,10 @@ import {
   getScheduleTasks,
   setScheduleTasks,
 } from '@kungfu-trader/kungfu-js-api/actions';
-import { getProcessIdByKfLocation } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
+import {
+  getProcessIdByKfLocation,
+  initFormStateByConfig,
+} from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import dayjs, { Dayjs } from 'dayjs';
 import {
   coreForScheduleTasksOptions,

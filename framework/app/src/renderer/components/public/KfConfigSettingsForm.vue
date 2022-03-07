@@ -8,13 +8,7 @@ import {
 import {
   buildInstrumentSelectOptionLabel,
   buildInstrumentSelectOptionValue,
-  numberEnumRadioType,
-  numberEnumSelectType,
-  stringEnumSelectType,
   useAllKfConfigData,
-  KfConfigValueNumberType,
-  KfConfigValueArrayType,
-  KfConfigValueBooleanType,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import {
   getCurrentInstance,
@@ -33,6 +27,12 @@ import {
 import {
   getIdByKfLocation,
   transformSearchInstrumentResultToInstrument,
+  numberEnumRadioType,
+  numberEnumSelectType,
+  stringEnumSelectType,
+  KfConfigValueNumberType,
+  KfConfigValueArrayType,
+  KfConfigValueBooleanType,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { RuleObject } from 'ant-design-vue/lib/form';
 import { useInstruments } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
@@ -89,7 +89,7 @@ const primaryKeys: string[] = (props.configSettings || [])
   .filter((item) => item.primary)
   .map((item) => item.key);
 
-const { td } = toRefs(useAllKfConfigData());
+const { td, md, strategy } = toRefs(useAllKfConfigData());
 
 const instrumentKeys = props.configSettings
   .filter((item) => item.type === 'instrument' || item.type === 'instruments')
@@ -589,6 +589,32 @@ defineExpose({
           {{ getIdByKfLocation(config) }}
         </a-select-option>
       </a-select>
+      <a-select
+        v-else-if="item.type === 'md'"
+        v-model:value="formState[item.key]"
+        :disabled="changeType === 'update' && item.primary"
+      >
+        <a-select-option
+          v-for="config in md"
+          :key="getIdByKfLocation(config)"
+          :value="getIdByKfLocation(config)"
+        >
+          {{ getIdByKfLocation(config) }}
+        </a-select-option>
+      </a-select>
+      <a-select
+        v-else-if="item.type === 'strategy'"
+        v-model:value="formState[item.key]"
+        :disabled="changeType === 'update' && item.primary"
+      >
+        <a-select-option
+          v-for="config in strategy"
+          :key="getIdByKfLocation(config)"
+          :value="getIdByKfLocation(config)"
+        >
+          {{ getIdByKfLocation(config) }}
+        </a-select-option>
+      </a-select>
       <a-switch
         size="small"
         v-else-if="item.type === 'bool'"
@@ -611,7 +637,7 @@ defineExpose({
         </div>
       </div>
       <div
-        v-else-if="item.type === 'folder'"
+        v-else-if="item.type === 'files'"
         class="kf-form-item__warp file"
         :disabled="changeType === 'update' && item.primary"
       >

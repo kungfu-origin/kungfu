@@ -16,6 +16,9 @@ import {
   PriceType,
   TimeCondition,
   VolumeCondition,
+  ExchangeIds,
+  FutureArbitrageCodes,
+  CommissionMode,
 } from '../config/tradingConfig';
 import {
   KfCategoryEnum,
@@ -54,7 +57,7 @@ interface SourceAccountId {
   id: string;
 }
 
-interface ExtensionData {
+export interface ExtensionData {
   name: string;
   key: string;
   extPath: string;
@@ -225,10 +228,11 @@ export const setTimerPromiseTask = (fn: Function, interval = 500) => {
   var taskTimer: number | undefined = undefined;
   var clear = false;
   function timerPromiseTask(fn: Function, interval = 500) {
-    if (taskTimer) global.clearTimeout(taskTimer);
+    if (taskTimer) global.clearTimeout(taskTimer as unknown as NodeJS.Timeout);
     fn().finally(() => {
       if (clear) {
-        if (taskTimer) global.clearTimeout(taskTimer);
+        if (taskTimer)
+          global.clearTimeout(taskTimer as unknown as NodeJS.Timeout);
         return;
       }
       taskTimer = +global.setTimeout(() => {
@@ -240,7 +244,8 @@ export const setTimerPromiseTask = (fn: Function, interval = 500) => {
   return {
     clearLoop: function () {
       clear = true;
-      if (taskTimer != null) global.clearTimeout(taskTimer);
+      if (taskTimer != null)
+        global.clearTimeout(taskTimer as unknown as NodeJS.Timeout);
     },
   };
 };
@@ -1285,4 +1290,96 @@ export const booleanProcessEnv = (val: string): boolean => {
   } else {
     return !!val;
   }
+};
+
+export const numberEnumRadioType: Record<
+  string,
+  Record<number, KungfuApi.KfTradeValueCommonData>
+> = {
+  offset: Offset,
+  hedgeFlag: HedgeFlag,
+  direction: Direction,
+  volumeCondition: VolumeCondition,
+  timeCondition: TimeCondition,
+  commissionMode: CommissionMode,
+};
+
+export const numberEnumSelectType: Record<
+  string,
+  Record<number, KungfuApi.KfTradeValueCommonData>
+> = {
+  side: Side,
+  priceType: PriceType,
+  instrumentType: InstrumentType,
+};
+
+export const stringEnumSelectType: Record<
+  string,
+  Record<string, KungfuApi.KfTradeValueCommonData>
+> = {
+  exchange: ExchangeIds,
+  futureArbitrageCode: FutureArbitrageCodes,
+};
+
+export const KfConfigValueNumberType = [
+  'int',
+  'float',
+  'percent',
+  ...Object.keys(numberEnumSelectType || {}),
+  ...Object.keys(numberEnumRadioType || {}),
+];
+
+export const KfConfigValueBooleanType = ['bool'];
+
+export const KfConfigValueArrayType = ['files', 'instruments'];
+
+export const initFormStateByConfig = (
+  configSettings: KungfuApi.KfConfigItem[],
+  initValue?: Record<string, KungfuApi.KfConfigValue>,
+): Record<string, KungfuApi.KfConfigValue> => {
+  if (!configSettings) return {};
+  const formState: Record<string, KungfuApi.KfConfigValue> = {};
+  configSettings.forEach((item) => {
+    const type = item.type;
+    const isBoolean = KfConfigValueBooleanType.includes(type);
+    const isNumber = KfConfigValueNumberType.includes(type);
+    const isArray = KfConfigValueArrayType.includes(type);
+
+    let defaultValue;
+    if (typeof item?.default === 'object') {
+      defaultValue = JSON.parse(JSON.stringify(item?.default));
+    } else {
+      defaultValue = item?.default;
+    }
+
+    if (defaultValue === undefined) {
+      defaultValue = isBoolean
+        ? false
+        : isNumber
+        ? 0
+        : type === 'timePicker'
+        ? dayjs().valueOf().toString()
+        : isArray
+        ? []
+        : '';
+    }
+    if ((initValue || {})[item.key] !== undefined) {
+      defaultValue = (initValue || {})[item.key];
+    }
+
+    if (KfConfigValueBooleanType.includes(type)) {
+      defaultValue =
+        defaultValue === 'true'
+          ? true
+          : defaultValue === 'false'
+          ? false
+          : !!defaultValue;
+    } else if (KfConfigValueNumberType.includes(type)) {
+      defaultValue = +defaultValue;
+    }
+
+    formState[item.key] = defaultValue;
+  });
+
+  return formState;
 };

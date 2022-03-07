@@ -13,7 +13,6 @@ import KfDashboardItem from '@kungfu-trader/kungfu-app/src/renderer/components/p
 import KfConfigSettingsForm from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfConfigSettingsForm.vue';
 import {
   buildInstrumentSelectOptionValue,
-  initFormStateByConfig,
   useCurrentGlobalKfLocation,
   useExtConfigsRelated,
   useProcessStatusDetailData,
@@ -26,6 +25,7 @@ import { InstrumentTypeEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import { useInstruments } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
 import {
   getProcessIdByKfLocation,
+  initFormStateByConfig,
   transformSearchInstrumentResultToInstrument,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 

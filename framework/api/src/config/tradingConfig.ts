@@ -1,4 +1,4 @@
-const isEnglish = false;
+const isEnglish = process.env.LANG_ENV === 'en';
 
 import {
   InstrumentTypeEnum,

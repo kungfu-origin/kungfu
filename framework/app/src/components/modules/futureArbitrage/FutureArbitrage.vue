@@ -4,7 +4,6 @@ import KfDashboard from '@kungfu-trader/kungfu-app/src/renderer/components/publi
 import KfDashboardItem from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfDashboardItem.vue';
 import KfConfigSettingsForm from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfConfigSettingsForm.vue';
 import {
-  initFormStateByConfig,
   useCurrentGlobalKfLocation,
   useProcessStatusDetailData,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
@@ -15,6 +14,7 @@ import { message } from 'ant-design-vue';
 import { makeOrderByOrderInput } from '@kungfu-trader/kungfu-js-api/kungfu';
 import {
   getProcessIdByKfLocation,
+  initFormStateByConfig,
   transformSearchInstrumentResultToInstrument,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 

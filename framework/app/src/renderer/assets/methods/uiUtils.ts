@@ -22,19 +22,7 @@ import {
   kfLogger,
   removeJournal,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
-import {
-  CommissionMode,
-  Direction,
-  ExchangeIds,
-  FutureArbitrageCodes,
-  HedgeFlag,
-  InstrumentType,
-  Offset,
-  PriceType,
-  Side,
-  TimeCondition,
-  VolumeCondition,
-} from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
+import { ExchangeIds } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
 
 import {
   Pm2ProcessStatusData,
@@ -130,98 +118,6 @@ export const useTableSearchKeyword = <T>(
   };
 };
 
-export const numberEnumRadioType: Record<
-  string,
-  Record<number, KungfuApi.KfTradeValueCommonData>
-> = {
-  offset: Offset,
-  hedgeFlag: HedgeFlag,
-  direction: Direction,
-  volumeCondition: VolumeCondition,
-  timeCondition: TimeCondition,
-  commissionMode: CommissionMode,
-};
-
-export const numberEnumSelectType: Record<
-  string,
-  Record<number, KungfuApi.KfTradeValueCommonData>
-> = {
-  side: Side,
-  priceType: PriceType,
-  instrumentType: InstrumentType,
-};
-
-export const stringEnumSelectType: Record<
-  string,
-  Record<string, KungfuApi.KfTradeValueCommonData>
-> = {
-  exchange: ExchangeIds,
-  futureArbitrageCode: FutureArbitrageCodes,
-};
-
-export const KfConfigValueNumberType = [
-  'int',
-  'float',
-  'percent',
-  ...Object.keys(numberEnumSelectType || {}),
-  ...Object.keys(numberEnumRadioType || {}),
-];
-
-export const KfConfigValueBooleanType = ['bool'];
-
-export const KfConfigValueArrayType = ['folder', 'instruments'];
-
-export const initFormStateByConfig = (
-  configSettings: KungfuApi.KfConfigItem[],
-  initValue?: Record<string, KungfuApi.KfConfigValue>,
-): Record<string, KungfuApi.KfConfigValue> => {
-  if (!configSettings) return {};
-  const formState: Record<string, KungfuApi.KfConfigValue> = {};
-  configSettings.forEach((item) => {
-    const type = item.type;
-    const isBoolean = KfConfigValueBooleanType.includes(type);
-    const isNumber = KfConfigValueNumberType.includes(type);
-    const isArray = KfConfigValueArrayType.includes(type);
-
-    let defaultValue;
-    if (typeof item?.default === 'object') {
-      defaultValue = JSON.parse(JSON.stringify(item?.default));
-    } else {
-      defaultValue = item?.default;
-    }
-
-    if (defaultValue === undefined) {
-      defaultValue = isBoolean
-        ? false
-        : isNumber
-        ? 0
-        : type === 'timePicker'
-        ? dayjs().valueOf().toString()
-        : isArray
-        ? []
-        : '';
-    }
-    if ((initValue || {})[item.key] !== undefined) {
-      defaultValue = (initValue || {})[item.key];
-    }
-
-    if (KfConfigValueBooleanType.includes(type)) {
-      defaultValue =
-        defaultValue === 'true'
-          ? true
-          : defaultValue === 'false'
-          ? false
-          : !!defaultValue;
-    } else if (KfConfigValueNumberType.includes(type)) {
-      defaultValue = +defaultValue;
-    }
-
-    formState[item.key] = defaultValue;
-  });
-
-  return formState;
-};
-
 export const beforeStartAll = (): Promise<void> => {
   const clearJournalDateFromLocal = localStorage.getItem(
     'clearJournalTradingDate',
@@ -250,7 +146,7 @@ export const getInstrumentTypeColor = (
 export const useExtConfigsRelated = (): {
   extConfigs: { data: KungfuApi.KfExtConfigs };
   uiExtConfigs: { data: KungfuApi.KfUIExtConfigs };
-  extTypeMap: ComputedRef<Record<string, InstrumentTypes>>;
+  tdExtTypeMap: ComputedRef<Record<string, InstrumentTypes>>;
   mdExtTypeMap: ComputedRef<Record<string, InstrumentTypes>>;
 } => {
   const app = getCurrentInstance();
@@ -260,7 +156,7 @@ export const useExtConfigsRelated = (): {
   const uiExtConfigs = reactive<{ data: KungfuApi.KfUIExtConfigs }>({
     data: {},
   });
-  const extTypeMap = computed(() => buildExtTypeMap(extConfigs.data, 'td'));
+  const tdExtTypeMap = computed(() => buildExtTypeMap(extConfigs.data, 'td'));
   const mdExtTypeMap = computed(() => buildExtTypeMap(extConfigs.data, 'md'));
 
   onMounted(() => {
@@ -275,7 +171,7 @@ export const useExtConfigsRelated = (): {
   return {
     extConfigs,
     uiExtConfigs,
-    extTypeMap,
+    tdExtTypeMap,
     mdExtTypeMap,
   };
 };

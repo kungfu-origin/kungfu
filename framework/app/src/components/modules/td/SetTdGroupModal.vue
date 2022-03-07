@@ -28,7 +28,7 @@ defineEmits<{
 
 const app = getCurrentInstance();
 const { modalVisible, closeModal } = useModalVisible(props.visible);
-const { extTypeMap } = useExtConfigsRelated();
+const { tdExtTypeMap } = useExtConfigsRelated();
 const tdGroup = useTdGroups();
 const { td } = toRefs(useAllKfConfigData());
 
@@ -159,7 +159,7 @@ getInstrumentTypeColor;
           <a-tag
             class="kf-td-tree-tag"
             size="small"
-            :color="getInstrumentTypeColor(extTypeMap[dataRef.group])"
+            :color="getInstrumentTypeColor(tdExtTypeMap[dataRef.group])"
           >
             {{ dataRef.group }}
           </a-tag>

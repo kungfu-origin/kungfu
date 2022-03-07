@@ -151,12 +151,15 @@ exports.getExtensionDirs = (production = false) => {
     ...(production ? [] : Object.keys(packageJSON.devDependencies || {})),
   ]
     .map((name) => {
-      const jsonPath = require.resolve(name + '/package.json');
-      const json = fs.readJSONSync(jsonPath);
-      if (json.kungfuConfig) {
-        return path.dirname(jsonPath);
-      }
-      return null;
+      let fullPath = '';
+      try {
+        const jsonPath = require.resolve(name + '/package.json');
+        const json = fs.readJSONSync(jsonPath);
+        if (json.kungfuConfig) {
+          fullPath = path.dirname(jsonPath);
+        }
+      } catch (err) {}
+      return fullPath;
     })
     .filter((fullpath) => !!fullpath);
 

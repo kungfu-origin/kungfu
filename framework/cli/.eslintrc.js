@@ -21,6 +21,7 @@ module.exports = {
   rules: {
     'no-console': 'off',
     'no-debugger': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
+    'no-control-regex': 0,
     'vue/multi-word-component-names': 'off',
   },
 };

@@ -28,7 +28,10 @@ if (process.env.RENDERER_TYPE === 'logview') {
 }
 
 export const kf = kungfu();
-kfLogger.info('Load kungfu node');
+
+if (process.env.NODE_ENV === 'development') {
+  kfLogger.info('Load kungfu node');
+}
 
 export const configStore = kf.ConfigStore(KF_RUNTIME_DIR);
 export const history = kf.History(KF_RUNTIME_DIR);

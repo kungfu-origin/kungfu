@@ -33,7 +33,7 @@ export const BASE_DB_DIR = path.join(SYSTEM_DIR, 'etc', 'kungfu', 'db', 'live');
 //================== others start =================================
 
 const production = process.env.NODE_ENV === 'production';
-const staticKfcDir = path.join('..', 'core', 'dist', 'kfc');
+const staticKfcDir = path.resolve('..', 'core', 'dist', 'kfc');
 
 //获取进程日志地址
 export const buildProcessLogPath = (processId: string) => {

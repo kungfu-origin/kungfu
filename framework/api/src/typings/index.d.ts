@@ -84,12 +84,9 @@ declare namespace KungfuApi {
     | 'str'
     | 'password'
     | 'file' // string
+    | 'files' // string[]
     | 'folder' // string
     | 'timePicker' //string
-    | 'process'
-    | 'account' // select - string
-    | 'source' // select - string
-    | 'exchange' // select - string
     | 'select'
     | 'bool'
     | 'int'
@@ -104,9 +101,11 @@ declare namespace KungfuApi {
     | 'timeCondition' // select - number
     | 'commissionMode' // select - number
     | 'instrumentType' // select - number
+    | 'td'
+    | 'md'
+    | 'strategy'
     | 'instrument'
-    | 'instruments'
-    | 'td';
+    | 'instruments';
 
   export type KfConfigValue =
     | string
@@ -130,7 +129,6 @@ declare namespace KungfuApi {
     default?: KfConfigValue;
     required?: boolean;
     primary?: boolean;
-    validator?: string[];
     options?: KfSelectOption[];
     data?: KfSelectOption[];
     args?: Array<{ key: string | number; value: string | number }>; // process
@@ -153,12 +151,13 @@ declare namespace KungfuApi {
             page: string;
           };
     };
-    config?: {
-      [key in KfCategoryTypes]?: {
+    config?: Record<
+      string,
+      {
         type?: Array<InstrumentTypes> | InstrumentTypes;
         settings: KfConfigItem[];
-      };
-    };
+      }
+    >;
   }
 
   interface KfExtConfig {
@@ -168,11 +167,7 @@ declare namespace KungfuApi {
     settings: KfConfigItem[];
   }
 
-  export interface KfExtConfigs {
-    [key in KfCategoryTypes]?: {
-      [extKey: string]: KfExtConfig;
-    };
-  }
+  export type KfExtConfigs = Record<string, Record<string, KfExtConfig>>;
 
   export type KfUIExtConfigs = Record<
     string,

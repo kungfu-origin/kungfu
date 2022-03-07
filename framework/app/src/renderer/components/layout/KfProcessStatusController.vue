@@ -31,7 +31,7 @@ const {
   processStatusDetailData,
   getProcessStatusName,
 } = useProcessStatusDetailData();
-const { extTypeMap, mdExtTypeMap } = useExtConfigsRelated();
+const { tdExtTypeMap, mdExtTypeMap } = useExtConfigsRelated();
 
 let hasAlertMasterStop = false;
 let hasAlertLedgerStop = false;
@@ -143,7 +143,8 @@ function handleOpenProcessControllerBoard(): void {
                     v-if="config.category === 'td' || config.category === 'md'"
                     :color="
                       getInstrumentTypeColor(
-                        extTypeMap[config.group] || mdExtTypeMap[config.group],
+                        tdExtTypeMap[config.group] ||
+                          mdExtTypeMap[config.group],
                       )
                     "
                   >
