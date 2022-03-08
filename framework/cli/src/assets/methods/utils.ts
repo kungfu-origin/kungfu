@@ -65,7 +65,7 @@ export const parseExtDataList = (extList: ExtensionData[]): string[] => {
 export const getPromptQuestionsBySettings = (
   settings: KungfuApi.KfConfigItem[],
   initValue?: Record<string, KungfuApi.KfConfigValue>,
-): Promise<void> => {
+): Promise<KungfuApi.KfConfigValue> => {
   const formState = initFormStateByConfig(settings, initValue || {});
   const questions = settings.map((item) =>
     buildQuestionByKfConfigItem(item, formState[item.key], !!initValue),
@@ -73,7 +73,7 @@ export const getPromptQuestionsBySettings = (
 
   return inquirer
     .prompt(questions)
-    .then((answers: Record<string, string | number>) => {
+    .then((answers: Record<string, KungfuApi.KfConfigValue>) => {
       return trimAnswers(answers);
     });
 };
@@ -139,9 +139,17 @@ export const buildQuestionByKfConfigItem = (
     message: `${isUpdate ? 'Update' : 'Enter'} ${key} ${renderSelect(
       configItem,
     )}`,
+
+    validate: async (value: KungfuApi.KfConfigValue) => {
+      if (configItem.required && value.toString() === '') {
+        return new Error('Required');
+      }
+
+      return true;
+    },
   };
 
-  if (value !== undefined) {
+  if (value !== undefined && value !== '' && value !== 0) {
     questions.default = value;
   }
 

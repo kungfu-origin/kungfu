@@ -204,17 +204,23 @@ export const logger = log4js.getLogger('app');
 
 export const kfLogger = {
   info: (...args: Array<string | number>) => {
-    console.log('<KF_INFO>', args.join(' '));
+    if (process.env.NODE_ENV === 'development') {
+      console.log('<KF_INFO>', args.join(' '));
+    }
     logger.info('<KF_INFO>', args.join(' '));
   },
 
   warn: (...args: Array<string | number>) => {
-    console.warn('<KF_INFO>', args.join(' '));
+    if (process.env.NODE_ENV === 'development') {
+      console.warn('<KF_INFO>', args.join(' '));
+    }
     logger.warn('<KF_INFO>', args.join(' '));
   },
 
   error: (...args: Array<string | number>) => {
-    console.error('<KF_INFO>', args.join(' '));
+    if (process.env.NODE_ENV === 'development') {
+      console.error('<KF_INFO>', args.join(' '));
+    }
     logger.error('<KF_INFO>', args.join(' '));
   },
 };
@@ -1230,6 +1236,16 @@ export const getPrimaryKeyFromKfConfigItem = (
   return settings.filter((item) => {
     return !!item.primary;
   });
+};
+
+export const getCombineValueByPrimaryKeys = (
+  primaryKeys: string[],
+  formState: Record<string, KungfuApi.KfConfigValue>,
+  extraValue = '',
+) => {
+  return [extraValue || '', ...primaryKeys.map((key) => formState[key])]
+    .filter((item) => item !== '')
+    .join('_');
 };
 
 export const transformSearchInstrumentResultToInstrument = (

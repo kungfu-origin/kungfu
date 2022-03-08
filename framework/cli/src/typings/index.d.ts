@@ -20,4 +20,5 @@ interface PromptQuestion {
   default?: KungfuApi.KfConfigValue;
   choices: (string | number)[];
   message: string;
+  validate: (value: KungfuApi.KfConfigValue) => Promise<Error | boolean>;
 }

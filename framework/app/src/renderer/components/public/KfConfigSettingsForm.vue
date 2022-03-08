@@ -33,6 +33,7 @@ import {
   KfConfigValueNumberType,
   KfConfigValueArrayType,
   KfConfigValueBooleanType,
+  getCombineValueByPrimaryKeys,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { RuleObject } from 'ant-design-vue/lib/form';
 import { useInstruments } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
@@ -205,12 +206,11 @@ const SpecialWordsReg = new RegExp(
   "[`~!@#$^&*()=|{}':;',\\[\\].<>《》/?~！@#￥……&*（）——|{}【】‘；：”“'。, 、？]",
 );
 function primaryKeyValidator(_rule: RuleObject, value: string): Promise<void> {
-  const combineValue: string = [
-    props.primaryKeyAvoidRepeatCompareExtra || '',
-    ...primaryKeys.map((key) => formState[key]),
-  ]
-    .filter((item) => item !== '')
-    .join('_');
+  const combineValue: string = getCombineValueByPrimaryKeys(
+    primaryKeys,
+    formState,
+    props.primaryKeyAvoidRepeatCompareExtra,
+  );
 
   if (
     props.primaryKeyAvoidRepeatCompareTarget

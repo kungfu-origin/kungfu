@@ -39,7 +39,6 @@ import {
   KfCategoryTypes,
   KfUIExtLocatorTypes,
 } from '@kungfu-trader/kungfu-js-api/typings/enums';
-import dayjs from 'dayjs';
 import path from 'path';
 
 // this utils file is only for ui components
