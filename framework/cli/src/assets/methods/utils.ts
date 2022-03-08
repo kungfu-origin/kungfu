@@ -1,9 +1,12 @@
 import inquirer from 'inquirer';
+import colors from 'colors';
 import { KfCategoryTypes } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import {
   ExtensionData,
+  getIdByKfLocation,
   initFormStateByConfig,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
+import { getAllKfConfigOriginData } from '@kungfu-trader/kungfu-js-api/actions';
 
 export const parseToString = (
   targetList: string[],
@@ -164,3 +167,92 @@ export const trimAnswers = (answers: Record<string, string | number>) => {
   });
   return answers;
 };
+
+export const buildObjectFromKfConfigArray = (
+  kfConfigs: KungfuApi.KfConfig[],
+) => {
+  return kfConfigs.reduce((data, item: KungfuApi.KfConfig) => {
+    data[getIdByKfLocation(item)] = item;
+    return data;
+  }, {} as Record<string, KungfuApi.KfConfig>);
+};
+
+export const getKfLocation = (
+  type: KfCategoryTypes,
+  targetId: string,
+): KungfuApi.KfLocation => {
+  if (type === 'md') {
+    return {
+      category: 'md',
+      group: targetId,
+      name: targetId,
+      mode: 'live',
+    };
+  } else if (type === 'td') {
+    return {
+      category: 'td',
+      group: targetId.parseSourceAccountId().source,
+      name: targetId.parseSourceAccountId().id,
+      mode: 'live',
+    };
+  } else if (type === 'strategy') {
+    return {
+      category: 'strategy',
+      group: 'default',
+      name: targetId,
+      mode: 'live',
+    };
+  } else {
+    throw new Error(`Unsupported update category ${type}`);
+  }
+};
+
+export const selectTargetKfLocation =
+  async (): Promise<KungfuApi.KfLocation> => {
+    const { md, td, strategy } = await getAllKfConfigOriginData();
+
+    const mdTdStrategyList = [
+      ...md.map((item) =>
+        parseToString(
+          [colors.yellow('md'), getIdByKfLocation(item)],
+          [8, 'auto'],
+          1,
+        ),
+      ),
+      ...td.map((item) =>
+        parseToString(
+          [colors.blue('td'), getIdByKfLocation(item)],
+          [8, 'auto'],
+          1,
+        ),
+      ),
+      ...strategy.map((item) =>
+        parseToString(
+          [colors.cyan('strategy'), getIdByKfLocation(item)],
+          [8, 'auto'],
+          1,
+        ),
+      ),
+    ];
+
+    const answers: { process: string } = await inquirer.prompt([
+      {
+        type: 'autocomplete',
+        name: 'process',
+        message: 'Select targeted md / td / strategy  ',
+        source: async (answersSoFar: { process: string }, input: string) => {
+          input = input || '';
+          return mdTdStrategyList.filter((s: string): boolean =>
+            s.includes(input),
+          );
+        },
+      },
+    ]);
+
+    const processes = answers.process;
+    const splits = processes.split(' ');
+    const targetType = splits[0].trim();
+    const targetId = splits[splits.length - 1].trim();
+    const type = getKfCategoryFromString(targetType);
+    return getKfLocation(type, targetId);
+  };
