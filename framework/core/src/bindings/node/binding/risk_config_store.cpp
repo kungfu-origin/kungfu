@@ -30,39 +30,37 @@ inline RiskConfig getConfigFromJs(const Napi::CallbackInfo &info, const locator_
 }
 
 Napi::Value RiskConfigStore::SetRiskConfig(const Napi::CallbackInfo &info) {
-  RiskConfig RiskConfig = getConfigFromJs(info, locator_);
-  // int valueIndex = info[0].IsObject() ? 1 : 4;
+  RiskConfig risk_config = getConfigFromJs(info, locator_);
   if (info[0].IsObject()) {
-    RiskConfig.max_order_volume = info[0].ToObject().Get("max_order_volume").ToNumber().Int32Value();
-    RiskConfig.max_daily_volume = info[0].ToObject().Get("max_daily_volume").ToNumber().Int32Value();
-    RiskConfig.white_list = info[0].ToObject().Get("white_list").ToString().Utf8Value();
-    RiskConfig.self_filled_check = info[0].ToObject().Get("self_filled_check").ToBoolean().Value();
-    RiskConfig.max_cancel_ratio = info[0].ToObject().Get("max_cancel_ratio").ToNumber().DoubleValue();
+    risk_config.max_order_volume = info[0].ToObject().Get("max_order_volume").ToNumber().Int32Value();
+    risk_config.max_daily_volume = info[0].ToObject().Get("max_daily_volume").ToNumber().Int32Value();
+    risk_config.white_list = info[0].ToObject().Get("white_list").ToString().Utf8Value();
+    risk_config.self_filled_check = info[0].ToObject().Get("self_filled_check").ToBoolean().Value();
+    risk_config.max_cancel_ratio = info[0].ToObject().Get("max_cancel_ratio").ToNumber().DoubleValue();
   } else {
-    // RiskConfig.value = info[valueIndex].ToString().Utf8Value();
-    RiskConfig.max_order_volume = info[4].ToObject().Get("max_order_volume").ToNumber().Int32Value();
-    RiskConfig.max_daily_volume = info[5].ToObject().Get("max_daily_volume").ToNumber().Int32Value();
-    RiskConfig.white_list = info[6].ToObject().Get("white_list").ToString().Utf8Value();
-    RiskConfig.self_filled_check = info[7].ToObject().Get("self_filled_check").ToBoolean().Value();
-    RiskConfig.max_cancel_ratio = info[8].ToObject().Get("max_cancel_ratio").ToNumber().DoubleValue();
+    risk_config.max_order_volume = info[4].ToNumber().Int32Value();
+    risk_config.max_daily_volume = info[5].ToNumber().Int32Value();
+    risk_config.white_list = info[6].ToString().Utf8Value();
+    risk_config.self_filled_check = info[7].ToBoolean().Value();
+    risk_config.max_cancel_ratio = info[8].ToNumber().DoubleValue();
   }
-  profile_.set(RiskConfig);
+  profile_.set(risk_config);
   return {};
 }
 
 Napi::Value RiskConfigStore::GetRiskConfig(const Napi::CallbackInfo &info) {
   auto result = Napi::Object::New(info.Env());
-  auto RiskConfig = profile_.get(getConfigFromJs(info, locator_));
-  set(RiskConfig, result);
+  auto risk_config = profile_.get(getConfigFromJs(info, locator_));
+  set(risk_config, result);
   return result;
 }
 
 Napi::Value RiskConfigStore::GetAllRiskConfig(const Napi::CallbackInfo &info) {
   auto table = Napi::Object::New(info.Env());
-  for (const auto &RiskConfig : profile_.get_all(RiskConfig{})) {
-    auto uid = fmt::format("{:016x}", RiskConfig.uid());
+  for (const auto &risk_config : profile_.get_all(RiskConfig{})) {
+    auto uid = fmt::format("{:016x}", risk_config.uid());
     auto object = Napi::Object::New(info.Env());
-    set(RiskConfig, object);
+    set(risk_config, object);
     table.Set(uid, object);
   }
   return table;
