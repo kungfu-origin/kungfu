@@ -46,11 +46,28 @@ class ListElementResolved extends Widgets.ListElement {
 }
 
 interface Pm2Packet {
-  type: 'process:msg';
+  process: {
+    pm_id: number;
+  };
   data: {
     type: string;
-    body: Record<string, string | number>;
+    body: Record<string, string | number | boolean>;
   };
+}
+
+interface Pm2PacketMain {
+  type: string;
+  topic: string;
+  data: object;
+  id: number;
+}
+
+interface SwitchKfLocationPacketData {
+  category: string;
+  group: string;
+  name: string;
+  value: string;
+  status: boolean;
 }
 
 class Pm2Bus {

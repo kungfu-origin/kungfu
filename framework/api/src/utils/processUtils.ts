@@ -16,7 +16,6 @@ import {
   getIfProcessRunning,
 } from '../utils/busiUtils';
 import {
-  APP_DIR,
   buildProcessLogPath,
   EXTENSION_DIRS,
   KFC_DIR,
@@ -304,11 +303,12 @@ export const startProcess = (
     exec_mode: 'fork',
     kill_timeout: 16000,
     env: {
-      ...options.env,
       KF_HOME: dealSpaceInPath(KF_HOME),
       LANG: `${locale}.UTF-8`,
       PYTHONUTF8: '1',
       PYTHONIOENCODING: 'utf8',
+      KFC_AS_VARIANT: '',
+      ...options.env,
     },
   };
 
@@ -732,6 +732,30 @@ export const startCustomProcess = (
     args,
   }).catch((err) => {
     kfLogger.error(err.message);
+  });
+};
+
+export const sendDataToProcessIdByPm2 = (
+  topic: string,
+  pm2Id: number,
+  data: Record<string, number | string | boolean>,
+): Promise<void> => {
+  return new Promise((resolve, reject) => {
+    pm2.sendDataToProcessId(
+      pm2Id,
+      {
+        type: 'process:msg',
+        topic,
+        data,
+      },
+      (err) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve();
+        }
+      },
+    );
   });
 };
 

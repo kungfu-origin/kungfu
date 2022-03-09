@@ -8,7 +8,7 @@ import {
   processListObservable,
   switchProcess,
 } from '../assets/actions/processList';
-import { parseToString } from '../assets/methods/utils';
+import { dealMemory, parseToString } from '../assets/methods/utils';
 
 const WIDTH_LEFT_PANEL = 35;
 
@@ -17,6 +17,7 @@ export class MonitorDashboard extends Dashboard {
     processBoard: ListElementResolved | null;
     message: Widgets.MessageElement | null;
     loader: Widgets.LoadingElement | null;
+    boxInfo: Widgets.TextElement | null;
   };
 
   processList: ProcessListItem[];
@@ -29,6 +30,7 @@ export class MonitorDashboard extends Dashboard {
       processBoard: null,
       message: null,
       loader: null,
+      boxInfo: null,
     };
 
     this.processList = [];
@@ -38,6 +40,7 @@ export class MonitorDashboard extends Dashboard {
   init() {
     this.initProcessList();
     this.initLog();
+    this.initBoxInfo();
     this.initMessage();
     this.initLoader();
     this.screen.render();
@@ -81,6 +84,20 @@ export class MonitorDashboard extends Dashboard {
     this.boards.loader = Loading(this.screen);
   }
 
+  initBoxInfo() {
+    this.boards.boxInfo = blessed.text({
+      content:
+        ' left/right: switch boards | up/down/mouse: scroll | Ctrl/Cmd-C: exit | Enter: start/stop process',
+      parent: this.screen,
+      left: '0%',
+      top: '95%',
+      width: '100%',
+      height: '6%',
+      valign: 'middle',
+      tags: true,
+    });
+  }
+
   bindData() {
     processListObservable().subscribe((processList) => {
       this.processList = processList;
@@ -90,8 +107,8 @@ export class MonitorDashboard extends Dashboard {
             item.typeName,
             item.processName,
             item.statusName,
-            'Cpu ' + (item.monit?.cpu || '--'),
-            'MEM ' + (item.monit?.memory || '--'),
+            'MEM ' + dealMemory(item.monit?.memory),
+            'Cpu ' + (item.monit?.cpu || '0') + '%',
           ],
           [5, 15, 10, 10, 10],
         );

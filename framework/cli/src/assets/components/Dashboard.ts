@@ -17,15 +17,15 @@ class Dashboard {
   }
 
   init() {
-    console.error('Init must be cover!');
+    console.error('Init must be cover');
   }
 
   refresh() {
-    console.error('Refresh must be cover!');
+    console.error('Refresh must be cover');
   }
 
   bindEvent() {
-    console.error('BindEvent must be cover!');
+    console.error('BindEvent must be cover');
   }
 
   render() {
