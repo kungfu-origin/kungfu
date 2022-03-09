@@ -53,6 +53,8 @@ public:
 
   [[nodiscard]] const std::string &get_config();
 
+  [[nodiscard]] const kungfu::longfist::types::RiskConfig &get_risk_config();
+
   [[nodiscard]] const yijinjing::data::location_ptr &get_home() const;
 
   [[nodiscard]] yijinjing::journal::writer_ptr get_writer(uint32_t dest_id) const;

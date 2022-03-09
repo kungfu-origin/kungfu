@@ -161,6 +161,9 @@ module.exports = function () {
     ConfigStore: function (home) {
       return new binding.ConfigStore(locator(home));
     },
+    RiskConfigStore: function (home) {
+      return new binding.RiskConfigStore(locator(home));
+    },
     CommissionStore: function (home) {
       return new binding.CommissionStore(locator(home));
     },

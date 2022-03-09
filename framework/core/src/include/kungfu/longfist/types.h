@@ -87,6 +87,20 @@ KF_DEFINE_PACK_TYPE(                                             //
     (double, min_commission) //最小手续费
 );
 
+KF_DEFINE_DATA_TYPE(                                  //
+    RiskConfig, 10007, PK(location_uid), PERPETUAL(), //
+    (uint32_t, location_uid),                         //
+    (enums::category, category),                      //
+    (std::string, group),                             //
+    (std::string, name),                              //
+    (enums::mode, mode),                              //
+    (uint32_t, max_order_volume),                     // 单笔最大量
+    (uint32_t, max_daily_volume),                     // 每日最大成交量
+    (std::string, white_list),                        // 白名单列表
+    (bool, self_filled_check),                        // 自成交检查
+    (double, max_cancel_ratio)                       // 最大撤单比
+);
+
 KF_DEFINE_DATA_TYPE(                                                     //
     Session, 10010, PK(location_uid, begin_time), TIMESTAMP(begin_time), //
     (uint32_t, location_uid),                                            //
