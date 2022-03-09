@@ -1,7 +1,7 @@
 import CFonts from 'cfonts';
 import colors from 'colors';
 import { version } from '../package.json';
-import { program } from 'commander';
+import { Command, program } from 'commander';
 import { listKfLocations } from './commanders/list';
 import { selectMdTdStrategy, addMdTdStrategy } from './commanders/add';
 import { KfCategoryTypes } from '@kungfu-trader/kungfu-js-api/typings/enums';
@@ -12,6 +12,11 @@ import {
 } from '@kungfu-trader/kungfu-js-api/config/pathConfig';
 import { updateMdTdStrategy } from './commanders/update';
 import { removeMdTdStrategy } from './commanders/remove';
+import { monitPrompt } from './commanders/monit';
+import {
+  ensureKungfuKey,
+  initKfConfig,
+} from '@kungfu-trader/kungfu-js-api/config';
 
 if (process.argv.length === 2 || process.argv[2] === '-h') {
   console.log(colors.green('Welcome to kungfu trader system'));
@@ -96,6 +101,16 @@ program
   });
 
 program
+  .command('monit [options]')
+  .description(
+    'monitor all process with merged logs OR monitor one trading process (with -l)',
+  )
+  .action((type: string, commander: Command) => {
+    const list = (commander?.parent || {})['list'] || false;
+    monitPrompt(!!list);
+  });
+
+program
   .command('showdir <home|log|base>')
   .description('show the dir path of home, log or base')
   .action((target: string) => {
@@ -123,3 +138,6 @@ program.on('command:*', function () {
 });
 
 program.parse(process.argv);
+
+initKfConfig();
+ensureKungfuKey();

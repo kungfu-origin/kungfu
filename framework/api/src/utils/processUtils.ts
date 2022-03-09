@@ -285,12 +285,11 @@ export const pm2Disconnect = pm2.disconnect;
 export const startProcess = (
   options: Pm2StartOptions,
 ): Promise<Proc | void> => {
-  const kfcScript = isWin ? 'kfc.exe' : 'kfc';
   const optionsResolved: Pm2StartOptions = {
     name: options.name,
     args: options.args, //有问题吗？
     cwd: options.cwd || path.join(KFC_DIR),
-    script: options.script || kfcScript,
+    script: options.script || kfcName,
     interpreter: options.interpreter || 'none',
     output: buildProcessLogPath(options.name),
     error: buildProcessLogPath(options.name),
@@ -468,6 +467,10 @@ function getRocketParams(args: string, ifRocket: boolean) {
   }
 
   if (args.includes('archive')) {
+    rocket = '';
+  }
+
+  if (args.includes('dzxy')) {
     rocket = '';
   }
 
@@ -688,6 +691,24 @@ export const startStrategy = (
   }
 };
 
+export const startDzxy = () => {
+  console.log(process.cwd());
+  return startProcess({
+    name: 'dzxy',
+    args: '',
+    cwd: path.join(process.cwd(), 'dist', 'cli'),
+    script: 'dzxy.js',
+    interpreter: 'node',
+    force: true,
+    watch: process.env.NODE_ENV === 'production' ? false : true,
+    env: {
+      KFC_AS_VARIANT: 'node',
+    },
+  }).catch((err) => {
+    kfLogger.error(err.message);
+  });
+};
+
 export const startBar = (
   targetName: string,
   source: string,
@@ -709,20 +730,6 @@ export const startCustomProcess = (
   return startProcess({
     name: targetName,
     args,
-  }).catch((err) => {
-    kfLogger.error(err.message);
-  });
-};
-
-export const startDzxy = (): Promise<any> => {
-  return startProcess({
-    name: 'dzxy',
-    args: '',
-    force: true,
-    watch: process.env.NODE_ENV === 'production' ? false : true,
-    script: 'daemon.js',
-    cwd: APP_DIR,
-    interpreter: process.execPath,
   }).catch((err) => {
     kfLogger.error(err.message);
   });

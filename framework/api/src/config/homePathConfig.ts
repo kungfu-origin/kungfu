@@ -35,10 +35,4 @@ if (process.env.APP_TYPE === 'cli') {
     .replace(/\\/g, '\\\\');
 }
 
-if (process.env.APP_TYPE === 'dzxy') {
-  global.__kfResourcesPath = path
-    .join(__dirname, '..', '..', '..')
-    .replace(/\\/g, '\\\\');
-}
-
 export const KF_HOME_BASE_DIR_RESOLVE: string = getHomePath();

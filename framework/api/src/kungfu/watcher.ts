@@ -23,22 +23,34 @@ export const watcher = ((): KungfuApi.Watcher | null => {
   );
 
   if (process.env.APP_TYPE !== 'renderer') {
-    return null;
+    if (process.env.APP_TYPE !== 'cli') {
+      return null;
+    }
   }
 
-  if (process.env.RENDERER_TYPE !== 'app') {
-    return null;
+  if (process.env.APP_TYPE === 'renderer') {
+    if (process.env.RENDERER_TYPE !== 'app') {
+      return null;
+    }
+  }
+
+  if (process.env.APP_TYPE === 'cli') {
+    if (process.env.RENDERER_TYPE !== 'dzxy') {
+      return null;
+    }
   }
 
   const id = [process.env.APP_TYPE || '', process.env.RENDERER_TYPE || ''].join(
     '',
   );
+
   const bypassRestore = booleanProcessEnv(process.env.RELOAD_AFTER_CRASHED);
+  const bypassQuote = process.env.APP_TYPE === 'cli';
 
   return kf.watcher(
     KF_RUNTIME_DIR,
     kf.formatStringToHashHex(id),
-    false,
+    bypassQuote,
     bypassRestore,
   );
 })();

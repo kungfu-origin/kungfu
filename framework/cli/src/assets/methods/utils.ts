@@ -7,6 +7,8 @@ import {
   initFormStateByConfig,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { getAllKfConfigOriginData } from '@kungfu-trader/kungfu-js-api/actions';
+import { Pm2ProcessStatus } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
+import { PromptInputType, PromptQuestion } from 'src/typings';
 
 export const parseToString = (
   targetList: string[],
@@ -256,3 +258,14 @@ export const selectTargetKfLocation =
     const type = getKfCategoryFromString(targetType);
     return getKfLocation(type, targetId);
   };
+
+export const dealStatus = (status: string): string => {
+  if (status === '--') return status;
+  if (!Pm2ProcessStatus[status]) return status;
+  const name: string = Pm2ProcessStatus[status].name || '';
+  const level: number = Pm2ProcessStatus[status].level || 0;
+  if (level == 1) return colors.green(name);
+  else if (level == 0) return colors.white(name);
+  else if (level == -1) return colors.red(name);
+  else return status;
+};

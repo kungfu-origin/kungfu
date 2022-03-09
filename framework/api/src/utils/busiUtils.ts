@@ -205,21 +205,27 @@ export const logger = log4js.getLogger('app');
 export const kfLogger = {
   info: (...args: Array<string | number>) => {
     if (process.env.NODE_ENV === 'development') {
-      console.log('<KF_INFO>', args.join(' '));
+      if (process.env.APP_TYPE !== 'cli') {
+        console.log('<KF_INFO>', args.join(' '));
+      }
     }
     logger.info('<KF_INFO>', args.join(' '));
   },
 
   warn: (...args: Array<string | number>) => {
     if (process.env.NODE_ENV === 'development') {
-      console.warn('<KF_INFO>', args.join(' '));
+      if (process.env.APP_TYPE !== 'cli') {
+        console.warn('<KF_INFO>', args.join(' '));
+      }
     }
     logger.warn('<KF_INFO>', args.join(' '));
   },
 
   error: (...args: Array<string | number>) => {
     if (process.env.NODE_ENV === 'development') {
-      console.error('<KF_INFO>', args.join(' '));
+      if (process.env.APP_TYPE !== 'cli') {
+        console.error('<KF_INFO>', args.join(' '));
+      }
     }
     logger.error('<KF_INFO>', args.join(' '));
   },
