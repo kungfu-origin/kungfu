@@ -154,7 +154,7 @@ export const processListObservable = () =>
       return [
         {
           processId: 'archive',
-          processName: colors.gray('_archive_'),
+          processName: '_archive_',
           typeName: colors.bgMagenta('Sys'),
           category: 'system',
           group: '',
@@ -166,7 +166,7 @@ export const processListObservable = () =>
         },
         {
           processId: 'master',
-          processName: colors.bold(colors.white('MASTER')),
+          processName: colors.bold('MASTER'),
           typeName: colors.bgMagenta('Sys'),
           category: 'system',
           group: 'master',
@@ -178,7 +178,7 @@ export const processListObservable = () =>
         },
         {
           processId: 'ledger',
-          processName: colors.gray('LEDGER'),
+          processName: 'LEDGER',
           typeName: colors.bgMagenta('Sys'),
           category: 'system',
           group: 'service',
@@ -190,7 +190,7 @@ export const processListObservable = () =>
         },
         {
           processId: 'dzxy',
-          processName: colors.grey('DZXY'),
+          processName: 'DZXY',
           typeName: colors.bgMagenta('Sys'),
           category: 'system',
           group: 'service',
