@@ -21,7 +21,8 @@ import {
 import { shutdown } from './commanders/shutdown';
 import 'console-success';
 import { removeJournal } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
-import { setSystemConfig, showGlobalSetting } from './commanders/config';
+import { setGlobalSetting, showGlobalSetting } from './commanders/config';
+import { exportTradingDataPrompt } from './commanders/export';
 
 if (process.argv.length === 2 || process.argv[2] === '-h') {
   console.log(colors.green('Welcome to kungfu trader system'));
@@ -116,6 +117,21 @@ program
   });
 
 program
+  .command('export')
+  .description('Export all trading data by date')
+  .action(() => {
+    return exportTradingDataPrompt()
+      .then((output_path: string) => {
+        console.success(`Export trading data to ${output_path} success`);
+      })
+      .catch((err: Error) => {
+        console.error(err);
+        process.exit(1);
+      })
+      .finally(() => process.exit(0));
+  });
+
+program
   .command('shutdown')
   .description('shutdown all kungfu processes')
   .action(() => {
@@ -127,7 +143,7 @@ program
   .description('set system config of kungfu')
   .action(async () => {
     try {
-      await setSystemConfig();
+      await setGlobalSetting();
       await showGlobalSetting();
       await process.exit(0);
     } catch (err) {

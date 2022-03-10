@@ -37,7 +37,8 @@ declare global {
         | 'logview'
         | 'makeOrder'
         | 'codeEditor'
-        | 'dzxy';
+        | 'dzxy'
+        | 'export';
       RELOAD_AFTER_CRASHED: 'false' | 'true';
       ELECTRON_RUN_AS_NODE: boolean;
       ELECTRON_ENABLE_STACK_DUMPING: boolean;

@@ -26,7 +26,7 @@ const promptQuestionForSelectTargetConfigItem = () => {
   ]);
 };
 
-export const setSystemConfig = async () => {
+export const setGlobalSetting = async () => {
   const targetConfigKey: { target: string } =
     await promptQuestionForSelectTargetConfigItem();
 

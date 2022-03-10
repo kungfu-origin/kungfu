@@ -37,7 +37,9 @@ export const watcher = ((): KungfuApi.Watcher | null => {
 
   if (process.env.APP_TYPE === 'cli') {
     if (process.env.RENDERER_TYPE !== 'dzxy') {
-      return null;
+      if (process.env.RENDERER_TYPE !== 'export') {
+        return null;
+      }
     }
   }
 
