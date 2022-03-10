@@ -32,7 +32,7 @@ setTimerPromiseTask((): Promise<void> => {
       type: 'process:msg',
       data: {
         type: 'WATCHER_IS_LIVE',
-        body: !!WATCHER.isLive(),
+        body: WATCHER ? !!WATCHER.isLive() : false,
       },
     });
 
@@ -59,7 +59,7 @@ function swithKfLocationResolved(data: SwitchKfLocationPacketData) {
     category,
     group,
     name,
-    value: JSON.parse(value),
+    value: value,
     location_uid: 0,
     mode: 'live',
   };

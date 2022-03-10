@@ -43,6 +43,7 @@ interface ProcessListItem {
 class ListElementResolved extends Widgets.ListElement {
   setItems(items: string[]): void;
   selected: number;
+  focused: boolean;
 }
 
 interface Pm2Packet {

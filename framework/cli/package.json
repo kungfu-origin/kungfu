@@ -51,6 +51,7 @@
     "inquirer": "^8.2.0",
     "inquirer-autocomplete-prompt": "^2.0.0",
     "inquirer-path": "^1.0.0-beta5",
-    "minimist": "^1.2.5"
+    "minimist": "^1.2.5",
+    "tail": "^2.2.4"
   }
 }

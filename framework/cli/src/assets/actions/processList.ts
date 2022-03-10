@@ -154,7 +154,7 @@ export const processListObservable = () =>
       return [
         {
           processId: 'archive',
-          processName: '_archive_',
+          processName: colors.gray('_archive_'),
           typeName: colors.bgMagenta('Sys'),
           category: 'system',
           group: '',
@@ -166,7 +166,7 @@ export const processListObservable = () =>
         },
         {
           processId: 'master',
-          processName: colors.bold('MASTER'),
+          processName: colors.bold(colors.white('MASTER')),
           typeName: colors.bgMagenta('Sys'),
           category: 'system',
           group: 'master',
@@ -178,7 +178,7 @@ export const processListObservable = () =>
         },
         {
           processId: 'ledger',
-          processName: 'LEDGER',
+          processName: colors.gray('LEDGER'),
           typeName: colors.bgMagenta('Sys'),
           category: 'system',
           group: 'service',
@@ -190,7 +190,7 @@ export const processListObservable = () =>
         },
         {
           processId: 'dzxy',
-          processName: 'DZXY',
+          processName: colors.grey('DZXY'),
           typeName: colors.bgMagenta('Sys'),
           category: 'system',
           group: 'service',
@@ -337,6 +337,19 @@ const switchMaster = async (status: boolean): Promise<void> => {
     await startDzxy();
   }
 };
+
+const timer = setTimeout(() => {
+  DZXY_SUBJECT.next({
+    process: {
+      pm_id: -1,
+    },
+    data: {
+      type: 'APP_STATES',
+      body: {},
+    },
+  });
+  clearTimeout(timer);
+}, 1000);
 
 pm2.launchBus((err: Error, pm2_bus: Pm2Bus) => {
   if (err) {

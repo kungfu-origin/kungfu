@@ -9,18 +9,25 @@ import {
   switchProcess,
 } from '../assets/actions/processList';
 import { dealMemory, parseToString } from '../assets/methods/utils';
+import { Log } from '../assets/actions/log';
+import {
+  debounce,
+  setTimerPromiseTask,
+} from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 
 const WIDTH_LEFT_PANEL = 35;
 
 export class MonitorDashboard extends Dashboard {
   boards: {
     processBoard: ListElementResolved | null;
+    logBoard: ListElementResolved | null;
     message: Widgets.MessageElement | null;
     loader: Widgets.LoadingElement | null;
     boxInfo: Widgets.TextElement | null;
   };
 
   processList: ProcessListItem[];
+  log: Log | null;
 
   constructor() {
     super();
@@ -28,12 +35,14 @@ export class MonitorDashboard extends Dashboard {
 
     this.boards = {
       processBoard: null,
+      logBoard: null,
       message: null,
       loader: null,
       boxInfo: null,
     };
 
     this.processList = [];
+    this.log = null;
     this.init();
   }
 
@@ -59,7 +68,7 @@ export class MonitorDashboard extends Dashboard {
       left: '0',
       interactive: true,
       mouse: false,
-      width: WIDTH_LEFT_PANEL + '%',
+      width: `${WIDTH_LEFT_PANEL}%`,
       height: '95%',
       style: {
         ...TABLE_BASE_OPTIONS.style,
@@ -73,7 +82,24 @@ export class MonitorDashboard extends Dashboard {
   }
 
   initLog() {
-    return false;
+    this.boards.logBoard = blessed.list({
+      ...TABLE_BASE_OPTIONS,
+      label: ' Logs ',
+      parent: this.screen,
+      top: '0',
+      left: `${WIDTH_LEFT_PANEL + 1}%`,
+      width: `${100 - WIDTH_LEFT_PANEL - 1}%`,
+      height: '95%',
+      padding: DEFAULT_PADDING,
+      mouse: true,
+      style: {
+        ...TABLE_BASE_OPTIONS.style,
+        selected: {
+          bold: true,
+        },
+      },
+    }) as unknown as ListElementResolved;
+    this.log = new Log();
   }
 
   initMessage() {
@@ -100,6 +126,14 @@ export class MonitorDashboard extends Dashboard {
 
   bindData() {
     processListObservable().subscribe((processList) => {
+      if (!this.processList.length && processList.length) {
+        const processId = processList[0].processId;
+        this.log.initProcessId(processId);
+        this.boards.logBoard.setLabel(` Logs (${processId}) `);
+        this.boards.logBoard.setItems([]);
+        this.screen.render();
+      }
+
       this.processList = processList;
       const processListForRender = processList.map((item) => {
         return parseToString(
@@ -117,6 +151,13 @@ export class MonitorDashboard extends Dashboard {
       this.boards.processBoard.setItems(processListForRender);
       this.screen.render();
     });
+
+    setTimerPromiseTask((): Promise<void> => {
+      return new Promise((resolve) => {
+        this._setLogItems();
+        resolve();
+      });
+    }, 2000);
   }
 
   bindEvent() {
@@ -131,14 +172,36 @@ export class MonitorDashboard extends Dashboard {
       switchProcess(processItem, this.boards.message, this.boards.loader);
     });
 
-    // t.boards.processList.key(
-    //   ['up', 'down'],
-    //   debounce((ch: string, key: any) => {
-    //     const selectedIndex: number = t.boards.processList.selected;
-    //     const curProcessItem = t.globalData.processList[selectedIndex];
-    //     t._getLogs(curProcessItem);
-    //   }, 1000),
-    // );
+    this.boards.processBoard.key(
+      ['up', 'down'],
+      debounce(() => {
+        const selectedIndex: number = this.boards.processBoard.selected;
+        const curProcessItem = this.processList[selectedIndex];
+        this.log.initProcessId(curProcessItem.processId);
+        this.boards.logBoard.setLabel(` Logs (${curProcessItem.processId}) `);
+        this.boards.logBoard.setItems([]);
+        this.screen.render();
+      }, 300),
+    );
+
+    let i = 0;
+    const boards = ['processBoard', 'logBoard'];
+    this.screen.key(['left', 'right'], (ch: string, key: { name: string }) => {
+      key.name === 'left' ? i-- : i++;
+      if (i === 2) i = 0;
+      if (i === -1) i = 1;
+      const nameKey: string = boards[i];
+      this.boards[nameKey].focus();
+    });
+  }
+
+  _setLogItems() {
+    if (!this.boards.logBoard.focused) {
+      this.boards.logBoard.setItems(this.log.getLogs());
+      this.boards.logBoard.select(this.log.getLogs().length - 1);
+      this.boards.logBoard.setScrollPerc(100);
+      this.screen.render();
+    }
   }
 }
 

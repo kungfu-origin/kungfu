@@ -1405,3 +1405,43 @@ export const initFormStateByConfig = (
 
   return formState;
 };
+
+export function isCriticalLog(line: string): boolean {
+  if (line.indexOf('critical') !== -1) {
+    return true;
+  }
+
+  if (line.indexOf('File') !== -1) {
+    if (line.indexOf('line') !== -1) {
+      return true;
+    }
+  }
+
+  if (line.indexOf('Traceback') != -1) {
+    return true;
+  }
+
+  if (line.indexOf('Error') != -1) {
+    return true;
+  }
+
+  if (line.indexOf('Try') != -1) {
+    if (line.indexOf('for help') != -1) {
+      return true;
+    }
+  }
+
+  if (line.indexOf('Usage') != -1) {
+    return true;
+  }
+
+  if (line.indexOf('Failed to execute') != -1) {
+    return true;
+  }
+
+  if (line.indexOf('KeyboardInterrupt') != -1) {
+    return true;
+  }
+
+  return false;
+}
