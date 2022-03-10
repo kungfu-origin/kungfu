@@ -10,6 +10,7 @@ import {
   KF_HOME,
   LOG_DIR,
 } from '@kungfu-trader/kungfu-js-api/config/pathConfig';
+import { removeFilesInFolder } from '@kungfu-trader/kungfu-js-api/utils/fileUtils';
 import { updateMdTdStrategy } from './commanders/update';
 import { removeMdTdStrategy } from './commanders/remove';
 import { monitPrompt } from './commanders/monit';
@@ -17,6 +18,10 @@ import {
   ensureKungfuKey,
   initKfConfig,
 } from '@kungfu-trader/kungfu-js-api/config';
+import { shutdown } from './commanders/shutdown';
+import 'console-success';
+import { removeJournal } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
+import { setSystemConfig, showGlobalSetting } from './commanders/config';
 
 if (process.argv.length === 2 || process.argv[2] === '-h') {
   console.log(colors.green('Welcome to kungfu trader system'));
@@ -108,6 +113,55 @@ program
   .action((type: string, commander: Command) => {
     const list = (commander?.parent || {})['list'] || false;
     monitPrompt(!!list);
+  });
+
+program
+  .command('shutdown')
+  .description('shutdown all kungfu processes')
+  .action(() => {
+    shutdown();
+  });
+
+program
+  .command('config')
+  .description('set system config of kungfu')
+  .action(async () => {
+    try {
+      await setSystemConfig();
+      await showGlobalSetting();
+      await process.exit(0);
+    } catch (err) {
+      console.error(err);
+      process.exit(1);
+    }
+  });
+
+program
+  .command('clearLog')
+  .description('clear all logs (should do it often)')
+  .action(() => {
+    return removeFilesInFolder(LOG_DIR)
+      .then(() => console.success('Clear all logs'))
+      .catch((err: Error) => {
+        console.error(err);
+        process.exit(1);
+      })
+      .finally(() => process.exit(0));
+  });
+
+program
+  .command('clearJournal')
+  .description(
+    'clear all journal (Be carefull, this action will clear all trading data)',
+  )
+  .action(() => {
+    return removeJournal(KF_HOME)
+      .then(() => console.success('Clear all jouranl files'))
+      .catch((err: Error) => {
+        console.error(err);
+        process.exit(1);
+      })
+      .finally(() => process.exit(0));
   });
 
 program

@@ -146,7 +146,7 @@ export const buildQuestionByKfConfigItem = (
         : [],
     message: `${isUpdate ? 'Update' : 'Enter'} ${key} ${renderSelect(
       configItem,
-    )}`,
+    )} ${configItem.tip ? '(' + configItem.tip + ')' : ''}`,
 
     validate: async (value: KungfuApi.KfConfigValue) => {
       if (configItem.required && value.toString() === '') {

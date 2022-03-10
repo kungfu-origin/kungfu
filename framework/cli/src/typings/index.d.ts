@@ -74,3 +74,9 @@ interface SwitchKfLocationPacketData {
 class Pm2Bus {
   on(type: string, cb: (packet: Pm2Packet) => void);
 }
+
+declare module NodeJS {
+  interface console {
+    success: (str: string) => void;
+  }
+}

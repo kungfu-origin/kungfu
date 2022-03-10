@@ -1,5 +1,6 @@
 import { kf } from './index';
 import { KF_RUNTIME_DIR } from '../config/pathConfig';
+import { getKfGlobalSettingsValue } from '@kungfu-trader/kungfu-js-api/config/globalSettings';
 import {
   booleanProcessEnv,
   getProcessIdByKfLocation,
@@ -45,7 +46,8 @@ export const watcher = ((): KungfuApi.Watcher | null => {
   );
 
   const bypassRestore = booleanProcessEnv(process.env.RELOAD_AFTER_CRASHED);
-  const bypassQuote = process.env.APP_TYPE === 'cli';
+  const globalSetting = getKfGlobalSettingsValue();
+  const bypassQuote = globalSetting?.performance?.bypassQuote;
 
   return kf.watcher(
     KF_RUNTIME_DIR,

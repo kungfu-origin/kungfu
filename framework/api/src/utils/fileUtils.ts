@@ -45,3 +45,26 @@ export const writeCSV = (
       });
   });
 };
+
+export const removeFileFolder = (targetPath: string): Promise<void> => {
+  targetPath = path.normalize(targetPath);
+  return new Promise((resolve) => {
+    if (!fse.existsSync(targetPath)) {
+      resolve();
+      return;
+    }
+    fse.removeSync(targetPath);
+    resolve();
+  });
+};
+
+export const removeFilesInFolder = (targetDir: string) => {
+  targetDir = path.normalize(targetDir);
+  if (!fse.existsSync(targetDir)) throw new Error(`${targetDir} not existed!`);
+  const promises = fse.readdirSync(targetDir).map((file: any) => {
+    const filePath = path.join(targetDir, file);
+    return removeFileFolder(filePath);
+  });
+
+  return Promise.all(promises);
+};

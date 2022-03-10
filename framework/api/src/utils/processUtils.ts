@@ -22,6 +22,7 @@ import {
   KF_CONFIG_PATH,
   KF_HOME,
 } from '../config/pathConfig';
+import { getKfGlobalSettingsValue } from '../config/globalSettings';
 
 process.env.PM2_HOME = path.resolve(os.homedir(), '.pm2');
 const numCPUs = os.cpus() ? os.cpus().length : 1;
@@ -478,9 +479,9 @@ function getRocketParams(args: string, ifRocket: boolean) {
 }
 
 function buildArgs(args: string): string {
-  const kfConfig: any = fse.readJsonSync(KF_CONFIG_PATH) || {};
-  const logLevel: string = (kfConfig.system || {}).logLevel || '';
-  const ifRocket = (kfConfig.performance || {}).rocket || false;
+  const globalSetting = getKfGlobalSettingsValue();
+  const logLevel: string = globalSetting?.system?.logLevel || '';
+  const ifRocket = globalSetting?.performance?.rocket || false;
   const rocket = getRocketParams(args, ifRocket);
   return [logLevel, args, rocket].join(' ');
 }
@@ -670,9 +671,9 @@ export const startStrategy = (
   strategyPath: string,
 ): Promise<Proc | void> => {
   strategyPath = dealSpaceInPath(strategyPath);
-  const kfSystemConfig: any = fse.readJsonSync(KF_CONFIG_PATH);
-  const ifLocalPython = (kfSystemConfig.strategy || {}).python || false;
-  const pythonPath = (kfSystemConfig.strategy || {}).pythonPath || '';
+  const globalSetting = getKfGlobalSettingsValue();
+  const ifLocalPython = globalSetting?.strategy?.python || false;
+  const pythonPath = globalSetting?.strategy?.pythonPath || '';
 
   if (ifLocalPython) {
     return deleteProcess(strategyId)
