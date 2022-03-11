@@ -16,7 +16,6 @@ export const TABLE_BASE_OPTIONS: Widgets.ElementOptions = {
   },
   border: {
     type: 'line',
-    // fg: 'white',
   },
   keys: true,
   align: 'left',

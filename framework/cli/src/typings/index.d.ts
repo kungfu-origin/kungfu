@@ -80,3 +80,19 @@ declare module NodeJS {
     success: (str: string) => void;
   }
 }
+
+interface TableOption {
+  headers: string[];
+  columnWidth: (number | string)[];
+  pad: number;
+  cell: Widgets.StyleListTable['cell'];
+  style: {
+    cell: Widgets.StyleListTable['cell'];
+  };
+}
+
+interface BoxElementResolved extends Widgets.BoxElement {
+  setItems(list: string[]): void;
+  headers: string[];
+  childList: ListElementResolved;
+}

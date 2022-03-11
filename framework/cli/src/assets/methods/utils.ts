@@ -14,8 +14,8 @@ import {
 import { PromptInputType, PromptQuestion } from 'src/typings';
 
 export const parseToString = (
-  targetList: string[],
-  columnWidth: Array<string | number>,
+  targetList: (string | number)[],
+  columnWidth: (string | number)[],
   pad = 2,
 ) => {
   return targetList
@@ -280,4 +280,16 @@ export const dealMemory = (mem: number): string => {
     return '--';
   }
   return Number((mem || 0) / (1024 * 1024)).toFixed(0) + 'MB';
+};
+
+export const calcHeaderWidth = (
+  target: string[],
+  wish: (string | number)[],
+) => {
+  wish = wish || [];
+  return target.map((t: string, i) => {
+    if (wish[i] === 'auto') return wish[i];
+    if (t.length < (wish[i] || 0)) return wish[i];
+    else return t.length;
+  });
 };

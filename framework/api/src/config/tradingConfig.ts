@@ -252,6 +252,12 @@ export const UnfinishedOrderStatus = [
   OrderStatusEnum.PartialFilledActive,
 ];
 
+export const WellFinishedOrderStatus = [
+  OrderStatusEnum.Cancelled,
+  OrderStatusEnum.Filled,
+  OrderStatusEnum.PartialFilledNotActive,
+];
+
 export const Direction: Record<
   DirectionEnum,
   KungfuApi.KfTradeValueCommonData
