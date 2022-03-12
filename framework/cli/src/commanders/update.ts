@@ -2,7 +2,7 @@ import { getAllKfConfigOriginData } from '@kungfu-trader/kungfu-js-api/actions';
 import {
   buildObjectFromKfConfigArray,
   getPromptQuestionsBySettings,
-  selectTargetKfLocation,
+  selectTargetKfConfig,
 } from '../assets/methods/utils';
 import {
   getIdByKfLocation,
@@ -11,7 +11,12 @@ import {
 import { setKfConfig } from '@kungfu-trader/kungfu-js-api/kungfu/store';
 
 export const updateMdTdStrategy = async () => {
-  const kfLocation = await selectTargetKfLocation();
+  const kfLocation = await selectTargetKfConfig();
+
+  if (!kfLocation) {
+    throw new Error('target is illegal kfLocation');
+  }
+
   const extConfigs = await getKfExtensionConfig();
   const { md, td, strategy } = await getAllKfConfigOriginData();
 

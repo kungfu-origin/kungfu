@@ -3,7 +3,7 @@ import MessageBox from '../assets/components/MessageBox';
 import Loading from '../assets/components/Loading';
 import { DEFAULT_PADDING, TABLE_BASE_OPTIONS } from '../assets/config/index';
 import blessed, { Widgets } from 'blessed';
-import { ListElementResolved, ProcessListItem } from '../typings';
+import { ListElementResolved, ProcessListItem } from 'src/typings';
 import {
   processListObservable,
   switchProcess,

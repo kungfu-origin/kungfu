@@ -2,6 +2,7 @@ import { calcHeaderWidth, parseToString } from '../methods/utils';
 import Table from './Table';
 import colors from 'colors';
 import {
+  KfCategoryTypes,
   OffsetEnum,
   OrderStatusEnum,
   SideEnum,
@@ -11,17 +12,14 @@ import {
   dealOrderStatus,
   dealSide,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
-import {
-  UnfinishedOrderStatus,
-  WellFinishedOrderStatus,
-} from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
+import { WellFinishedOrderStatus } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
 
-class OrderTable extends Table {
-  type: string;
+export class OrderTable extends Table {
+  category: KfCategoryTypes;
 
-  constructor(type: string) {
+  constructor(category: KfCategoryTypes) {
     super();
-    this.type = type;
+    this.category = category;
     this.headers = [
       'UpdateTime',
       'Ticker',
@@ -30,7 +28,7 @@ class OrderTable extends Table {
       'Price',
       'Filled/Not',
       'Status',
-      type === 'account' ? 'Strate' : 'AccountId',
+      category === 'td' ? 'StratId' : 'AccountId',
       'System LA',
       'Network LA',
     ];
@@ -38,7 +36,7 @@ class OrderTable extends Table {
   }
 
   setItems(orderDataList: KungfuApi.OrderResolved[]) {
-    this.refresh(orderDataList.slice(0, 50));
+    this.refresh(orderDataList.slice(0, 10));
   }
 
   dealSide(side: SideEnum) {
@@ -73,7 +71,7 @@ class OrderTable extends Table {
   }
 
   dealLast(order: KungfuApi.OrderResolved) {
-    if (this.type === 'strategy') {
+    if (this.category === 'strategy') {
       return order.source_uname;
     } else {
       return order.dest_uname;
@@ -81,24 +79,24 @@ class OrderTable extends Table {
   }
 
   refresh(ordersList: KungfuApi.OrderResolved[]) {
-    const orderListData = ordersList.map((o) => {
-      const side = this.dealSide(o.side);
-      const offset = this.dealOffset(o.offset);
-      const orderStatus = this.dealOrderStatus(o.status);
-      const last = this.dealLast(o);
+    const orderListData = ordersList.map((order) => {
+      const side = this.dealSide(order.side);
+      const offset = this.dealOffset(order.offset);
+      const orderStatus = this.dealOrderStatus(order.status);
+      const last = this.dealLast(order);
 
       return parseToString(
         [
-          o.update_time_resolved,
-          o.instrument_id,
+          order.update_time_resolved,
+          order.instrument_id,
           side,
           offset,
-          o.limit_price,
-          Number(o.volume_traded),
+          order.limit_price,
+          `${order.volume_traded}/${order.volume}`,
           orderStatus,
           last,
-          o.latency_system,
-          o.latency_network,
+          order.latency_system,
+          order.latency_network,
         ],
         calcHeaderWidth(this.headers, this.columnWidth),
         this.pad,
@@ -113,4 +111,4 @@ class OrderTable extends Table {
   }
 }
 
-export default (type: string) => new OrderTable(type);
+export default (category: KfCategoryTypes) => new OrderTable(category);

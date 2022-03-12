@@ -1,15 +1,22 @@
-import Table from '@/assets/components/Table';
-import { calcHeaderWidth, parseToString } from '@/assets/scripts/utils';
-const colors = require('colors');
+import {
+  KfCategoryTypes,
+  OffsetEnum,
+  SideEnum,
+} from '@kungfu-trader/kungfu-js-api/typings/enums';
+import {
+  dealOffset,
+  dealSide,
+} from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
+import colors from 'colors';
+import { calcHeaderWidth, parseToString } from '../methods/utils';
+import Table from './Table';
 
-class TradeTable extends Table {
-  type: string;
-  headers: string[];
-  columnWidth: number[];
+export class TradeTable extends Table {
+  category: KfCategoryTypes;
 
-  constructor(type: string) {
+  constructor(category: KfCategoryTypes) {
     super();
-    this.type = type;
+    this.category = category;
     this.headers = [
       'UpdateTime',
       'Ticker',
@@ -17,49 +24,70 @@ class TradeTable extends Table {
       'Offset',
       'Price',
       'Volume',
-      type === 'account' ? 'Strate' : 'AccountId ',
+      category === 'td' ? 'StratId' : 'AccountId ',
       'Trade LA',
     ];
     this.columnWidth = [10, 0, 0, 0, 8, 6, 9, 10];
   }
 
-  setItems(tradeDataList: TradeData[]) {
-    this.refresh(tradeDataList.slice(0, 500));
+  setItems(tradeDataList: KungfuApi.TradeResolved[]) {
+    this.refresh(tradeDataList.slice(0, 10));
   }
-  /**
-   * @param  {Object} accountData
-   * @param  {Object} processStatus
-   */
-  refresh(tradeList: TradeData[]) {
-    const t = this;
-    const tradeListData = tradeList.map((trade: TradeData) => {
-      let side = trade.side || '';
-      if (side.toLowerCase() === 'buy') side = colors.red(side);
-      else if (side.toLowerCase() === 'sell') side = colors.green(side);
-      let offset = trade.offset || '';
-      if (offset.toLowerCase() === 'open') offset = colors.red(offset);
-      else if (offset.toLowerCase() === 'close') offset = colors.green(offset);
-      let last = trade.clientId;
-      if (t.type === 'strategy') last = trade.accountId;
+
+  dealSide(side: SideEnum) {
+    const name = dealSide(side).name;
+    if (side === SideEnum.Buy) {
+      return colors.red(name);
+    }
+
+    if (side === SideEnum.Sell) {
+      return colors.green(name);
+    }
+  }
+
+  dealOffset(offset: OffsetEnum) {
+    const name = dealOffset(offset).name;
+    if (offset === OffsetEnum.Open) {
+      return colors.red(name);
+    } else {
+      return colors.green(name);
+    }
+  }
+
+  dealLast(trade: KungfuApi.TradeResolved) {
+    if (this.category === 'strategy') {
+      return trade.source_uname;
+    } else {
+      return trade.dest_uname;
+    }
+  }
+
+  refresh(tradeList: KungfuApi.TradeResolved[]) {
+    const tradeListData = tradeList.map((trade: KungfuApi.TradeResolved) => {
+      const side = this.dealSide(trade.side);
+      const offset = this.dealOffset(trade.offset);
+      const last = this.dealLast(trade);
+
       return parseToString(
         [
-          trade.updateTime,
-          trade.instrumentId,
+          trade.trade_time_resolved,
+          trade.instrument_id,
           side,
           offset,
           trade.price,
-          trade.volume,
+          Number(trade.volume),
           last,
-          trade.latencyTrade,
+          trade.latency_trade,
         ],
         calcHeaderWidth(this.headers, this.columnWidth),
-        t.pad,
+        this.pad,
       );
     });
-    t.table.setItems(tradeListData);
-    if (!t.table.childList.focused) {
-      t.table.childList.select(0);
-      t.table.childList.setScrollPerc(0);
+
+    this.table.setItems(tradeListData);
+    if (!this.table.childList.focused) {
+      this.table.childList.select(0);
+      this.table.childList.setScrollPerc(0);
     }
   }
 }
