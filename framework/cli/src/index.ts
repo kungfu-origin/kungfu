@@ -38,21 +38,18 @@ if (process.argv.length === 2 || process.argv[2] === '-h') {
   });
 }
 
-program
-  .version(version)
-  .option('-l --list', 'list detail')
-  .option('-a --add', 'add [for ext]')
-  .option('-r --remove', 'remove [for ext]')
-  .option('-k --kill', 'kill [for monit]');
+program.version(version);
 
-program.on('command:*', function () {
-  console.error(
-    `Invalid command: ${program.args.join(
-      ' ',
-    )}\nSee --help for a list of available commands.`,
-  );
-  process.exit(1);
-});
+program
+  .command('monit [options]')
+  .option('-l --list', 'list detail')
+  .description(
+    'monitor all process with merged logs OR monitor one trading process (with -l)',
+  )
+  .action((type: string, commander: Command) => {
+    const list = commander['list'] || false;
+    monitPrompt(!!list);
+  });
 
 program
   .command('list')
@@ -104,16 +101,6 @@ program
         process.exit(1);
       })
       .finally(() => process.exit(0));
-  });
-
-program
-  .command('monit [options]')
-  .description(
-    'monitor all process with merged logs OR monitor one trading process (with -l)',
-  )
-  .action((type: string, commander: Command) => {
-    const list = (commander?.parent || {})['list'] || false;
-    monitPrompt(!!list);
   });
 
 program

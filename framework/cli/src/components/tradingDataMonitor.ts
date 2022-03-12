@@ -1,88 +1,102 @@
-import posTable from '@/assets/components/PosTable';
-import orderTable from '@/assets/components/OrderTable';
-import tradeTable from '@/assets/components/TradeTable';
-import Dashboard from '@/assets/components/Dashboard';
-import MessageBox from '@/assets/components/MessageBox';
-import Loading from '@/assets/components/Loading';
-
+import Loading from '../assets/components/Loading';
+import MessageBox from '../assets/components/MessageBox';
+import Dashboard from '../assets/components/Dashboard';
+import buildOrderTable, { OrderTable } from '../assets/components/OrderTable';
+import buildTradeTable, { TradeTable } from '../assets/components/TradeTable';
+import buildPosTable, { PosTable } from '../assets/components/PosTable';
+import { TABLE_BASE_OPTIONS, DEFAULT_PADDING } from '../assets/config';
+import { ListElementResolved, ProcessListItem } from '../typings';
+import blessed, { Widgets } from 'blessed';
+import { specificProcessListObserver } from '../assets/actions/processList';
+import { colorNum, dealMemory, parseToString } from '../assets/methods/utils';
+import { switchProcess } from '../assets/actions/processList';
 import {
-  parseToString,
-  TABLE_BASE_OPTIONS,
-  DEFAULT_PADDING,
-  dealNum,
-} from '@/assets/scripts/utils';
-import { tradingDataObservale } from '@/assets/scripts/actions/tradingDataActions';
+  assetObservable,
+  getAsset,
+  getOrders,
+  getPosition,
+  getTrades,
+  ordersObservable,
+  posObservable,
+  reqCancelAllOrders,
+  tradesObservable,
+} from '../assets/actions/tradingData';
 import {
-  switchProcess,
-  processListObservable,
-} from '@/assets/scripts/actions/processActions';
-import { kungfuCancelAllOrders } from '__io/kungfu/makeCancelOrder';
-import { dealOrder } from '__io/kungfu/watcher';
-import { deepClone } from '__gUtils/busiUtils';
-import { aliveOrderStatusList } from 'kungfu-shared/config/tradingConfig';
-
-const blessed = require('blessed');
+  dealKfPrice,
+  setTimerPromiseTask,
+} from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 
 // 定义全局变量
 const WIDTH_LEFT_PANEL = 60;
-const WIDTH_PROCESS_PANEL = 46;
+const WIDTH_PROCESS_PANEL = 30;
 
 class TradingDataDashboard extends Dashboard {
-  targetId: string;
-  type: string;
-  screen: any;
-  globalData: {
-    processList: ProcessListItem[];
+  kfLocation: KungfuApi.KfConfig;
+  boards: {
+    processBoard: ListElementResolved | null;
+    cancelBtn: Widgets.ButtonElement | null;
+    message: Widgets.MessageElement | null;
+    loader: Widgets.LoadingElement | null;
+    boxInfo: Widgets.TextElement | null;
+    orderTable: OrderTable | null;
+    tradeTable: TradeTable | null;
+    posTable: PosTable | null;
+    assetTable: ListElementResolved | null;
   };
-  boards: any;
-  orders: OrderData[];
 
-  constructor(targetId: string, type: string) {
+  processList: ProcessListItem[];
+
+  constructor(kfLocation: KungfuApi.KfConfig) {
     super();
     this.screen.title =
-      type === 'account' ? 'Account Dashboard' : 'Strategy Dashboard';
-    this.targetId = targetId;
-    this.type = type;
-    this.globalData = {
-      processList: [],
+      kfLocation.category === 'td' ? 'Td Dashboard' : 'Strategy Dashboard';
+    this.kfLocation = kfLocation;
+
+    this.boards = {
+      processBoard: null,
+      cancelBtn: null,
+      message: null,
+      loader: null,
+      boxInfo: null,
+      orderTable: null,
+      tradeTable: null,
+      posTable: null,
+      assetTable: null,
     };
 
-    this.boards = {};
-    this.orders = [];
+    this.processList = [];
     this.init();
   }
 
   init() {
-    const t = this;
-    t.initProcessTable();
-    t.initAssetsTable();
-    t.initPosTable();
-    t.initOrderList();
-    t.initTradeList();
-    t.initBoxInfo();
-    t.initMessage();
-    t.initLoader();
-    t.initCancelOrderBtn();
-    t.screen.render();
-    t.bindEvent();
-    t.bindData();
+    this.initProcessTable();
+    this.initAssetTable();
+    this.initPosTable();
+    this.initOrderList();
+    this.initTradeList();
+    this.initBoxInfo();
+    this.initCancelOrderBtn();
+    this.initMessage();
+    this.initLoader();
+    this.screen.render();
+    this.bindEvent();
+    this.bindData();
   }
 
   initProcessTable() {
-    const t = this;
-    t.boards.processTable = blessed.list({
+    this.boards.processBoard = blessed.list({
       ...TABLE_BASE_OPTIONS,
       label:
-        t.type === 'account'
-          ? ' Account Trading Engines (Td/Md) '
+        this.kfLocation.category === 'td'
+          ? ' Account Trading Engines '
           : ' Strategy Trading Engines ',
-      parent: t.screen,
+      parent: this.screen,
       padding: DEFAULT_PADDING,
       top: '0',
       left: '0',
       interactive: true,
       mouse: false,
-      width: WIDTH_PROCESS_PANEL,
+      width: `${WIDTH_PROCESS_PANEL}%`,
       height: '40%',
       style: {
         ...TABLE_BASE_OPTIONS.style,
@@ -91,22 +105,21 @@ class TradingDataDashboard extends Dashboard {
           bg: 'blue',
         },
       },
-    });
-    t.boards.processTable.focus();
+    }) as unknown as ListElementResolved;
+    this.boards.processBoard.focus();
   }
 
-  initAssetsTable() {
-    const t = this;
-    t.boards.assetTable = blessed.list({
+  initAssetTable() {
+    this.boards.assetTable = blessed.list({
       ...TABLE_BASE_OPTIONS,
       label: ' Assets ',
-      parent: t.screen,
+      parent: this.screen,
       padding: DEFAULT_PADDING,
       top: 0,
-      left: WIDTH_PROCESS_PANEL,
+      left: `${WIDTH_PROCESS_PANEL}%+1`,
       interactive: true,
       mouse: true,
-      width: 100 - WIDTH_LEFT_PANEL + 5 + `%-${WIDTH_PROCESS_PANEL}`,
+      width: `${WIDTH_LEFT_PANEL - WIDTH_PROCESS_PANEL}%-1`,
       height: '40%-3',
       style: {
         ...TABLE_BASE_OPTIONS.style,
@@ -114,17 +127,17 @@ class TradingDataDashboard extends Dashboard {
           bold: true,
         },
       },
-    });
+    }) as unknown as ListElementResolved;
+    return false;
   }
 
   initCancelOrderBtn() {
-    const t = this;
-    t.boards.cancelBtn = blessed.button({
+    this.boards.cancelBtn = blessed.button({
       content: 'Cancel All Order',
-      parent: t.screen,
-      width: 100 - WIDTH_LEFT_PANEL + 5 + `%-${WIDTH_PROCESS_PANEL}`,
+      parent: this.screen,
+      width: `${WIDTH_LEFT_PANEL - WIDTH_PROCESS_PANEL}%-1`,
       height: 3,
-      left: 45,
+      left: `${WIDTH_PROCESS_PANEL}%+1`,
       top: '40%-3',
       align: 'center',
       valign: 'middle',
@@ -144,53 +157,51 @@ class TradingDataDashboard extends Dashboard {
         },
       },
     });
-    t.boards.cancelBtn.setIndex(999);
+    this.boards.cancelBtn.setIndex(999);
   }
 
   initPosTable() {
-    const t = this;
-    t.boards.posTable = posTable();
-    t.boards.posTable.build({
+    this.boards.posTable = buildPosTable();
+    this.boards.posTable.build({
       label: ' Positions ',
-      parent: t.screen,
+      parent: this.screen,
       top: '0',
-      left: 100 - WIDTH_LEFT_PANEL + 5 + '%',
-      width: WIDTH_LEFT_PANEL - 5 + '%',
+      left: `${WIDTH_LEFT_PANEL}%+1`,
+      width: `${100 - WIDTH_LEFT_PANEL}%-1`,
       height: '40%',
     });
+    return;
   }
 
   initOrderList() {
-    const t = this;
-    t.boards.orderTable = orderTable(t.type);
-    t.boards.orderTable.build({
+    this.boards.orderTable = buildOrderTable(this.kfLocation.category);
+    this.boards.orderTable.build({
       label: ' Orders Records ',
-      parent: t.screen,
+      parent: this.screen,
       top: '40%',
-      width: WIDTH_LEFT_PANEL - 5 + '%',
+      width: `${WIDTH_LEFT_PANEL}%`,
       height: '55%',
     });
   }
 
   initTradeList() {
-    const t = this;
-    t.boards.tradeTable = tradeTable(t.type);
-    t.boards.tradeTable.build({
+    this.boards.tradeTable = buildTradeTable(this.kfLocation.category);
+    this.boards.tradeTable.build({
       label: ' Trades Records ',
-      parent: t.screen,
+      parent: this.screen,
       top: '40%',
-      left: WIDTH_LEFT_PANEL - 5 + '%',
-      width: 100 - WIDTH_LEFT_PANEL + 5 + '%',
+      left: `${WIDTH_LEFT_PANEL}%+1`,
+      width: `${100 - WIDTH_LEFT_PANEL}%-1`,
       height: '55%',
     });
+    return false;
   }
 
   initBoxInfo() {
-    const t = this;
-    t.boards.boxInfo = blessed.text({
+    this.boards.boxInfo = blessed.text({
       content:
         ' left/right: switch boards | up/down/mouse: scroll | Ctrl/Cmd-C: exit | Enter: start/stop process',
-      parent: t.screen,
+      parent: this.screen,
       left: '0%',
       top: '95%',
       width: '100%',
@@ -201,137 +212,152 @@ class TradingDataDashboard extends Dashboard {
   }
 
   initMessage() {
-    const t = this;
-    t.boards.message = MessageBox(t.screen);
+    this.boards.message = MessageBox(this.screen);
   }
 
   initLoader() {
-    const t = this;
-    t.boards.loader = Loading(t.screen);
+    this.boards.loader = Loading(this.screen);
   }
 
   bindEvent() {
-    const t = this;
+    this.screen.key(['C-c'], () => {
+      this.screen.destroy();
+      process.exit(0);
+    });
+
+    this.boards.processBoard.key(['enter'], () => {
+      const selectedIndex: number = this.boards.processBoard.selected;
+      const processItem = this.processList[selectedIndex];
+      switchProcess(processItem, this.boards.message, this.boards.loader);
+    });
+
+    this.boards.cancelBtn.key(['enter'], () => {
+      reqCancelAllOrders(this.kfLocation);
+      this.boards.message.log(
+        'Cancel Order Req sent, Please wait...',
+        2,
+        (err) => {
+          if (err) {
+            console.error(err);
+          }
+        },
+      );
+    });
+
     let i = 0;
-    let boards = [
-      'processTable',
+    const boards = [
+      'processBoard',
       'assetTable',
       'cancelBtn',
       'posTable',
       'orderTable',
       'tradeTable',
     ];
-    t.screen.key(['left', 'right'], (ch: any, key: any) => {
+    this.screen.key(['left', 'right'], (ch: string, key: { name: string }) => {
       key.name === 'left' ? i-- : i++;
       if (i === 6) i = 0;
       if (i === -1) i = 5;
-      t.boards[boards[i]].focus();
-    });
-
-    t.screen.key(['C-c'], function (ch: any, key: any) {
-      t.screen.destroy();
-      process.exit(0);
-    });
-
-    t.boards.processTable.key(['enter'], () => {
-      const selectedIndex: number = t.boards.processTable.selected;
-      switchProcess(
-        t.globalData.processList[selectedIndex],
-        t.boards.message,
-        t.boards.loader,
-      );
-    });
-
-    t.boards.cancelBtn.on('press', () => {
-      const { watcher } = require('__io/kungfu/watcher');
-      const aliveOrders = watcher.ledger.Order.list().filter(
-        (item: OrderOriginData) => aliveOrderStatusList.includes(+item.status),
-      );
-
-      if (this.type === 'account') {
-        kungfuCancelAllOrders(aliveOrders, this.targetId, 'account').then(() =>
-          t.boards.message.log(`Cancel all orders signal sending`, 3),
-        );
-      } else if (this.type === 'strategy') {
-        kungfuCancelAllOrders(aliveOrders, this.targetId, 'strategy').then(() =>
-          t.boards.message.log(`Cancel all orders signal sending`, 3),
-        );
-      }
-    });
-  }
-
-  freshAssets(assets: AssetData) {
-    let assetsCloned: any = deepClone(assets);
-
-    if (this.type === 'account') {
-      delete assetsCloned.clientId;
-    } else if (this.type === 'strategy') {
-      delete assetsCloned.accountId;
-    }
-
-    return Object.entries(assetsCloned).map((kvPair: any[]) => {
-      let key = kvPair[0];
-      let val = kvPair[1];
-      let theFirst = key[0];
-      key = theFirst.toUpperCase() + key.slice(1);
-      if (['UnRealizedPnl', 'RealizedPnl'].includes(key)) {
-        val = dealNum(+val);
-      }
-      return parseToString([key, val], [14, 14]);
+      const nameKey: string = boards[i];
+      this.boards[nameKey].focus();
     });
   }
 
   bindData() {
-    tradingDataObservale(this.type, this.targetId).subscribe(
-      (tradingData: any) => {
-        const orders = tradingData.orders;
-        this.orders = orders;
+    setTimerPromiseTask(
+      () =>
+        Promise.all([
+          getOrders(this.kfLocation),
+          getTrades(this.kfLocation),
+          getPosition(this.kfLocation),
+          getAsset(this.kfLocation),
+        ]),
+      3000,
+    );
+
+    specificProcessListObserver(this.kfLocation).subscribe((processList) => {
+      this.processList = processList;
+      const processListForRender = processList.map((item) => {
+        return parseToString(
+          [
+            item.typeName,
+            item.processName,
+            item.statusName,
+            'MEM ' + dealMemory(item.monit?.memory),
+            'Cpu ' + (item.monit?.cpu || '0') + '%',
+          ],
+          [5, 15, 10, 10, 10],
+        );
+      });
+
+      this.boards.processBoard.setItems(processListForRender);
+      this.screen.render();
+    });
+
+    ordersObservable(this.kfLocation).subscribe(
+      (orders: KungfuApi.OrderResolved[]) => {
         this.boards.orderTable.setItems(orders);
-
-        const trades = tradingData.trades;
-        this.boards.tradeTable.setItems(trades);
-
-        const positions = tradingData.positions;
-        this.boards.posTable.setItems(positions);
-
-        const assets = this.freshAssets(tradingData.assets);
-        this.boards.assetTable.setItems(assets);
-
-        this.screen.render();
       },
     );
 
-    processListObservable().subscribe((processList: any) => {
-      const t = this;
-      if (t.type === 'account') {
-        processList = processList.filter((proc: ProcessListItem) => {
-          if (proc.type === 'td' && proc.account_id === t.targetId) return true;
-          else if (proc.type === 'md' && t.targetId.includes(proc.source_name))
-            return true;
-          else if (proc.type === 'main') return true;
-          else return false;
-        });
-      } else if (t.type === 'strategy') {
-        processList = processList.filter((proc: ProcessListItem) => {
-          if (proc.type === 'strategy' && proc.strategy_id === t.targetId)
-            return true;
-          else if (proc.type === 'main') return true;
-          else return false;
-        });
-      }
+    tradesObservable(this.kfLocation).subscribe(
+      (trades: KungfuApi.TradeResolved[]) => {
+        this.boards.tradeTable.setItems(trades);
+      },
+    );
 
-      t.globalData.processList = processList;
-      const processListResolve = processList.map((proc: ProcessListItem) =>
-        parseToString(
-          [proc.typeName, proc.processName, proc.statusName],
-          [5, 15, 10],
-        ),
-      );
-      t.boards.processTable.setItems(processListResolve);
-      t.screen.render();
+    posObservable(this.kfLocation).subscribe(
+      (positions: KungfuApi.PositionResolved[]) => {
+        this.boards.posTable.setItems(positions);
+      },
+    );
+
+    assetObservable(this.kfLocation).subscribe((asset: KungfuApi.Asset) => {
+      this.boards.assetTable.setItems(this._freshAssets(asset));
+    });
+  }
+
+  _freshAssets(asset: KungfuApi.Asset) {
+    const assetForShow: {
+      account_id?: string;
+      client_id?: string;
+      market_value: string;
+      margin: string;
+      avail: string;
+      unrealized_pnl: string;
+    } = {
+      market_value: '--',
+      margin: '--',
+      avail: '--',
+      unrealized_pnl: '--',
+    };
+
+    const {
+      client_id,
+      account_id,
+      market_value,
+      avail,
+      margin,
+      unrealized_pnl,
+    } = asset;
+
+    if (this.kfLocation.category === 'td') {
+      assetForShow.account_id = account_id;
+    } else if (this.kfLocation.category === 'strategy') {
+      assetForShow.client_id = client_id;
+    }
+
+    assetForShow.market_value = dealKfPrice(market_value);
+    assetForShow.avail = colorNum(dealKfPrice(avail));
+    assetForShow.margin = dealKfPrice(margin);
+    assetForShow.unrealized_pnl = colorNum(dealKfPrice(unrealized_pnl));
+
+    return Object.entries(assetForShow).map((kvPair: (string | number)[]) => {
+      const key = kvPair[0];
+      const val = kvPair[1];
+      return parseToString([key, val], [14, 18]);
     });
   }
 }
 
-export default (targetId: string, type: string) =>
-  new TradingDataDashboard(targetId, type);
+export default (kfLocation: KungfuApi.KfConfig) =>
+  new TradingDataDashboard(kfLocation);

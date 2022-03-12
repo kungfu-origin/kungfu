@@ -24,18 +24,14 @@ import {
   startLedger,
   startDzxy,
 } from '@kungfu-trader/kungfu-js-api/utils/processUtils';
-import { combineLatest, filter, map, Observable, Subject } from 'rxjs';
+import { combineLatest, filter, map, Observable } from 'rxjs';
 import { ProcessListItem } from 'src/typings';
 import colors from 'colors';
 import { Widgets } from 'blessed';
 import { KF_HOME } from '@kungfu-trader/kungfu-js-api/config/pathConfig';
-import { dealStatus } from '../methods/utils';
-import { Pm2Bus, Pm2Packet } from '../../typings';
-import pm2 from 'pm2';
-
-const DZXY_SUBJECT = new Subject<Pm2Packet>();
-let DZXY_PM_ID = 0;
-let DZXY_WATCHER_IS_LIVE = false;
+import { dealStatus, getCategoryName } from '../methods/utils';
+import { Pm2Packet } from '../../typings';
+import { globalState } from '../actions/globalState';
 
 export const mdTdStrategyObservable = () => {
   return new Observable<Record<KfCategoryTypes, KungfuApi.KfConfig[]>>(
@@ -66,7 +62,7 @@ export const processStatusDataObservable = () => {
 };
 
 export const appStatesObservable = () => {
-  return DZXY_SUBJECT.pipe(
+  return globalState.DZXY_SUBJECT.pipe(
     filter((packet: Pm2Packet) => {
       if (packet.data.type === 'APP_STATES') {
         return true;
@@ -78,6 +74,103 @@ export const appStatesObservable = () => {
     }),
   );
 };
+
+const getProcessStatus = (
+  kfLocation: KungfuApi.KfLocation,
+  processStatus: Pm2ProcessStatusData,
+  appStates: Record<string, BrokerStateStatusTypes>,
+) => {
+  const category = kfLocation.category;
+  const processId = getProcessIdByKfLocation(kfLocation);
+  if (category === 'md' || category === 'td') {
+    return dealStatus(
+      processStatus[processId]
+        ? appStates[processId] || processStatus[processId] || '--'
+        : '--',
+    );
+  } else {
+    return dealStatus(processStatus[processId] || '--');
+  }
+};
+
+export const specificProcessListObserver = (kfLocation: KungfuApi.KfConfig) =>
+  combineLatest(
+    processStatusDataObservable(),
+    appStatesObservable(),
+    (
+      ps: {
+        processStatus: Pm2ProcessStatusData;
+        processStatusWithDetail: Pm2ProcessStatusDetailData;
+      },
+      appStates: Record<string, BrokerStateStatusTypes>,
+    ): ProcessListItem[] => {
+      const { processStatus, processStatusWithDetail } = ps;
+      const processId = getProcessIdByKfLocation(kfLocation);
+
+      return [
+        {
+          processId: 'archive',
+          processName: '_archive_',
+          typeName: colors.bgMagenta('Sys'),
+          category: 'system',
+          group: '',
+          name: '',
+          value: {},
+          status: processStatus['archive'] || '--',
+          statusName: dealStatus(processStatus['archive'] || '--'),
+          monit: processStatusWithDetail['archive']?.monit,
+        },
+        {
+          processId: 'master',
+          processName: colors.bold('MASTER'),
+          typeName: colors.bgMagenta('Sys'),
+          category: 'system',
+          group: 'master',
+          name: 'master',
+          value: {},
+          status: processStatus['master'] || '--',
+          statusName: dealStatus(processStatus['master'] || '--'),
+          monit: processStatusWithDetail['master']?.monit,
+        },
+        {
+          processId: 'ledger',
+          processName: 'LEDGER',
+          typeName: colors.bgMagenta('Sys'),
+          category: 'system',
+          group: 'service',
+          name: 'ledger',
+          value: {},
+          status: processStatus['ledger'] || '--',
+          statusName: dealStatus(processStatus['ledger'] || '--'),
+          monit: processStatusWithDetail['ledger']?.monit,
+        },
+        {
+          processId: 'dzxy',
+          processName: 'DZXY',
+          typeName: colors.bgMagenta('Sys'),
+          category: 'system',
+          group: 'service',
+          name: 'dzxy',
+          value: {},
+          status: processStatus['dzxy'] || '--',
+          statusName: dealStatus(processStatus['dzxy'] || '--'),
+          monit: processStatusWithDetail['dzxy']?.monit,
+        },
+        {
+          processId,
+          processName: processId,
+          typeName: getCategoryName(kfLocation.category),
+          category: kfLocation.category,
+          group: kfLocation.group,
+          name: kfLocation.name,
+          value: JSON.parse(kfLocation.value || '{}'),
+          status: processStatus[processId] || '--',
+          statusName: getProcessStatus(kfLocation, processStatus, appStates),
+          monit: processStatusWithDetail[processId]?.monit,
+        },
+      ];
+    },
+  );
 
 export const processListObservable = () =>
   combineLatest(
@@ -100,7 +193,7 @@ export const processListObservable = () =>
         return {
           processId,
           processName: processId,
-          typeName: colors.yellow('Md'),
+          typeName: getCategoryName(item.category),
           category: item.category,
           group: item.group,
           name: item.name,
@@ -120,7 +213,7 @@ export const processListObservable = () =>
         return {
           processId,
           processName: processId,
-          typeName: colors.cyan('Td'),
+          typeName: getCategoryName(item.category),
           category: item.category,
           group: item.group,
           name: item.name,
@@ -140,7 +233,7 @@ export const processListObservable = () =>
         return {
           processId,
           processName: processId,
-          typeName: colors.blue('Strat'),
+          typeName: getCategoryName(item.category),
           category: item.category,
           group: item.group,
           name: item.name,
@@ -257,7 +350,7 @@ export const switchProcess = (
     case 'md':
     case 'td':
     case 'strategy':
-      if (!DZXY_WATCHER_IS_LIVE) {
+      if (!globalState.DZXY_WATCHER_IS_LIVE) {
         messageBoard.log('Start master first', 2, (err) => {
           if (err) {
             console.error(err);
@@ -266,13 +359,17 @@ export const switchProcess = (
         return;
       }
 
-      return sendDataToProcessIdByPm2('SWITCH_KF_LOCATION', DZXY_PM_ID, {
-        category,
-        group,
-        name,
-        value: JSON.stringify(value),
-        status,
-      })
+      return sendDataToProcessIdByPm2(
+        'SWITCH_KF_LOCATION',
+        globalState.DZXY_PM_ID,
+        {
+          category,
+          group,
+          name,
+          value: JSON.stringify(value),
+          status,
+        },
+      )
         .then(() => {
           messageBoard.log('Please wait...', 2, (err) => {
             if (err) {
@@ -337,34 +434,3 @@ const switchMaster = async (status: boolean): Promise<void> => {
     await startDzxy();
   }
 };
-
-const timer = setTimeout(() => {
-  DZXY_SUBJECT.next({
-    process: {
-      pm_id: -1,
-    },
-    data: {
-      type: 'APP_STATES',
-      body: {},
-    },
-  });
-  clearTimeout(timer);
-}, 1000);
-
-pm2.launchBus((err: Error, pm2_bus: Pm2Bus) => {
-  if (err) {
-    console.error('pm2 launchBus Error', err);
-    return;
-  }
-
-  pm2_bus.on('process:msg', (packet: Pm2Packet) => {
-    const processData = packet.process;
-    DZXY_PM_ID = processData.pm_id;
-
-    if (packet.data.type === 'WATCHER_IS_LIVE') {
-      DZXY_WATCHER_IS_LIVE = !!packet.data.body;
-    }
-
-    DZXY_SUBJECT.next(packet);
-  });
-});

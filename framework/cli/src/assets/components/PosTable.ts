@@ -1,19 +1,13 @@
-import colors from 'colors';
-import Table from './Table';
+import { DirectionEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import {
-  calcHeaderWidth,
-  parseToString,
-  dealNum,
-} from '@/assets/scripts/utils';
-import { toDecimal } from '__gUtils/busiUtils';
+  dealDirection,
+  dealKfPrice,
+} from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
+import colors from 'colors';
+import { calcHeaderWidth, colorNum, parseToString } from '../methods/utils';
+import Table from './Table';
 
-interface StringToPosData {
-  [propName: string]: PosData;
-}
-
-class PosTable extends Table {
-  headers: string[];
-  columnWidth: Array<number>;
+export class PosTable extends Table {
   constructor() {
     super();
     this.headers = [
@@ -34,37 +28,40 @@ class PosTable extends Table {
    * @param  {Object} processStatus
    */
 
-  setItems(posData: StringToPosData) {
-    this.refresh(posData);
+  setItems(positions: KungfuApi.PositionResolved[]) {
+    this.refresh(positions);
   }
 
-  refresh(posData: StringToPosData) {
-    const t = this;
-    const posListData = Object.values(posData || {}).map((p: PosData) => {
-      let direction = p.direction;
-      if (direction === 'Long') direction = colors.red(direction);
-      else direction = colors.green(direction);
-      let unRealizedPnl = toDecimal(+p.unRealizedPnl);
-      if (+unRealizedPnl > 0) unRealizedPnl = colors.red(unRealizedPnl);
-      else if (+unRealizedPnl < 0) unRealizedPnl = colors.green(unRealizedPnl);
+  dealDirection(direction: DirectionEnum) {
+    const name = dealDirection(direction).name;
+    if (direction === DirectionEnum.Long) {
+      return colors.red(name);
+    } else {
+      return colors.green(name);
+    }
+  }
+
+  refresh(positions: KungfuApi.PositionResolved[]) {
+    const posListData = positions.map((p: KungfuApi.PositionResolved) => {
+      const direction = this.dealDirection(p.direction);
 
       return parseToString(
         [
-          p.instrumentId,
+          p.instrument_id_resolved,
           direction,
-          dealNum(p.yesterdayVolume),
-          dealNum(p.todayVolume),
-          dealNum(p.totalVolume),
-          dealNum(+p.avgPrice),
-          dealNum(+p.lastPrice),
-          unRealizedPnl,
+          Number(p.yesterday_volume),
+          Number(p.volume - p.yesterday_volume),
+          Number(p.volume),
+          dealKfPrice(p.avg_open_price),
+          dealKfPrice(p.last_price),
+          colorNum(dealKfPrice(p.unrealized_pnl)),
         ],
-        calcHeaderWidth(t.headers, t.columnWidth),
-        t.pad,
+        calcHeaderWidth(this.headers, this.columnWidth),
+        this.pad,
       );
     });
-    t.table.setItems(posListData);
-    if (!t.table.childList.focused) t.table.childList.setScrollPerc(0);
+    this.table.setItems(posListData);
+    if (!this.table.childList.focused) this.table.childList.setScrollPerc(0);
   }
 }
 

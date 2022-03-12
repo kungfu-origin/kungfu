@@ -4,6 +4,7 @@ import { KfCategoryTypes } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import {
   ExtensionData,
   getIdByKfLocation,
+  getProcessIdByKfLocation,
   initFormStateByConfig,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { getAllKfConfigOriginData } from '@kungfu-trader/kungfu-js-api/actions';
@@ -212,55 +213,74 @@ export const getKfLocation = (
   }
 };
 
-export const selectTargetKfLocation =
-  async (): Promise<KungfuApi.KfLocation> => {
-    const { md, td, strategy } = await getAllKfConfigOriginData();
+export const selectTargetKfConfig = async (
+  noMd = false,
+): Promise<KungfuApi.KfConfig | null> => {
+  const { md, td, strategy } = await getAllKfConfigOriginData();
 
-    const mdTdStrategyList = [
-      ...md.map((item) =>
-        parseToString(
-          [colors.yellow('md'), getIdByKfLocation(item)],
-          [8, 'auto'],
-          1,
-        ),
+  const mdTdStrategyList = [
+    ...(noMd
+      ? []
+      : md.map((item) =>
+          parseToString(
+            [colors.yellow('md'), getIdByKfLocation(item)],
+            [8, 'auto'],
+            1,
+          ),
+        )),
+    ...td.map((item) =>
+      parseToString(
+        [colors.blue('td'), getIdByKfLocation(item)],
+        [8, 'auto'],
+        1,
       ),
-      ...td.map((item) =>
-        parseToString(
-          [colors.blue('td'), getIdByKfLocation(item)],
-          [8, 'auto'],
-          1,
-        ),
+    ),
+    ...strategy.map((item) =>
+      parseToString(
+        [colors.cyan('strategy'), getIdByKfLocation(item)],
+        [8, 'auto'],
+        1,
       ),
-      ...strategy.map((item) =>
-        parseToString(
-          [colors.cyan('strategy'), getIdByKfLocation(item)],
-          [8, 'auto'],
-          1,
-        ),
-      ),
-    ];
+    ),
+  ];
 
-    const answers: { process: string } = await inquirer.prompt([
-      {
-        type: 'autocomplete',
-        name: 'process',
-        message: 'Select targeted md / td / strategy  ',
-        source: async (answersSoFar: { process: string }, input: string) => {
-          input = input || '';
-          return mdTdStrategyList.filter((s: string): boolean =>
-            s.includes(input),
-          );
-        },
+  const answers: { process: string } = await inquirer.prompt([
+    {
+      type: 'autocomplete',
+      name: 'process',
+      message: 'Select targeted md / td / strategy  ',
+      source: async (answersSoFar: { process: string }, input: string) => {
+        input = input || '';
+        return mdTdStrategyList.filter((s: string): boolean =>
+          s.includes(input),
+        );
       },
-    ]);
+    },
+  ]);
 
-    const processes = answers.process;
-    const splits = processes.split(' ');
-    const targetType = splits[0].trim();
-    const targetId = splits[splits.length - 1].trim();
-    const type = getKfCategoryFromString(targetType);
-    return getKfLocation(type, targetId);
-  };
+  const processes = answers.process;
+  const splits = processes.split(' ');
+  const targetType = splits[0].trim();
+  const targetId = splits[splits.length - 1].trim();
+  const type = getKfCategoryFromString(targetType);
+  const kfLocation = getKfLocation(type, targetId);
+  const processId = getProcessIdByKfLocation(kfLocation);
+  const searchList = [...md, ...td, ...strategy];
+  const targetIndex = searchList.findIndex((item: KungfuApi.KfConfig) => {
+    const id = getProcessIdByKfLocation(item);
+    if (id === processId) {
+      return true;
+    }
+
+    return false;
+  });
+
+  if (targetIndex === -1) {
+    return null;
+  } else {
+    return searchList[targetIndex];
+  }
+};
 
 export const dealStatus = (status: string): string => {
   if (status === '--') return status;
@@ -292,4 +312,26 @@ export const calcHeaderWidth = (
     if (t.length < (wish[i] || 0)) return wish[i];
     else return t.length;
   });
+};
+
+export const getCategoryName = (category: KfCategoryTypes) => {
+  if (category === 'md') {
+    return colors.yellow('Md');
+  } else if (category === 'td') {
+    return colors.cyan('td');
+  } else if (category === 'strategy') {
+    return colors.blue('Strat');
+  } else {
+    return colors.bgMagenta('Sys');
+  }
+};
+
+export const colorNum = (num: number | string): string => {
+  if (+num > 0) {
+    return colors.red(num.toString());
+  } else if (+num === 0) {
+    return num.toString();
+  } else {
+    return colors.green(num.toString());
+  }
 };

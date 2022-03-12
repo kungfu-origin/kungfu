@@ -1,6 +1,6 @@
 import { TABLE_BASE_OPTIONS } from '../config';
 import { calcHeaderWidth, parseToString } from '../methods/utils';
-import blessed from 'blessed';
+import blessed, { Widgets } from 'blessed';
 import colors from 'colors';
 import {
   BoxElementResolved,
@@ -89,7 +89,7 @@ class Table {
     return box;
   }
 
-  bindEvent(box: any, list: any) {
+  bindEvent(box: Widgets.BoxElement, list: ListElementResolved) {
     box.on('focus', () => {
       box.style.border.fg = 'blue';
       if (!list.focused) list.focus();

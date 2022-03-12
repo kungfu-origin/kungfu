@@ -82,11 +82,17 @@ declare module NodeJS {
 }
 
 interface TableOption {
-  headers: string[];
-  columnWidth: (number | string)[];
-  pad: number;
-  cell: Widgets.StyleListTable['cell'];
-  style: {
+  headers?: string[];
+  columnWidth?: (number | string)[];
+  label?: string;
+  parent?: Widgets.Screen;
+  top?: string;
+  left?: string;
+  width?: string;
+  height?: string;
+  pad?: number;
+  cell?: Widgets.StyleListTable['cell'];
+  style?: {
     cell: Widgets.StyleListTable['cell'];
   };
 }
