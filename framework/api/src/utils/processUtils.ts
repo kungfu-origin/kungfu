@@ -19,7 +19,6 @@ import {
   buildProcessLogPath,
   EXTENSION_DIRS,
   KFC_DIR,
-  KF_CONFIG_PATH,
   KF_HOME,
 } from '../config/pathConfig';
 import { getKfGlobalSettingsValue } from '../config/globalSettings';
@@ -699,7 +698,7 @@ export const startDzxy = () => {
     args: '',
     cwd: path.join(process.cwd(), 'dist', 'cli'),
     script: 'dzxy.js',
-    interpreter: 'node',
+    interpreter: path.join(KFC_DIR, kfcName),
     force: true,
     watch: process.env.NODE_ENV === 'production' ? false : true,
     env: {
