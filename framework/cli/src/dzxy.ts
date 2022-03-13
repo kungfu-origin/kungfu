@@ -175,6 +175,19 @@ function swithKfLocationResolved(data: SwitchKfLocationPacketData) {
   });
 }
 
+function cancellAllOrders(packet: Pm2PacketMain) {
+  const { category } = packet.data as KungfuApi.KfLocation;
+  const kfLocation = fromPacketToKfLocation(packet);
+  const filterKey = getOrderTradeFilterKey(category);
+  const orders = watcher.ledger.Order.filter(
+    filterKey,
+    watcher.getLocationUID(kfLocation),
+  ).list();
+  return kfCancelAllOrders(watcher, orders, kfLocation).catch((err) => {
+    console.error(err.message);
+  });
+}
+
 function fromPacketToKfLocation(packet: Pm2PacketMain): KungfuApi.KfLocation {
   const { category, group, name } = packet.data as KungfuApi.KfLocation;
   return {
@@ -192,23 +205,5 @@ function turnBigIntToString<T>(list: T[]) {
         item[key] = Number(item[key]).toFixed(0);
       }
     });
-  });
-}
-
-function cancellAllOrders(packet: Pm2PacketMain) {
-  const { category, group, name } = packet.data as KungfuApi.KfLocation;
-  const kfLocation: KungfuApi.KfLocation = {
-    category,
-    group,
-    name,
-    mode: 'live',
-  };
-  const filterKey = getOrderTradeFilterKey(category);
-  const orders = watcher.ledger.Order.filter(
-    filterKey,
-    watcher.getLocationUID(kfLocation),
-  ).list();
-  return kfCancelAllOrders(watcher, orders, kfLocation).catch((err) => {
-    console.error(err.message);
   });
 }
