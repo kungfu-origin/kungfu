@@ -9,7 +9,9 @@ const {
   getCliDir,
   getKfcDir,
   getExtensionDirs,
+  getCliDefaultDistDir,
 } = require('@kungfu-trader/kungfu-js-api/toolkit/utils');
+const defaultDistDir = getCliDefaultDistDir();
 
 function greeting() {
   const cols = process.stdout.columns;
@@ -96,6 +98,6 @@ const run = (distDir, distName = 'cli') => {
 module.exports = run;
 
 if (require.main === module) {
-  const distDir = path.join(process.cwd(), 'dist');
-  run(distDir, 'cli').catch(console.error);
+  fse.ensureDirSync(defaultDistDir);
+  run(defaultDistDir).catch(console.error);
 }

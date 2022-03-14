@@ -107,6 +107,10 @@ exports.getAppDefaultDistDir = () => {
   return path.resolve(this.getAppDir(), 'dist');
 };
 
+exports.getCliDefaultDistDir = () => {
+  return path.resolve(this.getCliDir(), 'dist');
+};
+
 exports.getAppDir = () => {
   return path.dirname(
     require.resolve('@kungfu-trader/kungfu-app/package.json'),
