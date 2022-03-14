@@ -25,7 +25,6 @@ if (process.env.NODE_ENV === 'development') {
   global.__resources = path
     .resolve(__dirname, '../public')
     .replace(/\\/g, '\\\\');
-  console.log('global.__resources', global.__resources);
 }
 
 if (process.env.APP_TYPE === 'main' || process.env.APP_TYPE === 'renderer') {
@@ -35,9 +34,8 @@ if (process.env.APP_TYPE === 'main' || process.env.APP_TYPE === 'renderer') {
 
 if (process.env.APP_TYPE === 'cli') {
   global.__kfResourcesPath = path
-    .resolve(__dirname, '..', '..')
+    .resolve(__dirname, '..', '..', '..')
     .replace(/\\/g, '\\\\');
-  console.log('global.__kfResourcesPath', global.__kfResourcesPath);
 }
 
 export const KF_HOME_BASE_DIR_RESOLVE: string = getHomePath();

@@ -13,6 +13,7 @@ const appDir = getAppDir();
 const kfcDir = getKfcDir();
 const coreDir = getCoreDir();
 const extdirs = getExtensionDirs(true);
+
 const extras = extdirs.map((fullpath) => {
   return {
     from: path.resolve(fullpath, 'dist'),

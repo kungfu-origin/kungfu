@@ -109,18 +109,6 @@ export const specificProcessListObserver = (kfLocation: KungfuApi.KfConfig) =>
 
       return [
         {
-          processId: 'archive',
-          processName: '_archive_',
-          typeName: colors.bgMagenta('Sys'),
-          category: 'system',
-          group: '',
-          name: '',
-          value: {},
-          status: processStatus['archive'] || '--',
-          statusName: dealStatus(processStatus['archive'] || '--'),
-          monit: processStatusWithDetail['archive']?.monit,
-        },
-        {
           processId: 'master',
           processName: colors.bold('MASTER'),
           typeName: colors.bgMagenta('Sys'),

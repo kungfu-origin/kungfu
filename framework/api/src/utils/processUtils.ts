@@ -692,11 +692,13 @@ export const startStrategy = (
 };
 
 export const startDzxy = () => {
-  console.log(process.cwd());
   return startProcess({
     name: 'dzxy',
     args: '',
-    cwd: path.join(process.cwd(), 'dist', 'cli'),
+    cwd:
+      process.env.NODE_ENV === 'development'
+        ? path.join(process.cwd(), 'dist', 'cli')
+        : path.join(global.__kfResourcesPath, 'app', 'dist', 'cli'),
     script: 'dzxy.js',
     interpreter: path.join(KFC_DIR, kfcName),
     force: true,
