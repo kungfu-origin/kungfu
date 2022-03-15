@@ -136,6 +136,7 @@ function handleMakeOrder() {
         side: +side,
         offset: +(offset !== undefined ? offset : +side === 0 ? 0 : 1),
         hedge_flag: +(hedge_flag || 0),
+        parent_id: BigInt(0),
       };
 
       if (!currentGlobalKfLocation.data) {
@@ -157,7 +158,7 @@ function handleMakeOrder() {
         window.watcher,
         makeOrderInput,
         currentGlobalKfLocation.data,
-        account_id.toString(),
+        tdProcessId.toAccountId(),
       ).catch((err) => {
         message.error(err.message);
       });
