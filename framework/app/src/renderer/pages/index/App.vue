@@ -64,10 +64,20 @@ const busSubscription = globalBus.subscribe((data: KfBusEvent) => {
 
 const tradingDataSubscription = tradingDataSubject.subscribe(
   (watcher: KungfuApi.Watcher) => {
+         console.log("App.vue 111");
+         console.log(watcher.appStates);
     const appStates = dealAppStates(watcher.appStates);
+         console.log("App.vue 222");
+         console.log(appStates);
+         console.log(store);
     store.setAppStates(appStates);
+         console.log("App.vue 333");
+         console.log(watcher.ledger.Asset);
     const assets = dealAssetsByHolderUID(watcher.ledger.Asset);
+         console.log("App.vue 444");
+         console.log(assets);
     store.setAssets(assets);
+         console.log("App.vue 555");
   },
 );
 

@@ -15,7 +15,8 @@
 #include <kungfu/wingchun/broker/client.h>
 #include <kungfu/yijinjing/cache/runtime.h>
 #include <kungfu/yijinjing/practice/apprentice.h>
-
+#include <typeinfo>
+#include "uv.h"
 namespace kungfu::node {
 constexpr uint64_t ID_TRANC = 0x00000000FFFFFFFF;
 constexpr uint32_t PAGE_ID_MASK = 0x80000000;
@@ -76,7 +77,17 @@ public:
 
   void UpdateQuote(const Napi::CallbackInfo &info);
 
+  Napi::Value CreateTask(const Napi::CallbackInfo &info);
+
   static void Init(Napi::Env env, Napi::Object exports);
+
+  void SyncAppStatus();
+  void UpdateEventCache(const event_ptr e);
+  void SyncEventCache();
+
+  std::unordered_map<uint32_t, int> location_uid_states_map_ = {};
+  bool start_;
+  uv_mutex_t mutex;
 
 protected:
   void on_react() override;
@@ -99,7 +110,8 @@ private:
   serialize::JsUpdateState update_ledger;
   serialize::JsPublishState publish;
   serialize::JsResetCache reset_cache;
-  yijinjing::cache::bank quotes_bank_;
+  yijinjing::cache::bank data_bank_;
+  event_ptr event_cache_;
   std::unordered_map<uint32_t, longfist::types::InstrumentKey> subscribed_instruments_ = {};
 
   static constexpr auto bypass = [](yijinjing::practice::apprentice *app, bool bypass_quotes) {
@@ -134,6 +146,21 @@ private:
 
   void UpdateBook(int64_t update_time, uint32_t source_id, uint32_t dest_id, const longfist::types::Position &position);
 
+  void upQuote();
+  void SyncLedger();
+  Napi::Value Lock(const Napi::CallbackInfo &info);
+  Napi::Value Unlock(const Napi::CallbackInfo &info);
+
+template <typename DataType> void feed_state_data_bank(const state<DataType> &state, yijinjing::cache::bank &receiver) {
+    boost::hana::for_each(longfist::StateDataTypes, [&](auto it) {
+      using DataTypeItem = typename decltype(+boost::hana::second(it))::type;
+      if(std::is_same<DataType, DataTypeItem>::value){
+        SPDLOG_INFO("feed_state_data_bank same {}", typeid(DataTypeItem).name());
+        receiver << state;
+      }
+    });
+  };
+
   template <typename TradingData> void UpdateBook(const event_ptr &event, const TradingData &data) {
     auto update = [&](uint32_t source, uint32_t dest) {
       if (source == yijinjing::data::location::PUBLIC) {
@@ -142,8 +169,12 @@ private:
       auto location = get_location(source);
       auto book = bookkeeper_.get_book(source);
       auto &position = book->get_position_for(data);
-      update_ledger(event->gen_time(), source, dest, position);
-      update_ledger(event->gen_time(), source, dest, book->asset);
+      state<kungfu::longfist::types::Position> cache_state_position(source, dest, event->gen_time(), position);
+      feed_state_data_bank(cache_state_position, data_bank_);
+      state<kungfu::longfist::types::Asset> cache_state_asset(source, dest, event->gen_time(), book->asset);
+      feed_state_data_bank(cache_state_asset, data_bank_);
+      // update_ledger(event->gen_time(), source, dest, position);
+      // update_ledger(event->gen_time(), source, dest, book->asset);
     };
     update(event->source(), event->dest());
     update(event->dest(), event->source());
@@ -169,6 +200,17 @@ private:
     instruction.*id_ptr = id_left | id_right;
     account_writer->write_as(trigger_time, instruction, strategy_location->uid, account_location->uid);
     UpdateBook(strategy_location->uid, account_location->uid, instruction);
+  }
+
+  template <typename DataType>
+  void UpdateLedger(const boost::hana::basic_type<DataType> &type) {
+    if(data_bank_[type].size() == 0){
+      return;
+    }
+    for (auto &pair : data_bank_[type]) {
+      auto &state = pair.second;
+      update_ledger(state.update_time, state.source, state.dest, state.data);
+    }
   }
 
   template <typename Instruction, typename IdPtrType = uint64_t Instruction::*>

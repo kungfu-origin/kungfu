@@ -825,7 +825,9 @@ export const useQuote = (): {
     if (app?.proxy) {
       const subscription = app.proxy.$tradingDataSubject.subscribe(
         (watcher: KungfuApi.Watcher) => {
+          console.log('uiUtils.vue 111');
           quotes.value = toRaw({ ...watcher.ledger.Quote });
+          console.log('uiUtils.vue 222');
         },
       );
 
