@@ -698,7 +698,7 @@ export const startDzxy = () => {
     cwd:
       process.env.NODE_ENV === 'development'
         ? path.join(process.cwd(), 'dist', 'cli')
-        : path.join(global.__kfResourcesPath, 'app', 'dist', 'cli'),
+        : path.resolve(__dirname),
     script: 'dzxy.js',
     interpreter: path.join(KFC_DIR, kfcName),
     force: true,

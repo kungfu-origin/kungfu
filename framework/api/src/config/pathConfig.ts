@@ -110,9 +110,5 @@ export const EXTENSION_DIRS: string[] = production
       path.resolve('dist'),
     ];
 
-export const APP_DIR = production
-  ? path.resolve(global.__kfResourcesPath, 'app', 'dist', 'app')
-  : path.resolve(process.cwd(), 'dist', 'app');
-
 process.env.KFC_DIR = KFC_DIR;
 //================== kfc end ======================================

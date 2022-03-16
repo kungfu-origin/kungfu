@@ -24,7 +24,8 @@ import { removeJournal } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { setGlobalSetting, showGlobalSetting } from './commanders/config';
 import { exportTradingDataPrompt } from './commanders/export';
 
-if (process.argv.length === 2 || process.argv[2] === '-h') {
+const argvs = process.argv.filter((s) => !!s);
+if (argvs[argvs.length - 1] === '-h') {
   console.log(colors.green('Welcome to kungfu trader system'));
   CFonts.say('KungFu', {
     font: 'block', // define the font face
@@ -41,7 +42,7 @@ if (process.argv.length === 2 || process.argv[2] === '-h') {
 program.version(version);
 
 program
-  .command('monit [options]')
+  .command('monit')
   .option('-l --list', 'list detail')
   .description(
     'monitor all process with merged logs OR monitor one trading process (with -l)',
