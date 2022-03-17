@@ -31,10 +31,10 @@ module.exports = {
                       loader: 'ts-loader',
                       options: {
                         // 指定特定的ts编译配置，为了区分脚本的ts配置
-                        configFile: path.resolve(
-                          process.cwd(),
-                          'tsconfig.json',
-                        ),
+                        // configFile: path.resolve(
+                        //   process.cwd(),
+                        //   'tsconfig.json',
+                        // ),
                         // 对应文件添加个.ts或.tsx后缀
                         appendTsSuffixTo: [/\.vue$/],
                         transpileOnly: true, // 关闭类型检测，即值进行转译
