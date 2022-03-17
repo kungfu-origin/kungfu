@@ -39,16 +39,6 @@ if (argvs[argvs.length - 1] === '-h') {
   });
 }
 
-interface Test {
-  a: number;
-}
-
-const test: Test = {
-  a: 'as',
-};
-
-console.log(test);
-
 program.version(version);
 
 program
