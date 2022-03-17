@@ -156,6 +156,7 @@ function handleClickRow(data: {
 }
 
 function dealLocationUIDResolved(holderUID: number): string {
+  console.log("9...")
   return getIdByKfLocation(window.watcher.getLocation(holderUID));
 }
 </script>

@@ -127,19 +127,13 @@ export const startUpdateKungfuWatcherQuotes = (interval = 2000) => {
 export const dealAppStates = (
   appStates: Record<string, BrokerStateStatusEnum>,
 ): Record<string, BrokerStateStatusTypes> => {
-         console.log("dealAppStates 111");
   if (!watcher) {
     return {} as Record<string, BrokerStateStatusTypes>;
   }
 
-         console.log("dealAppStates 222");
   return Object.keys(appStates || {}).reduce((appStatesResolved, key) => {
-         console.log("dealAppStates key");
-         console.log(key);
-    const kfLocation = watcher.getLocation(key);
-         console.log(kfLocation);
-    const processId = getProcessIdByKfLocation(kfLocation);
-         console.log(kfLocation);
+    const processId = watcher.getProcessId(key);
+         console.log(processId);
     const appStateValue = appStates[key] as BrokerStateStatusEnum;
          console.log(appStateValue);
     appStatesResolved[processId] = BrokerStateStatusEnum[
@@ -153,22 +147,15 @@ export const dealAppStates = (
 export const dealAssetsByHolderUID = (
   assets: KungfuApi.DataTable<KungfuApi.Asset>,
 ): Record<string, KungfuApi.Asset> => {
-         console.log("dealAssetsByHolderUID 111");
   if (!watcher) {
     return {} as Record<string, KungfuApi.Asset>;
   }
-         console.log("dealAssetsByHolderUID 222");
 
   return Object.values(assets).reduce((assetsResolved, asset) => {
-         console.log("dealAssetsByHolderUID 333");
          console.log(asset);
     const { holder_uid } = asset;
          console.log("dealAssetsByHolderUID 444");
-         console.log(holder_uid);
-    const kfLocation = watcher.getLocation(holder_uid);
-         console.log("dealAssetsByHolderUID 555");
-         console.log("dealAssetsByHolderUID 555");
-    const processId = getProcessIdByKfLocation(kfLocation);
+    const processId = watcher.getProcessId(holder_uid);
          console.log("dealAssetsByHolderUID 666");
          console.log(processId);
     assetsResolved[processId] = asset;

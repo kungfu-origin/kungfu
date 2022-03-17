@@ -104,6 +104,8 @@ void Watcher::NoSet(const Napi::CallbackInfo &info, const Napi::Value &value) {
 }
 
 Napi::Value Watcher::GetLocator(const Napi::CallbackInfo &info) {
+  SPDLOG_INFO("Watcher::GetLocator");
+
   return std::dynamic_pointer_cast<Locator>(get_locator())->get_js_locator();
 }
 
@@ -119,8 +121,71 @@ Napi::Value Watcher::GetLocation(const Napi::CallbackInfo &info) {
   locationObj.Set("mode", Napi::String::New(info.Env(), get_mode_name(location->mode)));
   locationObj.Set("uname", Napi::String::New(info.Env(), location->uname));
   locationObj.Set("uid", Napi::Number::New(info.Env(), location->uid));
+  SPDLOG_INFO("Watcher::GetLocation");
   locationObj.Set("locator", std::dynamic_pointer_cast<Locator>(location->locator)->get_js_locator());
   return locationObj;
+}
+
+Napi::Value Watcher::GetProcessId(const Napi::CallbackInfo &info) {
+  auto location = FindLocation(info);
+  if (not location) {
+    return {};
+  }
+  std::string process_id;
+  if (location->category == kungfu::longfist::enums::category::TD) {
+    process_id.append(get_category_name(location->category))
+        .append("_")
+        .append(location->group)
+        .append("_")
+        .append(location->name);
+  } else if (location->category == kungfu::longfist::enums::category::MD) {
+    process_id.append(get_category_name(location->category)).append("_").append(location->group);
+  } else if (location->category == kungfu::longfist::enums::category::STRATEGY) {
+    if (location->group == "default") {
+      process_id.append(get_category_name(location->category)).append("_").append(location->name);
+    } else {
+      process_id.append(get_category_name(location->category))
+          .append("_")
+          .append(location->group)
+          .append("_")
+          .append(location->name);
+    }
+  } else if (location->category == kungfu::longfist::enums::category::SYSTEM) {
+    process_id.append(location->name);
+  } else {
+    process_id.append(get_category_name(location->category))
+        .append("_")
+        .append(location->group)
+        .append("_")
+        .append(location->name);
+  }
+  return Napi::String::New(info.Env(), process_id);
+}
+
+Napi::Value Watcher::GetId(const Napi::CallbackInfo &info) {
+  auto location = FindLocation(info);
+  if (not location) {
+    return {};
+  }
+  std::string process_id;
+  if (location->category == kungfu::longfist::enums::category::TD) {
+    process_id.append(location->group)
+        .append("_")
+        .append(location->name);
+  } else if (location->category == kungfu::longfist::enums::category::MD) {
+    process_id.append(location->group);
+  } else if (location->category == kungfu::longfist::enums::category::STRATEGY) {
+    process_id.append(location->name);
+  } else if (location->category == kungfu::longfist::enums::category::SYSTEM) {
+    process_id.append(location->group)
+        .append("_")
+        .append(location->name);
+  } else {
+    process_id.append(location->group)
+        .append("_")
+        .append(location->name);
+  }
+  return Napi::String::New(info.Env(), process_id);
 }
 
 Napi::Value Watcher::GetLocationUID(const Napi::CallbackInfo &info) {
@@ -196,6 +261,11 @@ Napi::Value Watcher::PublishState(const Napi::CallbackInfo &info) {
   return {};
 }
 
+Napi::Value Watcher::IsReadyToInteractByKey(const Napi::CallbackInfo &info) {
+  auto account_location = FindLocation(info);
+  return Napi::Boolean::New(info.Env(), account_location and has_writer(account_location->uid));
+}
+
 Napi::Value Watcher::IsReadyToInteract(const Napi::CallbackInfo &info) {
   auto account_location = ExtractLocation(info, 0, get_locator());
   return Napi::Boolean::New(info.Env(), account_location and has_writer(account_location->uid));
@@ -247,6 +317,42 @@ Napi::Value Watcher::RequestMarketData(const Napi::CallbackInfo &info) {
   return Napi::Boolean::New(info.Env(), true);
 }
 
+Napi::Value Watcher::RequestMarketDataByKey(const Napi::CallbackInfo &info) {
+  if (!IsValid(info, 0, &Napi::Value::IsString) && !IsValid(info, 0, &Napi::Value::IsNumber)) {
+    return Napi::Boolean::New(info.Env(), false);
+  }
+
+  if (not IsValid(info, 1, &Napi::Value::IsString)) {
+    return Napi::Boolean::New(info.Env(), false);
+  }
+
+  if (not IsValid(info, 2, &Napi::Value::IsString)) {
+    return Napi::Boolean::New(info.Env(), false);
+  }
+  auto md_location = FindLocation(info);
+  auto exchange_id = info[1].ToString().Utf8Value();
+  auto instrument_id = info[2].ToString().Utf8Value();
+
+
+  if (!md_location || !has_writer(md_location->uid)) {
+    return Napi::Boolean::New(info.Env(), false);
+  }
+
+  SPDLOG_INFO("request market data {}@{} from {}", exchange_id, instrument_id, md_location->uname);
+
+  auto writer = get_writer(md_location->uid);
+  uint32_t key = hash_instrument(exchange_id.c_str(), instrument_id.c_str());
+  InstrumentKey instrument_key = {};
+  instrument_key.key = key;
+  strcpy(instrument_key.instrument_id, instrument_id.c_str());
+  strcpy(instrument_key.exchange_id, exchange_id.c_str());
+  instrument_key.instrument_type = get_instrument_type(exchange_id, instrument_id);
+  writer->write(now(), instrument_key);
+  subscribed_instruments_.emplace(key, instrument_key);
+
+  return Napi::Boolean::New(info.Env(), true);
+}
+
 void Watcher::UpdateQuote(const Napi::CallbackInfo &info) {
   upQuote();
 }
@@ -270,10 +376,13 @@ void Watcher::Init(Napi::Env env, Napi::Object exports) {
                                         InstanceMethod("step", &Watcher::Step),                                   //
                                         InstanceMethod("requestStop", &Watcher::RequestStop),                     //
                                         InstanceMethod("getLocation", &Watcher::GetLocation),                     //
+                                        InstanceMethod("getProcessId", &Watcher::GetProcessId),                   //
+                                        InstanceMethod("getId", &Watcher::GetId),                   //
                                         InstanceMethod("getLocationUID", &Watcher::GetLocationUID),               //
                                         InstanceMethod("getInstrumentUID", &Watcher::GetInstrumentUID),           //
                                         InstanceMethod("publishState", &Watcher::PublishState),                   //
                                         InstanceMethod("isReadyToInteract", &Watcher::IsReadyToInteract),         //
+                                        InstanceMethod("isReadyToInteractByKey", &Watcher::IsReadyToInteractByKey),         //
                                         InstanceMethod("issueOrder", &Watcher::IssueOrder),                       //
                                         InstanceMethod("updateQuote", &Watcher::UpdateQuote),                     //
                                         InstanceMethod("cancelOrder", &Watcher::CancelOrder),                     //
@@ -359,7 +468,6 @@ Napi::Value Watcher::CreateTask(const Napi::CallbackInfo &info) {
   uv_queue_work(
       loop, &greq,
       [](uv_work_t *req) {
-        SPDLOG_INFO("uv_thread_create::Step 1 tid {} pid {}", std::this_thread::get_id(), GETPID());
         // std::this_thread::sleep_for(std::chrono::milliseconds(3000));
 
         Watcher *watcher = (Watcher *)(req->data);
@@ -380,7 +488,7 @@ Napi::Value Watcher::CreateTask(const Napi::CallbackInfo &info) {
             SPDLOG_INFO("uv_thread_create::Step 4 tid {} pid {}", std::this_thread::get_id(), GETPID());
           }
           if(!watcher->start_) break;
-          std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+          std::this_thread::sleep_for(std::chrono::milliseconds(500));
         }
       },
       [](uv_work_t *req, int status) { SPDLOG_INFO("uv_close!!!!!"); });
@@ -390,7 +498,6 @@ Napi::Value Watcher::CreateTask(const Napi::CallbackInfo &info) {
   uv_timer_start(
       &timer_req,
       [](uv_timer_t *req) {
-        SPDLOG_INFO("uv_timer_start 1 tid {} pid {}", std::this_thread::get_id(), GETPID());
         Watcher *watcher = (Watcher *)(req->data);
         SPDLOG_INFO("uv_timer_start 2 tid {} pid {} this {}", std::this_thread::get_id(), GETPID(), (uint64_t)(watcher));
         uv_mutex_lock(&watcher->mutex);
@@ -399,7 +506,7 @@ Napi::Value Watcher::CreateTask(const Napi::CallbackInfo &info) {
         watcher->SyncEventCache();
         uv_mutex_unlock(&watcher->mutex);
       },
-      0, 2000);
+      0, 500);
   
   return {};
 }

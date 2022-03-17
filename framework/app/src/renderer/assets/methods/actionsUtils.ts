@@ -6,6 +6,7 @@ import {
   getKungfuHistoryData,
   hashInstrumentUKey,
   kfRequestMarketData,
+  kfRequestMarketDataByKey,
 } from '@kungfu-trader/kungfu-js-api/kungfu';
 import { setKfConfig } from '@kungfu-trader/kungfu-js-api/kungfu/store';
 import {
@@ -709,16 +710,17 @@ export const useSubscibeInstrumentAtEntry = (): void => {
         .pipe(throttleTime(3000))
         .subscribe((watcher: KungfuApi.Watcher) => {
           const bigint0 = BigInt(0);
+          console.log('10...');
           const positions = watcher.ledger.Position.filter('ledger_category', 0)
             .nofilter('volume', bigint0)
             .list()
             .map(
-              (item: KungfuApi.Position): KungfuApi.InstrumentForSub => ({
+              (item: KungfuApi.Position): KungfuApi.InstrumentForSubByKey => ({
                 uidKey: item.uid_key,
                 exchangeId: item.exchange_id,
                 instrumentId: item.instrument_id,
                 instrumentType: item.instrument_type,
-                mdLocation: watcher.getLocation(item.holder_uid),
+                mdLocationKey: item.holder_uid,
               }),
             );
 
@@ -727,19 +729,19 @@ export const useSubscibeInstrumentAtEntry = (): void => {
               return;
             }
 
-            const { group } = item.mdLocation;
-            const mdLocationResolved: KungfuApi.KfLocation = {
-              category: 'md',
-              group,
-              name: group,
-              mode: 'live',
-            };
+            // const { group } = item.mdLocationKey;
+            // const mdLocationResolved: KungfuApi.KfLocation = {
+            //   category: 'md',
+            //   group,
+            //   name: group,
+            //   mode: 'live',
+            // };
 
-            kfRequestMarketData(
+            kfRequestMarketDataByKey(
               watcher,
               item.exchangeId,
               item.instrumentId,
-              mdLocationResolved,
+              item.mdLocationKey,
             );
             subscribedInstrumentsForPos[item.uidKey] = true;
           });

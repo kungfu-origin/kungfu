@@ -246,6 +246,30 @@ export const kfRequestMarketData = (
   );
 };
 
+export const kfRequestMarketDataByKey = (
+  watcher: KungfuApi.Watcher | null,
+  exchangeId: string,
+  instrumentId: string,
+  mdLocationKey: string | number,
+): Promise<void> => {
+  if (!watcher) {
+    return Promise.reject(new Error(`Watcher 错误`));
+  }
+
+  if (!watcher.isLive()) {
+    return Promise.reject(new Error(`Master 进程未连接`));
+  }
+
+  if (!watcher.isReadyToInteractByKey(mdLocationKey)) {
+    const sourceId = watcher.getId(mdLocationKey);
+    return Promise.reject(new Error(`行情源 ${sourceId} 未就绪`));
+  }
+
+  return Promise.resolve(
+    watcher.requestMarketDataByKey(mdLocationKey, exchangeId, instrumentId),
+  );
+};
+
 export const kfCancelOrder = (
   watcher: KungfuApi.Watcher | null,
   orderId: bigint,
@@ -306,6 +330,7 @@ export const kfCancelAllOrders = (
       if (kfLocation.category === 'td') {
         return Promise.resolve(watcher.cancelOrder(orderAction, kfLocation));
       } else if (kfLocation.category === 'strategy') {
+          console.log("111222...");
         return Promise.resolve(
           watcher.cancelOrder(
             orderAction,
@@ -314,6 +339,7 @@ export const kfCancelAllOrders = (
           ),
         );
       } else {
+          console.log("111...");
         return Promise.resolve(
           watcher.cancelOrder(orderAction, watcher.getLocation(item.source)),
         );
