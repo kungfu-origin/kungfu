@@ -148,9 +148,7 @@ function resPosition(packet: Pm2PacketMain) {
     watcher.ledger,
     'Position',
     kfLocation,
-  ).map((item) =>
-    dealPosition(watcher as KungfuApi.Watcher, item as KungfuApi.Position),
-  );
+  ).map((item) => dealPosition(item as KungfuApi.Position));
 
   turnBigIntToString(position);
 

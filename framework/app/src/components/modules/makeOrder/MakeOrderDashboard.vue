@@ -29,9 +29,6 @@ import {
   transformSearchInstrumentResultToInstrument,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 
-interface MakeOrderProps {}
-defineProps<MakeOrderProps>();
-
 const app = getCurrentInstance();
 const formState = ref(
   initFormStateByConfig(getConfigSettings('td', InstrumentTypeEnum.future), {}),

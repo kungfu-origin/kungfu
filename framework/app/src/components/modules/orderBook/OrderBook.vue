@@ -16,9 +16,6 @@ import KfBlinkNum from '@kungfu-trader/kungfu-app/src/renderer/components/public
 import { SideEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import { useQuote } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
 
-interface OrderBookProps {}
-defineProps<OrderBookProps>();
-
 const currentInstrument = ref<KungfuApi.InstrumentResolved | undefined>();
 const { getQuoteByInstrument, getLastPricePercent } = useQuote();
 const { triggerOrderBookUpdate } = useTriggerMakeOrder();
@@ -163,7 +160,7 @@ function handleTriggerSellOrderBookPriceVolume(
       </div>
     </div>
     <div class="level-book">
-      <div class="level-row" v-for="(item, index) in Array(10)" :key="index">
+      <div class="level-row" v-for="(_item, index) in Array(10)" :key="index">
         <div
           class="buy volume"
           @click="

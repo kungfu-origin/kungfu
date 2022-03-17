@@ -50,8 +50,8 @@ export const dealKfTime = (nano: bigint, date = false): string => {
 export const dealTradingDataItem = (
   item: KungfuApi.TradingDataTypes,
   watcher: KungfuApi.Watcher | null,
-) => {
-  const itemResolved = { ...item } as Record<string, unknown>;
+): Record<string, string | number | bigint> => {
+  const itemResolved = { ...item } as Record<string, string | number | bigint>;
   if ('trade_time' in item) {
     itemResolved.trade_time = dealKfTime(item.trade_time, true);
   }
@@ -508,7 +508,6 @@ export const dealTrade = (
 };
 
 export const dealPosition = (
-  watcher: KungfuApi.Watcher,
   pos: KungfuApi.Position,
 ): KungfuApi.PositionResolved => {
   return {

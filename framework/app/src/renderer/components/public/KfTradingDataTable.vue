@@ -99,9 +99,9 @@ onMounted(() => {
 
 function getHeaderWidth(column: KfTradingDataTableHeaderConfig): string {
   const headerWidthByCalc = headerWidth.value[column.dataIndex];
-  const columnWidth = +column.width;
+  const columnWidth = +(column?.width || 0);
 
-  if (parseInt(headerWidthByCalc) <= 0 || !headerWidthByCalc) {
+  if ((parseInt(headerWidthByCalc) <= 0 || !headerWidthByCalc) && columnWidth) {
     return columnWidth + 'px';
   } else {
     return headerWidthByCalc.toString();

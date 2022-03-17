@@ -2,19 +2,10 @@
 import { SlidersOutlined, SettingOutlined } from '@ant-design/icons-vue';
 import { useExtConfigsRelated } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import KfProcessStatusController from '@kungfu-trader/kungfu-app/src/renderer/components/layout/KfProcessStatusController.vue';
-import {
-  computed,
-  getCurrentInstance,
-  onBeforeUnmount,
-  onUnmounted,
-  ref,
-} from 'vue';
+import { computed, getCurrentInstance, onBeforeUnmount, ref } from 'vue';
 import globalBus from '../../assets/methods/globalBus';
 import KfGlobalSettingModal from '../public/KfGlobalSettingModal.vue';
 const logo = require('@kungfu-trader/kungfu-app/src/renderer/assets/svg/LOGO.svg');
-
-interface LayoutProps {}
-defineProps<LayoutProps>();
 
 const app = getCurrentInstance();
 const globalSettingModalVisible = ref<boolean>(false);
@@ -57,7 +48,7 @@ onBeforeUnmount(() => {
 });
 
 function handleToPage(pathname: string) {
-  if (app.proxy) {
+  if (app?.proxy) {
     app.proxy.$router.push(pathname);
   }
 }

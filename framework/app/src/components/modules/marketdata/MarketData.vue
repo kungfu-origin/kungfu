@@ -32,9 +32,6 @@ import {
   removeSubscribeInstruments,
 } from '@kungfu-trader/kungfu-js-api/actions';
 
-interface MarketDataProps {}
-defineProps<MarketDataProps>();
-
 const app = getCurrentInstance();
 const { dashboardBodyHeight, dashboardBodyWidth, handleBodySizeChange } =
   useDashboardBodySize();

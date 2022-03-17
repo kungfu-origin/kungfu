@@ -130,7 +130,7 @@ export const useLogSearch = (
   const inputSearchRef = ref();
   const searchKeyword = ref<string>('');
   const searchKeywordReg = computed(() => {
-    let reg = null;
+    let reg: RegExp | null = null;
     try {
       reg = new RegExp(searchKeyword.value, 'g');
     } catch (err) {

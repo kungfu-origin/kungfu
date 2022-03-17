@@ -4,7 +4,6 @@ import {
   dealAssetPrice,
   dealDirection,
   dealTradingData,
-  findTargetFromArray,
   isTdStrategyCategory,
   getIdByKfLocation,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
@@ -30,10 +29,7 @@ import {
 } from 'vue';
 import { getColumns } from './config';
 import KfBlinkNum from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfBlinkNum.vue';
-import {
-  dealPosition,
-  hashInstrumentUKey,
-} from '@kungfu-trader/kungfu-js-api/kungfu';
+import { dealPosition } from '@kungfu-trader/kungfu-js-api/kungfu';
 import {
   OffsetEnum,
   SideEnum,
@@ -100,7 +96,7 @@ onMounted(() => {
             ) as KungfuApi.Position[]);
 
         pos.value = toRaw(
-          positions.reverse().map((item) => dealPosition(watcher, item)),
+          positions.reverse().map((item) => dealPosition(item)),
         );
       },
     );

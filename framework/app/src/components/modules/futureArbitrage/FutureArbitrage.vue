@@ -18,9 +18,6 @@ import {
   transformSearchInstrumentResultToInstrument,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 
-interface MakeOrderProps {}
-defineProps<MakeOrderProps>();
-
 const formState = ref(initFormStateByConfig(getConfigSettings(), {}));
 const formRef = ref();
 const { processStatusData } = useProcessStatusDetailData();

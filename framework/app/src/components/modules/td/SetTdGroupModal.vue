@@ -109,13 +109,14 @@ function handleDrop(info: AntTreeNodeDropEvent) {
     oldGroup.children.splice(oldTargetIndex, 1); //remove from old
   }
 
-  if (isGroup(node)) {
+  const group = isGroup(node);
+  if (group) {
     const groupIndex = tdGroup.data.findIndex(
       (group) => node.name === group.name,
     );
     //from group to bottom
     if (!dropToGap || dropPosition !== groupIndex + 1) {
-      isGroup(node).children.push(targetAccountId);
+      group.children.push(targetAccountId);
     }
   }
 

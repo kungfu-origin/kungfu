@@ -417,7 +417,9 @@ const getKfExtConfigList = async (): Promise<KungfuApi.KfExtOriginConfig[]> => {
     }),
   ).then((configList: KungfuApi.KfExtOriginConfig[]) => {
     return configList.filter(
-      (config: KungfuApi.KfExtOriginConfig | null): boolean => !!config,
+      (
+        config: KungfuApi.KfExtOriginConfig,
+      ): config is KungfuApi.KfExtOriginConfig => !!config,
     );
   });
 };
