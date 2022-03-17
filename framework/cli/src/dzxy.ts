@@ -25,21 +25,23 @@ triggerStartStep();
 
 setTimerPromiseTask((): Promise<void> => {
   return new Promise((resolve) => {
-    process.send({
-      type: 'process:msg',
-      data: {
-        type: 'APP_STATES',
-        body: dealAppStates(watcher, watcher?.appStates || {}),
-      },
-    });
+    process.send &&
+      process.send({
+        type: 'process:msg',
+        data: {
+          type: 'APP_STATES',
+          body: dealAppStates(watcher, watcher?.appStates || {}),
+        },
+      });
 
-    process.send({
-      type: 'process:msg',
-      data: {
-        type: 'WATCHER_IS_LIVE',
-        body: watcher ? !!watcher.isLive() : false,
-      },
-    });
+    process.send &&
+      process.send({
+        type: 'process:msg',
+        data: {
+          type: 'WATCHER_IS_LIVE',
+          body: watcher ? !!watcher.isLive() : false,
+        },
+      });
 
     resolve();
   });
@@ -74,89 +76,119 @@ process.on('message', (packet: Pm2PacketMain) => {
 });
 
 function resOrders(packet: Pm2PacketMain) {
+  if (!watcher) {
+    throw new Error('watcher is null');
+  }
+
   const kfLocation = fromPacketToKfLocation(packet);
   const orders = dealTradingData(watcher, watcher.ledger, 'Order', kfLocation)
     .slice(0, 10)
     .map((item) =>
-      dealOrder(watcher, item as KungfuApi.Order, watcher.ledger.OrderStat),
+      dealOrder(
+        watcher as KungfuApi.Watcher,
+        item as KungfuApi.Order,
+        (watcher as KungfuApi.Watcher).ledger.OrderStat,
+      ),
     );
 
   turnBigIntToString(orders);
 
-  process.send({
-    type: 'process:msg',
-    data: {
-      type: 'ORDER',
-      body: {
-        processId: getProcessIdByKfLocation(kfLocation),
-        orders,
+  process.send &&
+    process.send({
+      type: 'process:msg',
+      data: {
+        type: 'ORDER',
+        body: {
+          processId: getProcessIdByKfLocation(kfLocation),
+          orders,
+        },
       },
-    },
-  });
+    });
 }
 
 function resTrades(packet: Pm2PacketMain) {
+  if (!watcher) {
+    throw new Error('watcher is null');
+  }
+
   const kfLocation = fromPacketToKfLocation(packet);
   const trades = dealTradingData(watcher, watcher.ledger, 'Trade', kfLocation)
     .slice(0, 10)
     .map((item) =>
-      dealTrade(watcher, item as KungfuApi.Trade, watcher.ledger.OrderStat),
+      dealTrade(
+        watcher as KungfuApi.Watcher,
+        item as KungfuApi.Trade,
+        (watcher as KungfuApi.Watcher).ledger.OrderStat,
+      ),
     );
 
   turnBigIntToString(trades);
 
-  process.send({
-    type: 'process:msg',
-    data: {
-      type: 'TRADE',
-      body: {
-        processId: getProcessIdByKfLocation(kfLocation),
-        trades,
+  process.send &&
+    process.send({
+      type: 'process:msg',
+      data: {
+        type: 'TRADE',
+        body: {
+          processId: getProcessIdByKfLocation(kfLocation),
+          trades,
+        },
       },
-    },
-  });
+    });
 }
 
 function resPosition(packet: Pm2PacketMain) {
+  if (!watcher) {
+    throw new Error('watcher is null');
+  }
+
   const kfLocation = fromPacketToKfLocation(packet);
   const position = dealTradingData(
     watcher,
     watcher.ledger,
     'Position',
     kfLocation,
-  ).map((item) => dealPosition(watcher, item as KungfuApi.Position));
+  ).map((item) =>
+    dealPosition(watcher as KungfuApi.Watcher, item as KungfuApi.Position),
+  );
 
   turnBigIntToString(position);
 
-  process.send({
-    type: 'process:msg',
-    data: {
-      type: 'POSITION',
-      body: {
-        processId: getProcessIdByKfLocation(kfLocation),
-        position,
+  process.send &&
+    process.send({
+      type: 'process:msg',
+      data: {
+        type: 'POSITION',
+        body: {
+          processId: getProcessIdByKfLocation(kfLocation),
+          position,
+        },
       },
-    },
-  });
+    });
 }
 
 function resAsset(packet: Pm2PacketMain) {
+  if (!watcher) {
+    throw new Error('watcher is null');
+  }
+
   const kfLocation = fromPacketToKfLocation(packet);
   const assets = dealAssetsByHolderUID(watcher, watcher.ledger.Asset);
   const processId = getProcessIdByKfLocation(kfLocation);
   const assetsResolved = [assets[processId] || {}];
   turnBigIntToString(assetsResolved);
 
-  process.send({
-    type: 'process:msg',
-    data: {
-      type: 'ASSET',
-      body: {
-        processId,
-        asset: assetsResolved[0],
+  process.send &&
+    process.send({
+      type: 'process:msg',
+      data: {
+        type: 'ASSET',
+        body: {
+          processId,
+          asset: assetsResolved[0],
+        },
       },
-    },
-  });
+    });
 }
 
 function swithKfLocationResolved(data: SwitchKfLocationPacketData) {
@@ -176,6 +208,10 @@ function swithKfLocationResolved(data: SwitchKfLocationPacketData) {
 }
 
 function cancellAllOrders(packet: Pm2PacketMain) {
+  if (!watcher) {
+    throw new Error('watcher is null');
+  }
+
   const { category } = packet.data as KungfuApi.KfLocation;
   const kfLocation = fromPacketToKfLocation(packet);
   const filterKey = getOrderTradeFilterKey(category);

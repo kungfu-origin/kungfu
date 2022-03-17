@@ -388,7 +388,7 @@ export const makeOrderByOrderInput = (
     }
 
     if (kfLocation.category === 'td') {
-      kfMakeOrder(window.watcher, orderInput, kfLocation)
+      kfMakeOrder(watcher, orderInput, kfLocation)
         .then(() => {
           resolve();
         })
@@ -401,7 +401,7 @@ export const makeOrderByOrderInput = (
         reject(new Error('下单账户信息错误'));
         return;
       }
-      kfMakeOrder(window.watcher, orderInput, tdLocation, kfLocation)
+      kfMakeOrder(watcher, orderInput, tdLocation, kfLocation)
         .then(() => {
           resolve();
         })
@@ -414,7 +414,7 @@ export const makeOrderByOrderInput = (
         reject(new Error('下单账户信息错误'));
         return;
       }
-      kfMakeOrder(window.watcher, orderInput, tdLocation)
+      kfMakeOrder(watcher, orderInput, tdLocation)
         .then(() => {
           resolve();
         })

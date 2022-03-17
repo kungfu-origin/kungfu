@@ -8,7 +8,6 @@
     "importHelpers": true,
     "strictNullChecks": true,
     "noUnusedLocals": true,
-    "noUnusedParameters": true,
     "noImplicitReturns": true, 
     "moduleResolution": "node",
     "skipLibCheck": true,
@@ -20,8 +19,7 @@
     "types": ["jschardet"],
     "typeRoots": [],
     "paths": {
-      "@kungfu-trader/kungfu-js-api/*": ["./framework/api/src/*"],
-      "@kungfu-trader/kungfu-app/*": ["./framework/app/*"],
+      "@kungfu-trader/kungfu-js-api/*": ["../api/src/*"],
     },
     "lib": ["esnext", "dom", "dom.iterable", "scripthost"]
   },
@@ -31,6 +29,6 @@
     "src/**/*.vue",
     "tests/**/*.ts",
     "tests/**/*.tsx",
-    "./framework/api/src/**/*.ts"
+    "../api/src/**/*.ts"
   ],
 }

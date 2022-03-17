@@ -48,6 +48,8 @@ export class OrderTable extends Table {
     if (side === SideEnum.Sell) {
       return colors.green(name);
     }
+
+    return name;
   }
 
   dealOffset(offset: OffsetEnum) {
@@ -103,8 +105,8 @@ export class OrderTable extends Table {
       );
     });
 
-    this.table.setItems(orderListData);
-    if (!this.table.childList.focused) {
+    this.table && this.table.setItems(orderListData);
+    if (this.table && !this.table.childList.focused) {
       this.table.childList.select(0);
       this.table.childList.setScrollPerc(0);
     }

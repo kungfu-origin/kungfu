@@ -36,7 +36,7 @@ class Table {
   }
 
   focus() {
-    this.table.focus();
+    this.table && this.table.focus();
   }
 
   init(options: TableOption): BoxElementResolved {

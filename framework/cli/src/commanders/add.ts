@@ -15,6 +15,7 @@ import {
   getPrimaryKeyFromKfConfigItem,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { setKfConfig } from '@kungfu-trader/kungfu-js-api/kungfu/store';
+import { PromptAnswer } from 'src/typings';
 
 inquirer.registerPrompt('autocomplete', autocompletePrompt);
 inquirer.registerPrompt('path', PathPrompt);
@@ -147,7 +148,7 @@ export const selectKfExtPrompt = async (
       type: 'autocomplete',
       name: 'source',
       message: 'Select one type of source    ',
-      source: async (answersSoFar: unknown, input = '') => {
+      source: async (_answersSoFar, input = '') => {
         return extStrList.filter((s: string) => s.includes(input));
       },
     },

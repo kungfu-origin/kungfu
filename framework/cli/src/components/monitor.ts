@@ -128,9 +128,10 @@ export class MonitorDashboard extends Dashboard {
     processListObservable().subscribe((processList) => {
       if (!this.processList.length && processList.length) {
         const processId = processList[0].processId;
-        this.log.initProcessId(processId);
-        this.boards.logBoard.setLabel(` Logs (${processId}) `);
-        this.boards.logBoard.setItems([]);
+        this.log && this.log.initProcessId(processId);
+        this.boards.logBoard &&
+          this.boards.logBoard.setLabel(` Logs (${processId}) `);
+        this.boards.logBoard && this.boards.logBoard.setItems([]);
         this.screen.render();
       }
 
@@ -141,14 +142,15 @@ export class MonitorDashboard extends Dashboard {
             item.typeName,
             item.processName,
             item.statusName,
-            'MEM ' + dealMemory(item.monit?.memory),
+            'MEM ' + dealMemory(item.monit?.memory || 0),
             'Cpu ' + (item.monit?.cpu || '0') + '%',
           ],
           [5, 15, 10, 10, 10],
         );
       });
 
-      this.boards.processBoard.setItems(processListForRender);
+      this.boards.processBoard &&
+        this.boards.processBoard.setItems(processListForRender);
       this.screen.render();
     });
 
@@ -166,23 +168,37 @@ export class MonitorDashboard extends Dashboard {
       process.exit(0);
     });
 
-    this.boards.processBoard.key(['enter'], () => {
-      const selectedIndex: number = this.boards.processBoard.selected;
-      const processItem = this.processList[selectedIndex];
-      switchProcess(processItem, this.boards.message, this.boards.loader);
-    });
+    this.boards.processBoard &&
+      this.boards.processBoard.key(['enter'], () => {
+        const selectedIndex: number = this.boards.processBoard?.selected || -1;
+        if (selectedIndex === -1) {
+          throw new Error('selectedIndex === -1');
+        }
+        const processItem = this.processList[selectedIndex];
+        if (this.boards.message && this.boards.loader) {
+          switchProcess(processItem, this.boards.message, this.boards.loader);
+        }
+      });
 
-    this.boards.processBoard.key(
-      ['up', 'down'],
-      debounce(() => {
-        const selectedIndex: number = this.boards.processBoard.selected;
-        const curProcessItem = this.processList[selectedIndex];
-        this.log.initProcessId(curProcessItem.processId);
-        this.boards.logBoard.setLabel(` Logs (${curProcessItem.processId}) `);
-        this.boards.logBoard.setItems([]);
-        this.screen.render();
-      }, 300),
-    );
+    this.boards.processBoard &&
+      this.boards.processBoard.key(
+        ['up', 'down'],
+        debounce(() => {
+          const selectedIndex: number =
+            this.boards.processBoard?.selected || -1;
+          if (selectedIndex === -1) {
+            throw new Error('selectedIndex === -1');
+          }
+          const curProcessItem = this.processList[selectedIndex];
+          this.log && this.log.initProcessId(curProcessItem.processId);
+          this.boards.logBoard &&
+            this.boards.logBoard.setLabel(
+              ` Logs (${curProcessItem.processId}) `,
+            );
+          this.boards.logBoard && this.boards.logBoard.setItems([]);
+          this.screen.render();
+        }, 300),
+      );
 
     let i = 0;
     const boards = ['processBoard', 'logBoard'];
@@ -196,7 +212,7 @@ export class MonitorDashboard extends Dashboard {
   }
 
   _setLogItems() {
-    if (!this.boards.logBoard.focused) {
+    if (this.boards.logBoard && this.log && !this.boards.logBoard.focused) {
       this.boards.logBoard.setItems(this.log.getLogs());
       this.boards.logBoard.select(this.log.getLogs().length - 1);
       this.boards.logBoard.setScrollPerc(100);

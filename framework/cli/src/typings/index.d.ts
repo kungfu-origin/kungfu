@@ -102,3 +102,9 @@ interface BoxElementResolved extends Widgets.BoxElement {
   headers: string[];
   childList: ListElementResolved;
 }
+
+declare global {
+  interface Console {
+    success: (str: string) => void;
+  }
+}

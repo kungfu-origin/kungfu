@@ -292,7 +292,7 @@ export const switchProcess = (
   proc: ProcessListItem,
   messageBoard: Widgets.MessageElement,
   loading: Widgets.LoadingElement,
-) => {
+): void => {
   const status = proc.status !== '--';
   const startOrStop = status ? 'Stop' : 'Start';
   const { category, group, name, value } = proc;
@@ -347,17 +347,13 @@ export const switchProcess = (
         return;
       }
 
-      return sendDataToProcessIdByPm2(
-        'SWITCH_KF_LOCATION',
-        globalState.DZXY_PM_ID,
-        {
-          category,
-          group,
-          name,
-          value: JSON.stringify(value),
-          status,
-        },
-      )
+      sendDataToProcessIdByPm2('SWITCH_KF_LOCATION', globalState.DZXY_PM_ID, {
+        category,
+        group,
+        name,
+        value: JSON.stringify(value),
+        status,
+      })
         .then(() => {
           messageBoard.log('Please wait...', 2, (err) => {
             if (err) {

@@ -68,7 +68,7 @@
     "tail": "^2.2.4",
     "treeify": "^1.1.0",
     "ts-loader": "^9.2.8",
-    "typescript": "^4.5.2",
+    "typescript": "~4.5.2",
     "url-loader": "^4.1.1",
     "vue-loader": "^17.0.0",
     "vue-virtual-scroller": "^2.0.0-0",

@@ -60,8 +60,10 @@ export class PosTable extends Table {
         this.pad,
       );
     });
-    this.table.setItems(posListData);
-    if (!this.table.childList.focused) this.table.childList.setScrollPerc(0);
+    this.table && this.table.setItems(posListData);
+    if (this.table && !this.table.childList.focused) {
+      this.table.childList.setScrollPerc(0);
+    }
   }
 }
 

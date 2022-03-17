@@ -127,7 +127,7 @@ export function showQuitMessageBox(
       })
       .then(({ response }) => {
         if (response === 0) {
-          return Promise.all([
+          Promise.all([
             reqRecordBeforeQuit(mainWindow),
             killAllBeforeQuit(mainWindow),
           ]).finally(() => {

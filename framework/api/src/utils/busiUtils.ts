@@ -263,20 +263,20 @@ export const setTimerPromiseTask = (fn: Function, interval = 500) => {
   };
 };
 
-export const loopToRunProcess = async (
-  promiseFunc: Array<Function>,
+export const loopToRunProcess = async <T>(
+  promiseFunc: Array<() => Promise<T>>,
   interval = 1000,
 ) => {
   let i = 0,
     len = promiseFunc.length;
-  let resList = [];
+  let resList: (T | Error)[] = [];
   for (i = 0; i < len; i++) {
     const pFunc = promiseFunc[i];
     try {
-      const res = await pFunc();
+      const res: T = await pFunc();
       resList.push(res);
-    } catch (err) {
-      resList.push(err);
+    } catch (err: unknown) {
+      resList.push(err as Error);
     }
 
     await delayMilliSeconds(interval);
@@ -448,7 +448,7 @@ const getKfExtensionConfigByCategory = (
       const extPath = extConfig.extPath;
       (Object.keys(extConfig['config'] || {}) as KfCategoryTypes[]).forEach(
         (category: KfCategoryTypes) => {
-          const configOfCategory = extConfig['config'][category];
+          const configOfCategory = (extConfig['config'] || {})[category];
           configByCategory[category] = {
             ...(configByCategory[category] || {}),
             [extKey]: {
@@ -476,7 +476,8 @@ const getKfUIExtensionConfigByExtKey = (
       const extName = extConfig.name;
       const extPath = extConfig.extPath;
       const uiConfig = extConfig['ui_config'];
-      const { position, components } = uiConfig;
+      const position = uiConfig?.position || '';
+      const components = uiConfig?.components;
 
       if (!position) {
         return configByExtraKey;

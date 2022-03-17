@@ -225,24 +225,32 @@ class TradingDataDashboard extends Dashboard {
       process.exit(0);
     });
 
-    this.boards.processBoard.key(['enter'], () => {
-      const selectedIndex: number = this.boards.processBoard.selected;
-      const processItem = this.processList[selectedIndex];
-      switchProcess(processItem, this.boards.message, this.boards.loader);
-    });
+    this.boards.processBoard &&
+      this.boards.processBoard.key(['enter'], () => {
+        const selectedIndex: number = this.boards.processBoard?.selected || -1;
+        if (selectedIndex === -1) {
+          throw new Error('selectedIndex === -1');
+        }
+        const processItem = this.processList[selectedIndex];
+        if (this.boards.message && this.boards.loader) {
+          switchProcess(processItem, this.boards.message, this.boards.loader);
+        }
+      });
 
-    this.boards.cancelBtn.key(['enter'], () => {
-      reqCancelAllOrders(this.kfLocation);
-      this.boards.message.log(
-        'Cancel Order Req sent, Please wait...',
-        2,
-        (err) => {
-          if (err) {
-            console.error(err);
-          }
-        },
-      );
-    });
+    this.boards.cancelBtn &&
+      this.boards.cancelBtn.key(['enter'], () => {
+        reqCancelAllOrders(this.kfLocation);
+        this.boards.message &&
+          this.boards.message.log(
+            'Cancel Order Req sent, Please wait...',
+            2,
+            (err) => {
+              if (err) {
+                console.error(err);
+              }
+            },
+          );
+      });
 
     let i = 0;
     const boards = [
@@ -282,37 +290,39 @@ class TradingDataDashboard extends Dashboard {
             item.typeName,
             item.processName,
             item.statusName,
-            'MEM ' + dealMemory(item.monit?.memory),
+            'MEM ' + dealMemory(item.monit?.memory || 0),
             'Cpu ' + (item.monit?.cpu || '0') + '%',
           ],
           [5, 15, 10, 10, 10],
         );
       });
 
-      this.boards.processBoard.setItems(processListForRender);
+      this.boards.processBoard &&
+        this.boards.processBoard.setItems(processListForRender);
       this.screen.render();
     });
 
     ordersObservable(this.kfLocation).subscribe(
       (orders: KungfuApi.OrderResolved[]) => {
-        this.boards.orderTable.setItems(orders);
+        this.boards.orderTable && this.boards.orderTable.setItems(orders);
       },
     );
 
     tradesObservable(this.kfLocation).subscribe(
       (trades: KungfuApi.TradeResolved[]) => {
-        this.boards.tradeTable.setItems(trades);
+        this.boards.tradeTable && this.boards.tradeTable.setItems(trades);
       },
     );
 
     posObservable(this.kfLocation).subscribe(
       (positions: KungfuApi.PositionResolved[]) => {
-        this.boards.posTable.setItems(positions);
+        this.boards.posTable && this.boards.posTable.setItems(positions);
       },
     );
 
     assetObservable(this.kfLocation).subscribe((asset: KungfuApi.Asset) => {
-      this.boards.assetTable.setItems(this._freshAssets(asset));
+      this.boards.assetTable &&
+        this.boards.assetTable.setItems(this._freshAssets(asset));
     });
   }
 

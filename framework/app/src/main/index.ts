@@ -123,7 +123,7 @@ function createWindow(reloadAfterCrashed = false, reloadBySchedule = false) {
     }
   });
 
-  MainWindow.webContents.on('render-process-gone', (event, details) => {
+  MainWindow.webContents.on('render-process-gone', (_event, details) => {
     kfLogger.error(
       '[MainWindow.webContents] crashed' + new Date(),
       JSON.stringify(details),

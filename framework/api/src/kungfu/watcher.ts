@@ -3,24 +3,19 @@ import { KF_RUNTIME_DIR } from '../config/pathConfig';
 import { getKfGlobalSettingsValue } from '@kungfu-trader/kungfu-js-api/config/globalSettings';
 import {
   booleanProcessEnv,
-  getProcessIdByKfLocation,
   kfLogger,
   setTimerPromiseTask,
   // statTime,
   // statTimeEnd,
 } from '../utils/busiUtils';
-import {
-  BrokerStateStatusEnum,
-  BrokerStateStatusTypes,
-} from '../typings/enums';
 
 export const watcher = ((): KungfuApi.Watcher | null => {
   kfLogger.info(
     'Init Watcher',
     'APP_TYPE',
-    process.env.APP_TYPE,
+    process.env.APP_TYPE || 'undefined',
     'RENDERER_TYPE',
-    process.env.RENDERER_TYPE,
+    process.env.RENDERER_TYPE || 'undefined',
   );
 
   if (process.env.APP_TYPE !== 'renderer') {
@@ -47,7 +42,9 @@ export const watcher = ((): KungfuApi.Watcher | null => {
     '',
   );
 
-  const bypassRestore = booleanProcessEnv(process.env.RELOAD_AFTER_CRASHED);
+  const bypassRestore = booleanProcessEnv(
+    process.env.RELOAD_AFTER_CRASHED || '',
+  );
   const globalSetting = getKfGlobalSettingsValue();
   const bypassQuote = globalSetting?.performance?.bypassQuote;
 

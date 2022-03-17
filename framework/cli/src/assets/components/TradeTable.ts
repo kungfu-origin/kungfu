@@ -43,6 +43,8 @@ export class TradeTable extends Table {
     if (side === SideEnum.Sell) {
       return colors.green(name);
     }
+
+    return name;
   }
 
   dealOffset(offset: OffsetEnum) {
@@ -84,12 +86,12 @@ export class TradeTable extends Table {
       );
     });
 
-    this.table.setItems(tradeListData);
-    if (!this.table.childList.focused) {
+    this.table && this.table.setItems(tradeListData);
+    if (this.table && !this.table.childList.focused) {
       this.table.childList.select(0);
       this.table.childList.setScrollPerc(0);
     }
   }
 }
 
-export default (type: string) => new TradeTable(type);
+export default (type: KfCategoryTypes) => new TradeTable(type);
