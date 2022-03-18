@@ -80,14 +80,11 @@ onMounted(() => {
   if (app?.proxy) {
     const subscription = app.proxy.$tradingDataSubject.subscribe(
       (watcher: KungfuApi.Watcher) => {
-         console.log("Trade.vue 111");
         if (historyDate.value) {
-         console.log("Trade.vue 222");
           return;
         }
 
         if (currentGlobalKfLocation.data === null) {
-         console.log("Trade.vue 333");
           return;
         }
 
@@ -113,7 +110,6 @@ onMounted(() => {
               toRaw(dealTrade(watcher, item, watcher.ledger.OrderStat)),
             ),
         );
-         console.log("Trade.vue 444");
       },
     );
 

@@ -675,7 +675,6 @@ declare namespace KungfuApi {
     isUsable(): boolean;
     setup(): boolean;
     step(): boolean;
-    updateQuote(): void;
     createTask(): void;
     isReadyToInteract(kfLocation: KfLocation | KfConfig): boolean;
     getLocationUID(kfLocation: KfLocation | KfConfig): string;
@@ -747,14 +746,6 @@ declare namespace KungfuApi {
     instrumentId: string;
     instrumentType: InstrumentTypeEnum;
     mdLocation: KfLocation;
-  }
-
-  export interface InstrumentForSubByKey {
-    uidKey: string;
-    exchangeId: string;
-    instrumentId: string;
-    instrumentType: InstrumentTypeEnum;
-    mdLocationKey: string | number;
   }
 
   export interface InstrumentResolved {

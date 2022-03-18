@@ -7,7 +7,6 @@
 #include "config_store.h"
 #include "history.h"
 #include <sstream>
-#include <kungfu/yijinjing/util/os.h>
 
 using namespace kungfu::rx;
 using namespace kungfu::longfist;
@@ -102,7 +101,6 @@ void Watcher::NoSet(const Napi::CallbackInfo &info, const Napi::Value &value) {
 }
 
 Napi::Value Watcher::GetLocator(const Napi::CallbackInfo &info) {
-  SPDLOG_INFO("Watcher::GetLocator");
   return std::dynamic_pointer_cast<Locator>(get_locator())->get_js_locator();
 }
 
@@ -118,7 +116,6 @@ Napi::Value Watcher::GetLocation(const Napi::CallbackInfo &info) {
   locationObj.Set("mode", Napi::String::New(info.Env(), get_mode_name(location->mode)));
   locationObj.Set("uname", Napi::String::New(info.Env(), location->uname));
   locationObj.Set("uid", Napi::Number::New(info.Env(), location->uid));
-  // locationObj.Set("locator", std::dynamic_pointer_cast<Locator>(location->locator)->get_js_locator());
   return locationObj;
 }
 
@@ -246,16 +243,6 @@ Napi::Value Watcher::RequestMarketData(const Napi::CallbackInfo &info) {
   return Napi::Boolean::New(info.Env(), true);
 }
 
-void Watcher::UpdateQuote(const Napi::CallbackInfo &info) {
-  upQuote();
-}
-
-void Watcher::upQuote() {
-  boost::hana::for_each(longfist::StateDataTypes, [&](auto it) {
-    UpdateLedger(+boost::hana::second(it));
-  });
-}
-
 void Watcher::Init(Napi::Env env, Napi::Object exports) {
   Napi::HandleScope scope(env);
 
@@ -274,7 +261,6 @@ void Watcher::Init(Napi::Env env, Napi::Object exports) {
                                         InstanceMethod("publishState", &Watcher::PublishState),                   //
                                         InstanceMethod("isReadyToInteract", &Watcher::IsReadyToInteract),         //
                                         InstanceMethod("issueOrder", &Watcher::IssueOrder),                       //
-                                        InstanceMethod("updateQuote", &Watcher::UpdateQuote),                     //
                                         InstanceMethod("cancelOrder", &Watcher::CancelOrder),                     //
                                         InstanceMethod("requestMarketData", &Watcher::RequestMarketData),         //
                                         InstanceAccessor("locator", &Watcher::GetLocator, &Watcher::NoSet),       //
@@ -341,8 +327,7 @@ void Watcher::RestoreState(const location_ptr &state_location, int64_t from, int
 }
 
 Napi::Value Watcher::CreateTask(const Napi::CallbackInfo &info) {
-  SPDLOG_INFO("Watcher::Watcher CreateTask tid {} pid {} this in main{}", std::this_thread::get_id(), GETPID(),
-              uint64_t(this));
+  SPDLOG_INFO("Watcher::Watcher CreateTask tid {} this in main {}", std::this_thread::get_id(), uint64_t(this));
   greq.data = (void *)this;
   loop = uv_default_loop();
   uv_queue_work(
@@ -351,14 +336,10 @@ Napi::Value Watcher::CreateTask(const Napi::CallbackInfo &info) {
         Watcher *watcher = (Watcher *)(req->data);
         while (watcher->IsStart()) {
           if (!watcher->is_live() && !watcher->is_started() && watcher->is_usable()) {
-            // uv_mutex_lock(&watcher->mutex_);
             watcher->setup();
-            // uv_mutex_unlock(&watcher->mutex_);
           }
           if (watcher->is_live()) {
-            // uv_mutex_lock(&watcher->mutex_);
             watcher->step();
-            // uv_mutex_unlock(&watcher->mutex_);
           }
           if (!watcher->IsStart())
             break;
@@ -376,11 +357,9 @@ Napi::Value Watcher::CreateTask(const Napi::CallbackInfo &info) {
         Watcher *watcher = (Watcher *)(req->data);
         // SPDLOG_INFO("uv_timer_start tid {} pid {} this {}", std::this_thread::get_id(), GETPID(),
         //             (uint64_t)(watcher));
-        // uv_mutex_lock(&watcher->mutex_);
         watcher->SyncLedger();
         watcher->SyncAppStatus();
         watcher->SyncEventCache();
-        // uv_mutex_unlock(&watcher->mutex_);
       },
       0, 2000);
 
