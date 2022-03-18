@@ -105,12 +105,12 @@ Book_ptr Bookkeeper::make_book(uint32_t location_uid) {
   asset.holder_uid = location_uid;
   asset.ledger_category = location->category == category::TD ? LedgerCategory::Account : LedgerCategory::Strategy;
   strcpy(asset.trading_day, time::strftime(app_.get_trading_day(), KUNGFU_TRADING_DAY_FORMAT).c_str());
-  if (location->category == category::TD) {
+  if (asset.ledger_category == LedgerCategory::Account) {
     strcpy(asset.source_id, location->group.c_str());
     strcpy(asset.broker_id, location->group.c_str());
     strcpy(asset.account_id, location->name.c_str());
   }
-  if (location->category == category::STRATEGY) {
+  if (asset.ledger_category == LedgerCategory::Strategy) {
     strcpy(asset.client_id, location->name.c_str());
   }
   return book;

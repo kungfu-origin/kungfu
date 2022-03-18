@@ -21,6 +21,7 @@ import {
   getTradingDate,
   kfLogger,
   removeJournal,
+  removeDB,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { ExchangeIds } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
 
@@ -117,11 +118,13 @@ export const useTableSearchKeyword = <T>(
   };
 };
 
-export const beforeStartAll = (): Promise<void> => {
+const removeJournalBeforeStartAll = (
+  currentTradingDate: string,
+): Promise<void> => {
   const clearJournalDateFromLocal = localStorage.getItem(
     'clearJournalTradingDate',
   );
-  const currentTradingDate = getTradingDate();
+
   kfLogger.info(
     'Lastest Clear Journal Trading Date: ',
     clearJournalDateFromLocal || '',
@@ -134,6 +137,28 @@ export const beforeStartAll = (): Promise<void> => {
   } else {
     return Promise.resolve();
   }
+};
+
+const removeDBBeforeStartAll = (currentTradingDate: string): Promise<void> => {
+  const clearDBDateFromLocal = localStorage.getItem('clearDBTradingDate');
+
+  kfLogger.info('Lastest Clear DB Trading Date: ', clearDBDateFromLocal || '');
+
+  if (currentTradingDate !== clearDBDateFromLocal) {
+    localStorage.setItem('clearDBTradingDate', currentTradingDate);
+    kfLogger.info('Clear DB Trading Date: ', currentTradingDate);
+    return removeDB(KF_HOME);
+  } else {
+    return Promise.resolve();
+  }
+};
+
+export const beforeStartAll = (): Promise<void[]> => {
+  const currentTradingDate = getTradingDate();
+  return Promise.all([
+    removeJournalBeforeStartAll(currentTradingDate),
+    removeDBBeforeStartAll(currentTradingDate),
+  ]);
 };
 
 export const getInstrumentTypeColor = (
@@ -263,6 +288,14 @@ export const useAllKfConfigData = (): Record<
           category: 'system',
           group: 'service',
           name: 'ledger',
+          mode: 'live',
+          value: '',
+        },
+        {
+          location_uid: 0,
+          category: 'system',
+          group: 'service',
+          name: 'cached',
           mode: 'live',
           value: '',
         },
@@ -553,6 +586,11 @@ export const useIpcListener = (): void => {
 export const markClearJournal = (): void => {
   localStorage.setItem('clearJournalTradingDate', '');
   message.success('清理 journal 完成, 请重启应用');
+};
+
+export const markClearDB = (): void => {
+  localStorage.setItem('clearDBTradingDate', '');
+  message.success('清理 DB 完成, 请重启应用');
 };
 
 export const handleOpenLogview = (

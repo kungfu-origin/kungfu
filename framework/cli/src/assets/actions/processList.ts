@@ -23,6 +23,7 @@ import {
   startMaster,
   startLedger,
   startDzxy,
+  startCacheD,
 } from '@kungfu-trader/kungfu-js-api/utils/processUtils';
 import { combineLatest, filter, map, Observable } from 'rxjs';
 import { ProcessListItem } from 'src/typings';
@@ -414,6 +415,7 @@ const switchMaster = async (status: boolean): Promise<void> => {
   } else {
     await startMaster(false);
     await delayMilliSeconds(1000);
+    await startCacheD(false);
     await startLedger(false);
     await startDzxy();
   }

@@ -35,6 +35,7 @@ const { tdExtTypeMap, mdExtTypeMap } = useExtConfigsRelated();
 
 let hasAlertMasterStop = false;
 let hasAlertLedgerStop = false;
+let hasAlertCacheDStop = false;
 
 watch(processStatusData, (newPSD, oldPSD) => {
   if (newPSD.master !== 'online' && oldPSD.master === 'online') {
@@ -55,6 +56,19 @@ watch(processStatusData, (newPSD, oldPSD) => {
       notification.error({
         message: '计算服务 ledger 中断',
         description: '计算服务负责持仓跟资金计算, 请重启功夫交易系统',
+        duration: 8,
+        placement: 'bottomRight',
+      });
+    }
+  }
+
+  if (newPSD.cached !== 'online' && oldPSD.cached === 'online') {
+    if (!hasAlertCacheDStop) {
+      hasAlertCacheDStop = true;
+      notification.error({
+        message: '存储服务 cached 中断',
+        description:
+          '存储服务负责数据落地, 存储服务断开不影响交易, 可等交易完成后重启功夫系统',
         duration: 8,
         placement: 'bottomRight',
       });
@@ -85,8 +99,9 @@ watch(appStates, (newAppStates, oldAppStates) => {
 const mainStatusWell = computed(() => {
   const masterIsLive = processStatusData.value['master'] === 'online';
   const ledgerIsLive = processStatusData.value['ledger'] === 'online';
+  const cachedIsLive = processStatusData.value['cached'] === 'online';
 
-  return masterIsLive && ledgerIsLive;
+  return masterIsLive && ledgerIsLive && cachedIsLive;
 });
 
 function handleOpenProcessControllerBoard(): void {

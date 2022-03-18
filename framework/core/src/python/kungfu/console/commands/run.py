@@ -44,6 +44,7 @@ def run(ctx, mode, category, group, name, low_latency, reference, arguments):
     cheatsheet = {
         "master": registry["system"]["master"]["master"],
         "ledger": registry["system"]["service"]["ledger"],
+        "cached": registry["system"]["service"]["cached"],
     }
 
     if not category and not reference:

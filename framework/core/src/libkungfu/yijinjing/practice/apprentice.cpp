@@ -33,16 +33,19 @@ inline location_ptr make_master_location(const std::string &name, const locator_
   return location::make_shared(mode::LIVE, category::SYSTEM, "master", name, locator);
 }
 
+inline location_ptr maske_cached_location(const locator_ptr &locator) {
+  return location::make_shared(mode::LIVE, category::SYSTEM, "service", "cached", locator);
+}
+
 apprentice::apprentice(location_ptr home, bool low_latency)
     : hero(std::make_shared<io_device_client>(home, low_latency)),
       master_home_location_(make_master_location("master", get_locator())),
       master_cmd_location_(make_master_location(fmt::format("{:08x}", get_live_home_uid()), get_locator())),
-      state_bank_(), trading_day_(time::today_start()), session_finder_(get_io_device()) {
+      cached_home_location_(maske_cached_location(get_locator())), state_bank_(), trading_day_(time::today_start()) {
   add_location(0, master_home_location_);
   add_location(0, master_cmd_location_);
+  add_location(0, cached_home_location_);
 }
-
-index::session_finder &apprentice::get_session_finder() { return session_finder_; }
 
 bool apprentice::is_started() const { return started_; }
 
@@ -72,6 +75,36 @@ void apprentice::request_write_to(int64_t trigger_time, uint32_t dest_id) {
   if (get_io_device()->get_home()->mode == mode::LIVE) {
     require_write_to(trigger_time, master_cmd_location_->uid, dest_id);
   }
+}
+
+void apprentice::request_cached_reader_writer(const event_ptr &event) {
+  if (get_io_device()->get_home()->mode == mode::LIVE) {
+    if (writers_.find(master_cmd_location_->uid) == writers_.end()) {
+      SPDLOG_ERROR("no writer for {}", get_location_uname(master_cmd_location_->uid));
+      return;
+    }
+
+    if (get_live_home_uid() != cached_home_location_->uid) {
+      if (registry_.find(cached_home_location_->uid) == registry_.end()) {
+        SPDLOG_ERROR("no register in registry_ {}", get_location_uname(master_cmd_location_->uid));
+        return;
+      }
+
+      request_write_to(now(), cached_home_location_->uid);
+      request_read_from(now(), cached_home_location_->uid, now());
+
+    } else {
+      auto writer = get_writer(master_cmd_location_->uid);
+      RequestCachedDone &rcd = writer->open_data<RequestCachedDone>();
+      rcd.dest_id = get_io_device()->get_live_home()->uid;
+      writer->close_data();
+    }
+  }
+}
+
+void apprentice::request_cached(uint32_t source_id) {
+  auto writer = get_writer(source_id);
+  writer->mark(now(), RequestCached::tag);
 }
 
 void apprentice::add_timer(int64_t nanotime, const std::function<void(const event_ptr &)> &callback) {
@@ -151,6 +184,20 @@ void apprentice::react() {
       reader_->join(master_cmd_location_, get_live_home_uid(), event->gen_time());
     });
 
+    auto cached_register_event = events_ | is(Register::tag) | filter([&](const event_ptr &event) {
+                                   auto register_data = event->data<Register>();
+                                   return register_data.location_uid == cached_home_location_->uid;
+                                 }) |
+                                 filter([&](const event_ptr &event) {
+                                   if (writers_.find(master_cmd_location_->uid) != writers_.end()) {
+                                     return true;
+                                   }
+                                   return false;
+                                 }) |
+                                 first();
+
+    cached_register_event | $$(request_cached_reader_writer(event));
+
     checkin();
     expect_start();
   }
@@ -174,6 +221,10 @@ void apprentice::on_react() {}
 
 void apprentice::on_start() {}
 
+void apprentice::on_register(int64_t trigger_time, const Register &register_data) {
+  register_location(trigger_time, register_data);
+}
+
 void apprentice::on_deregister(const event_ptr &event) {
   uint32_t location_uid = data::location::make_shared(event->data<Deregister>(), get_locator())->uid;
   reader_->disjoin(location_uid);
@@ -181,7 +232,15 @@ void apprentice::on_deregister(const event_ptr &event) {
   deregister_location(event->trigger_time(), location_uid);
 }
 
-void apprentice::on_read_from(const event_ptr &event) { do_read_from<RequestReadFrom>(event, get_live_home_uid()); }
+void apprentice::on_read_from(const event_ptr &event) {
+  do_read_from<RequestReadFrom>(event, get_live_home_uid());
+
+  // In on read to ensure the write in cached established
+  auto source_id = event->data<RequestReadFrom>().source_id;
+  if (source_id == cached_home_location_->uid) {
+    request_cached(source_id);
+  }
+}
 
 void apprentice::on_read_from_public(const event_ptr &event) { do_read_from<RequestReadFromPublic>(event, 0); }
 
