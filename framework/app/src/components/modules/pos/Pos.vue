@@ -76,9 +76,7 @@ onMounted(() => {
   if (app?.proxy) {
     const subscription = app.proxy.$tradingDataSubject.subscribe(
       (watcher: KungfuApi.Watcher) => {
-        console.log("Pos.vue 111");
         if (currentGlobalKfLocation.data === null) {
-        console.log("Pos.vue 222");
           return;
         }
 
@@ -100,7 +98,6 @@ onMounted(() => {
         pos.value = toRaw(
           positions.reverse().map((item) => dealPosition(item)),
         );
-        console.log("Pos.vue 333");
       },
     );
 
@@ -152,7 +149,6 @@ function handleClickRow(data: {
 }
 
 function dealLocationUIDResolved(holderUID: number): string {
-  console.log("9...")
   return getIdByKfLocation(window.watcher.getLocation(holderUID));
 }
 </script>

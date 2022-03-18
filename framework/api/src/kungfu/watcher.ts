@@ -108,31 +108,3 @@ export const startGetKungfuWatcherStep = (
     });
   }, interval);
 };
-
-export const startUpdateKungfuWatcherQuotes = (interval = 2000) => {
-  return;
-  if (watcher === null) return;
-
-  return setTimerPromiseTask(() => {
-    return new Promise((resolve) => {
-      if (watcher.isLive()) {
-        if (process.env.APP_TYPE == 'renderer') {
-          window.requestIdleCallback(
-            () => {
-              // statTime('update Quote');
-              watcher.updateQuote();
-              // statTimeEnd('update Quote');
-              resolve(true);
-            },
-            { timeout: 5000 },
-          );
-        } else {
-          watcher.updateQuote();
-          resolve(true);
-        }
-      } else {
-        resolve(false);
-      }
-    });
-  }, interval);
-};

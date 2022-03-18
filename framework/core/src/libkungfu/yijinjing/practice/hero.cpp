@@ -98,7 +98,6 @@ bool hero::has_location(uint32_t uid) const { return locations_.find(uid) != loc
 
 location_ptr hero::get_location(uint32_t uid) const {
   assert(has_location(uid));
-  SPDLOG_INFO("hero::get_location uid {} locations_.at(uid) {}", uid, locations_.at(uid));
   return locations_.at(uid);
 }
 
