@@ -16,6 +16,7 @@ import {
   useAllKfConfigData,
   useDashboardBodySize,
   handleOpenLogview,
+  handleOpenCodeView,
   useProcessStatusDetailData,
   useAssets,
   useCurrentGlobalKfLocation,
@@ -211,7 +212,7 @@ function handleOpenFile(kfConfig: KungfuApi.KfConfig) {
               />
               <FormOutlined
                 style="font-size: 12px"
-                @click.stop="handleOpenFile(record)"
+                @click.stop="handleOpenCodeView(record)"
               ></FormOutlined>
               <SettingOutlined
                 style="font-size: 12px"

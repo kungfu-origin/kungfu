@@ -11,6 +11,7 @@ import {
   LOG_DIR,
 } from '@kungfu-trader/kungfu-js-api/config/pathConfig';
 import { updateMdTdStrategy } from './commanders/update';
+import { removeMdTdStrategy } from './commanders/remove';
 
 if (process.argv.length === 2 || process.argv[2] === '-h') {
   console.log(colors.green('Welcome to kungfu trader system'));
@@ -73,6 +74,20 @@ program
   .description('update a md, td or strategy')
   .action(() => {
     return updateMdTdStrategy()
+      .then(() => listKfLocations())
+      .catch((err: Error) => {
+        console.error(err);
+        process.exit(1);
+      })
+      .finally(() => process.exit(0));
+  });
+
+program
+  .command('remove')
+  .description('remove a md, td or strategy')
+  .action(() => {
+    return removeMdTdStrategy()
+      .then(() => listKfLocations())
       .catch((err: Error) => {
         console.error(err);
         process.exit(1);

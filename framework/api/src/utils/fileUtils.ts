@@ -45,3 +45,27 @@ export const writeCSV = (
       });
   });
 };
+
+
+//获取文件内容
+export const getCodeText = (targetPath: string): Promise<string> => {
+  if (!targetPath) throw new Error('文件路径不存在！');
+  targetPath = path.normalize(targetPath);
+  return new Promise((resolve, reject): void => {
+    fse.readFile(targetPath, 'utf-8', (err: Error, data: any) => {
+      if (err) {
+        console.error(err);
+        reject(err);
+        return;
+      }
+      resolve(data.toString());
+    });
+  });
+};
+
+//写入文件
+export const writeFile = (filePath: string, data: string): Promise<void> => {
+  filePath = path.normalize(filePath);
+  if (data === undefined) throw new Error('input data is undefined!');
+  return fse.outputFile(filePath, data);
+};

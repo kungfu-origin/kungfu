@@ -1,59 +1,86 @@
-import colors from 'colors';
-import inquirer from 'inquirer';
 import { getAllKfConfigOriginData } from '@kungfu-trader/kungfu-js-api/actions';
 import {
-  parseToString,
-  getKfCategoryFromString,
+  buildObjectFromKfConfigArray,
+  getPromptQuestionsBySettings,
+  selectTargetKfLocation,
 } from '../assets/methods/utils';
-import { getIdByKfLocation } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
+import {
+  getIdByKfLocation,
+  getKfExtensionConfig,
+} from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
+import { setKfConfig } from '@kungfu-trader/kungfu-js-api/kungfu/store';
 
 export const updateMdTdStrategy = async () => {
+  const kfLocation = await selectTargetKfLocation();
+  const extConfigs = await getKfExtensionConfig();
   const { md, td, strategy } = await getAllKfConfigOriginData();
-  const mdTdStrategyList = [
-    ...md.map((item) =>
-      parseToString(
-        [colors.yellow('md'), getIdByKfLocation(item)],
-        [8, 'auto'],
-        1,
-      ),
-    ),
-    ...td.map((item) =>
-      parseToString(
-        [colors.blue('td'), getIdByKfLocation(item)],
-        [8, 'auto'],
-        1,
-      ),
-    ),
-    ...strategy.map((item) =>
-      parseToString(
-        [colors.cyan('strategy'), getIdByKfLocation(item)],
-        [8, 'auto'],
-        1,
-      ),
-    ),
-  ];
 
-  const answers: { process: string } = await inquirer.prompt([
-    {
-      type: 'autocomplete',
-      name: 'process',
-      message: 'Select targeted md / td / strategy to update    ',
-      source: async (answersSoFar: { process: string }, input: string) => {
-        input = input || '';
-        return mdTdStrategyList.filter((s: string): boolean =>
-          s.includes(input),
-        );
+  if (kfLocation.category === 'md') {
+    const targetMd = getTargetKfConfig(md, kfLocation);
+    const initValue = JSON.parse(targetMd.value || '{}');
+    const extConfig = extConfigs['md'][kfLocation.group];
+    const settings = extConfig?.settings;
+
+    if (settings === undefined) {
+      throw new Error('Please check md extension config');
+    }
+
+    return buildPromptAndSetConfig(settings, initValue, kfLocation);
+  } else if (kfLocation.category === 'td') {
+    const targetTd = getTargetKfConfig(td, kfLocation);
+    const initValue = JSON.parse(targetTd.value || '{}');
+    const extConfig = extConfigs['td'][kfLocation.group];
+    const settings = extConfig?.settings;
+
+    if (settings === undefined) {
+      throw new Error('Please check td extension config');
+    }
+
+    return buildPromptAndSetConfig(settings, initValue, kfLocation);
+  } else if (kfLocation.category === 'strategy') {
+    const targetStrategy = getTargetKfConfig(strategy, kfLocation);
+    const initValue = JSON.parse(targetStrategy.value || '{}');
+    const strategySettings: KungfuApi.KfConfigItem[] = [
+      {
+        key: 'strategy_id',
+        name: '策略ID',
+        type: 'str',
+        primary: true,
+        required: true,
+        tip: '需保证该策略ID唯一',
       },
-    },
-  ]);
+      {
+        key: 'strategy_path',
+        name: '策略路径',
+        type: 'file',
+        required: true,
+      },
+    ];
 
-  console.log(answers);
-
-  const processes = answers.process;
-  const splits = processes.split(' ');
-  const targetType = splits[0].trim();
-  const targetId = splits[splits.length - 1].trim();
-  const type = getKfCategoryFromString(targetType);
-
-  console.log(type, targetId, '===');
+    return buildPromptAndSetConfig(strategySettings, initValue, kfLocation);
+  }
 };
+
+function getTargetKfConfig(
+  kfConfigs: KungfuApi.KfConfig[],
+  kfLocation: KungfuApi.KfLocation,
+): KungfuApi.KfConfig | null {
+  const kfConfigMap = buildObjectFromKfConfigArray(kfConfigs);
+  return kfConfigMap[getIdByKfLocation(kfLocation)] || null;
+}
+
+async function buildPromptAndSetConfig(
+  settings: KungfuApi.KfConfigItem[],
+  initValue: Record<string, KungfuApi.KfConfigValue>,
+  kfLocation: KungfuApi.KfLocation,
+): Promise<void> {
+  const formState = await getPromptQuestionsBySettings(settings, initValue);
+
+  return setKfConfig(
+    kfLocation,
+    JSON.stringify({
+      ...formState,
+      add_time: +new Date().getTime() * Math.pow(10, 6),
+    }),
+  );
+}

@@ -1399,3 +1399,9 @@ export const initFormStateByConfig = (
 
   return formState;
 };
+
+//深度克隆obj
+export const deepClone = <T>(obj: T): T => {
+  if (!obj) return obj;
+  return JSON.parse(JSON.stringify(obj));
+};

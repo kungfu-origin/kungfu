@@ -125,6 +125,34 @@ interface ExtraOrderInput {
   accountId?: string;
 }
 
+
+interface FileProps {
+    root?: Array;
+    filePath?: string;
+    ext?: string;
+    isDir?: boolean
+}
+interface IValue {
+    isDir: boolean
+}
+interface ICurrentFile {
+    filePath?: string;
+    value: IValue;
+}
+interface IFileNode {
+    filePath: string;
+    root?: string;
+    children?: IFileNode;
+    name: string;
+}
+
+
+interface ICodeSetting {
+    tabSpaceType: 'Spaces' | 'Tabs';
+    tabSpaceSize: '2' | '4'
+
+}
+
 type TradingDataItem = KungfuApi.Position | KungfuApi.Order | KungfuApi.Trade;
 interface KfTradingDataTableHeaderConfig {
   name: string;
@@ -144,6 +172,7 @@ interface KfTradingDataTableHeaderConfig {
     | 'actions';
   sorter?: (a: any, b: any) => number;
 }
+
 
 declare module 'worker-loader!*' {
   class WebpackWorker extends Worker {
