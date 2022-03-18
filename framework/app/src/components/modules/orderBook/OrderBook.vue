@@ -109,7 +109,7 @@ function handleTriggerSellOrderBookPriceVolume(
     <div class="level-book">
       <div
         class="level-row"
-        v-for="(item, index) in Array(10)"
+        v-for="(_item, index) in Array(10)"
         :key="index"
         @click=""
       >

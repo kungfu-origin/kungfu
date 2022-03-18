@@ -347,7 +347,7 @@ function handleRemoveScheduleTask(index: number) {
                 </a-button>
                 <div
                   class="value schedule-setting__warp"
-                  v-for="(task, index) in scheduleTask.tasks"
+                  v-for="(task, index) in scheduleTask.tasks || []"
                 >
                   <a-row>
                     <a-col>

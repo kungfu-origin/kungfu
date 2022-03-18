@@ -8,7 +8,7 @@
     "importHelpers": true,
     "strictNullChecks": true,
     "noUnusedLocals": true,
-    "noUnusedParameters": true,
+    // "noUnusedParameters": true,
     "noImplicitReturns": true, 
     "moduleResolution": "node",
     "skipLibCheck": true,
