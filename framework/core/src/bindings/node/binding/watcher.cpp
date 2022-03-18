@@ -7,6 +7,7 @@
 #include "config_store.h"
 #include "history.h"
 #include <sstream>
+#include <uv.h>
 
 using namespace kungfu::rx;
 using namespace kungfu::longfist;
