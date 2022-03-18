@@ -15,7 +15,6 @@
 #include <kungfu/wingchun/broker/client.h>
 #include <kungfu/yijinjing/cache/runtime.h>
 #include <kungfu/yijinjing/practice/apprentice.h>
-#include <typeinfo>
 #include "uv.h"
 namespace kungfu::node {
 constexpr uint64_t ID_TRANC = 0x00000000FFFFFFFF;
@@ -82,12 +81,13 @@ public:
   static void Init(Napi::Env env, Napi::Object exports);
 
   void SyncAppStatus();
+  
   void UpdateEventCache(const event_ptr e);
+
   void SyncEventCache();
 
-  std::unordered_map<uint32_t, int> location_uid_states_map_ = {};
-  bool start_;
-  uv_mutex_t mutex_;
+  bool IsStart(){return start_;}
+
 
 protected:
   void on_react() override;
@@ -112,7 +112,9 @@ private:
   serialize::JsResetCache reset_cache;
   yijinjing::cache::bank data_bank_;
   event_ptr event_cache_;
+  bool start_;
   std::unordered_map<uint32_t, longfist::types::InstrumentKey> subscribed_instruments_ = {};
+  std::unordered_map<uint32_t, int> location_uid_states_map_ = {};
 
   static constexpr auto bypass = [](yijinjing::practice::apprentice *app, bool bypass_quotes) {
     return rx::filter([=](const event_ptr &event) {
@@ -155,7 +157,7 @@ template <typename DataType> void feed_state_data_bank(const state<DataType> &st
     boost::hana::for_each(longfist::StateDataTypes, [&](auto it) {
       using DataTypeItem = typename decltype(+boost::hana::second(it))::type;
       if(std::is_same<DataType, DataTypeItem>::value){
-        SPDLOG_INFO("feed_state_data_bank same {}", typeid(DataTypeItem).name());
+        // SPDLOG_INFO("feed_state_data_bank same {}", typeid(DataTypeItem).name());
         receiver << state;
       }
     });

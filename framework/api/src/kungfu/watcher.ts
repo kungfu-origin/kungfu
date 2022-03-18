@@ -58,6 +58,7 @@ export const watcher = ((): KungfuApi.Watcher | null => {
 
 export const startStep = (
 ) => {
+  if (watcher === null) return;
   watcher.createTask();
 };
 
@@ -96,11 +97,7 @@ export const startGetKungfuWatcherStep = (
       console.log(watcher.isLive());
         // watcher.lock();
       if (watcher.isLive()) {
-        console.log(watcher.appStates);
-        console.log(watcher.ledger);
-        console.log(watcher);
         callback(watcher);
-        console.log("222222222");
       }
         // watcher.unlock();
 

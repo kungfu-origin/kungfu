@@ -85,7 +85,6 @@ Watcher::Watcher(const Napi::CallbackInfo &info)
   RestoreState(ledger_location_, today, INT64_MAX, sync_schema);
 
   shift(ledger_location_) >> state_bank_; // Load positions to restore bookkeeper
-  uv_mutex_init(&mutex_);
   SPDLOG_INFO("watcher {} initialized", get_io_device()->get_home()->uname);
 }
 
@@ -350,20 +349,20 @@ Napi::Value Watcher::CreateTask(const Napi::CallbackInfo &info) {
       loop, &greq,
       [](uv_work_t *req) {
         Watcher *watcher = (Watcher *)(req->data);
-        while (watcher->start_) {
+        while (watcher->IsStart()) {
           if (!watcher->is_live() && !watcher->is_started() && watcher->is_usable()) {
-            uv_mutex_lock(&watcher->mutex_);
+            // uv_mutex_lock(&watcher->mutex_);
             watcher->setup();
-            uv_mutex_unlock(&watcher->mutex_);
+            // uv_mutex_unlock(&watcher->mutex_);
           }
           if (watcher->is_live()) {
-            uv_mutex_lock(&watcher->mutex_);
+            // uv_mutex_lock(&watcher->mutex_);
             watcher->step();
-            uv_mutex_unlock(&watcher->mutex_);
+            // uv_mutex_unlock(&watcher->mutex_);
           }
-          if (!watcher->start_)
+          if (!watcher->IsStart())
             break;
-          std::this_thread::sleep_for(std::chrono::milliseconds(500));
+          std::this_thread::sleep_for(std::chrono::milliseconds(2000));
         }
       },
       [](uv_work_t *req, int status) { SPDLOG_INFO("uv_close!"); });
@@ -374,15 +373,15 @@ Napi::Value Watcher::CreateTask(const Napi::CallbackInfo &info) {
       &timer_req,
       [](uv_timer_t *req) {
         Watcher *watcher = (Watcher *)(req->data);
-        SPDLOG_INFO("uv_timer_start tid {} pid {} this {}", std::this_thread::get_id(), GETPID(),
-                    (uint64_t)(watcher));
-        uv_mutex_lock(&watcher->mutex_);
+        // SPDLOG_INFO("uv_timer_start tid {} pid {} this {}", std::this_thread::get_id(), GETPID(),
+        //             (uint64_t)(watcher));
+        // uv_mutex_lock(&watcher->mutex_);
         watcher->SyncLedger();
         watcher->SyncAppStatus();
         watcher->SyncEventCache();
-        uv_mutex_unlock(&watcher->mutex_);
+        // uv_mutex_unlock(&watcher->mutex_);
       },
-      0, 500);
+      0, 2000);
 
   return {};
 }

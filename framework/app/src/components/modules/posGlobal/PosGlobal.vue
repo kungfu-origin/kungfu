@@ -49,12 +49,10 @@ onMounted(() => {
   if (app?.proxy) {
     const subscription = app.proxy.$tradingDataSubject.subscribe(
       (watcher: KungfuApi.Watcher) => {
-        console.log("PosGlobal.vue 111");
         const positions = watcher.ledger.Position.nofilter('volume', BigInt(0))
           .filter('ledger_category', LedgerCategoryEnum.td)
           .list();
         pos.value = toRaw(buildGlobalPositions(positions));
-        console.log("PosGlobal.vue 222");
       },
     );
 
