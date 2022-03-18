@@ -156,11 +156,7 @@ template <typename DataType> void feed_state_data_bank(const state<DataType> &st
     boost::hana::for_each(longfist::StateDataTypes, [&](auto it) {
       using DataTypeItem = typename decltype(+boost::hana::second(it))::type;
       if(std::is_same<DataType, DataTypeItem>::value){
-<<<<<<< HEAD
         // SPDLOG_INFO("feed_state_data_bank same {}", typeid(DataTypeItem).name());
-=======
-        SPDLOG_INFO("feed_state_data_bank same {}", typeid(DataTypeItem).name());
->>>>>>> c5557528c5a086d18a8ab3bca9a5b06c7156ac30
         receiver << state;
       }
     });
