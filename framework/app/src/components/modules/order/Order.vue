@@ -98,15 +98,18 @@ onMounted(() => {
   if (app?.proxy) {
     const subscription = app.proxy.$tradingDataSubject.subscribe(
       (watcher: KungfuApi.Watcher) => {
+        console.log("Order.vue 111");
         if (historyDate.value) {
           return;
         }
 
         if (currentGlobalKfLocation.data === null) {
+        console.log("Order.vue 222");
           return;
         }
 
         if (adjustOrderMaskVisible.value) {
+        console.log("Order.vue 333");
           return;
         }
 
@@ -134,6 +137,7 @@ onMounted(() => {
                 toRaw(dealOrder(watcher, item, watcher.ledger.OrderStat)),
               ),
           );
+        console.log("Order.vue 444");
           return;
         }
 
@@ -144,6 +148,7 @@ onMounted(() => {
               toRaw(dealOrder(watcher, item, watcher.ledger.OrderStat)),
             ),
         );
+        console.log("Order.vue 555");
       },
     );
 
@@ -283,6 +288,7 @@ function getTargetCancelOrders(): KungfuApi.OrderResolved[] {
     const filterKey = getOrderTradeFilterKey(
       currentGlobalKfLocation.data.category,
     );
+  console.log("6...")
     return window.watcher.ledger.Order.filter(
       filterKey,
       window.watcher.getLocationUID(currentGlobalKfLocation.data),
@@ -391,6 +397,7 @@ function handleClickAdjustOrderMask(): void {
         parent_id: BigInt(order.parent_id),
       };
 
+  console.log("7...")
       return makeOrderByOrderInput(
         window.watcher,
         makeOrderInput,
@@ -415,6 +422,7 @@ function testOrderSourceIsOnline(order: KungfuApi.OrderResolved) {
   }
 
   const { source, status } = order;
+  console.log("8...")
   const tdLocation = window.watcher.getLocation(source);
   const processId = getProcessIdByKfLocation(tdLocation);
   if (processStatusData.value[processId] !== 'online') {

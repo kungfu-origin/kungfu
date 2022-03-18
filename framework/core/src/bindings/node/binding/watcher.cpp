@@ -363,6 +363,7 @@ Napi::Value Watcher::CreateTask(const Napi::CallbackInfo &info) {
           if (!watcher->IsStart())
             break;
           std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+
         }
       },
       [](uv_work_t *req, int status) { SPDLOG_INFO("uv_close!"); });
