@@ -56,37 +56,53 @@ export const watcher = ((): KungfuApi.Watcher | null => {
   );
 })();
 
+export const startStep = (
+) => {
+  watcher.createTask();
+};
+
 export const startGetKungfuWatcherStep = (
   interval = 1000,
   callback: (watcher: KungfuApi.Watcher) => void,
 ) => {
+  // return;
   if (watcher === null) return;
 
   return setTimerPromiseTask(() => {
     return new Promise((resolve) => {
-      if (!watcher.isLive() && !watcher.isStarted() && watcher.isUsable()) {
-        watcher.setup();
-        callback(watcher);
-      }
+      // if (!watcher.isLive() && !watcher.isStarted() && watcher.isUsable()) {
+      //   watcher.setup();
+      //   callback(watcher);
+      // }
 
+      // if (watcher.isLive()) {
+      //   if (process.env.APP_TYPE == 'renderer') {
+      //     window.requestIdleCallback(
+      //       () => {
+      //         // statTime('step');
+      //         // watcher.step();
+      //         callback(watcher);
+      //         // statTimeEnd('step');
+      //         resolve(true);
+      //       },
+      //       { timeout: 5000 },
+      //     );
+      //   } else {
+      //     // watcher.step();
+      //     callback(watcher);
+      //     resolve(true);
+      //   }
+      // }
+      console.log(watcher.isLive());
+        // watcher.lock();
       if (watcher.isLive()) {
-        if (process.env.APP_TYPE == 'renderer') {
-          window.requestIdleCallback(
-            () => {
-              // statTime('step');
-              watcher.step();
-              callback(watcher);
-              // statTimeEnd('step');
-              resolve(true);
-            },
-            { timeout: 5000 },
-          );
-        } else {
-          watcher.step();
-          callback(watcher);
-          resolve(true);
-        }
+        console.log(watcher.appStates);
+        console.log(watcher.ledger);
+        console.log(watcher);
+        callback(watcher);
+        console.log("222222222");
       }
+        // watcher.unlock();
 
       resolve(true);
     });
@@ -94,6 +110,7 @@ export const startGetKungfuWatcherStep = (
 };
 
 export const startUpdateKungfuWatcherQuotes = (interval = 2000) => {
+  return;
   if (watcher === null) return;
 
   return setTimerPromiseTask(() => {

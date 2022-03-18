@@ -676,6 +676,9 @@ declare namespace KungfuApi {
     setup(): boolean;
     step(): boolean;
     updateQuote(): void;
+    createTask(): void;
+    lock(): void;
+    unlock(): void;
     isReadyToInteract(kfLocation: KfLocation | KfConfig): boolean;
     getLocationUID(kfLocation: KfLocation | KfConfig): string;
     getLocation(hashedKey: string | number): KfLocation;

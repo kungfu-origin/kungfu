@@ -98,15 +98,18 @@ onMounted(() => {
   if (app?.proxy) {
     const subscription = app.proxy.$tradingDataSubject.subscribe(
       (watcher: KungfuApi.Watcher) => {
+        console.log("Order.vue 111");
         if (historyDate.value) {
           return;
         }
 
         if (currentGlobalKfLocation.data === null) {
+        console.log("Order.vue 222");
           return;
         }
 
         if (adjustOrderMaskVisible.value) {
+        console.log("Order.vue 333");
           return;
         }
 
@@ -134,6 +137,7 @@ onMounted(() => {
                 toRaw(dealOrder(watcher, item, watcher.ledger.OrderStat)),
               ),
           );
+        console.log("Order.vue 444");
           return;
         }
 
@@ -144,6 +148,7 @@ onMounted(() => {
               toRaw(dealOrder(watcher, item, watcher.ledger.OrderStat)),
             ),
         );
+        console.log("Order.vue 555");
       },
     );
 
