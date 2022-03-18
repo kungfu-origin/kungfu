@@ -681,21 +681,11 @@ declare namespace KungfuApi {
     step(): boolean;
     updateQuote(): void;
     createTask(): void;
-    lock(): void;
-    unlock(): void;
     isReadyToInteract(kfLocation: KfLocation | KfConfig): boolean;
-    isReadyToInteractByKey(hashedKey: string | number): boolean;
     getLocationUID(kfLocation: KfLocation | KfConfig): string;
     getLocation(hashedKey: string | number): KfLocation;
-    getProcessId(hashedKey: string | number): string;
-    getId(hashedKey: string | number): string;
     requestMarketData(
       kfLocation: KfLocation,
-      exchangeId: string,
-      instrumentId: string,
-    ): void;
-    requestMarketDataByKey(
-      hashedKey: string | number,
       exchangeId: string,
       instrumentId: string,
     ): void;

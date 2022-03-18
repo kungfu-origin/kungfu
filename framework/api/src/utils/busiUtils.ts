@@ -1034,7 +1034,6 @@ export const dealLocationUID = (
     return '--';
   }
 
-  console.log("2...")
   const kfLocation = watcher?.getLocation(uid);
   if (!kfLocation) return '';
   return getIdByKfLocation(kfLocation);
@@ -1049,7 +1048,6 @@ export const resolveAccountId = (
   if (!watcher) return { color: 'default', name: '--' };
 
   const accountId = dealLocationUID(watcher, source);
-  console.log("2!!!...")
   const destLocation: KungfuApi.KfLocation = watcher.getLocation(dest);
 
   if (parent_id === BigInt(MakeOrderByWatcherEnum.Manual)) {

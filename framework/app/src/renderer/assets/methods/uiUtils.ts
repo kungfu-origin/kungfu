@@ -525,7 +525,6 @@ export const useCurrentGlobalKfLocation = (
     if (!currentKfLocation.data) {
       return '';
     }
-    console.log('12...');
 
     return watcher.getLocationUID(currentKfLocation.data);
   });
@@ -763,7 +762,6 @@ export const useAssets = (): {
 
 export const getKfLocationUID = (kfConfig: KungfuApi.KfConfig): string => {
   if (!window.watcher) return '';
-  console.log('11...');
   return window.watcher?.getLocationUID(kfConfig);
 };
 
@@ -827,9 +825,7 @@ export const useQuote = (): {
     if (app?.proxy) {
       const subscription = app.proxy.$tradingDataSubject.subscribe(
         (watcher: KungfuApi.Watcher) => {
-          console.log('uiUtils.vue 111');
           quotes.value = toRaw({ ...watcher.ledger.Quote });
-          console.log('uiUtils.vue 222');
         },
       );
 
