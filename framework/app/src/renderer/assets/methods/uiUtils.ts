@@ -417,6 +417,7 @@ export const useCurrentGlobalKfLocation = (
     if (!currentKfLocation.data) {
       return '';
     }
+    console.log('12...');
 
     return watcher.getLocationUID(currentKfLocation.data);
   });
@@ -654,6 +655,7 @@ export const useAssets = (): {
 
 export const getKfLocationUID = (kfConfig: KungfuApi.KfConfig): string => {
   if (!window.watcher) return '';
+  console.log('11...');
   return window.watcher?.getLocationUID(kfConfig);
 };
 

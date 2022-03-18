@@ -226,6 +226,7 @@ function kfCancelOrderResovled(
   order: KungfuApi.OrderResolved,
   kfLocation: KungfuApi.KfLocation | KungfuApi.KfConfig,
 ): Promise<void> {
+  console.log("5...")
   const tdLocation = window.watcher.getLocation(order.source);
   if (kfLocation.category === 'strategy') {
     return kfCancelOrder(
@@ -287,6 +288,7 @@ function getTargetCancelOrders(): KungfuApi.OrderResolved[] {
     const filterKey = getOrderTradeFilterKey(
       currentGlobalKfLocation.data.category,
     );
+  console.log("6...")
     return window.watcher.ledger.Order.filter(
       filterKey,
       window.watcher.getLocationUID(currentGlobalKfLocation.data),
@@ -395,6 +397,7 @@ function handleClickAdjustOrderMask(): void {
         parent_id: BigInt(order.parent_id),
       };
 
+  console.log("7...")
       return makeOrderByOrderInput(
         window.watcher,
         makeOrderInput,
@@ -419,6 +422,7 @@ function testOrderSourceIsOnline(order: KungfuApi.OrderResolved) {
   }
 
   const { source, status } = order;
+  console.log("8...")
   const tdLocation = window.watcher.getLocation(source);
   const processId = getProcessIdByKfLocation(tdLocation);
   if (processStatusData.value[processId] !== 'online') {

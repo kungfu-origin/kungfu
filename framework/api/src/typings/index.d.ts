@@ -680,10 +680,18 @@ declare namespace KungfuApi {
     lock(): void;
     unlock(): void;
     isReadyToInteract(kfLocation: KfLocation | KfConfig): boolean;
+    isReadyToInteractByKey(hashedKey: string | number): boolean;
     getLocationUID(kfLocation: KfLocation | KfConfig): string;
     getLocation(hashedKey: string | number): KfLocation;
+    getProcessId(hashedKey: string | number): string;
+    getId(hashedKey: string | number): string;
     requestMarketData(
       kfLocation: KfLocation,
+      exchangeId: string,
+      instrumentId: string,
+    ): void;
+    requestMarketDataByKey(
+      hashedKey: string | number,
       exchangeId: string,
       instrumentId: string,
     ): void;
@@ -749,6 +757,14 @@ declare namespace KungfuApi {
     instrumentId: string;
     instrumentType: InstrumentTypeEnum;
     mdLocation: KfLocation;
+  }
+
+  export interface InstrumentForSubByKey {
+    uidKey: string;
+    exchangeId: string;
+    instrumentId: string;
+    instrumentType: InstrumentTypeEnum;
+    mdLocationKey: string | number;
   }
 
   export interface InstrumentResolved {

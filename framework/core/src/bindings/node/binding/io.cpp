@@ -136,7 +136,7 @@ std::vector<uint32_t> Locator::list_location_dest(const location_ptr &location) 
   return result;
 }
 
-Napi::Object Locator::get_js_locator() { return locator_ref_.Value(); }
+Napi::Object Locator::get_js_locator() { SPDLOG_INFO("get_js_locator"); SPDLOG_INFO("get_js_locator IsEmpty {}", locator_ref_.IsEmpty());return locator_ref_.Value(); }
 
 Napi::FunctionReference IODevice::constructor = {};
 

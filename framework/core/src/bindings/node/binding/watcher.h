@@ -33,6 +33,10 @@ public:
 
   Napi::Value GetLocation(const Napi::CallbackInfo &info);
 
+  Napi::Value GetProcessId(const Napi::CallbackInfo &info);
+
+  Napi::Value GetId(const Napi::CallbackInfo &info);
+
   Napi::Value GetLocationUID(const Napi::CallbackInfo &info);
 
   Napi::Value GetInstrumentUID(const Napi::CallbackInfo &info);
@@ -67,6 +71,8 @@ public:
 
   Napi::Value PublishState(const Napi::CallbackInfo &info);
 
+  Napi::Value IsReadyToInteractByKey(const Napi::CallbackInfo &info);
+  
   Napi::Value IsReadyToInteract(const Napi::CallbackInfo &info);
 
   Napi::Value IssueOrder(const Napi::CallbackInfo &info);
@@ -74,6 +80,8 @@ public:
   Napi::Value CancelOrder(const Napi::CallbackInfo &info);
 
   Napi::Value RequestMarketData(const Napi::CallbackInfo &info);
+
+  Napi::Value RequestMarketDataByKey(const Napi::CallbackInfo &info);
 
   void UpdateQuote(const Napi::CallbackInfo &info);
 
