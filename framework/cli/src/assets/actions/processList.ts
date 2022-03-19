@@ -134,6 +134,18 @@ export const specificProcessListObserver = (kfLocation: KungfuApi.KfConfig) =>
           monit: processStatusWithDetail['ledger']?.monit,
         },
         {
+          processId: 'cached',
+          processName: 'CACHED',
+          typeName: colors.bgMagenta('Sys'),
+          category: 'system',
+          group: 'service',
+          name: 'cached',
+          value: {},
+          status: processStatus['cached'] || '--',
+          statusName: dealStatus(processStatus['cached'] || '--'),
+          monit: processStatusWithDetail['cached']?.monit,
+        },
+        {
           processId: 'dzxy',
           processName: 'DZXY',
           typeName: colors.bgMagenta('Sys'),

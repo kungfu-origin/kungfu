@@ -156,18 +156,6 @@ void CacheD::feed(const event_ptr &event) {
     return;
   }
 
-  boost::hana::for_each(StateDataTypes, [&](auto it) {
-    using DataType = typename decltype(+boost::hana::second(it))::type;
-    if (DataType::tag == event->msg_type()) {
-      auto &data = event->data<DataType>();
-      SPDLOG_INFO("===========");
-      SPDLOG_INFO("soure {}, dest {}", get_location_uname(source_id), get_location_uname(dest_id));
-      auto type_name = DataType::type_name.c_str();
-      SPDLOG_INFO("{}, {}", type_name, data.to_string());
-      SPDLOG_INFO("===========");
-    }
-  });
-
   feed_state_data(event, feed_bank_);
 }
 
