@@ -208,30 +208,13 @@ function handleCancelOrder(order: KungfuApi.OrderResolved): void {
     return;
   }
 
-  kfCancelOrderResovled(order, currentGlobalKfLocation.data)
+  kfCancelOrder(window.watcher, order)
     .then(() => {
       message.success('操作成功');
     })
     .catch(() => {
       message.error('操作失败');
     });
-}
-
-function kfCancelOrderResovled(
-  order: KungfuApi.OrderResolved,
-  kfLocation: KungfuApi.KfLocation | KungfuApi.KfConfig,
-): Promise<void> {
-  const tdLocation = window.watcher.getLocation(order.source);
-  if (kfLocation.category === 'strategy') {
-    return kfCancelOrder(
-      window.watcher,
-      order.order_id,
-      tdLocation,
-      kfLocation,
-    );
-  } else {
-    return kfCancelOrder(window.watcher, order.order_id, tdLocation);
-  }
 }
 
 function handleCancelAllOrders(): void {
@@ -259,11 +242,7 @@ function handleCancelAllOrders(): void {
       }
 
       const orders = getTargetCancelOrders();
-      return kfCancelAllOrders(
-        window.watcher,
-        orders,
-        currentGlobalKfLocation.data,
-      )
+      return kfCancelAllOrders(window.watcher, orders)
         .then(() => {
           message.success('操作成功');
         })
@@ -375,7 +354,7 @@ function handleClickAdjustOrderMask(): void {
     return;
   }
 
-  kfCancelOrderResovled(order, kfLocation)
+  kfCancelOrder(window.watcher, order)
     .then(() => {
       const makeOrderInput: KungfuApi.MakeOrderInput = {
         instrument_id: order.instrument_id,
