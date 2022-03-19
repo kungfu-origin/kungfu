@@ -15,19 +15,7 @@
 <script lang="ts">
 import { defineComponent, PropType, reactive, toRefs } from 'vue';
 import { mapActions, mapState } from 'pinia';
-
 import { useGlobalStore } from '@kungfu-trader/kungfu-app/src/renderer/pages/index/store/global';
-
-interface KfDragColData {
-  upRow$: HTMLElement | null;
-  upBoardId: string;
-  upRowHeight: number;
-  bottomRow$: HTMLElement | null;
-  bottomBoardId: string;
-  bottomRowHeight: number;
-  paHeight: number;
-  preY: number;
-}
 
 export default defineComponent({
   name: 'KfDragCol',

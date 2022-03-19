@@ -8,13 +8,7 @@ import {
 import {
   buildInstrumentSelectOptionLabel,
   buildInstrumentSelectOptionValue,
-  numberEnumRadioType,
-  numberEnumSelectType,
-  stringEnumSelectType,
   useAllKfConfigData,
-  KfConfigValueNumberType,
-  KfConfigValueArrayType,
-  KfConfigValueBooleanType,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import {
   getCurrentInstance,
@@ -22,7 +16,6 @@ import {
   reactive,
   Ref,
   ref,
-  toRaw,
   toRefs,
   watch,
 } from 'vue';
@@ -33,6 +26,13 @@ import {
 import {
   getIdByKfLocation,
   transformSearchInstrumentResultToInstrument,
+  numberEnumRadioType,
+  numberEnumSelectType,
+  stringEnumSelectType,
+  KfConfigValueNumberType,
+  KfConfigValueArrayType,
+  KfConfigValueBooleanType,
+  getCombineValueByPrimaryKeys,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { RuleObject } from 'ant-design-vue/lib/form';
 import { useInstruments } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
@@ -89,7 +89,7 @@ const primaryKeys: string[] = (props.configSettings || [])
   .filter((item) => item.primary)
   .map((item) => item.key);
 
-const { td } = toRefs(useAllKfConfigData());
+const { td, md, strategy } = toRefs(useAllKfConfigData());
 
 const instrumentKeys = props.configSettings
   .filter((item) => item.type === 'instrument' || item.type === 'instruments')
@@ -164,7 +164,7 @@ function makeSearchOptionFormInstruments(
     .map((item) => {
       return transformSearchInstrumentResultToInstrument(item.toString());
     })
-    .filter((item) => !!item);
+    .filter((item): item is KungfuApi.InstrumentResolved => !!item);
 
   if (!instrumentResolveds.length) {
     if (type === 'instruments') {
@@ -205,12 +205,11 @@ const SpecialWordsReg = new RegExp(
   "[`~!@#$^&*()=|{}':;',\\[\\].<>《》/?~！@#￥……&*（）——|{}【】‘；：”“'。, 、？]",
 );
 function primaryKeyValidator(_rule: RuleObject, value: string): Promise<void> {
-  const combineValue: string = [
-    props.primaryKeyAvoidRepeatCompareExtra || '',
-    ...primaryKeys.map((key) => formState[key]),
-  ]
-    .filter((item) => item !== '')
-    .join('_');
+  const combineValue: string = getCombineValueByPrimaryKeys(
+    primaryKeys,
+    formState,
+    props.primaryKeyAvoidRepeatCompareExtra,
+  );
 
   if (
     props.primaryKeyAvoidRepeatCompareTarget
@@ -589,6 +588,32 @@ defineExpose({
           {{ getIdByKfLocation(config) }}
         </a-select-option>
       </a-select>
+      <a-select
+        v-else-if="item.type === 'md'"
+        v-model:value="formState[item.key]"
+        :disabled="changeType === 'update' && item.primary"
+      >
+        <a-select-option
+          v-for="config in md"
+          :key="getIdByKfLocation(config)"
+          :value="getIdByKfLocation(config)"
+        >
+          {{ getIdByKfLocation(config) }}
+        </a-select-option>
+      </a-select>
+      <a-select
+        v-else-if="item.type === 'strategy'"
+        v-model:value="formState[item.key]"
+        :disabled="changeType === 'update' && item.primary"
+      >
+        <a-select-option
+          v-for="config in strategy"
+          :key="getIdByKfLocation(config)"
+          :value="getIdByKfLocation(config)"
+        >
+          {{ getIdByKfLocation(config) }}
+        </a-select-option>
+      </a-select>
       <a-switch
         size="small"
         v-else-if="item.type === 'bool'"
@@ -611,7 +636,7 @@ defineExpose({
         </div>
       </div>
       <div
-        v-else-if="item.type === 'folder'"
+        v-else-if="item.type === 'files'"
         class="kf-form-item__warp file"
         :disabled="changeType === 'update' && item.primary"
       >

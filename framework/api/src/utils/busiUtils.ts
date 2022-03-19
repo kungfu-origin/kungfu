@@ -16,6 +16,9 @@ import {
   PriceType,
   TimeCondition,
   VolumeCondition,
+  ExchangeIds,
+  FutureArbitrageCodes,
+  CommissionMode,
 } from '../config/tradingConfig';
 import {
   KfCategoryEnum,
@@ -35,6 +38,7 @@ import {
   TimeConditionEnum,
   VolumeConditionEnum,
   MakeOrderByWatcherEnum,
+  BrokerStateStatusEnum,
 } from '../typings/enums';
 import {
   deleteProcess,
@@ -54,7 +58,7 @@ interface SourceAccountId {
   id: string;
 }
 
-interface ExtensionData {
+export interface ExtensionData {
   name: string;
   key: string;
   extPath: string;
@@ -201,17 +205,29 @@ export const logger = log4js.getLogger('app');
 
 export const kfLogger = {
   info: (...args: Array<string | number>) => {
-    console.log('<KF_INFO>', args.join(' '));
+    if (process.env.NODE_ENV === 'development') {
+      if (process.env.APP_TYPE !== 'cli') {
+        console.log('<KF_INFO>', args.join(' '));
+      }
+    }
     logger.info('<KF_INFO>', args.join(' '));
   },
 
   warn: (...args: Array<string | number>) => {
-    console.warn('<KF_INFO>', args.join(' '));
+    if (process.env.NODE_ENV === 'development') {
+      if (process.env.APP_TYPE !== 'cli') {
+        console.warn('<KF_INFO>', args.join(' '));
+      }
+    }
     logger.warn('<KF_INFO>', args.join(' '));
   },
 
   error: (...args: Array<string | number>) => {
-    console.error('<KF_INFO>', args.join(' '));
+    if (process.env.NODE_ENV === 'development') {
+      if (process.env.APP_TYPE !== 'cli') {
+        console.error('<KF_INFO>', args.join(' '));
+      }
+    }
     logger.error('<KF_INFO>', args.join(' '));
   },
 };
@@ -225,10 +241,11 @@ export const setTimerPromiseTask = (fn: Function, interval = 500) => {
   var taskTimer: number | undefined = undefined;
   var clear = false;
   function timerPromiseTask(fn: Function, interval = 500) {
-    if (taskTimer) global.clearTimeout(taskTimer);
+    if (taskTimer) global.clearTimeout(taskTimer as unknown as NodeJS.Timeout);
     fn().finally(() => {
       if (clear) {
-        if (taskTimer) global.clearTimeout(taskTimer);
+        if (taskTimer)
+          global.clearTimeout(taskTimer as unknown as NodeJS.Timeout);
         return;
       }
       taskTimer = +global.setTimeout(() => {
@@ -240,25 +257,26 @@ export const setTimerPromiseTask = (fn: Function, interval = 500) => {
   return {
     clearLoop: function () {
       clear = true;
-      if (taskTimer != null) global.clearTimeout(taskTimer);
+      if (taskTimer != null)
+        global.clearTimeout(taskTimer as unknown as NodeJS.Timeout);
     },
   };
 };
 
-export const loopToRunProcess = async (
-  promiseFunc: Array<Function>,
+export const loopToRunProcess = async <T>(
+  promiseFunc: Array<() => Promise<T>>,
   interval = 1000,
 ) => {
   let i = 0,
     len = promiseFunc.length;
-  let resList = [];
+  let resList: (T | Error)[] = [];
   for (i = 0; i < len; i++) {
     const pFunc = promiseFunc[i];
     try {
-      const res = await pFunc();
+      const res: T = await pFunc();
       resList.push(res);
-    } catch (err) {
-      resList.push(err);
+    } catch (err: unknown) {
+      resList.push(err as Error);
     }
 
     await delayMilliSeconds(interval);
@@ -399,7 +417,9 @@ const getKfExtConfigList = async (): Promise<KungfuApi.KfExtOriginConfig[]> => {
     }),
   ).then((configList: KungfuApi.KfExtOriginConfig[]) => {
     return configList.filter(
-      (config: KungfuApi.KfExtOriginConfig | null): boolean => !!config,
+      (
+        config: KungfuApi.KfExtOriginConfig,
+      ): config is KungfuApi.KfExtOriginConfig => !!config,
     );
   });
 };
@@ -430,7 +450,7 @@ const getKfExtensionConfigByCategory = (
       const extPath = extConfig.extPath;
       (Object.keys(extConfig['config'] || {}) as KfCategoryTypes[]).forEach(
         (category: KfCategoryTypes) => {
-          const configOfCategory = extConfig['config'][category];
+          const configOfCategory = (extConfig['config'] || {})[category];
           configByCategory[category] = {
             ...(configByCategory[category] || {}),
             [extKey]: {
@@ -458,7 +478,8 @@ const getKfUIExtensionConfigByExtKey = (
       const extName = extConfig.name;
       const extPath = extConfig.extPath;
       const uiConfig = extConfig['ui_config'];
-      const { position, components } = uiConfig;
+      const position = uiConfig?.position || '';
+      const components = uiConfig?.components;
 
       if (!position) {
         return configByExtraKey;
@@ -1168,6 +1189,42 @@ export const filterLedgerResult = <T>(
   return dataTableResolved.list();
 };
 
+export const dealAppStates = (
+  watcher: KungfuApi.Watcher | null,
+  appStates: Record<string, BrokerStateStatusEnum>,
+): Record<string, BrokerStateStatusTypes> => {
+  if (!watcher) {
+    return {} as Record<string, BrokerStateStatusTypes>;
+  }
+
+  return Object.keys(appStates || {}).reduce((appStatesResolved, key) => {
+    const kfLocation = watcher.getLocation(key);
+    const processId = getProcessIdByKfLocation(kfLocation);
+    const appStateValue = appStates[key] as BrokerStateStatusEnum;
+    appStatesResolved[processId] = BrokerStateStatusEnum[
+      appStateValue
+    ] as BrokerStateStatusTypes;
+    return appStatesResolved;
+  }, {} as Record<string, BrokerStateStatusTypes>);
+};
+
+export const dealAssetsByHolderUID = (
+  watcher: KungfuApi.Watcher | null,
+  assets: KungfuApi.DataTable<KungfuApi.Asset>,
+): Record<string, KungfuApi.Asset> => {
+  if (!watcher) {
+    return {} as Record<string, KungfuApi.Asset>;
+  }
+
+  return Object.values(assets).reduce((assetsResolved, asset) => {
+    const { holder_uid } = asset;
+    const kfLocation = watcher.getLocation(holder_uid);
+    const processId = getProcessIdByKfLocation(kfLocation);
+    assetsResolved[processId] = asset;
+    return assetsResolved;
+  }, {} as Record<string, KungfuApi.Asset>);
+};
+
 export const dealTradingData = (
   watcher: KungfuApi.Watcher | null,
   tradingData: KungfuApi.TradingData | undefined,
@@ -1225,6 +1282,16 @@ export const getPrimaryKeyFromKfConfigItem = (
   return settings.filter((item) => {
     return !!item.primary;
   });
+};
+
+export const getCombineValueByPrimaryKeys = (
+  primaryKeys: string[],
+  formState: Record<string, KungfuApi.KfConfigValue>,
+  extraValue = '',
+) => {
+  return [extraValue || '', ...primaryKeys.map((key) => formState[key])]
+    .filter((item) => item !== '')
+    .join('_');
 };
 
 export const transformSearchInstrumentResultToInstrument = (
@@ -1286,3 +1353,135 @@ export const booleanProcessEnv = (val: string): boolean => {
     return !!val;
   }
 };
+
+export const numberEnumRadioType: Record<
+  string,
+  Record<number, KungfuApi.KfTradeValueCommonData>
+> = {
+  offset: Offset,
+  hedgeFlag: HedgeFlag,
+  direction: Direction,
+  volumeCondition: VolumeCondition,
+  timeCondition: TimeCondition,
+  commissionMode: CommissionMode,
+};
+
+export const numberEnumSelectType: Record<
+  string,
+  Record<number, KungfuApi.KfTradeValueCommonData>
+> = {
+  side: Side,
+  priceType: PriceType,
+  instrumentType: InstrumentType,
+};
+
+export const stringEnumSelectType: Record<
+  string,
+  Record<string, KungfuApi.KfTradeValueCommonData>
+> = {
+  exchange: ExchangeIds,
+  futureArbitrageCode: FutureArbitrageCodes,
+};
+
+export const KfConfigValueNumberType = [
+  'int',
+  'float',
+  'percent',
+  ...Object.keys(numberEnumSelectType || {}),
+  ...Object.keys(numberEnumRadioType || {}),
+];
+
+export const KfConfigValueBooleanType = ['bool'];
+
+export const KfConfigValueArrayType = ['files', 'instruments'];
+
+export const initFormStateByConfig = (
+  configSettings: KungfuApi.KfConfigItem[],
+  initValue?: Record<string, KungfuApi.KfConfigValue>,
+): Record<string, KungfuApi.KfConfigValue> => {
+  if (!configSettings) return {};
+  const formState: Record<string, KungfuApi.KfConfigValue> = {};
+  configSettings.forEach((item) => {
+    const type = item.type;
+    const isBoolean = KfConfigValueBooleanType.includes(type);
+    const isNumber = KfConfigValueNumberType.includes(type);
+    const isArray = KfConfigValueArrayType.includes(type);
+
+    let defaultValue;
+    if (typeof item?.default === 'object') {
+      defaultValue = JSON.parse(JSON.stringify(item?.default));
+    } else {
+      defaultValue = item?.default;
+    }
+
+    if (defaultValue === undefined) {
+      defaultValue = isBoolean
+        ? false
+        : isNumber
+        ? 0
+        : type === 'timePicker'
+        ? dayjs().valueOf().toString()
+        : isArray
+        ? []
+        : '';
+    }
+    if ((initValue || {})[item.key] !== undefined) {
+      defaultValue = (initValue || {})[item.key];
+    }
+
+    if (KfConfigValueBooleanType.includes(type)) {
+      defaultValue =
+        defaultValue === 'true'
+          ? true
+          : defaultValue === 'false'
+          ? false
+          : !!defaultValue;
+    } else if (KfConfigValueNumberType.includes(type)) {
+      defaultValue = +defaultValue;
+    }
+
+    formState[item.key] = defaultValue;
+  });
+
+  return formState;
+};
+
+export function isCriticalLog(line: string): boolean {
+  if (line.indexOf('critical') !== -1) {
+    return true;
+  }
+
+  if (line.indexOf('File') !== -1) {
+    if (line.indexOf('line') !== -1) {
+      return true;
+    }
+  }
+
+  if (line.indexOf('Traceback') != -1) {
+    return true;
+  }
+
+  if (line.indexOf('Error') != -1) {
+    return true;
+  }
+
+  if (line.indexOf('Try') != -1) {
+    if (line.indexOf('for help') != -1) {
+      return true;
+    }
+  }
+
+  if (line.indexOf('Usage') != -1) {
+    return true;
+  }
+
+  if (line.indexOf('Failed to execute') != -1) {
+    return true;
+  }
+
+  if (line.indexOf('KeyboardInterrupt') != -1) {
+    return true;
+  }
+
+  return false;
+}

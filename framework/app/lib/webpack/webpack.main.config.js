@@ -16,7 +16,6 @@ const { gitCommitVersion, pyVersion, buildTimeStamp } = getKungfuBuildInfo();
 const webpackConfig = (argv) =>
   merge(toolkit.webpack.makeConfig(argv), {
     externals: getWebpackExternals(),
-
     entry: {
       main: path.join(appDir, 'src', 'main', 'index.ts'),
     },

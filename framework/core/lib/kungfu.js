@@ -109,6 +109,7 @@ module.exports = function () {
       const binary = config.binary;
       const kfcDir =
         process.env.KFC_DIR || `${moduleName}/${binary.module_path}`;
+
       const nodeBinding = require.resolve(
         `${kfcDir}/${binary.module_name}.node`,
       );

@@ -1,7 +1,7 @@
 import fse from 'fs-extra';
-import { KF_CONFIG_PATH, EXTENSION_DIRS } from './pathConfig';
+import { KF_CONFIG_PATH } from './pathConfig';
 
-const isEnglish = false;
+const isEnglish = process.env.LANG_ENV === 'en';
 
 export interface KfSystemConfig {
   key: string;
@@ -32,7 +32,7 @@ export const getKfGlobalSettings = (): KfSystemConfig[] => [
     ],
   },
   {
-    key: 'Performance',
+    key: 'performance',
     name: isEnglish ? 'Performance' : '性能',
     config: [
       {

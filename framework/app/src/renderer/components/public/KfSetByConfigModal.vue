@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { computed, getCurrentInstance, reactive, ref } from 'vue';
-import {
-  initFormStateByConfig,
-  useModalVisible,
-} from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
+import { computed, getCurrentInstance, ref } from 'vue';
+import { useModalVisible } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 
-import { buildIdByKeysFromKfConfigSettings } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
+import {
+  buildIdByKeysFromKfConfigSettings,
+  initFormStateByConfig,
+} from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import KfConfigSettingsForm from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfConfigSettingsForm.vue';
 
 const props = withDefaults(

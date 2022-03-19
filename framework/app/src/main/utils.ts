@@ -53,10 +53,14 @@ export function showKungfuInfo(): void {
     `electron: ${electronVersion} \n` +
     `python: ${__python_version}\n` +
     `platform: ${os.platform()} \n` +
+    ' \n' +
     `kungfu_home: ${KF_HOME} \n` +
+    ' \n' +
     `kungfu_engine: ${KFC_DIR} \n` +
+    ' \n' +
     `kungfu_resources: ${KFC_PARENT_DIR} \n` +
-    `commit: ${__git_commit_version}` +
+    ' \n' +
+    `commit: ${__git_commit_version} \n` +
     `build_time: ${__build_timestamp}`;
   dialog.showMessageBox({
     type: 'info',
@@ -123,7 +127,7 @@ export function showQuitMessageBox(
       })
       .then(({ response }) => {
         if (response === 0) {
-          return Promise.all([
+          Promise.all([
             reqRecordBeforeQuit(mainWindow),
             killAllBeforeQuit(mainWindow),
           ]).finally(() => {
@@ -181,8 +185,8 @@ export const registerScheduleTasks = async (
   const { active, tasks } = scheduleTasks;
   if (!active || !tasks) return false;
 
-  const tasksResolved = Object.values(
-    scheduleTasks.tasks.reduce((avoidRepeatTasks, task) => {
+  const tasksResolved: KungfuApi.ScheduleTask[] = Object.values(
+    (scheduleTasks.tasks || []).reduce((avoidRepeatTasks, task) => {
       const id = `${task.processId}_${
         task.mode
       }_${+task.hour}_${+task.minute}_${+task.second}`;
@@ -267,7 +271,7 @@ export const registerScheduleTasks = async (
       rule.minute = item.minute;
       rule.second = item.second;
       const strategyId = item.processId.toStrategyId();
-      const targetStrategy: KungfuApi.KfConfig =
+      const targetStrategy: KungfuApi.KfConfig | null =
         findTargetFromArray<KungfuApi.KfConfig>(strategy, 'name', strategyId);
 
       if (!targetStrategy) {

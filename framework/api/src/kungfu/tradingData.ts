@@ -9,6 +9,5 @@ export const triggerStartStep = () => {
   startGetKungfuWatcherStep(2000, (watcher) => {
     tradingDataSubject.next(watcher);
   });
-
   startUpdateKungfuWatcherQuotes(3000);
 };

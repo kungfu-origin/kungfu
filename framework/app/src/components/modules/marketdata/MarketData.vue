@@ -12,7 +12,10 @@ import {
 import { computed, getCurrentInstance } from 'vue';
 import { getColumns } from './config';
 import { ExchangeIds } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
-import { useInstruments, useQuote } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
+import {
+  useInstruments,
+  useQuote,
+} from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
 import { StarFilled, PlusOutlined } from '@ant-design/icons-vue';
 import { message } from 'ant-design-vue';
 import {
@@ -28,9 +31,6 @@ import {
   addSubscribeInstruments,
   removeSubscribeInstruments,
 } from '@kungfu-trader/kungfu-js-api/actions';
-
-interface MarketDataProps {}
-defineProps<MarketDataProps>();
 
 const app = getCurrentInstance();
 const { dashboardBodyHeight, dashboardBodyWidth, handleBodySizeChange } =

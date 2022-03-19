@@ -28,7 +28,7 @@ defineEmits<{
 
 const app = getCurrentInstance();
 const { modalVisible, closeModal } = useModalVisible(props.visible);
-const { extTypeMap } = useExtConfigsRelated();
+const { tdExtTypeMap } = useExtConfigsRelated();
 const tdGroup = useTdGroups();
 const { td } = toRefs(useAllKfConfigData());
 
@@ -109,13 +109,14 @@ function handleDrop(info: AntTreeNodeDropEvent) {
     oldGroup.children.splice(oldTargetIndex, 1); //remove from old
   }
 
-  if (isGroup(node)) {
+  const group = isGroup(node);
+  if (group) {
     const groupIndex = tdGroup.data.findIndex(
       (group) => node.name === group.name,
     );
     //from group to bottom
     if (!dropToGap || dropPosition !== groupIndex + 1) {
-      isGroup(node).children.push(targetAccountId);
+      group.children.push(targetAccountId);
     }
   }
 
@@ -159,7 +160,7 @@ getInstrumentTypeColor;
           <a-tag
             class="kf-td-tree-tag"
             size="small"
-            :color="getInstrumentTypeColor(extTypeMap[dataRef.group])"
+            :color="getInstrumentTypeColor(tdExtTypeMap[dataRef.group])"
           >
             {{ dataRef.group }}
           </a-tag>

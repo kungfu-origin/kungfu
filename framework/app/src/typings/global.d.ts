@@ -29,8 +29,16 @@ declare global {
 
   namespace NodeJS {
     interface ProcessEnv {
-      APP_TYPE: 'cli' | 'dzxy' | 'renderer' | 'component' | 'main';
-      RENDERER_TYPE: 'app' | 'admin' | 'logview' | 'makeOrder' | 'codeEditor';
+      LANG_ENV: 'en' | undefined;
+      APP_TYPE: 'cli' | 'renderer' | 'component' | 'main';
+      RENDERER_TYPE:
+        | 'app'
+        | 'admin'
+        | 'logview'
+        | 'makeOrder'
+        | 'codeEditor'
+        | 'dzxy'
+        | 'export';
       RELOAD_AFTER_CRASHED: 'false' | 'true';
       ELECTRON_RUN_AS_NODE: boolean;
       ELECTRON_ENABLE_STACK_DUMPING: boolean;

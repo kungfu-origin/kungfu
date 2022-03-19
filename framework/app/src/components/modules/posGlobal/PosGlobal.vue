@@ -20,7 +20,6 @@ import {
   dealAssetPrice,
   dealDirection,
   dealKfPrice,
-  findTargetFromArray,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import {
   LedgerCategoryEnum,
@@ -28,14 +27,10 @@ import {
   SideEnum,
 } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import { ExchangeIds } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
-import { hashInstrumentUKey } from '@kungfu-trader/kungfu-js-api/kungfu';
 import {
   getInstrumentByInstrumentPair,
   useInstruments,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
-
-interface PositionGlobalProps {}
-defineProps<PositionGlobalProps>();
 
 const app = getCurrentInstance();
 const pos = ref<KungfuApi.Position[]>([]);

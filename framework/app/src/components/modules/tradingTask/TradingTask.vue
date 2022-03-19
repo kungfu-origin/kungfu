@@ -26,7 +26,6 @@ import {
   dealKfConfigValueByType,
   getIfProcessRunning,
   getTaskKfLocationByProcessId,
-  transformSearchInstrumentResultToInstrument,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import {
   graceDeleteProcess,
@@ -71,7 +70,7 @@ const taskList = computed(() => {
       );
     })
     .map((processId) => processStatusDetailData.value[processId])
-    .sort((a, b) => b.name.localeCompare(a.name));
+    .sort((a, b) => (b?.name || '').localeCompare(a?.name || ''));
 });
 
 const { searchKeyword, tableData } =
@@ -86,6 +85,11 @@ function handleOpenSetTaskModal(
   selectedExtKey: string,
   taskConfig?: Record<string, KungfuApi.KfConfigValue>,
 ) {
+  if (selectedExtKey === '') {
+    message.error(`交易任务插件 key 不存在`);
+    return;
+  }
+
   const extConfig: KungfuApi.KfExtConfig = (extConfigs.data['strategy'] || {})[
     selectedExtKey
   ];
@@ -124,7 +128,7 @@ function handleSwitchProcessStatusResolved(
 ) {
   event.stopPropagation();
 
-  const taskLocation = getTaskKfLocationByProcessId(record.name);
+  const taskLocation = getTaskKfLocationByProcessId(record?.name || '');
   if (!taskLocation) {
     message.error(`${record.name} 不是合法交易任务进程ID`);
     return;
@@ -212,7 +216,7 @@ function handleConfirmAddUpdateTask(
 }
 
 function handleOpenLogviewResolved(record: Pm2ProcessStatusDetail) {
-  const taskLocation = getTaskKfLocationByProcessId(record.name);
+  const taskLocation = getTaskKfLocationByProcessId(record?.name || '');
   if (!taskLocation) {
     message.error(`${record.name} 不是合法交易任务进程ID`);
     return;
@@ -221,7 +225,7 @@ function handleOpenLogviewResolved(record: Pm2ProcessStatusDetail) {
 }
 
 function handleRemoveTask(record: Pm2ProcessStatusDetail) {
-  const taskLocation = getTaskKfLocationByProcessId(record.name);
+  const taskLocation = getTaskKfLocationByProcessId(record?.name || '');
   if (!taskLocation) {
     message.error(`${record.name} 不是合法交易任务进程ID`);
     return;
@@ -272,7 +276,7 @@ function fromArgs(args: string[]): Record<string, KungfuApi.KfConfigValue> {
 }
 
 function dealArgs(record: Pm2ProcessStatusDetail): string {
-  const taskKfLocation = getTaskKfLocationByProcessId(record.name);
+  const taskKfLocation = getTaskKfLocationByProcessId(record?.name || '');
   const taskArgs = minimist(record.args as string[])['a'] || '';
   if (!taskKfLocation) {
     return taskArgs.split(path.delimiter).join(' ');
@@ -356,7 +360,8 @@ function getDataByArgs(taskArgs: string): Record<string, string> {
                 @click.stop="
                   handleOpenSetTaskModal(
                     'update',
-                    getTaskKfLocationByProcessId(record.name)?.group,
+                    getTaskKfLocationByProcessId(record?.name || '')?.group ||
+                      '',
                     fromArgs(record.args),
                   )
                 "

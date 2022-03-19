@@ -15,14 +15,15 @@ import {
   usePreStartAndQuitApp,
   useSubscibeInstrumentAtEntry,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
-import {
-  dealAppStates,
-  dealAssetsByHolderUID,
-} from '@kungfu-trader/kungfu-js-api/kungfu/watcher';
+
 import { useGlobalStore } from './store/global';
 import KfDownloadDateModal from '@kungfu-trader/kungfu-app/src/renderer/components/layout/KfHistoryDateModal.vue';
 import { tradingDataSubject } from '@kungfu-trader/kungfu-js-api/kungfu/tradingData';
 import globalBus from '../../assets/methods/globalBus';
+import {
+  dealAppStates,
+  dealAssetsByHolderUID,
+} from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 
 const app = getCurrentInstance();
 const store = useGlobalStore();
@@ -44,9 +45,9 @@ useIpcListener();
 
 const tradingDataSubscription = tradingDataSubject.subscribe(
   (watcher: KungfuApi.Watcher) => {
-    const appStates = dealAppStates(watcher.appStates);
+    const appStates = dealAppStates(watcher, watcher.appStates);
     store.setAppStates(appStates);
-    const assets = dealAssetsByHolderUID(watcher.ledger.Asset);
+    const assets = dealAssetsByHolderUID(watcher, watcher.ledger.Asset);
     store.setAssets(assets);
   },
 );

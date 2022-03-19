@@ -521,7 +521,7 @@ export const useInstruments = (): {
             const sourceId = mdLocation.group;
             const sourceType = mdExtTypeMap[sourceId];
             const ableSubscribedInstrumentTypes =
-              AbleSubscribeInstrumentTypesBySourceType[sourceType];
+              AbleSubscribeInstrumentTypesBySourceType[sourceType] || [];
 
             instrumentsForSubscribe.forEach((item) => {
               if (
@@ -890,7 +890,6 @@ export const useDealInstruments = (): void => {
   onMounted(() => {
     if (app?.proxy) {
       dealInstrumentController.value = true;
-      console.log(window.workers.dealInstruments);
       window.workers.dealInstruments.postMessage({
         tag: 'req_instruments',
       });

@@ -4,7 +4,6 @@ import KfDashboard from '@kungfu-trader/kungfu-app/src/renderer/components/publi
 import KfDashboardItem from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfDashboardItem.vue';
 import KfConfigSettingsForm from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfConfigSettingsForm.vue';
 import {
-  initFormStateByConfig,
   useCurrentGlobalKfLocation,
   useProcessStatusDetailData,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
@@ -15,11 +14,9 @@ import { message } from 'ant-design-vue';
 import { makeOrderByOrderInput } from '@kungfu-trader/kungfu-js-api/kungfu';
 import {
   getProcessIdByKfLocation,
+  initFormStateByConfig,
   transformSearchInstrumentResultToInstrument,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
-
-interface MakeOrderProps {}
-defineProps<MakeOrderProps>();
 
 const formState = ref(initFormStateByConfig(getConfigSettings(), {}));
 const formRef = ref();
@@ -136,6 +133,7 @@ function handleMakeOrder() {
         side: +side,
         offset: +(offset !== undefined ? offset : +side === 0 ? 0 : 1),
         hedge_flag: +(hedge_flag || 0),
+        parent_id: BigInt(0),
       };
 
       if (!currentGlobalKfLocation.data) {
@@ -157,7 +155,7 @@ function handleMakeOrder() {
         window.watcher,
         makeOrderInput,
         currentGlobalKfLocation.data,
-        account_id.toString(),
+        tdProcessId.toAccountId(),
       ).catch((err) => {
         message.error(err.message);
       });

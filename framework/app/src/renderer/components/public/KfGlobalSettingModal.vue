@@ -6,7 +6,6 @@ import {
   setKfGlobalSettingsValue,
 } from '@kungfu-trader/kungfu-js-api/config/globalSettings';
 import {
-  initFormStateByConfig,
   useAllKfConfigData,
   useModalVisible,
   useTableSearchKeyword,
@@ -40,7 +39,10 @@ import {
   getScheduleTasks,
   setScheduleTasks,
 } from '@kungfu-trader/kungfu-js-api/actions';
-import { getProcessIdByKfLocation } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
+import {
+  getProcessIdByKfLocation,
+  initFormStateByConfig,
+} from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import dayjs, { Dayjs } from 'dayjs';
 import {
   coreForScheduleTasksOptions,
@@ -188,15 +190,19 @@ function handleAddCommission() {
 }
 
 function handleAddScheduleTask() {
-  scheduleTask.tasks.push({
-    processId: '',
-    mode: 'start',
-    timeValue: dayjs(),
-  });
+  if (scheduleTask.tasks) {
+    scheduleTask.tasks.push({
+      processId: '',
+      mode: 'start',
+      timeValue: dayjs(),
+    });
+  }
 }
 
 function handleRemoveScheduleTask(index: number) {
-  scheduleTask.tasks.splice(index, 1);
+  if (scheduleTask.tasks) {
+    scheduleTask.tasks.splice(index, 1);
+  }
 }
 </script>
 <template>
@@ -341,7 +347,7 @@ function handleRemoveScheduleTask(index: number) {
                 </a-button>
                 <div
                   class="value schedule-setting__warp"
-                  v-for="(task, index) in scheduleTask.tasks"
+                  v-for="(task, index) in scheduleTask.tasks || []"
                 >
                   <a-row>
                     <a-col>

@@ -34,9 +34,6 @@ import {
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
 import { message } from 'ant-design-vue';
 
-interface MdProps {}
-defineProps<MdProps>();
-
 const { dashboardBodyHeight, handleBodySizeChange } = useDashboardBodySize();
 
 const setSourceModalVisible = ref<boolean>(false);
@@ -48,7 +45,7 @@ const setMdConfigPayload = ref<KungfuApi.SetKfConfigPayload>({
 });
 const currentSelectedSourceId = ref<string>('');
 
-const { extConfigs, extTypeMap } = useExtConfigsRelated();
+const { extConfigs, tdExtTypeMap } = useExtConfigsRelated();
 const { md } = toRefs(useAllKfConfigData());
 const mdIdList = computed(() => {
   return md.value.map((item: KungfuApi.KfConfig): string =>
@@ -165,7 +162,7 @@ function handleOpenSetSourceDialog() {
           }"
         >
           <template v-if="column.dataIndex === 'name'">
-            <a-tag :color="getInstrumentTypeColor(extTypeMap[record.name])">
+            <a-tag :color="getInstrumentTypeColor(tdExtTypeMap[record.name])">
               {{ record.group }}
             </a-tag>
           </template>
