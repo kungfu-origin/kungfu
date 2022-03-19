@@ -23,7 +23,7 @@ if (process.env.NODE_ENV === 'development') {
   global.__resources = `${__resources}`;
 } else {
   global.__resources = path
-    .resolve(__dirname, '../../public')
+    .resolve(__dirname, '../public')
     .replace(/\\/g, '\\\\');
 }
 

@@ -94,6 +94,7 @@ void apprentice::request_cached_reader_writer(const event_ptr &event) {
       request_read_from(now(), cached_home_location_->uid, now());
 
     } else {
+      // At cached case, pass the restore, start directly
       auto writer = get_writer(master_cmd_location_->uid);
       RequestCachedDone &rcd = writer->open_data<RequestCachedDone>();
       rcd.dest_id = get_io_device()->get_live_home()->uid;
@@ -143,7 +144,7 @@ void apprentice::on_trading_day(const event_ptr &event, int64_t daytime) {}
 void apprentice::react() {
   events_ | is(TimeReset::tag) | first() | $$(reset_time(event->data<TimeReset>()));
   events_ | is(Location::tag) | $$(add_location(event->gen_time(), event->data<Location>()));
-  events_ | is(Register::tag) | $$(register_location(event->trigger_time(), event->data<Register>()));
+  events_ | is(Register::tag) | $$(on_register(event->trigger_time(), event->data<Register>()));
   events_ | is(Deregister::tag) | $$(on_deregister(event));
   events_ | is(RequestReadFrom::tag) | $$(on_read_from(event));
   events_ | is(RequestReadFromPublic::tag) | $$(on_read_from_public(event));
