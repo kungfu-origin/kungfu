@@ -21,6 +21,7 @@ import {
 import { kfLogger } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { killExtra } from '@kungfu-trader/kungfu-js-api/utils/processUtils';
 import {
+  clearDB,
   clearJournal,
   exportAllTradingData,
   openLogFile,
@@ -305,6 +306,10 @@ function setMenu() {
         {
           label: '清理journal',
           click: () => MainWindow && clearJournal(MainWindow),
+        },
+        {
+          label: '清理DB',
+          click: () => MainWindow && clearDB(MainWindow),
         },
         {
           label: '重置主面板',

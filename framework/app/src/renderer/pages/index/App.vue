@@ -5,6 +5,7 @@ import KfLayoutVue from '@kungfu-trader/kungfu-app/src/renderer/components/layou
 
 import zhCN from 'ant-design-vue/es/locale/zh_CN';
 import {
+  markClearDB,
   markClearJournal,
   removeLoadingMask,
   useIpcListener,
@@ -61,6 +62,9 @@ const busSubscription = globalBus.subscribe((data: KfBusEvent) => {
     switch (data.name) {
       case 'clear-journal':
         markClearJournal();
+        break;
+      case 'clear-db':
+        markClearDB();
         break;
       case 'export-all-trading-data':
         globalBus.next({

@@ -344,7 +344,6 @@ void bind(pybind11::module &&m) {
 
   py::class_<apprentice, PyApprentice, apprentice_ptr>(m, "apprentice")
       .def(py::init<location_ptr, bool>(), py::arg("home"), py::arg("low_latency") = false)
-      .def_property_readonly("session_finder", &apprentice::get_session_finder)
       .def_property_readonly("io_device", &apprentice::get_io_device)
       .def_property_readonly("home", &apprentice::get_home)
       .def_property_readonly("live", &apprentice::is_live)

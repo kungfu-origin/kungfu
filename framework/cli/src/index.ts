@@ -20,7 +20,10 @@ import {
 } from '@kungfu-trader/kungfu-js-api/config';
 import { shutdown } from './commanders/shutdown';
 import 'console-success';
-import { removeJournal } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
+import {
+  removeDB,
+  removeJournal,
+} from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { setGlobalSetting, showGlobalSetting } from './commanders/config';
 import { exportTradingDataPrompt } from './commanders/export';
 
@@ -161,6 +164,21 @@ program
   .action(() => {
     return removeJournal(KF_HOME)
       .then(() => console.success('Clear all jouranl files'))
+      .catch((err: Error) => {
+        console.error(err);
+        process.exit(1);
+      })
+      .finally(() => process.exit(0));
+  });
+
+program
+  .command('clearDB')
+  .description(
+    'clear all DB (Be carefull, this action will clear all trading data)',
+  )
+  .action(() => {
+    return removeDB(KF_HOME)
+      .then(() => console.success('Clear all DB files'))
       .catch((err: Error) => {
         console.error(err);
         process.exit(1);

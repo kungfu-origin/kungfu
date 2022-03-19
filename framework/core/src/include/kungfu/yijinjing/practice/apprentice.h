@@ -30,8 +30,6 @@ class apprentice : public hero {
 public:
   explicit apprentice(yijinjing::data::location_ptr home, bool low_latency = false);
 
-  index::session_finder &get_session_finder();
-
   bool is_started() const;
 
   uint32_t get_master_commands_uid() const;
@@ -50,6 +48,10 @@ public:
 
   void request_write_to(int64_t trigger_time, uint32_t dest_id);
 
+  void request_cached_reader_writer(const event_ptr &event);
+
+  void request_cached(uint32_t source_id);
+
   void add_timer(int64_t nanotime, const std::function<void(const event_ptr &)> &callback);
 
   void add_time_interval(int64_t nanotime, const std::function<void(const event_ptr &)> &callback);
@@ -64,6 +66,7 @@ public:
 protected:
   const data::location_ptr master_home_location_;
   const data::location_ptr master_cmd_location_;
+  const data::location_ptr cached_home_location_;
   cache::bank state_bank_;
 
   void react() final;
@@ -73,6 +76,8 @@ protected:
   virtual void on_react();
 
   virtual void on_start();
+
+  void on_register(int64_t trigger_time, const longfist::types::Register &register_data);
 
   void on_deregister(const event_ptr &event);
 
@@ -170,7 +175,6 @@ protected:
   }
 
 private:
-  index::session_finder session_finder_;
   bool started_ = false;
   int64_t last_active_time_ = INT64_MIN;
   int64_t checkin_time_ = INT64_MIN;
