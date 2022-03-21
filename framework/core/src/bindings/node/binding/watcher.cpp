@@ -58,7 +58,7 @@ Watcher::Watcher(const Napi::CallbackInfo &info)
       state_ref_(Napi::ObjectReference::New(Napi::Object::New(info.Env()), 1)),
       ledger_ref_(Napi::ObjectReference::New(Napi::Object::New(info.Env()), 1)),
       app_states_ref_(Napi::ObjectReference::New(Napi::Object::New(info.Env()), 1)), update_state(state_ref_),
-      update_ledger(ledger_ref_), publish(*this, state_ref_), reset_cache(*this, ledger_ref_), start_(true) {
+      update_ledger(ledger_ref_), publish(*this, state_ref_), reset_cache(*this, ledger_ref_) {
   log::copy_log_settings(get_home(), get_home()->name);
 
   serialize::InitStateMap(info, state_ref_, "state");
@@ -89,7 +89,6 @@ Watcher::Watcher(const Napi::CallbackInfo &info)
 }
 
 Watcher::~Watcher() {
-  start_ = false;
   app_states_ref_.Unref();
   ledger_ref_.Unref();
   state_ref_.Unref();
@@ -289,10 +288,10 @@ void Watcher::Feed(const event_ptr &event) {
         if (subscribed_instruments_.find(uid) != subscribed_instruments_.end()) {
           bookkeeper_.update_book(quote);
           UpdateBook(event->gen_time(), event->source(), event->dest(), quote);
-          feed_state_data(event, data_bank_);
+          data_bank_ << typed_event_ptr<DataType>(event);
         }
       } else {
-        feed_state_data(event, data_bank_);
+          data_bank_ << typed_event_ptr<DataType>(event);
       }
     }
   });
@@ -311,15 +310,13 @@ Napi::Value Watcher::CreateTask(const Napi::CallbackInfo &info) {
       loop, &greq,
       [](uv_work_t *req) {
         Watcher *watcher = (Watcher *)(req->data);
-        while (watcher->IsStart()) {
+        while (true) {
           if (!watcher->is_live() && !watcher->is_started() && watcher->is_usable()) {
             watcher->setup();
           }
           if (watcher->is_live()) {
             watcher->step();
           }
-          if (!watcher->IsStart())
-            break;
           std::this_thread::sleep_for(std::chrono::milliseconds(2000));
 
         }
@@ -362,8 +359,28 @@ void Watcher::SyncEventCache() {
   }
 }
 
-void Watcher::UpdateEventCache(const event_ptr e) {
-  event_cache_ = e;
+void Watcher::UpdateEventCache(const event_ptr event) {
+  const auto &request = event->data<CacheReset>();
+  boost::hana::for_each(StateDataTypes, [&](auto it) {
+    using DataType = typename decltype(+boost::hana::second(it))::type;
+    if (DataType::tag == request.msg_type) {
+      auto hana_type = boost::hana::type_c<DataType>;
+      using DelMap = std::unordered_map<uint64_t, state<DataType>>;
+      auto &del_map = const_cast<DelMap &>(data_bank_[hana_type]);
+      auto iter = del_map.begin();
+      while (iter != del_map.end()) {
+        auto s = iter->second;
+        auto source_id = s.source;
+        auto dest_id = s.dest;
+        if ((source_id == event->source() and dest_id == event->dest()) || source_id == event->dest()) {
+          iter = del_map.erase(iter);
+        } else {
+          iter++;
+        }
+      }
+    }
+  });
+  event_cache_ = event;
 }
 
 location_ptr Watcher::FindLocation(const Napi::CallbackInfo &info) {

@@ -74,7 +74,6 @@ public:
 
   static void Init(Napi::Env env, Napi::Object exports);
 
-  bool IsStart(){return start_;}
 
 protected:
   void on_react() override;
@@ -99,7 +98,6 @@ private:
   serialize::JsResetCache reset_cache;
   yijinjing::cache::bank data_bank_;
   event_ptr event_cache_;
-  bool start_;
   std::unordered_map<uint32_t, longfist::types::InstrumentKey> subscribed_instruments_ = {};
   std::unordered_map<uint32_t, int> location_uid_states_map_ = {};
 
