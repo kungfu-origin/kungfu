@@ -96,11 +96,11 @@ exports.getWebpackExternals = () => {
   const currentPackageJSON = fs.pathExistsSync(currentPackageJSONPath)
     ? fs.readJSONSync(currentPackageJSONPath)
     : {};
-  return [
-    ...Object.keys(appPackageJSON.dependencies),
-    ...Object.keys(apiPackageJSON.dependencies),
-    ...Object.keys(currentPackageJSON.dependencies || {}),
-  ].filter((item) => !item.includes('kungfu-js-api'));
+  return Object.keys({
+    ...appPackageJSON.dependencies,
+    ...apiPackageJSON.dependencies,
+    ...(currentPackageJSON.dependencies || {}),
+  }).filter((item) => !item.includes('kungfu-js-api'));
 };
 
 exports.getAppDefaultDistDir = () => {
