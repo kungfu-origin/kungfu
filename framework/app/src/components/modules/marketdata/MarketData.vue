@@ -63,7 +63,7 @@ function handleSubscribeAll(): void {
     processStatusData.value,
     appStates.value,
     mdExtTypeMap.value,
-    subscribedInstruments.data,
+    subscribedInstruments.value,
   );
   message.success('操作成功');
 }
@@ -155,7 +155,7 @@ function handleClickRow(row: KungfuApi.InstrumentResolved) {
       <a-table
         class="kf-ant-table"
         :columns="columns"
-        :data-source="subscribedInstruments.data"
+        :data-source="subscribedInstruments"
         size="small"
         :pagination="false"
         :scroll="{ y: dashboardBodyHeight - 4 }"

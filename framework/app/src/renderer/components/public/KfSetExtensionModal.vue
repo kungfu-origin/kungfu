@@ -32,7 +32,7 @@ const app = getCurrentInstance();
 const { extConfigs } = useExtConfigsRelated();
 const selectedExtension = ref<string>('');
 const availExtensionList = computed(() => {
-  return getExtConfigList(extConfigs.data, props.extensionType);
+  return getExtConfigList(extConfigs.value, props.extensionType);
 });
 
 const { modalVisible, closeModal } = useModalVisible(props.visible);

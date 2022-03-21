@@ -89,7 +89,7 @@ const addTdGroupModalVisble = ref<boolean>(false);
 const setTdGroupModalVisble = ref<boolean>(false);
 const tdGroup = useTdGroups();
 const tdGroupNames = computed(() => {
-  return tdGroup.data.map((item) => item.name);
+  return tdGroup.value.map((item) => item.name);
 });
 const addTdGroupConfigPayload = ref<KungfuApi.SetKfConfigPayload>({
   type: 'add',
@@ -105,7 +105,7 @@ const tableDataResolved = computed(() => {
   const tdGroupResolved: Record<string, KungfuApi.KfExtraLocation> = {};
   const tdResolved: KungfuApi.KfConfig[] = [];
   const markedNameToTdGroup: Record<string, KungfuApi.KfExtraLocation> = {};
-  [...tdGroup.data, ...tableData.value].forEach((item) => {
+  [...tdGroup.value, ...tableData.value].forEach((item) => {
     if ('children' in item) {
       markedNameToTdGroup[item.name] = { ...item };
       tdGroupResolved[item.name] = {
@@ -162,7 +162,7 @@ function handleOpenSetTdModal(
   selectedSource: string,
   tdConfig?: KungfuApi.KfConfig,
 ) {
-  const extConfig: KungfuApi.KfExtConfig = (extConfigs.data['td'] || {})[
+  const extConfig: KungfuApi.KfExtConfig = (extConfigs.value['td'] || {})[
     selectedSource
   ];
 
@@ -265,11 +265,11 @@ function handleRemoveTdGroup(item: KungfuApi.KfExtraLocation) {
 function handleRemoveTd(item: KungfuApi.KfConfig) {
   handleRemoveKfConfig(item).then(() => {
     const accountId = getIdByKfLocation(item);
-    const oldGroup = isInTdGroup(tdGroup.data, accountId);
+    const oldGroup = isInTdGroup(tdGroup.value, accountId);
     if (oldGroup) {
       const index = oldGroup.children?.indexOf(accountId);
       oldGroup.children.splice(index, 1);
-      setTdGroup(toRaw(tdGroup.data)).then(() => {
+      setTdGroup(toRaw(tdGroup.value)).then(() => {
         return setTdGroups();
       });
     }

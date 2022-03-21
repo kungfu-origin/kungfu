@@ -455,8 +455,8 @@ export const showTradingDataDetail = (
 };
 
 export const useInstruments = (): {
-  instruments: { data: KungfuApi.InstrumentResolved[] };
-  subscribedInstruments: { data: KungfuApi.InstrumentResolved[] };
+  instruments: Ref<KungfuApi.InstrumentResolved[]>;
+  subscribedInstruments: Ref<KungfuApi.InstrumentResolved[]>;
   subscribeAllInstrumentByMdProcessId(
     processId: string,
     processStatus: Pm2ProcessStatusData,
@@ -479,27 +479,7 @@ export const useInstruments = (): {
     callback?: (value: string) => void,
   ) => void;
 } => {
-  const instrumentsResolved = reactive<{
-    data: KungfuApi.InstrumentResolved[];
-  }>({
-    data: [],
-  });
-
-  const subscribedInstrumentsResolved = reactive<{
-    data: KungfuApi.InstrumentResolved[];
-  }>({
-    data: [],
-  });
-
-  onMounted(() => {
-    const { instruments, subscribedInstruments } = storeToRefs(
-      useGlobalStore(),
-    );
-    instrumentsResolved.data =
-      instruments as unknown as KungfuApi.InstrumentResolved[];
-    subscribedInstrumentsResolved.data =
-      subscribedInstruments as unknown as KungfuApi.InstrumentResolved[];
-  });
+  const { instruments, subscribedInstruments } = storeToRefs(useGlobalStore());
 
   const subscribeAllInstrumentByMdProcessId = (
     processId: string,
@@ -557,7 +537,7 @@ export const useInstruments = (): {
   const searchInstrumnetOptions = ref<{ value: string; label: string }[]>([]);
 
   const handleSearchInstrument = (val: string): void => {
-    searchInstrumnetOptions.value = instrumentsResolved.data
+    searchInstrumnetOptions.value = instruments.value
       .filter((item) => {
         return !!val && item.id.includes(val);
       })
@@ -579,8 +559,8 @@ export const useInstruments = (): {
   };
 
   return {
-    instruments: instrumentsResolved,
-    subscribedInstruments: subscribedInstrumentsResolved,
+    instruments,
+    subscribedInstruments,
     subscribeAllInstrumentByMdProcessId,
     subscribeAllInstrumentByAppStates,
 
@@ -777,7 +757,7 @@ export const useSubscibeInstrumentAtEntry = (): void => {
           processStatusData.value,
           appStates.value,
           mdExtTypeMap.value,
-          [...subscribedInstruments.data, ...positions],
+          [...subscribedInstruments.value, ...positions],
         );
       }
     });

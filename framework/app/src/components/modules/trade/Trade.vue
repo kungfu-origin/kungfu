@@ -68,11 +68,11 @@ const { getExtraCategoryData } = useExtraCategory();
 const statisticModalVisible = ref<boolean>(false);
 
 const columns = computed(() => {
-  if (currentGlobalKfLocation.data === null) {
+  if (currentGlobalKfLocation.value === null) {
     return getColumns('td', !!historyDate.value);
   }
 
-  const { category } = currentGlobalKfLocation.data;
+  const category = currentGlobalKfLocation.value?.category;
   return getColumns(category, !!historyDate.value);
 });
 
@@ -84,22 +84,22 @@ onMounted(() => {
           return;
         }
 
-        if (currentGlobalKfLocation.data === null) {
+        if (currentGlobalKfLocation.value === null) {
           return;
         }
 
         const tradesResolved = isTdStrategyCategory(
-          currentGlobalKfLocation.data.category,
+          currentGlobalKfLocation.value?.category,
         )
           ? ((dealTradingData(
               watcher,
               watcher.ledger,
               'Trade',
-              currentGlobalKfLocation.data,
+              currentGlobalKfLocation.value,
             ) || []) as KungfuApi.Trade[])
           : (getExtraCategoryData(
               watcher.ledger.Trade,
-              currentGlobalKfLocation.data,
+              currentGlobalKfLocation.value,
               'trade',
             ) as KungfuApi.Trade[]);
 
@@ -129,7 +129,7 @@ watch(historyDate, async (newDate) => {
     return;
   }
 
-  if (currentGlobalKfLocation.data === null) {
+  if (currentGlobalKfLocation.value === null) {
     return;
   }
 
@@ -141,16 +141,16 @@ watch(historyDate, async (newDate) => {
     newDate.format(),
     HistoryDateEnum.naturalDate,
     'Trade',
-    currentGlobalKfLocation.data,
+    currentGlobalKfLocation.value,
   );
 
   const tradesResolved = isTdStrategyCategory(
-    currentGlobalKfLocation.data.category,
+    currentGlobalKfLocation.value?.category,
   )
     ? toRaw(historyDatas as KungfuApi.Trade[])
     : (getExtraCategoryData(
         tradingData.Trade,
-        currentGlobalKfLocation.data,
+        currentGlobalKfLocation.value,
         'trade',
       ) as KungfuApi.Trade[]);
 
@@ -175,15 +175,15 @@ function handleShowTradingDataDetail({
   <div class="kf-trades__warp kf-translateZ">
     <KfDashboard>
       <template v-slot:title>
-        <span v-if="currentGlobalKfLocation.data">
+        <span v-if="currentGlobalKfLocation">
           <a-tag
             v-if="currentCategoryData"
             :color="currentCategoryData?.color || 'default'"
           >
             {{ currentCategoryData?.name }}
           </a-tag>
-          <span class="name" v-if="currentGlobalKfLocation.data">
-            {{ getCurrentGlobalKfLocationId(currentGlobalKfLocation.data) }}
+          <span class="name" v-if="currentGlobalKfLocation">
+            {{ getCurrentGlobalKfLocationId(currentGlobalKfLocation) }}
           </span>
         </span>
       </template>
@@ -216,7 +216,7 @@ function handleShowTradingDataDetail({
         <KfDashboardItem>
           <a-button
             size="small"
-            @click="handleDownload('Trade', currentGlobalKfLocation.data)"
+            @click="handleDownload('Trade', currentGlobalKfLocation)"
           >
             <template #icon>
               <DownloadOutlined style="font-size: 14px" />
