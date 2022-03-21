@@ -18,7 +18,8 @@
     "package": "yarn kfs craft package",
     "clean": "yarn kfs craft clean",
     "dev": "yarn kfs craft dev --with-webpack",
-    "dev:pure": "yarn kfs craft dev"
+    "app": "yarn kfs craft dev",
+    "cli": "yarn kfs craft cli"
   },
   "dependencies": {
     "@kungfu-trader/kfx-sim": "^2.4.0-alpha.21",
