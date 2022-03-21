@@ -5,6 +5,7 @@ const {
   getAppDir,
   getCliDir,
 } = require('@kungfu-trader/kungfu-js-api/toolkit/utils');
+const { spawnSync } = require('child_process');
 
 const ensureDir = (cwd, ...dirNames) => {
   const targetDir = path.join(cwd, ...dirNames);
@@ -35,4 +36,14 @@ exports.package = async () => {
 
 exports.dev = (withWebpack) => {
   app.devRun(ensureDir(process.cwd(), 'dist'), 'app', withWebpack);
+};
+
+exports.cli = () => {
+  const cliPath = require.resolve('@kungfu-trader/kungfu-cli');
+  const runExecutable = path.join(cliPath, '..', 'dev', 'devCli.js');
+
+  spawnSync('node', [runExecutable, ...process.argv.slice(4)], {
+    stdio: 'inherit',
+    windowsHide: true,
+  });
 };

@@ -51,7 +51,10 @@ program
     'monitor all process with merged logs OR monitor one trading process (with -l)',
   )
   .action((type: string, commander: Command) => {
-    const list = commander['list'] || false;
+    const list =
+      commander['list'] ||
+      process.argv.includes('-l') ||
+      process.argv.includes('--list');
     monitPrompt(!!list);
   });
 
