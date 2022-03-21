@@ -19,8 +19,7 @@
 
 <script lang="ts">
 import { defineComponent, PropType, reactive, toRefs } from 'vue';
-import { mapActions, mapState } from 'pinia';
-
+import { storeToRefs } from 'pinia';
 import { useGlobalStore } from '@kungfu-trader/kungfu-app/src/renderer/pages/index/store/global';
 
 interface KfDragRowData {
@@ -56,16 +55,18 @@ export default defineComponent({
       preX: 0,
     });
 
+    const { boardsMap } = storeToRefs(useGlobalStore());
+    const { setBoardsMapAttrById } = useGlobalStore();
+
     return {
       ...toRefs(rowData),
+
+      boardsMap,
+      setBoardsMapAttrById,
     };
   },
 
   computed: {
-    ...mapState(useGlobalStore, {
-      boardsMap: (store) => store.boardsMap,
-    }),
-
     boardInfo(): KfLayout.BoardInfo {
       return this.boardsMap[this.id];
     },
@@ -84,10 +85,6 @@ export default defineComponent({
   },
 
   methods: {
-    ...mapActions(useGlobalStore, {
-      setBoardsMapAttrById: 'setBoardsMapAttrById',
-    }),
-
     handleMouseDown(e: MouseEvent) {
       const target = e.target as HTMLElement;
 

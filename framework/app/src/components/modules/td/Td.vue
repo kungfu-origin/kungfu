@@ -52,6 +52,7 @@ import {
   setTdGroup,
 } from '@kungfu-trader/kungfu-js-api/actions';
 import SetTdGroupModal from './SetTdGroupModal.vue';
+import { useGlobalStore } from '@kungfu-trader/kungfu-app/src/renderer/pages/index/store/global';
 
 const { dashboardBodyHeight, handleBodySizeChange } = useDashboardBodySize();
 
@@ -144,16 +145,16 @@ const columns = getColumns((dataIndex) => {
   };
 });
 
+const { setTdGroups } = useGlobalStore();
+
 onMounted(() => {
   if (app?.proxy) {
     app.proxy.$globalCategoryRegister.register(categoryRegisterConfig);
-    app.proxy
-      .$useGlobalStore()
-      .setTdGroups()
-      .then(() => {
-        tdGroupDataLoaded.value = true;
-      });
   }
+
+  setTdGroups().then(() => {
+    tdGroupDataLoaded.value = true;
+  });
 });
 
 function handleOpenSetTdModal(
@@ -230,9 +231,7 @@ function handleConfirmAddUpdateTdGroup(
 
   return addTdGroup(newTdGroup)
     .then(() => {
-      if (app?.proxy) {
-        app.proxy.$useGlobalStore().setTdGroups();
-      }
+      return setTdGroups();
     })
     .then(() => {
       message.success('操作成功');
@@ -251,9 +250,7 @@ function handleRemoveTdGroup(item: KungfuApi.KfExtraLocation) {
     onOk() {
       return removeTdGroup(item.name)
         .then(() => {
-          if (app?.proxy) {
-            app.proxy.$useGlobalStore().setTdGroups();
-          }
+          return setTdGroups();
         })
         .then(() => {
           message.success('操作成功');
@@ -273,9 +270,7 @@ function handleRemoveTd(item: KungfuApi.KfConfig) {
       const index = oldGroup.children?.indexOf(accountId);
       oldGroup.children.splice(index, 1);
       setTdGroup(toRaw(tdGroup.data)).then(() => {
-        if (app?.proxy) {
-          app?.proxy.$useGlobalStore().setTdGroups();
-        }
+        return setTdGroups();
       });
     }
   });

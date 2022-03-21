@@ -57,7 +57,7 @@ import { storeToRefs } from 'pinia';
 import { ipcRenderer } from 'electron';
 import { throttleTime } from 'rxjs';
 import { useExtraCategory } from './uiExtraLocationUtils';
-import { tradingDataSubject } from '@kungfu-trader/kungfu-js-api/kungfu/tradingData';
+import { useGlobalStore } from '../../pages/index/store/global';
 
 export const ensureRemoveLocation = (
   kfLocation: KungfuApi.KfLocation | KungfuApi.KfConfig,
@@ -172,13 +172,11 @@ export const useAddUpdateRemoveKfConfig = (): {
     group: string,
   ) => Promise<void>;
 } => {
-  const app = getCurrentInstance();
-
   const handleRemoveKfConfig = (
     kfConfig: KungfuApi.KfConfig | KungfuApi.KfLocation,
   ): Promise<void> => {
     return ensureRemoveLocation(kfConfig).then(() => {
-      app?.proxy && app?.proxy.$useGlobalStore().setKfConfigList();
+      useGlobalStore().setKfConfigList();
     });
   };
 
@@ -225,7 +223,7 @@ export const useAddUpdateRemoveKfConfig = (): {
               message.success('操作成功');
             })
             .then(() => {
-              app?.proxy && app?.proxy.$useGlobalStore().setKfConfigList();
+              useGlobalStore().setKfConfigList();
             })
             .catch((err: Error) => {
               message.error('操作失败 ' + err.message);
@@ -481,7 +479,6 @@ export const useInstruments = (): {
     callback?: (value: string) => void,
   ) => void;
 } => {
-  const app = getCurrentInstance();
   const instrumentsResolved = reactive<{
     data: KungfuApi.InstrumentResolved[];
   }>({
@@ -495,15 +492,13 @@ export const useInstruments = (): {
   });
 
   onMounted(() => {
-    if (app?.proxy) {
-      const { instruments, subscribedInstruments } = storeToRefs(
-        app?.proxy.$useGlobalStore(),
-      );
-      instrumentsResolved.data =
-        instruments as unknown as KungfuApi.InstrumentResolved[];
-      subscribedInstrumentsResolved.data =
-        subscribedInstruments as unknown as KungfuApi.InstrumentResolved[];
-    }
+    const { instruments, subscribedInstruments } = storeToRefs(
+      useGlobalStore(),
+    );
+    instrumentsResolved.data =
+      instruments as unknown as KungfuApi.InstrumentResolved[];
+    subscribedInstrumentsResolved.data =
+      subscribedInstruments as unknown as KungfuApi.InstrumentResolved[];
   });
 
   const subscribeAllInstrumentByMdProcessId = (
@@ -644,12 +639,11 @@ export const usePreStartAndQuitApp = (): {
   }, 500);
 
   const saveBoardsMap = (): Promise<void> => {
-    const proxy = app?.proxy;
-    if (proxy) {
-      const { boardsMap } = proxy.$useGlobalStore();
-      localStorage.setItem('indexBoardsMap', JSON.stringify(boardsMap));
-      return Promise.resolve();
-    }
+    const { boardsMap } = storeToRefs(useGlobalStore());
+    localStorage.setItem(
+      'indexBoardsMap',
+      JSON.stringify(boardsMap.value || '{}'),
+    );
     return Promise.resolve();
   };
 
@@ -894,7 +888,7 @@ export const useDealInstruments = (): void => {
         tag: 'req_instruments',
       });
 
-      const subscription = tradingDataSubject
+      const subscription = app.proxy.$tradingDataSubject
         .pipe(throttleTime(5000))
         .subscribe((watcher: KungfuApi.Watcher) => {
           const instruments = watcher.ledger.Instrument.list();
@@ -934,9 +928,7 @@ export const useDealInstruments = (): void => {
     dealInstrumentController.value = false;
     if (instruments.length) {
       existedInstrumentsLength.value = instruments.length || 0; //refresh old instruments
-      if (app?.proxy) {
-        app?.proxy.$useGlobalStore().setInstruments(instruments);
-      }
+      useGlobalStore().setInstruments(instruments);
     }
   };
 };

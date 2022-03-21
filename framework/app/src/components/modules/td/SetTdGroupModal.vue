@@ -10,7 +10,8 @@ import {
   useTdGroups,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import { AntTreeNodeDropEvent, DataNode } from 'ant-design-vue/lib/tree';
-import { computed, ComputedRef, getCurrentInstance, toRaw, toRefs } from 'vue';
+import { computed, ComputedRef, toRaw, toRefs } from 'vue';
+import { useGlobalStore } from '@kungfu-trader/kungfu-app/src/renderer/pages/index/store/global';
 
 const props = withDefaults(
   defineProps<{
@@ -26,7 +27,6 @@ defineEmits<{
   (e: 'close'): void;
 }>();
 
-const app = getCurrentInstance();
 const { modalVisible, closeModal } = useModalVisible(props.visible);
 const { tdExtTypeMap } = useExtConfigsRelated();
 const tdGroup = useTdGroups();
@@ -129,9 +129,7 @@ function handleDrop(info: AntTreeNodeDropEvent) {
   }
 
   setTdGroup(toRaw(tdGroup.data)).then(() => {
-    if (app?.proxy) {
-      app?.proxy.$useGlobalStore().setTdGroups();
-    }
+    useGlobalStore().setTdGroups();
   });
 }
 

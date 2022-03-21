@@ -41,6 +41,7 @@ import {
   KfUIExtLocatorTypes,
 } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import path from 'path';
+import { useGlobalStore } from '../../pages/index/store/global';
 
 // this utils file is only for ui components
 export const getUIComponents = (
@@ -173,7 +174,7 @@ export const useExtConfigsRelated = (): {
   tdExtTypeMap: ComputedRef<Record<string, InstrumentTypes>>;
   mdExtTypeMap: ComputedRef<Record<string, InstrumentTypes>>;
 } => {
-  const app = getCurrentInstance();
+  // const app = getCurrentInstance();
   const extConfigs = reactive<{ data: KungfuApi.KfExtConfigs }>({
     data: {},
   });
@@ -184,12 +185,10 @@ export const useExtConfigsRelated = (): {
   const mdExtTypeMap = computed(() => buildExtTypeMap(extConfigs.data, 'md'));
 
   onMounted(() => {
-    if (app?.proxy) {
-      const store = storeToRefs(app?.proxy.$useGlobalStore());
-      extConfigs.data = store.extConfigs as unknown as KungfuApi.KfExtConfigs;
-      uiExtConfigs.data =
-        store.uiExtConfigs as unknown as KungfuApi.KfUIExtConfigs;
-    }
+    const store = storeToRefs(useGlobalStore());
+    extConfigs.data = store.extConfigs as unknown as KungfuApi.KfExtConfigs;
+    uiExtConfigs.data =
+      store.uiExtConfigs as unknown as KungfuApi.KfUIExtConfigs;
   });
 
   return {
@@ -208,7 +207,6 @@ export const useProcessStatusDetailData = (): {
     kfConfig: KungfuApi.KfLocation | KungfuApi.KfConfig,
   ): ProcessStatusTypes | undefined;
 } => {
-  const app = getCurrentInstance();
   const allProcessStatusData = reactive<{
     processStatusData: Pm2ProcessStatusData;
     processStatusDetailData: Pm2ProcessStatusDetailData;
@@ -220,18 +218,16 @@ export const useProcessStatusDetailData = (): {
   });
 
   onMounted(() => {
-    if (app?.proxy) {
-      const { processStatusData, processStatusWithDetail, appStates } =
-        storeToRefs(app?.proxy.$useGlobalStore());
-      allProcessStatusData.processStatusData =
-        processStatusData as unknown as Pm2ProcessStatusData;
-      allProcessStatusData.processStatusDetailData =
-        processStatusWithDetail as unknown as Pm2ProcessStatusDetailData;
-      allProcessStatusData.appStates = appStates as unknown as Record<
-        string,
-        BrokerStateStatusTypes
-      >;
-    }
+    const { processStatusData, processStatusWithDetail, appStates } =
+      storeToRefs(useGlobalStore());
+    allProcessStatusData.processStatusData =
+      processStatusData as unknown as Pm2ProcessStatusData;
+    allProcessStatusData.processStatusDetailData =
+      processStatusWithDetail as unknown as Pm2ProcessStatusDetailData;
+    allProcessStatusData.appStates = appStates as unknown as Record<
+      string,
+      BrokerStateStatusTypes
+    >;
   });
 
   const getProcessStatusName = (
@@ -259,7 +255,6 @@ export const useAllKfConfigData = (): Record<
   KfCategoryTypes,
   KungfuApi.KfConfig[]
 > => {
-  const app = getCurrentInstance();
   const allKfConfigData: Record<KfCategoryTypes, KungfuApi.KfConfig[]> =
     reactive({
       system: ref<KungfuApi.KfConfig[]>([
@@ -307,32 +302,24 @@ export const useAllKfConfigData = (): Record<
     });
 
   onMounted(() => {
-    if (app?.proxy) {
-      const { mdList, tdList, strategyList } = storeToRefs(
-        app?.proxy.$useGlobalStore(),
-      );
+    const { mdList, tdList, strategyList } = storeToRefs(useGlobalStore());
 
-      allKfConfigData.md = mdList as unknown as KungfuApi.KfConfig[];
-      allKfConfigData.td = tdList as unknown as KungfuApi.KfConfig[];
-      allKfConfigData.strategy =
-        strategyList as unknown as KungfuApi.KfConfig[];
-    }
+    allKfConfigData.md = mdList as unknown as KungfuApi.KfConfig[];
+    allKfConfigData.td = tdList as unknown as KungfuApi.KfConfig[];
+    allKfConfigData.strategy = strategyList as unknown as KungfuApi.KfConfig[];
   });
 
   return allKfConfigData;
 };
 
 export const useTdGroups = (): { data: KungfuApi.KfExtraLocation[] } => {
-  const app = getCurrentInstance();
   const tdGroups = reactive<{ data: KungfuApi.KfExtraLocation[] }>({
     data: [],
   });
 
   onMounted(() => {
-    if (app?.proxy) {
-      const { tdGroupList } = storeToRefs(app?.proxy.$useGlobalStore());
-      tdGroups.data = tdGroupList as unknown as KungfuApi.KfExtraLocation[];
-    }
+    const { tdGroupList } = storeToRefs(useGlobalStore());
+    tdGroups.data = tdGroupList as unknown as KungfuApi.KfExtraLocation[];
   });
 
   return tdGroups;
@@ -379,9 +366,7 @@ export const useCurrentGlobalKfLocation = (
 
   onMounted(() => {
     if (app?.proxy) {
-      const { currentGlobalKfLocation } = storeToRefs(
-        app?.proxy.$useGlobalStore(),
-      );
+      const { currentGlobalKfLocation } = storeToRefs(useGlobalStore());
 
       currentKfLocation.data = currentGlobalKfLocation as unknown as
         | KungfuApi.KfLocation
@@ -396,9 +381,7 @@ export const useCurrentGlobalKfLocation = (
       | KungfuApi.KfConfig
       | KungfuApi.KfExtraLocation,
   ) => {
-    if (app?.proxy) {
-      app?.proxy?.$useGlobalStore().setCurrentGlobalKfLocation(kfLocation);
-    }
+    useGlobalStore().setCurrentGlobalKfLocation(kfLocation);
   };
 
   const dealRowClassName = (
@@ -645,16 +628,9 @@ export const useAssets = (): {
     data: {},
   });
 
-  const app = getCurrentInstance();
-
   onMounted(() => {
-    if (app?.proxy) {
-      const { assets } = storeToRefs(app?.proxy.$useGlobalStore());
-      assetsResolved.data = assets as unknown as Record<
-        string,
-        KungfuApi.Asset
-      >;
-    }
+    const { assets } = storeToRefs(useGlobalStore());
+    assetsResolved.data = assets as unknown as Record<string, KungfuApi.Asset>;
   });
 
   const getAssetsByKfConfig = (

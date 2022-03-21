@@ -9,7 +9,7 @@ import {
   useProcessStatusDetailData,
   useTriggerMakeOrder,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
-import { computed, getCurrentInstance } from 'vue';
+import { computed } from 'vue';
 import { getColumns } from './config';
 import { ExchangeIds } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
 import {
@@ -31,8 +31,8 @@ import {
   addSubscribeInstruments,
   removeSubscribeInstruments,
 } from '@kungfu-trader/kungfu-js-api/actions';
+import { useGlobalStore } from '@kungfu-trader/kungfu-app/src/renderer/pages/index/store/global';
 
-const app = getCurrentInstance();
 const { dashboardBodyHeight, dashboardBodyWidth, handleBodySizeChange } =
   useDashboardBodySize();
 
@@ -56,6 +56,7 @@ const { mdExtTypeMap } = useExtConfigsRelated();
 
 const { getQuoteByInstrument, getLastPricePercent } = useQuote();
 const { customRow, triggerOrderBook, triggerMakeOrder } = useTriggerMakeOrder();
+const { setSubscribedInstruments } = useGlobalStore();
 
 function handleSubscribeAll(): void {
   subscribeAllInstrumentByAppStates(
@@ -78,9 +79,7 @@ function handleConfirmAddInstrumentCallback(val: string): Promise<void> {
 
   return addSubscribeInstruments([instrumentResolved])
     .then(() => {
-      if (app?.proxy) {
-        app.proxy.$useGlobalStore().setSubscribedInstruments();
-      }
+      return setSubscribedInstruments();
     })
     .then(() =>
       subscribeAllInstrumentByAppStates(
@@ -100,9 +99,7 @@ function handleConfirmRemoveInstrument(
 ) {
   return removeSubscribeInstruments(instrument)
     .then(() => {
-      if (app?.proxy) {
-        app.proxy.$useGlobalStore().setSubscribedInstruments();
-      }
+      return setSubscribedInstruments();
     })
     .then(() => {
       message.success('操作成功');

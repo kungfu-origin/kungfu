@@ -91,10 +91,8 @@ app
   .use(Statistic)
   .use(VueVirtualScroller);
 
-//this sort ensure $useGlobalStore can be get in mounted callback
 app.config.globalProperties.$globalBus = globalBus;
 app.config.globalProperties.$tradingDataSubject = tradingDataSubject;
-app.config.globalProperties.$useGlobalStore = useGlobalStore;
 app.config.globalProperties.$globalCategoryRegister =
   new GlobalCategoryRegister();
 
