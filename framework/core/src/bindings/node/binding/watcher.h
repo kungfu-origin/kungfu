@@ -58,10 +58,6 @@ public:
 
   Napi::Value IsStarted(const Napi::CallbackInfo &info);
 
-  Napi::Value Setup(const Napi::CallbackInfo &info);
-
-  Napi::Value Step(const Napi::CallbackInfo &info);
-
   Napi::Value RequestStop(const Napi::CallbackInfo &info);
 
   Napi::Value PublishState(const Napi::CallbackInfo &info);

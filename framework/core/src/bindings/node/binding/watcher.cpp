@@ -158,28 +158,6 @@ Napi::Value Watcher::IsLive(const Napi::CallbackInfo &info) { return Napi::Boole
 
 Napi::Value Watcher::IsStarted(const Napi::CallbackInfo &info) { return Napi::Boolean::New(info.Env(), is_started()); }
 
-Napi::Value Watcher::Setup(const Napi::CallbackInfo &info) {
-  try {
-    setup();
-    return {};
-  } catch (const std::exception &ex) {
-    throw Napi::Error::New(info.Env(), fmt::format("setup failed: {}", ex.what()));
-  } catch (...) {
-    throw Napi::Error::New(info.Env(), "setup failed");
-  }
-}
-
-Napi::Value Watcher::Step(const Napi::CallbackInfo &info) {
-  try {
-    step();
-    return {};
-  } catch (const std::exception &ex) {
-    throw Napi::Error::New(info.Env(), fmt::format("step failed: {}", ex.what()));
-  } catch (...) {
-    throw Napi::Error::New(info.Env(), "step failed");
-  }
-}
-
 Napi::Value Watcher::RequestStop(const Napi::CallbackInfo &info) {
   auto app_location = ExtractLocation(info, 0, get_locator());
   get_writer(app_location->uid)->mark(now(), RequestStop::tag);
@@ -253,8 +231,6 @@ void Watcher::Init(Napi::Env env, Napi::Object exports) {
                                         InstanceMethod("isUsable", &Watcher::IsUsable),                           //
                                         InstanceMethod("isLive", &Watcher::IsLive),                               //
                                         InstanceMethod("isStarted", &Watcher::IsStarted),                         //
-                                        InstanceMethod("setup", &Watcher::Setup),                                 //
-                                        InstanceMethod("step", &Watcher::Step),                                   //
                                         InstanceMethod("requestStop", &Watcher::RequestStop),                     //
                                         InstanceMethod("getLocation", &Watcher::GetLocation),                     //
                                         InstanceMethod("getLocationUID", &Watcher::GetLocationUID),               //
