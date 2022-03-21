@@ -58,7 +58,7 @@ Watcher::Watcher(const Napi::CallbackInfo &info)
       state_ref_(Napi::ObjectReference::New(Napi::Object::New(info.Env()), 1)),
       ledger_ref_(Napi::ObjectReference::New(Napi::Object::New(info.Env()), 1)),
       app_states_ref_(Napi::ObjectReference::New(Napi::Object::New(info.Env()), 1)), update_state(state_ref_),
-      update_ledger(ledger_ref_), publish(*this, state_ref_), reset_cache(*this, ledger_ref_) {
+      update_ledger(ledger_ref_), publish(*this, state_ref_), reset_cache(*this, ledger_ref_), start_(true) {
   log::copy_log_settings(get_home(), get_home()->name);
 
   serialize::InitStateMap(info, state_ref_, "state");
@@ -89,6 +89,7 @@ Watcher::Watcher(const Napi::CallbackInfo &info)
 }
 
 Watcher::~Watcher() {
+  start_ = false;
   app_states_ref_.Unref();
   ledger_ref_.Unref();
   state_ref_.Unref();
@@ -310,13 +311,15 @@ Napi::Value Watcher::CreateTask(const Napi::CallbackInfo &info) {
       loop, &greq,
       [](uv_work_t *req) {
         Watcher *watcher = (Watcher *)(req->data);
-        while (true) {
+        while (watcher->IsStart()) {
           if (!watcher->is_live() && !watcher->is_started() && watcher->is_usable()) {
             watcher->setup();
           }
           if (watcher->is_live()) {
             watcher->step();
           }
+          if (!watcher->IsStart())
+            break;
           std::this_thread::sleep_for(std::chrono::milliseconds(2000));
 
         }
@@ -331,9 +334,9 @@ Napi::Value Watcher::CreateTask(const Napi::CallbackInfo &info) {
         Watcher *watcher = (Watcher *)(req->data);
         // SPDLOG_INFO("uv_timer_start tid {} pid {} this {}", std::this_thread::get_id(), GETPID(),
         //             (uint64_t)(watcher));
+        watcher->SyncEventCache();
         watcher->SyncLedger();
         watcher->SyncAppStatus();
-        watcher->SyncEventCache();
       },
       0, 2000);
 
