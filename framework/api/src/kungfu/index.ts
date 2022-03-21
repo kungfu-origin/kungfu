@@ -253,9 +253,7 @@ export const kfRequestMarketData = (
 
 export const kfCancelOrder = (
   watcher: KungfuApi.Watcher | null,
-  orderId: bigint,
-  tdLocation: KungfuApi.KfLocation | KungfuApi.KfConfig,
-  strategyLocation?: KungfuApi.KfLocation | KungfuApi.KfConfig,
+  order: KungfuApi.Order,
 ): Promise<void> => {
   if (!watcher) {
     return Promise.reject(new Error(`Watcher 错误`));
@@ -265,29 +263,28 @@ export const kfCancelOrder = (
     return Promise.reject(new Error(`Master 未连接`));
   }
 
-  if (!watcher.isReadyToInteract(tdLocation)) {
-    const accountId = getIdByKfLocation(tdLocation);
+  const { order_id, dest, source } = order;
+  const sourceLocation = watcher.getLocation(source);
+  const destLocation = watcher.getLocation(dest);
+
+  if (!watcher.isReadyToInteract(sourceLocation)) {
+    const accountId = getIdByKfLocation(sourceLocation);
     return Promise.reject(new Error(`交易账户 ${accountId} 未就绪`));
   }
 
   const orderAction: KungfuApi.OrderAction = {
     ...longfist.OrderAction(),
-    order_id: orderId,
+    order_id,
   };
 
-  if (strategyLocation) {
-    return Promise.resolve(
-      watcher.cancelOrder(orderAction, tdLocation, strategyLocation),
-    );
-  } else {
-    return Promise.resolve(watcher.cancelOrder(orderAction, tdLocation));
-  }
+  return Promise.resolve(
+    watcher.cancelOrder(orderAction, sourceLocation, destLocation),
+  );
 };
 
 export const kfCancelAllOrders = (
   watcher: KungfuApi.Watcher | null,
   orders: KungfuApi.Order[],
-  kfLocation: KungfuApi.KfLocation | KungfuApi.KfConfig,
 ): Promise<void[]> => {
   if (!watcher) {
     return Promise.reject(new Error(`Watcher 错误`));
@@ -297,32 +294,9 @@ export const kfCancelAllOrders = (
     return Promise.reject(new Error(`Master 未连接`));
   }
 
-  if (kfLocation.category === 'td' && !watcher.isReadyToInteract(kfLocation)) {
-    const accountId = getIdByKfLocation(kfLocation);
-    return Promise.reject(new Error(`交易账户 ${accountId} 未就绪`));
-  }
-
   const cancelOrderTasks = orders.map(
     (item: KungfuApi.Order): Promise<void> => {
-      const orderAction: KungfuApi.OrderAction = {
-        ...longfist.OrderAction(),
-        order_id: item.order_id,
-      };
-      if (kfLocation.category === 'td') {
-        return Promise.resolve(watcher.cancelOrder(orderAction, kfLocation));
-      } else if (kfLocation.category === 'strategy') {
-        return Promise.resolve(
-          watcher.cancelOrder(
-            orderAction,
-            watcher.getLocation(item.source),
-            kfLocation,
-          ),
-        );
-      } else {
-        return Promise.resolve(
-          watcher.cancelOrder(orderAction, watcher.getLocation(item.source)),
-        );
-      }
+      return kfCancelOrder(watcher, item);
     },
   );
 

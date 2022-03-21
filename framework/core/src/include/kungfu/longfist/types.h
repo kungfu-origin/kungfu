@@ -29,6 +29,7 @@ KF_DEFINE_MARK_TYPE(Ping, 10008);
 KF_DEFINE_MARK_TYPE(Pong, 10009);
 KF_DEFINE_MARK_TYPE(RequestStop, 10024);
 KF_DEFINE_MARK_TYPE(RequestStart, 10025);
+KF_DEFINE_MARK_TYPE(RequestCached, 10061);
 KF_DEFINE_MARK_TYPE(SubscribeAll, 303);
 KF_DEFINE_MARK_TYPE(NewOrderSingle, 353);
 KF_DEFINE_MARK_TYPE(CancelOrder, 354);
@@ -166,6 +167,11 @@ KF_DEFINE_PACK_TYPE(                                     //
     Channel, 10028, PK(source_id, dest_id), PERPETUAL(), //
     (uint32_t, source_id),                               //
     (uint32_t, dest_id)                                  //
+);
+
+KF_DEFINE_PACK_TYPE(                                    //
+    RequestCachedDone, 10062, PK(dest_id), PERPETUAL(), //
+    (uint32_t, dest_id)                                 //
 );
 
 KF_DEFINE_PACK_TYPE(                         //

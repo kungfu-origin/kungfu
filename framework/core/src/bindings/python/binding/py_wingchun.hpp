@@ -15,6 +15,7 @@
 #include <kungfu/wingchun/broker/trader.h>
 #include <kungfu/wingchun/service/bar.h>
 #include <kungfu/wingchun/service/ledger.h>
+#include <kungfu/wingchun/service/cached.h>
 #include <kungfu/wingchun/strategy/context.h>
 #include <kungfu/wingchun/strategy/runner.h>
 
@@ -300,6 +301,16 @@ void bind(pybind11::module &&m) {
       .def("now", &Ledger::now)
       .def("run", &Ledger::run)
       .def("on_exit", &Ledger::on_exit);
+
+  py::class_<CacheD, kungfu::yijinjing::practice::apprentice, std::shared_ptr<CacheD>>(m, "CacheD")
+      .def(py::init<yijinjing::data::locator_ptr, longfist::enums::mode, bool>())
+      .def_property_readonly("io_device", &CacheD::get_io_device)
+      .def_property_readonly("usable", &CacheD::is_usable)
+      .def("set_begin_time", &CacheD::set_begin_time)
+      .def("set_end_time", &CacheD::set_end_time)
+      .def("now", &CacheD::now)
+      .def("run", &CacheD::run)
+      .def("on_exit", &CacheD::on_exit);
 
   py::class_<strategy::Runner, PyRunner, kungfu::yijinjing::practice::apprentice, std::shared_ptr<strategy::Runner>>(
       m, "Runner")

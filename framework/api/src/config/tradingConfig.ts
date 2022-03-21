@@ -503,5 +503,6 @@ export const SystemProcessName: Record<
 > = {
   master: { name: '主控进程' },
   ledger: { name: '计算服务' },
+  cached: { name: '存储服务' },
   archive: { name: '归档服务' },
 };

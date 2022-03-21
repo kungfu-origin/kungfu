@@ -43,6 +43,7 @@ import {
   startArchiveMakeTask,
   startGetProcessStatus,
   startLedger,
+  startCacheD,
   startMaster,
 } from '@kungfu-trader/kungfu-js-api/utils/processUtils';
 
@@ -129,6 +130,7 @@ if (process.env.RELOAD_AFTER_CRASHED === 'false') {
       );
 
       delayMilliSeconds(1000)
+        .then(() => startCacheD(false))
         .then(() => startLedger(false))
         .catch((err) => console.error(err.message));
     });

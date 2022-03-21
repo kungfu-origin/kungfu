@@ -97,6 +97,10 @@ writer_ptr hero::get_writer(uint32_t dest_id) const {
 bool hero::has_location(uint32_t uid) const { return locations_.find(uid) != locations_.end(); }
 
 location_ptr hero::get_location(uint32_t uid) const {
+  if (not has_location(uid)) {
+    SPDLOG_ERROR("no location {} in locations_", get_location_uname(uid));
+  }
+
   assert(has_location(uid));
   return locations_.at(uid);
 }
@@ -134,11 +138,11 @@ uint64_t hero::make_chanel_hash(uint32_t source_id, uint32_t dest_id) const {
 
 bool hero::check_location_exists(uint32_t source_id, uint32_t dest_id) const {
   if (not has_location(source_id)) {
-    SPDLOG_ERROR("{} does not exist", get_location_uname(source_id));
+    SPDLOG_ERROR("source_id {}, {} does not exist", source_id, get_location_uname(source_id));
     return false;
   }
   if (dest_id != 0 and not has_location(dest_id)) {
-    SPDLOG_ERROR("{} does not exist", get_location_uname(dest_id));
+    SPDLOG_ERROR("dest_id {}, {} does not exist", dest_id, get_location_uname(dest_id));
     return false;
   }
   return true;

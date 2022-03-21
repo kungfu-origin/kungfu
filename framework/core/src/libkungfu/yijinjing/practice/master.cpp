@@ -67,10 +67,6 @@ void master::register_app(const event_ptr &event) {
   try_add_location(event->gen_time(), master_cmd_location);
   app_cmd_locations_.emplace(app_location->uid, master_cmd_location->uid);
 
-  app_cache_shift_.emplace(app_location->uid, app_location);
-  app_cache_shift_.emplace(master_cmd_location->uid, master_cmd_location);
-  app_cache_shift_[master_cmd_location->uid].ensure_storage(app_location->uid);
-
   register_data.last_active_time = session_builder_.find_last_active_time(app_location);
   register_location(event->gen_time(), register_data);
 
@@ -83,8 +79,8 @@ void master::register_app(const event_ptr &event) {
   public_writer->write(event->gen_time(), *std::dynamic_pointer_cast<Location>(app_location));
   public_writer->write(event->gen_time(), register_data);
 
-  require_cached_write_to(event->gen_time(), app_location->uid, location::PUBLIC);
-  require_cached_write_to(event->gen_time(), app_location->uid, master_cmd_location->uid);
+  require_write_to(event->gen_time(), app_location->uid, location::PUBLIC);
+  require_write_to(event->gen_time(), app_location->uid, master_cmd_location->uid);
 
   app_cmd_writer->mark(event->gen_time(), SessionStart::tag);
 
@@ -92,12 +88,8 @@ void master::register_app(const event_ptr &event) {
   write_trading_day(event->gen_time(), app_cmd_writer);
   write_profile_data(event->gen_time(), app_cmd_writer);
 
-  app_cache_shift_[app_location->uid] >> app_cmd_writer;
-
-  app_cmd_writer->mark(start_time_, RequestStart::tag);
-
+  // tell others the cached process started
   write_registries(event->gen_time(), app_cmd_writer);
-  write_channels(event->gen_time(), app_cmd_writer);
 
   on_register(event, register_data);
 }
@@ -113,7 +105,6 @@ void master::deregister_app(int64_t trigger_time, uint32_t app_location_uid) {
   reader_->disjoin(app_location_uid);
   writers_.erase(app_location_uid);
   timer_tasks_.erase(app_location_uid);
-  app_cache_shift_.erase(app_location_uid);
   get_writer(location::PUBLIC)->write(trigger_time, location->to<Deregister>());
 }
 
@@ -126,8 +117,8 @@ void master::react() {
   events_ | is(Channel::tag) | $$(on_channel_request(event));
   events_ | is(TimeRequest::tag) | $$(on_time_request(event));
   events_ | is(Location::tag) | $$(on_new_location(event));
-  events_ | is(CacheReset::tag) | $$(on_cache_reset(event));
   events_ | is(Register::tag) | $$(register_app(event));
+  events_ | is(RequestCachedDone::tag) | $$(on_request_cached_done(event));
   events_ | is(Ping::tag) | $$(pong(event));
   events_ | instanceof <journal::frame>() | $$(feed(event));
 }
@@ -139,12 +130,6 @@ void master::on_active() {
     last_check_ = now;
   }
   handle_timer_tasks();
-  handle_cached_feeds();
-}
-
-void master::require_cached_write_to(int64_t trigger_time, uint32_t source_id, uint32_t dest_id) {
-  app_cache_shift_[source_id].ensure_storage(dest_id);
-  require_write_to(trigger_time, source_id, dest_id);
 }
 
 void master::handle_timer_tasks() {
@@ -168,39 +153,6 @@ void master::handle_timer_tasks() {
   }
 }
 
-void master::handle_cached_feeds() {
-  bool stored_controller = false;
-  boost::hana::for_each(StateDataTypes, [&](auto it) {
-    using DataType = typename decltype(+boost::hana::second(it))::type;
-    auto hana_type = boost::hana::type_c<DataType>;
-
-    using FeedMap = std::unordered_map<uint64_t, state<DataType>>;
-    auto &feed_map = const_cast<FeedMap &>(feed_bank_[hana_type]);
-
-    if (feed_map.size() != 0) {
-      auto iter = feed_map.begin();
-      while (iter != feed_map.end() and !stored_controller) {
-        auto s = iter->second;
-        auto source_id = s.source;
-
-        if (app_cache_shift_.find(source_id) != app_cache_shift_.end()) {
-          try {
-            app_cache_shift_.at(source_id) << s;
-          } catch (const std::exception &e) {
-            SPDLOG_ERROR("Unexpected exception by storage << {}", e.what());
-            continue;
-          }
-
-          iter = feed_map.erase(iter);
-          stored_controller = true;
-        } else {
-          iter++;
-        }
-      }
-    }
-  });
-}
-
 void master::try_add_location(int64_t trigger_time, const location_ptr &app_location) {
   if (not has_location(app_location->uid)) {
     profile_.set(dynamic_cast<Location &>(*app_location));
@@ -218,21 +170,22 @@ void master::feed(const event_ptr &event) {
     return;
   }
 
-  feed_state_data(event, feed_bank_);
   feed_profile_data(event, profile_);
 }
 
 void master::pong(const event_ptr &event) { get_io_device()->get_publisher()->publish("{}"); }
 
-void master::on_cache_reset(const event_ptr &event) {
-  auto msg_type = event->data<CacheReset>().msg_type;
-  boost::hana::for_each(StateDataTypes, [&](auto it) {
-    using DataType = typename decltype(+boost::hana::second(it))::type;
-    if (DataType::tag == msg_type) {
-      app_cache_shift_[event->source()] -= typed_event_ptr<DataType>(event);
-      app_cache_shift_[event->dest()] /= typed_event_ptr<DataType>(event);
-    }
-  });
+void master::on_request_cached_done(const event_ptr &event) {
+  auto request_cached_done_data = event->data<RequestCachedDone>();
+  auto app_uid = request_cached_done_data.dest_id;
+  if (writers_.find(app_uid) == writers_.end()) {
+    SPDLOG_ERROR("no app_uid {} in writers_ ", get_location_uname(app_uid));
+    return;
+  }
+  auto app_cmd_writer = writers_.at(app_uid);
+  app_cmd_writer->mark(now(), RequestStart::tag);
+  write_registries(event->gen_time(), app_cmd_writer);
+  write_channels(event->gen_time(), app_cmd_writer);
 }
 
 void master::on_request_write_to(const event_ptr &event) {
@@ -243,7 +196,7 @@ void master::on_request_write_to(const event_ptr &event) {
     return;
   }
   reader_->join(get_location(app_uid), request.dest_id, trigger_time);
-  require_cached_write_to(trigger_time, app_uid, request.dest_id);
+  require_write_to(trigger_time, app_uid, request.dest_id);
   if (is_location_live(request.dest_id) and has_writer(request.dest_id)) {
     require_read_from(0, request.dest_id, app_uid, trigger_time);
   }
@@ -262,7 +215,7 @@ void master::on_request_read_from(const event_ptr &event) {
     return;
   }
   reader_->join(get_location(request.source_id), app_uid, trigger_time);
-  require_cached_write_to(trigger_time, request.source_id, app_uid);
+  require_write_to(trigger_time, request.source_id, app_uid);
   require_read_from(trigger_time, app_uid, request.source_id, request.from_time);
   Channel channel = {};
   channel.source_id = request.source_id;
@@ -281,7 +234,7 @@ void master::on_channel_request(const event_ptr &event) {
   auto trigger_time = event->gen_time();
   if (is_location_live(request.source_id) and not has_channel(request.source_id, request.dest_id)) {
     reader_->join(get_location(request.source_id), request.dest_id, trigger_time);
-    require_cached_write_to(trigger_time, request.source_id, request.dest_id);
+    require_write_to(trigger_time, request.source_id, request.dest_id);
     register_channel(trigger_time, request);
     get_writer(location::PUBLIC)->write(trigger_time, request);
   }

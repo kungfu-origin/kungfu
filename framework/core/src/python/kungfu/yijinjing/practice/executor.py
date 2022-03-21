@@ -71,6 +71,9 @@ class ServiceLoader(dict):
         self["ledger"] = lambda mode, low_latency: wc.Ledger(
             ctx.runtime_locator, kfj.MODES[ctx.mode], ctx.low_latency
         ).run()
+        self["cached"] = lambda mode, low_latency: wc.CacheD(
+            ctx.runtime_locator, kfj.MODES[ctx.mode], ctx.low_latency
+        ).run()
 
 
 class ExtensionLoader:

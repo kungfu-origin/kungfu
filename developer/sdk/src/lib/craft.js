@@ -1,7 +1,10 @@
 const fse = require('fs-extra');
 const path = require('path');
 const app = require('@kungfu-trader/kungfu-app');
-const { getAppDir } = require('@kungfu-trader/kungfu-js-api/toolkit/utils');
+const {
+  getAppDir,
+  getCliDir,
+} = require('@kungfu-trader/kungfu-js-api/toolkit/utils');
 
 const ensureDir = (cwd, ...dirNames) => {
   const targetDir = path.join(cwd, ...dirNames);
@@ -10,18 +13,18 @@ const ensureDir = (cwd, ...dirNames) => {
 };
 
 exports.build = () => {
-  const appDistDir = path.dirname(
-    require.resolve('@kungfu-trader/kungfu-app/dist/app'),
-  );
-  const cliDistDir = path.dirname(
-    require.resolve('@kungfu-trader/kungfu-cli/dist/cli'),
-  );
-  const targetAppDistDir = ensureDir(process.cwd(), 'dist', 'app');
-  const targetCliDistDir = ensureDir(process.cwd(), 'dist', 'cli');
+  const appDistDir = path.join(getAppDir(), 'dist', 'app');
+  const publicDir = path.resolve(getAppDir(), 'public');
+  const cliDistDir = path.join(getCliDir(), 'dist', 'cli');
 
-  fse.removeSync(targetAppDistDir);
-  fse.removeSync(targetCliDistDir);
+  const targetDistDir = ensureDir(process.cwd(), 'dist');
+  const targetAppDistDir = ensureDir(targetDistDir, 'app');
+  const targetPublicDistDir = ensureDir(targetDistDir, 'public');
+  const targetCliDistDir = ensureDir(targetDistDir, 'cli');
+
+  fse.removeSync(targetDistDir);
   fse.copySync(appDistDir, targetAppDistDir);
+  fse.copySync(publicDir, targetPublicDistDir);
   fse.copySync(cliDistDir, targetCliDistDir);
 };
 

@@ -68,3 +68,50 @@ export const removeFilesInFolder = (targetDir: string) => {
 
   return Promise.all(promises);
 };
+
+export const listDirSync = (filePath: string): string[] => {
+  fse.ensureDirSync(filePath);
+  return fse.readdirSync(filePath);
+};
+
+export const removeTargetFilesInFolder = (
+  targetFolder: string,
+  includes: string[],
+  filters: string[] = [],
+): Promise<void> => {
+  const iterator = (folder: string) => {
+    const items = listDirSync(folder);
+
+    if (!items) return;
+
+    const folders = items.filter((f: string) => {
+      const stat = fse.statSync(path.join(folder, f));
+
+      if (stat.isDirectory()) return true;
+      return false;
+    });
+
+    const files = items.filter((f: string) => {
+      const stat = fse.statSync(path.join(folder, f));
+
+      if (stat.isFile()) return true;
+      return false;
+    });
+
+    files.forEach((f: string) => {
+      includes.forEach((n: string) => {
+        if (f.includes(n) && !filters.includes(f)) {
+          fse.removeSync(path.join(folder, f));
+        }
+      });
+    });
+
+    folders.forEach((f: string) => {
+      iterator(path.join(folder, f));
+    });
+  };
+
+  iterator(targetFolder);
+
+  return Promise.resolve();
+};
