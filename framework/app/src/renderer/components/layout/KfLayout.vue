@@ -13,22 +13,22 @@ const menuSelectedKeys = ref<string[]>(['main']);
 
 const { uiExtConfigs } = useExtConfigsRelated();
 const sidebarFooterComponentConfigs = computed(() => {
-  return Object.keys(uiExtConfigs.data)
-    .filter((key) => uiExtConfigs.data[key].position === 'sidebar_footer')
+  return Object.keys(uiExtConfigs.value)
+    .filter((key) => uiExtConfigs.value[key].position === 'sidebar_footer')
     .map((key) => {
       return {
-        ...uiExtConfigs.data[key],
+        ...uiExtConfigs.value[key],
         key,
       };
     });
 });
 
 const sidebarComponentConfigs = computed(() => {
-  return Object.keys(uiExtConfigs.data)
-    .filter((key) => uiExtConfigs.data[key].position === 'sidebar')
+  return Object.keys(uiExtConfigs.value)
+    .filter((key) => uiExtConfigs.value[key].position === 'sidebar')
     .map((key) => {
       return {
-        ...uiExtConfigs.data[key],
+        ...uiExtConfigs.value[key],
         key,
       };
     });

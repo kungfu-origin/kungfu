@@ -96,11 +96,11 @@ exports.getWebpackExternals = () => {
   const currentPackageJSON = fs.pathExistsSync(currentPackageJSONPath)
     ? fs.readJSONSync(currentPackageJSONPath)
     : {};
-  return [
-    ...Object.keys(appPackageJSON.dependencies),
-    ...Object.keys(apiPackageJSON.dependencies),
-    ...Object.keys(currentPackageJSON.dependencies || {}),
-  ].filter((item) => !item.includes('kungfu-js-api'));
+  return Object.keys({
+    ...appPackageJSON.dependencies,
+    ...apiPackageJSON.dependencies,
+    ...(currentPackageJSON.dependencies || {}),
+  }).filter((item) => !item.includes('kungfu-js-api'));
 };
 
 exports.getAppDefaultDistDir = () => {
@@ -149,23 +149,10 @@ exports.getExtensionDirs = (production = false) => {
   const packageJSON = fs.readJSONSync(
     path.resolve(process.cwd(), 'package.json'),
   );
-  const artifactPackageJSON = fs.readJSONSync(
-    path.resolve(
-      require.resolve('@kungfu-trader/artifact-kungfu'),
-      '..',
-      '..',
-      '..',
-      'package.json',
-    ),
-  );
 
   const extdirs = [
     ...Object.keys(packageJSON.dependencies || {}),
-    ...Object.keys(artifactPackageJSON.dependencies || {}),
     ...(production ? [] : Object.keys(packageJSON.devDependencies || {})),
-    ...(production
-      ? []
-      : Object.keys(artifactPackageJSON.devDependencies || {})),
   ]
     .map((name) => {
       let fullPath = '';

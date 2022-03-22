@@ -135,7 +135,7 @@ function tiggerOrderBookAndMakeOrder(record: KungfuApi.Position) {
         instrument_type,
         exchange_id,
       },
-      instruments.data,
+      instruments.value,
     );
 
   triggerOrderBook(ensuredInstrument);

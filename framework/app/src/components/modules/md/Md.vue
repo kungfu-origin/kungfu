@@ -72,7 +72,7 @@ function handleOpenSetMdDialog(
   selectedSource: string,
   mdConfig?: KungfuApi.KfConfig,
 ) {
-  const extConfig: KungfuApi.KfExtConfig = (extConfigs.data['md'] || {})[
+  const extConfig: KungfuApi.KfExtConfig = (extConfigs.value['md'] || {})[
     selectedSource
   ];
 

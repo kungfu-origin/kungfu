@@ -52,6 +52,7 @@ import {
   setTdGroup,
 } from '@kungfu-trader/kungfu-js-api/actions';
 import SetTdGroupModal from './SetTdGroupModal.vue';
+import { useGlobalStore } from '@kungfu-trader/kungfu-app/src/renderer/pages/index/store/global';
 
 const { dashboardBodyHeight, handleBodySizeChange } = useDashboardBodySize();
 
@@ -88,7 +89,7 @@ const addTdGroupModalVisble = ref<boolean>(false);
 const setTdGroupModalVisble = ref<boolean>(false);
 const tdGroup = useTdGroups();
 const tdGroupNames = computed(() => {
-  return tdGroup.data.map((item) => item.name);
+  return tdGroup.value.map((item) => item.name);
 });
 const addTdGroupConfigPayload = ref<KungfuApi.SetKfConfigPayload>({
   type: 'add',
@@ -104,7 +105,7 @@ const tableDataResolved = computed(() => {
   const tdGroupResolved: Record<string, KungfuApi.KfExtraLocation> = {};
   const tdResolved: KungfuApi.KfConfig[] = [];
   const markedNameToTdGroup: Record<string, KungfuApi.KfExtraLocation> = {};
-  [...tdGroup.data, ...tableData.value].forEach((item) => {
+  [...tdGroup.value, ...tableData.value].forEach((item) => {
     if ('children' in item) {
       markedNameToTdGroup[item.name] = { ...item };
       tdGroupResolved[item.name] = {
@@ -144,16 +145,16 @@ const columns = getColumns((dataIndex) => {
   };
 });
 
+const { setTdGroups } = useGlobalStore();
+
 onMounted(() => {
   if (app?.proxy) {
     app.proxy.$globalCategoryRegister.register(categoryRegisterConfig);
-    app.proxy
-      .$useGlobalStore()
-      .setTdGroups()
-      .then(() => {
-        tdGroupDataLoaded.value = true;
-      });
   }
+
+  setTdGroups().then(() => {
+    tdGroupDataLoaded.value = true;
+  });
 });
 
 function handleOpenSetTdModal(
@@ -161,7 +162,7 @@ function handleOpenSetTdModal(
   selectedSource: string,
   tdConfig?: KungfuApi.KfConfig,
 ) {
-  const extConfig: KungfuApi.KfExtConfig = (extConfigs.data['td'] || {})[
+  const extConfig: KungfuApi.KfExtConfig = (extConfigs.value['td'] || {})[
     selectedSource
   ];
 
@@ -230,9 +231,7 @@ function handleConfirmAddUpdateTdGroup(
 
   return addTdGroup(newTdGroup)
     .then(() => {
-      if (app?.proxy) {
-        app.proxy.$useGlobalStore().setTdGroups();
-      }
+      return setTdGroups();
     })
     .then(() => {
       message.success('操作成功');
@@ -251,9 +250,7 @@ function handleRemoveTdGroup(item: KungfuApi.KfExtraLocation) {
     onOk() {
       return removeTdGroup(item.name)
         .then(() => {
-          if (app?.proxy) {
-            app.proxy.$useGlobalStore().setTdGroups();
-          }
+          return setTdGroups();
         })
         .then(() => {
           message.success('操作成功');
@@ -268,14 +265,12 @@ function handleRemoveTdGroup(item: KungfuApi.KfExtraLocation) {
 function handleRemoveTd(item: KungfuApi.KfConfig) {
   handleRemoveKfConfig(item).then(() => {
     const accountId = getIdByKfLocation(item);
-    const oldGroup = isInTdGroup(tdGroup.data, accountId);
+    const oldGroup = isInTdGroup(tdGroup.value, accountId);
     if (oldGroup) {
       const index = oldGroup.children?.indexOf(accountId);
       oldGroup.children.splice(index, 1);
-      setTdGroup(toRaw(tdGroup.data)).then(() => {
-        if (app?.proxy) {
-          app?.proxy.$useGlobalStore().setTdGroups();
-        }
+      setTdGroup(toRaw(tdGroup.value)).then(() => {
+        return setTdGroups();
       });
     }
   });
