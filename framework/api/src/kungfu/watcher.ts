@@ -56,8 +56,7 @@ export const watcher = ((): KungfuApi.Watcher | null => {
   );
 })();
 
-export const startStep = (
-) => {
+export const startStep = () => {
   if (watcher === null) return;
   watcher.createTask();
 };

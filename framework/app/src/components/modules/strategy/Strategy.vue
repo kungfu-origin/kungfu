@@ -13,17 +13,17 @@ import {
 
 import {
   useTableSearchKeyword,
-  useAllKfConfigData,
   useDashboardBodySize,
   handleOpenLogview,
-  useProcessStatusDetailData,
-  useAssets,
-  useCurrentGlobalKfLocation,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import { getColumns } from './config';
 import {
   handleSwitchProcessStatus,
   useAddUpdateRemoveKfConfig,
+  useAllKfConfigData,
+  useAssets,
+  useCurrentGlobalKfLocation,
+  useProcessStatusDetailData,
   useSwitchAllConfig,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
 import {

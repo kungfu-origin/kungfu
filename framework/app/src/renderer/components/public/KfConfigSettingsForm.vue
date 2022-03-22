@@ -8,7 +8,6 @@ import {
 import {
   buildInstrumentSelectOptionLabel,
   buildInstrumentSelectOptionValue,
-  useAllKfConfigData,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import {
   getCurrentInstance,
@@ -35,7 +34,10 @@ import {
   getCombineValueByPrimaryKeys,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { RuleObject } from 'ant-design-vue/lib/form';
-import { useInstruments } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
+import {
+  useAllKfConfigData,
+  useInstruments,
+} from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
 import dayjs, { Dayjs } from 'dayjs';
 
 const props = withDefaults(

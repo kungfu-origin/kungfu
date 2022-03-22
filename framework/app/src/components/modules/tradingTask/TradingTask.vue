@@ -2,8 +2,6 @@
 import {
   handleOpenLogview,
   useDashboardBodySize,
-  useExtConfigsRelated,
-  useProcessStatusDetailData,
   useTableSearchKeyword,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import { computed, ref } from 'vue';
@@ -37,6 +35,7 @@ import {
   removeKfLocation,
   removeLog,
 } from '@kungfu-trader/kungfu-js-api/actions';
+import { useExtConfigsRelated, useProcessStatusDetailData } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
 
 const { extConfigs } = useExtConfigsRelated();
 const { dashboardBodyHeight, handleBodySizeChange } = useDashboardBodySize();

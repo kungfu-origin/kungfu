@@ -19,9 +19,9 @@ using namespace kungfu::yijinjing::cache;
 using namespace kungfu::yijinjing::data;
 
 namespace kungfu::node {
-  uv_loop_t *loop;
-  uv_work_t greq;
-  uv_timer_t timer_req;
+uv_loop_t *loop;
+uv_work_t greq;
+uv_timer_t timer_req;
 inline std::string format(uint32_t uid) { return fmt::format("{:08x}", uid); }
 
 Napi::FunctionReference Watcher::constructor = {};
@@ -292,7 +292,7 @@ void Watcher::Feed(const event_ptr &event) {
           data_bank_ << typed_event_ptr<DataType>(event);
         }
       } else {
-          data_bank_ << typed_event_ptr<DataType>(event);
+        data_bank_ << typed_event_ptr<DataType>(event);
       }
     }
   });
@@ -321,7 +321,6 @@ Napi::Value Watcher::CreateTask(const Napi::CallbackInfo &info) {
           if (!watcher->IsStart())
             break;
           std::this_thread::sleep_for(std::chrono::milliseconds(2000));
-
         }
       },
       [](uv_work_t *req, int status) { SPDLOG_INFO("uv_close!"); });
@@ -344,20 +343,18 @@ Napi::Value Watcher::CreateTask(const Napi::CallbackInfo &info) {
 }
 
 void Watcher::SyncLedger() {
-  boost::hana::for_each(longfist::StateDataTypes, [&](auto it) {
-    UpdateLedger(+boost::hana::second(it));
-  });
+  boost::hana::for_each(longfist::StateDataTypes, [&](auto it) { UpdateLedger(+boost::hana::second(it)); });
 }
 
 void Watcher::SyncAppStatus() {
-  for(auto &s : location_uid_states_map_ ){
+  for (auto &s : location_uid_states_map_) {
     auto app_state = Napi::Number::New(app_states_ref_.Env(), s.second);
     app_states_ref_.Set(format(s.first), app_state);
   }
 }
 
 void Watcher::SyncEventCache() {
-  if(event_cache_){
+  if (event_cache_) {
     reset_cache(event_cache_);
   }
 }
@@ -456,7 +453,7 @@ void Watcher::UpdateBrokerState(uint32_t broker_uid, const BrokerStateUpdate &st
 void Watcher::UpdateAsset(const event_ptr &event, uint32_t book_uid) {
   auto book = bookkeeper_.get_book(book_uid);
   book->update(event->gen_time());
-  state<kungfu::longfist::types::Asset> cache_state(ledger_location_->uid, book_uid, event->gen_time() , book->asset);
+  state<kungfu::longfist::types::Asset> cache_state(ledger_location_->uid, book_uid, event->gen_time(), book->asset);
   feed_state_data_bank(cache_state, data_bank_);
 }
 
@@ -481,7 +478,7 @@ void Watcher::UpdateBook(const event_ptr &event, const Quote &quote) {
     }
 
     if (has_short_position_for_quote or has_long_position_for_quote) {
-      state<kungfu::longfist::types::Asset> cache_state(ledger_uid, holder_uid, event->gen_time() , book->asset);
+      state<kungfu::longfist::types::Asset> cache_state(ledger_uid, holder_uid, event->gen_time(), book->asset);
       feed_state_data_bank(cache_state, data_bank_);
     }
   }
@@ -509,7 +506,7 @@ void Watcher::UpdateBook(int64_t update_time, uint32_t source_id, uint32_t dest_
     }
 
     if (has_short_position_for_quote or has_long_position_for_quote) {
-      state<kungfu::longfist::types::Asset> cache_state(ledger_uid, holder_uid, update_time , book->asset);
+      state<kungfu::longfist::types::Asset> cache_state(ledger_uid, holder_uid, update_time, book->asset);
       feed_state_data_bank(cache_state, data_bank_);
     }
   }
@@ -519,7 +516,8 @@ void Watcher::UpdateBook(const event_ptr &event, const Position &position) {
   auto book = bookkeeper_.get_book(position.holder_uid);
   auto &book_position = book->get_position_for(position.direction, position);
   if (book_position.volume > 0 or book_position.direction == Direction::Long) {
-    state<kungfu::longfist::types::Position> cache_state(event->source(), event->dest(), event->gen_time(), book_position);
+    state<kungfu::longfist::types::Position> cache_state(event->source(), event->dest(), event->gen_time(),
+                                                         book_position);
     feed_state_data_bank(cache_state, data_bank_);
   }
 }
@@ -529,8 +527,8 @@ void Watcher::UpdateBook(int64_t update_time, uint32_t source_id, uint32_t dest_
   auto book = bookkeeper_.get_book(position.holder_uid);
   auto &book_position = book->get_position_for(position.direction, position);
   if (book_position.volume > 0 or book_position.direction == Direction::Long) {
-      state<kungfu::longfist::types::Position> cache_state(source_id, dest_id, update_time, book_position);
-      feed_state_data_bank(cache_state, data_bank_);
+    state<kungfu::longfist::types::Position> cache_state(source_id, dest_id, update_time, book_position);
+    feed_state_data_bank(cache_state, data_bank_);
   }
 }
 

@@ -5,11 +5,9 @@ import {
   getInstrumentTypeData,
   getExtConfigList,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
-import {
-  useExtConfigsRelated,
-  useModalVisible,
-} from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
+import { useModalVisible } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import { KfCategoryTypes } from '@kungfu-trader/kungfu-js-api/typings/enums';
+import { useExtConfigsRelated } from '../../assets/methods/actionsUtils';
 
 const props = withDefaults(
   defineProps<{

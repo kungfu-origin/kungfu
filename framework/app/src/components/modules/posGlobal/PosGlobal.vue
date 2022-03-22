@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import {
-  useCurrentGlobalKfLocation,
   useDashboardBodySize,
   useTableSearchKeyword,
   useTriggerMakeOrder,
@@ -29,6 +28,7 @@ import {
 import { ExchangeIds } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
 import {
   getInstrumentByInstrumentPair,
+  useCurrentGlobalKfLocation,
   useInstruments,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
 

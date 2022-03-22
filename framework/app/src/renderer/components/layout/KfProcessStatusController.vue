@@ -7,10 +7,7 @@ import KfProcessStatus from '@kungfu-trader/kungfu-app/src/renderer/components/p
 import { computed, ref, watch } from 'vue';
 import { SystemProcessName } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
 import {
-  useExtConfigsRelated,
   getInstrumentTypeColor,
-  useAllKfConfigData,
-  useProcessStatusDetailData,
   handleOpenLogview,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import {
@@ -19,7 +16,12 @@ import {
   getProcessIdByKfLocation,
   getPropertyFromProcessStatusDetailDataByKfLocation,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
-import { handleSwitchProcessStatus } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
+import {
+  handleSwitchProcessStatus,
+  useAllKfConfigData,
+  useExtConfigsRelated,
+  useProcessStatusDetailData,
+} from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
 import { KfCategoryTypes } from '@kungfu-trader/kungfu-js-api/typings/enums';
 
 const processControllerBoardVisible = ref<boolean>(false);

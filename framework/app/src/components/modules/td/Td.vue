@@ -22,21 +22,21 @@ import {
 import { categoryRegisterConfig, getColumns } from './config';
 import {
   useTableSearchKeyword,
-  useExtConfigsRelated,
-  useAllKfConfigData,
-  useProcessStatusDetailData,
   handleOpenLogview,
   useDashboardBodySize,
   getInstrumentTypeColor,
-  useAssets,
-  useCurrentGlobalKfLocation,
-  useTdGroups,
   isInTdGroup,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import {
   useAddUpdateRemoveKfConfig,
   handleSwitchProcessStatus,
   useSwitchAllConfig,
+  useProcessStatusDetailData,
+  useExtConfigsRelated,
+  useCurrentGlobalKfLocation,
+  useAllKfConfigData,
+  useTdGroups,
+  useAssets,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
 import {
   dealAssetPrice,

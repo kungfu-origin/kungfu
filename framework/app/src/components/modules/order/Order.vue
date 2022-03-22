@@ -13,9 +13,7 @@ import {
   getProcessIdByKfLocation,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import {
-  useCurrentGlobalKfLocation,
   useDownloadHistoryTradingData,
-  useProcessStatusDetailData,
   useTableSearchKeyword,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import KfDashboard from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfDashboard.vue';
@@ -54,7 +52,7 @@ import {
   OrderStatusEnum,
 } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import { message, Modal } from 'ant-design-vue';
-import { showTradingDataDetail } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
+import { showTradingDataDetail, useCurrentGlobalKfLocation, useProcessStatusDetailData } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
 import { useExtraCategory } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiExtraLocationUtils';
 import StatisticModal from './OrderStatisticModal.vue';
 
