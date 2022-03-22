@@ -286,7 +286,7 @@ void Watcher::Feed(const event_ptr &event) {
     if (subscribed_instruments_.find(uid) != subscribed_instruments_.end()) {
       bookkeeper_.update_book(quote);
       UpdateBook(event->gen_time(), event->source(), event->dest(), quote);
-      data_bank_ << typed_event_ptr<DataType>(event);
+      data_bank_ << typed_event_ptr<Quote>(event);
     }
   } else {
     boost::hana::for_each(longfist::StateDataTypes, [&](auto it) {
