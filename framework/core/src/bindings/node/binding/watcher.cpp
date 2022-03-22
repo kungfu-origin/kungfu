@@ -280,6 +280,7 @@ void Watcher::on_start() {
 }
 
 void Watcher::Feed(const event_ptr &event) {
+<<<<<<< HEAD
   boost::hana::for_each(longfist::StateDataTypes, [&](auto it) {
     using DataType = typename decltype(+boost::hana::second(it))::type;
     if (DataType::tag == event->msg_type()) {
@@ -294,8 +295,24 @@ void Watcher::Feed(const event_ptr &event) {
       } else {
         data_bank_ << typed_event_ptr<DataType>(event);
       }
+=======
+  if (Quote::tag == event->msg_type()) {
+    auto quote = event->data<Quote>();
+    auto uid = quote.uid();
+    if (subscribed_instruments_.find(uid) != subscribed_instruments_.end()) {
+      bookkeeper_.update_book(quote);
+      UpdateBook(event->gen_time(), event->source(), event->dest(), quote);
+      data_bank_ << typed_event_ptr<Quote>(event);
+>>>>>>> acd95096e39cc2a85439d7ba43349e6dab20db42
     }
-  });
+  } else {
+    boost::hana::for_each(longfist::StateDataTypes, [&](auto it) {
+      using DataType = typename decltype(+boost::hana::second(it))::type;
+      if (DataType::tag == event->msg_type()) {
+        data_bank_ << typed_event_ptr<DataType>(event);
+      }
+    });
+  }
 }
 
 void Watcher::RestoreState(const location_ptr &state_location, int64_t from, int64_t to, bool sync_schema) {
