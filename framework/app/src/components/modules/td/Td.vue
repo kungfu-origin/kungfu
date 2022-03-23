@@ -53,9 +53,6 @@ import {
 } from '@kungfu-trader/kungfu-js-api/actions';
 import SetTdGroupModal from './SetTdGroupModal.vue';
 
-interface TdProps {}
-defineProps<TdProps>();
-
 const { dashboardBodyHeight, handleBodySizeChange } = useDashboardBodySize();
 
 const app = getCurrentInstance();

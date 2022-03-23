@@ -20,7 +20,7 @@ import * as CODE_UTILS from '@kungfu-trader/kungfu-js-api/utils/fileUtils';
 import { objectToString } from '@vue/shared';
 import { storeToRefs } from 'pinia';
 import languageJSON from '../config/iconFileConfig.json';
-import { useCodeStore } from '../store/global'
+import { useCodeStore } from '../store/codeStore'
 import themeData from '../config/Monocai.json';
 
 monaco.editor.defineTheme('monokai', themeData);

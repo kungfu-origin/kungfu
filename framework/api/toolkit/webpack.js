@@ -37,7 +37,7 @@ module.exports = {
                         ),
                         // 对应文件添加个.ts或.tsx后缀
                         appendTsSuffixTo: [/\.vue$/],
-                        transpileOnly: true, // 关闭类型检测，即值进行转译
+                        transpileOnly: false, // 关闭类型检测，即值进行转译
                       },
                     },
                   ],

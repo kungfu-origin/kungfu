@@ -34,9 +34,6 @@ import {
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
 import { message } from 'ant-design-vue';
 
-interface MdProps {}
-defineProps<MdProps>();
-
 const { dashboardBodyHeight, handleBodySizeChange } = useDashboardBodySize();
 
 const setSourceModalVisible = ref<boolean>(false);

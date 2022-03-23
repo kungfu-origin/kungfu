@@ -4,7 +4,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import { editor } from 'monaco-editor';
+import { findTargetFromArray } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.main.js';
 import { storeToRefs } from 'pinia';
 import { computed, onMounted, reactive, watch } from 'vue'
@@ -17,7 +17,7 @@ import {
   kungfuKeywords,
   pythonKeywords,
  } from '../hint/monaco.python.hint';
-import { useCodeStore } from '../store/global';
+import { useCodeStore } from '../store/codeStore';
 
 
 monaco.editor.defineTheme('monokai', themeData);
@@ -29,14 +29,13 @@ monaco.languages.registerCompletionItemProvider('python', {
 
 const store = useCodeStore();
 
-
-const { currentFile, fileTree, kfConfig } = storeToRefs(store)
+// currentFile
+const { fileTree, kfConfig } = storeToRefs(store)
 const code = computed(() => kfConfig['code'])
-console.log(kfConfig.value.code, 1);
 
 
-let handleEditor: monaco.editor = reactive(null)
-let file: FileProps = reactive(null)
+let handleEditor: monaco.editor.IDiffNavigator = reactive({})
+let file: FileProps = reactive({})
 
 
 
@@ -47,18 +46,23 @@ watch(code, spaceTabSetting => {
 
 // 监听文件树变化
 watch(fileTree, (newTree, oldTree) => {
-    const newRootPath = Object.values(newTree).map((tree: FileProps) => {
-        if (tree.root) {
-            return tree.filePath
-        }
-    })[0];
-    const oldRootPath = Object.values(oldTree).map((tree: FileProps) => {
-        if (tree.root) {
-            return tree.filePath
-        }
-    })[0];
+
+    const newRootPath = findTargetFromArray<FileData>(Object.values(newTree), 'root', true)!.filePath
+    // const newRootPath = Object.values(newTree).map((tree: FileProps) => {
+    //     if (tree.root) {
+    //         return tree.filePath
+    //     }
+    //     return
+    // })[0];
+    const oldRootPath = findTargetFromArray<FileData>(Object.values(oldTree), 'root', true)!.filePath
+
+    // const oldRootPath = Object.values(oldTree).map((tree: FileProps) => {
+    //     if (tree.root) {
+    //         return tree.filePath
+    //     }
+    // })[0];
     if (newRootPath != oldRootPath) {
-        file = null;
+        file = {};
         handleEditor = null
     }
 })
@@ -66,7 +70,7 @@ watch(fileTree, (newTree, oldTree) => {
 // 创建代码编辑器
 function createEditor(file?: any, codeText?: string): monaco.editor {
     if (document.getElementById('editor-content')) {
-        document.getElementById('editor-content').innerHTML = '';
+        (document.getElementById('editor-content') as any).innerHTML = '';
         let fileLanguage: string = 'plaintext';
         if (file) {
             fileLanguage = languageJSON[file.ext]
@@ -93,7 +97,7 @@ function createEditor(file?: any, codeText?: string): monaco.editor {
 // 更新代码编辑器
 function updateEditor(editor: monaco.editor, file: FileProps, codeText: string): monaco.editor {
     editor.updateOptions({value: codeText});
-    const fileLanguage = languageJSON[file.ext] || 'plaintext';
+    const fileLanguage = file.ext ? (languageJSON[file.ext] || 'plaintext') : 'plaintext';
     handleEditor.setModelLanguage(editor.getModel(), fileLanguage);
     return editor;
 }
@@ -137,7 +141,7 @@ function updateSpaceTab(spaceTabSetting: ICodeSetting) {
 function clearState(): void {
     handleEditor && handleEditor.dispose();
     handleEditor = null;
-    file = null;
+    file = {};
 }
 
 

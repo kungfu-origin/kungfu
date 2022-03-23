@@ -127,7 +127,7 @@ export function showQuitMessageBox(
       })
       .then(({ response }) => {
         if (response === 0) {
-          return Promise.all([
+          Promise.all([
             reqRecordBeforeQuit(mainWindow),
             killAllBeforeQuit(mainWindow),
           ]).finally(() => {
@@ -185,8 +185,8 @@ export const registerScheduleTasks = async (
   const { active, tasks } = scheduleTasks;
   if (!active || !tasks) return false;
 
-  const tasksResolved = Object.values(
-    scheduleTasks.tasks.reduce((avoidRepeatTasks, task) => {
+  const tasksResolved: KungfuApi.ScheduleTask[] = Object.values(
+    (scheduleTasks.tasks || []).reduce((avoidRepeatTasks, task) => {
       const id = `${task.processId}_${
         task.mode
       }_${+task.hour}_${+task.minute}_${+task.second}`;
@@ -271,7 +271,7 @@ export const registerScheduleTasks = async (
       rule.minute = item.minute;
       rule.second = item.second;
       const strategyId = item.processId.toStrategyId();
-      const targetStrategy: KungfuApi.KfConfig =
+      const targetStrategy: KungfuApi.KfConfig | null =
         findTargetFromArray<KungfuApi.KfConfig>(strategy, 'name', strategyId);
 
       if (!targetStrategy) {

@@ -35,19 +35,25 @@
   "dependencies": {
     "@kungfu-trader/kungfu-js-api": "^2.4.0-alpha.19",
     "blessed": "^0.1.81",
-    "core-js": "^3.20.0",
-    "rxjs": "^7.5.0"
+    "core-js": "^3.20.0"
   },
   "devDependencies": {
     "@babel/core": "^7.0.0",
     "@kungfu-trader/kungfu-toolchain": "^2.4.0-alpha.19",
+    "@types/blessed": "^0.1.19",
     "babel-loader": "^8.0.0",
     "babel-plugin-syntax-dynamic-import": "^6.18.0",
+    "colors": "^1.4.0",
     "commander": "^9.0.0",
+    "console-success": "^1.0.4",
+    "dayjs": "^1.10.8",
     "fs-extra": "^10.0.0",
+    "glob": "^7.2.0",
     "inquirer": "^8.2.0",
     "inquirer-autocomplete-prompt": "^2.0.0",
     "inquirer-path": "^1.0.0-beta5",
-    "minimist": "^1.2.5"
+    "minimist": "^1.2.5",
+    "rxjs": "^7.5.5",
+    "tail": "^2.2.4"
   }
 }

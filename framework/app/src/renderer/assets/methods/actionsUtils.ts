@@ -521,7 +521,7 @@ export const useInstruments = (): {
             const sourceId = mdLocation.group;
             const sourceType = mdExtTypeMap[sourceId];
             const ableSubscribedInstrumentTypes =
-              AbleSubscribeInstrumentTypesBySourceType[sourceType];
+              AbleSubscribeInstrumentTypesBySourceType[sourceType] || [];
 
             instrumentsForSubscribe.forEach((item) => {
               if (

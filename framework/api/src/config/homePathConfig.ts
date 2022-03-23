@@ -22,22 +22,19 @@ const getHomePath = () => {
 if (process.env.NODE_ENV === 'development') {
   global.__resources = `${__resources}`;
 } else {
-  global.__resources = path.join(__dirname, '/public').replace(/\\/g, '\\\\');
+  global.__resources = path
+    .resolve(__dirname, '../public')
+    .replace(/\\/g, '\\\\');
 }
 
 if (process.env.APP_TYPE === 'main' || process.env.APP_TYPE === 'renderer') {
+  //global.__kfResourcesPath 是一个容易出错的问题, 需要每个调用pathconfig的进程都注册了这个值, 不然报错
   global.__kfResourcesPath = process.resourcesPath;
 }
 
 if (process.env.APP_TYPE === 'cli') {
   global.__kfResourcesPath = path
-    .join(path.dirname(process.execPath), '..')
-    .replace(/\\/g, '\\\\');
-}
-
-if (process.env.APP_TYPE === 'dzxy') {
-  global.__kfResourcesPath = path
-    .join(__dirname, '..', '..', '..')
+    .resolve(__dirname, '..', '..', '..')
     .replace(/\\/g, '\\\\');
 }
 

@@ -30,7 +30,7 @@ class KungfuCoreConan(ConanFile):
         "nlohmann_json/3.10.5",
         "nng/1.5.2",
         "rxcpp/4.1.1",
-        "sqlite3/3.37.2",
+        # "sqlite3/3.37.2",
         "sqlite_orm/1.7",
         "spdlog/1.9.2",
         "tabulate/1.4",

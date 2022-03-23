@@ -2,7 +2,7 @@
 
 const toolkit = require('@kungfu-trader/kungfu-js-api/toolkit');
 const path = require('path');
-const CopyPlugin = require('copy-webpack-plugin');
+// const CopyPlugin = require('copy-webpack-plugin');
 
 const webpack = require('webpack');
 const { merge } = require('webpack-merge');
@@ -74,27 +74,7 @@ const webpackConfig = (argv) => {
         },
       ],
     },
-    plugins: [
-      ...pagesConfig.plugins,
-      new VueLoaderPlugin(),
-      new CopyPlugin({
-        patterns: [
-          {
-            from: path.posix.join(
-              path.join(appDir, 'public').replace(/\\/g, '/'),
-              '**/*',
-            ),
-            to: path.join(argv.distDir, argv.distName),
-            filter: (resourcePath) => {
-              if (resourcePath.includes('vue-devtool')) {
-                return false;
-              }
-              return true;
-            },
-          },
-        ],
-      }),
-    ],
+    plugins: [...pagesConfig.plugins, new VueLoaderPlugin()],
     target: 'electron-renderer',
   });
 };

@@ -387,6 +387,7 @@ function handleClickAdjustOrderMask(): void {
         side: +order.side,
         offset: +order.offset,
         hedge_flag: +order.hedge_flag,
+        parent_id: BigInt(order.parent_id),
       };
 
       return makeOrderByOrderInput(

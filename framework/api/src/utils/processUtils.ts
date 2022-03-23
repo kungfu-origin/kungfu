@@ -1,4 +1,3 @@
-import fse from 'fs-extra';
 import path from 'path';
 import os from 'os';
 import fkill from 'fkill';
@@ -16,13 +15,12 @@ import {
   getIfProcessRunning,
 } from '../utils/busiUtils';
 import {
-  APP_DIR,
   buildProcessLogPath,
   EXTENSION_DIRS,
   KFC_DIR,
-  KF_CONFIG_PATH,
   KF_HOME,
 } from '../config/pathConfig';
+import { getKfGlobalSettingsValue } from '../config/globalSettings';
 
 process.env.PM2_HOME = path.resolve(os.homedir(), '.pm2');
 const numCPUs = os.cpus() ? os.cpus().length : 1;
@@ -285,12 +283,11 @@ export const pm2Disconnect = pm2.disconnect;
 export const startProcess = (
   options: Pm2StartOptions,
 ): Promise<Proc | void> => {
-  const kfcScript = isWin ? 'kfc.exe' : 'kfc';
   const optionsResolved: Pm2StartOptions = {
     name: options.name,
     args: options.args, //有问题吗？
     cwd: options.cwd || path.join(KFC_DIR),
-    script: options.script || kfcScript,
+    script: options.script || kfcName,
     interpreter: options.interpreter || 'none',
     output: buildProcessLogPath(options.name),
     error: buildProcessLogPath(options.name),
@@ -305,11 +302,12 @@ export const startProcess = (
     exec_mode: 'fork',
     kill_timeout: 16000,
     env: {
-      ...options.env,
       KF_HOME: dealSpaceInPath(KF_HOME),
       LANG: `${locale}.UTF-8`,
       PYTHONUTF8: '1',
       PYTHONIOENCODING: 'utf8',
+      KFC_AS_VARIANT: '',
+      ...options.env,
     },
   };
 
@@ -471,13 +469,17 @@ function getRocketParams(args: string, ifRocket: boolean) {
     rocket = '';
   }
 
+  if (args.includes('dzxy')) {
+    rocket = '';
+  }
+
   return rocket;
 }
 
 function buildArgs(args: string): string {
-  const kfConfig: any = fse.readJsonSync(KF_CONFIG_PATH) || {};
-  const logLevel: string = (kfConfig.system || {}).logLevel || '';
-  const ifRocket = (kfConfig.performance || {}).rocket || false;
+  const globalSetting = getKfGlobalSettingsValue();
+  const logLevel: string = globalSetting?.system?.logLevel || '';
+  const ifRocket = globalSetting?.performance?.rocket || false;
   const rocket = getRocketParams(args, ifRocket);
   return [logLevel, args, rocket].join(' ');
 }
@@ -667,9 +669,9 @@ export const startStrategy = (
   strategyPath: string,
 ): Promise<Proc | void> => {
   strategyPath = dealSpaceInPath(strategyPath);
-  const kfSystemConfig: any = fse.readJsonSync(KF_CONFIG_PATH);
-  const ifLocalPython = (kfSystemConfig.strategy || {}).python || false;
-  const pythonPath = (kfSystemConfig.strategy || {}).pythonPath || '';
+  const globalSetting = getKfGlobalSettingsValue();
+  const ifLocalPython = globalSetting?.strategy?.python || false;
+  const pythonPath = globalSetting?.strategy?.pythonPath || '';
 
   if (ifLocalPython) {
     return deleteProcess(strategyId)
@@ -686,6 +688,26 @@ export const startStrategy = (
       kfLogger.error(err.message);
     });
   }
+};
+
+export const startDzxy = () => {
+  return startProcess({
+    name: 'dzxy',
+    args: '',
+    cwd:
+      process.env.NODE_ENV === 'development'
+        ? path.join(process.cwd(), 'dist', 'cli')
+        : path.resolve(__dirname),
+    script: 'dzxy.js',
+    interpreter: path.join(KFC_DIR, kfcName),
+    force: true,
+    watch: process.env.NODE_ENV === 'production' ? false : true,
+    env: {
+      KFC_AS_VARIANT: 'node',
+    },
+  }).catch((err) => {
+    kfLogger.error(err.message);
+  });
 };
 
 export const startBar = (
@@ -714,17 +736,27 @@ export const startCustomProcess = (
   });
 };
 
-export const startDzxy = (): Promise<any> => {
-  return startProcess({
-    name: 'dzxy',
-    args: '',
-    force: true,
-    watch: process.env.NODE_ENV === 'production' ? false : true,
-    script: 'daemon.js',
-    cwd: APP_DIR,
-    interpreter: process.execPath,
-  }).catch((err) => {
-    kfLogger.error(err.message);
+export const sendDataToProcessIdByPm2 = (
+  topic: string,
+  pm2Id: number,
+  data: Record<string, number | string | boolean>,
+): Promise<void> => {
+  return new Promise((resolve, reject) => {
+    pm2.sendDataToProcessId(
+      pm2Id,
+      {
+        type: 'process:msg',
+        topic,
+        data,
+      },
+      (err) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve();
+        }
+      },
+    );
   });
 };
 

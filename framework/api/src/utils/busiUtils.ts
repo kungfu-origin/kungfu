@@ -38,6 +38,7 @@ import {
   TimeConditionEnum,
   VolumeConditionEnum,
   MakeOrderByWatcherEnum,
+  BrokerStateStatusEnum,
 } from '../typings/enums';
 import {
   deleteProcess,
@@ -205,21 +206,27 @@ export const logger = log4js.getLogger('app');
 export const kfLogger = {
   info: (...args: Array<string | number>) => {
     if (process.env.NODE_ENV === 'development') {
-      console.log('<KF_INFO>', args.join(' '));
+      if (process.env.APP_TYPE !== 'cli') {
+        console.log('<KF_INFO>', args.join(' '));
+      }
     }
     logger.info('<KF_INFO>', args.join(' '));
   },
 
   warn: (...args: Array<string | number>) => {
     if (process.env.NODE_ENV === 'development') {
-      console.warn('<KF_INFO>', args.join(' '));
+      if (process.env.APP_TYPE !== 'cli') {
+        console.warn('<KF_INFO>', args.join(' '));
+      }
     }
     logger.warn('<KF_INFO>', args.join(' '));
   },
 
   error: (...args: Array<string | number>) => {
     if (process.env.NODE_ENV === 'development') {
-      console.error('<KF_INFO>', args.join(' '));
+      if (process.env.APP_TYPE !== 'cli') {
+        console.error('<KF_INFO>', args.join(' '));
+      }
     }
     logger.error('<KF_INFO>', args.join(' '));
   },
@@ -256,20 +263,20 @@ export const setTimerPromiseTask = (fn: Function, interval = 500) => {
   };
 };
 
-export const loopToRunProcess = async (
-  promiseFunc: Array<Function>,
+export const loopToRunProcess = async <T>(
+  promiseFunc: Array<() => Promise<T>>,
   interval = 1000,
 ) => {
   let i = 0,
     len = promiseFunc.length;
-  let resList = [];
+  let resList: (T | Error)[] = [];
   for (i = 0; i < len; i++) {
     const pFunc = promiseFunc[i];
     try {
-      const res = await pFunc();
+      const res: T = await pFunc();
       resList.push(res);
-    } catch (err) {
-      resList.push(err);
+    } catch (err: unknown) {
+      resList.push(err as Error);
     }
 
     await delayMilliSeconds(interval);
@@ -289,7 +296,7 @@ export const delayMilliSeconds = (miliSeconds: number): Promise<void> => {
 export const findTargetFromArray = <T>(
   list: Array<T>,
   targetKey: string,
-  targetValue: string | number,
+  targetValue: string | number | boolean,
 ) => {
   const targetList = list.filter(
     (item) => (item || {})[targetKey] === targetValue,
@@ -410,7 +417,9 @@ const getKfExtConfigList = async (): Promise<KungfuApi.KfExtOriginConfig[]> => {
     }),
   ).then((configList: KungfuApi.KfExtOriginConfig[]) => {
     return configList.filter(
-      (config: KungfuApi.KfExtOriginConfig | null): boolean => !!config,
+      (
+        config: KungfuApi.KfExtOriginConfig,
+      ): config is KungfuApi.KfExtOriginConfig => !!config,
     );
   });
 };
@@ -441,7 +450,7 @@ const getKfExtensionConfigByCategory = (
       const extPath = extConfig.extPath;
       (Object.keys(extConfig['config'] || {}) as KfCategoryTypes[]).forEach(
         (category: KfCategoryTypes) => {
-          const configOfCategory = extConfig['config'][category];
+          const configOfCategory = (extConfig['config'] || {})[category];
           configByCategory[category] = {
             ...(configByCategory[category] || {}),
             [extKey]: {
@@ -469,7 +478,8 @@ const getKfUIExtensionConfigByExtKey = (
       const extName = extConfig.name;
       const extPath = extConfig.extPath;
       const uiConfig = extConfig['ui_config'];
-      const { position, components } = uiConfig;
+      const position = uiConfig?.position || '';
+      const components = uiConfig?.components;
 
       if (!position) {
         return configByExtraKey;
@@ -1179,6 +1189,42 @@ export const filterLedgerResult = <T>(
   return dataTableResolved.list();
 };
 
+export const dealAppStates = (
+  watcher: KungfuApi.Watcher | null,
+  appStates: Record<string, BrokerStateStatusEnum>,
+): Record<string, BrokerStateStatusTypes> => {
+  if (!watcher) {
+    return {} as Record<string, BrokerStateStatusTypes>;
+  }
+
+  return Object.keys(appStates || {}).reduce((appStatesResolved, key) => {
+    const kfLocation = watcher.getLocation(key);
+    const processId = getProcessIdByKfLocation(kfLocation);
+    const appStateValue = appStates[key] as BrokerStateStatusEnum;
+    appStatesResolved[processId] = BrokerStateStatusEnum[
+      appStateValue
+    ] as BrokerStateStatusTypes;
+    return appStatesResolved;
+  }, {} as Record<string, BrokerStateStatusTypes>);
+};
+
+export const dealAssetsByHolderUID = (
+  watcher: KungfuApi.Watcher | null,
+  assets: KungfuApi.DataTable<KungfuApi.Asset>,
+): Record<string, KungfuApi.Asset> => {
+  if (!watcher) {
+    return {} as Record<string, KungfuApi.Asset>;
+  }
+
+  return Object.values(assets).reduce((assetsResolved, asset) => {
+    const { holder_uid } = asset;
+    const kfLocation = watcher.getLocation(holder_uid);
+    const processId = getProcessIdByKfLocation(kfLocation);
+    assetsResolved[processId] = asset;
+    return assetsResolved;
+  }, {} as Record<string, KungfuApi.Asset>);
+};
+
 export const dealTradingData = (
   watcher: KungfuApi.Watcher | null,
   tradingData: KungfuApi.TradingData | undefined,
@@ -1405,3 +1451,44 @@ export const deepClone = <T>(obj: T): T => {
   if (!obj) return obj;
   return JSON.parse(JSON.stringify(obj));
 };
+
+
+export function isCriticalLog(line: string): boolean {
+  if (line.indexOf('critical') !== -1) {
+    return true;
+  }
+
+  if (line.indexOf('File') !== -1) {
+    if (line.indexOf('line') !== -1) {
+      return true;
+    }
+  }
+
+  if (line.indexOf('Traceback') != -1) {
+    return true;
+  }
+
+  if (line.indexOf('Error') != -1) {
+    return true;
+  }
+
+  if (line.indexOf('Try') != -1) {
+    if (line.indexOf('for help') != -1) {
+      return true;
+    }
+  }
+
+  if (line.indexOf('Usage') != -1) {
+    return true;
+  }
+
+  if (line.indexOf('Failed to execute') != -1) {
+    return true;
+  }
+
+  if (line.indexOf('KeyboardInterrupt') != -1) {
+    return true;
+  }
+
+  return false;
+}

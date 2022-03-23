@@ -1,6 +1,7 @@
 const fse = require('fs-extra');
 const path = require('path');
 const app = require('@kungfu-trader/kungfu-app');
+const { getAppDir } = require('@kungfu-trader/kungfu-js-api/toolkit/utils');
 
 const ensureDir = (cwd, ...dirNames) => {
   const targetDir = path.join(cwd, ...dirNames);
@@ -9,11 +10,19 @@ const ensureDir = (cwd, ...dirNames) => {
 };
 
 exports.build = () => {
-  const appDrone = '@kungfu-trader/kungfu-app/dist/app/kungfu-app.node';
-  const srcDir = path.dirname(require.resolve(appDrone));
-  const targetDir = ensureDir(process.cwd(), 'dist', 'app');
-  fse.removeSync(targetDir);
-  fse.copySync(srcDir, targetDir);
+  const appDistDir = path.dirname(
+    require.resolve('@kungfu-trader/kungfu-app/dist/app'),
+  );
+  const cliDistDir = path.dirname(
+    require.resolve('@kungfu-trader/kungfu-cli/dist/cli'),
+  );
+  const targetAppDistDir = ensureDir(process.cwd(), 'dist', 'app');
+  const targetCliDistDir = ensureDir(process.cwd(), 'dist', 'cli');
+
+  fse.removeSync(targetAppDistDir);
+  fse.removeSync(targetCliDistDir);
+  fse.copySync(appDistDir, targetAppDistDir);
+  fse.copySync(cliDistDir, targetCliDistDir);
 };
 
 exports.package = async () => {

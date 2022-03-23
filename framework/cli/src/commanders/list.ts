@@ -34,7 +34,7 @@ export const listKfLocations = async (): Promise<void> => {
   });
 
   if ([...mdList, ...tdList, ...strategyList].length === 0) {
-    console.log('No mds, tds and strategies!');
+    console.log('No mds, tds and strategies');
   } else {
     console.log(
       [

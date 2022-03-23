@@ -37,9 +37,6 @@ import path from 'path';
 import { shell } from '@electron/remote';
 import KfBlinkNum from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfBlinkNum.vue';
 
-interface StrategyProps {}
-defineProps<StrategyProps>();
-
 const { dashboardBodyHeight, handleBodySizeChange } = useDashboardBodySize();
 
 const setStrategyModalVisible = ref<boolean>(false);

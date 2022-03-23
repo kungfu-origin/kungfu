@@ -125,9 +125,14 @@ interface ExtraOrderInput {
   accountId?: string;
 }
 
+interface Strategy {
+  strategy_id: string;
+  strategy_path: string;
+  add_time: number;
+}
 
 interface FileProps {
-    root?: Array;
+    root?: boolean;
     filePath?: string;
     ext?: string;
     isDir?: boolean
@@ -135,10 +140,30 @@ interface FileProps {
 interface IValue {
     isDir: boolean
 }
-interface ICurrentFile {
-    filePath?: string;
-    value: IValue;
+interface FileIds {
+  file: any[];
+  folder: any[];
 }
+interface FileTreeByPath {
+  ids: FileIds;
+  fileTree: any;
+}
+interface FileData {
+  id: number;
+  parentId: number;
+  isDir: boolean;
+  name: string;
+  ext: string;
+  filePath: string;
+  children: FileIds;
+  stats: object;
+  root: boolean;
+  open: boolean;
+}
+
+type IFileTree = Record<string, FileData>
+
+
 interface IFileNode {
     filePath: string;
     root?: string;

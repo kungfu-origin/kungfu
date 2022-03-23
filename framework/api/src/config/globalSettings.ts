@@ -45,7 +45,7 @@ export const getKfGlobalSettings = (): KfSystemConfig[] => [
     ],
   },
   {
-    key: 'Performance',
+    key: 'performance',
     name: isEnglish ? 'Performance' : '性能',
     config: [
       {

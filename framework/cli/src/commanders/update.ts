@@ -2,7 +2,7 @@ import { getAllKfConfigOriginData } from '@kungfu-trader/kungfu-js-api/actions';
 import {
   buildObjectFromKfConfigArray,
   getPromptQuestionsBySettings,
-  selectTargetKfLocation,
+  selectTargetKfConfig,
 } from '../assets/methods/utils';
 import {
   getIdByKfLocation,
@@ -11,13 +11,18 @@ import {
 import { setKfConfig } from '@kungfu-trader/kungfu-js-api/kungfu/store';
 
 export const updateMdTdStrategy = async () => {
-  const kfLocation = await selectTargetKfLocation();
+  const kfLocation = await selectTargetKfConfig();
+
+  if (!kfLocation) {
+    throw new Error('target is illegal kfLocation');
+  }
+
   const extConfigs = await getKfExtensionConfig();
   const { md, td, strategy } = await getAllKfConfigOriginData();
 
   if (kfLocation.category === 'md') {
     const targetMd = getTargetKfConfig(md, kfLocation);
-    const initValue = JSON.parse(targetMd.value || '{}');
+    const initValue = JSON.parse(targetMd?.value || '{}');
     const extConfig = extConfigs['md'][kfLocation.group];
     const settings = extConfig?.settings;
 
@@ -28,6 +33,11 @@ export const updateMdTdStrategy = async () => {
     return buildPromptAndSetConfig(settings, initValue, kfLocation);
   } else if (kfLocation.category === 'td') {
     const targetTd = getTargetKfConfig(td, kfLocation);
+
+    if (!targetTd) {
+      throw new Error('targetTd is null');
+    }
+
     const initValue = JSON.parse(targetTd.value || '{}');
     const extConfig = extConfigs['td'][kfLocation.group];
     const settings = extConfig?.settings;
@@ -39,6 +49,11 @@ export const updateMdTdStrategy = async () => {
     return buildPromptAndSetConfig(settings, initValue, kfLocation);
   } else if (kfLocation.category === 'strategy') {
     const targetStrategy = getTargetKfConfig(strategy, kfLocation);
+
+    if (!targetStrategy) {
+      throw new Error('targetTd is null');
+    }
+
     const initValue = JSON.parse(targetStrategy.value || '{}');
     const strategySettings: KungfuApi.KfConfigItem[] = [
       {

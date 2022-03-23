@@ -24,7 +24,8 @@
     "@kungfu-trader/kfx-sim": "^2.4.0-alpha.19",
     "@kungfu-trader/kfx-timer-task": "^2.4.0-alpha.19",
     "@kungfu-trader/kfx-xtp-demo": "^2.4.0-alpha.19",
-    "@kungfu-trader/kungfu-app": "^2.4.0-alpha.19"
+    "@kungfu-trader/kungfu-app": "^2.4.0-alpha.19",
+    "@kungfu-trader/kungfu-cli": "^2.4.0-alpha.19"
   },
   "devDependencies": {
     "@kungfu-trader/kungfu-sdk": "^2.4.0-alpha.19"

@@ -50,8 +50,8 @@ export const dealKfTime = (nano: bigint, date = false): string => {
 export const dealTradingDataItem = (
   item: KungfuApi.TradingDataTypes,
   watcher: KungfuApi.Watcher | null,
-) => {
-  const itemResolved = { ...item } as Record<string, unknown>;
+): Record<string, string | number | bigint> => {
+  const itemResolved = { ...item } as Record<string, string | number | bigint>;
   if ('trade_time' in item) {
     itemResolved.trade_time = dealKfTime(item.trade_time, true);
   }
@@ -388,7 +388,7 @@ export const makeOrderByOrderInput = (
     }
 
     if (kfLocation.category === 'td') {
-      kfMakeOrder(window.watcher, orderInput, kfLocation)
+      kfMakeOrder(watcher, orderInput, kfLocation)
         .then(() => {
           resolve();
         })
@@ -401,7 +401,7 @@ export const makeOrderByOrderInput = (
         reject(new Error('下单账户信息错误'));
         return;
       }
-      kfMakeOrder(window.watcher, orderInput, tdLocation, kfLocation)
+      kfMakeOrder(watcher, orderInput, tdLocation, kfLocation)
         .then(() => {
           resolve();
         })
@@ -414,7 +414,7 @@ export const makeOrderByOrderInput = (
         reject(new Error('下单账户信息错误'));
         return;
       }
-      kfMakeOrder(window.watcher, orderInput, tdLocation)
+      kfMakeOrder(watcher, orderInput, tdLocation)
         .then(() => {
           resolve();
         })
@@ -508,7 +508,6 @@ export const dealTrade = (
 };
 
 export const dealPosition = (
-  watcher: KungfuApi.Watcher,
   pos: KungfuApi.Position,
 ): KungfuApi.PositionResolved => {
   return {

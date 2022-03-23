@@ -16,7 +16,6 @@ import {
   reactive,
   Ref,
   ref,
-  toRaw,
   toRefs,
   watch,
 } from 'vue';
@@ -165,7 +164,7 @@ function makeSearchOptionFormInstruments(
     .map((item) => {
       return transformSearchInstrumentResultToInstrument(item.toString());
     })
-    .filter((item) => !!item);
+    .filter((item): item is KungfuApi.InstrumentResolved => !!item);
 
   if (!instrumentResolveds.length) {
     if (type === 'instruments') {

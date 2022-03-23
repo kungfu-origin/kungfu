@@ -32,7 +32,7 @@ export const Pm2ProcessStatus: Record<
   ['stopping']: {
     name: isEnglish ? 'Stopping' : '停止中',
     color: 'kf-color-waiting',
-    level: 1,
+    level: 0,
   },
   ['stopped']: {
     name: isEnglish ? 'Stopped' : '已停止',
@@ -250,6 +250,12 @@ export const UnfinishedOrderStatus = [
   OrderStatusEnum.Pending,
   OrderStatusEnum.Submitted,
   OrderStatusEnum.PartialFilledActive,
+];
+
+export const WellFinishedOrderStatus = [
+  OrderStatusEnum.Cancelled,
+  OrderStatusEnum.Filled,
+  OrderStatusEnum.PartialFilledNotActive,
 ];
 
 export const Direction: Record<
