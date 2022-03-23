@@ -13,16 +13,18 @@ import KfDashboardItem from '@kungfu-trader/kungfu-app/src/renderer/components/p
 import KfConfigSettingsForm from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfConfigSettingsForm.vue';
 import {
   buildInstrumentSelectOptionValue,
-  useCurrentGlobalKfLocation,
-  useExtConfigsRelated,
-  useProcessStatusDetailData,
   useTriggerMakeOrder,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import { getConfigSettings } from './config';
 import { message } from 'ant-design-vue';
 import { makeOrderByOrderInput } from '@kungfu-trader/kungfu-js-api/kungfu';
 import { InstrumentTypeEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';
-import { useInstruments } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
+import {
+  useCurrentGlobalKfLocation,
+  useExtConfigsRelated,
+  useInstruments,
+  useProcessStatusDetailData,
+} from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
 import {
   getProcessIdByKfLocation,
   initFormStateByConfig,
@@ -50,11 +52,11 @@ const makeOrderInstrumentType = ref<InstrumentTypeEnum>(
 );
 
 const configSettings = computed(() => {
-  if (!currentGlobalKfLocation.data) {
+  if (!currentGlobalKfLocation.value) {
     return getConfigSettings();
   }
 
-  const { category } = currentGlobalKfLocation.data;
+  const { category } = currentGlobalKfLocation.value;
   return getConfigSettings(
     category,
     makeOrderInstrumentType.value,
@@ -187,14 +189,14 @@ function handleMakeOrder() {
         parent_id: BigInt(0),
       };
 
-      if (!currentGlobalKfLocation.data || !window.watcher) {
+      if (!currentGlobalKfLocation.value || !window.watcher) {
         message.error('当前 Location 错误');
         return;
       }
 
       const tdProcessId =
-        currentGlobalKfLocation.data.category === 'td'
-          ? getProcessIdByKfLocation(currentGlobalKfLocation.data)
+        currentGlobalKfLocation.value?.category === 'td'
+          ? getProcessIdByKfLocation(currentGlobalKfLocation.value)
           : `td_${account_id.toString()}`;
 
       if (processStatusData.value[tdProcessId] !== 'online') {
@@ -205,7 +207,7 @@ function handleMakeOrder() {
       makeOrderByOrderInput(
         window.watcher,
         makeOrderInput,
-        currentGlobalKfLocation.data,
+        currentGlobalKfLocation.value,
         tdProcessId.toAccountId(),
       ).catch((err) => {
         message.error(err.message);
@@ -221,15 +223,15 @@ function handleMakeOrder() {
   <div class="kf-make-order-dashboard__warp">
     <KfDashboard>
       <template v-slot:title>
-        <span v-if="currentGlobalKfLocation.data">
+        <span v-if="currentGlobalKfLocation">
           <a-tag
             v-if="currentCategoryData"
             :color="currentCategoryData?.color || 'default'"
           >
             {{ currentCategoryData?.name }}
           </a-tag>
-          <span class="name" v-if="currentGlobalKfLocation.data">
-            {{ getCurrentGlobalKfLocationId(currentGlobalKfLocation.data) }}
+          <span class="name" v-if="currentGlobalKfLocation">
+            {{ getCurrentGlobalKfLocationId(currentGlobalKfLocation) }}
           </span>
         </span>
       </template>

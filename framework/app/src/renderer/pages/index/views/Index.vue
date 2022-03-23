@@ -31,8 +31,8 @@ export default defineComponent({
     const boardsMap: KfLayout.BoardsMap =
       getIndexBoardsMap() || defaultBoardsMap;
 
-    const store = useGlobalStore();
-    store.initBoardsMap(boardsMap);
+    const { initBoardsMap } = useGlobalStore();
+    initBoardsMap(boardsMap);
 
     const addBoardModalVisible = ref<boolean>(false);
     const addBoardTargetBoardId = ref<number>(-1);
@@ -45,7 +45,7 @@ export default defineComponent({
 
       if (data.tag === 'main') {
         if (data.name === 'reset-main-dashboard') {
-          store.initBoardsMap(defaultBoardsMap);
+          initBoardsMap(defaultBoardsMap);
           message.success('操作成功');
         }
       }

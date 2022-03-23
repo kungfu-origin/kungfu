@@ -105,7 +105,7 @@
 
 <script lang="ts">
 import { defineComponent, PropType, reactive, toRefs } from 'vue';
-import { mapActions, mapState } from 'pinia';
+import { storeToRefs } from 'pinia';
 import {
   KfLayoutDirection,
   KfLayoutTargetDirectionClassName,
@@ -149,6 +149,18 @@ export default defineComponent({
   },
 
   setup() {
+    const { boardsMap, dragedContentData, isBoardDragging } = storeToRefs(
+      useGlobalStore(),
+    );
+
+    const {
+      setBoardsMapAttrById,
+      removeBoardByContentId,
+      setDragedContentData,
+      afterDragMoveBoard,
+      markIsBoardDragging,
+    } = useGlobalStore();
+
     const rowColIterData = reactive<KfRowColIterData>({
       h: KfLayoutDirection.h,
       v: KfLayoutDirection.v,
@@ -161,17 +173,19 @@ export default defineComponent({
 
     return {
       ...toRefs(rowColIterData),
+      boardsMap,
+      dragedContentData,
+      isBoardDragging,
+
+      setBoardsMapAttrById,
+      removeBoardByContentId,
+      setDragedContentData,
+      afterDragMoveBoard,
+      markIsBoardDragging,
     };
   },
 
   computed: {
-    ...mapState(useGlobalStore, {
-      boardsMap: (store): KfLayout.BoardsMap => store.boardsMap,
-      dragedContentData: (store): KfLayout.ContentData | null =>
-        store.dragedContentData,
-      isBoardDragging: (store): boolean => store.isBoardDragging,
-    }),
-
     boardInfo(): KfLayout.BoardInfo {
       return this.boardsMap[this.boardId] || {};
     },
@@ -190,14 +204,6 @@ export default defineComponent({
   },
 
   methods: {
-    ...mapActions(useGlobalStore, {
-      setBoardsMapAttrById: 'setBoardsMapAttrById',
-      removeBoardByContentId: 'removeBoardByContentId',
-      setDragedContentData: 'setDragedContentData',
-      afterDragMoveBoard: 'afterDragMoveBoard',
-      markIsBoardDragging: 'markIsBoardDragging',
-    }),
-
     handleDragStart(contentId: KfLayout.ContentId) {
       this.setDragedContentData(this.boardId, contentId);
       this.markIsBoardDragging(true);

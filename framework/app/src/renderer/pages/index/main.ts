@@ -43,6 +43,7 @@ import {
   startArchiveMakeTask,
   startGetProcessStatus,
   startLedger,
+  startCacheD,
   startMaster,
 } from '@kungfu-trader/kungfu-js-api/utils/processUtils';
 
@@ -92,10 +93,8 @@ app
   .use(Statistic)
   .use(VueVirtualScroller);
 
-//this sort ensure $useGlobalStore can be get in mounted callback
 app.config.globalProperties.$globalBus = globalBus;
 app.config.globalProperties.$tradingDataSubject = tradingDataSubject;
-app.config.globalProperties.$useGlobalStore = useGlobalStore;
 app.config.globalProperties.$globalCategoryRegister =
   new GlobalCategoryRegister();
 
@@ -131,6 +130,7 @@ if (process.env.RELOAD_AFTER_CRASHED === 'false') {
       );
 
       delayMilliSeconds(1000)
+        .then(() => startCacheD(false))
         .then(() => startLedger(false))
         .catch((err) => console.error(err.message));
     });

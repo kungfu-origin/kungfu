@@ -15,12 +15,9 @@ import KfSetByConfigModal from '@kungfu-trader/kungfu-app/src/renderer/component
 import { columns } from './config';
 import {
   getInstrumentTypeColor,
-  useExtConfigsRelated,
-  useProcessStatusDetailData,
   handleOpenLogview,
   useDashboardBodySize,
   useTableSearchKeyword,
-  useAllKfConfigData,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import {
   getIdByKfLocation,
@@ -30,6 +27,9 @@ import {
 import {
   handleSwitchProcessStatus,
   useAddUpdateRemoveKfConfig,
+  useAllKfConfigData,
+  useExtConfigsRelated,
+  useProcessStatusDetailData,
   useSwitchAllConfig,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
 import { message } from 'ant-design-vue';
@@ -72,7 +72,7 @@ function handleOpenSetMdDialog(
   selectedSource: string,
   mdConfig?: KungfuApi.KfConfig,
 ) {
-  const extConfig: KungfuApi.KfExtConfig = (extConfigs.data['md'] || {})[
+  const extConfig: KungfuApi.KfExtConfig = (extConfigs.value['md'] || {})[
     selectedSource
   ];
 

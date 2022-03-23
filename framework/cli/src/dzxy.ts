@@ -217,7 +217,7 @@ function cancellAllOrders(packet: Pm2PacketMain) {
     filterKey,
     watcher.getLocationUID(kfLocation),
   ).list();
-  return kfCancelAllOrders(watcher, orders, kfLocation).catch((err) => {
+  return kfCancelAllOrders(watcher, orders).catch((err) => {
     console.error(err.message);
   });
 }

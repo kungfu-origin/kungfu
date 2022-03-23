@@ -4,13 +4,12 @@ import { getIdByKfLocation } from '@kungfu-trader/kungfu-js-api/utils/busiUtils'
 import {
   getInstrumentTypeColor,
   isInTdGroup,
-  useAllKfConfigData,
-  useExtConfigsRelated,
   useModalVisible,
-  useTdGroups,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import { AntTreeNodeDropEvent, DataNode } from 'ant-design-vue/lib/tree';
-import { computed, ComputedRef, getCurrentInstance, toRaw, toRefs } from 'vue';
+import { computed, ComputedRef, toRaw, toRefs } from 'vue';
+import { useGlobalStore } from '@kungfu-trader/kungfu-app/src/renderer/pages/index/store/global';
+import { useAllKfConfigData, useExtConfigsRelated, useTdGroups } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
 
 const props = withDefaults(
   defineProps<{
@@ -26,7 +25,6 @@ defineEmits<{
   (e: 'close'): void;
 }>();
 
-const app = getCurrentInstance();
 const { modalVisible, closeModal } = useModalVisible(props.visible);
 const { tdExtTypeMap } = useExtConfigsRelated();
 const tdGroup = useTdGroups();
@@ -36,7 +34,7 @@ const tdTreeData: ComputedRef<DataNode[]> = computed(() => {
   const tdGroupResolved: Record<string, DataNode> = {};
   const tdResolved: DataNode[] = [];
   const markedNameToTdGroup: Record<string, KungfuApi.KfExtraLocation> = {};
-  [...tdGroup.data, ...td.value].forEach((item) => {
+  [...tdGroup.value, ...td.value].forEach((item) => {
     if ('children' in item) {
       markedNameToTdGroup[item.name] = { ...item };
       tdGroupResolved[item.name] = {
@@ -79,7 +77,7 @@ function transformKfConfigToDataNode(
 function isGroup(node: DataNode): KungfuApi.KfExtraLocation | null {
   if ('children' in node) {
     const name = node.name;
-    const targetGroups = tdGroup.data.filter((item) => {
+    const targetGroups = tdGroup.value.filter((item) => {
       return item.name === name;
     });
     if (targetGroups.length) {
@@ -102,7 +100,7 @@ function handleDrop(info: AntTreeNodeDropEvent) {
   const targetAccountId = getIdByKfLocation(
     dragNode as unknown as KungfuApi.KfExtraLocation,
   );
-  const oldGroup = isInTdGroup(tdGroup.data, targetAccountId);
+  const oldGroup = isInTdGroup(tdGroup.value, targetAccountId);
 
   if (oldGroup) {
     const oldTargetIndex = oldGroup.children.indexOf(targetAccountId);
@@ -111,7 +109,7 @@ function handleDrop(info: AntTreeNodeDropEvent) {
 
   const group = isGroup(node);
   if (group) {
-    const groupIndex = tdGroup.data.findIndex(
+    const groupIndex = tdGroup.value.findIndex(
       (group) => node.name === group.name,
     );
     //from group to bottom
@@ -123,15 +121,13 @@ function handleDrop(info: AntTreeNodeDropEvent) {
   const destAccountId = getIdByKfLocation(
     node as unknown as KungfuApi.KfExtraLocation,
   );
-  const newGroup = isInTdGroup(tdGroup.data, destAccountId);
+  const newGroup = isInTdGroup(tdGroup.value, destAccountId);
   if (newGroup) {
     newGroup.children.push(targetAccountId);
   }
 
-  setTdGroup(toRaw(tdGroup.data)).then(() => {
-    if (app?.proxy) {
-      app?.proxy.$useGlobalStore().setTdGroups();
-    }
+  setTdGroup(toRaw(tdGroup.value)).then(() => {
+    useGlobalStore().setTdGroups();
   });
 }
 

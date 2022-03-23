@@ -2,8 +2,6 @@
 import {
   handleOpenLogview,
   useDashboardBodySize,
-  useExtConfigsRelated,
-  useProcessStatusDetailData,
   useTableSearchKeyword,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import { computed, ref } from 'vue';
@@ -37,6 +35,7 @@ import {
   removeKfLocation,
   removeLog,
 } from '@kungfu-trader/kungfu-js-api/actions';
+import { useExtConfigsRelated, useProcessStatusDetailData } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
 
 const { extConfigs } = useExtConfigsRelated();
 const { dashboardBodyHeight, handleBodySizeChange } = useDashboardBodySize();
@@ -53,7 +52,7 @@ const setTaskConfigPayload = ref<KungfuApi.SetKfConfigPayload>({
 });
 
 const taskTypeKeys = computed(() => {
-  return Object.keys(extConfigs.data['strategy'] || {});
+  return Object.keys(extConfigs.value['strategy'] || {});
 });
 
 const taskList = computed(() => {
@@ -90,7 +89,7 @@ function handleOpenSetTaskModal(
     return;
   }
 
-  const extConfig: KungfuApi.KfExtConfig = (extConfigs.data['strategy'] || {})[
+  const extConfig: KungfuApi.KfExtConfig = (extConfigs.value['strategy'] || {})[
     selectedExtKey
   ];
 
@@ -149,7 +148,7 @@ function handleSwitchProcessStatusResolved(
   }
 
   const extKey = taskLocation.group;
-  const extConfig: KungfuApi.KfExtConfig = (extConfigs.data['strategy'] || {})[
+  const extConfig: KungfuApi.KfExtConfig = (extConfigs.value['strategy'] || {})[
     extKey
   ];
 
@@ -191,7 +190,7 @@ function handleConfirmAddUpdateTask(
     mode: 'LIVE',
   };
 
-  const extConfig: KungfuApi.KfExtConfig = (extConfigs.data['strategy'] || {})[
+  const extConfig: KungfuApi.KfExtConfig = (extConfigs.value['strategy'] || {})[
     extKey
   ];
 
@@ -282,7 +281,7 @@ function dealArgs(record: Pm2ProcessStatusDetail): string {
     return taskArgs.split(path.delimiter).join(' ');
   }
 
-  const extConfig: KungfuApi.KfExtConfig = (extConfigs.data['strategy'] || {})[
+  const extConfig: KungfuApi.KfExtConfig = (extConfigs.value['strategy'] || {})[
     taskKfLocation.group
   ];
   if (!extConfig || !extConfig.settings) {

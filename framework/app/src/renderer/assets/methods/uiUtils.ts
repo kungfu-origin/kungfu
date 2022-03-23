@@ -1,42 +1,28 @@
 import {
   ComputedRef,
   Ref,
-  reactive,
   ref,
   computed,
   getCurrentInstance,
-  onMounted,
-  toRefs,
   toRaw,
   Component,
 } from 'vue';
 import { KF_HOME } from '@kungfu-trader/kungfu-js-api/config/pathConfig';
 import {
-  buildExtTypeMap,
-  dealCategory,
-  getAppStateStatusName,
-  getIdByKfLocation,
   getInstrumentTypeData,
   getProcessIdByKfLocation,
   getTradingDate,
   kfLogger,
   removeJournal,
+  removeDB,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { ExchangeIds } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
 
-import {
-  Pm2ProcessStatusData,
-  Pm2ProcessStatusDetailData,
-} from '@kungfu-trader/kungfu-js-api/utils/processUtils';
-import { storeToRefs } from 'pinia';
 import { BrowserWindow, getCurrentWindow } from '@electron/remote';
 import { ipcRenderer } from 'electron';
 import { message } from 'ant-design-vue';
 import {
   InstrumentTypes,
-  BrokerStateStatusTypes,
-  ProcessStatusTypes,
-  KfCategoryTypes,
   KfUIExtLocatorTypes,
 } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import path from 'path';
@@ -117,11 +103,13 @@ export const useTableSearchKeyword = <T>(
   };
 };
 
-export const beforeStartAll = (): Promise<void> => {
+const removeJournalBeforeStartAll = (
+  currentTradingDate: string,
+): Promise<void> => {
   const clearJournalDateFromLocal = localStorage.getItem(
     'clearJournalTradingDate',
   );
-  const currentTradingDate = getTradingDate();
+
   kfLogger.info(
     'Lastest Clear Journal Trading Date: ',
     clearJournalDateFromLocal || '',
@@ -136,310 +124,32 @@ export const beforeStartAll = (): Promise<void> => {
   }
 };
 
+const removeDBBeforeStartAll = (currentTradingDate: string): Promise<void> => {
+  const clearDBDateFromLocal = localStorage.getItem('clearDBTradingDate');
+
+  kfLogger.info('Lastest Clear DB Trading Date: ', clearDBDateFromLocal || '');
+
+  if (currentTradingDate !== clearDBDateFromLocal) {
+    localStorage.setItem('clearDBTradingDate', currentTradingDate);
+    kfLogger.info('Clear DB Trading Date: ', currentTradingDate);
+    return removeDB(KF_HOME);
+  } else {
+    return Promise.resolve();
+  }
+};
+
+export const beforeStartAll = (): Promise<void[]> => {
+  const currentTradingDate = getTradingDate();
+  return Promise.all([
+    removeJournalBeforeStartAll(currentTradingDate),
+    removeDBBeforeStartAll(currentTradingDate),
+  ]);
+};
+
 export const getInstrumentTypeColor = (
   type: InstrumentTypes,
 ): KungfuApi.AntInKungfuColorTypes => {
   return getInstrumentTypeData(type).color || 'default';
-};
-
-export const useExtConfigsRelated = (): {
-  extConfigs: { data: KungfuApi.KfExtConfigs };
-  uiExtConfigs: { data: KungfuApi.KfUIExtConfigs };
-  tdExtTypeMap: ComputedRef<Record<string, InstrumentTypes>>;
-  mdExtTypeMap: ComputedRef<Record<string, InstrumentTypes>>;
-} => {
-  const app = getCurrentInstance();
-  const extConfigs = reactive<{ data: KungfuApi.KfExtConfigs }>({
-    data: {},
-  });
-  const uiExtConfigs = reactive<{ data: KungfuApi.KfUIExtConfigs }>({
-    data: {},
-  });
-  const tdExtTypeMap = computed(() => buildExtTypeMap(extConfigs.data, 'td'));
-  const mdExtTypeMap = computed(() => buildExtTypeMap(extConfigs.data, 'md'));
-
-  onMounted(() => {
-    if (app?.proxy) {
-      const store = storeToRefs(app?.proxy.$useGlobalStore());
-      extConfigs.data = store.extConfigs as unknown as KungfuApi.KfExtConfigs;
-      uiExtConfigs.data =
-        store.uiExtConfigs as unknown as KungfuApi.KfUIExtConfigs;
-    }
-  });
-
-  return {
-    extConfigs,
-    uiExtConfigs,
-    tdExtTypeMap,
-    mdExtTypeMap,
-  };
-};
-
-export const useProcessStatusDetailData = (): {
-  processStatusData: Ref<Pm2ProcessStatusData>;
-  processStatusDetailData: Ref<Pm2ProcessStatusDetailData>;
-  appStates: Ref<Record<string, BrokerStateStatusTypes>>;
-  getProcessStatusName(
-    kfConfig: KungfuApi.KfLocation | KungfuApi.KfConfig,
-  ): ProcessStatusTypes | undefined;
-} => {
-  const app = getCurrentInstance();
-  const allProcessStatusData = reactive<{
-    processStatusData: Pm2ProcessStatusData;
-    processStatusDetailData: Pm2ProcessStatusDetailData;
-    appStates: Record<string, BrokerStateStatusTypes>;
-  }>({
-    processStatusData: {},
-    processStatusDetailData: {},
-    appStates: {},
-  });
-
-  onMounted(() => {
-    if (app?.proxy) {
-      const { processStatusData, processStatusWithDetail, appStates } =
-        storeToRefs(app?.proxy.$useGlobalStore());
-      allProcessStatusData.processStatusData =
-        processStatusData as unknown as Pm2ProcessStatusData;
-      allProcessStatusData.processStatusDetailData =
-        processStatusWithDetail as unknown as Pm2ProcessStatusDetailData;
-      allProcessStatusData.appStates = appStates as unknown as Record<
-        string,
-        BrokerStateStatusTypes
-      >;
-    }
-  });
-
-  const getProcessStatusName = (
-    kfConfig: KungfuApi.KfLocation | KungfuApi.KfConfig,
-  ) => {
-    return getAppStateStatusName(
-      kfConfig,
-      allProcessStatusData.processStatusData,
-      allProcessStatusData.appStates,
-    );
-  };
-
-  const { processStatusData, processStatusDetailData, appStates } =
-    toRefs(allProcessStatusData);
-
-  return {
-    processStatusData,
-    processStatusDetailData,
-    appStates,
-    getProcessStatusName,
-  };
-};
-
-export const useAllKfConfigData = (): Record<
-  KfCategoryTypes,
-  KungfuApi.KfConfig[]
-> => {
-  const app = getCurrentInstance();
-  const allKfConfigData: Record<KfCategoryTypes, KungfuApi.KfConfig[]> =
-    reactive({
-      system: ref<KungfuApi.KfConfig[]>([
-        ...(process.env.NODE_ENV === 'development'
-          ? ([
-              {
-                location_uid: 0,
-                category: 'system',
-                group: 'service',
-                name: 'archive',
-                mode: 'live',
-                value: '',
-              },
-            ] as KungfuApi.KfConfig[])
-          : []),
-        {
-          location_uid: 0,
-          category: 'system',
-          group: 'master',
-          name: 'master',
-          mode: 'live',
-          value: '',
-        },
-        {
-          location_uid: 0,
-          category: 'system',
-          group: 'service',
-          name: 'ledger',
-          mode: 'live',
-          value: '',
-        },
-      ]),
-
-      md: [],
-      td: [],
-      strategy: [],
-    });
-
-  onMounted(() => {
-    if (app?.proxy) {
-      const { mdList, tdList, strategyList } = storeToRefs(
-        app?.proxy.$useGlobalStore(),
-      );
-
-      allKfConfigData.md = mdList as unknown as KungfuApi.KfConfig[];
-      allKfConfigData.td = tdList as unknown as KungfuApi.KfConfig[];
-      allKfConfigData.strategy =
-        strategyList as unknown as KungfuApi.KfConfig[];
-    }
-  });
-
-  return allKfConfigData;
-};
-
-export const useTdGroups = (): { data: KungfuApi.KfExtraLocation[] } => {
-  const app = getCurrentInstance();
-  const tdGroups = reactive<{ data: KungfuApi.KfExtraLocation[] }>({
-    data: [],
-  });
-
-  onMounted(() => {
-    if (app?.proxy) {
-      const { tdGroupList } = storeToRefs(app?.proxy.$useGlobalStore());
-      tdGroups.data = tdGroupList as unknown as KungfuApi.KfExtraLocation[];
-    }
-  });
-
-  return tdGroups;
-};
-
-export const useCurrentGlobalKfLocation = (
-  watcher: KungfuApi.Watcher | null,
-): {
-  currentGlobalKfLocation: {
-    data: KungfuApi.KfLocation | KungfuApi.KfConfig | null;
-  };
-  currentCategoryData: ComputedRef<KungfuApi.KfTradeValueCommonData | null>;
-  currentUID: ComputedRef<string>;
-  setCurrentGlobalKfLocation(
-    kfConfig:
-      | KungfuApi.KfLocation
-      | KungfuApi.KfConfig
-      | KungfuApi.KfExtraLocation,
-  ): void;
-  dealRowClassName(
-    kfConfig:
-      | KungfuApi.KfLocation
-      | KungfuApi.KfConfig
-      | KungfuApi.KfExtraLocation,
-  ): string;
-  customRow(
-    kfConfig:
-      | KungfuApi.KfLocation
-      | KungfuApi.KfConfig
-      | KungfuApi.KfExtraLocation,
-  ): {
-    onClick(): void;
-  };
-  getCurrentGlobalKfLocationId(
-    kfConfig: KungfuApi.KfLocation | KungfuApi.KfConfig | null,
-  ): string;
-} => {
-  const app = getCurrentInstance();
-  const currentKfLocation = reactive<{
-    data: KungfuApi.KfLocation | KungfuApi.KfConfig | null;
-  }>({
-    data: null,
-  });
-
-  onMounted(() => {
-    if (app?.proxy) {
-      const { currentGlobalKfLocation } = storeToRefs(
-        app?.proxy.$useGlobalStore(),
-      );
-
-      currentKfLocation.data = currentGlobalKfLocation as unknown as
-        | KungfuApi.KfLocation
-        | KungfuApi.KfConfig
-        | null;
-    }
-  });
-
-  const setCurrentGlobalKfLocation = (
-    kfLocation:
-      | KungfuApi.KfLocation
-      | KungfuApi.KfConfig
-      | KungfuApi.KfExtraLocation,
-  ) => {
-    if (app?.proxy) {
-      app?.proxy?.$useGlobalStore().setCurrentGlobalKfLocation(kfLocation);
-    }
-  };
-
-  const dealRowClassName = (
-    record:
-      | KungfuApi.KfLocation
-      | KungfuApi.KfConfig
-      | KungfuApi.KfExtraLocation,
-  ): string => {
-    if (currentKfLocation.data === null) return '';
-
-    if (
-      getIdByKfLocation(record) === getIdByKfLocation(currentKfLocation.data)
-    ) {
-      return 'current-global-kfLocation';
-    }
-
-    return '';
-  };
-
-  const customRow = (
-    record:
-      | KungfuApi.KfLocation
-      | KungfuApi.KfConfig
-      | KungfuApi.KfExtraLocation,
-  ) => {
-    return {
-      onClick: () => {
-        setCurrentGlobalKfLocation(record);
-      },
-    };
-  };
-
-  const currentCategoryData = computed(() => {
-    if (!currentKfLocation.data) {
-      return null;
-    }
-
-    const extraCategory: Record<string, KungfuApi.KfTradeValueCommonData> =
-      app?.proxy ? app?.proxy.$globalCategoryRegister.getExtraCategory() : {};
-
-    return dealCategory(currentKfLocation.data.category, extraCategory);
-  });
-
-  const currentUID = computed(() => {
-    if (!watcher) {
-      return '';
-    }
-
-    if (!currentKfLocation.data) {
-      return '';
-    }
-
-    return watcher.getLocationUID(currentKfLocation.data);
-  });
-
-  const getCurrentGlobalKfLocationId = (
-    kfConfig: KungfuApi.KfLocation | KungfuApi.KfConfig | null,
-  ): string => {
-    if (!kfConfig) {
-      return '';
-    }
-
-    return getIdByKfLocation(kfConfig) || '';
-  };
-
-  return {
-    currentGlobalKfLocation: currentKfLocation,
-    currentCategoryData,
-    currentUID,
-    setCurrentGlobalKfLocation,
-    dealRowClassName,
-    customRow,
-    getCurrentGlobalKfLocationId,
-  };
 };
 
 /**
@@ -560,6 +270,11 @@ export const markClearJournal = (): void => {
   message.success('清理 journal 完成, 请重启应用');
 };
 
+export const markClearDB = (): void => {
+  localStorage.setItem('clearDBTradingDate', '');
+  message.success('清理 DB 完成, 请重启应用');
+};
+
 export const handleOpenLogview = (
   config: KungfuApi.KfConfig | KungfuApi.KfLocation,
 ): Promise<Electron.BrowserWindow | void> => {
@@ -607,62 +322,6 @@ export const useDashboardBodySize = (): {
     dashboardBodyHeight,
     dashboardBodyWidth,
     handleBodySizeChange,
-  };
-};
-
-export const useAssets = (): {
-  assets: { data: Record<string, KungfuApi.Asset> };
-  getAssetsByKfConfig(
-    kfLocation: KungfuApi.KfLocation | KungfuApi.KfConfig,
-  ): KungfuApi.Asset;
-  getAssetsByTdGroup(tdGroup: KungfuApi.KfExtraLocation): KungfuApi.Asset;
-} => {
-  const assetsResolved = reactive<{ data: Record<string, KungfuApi.Asset> }>({
-    data: {},
-  });
-
-  const app = getCurrentInstance();
-
-  onMounted(() => {
-    if (app?.proxy) {
-      const { assets } = storeToRefs(app?.proxy.$useGlobalStore());
-      assetsResolved.data = assets as unknown as Record<
-        string,
-        KungfuApi.Asset
-      >;
-    }
-  });
-
-  const getAssetsByKfConfig = (
-    kfConfig: KungfuApi.KfLocation | KungfuApi.KfConfig,
-  ): KungfuApi.Asset => {
-    const processId = getProcessIdByKfLocation(kfConfig);
-    return assetsResolved.data[processId] || ({} as KungfuApi.Asset);
-  };
-
-  const getAssetsByTdGroup = (
-    tdGroup: KungfuApi.KfExtraLocation,
-  ): KungfuApi.Asset => {
-    const children = (tdGroup.children || []) as KungfuApi.KfConfig[];
-    const assetsList = children
-      .map((item) => getAssetsByKfConfig(item))
-      .filter((item) => Object.keys(item).length);
-
-    return assetsList.reduce((allAssets, asset) => {
-      return {
-        ...allAssets,
-        unrealized_pnl: (allAssets.unrealized_pnl || 0) + asset.unrealized_pnl,
-        market_value: (allAssets.market_value || 0) + asset.market_value,
-        margin: (allAssets.margin || 0) + asset.margin,
-        avail: (allAssets.avail || 0) + asset.avail,
-      };
-    }, {} as KungfuApi.Asset);
-  };
-
-  return {
-    assets: assetsResolved,
-    getAssetsByKfConfig,
-    getAssetsByTdGroup,
   };
 };
 

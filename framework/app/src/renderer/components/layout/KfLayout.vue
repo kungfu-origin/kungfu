@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { SlidersOutlined, SettingOutlined } from '@ant-design/icons-vue';
-import { useExtConfigsRelated } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import KfProcessStatusController from '@kungfu-trader/kungfu-app/src/renderer/components/layout/KfProcessStatusController.vue';
 import { computed, getCurrentInstance, onBeforeUnmount, ref } from 'vue';
+import { useExtConfigsRelated } from '../../assets/methods/actionsUtils';
 import globalBus from '../../assets/methods/globalBus';
 import KfGlobalSettingModal from '../public/KfGlobalSettingModal.vue';
 const logo = require('@kungfu-trader/kungfu-app/src/renderer/assets/svg/LOGO.svg');
@@ -13,22 +13,22 @@ const menuSelectedKeys = ref<string[]>(['main']);
 
 const { uiExtConfigs } = useExtConfigsRelated();
 const sidebarFooterComponentConfigs = computed(() => {
-  return Object.keys(uiExtConfigs.data)
-    .filter((key) => uiExtConfigs.data[key].position === 'sidebar_footer')
+  return Object.keys(uiExtConfigs.value)
+    .filter((key) => uiExtConfigs.value[key].position === 'sidebar_footer')
     .map((key) => {
       return {
-        ...uiExtConfigs.data[key],
+        ...uiExtConfigs.value[key],
         key,
       };
     });
 });
 
 const sidebarComponentConfigs = computed(() => {
-  return Object.keys(uiExtConfigs.data)
-    .filter((key) => uiExtConfigs.data[key].position === 'sidebar')
+  return Object.keys(uiExtConfigs.value)
+    .filter((key) => uiExtConfigs.value[key].position === 'sidebar')
     .map((key) => {
       return {
-        ...uiExtConfigs.data[key],
+        ...uiExtConfigs.value[key],
         key,
       };
     });

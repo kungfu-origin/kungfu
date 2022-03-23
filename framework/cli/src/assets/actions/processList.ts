@@ -23,6 +23,7 @@ import {
   startMaster,
   startLedger,
   startDzxy,
+  startCacheD,
 } from '@kungfu-trader/kungfu-js-api/utils/processUtils';
 import { combineLatest, filter, map, Observable } from 'rxjs';
 import { ProcessListItem } from 'src/typings';
@@ -131,6 +132,18 @@ export const specificProcessListObserver = (kfLocation: KungfuApi.KfConfig) =>
           status: processStatus['ledger'] || '--',
           statusName: dealStatus(processStatus['ledger'] || '--'),
           monit: processStatusWithDetail['ledger']?.monit,
+        },
+        {
+          processId: 'cached',
+          processName: 'CACHED',
+          typeName: colors.bgMagenta('Sys'),
+          category: 'system',
+          group: 'service',
+          name: 'cached',
+          value: {},
+          status: processStatus['cached'] || '--',
+          statusName: dealStatus(processStatus['cached'] || '--'),
+          monit: processStatusWithDetail['cached']?.monit,
         },
         {
           processId: 'dzxy',
@@ -414,6 +427,7 @@ const switchMaster = async (status: boolean): Promise<void> => {
   } else {
     await startMaster(false);
     await delayMilliSeconds(1000);
+    await startCacheD(false);
     await startLedger(false);
     await startDzxy();
   }

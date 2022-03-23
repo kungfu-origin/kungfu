@@ -15,6 +15,7 @@ import {
   InstrumentTypes,
   KfCategoryTypes,
   LedgerCategoryEnum,
+  ProcessStatusTypes,
 } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import {
   getKfCategoryData,
@@ -24,9 +25,15 @@ import {
   isTdStrategyCategory,
   switchKfLocation,
   findTargetFromArray,
+  getAppStateStatusName,
+  buildExtTypeMap,
+  dealCategory,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { writeCSV } from '@kungfu-trader/kungfu-js-api/utils/fileUtils';
-import { Pm2ProcessStatusData } from '@kungfu-trader/kungfu-js-api/utils/processUtils';
+import {
+  Pm2ProcessStatusData,
+  Pm2ProcessStatusDetailData,
+} from '@kungfu-trader/kungfu-js-api/utils/processUtils';
 import { message, Modal } from 'ant-design-vue';
 import path from 'path';
 import { Proc } from 'pm2';
@@ -42,6 +49,7 @@ import {
   ref,
   Ref,
   toRaw,
+  toRefs,
   watch,
 } from 'vue';
 import dayjs from 'dayjs';
@@ -50,14 +58,12 @@ import { AbleSubscribeInstrumentTypesBySourceType } from '@kungfu-trader/kungfu-
 import {
   buildInstrumentSelectOptionLabel,
   buildInstrumentSelectOptionValue,
-  useExtConfigsRelated,
-  useProcessStatusDetailData,
 } from './uiUtils';
 import { storeToRefs } from 'pinia';
 import { ipcRenderer } from 'electron';
 import { throttleTime } from 'rxjs';
 import { useExtraCategory } from './uiExtraLocationUtils';
-import { tradingDataSubject } from '@kungfu-trader/kungfu-js-api/kungfu/tradingData';
+import { useGlobalStore } from '../../pages/index/store/global';
 
 export const ensureRemoveLocation = (
   kfLocation: KungfuApi.KfLocation | KungfuApi.KfConfig,
@@ -172,13 +178,11 @@ export const useAddUpdateRemoveKfConfig = (): {
     group: string,
   ) => Promise<void>;
 } => {
-  const app = getCurrentInstance();
-
   const handleRemoveKfConfig = (
     kfConfig: KungfuApi.KfConfig | KungfuApi.KfLocation,
   ): Promise<void> => {
     return ensureRemoveLocation(kfConfig).then(() => {
-      app?.proxy && app?.proxy.$useGlobalStore().setKfConfigList();
+      useGlobalStore().setKfConfigList();
     });
   };
 
@@ -225,7 +229,7 @@ export const useAddUpdateRemoveKfConfig = (): {
               message.success('操作成功');
             })
             .then(() => {
-              app?.proxy && app?.proxy.$useGlobalStore().setKfConfigList();
+              useGlobalStore().setKfConfigList();
             })
             .catch((err: Error) => {
               message.error('操作失败 ' + err.message);
@@ -457,8 +461,8 @@ export const showTradingDataDetail = (
 };
 
 export const useInstruments = (): {
-  instruments: { data: KungfuApi.InstrumentResolved[] };
-  subscribedInstruments: { data: KungfuApi.InstrumentResolved[] };
+  instruments: Ref<KungfuApi.InstrumentResolved[]>;
+  subscribedInstruments: Ref<KungfuApi.InstrumentResolved[]>;
   subscribeAllInstrumentByMdProcessId(
     processId: string,
     processStatus: Pm2ProcessStatusData,
@@ -481,30 +485,7 @@ export const useInstruments = (): {
     callback?: (value: string) => void,
   ) => void;
 } => {
-  const app = getCurrentInstance();
-  const instrumentsResolved = reactive<{
-    data: KungfuApi.InstrumentResolved[];
-  }>({
-    data: [],
-  });
-
-  const subscribedInstrumentsResolved = reactive<{
-    data: KungfuApi.InstrumentResolved[];
-  }>({
-    data: [],
-  });
-
-  onMounted(() => {
-    if (app?.proxy) {
-      const { instruments, subscribedInstruments } = storeToRefs(
-        app?.proxy.$useGlobalStore(),
-      );
-      instrumentsResolved.data =
-        instruments as unknown as KungfuApi.InstrumentResolved[];
-      subscribedInstrumentsResolved.data =
-        subscribedInstruments as unknown as KungfuApi.InstrumentResolved[];
-    }
-  });
+  const { instruments, subscribedInstruments } = storeToRefs(useGlobalStore());
 
   const subscribeAllInstrumentByMdProcessId = (
     processId: string,
@@ -562,7 +543,7 @@ export const useInstruments = (): {
   const searchInstrumnetOptions = ref<{ value: string; label: string }[]>([]);
 
   const handleSearchInstrument = (val: string): void => {
-    searchInstrumnetOptions.value = instrumentsResolved.data
+    searchInstrumnetOptions.value = instruments.value
       .filter((item) => {
         return !!val && item.id.includes(val);
       })
@@ -584,8 +565,8 @@ export const useInstruments = (): {
   };
 
   return {
-    instruments: instrumentsResolved,
-    subscribedInstruments: subscribedInstrumentsResolved,
+    instruments,
+    subscribedInstruments,
     subscribeAllInstrumentByMdProcessId,
     subscribeAllInstrumentByAppStates,
 
@@ -644,12 +625,11 @@ export const usePreStartAndQuitApp = (): {
   }, 500);
 
   const saveBoardsMap = (): Promise<void> => {
-    const proxy = app?.proxy;
-    if (proxy) {
-      const { boardsMap } = proxy.$useGlobalStore();
-      localStorage.setItem('indexBoardsMap', JSON.stringify(boardsMap));
-      return Promise.resolve();
-    }
+    const { boardsMap } = storeToRefs(useGlobalStore());
+    localStorage.setItem(
+      'indexBoardsMap',
+      JSON.stringify(boardsMap.value || '{}'),
+    );
     return Promise.resolve();
   };
 
@@ -783,7 +763,7 @@ export const useSubscibeInstrumentAtEntry = (): void => {
           processStatusData.value,
           appStates.value,
           mdExtTypeMap.value,
-          [...subscribedInstruments.data, ...positions],
+          [...subscribedInstruments.value, ...positions],
         );
       }
     });
@@ -894,7 +874,7 @@ export const useDealInstruments = (): void => {
         tag: 'req_instruments',
       });
 
-      const subscription = tradingDataSubject
+      const subscription = app.proxy.$tradingDataSubject
         .pipe(throttleTime(5000))
         .subscribe((watcher: KungfuApi.Watcher) => {
           const instruments = watcher.ledger.Instrument.list();
@@ -934,9 +914,304 @@ export const useDealInstruments = (): void => {
     dealInstrumentController.value = false;
     if (instruments.length) {
       existedInstrumentsLength.value = instruments.length || 0; //refresh old instruments
-      if (app?.proxy) {
-        app?.proxy.$useGlobalStore().setInstruments(instruments);
-      }
+      useGlobalStore().setInstruments(instruments);
     }
+  };
+};
+
+export const useProcessStatusDetailData = (): {
+  processStatusData: Ref<Pm2ProcessStatusData>;
+  processStatusDetailData: Ref<Pm2ProcessStatusDetailData>;
+  appStates: Ref<Record<string, BrokerStateStatusTypes>>;
+  getProcessStatusName(
+    kfConfig: KungfuApi.KfLocation | KungfuApi.KfConfig,
+  ): ProcessStatusTypes | undefined;
+} => {
+  const allProcessStatusData = reactive<{
+    processStatusData: Pm2ProcessStatusData;
+    processStatusDetailData: Pm2ProcessStatusDetailData;
+    appStates: Record<string, BrokerStateStatusTypes>;
+  }>({
+    processStatusData: {},
+    processStatusDetailData: {},
+    appStates: {},
+  });
+
+  onMounted(() => {
+    const { processStatusData, processStatusWithDetail, appStates } =
+      storeToRefs(useGlobalStore());
+    allProcessStatusData.processStatusData =
+      processStatusData as unknown as Pm2ProcessStatusData;
+    allProcessStatusData.processStatusDetailData =
+      processStatusWithDetail as unknown as Pm2ProcessStatusDetailData;
+    allProcessStatusData.appStates = appStates as unknown as Record<
+      string,
+      BrokerStateStatusTypes
+    >;
+  });
+
+  const getProcessStatusName = (
+    kfConfig: KungfuApi.KfLocation | KungfuApi.KfConfig,
+  ) => {
+    return getAppStateStatusName(
+      kfConfig,
+      allProcessStatusData.processStatusData,
+      allProcessStatusData.appStates,
+    );
+  };
+
+  const { processStatusData, processStatusDetailData, appStates } =
+    toRefs(allProcessStatusData);
+
+  return {
+    processStatusData,
+    processStatusDetailData,
+    appStates,
+    getProcessStatusName,
+  };
+};
+
+export const useExtConfigsRelated = (): {
+  extConfigs: Ref<KungfuApi.KfExtConfigs>;
+  uiExtConfigs: Ref<KungfuApi.KfUIExtConfigs>;
+  tdExtTypeMap: ComputedRef<Record<string, InstrumentTypes>>;
+  mdExtTypeMap: ComputedRef<Record<string, InstrumentTypes>>;
+} => {
+  const { extConfigs, uiExtConfigs } = storeToRefs(useGlobalStore());
+  const tdExtTypeMap = computed(() => buildExtTypeMap(extConfigs.value, 'td'));
+  const mdExtTypeMap = computed(() => buildExtTypeMap(extConfigs.value, 'md'));
+
+  return {
+    extConfigs,
+    uiExtConfigs,
+    tdExtTypeMap,
+    mdExtTypeMap,
+  };
+};
+
+export const useCurrentGlobalKfLocation = (
+  watcher: KungfuApi.Watcher | null,
+): {
+  currentGlobalKfLocation: Ref<
+    KungfuApi.KfLocation | KungfuApi.KfConfig | null
+  >;
+  currentCategoryData: ComputedRef<KungfuApi.KfTradeValueCommonData | null>;
+  currentUID: ComputedRef<string>;
+  setCurrentGlobalKfLocation(
+    kfConfig:
+      | KungfuApi.KfLocation
+      | KungfuApi.KfConfig
+      | KungfuApi.KfExtraLocation,
+  ): void;
+  dealRowClassName(
+    kfConfig:
+      | KungfuApi.KfLocation
+      | KungfuApi.KfConfig
+      | KungfuApi.KfExtraLocation,
+  ): string;
+  customRow(
+    kfConfig:
+      | KungfuApi.KfLocation
+      | KungfuApi.KfConfig
+      | KungfuApi.KfExtraLocation,
+  ): {
+    onClick(): void;
+  };
+  getCurrentGlobalKfLocationId(
+    kfConfig: KungfuApi.KfLocation | KungfuApi.KfConfig | null,
+  ): string;
+} => {
+  const { currentGlobalKfLocation } = storeToRefs(useGlobalStore());
+  const app = getCurrentInstance();
+
+  const setCurrentGlobalKfLocation = (
+    kfLocation:
+      | KungfuApi.KfLocation
+      | KungfuApi.KfConfig
+      | KungfuApi.KfExtraLocation,
+  ) => {
+    useGlobalStore().setCurrentGlobalKfLocation(kfLocation);
+  };
+
+  const dealRowClassName = (
+    record:
+      | KungfuApi.KfLocation
+      | KungfuApi.KfConfig
+      | KungfuApi.KfExtraLocation,
+  ): string => {
+    if (currentGlobalKfLocation.value === null) return '';
+
+    if (
+      getIdByKfLocation(record) ===
+      getIdByKfLocation(currentGlobalKfLocation.value)
+    ) {
+      return 'current-global-kfLocation';
+    }
+
+    return '';
+  };
+
+  const customRow = (
+    record:
+      | KungfuApi.KfLocation
+      | KungfuApi.KfConfig
+      | KungfuApi.KfExtraLocation,
+  ) => {
+    return {
+      onClick: () => {
+        setCurrentGlobalKfLocation(record);
+      },
+    };
+  };
+
+  const currentCategoryData = computed(() => {
+    if (!currentGlobalKfLocation.value) {
+      return null;
+    }
+
+    const extraCategory: Record<string, KungfuApi.KfTradeValueCommonData> =
+      app?.proxy ? app?.proxy.$globalCategoryRegister.getExtraCategory() : {};
+
+    return dealCategory(currentGlobalKfLocation.value?.category, extraCategory);
+  });
+
+  const currentUID = computed(() => {
+    if (!watcher) {
+      return '';
+    }
+
+    if (!currentGlobalKfLocation.value) {
+      return '';
+    }
+
+    return watcher.getLocationUID(currentGlobalKfLocation.value);
+  });
+
+  const getCurrentGlobalKfLocationId = (
+    kfConfig: KungfuApi.KfLocation | KungfuApi.KfConfig | null,
+  ): string => {
+    if (!kfConfig) {
+      return '';
+    }
+
+    return getIdByKfLocation(kfConfig) || '';
+  };
+
+  return {
+    currentGlobalKfLocation,
+    currentCategoryData,
+    currentUID,
+    setCurrentGlobalKfLocation,
+    dealRowClassName,
+    customRow,
+    getCurrentGlobalKfLocationId,
+  };
+};
+
+export const useAllKfConfigData = (): Record<
+  KfCategoryTypes,
+  KungfuApi.KfConfig[]
+> => {
+  const allKfConfigData: Record<KfCategoryTypes, KungfuApi.KfConfig[]> =
+    reactive({
+      system: ref<KungfuApi.KfConfig[]>([
+        ...(process.env.NODE_ENV === 'development'
+          ? ([
+              {
+                location_uid: 0,
+                category: 'system',
+                group: 'service',
+                name: 'archive',
+                mode: 'live',
+                value: '',
+              },
+            ] as KungfuApi.KfConfig[])
+          : []),
+        {
+          location_uid: 0,
+          category: 'system',
+          group: 'master',
+          name: 'master',
+          mode: 'live',
+          value: '',
+        },
+        {
+          location_uid: 0,
+          category: 'system',
+          group: 'service',
+          name: 'ledger',
+          mode: 'live',
+          value: '',
+        },
+        {
+          location_uid: 0,
+          category: 'system',
+          group: 'service',
+          name: 'cached',
+          mode: 'live',
+          value: '',
+        },
+      ]),
+
+      md: [],
+      td: [],
+      strategy: [],
+    });
+
+  onMounted(() => {
+    const { mdList, tdList, strategyList } = storeToRefs(useGlobalStore());
+
+    allKfConfigData.md = mdList as unknown as KungfuApi.KfConfig[];
+    allKfConfigData.td = tdList as unknown as KungfuApi.KfConfig[];
+    allKfConfigData.strategy = strategyList as unknown as KungfuApi.KfConfig[];
+  });
+
+  return allKfConfigData;
+};
+
+export const useTdGroups = (): Ref<KungfuApi.KfExtraLocation[]> => {
+  const { tdGroupList } = storeToRefs(useGlobalStore());
+  return tdGroupList;
+};
+
+export const useAssets = (): {
+  assets: Ref<Record<string, KungfuApi.Asset>>;
+  getAssetsByKfConfig(
+    kfLocation: KungfuApi.KfLocation | KungfuApi.KfConfig,
+  ): KungfuApi.Asset;
+  getAssetsByTdGroup(tdGroup: KungfuApi.KfExtraLocation): KungfuApi.Asset;
+} => {
+  const { assets } = storeToRefs(useGlobalStore());
+
+  const getAssetsByKfConfig = (
+    kfConfig: KungfuApi.KfLocation | KungfuApi.KfConfig,
+  ): KungfuApi.Asset => {
+    const processId = getProcessIdByKfLocation(kfConfig);
+    return assets.value[processId] || ({} as KungfuApi.Asset);
+  };
+
+  const getAssetsByTdGroup = (
+    tdGroup: KungfuApi.KfExtraLocation,
+  ): KungfuApi.Asset => {
+    const children = (tdGroup.children || []) as KungfuApi.KfConfig[];
+    const assetsList = children
+      .map((item) => getAssetsByKfConfig(item))
+      .filter((item) => Object.keys(item).length);
+
+    return assetsList.reduce((allAssets, asset) => {
+      return {
+        ...allAssets,
+        unrealized_pnl: (allAssets.unrealized_pnl || 0) + asset.unrealized_pnl,
+        market_value: (allAssets.market_value || 0) + asset.market_value,
+        margin: (allAssets.margin || 0) + asset.margin,
+        avail: (allAssets.avail || 0) + asset.avail,
+      };
+    }, {} as KungfuApi.Asset);
+  };
+
+  return {
+    assets,
+    getAssetsByKfConfig,
+    getAssetsByTdGroup,
   };
 };

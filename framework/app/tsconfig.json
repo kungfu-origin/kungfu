@@ -8,8 +8,7 @@
     "importHelpers": true,
     "strictNullChecks": true,
     "noUnusedLocals": true,
-    // "noUnusedParameters": true,
-    "noImplicitReturns": true, 
+    "noImplicitReturns": true,
     "moduleResolution": "node",
     "skipLibCheck": true,
     "esModuleInterop": true,
@@ -21,7 +20,7 @@
     "typeRoots": [],
     "paths": {
       "@kungfu-trader/kungfu-js-api/*": ["../api/src/*"],
-      "@kungfu-trader/kungfu-app/*": ["./*"],
+      "@kungfu-trader/kungfu-app/*": ["./*"]
     },
     "lib": ["esnext", "dom", "dom.iterable", "scripthost"]
   },
@@ -32,5 +31,5 @@
     "tests/**/*.ts",
     "tests/**/*.tsx",
     "../api/src/**/*.ts"
-  ],
+  ]
 }

@@ -7,6 +7,7 @@
 #include "config_store.h"
 #include "history.h"
 #include <sstream>
+#include <uv.h>
 
 using namespace kungfu::rx;
 using namespace kungfu::longfist;
@@ -18,6 +19,9 @@ using namespace kungfu::yijinjing::cache;
 using namespace kungfu::yijinjing::data;
 
 namespace kungfu::node {
+uv_loop_t *loop;
+uv_work_t greq;
+uv_timer_t timer_req;
 inline std::string format(uint32_t uid) { return fmt::format("{:08x}", uid); }
 
 Napi::FunctionReference Watcher::constructor = {};
@@ -27,7 +31,7 @@ inline location_ptr GetWatcherLocation(const Napi::CallbackInfo &info) {
     throw Napi::Error::New(info.Env(), "Invalid location argument");
   }
   auto name = info[1].As<Napi::String>().Utf8Value();
-  return std::make_shared<location>(mode::LIVE, category::SYSTEM, "node", name, IODevice::GetLocator(info));
+  return std::make_shared<location>(mode::LIVE, category::SYSTEM, "node", name, std::make_shared<locator>());
 }
 
 inline bool GetBypassQuotes(const Napi::CallbackInfo &info) {
@@ -54,7 +58,7 @@ Watcher::Watcher(const Napi::CallbackInfo &info)
       state_ref_(Napi::ObjectReference::New(Napi::Object::New(info.Env()), 1)),
       ledger_ref_(Napi::ObjectReference::New(Napi::Object::New(info.Env()), 1)),
       app_states_ref_(Napi::ObjectReference::New(Napi::Object::New(info.Env()), 1)), update_state(state_ref_),
-      update_ledger(ledger_ref_), publish(*this, state_ref_), reset_cache(*this, ledger_ref_) {
+      update_ledger(ledger_ref_), publish(*this, state_ref_), reset_cache(*this, ledger_ref_), start_(true) {
   log::copy_log_settings(get_home(), get_home()->name);
 
   serialize::InitStateMap(info, state_ref_, "state");
@@ -81,11 +85,11 @@ Watcher::Watcher(const Napi::CallbackInfo &info)
   RestoreState(ledger_location_, today, INT64_MAX, sync_schema);
 
   shift(ledger_location_) >> state_bank_; // Load positions to restore bookkeeper
-
   SPDLOG_INFO("watcher {} initialized", get_io_device()->get_home()->uname);
 }
 
 Watcher::~Watcher() {
+  start_ = false;
   app_states_ref_.Unref();
   ledger_ref_.Unref();
   state_ref_.Unref();
@@ -113,7 +117,6 @@ Napi::Value Watcher::GetLocation(const Napi::CallbackInfo &info) {
   locationObj.Set("mode", Napi::String::New(info.Env(), get_mode_name(location->mode)));
   locationObj.Set("uname", Napi::String::New(info.Env(), location->uname));
   locationObj.Set("uid", Napi::Number::New(info.Env(), location->uid));
-  locationObj.Set("locator", std::dynamic_pointer_cast<Locator>(location->locator)->get_js_locator());
   return locationObj;
 }
 
@@ -154,28 +157,6 @@ Napi::Value Watcher::IsUsable(const Napi::CallbackInfo &info) { return Napi::Boo
 Napi::Value Watcher::IsLive(const Napi::CallbackInfo &info) { return Napi::Boolean::New(info.Env(), is_live()); }
 
 Napi::Value Watcher::IsStarted(const Napi::CallbackInfo &info) { return Napi::Boolean::New(info.Env(), is_started()); }
-
-Napi::Value Watcher::Setup(const Napi::CallbackInfo &info) {
-  try {
-    setup();
-    return {};
-  } catch (const std::exception &ex) {
-    throw Napi::Error::New(info.Env(), fmt::format("setup failed: {}", ex.what()));
-  } catch (...) {
-    throw Napi::Error::New(info.Env(), "setup failed");
-  }
-}
-
-Napi::Value Watcher::Step(const Napi::CallbackInfo &info) {
-  try {
-    step();
-    return {};
-  } catch (const std::exception &ex) {
-    throw Napi::Error::New(info.Env(), fmt::format("step failed: {}", ex.what()));
-  } catch (...) {
-    throw Napi::Error::New(info.Env(), "step failed");
-  }
-}
 
 Napi::Value Watcher::RequestStop(const Napi::CallbackInfo &info) {
   auto app_location = ExtractLocation(info, 0, get_locator());
@@ -241,15 +222,6 @@ Napi::Value Watcher::RequestMarketData(const Napi::CallbackInfo &info) {
   return Napi::Boolean::New(info.Env(), true);
 }
 
-void Watcher::UpdateQuote(const Napi::CallbackInfo &info) {
-  for (auto &pair : quotes_bank_[boost::hana::type_c<Quote>]) {
-    auto &state = pair.second;
-    bookkeeper_.update_book(state.data);
-    UpdateBook(state.update_time, state.source, state.dest, state.data);
-    update_ledger(state.update_time, state.source, state.dest, state.data);
-  }
-}
-
 void Watcher::Init(Napi::Env env, Napi::Object exports) {
   Napi::HandleScope scope(env);
 
@@ -259,8 +231,6 @@ void Watcher::Init(Napi::Env env, Napi::Object exports) {
                                         InstanceMethod("isUsable", &Watcher::IsUsable),                           //
                                         InstanceMethod("isLive", &Watcher::IsLive),                               //
                                         InstanceMethod("isStarted", &Watcher::IsStarted),                         //
-                                        InstanceMethod("setup", &Watcher::Setup),                                 //
-                                        InstanceMethod("step", &Watcher::Step),                                   //
                                         InstanceMethod("requestStop", &Watcher::RequestStop),                     //
                                         InstanceMethod("getLocation", &Watcher::GetLocation),                     //
                                         InstanceMethod("getLocationUID", &Watcher::GetLocationUID),               //
@@ -268,7 +238,6 @@ void Watcher::Init(Napi::Env env, Napi::Object exports) {
                                         InstanceMethod("publishState", &Watcher::PublishState),                   //
                                         InstanceMethod("isReadyToInteract", &Watcher::IsReadyToInteract),         //
                                         InstanceMethod("issueOrder", &Watcher::IssueOrder),                       //
-                                        InstanceMethod("updateQuote", &Watcher::UpdateQuote),                     //
                                         InstanceMethod("cancelOrder", &Watcher::CancelOrder),                     //
                                         InstanceMethod("requestMarketData", &Watcher::RequestMarketData),         //
                                         InstanceAccessor("locator", &Watcher::GetLocator, &Watcher::NoSet),       //
@@ -279,6 +248,7 @@ void Watcher::Init(Napi::Env env, Napi::Object exports) {
                                         InstanceAccessor("ledger", &Watcher::GetLedger, &Watcher::NoSet),         //
                                         InstanceAccessor("appStates", &Watcher::GetAppStates, &Watcher::NoSet),   //
                                         InstanceAccessor("tradingDay", &Watcher::GetTradingDay, &Watcher::NoSet), //
+                                        InstanceMethod("createTask", &Watcher::CreateTask),
                                     });
 
   constructor = Napi::Persistent(func);
@@ -288,7 +258,7 @@ void Watcher::Init(Napi::Env env, Napi::Object exports) {
 }
 
 void Watcher::on_react() {
-  events_ | $([&](const event_ptr &event) { feed_state_data(event, update_state); });
+  events_ | $([&](const event_ptr &event) { feed_state_data(event, data_bank_); });
 }
 
 void Watcher::on_start() {
@@ -306,7 +276,7 @@ void Watcher::on_start() {
   events_ | is(Register::tag) | $$(OnRegister(event->gen_time(), event->data<Register>()));
   events_ | is(Deregister::tag) | $$(OnDeregister(event->gen_time(), event->data<Deregister>()));
   events_ | is(BrokerStateUpdate::tag) | $$(UpdateBrokerState(event->source(), event->data<BrokerStateUpdate>()));
-  events_ | is(CacheReset::tag) | $$(reset_cache(event));
+  events_ | is(CacheReset::tag) | $$(UpdateEventCache(event));
 }
 
 void Watcher::Feed(const event_ptr &event) {
@@ -314,16 +284,103 @@ void Watcher::Feed(const event_ptr &event) {
     auto quote = event->data<Quote>();
     auto uid = quote.uid();
     if (subscribed_instruments_.find(uid) != subscribed_instruments_.end()) {
-      feed_state_data(event, quotes_bank_);
+      bookkeeper_.update_book(quote);
+      UpdateBook(event->gen_time(), event->source(), event->dest(), quote);
+      data_bank_ << typed_event_ptr<Quote>(event);
     }
   } else {
-    feed_state_data(event, update_ledger);
+    boost::hana::for_each(longfist::StateDataTypes, [&](auto it) {
+      using DataType = typename decltype(+boost::hana::second(it))::type;
+      if (DataType::tag == event->msg_type()) {
+        data_bank_ << typed_event_ptr<DataType>(event);
+      }
+    });
   }
 }
 
 void Watcher::RestoreState(const location_ptr &state_location, int64_t from, int64_t to, bool sync_schema) {
   add_location(0, state_location);
   serialize::JsRestoreState(ledger_ref_, state_location)(from, to, sync_schema);
+}
+
+Napi::Value Watcher::CreateTask(const Napi::CallbackInfo &info) {
+  SPDLOG_INFO("Watcher::Watcher CreateTask tid {} this in main {}", std::this_thread::get_id(), uint64_t(this));
+  greq.data = (void *)this;
+  loop = uv_default_loop();
+  uv_queue_work(
+      loop, &greq,
+      [](uv_work_t *req) {
+        Watcher *watcher = (Watcher *)(req->data);
+        while (watcher->IsStart()) {
+          if (!watcher->is_live() && !watcher->is_started() && watcher->is_usable()) {
+            watcher->setup();
+          }
+          if (watcher->is_live()) {
+            watcher->step();
+          }
+          if (!watcher->IsStart())
+            break;
+          std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+        }
+      },
+      [](uv_work_t *req, int status) { SPDLOG_INFO("uv_close!"); });
+
+  timer_req.data = (void *)this;
+  uv_timer_init(loop, &timer_req);
+  uv_timer_start(
+      &timer_req,
+      [](uv_timer_t *req) {
+        Watcher *watcher = (Watcher *)(req->data);
+        // SPDLOG_INFO("uv_timer_start tid {} pid {} this {}", std::this_thread::get_id(), GETPID(),
+        //             (uint64_t)(watcher));
+        watcher->SyncEventCache();
+        watcher->SyncLedger();
+        watcher->SyncAppStatus();
+      },
+      0, 2000);
+
+  return {};
+}
+
+void Watcher::SyncLedger() {
+  boost::hana::for_each(longfist::StateDataTypes, [&](auto it) { UpdateLedger(+boost::hana::second(it)); });
+}
+
+void Watcher::SyncAppStatus() {
+  for (auto &s : location_uid_states_map_) {
+    auto app_state = Napi::Number::New(app_states_ref_.Env(), s.second);
+    app_states_ref_.Set(format(s.first), app_state);
+  }
+}
+
+void Watcher::SyncEventCache() {
+  if (event_cache_) {
+    reset_cache(event_cache_);
+  }
+}
+
+void Watcher::UpdateEventCache(const event_ptr event) {
+  const auto &request = event->data<CacheReset>();
+  boost::hana::for_each(StateDataTypes, [&](auto it) {
+    using DataType = typename decltype(+boost::hana::second(it))::type;
+    if (DataType::tag == request.msg_type) {
+      auto hana_type = boost::hana::type_c<DataType>;
+      using DelMap = std::unordered_map<uint64_t, state<DataType>>;
+      auto &del_map = const_cast<DelMap &>(data_bank_[hana_type]);
+      auto iter = del_map.begin();
+      while (iter != del_map.end()) {
+        auto s = iter->second;
+        auto source_id = s.source;
+        auto dest_id = s.dest;
+        if ((source_id == event->source() and dest_id == event->dest()) || source_id == event->dest()) {
+          iter = del_map.erase(iter);
+        } else {
+          iter++;
+        }
+      }
+    }
+  });
+  event_cache_ = event;
 }
 
 location_ptr Watcher::FindLocation(const Napi::CallbackInfo &info) {
@@ -355,13 +412,11 @@ void Watcher::MonitorMarketData(int64_t trigger_time, const location_ptr &md_loc
   events_ | is(Quote::tag) | from(md_location->uid) | first() |
       $(
           [&, trigger_time, md_location](const event_ptr &event) {
-            auto ready = Napi::Number::New(app_states_ref_.Env(), int(BrokerState::Ready));
-            app_states_ref_.Set(format(md_location->uid), ready);
+            location_uid_states_map_.insert_or_assign(md_location->uid, int(BrokerState::Ready));
             events_ | from(md_location->uid) | is(Quote::tag) | timeout(std::chrono::seconds(5)) |
                 $(noop_event_handler(), [&, trigger_time, md_location](std::exception_ptr e) {
                   if (is_location_live(md_location->uid)) {
-                    auto idle = Napi::Number::New(app_states_ref_.Env(), int(BrokerState::Idle));
-                    app_states_ref_.Set(format(md_location->uid), idle);
+                    location_uid_states_map_.insert_or_assign(md_location->uid, int(BrokerState::Idle));
                     MonitorMarketData(trigger_time, md_location);
                   }
                 });
@@ -377,8 +432,7 @@ void Watcher::OnRegister(int64_t trigger_time, const Register &register_data) {
   auto app_location = get_location(register_data.location_uid);
 
   if (app_location->category == category::MD or app_location->category == category::TD) {
-    auto state = Napi::Number::New(app_states_ref_.Env(), int(BrokerState::Connected));
-    app_states_ref_.Set(format(app_location->uid), state);
+    location_uid_states_map_.insert_or_assign(app_location->uid, int(BrokerState::Connected));
   }
 
   if (app_location->category == category::MD and app_location->mode == mode::LIVE) {
@@ -388,20 +442,19 @@ void Watcher::OnRegister(int64_t trigger_time, const Register &register_data) {
 
 void Watcher::OnDeregister(int64_t trigger_time, const Deregister &deregister_data) {
   auto app_location = location::make_shared(deregister_data, get_locator());
-  auto state = Napi::Number::New(app_states_ref_.Env(), int(BrokerState::Pending));
-  app_states_ref_.Set(format(app_location->uid), state);
+  location_uid_states_map_.insert_or_assign(app_location->uid, int(BrokerState::Pending));
 }
 
 void Watcher::UpdateBrokerState(uint32_t broker_uid, const BrokerStateUpdate &state) {
   auto app_location = get_location(broker_uid);
-  auto state_value = Napi::Number::New(app_states_ref_.Env(), int(state.state));
-  app_states_ref_.Set(format(app_location->uid), state_value);
+  location_uid_states_map_.insert_or_assign(app_location->uid, int(state.state));
 }
 
 void Watcher::UpdateAsset(const event_ptr &event, uint32_t book_uid) {
   auto book = bookkeeper_.get_book(book_uid);
   book->update(event->gen_time());
-  update_ledger(event->gen_time(), ledger_location_->uid, book_uid, book->asset);
+  state<kungfu::longfist::types::Asset> cache_state(ledger_location_->uid, book_uid, event->gen_time(), book->asset);
+  feed_state_data_bank(cache_state, data_bank_);
 }
 
 void Watcher::UpdateBook(const event_ptr &event, const Quote &quote) {
@@ -425,7 +478,8 @@ void Watcher::UpdateBook(const event_ptr &event, const Quote &quote) {
     }
 
     if (has_short_position_for_quote or has_long_position_for_quote) {
-      update_ledger(event->gen_time(), ledger_uid, holder_uid, book->asset);
+      state<kungfu::longfist::types::Asset> cache_state(ledger_uid, holder_uid, event->gen_time(), book->asset);
+      feed_state_data_bank(cache_state, data_bank_);
     }
   }
 }
@@ -452,7 +506,8 @@ void Watcher::UpdateBook(int64_t update_time, uint32_t source_id, uint32_t dest_
     }
 
     if (has_short_position_for_quote or has_long_position_for_quote) {
-      update_ledger(update_time, ledger_uid, holder_uid, book->asset);
+      state<kungfu::longfist::types::Asset> cache_state(ledger_uid, holder_uid, update_time, book->asset);
+      feed_state_data_bank(cache_state, data_bank_);
     }
   }
 }
@@ -461,7 +516,9 @@ void Watcher::UpdateBook(const event_ptr &event, const Position &position) {
   auto book = bookkeeper_.get_book(position.holder_uid);
   auto &book_position = book->get_position_for(position.direction, position);
   if (book_position.volume > 0 or book_position.direction == Direction::Long) {
-    update_ledger(event->gen_time(), event->source(), event->dest(), book_position);
+    state<kungfu::longfist::types::Position> cache_state(event->source(), event->dest(), event->gen_time(),
+                                                         book_position);
+    feed_state_data_bank(cache_state, data_bank_);
   }
 }
 
@@ -470,7 +527,8 @@ void Watcher::UpdateBook(int64_t update_time, uint32_t source_id, uint32_t dest_
   auto book = bookkeeper_.get_book(position.holder_uid);
   auto &book_position = book->get_position_for(position.direction, position);
   if (book_position.volume > 0 or book_position.direction == Direction::Long) {
-    update_ledger(update_time, source_id, dest_id, book_position);
+    state<kungfu::longfist::types::Position> cache_state(source_id, dest_id, update_time, book_position);
+    feed_state_data_bank(cache_state, data_bank_);
   }
 }
 

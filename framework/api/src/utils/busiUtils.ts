@@ -45,6 +45,7 @@ import {
   Pm2ProcessStatusData,
   Pm2ProcessStatusDetail,
   Pm2ProcessStatusDetailData,
+  startCacheD,
   startLedger,
   startMaster,
   startMd,
@@ -52,6 +53,7 @@ import {
   startTd,
 } from './processUtils';
 import { Proc } from 'pm2';
+import { removeTargetFilesInFolder } from './fileUtils';
 
 interface SourceAccountId {
   source: string;
@@ -617,45 +619,12 @@ export const getTradingDate = (today = true): string => {
   }
 };
 
-export const listDirSync = (filePath: string): string[] => {
-  fse.ensureDirSync(filePath);
-  return fse.readdirSync(filePath);
+export const removeJournal = (targetFolder: string): Promise<void> => {
+  return removeTargetFilesInFolder(targetFolder, ['.journal']);
 };
 
-export const removeJournal = (targetFolder: string): Promise<void> => {
-  function iterator(folder: string) {
-    const items = listDirSync(folder);
-
-    if (!items) return;
-
-    const folders = items.filter((f: string) => {
-      const stat = fse.statSync(path.join(folder, f));
-
-      if (stat.isDirectory()) return true;
-      return false;
-    });
-
-    const files = items.filter((f: string) => {
-      const stat = fse.statSync(path.join(folder, f));
-
-      if (stat.isFile()) return true;
-      return false;
-    });
-
-    files.forEach((f: string) => {
-      if (f.includes('.journal')) {
-        fse.removeSync(path.join(folder, f));
-      }
-    });
-
-    folders.forEach((f: string) => {
-      iterator(path.join(folder, f));
-    });
-  }
-
-  iterator(targetFolder);
-
-  return Promise.resolve();
+export const removeDB = (targetFolder: string): Promise<void> => {
+  return removeTargetFilesInFolder(targetFolder, ['.db'], ['config.db']);
 };
 
 export const getProcessIdByKfLocation = (
@@ -873,13 +842,14 @@ export const switchKfLocation = (
         return startMaster(true);
       } else if (kfLocation.name === 'ledger') {
         return startLedger(true);
+      } else if (kfLocation.name === 'cached') {
+        return startCacheD(true);
       }
 
     case 'td':
       return startTd(getIdByKfLocation(kfLocation));
     case 'md':
       return startMd(getIdByKfLocation(kfLocation));
-
     case 'strategy':
       const strategyPath =
         JSON.parse((kfLocation as KungfuApi.KfConfig)?.value || '{}')

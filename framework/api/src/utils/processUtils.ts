@@ -55,7 +55,10 @@ export const forceKill = (tasks: string[]): Promise<void> => {
 
 const kfcName = isWin ? 'kfc.exe' : 'kfc';
 
-export const killKfc = () => forceKill([kfcName]);
+export const killKfc = (): Promise<void> =>
+  new Promise((resolve) => {
+    forceKill([kfcName]).finally(() => resolve());
+  });
 
 export const killKungfu = () => {
   if (isLinux) {
@@ -511,65 +514,81 @@ export function startArchiveMakeTask(cb?: Function) {
   );
 }
 
-export const startMaster = async (force = false): Promise<Proc | void> => {
+export const startMaster = async (force = false): Promise<void> => {
   const processName = 'master';
 
-  const processOrError = await pm2Describe(processName);
-  if (processOrError instanceof Error) {
-    kfLogger.error(processOrError.message);
-    throw processOrError;
-  }
-  const isMasterAlive = !!processOrError.filter(
-    (item) => item?.pm2_env?.status === 'online',
-  ).length;
-
-  if (!force && isMasterAlive) {
-    const err = new Error('kungfu master is alive');
-    kfLogger.error(err.message);
-    return Promise.reject(err);
-  }
-  return killKfc()
-    .finally(() => {
-      const args = buildArgs('run -c system -g master -n master');
-      return startProcess({
-        name: processName,
-        args,
-        env: {
-          KF_NO_EXT: 'on',
-        },
-      });
-    })
-    .catch((err: Error) => {
-      kfLogger.error(err.message);
+  try {
+    await preStartProcess(processName, force);
+    await killKfc();
+    const args = buildArgs('run -c system -g master -n master');
+    await startProcess({
+      name: processName,
+      args,
+      force,
+      env: {
+        KF_NO_EXT: 'on',
+      },
     });
+  } catch (err) {
+    kfLogger.error(err.message);
+  }
 };
 
 //启动ledger
-export const startLedger = async (force = false): Promise<Proc | void> => {
+export const startLedger = async (force = false): Promise<void> => {
   const processName = 'ledger';
+
+  try {
+    await preStartProcess(processName, force);
+    const args = buildArgs('run -c system -g service -n ledger');
+    await startProcess({
+      name: processName,
+      args,
+      force,
+    });
+  } catch (err) {
+    kfLogger.error(err.message);
+  }
+};
+
+export const startCacheD = async (force = false): Promise<void> => {
+  const processName = 'cached';
+
+  try {
+    await preStartProcess(processName, force);
+    const args = buildArgs('run -c system -g service -n cached');
+    await startProcess({
+      name: processName,
+      args,
+      force,
+    });
+  } catch (err) {
+    kfLogger.error(err.message);
+  }
+};
+
+async function preStartProcess(
+  processName: string,
+  force = false,
+): Promise<void> {
   const processOrError = await pm2Describe(processName);
   if (processOrError instanceof Error) {
     kfLogger.error(processOrError.message);
     throw processOrError;
   }
-  const isLedgerAlive = !!processOrError.filter(
+
+  const isProcessAlive = !!processOrError.filter(
     (item) => item?.pm2_env?.status === 'online',
   ).length;
 
-  if (!force && isLedgerAlive) {
-    const err = new Error('kungfu ledger is alive');
+  if (!force && isProcessAlive) {
+    const err = new Error(`kungfu ${processName} is alive`);
     kfLogger.error(err.message);
     return Promise.reject(err);
   }
 
-  const args = buildArgs('run -c system -g service -n ledger');
-  return startProcess({
-    name: processName,
-    args,
-  }).catch((err) => {
-    kfLogger.error(err.message);
-  });
-};
+  return Promise.resolve();
+}
 
 //启动md
 export const startMd = async (sourceId: string): Promise<Proc | void> => {
