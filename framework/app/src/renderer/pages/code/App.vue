@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<!-- <script setup lang="ts">
     import { nextTick, onMounted, reactive } from 'vue';
     import { getLogProcessId } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/logUtils';
     import { removeLoadingMask, setHtmlTitle } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
@@ -46,6 +46,7 @@
         strategy.strategy_path = value.strategy_path
         strategy.add_time = value.add_time
     }
+
     onMounted(() => {
         removeLoadingMask();
         nextTick().then(() => {
@@ -89,4 +90,10 @@
         }
     }
 }
-</style>
+</style> -->
+<script setup></script>
+<template>
+    <div>
+        111
+    </div>
+</template>

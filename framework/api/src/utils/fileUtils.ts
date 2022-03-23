@@ -168,7 +168,6 @@ export const removeFilesInFolder = (targetDir: string) => {
   return Promise.all(promises);
 };
 
-<<<<<<< HEAD
 //建立fileObj
 export const buildFileObj = (fileData: FileInputData): FileData => {
   const {
@@ -270,7 +269,6 @@ export const editFileFolderName = (
   newPath = path.normalize(newPath);
   return fse.rename(oldPath, newPath);
 };
-=======
 export const listDirSync = (filePath: string): string[] => {
   fse.ensureDirSync(filePath);
   return fse.readdirSync(filePath);
@@ -317,4 +315,3 @@ export const removeTargetFilesInFolder = (
 
   return Promise.resolve();
 };
->>>>>>> ae2d6411dcab8bcea351e8611ba76707220f4f38
