@@ -125,59 +125,6 @@ interface ExtraOrderInput {
   accountId?: string;
 }
 
-interface Strategy {
-  strategy_id: string;
-  strategy_path: string;
-  add_time: number;
-}
-
-interface FileProps {
-    root?: boolean;
-    filePath?: string;
-    ext?: string;
-    isDir?: boolean
-}
-interface IValue {
-    isDir: boolean
-}
-interface FileIds {
-  file: any[];
-  folder: any[];
-}
-interface FileTreeByPath {
-  ids: FileIds;
-  fileTree: any;
-}
-interface FileData {
-  id: number;
-  parentId: number;
-  isDir: boolean;
-  name: string;
-  ext: string;
-  filePath: string;
-  children: FileIds;
-  stats: object;
-  root: boolean;
-  open: boolean;
-}
-
-type IFileTree = Record<string, FileData>
-
-
-interface IFileNode {
-    filePath: string;
-    root?: string;
-    children?: IFileNode;
-    name: string;
-}
-
-
-interface ICodeSetting {
-    tabSpaceType: 'Spaces' | 'Tabs';
-    tabSpaceSize: '2' | '4'
-
-}
-
 type TradingDataItem = KungfuApi.Position | KungfuApi.Order | KungfuApi.Trade;
 interface KfTradingDataTableHeaderConfig {
   name: string;

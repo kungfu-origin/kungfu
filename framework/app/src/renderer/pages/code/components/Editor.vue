@@ -35,7 +35,7 @@ const code = computed(() => kfConfig['code'])
 
 
 let handleEditor: monaco.editor.IDiffNavigator = reactive({})
-let file: FileProps = reactive({})
+let file: Code.FileProps = reactive({})
 
 
 
@@ -47,16 +47,16 @@ watch(code, spaceTabSetting => {
 // 监听文件树变化
 watch(fileTree, (newTree, oldTree) => {
 
-    const newRootPath = findTargetFromArray<FileData>(Object.values(newTree), 'root', true)!.filePath
-    // const newRootPath = Object.values(newTree).map((tree: FileProps) => {
+    const newRootPath = findTargetFromArray<Code.FileData>(Object.values(newTree), 'root', true)!.filePath
+    // const newRootPath = Object.values(newTree).map((tree: Code.FileProps) => {
     //     if (tree.root) {
     //         return tree.filePath
     //     }
     //     return
     // })[0];
-    const oldRootPath = findTargetFromArray<FileData>(Object.values(oldTree), 'root', true)!.filePath
+    const oldRootPath = findTargetFromArray<Code.FileData>(Object.values(oldTree), 'root', true)!.filePath
 
-    // const oldRootPath = Object.values(oldTree).map((tree: FileProps) => {
+    // const oldRootPath = Object.values(oldTree).map((tree: Code.FileProps) => {
     //     if (tree.root) {
     //         return tree.filePath
     //     }
@@ -95,7 +95,7 @@ function createEditor(file?: any, codeText?: string): monaco.editor {
 }
 
 // 更新代码编辑器
-function updateEditor(editor: monaco.editor, file: FileProps, codeText: string): monaco.editor {
+function updateEditor(editor: monaco.editor, file: Code.FileProps, codeText: string): monaco.editor {
     editor.updateOptions({value: codeText});
     const fileLanguage = file.ext ? (languageJSON[file.ext] || 'plaintext') : 'plaintext';
     handleEditor.setModelLanguage(editor.getModel(), fileLanguage);
@@ -103,7 +103,7 @@ function updateEditor(editor: monaco.editor, file: FileProps, codeText: string):
 }
 
 // 构建代码编辑器
-function buildEditor(editor: monaco.editor, file: FileProps, codeText: string) {
+function buildEditor(editor: monaco.editor, file: Code.FileProps, codeText: string) {
     if (!editor) {
         return createEditor(file, codeText);
     } else {
@@ -113,7 +113,7 @@ function buildEditor(editor: monaco.editor, file: FileProps, codeText: string) {
 
 
 // 更新缩进设置
-function updateSpaceTab(spaceTabSetting: ICodeSetting) {
+function updateSpaceTab(spaceTabSetting: Code.ICodeSetting) {
     const type: string = spaceTabSetting.tabSpaceType || 'spaces'
 
     if (handleEditor) {

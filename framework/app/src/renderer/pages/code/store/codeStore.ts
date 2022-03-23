@@ -8,9 +8,9 @@ import { getAllKfConfigOriginData } from '@kungfu-trader/kungfu-js-api/actions';
 interface ICodeState {
   currentStrategy: string;
   strategyList: KungfuApi.KfConfig[];
-  currentFile: FileData;
+  currentFile: Code.FileData;
   //   entryFile: any;
-  fileTree: IFileTree;
+  fileTree: Code.IFileTree;
   kfConfig: Record<string, Record<string, KungfuApi.KfConfigValue>>;
 }
 
@@ -19,7 +19,7 @@ export const useCodeStore = defineStore('code', {
     return {
       currentStrategy: '', //当前运行策略
       strategyList: [], //策略列表
-      currentFile: {} as FileData, //文件树高亮
+      currentFile: {} as Code.FileData, //文件树高亮
       //   entryFile: {}, //入口文件
       fileTree: {}, //文件树
       kfConfig: {}, // kf 配置

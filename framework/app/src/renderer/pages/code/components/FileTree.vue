@@ -40,6 +40,7 @@ import { defineProps, watch, ref } from 'vue';
 import path from 'path';
 import { message } from 'ant-design-vue';
 import * as CODE_UTILS from '@kungfu-trader/kungfu-js-api/utils/fileUtils';
+import { getTreeByFilePath } from '../../../assets/methods/codeUtils';
 import { useCodeStore } from '../store/codeStore'
 
 // import FileNode from './FileNode.vue';
@@ -54,12 +55,12 @@ const strategyPathName = ref<string>('')
 const { strategy } = props
 
 
-watch(strategy as Strategy, newStrategy => {
+watch(strategy as Code.Strategy, newStrategy => {
     getPath(newStrategy);
     initFileTree(newStrategy).then (fileTree => {
         const entryPath: string = newStrategy.strategy_path
         
-        const currentFile: FileData = (Object.values(fileTree || {}) as FileData[]).filter(f => f.filePath === entryPath)[0]
+        const currentFile: Code.FileData = (Object.values(fileTree || {}) as Code.FileData[]).filter(f => f.filePath === entryPath)[0]
         if (currentFile) {
             store.setEntryFile(currentFile)
             store.setCurrentFile(currentFile)
@@ -71,7 +72,7 @@ watch(strategy as Strategy, newStrategy => {
 })
 
 //从prop内获取path
-function getPath (strategy: Strategy) {
+function getPath (strategy: Code.Strategy) {
     if (strategy && strategy.strategy_path) {
         //因为绑定策略时是文件，需要提取其父目录
         strategyPath.value = path.dirname(strategy.strategy_path);
@@ -84,7 +85,7 @@ async function initFileTree(strategy) {
     const rootId = window.fileId++;
     
     
-    const rootFile: FileData = CODE_UTILS.buildFileObj({
+    const rootFile: Code.FileData = CODE_UTILS.buildFileObj({
         id: rootId,
         parentId: 0,
         isDir: true,
@@ -99,7 +100,7 @@ async function initFileTree(strategy) {
     //获取第一级文件树
     let ids, fileTree;
     try {
-        const fileTreeData = await CODE_UTILS.getTreeByFilePath(rootFile, fileTree);
+        const fileTreeData = await getTreeByFilePath(rootFile, fileTree);
         
         ids = fileTreeData.ids;
         fileTree = fileTreeData.fileTree

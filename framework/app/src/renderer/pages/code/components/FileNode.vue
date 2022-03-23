@@ -134,7 +134,7 @@ const { currentFile, fileTree, kfConfig } = storeToRefs(store)
 
 
 
-function getIcon(file: FileData) {
+function getIcon(file: Code.FileData) {
     let iconName: string = '';
         if (this.type == 'folder') {
             iconName = iconFolderJSON[file.name];

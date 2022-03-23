@@ -45,10 +45,10 @@ const code = computed(() => kfConfig['code'])
 
 
 let editor: monaco.editor;
-let file: FileProps;
+let file: Code.FileProps;
 
 
-watch(currentFile, async (newFile: FileProps) => {
+watch(currentFile, async (newFile: Code.FileProps) => {
     const filePath = newFile.filePath;
 
     if (currentFile.value.isDir) return;
@@ -66,10 +66,10 @@ watch(currentFile, async (newFile: FileProps) => {
     bindBlur(editor, file);
 })
 watch(fileTree, (newTree, oldTree) => {
-    const newRootPath = Object.values(newTree).map((tree: FileProps) => {
+    const newRootPath = Object.values(newTree).map((tree: Code.FileProps) => {
         if (tree.root) return tree.filePath;
     })[0];
-    const oldRootPath = Object.values(oldTree).map((tree: FileProps) => {
+    const oldRootPath = Object.values(oldTree).map((tree: Code.FileProps) => {
         if (tree.root) return tree.filePath;
     })[0];
     if (newRootPath != oldRootPath) {
