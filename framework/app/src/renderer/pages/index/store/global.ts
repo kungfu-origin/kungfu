@@ -205,6 +205,10 @@ export const useGlobalStore = defineStore('global', {
     setKfExtConfigs() {
       return getKfExtensionConfig().then(
         (kfExtConfigs: KungfuApi.KfExtConfigs) => {
+          globalBus.next({
+            tag: 'update:extConfigs',
+            extConfigs: kfExtConfigs,
+          });
           this.extConfigs = toRaw(kfExtConfigs);
         },
       );
