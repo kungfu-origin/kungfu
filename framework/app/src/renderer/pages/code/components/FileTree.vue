@@ -7,7 +7,7 @@
       <div class="strategy-name">
         <span class="name">
           <span>sssss</span>
-          （当前策略）
+          （当前策略)
         </span>
         <span
           class="fr folder-oper"
@@ -22,38 +22,41 @@
           <i class="fl iconfont tr-document1"></i>
         </span>
       </div>
-      <!-- <ul class="file-tree-body" v-if="strategyPath">
-        <fileNode
-          v-for="item in fileTree"
-          :fileNode="item"
-          :key="item.fileId"
-          v-if="item.root"
-          :id="item.id"
-          type="folder"
-        ></fileNode>
-      </ul> -->
+      <div class="file-tree-body" v-if="strategyPath">
+        <div v-for="file in fileTree">
+            <FileNode
+                v-if="file.root"
+                :fileNode="file"
+                :key="file.id"
+                :id="file.id"
+                type="folder"
+            ></FileNode>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 <script setup lang="ts">
-import { defineProps, watch, ref } from 'vue';
+import { defineProps, watch, ref, onMounted } from 'vue';
 import path from 'path';
+import { storeToRefs } from 'pinia';
 import { message } from 'ant-design-vue';
-import * as CODE_UTILS from '@kungfu-trader/kungfu-js-api/utils/fileUtils';
+import { buildFileObj } from '@kungfu-trader/kungfu-js-api/utils/fileUtils';
 import { getTreeByFilePath } from '../../../assets/methods/codeUtils';
 import { useCodeStore } from '../store/codeStore'
 
-// import FileNode from './FileNode.vue';
+import FileNode from './FileNode.vue';
+import { nextTick } from 'vue';
 const store = useCodeStore();
 
 const props = defineProps({
     strategy: Object
 })
-
+const { strategy } = props
 const strategyPath = ref<string>('')
 const strategyPathName = ref<string>('')
-const { strategy } = props
 
+const { fileTree } = storeToRefs(useCodeStore());
 
 watch(strategy as Code.Strategy, newStrategy => {
     getPath(newStrategy);
@@ -65,11 +68,11 @@ watch(strategy as Code.Strategy, newStrategy => {
             store.setEntryFile(currentFile)
             store.setCurrentFile(currentFile)
         }      
-        
     })
-    
-    
+
 })
+
+
 
 //从prop内获取path
 function getPath (strategy: Code.Strategy) {
@@ -85,7 +88,7 @@ async function initFileTree(strategy) {
     const rootId = window.fileId++;
     
     
-    const rootFile: Code.FileData = CODE_UTILS.buildFileObj({
+    const rootFile: Code.FileData = buildFileObj({
         id: rootId,
         parentId: 0,
         isDir: true,
@@ -125,6 +128,12 @@ function bindFunctionalNode(fileTree) {
     };
     return fileTree;
 }
+
+onMounted(() => {
+    nextTick(() => {
+    })
+   
+})
 </script>
 
 <style lang="less">

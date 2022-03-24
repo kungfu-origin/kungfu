@@ -1,10 +1,10 @@
-<!-- <script setup lang="ts">
+<script setup lang="ts">
     import { nextTick, onMounted, reactive } from 'vue';
     import { getLogProcessId } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/logUtils';
     import { removeLoadingMask, setHtmlTitle } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
     import Editor from './components/Editor.vue';
     import FileTree from './components/FileTree.vue';
-
+    
     import { useCodeStore } from './store/codeStore'
 
     const store = useCodeStore();
@@ -32,7 +32,7 @@
     // };
 
 
-    const strategy = reactive<Strategy>({
+    const strategy = reactive<Code.Strategy>({
         strategy_id: '',
         strategy_path: '',
         add_time: 0
@@ -40,7 +40,7 @@
         
     function getCurrentStrategy (strategyList): void {
 
-        let value: Strategy = JSON.parse(strategyList[0].value)
+        let value: Code.Strategy = JSON.parse(strategyList[0].value)
         
         strategy.strategy_id = value.strategy_id
         strategy.strategy_path = value.strategy_path
@@ -90,10 +90,4 @@
         }
     }
 }
-</style> -->
-<script setup></script>
-<template>
-    <div>
-        111
-    </div>
-</template>
+</style>

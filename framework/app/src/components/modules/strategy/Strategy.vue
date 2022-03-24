@@ -15,6 +15,7 @@ import {
   useTableSearchKeyword,
   useDashboardBodySize,
   handleOpenLogview,
+  handleOpenCodeView
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import { getColumns } from './config';
 import {

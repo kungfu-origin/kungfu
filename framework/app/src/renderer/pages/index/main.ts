@@ -58,8 +58,6 @@ import { useComponenets } from './useComponents';
 import { GlobalCategoryRegister } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiExtraLocationUtils';
 import globalBus from '../../assets/methods/globalBus';
 
-console.log('000');
-
 const app = createApp(App);
 
 app
@@ -152,7 +150,5 @@ if (process.env.RELOAD_AFTER_CRASHED === 'false') {
     },
   );
 }
-
-console.log(111);
 
 triggerStartStep();

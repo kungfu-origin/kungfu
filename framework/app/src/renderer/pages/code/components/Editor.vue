@@ -4,7 +4,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import { findTargetFromArray } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
+// import { findTargetFromArray } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.main.js';
 import { storeToRefs } from 'pinia';
 import { computed, onMounted, reactive, watch } from 'vue'
@@ -45,35 +45,23 @@ watch(code, spaceTabSetting => {
 
 
 // 监听文件树变化
-watch(fileTree, (newTree, oldTree) => {
-
-    const newRootPath = findTargetFromArray<Code.FileData>(Object.values(newTree), 'root', true)!.filePath
-    // const newRootPath = Object.values(newTree).map((tree: Code.FileProps) => {
-    //     if (tree.root) {
-    //         return tree.filePath
-    //     }
-    //     return
-    // })[0];
-    const oldRootPath = findTargetFromArray<Code.FileData>(Object.values(oldTree), 'root', true)!.filePath
-
-    // const oldRootPath = Object.values(oldTree).map((tree: Code.FileProps) => {
-    //     if (tree.root) {
-    //         return tree.filePath
-    //     }
-    // })[0];
-    if (newRootPath != oldRootPath) {
-        file = {};
-        handleEditor = null
-    }
-})
+// watch(fileTree, (newTree, oldTree) => {
+    
+//     const newRootPath = findTargetFromArray<Code.FileData>(Object.values(newTree), 'root', true)!.filePath
+//     const oldRootPath = findTargetFromArray<Code.FileData>(Object.values(oldTree), 'root', true)!.filePath
+//     if (newRootPath != oldRootPath) {
+//         file = {};
+//         handleEditor = null
+//     }
+// })
 
 // 创建代码编辑器
-function createEditor(file?: any, codeText?: string): monaco.editor {
+function createEditor(file?: Code.FileProps, codeText?: string): monaco.editor {
     if (document.getElementById('editor-content')) {
         (document.getElementById('editor-content') as any).innerHTML = '';
         let fileLanguage: string = 'plaintext';
         if (file) {
-            fileLanguage = languageJSON[file.ext]
+            fileLanguage = file.ext ? languageJSON[file.ext] : 'plaintext';
         }
         const editor: monaco.editor = monaco.editor.create(
             document.getElementById("editor-content"),
