@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, toRefs } from 'vue';
+import { computed, Ref, ref, toRefs } from 'vue';
 import {
   FileTextOutlined,
   SettingOutlined,
@@ -60,7 +60,7 @@ const { allProcessOnline, handleSwitchAllProcessStatus } = useSwitchAllConfig(
 );
 
 const { searchKeyword, tableData } = useTableSearchKeyword<KungfuApi.KfConfig>(
-  md,
+  md as Ref<KungfuApi.KfConfig[]>,
   ['group'],
 );
 

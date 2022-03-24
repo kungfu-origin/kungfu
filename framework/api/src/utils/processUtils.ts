@@ -729,6 +729,23 @@ export const startDzxy = () => {
   });
 };
 
+export const startExtDaemon = (name: string, cwd: string, script: string) => {
+  return startProcess({
+    name,
+    args: '',
+    cwd,
+    script,
+    interpreter: path.join(KFC_DIR, kfcName),
+    force: true,
+    watch: process.env.NODE_ENV === 'production' ? false : true,
+    env: {
+      KFC_AS_VARIANT: 'node',
+    },
+  }).catch((err) => {
+    kfLogger.error(err.message);
+  });
+};
+
 export const startBar = (
   targetName: string,
   source: string,

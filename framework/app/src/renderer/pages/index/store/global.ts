@@ -174,6 +174,7 @@ export const useGlobalStore = defineStore('global', {
         td: this.tdList,
         md: this.mdList,
         strategy: this.strategyList,
+        daemon: [],
         system: [],
       };
 

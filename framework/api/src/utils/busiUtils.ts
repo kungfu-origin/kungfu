@@ -88,6 +88,19 @@ declare global {
 
 export {};
 
+export const getGlobal = () => {
+  if (typeof self !== 'undefined') {
+    return self;
+  }
+  if (typeof window !== 'undefined') {
+    return window;
+  }
+  if (typeof global !== 'undefined') {
+    return global;
+  }
+  throw new Error('unable to locate global object');
+};
+
 //for td processId
 String.prototype.toAccountId = function (): string {
   if (this.indexOf('_') === -1) return this.toString();
@@ -482,6 +495,7 @@ const getKfUIExtensionConfigByExtKey = (
       const uiConfig = extConfig['ui_config'];
       const position = uiConfig?.position || '';
       const components = uiConfig?.components;
+      const daemon = uiConfig?.daemon || ({} as Record<string, string>);
 
       if (!position) {
         return configByExtraKey;
@@ -494,6 +508,7 @@ const getKfUIExtensionConfigByExtKey = (
         components: components || {
           index: 'index.js',
         },
+        daemon,
       };
       return configByExtraKey;
     }, {} as KungfuApi.KfUIExtConfigs);
@@ -511,6 +526,28 @@ export const getKfUIExtensionConfig =
     const kfExtConfigList = await getKfExtConfigList();
     return getKfUIExtensionConfigByExtKey(kfExtConfigList);
   };
+
+export const getAvailDaemonList = async (): Promise<
+  KungfuApi.KfDaemonLocation[]
+> => {
+  const kfExtConfig: KungfuApi.KfUIExtConfigs = await getKfUIExtensionConfig();
+  return Object.values(kfExtConfig || ({} as KungfuApi.KfUIExtConfigs))
+    .filter((item) => Object.keys(item).length)
+    .reduce((daemonList, item) => {
+      daemonList = [
+        ...daemonList,
+        ...Object.keys(item.daemon).map((name) => ({
+          category: 'daemon',
+          group: 'ext',
+          name,
+          mode: 'live',
+          cwd: item.extPath,
+          script: item.daemon[name],
+        })),
+      ];
+      return daemonList;
+    }, [] as KungfuApi.KfDaemonLocation[]);
+};
 
 export const buildExtTypeMap = (
   extConfigs: KungfuApi.KfExtConfigs,

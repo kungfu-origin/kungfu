@@ -16,11 +16,15 @@ export const watcher = ((): KungfuApi.Watcher | null => {
     process.env.APP_TYPE || 'undefined',
     'RENDERER_TYPE',
     process.env.RENDERER_TYPE || 'undefined',
+    'DAEMON_TYPE',
+    process.env.DAEMON_TYPE || 'undefined',
   );
 
   if (process.env.APP_TYPE !== 'renderer') {
     if (process.env.APP_TYPE !== 'cli') {
-      return null;
+      if (process.env.APP_TYPE !== 'daemon') {
+        return null;
+      }
     }
   }
 
@@ -38,13 +42,15 @@ export const watcher = ((): KungfuApi.Watcher | null => {
     }
   }
 
-  const id = [process.env.APP_TYPE || '', process.env.RENDERER_TYPE || ''].join(
-    '',
-  );
+  const id = [
+    process.env.APP_TYPE || '',
+    process.env.RENDERER_TYPE || process.env.DAEMON_TYPE || '',
+  ].join('');
 
-  const bypassRestore = booleanProcessEnv(
-    process.env.RELOAD_AFTER_CRASHED || '',
-  );
+  const bypassRestore =
+    process.env.APP_TYPE === 'daemon'
+      ? false
+      : booleanProcessEnv(process.env.RELOAD_AFTER_CRASHED || '');
   const globalSetting = getKfGlobalSettingsValue();
   const bypassQuote = globalSetting?.performance?.bypassQuote;
 

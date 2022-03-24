@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, toRefs } from 'vue';
+import { ref, computed, toRefs, Ref } from 'vue';
 
 import KfDashboard from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfDashboard.vue';
 import KfDashboardItem from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfDashboardItem.vue';
@@ -60,7 +60,7 @@ const { allProcessOnline, handleSwitchAllProcessStatus } = useSwitchAllConfig(
   processStatusData,
 );
 const { searchKeyword, tableData } = useTableSearchKeyword<KungfuApi.KfConfig>(
-  strategy,
+  strategy as Ref<KungfuApi.KfConfig[]>,
   ['name'],
 );
 const { getAssetsByKfConfig } = useAssets();

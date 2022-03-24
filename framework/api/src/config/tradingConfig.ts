@@ -119,20 +119,25 @@ export const KfCategory: Record<
     color: 'red',
     level: 100,
   },
+  [KfCategoryEnum.daemon]: {
+    name: isEnglish ? 'Daemon' : '后台任务',
+    color: 'purple',
+    level: 90,
+  },
   [KfCategoryEnum.md]: {
     name: isEnglish ? 'Md' : '行情源',
     color: 'orange',
-    level: 90,
+    level: 80,
   },
   [KfCategoryEnum.td]: {
     name: isEnglish ? 'Td' : '交易账户',
     color: 'blue',
-    level: 80,
+    level: 70,
   },
   [KfCategoryEnum.strategy]: {
     name: isEnglish ? 'Strategy' : '策略',
     color: 'cyan',
-    level: 70,
+    level: 60,
   },
 };
 
