@@ -9,7 +9,7 @@ interface ICodeState {
   currentStrategy: string;
   strategyList: KungfuApi.KfConfig[];
   currentFile: Code.FileData;
-  //   entryFile: any;
+  entryFile: Code.FileData;
   fileTree: Code.IFileTree;
   kfConfig: Record<string, Record<string, KungfuApi.KfConfigValue>>;
 }
@@ -20,7 +20,7 @@ export const useCodeStore = defineStore('code', {
       currentStrategy: '', //当前运行策略
       strategyList: [], //策略列表
       currentFile: {} as Code.FileData, //文件树高亮
-      //   entryFile: {}, //入口文件
+      entryFile: {} as Code.FileData, //入口文件
       fileTree: {}, //文件树
       kfConfig: {}, // kf 配置
     };

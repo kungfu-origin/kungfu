@@ -5,8 +5,7 @@ import {
   buildFileObj,
 } from '@kungfu-trader/kungfu-js-api/utils/fileUtils';
 import { Stats } from 'fs-extra';
-
-// import { deepClone } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
+import { deepClone } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 
 export const getTreeByFilePath = (
   strategy: Code.FileData,
@@ -76,59 +75,59 @@ export const getTreeByFilePath = (
 };
 
 // //打开文件树
-// export const openFolder = (
-//   store: any,
-//   folder: Code.FileData,
-//   oldFileTree: Code.IFileTree,
-//   openStatus?: boolean,
-//   force?: boolean,
-// ) => {
-//   oldFileTree = deepClone(oldFileTree);
-//   //清空
-//   if (force) oldFileTree = clearChildrenByFileId(oldFileTree, folder.id);
-//   return new Promise(async (resolve) => {
-//     if (openStatus === undefined) {
-//       openStatus = !folder.open;
-//     }
-//     if (openStatus) {
-//       const { ids, fileTree }: Code.FileTreeByPath = await getTreeByFilePath(
-//         folder,
-//         oldFileTree,
-//       );
-//       store.dispatch('setFileTree', fileTree);
-//       store.dispatch('setFileNode', {
-//         id: folder.id,
-//         attr: 'children',
-//         val: ids,
-//       });
-//       resolve(fileTree);
-//     } else {
-//       resolve({});
-//     }
-//     //打开
-//     store.dispatch('setFileNode', {
-//       id: folder.id,
-//       attr: 'open',
-//       val: openStatus,
-//     });
-//   });
-// };
+export const openFolder = (
+  store: any,
+  folder: Code.FileData,
+  oldFileTree: Code.IFileTree,
+  openStatus?: boolean,
+  force?: boolean,
+) => {
+  oldFileTree = deepClone(oldFileTree);
+  //清空
+  if (force) oldFileTree = clearChildrenByFileId(oldFileTree, folder.id);
+  return new Promise(async (resolve) => {
+    if (openStatus === undefined) {
+      openStatus = !folder.open;
+    }
+    if (openStatus) {
+      const { ids, fileTree }: Code.FileTreeByPath = await getTreeByFilePath(
+        folder,
+        oldFileTree,
+      );
+      store.setFileTree(fileTree)
+      store.setFileTree({
+            id: folder.id,
+            attr: 'children',
+            val: ids,
+      })
+      resolve(fileTree);
+    } else {
+      resolve({});
+    }
+    //打开
+    store.setFileNode({
+        id: folder.id,
+        attr: 'open',
+        val: openStatus,
+    })
+  });
+};
 
 // //清空children
-// export const clearChildrenByFileId = (fileTree: any, fileId: number): any => {
-//   const target: any = fileTree[fileId];
-//   const children: any = target.children;
-//   const files: any = children['file'] || [];
-//   const folders: any = children['folders'] || [];
+export const clearChildrenByFileId = (fileTree: any, fileId: number): any => {
+  const target: any = fileTree[fileId];
+  const children: any = target.children;
+  const files: any = children['file'] || [];
+  const folders: any = children['folders'] || [];
 
-//   [...files, ...folders].forEach((id) => {
-//     fileTree[id] = null;
-//     delete fileTree[id];
-//   });
+  [...files, ...folders].forEach((id) => {
+    fileTree[id] = null;
+    delete fileTree[id];
+  });
 
-//   target.children = {
-//     file: [],
-//     folder: [],
-//   };
-//   return fileTree;
-// };
+  target.children = {
+    file: [],
+    folder: [],
+  };
+  return fileTree;
+};

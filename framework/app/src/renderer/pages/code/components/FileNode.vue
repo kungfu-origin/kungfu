@@ -1,17 +1,86 @@
 <template>
   <li>
-      <div>
+      <div
+        @click.stop="handleClickFile(fileNode)"
+        ref="name-content"
+      >
           <span>
-              <i></i>
-              <!-- <img src="iconPath" alt="iconPath"> -->
-              <span></span>
-              <el-imput></el-imput>
-              <span></span>
+                <i v-if="type == 'folder' && fileNode && !fileNode.root"></i>
+                <img src="iconPath" alt="iconPath">
+                <!-- 文件名/编辑 -->
+                <span
+                    v-if="id !='pending' && fileNode && !onEditing"
+                    :title="fileNode.name"
+                >{{ fileNode.name }}</span>
 
-              <span></span>
-              <span></span>
-              <div class="error-message"></div>
+                <el-input
+                    v-else-if="id === 'pending'"
+                    ref="add-pending"
+                    :class="{ error: editError }"
+                    v-model.trim="fileName"
+                    @click.stop="() => {}"
+                    @focus.stop="() => {}"
+                    @keyup.enter.native="(e) => handleAddFileBlur(e, 'enter')"
+                    @blur="handleAddFileBlur"
+                    @input="handleAddEditFileInput"
+                />
+                <el-input
+                    v-else-if="onEditing"
+                    ref="edit-name"
+                    :class="{ error: editError }"
+                    v-model.trim="fileName"
+                    @click.stop="() => {}"
+                    @focus.stop="() => {}"
+                    @keyup.enter.native="handleEditFileBlur"
+                    @blur="handleEditFileBlur"
+                    @input="(e) => handleAddEditFileInput(e, 'edit')"
+                ></el-input>
+                <span
+                    v-if="
+                        entryFile.filePath === fileNode?.filePath &&
+                        fileNode?.filePath !== undefined &&
+                        !onEditing"
+                >{{'(入口文件)'}}</span>
+
+                <span
+                    :title="fileNode?.filePath"
+                    class="path text-overflow"
+                    v-if="fileNode?.root"
+                >{{ fileNode.filePath }}}</span>
+
+                <span
+                    class="fr file-oper"
+                    v-if="!fileNode?.root && !onEditing && id !== 'pending'"
+                >
+                    <i
+                        class="mouse-over"
+                        title="重命名"
+                        @click.stop="handleRename()"
+                    ></i>
+                    <i
+                        class="mouse-over"
+                        title="删除"
+                        @click.stop="handleDelete()"
+                    ></i>
+                </span>
+                <div class="error-message"></div>
           </span>
+      </div>
+      <div v-if="fileNode && fileNode.children && fileNode.open">
+        <file-node
+            v-for="id in fileNode.children.folder"
+            :fileNode="fileTree[id]"
+            :id="id"
+            type="folder"
+            :key="id"
+        ></file-node>
+        <file-node
+            v-for="id in fileNode.children.file"
+            :fileNode="fileTree[id]"
+            :id="id"
+            type="file"
+            :key="id"
+        ></file-node>
       </div>
   </li>
 </template>
@@ -20,18 +89,20 @@
 import { useCodeStore } from '../store/codeStore'
 import iconFolderJSON from '../config/iconFolderConfig.json';
 import iconFileJSON from '../config/iconFileConfig.json';
-// import path from 'path';
+import path from 'path';
 import { storeToRefs } from 'pinia';
 import { onMounted, PropType, ref } from 'vue';
 import { nextTick } from 'process';
 import { message } from 'ant-design-vue';
-
+import { openFolder } from '../../../assets/methods/codeUtils';
+import { removeFileFolder, editFileFolderName, addFileSync } from '@kungfu-trader/kungfu-js-api/utils/fileUtils'
 
 const store = useCodeStore();
 // const { currentFile, fileTree, kfConfig } = storeToRefs(store)
 const props = defineProps({
     fileNode: Object as PropType<Code.FileData>,
-    type: String
+    type: String,
+    id: [Number, String]
 })
 const { fileNode, type } = props
 
@@ -41,22 +112,25 @@ const onEditing = ref<boolean>(false)
 const editError = ref<boolean>(false)
 const editErrorMessage = ref<string>('');
 
-const { fileTree } = storeToRefs(store)
+const { fileTree, entryFile } = storeToRefs(store)
 
+// const nameContent = ref<HTMLElement | null>(null)
+const addPending = ref<HTMLElement | null>(null)
+const editName = ref<HTMLElement | null>(null)
 
 //点击文件或文件树
-// function handleClickFile(file) {
-//     //正在编辑的input
-//     if (Object.keys(file).length === 1) return;
-//     //更新active file id
-//     this.$store.dispatch('setCurrentFile', file);
-//     //如果为dir
-//     //打开文件夹, 如果children不为空，直接展示, 之后异步更新，将原来删除
-//     //如果children为空，读取文件夹下文件，赋值children
-//     if (this.type == 'folder' && !file.root) {
-//     CODE_UTILS.openFolder(this.$store, file, this.fileTree);
-//     }
-// }
+function handleClickFile(file) {
+    //正在编辑的input
+    if (Object.keys(file).length === 1) return;
+    //更新active file id
+    store.setCurrentFile(file)
+    //如果为dir
+    //打开文件夹, 如果children不为空，直接展示, 之后异步更新，将原来删除
+    //如果children为空，读取文件夹下文件，赋值children
+    if (type == 'folder' && !file.root) {
+        openFolder(store, file, fileTree.value);
+    }
+}
 
 //添加文件或文件夹时
 function handleAddFileBlur(e, eType) {
@@ -64,7 +138,7 @@ function handleAddFileBlur(e, eType) {
     if (eType === 'enter' && e.key !== 'Enter') return;
     const filename = e.target.value;
     //test 重复 或 为空
-    const parentId = fileNode?.parentId;
+    const parentId = fileNode?.parentId || '';
     if (parentId === '') return;
     const names = getSiblingsName(parentId);
     //如果为空则直接删除（重复会通过@input来判断）
@@ -78,7 +152,9 @@ function handleAddFileBlur(e, eType) {
     //添加文件
     try {
         const targetPath = parentId ? fileTree[parentId].filePath : '';
-        CODE_UTILS.addFileSync(targetPath, filename, type);
+        if (type === 'folder' || type ==='file') {
+            addFileSync(targetPath, filename, type);
+        }
         store.removeFileFolderPending({
             id: fileNode?.parentId,
             type: type,
@@ -117,16 +193,59 @@ function handleAddEditFileInput(val, type): void {
 function handleRename(): void {
     onEditing.value = true;
     nextTick(() => {
-        //添加高亮
-        // if (this.$refs['edit-name']) {
-        //     this.$refs['edit-name'].$el.querySelectorAll('input')[0].focus();
-        // }
+        // 添加高亮
+        if (editName.value) {
+            editName.value.querySelectorAll('input')[0].focus();
+        }
+    });
+}
+
+//删除文件
+function handleDelete() {
+    const parentId = fileNode?.parentId;
+    const typeName = type == 'folder' ? '文件夹' : '文件';
+    this.$confirm(`确认删除该${typeName}吗？`, '提示', {
+    confirmButtonText: '确 定',
+    cancelButtonText: '取 消',
+    })
+    .then(() => removeFileFolder(fileNode?.filePath || ''))
+    .then(() =>
+        openFolder(
+            store,
+            fileTree.value[parentId || 0],
+            fileTree.value,
+            true,
+            true,
+        ),
+    )
+    .then(() =>
+        store.setCurrentFile(fileTree[parentId || 0]),
+    )
+    .then(() => message.success(`${typeName}删除成功！`))
+    .catch((err) => {
+        if (err == 'cancel') return;
+        message.error(err.message || '操作失败！');
+    });
+}
+
+//重命名文件blur
+function handleEditFileBlur(e) {
+    if (editError) {
+        resetStatus();
+        return;
+    }
+    const oldPath = fileNode?.filePath || '';
+    const newName = e.target.value;
+    const newPath = path.join(path.dirname(oldPath), newName);
+    const parentId = fileNode?.parentId;
+    editFileFolderName(oldPath, newPath).then(() => {
+        reloadFolder(parentId, newName);
     });
 }
 
 //重制状态
 function resetStatus(): void {
-    fileName.value = (fileNode as Code.FileData).name;
+    fileName.value = fileNode?.name;
     onEditing.value = false;
     editError.value = false;
     editErrorMessage.value = '';
@@ -134,21 +253,21 @@ function resetStatus(): void {
 
 // 重新加载folder
 function reloadFolder(parentId, filename) {
-    CODE_UTILS.openFolder(9
-    this.$store,
-    this.fileTree[parentId],
-    this.fileTree,
-    true,
-    true,
+    openFolder(
+        store,
+        fileTree.value[parentId],
+        fileTree.value,
+        true,
+        true,
     ).then((fileTree) => {
-    const currentFile = this.getCurrentFileByName(
-        parentId,
-        fileTree,
-        filename,
-    );
-    if (currentFile.id) {
-        this.$store.dispatch('setCurrentFile', currentFile);
-    }
+        const currentFile = getCurrentFileByName(
+            parentId,
+            fileTree,
+            filename,
+        );
+        if (currentFile.id) {
+            store.setCurrentFile(currentFile)
+        }
     });
 }
 
@@ -193,11 +312,11 @@ function getSiblings(parentId, fileTree) {
 //获取所有兄弟 name
 function getSiblingsName(parentId) {
     let targetList: Array<string>[] = [];
-    const folders = fileTree[parentId].children['folder'];
-    const files = fileTree[parentId].children['file'];
+    const folders = fileTree.value[parentId].children['folder'];
+    const files = fileTree.value[parentId].children['file'];
 
     [...folders, ...files].forEach((id) => {
-    if (fileTree[id] && fileTree[id].name)
+    if (fileTree.value[id] && fileTree.value[id].name)
         targetList.push(fileTree[id].name);
     });
     return targetList;
@@ -209,7 +328,11 @@ onMounted(() => {
             iconPath.value = getIcon(fileNode)
         }
     })
-    
+    //添加高亮
+    if (addPending.value) {
+      addPending.value.querySelectorAll('input')[0].focus();
+    }
+    //缓存filename
     fileName.value = fileNode ? fileNode.name : ''
 })
 </script>
