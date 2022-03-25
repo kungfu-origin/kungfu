@@ -2,7 +2,8 @@
     import { nextTick, onMounted, reactive } from 'vue';
     import { getLogProcessId } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/logUtils';
     import { removeLoadingMask, setHtmlTitle } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
-    import Editor from './components/Editor.vue';
+    // import Editor from './components/Editor.vue';
+    import Editor from './components/MonacoEditor.vue';
     import FileTree from './components/FileTree.vue';
     
     import { useCodeStore } from './store/codeStore'
@@ -15,22 +16,6 @@
 
     
     setHtmlTitle(`功夫交易系统 - ${ProcessId}.log`);
-
-    // const boardSize = ref<{ width: number; height: number }>({
-    //     width: 0,
-    //     height: 0,
-    // });
-    // const handleChangeBoardSize = ({
-    //     width,
-    //     height,
-    // }: {
-    //     width: number;
-    //     height: number;
-    // }) => {
-    //     boardSize.value.width = width;
-    //     boardSize.value.height = height;
-    // };
-
 
     const strategy = reactive<Code.Strategy>({
         strategy_id: '',

@@ -1,89 +1,47 @@
 <template>
-  <li>
-      <div
-        @click.stop="handleClickFile(fileNode)"
-        ref="name-content"
-      >
-          <span>
+    <div>
+        <div @click.stop="handleClickFile(fileNode)">
+            <span>
                 <i v-if="type == 'folder' && fileNode && !fileNode.root"></i>
-                <img src="iconPath" alt="iconPath">
-                <!-- 文件名/编辑 -->
-                <span
-                    v-if="id !='pending' && fileNode && !onEditing"
-                    :title="fileNode.name"
-                >{{ fileNode.name }}</span>
-
-                <el-input
-                    v-else-if="id === 'pending'"
-                    ref="add-pending"
-                    :class="{ error: editError }"
-                    v-model.trim="fileName"
-                    @click.stop="() => {}"
-                    @focus.stop="() => {}"
-                    @keyup.enter.native="(e) => handleAddFileBlur(e, 'enter')"
-                    @blur="handleAddFileBlur"
-                    @input="handleAddEditFileInput"
-                />
-                <el-input
-                    v-else-if="onEditing"
-                    ref="edit-name"
-                    :class="{ error: editError }"
-                    v-model.trim="fileName"
-                    @click.stop="() => {}"
-                    @focus.stop="() => {}"
-                    @keyup.enter.native="handleEditFileBlur"
-                    @blur="handleEditFileBlur"
-                    @input="(e) => handleAddEditFileInput(e, 'edit')"
-                ></el-input>
-                <span
-                    v-if="
-                        entryFile.filePath === fileNode?.filePath &&
-                        fileNode?.filePath !== undefined &&
-                        !onEditing"
-                >{{'(入口文件)'}}</span>
-
-                <span
-                    :title="fileNode?.filePath"
-                    class="path text-overflow"
-                    v-if="fileNode?.root"
-                >{{ fileNode.filePath }}}</span>
-
-                <span
-                    class="fr file-oper"
-                    v-if="!fileNode?.root && !onEditing && id !== 'pending'"
-                >
-                    <i
-                        class="mouse-over"
-                        title="重命名"
-                        @click.stop="handleRename()"
-                    ></i>
-                    <i
-                        class="mouse-over"
-                        title="删除"
-                        @click.stop="handleDelete()"
-                    ></i>
+                <img :src="iconPath" v-if="iconPath">
+                <span v-if="id !== 'pedding' &&  fileNode && !onEditing">{{ fileNode.name }}</span>
+                <span v-if="fileNode && entryFile.filePath === fileNode.filePath && fileNode.filePath !== undefined && !onEditing">{{ '入口文件' }}</span>
+                <span v-if="fileNode && fileNode.root" :title="fileNode.filePath">{{fileNode.filePath}}</span>
+                <span v-if="fileNode && !fileNode.root && !onEditing && id !== 'padding'">
+                    <i class="nouse-over" title="重命名" @click="handleRename"></i>
+                    <i class="nouse-over" title="删除" @click="handleDelete"></i>
                 </span>
-                <div class="error-message"></div>
-          </span>
-      </div>
-      <div v-if="fileNode && fileNode.children && fileNode.open">
-        <file-node
-            v-for="id in fileNode.children.folder"
-            :fileNode="fileTree[id]"
-            :id="id"
-            type="folder"
-            :key="id"
-        ></file-node>
-        <file-node
-            v-for="id in fileNode.children.file"
-            :fileNode="fileTree[id]"
-            :id="id"
-            type="file"
-            :key="id"
-        ></file-node>
-      </div>
-  </li>
+            </span>
+        </div>
+        <div v-if="fileNode && fileNode.children && fileNode.children.folder">
+            <div v-for="id in fileNode.children.folder">
+                <ComFileNode
+                    :fileNode="fileTree[id]"
+                    :id="id"
+                    type="folder"
+                    :key="id"
+                />
+            </div>
+        </div>
+        <div v-if="fileNode && fileNode.children && fileNode.children.file">
+            <div v-for="id in fileNode.children.file">
+                <ComFileNode
+                    :fileNode="fileTree[id]"
+                    :id="id"
+                    type="file"
+                    :key="id"
+                />
+            </div>
+        </div>
+    </div>
 </template>
+
+<script lang="ts">
+export default {
+    name: 'ComFileNode'
+}
+</script>
+
 
 <script setup lang="ts">
 import { useCodeStore } from '../store/codeStore'
@@ -128,7 +86,7 @@ function handleClickFile(file) {
     //打开文件夹, 如果children不为空，直接展示, 之后异步更新，将原来删除
     //如果children为空，读取文件夹下文件，赋值children
     if (type == 'folder' && !file.root) {
-        openFolder(store, file, fileTree.value);
+        openFolder(file, fileTree.value);
     }
 }
 
@@ -211,7 +169,6 @@ function handleDelete() {
     .then(() => removeFileFolder(fileNode?.filePath || ''))
     .then(() =>
         openFolder(
-            store,
             fileTree.value[parentId || 0],
             fileTree.value,
             true,
@@ -245,7 +202,7 @@ function handleEditFileBlur(e) {
 
 //重制状态
 function resetStatus(): void {
-    fileName.value = fileNode?.name;
+    fileName.value = fileNode?.name || '';
     onEditing.value = false;
     editError.value = false;
     editErrorMessage.value = '';
@@ -254,7 +211,6 @@ function resetStatus(): void {
 // 重新加载folder
 function reloadFolder(parentId, filename) {
     openFolder(
-        store,
         fileTree.value[parentId],
         fileTree.value,
         true,
@@ -287,7 +243,7 @@ function getIcon(file: Code.FileData): string {
             if (!iconName) iconName = 'file';
         }
     if (!iconName) return '';
-    return `resources/file-icons/${iconName}.svg`;
+    return `public/file-icons/${iconName}.svg`;
 }
 
 //添加策略之后，刷新文件树，需要将current 更新为添加的file/folder
@@ -326,6 +282,7 @@ onMounted(() => {
     nextTick(() => {
         if (fileNode) {
             iconPath.value = getIcon(fileNode)
+            
         }
     })
     //添加高亮

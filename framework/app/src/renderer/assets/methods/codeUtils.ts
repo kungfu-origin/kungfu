@@ -6,6 +6,7 @@ import {
 } from '@kungfu-trader/kungfu-js-api/utils/fileUtils';
 import { Stats } from 'fs-extra';
 import { deepClone } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
+import { useCodeStore } from '../../pages/code/store/codeStore';
 
 export const getTreeByFilePath = (
   strategy: Code.FileData,
@@ -75,13 +76,13 @@ export const getTreeByFilePath = (
 };
 
 // //打开文件树
-export const openFolder = (
-  store: any,
+export const openFolder = async (
   folder: Code.FileData,
   oldFileTree: Code.IFileTree,
   openStatus?: boolean,
   force?: boolean,
 ) => {
+  const store = useCodeStore();
   oldFileTree = deepClone(oldFileTree);
   //清空
   if (force) oldFileTree = clearChildrenByFileId(oldFileTree, folder.id);
@@ -94,34 +95,38 @@ export const openFolder = (
         folder,
         oldFileTree,
       );
-      store.setFileTree(fileTree)
+      store.setFileTree(fileTree);
       store.setFileTree({
-            id: folder.id,
-            attr: 'children',
-            val: ids,
-      })
+        id: folder.id,
+        attr: 'children',
+        val: ids,
+      });
       resolve(fileTree);
     } else {
       resolve({});
     }
     //打开
     store.setFileNode({
-        id: folder.id,
-        attr: 'open',
-        val: openStatus,
-    })
+      id: folder.id,
+      attr: 'open',
+      val: openStatus,
+    });
   });
 };
 
 // //清空children
-export const clearChildrenByFileId = (fileTree: any, fileId: number): any => {
-  const target: any = fileTree[fileId];
-  const children: any = target.children;
-  const files: any = children['file'] || [];
-  const folders: any = children['folders'] || [];
+export const clearChildrenByFileId = (
+  fileTree: Code.IFileTree,
+  fileId: number,
+): Code.IFileTree => {
+  const target: Code.FileData = fileTree[fileId];
+  const children: { file: Array<number>; folder: Array<number> } =
+    target.children;
+  const files: Array<number> = children['file'] || [];
+  const folders: Array<number> = children['folders'] || [];
 
   [...files, ...folders].forEach((id) => {
-    fileTree[id] = null;
+    // fileTree[id] = null;
     delete fileTree[id];
   });
 

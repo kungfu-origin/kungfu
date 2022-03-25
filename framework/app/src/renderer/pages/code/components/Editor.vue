@@ -10,6 +10,8 @@ import { storeToRefs } from 'pinia';
 import { computed, onMounted, reactive, watch } from 'vue'
 import languageJSON from '../config/iconFileConfig.json';
 import themeData from '../config/Monocai.json';
+import { findTargetFromArray } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
+
 import {
   keywordsList,
   kungfuFunctions,
@@ -30,7 +32,7 @@ monaco.languages.registerCompletionItemProvider('python', {
 const store = useCodeStore();
 
 // currentFile
-const { fileTree, kfConfig } = storeToRefs(store)
+const { currentFile, fileTree, kfConfig } = storeToRefs(store)
 const code = computed(() => kfConfig['code'])
 
 
@@ -43,17 +45,19 @@ watch(code, spaceTabSetting => {
     updateSpaceTab(spaceTabSetting)
 })
 
-
 // 监听文件树变化
-// watch(fileTree, (newTree, oldTree) => {
+watch(fileTree, (newTree, oldTree) => {
     
-//     const newRootPath = findTargetFromArray<Code.FileData>(Object.values(newTree), 'root', true)!.filePath
-//     const oldRootPath = findTargetFromArray<Code.FileData>(Object.values(oldTree), 'root', true)!.filePath
-//     if (newRootPath != oldRootPath) {
-//         file = {};
-//         handleEditor = null
-//     }
-// })
+    let newRootPath = findTargetFromArray<Code.FileData>(Object.values(newTree), 'root', true)!.filePath
+    let oldRootPath = ''
+    if (oldTree[0] && oldTree[0].id) {
+        oldRootPath = findTargetFromArray<Code.FileData>(Object.values(oldTree), 'root', true)!.filePath
+    }
+    if (newRootPath != oldRootPath) {
+        file = {};
+        handleEditor = null
+    }
+})
 
 // 创建代码编辑器
 function createEditor(file?: Code.FileProps, codeText?: string): monaco.editor {

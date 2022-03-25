@@ -7,7 +7,7 @@ ipcRenderer.setMaxListeners(10);
 
 export const ipcEmitDataByName = (
   name: string,
-  postData?: any,
+  postData?: { strategyId: string; strategyPath: string },
   interval?: number,
 ) => {
   interval = interval || 5000;
@@ -26,7 +26,7 @@ export const ipcEmitDataByName = (
       ipcRenderer.removeAllListeners(`ipc-res-${name}`);
       clearTimeout(timer);
     }, interval);
-    ipcRenderer.on(`ipc-res-${name}`, (event: any, data: any) => {
+    ipcRenderer.on(`ipc-res-${name}`, (event, data) => {
       resolve({ event, data });
       ipcRenderer.removeAllListeners(`ipc-res-${name}`);
       clearTimeout(timer);

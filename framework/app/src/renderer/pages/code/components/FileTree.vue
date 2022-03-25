@@ -1,23 +1,27 @@
 <template>
   <div class="file-tree">
-    <div class="open-editor-folder">
+    <div class="open-editor-folder" @click="handleBindStrategyFolder">
       设置策略入口文件
     </div>
     <div class="file-tree-content">
       <div class="strategy-name">
         <span class="name">
-          <span>sssss</span>
+          <span v-if="strategy">{{ strategy.strategy_id }}</span>
           （当前策略)
         </span>
         <span
           class="fr folder-oper"
           title="新建文件夹"
+          v-if="strategyPath"
+          @click="handleAddFolder"
         >
           <i class="fl iconfont tr-folder1"></i>
         </span>
         <span
           class="fr folder-oper"
           title="新建文件"
+          v-if="strategyPath"
+          @click="handleAddFile"
         >
           <i class="fl iconfont tr-document1"></i>
         </span>
@@ -44,9 +48,12 @@ import { message } from 'ant-design-vue';
 import { buildFileObj } from '@kungfu-trader/kungfu-js-api/utils/fileUtils';
 import { getTreeByFilePath } from '../../../assets/methods/codeUtils';
 import { useCodeStore } from '../store/codeStore'
-
+import { remote } from 'electron';
 import FileNode from './FileNode.vue';
 import { nextTick } from 'vue';
+import { ipcEmitDataByName } from '../emitter';
+import { openFolder } from '../../../assets/methods/codeUtils';
+
 const store = useCodeStore();
 
 const props = defineProps({
@@ -56,7 +63,7 @@ const { strategy } = props
 const strategyPath = ref<string>('')
 const strategyPathName = ref<string>('')
 
-const { fileTree } = storeToRefs(useCodeStore());
+const { fileTree, currentFile } = storeToRefs(useCodeStore());
 
 watch(strategy as Code.Strategy, newStrategy => {
     getPath(newStrategy);
@@ -71,8 +78,77 @@ watch(strategy as Code.Strategy, newStrategy => {
     })
 
 })
+ //绑定策略
+function handleBindStrategyFolder() {
+    remote.dialog.showOpenDialog(
+        {
+            properties: ['openFile'],
+        },
+        (strategyPath) => {
+            if (!strategyPath || !strategyPath[0]) return;
+            if (!strategy?.strategy_id) return;
+            bindStrategyPath(strategyPath);
+        },
+    );
+}
 
+//bind data中path 与 sqlite中path
+async function bindStrategyPath(strategyPath) {
+    await ipcEmitDataByName('updateStrategyPath', {
+        strategyId: strategy?.strategy_id,
+        strategyPath: strategyPath[0],
+    });
+    if (strategy && strategy.strategy_id) {
+        message.success(
+            `策略${strategy.strategy_id}文件路径修改成功！`,
+        );
+        //每次更新path，需要通知root组件更新stratgy
+        this.$emit('updateStrategy');
+    }
+}
 
+//加文件夹
+function handleAddFolder() {
+    const target = fileTree.value[currentFile.value.id];
+    if (target.isDir) {
+    openFolder(target, fileTree.value, true).then(
+        () => {
+            store.addFileFolderPending({
+                id: target.id,
+                type: 'folder',
+            })
+        },
+    );
+    } else {
+    if (target.parentId !== undefined && !isNaN(target.parentId)) {
+        store.addFileFolderPending({
+            id: target.parentId,
+            type: 'folder',
+        })
+    } else {
+        throw new Error();
+    }
+    }
+}
+
+//加文件
+function handleAddFile() {
+    let id = currentFile.value.id
+    const target = fileTree.value[id];
+    if (target.isDir) {
+    openFolder(target, fileTree.value, true).then(
+        () => {
+            store.addFileFolderPending({ id: target.id, type: '' })
+        },
+    );
+    } else {
+        if (target.parentId !== undefined && !isNaN(target.parentId)) {
+            store.addFileFolderPending({ id: target.parentId, type: '' })
+        } else {
+            throw new Error();
+        }
+    }
+}
 
 //从prop内获取path
 function getPath (strategy: Code.Strategy) {

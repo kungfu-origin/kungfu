@@ -7,8 +7,9 @@ import 'vue-virtual-scroller/dist/vue-virtual-scroller.css';
 import { Button, Checkbox, Input, Layout, Spin } from 'ant-design-vue';
 import 'monaco-editor/min/vs/editor/editor.main.css';
 import { useCodeStore } from '@kungfu-trader/kungfu-app/src/renderer/pages/code/store/codeStore';
-
 const app = createApp(App);
+
+app.component('ComFileNode');
 app
   .use(Layout)
   .use(Button)
