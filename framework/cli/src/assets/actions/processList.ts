@@ -340,11 +340,15 @@ export const switchProcess = (
             }
           });
         } else {
-          messageBoard.log('Start master first', 2, (err) => {
-            if (err) {
-              console.error(err);
-            }
-          });
+          messageBoard.log(
+            'Start master first, If did, Please wait...',
+            2,
+            (err) => {
+              if (err) {
+                console.error(err);
+              }
+            },
+          );
         }
       }
       break;
@@ -352,11 +356,15 @@ export const switchProcess = (
     case 'td':
     case 'strategy':
       if (!globalState.DZXY_WATCHER_IS_LIVE) {
-        messageBoard.log('Start master first', 2, (err) => {
-          if (err) {
-            console.error(err);
-          }
-        });
+        messageBoard.log(
+          'Start master first, If did, Please wait...',
+          2,
+          (err) => {
+            if (err) {
+              console.error(err);
+            }
+          },
+        );
         return;
       }
 
@@ -429,6 +437,7 @@ const switchMaster = async (status: boolean): Promise<void> => {
     await delayMilliSeconds(1000);
     await startCacheD(false);
     await startLedger(false);
+    await delayMilliSeconds(2000);
     await startDzxy();
   }
 };

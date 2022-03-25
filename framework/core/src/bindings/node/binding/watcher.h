@@ -28,7 +28,7 @@ public:
 
   void NoSet(const Napi::CallbackInfo &info, const Napi::Value &value);
 
-  Napi::Value GetLocator(const Napi::CallbackInfo &info);
+  // Napi::Value GetLocator(const Napi::CallbackInfo &info);
 
   Napi::Value GetLocation(const Napi::CallbackInfo &info);
 
@@ -72,9 +72,13 @@ public:
 
   Napi::Value CreateTask(const Napi::CallbackInfo &info);
 
+  Napi::Value Sync(const Napi::CallbackInfo &info);
+
   static void Init(Napi::Env env, Napi::Object exports);
 
-  bool IsStart() { return start_; }
+  bool IsStart(){return start_;}
+  
+  std::chrono::system_clock::time_point tp_;
 
 protected:
   void on_react() override;

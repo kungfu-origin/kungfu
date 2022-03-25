@@ -42,6 +42,7 @@ import {
   dealAssetPrice,
   getIdByKfLocation,
   getIfProcessRunning,
+  getIfProcessStopping,
   getProcessIdByKfLocation,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { message, Modal } from 'ant-design-vue';
@@ -370,6 +371,12 @@ function handleRemoveTd(item: KungfuApi.KfConfig) {
               size="small"
               :checked="
                 getIfProcessRunning(
+                  processStatusData,
+                  getProcessIdByKfLocation(record),
+                )
+              "
+              :loading="
+                getIfProcessStopping(
                   processStatusData,
                   getProcessIdByKfLocation(record),
                 )

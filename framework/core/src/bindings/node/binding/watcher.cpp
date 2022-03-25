@@ -19,9 +19,9 @@ using namespace kungfu::yijinjing::cache;
 using namespace kungfu::yijinjing::data;
 
 namespace kungfu::node {
-uv_loop_t *loop;
-uv_work_t greq;
-uv_timer_t timer_req;
+  uv_loop_t *loop;
+  uv_work_t greq;
+  uv_idle_t  timer_req;
 inline std::string format(uint32_t uid) { return fmt::format("{:08x}", uid); }
 
 Napi::FunctionReference Watcher::constructor = {};
@@ -101,9 +101,9 @@ void Watcher::NoSet(const Napi::CallbackInfo &info, const Napi::Value &value) {
   SPDLOG_WARN("do not manipulate watcher internals");
 }
 
-Napi::Value Watcher::GetLocator(const Napi::CallbackInfo &info) {
-  return std::dynamic_pointer_cast<Locator>(get_locator())->get_js_locator();
-}
+// Napi::Value Watcher::GetLocator(const Napi::CallbackInfo &info) {
+//   return std::dynamic_pointer_cast<Locator>(get_locator())->get_js_locator();
+// }
 
 Napi::Value Watcher::GetLocation(const Napi::CallbackInfo &info) {
   auto location = FindLocation(info);
@@ -240,7 +240,7 @@ void Watcher::Init(Napi::Env env, Napi::Object exports) {
                                         InstanceMethod("issueOrder", &Watcher::IssueOrder),                       //
                                         InstanceMethod("cancelOrder", &Watcher::CancelOrder),                     //
                                         InstanceMethod("requestMarketData", &Watcher::RequestMarketData),         //
-                                        InstanceAccessor("locator", &Watcher::GetLocator, &Watcher::NoSet),       //
+                                        // InstanceAccessor("locator", &Watcher::GetLocator, &Watcher::NoSet),       //
                                         InstanceAccessor("config", &Watcher::GetConfig, &Watcher::NoSet),         //
                                         InstanceAccessor("history", &Watcher::GetHistory, &Watcher::NoSet),       //
                                         InstanceAccessor("commission", &Watcher::GetCommission, &Watcher::NoSet), //
@@ -249,6 +249,7 @@ void Watcher::Init(Napi::Env env, Napi::Object exports) {
                                         InstanceAccessor("appStates", &Watcher::GetAppStates, &Watcher::NoSet),   //
                                         InstanceAccessor("tradingDay", &Watcher::GetTradingDay, &Watcher::NoSet), //
                                         InstanceMethod("createTask", &Watcher::CreateTask),
+                                        InstanceMethod("sync", &Watcher::Sync),
                                     });
 
   constructor = Napi::Persistent(func);
@@ -324,21 +325,33 @@ Napi::Value Watcher::CreateTask(const Napi::CallbackInfo &info) {
         }
       },
       [](uv_work_t *req, int status) { SPDLOG_INFO("uv_close!"); });
+  tp_ = std::chrono::system_clock::now();
 
-  timer_req.data = (void *)this;
-  uv_timer_init(loop, &timer_req);
-  uv_timer_start(
-      &timer_req,
-      [](uv_timer_t *req) {
-        Watcher *watcher = (Watcher *)(req->data);
-        // SPDLOG_INFO("uv_timer_start tid {} pid {} this {}", std::this_thread::get_id(), GETPID(),
-        //             (uint64_t)(watcher));
-        watcher->SyncEventCache();
-        watcher->SyncLedger();
-        watcher->SyncAppStatus();
-      },
-      0, 2000);
+  // timer_req.data = (void *)this;
+  // uv_idle_init(loop, &timer_req);
+  // uv_idle_start(
+  //     &timer_req,
+  //     [](uv_idle_t  *req) {
+  //       Watcher *watcher = (Watcher *)(req->data);
+  //       std::chrono::system_clock::time_point now = std::chrono::system_clock::now(); 
+  //       auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(now - watcher->tp_);
+  //       if(duration.count() >= 2000){
+  //         watcher->SyncEventCache();
+  //         watcher->SyncLedger();
+  //         watcher->SyncAppStatus();
+  //         watcher->tp_ = std::chrono::system_clock::now();
+  //       }
+  //       // SPDLOG_INFO("uv_timer_start tid {} pid {} this {}", std::this_thread::get_id(), GETPID(),
+  //       //             (uint64_t)(watcher));
+  //     });
 
+  return {};
+}
+
+Napi::Value Watcher::Sync(const Napi::CallbackInfo &info) {
+  SyncEventCache();
+  SyncLedger();
+  SyncAppStatus();
   return {};
 }
 

@@ -30,6 +30,7 @@ import {
   dealAssetPrice,
   getConfigValue,
   getIfProcessRunning,
+  getIfProcessStopping,
   getProcessIdByKfLocation,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import path from 'path';
@@ -182,6 +183,12 @@ function handleOpenFile(kfConfig: KungfuApi.KfConfig) {
               size="small"
               :checked="
                 getIfProcessRunning(
+                  processStatusData,
+                  getProcessIdByKfLocation(record),
+                )
+              "
+              :loading="
+                getIfProcessStopping(
                   processStatusData,
                   getProcessIdByKfLocation(record),
                 )

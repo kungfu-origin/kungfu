@@ -27,12 +27,12 @@ export const Pm2ProcessStatus: Record<
   ['online']: {
     name: isEnglish ? 'Running' : '运行中',
     color: 'kf-color-running',
-    level: 1,
+    level: 2,
   },
   ['stopping']: {
     name: isEnglish ? 'Stopping' : '停止中',
     color: 'kf-color-waiting',
-    level: 0,
+    level: 1,
   },
   ['stopped']: {
     name: isEnglish ? 'Stopped' : '已停止',
@@ -42,7 +42,7 @@ export const Pm2ProcessStatus: Record<
   ['launching']: {
     name: isEnglish ? 'Launching' : '启动中',
     color: 'kf-color-waiting',
-    level: 1,
+    level: 2,
   },
   ['errored']: {
     name: isEnglish ? 'Errored' : '错误',
@@ -57,7 +57,7 @@ export const Pm2ProcessStatus: Record<
   ['one-launch-status']: {
     name: isEnglish ? 'Launching' : '启动中',
     color: 'kf-color-waiting',
-    level: 1,
+    level: 2,
   },
 };
 

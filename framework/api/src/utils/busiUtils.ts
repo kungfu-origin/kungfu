@@ -46,6 +46,7 @@ import {
   Pm2ProcessStatusDetail,
   Pm2ProcessStatusDetailData,
   startCacheD,
+  startExtDaemon,
   startLedger,
   startMaster,
   startMd,
@@ -767,6 +768,20 @@ export const getIfProcessRunning = (
   return false;
 };
 
+export const getIfProcessStopping = (
+  processStatusData: Pm2ProcessStatusData,
+  processId: string,
+) => {
+  const statusName = processStatusData[processId] || '';
+  if (statusName) {
+    if (Pm2ProcessStatus[statusName].level === 1) {
+      return true;
+    }
+  }
+
+  return false;
+};
+
 export const getAppStateStatusName = (
   kfConfig: KungfuApi.KfLocation | KungfuApi.KfConfig,
   processStatusData: Pm2ProcessStatusData,
@@ -856,13 +871,20 @@ export const buildIdByKeysFromKfConfigSettings = (
 
 export const switchKfLocation = (
   watcher: KungfuApi.Watcher | null,
-  kfLocation: KungfuApi.KfLocation | KungfuApi.KfConfig,
+  kfLocation:
+    | KungfuApi.KfLocation
+    | KungfuApi.KfConfig
+    | KungfuApi.KfExtraLocation,
   targetStatus: boolean,
 ): Promise<void | Proc> => {
   const processId = getProcessIdByKfLocation(kfLocation);
 
   if (!targetStatus) {
-    if (kfLocation.category !== 'system') {
+    if (
+      kfLocation.category === 'td' ||
+      kfLocation.category === 'md' ||
+      kfLocation.category === 'strategy'
+    ) {
       if (watcher && !watcher.isReadyToInteract(kfLocation)) {
         return Promise.reject(
           new Error(`${processId} 还未准备就绪, 请稍后重试`),
@@ -895,6 +917,12 @@ export const switchKfLocation = (
         throw new Error('Start Stratgy without strategy_path');
       }
       return startStrategy(getIdByKfLocation(kfLocation), strategyPath);
+    case 'daemon':
+      return startExtDaemon(
+        getProcessIdByKfLocation(kfLocation),
+        kfLocation['cwd'] || '',
+        kfLocation['script'] || '',
+      );
     default:
       return Promise.resolve();
   }
