@@ -72,6 +72,8 @@ public:
 
   Napi::Value CreateTask(const Napi::CallbackInfo &info);
 
+  Napi::Value Sync(const Napi::CallbackInfo &info);
+
   static void Init(Napi::Env env, Napi::Object exports);
 
   bool IsStart(){return start_;}

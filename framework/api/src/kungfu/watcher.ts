@@ -76,6 +76,7 @@ export const startGetKungfuWatcherStep = (
   return setTimerPromiseTask(() => {
     return new Promise((resolve) => {
       if (watcher.isLive()) {
+        watcher.sync();
         callback(watcher);
       }
       resolve(true);

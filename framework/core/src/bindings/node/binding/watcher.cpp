@@ -249,6 +249,7 @@ void Watcher::Init(Napi::Env env, Napi::Object exports) {
                                         InstanceAccessor("appStates", &Watcher::GetAppStates, &Watcher::NoSet),   //
                                         InstanceAccessor("tradingDay", &Watcher::GetTradingDay, &Watcher::NoSet), //
                                         InstanceMethod("createTask", &Watcher::CreateTask),
+                                        InstanceMethod("sync", &Watcher::Sync),
                                     });
 
   constructor = Napi::Persistent(func);
@@ -326,25 +327,31 @@ Napi::Value Watcher::CreateTask(const Napi::CallbackInfo &info) {
       [](uv_work_t *req, int status) { SPDLOG_INFO("uv_close!"); });
   tp_ = std::chrono::system_clock::now();
 
-  timer_req.data = (void *)this;
-  uv_idle_init(loop, &timer_req);
-  uv_idle_start(
-      &timer_req,
-      [](uv_idle_t  *req) {
-        Watcher *watcher = (Watcher *)(req->data);
-        std::chrono::system_clock::time_point now = std::chrono::system_clock::now(); 
-        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(now - watcher->tp_);
-        if(duration.count() >= 2000){
-          watcher->SyncEventCache();
-          watcher->SyncLedger();
-          watcher->SyncAppStatus();
-          watcher->tp_ = std::chrono::system_clock::now();
-        }
-        // SPDLOG_INFO("uv_timer_start tid {} pid {} this {}", std::this_thread::get_id(), GETPID(),
-        //             (uint64_t)(watcher));
-      });
+  // timer_req.data = (void *)this;
+  // uv_idle_init(loop, &timer_req);
+  // uv_idle_start(
+  //     &timer_req,
+  //     [](uv_idle_t  *req) {
+  //       Watcher *watcher = (Watcher *)(req->data);
+  //       std::chrono::system_clock::time_point now = std::chrono::system_clock::now(); 
+  //       auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(now - watcher->tp_);
+  //       if(duration.count() >= 2000){
+  //         watcher->SyncEventCache();
+  //         watcher->SyncLedger();
+  //         watcher->SyncAppStatus();
+  //         watcher->tp_ = std::chrono::system_clock::now();
+  //       }
+  //       // SPDLOG_INFO("uv_timer_start tid {} pid {} this {}", std::this_thread::get_id(), GETPID(),
+  //       //             (uint64_t)(watcher));
+  //     });
 
   return {};
+}
+
+Napi::Value Watcher::Sync(const Napi::CallbackInfo &info) {
+  SyncEventCache();
+  SyncLedger();
+  SyncAppStatus();
 }
 
 void Watcher::SyncLedger() {
