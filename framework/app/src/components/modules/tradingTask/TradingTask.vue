@@ -2,8 +2,6 @@
 import {
   handleOpenLogview,
   useDashboardBodySize,
-  useExtConfigsRelated,
-  useProcessStatusDetailData,
   useTableSearchKeyword,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import { computed, ref } from 'vue';
@@ -25,6 +23,7 @@ import path from 'path';
 import {
   dealKfConfigValueByType,
   getIfProcessRunning,
+  getIfProcessStopping,
   getTaskKfLocationByProcessId,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import {
@@ -37,6 +36,10 @@ import {
   removeKfLocation,
   removeLog,
 } from '@kungfu-trader/kungfu-js-api/actions';
+import {
+  useExtConfigsRelated,
+  useProcessStatusDetailData,
+} from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
 
 const { extConfigs } = useExtConfigsRelated();
 const { dashboardBodyHeight, handleBodySizeChange } = useDashboardBodySize();
@@ -343,6 +346,7 @@ function getDataByArgs(taskArgs: string): Record<string, string> {
             <a-switch
               size="small"
               :checked="getIfProcessRunning(processStatusData, record.name)"
+              :loading="getIfProcessStopping(processStatusData, record.name)"
               @click="(checked: boolean, Event: MouseEvent) => handleSwitchProcessStatusResolved(checked, Event, record)"
             ></a-switch>
           </template>

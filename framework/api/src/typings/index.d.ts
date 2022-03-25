@@ -150,6 +150,7 @@ declare namespace KungfuApi {
             entry: string;
             page: string;
           };
+      daemon?: Record<string, string>;
     };
     config?: Record<
       string,
@@ -183,6 +184,7 @@ declare namespace KungfuApi {
             entry: string;
             page: string;
           };
+      daemon: Record<string, string>;
     }
   >;
 
@@ -785,6 +787,11 @@ declare namespace KungfuApi {
     group: string;
     name: string;
     [prop: string]: any;
+  }
+
+  export interface KfDaemonLocation extends KfExtraLocation {
+    cwd: string;
+    script: string;
   }
 
   export type ScheduleTaskMode = 'restart' | 'start' | 'stop';

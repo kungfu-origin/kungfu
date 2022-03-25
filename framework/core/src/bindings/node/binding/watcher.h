@@ -28,7 +28,7 @@ public:
 
   void NoSet(const Napi::CallbackInfo &info, const Napi::Value &value);
 
-  Napi::Value GetLocator(const Napi::CallbackInfo &info);
+  // Napi::Value GetLocator(const Napi::CallbackInfo &info);
 
   Napi::Value GetLocation(const Napi::CallbackInfo &info);
 
@@ -140,15 +140,16 @@ private:
   void SyncLedger();
 
   void SyncAppStatus();
-  
+
   void UpdateEventCache(const event_ptr e);
 
   void SyncEventCache();
 
-template <typename DataType> void feed_state_data_bank(const state<DataType> &state, yijinjing::cache::bank &receiver) {
+  template <typename DataType>
+  void feed_state_data_bank(const state<DataType> &state, yijinjing::cache::bank &receiver) {
     boost::hana::for_each(longfist::StateDataTypes, [&](auto it) {
       using DataTypeItem = typename decltype(+boost::hana::second(it))::type;
-      if(std::is_same<DataType, DataTypeItem>::value){
+      if (std::is_same<DataType, DataTypeItem>::value) {
         // SPDLOG_INFO("feed_state_data_bank same {}", typeid(DataTypeItem).name());
         receiver << state;
       }
@@ -194,8 +195,7 @@ template <typename DataType> void feed_state_data_bank(const state<DataType> &st
     UpdateBook(strategy_location->uid, account_location->uid, instruction);
   }
 
-  template <typename DataType>
-  void UpdateLedger(const boost::hana::basic_type<DataType> &type) {
+  template <typename DataType> void UpdateLedger(const boost::hana::basic_type<DataType> &type) {
     for (auto &pair : data_bank_[type]) {
       auto &state = pair.second;
       update_ledger(state.update_time, state.source, state.dest, state.data);

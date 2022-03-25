@@ -44,6 +44,7 @@ export const getAllKfConfigOriginData = (): Promise<
       system: allConfigResolved.filter((config: KungfuApi.KfConfig) => {
         return config.category === 'system';
       }),
+      daemon: [],
     };
   });
 };

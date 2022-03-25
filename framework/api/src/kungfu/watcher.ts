@@ -16,11 +16,15 @@ export const watcher = ((): KungfuApi.Watcher | null => {
     process.env.APP_TYPE || 'undefined',
     'RENDERER_TYPE',
     process.env.RENDERER_TYPE || 'undefined',
+    'DAEMON_TYPE',
+    process.env.DAEMON_TYPE || 'undefined',
   );
 
   if (process.env.APP_TYPE !== 'renderer') {
     if (process.env.APP_TYPE !== 'cli') {
-      return null;
+      if (process.env.APP_TYPE !== 'daemon') {
+        return null;
+      }
     }
   }
 
@@ -38,26 +42,28 @@ export const watcher = ((): KungfuApi.Watcher | null => {
     }
   }
 
-  const id = [process.env.APP_TYPE || '', process.env.RENDERER_TYPE || ''].join(
-    '',
-  );
+  const id = [
+    process.env.APP_TYPE || '',
+    process.env.DAEMON_TYPE || process.env.RENDERER_TYPE || '',
+  ].join('');
 
-  const bypassRestore = booleanProcessEnv(
-    process.env.RELOAD_AFTER_CRASHED || '',
-  );
+  const bypassRestore =
+    process.env.APP_TYPE === 'daemon'
+      ? true
+      : booleanProcessEnv(process.env.RELOAD_AFTER_CRASHED || '');
   const globalSetting = getKfGlobalSettingsValue();
   const bypassQuote = globalSetting?.performance?.bypassQuote;
 
   return kf.watcher(
     KF_RUNTIME_DIR,
-    kf.formatStringToHashHex(id),
+    // kf.formatStringToHashHex(id),
+    id,
     bypassQuote,
     bypassRestore,
   );
 })();
 
-export const startStep = (
-) => {
+export const startStep = () => {
   if (watcher === null) return;
   watcher.createTask();
 };
@@ -67,7 +73,6 @@ export const startGetKungfuWatcherStep = (
   callback: (watcher: KungfuApi.Watcher) => void,
 ) => {
   if (watcher === null) return;
-
   return setTimerPromiseTask(() => {
     return new Promise((resolve) => {
       if (watcher.isLive()) {

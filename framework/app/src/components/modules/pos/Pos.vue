@@ -8,7 +8,6 @@ import {
   getIdByKfLocation,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import {
-  useCurrentGlobalKfLocation,
   useDownloadHistoryTradingData,
   useTableSearchKeyword,
   useTriggerMakeOrder,
@@ -36,6 +35,7 @@ import {
 } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import {
   getInstrumentByInstrumentPair,
+  useCurrentGlobalKfLocation,
   useInstruments,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
 import { useExtraCategory } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiExtraLocationUtils';

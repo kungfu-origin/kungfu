@@ -1,3 +1,4 @@
+import './preInit';
 import CFonts from 'cfonts';
 import colors from 'colors';
 import { version } from '../package.json';
@@ -14,10 +15,7 @@ import { removeFilesInFolder } from '@kungfu-trader/kungfu-js-api/utils/fileUtil
 import { updateMdTdStrategy } from './commanders/update';
 import { removeMdTdStrategy } from './commanders/remove';
 import { monitPrompt } from './commanders/monit';
-import {
-  ensureKungfuKey,
-  initKfConfig,
-} from '@kungfu-trader/kungfu-js-api/config';
+
 import { shutdown } from './commanders/shutdown';
 import 'console-success';
 import {
@@ -217,6 +215,3 @@ program.on('command:*', function () {
 });
 
 program.parse(process.argv);
-
-initKfConfig();
-ensureKungfuKey();

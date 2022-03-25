@@ -7,10 +7,7 @@ import KfProcessStatus from '@kungfu-trader/kungfu-app/src/renderer/components/p
 import { computed, ref, watch } from 'vue';
 import { SystemProcessName } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
 import {
-  useExtConfigsRelated,
   getInstrumentTypeColor,
-  useAllKfConfigData,
-  useProcessStatusDetailData,
   handleOpenLogview,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import {
@@ -18,12 +15,24 @@ import {
   getIfProcessRunning,
   getProcessIdByKfLocation,
   getPropertyFromProcessStatusDetailDataByKfLocation,
+  getIfProcessStopping,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
-import { handleSwitchProcessStatus } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
+import {
+  handleSwitchProcessStatus,
+  useAllKfConfigData,
+  useExtConfigsRelated,
+  useProcessStatusDetailData,
+} from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
 import { KfCategoryTypes } from '@kungfu-trader/kungfu-js-api/typings/enums';
 
 const processControllerBoardVisible = ref<boolean>(false);
-const categoryList: KfCategoryTypes[] = ['system', 'td', 'md', 'strategy'];
+const categoryList: (KfCategoryTypes | string)[] = [
+  'system',
+  'daemon',
+  'td',
+  'md',
+  'strategy',
+];
 const allKfConfigData = useAllKfConfigData();
 const {
   appStates,
@@ -100,7 +109,6 @@ const mainStatusWell = computed(() => {
   const masterIsLive = processStatusData.value['master'] === 'online';
   const ledgerIsLive = processStatusData.value['ledger'] === 'online';
   const cachedIsLive = processStatusData.value['cached'] === 'online';
-
   return masterIsLive && ledgerIsLive && cachedIsLive;
 });
 
@@ -181,6 +189,12 @@ function handleOpenProcessControllerBoard(): void {
                   size="small"
                   :checked="
                     getIfProcessRunning(
+                      processStatusData,
+                      getProcessIdByKfLocation(config),
+                    )
+                  "
+                  :loading="
+                    getIfProcessStopping(
                       processStatusData,
                       getProcessIdByKfLocation(config),
                     )

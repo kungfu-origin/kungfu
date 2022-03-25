@@ -22,26 +22,27 @@ import {
 import { categoryRegisterConfig, getColumns } from './config';
 import {
   useTableSearchKeyword,
-  useExtConfigsRelated,
-  useAllKfConfigData,
-  useProcessStatusDetailData,
   handleOpenLogview,
   useDashboardBodySize,
   getInstrumentTypeColor,
-  useAssets,
-  useCurrentGlobalKfLocation,
-  useTdGroups,
   isInTdGroup,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import {
   useAddUpdateRemoveKfConfig,
   handleSwitchProcessStatus,
   useSwitchAllConfig,
+  useProcessStatusDetailData,
+  useExtConfigsRelated,
+  useCurrentGlobalKfLocation,
+  useAllKfConfigData,
+  useTdGroups,
+  useAssets,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
 import {
   dealAssetPrice,
   getIdByKfLocation,
   getIfProcessRunning,
+  getIfProcessStopping,
   getProcessIdByKfLocation,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { message, Modal } from 'ant-design-vue';
@@ -370,6 +371,12 @@ function handleRemoveTd(item: KungfuApi.KfConfig) {
               size="small"
               :checked="
                 getIfProcessRunning(
+                  processStatusData,
+                  getProcessIdByKfLocation(record),
+                )
+              "
+              :loading="
+                getIfProcessStopping(
                   processStatusData,
                   getProcessIdByKfLocation(record),
                 )
