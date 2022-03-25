@@ -75,6 +75,8 @@ public:
   static void Init(Napi::Env env, Napi::Object exports);
 
   bool IsStart(){return start_;}
+  
+  std::chrono::system_clock::time_point tp_;
 
 protected:
   void on_react() override;

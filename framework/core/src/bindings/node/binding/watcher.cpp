@@ -21,7 +21,7 @@ using namespace kungfu::yijinjing::data;
 namespace kungfu::node {
   uv_loop_t *loop;
   uv_work_t greq;
-  uv_timer_t timer_req;
+  uv_idle_t  timer_req;
 inline std::string format(uint32_t uid) { return fmt::format("{:08x}", uid); }
 
 Napi::FunctionReference Watcher::constructor = {};
@@ -325,20 +325,25 @@ Napi::Value Watcher::CreateTask(const Napi::CallbackInfo &info) {
         }
       },
       [](uv_work_t *req, int status) { SPDLOG_INFO("uv_close!"); });
+  tp_ = std::chrono::system_clock::now();
 
   timer_req.data = (void *)this;
-  uv_timer_init(loop, &timer_req);
-  uv_timer_start(
+  uv_idle_init(loop, &timer_req);
+  uv_idle_start(
       &timer_req,
-      [](uv_timer_t *req) {
+      [](uv_idle_t  *req) {
         Watcher *watcher = (Watcher *)(req->data);
+        std::chrono::system_clock::time_point now = std::chrono::system_clock::now(); 
+        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(now - watcher->tp_);
+        if(duration.count() >= 2000){
+          watcher->SyncEventCache();
+          watcher->SyncLedger();
+          watcher->SyncAppStatus();
+          watcher->tp_ = std::chrono::system_clock::now();
+        }
         // SPDLOG_INFO("uv_timer_start tid {} pid {} this {}", std::this_thread::get_id(), GETPID(),
         //             (uint64_t)(watcher));
-        watcher->SyncEventCache();
-        watcher->SyncLedger();
-        watcher->SyncAppStatus();
-      },
-      0, 2000);
+      });
 
   return {};
 }
