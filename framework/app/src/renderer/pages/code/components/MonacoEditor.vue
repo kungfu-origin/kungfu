@@ -42,7 +42,8 @@ let file: Code.FileProps = reactive({})
 
 
 watch(code, spaceTabSetting => {
-    updateSpaceTab(spaceTabSetting)
+    updateSpaceTab(spaceTabSetting || {})
+    
 })
 
 
@@ -69,8 +70,6 @@ watch(currentFile, async (newFile: Code.FileProps) => {
     file = newFile;
     const codeText = await getCodeText(filePath)
     await nextTick();
-    console.log(codeText);
-    
     handleEditor = buildEditor(handleEditor, file, codeText);
     await nextTick();
 

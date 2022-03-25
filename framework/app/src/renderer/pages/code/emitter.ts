@@ -21,15 +21,15 @@ export const ipcEmitDataByName = (
       params: Object.freeze(postData || {}),
     });
 
-    const timer = setTimeout(() => {
-      reject(new Error(`ipc-emit-${name} timeout`));
-      ipcRenderer.removeAllListeners(`ipc-res-${name}`);
-      clearTimeout(timer);
-    }, interval);
-    ipcRenderer.on(`ipc-res-${name}`, (event, data) => {
-      resolve({ event, data });
-      ipcRenderer.removeAllListeners(`ipc-res-${name}`);
-      clearTimeout(timer);
-    });
+    // const timer = setTimeout(() => {
+    //   reject(new Error(`ipc-emit-${name} timeout`));
+    //   ipcRenderer.removeAllListeners(`ipc-res-${name}`);
+    //   clearTimeout(timer);
+    // }, interval);
+    // ipcRenderer.on(`ipc-res-${name}`, (event, data) => {
+    //   resolve({ event, data });
+    //   ipcRenderer.removeAllListeners(`ipc-res-${name}`);
+    //   clearTimeout(timer);
+    // });
   });
 };

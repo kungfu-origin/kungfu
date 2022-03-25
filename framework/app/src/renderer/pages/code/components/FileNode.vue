@@ -109,7 +109,7 @@ function handleAddFileBlur(e, eType) {
     }
     //添加文件
     try {
-        const targetPath = parentId ? fileTree[parentId].filePath : '';
+        const targetPath = parentId ? fileTree.value[parentId].filePath : '';
         if (type === 'folder' || type ==='file') {
             addFileSync(targetPath, filename, type);
         }
@@ -176,7 +176,7 @@ function handleDelete() {
         ),
     )
     .then(() =>
-        store.setCurrentFile(fileTree[parentId || 0]),
+        store.setCurrentFile(fileTree.value[parentId || 0]),
     )
     .then(() => message.success(`${typeName}删除成功！`))
     .catch((err) => {

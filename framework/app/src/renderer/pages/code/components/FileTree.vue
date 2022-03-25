@@ -40,18 +40,24 @@
     </div>
   </div>
 </template>
+
+<script lang="ts">
+export default {
+    emits: ['updateStrategy']
+}
+</script>
 <script setup lang="ts">
-import { defineProps, watch, ref, onMounted } from 'vue';
+import { defineProps, watch, ref, onMounted, getCurrentInstance, ComponentInternalInstance } from 'vue';
 import path from 'path';
 import { storeToRefs } from 'pinia';
+import { dialog } from '@electron/remote';
 import { message } from 'ant-design-vue';
 import { buildFileObj } from '@kungfu-trader/kungfu-js-api/utils/fileUtils';
 import { getTreeByFilePath } from '../../../assets/methods/codeUtils';
 import { useCodeStore } from '../store/codeStore'
-import { remote } from 'electron';
 import FileNode from './FileNode.vue';
 import { nextTick } from 'vue';
-import { ipcEmitDataByName } from '../emitter';
+// import { ipcEmitDataByName } from '../emitter';
 import { openFolder } from '../../../assets/methods/codeUtils';
 
 const store = useCodeStore();
@@ -62,7 +68,7 @@ const props = defineProps({
 const { strategy } = props
 const strategyPath = ref<string>('')
 const strategyPathName = ref<string>('')
-
+const { proxy } = getCurrentInstance() as ComponentInternalInstance
 const { fileTree, currentFile } = storeToRefs(useCodeStore());
 
 watch(strategy as Code.Strategy, newStrategy => {
@@ -74,36 +80,36 @@ watch(strategy as Code.Strategy, newStrategy => {
         if (currentFile) {
             store.setEntryFile(currentFile)
             store.setCurrentFile(currentFile)
-        }      
+        }       
     })
 
 })
  //绑定策略
 function handleBindStrategyFolder() {
-    remote.dialog.showOpenDialog(
+    dialog.showOpenDialog(
         {
             properties: ['openFile'],
         },
-        (strategyPath) => {
-            if (!strategyPath || !strategyPath[0]) return;
+    ).then (strategyPath => {
+            if (!strategyPath || !strategyPath.filePaths[0]) return;
             if (!strategy?.strategy_id) return;
-            bindStrategyPath(strategyPath);
-        },
-    );
+            bindStrategyPath(strategyPath.filePaths);
+    });
 }
 
 //bind data中path 与 sqlite中path
 async function bindStrategyPath(strategyPath) {
-    await ipcEmitDataByName('updateStrategyPath', {
-        strategyId: strategy?.strategy_id,
-        strategyPath: strategyPath[0],
-    });
+    // await ipcEmitDataByName('updateStrategyPath', {
+    //     strategyId: strategy?.strategy_id,
+    //     strategyPath: strategyPath[0],
+    // });
     if (strategy && strategy.strategy_id) {
+        
         message.success(
             `策略${strategy.strategy_id}文件路径修改成功！`,
         );
         //每次更新path，需要通知root组件更新stratgy
-        this.$emit('updateStrategy');
+        proxy?.$emit('updateStrategy', strategyPath);
     }
 }
 

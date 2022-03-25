@@ -5,6 +5,7 @@
     // import Editor from './components/Editor.vue';
     import Editor from './components/MonacoEditor.vue';
     import FileTree from './components/FileTree.vue';
+    import { ipcEmitDataByName } from './emitter';
     
     import { useCodeStore } from './store/codeStore'
 
@@ -23,20 +24,39 @@
         add_time: 0
     })
         
-    function getCurrentStrategy (strategyList): void {
+    function getCurrentStrategy (strategyList, jsonDone: boolean = false): void {
 
-        let value: Code.Strategy = JSON.parse(strategyList[0].value)
+        let value: Code.Strategy = jsonDone ? JSON.parse(strategyList[0].value) : strategyList[0]
         
         strategy.strategy_id = value.strategy_id
         strategy.strategy_path = value.strategy_path
         strategy.add_time = value.add_time
     }
 
+    function handleUpdateStrategy(strategyPath) {
+        
+      if (!strategy.strategy_id) return;
+      updateStrategy(strategy.strategy_id, strategy.strategy_path);
+    }
+
+    async function updateStrategy(strategyId: string, strategyPath: string) {
+        
+        // const { data } = await ipcEmitDataByName('strategyById', { strategyId, strategyPath });
+        // getCurrentStrategy(data)
+        // console.log(data);
+        
+        // console.log(strategy);
+
+        
+    }
+
+
     onMounted(() => {
         removeLoadingMask();
         nextTick().then(() => {
-            getCurrentStrategy(store.strategyList);
+            getCurrentStrategy(store.strategyList, true);
         })
+
         store.getKungfuConfig()
         
     })
@@ -47,6 +67,7 @@
     <div class="code-content">
         <FileTree
             :strategy="strategy"
+            @updateStrategy="handleUpdateStrategy"
             class="file-tree"
         ></FileTree>
         <Editor class="editor" ref="code-editor"></Editor>

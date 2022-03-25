@@ -89,6 +89,7 @@ export const useCodeStore = defineStore('code', {
     //标记入口文件
     setEntryFile(entryFile) {
       this.entryFile = entryFile;
+      console.log('this.', entryFile);
     },
 
     async getKungfuConfig() {
