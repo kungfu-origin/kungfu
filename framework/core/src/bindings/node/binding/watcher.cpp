@@ -352,6 +352,7 @@ Napi::Value Watcher::Sync(const Napi::CallbackInfo &info) {
   SyncEventCache();
   SyncLedger();
   SyncAppStatus();
+  return {};
 }
 
 void Watcher::SyncLedger() {
