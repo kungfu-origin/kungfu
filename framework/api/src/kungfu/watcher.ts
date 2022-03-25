@@ -44,19 +44,20 @@ export const watcher = ((): KungfuApi.Watcher | null => {
 
   const id = [
     process.env.APP_TYPE || '',
-    process.env.RENDERER_TYPE || process.env.DAEMON_TYPE || '',
+    process.env.DAEMON_TYPE || process.env.RENDERER_TYPE || '',
   ].join('');
 
   const bypassRestore =
     process.env.APP_TYPE === 'daemon'
-      ? false
+      ? true
       : booleanProcessEnv(process.env.RELOAD_AFTER_CRASHED || '');
   const globalSetting = getKfGlobalSettingsValue();
   const bypassQuote = globalSetting?.performance?.bypassQuote;
 
   return kf.watcher(
     KF_RUNTIME_DIR,
-    kf.formatStringToHashHex(id),
+    // kf.formatStringToHashHex(id),
+    id,
     bypassQuote,
     bypassRestore,
   );
@@ -72,7 +73,6 @@ export const startGetKungfuWatcherStep = (
   callback: (watcher: KungfuApi.Watcher) => void,
 ) => {
   if (watcher === null) return;
-
   return setTimerPromiseTask(() => {
     return new Promise((resolve) => {
       if (watcher.isLive()) {

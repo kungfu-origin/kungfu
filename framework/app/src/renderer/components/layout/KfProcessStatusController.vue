@@ -15,6 +15,7 @@ import {
   getIfProcessRunning,
   getProcessIdByKfLocation,
   getPropertyFromProcessStatusDetailDataByKfLocation,
+  getIfProcessStopping,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import {
   handleSwitchProcessStatus,
@@ -188,6 +189,12 @@ function handleOpenProcessControllerBoard(): void {
                   size="small"
                   :checked="
                     getIfProcessRunning(
+                      processStatusData,
+                      getProcessIdByKfLocation(config),
+                    )
+                  "
+                  :loading="
+                    getIfProcessStopping(
                       processStatusData,
                       getProcessIdByKfLocation(config),
                     )

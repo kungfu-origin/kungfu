@@ -14,7 +14,7 @@ namespace kungfu::node {
 Napi::FunctionReference CommissionStore::constructor = {};
 
 CommissionStore::CommissionStore(const Napi::CallbackInfo &info)
-    : ObjectWrap(info), locator_(IODevice::GetLocator(info)), profile_(locator_) {}
+    : ObjectWrap(info), locator_(std::make_shared<locator>()), profile_(locator_) {}
 
 Napi::Value CommissionStore::SetCommission(const Napi::CallbackInfo &info) {
   profile_.set(ExtractCommission(info));

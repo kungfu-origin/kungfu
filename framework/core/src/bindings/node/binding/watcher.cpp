@@ -101,9 +101,9 @@ void Watcher::NoSet(const Napi::CallbackInfo &info, const Napi::Value &value) {
   SPDLOG_WARN("do not manipulate watcher internals");
 }
 
-Napi::Value Watcher::GetLocator(const Napi::CallbackInfo &info) {
-  return std::dynamic_pointer_cast<Locator>(get_locator())->get_js_locator();
-}
+// Napi::Value Watcher::GetLocator(const Napi::CallbackInfo &info) {
+//   return std::dynamic_pointer_cast<Locator>(get_locator())->get_js_locator();
+// }
 
 Napi::Value Watcher::GetLocation(const Napi::CallbackInfo &info) {
   auto location = FindLocation(info);
@@ -240,7 +240,7 @@ void Watcher::Init(Napi::Env env, Napi::Object exports) {
                                         InstanceMethod("issueOrder", &Watcher::IssueOrder),                       //
                                         InstanceMethod("cancelOrder", &Watcher::CancelOrder),                     //
                                         InstanceMethod("requestMarketData", &Watcher::RequestMarketData),         //
-                                        InstanceAccessor("locator", &Watcher::GetLocator, &Watcher::NoSet),       //
+                                        // InstanceAccessor("locator", &Watcher::GetLocator, &Watcher::NoSet),       //
                                         InstanceAccessor("config", &Watcher::GetConfig, &Watcher::NoSet),         //
                                         InstanceAccessor("history", &Watcher::GetHistory, &Watcher::NoSet),       //
                                         InstanceAccessor("commission", &Watcher::GetCommission, &Watcher::NoSet), //
