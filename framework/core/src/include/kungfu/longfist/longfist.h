@@ -6,6 +6,9 @@
 #define KUNGFU_LONGFIST_H
 
 #include <kungfu/longfist/types.h>
+#include "kungfu/yijinjing/cache/ringqueue.h"
+
+#include <typeinfo>
 
 #define TYPE_PAIR(DataType) boost::hana::make_pair(HANA_STR(#DataType), boost::hana::type_c<types::DataType>)
 
@@ -150,6 +153,13 @@ constexpr auto StateDataTypes = boost::hana::make_map( //
     TYPE_PAIR(OrderStat)                               //
 );
 
+constexpr auto OrderDataTypes = boost::hana::make_map( //
+    TYPE_PAIR(OrderInput),                             //
+    TYPE_PAIR(Order),                                  //
+    TYPE_PAIR(Trade),                                  //
+    TYPE_PAIR(OrderStat)                               //
+);
+
 constexpr auto build_data_map = [](auto types) {
   auto maps = boost::hana::transform(boost::hana::values(types), [](auto value) {
     using DataType = typename decltype(+value)::type;
@@ -166,11 +176,27 @@ constexpr auto build_state_map = [](auto types) {
   return boost::hana::unpack(maps, boost::hana::make_map);
 };
 
+constexpr auto build_order_map = [](auto types) {
+  auto maps = boost::hana::transform(boost::hana::values(types), [](auto value) {
+    using DataType = typename decltype(+value)::type;
+    SPDLOG_INFO("type = {}", typeid(DataType).name());
+    // return boost::hana::make_pair(value, kungfu::yijinjing::cache::ringqueue<int>(1024));
+    // return boost::hana::make_pair(value, int(1));
+    boost::hana::make_pair(value, kungfu::yijinjing::cache::ringqueue<state<DataType>>(1024));
+   SPDLOG_INFO("1111111111111111111"); 
+    return boost::hana::make_pair(value, kungfu::yijinjing::cache::ringqueue<state<DataType>>(1024));
+  });
+  return boost::hana::unpack(maps, boost::hana::make_map);
+};
+
 using ProfileMapType = decltype(build_data_map(longfist::ProfileDataTypes));
 DECLARE_PTR(ProfileMapType)
 
 using StateMapType = decltype(build_state_map(longfist::StateDataTypes));
 DECLARE_PTR(StateMapType)
+
+using OrderMapType = decltype(build_order_map(longfist::OrderDataTypes));
+DECLARE_PTR(OrderMapType)
 
 template <typename DataType> std::enable_if_t<size_fixed_v<DataType>> copy(DataType &to, const DataType &from) {
   memcpy(&to, &from, sizeof(DataType));

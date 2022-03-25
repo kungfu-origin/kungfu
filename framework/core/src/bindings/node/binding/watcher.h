@@ -14,6 +14,7 @@
 #include <kungfu/wingchun/book/bookkeeper.h>
 #include <kungfu/wingchun/broker/client.h>
 #include <kungfu/yijinjing/cache/runtime.h>
+#include <kungfu/yijinjing/cache/runtimering.h>
 #include <kungfu/yijinjing/practice/apprentice.h>
 
 namespace kungfu::node {
@@ -102,6 +103,7 @@ private:
   serialize::JsPublishState publish;
   serialize::JsResetCache reset_cache;
   yijinjing::cache::bank data_bank_;
+  yijinjing::cache::order_bank order_bank_;
   event_ptr event_cache_;
   bool start_;
   std::unordered_map<uint32_t, longfist::types::InstrumentKey> subscribed_instruments_ = {};
@@ -140,6 +142,8 @@ private:
   void UpdateBook(int64_t update_time, uint32_t source_id, uint32_t dest_id, const longfist::types::Position &position);
 
   void SyncLedger();
+
+  void SyncOrder();
 
   void SyncAppStatus();
 
@@ -202,6 +206,16 @@ private:
       auto &state = pair.second;
       update_ledger(state.update_time, state.source, state.dest, state.data);
     }
+  }
+
+  template <typename DataType> void UpdateOrder(const boost::hana::basic_type<DataType> &type) {
+    // auto& order_queue = order_bank_[type];
+    // int i = 0;
+    // kungfu::state<DataType>* pstate;
+    // while( i < 1024 && order_queue.pop(pstate) && pstate != nullptr){
+    //   update_ledger(pstate->update_time, pstate->source, pstate->dest, pstate->data);
+    //   i++;
+    // }
   }
 
   template <typename Instruction, typename IdPtrType = uint64_t Instruction::*>

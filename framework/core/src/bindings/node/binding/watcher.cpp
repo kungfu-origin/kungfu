@@ -289,11 +289,19 @@ void Watcher::Feed(const event_ptr &event) {
       UpdateBook(event->gen_time(), event->source(), event->dest(), quote);
       data_bank_ << typed_event_ptr<Quote>(event);
     }
-  } else {
+  }else {
+  //  boost::hana::for_each(longfist::OrderDataTypes, [&](auto it) {
+  //     using DataType = typename decltype(+boost::hana::second(it))::type; 
+  //     if (DataType::tag == event->msg_type()) {
+  //       order_bank_ << typed_event_ptr<DataType>(event);
+  //     }
+  //  });
     boost::hana::for_each(longfist::StateDataTypes, [&](auto it) {
       using DataType = typename decltype(+boost::hana::second(it))::type;
       if (DataType::tag == event->msg_type()) {
-        data_bank_ << typed_event_ptr<DataType>(event);
+        // if (boost::hana::find(boost::hana::values(longfist::OrderDataTypes), boost::hana::type_c<DataType>) == hana::nothing) {
+          data_bank_ << typed_event_ptr<DataType>(event);
+        // }
       }
     });
   }
@@ -357,6 +365,12 @@ Napi::Value Watcher::Sync(const Napi::CallbackInfo &info) {
 
 void Watcher::SyncLedger() {
   boost::hana::for_each(longfist::StateDataTypes, [&](auto it) { UpdateLedger(+boost::hana::second(it)); });
+}
+
+void Watcher::SyncOrder() {
+  boost::hana::for_each(longfist::OrderDataTypes, [&](auto it) {
+    UpdateOrder(+boost::hana::second(it));
+  });
 }
 
 void Watcher::SyncAppStatus() {
