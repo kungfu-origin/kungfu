@@ -49,8 +49,7 @@ import iconFolderJSON from '../config/iconFolderConfig.json';
 import iconFileJSON from '../config/iconFileConfig.json';
 import path from 'path';
 import { storeToRefs } from 'pinia';
-import { onMounted, PropType, ref } from 'vue';
-import { nextTick } from 'process';
+import { onMounted, PropType, ref, nextTick } from 'vue';
 import { message } from 'ant-design-vue';
 import { openFolder } from '../../../assets/methods/codeUtils';
 import { removeFileFolder, editFileFolderName, addFileSync } from '@kungfu-trader/kungfu-js-api/utils/fileUtils'

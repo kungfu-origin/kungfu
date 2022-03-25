@@ -59,7 +59,6 @@ import FileNode from './FileNode.vue';
 import { nextTick } from 'vue';
 // import { ipcEmitDataByName } from '../emitter';
 import { openFolder } from '../../../assets/methods/codeUtils';
-
 const store = useCodeStore();
 
 const props = defineProps({
