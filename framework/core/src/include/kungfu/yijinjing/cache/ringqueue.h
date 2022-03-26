@@ -13,7 +13,6 @@ template <typename T> class ringqueue
 {
 public:
   explicit ringqueue(size_t capacity) {
-	  SPDLOG_INFO("ringqueue 1");
     _capacityMask = capacity - 1;
     // std::cout << "_capacityMask=" << _capacityMask << " " << std::bitset<sizeof(_capacityMask) * 8>(_capacityMask) <<
     // std::endl;
@@ -24,14 +23,10 @@ public:
     }
     _capacity = _capacityMask + 1;
     // std::cout << "_capacity=" << _capacity << std::endl;
-	  SPDLOG_INFO("ringqueue 2");
     _queue = (T *)new char[sizeof(T) * _capacity];
-	  SPDLOG_INFO("ringqueue 3");
 	pop_value_ = (T *)new char[sizeof(T)];
-	  SPDLOG_INFO("ringqueue 4");
     _tail.store(0, std::memory_order_relaxed);
     _head.store(0, std::memory_order_relaxed);
-	  SPDLOG_INFO("ringqueue 5");
 	}
 
 	ringqueue(ringqueue &&that)

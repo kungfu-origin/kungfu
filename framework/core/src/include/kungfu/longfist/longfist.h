@@ -180,12 +180,10 @@ constexpr auto build_order_map = [](auto types) {
   auto maps = boost::hana::transform(boost::hana::values(types), [](auto value) {
     using DataType = typename decltype(+value)::type;
     SPDLOG_INFO("type = {}", typeid(DataType).name());
-    // return boost::hana::make_pair(value, kungfu::yijinjing::cache::ringqueue<int>(1024));
-    // return boost::hana::make_pair(value, int(1));
-    boost::hana::make_pair(value, kungfu::yijinjing::cache::ringqueue<state<DataType>>(1024));
-   SPDLOG_INFO("1111111111111111111"); 
-    return boost::hana::make_pair(value, kungfu::yijinjing::cache::ringqueue<state<DataType>>(1024));
+    kungfu::yijinjing::cache::ringqueue<state<DataType>>* p = new  kungfu::yijinjing::cache::ringqueue<state<DataType>>(1024);
+    return boost::hana::make_pair(value, p);
   });
+  // SPDLOG_INFO("type = {}", typeid(maps).name());
   return boost::hana::unpack(maps, boost::hana::make_map);
 };
 

@@ -209,13 +209,13 @@ private:
   }
 
   template <typename DataType> void UpdateOrder(const boost::hana::basic_type<DataType> &type) {
-    // auto& order_queue = order_bank_[type];
-    // int i = 0;
-    // kungfu::state<DataType>* pstate;
-    // while( i < 1024 && order_queue.pop(pstate) && pstate != nullptr){
-    //   update_ledger(pstate->update_time, pstate->source, pstate->dest, pstate->data);
-    //   i++;
-    // }
+    auto& order_queue = order_bank_[type];
+    int i = 0;
+    kungfu::state<DataType>* pstate;
+    while( i < 1024 && order_queue.pop(pstate) && pstate != nullptr){
+      update_ledger(pstate->update_time, pstate->source, pstate->dest, pstate->data);
+      i++;
+    }
   }
 
   template <typename Instruction, typename IdPtrType = uint64_t Instruction::*>

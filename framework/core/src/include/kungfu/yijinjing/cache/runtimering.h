@@ -8,13 +8,13 @@ class order_bank {
 public:
   template <typename DataType> void operator<<(const state<DataType> &state) {
     auto &target_queue = order_map_[boost::hana::type_c<DataType>];
-    target_queue.push(state);
+    target_queue->push(state);
   }
 
   template <typename DataType> void operator<<(const typed_event_ptr<DataType> &event) {
     auto &target_queue = order_map_[boost::hana::type_c<DataType>];
     kungfu::state<DataType> s(*event);
-    target_queue.push(s);
+    target_queue->push(s);
   }
 
   // void operator>>(const yijinjing::journal::writer_ptr &writer) const {
@@ -29,7 +29,13 @@ public:
 
   template <typename DataType>
   kungfu::yijinjing::cache::ringqueue<state<DataType>> &operator[](const boost::hana::basic_type<DataType> &type) {
-    return order_map_[type];
+    return *(order_map_[type]);
+  }
+
+  ~order_bank(){
+    boost::hana::for_each(order_map_, [&](const auto& x) {
+    delete hana::second(x);
+});
   }
 
 private:

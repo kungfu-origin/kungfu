@@ -8,6 +8,7 @@
 #include "history.h"
 #include <sstream>
 #include <uv.h>
+#include "kungfu/yijinjing/cache/ringqueue.h"
 
 using namespace kungfu::rx;
 using namespace kungfu::longfist;
@@ -86,6 +87,7 @@ Watcher::Watcher(const Napi::CallbackInfo &info)
 
   shift(ledger_location_) >> state_bank_; // Load positions to restore bookkeeper
   SPDLOG_INFO("watcher {} initialized", get_io_device()->get_home()->uname);
+
 }
 
 Watcher::~Watcher() {
@@ -290,12 +292,13 @@ void Watcher::Feed(const event_ptr &event) {
       data_bank_ << typed_event_ptr<Quote>(event);
     }
   }else {
-  //  boost::hana::for_each(longfist::OrderDataTypes, [&](auto it) {
-  //     using DataType = typename decltype(+boost::hana::second(it))::type; 
-  //     if (DataType::tag == event->msg_type()) {
-  //       order_bank_ << typed_event_ptr<DataType>(event);
-  //     }
-  //  });
+   boost::hana::for_each(longfist::OrderDataTypes, [&](auto it) {
+      using DataType = typename decltype(+boost::hana::second(it))::type; 
+      if (DataType::tag == event->msg_type()) {
+        order_bank_ << typed_event_ptr<DataType>(event);
+        return;
+      }
+   });
     boost::hana::for_each(longfist::StateDataTypes, [&](auto it) {
       using DataType = typename decltype(+boost::hana::second(it))::type;
       if (DataType::tag == event->msg_type()) {
@@ -359,6 +362,7 @@ Napi::Value Watcher::CreateTask(const Napi::CallbackInfo &info) {
 Napi::Value Watcher::Sync(const Napi::CallbackInfo &info) {
   SyncEventCache();
   SyncLedger();
+  SyncOrder();
   SyncAppStatus();
   return {};
 }
