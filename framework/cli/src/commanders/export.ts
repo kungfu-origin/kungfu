@@ -34,7 +34,7 @@ const inputExportDateAndPath = async () => {
       type: 'path',
       name: 'output_folder',
       message: 'Input trading data output folder',
-      default: os.homedir(),
+      default: path.resolve(os.homedir()),
       validate: (value: string) => {
         const stats = fse.statSync(value);
         if (stats && stats.isDirectory()) {

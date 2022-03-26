@@ -19,7 +19,7 @@ import {
   EXTENSION_DIRS,
   KFC_DIR,
   KF_HOME,
-  KF_RUNTIME_DIR,
+  // KF_RUNTIME_DIR,
 } from '../config/pathConfig';
 import { getKfGlobalSettingsValue } from '../config/globalSettings';
 
@@ -307,6 +307,7 @@ export const startProcess = (
     kill_timeout: 16000,
     env: {
       KF_HOME: dealSpaceInPath(KF_HOME),
+      // KF_RUNTIME_DIR: dealSpaceInPath(KF_RUNTIME_DIR),
       LANG: `${locale}.UTF-8`,
       PYTHONUTF8: '1',
       PYTHONIOENCODING: 'utf8',
@@ -729,7 +730,6 @@ export const startDzxy = () => {
     watch: process.env.NODE_ENV === 'production' ? false : true,
     env: {
       KFC_AS_VARIANT: 'node',
-      KF_HOME: dealSpaceInPath(KF_RUNTIME_DIR),
     },
   }).catch((err) => {
     kfLogger.error(err.message);
@@ -747,7 +747,6 @@ export const startExtDaemon = (name: string, cwd: string, script: string) => {
     watch: process.env.NODE_ENV === 'production' ? false : true,
     env: {
       KFC_AS_VARIANT: 'node',
-      KF_HOME: dealSpaceInPath(KF_RUNTIME_DIR),
     },
   }).catch((err) => {
     kfLogger.error(err.message);

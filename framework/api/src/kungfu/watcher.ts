@@ -56,8 +56,7 @@ export const watcher = ((): KungfuApi.Watcher | null => {
 
   return kf.watcher(
     KF_RUNTIME_DIR,
-    // kf.formatStringToHashHex(id),
-    id,
+    kf.formatStringToHashHex(id),
     bypassQuote,
     bypassRestore,
   );

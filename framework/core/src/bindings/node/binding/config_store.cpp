@@ -14,7 +14,7 @@ namespace kungfu::node {
 Napi::FunctionReference ConfigStore::constructor = {};
 
 ConfigStore::ConfigStore(const Napi::CallbackInfo &info)
-    : ObjectWrap(info), locator_(std::make_shared<locator>()), profile_(locator_) {}
+    : ObjectWrap(info), locator_(ExtractRuntimeLocatorByInfo0(info)), profile_(locator_) {}
 
 inline Config getConfigFromJs(const Napi::CallbackInfo &info, const locator_ptr &locator) {
   Config query = {};
