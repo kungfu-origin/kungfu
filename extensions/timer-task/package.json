@@ -4,7 +4,7 @@
     "name": "kungfu-trader",
     "email": "info@kungfu.link"
   },
-  "version": "2.4.0-alpha.22",
+  "version": "2.4.0-alpha.23",
   "description": "Kungfu Extension - Timer Task",
   "license": "Apache-2.0",
   "main": "package.json",
@@ -28,7 +28,7 @@
     "package": "kfs prebuilt package"
   },
   "devDependencies": {
-    "@kungfu-trader/kungfu-sdk": "^2.4.0-alpha.22"
+    "@kungfu-trader/kungfu-sdk": "^2.4.0-alpha.23"
   },
   "kungfuBuild": {
     "python": {
