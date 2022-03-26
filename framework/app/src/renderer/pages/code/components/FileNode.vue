@@ -1,13 +1,13 @@
 <template>
-    <div>
+    <div class="c-app-code-file-node">
         <div @click.stop="handleClickFile(fileNode)">
             <span>
                 <i v-if="type == 'folder' && fileNode && !fileNode.root"></i>
-                <img :src="iconPath" v-if="iconPath">
+                <img class="file-icon" :src="iconPath" v-if="iconPath">
                 <span v-if="id !== 'pedding' &&  fileNode && !onEditing">{{ fileNode.name }}</span>
-                <span v-if="fileNode && entryFile.filePath === fileNode.filePath && fileNode.filePath !== undefined && !onEditing">{{ '入口文件' }}</span>
-                <span v-if="fileNode && fileNode.root" :title="fileNode.filePath">{{fileNode.filePath}}</span>
-                <span v-if="fileNode && !fileNode.root && !onEditing && id !== 'padding'">
+                <span class="path text-overflow" v-if="fileNode && entryFile.filePath === fileNode.filePath && fileNode.filePath !== undefined && !onEditing">{{ '(入口文件)' }}</span>
+                <span class="path text-overflow" v-if="fileNode && fileNode.root" :title="fileNode.filePath">{{fileNode.filePath}}</span>
+                <span class="fr fild-oper" v-if="fileNode && !fileNode.root && !onEditing && id !== 'padding'">
                     <i class="nouse-over" title="重命名" @click="handleRename"></i>
                     <i class="nouse-over" title="删除" @click="handleDelete"></i>
                 </span>
@@ -242,7 +242,7 @@ function getIcon(file: Code.FileData): string {
             if (!iconName) iconName = 'file';
         }
     if (!iconName) return '';
-    return `public/file-icons/${iconName}.svg`;
+    return require(`../../../../../public/file-icons/${iconName}.svg`);
 }
 
 //添加策略之后，刷新文件树，需要将current 更新为添加的file/folder
@@ -292,4 +292,11 @@ onMounted(() => {
     fileName.value = fileNode ? fileNode.name : ''
 })
 </script>
-<style lang="scss"></style>
+<style lang="less">
+    .c-app-code-file-node {
+        .file-icon {
+            width: 20px;
+            height: 20px;
+        }
+    }
+</style>

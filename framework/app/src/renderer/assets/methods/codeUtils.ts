@@ -76,7 +76,7 @@ export const getTreeByFilePath = (
 };
 
 // //打开文件树
-export const openFolder = async (
+export const openFolder = (
   folder: Code.FileData,
   oldFileTree: Code.IFileTree,
   openStatus?: boolean,

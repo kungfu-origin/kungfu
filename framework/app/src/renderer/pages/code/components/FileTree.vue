@@ -74,6 +74,7 @@ watch(strategy as Code.Strategy, newStrategy => {
     getPath(newStrategy);
     initFileTree(newStrategy).then (fileTree => {
         const entryPath: string = newStrategy.strategy_path
+        console.log(entryPath);
         
         const currentFile: Code.FileData = (Object.values(fileTree || {}) as Code.FileData[]).filter(f => f.filePath === entryPath)[0]
         if (currentFile) {

@@ -5,7 +5,7 @@
     // import Editor from './components/Editor.vue';
     import Editor from './components/MonacoEditor.vue';
     import FileTree from './components/FileTree.vue';
-    import { ipcEmitDataByName } from './emitter';
+    // import { ipcEmitDataByName } from './emitter';
     
     import { useCodeStore } from './store/codeStore'
 
@@ -34,13 +34,16 @@
     }
 
     function handleUpdateStrategy(strategyPath) {
-        
-      if (!strategy.strategy_id) return;
-      updateStrategy(strategy.strategy_id, strategy.strategy_path);
+        if (!strategy.strategy_id) return;
+        updateStrategy(strategy.strategy_id, strategyPath[0]);
     }
 
     async function updateStrategy(strategyId: string, strategyPath: string) {
-        
+        // let addTime = +new Date().getTime() * Math.pow(10, 6);
+        // const strategyOld: Array<Code.Strategy> = await getStrategyById(strategyId);
+        // if (strategyOld.length) {
+        //     addTime = strategyOld[0].add_time;
+        // }
         // const { data } = await ipcEmitDataByName('strategyById', { strategyId, strategyPath });
         // getCurrentStrategy(data)
         // console.log(data);
@@ -49,7 +52,14 @@
 
         
     }
-
+    // function getStrategyById (strategyId: string): Promise<Array<Code.Strategy>> {
+    //     return new Promise((resolve) => {
+    //         const strategyData: any = getKfConfig(strategyId, 'strategy');
+    //         const strategy: any[] = [{ ...JSON.parse(strategyData.value || '{}') }];
+    //         resolve(strategy);
+    //     });
+    // };
+    
 
     onMounted(() => {
         removeLoadingMask();
