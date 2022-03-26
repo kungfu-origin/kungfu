@@ -8,7 +8,6 @@ import {
   isTdStrategyCategory,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import {
-  useCurrentGlobalKfLocation,
   useDownloadHistoryTradingData,
   useTableSearchKeyword,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
@@ -37,7 +36,10 @@ import {
   getKungfuHistoryData,
 } from '@kungfu-trader/kungfu-js-api/kungfu';
 import type { Dayjs } from 'dayjs';
-import { showTradingDataDetail } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
+import {
+  showTradingDataDetail,
+  useCurrentGlobalKfLocation,
+} from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
 import { useExtraCategory } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiExtraLocationUtils';
 import TradeStatisticModal from './TradeStatisticModal.vue';
 import { HistoryDateEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';

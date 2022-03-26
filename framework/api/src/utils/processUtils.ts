@@ -19,6 +19,7 @@ import {
   EXTENSION_DIRS,
   KFC_DIR,
   KF_HOME,
+  KF_RUNTIME_DIR,
 } from '../config/pathConfig';
 import { getKfGlobalSettingsValue } from '../config/globalSettings';
 
@@ -373,7 +374,12 @@ export function startProcessGetStatusUntilStop(
   });
 }
 
-export const startGetProcessStatus = (callback: Function) => {
+export const startGetProcessStatus = (
+  callback: (res: {
+    processStatus: Pm2ProcessStatusData;
+    processStatusWithDetail: Pm2ProcessStatusDetailData;
+  }) => void,
+) => {
   setTimerPromiseTask(() => {
     return listProcessStatus()
       .then((res) => {
@@ -723,6 +729,25 @@ export const startDzxy = () => {
     watch: process.env.NODE_ENV === 'production' ? false : true,
     env: {
       KFC_AS_VARIANT: 'node',
+      KF_HOME: dealSpaceInPath(KF_RUNTIME_DIR),
+    },
+  }).catch((err) => {
+    kfLogger.error(err.message);
+  });
+};
+
+export const startExtDaemon = (name: string, cwd: string, script: string) => {
+  return startProcess({
+    name,
+    args: '',
+    cwd,
+    script,
+    interpreter: path.join(KFC_DIR, kfcName),
+    force: true,
+    watch: process.env.NODE_ENV === 'production' ? false : true,
+    env: {
+      KFC_AS_VARIANT: 'node',
+      KF_HOME: dealSpaceInPath(KF_RUNTIME_DIR),
     },
   }).catch((err) => {
     kfLogger.error(err.message);

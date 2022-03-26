@@ -13,16 +13,18 @@ import KfDashboardItem from '@kungfu-trader/kungfu-app/src/renderer/components/p
 import KfConfigSettingsForm from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfConfigSettingsForm.vue';
 import {
   buildInstrumentSelectOptionValue,
-  useCurrentGlobalKfLocation,
-  useExtConfigsRelated,
-  useProcessStatusDetailData,
   useTriggerMakeOrder,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import { getConfigSettings } from './config';
 import { message } from 'ant-design-vue';
 import { makeOrderByOrderInput } from '@kungfu-trader/kungfu-js-api/kungfu';
 import { InstrumentTypeEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';
-import { useInstruments } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
+import {
+  useCurrentGlobalKfLocation,
+  useExtConfigsRelated,
+  useInstruments,
+  useProcessStatusDetailData,
+} from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
 import {
   getProcessIdByKfLocation,
   initFormStateByConfig,

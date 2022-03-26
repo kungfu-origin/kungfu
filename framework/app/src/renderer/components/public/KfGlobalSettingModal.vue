@@ -6,7 +6,6 @@ import {
   setKfGlobalSettingsValue,
 } from '@kungfu-trader/kungfu-js-api/config/globalSettings';
 import {
-  useAllKfConfigData,
   useModalVisible,
   useTableSearchKeyword,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
@@ -50,6 +49,7 @@ import {
   modeForScheduleTasksOptions,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/configs';
 import { ipcRenderer } from 'electron';
+import { useAllKfConfigData } from '../../assets/methods/actionsUtils';
 
 interface ScheduleTaskFormItem {
   timeValue: Dayjs;

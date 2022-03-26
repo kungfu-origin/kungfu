@@ -27,12 +27,12 @@ export const Pm2ProcessStatus: Record<
   ['online']: {
     name: isEnglish ? 'Running' : '运行中',
     color: 'kf-color-running',
-    level: 1,
+    level: 2,
   },
   ['stopping']: {
     name: isEnglish ? 'Stopping' : '停止中',
     color: 'kf-color-waiting',
-    level: 0,
+    level: 1,
   },
   ['stopped']: {
     name: isEnglish ? 'Stopped' : '已停止',
@@ -42,7 +42,7 @@ export const Pm2ProcessStatus: Record<
   ['launching']: {
     name: isEnglish ? 'Launching' : '启动中',
     color: 'kf-color-waiting',
-    level: 1,
+    level: 2,
   },
   ['errored']: {
     name: isEnglish ? 'Errored' : '错误',
@@ -57,7 +57,7 @@ export const Pm2ProcessStatus: Record<
   ['one-launch-status']: {
     name: isEnglish ? 'Launching' : '启动中',
     color: 'kf-color-waiting',
-    level: 1,
+    level: 2,
   },
 };
 
@@ -119,20 +119,25 @@ export const KfCategory: Record<
     color: 'red',
     level: 100,
   },
+  [KfCategoryEnum.daemon]: {
+    name: isEnglish ? 'Daemon' : '后台任务',
+    color: 'purple',
+    level: 90,
+  },
   [KfCategoryEnum.md]: {
     name: isEnglish ? 'Md' : '行情源',
     color: 'orange',
-    level: 90,
+    level: 80,
   },
   [KfCategoryEnum.td]: {
     name: isEnglish ? 'Td' : '交易账户',
     color: 'blue',
-    level: 80,
+    level: 70,
   },
   [KfCategoryEnum.strategy]: {
     name: isEnglish ? 'Strategy' : '策略',
     color: 'cyan',
-    level: 70,
+    level: 60,
   },
 };
 

@@ -24,7 +24,7 @@ import { HistoryDateEnum, MakeOrderByWatcherEnum } from '../typings/enums';
 import { ExchangeIds } from '../config/tradingConfig';
 
 if (process.env.RENDERER_TYPE === 'logview') {
-  throw new Error('test');
+  throw new Error('Logview should not use kungfu.node');
 }
 
 export const kf = kungfu();

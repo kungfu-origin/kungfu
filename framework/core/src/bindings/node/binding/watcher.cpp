@@ -21,7 +21,7 @@ using namespace kungfu::yijinjing::data;
 namespace kungfu::node {
   uv_loop_t *loop;
   uv_work_t greq;
-  uv_timer_t timer_req;
+  uv_idle_t  timer_req;
 inline std::string format(uint32_t uid) { return fmt::format("{:08x}", uid); }
 
 Napi::FunctionReference Watcher::constructor = {};
@@ -101,9 +101,9 @@ void Watcher::NoSet(const Napi::CallbackInfo &info, const Napi::Value &value) {
   SPDLOG_WARN("do not manipulate watcher internals");
 }
 
-Napi::Value Watcher::GetLocator(const Napi::CallbackInfo &info) {
-  return std::dynamic_pointer_cast<Locator>(get_locator())->get_js_locator();
-}
+// Napi::Value Watcher::GetLocator(const Napi::CallbackInfo &info) {
+//   return std::dynamic_pointer_cast<Locator>(get_locator())->get_js_locator();
+// }
 
 Napi::Value Watcher::GetLocation(const Napi::CallbackInfo &info) {
   auto location = FindLocation(info);
@@ -240,7 +240,7 @@ void Watcher::Init(Napi::Env env, Napi::Object exports) {
                                         InstanceMethod("issueOrder", &Watcher::IssueOrder),                       //
                                         InstanceMethod("cancelOrder", &Watcher::CancelOrder),                     //
                                         InstanceMethod("requestMarketData", &Watcher::RequestMarketData),         //
-                                        InstanceAccessor("locator", &Watcher::GetLocator, &Watcher::NoSet),       //
+                                        // InstanceAccessor("locator", &Watcher::GetLocator, &Watcher::NoSet),       //
                                         InstanceAccessor("config", &Watcher::GetConfig, &Watcher::NoSet),         //
                                         InstanceAccessor("history", &Watcher::GetHistory, &Watcher::NoSet),       //
                                         InstanceAccessor("commission", &Watcher::GetCommission, &Watcher::NoSet), //
@@ -249,6 +249,7 @@ void Watcher::Init(Napi::Env env, Napi::Object exports) {
                                         InstanceAccessor("appStates", &Watcher::GetAppStates, &Watcher::NoSet),   //
                                         InstanceAccessor("tradingDay", &Watcher::GetTradingDay, &Watcher::NoSet), //
                                         InstanceMethod("createTask", &Watcher::CreateTask),
+                                        InstanceMethod("sync", &Watcher::Sync),
                                     });
 
   constructor = Napi::Persistent(func);
@@ -280,22 +281,22 @@ void Watcher::on_start() {
 }
 
 void Watcher::Feed(const event_ptr &event) {
-  boost::hana::for_each(longfist::StateDataTypes, [&](auto it) {
-    using DataType = typename decltype(+boost::hana::second(it))::type;
-    if (DataType::tag == event->msg_type()) {
-      if (Quote::tag == event->msg_type()) {
-        auto quote = event->data<Quote>();
-        auto uid = quote.uid();
-        if (subscribed_instruments_.find(uid) != subscribed_instruments_.end()) {
-          bookkeeper_.update_book(quote);
-          UpdateBook(event->gen_time(), event->source(), event->dest(), quote);
-          data_bank_ << typed_event_ptr<DataType>(event);
-        }
-      } else {
-          data_bank_ << typed_event_ptr<DataType>(event);
-      }
+  if (Quote::tag == event->msg_type()) {
+    auto quote = event->data<Quote>();
+    auto uid = quote.uid();
+    if (subscribed_instruments_.find(uid) != subscribed_instruments_.end()) {
+      bookkeeper_.update_book(quote);
+      UpdateBook(event->gen_time(), event->source(), event->dest(), quote);
+      data_bank_ << typed_event_ptr<Quote>(event);
     }
-  });
+  } else {
+    boost::hana::for_each(longfist::StateDataTypes, [&](auto it) {
+      using DataType = typename decltype(+boost::hana::second(it))::type;
+      if (DataType::tag == event->msg_type()) {
+        data_bank_ << typed_event_ptr<DataType>(event);
+      }
+    });
+  }
 }
 
 void Watcher::RestoreState(const location_ptr &state_location, int64_t from, int64_t to, bool sync_schema) {
@@ -321,43 +322,52 @@ Napi::Value Watcher::CreateTask(const Napi::CallbackInfo &info) {
           if (!watcher->IsStart())
             break;
           std::this_thread::sleep_for(std::chrono::milliseconds(2000));
-
         }
       },
       [](uv_work_t *req, int status) { SPDLOG_INFO("uv_close!"); });
+  tp_ = std::chrono::system_clock::now();
 
-  timer_req.data = (void *)this;
-  uv_timer_init(loop, &timer_req);
-  uv_timer_start(
-      &timer_req,
-      [](uv_timer_t *req) {
-        Watcher *watcher = (Watcher *)(req->data);
-        // SPDLOG_INFO("uv_timer_start tid {} pid {} this {}", std::this_thread::get_id(), GETPID(),
-        //             (uint64_t)(watcher));
-        watcher->SyncEventCache();
-        watcher->SyncLedger();
-        watcher->SyncAppStatus();
-      },
-      0, 2000);
+  // timer_req.data = (void *)this;
+  // uv_idle_init(loop, &timer_req);
+  // uv_idle_start(
+  //     &timer_req,
+  //     [](uv_idle_t  *req) {
+  //       Watcher *watcher = (Watcher *)(req->data);
+  //       std::chrono::system_clock::time_point now = std::chrono::system_clock::now(); 
+  //       auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(now - watcher->tp_);
+  //       if(duration.count() >= 2000){
+  //         watcher->SyncEventCache();
+  //         watcher->SyncLedger();
+  //         watcher->SyncAppStatus();
+  //         watcher->tp_ = std::chrono::system_clock::now();
+  //       }
+  //       // SPDLOG_INFO("uv_timer_start tid {} pid {} this {}", std::this_thread::get_id(), GETPID(),
+  //       //             (uint64_t)(watcher));
+  //     });
 
   return {};
 }
 
+Napi::Value Watcher::Sync(const Napi::CallbackInfo &info) {
+  SyncEventCache();
+  SyncLedger();
+  SyncAppStatus();
+  return {};
+}
+
 void Watcher::SyncLedger() {
-  boost::hana::for_each(longfist::StateDataTypes, [&](auto it) {
-    UpdateLedger(+boost::hana::second(it));
-  });
+  boost::hana::for_each(longfist::StateDataTypes, [&](auto it) { UpdateLedger(+boost::hana::second(it)); });
 }
 
 void Watcher::SyncAppStatus() {
-  for(auto &s : location_uid_states_map_ ){
+  for (auto &s : location_uid_states_map_) {
     auto app_state = Napi::Number::New(app_states_ref_.Env(), s.second);
     app_states_ref_.Set(format(s.first), app_state);
   }
 }
 
 void Watcher::SyncEventCache() {
-  if(event_cache_){
+  if (event_cache_) {
     reset_cache(event_cache_);
   }
 }
@@ -456,7 +466,7 @@ void Watcher::UpdateBrokerState(uint32_t broker_uid, const BrokerStateUpdate &st
 void Watcher::UpdateAsset(const event_ptr &event, uint32_t book_uid) {
   auto book = bookkeeper_.get_book(book_uid);
   book->update(event->gen_time());
-  state<kungfu::longfist::types::Asset> cache_state(ledger_location_->uid, book_uid, event->gen_time() , book->asset);
+  state<kungfu::longfist::types::Asset> cache_state(ledger_location_->uid, book_uid, event->gen_time(), book->asset);
   feed_state_data_bank(cache_state, data_bank_);
 }
 
@@ -481,7 +491,7 @@ void Watcher::UpdateBook(const event_ptr &event, const Quote &quote) {
     }
 
     if (has_short_position_for_quote or has_long_position_for_quote) {
-      state<kungfu::longfist::types::Asset> cache_state(ledger_uid, holder_uid, event->gen_time() , book->asset);
+      state<kungfu::longfist::types::Asset> cache_state(ledger_uid, holder_uid, event->gen_time(), book->asset);
       feed_state_data_bank(cache_state, data_bank_);
     }
   }
@@ -509,7 +519,7 @@ void Watcher::UpdateBook(int64_t update_time, uint32_t source_id, uint32_t dest_
     }
 
     if (has_short_position_for_quote or has_long_position_for_quote) {
-      state<kungfu::longfist::types::Asset> cache_state(ledger_uid, holder_uid, update_time , book->asset);
+      state<kungfu::longfist::types::Asset> cache_state(ledger_uid, holder_uid, update_time, book->asset);
       feed_state_data_bank(cache_state, data_bank_);
     }
   }
@@ -519,7 +529,8 @@ void Watcher::UpdateBook(const event_ptr &event, const Position &position) {
   auto book = bookkeeper_.get_book(position.holder_uid);
   auto &book_position = book->get_position_for(position.direction, position);
   if (book_position.volume > 0 or book_position.direction == Direction::Long) {
-    state<kungfu::longfist::types::Position> cache_state(event->source(), event->dest(), event->gen_time(), book_position);
+    state<kungfu::longfist::types::Position> cache_state(event->source(), event->dest(), event->gen_time(),
+                                                         book_position);
     feed_state_data_bank(cache_state, data_bank_);
   }
 }
@@ -529,8 +540,8 @@ void Watcher::UpdateBook(int64_t update_time, uint32_t source_id, uint32_t dest_
   auto book = bookkeeper_.get_book(position.holder_uid);
   auto &book_position = book->get_position_for(position.direction, position);
   if (book_position.volume > 0 or book_position.direction == Direction::Long) {
-      state<kungfu::longfist::types::Position> cache_state(source_id, dest_id, update_time, book_position);
-      feed_state_data_bank(cache_state, data_bank_);
+    state<kungfu::longfist::types::Position> cache_state(source_id, dest_id, update_time, book_position);
+    feed_state_data_bank(cache_state, data_bank_);
   }
 }
 

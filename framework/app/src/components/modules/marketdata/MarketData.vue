@@ -5,15 +5,15 @@ import KfBlinkNum from '@kungfu-trader/kungfu-app/src/renderer/components/public
 
 import {
   useDashboardBodySize,
-  useExtConfigsRelated,
-  useProcessStatusDetailData,
   useTriggerMakeOrder,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import { computed } from 'vue';
 import { getColumns } from './config';
 import { ExchangeIds } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
 import {
+useExtConfigsRelated,
   useInstruments,
+  useProcessStatusDetailData,
   useQuote,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
 import { StarFilled, PlusOutlined } from '@ant-design/icons-vue';

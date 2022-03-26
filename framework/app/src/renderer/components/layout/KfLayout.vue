@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { SlidersOutlined, SettingOutlined } from '@ant-design/icons-vue';
-import { useExtConfigsRelated } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import KfProcessStatusController from '@kungfu-trader/kungfu-app/src/renderer/components/layout/KfProcessStatusController.vue';
 import { computed, getCurrentInstance, onBeforeUnmount, ref } from 'vue';
+import { useExtConfigsRelated } from '../../assets/methods/actionsUtils';
 import globalBus from '../../assets/methods/globalBus';
 import KfGlobalSettingModal from '../public/KfGlobalSettingModal.vue';
 const logo = require('@kungfu-trader/kungfu-app/src/renderer/assets/svg/LOGO.svg');

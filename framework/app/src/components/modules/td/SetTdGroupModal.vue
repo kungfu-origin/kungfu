@@ -4,14 +4,12 @@ import { getIdByKfLocation } from '@kungfu-trader/kungfu-js-api/utils/busiUtils'
 import {
   getInstrumentTypeColor,
   isInTdGroup,
-  useAllKfConfigData,
-  useExtConfigsRelated,
   useModalVisible,
-  useTdGroups,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import { AntTreeNodeDropEvent, DataNode } from 'ant-design-vue/lib/tree';
 import { computed, ComputedRef, toRaw, toRefs } from 'vue';
 import { useGlobalStore } from '@kungfu-trader/kungfu-app/src/renderer/pages/index/store/global';
+import { useAllKfConfigData, useExtConfigsRelated, useTdGroups } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
 
 const props = withDefaults(
   defineProps<{
