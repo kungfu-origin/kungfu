@@ -19,19 +19,25 @@ using namespace kungfu::yijinjing::cache;
 using namespace kungfu::yijinjing::data;
 
 namespace kungfu::node {
-  uv_loop_t *loop;
-  uv_work_t greq;
-  uv_idle_t  timer_req;
+uv_loop_t *loop;
+uv_work_t greq;
+uv_idle_t timer_req;
 inline std::string format(uint32_t uid) { return fmt::format("{:08x}", uid); }
 
 Napi::FunctionReference Watcher::constructor = {};
 
 inline location_ptr GetWatcherLocation(const Napi::CallbackInfo &info) {
-  if (not IsValid(info, 1, &Napi::Value::IsString)) {
-    throw Napi::Error::New(info.Env(), "Invalid location argument");
+  if (not IsValid(info, 0, &Napi::Value::IsString)) {
+    throw Napi::Error::New(info.Env(), "Invalid runtime dirname");
   }
+
+  if (not IsValid(info, 1, &Napi::Value::IsString)) {
+    throw Napi::Error::New(info.Env(), "Invalid node app name");
+  }
+
+  auto runtime_dir = info[0].As<Napi::String>().Utf8Value();
   auto name = info[1].As<Napi::String>().Utf8Value();
-  return std::make_shared<location>(mode::LIVE, category::SYSTEM, "node", name, std::make_shared<locator>());
+  return std::make_shared<location>(mode::LIVE, category::SYSTEM, "node", name, GetRuntimeLocator(runtime_dir));
 }
 
 inline bool GetBypassQuotes(const Napi::CallbackInfo &info) {
@@ -100,10 +106,6 @@ Watcher::~Watcher() {
 void Watcher::NoSet(const Napi::CallbackInfo &info, const Napi::Value &value) {
   SPDLOG_WARN("do not manipulate watcher internals");
 }
-
-// Napi::Value Watcher::GetLocator(const Napi::CallbackInfo &info) {
-//   return std::dynamic_pointer_cast<Locator>(get_locator())->get_js_locator();
-// }
 
 Napi::Value Watcher::GetLocation(const Napi::CallbackInfo &info) {
   auto location = FindLocation(info);
@@ -240,7 +242,6 @@ void Watcher::Init(Napi::Env env, Napi::Object exports) {
                                         InstanceMethod("issueOrder", &Watcher::IssueOrder),                       //
                                         InstanceMethod("cancelOrder", &Watcher::CancelOrder),                     //
                                         InstanceMethod("requestMarketData", &Watcher::RequestMarketData),         //
-                                        // InstanceAccessor("locator", &Watcher::GetLocator, &Watcher::NoSet),       //
                                         InstanceAccessor("config", &Watcher::GetConfig, &Watcher::NoSet),         //
                                         InstanceAccessor("history", &Watcher::GetHistory, &Watcher::NoSet),       //
                                         InstanceAccessor("commission", &Watcher::GetCommission, &Watcher::NoSet), //
@@ -326,25 +327,6 @@ Napi::Value Watcher::CreateTask(const Napi::CallbackInfo &info) {
       },
       [](uv_work_t *req, int status) { SPDLOG_INFO("uv_close!"); });
   tp_ = std::chrono::system_clock::now();
-
-  // timer_req.data = (void *)this;
-  // uv_idle_init(loop, &timer_req);
-  // uv_idle_start(
-  //     &timer_req,
-  //     [](uv_idle_t  *req) {
-  //       Watcher *watcher = (Watcher *)(req->data);
-  //       std::chrono::system_clock::time_point now = std::chrono::system_clock::now(); 
-  //       auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(now - watcher->tp_);
-  //       if(duration.count() >= 2000){
-  //         watcher->SyncEventCache();
-  //         watcher->SyncLedger();
-  //         watcher->SyncAppStatus();
-  //         watcher->tp_ = std::chrono::system_clock::now();
-  //       }
-  //       // SPDLOG_INFO("uv_timer_start tid {} pid {} this {}", std::this_thread::get_id(), GETPID(),
-  //       //             (uint64_t)(watcher));
-  //     });
-
   return {};
 }
 

@@ -27,10 +27,10 @@ namespace kungfu::yijinjing::data {
 namespace fs = std::filesystem;
 namespace es = longfist::enums;
 
-std::string get_home() {
-  auto kf_home = std::getenv("KF_HOME");
-  if (kf_home != nullptr) {
-    return kf_home;
+std::string get_runtime_dir() {
+  auto runtime_dir = std::getenv("KF_RUNTIME_DIR");
+  if (runtime_dir != nullptr) {
+    return runtime_dir;
   }
 #ifdef _WINDOWS
   auto appdata = std::getenv("APPDATA");
@@ -45,7 +45,7 @@ std::string get_home() {
   return (root / "kungfu" / "home" / "runtime").string();
 }
 
-locator::locator() : root_(get_home()) {}
+locator::locator() : root_(get_runtime_dir()) {}
 
 bool locator::has_env(const std::string &name) const { return std::getenv(name.c_str()) != nullptr; }
 
