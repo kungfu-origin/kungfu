@@ -51,8 +51,8 @@ export const useCodeStore = defineStore('code', {
     //策略编辑，设置文件节点
     setFileNode({ id, attr, val }) {
       const fileTree = this.fileTree;
+      fileTree[attr] = val;
       const node = deepClone(fileTree[id]);
-      node[attr] = val;
       this.fileTree[id] = node;
     },
 

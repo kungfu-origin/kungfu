@@ -96,7 +96,7 @@ export const openFolder = (
         oldFileTree,
       );
       store.setFileTree(fileTree);
-      store.setFileTree({
+      store.setFileNode({
         id: folder.id,
         attr: 'children',
         val: ids,

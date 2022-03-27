@@ -49,13 +49,13 @@ watch(code, spaceTabSetting => {
 
 // 监听文件树变化
 watch(fileTree, (newTree, oldTree) => {
-    
     let newRootPath = findTargetFromArray<Code.FileData>(Object.values(newTree), 'root', true)!.filePath
+    
     let oldRootPath = ''
     if (oldTree[0] && oldTree[0].id) {
         oldRootPath = findTargetFromArray<Code.FileData>(Object.values(oldTree), 'root', true)!.filePath
     }
-    if (newRootPath != oldRootPath) {
+    if (newRootPath !== oldRootPath) {
         file = {};
         handleEditor = null
     }
@@ -72,14 +72,13 @@ watch(currentFile, async (newFile: Code.FileProps) => {
     await nextTick();
     handleEditor = buildEditor(handleEditor, file, codeText);
     await nextTick();
-
-    updateSpaceTab(code.value);
+    // updateSpaceTab(code.value);
     bindBlur(handleEditor, file);
 })
 
 function bindBlur(editor, file) {
     editor !== null &&
-    editor.onDidBlurEditorText((e) => {
+    editor.onDidBlurEditorText(() => {
         curWriteFile(editor, file);
     });
 }
@@ -90,7 +89,7 @@ function curWriteFile(editor, file) {
 }
 
 // 创建代码编辑器
-function createEditor(file?: Code.FileProps, codeText?: string): monaco.editor {
+function createEditor(file: Code.FileProps, codeText: string): monaco.editor {
     if (document.getElementById('editor-content')) {
         (document.getElementById('editor-content') as any).innerHTML = '';
         let fileLanguage: string = 'plaintext';
@@ -100,7 +99,7 @@ function createEditor(file?: Code.FileProps, codeText?: string): monaco.editor {
         const editor: monaco.editor = monaco.editor.create(
             document.getElementById("editor-content"),
             {
-                value: codeText || 'pring(1 + 2)  ',
+                value: codeText,
                 language: fileLanguage,
 
                 autoIndent: 'full',

@@ -6,6 +6,7 @@
     import Editor from './components/MonacoEditor.vue';
     import FileTree from './components/FileTree.vue';
     import { getStrategyById } from '@kungfu-trader/kungfu-js-api/kungfu/strategy';
+    import { ClusterOutlined } from '@ant-design/icons-vue';
     
     import { useCodeStore } from './store/codeStore'
 
@@ -75,13 +76,17 @@
 </script>
 
 <template>
-    <div class="code-content">
-        <FileTree
-            :strategy="strategy"
-            @updateStrategy="handleUpdateStrategy"
-            class="file-tree"
-        ></FileTree>
-        <Editor class="editor" ref="code-editor"></Editor>
+    <div>
+        <div class="code-content">
+            <FileTree
+                :strategy="strategy"
+                @updateStrategy="handleUpdateStrategy"
+                class="file-tree"
+            ></FileTree>
+            <Editor class="editor" ref="code-editor"></Editor>
+        </div>
+        <ClusterOutlined style="font-size: 14px; padding-right: 4px" />
+        <span class="title">缩进</span>
     </div>
 </template>
 
@@ -99,11 +104,10 @@
         display: flex;
         height: 100%;
         .file-tree {
-            min-width: 300px;
-            flex: 1;
+            width: 300px;
         }
         .editor {
-            flex: 2;
+            flex: 1;
         }
     }
 }

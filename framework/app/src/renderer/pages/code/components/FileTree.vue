@@ -9,27 +9,30 @@
           <span v-if="strategy">{{ strategy.strategy_id }}</span>
           （当前策略)
         </span>
-        <span
-          class="fr folder-oper"
-          title="新建文件夹"
-          v-if="strategyPath"
-          @click="handleAddFolder"
-        >
-          <i class="fl iconfont tr-folder1"></i>
-        </span>
-        <span
-          class="fr folder-oper"
-          title="新建文件"
-          v-if="strategyPath"
-          @click="handleAddFile"
-        >
-          <i class="fl iconfont tr-document1"></i>
+        <span class="deal-file">
+            <span
+                class="create"
+                title="新建文件夹"
+                v-if="strategyPath"
+                @click="handleAddFolder"
+            >
+            <img src="../../../../../public/file-icons/addFolder.svg" alt="">
+            </span>
+            <span
+                class="create"
+                title="新建文件"
+                v-if="strategyPath"
+                @click="handleAddFile"
+            >
+            <img src="../../../../../public/file-icons/addFile.svg" alt="">
+            </span>
         </span>
       </div>
       <div class="file-tree-body" v-if="strategyPath">
         <div v-for="file in fileTree">
             <FileNode
                 v-if="file.root"
+                :count="0"
                 :fileNode="file"
                 :key="file.id"
                 :id="file.id"
@@ -71,8 +74,6 @@ const { proxy } = getCurrentInstance() as ComponentInternalInstance
 const { fileTree, currentFile } = storeToRefs(useCodeStore());
 
 watch(strategy as Code.Strategy, newStrategy => {
-    console.log(newStrategy);
-    
     getPath(newStrategy);
     initFileTree(newStrategy).then (fileTree => {
         const entryPath: string = newStrategy.strategy_path
@@ -83,7 +84,6 @@ watch(strategy as Code.Strategy, newStrategy => {
             store.setCurrentFile(currentFile)
         }       
     })
-
 })
  //绑定策略
 function handleBindStrategyFolder() {
@@ -115,23 +115,23 @@ async function bindStrategyPath(strategyPathNew) {
 function handleAddFolder() {
     const target = fileTree.value[currentFile.value.id];
     if (target.isDir) {
-    openFolder(target, fileTree.value, true).then(
-        () => {
+        openFolder(target, fileTree.value, true).then(
+            () => {
+                store.addFileFolderPending({
+                    id: target.id,
+                    type: 'folder',
+                })
+            },
+        );
+        } else {
+        if (target.parentId !== undefined && !isNaN(target.parentId)) {
             store.addFileFolderPending({
-                id: target.id,
+                id: target.parentId,
                 type: 'folder',
             })
-        },
-    );
-    } else {
-    if (target.parentId !== undefined && !isNaN(target.parentId)) {
-        store.addFileFolderPending({
-            id: target.parentId,
-            type: 'folder',
-        })
-    } else {
-        throw new Error();
-    }
+        } else {
+            throw new Error();
+        }
     }
 }
 
@@ -140,8 +140,7 @@ function handleAddFile() {
     let id = currentFile.value.id
     const target = fileTree.value[id];
     if (target.isDir) {
-    openFolder(target, fileTree.value, true).then(
-        () => {
+        openFolder(target, fileTree.value, true).then(() => {
             store.addFileFolderPending({ id: target.id, type: '' })
         },
     );
@@ -217,7 +216,94 @@ onMounted(() => {
 </script>
 
 <style lang="less">
+@import '@kungfu-trader/kungfu-app/src/renderer/assets/less/code.less';
+
+@fileTreeWidth: 300px;
 .file-tree {
-    width: 100%;
+    width: @fileTreeWidth;
+    padding-top: 8px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    background: @bg_dark;
+
+    .open-editor-folder {
+        width: 90%;
+        height: 36px;
+        line-height: 36px;
+        color: @font;
+        background: @tab_header;
+        margin: auto;
+        cursor: pointer;
+        border-radius: 3px;
+    }
+    .open-editor-folder:hover {
+        background: @bg_light;
+        color: #fff;
+    }
+    .strategy-name {
+        font-size: 14px;
+        font-weight: bolder;
+        margin-top: 8px;
+        height: 30px;
+        line-height: 30px;
+        padding: 0px 8px;
+        border-top: none;
+        border-bottom: 2px solid @bg_card;
+        text-align: left;
+        box-sizing: border-box;
+        color: @input_bg;
+        .name {
+            span {
+                vertical-align: bottom;
+                display: inline-block;
+                max-width: 160px;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                overflow: hidden;
+            }
+        }
+        .deal-file {
+            float: right;
+            margin-right: 10px;
+            .create {
+                margin: 0 2px;
+            }
+        }
+        .folder-oper {
+            cursor: pointer;
+            display: none;
+            padding: 0 6px;
+            i {
+                font-size: 15px;
+            }
+        }
+    }
+    .folder-name {
+        height: 30px;
+        line-height: 30px;
+        color: @font_1;
+        text-align: left;
+        display: flex;
+        flex-direction: row;
+        padding-left: 5px;
+        .name {
+            max-width: 100px;
+            font-size: 14px;
+            padding-right: 20px;
+            color: @font;
+        }
+        .title {
+            color: @input_bg;
+        }
+    }
+    .file-tree-content {
+        height: calc(100% - 40px);
+    }
+    .file-tree-body {
+        height: calc(100% - 38px);
+        overflow: auto;
+        padding-left: 5px;
+    }
 }
 </style>
