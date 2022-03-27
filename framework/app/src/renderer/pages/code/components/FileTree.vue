@@ -57,7 +57,7 @@ import { getTreeByFilePath } from '../../../assets/methods/codeUtils';
 import { useCodeStore } from '../store/codeStore'
 import FileNode from './FileNode.vue';
 import { nextTick } from 'vue';
-// import { ipcEmitDataByName } from '../emitter';
+import { updateStrategyPath } from '@kungfu-trader/kungfu-js-api/kungfu/strategy';
 import { openFolder } from '../../../assets/methods/codeUtils';
 const store = useCodeStore();
 
@@ -71,10 +71,11 @@ const { proxy } = getCurrentInstance() as ComponentInternalInstance
 const { fileTree, currentFile } = storeToRefs(useCodeStore());
 
 watch(strategy as Code.Strategy, newStrategy => {
+    console.log(newStrategy);
+    
     getPath(newStrategy);
     initFileTree(newStrategy).then (fileTree => {
         const entryPath: string = newStrategy.strategy_path
-        console.log(entryPath);
         
         const currentFile: Code.FileData = (Object.values(fileTree || {}) as Code.FileData[]).filter(f => f.filePath === entryPath)[0]
         if (currentFile) {
@@ -93,23 +94,20 @@ function handleBindStrategyFolder() {
     ).then (strategyPath => {
             if (!strategyPath || !strategyPath.filePaths[0]) return;
             if (!strategy?.strategy_id) return;
-            bindStrategyPath(strategyPath.filePaths);
+            bindStrategyPath(strategyPath.filePaths[0]);
     });
 }
 
 //bind data中path 与 sqlite中path
-async function bindStrategyPath(strategyPath) {
-    // await ipcEmitDataByName('updateStrategyPath', {
-    //     strategyId: strategy?.strategy_id,
-    //     strategyPath: strategyPath[0],
-    // });
+async function bindStrategyPath(strategyPathNew) {
     if (strategy && strategy.strategy_id) {
+        await updateStrategyPath(strategy.strategy_id, strategyPathNew)
         
         message.success(
             `策略${strategy.strategy_id}文件路径修改成功！`,
         );
         //每次更新path，需要通知root组件更新stratgy
-        proxy?.$emit('updateStrategy', strategyPath);
+        proxy?.$emit('updateStrategy', strategyPathNew);
     }
 }
 

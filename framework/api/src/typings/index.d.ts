@@ -236,6 +236,12 @@ declare namespace KungfuApi {
       name: string,
       mode: string,
     ): void;
+    getConfig(
+      category: string,
+      group: string,
+      name: string,
+      mode: string,
+    )
   }
 
   export interface DataTable<T> {

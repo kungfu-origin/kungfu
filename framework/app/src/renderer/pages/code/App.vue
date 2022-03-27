@@ -5,7 +5,7 @@
     // import Editor from './components/Editor.vue';
     import Editor from './components/MonacoEditor.vue';
     import FileTree from './components/FileTree.vue';
-    // import { ipcEmitDataByName } from './emitter';
+    import { getStrategyById } from '@kungfu-trader/kungfu-js-api/kungfu/strategy';
     
     import { useCodeStore } from './store/codeStore'
 
@@ -17,7 +17,6 @@
 
     
     setHtmlTitle(`功夫交易系统 - ${ProcessId}.log`);
-
     const strategy = reactive<Code.Strategy>({
         strategy_id: '',
         strategy_path: '',
@@ -35,32 +34,34 @@
 
     function handleUpdateStrategy(strategyPath) {
         if (!strategy.strategy_id) return;
-        updateStrategy(strategy.strategy_id, strategyPath[0]);
+        updateStrategy(strategy.strategy_id, strategyPath);
     }
 
     async function updateStrategy(strategyId: string, strategyPath: string) {
-        // let addTime = +new Date().getTime() * Math.pow(10, 6);
-        // const strategyOld: Array<Code.Strategy> = await getStrategyById(strategyId);
-        // if (strategyOld.length) {
-        //     addTime = strategyOld[0].add_time;
-        // }
-        // const { data } = await ipcEmitDataByName('strategyById', { strategyId, strategyPath });
-        // getCurrentStrategy(data)
-        // console.log(data);
-        
-        // console.log(strategy);
-
-        
+        const strategyList: Array<Code.Strategy> = await getStrategyById(strategyId)
+        getCurrentStrategy(strategyList)
     }
-    // function getStrategyById (strategyId: string): Promise<Array<Code.Strategy>> {
-    //     return new Promise((resolve) => {
-    //         const strategyData: any = getKfConfig(strategyId, 'strategy');
-    //         const strategy: any[] = [{ ...JSON.parse(strategyData.value || '{}') }];
-    //         resolve(strategy);
-    //     });
-    // };
+   
     
+    let shouldClose: boolean = false
 
+    function bindCloseWindowEvent() {
+      shouldClose = false;
+
+      window.onbeforeunload = (e) => {
+        e.preventDefault(e);
+        if (shouldClose) return undefined;
+        const $textareaList = document.querySelectorAll('textarea');
+        $textareaList.forEach(($textarea) => {
+          $textarea && $textarea.blur();
+        });
+        shouldClose = true;
+        setTimeout(() => {
+          window.close();
+        }, 100);
+        return false;
+      };
+    }
     onMounted(() => {
         removeLoadingMask();
         nextTick().then(() => {
@@ -68,7 +69,7 @@
         })
 
         store.getKungfuConfig()
-        
+        bindCloseWindowEvent()
     })
 
 </script>
