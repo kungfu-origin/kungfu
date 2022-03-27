@@ -20,6 +20,16 @@ export const watcher = ((): KungfuApi.Watcher | null => {
     process.env.DAEMON_TYPE || 'undefined',
   );
 
+  console.log(
+    'Init Watcher',
+    'APP_TYPE',
+    process.env.APP_TYPE || 'undefined',
+    'RENDERER_TYPE',
+    process.env.RENDERER_TYPE || 'undefined',
+    'DAEMON_TYPE',
+    process.env.DAEMON_TYPE || 'undefined',
+  );
+
   if (process.env.APP_TYPE !== 'renderer') {
     if (process.env.APP_TYPE !== 'cli') {
       if (process.env.APP_TYPE !== 'daemon') {
@@ -36,9 +46,7 @@ export const watcher = ((): KungfuApi.Watcher | null => {
 
   if (process.env.APP_TYPE === 'cli') {
     if (process.env.RENDERER_TYPE !== 'dzxy') {
-      if (process.env.RENDERER_TYPE !== 'export') {
-        return null;
-      }
+      return null;
     }
   }
 

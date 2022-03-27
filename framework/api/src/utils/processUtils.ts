@@ -19,7 +19,7 @@ import {
   EXTENSION_DIRS,
   KFC_DIR,
   KF_HOME,
-  // KF_RUNTIME_DIR,
+  KF_RUNTIME_DIR,
 } from '../config/pathConfig';
 import { getKfGlobalSettingsValue } from '../config/globalSettings';
 
@@ -307,7 +307,7 @@ export const startProcess = (
     kill_timeout: 16000,
     env: {
       KF_HOME: dealSpaceInPath(KF_HOME),
-      // KF_RUNTIME_DIR: dealSpaceInPath(KF_RUNTIME_DIR),
+      KF_RUNTIME_DIR: dealSpaceInPath(KF_RUNTIME_DIR),
       LANG: `${locale}.UTF-8`,
       PYTHONUTF8: '1',
       PYTHONIOENCODING: 'utf8',

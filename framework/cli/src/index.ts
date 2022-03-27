@@ -23,7 +23,7 @@ import {
   removeJournal,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { setGlobalSetting, showGlobalSetting } from './commanders/config';
-// import { exportTradingDataPrompt } from './commanders/export';
+import { exportTradingDataPrompt } from './commanders/export';
 
 const argvs = process.argv.filter((s) => !!s);
 if (argvs[argvs.length - 1] === '-h') {
@@ -108,20 +108,20 @@ program
       .finally(() => process.exit(0));
   });
 
-// program
-//   .command('export')
-//   .description('Export all trading data by date')
-//   .action(() => {
-//     return exportTradingDataPrompt()
-//       .then((output_path: string) => {
-//         console.success(`Export trading data to ${output_path} success`);
-//       })
-//       .catch((err: Error) => {
-//         console.error(err);
-//         process.exit(1);
-//       })
-//       .finally(() => process.exit(0));
-//   });
+program
+  .command('export')
+  .description('Export all trading data by date')
+  .action(() => {
+    return exportTradingDataPrompt()
+      .then((output_path: string) => {
+        console.success(`Export trading data to ${output_path} success`);
+      })
+      .catch((err: Error) => {
+        console.error(err);
+        process.exit(1);
+      })
+      .finally(() => process.exit(0));
+  });
 
 program
   .command('shutdown')
