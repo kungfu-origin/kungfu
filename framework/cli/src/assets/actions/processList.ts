@@ -445,11 +445,12 @@ const switchMaster = async (status: boolean): Promise<void> => {
       await killKungfu();
     }
   } else {
-    await startDzxy();
     await delayMilliSeconds(1000);
     await startMaster(false);
     await delayMilliSeconds(1000);
     await startCacheD(false);
     await startLedger(false);
+    await delayMilliSeconds(1000);
+    await startDzxy();
   }
 };

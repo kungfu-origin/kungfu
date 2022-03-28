@@ -32,13 +32,6 @@ void CacheD::on_react() {
   });
 }
 
-void CacheD::mark_request_cached_done(uint32_t dest_id) {
-  auto writer = get_writer(master_cmd_location_->uid);
-  RequestCachedDone &rcd = writer->open_data<RequestCachedDone>();
-  rcd.dest_id = dest_id;
-  writer->close_data();
-}
-
 void CacheD::on_start() {
   events_ | is(Channel::tag) | $$(inspect_channel(event->gen_time(), event->data<Channel>()));
   events_ | is(Deregister::tag) | $$(deregister_cache_shift(event->data<Deregister>()));
@@ -51,6 +44,13 @@ void CacheD::on_start() {
 }
 
 void CacheD::on_active() { handle_cached_feeds(); }
+
+void CacheD::mark_request_cached_done(uint32_t dest_id) {
+  auto writer = get_writer(master_cmd_location_->uid);
+  RequestCachedDone &rcd = writer->open_data<RequestCachedDone>();
+  rcd.dest_id = dest_id;
+  writer->close_data();
+}
 
 void CacheD::handle_cached_feeds() {
   bool stored_controller = false;
