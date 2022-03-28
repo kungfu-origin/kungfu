@@ -10,129 +10,108 @@
 
 // using namespace std;
 namespace kungfu::yijinjing::cache {
-template <typename T> class ringqueue
-{
+template <typename T> class ringqueue {
 public:
-  explicit ringqueue(size_t capacity) {
-    _capacityMask = capacity - 1;
-    // std::cout << "_capacityMask=" << _capacityMask << " " << std::bitset<sizeof(_capacityMask) * 8>(_capacityMask) <<
+  explicit ringqueue(size_t capacity) : capacityMask_(capacity - 1), tail_(0), head_(0) {
+    // std::cout << "capacityMask_=" << capacityMask_ << " " << std::bitset<sizeof(capacityMask_) * 8>(capacityMask_) <<
     // std::endl;
     for (size_t i = 1; i <= sizeof(void *) * 4; i <<= 1) {
-      _capacityMask |= _capacityMask >> i;
-      // std::cout << "i=" << i << " _capacityMask=" << _capacityMask << " " << bitset<sizeof(_capacityMask) *
-      // 8>(_capacityMask) << std::endl;
+      capacityMask_ |= capacityMask_ >> i;
+      // std::cout << "i=" << i << " capacityMask_=" << capacityMask_ << " " << bitset<sizeof(capacityMask_) *
+      // 8>(capacityMask_) << std::endl;
     }
-    _capacity = _capacityMask + 1;
-    // std::cout << "_capacity=" << _capacity << std::endl;
-    _queue = (T *)new char[sizeof(T) * _capacity];
-	pop_value_ = (T *)new char[sizeof(T)];
-    _tail.store(0, std::memory_order_relaxed);
-    _head.store(0, std::memory_order_relaxed);
-	}
+    capacity_ = capacityMask_ + 1;
+    // std::cout << "capacity_=" << capacity_ << std::endl;
+    queue_ = (T *)new char[sizeof(T) * capacity_];
+    pop_value_ = (T *)new char[sizeof(T)];
+    // SPDLOG_INFO("ringqueue 1 capacity_ {} capacityMask_ {}", capacity_, capacityMask_);
+  }
 
-	ringqueue(ringqueue &&that)
-		: _capacity(that._capacity), _capacityMask(that._capacityMask),
-			_head(that._head.load(std::memory_order_relaxed)), _tail(that._tail.load(std::memory_order_relaxed)),
-			_queue(that._queue), pop_value_(that.pop_value_) {
-		that._queue = nullptr;
-		that.pop_value_ = nullptr;
-	}
+  ringqueue(ringqueue &&that)
+      : capacity_(that.capacity_), capacityMask_(that.capacityMask_), head_(that.head_), tail_(that.tail_),
+        queue_(that.queue_), pop_value_(that.pop_value_) {
+    that.queue_ = nullptr;
+    that.pop_value_ = nullptr;
+    // SPDLOG_INFO("ringqueue 2 capacity_ {} capacityMask_ {}", capacity_, capacityMask_);
+  }
 
-        ringqueue(const ringqueue &that)
-            : _capacity(that._capacity), _capacityMask(that._capacityMask),
-              _head(that._head.load(std::memory_order_relaxed)), _tail(that._tail.load(std::memory_order_relaxed)),
-              _queue((T *)new char[sizeof(T) * that._capacity]) {
-          for (int i = 0; i < that.size(); i++) {
-            T *node = _queue + i;
-            new (node) T(*(that._queue + i));
-          }
-          new (pop_value_) T(*(that.pop_value_));
-        }
+  ringqueue(const ringqueue &that)
+      : capacity_(that.capacity_), capacityMask_(that.capacityMask_), head_(that.head_), tail_(that.tail_),
+        queue_((T *)new char[sizeof(T) * that.capacity_]) {
+    for (int i = 0; i < that.size(); i++) {
+      T *node = queue_ + i;
+      new (node) T(*(that.queue_ + i));
+    }
+    new (pop_value_) T(*(that.pop_value_));
+    // SPDLOG_INFO("ringqueue 3 capacity_ {} capacityMask_ {}", capacity_, capacityMask_);
+  }
 
-        ~ringqueue() {
-          for (size_t i = _head; i != _tail; ++i)
-            (&_queue[i & _capacityMask])->~T();
-          (pop_value_)->~T();
-          delete[](char *) _queue;
-          delete[](char *) pop_value_;
-        }
+  ~ringqueue() {
+    for (size_t i = head_; i != tail_; ++i)
+      (&queue_[i & capacityMask_])->~T();
+    (pop_value_)->~T();
+    delete[](char *) queue_;
+    delete[](char *) pop_value_;
+  }
 
-        size_t capacity() const { return _capacity; }
+  size_t capacity() const { return capacity_; }
 
-	size_t size() const
-	{
-		size_t head = _head.load(std::memory_order_acquire);
-		return _tail.load(std::memory_order_relaxed) - head;
-	}
-	bool push(const T& p_data)
-	{
-		T* node;
-		// for (;;)
-		// {
-		if(mtx.try_lock()) {
-			size_t tail = _tail.load(std::memory_order_relaxed);
-			size_t head = _head.load(std::memory_order_relaxed);
-			node = &_queue[tail & _capacityMask];
-			if (tail - head >= _capacity) {
-				if (!_head.compare_exchange_weak(head, tail + 1 - _capacity, std::memory_order_relaxed)) {
-					// std::cout << "push " << p_data << " head from " << head << " to " << tail + 1 - _capacity  << std::endl;
-					//continue;
-					mtx.unlock();
-					return false;
-				}
-			}
-			new (node)T(p_data);
-			_tail++;
-			mtx.unlock();
-		return true;
-			// break;
-		}
-		else{
-			return false;
-		}
-		// std::cout << "push " << p_data << " _head>>" << _head << " _tail>>" << _tail << std::endl;
-	}
+  size_t size() const { return tail_ - head_; }
 
-	bool pop(T* result)
-	{
-		T* node;
-		result = nullptr;
-		int i = 0;
-		for (i = 0; i < 128; i++)
-		{
-			if (mtx.try_lock()) { 
-			
-			size_t head = _head.load(std::memory_order_relaxed);
-			size_t tail = _tail.load(std::memory_order_relaxed);
-			if (head >= tail) {
-				// std::cout << "pop empty queue..........................." << std::endl;
-				return false;
-			}
-			node = &_queue[head & _capacityMask];
-			// if (_head.compare_exchange_weak(head, head + 1, std::memory_order_relaxed)) {
-				_head++;
-				*pop_value_ = *node;
-				result = pop_value_;
-				node->~T();			
-			// }	
-			mtx.unlock();
-				break;
-			}			
-		}
-		if (i == 128) {
-			// std::cout << "pop 128 fail..........................." << std::endl;
-			return  false;
-		}
-		// std::cout << "pop " << result << " head<<" << _head << " tail<<" << _tail << std::endl;
-		return true;
-	}
+  bool push(const T &p_data) {
+    T *node;
+    if (mtx_.try_lock()) {
+      node = &queue_[tail_ & capacityMask_];
+      if (tail_ - head_ >= capacity_) {
+        head_ = tail_ + 1;
+      }
+      // SPDLOG_INFO("push head_ {} tail_ {}, p_data {} capacity_ {} capacityMask_ {}", head_, tail_, p_data.update_time, capacity_, capacityMask_);
+      new (node) T(p_data);
+      // SPDLOG_INFO("push head_ {} tail_ {}", head_, tail_);
+      tail_++;
+      mtx_.unlock();
+      return true;
+    } else {
+      return false;
+    }
+    // std::cout << "push " << p_data << " head_>>" << head_ << " tail_>>" << tail_ << std::endl;
+  }
+
+  bool pop(T *result) {
+    if (head_ >= tail_) {
+      // std::cout << "pop empty queue..........................." << std::endl;
+      return false;
+    }
+    T *node;
+      // SPDLOG_INFO("pop head_ 1 {} tail_ {}", head_, tail_);
+    result = nullptr;
+    if (mtx_.try_lock()) {
+      // SPDLOG_INFO("pop head_ 2 {} tail_ {}", head_, tail_);
+      if (head_ >= tail_) {
+        // std::cout << "pop empty queue..........................." << std::endl;
+        mtx_.unlock();
+        return false;
+      }
+      node = &queue_[head_ & capacityMask_];
+      head_++;
+      *pop_value_ = *node;
+      result = pop_value_;
+      node->~T();
+      mtx_.unlock();
+      return true;
+    } else {
+      return false;
+    }
+    // std::cout << "pop " << result << " head<<" << head_ << " tail<<" << tail_ << std::endl;
+  }
+
 private:
-	size_t _capacityMask;
-	T* _queue;
-	T* pop_value_;
-	size_t _capacity;
-	std::atomic<size_t> _tail;
-	std::atomic<size_t> _head;
-	std::mutex mtx;
+  size_t capacityMask_;
+  T *queue_;
+  T *pop_value_;
+  size_t capacity_;
+  volatile size_t tail_;
+  volatile size_t head_;
+  std::mutex mtx_;
 };
-}
+} // namespace kungfu::yijinjing::cache

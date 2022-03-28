@@ -87,11 +87,9 @@ Watcher::Watcher(const Napi::CallbackInfo &info)
 
   shift(ledger_location_) >> state_bank_; // Load positions to restore bookkeeper
   SPDLOG_INFO("watcher {} initialized", get_io_device()->get_home()->uname);
-
 }
 
 Watcher::~Watcher() {
-  SPDLOG_INFO("~~~~~~~~~watcher");
   start_ = false;
   app_states_ref_.Unref();
   ledger_ref_.Unref();
@@ -296,20 +294,12 @@ void Watcher::Feed(const event_ptr &event) {
    boost::hana::for_each(longfist::OrderDataTypes, [&](auto it) {
       using DataType = typename decltype(+boost::hana::second(it))::type; 
       if (DataType::tag == event->msg_type()) {
-        SPDLOG_INFO("Feed {}", typeid(DataType).name());
+        // SPDLOG_INFO("Feed {}", typeid(DataType).name());
         order_bank_ << typed_event_ptr<DataType>(event);
         return;
       }
    });
    feed_state_data(event, data_bank_);
-    // boost::hana::for_each(longfist::StateDataTypes, [&](auto it) {
-    //   using DataType = typename decltype(+boost::hana::second(it))::type;
-    //   if (DataType::tag == event->msg_type()) {
-    //     // if (boost::hana::find(boost::hana::values(longfist::OrderDataTypes), boost::hana::type_c<DataType>) == hana::nothing) {
-    //       data_bank_ << typed_event_ptr<DataType>(event);
-    //     // }
-    //   }
-    // });
   }
 }
 
