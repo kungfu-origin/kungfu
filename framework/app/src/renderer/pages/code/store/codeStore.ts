@@ -65,7 +65,6 @@ export const useCodeStore = defineStore('code', {
         targetChildren['file'].unshift('pending');
       }
       this.fileTree[id]['children'] = targetChildren;
-      console.log(this.fileTree['padding']);
       this.fileTree['pending']['parentId'] = id;
     },
 

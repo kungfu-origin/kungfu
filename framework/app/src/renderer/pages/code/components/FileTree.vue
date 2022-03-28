@@ -29,7 +29,7 @@
         </span>
       </div>
       <div class="file-tree-body" v-if="strategyPath">
-        <div v-for="file in fileTree">
+        <div v-for="file in fileTree" v-if="isActive">
             <FileNode
                 v-if="file.root"
                 :count="0"
@@ -37,6 +37,7 @@
                 :key="file.id"
                 :id="file.id"
                 type="folder"
+                @reload="reload"
             ></FileNode>
         </div>
       </div>
@@ -72,6 +73,7 @@ const strategyPath = ref<string>('')
 const strategyPathName = ref<string>('')
 const { proxy } = getCurrentInstance() as ComponentInternalInstance
 const { fileTree, currentFile } = storeToRefs(useCodeStore());
+const isActive = ref<boolean>(true)
 
 watch(strategy as Code.Strategy, newStrategy => {
     getPath(newStrategy);
@@ -86,6 +88,18 @@ watch(strategy as Code.Strategy, newStrategy => {
     })
 })
 
+watch(fileTree, newTree => {
+    console.log(newTree);
+    
+        reload()
+}, {deep: true})
+
+function reload () {
+    isActive.value = false;
+    nextTick(() => {
+        isActive.value = true
+    })
+}
 
  //绑定策略
 function handleBindStrategyFolder() {
@@ -116,10 +130,6 @@ async function bindStrategyPath(strategyPathNew) {
 //加文件夹
 function handleAddFolder() {
     const target = fileTree.value[currentFile.value.id];
-    
-console.log(fileTree.value);
-console.log(currentFile.value);
-
     if (target.isDir) {
         openFolder(target, fileTree.value, true).then(() => {
             store.addFileFolderPending({ id: target.id, type: 'folder' })

@@ -75,7 +75,8 @@
 
 <script lang="ts">
 export default {
-    name: 'ComFileNode'
+    name: 'ComFileNode',
+    emits: ['reload']
 }
 </script>
 
@@ -86,7 +87,7 @@ import iconFolderJSON from '../config/iconFolderConfig.json';
 import iconFileJSON from '../config/iconFileConfig.json';
 import path from 'path';
 import { storeToRefs } from 'pinia';
-import { onMounted, PropType, ref, nextTick } from 'vue';
+import { onMounted, PropType, ref, nextTick, getCurrentInstance, ComponentInternalInstance } from 'vue';
 import { message, Modal } from 'ant-design-vue';
 import { openFolder } from '../../../assets/methods/codeUtils';
 import { removeFileFolder, editFileFolderName, addFileSync } from '@kungfu-trader/kungfu-js-api/utils/fileUtils'
@@ -99,6 +100,8 @@ const props = defineProps({
     id: [Number, String],
     count: [Number, String]
 })
+const { proxy } = getCurrentInstance() as ComponentInternalInstance
+
 const { fileNode, type, id, count } = props
 const curCount = ref<number>(+(count || 0))
 const childCount = ref<number>(curCount.value + 1)
@@ -126,14 +129,16 @@ function handleClickFile(file) {
     if (Object.keys(file).length === 1) return;
     //更新active file id
     store.setCurrentFile(file)
-    console.log(file);
-    
     //如果为dir
     //打开文件夹, 如果children不为空，直接展示, 之后异步更新，将原来删除
     //如果children为空，读取文件夹下文件，赋值children
     if (type == 'folder' && !file.root) {
         openFolder(file, fileTree.value);
     }
+}
+
+function reload() {
+    proxy?.$emit('reload');
 }
 
 //添加文件或文件夹时
@@ -154,7 +159,7 @@ function handleAddFileBlur(e) {
     }
     //添加文件
     try {
-        const targetPath = parentId ? fileTree.value[parentId].filePath : '';
+        const targetPath = (parentId !== null && parentId !== undefined) ? fileTree.value[parentId].filePath : '';
         if (type === 'folder' || type ==='file') {
             addFileSync(targetPath, filename, type);
         }
@@ -163,6 +168,7 @@ function handleAddFileBlur(e) {
             type: type,
         })
         reloadFolder(parentId, filename);
+        reload()
     } catch (err) {
         message.error(err.message || '操作失败！');
     }
@@ -198,12 +204,6 @@ function handleAddFileBlur(e) {
 //重命名文件
 function handleRename(): void {
     onEditing.value = true;
-    // nextTick(() => {
-        // 添加高亮
-        // if (editName.value) {
-        //     editName.value.querySelectorAll('input')[0].focus();
-        // }
-    // });
 }
 
 //删除文件
@@ -225,7 +225,6 @@ function handleDelete() {
                 ),
             )
             .then(() =>{
-                beforeDelate.value = false
                 store.setCurrentFile(entryFile.value)
             })
             .then(() => message.success(`${typeName}删除成功！`))
@@ -251,9 +250,10 @@ function addChangePath(e): void {
 
 //重命名文件blur
 function handleEditFileBlur(e) {
-    if (fileNode) {
-        fileNode.name = editValue.value
-    }
+    // if (fileNode) {
+    //     fileNode.name = editValue.value
+    // }
+    // editValue.value = fileNode?.name || ''
     onEditing.value = false
     // if (editError) {
     //     resetStatus();
@@ -264,11 +264,14 @@ function handleEditFileBlur(e) {
     const newName = editValue.value
     const newPath = path.join(path.dirname(oldPath), newName);
     const parentId = fileNode?.parentId;
-    if (fileNode) {
-        fileNode.filePath = newPath
-    }
+    
     editFileFolderName(oldPath, newPath).then(() => {
+        // reload
         reloadFolder(parentId, newName);
+        nextTick(() => {
+            // console.log(fileNode);
+            
+        })
     });
 }
 
@@ -324,7 +327,7 @@ function getCurrentFileByName(parentId, fileTree, name) {
     return siblings[name] || {};
 }
 
-//获取所有兄弟 name
+// 获取所有兄弟 name
 function getSiblings(parentId, fileTree) {
     let target = {};
     const folders = fileTree[parentId].children['folder'];

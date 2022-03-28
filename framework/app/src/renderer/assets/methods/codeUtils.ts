@@ -85,7 +85,9 @@ export const openFolder = async (
   const store = useCodeStore();
   oldFileTree = deepClone(oldFileTree);
   //清空
-  if (force) oldFileTree = clearChildrenByFileId(oldFileTree, folder.id);
+  if (force) {
+    oldFileTree = clearChildrenByFileId(oldFileTree, folder.id);
+  }
   if (openStatus === undefined) {
     openStatus = !folder.open;
   }
@@ -128,15 +130,14 @@ export const clearChildrenByFileId = (
     target.children;
   const files: Array<number> = children['file'] || [];
   const folders: Array<number> = children['folders'] || [];
-
+  const returnFile: Code.IFileTree = deepClone(fileTree);
   [...files, ...folders].forEach((id) => {
-    // fileTree[id] = null;
-    delete fileTree[id];
+    delete returnFile[id];
   });
 
-  target.children = {
-    file: [],
-    folder: [],
-  };
-  return fileTree;
+  //   target.children = {
+  //     file: [],
+  //     folder: [],
+  //   };
+  return returnFile;
 };
