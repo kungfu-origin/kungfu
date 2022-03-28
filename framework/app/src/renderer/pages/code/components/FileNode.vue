@@ -268,10 +268,6 @@ function handleEditFileBlur(e) {
     editFileFolderName(oldPath, newPath).then(() => {
         // reload
         reloadFolder(parentId, newName);
-        nextTick(() => {
-            // console.log(fileNode);
-            
-        })
     });
 }
 

@@ -89,9 +89,7 @@ watch(strategy as Code.Strategy, newStrategy => {
 })
 
 watch(fileTree, newTree => {
-    console.log(newTree);
-    
-        reload()
+    reload()
 }, {deep: true})
 
 function reload () {
