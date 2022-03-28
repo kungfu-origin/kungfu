@@ -126,6 +126,11 @@ void io_device_console::trace(int64_t begin_time, int64_t end_time, bool in, boo
       auto source_location = locations.at(request.source_id);
       reader->join(source_location, location::PUBLIC, request.from_time);
     }
+    if (frame->dest() == home_->uid and frame->msg_type() == RequestReadFromUpdate::tag) {
+      auto request = frame->data<RequestReadFromUpdate>();
+      auto source_location = locations.at(request.source_id);
+      reader->join(source_location, location::UPDATE, request.from_time);
+    }
     if (frame->dest() == home_->uid and frame->msg_type() == Deregister::tag) {
       reader->disjoin(location::make_shared(frame->data<Deregister>(), get_locator())->uid);
     }

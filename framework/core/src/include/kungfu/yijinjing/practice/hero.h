@@ -110,6 +110,8 @@ protected:
 
   void require_read_from_public(int64_t trigger_time, uint32_t dest_id, uint32_t source_id, int64_t from_time);
 
+  void require_read_from_update(int64_t trigger_time, uint32_t dest_id, uint32_t source_id, int64_t from_time);
+
   void require_write_to(int64_t trigger_time, uint32_t source_id, uint32_t dest_id);
 
   virtual void react() = 0;

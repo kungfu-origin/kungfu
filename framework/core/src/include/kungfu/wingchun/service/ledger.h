@@ -58,6 +58,10 @@ private:
 
   void write_asset_snapshots(int32_t msg_type);
 
+  void write_asset_update(const event_ptr &event);
+
+  void write_position_update(const event_ptr &event);
+
   template <typename TradingData>
   void write_book(int64_t trigger_time, uint32_t account_uid, uint32_t strategy_uid, const TradingData &data) {
     write_book(trigger_time, account_uid, data);

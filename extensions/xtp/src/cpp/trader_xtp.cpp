@@ -4,10 +4,11 @@
 
 #include <algorithm>
 
-#include "type_convert.h"
 #include "trader_xtp.h"
+#include "type_convert.h"
 
 namespace kungfu::wingchun::xtp {
+using namespace kungfu::yijinjing::data;
 struct TDConfiguration {
   int client_id;
   std::string account_id;
@@ -26,9 +27,7 @@ void from_json(const nlohmann::json &j, TDConfiguration &c) {
   j.at("td_port").get_to(c.td_port);
 }
 
-TraderXTP::TraderXTP(broker::BrokerVendor &vendor)
-    : Trader(vendor), session_id_(0), request_id_(0),
-      trading_day_("") {}
+TraderXTP::TraderXTP(broker::BrokerVendor &vendor) : Trader(vendor), session_id_(0), request_id_(0), trading_day_("") {}
 
 TraderXTP::~TraderXTP() {
   if (api_ != nullptr) {
@@ -48,8 +47,8 @@ void TraderXTP::on_start() {
   api_->SubscribePublicTopic(XTP_TERT_QUICK);
   api_->SetSoftwareVersion("1.1.0");
   api_->SetSoftwareKey(config.software_key.c_str());
-  session_id_ = api_->Login(config.td_ip.c_str(), config.td_port, config.account_id.c_str(),
-                            config.password.c_str(), XTP_PROTOCOL_TCP);
+  session_id_ = api_->Login(config.td_ip.c_str(), config.td_port, config.account_id.c_str(), config.password.c_str(),
+                            XTP_PROTOCOL_TCP);
   if (session_id_ > 0) {
     update_broker_state(BrokerState::Ready);
     SPDLOG_INFO("Login successfully");
@@ -92,7 +91,8 @@ bool TraderXTP::insert_order(const event_ptr &event) {
   orders_.emplace(order.uid(), state<Order>(event->dest(), event->source(), nano, order));
   writer->close_data();
   if (not success) {
-    SPDLOG_ERROR("fail to insert order {}, error id {}, {}", to_string(xtp_input), (int)order.error_id, order.error_msg);
+    SPDLOG_ERROR("fail to insert order {}, error id {}, {}", to_string(xtp_input), (int)order.error_id,
+                 order.error_msg);
   }
   return success;
 }
@@ -115,9 +115,15 @@ bool TraderXTP::cancel_order(const event_ptr &event) {
   return success;
 }
 
-bool TraderXTP::req_position() { return api_->QueryPosition(nullptr, this->session_id_, ++request_id_) == 0; }
+bool TraderXTP::req_position() {
+  SPDLOG_INFO("req_position");
+  return api_->QueryPosition(nullptr, this->session_id_, ++request_id_) == 0;
+}
 
-bool TraderXTP::req_account() { return api_->QueryAsset(session_id_, ++request_id_) == 0; }
+bool TraderXTP::req_account() {
+  SPDLOG_INFO("req_account");
+  return api_->QueryAsset(session_id_, ++request_id_) == 0;
+}
 
 void TraderXTP::OnDisconnected(uint64_t session_id, int reason) {
   if (session_id == session_id_) {
@@ -211,7 +217,11 @@ void TraderXTP::OnQueryAsset(XTPQueryAssetRsp *asset, XTPRI *error_info, int req
                  request_id, is_last);
   }
   if (error_info == nullptr || error_info->error_id == 0 || error_info->error_id == 11000350) {
-    auto writer = get_writer(0);
+    auto writer = get_writer(location::PUBLIC);
+    if (b_update_) {
+      writer = get_writer(location::UPDATE);
+    }
+    SPDLOG_INFO("writer->get_dest() : {}", writer->get_dest());
     Asset &account = writer->open_data<Asset>(0);
     if (error_info == nullptr || error_info->error_id == 0) {
       from_xtp(*asset, account);
@@ -222,6 +232,7 @@ void TraderXTP::OnQueryAsset(XTPQueryAssetRsp *asset, XTPRI *error_info, int req
     account.holder_uid = get_home()->uid;
     account.update_time = yijinjing::time::now_in_nano();
     writer->close_data();
+    b_update_ = true;
   }
 }
 } // namespace kungfu::wingchun::xtp

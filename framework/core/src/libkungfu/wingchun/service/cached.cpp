@@ -110,6 +110,7 @@ void CacheD::register_cache_shift(const Channel &channel) {
   app_cache_shift_.emplace(source_id, location);
   ensure_cached_storage(source_id, dest_id);
   ensure_cached_storage(source_id, location::PUBLIC);
+  ensure_cached_storage(source_id, location::UPDATE);
 }
 
 void CacheD::deregister_cache_shift(const Deregister &deregister_data) {

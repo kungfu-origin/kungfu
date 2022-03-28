@@ -109,6 +109,9 @@ std::string hero::get_location_uname(uint32_t uid) const {
   if (uid == location::PUBLIC) {
     return "public";
   }
+  if (uid == location::UPDATE) {
+    return "update";
+  }
   if (not has_location(uid)) {
     return fmt::format("{:08x}", uid);
   }
@@ -141,7 +144,7 @@ bool hero::check_location_exists(uint32_t source_id, uint32_t dest_id) const {
     SPDLOG_ERROR("source_id {}, {} does not exist", source_id, get_location_uname(source_id));
     return false;
   }
-  if (dest_id != 0 and not has_location(dest_id)) {
+  if (dest_id != 0 and dest_id != location::UPDATE and not has_location(dest_id)) {
     SPDLOG_ERROR("dest_id {}, {} does not exist", dest_id, get_location_uname(dest_id));
     return false;
   }
@@ -220,6 +223,10 @@ void hero::require_read_from(int64_t trigger_time, uint32_t dest_id, uint32_t so
 
 void hero::require_read_from_public(int64_t trigger_time, uint32_t dest_id, uint32_t source_id, int64_t from_time) {
   do_require_read_from<RequestReadFromPublic>(get_writer(dest_id), trigger_time, dest_id, source_id, from_time);
+}
+
+void hero::require_read_from_update(int64_t trigger_time, uint32_t dest_id, uint32_t source_id, int64_t from_time) {
+  do_require_read_from<RequestReadFromUpdate>(get_writer(dest_id), trigger_time, dest_id, source_id, from_time);
 }
 
 void hero::require_write_to(int64_t trigger_time, uint32_t source_id, uint32_t dest_id) {

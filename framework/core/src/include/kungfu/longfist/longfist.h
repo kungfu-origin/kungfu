@@ -45,6 +45,7 @@ constexpr auto AllTypes = boost::hana::make_map( //
     TYPE_PAIR(BrokerStateUpdate),                //
     TYPE_PAIR(RequestReadFrom),                  //
     TYPE_PAIR(RequestReadFromPublic),            //
+    TYPE_PAIR(RequestReadFromUpdate),            //
     TYPE_PAIR(RequestWriteTo),                   //
     TYPE_PAIR(TradingDay),                       //
     TYPE_PAIR(Channel),                          //
@@ -86,6 +87,7 @@ constexpr auto AllDataTypes = boost::hana::make_map( //
     TYPE_PAIR(BrokerStateUpdate),                    //
     TYPE_PAIR(RequestReadFrom),                      //
     TYPE_PAIR(RequestReadFromPublic),                //
+    TYPE_PAIR(RequestReadFromUpdate),                //
     TYPE_PAIR(RequestWriteTo),                       //
     TYPE_PAIR(TradingDay),                           //
     TYPE_PAIR(Channel),                              //

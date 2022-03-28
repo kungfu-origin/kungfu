@@ -25,6 +25,8 @@ void TraderVendor::on_start() {
   events_ | is(OrderAction::tag) | $$(service_->cancel_order(event));
   events_ | is(AssetRequest::tag) | $$(service_->req_account());
   events_ | is(PositionRequest::tag) | $$(service_->req_position());
+  events_ | is(AssetUpdate::tag) | $$(service_->req_account());
+  events_ | is(PositionUpdate::tag) | $$(service_->req_position());
   events_ | is(ResetBookRequest::tag) | $$(get_writer(location::PUBLIC)->mark(now(), ResetBookRequest::tag));
 
   clean_orders();

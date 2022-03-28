@@ -46,6 +46,8 @@ public:
 
   void request_read_from_public(int64_t trigger_time, uint32_t source_id, int64_t from_time);
 
+  void request_read_from_update(int64_t trigger_time, uint32_t source_id, int64_t from_time);
+
   void request_write_to(int64_t trigger_time, uint32_t dest_id);
 
   void request_cached_reader_writer(const event_ptr &event);
@@ -84,6 +86,8 @@ protected:
   void on_read_from(const event_ptr &event);
 
   void on_read_from_public(const event_ptr &event);
+
+  void on_read_from_update(const event_ptr &event);
 
   void on_write_to(const event_ptr &event);
 

@@ -47,6 +47,9 @@ void Ledger::on_start() {
   add_time_interval(time_unit::NANOSECONDS_PER_MINUTE, [&](auto e) { write_asset_snapshots(AssetSnapshot::tag); });
   add_time_interval(time_unit::NANOSECONDS_PER_HOUR, [&](auto e) { write_asset_snapshots(DailyAsset::tag); });
 
+  add_time_interval(time_unit::NANOSECONDS_PER_MINUTE, [&](auto e) { write_asset_update(e); });
+  add_time_interval(time_unit::NANOSECONDS_PER_MINUTE, [&](auto e) { write_position_update(e); });
+
   refresh_books();
 }
 
@@ -259,4 +262,27 @@ void Ledger::write_asset_snapshots(int32_t msg_type) {
     }
   }
 }
+
+void Ledger::write_asset_update(const event_ptr &event) {
+  SPDLOG_WARN("write_asset_update");
+  for (const auto &pair : bookkeeper_.get_books()) {
+    auto &book = pair.second;
+    auto &asset = book->asset;
+    if (asset.ledger_category == LedgerCategory::Account and has_writer(asset.holder_uid)) {
+      get_writer(asset.holder_uid)->mark(event->gen_time(), AssetUpdate::tag);
+    }
+  }
+}
+
+void Ledger::write_position_update(const event_ptr &event) {
+  SPDLOG_WARN("write_position_update");
+  for (const auto &pair : bookkeeper_.get_books()) {
+    auto &book = pair.second;
+    auto &asset = book->asset;
+    if (asset.ledger_category == LedgerCategory::Account and has_writer(asset.holder_uid)) {
+      get_writer(asset.holder_uid)->mark(event->gen_time(), PositionUpdate::tag);
+    }
+  }
+}
+
 } // namespace kungfu::wingchun::service

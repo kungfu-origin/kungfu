@@ -71,6 +71,8 @@ private:
 
   void on_request_read_from_public(const event_ptr &event);
 
+  void on_request_read_from_update(const event_ptr &event);
+
   void on_channel_request(const event_ptr &event);
 
   void on_time_request(const event_ptr &event);

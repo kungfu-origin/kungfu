@@ -32,3 +32,4 @@ build/
 build-*/
 cmake-build-debug/
 dist/
+cmake-build-release-visual-studio/
