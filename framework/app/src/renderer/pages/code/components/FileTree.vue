@@ -85,6 +85,8 @@ watch(strategy as Code.Strategy, newStrategy => {
         }       
     })
 })
+
+
  //绑定策略
 function handleBindStrategyFolder() {
     dialog.showOpenDialog(
@@ -114,21 +116,21 @@ async function bindStrategyPath(strategyPathNew) {
 //加文件夹
 function handleAddFolder() {
     const target = fileTree.value[currentFile.value.id];
+    
+console.log(fileTree.value);
+console.log(currentFile.value);
+
     if (target.isDir) {
-        openFolder(target, fileTree.value, true).then(
-            () => {
-                store.addFileFolderPending({
-                    id: target.id,
-                    type: 'folder',
-                })
+        openFolder(target, fileTree.value, true).then(() => {
+            store.addFileFolderPending({ id: target.id, type: 'folder' })
             },
         );
-        } else {
+    } else {
         if (target.parentId !== undefined && !isNaN(target.parentId)) {
-            store.addFileFolderPending({
-                id: target.parentId,
-                type: 'folder',
-            })
+        store.addFileFolderPending({
+            id: target.parentId,
+            type: 'folder',
+        })
         } else {
             throw new Error();
         }
@@ -268,6 +270,7 @@ onMounted(() => {
             margin-right: 10px;
             .create {
                 margin: 0 2px;
+                cursor: pointer;
             }
         }
         .folder-oper {

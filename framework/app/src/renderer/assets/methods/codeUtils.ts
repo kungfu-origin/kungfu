@@ -76,7 +76,7 @@ export const getTreeByFilePath = (
 };
 
 // //打开文件树
-export const openFolder = (
+export const openFolder = async (
   folder: Code.FileData,
   oldFileTree: Code.IFileTree,
   openStatus?: boolean,
@@ -86,32 +86,36 @@ export const openFolder = (
   oldFileTree = deepClone(oldFileTree);
   //清空
   if (force) oldFileTree = clearChildrenByFileId(oldFileTree, folder.id);
-  return new Promise(async (resolve) => {
-    if (openStatus === undefined) {
-      openStatus = !folder.open;
-    }
-    if (openStatus) {
-      const { ids, fileTree }: Code.FileTreeByPath = await getTreeByFilePath(
-        folder,
-        oldFileTree,
-      );
-      store.setFileTree(fileTree);
-      store.setFileNode({
-        id: folder.id,
-        attr: 'children',
-        val: ids,
-      });
-      resolve(fileTree);
-    } else {
-      resolve({});
-    }
+  if (openStatus === undefined) {
+    openStatus = !folder.open;
+  }
+  if (openStatus) {
+    const { ids, fileTree }: Code.FileTreeByPath = await getTreeByFilePath(
+      folder,
+      oldFileTree,
+    );
+    store.setFileTree(fileTree);
+    store.setFileNode({
+      id: folder.id,
+      attr: 'children',
+      val: ids,
+    });
     //打开
     store.setFileNode({
       id: folder.id,
       attr: 'open',
       val: openStatus,
     });
-  });
+    return fileTree;
+  } else {
+    //打开
+    store.setFileNode({
+      id: folder.id,
+      attr: 'open',
+      val: openStatus,
+    });
+    return {};
+  }
 };
 
 // //清空children

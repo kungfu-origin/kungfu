@@ -140,6 +140,7 @@ export const editFileFolderName = (
   newPath = path.normalize(newPath);
   return fse.rename(oldPath, newPath);
 };
+
 export const listDirSync = (filePath: string): string[] => {
   fse.ensureDirSync(filePath);
   return fse.readdirSync(filePath);

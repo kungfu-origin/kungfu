@@ -1,5 +1,6 @@
 <template>
     <div
+        v-if="beforeDelate"
         class="c-app-code-file-node"
         :class="{
             folder: type == 'folder',
@@ -21,9 +22,8 @@
                     size="small"
                     @click.stop="() => {}"
                     @focus.stop="() => {}"
-                    :value="editValue"
-                    @change="changePath"
-                    @blur="handleAddFileBlur"
+                    :value="addValue"
+                    @change="addChangePath"
                     @pressEnter="handleAddFileBlur"
                 ></a-input>
                 <a-input
@@ -34,8 +34,9 @@
                     :defaultValue="fileNode?.name"
                     size="small"
                     :value="editValue"
+                    @click.stop="() => {}"
+                    @focus.stop="() => {}"
                     @change="changePath"
-                    @blur="handleEditFileBlur"
                     @pressEnter="handleEditFileBlur"
                 ></a-input>
 
@@ -107,22 +108,26 @@ const fileName = ref<string>('');
 const onEditing = ref<boolean>(false)
 const editError = ref<boolean>(false)
 const showChild = ref<boolean>(true)
+const beforeDelate = ref<boolean>(true)
+
 const editErrorMessage = ref<string>('');
 
 const editValue = ref<string>(fileNode?.name || '')
+const addValue = ref<string>(fileNode?.name || '')
 
 const { fileTree, entryFile, currentFile } = storeToRefs(store)
 
-
 //点击文件或文件树
 function handleClickFile(file) {
-    if (type === 'folder') {
-        showChild.value = !showChild.value
-    }
+    // if (type === 'folder') {
+    //     showChild.value = !showChild.value
+    // }
     //正在编辑的input
     if (Object.keys(file).length === 1) return;
     //更新active file id
     store.setCurrentFile(file)
+    console.log(file);
+    
     //如果为dir
     //打开文件夹, 如果children不为空，直接展示, 之后异步更新，将原来删除
     //如果children为空，读取文件夹下文件，赋值children
@@ -132,13 +137,12 @@ function handleClickFile(file) {
 }
 
 //添加文件或文件夹时
-function handleAddFileBlur(e, eType) {
+function handleAddFileBlur(e) {
     e.stopPropagation();
-    if (eType === 'enter' && e.key !== 'Enter') return;
-    const filename = e.target.value;
+    const filename = addValue.value
     //test 重复 或 为空
-    const parentId = fileNode?.parentId || '';
-    if (parentId === '') return;
+    const parentId = fileNode?.parentId;
+    if (parentId === null || parentId === undefined) return;
     const names = getSiblingsName(parentId);
     //如果为空则直接删除（重复会通过@input来判断）
     if (names.indexOf(filename) != -1 || !filename) {
@@ -220,9 +224,10 @@ function handleDelete() {
                     true,
                 ),
             )
-            .then(() =>
-                store.setCurrentFile(fileTree.value[parentId || 0]),
-            )
+            .then(() =>{
+                beforeDelate.value = false
+                store.setCurrentFile(entryFile.value)
+            })
             .then(() => message.success(`${typeName}删除成功！`))
             .catch((err) => {
                 if (err == 'cancel') return;
@@ -239,10 +244,17 @@ function changePath(e): void {
     const value = e.target.value
     editValue.value = value
 }
+function addChangePath(e): void {
+    const value = e.target.value
+    addValue.value = value
+}
 
 //重命名文件blur
 function handleEditFileBlur(e) {
-    
+    if (fileNode) {
+        fileNode.name = editValue.value
+    }
+    onEditing.value = false
     // if (editError) {
     //     resetStatus();
     //     return;
@@ -252,6 +264,9 @@ function handleEditFileBlur(e) {
     const newName = editValue.value
     const newPath = path.join(path.dirname(oldPath), newName);
     const parentId = fileNode?.parentId;
+    if (fileNode) {
+        fileNode.filePath = newPath
+    }
     editFileFolderName(oldPath, newPath).then(() => {
         reloadFolder(parentId, newName);
     });
@@ -324,15 +339,18 @@ function getSiblings(parentId, fileTree) {
 
 //获取所有兄弟 name
 function getSiblingsName(parentId) {
-    let targetList: Array<string>[] = [];
-    const folders = fileTree.value[parentId].children['folder'];
-    const files = fileTree.value[parentId].children['file'];
+    let targetList: Array<string> = [];
+    if (fileTree.value[parentId] && fileTree.value[parentId].children) {
+        const folders = fileTree.value[parentId].children['folder'] || [];
+        const files = fileTree.value[parentId].children['file'] || [];
 
-    [...folders, ...files].forEach((id) => {
-    if (fileTree.value[id] && fileTree.value[id].name)
-        targetList.push(fileTree[id].name);
-    });
-    return targetList;
+        [...folders, ...files].forEach((id) => {
+        if (fileTree.value[id] && fileTree.value[id].name)
+            targetList.push(fileTree.value[id].name);
+        });
+        return targetList;
+    }
+    return []
 }
 
 onMounted(() => {
@@ -363,7 +381,7 @@ onMounted(() => {
         padding: 2px 0px;
         padding-left: 5px;
         color: @font_6;
-        cursor:pointer;
+        cursor: pointer;
         .text-overflow {
             overflow: hidden;
             text-overflow: ellipsis;
