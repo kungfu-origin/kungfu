@@ -65,7 +65,6 @@ void master::register_app(const event_ptr &event) {
 
   try_add_location(event->gen_time(), app_location);
   try_add_location(event->gen_time(), master_cmd_location);
-  app_cmd_locations_.emplace(app_location->uid, master_cmd_location->uid);
 
   register_data.last_active_time = session_builder_.find_last_active_time(app_location);
   register_location(event->gen_time(), register_data);
