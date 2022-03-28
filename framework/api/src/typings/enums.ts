@@ -142,6 +142,7 @@ export enum KfCategoryEnum {
   td,
   strategy,
   system,
+  daemon,
 }
 
 export type KfCategoryTypes = keyof typeof KfCategoryEnum;

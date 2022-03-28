@@ -36,7 +36,7 @@ plotly = "^5.4.0"
 chinesecalendar = "^1.6.0"
 
 [tool.poetry.dev-dependencies]
-conan = "^1.45.0"
+conan = "^1.46.2"
 pyinstaller = "^4.9"
 
 [build-system]

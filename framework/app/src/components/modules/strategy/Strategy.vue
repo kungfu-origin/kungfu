@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, toRefs } from 'vue';
+import { ref, computed, toRefs, Ref } from 'vue';
 
 import KfDashboard from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfDashboard.vue';
 import KfDashboardItem from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfDashboardItem.vue';
@@ -30,6 +30,7 @@ import {
   dealAssetPrice,
   getConfigValue,
   getIfProcessRunning,
+  getIfProcessStopping,
   getProcessIdByKfLocation,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import path from 'path';
@@ -60,7 +61,7 @@ const { allProcessOnline, handleSwitchAllProcessStatus } = useSwitchAllConfig(
   processStatusData,
 );
 const { searchKeyword, tableData } = useTableSearchKeyword<KungfuApi.KfConfig>(
-  strategy,
+  strategy as Ref<KungfuApi.KfConfig[]>,
   ['name'],
 );
 const { getAssetsByKfConfig } = useAssets();
@@ -182,6 +183,12 @@ function handleOpenFile(kfConfig: KungfuApi.KfConfig) {
               size="small"
               :checked="
                 getIfProcessRunning(
+                  processStatusData,
+                  getProcessIdByKfLocation(record),
+                )
+              "
+              :loading="
+                getIfProcessStopping(
                   processStatusData,
                   getProcessIdByKfLocation(record),
                 )

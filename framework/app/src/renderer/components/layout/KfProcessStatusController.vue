@@ -15,6 +15,7 @@ import {
   getIfProcessRunning,
   getProcessIdByKfLocation,
   getPropertyFromProcessStatusDetailDataByKfLocation,
+  getIfProcessStopping,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import {
   handleSwitchProcessStatus,
@@ -25,7 +26,13 @@ import {
 import { KfCategoryTypes } from '@kungfu-trader/kungfu-js-api/typings/enums';
 
 const processControllerBoardVisible = ref<boolean>(false);
-const categoryList: KfCategoryTypes[] = ['system', 'td', 'md', 'strategy'];
+const categoryList: (KfCategoryTypes | string)[] = [
+  'system',
+  'daemon',
+  'td',
+  'md',
+  'strategy',
+];
 const allKfConfigData = useAllKfConfigData();
 const {
   appStates,
@@ -102,7 +109,6 @@ const mainStatusWell = computed(() => {
   const masterIsLive = processStatusData.value['master'] === 'online';
   const ledgerIsLive = processStatusData.value['ledger'] === 'online';
   const cachedIsLive = processStatusData.value['cached'] === 'online';
-
   return masterIsLive && ledgerIsLive && cachedIsLive;
 });
 
@@ -183,6 +189,12 @@ function handleOpenProcessControllerBoard(): void {
                   size="small"
                   :checked="
                     getIfProcessRunning(
+                      processStatusData,
+                      getProcessIdByKfLocation(config),
+                    )
+                  "
+                  :loading="
+                    getIfProcessStopping(
                       processStatusData,
                       getProcessIdByKfLocation(config),
                     )

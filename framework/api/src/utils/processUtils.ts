@@ -19,6 +19,7 @@ import {
   EXTENSION_DIRS,
   KFC_DIR,
   KF_HOME,
+  KF_RUNTIME_DIR,
 } from '../config/pathConfig';
 import { getKfGlobalSettingsValue } from '../config/globalSettings';
 
@@ -306,6 +307,7 @@ export const startProcess = (
     kill_timeout: 16000,
     env: {
       KF_HOME: dealSpaceInPath(KF_HOME),
+      KF_RUNTIME_DIR: dealSpaceInPath(KF_RUNTIME_DIR),
       LANG: `${locale}.UTF-8`,
       PYTHONUTF8: '1',
       PYTHONIOENCODING: 'utf8',
@@ -373,7 +375,12 @@ export function startProcessGetStatusUntilStop(
   });
 }
 
-export const startGetProcessStatus = (callback: Function) => {
+export const startGetProcessStatus = (
+  callback: (res: {
+    processStatus: Pm2ProcessStatusData;
+    processStatusWithDetail: Pm2ProcessStatusDetailData;
+  }) => void,
+) => {
   setTimerPromiseTask(() => {
     return listProcessStatus()
       .then((res) => {
@@ -718,6 +725,23 @@ export const startDzxy = () => {
         ? path.join(process.cwd(), 'dist', 'cli')
         : path.resolve(__dirname),
     script: 'dzxy.js',
+    interpreter: path.join(KFC_DIR, kfcName),
+    force: true,
+    watch: process.env.NODE_ENV === 'production' ? false : true,
+    env: {
+      KFC_AS_VARIANT: 'node',
+    },
+  }).catch((err) => {
+    kfLogger.error(err.message);
+  });
+};
+
+export const startExtDaemon = (name: string, cwd: string, script: string) => {
+  return startProcess({
+    name,
+    args: '',
+    cwd,
+    script,
     interpreter: path.join(KFC_DIR, kfcName),
     force: true,
     watch: process.env.NODE_ENV === 'production' ? false : true,

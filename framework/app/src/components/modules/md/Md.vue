@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, toRefs } from 'vue';
+import { computed, Ref, ref, toRefs } from 'vue';
 import {
   FileTextOutlined,
   SettingOutlined,
@@ -22,6 +22,7 @@ import {
 import {
   getIdByKfLocation,
   getIfProcessRunning,
+  getIfProcessStopping,
   getProcessIdByKfLocation,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import {
@@ -60,7 +61,7 @@ const { allProcessOnline, handleSwitchAllProcessStatus } = useSwitchAllConfig(
 );
 
 const { searchKeyword, tableData } = useTableSearchKeyword<KungfuApi.KfConfig>(
-  md,
+  md as Ref<KungfuApi.KfConfig[]>,
   ['group'],
 );
 
@@ -180,6 +181,12 @@ function handleOpenSetSourceDialog() {
                   getProcessIdByKfLocation(record),
                 )
               "
+               :loading="
+                    getIfProcessStopping(
+                    processStatusData,
+                  getProcessIdByKfLocation(record),
+                    )
+                  "
               @click="(checked: boolean, Event: MouseEvent) => handleSwitchProcessStatus(checked, Event, record)"
             ></a-switch>
           </template>

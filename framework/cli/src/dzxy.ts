@@ -1,4 +1,5 @@
 import './assets/methods/setDzxyEnv';
+import path from 'path';
 import { triggerStartStep } from '@kungfu-trader/kungfu-js-api/kungfu/tradingData';
 import {
   dealTradingData,
@@ -17,9 +18,14 @@ import {
   dealOrder,
   dealPosition,
   dealTrade,
+  dealTradingDataItem,
+  getKungfuHistoryData,
   kfCancelAllOrders,
 } from '@kungfu-trader/kungfu-js-api/kungfu';
 import { watcher } from '@kungfu-trader/kungfu-js-api/kungfu/watcher';
+import { HistoryDateEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';
+import { writeCSV } from '@kungfu-trader/kungfu-js-api/utils/fileUtils';
+import { Row } from '@fast-csv/format';
 
 triggerStartStep();
 
@@ -71,6 +77,9 @@ process.on('message', (packet: Pm2PacketMain) => {
       break;
     case 'CANCEL_ALL_ORDERS':
       cancellAllOrders(packet);
+      break;
+    case 'EXPORT':
+      dealExport(packet);
       break;
   }
 });
@@ -220,6 +229,44 @@ function cancellAllOrders(packet: Pm2PacketMain) {
   return kfCancelAllOrders(watcher, orders).catch((err) => {
     console.error(err.message);
   });
+}
+
+function dealExport(packet: Pm2PacketMain) {
+  const { date, output_folder } = packet.data as {
+    date: string;
+    output_folder: string;
+  };
+  return exportTradingData(date, output_folder);
+}
+
+function dealTradingDataItemResolved(item: KungfuApi.TradingDataTypes): Row {
+  return dealTradingDataItem(item, watcher) as Row;
+}
+
+async function exportTradingData(date, output_folder) {
+  const { tradingData } = await getKungfuHistoryData(
+    watcher,
+    date,
+    HistoryDateEnum.naturalDate,
+    'all',
+  );
+
+  const orders = tradingData.Order.sort('update_time');
+  const trades = tradingData.Trade.sort('trade_time');
+  const orderStat = tradingData.OrderStat.sort('insert_time');
+  const positions = tradingData.Trade.list();
+
+  const ordersFilename = path.join(output_folder, `orders-${date}}`);
+  const tradesFilename = path.join(output_folder, `trades-${date}`);
+  const orderStatFilename = path.join(output_folder, `orderStats-${date}`);
+  const posFilename = path.join(output_folder, `pos-${date}`);
+
+  return Promise.all([
+    writeCSV(ordersFilename, orders, dealTradingDataItemResolved),
+    writeCSV(tradesFilename, trades, dealTradingDataItemResolved),
+    writeCSV(orderStatFilename, orderStat, dealTradingDataItemResolved),
+    writeCSV(posFilename, positions, dealTradingDataItemResolved),
+  ]);
 }
 
 function fromPacketToKfLocation(packet: Pm2PacketMain): KungfuApi.KfLocation {

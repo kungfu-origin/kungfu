@@ -56,7 +56,9 @@ export class Log {
 function preDealLogMessage(line: string): string {
   const lineResolved = line.slice(20).split('] ');
   lineResolved.splice(2, 1);
-  lineResolved.splice(2, 1);
+  if (lineResolved.length > 3) {
+    lineResolved.splice(2, 1);
+  }
   return lineResolved.join('] ');
 }
 

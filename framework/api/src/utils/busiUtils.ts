@@ -46,6 +46,7 @@ import {
   Pm2ProcessStatusDetail,
   Pm2ProcessStatusDetailData,
   startCacheD,
+  startExtDaemon,
   startLedger,
   startMaster,
   startMd,
@@ -87,6 +88,19 @@ declare global {
 }
 
 export {};
+
+export const getGlobal = () => {
+  if (typeof self !== 'undefined') {
+    return self;
+  }
+  if (typeof window !== 'undefined') {
+    return window;
+  }
+  if (typeof global !== 'undefined') {
+    return global;
+  }
+  throw new Error('unable to locate global object');
+};
 
 //for td processId
 String.prototype.toAccountId = function (): string {
@@ -482,6 +496,7 @@ const getKfUIExtensionConfigByExtKey = (
       const uiConfig = extConfig['ui_config'];
       const position = uiConfig?.position || '';
       const components = uiConfig?.components;
+      const daemon = uiConfig?.daemon || ({} as Record<string, string>);
 
       if (!position) {
         return configByExtraKey;
@@ -494,6 +509,7 @@ const getKfUIExtensionConfigByExtKey = (
         components: components || {
           index: 'index.js',
         },
+        daemon,
       };
       return configByExtraKey;
     }, {} as KungfuApi.KfUIExtConfigs);
@@ -511,6 +527,28 @@ export const getKfUIExtensionConfig =
     const kfExtConfigList = await getKfExtConfigList();
     return getKfUIExtensionConfigByExtKey(kfExtConfigList);
   };
+
+export const getAvailDaemonList = async (): Promise<
+  KungfuApi.KfDaemonLocation[]
+> => {
+  const kfExtConfig: KungfuApi.KfUIExtConfigs = await getKfUIExtensionConfig();
+  return Object.values(kfExtConfig || ({} as KungfuApi.KfUIExtConfigs))
+    .filter((item) => Object.keys(item).length)
+    .reduce((daemonList, item) => {
+      daemonList = [
+        ...daemonList,
+        ...Object.keys(item.daemon).map((name) => ({
+          category: 'daemon',
+          group: 'ext',
+          name,
+          mode: 'live',
+          cwd: item.extPath,
+          script: item.daemon[name],
+        })),
+      ];
+      return daemonList;
+    }, [] as KungfuApi.KfDaemonLocation[]);
+};
 
 export const buildExtTypeMap = (
   extConfigs: KungfuApi.KfExtConfigs,
@@ -730,6 +768,20 @@ export const getIfProcessRunning = (
   return false;
 };
 
+export const getIfProcessStopping = (
+  processStatusData: Pm2ProcessStatusData,
+  processId: string,
+) => {
+  const statusName = processStatusData[processId] || '';
+  if (statusName) {
+    if (Pm2ProcessStatus[statusName].level === 1) {
+      return true;
+    }
+  }
+
+  return false;
+};
+
 export const getAppStateStatusName = (
   kfConfig: KungfuApi.KfLocation | KungfuApi.KfConfig,
   processStatusData: Pm2ProcessStatusData,
@@ -819,13 +871,20 @@ export const buildIdByKeysFromKfConfigSettings = (
 
 export const switchKfLocation = (
   watcher: KungfuApi.Watcher | null,
-  kfLocation: KungfuApi.KfLocation | KungfuApi.KfConfig,
+  kfLocation:
+    | KungfuApi.KfLocation
+    | KungfuApi.KfConfig
+    | KungfuApi.KfExtraLocation,
   targetStatus: boolean,
 ): Promise<void | Proc> => {
   const processId = getProcessIdByKfLocation(kfLocation);
 
   if (!targetStatus) {
-    if (kfLocation.category !== 'system') {
+    if (
+      kfLocation.category === 'td' ||
+      kfLocation.category === 'md' ||
+      kfLocation.category === 'strategy'
+    ) {
       if (watcher && !watcher.isReadyToInteract(kfLocation)) {
         return Promise.reject(
           new Error(`${processId} 还未准备就绪, 请稍后重试`),
@@ -858,6 +917,12 @@ export const switchKfLocation = (
         throw new Error('Start Stratgy without strategy_path');
       }
       return startStrategy(getIdByKfLocation(kfLocation), strategyPath);
+    case 'daemon':
+      return startExtDaemon(
+        getProcessIdByKfLocation(kfLocation),
+        kfLocation['cwd'] || '',
+        kfLocation['script'] || '',
+      );
     default:
       return Promise.resolve();
   }
