@@ -84,13 +84,9 @@ Watcher::Watcher(const Napi::CallbackInfo &info)
 
   for (const auto &item : config_store->profile_.get_all(Location{})) {
     auto saved_location = location::make_shared(item, get_locator());
-
-    SPDLOG_INFO("saved_location === {} {} {}", saved_location->category, saved_location->group, saved_location->name);
-
     if (saved_location->group == "master" or saved_location->name == "cached") {
       continue;
     }
-
     add_location(now(), saved_location);
     RestoreState(saved_location, today, INT64_MAX, sync_schema);
     SPDLOG_WARN("restored data for {}", saved_location->uname);
