@@ -34,7 +34,8 @@ public:
 
   ~order_bank(){
     boost::hana::for_each(order_map_, [&](const auto& x) {
-    delete hana::second(x);
+      SPDLOG_INFO(" ~order_bank {}", typeid(x).name());
+    delete (+boost::hana::second(x));
 });
   }
 

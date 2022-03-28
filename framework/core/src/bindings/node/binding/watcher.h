@@ -213,7 +213,9 @@ private:
     int i = 0;
     kungfu::state<DataType>* pstate;
     while( i < 1024 && order_queue.pop(pstate) && pstate != nullptr){
+    // SPDLOG_INFO("UpdateOrder 1");
       update_ledger(pstate->update_time, pstate->source, pstate->dest, pstate->data);
+    // SPDLOG_INFO("UpdateOrder 2");
       i++;
     }
   }

@@ -4,6 +4,7 @@
 #include <atomic>
 #include <cstddef>
 #include <kungfu/common.h>
+#include <mutex>
 //#include <bitset>
 // #include <iostream>
 
@@ -66,23 +67,30 @@ public:
 	bool push(const T& p_data)
 	{
 		T* node;
-		for (;;)
-		{
+		// for (;;)
+		// {
+		if(mtx.try_lock()) {
 			size_t tail = _tail.load(std::memory_order_relaxed);
 			size_t head = _head.load(std::memory_order_relaxed);
 			node = &_queue[tail & _capacityMask];
 			if (tail - head >= _capacity) {
 				if (!_head.compare_exchange_weak(head, tail + 1 - _capacity, std::memory_order_relaxed)) {
 					// std::cout << "push " << p_data << " head from " << head << " to " << tail + 1 - _capacity  << std::endl;
-					continue;
+					//continue;
+					mtx.unlock();
+					return false;
 				}
 			}
 			new (node)T(p_data);
 			_tail++;
-			break;
+			mtx.unlock();
+		return true;
+			// break;
+		}
+		else{
+			return false;
 		}
 		// std::cout << "push " << p_data << " _head>>" << _head << " _tail>>" << _tail << std::endl;
-		return true;
 	}
 
 	bool pop(T* result)
@@ -92,6 +100,8 @@ public:
 		int i = 0;
 		for (i = 0; i < 128; i++)
 		{
+			if (mtx.try_lock()) { 
+			
 			size_t head = _head.load(std::memory_order_relaxed);
 			size_t tail = _tail.load(std::memory_order_relaxed);
 			if (head >= tail) {
@@ -99,13 +109,15 @@ public:
 				return false;
 			}
 			node = &_queue[head & _capacityMask];
-			if (_head.compare_exchange_weak(head, head + 1, std::memory_order_relaxed)) {
+			// if (_head.compare_exchange_weak(head, head + 1, std::memory_order_relaxed)) {
+				_head++;
 				*pop_value_ = *node;
 				result = pop_value_;
-				node->~T();
-			
+				node->~T();			
+			// }	
+			mtx.unlock();
 				break;
-			}				
+			}			
 		}
 		if (i == 128) {
 			// std::cout << "pop 128 fail..........................." << std::endl;
@@ -121,5 +133,6 @@ private:
 	size_t _capacity;
 	std::atomic<size_t> _tail;
 	std::atomic<size_t> _head;
+	std::mutex mtx;
 };
 }

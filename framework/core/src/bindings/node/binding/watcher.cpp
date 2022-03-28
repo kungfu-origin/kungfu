@@ -91,6 +91,7 @@ Watcher::Watcher(const Napi::CallbackInfo &info)
 }
 
 Watcher::~Watcher() {
+  SPDLOG_INFO("~~~~~~~~~watcher");
   start_ = false;
   app_states_ref_.Unref();
   ledger_ref_.Unref();
@@ -295,18 +296,20 @@ void Watcher::Feed(const event_ptr &event) {
    boost::hana::for_each(longfist::OrderDataTypes, [&](auto it) {
       using DataType = typename decltype(+boost::hana::second(it))::type; 
       if (DataType::tag == event->msg_type()) {
+        SPDLOG_INFO("Feed {}", typeid(DataType).name());
         order_bank_ << typed_event_ptr<DataType>(event);
         return;
       }
    });
-    boost::hana::for_each(longfist::StateDataTypes, [&](auto it) {
-      using DataType = typename decltype(+boost::hana::second(it))::type;
-      if (DataType::tag == event->msg_type()) {
-        // if (boost::hana::find(boost::hana::values(longfist::OrderDataTypes), boost::hana::type_c<DataType>) == hana::nothing) {
-          data_bank_ << typed_event_ptr<DataType>(event);
-        // }
-      }
-    });
+   feed_state_data(event, data_bank_);
+    // boost::hana::for_each(longfist::StateDataTypes, [&](auto it) {
+    //   using DataType = typename decltype(+boost::hana::second(it))::type;
+    //   if (DataType::tag == event->msg_type()) {
+    //     // if (boost::hana::find(boost::hana::values(longfist::OrderDataTypes), boost::hana::type_c<DataType>) == hana::nothing) {
+    //       data_bank_ << typed_event_ptr<DataType>(event);
+    //     // }
+    //   }
+    // });
   }
 }
 
@@ -373,7 +376,9 @@ void Watcher::SyncLedger() {
 
 void Watcher::SyncOrder() {
   boost::hana::for_each(longfist::OrderDataTypes, [&](auto it) {
+    // SPDLOG_INFO("SyncOrder 1");
     UpdateOrder(+boost::hana::second(it));
+    // SPDLOG_INFO("SyncOrder 2");
   });
 }
 
