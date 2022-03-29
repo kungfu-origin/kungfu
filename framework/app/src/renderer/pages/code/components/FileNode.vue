@@ -90,8 +90,8 @@ import { storeToRefs } from 'pinia';
 import { onMounted, PropType, ref, nextTick, getCurrentInstance, ComponentInternalInstance } from 'vue';
 import { message, Modal } from 'ant-design-vue';
 import { openFolder } from '../../../assets/methods/codeUtils';
-import { removeFileFolder, editFileFolderName, addFileSync } from '@kungfu-trader/kungfu-js-api/utils/fileUtils'
-
+import { removeFileFolder, addFileSync } from '@kungfu-trader/kungfu-js-api/utils/fileUtils'
+import fse from 'fs-extra'
 
 const store = useCodeStore();
 const props = defineProps({
@@ -265,7 +265,8 @@ function handleEditFileBlur(e) {
     const newPath = path.join(path.dirname(oldPath), newName);
     const parentId = fileNode?.parentId;
     
-    editFileFolderName(oldPath, newPath).then(() => {
+    // 更改文件名
+    fse.rename(oldPath, newPath).then(() => {
         // reload
         reloadFolder(parentId, newName);
     });

@@ -19,8 +19,9 @@ import {
   pythonKeywords,
  } from '../hint/monaco.python.hint';
 import { useCodeStore } from '../store/codeStore';
-import { getCodeText, writeFile } from '@kungfu-trader/kungfu-js-api/utils/fileUtils';
-
+import { getCodeText } from '@kungfu-trader/kungfu-js-api/utils/fileUtils';
+import path from 'path';
+import fse from 'fs-extra'
 
 monaco.editor.defineTheme('monokai', themeData);
 monaco.editor.setTheme('monokai');
@@ -85,7 +86,8 @@ function bindBlur(editor, file) {
 
 function curWriteFile(editor, file) {
     const value = editor.getValue();
-    writeFile(file.filePath, value);
+    let curPath: string = path.normalize(file.filePath)
+    fse.outputFile(curPath, value);
 }
 
 // 创建代码编辑器

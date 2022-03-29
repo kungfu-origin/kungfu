@@ -1,9 +1,6 @@
 import fse from 'fs-extra';
 import path from 'path';
-import {
-  listDir,
-  buildFileObj,
-} from '@kungfu-trader/kungfu-js-api/utils/fileUtils';
+import { listDir } from '@kungfu-trader/kungfu-js-api/utils/fileUtils';
 import { Stats } from 'fs-extra';
 import { deepClone } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { useCodeStore } from '../../pages/code/store/codeStore';
@@ -73,6 +70,34 @@ export const getTreeByFilePath = (
     });
     // .catch(err => reject(err))
   });
+};
+
+//建立fileObj
+export const buildFileObj = (fileData: Code.FileData): Code.FileData => {
+  const {
+    id,
+    isDir,
+    name,
+    ext,
+    filePath,
+    children,
+    stats,
+    root,
+    open,
+    parentId,
+  } = fileData;
+  return {
+    id,
+    isDir,
+    name,
+    ext,
+    filePath,
+    children,
+    stats,
+    root,
+    open,
+    parentId,
+  };
 };
 
 // //打开文件树

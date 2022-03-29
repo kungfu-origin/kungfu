@@ -5,7 +5,7 @@
     // import Editor from './components/Editor.vue';
     import Editor from './components/MonacoEditor.vue';
     import FileTree from './components/FileTree.vue';
-    import { getStrategyById } from '@kungfu-trader/kungfu-js-api/kungfu/strategy';
+    import { getStrategyById } from '@kungfu-trader/kungfu-js-api/kungfu/store';
     import { ClusterOutlined } from '@ant-design/icons-vue';
     
     import { useCodeStore } from './store/codeStore'

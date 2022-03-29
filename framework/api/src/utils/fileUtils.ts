@@ -3,9 +3,7 @@ import fse from 'fs-extra';
 import * as csv from '@fast-csv/format';
 import { Row } from '@fast-csv/format';
 
-interface FileInputData extends Code.FileData {
-  [propName: string]: any;
-}
+
 //添加文件
 export const addFileSync = (
   parentDir = '',
@@ -70,14 +68,6 @@ export const listDir = (filePath: string): Promise<void | string[]> => {
   return fse.readdir(filePath).catch((err) => console.error(err));
 };
 
-
-//写入文件
-export const writeFile = (filePath: string, data: string): Promise<void> => {
-  filePath = path.normalize(filePath);
-  if (data === undefined) throw new Error('input data is undefined!');
-  return fse.outputFile(filePath, data);
-};
-
 export const removeFileFolder = (targetPath: string): Promise<void> => {
   targetPath = path.normalize(targetPath);
   return new Promise((resolve) => {
@@ -99,46 +89,6 @@ export const removeFilesInFolder = (targetDir: string) => {
   });
 
   return Promise.all(promises);
-};
-
-//建立fileObj
-export const buildFileObj = (fileData: FileInputData): Code.FileData => {
-  const {
-    id,
-    isDir,
-    name,
-    ext,
-    filePath,
-    children,
-    stats,
-    root,
-    open,
-    parentId,
-  } = fileData;
-  return {
-    id,
-    isDir,
-    name,
-    ext,
-    filePath,
-    children,
-    stats,
-    root,
-    open,
-    parentId,
-  };
-};
-
-
-
-//更改文件名
-export const editFileFolderName = (
-  oldPath: string,
-  newPath: string,
-): Promise<void> => {
-  oldPath = path.normalize(oldPath);
-  newPath = path.normalize(newPath);
-  return fse.rename(oldPath, newPath);
 };
 
 export const listDirSync = (filePath: string): string[] => {

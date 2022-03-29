@@ -3,6 +3,7 @@ import fse from 'fs-extra';
 import { configStore } from '../kungfu';
 import { kfLogger, hidePasswordByLogger } from '../utils/busiUtils';
 import { BASE_DB_DIR } from '../config/pathConfig';
+import { getKfConfig } from './strategy'
 
 type AllConfig = Record<string, KungfuApi.KfConfigOrigin>;
 
@@ -50,3 +51,14 @@ export const removeKfConfig = (
     ),
   );
 };
+
+export const getStrategyById = (
+  strategyId: string,
+): Promise<Array<Code.Strategy>> => {
+  return new Promise((resolve) => {
+    const strategyData: any = getKfConfig(strategyId);
+    const strategy: Array<Code.Strategy> = [{ ...JSON.parse(strategyData.value || '{}') }];
+    resolve(strategy);
+  });
+};
+

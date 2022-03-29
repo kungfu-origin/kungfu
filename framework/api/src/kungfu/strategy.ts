@@ -1,15 +1,7 @@
 import { setKfConfig } from './store';
 import { configStore } from '@kungfu-trader/kungfu-js-api/kungfu/index'
+import { getStrategyById } from './store'
 
-export const getStrategyById = (
-  strategyId: string,
-): Promise<Array<Code.Strategy>> => {
-  return new Promise((resolve) => {
-    const strategyData: any = getKfConfig(strategyId);
-    const strategy: Array<Code.Strategy> = [{ ...JSON.parse(strategyData.value || '{}') }];
-    resolve(strategy);
-  });
-};
 
 export const getKfConfig = (strategyId: string) => {
   const kfLocation: KungfuApi.KfLocation = getStrategyKfLocation(strategyId);

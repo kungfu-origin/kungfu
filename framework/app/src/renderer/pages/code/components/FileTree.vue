@@ -56,13 +56,12 @@ import path from 'path';
 import { storeToRefs } from 'pinia';
 import { dialog } from '@electron/remote';
 import { message } from 'ant-design-vue';
-import { buildFileObj } from '@kungfu-trader/kungfu-js-api/utils/fileUtils';
 import { getTreeByFilePath } from '../../../assets/methods/codeUtils';
 import { useCodeStore } from '../store/codeStore'
 import FileNode from './FileNode.vue';
 import { nextTick } from 'vue';
 import { updateStrategyPath } from '@kungfu-trader/kungfu-js-api/kungfu/strategy';
-import { openFolder } from '../../../assets/methods/codeUtils';
+import { openFolder, buildFileObj } from '../../../assets/methods/codeUtils';
 const store = useCodeStore();
 
 const props = defineProps({
