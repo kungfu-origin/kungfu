@@ -267,7 +267,6 @@ function handleEditFileBlur(e) {
     
     // 更改文件名
     fse.rename(oldPath, newPath).then(() => {
-        // reload
         reloadFolder(parentId, newName);
     });
 }

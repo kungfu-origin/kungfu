@@ -16,6 +16,7 @@
                 v-if="strategyPath"
                 @click="handleAddFolder"
             >
+            <!-- <a-icon type="folder-add" width="20px" height="20px" /> -->
             <img src="../../../../../public/file-icons/addFolder.svg" alt="">
             </span>
             <span
@@ -24,6 +25,7 @@
                 v-if="strategyPath"
                 @click="handleAddFile"
             >
+            <a-icon type="file-add" color="#ffffff"/>
             <img src="../../../../../public/file-icons/addFile.svg" alt="">
             </span>
         </span>
@@ -51,7 +53,7 @@ export default {
 }
 </script>
 <script setup lang="ts">
-import { defineProps, watch, ref, onMounted, getCurrentInstance, ComponentInternalInstance } from 'vue';
+import { defineProps, watch, ref, nextTick, getCurrentInstance, ComponentInternalInstance } from 'vue';
 import path from 'path';
 import { storeToRefs } from 'pinia';
 import { dialog } from '@electron/remote';
@@ -59,8 +61,8 @@ import { message } from 'ant-design-vue';
 import { getTreeByFilePath } from '../../../assets/methods/codeUtils';
 import { useCodeStore } from '../store/codeStore'
 import FileNode from './FileNode.vue';
-import { nextTick } from 'vue';
 import { updateStrategyPath } from '@kungfu-trader/kungfu-js-api/kungfu/strategy';
+import { findTargetFromArray } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { openFolder, buildFileObj } from '../../../assets/methods/codeUtils';
 const store = useCodeStore();
 
@@ -79,7 +81,7 @@ watch(strategy as Code.Strategy, newStrategy => {
     initFileTree(newStrategy).then (fileTree => {
         const entryPath: string = newStrategy.strategy_path
         
-        const currentFile: Code.FileData = (Object.values(fileTree || {}) as Code.FileData[]).filter(f => f.filePath === entryPath)[0]
+        const currentFile = findTargetFromArray<Code.FileData>(Object.values(fileTree), 'filePath' , entryPath)
         if (currentFile) {
             store.setEntryFile(currentFile)
             store.setCurrentFile(currentFile)
@@ -217,11 +219,6 @@ function bindFunctionalNode(fileTree) {
     return fileTree;
 }
 
-onMounted(() => {
-    nextTick(() => {
-    })
-   
-})
 </script>
 
 <style lang="less">

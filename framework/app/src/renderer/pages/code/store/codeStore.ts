@@ -4,7 +4,7 @@ import fse from 'fs-extra';
 import { KF_CONFIG_PATH } from '@kungfu-trader/kungfu-js-api/config/pathConfig';
 import { deepClone } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { getAllKfConfigOriginData } from '@kungfu-trader/kungfu-js-api/actions';
-
+// import { KfCategoryTypes } from '@kungfu-trader/kungfu-js-api/typings/enums';
 interface ICodeState {
   currentStrategy: string;
   strategyList: KungfuApi.KfConfig[];
@@ -27,11 +27,11 @@ export const useCodeStore = defineStore('code', {
   },
   actions: {
     //设置当前策略
-    setCurrentStrategy(strategy) {
+    setCurrentStrategy(strategy): void {
       this.currentStrategy = strategy;
     },
 
-    setStrategyList() {
+    setStrategyList(): Promise<void> {
       return getAllKfConfigOriginData().then((res) => {
         const { strategy } = res;
         this.strategyList = strategy;
@@ -39,17 +39,17 @@ export const useCodeStore = defineStore('code', {
     },
 
     //策略编辑，设置当前文件
-    setCurrentFile(file) {
+    setCurrentFile(file): void {
       this.currentFile = file;
     },
 
     //策略编辑，设置文件树
-    setFileTree(fileTree) {
+    setFileTree(fileTree): void {
       this.fileTree = fileTree;
     },
 
     //策略编辑，设置文件节点
-    setFileNode({ id, attr, val }) {
+    setFileNode({ id, attr, val }): void {
       const fileTree = this.fileTree;
       const node = deepClone(fileTree[id]);
       node[attr] = val;
@@ -57,7 +57,7 @@ export const useCodeStore = defineStore('code', {
     },
 
     //策略编辑，添加文件或文件夹时，添加“pending”
-    addFileFolderPending({ id, type }) {
+    addFileFolderPending({ id, type }): void {
       const targetChildren = this.fileTree[id].children;
       if (type == 'folder') {
         targetChildren['folder'].unshift('pending');
@@ -69,7 +69,7 @@ export const useCodeStore = defineStore('code', {
     },
 
     //策略编辑时，添加文件或文件夹时，删除“pending”
-    removeFileFolderPending({ id, type }) {
+    removeFileFolderPending({ id, type }): void {
       const targetChildren = this.fileTree[id].children;
       if (type == 'folder') {
         targetChildren['folder'].splice(
@@ -87,22 +87,22 @@ export const useCodeStore = defineStore('code', {
     },
 
     //标记入口文件
-    setEntryFile(entryFile) {
+    setEntryFile(entryFile): void {
       this.entryFile = entryFile;
     },
 
-    async getKungfuConfig() {
+    async getKungfuConfig(): Promise<void> {
       const kfConfig = fse.readJsonSync(KF_CONFIG_PATH);
       await this.setKungfuConfig(kfConfig);
     },
 
-    setKungfuConfig(kfConfig) {
+    setKungfuConfig(kfConfig): void {
       Object.keys(kfConfig || {}).forEach((key) => {
         this.kfConfig[key] = kfConfig[key];
       });
     },
 
-    setKungfuConfigByKeys(kfConfig) {
+    setKungfuConfigByKeys(kfConfig): void {
       Object.keys(kfConfig || {}).forEach((key) => {
         this.kfConfig[key] = kfConfig[key];
       });

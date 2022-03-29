@@ -106,7 +106,7 @@ export const openFolder = async (
   oldFileTree: Code.IFileTree,
   openStatus?: boolean,
   force?: boolean,
-) => {
+): Promise<Code.IFileTree> => {
   const store = useCodeStore();
   oldFileTree = deepClone(oldFileTree);
   //清空

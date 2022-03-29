@@ -24,7 +24,7 @@
         add_time: 0
     })
         
-    function getCurrentStrategy (strategyList, jsonDone: boolean = false): void {
+    function handleStrategyList (strategyList, jsonDone: boolean = false): void {
 
         let value: Code.Strategy = jsonDone ? JSON.parse(strategyList[0].value) : strategyList[0]
         
@@ -40,7 +40,7 @@
 
     async function updateStrategy(strategyId: string, strategyPath: string) {
         const strategyList: Array<Code.Strategy> = await getStrategyById(strategyId)
-        getCurrentStrategy(strategyList)
+        handleStrategyList(strategyList)
     }
    
     
@@ -66,7 +66,7 @@
     onMounted(() => {
         removeLoadingMask();
         nextTick().then(() => {
-            getCurrentStrategy(store.strategyList, true);
+            handleStrategyList(store.strategyList, true);
         })
 
         store.getKungfuConfig()
