@@ -190,7 +190,9 @@ void TraderXTP::OnQueryPosition(XTPQueryStkPositionRsp *position, XTPRI *error_i
                  request_id, is_last);
     return;
   }
-  auto writer = get_writer(0);
+  //  auto writer = get_writer(0);
+  auto writer = get_position_writer();
+  SPDLOG_INFO("OnQueryPosition writer->get_dest() : {}", writer->get_dest());
   Position &stock_pos = writer->open_data<Position>(0);
   if (error_info == nullptr || error_info->error_id == 0) {
     from_xtp(*position, stock_pos);
@@ -207,6 +209,7 @@ void TraderXTP::OnQueryPosition(XTPQueryStkPositionRsp *position, XTPRI *error_i
     PositionEnd &end = writer->open_data<PositionEnd>(0);
     end.holder_uid = get_home()->uid;
     writer->close_data();
+    set_update_position();
   }
 }
 
@@ -217,11 +220,9 @@ void TraderXTP::OnQueryAsset(XTPQueryAssetRsp *asset, XTPRI *error_info, int req
                  request_id, is_last);
   }
   if (error_info == nullptr || error_info->error_id == 0 || error_info->error_id == 11000350) {
-    auto writer = get_writer(location::PUBLIC);
-    if (b_update_) {
-      writer = get_writer(location::UPDATE);
-    }
-    SPDLOG_INFO("writer->get_dest() : {}", writer->get_dest());
+    //    auto writer = get_writer(location::PUBLIC);
+    auto writer = get_asset_writer();
+    SPDLOG_INFO("OnQueryAsset writer->get_dest() : {}", writer->get_dest());
     Asset &account = writer->open_data<Asset>(0);
     if (error_info == nullptr || error_info->error_id == 0) {
       from_xtp(*asset, account);
@@ -232,7 +233,7 @@ void TraderXTP::OnQueryAsset(XTPQueryAssetRsp *asset, XTPRI *error_info, int req
     account.holder_uid = get_home()->uid;
     account.update_time = yijinjing::time::now_in_nano();
     writer->close_data();
-    b_update_ = true;
+    set_update_asset();
   }
 }
 } // namespace kungfu::wingchun::xtp

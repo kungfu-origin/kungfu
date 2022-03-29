@@ -58,6 +58,17 @@ protected:
   OrderMap orders_ = {};
   OrderActionMap actions_ = {};
   TradeMap trades_ = {};
+
+  bool update_asset_ = false;
+  bool update_position_ = false;
+
+  yijinjing::journal::writer_ptr get_asset_writer() const;
+
+  yijinjing::journal::writer_ptr get_position_writer() const;
+
+  void set_update_asset(bool update_asset = true);
+
+  void set_update_position(bool update_position = true);
 };
 } // namespace kungfu::wingchun::broker
 

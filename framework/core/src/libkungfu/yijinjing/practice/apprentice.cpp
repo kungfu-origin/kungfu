@@ -256,7 +256,6 @@ void apprentice::on_read_from_update(const event_ptr &event) { do_read_from<Requ
 
 void apprentice::on_write_to(const event_ptr &event) {
   auto dest_id = event->data<RequestWriteTo>().dest_id;
-  SPDLOG_WARN("apprentice::on_write_to(const event_ptr &event) dest_id : {}",dest_id);
   if (writers_.find(dest_id) == writers_.end()) {
     writers_.emplace(dest_id, get_io_device()->open_writer(dest_id));
   }

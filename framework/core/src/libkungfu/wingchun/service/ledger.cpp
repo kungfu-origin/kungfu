@@ -264,7 +264,6 @@ void Ledger::write_asset_snapshots(int32_t msg_type) {
 }
 
 void Ledger::write_asset_update(const event_ptr &event) {
-  SPDLOG_WARN("write_asset_update");
   for (const auto &pair : bookkeeper_.get_books()) {
     auto &book = pair.second;
     auto &asset = book->asset;
@@ -275,7 +274,6 @@ void Ledger::write_asset_update(const event_ptr &event) {
 }
 
 void Ledger::write_position_update(const event_ptr &event) {
-  SPDLOG_WARN("write_position_update");
   for (const auto &pair : bookkeeper_.get_books()) {
     auto &book = pair.second;
     auto &asset = book->asset;
