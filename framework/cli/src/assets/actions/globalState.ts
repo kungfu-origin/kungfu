@@ -27,14 +27,15 @@ pm2.launchBus((err: Error, pm2_bus: Pm2Bus) => {
     return;
   }
 
-  pm2_bus.on('process:msg', (packet: Pm2Packet) => {
-    const processData = packet.process;
-    globalState.DZXY_PM_ID = processData.pm_id;
+  pm2_bus &&
+    pm2_bus.on('process:msg', (packet: Pm2Packet) => {
+      const processData = packet.process;
+      globalState.DZXY_PM_ID = processData.pm_id;
 
-    if (packet.data.type === 'WATCHER_IS_LIVE') {
-      globalState.DZXY_WATCHER_IS_LIVE = !!packet.data.body;
-    }
+      if (packet.data.type === 'WATCHER_IS_LIVE') {
+        globalState.DZXY_WATCHER_IS_LIVE = !!packet.data.body;
+      }
 
-    globalState.DZXY_SUBJECT.next(packet);
-  });
+      globalState.DZXY_SUBJECT.next(packet);
+    });
 });

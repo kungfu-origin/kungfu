@@ -28,8 +28,6 @@ public:
 
   void NoSet(const Napi::CallbackInfo &info, const Napi::Value &value);
 
-  // Napi::Value GetLocator(const Napi::CallbackInfo &info);
-
   Napi::Value GetLocation(const Napi::CallbackInfo &info);
 
   Napi::Value GetLocationUID(const Napi::CallbackInfo &info);
@@ -76,8 +74,8 @@ public:
 
   static void Init(Napi::Env env, Napi::Object exports);
 
-  bool IsStart(){return start_;}
-  
+  bool IsStart() { return start_; }
+
   std::chrono::system_clock::time_point tp_;
 
 protected:
