@@ -2,14 +2,11 @@
     import { nextTick, onMounted, reactive } from 'vue';
     import { getLogProcessId } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/logUtils';
     import { removeLoadingMask, setHtmlTitle } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
-    // import Editor from './components/Editor.vue';
     import Editor from './components/MonacoEditor.vue';
     import FileTree from './components/FileTree.vue';
     import { getStrategyById } from '@kungfu-trader/kungfu-js-api/kungfu/store';
     import { ClusterOutlined } from '@ant-design/icons-vue';
-    
-    import { useCodeStore } from './store/codeStore'
-
+    import { useCodeStore } from './store/codeStore';
     const store = useCodeStore();
     const ProcessId = getLogProcessId();
     store.setStrategyList();
@@ -23,10 +20,21 @@
         strategy_path: '',
         add_time: 0
     })
-        
-    function handleStrategyList (strategyList, jsonDone: boolean = false): void {
+    
+    // 处理JSON格式strangeList
+    function handleStrategyJsonList (strategyList): void {
 
-        let value: Code.Strategy = jsonDone ? JSON.parse(strategyList[0].value) : strategyList[0]
+        let value: Code.Strategy = JSON.parse(strategyList[0].value)
+        
+        strategy.strategy_id = value.strategy_id
+        strategy.strategy_path = value.strategy_path
+        strategy.add_time = value.add_time
+    }
+
+    // 处理Object格式strageList
+    function handleStrategyList (strategyList): void {
+
+        let value: Code.Strategy = strategyList[0]
         
         strategy.strategy_id = value.strategy_id
         strategy.strategy_path = value.strategy_path
@@ -66,7 +74,7 @@
     onMounted(() => {
         removeLoadingMask();
         nextTick().then(() => {
-            handleStrategyList(store.strategyList, true);
+            handleStrategyJsonList(store.strategyList);
         })
 
         store.getKungfuConfig()
