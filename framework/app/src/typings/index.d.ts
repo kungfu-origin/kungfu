@@ -2,56 +2,54 @@
 /* eslint-disable  @typescript-eslint/no-explicit-any */
 
 declare namespace Code {
-export interface Strategy {
-  strategy_id: string;
-  strategy_path: string;
-  add_time: number;
-}
+    export interface Strategy {
+        strategy_id: string;
+        strategy_path: string;
+        add_time: number;
+    }
 
-export interface FileProps {
-    root?: boolean;
-    filePath?: string;
-    ext?: string;
-    isDir?: boolean
-}
+    export interface FileProps {
+        root?: boolean;
+        filePath?: string;
+        ext?: string;
+        isDir?: boolean
+    }
 
-export interface FileIds {
-  file: any[];
-  folder: any[];
-}
-export interface FileTreeByPath {
-  ids: FileIds;
-  fileTree: any;
-}
-export interface FileData {
-  id: number;
-  parentId: number;
-  isDir: boolean;
-  name: string;
-  ext: string;
-  filePath: string;
-  children: FileIds;
-  stats: object;
-  root: boolean;
-  open: boolean;
-}
+    export interface FileIds {
+        file: number[];
+        folder: number[];
+    }
+    export interface FileTreeByPath {
+        ids: FileIds;
+        fileTree: IFileTree;
+    }
+    export interface FileData {
+        id: number;
+        parentId: number;
+        isDir: boolean;
+        name: string;
+        ext: string;
+        filePath: string;
+        children: FileIds;
+        stats: object;
+        root: boolean;
+        open: boolean;
+    }
 
-export type IFileTree = Record<string, FileData>
+    export type IFileTree = Record<string, FileData>
 
+    export interface IFileNode {
+        filePath: string;
+        root?: string;
+        children?: IFileNode;
+        name: string;
+    }
 
-export interface IFileNode {
-    filePath: string;
-    root?: string;
-    children?: IFileNode;
-    name: string;
-}
+    export interface ICodeSetting {
+        tabSpaceType: 'Spaces' | 'Tabs';
+        tabSpaceSize: '2' | '4'
 
-
-export interface ICodeSetting {
-    tabSpaceType: 'Spaces' | 'Tabs';
-    tabSpaceSize: '2' | '4'
-
-}
+    }
 }
 namespace KfLayout {
   type ContentId = string;

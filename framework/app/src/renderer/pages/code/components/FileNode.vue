@@ -48,7 +48,7 @@
                 </span>
             </div>
         </div>
-        <div v-if="fileNode && fileNode.children && fileNode.children.folder && showChild">
+        <div v-if="fileNode && fileNode.children && fileNode.children.folder && fileNode['open']">
             <div v-for="id in fileNode.children.folder">
                 <ComFileNode
                     :fileNode="fileTree[id]"
@@ -59,7 +59,7 @@
                 />
             </div>
         </div>
-        <div v-if="fileNode && fileNode.children && fileNode.children.file && showChild">
+        <div v-if="fileNode && fileNode.children && fileNode.children.file && fileNode['open']">
             <div v-for="id in fileNode.children.file">
                 <ComFileNode
                     :fileNode="fileTree[id]"
@@ -108,7 +108,6 @@ const iconPath = ref<string>('');
 const fileName = ref<string>('');
 const onEditing = ref<boolean>(false)
 const editError = ref<boolean>(false)
-const showChild = ref<boolean>(true)
 const beforeDelate = ref<boolean>(true)
 
 const editErrorMessage = ref<string>('');
@@ -120,9 +119,6 @@ const { fileTree, entryFile, currentFile } = storeToRefs(store)
 
 //点击文件或文件树
 function handleClickFile(file) {
-    // if (type === 'folder') {
-    //     showChild.value = !showChild.value
-    // }
     //正在编辑的input
     if (Object.keys(file).length === 1) return;
     //更新active file id

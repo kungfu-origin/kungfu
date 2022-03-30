@@ -68,7 +68,6 @@ export const getTreeByFilePath = (
       });
       resolve({ ids, fileTree });
     });
-    // .catch(err => reject(err))
   });
 };
 
@@ -135,11 +134,15 @@ export const openFolder = async (
     });
     return fileTree;
   } else {
-    //打开
+    //关闭
+    const fileClosed = clearChildrenByFileId(oldFileTree, folder.id);
+    console.log(fileClosed);
+
+    store.setFileTree(fileClosed);
     store.setFileNode({
       id: folder.id,
       attr: 'open',
-      val: openStatus,
+      val: false,
     });
     return {};
   }
@@ -160,9 +163,9 @@ export const clearChildrenByFileId = (
     delete returnFile[id];
   });
 
-  //   target.children = {
-  //     file: [],
-  //     folder: [],
-  //   };
+  returnFile[fileId].children = {
+    file: [],
+    folder: [],
+  };
   return returnFile;
 };
