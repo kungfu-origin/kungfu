@@ -25,7 +25,7 @@
                 v-if="strategyPath"
                 @click="handleAddFile"
             >
-            <a-icon type="file-add" color="#ffffff"/>
+            <!-- <a-icon type="file-add" color="#ffffff"/> -->
             <img src="../../../../../public/file-icons/addFile.svg" alt="">
             </span>
         </span>
@@ -39,7 +39,6 @@
                 :key="file.id"
                 :id="file.id"
                 type="folder"
-                @reload="reload"
             ></FileNode>
         </div>
       </div>
@@ -53,7 +52,7 @@ export default {
 }
 </script>
 <script setup lang="ts">
-import { defineProps, watch, ref, nextTick, getCurrentInstance, ComponentInternalInstance } from 'vue';
+import { defineProps, watch, ref, getCurrentInstance, ComponentInternalInstance, nextTick } from 'vue';
 import path from 'path';
 import { storeToRefs } from 'pinia';
 import { dialog } from '@electron/remote';

@@ -75,8 +75,7 @@
 
 <script lang="ts">
 export default {
-    name: 'ComFileNode',
-    emits: ['reload']
+    name: 'ComFileNode'
 }
 </script>
 
@@ -87,7 +86,7 @@ import iconFolderJSON from '../config/iconFolderConfig.json';
 import iconFileJSON from '../config/iconFileConfig.json';
 import path from 'path';
 import { storeToRefs } from 'pinia';
-import { onMounted, PropType, ref, nextTick, getCurrentInstance, ComponentInternalInstance } from 'vue';
+import { onMounted, PropType, ref, nextTick } from 'vue';
 import { message, Modal } from 'ant-design-vue';
 import { openFolder } from '../../../assets/methods/codeUtils';
 import { removeFileFolder, addFileSync } from '@kungfu-trader/kungfu-js-api/utils/fileUtils'
@@ -100,7 +99,6 @@ const props = defineProps({
     id: [Number, String],
     count: [Number, String]
 })
-const { proxy } = getCurrentInstance() as ComponentInternalInstance
 
 const { fileNode, type, id, count } = props
 const curCount = ref<number>(+(count || 0))
@@ -137,10 +135,6 @@ function handleClickFile(file) {
     }
 }
 
-function reload() {
-    proxy?.$emit('reload');
-}
-
 //添加文件或文件夹时
 function handleAddFileBlur(e) {
     e.stopPropagation();
@@ -168,7 +162,6 @@ function handleAddFileBlur(e) {
             type: type,
         })
         reloadFolder(parentId, filename);
-        reload()
     } catch (err) {
         message.error(err.message || '操作失败！');
     }
