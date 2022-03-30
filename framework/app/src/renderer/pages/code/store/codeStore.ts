@@ -27,7 +27,7 @@ export const useCodeStore = defineStore('code', {
   },
   actions: {
     //设置当前策略
-    setCurrentStrategy(strategy): void {
+    setCurrentStrategy(strategy: Code.Strategy): void {
       this.currentStrategy = strategy;
     },
 
@@ -39,17 +39,25 @@ export const useCodeStore = defineStore('code', {
     },
 
     //策略编辑，设置当前文件
-    setCurrentFile(file): void {
+    setCurrentFile(file: Code.FileData): void {
       this.currentFile = file;
     },
 
     //策略编辑，设置文件树
-    setFileTree(fileTree): void {
+    setFileTree(fileTree: Code.IFileTree): void {
       this.fileTree = fileTree;
     },
 
     //策略编辑，设置文件节点
-    setFileNode({ id, attr, val }): void {
+    setFileNode({
+      id,
+      attr,
+      val,
+    }: {
+      id: number;
+      attr: string;
+      val: Code.FileIds | boolean;
+    }): void {
       const fileTree = this.fileTree;
       const node = deepClone(fileTree[id]);
       node[attr] = val;
@@ -87,7 +95,7 @@ export const useCodeStore = defineStore('code', {
     },
 
     //标记入口文件
-    setEntryFile(entryFile): void {
+    setEntryFile(entryFile: Code.FileData): void {
       this.entryFile = entryFile;
     },
 
@@ -96,13 +104,15 @@ export const useCodeStore = defineStore('code', {
       await this.setKungfuConfig(kfConfig);
     },
 
-    setKungfuConfig(kfConfig): void {
+    setKungfuConfig(kfConfig: KungfuApi.KfLocation | KungfuApi.KfConfig): void {
       Object.keys(kfConfig || {}).forEach((key) => {
         this.kfConfig[key] = kfConfig[key];
       });
     },
 
-    setKungfuConfigByKeys(kfConfig): void {
+    setKungfuConfigByKeys(
+      kfConfig: KungfuApi.KfLocation | KungfuApi.KfConfig,
+    ): void {
       Object.keys(kfConfig || {}).forEach((key) => {
         this.kfConfig[key] = kfConfig[key];
       });

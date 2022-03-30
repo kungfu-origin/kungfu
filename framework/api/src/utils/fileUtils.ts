@@ -3,7 +3,6 @@ import fse from 'fs-extra';
 import * as csv from '@fast-csv/format';
 import { Row } from '@fast-csv/format';
 
-
 //添加文件
 export const addFileSync = (
   parentDir = '',
@@ -52,15 +51,20 @@ export const getCodeText = (targetPath: string): Promise<string> => {
   if (!targetPath) throw new Error('文件路径不存在！');
   targetPath = path.normalize(targetPath);
   return new Promise((resolve, reject): void => {
-    fse.readFile(targetPath, 'utf-8', (err: Error, data: any) => {
-      if (err) {
-        console.error(err);
-        reject(err);
-        return;
-      }
-      resolve(data.toString());
-    });
-  });
+    const file = fse.createReadStream(targetPath);
+    let fileContextList: Array<Buffer> = []
+    file.on('data', data => {
+        fileContextList.push(data as Buffer)
+    })
+    file.on('end', () => {
+        resolve(Buffer.concat(fileContextList).toString())
+    })
+    file.on('error', (err) => {
+        reject(err)
+        return
+    })
+  })
+ 
 };
 
 export const listDir = (filePath: string): Promise<void | string[]> => {

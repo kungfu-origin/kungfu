@@ -69,7 +69,7 @@ watch(currentFile, async (newFile: Code.FileProps) => {
     if (currentFile.value.isDir) return;
     clearState();
     file = newFile;
-    const codeText = await getCodeText(filePath)
+    const codeText: string = await getCodeText(filePath)
     await nextTick();
     handleEditor = buildEditor(handleEditor, file, codeText);
     await nextTick();
