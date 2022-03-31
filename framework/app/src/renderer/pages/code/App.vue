@@ -7,8 +7,14 @@
     import { getStrategyById } from '@kungfu-trader/kungfu-js-api/kungfu/store';
     import { ClusterOutlined } from '@ant-design/icons-vue';
     import { useCodeStore } from './store/codeStore';
+    import { ipcEmitDataByName } from '../../../renderer/ipcMsg/emitter'
+    import { message } from 'ant-design-vue';
     const store = useCodeStore();
     const ProcessId = getLogProcessId();
+    ipcEmitDataByName('strategyList').then(({data}) => {
+        console.log(data);
+        
+    })
     store.setStrategyList();
 
     
@@ -42,7 +48,10 @@
     }
 
     function handleUpdateStrategy(strategyPath) {
-        if (!strategy.strategy_id) return;
+        if (!strategy.strategy_id) {
+            message.error('策略id不存在！')
+            return
+        };
         updateStrategy(strategy.strategy_id, strategyPath);
     }
 

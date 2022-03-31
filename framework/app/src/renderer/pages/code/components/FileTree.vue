@@ -1,8 +1,6 @@
 <template>
   <div class="file-tree">
-    <div class="open-editor-folder" @click="handleBindStrategyFolder">
-      设置策略入口文件
-    </div>
+    <a-button type="primary" class="open-editor-folder" @click="handleBindStrategyFolder">设置策略入口文件</a-button>
     <div class="file-tree-content">
       <div class="strategy-name">
         <span class="name">
@@ -16,8 +14,7 @@
                 v-if="strategyPath"
                 @click="handleAddFolder"
             >
-            <!-- <a-icon type="folder-add" width="20px" height="20px" /> -->
-            <img src="../../../../../public/file-icons/addFolder.svg" alt="">
+            <FolderAddOutlined />
             </span>
             <span
                 class="create"
@@ -25,13 +22,12 @@
                 v-if="strategyPath"
                 @click="handleAddFile"
             >
-            <!-- <a-icon type="file-add" color="#ffffff"/> -->
-            <img src="../../../../../public/file-icons/addFile.svg" alt="">
+            <FileAddOutlined />
             </span>
         </span>
       </div>
       <div class="file-tree-body" v-if="strategyPath">
-        <div v-for="file in fileTree" v-if="isActive" :key="file.fileId">
+        <div v-for="file in fileTree" :key="file.fileId">
             <FileNode
                 v-if="file.root"
                 :count="0"
@@ -59,21 +55,24 @@ import { message } from 'ant-design-vue';
 import { getTreeByFilePath } from '../../../assets/methods/codeUtils';
 import { useCodeStore } from '../store/codeStore'
 import FileNode from './FileNode.vue';
-import { updateStrategyPath } from '@kungfu-trader/kungfu-js-api/kungfu/strategy';
+import { updateStrategyPath } from '@kungfu-trader/kungfu-js-api/kungfu/store';
 import { findTargetFromArray } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { openFolder, buildFileObj } from '../../../assets/methods/codeUtils';
+
+import { FileAddOutlined, FolderAddOutlined } from '@ant-design/icons-vue';
+
 const store = useCodeStore();
 
-const props = defineProps({
-    strategy: Object
-})
+const props = defineProps<{
+    strategy: Code.Strategy
+   
+}>()
 const { strategy } = props
 const strategyPath = ref<string>('')
 const strategyPathName = ref<string>('')
 const { proxy } = getCurrentInstance() as ComponentInternalInstance
 const { currentFile } = storeToRefs(useCodeStore());
 const fileTree = computed(() => store.fileTree)
-const isActive = ref<boolean>(true)
 
 watch(strategy as Code.Strategy, newStrategy => {
     getPath(newStrategy);
@@ -81,6 +80,7 @@ watch(strategy as Code.Strategy, newStrategy => {
         const entryPath: string = newStrategy.strategy_path
         
         const currentFile = findTargetFromArray<Code.FileData>(Object.values(fileTree), 'filePath' , entryPath)
+        
         if (currentFile) {
             store.setEntryFile(currentFile)
             store.setCurrentFile(currentFile)
@@ -177,6 +177,7 @@ async function initFileTree(strategy) {
         stats: {},
         root: true,
         open: true,
+        fileId: 1
     });
     //获取第一级文件树
     let ids, fileTree;
@@ -185,6 +186,8 @@ async function initFileTree(strategy) {
         
         ids = fileTreeData.ids;
         fileTree = fileTreeData.fileTree
+        console.log(fileTree);
+        
     } catch (err) {
         message.error(err);
     }
@@ -196,6 +199,7 @@ async function initFileTree(strategy) {
     fileTree = bindFunctionalNode(fileTree);
     store.setFileTree(fileTree);
     store.setCurrentFile(rootFile)
+    
     return fileTree
 }
 
@@ -224,17 +228,9 @@ function bindFunctionalNode(fileTree) {
     .open-editor-folder {
         width: 90%;
         height: 36px;
-        line-height: 36px;
-        color: @font;
-        background: @tab_header;
         margin: auto;
-        cursor: pointer;
-        border-radius: 3px;
     }
-    .open-editor-folder:hover {
-        background: @bg_light;
-        color: #fff;
-    }
+    
     .strategy-name {
         font-size: 14px;
         font-weight: bolder;

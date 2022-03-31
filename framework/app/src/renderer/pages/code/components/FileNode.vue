@@ -84,19 +84,22 @@ import iconFolderJSON from '../config/iconFolderConfig.json';
 import iconFileJSON from '../config/iconFileConfig.json';
 import path from 'path';
 import { storeToRefs } from 'pinia';
-import { onMounted, PropType, ref, nextTick } from 'vue';
+import { onMounted, ref, nextTick } from 'vue';
 import { message, Modal } from 'ant-design-vue';
 import { openFolder } from '../../../assets/methods/codeUtils';
 import { removeFileFolder, addFileSync } from '@kungfu-trader/kungfu-js-api/utils/fileUtils'
 import fse from 'fs-extra'
 
 const store = useCodeStore();
-const props = defineProps({
-    fileNode: Object as PropType<Code.FileData>,
-    type: String,
-    id: [Number, String],
-    count: [Number, String]
-})
+
+
+const props = defineProps<{
+    fileNode: Code.FileData,
+    type: string,
+    id: number | string,
+    count: number | string
+}>()
+
 
 const { fileNode, type, id, count } = props
 const curCount = ref<number>(+(count || 0))

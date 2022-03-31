@@ -26,6 +26,11 @@ export const useCodeStore = defineStore('code', {
     };
   },
   actions: {
+    clearAllState() {
+      this.currentFile = {};
+      this.entryFile = {};
+      this.fileTree = {};
+    },
     //设置当前策略
     setCurrentStrategy(strategy: Code.Strategy): void {
       this.currentStrategy = strategy;

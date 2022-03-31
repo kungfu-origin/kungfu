@@ -41,7 +41,7 @@ export const getTreeByFilePath = (
             stats,
             root: false,
             open: false,
-            fileId: 0,
+            fileId: 1,
           });
           //保证顺序
           if (isDir) {
@@ -51,6 +51,7 @@ export const getTreeByFilePath = (
           }
         }
       });
+
       dirList.forEach((dir: Code.FileData): void => {
         const id: number = window.fileId++;
         ids.folder.push(id);
@@ -84,6 +85,7 @@ export const buildFileObj = (fileData: Code.FileData): Code.FileData => {
     stats,
     root,
     open,
+    fileId,
     parentId,
   } = fileData;
   return {
@@ -96,6 +98,7 @@ export const buildFileObj = (fileData: Code.FileData): Code.FileData => {
     stats,
     root,
     open,
+    fileId,
     parentId,
   };
 };
@@ -121,8 +124,10 @@ export const openFolder = async (
       folder,
       oldFileTree,
     );
-    fileTree[0].fileId = (fileTree[0].fileId || 0) + 1;
-    store.setFileTree(fileTree);
+    const newFileTree: Code.IFileTree = reSetParentFileId(fileTree, folder);
+    // folder.fileId = (folder.fileId || 0) + 1;
+    // fileTree[0].fileId = (fileTree[0].fileId || 0) + 1;
+    store.setFileTree(newFileTree);
     store.setFileNode({
       id: folder.id,
       attr: 'children',
@@ -134,10 +139,14 @@ export const openFolder = async (
       attr: 'open',
       val: openStatus,
     });
-    return fileTree;
+    return newFileTree;
   } else {
     //关闭
-    const fileClosed = clearChildrenByFileId(oldFileTree, folder.id);
+    const fileClosed = reSetParentFileId(
+      clearChildrenByFileId(oldFileTree, folder.id),
+      folder,
+    );
+    // fileClosed[0].fileId = (fileClosed[0].fileId || 0) + 1;
     store.setFileTree(fileClosed);
     store.setFileNode({
       id: folder.id,
@@ -169,3 +178,12 @@ export const clearChildrenByFileId = (
   };
   return returnFile;
 };
+
+function reSetParentFileId(
+  fileTree: Code.IFileTree,
+  folder: Code.FileData,
+): Code.IFileTree {
+  const fileId: number = (fileTree[folder?.parentId].fileId || 0) + 1;
+  fileTree[folder.parentId].fileId = fileId;
+  return fileTree;
+}
