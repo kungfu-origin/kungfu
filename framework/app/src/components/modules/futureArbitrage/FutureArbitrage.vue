@@ -3,8 +3,7 @@ import { computed, nextTick, ref } from 'vue';
 import KfDashboard from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfDashboard.vue';
 import KfDashboardItem from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfDashboardItem.vue';
 import KfConfigSettingsForm from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfConfigSettingsForm.vue';
-import {
-} from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
+import {} from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import { getConfigSettings } from './config';
 import { RuleObject } from 'ant-design-vue/lib/form';
 import { FutureArbitrageCodeEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';
@@ -15,7 +14,10 @@ import {
   initFormStateByConfig,
   transformSearchInstrumentResultToInstrument,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
-import { useCurrentGlobalKfLocation, useProcessStatusDetailData } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
+import {
+  useCurrentGlobalKfLocation,
+  useProcessStatusDetailData,
+} from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
 
 const formState = ref(initFormStateByConfig(getConfigSettings(), {}));
 const formRef = ref();

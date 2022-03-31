@@ -11,7 +11,7 @@ import { computed } from 'vue';
 import { getColumns } from './config';
 import { ExchangeIds } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
 import {
-useExtConfigsRelated,
+  useExtConfigsRelated,
   useInstruments,
   useProcessStatusDetailData,
   useQuote,
