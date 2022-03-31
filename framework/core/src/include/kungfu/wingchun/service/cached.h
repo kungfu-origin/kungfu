@@ -29,13 +29,17 @@ protected:
     boost::hana::for_each(longfist::ProfileDataTypes, [&](auto it) {
       auto type = boost::hana::second(it);
       using DataType = typename decltype(+type)::type;
-      try {
-        for (const auto &data : profile.get_all(DataType{})) {
-          auto s = state(0, 0, 0, data);
-          receiver << s;
+      int get_all_count = 0;
+      while (get_all_count++ < 10) {
+        try {
+          for (const auto &data : profile.get_all(DataType{})) {
+            auto s = state(0, 0, 0, data);
+            receiver << s;
+          }
+          break;
+        } catch (const std::exception &e) {
+          SPDLOG_ERROR("Unexpected exception by profile_get_all {}", e.what());
         }
-      } catch (const std::exception &e) {
-        SPDLOG_ERROR("Unexpected exception by profile_get_all {}", e.what());
       }
     });
   };
