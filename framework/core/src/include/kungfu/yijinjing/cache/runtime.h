@@ -74,6 +74,32 @@ private:
   DataTypesMap state_map_;
 };
 
+class ring_bank {
+public:
+  ring_bank() : order_map_(longfist::build_ring_state_map(longfist::OrderDataTypes)) {}
+  template <typename DataType> void operator<<(const state<DataType> &state) {
+    auto &target_queue = order_map_[boost::hana::type_c<DataType>];
+    target_queue->push(state);
+  }
+
+  template <typename DataType> void operator<<(const typed_event_ptr<DataType> &event) {
+    auto &target_queue = order_map_[boost::hana::type_c<DataType>];
+    kungfu::state<DataType> s(*event);
+    target_queue->push(s);
+  }
+
+  template <typename DataType>
+  kungfu::yijinjing::cache::ringqueue<state<DataType>> &operator[](const boost::hana::basic_type<DataType> &type) {
+    return *(order_map_[type]);
+  }
+
+  ~ring_bank() {
+    boost::hana::for_each(order_map_, [&](const auto &x) { delete (+boost::hana::second(x)); });
+  }
+
+private:
+  longfist::OrderMapType order_map_;
+};
 } // namespace kungfu::yijinjing::cache
 
 #endif // KUNGFU_CACHE_RUNTIME_H

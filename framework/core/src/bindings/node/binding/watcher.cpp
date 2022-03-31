@@ -295,15 +295,18 @@ void Watcher::Feed(const event_ptr &event) {
       data_bank_ << typed_event_ptr<Quote>(event);
     }
   }else {
-   boost::hana::for_each(longfist::OrderDataTypes, [&](auto it) {
-      using DataType = typename decltype(+boost::hana::second(it))::type; 
+    bool is_order(false);
+    boost::hana::for_each(longfist::OrderDataTypes, [&](auto it) {
+      using DataType = typename decltype(+boost::hana::second(it))::type;
       if (DataType::tag == event->msg_type()) {
         // SPDLOG_INFO("Feed {}", typeid(DataType).name());
-        order_bank_ << typed_event_ptr<DataType>(event);
-        return;
+        ring_bank_ << typed_event_ptr<DataType>(event);
+        is_order = true;
       }
-   });
-   feed_state_data(event, data_bank_);
+    });
+    if(!is_order){
+      feed_state_data(event, data_bank_);
+    }
   }
 }
 

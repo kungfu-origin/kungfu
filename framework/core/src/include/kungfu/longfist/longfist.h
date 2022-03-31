@@ -174,7 +174,7 @@ constexpr auto build_state_map = [](auto types) {
   return boost::hana::unpack(maps, boost::hana::make_map);
 };
 
-constexpr auto build_order_map = [](auto types) {
+constexpr auto build_ring_state_map = [](auto types) {
   auto maps = boost::hana::transform(boost::hana::values(types), [](auto value) {
     using DataType = typename decltype(+value)::type;
     kungfu::yijinjing::cache::ringqueue<state<DataType>>* p = new  kungfu::yijinjing::cache::ringqueue<state<DataType>>(1024);
@@ -190,7 +190,7 @@ DECLARE_PTR(ProfileMapType)
 using StateMapType = decltype(build_state_map(longfist::StateDataTypes));
 DECLARE_PTR(StateMapType)
 
-using OrderMapType = decltype(build_order_map(longfist::OrderDataTypes));
+using OrderMapType = decltype(build_ring_state_map(longfist::OrderDataTypes));
 DECLARE_PTR(OrderMapType)
 
 template <typename DataType> std::enable_if_t<size_fixed_v<DataType>> copy(DataType &to, const DataType &from) {
