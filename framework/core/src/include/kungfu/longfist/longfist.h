@@ -151,7 +151,7 @@ constexpr auto StateDataTypes = boost::hana::make_map( //
     TYPE_PAIR(OrderStat)                               //
 );
 
-constexpr auto OrderDataTypes = boost::hana::make_map( //
+constexpr auto TradingDataTypes = boost::hana::make_map( //
     TYPE_PAIR(OrderInput),                             //
     TYPE_PAIR(Order),                                  //
     TYPE_PAIR(Trade),                                  //
@@ -191,8 +191,8 @@ DECLARE_PTR(ProfileMapType)
 using StateMapType = decltype(build_state_map(longfist::StateDataTypes));
 DECLARE_PTR(StateMapType)
 
-using OrderMapType = decltype(build_ring_state_map(longfist::OrderDataTypes));
-DECLARE_PTR(OrderMapType)
+using TradingMapType= decltype(build_ring_state_map(longfist::TradingDataTypes));
+DECLARE_PTR(TradingMapType)
 
 template <typename DataType> std::enable_if_t<size_fixed_v<DataType>> copy(DataType &to, const DataType &from) {
   memcpy(&to, &from, sizeof(DataType));

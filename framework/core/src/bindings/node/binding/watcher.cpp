@@ -296,11 +296,10 @@ void Watcher::Feed(const event_ptr &event) {
     }
   } else {
     bool is_order(false);
-    boost::hana::for_each(longfist::OrderDataTypes, [&](auto it) {
+    boost::hana::for_each(longfist::TradingDataTypes, [&](auto it) {
       using DataType = typename decltype(+boost::hana::second(it))::type;
       if (DataType::tag == event->msg_type()) {
-        // SPDLOG_INFO("Feed {}", typeid(DataType).name());
-        ring_bank_ << typed_event_ptr<DataType>(event);
+        trading_bank_ << typed_event_ptr<DataType>(event);
         is_order = true;
       }
     });
@@ -353,7 +352,7 @@ void Watcher::SyncLedger() {
 }
 
 void Watcher::SyncOrder() {
-  boost::hana::for_each(longfist::OrderDataTypes, [&](auto it) {
+  boost::hana::for_each(longfist::TradingDataTypes, [&](auto it) {
     // SPDLOG_INFO("SyncOrder 1");
     UpdateOrder(+boost::hana::second(it));
     // SPDLOG_INFO("SyncOrder 2");
