@@ -40,9 +40,9 @@ private:
   longfist::StateMapType state_map_ = longfist::build_state_map(longfist::StateDataTypes);
 };
 
-template <typename DataTypes, typename DataTypesMap> class type_bank {
+template <typename DataTypes, typename DataTypesMap> class typed_bank {
 public:
-  explicit type_bank(const DataTypes &types) : types_(types), state_map_(longfist::build_state_map(types_)) {}
+  explicit typed_bank(const DataTypes &types) : types_(types), state_map_(longfist::build_state_map(types_)) {}
 
   template <typename DataType> void operator<<(const state<DataType> &state) {
     auto &target_map = state_map_[boost::hana::type_c<DataType>];

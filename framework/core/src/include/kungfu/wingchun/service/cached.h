@@ -12,7 +12,7 @@ namespace kungfu::wingchun::service {
 
 using ProfileDataTypesType = decltype(longfist::ProfileDataTypes);
 using ProfileStateMapType = decltype(longfist::build_state_map(longfist::ProfileDataTypes));
-typedef yijinjing::cache::type_bank<ProfileDataTypesType, ProfileStateMapType> ProfileStateBank;
+typedef yijinjing::cache::typed_bank<ProfileDataTypesType, ProfileStateMapType> ProfileStateBank;
 
 class CacheD : public yijinjing::practice::apprentice {
 public:
