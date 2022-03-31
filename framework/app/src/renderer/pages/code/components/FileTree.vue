@@ -27,14 +27,16 @@
         </span>
       </div>
       <div class="file-tree-body" v-if="strategyPath">
-        <div v-for="file in fileTree" :key="`${file.id}_${file.fileId}`">
-            <FileNode
-                v-if="file.root"
-                :count="0"
-                :fileNode="file"
-                :id="file.id"
-                type="folder"
-            ></FileNode>
+        <div class="scroll-view">
+            <div v-for="file in fileTree" :key="`${file.id}_${file.fileId}`">
+                <FileNode
+                    v-if="file.root"
+                    :count="0"
+                    :fileNode="file"
+                    :id="file.id"
+                    type="folder"
+                ></FileNode>
+            </div>
         </div>
       </div>
     </div>
@@ -183,11 +185,8 @@ async function initFileTree(strategy) {
     let ids, fileTree;
     try {
         const fileTreeData = await getTreeByFilePath(rootFile, fileTree);
-        
         ids = fileTreeData.ids;
         fileTree = fileTreeData.fileTree
-        console.log(fileTree);
-        
     } catch (err) {
         message.error(err);
     }
@@ -295,6 +294,10 @@ function bindFunctionalNode(fileTree) {
         height: calc(100% - 38px);
         overflow: auto;
         padding-left: 5px;
+        .scroll-view {
+            overflow-y: scroll;
+
+        }
     }
 }
 </style>

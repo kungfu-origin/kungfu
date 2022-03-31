@@ -79,7 +79,13 @@ export const useCodeStore = defineStore('code', {
       }
       this.fileTree[id]['children'] = targetChildren;
       this.fileTree['pending']['parentId'] = id;
-      this.fileTree[this.fileTree[id].parentId].fileId++;
+      const currentId: number =
+        this.fileTree[id].parentId == 0 ? id : this.fileTree[id].parentId;
+      if (this.fileTree[currentId].fileId) {
+        this.fileTree[currentId].fileId++;
+      } else {
+        this.fileTree[currentId].fileId = 1;
+      }
     },
 
     //策略编辑时，添加文件或文件夹时，删除“pending”

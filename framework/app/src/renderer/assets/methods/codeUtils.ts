@@ -183,7 +183,8 @@ function reSetParentFileId(
   fileTree: Code.IFileTree,
   folder: Code.FileData,
 ): Code.IFileTree {
-  const fileId: number = (fileTree[folder?.parentId].fileId || 0) + 1;
-  fileTree[folder.parentId].fileId = fileId;
+  const currentId: number = folder.parentId == 0 ? folder.id : folder.parentId;
+  const fileId: number = (fileTree[currentId].fileId || 0) + 1;
+  fileTree[currentId].fileId = fileId;
   return fileTree;
 }
