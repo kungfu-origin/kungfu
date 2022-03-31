@@ -100,7 +100,7 @@ private:
   serialize::JsPublishState publish;
   serialize::JsResetCache reset_cache;
   yijinjing::cache::bank data_bank_;
-  yijinjing::cache::ring_bank ring_bank_;
+  yijinjing::cache::trading_bank trading_bank_;
   event_ptr event_cache_;
   bool start_;
   std::unordered_map<uint32_t, longfist::types::InstrumentKey> subscribed_instruments_ = {};
