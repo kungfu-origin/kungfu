@@ -100,7 +100,7 @@ private:
   serialize::JsPublishState publish;
   serialize::JsResetCache reset_cache;
   yijinjing::cache::bank data_bank_;
-  yijinjing::cache::ring_bank ring_bank_;
+  yijinjing::cache::trading_bank trading_bank_;
   event_ptr event_cache_;
   bool start_;
   std::unordered_map<uint32_t, longfist::types::InstrumentKey> subscribed_instruments_ = {};
@@ -205,10 +205,10 @@ private:
   }
 
   template <typename DataType> void UpdateOrder(const boost::hana::basic_type<DataType> &type) {
-    auto& order_queue = ring_bank_[type];
+    auto& trading_queue = trading_bank_[type];
     int i = 0;
     kungfu::state<DataType>* pstate = nullptr;
-    while( i < 1024 && order_queue.pop(pstate) && pstate != nullptr){
+    while( i < 1024 && trading_queue.pop(pstate) && pstate != nullptr){
       update_ledger(pstate->update_time, pstate->source, pstate->dest, pstate->data);
       i++;
     }
