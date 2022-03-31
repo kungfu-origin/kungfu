@@ -15,9 +15,14 @@ using namespace kungfu::yijinjing::cache;
 namespace kungfu::wingchun::service {
 
 CacheD::CacheD(locator_ptr locator, mode m, bool low_latency)
-    : apprentice(location::make_shared(m, category::SYSTEM, "service", "cached", std::move(locator))) {}
+    : apprentice(location::make_shared(m, category::SYSTEM, "service", "cached", std::move(locator))),
+      profile_(get_locator()) {
+  profile_.setup();
+  profile_get_all(profile_, profile_bank_);
+}
 
 void CacheD::on_react() {
+  events_ | is(Location::tag) | $$(on_location(event));
   events_ | is(RequestCached::tag) | $([&](const event_ptr &event) {
     auto source_id = event->source();
     if (locations_.find(source_id) == locations_.end()) {
@@ -28,6 +33,10 @@ void CacheD::on_react() {
     app_cache_shift_.try_emplace(source_id, locations_.at(source_id));
     auto cached_writer = get_writer(source_id);
     app_cache_shift_.at(source_id) >> cached_writer;
+
+    profile_get_all(profile_, profile_bank_);
+    profile_bank_ >> cached_writer;
+
     mark_request_cached_done(source_id);
   });
 }
@@ -43,7 +52,10 @@ void CacheD::on_start() {
                        }) | $$(feed(event));
 }
 
-void CacheD::on_active() { handle_cached_feeds(); }
+void CacheD::on_active() {
+  handle_cached_feeds();
+  handle_profile_feeds();
+}
 
 void CacheD::mark_request_cached_done(uint32_t dest_id) {
   auto writer = get_writer(master_cmd_location_->uid);
@@ -64,14 +76,14 @@ void CacheD::handle_cached_feeds() {
     if (feed_map.size() != 0) {
       auto iter = feed_map.begin();
       while (iter != feed_map.end() and !stored_controller) {
-        auto s = iter->second;
+        auto &s = iter->second;
         auto source_id = s.source;
 
         if (app_cache_shift_.find(source_id) != app_cache_shift_.end()) {
           try {
             app_cache_shift_.at(source_id) << s;
           } catch (const std::exception &e) {
-            SPDLOG_ERROR("Unexpected exception by storage << {}", e.what());
+            SPDLOG_ERROR("Unexpected exception by handle_cached_feeds {}", e.what());
             continue;
           }
 
@@ -84,6 +96,36 @@ void CacheD::handle_cached_feeds() {
     }
   });
 }
+
+void CacheD::handle_profile_feeds() {
+  bool stored_controller = false;
+  boost::hana::for_each(ProfileDataTypes, [&](auto it) {
+    using DataType = typename decltype(+boost::hana::second(it))::type;
+    auto hana_type = boost::hana::type_c<DataType>;
+
+    using FeedMap = std::unordered_map<uint64_t, state<DataType>>;
+    auto &feed_map = const_cast<FeedMap &>(profile_bank_[hana_type]);
+
+    if (feed_map.size() != 0) {
+      auto iter = feed_map.begin();
+      while (iter != feed_map.end() and !stored_controller) {
+        auto &s = iter->second;
+
+        try {
+          profile_ << s;
+        } catch (const std::exception &e) {
+          SPDLOG_ERROR("Unexpected exception by handle_profile_feeds {}", e.what());
+          continue;
+        }
+
+        iter = feed_map.erase(iter);
+        stored_controller = true;
+      }
+    }
+  });
+}
+
+void CacheD::on_location(const event_ptr &event) { profile_bank_ << typed_event_ptr<Location>(event); }
 
 void CacheD::inspect_channel(int64_t trigger_time, const Channel &channel) {
   if (channel.source_id != get_live_home_uid() and channel.dest_id != get_live_home_uid()) {
@@ -118,8 +160,6 @@ void CacheD::deregister_cache_shift(const Deregister &deregister_data) {
     SPDLOG_ERROR("no location_uid {} in app_cache_shift_", get_location_uname(location_uid));
     return;
   }
-  // maybe some data not cached done, so pass the deregister
-  // app_cache_shift_.erase(location_uid);
 }
 
 void CacheD::on_cache_reset(const event_ptr &event) {
@@ -138,7 +178,6 @@ void CacheD::ensure_cached_storage(uint32_t source_id, uint32_t dest_id) {
     SPDLOG_ERROR("no source {} in app_cache_shift_", get_location_uname(source_id));
     return;
   }
-
   app_cache_shift_.at(source_id).ensure_storage(dest_id);
 }
 
@@ -148,15 +187,13 @@ void CacheD::feed(const event_ptr &event) {
   uint32_t dest_id = event->dest();
 
   if (get_location(source_id)->category == category::MD) {
-    return;
-  }
-
-  if (app_cache_shift_.find(source_id) == app_cache_shift_.end()) {
-    SPDLOG_ERROR("no source {} in app_cache_shift_", get_location_uname(source_id));
-    return;
+    if (event->msg_type() != Instrument::tag) {
+      return;
+    }
   }
 
   feed_state_data(event, feed_bank_);
+  feed_profile_data(event, profile_bank_);
 }
 
 } // namespace kungfu::wingchun::service

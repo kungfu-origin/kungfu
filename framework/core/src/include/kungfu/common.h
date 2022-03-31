@@ -427,12 +427,14 @@ template <typename DataType> struct typed_event_ptr {
 template <typename DataType> struct state {
   uint32_t source;
   uint32_t dest;
-
   int64_t update_time;
   DataType data;
 
-  explicit state(const event_ptr &event)
+  state(const event_ptr &event)
       : source(event->source()), dest(event->dest()), update_time(event->gen_time()), data(event->data<DataType>()) {}
+
+  state(const state<DataType> &s)
+      : source(s.source), dest(s.dest), update_time(s.update_time), data(s.data) {}
 
   state(uint32_t s, uint32_t d, int64_t t, const DataType &data) : source(s), dest(d), update_time(t), data(data) {}
 

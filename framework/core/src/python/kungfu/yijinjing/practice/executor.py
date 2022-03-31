@@ -41,13 +41,14 @@ class ExecutorRegistry:
                 with open(config_path, mode="r", encoding="utf8") as config_file:
                     config = json.load(config_file)
                     if "kungfuConfig" in config:
-                        group = config["kungfuConfig"]["key"]
-                        for category in config["kungfuConfig"]["config"]:
-                            if category not in kfj.CATEGORIES:
-                                raise RuntimeError(f"Unsupported category {category}")
-                            self.executors[category][group] = ExtensionLoader(
-                                self.ctx, extension_dir, config
-                            )
+                        if "config" in config["kungfuConfig"]:
+                            group = config["kungfuConfig"]["key"]
+                            for category in config["kungfuConfig"]["config"]:
+                                if category not in kfj.CATEGORIES:
+                                    raise RuntimeError(f"Unsupported category {category}")
+                                self.executors[category][group] = ExtensionLoader(
+                                    self.ctx, extension_dir, config
+                                )
 
     def __getitem__(self, category):
         return self.executors[category]
