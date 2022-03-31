@@ -34,6 +34,7 @@ declare namespace Code {
         stats: object;
         root: boolean;
         open: boolean;
+        fileId?: number
     }
 
     export type IFileTree = Record<string, FileData>

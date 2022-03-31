@@ -49,7 +49,7 @@
             </div>
         </div>
         <div v-if="fileNode && fileNode.children && fileNode.children.folder && fileNode['open']">
-            <div v-for="id in fileNode.children.folder" :key="id">
+            <div v-for="id in fileNode.children.folder" :key="fileTree[id].fileId">
                 <ComFileNode
                     :fileNode="fileTree[id]"
                     :id="id"
@@ -59,7 +59,7 @@
             </div>
         </div>
         <div v-if="fileNode && fileNode.children && fileNode.children.file && fileNode['open']">
-            <div v-for="id in fileNode.children.file" :key="id">
+            <div v-for="id in fileNode.children.file" :key="fileTree[id].fileId">
                 <ComFileNode
                     :fileNode="fileTree[id]"
                     :id="id"
@@ -203,7 +203,9 @@ function handleDelete() {
         okText: '确 定',
         cancelText: '取 消',
         onOk() {
-            removeFileFolder(fileNode?.filePath || '').then(() =>
+            removeFileFolder(fileNode?.filePath || '').then(() => {
+                store.setCurrentFile(entryFile.value)
+            }).then(() =>
                 openFolder(
                     fileTree.value[parentId || 0],
                     fileTree.value,
@@ -211,9 +213,6 @@ function handleDelete() {
                     true,
                 ),
             )
-            .then(() =>{
-                store.setCurrentFile(entryFile.value)
-            })
             .then(() => message.success(`${typeName}删除成功！`))
             .catch((err) => {
                 if (err == 'cancel') return;
