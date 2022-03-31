@@ -49,7 +49,7 @@
             </div>
         </div>
         <div v-if="fileNode && fileNode.children && fileNode.children.folder && fileNode['open']">
-            <div v-for="id in fileNode.children.folder" :key="fileTree[id].fileId">
+            <div v-for="id in fileNode.children.folder" :key="`${fileTree[id].id}_${fileTree[id].fileId}`">
                 <ComFileNode
                     :fileNode="fileTree[id]"
                     :id="id"
@@ -59,7 +59,7 @@
             </div>
         </div>
         <div v-if="fileNode && fileNode.children && fileNode.children.file && fileNode['open']">
-            <div v-for="id in fileNode.children.file" :key="fileTree[id].fileId">
+            <div v-for="id in fileNode.children.file" :key="`${fileTree[id].id}_${fileTree[id].fileId}`">
                 <ComFileNode
                     :fileNode="fileTree[id]"
                     :id="id"

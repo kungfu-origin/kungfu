@@ -27,7 +27,7 @@
         </span>
       </div>
       <div class="file-tree-body" v-if="strategyPath">
-        <div v-for="file in fileTree" :key="file.fileId">
+        <div v-for="file in fileTree" :key="`${file.id}_${file.fileId}`">
             <FileNode
                 v-if="file.root"
                 :count="0"
