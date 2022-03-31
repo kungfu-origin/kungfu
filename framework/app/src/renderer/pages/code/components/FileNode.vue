@@ -43,8 +43,8 @@
                 <span class="path text-overflow" v-if="fileNode && entryFile.filePath === fileNode.filePath && fileNode.filePath !== undefined && !onEditing">{{ '(入口文件)' }}</span>
                 <span class="path text-overflow" v-if="fileNode && fileNode.root" :title="fileNode.filePath">{{fileNode.filePath}}</span>
                 <span class="deal-file"  v-if="fileNode && !fileNode.root && !onEditing && id !== 'padding'">
-                    <span class="mouse-over" title="重命名" @click.stop="handleRename"><img src="../../../../../public/file-icons/edit.svg" alt=""></span>
-                    <span class="mouse-over" title="删除" @click.stop="handleDelete"><img src="../../../../../public/file-icons/delate.svg" alt=""></span>
+                    <span class="mouse-over" title="重命名" @click.stop="handleRename"><FormOutlined /></span>
+                    <span class="mouse-over" title="删除" @click.stop="handleDelete"><DeleteOutlined /></span>
                 </span>
             </div>
         </div>
@@ -79,6 +79,7 @@ export default {
 
 
 <script setup lang="ts">
+import { FormOutlined, DeleteOutlined } from '@ant-design/icons-vue';
 import { useCodeStore } from '../store/codeStore'
 import iconFolderJSON from '../config/iconFolderConfig.json';
 import iconFileJSON from '../config/iconFileConfig.json';
@@ -303,6 +304,7 @@ function getIcon(file: Code.FileData): string {
             if (!iconName) iconName = 'file';
         }
     if (!iconName) return '';
+    
     return require(`../../../../../public/file-icons/${iconName}.svg`);
 }
 

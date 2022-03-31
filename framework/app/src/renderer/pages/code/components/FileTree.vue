@@ -14,7 +14,7 @@
                 v-if="strategyPath"
                 @click="handleAddFolder"
             >
-            <FolderAddOutlined />
+                <FolderAddOutlined />
             </span>
             <span
                 class="create"
@@ -22,7 +22,7 @@
                 v-if="strategyPath"
                 @click="handleAddFile"
             >
-            <FileAddOutlined />
+                <FileAddOutlined />
             </span>
         </span>
       </div>

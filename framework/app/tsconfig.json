@@ -30,6 +30,6 @@
         "src/**/*.vue",
         "tests/**/*.ts",
         "tests/**/*.tsx",
-        "../api/src/**/*.ts", "src/renderer/assets/iconfont/iconfont.js"
+        "../api/src/**/*.ts"
     ]
 }
