@@ -31,12 +31,11 @@
         </span>
       </div>
       <div class="file-tree-body" v-if="strategyPath">
-        <div v-for="file in fileTree" v-if="isActive">
+        <div v-for="file in fileTree" v-if="isActive" :key="file.id">
             <FileNode
                 v-if="file.root"
                 :count="0"
                 :fileNode="file"
-                :key="file.id"
                 :id="file.id"
                 type="folder"
             ></FileNode>
@@ -52,7 +51,7 @@ export default {
 }
 </script>
 <script setup lang="ts">
-import { defineProps, watch, ref, getCurrentInstance, ComponentInternalInstance, nextTick } from 'vue';
+import { defineProps, watch, ref, nextTick, getCurrentInstance, ComponentInternalInstance, computed } from 'vue';
 import path from 'path';
 import { storeToRefs } from 'pinia';
 import { dialog } from '@electron/remote';
@@ -72,7 +71,8 @@ const { strategy } = props
 const strategyPath = ref<string>('')
 const strategyPathName = ref<string>('')
 const { proxy } = getCurrentInstance() as ComponentInternalInstance
-const { fileTree, currentFile } = storeToRefs(useCodeStore());
+const { currentFile } = storeToRefs(useCodeStore());
+const fileTree = computed(() => store.fileTree)
 const isActive = ref<boolean>(true)
 
 watch(strategy as Code.Strategy, newStrategy => {
@@ -89,6 +89,8 @@ watch(strategy as Code.Strategy, newStrategy => {
 })
 
 watch(fileTree, newTree => {
+    // console.log(newTree);
+    
     reload()
 }, {deep: true})
 

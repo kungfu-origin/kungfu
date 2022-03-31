@@ -136,8 +136,6 @@ export const openFolder = async (
   } else {
     //关闭
     const fileClosed = clearChildrenByFileId(oldFileTree, folder.id);
-    console.log(fileClosed);
-
     store.setFileTree(fileClosed);
     store.setFileNode({
       id: folder.id,
