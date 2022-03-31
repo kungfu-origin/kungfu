@@ -8,6 +8,7 @@
 #include "history.h"
 #include <sstream>
 #include <uv.h>
+#include "kungfu/yijinjing/cache/ringqueue.h"
 
 using namespace kungfu::rx;
 using namespace kungfu::longfist;
@@ -84,6 +85,9 @@ Watcher::Watcher(const Napi::CallbackInfo &info)
 
   for (const auto &item : config_store->profile_.get_all(Location{})) {
     auto saved_location = location::make_shared(item, get_locator());
+    if (saved_location->category == longfist::enums::category::SYSTEM) {
+      continue;
+    }
     add_location(now(), saved_location);
     RestoreState(saved_location, today, INT64_MAX, sync_schema);
     SPDLOG_WARN("restored data for {}", saved_location->uname);
@@ -290,13 +294,19 @@ void Watcher::Feed(const event_ptr &event) {
       UpdateBook(event->gen_time(), event->source(), event->dest(), quote);
       data_bank_ << typed_event_ptr<Quote>(event);
     }
-  } else {
-    boost::hana::for_each(longfist::StateDataTypes, [&](auto it) {
+  }else {
+    bool is_order(false);
+    boost::hana::for_each(longfist::OrderDataTypes, [&](auto it) {
       using DataType = typename decltype(+boost::hana::second(it))::type;
       if (DataType::tag == event->msg_type()) {
-        data_bank_ << typed_event_ptr<DataType>(event);
+        // SPDLOG_INFO("Feed {}", typeid(DataType).name());
+        ring_bank_ << typed_event_ptr<DataType>(event);
+        is_order = true;
       }
     });
+    if(!is_order){
+      feed_state_data(event, data_bank_);
+    }
   }
 }
 
@@ -333,12 +343,21 @@ Napi::Value Watcher::CreateTask(const Napi::CallbackInfo &info) {
 Napi::Value Watcher::Sync(const Napi::CallbackInfo &info) {
   SyncEventCache();
   SyncLedger();
+  SyncOrder();
   SyncAppStatus();
   return {};
 }
 
 void Watcher::SyncLedger() {
   boost::hana::for_each(longfist::StateDataTypes, [&](auto it) { UpdateLedger(+boost::hana::second(it)); });
+}
+
+void Watcher::SyncOrder() {
+  boost::hana::for_each(longfist::OrderDataTypes, [&](auto it) {
+    // SPDLOG_INFO("SyncOrder 1");
+    UpdateOrder(+boost::hana::second(it));
+    // SPDLOG_INFO("SyncOrder 2");
+  });
 }
 
 void Watcher::SyncAppStatus() {

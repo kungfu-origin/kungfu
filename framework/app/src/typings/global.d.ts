@@ -6,7 +6,6 @@ declare module '@vue/runtime-core' {
   interface ComponentCustomProperties {
     $globalBus: Subject<KfBusEvent>;
     $tradingDataSubject: Subject<Watcher>;
-    // $useGlobalStore: Store;
     $globalCategoryRegister: GlobalCategoryRegister;
     $availKfBoards: string[];
   }

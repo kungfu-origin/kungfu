@@ -52,7 +52,6 @@ private:
   index::session_builder session_builder_;
   profile profile_;
 
-  std::unordered_map<uint32_t, uint32_t> app_cmd_locations_ = {};
   std::unordered_map<uint32_t, std::unordered_map<int32_t, timer_task>> timer_tasks_ = {};
 
   void handle_timer_tasks();
@@ -81,9 +80,9 @@ private:
 
   void write_trading_day(int64_t trigger_time, const journal::writer_ptr &writer);
 
-  void write_profile_data(int64_t trigger_time, const journal::writer_ptr &writer);
-
   void write_registries(int64_t trigger_time, const journal::writer_ptr &writer);
+  
+  void write_locations(int64_t trigger_time, const journal::writer_ptr &writer);
 
   void write_channels(int64_t trigger_time, const journal::writer_ptr &writer);
 };

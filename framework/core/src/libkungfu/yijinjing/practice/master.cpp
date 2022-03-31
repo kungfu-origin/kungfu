@@ -26,6 +26,7 @@ master::master(location_ptr home, bool low_latency)
   for (const auto &config : profile_.get_all(Config{})) {
     try_add_location(start_time_, location::make_shared(config, get_locator()));
   }
+
   auto io_device = std::dynamic_pointer_cast<io_device_master>(get_io_device());
   writers_.emplace(location::PUBLIC, io_device->open_writer(0));
   get_writer(location::PUBLIC)->mark(start_time_, SessionStart::tag);
@@ -65,7 +66,6 @@ void master::register_app(const event_ptr &event) {
 
   try_add_location(event->gen_time(), app_location);
   try_add_location(event->gen_time(), master_cmd_location);
-  app_cmd_locations_.emplace(app_location->uid, master_cmd_location->uid);
 
   register_data.last_active_time = session_builder_.find_last_active_time(app_location);
   register_location(event->gen_time(), register_data);
@@ -86,8 +86,9 @@ void master::register_app(const event_ptr &event) {
 
   write_time_reset(event->gen_time(), app_cmd_writer);
   write_trading_day(event->gen_time(), app_cmd_writer);
-  write_profile_data(event->gen_time(), app_cmd_writer);
 
+  // tell others alive locations
+  write_locations(event->gen_time(), app_cmd_writer);
   // tell others the cached process started
   write_registries(event->gen_time(), app_cmd_writer);
 
@@ -155,22 +156,18 @@ void master::handle_timer_tasks() {
 
 void master::try_add_location(int64_t trigger_time, const location_ptr &app_location) {
   if (not has_location(app_location->uid)) {
-    profile_.set(dynamic_cast<Location &>(*app_location));
     add_location(trigger_time, app_location);
   }
 }
 
 void master::feed(const event_ptr &event) {
   handle_timer_tasks();
+
   if (registry_.find(event->source()) == registry_.end()) {
     return;
   }
-  session_builder_.update_session(std::dynamic_pointer_cast<journal::frame>(event));
-  if (get_location(event->source())->category == category::MD) {
-    return;
-  }
 
-  feed_profile_data(event, profile_);
+  session_builder_.update_session(std::dynamic_pointer_cast<journal::frame>(event));
 }
 
 void master::pong(const event_ptr &event) { get_io_device()->get_publisher()->publish("{}"); }
@@ -272,18 +269,15 @@ void master::write_trading_day(int64_t trigger_time, const writer_ptr &writer) {
   writer->close_data();
 }
 
-void master::write_profile_data(int64_t trigger_time, const writer_ptr &writer) {
-  boost::hana::for_each(ProfileDataTypes, [&](auto it) {
-    using DataType = typename decltype(+boost::hana::second(it))::type;
-    for (const auto &data : profile_.get_all(DataType{})) {
-      writer->write(trigger_time, data);
-    }
-  });
-}
-
 void master::write_registries(int64_t trigger_time, const writer_ptr &writer) {
   for (const auto &item : registry_) {
     writer->write(trigger_time, item.second);
+  }
+}
+
+void master::write_locations(int64_t trigger_time, const writer_ptr &writer) {
+  for (const auto &item : locations_) {
+    writer->write(trigger_time, dynamic_cast<Location &>(*item.second));
   }
 }
 
