@@ -601,9 +601,9 @@ async function preStartProcess(
 export const startMd = async (sourceId: string): Promise<Proc | void> => {
   const extDirs = await flattenExtensionModuleDirs(EXTENSION_DIRS);
   const args = buildArgs(
-    `-X ${extDirs
-      .map((dir) => path.dirname(dir))
-      .join(path.delimiter)} run -c md -g "${sourceId}" -n "${sourceId}"`,
+    `-X "${extDirs
+      .map((dir) => dealSpaceInPath(path.dirname(dir)))
+      .join(path.delimiter)}" run -c md -g "${sourceId}" -n "${sourceId}"`,
   );
   return startProcess({
     name: `md_${sourceId}`,
@@ -620,9 +620,9 @@ export const startTd = async (accountId: string): Promise<Proc | void> => {
   const extDirs = await flattenExtensionModuleDirs(EXTENSION_DIRS);
   const { source, id } = accountId.parseSourceAccountId();
   const args = buildArgs(
-    `-X ${extDirs
-      .map((dir) => path.dirname(dir))
-      .join(path.delimiter)} run -c td -g "${source}" -n "${id}"`,
+    `-X "${extDirs
+      .map((dir) => dealSpaceInPath(path.dirname(dir)))
+      .join(path.delimiter)}" run -c td -g "${source}" -n "${id}"`,
   );
   return startProcess({
     name: `td_${accountId}`,
@@ -641,9 +641,9 @@ export const startTask = async (
 ): Promise<Proc | void> => {
   const extDirs = await flattenExtensionModuleDirs(EXTENSION_DIRS);
   const argsResolved: string = buildArgs(
-    `-X ${extDirs
-      .map((dir) => path.dirname(dir))
-      .join(path.delimiter)} run -c strategy -g "${taskLocation.group}" -n "${
+    `-X "${extDirs
+      .map((dir) => dealSpaceInPath(path.dirname(dir)))
+      .join(path.delimiter)}" run -c strategy -g "${taskLocation.group}" -n "${
       taskLocation.name
     }" ${soPath} -a ${args}`,
   );

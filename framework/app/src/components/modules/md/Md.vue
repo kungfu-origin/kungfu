@@ -181,12 +181,12 @@ function handleOpenSetSourceDialog() {
                   getProcessIdByKfLocation(record),
                 )
               "
-               :loading="
-                    getIfProcessStopping(
-                    processStatusData,
+              :loading="
+                getIfProcessStopping(
+                  processStatusData,
                   getProcessIdByKfLocation(record),
-                    )
-                  "
+                )
+              "
               @click="(checked: boolean, Event: MouseEvent) => handleSwitchProcessStatus(checked, Event, record)"
             ></a-switch>
           </template>

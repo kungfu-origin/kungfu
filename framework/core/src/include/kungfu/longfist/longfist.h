@@ -5,8 +5,8 @@
 #ifndef KUNGFU_LONGFIST_H
 #define KUNGFU_LONGFIST_H
 
-#include <kungfu/longfist/types.h>
 #include "kungfu/yijinjing/cache/ringqueue.h"
+#include <kungfu/longfist/types.h>
 
 #define TYPE_PAIR(DataType) boost::hana::make_pair(HANA_STR(#DataType), boost::hana::type_c<types::DataType>)
 
@@ -177,7 +177,8 @@ constexpr auto build_state_map = [](auto types) {
 constexpr auto build_ring_state_map = [](auto types) {
   auto maps = boost::hana::transform(boost::hana::values(types), [](auto value) {
     using DataType = typename decltype(+value)::type;
-    kungfu::yijinjing::cache::ringqueue<state<DataType>>* p = new  kungfu::yijinjing::cache::ringqueue<state<DataType>>(1024);
+    kungfu::yijinjing::cache::ringqueue<state<DataType>> *p =
+        new kungfu::yijinjing::cache::ringqueue<state<DataType>>(1024);
     return boost::hana::make_pair(value, p);
   });
   // SPDLOG_INFO("type = {}", typeid(maps).name());

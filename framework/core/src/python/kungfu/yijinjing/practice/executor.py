@@ -45,7 +45,9 @@ class ExecutorRegistry:
                             group = config["kungfuConfig"]["key"]
                             for category in config["kungfuConfig"]["config"]:
                                 if category not in kfj.CATEGORIES:
-                                    raise RuntimeError(f"Unsupported category {category}")
+                                    raise RuntimeError(
+                                        f"Unsupported category {category}"
+                                    )
                                 self.executors[category][group] = ExtensionLoader(
                                     self.ctx, extension_dir, config
                                 )

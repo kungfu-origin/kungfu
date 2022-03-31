@@ -205,10 +205,10 @@ private:
   }
 
   template <typename DataType> void UpdateOrder(const boost::hana::basic_type<DataType> &type) {
-    auto& order_queue = ring_bank_[type];
+    auto &order_queue = ring_bank_[type];
     int i = 0;
-    kungfu::state<DataType>* pstate = nullptr;
-    while( i < 1024 && order_queue.pop(pstate) && pstate != nullptr){
+    kungfu::state<DataType> *pstate = nullptr;
+    while (i < 1024 && order_queue.pop(pstate) && pstate != nullptr) {
       update_ledger(pstate->update_time, pstate->source, pstate->dest, pstate->data);
       i++;
     }
