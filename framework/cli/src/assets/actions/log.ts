@@ -12,15 +12,17 @@ export class Log {
   logTail: Tail | null;
   lines: number;
   logList: KungfuApi.KfNumList<string>;
+  EXTRA_LINES: number;
 
-  constructor(lines = 500) {
+  constructor(lines = 10000) {
+    this.EXTRA_LINES = 1000;
     this.logTail = null;
     this.lines = lines;
-    this.logList = new KfNumList(lines + 500);
+    this.logList = new KfNumList(lines + this.EXTRA_LINES);
   }
 
   initProcessId(processId: string) {
-    this.logList = new KfNumList(this.lines + 500);
+    this.logList = new KfNumList(this.lines + this.EXTRA_LINES);
     this.tailLog(processId);
   }
 

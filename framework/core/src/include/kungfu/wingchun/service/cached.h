@@ -6,8 +6,13 @@
 #include <kungfu/yijinjing/io.h>
 #include <kungfu/yijinjing/log.h>
 #include <kungfu/yijinjing/practice/apprentice.h>
+#include <kungfu/yijinjing/practice/profile.h>
 
 namespace kungfu::wingchun::service {
+
+using ProfileDataTypesType = decltype(longfist::ProfileDataTypes);
+using ProfileStateMapType = decltype(longfist::build_state_map(longfist::ProfileDataTypes));
+typedef yijinjing::cache::type_bank<ProfileDataTypesType, ProfileStateMapType> ProfileStateBank;
 
 class CacheD : public yijinjing::practice::apprentice {
 public:
@@ -20,11 +25,32 @@ protected:
 
   void on_active() override;
 
+  static constexpr auto profile_get_all = [](auto &profile, auto &receiver) {
+    boost::hana::for_each(longfist::ProfileDataTypes, [&](auto it) {
+      auto type = boost::hana::second(it);
+      using DataType = typename decltype(+type)::type;
+      try {
+        for (const auto &data : profile.get_all(DataType{})) {
+          auto s = state(0, 0, 0, data);
+          receiver << s;
+        }
+      } catch (const std::exception &e) {
+        SPDLOG_ERROR("Unexpected exception by profile_get_all {}", e.what());
+      }
+    });
+  };
+
 private:
   std::unordered_map<uint32_t, yijinjing::cache::shift> app_cache_shift_ = {};
   yijinjing::cache::bank feed_bank_;
+  yijinjing::practice::profile profile_;
+  ProfileStateBank profile_bank_ = ProfileStateBank(longfist::ProfileDataTypes);
+
+  void on_location(const event_ptr &event);
 
   void handle_cached_feeds();
+
+  void handle_profile_feeds();
 
   void mark_request_cached_done(uint32_t dest_id);
 

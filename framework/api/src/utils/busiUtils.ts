@@ -646,8 +646,8 @@ export const getTradingDate = (today = true): string => {
 
   const currentTimestamp = dayjs().valueOf();
   const tradingDayTimestamp = +dayjs()
-    .set('hours', 15)
-    .set('minutes', 30)
+    .set('hour', 15)
+    .set('minute', 30)
     .valueOf();
 
   if (currentTimestamp > tradingDayTimestamp) {
@@ -1496,7 +1496,7 @@ export function isCriticalLog(line: string): boolean {
     return true;
   }
 
-  if (line.indexOf('Error') != -1) {
+  if (line.indexOf(' Error ') != -1) {
     return true;
   }
 

@@ -427,7 +427,6 @@ template <typename DataType> struct typed_event_ptr {
 template <typename DataType> struct state {
   uint32_t source;
   uint32_t dest;
-
   int64_t update_time;
   DataType data;
 
