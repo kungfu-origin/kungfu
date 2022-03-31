@@ -14,7 +14,6 @@
 #include <kungfu/wingchun/book/bookkeeper.h>
 #include <kungfu/wingchun/broker/client.h>
 #include <kungfu/yijinjing/cache/runtime.h>
-#include <kungfu/yijinjing/cache/runtimering.h>
 #include <kungfu/yijinjing/practice/apprentice.h>
 
 namespace kungfu::node {
@@ -101,7 +100,7 @@ private:
   serialize::JsPublishState publish;
   serialize::JsResetCache reset_cache;
   yijinjing::cache::bank data_bank_;
-  yijinjing::cache::order_bank order_bank_;
+  yijinjing::cache::ring_bank ring_bank_;
   event_ptr event_cache_;
   bool start_;
   std::unordered_map<uint32_t, longfist::types::InstrumentKey> subscribed_instruments_ = {};
@@ -154,7 +153,6 @@ private:
     boost::hana::for_each(longfist::StateDataTypes, [&](auto it) {
       using DataTypeItem = typename decltype(+boost::hana::second(it))::type;
       if (std::is_same<DataType, DataTypeItem>::value) {
-        // SPDLOG_INFO("feed_state_data_bank same {}", typeid(DataTypeItem).name());
         receiver << state;
       }
     });
@@ -207,14 +205,11 @@ private:
   }
 
   template <typename DataType> void UpdateOrder(const boost::hana::basic_type<DataType> &type) {
-    auto& order_queue = order_bank_[type];
+    auto& order_queue = ring_bank_[type];
     int i = 0;
     kungfu::state<DataType>* pstate = nullptr;
-    //  SPDLOG_INFO("UpdateOrder 1 {} pstate->update_time {}, pstate->source {}, pstate->dest {}, pstate->data ",i, pstate->update_time, pstate->source, pstate->dest);
     while( i < 1024 && order_queue.pop(pstate) && pstate != nullptr){
-    //  SPDLOG_INFO("UpdateOrder 2 {} pstate->update_time {}, pstate->source {}, pstate->dest {}, pstate->data ",i, pstate->update_time, pstate->source, pstate->dest);
       update_ledger(pstate->update_time, pstate->source, pstate->dest, pstate->data);
-    //  SPDLOG_INFO("UpdateOrder 2");
       i++;
     }
   }
