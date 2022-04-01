@@ -28,7 +28,7 @@
       </div>
       <div class="file-tree-body" v-if="strategyPath">
         <div class="scroll-view">
-            <div v-for="file in fileTree" :key="`${file.id}_${file.fileId}`">
+            <div v-for="file in fileTree">
                 <FileNode
                     v-if="file.root"
                     :count="0"
@@ -49,7 +49,7 @@ export default {
 }
 </script>
 <script setup lang="ts">
-import { defineProps, watch, ref, getCurrentInstance, ComponentInternalInstance, computed } from 'vue';
+import { defineProps, watch, ref, getCurrentInstance, ComponentInternalInstance, computed, toRefs } from 'vue';
 import path from 'path';
 import { storeToRefs } from 'pinia';
 import { dialog } from '@electron/remote';
@@ -69,14 +69,14 @@ const props = defineProps<{
     strategy: Code.Strategy
    
 }>()
-const { strategy } = props
+const { strategy } = toRefs(props)
 const strategyPath = ref<string>('')
 const strategyPathName = ref<string>('')
 const { proxy } = getCurrentInstance() as ComponentInternalInstance
 const { currentFile } = storeToRefs(useCodeStore());
 const fileTree = computed(() => store.fileTree)
 
-watch(strategy as Code.Strategy, newStrategy => {
+watch(strategy.value as Code.Strategy, newStrategy => {
     getPath(newStrategy);
     initFileTree(newStrategy).then (fileTree => {
         const entryPath: string = newStrategy.strategy_path
@@ -98,18 +98,18 @@ function handleBindStrategyFolder() {
         },
     ).then (strategyPath => {
             if (!strategyPath || !strategyPath.filePaths[0]) return;
-            if (!strategy?.strategy_id) return;
+            if (!strategy.value?.strategy_id) return;
             bindStrategyPath(strategyPath.filePaths[0]);
     });
 }
 
 //bind data中path 与 sqlite中path
 async function bindStrategyPath(strategyPathNew) {
-    if (strategy && strategy.strategy_id) {
-        await updateStrategyPath(strategy.strategy_id, strategyPathNew)
+    if (strategy && strategy.value.strategy_id) {
+        await updateStrategyPath(strategy.value.strategy_id, strategyPathNew)
         
         message.success(
-            `策略${strategy.strategy_id}文件路径修改成功！`,
+            `策略${strategy.value.strategy_id}文件路径修改成功！`,
         );
         //每次更新path，需要通知root组件更新stratgy
         proxy?.$emit('updateStrategy', strategyPathNew);
