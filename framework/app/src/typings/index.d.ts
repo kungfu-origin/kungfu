@@ -2,6 +2,7 @@
 /* eslint-disable  @typescript-eslint/no-explicit-any */
 
 declare namespace Code {
+    import { Stats } from 'fs-extra'
     export interface Strategy {
         strategy_id: string;
         strategy_path: string;
@@ -31,7 +32,7 @@ declare namespace Code {
         ext: string;
         filePath: string;
         children: FileIds;
-        stats: object;
+        stats: Stats;
         root: boolean;
         open: boolean;
         fileId?: number

@@ -811,61 +811,6 @@ declare namespace KungfuApi {
     processId: string;
   }
 }
-
-declare namespace Code {
-    export interface Strategy {
-        strategy_id: string;
-        strategy_path: string;
-        add_time: number;
-    }
-
-    export interface FileProps {
-        root?: boolean;
-        filePath?: string;
-        ext?: string;
-        isDir?: boolean
-    }
-
-    export interface FileIds {
-        file: number[];
-        folder: number[];
-    }
-    export interface FileTreeByPath {
-        ids: FileIds;
-        fileTree: IFileTree;
-    }
-    export interface FileData {
-        id: number;
-        parentId: number;
-        isDir: boolean;
-        name: string;
-        ext: string;
-        filePath: string;
-        children: FileIds;
-        stats: object;
-        root: boolean;
-        open: boolean;
-        fileId?: number
-    }
-
-    export type IFileTree = Record<string, FileData>
-
-
-    export interface IFileNode {
-        filePath: string;
-        root?: string;
-        children?: IFileNode;
-        name: string;
-    }
-
-
-    export interface ICodeSetting {
-        tabSpaceType: 'Spaces' | 'Tabs';
-        tabSpaceSize: '2' | '4'
-
-    }
-}
-
 declare module '@kungfu-trader/kungfu-core' {
   export function kungfu(): KungfuApi.Kungfu;
 }
