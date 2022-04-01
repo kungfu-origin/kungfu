@@ -57,7 +57,7 @@ import { message } from 'ant-design-vue';
 import { getTreeByFilePath } from '../../../assets/methods/codeUtils';
 import { useCodeStore } from '../store/codeStore'
 import FileNode from './FileNode.vue';
-import { updateStrategyPath } from '@kungfu-trader/kungfu-js-api/kungfu/store';
+import { updateStrategyPath } from '@kungfu-trader/kungfu-js-api/kungfu/strategy';
 import { findTargetFromArray } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { openFolder, buildFileObj } from '../../../assets/methods/codeUtils';
 

@@ -4,7 +4,7 @@
     import { removeLoadingMask, setHtmlTitle } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
     import Editor from './components/MonacoEditor.vue';
     import FileTree from './components/FileTree.vue';
-    import { getStrategyById } from '@kungfu-trader/kungfu-js-api/kungfu/store';
+    import { getStrategyById } from '@kungfu-trader/kungfu-js-api/kungfu/strategy';
     import { ClusterOutlined } from '@ant-design/icons-vue';
     import { useCodeStore } from './store/codeStore';
     import { ipcEmitDataByName } from '../../../renderer/ipcMsg/emitter'
@@ -49,7 +49,7 @@
 
     function handleUpdateStrategy(strategyPath) {
         if (!strategy.strategy_id) {
-            message.error('策略id不存在！')
+            message.error('策略id不存在!')
             return
         };
         updateStrategy(strategy.strategy_id, strategyPath);

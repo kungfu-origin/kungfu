@@ -241,7 +241,7 @@ declare namespace KungfuApi {
       group: string,
       name: string,
       mode: string,
-    )
+    ): KungfuApi.KfConfig
   }
 
   export interface DataTable<T> {

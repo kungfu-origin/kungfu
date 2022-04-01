@@ -2,7 +2,7 @@ import { ipcRenderer, remote } from 'electron';
 import {
   getStrategyById,
   updateStrategyPath,
-} from '@kungfu-trader/kungfu-js-api/kungfu/store';
+} from '@kungfu-trader/kungfu-js-api/kungfu/strategy';
 const { BrowserWindow } = remote;
 
 export function bindIPCListener() {

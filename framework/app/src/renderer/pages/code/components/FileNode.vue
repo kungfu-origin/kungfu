@@ -47,6 +47,7 @@
                     <span class="mouse-over" title="删除" @click.stop="handleDelete"><DeleteOutlined /></span>
                 </span>
             </div>
+            <div class="error-message" v-if="editError">{{ editErrorMessage }}</div>
         </div>
         <div v-if="fileNode && fileNode.children && fileNode.children.folder && fileNode['open']">
             <div v-for="id in fileNode.children.folder" :key="`${fileTree[id].id}_${fileTree[id].fileId}`">
@@ -168,29 +169,25 @@ function handleAddFileBlur(e) {
 }
 
 //添加/编辑输入检测
-// function handleAddEditFileInput(val, type): void {
+function handleAddEditFileInput(val): void {
     
-//     const siblings = getSiblingsName((fileNode as Code.FileData).parentId);
-//     const pattern = new RegExp('[\\ / : * ? " < > |]');
-//     if (siblings.indexOf(val) != -1) {
-//         if (type == 'edit' && val === (fileNode as Code.FileData).name) {
-//             return;
-//         }
-//         editError.value = true;
-//         editErrorMessage.value = `此位置已存在文件或文件夹 ${val} ，请选择其他名称！`;
-//     } else if (!val) {
-//         editError.value = true;
-//         editErrorMessage.value = '必须提供文件或文件夹名称！';
-//     } else if (pattern.test(val)) {
-//         editError.value = true;
-//         editErrorMessage.value = '名称不能包含\\/:*?"<>|';
-//     } else {
-//         editError.value = false;
-//         editErrorMessage.value = '';
-//     }
-// }
-
-
+    const siblings = getSiblingsName((fileNode as Code.FileData).parentId);
+    const pattern = new RegExp('[\\ / : * ? " < > |]');
+    if (siblings.indexOf(val) != -1) {
+        
+        editError.value = true;
+        editErrorMessage.value = `此位置已存在文件或文件夹 ${val} ，请选择其他名称！`;
+    } else if (!val) {
+        editError.value = true;
+        editErrorMessage.value = '必须提供文件或文件夹名称！';
+    } else if (pattern.test(val)) {
+        editError.value = true;
+        editErrorMessage.value = '名称不能包含\\/:*?"<>|';
+    } else {
+        editError.value = false;
+        editErrorMessage.value = '';
+    }
+}
 
 //重命名文件
 function handleRename(): void {
@@ -231,25 +228,22 @@ function handleDelete() {
 
 function changePath(e): void {
     const value = e.target.value
+    handleAddEditFileInput(value)
     editValue.value = value
 }
 function addChangePath(e): void {
     const value = e.target.value
+    handleAddEditFileInput(value)
     addValue.value = value
 }
 
 //重命名文件blur
 function handleEditFileBlur(e) {
-    // if (fileNode) {
-    //     fileNode.name = editValue.value
-    // }
-    // editValue.value = fileNode?.name || ''
     onEditing.value = false
-    // if (editError) {
-    //     resetStatus();
-    //     return;
-    // }
-    
+    if (editError) {
+        resetStatus();
+    }
+
     const oldPath = fileNode?.filePath || '';
     const newName = editValue.value
     const newPath = path.join(path.dirname(oldPath), newName);
@@ -350,10 +344,6 @@ onMounted(() => {
             
         }
     })
-    //添加高亮
-    // if (addPending.value) {
-    //   addPending.value.querySelectorAll('input')[0].focus();
-    // }
     //缓存filename
     fileName.value = fileNode ? fileNode.name : ''
 })
@@ -407,5 +397,19 @@ onMounted(() => {
             margin: 0 2px;
         }
     }
+    .error-message {
+        border: 1px solid red;
+        top: 30px;
+        width: calc(100% - 62px);
+        background: $bg_card;
+        border-radius: 3px;
+        left: 60px;
+        z-index: 999;
+        color: red !important;
+        padding: 5px 10px;
+        box-sizing: border-box;
+        line-height: 20px;
+        font-size: 12px;
+        }
 }
 </style>
