@@ -19,6 +19,7 @@ import {
   EXTENSION_DIRS,
   KFC_DIR,
   KF_HOME,
+  KF_RUNTIME_DIR,
 } from '../config/pathConfig';
 import { getKfGlobalSettingsValue } from '../config/globalSettings';
 
@@ -86,9 +87,10 @@ export type Pm2ProcessStatusTypes =
   | 'waiting restart'
   | 'one-launch-status';
 
-export interface Pm2ProcessStatusData {
-  [prop: string]: Pm2ProcessStatusTypes | undefined;
-}
+export type Pm2ProcessStatusData = Record<
+  string,
+  Pm2ProcessStatusTypes | undefined
+>;
 
 export interface Pm2ProcessStatusDetail {
   monit: ProcessDescription['monit'];
@@ -103,9 +105,7 @@ export interface Pm2ProcessStatusDetail {
   args: Pm2Env['args'];
 }
 
-export interface Pm2ProcessStatusDetailData {
-  [prop: string]: Pm2ProcessStatusDetail;
-}
+export type Pm2ProcessStatusDetailData = Record<string, Pm2ProcessStatusDetail>;
 
 export interface Pm2Env {
   pm_cwd?: string;
@@ -306,6 +306,7 @@ export const startProcess = (
     kill_timeout: 16000,
     env: {
       KF_HOME: dealSpaceInPath(KF_HOME),
+      KF_RUNTIME_DIR: dealSpaceInPath(KF_RUNTIME_DIR),
       LANG: `${locale}.UTF-8`,
       PYTHONUTF8: '1',
       PYTHONIOENCODING: 'utf8',
@@ -373,7 +374,12 @@ export function startProcessGetStatusUntilStop(
   });
 }
 
-export const startGetProcessStatus = (callback: Function) => {
+export const startGetProcessStatus = (
+  callback: (res: {
+    processStatus: Pm2ProcessStatusData;
+    processStatusWithDetail: Pm2ProcessStatusDetailData;
+  }) => void,
+) => {
   setTimerPromiseTask(() => {
     return listProcessStatus()
       .then((res) => {
@@ -594,9 +600,9 @@ async function preStartProcess(
 export const startMd = async (sourceId: string): Promise<Proc | void> => {
   const extDirs = await flattenExtensionModuleDirs(EXTENSION_DIRS);
   const args = buildArgs(
-    `-X ${extDirs
-      .map((dir) => path.dirname(dir))
-      .join(path.delimiter)} run -c md -g "${sourceId}" -n "${sourceId}"`,
+    `-X "${extDirs
+      .map((dir) => dealSpaceInPath(path.dirname(dir)))
+      .join(path.delimiter)}" run -c md -g "${sourceId}" -n "${sourceId}"`,
   );
   return startProcess({
     name: `md_${sourceId}`,
@@ -613,9 +619,9 @@ export const startTd = async (accountId: string): Promise<Proc | void> => {
   const extDirs = await flattenExtensionModuleDirs(EXTENSION_DIRS);
   const { source, id } = accountId.parseSourceAccountId();
   const args = buildArgs(
-    `-X ${extDirs
-      .map((dir) => path.dirname(dir))
-      .join(path.delimiter)} run -c td -g "${source}" -n "${id}"`,
+    `-X "${extDirs
+      .map((dir) => dealSpaceInPath(path.dirname(dir)))
+      .join(path.delimiter)}" run -c td -g "${source}" -n "${id}"`,
   );
   return startProcess({
     name: `td_${accountId}`,
@@ -634,9 +640,9 @@ export const startTask = async (
 ): Promise<Proc | void> => {
   const extDirs = await flattenExtensionModuleDirs(EXTENSION_DIRS);
   const argsResolved: string = buildArgs(
-    `-X ${extDirs
-      .map((dir) => path.dirname(dir))
-      .join(path.delimiter)} run -c strategy -g "${taskLocation.group}" -n "${
+    `-X "${extDirs
+      .map((dir) => dealSpaceInPath(path.dirname(dir)))
+      .join(path.delimiter)}" run -c strategy -g "${taskLocation.group}" -n "${
       taskLocation.name
     }" ${soPath} -a ${args}`,
   );
@@ -718,6 +724,23 @@ export const startDzxy = () => {
         ? path.join(process.cwd(), 'dist', 'cli')
         : path.resolve(__dirname),
     script: 'dzxy.js',
+    interpreter: path.join(KFC_DIR, kfcName),
+    force: true,
+    watch: process.env.NODE_ENV === 'production' ? false : true,
+    env: {
+      KFC_AS_VARIANT: 'node',
+    },
+  }).catch((err) => {
+    kfLogger.error(err.message);
+  });
+};
+
+export const startExtDaemon = (name: string, cwd: string, script: string) => {
+  return startProcess({
+    name,
+    args: '',
+    cwd,
+    script,
     interpreter: path.join(KFC_DIR, kfcName),
     force: true,
     watch: process.env.NODE_ENV === 'production' ? false : true,

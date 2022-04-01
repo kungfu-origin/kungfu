@@ -58,7 +58,7 @@ export const getAsset = (kfLocation: KungfuApi.KfLocation) => {
 
 export const reqCancelAllOrders = (kfLocation: KungfuApi.KfLocation) => {
   if (!globalState.DZXY_PM_ID) {
-    return Promise.resolve();
+    throw new Error('DZXY process not ready');
   }
 
   const { category, group, name } = kfLocation;
@@ -66,6 +66,17 @@ export const reqCancelAllOrders = (kfLocation: KungfuApi.KfLocation) => {
     category,
     group,
     name,
+  });
+};
+
+export const exportTradingData = (date, output_folder) => {
+  if (!globalState.DZXY_PM_ID) {
+    throw new Error('DZXY process not ready');
+  }
+
+  return sendDataToProcessIdByPm2('EXPORT', globalState.DZXY_PM_ID, {
+    date,
+    output_folder,
   });
 };
 

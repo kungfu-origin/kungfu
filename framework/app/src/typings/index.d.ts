@@ -149,6 +149,11 @@ interface TriggerUpdateStrategy {
   strategys: KungfuApi.KfConfig[];
 }
 
+interface TriggerUpdateExtConfigs {
+  tag: 'update:extConfigs';
+  extConfigs: KungfuApi.KfExtConfigs;
+}
+
 interface TriggerAddBoard {
   tag: 'addBoard';
   boardId: number;
@@ -166,6 +171,7 @@ type KfBusEvent =
   | TriggerUpdateTd
   | TriggerUpdateMd
   | TriggerUpdateStrategy
+  | TriggerUpdateExtConfigs
   | TriggerAddBoard
   | ExportTradingDataEvent;
 

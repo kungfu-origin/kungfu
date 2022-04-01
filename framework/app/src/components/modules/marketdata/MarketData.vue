@@ -11,7 +11,7 @@ import { computed } from 'vue';
 import { getColumns } from './config';
 import { ExchangeIds } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
 import {
-useExtConfigsRelated,
+  useExtConfigsRelated,
   useInstruments,
   useProcessStatusDetailData,
   useQuote,
@@ -132,7 +132,7 @@ function handleClickRow(row: KungfuApi.InstrumentResolved) {
             show-search
             v-model:value="searchInstrumentResult"
             placeholder="添加自选"
-            style="min-width: 100px"
+            style="min-width: 140px"
             :filter-option="false"
             :options="searchInstrumnetOptions"
             @search="handleSearchInstrument"

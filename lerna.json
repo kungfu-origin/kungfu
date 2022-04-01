@@ -1,5 +1,5 @@
 {
-  "version": "2.4.0-alpha.22",
+  "version": "2.4.0-alpha.26",
   "packages": [
     "framework/*",
     "developer/*",

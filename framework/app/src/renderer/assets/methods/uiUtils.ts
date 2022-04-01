@@ -15,6 +15,7 @@ import {
   kfLogger,
   removeJournal,
   removeDB,
+  getAvailDaemonList,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { ExchangeIds } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
 
@@ -26,6 +27,8 @@ import {
   KfUIExtLocatorTypes,
 } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import path from 'path';
+import { startExtDaemon } from '@kungfu-trader/kungfu-js-api/utils/processUtils';
+import { Proc } from 'pm2';
 
 // this utils file is only for ui components
 export const getUIComponents = (
@@ -138,11 +141,20 @@ const removeDBBeforeStartAll = (currentTradingDate: string): Promise<void> => {
   }
 };
 
-export const beforeStartAll = (): Promise<void[]> => {
+export const beforeStartAll = async (): Promise<(void | Proc)[]> => {
   const currentTradingDate = getTradingDate();
+  const availDaemon = await getAvailDaemonList();
+
   return Promise.all([
     removeJournalBeforeStartAll(currentTradingDate),
     removeDBBeforeStartAll(currentTradingDate),
+    ...availDaemon.map((item) =>
+      startExtDaemon(getProcessIdByKfLocation(item), item.cwd, item.script)
+        .then((res) => {
+          return res;
+        })
+        .catch((err) => console.error(err)),
+    ),
   ]);
 };
 

@@ -14,41 +14,18 @@ namespace kungfu::node {
 yijinjing::data::location_ptr ExtractLocation(const Napi::CallbackInfo &info, int index,
                                               const yijinjing::data::locator_ptr &locator);
 
-class Locator : public yijinjing::data::locator, public std::enable_shared_from_this<Locator> {
+inline yijinjing::data::locator_ptr GetRuntimeLocator(const std::string &dirname) {
+  return std::make_shared<yijinjing::data::locator>(dirname);
+}
 
-public:
-  explicit Locator(const Napi::Object &locator_obj);
+inline yijinjing::data::locator_ptr ExtractRuntimeLocatorByInfo0(const Napi::CallbackInfo &info) {
+  if (not IsValid(info, 0, &Napi::Value::IsString)) {
+    throw Napi::Error::New(info.Env(), "Invalid Info[0] type, not string");
+  }
 
-  ~Locator() override;
-
-  [[nodiscard]] bool has_env(const std::string &name) const override;
-
-  [[nodiscard]] std::string get_env(const std::string &name) const override;
-
-  [[nodiscard]] std::string layout_dir(const yijinjing::data::location_ptr &location,
-                                       longfist::enums::layout layout) const override;
-
-  [[nodiscard]] std::string layout_file(const yijinjing::data::location_ptr &location, longfist::enums::layout layout,
-                                        const std::string &name) const override;
-
-  [[nodiscard]] std::string default_to_system_db(const yijinjing::data::location_ptr &location,
-                                                 const std::string &name) const override;
-
-  [[nodiscard]] std::vector<uint32_t> list_page_id(const yijinjing::data::location_ptr &location,
-                                                   uint32_t dest_id) const override;
-
-  [[nodiscard]] std::vector<yijinjing::data::location_ptr> list_locations(const std::string &category,
-                                                                          const std::string &group,
-                                                                          const std::string &name,
-                                                                          const std::string &mode) const override;
-
-  [[nodiscard]] std::vector<uint32_t> list_location_dest(const yijinjing::data::location_ptr &location) const override;
-
-  Napi::Object get_js_locator();
-
-private:
-  Napi::ObjectReference locator_ref_;
-};
+  auto runtime_dir = info[0].As<Napi::String>().Utf8Value();
+  return GetRuntimeLocator(runtime_dir);
+}
 
 class IODevice : public Napi::ObjectWrap<IODevice>, public yijinjing::io_device {
 public:
@@ -57,8 +34,6 @@ public:
   Napi::Value OpenReader(const Napi::CallbackInfo &info);
 
   static yijinjing::data::locator_ptr GetLocator(const Napi::CallbackInfo &info, int index = 0);
-
-  static yijinjing::data::locator_ptr GetLocator(Napi::Array locators, int index = 0);
 
   static yijinjing::data::location_ptr GetLocation(const Napi::CallbackInfo &info);
 

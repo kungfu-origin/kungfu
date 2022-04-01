@@ -28,6 +28,7 @@ import {
   getAppStateStatusName,
   buildExtTypeMap,
   dealCategory,
+  getAvailDaemonList,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { writeCSV } from '@kungfu-trader/kungfu-js-api/utils/fileUtils';
 import {
@@ -1110,53 +1111,56 @@ export const useCurrentGlobalKfLocation = (
 
 export const useAllKfConfigData = (): Record<
   KfCategoryTypes,
-  KungfuApi.KfConfig[]
+  (KungfuApi.KfConfig | KungfuApi.KfExtraLocation)[]
 > => {
-  const allKfConfigData: Record<KfCategoryTypes, KungfuApi.KfConfig[]> =
-    reactive({
-      system: ref<KungfuApi.KfConfig[]>([
-        ...(process.env.NODE_ENV === 'development'
-          ? ([
-              {
-                location_uid: 0,
-                category: 'system',
-                group: 'service',
-                name: 'archive',
-                mode: 'live',
-                value: '',
-              },
-            ] as KungfuApi.KfConfig[])
-          : []),
-        {
-          location_uid: 0,
-          category: 'system',
-          group: 'master',
-          name: 'master',
-          mode: 'live',
-          value: '',
-        },
-        {
-          location_uid: 0,
-          category: 'system',
-          group: 'service',
-          name: 'ledger',
-          mode: 'live',
-          value: '',
-        },
-        {
-          location_uid: 0,
-          category: 'system',
-          group: 'service',
-          name: 'cached',
-          mode: 'live',
-          value: '',
-        },
-      ]),
+  const allKfConfigData: Record<
+    KfCategoryTypes,
+    (KungfuApi.KfConfig | KungfuApi.KfExtraLocation)[]
+  > = reactive({
+    system: ref<(KungfuApi.KfConfig | KungfuApi.KfExtraLocation)[]>([
+      ...(process.env.NODE_ENV === 'development'
+        ? ([
+            {
+              location_uid: 0,
+              category: 'system',
+              group: 'service',
+              name: 'archive',
+              mode: 'live',
+              value: '',
+            },
+          ] as KungfuApi.KfConfig[])
+        : []),
+      {
+        location_uid: 0,
+        category: 'system',
+        group: 'master',
+        name: 'master',
+        mode: 'live',
+        value: '',
+      },
+      {
+        location_uid: 0,
+        category: 'system',
+        group: 'service',
+        name: 'ledger',
+        mode: 'live',
+        value: '',
+      },
+      {
+        location_uid: 0,
+        category: 'system',
+        group: 'service',
+        name: 'cached',
+        mode: 'live',
+        value: '',
+      },
+    ]),
 
-      md: [],
-      td: [],
-      strategy: [],
-    });
+    daemon: [],
+    md: [],
+    td: [],
+    strategy: [],
+  });
 
   onMounted(() => {
     const { mdList, tdList, strategyList } = storeToRefs(useGlobalStore());
@@ -1164,6 +1168,10 @@ export const useAllKfConfigData = (): Record<
     allKfConfigData.md = mdList as unknown as KungfuApi.KfConfig[];
     allKfConfigData.td = tdList as unknown as KungfuApi.KfConfig[];
     allKfConfigData.strategy = strategyList as unknown as KungfuApi.KfConfig[];
+
+    getAvailDaemonList().then((daemonList) => {
+      allKfConfigData.daemon = daemonList;
+    });
   });
 
   return allKfConfigData;

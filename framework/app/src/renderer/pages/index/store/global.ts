@@ -174,6 +174,7 @@ export const useGlobalStore = defineStore('global', {
         td: this.tdList,
         md: this.mdList,
         strategy: this.strategyList,
+        daemon: [],
         system: [],
       };
 
@@ -205,6 +206,10 @@ export const useGlobalStore = defineStore('global', {
     setKfExtConfigs() {
       return getKfExtensionConfig().then(
         (kfExtConfigs: KungfuApi.KfExtConfigs) => {
+          globalBus.next({
+            tag: 'update:extConfigs',
+            extConfigs: kfExtConfigs,
+          });
           this.extConfigs = toRaw(kfExtConfigs);
         },
       );

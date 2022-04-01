@@ -283,6 +283,18 @@ export const processListObservable = () =>
           monit: processStatusWithDetail['ledger']?.monit,
         },
         {
+          processId: 'cached',
+          processName: 'CACHED',
+          typeName: colors.bgMagenta('Sys'),
+          category: 'system',
+          group: 'service',
+          name: 'cached',
+          value: {},
+          status: processStatus['cached'] || '--',
+          statusName: dealStatus(processStatus['cached'] || '--'),
+          monit: processStatusWithDetail['cached']?.monit,
+        },
+        {
           processId: 'dzxy',
           processName: 'DZXY',
           typeName: colors.bgMagenta('Sys'),
@@ -340,11 +352,15 @@ export const switchProcess = (
             }
           });
         } else {
-          messageBoard.log('Start master first', 2, (err) => {
-            if (err) {
-              console.error(err);
-            }
-          });
+          messageBoard.log(
+            'Start master first, If did, Please wait...',
+            2,
+            (err) => {
+              if (err) {
+                console.error(err);
+              }
+            },
+          );
         }
       }
       break;
@@ -352,11 +368,15 @@ export const switchProcess = (
     case 'td':
     case 'strategy':
       if (!globalState.DZXY_WATCHER_IS_LIVE) {
-        messageBoard.log('Start master first', 2, (err) => {
-          if (err) {
-            console.error(err);
-          }
-        });
+        messageBoard.log(
+          'Start master first, If did, Please wait...',
+          2,
+          (err) => {
+            if (err) {
+              console.error(err);
+            }
+          },
+        );
         return;
       }
 
@@ -425,10 +445,12 @@ const switchMaster = async (status: boolean): Promise<void> => {
       await killKungfu();
     }
   } else {
+    await delayMilliSeconds(1000);
     await startMaster(false);
     await delayMilliSeconds(1000);
     await startCacheD(false);
     await startLedger(false);
+    await delayMilliSeconds(1000);
     await startDzxy();
   }
 };
