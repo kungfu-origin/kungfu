@@ -140,7 +140,7 @@ function handleClickRow(data: {
         ? row.yesterday_volume
         : row.volume - row.yesterday_volume,
 
-    price: row.last_price || 0,
+    price: row.last_price || row.avg_open_price || 0,
     accountId: isTdStrategyCategory(currentGlobalKfLocation.value?.category)
       ? undefined
       : dealLocationUIDResolved(row.holder_uid),
