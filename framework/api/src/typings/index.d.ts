@@ -238,6 +238,12 @@ declare namespace KungfuApi {
       name: string,
       mode: string,
     ): void;
+    getConfig(
+      category: string,
+      group: string,
+      name: string,
+      mode: string,
+    ): KungfuApi.KfConfig
   }
 
   export interface DataTable<T> {
@@ -805,7 +811,6 @@ declare namespace KungfuApi {
     processId: string;
   }
 }
-
 declare module '@kungfu-trader/kungfu-core' {
   export function kungfu(): KungfuApi.Kungfu;
 }

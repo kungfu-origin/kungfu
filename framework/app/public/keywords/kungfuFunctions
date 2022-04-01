@@ -1,0 +1,7 @@
+pre_start
+post_start
+pre_stop
+post_stop
+on_quote
+on_order
+on_trade

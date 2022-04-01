@@ -312,7 +312,7 @@ export const delayMilliSeconds = (miliSeconds: number): Promise<void> => {
 export const findTargetFromArray = <T>(
   list: Array<T>,
   targetKey: string,
-  targetValue: string | number,
+  targetValue: string | number | boolean,
 ) => {
   const targetList = list.filter(
     (item) => (item || {})[targetKey] === targetValue,
@@ -1480,6 +1480,13 @@ export const initFormStateByConfig = (
 
   return formState;
 };
+
+//深度克隆obj
+export const deepClone = <T>(obj: T): T => {
+  if (!obj) return obj;
+  return JSON.parse(JSON.stringify(obj));
+};
+
 
 export function isCriticalLog(line: string): boolean {
   if (line.indexOf('critical') !== -1) {

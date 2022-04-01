@@ -25,6 +25,7 @@ import {
   dealAppStates,
   dealAssetsByHolderUID,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
+import { bindIPCListener } from '@kungfu-trader/kungfu-app/src/renderer/ipcMsg/ipcListener'
 
 const app = getCurrentInstance();
 const store = useGlobalStore();
@@ -76,6 +77,7 @@ const busSubscription = globalBus.subscribe((data: KfBusEvent) => {
 });
 
 onMounted(() => {
+    bindIPCListener()
   removeLoadingMask();
 
   window.addEventListener('resize', () => {
