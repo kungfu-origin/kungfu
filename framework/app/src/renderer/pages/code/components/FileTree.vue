@@ -7,22 +7,22 @@
           <span v-if="strategy">{{ strategy.strategy_id }}</span>
           （当前策略)
         </span>
-        <span class="deal-file">
+        <span class="tree-deal-file">
+             <span
+                class="create"
+                title="新建文件"
+                v-if="strategyPath"
+                @click="handleAddFile"
+            >
+                <FileAddFilled class="icon"/>
+            </span>
             <span
                 class="create"
                 title="新建文件夹"
                 v-if="strategyPath"
                 @click="handleAddFolder"
             >
-                <FolderAddOutlined />
-            </span>
-            <span
-                class="create"
-                title="新建文件"
-                v-if="strategyPath"
-                @click="handleAddFile"
-            >
-                <FileAddOutlined />
+                <FolderAddFilled class="icon"/>
             </span>
         </span>
       </div>
@@ -61,7 +61,7 @@ import { updateStrategyPath } from '@kungfu-trader/kungfu-js-api/kungfu/strategy
 import { findTargetFromArray } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { openFolder, buildFileObj } from '../../../assets/methods/codeUtils';
 
-import { FileAddOutlined, FolderAddOutlined } from '@ant-design/icons-vue';
+import { FileAddFilled, FolderAddFilled} from '@ant-design/icons-vue';
 
 const store = useCodeStore();
 
@@ -118,7 +118,9 @@ async function bindStrategyPath(strategyPathNew) {
 
 //加文件夹
 function handleAddFolder() {
-    const target = fileTree.value[currentFile.value.id];
+    let id: number = currentFile.value.id
+    let rootId: number = +store.getRootFileId
+    const target = fileTree.value[id] || fileTree.value[rootId]
     if (target.isDir) {
         openFolder(target, fileTree.value, true).then(() => {
             store.addFileFolderPending({ id: target.id, type: 'folder' })
@@ -139,7 +141,8 @@ function handleAddFolder() {
 //加文件
 function handleAddFile() {
     let id = currentFile.value.id
-    const target = fileTree.value[id];
+    let rootId: number = +store.getRootFileId
+    const target = fileTree.value[id] || fileTree.value[rootId]
     if (target.isDir) {
         openFolder(target, fileTree.value, true).then(() => {
             store.addFileFolderPending({ id: target.id, type: '' })
@@ -213,16 +216,13 @@ function bindFunctionalNode(fileTree) {
 </script>
 
 <style lang="less">
-@import '@kungfu-trader/kungfu-app/src/renderer/assets/less/code.less';
-
-@fileTreeWidth: 300px;
 .file-tree {
-    width: @fileTreeWidth;
+    width: 300px;
     padding-top: 8px;
     text-align: center;
     display: flex;
     flex-direction: column;
-    background: @bg_dark;
+    background: @component-background;
 
     .open-editor-folder {
         width: 90%;
@@ -238,10 +238,10 @@ function bindFunctionalNode(fileTree) {
         line-height: 30px;
         padding: 0px 8px;
         border-top: none;
-        border-bottom: 2px solid @bg_card;
+        border-bottom: 2px solid @component-background;
         text-align: left;
         box-sizing: border-box;
-        color: @input_bg;
+        color: @text-color;
         .name {
             span {
                 vertical-align: bottom;
@@ -252,13 +252,8 @@ function bindFunctionalNode(fileTree) {
                 overflow: hidden;
             }
         }
-        .deal-file {
-            float: right;
-            margin-right: 10px;
-            .create {
-                margin: 0 2px;
-                cursor: pointer;
-            }
+        .tree-deal-file {
+            display: none;
         }
         .folder-oper {
             cursor: pointer;
@@ -272,7 +267,7 @@ function bindFunctionalNode(fileTree) {
     .folder-name {
         height: 30px;
         line-height: 30px;
-        color: @font_1;
+        color: @text-color;
         text-align: left;
         display: flex;
         flex-direction: row;
@@ -281,10 +276,10 @@ function bindFunctionalNode(fileTree) {
             max-width: 100px;
             font-size: 14px;
             padding-right: 20px;
-            color: @font;
+            color: @text-color;
         }
         .title {
-            color: @input_bg;
+            color: @input-bg;
         }
     }
     .file-tree-content {
@@ -297,6 +292,23 @@ function bindFunctionalNode(fileTree) {
         .scroll-view {
             overflow-y: scroll;
 
+        }
+    }
+    &:hover {
+        .tree-deal-file {
+            display: block;
+            float: right;
+            margin-right: 10px;
+            .create {
+                margin: 0 2px;
+                cursor: pointer;
+                .icon {
+                    color: @text-color;
+                    &:hover {
+                        color: @icon-color-hover;
+                    }
+                }
+            }
         }
     }
 }

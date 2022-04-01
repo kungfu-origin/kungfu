@@ -5,7 +5,7 @@
         :class="{
             folder: type == 'folder',
             file: type !== 'folder',
-            active: fileNode?.id === currentFile?.id,
+            active: fileNode.name === currentFile.name,
         }"
     >
         <div @click.stop="handleClickFile(fileNode)">
@@ -24,6 +24,7 @@
                     @focus.stop="() => {}"
                     :value="addValue"
                     @change="addChangePath"
+                    @blur="handleAddFileBlur"
                     @pressEnter="handleAddFileBlur"
                 ></a-input>
                 <a-input
@@ -37,17 +38,18 @@
                     @click.stop="() => {}"
                     @focus.stop="() => {}"
                     @change="changePath"
+                    @blur="handleEditFileBlur"
                     @pressEnter="handleEditFileBlur"
                 ></a-input>
 
                 <span class="path text-overflow" v-if="fileNode && entryFile.filePath === fileNode.filePath && fileNode.filePath !== undefined && !onEditing">{{ '(入口文件)' }}</span>
                 <span class="path text-overflow" v-if="fileNode && fileNode.root" :title="fileNode.filePath">{{fileNode.filePath}}</span>
                 <span class="deal-file"  v-if="fileNode && !fileNode.root && !onEditing && id !== 'padding'">
-                    <span class="mouse-over" title="重命名" @click.stop="handleRename"><FormOutlined /></span>
-                    <span class="mouse-over" title="删除" @click.stop="handleDelete"><DeleteOutlined /></span>
+                    <span class="mouse-over" title="重命名" @click.stop="handleRename"><EditFilled class="icon"/></span>
+                    <span class="mouse-over" title="删除" @click.stop="handleDelete"><DeleteFilled class="icon"/></span>
                 </span>
             </div>
-            <div class="error-message" v-if="editError">{{ editErrorMessage }}</div>
+            <Alert class="error-message" :message="editErrorMessage" type="error" v-if="editError" style="{'padding-left': `${curCount * 16 + 20}px`}"/>
         </div>
         <div v-if="fileNode && fileNode.children && fileNode.children.folder && fileNode['open']">
             <div v-for="id in fileNode.children.folder" :key="`${fileTree[id].id}_${fileTree[id].fileId}`">
@@ -80,14 +82,14 @@ export default {
 
 
 <script setup lang="ts">
-import { FormOutlined, DeleteOutlined } from '@ant-design/icons-vue';
+import { EditFilled, DeleteFilled } from '@ant-design/icons-vue';
 import { useCodeStore } from '../store/codeStore'
 import iconFolderJSON from '../config/iconFolderConfig.json';
 import iconFileJSON from '../config/iconFileConfig.json';
 import path from 'path';
 import { storeToRefs } from 'pinia';
 import { onMounted, ref, nextTick } from 'vue';
-import { message, Modal } from 'ant-design-vue';
+import { message, Modal, Alert } from 'ant-design-vue';
 import { openFolder } from '../../../assets/methods/codeUtils';
 import { removeFileFolder, addFileSync } from '@kungfu-trader/kungfu-js-api/utils/fileUtils'
 import fse from 'fs-extra'
@@ -153,6 +155,8 @@ function handleAddFileBlur(e) {
     //添加文件
     try {
         const targetPath = (parentId !== null && parentId !== undefined) ? fileTree.value[parentId].filePath : '';
+        const typeName = type == 'folder' ? '文件夹' : '文件';
+
         if (type === 'folder' || type ==='file') {
             addFileSync(targetPath, filename, type);
         }
@@ -161,6 +165,7 @@ function handleAddFileBlur(e) {
             type: type,
         })
         reloadFolder(parentId, filename);
+        message.success(`${typeName}创建成功！`)
     } catch (err) {
         message.error(err.message || '操作失败！');
     }
@@ -341,7 +346,6 @@ onMounted(() => {
     nextTick(() => {
         if (fileNode) {
             iconPath.value = getIcon(fileNode)
-            
         }
     })
     //缓存filename
@@ -350,7 +354,6 @@ onMounted(() => {
 </script>
 
 <style lang="less">
-@import '@kungfu-trader/kungfu-app/src/renderer/assets/less/code.less';
 .c-app-code-file-node {
     .each-files {
         display: flex;
@@ -360,7 +363,7 @@ onMounted(() => {
         margin-right: 20px;
         padding: 2px 0px;
         padding-left: 5px;
-        color: @font_6;
+        color: @text-color;
         cursor: pointer;
         .text-overflow {
             overflow: hidden;
@@ -375,8 +378,8 @@ onMounted(() => {
             margin: 0 2px;
         }
         &:hover {
-            background-color: @bg_light;
-            color: @white;
+            background-color: @popover-customize-border-color;
+            color: @gold-base;
             .deal-file {
                 display: block;
             }
@@ -384,8 +387,8 @@ onMounted(() => {
     }
     .active {
         .each-files {
-            background-color: @bg_light;
-            color: @white;
+            background-color: @popover-customize-border-color;
+            color: @gold-base;
         }
     }
     .deal-file {
@@ -395,21 +398,23 @@ onMounted(() => {
         display: none;
         .mouse-over {
             margin: 0 2px;
+            .icon {
+                color: @text-color;
+                &:hover {
+                    color: @icon-color-hover;
+                }
+            }
         }
     }
     .error-message {
-        border: 1px solid red;
-        top: 30px;
-        width: calc(100% - 62px);
-        background: $bg_card;
-        border-radius: 3px;
-        left: 60px;
+        width: calc(100% - 10px);
         z-index: 999;
         color: red !important;
         padding: 5px 10px;
         box-sizing: border-box;
-        line-height: 20px;
-        font-size: 12px;
-        }
+        line-height: 12px;
+        font-size: 9px;
+    }
+    
 }
 </style>

@@ -134,4 +134,14 @@ export const useCodeStore = defineStore('code', {
       });
     },
   },
+  getters: {
+    getRootFileId(): string {
+      for (const id in this.fileTree) {
+        if (this.fileTree[id].root) {
+          return id;
+        }
+      }
+      return '';
+    },
+  },
 });
