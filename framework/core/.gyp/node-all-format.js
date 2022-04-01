@@ -6,6 +6,10 @@ dealSpawnSyncResult(spawnSync('yarn', ['format:js']));
 
 function dealSpawnSyncResult(res) {
   const { stderr, stdout } = res;
-  console.log(stdout.toString());
-  console.error(stderr.toString());
+  if (stdout) {
+    console.log(stdout.toString());
+  }
+  if (stderr) {
+    console.error(stderr.toString());
+  }
 }
