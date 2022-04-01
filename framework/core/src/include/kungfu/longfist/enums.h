@@ -132,7 +132,8 @@ enum class Side : int8_t {
   StockRepayStock,          //现券还券
   SurplusStockTransfer,     //余券划转
   GuaranteeStockTransferIn, //担保品转入
-  GuaranteeStockTransferOut //担保品转出
+  GuaranteeStockTransferOut, //担保品转出
+  Unknown = 127
 };
 
 inline std::ostream &operator<<(std::ostream &os, Side t) { return os << int8_t(t); }
