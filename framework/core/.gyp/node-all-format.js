@@ -1,35 +1,8 @@
-const path = require('path');
-const { spawnSync } = require('child_process');
-const moduleDir = path.resolve(
-  require.resolve('@kungfu-trader/kungfu-core'),
-  '..',
-  '..',
-);
+const { run } = require('./node-lib.js');
 
-dealSpawnSyncResult(
-  spawnSync('npm', ['run', 'format:cpp'], {
-    shell: true,
-    stdio: 'inherit',
-    windowsHide: true,
-    cwd: moduleDir,
-  }),
-);
-dealSpawnSyncResult(
-  spawnSync('npm', ['run', 'format:python'], {
-    shell: true,
-    stdio: 'inherit',
-    windowsHide: true,
-    cwd: moduleDir,
-  }),
-);
-dealSpawnSyncResult(
-  spawnSync('npm', ['run', 'format:js'], {
-    shell: true,
-    stdio: 'inherit',
-    windowsHide: true,
-    cwd: moduleDir,
-  }),
-);
+dealSpawnSyncResult(run('yarn', ['format:cpp']));
+dealSpawnSyncResult(run('yarn', ['format:python']));
+dealSpawnSyncResult(run('yarn', ['format:js']));
 
 function dealSpawnSyncResult(res) {
   const { stderr, stdout, error } = res;
