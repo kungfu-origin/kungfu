@@ -174,7 +174,6 @@ export const openNewBrowserWindow = (
   windowConfig?: Electron.BrowserWindowConstructorOptions,
 ): Promise<Electron.BrowserWindow> => {
   const currentWindow = getCurrentWindow();
-
   const modalPath =
     process.env.NODE_ENV !== 'production'
       ? `http://localhost:9090/${name}.html${params}`
@@ -235,6 +234,12 @@ export const openLogView = (
   return openNewBrowserWindow('logview', `?processId=${processId}`);
 };
 
+export const openCodeView = (
+  processId: string,
+): Promise<Electron.BrowserWindow> => {
+  return openNewBrowserWindow('code', `?processId=${processId}`);
+};
+
 export const removeLoadingMask = (): void => {
   const $loadingMask = document.getElementById('loading');
   if ($loadingMask) $loadingMask.remove();
@@ -288,6 +293,15 @@ export const handleOpenLogview = (
   const hideloading = message.loading('正在打开窗口');
   return openLogView(getProcessIdByKfLocation(config)).finally(() => {
     hideloading();
+  });
+};
+
+export const handleOpenCodeView = (
+  config: KungfuApi.KfConfig | KungfuApi.KfLocation,
+): Promise<Electron.BrowserWindow> => {
+  const openMessage = message.loading('正在打开代码编辑器');
+  return openCodeView(getProcessIdByKfLocation(config)).finally(() => {
+    openMessage();
   });
 };
 

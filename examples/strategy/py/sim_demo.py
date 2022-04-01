@@ -13,7 +13,6 @@ def pre_start(context):
 
 
 def on_quote(context, quote):
-    # context.logger.info(f"quote: {quote}")
     side = random.choice([Side.Buy, Side.Sell])
     side = Side.Buy
     price = quote.ask_price[0] if side == Side.Buy else quote.bid_price[0]

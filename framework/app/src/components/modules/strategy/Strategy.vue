@@ -15,6 +15,7 @@ import {
   useTableSearchKeyword,
   useDashboardBodySize,
   handleOpenLogview,
+  handleOpenCodeView
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import { getColumns } from './config';
 import {
@@ -215,7 +216,7 @@ function handleOpenFile(kfConfig: KungfuApi.KfConfig) {
               />
               <FormOutlined
                 style="font-size: 12px"
-                @click.stop="handleOpenFile(record)"
+                @click.stop="handleOpenCodeView(record)"
               ></FormOutlined>
               <SettingOutlined
                 style="font-size: 12px"
