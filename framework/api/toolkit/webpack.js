@@ -1,4 +1,5 @@
 const path = require('path');
+const TerserPlugin = require('terser-webpack-plugin');
 const ESLintPlugin = require('eslint-webpack-plugin');
 const { isProduction, getAppDir } = require('./utils');
 const appDir = getAppDir();
@@ -9,6 +10,10 @@ module.exports = {
     return {
       devtool: 'eval-source-map',
       mode: production ? 'production' : 'development',
+      optimization: {
+        minimize: true,
+        minimizer: [new TerserPlugin()],
+      },
       module: {
         rules: [
           ...(argv.passTJSLoader

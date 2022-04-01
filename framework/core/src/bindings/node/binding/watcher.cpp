@@ -6,6 +6,7 @@
 #include "commission_store.h"
 #include "config_store.h"
 #include "history.h"
+#include "kungfu/yijinjing/cache/ringqueue.h"
 #include <sstream>
 #include <uv.h>
 
@@ -293,7 +294,7 @@ void Watcher::Feed(const event_ptr &event) {
       UpdateBook(event->gen_time(), event->source(), event->dest(), quote);
       data_bank_ << typed_event_ptr<Quote>(event);
     }
-  }else {
+  } else {
     bool is_order(false);
     boost::hana::for_each(longfist::TradingDataTypes, [&](auto it) {
       using DataType = typename decltype(+boost::hana::second(it))::type;
@@ -302,7 +303,7 @@ void Watcher::Feed(const event_ptr &event) {
         is_order = true;
       }
     });
-    if(!is_order){
+    if (!is_order) {
       feed_state_data(event, data_bank_);
     }
   }
