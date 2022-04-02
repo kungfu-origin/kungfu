@@ -25,8 +25,8 @@
                     @click.stop="() => {}"
                     @focus.stop="() => {}"
                     @change="changePath"
-                    @blur="loseEditFocus"
-                    @pressEnter="loseEditFocus"
+                    @blur="handleEditFileBlur"
+                    @pressEnter="handleEditFileBlur"
                 ></a-input>
                 <a-input
                     v-else-if="!isPending && !onEditing"
@@ -40,7 +40,6 @@
                     @focus.stop="() => {}"
                     :value="addValue"
                     @change="addChangePath"
-                    @blur="loseFocus"
                     @pressEnter="handleAddFileBlur"
                 ></a-input>
                 <span class="path text-overflow" v-if="fileNode && entryFile.filePath === fileNode.filePath && fileNode.filePath !== undefined && !onEditing">{{ '(入口文件)' }}</span>
@@ -94,6 +93,7 @@ import { message, Modal, Alert } from 'ant-design-vue';
 import { openFolder } from '../../../assets/methods/codeUtils';
 import { removeFileFolder, addFileSync } from '@kungfu-trader/kungfu-js-api/utils/fileUtils'
 import fse from 'fs-extra'
+// import { debounce } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 
 const store = useCodeStore();
 
@@ -142,22 +142,22 @@ function handleClickFile(file) {
     }
 }
 
-function loseFocus() {
-    onEditing.value = false;
-    store.removeFileFolderPending({
-        id: fileNode.value?.parentId,
-        type: type,
-    })
-}
+// function loseFocus() {
+//     onEditing.value = false;
+//     store.removeFileFolderPending({
+//         id: fileNode.value?.parentId,
+//         type: type,
+//     })
+// }
 
-function loseEditFocus() {
-    if (!editValue.value) {
-        editValue.value = fileNode.value.name
-        handleEditFileBlur()
-    } else {
-        handleEditFileBlur()
-    }
-}
+// function loseEditFocus() {
+//     if (!editValue.value) {
+//         editValue.value = fileNode.value.name
+//         handleEditFileBlur()
+//     } else {
+//         handleEditFileBlur()
+//     }
+// }
 
 //添加文件或文件夹时
 function handleAddFileBlur(e) {
@@ -264,6 +264,7 @@ function addChangePath(e): void {
     handleAddEditFileInput(value)
     addValue.value = value
 }
+
 
 //重命名文件blur
 function handleEditFileBlur() {
