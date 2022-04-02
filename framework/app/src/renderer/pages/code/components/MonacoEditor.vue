@@ -31,10 +31,10 @@ monaco.languages.registerCompletionItemProvider('python', {
 });
 
 // currentFile
-const { currentFile, fileTree, kfConfig } = storeToRefs(useCodeStore());
-const code = computed(() => kfConfig['code']);
+const { currentFile, fileTree, globallSetting } = storeToRefs(useCodeStore());
+const code = computed(() => globallSetting['code']);
 
-let handleEditor: monaco.editor.IDiffNavigator = reactive({});
+let handleEditor: monaco.editor.IDiffNavigator = {};
 let file: Code.FileProps = reactive({});
 
 watch(code, (spaceTabSetting) => {
@@ -234,11 +234,5 @@ function pythonProvideCompletionItems(model, position, context, token) {
   .monaco-editor {
     height: 100vh !important;
   }
-}
-</style>
-<style lang="less" scoped>
-.code-editor {
-  width: 100%;
-  height: 100vh;
 }
 </style>

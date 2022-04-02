@@ -11,7 +11,7 @@ interface ICodeState {
   currentFile: Code.FileData;
   entryFile: Code.FileData;
   fileTree: Code.IFileTree;
-  kfConfig: Record<string, Record<string, KungfuApi.KfConfigValue>>;
+  globallSetting: Record<string, Record<string, KungfuApi.KfConfigValue>>;
 }
 
 export const useCodeStore = defineStore('code', {
@@ -22,7 +22,7 @@ export const useCodeStore = defineStore('code', {
       currentFile: {} as Code.FileData, //文件树高亮
       entryFile: {} as Code.FileData, //入口文件
       fileTree: {}, //文件树
-      kfConfig: {}, // kf 配置
+      globallSetting: {}, // kf 配置
     };
   },
   actions: {
@@ -112,25 +112,27 @@ export const useCodeStore = defineStore('code', {
     },
 
     async getKungfuConfig(): Promise<void> {
-      const kfConfig = fse.readJsonSync(KF_CONFIG_PATH);
-      await this.setKungfuConfig(kfConfig);
+      const globallSetting = fse.readJsonSync(KF_CONFIG_PATH);
+      await this.setKungfuConfig(globallSetting);
     },
 
-    setKungfuConfig(kfConfig: KungfuApi.KfLocation | KungfuApi.KfConfig): void {
-      Object.keys(kfConfig || {}).forEach((key) => {
-        this.kfConfig[key] = kfConfig[key];
+    setKungfuConfig(
+      globallSetting: KungfuApi.KfLocation | KungfuApi.KfConfig,
+    ): void {
+      Object.keys(globallSetting || {}).forEach((key) => {
+        this.globallSetting[key] = globallSetting[key];
       });
     },
 
     setKungfuConfigByKeys(
-      kfConfig: KungfuApi.KfLocation | KungfuApi.KfConfig,
+      globallSetting: KungfuApi.KfLocation | KungfuApi.KfConfig,
     ): void {
-      Object.keys(kfConfig || {}).forEach((key) => {
-        this.kfConfig[key] = kfConfig[key];
+      Object.keys(globallSetting || {}).forEach((key) => {
+        this.globallSetting[key] = globallSetting[key];
       });
       fse.outputJsonSync(KF_CONFIG_PATH, {
-        ...this.kfConfig,
-        ...kfConfig,
+        ...this.globallSetting,
+        ...globallSetting,
       });
     },
   },
