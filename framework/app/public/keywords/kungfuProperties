@@ -3,6 +3,7 @@ suscribe
 insert_order
 cancel_order
 book
+get_account_book
 avail
 positions
 get_position

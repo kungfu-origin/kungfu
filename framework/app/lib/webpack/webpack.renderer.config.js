@@ -2,7 +2,7 @@
 
 const toolkit = require('@kungfu-trader/kungfu-js-api/toolkit');
 const path = require('path');
-// const CopyPlugin = require('copy-webpack-plugin');
+const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
 
 const webpack = require('webpack');
 const { merge } = require('webpack-merge');
@@ -74,7 +74,14 @@ const webpackConfig = (argv) => {
         },
       ],
     },
-    plugins: [...pagesConfig.plugins, new VueLoaderPlugin()],
+    plugins: [
+      ...pagesConfig.plugins,
+      new VueLoaderPlugin(),
+      new MonacoWebpackPlugin({
+        publicPath: 'monaco',
+        languages: ['python', 'cpp', 'yaml', 'json'],
+      }),
+    ],
     target: 'electron-renderer',
   });
 };

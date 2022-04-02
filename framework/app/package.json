@@ -36,7 +36,6 @@
     "core-js": "^3.20.0",
     "iconv-lite": "^0.6.3",
     "jschardet": "^3.0.0",
-    "monaco-editor": "^0.33.0",
     "pinia": "^2.0.0",
     "rxjs": "^7.5.0",
     "vue": "^3.2.31"
@@ -49,6 +48,8 @@
     "electron": "^13.0.0",
     "fs-extra": "^10.0.0",
     "minimist": "^1.2.5",
+    "monaco-editor": "^0.33.0",
+    "monaco-editor-webpack-plugin": "^7.0.1",
     "vue-router": "^4.0.0"
   }
 }

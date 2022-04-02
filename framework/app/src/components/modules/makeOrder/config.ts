@@ -67,7 +67,7 @@ export const getConfigSettings = (
       required: true,
     },
     {
-      key: 'price',
+      key: 'limit_price',
       name: priceType === PriceTypeEnum.Limit ? '价格' : '保护价格',
       type: 'float',
       required: priceType === PriceTypeEnum.Limit ? true : false,
