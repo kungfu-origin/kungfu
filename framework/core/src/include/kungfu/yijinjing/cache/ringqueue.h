@@ -58,7 +58,7 @@ public:
         head_ = tail_ + 1;
       }
       new (node) T(p_data);
-      tail_++;
+      tail_ = tail_ + 1;
       mtx_.unlock();
       return true;
     } else {
@@ -78,7 +78,7 @@ public:
         return false;
       }
       node = &queue_[head_ & capacityMask_];
-      head_++;
+      head_ = head_ + 1;
       *pop_value_ = *node;
       result = pop_value_;
       node->~T();
