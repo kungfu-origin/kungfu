@@ -12,36 +12,36 @@
             <div class="each-files" :style="{'padding-left': `${curCount * 16 + 5}px`}">
                 <i v-if="type == 'folder' && fileNode && !fileNode.root"></i>
                 <img class="file-icon" :src="iconPath" v-if="iconPath">
-                <span class="file-name" v-if="id !== 'pedding' &&  fileNode && !onEditing && fileNode.name">{{ fileNode.name }}</span>
-
-                <a-input
-                    v-else-if="id === 'pending'"
-                    ref="addPending"
-                    :class="{ error: editError }"
-                    v-model.trim="fileName"
-                    size="small"
-                    @click.stop="() => {}"
-                    @focus.stop="() => {}"
-                    :value="addValue"
-                    @change="addChangePath"
-                    @blur="handleAddFileBlur"
-                    @pressEnter="handleAddFileBlur"
-                ></a-input>
+                <span class="file-name" v-if="fileNode && !onEditing && fileNode.name">{{ fileNode.name }}</span>
                 <a-input
                     v-else-if="onEditing"
                     ref="edit-name"
                     :class="{ error: editError }"
                     v-model.trim="fileName"
-                    :defaultValue="fileNode?.name"
                     size="small"
                     :value="editValue"
+                    autofocus="autofocus"
+                    style="margin-left: 2px"
                     @click.stop="() => {}"
                     @focus.stop="() => {}"
                     @change="changePath"
                     @blur="handleEditFileBlur"
                     @pressEnter="handleEditFileBlur"
                 ></a-input>
-
+                <a-input
+                    v-else-if="!isPending && !onEditing"
+                    ref="addPending"
+                    :class="{ error: editError }"
+                    v-model.trim="fileName"
+                    size="small"
+                    style="margin-left: 2px"
+                    autofocus="autofocus"
+                    @click.stop="() => {}"
+                    @focus.stop="() => {}"
+                    :value="addValue"
+                    @change="addChangePath"
+                    @pressEnter="handleAddFileBlur"
+                ></a-input>
                 <span class="path text-overflow" v-if="fileNode && entryFile.filePath === fileNode.filePath && fileNode.filePath !== undefined && !onEditing">{{ '(入口文件)' }}</span>
                 <span class="path text-overflow" v-if="fileNode && fileNode.root" :title="fileNode.filePath">{{fileNode.filePath}}</span>
                 <span class="deal-file"  v-if="fileNode && !fileNode.root && !onEditing && id !== 'padding'">
@@ -52,7 +52,7 @@
             <Alert class="error-message" :message="editErrorMessage" type="error" v-if="editError" style="{'padding-left': `${curCount * 16 + 20}px`}"/>
         </div>
         <div v-if="fileNode && fileNode.children && fileNode.children.folder && fileNode['open']">
-            <div v-for="id in fileNode.children.folder" :key="`${fileTree[id].id}_${fileTree[id].fileId}`">
+            <div v-for="id in fileNode.children.folder">
                 <ComFileNode
                     :fileNode="fileTree[id]"
                     :id="id"
@@ -62,7 +62,7 @@
             </div>
         </div>
         <div v-if="fileNode && fileNode.children && fileNode.children.file && fileNode['open']">
-            <div v-for="id in fileNode.children.file" :key="`${fileTree[id].id}_${fileTree[id].fileId}`">
+            <div v-for="id in fileNode.children.file">
                 <ComFileNode
                     :fileNode="fileTree[id]"
                     :id="id"
@@ -88,11 +88,12 @@ import iconFolderJSON from '../config/iconFolderConfig.json';
 import iconFileJSON from '../config/iconFileConfig.json';
 import path from 'path';
 import { storeToRefs } from 'pinia';
-import { onMounted, ref, nextTick } from 'vue';
+import { onMounted, ref, nextTick, toRefs, computed } from 'vue';
 import { message, Modal, Alert } from 'ant-design-vue';
 import { openFolder } from '../../../assets/methods/codeUtils';
 import { removeFileFolder, addFileSync } from '@kungfu-trader/kungfu-js-api/utils/fileUtils'
 import fse from 'fs-extra'
+// import { debounce } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 
 const store = useCodeStore();
 
@@ -105,7 +106,8 @@ const props = defineProps<{
 }>()
 
 
-const { fileNode, type, id, count } = props
+const { type, count } = props
+const { fileNode, id } = toRefs(props)
 const curCount = ref<number>(+(count || 0))
 const childCount = ref<number>(curCount.value + 1)
 
@@ -117,8 +119,12 @@ const beforeDelate = ref<boolean>(true)
 
 const editErrorMessage = ref<string>('');
 
-const editValue = ref<string>(fileNode?.name || '')
-const addValue = ref<string>(fileNode?.name || '')
+const editValue = ref<string>('')
+const addValue = ref<string>('')
+const isPending = computed(() => {
+    return fileTree.value['pending']['parentId'] === id.value
+})
+
 
 const { fileTree, entryFile, currentFile } = storeToRefs(store)
 
@@ -136,18 +142,35 @@ function handleClickFile(file) {
     }
 }
 
+// function loseFocus() {
+//     onEditing.value = false;
+//     store.removeFileFolderPending({
+//         id: fileNode.value?.parentId,
+//         type: type,
+//     })
+// }
+
+// function loseEditFocus() {
+//     if (!editValue.value) {
+//         editValue.value = fileNode.value.name
+//         handleEditFileBlur()
+//     } else {
+//         handleEditFileBlur()
+//     }
+// }
+
 //添加文件或文件夹时
 function handleAddFileBlur(e) {
     e.stopPropagation();
     const filename = addValue.value
     //test 重复 或 为空
-    const parentId = fileNode?.parentId;
+    const parentId = fileNode.value?.parentId;
     if (parentId === null || parentId === undefined) return;
     const names = getSiblingsName(parentId);
     //如果为空则直接删除（重复会通过@input来判断）
     if (names.indexOf(filename) != -1 || !filename) {
         store.removeFileFolderPending({
-            id: fileNode?.parentId,
+            id: fileNode.value?.parentId,
             type: type,
         })
         return;
@@ -161,7 +184,7 @@ function handleAddFileBlur(e) {
             addFileSync(targetPath, filename, type);
         }
         store.removeFileFolderPending({
-            id: fileNode?.parentId,
+            id: fileNode.value?.parentId,
             type: type,
         })
         reloadFolder(parentId, filename);
@@ -176,7 +199,7 @@ function handleAddFileBlur(e) {
 //添加/编辑输入检测
 function handleAddEditFileInput(val): void {
     
-    const siblings = getSiblingsName((fileNode as Code.FileData).parentId);
+    const siblings = getSiblingsName((fileNode.value as Code.FileData).parentId);
     const pattern = new RegExp('[\\ / : * ? " < > |]');
     if (siblings.indexOf(val) != -1) {
         
@@ -201,7 +224,7 @@ function handleRename(): void {
 
 //删除文件
 function handleDelete() {
-    const parentId = fileNode?.parentId;
+    const parentId = fileNode.value?.parentId;
     const typeName = type == 'folder' ? '文件夹' : '文件';
     Modal.confirm({
         title: '提示',
@@ -209,7 +232,7 @@ function handleDelete() {
         okText: '确 定',
         cancelText: '取 消',
         onOk() {
-            removeFileFolder(fileNode?.filePath || '').then(() => {
+            removeFileFolder(fileNode.value?.filePath || '').then(() => {
                 store.setCurrentFile(entryFile.value)
             }).then(() =>
                 openFolder(
@@ -242,17 +265,18 @@ function addChangePath(e): void {
     addValue.value = value
 }
 
+
 //重命名文件blur
-function handleEditFileBlur(e) {
+function handleEditFileBlur() {
     onEditing.value = false
     if (editError) {
         resetStatus();
     }
 
-    const oldPath = fileNode?.filePath || '';
+    const oldPath = fileNode.value?.filePath || '';
     const newName = editValue.value
     const newPath = path.join(path.dirname(oldPath), newName);
-    const parentId = fileNode?.parentId;
+    const parentId = fileNode.value?.parentId;
     
     // 更改文件名
     fse.rename(oldPath, newPath).then(() => {
@@ -262,7 +286,7 @@ function handleEditFileBlur(e) {
 
 //重制状态
 function resetStatus(): void {
-    fileName.value = fileNode?.name || '';
+    fileName.value = fileNode.value?.name || '';
     onEditing.value = false;
     editError.value = false;
     editErrorMessage.value = '';
@@ -345,11 +369,11 @@ function getSiblingsName(parentId) {
 onMounted(() => {
     nextTick(() => {
         if (fileNode) {
-            iconPath.value = getIcon(fileNode)
+            iconPath.value = getIcon(fileNode.value)
         }
     })
     //缓存filename
-    fileName.value = fileNode ? fileNode.name : ''
+    fileName.value = fileNode ? fileNode.value.name : ''
 })
 </script>
 
@@ -364,6 +388,7 @@ onMounted(() => {
         padding: 2px 0px;
         padding-left: 5px;
         color: @text-color;
+        font-size: 14px;
         cursor: pointer;
         .text-overflow {
             overflow: hidden;
@@ -375,7 +400,7 @@ onMounted(() => {
             height: 20px;
         }
         .file-name {
-            margin: 0 2px;
+            margin: 0 4px;
         }
         &:hover {
             background-color: @popover-customize-border-color;
@@ -407,14 +432,14 @@ onMounted(() => {
         }
     }
     .error-message {
-        width: calc(100% - 10px);
+        width: calc(100% - 34px);
         z-index: 999;
-        color: red !important;
         padding: 5px 10px;
         box-sizing: border-box;
         line-height: 12px;
         font-size: 9px;
+        margin-top: 5px;
+        margin-left: 15px;
     }
-    
 }
 </style>
