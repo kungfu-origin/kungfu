@@ -114,6 +114,7 @@ void master::publish_trading_day() { write_trading_day(0, get_writer(location::P
 void master::react() {
   events_ | is(RequestWriteTo::tag) | $$(on_request_write_to(event));
   events_ | is(RequestReadFrom::tag) | $$(on_request_read_from(event));
+  events_ | is(RequestReadFrom::tag) | $$(check_cached_ready_to_read(event));
   events_ | is(RequestReadFromPublic::tag) | $$(on_request_read_from_public(event));
   events_ | is(Channel::tag) | $$(on_channel_request(event));
   events_ | is(TimeRequest::tag) | $$(on_time_request(event));
@@ -172,19 +173,6 @@ void master::feed(const event_ptr &event) {
 
 void master::pong(const event_ptr &event) { get_io_device()->get_publisher()->publish("{}"); }
 
-void master::on_request_cached_done(const event_ptr &event) {
-  auto request_cached_done_data = event->data<RequestCachedDone>();
-  auto app_uid = request_cached_done_data.dest_id;
-  if (writers_.find(app_uid) == writers_.end()) {
-    SPDLOG_ERROR("no app_uid {} in writers_ ", get_location_uname(app_uid));
-    return;
-  }
-  auto app_cmd_writer = writers_.at(app_uid);
-  app_cmd_writer->mark(now(), RequestStart::tag);
-  write_registries(event->gen_time(), app_cmd_writer);
-  write_channels(event->gen_time(), app_cmd_writer);
-}
-
 void master::on_request_write_to(const event_ptr &event) {
   const RequestWriteTo &request = event->data<RequestWriteTo>();
   auto trigger_time = event->gen_time();
@@ -219,6 +207,39 @@ void master::on_request_read_from(const event_ptr &event) {
   channel.dest_id = app_uid;
   register_channel(trigger_time, channel);
   get_writer(location::PUBLIC)->write(trigger_time, channel);
+}
+
+void master::check_cached_ready_to_read(const event_ptr &event) {
+  const RequestReadFrom &request = event->data<RequestReadFrom>();
+  auto trigger_time = event->gen_time();
+  auto app_uid = event->source();
+  auto read_from_source_id = request.source_id;
+  const location_ptr &read_from_source_location = get_location(read_from_source_id);
+
+  SPDLOG_INFO("~~~~~~~~");
+  SPDLOG_INFO("~~~~~~~~");
+  SPDLOG_INFO("~~~~~~~~");
+  SPDLOG_INFO("check_cached_ready_to_read app_uid {} source_id {} source_location c {} g {} n {}",
+              get_location_uname(app_uid), get_location_uname(request.source_id), read_from_source_location->category,
+              read_from_source_location->group, read_from_source_location->name);
+
+  if (read_from_source_location->group == "service" and read_from_source_location->name == "cached") {
+    SPDLOG_INFO("============");
+    SPDLOG_INFO("============");
+    SPDLOG_INFO("============");
+    SPDLOG_INFO("============");
+    auto app_cmd_writer = get_writer(read_from_source_id);
+    app_cmd_writer->mark(now(), CachedReadyToRead::tag);
+  }
+}
+
+void master::on_request_cached_done(const event_ptr &event) {
+  auto request_cached_done_data = event->data<RequestCachedDone>();
+  auto app_uid = request_cached_done_data.dest_id;
+  auto app_cmd_writer = get_writer(app_uid);
+  app_cmd_writer->mark(now(), RequestStart::tag);
+  write_registries(event->gen_time(), app_cmd_writer);
+  write_channels(event->gen_time(), app_cmd_writer);
 }
 
 void master::on_request_read_from_public(const event_ptr &event) {

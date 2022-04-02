@@ -78,8 +78,7 @@ const webpackConfig = (argv) => {
       ...pagesConfig.plugins,
       new VueLoaderPlugin(),
       new MonacoWebpackPlugin({
-        publicPath: 'monaco',
-        languages: ['python', 'cpp', 'yaml', 'json'],
+        languages: ['python', 'yaml', 'json'],
       }),
     ],
     target: 'electron-renderer',

@@ -1,58 +1,3 @@
-/* eslint-disable  @typescript-eslint/no-unused-vars */
-/* eslint-disable  @typescript-eslint/no-explicit-any */
-
-declare namespace Code {
-    import { Stats } from 'fs-extra'
-    export interface Strategy {
-        strategy_id: string;
-        strategy_path: string;
-        add_time: number;
-    }
-
-    export interface FileProps {
-        root?: boolean;
-        filePath?: string;
-        ext?: string;
-        isDir?: boolean
-    }
-
-    export interface FileIds {
-        file: number[];
-        folder: number[];
-    }
-    export interface FileTreeByPath {
-        ids: FileIds;
-        fileTree: IFileTree;
-    }
-    export interface FileData {
-        id: number;
-        parentId: number;
-        isDir: boolean;
-        name: string;
-        ext: string;
-        filePath: string;
-        children: FileIds;
-        stats: Stats;
-        root: boolean;
-        open: boolean;
-        fileId?: number
-    }
-
-    export type IFileTree = Record<string, FileData>
-
-    export interface IFileNode {
-        filePath: string;
-        root?: string;
-        children?: IFileNode;
-        name: string;
-    }
-
-    export interface ICodeSetting {
-        tabSpaceType: 'Spaces' | 'Tabs';
-        tabSpaceSize: '2' | '4'
-
-    }
-}
 namespace KfLayout {
   type ContentId = string;
   type BoardId = number;
@@ -203,7 +148,6 @@ interface KfTradingDataTableHeaderConfig {
     | 'actions';
   sorter?: (a: any, b: any) => number;
 }
-
 
 declare module 'worker-loader!*' {
   class WebpackWorker extends Worker {

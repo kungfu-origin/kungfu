@@ -33,7 +33,7 @@ inline location_ptr make_master_location(const std::string &name, const locator_
   return location::make_shared(mode::LIVE, category::SYSTEM, "master", name, locator);
 }
 
-inline location_ptr maske_cached_location(const locator_ptr &locator) {
+inline location_ptr make_cached_location(const locator_ptr &locator) {
   return location::make_shared(mode::LIVE, category::SYSTEM, "service", "cached", locator);
 }
 
@@ -41,7 +41,7 @@ apprentice::apprentice(location_ptr home, bool low_latency)
     : hero(std::make_shared<io_device_client>(home, low_latency)),
       master_home_location_(make_master_location("master", get_locator())),
       master_cmd_location_(make_master_location(fmt::format("{:08x}", get_live_home_uid()), get_locator())),
-      cached_home_location_(maske_cached_location(get_locator())), state_bank_(), trading_day_(time::today_start()) {
+      cached_home_location_(make_cached_location(get_locator())), state_bank_(), trading_day_(time::today_start()) {
   add_location(0, master_home_location_);
   add_location(0, master_cmd_location_);
   add_location(0, cached_home_location_);
@@ -239,6 +239,15 @@ void apprentice::on_read_from(const event_ptr &event) {
   // In on read to ensure the write in cached established
   auto source_id = event->data<RequestReadFrom>().source_id;
   if (source_id == cached_home_location_->uid) {
+    SPDLOG_INFO("-------");
+    SPDLOG_INFO("-------");
+    SPDLOG_INFO("-------");
+    SPDLOG_INFO("-------");
+    SPDLOG_INFO("-------");
+    SPDLOG_INFO("-------");
+    SPDLOG_INFO("-------");
+    SPDLOG_INFO("-------");
+    SPDLOG_INFO("-------");
     request_cached(source_id);
   }
 }
