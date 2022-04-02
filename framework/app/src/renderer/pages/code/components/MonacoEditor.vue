@@ -33,8 +33,8 @@ monaco.languages.registerCompletionItemProvider('python', {
 const store = useCodeStore();
 
 // currentFile
-const { currentFile, fileTree, kfConfig } = storeToRefs(store)
-const code = computed(() => kfConfig['code'])
+const { currentFile, fileTree, globallSetting } = storeToRefs(store)
+const code = computed(() => globallSetting['code'])
 
 
 let handleEditor: monaco.editor.IDiffNavigator = reactive({})

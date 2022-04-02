@@ -1,6 +1,6 @@
 <template>
   <div class="file-tree">
-    <a-button type="primary" class="open-editor-folder" @click="handleBindStrategyFolder">设置策略入口文件</a-button>
+    <a-button type="default" class="open-editor-folder" @click="handleBindStrategyFolder">设置策略入口文件</a-button>
     <div class="file-tree-content">
       <div class="strategy-name">
         <span class="name">
@@ -49,7 +49,7 @@ export default {
 }
 </script>
 <script setup lang="ts">
-import { defineProps, watch, ref, getCurrentInstance, ComponentInternalInstance, computed, toRefs } from 'vue';
+import { defineProps, watch, ref, getCurrentInstance, ComponentInternalInstance, toRefs } from 'vue';
 import path from 'path';
 import { storeToRefs } from 'pinia';
 import { dialog } from '@electron/remote';
@@ -67,21 +67,19 @@ const store = useCodeStore();
 
 const props = defineProps<{
     strategy: Code.Strategy
-   
 }>()
 const { strategy } = toRefs(props)
 const strategyPath = ref<string>('')
 const strategyPathName = ref<string>('')
 const { proxy } = getCurrentInstance() as ComponentInternalInstance
-const { currentFile } = storeToRefs(useCodeStore());
-const fileTree = computed(() => store.fileTree)
+const { currentFile, fileTree } = storeToRefs(useCodeStore());
 
 watch(strategy.value as Code.Strategy, newStrategy => {
     getPath(newStrategy);
-    initFileTree(newStrategy).then (fileTree => {
+    initFileTree(newStrategy).then (fileItem => {
         const entryPath: string = newStrategy.strategy_path
         
-        const currentFile = findTargetFromArray<Code.FileData>(Object.values(fileTree), 'filePath' , entryPath)
+        const currentFile = findTargetFromArray<Code.FileData>(Object.values(fileItem), 'filePath' , entryPath)
         
         if (currentFile) {
             store.setEntryFile(currentFile)

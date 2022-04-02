@@ -14,29 +14,33 @@
                 <img class="file-icon" :src="iconPath" v-if="iconPath">
                 <span class="file-name" v-if="fileNode && !onEditing && fileNode.name">{{ fileNode.name }}</span>
                 <a-input
-                    v-else-if="onEditing && isPending"
+                    v-else-if="onEditing"
                     ref="edit-name"
                     :class="{ error: editError }"
                     v-model.trim="fileName"
                     size="small"
                     :value="editValue"
+                    autofocus="autofocus"
+                    style="margin-left: 2px"
                     @click.stop="() => {}"
                     @focus.stop="() => {}"
                     @change="changePath"
-                    @blur="handleEditFileBlur"
-                    @pressEnter="handleEditFileBlur"
+                    @blur="loseEditFocus"
+                    @pressEnter="loseEditFocus"
                 ></a-input>
                 <a-input
-                    v-else-if="!isPending"
+                    v-else-if="!isPending && !onEditing"
                     ref="addPending"
                     :class="{ error: editError }"
                     v-model.trim="fileName"
                     size="small"
+                    style="margin-left: 2px"
+                    autofocus="autofocus"
                     @click.stop="() => {}"
                     @focus.stop="() => {}"
                     :value="addValue"
                     @change="addChangePath"
-                    @blur="handleAddFileBlur"
+                    @blur="loseFocus"
                     @pressEnter="handleAddFileBlur"
                 ></a-input>
                 <span class="path text-overflow" v-if="fileNode && entryFile.filePath === fileNode.filePath && fileNode.filePath !== undefined && !onEditing">{{ '(入口文件)' }}</span>
@@ -135,6 +139,23 @@ function handleClickFile(file) {
     //如果children为空，读取文件夹下文件，赋值children
     if (type == 'folder' && !file.root) {
         openFolder(file, fileTree.value);
+    }
+}
+
+function loseFocus() {
+    onEditing.value = false;
+    store.removeFileFolderPending({
+        id: fileNode.value?.parentId,
+        type: type,
+    })
+}
+
+function loseEditFocus() {
+    if (!editValue.value) {
+        editValue.value = fileNode.value.name
+        handleEditFileBlur()
+    } else {
+        handleEditFileBlur()
     }
 }
 
@@ -245,7 +266,7 @@ function addChangePath(e): void {
 }
 
 //重命名文件blur
-function handleEditFileBlur(e) {
+function handleEditFileBlur() {
     onEditing.value = false
     if (editError) {
         resetStatus();
@@ -366,6 +387,7 @@ onMounted(() => {
         padding: 2px 0px;
         padding-left: 5px;
         color: @text-color;
+        font-size: 14px;
         cursor: pointer;
         .text-overflow {
             overflow: hidden;
@@ -377,7 +399,7 @@ onMounted(() => {
             height: 20px;
         }
         .file-name {
-            margin: 0 2px;
+            margin: 0 4px;
         }
         &:hover {
             background-color: @popover-customize-border-color;
@@ -409,14 +431,14 @@ onMounted(() => {
         }
     }
     .error-message {
-        width: calc(100% - 10px);
+        width: calc(100% - 34px);
         z-index: 999;
-        color: red !important;
         padding: 5px 10px;
         box-sizing: border-box;
         line-height: 12px;
         font-size: 9px;
+        margin-top: 5px;
+        margin-left: 15px;
     }
-    
 }
 </style>
