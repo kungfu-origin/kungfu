@@ -6,7 +6,6 @@ declare module '@vue/runtime-core' {
   interface ComponentCustomProperties {
     $globalBus: Subject<KfBusEvent>;
     $tradingDataSubject: Subject<Watcher>;
-    // $useGlobalStore: Store;
     $globalCategoryRegister: GlobalCategoryRegister;
     $availKfBoards: string[];
   }
@@ -25,6 +24,7 @@ declare global {
     watcher: Watcher | null;
     kungfu: Kungfu;
     workers: Record<string, WebpackWorker>;
+    fileId: number
   }
 
   namespace NodeJS {

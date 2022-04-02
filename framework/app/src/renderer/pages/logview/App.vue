@@ -18,13 +18,13 @@ import { shell } from '@electron/remote';
 import { clipboard } from 'electron';
 import { platform } from 'os';
 import {
-  getLogProcessId,
+  getLogPath,
   useLogInit,
   useLogSearch,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/logUtils';
 
-const ProcessId = getLogProcessId();
-setHtmlTitle(`功夫交易系统 - ${ProcessId}.log`);
+const LOG_PATH = getLogPath();
+setHtmlTitle(`功夫交易系统 - ${LOG_PATH}`);
 
 const boardSize = ref<{ width: number; height: number }>({
   width: 0,
@@ -44,13 +44,12 @@ const handleChangeBoardSize = ({
 
 const {
   logList,
-  logPath,
   scrollToBottomChecked,
   scrollerTableRef,
   scrollToBottom,
   startTailLog,
   clearLogState,
-} = useLogInit(ProcessId);
+} = useLogInit(LOG_PATH);
 
 startTailLog();
 
@@ -88,8 +87,8 @@ document.addEventListener('keydown', (e) => {
 });
 
 function handleRemoveLog(): Promise<void> {
-  ensureFileSync(logPath);
-  return outputFile(logPath, '')
+  ensureFileSync(LOG_PATH);
+  return outputFile(LOG_PATH, '')
     .then(() => {
       message.success('操作成功');
       resetLog();
@@ -100,7 +99,7 @@ function handleRemoveLog(): Promise<void> {
 }
 
 function handleOpenFileLocation() {
-  return shell.showItemInFolder(logPath);
+  return shell.showItemInFolder(LOG_PATH);
 }
 
 function resetLog() {
@@ -293,7 +292,7 @@ function resetLog() {
     }
 
     .search-keyword {
-      background: fade(@white, 60%);
+      background: fade(@white, 70%);
       color: #000;
       font-weight: normal;
 

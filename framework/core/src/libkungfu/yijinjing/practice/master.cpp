@@ -26,6 +26,7 @@ master::master(location_ptr home, bool low_latency)
   for (const auto &config : profile_.get_all(Config{})) {
     try_add_location(start_time_, location::make_shared(config, get_locator()));
   }
+
   auto io_device = std::dynamic_pointer_cast<io_device_master>(get_io_device());
   writers_.emplace(location::PUBLIC, io_device->open_writer(0));
   get_writer(location::PUBLIC)->mark(start_time_, SessionStart::tag);
@@ -68,7 +69,6 @@ void master::register_app(const event_ptr &event) {
 
   try_add_location(event->gen_time(), app_location);
   try_add_location(event->gen_time(), master_cmd_location);
-  app_cmd_locations_.emplace(app_location->uid, master_cmd_location->uid);
 
   register_data.last_active_time = session_builder_.find_last_active_time(app_location);
   register_location(event->gen_time(), register_data);
@@ -94,8 +94,9 @@ void master::register_app(const event_ptr &event) {
 
   write_time_reset(event->gen_time(), app_cmd_writer);
   write_trading_day(event->gen_time(), app_cmd_writer);
-  write_profile_data(event->gen_time(), app_cmd_writer);
 
+  // tell others alive locations
+  write_locations(event->gen_time(), app_cmd_writer);
   // tell others the cached process started
   write_registries(event->gen_time(), app_cmd_writer);
 
@@ -121,6 +122,7 @@ void master::publish_trading_day() { write_trading_day(0, get_writer(location::P
 void master::react() {
   events_ | is(RequestWriteTo::tag) | $$(on_request_write_to(event));
   events_ | is(RequestReadFrom::tag) | $$(on_request_read_from(event));
+  events_ | is(RequestReadFrom::tag) | $$(check_cached_ready_to_read(event));
   events_ | is(RequestReadFromPublic::tag) | $$(on_request_read_from_public(event));
   events_ | is(RequestReadFromUpdate::tag) | $$(on_request_read_from_update(event));
   events_ | is(Channel::tag) | $$(on_channel_request(event));
@@ -164,38 +166,21 @@ void master::handle_timer_tasks() {
 
 void master::try_add_location(int64_t trigger_time, const location_ptr &app_location) {
   if (not has_location(app_location->uid)) {
-    profile_.set(dynamic_cast<Location &>(*app_location));
     add_location(trigger_time, app_location);
   }
 }
 
 void master::feed(const event_ptr &event) {
   handle_timer_tasks();
+
   if (registry_.find(event->source()) == registry_.end()) {
     return;
   }
-  session_builder_.update_session(std::dynamic_pointer_cast<journal::frame>(event));
-  if (get_location(event->source())->category == category::MD) {
-    return;
-  }
 
-  feed_profile_data(event, profile_);
+  session_builder_.update_session(std::dynamic_pointer_cast<journal::frame>(event));
 }
 
 void master::pong(const event_ptr &event) { get_io_device()->get_publisher()->publish("{}"); }
-
-void master::on_request_cached_done(const event_ptr &event) {
-  auto request_cached_done_data = event->data<RequestCachedDone>();
-  auto app_uid = request_cached_done_data.dest_id;
-  if (writers_.find(app_uid) == writers_.end()) {
-    SPDLOG_ERROR("no app_uid {} in writers_ ", get_location_uname(app_uid));
-    return;
-  }
-  auto app_cmd_writer = writers_.at(app_uid);
-  app_cmd_writer->mark(now(), RequestStart::tag);
-  write_registries(event->gen_time(), app_cmd_writer);
-  write_channels(event->gen_time(), app_cmd_writer);
-}
 
 void master::on_request_write_to(const event_ptr &event) {
   const RequestWriteTo &request = event->data<RequestWriteTo>();
@@ -231,6 +216,39 @@ void master::on_request_read_from(const event_ptr &event) {
   channel.dest_id = app_uid;
   register_channel(trigger_time, channel);
   get_writer(location::PUBLIC)->write(trigger_time, channel);
+}
+
+void master::check_cached_ready_to_read(const event_ptr &event) {
+  const RequestReadFrom &request = event->data<RequestReadFrom>();
+  auto trigger_time = event->gen_time();
+  auto app_uid = event->source();
+  auto read_from_source_id = request.source_id;
+  const location_ptr &read_from_source_location = get_location(read_from_source_id);
+
+  SPDLOG_INFO("~~~~~~~~");
+  SPDLOG_INFO("~~~~~~~~");
+  SPDLOG_INFO("~~~~~~~~");
+  SPDLOG_INFO("check_cached_ready_to_read app_uid {} source_id {} source_location c {} g {} n {}",
+              get_location_uname(app_uid), get_location_uname(request.source_id), read_from_source_location->category,
+              read_from_source_location->group, read_from_source_location->name);
+
+  if (read_from_source_location->group == "service" and read_from_source_location->name == "cached") {
+    SPDLOG_INFO("============");
+    SPDLOG_INFO("============");
+    SPDLOG_INFO("============");
+    SPDLOG_INFO("============");
+    auto app_cmd_writer = get_writer(read_from_source_id);
+    app_cmd_writer->mark(now(), CachedReadyToRead::tag);
+  }
+}
+
+void master::on_request_cached_done(const event_ptr &event) {
+  auto request_cached_done_data = event->data<RequestCachedDone>();
+  auto app_uid = request_cached_done_data.dest_id;
+  auto app_cmd_writer = get_writer(app_uid);
+  app_cmd_writer->mark(now(), RequestStart::tag);
+  write_registries(event->gen_time(), app_cmd_writer);
+  write_channels(event->gen_time(), app_cmd_writer);
 }
 
 void master::on_request_read_from_public(const event_ptr &event) {
@@ -286,18 +304,15 @@ void master::write_trading_day(int64_t trigger_time, const writer_ptr &writer) {
   writer->close_data();
 }
 
-void master::write_profile_data(int64_t trigger_time, const writer_ptr &writer) {
-  boost::hana::for_each(ProfileDataTypes, [&](auto it) {
-    using DataType = typename decltype(+boost::hana::second(it))::type;
-    for (const auto &data : profile_.get_all(DataType{})) {
-      writer->write(trigger_time, data);
-    }
-  });
-}
-
 void master::write_registries(int64_t trigger_time, const writer_ptr &writer) {
   for (const auto &item : registry_) {
     writer->write(trigger_time, item.second);
+  }
+}
+
+void master::write_locations(int64_t trigger_time, const writer_ptr &writer) {
+  for (const auto &item : locations_) {
+    writer->write(trigger_time, dynamic_cast<Location &>(*item.second));
   }
 }
 

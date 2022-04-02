@@ -80,7 +80,7 @@ onMounted(() => {
         formState.value.offset = +offset;
         formState.value.side = +side;
         formState.value.volume = +Number(volume).toFixed(0);
-        formState.value.price = +Number(price).toFixed(4);
+        formState.value.limit_price = +Number(price).toFixed(4);
         formState.value.instrument_type = +instrumentType;
 
         if (accountId) {
@@ -102,7 +102,7 @@ onMounted(() => {
           formState.value.instrument_type = +instrumentType;
         }
         if (+price !== 0) {
-          formState.value.price = +Number(price).toFixed(4);
+          formState.value.limit_price = +Number(price).toFixed(4);
         }
         if (BigInt(volume) !== BigInt(0)) {
           formState.value.volume = +Number(volume).toFixed(0);

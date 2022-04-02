@@ -1,22 +1,24 @@
 import path from 'path';
-import dayjs from 'dayjs';
 import { computed, reactive, Ref, ref, watch, nextTick } from 'vue';
 import {
   debounce,
   isCriticalLog,
   KfNumList,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
-import { LOG_DIR } from '@kungfu-trader/kungfu-js-api/config/pathConfig';
 import { Tail } from 'tail';
 import { message } from 'ant-design-vue';
 import { parseURIParams } from './uiUtils';
 import { ensureFileSync } from 'fs-extra';
 
-export const getLogProcessId = (): string => {
-  return parseURIParams().processId || '';
+export const getLogPath = (): string => {
+  return path.resolve(decodeURI(parseURIParams().logPath) || '');
 };
 
 export function preDealLogMessage(line: string): string {
+  // 21 = pm2 timestamp length
+  if (line.indexOf('[') === 21) {
+    line = line.slice(21);
+  }
   line = line.replace(/</g, '[').replace(/>/g, ']');
   return line;
 }
@@ -38,11 +40,10 @@ export function dealLogMessage(line: string): string {
 }
 
 export const useLogInit = (
-  processId: string,
-  nLines = 2000,
+  logPath: string,
+  nLines = 10000,
 ): {
   logList: KungfuApi.KfNumList<KungfuApi.KfLogData>;
-  logPath: string;
   scrollToBottomChecked: Ref<boolean>;
   scrollerTableRef: Ref;
   scrollToBottom: () => void;
@@ -51,15 +52,10 @@ export const useLogInit = (
 } => {
   let LogTail: Tail | null = null;
   const logList = reactive<KungfuApi.KfNumList<KungfuApi.KfLogData>>(
-    new KfNumList(2000),
+    new KfNumList(nLines),
   );
   const scrollerTableRef = ref();
   const scrollToBottomChecked = ref<boolean>(false);
-  const logPath = path.resolve(
-    LOG_DIR,
-    dayjs().format('YYYYMMDD'),
-    `${processId}.log`,
-  );
   ensureFileSync(logPath);
 
   const scrollToBottom = () => {
@@ -102,7 +98,6 @@ export const useLogInit = (
 
   return {
     logList,
-    logPath,
     scrollToBottomChecked,
     scrollerTableRef,
     scrollToBottom,
