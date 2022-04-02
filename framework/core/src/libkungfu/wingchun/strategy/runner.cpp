@@ -22,7 +22,10 @@ RuntimeContext_ptr Runner::get_context() const { return context_; }
 
 RuntimeContext_ptr Runner::make_context() { return std::make_shared<RuntimeContext>(*this, events_); }
 
-void Runner::add_strategy(const Strategy_ptr &strategy) { strategies_.push_back(strategy); }
+void Runner::add_strategy(const Strategy_ptr &strategy) {
+  context_->get_bookkeeper().add_book_listener(strategy);
+  strategies_.push_back(strategy);
+}
 
 void Runner::on_exit() { post_stop(); }
 

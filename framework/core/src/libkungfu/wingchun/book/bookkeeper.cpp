@@ -16,6 +16,9 @@ using namespace kungfu::yijinjing::util;
 namespace kungfu::wingchun::book {
 Bookkeeper::Bookkeeper(apprentice &app, broker::Client &broker_client) : app_(app), broker_client_(broker_client) {
   book::AccountingMethod::setup_defaults(*this);
+  SPDLOG_WARN(" Bookkeeper::Bookkeeper begin");
+  book_listeners_.push_back(std::make_shared<BookListener>());
+  SPDLOG_WARN(" Bookkeeper::Bookkeeper end");
 }
 
 bool Bookkeeper::has_book(uint32_t location_uid) { return books_.find(location_uid) != books_.end(); }
@@ -59,9 +62,31 @@ void Bookkeeper::on_start(const rx::connectable_observable<event_ptr> &events) {
   events | is(OrderInput::tag) | $$(update_book<OrderInput>(event, &AccountingMethod::apply_order_input));
   events | is(Order::tag) | $$(update_book<Order>(event, &AccountingMethod::apply_order));
   events | is(Trade::tag) | $$(update_book<Trade>(event, &AccountingMethod::apply_trade));
-  events | is(Asset::tag) | $$(try_update_asset(event->data<Asset>()));
-  events | is(Position::tag) | $$(try_update_position(event->data<Position>()));
-  events | is(PositionEnd::tag) | $$(get_book(event->data<PositionEnd>().holder_uid)->update(event->gen_time()));
+  //  从UPDATE来的event，特殊处理
+  //  filter和正常的函数一样，返回true则会继续下一步
+  //  beging, book,
+  events | is(Asset::tag) | filter([&](const event_ptr &event) { return event->dest() == location::UPDATE; }) |
+      $$(try_update_asset_replica(event->data<Asset>()));
+  events | is(Position::tag) | filter([&](const event_ptr &event) {
+    SPDLOG_WARN("1 Position event->source() : {}, event->dest() : {}", app_.get_location_uname(event->source()),
+                app_.get_location_uname(event->dest()));
+    return event->dest() == location::UPDATE;
+  }) | $$(try_update_position_replica(event->data<Position>()));
+  events | is(PositionEnd::tag) | filter([&](const event_ptr &event) { return event->dest() == location::UPDATE; }) |
+      $$(update_position_guard(event->data<PositionEnd>().holder_uid));
+  //  end book
+  //  然后整个book直接更新到各个strategy
+  //  不是从UPDATE来的event，按原来的处理逻辑走
+  events | is(Asset::tag) | filter([&](const event_ptr &event) { return event->dest() != location::UPDATE; }) |
+      $$(try_update_asset(event->data<Asset>()));
+  events | is(Position::tag) | filter([&](const event_ptr &event) {
+    SPDLOG_WARN("!1 Position event->source() : {}, event->dest() : {}", app_.get_location_uname(event->source()),
+                app_.get_location_uname(event->dest()));
+    return event->dest() != location::UPDATE;
+  }) | $$(try_update_position(event->data<Position>()));
+  events | is(PositionEnd::tag) | filter([&](const event_ptr &event) { return event->dest() != location::UPDATE; }) |
+      $$(get_book(event->data<PositionEnd>().holder_uid)->update(event->gen_time()));
+
   events | is(TradingDay::tag) | $$(on_trading_day(event->data<TradingDay>().timestamp));
   events | is(ResetBookRequest::tag) | $$(drop_book(event->source()));
 }
@@ -177,6 +202,7 @@ void Bookkeeper::try_update_asset(const Asset &asset) {
 }
 
 void Bookkeeper::try_update_position(const Position &position) {
+  //  SPDLOG_WARN("begin try_update_position, get_home_uname: {}", app_.get_home_uname());
   if (not app_.has_location(position.holder_uid)) {
     return;
   }
@@ -185,6 +211,7 @@ void Bookkeeper::try_update_position(const Position &position) {
   if (positions_guarded_ and target_position.update_time >= position.update_time) {
     return;
   }
+  //  SPDLOG_WARN("mind try_update_position, get_home_uname: {}", app_.get_home_uname());
   auto last_price = target_position.last_price;
   target_position = position;
   target_position.last_price = std::max(last_price, target_position.last_price);
@@ -192,5 +219,95 @@ void Bookkeeper::try_update_position(const Position &position) {
     return;
   }
   accounting_methods_.at(target_position.instrument_type)->update_position(book, target_position);
+  //  SPDLOG_WARN("end try_update_position, get_home_uname: {}", app_.get_home_uname());
+}
+
+void Bookkeeper::try_sync_book_replica(uint32_t location_uid) {
+  SPDLOG_WARN("try_sync_book_replica, get_home_uname : {}", app_.get_home_uname());
+  if (books_replica_asset_guards_.find(location_uid) == books_replica_asset_guards_.end() ||
+      books_replica_position_guard_.find(location_uid) == books_replica_position_guard_.end()) {
+    return;
+  }
+  if (books_replica_asset_guards_.at(location_uid) && books_replica_position_guard_.at(location_uid)) {
+    books_replica_asset_guards_.insert_or_assign(location_uid, false);
+    books_replica_position_guard_.insert_or_assign(location_uid, false);
+    auto old_book = books_.at(location_uid);
+    auto new_book = books_replica_.at(location_uid);
+    books_.erase(location_uid);
+    books_.insert_or_assign(location_uid, new_book);
+    books_replica_.erase(location_uid);
+    bool book_changed = false;
+    SPDLOG_WARN("old asset : {}", old_book->asset.to_string());
+    SPDLOG_WARN("new asset : {}", new_book->asset.to_string());
+
+    auto fun_asset_compare = [](const Asset old_asset, const Asset new_asset) {
+      bool asset_changed = false;
+      asset_changed &= old_asset.avail == new_asset.avail;
+      asset_changed &= old_asset.margin == new_asset.margin;
+      return asset_changed;
+    };
+    book_changed &= fun_asset_compare(old_book->asset, new_book->asset);
+
+    for (auto &old_pair : old_book->long_positions) {
+      auto &old_position = old_pair.second;
+      auto &new_position = new_book->get_position_for(old_position.direction, old_position);
+      book_changed &= old_position.volume == new_position.volume;
+    }
+    for (auto &old_pair : old_book->short_positions) {
+      auto &old_position = old_pair.second;
+      auto &new_position = new_book->get_position_for(old_position.direction, old_position);
+      book_changed &= old_position.volume == new_position.volume;
+    }
+
+    for (BookListener_ptr book_listener : book_listeners_) {
+      //      book_listener->on_book_update_reset(*old_book, *new_book, book_changed);
+      SPDLOG_WARN("book_listener->on_book_update_reset");
+    }
+  }
+}
+
+void Bookkeeper::try_update_asset_replica(const longfist::types::Asset &asset) {
+  SPDLOG_WARN("try_update_asset_replica");
+  if (app_.has_location(asset.holder_uid)) {
+    get_book_replica(asset.holder_uid)->asset = asset;
+    books_replica_asset_guards_.insert_or_assign(asset.holder_uid, true);
+    SPDLOG_WARN("books_replica_asset_guards_.at(asset.holder_uid) : {}",
+                books_replica_asset_guards_.at(asset.holder_uid));
+    try_sync_book_replica(asset.holder_uid);
+  }
+  SPDLOG_WARN("app_.has_location(asset.holder_uid) : {}", app_.has_location(asset.holder_uid));
+}
+
+void Bookkeeper::try_update_position_replica(const longfist::types::Position &position) {
+  SPDLOG_WARN("try_update_position_replica");
+  if (not app_.has_location(position.holder_uid)) {
+    return;
+  }
+  auto book = get_book_replica(position.holder_uid);
+  auto &target_position = book->get_position_for(position.direction, position);
+  target_position = position;
+}
+
+Book_ptr Bookkeeper::get_book_replica(uint32_t location_uid) {
+  //  SPDLOG_WARN("get_book_replica");
+  if (books_replica_.find(location_uid) == books_replica_.end()) {
+    books_replica_.emplace(location_uid, make_book(location_uid));
+  }
+  return books_replica_.at(location_uid);
+}
+
+void Bookkeeper::update_position_guard(uint32_t location_uid) {
+  SPDLOG_WARN("update_position_guard");
+  books_replica_position_guard_.insert_or_assign(location_uid, true);
+  SPDLOG_WARN("books_replica_position_guard_.at(location_uid) : {}", books_replica_position_guard_.at(location_uid));
+  try_sync_book_replica(location_uid);
+}
+
+void Bookkeeper::add_book_listener(const BookListener_ptr &book_listener) {
+  SPDLOG_WARN(" Bookkeeper::add_book_listener begin");
+  book_listeners_.emplace_back(std::make_shared<BookListener>());
+  SPDLOG_WARN(" Bookkeeper::add_book_listener insert new");
+  book_listeners_.push_back(book_listener);
+  SPDLOG_WARN(" Bookkeeper::add_book_listener insert args");
 }
 } // namespace kungfu::wingchun::book

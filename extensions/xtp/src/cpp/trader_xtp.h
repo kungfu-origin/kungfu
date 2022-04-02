@@ -193,7 +193,7 @@ protected:
   void on_start() override;
 
 private:
-  XTP::API::TraderApi *api_ {};
+  XTP::API::TraderApi *api_{};
   uint64_t session_id_;
   int request_id_;
   std::string trading_day_;
