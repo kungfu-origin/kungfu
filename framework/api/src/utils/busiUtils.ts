@@ -2,7 +2,11 @@ import path from 'path';
 import dayjs from 'dayjs';
 import fse, { Stats } from 'fs-extra';
 import log4js from 'log4js';
-import { buildProcessLogPath, EXTENSION_DIRS } from '../config/pathConfig';
+import {
+  buildProcessLogPath,
+  EXTENSION_DIRS,
+  KF_RUNTIME_DIR,
+} from '../config/pathConfig';
 import {
   InstrumentType,
   KfCategory,
@@ -54,7 +58,7 @@ import {
   startTd,
 } from './processUtils';
 import { Proc } from 'pm2';
-import { removeTargetFilesInFolder } from './fileUtils';
+import { listDir, removeTargetFilesInFolder } from './fileUtils';
 
 interface SourceAccountId {
   source: string;
@@ -1487,7 +1491,6 @@ export const deepClone = <T>(obj: T): T => {
   return JSON.parse(JSON.stringify(obj));
 };
 
-
 export function isCriticalLog(line: string): boolean {
   if (line.indexOf('critical') !== -1) {
     return true;
@@ -1527,3 +1530,17 @@ export function isCriticalLog(line: string): boolean {
 
   return false;
 }
+
+export const removeNoDefaultStrategyFolders = async (): Promise<void> => {
+  const strategyDir = path.join(KF_RUNTIME_DIR, 'strategy');
+  const filedirList: string[] = (await listDir(strategyDir)) || [];
+  filedirList.map((fileOrFolder) => {
+    const fullPath = path.join(strategyDir, fileOrFolder);
+    if (fileOrFolder === 'default') {
+      if (fse.statSync(fullPath).isDirectory()) {
+        return Promise.resolve();
+      }
+    }
+    return fse.remove(fullPath);
+  });
+};

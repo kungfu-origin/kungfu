@@ -9,6 +9,7 @@ import {
   markClearJournal,
   removeLoadingMask,
   useIpcListener,
+  handleOpenLogviewByFile,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import {
   useDealExportHistoryTradingData,
@@ -25,7 +26,7 @@ import {
   dealAppStates,
   dealAssetsByHolderUID,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
-import { bindIPCListener } from '@kungfu-trader/kungfu-app/src/renderer/ipcMsg/ipcListener'
+import { bindIPCListener } from '@kungfu-trader/kungfu-app/src/renderer/ipcMsg/ipcListener';
 
 const app = getCurrentInstance();
 const store = useGlobalStore();
@@ -67,6 +68,9 @@ const busSubscription = globalBus.subscribe((data: KfBusEvent) => {
       case 'clear-db':
         markClearDB();
         break;
+      case 'open-log':
+        handleOpenLogviewByFile();
+        break;
       case 'export-all-trading-data':
         globalBus.next({
           tag: 'export',
@@ -77,7 +81,7 @@ const busSubscription = globalBus.subscribe((data: KfBusEvent) => {
 });
 
 onMounted(() => {
-    bindIPCListener()
+  bindIPCListener();
   removeLoadingMask();
 
   window.addEventListener('resize', () => {

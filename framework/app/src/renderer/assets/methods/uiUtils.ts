@@ -7,7 +7,10 @@ import {
   toRaw,
   Component,
 } from 'vue';
-import { KF_HOME } from '@kungfu-trader/kungfu-js-api/config/pathConfig';
+import {
+  KF_HOME,
+  LOG_DIR,
+} from '@kungfu-trader/kungfu-js-api/config/pathConfig';
 import {
   getInstrumentTypeData,
   getProcessIdByKfLocation,
@@ -18,8 +21,8 @@ import {
   getAvailDaemonList,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { ExchangeIds } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
-
-import { BrowserWindow, getCurrentWindow } from '@electron/remote';
+import dayjs from 'dayjs';
+import { BrowserWindow, getCurrentWindow, dialog } from '@electron/remote';
 import { ipcRenderer } from 'electron';
 import { message } from 'ant-design-vue';
 import {
@@ -229,9 +232,9 @@ function getNewWindowLocation(): { x: number; y: number } | null {
 }
 
 export const openLogView = (
-  processId: string,
+  logPath: string,
 ): Promise<Electron.BrowserWindow> => {
-  return openNewBrowserWindow('logview', `?processId=${processId}`);
+  return openNewBrowserWindow('logview', `?logPath=${logPath}`);
 };
 
 export const openCodeView = (
@@ -291,10 +294,35 @@ export const handleOpenLogview = (
   config: KungfuApi.KfConfig | KungfuApi.KfLocation,
 ): Promise<Electron.BrowserWindow | void> => {
   const hideloading = message.loading('正在打开窗口');
-  return openLogView(getProcessIdByKfLocation(config)).finally(() => {
+  const logPath = path.resolve(
+    LOG_DIR,
+    dayjs().format('YYYYMMDD'),
+    `${getProcessIdByKfLocation(config)}.log`,
+  );
+  return openLogView(logPath).finally(() => {
     hideloading();
   });
 };
+
+export const handleOpenLogviewByFile =
+  (): Promise<Electron.BrowserWindow | void> => {
+    return dialog
+      .showOpenDialog({
+        properties: ['openFile'],
+      })
+      .then((res): Promise<Electron.BrowserWindow | void> => {
+        const { filePaths } = res;
+        if (filePaths.length) {
+          const targetLogPath = filePaths[0];
+          const hideloading = message.loading('正在打开窗口');
+          return openLogView(targetLogPath).finally(() => {
+            hideloading();
+          });
+        }
+
+        return Promise.resolve();
+      });
+  };
 
 export const handleOpenCodeView = (
   config: KungfuApi.KfConfig | KungfuApi.KfLocation,
