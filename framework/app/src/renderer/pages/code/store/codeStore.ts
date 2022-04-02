@@ -102,6 +102,7 @@ export const useCodeStore = defineStore('code', {
           1,
         );
       }
+
       this.fileTree[id]['children'] = targetChildren;
       this.fileTree['pending']['parentId'] = '';
     },

@@ -19,7 +19,7 @@ import {
   pythonKeywords,
 } from '../hint/monaco.python.hint';
 import { useCodeStore } from '../store/codeStore';
-import { getCodeText } from '@kungfu-trader/kungfu-js-api/utils/fileUtils';
+import { getFileContent } from '@kungfu-trader/kungfu-js-api/utils/fileUtils';
 import path from 'path';
 import fse from 'fs-extra';
 
@@ -70,7 +70,7 @@ watch(currentFile, async (newFile: Code.FileProps) => {
   if (currentFile.value.isDir) return;
   clearState();
   file = newFile;
-  const codeText: string = await getCodeText(filePath);
+  const codeText: string = await getFileContent(filePath);
   await nextTick();
   handleEditor = buildEditor(handleEditor, file, codeText);
   await nextTick();

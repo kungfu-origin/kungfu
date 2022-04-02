@@ -1,7 +1,7 @@
 <template>
   <div class="file-tree">
     <a-button
-      type="primary"
+      type="default"
       class="open-editor-folder"
       @click="handleBindStrategyFolder"
     >
