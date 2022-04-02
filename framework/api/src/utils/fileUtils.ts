@@ -47,7 +47,7 @@ export const writeCSV = (
 };
 
 //获取文件内容
-export const getCodeText = (targetPath: string): Promise<string> => {
+export const getFileContent = (targetPath: string): Promise<string> => {
   if (!targetPath) throw new Error('文件路径不存在！');
   targetPath = path.normalize(targetPath);
   return new Promise((resolve, reject): void => {
