@@ -17,7 +17,7 @@ import {
   kungfuProperties,
   kungfuKeywords,
   pythonKeywords,
-} from '../hint/monaco-python-hint';
+} from '../hint/monaco.python.hint';
 import { useCodeStore } from '../store/codeStore';
 import { getCodeText } from '@kungfu-trader/kungfu-js-api/utils/fileUtils';
 import path from 'path';
