@@ -51,8 +51,6 @@ const {
   clearLogState,
 } = useLogInit(LOG_PATH);
 
-startTailLog();
-
 const {
   inputSearchRef,
   searchKeyword,
@@ -105,6 +103,7 @@ function handleOpenFileLocation() {
 function resetLog() {
   clearLogState();
   clearLogSearchState();
+  console.log(555);
   startTailLog();
 }
 </script>

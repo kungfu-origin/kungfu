@@ -12,6 +12,13 @@
 #include <kungfu/yijinjing/time.h>
 
 namespace kungfu::yijinjing::practice {
+
+inline data::location_ptr make_system_location(const std::string &group, const std::string &name,
+                                               const data::locator_ptr &locator) {
+  return data::location::make_shared(longfist::enums::mode::LIVE, longfist::enums::category::SYSTEM, group, name,
+                                     locator);
+}
+
 class hero : public resource {
 public:
   explicit hero(yijinjing::io_device_ptr io_device);

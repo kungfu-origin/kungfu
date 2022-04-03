@@ -52,6 +52,7 @@ private:
   index::session_builder session_builder_;
   profile profile_;
   std::unordered_map<uint32_t, std::unordered_map<int32_t, timer_task>> timer_tasks_ = {};
+  const data::location_ptr cached_home_location_;
 
   void handle_timer_tasks();
 
