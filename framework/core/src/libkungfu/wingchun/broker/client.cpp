@@ -221,24 +221,33 @@ PassiveClient::PassiveClient(apprentice &app) : Client(app) {}
 const ResumePolicy &PassiveClient::get_resume_policy() const { return resume_policy_; }
 
 bool PassiveClient::is_fully_subscribed(uint32_t md_location_uid) const {
-  return should_connect_md(app_.get_location(md_location_uid)) and enrolled_md_locations_.at(md_location_uid);
+  return should_connect_md(app_.get_location(md_location_uid)) and enrolled_md_locations_.at(md_location_uid).all_;
 }
 
 void PassiveClient::subscribe(const location_ptr &md_location, const std::string &exchange_id,
                               const std::string &instrument_id) {
   if (not is_fully_subscribed(md_location->uid)) {
-    enrolled_md_locations_.emplace(md_location->uid, false);
+    enrolled_md_locations_.emplace(md_location->uid, subscribe_info(false, 0, 0, 0));
   }
   Client::subscribe(md_location, exchange_id, instrument_id);
 }
 
-void PassiveClient::subscribe_all(const location_ptr &md_location) {
-  enrolled_md_locations_.emplace(md_location->uid, true);
+void PassiveClient::subscribe_all(const location_ptr &md_location, int8_t exchanges_ids,
+                             uint64_t instrument_types,
+                             uint64_t callback_types) {
+  enrolled_md_locations_.emplace(md_location->uid, subscribe_info(true, exchanges_ids, instrument_types, callback_types));
 }
 
 void PassiveClient::renew(int64_t trigger_time, const location_ptr &md_location) {
   if (is_fully_subscribed(md_location->uid)) {
-    app_.get_writer(md_location->uid)->mark(trigger_time, SubscribeAll::tag);
+    auto &sub_paras = enrolled_md_locations_.at(md_location->uid);
+    auto writer = app_.get_writer(md_location->uid);
+    SubscribeAll &subscribeall = writer->open_data<SubscribeAll>(trigger_time);
+    subscribeall.market_type = MarketType(sub_paras.exchanges_ids_);
+    subscribeall.subscribe_secu_datatype = SubscribeSecuDataType(sub_paras.callback_types_);
+    subscribeall.subscribe_category_type = SubscribeCategoryType(sub_paras.instrument_types_);
+    subscribeall.update_time = trigger_time;
+    writer->close_data();
   } else {
     Client::renew(trigger_time, md_location);
   }

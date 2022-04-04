@@ -51,6 +51,14 @@ KF_DEFINE_MARK_TYPE(AlgoOrderReport, 20011);
 KF_DEFINE_MARK_TYPE(AlgoOrderModify, 20012);
 
 KF_DEFINE_DATA_TYPE(                              //
+    SubscribeAll, 303, PK(update_time), TIMESTAMP(update_time), //
+    (int64_t, update_time),                                    //
+    (MarketType, market_type),                     //
+    (SubscribeSecuDataType, subscribe_secu_datatype),                  //
+    (SubscribeCategoryType, subscribe_category_type)                          //
+);
+
+KF_DEFINE_DATA_TYPE(                              //
     Config, 10005, PK(location_uid), PERPETUAL(), //
     (uint32_t, location_uid),                     //
     (enums::category, category),                  //

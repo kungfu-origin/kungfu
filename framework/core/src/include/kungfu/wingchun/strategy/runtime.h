@@ -53,7 +53,9 @@ public:
    * Subscribe all from given MD
    * @param source MD group
    */
-  void subscribe_all(const std::string &source) override;
+  void subscribe_all(const std::string &source, int8_t exchanges_ids = 0,
+                             uint64_t instrument_types = 0,
+                             uint64_t callback_types = 0) override;
 
   /**
    * Insert order.

@@ -182,5 +182,48 @@ void bind_enums(py::module &m) {
       .value("Error", StrategyState::Error)
       .export_values()
       .def("__eq__", [](const StrategyState &a, int b) { return static_cast<int>(a) == b; });
+      
+  py::enum_<MarketType>(m_enums, "MarketType", py::arithmetic())
+      .value("kNone", MarketType::kNone)
+      .value("kNEEQ", MarketType::kNEEQ)
+      .value("kSHFE", MarketType::kSHFE)
+      .value("kCFFEX", MarketType::kCFFEX)
+      .value("kDCE", MarketType::kDCE)
+      .value("kCZCE", MarketType::kCZCE)
+      .value("kINE", MarketType::kINE)
+      .value("kSSE", MarketType::kSSE)
+      .value("kSZSE", MarketType::kSZSE)
+      .value("kHKEx", MarketType::kHKEx)
+      .value("kMax", MarketType::kMax)
+      .export_values()
+      .def("__eq__", [](const MarketType &a, int b) { return static_cast<int>(a) == b; });
+  
+  py::enum_<SubscribeSecuDataType>(m_enums, "SubscribeSecuDataType", py::arithmetic())
+      .value("kNone", SubscribeSecuDataType::kNone)
+      .value("kSnapshot", SubscribeSecuDataType::kSnapshot)
+      .value("kTickExecution", SubscribeSecuDataType::kTickExecution)
+      .value("kTickOrder", SubscribeSecuDataType::kTickOrder)
+      .value("kOrderQueue", SubscribeSecuDataType::kOrderQueue)
+      .export_values()
+      .def("__eq__", [](const SubscribeSecuDataType &a, uint64_t b) { return static_cast<uint64_t>(a) == b; })
+      .def("__or__", py::overload_cast<const SubscribeSecuDataType &, const SubscribeSecuDataType &>(&datatype_bitwise))
+      .def("__or__", py::overload_cast<const SubscribeSecuDataType &, int>(&datatype_bitwise))
+      .def("__or__", py::overload_cast<int, const SubscribeSecuDataType &>(&datatype_bitwise));
+  
+  py::enum_<SubscribeCategoryType>(m_enums, "SubscribeCategoryType", py::arithmetic())
+      .value("kNone", SubscribeCategoryType::kNone)
+      .value("kStock", SubscribeCategoryType::kStock)
+      .value("kFund", SubscribeCategoryType::kFund)
+      .value("kBond", SubscribeCategoryType::kBond)
+      .value("kIndex", SubscribeCategoryType::kIndex)
+      .value("kHKT", SubscribeCategoryType::kHKT)
+      .value("kOption", SubscribeCategoryType::kOption)
+      .value("kFutureOption", SubscribeCategoryType::kFutureOption)
+      .value("kOthers", SubscribeCategoryType::kOthers)
+      .export_values()
+      .def("__eq__", [](const SubscribeCategoryType &a, int b) { return static_cast<int>(a) == b; })
+      .def("__or__", py::overload_cast<const SubscribeCategoryType &, const SubscribeCategoryType &>(&category_bitwise))
+      .def("__or__", py::overload_cast<const SubscribeCategoryType &, int>(&category_bitwise))
+      .def("__or__", py::overload_cast<int, const SubscribeCategoryType &>(&category_bitwise));
 }
 } // namespace kungfu::longfist::pybind
