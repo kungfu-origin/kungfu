@@ -261,16 +261,8 @@ enum class SubscribeCategoryType : uint64_t
     kFutureOption                         = 0x000000000040,    ///< 订阅期货/期货期权证券品种类别
     kOthers                               = 0x100000000000,    ///< 订阅其他证券品种类别
 };
-// SubscribeCategory():type(SubscribeCategoryType::kNone) {  }
-// SubscribeCategoryType type ;
 
-inline SubscribeSecuDataType datatype_bitwise(const SubscribeSecuDataType &a, const SubscribeSecuDataType &b) { return SubscribeSecuDataType(int(a) | int(b)); }
-inline SubscribeSecuDataType datatype_bitwise(int a, const SubscribeSecuDataType &b) { return SubscribeSecuDataType(a | int(b)); }
-inline SubscribeSecuDataType datatype_bitwise(const SubscribeSecuDataType &a, int b) { return SubscribeSecuDataType(int(a) | b); }
-
-inline SubscribeCategoryType category_bitwise(const SubscribeCategoryType &a, const SubscribeCategoryType &b) { return SubscribeCategoryType(uint64_t(a) | uint64_t(b)); }
-inline SubscribeCategoryType category_bitwise(int a, const SubscribeCategoryType &b) { return SubscribeCategoryType(uint64_t(a) | uint64_t(b)); }
-inline SubscribeCategoryType category_bitwise(const SubscribeCategoryType &a, int b) { return SubscribeCategoryType(uint64_t(a) | uint64_t(b)); }
-// };
+template <typename T, typename U>
+inline T sub_data_bitwise(const T &a, const T &b) { return static_cast<T>(static_cast<U>(a) | static_cast<U>(b)); }
 } // namespace kungfu::longfist::enums
 #endif // KUNGFU_LONGFIST_ENUM_H
