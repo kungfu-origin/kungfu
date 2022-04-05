@@ -207,8 +207,6 @@ void bind_enums(py::module &m) {
       .export_values()
       .def("__eq__", [](const SubscribeSecuDataType &a, uint64_t b) { return static_cast<uint64_t>(a) == b; })
       .def("__or__", py::overload_cast<const SubscribeSecuDataType &, const SubscribeSecuDataType &>(&sub_data_bitwise<SubscribeSecuDataType, int>));
-      // .def("__or__", py::overload_cast<const SubscribeSecuDataType &, int>(&datatype_bitwise))
-      // .def("__or__", py::overload_cast<int, const SubscribeSecuDataType &>(&datatype_bitwise));
   
   py::enum_<SubscribeCategoryType>(m_enums, "SubscribeCategoryType", py::arithmetic())
       .value("kNone", SubscribeCategoryType::kNone)
@@ -223,7 +221,5 @@ void bind_enums(py::module &m) {
       .export_values()
       .def("__eq__", [](const SubscribeCategoryType &a, int b) { return static_cast<int>(a) == b; })
       .def("__or__", py::overload_cast<const SubscribeCategoryType &, const SubscribeCategoryType &>(&sub_data_bitwise<SubscribeCategoryType, uint64_t>));
-      // .def("__or__", py::overload_cast<const SubscribeCategoryType &, int>(&category_bitwise))
-      // .def("__or__", py::overload_cast<int, const SubscribeCategoryType &>(&category_bitwise));
 }
 } // namespace kungfu::longfist::pybind
