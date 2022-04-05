@@ -32,13 +32,8 @@ namespace kungfu::yijinjing::practice {
 
 apprentice::apprentice(location_ptr home, bool low_latency)
     : hero(std::make_shared<io_device_client>(home, low_latency)),
-      master_home_location_(make_system_location("master", "master", get_locator())),
-      master_cmd_location_(make_system_location("master", fmt::format("{:08x}", get_live_home_uid()), get_locator())),
-      cached_home_location_(make_system_location("service", "cached", get_locator())), state_bank_(),
       trading_day_(time::today_start()) {
-  add_location(0, master_home_location_);
-  add_location(0, master_cmd_location_);
-  add_location(0, cached_home_location_);
+
 }
 
 bool apprentice::is_started() const { return started_; }

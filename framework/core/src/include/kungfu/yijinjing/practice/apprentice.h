@@ -64,9 +64,6 @@ public:
   }
 
 protected:
-  const data::location_ptr master_home_location_;
-  const data::location_ptr master_cmd_location_;
-  const data::location_ptr cached_home_location_;
   cache::bank state_bank_;
 
   void react() final;
