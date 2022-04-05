@@ -103,7 +103,6 @@ function handleOpenFileLocation() {
 function resetLog() {
   clearLogState();
   clearLogSearchState();
-  console.log(555);
   startTailLog();
 }
 </script>
