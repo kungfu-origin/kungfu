@@ -282,12 +282,6 @@ void master::write_registries(int64_t trigger_time, const writer_ptr &writer) {
   }
 }
 
-void master::write_locations(int64_t trigger_time, const writer_ptr &writer) {
-  for (const auto &item : locations_) {
-    writer->write(trigger_time, dynamic_cast<Location &>(*item.second));
-  }
-}
-
 void master::write_channels(int64_t trigger_time, const writer_ptr &writer) {
   for (const auto &item : channels_) {
     writer->write(trigger_time, item.second);
