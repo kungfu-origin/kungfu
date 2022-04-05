@@ -268,9 +268,9 @@ inline SubscribeSecuDataType datatype_bitwise(const SubscribeSecuDataType &a, co
 inline SubscribeSecuDataType datatype_bitwise(int a, const SubscribeSecuDataType &b) { return SubscribeSecuDataType(a | int(b)); }
 inline SubscribeSecuDataType datatype_bitwise(const SubscribeSecuDataType &a, int b) { return SubscribeSecuDataType(int(a) | b); }
 
-inline SubscribeCategoryType category_bitwise(const SubscribeCategoryType &a, const SubscribeCategoryType &b) { return SubscribeCategoryType(int(a) | int(b)); }
-inline SubscribeCategoryType category_bitwise(int a, const SubscribeCategoryType &b) { return SubscribeCategoryType(a | int(b)); }
-inline SubscribeCategoryType category_bitwise(const SubscribeCategoryType &a, int b) { return SubscribeCategoryType(int(a) | b); }
+inline SubscribeCategoryType category_bitwise(const SubscribeCategoryType &a, const SubscribeCategoryType &b) { return SubscribeCategoryType(uint64_t(a) | uint64_t(b)); }
+inline SubscribeCategoryType category_bitwise(int a, const SubscribeCategoryType &b) { return SubscribeCategoryType(uint64_t(a) | uint64_t(b)); }
+inline SubscribeCategoryType category_bitwise(const SubscribeCategoryType &a, int b) { return SubscribeCategoryType(uint64_t(a) | uint64_t(b)); }
 // };
 } // namespace kungfu::longfist::enums
 #endif // KUNGFU_LONGFIST_ENUM_H
