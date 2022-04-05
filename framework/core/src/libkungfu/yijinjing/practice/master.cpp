@@ -87,8 +87,6 @@ void master::register_app(const event_ptr &event) {
   write_time_reset(event->gen_time(), app_cmd_writer);
   write_trading_day(event->gen_time(), app_cmd_writer);
 
-  // tell the registing app all locations from db + memory;
-  write_locations(event->gen_time(), app_cmd_writer);
   // tell the registing app the their self and cached process started
   write_registries(event->gen_time(), app_cmd_writer);
 
@@ -230,9 +228,9 @@ void master::on_request_cached_done(const event_ptr &event) {
   auto request_cached_done_data = event->data<RequestCachedDone>();
   auto app_uid = request_cached_done_data.dest_id;
   auto app_cmd_writer = get_writer(app_uid);
+  app_cmd_writer->mark(now(), RequestStart::tag);
   write_registries(event->gen_time(), app_cmd_writer);
   write_channels(event->gen_time(), app_cmd_writer);
-  app_cmd_writer->mark(now(), RequestStart::tag);
 }
 
 void master::on_channel_request(const event_ptr &event) {
