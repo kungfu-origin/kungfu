@@ -1,9 +1,14 @@
 import fse from 'fs-extra';
 import path from 'path';
+import { parseURIParams } from './uiUtils';
 import { listDir } from '@kungfu-trader/kungfu-js-api/utils/fileUtils';
 import { Stats } from 'fs-extra';
 import { deepClone } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { useCodeStore } from '../../pages/code/store/codeStore';
+
+export const getProcessId = () => {
+  return parseURIParams().processId || '';
+};
 
 export const getTreeByFilePath = (
   strategy: Code.FileData,

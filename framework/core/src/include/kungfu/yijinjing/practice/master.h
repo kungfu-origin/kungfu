@@ -51,7 +51,6 @@ private:
   int64_t last_check_;
   index::session_builder session_builder_;
   profile profile_;
-
   std::unordered_map<uint32_t, std::unordered_map<int32_t, timer_task>> timer_tasks_ = {};
 
   void handle_timer_tasks();
@@ -62,13 +61,15 @@ private:
 
   void pong(const event_ptr &event);
 
-  void on_request_cached_done(const event_ptr &event);
-
   void on_request_write_to(const event_ptr &event);
 
   void on_request_read_from(const event_ptr &event);
 
   void on_request_read_from_public(const event_ptr &event);
+
+  void check_cached_ready_to_read(const event_ptr &event);
+
+  void on_request_cached_done(const event_ptr &event);
 
   void on_channel_request(const event_ptr &event);
 
@@ -81,8 +82,6 @@ private:
   void write_trading_day(int64_t trigger_time, const journal::writer_ptr &writer);
 
   void write_registries(int64_t trigger_time, const journal::writer_ptr &writer);
-
-  void write_locations(int64_t trigger_time, const journal::writer_ptr &writer);
 
   void write_channels(int64_t trigger_time, const journal::writer_ptr &writer);
 };

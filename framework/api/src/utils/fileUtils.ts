@@ -52,19 +52,18 @@ export const getFileContent = (targetPath: string): Promise<string> => {
   targetPath = path.normalize(targetPath);
   return new Promise((resolve, reject): void => {
     const file = fse.createReadStream(targetPath);
-    let fileContextList: Array<Buffer> = []
-    file.on('data', data => {
-        fileContextList.push(data as Buffer)
-    })
+    let fileContextList: Array<Buffer> = [];
+    file.on('data', (data) => {
+      fileContextList.push(data as Buffer);
+    });
     file.on('end', () => {
-        resolve(Buffer.concat(fileContextList).toString())
-    })
+      resolve(Buffer.concat(fileContextList).toString());
+    });
     file.on('error', (err) => {
-        reject(err)
-        return
-    })
-  })
- 
+      reject(err);
+      return;
+    });
+  });
 };
 
 export const listDir = (filePath: string): Promise<void | string[]> => {

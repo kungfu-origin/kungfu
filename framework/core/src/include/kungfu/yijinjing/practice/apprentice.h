@@ -48,7 +48,7 @@ public:
 
   void request_write_to(int64_t trigger_time, uint32_t dest_id);
 
-  void request_cached_reader_writer(const event_ptr &event);
+  void request_cached_reader_writer();
 
   void request_cached(uint32_t source_id);
 
@@ -64,9 +64,6 @@ public:
   }
 
 protected:
-  const data::location_ptr master_home_location_;
-  const data::location_ptr master_cmd_location_;
-  const data::location_ptr cached_home_location_;
   cache::bank state_bank_;
 
   void react() final;
@@ -82,6 +79,8 @@ protected:
   void on_deregister(const event_ptr &event);
 
   void on_read_from(const event_ptr &event);
+
+  void on_cached_ready_to_read();
 
   void on_read_from_public(const event_ptr &event);
 

@@ -87,9 +87,7 @@ void master::register_app(const event_ptr &event) {
   write_time_reset(event->gen_time(), app_cmd_writer);
   write_trading_day(event->gen_time(), app_cmd_writer);
 
-  // tell others alive locations
-  write_locations(event->gen_time(), app_cmd_writer);
-  // tell others the cached process started
+  // tell the registing app the their self and cached process started
   write_registries(event->gen_time(), app_cmd_writer);
 
   on_register(event, register_data);
@@ -114,6 +112,7 @@ void master::publish_trading_day() { write_trading_day(0, get_writer(location::P
 void master::react() {
   events_ | is(RequestWriteTo::tag) | $$(on_request_write_to(event));
   events_ | is(RequestReadFrom::tag) | $$(on_request_read_from(event));
+  events_ | is(RequestReadFrom::tag) | $$(check_cached_ready_to_read(event));
   events_ | is(RequestReadFromPublic::tag) | $$(on_request_read_from_public(event));
   events_ | is(Channel::tag) | $$(on_channel_request(event));
   events_ | is(TimeRequest::tag) | $$(on_time_request(event));
@@ -172,19 +171,6 @@ void master::feed(const event_ptr &event) {
 
 void master::pong(const event_ptr &event) { get_io_device()->get_publisher()->publish("{}"); }
 
-void master::on_request_cached_done(const event_ptr &event) {
-  auto request_cached_done_data = event->data<RequestCachedDone>();
-  auto app_uid = request_cached_done_data.dest_id;
-  if (writers_.find(app_uid) == writers_.end()) {
-    SPDLOG_ERROR("no app_uid {} in writers_ ", get_location_uname(app_uid));
-    return;
-  }
-  auto app_cmd_writer = writers_.at(app_uid);
-  app_cmd_writer->mark(now(), RequestStart::tag);
-  write_registries(event->gen_time(), app_cmd_writer);
-  write_channels(event->gen_time(), app_cmd_writer);
-}
-
 void master::on_request_write_to(const event_ptr &event) {
   const RequestWriteTo &request = event->data<RequestWriteTo>();
   auto trigger_time = event->gen_time();
@@ -226,14 +212,35 @@ void master::on_request_read_from_public(const event_ptr &event) {
   require_read_from_public(event->gen_time(), event->source(), request.source_id, request.from_time);
 }
 
-void master::on_channel_request(const event_ptr &event) {
-  const Channel &request = event->data<Channel>();
+void master::check_cached_ready_to_read(const event_ptr &event) {
+  const RequestReadFrom &request = event->data<RequestReadFrom>();
   auto trigger_time = event->gen_time();
-  if (is_location_live(request.source_id) and not has_channel(request.source_id, request.dest_id)) {
-    reader_->join(get_location(request.source_id), request.dest_id, trigger_time);
-    require_write_to(trigger_time, request.source_id, request.dest_id);
-    register_channel(trigger_time, request);
-    get_writer(location::PUBLIC)->write(trigger_time, request);
+  auto app_uid = event->source();
+  auto read_from_source_id = request.source_id;
+
+  if (read_from_source_id == cached_home_location_->uid) {
+    auto app_cmd_writer = get_writer(app_uid);
+    app_cmd_writer->mark(now(), CachedReadyToRead::tag);
+  }
+}
+
+void master::on_request_cached_done(const event_ptr &event) {
+  auto request_cached_done_data = event->data<RequestCachedDone>();
+  auto app_uid = request_cached_done_data.dest_id;
+  auto app_cmd_writer = get_writer(app_uid);
+  app_cmd_writer->mark(now(), RequestStart::tag);
+  write_registries(event->gen_time(), app_cmd_writer);
+  write_channels(event->gen_time(), app_cmd_writer);
+}
+
+void master::on_channel_request(const event_ptr &event) {
+  const Channel &channel = event->data<Channel>();
+  auto trigger_time = event->gen_time();
+  if (is_location_live(channel.source_id) and not has_channel(channel.source_id, channel.dest_id)) {
+    reader_->join(get_location(channel.source_id), channel.dest_id, trigger_time);
+    require_write_to(trigger_time, channel.source_id, channel.dest_id);
+    register_channel(trigger_time, channel);
+    get_writer(location::PUBLIC)->write(trigger_time, channel);
   }
 }
 
@@ -275,15 +282,10 @@ void master::write_registries(int64_t trigger_time, const writer_ptr &writer) {
   }
 }
 
-void master::write_locations(int64_t trigger_time, const writer_ptr &writer) {
-  for (const auto &item : locations_) {
-    writer->write(trigger_time, dynamic_cast<Location &>(*item.second));
-  }
-}
-
 void master::write_channels(int64_t trigger_time, const writer_ptr &writer) {
   for (const auto &item : channels_) {
     writer->write(trigger_time, item.second);
   }
 }
+
 } // namespace kungfu::yijinjing::practice
