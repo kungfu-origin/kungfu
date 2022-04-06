@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia';
 import { deepClone } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
-import { getAllKfConfigOriginData } from '@kungfu-trader/kungfu-js-api/actions';
 import {
   getKfGlobalSettingsValue,
   setKfGlobalSettingsValue,
@@ -37,11 +36,8 @@ export const useCodeStore = defineStore('code', {
       this.currentStrategy = strategy;
     },
 
-    setStrategyList(): Promise<void> {
-      return getAllKfConfigOriginData().then((res) => {
-        const { strategy } = res;
-        this.strategyList = strategy;
-      });
+    setStrategyList(data): void {
+      this.strategyList = data;
     },
 
     //策略编辑，设置当前文件

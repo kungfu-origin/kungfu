@@ -1,6 +1,6 @@
 <template>
   <div class="code-editor">
-    <div id="editor-content" v-if="file !== null && !file.isDir"></div>
+    <div id="editor-content" v-if="activeFile !== null && !activeFile.isDir"></div>
     <i class="iconfont tr-logo" v-else></i>
   </div>
 </template>
@@ -42,7 +42,7 @@ const handleEditor: {
 } = {
   value: null,
 };
-const file = ref<Code.FileData | null>(null);
+const activeFile = ref<Code.FileData | null>(null);
 
 watch(code, (spaceTabSetting) => {
   updateSpaceTab(spaceTabSetting || {});
@@ -65,7 +65,7 @@ watch(fileTree, (newTree, oldTree) => {
     )!.filePath;
   }
   if (newRootPath !== oldRootPath) {
-    file.value = null;
+    activeFile.value = null;
     handleEditor.value = null;
   }
 });
@@ -75,15 +75,16 @@ watch(currentFile, async (newFile: Code.FileData) => {
   const filePath: string = newFile.filePath || '';
 
   if (currentFile.value.isDir) return;
+  
   clearState();
-  file.value = newFile as Code.FileData;
+  activeFile.value = newFile as Code.FileData;
   const codeText: string = await getFileContent(filePath);
   await nextTick();
-  if (file.value) {
-    handleEditor.value = buildEditor(handleEditor.value, file.value, codeText);
+  if (activeFile.value) {
+    handleEditor.value = buildEditor(handleEditor.value, activeFile.value, codeText);
     await nextTick();
     // updateSpaceTab(code.value);
-    bindBlur(handleEditor.value, file.value);
+    bindBlur(handleEditor.value, activeFile.value);
   }
 });
 
@@ -202,7 +203,7 @@ function updateSpaceTab(spaceTabSetting: Code.ICodeSetting) {
 function clearState(): void {
   handleEditor.value && handleEditor.value.dispose();
   handleEditor.value = null;
-  file.value = null;
+  activeFile.value = null;
 }
 
 function pythonProvideCompletionItems(model, position, context, token) {
