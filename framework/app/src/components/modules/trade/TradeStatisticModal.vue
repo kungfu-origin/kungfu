@@ -55,7 +55,7 @@ const tradeLatencyStats = computed(() => {
 const priceVolumeStats = computed(() => {
   const tradesForStatistic = props.trades
     .slice(0)
-    .filter((item) => item.price > 0);
+    .filter((item) => item.price >= 0);
   const priceVolumeData: Record<
     string,
     {

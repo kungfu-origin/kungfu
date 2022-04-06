@@ -87,9 +87,10 @@ export type Pm2ProcessStatusTypes =
   | 'waiting restart'
   | 'one-launch-status';
 
-export interface Pm2ProcessStatusData {
-  [prop: string]: Pm2ProcessStatusTypes | undefined;
-}
+export type Pm2ProcessStatusData = Record<
+  string,
+  Pm2ProcessStatusTypes | undefined
+>;
 
 export interface Pm2ProcessStatusDetail {
   monit: ProcessDescription['monit'];
@@ -104,9 +105,7 @@ export interface Pm2ProcessStatusDetail {
   args: Pm2Env['args'];
 }
 
-export interface Pm2ProcessStatusDetailData {
-  [prop: string]: Pm2ProcessStatusDetail;
-}
+export type Pm2ProcessStatusDetailData = Record<string, Pm2ProcessStatusDetail>;
 
 export interface Pm2Env {
   pm_cwd?: string;

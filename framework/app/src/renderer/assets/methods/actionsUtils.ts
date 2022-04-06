@@ -29,6 +29,7 @@ import {
   buildExtTypeMap,
   dealCategory,
   getAvailDaemonList,
+  removeNoDefaultStrategyFolders,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { writeCSV } from '@kungfu-trader/kungfu-js-api/utils/fileUtils';
 import {
@@ -649,7 +650,7 @@ export const usePreStartAndQuitApp = (): {
             switch (data.name) {
               case 'record-before-quit':
                 preQuitSystemLoadingData.record = 'loading';
-                preQuitTasks([]).finally(() => {
+                preQuitTasks([removeNoDefaultStrategyFolders()]).finally(() => {
                   ipcRenderer.send('record-before-quit-done');
                   preQuitSystemLoadingData.record = 'done';
                 });

@@ -9,6 +9,7 @@ export interface KfSystemConfig {
   config: KungfuApi.KfConfigItem[];
 }
 
+
 export const getKfGlobalSettings = (): KfSystemConfig[] => [
   {
     key: 'system',
@@ -79,6 +80,32 @@ export const getKfGlobalSettings = (): KfSystemConfig[] => [
       },
     ],
   },
+  {
+    key: 'code',
+    name: isEnglish ? 'Editor' : '编辑器',
+    config: [
+        {
+            key: 'tabSpaceType',
+            name: isEnglish ? 'Indentation Category' : '缩进类别',
+            tip: isEnglish ? 'Kungfu Editor Indentation Category' : '功夫编辑器缩进类别',
+            type: 'select',
+            options: [
+                { value: 'Spaces', label: 'Spaces' },
+                { value: 'Tabs', label: 'Tabs' },
+            ],
+        },
+        {
+            key: 'tabSpaceSize',
+            name: isEnglish ? 'Indentation Size' : '缩进大小',
+            tip: isEnglish ? 'Kungfu Editor Indentation Size (space)' : '功夫编辑器缩进大小（空格）',
+            type: 'select',
+            options: [
+                { value: '2', label: '2' },
+                { value: '4', label: '4' },
+            ],
+        },
+    ]
+  }
 ];
 
 export const getKfGlobalSettingsValue = () => {

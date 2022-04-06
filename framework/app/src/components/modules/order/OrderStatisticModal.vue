@@ -101,7 +101,7 @@ const networkLatencyStats = computed(() => {
 const priceVolumeStats = computed(() => {
   const ordersForStatistic = props.orders
     .slice(0)
-    .filter((item) => item.limit_price > 0);
+    .filter((item) => item.limit_price >= 0);
   const priceVolumeData: Record<
     string,
     {

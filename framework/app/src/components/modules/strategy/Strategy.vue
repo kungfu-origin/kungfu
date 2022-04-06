@@ -15,6 +15,7 @@ import {
   useTableSearchKeyword,
   useDashboardBodySize,
   handleOpenLogview,
+  handleOpenCodeView,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import { getColumns } from './config';
 import {
@@ -34,7 +35,6 @@ import {
   getProcessIdByKfLocation,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import path from 'path';
-import { shell } from '@electron/remote';
 import KfBlinkNum from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfBlinkNum.vue';
 
 const { dashboardBodyHeight, handleBodySizeChange } = useDashboardBodySize();
@@ -119,11 +119,6 @@ function handleOpenSetStrategyDialog(
 function getStrategyPathShowName(kfConfig: KungfuApi.KfConfig): string {
   const strategyPath = getConfigValue(kfConfig).strategy_path || '';
   return path.basename(strategyPath);
-}
-
-function handleOpenFile(kfConfig: KungfuApi.KfConfig) {
-  const strategyPath = getConfigValue(kfConfig).strategy_path || '';
-  shell.openPath(strategyPath);
 }
 </script>
 
@@ -215,7 +210,7 @@ function handleOpenFile(kfConfig: KungfuApi.KfConfig) {
               />
               <FormOutlined
                 style="font-size: 12px"
-                @click.stop="handleOpenFile(record)"
+                @click.stop="handleOpenCodeView(record)"
               ></FormOutlined>
               <SettingOutlined
                 style="font-size: 12px"
