@@ -35,10 +35,10 @@ const { currentFile, fileTree, globallSetting } = storeToRefs(useCodeStore());
 const code = computed(() => globallSetting['code']);
 
 const handleEditor: {
-    value: monaco.editor
+  value: monaco.editor | null;
 } = {
-    value: null
-}
+  value: null,
+};
 const file = ref<Code.FileData | null>(null);
 
 watch(code, (spaceTabSetting) => {
