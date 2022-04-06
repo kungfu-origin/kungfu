@@ -10,13 +10,13 @@ import FileTree from './components/FileTree.vue';
 import { getStrategyById } from '@kungfu-trader/kungfu-js-api/kungfu/strategy';
 import { ClusterOutlined } from '@ant-design/icons-vue';
 import { useCodeStore } from './store/codeStore';
-import { ipcEmitDataByName } from '../../../renderer/ipcMsg/emitter';
+// import { ipcEmitDataByName } from '../../../renderer/ipcMsg/emitter';
 import { message } from 'ant-design-vue';
 const store = useCodeStore();
 const ProcessId = getProcessId();
-ipcEmitDataByName('strategyList').then(({ data }) => {
-  console.log(data);
-});
+// ipcEmitDataByName('strategyList').then(({ data }) => {
+//   console.log(data);
+// });
 store.setStrategyList();
 
 setHtmlTitle(`功夫交易系统 - ${ProcessId}.log`);

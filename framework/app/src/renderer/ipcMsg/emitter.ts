@@ -14,7 +14,6 @@ export const ipcEmitDataByName = (
   interval?: number,
 ) => {
   interval = interval || 5000;
-
   if (!paWin) {
     return Promise.reject(new Error('paWin is null!'));
   }
@@ -31,8 +30,10 @@ export const ipcEmitDataByName = (
       clearTimeout(timer);
     }, interval);
 
-    ipcRenderer.on(`ipc-res-${name}`, (event, data) => {
-      resolve({ event, data });
+    ipcRenderer.on(`ipc-res-${name}`, (data) => {
+      console.log(111);
+
+      resolve({ data });
       ipcRenderer.removeAllListeners(`ipc-res-${name}`);
       clearTimeout(timer);
     });
