@@ -24,7 +24,7 @@ declare global {
     watcher: Watcher | null;
     kungfu: Kungfu;
     workers: Record<string, WebpackWorker>;
-    fileId: number
+    fileId: number;
   }
 
   namespace NodeJS {
