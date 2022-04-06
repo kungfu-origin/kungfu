@@ -42,7 +42,6 @@ if (process.env.APP_TYPE === 'daemon') {
   global.__kfResourcesPath = path
     .resolve(__dirname, '..', '..', '..')
     .replace(/\\/g, '\\\\');
-  console.log('daemon, global.__kfResurcesPath', global.__kfResourcesPath);
 }
 
 export const KF_HOME_BASE_DIR_RESOLVE: string = getHomePath();
