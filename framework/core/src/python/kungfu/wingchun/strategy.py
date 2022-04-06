@@ -64,6 +64,9 @@ class Strategy(wc.Strategy):
         self._on_order_action_error = getattr(
             self._module, "on_order_action_error", lambda ctx, error: None
         )
+        self._on_book_update_reset = getattr(
+            self._module, "on_book_update_reset", lambda ctx, error: None
+        )
 
     def __call_proxy(self, func, *args):
         if inspect.iscoroutinefunction(func):
@@ -192,6 +195,9 @@ class Strategy(wc.Strategy):
     def on_trading_day(self, wc_context, daytime):
         self.ctx.trading_day = kft.to_datetime(daytime)
         self.__call_proxy(self._on_trading_day, self.ctx, daytime)
+
+    def on_book_update_reset(self, old_book, new_book):
+        self.__call_proxy(self._on_book_update_reset, old_book, new_book)
 
 
 class AsyncOrderAction:

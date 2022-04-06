@@ -182,6 +182,10 @@ public:
   void on_trade(strategy::Context_ptr &context, const Trade &trade) override {
     PYBIND11_OVERLOAD(void, strategy::Strategy, on_trade, context, trade);
   }
+
+  void on_book_update_reset(const Book &old_book, const Book &new_book) override {
+    PYBIND11_OVERLOAD(void, strategy::Strategy, on_book_update_reset, old_book, new_book);
+  }
 };
 
 void bind(pybind11::module &&m) {
@@ -362,7 +366,8 @@ void bind(pybind11::module &&m) {
       .def("on_entrust", &strategy::Strategy::on_entrust)
       .def("on_transaction", &strategy::Strategy::on_transaction)
       .def("on_order", &strategy::Strategy::on_order)
-      .def("on_trade", &strategy::Strategy::on_trade);
+      .def("on_trade", &strategy::Strategy::on_trade)
+      .def("on_book_update_reset", &strategy::Strategy::on_book_update_reset);
 
   py::class_<BarGenerator, kungfu::yijinjing::practice::apprentice, std::shared_ptr<BarGenerator>>(m, "BarGenerator")
       .def(py::init<yijinjing::data::locator_ptr, longfist::enums::mode, bool, std::string &>())

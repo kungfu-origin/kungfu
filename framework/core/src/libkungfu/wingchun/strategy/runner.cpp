@@ -23,7 +23,9 @@ RuntimeContext_ptr Runner::get_context() const { return context_; }
 RuntimeContext_ptr Runner::make_context() { return std::make_shared<RuntimeContext>(*this, events_); }
 
 void Runner::add_strategy(const Strategy_ptr &strategy) {
-  context_->get_bookkeeper().add_book_listener(strategy);
+  if (context_) {
+    context_->get_bookkeeper().add_book_listener(strategy);
+  }
   strategies_.push_back(strategy);
 }
 
@@ -55,6 +57,9 @@ void Runner::inspect_channel(const event_ptr &event) {
 
 void Runner::on_start() {
   enable(*context_);
+  for (auto &st : strategies_) {
+    context_->get_bookkeeper().add_book_listener(st);
+  }
   pre_start();
   events_ | take_until(events_ | filter([&](auto e) { return started_; })) | $$(prepare(event));
   post_start();

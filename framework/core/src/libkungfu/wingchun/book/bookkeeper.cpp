@@ -15,9 +15,10 @@ using namespace kungfu::yijinjing::util;
 
 namespace kungfu::wingchun::book {
 Bookkeeper::Bookkeeper(apprentice &app, broker::Client &broker_client) : app_(app), broker_client_(broker_client) {
+  SPDLOG_WARN(" Bookkeeper::Bookkeeper begin 1111");
   book::AccountingMethod::setup_defaults(*this);
-  SPDLOG_WARN(" Bookkeeper::Bookkeeper begin");
-  book_listeners_.push_back(std::make_shared<BookListener>());
+  //  book_listeners_.push(book_listener);
+  //  book_listeners_.emplace(std::make_shared<BookListener>());
   SPDLOG_WARN(" Bookkeeper::Bookkeeper end");
 }
 
@@ -231,8 +232,8 @@ void Bookkeeper::try_sync_book_replica(uint32_t location_uid) {
   if (books_replica_asset_guards_.at(location_uid) && books_replica_position_guard_.at(location_uid)) {
     books_replica_asset_guards_.insert_or_assign(location_uid, false);
     books_replica_position_guard_.insert_or_assign(location_uid, false);
-    auto old_book = books_.at(location_uid);
-    auto new_book = books_replica_.at(location_uid);
+    auto old_book = get_book(location_uid);
+    auto new_book = get_book_replica(location_uid);
     books_.erase(location_uid);
     books_.insert_or_assign(location_uid, new_book);
     books_replica_.erase(location_uid);
@@ -242,26 +243,32 @@ void Bookkeeper::try_sync_book_replica(uint32_t location_uid) {
 
     auto fun_asset_compare = [](const Asset old_asset, const Asset new_asset) {
       bool asset_changed = false;
-      asset_changed &= old_asset.avail == new_asset.avail;
-      asset_changed &= old_asset.margin == new_asset.margin;
+      asset_changed |= old_asset.avail != new_asset.avail;
+      asset_changed |= old_asset.margin != new_asset.margin;
+      SPDLOG_WARN("fun_asset_compare after : {}", asset_changed);
       return asset_changed;
     };
-    book_changed &= fun_asset_compare(old_book->asset, new_book->asset);
+    book_changed |= fun_asset_compare(old_book->asset, new_book->asset);
 
-    for (auto &old_pair : old_book->long_positions) {
-      auto &old_position = old_pair.second;
-      auto &new_position = new_book->get_position_for(old_position.direction, old_position);
-      book_changed &= old_position.volume == new_position.volume;
+    SPDLOG_WARN("old_book->long_positions");
+    for (auto &new_pair : new_book->long_positions) {
+      auto &new_position = new_pair.second;
+      auto &old_position = old_book->get_position_for(new_position.direction, new_position);
+      book_changed |= old_position.volume != new_position.volume;
+      SPDLOG_WARN("old_book->long_positions after : {}", book_changed);
     }
-    for (auto &old_pair : old_book->short_positions) {
-      auto &old_position = old_pair.second;
-      auto &new_position = new_book->get_position_for(old_position.direction, old_position);
-      book_changed &= old_position.volume == new_position.volume;
+    SPDLOG_WARN("old_book->short_position");
+    for (auto &new_pair : new_book->short_positions) {
+      auto &new_position = new_pair.second;
+      auto &old_position = new_book->get_position_for(new_position.direction, new_position);
+      book_changed |= old_position.volume != new_position.volume;
+      SPDLOG_WARN("old_book->short_position after : {}", book_changed);
     }
-
-    for (BookListener_ptr book_listener : book_listeners_) {
-      //      book_listener->on_book_update_reset(*old_book, *new_book, book_changed);
-      SPDLOG_WARN("book_listener->on_book_update_reset");
+    if (book_changed) {
+      for (auto &book_listener : book_listeners_) {
+        SPDLOG_WARN("book_listener->on_book_update_reset");
+        book_listener->on_book_update_reset(*old_book, *new_book);
+      }
     }
   }
 }
@@ -304,9 +311,7 @@ void Bookkeeper::update_position_guard(uint32_t location_uid) {
 }
 
 void Bookkeeper::add_book_listener(const BookListener_ptr &book_listener) {
-  SPDLOG_WARN(" Bookkeeper::add_book_listener begin");
-  book_listeners_.emplace_back(std::make_shared<BookListener>());
-  SPDLOG_WARN(" Bookkeeper::add_book_listener insert new");
+  SPDLOG_WARN(" Bookkeeper::add_book_listener xxxxxxx");
   book_listeners_.push_back(book_listener);
   SPDLOG_WARN(" Bookkeeper::add_book_listener insert args");
 }

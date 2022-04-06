@@ -69,7 +69,11 @@ private:
 
   void on_request_read_from(const event_ptr &event);
 
+  void check_cached_ready_to_read(const event_ptr &event);
+
   void on_request_read_from_public(const event_ptr &event);
+
+  void on_request_read_from_update(const event_ptr &event);
 
   void on_channel_request(const event_ptr &event);
 
@@ -81,7 +85,7 @@ private:
 
   void write_trading_day(int64_t trigger_time, const journal::writer_ptr &writer);
 
-  void write_profile_data(int64_t trigger_time, const journal::writer_ptr &writer);
+  void write_locations(int64_t trigger_time, const journal::writer_ptr &writer);
 
   void write_registries(int64_t trigger_time, const journal::writer_ptr &writer);
 

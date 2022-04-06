@@ -11,7 +11,7 @@
 namespace kungfu::wingchun::strategy {
 FORWARD_DECLARE_PTR(Context)
 
-class Strategy : public kungfu::wingchun::book::BookListener{
+class Strategy : public kungfu::wingchun::book::BookListener {
 public:
   virtual ~Strategy() = default;
 

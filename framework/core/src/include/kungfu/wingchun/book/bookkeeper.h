@@ -18,9 +18,8 @@ typedef std::unordered_map<longfist::enums::InstrumentType, AccountingMethod_ptr
 FORWARD_DECLARE_PTR(Context)
 class BookListener {
 public:
-  virtual void on_book_update_reset(const Book &old_book, const Book &new_book, bool changed) {
-    SPDLOG_WARN("old_book.asset : {}, new_book.asset : {} ,changed : {}", old_book.asset.to_string(),
-                new_book.asset.to_string(), changed);
+  virtual void on_book_update_reset(const Book &old_book, const Book &new_book) {
+    SPDLOG_WARN("old_book.asset : {}, new_book.asset : {} ", old_book.asset.to_string(), new_book.asset.to_string());
   };
 };
 DECLARE_PTR(BookListener)
