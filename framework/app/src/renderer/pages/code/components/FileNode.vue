@@ -216,34 +216,39 @@ function handleRename(): void {
 
 //删除文件
 function handleDelete() {
-    const parentId = fileNode.value?.parentId;
-    const typeName = type == 'folder' ? '文件夹' : '文件';
-    Modal.confirm({
-        title: '提示',
-        content: `确认删除该${typeName}吗？`,
-        okText: '确 定',
-        cancelText: '取 消',
-        onOk() {
-            removeFileFolder(fileNode.value?.filePath || '').then(() => {
-                store.setCurrentFile(entryFile.value)
-            }).then(() =>
-                openFolder(
-                    fileTree.value[parentId || 0],
-                    fileTree.value,
-                    true,
-                    true,
-                ),
-            )
-            .then(() => message.success(`${typeName}删除成功！`))
-            .catch((err) => {
-                if (err == 'cancel') return;
-                message.error(err.message || '操作失败！');
-            });
-        },
-        onCancel() {
-            return
-        }
-    })
+    if (entryFile.value.id != fileNode.value.id) {
+        const parentId = fileNode.value?.parentId;
+        const typeName = type == 'folder' ? '文件夹' : '文件';
+        Modal.confirm({
+            title: '提示',
+            content: `确认删除该${typeName}吗？`,
+            okText: '确 定',
+            cancelText: '取 消',
+            onOk() {
+                removeFileFolder(fileNode.value?.filePath || '').then(() => {
+                    store.setCurrentFile(entryFile.value)
+                }).then(() =>
+                    openFolder(
+                        fileTree.value[parentId || 0],
+                        fileTree.value,
+                        true,
+                        true,
+                    ),
+                )
+                .then(() => message.success(`${typeName}删除成功！`))
+                .catch((err) => {
+                    if (err == 'cancel') return;
+                    message.error(err.message || '操作失败！');
+                });
+            },
+            onCancel() {
+                return
+            }
+        })
+    } else {
+        message.warning('不可删除入口文件')
+        return
+    }
 }
 
 function changePath(e): void {
@@ -261,7 +266,7 @@ function addChangePath(e): void {
 //重命名文件blur
 const handleEditFileBlur = () => {
     onEditing.value = false
-    if (editError) {
+    if (editError.value) {
         resetStatus();
     }
 

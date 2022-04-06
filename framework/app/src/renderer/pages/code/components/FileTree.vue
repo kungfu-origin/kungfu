@@ -69,11 +69,11 @@ import { message } from 'ant-design-vue';
 import { getTreeByFilePath } from '../../../assets/methods/codeUtils';
 import { useCodeStore } from '../store/codeStore';
 import FileNode from './FileNode.vue';
-import { updateStrategyPath } from '@kungfu-trader/kungfu-js-api/kungfu/strategy';
 import { findTargetFromArray } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { openFolder, buildFileObj } from '../../../assets/methods/codeUtils';
 
 import { FileAddFilled, FolderAddFilled } from '@ant-design/icons-vue';
+import { ipcEmitDataByName } from '../../../ipcMsg/emitter';
 
 const store = useCodeStore();
 const props = defineProps<{
@@ -115,8 +115,10 @@ function handleBindStrategyFolder() {
 //bind data中path 与 sqlite中path
 async function bindStrategyPath(strategyPathNew) {
     if (strategy && strategy.value.strategy_id) {
-        await updateStrategyPath(strategy.value.strategy_id, strategyPathNew)
-        
+        await ipcEmitDataByName('updateStrategyPath', {
+            strategyId: strategy.value.strategy_id,
+            strategyPath: strategyPathNew,
+        })
         message.success(
             `策略${strategy.value.strategy_id}文件路径修改成功！`,
         );

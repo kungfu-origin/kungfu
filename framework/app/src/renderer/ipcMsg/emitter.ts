@@ -8,7 +8,7 @@ ipcRenderer.setMaxListeners(10);
 export const ipcEmitDataByName = (
   name: string,
   postData?: {
-    strategyId: number;
+    strategyId: string;
     strategyPath?: string;
   },
   interval?: number,

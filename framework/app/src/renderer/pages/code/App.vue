@@ -7,7 +7,6 @@ import {
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import Editor from './components/MonacoEditor.vue';
 import FileTree from './components/FileTree.vue';
-import { getStrategyById } from '@kungfu-trader/kungfu-js-api/kungfu/strategy';
 import { ClusterOutlined } from '@ant-design/icons-vue';
 import { useCodeStore } from './store/codeStore';
 import { ipcEmitDataByName } from '../../../renderer/ipcMsg/emitter';
@@ -50,11 +49,15 @@ function handleUpdateStrategy(strategyPath) {
 }
 
 async function updateStrategy(strategyId: string, strategyPath: string) {
-  const strategyList: Array<Code.Strategy> = await getStrategyById(strategyId);
-  handleStrategyList(strategyList);
+  await getStrategyById(strategyId);
 }
 
 let shouldClose: boolean = false;
+
+async function getStrategyById(strategyId: string) {
+    const { data } = await ipcEmitDataByName('strategyById', { strategyId }) as Record<string, Array<Code.Strategy>>;
+    handleStrategyList(data);
+}
 
 function bindCloseWindowEvent() {
   shouldClose = false;
@@ -82,7 +85,7 @@ onMounted(() => {
     });
     removeLoadingMask();
 
-    store.getKungfuConfig();
+    // store.getKungfuConfig();
     bindCloseWindowEvent();
 });
 </script>
