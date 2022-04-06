@@ -132,6 +132,7 @@ watch(isShowChildren, () => {
 
 function enterBlur(e) {
     e.target.blur()
+    resetStatus()
 }
 
 //点击文件或文件树

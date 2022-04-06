@@ -260,9 +260,11 @@ function pythonProvideCompletionItems(model, position, context, token) {
 }
 </script>
 <style lang="less">
-.code-editor {
-  .monaco-editor {
-    height: 100vh !important;
-  }
+#editor-content {
+    height: 100%;
+    .code-editor {
+        height: 100%;
+    }
 }
+
 </style>
