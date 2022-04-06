@@ -1,14 +1,14 @@
 <template>
   <div class="code-editor">
-    <div id="editor-content" v-if="file !== null && !file.isDir"></div>
+    <div id="editor-content" v-if="activeFile !== null && !activeFile.isDir"></div>
     <i class="iconfont tr-logo" v-else></i>
   </div>
 </template>
 <script setup lang="ts">
 import { findTargetFromArray } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
-import * as monaco from 'monaco-editor/esm/vs/editor/editor.main.js';
+import * as monaco from 'monaco-editor';
 import { storeToRefs } from 'pinia';
-import { computed, nextTick, reactive, watch } from 'vue';
+import { computed, nextTick, ref, watch } from 'vue';
 import languageJSON from '../config/iconFileConfig.json';
 import themeData from '../config/Monocai.json';
 import {
@@ -19,11 +19,14 @@ import {
   pythonKeywords,
 } from '../hint/monaco.python.hint';
 import { useCodeStore } from '../store/codeStore';
-import { getCodeText } from '@kungfu-trader/kungfu-js-api/utils/fileUtils';
+import { getFileContent } from '@kungfu-trader/kungfu-js-api/utils/fileUtils';
 import path from 'path';
 import fse from 'fs-extra';
 
-monaco.editor.defineTheme('monokai', themeData);
+monaco.editor.defineTheme(
+  'monokai',
+  themeData as monaco.editor.IStandaloneThemeData,
+);
 monaco.editor.setTheme('monokai');
 
 monaco.languages.registerCompletionItemProvider('python', {
@@ -34,8 +37,12 @@ monaco.languages.registerCompletionItemProvider('python', {
 const { currentFile, fileTree, globallSetting } = storeToRefs(useCodeStore());
 const code = computed(() => globallSetting['code']);
 
-let handleEditor: monaco.editor.IDiffNavigator = {};
-let file: Code.FileProps = reactive({});
+const handleEditor: {
+  value: monaco.editor.IStandaloneCodeEditor | null;
+} = {
+  value: null,
+};
+const activeFile = ref<Code.FileData | null>(null);
 
 watch(code, (spaceTabSetting) => {
   updateSpaceTab(spaceTabSetting || {});
@@ -58,90 +65,110 @@ watch(fileTree, (newTree, oldTree) => {
     )!.filePath;
   }
   if (newRootPath !== oldRootPath) {
-    file = {};
-    handleEditor = null;
+    activeFile.value = null;
+    handleEditor.value = null;
   }
 });
 
 // 监听当前文件状态
-watch(currentFile, async (newFile: Code.FileProps) => {
+watch(currentFile, async (newFile: Code.FileData) => {
   const filePath: string = newFile.filePath || '';
 
   if (currentFile.value.isDir) return;
+  
   clearState();
-  file = newFile;
-  const codeText: string = await getCodeText(filePath);
+  activeFile.value = newFile as Code.FileData;
+  const codeText: string = await getFileContent(filePath);
   await nextTick();
-  handleEditor = buildEditor(handleEditor, file, codeText);
-  await nextTick();
-  // updateSpaceTab(code.value);
-  bindBlur(handleEditor, file);
+  if (activeFile.value) {
+    handleEditor.value = buildEditor(handleEditor.value, activeFile.value, codeText);
+    await nextTick();
+    // updateSpaceTab(code.value);
+    bindBlur(handleEditor.value, activeFile.value);
+  }
 });
 
-function bindBlur(editor, file) {
+function bindBlur(editor, curFile) {
   editor !== null &&
     editor.onDidBlurEditorText(() => {
-      curWriteFile(editor, file);
+      curWriteFile(editor, curFile);
     });
 }
 
-function curWriteFile(editor, file) {
+function curWriteFile(editor, curFile) {
   const value = editor.getValue();
-  let curPath: string = path.normalize(file.filePath);
+  let curPath: string = path.normalize(curFile.filePath);
   fse.outputFile(curPath, value);
 }
 
 // 创建代码编辑器
-function createEditor(file: Code.FileProps, codeText: string): monaco.editor {
-  if (document.getElementById('editor-content')) {
-    (document.getElementById('editor-content') as any).innerHTML = '';
-    let fileLanguage: string = 'plaintext';
-    if (file) {
-      fileLanguage = file.ext ? languageJSON[file.ext] : 'plaintext';
-    }
-    const editor: monaco.editor = monaco.editor.create(
-      document.getElementById('editor-content'),
-      {
-        value: codeText,
-        language: fileLanguage,
-
-        autoIndent: 'full',
-        formatOnPaste: true,
-        formatOnType: true,
-
-        fontSize: 14,
-        automaticLayout: true,
-      },
-    );
-    return editor;
+function createEditor(
+  file: Code.FileData,
+  codeText: string,
+): monaco.editor.IStandaloneCodeEditor | null {
+  const $editorContent = document.getElementById('editor-content');
+  if (!$editorContent) {
+    return null;
   }
-  return null;
+
+  $editorContent.innerHTML = '';
+  const fileLanguage: string = getFileLanguage(file);
+  const editor: monaco.editor.IStandaloneCodeEditor = monaco.editor.create(
+    $editorContent,
+    {
+      value: codeText,
+      language: fileLanguage,
+
+      autoIndent: 'full',
+      formatOnPaste: true,
+      formatOnType: true,
+
+      fontSize: 14,
+      automaticLayout: true,
+    },
+  );
+  return editor;
+}
+
+function getFileLanguage(file: Code.FileData | null): string {
+  if (file) {
+    return file.ext ? languageJSON[file.ext] : 'plaintext';
+  }
+
+  return 'plaintext';
 }
 
 // 更新代码编辑器
 function updateEditor(
-  editor: monaco.editor,
-  file: Code.FileProps,
+  editor: monaco.editor.IStandaloneCodeEditor,
+  file: Code.FileData,
   codeText: string,
-): monaco.editor {
-  editor.updateOptions({ value: codeText });
+): monaco.editor.IStandaloneCodeEditor {
+  editor.getModel()?.setValue(codeText);
   const fileLanguage = file.ext
     ? languageJSON[file.ext] || 'plaintext'
     : 'plaintext';
-  handleEditor.setModelLanguage(editor.getModel(), fileLanguage);
+  const model = editor.getModel();
+  if (model) {
+    monaco.editor.setModelLanguage(model, fileLanguage);
+  }
   return editor;
 }
 
 // 构建代码编辑器
 function buildEditor(
-  editor: monaco.editor,
-  file: Code.FileProps,
+  editor: monaco.editor.IStandaloneCodeEditor | null,
+  file: Code.FileData,
   codeText: string,
 ) {
   if (!editor) {
     return createEditor(file, codeText);
   } else {
-    return updateEditor(handleEditor, file, codeText);
+    return updateEditor(
+      editor as monaco.editor.IStandaloneCodeEditor,
+      file,
+      codeText,
+    );
   }
 }
 
@@ -151,19 +178,22 @@ function updateSpaceTab(spaceTabSetting: Code.ICodeSetting) {
     ? spaceTabSetting.tabSpaceType || 'spaces'
     : 'spaces';
 
-  if (handleEditor) {
-    const model = handleEditor.getModel();
+  if (handleEditor.value) {
+    const model = handleEditor.value.getModel();
+
+    if (!model) return;
+
     if (type.toLowerCase() === 'spaces') {
       model.updateOptions({
         insertSpaces: true,
-        indentSize: spaceTabSetting.tabSpaceSize,
-        tabSize: spaceTabSetting.tabSpaceSize,
+        indentSize: +spaceTabSetting.tabSpaceSize,
+        tabSize: +spaceTabSetting.tabSpaceSize,
       });
     } else if (type.toLowerCase() === 'tabs') {
       model.updateOptions({
         insertSpaces: false,
-        indentSize: spaceTabSetting.tabSpaceSize,
-        tabSize: spaceTabSetting.tabSpaceSize,
+        indentSize: +spaceTabSetting.tabSpaceSize,
+        tabSize: +spaceTabSetting.tabSpaceSize,
       });
     }
   }
@@ -171,9 +201,9 @@ function updateSpaceTab(spaceTabSetting: Code.ICodeSetting) {
 
 // 使用完成销毁实例
 function clearState(): void {
-  handleEditor && handleEditor.dispose();
-  handleEditor = null;
-  file = {};
+  handleEditor.value && handleEditor.value.dispose();
+  handleEditor.value = null;
+  activeFile.value = null;
 }
 
 function pythonProvideCompletionItems(model, position, context, token) {

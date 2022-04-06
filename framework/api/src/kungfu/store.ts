@@ -4,7 +4,6 @@ import { configStore } from '../kungfu';
 import { kfLogger, hidePasswordByLogger } from '../utils/busiUtils';
 import { BASE_DB_DIR } from '../config/pathConfig';
 
-
 type AllConfig = Record<string, KungfuApi.KfConfigOrigin>;
 
 export const getKfAllConfig = (): Promise<KungfuApi.KfConfigOrigin[]> => {
@@ -52,22 +51,21 @@ export const removeKfConfig = (
   );
 };
 
-
 export const getKfConfig = (strategyId: string) => {
   const kfLocation: KungfuApi.KfLocation = getStrategyKfLocation(strategyId);
   return configStore.getConfig(
-      kfLocation.category,
-      kfLocation.group,
-      kfLocation.name,
-      kfLocation.mode
+    kfLocation.category,
+    kfLocation.group,
+    kfLocation.name,
+    kfLocation.mode,
   );
 };
 
 export const getStrategyKfLocation = (strategyId: string) => {
-    return {
-        category: 'strategy',
-        group: 'default',
-        name: strategyId,
-        mode: 'live',
-    }
-}
+  return {
+    category: 'strategy',
+    group: 'default',
+    name: strategyId,
+    mode: 'live',
+  };
+};

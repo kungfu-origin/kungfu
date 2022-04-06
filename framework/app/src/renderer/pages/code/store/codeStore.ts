@@ -1,9 +1,9 @@
 import { defineStore } from 'pinia';
-import fse from 'fs-extra';
-
-import { KF_CONFIG_PATH } from '@kungfu-trader/kungfu-js-api/config/pathConfig';
 import { deepClone } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
-import { getAllKfConfigOriginData } from '@kungfu-trader/kungfu-js-api/actions';
+import {
+  getKfGlobalSettingsValue,
+  setKfGlobalSettingsValue,
+} from '@kungfu-trader/kungfu-js-api/config/globalSettings';
 // import { KfCategoryTypes } from '@kungfu-trader/kungfu-js-api/typings/enums';
 interface ICodeState {
   currentStrategy: string;
@@ -36,11 +36,8 @@ export const useCodeStore = defineStore('code', {
       this.currentStrategy = strategy;
     },
 
-    setStrategyList(): Promise<void> {
-      return getAllKfConfigOriginData().then((res) => {
-        const { strategy } = res;
-        this.strategyList = strategy;
-      });
+    setStrategyList(data): void {
+      this.strategyList = data;
     },
 
     //策略编辑，设置当前文件
@@ -102,6 +99,7 @@ export const useCodeStore = defineStore('code', {
           1,
         );
       }
+
       this.fileTree[id]['children'] = targetChildren;
       this.fileTree['pending']['parentId'] = '';
     },
@@ -112,7 +110,7 @@ export const useCodeStore = defineStore('code', {
     },
 
     async getKungfuConfig(): Promise<void> {
-      const globallSetting = fse.readJsonSync(KF_CONFIG_PATH);
+      const globallSetting = getKfGlobalSettingsValue();
       await this.setKungfuConfig(globallSetting);
     },
 
@@ -130,10 +128,11 @@ export const useCodeStore = defineStore('code', {
       Object.keys(globallSetting || {}).forEach((key) => {
         this.globallSetting[key] = globallSetting[key];
       });
-      fse.outputJsonSync(KF_CONFIG_PATH, {
+      const value = {
         ...this.globallSetting,
         ...globallSetting,
-      });
+      };
+      setKfGlobalSettingsValue(value);
     },
   },
   getters: {

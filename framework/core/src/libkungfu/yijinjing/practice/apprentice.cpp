@@ -31,10 +31,7 @@ using namespace std::chrono;
 namespace kungfu::yijinjing::practice {
 
 apprentice::apprentice(location_ptr home, bool low_latency)
-    : hero(std::make_shared<io_device_client>(home, low_latency)),
-      trading_day_(time::today_start()) {
-
-}
+    : hero(std::make_shared<io_device_client>(home, low_latency)), trading_day_(time::today_start()) {}
 
 bool apprentice::is_started() const { return started_; }
 

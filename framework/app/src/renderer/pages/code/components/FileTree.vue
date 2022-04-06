@@ -1,7 +1,7 @@
 <template>
   <div class="file-tree">
     <a-button
-      type="primary"
+      type="default"
       class="open-editor-folder"
       @click="handleBindStrategyFolder"
     >
@@ -191,32 +191,32 @@ async function initFileTree(strategy) {
     fileId: 1,
   });
   //获取第一级文件树
-  let ids, fileTree;
+  let ids, rootFileTree;
   try {
-    const fileTreeData = await getTreeByFilePath(rootFile, fileTree);
+    const fileTreeData = await getTreeByFilePath(rootFile, rootFileTree);
     ids = fileTreeData.ids;
-    fileTree = fileTreeData.fileTree;
+    rootFileTree = fileTreeData.fileTree;
   } catch (err) {
     message.error(err);
   }
 
   // 处理根
   rootFile['children'] = ids;
-  fileTree[rootId] = rootFile;
+  rootFileTree[rootId] = rootFile;
   // padding
-  fileTree = bindFunctionalNode(fileTree);
-  store.setFileTree(fileTree);
+  rootFileTree = bindFunctionalNode(rootFileTree);
+  store.setFileTree(rootFileTree);
   store.setCurrentFile(rootFile);
 
-  return fileTree;
+  return rootFileTree;
 }
 
 //增加 以pending 为key 的node，为addfile做准备
-function bindFunctionalNode(fileTree) {
-  fileTree['pending'] = {
+function bindFunctionalNode(curFileTree) {
+  curFileTree['pending'] = {
     parentId: '',
   };
-  return fileTree;
+  return curFileTree;
 }
 </script>
 

@@ -1,8 +1,12 @@
 const { run } = require('./node-lib.js');
 
-dealSpawnSyncResult(run('yarn', ['format:cpp']));
-dealSpawnSyncResult(run('yarn', ['format:python']));
-dealSpawnSyncResult(run('yarn', ['format:js']));
+try {
+  dealSpawnSyncResult(run('yarn', ['format:cpp']));
+  dealSpawnSyncResult(run('yarn', ['format:python']));
+  dealSpawnSyncResult(run('yarn', ['format:js']));
+} catch (err) {
+  console.error(err);
+}
 
 function dealSpawnSyncResult(res) {
   const { stderr, stdout, error } = res;
