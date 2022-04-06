@@ -10,14 +10,11 @@ import FileTree from './components/FileTree.vue';
 import { getStrategyById } from '@kungfu-trader/kungfu-js-api/kungfu/strategy';
 import { ClusterOutlined } from '@ant-design/icons-vue';
 import { useCodeStore } from './store/codeStore';
-// import { ipcEmitDataByName } from '../../../renderer/ipcMsg/emitter';
+import { ipcEmitDataByName } from '../../../renderer/ipcMsg/emitter';
 import { message } from 'ant-design-vue';
 const store = useCodeStore();
 const ProcessId = getProcessId();
-// ipcEmitDataByName('strategyList').then(({ data }) => {
-//   console.log(data);
-// });
-store.setStrategyList();
+
 
 setHtmlTitle(`功夫交易系统 - ${ProcessId}.log`);
 const strategy = reactive<Code.Strategy>({
@@ -77,13 +74,16 @@ function bindCloseWindowEvent() {
   };
 }
 onMounted(() => {
-  removeLoadingMask();
-  nextTick().then(() => {
-    handleStrategyJsonList(store.strategyList);
-  });
+    ipcEmitDataByName('strategyList').then(({data}) => {
+        store.setStrategyList(data)
+        nextTick().then(() => {
+            handleStrategyJsonList(store.strategyList);
+        });
+    });
+    removeLoadingMask();
 
-  store.getKungfuConfig();
-  bindCloseWindowEvent();
+    store.getKungfuConfig();
+    bindCloseWindowEvent();
 });
 </script>
 

@@ -39,12 +39,7 @@ export function bindIPCListener(store) {
     const childWin = BrowserWindow.fromId(childWinId);
     return new Promise(() => {
       if (childWin) {
-        console.log(store.strategyList);
-
-        // childWin.webContents.send(
-        //   'ipc-res-strategyList',
-        //   Object.freeze(store.strategyList),
-        // );
+        childWin.webContents.send('ipc-res-strategyList', store.strategyList);
       }
     });
   });
