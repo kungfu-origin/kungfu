@@ -22,9 +22,19 @@ using namespace kungfu::yijinjing::nanomsg;
 namespace kungfu::yijinjing::practice {
 
 hero::hero(io_device_ptr io_device)
-    : io_device_(std::move(io_device)), now_(0), begin_time_(time::now_in_nano()), end_time_(INT64_MAX) {
+    : io_device_(std::move(io_device)), now_(0), begin_time_(time::now_in_nano()), end_time_(INT64_MAX),
+      master_home_location_(make_system_location("master", "master", io_device->get_locator())),
+      master_cmd_location_(make_system_location("master", fmt::format("{:08x}", io_device->get_live_home()->uid),
+                                                io_device->get_locator())),
+      cached_home_location_(make_system_location("service", "cached", io_device->get_locator())),
+      ledger_home_location_(make_system_location("service", "ledger", io_device->get_locator())) {
+
   os::handle_os_signals(this);
   add_location(0, get_io_device()->get_home());
+  add_location(0, master_home_location_);
+  add_location(0, master_cmd_location_);
+  add_location(0, cached_home_location_);
+  add_location(0, ledger_home_location_);
   reader_ = io_device_->open_reader_to_subscribe();
 }
 
@@ -98,7 +108,7 @@ bool hero::has_location(uint32_t uid) const { return locations_.find(uid) != loc
 
 location_ptr hero::get_location(uint32_t uid) const {
   if (not has_location(uid)) {
-    SPDLOG_ERROR("no location {} in locations_", get_location_uname(uid));
+    SPDLOG_ERROR("no location {} uname {} in locations_", uid, get_location_uname(uid));
   }
 
   assert(has_location(uid));

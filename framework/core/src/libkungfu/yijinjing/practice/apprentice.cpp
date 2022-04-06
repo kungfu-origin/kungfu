@@ -29,23 +29,9 @@ using namespace kungfu::yijinjing::data;
 using namespace std::chrono;
 
 namespace kungfu::yijinjing::practice {
-inline location_ptr make_master_location(const std::string &name, const locator_ptr &locator) {
-  return location::make_shared(mode::LIVE, category::SYSTEM, "master", name, locator);
-}
-
-inline location_ptr make_cached_location(const locator_ptr &locator) {
-  return location::make_shared(mode::LIVE, category::SYSTEM, "service", "cached", locator);
-}
 
 apprentice::apprentice(location_ptr home, bool low_latency)
-    : hero(std::make_shared<io_device_client>(home, low_latency)),
-      master_home_location_(make_master_location("master", get_locator())),
-      master_cmd_location_(make_master_location(fmt::format("{:08x}", get_live_home_uid()), get_locator())),
-      cached_home_location_(make_cached_location(get_locator())), state_bank_(), trading_day_(time::today_start()) {
-  add_location(0, master_home_location_);
-  add_location(0, master_cmd_location_);
-  add_location(0, cached_home_location_);
-}
+    : hero(std::make_shared<io_device_client>(home, low_latency)), trading_day_(time::today_start()) {}
 
 bool apprentice::is_started() const { return started_; }
 
@@ -83,7 +69,7 @@ void apprentice::request_write_to(int64_t trigger_time, uint32_t dest_id) {
   }
 }
 
-void apprentice::request_cached_reader_writer(const event_ptr &event) {
+void apprentice::request_cached_reader_writer() {
   if (get_io_device()->get_home()->mode == mode::LIVE) {
     if (writers_.find(master_cmd_location_->uid) == writers_.end()) {
       SPDLOG_ERROR("no writer for {}", get_location_uname(master_cmd_location_->uid));
@@ -153,6 +139,7 @@ void apprentice::react() {
   events_ | is(Register::tag) | $$(on_register(event->trigger_time(), event->data<Register>()));
   events_ | is(Deregister::tag) | $$(on_deregister(event));
   events_ | is(RequestReadFrom::tag) | $$(on_read_from(event));
+  events_ | is(CachedReadyToRead::tag) | $$(on_cached_ready_to_read());
   events_ | is(RequestReadFromPublic::tag) | $$(on_read_from_public(event));
   events_ | is(RequestReadFromUpdate::tag) | $$(on_read_from_update(event));
   events_ | is(RequestWriteTo::tag) | $$(on_write_to(event));
@@ -204,7 +191,7 @@ void apprentice::react() {
                                  }) |
                                  first();
 
-    cached_register_event | $$(request_cached_reader_writer(event));
+    cached_register_event | $$(request_cached_reader_writer());
 
     checkin();
     expect_start();
@@ -240,24 +227,7 @@ void apprentice::on_deregister(const event_ptr &event) {
   deregister_location(event->trigger_time(), location_uid);
 }
 
-void apprentice::on_read_from(const event_ptr &event) {
-  do_read_from<RequestReadFrom>(event, get_live_home_uid());
-
-  // In on read to ensure the write in cached established
-  auto source_id = event->data<RequestReadFrom>().source_id;
-  if (source_id == cached_home_location_->uid) {
-    SPDLOG_INFO("-------");
-    SPDLOG_INFO("-------");
-    SPDLOG_INFO("-------");
-    SPDLOG_INFO("-------");
-    SPDLOG_INFO("-------");
-    SPDLOG_INFO("-------");
-    SPDLOG_INFO("-------");
-    SPDLOG_INFO("-------");
-    SPDLOG_INFO("-------");
-    request_cached(source_id);
-  }
-}
+void apprentice::on_read_from(const event_ptr &event) { do_read_from<RequestReadFrom>(event, get_live_home_uid()); }
 
 void apprentice::on_read_from_public(const event_ptr &event) { do_read_from<RequestReadFromPublic>(event, 0); }
 
@@ -271,6 +241,8 @@ void apprentice::on_write_to(const event_ptr &event) {
     writers_.emplace(dest_id, get_io_device()->open_writer(dest_id));
   }
 }
+
+void apprentice::on_cached_ready_to_read() { request_cached(cached_home_location_->uid); }
 
 void apprentice::checkin() {
   auto now = time::now_in_nano();

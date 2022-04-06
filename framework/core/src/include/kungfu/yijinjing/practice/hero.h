@@ -12,6 +12,13 @@
 #include <kungfu/yijinjing/time.h>
 
 namespace kungfu::yijinjing::practice {
+
+inline yijinjing::data::location_ptr make_system_location(const std::string &group, const std::string &name,
+                                                          const data::locator_ptr &locator) {
+  return yijinjing::data::location::make_shared(longfist::enums::mode::LIVE, longfist::enums::category::SYSTEM, group,
+                                                name, locator);
+}
+
 class hero : public resource {
 public:
   explicit hero(yijinjing::io_device_ptr io_device);
@@ -85,6 +92,11 @@ protected:
   std::unordered_map<uint32_t, yijinjing::data::location_ptr> locations_ = {};
   std::unordered_map<uint32_t, longfist::types::Register> registry_ = {};
   rx::connectable_observable<event_ptr> events_ = {};
+
+  const yijinjing::data::location_ptr master_home_location_;
+  const yijinjing::data::location_ptr master_cmd_location_;
+  const yijinjing::data::location_ptr cached_home_location_;
+  const yijinjing::data::location_ptr ledger_home_location_;
 
   uint64_t make_chanel_hash(uint32_t source_id, uint32_t dest_id) const;
 

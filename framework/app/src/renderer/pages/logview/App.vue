@@ -51,8 +51,6 @@ const {
   clearLogState,
 } = useLogInit(LOG_PATH);
 
-startTailLog();
-
 const {
   inputSearchRef,
   searchKeyword,

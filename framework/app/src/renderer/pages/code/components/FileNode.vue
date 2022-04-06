@@ -5,44 +5,45 @@
         :class="{
             folder: type == 'folder',
             file: type !== 'folder',
-            active: fileNode.name === currentFile.name,
+            active: fileNode.id === currentFile.id,
         }"
     >
         <div @click.stop="handleClickFile(fileNode)">
             <div class="each-files" :style="{'padding-left': `${curCount * 16 + 5}px`}">
                 <i v-if="type == 'folder' && fileNode && !fileNode.root"></i>
                 <img class="file-icon" :src="iconPath" v-if="iconPath">
-                <span class="file-name" v-if="fileNode && !onEditing && fileNode.name">{{ fileNode.name }}</span>
+                <span class="file-name" :class="{'root-name': fileNode.root}" v-if="fileNode && !onEditing && fileNode.name">{{ fileNode.name }}</span>
                 <a-input
                     v-else-if="onEditing"
+                    id="edit-input"
                     ref="edit-name"
                     :class="{ error: editError }"
                     v-model.trim="fileName"
                     size="small"
                     :value="editValue"
-                    autofocus="autofocus"
                     style="margin-left: 2px"
                     @click.stop="() => {}"
                     @focus.stop="() => {}"
                     @change="changePath"
                     @blur="handleEditFileBlur"
-                    @pressEnter="handleEditFileBlur"
+                    @pressEnter="enterBlur"
                 ></a-input>
                 <a-input
                     v-else-if="!isPending && !onEditing"
                     ref="addPending"
+                    id="add-input"
                     :class="{ error: editError }"
                     v-model.trim="fileName"
                     size="small"
                     style="margin-left: 2px"
-                    autofocus="autofocus"
                     @click.stop="() => {}"
                     @focus.stop="() => {}"
                     :value="addValue"
                     @change="addChangePath"
-                    @pressEnter="handleAddFileBlur"
+                    @blur="handleAddFileBlur"
+                    @pressEnter="enterBlur"
                 ></a-input>
-                <span class="path text-overflow" v-if="fileNode && entryFile.filePath === fileNode.filePath && fileNode.filePath !== undefined && !onEditing">{{ '(入口文件)' }}</span>
+                <span class="text-overflow" v-if="fileNode && entryFile.filePath === fileNode.filePath && fileNode.filePath !== undefined && !onEditing">{{ '(入口文件)' }}</span>
                 <span class="path text-overflow" v-if="fileNode && fileNode.root" :title="fileNode.filePath">{{fileNode.filePath}}</span>
                 <span class="deal-file"  v-if="fileNode && !fileNode.root && !onEditing && id !== 'padding'">
                     <span class="mouse-over" title="重命名" @click.stop="handleRename"><EditFilled class="icon"/></span>
@@ -51,7 +52,7 @@
             </div>
             <Alert class="error-message" :message="editErrorMessage" type="error" v-if="editError" style="{'padding-left': `${curCount * 16 + 20}px`}"/>
         </div>
-        <div v-if="fileNode && fileNode.children && fileNode.children.folder && fileNode['open']">
+        <div v-if="isShowChildren">
             <div v-for="id in fileNode.children.folder">
                 <ComFileNode
                     :fileNode="fileTree[id]"
@@ -61,7 +62,7 @@
                 />
             </div>
         </div>
-        <div v-if="fileNode && fileNode.children && fileNode.children.file && fileNode['open']">
+        <div v-if="isShowChildren">
             <div v-for="id in fileNode.children.file">
                 <ComFileNode
                     :fileNode="fileTree[id]"
@@ -88,13 +89,11 @@ import iconFolderJSON from '../config/iconFolderConfig.json';
 import iconFileJSON from '../config/iconFileConfig.json';
 import path from 'path';
 import { storeToRefs } from 'pinia';
-import { onMounted, ref, nextTick, toRefs, computed } from 'vue';
+import { onMounted, ref, toRefs, computed, watch, nextTick } from 'vue';
 import { message, Modal, Alert } from 'ant-design-vue';
 import { openFolder } from '../../../assets/methods/codeUtils';
 import { removeFileFolder, addFileSync } from '@kungfu-trader/kungfu-js-api/utils/fileUtils'
 import fse from 'fs-extra'
-// import { debounce } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
-
 const store = useCodeStore();
 
 
@@ -104,7 +103,6 @@ const props = defineProps<{
     id: number | string,
     count: number | string
 }>()
-
 
 const { type, count } = props
 const { fileNode, id } = toRefs(props)
@@ -116,17 +114,25 @@ const fileName = ref<string>('');
 const onEditing = ref<boolean>(false)
 const editError = ref<boolean>(false)
 const beforeDelate = ref<boolean>(true)
-
 const editErrorMessage = ref<string>('');
+const { fileTree, entryFile, currentFile } = storeToRefs(store)
 
 const editValue = ref<string>('')
 const addValue = ref<string>('')
+const isShowChildren = computed(() => {
+    return fileNode.value && fileNode.value.children && fileNode.value.children.folder && fileNode.value['open']
+})
 const isPending = computed(() => {
     return fileTree.value['pending']['parentId'] === id.value
 })
 
+watch(isShowChildren, () => {
+    iconPath.value = getIcon(fileNode.value)
+})
 
-const { fileTree, entryFile, currentFile } = storeToRefs(store)
+function enterBlur(e) {
+    e.target.blur()
+}
 
 //点击文件或文件树
 function handleClickFile(file) {
@@ -142,25 +148,8 @@ function handleClickFile(file) {
     }
 }
 
-// function loseFocus() {
-//     onEditing.value = false;
-//     store.removeFileFolderPending({
-//         id: fileNode.value?.parentId,
-//         type: type,
-//     })
-// }
-
-// function loseEditFocus() {
-//     if (!editValue.value) {
-//         editValue.value = fileNode.value.name
-//         handleEditFileBlur()
-//     } else {
-//         handleEditFileBlur()
-//     }
-// }
-
 //添加文件或文件夹时
-function handleAddFileBlur(e) {
+const handleAddFileBlur = (e) => {
     e.stopPropagation();
     const filename = addValue.value
     //test 重复 或 为空
@@ -220,6 +209,9 @@ function handleAddEditFileInput(val): void {
 //重命名文件
 function handleRename(): void {
     onEditing.value = true;
+    nextTick(() => {
+        document.getElementById('edit-input')?.focus()
+    })
 }
 
 //删除文件
@@ -267,7 +259,7 @@ function addChangePath(e): void {
 
 
 //重命名文件blur
-function handleEditFileBlur() {
+const handleEditFileBlur = () => {
     onEditing.value = false
     if (editError) {
         resetStatus();
@@ -314,8 +306,16 @@ function reloadFolder(parentId, filename) {
 function getIcon(file: Code.FileData): string {
     let iconName: string = '';
         if (type == 'folder') {
-            iconName = iconFolderJSON[file.name];
-            if (!iconName) iconName = 'folder';
+            if (file['open']) {
+                if (iconFolderJSON[file.name]) {
+                    iconName = iconFolderJSON[file.name] + 'open';
+                } else {
+                    iconName = 'folder-open';
+                }
+            } else {
+                iconName = iconFolderJSON[file.name];
+                if (!iconName) iconName = 'folder';
+            }
         } else {
             const ext: string = file.ext || '';
             const fileName: string = file.name || '';
@@ -371,6 +371,9 @@ onMounted(() => {
         if (fileNode) {
             iconPath.value = getIcon(fileNode.value)
         }
+        if (document.getElementById('add-input')) {
+            document.getElementById('add-input')?.focus()
+        }
     })
     //缓存filename
     fileName.value = fileNode ? fileNode.value.name : ''
@@ -381,19 +384,18 @@ onMounted(() => {
 .c-app-code-file-node {
     .each-files {
         display: flex;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
         margin-right: 20px;
         padding: 2px 0px;
         padding-left: 5px;
         color: @text-color;
         font-size: 14px;
+        align-items: center;
+        white-space:normal;
         cursor: pointer;
         .text-overflow {
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
+            &.path {
+                display: block;
+            }
         }
         .file-icon {
             width: 20px;
@@ -401,6 +403,9 @@ onMounted(() => {
         }
         .file-name {
             margin: 0 4px;
+            &.root-name {
+                font-size: 18px;
+            }
         }
         &:hover {
             background-color: @popover-customize-border-color;

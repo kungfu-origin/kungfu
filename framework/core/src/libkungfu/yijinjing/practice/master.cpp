@@ -97,7 +97,7 @@ void master::register_app(const event_ptr &event) {
 
   // tell others alive locations
   write_locations(event->gen_time(), app_cmd_writer);
-  // tell others the cached process started
+  // tell the registing app the their self and cached process started
   write_registries(event->gen_time(), app_cmd_writer);
 
   on_register(event, register_data);
@@ -218,26 +218,19 @@ void master::on_request_read_from(const event_ptr &event) {
   get_writer(location::PUBLIC)->write(trigger_time, channel);
 }
 
+void master::on_request_read_from_public(const event_ptr &event) {
+  const RequestReadFromPublic &request = event->data<RequestReadFromPublic>();
+  require_read_from_public(event->gen_time(), event->source(), request.source_id, request.from_time);
+}
+
 void master::check_cached_ready_to_read(const event_ptr &event) {
   const RequestReadFrom &request = event->data<RequestReadFrom>();
   auto trigger_time = event->gen_time();
   auto app_uid = event->source();
   auto read_from_source_id = request.source_id;
-  const location_ptr &read_from_source_location = get_location(read_from_source_id);
 
-  SPDLOG_INFO("~~~~~~~~");
-  SPDLOG_INFO("~~~~~~~~");
-  SPDLOG_INFO("~~~~~~~~");
-  SPDLOG_INFO("check_cached_ready_to_read app_uid {} source_id {} source_location c {} g {} n {}",
-              get_location_uname(app_uid), get_location_uname(request.source_id), read_from_source_location->category,
-              read_from_source_location->group, read_from_source_location->name);
-
-  if (read_from_source_location->group == "service" and read_from_source_location->name == "cached") {
-    SPDLOG_INFO("============");
-    SPDLOG_INFO("============");
-    SPDLOG_INFO("============");
-    SPDLOG_INFO("============");
-    auto app_cmd_writer = get_writer(read_from_source_id);
+  if (read_from_source_id == cached_home_location_->uid) {
+    auto app_cmd_writer = get_writer(app_uid);
     app_cmd_writer->mark(now(), CachedReadyToRead::tag);
   }
 }
@@ -251,24 +244,19 @@ void master::on_request_cached_done(const event_ptr &event) {
   write_channels(event->gen_time(), app_cmd_writer);
 }
 
-void master::on_request_read_from_public(const event_ptr &event) {
-  const RequestReadFromPublic &request = event->data<RequestReadFromPublic>();
-  require_read_from_public(event->gen_time(), event->source(), request.source_id, request.from_time);
-}
-
 void master::on_request_read_from_update(const event_ptr &event) {
   const RequestReadFromUpdate &request = event->data<RequestReadFromUpdate>();
   require_read_from_update(event->gen_time(), event->source(), request.source_id, request.from_time);
 }
 
 void master::on_channel_request(const event_ptr &event) {
-  const Channel &request = event->data<Channel>();
+  const Channel &channel = event->data<Channel>();
   auto trigger_time = event->gen_time();
-  if (is_location_live(request.source_id) and not has_channel(request.source_id, request.dest_id)) {
-    reader_->join(get_location(request.source_id), request.dest_id, trigger_time);
-    require_write_to(trigger_time, request.source_id, request.dest_id);
-    register_channel(trigger_time, request);
-    get_writer(location::PUBLIC)->write(trigger_time, request);
+  if (is_location_live(channel.source_id) and not has_channel(channel.source_id, channel.dest_id)) {
+    reader_->join(get_location(channel.source_id), channel.dest_id, trigger_time);
+    require_write_to(trigger_time, channel.source_id, channel.dest_id);
+    register_channel(trigger_time, channel);
+    get_writer(location::PUBLIC)->write(trigger_time, channel);
   }
 }
 
@@ -321,4 +309,5 @@ void master::write_channels(int64_t trigger_time, const writer_ptr &writer) {
     writer->write(trigger_time, item.second);
   }
 }
+
 } // namespace kungfu::yijinjing::practice
