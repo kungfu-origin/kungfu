@@ -31,7 +31,7 @@ export const ipcEmitDataByName = (
     }, interval);
 
     ipcRenderer.on(`ipc-res-${name}`, (data) => {
-      console.log(data, 111);
+      console.log(111);
 
       resolve({ data });
       ipcRenderer.removeAllListeners(`ipc-res-${name}`);

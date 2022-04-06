@@ -9,13 +9,6 @@ declare namespace Code {
         add_time: number;
     }
 
-    export interface FileProps {
-        root?: boolean;
-        filePath?: string;
-        ext?: string;
-        isDir?: boolean
-    }
-
     export interface FileIds {
         file: number[];
         folder: number[];

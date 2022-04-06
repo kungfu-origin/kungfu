@@ -68,7 +68,7 @@ watch(fileTree, (newTree, oldTree) => {
 });
 
 // 监听当前文件状态
-watch(currentFile, async (newFile: Code.FileProps) => {
+watch(currentFile, async (newFile: Code.FileData) => {
   const filePath: string = newFile.filePath || '';
 
   if (currentFile.value.isDir) return;
@@ -98,7 +98,7 @@ function curWriteFile(editor, curFile) {
 }
 
 // 创建代码编辑器
-function createEditor(file: Code.FileProps, codeText: string): monaco.editor {
+function createEditor(file: Code.FileData, codeText: string): monaco.editor {
   if (document.getElementById('editor-content')) {
     (document.getElementById('editor-content') as any).innerHTML = '';
     let fileLanguage: string = 'plaintext';
@@ -127,7 +127,7 @@ function createEditor(file: Code.FileProps, codeText: string): monaco.editor {
 // 更新代码编辑器
 function updateEditor(
   editor: monaco.editor,
-  file: Code.FileProps,
+  file: Code.FileData,
   codeText: string,
 ): monaco.editor {
   editor.updateOptions({ value: codeText });
@@ -141,7 +141,7 @@ function updateEditor(
 // 构建代码编辑器
 function buildEditor(
   editor: monaco.editor,
-  file: Code.FileProps,
+  file: Code.FileData,
   codeText: string,
 ) {
   if (!editor) {

@@ -20,7 +20,7 @@
             v-if="strategyPath"
             @click="handleAddFile"
           >
-            <FileAddFilled class="icon" />
+            <FileAddFilled class="icon"/>
           </span>
           <span
             class="create"
@@ -28,7 +28,7 @@
             v-if="strategyPath"
             @click="handleAddFolder"
           >
-            <FolderAddFilled class="icon" />
+            <FolderAddFilled class="icon"/>
           </span>
         </span>
       </div>
