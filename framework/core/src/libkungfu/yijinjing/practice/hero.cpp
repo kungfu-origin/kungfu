@@ -108,7 +108,7 @@ bool hero::has_location(uint32_t uid) const { return locations_.find(uid) != loc
 
 location_ptr hero::get_location(uint32_t uid) const {
   if (not has_location(uid)) {
-    SPDLOG_ERROR("no location {} in locations_", get_location_uname(uid));
+    SPDLOG_ERROR("no location {} uname {} in locations_", uid, get_location_uname(uid));
   }
 
   assert(has_location(uid));
