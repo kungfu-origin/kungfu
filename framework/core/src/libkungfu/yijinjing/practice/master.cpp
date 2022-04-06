@@ -87,6 +87,8 @@ void master::register_app(const event_ptr &event) {
   write_time_reset(event->gen_time(), app_cmd_writer);
   write_trading_day(event->gen_time(), app_cmd_writer);
 
+  // tell others alive locations
+  write_locations(event->gen_time(), app_cmd_writer);
   // tell the registing app the their self and cached process started
   write_registries(event->gen_time(), app_cmd_writer);
 
@@ -279,6 +281,12 @@ void master::write_trading_day(int64_t trigger_time, const writer_ptr &writer) {
 void master::write_registries(int64_t trigger_time, const writer_ptr &writer) {
   for (const auto &item : registry_) {
     writer->write(trigger_time, item.second);
+  }
+}
+
+void master::write_locations(int64_t trigger_time, const writer_ptr &writer) {
+  for (const auto &item : locations_) {
+    writer->write(trigger_time, dynamic_cast<Location &>(*item.second));
   }
 }
 
