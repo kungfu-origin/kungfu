@@ -206,7 +206,7 @@ void bind_enums(py::module &m) {
       .value("kOrderQueue", SubscribeSecuDataType::kOrderQueue)
       .export_values()
       .def("__eq__", [](const SubscribeSecuDataType &a, uint64_t b) { return static_cast<uint64_t>(a) == b; })
-      .def("__or__", py::overload_cast<const SubscribeSecuDataType &, const SubscribeSecuDataType &>(&sub_data_bitwise<SubscribeSecuDataType, int>));
+      .def("__or__", py::overload_cast<const SubscribeSecuDataType &, const SubscribeSecuDataType &>(&sub_data_bitwise<SubscribeSecuDataType, uint64_t>));
   
   py::enum_<SubscribeCategoryType>(m_enums, "SubscribeCategoryType", py::arithmetic())
       .value("kNone", SubscribeCategoryType::kNone)
