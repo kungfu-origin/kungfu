@@ -6,6 +6,11 @@ const buildSorter =
   (a: KungfuApi.Position, b: KungfuApi.Position) =>
     +Number(a[dataIndex]) - +Number(b[dataIndex]);
 
+const buildStrSorter =
+  (dataIndex: keyof KungfuApi.PositionResolved) =>
+  (a: KungfuApi.PositionResolved, b: KungfuApi.PositionResolved) =>
+    a[dataIndex].toString().localeCompare(b[dataIndex].toString());
+
 export const getColumns = (
   category: KfCategoryTypes,
 ): KfTradingDataTableHeaderConfig[] => [
@@ -13,6 +18,7 @@ export const getColumns = (
     type: 'string',
     name: '代码',
     dataIndex: 'instrument_id_resolved',
+    sorter: buildStrSorter('instrument_id_resolved'),
     width: 120,
   },
   ...(isTdStrategyCategory(category)
@@ -21,6 +27,7 @@ export const getColumns = (
         {
           name: '持有账户',
           dataIndex: 'account_id_resolved',
+          sorter: buildStrSorter('account_id_resolved'),
           width: 120,
         },
       ]),
@@ -28,6 +35,7 @@ export const getColumns = (
     type: 'string',
     name: '',
     dataIndex: 'direction',
+    sorter: buildSorter('direction'),
     width: 40,
   },
   {
