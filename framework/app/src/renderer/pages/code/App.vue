@@ -7,14 +7,14 @@
     import { getStrategyById } from '@kungfu-trader/kungfu-js-api/kungfu/strategy';
     import { ClusterOutlined } from '@ant-design/icons-vue';
     import { useCodeStore } from './store/codeStore';
-    import { ipcEmitDataByName } from '../../../renderer/ipcMsg/emitter'
+    // import { ipcEmitDataByName } from '../../../renderer/ipcMsg/emitter'
     import { message } from 'ant-design-vue';
     const store = useCodeStore();
     const ProcessId = getLogProcessId();
-    ipcEmitDataByName('strategyList').then(({data}) => {
-        console.log(data);
+    // ipcEmitDataByName('strategyList').then(data => {
+    //     console.log(data);
         
-    })
+    // })
     store.setStrategyList();
 
     

@@ -1,9 +1,10 @@
 import { defineStore } from 'pinia';
-import fse from 'fs-extra';
-
-import { KF_CONFIG_PATH } from '@kungfu-trader/kungfu-js-api/config/pathConfig';
 import { deepClone } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { getAllKfConfigOriginData } from '@kungfu-trader/kungfu-js-api/actions';
+import {
+  getKfGlobalSettingsValue,
+  setKfGlobalSettingsValue,
+} from '@kungfu-trader/kungfu-js-api/config/globalSettings';
 // import { KfCategoryTypes } from '@kungfu-trader/kungfu-js-api/typings/enums';
 interface ICodeState {
   currentStrategy: string;
@@ -113,7 +114,7 @@ export const useCodeStore = defineStore('code', {
     },
 
     async getKungfuConfig(): Promise<void> {
-      const globallSetting = fse.readJsonSync(KF_CONFIG_PATH);
+      const globallSetting = getKfGlobalSettingsValue();
       await this.setKungfuConfig(globallSetting);
     },
 
@@ -131,10 +132,11 @@ export const useCodeStore = defineStore('code', {
       Object.keys(globallSetting || {}).forEach((key) => {
         this.globallSetting[key] = globallSetting[key];
       });
-      fse.outputJsonSync(KF_CONFIG_PATH, {
+      const value = {
         ...this.globallSetting,
         ...globallSetting,
-      });
+      };
+      setKfGlobalSettingsValue(value);
     },
   },
   getters: {

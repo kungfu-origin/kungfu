@@ -4,8 +4,11 @@ import {
   updateStrategyPath,
 } from '@kungfu-trader/kungfu-js-api/kungfu/strategy';
 const { BrowserWindow } = remote;
+// import { useGlobalStore } from '../pages/index/store/global';
 
-export function bindIPCListener() {
+// const store = useGlobalStore();
+
+export function bindIPCListener(store) {
   ipcRenderer.removeAllListeners('ipc-emit-strategyById');
   ipcRenderer.on('ipc-emit-strategyById', (event, { childWinId, params }) => {
     const childWin = BrowserWindow.fromId(childWinId);
@@ -37,11 +40,11 @@ export function bindIPCListener() {
   ipcRenderer.removeAllListeners('ipc-emit-strategyList');
   ipcRenderer.on('ipc-emit-strategyList', (event, { childWinId }) => {
     const childWin = BrowserWindow.fromId(childWinId);
-    return this.$store.dispatch('getStrategyList').then((strategyList) => {
+    return new Promise(() => {
       if (childWin) {
         childWin.webContents.send(
           'ipc-res-strategyList',
-          Object.freeze(strategyList),
+          Object.freeze(store.strategyList),
         );
       }
     });

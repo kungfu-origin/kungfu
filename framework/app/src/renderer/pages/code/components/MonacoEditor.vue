@@ -8,7 +8,7 @@
 import { findTargetFromArray } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.main.js';
 import { storeToRefs } from 'pinia';
-import { computed, nextTick, reactive, watch } from 'vue';
+import { computed, nextTick, ref, watch } from 'vue';
 import languageJSON from '../config/iconFileConfig.json';
 import themeData from '../config/Monocai.json';
 import {
@@ -34,8 +34,12 @@ monaco.languages.registerCompletionItemProvider('python', {
 const { currentFile, fileTree, globallSetting } = storeToRefs(useCodeStore());
 const code = computed(() => globallSetting['code']);
 
-let handleEditor: monaco.editor.IDiffNavigator = {};
-let file: Code.FileProps = reactive({});
+const handleEditor: {
+    value: monaco.editor
+} = {
+    value: null
+}
+const file = ref<Code.FileData | null>(null);
 
 watch(code, (spaceTabSetting) => {
   updateSpaceTab(spaceTabSetting || {});
@@ -58,8 +62,8 @@ watch(fileTree, (newTree, oldTree) => {
     )!.filePath;
   }
   if (newRootPath !== oldRootPath) {
-    file = {};
-    handleEditor = null;
+    file.value = null;
+    handleEditor.value = null;
   }
 });
 
@@ -69,25 +73,27 @@ watch(currentFile, async (newFile: Code.FileProps) => {
 
   if (currentFile.value.isDir) return;
   clearState();
-  file = newFile;
+  file.value = newFile as Code.FileData;
   const codeText: string = await getFileContent(filePath);
   await nextTick();
-  handleEditor = buildEditor(handleEditor, file, codeText);
-  await nextTick();
-  // updateSpaceTab(code.value);
-  bindBlur(handleEditor, file);
+  if (file.value) {
+    handleEditor.value = buildEditor(handleEditor.value, file.value, codeText);
+    await nextTick();
+    // updateSpaceTab(code.value);
+    bindBlur(handleEditor.value, file.value);
+  }
 });
 
-function bindBlur(editor, file) {
+function bindBlur(editor, curFile) {
   editor !== null &&
     editor.onDidBlurEditorText(() => {
-      curWriteFile(editor, file);
+      curWriteFile(editor, curFile);
     });
 }
 
-function curWriteFile(editor, file) {
+function curWriteFile(editor, curFile) {
   const value = editor.getValue();
-  let curPath: string = path.normalize(file.filePath);
+  let curPath: string = path.normalize(curFile.filePath);
   fse.outputFile(curPath, value);
 }
 
@@ -128,7 +134,7 @@ function updateEditor(
   const fileLanguage = file.ext
     ? languageJSON[file.ext] || 'plaintext'
     : 'plaintext';
-  handleEditor.setModelLanguage(editor.getModel(), fileLanguage);
+  handleEditor.value.setModelLanguage(editor.getModel(), fileLanguage);
   return editor;
 }
 
@@ -141,7 +147,7 @@ function buildEditor(
   if (!editor) {
     return createEditor(file, codeText);
   } else {
-    return updateEditor(handleEditor, file, codeText);
+    return updateEditor(handleEditor.value, file, codeText);
   }
 }
 
@@ -151,8 +157,8 @@ function updateSpaceTab(spaceTabSetting: Code.ICodeSetting) {
     ? spaceTabSetting.tabSpaceType || 'spaces'
     : 'spaces';
 
-  if (handleEditor) {
-    const model = handleEditor.getModel();
+  if (handleEditor.value) {
+    const model = handleEditor.value.getModel();
     if (type.toLowerCase() === 'spaces') {
       model.updateOptions({
         insertSpaces: true,
@@ -171,9 +177,9 @@ function updateSpaceTab(spaceTabSetting: Code.ICodeSetting) {
 
 // 使用完成销毁实例
 function clearState(): void {
-  handleEditor && handleEditor.dispose();
-  handleEditor = null;
-  file = {};
+  handleEditor.value && handleEditor.value.dispose();
+  handleEditor.value = null;
+  file.value = null;
 }
 
 function pythonProvideCompletionItems(model, position, context, token) {

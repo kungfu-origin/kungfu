@@ -12,7 +12,7 @@
             <div class="each-files" :style="{'padding-left': `${curCount * 16 + 5}px`}">
                 <i v-if="type == 'folder' && fileNode && !fileNode.root"></i>
                 <img class="file-icon" :src="iconPath" v-if="iconPath">
-                <span class="file-name" v-if="fileNode && !onEditing && fileNode.name">{{ fileNode.name }}</span>
+                <span class="file-name" :class="{'root-name': fileNode.root}" v-if="fileNode && !onEditing && fileNode.name">{{ fileNode.name }}</span>
                 <a-input
                     v-else-if="onEditing"
                     id="edit-input"
@@ -43,7 +43,7 @@
                     @blur="handleAddFileBlur"
                     @pressEnter="enterBlur"
                 ></a-input>
-                <span class="path text-overflow" v-if="fileNode && entryFile.filePath === fileNode.filePath && fileNode.filePath !== undefined && !onEditing">{{ '(入口文件)' }}</span>
+                <span class="text-overflow" v-if="fileNode && entryFile.filePath === fileNode.filePath && fileNode.filePath !== undefined && !onEditing">{{ '(入口文件)' }}</span>
                 <span class="path text-overflow" v-if="fileNode && fileNode.root" :title="fileNode.filePath">{{fileNode.filePath}}</span>
                 <span class="deal-file"  v-if="fileNode && !fileNode.root && !onEditing && id !== 'padding'">
                     <span class="mouse-over" title="重命名" @click.stop="handleRename"><EditFilled class="icon"/></span>
@@ -384,19 +384,18 @@ onMounted(() => {
 .c-app-code-file-node {
     .each-files {
         display: flex;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
         margin-right: 20px;
         padding: 2px 0px;
         padding-left: 5px;
         color: @text-color;
         font-size: 14px;
+        align-items: center;
+        white-space:normal;
         cursor: pointer;
         .text-overflow {
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
+            &.path {
+                display: block;
+            }
         }
         .file-icon {
             width: 20px;
@@ -404,6 +403,9 @@ onMounted(() => {
         }
         .file-name {
             margin: 0 4px;
+            &.root-name {
+                font-size: 18px;
+            }
         }
         &:hover {
             background-color: @popover-customize-border-color;
