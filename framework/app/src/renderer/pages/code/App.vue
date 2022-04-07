@@ -92,13 +92,12 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="background">
+  <div class="code-editor-background">
     <MainContentVue>
         <div class="code-content">
         <FileTree
             :strategy="strategy"
             @updateStrategy="handleUpdateStrategy"
-            class="file-tree"
         ></FileTree>
         <Editor class="editor" ref="code-editor"></Editor>
         </div>
@@ -106,7 +105,7 @@ onMounted(() => {
   </div>
 </template>
 
-<style lang="less" scoped>
+<style lang="less">
 #app {
   width: 100%;
   height: 100%;
@@ -115,16 +114,14 @@ onMounted(() => {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
-  .background {
+  .code-editor-background {
       width: 100%;
     .code-content {
         width: auto;
         display: flex;
         height: calc(100vh - 32px);
-        .file-tree {
-            width: 300px;
-        }
         .editor {
+            text-align: left;
             flex: 1;
         }
     }
