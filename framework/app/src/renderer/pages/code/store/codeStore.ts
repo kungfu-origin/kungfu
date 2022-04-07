@@ -5,6 +5,7 @@ import {
   setKfGlobalSettingsValue,
 } from '@kungfu-trader/kungfu-js-api/config/globalSettings';
 // import { KfCategoryTypes } from '@kungfu-trader/kungfu-js-api/typings/enums';
+
 interface ICodeState {
   currentStrategy: string;
   strategyList: KungfuApi.KfConfig[];
@@ -114,25 +115,19 @@ export const useCodeStore = defineStore('code', {
       await this.setKungfuConfig(globallSetting);
     },
 
-    setKungfuConfig(
-      globallSetting: KungfuApi.KfLocation | KungfuApi.KfConfig,
-    ): void {
-      Object.keys(globallSetting || {}).forEach((key) => {
-        this.globallSetting[key] = globallSetting[key];
-      });
+    async setGlobalSetting(
+      globallSetting: Record<string, Record<string, KungfuApi.KfConfigValue>>,
+    ): Promise<void> {
+      await this.setKungfuConfig(globallSetting);
+      setKfGlobalSettingsValue(this.globallSetting);
     },
 
-    setKungfuConfigByKeys(
-      globallSetting: KungfuApi.KfLocation | KungfuApi.KfConfig,
+    setKungfuConfig(
+      globallSetting: Record<string, Record<string, KungfuApi.KfConfigValue>>,
     ): void {
       Object.keys(globallSetting || {}).forEach((key) => {
         this.globallSetting[key] = globallSetting[key];
       });
-      const value = {
-        ...this.globallSetting,
-        ...globallSetting,
-      };
-      setKfGlobalSettingsValue(value);
     },
   },
   getters: {
