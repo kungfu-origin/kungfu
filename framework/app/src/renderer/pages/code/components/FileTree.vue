@@ -41,6 +41,7 @@
                     :fileNode="file"
                     :id="file.id"
                     type="folder"
+                    
                 ></FileNode>
             </div>
         </div>

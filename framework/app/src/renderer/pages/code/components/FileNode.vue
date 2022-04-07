@@ -5,7 +5,7 @@
     :class="{
       folder: type == 'folder',
       file: type !== 'folder',
-      active: fileNode.id === currentFile.id,
+      active: fileNode.id === currentFile.id || fileNode.root,
     }"
   >
     <div @click.stop="handleClickFile(fileNode)">
@@ -13,74 +13,76 @@
         class="each-files"
         :style="{ 'padding-left': `${curCount * 16 + 5}px` }"
       >
-        <i v-if="type == 'folder' && fileNode && !fileNode.root"></i>
-        <img class="file-icon" :src="iconPath" v-if="iconPath" />
+        <div class="file-top">
+            <img class="file-icon" :src="iconPath" v-if="iconPath" />
+            <span
+                class="file-name"
+                :class="{ 'root-name': fileNode.root, 'normal-name': entryFile.filePath !== fileNode.filePath }"
+                v-if="fileNode && !onEditing && fileNode.name"
+            >
+                {{ fileNode.name }}
+            </span>
+            <a-input
+                v-else-if="onEditing"
+                id="edit-input"
+                ref="edit-name"
+                :class="{ 'error': editError || editErrorMessage }"
+                v-model.trim="fileName"
+                size="small"
+                :value="editValue"
+                style="margin-left: 2px"
+                @click.stop="() => {}"
+                @focus.stop="() => {}"
+                @change="changePath"
+                @blur="handleEditFileBlur"
+                @pressEnter="enterBlur"
+            ></a-input>
+            <a-input
+                v-else-if="!isPending && !onEditing"
+                ref="addPending"
+                id="add-input"
+                :class="{ 'error': editError || editErrorMessage }"
+                v-model.trim="fileName"
+                size="small"
+                style="margin-left: 2px"
+                @click.stop="() => {}"
+                @focus.stop="() => {}"
+                :value="addValue"
+                @change="addChangePath"
+                @blur="handleAddFileBlur"
+                @pressEnter="enterBlur"
+                ></a-input>
+            <span
+                class="text-overflow"
+                v-show="
+                    fileNode &&
+                    entryFile.filePath === fileNode.filePath &&
+                    fileNode.filePath !== undefined &&
+                    !onEditing
+                "
+            >
+                {{ '(入口文件)' }}
+            </span>
+            <div
+                class="deal-file"
+                v-show="fileNode && !onEditing && fileNode.name && !fileNode.root"
+            >
+                <span class="mouse-over" title="重命名" @click.stop="handleRename">
+                    <EditFilled class="icon" />
+                </span>
+                <span class="mouse-over" title="删除" @click.stop="handleDelete">
+                    <DeleteFilled class="icon" />
+                </span>
+            </div>
+        </div>
         <span
-          class="file-name"
-          :class="{ 'root-name': fileNode.root }"
-          v-if="fileNode && !onEditing && fileNode.name"
-        >
-          {{ fileNode.name }}
-        </span>
-        <a-input
-          v-else-if="onEditing"
-          id="edit-input"
-          ref="edit-name"
-          :class="{ 'error': editError || editErrorMessage }"
-          v-model.trim="fileName"
-          size="small"
-          :value="editValue"
-          style="margin-left: 2px"
-          @click.stop="() => {}"
-          @focus.stop="() => {}"
-          @change="changePath"
-          @blur="handleEditFileBlur"
-          @pressEnter="enterBlur"
-        ></a-input>
-        <a-input
-          v-else-if="!isPending && !onEditing"
-          ref="addPending"
-          id="add-input"
-          :class="{ 'error': editError || editErrorMessage }"
-          v-model.trim="fileName"
-          size="small"
-          style="margin-left: 2px"
-          @click.stop="() => {}"
-          @focus.stop="() => {}"
-          :value="addValue"
-          @change="addChangePath"
-          @blur="handleAddFileBlur"
-          @pressEnter="enterBlur"
-        ></a-input>
-        <span
-          class="text-overflow"
-          v-if="
-            fileNode &&
-            entryFile.filePath === fileNode.filePath &&
-            fileNode.filePath !== undefined &&
-            !onEditing
-          "
-        >
-          {{ '(入口文件)' }}
-        </span>
-        <span
-          class="path text-overflow"
+          class="path"
           v-if="fileNode && fileNode.root"
           :title="fileNode.filePath"
         >
           {{ fileNode.filePath }}
         </span>
-        <span
-          class="deal-file"
-          v-if="fileNode && !onEditing && fileNode.name"
-        >
-          <span class="mouse-over" title="重命名" @click.stop="handleRename">
-            <EditFilled class="icon" />
-          </span>
-          <span class="mouse-over" title="删除" @click.stop="handleDelete">
-            <DeleteFilled class="icon" />
-          </span>
-        </span>
+        
       </div>
       <div :style="{ 'padding-left': `${curCount * 16 + 26}px` }">
         <Alert
@@ -235,6 +237,7 @@ const handleAddFileBlur = (e) => {
   }
   //重置
   resetStatus();
+  addValue.value = ''
 };
 
 //添加/编辑输入检测
@@ -326,14 +329,13 @@ const handleEditFileBlur = () => {
   fse.rename(oldPath, newPath).then(() => {
     reloadFolder(parentId, newName);
   });
+  editValue.value = ''
 };
 
 //重制状态
 function resetStatus(): void {
   fileName.value = '';
   editErrorMessage.value = '';
-  editValue.value = '';
-  addValue.value = ''
   onEditing.value = false;
   editError.value = false;
 }
@@ -434,25 +436,46 @@ onMounted(() => {
         background-color: #8d3333 !important;
     }
   .each-files {
-    display: flex;
+    text-align: left;
     padding: 2px 0px;
     padding-left: 5px;
     color: @text-color;
     font-size: 14px;
-    align-items: center;
     white-space: normal;
     cursor: pointer;
+    .file-top {
+        display: flex;
+        flex-wrap: nowrap;
+        align-items: center;
+    }
     .text-overflow {
-      &.path {
-        display: block;
-      }
+        flex: 1;
+        white-space: nowrap;
+        margin-right: 10px;
+    }
+    .path {
+        margin: 0 4px;
+        word-break:normal; 
+        width:auto; 
+        display:block; 
+        white-space:pre-wrap;
+        word-wrap : break-word;
+        overflow: hidden;
     }
     .file-icon {
       width: 20px;
       height: 20px;
+      display: inline;
     }
     .file-name {
-      margin: 0 4px;
+        margin: 0 4px;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        word-break: break-all;
+        &.normal-name {
+            flex: 1;
+        }
       &.root-name {
         font-size: 18px;
       }
@@ -462,6 +485,7 @@ onMounted(() => {
       color: @gold-base;
       .deal-file {
         display: block;
+        white-space: nowrap;
       }
     }
     .editError {
@@ -476,8 +500,8 @@ onMounted(() => {
   }
   .deal-file {
     margin-right: 5px;
-    flex: 1;
     text-align: right;
+    width: 60px;
     display: none;
     .mouse-over {
       margin: 0 2px;
