@@ -15,7 +15,6 @@ import MainContentVue from './components/MainContent.vue';
 const store = useCodeStore();
 const ProcessId: string = getProcessId();
 
-
 setHtmlTitle(`功夫交易系统 - ${ProcessId}.log`);
 const strategy = reactive<Code.Strategy>({
   strategy_id: '',
@@ -30,8 +29,8 @@ const curnStrategyIndex: {
 }
 // 处理JSON格式strangeList
 function handleStrategyJsonList(strategyList): void {
+  getCurrentStrategy(strategyList)
   let value: Code.Strategy = JSON.parse(strategyList[curnStrategyIndex.value].value);
-
   strategy.strategy_id = value.strategy_id;
   strategy.strategy_path = value.strategy_path;
   strategy.add_time = value.add_time;
@@ -95,7 +94,6 @@ onMounted(() => {
         store.setStrategyList(data)
         nextTick().then(() => {
             handleStrategyJsonList(store.strategyList);
-            getCurrentStrategy(store.strategyList)
         });
     });
     removeLoadingMask();
