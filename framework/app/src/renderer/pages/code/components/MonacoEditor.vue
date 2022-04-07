@@ -8,7 +8,7 @@
 import { findTargetFromArray } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import * as monaco from 'monaco-editor';
 import { storeToRefs } from 'pinia';
-import { computed, nextTick, ref, watch } from 'vue';
+import { nextTick, ref, watch } from 'vue';
 import languageJSON from '../config/iconFileConfig.json';
 import themeData from '../config/Monocai.json';
 import {
@@ -35,8 +35,6 @@ monaco.languages.registerCompletionItemProvider('python', {
 
 // currentFile
 const { currentFile, fileTree, globallSetting } = storeToRefs(useCodeStore());
-const code = computed(() => globallSetting['code']);
-
 const handleEditor: {
   value: monaco.editor.IStandaloneCodeEditor | null;
 } = {
@@ -44,8 +42,10 @@ const handleEditor: {
 };
 const activeFile = ref<Code.FileData | null>(null);
 
-watch(code, (spaceTabSetting) => {
-  updateSpaceTab(spaceTabSetting || {});
+watch(globallSetting.value, (newSetting) => {
+    console.log(newSetting.code);
+    const code: Code.ICodeSetting = newSetting.code as Code.ICodeSetting
+    updateSpaceTab(code || {});
 });
 
 // 监听文件树变化
@@ -83,7 +83,7 @@ watch(currentFile, async (newFile: Code.FileData) => {
   if (activeFile.value) {
     handleEditor.value = buildEditor(handleEditor.value, activeFile.value, codeText);
     await nextTick();
-    // updateSpaceTab(code.value);
+    updateSpaceTab(globallSetting.value.code as Code.ICodeSetting);
     bindBlur(handleEditor.value, activeFile.value);
   }
 });
@@ -179,20 +179,15 @@ function updateSpaceTab(spaceTabSetting: Code.ICodeSetting) {
     : 'spaces';
 
   if (handleEditor.value) {
-    const model = handleEditor.value.getModel();
-
-    if (!model) return;
 
     if (type.toLowerCase() === 'spaces') {
-      model.updateOptions({
+        handleEditor.value.getModel()?.updateOptions({
         insertSpaces: true,
-        indentSize: +spaceTabSetting.tabSpaceSize,
         tabSize: +spaceTabSetting.tabSpaceSize,
       });
     } else if (type.toLowerCase() === 'tabs') {
-      model.updateOptions({
+        handleEditor.value.getModel()?.updateOptions({
         insertSpaces: false,
-        indentSize: +spaceTabSetting.tabSpaceSize,
         tabSize: +spaceTabSetting.tabSpaceSize,
       });
     }
