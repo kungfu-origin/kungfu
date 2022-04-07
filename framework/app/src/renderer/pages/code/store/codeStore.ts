@@ -120,6 +120,7 @@ export const useCodeStore = defineStore('code', {
     ): Promise<void> {
       await this.setKungfuConfig(globallSetting);
       setKfGlobalSettingsValue(this.globallSetting);
+      await this.getKungfuConfig();
     },
 
     setKungfuConfig(
