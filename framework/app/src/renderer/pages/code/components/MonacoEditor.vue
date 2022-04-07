@@ -43,7 +43,6 @@ const handleEditor: {
 const activeFile = ref<Code.FileData | null>(null);
 
 watch(globallSetting.value, (newSetting) => {
-    console.log(newSetting.code);
     const code: Code.ICodeSetting = newSetting.code as Code.ICodeSetting
     updateSpaceTab(code || {});
 });

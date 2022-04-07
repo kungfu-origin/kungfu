@@ -26,7 +26,7 @@
           v-else-if="onEditing"
           id="edit-input"
           ref="edit-name"
-          :class="{ error: editError }"
+          :class="{ 'error': editError || editErrorMessage }"
           v-model.trim="fileName"
           size="small"
           :value="editValue"
@@ -41,7 +41,7 @@
           v-else-if="!isPending && !onEditing"
           ref="addPending"
           id="add-input"
-          :class="{ error: editError }"
+          :class="{ 'error': editError || editErrorMessage }"
           v-model.trim="fileName"
           size="small"
           style="margin-left: 2px"
@@ -72,7 +72,7 @@
         </span>
         <span
           class="deal-file"
-          v-if="fileNode && !fileNode.root && !onEditing && id !== 'padding'"
+          v-if="fileNode && !onEditing && fileNode.name"
         >
           <span class="mouse-over" title="重命名" @click.stop="handleRename">
             <EditFilled class="icon" />
@@ -82,13 +82,15 @@
           </span>
         </span>
       </div>
-      <Alert
-        class="error-message"
-        :message="editErrorMessage"
-        type="error"
-        v-if="editError"
-        style="{'padding-left': `${curCount * 16 + 20}px`}"
-      />
+      <div :style="{ 'padding-left': `${curCount * 16 + 26}px` }">
+        <Alert
+            class="error-message"
+            :message="editErrorMessage"
+            type="error"
+            v-if="editError && editErrorMessage"
+        />
+      </div>
+      
     </div>
     <div v-if="isShowChildren">
       <div v-for="id in fileNode.children.folder">
@@ -175,12 +177,13 @@ watch(isShowChildren, () => {
 });
 
 function enterBlur(e) {
-  e.target.blur()
   resetStatus()
+  e.target.blur()
 }
 
 //点击文件或文件树
 function handleClickFile(file) {
+  resetStatus()
   //正在编辑的input
   if (Object.keys(file).length === 1) return;
   //更新active file id
@@ -195,6 +198,7 @@ function handleClickFile(file) {
 
 //添加文件或文件夹时
 const handleAddFileBlur = (e) => {
+  resetStatus()
   e.stopPropagation();
   const filename = addValue.value;
   //test 重复 或 为空
@@ -311,9 +315,7 @@ function addChangePath(e): void {
 //重命名文件blur
 const handleEditFileBlur = () => {
   onEditing.value = false;
-  if (editError) {
-    resetStatus();
-  }
+  resetStatus();
 
   const oldPath = fileNode.value?.filePath || '';
   const newName = editValue.value;
@@ -328,10 +330,12 @@ const handleEditFileBlur = () => {
 
 //重制状态
 function resetStatus(): void {
-  fileName.value = fileNode.value?.name || '';
+  fileName.value = '';
+  editErrorMessage.value = '';
+  editValue.value = '';
+  addValue.value = ''
   onEditing.value = false;
   editError.value = false;
-  editErrorMessage.value = '';
 }
 
 // 重新加载folder
@@ -425,9 +429,12 @@ onMounted(() => {
 
 <style lang="less">
 .c-app-code-file-node {
+    .ant-alert-error {
+        border: 1px solid @red-base !important;
+        background-color: #8d3333 !important;
+    }
   .each-files {
     display: flex;
-    margin-right: 20px;
     padding: 2px 0px;
     padding-left: 5px;
     color: @text-color;
@@ -457,6 +464,9 @@ onMounted(() => {
         display: block;
       }
     }
+    .editError {
+        border: 1px solid red1-base;
+    }
   }
   .active {
     .each-files {
@@ -480,14 +490,13 @@ onMounted(() => {
     }
   }
   .error-message {
-    width: calc(100% - 34px);
+    width: 100%;
     z-index: 999;
     padding: 5px 10px;
     box-sizing: border-box;
     line-height: 12px;
-    font-size: 9px;
-    margin-top: 5px;
-    margin-left: 15px;
+    font-size: 12px;
+    border-top: none;
   }
 }
 </style>

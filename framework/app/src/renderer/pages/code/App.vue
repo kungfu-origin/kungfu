@@ -13,7 +13,7 @@ import { message } from 'ant-design-vue';
 import MainContentVue from './components/MainContent.vue';
 
 const store = useCodeStore();
-const ProcessId = getProcessId();
+const ProcessId: string = getProcessId();
 
 
 setHtmlTitle(`功夫交易系统 - ${ProcessId}.log`);
@@ -22,14 +22,27 @@ const strategy = reactive<Code.Strategy>({
   strategy_path: '',
   add_time: 0,
 });
-
+const strategyName = ProcessId.split('_')[1]
+const curnStrategyIndex: {
+    value: number
+} = {
+    value: 0
+}
 // 处理JSON格式strangeList
 function handleStrategyJsonList(strategyList): void {
-  let value: Code.Strategy = JSON.parse(strategyList[0].value);
+  let value: Code.Strategy = JSON.parse(strategyList[curnStrategyIndex.value].value);
 
   strategy.strategy_id = value.strategy_id;
   strategy.strategy_path = value.strategy_path;
   strategy.add_time = value.add_time;
+}
+
+function getCurrentStrategy (strategyList) {
+    strategyList.forEach((item, index) => {
+        if (item.name === strategyName) {
+            curnStrategyIndex.value = index
+        }
+    })
 }
 
 // 处理Object格式strageList
@@ -82,6 +95,7 @@ onMounted(() => {
         store.setStrategyList(data)
         nextTick().then(() => {
             handleStrategyJsonList(store.strategyList);
+            getCurrentStrategy(store.strategyList)
         });
     });
     removeLoadingMask();
@@ -105,7 +119,7 @@ onMounted(() => {
   </div>
 </template>
 
-<style lang="less">
+<style lang="less" scoped>
 #app {
   width: 100%;
   height: 100%;
