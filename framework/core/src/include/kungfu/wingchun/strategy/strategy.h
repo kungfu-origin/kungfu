@@ -11,7 +11,7 @@
 namespace kungfu::wingchun::strategy {
 FORWARD_DECLARE_PTR(Context)
 
-class Strategy : public kungfu::wingchun::book::BookListener {
+class Strategy {
 public:
   virtual ~Strategy() = default;
 
@@ -60,6 +60,12 @@ public:
   //订单成交回报回调
   //@param trade             订单成交数据
   virtual void on_trade(Context_ptr &context, const longfist::types::Trade &trade){};
+
+  //同步柜台资金持仓信息回调
+  //@param old_book          更新前本地维护的旧数据
+  //@param new_book          更新后重新从柜台获取的新数据
+  virtual void on_book_update_reset(Context_ptr &context, const kungfu::wingchun::book::Book &old_book,
+                                    const kungfu::wingchun::book::Book &new_book){};
 };
 
 DECLARE_PTR(Strategy)

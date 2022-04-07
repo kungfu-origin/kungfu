@@ -148,7 +148,6 @@ void Client::connect(const event_ptr &event, const Register &register_data) {
     app_.request_write_to(app_.now(), app_location->uid);
     app_.request_read_from(app_.now(), app_location->uid, resume_time_point);
     app_.request_read_from_public(app_.now(), app_location->uid, resume_time_point);
-    //    app_.request_read_from_update(app_.now(), app_location->uid, resume_time_point);
     SPDLOG_INFO("resume {} connection from {}", app_.get_location_uname(app_uid), time::strftime(resume_time_point));
   }
 }

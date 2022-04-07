@@ -22,12 +22,7 @@ RuntimeContext_ptr Runner::get_context() const { return context_; }
 
 RuntimeContext_ptr Runner::make_context() { return std::make_shared<RuntimeContext>(*this, events_); }
 
-void Runner::add_strategy(const Strategy_ptr &strategy) {
-  if (context_) {
-    context_->get_bookkeeper().add_book_listener(strategy);
-  }
-  strategies_.push_back(strategy);
-}
+void Runner::add_strategy(const Strategy_ptr &strategy) { strategies_.push_back(strategy); }
 
 void Runner::on_exit() { post_stop(); }
 
@@ -57,9 +52,7 @@ void Runner::inspect_channel(const event_ptr &event) {
 
 void Runner::on_start() {
   enable(*context_);
-  for (auto &st : strategies_) {
-    context_->get_bookkeeper().add_book_listener(st);
-  }
+  context_->get_bookkeeper().add_book_listener(std::shared_ptr<Runner>(this));
   pre_start();
   events_ | take_until(events_ | filter([&](auto e) { return started_; })) | $$(prepare(event));
   post_start();
@@ -141,5 +134,12 @@ void Runner::prepare(const event_ptr &event) {
   context_->get_bookkeeper().guard_positions();
   started_ = true;
   post_start();
+}
+
+void Runner::on_book_update_reset(const book::Book &old_book, const book::Book &new_book) {
+  auto context = std::dynamic_pointer_cast<Context>(context_);
+  for (const auto &strategy : strategies_) {
+    strategy->on_book_update_reset(context, old_book, new_book);
+  }
 }
 } // namespace kungfu::wingchun::strategy

@@ -42,11 +42,8 @@ void Ledger::on_start() {
   events_ | is(MirrorPositionsRequest::tag) | $$(mirror_positions(event->gen_time(), event->source()));
   events_ | is(PositionRequest::tag) | $$(write_strategy_data(event->gen_time(), event->source()));
   events_ | is(AssetRequest::tag) | $$(write_book_reset(event->gen_time(), event->source()));
-  events_ | is(PositionEnd::tag) | filter([&](const event_ptr &event) {
-    SPDLOG_WARN(" Ledger::on_start Position event->source() : {}, event->dest() : {}",
-                get_location_uname(event->source()), get_location_uname(event->dest()));
-    return event->dest() != location::UPDATE;
-  }) | $$(update_account_book(event->gen_time(), event->data<PositionEnd>().holder_uid););
+  events_ | is(PositionEnd::tag) | filter([&](const event_ptr &event) { return event->dest() != location::UPDATE; }) |
+      $$(update_account_book(event->gen_time(), event->data<PositionEnd>().holder_uid););
 
   add_time_interval(time_unit::NANOSECONDS_PER_MINUTE, [&](auto e) { write_asset_snapshots(AssetSnapshot::tag); });
   add_time_interval(time_unit::NANOSECONDS_PER_HOUR, [&](auto e) { write_asset_snapshots(DailyAsset::tag); });

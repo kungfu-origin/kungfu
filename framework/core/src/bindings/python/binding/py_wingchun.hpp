@@ -183,8 +183,8 @@ public:
     PYBIND11_OVERLOAD(void, strategy::Strategy, on_trade, context, trade);
   }
 
-  void on_book_update_reset(const Book &old_book, const Book &new_book) override {
-    PYBIND11_OVERLOAD(void, strategy::Strategy, on_book_update_reset, old_book, new_book);
+  void on_book_update_reset(strategy::Context_ptr &context, const Book &old_book, const Book &new_book) override {
+    PYBIND11_OVERLOAD(void, strategy::Strategy, on_book_update_reset, context, old_book, new_book);
   }
 };
 
