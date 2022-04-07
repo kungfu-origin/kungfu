@@ -6,6 +6,11 @@ const buildSorter =
   (a: KungfuApi.TradeResolved, b: KungfuApi.TradeResolved) =>
     +Number(a[dataIndex]) - +Number(b[dataIndex]);
 
+const buildStrSorter =
+  (dataIndex: keyof KungfuApi.TradeResolved) =>
+  (a: KungfuApi.TradeResolved, b: KungfuApi.TradeResolved) =>
+    a[dataIndex].toString().localeCompare(b[dataIndex].toString());
+
 export const getColumns = (
   category: KfCategoryTypes,
   isHistory = false,
@@ -28,6 +33,7 @@ export const getColumns = (
     type: 'string',
     name: '代码',
     dataIndex: 'instrument_id',
+    sorter: buildStrSorter('instrument_id'),
     width: 60,
   },
   {
@@ -67,6 +73,7 @@ export const getColumns = (
   {
     name: category == 'td' ? '下单源' : '目标账户',
     dataIndex: category == 'td' ? 'dest_uname' : 'source_uname',
+    sorter: buildStrSorter(category == 'td' ? 'dest_uname' : 'source_uname'),
     flex: 1,
   },
   ...(isTdStrategyCategory(category)
@@ -75,6 +82,7 @@ export const getColumns = (
         {
           name: '下单源',
           dataIndex: 'dest_uname',
+          sorter: buildStrSorter('dest_uname'),
           flex: 1,
         },
       ]),

@@ -61,7 +61,7 @@ module.exports = {
     {
       from: appDir,
       to: 'app/dist',
-      filter: ['public/config', 'public/key', 'public/logo'],
+      filter: ['public/config', 'public/key', 'public/logo', 'public/keywords'],
     },
     {
       from: appDir,
