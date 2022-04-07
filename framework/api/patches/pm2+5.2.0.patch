@@ -1,0 +1,21 @@
+diff --git a/node_modules/pm2/paths.js b/node_modules/pm2/paths.js
+index b1e8382..53704d2 100644
+--- a/node_modules/pm2/paths.js
++++ b/node_modules/pm2/paths.js
+@@ -81,10 +81,13 @@ module.exports = function(PM2_HOME) {
+ 
+   if (process.platform === 'win32' ||
+       process.platform === 'win64') {
++    
++    console.log("USING PM2 PATCH");
+     //@todo instead of static unique rpc/pub file custom with PM2_HOME or UID
+-    pm2_file_stucture.DAEMON_RPC_PORT = '\\\\.\\pipe\\rpc.sock';
+-    pm2_file_stucture.DAEMON_PUB_PORT = '\\\\.\\pipe\\pub.sock';
+-    pm2_file_stucture.INTERACTOR_RPC_PORT = '\\\\.\\pipe\\interactor.sock';
++    var USERNAME = require("os").userInfo().username;
++    pm2_file_stucture.DAEMON_RPC_PORT = `\\\\.\\pipe\\${USERNAME}\\rpc.sock`;
++    pm2_file_stucture.DAEMON_PUB_PORT = `\\\\.\\pipe\\${USERNAME}\\pub.sock`;
++    pm2_file_stucture.INTERACTOR_RPC_PORT = `\\\\.\\pipe\\${USERNAME}\\interactor.sock`;
+   }
+ 
+   return pm2_file_stucture;
