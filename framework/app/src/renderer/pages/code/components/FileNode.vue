@@ -445,7 +445,7 @@ onMounted(() => {
     white-space: normal;
     cursor: pointer;
     &.root-file {
-      background-color: @popover-customize-border-color;
+      background-color: #1b1c1e;
       color: @gold-base;
     }
     .file-top {
