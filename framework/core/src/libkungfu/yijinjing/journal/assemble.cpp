@@ -1,3 +1,4 @@
+
 //
 // Created by Keren Dong on 2020/5/22.
 //
@@ -36,7 +37,7 @@ void copy_sink::put(const data::location_ptr &location, uint32_t dest_id, const 
 
 assemble::assemble(const std::vector<data::locator_ptr> &locators, const std::string &mode, const std::string &category,
                    const std::string &group, const std::string &name)
-    : publisher_(std::make_shared<noop_publisher>()), mode_(mode), category_(category), group_(group), name_(name) {
+    : mode_(mode), category_(category), group_(group), name_(name), publisher_(std::make_shared<noop_publisher>()) {
   for (auto &locator : locators) {
     locators_.push_back(locator);
     readers_.push_back(std::make_shared<reader>(true));

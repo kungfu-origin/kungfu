@@ -13,13 +13,13 @@
 
 namespace kungfu::wingchun::broker {
 
-FORWARD_DECLARE_PTR(MarketData)
+FORWARD_DECLARE_CLASS_PTR(MarketData)
 
 class MarketDataVendor : public BrokerVendor {
 public:
   MarketDataVendor(locator_ptr locator, const std::string &group, const std::string &name, bool low_latency);
 
-  void setup(MarketData_ptr service);
+  void set_service(MarketData_ptr service);
 
 protected:
   void on_react() override;

@@ -24,7 +24,6 @@ public:
   void operator>>(const yijinjing::journal::writer_ptr &writer) const {
     boost::hana::for_each(longfist::StateDataTypes, [&](auto it) {
       auto type = boost::hana::second(it);
-      using DataType = typename decltype(+type)::type;
       for (const auto &element : state_map_[type]) {
         writer->write(0, element.second.data);
       }
@@ -57,7 +56,6 @@ public:
   void operator>>(const yijinjing::journal::writer_ptr &writer) const {
     boost::hana::for_each(types_, [&](auto it) {
       auto type = boost::hana::second(it);
-      using DataType = typename decltype(+type)::type;
       for (const auto &element : state_map_[type]) {
         writer->write(0, element.second.data);
       }

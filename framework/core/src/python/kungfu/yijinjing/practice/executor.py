@@ -118,7 +118,7 @@ class ExtensionExecutor:
             ctx.runtime_locator, ctx.group, ctx.name, ctx.low_latency
         )
         service = getattr(module, ctx.category)(vendor)
-        vendor.setup(service)
+        vendor.set_service(service)
         vendor.run()
 
     def run_market_data(self):
