@@ -358,7 +358,7 @@ function getIcon(file: Code.FileData): string {
   if (type == 'folder') {
     if (file['open']) {
       if (iconFolderJSON[file.name]) {
-        iconName = iconFolderJSON[file.name] + 'open';
+        iconName = iconFolderJSON[file.name] + '-open';
       } else {
         iconName = 'folder-open';
       }
@@ -377,7 +377,6 @@ function getIcon(file: Code.FileData): string {
     if (!iconName) iconName = 'file';
   }
   if (!iconName) return '';
-
   return require(`@kungfu-trader/kungfu-app/src/renderer/assets/svg/file-icons/${iconName}.svg`);
 }
 
