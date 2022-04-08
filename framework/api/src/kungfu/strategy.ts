@@ -1,6 +1,7 @@
 import { setKfConfig } from './store';
 import { getStrategyKfLocation, getKfConfig } from './store';
-
+import { message } from 'ant-design-vue';
+import { useGlobalStore } from '@kungfu-trader/kungfu-app/src/renderer/pages/index/store/global';
 export const getStrategyById = (
   strategyId: string,
 ): Promise<Array<Code.Strategy>> => {
@@ -31,7 +32,11 @@ export const updateStrategyPath = async (
         strategy_path: strategyPath,
         add_time: addTime,
       }),
-    );
+    ).then(() => {
+        message.success('更新策略路径成功');
+    }).then(() => {
+        useGlobalStore().setKfConfigList();
+    })
     resolve(strategy);
   });
 };
