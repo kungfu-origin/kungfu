@@ -17,7 +17,7 @@
   "main": "lib/index.js",
   "scripts": {
     "postinstall": "yarn patch",
-    "patch": "patch-package",
+    "patch": "./node_modules/.bin/patch-package",
     "format": "prettier -l -w --config ../../.prettierrc.js ."
   },
   "dependencies": {
