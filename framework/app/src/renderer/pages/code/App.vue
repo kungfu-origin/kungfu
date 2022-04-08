@@ -117,17 +117,9 @@ onMounted(() => {
   </div>
 </template>
 
-<style lang="less" scoped>
-#app {
-  width: 100%;
-  height: 100%;
-  font-family: Consolas, Monaco, Lucida Console, Liberation Mono,
-    DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  .code-editor-background {
-      width: 100%;
+<style lang="less">
+.code-editor-background {
+    width: 100%;
     .code-content {
         width: auto;
         display: flex;
@@ -137,6 +129,5 @@ onMounted(() => {
             flex: 1;
         }
     }
-  }
 }
 </style>

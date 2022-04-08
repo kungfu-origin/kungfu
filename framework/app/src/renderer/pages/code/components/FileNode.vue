@@ -5,12 +5,13 @@
     :class="{
       folder: type == 'folder',
       file: type !== 'folder',
-      active: fileNode.id === currentFile.id || fileNode.root,
+      active: fileNode.id === currentFile.id,
     }"
   >
     <div @click.stop="handleClickFile(fileNode)">
       <div
         class="each-files"
+        :class="{'root-file': fileNode.root}"
         :style="{ 'padding-left': `${curCount * 16 + 5}px` }"
       >
         <div class="file-top">
@@ -443,6 +444,10 @@ onMounted(() => {
     font-size: 14px;
     white-space: normal;
     cursor: pointer;
+    &.root-file {
+      background-color: @popover-customize-border-color;
+      color: @gold-base;
+    }
     .file-top {
         display: flex;
         flex-wrap: nowrap;
