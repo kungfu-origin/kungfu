@@ -803,7 +803,7 @@ export const startCustomProcess = (
 export const sendDataToProcessIdByPm2 = (
   topic: string,
   pm2Id: number,
-  data: Record<string, any>,
+  data: Record<string, KungfuApi.KfConfigValue>,
 ): Promise<void> => {
   return new Promise((resolve, reject) => {
     pm2.sendDataToProcessId(
