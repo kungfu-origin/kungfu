@@ -1,5 +1,9 @@
 import { Subject } from 'rxjs';
-import { Pm2Bus, Pm2Packet } from 'src/typings';
+import {
+  Pm2Packet,
+  Pm2Bus,
+} from '@kungfu-trader/kungfu-js-api/utils/processUtils';
+
 import pm2 from 'pm2';
 
 export const globalState = {
