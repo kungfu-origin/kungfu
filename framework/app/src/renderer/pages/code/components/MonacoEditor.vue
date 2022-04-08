@@ -260,5 +260,23 @@ function pythonProvideCompletionItems(model, position, context, token) {
         height: 100%;
     }
 }
-
+.tr-logo {
+    color: @popover-customize-border-color;
+    font-size: 160px;
+    display: block;
+    margin: auto;
+    text-align: center;
+    position: relative;
+    top: 30%;
+    transform: translateY(-50%);
+    transform: rotate(90deg);
+    &::before {
+        content: '\e61f';
+    }
+}
+.iconfont {
+  font-style: normal;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
 </style>
