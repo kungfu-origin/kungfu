@@ -16,8 +16,8 @@
   "types": "./src/typings/index.d.ts",
   "main": "lib/index.js",
   "scripts": {
-    "postinstall": "patch-package",
-    "patch": "patch-package",
+    "postinstall": "yarn run patch",
+    "patch": "node .gyp/patch.js",
     "format": "prettier -l -w --config ../../.prettierrc.js ."
   },
   "dependencies": {
