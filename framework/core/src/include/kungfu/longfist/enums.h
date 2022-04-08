@@ -263,6 +263,6 @@ enum class SubscribeCategoryType : uint64_t
 };
 
 template <typename T, typename U>
-inline T sub_data_bitwise(const T &a, const T &b) { return static_cast<T>(static_cast<U>(a) + static_cast<U>(b)); }
+inline T sub_data_bitwise(const T &a, const T &b) { return static_cast<T>(static_cast<U>(a) | static_cast<U>(b)); }
 } // namespace kungfu::longfist::enums
 #endif // KUNGFU_LONGFIST_ENUM_H
