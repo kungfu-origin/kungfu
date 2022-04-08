@@ -109,6 +109,12 @@ bool MarketDataXTP::subscribe_all() {
   return result;
 }
 
+bool MarketDataXTP::subscribe_market(const longfist::types::SubscribeAll &subscribe_all)
+            {
+                SPDLOG_INFO("subscribe_market, market_type {} subscribe_category_type {} subscribe_secu_datatype {} update_time {}", (subscribe_all.market_type), uint64_t(subscribe_all.subscribe_category_type), uint64_t(subscribe_all.subscribe_secu_datatype), int64_t(subscribe_all.update_time));
+                return true;
+            }
+
 void MarketDataXTP::OnDisconnected(int reason) {
   SPDLOG_ERROR("disconnected with reason {}", reason);
   update_broker_state(BrokerState::DisConnected);

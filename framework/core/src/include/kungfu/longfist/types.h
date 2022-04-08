@@ -53,8 +53,8 @@ KF_DEFINE_DATA_TYPE(                              //
     SubscribeAll, 303, PK(update_time), TIMESTAMP(update_time), //
     (int64_t, update_time),                                    //
     (MarketType, market_type),                     //
-    (SubscribeSecuDataType, subscribe_secu_datatype),                  //
-    (SubscribeCategoryType, subscribe_category_type)                          //
+    (SubscribeCategoryType, subscribe_category_type),                          //
+    (SubscribeSecuDataType, subscribe_secu_datatype)                  //
 );
 
 KF_DEFINE_DATA_TYPE(                              //
