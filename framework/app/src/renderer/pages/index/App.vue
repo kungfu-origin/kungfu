@@ -81,7 +81,7 @@ const busSubscription = globalBus.subscribe((data: KfBusEvent) => {
 });
 
 onMounted(() => {
-  bindIPCListener(store);
+  bindIPCListener(store, app);
   removeLoadingMask();
 
   window.addEventListener('resize', () => {

@@ -68,6 +68,8 @@ function handleConfirm(): void {
         formState.value,
         primaryKeys,
       );
+      console.log(app);
+      
 
       app &&
         app.emit('confirm', {

@@ -1,6 +1,6 @@
-import { remote, ipcRenderer } from 'electron';
-
-const currentWin = remote.getCurrentWindow();
+import { ipcRenderer } from 'electron';
+import { getCurrentWindow } from '@electron/remote';
+const currentWin = getCurrentWindow();
 const paWin = currentWin.getParentWindow();
 
 ipcRenderer.setMaxListeners(10);

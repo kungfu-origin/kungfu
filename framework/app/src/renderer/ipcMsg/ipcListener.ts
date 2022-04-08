@@ -1,11 +1,11 @@
-import { ipcRenderer, remote } from 'electron';
+import { ipcRenderer } from 'electron';
 import {
   getStrategyById,
   updateStrategyPath,
 } from '@kungfu-trader/kungfu-js-api/kungfu/strategy';
-const { BrowserWindow } = remote;
+import { BrowserWindow } from '@electron/remote';
 
-export function bindIPCListener(store) {
+export function bindIPCListener(store, app) {
   ipcRenderer.removeAllListeners('ipc-emit-strategyById');
   ipcRenderer.on('ipc-emit-strategyById', (event, { childWinId, params }) => {
     const childWin = BrowserWindow.fromId(childWinId);
@@ -21,10 +21,21 @@ export function bindIPCListener(store) {
   ipcRenderer.on(
     'ipc-emit-updateStrategyPath',
     (event, { childWinId, params }) => {
+      console.log(app);
+
       const childWin = BrowserWindow.fromId(childWinId);
       const { strategyId, strategyPath } = params;
       return updateStrategyPath(strategyId, strategyPath).then(() => {
         if (childWin) {
+          app &&
+            app.emit('confirm', {
+              formState: {
+                strategy_id: strategyId,
+                strategy_path: strategyPath,
+              },
+              strategyId,
+              changeType: 'update',
+            });
           childWin.webContents.send('ipc-res-updateStrategyPath');
         }
       });
