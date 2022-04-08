@@ -27,8 +27,7 @@
     "get-user-locale": "^1.4.0",
     "log4js": "^6.4.0",
     "pm2": "^5.2.0",
-    "ps-list": "~7.2",
-    "rxjs": "^7.5.0"
+    "ps-list": "~7.2"
   },
   "devDependencies": {
     "patch-package": "^6.4.7"

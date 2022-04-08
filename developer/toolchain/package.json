@@ -69,6 +69,7 @@
     "postcss-loader": "^6.2.0",
     "prettier": "^2.5.0",
     "rimraf": "^3.0.0",
+    "rxjs": "^7.5.5",
     "semver": "^7.3.5",
     "style-loader": "^3.3.1",
     "tail": "^2.2.4",

@@ -37,7 +37,6 @@
     "iconv-lite": "^0.6.3",
     "jschardet": "^3.0.0",
     "pinia": "^2.0.0",
-    "rxjs": "^7.5.0",
     "vue": "^3.2.31"
   },
   "devDependencies": {
