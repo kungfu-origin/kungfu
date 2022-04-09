@@ -14,8 +14,7 @@
       "extensions/*",
       "developer/*",
       "artifact"
-    ],
-    "nohoist": ["**/pm2", "**/pm2/**"]
+    ]
   },
   "scripts": {
     "dev": "yarn workspace @kungfu-trader/artifact-kungfu dev",

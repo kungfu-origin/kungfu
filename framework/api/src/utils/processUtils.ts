@@ -1,7 +1,8 @@
 import path from 'path';
 import os from 'os';
 import fkill from 'fkill';
-import pm2, { Proc, ProcessDescription, StartOptions } from 'pm2';
+import { Proc, ProcessDescription, StartOptions } from 'pm2';
+import pm2 from './pm2Custom';
 import { getUserLocale } from 'get-user-locale';
 import psList, { ProcessDescriptor } from 'ps-list';
 
