@@ -24,8 +24,6 @@ import {
 import { getKfGlobalSettingsValue } from '../config/globalSettings';
 import { Observable } from 'rxjs';
 
-console.log(require.cache);
-
 process.env.PM2_HOME = path.resolve(os.homedir(), '.pm2');
 const numCPUs = os.cpus() ? os.cpus().length : 1;
 const isWin = os.platform() === 'win32';
