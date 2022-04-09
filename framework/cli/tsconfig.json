@@ -30,6 +30,5 @@
     "tests/**/*.ts",
     "tests/**/*.tsx",
     "../api/src/**/*.ts",
-    "../kungfu-js-api/src/**/*.ts",
   ]
 }

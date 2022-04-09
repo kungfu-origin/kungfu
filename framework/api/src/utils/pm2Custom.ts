@@ -3,8 +3,6 @@ import os from 'os';
 
 const pm2Custom = new pm2['custom']();
 
-console.log(pm2Custom);
-
 if (process.platform === 'win32') {
   const USERNAME = os.userInfo().username;
   pm2Custom._conf.DAEMON_RPC_PORT = `\\\\.\\pipe\\${USERNAME}\\rpc.sock`;
