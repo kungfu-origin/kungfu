@@ -2,9 +2,8 @@ import { Subject } from 'rxjs';
 import {
   Pm2Packet,
   Pm2Bus,
+  pm2LaunchBus,
 } from '@kungfu-trader/kungfu-js-api/utils/processUtils';
-
-import pm2 from 'pm2';
 
 export const globalState = {
   DZXY_PM_ID: 0,
@@ -25,7 +24,7 @@ const timer = setTimeout(() => {
   clearTimeout(timer);
 }, 1000);
 
-pm2.launchBus((err: Error, pm2_bus: Pm2Bus) => {
+pm2LaunchBus((err: Error, pm2_bus: Pm2Bus) => {
   if (err) {
     console.error('pm2 launchBus Error', err);
     return;

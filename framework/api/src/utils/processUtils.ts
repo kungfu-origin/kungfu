@@ -24,6 +24,8 @@ import {
 import { getKfGlobalSettingsValue } from '../config/globalSettings';
 import { Observable } from 'rxjs';
 
+console.log(require.cache);
+
 process.env.PM2_HOME = path.resolve(os.homedir(), '.pm2');
 const numCPUs = os.cpus() ? os.cpus().length : 1;
 const isWin = os.platform() === 'win32';
@@ -304,6 +306,10 @@ export const pm2KillGodDaemon = (): Promise<void> => {
 };
 
 export const pm2Disconnect = pm2.disconnect;
+
+export function pm2LaunchBus(cb: (err: Error, pm2_bus: Pm2Bus) => void) {
+  pm2.launchBus(cb);
+}
 
 export const startProcess = (
   options: Pm2StartOptions,
