@@ -97,7 +97,8 @@ class KungfuCoreConan(ConanFile):
     def build(self):
         build_type = self.__get_build_type()
         self.__clean_build_info(build_type)
-        self.__run_build(build_type, "node")
+        if tools.detected_os() != "Windows":
+            self.__run_build(build_type, "node")
         self.__run_build(build_type, "electron")
         self.__gen_build_info(build_type)
         self.__show_build_info(build_type)
