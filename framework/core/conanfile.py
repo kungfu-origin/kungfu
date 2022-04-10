@@ -232,7 +232,11 @@ class KungfuCoreConan(ConanFile):
             .strip()
         )
 
-        toolset_option = ["--toolset", str(self.options.vs_toolset)] if self.options.vs_toolset else []
+        toolset_option = (
+            ["--toolset", str(self.options.vs_toolset)]
+            if self.options.vs_toolset
+            else []
+        )
         build_option = (
             toolset_option + ["--platform", str(self.options.arch)]
             if tools.detected_os() == "Windows"

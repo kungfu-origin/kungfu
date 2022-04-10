@@ -34,16 +34,15 @@
       </div>
       <div class="file-tree-body" v-if="strategyPath">
         <div class="scroll-view">
-            <div v-for="file in fileTree">
-                <FileNode
-                    v-if="file.root"
-                    :count="0"
-                    :fileNode="file"
-                    :id="file.id"
-                    type="folder"
-
-                ></FileNode>
-            </div>
+          <div v-for="file in fileTree">
+            <FileNode
+              v-if="file.root"
+              :count="0"
+              :fileNode="file"
+              :id="file.id"
+              type="folder"
+            ></FileNode>
+          </div>
         </div>
       </div>
     </div>
@@ -61,7 +60,7 @@ import {
   ref,
   getCurrentInstance,
   ComponentInternalInstance,
-toRefs,
+  toRefs,
 } from 'vue';
 import path from 'path';
 import { storeToRefs } from 'pinia';
@@ -78,54 +77,56 @@ import { ipcEmitDataByName } from '../../../ipcMsg/emitter';
 
 const store = useCodeStore();
 const props = defineProps<{
-    strategy: Code.Strategy
-}>()
-const { strategy } = toRefs(props)
-const strategyPath = ref<string>('')
-const strategyPathName = ref<string>('')
-const { proxy } = getCurrentInstance() as ComponentInternalInstance
+  strategy: Code.Strategy;
+}>();
+const { strategy } = toRefs(props);
+const strategyPath = ref<string>('');
+const strategyPathName = ref<string>('');
+const { proxy } = getCurrentInstance() as ComponentInternalInstance;
 const { currentFile, fileTree } = storeToRefs(useCodeStore());
 
-watch(strategy.value as Code.Strategy, newStrategy => {
-    getPath(newStrategy);
-    initFileTree(newStrategy).then (fileItem => {
-        const entryPath: string = newStrategy.strategy_path
-        
-        const currentFile = findTargetFromArray<Code.FileData>(Object.values(fileItem), 'filePath' , entryPath)
-        
-        if (currentFile) {
-            store.setEntryFile(currentFile)
-            store.setCurrentFile(currentFile)
-        }       
-    })
-})
+watch(strategy.value as Code.Strategy, (newStrategy) => {
+  getPath(newStrategy);
+  initFileTree(newStrategy).then((fileItem) => {
+    const entryPath: string = newStrategy.strategy_path;
+
+    const currentFile = findTargetFromArray<Code.FileData>(
+      Object.values(fileItem),
+      'filePath',
+      entryPath,
+    );
+
+    if (currentFile) {
+      store.setEntryFile(currentFile);
+      store.setCurrentFile(currentFile);
+    }
+  });
+});
 
 //绑定策略
 function handleBindStrategyFolder() {
-    dialog.showOpenDialog(
-        {
-            properties: ['openFile'],
-        },
-    ).then (strategyPath => {
-            if (!strategyPath || !strategyPath.filePaths[0]) return;
-            if (!strategy.value?.strategy_id) return;
-            bindStrategyPath(strategyPath.filePaths[0]);
+  dialog
+    .showOpenDialog({
+      properties: ['openFile'],
+    })
+    .then((strategyPath) => {
+      if (!strategyPath || !strategyPath.filePaths[0]) return;
+      if (!strategy.value?.strategy_id) return;
+      bindStrategyPath(strategyPath.filePaths[0]);
     });
 }
 
 //bind data中path 与 sqlite中path
 async function bindStrategyPath(strategyPathNew) {
-    if (strategy && strategy.value.strategy_id) {
-        await ipcEmitDataByName('updateStrategyPath', {
-            strategyId: strategy.value.strategy_id,
-            strategyPath: strategyPathNew,
-        })
-        message.success(
-            `策略${strategy.value.strategy_id}文件路径修改成功！`,
-        );
-        //每次更新path，需要通知root组件更新stratgy
-        proxy?.$emit('updateStrategy', strategyPathNew);
-    }
+  if (strategy && strategy.value.strategy_id) {
+    await ipcEmitDataByName('updateStrategyPath', {
+      strategyId: strategy.value.strategy_id,
+      strategyPath: strategyPathNew,
+    });
+    message.success(`策略${strategy.value.strategy_id}文件路径修改成功！`);
+    //每次更新path，需要通知root组件更新stratgy
+    proxy?.$emit('updateStrategy', strategyPathNew);
+  }
 }
 
 //加文件夹

@@ -21,27 +21,29 @@ const strategy = reactive<Code.Strategy>({
   strategy_path: '',
   add_time: 0,
 });
-const strategyName = ProcessId.split('_')[1]
+const strategyName = ProcessId.split('_')[1];
 const curnStrategyIndex: {
-    value: number
+  value: number;
 } = {
-    value: 0
-}
+  value: 0,
+};
 // 处理JSON格式strangeList
 function handleStrategyJsonList(strategyList): void {
-  getCurrentStrategy(strategyList)
-  let value: Code.Strategy = JSON.parse(strategyList[curnStrategyIndex.value].value);
+  getCurrentStrategy(strategyList);
+  let value: Code.Strategy = JSON.parse(
+    strategyList[curnStrategyIndex.value].value,
+  );
   strategy.strategy_id = value.strategy_id;
   strategy.strategy_path = value.strategy_path;
   strategy.add_time = value.add_time;
 }
 
-function getCurrentStrategy (strategyList) {
-    strategyList.forEach((item, index) => {
-        if (item.name === strategyName) {
-            curnStrategyIndex.value = index
-        }
-    })
+function getCurrentStrategy(strategyList) {
+  strategyList.forEach((item, index) => {
+    if (item.name === strategyName) {
+      curnStrategyIndex.value = index;
+    }
+  });
 }
 
 // 处理Object格式strageList
@@ -68,8 +70,10 @@ async function updateStrategy(strategyId: string, strategyPath: string) {
 let shouldClose: boolean = false;
 
 async function getStrategyById(strategyId: string) {
-    const { data } = await ipcEmitDataByName('strategyById', { strategyId }) as Record<string, Array<Code.Strategy>>;
-    handleStrategyList(data);
+  const { data } = (await ipcEmitDataByName('strategyById', {
+    strategyId,
+  })) as Record<string, Array<Code.Strategy>>;
+  handleStrategyList(data);
 }
 
 function bindCloseWindowEvent() {
@@ -90,44 +94,44 @@ function bindCloseWindowEvent() {
   };
 }
 onMounted(() => {
-    ipcEmitDataByName('strategyList').then(({data}) => {
-        store.setStrategyList(data)
-        nextTick().then(() => {
-            handleStrategyJsonList(store.strategyList);
-        });
+  ipcEmitDataByName('strategyList').then(({ data }) => {
+    store.setStrategyList(data);
+    nextTick().then(() => {
+      handleStrategyJsonList(store.strategyList);
     });
-    removeLoadingMask();
+  });
+  removeLoadingMask();
 
-    store.getKungfuConfig();
-    bindCloseWindowEvent();
+  store.getKungfuConfig();
+  bindCloseWindowEvent();
 });
 </script>
 
 <template>
   <div class="code-editor-background">
     <MainContentVue>
-        <div class="code-content">
+      <div class="code-content">
         <FileTree
-            :strategy="strategy"
-            @updateStrategy="handleUpdateStrategy"
+          :strategy="strategy"
+          @updateStrategy="handleUpdateStrategy"
         ></FileTree>
         <Editor class="editor" ref="code-editor"></Editor>
-        </div>
+      </div>
     </MainContentVue>
   </div>
 </template>
 
 <style lang="less">
 .code-editor-background {
-    width: 100%;
-    .code-content {
-        width: auto;
-        display: flex;
-        height: calc(100vh - 32px);
-        .editor {
-            text-align: left;
-            flex: 1;
-        }
+  width: 100%;
+  .code-content {
+    width: auto;
+    display: flex;
+    height: calc(100vh - 32px);
+    .editor {
+      text-align: left;
+      flex: 1;
     }
+  }
 }
 </style>
