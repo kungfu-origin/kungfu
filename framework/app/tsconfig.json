@@ -20,7 +20,8 @@
     "typeRoots": [],
     "paths": {
       "@kungfu-trader/kungfu-js-api/*": ["../api/src/*"],
-      "@kungfu-trader/kungfu-app/*": ["./*"]
+      "@kungfu-trader/kungfu-app/*": ["./*"],
+      "pm2": ["../api/node_modules/pm2", "../kungfu-js-api/node_modules/pm2"],
     },
     "lib": ["esnext", "dom", "dom.iterable", "scripthost"]
   },
@@ -30,6 +31,6 @@
     "src/**/*.vue",
     "tests/**/*.ts",
     "tests/**/*.tsx",
-    "../api/src/**/*.ts"
+    "../api/src/**/*.ts",
   ]
 }

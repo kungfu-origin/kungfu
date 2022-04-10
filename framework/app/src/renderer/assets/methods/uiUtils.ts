@@ -144,13 +144,17 @@ const removeDBBeforeStartAll = (currentTradingDate: string): Promise<void> => {
   }
 };
 
-export const beforeStartAll = async (): Promise<(void | Proc)[]> => {
+export const preStartAll = async (): Promise<(void | Proc)[]> => {
   const currentTradingDate = getTradingDate();
-  const availDaemon = await getAvailDaemonList();
-
   return Promise.all([
     removeJournalBeforeStartAll(currentTradingDate),
     removeDBBeforeStartAll(currentTradingDate),
+  ]);
+};
+
+export const postStartAll = async (): Promise<(void | Proc)[]> => {
+  const availDaemon = await getAvailDaemonList();
+  return Promise.all([
     ...availDaemon.map((item) =>
       startExtDaemon(getProcessIdByKfLocation(item), item.cwd, item.script)
         .then((res) => {

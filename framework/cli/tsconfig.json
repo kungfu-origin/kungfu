@@ -19,7 +19,7 @@
     "types": ["jschardet"],
     "typeRoots": [],
     "paths": {
-      "@kungfu-trader/kungfu-js-api/*": ["../api/src/*"]
+      "@kungfu-trader/kungfu-js-api/*": ["../api/src/*"],
     },
     "lib": ["esnext", "dom", "dom.iterable", "scripthost"]
   },
@@ -29,6 +29,6 @@
     "src/**/*.vue",
     "tests/**/*.ts",
     "tests/**/*.tsx",
-    "../api/src/**/*.ts"
+    "../api/src/**/*.ts",
   ]
 }

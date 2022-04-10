@@ -21,8 +21,8 @@ std::string get_index_db_file(const io_device_ptr &io_device) {
 }
 
 session_finder::session_finder(const io_device_ptr &io_device)
-    : session_storage_(cache::make_storage_ptr(get_index_db_file(io_device), longfist::SessionDataTypes)),
-      io_device_(io_device) {
+    : io_device_(io_device),
+      session_storage_(cache::make_storage_ptr(get_index_db_file(io_device), longfist::SessionDataTypes)) {
   if (not session_storage_->sync_schema_simulate().empty()) {
     session_storage_->sync_schema();
   }

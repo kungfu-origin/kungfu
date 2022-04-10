@@ -32,6 +32,8 @@ using namespace kungfu::yijinjing::nanomsg;
 namespace kungfu::yijinjing {
 class ipc_url_factory : public url_factory {
 public:
+  virtual ~ipc_url_factory() {}
+
   [[nodiscard]] std::string make_path_bind(data::location_ptr location, protocol p) const override {
     return location->locator->layout_file(location, layout::NANOMSG, get_protocol_name(p));
   }

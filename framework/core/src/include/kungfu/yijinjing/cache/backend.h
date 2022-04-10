@@ -81,7 +81,8 @@ template <typename DataType> struct time_spec<DataType, std::enable_if_t<DataTyp
   static std::vector<DataType> get_all(StateStoragePtr &storage, int64_t from, int64_t to) {
     using namespace boost::hana;
     using namespace sqlite_orm;
-    auto just = find_if(accessors<DataType>(), [](auto it) { return DataType::timestamp_key.value() == first(it); });
+    auto comparator = [](auto it) { return DataType::timestamp_key.value() == boost::hana::first(it); };
+    auto just = find_if(accessors<DataType>(), comparator);
     auto accessor = second(*just);
     auto ts = member_pointer_trait<decltype(accessor)>().pointer();
     return storage->get_all<DataType>(where(greater_or_equal(ts, from) and lesser_or_equal(ts, to)));

@@ -13,8 +13,8 @@
 
 namespace kungfu::wingchun::broker {
 
-FORWARD_DECLARE_PTR(BrokerVendor)
-FORWARD_DECLARE_PTR(BrokerService)
+FORWARD_DECLARE_CLASS_PTR(BrokerVendor)
+FORWARD_DECLARE_CLASS_PTR(BrokerService)
 
 class BrokerVendor : public yijinjing::practice::apprentice {
 public:
