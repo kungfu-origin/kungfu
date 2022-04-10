@@ -52,24 +52,21 @@ watch(globallSetting.value, (newSetting) => {
 
 // 监听文件树变化
 watch(fileTree, (newTree, oldTree) => {
-  const newRootPath = findTargetFromArray<Code.FileData>(
-    Object.values(newTree),
-    'root',
-    true,
-  )!.filePath;
-
-  let oldRootPath = '';
   if (oldTree['0'] && oldTree['0'].id !== null && oldTree['0'].id !== undefined) {
-    oldRootPath = findTargetFromArray<Code.FileData>(
-      Object.values(oldTree),
-      'root',
-      true,
+    const newRootPath = findTargetFromArray<Code.FileData>(
+			Object.values(newTree),
+			'root',
+			true,
     )!.filePath;
-  }
-  
-  if (newRootPath !== oldRootPath) {
-    activeFile.value = null;
-    handleEditor.value = null;
+    const oldRootPath = findTargetFromArray<Code.FileData>(
+			Object.values(oldTree),
+			'root',
+			true,
+			)!.filePath;
+    if (newRootPath !== oldRootPath) {
+			activeFile.value = null;
+			handleEditor.value = null;
+    }
   }
 });
 

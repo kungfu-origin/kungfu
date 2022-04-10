@@ -429,7 +429,7 @@ function getSiblings(parentId, fileTree) {
 
 //获取所有兄弟 name
 function getSiblingsName(parentId) {
-  let targetList: Array<string> = [];
+  const targetList: Array<string> = [];
   if (fileTree.value[parentId] && fileTree.value[parentId].children) {
     const folders = fileTree.value[parentId].children['folder'] || [];
     const files = fileTree.value[parentId].children['file'] || [];
