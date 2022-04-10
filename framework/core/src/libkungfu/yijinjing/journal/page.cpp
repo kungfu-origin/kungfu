@@ -20,7 +20,7 @@
 namespace kungfu::yijinjing::journal {
 page::page(data::location_ptr location, uint32_t dest_id, const uint32_t page_id, const size_t size, const bool lazy,
            uintptr_t address)
-    : location_(std::move(location)), dest_id_(dest_id), page_id_(page_id), size_(size), lazy_(lazy),
+    : location_(std::move(location)), dest_id_(dest_id), page_id_(page_id), lazy_(lazy), size_(size),
       header_(reinterpret_cast<page_header *>(address)) {
   assert(address > 0);
 }

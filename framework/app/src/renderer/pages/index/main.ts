@@ -33,7 +33,10 @@ import {
   TimePicker,
 } from 'ant-design-vue';
 
-import { beforeStartAll } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
+import {
+  postStartAll,
+  preStartAll,
+} from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import { useGlobalStore } from '@kungfu-trader/kungfu-app/src/renderer/pages/index/store/global';
 import { delayMilliSeconds } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import {
@@ -103,7 +106,7 @@ app.mount('#app');
 const globalStore = useGlobalStore();
 
 if (process.env.RELOAD_AFTER_CRASHED === 'false') {
-  beforeStartAll()
+  preStartAll()
     .then(() => {
       return startArchiveMakeTask((archiveStatus: Pm2ProcessStatusTypes) => {
         globalBus.next({
@@ -129,7 +132,9 @@ if (process.env.RELOAD_AFTER_CRASHED === 'false') {
 
       delayMilliSeconds(1000)
         .then(() => startCacheD(false))
+        .then(() => delayMilliSeconds(1000))
         .then(() => startLedger(false))
+        .then(() => postStartAll())
         .catch((err) => console.error(err.message));
     });
 } else {

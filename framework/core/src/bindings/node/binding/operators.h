@@ -96,7 +96,7 @@ private:
 class JsSet {
 public:
   template <typename DataType> void operator()(const DataType &data, Napi::Object &object) {
-    boost::hana::for_each(boost::hana::accessors<DataType>(), [&, this](auto it) {
+    boost::hana::for_each(boost::hana::accessors<DataType>(), [&](auto it) {
       auto name = boost::hana::first(it);
       auto accessor = boost::hana::second(it);
       Set(object, name.c_str(), accessor(data));
@@ -202,7 +202,7 @@ private:
 class JsGet {
 public:
   template <typename DataType> void operator()(const Napi::Object &object, DataType &data) {
-    boost::hana::for_each(boost::hana::accessors<DataType>(), [&, this](auto it) {
+    boost::hana::for_each(boost::hana::accessors<DataType>(), [&](auto it) {
       auto name = boost::hana::first(it);
       auto accessor = boost::hana::second(it);
       using ValueType = std::decay_t<std::invoke_result_t<decltype(accessor), const DataType &>>;

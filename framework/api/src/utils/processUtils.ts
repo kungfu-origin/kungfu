@@ -1,7 +1,8 @@
 import path from 'path';
 import os from 'os';
 import fkill from 'fkill';
-import pm2, { Proc, ProcessDescription, StartOptions } from 'pm2';
+import { Proc, ProcessDescription, StartOptions } from 'pm2';
+import pm2 from './pm2Custom';
 import { getUserLocale } from 'get-user-locale';
 import psList, { ProcessDescriptor } from 'ps-list';
 
@@ -22,6 +23,7 @@ import {
   KF_RUNTIME_DIR,
 } from '../config/pathConfig';
 import { getKfGlobalSettingsValue } from '../config/globalSettings';
+import { Observable } from 'rxjs';
 
 process.env.PM2_HOME = path.resolve(os.homedir(), '.pm2');
 const numCPUs = os.cpus() ? os.cpus().length : 1;
@@ -121,6 +123,27 @@ export interface Pm2Env {
   created_at?: number;
   script?: StartOptions['script'];
   args?: StartOptions['args'];
+}
+
+export interface Pm2Packet {
+  process: {
+    pm_id: number;
+  };
+  data: {
+    type: string;
+    body: Record<string, string | number | boolean>;
+  };
+}
+
+export interface Pm2PacketMain {
+  type: string;
+  topic: string;
+  data: object;
+  id: number;
+}
+
+export class Pm2Bus {
+  on: (type: string, cb: (packet: Pm2Packet) => void) => void;
 }
 
 export const pm2Connect = (): Promise<void> => {
@@ -282,6 +305,10 @@ export const pm2KillGodDaemon = (): Promise<void> => {
 };
 
 export const pm2Disconnect = pm2.disconnect;
+
+export function pm2LaunchBus(cb: (err: Error, pm2_bus: Pm2Bus) => void) {
+  pm2.launchBus(cb);
+}
 
 export const startProcess = (
   options: Pm2StartOptions,
@@ -781,7 +808,7 @@ export const startCustomProcess = (
 export const sendDataToProcessIdByPm2 = (
   topic: string,
   pm2Id: number,
-  data: Record<string, number | string | boolean>,
+  data: Record<string, KungfuApi.KfConfigValue>,
 ): Promise<void> => {
   return new Promise((resolve, reject) => {
     pm2.sendDataToProcessId(
@@ -797,6 +824,22 @@ export const sendDataToProcessIdByPm2 = (
         } else {
           resolve();
         }
+      },
+    );
+  });
+};
+
+export const processStatusDataObservable = () => {
+  return new Observable<{
+    processStatus: Pm2ProcessStatusData;
+    processStatusWithDetail: Pm2ProcessStatusDetailData;
+  }>((observer) => {
+    startGetProcessStatus(
+      (res: {
+        processStatus: Pm2ProcessStatusData;
+        processStatusWithDetail: Pm2ProcessStatusDetailData;
+      }) => {
+        observer.next(res);
       },
     );
   });

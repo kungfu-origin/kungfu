@@ -47,13 +47,15 @@ export const buildProcessLogPath = (processId: string) => {
 
 export const KUNGFU_RESOURCES_DIR = global.__resources;
 
+export const KF_CONFIG_DIR = path.join(KF_HOME, 'config');
+
 export const KF_CONFIG_DEFAULT_PATH = path.join(
   KUNGFU_RESOURCES_DIR,
   'config',
   'kfConfig.json',
 );
 
-export const KF_CONFIG_PATH = path.join(KF_HOME, 'config', 'kfConfig.json');
+export const KF_CONFIG_PATH = path.join(KF_CONFIG_DIR, 'kfConfig.json');
 
 export const KF_INSTRUMENTS_DEFAULT_PATH = path.join(
   KUNGFU_RESOURCES_DIR,
@@ -62,28 +64,21 @@ export const KF_INSTRUMENTS_DEFAULT_PATH = path.join(
 );
 
 export const KF_INSTRUMENTS_PATH = path.join(
-  KF_HOME,
-  'config',
+  KF_CONFIG_DIR,
   'defaultInstruments.json',
 );
 
 export const KF_SUBSCRIBED_INSTRUMENTS_JSON_PATH = path.join(
-  KF_HOME,
-  'config',
+  KF_CONFIG_DIR,
   'subscribedInstruments.json',
 );
 addFileSync('', KF_SUBSCRIBED_INSTRUMENTS_JSON_PATH, 'file');
 
-export const KF_TD_GROUP_JSON_PATH = path.join(
-  KF_HOME,
-  'config',
-  'tdGroups.json',
-);
+export const KF_TD_GROUP_JSON_PATH = path.join(KF_CONFIG_DIR, 'tdGroups.json');
 addFileSync('', KF_TD_GROUP_JSON_PATH, 'file');
 
 export const KF_SCHEDULE_TASKS_JSON_PATH = path.join(
-  KF_HOME,
-  'config',
+  KF_CONFIG_DIR,
   'scheduleTasks.json',
 );
 addFileSync('', KF_SCHEDULE_TASKS_JSON_PATH, 'file');

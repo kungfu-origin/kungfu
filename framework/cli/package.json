@@ -46,14 +46,9 @@
     "colors": "^1.4.0",
     "commander": "^9.0.0",
     "console-success": "^1.0.4",
-    "dayjs": "^1.10.8",
-    "fs-extra": "^10.0.0",
     "glob": "^7.2.0",
     "inquirer": "^8.2.0",
     "inquirer-autocomplete-prompt": "^2.0.0",
-    "inquirer-path": "^1.0.0-beta5",
-    "minimist": "^1.2.5",
-    "rxjs": "^7.5.5",
-    "tail": "^2.2.4"
+    "inquirer-path": "^1.0.0-beta5"
   }
 }

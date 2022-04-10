@@ -14,67 +14,69 @@
         :style="{ 'padding-left': `${curCount * 16 + 5}px` }"
       >
         <div class="file-top">
-            <img class="file-icon" :src="iconPath" v-if="iconPath" />
-            <span
-                class="file-name"
-                :class="{ 'root-name': fileNode.root, 'normal-name': entryFile.filePath !== fileNode.filePath }"
-                v-if="fileNode && !onEditing && fileNode.name"
-            >
-                {{ fileNode.name }}
+          <img class="file-icon" :src="iconPath" v-if="iconPath" />
+          <span
+            class="file-name"
+            :class="{
+              'root-name': fileNode.root,
+              'normal-name': entryFile.filePath !== fileNode.filePath,
+            }"
+            v-if="fileNode && !onEditing && fileNode.name"
+          >
+            {{ fileNode.name }}
+          </span>
+          <a-input
+            v-else-if="onEditing"
+            id="edit-input"
+            ref="edit-name"
+            :class="{ error: editError || editErrorMessage }"
+            v-model.trim="fileName"
+            size="small"
+            :value="editValue"
+            style="margin-left: 2px"
+            @click.stop="() => {}"
+            @focus.stop="() => {}"
+            @change="changePath"
+            @blur="handleEditFileBlur"
+            @pressEnter="enterBlur"
+          ></a-input>
+          <a-input
+            v-else-if="!isPending && !onEditing"
+            ref="addPending"
+            id="add-input"
+            :class="{ error: editError || editErrorMessage }"
+            v-model.trim="fileName"
+            size="small"
+            style="margin-left: 2px"
+            @click.stop="() => {}"
+            @focus.stop="() => {}"
+            :value="addValue"
+            @change="addChangePath"
+            @blur="handleAddFileBlur"
+            @pressEnter="enterBlur"
+          ></a-input>
+          <span
+            class="text-overflow"
+            v-show="
+              fileNode &&
+              entryFile.filePath === fileNode.filePath &&
+              fileNode.filePath !== undefined &&
+              !onEditing
+            "
+          >
+            {{ '(入口文件)' }}
+          </span>
+          <div
+            class="deal-file"
+            v-show="fileNode && !onEditing && fileNode.name && !fileNode.root"
+          >
+            <span class="mouse-over" title="重命名" @click.stop="handleRename">
+              <EditFilled class="icon" />
             </span>
-            <a-input
-                v-else-if="onEditing"
-                id="edit-input"
-                ref="edit-name"
-                :class="{ 'error': editError || editErrorMessage }"
-                v-model.trim="fileName"
-                size="small"
-                :value="editValue"
-                :defaultValue="fileNode.name"
-                style="margin-left: 2px"
-                @click.stop="() => {}"
-                @focus.stop="() => {}"
-                @change="changePath"
-                @blur="handleEditFileBlur"
-                @pressEnter="enterBlur"
-            ></a-input>
-            <a-input
-                v-else-if="!isPending && !onEditing"
-                ref="addPending"
-                id="add-input"
-                :class="{ 'error': editError || editErrorMessage }"
-                v-model.trim="fileName"
-                size="small"
-                style="margin-left: 2px"
-                @click.stop="() => {}"
-                @focus.stop="() => {}"
-                :value="addValue"
-                @change="addChangePath"
-                @blur="handleAddFileBlur"
-                @pressEnter="enterBlur"
-                ></a-input>
-            <span
-                class="text-overflow"
-                v-show="
-                    fileNode &&
-                    fileNode.isEntryFile &&
-                    fileNode.filePath !== undefined &&
-                    !onEditing
-                "
-            >
-                {{ '(入口文件)' }}
+            <span class="mouse-over" title="删除" @click.stop="handleDelete">
+              <DeleteFilled class="icon" />
             </span>
-            <div
-                class="deal-file"
-                v-show="fileNode && !onEditing && fileNode.name && !fileNode.root"
-            >
-                <span class="mouse-over" title="重命名" @click.stop="handleRename">
-                    <EditFilled class="icon" />
-                </span>
-                <span class="mouse-over" title="删除" @click.stop="handleDelete">
-                    <DeleteFilled class="icon" />
-                </span>
-            </div>
+          </div>
         </div>
         <span
           class="path"
@@ -83,17 +85,15 @@
         >
           {{ fileNode.filePath }}
         </span>
-        
       </div>
       <div :style="{ 'padding-left': `${curCount * 16 + 26}px` }">
         <Alert
-            class="error-message"
-            :message="editErrorMessage"
-            type="error"
-            v-if="editError && editErrorMessage"
+          class="error-message"
+          :message="editErrorMessage"
+          type="error"
+          v-if="editError && editErrorMessage"
         />
       </div>
-      
     </div>
     <div v-if="isShowChildren">
       <div v-for="id in fileNode.children.folder">
@@ -182,13 +182,13 @@ watch(isShowChildren, () => {
 });
 
 function enterBlur(e) {
-  resetStatus()
-  e.target.blur()
+  resetStatus();
+  e.target.blur();
 }
 
 //点击文件或文件树
 function handleClickFile(file) {
-  resetStatus()
+  resetStatus();
   //正在编辑的input
   if (Object.keys(file).length === 1) return;
   //更新active file id
@@ -203,7 +203,7 @@ function handleClickFile(file) {
 
 //添加文件或文件夹时
 const handleAddFileBlur = (e) => {
-  resetStatus()
+  resetStatus();
   e.stopPropagation();
   const filename = addValue.value;
   //test 重复 或 为空
@@ -240,7 +240,7 @@ const handleAddFileBlur = (e) => {
   }
   //重置
   resetStatus();
-  addValue.value = ''
+  addValue.value = '';
 };
 
 //添加/编辑输入检测
@@ -273,39 +273,41 @@ function handleRename(): void {
 
 //删除文件
 function handleDelete() {
-    if (entryFile.value.id != fileNode.value.id) {
-        const parentId = fileNode.value?.parentId;
-        const typeName = type == 'folder' ? '文件夹' : '文件';
-        Modal.confirm({
-            title: '提示',
-            content: `确认删除该${typeName}吗？`,
-            okText: '确 定',
-            cancelText: '取 消',
-            onOk() {
-                removeFileFolder(fileNode.value?.filePath || '').then(() => {
-                    store.setCurrentFile(entryFile.value)
-                }).then(() =>
-                    openFolder(
-                        fileTree.value[parentId || 0],
-                        fileTree.value,
-                        true,
-                        true,
-                    ),
-                )
-                .then(() => message.success(`${typeName}删除成功！`))
-                .catch((err) => {
-                    if (err == 'cancel') return;
-                    message.error(err.message || '操作失败！');
-                });
-            },
-            onCancel() {
-                return
-            }
-        })
-    } else {
-        message.warning('不可删除入口文件')
-        return
-    }
+  if (entryFile.value.id != fileNode.value.id) {
+    const parentId = fileNode.value?.parentId;
+    const typeName = type == 'folder' ? '文件夹' : '文件';
+    Modal.confirm({
+      title: '提示',
+      content: `确认删除该${typeName}吗？`,
+      okText: '确 定',
+      cancelText: '取 消',
+      onOk() {
+        removeFileFolder(fileNode.value?.filePath || '')
+          .then(() => {
+            store.setCurrentFile(entryFile.value);
+          })
+          .then(() =>
+            openFolder(
+              fileTree.value[parentId || 0],
+              fileTree.value,
+              true,
+              true,
+            ),
+          )
+          .then(() => message.success(`${typeName}删除成功！`))
+          .catch((err) => {
+            if (err == 'cancel') return;
+            message.error(err.message || '操作失败！');
+          });
+      },
+      onCancel() {
+        return;
+      },
+    });
+  } else {
+    message.warning('不可删除入口文件');
+    return;
+  }
 }
 
 function changePath(e): void {
@@ -450,10 +452,10 @@ onMounted(() => {
 
 <style lang="less">
 .c-app-code-file-node {
-    .ant-alert-error {
-        border: 1px solid @red-base !important;
-        background-color: #8d3333 !important;
-    }
+  .ant-alert-error {
+    border: 1px solid @red-base !important;
+    background-color: #8d3333 !important;
+  }
   .each-files {
     text-align: left;
     padding: 2px 0px;
@@ -467,23 +469,23 @@ onMounted(() => {
       color: @gold-base;
     }
     .file-top {
-        display: flex;
-        flex-wrap: nowrap;
-        align-items: center;
+      display: flex;
+      flex-wrap: nowrap;
+      align-items: center;
     }
     .text-overflow {
-        flex: 1;
-        white-space: nowrap;
-        margin-right: 10px;
+      flex: 1;
+      white-space: nowrap;
+      margin-right: 10px;
     }
     .path {
-        margin: 0 4px;
-        word-break:normal; 
-        width:auto; 
-        display:block; 
-        white-space:pre-wrap;
-        word-wrap : break-word;
-        overflow: hidden;
+      margin: 0 4px;
+      word-break: normal;
+      width: auto;
+      display: block;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      overflow: hidden;
     }
     .file-icon {
       width: 20px;
@@ -491,14 +493,14 @@ onMounted(() => {
       display: inline;
     }
     .file-name {
-        margin: 0 4px;
-        white-space: nowrap;
-        text-overflow: ellipsis;
-        overflow: hidden;
-        word-break: break-all;
-        &.normal-name {
-            flex: 1;
-        }
+      margin: 0 4px;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      word-break: break-all;
+      &.normal-name {
+        flex: 1;
+      }
       &.root-name {
         font-size: 18px;
       }
@@ -512,7 +514,7 @@ onMounted(() => {
       }
     }
     .editError {
-        border: 1px solid red1-base;
+      border: 1px solid red1-base;
     }
   }
   .active {

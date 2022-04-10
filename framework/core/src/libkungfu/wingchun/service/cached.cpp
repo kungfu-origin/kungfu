@@ -182,16 +182,9 @@ void CacheD::ensure_cached_storage(uint32_t source_id, uint32_t dest_id) {
 }
 
 void CacheD::feed(const event_ptr &event) {
-
-  uint32_t source_id = event->source();
-  uint32_t dest_id = event->dest();
-
-  if (get_location(source_id)->category == category::MD) {
-    if (event->msg_type() != Instrument::tag) {
-      return;
-    }
+  if (event->msg_type() != Instrument::tag and get_location(event->source())->category == category::MD) {
+    return;
   }
-
   feed_state_data(event, feed_bank_);
   feed_profile_data(event, profile_bank_);
 }

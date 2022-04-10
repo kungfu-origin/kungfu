@@ -31,7 +31,8 @@ export const updateStrategyPath = async (
         strategy_path: strategyPath,
         add_time: addTime,
       }),
-    ).then(() => {
+    )
+      .then(() => {
         message.success('更新策略路径成功');
     })
     resolve(strategy);

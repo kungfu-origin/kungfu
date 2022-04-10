@@ -46,33 +46,12 @@ class ListElementResolved extends Widgets.ListElement {
   focused: boolean;
 }
 
-interface Pm2Packet {
-  process: {
-    pm_id: number;
-  };
-  data: {
-    type: string;
-    body: Record<string, string | number | boolean>;
-  };
-}
-
-interface Pm2PacketMain {
-  type: string;
-  topic: string;
-  data: object;
-  id: number;
-}
-
 interface SwitchKfLocationPacketData {
   category: string;
   group: string;
   name: string;
   value: string;
   status: boolean;
-}
-
-class Pm2Bus {
-  on(type: string, cb: (packet: Pm2Packet) => void);
 }
 
 declare module NodeJS {

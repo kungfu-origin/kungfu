@@ -16,7 +16,7 @@ namespace kungfu::wingchun::broker {
 TraderVendor::TraderVendor(locator_ptr locator, const std::string &group, const std::string &name, bool low_latency)
     : BrokerVendor(location::make_shared(mode::LIVE, category::TD, group, name, std::move(locator)), low_latency) {}
 
-void TraderVendor::setup(Trader_ptr service) { service_ = std::move(service); }
+void TraderVendor::set_service(Trader_ptr service) { service_ = std::move(service); }
 
 void TraderVendor::on_start() {
   BrokerVendor::on_start();

@@ -1,6 +1,9 @@
 <template>
   <div class="code-editor">
-    <div id="editor-content" v-if="activeFile !== null && !activeFile.isDir"></div>
+    <div
+      id="editor-content"
+      v-if="activeFile !== null && !activeFile.isDir"
+    ></div>
     <i class="iconfont tr-logo" v-else></i>
   </div>
 </template>
@@ -43,8 +46,8 @@ const handleEditor: {
 const activeFile = ref<Code.FileData | null>(null);
 
 watch(globallSetting.value, (newSetting) => {
-    const code: Code.ICodeSetting = newSetting.code as Code.ICodeSetting
-    updateSpaceTab(code || {});
+  const code: Code.ICodeSetting = newSetting.code as Code.ICodeSetting;
+  updateSpaceTab(code || {});
 });
 
 // 监听文件树变化
@@ -80,7 +83,11 @@ watch(currentFile, async (newFile: Code.FileData) => {
   const codeText: string = await getFileContent(filePath);
   await nextTick();
   if (activeFile.value) {
-    handleEditor.value = buildEditor(handleEditor.value, activeFile.value, codeText);
+    handleEditor.value = buildEditor(
+      handleEditor.value,
+      activeFile.value,
+      codeText,
+    );
     await nextTick();
     updateSpaceTab(globallSetting.value.code as Code.ICodeSetting);
     bindBlur(handleEditor.value, activeFile.value);
@@ -178,14 +185,13 @@ function updateSpaceTab(spaceTabSetting: Code.ICodeSetting) {
     : 'spaces';
 
   if (handleEditor.value) {
-
     if (type.toLowerCase() === 'spaces') {
-        handleEditor.value.getModel()?.updateOptions({
+      handleEditor.value.getModel()?.updateOptions({
         insertSpaces: true,
         tabSize: +spaceTabSetting.tabSpaceSize,
       });
     } else if (type.toLowerCase() === 'tabs') {
-        handleEditor.value.getModel()?.updateOptions({
+      handleEditor.value.getModel()?.updateOptions({
         insertSpaces: false,
         tabSize: +spaceTabSetting.tabSpaceSize,
       });
@@ -255,24 +261,24 @@ function pythonProvideCompletionItems(model, position, context, token) {
 </script>
 <style lang="less">
 #editor-content {
+  height: 100%;
+  .code-editor {
     height: 100%;
-    .code-editor {
-        height: 100%;
-    }
+  }
 }
 .tr-logo {
-    color: @popover-customize-border-color;
-    font-size: 160px;
-    display: block;
-    margin: auto;
-    text-align: center;
-    position: relative;
-    top: 30%;
-    transform: translateY(-50%);
-    transform: rotate(90deg);
-    &::before {
-        content: '\e61f';
-    }
+  color: @popover-customize-border-color;
+  font-size: 160px;
+  display: block;
+  margin: auto;
+  text-align: center;
+  position: relative;
+  top: 30%;
+  transform: translateY(-50%);
+  transform: rotate(90deg);
+  &::before {
+    content: '\e61f';
+  }
 }
 .iconfont {
   font-style: normal;
