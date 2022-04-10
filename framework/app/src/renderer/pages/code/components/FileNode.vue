@@ -121,7 +121,6 @@
 <script lang="ts">
 export default {
   name: 'ComFileNode',
-  emits: ['updateStrategyToApp']
 };
 </script>
 
@@ -132,7 +131,7 @@ import iconFolderJSON from '../config/iconFolderConfig.json';
 import iconFileJSON from '../config/iconFileConfig.json';
 import path from 'path';
 import { storeToRefs } from 'pinia';
-import { onMounted, ref, toRefs, computed, watch, nextTick, getCurrentInstance, ComponentInternalInstance } from 'vue';
+import { onMounted, ref, toRefs, computed, watch, nextTick } from 'vue';
 import { message, Modal, Alert } from 'ant-design-vue';
 import { openFolder } from '../../../assets/methods/codeUtils';
 import {
@@ -141,7 +140,6 @@ import {
 } from '@kungfu-trader/kungfu-js-api/utils/fileUtils';
 import fse from 'fs-extra';
 import { ipcEmitDataByName } from '../../../ipcMsg/emitter';
-const { proxy } = getCurrentInstance() as ComponentInternalInstance
 
 const store = useCodeStore();
 
@@ -346,7 +344,6 @@ const handleEditFileBlur = () => {
         }).then (() => {
             message.success('策略入口重命名成功！')
         });
-        proxy?.$emit('updateStrategyToApp', newPath);
       } else {
           message.success('重命名成功！')
       }

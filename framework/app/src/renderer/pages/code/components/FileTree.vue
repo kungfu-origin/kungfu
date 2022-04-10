@@ -41,7 +41,6 @@
                     :fileNode="file"
                     :id="file.id"
                     type="folder"
-                    @updateStrategyToApp="updateStrategyToApp"
                 ></FileNode>
             </div>
         </div>
@@ -131,8 +130,6 @@ async function bindStrategyPath(strategyPathNew) {
 }
 
 function updateStrategyToApp(strategyPath) {
-    console.log(1);
-    
     proxy?.$emit('updateStrategy', strategyPath);
 
 }
