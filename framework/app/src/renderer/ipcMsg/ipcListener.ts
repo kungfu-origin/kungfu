@@ -4,6 +4,7 @@ import {
   updateStrategyPath,
 } from '@kungfu-trader/kungfu-js-api/kungfu/strategy';
 import { BrowserWindow } from '@electron/remote';
+import { message } from 'ant-design-vue';
 
 export function bindIPCListener(store) {
   ipcRenderer.removeAllListeners('ipc-emit-strategyById');
@@ -25,6 +26,7 @@ export function bindIPCListener(store) {
       const { strategyId, strategyPath } = params;
       return updateStrategyPath(strategyId, strategyPath).then(() => {
         store.setKfConfigList();
+        message.success('操作成功');
         if (childWin) {
           childWin.webContents.send('ipc-res-updateStrategyPath');
         }

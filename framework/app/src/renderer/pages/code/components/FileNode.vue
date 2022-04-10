@@ -323,12 +323,15 @@ function addChangePath(e): void {
 
 //重命名文件blur
 const handleEditFileBlur = () => {
+  onEditing.value = false;
+	if (editValue.value == fileNode.value.name) {
+		return
+	}
   if (!editValue.value || editError.value) {
     resetStatus();
     editValue.value = fileNode.value.name
     return
   }
-  onEditing.value = false;
   resetStatus();
   const oldPath = fileNode.value?.filePath || '';
   const newName = editValue.value;
@@ -339,16 +342,13 @@ const handleEditFileBlur = () => {
   fse.rename(oldPath, newPath).then(() => {
     reloadFolder(parentId, newName);
   }).then(() => {
-      if (fileNode.value === entryFile.value) {
-        ipcEmitDataByName('updateStrategyPath', {
-            strategyId: store.currentStrategy.strategy_id,
-            strategyPath: newPath,
-        }).then (() => {
-            message.success('策略入口重命名成功！')
-        });
-      } else {
-          message.success('重命名成功！')
-      }
+		if (fileNode.value === entryFile.value) {
+			ipcEmitDataByName('updateStrategyPath', {
+					strategyId: store.currentStrategy.strategy_id,
+					strategyPath: newPath,
+			}).then (() => {
+			});
+		}
   });
   editValue.value = ''
   

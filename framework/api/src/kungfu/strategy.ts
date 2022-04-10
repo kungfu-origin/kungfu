@@ -1,6 +1,5 @@
 import { setKfConfig } from './store';
 import { getStrategyKfLocation, getKfConfig } from './store';
-import { message } from 'ant-design-vue';
 export const getStrategyById = (
   strategyId: string,
 ): Promise<Array<Code.Strategy>> => {
@@ -32,9 +31,6 @@ export const updateStrategyPath = async (
         add_time: addTime,
       }),
     )
-      .then(() => {
-        message.success('更新策略路径成功');
-    })
     resolve(strategy);
   });
 };

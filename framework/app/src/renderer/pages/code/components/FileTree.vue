@@ -86,6 +86,8 @@ const { proxy } = getCurrentInstance() as ComponentInternalInstance;
 const { currentFile, fileTree } = storeToRefs(useCodeStore());
 
 watch(strategy.value as Code.Strategy, (newStrategy) => {
+    console.log(newStrategy);
+    
   getPath(newStrategy);
   initFileTree(newStrategy).then((fileItem) => {
     const entryPath: string = newStrategy.strategy_path;
@@ -138,8 +140,8 @@ function updateStrategyToApp(strategyPath) {
 
 //加文件夹
 function handleAddFolder() {
-  let id: number = currentFile.value.id;
-  let rootId: number = +store.getRootFileId;
+  const id: number = currentFile.value.id;
+  const rootId: number = +store.getRootFileId;
   const target = fileTree.value[id] || fileTree.value[rootId];
   if (target.isDir) {
     openFolder(target, fileTree.value, true).then(() => {
@@ -159,8 +161,8 @@ function handleAddFolder() {
 
 //加文件
 function handleAddFile() {
-  let id = currentFile.value.id;
-  let rootId: number = +store.getRootFileId;
+  const id = currentFile.value.id;
+  const rootId: number = +store.getRootFileId;
   const target = fileTree.value[id] || fileTree.value[rootId];
   if (target.isDir) {
     openFolder(target, fileTree.value, true).then(() => {
