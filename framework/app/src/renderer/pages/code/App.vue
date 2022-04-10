@@ -30,7 +30,7 @@ const curnStrategyIndex: {
 // 处理JSON格式strangeList
 function handleStrategyJsonList(strategyList): void {
   getCurrentStrategy(strategyList);
-  let value: Code.Strategy = JSON.parse(
+  const value: Code.Strategy = JSON.parse(
     strategyList[curnStrategyIndex.value].value,
   );
   strategy.strategy_id = value.strategy_id;
@@ -49,7 +49,7 @@ function getCurrentStrategy(strategyList) {
 
 // 处理Object格式strageList
 function handleStrategyList(strategyList): void {
-  let value: Code.Strategy = strategyList[0];
+  const value: Code.Strategy = strategyList[0];
 
   strategy.strategy_id = value.strategy_id;
   strategy.strategy_path = value.strategy_path;
@@ -100,9 +100,9 @@ onMounted(() => {
     store.setStrategyList(data);
     nextTick().then(() => {
       handleStrategyJsonList(store.strategyList);
+      removeLoadingMask();
     });
   });
-  removeLoadingMask();
 
   store.getKungfuConfig();
   bindCloseWindowEvent();

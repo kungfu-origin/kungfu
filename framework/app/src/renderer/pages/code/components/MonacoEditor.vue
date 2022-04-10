@@ -52,7 +52,7 @@ watch(globallSetting.value, (newSetting) => {
 
 // 监听文件树变化
 watch(fileTree, (newTree, oldTree) => {
-  let newRootPath = findTargetFromArray<Code.FileData>(
+  const newRootPath = findTargetFromArray<Code.FileData>(
     Object.values(newTree),
     'root',
     true,
@@ -103,7 +103,7 @@ function bindBlur(editor, curFile) {
 
 function curWriteFile(editor, curFile) {
   const value = editor.getValue();
-  let curPath: string = path.normalize(curFile.filePath);
+  const curPath: string = path.normalize(curFile.filePath);
   fse.outputFile(curPath, value);
 }
 

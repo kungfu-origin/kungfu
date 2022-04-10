@@ -59,7 +59,7 @@
             class="text-overflow"
             v-show="
               fileNode &&
-              entryFile.filePath === fileNode.filePath &&
+              fileNode.isEntryFile &&
               fileNode.filePath !== undefined &&
               !onEditing
             "
@@ -112,6 +112,7 @@
           :id="id"
           type="file"
           :count="childCount"
+					@updateStrategyToApp="updateStrategyToApp"
         />
       </div>
     </div>
@@ -121,6 +122,7 @@
 <script lang="ts">
 export default {
   name: 'ComFileNode',
+	emits: ['updateStrategyToApp']
 };
 </script>
 
@@ -131,7 +133,7 @@ import iconFolderJSON from '../config/iconFolderConfig.json';
 import iconFileJSON from '../config/iconFileConfig.json';
 import path from 'path';
 import { storeToRefs } from 'pinia';
-import { onMounted, ref, toRefs, computed, watch, nextTick } from 'vue';
+import { onMounted, ref, toRefs, computed, watch, nextTick, getCurrentInstance, ComponentInternalInstance } from 'vue';
 import { message, Modal, Alert } from 'ant-design-vue';
 import { openFolder } from '../../../assets/methods/codeUtils';
 import {
@@ -140,6 +142,7 @@ import {
 } from '@kungfu-trader/kungfu-js-api/utils/fileUtils';
 import fse from 'fs-extra';
 import { ipcEmitDataByName } from '../../../ipcMsg/emitter';
+const { proxy } = getCurrentInstance() as ComponentInternalInstance;
 
 const store = useCodeStore();
 
@@ -273,7 +276,7 @@ function handleRename(): void {
 
 //删除文件
 function handleDelete() {
-  if (entryFile.value.id != fileNode.value.id) {
+  if (!fileNode.value.isEntryFile) {
     const parentId = fileNode.value?.parentId;
     const typeName = type == 'folder' ? '文件夹' : '文件';
     Modal.confirm({
@@ -305,8 +308,8 @@ function handleDelete() {
       },
     });
   } else {
-    message.warning('不可删除入口文件');
-    return;
+			message.warning('不可删除入口文件');
+			return;
   }
 }
 
@@ -344,15 +347,19 @@ const handleEditFileBlur = () => {
   }).then(() => {
 		if (fileNode.value === entryFile.value) {
 			ipcEmitDataByName('updateStrategyPath', {
-					strategyId: store.currentStrategy.strategy_id,
-					strategyPath: newPath,
+				strategyId: store.currentStrategy.strategy_id,
+				strategyPath: newPath
 			}).then (() => {
+				updateStrategyToApp(newPath)
 			});
 		}
   });
   editValue.value = ''
-  
 };
+
+function updateStrategyToApp(newPath) {
+	proxy?.$emit('updateStrategyToApp', newPath)
+}
 
 //重制状态
 function resetStatus(): void {

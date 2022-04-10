@@ -41,6 +41,7 @@
               :fileNode="file"
               :id="file.id"
               type="folder"
+              @updateStrategyToApp="updateStrategyToApp"
             ></FileNode>
           </div>
         </div>
@@ -86,8 +87,6 @@ const { proxy } = getCurrentInstance() as ComponentInternalInstance;
 const { currentFile, fileTree } = storeToRefs(useCodeStore());
 
 watch(strategy.value as Code.Strategy, (newStrategy) => {
-    console.log(newStrategy);
-    
   getPath(newStrategy);
   initFileTree(newStrategy).then((fileItem) => {
     const entryPath: string = newStrategy.strategy_path;
