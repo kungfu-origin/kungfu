@@ -41,7 +41,7 @@
                     :fileNode="file"
                     :id="file.id"
                     type="folder"
-
+                    @updateStrategyToApp="updateStrategyToApp"
                 ></FileNode>
             </div>
         </div>
@@ -87,6 +87,8 @@ const { proxy } = getCurrentInstance() as ComponentInternalInstance
 const { currentFile, fileTree } = storeToRefs(useCodeStore());
 
 watch(strategy.value as Code.Strategy, newStrategy => {
+    console.log(newStrategy);
+    
     getPath(newStrategy);
     initFileTree(newStrategy).then (fileItem => {
         const entryPath: string = newStrategy.strategy_path
@@ -124,8 +126,15 @@ async function bindStrategyPath(strategyPathNew) {
             `策略${strategy.value.strategy_id}文件路径修改成功！`,
         );
         //每次更新path，需要通知root组件更新stratgy
-        proxy?.$emit('updateStrategy', strategyPathNew);
+        updateStrategyToApp(strategyPathNew)
     }
+}
+
+function updateStrategyToApp(strategyPath) {
+    console.log(1);
+    
+    proxy?.$emit('updateStrategy', strategyPath);
+
 }
 
 //加文件夹

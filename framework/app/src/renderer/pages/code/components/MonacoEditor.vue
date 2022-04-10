@@ -56,13 +56,14 @@ watch(fileTree, (newTree, oldTree) => {
   )!.filePath;
 
   let oldRootPath = '';
-  if (oldTree[0] && oldTree[0].id) {
+  if (oldTree['0'] && oldTree['0'].id !== null && oldTree['0'].id !== undefined) {
     oldRootPath = findTargetFromArray<Code.FileData>(
       Object.values(oldTree),
       'root',
       true,
     )!.filePath;
   }
+  
   if (newRootPath !== oldRootPath) {
     activeFile.value = null;
     handleEditor.value = null;
@@ -73,8 +74,7 @@ watch(fileTree, (newTree, oldTree) => {
 watch(currentFile, async (newFile: Code.FileData) => {
   const filePath: string = newFile.filePath || '';
 
-  if (currentFile.value.isDir) return;
-  
+  if (newFile.isDir) return;
   clearState();
   activeFile.value = newFile as Code.FileData;
   const codeText: string = await getFileContent(filePath);

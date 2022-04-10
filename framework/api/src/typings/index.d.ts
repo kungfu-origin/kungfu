@@ -851,6 +851,7 @@ declare namespace Code {
     root: boolean;
     open: boolean;
     fileId?: number;
+    isEntryFile?: boolean;
   }
 
   export type IFileTree = Record<string, FileData>;

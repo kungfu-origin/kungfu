@@ -49,11 +49,11 @@ watch(globallSetting.value, newSetting => {
 })
 
 const options = ref<Array<indent>>([{
-        name: 'Indent Using Spaces',
+        name: 'space',
         key: 'Spaces',
     },
     {
-        name: 'Indent Using Tabs',
+        name: 'tab',
         key: 'Tabs',
     }])
 const sizeOptions = ref<Array<indent>>([{

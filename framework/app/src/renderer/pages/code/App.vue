@@ -34,6 +34,7 @@ function handleStrategyJsonList(strategyList): void {
   strategy.strategy_id = value.strategy_id;
   strategy.strategy_path = value.strategy_path;
   strategy.add_time = value.add_time;
+  store.setCurrentStrategy(strategy);
 }
 
 function getCurrentStrategy (strategyList) {
@@ -51,6 +52,7 @@ function handleStrategyList(strategyList): void {
   strategy.strategy_id = value.strategy_id;
   strategy.strategy_path = value.strategy_path;
   strategy.add_time = value.add_time;
+  store.setCurrentStrategy(strategy);
 }
 
 function handleUpdateStrategy(strategyPath) {

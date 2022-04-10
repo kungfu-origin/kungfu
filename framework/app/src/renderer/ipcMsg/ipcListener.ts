@@ -24,6 +24,7 @@ export function bindIPCListener(store) {
       const childWin = BrowserWindow.fromId(childWinId);
       const { strategyId, strategyPath } = params;
       return updateStrategyPath(strategyId, strategyPath).then(() => {
+        store.setKfConfigList();
         if (childWin) {
           childWin.webContents.send('ipc-res-updateStrategyPath');
         }
