@@ -206,6 +206,7 @@ function handleClickFile(file) {
 
 //添加文件或文件夹时
 const handleAddFileBlur = (e) => {
+  addValue.value = '';
   resetStatus();
   e.stopPropagation();
   const filename = addValue.value;
