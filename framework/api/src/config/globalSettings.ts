@@ -89,6 +89,7 @@ export const getKfGlobalSettings = (): KfSystemConfig[] => [
         tip: isEnglish
           ? 'Kungfu Editor Indentation Category'
           : '功夫编辑器缩进类别',
+        default: 'Spaces',
         type: 'select',
         options: [
           { value: 'Spaces', label: 'Spaces' },
@@ -101,6 +102,7 @@ export const getKfGlobalSettings = (): KfSystemConfig[] => [
         tip: isEnglish
           ? 'Kungfu Editor Indentation Size (space)'
           : '功夫编辑器缩进大小（空格）',
+        default: '4',
         type: 'select',
         options: [
           { value: '2', label: '2' },
@@ -111,8 +113,14 @@ export const getKfGlobalSettings = (): KfSystemConfig[] => [
   },
 ];
 
-export const getKfGlobalSettingsValue = () => {
-  return fse.readJSONSync(KF_CONFIG_PATH);
+export const getKfGlobalSettingsValue = (): Record<
+  string,
+  Record<string, KungfuApi.KfConfigValue>
+> => {
+  return fse.readJSONSync(KF_CONFIG_PATH) as Record<
+    string,
+    Record<string, KungfuApi.KfConfigValue>
+  >;
 };
 
 export const setKfGlobalSettingsValue = (

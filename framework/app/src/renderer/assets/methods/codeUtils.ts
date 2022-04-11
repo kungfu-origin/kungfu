@@ -47,6 +47,7 @@ export const getTreeByFilePath = (
             root: false,
             open: false,
             fileId: 1,
+            isEntryFile: false,
           });
           //保证顺序
           if (isDir) {
@@ -92,6 +93,7 @@ export const buildFileObj = (fileData: Code.FileData): Code.FileData => {
     open,
     fileId,
     parentId,
+    isEntryFile,
   } = fileData;
   return {
     id,
@@ -105,6 +107,7 @@ export const buildFileObj = (fileData: Code.FileData): Code.FileData => {
     open,
     fileId,
     parentId,
+    isEntryFile,
   };
 };
 
@@ -130,8 +133,6 @@ export const openFolder = async (
       oldFileTree,
     );
     const newFileTree: Code.IFileTree = reSetParentFileId(fileTree, folder);
-    // folder.fileId = (folder.fileId || 0) + 1;
-    // fileTree[0].fileId = (fileTree[0].fileId || 0) + 1;
     store.setFileTree(newFileTree);
     store.setFileNode({
       id: folder.id,

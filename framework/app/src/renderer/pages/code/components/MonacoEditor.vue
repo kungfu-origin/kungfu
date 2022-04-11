@@ -1,16 +1,23 @@
 <template>
   <div class="code-editor">
-    <div id="editor-content" v-if="activeFile !== null && !activeFile.isDir"></div>
-    <i class="iconfont tr-logo" v-else></i>
+    <div
+      id="editor-content"
+      v-if="activeFile !== null && !activeFile.isDir"
+    ></div>
+    <div class="iconfont" v-else>
+      <code-outlined :style="{ width: '100%', height: '100%' }" />
+    </div>
   </div>
 </template>
 <script setup lang="ts">
 import { findTargetFromArray } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import * as monaco from 'monaco-editor';
 import { storeToRefs } from 'pinia';
-import { computed, nextTick, ref, watch } from 'vue';
+import { nextTick, ref, watch } from 'vue';
 import languageJSON from '../config/iconFileConfig.json';
 import themeData from '../config/Monocai.json';
+import { CodeOutlined } from '@ant-design/icons-vue';
+
 import {
   keywordsList,
   kungfuFunctions,
@@ -35,8 +42,6 @@ monaco.languages.registerCompletionItemProvider('python', {
 
 // currentFile
 const { currentFile, fileTree, globallSetting } = storeToRefs(useCodeStore());
-const code = computed(() => globallSetting['code']);
-
 const handleEditor: {
   value: monaco.editor.IStandaloneCodeEditor | null;
 } = {
@@ -44,29 +49,32 @@ const handleEditor: {
 };
 const activeFile = ref<Code.FileData | null>(null);
 
-watch(code, (spaceTabSetting) => {
-  updateSpaceTab(spaceTabSetting || {});
+watch(globallSetting.value, (newSetting) => {
+  const code: Code.ICodeSetting = newSetting.code as Code.ICodeSetting;
+  updateSpaceTab(code || {});
 });
 
 // 监听文件树变化
 watch(fileTree, (newTree, oldTree) => {
-  let newRootPath = findTargetFromArray<Code.FileData>(
-    Object.values(newTree),
-    'root',
-    true,
-  )!.filePath;
-
-  let oldRootPath = '';
-  if (oldTree[0] && oldTree[0].id) {
-    oldRootPath = findTargetFromArray<Code.FileData>(
+  if (
+    oldTree['0'] &&
+    oldTree['0'].id !== null &&
+    oldTree['0'].id !== undefined
+  ) {
+    const newRootPath = findTargetFromArray<Code.FileData>(
+      Object.values(newTree),
+      'root',
+      true,
+    )!.filePath;
+    const oldRootPath = findTargetFromArray<Code.FileData>(
       Object.values(oldTree),
       'root',
       true,
     )!.filePath;
-  }
-  if (newRootPath !== oldRootPath) {
-    activeFile.value = null;
-    handleEditor.value = null;
+    if (newRootPath !== oldRootPath) {
+      activeFile.value = null;
+      handleEditor.value = null;
+    }
   }
 });
 
@@ -74,16 +82,19 @@ watch(fileTree, (newTree, oldTree) => {
 watch(currentFile, async (newFile: Code.FileData) => {
   const filePath: string = newFile.filePath || '';
 
-  if (currentFile.value.isDir) return;
-  
+  if (newFile.isDir) return;
   clearState();
   activeFile.value = newFile as Code.FileData;
   const codeText: string = await getFileContent(filePath);
   await nextTick();
   if (activeFile.value) {
-    handleEditor.value = buildEditor(handleEditor.value, activeFile.value, codeText);
+    handleEditor.value = buildEditor(
+      handleEditor.value,
+      activeFile.value,
+      codeText,
+    );
     await nextTick();
-    // updateSpaceTab(code.value);
+    updateSpaceTab(globallSetting.value.code as Code.ICodeSetting);
     bindBlur(handleEditor.value, activeFile.value);
   }
 });
@@ -97,7 +108,9 @@ function bindBlur(editor, curFile) {
 
 function curWriteFile(editor, curFile) {
   const value = editor.getValue();
-  let curPath: string = path.normalize(curFile.filePath);
+  const curPath: string = path.normalize(curFile.filePath);
+  console.log(value, curPath);
+
   fse.outputFile(curPath, value);
 }
 
@@ -175,25 +188,19 @@ function buildEditor(
 // 更新缩进设置
 function updateSpaceTab(spaceTabSetting: Code.ICodeSetting) {
   const type: string = spaceTabSetting
-    ? spaceTabSetting.tabSpaceType || 'spaces'
-    : 'spaces';
+    ? spaceTabSetting?.tabSpaceType || 'Spaces'
+    : 'Spaces';
 
   if (handleEditor.value) {
-    const model = handleEditor.value.getModel();
-
-    if (!model) return;
-
     if (type.toLowerCase() === 'spaces') {
-      model.updateOptions({
+      handleEditor.value.getModel()?.updateOptions({
         insertSpaces: true,
-        indentSize: +spaceTabSetting.tabSpaceSize,
-        tabSize: +spaceTabSetting.tabSpaceSize,
+        tabSize: +spaceTabSetting?.tabSpaceSize || 2,
       });
     } else if (type.toLowerCase() === 'tabs') {
-      model.updateOptions({
+      handleEditor.value.getModel()?.updateOptions({
         insertSpaces: false,
-        indentSize: +spaceTabSetting.tabSpaceSize,
-        tabSize: +spaceTabSetting.tabSpaceSize,
+        tabSize: +spaceTabSetting?.tabSpaceSize || 2,
       });
     }
   }
@@ -261,8 +268,20 @@ function pythonProvideCompletionItems(model, position, context, token) {
 </script>
 <style lang="less">
 .code-editor {
-  .monaco-editor {
-    height: 100vh !important;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  #editor-content {
+    height: 100%;
+    width: 100%;
+    .code-editor {
+      height: 100%;
+      width: 100%;
+    }
+  }
+  .iconfont {
+    font-size: 100px;
+    color: #969896;
   }
 }
 </style>
