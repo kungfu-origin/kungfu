@@ -56,7 +56,7 @@ const sizeUsingFour: string = CodeSizeSetting[SpaceSizeSettingEnum.FOREINDENT].n
 const defaultValue = ref<string>('');
 watch(globallSetting.value, (newSetting) => {
   defaultValue.value = `${newSetting?.code?.tabSpaceType || CodeTabSetting[SpaceTabSettingEnum.SPACES].name}: ${
-    newSetting?.code?.tabSpaceSize || CodeSizeSetting[SpaceSizeSettingEnum.TWOINDENT].name
+    newSetting?.code?.tabSpaceSize || CodeSizeSetting[SpaceSizeSettingEnum.FOREINDENT].name
   }`;
 });
 

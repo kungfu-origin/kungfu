@@ -139,7 +139,6 @@ export const useCodeStore = defineStore('code', {
     ): void {
       Object.keys(globallSetting || {}).forEach((key) => {
         this.globallSetting[key] = globallSetting[key];
-        console.log(this.globallSetting);
       });
     },
   },
