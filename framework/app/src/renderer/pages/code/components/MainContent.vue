@@ -51,33 +51,39 @@ const { globallSetting } = storeToRefs(store);
 
 const defaultValue = ref<string>('');
 watch(globallSetting.value, (newSetting) => {
-  defaultValue.value = `${newSetting?.code?.tabSpaceType}: ${newSetting?.code?.tabSpaceSize}`;
+  defaultValue.value = `${newSetting?.code?.tabSpaceType || 'Spaces'}: ${
+    newSetting?.code?.tabSpaceSize || '2'
+  }`;
 });
 
-const options = ref<Array<indent>>([{
-        name: 'space',
-        key: 'Spaces',
-    },
-    {
-        name: 'tab',
-        key: 'Tabs',
-    }])
-const sizeOptions = ref<Array<indent>>([{
-        name: 2,
-        key: 2,
-    },
-    {
-        name: 4,
-        key: 4,
-    }])
+const options = ref<Array<indent>>([
+  {
+    name: 'space',
+    key: 'Spaces',
+  },
+  {
+    name: 'tab',
+    key: 'Tabs',
+  },
+]);
+const sizeOptions = ref<Array<indent>>([
+  {
+    name: 2,
+    key: 2,
+  },
+  {
+    name: 4,
+    key: 4,
+  },
+]);
 
 function handleClick(type: indent, size: indent) {
   const setting: Record<
     string,
     Record<string, KungfuApi.KfConfigValue>
   > = deepClone(toRaw(globallSetting.value));
-  setting.code.tabSpaceType = type.key;
-  setting.code.tabSpaceSize = size.key;
+  setting.code.tabSpaceType = type.key || 'Spaces';
+  setting.code.tabSpaceSize = size.key || '2';
   store.setGlobalSetting(setting);
 }
 </script>
