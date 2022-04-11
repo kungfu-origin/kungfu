@@ -51,7 +51,7 @@ const { globallSetting } = storeToRefs(store);
 
 const defaultValue = ref<string>('');
 watch(globallSetting.value, (newSetting) => {
-  defaultValue.value = `${newSetting?.code?.tabSpaceType}: ${newSetting?.code?.tabSpaceSize}`;
+  defaultValue.value = `${newSetting?.code?.tabSpaceType || 'Spaces'}: ${newSetting?.code?.tabSpaceSize || '2'}`;
 });
 
 const options = ref<Array<indent>>([{
@@ -63,12 +63,12 @@ const options = ref<Array<indent>>([{
         key: 'Tabs',
     }])
 const sizeOptions = ref<Array<indent>>([{
-        name: 2,
-        key: 2,
+        name: '2',
+        key: '2',
     },
     {
-        name: 4,
-        key: 4,
+        name: '4',
+        key: '4',
     }])
 
 function handleClick(type: indent, size: indent) {

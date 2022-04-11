@@ -1,12 +1,16 @@
 <template>
   <div class="code-editor">
-    <div
+    <!-- <div
       id="editor-content"
       v-if="activeFile !== null && !activeFile.isDir"
     ></div>
     <div class="iconfont" v-else>
         <code-outlined :style="{width: '100%', height: '100%'}" />
+    </div> -->
+    <div class="iconfont">
+        <code-outlined/>
     </div>
+   
    
   </div>
 </template>
@@ -266,18 +270,16 @@ function pythonProvideCompletionItems(model, position, context, token) {
 }
 </script>
 <style lang="less">
-#editor-content {
-  height: 100%;
-  .code-editor {
-    height: 100%;
-  }
-}
-.iconfont {
-    transform: translate(-100%, -100%);
-    width: 100px;
-    height: 100px;
-    font-size: 100px;
-    margin: auto;
-    margin-top: 40%;
+.code-editor {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    #editor-content {
+        height: 100%;
+    }
+    .iconfont {
+        font-size: 100px;
+        color: #969896;
+    }
 }
 </style>

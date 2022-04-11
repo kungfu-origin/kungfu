@@ -865,6 +865,6 @@ declare namespace Code {
 
   export interface ICodeSetting {
     tabSpaceType: 'Spaces' | 'Tabs';
-    tabSpaceSize: '2' | '4' | 2 | 4;
+    tabSpaceSize: '2' | '4';
   }
 }
