@@ -36,6 +36,8 @@
 </template>
 
 <script setup lang="ts">
+import { CodeTabSetting, CodeSizeSetting } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
+import { SpaceTabSettingEnum, SpaceSizeSettingEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import { deepClone } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { storeToRefs } from 'pinia';
 import { ref, toRaw, watch } from 'vue';
@@ -47,32 +49,35 @@ interface indent {
 }
 const store = useCodeStore();
 const { globallSetting } = storeToRefs(store);
-
+const indentUsingSpace: string = CodeTabSetting[SpaceTabSettingEnum.SPACES].name
+const indentUsingTab: string = CodeTabSetting[SpaceTabSettingEnum.TABS].name
+const sizeUsingTwo: string = CodeSizeSetting[SpaceSizeSettingEnum.TWOINDENT].name
+const sizeUsingFour: string = CodeSizeSetting[SpaceSizeSettingEnum.FOREINDENT].name
 const defaultValue = ref<string>('');
 watch(globallSetting.value, (newSetting) => {
-  defaultValue.value = `${newSetting?.code?.tabSpaceType || 'Spaces'}: ${
-    newSetting?.code?.tabSpaceSize || '2'
+  defaultValue.value = `${newSetting?.code?.tabSpaceType || CodeTabSetting[SpaceTabSettingEnum.SPACES].name}: ${
+    newSetting?.code?.tabSpaceSize || CodeSizeSetting[SpaceSizeSettingEnum.TWOINDENT].name
   }`;
 });
 
 const options = ref<Array<indent>>([
   {
-    name: 'space',
-    key: 'Spaces',
+    name: indentUsingSpace,
+    key: indentUsingSpace,
   },
   {
-    name: 'tab',
-    key: 'Tabs',
+    name: indentUsingTab,
+    key: indentUsingTab,
   },
 ]);
 const sizeOptions = ref<Array<indent>>([
   {
-    name: '2',
-    key: '2',
+    name: sizeUsingTwo,
+    key: sizeUsingTwo,
   },
   {
-    name: '4',
-    key: '4',
+    name: sizeUsingFour,
+    key: sizeUsingFour,
   },
 ]);
 
@@ -81,8 +86,8 @@ function handleClick(type: indent, size: indent) {
     string,
     Record<string, KungfuApi.KfConfigValue>
   > = deepClone(toRaw(globallSetting.value));
-  setting.code.tabSpaceType = type.key || 'Spaces';
-  setting.code.tabSpaceSize = size.key || '2';
+  setting.code.tabSpaceType = type.key || CodeTabSetting[SpaceTabSettingEnum.SPACES].name;
+  setting.code.tabSpaceSize = size.key || CodeSizeSetting[SpaceSizeSettingEnum.TWOINDENT].name;
   store.setGlobalSetting(setting);
 }
 </script>

@@ -178,3 +178,13 @@ export enum FutureArbitrageCodeEnum {
   SPD = 'SPD',
   IPS = 'IPS',
 }
+
+export enum SpaceTabSettingEnum {
+  SPACES = 'SPACES',
+  TABS = 'TABS',
+}
+
+export enum SpaceSizeSettingEnum {
+  FOREINDENT = 'FOREINDENT',
+  TWOINDENT = 'TWOINDENT',
+}

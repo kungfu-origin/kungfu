@@ -16,6 +16,8 @@ import {
   OrderStatusEnum,
   BrokerStateStatusTypes,
   FutureArbitrageCodeEnum,
+  SpaceTabSettingEnum,
+  SpaceSizeSettingEnum
 } from '../typings/enums';
 
 import { Pm2ProcessStatusTypes } from '../utils/processUtils';
@@ -153,6 +155,16 @@ export const Offset: Record<OffsetEnum, KungfuApi.KfTradeValueCommonData> = {
     color: 'green',
   },
 };
+
+export const CodeTabSetting: Record<SpaceTabSettingEnum, KungfuApi.KfTradeValueCommonData> = {
+  [SpaceTabSettingEnum.SPACES]: { name: 'Spaces' },
+  [SpaceTabSettingEnum.TABS]: { name: 'Tabs' },
+}
+
+export const CodeSizeSetting: Record<SpaceSizeSettingEnum, KungfuApi.KfTradeValueCommonData> = {
+  [SpaceSizeSettingEnum.FOREINDENT]: { name: '4' },
+  [SpaceSizeSettingEnum.TWOINDENT]: { name: '2' },
+}
 
 export const Side: Record<SideEnum, KungfuApi.KfTradeValueCommonData> = {
   [SideEnum.Buy]: { name: isEnglish ? 'Buy' : '买', color: 'red' },
