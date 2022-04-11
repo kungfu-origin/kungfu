@@ -1,17 +1,12 @@
 <template>
   <div class="code-editor">
-    <!-- <div
+    <div
       id="editor-content"
       v-if="activeFile !== null && !activeFile.isDir"
     ></div>
     <div class="iconfont" v-else>
         <code-outlined :style="{width: '100%', height: '100%'}" />
-    </div> -->
-    <div class="iconfont">
-        <code-outlined/>
     </div>
-   
-   
   </div>
 </template>
 <script setup lang="ts">
