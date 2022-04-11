@@ -415,30 +415,31 @@ function getCurrentFileByName(parentId, fileTree, name) {
 }
 
 // 获取所有兄弟 name
-function getSiblings(parentId, fileTree) {
-  let target = {};
-  const folders = fileTree[parentId].children['folder'];
-  const files = fileTree[parentId].children['file'];
-
-  [...folders, ...files].forEach((id) => {
-    if (fileTree[id] && fileTree[id].name)
-      target[fileTree[id].name] = fileTree[id];
-  });
-  return target;
+function getSiblings(parentId: number | string, fileTree: Code.IFileTree) {
+    const folders: Array<number> = fileTree[parentId].children['folder'] || [];
+    const files: Array<number> = fileTree[parentId].children['file'] || [];
+    return [...folders, ...files].reduce((pre, cur) => {
+        if (fileTree[cur] && fileTree[cur].name) {
+            pre[fileTree[cur].name] = fileTree[cur]
+            return pre
+        }
+        return pre
+    }, {} as Record<string, Code.FileData>)
 }
 
 //获取所有兄弟 name
 function getSiblingsName(parentId) {
-  const targetList: Array<string> = [];
   if (fileTree.value[parentId] && fileTree.value[parentId].children) {
     const folders = fileTree.value[parentId].children['folder'] || [];
     const files = fileTree.value[parentId].children['file'] || [];
-
-    [...folders, ...files].forEach((id) => {
-      if (fileTree.value[id] && fileTree.value[id].name)
-        targetList.push(fileTree.value[id].name);
-    });
-    return targetList;
+    return [...folders, ...files].reduce((pre, cur) => {
+        if (fileTree.value[cur] && fileTree.value[cur].name) {
+            pre.push(fileTree.value[cur].name)
+            return pre
+        } else {
+            return pre
+        }
+    }, [] as Array<string>)
   }
   return [];
 }
@@ -472,7 +473,7 @@ onMounted(() => {
     white-space: normal;
     cursor: pointer;
     &.root-file {
-      background-color: #1b1c1e;
+      background-color: #1D1F21;
       color: @gold-base;
     }
     .file-top {

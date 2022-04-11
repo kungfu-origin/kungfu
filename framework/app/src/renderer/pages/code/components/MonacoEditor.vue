@@ -178,19 +178,19 @@ function buildEditor(
 // 更新缩进设置
 function updateSpaceTab(spaceTabSetting: Code.ICodeSetting) {
   const type: string = spaceTabSetting
-    ? spaceTabSetting.tabSpaceType || 'spaces'
-    : 'spaces';
+    ? spaceTabSetting?.tabSpaceType || 'Spaces'
+    : 'Spaces';
 
   if (handleEditor.value) {
     if (type.toLowerCase() === 'spaces') {
       handleEditor.value.getModel()?.updateOptions({
         insertSpaces: true,
-        tabSize: +spaceTabSetting.tabSpaceSize,
+        tabSize: +spaceTabSetting?.tabSpaceSize || 2,
       });
     } else if (type.toLowerCase() === 'tabs') {
       handleEditor.value.getModel()?.updateOptions({
         insertSpaces: false,
-        tabSize: +spaceTabSetting.tabSpaceSize,
+        tabSize: +spaceTabSetting?.tabSpaceSize || 2,
       });
     }
   }
