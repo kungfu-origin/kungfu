@@ -16,8 +16,6 @@
   "types": "./src/typings/index.d.ts",
   "main": "lib/index.js",
   "scripts": {
-    "postinstall": "yarn run patch",
-    "patch": "node .gyp/patch.js",
     "format": "prettier -l -w --config ../../.prettierrc.js ."
   },
   "dependencies": {
@@ -29,7 +27,5 @@
     "pm2": "^5.2.0",
     "ps-list": "~7.2"
   },
-  "devDependencies": {
-    "patch-package": "^6.4.7"
-  }
+  "devDependencies": {}
 }
