@@ -59,7 +59,7 @@
             class="text-overflow"
             v-show="
               fileNode &&
-              fileNode.isEntryFile &&
+              (fileNode.isEntryFile || fileNode.filePath === entryFile.filePath) &&
               fileNode.filePath !== undefined &&
               !onEditing
             "
@@ -206,7 +206,6 @@ function handleClickFile(file) {
 
 //添加文件或文件夹时
 const handleAddFileBlur = (e) => {
-  addValue.value = '';
   resetStatus();
   e.stopPropagation();
   const filename = addValue.value;
@@ -220,6 +219,7 @@ const handleAddFileBlur = (e) => {
       id: fileNode.value?.parentId,
       type: type,
     });
+    addValue.value = '';
     return;
   }
   //添加文件
@@ -277,7 +277,7 @@ function handleRename(): void {
 
 //删除文件
 function handleDelete() {
-  if (!fileNode.value.isEntryFile) {
+  if (!fileNode.value.isEntryFile || fileNode.value.filePath !== entryFile.value.filePath) {
     const parentId = fileNode.value?.parentId;
     const typeName = type == 'folder' ? '文件夹' : '文件';
     Modal.confirm({
@@ -309,8 +309,8 @@ function handleDelete() {
       },
     });
   } else {
-			message.warning('不可删除入口文件');
-			return;
+    message.warning('不可删除入口文件');
+    return;
   }
 }
 
@@ -346,7 +346,7 @@ const handleEditFileBlur = () => {
   fse.rename(oldPath, newPath).then(() => {
     reloadFolder(parentId, newName);
   }).then(() => {
-		if (fileNode.value === entryFile.value) {
+		if (fileNode.value === entryFile.value || fileNode.value.isEntryFile) {
 			ipcEmitDataByName('updateStrategyPath', {
 				strategyId: store.currentStrategy.strategy_id,
 				strategyPath: newPath
