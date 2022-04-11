@@ -201,7 +201,6 @@ async function initFileTree(strategy) {
     root: true,
     open: true,
     fileId: 1,
-    isEntryFile: false
   });
   //获取第一级文件树
   let ids, rootFileTree;

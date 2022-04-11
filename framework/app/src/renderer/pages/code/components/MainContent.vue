@@ -11,7 +11,6 @@
           <a-dropdown :trigger="['click']">
             <a-button class="ant-dropdown-link">
               {{ defaultValue }}
-              <a-icon type="down" />
             </a-button>
             <template #overlay>
               <a-menu>

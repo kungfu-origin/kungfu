@@ -127,7 +127,7 @@ onMounted(() => {
 .code-editor-background {
   width: 100%;
   .code-content {
-    width: auto;
+    width: 100%;
     display: flex;
     height: calc(100vh - 32px);
     background-color: #1D1F21;

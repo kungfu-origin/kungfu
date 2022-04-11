@@ -109,6 +109,8 @@ function bindBlur(editor, curFile) {
 function curWriteFile(editor, curFile) {
   const value = editor.getValue();
   const curPath: string = path.normalize(curFile.filePath);
+  console.log(value, curPath);
+  
   fse.outputFile(curPath, value);
 }
 
@@ -271,6 +273,11 @@ function pythonProvideCompletionItems(model, position, context, token) {
     align-items: center;
     #editor-content {
         height: 100%;
+        width: 100%;
+        .code-editor {
+            height: 100%;
+            width: 100%;
+        }
     }
     .iconfont {
         font-size: 100px;
