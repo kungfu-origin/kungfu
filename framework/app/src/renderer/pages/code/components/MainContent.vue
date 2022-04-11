@@ -76,8 +76,8 @@ function handleClick(type: indent, size: indent) {
     string,
     Record<string, KungfuApi.KfConfigValue>
   > = deepClone(toRaw(globallSetting.value));
-  setting.code.tabSpaceType = type.key;
-  setting.code.tabSpaceSize = size.key;
+  setting.code.tabSpaceType = type.key || 'Spaces';
+  setting.code.tabSpaceSize = size.key || '2';
   store.setGlobalSetting(setting);
 }
 </script>
