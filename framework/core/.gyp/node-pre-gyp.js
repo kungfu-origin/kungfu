@@ -21,7 +21,11 @@ module.exports = require('@kungfu-trader/kungfu-core').sywac(module, (cli) => {
     })
     .command('build', () => node_pre_gyp(['configure', 'build']))
     .command('clean', () => node_pre_gyp(['clean']))
-    .command('rebuild', () => node_pre_gyp(['rebuild']))
+    .command('rebuild', () => {
+      fs.rmSync('dist', { recursive: true, force: true });
+      fs.rmSync('build', { recursive: true, force: true });
+      node_pre_gyp(['configure', 'build']);
+    })
     .command('package', () => {
       node_pre_gyp(['package']);
       const prebuilt = glob.sync(
