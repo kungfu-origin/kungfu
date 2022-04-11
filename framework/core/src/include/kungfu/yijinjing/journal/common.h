@@ -11,15 +11,15 @@
 
 namespace kungfu::yijinjing::journal {
 
-FORWARD_DECLARE_PTR(frame)
+FORWARD_DECLARE_STRUCT_PTR(frame)
 
-FORWARD_DECLARE_PTR(page)
+FORWARD_DECLARE_CLASS_PTR(page)
 
-FORWARD_DECLARE_PTR(journal)
+FORWARD_DECLARE_CLASS_PTR(journal)
 
-FORWARD_DECLARE_PTR(reader)
+FORWARD_DECLARE_CLASS_PTR(reader)
 
-FORWARD_DECLARE_PTR(writer)
+FORWARD_DECLARE_CLASS_PTR(writer)
 
 class journal_error : public std::runtime_error {
 public:

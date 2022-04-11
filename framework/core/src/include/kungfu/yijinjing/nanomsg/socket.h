@@ -76,8 +76,6 @@ public:
 
 DECLARE_PTR(url_factory)
 
-static void term();
-
 class nn_exception : public std::exception {
 public:
   nn_exception() : errno_(nn_errno()) {}

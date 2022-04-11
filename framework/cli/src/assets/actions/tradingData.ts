@@ -1,7 +1,9 @@
 import { getProcessIdByKfLocation } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
-import { sendDataToProcessIdByPm2 } from '@kungfu-trader/kungfu-js-api/utils/processUtils';
+import {
+  sendDataToProcessIdByPm2,
+  Pm2Packet,
+} from '@kungfu-trader/kungfu-js-api/utils/processUtils';
 import { filter, map, Observable } from 'rxjs';
-import { Pm2Packet } from 'src/typings';
 import { globalState } from './globalState';
 
 export const getOrders = (kfLocation: KungfuApi.KfLocation) => {
