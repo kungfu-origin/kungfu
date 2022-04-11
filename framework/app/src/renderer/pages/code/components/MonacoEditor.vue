@@ -4,7 +4,10 @@
       id="editor-content"
       v-if="activeFile !== null && !activeFile.isDir"
     ></div>
-    <i class="iconfont tr-logo" v-else></i>
+    <div class="iconfont" v-else>
+        <code-outlined :style="{width: '100%', height: '100%'}" />
+    </div>
+   
   </div>
 </template>
 <script setup lang="ts">
@@ -14,6 +17,8 @@ import { storeToRefs } from 'pinia';
 import { nextTick, ref, watch } from 'vue';
 import languageJSON from '../config/iconFileConfig.json';
 import themeData from '../config/Monocai.json';
+import { CodeOutlined } from '@ant-design/icons-vue';
+
 import {
   keywordsList,
   kungfuFunctions,
@@ -263,23 +268,12 @@ function pythonProvideCompletionItems(model, position, context, token) {
     height: 100%;
   }
 }
-.tr-logo {
-  color: @popover-customize-border-color;
-  font-size: 160px;
-  display: block;
-  margin: auto;
-  text-align: center;
-  position: relative;
-  top: 30%;
-  transform: translateY(-50%);
-  transform: rotate(90deg);
-  &::before {
-    content: '\e61f';
-  }
-}
 .iconfont {
-  font-style: normal;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+    transform: translate(-100%, -100%);
+    width: 100px;
+    height: 100px;
+    font-size: 100px;
+    margin: auto;
+    margin-top: 40%;
 }
 </style>
