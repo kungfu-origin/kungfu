@@ -5,7 +5,7 @@
       v-if="activeFile !== null && !activeFile.isDir"
     ></div>
     <div class="iconfont" v-else>
-        <code-outlined :style="{width: '100%', height: '100%'}" />
+      <code-outlined :style="{ width: '100%', height: '100%' }" />
     </div>
   </div>
 </template>
@@ -110,7 +110,7 @@ function curWriteFile(editor, curFile) {
   const value = editor.getValue();
   const curPath: string = path.normalize(curFile.filePath);
   console.log(value, curPath);
-  
+
   fse.outputFile(curPath, value);
 }
 
@@ -268,20 +268,20 @@ function pythonProvideCompletionItems(model, position, context, token) {
 </script>
 <style lang="less">
 .code-editor {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    #editor-content {
-        height: 100%;
-        width: 100%;
-        .code-editor {
-            height: 100%;
-            width: 100%;
-        }
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  #editor-content {
+    height: 100%;
+    width: 100%;
+    .code-editor {
+      height: 100%;
+      width: 100%;
     }
-    .iconfont {
-        font-size: 100px;
-        color: #969896;
-    }
+  }
+  .iconfont {
+    font-size: 100px;
+    color: #969896;
+  }
 }
 </style>

@@ -130,7 +130,7 @@ onMounted(() => {
     width: 100%;
     display: flex;
     height: calc(100vh - 32px);
-    background-color: #1D1F21;
+    background-color: #1d1f21;
     .editor {
       text-align: left;
       flex: 1;

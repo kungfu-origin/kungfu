@@ -119,22 +119,19 @@ function handleBindStrategyFolder() {
 
 //bind data中path 与 sqlite中path
 async function bindStrategyPath(strategyPathNew) {
-    if (strategy && strategy.value.strategy_id) {
-        await ipcEmitDataByName('updateStrategyPath', {
-            strategyId: strategy.value.strategy_id,
-            strategyPath: strategyPathNew,
-        })
-        message.success(
-            `策略${strategy.value.strategy_id}文件路径修改成功！`,
-        );
-        //每次更新path，需要通知root组件更新stratgy
-        updateStrategyToApp(strategyPathNew)
-    }
+  if (strategy && strategy.value.strategy_id) {
+    await ipcEmitDataByName('updateStrategyPath', {
+      strategyId: strategy.value.strategy_id,
+      strategyPath: strategyPathNew,
+    });
+    message.success(`策略${strategy.value.strategy_id}文件路径修改成功！`);
+    //每次更新path，需要通知root组件更新stratgy
+    updateStrategyToApp(strategyPathNew);
+  }
 }
 
 function updateStrategyToApp(strategyPath) {
-    proxy?.$emit('updateStrategy', strategyPath);
-
+  proxy?.$emit('updateStrategy', strategyPath);
 }
 
 //加文件夹

@@ -10,7 +10,10 @@
     <div @click.stop="handleClickFile(fileNode)">
       <div
         class="each-files"
-        :class="{'root-file': fileNode.root, 'active': fileNode.filePath === currentFile.filePath}"
+        :class="{
+          'root-file': fileNode.root,
+          active: fileNode.filePath === currentFile.filePath,
+        }"
         :style="{ 'padding-left': `${curCount * 16 + 5}px` }"
       >
         <div class="file-top">
@@ -59,7 +62,8 @@
             class="text-overflow"
             v-show="
               fileNode &&
-              (fileNode.isEntryFile || fileNode.filePath === entryFile.filePath) &&
+              (fileNode.isEntryFile ||
+                fileNode.filePath === entryFile.filePath) &&
               fileNode.filePath !== undefined &&
               !onEditing
             "
@@ -112,7 +116,7 @@
           :id="id"
           type="file"
           :count="childCount"
-					@updateStrategyToApp="updateStrategyToApp"
+          @updateStrategyToApp="updateStrategyToApp"
         />
       </div>
     </div>
@@ -122,7 +126,7 @@
 <script lang="ts">
 export default {
   name: 'ComFileNode',
-	emits: ['updateStrategyToApp']
+  emits: ['updateStrategyToApp'],
 };
 </script>
 
@@ -133,7 +137,16 @@ import iconFolderJSON from '../config/iconFolderConfig.json';
 import iconFileJSON from '../config/iconFileConfig.json';
 import path from 'path';
 import { storeToRefs } from 'pinia';
-import { onMounted, ref, toRefs, computed, watch, nextTick, getCurrentInstance, ComponentInternalInstance } from 'vue';
+import {
+  onMounted,
+  ref,
+  toRefs,
+  computed,
+  watch,
+  nextTick,
+  getCurrentInstance,
+  ComponentInternalInstance,
+} from 'vue';
 import { message, Modal, Alert } from 'ant-design-vue';
 import { openFolder } from '../../../assets/methods/codeUtils';
 import {
@@ -271,13 +284,16 @@ function handleRename(): void {
   onEditing.value = true;
   nextTick(() => {
     document.getElementById('edit-input')?.focus();
-    editValue.value = fileNode.value.name
+    editValue.value = fileNode.value.name;
   });
 }
 
 //删除文件
 function handleDelete() {
-  if (!fileNode.value.isEntryFile || fileNode.value.filePath !== entryFile.value.filePath) {
+  if (
+    !fileNode.value.isEntryFile ||
+    fileNode.value.filePath !== entryFile.value.filePath
+  ) {
     const parentId = fileNode.value?.parentId;
     const typeName = type == 'folder' ? '文件夹' : '文件';
     Modal.confirm({
@@ -328,13 +344,13 @@ function addChangePath(e): void {
 //重命名文件blur
 const handleEditFileBlur = () => {
   onEditing.value = false;
-	if (editValue.value == fileNode.value.name) {
-		return
-	}
+  if (editValue.value == fileNode.value.name) {
+    return;
+  }
   if (!editValue.value || editError.value) {
     resetStatus();
-    editValue.value = fileNode.value.name
-    return
+    editValue.value = fileNode.value.name;
+    return;
   }
   resetStatus();
   const oldPath = fileNode.value?.filePath || '';
@@ -343,23 +359,26 @@ const handleEditFileBlur = () => {
   const parentId = fileNode.value?.parentId;
 
   // 更改文件名
-  fse.rename(oldPath, newPath).then(() => {
-    reloadFolder(parentId, newName);
-  }).then(() => {
-		if (fileNode.value === entryFile.value || fileNode.value.isEntryFile) {
-			ipcEmitDataByName('updateStrategyPath', {
-				strategyId: store.currentStrategy.strategy_id,
-				strategyPath: newPath
-			}).then (() => {
-				updateStrategyToApp(newPath)
-			});
-		}
-  });
-  editValue.value = ''
+  fse
+    .rename(oldPath, newPath)
+    .then(() => {
+      reloadFolder(parentId, newName);
+    })
+    .then(() => {
+      if (fileNode.value === entryFile.value || fileNode.value.isEntryFile) {
+        ipcEmitDataByName('updateStrategyPath', {
+          strategyId: store.currentStrategy.strategy_id,
+          strategyPath: newPath,
+        }).then(() => {
+          updateStrategyToApp(newPath);
+        });
+      }
+    });
+  editValue.value = '';
 };
 
 function updateStrategyToApp(newPath) {
-	proxy?.$emit('updateStrategyToApp', newPath)
+  proxy?.$emit('updateStrategyToApp', newPath);
 }
 
 //重制状态
@@ -417,15 +436,15 @@ function getCurrentFileByName(parentId, fileTree, name) {
 
 // 获取所有兄弟 name
 function getSiblings(parentId: number | string, fileTree: Code.IFileTree) {
-    const folders: Array<number> = fileTree[parentId].children['folder'] || [];
-    const files: Array<number> = fileTree[parentId].children['file'] || [];
-    return [...folders, ...files].reduce((pre, cur) => {
-        if (fileTree[cur] && fileTree[cur].name) {
-            pre[fileTree[cur].name] = fileTree[cur]
-            return pre
-        }
-        return pre
-    }, {} as Record<string, Code.FileData>)
+  const folders: Array<number> = fileTree[parentId].children['folder'] || [];
+  const files: Array<number> = fileTree[parentId].children['file'] || [];
+  return [...folders, ...files].reduce((pre, cur) => {
+    if (fileTree[cur] && fileTree[cur].name) {
+      pre[fileTree[cur].name] = fileTree[cur];
+      return pre;
+    }
+    return pre;
+  }, {} as Record<string, Code.FileData>);
 }
 
 //获取所有兄弟 name
@@ -434,13 +453,13 @@ function getSiblingsName(parentId) {
     const folders = fileTree.value[parentId].children['folder'] || [];
     const files = fileTree.value[parentId].children['file'] || [];
     return [...folders, ...files].reduce((pre, cur) => {
-        if (fileTree.value[cur] && fileTree.value[cur].name) {
-            pre.push(fileTree.value[cur].name)
-            return pre
-        } else {
-            return pre
-        }
-    }, [] as Array<string>)
+      if (fileTree.value[cur] && fileTree.value[cur].name) {
+        pre.push(fileTree.value[cur].name);
+        return pre;
+      } else {
+        return pre;
+      }
+    }, [] as Array<string>);
   }
   return [];
 }
@@ -474,7 +493,7 @@ onMounted(() => {
     white-space: normal;
     cursor: pointer;
     &.root-file {
-      background-color: #1D1F21;
+      background-color: #1d1f21;
       color: @gold-base;
     }
     .file-top {
