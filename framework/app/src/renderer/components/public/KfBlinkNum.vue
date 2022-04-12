@@ -90,7 +90,6 @@ watch(
   display: inline-block;
   width: 100%;
   height: 100%;
-  // display: table-cell;
   box-sizing: border-box;
   overflow-wrap: break-word;
   transform: translateZ(0);
@@ -99,9 +98,6 @@ watch(
     position: absolute;
     top: 0;
     left: 0;
-    // overflow: hidden;
-    // text-overflow: ellipsis;
-    // white-space: nowrap;
   }
 
   &.blink-red {
@@ -126,6 +122,10 @@ watch(
 
   span {
     vertical-align: middle;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    right: 8px;
   }
 }
 

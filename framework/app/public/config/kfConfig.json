@@ -2,5 +2,5 @@
   "performance": { "rocket": false, "bypassQuote": false },
   "strategy": { "python": false },
   "system": { "logLevel": "-l info" },
-  "code": { "tabSpaceType": "Spaces", "tabSpaceSize": "4" }
+  "code": { "tabSpaceType": "SPACES", "tabSpaceSize": "TWOINDENT" }
 }
