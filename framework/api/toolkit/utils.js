@@ -124,9 +124,13 @@ exports.getApiDir = () => {
 };
 
 exports.getCliDir = () => {
-  return path.dirname(
-    require.resolve('@kungfu-trader/kungfu-cli/package.json'),
-  );
+  try {
+    return path.dirname(
+      require.resolve('@kungfu-trader/kungfu-cli/package.json'),
+    );
+  } catch (err) {
+    return '.';
+  }
 };
 
 exports.getCoreDir = () => {
