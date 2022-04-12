@@ -57,8 +57,6 @@ const sizeUsingTwo: string = CodeSizeSetting[SpaceSizeSettingEnum.TWOINDENT].nam
 watch(globallSetting.value, (newSetting) => {
   const code: Code.ICodeSetting = newSetting.code as Code.ICodeSetting;
   updateSpaceTab(code || {});
-  console.log(code);
-  
 });
 
 // 监听文件树变化

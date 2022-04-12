@@ -44,19 +44,19 @@ import { ref, toRaw, watch } from 'vue';
 import { useCodeStore } from '../store/codeStore';
 
 interface indent {
-  name: string | number;
-  key: string | number;
+  name: string;
+  key: string;
 }
 const store = useCodeStore();
 const { globallSetting } = storeToRefs(store);
 const indentUsingSpace: string = CodeTabSetting[SpaceTabSettingEnum.SPACES].name
 const indentUsingTab: string = CodeTabSetting[SpaceTabSettingEnum.TABS].name
 const sizeUsingTwo: string = CodeSizeSetting[SpaceSizeSettingEnum.TWOINDENT].name
-const sizeUsingFour: string = CodeSizeSetting[SpaceSizeSettingEnum.FOREINDENT].name
+const sizeUsingFour: string = CodeSizeSetting[SpaceSizeSettingEnum.FOURINDENT].name
 const defaultValue = ref<string>('');
 watch(globallSetting.value, (newSetting) => {
-  defaultValue.value = `${newSetting?.code?.tabSpaceType || CodeTabSetting[SpaceTabSettingEnum.SPACES].name}: ${
-    newSetting?.code?.tabSpaceSize || CodeSizeSetting[SpaceSizeSettingEnum.FOREINDENT].name
+  defaultValue.value = `${newSetting?.code?.tabSpaceType ? CodeTabSetting[newSetting?.code?.tabSpaceType]?.name : indentUsingSpace}: ${
+    newSetting?.code?.tabSpaceSize ? CodeSizeSetting[newSetting?.code?.tabSpaceSize]?.name : sizeUsingFour
   }`;
 });
 
@@ -81,13 +81,40 @@ const sizeOptions = ref<Array<indent>>([
   },
 ]);
 
+function handleSpaceType (type: string): string {
+  let handledType = ''
+  switch (type){
+    case indentUsingSpace: 
+      handledType = SpaceTabSettingEnum.SPACES
+      break
+    case indentUsingTab:
+      handledType = SpaceTabSettingEnum.TABS
+      break
+  } 
+  return handledType
+}
+
+function handleSpaceSize (type: string): string {
+  let handledSize = ''
+  switch (type){
+    case sizeUsingTwo: 
+      handledSize = SpaceSizeSettingEnum.TWOINDENT
+      break
+    case sizeUsingFour:
+      handledSize = SpaceSizeSettingEnum.FOURINDENT
+      break
+  } 
+  return handledSize
+}
+
 function handleClick(type: indent, size: indent) {
   const setting: Record<
     string,
     Record<string, KungfuApi.KfConfigValue>
   > = deepClone(toRaw(globallSetting.value));
-  setting.code.tabSpaceType = type.key || CodeTabSetting[SpaceTabSettingEnum.SPACES].name;
-  setting.code.tabSpaceSize = size.key || CodeSizeSetting[SpaceSizeSettingEnum.TWOINDENT].name;
+  
+  setting.code.tabSpaceType = handleSpaceType(type.key) || SpaceTabSettingEnum.SPACES;
+  setting.code.tabSpaceSize = handleSpaceSize(size.key) || SpaceSizeSettingEnum.TWOINDENT;
   store.setGlobalSetting(setting);
 }
 </script>
