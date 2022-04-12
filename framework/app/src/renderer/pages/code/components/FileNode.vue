@@ -5,90 +5,99 @@
     :class="{
       folder: type == 'folder',
       file: type !== 'folder',
-      active: fileNode.id === currentFile.id,
     }"
   >
     <div @click.stop="handleClickFile(fileNode)">
       <div
         class="each-files"
+        :class="{
+          'root-file': fileNode.root,
+          active: fileNode.filePath === currentFile.filePath,
+        }"
         :style="{ 'padding-left': `${curCount * 16 + 5}px` }"
       >
-        <i v-if="type == 'folder' && fileNode && !fileNode.root"></i>
-        <img class="file-icon" :src="iconPath" v-if="iconPath" />
+        <div class="file-top">
+          <img class="file-icon" :src="iconPath" v-if="iconPath" />
+          <span
+            class="file-name"
+            :class="{
+              'root-name': fileNode.root,
+              'normal-name': entryFile.filePath !== fileNode.filePath,
+            }"
+            v-if="fileNode && !onEditing && fileNode.name"
+          >
+            {{ fileNode.name }}
+          </span>
+          <a-input
+            v-else-if="onEditing"
+            id="edit-input"
+            ref="edit-name"
+            :class="{ error: editError || editErrorMessage }"
+            v-model.trim="fileName"
+            size="small"
+            :value="editValue"
+            style="margin-left: 2px"
+            @click.stop="() => {}"
+            @focus.stop="() => {}"
+            @change="changePath"
+            @blur="handleEditFileBlur"
+            @pressEnter="enterBlur"
+          ></a-input>
+          <a-input
+            v-else-if="!isPending && !onEditing"
+            ref="addPending"
+            id="add-input"
+            :class="{ error: editError || editErrorMessage }"
+            v-model.trim="fileName"
+            size="small"
+            style="margin-left: 2px"
+            @click.stop="() => {}"
+            @focus.stop="() => {}"
+            :value="addValue"
+            @change="addChangePath"
+            @blur="handleAddFileBlur"
+            @pressEnter="enterBlur"
+          ></a-input>
+          <span
+            class="text-overflow"
+            v-show="
+              fileNode &&
+              (fileNode.isEntryFile ||
+                fileNode.filePath === entryFile.filePath) &&
+              fileNode.filePath !== undefined &&
+              !onEditing
+            "
+          >
+            {{ '(入口文件)' }}
+          </span>
+          <div
+            class="deal-file"
+            v-show="fileNode && !onEditing && fileNode.name && !fileNode.root"
+          >
+            <span class="mouse-over" title="重命名" @click.stop="handleRename">
+              <EditFilled class="icon" />
+            </span>
+            <span class="mouse-over" title="删除" @click.stop="handleDelete">
+              <DeleteFilled class="icon" />
+            </span>
+          </div>
+        </div>
         <span
-          class="file-name"
-          :class="{ 'root-name': fileNode.root }"
-          v-if="fileNode && !onEditing && fileNode.name"
-        >
-          {{ fileNode.name }}
-        </span>
-        <a-input
-          v-else-if="onEditing"
-          id="edit-input"
-          ref="edit-name"
-          :class="{ error: editError }"
-          v-model.trim="fileName"
-          size="small"
-          :value="editValue"
-          style="margin-left: 2px"
-          @click.stop="() => {}"
-          @focus.stop="() => {}"
-          @change="changePath"
-          @blur="handleEditFileBlur"
-          @pressEnter="enterBlur"
-        ></a-input>
-        <a-input
-          v-else-if="!isPending && !onEditing"
-          ref="addPending"
-          id="add-input"
-          :class="{ error: editError }"
-          v-model.trim="fileName"
-          size="small"
-          style="margin-left: 2px"
-          @click.stop="() => {}"
-          @focus.stop="() => {}"
-          :value="addValue"
-          @change="addChangePath"
-          @blur="handleAddFileBlur"
-          @pressEnter="enterBlur"
-        ></a-input>
-        <span
-          class="text-overflow"
-          v-if="
-            fileNode &&
-            entryFile.filePath === fileNode.filePath &&
-            fileNode.filePath !== undefined &&
-            !onEditing
-          "
-        >
-          {{ '(入口文件)' }}
-        </span>
-        <span
-          class="path text-overflow"
+          class="path"
           v-if="fileNode && fileNode.root"
           :title="fileNode.filePath"
         >
           {{ fileNode.filePath }}
         </span>
-        <span
-          class="deal-file"
-          v-if="fileNode && !fileNode.root && !onEditing && id !== 'padding'"
-        >
-          <span class="mouse-over" title="重命名" @click.stop="handleRename">
-            <EditFilled class="icon" />
-          </span>
-          <span class="mouse-over" title="删除" @click.stop="handleDelete">
-            <DeleteFilled class="icon" />
-          </span>
-        </span>
       </div>
-      <Alert
-        class="error-message"
-        :message="editErrorMessage"
-        type="error"
-        v-if="editError"
-        style="{'padding-left': `${curCount * 16 + 20}px`}"
-      />
+      <div :style="{ 'padding-left': `${curCount * 16 + 26}px` }">
+        <Alert
+          class="error-message"
+          :message="editErrorMessage"
+          type="error"
+          v-if="editError && editErrorMessage"
+        />
+      </div>
     </div>
     <div v-if="isShowChildren">
       <div v-for="id in fileNode.children.folder">
@@ -107,6 +116,7 @@
           :id="id"
           type="file"
           :count="childCount"
+          @updateStrategyToApp="updateStrategyToApp"
         />
       </div>
     </div>
@@ -116,6 +126,7 @@
 <script lang="ts">
 export default {
   name: 'ComFileNode',
+  emits: ['updateStrategyToApp'],
 };
 </script>
 
@@ -126,7 +137,16 @@ import iconFolderJSON from '../config/iconFolderConfig.json';
 import iconFileJSON from '../config/iconFileConfig.json';
 import path from 'path';
 import { storeToRefs } from 'pinia';
-import { onMounted, ref, toRefs, computed, watch, nextTick } from 'vue';
+import {
+  onMounted,
+  ref,
+  toRefs,
+  computed,
+  watch,
+  nextTick,
+  getCurrentInstance,
+  ComponentInternalInstance,
+} from 'vue';
 import { message, Modal, Alert } from 'ant-design-vue';
 import { openFolder } from '../../../assets/methods/codeUtils';
 import {
@@ -134,6 +154,9 @@ import {
   addFileSync,
 } from '@kungfu-trader/kungfu-js-api/utils/fileUtils';
 import fse from 'fs-extra';
+import { ipcEmitDataByName } from '../../../ipcMsg/emitter';
+const { proxy } = getCurrentInstance() as ComponentInternalInstance;
+
 const store = useCodeStore();
 
 const props = defineProps<{
@@ -175,11 +198,13 @@ watch(isShowChildren, () => {
 });
 
 function enterBlur(e) {
+  resetStatus();
   e.target.blur();
 }
 
 //点击文件或文件树
 function handleClickFile(file) {
+  resetStatus();
   //正在编辑的input
   if (Object.keys(file).length === 1) return;
   //更新active file id
@@ -194,6 +219,7 @@ function handleClickFile(file) {
 
 //添加文件或文件夹时
 const handleAddFileBlur = (e) => {
+  resetStatus();
   e.stopPropagation();
   const filename = addValue.value;
   //test 重复 或 为空
@@ -206,6 +232,7 @@ const handleAddFileBlur = (e) => {
       id: fileNode.value?.parentId,
       type: type,
     });
+    addValue.value = '';
     return;
   }
   //添加文件
@@ -230,6 +257,7 @@ const handleAddFileBlur = (e) => {
   }
   //重置
   resetStatus();
+  addValue.value = '';
 };
 
 //添加/编辑输入检测
@@ -256,36 +284,50 @@ function handleRename(): void {
   onEditing.value = true;
   nextTick(() => {
     document.getElementById('edit-input')?.focus();
+    editValue.value = fileNode.value.name;
   });
 }
 
 //删除文件
 function handleDelete() {
-  const parentId = fileNode.value?.parentId;
-  const typeName = type == 'folder' ? '文件夹' : '文件';
-  Modal.confirm({
-    title: '提示',
-    content: `确认删除该${typeName}吗？`,
-    okText: '确 定',
-    cancelText: '取 消',
-    onOk() {
-      removeFileFolder(fileNode.value?.filePath || '')
-        .then(() => {
-          store.setCurrentFile(entryFile.value);
-        })
-        .then(() =>
-          openFolder(fileTree.value[parentId || 0], fileTree.value, true, true),
-        )
-        .then(() => message.success(`${typeName}删除成功！`))
-        .catch((err) => {
-          if (err == 'cancel') return;
-          message.error(err.message || '操作失败！');
-        });
-    },
-    onCancel() {
-      return;
-    },
-  });
+  if (
+    !fileNode.value.isEntryFile ||
+    fileNode.value.filePath !== entryFile.value.filePath
+  ) {
+    const parentId = fileNode.value?.parentId;
+    const typeName = type == 'folder' ? '文件夹' : '文件';
+    Modal.confirm({
+      title: '提示',
+      content: `确认删除该${typeName}吗？`,
+      okText: '确 定',
+      cancelText: '取 消',
+      onOk() {
+        removeFileFolder(fileNode.value?.filePath || '')
+          .then(() => {
+            store.setCurrentFile(entryFile.value);
+          })
+          .then(() =>
+            openFolder(
+              fileTree.value[parentId || 0],
+              fileTree.value,
+              true,
+              true,
+            ),
+          )
+          .then(() => message.success(`${typeName}删除成功！`))
+          .catch((err) => {
+            if (err == 'cancel') return;
+            message.error(err.message || '操作失败！');
+          });
+      },
+      onCancel() {
+        return;
+      },
+    });
+  } else {
+    message.warning('不可删除入口文件');
+    return;
+  }
 }
 
 function changePath(e): void {
@@ -302,27 +344,49 @@ function addChangePath(e): void {
 //重命名文件blur
 const handleEditFileBlur = () => {
   onEditing.value = false;
-  if (editError) {
-    resetStatus();
+  if (editValue.value == fileNode.value.name) {
+    return;
   }
-
+  if (!editValue.value || editError.value) {
+    resetStatus();
+    editValue.value = fileNode.value.name;
+    return;
+  }
+  resetStatus();
   const oldPath = fileNode.value?.filePath || '';
   const newName = editValue.value;
   const newPath = path.join(path.dirname(oldPath), newName);
   const parentId = fileNode.value?.parentId;
 
   // 更改文件名
-  fse.rename(oldPath, newPath).then(() => {
-    reloadFolder(parentId, newName);
-  });
+  fse
+    .rename(oldPath, newPath)
+    .then(() => {
+      reloadFolder(parentId, newName);
+    })
+    .then(() => {
+      if (fileNode.value === entryFile.value || fileNode.value.isEntryFile) {
+        ipcEmitDataByName('updateStrategyPath', {
+          strategyId: store.currentStrategy.strategy_id,
+          strategyPath: newPath,
+        }).then(() => {
+          updateStrategyToApp(newPath);
+        });
+      }
+    });
+  editValue.value = '';
 };
+
+function updateStrategyToApp(newPath) {
+  proxy?.$emit('updateStrategyToApp', newPath);
+}
 
 //重制状态
 function resetStatus(): void {
-  fileName.value = fileNode.value?.name || '';
+  fileName.value = '';
+  editErrorMessage.value = '';
   onEditing.value = false;
   editError.value = false;
-  editErrorMessage.value = '';
 }
 
 // 重新加载folder
@@ -342,7 +406,7 @@ function getIcon(file: Code.FileData): string {
   if (type == 'folder') {
     if (file['open']) {
       if (iconFolderJSON[file.name]) {
-        iconName = iconFolderJSON[file.name] + 'open';
+        iconName = iconFolderJSON[file.name] + '-open';
       } else {
         iconName = 'folder-open';
       }
@@ -361,7 +425,6 @@ function getIcon(file: Code.FileData): string {
     if (!iconName) iconName = 'file';
   }
   if (!iconName) return '';
-
   return require(`@kungfu-trader/kungfu-app/src/renderer/assets/svg/file-icons/${iconName}.svg`);
 }
 
@@ -372,30 +435,31 @@ function getCurrentFileByName(parentId, fileTree, name) {
 }
 
 // 获取所有兄弟 name
-function getSiblings(parentId, fileTree) {
-  let target = {};
-  const folders = fileTree[parentId].children['folder'];
-  const files = fileTree[parentId].children['file'];
-
-  [...folders, ...files].forEach((id) => {
-    if (fileTree[id] && fileTree[id].name)
-      target[fileTree[id].name] = fileTree[id];
-  });
-  return target;
+function getSiblings(parentId: number | string, fileTree: Code.IFileTree) {
+  const folders: Array<number> = fileTree[parentId].children['folder'] || [];
+  const files: Array<number> = fileTree[parentId].children['file'] || [];
+  return [...folders, ...files].reduce((pre, cur) => {
+    if (fileTree[cur] && fileTree[cur].name) {
+      pre[fileTree[cur].name] = fileTree[cur];
+      return pre;
+    }
+    return pre;
+  }, {} as Record<string, Code.FileData>);
 }
 
 //获取所有兄弟 name
 function getSiblingsName(parentId) {
-  let targetList: Array<string> = [];
   if (fileTree.value[parentId] && fileTree.value[parentId].children) {
     const folders = fileTree.value[parentId].children['folder'] || [];
     const files = fileTree.value[parentId].children['file'] || [];
-
-    [...folders, ...files].forEach((id) => {
-      if (fileTree.value[id] && fileTree.value[id].name)
-        targetList.push(fileTree.value[id].name);
-    });
-    return targetList;
+    return [...folders, ...files].reduce((pre, cur) => {
+      if (fileTree.value[cur] && fileTree.value[cur].name) {
+        pre.push(fileTree.value[cur].name);
+        return pre;
+      } else {
+        return pre;
+      }
+    }, [] as Array<string>);
   }
   return [];
 }
@@ -416,27 +480,55 @@ onMounted(() => {
 
 <style lang="less">
 .c-app-code-file-node {
+  .ant-alert-error {
+    border: 1px solid @red-base !important;
+    background-color: #8d3333 !important;
+  }
   .each-files {
-    display: flex;
-    margin-right: 20px;
+    text-align: left;
     padding: 2px 0px;
     padding-left: 5px;
     color: @text-color;
     font-size: 14px;
-    align-items: center;
     white-space: normal;
     cursor: pointer;
+    &.root-file {
+      background-color: #1d1f21;
+      color: @gold-base;
+    }
+    .file-top {
+      display: flex;
+      flex-wrap: nowrap;
+      align-items: center;
+    }
     .text-overflow {
-      &.path {
-        display: block;
-      }
+      flex: 1;
+      white-space: nowrap;
+      margin-right: 10px;
+    }
+    .path {
+      margin: 0 4px;
+      word-break: normal;
+      width: auto;
+      display: block;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      overflow: hidden;
     }
     .file-icon {
       width: 20px;
       height: 20px;
+      display: inline;
     }
     .file-name {
       margin: 0 4px;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      word-break: break-all;
+      &.normal-name {
+        flex: 1;
+      }
       &.root-name {
         font-size: 18px;
       }
@@ -446,19 +538,21 @@ onMounted(() => {
       color: @gold-base;
       .deal-file {
         display: block;
+        white-space: nowrap;
       }
+    }
+    .editError {
+      border: 1px solid red1-base;
     }
   }
   .active {
-    .each-files {
-      background-color: @popover-customize-border-color;
-      color: @gold-base;
-    }
+    background-color: @popover-customize-border-color;
+    color: @gold-base;
   }
   .deal-file {
     margin-right: 5px;
-    flex: 1;
     text-align: right;
+    width: 60px;
     display: none;
     .mouse-over {
       margin: 0 2px;
@@ -471,14 +565,14 @@ onMounted(() => {
     }
   }
   .error-message {
-    width: calc(100% - 34px);
+    width: 100%;
     z-index: 999;
     padding: 5px 10px;
     box-sizing: border-box;
     line-height: 12px;
-    font-size: 9px;
-    margin-top: 5px;
-    margin-left: 15px;
+    font-size: 12px;
+    border-top: none;
+    text-align: left;
   }
 }
 </style>
