@@ -201,19 +201,19 @@ function buildEditor(
 // 更新缩进设置
 function updateSpaceTab(spaceTabSetting: Code.ICodeSetting) {
   const type: string = spaceTabSetting
-    ? spaceTabSetting?.tabSpaceType || indentUsingSpace
+    ? CodeTabSetting[spaceTabSetting?.tabSpaceType].name || indentUsingSpace
     : indentUsingSpace;
 
   if (handleEditor.value) {
     if (type === indentUsingSpace) {
       handleEditor.value.getModel()?.updateOptions({
         insertSpaces: true,
-        tabSize: +(spaceTabSetting?.tabSpaceSize || sizeUsingTwo),
+        tabSize: +(CodeSizeSetting[spaceTabSetting?.tabSpaceSize].name || sizeUsingTwo),
       });
     } else if (type === indentUsingTab) {
       handleEditor.value.getModel()?.updateOptions({
         insertSpaces: false,
-        tabSize: +(spaceTabSetting?.tabSpaceSize || sizeUsingTwo),
+        tabSize: +(CodeSizeSetting[spaceTabSetting?.tabSpaceSize].name || sizeUsingTwo),
       });
     }
   }
