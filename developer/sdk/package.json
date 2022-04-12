@@ -23,6 +23,7 @@
   },
   "dependencies": {
     "@kungfu-trader/kungfu-app": "^2.4.0-alpha.32",
+    "@kungfu-trader/kungfu-cli": "^2.4.0-alpha.32",
     "@kungfu-trader/kungfu-core": "^2.4.0-alpha.32",
     "@kungfu-trader/kungfu-js-api": "^2.4.0-alpha.32",
     "@kungfu-trader/kungfu-toolchain": "^2.4.0-alpha.32"
