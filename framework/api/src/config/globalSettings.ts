@@ -94,8 +94,14 @@ export const getKfGlobalSettings = (): KfSystemConfig[] => [
         default: CodeTabSetting[SpaceTabSettingEnum.SPACES].name,
         type: 'select',
         options: [
-          { value: SpaceTabSettingEnum.SPACES, label: CodeTabSetting[SpaceTabSettingEnum.SPACES].name },
-          { value: SpaceTabSettingEnum.TABS, label: CodeTabSetting[SpaceTabSettingEnum.TABS].name },
+          {
+            value: SpaceTabSettingEnum.SPACES,
+            label: CodeTabSetting[SpaceTabSettingEnum.SPACES].name,
+          },
+          {
+            value: SpaceTabSettingEnum.TABS,
+            label: CodeTabSetting[SpaceTabSettingEnum.TABS].name,
+          },
         ],
       },
       {
@@ -107,8 +113,14 @@ export const getKfGlobalSettings = (): KfSystemConfig[] => [
         default: CodeSizeSetting[SpaceSizeSettingEnum.FOURINDENT].name,
         type: 'select',
         options: [
-          { value: SpaceSizeSettingEnum.TWOINDENT, label: CodeSizeSetting[SpaceSizeSettingEnum.TWOINDENT].name },
-          { value: SpaceSizeSettingEnum.FOURINDENT, label: CodeSizeSetting[SpaceSizeSettingEnum.FOURINDENT].name },
+          {
+            value: SpaceSizeSettingEnum.TWOINDENT,
+            label: CodeSizeSetting[SpaceSizeSettingEnum.TWOINDENT].name,
+          },
+          {
+            value: SpaceSizeSettingEnum.FOURINDENT,
+            label: CodeSizeSetting[SpaceSizeSettingEnum.FOURINDENT].name,
+          },
         ],
       },
     ],

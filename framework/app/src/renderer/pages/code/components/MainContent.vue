@@ -36,8 +36,14 @@
 </template>
 
 <script setup lang="ts">
-import { CodeTabSetting, CodeSizeSetting } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
-import { SpaceTabSettingEnum, SpaceSizeSettingEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';
+import {
+  CodeTabSetting,
+  CodeSizeSetting,
+} from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
+import {
+  SpaceTabSettingEnum,
+  SpaceSizeSettingEnum,
+} from '@kungfu-trader/kungfu-js-api/typings/enums';
 import { deepClone } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { storeToRefs } from 'pinia';
 import { ref, toRaw, watch } from 'vue';
@@ -49,14 +55,23 @@ interface indent {
 }
 const store = useCodeStore();
 const { globallSetting } = storeToRefs(store);
-const indentUsingSpace: string = CodeTabSetting[SpaceTabSettingEnum.SPACES].name
-const indentUsingTab: string = CodeTabSetting[SpaceTabSettingEnum.TABS].name
-const sizeUsingTwo: string = CodeSizeSetting[SpaceSizeSettingEnum.TWOINDENT].name
-const sizeUsingFour: string = CodeSizeSetting[SpaceSizeSettingEnum.FOURINDENT].name
+const indentUsingSpace: string =
+  CodeTabSetting[SpaceTabSettingEnum.SPACES].name;
+const indentUsingTab: string = CodeTabSetting[SpaceTabSettingEnum.TABS].name;
+const sizeUsingTwo: string =
+  CodeSizeSetting[SpaceSizeSettingEnum.TWOINDENT].name;
+const sizeUsingFour: string =
+  CodeSizeSetting[SpaceSizeSettingEnum.FOURINDENT].name;
 const defaultValue = ref<string>('');
 watch(globallSetting.value, (newSetting) => {
-  defaultValue.value = `${newSetting?.code?.tabSpaceType ? CodeTabSetting[newSetting?.code?.tabSpaceType]?.name : indentUsingSpace}: ${
-    newSetting?.code?.tabSpaceSize ? CodeSizeSetting[newSetting?.code?.tabSpaceSize]?.name : sizeUsingFour
+  defaultValue.value = `${
+    newSetting?.code?.tabSpaceType
+      ? CodeTabSetting[newSetting?.code?.tabSpaceType]?.name
+      : indentUsingSpace
+  }: ${
+    newSetting?.code?.tabSpaceSize
+      ? CodeSizeSetting[newSetting?.code?.tabSpaceSize]?.name
+      : sizeUsingFour
   }`;
 });
 
@@ -81,30 +96,30 @@ const sizeOptions = ref<Array<indent>>([
   },
 ]);
 
-function handleSpaceType (type: string): string {
-  let handledType = ''
-  switch (type){
-    case indentUsingSpace: 
-      handledType = SpaceTabSettingEnum.SPACES
-      break
+function handleSpaceType(type: string): string {
+  let handledType = '';
+  switch (type) {
+    case indentUsingSpace:
+      handledType = SpaceTabSettingEnum.SPACES;
+      break;
     case indentUsingTab:
-      handledType = SpaceTabSettingEnum.TABS
-      break
-  } 
-  return handledType
+      handledType = SpaceTabSettingEnum.TABS;
+      break;
+  }
+  return handledType;
 }
 
-function handleSpaceSize (type: string): string {
-  let handledSize = ''
-  switch (type){
-    case sizeUsingTwo: 
-      handledSize = SpaceSizeSettingEnum.TWOINDENT
-      break
+function handleSpaceSize(type: string): string {
+  let handledSize = '';
+  switch (type) {
+    case sizeUsingTwo:
+      handledSize = SpaceSizeSettingEnum.TWOINDENT;
+      break;
     case sizeUsingFour:
-      handledSize = SpaceSizeSettingEnum.FOURINDENT
-      break
-  } 
-  return handledSize
+      handledSize = SpaceSizeSettingEnum.FOURINDENT;
+      break;
+  }
+  return handledSize;
 }
 
 function handleClick(type: indent, size: indent) {
@@ -112,9 +127,11 @@ function handleClick(type: indent, size: indent) {
     string,
     Record<string, KungfuApi.KfConfigValue>
   > = deepClone(toRaw(globallSetting.value));
-  
-  setting.code.tabSpaceType = handleSpaceType(type.key) || SpaceTabSettingEnum.SPACES;
-  setting.code.tabSpaceSize = handleSpaceSize(size.key) || SpaceSizeSettingEnum.TWOINDENT;
+
+  setting.code.tabSpaceType =
+    handleSpaceType(type.key) || SpaceTabSettingEnum.SPACES;
+  setting.code.tabSpaceSize =
+    handleSpaceSize(size.key) || SpaceSizeSettingEnum.TWOINDENT;
   store.setGlobalSetting(setting);
 }
 </script>
