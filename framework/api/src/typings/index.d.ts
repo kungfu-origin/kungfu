@@ -818,6 +818,10 @@ declare module '@kungfu-trader/kungfu-core' {
 
 declare namespace Code {
   import { Stats } from 'fs-extra';
+  import {
+    SpaceTabSettingEnum,
+    SpaceSizeSettingEnum
+  } from './enums'
   export interface Strategy {
     strategy_id: string;
     strategy_path: string;
@@ -864,7 +868,7 @@ declare namespace Code {
   }
 
   export interface ICodeSetting {
-    tabSpaceType: 'Spaces' | 'Tabs';
-    tabSpaceSize: '2' | '4';
+    tabSpaceType: SpaceTabSettingEnum;
+    tabSpaceSize: SpaceSizeSettingEnum;
   }
 }

@@ -185,6 +185,6 @@ export enum SpaceTabSettingEnum {
 }
 
 export enum SpaceSizeSettingEnum {
-  FOREINDENT = 'FOREINDENT',
+  FOURINDENT = 'FOURINDENT',
   TWOINDENT = 'TWOINDENT',
 }

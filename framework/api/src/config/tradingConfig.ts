@@ -162,7 +162,7 @@ export const CodeTabSetting: Record<SpaceTabSettingEnum, KungfuApi.KfTradeValueC
 }
 
 export const CodeSizeSetting: Record<SpaceSizeSettingEnum, KungfuApi.KfTradeValueCommonData> = {
-  [SpaceSizeSettingEnum.FOREINDENT]: { name: '4' },
+  [SpaceSizeSettingEnum.FOURINDENT]: { name: '4' },
   [SpaceSizeSettingEnum.TWOINDENT]: { name: '2' },
 }
 

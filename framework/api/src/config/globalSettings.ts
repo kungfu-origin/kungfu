@@ -94,8 +94,8 @@ export const getKfGlobalSettings = (): KfSystemConfig[] => [
         default: CodeTabSetting[SpaceTabSettingEnum.SPACES].name,
         type: 'select',
         options: [
-          { value: CodeTabSetting[SpaceTabSettingEnum.SPACES].name, label: CodeTabSetting[SpaceTabSettingEnum.SPACES].name },
-          { value: CodeTabSetting[SpaceTabSettingEnum.TABS].name, label: CodeTabSetting[SpaceTabSettingEnum.TABS].name },
+          { value: SpaceTabSettingEnum.SPACES, label: CodeTabSetting[SpaceTabSettingEnum.SPACES].name },
+          { value: SpaceTabSettingEnum.TABS, label: CodeTabSetting[SpaceTabSettingEnum.TABS].name },
         ],
       },
       {
@@ -104,11 +104,11 @@ export const getKfGlobalSettings = (): KfSystemConfig[] => [
         tip: isEnglish
           ? 'Kungfu Editor Indentation Size (space)'
           : '功夫编辑器缩进大小（空格）',
-        default: CodeSizeSetting[SpaceSizeSettingEnum.FOREINDENT].name,
+        default: CodeSizeSetting[SpaceSizeSettingEnum.FOURINDENT].name,
         type: 'select',
         options: [
-          { value: CodeSizeSetting[SpaceSizeSettingEnum.TWOINDENT].name, label: CodeSizeSetting[SpaceSizeSettingEnum.TWOINDENT].name },
-          { value: CodeSizeSetting[SpaceSizeSettingEnum.FOREINDENT].name, label: CodeSizeSetting[SpaceSizeSettingEnum.FOREINDENT].name },
+          { value: SpaceSizeSettingEnum.TWOINDENT, label: CodeSizeSetting[SpaceSizeSettingEnum.TWOINDENT].name },
+          { value: SpaceSizeSettingEnum.FOURINDENT, label: CodeSizeSetting[SpaceSizeSettingEnum.FOURINDENT].name },
         ],
       },
     ],
