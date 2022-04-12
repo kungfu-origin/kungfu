@@ -209,14 +209,13 @@ void Bookkeeper::try_sync_book_replica(uint32_t location_uid) {
       books_replica_position_guard_.find(location_uid) == books_replica_position_guard_.end()) {
     return;
   }
+
   if (books_replica_asset_guards_.at(location_uid) && books_replica_position_guard_.at(location_uid)) {
     books_replica_asset_guards_.insert_or_assign(location_uid, false);
     books_replica_position_guard_.insert_or_assign(location_uid, false);
     auto old_book = get_book(location_uid);
     auto new_book = get_book_replica(location_uid);
-    books_.erase(location_uid);
-    books_.insert_or_assign(location_uid, new_book);
-    books_replica_.erase(location_uid);
+
     bool book_changed = false;
 
     auto fun_asset_compare = [](const Asset old_asset, const Asset new_asset) {
@@ -237,10 +236,42 @@ void Bookkeeper::try_sync_book_replica(uint32_t location_uid) {
       auto &old_position = new_book->get_position_for(new_position.direction, new_position);
       book_changed |= old_position.volume != new_position.volume;
     }
+
     if (book_changed) {
+      // 遍历所有策略的book，如果有position的source_id和account_id是与本TD的一样，则更新
+      auto fun_update_st_position = [&](PositionMap &position_map) {
+        for (auto &st_pair : position_map) {
+          auto &st_position = st_pair.second;
+          auto &td_position = new_book->get_position_for(st_position.direction, st_position);
+          if (strcmp(st_position.source_id, td_position.source_id) == 0 and
+              strcmp(st_position.account_id, td_position.account_id) == 0) {
+            st_position.volume = td_position.volume;
+            st_position.yesterday_volume = td_position.yesterday_volume;
+            st_position.update_time = td_position.update_time;
+          }
+        }
+      };
+      for (auto &bk_pair : books_) {
+        auto &st_book = bk_pair.second;
+        if (st_book->asset.ledger_category == LedgerCategory::Strategy and
+            app_.has_channel(st_book->asset.holder_uid, location_uid)) {
+          st_book->asset.avail = new_book->asset.avail;
+          st_book->asset.margin = new_book->asset.margin;
+          st_book->asset.update_time = new_book->asset.update_time;
+          fun_update_st_position(st_book->long_positions);
+          fun_update_st_position(st_book->short_positions);
+        }
+      }
+
+      // 更新完strategy的position再调用回调
       for (auto &book_listener : book_listeners_) {
         book_listener->on_book_update_reset(*old_book, *new_book);
       }
+      // 如果不先做完上面操作提前进行了book替换，会导致前端无法把虚假持仓的volume设置为0
+      // 做完以下替换后，Watcher检测遍历td的book时，持仓为0的position已删除，处理操作会跳过该position导致页面上的虚假volume无法删除
+      books_.erase(location_uid);
+      books_.insert_or_assign(location_uid, new_book);
+      books_replica_.erase(location_uid);
     }
   }
 }

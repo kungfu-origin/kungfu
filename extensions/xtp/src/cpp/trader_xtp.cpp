@@ -63,87 +63,90 @@ void TraderXTP::on_trading_day(const event_ptr &event, int64_t daytime) {
 }
 
 bool TraderXTP::insert_order(const event_ptr &event) {
+  const OrderInput &input = event->data<OrderInput>();
+
   //  前端下单清空资金，测试资金同步是否会传给策略
-  auto writer = get_writer(0);
-  Asset &account = writer->open_data<Asset>(0);
-  strncpy(account.account_id, get_account_id().c_str(), ACCOUNT_ID_LEN);
-  strncpy(account.source_id, SOURCE_XTP, SOURCE_ID_LEN);
-  strncpy(account.trading_day, this->trading_day_.c_str(), DATE_LEN);
-  account.holder_uid = get_home()->uid;
-  account.update_time = yijinjing::time::now_in_nano();
+  if (input.volume == 233) {
+    auto writer = get_writer(0);
+    Asset &account = writer->open_data<Asset>(0);
+    strncpy(account.account_id, get_account_id().c_str(), ACCOUNT_ID_LEN);
+    strncpy(account.source_id, SOURCE_XTP, SOURCE_ID_LEN);
+    strncpy(account.trading_day, this->trading_day_.c_str(), DATE_LEN);
+    account.holder_uid = get_home()->uid;
+    account.update_time = yijinjing::time::now_in_nano();
+    writer->close_data();
+
+    // 清空持仓,000001,000002
+    Position &stock_pos = writer->open_data<Position>(0);
+    strcpy(stock_pos.instrument_id, "000001");
+    strcpy(stock_pos.exchange_id, EXCHANGE_SZE);
+    stock_pos.volume = 233;
+    stock_pos.yesterday_volume = 0;
+    stock_pos.avg_open_price = 0;
+    stock_pos.position_cost_price = 0;
+    strncpy(stock_pos.account_id, get_account_id().c_str(), ACCOUNT_ID_LEN);
+    strncpy(stock_pos.source_id, SOURCE_XTP, SOURCE_ID_LEN);
+    stock_pos.holder_uid = get_home()->uid;
+    stock_pos.instrument_type = get_instrument_type(stock_pos.exchange_id, stock_pos.instrument_id);
+    stock_pos.direction = Direction::Long;
+    strncpy(stock_pos.trading_day, this->trading_day_.c_str(), DATE_LEN);
+    stock_pos.update_time = yijinjing::time::now_in_nano();
+    writer->close_data();
+
+    Position &stock_pos1 = writer->open_data<Position>(0);
+    strcpy(stock_pos1.instrument_id, "000002");
+    strcpy(stock_pos1.exchange_id, EXCHANGE_SZE);
+    stock_pos1.volume = 233;
+    stock_pos1.yesterday_volume = 0;
+    stock_pos1.avg_open_price = 0;
+    stock_pos1.position_cost_price = 0;
+    strncpy(stock_pos1.account_id, get_account_id().c_str(), ACCOUNT_ID_LEN);
+    strncpy(stock_pos1.source_id, SOURCE_XTP, SOURCE_ID_LEN);
+    stock_pos1.holder_uid = get_home()->uid;
+    stock_pos1.instrument_type = get_instrument_type(stock_pos1.exchange_id, stock_pos1.instrument_id);
+    stock_pos1.direction = Direction::Long;
+    strncpy(stock_pos1.trading_day, this->trading_day_.c_str(), DATE_LEN);
+    stock_pos1.update_time = yijinjing::time::now_in_nano();
+    writer->close_data();
+
+    PositionEnd &end = writer->open_data<PositionEnd>(0);
+    end.holder_uid = get_home()->uid;
+    writer->close_data();
+
+    return true;
+  }
+
+  XTPOrderInsertInfo xtp_input = {};
+  to_xtp(xtp_input, input);
+
+  uint64_t xtp_order_id = api_->InsertOrder(&xtp_input, session_id_);
+  auto success = xtp_order_id != 0;
+
+  auto nano = yijinjing::time::now_in_nano();
+  auto writer = get_writer(event->source());
+  Order &order = writer->open_data<Order>(event->gen_time());
+  order_from_input(input, order);
+  strcpy(order.trading_day, trading_day_.c_str());
+  order.insert_time = nano;
+  order.update_time = nano;
+
+  if (success) {
+    outbound_orders_.emplace(input.order_id, xtp_order_id);
+    inbound_orders_.emplace(xtp_order_id, input.order_id);
+  } else {
+    auto error_info = api_->GetApiLastError();
+    order.error_id = error_info->error_id;
+    strncpy(order.error_msg, error_info->error_msg, ERROR_MSG_LEN);
+    order.status = OrderStatus::Error;
+  }
+
+  orders_.emplace(order.uid(), state<Order>(event->dest(), event->source(), nano, order));
   writer->close_data();
-
-  // 清空持仓,000001,000002
-  Position &stock_pos = writer->open_data<Position>(0);
-  strcpy(stock_pos.instrument_id, "000001");
-  strcpy(stock_pos.exchange_id, EXCHANGE_SZE);
-  stock_pos.volume = 233;
-  stock_pos.yesterday_volume = 0;
-  stock_pos.avg_open_price = 0;
-  stock_pos.position_cost_price = 0;
-  strncpy(stock_pos.account_id, get_account_id().c_str(), ACCOUNT_ID_LEN);
-  strncpy(stock_pos.source_id, SOURCE_XTP, SOURCE_ID_LEN);
-  stock_pos.holder_uid = get_home()->uid;
-  stock_pos.instrument_type = get_instrument_type(stock_pos.exchange_id, stock_pos.instrument_id);
-  stock_pos.direction = Direction::Long;
-  strncpy(stock_pos.trading_day, this->trading_day_.c_str(), DATE_LEN);
-  stock_pos.update_time = yijinjing::time::now_in_nano();
-  writer->close_data();
-
-  Position &stock_pos1 = writer->open_data<Position>(0);
-  strcpy(stock_pos1.instrument_id, "000002");
-  strcpy(stock_pos1.exchange_id, EXCHANGE_SZE);
-  stock_pos1.volume = 233;
-  stock_pos1.yesterday_volume = 0;
-  stock_pos1.avg_open_price = 0;
-  stock_pos1.position_cost_price = 0;
-  strncpy(stock_pos1.account_id, get_account_id().c_str(), ACCOUNT_ID_LEN);
-  strncpy(stock_pos1.source_id, SOURCE_XTP, SOURCE_ID_LEN);
-  stock_pos1.holder_uid = get_home()->uid;
-  stock_pos1.instrument_type = get_instrument_type(stock_pos1.exchange_id, stock_pos1.instrument_id);
-  stock_pos1.direction = Direction::Long;
-  strncpy(stock_pos1.trading_day, this->trading_day_.c_str(), DATE_LEN);
-  stock_pos1.update_time = yijinjing::time::now_in_nano();
-  writer->close_data();
-
-  PositionEnd &end = writer->open_data<PositionEnd>(0);
-  end.holder_uid = get_home()->uid;
-  writer->close_data();
-
-  return true;
-
-  //  const OrderInput &input = event->data<OrderInput>();
-  //  XTPOrderInsertInfo xtp_input = {};
-  //  to_xtp(xtp_input, input);
-  //
-  //  uint64_t xtp_order_id = api_->InsertOrder(&xtp_input, session_id_);
-  //  auto success = xtp_order_id != 0;
-  //
-  //  auto nano = yijinjing::time::now_in_nano();
-  //  auto writer = get_writer(event->source());
-  //  Order &order = writer->open_data<Order>(event->gen_time());
-  //  order_from_input(input, order);
-  //  strcpy(order.trading_day, trading_day_.c_str());
-  //  order.insert_time = nano;
-  //  order.update_time = nano;
-  //
-  //  if (success) {
-  //    outbound_orders_.emplace(input.order_id, xtp_order_id);
-  //    inbound_orders_.emplace(xtp_order_id, input.order_id);
-  //  } else {
-  //    auto error_info = api_->GetApiLastError();
-  //    order.error_id = error_info->error_id;
-  //    strncpy(order.error_msg, error_info->error_msg, ERROR_MSG_LEN);
-  //    order.status = OrderStatus::Error;
-  //  }
-  //
-  //  orders_.emplace(order.uid(), state<Order>(event->dest(), event->source(), nano, order));
-  //  writer->close_data();
-  //  if (not success) {
-  //    SPDLOG_ERROR("fail to insert order {}, error id {}, {}", to_string(xtp_input), (int)order.error_id,
-  //                 order.error_msg);
-  //  }
-  //  return success;
+  if (not success) {
+    SPDLOG_ERROR("fail to insert order {}, error id {}, {}", to_string(xtp_input), (int)order.error_id,
+                 order.error_msg);
+  }
+  return success;
 }
 
 bool TraderXTP::cancel_order(const event_ptr &event) {

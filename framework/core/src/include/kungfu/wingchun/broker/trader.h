@@ -62,9 +62,9 @@ protected:
   bool update_asset_ = false;
   bool update_position_ = false;
 
-  yijinjing::journal::writer_ptr get_asset_writer() const;
+  [[nodiscard]] yijinjing::journal::writer_ptr get_asset_writer() const;
 
-  yijinjing::journal::writer_ptr get_position_writer() const;
+  [[nodiscard]] yijinjing::journal::writer_ptr get_position_writer() const;
 
   void set_update_asset(bool update_asset = true);
 
