@@ -34,7 +34,6 @@ export class GlobalCategoryRegister {
 
   register(props: KfCategoryRegisterProps): void {
     if (this.globalRegisterdCategories[props.name]) {
-      console.warn(`${props.name} has been registed`);
       return;
     }
 
