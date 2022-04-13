@@ -45,7 +45,7 @@
     "freeze": "node .gyp/node-conan.js package",
     "wheel": "node .gyp/node-wheel.js",
     "package": "node .gyp/node-pre-gyp.js package",
-    "clean": "rimraf ./dist/* ./build/* && cmake-js clean",
+    "clean": "cmake-js clean",
     "pipenv": "node .gyp/node-pipenv.js",
     "poetry": "pipenv run python -m poetry",
     "pyinstaller": "pipenv run pyinstaller",

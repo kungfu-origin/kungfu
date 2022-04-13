@@ -190,7 +190,6 @@ void TraderXTP::OnQueryPosition(XTPQueryStkPositionRsp *position, XTPRI *error_i
                  request_id, is_last);
     return;
   }
-  //  auto writer = get_writer(0);
   auto writer = get_position_writer();
   Position &stock_pos = writer->open_data<Position>(0);
   if (error_info == nullptr || error_info->error_id == 0) {
