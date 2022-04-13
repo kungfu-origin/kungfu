@@ -67,6 +67,9 @@ class Strategy(wc.Strategy):
         self._on_book_update_reset = getattr(
             self._module, "on_book_update_reset", lambda ctx, error: None
         )
+        self._on_asset_update_reset = getattr(
+            self._module, "on_asset_update_reset", lambda ctx, error: None
+        )
 
     def __call_proxy(self, func, *args):
         if inspect.iscoroutinefunction(func):
@@ -198,6 +201,9 @@ class Strategy(wc.Strategy):
 
     def on_book_update_reset(self, wc_context, old_book, new_book):
         self.__call_proxy(self._on_book_update_reset, self.ctx, old_book, new_book)
+
+    def on_asset_update_reset(self, wc_context, old_asset, new_asset):
+        self.__call_proxy(self._on_asset_update_reset, self.ctx, old_asset, new_asset)
 
 
 class AsyncOrderAction:

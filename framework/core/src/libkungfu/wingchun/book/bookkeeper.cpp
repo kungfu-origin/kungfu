@@ -216,7 +216,8 @@ void Bookkeeper::try_sync_book_replica(uint32_t location_uid) {
     auto old_book = get_book(location_uid);
     auto new_book = get_book_replica(location_uid);
 
-    bool book_changed = false;
+    bool position_changed = false;
+    bool asset_changed = false;
 
     auto fun_asset_compare = [](const Asset old_asset, const Asset new_asset) {
       bool asset_changed = false;
@@ -224,20 +225,45 @@ void Bookkeeper::try_sync_book_replica(uint32_t location_uid) {
       asset_changed |= old_asset.margin != new_asset.margin;
       return asset_changed;
     };
-    book_changed |= fun_asset_compare(old_book->asset, new_book->asset);
+    asset_changed |= fun_asset_compare(old_book->asset, new_book->asset);
 
     for (auto &new_pair : new_book->long_positions) {
       auto &new_position = new_pair.second;
       auto &old_position = old_book->get_position_for(new_position.direction, new_position);
-      book_changed |= old_position.volume != new_position.volume;
+      position_changed |= old_position.volume != new_position.volume;
+      position_changed |= old_position.yesterday_volume != new_position.yesterday_volume;
     }
     for (auto &new_pair : new_book->short_positions) {
       auto &new_position = new_pair.second;
       auto &old_position = new_book->get_position_for(new_position.direction, new_position);
-      book_changed |= old_position.volume != new_position.volume;
+      position_changed |= old_position.volume != new_position.volume;
+      position_changed |= old_position.yesterday_volume != new_position.yesterday_volume;
     }
 
-    if (book_changed) {
+    // position_changed更新book也会修改asset信息
+    // on_asset_update_reset仅在asset改变而position不改变的情况下调用
+    if (asset_changed and !position_changed) {
+      auto old_asset = std::make_shared<Asset>();
+      memcpy(old_asset.get(), &old_book->asset, sizeof(Asset));
+      old_book->asset = new_book->asset;
+
+      for (auto &bk_pair : books_) {
+        auto &st_book = bk_pair.second;
+        if (st_book->asset.ledger_category == LedgerCategory::Strategy and
+            app_.has_channel(st_book->asset.holder_uid, location_uid)) {
+          st_book->asset.avail = new_book->asset.avail;
+          st_book->asset.margin = new_book->asset.margin;
+          st_book->asset.update_time = new_book->asset.update_time;
+        }
+      }
+
+      for (auto &book_listener : book_listeners_) {
+        book_listener->on_asset_update_reset(*old_asset, old_book->asset);
+      }
+    }
+
+    // position改变更新book，包括asset和position都更新并回调on_book_update_reset
+    if (position_changed) {
       // 遍历所有策略的book，如果有position的source_id和account_id是与本TD的一样，则更新
       auto fun_update_st_position = [&](PositionMap &position_map) {
         for (auto &st_pair : position_map) {

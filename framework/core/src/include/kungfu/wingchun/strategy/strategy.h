@@ -66,6 +66,12 @@ public:
   //@param new_book          更新后重新从柜台获取的新数据
   virtual void on_book_update_reset(Context_ptr &context, const kungfu::wingchun::book::Book &old_book,
                                     const kungfu::wingchun::book::Book &new_book){};
+
+  //同步柜台资金信息回调
+  //@param old_asset         更新前本地维护的旧数据
+  //@param new_asset         更新后重新从柜台获取的新数据
+  virtual void on_asset_update_reset(Context_ptr &context, const kungfu::longfist::types::Asset &old_asset,
+                                     const kungfu::longfist::types::Asset &new_asset){};
 };
 
 DECLARE_PTR(Strategy)

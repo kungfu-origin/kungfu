@@ -31,6 +31,9 @@ public:
   virtual void on_book_update_reset(const wingchun::book::Book &old_book,
                                     const wingchun::book::Book &new_book) override;
 
+  virtual void on_asset_update_reset(const longfist::types::Asset &old_asset,
+                                     const longfist::types::Asset &new_asset) override;
+
   void NoSet(const Napi::CallbackInfo &info, const Napi::Value &value);
 
   Napi::Value GetLocation(const Napi::CallbackInfo &info);

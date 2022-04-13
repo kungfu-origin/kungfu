@@ -536,6 +536,31 @@ void Watcher::UpdateBook(const event_ptr &event, const Position &position) {
   }
 }
 
+void Watcher::on_asset_update_reset(const longfist::types::Asset &old_asset, const longfist::types::Asset &new_asset) {
+
+  // watcher维护的bookkeeper中，与new_book(TD) has_channel的strategy更新前端数据
+  auto fun_has_channel = [&](const Asset &st_asset) {
+    return st_asset.ledger_category == LedgerCategory::Strategy and
+           has_channel(st_asset.holder_uid, new_asset.holder_uid);
+  };
+  // watcher维护的bookkeeper中，与new_book表示同一个TD的要更新前端数据
+  auto fun_same_td = [&](Asset &td_asset) {
+    return td_asset.ledger_category == LedgerCategory::Account and td_asset.holder_uid == new_asset.holder_uid;
+  };
+
+  for (auto &bk_pair : bookkeeper_.get_books()) {
+    auto st_book = bk_pair.second;
+    if (fun_has_channel(st_book->asset) or fun_same_td(st_book->asset)) {
+      st_book->asset.avail = new_asset.avail;
+      st_book->asset.margin = new_asset.margin;
+      st_book->asset.update_time = new_asset.update_time;
+      state<kungfu::longfist::types::Asset> cache_state(ledger_location_->uid, st_book->asset.holder_uid,
+                                                        st_book->asset.update_time, st_book->asset);
+      feed_state_data_bank(cache_state, data_bank_);
+    }
+  }
+}
+
 void Watcher::on_book_update_reset(const wingchun::book::Book &old_book, const wingchun::book::Book &new_book) {
   // on_book_update_reset调用时，bookkeeper中所有TD的book都是旧的，当回调结束后才替换成新的book
 

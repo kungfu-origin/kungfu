@@ -19,6 +19,8 @@ FORWARD_DECLARE_PTR(Context)
 class BookListener {
 public:
   virtual void on_book_update_reset(const Book &old_book, const Book &new_book){};
+  virtual void on_asset_update_reset(const longfist::types::Asset &old_asset,
+                                     const longfist::types::Asset &new_asset){};
 };
 DECLARE_PTR(BookListener)
 
@@ -90,13 +92,10 @@ private:
   InstrumentMap instruments_ = {};
   BookMap books_ = {};
   AccountingMethodMap accounting_methods_ = {};
-
   std::vector<BookListener_ptr> book_listeners_ = {};
-  BookMap books_replica_ = {}; // 用于暂存从location::UPDATE传来的asset和position信息
-  // 标记books_replica_中position更新完毕，收到PositionEnd::tag添加对应的location_uid
-  std::unordered_map<uint32_t, bool> books_replica_asset_guards_ = {};
-  // 标记books_replica_中asset更新完毕，收到Asset::tag添加对应location_uid
-  std::unordered_map<uint32_t, bool> books_replica_position_guard_ = {};
+  BookMap books_replica_ = {}; //暂存从location::UPDATE传来的asset和position信息
+  std::unordered_map<uint32_t, bool> books_replica_asset_guards_ = {}; //收到PositionEnd::tag添加对应<location_uid,true>
+  std::unordered_map<uint32_t, bool> books_replica_position_guard_ = {}; //收到Asset::tag添加对应<location_uid,true>
 
   static constexpr auto bypass = [](yijinjing::practice::apprentice *app, bool bypass_quotes) {
     return rx::filter([=](const event_ptr &event) {
@@ -112,11 +111,15 @@ private:
 
   void try_update_position(const longfist::types::Position &position);
 
-  // 把books_update_中location_uid对应的book复制到books_，然后删除asset_updated_和position_updated_对应的内容
+  // 把books_replica_中location_uid对应的book复制到books_，然后重置asset_guards和position_guards为false
   void try_sync_book_replica(uint32_t location_uid);
+
   void try_update_asset_replica(const longfist::types::Asset &asset);
+
   void try_update_position_replica(const longfist::types::Position &position);
+
   void update_position_guard(uint32_t location_uid);
+
   Book_ptr get_book_replica(uint32_t location_uid);
 };
 } // namespace kungfu::wingchun::book
