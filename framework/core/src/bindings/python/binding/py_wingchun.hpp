@@ -87,6 +87,8 @@ public:
   bool req_account() override { PYBIND11_OVERLOAD_PURE(bool, Trader, req_account, ); }
 
   void on_start() override { PYBIND11_OVERLOAD(void, Trader, on_start, ); }
+
+  void on_exit() override { PYBIND11_OVERLOAD(void, Trader, on_exit, ); }
 };
 
 class PyAccountingMethod : public AccountingMethod {
