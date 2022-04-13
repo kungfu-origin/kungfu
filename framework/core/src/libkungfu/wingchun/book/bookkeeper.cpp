@@ -227,18 +227,23 @@ void Bookkeeper::try_sync_book_replica(uint32_t location_uid) {
     };
     asset_changed |= fun_asset_compare(old_book->asset, new_book->asset);
 
-    for (auto &new_pair : new_book->long_positions) {
-      auto &new_position = new_pair.second;
-      auto &old_position = old_book->get_position_for(new_position.direction, new_position);
-      position_changed |= old_position.volume != new_position.volume;
-      position_changed |= old_position.yesterday_volume != new_position.yesterday_volume;
-    }
-    for (auto &new_pair : new_book->short_positions) {
-      auto &new_position = new_pair.second;
-      auto &old_position = new_book->get_position_for(new_position.direction, new_position);
-      position_changed |= old_position.volume != new_position.volume;
-      position_changed |= old_position.yesterday_volume != new_position.yesterday_volume;
-    }
+    auto fun_position_compare = [](const PositionMap &source_map, Book_ptr &target_book) {
+      bool changed = false;
+      for (auto &source_pair : source_map) {
+        auto &source_position = source_pair.second;
+        auto &target_position = target_book->get_position_for(source_position.direction, source_position);
+        changed |= source_position.volume != target_position.volume;
+        changed |= source_position.yesterday_volume != target_position.yesterday_volume;
+      }
+      return changed;
+    };
+
+    // 用new_book的position去检测old_book的position,new有old无会加上
+    position_changed |= fun_position_compare(new_book->long_positions, old_book);
+    position_changed |= fun_position_compare(new_book->short_positions, old_book);
+    // 用old_book的position去检测new_book的position，old有new无会设置为0删掉
+    position_changed |= fun_position_compare(old_book->long_positions, new_book);
+    position_changed |= fun_position_compare(old_book->short_positions, new_book);
 
     // position_changed更新book也会修改asset信息
     // on_asset_update_reset仅在asset改变而position不改变的情况下调用
