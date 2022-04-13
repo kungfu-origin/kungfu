@@ -644,7 +644,7 @@ export const startTask = async (
       .map((dir) => dealSpaceInPath(path.dirname(dir)))
       .join(path.delimiter)}" run -c strategy -g "${taskLocation.group}" -n "${
       taskLocation.name
-    }" ${soPath} -a ${args}`,
+    }" ${soPath} -a "${args}"`,
   );
 
   return startProcess({
