@@ -292,6 +292,7 @@ KF_DEFINE_PACK_TYPE(                                         //
 
     (double, close_price),      //收盘价
     (double, settlement_price), //结算价
+    (double, iopv),             //基金实时参考净值
 
     (kungfu::array<double, 10>, bid_price),   //申买价
     (kungfu::array<double, 10>, ask_price),   //申卖价
