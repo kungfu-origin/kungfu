@@ -5,6 +5,6 @@ module.exports = {
   desc: 'Package kungfu prebuilt',
   setup: () => {},
   run: () => {
-    sdk.lib.prebuilt.package();
+    sdk.lib.project.package();
   },
 };
