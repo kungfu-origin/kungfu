@@ -24,7 +24,6 @@
   "dependencies": {
     "@kungfu-trader/kfx-sim": "^2.4.0-alpha.32",
     "@kungfu-trader/kfx-sim": "^2.4.0-alpha.32",
-    "@kungfu-trader/kfx-remote-td": "1.0.0",
     "@kungfu-trader/kfx-timer-task": "^2.4.0-alpha.32",
     "@kungfu-trader/kfx-xtp-demo": "^2.4.0-alpha.32",
     "@kungfu-trader/kungfu-app": "^2.4.0-alpha.32",
