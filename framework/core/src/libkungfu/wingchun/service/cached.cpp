@@ -32,10 +32,19 @@ void CacheD::on_react() {
 
     app_cache_shift_.try_emplace(source_id, locations_.at(source_id));
     auto cached_writer = get_writer(source_id);
-    app_cache_shift_.at(source_id) >> cached_writer;
 
-    profile_get_all(profile_, profile_bank_);
-    profile_bank_ >> cached_writer;
+    try {
+      app_cache_shift_.at(source_id) >> cached_writer;
+    } catch (const std::exception &ex) {
+      SPDLOG_ERROR("failed to write cache {} {} {}", source_id, get_location_uname(source_id), ex.what());
+    }
+
+    try {
+      profile_get_all(profile_, profile_bank_);
+      profile_bank_ >> cached_writer;
+    } catch (const std::exception &ex) {
+      SPDLOG_ERROR("failed to write profile info {} {} {}", source_id, get_location_uname(source_id), ex.what());
+    }
 
     mark_request_cached_done(source_id);
   });

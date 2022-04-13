@@ -30,7 +30,7 @@ export const updateStrategyPath = async (
         strategy_path: strategyPath,
         add_time: addTime,
       }),
-    )
+    );
     resolve(strategy);
   });
 };

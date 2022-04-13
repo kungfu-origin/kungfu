@@ -29,6 +29,14 @@ import { useCodeStore } from '../store/codeStore';
 import { getFileContent } from '@kungfu-trader/kungfu-js-api/utils/fileUtils';
 import path from 'path';
 import fse from 'fs-extra';
+import {
+  CodeTabSetting,
+  CodeSizeSetting,
+} from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
+import {
+  SpaceTabSettingEnum,
+  SpaceSizeSettingEnum,
+} from '@kungfu-trader/kungfu-js-api/typings/enums';
 
 monaco.editor.defineTheme(
   'monokai',
@@ -48,6 +56,11 @@ const handleEditor: {
   value: null,
 };
 const activeFile = ref<Code.FileData | null>(null);
+const indentUsingSpace: string =
+  CodeTabSetting[SpaceTabSettingEnum.SPACES].name;
+const indentUsingTab: string = CodeTabSetting[SpaceTabSettingEnum.TABS].name;
+const sizeUsingTwo: string =
+  CodeSizeSetting[SpaceSizeSettingEnum.TWOINDENT].name;
 
 watch(globallSetting.value, (newSetting) => {
   const code: Code.ICodeSetting = newSetting.code as Code.ICodeSetting;
@@ -109,8 +122,6 @@ function bindBlur(editor, curFile) {
 function curWriteFile(editor, curFile) {
   const value = editor.getValue();
   const curPath: string = path.normalize(curFile.filePath);
-  console.log(value, curPath);
-
   fse.outputFile(curPath, value);
 }
 
@@ -188,19 +199,23 @@ function buildEditor(
 // 更新缩进设置
 function updateSpaceTab(spaceTabSetting: Code.ICodeSetting) {
   const type: string = spaceTabSetting
-    ? spaceTabSetting?.tabSpaceType || 'Spaces'
-    : 'Spaces';
+    ? CodeTabSetting[spaceTabSetting?.tabSpaceType].name || indentUsingSpace
+    : indentUsingSpace;
 
   if (handleEditor.value) {
-    if (type.toLowerCase() === 'spaces') {
+    if (type === indentUsingSpace) {
       handleEditor.value.getModel()?.updateOptions({
         insertSpaces: true,
-        tabSize: +spaceTabSetting?.tabSpaceSize || 2,
+        tabSize: +(
+          CodeSizeSetting[spaceTabSetting?.tabSpaceSize].name || sizeUsingTwo
+        ),
       });
-    } else if (type.toLowerCase() === 'tabs') {
+    } else if (type === indentUsingTab) {
       handleEditor.value.getModel()?.updateOptions({
         insertSpaces: false,
-        tabSize: +spaceTabSetting?.tabSpaceSize || 2,
+        tabSize: +(
+          CodeSizeSetting[spaceTabSetting?.tabSpaceSize].name || sizeUsingTwo
+        ),
       });
     }
   }

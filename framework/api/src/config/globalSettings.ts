@@ -1,5 +1,7 @@
 import fse from 'fs-extra';
+import { SpaceSizeSettingEnum, SpaceTabSettingEnum } from '../typings/enums';
 import { KF_CONFIG_PATH } from './pathConfig';
+import { CodeSizeSetting, CodeTabSetting } from './tradingConfig';
 
 const isEnglish = process.env.LANG_ENV === 'en';
 
@@ -89,11 +91,17 @@ export const getKfGlobalSettings = (): KfSystemConfig[] => [
         tip: isEnglish
           ? 'Kungfu Editor Indentation Category'
           : '功夫编辑器缩进类别',
-        default: 'Spaces',
+        default: CodeTabSetting[SpaceTabSettingEnum.SPACES].name,
         type: 'select',
         options: [
-          { value: 'Spaces', label: 'Spaces' },
-          { value: 'Tabs', label: 'Tabs' },
+          {
+            value: SpaceTabSettingEnum.SPACES,
+            label: CodeTabSetting[SpaceTabSettingEnum.SPACES].name,
+          },
+          {
+            value: SpaceTabSettingEnum.TABS,
+            label: CodeTabSetting[SpaceTabSettingEnum.TABS].name,
+          },
         ],
       },
       {
@@ -102,11 +110,17 @@ export const getKfGlobalSettings = (): KfSystemConfig[] => [
         tip: isEnglish
           ? 'Kungfu Editor Indentation Size (space)'
           : '功夫编辑器缩进大小（空格）',
-        default: '4',
+        default: CodeSizeSetting[SpaceSizeSettingEnum.FOURINDENT].name,
         type: 'select',
         options: [
-          { value: '2', label: '2' },
-          { value: '4', label: '4' },
+          {
+            value: SpaceSizeSettingEnum.TWOINDENT,
+            label: CodeSizeSetting[SpaceSizeSettingEnum.TWOINDENT].name,
+          },
+          {
+            value: SpaceSizeSettingEnum.FOURINDENT,
+            label: CodeSizeSetting[SpaceSizeSettingEnum.FOURINDENT].name,
+          },
         ],
       },
     ],
