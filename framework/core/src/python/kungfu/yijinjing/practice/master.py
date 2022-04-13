@@ -114,6 +114,7 @@ class Master(yjj.master):
             self.ctx.logger.error("task error [%s] %s", exc_type, err_msg)
 
     def on_exit(self):
+        yjj.master.on_exit(self)
         for app in self.get_live_processes():
             self.ctx.logger.info(
                 f'terminating apprentice {app["uname"]} pid {app["pid"]}'
