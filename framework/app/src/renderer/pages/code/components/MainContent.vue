@@ -123,27 +123,24 @@ function handleSpaceSize(type: string): string {
 }
 
 function handleClick(type: indent, size: indent) {
-  let setting: Record<
-      string,
-      Record<string, KungfuApi.KfConfigValue>
-    > 
+  let setting: Record<string, Record<string, KungfuApi.KfConfigValue>>;
   if (globallSetting.value != {} && globallSetting.value.code) {
     setting = deepClone(toRaw(globallSetting.value));
   } else {
-    setting =  {
+    setting = {
       code: {
         tabSpaceType: 'a',
-        tabSpaceSize: 'a'
-      }
+        tabSpaceSize: 'a',
+      },
     };
   }
   console.log(setting);
-  
-    setting.code.tabSpaceType =
+
+  setting.code.tabSpaceType =
     handleSpaceType(type.key) || SpaceTabSettingEnum.SPACES;
-    setting.code.tabSpaceSize =
+  setting.code.tabSpaceSize =
     handleSpaceSize(size.key) || SpaceSizeSettingEnum.TWOINDENT;
-    store.setGlobalSetting(setting);
+  store.setGlobalSetting(setting);
 }
 </script>
 

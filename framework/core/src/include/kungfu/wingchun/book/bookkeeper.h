@@ -19,8 +19,7 @@ FORWARD_DECLARE_CLASS_PTR(Context)
 class BookListener {
 public:
   virtual void on_book_sync_reset(const Book &old_book, const Book &new_book){};
-  virtual void on_asset_sync_reset(const longfist::types::Asset &old_asset,
-                                     const longfist::types::Asset &new_asset){};
+  virtual void on_asset_sync_reset(const longfist::types::Asset &old_asset, const longfist::types::Asset &new_asset){};
 };
 DECLARE_PTR(BookListener)
 

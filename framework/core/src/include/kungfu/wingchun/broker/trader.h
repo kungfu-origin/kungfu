@@ -58,14 +58,14 @@ public:
 
   [[nodiscard]] yijinjing::journal::writer_ptr get_position_writer() const;
 
+  void enable_asset_sync();
+
+  void enable_positions_sync();
+
 protected:
   OrderMap orders_ = {};
   OrderActionMap actions_ = {};
   TradeMap trades_ = {};
-
-  void enable_asset_sync();
-
-  void enable_positions_sync();
 
 private:
   bool sync_asset_ = false;
