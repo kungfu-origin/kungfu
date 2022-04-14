@@ -254,7 +254,7 @@ void bind(pybind11::module &&m) {
       .def("copy_frame", &writer::copy_frame)
       .def("mark", &writer::mark)
       .def("mark_at", &writer::mark_at);
-  boost::hana::for_each(StateDataTypes, [&](auto type) {
+  boost::hana::for_each(AllDataTypes, [&](auto type) {
     using DataType = typename decltype(+boost::hana::second(type))::type;
     writer_class.def("write", py::overload_cast<int64_t, const DataType &, int32_t>(&writer::write<DataType>),
                      py::arg("trigger_time"), py::arg("data"), py::arg("msg_type") = DataType::tag);
