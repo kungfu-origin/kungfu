@@ -61,8 +61,7 @@ void Bookkeeper::on_start(const rx::connectable_observable<event_ptr> &events) {
   events | is(Trade::tag) | $$(update_book<Trade>(event, &AccountingMethod::apply_trade));
   events | is(Asset::tag) | to(location::SYNC) | $$(try_update_asset_replica(event->data<Asset>()));
   events | is(Position::tag) | to(location::SYNC) | $$(try_update_position_replica(event->data<Position>()));
-  events | is(PositionEnd::tag) | to(location::SYNC) |
-      $$(update_position_guard(event->data<PositionEnd>().holder_uid));
+  events | is(PositionEnd::tag) | to(location::SYNC) | $$(update_position_guard(event->data<PositionEnd>().holder_uid));
 
   auto fun_not_to_sync = [&](const event_ptr &event) { return event->dest() != location::SYNC; };
   events | is(Asset::tag) | filter(fun_not_to_sync) | $$(try_update_asset(event->data<Asset>()));
@@ -323,7 +322,10 @@ void Bookkeeper::try_update_position_replica(const longfist::types::Position &po
 }
 
 Book_ptr Bookkeeper::get_book_replica(uint32_t location_uid) {
-  return books_replica_.try_emplace(location_uid, make_book(location_uid)).first->second;
+  if (books_replica_.find(location_uid) == books_replica_.end()) {
+    books_replica_.emplace(location_uid, make_book(location_uid));
+  }
+  return books_replica_.at(location_uid);
 }
 
 void Bookkeeper::update_position_guard(uint32_t location_uid) {

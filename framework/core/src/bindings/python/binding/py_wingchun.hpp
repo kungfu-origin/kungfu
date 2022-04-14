@@ -286,6 +286,8 @@ void bind(pybind11::module &&m) {
       .def("on_start", &Trader::on_start)
       .def("now", &Trader::now)
       .def("get_writer", &Trader::get_writer)
+      .def("get_asset_writer", &Trader::get_asset_writer)
+      .def("get_position_writer", &Trader::get_position_writer)
       .def("get_account_type", &Trader::get_account_type)
       .def("add_timer", &Trader::add_timer)
       .def("add_time_interval", &Trader::add_time_interval)

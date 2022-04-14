@@ -54,14 +54,14 @@ public:
 
   [[nodiscard]] const std::string &get_account_id() const;
 
+  [[nodiscard]] yijinjing::journal::writer_ptr get_asset_writer() const;
+
+  [[nodiscard]] yijinjing::journal::writer_ptr get_position_writer() const;
+
 protected:
   OrderMap orders_ = {};
   OrderActionMap actions_ = {};
   TradeMap trades_ = {};
-
-  [[nodiscard]] yijinjing::journal::writer_ptr get_asset_writer() const;
-
-  [[nodiscard]] yijinjing::journal::writer_ptr get_position_writer() const;
 
   void enable_asset_sync();
 
