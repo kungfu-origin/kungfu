@@ -154,7 +154,7 @@ bool hero::check_location_exists(uint32_t source_id, uint32_t dest_id) const {
     SPDLOG_ERROR("source_id {}, {} does not exist", source_id, get_location_uname(source_id));
     return false;
   }
-  if (dest_id != 0 and dest_id != location::UPDATE and not has_location(dest_id)) {
+  if (dest_id != location::PUBLIC and dest_id != location::UPDATE and not has_location(dest_id)) {
     SPDLOG_ERROR("dest_id {}, {} does not exist", dest_id, get_location_uname(dest_id));
     return false;
   }

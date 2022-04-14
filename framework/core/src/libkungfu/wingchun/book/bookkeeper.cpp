@@ -59,17 +59,15 @@ void Bookkeeper::on_start(const rx::connectable_observable<event_ptr> &events) {
   events | is(OrderInput::tag) | $$(update_book<OrderInput>(event, &AccountingMethod::apply_order_input));
   events | is(Order::tag) | $$(update_book<Order>(event, &AccountingMethod::apply_order));
   events | is(Trade::tag) | $$(update_book<Trade>(event, &AccountingMethod::apply_trade));
-  events | is(Asset::tag) | filter([&](const event_ptr &event) { return event->dest() == location::UPDATE; }) |
-      $$(try_update_asset_replica(event->data<Asset>()));
-  events | is(Position::tag) | filter([&](const event_ptr &event) { return event->dest() == location::UPDATE; }) |
-      $$(try_update_position_replica(event->data<Position>()));
-  events | is(PositionEnd::tag) | filter([&](const event_ptr &event) { return event->dest() == location::UPDATE; }) |
+  events | is(Asset::tag) | to(location::UPDATE) | $$(try_update_asset_replica(event->data<Asset>()));
+  events | is(Position::tag) | to(location::UPDATE) | $$(try_update_position_replica(event->data<Position>()));
+  events | is(PositionEnd::tag) | to(location::UPDATE) |
       $$(update_position_guard(event->data<PositionEnd>().holder_uid));
-  events | is(Asset::tag) | filter([&](const event_ptr &event) { return event->dest() != location::UPDATE; }) |
-      $$(try_update_asset(event->data<Asset>()));
-  events | is(Position::tag) | filter([&](const event_ptr &event) { return event->dest() != location::UPDATE; }) |
-      $$(try_update_position(event->data<Position>()));
-  events | is(PositionEnd::tag) | filter([&](const event_ptr &event) { return event->dest() != location::UPDATE; }) |
+
+  auto fun_not_to_update = [&](const event_ptr &event) { return event->dest() != location::UPDATE; };
+  events | is(Asset::tag) | filter(fun_not_to_update) | $$(try_update_asset(event->data<Asset>()));
+  events | is(Position::tag) | filter(fun_not_to_update) | $$(try_update_position(event->data<Position>()));
+  events | is(PositionEnd::tag) | filter(fun_not_to_update) |
       $$(get_book(event->data<PositionEnd>().holder_uid)->update(event->gen_time()));
 
   events | is(TradingDay::tag) | $$(on_trading_day(event->data<TradingDay>().timestamp));

@@ -66,9 +66,9 @@ protected:
 
   [[nodiscard]] yijinjing::journal::writer_ptr get_position_writer() const;
 
-  void set_update_asset(bool update_asset = true);
+  void enable_asset_sync();
 
-  void set_update_position(bool update_position = true);
+  void enable_positions_sync();
 };
 } // namespace kungfu::wingchun::broker
 

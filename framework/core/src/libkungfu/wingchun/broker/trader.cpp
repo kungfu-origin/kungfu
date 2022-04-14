@@ -68,11 +68,7 @@ void TraderVendor::clean_orders() {
 const std::string &Trader::get_account_id() const { return vendor_.get_home()->name; }
 
 yijinjing::journal::writer_ptr Trader::get_asset_writer() const {
-  if (update_asset_) {
-    return get_writer(location::UPDATE);
-  } else {
-    return get_writer(location::PUBLIC);
-  }
+  return get_writer(update_asset_ ? location::UPDATE : location::PUBLIC);
 }
 
 yijinjing::journal::writer_ptr Trader::get_position_writer() const {
@@ -83,8 +79,8 @@ yijinjing::journal::writer_ptr Trader::get_position_writer() const {
   }
 }
 
-void Trader::set_update_asset(bool update_asset) { update_asset_ = update_asset; }
+void Trader::enable_asset_sync() { update_asset_ = true; }
 
-void Trader::set_update_position(bool update_position) { update_position_ = update_position; }
+void Trader::enable_positions_sync() { update_position_ = true; }
 
 } // namespace kungfu::wingchun::broker

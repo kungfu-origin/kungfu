@@ -207,7 +207,7 @@ void TraderXTP::OnQueryPosition(XTPQueryStkPositionRsp *position, XTPRI *error_i
     PositionEnd &end = writer->open_data<PositionEnd>(0);
     end.holder_uid = get_home()->uid;
     writer->close_data();
-    set_update_position();
+    enable_positions_sync();
   }
 }
 
@@ -229,7 +229,7 @@ void TraderXTP::OnQueryAsset(XTPQueryAssetRsp *asset, XTPRI *error_info, int req
     account.holder_uid = get_home()->uid;
     account.update_time = yijinjing::time::now_in_nano();
     writer->close_data();
-    set_update_asset();
+    enable_asset_sync();
   }
 }
 } // namespace kungfu::wingchun::xtp
