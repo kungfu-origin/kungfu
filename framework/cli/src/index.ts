@@ -206,12 +206,13 @@ program
   });
 
 program.on('command:*', function () {
-  console.error(
-    `Invalid command: ${program.args.join(
-      ' ',
-    )}\nSee --help for a list of available commands.`,
-  );
-  process.exit(1);
+  program.outputHelp();
+  const unrecognized = program.args.join(' ').trimEnd();
+  const invalidCommand = unrecognized !== '';
+  if (invalidCommand) {
+    console.log(`\nUnknown command: ${unrecognized}`);
+  }
+  process.exit(invalidCommand ? 1 : 0);
 });
 
 program.parse(process.argv);
