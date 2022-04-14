@@ -1,8 +1,8 @@
-from pickle import FALSE
 import kungfu
-import kungfu.yijinjing.time as kft
 from kungfu.wingchun.constants import *
 import math 
+import time
+from datetime import datetime
 
 yjj = kungfu.__binding__.yijinjing
 class orderTask:
@@ -47,12 +47,16 @@ def pre_start(context):
     context.VOLUME = int(args["volume"])
     context.volume_to_fill = context.VOLUME
     context.LASTSINGULARITY = args["lastSingularity"]
-    context.LASTSINGULARITYNANOSECOND = int(args["lastSingularityMilliSecond"]) * 1e6
+    context.LASTSINGULARITYNANOSECOND = int(args["lastSingularityMilliSecond"]) * 10**6
     context.MAX_LOT_BY_STEP = int(args["maxLotByStep"])
     trigger_time = args["triggerTime"]
     finish_time = args["finishTime"]
     context.START_TIME_IN_NANO = str_to_nanotime(trigger_time)
     context.FINISH_TIME_IN_NANO = str_to_nanotime(finish_time)
+    if context.START_TIME_IN_NANO < context.now():
+        raise ValueError("trigger time must greater than current time!")
+    if context.START_TIME_IN_NANO >= context.FINISH_TIME_IN_NANO:
+        raise ValueError("finish time must greater than trigger time!")
     if(len(sourceAccountList) == 2 and len(exchangeTicker) == 5):
         context.SOURCE = sourceAccountList[0]
         context.ACCOUNT = sourceAccountList[1]
@@ -61,18 +65,18 @@ def pre_start(context):
         context.add_account(context.SOURCE, context.ACCOUNT, 100000.0)
         context.subscribe(context.SOURCE, [context.TICKER], context.EXCHANGE)
         context.log.info(f"SOURCE {context.SOURCE} context.TICKER {context.TICKER} context.EXCHANGE {context.EXCHANGE}")
-    context.log.info(f"STEPS {context.STEPS} context.SIDE {context.SIDE} context.OFFSET {context.OFFSET} context.VOLUME {context.VOLUME} context.SOURCE {context.SOURCE} context.ACCOUNT {context.ACCOUNT} context.EXCHANGE {context.EXCHANGE} context.TICKER {context.TICKER} context.LASTSINGULARITY {context.LASTSINGULARITY}")
+    context.log.info(f"STEPS {context.STEPS} context.SIDE {context.SIDE} context.OFFSET {context.OFFSET} context.VOLUME {context.VOLUME} context.SOURCE {context.SOURCE} context.ACCOUNT {context.ACCOUNT} context.EXCHANGE {context.EXCHANGE} context.TICKER {context.TICKER} context.LASTSINGULARITY {context.LASTSINGULARITY} context.START_TIME_IN_NANO {context.START_TIME_IN_NANO} context.FINISH_TIME_IN_NANO {context.FINISH_TIME_IN_NANO}")
 
 def str_to_nanotime(tm) :
     if(tm.isdigit()) : #in milliseconds
-        return int(tm) * 1e6
+        return int(tm) * 10**6
     else :
-        timeArray = time.strptime(tss1, "%Y-%m-%d %H:%M:%S")
-        nano = int(time.mktime(timeArray)) * 1e6
+        year_month_day = time.strftime("%Y-%m-%d", time.localtime())
+        ymdhms = year_month_day + ' ' + tm.split(' ')[1]
+        timeArray = time.strptime(ymdhms, "%Y-%m-%d %H:%M:%S")
+        print(timeArray)
+        nano = int(time.mktime(timeArray) * 10**9)
         return nano
-# def post_start(context):
-#     context.log.info(f"post start {context.STEPS}")
-#     context.log.info(f"post start {context.VOLUME}")
 
 def type_to_minvol(argument):
     switcher = {
@@ -104,6 +108,11 @@ def on_trade(context, trade):
     context.ORDERS[trade.order_id] -= trade.volume
     context.volume_to_fill -= trade.volume
 
+def print_datatime(context, info, nano) :
+    date_time_for_nano = datetime.fromtimestamp(nano / (10**9))
+    time_str = date_time_for_nano.strftime("%Y-%m-%d %H:%M:%S.%f")
+    context.log.info("{} nano {} datetime {}".format(info, nano, time_str))
+
 def on_quote(context, quote):
     context.bid_price = quote.bid_price[0]
     context.ask_price = quote.ask_price[0]
@@ -122,10 +131,8 @@ def on_quote(context, quote):
         context.START_TIME_IN_NANO = int(context.now()  + 2 * 1e9)
         context.FINISH_TIME_IN_NANO = int(context.START_TIME_IN_NANO  + 30 * 1e9)
         '''
-        context.log.info("context.START_TIME_IN_NANO {}".format(context.START_TIME_IN_NANO))
-        context.log.info("context.FINISH_TIME_IN_NANO {}".format(context.FINISH_TIME_IN_NANO))
-        context.log.info("context.START_TIME_IN_NANO {}".format(kft.strftime(int(context.START_TIME_IN_NANO))))
-        context.log.info("context.FINISH_TIME_IN_NANO {}".format(kft.strftime(int(context.FINISH_TIME_IN_NANO))))
+        print_datatime(context, "on_quote context.START_TIME_IN_NANO", context.START_TIME_IN_NANO)
+        print_datatime(context, "on_quote context.FINISH_TIME_IN_NANO", context.FINISH_TIME_IN_NANO)
         interval = int((context.FINISH_TIME_IN_NANO - context.START_TIME_IN_NANO) / (context.STEPS - 1))
         context.log.info(f"interval {interval}")
         for i in range(context.STEPS):
@@ -134,11 +141,18 @@ def on_quote(context, quote):
                 last_order_cancel_time = int(context.START_TIME_IN_NANO + interval * i - (interval + context.LASTSINGULARITYNANOSECOND) / 2) if context.LASTSINGULARITY == 'true' else int(context.START_TIME_IN_NANO + interval * i - interval / 2)
                 context.add_timer(last_order_cancel_time, lambda ctx, event: cancel_all_orders(ctx))
                 context.add_timer(last_order_time, lambda ctx, event: insert_order_task(ctx, True))
+                print_datatime(context, "add_timer for cancel_all_orders at last step", last_order_cancel_time) 
+                print_datatime(context, "add_timer for insert_order_task at last step", last_order_time) 
             else:
                 context.add_timer(int(context.START_TIME_IN_NANO + interval * i), lambda ctx, event: insert_order_task(ctx, False))
+                print_datatime(context, "add_timer for insert_order_task", context.START_TIME_IN_NANO + interval * i) 
         context.has_quote = True
 
+
+
+
 def insert_order_task(context, last_order):
+    print_datatime(context, "execute insert_order_task", context.now())
     if (not last_order) and context.ORDERS:
         cancel_all_orders(context)
     else :
