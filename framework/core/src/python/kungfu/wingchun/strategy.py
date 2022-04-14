@@ -118,15 +118,15 @@ class Strategy(wc.Strategy):
         return self.ctx.wc_context.bookkeeper.get_book(location.uid)
 
     async def __async_insert_order(
-            self,
-            side,
-            instrument_id,
-            exchange_id,
-            account_id,
-            price,
-            volume,
-            price_type=PriceType.Any,
-            status_set=None,
+        self,
+        side,
+        instrument_id,
+        exchange_id,
+        account_id,
+        price,
+        volume,
+        price_type=PriceType.Any,
+        status_set=None,
     ):
         if status_set is None:
             status_set = [

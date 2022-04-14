@@ -156,10 +156,10 @@ KF_DEFINE_PACK_TYPE(                                          //
     (int64_t, from_time)                                      //
 );
 
-KF_DEFINE_PACK_TYPE(                                          //
+KF_DEFINE_PACK_TYPE(                                        //
     RequestReadFromSync, 10029, PK(source_id), PERPETUAL(), //
-    (uint32_t, source_id),                                    //
-    (int64_t, from_time)                                      //
+    (uint32_t, source_id),                                  //
+    (int64_t, from_time)                                    //
 );
 
 KF_DEFINE_PACK_TYPE(                                 //

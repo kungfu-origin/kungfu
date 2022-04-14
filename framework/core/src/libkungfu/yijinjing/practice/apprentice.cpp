@@ -231,9 +231,7 @@ void apprentice::on_read_from(const event_ptr &event) { do_read_from<RequestRead
 
 void apprentice::on_read_from_public(const event_ptr &event) { do_read_from<RequestReadFromPublic>(event, 0); }
 
-void apprentice::on_read_from_sync(const event_ptr &event) {
-  do_read_from<RequestReadFromSync>(event, location::SYNC);
-}
+void apprentice::on_read_from_sync(const event_ptr &event) { do_read_from<RequestReadFromSync>(event, location::SYNC); }
 
 void apprentice::on_write_to(const event_ptr &event) {
   auto dest_id = event->data<RequestWriteTo>().dest_id;
