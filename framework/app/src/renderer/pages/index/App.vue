@@ -111,12 +111,20 @@ onBeforeUnmount(() => {
       :status="[
         { key: 'archive', status: preStartSystemLoadingData.archive },
         { key: 'watcher', status: preStartSystemLoadingData.watcher },
+        {
+          key: 'systemLoading',
+          status: preStartSystemLoadingData.systemLoading,
+        },
       ]"
       :txt="{
         archive: { done: '功夫归档完成 ✓', loading: '功夫归档中...' },
         watcher: {
           done: '功夫环境准备完成 ✓',
           loading: '功夫环境准备中...',
+        },
+        systemLoading: {
+          done: '功夫就绪 ✓',
+          loading: '功夫就绪检查中...',
         },
       }"
     ></KfSystemPrepareModal>

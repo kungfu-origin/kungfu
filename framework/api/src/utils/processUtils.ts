@@ -332,6 +332,7 @@ export const startProcess = (
     exec_mode: 'fork',
     kill_timeout: 16000,
     env: {
+      RELOAD_AFTER_CRASHED: process.env.RELOAD_AFTER_CRASHED,
       KF_HOME: dealSpaceInPath(KF_HOME),
       KF_RUNTIME_DIR: dealSpaceInPath(KF_RUNTIME_DIR),
       LANG: `${locale}.UTF-8`,
