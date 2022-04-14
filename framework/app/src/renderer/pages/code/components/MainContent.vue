@@ -62,7 +62,7 @@ const sizeUsingTwo: string =
   CodeSizeSetting[SpaceSizeSettingEnum.TWOINDENT].name;
 const sizeUsingFour: string =
   CodeSizeSetting[SpaceSizeSettingEnum.FOURINDENT].name;
-const defaultValue = ref<string>('');
+const defaultValue = ref<string>(`${indentUsingSpace}: ${sizeUsingTwo}`);
 watch(globallSetting.value, (newSetting) => {
   defaultValue.value = `${
     newSetting?.code?.tabSpaceType
@@ -123,16 +123,27 @@ function handleSpaceSize(type: string): string {
 }
 
 function handleClick(type: indent, size: indent) {
-  const setting: Record<
-    string,
-    Record<string, KungfuApi.KfConfigValue>
-  > = deepClone(toRaw(globallSetting.value));
-
-  setting.code.tabSpaceType =
+  let setting: Record<
+      string,
+      Record<string, KungfuApi.KfConfigValue>
+    > 
+  if (globallSetting.value != {} && globallSetting.value.code) {
+    setting = deepClone(toRaw(globallSetting.value));
+  } else {
+    setting =  {
+      code: {
+        tabSpaceType: 'a',
+        tabSpaceSize: 'a'
+      }
+    };
+  }
+  console.log(setting);
+  
+    setting.code.tabSpaceType =
     handleSpaceType(type.key) || SpaceTabSettingEnum.SPACES;
-  setting.code.tabSpaceSize =
+    setting.code.tabSpaceSize =
     handleSpaceSize(size.key) || SpaceSizeSettingEnum.TWOINDENT;
-  store.setGlobalSetting(setting);
+    store.setGlobalSetting(setting);
 }
 </script>
 
