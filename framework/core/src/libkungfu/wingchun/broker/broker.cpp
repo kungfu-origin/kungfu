@@ -22,7 +22,7 @@ BrokerVendor::BrokerVendor(location_ptr location, bool low_latency) : apprentice
 }
 
 void BrokerVendor::on_start() {
-  events_ | is(RequestWriteTo::tag, RequestReadFrom::tag, RequestReadFromPublic::tag, RequestReadFromUpdate::tag) |
+  events_ | is(RequestWriteTo::tag, RequestReadFrom::tag, RequestReadFromPublic::tag, RequestReadFromSync::tag) |
       $$(notify_broker_state());
 }
 

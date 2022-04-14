@@ -25,8 +25,8 @@ void TraderVendor::on_start() {
   events_ | is(OrderAction::tag) | $$(service_->cancel_order(event));
   events_ | is(AssetRequest::tag) | $$(service_->req_account());
   events_ | is(PositionRequest::tag) | $$(service_->req_position());
-  events_ | is(AssetUpdate::tag) | $$(service_->req_account());
-  events_ | is(PositionUpdate::tag) | $$(service_->req_position());
+  events_ | is(AssetSync::tag) | $$(service_->req_account());
+  events_ | is(PositionSync::tag) | $$(service_->req_position());
   events_ | is(ResetBookRequest::tag) | $$(get_writer(location::PUBLIC)->mark(now(), ResetBookRequest::tag));
 
   clean_orders();
@@ -68,19 +68,15 @@ void TraderVendor::clean_orders() {
 const std::string &Trader::get_account_id() const { return vendor_.get_home()->name; }
 
 yijinjing::journal::writer_ptr Trader::get_asset_writer() const {
-  return get_writer(update_asset_ ? location::UPDATE : location::PUBLIC);
+  return get_writer(sync_asset_ ? location::SYNC : location::PUBLIC);
 }
 
 yijinjing::journal::writer_ptr Trader::get_position_writer() const {
-  if (update_position_) {
-    return get_writer(location::UPDATE);
-  } else {
-    return get_writer(location::PUBLIC);
-  }
+  return get_writer(sync_position_ ? location::SYNC : location::PUBLIC);
 }
 
-void Trader::enable_asset_sync() { update_asset_ = true; }
+void Trader::enable_asset_sync() { sync_asset_ = true; }
 
-void Trader::enable_positions_sync() { update_position_ = true; }
+void Trader::enable_positions_sync() { sync_position_ = true; }
 
 } // namespace kungfu::wingchun::broker

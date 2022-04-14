@@ -141,7 +141,7 @@ void Client::connect(const event_ptr &event, const Register &register_data) {
     app_.request_write_to(app_.now(), app_uid);
     app_.request_read_from(app_.now(), app_uid, resume_time_point);
     app_.request_read_from_public(app_.now(), app_uid, resume_time_point);
-    app_.request_read_from_update(app_.now(), app_uid, resume_time_point); // 类似于request_read_from_public
+    app_.request_read_from_sync(app_.now(), app_uid, resume_time_point); // 类似于request_read_from_public
     SPDLOG_INFO("resume {} connection from {}", app_.get_location_uname(app_uid), time::strftime(resume_time_point));
   }
   if (app_location->category == category::STRATEGY and should_connect_strategy(app_location)) {

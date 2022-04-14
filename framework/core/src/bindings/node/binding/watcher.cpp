@@ -535,7 +535,7 @@ void Watcher::UpdateBook(const event_ptr &event, const Position &position) {
   }
 }
 
-void Watcher::on_asset_update_reset(const longfist::types::Asset &old_asset, const longfist::types::Asset &new_asset) {
+void Watcher::on_asset_sync_reset(const longfist::types::Asset &old_asset, const longfist::types::Asset &new_asset) {
 
   // watcher维护的bookkeeper中，与new_book(TD) has_channel的strategy更新前端数据
   auto fun_has_channel = [&](const Asset &st_asset) {
@@ -560,8 +560,8 @@ void Watcher::on_asset_update_reset(const longfist::types::Asset &old_asset, con
   }
 }
 
-void Watcher::on_book_update_reset(const book::Book &old_book, const book::Book &new_book) {
-  // on_book_update_reset调用时，bookkeeper中所有TD的book都是旧的，当回调结束后才替换成新的book
+void Watcher::on_book_sync_reset(const book::Book &old_book, const book::Book &new_book) {
+  // on_book_sync_reset调用时，bookkeeper中所有TD的book都是旧的，当回调结束后才替换成新的book
 
   auto fun_update_st_position = [&](book::PositionMap &position_map) {
     for (auto &st_pair : position_map) {

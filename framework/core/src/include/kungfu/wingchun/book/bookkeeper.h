@@ -15,11 +15,11 @@ typedef std::unordered_map<uint32_t, Book_ptr> BookMap;
 
 typedef std::unordered_map<longfist::enums::InstrumentType, AccountingMethod_ptr> AccountingMethodMap;
 
-FORWARD_DECLARE_PTR(Context)
+FORWARD_DECLARE_CLASS_PTR(Context)
 class BookListener {
 public:
-  virtual void on_book_update_reset(const Book &old_book, const Book &new_book){};
-  virtual void on_asset_update_reset(const longfist::types::Asset &old_asset,
+  virtual void on_book_sync_reset(const Book &old_book, const Book &new_book){};
+  virtual void on_asset_sync_reset(const longfist::types::Asset &old_asset,
                                      const longfist::types::Asset &new_asset){};
 };
 DECLARE_PTR(BookListener)
@@ -93,7 +93,7 @@ private:
   BookMap books_ = {};
   AccountingMethodMap accounting_methods_ = {};
   std::vector<BookListener_ptr> book_listeners_ = {};
-  BookMap books_replica_ = {}; //暂存从location::UPDATE传来的asset和position信息
+  BookMap books_replica_ = {}; //暂存从location::SYNC传来的asset和position信息
   std::unordered_map<uint32_t, bool> books_replica_asset_guards_ = {}; //收到PositionEnd::tag添加对应<location_uid,true>
   std::unordered_map<uint32_t, bool> books_replica_position_guard_ = {}; //收到Asset::tag添加对应<location_uid,true>
 

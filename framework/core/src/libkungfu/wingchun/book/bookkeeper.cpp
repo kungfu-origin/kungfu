@@ -59,15 +59,15 @@ void Bookkeeper::on_start(const rx::connectable_observable<event_ptr> &events) {
   events | is(OrderInput::tag) | $$(update_book<OrderInput>(event, &AccountingMethod::apply_order_input));
   events | is(Order::tag) | $$(update_book<Order>(event, &AccountingMethod::apply_order));
   events | is(Trade::tag) | $$(update_book<Trade>(event, &AccountingMethod::apply_trade));
-  events | is(Asset::tag) | to(location::UPDATE) | $$(try_update_asset_replica(event->data<Asset>()));
-  events | is(Position::tag) | to(location::UPDATE) | $$(try_update_position_replica(event->data<Position>()));
-  events | is(PositionEnd::tag) | to(location::UPDATE) |
+  events | is(Asset::tag) | to(location::SYNC) | $$(try_update_asset_replica(event->data<Asset>()));
+  events | is(Position::tag) | to(location::SYNC) | $$(try_update_position_replica(event->data<Position>()));
+  events | is(PositionEnd::tag) | to(location::SYNC) |
       $$(update_position_guard(event->data<PositionEnd>().holder_uid));
 
-  auto fun_not_to_update = [&](const event_ptr &event) { return event->dest() != location::UPDATE; };
-  events | is(Asset::tag) | filter(fun_not_to_update) | $$(try_update_asset(event->data<Asset>()));
-  events | is(Position::tag) | filter(fun_not_to_update) | $$(try_update_position(event->data<Position>()));
-  events | is(PositionEnd::tag) | filter(fun_not_to_update) |
+  auto fun_not_to_sync = [&](const event_ptr &event) { return event->dest() != location::SYNC; };
+  events | is(Asset::tag) | filter(fun_not_to_sync) | $$(try_update_asset(event->data<Asset>()));
+  events | is(Position::tag) | filter(fun_not_to_sync) | $$(try_update_position(event->data<Position>()));
+  events | is(PositionEnd::tag) | filter(fun_not_to_sync) |
       $$(get_book(event->data<PositionEnd>().holder_uid)->update(event->gen_time()));
 
   events | is(TradingDay::tag) | $$(on_trading_day(event->data<TradingDay>().timestamp));
@@ -217,7 +217,7 @@ void Bookkeeper::try_sync_book_replica(uint32_t location_uid) {
     bool position_changed = false;
     bool asset_changed = false;
 
-    auto fun_asset_compare = [](const Asset old_asset, const Asset new_asset) {
+    auto fun_asset_compare = [](const Asset &old_asset, const Asset &new_asset) {
       bool asset_changed = false;
       asset_changed |= old_asset.avail != new_asset.avail;
       asset_changed |= old_asset.margin != new_asset.margin;
@@ -244,10 +244,10 @@ void Bookkeeper::try_sync_book_replica(uint32_t location_uid) {
     position_changed |= fun_position_compare(old_book->short_positions, new_book);
 
     // position_changed更新book也会修改asset信息
-    // on_asset_update_reset仅在asset改变而position不改变的情况下调用
+    // on_asset_sync_reset仅在asset改变而position不改变的情况下调用
     if (asset_changed and !position_changed) {
-      auto old_asset = std::make_shared<Asset>();
-      memcpy(old_asset.get(), &old_book->asset, sizeof(Asset));
+      Asset old_asset = {};
+      memcpy(&old_asset, &(old_book->asset), sizeof(old_asset));
       old_book->asset = new_book->asset;
 
       for (auto &bk_pair : books_) {
@@ -261,11 +261,11 @@ void Bookkeeper::try_sync_book_replica(uint32_t location_uid) {
       }
 
       for (auto &book_listener : book_listeners_) {
-        book_listener->on_asset_update_reset(*old_asset, old_book->asset);
+        book_listener->on_asset_sync_reset(old_asset, old_book->asset);
       }
     }
 
-    // position改变更新book，包括asset和position都更新并回调on_book_update_reset
+    // position改变更新book，包括asset和position都更新并回调on_book_sync_reset
     if (position_changed) {
       // 遍历所有策略的book，如果有position的source_id和account_id是与本TD的一样，则更新
       auto fun_update_st_position = [&](PositionMap &position_map) {
@@ -294,7 +294,7 @@ void Bookkeeper::try_sync_book_replica(uint32_t location_uid) {
 
       // 更新完strategy的position再调用回调
       for (auto &book_listener : book_listeners_) {
-        book_listener->on_book_update_reset(*old_book, *new_book);
+        book_listener->on_book_sync_reset(*old_book, *new_book);
       }
       // 如果不先做完上面操作提前进行了book替换，会导致前端无法把虚假持仓的volume设置为0
       // 做完以下替换后，Watcher检测遍历td的book时，持仓为0的position已删除，处理操作会跳过该position导致页面上的虚假volume无法删除
@@ -323,10 +323,7 @@ void Bookkeeper::try_update_position_replica(const longfist::types::Position &po
 }
 
 Book_ptr Bookkeeper::get_book_replica(uint32_t location_uid) {
-  if (books_replica_.find(location_uid) == books_replica_.end()) {
-    books_replica_.emplace(location_uid, make_book(location_uid));
-  }
-  return books_replica_.at(location_uid);
+  return books_replica_.try_emplace(location_uid, make_book(location_uid)).first->second;
 }
 
 void Bookkeeper::update_position_guard(uint32_t location_uid) {

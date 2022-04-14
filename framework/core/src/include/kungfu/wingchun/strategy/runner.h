@@ -25,9 +25,9 @@ public:
 
   void on_trading_day(const event_ptr &event, int64_t daytime) override;
 
-  void on_book_update_reset(const book::Book &old_book, const book::Book &new_book) override;
+  void on_book_sync_reset(const book::Book &old_book, const book::Book &new_book) override;
 
-  void on_asset_update_reset(const longfist::types::Asset &old_asset, const longfist::types::Asset &new_asset) override;
+  void on_asset_sync_reset(const longfist::types::Asset &old_asset, const longfist::types::Asset &new_asset) override;
 
 protected:
   void on_react() override;

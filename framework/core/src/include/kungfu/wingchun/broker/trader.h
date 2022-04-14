@@ -59,9 +59,6 @@ protected:
   OrderActionMap actions_ = {};
   TradeMap trades_ = {};
 
-  bool update_asset_ = false;
-  bool update_position_ = false;
-
   [[nodiscard]] yijinjing::journal::writer_ptr get_asset_writer() const;
 
   [[nodiscard]] yijinjing::journal::writer_ptr get_position_writer() const;
@@ -69,6 +66,10 @@ protected:
   void enable_asset_sync();
 
   void enable_positions_sync();
+
+private:
+  bool sync_asset_ = false;
+  bool sync_position_ = false;
 };
 } // namespace kungfu::wingchun::broker
 

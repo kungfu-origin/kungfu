@@ -136,17 +136,17 @@ void Runner::prepare(const event_ptr &event) {
   post_start();
 }
 
-void Runner::on_book_update_reset(const book::Book &old_book, const book::Book &new_book) {
+void Runner::on_book_sync_reset(const book::Book &old_book, const book::Book &new_book) {
   auto context = std::dynamic_pointer_cast<Context>(context_);
   for (const auto &strategy : strategies_) {
-    strategy->on_book_update_reset(context, old_book, new_book);
+    strategy->on_book_sync_reset(context, old_book, new_book);
   }
 }
 
-void Runner::on_asset_update_reset(const longfist::types::Asset &old_asset, const longfist::types::Asset &new_asset) {
+void Runner::on_asset_sync_reset(const longfist::types::Asset &old_asset, const longfist::types::Asset &new_asset) {
   auto context = std::dynamic_pointer_cast<Context>(context_);
   for (const auto &strategy : strategies_) {
-    strategy->on_asset_update_reset(context, old_asset, new_asset);
+    strategy->on_asset_sync_reset(context, old_asset, new_asset);
   }
 }
 
