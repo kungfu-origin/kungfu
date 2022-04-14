@@ -430,6 +430,7 @@ function handleRemoveTd(item: KungfuApi.KfConfig) {
           </template>
           <template v-else-if="column.dataIndex === 'avail'">
             <KfBlinkNum
+              mode="compare-zero"
               v-if="record.category === 'td'"
               :num="dealAssetPrice(getAssetsByKfConfig(record).avail)"
             ></KfBlinkNum>

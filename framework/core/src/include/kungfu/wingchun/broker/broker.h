@@ -24,6 +24,8 @@ public:
 
   BrokerVendor(location_ptr location, bool low_latency);
 
+  void on_exit() override;
+
 protected:
   virtual BrokerService_ptr get_service() = 0;
 
@@ -42,6 +44,8 @@ public:
   virtual ~BrokerService() = default;
 
   virtual void on_start();
+
+  virtual void on_exit();
 
   virtual void on_trading_day(const event_ptr &event, int64_t daytime);
 

@@ -199,7 +199,7 @@ function buildEditor(
 // 更新缩进设置
 function updateSpaceTab(spaceTabSetting: Code.ICodeSetting) {
   const type: string = spaceTabSetting
-    ? CodeTabSetting[spaceTabSetting?.tabSpaceType].name || indentUsingSpace
+    ? CodeTabSetting[spaceTabSetting?.tabSpaceType]?.name || indentUsingSpace
     : indentUsingSpace;
 
   if (handleEditor.value) {
@@ -207,14 +207,14 @@ function updateSpaceTab(spaceTabSetting: Code.ICodeSetting) {
       handleEditor.value.getModel()?.updateOptions({
         insertSpaces: true,
         tabSize: +(
-          CodeSizeSetting[spaceTabSetting?.tabSpaceSize].name || sizeUsingTwo
+          CodeSizeSetting[spaceTabSetting?.tabSpaceSize]?.name || sizeUsingTwo
         ),
       });
     } else if (type === indentUsingTab) {
       handleEditor.value.getModel()?.updateOptions({
         insertSpaces: false,
         tabSize: +(
-          CodeSizeSetting[spaceTabSetting?.tabSpaceSize].name || sizeUsingTwo
+          CodeSizeSetting[spaceTabSetting?.tabSpaceSize]?.name || sizeUsingTwo
         ),
       });
     }
