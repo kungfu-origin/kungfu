@@ -97,9 +97,9 @@ struct Book {
 
   void replace(const longfist::types::Trade &trade);
 
-  const InstrumentMap &get_instruments() const { return instruments; }
+  [[nodiscard]] const InstrumentMap &get_instruments() const { return instruments; }
 
-  const CommissionMap &get_commissions() const { return commissions; }
+  [[nodiscard]] const CommissionMap &get_commissions() const { return commissions; }
 };
 } // namespace kungfu::wingchun::book
 

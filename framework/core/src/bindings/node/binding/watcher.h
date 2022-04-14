@@ -20,11 +20,19 @@ namespace kungfu::node {
 constexpr uint64_t ID_TRANC = 0x00000000FFFFFFFF;
 constexpr uint32_t PAGE_ID_MASK = 0x80000000;
 
-class Watcher : public Napi::ObjectWrap<Watcher>, public yijinjing::practice::apprentice {
+class Watcher : public Napi::ObjectWrap<Watcher>,
+                public yijinjing::practice::apprentice,
+                public wingchun::book::BookListener {
 public:
   explicit Watcher(const Napi::CallbackInfo &info);
 
   ~Watcher() override;
+
+  virtual void on_book_sync_reset(const wingchun::book::Book &old_book,
+                                    const wingchun::book::Book &new_book) override;
+
+  virtual void on_asset_sync_reset(const longfist::types::Asset &old_asset,
+                                     const longfist::types::Asset &new_asset) override;
 
   void NoSet(const Napi::CallbackInfo &info, const Napi::Value &value);
 
