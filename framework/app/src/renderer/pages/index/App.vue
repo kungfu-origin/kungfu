@@ -124,7 +124,7 @@ onBeforeUnmount(() => {
         },
         systemLoading: {
           done: '功夫就绪 ✓',
-          loading: '功夫就绪检查中...',
+          loading: '等待功夫就绪...',
         },
       }"
     ></KfSystemPrepareModal>
