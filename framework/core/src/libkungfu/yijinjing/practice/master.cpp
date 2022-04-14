@@ -30,6 +30,8 @@ master::master(location_ptr home, bool low_latency)
   auto io_device = std::dynamic_pointer_cast<io_device_master>(get_io_device());
   writers_.emplace(location::PUBLIC, io_device->open_writer(0));
   get_writer(location::PUBLIC)->mark(start_time_, SessionStart::tag);
+  writers_.emplace(location::SYNC, io_device->open_writer(location::SYNC));
+  get_writer(location::SYNC)->mark(start_time_, SessionStart::tag);
 }
 
 index::session_builder &master::get_session_builder() { return session_builder_; }
@@ -38,6 +40,7 @@ void master::on_exit() {
   auto io_device = std::dynamic_pointer_cast<io_device_master>(get_io_device());
   auto now = time::now_in_nano();
   get_writer(location::PUBLIC)->mark(now, SessionEnd::tag);
+  get_writer(location::SYNC)->mark(now, SessionEnd::tag);
 }
 
 void master::on_notify() { get_io_device()->get_publisher()->notify(); }
@@ -79,7 +82,12 @@ void master::register_app(const event_ptr &event) {
   public_writer->write(event->gen_time(), *std::dynamic_pointer_cast<Location>(app_location));
   public_writer->write(event->gen_time(), register_data);
 
+  auto update_writer = get_writer(location::SYNC);
+  update_writer->write(event->gen_time(), *std::dynamic_pointer_cast<Location>(app_location));
+  update_writer->write(event->gen_time(), register_data);
+
   require_write_to(event->gen_time(), app_location->uid, location::PUBLIC);
+  require_write_to(event->gen_time(), app_location->uid, location::SYNC);
   require_write_to(event->gen_time(), app_location->uid, master_cmd_location->uid);
 
   app_cmd_writer->mark(event->gen_time(), SessionStart::tag);
@@ -116,6 +124,7 @@ void master::react() {
   events_ | is(RequestReadFrom::tag) | $$(on_request_read_from(event));
   events_ | is(RequestReadFrom::tag) | $$(check_cached_ready_to_read(event));
   events_ | is(RequestReadFromPublic::tag) | $$(on_request_read_from_public(event));
+  events_ | is(RequestReadFromSync::tag) | $$(on_request_read_from_sync(event));
   events_ | is(Channel::tag) | $$(on_channel_request(event));
   events_ | is(TimeRequest::tag) | $$(on_time_request(event));
   events_ | is(Location::tag) | $$(on_new_location(event));
@@ -232,6 +241,11 @@ void master::on_request_cached_done(const event_ptr &event) {
   app_cmd_writer->mark(now(), RequestStart::tag);
   write_registries(event->gen_time(), app_cmd_writer);
   write_channels(event->gen_time(), app_cmd_writer);
+}
+
+void master::on_request_read_from_sync(const event_ptr &event) {
+  const RequestReadFromSync &request = event->data<RequestReadFromSync>();
+  require_read_from_sync(event->gen_time(), event->source(), request.source_id, request.from_time);
 }
 
 void master::on_channel_request(const event_ptr &event) {

@@ -42,10 +42,14 @@ void Ledger::on_start() {
   events_ | is(MirrorPositionsRequest::tag) | $$(mirror_positions(event->gen_time(), event->source()));
   events_ | is(PositionRequest::tag) | $$(write_strategy_data(event->gen_time(), event->source()));
   events_ | is(AssetRequest::tag) | $$(write_book_reset(event->gen_time(), event->source()));
-  events_ | is(PositionEnd::tag) | $$(update_account_book(event->gen_time(), event->data<PositionEnd>().holder_uid););
+  events_ | is(PositionEnd::tag) | filter([&](const event_ptr &event) { return event->dest() != location::SYNC; }) |
+      $$(update_account_book(event->gen_time(), event->data<PositionEnd>().holder_uid););
 
   add_time_interval(time_unit::NANOSECONDS_PER_MINUTE, [&](auto e) { write_asset_snapshots(AssetSnapshot::tag); });
   add_time_interval(time_unit::NANOSECONDS_PER_HOUR, [&](auto e) { write_asset_snapshots(DailyAsset::tag); });
+
+  add_time_interval(time_unit::NANOSECONDS_PER_MINUTE, [&](auto e) { request_asset_sync(e->gen_time()); });
+  add_time_interval(time_unit::NANOSECONDS_PER_MINUTE, [&](auto e) { request_position_sync(e->gen_time()); });
 
   refresh_books();
 }
@@ -259,4 +263,25 @@ void Ledger::write_asset_snapshots(int32_t msg_type) {
     }
   }
 }
+
+void Ledger::request_asset_sync(int64_t trigger_time) {
+  for (const auto &pair : bookkeeper_.get_books()) {
+    auto &book = pair.second;
+    auto &asset = book->asset;
+    if (asset.ledger_category == LedgerCategory::Account and has_writer(asset.holder_uid)) {
+      get_writer(asset.holder_uid)->mark(trigger_time, AssetSync::tag);
+    }
+  }
+}
+
+void Ledger::request_position_sync(int64_t trigger_time) {
+  for (const auto &pair : bookkeeper_.get_books()) {
+    auto &book = pair.second;
+    auto &asset = book->asset;
+    if (asset.ledger_category == LedgerCategory::Account and has_writer(asset.holder_uid)) {
+      get_writer(asset.holder_uid)->mark(trigger_time, PositionSync::tag);
+    }
+  }
+}
+
 } // namespace kungfu::wingchun::service
