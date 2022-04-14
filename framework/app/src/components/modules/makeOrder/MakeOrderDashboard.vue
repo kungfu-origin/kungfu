@@ -7,6 +7,7 @@ import {
   onMounted,
   ref,
   watch,
+  h
 } from 'vue';
 import KfDashboard from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfDashboard.vue';
 import KfDashboardItem from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfDashboardItem.vue';
@@ -16,8 +17,8 @@ import {
   useTriggerMakeOrder,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import { getConfigSettings } from './config';
-import { message } from 'ant-design-vue';
-import { makeOrderByOrderInput } from '@kungfu-trader/kungfu-js-api/kungfu';
+import { message, Modal } from 'ant-design-vue';
+import { makeOrderByOrderInput, dealOrderInputItem } from '@kungfu-trader/kungfu-js-api/kungfu';
 import { InstrumentTypeEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import {
   useCurrentGlobalKfLocation,
@@ -35,6 +36,7 @@ const app = getCurrentInstance();
 const formState = ref(
   initFormStateByConfig(getConfigSettings('td', InstrumentTypeEnum.future), {}),
 );
+
 const formRef = ref();
 const { subscribeAllInstrumentByAppStates } = useInstruments();
 const { appStates, processStatusData } = useProcessStatusDetailData();
@@ -63,6 +65,8 @@ const configSettings = computed(() => {
     +formState.value.price_type,
   );
 });
+
+const isShowConfirmModal = ref<boolean>(false);
 
 onMounted(() => {
   if (app?.proxy) {
@@ -151,71 +155,113 @@ function handleResetMakeOrderForm() {
   });
 }
 
+// 拆单
+function handleApartOrder () {
+  console.log('拆单');
+  
+}
+
+
+
 function handleMakeOrder() {
-  formRef.value
-    .validate()
-    .then(() => {
-      const instrument = formState.value.instrument.toString();
-      const instrumnetResolved =
-        transformSearchInstrumentResultToInstrument(instrument);
+  
+  const instrument = formState.value.instrument.toString();
+  const instrumnetResolved =
+    transformSearchInstrumentResultToInstrument(instrument);
 
-      if (!instrumnetResolved) {
-        message.error('标的错误');
-        return;
+  if (!instrumnetResolved) {
+    message.error('标的错误');
+    return;
+  }
+
+  const { exchangeId, instrumentId, instrumentType } = instrumnetResolved;
+
+  const {
+    account_id,
+    limit_price,
+    volume,
+    price_type,
+    side,
+    offset,
+    hedge_flag,
+  } = formState.value;
+
+  const makeOrderInput: KungfuApi.MakeOrderInput = {
+    instrument_id: instrumentId,
+    instrument_type: +instrumentType,
+    exchange_id: exchangeId,
+    limit_price: +limit_price,
+    volume: +volume,
+    price_type: +price_type,
+    side: +side,
+    offset: +(offset !== undefined ? offset : +side === 0 ? 0 : 1),
+    hedge_flag: +(hedge_flag || 0),
+    parent_id: BigInt(0),
+  };
+  const orderInput = dealOrderInputItem(makeOrderInput)
+  const vnode = Object.keys(orderInput)
+    .filter(key => {
+      if (orderInput[key].toString() === '[object Object]') {
+        return false;
       }
-
-      const { exchangeId, instrumentId, instrumentType } = instrumnetResolved;
-
-      const {
-        account_id,
-        limit_price,
-        volume,
-        price_type,
-        side,
-        offset,
-        hedge_flag,
-      } = formState.value;
-
-      const makeOrderInput: KungfuApi.MakeOrderInput = {
-        instrument_id: instrumentId,
-        instrument_type: +instrumentType,
-        exchange_id: exchangeId,
-        limit_price: +limit_price,
-        volume: +volume,
-        price_type: +price_type,
-        side: +side,
-        offset: +(offset !== undefined ? offset : +side === 0 ? 0 : 1),
-        hedge_flag: +(hedge_flag || 0),
-        parent_id: BigInt(0),
-      };
-
-      if (!currentGlobalKfLocation.value || !window.watcher) {
-        message.error('当前 Location 错误');
-        return;
-      }
-
-      const tdProcessId =
-        currentGlobalKfLocation.value?.category === 'td'
-          ? getProcessIdByKfLocation(currentGlobalKfLocation.value)
-          : `td_${account_id.toString()}`;
-
-      if (processStatusData.value[tdProcessId] !== 'online') {
-        message.error(`请先启动 ${tdProcessId} 交易进程`);
-        return;
-      }
-
-      makeOrderByOrderInput(
-        window.watcher,
-        makeOrderInput,
-        currentGlobalKfLocation.value,
-        tdProcessId.toAccountId(),
-      ).catch((err) => {
-        message.error(err.message);
-      });
+      return orderInput[key] !== '';
     })
-    .catch((err: Error) => {
-      console.error(err);
-    });
+    .map(key => 
+      h('div', {class: 'trading-data-detail-row'}, [
+        h('span', { class: 'label' }, `${key}`),
+        h('span', { class: 'value' }, `${orderInput[key]}`)
+      ])
+    )
+  
+  Modal.confirm({
+    title: '下单确认',
+    content: h(
+      'div',
+      {
+        class: 'trading-data-detail__warp'
+      },
+      vnode
+    ),
+      okText: '确 定',
+      cancelText: '取 消',
+    onOk() {
+      formRef.value
+        .validate()
+        .then(() => {
+          if (!currentGlobalKfLocation.value || !window.watcher) {
+            message.error('当前 Location 错误');
+            return;
+          }
+
+          const tdProcessId =
+            currentGlobalKfLocation.value?.category === 'td'
+              ? getProcessIdByKfLocation(currentGlobalKfLocation.value)
+              : `td_${account_id.toString()}`;
+
+          if (processStatusData.value[tdProcessId] !== 'online') {
+            message.error(`请先启动 ${tdProcessId} 交易进程`);
+            return;
+          }
+
+          makeOrderByOrderInput(
+            window.watcher,
+            makeOrderInput,
+            currentGlobalKfLocation.value,
+            tdProcessId.toAccountId(),
+          ).catch((err) => {
+            message.error(err.message);
+          });
+        })
+        .catch((err: Error) => {
+          console.error(err);
+        }).finally(() => {
+          isShowConfirmModal.value = false;
+        });
+     },
+     onCancel() {
+       return
+     }
+  })
 }
 </script>
 
@@ -254,11 +300,20 @@ function handleMakeOrder() {
           ></KfConfigSettingsForm>
         </div>
         <div class="make-order-btns">
-          <a-button size="small" @click="handleMakeOrder">下单</a-button>
+          <a-button class="make-order" size="small" @click="handleMakeOrder">下单</a-button>
+          <a-button size="small" @click="handleApartOrder">拆单</a-button>
         </div>
       </div>
     </KfDashboard>
+    <!-- <OrderConfirmModal
+      v-if="isShowConfirmModal"
+      v-model:visible="isShowConfirmModal"
+      @confirm="handleMakeOrder"
+      :formState="orderInput"
+    >
+    </OrderConfirmModal> -->
   </div>
+
 </template>
 <style lang="less">
 .kf-make-order-dashboard__warp {
@@ -289,9 +344,12 @@ function handleMakeOrder() {
     .make-order-btns {
       width: 40px;
       height: 100%;
+      .make-order {
+        margin-bottom: 8px;
+      }
 
       .ant-btn {
-        height: 100%;
+        height: 48%;
         text-align: center;
         word-break: break-word;
         word-wrap: unset;
