@@ -42,6 +42,7 @@ class KungfuCoreConan(ConanFile):
         "freezer": ["nuitka", "pyinstaller"],
         "node_version": "ANY",
         "electron_version": "ANY",
+        "vs_toolset": [None, "ClangCL"],
     }
     default_options = {
         "fmt:header_only": "True",
@@ -53,6 +54,7 @@ class KungfuCoreConan(ConanFile):
         "freezer": "pyinstaller",
         "node_version": "ANY",
         "electron_version": "ANY",
+        "vs_toolset": None,
     }
     cpp_files_extensions = [".h", ".hpp", ".hxx", ".cpp", ".c", ".cc", ".cxx"]
     conanfile_dir = path.dirname(path.realpath(__file__))
@@ -75,6 +77,8 @@ class KungfuCoreConan(ConanFile):
     def configure(self):
         if tools.detected_os() != "Windows":
             self.settings.compiler.libcxx = "libstdc++"
+        else:
+            self.settings.compiler.toolset = self.options.vs_toolset
 
     def generate(self):
         """Updates mtime of lock files for node-gyp sake"""
@@ -93,7 +97,8 @@ class KungfuCoreConan(ConanFile):
     def build(self):
         build_type = self.__get_build_type()
         self.__clean_build_info(build_type)
-        self.__run_build(build_type, "node")
+        if tools.detected_os() != "Windows":
+            self.__run_build(build_type, "node")
         self.__run_build(build_type, "electron")
         self.__gen_build_info(build_type)
         self.__show_build_info(build_type)
@@ -228,8 +233,13 @@ class KungfuCoreConan(ConanFile):
             .strip()
         )
 
+        toolset_option = (
+            ["--toolset", str(self.options.vs_toolset)]
+            if self.options.vs_toolset
+            else []
+        )
         build_option = (
-            ["--toolset", "host=" + str(self.options.arch)]
+            toolset_option + ["--platform", str(self.options.arch)]
             if tools.detected_os() == "Windows"
             else []
         )

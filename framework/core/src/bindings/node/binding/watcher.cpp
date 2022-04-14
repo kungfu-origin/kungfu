@@ -56,9 +56,9 @@ inline bool GetBypassRestore(const Napi::CallbackInfo &info) {
 }
 
 Watcher::Watcher(const Napi::CallbackInfo &info)
-    : ObjectWrap(info), apprentice(GetWatcherLocation(info), true),
+    : ObjectWrap(info), apprentice(GetWatcherLocation(info), true), bypass_quotes_(GetBypassQuotes(info)),
       ledger_location_(location::make_shared(mode::LIVE, category::SYSTEM, "service", "ledger", get_locator())),
-      bypass_quotes_(GetBypassQuotes(info)), broker_client_(*this), bookkeeper_(*this, broker_client_),
+      broker_client_(*this), bookkeeper_(*this, broker_client_),
       history_ref_(Napi::ObjectReference::New(History::NewInstance({info[0]}).ToObject(), 1)),
       config_ref_(Napi::ObjectReference::New(ConfigStore::NewInstance({info[0]}).ToObject(), 1)),
       commission_ref_(Napi::ObjectReference::New(CommissionStore::NewInstance({info[0]}).ToObject(), 1)),

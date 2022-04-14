@@ -13,8 +13,8 @@
 
 namespace kungfu::wingchun::broker {
 
-FORWARD_DECLARE_PTR(BrokerVendor)
-FORWARD_DECLARE_PTR(BrokerService)
+FORWARD_DECLARE_CLASS_PTR(BrokerVendor)
+FORWARD_DECLARE_CLASS_PTR(BrokerService)
 
 class BrokerVendor : public yijinjing::practice::apprentice {
 public:
@@ -23,6 +23,8 @@ public:
   typedef longfist::enums::BrokerState BrokerState;
 
   BrokerVendor(location_ptr location, bool low_latency);
+
+  void on_exit() override;
 
 protected:
   virtual BrokerService_ptr get_service() = 0;
@@ -42,6 +44,8 @@ public:
   virtual ~BrokerService() = default;
 
   virtual void on_start();
+
+  virtual void on_exit();
 
   virtual void on_trading_day(const event_ptr &event, int64_t daytime);
 

@@ -32,10 +32,19 @@ void CacheD::on_react() {
 
     app_cache_shift_.try_emplace(source_id, locations_.at(source_id));
     auto cached_writer = get_writer(source_id);
-    app_cache_shift_.at(source_id) >> cached_writer;
 
-    profile_get_all(profile_, profile_bank_);
-    profile_bank_ >> cached_writer;
+    try {
+      app_cache_shift_.at(source_id) >> cached_writer;
+    } catch (const std::exception &ex) {
+      SPDLOG_ERROR("failed to write cache {} {} {}", source_id, get_location_uname(source_id), ex.what());
+    }
+
+    try {
+      profile_get_all(profile_, profile_bank_);
+      profile_bank_ >> cached_writer;
+    } catch (const std::exception &ex) {
+      SPDLOG_ERROR("failed to write profile info {} {} {}", source_id, get_location_uname(source_id), ex.what());
+    }
 
     mark_request_cached_done(source_id);
   });
@@ -183,16 +192,9 @@ void CacheD::ensure_cached_storage(uint32_t source_id, uint32_t dest_id) {
 }
 
 void CacheD::feed(const event_ptr &event) {
-
-  uint32_t source_id = event->source();
-  uint32_t dest_id = event->dest();
-
-  if (get_location(source_id)->category == category::MD) {
-    if (event->msg_type() != Instrument::tag) {
-      return;
-    }
+  if (event->msg_type() != Instrument::tag and get_location(event->source())->category == category::MD) {
+    return;
   }
-
   feed_state_data(event, feed_bank_);
   feed_profile_data(event, profile_bank_);
 }

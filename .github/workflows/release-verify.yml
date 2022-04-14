@@ -9,7 +9,7 @@ on:
 
 jobs:
   try:
-    uses: kungfu-trader/workflows/.github/workflows/.release-verify.yml@v1.0-alpha
+    uses: kungfu-trader/workflows/.github/workflows/.release-verify.yml@v1
     with:
       use-pipenv: true
     secrets:

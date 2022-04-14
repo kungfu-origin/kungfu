@@ -335,18 +335,28 @@ function handleRemoveTd(item: KungfuApi.KfConfig) {
           <template
             v-if="column.dataIndex === 'name' && record.category === 'td'"
           >
-            <a-tag :color="getInstrumentTypeColor(tdExtTypeMap[record.group])">
-              {{ record.group }}
-            </a-tag>
-            {{ record.name }}
+            <div class="td-name__warp">
+              <a-tag
+                :color="getInstrumentTypeColor(tdExtTypeMap[record.group])"
+              >
+                {{ record.group }}
+              </a-tag>
+              <span>
+                {{ record.name }}
+              </span>
+            </div>
           </template>
           <template
             v-else-if="
               column.dataIndex === 'name' && record.category === 'tdGroup'
             "
           >
-            <a-tag color="#FAAD14">账户组</a-tag>
-            {{ record.name }}
+            <div class="td-name__warp">
+              <a-tag color="#FAAD14">账户组</a-tag>
+              <span>
+                {{ record.name }}
+              </span>
+            </div>
           </template>
           <template
             v-else-if="
@@ -420,6 +430,7 @@ function handleRemoveTd(item: KungfuApi.KfConfig) {
           </template>
           <template v-else-if="column.dataIndex === 'avail'">
             <KfBlinkNum
+              mode="compare-zero"
               v-if="record.category === 'td'"
               :num="dealAssetPrice(getAssetsByKfConfig(record).avail)"
             ></KfBlinkNum>
@@ -495,5 +506,9 @@ function handleRemoveTd(item: KungfuApi.KfConfig) {
 <style lang="less">
 .kf-td__warp {
   height: 100%;
+
+  .td-name__warp {
+    word-break: break-all;
+  }
 }
 </style>

@@ -662,7 +662,9 @@ defineExpose({
       <a-time-picker
         v-else-if="item.type === 'timePicker'"
         :disabled="changeType === 'update' && item.primary"
-        :value="dayjs(formState[item.key] || dayjs())"
+        :value="
+          dayjs(formState[item.key] || dayjs().format('YYYY-MM-DD HH:mm:ss'))
+        "
         @change="handleTimePickerChange($event as unknown as Dayjs, item.key)"
       ></a-time-picker>
     </a-form-item>

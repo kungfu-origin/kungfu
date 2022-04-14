@@ -16,11 +16,15 @@ if ("${NODE_RUNTIME}" STREQUAL "electron")
   set(KF_NODE_BINDING_NAME "kungfu_electron")
 endif ()
 
+if ("${NODE_RUNTIME}" STREQUAL "electron" AND WIN32)
+  set(KF_NODE_BINDING_NAME "kungfu_node")
+endif ()
+
 if (KF_NODE_BINDING_NAME)
   build_node_binding(${KF_NODE_BINDING_NAME} "${SOURCE_FILES_KUNGFU_NODE}")
 endif ()
 
-if ("${NODE_RUNTIME}" STREQUAL "node")
+if ("${KF_NODE_BINDING_NAME}" STREQUAL "kungfu_node")
   build_node_binding("drone" "${SOURCE_FILES_DRONE}")
 endif ()
 

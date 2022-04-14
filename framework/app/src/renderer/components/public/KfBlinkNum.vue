@@ -6,13 +6,11 @@ const props = withDefaults(
     num: string | number;
     mode?: 'normal' | 'compare-zero';
     blinkType?: 'background' | 'color';
-    absolute?: boolean;
   }>(),
   {
     num: '--',
     mode: 'normal',
     blinkType: 'background',
-    absolute: true,
   },
 );
 
@@ -72,14 +70,7 @@ watch(
 </script>
 <template>
   <div
-    :class="[
-      'kf-blink-num',
-      absolute ? 'position-absolute' : '',
-      mode,
-      classname,
-      blinkType,
-      compareZeroClassname,
-    ]"
+    :class="['kf-blink-num', mode, classname, blinkType, compareZeroClassname]"
     :key="num"
   >
     <span>{{ num }}</span>
@@ -90,19 +81,12 @@ watch(
   display: inline-block;
   width: 100%;
   height: 100%;
-  // display: table-cell;
   box-sizing: border-box;
   overflow-wrap: break-word;
   transform: translateZ(0);
-
-  &.position-absolute {
-    position: absolute;
-    top: 0;
-    left: 0;
-    // overflow: hidden;
-    // text-overflow: ellipsis;
-    // white-space: nowrap;
-  }
+  position: absolute;
+  top: 0;
+  left: 0;
 
   &.blink-red {
     animation: nanoRedBlink 1.1s 1;
@@ -126,6 +110,10 @@ watch(
 
   span {
     vertical-align: middle;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    right: 8px;
   }
 }
 

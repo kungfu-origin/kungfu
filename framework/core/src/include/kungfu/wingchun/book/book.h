@@ -9,8 +9,8 @@
 #include <kungfu/wingchun/common.h>
 
 namespace kungfu::wingchun::book {
-FORWARD_DECLARE_PTR(Book)
-FORWARD_DECLARE_PTR(Bookkeeper)
+FORWARD_DECLARE_STRUCT_PTR(Book)
+FORWARD_DECLARE_CLASS_PTR(Bookkeeper)
 
 // key = hash_str_32(product_id)
 typedef std::unordered_map<uint32_t, longfist::types::Commission> CommissionMap;

@@ -225,7 +225,6 @@ void master::on_request_read_from_public(const event_ptr &event) {
 
 void master::check_cached_ready_to_read(const event_ptr &event) {
   const RequestReadFrom &request = event->data<RequestReadFrom>();
-  auto trigger_time = event->gen_time();
   auto app_uid = event->source();
   auto read_from_source_id = request.source_id;
 

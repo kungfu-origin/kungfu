@@ -1,6 +1,5 @@
 import { setKfConfig } from './store';
 import { getStrategyKfLocation, getKfConfig } from './store';
-
 export const getStrategyById = (
   strategyId: string,
 ): Promise<Array<Code.Strategy>> => {

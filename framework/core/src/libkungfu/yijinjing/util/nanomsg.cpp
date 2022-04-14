@@ -8,8 +8,6 @@
 
 namespace kungfu::yijinjing::nanomsg {
 
-static void term() { nn_term(); }
-
 const char *nn_exception::what() const throw() { return nn_strerror(errno_); }
 
 int nn_exception::num() const { return errno_; }

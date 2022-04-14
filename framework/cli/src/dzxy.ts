@@ -8,12 +8,12 @@ import {
   setTimerPromiseTask,
   switchKfLocation,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
-import { Pm2PacketMain, SwitchKfLocationPacketData } from './typings';
+import { SwitchKfLocationPacketData } from './typings';
 import {
   dealAppStates,
   dealAssetsByHolderUID,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
-
+import { Pm2PacketMain } from '@kungfu-trader/kungfu-js-api/utils/processUtils';
 import {
   dealOrder,
   dealPosition,

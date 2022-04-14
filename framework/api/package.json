@@ -4,7 +4,7 @@
     "name": "kungfu-trader",
     "email": "info@kungfu.link"
   },
-  "version": "2.4.0-alpha.28",
+  "version": "2.4.0-alpha.33",
   "description": "Kungfu Javascript/Typescript API",
   "license": "Apache-2.0",
   "repository": {
@@ -16,20 +16,15 @@
   "types": "./src/typings/index.d.ts",
   "main": "lib/index.js",
   "scripts": {
-    "patch": "yarn patch-package",
     "format": "prettier -l -w --config ../../.prettierrc.js ."
   },
   "dependencies": {
     "@fast-csv/format": "^4.3.5",
-    "@kungfu-trader/kungfu-core": "^2.4.0-alpha.28",
+    "@kungfu-trader/kungfu-core": "^2.4.0-alpha.33",
     "fkill": "~7.2",
     "get-user-locale": "^1.4.0",
     "log4js": "^6.4.0",
     "pm2": "^5.2.0",
-    "ps-list": "~7.2",
-    "rxjs": "^7.5.0"
-  },
-  "devDependencies": {
-    "patch-package": "^6.4.7"
+    "ps-list": "~7.2"
   }
 }

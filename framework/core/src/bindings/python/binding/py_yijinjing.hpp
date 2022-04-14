@@ -117,7 +117,7 @@ class PyMaster : public master {
 public:
   using master::master;
 
-  void on_exit() override { PYBIND11_OVERLOAD_PURE(void, master, on_exit); }
+  void on_exit() override { PYBIND11_OVERLOAD(void, master, on_exit); }
 
   void on_register(const event_ptr &event, const Register &register_data) override {
     PYBIND11_OVERLOAD_PURE(void, master, on_register, event, register_data);
@@ -133,6 +133,8 @@ public:
 class PyApprentice : public apprentice {
 public:
   using apprentice::apprentice;
+
+  void on_exit() override { PYBIND11_OVERLOAD_PURE(void, apprentice, on_exit); }
 
   void on_trading_day(const event_ptr &event, int64_t daytime) override {
     PYBIND11_OVERLOAD(void, apprentice, on_trading_day, event, daytime);

@@ -7,14 +7,13 @@ import {
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import Editor from './components/MonacoEditor.vue';
 import FileTree from './components/FileTree.vue';
-import { getStrategyById } from '@kungfu-trader/kungfu-js-api/kungfu/strategy';
-import { ClusterOutlined } from '@ant-design/icons-vue';
 import { useCodeStore } from './store/codeStore';
 import { ipcEmitDataByName } from '../../../renderer/ipcMsg/emitter';
 import { message } from 'ant-design-vue';
-const store = useCodeStore();
-const ProcessId = getProcessId();
+import MainContentVue from './components/MainContent.vue';
 
+const store = useCodeStore();
+const ProcessId: string = getProcessId();
 
 setHtmlTitle(`功夫交易系统 - ${ProcessId}.log`);
 const strategy = reactive<Code.Strategy>({
@@ -22,23 +21,40 @@ const strategy = reactive<Code.Strategy>({
   strategy_path: '',
   add_time: 0,
 });
-
+const strategyName = ProcessId.split('_')[1];
+const curnStrategyIndex: {
+  value: number;
+} = {
+  value: 0,
+};
 // 处理JSON格式strangeList
 function handleStrategyJsonList(strategyList): void {
-  let value: Code.Strategy = JSON.parse(strategyList[0].value);
-
+  getCurrentStrategy(strategyList);
+  const value: Code.Strategy = JSON.parse(
+    strategyList[curnStrategyIndex.value].value,
+  );
   strategy.strategy_id = value.strategy_id;
   strategy.strategy_path = value.strategy_path;
   strategy.add_time = value.add_time;
+  store.setCurrentStrategy(strategy);
+}
+
+function getCurrentStrategy(strategyList) {
+  strategyList.forEach((item, index) => {
+    if (item.name === strategyName) {
+      curnStrategyIndex.value = index;
+    }
+  });
 }
 
 // 处理Object格式strageList
 function handleStrategyList(strategyList): void {
-  let value: Code.Strategy = strategyList[0];
+  const value: Code.Strategy = strategyList[0];
 
   strategy.strategy_id = value.strategy_id;
   strategy.strategy_path = value.strategy_path;
   strategy.add_time = value.add_time;
+  store.setCurrentStrategy(strategy);
 }
 
 function handleUpdateStrategy(strategyPath) {
@@ -50,11 +66,17 @@ function handleUpdateStrategy(strategyPath) {
 }
 
 async function updateStrategy(strategyId: string, strategyPath: string) {
-  const strategyList: Array<Code.Strategy> = await getStrategyById(strategyId);
-  handleStrategyList(strategyList);
+  await getStrategyById(strategyId);
 }
 
 let shouldClose: boolean = false;
+
+async function getStrategyById(strategyId: string) {
+  const { data } = (await ipcEmitDataByName('strategyById', {
+    strategyId,
+  })) as Record<string, Array<Code.Strategy>>;
+  handleStrategyList(data);
+}
 
 function bindCloseWindowEvent() {
   shouldClose = false;
@@ -74,51 +96,43 @@ function bindCloseWindowEvent() {
   };
 }
 onMounted(() => {
-    ipcEmitDataByName('strategyList').then(({data}) => {
-        store.setStrategyList(data)
-        nextTick().then(() => {
-            handleStrategyJsonList(store.strategyList);
-        });
+  ipcEmitDataByName('strategyList').then(({ data }) => {
+    store.setStrategyList(data);
+    nextTick().then(() => {
+      handleStrategyJsonList(store.strategyList);
+      removeLoadingMask();
     });
-    removeLoadingMask();
+  });
 
-    store.getKungfuConfig();
-    bindCloseWindowEvent();
+  store.getKungfuConfig();
+  bindCloseWindowEvent();
 });
 </script>
 
 <template>
-  <div>
-    <div class="code-content">
-      <FileTree
-        :strategy="strategy"
-        @updateStrategy="handleUpdateStrategy"
-        class="file-tree"
-      ></FileTree>
-      <Editor class="editor" ref="code-editor"></Editor>
-    </div>
-    <ClusterOutlined style="font-size: 14px; padding-right: 4px" />
-    <span class="title">缩进</span>
+  <div class="code-editor-background">
+    <MainContentVue>
+      <div class="code-content">
+        <FileTree
+          :strategy="strategy"
+          @updateStrategy="handleUpdateStrategy"
+        ></FileTree>
+        <Editor class="editor" ref="code-editor"></Editor>
+      </div>
+    </MainContentVue>
   </div>
 </template>
 
-<style lang="less" scoped>
-#app {
+<style lang="less">
+.code-editor-background {
   width: 100%;
-  height: 100%;
-  font-family: Consolas, Monaco, Lucida Console, Liberation Mono,
-    DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
   .code-content {
-    width: auto;
+    width: 100%;
     display: flex;
-    height: 100%;
-    .file-tree {
-      width: 300px;
-    }
+    height: calc(100vh - 32px);
+    background-color: #1d1f21;
     .editor {
+      text-align: left;
       flex: 1;
     }
   }

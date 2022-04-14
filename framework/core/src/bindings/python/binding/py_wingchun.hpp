@@ -87,6 +87,8 @@ public:
   bool req_account() override { PYBIND11_OVERLOAD_PURE(bool, Trader, req_account, ); }
 
   void on_start() override { PYBIND11_OVERLOAD(void, Trader, on_start, ); }
+
+  void on_exit() override { PYBIND11_OVERLOAD(void, Trader, on_exit, ); }
 };
 
 class PyAccountingMethod : public AccountingMethod {
@@ -293,11 +295,11 @@ void bind(pybind11::module &&m) {
 
   py::class_<MarketDataVendor, BrokerVendor, std::shared_ptr<MarketDataVendor>>(m, "MarketDataVendor")
       .def(py::init<locator_ptr, const std::string &, const std::string &, bool>())
-      .def("setup", &MarketDataVendor::setup);
+      .def("set_service", &MarketDataVendor::set_service);
 
   py::class_<TraderVendor, BrokerVendor, std::shared_ptr<TraderVendor>>(m, "TraderVendor")
       .def(py::init<locator_ptr, const std::string &, const std::string &, bool>())
-      .def("setup", &TraderVendor::setup);
+      .def("set_service", &TraderVendor::set_service);
 
   py::class_<Ledger, kungfu::yijinjing::practice::apprentice, std::shared_ptr<Ledger>>(m, "Ledger")
       .def(py::init<yijinjing::data::locator_ptr, longfist::enums::mode, bool>())

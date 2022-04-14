@@ -18,12 +18,13 @@ import {
   Pm2ProcessStatusDetailData,
   sendDataToProcessIdByPm2,
   startArchiveMakeTask,
-  startGetProcessStatus,
   killKungfu,
   startMaster,
   startLedger,
   startDzxy,
   startCacheD,
+  processStatusDataObservable,
+  Pm2Packet,
 } from '@kungfu-trader/kungfu-js-api/utils/processUtils';
 import { combineLatest, filter, map, Observable } from 'rxjs';
 import { ProcessListItem } from 'src/typings';
@@ -31,7 +32,6 @@ import colors from 'colors';
 import { Widgets } from 'blessed';
 import { KF_HOME } from '@kungfu-trader/kungfu-js-api/config/pathConfig';
 import { dealStatus, getCategoryName } from '../methods/utils';
-import { Pm2Packet } from '../../typings';
 import { globalState } from '../actions/globalState';
 
 export const mdTdStrategyObservable = () => {
@@ -44,22 +44,6 @@ export const mdTdStrategyObservable = () => {
       );
     },
   );
-};
-
-export const processStatusDataObservable = () => {
-  return new Observable<{
-    processStatus: Pm2ProcessStatusData;
-    processStatusWithDetail: Pm2ProcessStatusDetailData;
-  }>((observer) => {
-    startGetProcessStatus(
-      (res: {
-        processStatus: Pm2ProcessStatusData;
-        processStatusWithDetail: Pm2ProcessStatusDetailData;
-      }) => {
-        observer.next(res);
-      },
-    );
-  });
 };
 
 export const appStatesObservable = () => {
@@ -445,10 +429,10 @@ const switchMaster = async (status: boolean): Promise<void> => {
       await killKungfu();
     }
   } else {
-    await delayMilliSeconds(1000);
     await startMaster(false);
     await delayMilliSeconds(1000);
     await startCacheD(false);
+    await delayMilliSeconds(1000);
     await startLedger(false);
     await delayMilliSeconds(1000);
     await startDzxy();

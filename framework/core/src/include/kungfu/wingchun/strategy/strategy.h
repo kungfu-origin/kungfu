@@ -9,7 +9,7 @@
 #include <kungfu/yijinjing/practice/apprentice.h>
 
 namespace kungfu::wingchun::strategy {
-FORWARD_DECLARE_PTR(Context)
+FORWARD_DECLARE_CLASS_PTR(Context)
 
 class Strategy {
 public:

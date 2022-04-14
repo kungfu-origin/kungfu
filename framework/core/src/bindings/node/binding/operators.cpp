@@ -100,7 +100,6 @@ void JsResetCache::operator()(const event_ptr &event) {
 
 void InitStateMap(const Napi::CallbackInfo &info, Napi::ObjectReference &state, const std::string &name) {
   boost::hana::for_each(longfist::StateDataTypes, [&](auto it) {
-    using DataType = typename decltype(+boost::hana::second(it))::type;
     auto name = std::string(boost::hana::first(it).c_str());
     state.Set(name, DataTable::NewInstance(state.Value()));
   });
