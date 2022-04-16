@@ -4,7 +4,7 @@
     "name": "kungfu-trader",
     "email": "info@kungfu.link"
   },
-  "version": "2.4.0-alpha.32",
+  "version": "2.4.0-alpha.33",
   "description": "Kungfu Extension - Timer Task",
   "license": "Apache-2.0",
   "main": "package.json",
@@ -25,10 +25,10 @@
     "build": "kfs extension build",
     "clean": "kfs extension clean",
     "install": "node -e \"require('@kungfu-trader/kungfu-core').prebuilt('install')\"",
-    "package": "kfs prebuilt package"
+    "package": "kfs project package"
   },
   "devDependencies": {
-    "@kungfu-trader/kungfu-sdk": "^2.4.0-alpha.32"
+    "@kungfu-trader/kungfu-sdk": "^2.4.0-alpha.33"
   },
   "kungfuBuild": {
     "python": {
@@ -138,7 +138,7 @@
             "name": "临界下单",
             "type": "bool",
             "required": false,
-            "tip": "开启后最后一步下单操作会在结束时间前执行, 默认1000毫秒",
+            "tip": "开启后最后一步下单操作会在结束时间前执行, 默认200毫秒",
             "default": true
           },
           {
@@ -146,7 +146,7 @@
             "name": "临界下单时间",
             "type": "int",
             "required": false,
-            "tip": "设置临界下单临界时间, 单位毫秒, 时间默认1000毫秒",
+            "tip": "设置临界下单临界时间, 单位毫秒, 时间默认200毫秒",
             "default": 200
           }
         ]

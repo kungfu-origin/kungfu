@@ -59,9 +59,16 @@ void Bookkeeper::on_start(const rx::connectable_observable<event_ptr> &events) {
   events | is(OrderInput::tag) | $$(update_book<OrderInput>(event, &AccountingMethod::apply_order_input));
   events | is(Order::tag) | $$(update_book<Order>(event, &AccountingMethod::apply_order));
   events | is(Trade::tag) | $$(update_book<Trade>(event, &AccountingMethod::apply_trade));
-  events | is(Asset::tag) | $$(try_update_asset(event->data<Asset>()));
-  events | is(Position::tag) | $$(try_update_position(event->data<Position>()));
-  events | is(PositionEnd::tag) | $$(get_book(event->data<PositionEnd>().holder_uid)->update(event->gen_time()));
+  events | is(Asset::tag) | to(location::SYNC) | $$(try_update_asset_replica(event->data<Asset>()));
+  events | is(Position::tag) | to(location::SYNC) | $$(try_update_position_replica(event->data<Position>()));
+  events | is(PositionEnd::tag) | to(location::SYNC) | $$(update_position_guard(event->data<PositionEnd>().holder_uid));
+
+  auto fun_not_to_sync = [&](const event_ptr &event) { return event->dest() != location::SYNC; };
+  events | is(Asset::tag) | filter(fun_not_to_sync) | $$(try_update_asset(event->data<Asset>()));
+  events | is(Position::tag) | filter(fun_not_to_sync) | $$(try_update_position(event->data<Position>()));
+  events | is(PositionEnd::tag) | filter(fun_not_to_sync) |
+      $$(get_book(event->data<PositionEnd>().holder_uid)->update(event->gen_time()));
+
   events | is(TradingDay::tag) | $$(on_trading_day(event->data<TradingDay>().timestamp));
   events | is(ResetBookRequest::tag) | $$(drop_book(event->source()));
 }
@@ -193,4 +200,138 @@ void Bookkeeper::try_update_position(const Position &position) {
   }
   accounting_methods_.at(target_position.instrument_type)->update_position(book, target_position);
 }
+
+void Bookkeeper::try_sync_book_replica(uint32_t location_uid) {
+  if (books_replica_asset_guards_.find(location_uid) == books_replica_asset_guards_.end() ||
+      books_replica_position_guard_.find(location_uid) == books_replica_position_guard_.end()) {
+    return;
+  }
+
+  if (books_replica_asset_guards_.at(location_uid) && books_replica_position_guard_.at(location_uid)) {
+    books_replica_asset_guards_.insert_or_assign(location_uid, false);
+    books_replica_position_guard_.insert_or_assign(location_uid, false);
+    auto old_book = get_book(location_uid);
+    auto new_book = get_book_replica(location_uid);
+
+    bool position_changed = false;
+    bool asset_changed = false;
+
+    auto fun_asset_compare = [](const Asset &old_asset, const Asset &new_asset) {
+      bool asset_changed = false;
+      asset_changed |= old_asset.avail != new_asset.avail;
+      asset_changed |= old_asset.margin != new_asset.margin;
+      return asset_changed;
+    };
+    asset_changed |= fun_asset_compare(old_book->asset, new_book->asset);
+
+    auto fun_position_compare = [](const PositionMap &source_map, Book_ptr &target_book) {
+      bool changed = false;
+      for (auto &source_pair : source_map) {
+        auto &source_position = source_pair.second;
+        auto &target_position = target_book->get_position_for(source_position.direction, source_position);
+        changed |= source_position.volume != target_position.volume;
+        changed |= source_position.yesterday_volume != target_position.yesterday_volume;
+      }
+      return changed;
+    };
+
+    // 用new_book的position去检测old_book的position,new有old无会加上
+    position_changed |= fun_position_compare(new_book->long_positions, old_book);
+    position_changed |= fun_position_compare(new_book->short_positions, old_book);
+    // 用old_book的position去检测new_book的position，old有new无会设置为0删掉
+    position_changed |= fun_position_compare(old_book->long_positions, new_book);
+    position_changed |= fun_position_compare(old_book->short_positions, new_book);
+
+    // position_changed更新book也会修改asset信息
+    // on_asset_sync_reset仅在asset改变而position不改变的情况下调用
+    if (asset_changed and !position_changed) {
+      Asset old_asset = {};
+      memcpy(&old_asset, &(old_book->asset), sizeof(old_asset));
+      old_book->asset = new_book->asset;
+
+      for (auto &bk_pair : books_) {
+        auto &st_book = bk_pair.second;
+        if (st_book->asset.ledger_category == LedgerCategory::Strategy and
+            app_.has_channel(st_book->asset.holder_uid, location_uid)) {
+          st_book->asset.avail = new_book->asset.avail;
+          st_book->asset.margin = new_book->asset.margin;
+          st_book->asset.update_time = new_book->asset.update_time;
+        }
+      }
+
+      for (auto &book_listener : book_listeners_) {
+        book_listener->on_asset_sync_reset(old_asset, old_book->asset);
+      }
+    }
+
+    // position改变更新book，包括asset和position都更新并回调on_book_sync_reset
+    if (position_changed) {
+      // 遍历所有策略的book，如果有position的source_id和account_id是与本TD的一样，则更新
+      auto fun_update_st_position = [&](PositionMap &position_map) {
+        for (auto &st_pair : position_map) {
+          auto &st_position = st_pair.second;
+          auto &td_position = new_book->get_position_for(st_position.direction, st_position);
+          if (strcmp(st_position.source_id, td_position.source_id) == 0 and
+              strcmp(st_position.account_id, td_position.account_id) == 0) {
+            st_position.volume = td_position.volume;
+            st_position.yesterday_volume = td_position.yesterday_volume;
+            st_position.update_time = td_position.update_time;
+          }
+        }
+      };
+      for (auto &bk_pair : books_) {
+        auto &st_book = bk_pair.second;
+        if (st_book->asset.ledger_category == LedgerCategory::Strategy and
+            app_.has_channel(st_book->asset.holder_uid, location_uid)) {
+          st_book->asset.avail = new_book->asset.avail;
+          st_book->asset.margin = new_book->asset.margin;
+          st_book->asset.update_time = new_book->asset.update_time;
+          fun_update_st_position(st_book->long_positions);
+          fun_update_st_position(st_book->short_positions);
+        }
+      }
+
+      // 更新完strategy的position再调用回调
+      for (auto &book_listener : book_listeners_) {
+        book_listener->on_book_sync_reset(*old_book, *new_book);
+      }
+      // 如果不先做完上面操作提前进行了book替换，会导致前端无法把虚假持仓的volume设置为0
+      // 做完以下替换后，Watcher检测遍历td的book时，持仓为0的position已删除，处理操作会跳过该position导致页面上的虚假volume无法删除
+      books_.erase(location_uid);
+      books_.insert_or_assign(location_uid, new_book);
+      books_replica_.erase(location_uid);
+    }
+  }
+}
+
+void Bookkeeper::try_update_asset_replica(const longfist::types::Asset &asset) {
+  if (app_.has_location(asset.holder_uid)) {
+    get_book_replica(asset.holder_uid)->asset = asset;
+    books_replica_asset_guards_.insert_or_assign(asset.holder_uid, true);
+    try_sync_book_replica(asset.holder_uid);
+  }
+}
+
+void Bookkeeper::try_update_position_replica(const longfist::types::Position &position) {
+  if (not app_.has_location(position.holder_uid)) {
+    return;
+  }
+  auto book = get_book_replica(position.holder_uid);
+  auto &target_position = book->get_position_for(position.direction, position);
+  target_position = position;
+}
+
+Book_ptr Bookkeeper::get_book_replica(uint32_t location_uid) {
+  if (books_replica_.find(location_uid) == books_replica_.end()) {
+    books_replica_.emplace(location_uid, make_book(location_uid));
+  }
+  return books_replica_.at(location_uid);
+}
+
+void Bookkeeper::update_position_guard(uint32_t location_uid) {
+  books_replica_position_guard_.insert_or_assign(location_uid, true);
+  try_sync_book_replica(location_uid);
+}
+
+void Bookkeeper::add_book_listener(const BookListener_ptr &book_listener) { book_listeners_.push_back(book_listener); }
 } // namespace kungfu::wingchun::book

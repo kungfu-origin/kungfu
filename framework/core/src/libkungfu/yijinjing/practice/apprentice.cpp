@@ -57,6 +57,12 @@ void apprentice::request_read_from_public(int64_t trigger_time, uint32_t source_
   }
 }
 
+void apprentice::request_read_from_sync(int64_t trigger_time, uint32_t source_id, int64_t from_time) {
+  if (get_io_device()->get_home()->mode == mode::LIVE) {
+    require_read_from_sync(trigger_time, master_cmd_location_->uid, source_id, from_time);
+  }
+}
+
 void apprentice::request_write_to(int64_t trigger_time, uint32_t dest_id) {
   if (get_io_device()->get_home()->mode == mode::LIVE) {
     require_write_to(trigger_time, master_cmd_location_->uid, dest_id);
@@ -135,6 +141,7 @@ void apprentice::react() {
   events_ | is(RequestReadFrom::tag) | $$(on_read_from(event));
   events_ | is(CachedReadyToRead::tag) | $$(on_cached_ready_to_read());
   events_ | is(RequestReadFromPublic::tag) | $$(on_read_from_public(event));
+  events_ | is(RequestReadFromSync::tag) | $$(on_read_from_sync(event));
   events_ | is(RequestWriteTo::tag) | $$(on_write_to(event));
   events_ | is(Channel::tag) | $$(register_channel(event->gen_time(), event->data<Channel>()));
   events_ | is(TradingDay::tag) | $$(on_trading_day(event, event->data<TradingDay>().timestamp));
@@ -223,6 +230,8 @@ void apprentice::on_deregister(const event_ptr &event) {
 void apprentice::on_read_from(const event_ptr &event) { do_read_from<RequestReadFrom>(event, get_live_home_uid()); }
 
 void apprentice::on_read_from_public(const event_ptr &event) { do_read_from<RequestReadFromPublic>(event, 0); }
+
+void apprentice::on_read_from_sync(const event_ptr &event) { do_read_from<RequestReadFromSync>(event, location::SYNC); }
 
 void apprentice::on_write_to(const event_ptr &event) {
   auto dest_id = event->data<RequestWriteTo>().dest_id;

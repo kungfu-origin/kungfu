@@ -592,6 +592,7 @@ export const usePreStartAndQuitApp = (): {
   >({
     archive: 'loading',
     watcher: 'loading',
+    systemLoading: 'loading',
   });
 
   const preQuitSystemLoadingData = reactive<
@@ -643,6 +644,11 @@ export const usePreStartAndQuitApp = (): {
             if (data.name && data.name === 'archive') {
               preStartSystemLoadingData.archive =
                 data.status === 'online' ? 'loading' : 'done';
+            }
+
+            if (data.name && data.name === 'systemLoading') {
+              preStartSystemLoadingData.systemLoading =
+                data.status === 'online' ? 'done' : 'loading';
             }
           }
 

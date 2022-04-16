@@ -55,10 +55,9 @@ export const watcher = ((): KungfuApi.Watcher | null => {
     process.env.DAEMON_TYPE || process.env.RENDERER_TYPE || '',
   ].join('');
 
-  const bypassRestore =
-    process.env.APP_TYPE === 'daemon'
-      ? true
-      : booleanProcessEnv(process.env.RELOAD_AFTER_CRASHED || '');
+  const bypassRestore = booleanProcessEnv(
+    process.env.RELOAD_AFTER_CRASHED || '',
+  );
   const globalSetting = getKfGlobalSettingsValue();
   const bypassQuote = globalSetting?.performance?.bypassQuote;
 

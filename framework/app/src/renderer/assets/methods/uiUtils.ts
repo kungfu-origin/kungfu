@@ -19,6 +19,7 @@ import {
   removeJournal,
   removeDB,
   getAvailDaemonList,
+  loopToRunProcess,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { ExchangeIds } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
 import dayjs from 'dayjs';
@@ -154,15 +155,16 @@ export const preStartAll = async (): Promise<(void | Proc)[]> => {
 
 export const postStartAll = async (): Promise<(void | Proc)[]> => {
   const availDaemon = await getAvailDaemonList();
-  return Promise.all([
-    ...availDaemon.map((item) =>
-      startExtDaemon(getProcessIdByKfLocation(item), item.cwd, item.script)
-        .then((res) => {
-          return res;
-        })
-        .catch((err) => console.error(err)),
-    ),
-  ]);
+  return loopToRunProcess<void | Proc>(
+    availDaemon.map((item) => {
+      return () =>
+        startExtDaemon(getProcessIdByKfLocation(item), item.cwd, item.script)
+          .then((res) => {
+            return res;
+          })
+          .catch((err) => console.error(err));
+    }),
+  );
 };
 
 export const getInstrumentTypeColor = (
