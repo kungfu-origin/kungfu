@@ -1544,3 +1544,33 @@ export const removeNoDefaultStrategyFolders = async (): Promise<void> => {
     return fse.remove(fullPath);
   });
 };
+
+// 处理下单时输入数据
+export const dealOrderInputItem = (
+  inputData: KungfuApi.MakeOrderInput,
+): Record<string, KungfuApi.KfTradeValueCommonData> => {
+  const inputResolve: Record<string, KungfuApi.KfTradeValueCommonData> = {}
+  for (let key in inputData) {
+    if (key === 'instrument_type') {
+      inputResolve[key] = dealInstrumentType(inputData.instrument_type)
+    } else if (key === 'price_type') {
+      inputResolve[key] = dealPriceType(inputData.price_type);
+    } else if (key === 'side') {
+      inputResolve[key] = dealSide(inputData.side);
+    } else if (key === 'offset') {
+      inputResolve[key] = dealOffset(inputData.offset);
+    } else if (key === 'hedge_flag') {
+      inputResolve[key] = dealHedgeFlag(inputData.hedge_flag);
+    } else if (key === 'hedge_flag') {
+      inputResolve[key] = dealHedgeFlag(inputData.hedge_flag);
+    } else if (key === 'parent_id') {
+      break
+    } else {
+      inputResolve[key] = {
+        name: inputData[key],
+        color: 'default',
+      }
+    }
+  }
+  return inputResolve;
+};

@@ -47,32 +47,6 @@ export const dealKfTime = (nano: bigint, date = false): string => {
   return kf.formatTime(nano, '%H:%M:%S.%N').slice(0, 12);
 };
 
-export const dealOrderInputItem = (inputData: KungfuApi.MakeOrderInput): Record<string, string | number | bigint> => {
-  const inputResolved: Record<string, string | number | bigint> = {...inputData}
-  if ('instrument_type' in inputData) {
-    inputResolved.instrument_type = dealInstrumentType(
-      inputData.instrument_type,
-    ).name;
-  }
-  if ('price_type' in inputData) {
-    inputResolved.price_type = dealPriceType(inputData.price_type).name;
-  }
-    if ('side' in inputData) {
-    inputResolved.side = dealSide(inputData.side).name;
-  }
-  if ('offset' in inputData) {
-    inputResolved.offset = dealOffset(inputData.offset).name;
-  }
-  if ('hedge_flag' in inputData) {
-    inputResolved.hedge_flag = dealHedgeFlag(inputData.hedge_flag).name;
-  }
-  if ('hedge_flag' in inputData) {
-    inputResolved.hedge_flag = dealHedgeFlag(inputData.hedge_flag).name;
-  }
-
-  return inputResolved
-}
-
 export const dealTradingDataItem = (
   item: KungfuApi.TradingDataTypes,
   watcher: KungfuApi.Watcher | null,

@@ -7,7 +7,6 @@ import {
   onMounted,
   ref,
   watch,
-  h
 } from 'vue';
 import KfDashboard from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfDashboard.vue';
 import KfDashboardItem from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfDashboardItem.vue';
@@ -16,10 +15,11 @@ import {
   buildInstrumentSelectOptionValue,
   useTriggerMakeOrder,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
-import { getConfigSettings } from './config';
-import { message, Modal } from 'ant-design-vue';
-import { makeOrderByOrderInput, dealOrderInputItem } from '@kungfu-trader/kungfu-js-api/kungfu';
-import { InstrumentTypeEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';
+import { getConfigSettings, confirmModal, vNodeConfirmModal } from './config';
+import { message } from 'ant-design-vue';
+import { makeOrderByOrderInput } from '@kungfu-trader/kungfu-js-api/kungfu';
+import { InstrumentTypeEnum, SideEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';
+import { getKfGlobalSettingsValue } from '@kungfu-trader/kungfu-js-api/config/globalSettings';
 import {
   useCurrentGlobalKfLocation,
   useExtConfigsRelated,
@@ -31,6 +31,8 @@ import {
   initFormStateByConfig,
   transformSearchInstrumentResultToInstrument,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
+import OrderConfirmModal from './OrderConfirmModal.vue';
+import { hashInstrumentUKey } from '@kungfu-trader/kungfu-js-api/kungfu';
 
 const app = getCurrentInstance();
 const formState = ref(
@@ -67,6 +69,8 @@ const configSettings = computed(() => {
 });
 
 const isShowConfirmModal = ref<boolean>(false);
+const orderMessage = ref<number>(0)
+const orderData = ref<KungfuApi.MakeOrderInput>();
 
 onMounted(() => {
   if (app?.proxy) {
@@ -145,39 +149,36 @@ watch(
   },
 );
 
-function handleResetMakeOrderForm() {
-  const initFormState = initFormStateByConfig(configSettings.value, {});
-  Object.keys(initFormState).forEach((key) => {
-    formState.value[key] = initFormState[key];
-  });
-  nextTick().then(() => {
-    formRef.value.clearValidate();
-  });
+
+function placeOrder(
+  orderInput: KungfuApi.MakeOrderInput,
+  globallKfLocation,
+  tdProcessId: string
+) {
+    makeOrderByOrderInput(
+      window.watcher,
+      orderInput,
+      globallKfLocation,
+      tdProcessId.toAccountId(),
+    ).catch((err) => {
+      message.error(err.message);
+    });
 }
 
-// 拆单
-function handleApartOrder () {
-  console.log('拆单');
-  
-}
+function initInputData():Promise<KungfuApi.MakeOrderInput> {
 
-
-
-function handleMakeOrder() {
-  
   const instrument = formState.value.instrument.toString();
   const instrumnetResolved =
     transformSearchInstrumentResultToInstrument(instrument);
 
   if (!instrumnetResolved) {
     message.error('标的错误');
-    return;
+    return Promise.reject(new Error('标的错误'));
   }
 
   const { exchangeId, instrumentId, instrumentType } = instrumnetResolved;
 
   const {
-    account_id,
     limit_price,
     volume,
     price_type,
@@ -198,69 +199,135 @@ function handleMakeOrder() {
     hedge_flag: +(hedge_flag || 0),
     parent_id: BigInt(0),
   };
-  const orderInput = dealOrderInputItem(makeOrderInput)
-  const vnode = Object.keys(orderInput)
-    .filter(key => {
-      if (orderInput[key].toString() === '[object Object]') {
-        return false;
+  return new Promise(resolve => {
+    orderMessage.value = +makeOrderInput.volume
+    orderData.value = makeOrderInput
+    resolve(makeOrderInput);
+  })
+
+}
+
+function handleResetMakeOrderForm() {
+  const initFormState = initFormStateByConfig(configSettings.value, {});
+  Object.keys(initFormState).forEach((key) => {
+    formState.value[key] = initFormState[key];
+  });
+  nextTick().then(() => {
+    formRef.value.clearValidate();
+  });
+}
+
+// 拆单
+function handleApartOrder() {
+  formRef.value
+    .validate()
+    .then(async () => {
+      isShowConfirmModal.value = true;
+      const makeOrderInput: KungfuApi.MakeOrderInput = await initInputData()
+      orderMessage.value = +makeOrderInput.volume
+      orderData.value = makeOrderInput
+  })
+}
+
+
+function handleApartedConfirm(amount: number): void {
+  const remainder = orderMessage.value % +amount
+  const eachAmount = Math.floor(orderMessage.value / +amount)
+  const account_id = formState.value.account_id
+  if (!currentGlobalKfLocation.value || !window.watcher) {
+    message.error('当前 Location 错误');
+    return;
+  }
+
+  const tdProcessId =
+    currentGlobalKfLocation.value?.category === 'td'
+      ? getProcessIdByKfLocation(currentGlobalKfLocation.value)
+      : `td_${account_id.toString()}`;
+
+  if (processStatusData.value[tdProcessId] !== 'online') {
+    message.error(`请先启动 ${tdProcessId} 交易进程`);
+    return;
+  }
+  confirmOrderPlace(orderData.value as KungfuApi.MakeOrderInput).then(() => {
+    if (orderData.value !== undefined) {
+      for (let i = 1; i <= +amount; i++) {
+        if (i === +amount) {
+          orderData.value.volume = eachAmount + remainder
+        } else {
+          orderData.value.volume = eachAmount
+        }
+        placeOrder(orderData.value, currentGlobalKfLocation.value, tdProcessId)
       }
-      return orderInput[key] !== '';
-    })
-    .map(key => 
-      h('div', {class: 'trading-data-detail-row'}, [
-        h('span', { class: 'label' }, `${key}`),
-        h('span', { class: 'value' }, `${orderInput[key]}`)
-      ])
-    )
+    }
+  })
+}
+
+function confirmOrderPlace(makeOrderInput: KungfuApi.MakeOrderInput): Promise<string> {
   
-  Modal.confirm({
-    title: '下单确认',
-    content: h(
-      'div',
-      {
-        class: 'trading-data-detail__warp'
-      },
-      vnode
-    ),
-      okText: '确 定',
-      cancelText: '取 消',
-    onOk() {
-      formRef.value
-        .validate()
-        .then(() => {
-          if (!currentGlobalKfLocation.value || !window.watcher) {
-            message.error('当前 Location 错误');
-            return;
-          }
+  return new Promise(resolve => {
+    
+    const instrument = formState.value.instrument.toString();
+    const instrumnetResolved =
+      transformSearchInstrumentResultToInstrument(instrument);
+    if (!instrumnetResolved) {
+      message.error('标的错误');
+      return;
+    }
 
-          const tdProcessId =
-            currentGlobalKfLocation.value?.category === 'td'
-              ? getProcessIdByKfLocation(currentGlobalKfLocation.value)
-              : `td_${account_id.toString()}`;
+    const { exchangeId, instrumentId } = instrumnetResolved;
+    const { account_id } = formState.value;
+      vNodeConfirmModal(makeOrderInput).then(() => {
+      if (!currentGlobalKfLocation.value || !window.watcher) {
+        message.error('当前 Location 错误');
+        return;
+      }
 
-          if (processStatusData.value[tdProcessId] !== 'online') {
-            message.error(`请先启动 ${tdProcessId} 交易进程`);
-            return;
-          }
+      const tdProcessId =
+        currentGlobalKfLocation.value?.category === 'td'
+          ? getProcessIdByKfLocation(currentGlobalKfLocation.value)
+          : `td_${account_id.toString()}`;
 
-          makeOrderByOrderInput(
-            window.watcher,
-            makeOrderInput,
-            currentGlobalKfLocation.value,
-            tdProcessId.toAccountId(),
-          ).catch((err) => {
-            message.error(err.message);
-          });
+      if (processStatusData.value[tdProcessId] !== 'online') {
+        message.error(`请先启动 ${tdProcessId} 交易进程`);
+        return;
+      }
+
+      const fatFingerRange = +getKfGlobalSettingsValue()?.trade?.fatFinger || 0
+      
+      const {limit_price: price, side } = makeOrderInput
+      const ukey = hashInstrumentUKey(instrumentId, exchangeId);
+      const lastPrice = window.watcher.ledger.Quote[ukey].last_price
+      const fatFingerBuBuyRate = (100 + fatFingerRange) / 100
+      const fatFingerSellRate = (100 - fatFingerRange) / 100  || 1
+      const warnningMessage = {
+        message: ``,
+      }
+      if (SideEnum.Buy == side && price > lastPrice * fatFingerBuBuyRate) {
+        warnningMessage.message = `买入价格超出警戒线，当前价格为${price}，警戒线为${(lastPrice * fatFingerBuBuyRate).toFixed(4)}, 当前乌龙指阈值为${fatFingerRange}%`
+      }
+      if (SideEnum.Sell == side && price < lastPrice * fatFingerSellRate) {
+        warnningMessage.message = `卖出价格低于警戒线，当前价格为${price}，警戒线为${(lastPrice * fatFingerSellRate).toFixed(4)}, 当前乌龙指阈值为${fatFingerRange}%`
+      }
+      if (warnningMessage.message !== '') {
+        confirmModal('警告', warnningMessage.message, '继续下单').then(() => {
+          resolve(tdProcessId)
         })
-        .catch((err: Error) => {
-          console.error(err);
-        }).finally(() => {
-          isShowConfirmModal.value = false;
-        });
-     },
-     onCancel() {
-       return
-     }
+      } else {
+        resolve(tdProcessId)
+      }
+    })
+  })
+}
+
+
+function handleMakeOrder() {
+  formRef.value.validate().then(async () => {
+    const makeOrderInput: KungfuApi.MakeOrderInput = await initInputData()
+    await confirmOrderPlace(makeOrderInput).then((tdProcessId) => {
+      placeOrder(makeOrderInput, currentGlobalKfLocation.value, tdProcessId)
+    })
+  }).catch((err: Error) => {
+    console.error(err);
   })
 }
 </script>
@@ -300,20 +367,21 @@ function handleMakeOrder() {
           ></KfConfigSettingsForm>
         </div>
         <div class="make-order-btns">
-          <a-button class="make-order" size="small" @click="handleMakeOrder">下单</a-button>
+          <a-button class="make-order" size="small" @click="handleMakeOrder">
+            下单
+          </a-button>
           <a-button size="small" @click="handleApartOrder">拆单</a-button>
         </div>
       </div>
     </KfDashboard>
-    <!-- <OrderConfirmModal
+    <OrderConfirmModal
       v-if="isShowConfirmModal"
       v-model:visible="isShowConfirmModal"
-      @confirm="handleMakeOrder"
-      :formState="orderInput"
+      :orderMessage="orderMessage"
+      @confirm="handleApartedConfirm"
     >
-    </OrderConfirmModal> -->
+    </OrderConfirmModal>
   </div>
-
 </template>
 <style lang="less">
 .kf-make-order-dashboard__warp {
@@ -356,6 +424,12 @@ function handleMakeOrder() {
         white-space: normal;
       }
     }
+  }
+  .green {
+    color: @green-base !important;
+  }
+  .red {
+    color: @red-base !important;
   }
 }
 </style>

@@ -82,6 +82,39 @@ export const getKfGlobalSettings = (): KfSystemConfig[] => [
     ],
   },
   {
+    key: 'trade',
+    name: isEnglish ? 'Trade' : '交易',
+    config: [
+      {
+        key: 'sound',
+        name: isEnglish ? 'sound' : '声音',
+        tip: isEnglish
+          ? `Enable the system prompt sound`
+          : `启用系统提示音`,
+        default: false,
+        type: 'bool',
+      },
+      {
+        key: 'fatFinger',
+        name: isEnglish ? 'fat finger threshold' : '乌龙指阈值',
+        tip: isEnglish
+          ? 'Set the threshold for triggering an fat finger(percentage)'
+          : '设置乌龙指触发阈值(百分比)',
+        default: '',
+        type: 'int',
+      },
+      {
+        key: 'close',
+        name: isEnglish ? 'close threshold' : '平仓阈值',
+        tip: isEnglish
+          ? 'Set the threshold for triggering an close(percentage)'
+          : '设置平仓触发阈值(百分比)',
+        default: '',
+        type: 'int',
+      },
+    ],
+  },
+  {
     key: 'code',
     name: isEnglish ? 'Editor' : '编辑器',
     config: [
