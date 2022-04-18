@@ -260,7 +260,7 @@ function handleApartOrder() {
     .validate()
     .then(async () => {
       const makeOrderInput: KungfuApi.MakeOrderInput = await initInputData()
-      if (initialSideType.value !== makeOrderInput.side) {
+      if (initialSideType.value !== makeOrderInput.side && makeOrderInput.volume.toString() === currentPosition.position) {
         await confirmModal('提示', '是否全部平仓')
       }
       isShowConfirmModal.value = true;
