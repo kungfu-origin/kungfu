@@ -78,6 +78,13 @@ const columns = computed(() => {
   return getColumns(category, !!historyDate.value);
 });
 
+const lastTradeId: {
+  value: bigint
+} = {
+  value: 0n
+}
+
+
 onMounted(() => {
   if (app?.proxy) {
     const subscription = app.proxy.$tradingDataSubject.subscribe(
@@ -112,6 +119,15 @@ onMounted(() => {
               toRaw(dealTrade(watcher, item, watcher.ledger.OrderStat)),
             ),
         );
+        if (lastTradeId.value !== trades.value[0].trade_id) {
+          // const complateSound = new Audio();
+          // complateSound.src = require('./music/trade-complate.mp3');
+          // complateSound.play();
+          console.log(1);
+          
+          lastTradeId.value = trades.value[0].trade_id;
+          
+        }
       },
     );
 

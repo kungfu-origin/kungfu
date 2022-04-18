@@ -2,6 +2,7 @@
 import {
   computed,
   getCurrentInstance,
+  h,
   nextTick,
   onBeforeUnmount,
   onMounted,
@@ -15,10 +16,10 @@ import {
   buildInstrumentSelectOptionValue,
   useTriggerMakeOrder,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
-import { getConfigSettings, confirmModal, vNodeConfirmModal } from './config';
+import { getConfigSettings, confirmModal } from './config';
 import { message } from 'ant-design-vue';
 import { makeOrderByOrderInput } from '@kungfu-trader/kungfu-js-api/kungfu';
-import { InstrumentTypeEnum, SideEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';
+import { InstrumentTypeEnum, LedgerCategoryEnum, SideEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import { getKfGlobalSettingsValue } from '@kungfu-trader/kungfu-js-api/config/globalSettings';
 import {
   useCurrentGlobalKfLocation,
@@ -27,12 +28,26 @@ import {
   useProcessStatusDetailData,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
 import {
+dealOrderInputItem,
   getProcessIdByKfLocation,
   initFormStateByConfig,
   transformSearchInstrumentResultToInstrument,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import OrderConfirmModal from './OrderConfirmModal.vue';
 import { hashInstrumentUKey } from '@kungfu-trader/kungfu-js-api/kungfu';
+
+const orderconfig: Record<string, string> = {
+  account_id: '账户',
+  instrument_id: '标的ID',
+  instrument_type: '标的类型',
+  side: '买卖',
+  offset: '开平',
+  hedge_flag: '套保',
+  price_type: '方式',
+  volume: '下单量',
+  exchange_id: '交易所ID',
+  limit_price: '限额',
+};
 
 const app = getCurrentInstance();
 const formState = ref(
@@ -71,6 +86,25 @@ const configSettings = computed(() => {
 const isShowConfirmModal = ref<boolean>(false);
 const orderMessage = ref<number>(0)
 const orderData = ref<KungfuApi.MakeOrderInput>();
+const initialSideType: {
+  value: number
+} = {
+  value: 0
+}
+
+const fatFingerRange = +getKfGlobalSettingsValue()?.trade?.fatFinger || 0
+const closeRange = +getKfGlobalSettingsValue()?.trade?.close || 0
+const positionList =  window.watcher.ledger.Position
+const currentPosition = {
+  position: '0',
+}
+console.log(closeRange);
+for (let key in positionList) {
+  if (positionList[key].client_id === currentGlobalKfLocation?.value?.name && positionList[key].ledger_category === LedgerCategoryEnum.strategy) {
+    currentPosition.position = (positionList[key].yesterday_volume as bigint).toString();
+  }
+}
+
 
 onMounted(() => {
   if (app?.proxy) {
@@ -79,6 +113,7 @@ onMounted(() => {
         const { offset, side, volume, price, instrumentType, accountId } = (
           data as TriggerMakeOrder
         ).orderInput;
+        initialSideType.value = +side;
 
         const instrumentValue = buildInstrumentSelectOptionValue(
           (data as TriggerMakeOrder).orderInput,
@@ -222,8 +257,11 @@ function handleApartOrder() {
   formRef.value
     .validate()
     .then(async () => {
-      isShowConfirmModal.value = true;
       const makeOrderInput: KungfuApi.MakeOrderInput = await initInputData()
+      if (initialSideType.value !== makeOrderInput.side) {
+        await confirmModal('提示', '是否全部平仓')
+      }
+      isShowConfirmModal.value = true;
       orderMessage.value = +makeOrderInput.volume
       orderData.value = makeOrderInput
   })
@@ -276,7 +314,31 @@ function confirmOrderPlace(makeOrderInput: KungfuApi.MakeOrderInput): Promise<st
 
     const { exchangeId, instrumentId } = instrumnetResolved;
     const { account_id } = formState.value;
-      vNodeConfirmModal(makeOrderInput).then(() => {
+
+    const orderInput: Record<string, KungfuApi.KfTradeValueCommonData> =
+      dealOrderInputItem(makeOrderInput);
+    const vnode = Object.keys(orderInput)
+      .filter((key) => {
+        if (orderInput[key].name.toString() === '[object Object]') {
+          return false;
+        }
+        return orderInput[key].name !== '';
+      })
+      .map((key) =>
+        h('div', { class: 'trading-data-detail-row' }, [
+          h('span', { class: 'label' }, `${orderconfig[key]}`),
+          h(
+            'span',
+            {
+              class: `value ${orderInput[key].color}`,
+              style: { color: `${orderInput[key].color}` },
+            },
+            `${orderInput[key].name}`,
+          ),
+        ]),
+      );
+
+    confirmModal('下单确认', h('div', { class: 'trading-data-detail__warp', vnode }, vnode),).then(() => {
       if (!currentGlobalKfLocation.value || !window.watcher) {
         message.error('当前 Location 错误');
         return;
@@ -292,8 +354,6 @@ function confirmOrderPlace(makeOrderInput: KungfuApi.MakeOrderInput): Promise<st
         return;
       }
 
-      const fatFingerRange = +getKfGlobalSettingsValue()?.trade?.fatFinger || 0
-      
       const {limit_price: price, side } = makeOrderInput
       const ukey = hashInstrumentUKey(instrumentId, exchangeId);
       const lastPrice = window.watcher.ledger.Quote[ukey].last_price
@@ -323,9 +383,17 @@ function confirmOrderPlace(makeOrderInput: KungfuApi.MakeOrderInput): Promise<st
 function handleMakeOrder() {
   formRef.value.validate().then(async () => {
     const makeOrderInput: KungfuApi.MakeOrderInput = await initInputData()
-    await confirmOrderPlace(makeOrderInput).then((tdProcessId) => {
-      placeOrder(makeOrderInput, currentGlobalKfLocation.value, tdProcessId)
-    })
+    if (initialSideType.value !== makeOrderInput.side) {
+      await confirmModal('提示', '是否全部平仓').then(async () => {
+        await confirmOrderPlace(makeOrderInput).then((tdProcessId) => {
+          placeOrder(makeOrderInput, currentGlobalKfLocation.value, tdProcessId)
+        })
+      })
+    } else {
+      await confirmOrderPlace(makeOrderInput).then((tdProcessId) => {
+        placeOrder(makeOrderInput, currentGlobalKfLocation.value, tdProcessId)
+      })
+    }
   }).catch((err: Error) => {
     console.error(err);
   })
@@ -365,6 +433,7 @@ function handleMakeOrder() {
             :label-col="5"
             :wrapper-col="14"
           ></KfConfigSettingsForm>
+        <div class="make-order-position" v-if="formState.instrument">当前持有量为{{currentPosition.position}}</div>
         </div>
         <div class="make-order-btns">
           <a-button class="make-order" size="small" @click="handleMakeOrder">
