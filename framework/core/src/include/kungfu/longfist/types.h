@@ -39,6 +39,8 @@ KF_DEFINE_MARK_TYPE(ResetBookRequest, 400);
 KF_DEFINE_MARK_TYPE(MirrorPositionsRequest, 401);
 KF_DEFINE_MARK_TYPE(AssetRequest, 402);
 KF_DEFINE_MARK_TYPE(PositionRequest, 403);
+KF_DEFINE_MARK_TYPE(AssetSync, 404);
+KF_DEFINE_MARK_TYPE(PositionSync, 405);
 KF_DEFINE_MARK_TYPE(InstrumentEnd, 802);
 KF_DEFINE_MARK_TYPE(AlgoOrderInput, 20010);
 KF_DEFINE_MARK_TYPE(AlgoOrderReport, 20011);
@@ -152,6 +154,12 @@ KF_DEFINE_PACK_TYPE(                                          //
     RequestReadFromPublic, 10022, PK(source_id), PERPETUAL(), //
     (uint32_t, source_id),                                    //
     (int64_t, from_time)                                      //
+);
+
+KF_DEFINE_PACK_TYPE(                                        //
+    RequestReadFromSync, 10029, PK(source_id), PERPETUAL(), //
+    (uint32_t, source_id),                                  //
+    (int64_t, from_time)                                    //
 );
 
 KF_DEFINE_PACK_TYPE(                                 //

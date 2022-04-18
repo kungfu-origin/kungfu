@@ -285,7 +285,7 @@ export const setTimerPromiseTask = (fn: Function, interval = 500) => {
 
 export const loopToRunProcess = async <T>(
   promiseFunc: Array<() => Promise<T>>,
-  interval = 1000,
+  interval = 100,
 ) => {
   let i = 0,
     len = promiseFunc.length;

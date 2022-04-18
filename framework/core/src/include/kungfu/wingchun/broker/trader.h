@@ -54,10 +54,22 @@ public:
 
   [[nodiscard]] const std::string &get_account_id() const;
 
+  [[nodiscard]] yijinjing::journal::writer_ptr get_asset_writer() const;
+
+  [[nodiscard]] yijinjing::journal::writer_ptr get_position_writer() const;
+
+  void enable_asset_sync();
+
+  void enable_positions_sync();
+
 protected:
   OrderMap orders_ = {};
   OrderActionMap actions_ = {};
   TradeMap trades_ = {};
+
+private:
+  bool sync_asset_ = false;
+  bool sync_position_ = false;
 };
 } // namespace kungfu::wingchun::broker
 

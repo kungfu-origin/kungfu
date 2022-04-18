@@ -8,6 +8,7 @@ import {
   isTdStrategyCategory,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import {
+  useDashboardBodySize,
   useDownloadHistoryTradingData,
   useTableSearchKeyword,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
@@ -45,6 +46,7 @@ import TradeStatisticModal from './TradeStatisticModal.vue';
 import { HistoryDateEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';
 
 const app = getCurrentInstance();
+const { handleBodySizeChange } = useDashboardBodySize();
 
 const trades = ref<KungfuApi.TradeResolved[]>([]);
 const { searchKeyword, tableData } =
@@ -191,7 +193,7 @@ function handleShowTradingDataDetail({
 </script>
 <template>
   <div class="kf-trades__warp kf-translateZ">
-    <KfDashboard>
+    <KfDashboard @boardSizeChange="handleBodySizeChange">
       <template v-slot:title>
         <span v-if="currentGlobalKfLocation">
           <a-tag

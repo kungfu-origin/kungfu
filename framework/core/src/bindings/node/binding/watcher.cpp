@@ -271,6 +271,7 @@ void Watcher::on_start() {
   broker_client_.on_start(events_);
   bookkeeper_.on_start(events_);
   bookkeeper_.guard_positions();
+  bookkeeper_.add_book_listener(std::shared_ptr<Watcher>(this));
 
   events_ | bypass(this, bypass_quotes_) | $$(Feed(event));
   events_ | is(OrderInput::tag) | $$(UpdateBook(event, event->data<OrderInput>()));
@@ -416,6 +417,10 @@ location_ptr Watcher::FindLocation(const Napi::CallbackInfo &info) {
 }
 
 void Watcher::InspectChannel(int64_t trigger_time, const Channel &channel) {
+  if (channel.source_id == cached_home_location_->uid or channel.dest_id == cached_home_location_->uid) {
+    return;
+  }
+
   if (channel.source_id != get_live_home_uid() and channel.dest_id != get_live_home_uid()) {
     reader_->join(get_location(channel.source_id), channel.dest_id, trigger_time);
   }
@@ -466,7 +471,7 @@ void Watcher::UpdateBrokerState(uint32_t broker_uid, const BrokerStateUpdate &st
 void Watcher::UpdateAsset(const event_ptr &event, uint32_t book_uid) {
   auto book = bookkeeper_.get_book(book_uid);
   book->update(event->gen_time());
-  state<kungfu::longfist::types::Asset> cache_state(ledger_location_->uid, book_uid, event->gen_time(), book->asset);
+  state<Asset> cache_state(ledger_location_->uid, book_uid, event->gen_time(), book->asset);
   feed_state_data_bank(cache_state, data_bank_);
 }
 
@@ -491,7 +496,7 @@ void Watcher::UpdateBook(const event_ptr &event, const Quote &quote) {
     }
 
     if (has_short_position_for_quote or has_long_position_for_quote) {
-      state<kungfu::longfist::types::Asset> cache_state(ledger_uid, holder_uid, event->gen_time(), book->asset);
+      state<Asset> cache_state(ledger_uid, holder_uid, event->gen_time(), book->asset);
       feed_state_data_bank(cache_state, data_bank_);
     }
   }
@@ -519,7 +524,7 @@ void Watcher::UpdateBook(int64_t update_time, uint32_t source_id, uint32_t dest_
     }
 
     if (has_short_position_for_quote or has_long_position_for_quote) {
-      state<kungfu::longfist::types::Asset> cache_state(ledger_uid, holder_uid, update_time, book->asset);
+      state<Asset> cache_state(ledger_uid, holder_uid, update_time, book->asset);
       feed_state_data_bank(cache_state, data_bank_);
     }
   }
@@ -529,9 +534,80 @@ void Watcher::UpdateBook(const event_ptr &event, const Position &position) {
   auto book = bookkeeper_.get_book(position.holder_uid);
   auto &book_position = book->get_position_for(position.direction, position);
   if (book_position.volume > 0 or book_position.direction == Direction::Long) {
-    state<kungfu::longfist::types::Position> cache_state(event->source(), event->dest(), event->gen_time(),
-                                                         book_position);
+    state<Position> cache_state(event->source(), event->dest(), event->gen_time(), book_position);
     feed_state_data_bank(cache_state, data_bank_);
+  }
+}
+
+void Watcher::on_asset_sync_reset(const longfist::types::Asset &old_asset, const longfist::types::Asset &new_asset) {
+
+  // watcher维护的bookkeeper中，与new_book(TD) has_channel的strategy更新前端数据
+  auto fun_has_channel = [&](const Asset &st_asset) {
+    return st_asset.ledger_category == LedgerCategory::Strategy and
+           has_channel(st_asset.holder_uid, new_asset.holder_uid);
+  };
+  // watcher维护的bookkeeper中，与new_book表示同一个TD的要更新前端数据
+  auto fun_same_td = [&](Asset &td_asset) {
+    return td_asset.ledger_category == LedgerCategory::Account and td_asset.holder_uid == new_asset.holder_uid;
+  };
+
+  for (auto &bk_pair : bookkeeper_.get_books()) {
+    auto &st_book = bk_pair.second;
+    if (fun_has_channel(st_book->asset) or fun_same_td(st_book->asset)) {
+      st_book->asset.avail = new_asset.avail;
+      st_book->asset.margin = new_asset.margin;
+      st_book->asset.update_time = new_asset.update_time;
+      state<Asset> cache_state(ledger_location_->uid, st_book->asset.holder_uid, st_book->asset.update_time,
+                               st_book->asset);
+      feed_state_data_bank(cache_state, data_bank_);
+    }
+  }
+}
+
+void Watcher::on_book_sync_reset(const book::Book &old_book, const book::Book &new_book) {
+  // on_book_sync_reset调用时，bookkeeper中所有TD的book都是旧的，当回调结束后才替换成新的book
+
+  auto fun_update_st_position = [&](book::PositionMap &position_map) {
+    for (auto &st_pair : position_map) {
+      auto &st_position = st_pair.second;
+      auto &td_position = const_cast<book::Book &>(new_book).get_position_for(st_position.direction, st_position);
+      if (strcmp(st_position.source_id, td_position.source_id) == 0 and
+          strcmp(st_position.account_id, td_position.account_id) == 0) {
+        st_position.volume = td_position.volume;
+        st_position.yesterday_volume = td_position.yesterday_volume;
+        st_position.update_time = td_position.update_time;
+        state<Position> cache_state(ledger_location_->uid, st_position.holder_uid, st_position.update_time,
+                                    st_position);
+        feed_state_data_bank(cache_state, data_bank_);
+      }
+    }
+  };
+
+  // watcher维护的bookkeeper中，与new_book(TD) has_channel的strategy更新前端数据
+  auto fun_has_channel = [&](const Asset &st_asset) {
+    return st_asset.ledger_category == LedgerCategory::Strategy and
+           has_channel(st_asset.holder_uid, new_book.asset.holder_uid);
+  };
+  // watcher维护的bookkeeper中，与new_book表示同一个TD的要更新前端数据
+  auto fun_same_td = [&](Asset &td_asset) {
+    if (td_asset.ledger_category == LedgerCategory::Account and td_asset.holder_uid == new_book.asset.holder_uid) {
+      td_asset.avail = new_book.asset.avail;
+      td_asset.margin = new_book.asset.margin;
+      td_asset.update_time = new_book.asset.update_time;
+      state<Asset> cache_state(ledger_location_->uid, td_asset.holder_uid, td_asset.update_time, td_asset);
+      feed_state_data_bank(cache_state, data_bank_);
+      return true;
+    } else {
+      return false;
+    }
+  };
+
+  for (auto &bk_pair : bookkeeper_.get_books()) {
+    auto &st_book = bk_pair.second;
+    if (fun_has_channel(st_book->asset) or fun_same_td(st_book->asset)) {
+      fun_update_st_position(st_book->long_positions);
+      fun_update_st_position(st_book->short_positions);
+    }
   }
 }
 
@@ -540,7 +616,7 @@ void Watcher::UpdateBook(int64_t update_time, uint32_t source_id, uint32_t dest_
   auto book = bookkeeper_.get_book(position.holder_uid);
   auto &book_position = book->get_position_for(position.direction, position);
   if (book_position.volume > 0 or book_position.direction == Direction::Long) {
-    state<kungfu::longfist::types::Position> cache_state(source_id, dest_id, update_time, book_position);
+    state<Position> cache_state(source_id, dest_id, update_time, book_position);
     feed_state_data_bank(cache_state, data_bank_);
   }
 }

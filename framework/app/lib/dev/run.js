@@ -149,10 +149,15 @@ function startMain(argv) {
 
 function copyWebpackDist(argv) {
   const srcDir = path.join(getAppDir(), 'dist', 'app');
+  const publicDir = path.join(getAppDir(), 'public');
   const targetDir = path.join(argv.distDir, argv.distName);
+  const publicTargetDir = path.join(argv.distDir, 'public');
   logStats('Builder', `copy from ${srcDir} to ${targetDir}`);
   fse.removeSync(targetDir);
-  fse.copySync(srcDir, targetDir, {});
+  fse.copySync(srcDir, targetDir);
+  logStats('Builder', `copy from ${publicDir} to ${publicTargetDir}`);
+  fse.removeSync(publicTargetDir);
+  fse.copySync(publicDir, publicTargetDir);
 }
 
 function startElectron(argv) {

@@ -332,6 +332,7 @@ export const startProcess = (
     exec_mode: 'fork',
     kill_timeout: 16000,
     env: {
+      RELOAD_AFTER_CRASHED: process.env.RELOAD_AFTER_CRASHED || 'false',
       KF_HOME: dealSpaceInPath(KF_HOME),
       KF_RUNTIME_DIR: dealSpaceInPath(KF_RUNTIME_DIR),
       LANG: `${locale}.UTF-8`,
@@ -671,7 +672,7 @@ export const startTask = async (
       .map((dir) => dealSpaceInPath(path.dirname(dir)))
       .join(path.delimiter)}" run -c strategy -g "${taskLocation.group}" -n "${
       taskLocation.name
-    }" ${soPath} -a ${args}`,
+    }" ${soPath} -a "${args}"`,
   );
 
   return startProcess({

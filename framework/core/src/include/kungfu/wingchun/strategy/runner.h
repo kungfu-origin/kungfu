@@ -10,7 +10,7 @@
 #include <kungfu/yijinjing/practice/apprentice.h>
 
 namespace kungfu::wingchun::strategy {
-class Runner : public yijinjing::practice::apprentice {
+class Runner : public yijinjing::practice::apprentice, public kungfu::wingchun::book::BookListener {
 public:
   Runner(yijinjing::data::locator_ptr locator, const std::string &group, const std::string &name,
          longfist::enums::mode m, bool low_latency);
@@ -24,6 +24,10 @@ public:
   void on_exit() override;
 
   void on_trading_day(const event_ptr &event, int64_t daytime) override;
+
+  void on_book_sync_reset(const book::Book &old_book, const book::Book &new_book) override;
+
+  void on_asset_sync_reset(const longfist::types::Asset &old_asset, const longfist::types::Asset &new_asset) override;
 
 protected:
   void on_react() override;

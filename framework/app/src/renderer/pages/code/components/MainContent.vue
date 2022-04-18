@@ -129,8 +129,8 @@ function handleClick(type: indent, size: indent) {
   } else {
     setting = {
       code: {
-        tabSpaceType: SpaceTabSettingEnum.SPACES,
-        tabSpaceSize: SpaceSizeSettingEnum.TWOINDENT,
+        tabSpaceType: '',
+        tabSpaceSize: '',
       },
     };
   }

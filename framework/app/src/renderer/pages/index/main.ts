@@ -135,6 +135,14 @@ if (process.env.RELOAD_AFTER_CRASHED === 'false') {
         .then(() => delayMilliSeconds(1000))
         .then(() => startLedger(false))
         .then(() => postStartAll())
+        .then(() => delayMilliSeconds(1000))
+        .then(() => {
+          globalBus.next({
+            tag: 'processStatus',
+            name: 'systemLoading',
+            status: 'online',
+          });
+        })
         .catch((err) => console.error(err.message));
     });
 } else {
@@ -144,6 +152,13 @@ if (process.env.RELOAD_AFTER_CRASHED === 'false') {
     name: 'archive',
     status: 'waiting restart',
   });
+
+  globalBus.next({
+    tag: 'processStatus',
+    name: 'systemLoading',
+    status: 'online',
+  });
+
   startGetProcessStatus(
     (res: {
       processStatus: Pm2ProcessStatusData;
