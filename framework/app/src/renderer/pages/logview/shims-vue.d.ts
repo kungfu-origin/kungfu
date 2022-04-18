@@ -11,3 +11,7 @@ declare module 'vue-virtual-scroller' {
     install(app: App): void;,
   };
 }
+declare module '*.mp3' {
+  const src: string;
+  export default src;
+}

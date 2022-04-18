@@ -36,7 +36,7 @@ dealOrderInputItem,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import OrderConfirmModal from './OrderConfirmModal.vue';
 import { hashInstrumentUKey } from '@kungfu-trader/kungfu-js-api/kungfu';
-import soundFile from '@kungfu-trader/kungfu-app/src/renderer/assets/music/trade.mp3';
+import soundFile from '../../../renderer/assets/music/test.mp3';
 
 const orderconfig: Record<string, string> = {
   account_id: '账户',
@@ -261,7 +261,7 @@ function handleApartOrder() {
     .validate()
     .then(async () => {
       const makeOrderInput: KungfuApi.MakeOrderInput = await initInputData()
-      if (initialSideType.value !== makeOrderInput.side && makeOrderInput.volume.toString() === currentPosition.position) {
+      if (initialSideType.value !== makeOrderInput.side && makeOrderInput.volume.toString() === currentPosition.position && +makeOrderInput.volume > closeRange) {
         await confirmModal('提示', '是否全部平仓')
       }
       isShowConfirmModal.value = true;
@@ -386,7 +386,7 @@ function confirmOrderPlace(makeOrderInput: KungfuApi.MakeOrderInput): Promise<st
 function handleMakeOrder() {
   formRef.value.validate().then(async () => {
     const makeOrderInput: KungfuApi.MakeOrderInput = await initInputData()
-    if (initialSideType.value !== makeOrderInput.side) {
+    if (initialSideType.value !== makeOrderInput.side && makeOrderInput.volume.toString() === currentPosition.position && +makeOrderInput.volume > closeRange) {
       await confirmModal('提示', '是否全部平仓').then(async () => {
         await confirmOrderPlace(makeOrderInput).then((tdProcessId) => {
           placeOrder(makeOrderInput, currentGlobalKfLocation.value, tdProcessId)
@@ -401,23 +401,16 @@ function handleMakeOrder() {
     console.error(err);
   })
 }
-//  const complateSound = new Audio();
-//   complateSound.src = soundFile
 
-async function logger() {
-  console.log(soundFile, 1);
-  console.log(1);
-  console.log(require('../../../renderer/assets/music/trade.mp3'));
+function logger() {
+  const complateSound = new Audio();
+  complateSound.src = soundFile
+  console.log(complateSound);
+  console.log(complateSound.play());
   
-  console.log(require('@kungfu-trader/kungfu-app/src/renderer/assets/music/trade.mp3'));
-  
-  
-  // try {
-  //   await complateSound.play();
-  // } catch(err) {
-  //   console.log(err);
-    
-  // }
+  nextTick(() => {
+    complateSound.play();
+  });
 }
 </script>
 
