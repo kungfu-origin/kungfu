@@ -46,7 +46,9 @@ import TradeStatisticModal from './TradeStatisticModal.vue';
 import { HistoryDateEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import { getKfGlobalSettingsValue } from '@kungfu-trader/kungfu-js-api/config/globalSettings';
 
-// import soundFile from './music/trade-complete.mp3';
+// import soundFile from '@kungfu-trader/kungfu-app/src/renderer/assets/music/trade.mp3';
+
+// console.log(soundFile);
 
 const app = getCurrentInstance();
 const { handleBodySizeChange } = useDashboardBodySize();
@@ -128,7 +130,7 @@ onMounted(() => {
           const isPlaySound = getKfGlobalSettingsValue()?.trade?.sound || false
           if (isPlaySound) {
             const complateSound = new Audio();
-            complateSound.src = '@kungfu-trader/kungfu-app/src/rendererer/assets/music/trade-complete.mp3';
+            complateSound.src = '@kungfu-trader/kungfu-app/src/renderer/assets/music/trade.mp3';
             complateSound.play();
           }
         

@@ -19,33 +19,31 @@ module.exports = {
       },
       module: {
         rules: [
-          ...(argv.passTJSLoader ?
-            [] :
-            [{
-                test: /\.(t|j)s$/,
-                exclude: /node_modules/,
-                use: [{
-                  loader: 'babel-loader',
-                }, ],
-              },
-              {
-                test: /\.(t|j)s$/,
-                exclude: /node_modules/,
-                use: [{
-                  loader: 'ts-loader',
-                  options: {
-                    // 指定特定的ts编译配置，为了区分脚本的ts配置
-                    configFile: path.resolve(
-                      process.cwd(),
-                      'tsconfig.json',
-                    ),
-                    // 对应文件添加个.ts或.tsx后缀
-                    appendTsSuffixTo: [/\.vue$/],
-                    transpileOnly: false, // 关闭类型检测，即值进行转译
-                  },
-                }, ],
-              },
-            ]),
+          ...(argv.passTJSLoader ? [] : [{
+              test: /\.(t|j)s$/,
+              exclude: /node_modules/,
+              use: [{
+                loader: 'babel-loader',
+              }, ],
+            },
+            {
+              test: /\.(t|j)s$/,
+              exclude: /node_modules/,
+              use: [{
+                loader: 'ts-loader',
+                options: {
+                  // 指定特定的ts编译配置，为了区分脚本的ts配置
+                  configFile: path.resolve(
+                    process.cwd(),
+                    'tsconfig.json',
+                  ),
+                  // 对应文件添加个.ts或.tsx后缀
+                  appendTsSuffixTo: [/\.vue$/],
+                  transpileOnly: false, // 关闭类型检测，即值进行转译
+                },
+              }, ],
+            },
+          ]),
           {
             test: /\.node$/,
             use: 'node-loader',
@@ -77,7 +75,7 @@ module.exports = {
           {
             test: /\.(mp4|webm|ogg|mp3|wav|flac|aac)(\?.*)?$/,
             use: {
-              loader: 'url-loder',
+              loader: 'url-loader',
               options: {
                 limit: 10000,
                 name: 'media/[name]--[folder].[ext]',
@@ -86,7 +84,7 @@ module.exports = {
             },
           },
           {
-            test: /\.(woff2?|eot|ttf|otf)(\?.*)?$/,
+            test: /\.(woff2?|eot|ttf|otf|mp3)(\?.*)?$/,
             use: {
               loader: 'file-loader',
               options: {
