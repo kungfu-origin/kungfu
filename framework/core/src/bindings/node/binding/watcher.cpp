@@ -95,7 +95,7 @@ Watcher::Watcher(const Napi::CallbackInfo &info)
   RestoreState(ledger_location_, today, INT64_MAX, sync_schema);
 
   shift(ledger_location_) >> state_bank_; // Load positions to restore bookkeeper
-  SPDLOG_INFO("watcher {} initialized", get_io_device()->get_home()->uname);
+  SPDLOG_INFO("watcher {} with uid {} and live uid {} initialized", get_io_device()->get_home()->uname,  get_home_uid(), get_live_home_uid());
 }
 
 Watcher::~Watcher() {
@@ -264,7 +264,7 @@ void Watcher::Init(Napi::Env env, Napi::Object exports) {
 }
 
 void Watcher::on_react() {
-  events_ | $([&](const event_ptr &event) { feed_state_data(event, data_bank_); });
+  events_ | bypass(this, bypass_quotes_) | $([&](const event_ptr &event) { feed_state_data(event, data_bank_); });
 }
 
 void Watcher::on_start() {
