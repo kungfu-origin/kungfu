@@ -180,7 +180,7 @@ private:
   size_t capacityMask_;
   T *queue_;
   T *pop_value_;
-  size_t capacity_t ;
+  size_t capacity_ ;
   std::atomic<size_t> tail_;
   std::atomic<size_t> head_;
 };
