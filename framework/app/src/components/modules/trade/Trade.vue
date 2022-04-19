@@ -45,10 +45,9 @@ import { useExtraCategory } from '@kungfu-trader/kungfu-app/src/renderer/assets/
 import TradeStatisticModal from './TradeStatisticModal.vue';
 import { HistoryDateEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import { getKfGlobalSettingsValue } from '@kungfu-trader/kungfu-js-api/config/globalSettings';
-
+import path from 'path';
+import { KUNGFU_RESOURCES_DIR } from '@kungfu-trader/kungfu-js-api/config/pathConfig';
 // import soundFile from '@kungfu-trader/kungfu-app/src/renderer/assets/music/trade.mp3';
-
-// console.log(soundFile);
 
 const app = getCurrentInstance();
 const { handleBodySizeChange } = useDashboardBodySize();
@@ -130,12 +129,13 @@ onMounted(() => {
           const isPlaySound = getKfGlobalSettingsValue()?.trade?.sound || false
           if (isPlaySound) {
             const complateSound = new Audio();
-            complateSound.src = '@kungfu-trader/kungfu-app/src/renderer/assets/music/trade.mp3';
+            complateSound.src = path.join(`${path.join(KUNGFU_RESOURCES_DIR, 'music/Trade.mp3')}`);
+
+            console.log(complateSound);
+            
             complateSound.play();
           }
-        
           lastTradeId.value = trades.value[0].trade_id;
-          
         }
       },
     );

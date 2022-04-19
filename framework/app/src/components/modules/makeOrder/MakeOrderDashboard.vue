@@ -36,7 +36,9 @@ dealOrderInputItem,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import OrderConfirmModal from './OrderConfirmModal.vue';
 import { hashInstrumentUKey } from '@kungfu-trader/kungfu-js-api/kungfu';
-import soundFile from '../../../renderer/assets/music/test.mp3';
+import path from 'path';
+import { KUNGFU_RESOURCES_DIR } from '@kungfu-trader/kungfu-js-api/config/pathConfig';
+// import soundFile from '../../../renderer/assets/music/Trade.mp3';
 
 const orderconfig: Record<string, string> = {
   account_id: '账户',
@@ -101,7 +103,6 @@ const positionList =  window.watcher.ledger.Position
 const currentPosition = {
   position: '0',
 }
-console.log(closeRange);
 for (let key in positionList) {
   if (positionList[key].client_id === currentGlobalKfLocation?.value?.name && positionList[key].ledger_category === LedgerCategoryEnum.strategy) {
     currentPosition.position = (positionList[key].yesterday_volume as bigint).toString();
@@ -403,14 +404,13 @@ function handleMakeOrder() {
 }
 
 function logger() {
-  const complateSound = new Audio();
-  complateSound.src = soundFile
-  console.log(complateSound);
-  console.log(complateSound.play());
+  console.log(1);
   
-  nextTick(() => {
-    complateSound.play();
-  });
+  const complateSound = new Audio();
+  complateSound.src = path.join(`${path.join(KUNGFU_RESOURCES_DIR, 'music/Trade.mp3')}`);
+  console.log(complateSound);
+  
+  complateSound.play();
 }
 </script>
 
