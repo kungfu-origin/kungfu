@@ -79,7 +79,9 @@ public:
       book->update(update_time);
     };
     apply_and_update(source);
-    apply_and_update(dest);
+    if (dest != yijinjing::data::location::PUBLIC) {
+      apply_and_update(dest);
+    }
   }
 
 private:
