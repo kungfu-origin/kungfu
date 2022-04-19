@@ -29,6 +29,7 @@
   },
   "dependencies": {
     "lerna": "^4.0.0",
+    "sound-play": "^1.1.0",
     "wsrun": "^5.2.0"
   },
   "resolutions": {

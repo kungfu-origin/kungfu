@@ -36,9 +36,6 @@ dealOrderInputItem,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import OrderConfirmModal from './OrderConfirmModal.vue';
 import { hashInstrumentUKey } from '@kungfu-trader/kungfu-js-api/kungfu';
-import path from 'path';
-import { KUNGFU_RESOURCES_DIR } from '@kungfu-trader/kungfu-js-api/config/pathConfig';
-// import soundFile from '../../../renderer/assets/music/Trade.mp3';
 
 const orderconfig: Record<string, string> = {
   account_id: '账户',
@@ -403,15 +400,6 @@ function handleMakeOrder() {
   })
 }
 
-function logger() {
-  console.log(1);
-  
-  const complateSound = new Audio();
-  complateSound.src = path.join(`${path.join(KUNGFU_RESOURCES_DIR, 'music/Trade.mp3')}`);
-  console.log(complateSound);
-  
-  complateSound.play();
-}
 </script>
 
 <template>
@@ -447,7 +435,7 @@ function logger() {
             :label-col="5"
             :wrapper-col="14"
           ></KfConfigSettingsForm>
-        <div class="make-order-position" v-if="formState.instrument" @click="logger()">当前持有量为{{currentPosition.position}}</div>
+        <div class="make-order-position" v-if="formState.instrument">当前持有量为{{currentPosition.position}}</div>
         </div>
         <div class="make-order-btns">
           <a-button class="make-order" size="small" @click="handleMakeOrder">
