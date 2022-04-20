@@ -19,8 +19,8 @@ import {
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import { getConfigSettings, confirmModal } from './config';
 import { message } from 'ant-design-vue';
-import { makeOrderByOrderInput } from '@kungfu-trader/kungfu-js-api/kungfu';
-import { InstrumentTypeEnum, LedgerCategoryEnum, SideEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';
+import { makeOrderByOrderInput, hashInstrumentUKey } from '@kungfu-trader/kungfu-js-api/kungfu';
+import { InstrumentTypeEnum, SideEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import { getKfGlobalSettingsValue } from '@kungfu-trader/kungfu-js-api/config/globalSettings';
 import {
   useCurrentGlobalKfLocation,
@@ -29,13 +29,15 @@ import {
   useProcessStatusDetailData,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
 import {
-dealOrderInputItem,
+  dealOrderInputItem,
+  dealTradingData,
   getProcessIdByKfLocation,
   initFormStateByConfig,
+  isTdStrategyCategory,
   transformSearchInstrumentResultToInstrument,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import OrderConfirmModal from './OrderConfirmModal.vue';
-import { hashInstrumentUKey } from '@kungfu-trader/kungfu-js-api/kungfu';
+import { useExtraCategory } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiExtraLocationUtils';
 
 const orderconfig: Record<string, string> = {
   account_id: '账户',
@@ -93,18 +95,35 @@ const initialSideType: {
 } = {
   value: 0
 }
+const { getExtraCategoryData } = useExtraCategory();
 
 const fatFingerRange = +getKfGlobalSettingsValue()?.trade?.fatFinger || 0
 const closeRange = +getKfGlobalSettingsValue()?.trade?.close || 0
-const positionList =  window.watcher.ledger.Position
 const currentPosition = {
   position: '0',
 }
-for (let key in positionList) {
-  if (positionList[key].client_id === currentGlobalKfLocation?.value?.name && positionList[key].ledger_category === LedgerCategoryEnum.strategy) {
-    currentPosition.position = (positionList[key].yesterday_volume as bigint).toString();
+
+const curPositionList = computed(() => {
+  if (currentGlobalKfLocation.value === null) {
+    return {};
   }
-}
+
+  const positions = isTdStrategyCategory(
+    currentGlobalKfLocation.value.category,
+  )
+    ? ((dealTradingData(
+        window.watcher,
+        window.watcher.ledger,
+        'Position',
+        currentGlobalKfLocation.value,
+      ) || []) as KungfuApi.Position[])
+    : (getExtraCategoryData(
+         window.watcher.ledger.Position,
+        currentGlobalKfLocation.value,
+        'position',
+      ) as KungfuApi.Position[]);
+  return positions
+})
 
 
 onMounted(() => {
@@ -155,7 +174,7 @@ onMounted(() => {
         formState.value.side = +side;
       }
     });
-
+    
     onBeforeUnmount(() => {
       subscription.unsubscribe();
     });
@@ -168,11 +187,13 @@ watch(
     const instrumentResolved = transformSearchInstrumentResultToInstrument(
       newVal.toString(),
     );
-
+    
     if (!instrumentResolved) {
       return;
     }
-
+    const { exchangeId, instrumentId, instrumentType } = instrumentResolved as KungfuApi.InstrumentResolved;
+    const orderSymbol = `${instrumentId}_${exchangeId}_${instrumentType}`;
+    dealPositionList(curPositionList.value, orderSymbol)
     subscribeAllInstrumentByAppStates(
       processStatusData.value,
       appStates.value,
@@ -185,6 +206,14 @@ watch(
   },
 );
 
+function dealPositionList(positionList, orderSymbol) {
+  for (let key in positionList) {
+    const itemOrderSymbol = `${positionList[key].instrument_id}_${positionList[key].exchange_id}_${positionList[key].instrument_type}`
+    if (itemOrderSymbol === orderSymbol) {
+      currentPosition.position = (positionList[key].volume as bigint).toString();
+    }
+  }
+}
 
 function placeOrder(
   orderInput: KungfuApi.MakeOrderInput,
@@ -259,7 +288,7 @@ function handleApartOrder() {
     .validate()
     .then(async () => {
       const makeOrderInput: KungfuApi.MakeOrderInput = await initInputData()
-      if (initialSideType.value !== makeOrderInput.side && makeOrderInput.volume.toString() === currentPosition.position && +makeOrderInput.volume > closeRange) {
+      if (initialSideType.value !== makeOrderInput.side && makeOrderInput.volume.toString() === currentPosition.position && +makeOrderInput.volume > (closeRange * +currentPosition.position / 100)) {
         await confirmModal('提示', '是否全部平仓')
       }
       isShowConfirmModal.value = true;
@@ -268,7 +297,7 @@ function handleApartOrder() {
   })
 }
 
-
+// 拆单弹窗确认回调
 function handleApartedConfirm(amount: number): void {
   const remainder = orderMessage.value % +amount
   const eachAmount = Math.floor(orderMessage.value / +amount)
