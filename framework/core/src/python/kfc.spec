@@ -57,8 +57,10 @@ data_pdm_pep582 = make_path(site_path, "pdm", "pep582", "sitecustomize.py")
 data_pip_certifi = make_path(site_path, "pip", "_vendor", "certifi", "*.pem")
 
 # nuitka requires
+nuitka_dst_dir = make_path("nuitka")
 nuitka_build_dst_dir = make_path("nuitka", "build")
 nuitka_build_src_dir = make_path(site_path, "nuitka", "build")
+data_nuitka_codegen_templates = make_path(site_path, "nuitka", "codegen", "templates", "*.j2")
 data_nuitka_include = make_path(nuitka_build_src_dir, "include")
 data_nuitka_inline_copy = make_path(nuitka_build_src_dir, "inline_copy")
 data_nuitka_static_src = make_path(nuitka_build_src_dir, "static_src")
@@ -124,6 +126,7 @@ a = Analysis(
             (data_pdm_models, make_path("pdm", "models")),
             (data_pdm_pep582, make_path("pdm", "pep582")),
             (data_pip_certifi, make_path("pip", "_vendor", "certifi")),
+            (data_nuitka_codegen_templates, make_path(nuitka_dst_dir, "codegen", "templates")),
             (data_nuitka_include, make_path(nuitka_build_dst_dir, "include")),
             (data_nuitka_inline_copy, make_path(nuitka_build_dst_dir, "inline_copy")),
             (data_nuitka_static_src, make_path(nuitka_build_dst_dir, "static_src")),
