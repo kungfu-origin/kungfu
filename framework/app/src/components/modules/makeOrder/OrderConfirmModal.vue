@@ -14,7 +14,10 @@ const props = withDefaults(
   },
 );
 const orderNumber = computed(() => {
-  return Math.floor(+orderMessage.value / (+amount.value || 100))
+  if (apartType.value === 'orderSize') {
+    return Math.floor(+orderMessage.value / (+amount.value || 100))
+  }
+  return (+orderMessage.value % (+amount.value || 100) == 0) ? Math.floor(+orderMessage.value / (+amount.value || 100)) : Math.floor(+orderMessage.value / (+amount.value || 100)) + 1
 })
 
 defineEmits<{
@@ -51,7 +54,7 @@ function handleConfirm() {
           :value="orderMessage"
           title="总下单量"
         />
-        <a-input-group compact style="margin-top: 30px">
+        <a-input-group compact style="margin-top: 10px">
           <a-select v-model:value="apartType">
             <a-select-option value="orderSize">每次下单量</a-select-option>
             <a-select-option value="orderCount">下单次数</a-select-option>
@@ -69,7 +72,7 @@ function handleConfirm() {
         <a-statistic
           class="apart-result-statistic"
           :value="orderNumber"
-          :valueStyle="{fontSize: '30px'}"
+          :valueStyle="{fontSize: '35px'}"
           :title="apartType === 'orderSize' ? '下单次数' : '每次下单量'"
         />
       </a-col>
@@ -80,9 +83,7 @@ function handleConfirm() {
 .kf-order-confirm-modal {
   .apart-result {
     text-align: center;
-    margin: 0 auto;
-    .apart-result-statistic {
-    }
+    margin: auto;
   }
 }
 </style>

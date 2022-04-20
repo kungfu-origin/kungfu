@@ -101,7 +101,7 @@ export const getKfGlobalSettings = (): KfSystemConfig[] => [
           ? 'Set the threshold for triggering an fat finger(percentage)'
           : '设置乌龙指触发阈值(百分比)',
         default: '',
-        type: 'int',
+        type: 'percent',
       },
       {
         key: 'close',
@@ -110,7 +110,7 @@ export const getKfGlobalSettings = (): KfSystemConfig[] => [
           ? 'Set the threshold for triggering an close(percentage)'
           : '设置平仓触发阈值(百分比)',
         default: '',
-        type: 'int',
+        type: 'percent',
       },
     ],
   },
