@@ -41,9 +41,6 @@ exports.dev = (withWebpack) => {
 exports.cli = () => {
   const cliPath = require.resolve('@kungfu-trader/kungfu-cli');
   const runExecutable = path.join(cliPath, '..', 'dev', 'devCli.js');
-
-  console.log(runExecutable, '----');
-
   spawnSync('node', [runExecutable, ...process.argv.slice(4)], {
     stdio: 'inherit',
     windowsHide: true,
