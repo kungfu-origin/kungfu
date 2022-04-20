@@ -695,12 +695,12 @@ declare namespace KungfuApi {
       orderAction: OrderAction,
       tdLocation: KfLocation,
       strategyLocation?: KfLocation,
-    ): void;
+    ): bigint;
     issueOrder(
       orderInput: OrderInput,
       tdLocation: KfLocation,
       strategyLocation?: KfLocation,
-    ): void;
+    ): bigint;
     now(): bigint;
   }
 
