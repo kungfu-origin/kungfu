@@ -430,19 +430,16 @@ function handleMakeOrder() {
   formRef.value.validate().then(async () => {
     const makeOrderInput: KungfuApi.MakeOrderInput = await initInputData()
     const closeRange = +getKfGlobalSettingsValue()?.trade?.close || 0
-    if (initialSideType.value !== makeOrderInput.side && makeOrderInput.volume.toString() === currentPosition.position && +makeOrderInput.volume > closeRange) {
-      await confirmModal('提示', '是否全部平仓').then(async () => {
-        await handleFatFinger(makeOrderInput).then(async () => {
-          await confirmOrderPlace(makeOrderInput).then((tdProcessId) => {
-            placeOrder(makeOrderInput, currentGlobalKfLocation.value, tdProcessId)
-          })
-        })
+    if (initialSideType.value !== makeOrderInput.side && makeOrderInput.volume.toString() === currentPosition.position && +makeOrderInput.volume > (closeRange * +currentPosition.position / 100)) {
+      await confirmModal('提示', '是否全部平仓')
+      await handleFatFinger(makeOrderInput)
+      await confirmOrderPlace(makeOrderInput).then((tdProcessId) => {
+        placeOrder(makeOrderInput, currentGlobalKfLocation.value, tdProcessId)
       })
     } else {
-      await handleFatFinger(makeOrderInput).then(async () => {
-        await confirmOrderPlace(makeOrderInput).then((tdProcessId) => {
-          placeOrder(makeOrderInput, currentGlobalKfLocation.value, tdProcessId)
-        })
+      await handleFatFinger(makeOrderInput)
+      await confirmOrderPlace(makeOrderInput).then((tdProcessId) => {
+        placeOrder(makeOrderInput, currentGlobalKfLocation.value, tdProcessId)
       })
     }
   }).catch((err: Error) => {
