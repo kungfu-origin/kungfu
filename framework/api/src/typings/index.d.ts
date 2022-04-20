@@ -207,6 +207,8 @@ declare namespace KungfuApi {
     side: SideEnum;
     offset: OffsetEnum;
     hedge_flag: HedgeFlagEnum;
+    source_id?: string;
+    account_id?: string;
     parent_id: bigint;
   }
 

@@ -186,6 +186,7 @@ private:
   std::enable_if_t<std::is_same_v<TradingData, longfist::types::OrderInput>> UpdateBook(uint32_t source, uint32_t dest,
                                                                                         const TradingData &data) {
     bookkeeper_.on_order_input(now(), source, dest, data);
+    trading_bank_ << state<longfist::types::OrderInput>(source, dest, now(), data);
   }
 
   template <typename TradingData>
