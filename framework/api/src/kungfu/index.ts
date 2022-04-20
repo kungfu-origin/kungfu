@@ -254,7 +254,7 @@ export const kfRequestMarketData = (
 export const kfCancelOrder = (
   watcher: KungfuApi.Watcher | null,
   order: KungfuApi.Order,
-): Promise<void> => {
+): Promise<bigint> => {
   if (!watcher) {
     return Promise.reject(new Error(`Watcher 错误`));
   }
@@ -285,7 +285,7 @@ export const kfCancelOrder = (
 export const kfCancelAllOrders = (
   watcher: KungfuApi.Watcher | null,
   orders: KungfuApi.Order[],
-): Promise<void[]> => {
+): Promise<bigint[]> => {
   if (!watcher) {
     return Promise.reject(new Error(`Watcher 错误`));
   }
@@ -295,7 +295,7 @@ export const kfCancelAllOrders = (
   }
 
   const cancelOrderTasks = orders.map(
-    (item: KungfuApi.Order): Promise<void> => {
+    (item: KungfuApi.Order): Promise<bigint> => {
       return kfCancelOrder(watcher, item);
     },
   );
@@ -308,7 +308,7 @@ export const kfMakeOrder = (
   makeOrderInput: KungfuApi.MakeOrderInput,
   tdLocation: KungfuApi.KfLocation,
   strategyLocation?: KungfuApi.KfLocation,
-): Promise<void> => {
+): Promise<bigint> => {
   if (!watcher) {
     return Promise.reject(new Error('Watcher 错误'));
   }
@@ -354,7 +354,7 @@ export const makeOrderByOrderInput = (
   orderInput: KungfuApi.MakeOrderInput,
   kfLocation: KungfuApi.KfLocation,
   accountId: string,
-): Promise<void> => {
+): Promise<bigint> => {
   return new Promise((resolve, reject) => {
     if (!watcher) {
       reject(new Error(`Watcher 错误`));
@@ -362,9 +362,9 @@ export const makeOrderByOrderInput = (
     }
 
     if (kfLocation.category === 'td') {
-      kfMakeOrder(watcher, orderInput, kfLocation)
-        .then(() => {
-          resolve();
+      return kfMakeOrder(watcher, orderInput, kfLocation)
+        .then((order_id) => {
+          resolve(order_id);
         })
         .catch((err) => {
           reject(err);
@@ -375,9 +375,9 @@ export const makeOrderByOrderInput = (
         reject(new Error('下单账户信息错误'));
         return;
       }
-      kfMakeOrder(watcher, orderInput, tdLocation, kfLocation)
-        .then(() => {
-          resolve();
+      return kfMakeOrder(watcher, orderInput, tdLocation, kfLocation)
+        .then((order_id) => {
+          resolve(order_id);
         })
         .catch((err) => {
           reject(err);
@@ -388,9 +388,9 @@ export const makeOrderByOrderInput = (
         reject(new Error('下单账户信息错误'));
         return;
       }
-      kfMakeOrder(watcher, orderInput, tdLocation)
-        .then(() => {
-          resolve();
+      return kfMakeOrder(watcher, orderInput, tdLocation)
+        .then((order_id) => {
+          resolve(order_id);
         })
         .catch((err) => {
           reject(err);
