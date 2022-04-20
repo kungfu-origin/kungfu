@@ -371,13 +371,9 @@ function handleFatFinger(makeOrderInput: KungfuApi.MakeOrderInput): Promise<void
 function confirmOrderPlace(makeOrderInput: KungfuApi.MakeOrderInput, orderCount: number = 1): Promise<string> {
   
   return new Promise(resolve => {
-    console.log(orderCount);
-    
     const { account_id } = formState.value;
 
-    const orderInput: Record<string, KungfuApi.KfTradeValueCommonData> =
-      dealOrderInputItem(makeOrderInput);
-      console.log(orderInput);
+    const orderInput: Record<string, KungfuApi.KfTradeValueCommonData> = dealOrderInputItem(makeOrderInput);
       
     const vnode = Object.keys(orderInput)
       .filter((key) => {
