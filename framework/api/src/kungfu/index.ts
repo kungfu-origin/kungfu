@@ -305,7 +305,7 @@ export const kfCancelAllOrders = (
 
 export const kfMakeOrder = (
   watcher: KungfuApi.Watcher | null,
-  makeOrderInput: KungfuApi.MakeOrderInput,
+  makeOrderInput: KungfuApi.MakeOrderInput | KungfuApi.OrderInput,
   tdLocation: KungfuApi.KfLocation,
   strategyLocation?: KungfuApi.KfLocation,
 ): Promise<bigint> => {
@@ -351,7 +351,7 @@ export const kfMakeOrder = (
 
 export const makeOrderByOrderInput = (
   watcher: KungfuApi.Watcher | null,
-  orderInput: KungfuApi.MakeOrderInput,
+  orderInput: KungfuApi.MakeOrderInput | KungfuApi.OrderInput,
   kfLocation: KungfuApi.KfLocation,
   accountId: string,
 ): Promise<bigint> => {
