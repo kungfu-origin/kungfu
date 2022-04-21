@@ -220,7 +220,6 @@ private:
     int i = 0;
     kungfu::state<DataType> *pstate = nullptr;
     while (i < 1024 && order_queue.pop(pstate) && pstate != nullptr) {
-      SPDLOG_INFO("------- {}", pstate->data.to_string());
       update_ledger(pstate->update_time, pstate->source, pstate->dest, pstate->data);
       i++;
     }
