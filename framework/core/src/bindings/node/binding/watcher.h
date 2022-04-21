@@ -35,6 +35,8 @@ public:
 
   void NoSet(const Napi::CallbackInfo &info, const Napi::Value &value);
 
+  Napi::Value HasLocation(const Napi::CallbackInfo &info);
+
   Napi::Value GetLocation(const Napi::CallbackInfo &info);
 
   Napi::Value GetLocationUID(const Napi::CallbackInfo &info);

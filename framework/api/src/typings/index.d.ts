@@ -688,6 +688,7 @@ declare namespace KungfuApi {
     isReadyToInteract(kfLocation: KfLocation | KfConfig): boolean;
     getLocationUID(kfLocation: KfLocation | KfConfig): string;
     getLocation(hashedKey: string | number): KfLocation;
+    hasLocation(hashedKey: string | number): KfLocation;
     requestMarketData(
       kfLocation: KfLocation,
       exchangeId: string,
