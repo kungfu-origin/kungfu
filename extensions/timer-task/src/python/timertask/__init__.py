@@ -105,7 +105,8 @@ def on_order(context, order):
 
 def on_trade(context, trade):
     context.log.info("[on_trade] {}".format(trade))
-    context.orders[trade.order_id] -= trade.volume
+    if trade.order_id in context.orders:
+        context.orders[trade.order_id] -= trade.volume
     context.volume_to_fill -= trade.volume
 
 def print_datatime(context, info, nano) :
@@ -171,13 +172,13 @@ def make_order(context, orders):
     for item in orders:
         order_id = context.insert_order(context.TICKER, context.EXCHANGE, context.ACCOUNT, item.price, item.vol, PriceType.Limit, item.side, item.offset)
         context.orders[order_id] = item.vol
-        date_time_for_nano = datetime.fromtimestamp(nano / (10**9))
+        date_time_for_nano = datetime.fromtimestamp(context.now() / (10**9))
         time_str = date_time_for_nano.strftime("%Y-%m-%d %H:%M:%S.%f")
         pending_vol = int(0)
         for order_vol in context.orders.values():
             pending_vol += order_vol
         rest_vol = context.volume_to_fill - pending_vol
-        context.log.info("[第{}步下单] 标的 {} 交易所 {} 账户 {} 价格 {} 价格 {} 数量 {} 方向 {} 开平 {} 行情 {} 时间 {} 剩余数量 {}".format(order_step, context.TICKER, context.EXCHANGE, context.ACCOUNT, item.price, item.vol, item.side, item.offset, context.realtime_quote, time_str, rest_vol))
+        context.log.info("[第{}步下单] 标的 {} 交易所 {} 账户 {} 价格 {} 数量 {} 方向 {} 开平 {} 行情 {} 时间 {} 剩余数量 {}".format(order_step, context.TICKER, context.EXCHANGE, context.ACCOUNT, item.price, item.vol, item.side, item.offset, context.realtime_quote, time_str, rest_vol))
     context.steps_to_fill -= 1
     context.log.info("[make_order] context.orders {}".format(context.orders))
 
