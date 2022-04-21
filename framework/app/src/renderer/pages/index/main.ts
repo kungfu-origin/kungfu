@@ -156,7 +156,7 @@ if (process.env.RELOAD_AFTER_CRASHED === 'false') {
   globalBus.next({
     tag: 'processStatus',
     name: 'systemLoading',
-    status: 'done',
+    status: 'online',
   });
 
   startGetProcessStatus(

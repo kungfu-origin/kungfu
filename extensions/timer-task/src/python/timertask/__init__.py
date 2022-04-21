@@ -100,13 +100,13 @@ def on_order(context, order):
             for item in orders_to_insert:
                 context.log.info("now {} insert_order_task orders_to_insert {}".format(context.now(), item.__dict__))
             make_order(context, orders_to_insert)
-            context.steps_to_fill = context.steps_to_fill - 1
     elif (order.status == OrderStatus.Error) :
         del context.orders[order.order_id] 
 
 def on_trade(context, trade):
     context.log.info("[on_trade] {}".format(trade))
-    context.orders[trade.order_id] -= trade.volume
+    if trade.order_id in context.orders:
+        context.orders[trade.order_id] -= trade.volume
     context.volume_to_fill -= trade.volume
 
 def print_datatime(context, info, nano) :
@@ -117,6 +117,7 @@ def print_datatime(context, info, nano) :
 def on_quote(context, quote):
     context.bid_price = quote.bid_price[0]
     context.ask_price = quote.ask_price[0]
+    context.realtime_quote = quote
     context.UPPER_LIMIT_PRICE = quote.upper_limit_price
     context.LOWER_LIMIT_PRICE = quote.lower_limit_price
     if context.MIN_VOL == 0 :
@@ -159,7 +160,6 @@ def insert_order_task(context, last_order):
         for item in orders_to_insert:
             context.log.info("now {} insert_order_task orders_to_insert {}".format(context.now(), item.__dict__))
         make_order(context, orders_to_insert)
-        context.steps_to_fill = context.steps_to_fill - 1
 
 def cancel_all_orders(context):
     context.log.info("[cancel_all_orders] {}".format(context.orders))
@@ -168,9 +168,18 @@ def cancel_all_orders(context):
         context.cancel_order(item)
     
 def make_order(context, orders):
+    order_step = context.STEPS - context.steps_to_fill + 1
     for item in orders:
         order_id = context.insert_order(context.TICKER, context.EXCHANGE, context.ACCOUNT, item.price, item.vol, PriceType.Limit, item.side, item.offset)
         context.orders[order_id] = item.vol
+        date_time_for_nano = datetime.fromtimestamp(context.now() / (10**9))
+        time_str = date_time_for_nano.strftime("%Y-%m-%d %H:%M:%S.%f")
+        pending_vol = int(0)
+        for order_vol in context.orders.values():
+            pending_vol += order_vol
+        rest_vol = context.volume_to_fill - pending_vol
+        context.log.info("[第{}步下单] 标的 {} 交易所 {} 账户 {} 价格 {} 数量 {} 方向 {} 开平 {} 行情 {} 时间 {} 剩余数量 {}".format(order_step, context.TICKER, context.EXCHANGE, context.ACCOUNT, item.price, item.vol, item.side, item.offset, context.realtime_quote, time_str, rest_vol))
+    context.steps_to_fill -= 1
     context.log.info("[make_order] context.orders {}".format(context.orders))
 
 def split_order(context, vol, side, offset, price, task_list):

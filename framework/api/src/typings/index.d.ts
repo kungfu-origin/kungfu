@@ -207,6 +207,8 @@ declare namespace KungfuApi {
     side: SideEnum;
     offset: OffsetEnum;
     hedge_flag: HedgeFlagEnum;
+    source_id?: string;
+    account_id?: string;
     parent_id: bigint;
   }
 
@@ -686,6 +688,7 @@ declare namespace KungfuApi {
     isReadyToInteract(kfLocation: KfLocation | KfConfig): boolean;
     getLocationUID(kfLocation: KfLocation | KfConfig): string;
     getLocation(hashedKey: string | number): KfLocation;
+    hasLocation(hashedKey: string | number): KfLocation;
     requestMarketData(
       kfLocation: KfLocation,
       exchangeId: string,
@@ -695,12 +698,12 @@ declare namespace KungfuApi {
       orderAction: OrderAction,
       tdLocation: KfLocation,
       strategyLocation?: KfLocation,
-    ): void;
+    ): bigint;
     issueOrder(
       orderInput: OrderInput,
       tdLocation: KfLocation,
       strategyLocation?: KfLocation,
-    ): void;
+    ): bigint;
     now(): bigint;
   }
 

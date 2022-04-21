@@ -14,6 +14,7 @@ import KfConfigSettingsForm from '@kungfu-trader/kungfu-app/src/renderer/compone
 import {
   buildInstrumentSelectOptionValue,
   useTriggerMakeOrder,
+  useDashboardBodySize,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import { getConfigSettings } from './config';
 import { message } from 'ant-design-vue';
@@ -32,6 +33,7 @@ import {
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 
 const app = getCurrentInstance();
+const { handleBodySizeChange } = useDashboardBodySize();
 const formState = ref(
   initFormStateByConfig(getConfigSettings('td', InstrumentTypeEnum.future), {}),
 );
@@ -221,7 +223,7 @@ function handleMakeOrder() {
 
 <template>
   <div class="kf-make-order-dashboard__warp">
-    <KfDashboard>
+    <KfDashboard @boardSizeChange="handleBodySizeChange">
       <template v-slot:title>
         <span v-if="currentGlobalKfLocation">
           <a-tag

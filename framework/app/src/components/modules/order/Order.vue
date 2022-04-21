@@ -15,6 +15,7 @@ import {
 import {
   useDownloadHistoryTradingData,
   useTableSearchKeyword,
+  useDashboardBodySize,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import KfDashboard from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfDashboard.vue';
 import KfDashboardItem from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfDashboardItem.vue';
@@ -61,6 +62,7 @@ import { useExtraCategory } from '@kungfu-trader/kungfu-app/src/renderer/assets/
 import StatisticModal from './OrderStatisticModal.vue';
 
 const app = getCurrentInstance();
+const { handleBodySizeChange } = useDashboardBodySize();
 
 const { processStatusData } = useProcessStatusDetailData();
 const orders = ref<KungfuApi.OrderResolved[]>([]);
@@ -411,7 +413,7 @@ function testOrderSourceIsOnline(order: KungfuApi.OrderResolved) {
 </script>
 <template>
   <div class="kf-orders__warp kf-translateZ">
-    <KfDashboard>
+    <KfDashboard @boardSizeChange="handleBodySizeChange">
       <template v-slot:title>
         <span v-if="currentGlobalKfLocation">
           <a-tag

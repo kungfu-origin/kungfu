@@ -95,7 +95,8 @@ Watcher::Watcher(const Napi::CallbackInfo &info)
   RestoreState(ledger_location_, today, INT64_MAX, sync_schema);
 
   shift(ledger_location_) >> state_bank_; // Load positions to restore bookkeeper
-  SPDLOG_INFO("watcher {} initialized", get_io_device()->get_home()->uname);
+  SPDLOG_INFO("watcher {} with uid {} and live uid {} initialized", get_io_device()->get_home()->uname, get_home_uid(),
+              get_live_home_uid());
 }
 
 Watcher::~Watcher() {
@@ -109,6 +110,20 @@ Watcher::~Watcher() {
 
 void Watcher::NoSet(const Napi::CallbackInfo &info, const Napi::Value &value) {
   SPDLOG_WARN("do not manipulate watcher internals");
+}
+
+Napi::Value Watcher::HasLocation(const Napi::CallbackInfo &info) {
+  uint32_t uid = 0;
+  if (info[0].IsNumber()) {
+    uid = info[0].ToNumber().Uint32Value();
+  }
+  if (info[0].IsString()) {
+    std::stringstream ss;
+    ss << std::hex << info[0].ToString().Utf8Value();
+    ss >> uid;
+  }
+
+  return Napi::Boolean::New(info.Env(), has_location(uid));
 }
 
 Napi::Value Watcher::GetLocation(const Napi::CallbackInfo &info) {
@@ -238,6 +253,7 @@ void Watcher::Init(Napi::Env env, Napi::Object exports) {
                                         InstanceMethod("isLive", &Watcher::IsLive),                               //
                                         InstanceMethod("isStarted", &Watcher::IsStarted),                         //
                                         InstanceMethod("requestStop", &Watcher::RequestStop),                     //
+                                        InstanceMethod("hasLocation", &Watcher::HasLocation),                     //
                                         InstanceMethod("getLocation", &Watcher::GetLocation),                     //
                                         InstanceMethod("getLocationUID", &Watcher::GetLocationUID),               //
                                         InstanceMethod("getInstrumentUID", &Watcher::GetInstrumentUID),           //
@@ -264,7 +280,7 @@ void Watcher::Init(Napi::Env env, Napi::Object exports) {
 }
 
 void Watcher::on_react() {
-  events_ | $([&](const event_ptr &event) { feed_state_data(event, data_bank_); });
+  events_ | bypass(this, bypass_quotes_) | $([&](const event_ptr &event) { feed_state_data(event, data_bank_); });
 }
 
 void Watcher::on_start() {

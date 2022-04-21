@@ -17,6 +17,9 @@ import {
   useCurrentGlobalKfLocation,
   useProcessStatusDetailData,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
+import { useDashboardBodySize } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
+
+const { handleBodySizeChange } = useDashboardBodySize();
 
 const formState = ref(initFormStateByConfig(getConfigSettings(), {}));
 const formRef = ref();
@@ -167,7 +170,7 @@ function handleMakeOrder() {
 </script>
 <template>
   <div class="kf-make-order-dashboard__warp">
-    <KfDashboard>
+    <KfDashboard @boardSizeChange="handleBodySizeChange">
       <template v-slot:title>
         <span v-if="currentGlobalKfLocation">
           <a-tag

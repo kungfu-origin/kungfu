@@ -35,6 +35,8 @@ public:
 
   void NoSet(const Napi::CallbackInfo &info, const Napi::Value &value);
 
+  Napi::Value HasLocation(const Napi::CallbackInfo &info);
+
   Napi::Value GetLocation(const Napi::CallbackInfo &info);
 
   Napi::Value GetLocationUID(const Napi::CallbackInfo &info);
@@ -186,6 +188,7 @@ private:
   std::enable_if_t<std::is_same_v<TradingData, longfist::types::OrderInput>> UpdateBook(uint32_t source, uint32_t dest,
                                                                                         const TradingData &data) {
     bookkeeper_.on_order_input(now(), source, dest, data);
+    update_ledger(now(), source, dest, data);
   }
 
   template <typename TradingData>
@@ -193,15 +196,16 @@ private:
   UpdateBook(uint32_t source, uint32_t dest, const TradingData &data) {}
 
   template <typename Instruction, typename IdPtrType = uint64_t Instruction::*>
-  void WriteInstruction(int64_t trigger_time, Instruction instruction, IdPtrType id_ptr,
-                        const yijinjing::data::location_ptr &account_location,
-                        const yijinjing::data::location_ptr &strategy_location) {
+  uint64_t WriteInstruction(int64_t trigger_time, Instruction instruction, IdPtrType id_ptr,
+                            const yijinjing::data::location_ptr &account_location,
+                            const yijinjing::data::location_ptr &strategy_location) {
     auto account_writer = get_writer(account_location->uid);
     uint64_t id_left = (uint64_t)(strategy_location->uid xor account_location->uid) << 32u;
     uint64_t id_right = (ID_TRANC & account_writer->current_frame_uid()) | PAGE_ID_MASK;
     instruction.*id_ptr = id_left | id_right;
     account_writer->write_as(trigger_time, instruction, strategy_location->uid, account_location->uid);
     UpdateBook(strategy_location->uid, account_location->uid, instruction);
+    return instruction.*id_ptr;
   }
 
   template <typename DataType> void UpdateLedger(const boost::hana::basic_type<DataType> &type) {
@@ -216,6 +220,7 @@ private:
     int i = 0;
     kungfu::state<DataType> *pstate = nullptr;
     while (i < 1024 && order_queue.pop(pstate) && pstate != nullptr) {
+      SPDLOG_INFO("------- {}", pstate->data.to_string());
       update_ledger(pstate->update_time, pstate->source, pstate->dest, pstate->data);
       i++;
     }
@@ -231,7 +236,7 @@ private:
 
       auto account_location = ExtractLocation(info, 1, get_locator());
       if (not is_location_live(account_location->uid) or not has_writer(account_location->uid)) {
-        return Napi::Boolean::New(info.Env(), false);
+        return Napi::BigInt::New(info.Env(), std::uint64_t(0));
       }
 
       auto trigger_time = time::now_in_nano();
@@ -245,13 +250,13 @@ private:
         instruction.*id_ptr = account_writer->current_frame_uid();
         account_writer->write(trigger_time, instruction);
         UpdateBook(get_home_uid(), account_location->uid, instruction);
-        return Napi::Boolean::New(info.Env(), true);
+        return Napi::BigInt::New(info.Env(), instruction.*id_ptr);
       }
 
       auto strategy_location = ExtractLocation(info, 2, get_locator());
 
       if (not strategy_location or not has_location(strategy_location->uid)) {
-        return Napi::Boolean::New(info.Env(), false);
+        return Napi::BigInt::New(info.Env(), std::uint64_t(0));
       }
 
       if (not has_location(strategy_location->uid)) {
@@ -260,8 +265,8 @@ private:
       }
 
       if (has_channel(account_location->uid, strategy_location->uid)) {
-        WriteInstruction(trigger_time, instruction, id_ptr, account_location, strategy_location);
-        return Napi::Boolean::New(info.Env(), true);
+        uint64_t id = WriteInstruction(trigger_time, instruction, id_ptr, account_location, strategy_location);
+        return Napi::BigInt::New(info.Env(), id);
       }
 
       Channel request = {};
@@ -276,10 +281,11 @@ private:
         return channel.source_id == account_location->uid and channel.dest_id == strategy_location->uid;
       }) | first() |
           $([this, trigger_time, instruction, id_ptr, account_location, strategy_location](auto event) {
+            // TODO: async make order / order action
             WriteInstruction(trigger_time, instruction, id_ptr, account_location, strategy_location);
           });
 
-      return Napi::Boolean::New(info.Env(), true);
+      return Napi::BigInt::New(info.Env(), std::uint64_t(0));
     } catch (const std::exception &ex) {
       throw Napi::Error::New(info.Env(), fmt::format("invalid order arguments: {}", ex.what()));
     } catch (...) {
