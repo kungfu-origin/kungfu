@@ -4,7 +4,7 @@ import {
   useDashboardBodySize,
   useTableSearchKeyword,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
-import { computed, ref } from 'vue';
+import { computed, getCurrentInstance, onMounted, ref } from 'vue';
 import minimist from 'minimist';
 
 import KfDashboard from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfDashboard.vue';
@@ -17,7 +17,7 @@ import {
   DeleteOutlined,
 } from '@ant-design/icons-vue';
 
-import { columns } from './config';
+import { columns, tradeRegisterConfig } from './config';
 import { message, Modal } from 'ant-design-vue';
 import path from 'path';
 import {
@@ -37,6 +37,7 @@ import {
   removeLog,
 } from '@kungfu-trader/kungfu-js-api/actions';
 import {
+  useCurrentGlobalKfLocation,
   useExtConfigsRelated,
   useProcessStatusDetailData,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
@@ -45,7 +46,7 @@ const { extConfigs } = useExtConfigsRelated();
 const { dashboardBodyHeight, handleBodySizeChange } = useDashboardBodySize();
 const { processStatusData, processStatusDetailData } =
   useProcessStatusDetailData();
-
+  
 const setExtensionModalVisible = ref<boolean>(false);
 const setTaskModalVisible = ref<boolean>(false);
 const currentSelectedExtKey = ref<string>('');
@@ -75,9 +76,12 @@ const taskList = computed(() => {
     .map((processId) => processStatusDetailData.value[processId])
     .sort((a, b) => (b?.name || '').localeCompare(a?.name || ''));
 });
-
 const { searchKeyword, tableData } =
   useTableSearchKeyword<Pm2ProcessStatusDetail>(taskList, ['name', 'args']);
+
+const { dealRowClassName, setCurrentGlobalKfLocation } = useCurrentGlobalKfLocation(window.watcher)
+
+const app = getCurrentInstance();
 
 function handleOpenSetTaskDialog() {
   setExtensionModalVisible.value = true;
@@ -308,6 +312,39 @@ function getDataByArgs(taskArgs: string): Record<string, string> {
     return data;
   }, {} as Record<string, string>);
 }
+
+function customRowResolved(record) {
+  const tasklocation = getTaskKfLocationByProcessId(record?.name || {})
+  const locationResolved: KungfuApi.KfExtraLocation = {
+    category: tradeRegisterConfig.name,
+    group: tasklocation?.group || '',
+    name: tasklocation?.name || '',
+    mode: 'LIVE',
+  };
+  return {
+    onClick: () => {
+      setCurrentGlobalKfLocation(locationResolved);
+    },
+  };
+}
+
+function dealRowClassNameResolved(record: KungfuApi.Position) {
+  const locationResolved: KungfuApi.KfExtraLocation = {
+    category: tradeRegisterConfig.name,
+    group: record.exchange_id,
+    name: record.instrument_id,
+    mode: 'LIVE',
+  };
+
+  return dealRowClassName(locationResolved);
+}
+
+onMounted(() => {
+  if (app?.proxy && app.proxy.$globalCategoryRegister) {
+    app.proxy.$globalCategoryRegister.register(tradeRegisterConfig);
+  }
+});
+
 </script>
 
 <template>
@@ -337,6 +374,8 @@ function getDataByArgs(taskArgs: string): Record<string, string> {
         :data-source="tableData"
         size="small"
         :pagination="false"
+        :rowClassName="dealRowClassNameResolved"
+        :customRow="customRowResolved"
         :scroll="{ y: dashboardBodyHeight - 4 }"
         :defaultExpandAllRows="true"
         emptyText="暂无数据"
