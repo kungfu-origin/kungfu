@@ -22,9 +22,11 @@ const orderNumber = computed(() => {
     : Math.floor(+curOrderVolume.value / (+volume.value || 100)) + 1;
 });
 
-
 defineEmits<{
-  (e: 'confirm', {volume, count}: {volume: number, count: number}): Promise<void>;
+  (
+    e: 'confirm',
+    { volume, count }: { volume: number; count: number },
+  ): Promise<void>;
   (e: 'update:visible', visible: boolean): void;
   (e: 'close'): void;
 }>();
@@ -36,12 +38,10 @@ const volume = ref<number>(100);
 const apartType = ref<string>('orderSize');
 function handleConfirm() {
   app &&
-    app.emit(
-      'confirm', {
-        volume: volume.value,
-        count: orderNumber.value
-      },
-    );
+    app.emit('confirm', {
+      volume: volume.value,
+      count: orderNumber.value,
+    });
   closeModal();
 }
 </script>

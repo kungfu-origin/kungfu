@@ -19,7 +19,7 @@ import {
   confirmModal,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import { getConfigSettings } from './config';
-import { dealOrderPlaceVNode } from './orderUiUtils'
+import { dealOrderPlaceVNode } from './orderUiUtils';
 import { message } from 'ant-design-vue';
 import {
   makeOrderByOrderInput,
@@ -193,11 +193,18 @@ watch(
   },
 );
 
-function dealPositionList(positionList: KungfuApi.Position[], instrumentResolved: KungfuApi.InstrumentResolved) {
-  const { exchangeId, instrumentId, instrumentType } =
-    instrumentResolved
+function dealPositionList(
+  positionList: KungfuApi.Position[],
+  instrumentResolved: KungfuApi.InstrumentResolved,
+) {
+  const { exchangeId, instrumentId, instrumentType } = instrumentResolved;
 
-  const targetPosition: KungfuApi.Position = positionList.filter(position => position.exchange_id === exchangeId && position.instrument_id === instrumentId && position.instrument_type === instrumentType)[0];
+  const targetPosition: KungfuApi.Position = positionList.filter(
+    (position) =>
+      position.exchange_id === exchangeId &&
+      position.instrument_id === instrumentId &&
+      position.instrument_type === instrumentType,
+  )[0];
 
   currentPosition.position = targetPosition;
 }
@@ -273,7 +280,8 @@ async function handleApartOrder() {
 
     if (
       makeOrderInput.volume === Number(currentPosition.position?.volume) &&
-      +makeOrderInput.volume > (closeRange * Number(currentPosition.position?.volume)) / 100
+      +makeOrderInput.volume >
+        (closeRange * Number(currentPosition.position?.volume)) / 100
     ) {
       await confirmModal('提示', '是否全部平仓');
     }
@@ -281,24 +289,28 @@ async function handleApartOrder() {
     isShowConfirmModal.value = true;
 
     dealGlobalData(makeOrderInput);
-
   } catch (error) {
     message.error(error.message);
   }
 }
 
 // 拆单弹窗确认回调
-async function handleApartedConfirm({volume, count}: {volume: number, count: number}): Promise<void> {
-  
+async function handleApartedConfirm({
+  volume,
+  count,
+}: {
+  volume: number;
+  count: number;
+}): Promise<void> {
   const remainder: number = curOrderVolume.value % +volume; // 剩余数量
-  
+
   const realCount: number = remainder === 0 ? count : count + 1;
-  
+
   const apartVolumeList: number[] = new Array(count).fill(+volume);
   if (remainder !== 0) {
     apartVolumeList.push(remainder);
   }
-  
+
   const account_id = formState.value.account_id;
 
   if (!currentGlobalKfLocation.value || !window.watcher) {
@@ -315,11 +327,17 @@ async function handleApartedConfirm({volume, count}: {volume: number, count: num
     return;
   }
 
-  await confirmOrderPlace(orderData.value, realCount)
-  Promise.all(apartVolumeList.map(volume => {
-    (orderData.value as KungfuApi.MakeOrderInput).volume = volume;
-    return placeOrder((orderData.value as KungfuApi.MakeOrderInput), currentGlobalKfLocation.value as KungfuApi.KfLocation, tdProcessId);
-  }))
+  await confirmOrderPlace(orderData.value, realCount);
+  Promise.all(
+    apartVolumeList.map((volume) => {
+      (orderData.value as KungfuApi.MakeOrderInput).volume = volume;
+      return placeOrder(
+        orderData.value as KungfuApi.MakeOrderInput,
+        currentGlobalKfLocation.value as KungfuApi.KfLocation,
+        tdProcessId,
+      );
+    }),
+  );
 }
 
 function confirmFatFingerModal(
@@ -378,32 +396,32 @@ async function confirmOrderPlace(
   makeOrderInput: KungfuApi.MakeOrderInput,
   orderCount: number = 1,
 ): Promise<string> {
-    const { account_id } = formState.value;
+  const { account_id } = formState.value;
 
-    await confirmModal(
-      '下单确认',
-      h(
-        'div',
-        { class: 'modal-node' },
-        dealOrderPlaceVNode(makeOrderInput, orderCount),
-      ),
-    )
-    if (!currentGlobalKfLocation.value || !window.watcher) {
-      message.error('当前 Location 错误');
-      return Promise.reject('当前 Location 错误');
-    }
+  await confirmModal(
+    '下单确认',
+    h(
+      'div',
+      { class: 'modal-node' },
+      dealOrderPlaceVNode(makeOrderInput, orderCount),
+    ),
+  );
+  if (!currentGlobalKfLocation.value || !window.watcher) {
+    message.error('当前 Location 错误');
+    return Promise.reject('当前 Location 错误');
+  }
 
-    const tdProcessId =
-      currentGlobalKfLocation.value?.category === 'td'
-        ? getProcessIdByKfLocation(currentGlobalKfLocation.value)
-        : `td_${account_id.toString()}`;
+  const tdProcessId =
+    currentGlobalKfLocation.value?.category === 'td'
+      ? getProcessIdByKfLocation(currentGlobalKfLocation.value)
+      : `td_${account_id.toString()}`;
 
-    if (processStatusData.value[tdProcessId] !== 'online') {
-      message.error(`请先启动 ${tdProcessId} 交易进程`);
-      return Promise.reject('请先启动交易进程');
-    }
+  if (processStatusData.value[tdProcessId] !== 'online') {
+    message.error(`请先启动 ${tdProcessId} 交易进程`);
+    return Promise.reject('请先启动交易进程');
+  }
 
-    return Promise.resolve(tdProcessId);
+  return Promise.resolve(tdProcessId);
 }
 
 async function handleMakeOrder() {
@@ -416,7 +434,8 @@ async function handleMakeOrder() {
 
     if (
       makeOrderInput.volume === Number(currentPosition.position?.volume) &&
-      +makeOrderInput.volume > (closeRange * Number(currentPosition.position?.volume)) / 100
+      +makeOrderInput.volume >
+        (closeRange * Number(currentPosition.position?.volume)) / 100
     ) {
       await confirmModal('提示', '是否全部平仓');
     }
