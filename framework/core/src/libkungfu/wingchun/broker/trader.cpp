@@ -45,12 +45,17 @@ void TraderVendor::clean_orders() {
     auto strategy_uid = order_state.dest;
     if (order.status == OrderStatus::Submitted or order.status == OrderStatus::Pending or
         order.status == OrderStatus::PartialFilledActive) {
+
+      order.status = OrderStatus::Lost;
+      order.update_time = time::now_in_nano();
+
       if (strategy_uid == location::PUBLIC) {
         write_to(now(), order);
         continue;
       }
+
       strategy_uids.emplace(strategy_uid);
-      order.status = OrderStatus::Lost;
+
       events_ | is(Channel::tag) | filter([&, strategy_uid](const event_ptr &event) {
         const Channel &channel = event->data<Channel>();
         return channel.source_id == get_home_uid() and channel.dest_id == strategy_uid;

@@ -35,6 +35,8 @@ public:
 
   void NoSet(const Napi::CallbackInfo &info, const Napi::Value &value);
 
+  Napi::Value HasLocation(const Napi::CallbackInfo &info);
+
   Napi::Value GetLocation(const Napi::CallbackInfo &info);
 
   Napi::Value GetLocationUID(const Napi::CallbackInfo &info);
@@ -186,6 +188,7 @@ private:
   std::enable_if_t<std::is_same_v<TradingData, longfist::types::OrderInput>> UpdateBook(uint32_t source, uint32_t dest,
                                                                                         const TradingData &data) {
     bookkeeper_.on_order_input(now(), source, dest, data);
+    update_ledger(now(), source, dest, data);
   }
 
   template <typename TradingData>

@@ -277,6 +277,10 @@ export const kfCancelOrder = (
     order_id,
   };
 
+  if (!destLocation) {
+    return Promise.resolve(watcher.cancelOrder(orderAction, sourceLocation));
+  }
+
   return Promise.resolve(
     watcher.cancelOrder(orderAction, sourceLocation, destLocation),
   );
@@ -305,7 +309,7 @@ export const kfCancelAllOrders = (
 
 export const kfMakeOrder = (
   watcher: KungfuApi.Watcher | null,
-  makeOrderInput: KungfuApi.MakeOrderInput | KungfuApi.OrderInput,
+  makeOrderInput: KungfuApi.MakeOrderInput,
   tdLocation: KungfuApi.KfLocation,
   strategyLocation?: KungfuApi.KfLocation,
 ): Promise<bigint> => {
@@ -351,7 +355,7 @@ export const kfMakeOrder = (
 
 export const makeOrderByOrderInput = (
   watcher: KungfuApi.Watcher | null,
-  orderInput: KungfuApi.MakeOrderInput | KungfuApi.OrderInput,
+  orderInput: KungfuApi.MakeOrderInput,
   kfLocation: KungfuApi.KfLocation,
   accountId: string,
 ): Promise<bigint> => {
