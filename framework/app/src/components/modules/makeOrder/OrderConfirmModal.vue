@@ -7,7 +7,7 @@ const app = getCurrentInstance();
 const props = withDefaults(
   defineProps<{
     visible: boolean;
-    orderMessage: number;
+    curOrderVolume: number;
   }>(),
   {
     visible: false,
@@ -15,27 +15,35 @@ const props = withDefaults(
 );
 const orderNumber = computed(() => {
   if (apartType.value === 'orderSize') {
-    return Math.floor(+orderMessage.value / (+amount.value || 100))
+    return Math.floor(+curOrderVolume.value / (+volume.value || 100));
   }
-  return (+orderMessage.value % (+amount.value || 100) == 0) ? Math.floor(+orderMessage.value / (+amount.value || 100)) : Math.floor(+orderMessage.value / (+amount.value || 100)) + 1
-})
+  return +curOrderVolume.value % (+volume.value || 100) == 0
+    ? Math.floor(+curOrderVolume.value / (+volume.value || 100))
+    : Math.floor(+curOrderVolume.value / (+volume.value || 100)) + 1;
+});
+
 
 defineEmits<{
-  (e: 'confirm',  amount: number ): void;
+  (e: 'confirm', {volume, count}: {volume: number, count: number}): Promise<void>;
   (e: 'update:visible', visible: boolean): void;
   (e: 'close'): void;
 }>();
 
 const { modalVisible, closeModal } = useModalVisible(props.visible);
-const { orderMessage } = toRefs(props);
+const { curOrderVolume } = toRefs(props);
 
-const amount = ref<number>(100);
-const apartType = ref<string>('orderSize')
+const volume = ref<number>(100);
+const apartType = ref<string>('orderSize');
 function handleConfirm() {
-  app && app.emit('confirm', apartType.value === 'orderSize' ? orderNumber.value : amount.value);
+  app &&
+    app.emit(
+      'confirm', {
+        volume: volume.value,
+        count: orderNumber.value
+      },
+    );
   closeModal();
 }
-
 </script>
 
 <template>
@@ -50,29 +58,30 @@ function handleConfirm() {
   >
     <a-row class="apart-input">
       <a-col>
-        <a-statistic
-          :value="orderMessage"
-          title="总下单量"
-        />
+        <a-statistic :value="curOrderVolume" title="总下单量" />
         <a-input-group compact style="margin-top: 10px">
           <a-select v-model:value="apartType">
             <a-select-option value="orderSize">每次下单量</a-select-option>
             <a-select-option value="orderCount">下单次数</a-select-option>
           </a-select>
-        <a-input-number
-          :precision="0"
-          step="100"
-          v-model:value="amount"
-          :max="apartType === 'orderSize' ? orderMessage : Math.ceil(+orderMessage / +orderNumber)"
-          :min="1"
-        ></a-input-number>
-      </a-input-group>
+          <a-input-number
+            :precision="0"
+            step="100"
+            v-model:value="volume"
+            :max="
+              apartType === 'orderSize'
+                ? curOrderVolume
+                : Math.ceil(+curOrderVolume / +orderNumber)
+            "
+            :min="1"
+          ></a-input-number>
+        </a-input-group>
       </a-col>
       <a-col class="apart-result">
         <a-statistic
           class="apart-result-statistic"
-          :value="orderNumber"
-          :valueStyle="{fontSize: '35px'}"
+          :value="curOrderVolume % volume === 0 ? orderNumber : orderNumber + 1"
+          :valueStyle="{ fontSize: '35px' }"
           :title="apartType === 'orderSize' ? '下单次数' : '每次下单量'"
         />
       </a-col>

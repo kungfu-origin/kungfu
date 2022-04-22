@@ -1549,28 +1549,29 @@ export const removeNoDefaultStrategyFolders = async (): Promise<void> => {
 export const dealOrderInputItem = (
   inputData: KungfuApi.MakeOrderInput,
 ): Record<string, KungfuApi.KfTradeValueCommonData> => {
-  const inputResolve: Record<string, KungfuApi.KfTradeValueCommonData> = {}
+  const orderInputResolved: Record<string, KungfuApi.KfTradeValueCommonData> =
+    {};
   for (let key in inputData) {
     if (key === 'instrument_type') {
-      inputResolve[key] = dealInstrumentType(inputData.instrument_type)
+      orderInputResolved[key] = dealInstrumentType(inputData.instrument_type);
     } else if (key === 'price_type') {
-      inputResolve[key] = dealPriceType(inputData.price_type);
+      orderInputResolved[key] = dealPriceType(inputData.price_type);
     } else if (key === 'side') {
-      inputResolve[key] = dealSide(inputData.side);
+      orderInputResolved[key] = dealSide(inputData.side);
     } else if (key === 'offset') {
-      inputResolve[key] = dealOffset(inputData.offset);
+      orderInputResolved[key] = dealOffset(inputData.offset);
     } else if (key === 'hedge_flag') {
-      inputResolve[key] = dealHedgeFlag(inputData.hedge_flag);
+      orderInputResolved[key] = dealHedgeFlag(inputData.hedge_flag);
     } else if (key === 'hedge_flag') {
-      inputResolve[key] = dealHedgeFlag(inputData.hedge_flag);
+      orderInputResolved[key] = dealHedgeFlag(inputData.hedge_flag);
     } else if (key === 'parent_id') {
-      break
+      break;
     } else {
-      inputResolve[key] = {
+      orderInputResolved[key] = {
         name: inputData[key],
         color: 'default',
-      }
+      };
     }
   }
-  return inputResolve;
+  return orderInputResolved;
 };

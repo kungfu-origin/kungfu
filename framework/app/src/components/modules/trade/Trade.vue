@@ -84,11 +84,14 @@ const columns = computed(() => {
 });
 
 const lastTradeId: {
-  value: bigint
+  value: bigint;
 } = {
-  value: 0n
-}
-const sound = require("sound-play");
+  value: 0n,
+};
+
+const sound = require('sound-play');
+
+// const isPlaySound = getKfGlobalSettingsValue()?.trade?.sound || false
 
 onMounted(() => {
   if (app?.proxy) {
@@ -124,10 +127,17 @@ onMounted(() => {
               toRaw(dealTrade(watcher, item, watcher.ledger.OrderStat)),
             ),
         );
-        if (lastTradeId.value !== trades.value[0].trade_id) {
-          const isPlaySound = getKfGlobalSettingsValue()?.trade?.sound || false
+        if (
+          !trades.value.length ||
+          lastTradeId.value !== trades.value[0].trade_id
+        ) {
+          const isPlaySound = getKfGlobalSettingsValue()?.trade?.sound || false;
           if (isPlaySound) {
-            sound.play(path.join(`${path.join(KUNGFU_RESOURCES_DIR, 'music/Trade.mp3')}`));
+            sound.play(
+              path.join(
+                `${path.join(KUNGFU_RESOURCES_DIR, 'music/Trade.mp3')}`,
+              ),
+            );
           }
           lastTradeId.value = trades.value[0].trade_id;
         }

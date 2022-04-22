@@ -7,8 +7,6 @@ import {
   PriceTypeEnum,
   SideEnum,
 } from '@kungfu-trader/kungfu-js-api/typings/enums';
-import { Modal } from 'ant-design-vue';
-import { VueNode } from 'ant-design-vue/lib/_util/type';
 
 export const getConfigSettings = (
   category?: KfCategoryTypes,
@@ -85,21 +83,15 @@ export const getConfigSettings = (
   return defaultSettings;
 };
 
-export const confirmModal = (
-  title: string,
-  content: VueNode | (() => VueNode),
-  okText = '确 定',
-  cancelText = '取 消',
-): Promise<void> => {
-  return new Promise((resolve) => {
-    Modal.confirm({
-      title: title,
-      content: content,
-      okText: okText,
-      cancelText: cancelText,
-      onOk: () => {
-        resolve();
-      },
-    });
-  });
+export const orderInputTrans: Record<string, string> = {
+  account_id: '账户',
+  instrument_id: '标的ID',
+  instrument_type: '标的类型',
+  side: '买卖',
+  offset: '开平',
+  hedge_flag: '套保',
+  price_type: '方式',
+  volume: '下单量',
+  exchange_id: '交易所ID',
+  limit_price: '限额',
 };

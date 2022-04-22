@@ -88,9 +88,7 @@ export const getKfGlobalSettings = (): KfSystemConfig[] => [
       {
         key: 'sound',
         name: isEnglish ? 'sound' : '声音',
-        tip: isEnglish
-          ? `Enable the system prompt sound`
-          : `启用系统提示音`,
+        tip: isEnglish ? `Enable the system prompt sound` : `启用系统提示音`,
         default: false,
         type: 'bool',
       },

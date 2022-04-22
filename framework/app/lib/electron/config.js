@@ -25,10 +25,12 @@ module.exports = {
   generateUpdatesFilesForAllChannels: true,
   appId: 'Kungfu.Origin.KungFu.Trader',
   electronVersion: kungfuCore.dependencies.electron,
-  publish: [{
-    provider: 'generic',
-    url: 'https://www.kungfu-trader.com',
-  }, ],
+  publish: [
+    {
+      provider: 'generic',
+      url: 'https://www.kungfu-trader.com',
+    },
+  ],
   npmRebuild: false,
   files: [
     'dist/app/**/*',
@@ -45,7 +47,8 @@ module.exports = {
     '!**/@kungfu-trader/kungfu-js-api/*',
     '!**/@kungfu-trader/kungfu-js-api/**/*',
   ],
-  extraResources: [{
+  extraResources: [
+    {
       from: kfcDir,
       to: 'kfc',
       filter: ['!**/btdata'],
@@ -58,7 +61,13 @@ module.exports = {
     {
       from: appDir,
       to: 'app/dist',
-      filter: ['public/config', 'public/key', 'public/logo', 'public/keywords', 'public/music'],
+      filter: [
+        'public/config',
+        'public/key',
+        'public/logo',
+        'public/keywords',
+        'public/music',
+      ],
     },
     {
       from: appDir,
@@ -74,7 +83,8 @@ module.exports = {
   ],
   asar: false,
   dmg: {
-    contents: [{
+    contents: [
+      {
         x: 410,
         y: 150,
         type: 'link',
@@ -94,10 +104,12 @@ module.exports = {
   },
   win: {
     icon: `${appDir}/public/logo/icon.ico`,
-    target: [{
-      target: 'nsis',
-      arch: ['x64'],
-    }, ],
+    target: [
+      {
+        target: 'nsis',
+        arch: ['x64'],
+      },
+    ],
   },
   linux: {
     icon: `${appDir}/public/logo/icon.icns`,
