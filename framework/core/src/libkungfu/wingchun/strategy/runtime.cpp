@@ -70,7 +70,7 @@ void RuntimeContext::subscribe(const std::string &source, const std::vector<std:
   md_locations_.emplace(md_location->uid, md_location);
 }
 
-void RuntimeContext::subscribe_all(const std::string &source, int8_t exchanges_ids,
+void RuntimeContext::subscribe_all(const std::string &source, uint8_t exchanges_ids,
                              uint64_t instrument_types,
                              uint64_t callback_types) {
   broker_client_.subscribe_all(find_md_location(source), exchanges_ids, instrument_types, callback_types);
