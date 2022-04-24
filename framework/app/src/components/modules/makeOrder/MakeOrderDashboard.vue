@@ -27,6 +27,7 @@ import {
 } from '@kungfu-trader/kungfu-js-api/kungfu';
 import {
   InstrumentTypeEnum,
+  OffsetEnum,
   SideEnum,
 } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import { getKfGlobalSettingsValue } from '@kungfu-trader/kungfu-js-api/config/globalSettings';
@@ -133,12 +134,11 @@ const currentPosition = computed(() => {
   )[0];
 
   return targetPosition;
-})
+});
 
 onMounted(() => {
   if (app?.proxy) {
     const subscription = app.proxy.$globalBus.subscribe((data: KfBusEvent) => {
-
       if (data.tag === 'makeOrder') {
         const { offset, side, volume, price, instrumentType, accountId } = (
           data as TriggerMakeOrder
@@ -183,7 +183,6 @@ onMounted(() => {
         formState.value.side = +side;
       }
       updatePositionList();
-
     });
 
     onBeforeUnmount(() => {
@@ -466,17 +465,29 @@ function showCloseModal(
   if (!currentPosition.value) return Promise.resolve();
 
   const closeRange = +getKfGlobalSettingsValue()?.trade?.close || 100;
-  if (closeModalConditions(closeRange, makeOrderInput, Number(currentPosition.value.volume))) {
+  if (
+    closeModalConditions(
+      closeRange,
+      makeOrderInput,
+      Number(currentPosition.value.volume),
+    )
+  ) {
     return confirmModal('提示', '是否全部平仓');
   }
   return Promise.resolve();
 }
 
-function closeModalConditions(closeRange: number, orderInput: KungfuApi.MakeOrderInput, positionVolume: number): boolean {
+function closeModalConditions(
+  closeRange: number,
+  orderInput: KungfuApi.MakeOrderInput,
+  positionVolume: number,
+): boolean {
+  const { offset } = orderInput;
+  if (offset === OffsetEnum.Open) {
+    return false;
+  }
 
-  return orderInput.volume === positionVolume &&
-    orderInput.volume >
-      (closeRange * positionVolume) / 100
+  return orderInput.volume > positionVolume * (closeRange / 100);
 }
 </script>
 
