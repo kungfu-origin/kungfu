@@ -50,6 +50,7 @@ def pre_start(context):
     finish_time = args["finishTime"]
     context.START_TIME_IN_NANO = str_to_nanotime(trigger_time)
     context.FINISH_TIME_IN_NANO = str_to_nanotime(finish_time)
+    context.cancel_and_place_new_order = False
     if context.START_TIME_IN_NANO < context.now():
         raise ValueError("trigger time must greater than current time!")
     if context.START_TIME_IN_NANO >= context.FINISH_TIME_IN_NANO:
@@ -81,7 +82,7 @@ def type_to_minvol(argument):
         InstrumentType.Bond : int(1),
         InstrumentType.StockOption : int(1),
         InstrumentType.Fund : int(1),
-        InstrumentType.TechStock : int(100),
+        InstrumentType.TechStock : int(200),
         InstrumentType.Index : int(1),
     }
     return switcher.get(argument, int(1))
@@ -94,7 +95,8 @@ def on_order(context, order):
         context.log.info("[on_order 1] {}".format(context.orders))
         del context.orders[order.order_id]
         context.log.info("[on_order 2] {}".format(context.orders))
-        if (not context.orders) and context.steps_to_fill > 1 :
+        if (not context.orders) and context.steps_to_fill > 1 and context.cancel_and_place_new_order:
+            context.cancel_and_place_new_order = False
             orders_to_insert = make_plan(context, False)
             context.log.info("------------orders_to_insert---------------- total {} orders".format(len(orders_to_insert)))
             for item in orders_to_insert:
@@ -123,6 +125,7 @@ def on_quote(context, quote):
     if context.MIN_VOL == 0 :
         context.log.info("instrument_id {} bid {} ask {} up {} down {}".format(quote.instrument_id, str(quote.bid_price)[1:-1], str(quote.ask_price)[1:-1], quote.upper_limit_price, quote.lower_limit_price))
         context.MIN_VOL = type_to_minvol(quote.instrument_type)
+        assert context.MAX_LOT_BY_STEP >= context.MIN_VOL
         context.MAX_LOT_BY_STEP = int(math.floor(context.MAX_LOT_BY_STEP / float(context.MIN_VOL)) * context.MIN_VOL)
         context.log.info("quote.instrument_type {} context.MIN_VOL {} context.MAX_LOT_BY_STEP {}".format(quote.instrument_type, context.MIN_VOL, context.MAX_LOT_BY_STEP))
         assert context.MAX_LOT_BY_STEP > 0
@@ -153,6 +156,7 @@ def on_quote(context, quote):
 def insert_order_task(context, last_order):
     print_datatime(context, "execute insert_order_task", context.now())
     if (not last_order) and context.orders:
+        context.cancel_and_place_new_order = True
         cancel_all_orders(context)
     else :
         orders_to_insert = make_plan(context, last_order)
@@ -226,8 +230,10 @@ def make_plan(context, last_order):
             pending_vol += order_vol
         order_price = context.UPPER_LIMIT_PRICE if context.SIDE == Side.Buy else context.LOWER_LIMIT_PRICE
         context.volume_to_fill -=  pending_vol
+        context.log.info(f"make_plan last..................pending_vol {pending_vol} context.volume_to_fill {context.volume_to_fill}")
     else :
         order_price = context.bid_price if context.SIDE == Side.Buy else context.ask_price
+        context.log.info(f"make_plan ..................context.volume_to_fill {context.volume_to_fill}")
     if(context.OFFSET == Offset.Open):
         vol = int(math.floor(context.volume_to_fill / context.steps_to_fill / float(context.MIN_VOL)) * context.MIN_VOL)
         context.log.info(f"make_plan..................vol {vol}")
