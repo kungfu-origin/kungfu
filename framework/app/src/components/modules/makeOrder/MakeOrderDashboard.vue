@@ -83,39 +83,55 @@ const configSettings = computed(() => {
 
 const isShowConfirmModal = ref<boolean>(false);
 const curOrderVolume = ref<number>(0);
-const orderData = ref<KungfuApi.MakeOrderInput>();
+
+const instrumentResolve = computed(() => {
+  const { instrument } = formState.value;
+  return instrument
+    ? transformSearchInstrumentResultToInstrument(instrument)
+    : null;
+});
+
+const makeOrderData = computed(() => {
+  const instrument = formState.value.instrument.toString();
+  const instrumnetResolved =
+    transformSearchInstrumentResultToInstrument(instrument);
+
+  if (!instrumnetResolved) {
+    message.error('标的错误');
+    return null;
+  }
+
+  const { exchangeId, instrumentId, instrumentType } = instrumnetResolved;
+
+  const { limit_price, volume, price_type, side, offset, hedge_flag } =
+    formState.value;
+
+  const makeOrderInput: KungfuApi.MakeOrderInput = {
+    instrument_id: instrumentId,
+    instrument_type: +instrumentType,
+    exchange_id: exchangeId,
+    limit_price: +limit_price,
+    volume: +volume,
+    price_type: +price_type,
+    side: +side,
+    offset: +(offset !== undefined ? offset : +side === 0 ? 0 : 1),
+    hedge_flag: +(hedge_flag || 0),
+    parent_id: BigInt(0),
+  };
+  return makeOrderInput;
+});
 
 const { getExtraCategoryData } = useExtraCategory();
 
-const currentPosition: {
-  position: KungfuApi.Position | null;
-} = {
-  position: null,
-};
+const currentPosition = ref<KungfuApi.Position>();
 
-const curPositionList = computed(() => {
-  if (currentGlobalKfLocation.value === null) {
-    return [];
-  }
-
-  const positions = isTdStrategyCategory(currentGlobalKfLocation.value.category)
-    ? ((dealTradingData(
-        window.watcher,
-        window.watcher.ledger,
-        'Position',
-        currentGlobalKfLocation.value,
-      ) || []) as KungfuApi.Position[])
-    : (getExtraCategoryData(
-        window.watcher.ledger.Position,
-        currentGlobalKfLocation.value,
-        'position',
-      ) as KungfuApi.Position[]);
-  return positions;
-});
+const curPositionList = ref<KungfuApi.Position[]>();
 
 onMounted(() => {
   if (app?.proxy) {
     const subscription = app.proxy.$globalBus.subscribe((data: KfBusEvent) => {
+      getLatestPosition();
+
       if (data.tag === 'makeOrder') {
         const { offset, side, volume, price, instrumentType, accountId } = (
           data as TriggerMakeOrder
@@ -138,6 +154,8 @@ onMounted(() => {
       }
 
       if (data.tag === 'orderBookUpdate') {
+        console.log(2);
+
         const { side, price, volume, instrumentType } = (
           data as TriggerOrderBookUpdate
         ).orderInput;
@@ -169,44 +187,65 @@ onMounted(() => {
 
 watch(
   () => formState.value.instrument,
-  (newVal) => {
-    const instrumentResolved = transformSearchInstrumentResultToInstrument(
-      newVal.toString(),
-    );
-
-    if (!instrumentResolved) {
+  () => {
+    if (!instrumentResolve.value) {
       return;
     }
-
-    dealPositionList(curPositionList.value, instrumentResolved);
 
     subscribeAllInstrumentByAppStates(
       processStatusData.value,
       appStates.value,
       mdExtTypeMap.value,
-      [instrumentResolved],
+      [instrumentResolve.value],
     );
+    triggerOrderBook(instrumentResolve.value);
+    makeOrderInstrumentType.value = instrumentResolve.value.instrumentType;
 
-    triggerOrderBook(instrumentResolved);
-
-    makeOrderInstrumentType.value = instrumentResolved.instrumentType;
+    if (curPositionList.value) {
+      getLatestPosition();
+    }
   },
 );
 
-function dealPositionList(
-  positionList: KungfuApi.Position[],
-  instrumentResolved: KungfuApi.InstrumentResolved,
-) {
-  const { exchangeId, instrumentId, instrumentType } = instrumentResolved;
+function getLastPosition(): KungfuApi.Position[] {
+  if (currentGlobalKfLocation.value === null) {
+    return [];
+  }
 
-  const targetPosition: KungfuApi.Position = positionList.filter(
+  const positions = isTdStrategyCategory(currentGlobalKfLocation.value.category)
+    ? ((dealTradingData(
+        window.watcher,
+        window.watcher.ledger,
+        'Position',
+        currentGlobalKfLocation.value,
+      ) || []) as KungfuApi.Position[])
+    : (getExtraCategoryData(
+        window.watcher.ledger.Position,
+        currentGlobalKfLocation.value,
+        'position',
+      ) as KungfuApi.Position[]);
+
+  return positions;
+}
+
+function updatePositionList() {
+  curPositionList.value = getLastPosition();
+}
+
+function getLatestPosition() {
+  updatePositionList();
+
+  if (!curPositionList.value?.length || !instrumentResolve.value) return;
+  const { exchangeId, instrumentId, instrumentType } = instrumentResolve.value;
+
+  const targetPosition: KungfuApi.Position = curPositionList.value.filter(
     (position) =>
       position.exchange_id === exchangeId &&
       position.instrument_id === instrumentId &&
       position.instrument_type === instrumentType,
   )[0];
 
-  currentPosition.position = targetPosition;
+  currentPosition.value = targetPosition;
 }
 
 function placeOrder(
@@ -253,8 +292,7 @@ function initOrderInputData(): Promise<KungfuApi.MakeOrderInput> {
   return Promise.resolve(makeOrderInput);
 }
 
-function dealGlobalData(makeOrderInput: KungfuApi.MakeOrderInput) {
-  orderData.value = makeOrderInput;
+function dealGlobalData(makeOrderInput: KungfuApi.MakeOrderInput): void {
   curOrderVolume.value = +makeOrderInput.volume;
 }
 
@@ -271,23 +309,13 @@ function handleResetMakeOrderForm() {
 }
 
 // 拆单
-async function handleApartOrder() {
+async function handleApartOrder(): Promise<void> {
   try {
     await formRef.value.validate();
-
     const makeOrderInput: KungfuApi.MakeOrderInput = await initOrderInputData();
-    const closeRange = +getKfGlobalSettingsValue()?.trade?.close || 0;
 
-    if (
-      makeOrderInput.volume === Number(currentPosition.position?.volume) &&
-      +makeOrderInput.volume >
-        (closeRange * Number(currentPosition.position?.volume)) / 100
-    ) {
-      await confirmModal('提示', '是否全部平仓');
-    }
-
+    await showCloseModal(makeOrderInput);
     isShowConfirmModal.value = true;
-
     dealGlobalData(makeOrderInput);
   } catch (error) {
     message.error(error.message);
@@ -303,7 +331,6 @@ async function handleApartedConfirm({
   count: number;
 }): Promise<void> {
   const remainder: number = curOrderVolume.value % +volume; // 剩余数量
-
   const realCount: number = remainder === 0 ? count : count + 1;
 
   const apartVolumeList: number[] = new Array(count).fill(+volume);
@@ -313,26 +340,23 @@ async function handleApartedConfirm({
 
   const account_id = formState.value.account_id;
 
-  if (!currentGlobalKfLocation.value || !window.watcher) {
-    message.error('当前 Location 错误');
-    return;
-  }
-
   const tdProcessId =
     currentGlobalKfLocation.value?.category === 'td'
       ? getProcessIdByKfLocation(currentGlobalKfLocation.value)
       : `td_${account_id.toString()}`;
 
-  if (!orderData.value || !currentGlobalKfLocation.value) {
+  if (!makeOrderData.value || !currentGlobalKfLocation.value) {
     return;
   }
 
-  await confirmOrderPlace(orderData.value, realCount);
+  await confirmOrderPlace(makeOrderData.value, realCount);
+
+  const apartOrderInput: KungfuApi.MakeOrderInput = makeOrderData.value;
   Promise.all(
     apartVolumeList.map((volume) => {
-      (orderData.value as KungfuApi.MakeOrderInput).volume = volume;
+      apartOrderInput.volume = volume;
       return placeOrder(
-        orderData.value as KungfuApi.MakeOrderInput,
+        apartOrderInput as KungfuApi.MakeOrderInput,
         currentGlobalKfLocation.value as KungfuApi.KfLocation,
         tdProcessId,
       );
@@ -367,9 +391,9 @@ function dealFatFingerMessage(
   const fatFingerRange = +getKfGlobalSettingsValue()?.trade?.fatFinger || 0;
 
   const { exchangeId, instrumentId } = instrumnetResolved;
+  const ukey = hashInstrumentUKey(instrumentId, exchangeId);
 
   const { limit_price: price, side } = makeOrderInput;
-  const ukey = hashInstrumentUKey(instrumentId, exchangeId);
   const lastPrice = window.watcher.ledger.Quote[ukey].last_price;
 
   const fatFingerBuyRate =
@@ -424,24 +448,13 @@ async function confirmOrderPlace(
   return Promise.resolve(tdProcessId);
 }
 
-async function handleMakeOrder() {
+async function handleMakeOrder(): Promise<void> {
   try {
     await formRef.value.validate();
-
     const makeOrderInput: KungfuApi.MakeOrderInput = await initOrderInputData();
 
-    const closeRange = +getKfGlobalSettingsValue()?.trade?.close || 0;
-
-    if (
-      makeOrderInput.volume === Number(currentPosition.position?.volume) &&
-      +makeOrderInput.volume >
-        (closeRange * Number(currentPosition.position?.volume)) / 100
-    ) {
-      await confirmModal('提示', '是否全部平仓');
-    }
-
+    await showCloseModal(makeOrderInput);
     await confirmFatFingerModal(makeOrderInput);
-
     const tdProcessId = await confirmOrderPlace(makeOrderInput);
 
     if (currentGlobalKfLocation.value) {
@@ -454,6 +467,25 @@ async function handleMakeOrder() {
   } catch (e) {
     message.error(e.message);
   }
+}
+
+function showCloseModal(
+  makeOrderInput: KungfuApi.MakeOrderInput,
+): Promise<void> {
+  if (instrumentResolve.value) {
+    getLatestPosition();
+  }
+  console.log(currentPosition.value?.volume);
+
+  const closeRange = +getKfGlobalSettingsValue()?.trade?.close || 100;
+  if (
+    makeOrderInput.volume === Number(currentPosition.value?.volume) &&
+    +makeOrderInput.volume >
+      (closeRange * Number(currentPosition.value?.volume)) / 100
+  ) {
+    return confirmModal('提示', '是否全部平仓');
+  }
+  return Promise.resolve();
 }
 </script>
 
@@ -500,7 +532,7 @@ async function handleMakeOrder() {
             <div
               class="position-value ant-col ant-col-14 ant-form-item-control"
             >
-              {{ currentPosition.position?.volume }}
+              {{ currentPosition.volume }}
             </div>
           </div>
         </div>

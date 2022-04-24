@@ -66,7 +66,7 @@ function handleConfirm() {
           </a-select>
           <a-input-number
             :precision="0"
-            step="100"
+            step="1"
             v-model:value="volume"
             :max="
               apartType === 'orderSize'
