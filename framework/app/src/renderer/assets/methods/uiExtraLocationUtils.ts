@@ -83,7 +83,6 @@ export const useExtraCategory = (): {
       };
       const dealDataFuncData = targetCategories[type] || defaulFuncData;
       const dealDataFunc = dealDataFuncData.getter;
-      console.log(source, 111);
 
       return dealDataFunc(
         source as KungfuApi.DataTable<KungfuApi.Order> &
