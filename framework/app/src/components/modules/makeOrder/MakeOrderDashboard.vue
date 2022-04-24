@@ -92,16 +92,12 @@ const instrumentResolve = computed(() => {
 });
 
 const makeOrderData = computed(() => {
-  const instrument = formState.value.instrument.toString();
-  const instrumnetResolved =
-    transformSearchInstrumentResultToInstrument(instrument);
-
-  if (!instrumnetResolved) {
+  if (!instrumentResolve.value) {
     message.error('标的错误');
     return null;
   }
 
-  const { exchangeId, instrumentId, instrumentType } = instrumnetResolved;
+  const { exchangeId, instrumentId, instrumentType } = instrumentResolve.value;
 
   const { limit_price, volume, price_type, side, offset, hedge_flag } =
     formState.value;
@@ -130,7 +126,6 @@ const curPositionList = ref<KungfuApi.Position[]>();
 onMounted(() => {
   if (app?.proxy) {
     const subscription = app.proxy.$globalBus.subscribe((data: KfBusEvent) => {
-      getLatestPosition();
 
       if (data.tag === 'makeOrder') {
         const { offset, side, volume, price, instrumentType, accountId } = (
@@ -154,8 +149,6 @@ onMounted(() => {
       }
 
       if (data.tag === 'orderBookUpdate') {
-        console.log(2);
-
         const { side, price, volume, instrumentType } = (
           data as TriggerOrderBookUpdate
         ).orderInput;
@@ -177,6 +170,8 @@ onMounted(() => {
 
         formState.value.side = +side;
       }
+      getLatestPosition();
+
     });
 
     onBeforeUnmount(() => {
@@ -207,7 +202,7 @@ watch(
   },
 );
 
-function getLastPosition(): KungfuApi.Position[] {
+function getPositionList(): KungfuApi.Position[] {
   if (currentGlobalKfLocation.value === null) {
     return [];
   }
@@ -229,15 +224,15 @@ function getLastPosition(): KungfuApi.Position[] {
 }
 
 function updatePositionList() {
-  curPositionList.value = getLastPosition();
+  curPositionList.value = getPositionList();
 }
 
 function getLatestPosition() {
   updatePositionList();
 
   if (!curPositionList.value?.length || !instrumentResolve.value) return;
-  const { exchangeId, instrumentId, instrumentType } = instrumentResolve.value;
 
+  const { exchangeId, instrumentId, instrumentType } = instrumentResolve.value;
   const targetPosition: KungfuApi.Position = curPositionList.value.filter(
     (position) =>
       position.exchange_id === exchangeId &&
@@ -475,7 +470,6 @@ function showCloseModal(
   if (instrumentResolve.value) {
     getLatestPosition();
   }
-  console.log(currentPosition.value?.volume);
 
   const closeRange = +getKfGlobalSettingsValue()?.trade?.close || 100;
   if (
@@ -531,6 +525,7 @@ function showCloseModal(
             </div>
             <div
               class="position-value ant-col ant-col-14 ant-form-item-control"
+              v-if="currentPosition"
             >
               {{ currentPosition.volume }}
             </div>
