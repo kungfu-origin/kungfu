@@ -384,12 +384,15 @@ void Watcher::SyncAppStatus() {
 }
 
 void Watcher::SyncEventCache() {
-  if (event_cache_) {
-    reset_cache(event_cache_);
+  if (reset_cache_states_.size()) {
+    for (auto reset_state : reset_cache_states_) {
+      reset_cache(reset_state);
+    }
+    reset_cache_states_.clear();
   }
 }
 
-void Watcher::UpdateEventCache(const event_ptr event) {
+void Watcher::UpdateEventCache(const event_ptr& event) {
   const auto &request = event->data<CacheReset>();
   boost::hana::for_each(StateDataTypes, [&](auto it) {
     using DataType = typename decltype(+boost::hana::second(it))::type;
@@ -410,7 +413,7 @@ void Watcher::UpdateEventCache(const event_ptr event) {
       }
     }
   });
-  event_cache_ = event;
+  reset_cache_states_.push_back(state<CacheReset>(event));
 }
 
 location_ptr Watcher::FindLocation(const Napi::CallbackInfo &info) {
@@ -533,10 +536,10 @@ void Watcher::UpdateBook(int64_t update_time, uint32_t source_id, uint32_t dest_
     bool has_short_position_for_quote = book->has_short_position_for(quote);
 
     if (has_long_position_for_quote) {
-      UpdateBook(update_time, source_id, dest_id, book->get_position_for(Direction::Long, quote));
+      UpdateBook(update_time, holder_uid, dest_id, book->get_position_for(Direction::Long, quote));
     }
     if (has_short_position_for_quote) {
-      UpdateBook(update_time, source_id, dest_id, book->get_position_for(Direction::Short, quote));
+      UpdateBook(update_time, holder_uid, dest_id, book->get_position_for(Direction::Short, quote));
     }
 
     if (has_short_position_for_quote or has_long_position_for_quote) {
@@ -550,7 +553,7 @@ void Watcher::UpdateBook(const event_ptr &event, const Position &position) {
   auto book = bookkeeper_.get_book(position.holder_uid);
   auto &book_position = book->get_position_for(position.direction, position);
   if (book_position.volume > 0 or book_position.direction == Direction::Long) {
-    state<Position> cache_state(event->source(), event->dest(), event->gen_time(), book_position);
+    state<Position> cache_state(position.holder_uid, event->dest(), event->gen_time(), book_position);
     feed_state_data_bank(cache_state, data_bank_);
   }
 }
@@ -632,7 +635,7 @@ void Watcher::UpdateBook(int64_t update_time, uint32_t source_id, uint32_t dest_
   auto book = bookkeeper_.get_book(position.holder_uid);
   auto &book_position = book->get_position_for(position.direction, position);
   if (book_position.volume > 0 or book_position.direction == Direction::Long) {
-    state<Position> cache_state(source_id, dest_id, update_time, book_position);
+    state<Position> cache_state(position.holder_uid, dest_id, update_time, book_position);
     feed_state_data_bank(cache_state, data_bank_);
   }
 }

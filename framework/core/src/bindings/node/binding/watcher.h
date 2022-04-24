@@ -110,7 +110,7 @@ private:
   serialize::JsResetCache reset_cache;
   yijinjing::cache::bank data_bank_;
   yijinjing::cache::trading_bank trading_bank_;
-  event_ptr event_cache_;
+  std::vector<kungfu::state<longfist::types::CacheReset>> reset_cache_states_;
   bool start_;
   std::unordered_map<uint32_t, longfist::types::InstrumentKey> subscribed_instruments_ = {};
   std::unordered_map<uint32_t, int> location_uid_states_map_ = {};
@@ -153,7 +153,7 @@ private:
 
   void SyncAppStatus();
 
-  void UpdateEventCache(const event_ptr e);
+  void UpdateEventCache(const event_ptr& event);
 
   void SyncEventCache();
 

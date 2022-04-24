@@ -12,6 +12,10 @@
 #include <kungfu/yijinjing/practice/apprentice.h>
 
 namespace kungfu::wingchun::service {
+
+// key = hash_instrument(exchange_id, instrument_id)
+typedef std::unordered_map<uint32_t, longfist::types::Position> PositionMap;
+
 class Ledger : public yijinjing::practice::apprentice {
 public:
   explicit Ledger(yijinjing::data::locator_ptr locator, longfist::enums::mode m, bool low_latency = false);
@@ -30,6 +34,7 @@ protected:
 private:
   broker::AutoClient broker_client_;
   book::Bookkeeper bookkeeper_;
+  book::BookMap tmp_books_;
   std::unordered_map<uint64_t, state<longfist::types::OrderStat>> order_stats_ = {};
 
   void refresh_books();
@@ -47,6 +52,10 @@ private:
   void update_account_book(int64_t trigger_time, uint32_t account_uid);
 
   void inspect_channel(int64_t trigger_time, const longfist::types::Channel &channel);
+
+  void keep_positions(int64_t trigger_time, uint32_t strategy_uid);
+
+  void rebuild_positions(int64_t trigger_time, uint32_t strategy_uid);
 
   void mirror_positions(int64_t trigger_time, uint32_t strategy_uid);
 

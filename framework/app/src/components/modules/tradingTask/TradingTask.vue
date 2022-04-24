@@ -269,7 +269,7 @@ function toArgs(
     .map((item) => {
       return `${item.key}=${formState[item.key]}`;
     })
-    .join(path.delimiter);
+    .join(';');
 }
 
 function fromArgs(args: string[]): Record<string, KungfuApi.KfConfigValue> {
@@ -282,14 +282,14 @@ function dealArgs(record: Pm2ProcessStatusDetail): string {
   const taskKfLocation = getTaskKfLocationByProcessId(record?.name || '');
   const taskArgs = minimist(record.args as string[])['a'] || '';
   if (!taskKfLocation) {
-    return taskArgs.split(path.delimiter).join(' ');
+    return taskArgs.split(';').join(' ');
   }
 
   const extConfig: KungfuApi.KfExtConfig = (extConfigs.value['strategy'] || {})[
     taskKfLocation.group
   ];
   if (!extConfig || !extConfig.settings) {
-    return taskArgs.split(path.delimiter).join(' ');
+    return taskArgs.split(';').join(' ');
   }
 
   const data = getDataByArgs(taskArgs);
@@ -302,7 +302,7 @@ function dealArgs(record: Pm2ProcessStatusDetail): string {
 }
 
 function getDataByArgs(taskArgs: string): Record<string, string> {
-  return taskArgs.split(path.delimiter).reduce((data, pair) => {
+  return taskArgs.split(';').reduce((data, pair) => {
     const [key, value] = pair.split('=');
     data[key] = value;
     return data;
