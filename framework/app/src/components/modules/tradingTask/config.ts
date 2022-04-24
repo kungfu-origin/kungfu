@@ -38,22 +38,22 @@ export const tradeRegisterConfig: KfCategoryRegisterProps = {
   },
   order: {
     getter(orders, kfLocation: KungfuApi.KfExtraLocation) {
+      kfLocation.category = 'strategy';
       const currentUID = window.watcher.getLocationUID(kfLocation);
-
       return orders.filter('dest', currentUID).sort('trade_time');
     },
   },
   trade: {
     getter(trades, kfLocation: KungfuApi.KfExtraLocation) {
+      kfLocation.category = 'strategy';
       const currentUID = window.watcher.getLocationUID(kfLocation);
-
       return trades.filter('dest', currentUID).sort('trade_time');
     },
   },
   position: {
     getter(position, kfLocation: KungfuApi.KfExtraLocation) {
+      kfLocation.category = 'strategy';
       const currentUID = window.watcher.getLocationUID(kfLocation);
-
       return position
         .nofilter('volume', BigInt(0))
         .filter('dest', currentUID)

@@ -1280,6 +1280,9 @@ export const dealTradingData = (
   }
 
   const currentUID = watcher.getLocationUID(kfLocation);
+
+  console.log(watcher.getLocation(currentUID), 123456);
+  
   const orderTradeFilterKey = getOrderTradeFilterKey(kfLocation.category);
   const sortKey = getTradingDataSortKey(tradingDataTypeName);
 
