@@ -119,9 +119,21 @@ const makeOrderData = computed(() => {
 
 const { getExtraCategoryData } = useExtraCategory();
 
-const currentPosition = ref<KungfuApi.Position>();
-
 const curPositionList = ref<KungfuApi.Position[]>();
+
+const currentPosition = computed(() => {
+  if (!curPositionList.value?.length || !instrumentResolve.value) return null;
+
+  const { exchangeId, instrumentId, instrumentType } = instrumentResolve.value;
+  const targetPosition: KungfuApi.Position = curPositionList.value.filter(
+    (position) =>
+      position.exchange_id === exchangeId &&
+      position.instrument_id === instrumentId &&
+      position.instrument_type === instrumentType,
+  )[0];
+
+  return targetPosition;
+})
 
 onMounted(() => {
   if (app?.proxy) {
@@ -170,7 +182,7 @@ onMounted(() => {
 
         formState.value.side = +side;
       }
-      getLatestPosition();
+      updatePositionList();
 
     });
 
@@ -197,14 +209,14 @@ watch(
     makeOrderInstrumentType.value = instrumentResolve.value.instrumentType;
 
     if (curPositionList.value) {
-      getLatestPosition();
+      updatePositionList();
     }
   },
 );
 
-function getPositionList(): KungfuApi.Position[] {
+function updatePositionList(): void {
   if (currentGlobalKfLocation.value === null) {
-    return [];
+    return;
   }
 
   const positions = isTdStrategyCategory(currentGlobalKfLocation.value.category)
@@ -220,27 +232,7 @@ function getPositionList(): KungfuApi.Position[] {
         'position',
       ) as KungfuApi.Position[]);
 
-  return positions;
-}
-
-function updatePositionList() {
-  curPositionList.value = getPositionList();
-}
-
-function getLatestPosition() {
-  updatePositionList();
-
-  if (!curPositionList.value?.length || !instrumentResolve.value) return;
-
-  const { exchangeId, instrumentId, instrumentType } = instrumentResolve.value;
-  const targetPosition: KungfuApi.Position = curPositionList.value.filter(
-    (position) =>
-      position.exchange_id === exchangeId &&
-      position.instrument_id === instrumentId &&
-      position.instrument_type === instrumentType,
-  )[0];
-
-  currentPosition.value = targetPosition;
+  curPositionList.value = positions;
 }
 
 function placeOrder(
@@ -468,18 +460,23 @@ function showCloseModal(
   makeOrderInput: KungfuApi.MakeOrderInput,
 ): Promise<void> {
   if (instrumentResolve.value) {
-    getLatestPosition();
+    updatePositionList();
   }
 
+  if (!currentPosition.value) return Promise.resolve();
+
   const closeRange = +getKfGlobalSettingsValue()?.trade?.close || 100;
-  if (
-    makeOrderInput.volume === Number(currentPosition.value?.volume) &&
-    +makeOrderInput.volume >
-      (closeRange * Number(currentPosition.value?.volume)) / 100
-  ) {
+  if (closeModalConditions(closeRange, makeOrderInput, Number(currentPosition.value.volume))) {
     return confirmModal('提示', '是否全部平仓');
   }
   return Promise.resolve();
+}
+
+function closeModalConditions(closeRange: number, orderInput: KungfuApi.MakeOrderInput, positionVolume: number): boolean {
+
+  return orderInput.volume === positionVolume &&
+    orderInput.volume >
+      (closeRange * positionVolume) / 100
 }
 </script>
 
