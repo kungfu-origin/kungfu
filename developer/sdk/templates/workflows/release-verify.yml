@@ -10,6 +10,10 @@ on:
 jobs:
   try:
     uses: kungfu-trader/workflows/.github/workflows/.release-verify.yml@v1
+    with:
+      enable-linux: true
+      enable-macos: true
+      enable-windows: true
     secrets:
       AWS_CI_ACCESS_KEY_ID: ${{ secrets.AWS_CI_ACCESS_KEY_ID }}
       AWS_CI_SECRET_ACCESS_KEY: ${{ secrets.AWS_CI_SECRET_ACCESS_KEY }}
