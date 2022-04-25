@@ -96,7 +96,6 @@ const instrumentResolve = computed(() => {
 
 const makeOrderData = computed(() => {
   if (!instrumentResolve.value) {
-    message.error('标的错误');
     return null;
   }
 
@@ -207,12 +206,11 @@ watch(
     triggerOrderBook(instrumentResolve.value);
     makeOrderInstrumentType.value = instrumentResolve.value.instrumentType;
 
-    if (curPositionList.value) {
-      updatePositionList();
-    }
+    updatePositionList();
   },
 );
 
+// 更新持仓列表
 function updatePositionList(): void {
   if (currentGlobalKfLocation.value === null) {
     return;
@@ -234,6 +232,7 @@ function updatePositionList(): void {
   curPositionList.value = positions;
 }
 
+// 下单操作
 function placeOrder(
   orderInput: KungfuApi.MakeOrderInput,
   globalKfLocation: KungfuApi.KfLocation,
@@ -249,7 +248,6 @@ function placeOrder(
 
 function initOrderInputData(): Promise<KungfuApi.MakeOrderInput> {
   if (!instrumentResolve.value) {
-    message.error('标的错误');
     return Promise.reject(new Error('标的错误'));
   }
 
@@ -298,8 +296,9 @@ async function handleApartOrder(): Promise<void> {
     const makeOrderInput: KungfuApi.MakeOrderInput = await initOrderInputData();
 
     await showCloseModal(makeOrderInput);
-    isShowConfirmModal.value = true;
+    await confirmFatFingerModal(makeOrderInput);
 
+    isShowConfirmModal.value = true;
     dealGlobalData(makeOrderInput);
   } catch (error) {
     message.error(error.message);
@@ -308,20 +307,16 @@ async function handleApartOrder(): Promise<void> {
 
 // 拆单弹窗确认回调
 async function handleApartedConfirm(volumeList: number[]): Promise<void> {
-  const account_id = formState.value.account_id;
-
-  const tdProcessId =
-    currentGlobalKfLocation.value?.category === 'td'
-      ? getProcessIdByKfLocation(currentGlobalKfLocation.value)
-      : `td_${account_id.toString()}`;
-
   if (!makeOrderData.value || !currentGlobalKfLocation.value) {
     return;
   }
 
-  await confirmOrderPlace(makeOrderData.value, volumeList.length);
-
+  const tdProcessId = await confirmOrderPlace(
+    makeOrderData.value,
+    volumeList.length,
+  );
   const apartOrderInput: KungfuApi.MakeOrderInput = makeOrderData.value;
+
   Promise.all(
     volumeList.map((volume) => {
       apartOrderInput.volume = volume;
@@ -350,7 +345,6 @@ function dealFatFingerMessage(
   makeOrderInput: KungfuApi.MakeOrderInput,
 ): string {
   if (!instrumentResolve.value) {
-    message.error('标的错误');
     return '';
   }
 
@@ -392,7 +386,6 @@ async function confirmOrderPlace(
   );
 
   if (!currentGlobalKfLocation.value || !window.watcher) {
-    message.error('当前 Location 错误');
     return Promise.reject('当前 Location 错误');
   }
 
@@ -431,16 +424,15 @@ async function handleMakeOrder(): Promise<void> {
   }
 }
 
+// 展示平仓弹窗
 function showCloseModal(
   makeOrderInput: KungfuApi.MakeOrderInput,
 ): Promise<void> {
-  if (instrumentResolve.value) {
-    updatePositionList();
-  }
-
   if (!currentPosition.value) return Promise.resolve();
 
+  updatePositionList();
   const closeRange = +getKfGlobalSettingsValue()?.trade?.close || 100;
+
   if (
     closeModalConditions(
       closeRange,
@@ -450,9 +442,11 @@ function showCloseModal(
   ) {
     return confirmModal('提示', '是否全部平仓');
   }
+
   return Promise.resolve();
 }
 
+// 触发平仓弹窗条件
 function closeModalConditions(
   closeRange: number,
   orderInput: KungfuApi.MakeOrderInput,

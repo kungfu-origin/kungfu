@@ -44,7 +44,7 @@ export function dealOrderPlaceVNode(
       ]),
     );
 
-  const rootVNode = h('div', { class: 'root-node' }, [
+  const rootBox = h('div', { class: 'root-node' }, [
     h('div', { class: 'trading-data-detail__warp' }, vnode),
     h('div', { class: 'ant-statistic apart-result-statistic order-number' }, [
       h(
@@ -59,7 +59,7 @@ export function dealOrderPlaceVNode(
       ),
     ]),
   ]);
-  const rootBox: VNode = h('div', { class: 'modal-node' }, rootVNode);
+  const rootVNode: VNode = h('div', { class: 'modal-node' }, rootBox);
 
-  return rootBox;
+  return rootVNode;
 }
