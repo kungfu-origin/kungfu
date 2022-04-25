@@ -34,7 +34,7 @@ defineEmits<{
 }>();
 
 const { modalVisible, closeModal } = useModalVisible(props.visible);
-const { curOrderType } = props
+const { curOrderType } = props;
 const { curOrderVolume } = toRefs(props);
 
 const volume = ref<number>(100);

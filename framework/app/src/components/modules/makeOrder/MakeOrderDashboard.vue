@@ -281,7 +281,7 @@ function initOrderInputData(): Promise<KungfuApi.MakeOrderInput> {
 
 function dealGlobalData(makeOrderInput: KungfuApi.MakeOrderInput): void {
   curOrderVolume.value = +makeOrderInput.volume;
-  curOrderType.value = makeOrderInput.instrument_type
+  curOrderType.value = makeOrderInput.instrument_type;
 }
 
 function handleResetMakeOrderForm() {
