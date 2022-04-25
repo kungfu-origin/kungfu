@@ -84,6 +84,7 @@ const configSettings = computed(() => {
 
 const isShowConfirmModal = ref<boolean>(false);
 const curOrderVolume = ref<number>(0);
+const curOrderType = ref<InstrumentTypeEnum>(InstrumentTypeEnum.unknown);
 
 const instrumentResolve = computed(() => {
   const { instrument } = formState.value;
@@ -280,6 +281,7 @@ function initOrderInputData(): Promise<KungfuApi.MakeOrderInput> {
 
 function dealGlobalData(makeOrderInput: KungfuApi.MakeOrderInput): void {
   curOrderVolume.value = +makeOrderInput.volume;
+  curOrderType.value = makeOrderInput.instrument_type
 }
 
 function handleResetMakeOrderForm() {
@@ -552,6 +554,7 @@ function closeModalConditions(
       v-if="isShowConfirmModal"
       v-model:visible="isShowConfirmModal"
       :curOrderVolume="curOrderVolume"
+      :curOrderType="curOrderType"
       @confirm="handleApartedConfirm"
     ></OrderConfirmModal>
   </div>

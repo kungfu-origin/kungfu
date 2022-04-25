@@ -1,6 +1,6 @@
 <script setup lang="ts">
-// import { getCurrentInstance } from 'vue';
 import { useModalVisible } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
+import { InstrumentTypeEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import { ref, toRefs, computed, getCurrentInstance } from 'vue';
 const app = getCurrentInstance();
 
@@ -8,6 +8,7 @@ const props = withDefaults(
   defineProps<{
     visible: boolean;
     curOrderVolume: number;
+    curOrderType: InstrumentTypeEnum;
   }>(),
   {
     visible: false,
@@ -17,6 +18,7 @@ const orderNumber = computed(() => {
   if (apartType.value === 'orderSize') {
     return Math.floor(+curOrderVolume.value / (+volume.value || 100));
   }
+
   return +curOrderVolume.value % (+volume.value || 100) == 0
     ? Math.floor(+curOrderVolume.value / (+volume.value || 100))
     : Math.floor(+curOrderVolume.value / (+volume.value || 100)) + 1;
@@ -32,16 +34,21 @@ defineEmits<{
 }>();
 
 const { modalVisible, closeModal } = useModalVisible(props.visible);
+const { curOrderType } = props
 const { curOrderVolume } = toRefs(props);
 
 const volume = ref<number>(100);
+volume.value = curOrderType === InstrumentTypeEnum.stock ? 100 : 1;
+
 const apartType = ref<string>('orderSize');
+
 function handleConfirm() {
   app &&
     app.emit('confirm', {
       volume: volume.value,
       count: orderNumber.value,
     });
+
   closeModal();
 }
 </script>
