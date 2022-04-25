@@ -47,6 +47,7 @@ import { HistoryDateEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import { getKfGlobalSettingsValue } from '@kungfu-trader/kungfu-js-api/config/globalSettings';
 import path from 'path';
 import { KUNGFU_RESOURCES_DIR } from '@kungfu-trader/kungfu-js-api/config/pathConfig';
+import sound from 'sound-play';
 
 const app = getCurrentInstance();
 const { handleBodySizeChange } = useDashboardBodySize();
@@ -89,9 +90,8 @@ const lastTradeId: {
   value: 0n,
 };
 
-const sound = require('sound-play');
-
-// const isPlaySound = getKfGlobalSettingsValue()?.trade?.sound || false
+let isPlaySound = getKfGlobalSettingsValue()?.trade?.sound || false
+const soundPath = path.join(`${path.join(KUNGFU_RESOURCES_DIR, 'music/Trade.mp3')}`)
 
 onMounted(() => {
   if (app?.proxy) {
@@ -131,13 +131,8 @@ onMounted(() => {
           !trades.value.length ||
           lastTradeId.value !== trades.value[0].trade_id
         ) {
-          const isPlaySound = getKfGlobalSettingsValue()?.trade?.sound || false;
           if (isPlaySound) {
-            sound.play(
-              path.join(
-                `${path.join(KUNGFU_RESOURCES_DIR, 'music/Trade.mp3')}`,
-              ),
-            );
+            sound.play(soundPath);
           }
           lastTradeId.value = trades.value[0].trade_id;
         }

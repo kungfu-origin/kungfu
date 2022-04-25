@@ -1,3 +1,8 @@
+import {
+  InstrumentTypeEnum,
+  OffsetEnum,
+  SideEnum,
+} from '@kungfu-trader/kungfu-js-api/typings/enums';
 import { dealOrderInputItem } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { h, VNode } from 'vue';
 import { orderInputTrans } from './config';
@@ -6,15 +11,24 @@ export function dealOrderPlaceVNode(
   makeOrderInput: KungfuApi.MakeOrderInput,
   orderCount: number,
 ): VNode {
-  const orderInput: Record<string, KungfuApi.KfTradeValueCommonData> =
+  if (makeOrderInput.instrument_type == InstrumentTypeEnum.stock) {
+    if (makeOrderInput.side == SideEnum.Buy) {
+      makeOrderInput.offset = OffsetEnum.Open;
+    }
+    if (makeOrderInput.side == SideEnum.Sell) {
+      makeOrderInput.offset = OffsetEnum.Close;
+    }
+  }
+
+  const orderInputResolved: Record<string, KungfuApi.KfTradeValueCommonData> =
     dealOrderInputItem(makeOrderInput);
 
-  const vnode = Object.keys(orderInput)
+  const vnode = Object.keys(orderInputResolved)
     .filter((key) => {
-      if (orderInput[key].name.toString() === '[object Object]') {
+      if (orderInputResolved[key].name.toString() === '[object Object]') {
         return false;
       }
-      return orderInput[key].name !== '';
+      return orderInputResolved[key].name !== '';
     })
     .map((key) =>
       h('div', { class: 'trading-data-detail-row' }, [
@@ -22,10 +36,10 @@ export function dealOrderPlaceVNode(
         h(
           'span',
           {
-            class: `value ${orderInput[key].color}`,
-            style: { color: `${orderInput[key].color}` },
+            class: `value ${orderInputResolved[key].color}`,
+            style: { color: `${orderInputResolved[key].color}` },
           },
-          `${orderInput[key].name}`,
+          `${orderInputResolved[key].name}`,
         ),
       ]),
     );

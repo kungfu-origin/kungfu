@@ -302,6 +302,7 @@ async function handleApartOrder(): Promise<void> {
 
     await showCloseModal(makeOrderInput);
     isShowConfirmModal.value = true;
+
     dealGlobalData(makeOrderInput);
   } catch (error) {
     message.error(error.message);
@@ -441,8 +442,8 @@ async function handleMakeOrder(): Promise<void> {
 
     await showCloseModal(makeOrderInput);
     await confirmFatFingerModal(makeOrderInput);
-    const tdProcessId = await confirmOrderPlace(makeOrderInput);
 
+    const tdProcessId = await confirmOrderPlace(makeOrderInput);
     if (currentGlobalKfLocation.value) {
       await placeOrder(
         makeOrderInput,
