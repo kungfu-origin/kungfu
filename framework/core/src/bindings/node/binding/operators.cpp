@@ -86,10 +86,6 @@ void JsResetCache::operator()(const state<CacheReset>& state) {
         auto value = table.Get(name).ToObject();
         auto source_id = value.Get("source").ToNumber().Uint32Value();
         auto dest_id = value.Get("dest").ToNumber().Uint32Value();
-          app_.get_location_uname(source_id), 
-          app_.get_location_uname(dest_id), 
-          value.Get("instrument_id").ToString().Utf8Value(), 
-          value.Get("volume").ToString().Utf8Value());
         if ((source_id == source and dest_id == dest) or source_id == dest) {
           delete_keys.push_back(name);
         }
