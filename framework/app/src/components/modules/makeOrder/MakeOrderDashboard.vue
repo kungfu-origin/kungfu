@@ -2,7 +2,6 @@
 import {
   computed,
   getCurrentInstance,
-  h,
   nextTick,
   onBeforeUnmount,
   onMounted,
@@ -65,6 +64,8 @@ const {
   getCurrentGlobalKfLocationId,
 } = useCurrentGlobalKfLocation(window.watcher);
 
+const { getExtraCategoryData } = useExtraCategory();
+
 const makeOrderInstrumentType = ref<InstrumentTypeEnum>(
   InstrumentTypeEnum.unknown,
 );
@@ -118,8 +119,6 @@ const makeOrderData = computed(() => {
   };
   return makeOrderInput;
 });
-
-const { getExtraCategoryData } = useExtraCategory();
 
 const curPositionList = ref<KungfuApi.Position[]>();
 
@@ -280,7 +279,7 @@ function dealGlobalData(makeOrderInput: KungfuApi.MakeOrderInput): void {
   curOrderType.value = makeOrderInput.instrument_type;
 }
 
-function handleResetMakeOrderForm() {
+function handleResetMakeOrderForm(): void {
   const initFormState = initFormStateByConfig(configSettings.value, {});
 
   Object.keys(initFormState).forEach((key) => {
@@ -387,21 +386,17 @@ async function confirmOrderPlace(
   makeOrderInput: KungfuApi.MakeOrderInput,
   orderCount: number = 1,
 ): Promise<string> {
-  const { account_id } = formState.value;
-
   await confirmModal(
     '下单确认',
-    h(
-      'div',
-      { class: 'modal-node' },
-      dealOrderPlaceVNode(makeOrderInput, orderCount),
-    ),
+    dealOrderPlaceVNode(makeOrderInput, orderCount),
   );
+
   if (!currentGlobalKfLocation.value || !window.watcher) {
     message.error('当前 Location 错误');
     return Promise.reject('当前 Location 错误');
   }
 
+  const { account_id } = formState.value;
   const tdProcessId =
     currentGlobalKfLocation.value?.category === 'td'
       ? getProcessIdByKfLocation(currentGlobalKfLocation.value)

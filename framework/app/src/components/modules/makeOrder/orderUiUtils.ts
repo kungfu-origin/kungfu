@@ -59,6 +59,7 @@ export function dealOrderPlaceVNode(
       ),
     ]),
   ]);
+  const rootBox: VNode = h('div', { class: 'modal-node' }, rootVNode);
 
-  return rootVNode;
+  return rootBox;
 }

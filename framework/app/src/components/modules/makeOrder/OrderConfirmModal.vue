@@ -35,16 +35,15 @@ volume.value = curOrderType === InstrumentTypeEnum.stock ? 100 : 1;
 
 function handleConfirm() {
   const remainder: number = curOrderVolume.value % +volume.value; // 剩余数量
-
   const volumeList: number[] = new Array(+orderNumber.value).fill(
     +volume.value,
   );
+
   if (remainder !== 0) {
     volumeList.push(remainder);
   }
 
   app && app.emit('confirm', volumeList);
-
   closeModal();
 }
 </script>
