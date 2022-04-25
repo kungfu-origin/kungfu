@@ -15,20 +15,13 @@ const props = withDefaults(
   },
 );
 const orderNumber = computed(() => {
-  if (apartType.value === 'orderSize') {
-    return Math.floor(+curOrderVolume.value / (+volume.value || 100));
-  }
-
-  return +curOrderVolume.value % (+volume.value || 100) == 0
+  return volume.value
     ? Math.floor(+curOrderVolume.value / (+volume.value || 100))
-    : Math.floor(+curOrderVolume.value / (+volume.value || 100)) + 1;
+    : '--';
 });
 
 defineEmits<{
-  (
-    e: 'confirm',
-    { volume, count }: { volume: number; count: number },
-  ): Promise<void>;
+  (e: 'confirm', volumeList: number[]): Promise<void>;
   (e: 'update:visible', visible: boolean): void;
   (e: 'close'): void;
 }>();
@@ -40,14 +33,17 @@ const { curOrderVolume } = toRefs(props);
 const volume = ref<number>(100);
 volume.value = curOrderType === InstrumentTypeEnum.stock ? 100 : 1;
 
-const apartType = ref<string>('orderSize');
-
 function handleConfirm() {
-  app &&
-    app.emit('confirm', {
-      volume: volume.value,
-      count: orderNumber.value,
-    });
+  const remainder: number = curOrderVolume.value % +volume.value; // 剩余数量
+
+  const volumeList: number[] = new Array(+orderNumber.value).fill(
+    +volume.value,
+  );
+  if (remainder !== 0) {
+    volumeList.push(remainder);
+  }
+
+  app && app.emit('confirm', volumeList);
 
   closeModal();
 }
@@ -66,20 +62,13 @@ function handleConfirm() {
     <a-row class="apart-input">
       <a-col>
         <a-statistic :value="curOrderVolume" title="总下单量" />
-        <a-input-group compact style="margin-top: 10px">
-          <a-select v-model:value="apartType">
-            <a-select-option value="orderSize">每次下单量</a-select-option>
-            <a-select-option value="orderCount">下单次数</a-select-option>
-          </a-select>
+        <a-input-group compact style="margin-top: 10px" class="input-content">
+          <span>{{ '每次下单量: ' }}</span>
           <a-input-number
             :precision="0"
             step="1"
             v-model:value="volume"
-            :max="
-              apartType === 'orderSize'
-                ? curOrderVolume
-                : Math.ceil(+curOrderVolume / +orderNumber)
-            "
+            :max="curOrderVolume"
             :min="1"
           ></a-input-number>
         </a-input-group>
@@ -89,7 +78,7 @@ function handleConfirm() {
           class="apart-result-statistic"
           :value="curOrderVolume % volume === 0 ? orderNumber : orderNumber + 1"
           :valueStyle="{ fontSize: '35px' }"
-          :title="apartType === 'orderSize' ? '下单次数' : '每次下单量'"
+          title="下单次数"
         />
       </a-col>
     </a-row>
@@ -100,6 +89,12 @@ function handleConfirm() {
   .apart-result {
     text-align: center;
     margin: auto;
+  }
+  .input-content {
+    span {
+      line-height: 32px;
+      margin-right: 10px !important;
+    }
   }
 }
 </style>

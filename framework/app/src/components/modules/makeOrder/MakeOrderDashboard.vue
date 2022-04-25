@@ -249,16 +249,12 @@ function placeOrder(
 }
 
 function initOrderInputData(): Promise<KungfuApi.MakeOrderInput> {
-  const instrument = formState.value.instrument.toString();
-  const instrumnetResolved =
-    transformSearchInstrumentResultToInstrument(instrument);
-
-  if (!instrumnetResolved) {
+  if (!instrumentResolve.value) {
     message.error('标的错误');
     return Promise.reject(new Error('标的错误'));
   }
 
-  const { exchangeId, instrumentId, instrumentType } = instrumnetResolved;
+  const { exchangeId, instrumentId, instrumentType } = instrumentResolve.value;
 
   const { limit_price, volume, price_type, side, offset, hedge_flag } =
     formState.value;
@@ -312,21 +308,7 @@ async function handleApartOrder(): Promise<void> {
 }
 
 // 拆单弹窗确认回调
-async function handleApartedConfirm({
-  volume,
-  count,
-}: {
-  volume: number;
-  count: number;
-}): Promise<void> {
-  const remainder: number = curOrderVolume.value % +volume; // 剩余数量
-  const realCount: number = remainder === 0 ? count : count + 1;
-
-  const apartVolumeList: number[] = new Array(count).fill(+volume);
-  if (remainder !== 0) {
-    apartVolumeList.push(remainder);
-  }
-
+async function handleApartedConfirm(volumeList: number[]): Promise<void> {
   const account_id = formState.value.account_id;
 
   const tdProcessId =
@@ -338,11 +320,11 @@ async function handleApartedConfirm({
     return;
   }
 
-  await confirmOrderPlace(makeOrderData.value, realCount);
+  await confirmOrderPlace(makeOrderData.value, volumeList.length);
 
   const apartOrderInput: KungfuApi.MakeOrderInput = makeOrderData.value;
   Promise.all(
-    apartVolumeList.map((volume) => {
+    volumeList.map((volume) => {
       apartOrderInput.volume = volume;
       return placeOrder(
         apartOrderInput as KungfuApi.MakeOrderInput,
@@ -368,18 +350,14 @@ function confirmFatFingerModal(
 function dealFatFingerMessage(
   makeOrderInput: KungfuApi.MakeOrderInput,
 ): string {
-  const instrument = formState.value.instrument.toString();
-  const instrumnetResolved =
-    transformSearchInstrumentResultToInstrument(instrument);
-
-  if (!instrumnetResolved) {
+  if (!instrumentResolve.value) {
     message.error('标的错误');
     return '';
   }
 
   const fatFingerRange = +getKfGlobalSettingsValue()?.trade?.fatFinger || 0;
 
-  const { exchangeId, instrumentId } = instrumnetResolved;
+  const { exchangeId, instrumentId } = instrumentResolve.value;
   const ukey = hashInstrumentUKey(instrumentId, exchangeId);
 
   const { limit_price: price, side } = makeOrderInput;
