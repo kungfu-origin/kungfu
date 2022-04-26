@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useModalVisible } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import { InstrumentTypeEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';
+import { message } from 'ant-design-vue';
 import { ref, toRefs, computed, getCurrentInstance } from 'vue';
 const app = getCurrentInstance();
 
@@ -34,6 +35,10 @@ const volume = ref<number>(100);
 volume.value = curOrderType === InstrumentTypeEnum.stock ? 100 : 1;
 
 function handleConfirm() {
+  if (volume.value === null) {
+    message.error('下单量不可为空');
+    return;
+  }
   const remainder: number = curOrderVolume.value % +volume.value; // 剩余数量
   const volumeList: number[] = new Array(+orderNumber.value).fill(
     +volume.value,
@@ -64,6 +69,7 @@ function handleConfirm() {
         <a-input-group compact style="margin-top: 10px" class="input-content">
           <span>{{ '每次下单量: ' }}</span>
           <a-input-number
+            class="input-number"
             :precision="0"
             step="1"
             v-model:value="volume"
@@ -75,7 +81,13 @@ function handleConfirm() {
       <a-col class="apart-result">
         <a-statistic
           class="apart-result-statistic"
-          :value="curOrderVolume % volume === 0 ? orderNumber : orderNumber + 1"
+          :value="
+            volume
+              ? curOrderVolume % volume === 0
+                ? orderNumber
+                : orderNumber + 1
+              : '--'
+          "
           :valueStyle="{ fontSize: '35px' }"
           title="下单次数"
         />
@@ -89,10 +101,12 @@ function handleConfirm() {
     text-align: center;
     margin: auto;
   }
+  .input-number {
+    margin-left: 10px;
+  }
   .input-content {
     span {
       line-height: 32px;
-      margin-right: 10px !important;
     }
   }
 }
