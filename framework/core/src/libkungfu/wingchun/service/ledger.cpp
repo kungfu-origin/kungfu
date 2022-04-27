@@ -30,10 +30,8 @@ void Ledger::on_trading_day(const event_ptr &event, int64_t daytime) {
 
 book::Bookkeeper &Ledger::get_bookkeeper() { return bookkeeper_; }
 
-void Ledger::on_start() {
+void Ledger::on_start() {  
   broker_client_.on_start(events_);
-  events_ | is(KeepPositionsRequest::tag) | $$(keep_positions(event->gen_time(), event->source()));
-  
   bookkeeper_.on_start(events_);
   bookkeeper_.guard_positions();
 
@@ -41,6 +39,7 @@ void Ledger::on_start() {
   events_ | is(Order::tag) | $$(update_order_stat(event, event->data<Order>()));
   events_ | is(Trade::tag) | $$(update_order_stat(event, event->data<Trade>()));
   events_ | is(Channel::tag) | $$(inspect_channel(event->gen_time(), event->data<Channel>()));
+  events_ | is(KeepPositionsRequest::tag) | $$(keep_positions(event->gen_time(), event->source()));
   events_ | is(RebuildPositionsRequest::tag) | $$(rebuild_positions(event->gen_time(), event->source()));
   events_ | is(MirrorPositionsRequest::tag) | $$(mirror_positions(event->gen_time(), event->source()));
   events_ | is(AssetRequest::tag) | $$(write_book_reset(event->gen_time(), event->source()));
@@ -257,8 +256,8 @@ void Ledger::write_book_reset(int64_t trigger_time, uint32_t book_uid) {
 void Ledger::write_strategy_data(int64_t trigger_time, uint32_t strategy_uid) {
   auto strategy_book = bookkeeper_.get_book(strategy_uid);
   auto writer = get_writer(strategy_uid);
-  writer->open_data<CacheReset>(trigger_time).msg_type = Position::tag;
-  writer->close_data();
+  // writer->open_data<CacheReset>(trigger_time).msg_type = Position::tag;
+  // writer->close_data();
   for (const auto &pair : bookkeeper_.get_books()) {
     auto &book = pair.second;
     auto &asset = book->asset;

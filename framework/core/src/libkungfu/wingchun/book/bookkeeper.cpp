@@ -184,11 +184,17 @@ void Bookkeeper::try_update_asset(const Asset &asset) {
 }
 
 void Bookkeeper::try_update_position(const Position &position) {
+
+  SPDLOG_INFO("4444444444444444444444444 holder_uid {} {}", position.holder_uid, app_.get_location_uname(position.holder_uid));
+
   if (not app_.has_location(position.holder_uid)) {
     return;
   }
   auto book = get_book(position.holder_uid);
   auto &target_position = book->get_position_for(position.direction, position);
+
+  SPDLOG_INFO("positions_guarded_ {}, target_position.update_time {}, new_position.update_time {}, is newer {}", positions_guarded_, target_position.update_time, position.update_time, target_position.update_time > position.update_time);
+
   if (positions_guarded_ and target_position.update_time >= position.update_time) {
     return;
   }
@@ -196,9 +202,13 @@ void Bookkeeper::try_update_position(const Position &position) {
   target_position = position;
   target_position.last_price = std::max(last_price, target_position.last_price);
   if (accounting_methods_.find(target_position.instrument_type) == accounting_methods_.end()) {
+
+    SPDLOG_INFO("55555555");
     return;
   }
+  SPDLOG_INFO("66666666");
   accounting_methods_.at(target_position.instrument_type)->update_position(book, target_position);
+  SPDLOG_INFO("77777777");
 }
 
 void Bookkeeper::try_sync_book_replica(uint32_t location_uid) {
