@@ -299,7 +299,7 @@ async function handleApartOrder(): Promise<void> {
     curOrderVolume.value = Number(makeOrderInput.volume);
     curOrderType.value = makeOrderInput.instrument_type;
   } catch (e) {
-    message.error(e.message);
+    message.error(e);
   }
 }
 
@@ -325,7 +325,7 @@ async function handleApartedConfirm(volumeList: number[]): Promise<void> {
       }),
     );
   } catch (e) {
-    message.error(e.message);
+    message.error(e);
   }
 }
 
@@ -354,7 +354,7 @@ function dealFatFingerMessage(
   const ukey = hashInstrumentUKey(instrumentId, exchangeId);
 
   const { limit_price: price, side } = makeOrderInput;
-  const lastPrice = window.watcher.ledger.Quote[ukey].last_price;
+  const lastPrice = window.watcher.ledger.Quote[ukey]?.last_price;
 
   const fatFingerBuyRate =
     fatFingerRange === 0 ? 100 : (100 + fatFingerRange) / 100;
@@ -380,11 +380,6 @@ async function confirmOrderPlace(
   makeOrderInput: KungfuApi.MakeOrderInput,
   orderCount: number = 1,
 ): Promise<string> {
-  await confirmModal(
-    '下单确认',
-    dealOrderPlaceVNode(makeOrderInput, orderCount),
-  );
-
   if (!currentGlobalKfLocation.value || !window.watcher) {
     return Promise.reject('当前 Location 错误');
   }
@@ -396,9 +391,13 @@ async function confirmOrderPlace(
       : `td_${account_id.toString()}`;
 
   if (processStatusData.value[tdProcessId] !== 'online') {
-    message.error(`请先启动 ${tdProcessId} 交易进程`);
-    return Promise.reject('请先启动交易进程');
+    return Promise.reject(`请先启动${tdProcessId}交易进程`);
   }
+
+  await confirmModal(
+    '下单确认',
+    dealOrderPlaceVNode(makeOrderInput, orderCount),
+  );
 
   return Promise.resolve(tdProcessId);
 }
@@ -421,7 +420,7 @@ async function handleMakeOrder(): Promise<void> {
       tdProcessId,
     );
   } catch (e) {
-    message.error(e.message);
+    message.error(e);
   }
 }
 
