@@ -46,7 +46,7 @@ const { extConfigs } = useExtConfigsRelated();
 const { dashboardBodyHeight, handleBodySizeChange } = useDashboardBodySize();
 const { processStatusData, processStatusDetailData } =
   useProcessStatusDetailData();
-  
+
 const setExtensionModalVisible = ref<boolean>(false);
 const setTaskModalVisible = ref<boolean>(false);
 const currentSelectedExtKey = ref<string>('');
@@ -79,7 +79,8 @@ const taskList = computed(() => {
 const { searchKeyword, tableData } =
   useTableSearchKeyword<Pm2ProcessStatusDetail>(taskList, ['name', 'args']);
 
-const { dealRowClassName, setCurrentGlobalKfLocation } = useCurrentGlobalKfLocation(window.watcher)
+const { dealRowClassName, setCurrentGlobalKfLocation } =
+  useCurrentGlobalKfLocation(window.watcher);
 
 const app = getCurrentInstance();
 
@@ -313,14 +314,15 @@ function getDataByArgs(taskArgs: string): Record<string, string> {
   }, {} as Record<string, string>);
 }
 
-function customRowResolved(record) {
-  const tasklocation = getTaskKfLocationByProcessId(record?.name || {})
-  const locationResolved: KungfuApi.KfExtraLocation = {
-    category: tradeRegisterConfig.name,
-    group: tasklocation?.group || '',
-    name: tasklocation?.name || '',
-    mode: 'LIVE',
-  };
+function customRowResolved(record: Pm2ProcessStatusDetail) {
+  const taskLocation = getTaskKfLocationByProcessId(record?.name || '');
+  if (!taskLocation) {
+    message.error(`${record.name} 不是合法交易任务进程ID`);
+    return;
+  }
+  const locationResolved: KungfuApi.KfExtraLocation =
+    hendleRowRecord(taskLocation);
+    
   return {
     onClick: () => {
       setCurrentGlobalKfLocation(locationResolved);
@@ -328,15 +330,28 @@ function customRowResolved(record) {
   };
 }
 
-function dealRowClassNameResolved(record: KungfuApi.Position) {
-  const locationResolved: KungfuApi.KfExtraLocation = {
-    category: tradeRegisterConfig.name,
-    group: record.exchange_id,
-    name: record.instrument_id,
-    mode: 'LIVE',
-  };
+function dealRowClassNameResolved(record: Pm2ProcessStatusDetail) {
+  const taskLocation = getTaskKfLocationByProcessId(record?.name || '');
+  if (!taskLocation) {
+    message.error(`${record.name} 不是合法交易任务进程ID`);
+    return;
+  }
+  const locationResolved: KungfuApi.KfExtraLocation =
+    hendleRowRecord(taskLocation);
 
   return dealRowClassName(locationResolved);
+}
+
+function hendleRowRecord(
+  taskLocation: KungfuApi.KfLocation,
+): KungfuApi.KfExtraLocation {
+  const locationResolved: KungfuApi.KfExtraLocation = {
+    category: tradeRegisterConfig.name,
+    group: taskLocation?.group || '',
+    name: taskLocation?.name || '',
+    mode: 'LIVE',
+  };
+  return locationResolved;
 }
 
 onMounted(() => {
@@ -344,7 +359,6 @@ onMounted(() => {
     app.proxy.$globalCategoryRegister.register(tradeRegisterConfig);
   }
 });
-
 </script>
 
 <template>
