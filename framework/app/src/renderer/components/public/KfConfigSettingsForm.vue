@@ -241,6 +241,10 @@ function noZeroValidator(_rule: RuleObject, value: number): Promise<void> {
     return Promise.reject(new Error(`请输入非零数字`));
   }
 
+  if (+value < 0) {
+    return Promise.reject(new Error(`请输入非负数`));
+  }
+
   return Promise.resolve();
 }
 

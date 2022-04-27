@@ -171,17 +171,9 @@ private:
       if (source == yijinjing::data::location::PUBLIC) {
         return;
       }
-
-      SPDLOG_INFO("UpdateBook ~~~~~~~~~~~ type {} {} {} -> {} {}", data.type_name.c_str(), event->source(),
-                  get_location_uname(event->source()), event->dest(), get_location_uname(event->dest()));
-
       auto location = get_location(source);
       auto book = bookkeeper_.get_book(source);
       auto &position = book->get_position_for(data);
-
-      SPDLOG_INFO("0000 position {} {} {} {}", position.holder_uid, get_location_uname(position.holder_uid),
-                  position.instrument_id, position.volume);
-
       state<kungfu::longfist::types::Position> cache_state_position(source, dest, event->gen_time(), position);
       feed_state_data_bank(cache_state_position, data_bank_);
       state<kungfu::longfist::types::Asset> cache_state_asset(source, dest, event->gen_time(), book->asset);
@@ -215,23 +207,7 @@ private:
     return instruction.*id_ptr;
   }
 
-  template <typename DataType>
-  std::enable_if_t<std::is_same_v<DataType, longfist::types::Position>>
-  UpdateLedger(const boost::hana::basic_type<DataType> &type) {
-    for (auto &pair : data_bank_[type]) {
-      auto &state = pair.second;
-      if (state.data.holder_uid == uint32_t(1917333297)) {
-        SPDLOG_INFO("UpdateLedger {} {} -> {} {} type {} data {} {} {} ", state.source,
-                    get_location_uname(state.source), state.dest, get_location_uname(state.dest),
-                    state.data.type_name.c_str(), state.data.instrument_id, state.data.volume, state.data.update_time);
-      }
-      update_ledger(state.update_time, state.source, state.dest, state.data);
-    }
-  }
-
-  template <typename DataType>
-  std::enable_if_t<not std::is_same_v<DataType, longfist::types::Position>>
-  UpdateLedger(const boost::hana::basic_type<DataType> &type) {
+  template <typename DataType> void UpdateLedger(const boost::hana::basic_type<DataType> &type) {
     for (auto &pair : data_bank_[type]) {
       auto &state = pair.second;
       update_ledger(state.update_time, state.source, state.dest, state.data);
@@ -239,19 +215,11 @@ private:
   }
 
   template <typename DataType> void UpdateOrder(const boost::hana::basic_type<DataType> &type) {
-    SPDLOG_INFO("000000000 UpdateOrder");
-
     auto &order_queue = trading_bank_[type];
     int i = 0;
     kungfu::state<DataType> *pstate = nullptr;
-    while (i < 1024) {
-      if (order_queue.pop(pstate)) {
-        SPDLOG_INFO("000011111 is null {}", pstate == nullptr);
-        if (pstate != nullptr) {
-          SPDLOG_INFO("i {}, type {}, data {} ", i, DataType::type_name.c_str(), pstate->data.to_string());
-          update_ledger(pstate->update_time, pstate->source, pstate->dest, pstate->data);
-        }
-      }
+    while (i < 1024 && order_queue.pop(pstate) && pstate != nullptr) {
+      update_ledger(pstate->update_time, pstate->source, pstate->dest, pstate->data);
       i++;
     }
   }

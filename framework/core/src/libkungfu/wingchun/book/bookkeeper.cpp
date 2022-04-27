@@ -193,7 +193,7 @@ void Bookkeeper::try_update_position(const Position &position) {
   auto book = get_book(position.holder_uid);
   auto &target_position = book->get_position_for(position.direction, position);
 
-  SPDLOG_INFO("positions_guarded_ {}, target_position.update_time {}, new_position.update_time {}, is newer {}", positions_guarded_, target_position.update_time, position.update_time, target_position.update_time > position.update_time);
+  SPDLOG_INFO("positions_guarded_ {}, target_position.update_time {} {} {} |||| new_position.update_time {} {} {}, is newer {}", positions_guarded_, target_position.update_time, target_position.instrument_id, target_position.volume, position.update_time, position.instrument_id, position.volume, target_position.update_time <= position.update_time);
 
   if (positions_guarded_ and target_position.update_time >= position.update_time) {
     return;

@@ -279,7 +279,7 @@ void Watcher::Init(Napi::Env env, Napi::Object exports) {
 }
 
 void Watcher::on_react() {
-  events_ | bypass(this, bypass_quotes_) | $([&](const event_ptr& event) { SPDLOG_INFO("////////////////"); Feed(event); });
+  events_ | take_until(events_ | is(RequestStart::tag)) | bypass(this, bypass_quotes_) | $$(Feed(event));
 }
 
 void Watcher::on_start() {
@@ -288,7 +288,6 @@ void Watcher::on_start() {
   bookkeeper_.guard_positions();
   bookkeeper_.add_book_listener(std::shared_ptr<Watcher>(this));
 
-  // events_ | bypass(this, bypass_quotes_) | $$(Feed(event));
   events_ | is(OrderInput::tag) | $$(UpdateBook(event, event->data<OrderInput>()));
   events_ | is(Order::tag) | $$(UpdateBook(event, event->data<Order>()));
   events_ | is(Trade::tag) | $$(UpdateBook(event, event->data<Trade>()));
@@ -299,6 +298,7 @@ void Watcher::on_start() {
   events_ | is(Deregister::tag) | $$(OnDeregister(event->gen_time(), event->data<Deregister>()));
   events_ | is(BrokerStateUpdate::tag) | $$(UpdateBrokerState(event->source(), event->data<BrokerStateUpdate>()));
   events_ | is(CacheReset::tag) | $$(UpdateEventCache(event));
+  events_ | bypass(this, bypass_quotes_) | $$(Feed(event));
 }
 
 void Watcher::Feed(const event_ptr &event) {
@@ -306,7 +306,7 @@ void Watcher::Feed(const event_ptr &event) {
     auto quote = event->data<Quote>();
     auto uid = quote.uid();
     if (subscribed_instruments_.find(uid) != subscribed_instruments_.end()) {
-      bookkeeper_.update_book(quote);
+      bookkeeper_.update_book(event, quote);
       UpdateBook(event->gen_time(), event->source(), event->dest(), quote);
       data_bank_ << typed_event_ptr<Quote>(event);
     }
@@ -315,11 +315,7 @@ void Watcher::Feed(const event_ptr &event) {
     boost::hana::for_each(longfist::TradingDataTypes, [&](auto it) {
       using DataType = typename decltype(+boost::hana::second(it))::type;
       if (DataType::tag == event->msg_type()) {
-
-        SPDLOG_INFO("Feed >>>>> type {} data {} before size {}", DataType::type_name.c_str(), event->data<DataType>().to_string(), trading_bank_[boost::hana::type_c<DataType>].size());
         trading_bank_ << typed_event_ptr<DataType>(event);
-        SPDLOG_INFO("Feed >>>> type {} data {} after size {}", DataType::type_name.c_str(), event->data<DataType>().to_string(), trading_bank_[boost::hana::type_c<DataType>].size());
-        
         is_order = true;
       }
     });
@@ -373,9 +369,7 @@ void Watcher::SyncLedger() {
 
 void Watcher::SyncOrder() {
   boost::hana::for_each(longfist::TradingDataTypes, [&](auto it) {
-    // SPDLOG_INFO("SyncOrder 1");
     UpdateOrder(+boost::hana::second(it));
-    // SPDLOG_INFO("SyncOrder 2");
   });
 }
 
@@ -397,7 +391,6 @@ void Watcher::SyncEventCache() {
 
 void Watcher::UpdateEventCache(const event_ptr& event) {
   const auto &request = event->data<CacheReset>();
-  SPDLOG_INFO("UpdateEventCache ================ {}", request.msg_type);
   boost::hana::for_each(StateDataTypes, [&](auto it) {
     using DataType = typename decltype(+boost::hana::second(it))::type;
     if (DataType::tag == request.msg_type) {
@@ -492,9 +485,6 @@ void Watcher::UpdateBrokerState(uint32_t broker_uid, const BrokerStateUpdate &st
 }
 
 void Watcher::UpdateAsset(const event_ptr &event, uint32_t book_uid) {
-
-  SPDLOG_INFO("PositionEnd --------- book_uid {} uname {}", book_uid, get_location_uname(book_uid));
-
   auto book = bookkeeper_.get_book(book_uid);
   book->update(event->gen_time());
   state<Asset> cache_state(ledger_home_location_->uid, book_uid, event->gen_time(), book->asset);
@@ -559,8 +549,6 @@ void Watcher::UpdateBook(int64_t update_time, uint32_t source_id, uint32_t dest_
 void Watcher::UpdateBook(const event_ptr &event, const Position &position) {
   auto book = bookkeeper_.get_book(position.holder_uid);
   auto &book_position = book->get_position_for(position.direction, position);
-
-  SPDLOG_INFO("UpdateBook-position 1111 holder_uid {} {} {} {} |||| book_position {} {} ", position.holder_uid, get_location_uname(position.holder_uid), position.instrument_id, position.volume, book_position.instrument_id, book_position.volume);
   state<Position> cache_state(position.holder_uid, event->dest(), event->gen_time(), book_position);
   feed_state_data_bank(cache_state, data_bank_);
 }
@@ -569,8 +557,6 @@ void Watcher::UpdateBook(int64_t update_time, uint32_t source_id, uint32_t dest_
                          const longfist::types::Position &position) {
   auto book = bookkeeper_.get_book(position.holder_uid);
   auto &book_position = book->get_position_for(position.direction, position);
-
-  SPDLOG_INFO("UpdateBook-position 2222 holder_uid {} {} {} {} |||| book_position {} {} ", position.holder_uid, get_location_uname(position.holder_uid), position.instrument_id, position.volume, book_position.instrument_id, book_position.volume);
   state<Position> cache_state(position.holder_uid, dest_id, update_time, book_position);
   feed_state_data_bank(cache_state, data_bank_);
 }

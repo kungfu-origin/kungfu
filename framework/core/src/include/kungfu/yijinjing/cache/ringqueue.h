@@ -158,7 +158,7 @@ public:
     return true;
   }
 
-  bool pop(T *result) {
+  bool pop(T *&result) {
     T *node;
     result = nullptr;
     size_t head = head_.load(std::memory_order_relaxed);
