@@ -54,8 +54,6 @@ public:
 
   void update_book(const event_ptr &event, const longfist::types::Quote &quote);
 
-  void update_book(const longfist::types::Quote &quote);
-
   void add_book_listener(const BookListener_ptr &book_listener);
 
   template <typename TradingData, typename ApplyMethod = void (AccountingMethod::*)(Book_ptr, const TradingData &)>

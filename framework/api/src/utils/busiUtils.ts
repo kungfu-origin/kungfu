@@ -321,7 +321,7 @@ export const findTargetFromArray = <T>(
   const targetList = list.filter(
     (item) => (item || {})[targetKey] === targetValue,
   );
-  if (targetList) {
+  if (targetList && targetList.length) {
     return targetList[0];
   }
   return null;
@@ -1544,4 +1544,35 @@ export const removeNoDefaultStrategyFolders = async (): Promise<void> => {
     }
     return fse.remove(fullPath);
   });
+};
+
+// 处理下单时输入数据
+export const dealOrderInputItem = (
+  inputData: KungfuApi.MakeOrderInput,
+): Record<string, KungfuApi.KfTradeValueCommonData> => {
+  const orderInputResolved: Record<string, KungfuApi.KfTradeValueCommonData> =
+    {};
+  for (let key in inputData) {
+    if (key === 'instrument_type') {
+      orderInputResolved[key] = dealInstrumentType(inputData.instrument_type);
+    } else if (key === 'price_type') {
+      orderInputResolved[key] = dealPriceType(inputData.price_type);
+    } else if (key === 'side') {
+      orderInputResolved[key] = dealSide(inputData.side);
+    } else if (key === 'offset') {
+      orderInputResolved[key] = dealOffset(inputData.offset);
+    } else if (key === 'hedge_flag') {
+      orderInputResolved[key] = dealHedgeFlag(inputData.hedge_flag);
+    } else if (key === 'hedge_flag') {
+      orderInputResolved[key] = dealHedgeFlag(inputData.hedge_flag);
+    } else if (key === 'parent_id') {
+      break;
+    } else {
+      orderInputResolved[key] = {
+        name: inputData[key],
+        color: 'default',
+      };
+    }
+  }
+  return orderInputResolved;
 };

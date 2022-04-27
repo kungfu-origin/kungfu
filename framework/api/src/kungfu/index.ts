@@ -277,6 +277,10 @@ export const kfCancelOrder = (
     order_id,
   };
 
+  if (!destLocation) {
+    return Promise.resolve(watcher.cancelOrder(orderAction, sourceLocation));
+  }
+
   return Promise.resolve(
     watcher.cancelOrder(orderAction, sourceLocation, destLocation),
   );
