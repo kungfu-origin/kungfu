@@ -107,7 +107,7 @@ public:
   explicit ringqueue(size_t capacity) {
     capacityMask_ = capacity - 1;
     for (size_t i = 1; i <= sizeof(void *) * 4; i <<= 1) {
-      capacityMask_ |= capacityMask_ >> i                                          ;
+      capacityMask_ |= capacityMask_ >> i;
     }
     capacity_ = capacityMask_ + 1;
     queue_ = (T *)new char[sizeof(T) * capacity_];
@@ -180,7 +180,7 @@ private:
   size_t capacityMask_;
   T *queue_;
   T *pop_value_;
-  size_t capacity_ ;
+  size_t capacity_;
   std::atomic<size_t> tail_;
   std::atomic<size_t> head_;
 };

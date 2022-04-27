@@ -30,7 +30,7 @@ void Ledger::on_trading_day(const event_ptr &event, int64_t daytime) {
 
 book::Bookkeeper &Ledger::get_bookkeeper() { return bookkeeper_; }
 
-void Ledger::on_start() {  
+void Ledger::on_start() {
   broker_client_.on_start(events_);
   bookkeeper_.on_start(events_);
   bookkeeper_.guard_positions();

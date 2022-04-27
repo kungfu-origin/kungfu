@@ -288,6 +288,7 @@ void Watcher::on_start() {
   bookkeeper_.guard_positions();
   bookkeeper_.add_book_listener(std::shared_ptr<Watcher>(this));
 
+  events_ | bypass(this, bypass_quotes_) | $$(Feed(event));
   events_ | is(OrderInput::tag) | $$(UpdateBook(event, event->data<OrderInput>()));
   events_ | is(Order::tag) | $$(UpdateBook(event, event->data<Order>()));
   events_ | is(Trade::tag) | $$(UpdateBook(event, event->data<Trade>()));
@@ -298,7 +299,6 @@ void Watcher::on_start() {
   events_ | is(Deregister::tag) | $$(OnDeregister(event->gen_time(), event->data<Deregister>()));
   events_ | is(BrokerStateUpdate::tag) | $$(UpdateBrokerState(event->source(), event->data<BrokerStateUpdate>()));
   events_ | is(CacheReset::tag) | $$(UpdateEventCache(event));
-  events_ | bypass(this, bypass_quotes_) | $$(Feed(event));
 }
 
 void Watcher::Feed(const event_ptr &event) {
@@ -368,9 +368,7 @@ void Watcher::SyncLedger() {
 }
 
 void Watcher::SyncOrder() {
-  boost::hana::for_each(longfist::TradingDataTypes, [&](auto it) {
-    UpdateOrder(+boost::hana::second(it));
-  });
+  boost::hana::for_each(longfist::TradingDataTypes, [&](auto it) { UpdateOrder(+boost::hana::second(it)); });
 }
 
 void Watcher::SyncAppStatus() {
@@ -382,14 +380,14 @@ void Watcher::SyncAppStatus() {
 
 void Watcher::SyncEventCache() {
   if (reset_cache_states_.size()) {
-    for (auto& reset_state : reset_cache_states_) {
+    for (auto &reset_state : reset_cache_states_) {
       reset_cache(reset_state);
     }
     reset_cache_states_.clear();
   }
 }
 
-void Watcher::UpdateEventCache(const event_ptr& event) {
+void Watcher::UpdateEventCache(const event_ptr &event) {
   const auto &request = event->data<CacheReset>();
   boost::hana::for_each(StateDataTypes, [&](auto it) {
     using DataType = typename decltype(+boost::hana::second(it))::type;

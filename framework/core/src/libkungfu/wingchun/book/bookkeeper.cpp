@@ -154,29 +154,6 @@ void Bookkeeper::update_book(const event_ptr &event, const Quote &quote) {
   }
 }
 
-void Bookkeeper::update_book(const Quote &quote) {
-  if (accounting_methods_.find(quote.instrument_type) == accounting_methods_.end()) {
-    return;
-  }
-  auto accounting_method = accounting_methods_.at(quote.instrument_type);
-  for (auto &item : books_) {
-    auto &book = item.second;
-    auto has_long_position = book->has_long_position_for(quote);
-    auto has_short_position = book->has_short_position_for(quote);
-
-    if (has_long_position or has_short_position) {
-      accounting_method->apply_quote(book, quote);
-      book->update(app_.now());
-    }
-    if (has_long_position) {
-      book->get_position_for(Direction::Long, quote).update_time = app_.now();
-    }
-    if (has_short_position) {
-      book->get_position_for(Direction::Short, quote).update_time = app_.now();
-    }
-  }
-}
-
 void Bookkeeper::try_update_asset(const Asset &asset) {
   if (app_.has_location(asset.holder_uid)) {
     get_book(asset.holder_uid)->asset = asset;
@@ -185,7 +162,8 @@ void Bookkeeper::try_update_asset(const Asset &asset) {
 
 void Bookkeeper::try_update_position(const Position &position) {
 
-  SPDLOG_INFO("4444444444444444444444444 holder_uid {} {}", position.holder_uid, app_.get_location_uname(position.holder_uid));
+  SPDLOG_INFO("4444444444444444444444444 holder_uid {} {}", position.holder_uid,
+              app_.get_location_uname(position.holder_uid));
 
   if (not app_.has_location(position.holder_uid)) {
     return;
@@ -193,7 +171,11 @@ void Bookkeeper::try_update_position(const Position &position) {
   auto book = get_book(position.holder_uid);
   auto &target_position = book->get_position_for(position.direction, position);
 
-  SPDLOG_INFO("positions_guarded_ {}, target_position.update_time {} {} {} |||| new_position.update_time {} {} {}, is newer {}", positions_guarded_, target_position.update_time, target_position.instrument_id, target_position.volume, position.update_time, position.instrument_id, position.volume, target_position.update_time <= position.update_time);
+  SPDLOG_INFO(
+      "positions_guarded_ {}, target_position.update_time {} {} {} |||| new_position.update_time {} {} {}, is newer {}",
+      positions_guarded_, target_position.update_time, target_position.instrument_id, target_position.volume,
+      position.update_time, position.instrument_id, position.volume,
+      target_position.update_time <= position.update_time);
 
   if (positions_guarded_ and target_position.update_time >= position.update_time) {
     return;
