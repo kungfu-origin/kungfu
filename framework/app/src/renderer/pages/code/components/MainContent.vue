@@ -129,13 +129,11 @@ function handleClick(type: indent, size: indent) {
   } else {
     setting = {
       code: {
-        tabSpaceType: 'a',
-        tabSpaceSize: 'a',
+        tabSpaceType: '',
+        tabSpaceSize: '',
       },
     };
   }
-  console.log(setting);
-
   setting.code.tabSpaceType =
     handleSpaceType(type.key) || SpaceTabSettingEnum.SPACES;
   setting.code.tabSpaceSize =

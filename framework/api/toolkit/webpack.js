@@ -54,7 +54,9 @@ module.exports = {
           },
           {
             test: /\.(m?js|node)$/,
-            parser: { amd: false },
+            parser: {
+              amd: false,
+            },
             use: {
               loader: '@vercel/webpack-asset-relocator-loader',
               options: {
@@ -77,7 +79,7 @@ module.exports = {
           {
             test: /\.(mp4|webm|ogg|mp3|wav|flac|aac)(\?.*)?$/,
             use: {
-              loader: 'url-loder',
+              loader: 'url-loader',
               options: {
                 limit: 10000,
                 name: 'media/[name]--[folder].[ext]',
@@ -86,7 +88,7 @@ module.exports = {
             },
           },
           {
-            test: /\.(woff2?|eot|ttf|otf)(\?.*)?$/,
+            test: /\.(woff2?|eot|ttf|otf|mp3)(\?.*)?$/,
             use: {
               loader: 'file-loader',
               options: {
