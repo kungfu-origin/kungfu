@@ -17,9 +17,7 @@ const props = withDefaults(
   },
 );
 const orderNumber = computed(() => {
-  return volume.value
-    ? Math.floor(+curOrderVolume.value / +volume.value)
-    : 0;
+  return volume.value ? Math.floor(+curOrderVolume.value / +volume.value) : 0;
 });
 
 defineEmits<{

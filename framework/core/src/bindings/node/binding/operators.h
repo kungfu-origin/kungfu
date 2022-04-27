@@ -340,7 +340,7 @@ class JsResetCache {
 public:
   JsResetCache(yijinjing::practice::apprentice &app, Napi::ObjectReference &state);
 
-  void operator()(const state<longfist::types::CacheReset>& state);
+  void operator()(const state<longfist::types::CacheReset> &state);
 
 private:
   yijinjing::practice::apprentice &app_;

@@ -70,11 +70,11 @@ void JsPublishState::operator()(Napi::Object object) {
 
 JsResetCache::JsResetCache(apprentice &app, Napi::ObjectReference &state) : app_(app), state_(state) {}
 
-void JsResetCache::operator()(const state<CacheReset>& state) {
+void JsResetCache::operator()(const state<CacheReset> &state) {
   auto source = state.source;
   auto dest = state.dest;
   const auto &request = state.data;
-   boost::hana::for_each(StateDataTypes, [&](auto it) {
+  boost::hana::for_each(StateDataTypes, [&](auto it) {
     using DataType = typename decltype(+boost::hana::second(it))::type;
     if (DataType::tag == request.msg_type) {
       auto type_name = DataType::type_name.c_str();
