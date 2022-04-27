@@ -455,7 +455,7 @@ function closeModalConditions(
 ): boolean {
   const makeOrderInput = dealStockOffset(orderInput);
   const { offset } = makeOrderInput;
-  
+
   if (offset === OffsetEnum.Open) {
     return false;
   }
