@@ -132,7 +132,7 @@ const currentPosition = computed(() => {
       position.instrument_type === instrumentType,
   );
 
-  if (targetPositionList) {
+  if (targetPositionList && targetPositionList.length) {
     return targetPositionList[0];
   }
   return null;

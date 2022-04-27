@@ -321,7 +321,7 @@ export const findTargetFromArray = <T>(
   const targetList = list.filter(
     (item) => (item || {})[targetKey] === targetValue,
   );
-  if (targetList) {
+  if (targetList && targetList.length) {
     return targetList[0];
   }
   return null;
