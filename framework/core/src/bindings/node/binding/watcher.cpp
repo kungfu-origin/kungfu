@@ -280,7 +280,7 @@ void Watcher::Init(Napi::Env env, Napi::Object exports) {
 }
 
 void Watcher::on_react() {
-  events_ | bypass(this, bypass_quotes_) | $([&](const event_ptr &event) { feed_state_data(event, data_bank_); });
+  events_ | take_until(events_ | is(RequestStart::tag)) | bypass(this, bypass_quotes_) | $$(Feed(event));
 }
 
 void Watcher::on_start() {
