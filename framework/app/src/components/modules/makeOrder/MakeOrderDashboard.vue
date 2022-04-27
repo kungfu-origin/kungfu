@@ -255,7 +255,6 @@ function initOrderInputData(): Promise<KungfuApi.MakeOrderInput> {
   }
 
   const { exchangeId, instrumentId, instrumentType } = instrumentResolve.value;
-
   const { limit_price, volume, price_type, side, offset, hedge_flag } =
     formState.value;
 
@@ -520,7 +519,7 @@ function closeModalConditions(
       </div>
     </KfDashboard>
     <OrderConfirmModal
-      v-if="isShowConfirmModal"
+      v-if="isShowConfirmModal && curOrderType"
       v-model:visible="isShowConfirmModal"
       :curOrderVolume="curOrderVolume"
       :curOrderType="curOrderType"

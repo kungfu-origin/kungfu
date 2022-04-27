@@ -3,6 +3,7 @@ import { useModalVisible } from '@kungfu-trader/kungfu-app/src/renderer/assets/m
 import { InstrumentTypeEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import { message } from 'ant-design-vue';
 import { ref, toRefs, computed, getCurrentInstance } from 'vue';
+import { ShotableInstrumentTypes } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
 const app = getCurrentInstance();
 
 const props = withDefaults(
@@ -17,7 +18,7 @@ const props = withDefaults(
 );
 const orderNumber = computed(() => {
   return volume.value
-    ? Math.floor(+curOrderVolume.value / (+volume.value || 100))
+    ? Math.floor(+curOrderVolume.value / +volume.value)
     : '--';
 });
 
@@ -31,8 +32,17 @@ const { modalVisible, closeModal } = useModalVisible(props.visible);
 const { curOrderType } = props;
 const { curOrderVolume } = toRefs(props);
 
-const volume = ref<number>(100);
-volume.value = curOrderType === InstrumentTypeEnum.stock ? 100 : 1;
+const shotable = curOrderType
+  ? ShotableInstrumentTypes.includes(curOrderType)
+  : false;
+const defaultVolume = computed(() => {
+  if (shotable) {
+    return 1;
+  }
+  return 100;
+});
+
+const volume = ref<number>(defaultVolume.value);
 
 function handleConfirm() {
   if (volume.value === null) {
