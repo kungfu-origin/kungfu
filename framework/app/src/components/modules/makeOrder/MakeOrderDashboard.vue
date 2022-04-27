@@ -275,11 +275,6 @@ function initOrderInputData(): Promise<KungfuApi.MakeOrderInput> {
   return Promise.resolve(makeOrderInput);
 }
 
-function dealGlobalData(makeOrderInput: KungfuApi.MakeOrderInput): void {
-  curOrderVolume.value = +makeOrderInput.volume;
-  curOrderType.value = makeOrderInput.instrument_type;
-}
-
 function handleResetMakeOrderForm(): void {
   const initFormState = initFormStateByConfig(configSettings.value, {});
 
@@ -302,7 +297,8 @@ async function handleApartOrder(): Promise<void> {
     await confirmFatFingerModal(makeOrderInput);
 
     isShowConfirmModal.value = true;
-    dealGlobalData(makeOrderInput);
+    curOrderVolume.value = Number(makeOrderInput.volume);
+    curOrderType.value = makeOrderInput.instrument_type;
   } catch (e) {
     message.error(e.message);
   }
