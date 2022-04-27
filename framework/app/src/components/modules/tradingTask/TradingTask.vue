@@ -330,11 +330,11 @@ function customRowResolved(record: Pm2ProcessStatusDetail) {
   };
 }
 
-function dealRowClassNameResolved(record: Pm2ProcessStatusDetail) {
+function dealRowClassNameResolved(record: Pm2ProcessStatusDetail): string {
   const taskLocation = getTaskKfLocationByProcessId(record?.name || '');
   if (!taskLocation) {
     message.error(`${record.name} 不是合法交易任务进程ID`);
-    return;
+    return '';
   }
   const locationResolved: KungfuApi.KfExtraLocation =
     hendleRowRecord(taskLocation);
