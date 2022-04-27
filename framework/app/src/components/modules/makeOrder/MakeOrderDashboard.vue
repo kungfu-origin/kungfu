@@ -497,16 +497,15 @@ function closeModalConditions(
           ></KfConfigSettingsForm>
           <div
             class="make-order-position ant-row ant-form-item ant-form-item-has-success"
-            v-if="formState.instrument"
+            v-if="formState.instrument && currentPosition"
           >
             <div class="position-label ant-col ant-col-5 ant-form-item-label">
               持有量:&nbsp
             </div>
             <div
               class="position-value ant-col ant-col-14 ant-form-item-control"
-              v-if="currentPosition"
             >
-              {{ currentPosition.volume }}
+              {{ currentPosition!.volume }}
             </div>
           </div>
         </div>
