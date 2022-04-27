@@ -7,10 +7,9 @@ import { dealOrderInputItem } from '@kungfu-trader/kungfu-js-api/utils/busiUtils
 import { h, VNode } from 'vue';
 import { orderInputTrans } from './config';
 
-export function dealOrderPlaceVNode(
+export function dealStockOffset(
   makeOrderInput: KungfuApi.MakeOrderInput,
-  orderCount: number,
-): VNode {
+): KungfuApi.MakeOrderInput {
   if (makeOrderInput.instrument_type == InstrumentTypeEnum.stock) {
     if (makeOrderInput.side == SideEnum.Buy) {
       makeOrderInput.offset = OffsetEnum.Open;
@@ -19,9 +18,17 @@ export function dealOrderPlaceVNode(
       makeOrderInput.offset = OffsetEnum.Close;
     }
   }
+  return makeOrderInput;
+}
+
+export function dealOrderPlaceVNode(
+  makeOrderInput: KungfuApi.MakeOrderInput,
+  orderCount: number,
+): VNode {
+  const orderData: KungfuApi.MakeOrderInput = dealStockOffset(makeOrderInput);
 
   const orderInputResolved: Record<string, KungfuApi.KfTradeValueCommonData> =
-    dealOrderInputItem(makeOrderInput);
+    dealOrderInputItem(orderData);
 
   const vnode = Object.keys(orderInputResolved)
     .filter((key) => {

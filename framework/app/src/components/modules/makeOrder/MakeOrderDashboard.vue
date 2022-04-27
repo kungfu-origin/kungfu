@@ -18,7 +18,7 @@ import {
   confirmModal,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import { getConfigSettings } from './config';
-import { dealOrderPlaceVNode } from './orderUiUtils';
+import { dealOrderPlaceVNode, dealStockOffset } from './orderUiUtils';
 import { message } from 'ant-design-vue';
 import {
   makeOrderByOrderInput,
@@ -453,12 +453,14 @@ function closeModalConditions(
   orderInput: KungfuApi.MakeOrderInput,
   positionVolume: number,
 ): boolean {
-  const { offset } = orderInput;
+  const makeOrderInput = dealStockOffset(orderInput);
+  const { offset } = makeOrderInput;
+  
   if (offset === OffsetEnum.Open) {
     return false;
   }
 
-  return orderInput.volume > positionVolume * (closeRange / 100);
+  return makeOrderInput.volume > positionVolume * (closeRange / 100);
 }
 </script>
 
