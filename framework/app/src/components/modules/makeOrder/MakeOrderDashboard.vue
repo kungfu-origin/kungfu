@@ -125,14 +125,17 @@ const currentPosition = computed(() => {
   if (!curPositionList.value?.length || !instrumentResolve.value) return null;
 
   const { exchangeId, instrumentId, instrumentType } = instrumentResolve.value;
-  const targetPosition: KungfuApi.Position = curPositionList.value.filter(
+  const targetPositionList: KungfuApi.Position[] = curPositionList.value.filter(
     (position) =>
       position.exchange_id === exchangeId &&
       position.instrument_id === instrumentId &&
       position.instrument_type === instrumentType,
-  )[0];
+  );
 
-  return targetPosition;
+  if (targetPositionList && targetPositionList.length) {
+    return targetPositionList[0];
+  }
+  return null;
 });
 
 onMounted(() => {
@@ -300,33 +303,35 @@ async function handleApartOrder(): Promise<void> {
 
     isShowConfirmModal.value = true;
     dealGlobalData(makeOrderInput);
-  } catch (error) {
-    message.error(error.message);
+  } catch (e) {
+    message.error(e.message);
   }
 }
 
 // 拆单弹窗确认回调
 async function handleApartedConfirm(volumeList: number[]): Promise<void> {
-  if (!makeOrderData.value || !currentGlobalKfLocation.value) {
-    return;
+  try {
+    if (!makeOrderData.value || !currentGlobalKfLocation.value) return;
+
+    const tdProcessId = await confirmOrderPlace(
+      makeOrderData.value,
+      volumeList.length,
+    );
+    const apartOrderInput: KungfuApi.MakeOrderInput = makeOrderData.value;
+
+    Promise.all(
+      volumeList.map((volume) => {
+        apartOrderInput.volume = volume;
+        return placeOrder(
+          apartOrderInput as KungfuApi.MakeOrderInput,
+          currentGlobalKfLocation.value as KungfuApi.KfLocation,
+          tdProcessId,
+        );
+      }),
+    );
+  } catch (e) {
+    message.error(e.message);
   }
-
-  const tdProcessId = await confirmOrderPlace(
-    makeOrderData.value,
-    volumeList.length,
-  );
-  const apartOrderInput: KungfuApi.MakeOrderInput = makeOrderData.value;
-
-  Promise.all(
-    volumeList.map((volume) => {
-      apartOrderInput.volume = volume;
-      return placeOrder(
-        apartOrderInput as KungfuApi.MakeOrderInput,
-        currentGlobalKfLocation.value as KungfuApi.KfLocation,
-        tdProcessId,
-      );
-    }),
-  );
 }
 
 function confirmFatFingerModal(
@@ -406,6 +411,8 @@ async function confirmOrderPlace(
 // 下单
 async function handleMakeOrder(): Promise<void> {
   try {
+    if (!currentGlobalKfLocation.value) return;
+
     await formRef.value.validate();
     const makeOrderInput: KungfuApi.MakeOrderInput = await initOrderInputData();
 
@@ -413,13 +420,11 @@ async function handleMakeOrder(): Promise<void> {
     await confirmFatFingerModal(makeOrderInput);
 
     const tdProcessId = await confirmOrderPlace(makeOrderInput);
-    if (currentGlobalKfLocation.value) {
-      await placeOrder(
-        makeOrderInput,
-        currentGlobalKfLocation.value,
-        tdProcessId,
-      );
-    }
+    await placeOrder(
+      makeOrderInput,
+      currentGlobalKfLocation.value,
+      tdProcessId,
+    );
   } catch (e) {
     message.error(e.message);
   }
