@@ -34,7 +34,7 @@ export const tradeRegisterConfig: KfCategoryRegisterProps = {
   name: 'globalTrade',
   commonData: {
     name: '交易任务',
-    color: 'pink',
+    color: 'red',
   },
   order: {
     getter(orders, kfLocation: KungfuApi.KfExtraLocation) {
