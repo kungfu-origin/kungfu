@@ -237,13 +237,13 @@ function placeOrder(
   orderInput: KungfuApi.MakeOrderInput,
   globalKfLocation: KungfuApi.KfLocation,
   tdProcessId: string,
-): Promise<void> {
+): Promise<bigint> {
   return makeOrderByOrderInput(
     window.watcher,
     orderInput,
     globalKfLocation,
     tdProcessId.toAccountId(),
-  ).then();
+  );
 }
 
 function initOrderInputData(): Promise<KungfuApi.MakeOrderInput> {
