@@ -430,13 +430,13 @@ function testOrderSourceIsOnline(order: KungfuApi.OrderResolved) {
       <template v-slot:header>
         <KfDashboardItem>
           <a-checkbox size="small" v-model:checked="unfinishedOrder">
-            未完成委托
+            {{ $t('orderConfig.checkbox_text') }}
           </a-checkbox>
         </KfDashboardItem>
         <KfDashboardItem>
           <a-input-search
             v-model:value="searchKeyword"
-            placeholder="关键字"
+            :placeholder="$t('keyword_input')"
             style="width: 120px"
           />
         </KfDashboardItem>
@@ -475,7 +475,7 @@ function testOrderSourceIsOnline(order: KungfuApi.OrderResolved) {
             danger
             @click="handleCancelAllOrders"
           >
-            全部撤单
+            {{ $t('orderConfig.cancel_all') }}
           </a-button>
         </KfDashboardItem>
       </template>

@@ -1,26 +1,29 @@
+import VueI18n from '@kungfu-trader/kungfu-app/src/language';
+const { t } = VueI18n.global;
+
 export const columns: AntTableColumns = [
   {
-    title: '任务ID',
+    title: t('tradingTaskConfig.task_id'),
     dataIndex: 'name',
     align: 'left',
     width: 120,
     fixed: 'left',
   },
   {
-    title: '进程',
+    title: t('tradingTaskConfig.process_status'),
     dataIndex: 'processStatus',
     align: 'center',
     width: 60,
     fixed: 'left',
   },
   {
-    title: '参数',
+    title: t('tradingTaskConfig.args'),
     dataIndex: 'args',
     align: 'left',
     width: 280,
   },
   {
-    title: '操作',
+    title: t('tradingTaskConfig.actions'),
     dataIndex: 'actions',
     align: 'right',
     width: 140,

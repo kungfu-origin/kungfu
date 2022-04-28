@@ -145,7 +145,7 @@ function getStrategyPathShowName(kfConfig: KungfuApi.KfConfig): string {
             type="primary"
             @click="handleOpenSetStrategyDialog('add')"
           >
-            添加
+            {{ $t('strategyConfig.add_strategy') }}
           </a-button>
         </KfDashboardItem>
       </template>
@@ -159,7 +159,7 @@ function getStrategyPathShowName(kfConfig: KungfuApi.KfConfig): string {
         :rowClassName="dealRowClassName"
         :customRow="customRow"
         :defaultExpandAllRows="true"
-        emptyText="暂无数据"
+        :emptyText="$t('empty_text')"
       >
         <template
           #bodyCell="{

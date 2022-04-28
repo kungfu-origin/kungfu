@@ -131,7 +131,7 @@ function handleClickRow(row: KungfuApi.InstrumentResolved) {
           <a-select
             show-search
             v-model:value="searchInstrumentResult"
-            placeholder="添加自选"
+            :placeholder="$t('marketDataConfig.add_market')"
             style="min-width: 140px"
             :filter-option="false"
             :options="searchInstrumnetOptions"
@@ -149,7 +149,7 @@ function handleClickRow(row: KungfuApi.InstrumentResolved) {
           </a-select>
         </KfDashboardItem>
         <KfDashboardItem>
-          <a-button size="small" @click="handleSubscribeAll">订阅</a-button>
+          <a-button size="small" @click="handleSubscribeAll">{{ $t('marketDataConfig.subscribe_btn') }}</a-button>
         </KfDashboardItem>
       </template>
       <a-table
@@ -160,7 +160,7 @@ function handleClickRow(row: KungfuApi.InstrumentResolved) {
         :pagination="false"
         :scroll="{ y: dashboardBodyHeight - 4 }"
         :customRow="handleClickRow"
-        emptyText="暂无数据"
+        :emptyText="$t('empty_text')"
       >
         <template
           #bodyCell="{

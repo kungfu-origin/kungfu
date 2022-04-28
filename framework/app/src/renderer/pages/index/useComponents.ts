@@ -1,14 +1,18 @@
 import { getUIComponents } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import { App, defineAsyncComponent } from 'vue';
+
 import { Router } from 'vue-router';
 import { useGlobalStore } from './store/global';
+
+import VueI18n from '@kungfu-trader/kungfu-app/src/language';
+const { t } = VueI18n.global;
 
 export const useComponenets = (
   app: App<Element>,
   router: Router,
 ): Promise<void> => {
   app.component(
-    '持仓',
+    t('Pos.name'),
     defineAsyncComponent(
       () =>
         import('@kungfu-trader/kungfu-app/src/components/modules/pos/Pos.vue'),
@@ -16,7 +20,7 @@ export const useComponenets = (
   );
 
   app.component(
-    '持仓汇总',
+    t('PosGlobal.name'),
     defineAsyncComponent(
       () =>
         import(
@@ -26,7 +30,7 @@ export const useComponenets = (
   );
 
   app.component(
-    '委托记录',
+    t('Order.name'),
     defineAsyncComponent(
       () =>
         import(
@@ -36,7 +40,7 @@ export const useComponenets = (
   );
 
   app.component(
-    '成交记录',
+    t('Trade.name'),
     defineAsyncComponent(
       () =>
         import(
@@ -46,7 +50,7 @@ export const useComponenets = (
   );
 
   app.component(
-    '交易账户',
+    t('Td.name'),
     defineAsyncComponent(
       () =>
         import('@kungfu-trader/kungfu-app/src/components/modules/td/Td.vue'),
@@ -54,7 +58,7 @@ export const useComponenets = (
   );
 
   app.component(
-    '行情源',
+    t('Md.name'),
     defineAsyncComponent(
       () =>
         import('@kungfu-trader/kungfu-app/src/components/modules/md/Md.vue'),
@@ -62,7 +66,7 @@ export const useComponenets = (
   );
 
   app.component(
-    '策略进程',
+    t('Strategy.name'),
     defineAsyncComponent(
       () =>
         import(
@@ -72,7 +76,7 @@ export const useComponenets = (
   );
 
   app.component(
-    '交易任务',
+    t('TradingTask.name'),
     defineAsyncComponent(
       () =>
         import(
@@ -82,7 +86,7 @@ export const useComponenets = (
   );
 
   app.component(
-    '行情订阅',
+    t('MarketData.name'),
     defineAsyncComponent(
       () =>
         import(
@@ -92,7 +96,7 @@ export const useComponenets = (
   );
 
   app.component(
-    '深度行情',
+    t('OrderBook.name'),
     defineAsyncComponent(
       () =>
         import(
@@ -102,7 +106,7 @@ export const useComponenets = (
   );
 
   app.component(
-    '下单面板',
+    t('MakeOrderDashboard.name'),
     defineAsyncComponent(
       () =>
         import(
@@ -112,7 +116,7 @@ export const useComponenets = (
   );
 
   app.component(
-    '套利指令',
+    t('FutureArbitrage.name'),
     defineAsyncComponent(
       () =>
         import(
@@ -122,18 +126,18 @@ export const useComponenets = (
   );
 
   app.config.globalProperties.$availKfBoards = [
-    '持仓',
-    '持仓汇总',
-    '委托记录',
-    '成交记录',
-    '交易账户',
-    '行情源',
-    '策略进程',
-    '交易任务',
-    '行情订阅',
-    '深度行情',
-    '下单面板',
-    '套利指令',
+    t('Pos.name'),
+    t('PosGlobal.name'),
+    t('Order.name'),
+    t('Trade.name'),
+    t('Td.name'),
+    t('Md.name'),
+    t('Strategy.name'),
+    t('TradingTask.name'),
+    t('MarketData.name'),
+    t('OrderBook.name'),
+    t('MakeOrderDashboard.name'),
+    t('FutureArbitrage.name'),
   ];
 
   return useGlobalStore()

@@ -126,13 +126,13 @@ function handleOpenProcessControllerBoard(): void {
     @click="handleOpenProcessControllerBoard"
   >
     <ClusterOutlined style="font-size: 14px; padding-right: 4px" />
-    <span class="title">控制中心</span>
+    <span class="title">{{ $t('baseConfig.control_center') }}</span>
 
     <a-drawer
       v-model:visible="processControllerBoardVisible"
       :width="650"
       class="kf-process-status-controller-board__warp"
-      title="控制中心"
+      :title="$t('baseConfig.control_center')"
       placement="right"
     >
       <div

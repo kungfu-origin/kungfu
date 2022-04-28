@@ -176,7 +176,7 @@ function tiggerOrderBookAndMakeOrder(record: KungfuApi.Position) {
         :scroll="{ y: dashboardBodyHeight - 4 }"
         :rowClassName="dealRowClassNameResolved"
         :customRow="customRowResolved"
-        emptyText="暂无数据"
+        :emptyText="$t('empty_text')"
       >
         <template
           #bodyCell="{

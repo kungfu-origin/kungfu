@@ -139,7 +139,7 @@ function handleOpenSetSourceDialog() {
             type="primary"
             @click="handleOpenSetSourceDialog"
           >
-            添加
+            {{ $t('mdConfig.add_md') }}
           </a-button>
         </KfDashboardItem>
       </template>
@@ -151,7 +151,7 @@ function handleOpenSetSourceDialog() {
         size="small"
         :pagination="false"
         :scroll="{ y: dashboardBodyHeight - 4 }"
-        emptyText="暂无数据"
+        :emptyText="$t('empty_text')"
       >
         <template
           #bodyCell="{

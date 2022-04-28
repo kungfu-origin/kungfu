@@ -297,7 +297,7 @@ function handleRemoveTd(item: KungfuApi.KfConfig) {
         </KfDashboardItem>
         <KfDashboardItem>
           <a-button size="small" @click="handleOpenAddTdGroupDialog('add')">
-            添加分组
+            {{ $t('tdConfig.add_group_placeholder') }}
           </a-button>
         </KfDashboardItem>
         <KfDashboardItem>
@@ -306,7 +306,7 @@ function handleRemoveTd(item: KungfuApi.KfConfig) {
             type="primary"
             @click="handleOpenSetSourceDialog"
           >
-            添加
+            {{ $t('tdConfig.add_td') }}
           </a-button>
         </KfDashboardItem>
       </template>
@@ -321,7 +321,7 @@ function handleRemoveTd(item: KungfuApi.KfConfig) {
         :rowClassName="dealRowClassName"
         :customRow="customRow"
         :defaultExpandAllRows="true"
-        emptyText="暂无数据"
+        :emptyText="$t('empty_text')"
       >
         <template
           #bodyCell="{

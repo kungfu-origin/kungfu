@@ -131,12 +131,12 @@ onMounted(() => {
         );
         if (
           !trades.value.length ||
-          lastTradeId.value !== trades.value[0].trade_id
+          lastTradeId.value !== trades.value[0]?.trade_id
         ) {
           if (isPlaySound) {
             sound.play(soundPath);
           }
-          lastTradeId.value = trades.value[0].trade_id;
+          lastTradeId.value = trades.value[0]?.trade_id;
         }
       },
     );

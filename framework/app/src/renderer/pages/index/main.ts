@@ -61,6 +61,8 @@ import { useComponenets } from './useComponents';
 import { GlobalCategoryRegister } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiExtraLocationUtils';
 import globalBus from '../../assets/methods/globalBus';
 
+import VueI18n from '@kungfu-trader/kungfu-app/src/language';
+
 const app = createApp(App);
 
 app
@@ -92,6 +94,7 @@ app
   .use(Skeleton)
   .use(Tree)
   .use(Statistic)
+  .use(VueI18n)
   .use(VueVirtualScroller);
 
 app.config.globalProperties.$globalBus = globalBus;

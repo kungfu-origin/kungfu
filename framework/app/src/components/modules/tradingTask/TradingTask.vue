@@ -327,7 +327,7 @@ function getDataByArgs(taskArgs: string): Record<string, string> {
             type="primary"
             @click="handleOpenSetTaskDialog"
           >
-            添加
+            {{ $t('tradingTaskConfig.add_task') }}
           </a-button>
         </KfDashboardItem>
       </template>
@@ -339,7 +339,7 @@ function getDataByArgs(taskArgs: string): Record<string, string> {
         :pagination="false"
         :scroll="{ y: dashboardBodyHeight - 4 }"
         :defaultExpandAllRows="true"
-        emptyText="暂无数据"
+        :emptyText="$t('empty_text')"
       >
         <template #bodyCell="{ column, record }">
           <template v-if="column.dataIndex === 'processStatus'">
