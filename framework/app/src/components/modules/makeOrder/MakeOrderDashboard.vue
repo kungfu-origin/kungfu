@@ -299,7 +299,11 @@ async function handleApartOrder(): Promise<void> {
     curOrderVolume.value = Number(makeOrderInput.volume);
     curOrderType.value = makeOrderInput.instrument_type;
   } catch (e) {
-    message.error(e);
+    if (typeof e === 'string') {
+      message.error(e);
+    } else {
+      message.error('请输入正确内容');
+    }
   }
 }
 
@@ -420,7 +424,11 @@ async function handleMakeOrder(): Promise<void> {
       tdProcessId,
     );
   } catch (e) {
-    message.error(e);
+    if (typeof e === 'string') {
+      message.error(e);
+    } else {
+      message.error('请输入正确内容');
+    }
   }
 }
 
