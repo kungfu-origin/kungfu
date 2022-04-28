@@ -17,7 +17,7 @@ import {
   DeleteOutlined,
 } from '@ant-design/icons-vue';
 
-import { columns, tradeRegisterConfig } from './config';
+import { columns, tradingTaskConfig } from './config';
 import { message, Modal } from 'ant-design-vue';
 import path from 'path';
 import {
@@ -321,7 +321,7 @@ function customRowResolved(record: Pm2ProcessStatusDetail) {
     return;
   }
   const locationResolved: KungfuApi.KfExtraLocation =
-    hendleRowRecord(taskLocation);
+    handleRowRecord(taskLocation);
     
   return {
     onClick: () => {
@@ -337,16 +337,16 @@ function dealRowClassNameResolved(record: Pm2ProcessStatusDetail): string {
     return '';
   }
   const locationResolved: KungfuApi.KfExtraLocation =
-    hendleRowRecord(taskLocation);
+    handleRowRecord(taskLocation);
 
   return dealRowClassName(locationResolved);
 }
 
-function hendleRowRecord(
+function handleRowRecord(
   taskLocation: KungfuApi.KfLocation,
 ): KungfuApi.KfExtraLocation {
   const locationResolved: KungfuApi.KfExtraLocation = {
-    category: tradeRegisterConfig.name,
+    category: tradingTaskConfig.name,
     group: taskLocation?.group || '',
     name: taskLocation?.name || '',
     mode: 'LIVE',
@@ -356,7 +356,7 @@ function hendleRowRecord(
 
 onMounted(() => {
   if (app?.proxy && app.proxy.$globalCategoryRegister) {
-    app.proxy.$globalCategoryRegister.register(tradeRegisterConfig);
+    app.proxy.$globalCategoryRegister.register(tradingTaskConfig);
   }
 });
 </script>

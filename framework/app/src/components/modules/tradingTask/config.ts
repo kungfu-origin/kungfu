@@ -30,11 +30,11 @@ export const columns: AntTableColumns = [
   },
 ];
 
-export const tradeRegisterConfig: KfCategoryRegisterProps = {
+export const tradingTaskConfig: KfCategoryRegisterProps = {
   name: 'globalTrade',
   commonData: {
     name: '交易任务',
-    color: 'red',
+    color: 'purple',
   },
   order: {
     getter(orders, kfLocation: KungfuApi.KfExtraLocation) {
