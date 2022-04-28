@@ -17,7 +17,7 @@ import {
   DeleteOutlined,
 } from '@ant-design/icons-vue';
 
-import { columns, tradingTaskConfig } from './config';
+import { columns, categoryRegisterConfig } from './config';
 import { message, Modal } from 'ant-design-vue';
 import path from 'path';
 import {
@@ -346,7 +346,7 @@ function handleRowRecord(
   taskLocation: KungfuApi.KfLocation,
 ): KungfuApi.KfExtraLocation {
   const locationResolved: KungfuApi.KfExtraLocation = {
-    category: tradingTaskConfig.name,
+    category: categoryRegisterConfig.name,
     group: taskLocation?.group || '',
     name: taskLocation?.name || '',
     mode: 'LIVE',
@@ -356,7 +356,7 @@ function handleRowRecord(
 
 onMounted(() => {
   if (app?.proxy && app.proxy.$globalCategoryRegister) {
-    app.proxy.$globalCategoryRegister.register(tradingTaskConfig);
+    app.proxy.$globalCategoryRegister.register(categoryRegisterConfig);
   }
 });
 </script>
