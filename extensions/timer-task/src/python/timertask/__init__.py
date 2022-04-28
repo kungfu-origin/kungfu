@@ -13,6 +13,8 @@ class orderTask:
         self.offset = offset
 
 def pre_start(context):
+    context.hold_book()
+    context.hold_position()
     args = {}
     context.SOURCE = ""
     context.ACCOUNT =""

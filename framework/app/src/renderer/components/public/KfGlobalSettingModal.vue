@@ -29,8 +29,8 @@ import {
   KfCategory,
 } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
 import {
-  CommissionModeEnum,
   KfCategoryEnum,
+  CommissionModeEnum,
 } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import { DeleteOutlined } from '@ant-design/icons-vue';
 import { longfist } from '@kungfu-trader/kungfu-js-api/kungfu';
@@ -319,7 +319,7 @@ function handleRemoveScheduleTask(index: number) {
                   ></a-input-number>
                 </div>
                 <div class="commission-setting-item">
-                  <delete-outlined
+                  <DeleteOutlined
                     class="kf-hover"
                     style="font-size: 14px"
                     @click="handleRemoveCommission(item)"
@@ -402,7 +402,7 @@ function handleRemoveScheduleTask(index: number) {
                     </a-col>
                     <a-col v-if="task.processId !== 'core'">
                       <div class="title"></div>
-                      <delete-outlined
+                      <DeleteOutlined
                         class="kf-hover"
                         style="font-size: 14px"
                         @click="handleRemoveScheduleTask(index)"
