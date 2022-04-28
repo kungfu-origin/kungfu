@@ -301,8 +301,6 @@ async function handleApartOrder(): Promise<void> {
   } catch (e) {
     if (typeof e === 'string') {
       message.error(e);
-    } else {
-      message.error('请输入正确内容');
     }
   }
 }
@@ -426,8 +424,6 @@ async function handleMakeOrder(): Promise<void> {
   } catch (e) {
     if (typeof e === 'string') {
       message.error(e);
-    } else {
-      message.error('请输入正确内容');
     }
   }
 }
