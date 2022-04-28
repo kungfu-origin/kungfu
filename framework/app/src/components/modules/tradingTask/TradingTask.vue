@@ -321,7 +321,7 @@ function customRowResolved(record: Pm2ProcessStatusDetail) {
     return;
   }
   const locationResolved: KungfuApi.KfExtraLocation =
-    handleRowRecord(taskLocation);
+    resolveRowRecord(taskLocation);
     
   return {
     onClick: () => {
@@ -337,12 +337,12 @@ function dealRowClassNameResolved(record: Pm2ProcessStatusDetail): string {
     return '';
   }
   const locationResolved: KungfuApi.KfExtraLocation =
-    handleRowRecord(taskLocation);
+    resolveRowRecord(taskLocation);
 
   return dealRowClassName(locationResolved);
 }
 
-function handleRowRecord(
+function resolveRowRecord(
   taskLocation: KungfuApi.KfLocation,
 ): KungfuApi.KfExtraLocation {
   const locationResolved: KungfuApi.KfExtraLocation = {
