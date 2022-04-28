@@ -322,7 +322,7 @@ function customRowResolved(record: Pm2ProcessStatusDetail) {
   }
   const locationResolved: KungfuApi.KfExtraLocation =
     resolveRowRecord(taskLocation);
-    
+
   return {
     onClick: () => {
       setCurrentGlobalKfLocation(locationResolved);
