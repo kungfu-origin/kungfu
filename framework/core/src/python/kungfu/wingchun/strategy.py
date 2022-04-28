@@ -65,10 +65,10 @@ class Strategy(wc.Strategy):
             self._module, "on_order_action_error", lambda ctx, error: None
         )
         self._on_book_sync_reset = getattr(
-            self._module, "on_book_sync_reset", lambda ctx, error: None
+            self._module, "on_book_sync_reset", lambda ctx, old_book, new_book: None
         )
         self._on_asset_sync_reset = getattr(
-            self._module, "on_asset_sync_reset", lambda ctx, error: None
+            self._module, "on_asset_sync_reset", lambda ctx, old_asset, new_asset: None
         )
 
     def __call_proxy(self, func, *args):
