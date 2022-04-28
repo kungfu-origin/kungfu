@@ -86,6 +86,7 @@ declare namespace KungfuApi {
     | 'file' // string
     | 'files' // string[]
     | 'folder' // string
+    | 'table' // any[]
     | 'timePicker' //string
     | 'select'
     | 'bool'
@@ -114,6 +115,7 @@ declare namespace KungfuApi {
     | string[]
     | number[]
     | boolean[]
+    | any[]
     | Dayjs;
 
   export interface KfSelectOption {
@@ -125,6 +127,7 @@ declare namespace KungfuApi {
     key: string;
     name: string;
     type: KfConfigItemSupportedTypes;
+    columns?: KfConfigItem[];
     errMsg?: string;
     default?: KfConfigValue;
     required?: boolean;

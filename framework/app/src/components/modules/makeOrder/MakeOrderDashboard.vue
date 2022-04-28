@@ -18,7 +18,7 @@ import {
   confirmModal,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import { getConfigSettings } from './config';
-import { dealOrderPlaceVNode } from './orderUiUtils';
+import { dealOrderPlaceVNode, dealStockOffset } from './orderUiUtils';
 import { message } from 'ant-design-vue';
 import {
   makeOrderByOrderInput,
@@ -299,7 +299,9 @@ async function handleApartOrder(): Promise<void> {
     curOrderVolume.value = Number(makeOrderInput.volume);
     curOrderType.value = makeOrderInput.instrument_type;
   } catch (e) {
-    message.error(e.message);
+    if (typeof e === 'string') {
+      message.error(e);
+    }
   }
 }
 
@@ -325,7 +327,7 @@ async function handleApartedConfirm(volumeList: number[]): Promise<void> {
       }),
     );
   } catch (e) {
-    message.error(e.message);
+    message.error(e);
   }
 }
 
@@ -354,7 +356,7 @@ function dealFatFingerMessage(
   const ukey = hashInstrumentUKey(instrumentId, exchangeId);
 
   const { limit_price: price, side } = makeOrderInput;
-  const lastPrice = window.watcher.ledger.Quote[ukey].last_price;
+  const lastPrice = window.watcher.ledger.Quote[ukey]?.last_price;
 
   const fatFingerBuyRate =
     fatFingerRange === 0 ? 100 : (100 + fatFingerRange) / 100;
@@ -380,11 +382,6 @@ async function confirmOrderPlace(
   makeOrderInput: KungfuApi.MakeOrderInput,
   orderCount: number = 1,
 ): Promise<string> {
-  await confirmModal(
-    '下单确认',
-    dealOrderPlaceVNode(makeOrderInput, orderCount),
-  );
-
   if (!currentGlobalKfLocation.value || !window.watcher) {
     return Promise.reject('当前 Location 错误');
   }
@@ -396,9 +393,13 @@ async function confirmOrderPlace(
       : `td_${account_id.toString()}`;
 
   if (processStatusData.value[tdProcessId] !== 'online') {
-    message.error(`请先启动 ${tdProcessId} 交易进程`);
-    return Promise.reject('请先启动交易进程');
+    return Promise.reject(`请先启动${tdProcessId}交易进程`);
   }
+
+  await confirmModal(
+    '下单确认',
+    dealOrderPlaceVNode(makeOrderInput, orderCount),
+  );
 
   return Promise.resolve(tdProcessId);
 }
@@ -421,7 +422,9 @@ async function handleMakeOrder(): Promise<void> {
       tdProcessId,
     );
   } catch (e) {
-    message.error(e.message);
+    if (typeof e === 'string') {
+      message.error(e);
+    }
   }
 }
 
@@ -453,12 +456,14 @@ function closeModalConditions(
   orderInput: KungfuApi.MakeOrderInput,
   positionVolume: number,
 ): boolean {
-  const { offset } = orderInput;
+  const makeOrderInput = dealStockOffset(orderInput);
+  const { offset } = makeOrderInput;
+
   if (offset === OffsetEnum.Open) {
     return false;
   }
 
-  return orderInput.volume > positionVolume * (closeRange / 100);
+  return makeOrderInput.volume > positionVolume * (closeRange / 100);
 }
 </script>
 
@@ -509,7 +514,7 @@ function closeModalConditions(
             </div>
           </div>
         </div>
-        <div class="make-order-btns">
+        <div class="make-order-btn">
           <a-button class="make-order" size="small" @click="handleMakeOrder">
             下单
           </a-button>
@@ -555,7 +560,7 @@ function closeModalConditions(
       display: flex;
     }
 
-    .make-order-btns {
+    .make-order-btn {
       width: 40px;
       height: 100%;
       .ant-btn {

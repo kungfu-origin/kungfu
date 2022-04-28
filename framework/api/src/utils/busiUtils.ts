@@ -1432,7 +1432,7 @@ export const KfConfigValueNumberType = [
 
 export const KfConfigValueBooleanType = ['bool'];
 
-export const KfConfigValueArrayType = ['files', 'instruments'];
+export const KfConfigValueArrayType = ['files', 'instruments', 'table'];
 
 export const initFormStateByConfig = (
   configSettings: KungfuApi.KfConfigItem[],
@@ -1477,6 +1477,14 @@ export const initFormStateByConfig = (
           : !!defaultValue;
     } else if (KfConfigValueNumberType.includes(type)) {
       defaultValue = +defaultValue;
+    } else if (KfConfigValueArrayType.includes(type)) {
+      if (typeof defaultValue === 'string') {
+        try {
+          defaultValue = JSON.parse(defaultValue);
+        } catch (err) {
+          defaultValue = [];
+        }
+      }
     }
 
     formState[item.key] = defaultValue;
