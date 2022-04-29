@@ -724,6 +724,10 @@ defineExpose({
             :rules="rules"
             layout="inline"
           ></KfConfigSettingsForm>
+
+          <a-divider
+            v-if="index !== formState[item.key].length - 1"
+          ></a-divider>
         </div>
       </div>
     </a-form-item>

@@ -515,7 +515,7 @@ export const useInstruments = (): {
                   item.exchangeId,
                   item.instrumentId,
                   mdLocation,
-                );
+                ).catch((err) => console.warn(err.message));
               }
             });
           }
@@ -728,7 +728,7 @@ export const useSubscibeInstrumentAtEntry = (): void => {
               item.exchangeId,
               item.instrumentId,
               mdLocationResolved,
-            );
+            ).catch((err) => console.warn(err.message));
             subscribedInstrumentsForPos[item.uidKey] = true;
           });
         });

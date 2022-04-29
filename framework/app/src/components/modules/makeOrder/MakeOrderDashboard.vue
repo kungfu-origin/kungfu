@@ -38,6 +38,7 @@ import {
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
 import {
   dealTradingData,
+  getExtConfigList,
   getProcessIdByKfLocation,
   initFormStateByConfig,
   isTdStrategyCategory,
@@ -55,7 +56,7 @@ const formState = ref(
 const formRef = ref();
 const { subscribeAllInstrumentByAppStates } = useInstruments();
 const { appStates, processStatusData } = useProcessStatusDetailData();
-const { mdExtTypeMap } = useExtConfigsRelated();
+const { mdExtTypeMap, extConfigs } = useExtConfigsRelated();
 const { triggerOrderBook } = useTriggerMakeOrder();
 
 const {
@@ -136,6 +137,10 @@ const currentPosition = computed(() => {
     return targetPositionList[0];
   }
   return null;
+});
+
+const availTradingTaskExtensionList = computed(() => {
+  return getExtConfigList(extConfigs.value, 'strategy');
 });
 
 onMounted(() => {
@@ -491,34 +496,37 @@ function closeModalConditions(
         </KfDashboardItem>
       </template>
       <div class="make-order__warp">
-        <div class="make-order-form__warp">
-          <KfConfigSettingsForm
-            ref="formRef"
-            v-model:formState="formState"
-            :configSettings="configSettings"
-            changeType="add"
-            :label-col="5"
-            :wrapper-col="14"
-          ></KfConfigSettingsForm>
-          <div
-            class="make-order-position ant-row ant-form-item ant-form-item-has-success"
-            v-if="formState.instrument && currentPosition"
-          >
-            <div class="position-label ant-col ant-col-5 ant-form-item-label">
-              持有量:&nbsp
-            </div>
+        <div class="make-order-content">
+          <div class="make-order-form__warp">
+            <KfConfigSettingsForm
+              ref="formRef"
+              v-model:formState="formState"
+              :configSettings="configSettings"
+              changeType="add"
+              :label-col="5"
+              :wrapper-col="14"
+            ></KfConfigSettingsForm>
             <div
-              class="position-value ant-col ant-col-14 ant-form-item-control"
+              class="make-order-position ant-row ant-form-item ant-form-item-has-success"
+              v-if="formState.instrument && currentPosition"
             >
-              {{ currentPosition!.volume || '--'}}
+              <div class="position-label ant-col ant-col-5 ant-form-item-label">
+                持有量:&nbsp
+              </div>
+              <div
+                class="position-value ant-col ant-col-14 ant-form-item-control"
+              >
+                {{ currentPosition!.volume || '--'}}
+              </div>
             </div>
           </div>
         </div>
-        <div class="make-order-btn">
-          <a-button class="make-order" size="small" @click="handleMakeOrder">
-            下单
+        <div class="make-order-btns">
+          <a-button class="make-order" @click="handleMakeOrder">下单</a-button>
+          <a-button @click="handleApartOrder">拆单</a-button>
+          <a-button v-for="item in availTradingTaskExtensionList">
+            {{ item.name }}
           </a-button>
-          <a-button size="small" @click="handleApartOrder">拆单</a-button>
         </div>
       </div>
     </KfDashboard>
@@ -541,9 +549,15 @@ function closeModalConditions(
     justify-content: space-between;
     height: 100%;
 
-    .make-order-form__warp {
+    .make-order-content {
       flex: 1;
       height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+    }
+
+    .make-order-form__warp {
       padding-top: 16px;
       overflow-y: overlay;
 
@@ -556,23 +570,33 @@ function closeModalConditions(
         }
       }
     }
+
     .make-order-position {
       display: flex;
     }
 
-    .make-order-btn {
+    .make-order-btns {
       width: 40px;
       height: 100%;
+      display: flex;
+      flex-direction: column;
+
       .ant-btn {
         height: 26%;
         text-align: center;
         word-break: break-word;
         word-wrap: unset;
         white-space: normal;
+        flex: 1;
+        margin-bottom: 8px;
+
+        &:last-child {
+          margin-bottom: 0px;
+        }
       }
       .make-order {
-        margin-bottom: 8px;
         height: 72%;
+        flex: 4;
       }
     }
   }

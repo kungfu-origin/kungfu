@@ -105,6 +105,12 @@ interface TriggerAddBoard {
   boardId: number;
 }
 
+interface TriggerSetTradingTask {
+  tag: 'setTradingTask';
+  extKey: string;
+  payload: KungfuApi.SetKfConfigPayload;
+}
+
 type KfBusEvent =
   | ResizeEvent
   | ProcessStatusChangeEvent
@@ -119,7 +125,8 @@ type KfBusEvent =
   | TriggerUpdateStrategy
   | TriggerUpdateExtConfigs
   | TriggerAddBoard
-  | ExportTradingDataEvent;
+  | ExportTradingDataEvent
+  | TriggerSetTradingTask;
 
 interface ExtraOrderInput {
   side: SideEnum;

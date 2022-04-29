@@ -2,7 +2,7 @@
 import { getCurrentInstance, onBeforeUnmount, onMounted } from 'vue';
 import KfSystemPrepareModal from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfSystemPrepareModal.vue';
 import KfLayoutVue from '@kungfu-trader/kungfu-app/src/renderer/components/layout/KfLayout.vue';
-
+import KfSetByConfigModal from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfSetByConfigModal.vue';
 import zhCN from 'ant-design-vue/es/locale/zh_CN';
 import {
   markClearDB,
@@ -27,6 +27,7 @@ import {
   dealAssetsByHolderUID,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { bindIPCListener } from '@kungfu-trader/kungfu-app/src/renderer/ipcMsg/ipcListener';
+import { useTradingTask } from '@kungfu-trader/kungfu-app/src/components/modules/tradingTask/utils';
 
 const app = getCurrentInstance();
 const store = useGlobalStore();
@@ -79,6 +80,13 @@ const busSubscription = globalBus.subscribe((data: KfBusEvent) => {
     }
   }
 });
+
+const {
+  setTradingTaskModalVisible,
+  currentSelectedTradingTaskExtKey,
+  setTradingTaskConfigPayload,
+  handleConfirmAddUpdateTask,
+} = useTradingTask();
 
 onMounted(() => {
   bindIPCListener(store);
@@ -149,11 +157,29 @@ onBeforeUnmount(() => {
         },
       }"
     ></KfSystemPrepareModal>
+
+    <!-- global modal start -->
+
+    <!-- export trading data -->
     <KfDownloadDateModal
       v-if="exportDateModalVisible"
       v-model:visible="exportDateModalVisible"
       @confirm="handleConfirmExportDate"
     ></KfDownloadDateModal>
+
+    <!-- add/update trading task -->
+    <KfSetByConfigModal
+      v-if="setTradingTaskModalVisible"
+      v-model:visible="setTradingTaskModalVisible"
+      :payload="setTradingTaskConfigPayload"
+      :primaryKeyUnderline="true"
+      @confirm="
+        handleConfirmAddUpdateTask($event, currentSelectedTradingTaskExtKey)
+      "
+    ></KfSetByConfigModal>
+
+    <!-- global modal end -->
+
     <a-spin v-if="exportDataLoading" :spinning="exportDataLoading"></a-spin>
   </a-config-provider>
 </template>

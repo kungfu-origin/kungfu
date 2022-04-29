@@ -254,7 +254,7 @@ void master::on_channel_request(const event_ptr &event) {
   if (is_location_live(channel.source_id) and not has_channel(channel.source_id, channel.dest_id)) {
     reader_->join(get_location(channel.source_id), channel.dest_id, trigger_time);
     require_write_to(trigger_time, channel.source_id, channel.dest_id);
-    \(trigger_time, channel);
+    register_channel(trigger_time, channel);
     get_writer(location::PUBLIC)->write(trigger_time, channel);
   }
 }
