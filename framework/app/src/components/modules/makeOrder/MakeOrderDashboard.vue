@@ -18,7 +18,7 @@ import {
   confirmModal,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import { getConfigSettings } from './config';
-import { dealOrderPlaceVNode, dealStockOffset } from './orderUiUtils';
+import { dealOrderPlaceVNode, dealStockOffset } from './utils';
 import { message } from 'ant-design-vue';
 import {
   makeOrderByOrderInput,
