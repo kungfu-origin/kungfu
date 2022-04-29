@@ -514,7 +514,7 @@ function closeModalConditions(
             </div>
           </div>
         </div>
-        <div class="make-order-btns">
+        <div class="make-order-btn">
           <a-button class="make-order" size="small" @click="handleMakeOrder">
             下单
           </a-button>
@@ -560,7 +560,7 @@ function closeModalConditions(
       display: flex;
     }
 
-    .make-order-btns {
+    .make-order-btn {
       width: 40px;
       height: 100%;
       .ant-btn {
