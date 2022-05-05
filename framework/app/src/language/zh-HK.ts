@@ -4,13 +4,66 @@ export default {
   success: '成功',
   error: '失败',
   add: '添加',
+  close: '关闭',
+  delete: '删除',
+  rename: '重命名',
   set: '设置',
+  clean: '清空',
+  help: '帮助',
+  run: '运行',
+  quit: '退出',
   operation_success: '操作成功',
   operation_failed: '操作失败',
   location_error: '当前 Location 错误',
   instrument_error: '标的错误',
+  prompt: '提示',
+  warning: '警告',
   confirm: '确 认',
   cancel: '取 消',
+  save_file: '保存文件',
+  detail: '详情',
+  ok: '好的',
+
+  edit: '编辑',
+  copy: '复制',
+  paste: '粘贴',
+  select_all: '全选',
+  undo: '撤销',
+
+  open_resources_directory: '打开功夫资源目录 (KF_HOME)',
+  open_install_directory: '打开功夫安装目录',
+  open_basic_configuration: '打开功夫基础配置DB',
+  browsing_log: '浏览日志文件',
+
+  clear_journal: '清理journal',
+  clear_DB: '清理DB',
+  reset_main_panel: '重置主面板',
+  export_all_transaction_data: '导出所有交易数据',
+
+  website: '官网',
+  user_manual: '用户手册',
+  API_documentation: '策略API文档',
+  Kungfu_forum: 'Kungfu 论坛',
+
+  KungFu: '功夫',
+  about_kungfu: '关于功夫交易',
+
+  file: '文件',
+  folder: '文件夹',
+
+  no_focus: '当前页面没有聚焦',
+  clear: '清理 {content} 完成, 请重启应用',
+  open_window: '正在打开窗口',
+  open_code_editor: '正在打开代码编辑器',
+  add_board: '添加面板',
+  select_board: '请选择要添加的面板',
+  add_board_error: '添加面板目标错误',
+
+  delete_category:
+    '删除 {category} 所有数据， 如果该 {categoryName} 进程正在运行, 也将停止进程, 确认删除',
+  add_config_modal:
+    '{category}ID系统唯一, {changeTypeName} 成功后不可修改, 确认 {key}',
+  update_config_modal: '确认{key} 相关配置',
 
   MakeOrderDashboard: '交易意向面板',
   FutureArbitrage: '套利指令',
@@ -32,6 +85,8 @@ export default {
 
   tradingConfig: {
     un_known: '未知',
+    default: '封装策略',
+    order_task: '下单任务',
 
     running: '运行中',
     stopping: '停止中',
@@ -163,6 +218,15 @@ export default {
     no_empty: '交易意向总量不可为空',
     total_order_amount: '总交易意向量',
     every_volume: '每次下交易意向量',
+
+    fat_finger_buy_modal:
+      '买入价格超出警戒线, 当前价格为{price},警戒线为{warningLine}, 当前乌龙指阈值为{fatFinger}',
+    fat_finger_sell_modal:
+      '卖出价格超出警戒线, 当前价格为{price},警戒线为{warningLine}, 当前乌龙指阈值为{fatFinger}',
+    start_process: '请先启动{process}交易进程',
+    place_confirm: '下单确认',
+    close_all: '是否全部平仓?',
+    Continue: '继续下单',
   },
 
   orderConfig: {
@@ -388,4 +452,63 @@ export default {
     stop: '停止',
     restart: '重启',
   },
+
+  validate: {
+    no_special_characters: '不能含有特殊字符',
+    no_underline: '不能含有下划线',
+    no_zero_number: '请输入非零数字',
+    no_negative_number: '请输入非负数',
+    value_existing: '{value}已存在',
+    mandatory: '该项为必填项',
+  },
+
+  editor: {
+    set_strategy_entrance: '设置策略入口文件',
+    current_strategy: '当前策略',
+    new_file: '新建文件',
+    new_folder: '新建文件夹',
+    set_strategy_success: '策略{file}文件路径修改成功！',
+    entry_file: '入口文件',
+    creaate_success: '{file}创建成功！',
+
+    name_repeat: '此位置已存在文件或文件夹 {name} ，请选择其他名称！',
+    empty_input: '必须提供文件或文件夹名称！',
+    illegal_character: '名称不能包含\\/:*?"<>|',
+    delate_confirm: '确认删除{value}吗？',
+    cannot_delate_entry: '不可删除入口文件',
+  },
+
+  logview: {
+    scroll_to_bottom: '滚动到底部',
+  },
+
+  master_interrupt: '主控进程 master 中断',
+  master_desc: '主控进程负责策略进程间通信与资源配置, 请重启功夫交易系统',
+
+  ledger_interrupt: '计算服务 ledger 中断',
+  ledger_desc: '计算服务负责持仓跟资金计算, 请重启功夫交易系统',
+
+  cached_interrupt: '存储服务 cached 中断',
+  cached_desc:
+    '存储服务负责数据落地, 存储服务断开不影响交易, 可等交易完成后重启功夫系统',
+
+  state_interrupt_msg: '{state} 已断开',
+  state_interrupt_desc: '{state} 已断开, 可能会导致交易中断, 请检查',
+
+  kungfu: '功夫交易系统',
+
+  system_prompt: '系统提示',
+  archive_completion: '功夫归档完成',
+  archive: '功夫归档中...',
+  environment_complete: '功夫环境准备完成 ✓',
+  environment_preparation: '功夫环境准备中...',
+  ready: '功夫就绪 ✓',
+  wait_ready: '等待功夫就绪...',
+  saving_completed: '保存数据完成 ✓',
+  save_data: '保存数据中...',
+  end_all_transactions: '结束所有交易进程 ✓',
+  closing: '结束交易进程中, 请勿关闭...',
+
+  quit_confirm: '退出应用会结束所有交易进程, 确认退出吗?',
+  restart_process: '功夫图形进程中断, 该中断不会影响交易, 是否重启图形进程？',
 };
