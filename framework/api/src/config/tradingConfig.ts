@@ -44,7 +44,7 @@ export const Pm2ProcessStatus: Record<
     level: 0,
   },
   ['launching']: {
-    name:  t('tradingConfig.launching'),
+    name: t('tradingConfig.launching'),
     color: 'kf-color-waiting',
     level: 2,
   },
@@ -124,7 +124,7 @@ export const KfCategory: Record<
     level: 100,
   },
   [KfCategoryEnum.daemon]: {
-    name:  t('tradingConfig.daemon'),
+    name: t('tradingConfig.daemon'),
     color: 'purple',
     level: 90,
   },
@@ -298,7 +298,7 @@ export const PriceType: Record<
   [PriceTypeEnum.Limit]: { name: t('tradingConfig.Limit') },
   [PriceTypeEnum.Market]: { name: t('tradingConfig.Market') },
   [PriceTypeEnum.FakBest5]: {
-    name: t('tradingConfig.FakBest5')
+    name: t('tradingConfig.FakBest5'),
   },
   [PriceTypeEnum.ForwardBest]: {
     name: t('tradingConfig.Forward_best'),
@@ -312,7 +312,7 @@ export const PriceType: Record<
   [PriceTypeEnum.Fok]: {
     name: t('tradingConfig.Fok'),
   },
-  [PriceTypeEnum.Unknown]: { name:  t('tradingConfig.un_known') },
+  [PriceTypeEnum.Unknown]: { name: t('tradingConfig.un_known') },
 };
 
 export const HedgeFlag: Record<

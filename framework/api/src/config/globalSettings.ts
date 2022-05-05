@@ -61,7 +61,9 @@ export const getKfGlobalSettings = (): KfSystemConfig[] => [
       {
         key: 'python',
         name: t('globalSettingConfig.use_local_python'),
-        tip: `${t('globalSettingConfig.local_python_desc')} ${__python_version}`,
+        tip: `${t(
+          'globalSettingConfig.local_python_desc',
+        )} ${__python_version}`,
         default: false,
         type: 'bool',
       },
