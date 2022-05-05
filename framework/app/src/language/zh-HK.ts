@@ -270,6 +270,7 @@ export default {
 
   tdConfig: {
     td_group: '账户分组',
+    td_name: '账户组名称',
     account_name: '账户(组)',
     account_ps: '备注',
     state_status: '状态',
@@ -284,6 +285,11 @@ export default {
     add_group_placeholder: '添加分组',
     set_td_group: '账户分组设置',
     account_group: '账户组',
+    td_not_found: '{td}柜台插件不存在',
+    sourse_not_found: '配置项不存在, 请检查 {value} package.json',
+    need_only_group: '需保证该账户组名称唯一',
+    delete_amount_group: '删除账户组{group}',
+    confirm_delete_group: '不会影响改账户组下账户进程, 确认删除',
   },
 
   mdConfig: {
