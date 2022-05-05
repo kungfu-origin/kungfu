@@ -23,6 +23,7 @@ import {
   ExchangeIds,
   FutureArbitrageCodes,
   CommissionMode,
+  StrategyExtType,
 } from '../config/tradingConfig';
 import {
   KfCategoryEnum,
@@ -43,6 +44,7 @@ import {
   VolumeConditionEnum,
   MakeOrderByWatcherEnum,
   BrokerStateStatusEnum,
+  StrategyExtTypes,
 } from '../typings/enums';
 import {
   deleteProcess,
@@ -70,7 +72,7 @@ export interface ExtensionData {
   name: string;
   key: string;
   extPath: string;
-  type: InstrumentTypes[];
+  type: InstrumentTypes[] | StrategyExtTypes[];
 }
 
 declare global {
@@ -355,6 +357,12 @@ export const getInstrumentTypeData = (
   ];
 };
 
+export const getStrategyExtTypeData = (
+  strategyExtType: StrategyExtTypes,
+): KungfuApi.KfTradeValueCommonData => {
+  return StrategyExtType[strategyExtType || 'unknown'];
+};
+
 const getChildFileStat = async (
   dirname: string,
 ): Promise<Array<{ childFilePath: string; stat: Stats }>> => {
@@ -445,19 +453,31 @@ const getKfExtConfigList = async (): Promise<KungfuApi.KfExtOriginConfig[]> => {
   });
 };
 
-const resolveInstrumentTypesInExtType = (
-  types: InstrumentTypes | InstrumentTypes[],
-): InstrumentTypes[] => {
+const resolveTypesInExtConfig = (
+  category: KfCategoryTypes,
+  types:
+    | InstrumentTypes
+    | InstrumentTypes[]
+    | StrategyExtTypes
+    | StrategyExtTypes[],
+): InstrumentTypes[] | StrategyExtTypes[] => {
   if (typeof types === 'string') {
-    types = [types.toLowerCase() as InstrumentTypes];
-    return types;
+    const typesResolved = [
+      types.toLowerCase() as InstrumentTypes | StrategyExtTypes,
+    ];
+    return isTdMd(category)
+      ? (typesResolved as InstrumentTypes[])
+      : (typesResolved as StrategyExtTypes[]);
   }
 
   if (!types.length) {
     return ['unknown'];
   }
 
-  return types.map((type) => type.toLowerCase()) as InstrumentTypes[];
+  const typesResolved = types.map((type) => type.toLowerCase());
+  return isTdMd(category)
+    ? (typesResolved as InstrumentTypes[])
+    : (typesResolved as StrategyExtTypes[]);
 };
 
 const getKfExtensionConfigByCategory = (
@@ -477,7 +497,8 @@ const getKfExtensionConfigByCategory = (
             [extKey]: {
               name: extName,
               extPath,
-              type: resolveInstrumentTypesInExtType(
+              type: resolveTypesInExtConfig(
+                category,
                 configOfCategory?.type || [],
               ),
               settings: configOfCategory?.settings || [],
@@ -555,17 +576,26 @@ export const getAvailDaemonList = async (): Promise<
     }, [] as KungfuApi.KfDaemonLocation[]);
 };
 
+export const isTdMd = (category: KfCategoryTypes) => {
+  if (category === 'td' || category === 'md') {
+    return true;
+  }
+
+  return false;
+};
+
 export const buildExtTypeMap = (
   extConfigs: KungfuApi.KfExtConfigs,
   category: KfCategoryTypes,
-): Record<string, InstrumentTypes> => {
-  const extTypeMap: Record<string, InstrumentTypes> = {};
+): Record<string, InstrumentTypes | StrategyExtTypes> => {
+  const extTypeMap: Record<string, InstrumentTypes | StrategyExtTypes> = {};
   const targetCategoryConfig: Record<string, KungfuApi.KfExtConfig> =
     extConfigs[category] || {};
 
   Object.keys(targetCategoryConfig).forEach((extKey: string) => {
     const configInKfExtConfig = targetCategoryConfig[extKey];
-    const types = resolveInstrumentTypesInExtType(
+    const types = resolveTypesInExtConfig(
+      category,
       configInKfExtConfig?.type || [],
     );
 
@@ -574,23 +604,31 @@ export const buildExtTypeMap = (
       return;
     }
 
-    const primaryType = types.sort(
-      (type1: InstrumentTypes, type2: InstrumentTypes) => {
-        const level1 =
-          (
-            InstrumentType[
-              InstrumentTypeEnum[type1] || InstrumentTypeEnum.unknown
-            ] || {}
-          ).level || 0;
-        const level2 =
-          (
-            InstrumentType[
-              InstrumentTypeEnum[type2] || InstrumentTypeEnum.unknown
-            ] || {}
-          ).level || 0;
-        return level2 - level1;
-      },
-    )[0];
+    const primaryType = isTdMd(category)
+      ? (types as InstrumentTypes[]).sort(
+          (type1: InstrumentTypes, type2: InstrumentTypes) => {
+            const level1 =
+              (
+                InstrumentType[
+                  InstrumentTypeEnum[type1] || InstrumentTypeEnum.unknown
+                ] || {}
+              ).level || 0;
+            const level2 =
+              (
+                InstrumentType[
+                  InstrumentTypeEnum[type2] || InstrumentTypeEnum.unknown
+                ] || {}
+              ).level || 0;
+            return level2 - level1;
+          },
+        )[0]
+      : (types as StrategyExtTypes[]).sort(
+          (type1: StrategyExtTypes, type2: StrategyExtTypes) => {
+            const level1 = (StrategyExtType[type1] || {}).level || 0;
+            const level2 = (StrategyExtType[type2] || {}).level || 0;
+            return level2 - level1;
+          },
+        )[0];
 
     extTypeMap[extKey] = primaryType;
   });
@@ -612,23 +650,17 @@ export const statTimeEnd = (name: string) => {
 
 export const getExtConfigList = (
   extConfigs: KungfuApi.KfExtConfigs,
-  extensionType: KfCategoryTypes,
+  category: KfCategoryTypes,
 ): ExtensionData[] => {
-  const target = extConfigs[extensionType];
+  const target = extConfigs[category];
   return Object.keys(target || {})
     .map((extKey: string) => {
-      const sourceInstrumentType = (target || {})[extKey]?.type;
-
-      if (sourceInstrumentType === undefined) {
-        return null;
-      }
-
-      const isTypeStr = typeof sourceInstrumentType === 'string';
+      const extType = (target || {})[extKey]?.type || 'unknown';
       return {
         key: extKey,
         name: (target || {})[extKey]?.name || extKey,
         extPath: (target || {})[extKey]?.extPath || '',
-        type: isTypeStr ? [sourceInstrumentType] : [...sourceInstrumentType],
+        type: resolveTypesInExtConfig(category, extType),
       };
     })
     .filter((extData: ExtensionData | null) => !!extData) as ExtensionData[];

@@ -1,5 +1,4 @@
 const isEnglish = process.env.LANG_ENV === 'en';
-
 import {
   InstrumentTypeEnum,
   InstrumentTypes,
@@ -18,6 +17,7 @@ import {
   FutureArbitrageCodeEnum,
   SpaceTabSettingEnum,
   SpaceSizeSettingEnum,
+  StrategyExtTypes,
 } from '../typings/enums';
 
 import { Pm2ProcessStatusTypes } from '../utils/processUtils';
@@ -409,6 +409,26 @@ export const InstrumentType: Record<
   [InstrumentTypeEnum.simu]: {
     name: isEnglish ? 'KungFuSimu' : '功夫模拟',
     color: 'green',
+    level: 10,
+  },
+};
+
+export const StrategyExtType: Record<
+  StrategyExtTypes,
+  KungfuApi.KfTradeValueCommonData
+> = {
+  unknown: {
+    name: isEnglish ? 'Unknown' : '未知',
+    color: 'default',
+  },
+  default: {
+    name: isEnglish ? 'Default' : '封装策略',
+    color: 'cyan',
+    level: 9,
+  },
+  trade: {
+    name: isEnglish ? 'Trade' : '下单任务',
+    color: 'blue',
     level: 10,
   },
 };
