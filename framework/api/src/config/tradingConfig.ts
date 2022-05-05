@@ -16,6 +16,7 @@ import {
   FutureArbitrageCodeEnum,
   SpaceTabSettingEnum,
   SpaceSizeSettingEnum,
+  StrategyExtTypes,
 } from '../typings/enums';
 
 import { Pm2ProcessStatusTypes } from '../utils/processUtils';
@@ -406,6 +407,26 @@ export const InstrumentType: Record<
   [InstrumentTypeEnum.simu]: {
     name: t('tradingConfig.kungfu_simu'),
     color: 'green',
+    level: 10,
+  },
+};
+
+export const StrategyExtType: Record<
+  StrategyExtTypes,
+  KungfuApi.KfTradeValueCommonData
+> = {
+  unknown: {
+    name: t('tradingConfig.un_known'),
+    color: 'default',
+  },
+  default: {
+    name: t('tradingConfig.default'),
+    color: 'cyan',
+    level: 9,
+  },
+  trade: {
+    name: t('tradingConfig.order_task'),
+    color: 'blue',
     level: 10,
   },
 };

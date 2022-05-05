@@ -16,6 +16,7 @@ import {
   KfCategoryTypes,
   LedgerCategoryEnum,
   ProcessStatusTypes,
+  StrategyExtTypes,
 } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import {
   getKfCategoryData,
@@ -998,16 +999,38 @@ export const useExtConfigsRelated = (): {
   uiExtConfigs: Ref<KungfuApi.KfUIExtConfigs>;
   tdExtTypeMap: ComputedRef<Record<string, InstrumentTypes>>;
   mdExtTypeMap: ComputedRef<Record<string, InstrumentTypes>>;
+  strategyExtTypeMap: ComputedRef<Record<string, StrategyExtTypes>>;
 } => {
   const { extConfigs, uiExtConfigs } = storeToRefs(useGlobalStore());
-  const tdExtTypeMap = computed(() => buildExtTypeMap(extConfigs.value, 'td'));
-  const mdExtTypeMap = computed(() => buildExtTypeMap(extConfigs.value, 'md'));
+  const tdExtTypeMap = computed(
+    () =>
+      buildExtTypeMap(extConfigs.value, 'td') as Record<
+        string,
+        InstrumentTypes
+      >,
+  );
+  const mdExtTypeMap = computed(
+    () =>
+      buildExtTypeMap(extConfigs.value, 'md') as Record<
+        string,
+        InstrumentTypes
+      >,
+  );
+
+  const strategyExtTypeMap = computed(
+    () =>
+      buildExtTypeMap(extConfigs.value, 'strategy') as Record<
+        string,
+        StrategyExtTypes
+      >,
+  );
 
   return {
     extConfigs,
     uiExtConfigs,
     tdExtTypeMap,
     mdExtTypeMap,
+    strategyExtTypeMap,
   };
 };
 

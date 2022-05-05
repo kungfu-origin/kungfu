@@ -28,6 +28,7 @@ import {
   InstrumentTypeEnum,
   OffsetEnum,
   SideEnum,
+  StrategyExtTypes,
 } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import { getKfGlobalSettingsValue } from '@kungfu-trader/kungfu-js-api/config/globalSettings';
 import {
@@ -144,7 +145,9 @@ const currentPosition = computed(() => {
 });
 
 const availTradingTaskExtensionList = computed(() => {
-  return getExtConfigList(extConfigs.value, 'strategy');
+  return getExtConfigList(extConfigs.value, 'strategy').filter((item) =>
+    (item.type as StrategyExtTypes[]).includes('trade'),
+  );
 });
 
 onMounted(() => {

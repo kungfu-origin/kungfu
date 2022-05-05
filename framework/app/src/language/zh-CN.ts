@@ -85,6 +85,8 @@ export default {
 
   tradingConfig: {
     un_known: '未知',
+    default: '封装策略',
+    order_task: '下单任务',
 
     running: '运行中',
     stopping: '停止中',

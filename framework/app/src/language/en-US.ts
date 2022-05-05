@@ -85,6 +85,8 @@ export default {
 
   tradingConfig: {
     un_known: 'Unknown',
+    default: 'Default',
+    order_task: 'Trade',
 
     running: 'Running',
     stopping: 'Stopping',
