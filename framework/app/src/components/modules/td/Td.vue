@@ -172,9 +172,11 @@ function handleOpenSetTdModal(
   ];
 
   if (!extConfig) {
-    error(t('tdConfig.td_not_found', {
-      td: selectedSource,
-    }));
+    error(
+      t('tdConfig.td_not_found', {
+        td: selectedSource,
+      }),
+    );
     return;
   }
 
@@ -249,10 +251,10 @@ function handleConfirmAddUpdateTdGroup(
 function handleRemoveTdGroup(item: KungfuApi.KfExtraLocation) {
   confirmModal(
     t('tdConfig.delete_amount_group', {
-      group: item.name
+      group: item.name,
     }),
     `${t('tdConfig.delete_amount_group', {
-      group: item.name
+      group: item.name,
     })}, ${t('tdConfig.confirm_delete_group')}`,
   )
     .then(() => {

@@ -289,7 +289,7 @@ export default {
     sourse_not_found: '配置项不存在, 请检查 {value} package.json',
     need_only_group: '需保证该账户组名称唯一',
     delete_amount_group: '删除账户组{group}',
-    confirm_delete_group: '不会影响改账户组下账户进程, 确认删除'
+    confirm_delete_group: '不会影响改账户组下账户进程, 确认删除',
   },
 
   mdConfig: {
