@@ -41,6 +41,8 @@ KF_DEFINE_MARK_TYPE(AssetRequest, 402);
 KF_DEFINE_MARK_TYPE(PositionRequest, 403);
 KF_DEFINE_MARK_TYPE(AssetSync, 404);
 KF_DEFINE_MARK_TYPE(PositionSync, 405);
+KF_DEFINE_MARK_TYPE(KeepPositionsRequest, 406);
+KF_DEFINE_MARK_TYPE(RebuildPositionsRequest, 407);
 KF_DEFINE_MARK_TYPE(InstrumentEnd, 802);
 KF_DEFINE_MARK_TYPE(AlgoOrderInput, 20010);
 KF_DEFINE_MARK_TYPE(AlgoOrderReport, 20011);

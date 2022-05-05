@@ -141,6 +141,7 @@ class TraderSim(wc.Trader):
             order_action = event.OrderAction()
             if order_action.order_id in self.ctx.orders:
                 order = self.ctx.orders.pop(order_action.order_id)
+                order.update_time = yjj.now_in_nano()
                 order.status = (
                     lf.enums.OrderStatus.Cancelled
                     if order.volume_traded == 0

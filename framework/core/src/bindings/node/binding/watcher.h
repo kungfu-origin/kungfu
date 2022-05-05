@@ -95,7 +95,6 @@ protected:
 private:
   static Napi::FunctionReference constructor;
   const bool bypass_quotes_;
-  yijinjing::data::location_ptr ledger_location_;
   wingchun::broker::SilentAutoClient broker_client_;
   wingchun::book::Bookkeeper bookkeeper_;
   Napi::ObjectReference history_ref_;
@@ -110,7 +109,7 @@ private:
   serialize::JsResetCache reset_cache;
   yijinjing::cache::bank data_bank_;
   yijinjing::cache::trading_bank trading_bank_;
-  event_ptr event_cache_;
+  std::vector<kungfu::state<longfist::types::CacheReset>> reset_cache_states_;
   bool start_;
   std::unordered_map<uint32_t, longfist::types::InstrumentKey> subscribed_instruments_ = {};
   std::unordered_map<uint32_t, int> location_uid_states_map_ = {};
@@ -153,7 +152,7 @@ private:
 
   void SyncAppStatus();
 
-  void UpdateEventCache(const event_ptr e);
+  void UpdateEventCache(const event_ptr &event);
 
   void SyncEventCache();
 
@@ -220,7 +219,6 @@ private:
     int i = 0;
     kungfu::state<DataType> *pstate = nullptr;
     while (i < 1024 && order_queue.pop(pstate) && pstate != nullptr) {
-      SPDLOG_INFO("------- {}", pstate->data.to_string());
       update_ledger(pstate->update_time, pstate->source, pstate->dest, pstate->data);
       i++;
     }
@@ -271,7 +269,7 @@ private:
 
       Channel request = {};
       request.dest_id = strategy_location->uid;
-      request.source_id = ledger_location_->uid;
+      request.source_id = ledger_home_location_->uid;
       master_cmd_writer->write(trigger_time, request);
       request.source_id = account_location->uid;
       master_cmd_writer->write(trigger_time, request);

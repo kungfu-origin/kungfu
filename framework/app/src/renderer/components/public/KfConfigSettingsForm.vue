@@ -1,6 +1,11 @@
 <script setup lang="ts">
 import { dialog } from '@electron/remote';
-import { DashOutlined, CloseOutlined } from '@ant-design/icons-vue';
+import {
+  DeleteOutlined,
+  DashOutlined,
+  CloseOutlined,
+  PlusOutlined,
+} from '@ant-design/icons-vue';
 import {
   PriceTypeEnum,
   SideEnum,
@@ -10,6 +15,7 @@ import {
   buildInstrumentSelectOptionValue,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import {
+  defineComponent,
   getCurrentInstance,
   nextTick,
   reactive,
@@ -32,6 +38,7 @@ import {
   KfConfigValueArrayType,
   KfConfigValueBooleanType,
   getCombineValueByPrimaryKeys,
+  initFormStateByConfig,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { RuleObject } from 'ant-design-vue/lib/form';
 import {
@@ -49,6 +56,7 @@ const props = withDefaults(
     primaryKeyAvoidRepeatCompareTarget?: string[];
     layout?: 'horizontal' | 'vertical' | 'inline';
     labelAlign?: 'right' | 'left';
+    labelWrap?: boolean;
     labelCol?: number;
     wrapperCol?: number;
     rules?: Record<
@@ -69,6 +77,7 @@ const props = withDefaults(
     primaryKeyAvoidRepeatCompareExtra: '',
     layout: 'horizontal',
     labelAlign: 'right',
+    labelWrap: false,
     labelCol: 6,
     wrapperCol: 16,
     rules: () => ({}),
@@ -241,6 +250,10 @@ function noZeroValidator(_rule: RuleObject, value: number): Promise<void> {
     return Promise.reject(new Error(`请输入非零数字`));
   }
 
+  if (+value < 0) {
+    return Promise.reject(new Error(`请输入非负数`));
+  }
+
   return Promise.resolve();
 }
 
@@ -352,6 +365,21 @@ function parserPercentString(value: string): string {
   return value.replace('%', '');
 }
 
+function handleAddItemIntoTableRows(item: KungfuApi.KfConfigItem) {
+  const targetState = formState[item.key];
+  const tmp = initFormStateByConfig(item.columns || [], {});
+  if (targetState instanceof Array) {
+    targetState.push(tmp);
+  }
+}
+
+function handleRemoveItemIntoTableRows(item, index) {
+  const targetState = formState[item.key];
+  if (targetState instanceof Array) {
+    targetState.splice(index, 1);
+  }
+}
+
 defineExpose({
   validate,
   clearValidate,
@@ -362,8 +390,9 @@ defineExpose({
     class="kf-config-form"
     ref="formRef"
     :model="formState"
-    :label-col="{ span: labelCol }"
-    :wrapper-col="{ span: wrapperCol }"
+    :label-col="layout === 'inline' ? null : { span: labelCol }"
+    :label-wrap="labelWrap"
+    :wrapper-col="layout === 'inline' ? null : { span: wrapperCol }"
     :labelAlign="labelAlign"
     :colon="false"
     :scrollToFirstError="true"
@@ -643,7 +672,7 @@ defineExpose({
         :disabled="changeType === 'update' && item.primary"
       >
         <a-button size="small" @click="handleSelectFiles(item.key)">
-          <template #icon><DashOutlined /></template>
+          <template #icon><PlusOutlined /></template>
         </a-button>
         <div
           v-if="formState[item.key]"
@@ -652,7 +681,7 @@ defineExpose({
           :title="file"
         >
           <span class="name">{{ file }}</span>
-          <close-outlined
+          <CloseOutlined
             v-if="!(item.default as string[]).includes(file)"
             class="kf-hover"
             @click="handleRemoveFile(item.key, file)"
@@ -667,9 +696,48 @@ defineExpose({
         "
         @change="handleTimePickerChange($event as unknown as Dayjs, item.key)"
       ></a-time-picker>
+      <div
+        class="table-in-config-setting-form"
+        v-else-if="item.type === 'table'"
+      >
+        <a-button>
+          <template #icon>
+            <PlusOutlined @click.stop="handleAddItemIntoTableRows(item)" />
+          </template>
+        </a-button>
+        <div
+          class="table-in-config-setting-row"
+          v-for="(_item, index) in formState[item.key]"
+          :key="`${index}_${formState[item.key].length}`"
+        >
+          <a-button size="small">
+            <template #icon>
+              <DeleteOutlined
+                @click="handleRemoveItemIntoTableRows(item, index)"
+              />
+            </template>
+          </a-button>
+          <KfConfigSettingsForm
+            v-model:formState="formState[item.key][index]"
+            :configSettings="item.columns || []"
+            :changeType="changeType"
+            :rules="rules"
+            layout="inline"
+          ></KfConfigSettingsForm>
+
+          <a-divider
+            v-if="index !== formState[item.key].length - 1"
+          ></a-divider>
+        </div>
+      </div>
     </a-form-item>
   </a-form>
 </template>
+<script lang="ts">
+export default defineComponent({
+  name: 'KfConfigSettingsFrom',
+});
+</script>
 <style lang="less">
 .kf-config-form {
   .kf-form-item__warp {
@@ -689,6 +757,27 @@ defineExpose({
 
       button {
         width: 40px;
+      }
+    }
+  }
+
+  .table-in-config-setting-form {
+    .table-in-config-setting-row {
+      margin-top: 10px;
+
+      > .ant-btn {
+        float: right;
+      }
+
+      .ant-form {
+        padding-right: 60px;
+        box-sizing: border-box;
+
+        &.ant-form-inline {
+          .ant-row.ant-form-item {
+            margin-bottom: 8px;
+          }
+        }
       }
     }
   }

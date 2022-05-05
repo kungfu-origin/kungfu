@@ -25,7 +25,7 @@ import { ExchangeIds } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
 import dayjs from 'dayjs';
 import { BrowserWindow, getCurrentWindow, dialog } from '@electron/remote';
 import { ipcRenderer } from 'electron';
-import { message } from 'ant-design-vue';
+import { message, Modal } from 'ant-design-vue';
 import {
   InstrumentTypes,
   KfUIExtLocatorTypes,
@@ -33,6 +33,7 @@ import {
 import path from 'path';
 import { startExtDaemon } from '@kungfu-trader/kungfu-js-api/utils/processUtils';
 import { Proc } from 'pm2';
+import { VueNode } from 'ant-design-vue/lib/_util/type';
 
 // this utils file is only for ui components
 export const getUIComponents = (
@@ -503,4 +504,23 @@ export const isInTdGroup = (
     return item.children?.includes(accountId);
   });
   return targetGroups[0] || null;
+};
+
+export const confirmModal = (
+  title: string,
+  content: VueNode | (() => VueNode) | string,
+  okText = '确 定',
+  cancelText = '取 消',
+): Promise<void> => {
+  return new Promise((resolve) => {
+    Modal.confirm({
+      title: title,
+      content: content,
+      okText: okText,
+      cancelText: cancelText,
+      onOk: () => {
+        resolve();
+      },
+    });
+  });
 };

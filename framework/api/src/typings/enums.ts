@@ -38,6 +38,8 @@ export enum InstrumentTypeEnum {
 
 export type InstrumentTypes = keyof typeof InstrumentTypeEnum;
 
+export type StrategyExtTypes = 'trade' | 'default' | 'unknown';
+
 export enum HedgeFlagEnum {
   Speculation,
   Arbitrage,
