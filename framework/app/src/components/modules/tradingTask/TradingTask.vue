@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import {
+  confirmModal,
   handleOpenLogview,
   useDashboardBodySize,
   useTableSearchKeyword,
@@ -18,7 +19,6 @@ import {
 } from '@ant-design/icons-vue';
 
 import { columns, categoryRegisterConfig } from './config';
-import { message, Modal } from 'ant-design-vue';
 import path from 'path';
 import {
   dealKfConfigValueByType,
@@ -41,7 +41,11 @@ import {
   useExtConfigsRelated,
   useProcessStatusDetailData,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
+import { messagePrompt } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
+import VueI18n from '@kungfu-trader/kungfu-app/src/language';
 
+const { t } = VueI18n.global;
+const { success, error } = messagePrompt();
 const { extConfigs } = useExtConfigsRelated();
 const { dashboardBodyHeight, handleBodySizeChange } = useDashboardBodySize();
 const { processStatusData, processStatusDetailData } =
@@ -52,7 +56,7 @@ const setTaskModalVisible = ref<boolean>(false);
 const currentSelectedExtKey = ref<string>('');
 const setTaskConfigPayload = ref<KungfuApi.SetKfConfigPayload>({
   type: 'add',
-  title: '交易任务',
+  title: t('TradingTask'),
   config: {} as KungfuApi.KfExtConfig,
 });
 
@@ -94,7 +98,7 @@ function handleOpenSetTaskModal(
   taskConfig?: Record<string, KungfuApi.KfConfigValue>,
 ) {
   if (selectedExtKey === '') {
-    message.error(`交易任务插件 key 不存在`);
+    error(t('tradingTaskConfig.key_inexistence'));
     return;
   }
 
@@ -103,7 +107,7 @@ function handleOpenSetTaskModal(
   ];
 
   if (!extConfig) {
-    message.error(`${selectedExtKey} 交易任务插件不存在`);
+    error(`${selectedExtKey} ${t('tradingTaskConfig.plugin_inexistence')}`);
     return;
   }
 
@@ -120,8 +124,10 @@ function handleOpenSetTaskModal(
   }
 
   if (!extConfig?.settings?.length) {
-    message.error(
-      `配置项不存在, 请检查 ${extConfig?.name || selectedExtKey} package.json`,
+    error(
+      `${t('tradingTaskConfig.configuration_inexistence')} ${
+        extConfig?.name || selectedExtKey
+      } package.json`,
     );
     return;
   }
@@ -138,7 +144,7 @@ function handleSwitchProcessStatusResolved(
 
   const taskLocation = getTaskKfLocationByProcessId(record?.name || '');
   if (!taskLocation) {
-    message.error(`${record.name} 不是合法交易任务进程ID`);
+    error(`${record.name} ${t('tradingTaskConfig.illegal_process_id')}`);
     return;
   }
 
@@ -149,10 +155,10 @@ function handleSwitchProcessStatusResolved(
       processStatusData.value,
     )
       .then(() => {
-        message.success('操作成功');
+        success();
       })
       .catch((err: Error) => {
-        message.error(err.message || '操作失败');
+        error(err.message || t('operation_failed'));
       });
   }
 
@@ -162,24 +168,28 @@ function handleSwitchProcessStatusResolved(
   ];
 
   if (!extConfig) {
-    message.error(`${extKey} 交易任务插件不存在`);
+    error(`${extKey} ${t('tradingTaskConfig.plugin_inexistence')}`);
     return;
   }
 
   if (!extConfig.extPath) {
-    message.error(`配置项不存在, 请检查 ${extConfig?.name} .so`);
+    error(
+      `${t('tradingTaskConfig.configuration_inexistence')} ${
+        extConfig?.name
+      } .so`,
+    );
     return;
   }
 
   const soPath = path.join(extConfig.extPath, extKey);
   const args = minimist(record.args as string[])['a'] || '';
   return startTask(taskLocation, soPath, args)
-    .catch((err: Error) => message.error(err.message))
+    .catch((err: Error) => error(err.message))
     .then(() => {
-      message.success('操作成功');
+      success();
     })
     .catch((err: Error) => {
-      message.error(err.message || '操作失败');
+      error(err.message || t('operation_failed'));
     });
 }
 
@@ -204,12 +214,16 @@ function handleConfirmAddUpdateTask(
   ];
 
   if (!extConfig) {
-    message.error(`${extKey} 交易任务插件不存在`);
+    error(`${extKey} ${t('tradingTaskConfig.plugin_inexistence')}`);
     return;
   }
 
   if (!extConfig.extPath) {
-    message.error(`配置项不存在, 请检查 ${extConfig?.name} .so`);
+    error(
+      `${t('tradingTaskConfig.configuration_inexistence')} ${
+        extConfig?.name
+      } .so`,
+    );
     return;
   }
 
@@ -218,15 +232,15 @@ function handleConfirmAddUpdateTask(
   return ensureRemoveTask(taskLocation)
     .then(() => startTask(taskLocation, soPath, args))
     .then(() => {
-      message.success('操作成功');
+      success();
     })
-    .catch((err: Error) => message.error(err.message || '操作失败'));
+    .catch((err: Error) => error(err.message || t('operation_failed')));
 }
 
 function handleOpenLogviewResolved(record: Pm2ProcessStatusDetail) {
   const taskLocation = getTaskKfLocationByProcessId(record?.name || '');
   if (!taskLocation) {
-    message.error(`${record.name} 不是合法交易任务进程ID`);
+    error(`${record.name} ${t('tradingTaskConfig.illegal_process_id')}`);
     return;
   }
   handleOpenLogview(taskLocation);
@@ -235,18 +249,17 @@ function handleOpenLogviewResolved(record: Pm2ProcessStatusDetail) {
 function handleRemoveTask(record: Pm2ProcessStatusDetail) {
   const taskLocation = getTaskKfLocationByProcessId(record?.name || '');
   if (!taskLocation) {
-    message.error(`${record.name} 不是合法交易任务进程ID`);
+    error(`${record.name} ${t('tradingTaskConfig.illegal_process_id')}`);
     return;
   }
 
-  Modal.confirm({
-    title: `删除交易任务 ${record.name}`,
-    content: `删除交易任务 ${record.name}, 所有数据, 如果该交易任务正在运行, 也将停止进程, 确认删除`,
-    okText: '确认',
-    cancelText: '取消',
-    onOk() {
-      return ensureRemoveTask(taskLocation);
-    },
+  confirmModal(
+    `${t('tradingTaskConfig.delete_task')} ${record.name}`,
+    `${t('tradingTaskConfig.delete_task')} ${record.name}, ${t(
+      'tradingTaskConfig.delete_task_content',
+    )}`,
+  ).then(() => {
+    return ensureRemoveTask(taskLocation);
   });
 }
 
@@ -317,12 +330,12 @@ function getDataByArgs(taskArgs: string): Record<string, string> {
 function customRowResolved(record: Pm2ProcessStatusDetail) {
   const taskLocation = getTaskKfLocationByProcessId(record?.name || '');
   if (!taskLocation) {
-    message.error(`${record.name} 不是合法交易任务进程ID`);
+    error(`${record.name} ${t('tradingTaskConfig.illegal_process_id')}`);
     return;
   }
   const locationResolved: KungfuApi.KfExtraLocation =
     resolveRowRecord(taskLocation);
-    
+
   return {
     onClick: () => {
       setCurrentGlobalKfLocation(locationResolved);
@@ -333,7 +346,7 @@ function customRowResolved(record: Pm2ProcessStatusDetail) {
 function dealRowClassNameResolved(record: Pm2ProcessStatusDetail): string {
   const taskLocation = getTaskKfLocationByProcessId(record?.name || '');
   if (!taskLocation) {
-    message.error(`${record.name} 不是合法交易任务进程ID`);
+    error(`${record.name} ${t('tradingTaskConfig.illegal_process_id')}`);
     return '';
   }
   const locationResolved: KungfuApi.KfExtraLocation =
@@ -368,7 +381,7 @@ onMounted(() => {
         <KfDashboardItem>
           <a-input-search
             v-model:value="searchKeyword"
-            placeholder="关键字"
+            :placeholder="$t('keyword_input')"
             style="width: 120px"
           />
         </KfDashboardItem>

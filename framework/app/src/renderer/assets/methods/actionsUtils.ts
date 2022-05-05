@@ -36,7 +36,7 @@ import {
   Pm2ProcessStatusData,
   Pm2ProcessStatusDetailData,
 } from '@kungfu-trader/kungfu-js-api/utils/processUtils';
-import { message, Modal } from 'ant-design-vue';
+import { Modal } from 'ant-design-vue';
 import path from 'path';
 import { Proc } from 'pm2';
 import {
@@ -66,6 +66,11 @@ import { ipcRenderer } from 'electron';
 import { throttleTime } from 'rxjs';
 import { useExtraCategory } from './uiExtraLocationUtils';
 import { useGlobalStore } from '../../pages/index/store/global';
+import VueI18n from '@kungfu-trader/kungfu-app/src/language';
+import { messagePrompt } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
+
+const { t } = VueI18n.global;
+const { success, error } = messagePrompt();
 
 export const ensureRemoveLocation = (
   kfLocation: KungfuApi.KfLocation | KungfuApi.KfConfig,
@@ -81,13 +86,13 @@ export const ensureRemoveLocation = (
       onOk() {
         return deleteAllByKfLocation(kfLocation)
           .then(() => {
-            message.success('操作成功');
+            success();
           })
           .then(() => {
             resolve();
           })
           .catch((err) => {
-            message.error('操作失败', err.message);
+            error(err.message || t('operation_failed'));
           });
       },
       onCancel() {
@@ -105,10 +110,10 @@ export const handleSwitchProcessStatus = (
   mouseEvent.stopPropagation();
   return switchKfLocation(window.watcher, kfLocation, checked)
     .then(() => {
-      message.success('操作成功');
+      success();
     })
     .catch((err: Error) => {
-      message.error(err.message || '操作失败');
+      error(err.message || t('operation_failed'));
     });
 };
 
@@ -153,10 +158,10 @@ export const useSwitchAllConfig = (
       ),
     )
       .then(() => {
-        message.success('操作成功');
+        success();
       })
       .catch((err: Error) => {
-        message.error(err.message || '操作失败');
+        error(err.message || t('operation_failed'));
       });
   };
 
@@ -199,7 +204,7 @@ export const useAddUpdateRemoveKfConfig = (): {
   ): Promise<void> => {
     const { formState, idByPrimaryKeys, changeType } = data;
 
-    const changeTypename = changeType === 'add' ? '添加' : '设置';
+    const changeTypename = changeType === 'add' ? t('add') : t('set');
     const categoryName = getKfCategoryData(category).name;
 
     const context =
@@ -228,13 +233,13 @@ export const useAddUpdateRemoveKfConfig = (): {
             }),
           )
             .then(() => {
-              message.success('操作成功');
+              success();
             })
             .then(() => {
               useGlobalStore().setKfConfigList();
             })
             .catch((err: Error) => {
-              message.error('操作失败 ' + err.message);
+              error('操作失败 ' + err.message);
             })
             .finally(() => {
               resolve();
@@ -325,10 +330,10 @@ export const useDealExportHistoryTradingData = (): {
       ])
         .then(() => {
           shell.showItemInFolder(ordersFilename);
-          message.success('操作成功');
+          success();
         })
         .catch((err: Error) => {
-          message.error(err.message);
+          error(err.message);
         });
     }
 
@@ -383,10 +388,10 @@ export const useDealExportHistoryTradingData = (): {
     return writeCSV(filename, exportDatas, dealTradingDataItemResolved)
       .then(() => {
         shell.showItemInFolder(filename);
-        message.success('操作成功');
+        success();
       })
       .catch((err: Error) => {
-        message.error(err.message);
+        error(err.message);
       });
   };
 

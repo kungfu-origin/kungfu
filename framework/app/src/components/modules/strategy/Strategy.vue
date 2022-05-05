@@ -36,13 +36,16 @@ import {
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import path from 'path';
 import KfBlinkNum from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfBlinkNum.vue';
+import VueI18n from '@kungfu-trader/kungfu-app/src/language';
+
+const { t } = VueI18n.global;
 
 const { dashboardBodyHeight, handleBodySizeChange } = useDashboardBodySize();
 
 const setStrategyModalVisible = ref<boolean>(false);
 const setStrategyConfigPayload = ref<KungfuApi.SetKfConfigPayload>({
   type: 'add',
-  title: '策略',
+  title: t('strategyConfig.strategy'),
   config: {} as KungfuApi.KfExtConfig,
 });
 
@@ -85,19 +88,19 @@ function handleOpenSetStrategyDialog(
   setStrategyConfigPayload.value.type = type;
   setStrategyConfigPayload.value.config = {
     type: [],
-    name: '策略',
+    name: t('strategyConfig.strategy'),
     settings: [
       {
         key: 'strategy_id',
-        name: '策略ID',
+        name: t('strategyConfig.strategy_id'),
         type: 'str',
         primary: true,
         required: true,
-        tip: '需保证该策略ID唯一',
+        tip: t('strategyConfig.strategy_tip'),
       },
       {
         key: 'strategy_path',
-        name: '策略路径',
+        name: t('strategyConfig.strategy_path'),
         type: 'file',
         required: true,
       },
@@ -129,7 +132,7 @@ function getStrategyPathShowName(kfConfig: KungfuApi.KfConfig): string {
         <KfDashboardItem>
           <a-input-search
             v-model:value="searchKeyword"
-            placeholder="关键字"
+            :placeholder="$t('keyword_input')"
             style="width: 120px"
           />
         </KfDashboardItem>

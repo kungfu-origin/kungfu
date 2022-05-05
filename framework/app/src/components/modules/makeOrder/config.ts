@@ -89,14 +89,14 @@ export const getConfigSettings = (
 };
 
 export const orderInputTrans: Record<string, string> = {
-  account_id: '账户',
-  instrument_id: '标的ID',
-  instrument_type: '标的类型',
-  side: '买卖',
-  offset: '开平',
-  hedge_flag: '套保',
-  price_type: '方式',
-  volume: '下单量',
-  exchange_id: '交易所ID',
-  limit_price: '限额',
+  account_id: t('tradingConfig.account'),
+  instrument_id: `${t('tradingConfig.instrument')}ID`,
+  instrument_type: t('tradingConfig.instrument_type'),
+  side: t('tradingConfig.side'),
+  offset: t('tradingConfig.offset'),
+  hedge_flag: t('tradingConfig.hedge'),
+  price_type: t('tradingConfig.price_type'),
+  volume: t('tradingConfig.volume'),
+  exchange_id: `${t('globalSettingConfig.exchange_id')}ID`,
+  limit_price: t('tradingConfig.limit_price'),
 };

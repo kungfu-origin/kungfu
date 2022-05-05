@@ -35,7 +35,7 @@ export const columns: AntTableColumns = [
 export const categoryRegisterConfig: KfCategoryRegisterProps = {
   name: 'globalTrade',
   commonData: {
-    name: '交易任务',
+    name: t('TradingTask'),
     color: 'purple',
   },
   order: {

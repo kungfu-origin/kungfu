@@ -7,13 +7,13 @@ import {
 } from '@ant-design/icons-vue';
 
 import {
+  messagePrompt,
   removeLoadingMask,
   setHtmlTitle,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import KfDashboard from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfDashboard.vue';
 import KfDashboardItem from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfDashboardItem.vue';
 import { ensureFileSync, outputFile } from 'fs-extra';
-import { message } from 'ant-design-vue';
 import { shell } from '@electron/remote';
 import { clipboard } from 'electron';
 import { platform } from 'os';
@@ -22,6 +22,10 @@ import {
   useLogInit,
   useLogSearch,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/logUtils';
+import VueI18n from '@kungfu-trader/kungfu-app/src/language';
+
+const { t } = VueI18n.global;
+const { success, error } = messagePrompt();
 
 const LOG_PATH = getLogPath();
 setHtmlTitle(`功夫交易系统 - ${LOG_PATH}`);
@@ -88,11 +92,11 @@ function handleRemoveLog(): Promise<void> {
   ensureFileSync(LOG_PATH);
   return outputFile(LOG_PATH, '')
     .then(() => {
-      message.success('操作成功');
+      success();
       resetLog();
     })
     .catch((err: Error) => {
-      message.error(err.message || '操作失败');
+      error(err.message || t('operation_failed'));
     });
 }
 
@@ -126,7 +130,7 @@ function resetLog() {
                 ref="inputSearchRef"
                 class="search-int-table__item"
                 v-model:value="searchKeyword"
-                placeholder="关键字"
+                :placeholder="$t('keyword_input')"
                 style="width: 120px"
               />
               <div class="current-to-total search-int-table__item">

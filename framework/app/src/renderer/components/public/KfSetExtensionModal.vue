@@ -8,6 +8,8 @@ import {
 import { useModalVisible } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import { KfCategoryTypes } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import { useExtConfigsRelated } from '../../assets/methods/actionsUtils';
+import VueI18n from '@kungfu-trader/kungfu-app/src/language';
+const { t } = VueI18n.global;
 
 const props = withDefaults(
   defineProps<{
@@ -37,11 +39,11 @@ const { modalVisible, closeModal } = useModalVisible(props.visible);
 
 const modalTitle = computed(() => {
   if (props.extensionType === 'td' || props.extensionType === 'md') {
-    return '选择柜台API';
+    return t('mdConfig.select_counter_api');
   } else if (props.extensionType === 'strategy') {
-    return '选择交易任务';
+    return t('mdConfig.select_trade_task');
   } else {
-    return '选择插件类型';
+    return t('mdConfig.select_plugin_type');
   }
 });
 

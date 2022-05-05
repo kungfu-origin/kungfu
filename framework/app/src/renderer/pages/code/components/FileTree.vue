@@ -66,7 +66,6 @@ import {
 import path from 'path';
 import { storeToRefs } from 'pinia';
 import { dialog } from '@electron/remote';
-import { message } from 'ant-design-vue';
 import { getTreeByFilePath } from '../../../assets/methods/codeUtils';
 import { useCodeStore } from '../store/codeStore';
 import FileNode from './FileNode.vue';
@@ -75,6 +74,7 @@ import { openFolder, buildFileObj } from '../../../assets/methods/codeUtils';
 
 import { FileAddFilled, FolderAddFilled } from '@ant-design/icons-vue';
 import { ipcEmitDataByName } from '../../../ipcMsg/emitter';
+import { messagePrompt } from '../../../assets/methods/uiUtils';
 
 const store = useCodeStore();
 const props = defineProps<{
@@ -85,6 +85,7 @@ const strategyPath = ref<string>('');
 const strategyPathName = ref<string>('');
 const { proxy } = getCurrentInstance() as ComponentInternalInstance;
 const { currentFile, fileTree } = storeToRefs(useCodeStore());
+const { success, error } = messagePrompt();
 
 watch(strategy.value as Code.Strategy, (newStrategy) => {
   getPath(newStrategy);
@@ -124,7 +125,7 @@ async function bindStrategyPath(strategyPathNew) {
       strategyId: strategy.value.strategy_id,
       strategyPath: strategyPathNew,
     });
-    message.success(`策略${strategy.value.strategy_id}文件路径修改成功！`);
+    success(`策略${strategy.value.strategy_id}文件路径修改成功！`);
     //每次更新path，需要通知root组件更新stratgy
     updateStrategyToApp(strategyPathNew);
   }
@@ -206,7 +207,7 @@ async function initFileTree(strategy) {
     ids = fileTreeData.ids;
     rootFileTree = fileTreeData.fileTree;
   } catch (err) {
-    message.error(err);
+    error(err);
   }
 
   // 处理根

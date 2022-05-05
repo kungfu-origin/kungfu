@@ -85,7 +85,7 @@ export const getColumns = (
 export const categoryRegisterConfig: KfCategoryRegisterProps = {
   name: 'tdGroup',
   commonData: {
-    name: '账户分组',
+    name: t('tdConfig.td_group'),
     color: '#FAAD14',
   },
   order: {

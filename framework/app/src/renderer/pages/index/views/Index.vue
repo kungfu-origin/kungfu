@@ -21,8 +21,9 @@ import {
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/configs';
 import { usePreStartAndQuitApp } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
 import KfAddBoardModalVue from '../../../components/public/KfAddBoardModal.vue';
-import { message } from 'ant-design-vue';
 import globalBus from '../../../assets/methods/globalBus';
+import { messagePrompt } from '../../../assets/methods/uiUtils';
+const { success } = messagePrompt();
 
 export default defineComponent({
   name: 'Index',
@@ -46,7 +47,7 @@ export default defineComponent({
       if (data.tag === 'main') {
         if (data.name === 'reset-main-dashboard') {
           initBoardsMap(defaultBoardsMap);
-          message.success('操作成功');
+          success();
         }
       }
     });

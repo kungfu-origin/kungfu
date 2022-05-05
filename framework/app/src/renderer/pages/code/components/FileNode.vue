@@ -147,7 +147,7 @@ import {
   getCurrentInstance,
   ComponentInternalInstance,
 } from 'vue';
-import { message, Modal, Alert } from 'ant-design-vue';
+import { Alert } from 'ant-design-vue';
 import { openFolder } from '../../../assets/methods/codeUtils';
 import {
   removeFileFolder,
@@ -155,6 +155,9 @@ import {
 } from '@kungfu-trader/kungfu-js-api/utils/fileUtils';
 import fse from 'fs-extra';
 import { ipcEmitDataByName } from '../../../ipcMsg/emitter';
+import { confirmModal, messagePrompt } from '../../../assets/methods/uiUtils';
+
+const { success, error, warning } = messagePrompt();
 const { proxy } = getCurrentInstance() as ComponentInternalInstance;
 
 const store = useCodeStore();
@@ -251,9 +254,9 @@ const handleAddFileBlur = (e) => {
       type: type,
     });
     reloadFolder(parentId, filename);
-    message.success(`${typeName}创建成功！`);
+    success(`${typeName}创建成功！`);
   } catch (err) {
-    message.error(err.message || '操作失败！');
+    error(err.message || '操作失败！');
   }
   //重置
   resetStatus();
@@ -296,36 +299,23 @@ function handleDelete() {
   ) {
     const parentId = fileNode.value?.parentId;
     const typeName = type == 'folder' ? '文件夹' : '文件';
-    Modal.confirm({
-      title: '提示',
-      content: `确认删除该${typeName}吗？`,
-      okText: '确 定',
-      cancelText: '取 消',
-      onOk() {
-        removeFileFolder(fileNode.value?.filePath || '')
-          .then(() => {
-            store.setCurrentFile(entryFile.value);
-          })
-          .then(() =>
-            openFolder(
-              fileTree.value[parentId || 0],
-              fileTree.value,
-              true,
-              true,
-            ),
-          )
-          .then(() => message.success(`${typeName}删除成功！`))
-          .catch((err) => {
-            if (err == 'cancel') return;
-            message.error(err.message || '操作失败！');
-          });
-      },
-      onCancel() {
-        return;
-      },
+
+    confirmModal('提示', `确认删除该${typeName}吗？`).then(() => {
+      removeFileFolder(fileNode.value?.filePath || '')
+        .then(() => {
+          store.setCurrentFile(entryFile.value);
+        })
+        .then(() =>
+          openFolder(fileTree.value[parentId || 0], fileTree.value, true, true),
+        )
+        .then(() => success(`${typeName}删除成功！`))
+        .catch((err) => {
+          if (err == 'cancel') return;
+          error(err.message || '操作失败！');
+        });
     });
   } else {
-    message.warning('不可删除入口文件');
+    warning('不可删除入口文件');
     return;
   }
 }

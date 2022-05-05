@@ -9,8 +9,8 @@ export const defaultBoardsMap: KfLayout.BoardsMap = {
   '4': {
     paId: 1,
     direction: 'h',
-    contents: [t('Td.name')],
-    current: t('Td.name'),
+    contents: [t('Td')],
+    current: t('Td'),
     height: '23.294%',
     width: 0,
   },
@@ -24,53 +24,53 @@ export const defaultBoardsMap: KfLayout.BoardsMap = {
   '8': {
     paId: 2,
     direction: 'h',
-    contents: [t('Md.name')],
-    current: t('Md.name'),
+    contents: [t('Md')],
+    current: t('Md'),
     height: '17.577%',
   },
   '9': {
     paId: 2,
     direction: 'h',
-    contents: [t('Pos.name')],
-    current: t('Pos.name'),
+    contents: [t('Pos')],
+    current: t('Pos'),
     height: '28.157%',
   },
   '10': { paId: 2, direction: 'h', children: [11, 12], height: '54.266%' },
   '11': {
     paId: 10,
     direction: 'v',
-    contents: [t('OrderBook.name')],
-    current: t('OrderBook.name'),
+    contents: [t('OrderBook')],
+    current: t('OrderBook'),
     width: '43.279%',
   },
   '12': {
     paId: 10,
     direction: 'v',
-    contents: [t('MakeOrderDashboard.name'), t('FutureArbitrage.name')],
-    current: t('MakeOrderDashboard.name'),
+    contents: [t('MakeOrderDashboard'), t('FutureArbitrage')],
+    current: t('MakeOrderDashboard'),
     width: '56.721%',
   },
   '13': {
     paId: 5,
     direction: 'v',
-    contents: [t('MarketData.name')],
-    current: t('MarketData.name'),
+    contents: [t('MarketData')],
+    current: t('MarketData'),
     width: '23.045%',
   },
   '14': { paId: 5, direction: 'v', width: '76.955%', children: [16, 15] },
   '15': {
     paId: 14,
     direction: 'h',
-    contents: [t('Order.name'), t('Trade.name')],
-    current: t('Order.name'),
+    contents: [t('Order'), t('Trade')],
+    current: t('Order'),
     width: 0,
     height: 0,
   },
   '16': {
     paId: 14,
     direction: 'h',
-    contents: [t('Strategy.name'), t('TradingTask.name'), t('PosGlobal.name')],
-    current: t('Strategy.name'),
+    contents: [t('Strategy'), t('TradingTask'), t('PosGlobal')],
+    current: t('Strategy'),
   },
 };
 
@@ -93,7 +93,7 @@ export const coreForScheduleTasksOptions: Array<{
   category: KfCategoryTypes;
 }> = [
   {
-    label: '主控进程',
+    label: t('globalSettingConfig.master'),
     value: 'core',
     category: 'system',
   },
@@ -104,11 +104,11 @@ export const modeForScheduleTasksOptions: Array<{
   value: KungfuApi.ScheduleTaskMode;
 }> = [
   {
-    label: '启动',
+    label: t('globalSettingConfig.start'),
     value: 'start',
   },
   {
-    label: '停止',
+    label: t('globalSettingConfig.stop'),
     value: 'stop',
   },
 ];
@@ -118,15 +118,15 @@ export const modeForCoreScheduleTasksOptions: Array<{
   value: KungfuApi.ScheduleTaskMode;
 }> = [
   {
-    label: '重启',
+    label: t('globalSettingConfig.restart'),
     value: 'restart',
   },
   {
-    label: '启动',
+    label: t('globalSettingConfig.start'),
     value: 'start',
   },
   {
-    label: '停止',
+    label: t('globalSettingConfig.stop'),
     value: 'stop',
   },
 ];

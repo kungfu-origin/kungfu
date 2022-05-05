@@ -142,7 +142,7 @@ getInstrumentTypeColor;
     :width="420"
     class="set-td-group-modal"
     v-model:visible="modalVisible"
-    title="账户分组设置"
+    :title="$t('tdConfig.set_td_group')"
     :destroyOnClose="true"
     :footer="null"
     @cancel="closeModal"
@@ -167,7 +167,7 @@ getInstrumentTypeColor;
           {{ dataRef.name }}
         </div>
         <div v-else-if="dataRef.category === 'tdGroup'">
-          <a-tag size="small" color="#FAAD14">账户组</a-tag>
+          <a-tag size="small" color="#FAAD14">{{ $t('tdConfig.account_group') }}</a-tag>
           {{ dataRef.name }}
         </div>
       </template>

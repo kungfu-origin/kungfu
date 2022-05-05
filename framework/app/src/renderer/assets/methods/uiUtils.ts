@@ -34,6 +34,8 @@ import path from 'path';
 import { startExtDaemon } from '@kungfu-trader/kungfu-js-api/utils/processUtils';
 import { Proc } from 'pm2';
 import { VueNode } from 'ant-design-vue/lib/_util/type';
+import VueI18n from '@kungfu-trader/kungfu-app/src/language';
+const { t } = VueI18n.global;
 
 // this utils file is only for ui components
 export const getUIComponents = (
@@ -289,12 +291,33 @@ export const useIpcListener = (): void => {
 
 export const markClearJournal = (): void => {
   localStorage.setItem('clearJournalTradingDate', '');
-  message.success('清理 journal 完成, 请重启应用');
+  messagePrompt().success('清理 journal 完成, 请重启应用');
 };
 
 export const markClearDB = (): void => {
   localStorage.setItem('clearDBTradingDate', '');
-  message.success('清理 DB 完成, 请重启应用');
+  messagePrompt().success('清理 DB 完成, 请重启应用');
+};
+
+export const messagePrompt = (): {
+  success(msg?: string): void;
+  error(msg?: string): void;
+  warning(msg: string): void;
+} => {
+  const success = (msg: string = t('operation_success')): void => {
+    message.success(msg);
+  };
+  const error = (msg: string = t('operation_failed')): void => {
+    message.error(msg);
+  };
+  const warning = (msg: string): void => {
+    message.warning(msg);
+  };
+  return {
+    success,
+    error,
+    warning,
+  };
 };
 
 export const handleOpenLogview = (
@@ -509,8 +532,8 @@ export const isInTdGroup = (
 export const confirmModal = (
   title: string,
   content: VueNode | (() => VueNode) | string,
-  okText = '确 定',
-  cancelText = '取 消',
+  okText = t('confirm'),
+  cancelText = t('cancel'),
 ): Promise<void> => {
   return new Promise((resolve) => {
     Modal.confirm({

@@ -16,10 +16,10 @@ import {
   useTriggerMakeOrder,
   useDashboardBodySize,
   confirmModal,
+  messagePrompt,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import { getConfigSettings } from './config';
 import { dealOrderPlaceVNode, dealStockOffset } from './orderUiUtils';
-import { message } from 'ant-design-vue';
 import {
   makeOrderByOrderInput,
   hashInstrumentUKey,
@@ -45,6 +45,10 @@ import {
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import OrderConfirmModal from './OrderConfirmModal.vue';
 import { useExtraCategory } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiExtraLocationUtils';
+import VueI18n from '@kungfu-trader/kungfu-app/src/language';
+
+const { t } = VueI18n.global;
+const { error } = messagePrompt();
 
 const app = getCurrentInstance();
 const { handleBodySizeChange } = useDashboardBodySize();
@@ -300,7 +304,7 @@ async function handleApartOrder(): Promise<void> {
     curOrderType.value = makeOrderInput.instrument_type;
   } catch (e) {
     if (typeof e === 'string') {
-      message.error(e);
+      error(e);
     }
   }
 }
@@ -327,7 +331,7 @@ async function handleApartedConfirm(volumeList: number[]): Promise<void> {
       }),
     );
   } catch (e) {
-    message.error(e);
+    error(e);
   }
 }
 
@@ -383,7 +387,7 @@ async function confirmOrderPlace(
   orderCount: number = 1,
 ): Promise<string> {
   if (!currentGlobalKfLocation.value || !window.watcher) {
-    return Promise.reject('当前 Location 错误');
+    return Promise.reject(t('location_error'));
   }
 
   const { account_id } = formState.value;
@@ -423,7 +427,7 @@ async function handleMakeOrder(): Promise<void> {
     );
   } catch (e) {
     if (typeof e === 'string') {
-      message.error(e);
+      error(e);
     }
   }
 }
@@ -486,7 +490,7 @@ function closeModalConditions(
       <template v-slot:header>
         <KfDashboardItem>
           <a-button size="small" @click="handleResetMakeOrderForm">
-            重置
+            {{ $t('tradingConfig.reset_order') }}
           </a-button>
         </KfDashboardItem>
       </template>
@@ -516,9 +520,11 @@ function closeModalConditions(
         </div>
         <div class="make-order-btn">
           <a-button class="make-order" size="small" @click="handleMakeOrder">
-            下单
+            {{ $t('tradingConfig.place_order') }}
           </a-button>
-          <a-button size="small" @click="handleApartOrder">拆单</a-button>
+          <a-button size="small" @click="handleApartOrder">
+            {{ $t('tradingConfig.apart_order') }}
+          </a-button>
         </div>
       </div>
     </KfDashboard>

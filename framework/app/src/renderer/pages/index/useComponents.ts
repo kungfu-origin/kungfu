@@ -12,7 +12,7 @@ export const useComponenets = (
   router: Router,
 ): Promise<void> => {
   app.component(
-    t('Pos.name'),
+    t('Pos'),
     defineAsyncComponent(
       () =>
         import('@kungfu-trader/kungfu-app/src/components/modules/pos/Pos.vue'),
@@ -20,7 +20,7 @@ export const useComponenets = (
   );
 
   app.component(
-    t('PosGlobal.name'),
+    t('PosGlobal'),
     defineAsyncComponent(
       () =>
         import(
@@ -30,7 +30,7 @@ export const useComponenets = (
   );
 
   app.component(
-    t('Order.name'),
+    t('Order'),
     defineAsyncComponent(
       () =>
         import(
@@ -40,7 +40,7 @@ export const useComponenets = (
   );
 
   app.component(
-    t('Trade.name'),
+    t('Trade'),
     defineAsyncComponent(
       () =>
         import(
@@ -50,7 +50,7 @@ export const useComponenets = (
   );
 
   app.component(
-    t('Td.name'),
+    t('Td'),
     defineAsyncComponent(
       () =>
         import('@kungfu-trader/kungfu-app/src/components/modules/td/Td.vue'),
@@ -58,7 +58,7 @@ export const useComponenets = (
   );
 
   app.component(
-    t('Md.name'),
+    t('Md'),
     defineAsyncComponent(
       () =>
         import('@kungfu-trader/kungfu-app/src/components/modules/md/Md.vue'),
@@ -66,7 +66,7 @@ export const useComponenets = (
   );
 
   app.component(
-    t('Strategy.name'),
+    t('Strategy'),
     defineAsyncComponent(
       () =>
         import(
@@ -76,7 +76,7 @@ export const useComponenets = (
   );
 
   app.component(
-    t('TradingTask.name'),
+    t('TradingTask'),
     defineAsyncComponent(
       () =>
         import(
@@ -86,7 +86,7 @@ export const useComponenets = (
   );
 
   app.component(
-    t('MarketData.name'),
+    t('MarketData'),
     defineAsyncComponent(
       () =>
         import(
@@ -96,7 +96,7 @@ export const useComponenets = (
   );
 
   app.component(
-    t('OrderBook.name'),
+    t('OrderBook'),
     defineAsyncComponent(
       () =>
         import(
@@ -106,7 +106,7 @@ export const useComponenets = (
   );
 
   app.component(
-    t('MakeOrderDashboard.name'),
+    t('MakeOrderDashboard'),
     defineAsyncComponent(
       () =>
         import(
@@ -116,7 +116,7 @@ export const useComponenets = (
   );
 
   app.component(
-    t('FutureArbitrage.name'),
+    t('FutureArbitrage'),
     defineAsyncComponent(
       () =>
         import(
@@ -126,18 +126,18 @@ export const useComponenets = (
   );
 
   app.config.globalProperties.$availKfBoards = [
-    t('Pos.name'),
-    t('PosGlobal.name'),
-    t('Order.name'),
-    t('Trade.name'),
-    t('Td.name'),
-    t('Md.name'),
-    t('Strategy.name'),
-    t('TradingTask.name'),
-    t('MarketData.name'),
-    t('OrderBook.name'),
-    t('MakeOrderDashboard.name'),
-    t('FutureArbitrage.name'),
+    t('Pos'),
+    t('PosGlobal'),
+    t('Order'),
+    t('Trade'),
+    t('Td'),
+    t('Md'),
+    t('Strategy'),
+    t('TradingTask'),
+    t('MarketData'),
+    t('OrderBook'),
+    t('MakeOrderDashboard'),
+    t('FutureArbitrage'),
   ];
 
   return useGlobalStore()

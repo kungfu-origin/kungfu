@@ -26,6 +26,7 @@ import {
   useDashboardBodySize,
   getInstrumentTypeColor,
   isInTdGroup,
+  confirmModal,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import {
   useAddUpdateRemoveKfConfig,
@@ -45,7 +46,6 @@ import {
   getIfProcessStopping,
   getProcessIdByKfLocation,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
-import { message, Modal } from 'ant-design-vue';
 import KfBlinkNum from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfBlinkNum.vue';
 import {
   addTdGroup,
@@ -54,7 +54,11 @@ import {
 } from '@kungfu-trader/kungfu-js-api/actions';
 import SetTdGroupModal from './SetTdGroupModal.vue';
 import { useGlobalStore } from '@kungfu-trader/kungfu-app/src/renderer/pages/index/store/global';
+import { messagePrompt } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
+import VueI18n from '@kungfu-trader/kungfu-app/src/language';
 
+const { t } = VueI18n.global;
+const { success, error } = messagePrompt();
 const { dashboardBodyHeight, handleBodySizeChange } = useDashboardBodySize();
 
 const app = getCurrentInstance();
@@ -168,7 +172,7 @@ function handleOpenSetTdModal(
   ];
 
   if (!extConfig) {
-    message.error(`${selectedSource} 柜台插件不存在`);
+    error(`${selectedSource} 柜台插件不存在`);
     return;
   }
 
@@ -185,7 +189,7 @@ function handleOpenSetTdModal(
   }
 
   if (!extConfig?.settings?.length) {
-    message.error(
+    error(
       `配置项不存在, 请检查 ${extConfig?.name || selectedSource} package.json`,
     );
     return;
@@ -235,32 +239,30 @@ function handleConfirmAddUpdateTdGroup(
       return setTdGroups();
     })
     .then(() => {
-      message.success('操作成功');
+      success();
     })
     .catch((err) => {
-      message.error(err.message || '操作失败');
+      error(err.message || t('operation_failed'));
     });
 }
 
 function handleRemoveTdGroup(item: KungfuApi.KfExtraLocation) {
-  Modal.confirm({
-    title: `删除账户组 ${item.name}`,
-    content: `删除账户组 ${item.name}, 不会影响改账户组下账户进程, 确认删除`,
-    okText: '确认',
-    cancelText: '取消',
-    onOk() {
-      return removeTdGroup(item.name)
-        .then(() => {
-          return setTdGroups();
-        })
-        .then(() => {
-          message.success('操作成功');
-        })
-        .catch((err) => {
-          message.error(err.message || '操作失败');
-        });
-    },
-  });
+  confirmModal(
+    `删除账户组 ${item.name}`,
+    `删除账户组 ${item.name}, 不会影响改账户组下账户进程, 确认删除`,
+  )
+    .then(() => {
+      return removeTdGroup(item.name);
+    })
+    .then(() => {
+      return setTdGroups();
+    })
+    .then(() => {
+      success();
+    })
+    .catch((err) => {
+      error(err.message || t('operation_failed'));
+    });
 }
 
 function handleRemoveTd(item: KungfuApi.KfConfig) {
@@ -285,7 +287,7 @@ function handleRemoveTd(item: KungfuApi.KfConfig) {
         <KfDashboardItem>
           <a-input-search
             v-model:value="searchKeyword"
-            placeholder="关键字"
+            :placeholder="$t('keyword_input')"
             style="width: 120px"
           />
         </KfDashboardItem>

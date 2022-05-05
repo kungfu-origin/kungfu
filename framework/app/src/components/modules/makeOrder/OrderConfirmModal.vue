@@ -1,9 +1,15 @@
 <script setup lang="ts">
-import { useModalVisible } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
+import {
+  messagePrompt,
+  useModalVisible,
+} from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import { InstrumentTypeEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';
-import { message } from 'ant-design-vue';
 import { ref, toRefs, computed, getCurrentInstance } from 'vue';
 import { ShotableInstrumentTypes } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
+import VueI18n from '@kungfu-trader/kungfu-app/src/language';
+const { t } = VueI18n.global;
+
+const { error } = messagePrompt();
 const app = getCurrentInstance();
 
 const props = withDefaults(
@@ -44,7 +50,7 @@ const volume = ref<number>(defaultVolume.value);
 
 function handleConfirm() {
   if (volume.value === null) {
-    message.error('下单量不可为空');
+    error(t('tradingConfig.no_empty'));
     return;
   }
   const remainder: number = curOrderVolume.value % +volume.value; // 剩余数量
@@ -66,16 +72,16 @@ function handleConfirm() {
     class="kf-order-confirm-modal"
     :width="420"
     v-model:visible="modalVisible"
-    title="拆单"
+    :title="$t('tradingConfig.apart_order')"
     :destroyOnClose="true"
     @cancel="closeModal"
     @ok="handleConfirm"
   >
     <a-row class="apart-input">
       <a-col>
-        <a-statistic :value="curOrderVolume" title="总下单量" />
+        <a-statistic :value="curOrderVolume" :title="$t('tradingConfig.total_order_amount')" />
         <a-input-group compact style="margin-top: 10px" class="input-content">
-          <span>{{ '每次下单量: ' }}</span>
+          <span>{{ $t('tradingConfig.every_volume') }}: </span>
           <a-input-number
             class="input-number"
             :precision="0"
@@ -97,7 +103,7 @@ function handleConfirm() {
               : '--'
           "
           :valueStyle="{ fontSize: '35px' }"
-          title="下单次数"
+          :title="$t('tradingConfig.make_order_number')"
         />
       </a-col>
     </a-row>
