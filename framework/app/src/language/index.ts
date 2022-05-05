@@ -12,7 +12,7 @@ const messages = {
 };
 
 // 默认语言
-const langDefault = 'en-US';
+const langDefault = 'zh-HK';
 
 const i18n = createI18n({
   locale: langDefault, //默认显示的语言
