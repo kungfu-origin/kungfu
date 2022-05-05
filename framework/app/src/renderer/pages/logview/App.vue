@@ -28,7 +28,7 @@ const { t } = VueI18n.global;
 const { success, error } = messagePrompt();
 
 const LOG_PATH = getLogPath();
-setHtmlTitle(`功夫交易系统 - ${LOG_PATH}`);
+setHtmlTitle(`${t('kungfu')} - ${LOG_PATH}`);
 
 const boardSize = ref<{ width: number; height: number }>({
   width: 0,
@@ -121,7 +121,7 @@ function resetLog() {
               v-model:checked="scrollToBottomChecked"
               @change="scrollToBottom"
             >
-              滚动到底部
+              {{ $t('logview.scroll_to_bottom') }}
             </a-checkbox>
           </KfDashboardItem>
           <KfDashboardItem>
@@ -158,12 +158,12 @@ function resetLog() {
           </KfDashboardItem>
           <KfDashboardItem>
             <a-button size="small" @click="handleOpenFileLocation">
-              文件夹
+              {{ $t('folder') }}
             </a-button>
           </KfDashboardItem>
           <KfDashboardItem>
             <a-button size="small" type="primary" @click="handleRemoveLog">
-              清空
+              {{ $t('clean') }}
             </a-button>
           </KfDashboardItem>
         </template>

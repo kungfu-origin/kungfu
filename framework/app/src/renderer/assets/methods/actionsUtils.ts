@@ -79,10 +79,13 @@ export const ensureRemoveLocation = (
   const id = getIdByKfLocation(kfLocation);
   return new Promise((resolve, reject) => {
     Modal.confirm({
-      title: `删除${categoryName} ${id}`,
-      content: `删除${categoryName} ${id} 所有数据, 如果该${categoryName}进程正在运行, 也将停止进程, 确认删除`,
-      okText: '确认',
-      cancelText: '取消',
+      title: `${t('delete')}${categoryName} ${id}`,
+      content: t('delete_category', {
+        category: `${categoryName} ${id}`,
+        categoryName: categoryName,
+      }),
+      okText: t('confirm'),
+      cancelText: t('cancel'),
       onOk() {
         return deleteAllByKfLocation(kfLocation)
           .then(() => {
@@ -209,14 +212,20 @@ export const useAddUpdateRemoveKfConfig = (): {
 
     const context =
       changeType === 'add'
-        ? `${categoryName}ID系统唯一, ${changeTypename}成功后不可更改, 确认${changeTypename} ${idByPrimaryKeys}`
-        : `确认${changeTypename} ${idByPrimaryKeys} 相关配置`;
+        ? t('add_config_modal', {
+            category: categoryName,
+            changeTypename: changeTypename,
+            key: `${changeTypename} ${idByPrimaryKeys}`,
+          })
+        : t('update_config_modal', {
+            key: `${changeTypename} ${idByPrimaryKeys}`,
+          });
     return new Promise((resolve) => {
       Modal.confirm({
         title: `${changeTypename}${categoryName} ${idByPrimaryKeys}`,
         content: context,
-        okText: '确认',
-        cancelText: '取消',
+        okText: t('confirm'),
+        cancelText: t('cancel'),
         onOk() {
           const kfLocation: KungfuApi.KfLocation = {
             category: category,
@@ -239,7 +248,7 @@ export const useAddUpdateRemoveKfConfig = (): {
               useGlobalStore().setKfConfigList();
             })
             .catch((err: Error) => {
-              error('操作失败 ' + err.message);
+              error(t('operation_failed') + err.message);
             })
             .finally(() => {
               resolve();
@@ -354,7 +363,7 @@ export const useDealExportHistoryTradingData = (): {
     const processId = getProcessIdByKfLocation(currentKfLocation);
     const filename: string = await dialog
       .showSaveDialog({
-        title: '保存文件',
+        title: t('save_file'),
         defaultPath: path.join(
           os.homedir(),
           `${processId}-${tradingDataType}-${dateResolved}.csv`,
@@ -454,7 +463,7 @@ export const showTradingDataDetail = (
       ]),
     );
   Modal.confirm({
-    title: `${typename} 详情`,
+    title: `${typename} ${t('detail')}`,
     content: h(
       'div',
       {
@@ -462,7 +471,7 @@ export const showTradingDataDetail = (
       },
       vnode,
     ),
-    okText: '确认',
+    okText: t('confirm'),
     cancelText: '',
   });
 };

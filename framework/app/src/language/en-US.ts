@@ -4,13 +4,66 @@ export default {
   success: 'success',
   error: 'error',
   add: 'add',
+  close: 'close',
+  delete: 'delete',
+  rename: 'rename',
   set: 'set',
+  clean: 'clean',
+  help: 'help',
+  run: 'run',
+  quit: 'quit',
   operation_success: 'operation success',
   operation_failed: 'operation failed',
   location_error: 'current location error',
   instrument_error: 'instrument error',
+  prompt: 'prompt',
+  warning: 'warning',
   confirm: 'confirm',
   cancel: 'cancel',
+  save_file: 'save file',
+  detail: 'detail',
+  ok: 'ok',
+
+  edit: 'Edit',
+  copy: 'Copy',
+  paste: 'Paste',
+  select_all: 'Select all',
+  undo: 'Undo',
+
+  open_resources_directory: 'Open Kungfu Resources directory (KF_HOME)',
+  open_install_directory: 'Open Kungfu installation directory',
+  open_basic_configuration: 'Open Kungfu basic configuration DB',
+  browsing_log: 'Browsing log files',
+
+  clear_journal: 'clear journal',
+  clear_DB: 'clear DB',
+  reset_main_panel: 'reset main panel',
+  export_all_transaction_data: 'export all transaction data',
+
+  website: 'website',
+  user_manual: 'user manual',
+  API_documentation: 'Strategy API documentation',
+  Kungfu_forum: 'Kungfu forum',
+
+  KungFu: 'Kungfu',
+  about_kungfu: 'About Kungfu',
+
+  file: 'file',
+  folder: 'folder',
+
+  no_focus: 'The current page is not in focus',
+  clear: 'Clearing {content} completed, please restart the application',
+  open_window: 'Opening window',
+  open_code_editor: 'Opening code editor',
+  add_board: 'Add Board',
+  select_board: 'Please select the board to add',
+  add_board_error: 'Add board target error',
+
+  delete_category:
+    'Delete all data in {category}, if the {categoryName} process is running, the process will also be stopped, confirm deletion',
+  add_config_modal:
+    '{category} ID unique in the system. {changeTypeName} cannot be modified after it succeeds.',
+  update_config_modal: 'Confirm {key} configurations',
 
   MakeOrderDashboard: 'Order Dashboard',
   FutureArbitrage: 'Future Arbitrage',
@@ -162,6 +215,15 @@ export default {
     no_empty: 'Order quantity cannot be empty',
     total_order_amount: 'Total Order Amount',
     every_volume: 'Every Volume',
+
+    fat_finger_buy_modal:
+      'The buying price exceeded the warning line, the current price is {price}, line for {warningLine}, fat finger is {fatFinger}',
+    fat_finger_sell_modal:
+      'The selling price exceeded the warning line, the current price is {price}, line for {warningLine}, fat finger is {fatFinger}',
+    start_process: 'please start {process} first',
+    place_confirm: 'Place Order Confirm',
+    close_all: 'Close All?',
+    Continue: 'Continue',
   },
 
   orderConfig: {
@@ -386,4 +448,69 @@ export default {
     stop: 'stop',
     restart: 'restart',
   },
+
+  validate: {
+    no_special_characters: 'Cannot contain special characters',
+    no_underscore: 'Cannot contain underscores',
+    no_zero_number: 'Cannot contain zero',
+    no_negative_number: 'Cannot contain negative',
+    value_existing: '{value} has been in existence',
+    mandatory: 'mandatory',
+  },
+
+  editor: {
+    set_strategy_entrance: 'Set Strategy Entry',
+    current_strategy: 'Current strategy',
+    new_file: 'New File',
+    new_folder: 'New Folder',
+    set_strategy_success: 'Strategy {file} file path changed successfully!',
+    entry_file: 'Entry File',
+    creaate_success: '{file} created successfully!',
+
+    name_repeat:
+      'This location already exists file or folder {name}, please select a different name!',
+    empty_input: 'File or folder name must be provided!',
+    illegal_character: 'The name cannot contain \\/:*?" <>|',
+    delate_confirm: 'Are you sure to delete {value}?',
+    cannot_delate_entry: 'Cannot delete the entry',
+  },
+
+  logview: {
+    scroll_to_bottom: 'Scroll to bottom',
+  },
+
+  master_interrupt: 'master interrupted',
+  master_desc:
+    'The master process is responsible for inter-policy process communication and resource configuration, please restart the application',
+
+  ledger_interrupt: 'ledger interrupted',
+  ledger_desc:
+    'Accounting services are responsible for position and capital calculations, please restart the application',
+
+  cached_interrupt: 'cached interrupted',
+  cached_desc:
+    'The storage service is responsible for data landing. The storage service disconnection does not affect transactions, please restart the application after the transaction',
+
+  state_interrupt_msg: '{state} has been disconnected',
+  state_interrupt_desc:
+    '{state} has been disconnected, transaction may be interrupted. Please check',
+
+  kungfu: 'Kungfu',
+
+  system_prompt: 'System Prompt',
+  archive_completion: 'Archive Completion',
+  archive: 'Kungfu archive...',
+  environment_complete: 'Kungfu environment ready to complete ✓',
+  environment_preparation: 'Kungfu environment in preparation...',
+  ready: 'Kungfu ready ✓',
+  wait_ready: 'Wait for Kungfu...',
+  saving_completed: 'Data saving completed ✓',
+  save_data: 'Save Data...',
+  end_all_transactions: 'End all transactions ✓',
+  closing: 'End the transaction process, Please do not close...',
+
+  quit_confirm:
+    'Exiting the application ends all transactions, Confirm to exit?',
+  restart_process:
+    'Kungfu graphics process is interrupted. The interruption will not affect transactions. Do you want to restart the graphics process?',
 };

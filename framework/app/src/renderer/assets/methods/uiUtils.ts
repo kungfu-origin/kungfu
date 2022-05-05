@@ -215,7 +215,7 @@ export const openNewBrowserWindow = (
     win.webContents.loadURL(modalPath);
     win.webContents.on('did-finish-load', () => {
       if (!currentWindow || Object.keys(currentWindow).length == 0) {
-        reject(new Error('当前页面没有聚焦'));
+        reject(new Error(t('no_focus')));
         return;
       }
       resolve(win);
@@ -291,12 +291,12 @@ export const useIpcListener = (): void => {
 
 export const markClearJournal = (): void => {
   localStorage.setItem('clearJournalTradingDate', '');
-  messagePrompt().success('清理 journal 完成, 请重启应用');
+  messagePrompt().success(t('clear', { content: 'journal' }));
 };
 
 export const markClearDB = (): void => {
   localStorage.setItem('clearDBTradingDate', '');
-  messagePrompt().success('清理 DB 完成, 请重启应用');
+  messagePrompt().success(t('clear', { content: 'DB' }));
 };
 
 export const messagePrompt = (): {
@@ -323,7 +323,7 @@ export const messagePrompt = (): {
 export const handleOpenLogview = (
   config: KungfuApi.KfConfig | KungfuApi.KfLocation,
 ): Promise<Electron.BrowserWindow | void> => {
-  const hideloading = message.loading('正在打开窗口');
+  const hideloading = message.loading(t('open_window'));
   const logPath = path.resolve(
     LOG_DIR,
     dayjs().format('YYYYMMDD'),
@@ -344,7 +344,7 @@ export const handleOpenLogviewByFile =
         const { filePaths } = res;
         if (filePaths.length) {
           const targetLogPath = filePaths[0];
-          const hideloading = message.loading('正在打开窗口');
+          const hideloading = message.loading(t('open_window'));
           return openLogView(targetLogPath).finally(() => {
             hideloading();
           });
@@ -357,7 +357,7 @@ export const handleOpenLogviewByFile =
 export const handleOpenCodeView = (
   config: KungfuApi.KfConfig | KungfuApi.KfLocation,
 ): Promise<Electron.BrowserWindow> => {
-  const openMessage = message.loading('正在打开代码编辑器');
+  const openMessage = message.loading(t('open_code_editor'));
   return openCodeView(getProcessIdByKfLocation(config)).finally(() => {
     openMessage();
   });

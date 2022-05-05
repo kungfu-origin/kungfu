@@ -260,7 +260,7 @@ function placeOrder(
 
 function initOrderInputData(): Promise<KungfuApi.MakeOrderInput> {
   if (!instrumentResolve.value) {
-    return Promise.reject(new Error('标的错误'));
+    return Promise.reject(new Error(t('instrument_error')));
   }
 
   const { exchangeId, instrumentId, instrumentType } = instrumentResolve.value;
@@ -346,7 +346,11 @@ function confirmFatFingerModal(
   const warnningMessage = dealFatFingerMessage(makeOrderInput);
 
   if (warnningMessage !== '') {
-    return confirmModal('警告', warnningMessage, '继续下单');
+    return confirmModal(
+      t('warning'),
+      warnningMessage,
+      t('tradingConfig.Continue'),
+    );
   } else {
     return Promise.resolve();
   }
@@ -373,15 +377,19 @@ function dealFatFingerMessage(
     fatFingerRange === 0 ? 0 : (100 - fatFingerRange) / 100;
 
   if (SideEnum.Buy == side && price > lastPrice * fatFingerBuyRate) {
-    return `买入价格超出警戒线，当前价格为${price}，警戒线为${(
-      lastPrice * fatFingerBuyRate
-    ).toFixed(4)}, 当前乌龙指阈值为${fatFingerRange}%`;
+    return t('tradingConfig.fat_finger_buy_modal', {
+      price: price,
+      warningLine: (lastPrice * fatFingerBuyRate).toFixed(4),
+      fatFinger: fatFingerRange,
+    });
   }
 
   if (SideEnum.Sell == side && price < lastPrice * fatFingerSellRate) {
-    return `卖出价格低于警戒线，当前价格为${price}，警戒线为${(
-      lastPrice * fatFingerSellRate
-    ).toFixed(4)}, 当前乌龙指阈值为${fatFingerRange}%`;
+    return t('tradingConfig.fat_finger_sell_modal', {
+      price: price,
+      warningLine: (lastPrice * fatFingerBuyRate).toFixed(4),
+      fatFinger: fatFingerRange,
+    });
   }
 
   return '';
@@ -402,11 +410,13 @@ async function confirmOrderPlace(
       : `td_${account_id.toString()}`;
 
   if (processStatusData.value[tdProcessId] !== 'online') {
-    return Promise.reject(`请先启动${tdProcessId}交易进程`);
+    return Promise.reject(
+      t('tradingConfig.start_process', { process: tdProcessId }),
+    );
   }
 
   await confirmModal(
-    '下单确认',
+    t('tradingConfig.place_confirm'),
     dealOrderPlaceVNode(makeOrderInput, orderCount),
   );
 
@@ -453,7 +463,7 @@ function showCloseModal(
       Number(currentPosition.value.volume),
     )
   ) {
-    return confirmModal('提示', '是否全部平仓');
+    return confirmModal(t('prompt'), t('tradingConfig.close_all'));
   }
 
   return Promise.resolve();
