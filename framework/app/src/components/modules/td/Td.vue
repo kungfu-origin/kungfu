@@ -66,7 +66,7 @@ const setSourceModalVisible = ref<boolean>(false);
 const setTdModalVisible = ref<boolean>(false);
 const setTdConfigPayload = ref<KungfuApi.SetKfConfigPayload>({
   type: 'add',
-  title: '交易账户',
+  title: t('Td'),
   config: {} as KungfuApi.KfExtConfig,
 });
 
@@ -98,7 +98,7 @@ const tdGroupNames = computed(() => {
 });
 const addTdGroupConfigPayload = ref<KungfuApi.SetKfConfigPayload>({
   type: 'add',
-  title: '账户组',
+  title: t('tdConfig.account_group'),
   config: {} as KungfuApi.KfExtConfig,
 });
 
@@ -172,13 +172,15 @@ function handleOpenSetTdModal(
   ];
 
   if (!extConfig) {
-    error(`${selectedSource} 柜台插件不存在`);
+    error(t('tdConfig.td_not_found', {
+      td: selectedSource,
+    }));
     return;
   }
 
   currentSelectedSourceId.value = selectedSource;
   setTdConfigPayload.value.type = type;
-  setTdConfigPayload.value.title = `${selectedSource} 交易账户`;
+  setTdConfigPayload.value.title = `${selectedSource} ${t('Td')}`;
   setTdConfigPayload.value.config = extConfig;
   setTdConfigPayload.value.initValue = undefined;
 
@@ -189,9 +191,7 @@ function handleOpenSetTdModal(
   }
 
   if (!extConfig?.settings?.length) {
-    error(
-      `配置项不存在, 请检查 ${extConfig?.name || selectedSource} package.json`,
-    );
+    error(t('tdConfig.sourse_not_found'));
     return;
   }
 
@@ -206,15 +206,15 @@ function handleOpenAddTdGroupDialog(type: KungfuApi.ModalChangeType) {
   addTdGroupConfigPayload.value.type = type;
   addTdGroupConfigPayload.value.config = {
     type: [],
-    name: '账户分组',
+    name: t('tdConfig.td_group'),
     settings: [
       {
         key: 'td_group_name',
-        name: '账户组名称',
+        name: t('tdConfig.td_name'),
         type: 'str',
         primary: true,
         required: true,
-        tip: '需保证该账户组名称唯一',
+        tip: t('tdConfig.need_only_group'),
       },
     ],
   };
@@ -248,8 +248,12 @@ function handleConfirmAddUpdateTdGroup(
 
 function handleRemoveTdGroup(item: KungfuApi.KfExtraLocation) {
   confirmModal(
-    `删除账户组 ${item.name}`,
-    `删除账户组 ${item.name}, 不会影响改账户组下账户进程, 确认删除`,
+    t('tdConfig.delete_amount_group', {
+      group: item.name
+    }),
+    `${t('tdConfig.delete_amount_group', {
+      group: item.name
+    })}, ${t('tdConfig.confirm_delete_group')}`,
   )
     .then(() => {
       return removeTdGroup(item.name);

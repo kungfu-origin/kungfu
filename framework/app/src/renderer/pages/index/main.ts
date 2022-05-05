@@ -95,7 +95,6 @@ app
   .use(Skeleton)
   .use(Tree)
   .use(Statistic)
-  .use(VueI18n)
   .use(Divider)
   .use(VueVirtualScroller);
 
@@ -106,6 +105,7 @@ app.config.globalProperties.$globalCategoryRegister =
 
 useComponenets(app, router);
 
+app.use(VueI18n);
 app.mount('#app');
 
 const globalStore = useGlobalStore();

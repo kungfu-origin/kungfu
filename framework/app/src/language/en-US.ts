@@ -270,6 +270,7 @@ export default {
 
   tdConfig: {
     td_group: 'Td Group',
+    td_name: 'Td Group Name',
     account_name: 'account',
     account_ps: 'note',
     state_status: 'status',
@@ -282,6 +283,14 @@ export default {
 
     add_td: 'Add',
     add_group_placeholder: 'Add group',
+    set_td_group: 'Account Group Settings',
+    account_group: 'Account Group',
+    td_not_found: '{td} Td not found',
+    sourse_not_found: 'The configuration item does not exist, please check {value} package.json',
+    need_only_group: 'Ensure that the account group name is unique',
+    delete_amount_group: 'Deleting account Group {group}',
+    confirm_delete_group: 'The account process under account group change will not be affected, confirm the deletion'
+
   },
 
   mdConfig: {

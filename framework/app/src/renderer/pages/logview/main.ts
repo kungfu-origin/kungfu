@@ -7,12 +7,15 @@ import 'vue-virtual-scroller/dist/vue-virtual-scroller.css';
 import { Button, Checkbox, Input, Layout, Spin } from 'ant-design-vue';
 import VueI18n from '@kungfu-trader/kungfu-app/src/language';
 
-createApp(App)
+const app = createApp(App);
+
+app
   .use(Layout)
   .use(Button)
   .use(Checkbox)
   .use(Input)
   .use(Spin)
-  .use(VueI18n)
-  .use(VueVirtualScroller)
-  .mount('#app');
+  .use(VueVirtualScroller);
+
+app.use(VueI18n);
+app.mount('#app');

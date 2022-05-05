@@ -9,15 +9,9 @@ const app = createApp(App);
 
 app.component('ComFileNode');
 
-app
-  .use(Input)
-  .use(Button)
-  .use(Layout)
-  .use(Dropdown)
-  .use(VueI18n)
-  .use(Menu)
-  .use(store);
+app.use(Input).use(Button).use(Layout).use(Dropdown).use(Menu).use(store);
 
+app.use(VueI18n);
 app.mount('#app');
 
 window.fileId = 0;
