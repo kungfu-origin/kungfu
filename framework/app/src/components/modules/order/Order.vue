@@ -239,22 +239,25 @@ function handleCancelAllOrders(): void {
   ).name;
   const name = getIdByKfLocation(currentGlobalKfLocation.value);
 
-  confirmModal(t('orderConfig.confirm_cancel_all'), `${t('orderConfig.confirm')} ${categoryName} ${name} ${t('orderConfig.cancel_all')}`).then(
-    () => {
-      if (!currentGlobalKfLocation.value || !window.watcher) {
-        return;
-      }
+  confirmModal(
+    t('orderConfig.confirm_cancel_all'),
+    `${t('orderConfig.confirm')} ${categoryName} ${name} ${t(
+      'orderConfig.cancel_all',
+    )}`,
+  ).then(() => {
+    if (!currentGlobalKfLocation.value || !window.watcher) {
+      return;
+    }
 
-      const orders = getTargetCancelOrders();
-      return kfCancelAllOrders(window.watcher, orders)
-        .then(() => {
-          success();
-        })
-        .catch((err) => {
-          error(err.message);
-        });
-    },
-  );
+    const orders = getTargetCancelOrders();
+    return kfCancelAllOrders(window.watcher, orders)
+      .then(() => {
+        success();
+      })
+      .catch((err) => {
+        error(err.message);
+      });
+  });
 }
 
 function getTargetCancelOrders(): KungfuApi.OrderResolved[] {
@@ -284,7 +287,10 @@ function handleShowTradingDataDetail({
   event: MouseEvent;
   row: TradingDataItem;
 }) {
-  showTradingDataDetail(row as KungfuApi.OrderResolved, t('orderConfig.entrust'));
+  showTradingDataDetail(
+    row as KungfuApi.OrderResolved,
+    t('orderConfig.entrust'),
+  );
 }
 
 const adjustOrderConfig = reactive({
@@ -400,7 +406,11 @@ function testOrderSourceIsOnline(order: KungfuApi.OrderResolved) {
   const tdLocation = window.watcher.getLocation(source);
   const processId = getProcessIdByKfLocation(tdLocation);
   if (processStatusData.value[processId] !== 'online') {
-    error(`${t('orderConfig.start')} ${processId} ${t('orderConfig.trade_process')}`);
+    error(
+      `${t('orderConfig.start')} ${processId} ${t(
+        'orderConfig.trade_process',
+      )}`,
+    );
     return false;
   }
 

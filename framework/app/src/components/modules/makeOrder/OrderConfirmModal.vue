@@ -79,9 +79,12 @@ function handleConfirm() {
   >
     <a-row class="apart-input">
       <a-col>
-        <a-statistic :value="curOrderVolume" :title="$t('tradingConfig.total_order_amount')" />
+        <a-statistic
+          :value="curOrderVolume"
+          :title="$t('tradingConfig.total_order_amount')"
+        />
         <a-input-group compact style="margin-top: 10px" class="input-content">
-          <span>{{ $t('tradingConfig.every_volume') }}: </span>
+          <span>{{ $t('tradingConfig.every_volume') }}:</span>
           <a-input-number
             class="input-number"
             :precision="0"

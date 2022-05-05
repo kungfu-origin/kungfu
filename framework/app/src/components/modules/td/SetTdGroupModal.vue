@@ -167,7 +167,9 @@ getInstrumentTypeColor;
           {{ dataRef.name }}
         </div>
         <div v-else-if="dataRef.category === 'tdGroup'">
-          <a-tag size="small" color="#FAAD14">{{ $t('tdConfig.account_group') }}</a-tag>
+          <a-tag size="small" color="#FAAD14">
+            {{ $t('tdConfig.account_group') }}
+          </a-tag>
           {{ dataRef.name }}
         </div>
       </template>

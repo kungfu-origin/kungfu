@@ -138,7 +138,10 @@ const priceVolumeStats = computed(() => {
   >
     <a-row style="margin-bottom: 30px">
       <a-col>
-        <a-statistic :title="$t('tradeConfig.statistical_count')" :value="trades.length"></a-statistic>
+        <a-statistic
+          :title="$t('tradeConfig.statistical_count')"
+          :value="trades.length"
+        ></a-statistic>
       </a-col>
     </a-row>
     <a-row style="margin-bottom: 30px" class="limit-price-stats-row">

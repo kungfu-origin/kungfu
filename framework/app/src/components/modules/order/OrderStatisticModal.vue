@@ -181,7 +181,9 @@ const priceVolumeStats = computed(() => {
     class="kf-order-statistic-modal"
     v-model:visible="modalVisible"
     :title="`${$t('orderConfig.entrust_statistical')} ${
-      !!historyDate ? historyDate.format('YYYY-MM-DD') : $t('orderConfig.statistical_desc')
+      !!historyDate
+        ? historyDate.format('YYYY-MM-DD')
+        : $t('orderConfig.statistical_desc')
     }`"
     :destroyOnClose="true"
     :footer="null"
@@ -189,7 +191,10 @@ const priceVolumeStats = computed(() => {
   >
     <a-row style="margin-bottom: 30px">
       <a-col>
-        <a-statistic :title="$t('orderConfig.entrust_statistical_number')" :value="orders.length"></a-statistic>
+        <a-statistic
+          :title="$t('orderConfig.entrust_statistical_number')"
+          :value="orders.length"
+        ></a-statistic>
       </a-col>
     </a-row>
     <a-row style="margin-bottom: 30px" class="limit-price-stats-row">

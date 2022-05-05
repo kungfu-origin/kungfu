@@ -76,7 +76,13 @@ function arbitrageExchangeValidator(
     formState.value.future_arbitrage_code === FutureArbitrageCodeEnum.SPC
   ) {
     if (exchangeId !== 'CZCE') {
-      return Promise.reject(new Error(`${t('futureArbitrageConfig.only_corresponding')} ${'tradingConfig.CZCE'} ${'tradingConfig.instrument'}`));
+      return Promise.reject(
+        new Error(
+          `${t(
+            'futureArbitrageConfig.only_corresponding',
+          )} ${'tradingConfig.CZCE'} ${'tradingConfig.instrument'}`,
+        ),
+      );
     }
   }
 
@@ -85,7 +91,13 @@ function arbitrageExchangeValidator(
     formState.value.future_arbitrage_code === FutureArbitrageCodeEnum.IPS
   ) {
     if (exchangeId !== 'DCE') {
-      return Promise.reject(new Error(`${t('futureArbitrageConfig.only_corresponding')} ${'tradingConfig.DCE'} ${'tradingConfig.instrument'}`));
+      return Promise.reject(
+        new Error(
+          `${t(
+            'futureArbitrageConfig.only_corresponding',
+          )} ${'tradingConfig.DCE'} ${'tradingConfig.instrument'}`,
+        ),
+      );
     }
   }
 
@@ -156,7 +168,11 @@ function handleMakeOrder() {
           : `td_${account_id.toString()}`;
 
       if (processStatusData.value[tdProcessId] !== 'online') {
-        error(`${t('orderConfig.start')} ${tdProcessId} ${t('orderConfig.trade_process')}`);
+        error(
+          `${t('orderConfig.start')} ${tdProcessId} ${t(
+            'orderConfig.trade_process',
+          )}`,
+        );
         return;
       }
 

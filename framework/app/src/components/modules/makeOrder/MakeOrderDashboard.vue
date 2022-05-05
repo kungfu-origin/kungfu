@@ -526,8 +526,12 @@ function closeModalConditions(
           </div>
         </div>
         <div class="make-order-btns">
-          <a-button class="make-order" @click="handleMakeOrder">{{ $t('tradingConfig.place_order') }}</a-button>
-          <a-button @click="handleApartOrder">{{ $t('tradingConfig.apart_order') }}</a-button>
+          <a-button class="make-order" @click="handleMakeOrder">
+            {{ $t('tradingConfig.place_order') }}
+          </a-button>
+          <a-button @click="handleApartOrder">
+            {{ $t('tradingConfig.apart_order') }}
+          </a-button>
           <a-button v-for="item in availTradingTaskExtensionList">
             {{ item.name }}
           </a-button>
