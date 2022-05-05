@@ -11,7 +11,6 @@ import minimist from 'minimist';
 import KfDashboard from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfDashboard.vue';
 import KfDashboardItem from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfDashboardItem.vue';
 import KfSetExtensionModal from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfSetExtensionModal.vue';
-import KfSetByConfigModal from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfSetByConfigModal.vue';
 import {
   FileTextOutlined,
   SettingOutlined,
@@ -25,17 +24,14 @@ import {
   getIfProcessRunning,
   getIfProcessStopping,
   getTaskKfLocationByProcessId,
+  getDataByProcessArgs,
+  fromProcessArgsToKfConfigItems,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import {
-  graceDeleteProcess,
   graceStopProcess,
   Pm2ProcessStatusDetail,
   startTask,
 } from '@kungfu-trader/kungfu-js-api/utils/processUtils';
-import {
-  removeKfLocation,
-  removeLog,
-} from '@kungfu-trader/kungfu-js-api/actions';
 import {
   useCurrentGlobalKfLocation,
   useExtConfigsRelated,
@@ -43,6 +39,7 @@ import {
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
 import { messagePrompt } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import VueI18n from '@kungfu-trader/kungfu-app/src/language';
+import { useTradingTask, ensureRemoveTradingTask } from './utils';
 
 const { t } = VueI18n.global;
 const { success, error } = messagePrompt();
@@ -51,14 +48,9 @@ const { dashboardBodyHeight, handleBodySizeChange } = useDashboardBodySize();
 const { processStatusData, processStatusDetailData } =
   useProcessStatusDetailData();
 
+const { handleOpenSetTradingTaskModal } = useTradingTask();
+
 const setExtensionModalVisible = ref<boolean>(false);
-const setTaskModalVisible = ref<boolean>(false);
-const currentSelectedExtKey = ref<string>('');
-const setTaskConfigPayload = ref<KungfuApi.SetKfConfigPayload>({
-  type: 'add',
-  title: t('TradingTask'),
-  config: {} as KungfuApi.KfExtConfig,
-});
 
 const taskTypeKeys = computed(() => {
   return Object.keys(extConfigs.value['strategy'] || {});
@@ -90,49 +82,6 @@ const app = getCurrentInstance();
 
 function handleOpenSetTaskDialog() {
   setExtensionModalVisible.value = true;
-}
-
-function handleOpenSetTaskModal(
-  type = 'add' as KungfuApi.ModalChangeType,
-  selectedExtKey: string,
-  taskConfig?: Record<string, KungfuApi.KfConfigValue>,
-) {
-  if (selectedExtKey === '') {
-    error(t('tradingTaskConfig.key_inexistence'));
-    return;
-  }
-
-  const extConfig: KungfuApi.KfExtConfig = (extConfigs.value['strategy'] || {})[
-    selectedExtKey
-  ];
-
-  if (!extConfig) {
-    error(`${selectedExtKey} ${t('tradingTaskConfig.plugin_inexistence')}`);
-    return;
-  }
-
-  currentSelectedExtKey.value = selectedExtKey;
-  setTaskConfigPayload.value.type = type;
-  setTaskConfigPayload.value.title = `${extConfig.name}`;
-  setTaskConfigPayload.value.config = extConfig;
-  setTaskConfigPayload.value.initValue = undefined;
-
-  if (type === 'update') {
-    if (taskConfig) {
-      setTaskConfigPayload.value.initValue = taskConfig;
-    }
-  }
-
-  if (!extConfig?.settings?.length) {
-    error(
-      `${t('tradingTaskConfig.configuration_inexistence')} ${
-        extConfig?.name || selectedExtKey
-      } package.json`,
-    );
-    return;
-  }
-
-  setTaskModalVisible.value = true;
 }
 
 function handleSwitchProcessStatusResolved(
@@ -193,50 +142,6 @@ function handleSwitchProcessStatusResolved(
     });
 }
 
-function handleConfirmAddUpdateTask(
-  data: {
-    formState: Record<string, KungfuApi.KfConfigValue>;
-    idByPrimaryKeys: string;
-    changeType: KungfuApi.ModalChangeType;
-  },
-  extKey: string,
-) {
-  const { formState } = data;
-  const taskLocation: KungfuApi.KfLocation = {
-    category: 'strategy',
-    group: extKey,
-    name: new Date().getTime().toString(),
-    mode: 'LIVE',
-  };
-
-  const extConfig: KungfuApi.KfExtConfig = (extConfigs.value['strategy'] || {})[
-    extKey
-  ];
-
-  if (!extConfig) {
-    error(`${extKey} ${t('tradingTaskConfig.plugin_inexistence')}`);
-    return;
-  }
-
-  if (!extConfig.extPath) {
-    error(
-      `${t('tradingTaskConfig.configuration_inexistence')} ${
-        extConfig?.name
-      } .so`,
-    );
-    return;
-  }
-
-  const args: string = toArgs(extConfig.settings, formState);
-  const soPath = path.join(extConfig.extPath, extKey);
-  return ensureRemoveTask(taskLocation)
-    .then(() => startTask(taskLocation, soPath, args))
-    .then(() => {
-      success();
-    })
-    .catch((err: Error) => error(err.message || t('operation_failed')));
-}
-
 function handleOpenLogviewResolved(record: Pm2ProcessStatusDetail) {
   const taskLocation = getTaskKfLocationByProcessId(record?.name || '');
   if (!taskLocation) {
@@ -259,41 +164,8 @@ function handleRemoveTask(record: Pm2ProcessStatusDetail) {
       'tradingTaskConfig.delete_task_content',
     )}`,
   ).then(() => {
-    return ensureRemoveTask(taskLocation);
+    return ensureRemoveTradingTask(taskLocation, processStatusData.value);
   });
-}
-
-function ensureRemoveTask(taskLocation: KungfuApi.KfLocation) {
-  return graceDeleteProcess(
-    window.watcher,
-    taskLocation,
-    processStatusData.value,
-  )
-    .then(() => removeKfLocation(taskLocation))
-    .then(() => removeLog(taskLocation))
-    .catch((err) => {
-      console.error(err);
-    });
-}
-
-function toArgs(
-  settings: KungfuApi.KfConfigItem[],
-  formState: Record<string, KungfuApi.KfConfigValue>,
-) {
-  return settings
-    .filter((item) => {
-      return formState[item.key] !== undefined;
-    })
-    .map((item) => {
-      return `${item.key}=${formState[item.key]}`;
-    })
-    .join(';');
-}
-
-function fromArgs(args: string[]): Record<string, KungfuApi.KfConfigValue> {
-  const taskArgs = minimist(args)['a'] || '';
-  const data = getDataByArgs(taskArgs);
-  return data;
 }
 
 function dealArgs(record: Pm2ProcessStatusDetail): string {
@@ -310,21 +182,13 @@ function dealArgs(record: Pm2ProcessStatusDetail): string {
     return taskArgs.split(';').join(' ');
   }
 
-  const data = getDataByArgs(taskArgs);
+  const data = getDataByProcessArgs(taskArgs);
   return extConfig.settings
     .filter((item) => item.primary && data[item.key] !== undefined)
     .map((item) => {
       return dealKfConfigValueByType(item.type, data[item.key]);
     })
     .join(' ');
-}
-
-function getDataByArgs(taskArgs: string): Record<string, string> {
-  return taskArgs.split(';').reduce((data, pair) => {
-    const [key, value] = pair.split('=');
-    data[key] = value;
-    return data;
-  }, {} as Record<string, string>);
 }
 
 function customRowResolved(record: Pm2ProcessStatusDetail) {
@@ -334,7 +198,7 @@ function customRowResolved(record: Pm2ProcessStatusDetail) {
     return;
   }
   const locationResolved: KungfuApi.KfExtraLocation =
-    resolveRowRecord(taskLocation);
+    resolveKfLocation(taskLocation);
 
   return {
     onClick: () => {
@@ -350,12 +214,12 @@ function dealRowClassNameResolved(record: Pm2ProcessStatusDetail): string {
     return '';
   }
   const locationResolved: KungfuApi.KfExtraLocation =
-    resolveRowRecord(taskLocation);
+    resolveKfLocation(taskLocation);
 
   return dealRowClassName(locationResolved);
 }
 
-function resolveRowRecord(
+function resolveKfLocation(
   taskLocation: KungfuApi.KfLocation,
 ): KungfuApi.KfExtraLocation {
   const locationResolved: KungfuApi.KfExtraLocation = {
@@ -428,11 +292,11 @@ onMounted(() => {
               <SettingOutlined
                 style="font-size: 12px"
                 @click.stop="
-                  handleOpenSetTaskModal(
+                  handleOpenSetTradingTaskModal(
                     'update',
                     getTaskKfLocationByProcessId(record?.name || '')?.group ||
                       '',
-                    fromArgs(record.args),
+                    fromProcessArgsToKfConfigItems(record.args),
                   )
                 "
               />
@@ -449,15 +313,8 @@ onMounted(() => {
       v-if="setExtensionModalVisible"
       v-model:visible="setExtensionModalVisible"
       extensionType="strategy"
-      @confirm="handleOpenSetTaskModal('add', $event)"
+      @confirm="handleOpenSetTradingTaskModal('add', $event)"
     ></KfSetExtensionModal>
-    <KfSetByConfigModal
-      v-if="setTaskModalVisible"
-      v-model:visible="setTaskModalVisible"
-      :payload="setTaskConfigPayload"
-      :primaryKeyUnderline="true"
-      @confirm="handleConfirmAddUpdateTask($event, currentSelectedExtKey)"
-    ></KfSetByConfigModal>
   </div>
 </template>
 <style lang="less">

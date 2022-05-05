@@ -87,17 +87,18 @@ module.exports = {
               },
             },
           },
-          {
-            test: /\.(woff2?|eot|ttf|otf|mp3)(\?.*)?$/,
-            use: {
-              loader: 'file-loader',
-              options: {
-                limit: 10000,
-                name: 'fonts/[name]--[folder].[ext]',
-                esModule: false,
-              },
-            },
-          },
+          // {
+          //   test: /\.(woff2?|eot|ttf|otf)(\?.*)?$/,
+          //   use: {
+          //     // loader: 'file-loader',
+          //     loader: 'url-loader',
+          //     options: {
+          //       limit: 10000,
+          //       name: 'fonts/[name]--[folder].[ext]',
+          //       esModule: false,
+          //     },
+          //   },
+          // },
         ],
       },
       node: {

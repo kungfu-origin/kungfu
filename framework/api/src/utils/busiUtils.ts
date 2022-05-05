@@ -59,6 +59,7 @@ import {
 } from './processUtils';
 import { Proc } from 'pm2';
 import { listDir, removeTargetFilesInFolder } from './fileUtils';
+import minimist from 'minimist';
 
 interface SourceAccountId {
   source: string;
@@ -1582,4 +1583,36 @@ export const dealOrderInputItem = (
     }
   }
   return orderInputResolved;
+};
+
+export const kfConfigItemsToProcessArgs = (
+  settings: KungfuApi.KfConfigItem[],
+  formState: Record<string, KungfuApi.KfConfigValue>,
+) => {
+  return settings
+    .filter((item) => {
+      return formState[item.key] !== undefined;
+    })
+    .map((item) => {
+      return `${item.key}=${formState[item.key]}`;
+    })
+    .join(';');
+};
+
+export const fromProcessArgsToKfConfigItems = (
+  args: string[],
+): Record<string, KungfuApi.KfConfigValue> => {
+  const taskArgs = minimist(args)['a'] || '';
+  const data = getDataByProcessArgs(taskArgs);
+  return data;
+};
+
+export const getDataByProcessArgs = (
+  taskArgs: string,
+): Record<string, string> => {
+  return taskArgs.split(';').reduce((data, pair) => {
+    const [key, value] = pair.split('=');
+    data[key] = value;
+    return data;
+  }, {} as Record<string, string>);
 };
