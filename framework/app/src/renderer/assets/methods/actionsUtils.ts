@@ -61,6 +61,7 @@ import { AbleSubscribeInstrumentTypesBySourceType } from '@kungfu-trader/kungfu-
 import {
   buildInstrumentSelectOptionLabel,
   buildInstrumentSelectOptionValue,
+  confirmModal,
 } from './uiUtils';
 import { storeToRefs } from 'pinia';
 import { ipcRenderer } from 'electron';
@@ -463,18 +464,18 @@ export const showTradingDataDetail = (
         h('span', { class: 'value' }, `${dataResolved[key]}`),
       ]),
     );
-  Modal.confirm({
-    title: `${typename} ${t('detail')}`,
-    content: h(
+  confirmModal(
+    `${typename} ${t('detail')}`,
+    h(
       'div',
       {
         class: 'trading-data-detail__warp',
       },
       vnode,
     ),
-    okText: t('confirm'),
-    cancelText: '',
-  });
+    t('confirm'),
+    '',
+  );
 };
 
 export const useInstruments = (): {
