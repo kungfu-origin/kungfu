@@ -523,10 +523,7 @@ const getKfUIExtensionConfigByExtKey = (
       const position = uiConfig?.position || '';
       const components = uiConfig?.components;
       const daemon = uiConfig?.daemon || ({} as Record<string, string>);
-
-      if (!position) {
-        return configByExtraKey;
-      }
+      const script = uiConfig?.script || '';
 
       configByExtraKey[extKey] = {
         name: extName,
@@ -536,6 +533,7 @@ const getKfUIExtensionConfigByExtKey = (
           index: 'index.js',
         },
         daemon,
+        script,
       };
       return configByExtraKey;
     }, {} as KungfuApi.KfUIExtConfigs);
@@ -574,6 +572,13 @@ export const getAvailDaemonList = async (): Promise<
       ];
       return daemonList;
     }, [] as KungfuApi.KfDaemonLocation[]);
+};
+
+export const getAvailScripts = async (): Promise<string[]> => {
+  const kfExtConfig: KungfuApi.KfUIExtConfigs = await getKfUIExtensionConfig();
+  return Object.values(kfExtConfig || ({} as KungfuApi.KfUIExtConfigs))
+    .filter((item) => Object.keys(item).length && item.script)
+    .map((item) => path.resolve(item.extPath, item.script));
 };
 
 export const isTdMd = (category: KfCategoryTypes) => {

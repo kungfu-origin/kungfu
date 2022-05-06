@@ -34,6 +34,7 @@ import path from 'path';
 import { startExtDaemon } from '@kungfu-trader/kungfu-js-api/utils/processUtils';
 import { Proc } from 'pm2';
 import { VueNode } from 'ant-design-vue/lib/_util/type';
+import fse from 'fs-extra';
 
 // this utils file is only for ui components
 export const getUIComponents = (
@@ -41,24 +42,33 @@ export const getUIComponents = (
 ): {
   key: string;
   name: string;
+  script: string;
+  extPath: string;
   position: KfUIExtLocatorTypes;
   cData: Record<string, Component>;
 }[] => {
   return Object.keys(kfUiExtConfigs).map((key) => {
     const config = kfUiExtConfigs[key];
-    const { extPath, position, components, name } = config;
+    const { extPath, position, components, name, script } = config;
+
     return {
       key,
       name,
       position,
-      cData: Object.keys(components || {}).reduce((cData, cName) => {
-        return {
-          ...cData,
-          [`${key}-${cName}`]: global.require(
-            path.join(extPath, components[cName]),
-          ).default as Component,
-        };
-      }, {} as Record<string, Component>),
+      script,
+      extPath,
+      cData: Object.keys(components || {})
+        .filter((cName) =>
+          fse.pathExistsSync(path.join(extPath, components[cName])),
+        )
+        .reduce((cData, cName) => {
+          return {
+            ...cData,
+            [`${key}-${cName}`]: global.require(
+              path.join(extPath, components[cName]),
+            ).default as Component,
+          };
+        }, {} as Record<string, Component>),
     };
   });
 };
@@ -155,9 +165,9 @@ export const preStartAll = async (): Promise<(void | Proc)[]> => {
 };
 
 export const postStartAll = async (): Promise<(void | Proc)[]> => {
-  const availDaemon = await getAvailDaemonList();
+  const availDaemons = await getAvailDaemonList();
   return loopToRunProcess<void | Proc>(
-    availDaemon.map((item) => {
+    availDaemons.map((item) => {
       return () =>
         startExtDaemon(getProcessIdByKfLocation(item), item.cwd, item.script)
           .then((res) => {

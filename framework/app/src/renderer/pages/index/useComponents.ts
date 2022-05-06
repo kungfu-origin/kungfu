@@ -2,6 +2,8 @@ import { getUIComponents } from '@kungfu-trader/kungfu-app/src/renderer/assets/m
 import { App, defineAsyncComponent } from 'vue';
 import { Router } from 'vue-router';
 import { useGlobalStore } from './store/global';
+import path from 'path';
+import fse from 'fs-extra';
 
 export const useComponenets = (
   app: App<Element>,
@@ -140,7 +142,14 @@ export const useComponenets = (
     .setKfUIExtConfigs()
     .then((configs) => getUIComponents(configs))
     .then((components) => {
-      components.forEach(({ cData, position, key, name }) => {
+      components.forEach(({ cData, position, key, name, extPath, script }) => {
+        //load extension pure logic script
+        const scriptPath = path.join(extPath, script);
+        if (script && fse.pathExistsSync(scriptPath)) {
+          app.use(global.require(scriptPath).default);
+        }
+
+        //registe different type ui components
         switch (position) {
           case 'sidebar':
             app.component(key, cData[`${key}-entry`]);

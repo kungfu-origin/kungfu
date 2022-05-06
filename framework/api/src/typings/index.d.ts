@@ -155,6 +155,7 @@ declare namespace KungfuApi {
             page: string;
           };
       daemon?: Record<string, string>;
+      script?: string;
     };
     config?: Record<
       string,
@@ -193,6 +194,7 @@ declare namespace KungfuApi {
             page: string;
           };
       daemon: Record<string, string>;
+      script: string;
     }
   >;
 
