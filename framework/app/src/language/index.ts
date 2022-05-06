@@ -11,8 +11,10 @@ const messages = {
   'zh-HK': zh_HK,
 };
 
+export const languageList = []
+
 // 默认语言
-const langDefault = 'zh-HK';
+export const langDefault = 'zh-HK';
 
 const i18n = createI18n({
   locale: langDefault, //默认显示的语言

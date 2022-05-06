@@ -409,6 +409,9 @@ export default {
     log_level: 'Log Level',
     for_all_log: 'For all Log',
 
+    language: 'Language',
+    select_language: 'Select Language',
+
     porformance: 'Performance',
     open_rocket_model: 'Open Rocket Model',
     rocket_model_desc: 'Use CPU 100%, restart is required',

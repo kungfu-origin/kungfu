@@ -406,6 +406,9 @@ export default {
     log_level: '全局日志级别',
     for_all_log: '对系统内所有日志级别的设置',
 
+    language: '语言',
+    select_language: '选择语言',
+
     porformance: '性能',
     open_rocket_model: '开启极速模式',
     rocket_model_desc:

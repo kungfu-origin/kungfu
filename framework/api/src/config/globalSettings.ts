@@ -2,7 +2,7 @@ import fse from 'fs-extra';
 import { SpaceSizeSettingEnum, SpaceTabSettingEnum } from '../typings/enums';
 import { KF_CONFIG_PATH } from './pathConfig';
 import { CodeSizeSetting, CodeTabSetting } from './tradingConfig';
-
+import { languageList, langDefault } from '@kungfu-trader/kungfu-app/src/language/index';
 import VueI18n from '@kungfu-trader/kungfu-app/src/language';
 const { t } = VueI18n.global;
 
@@ -31,6 +31,14 @@ export const getKfGlobalSettings = (): KfSystemConfig[] => [
           { value: '-l critical', label: 'CRITICAL' },
         ],
         default: '-l info',
+      },
+      {
+        key: 'language',
+        name: t('globalSettingConfig.language'),
+        tip: t('globalSettingConfig.select_language'),
+        type: 'select',
+        options: languageList,
+        default: langDefault,
       },
     ],
   },
