@@ -110,6 +110,22 @@ export const getKfGlobalSettings = (): KfSystemConfig[] => [
         default: '',
         type: 'percent',
       },
+      {
+        key: 'riskControl',
+        name: isEnglish ? 'risk control' : '风控',
+        tip: isEnglish
+          ? 'Enable the risk control, which will automatically close positions when the position size is too large'
+          : '启用风险控制, 当持仓量超过阈值时自动平仓',
+        default: false,
+        type: 'table',
+        columns: [
+          {
+            key: 'td',
+            name: 'td',
+            type: 'td',
+          }
+        ]
+      }
     ],
   },
   {
