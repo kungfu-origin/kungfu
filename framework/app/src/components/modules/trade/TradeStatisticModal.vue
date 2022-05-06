@@ -127,10 +127,10 @@ const priceVolumeStats = computed(() => {
     :width="720"
     class="kf-trade-statistic-modal"
     v-model:visible="modalVisible"
-    :title="`成交统计 ${
+    :title="`${$t('tradeConfig.statistical')} ${
       !!historyDate
         ? historyDate.format('YYYY-MM-DD HH:mm:ss')
-        : '实时(最新100条数据)'
+        : $t('tradeConfig.statistical_desc')
     }`"
     :destroyOnClose="true"
     :footer="null"
@@ -138,11 +138,14 @@ const priceVolumeStats = computed(() => {
   >
     <a-row style="margin-bottom: 30px">
       <a-col>
-        <a-statistic title="统计成交数量" :value="trades.length"></a-statistic>
+        <a-statistic
+          :title="$t('tradeConfig.statistical_count')"
+          :value="trades.length"
+        ></a-statistic>
       </a-col>
     </a-row>
     <a-row style="margin-bottom: 30px" class="limit-price-stats-row">
-      <div class="title">成交价统计</div>
+      <div class="title">{{ $t('tradeConfig.statistical_price') }}</div>
       <a-table
         v-if="priceVolumeStats"
         size="small"
@@ -167,19 +170,19 @@ const priceVolumeStats = computed(() => {
     <a-row style="margin-bottom: 30px">
       <a-col :span="8">
         <a-statistic
-          title="平均成交延迟(μs)"
+          :title="$t('tradeConfig.average_trade_latency')"
           :value="tradeLatencyStats.mean"
         ></a-statistic>
       </a-col>
       <a-col :span="8">
         <a-statistic
-          title="最小成交延迟(μs)"
+          :title="$t('tradeConfig.max_trade_latency')"
           :value="tradeLatencyStats.min"
         ></a-statistic>
       </a-col>
       <a-col :span="8">
         <a-statistic
-          title="最大成交延迟(μs)"
+          :title="$t('tradeConfig.min_trade_latency')"
           :value="tradeLatencyStats.max"
         ></a-statistic>
       </a-col>

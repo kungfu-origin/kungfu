@@ -210,7 +210,7 @@ function handleRemoveScheduleTask(index: number) {
     class="kf-global-settings-modal"
     width="1000px"
     v-model:visible="modalVisible"
-    title="全局设置"
+    :title="$t('globalSettingConfig.global_setting_title')"
     :destoryOnClose="true"
     @cancel="closeModal"
     :footer="null"
@@ -238,29 +238,34 @@ function handleRemoveScheduleTask(index: number) {
                 layout="vertical"
               ></KfConfigSettingsForm>
             </a-tab-pane>
-            <a-tab-pane key="comission" tab="期货手续费">
+            <a-tab-pane
+              key="comission"
+              :tab="$t('globalSettingConfig.comission')"
+            >
               <div class="search-input">
                 <a-input-search
                   v-model:value="searchKeyword"
-                  placeholder="品种"
+                  :placeholder="$t('globalSettingConfig.varieties')"
                   size="large"
                   style="width: 480px"
                 />
-                <a-button @click="handleAddCommission">添加</a-button>
+                <a-button @click="handleAddCommission">
+                  {{ $t('globalSettingConfig.add_comission') }}
+                </a-button>
               </div>
               <div class="commission-setting-row" v-for="item in tableData">
                 <div class="commission-setting-item">
                   <a-input
                     class="value product-id"
                     v-model:value="item.product_id"
-                    placeholder="品种"
+                    :placeholder="$t('globalSettingConfig.varieties')"
                   ></a-input>
                 </div>
                 <div class="commission-setting-item">
                   <a-select
                     class="value exchange-id"
                     v-model:value="item.exchange_id"
-                    placeholder="交易所"
+                    :placeholder="$t('globalSettingConfig.exchange_id')"
                   >
                     <a-select-option
                       v-for="key in Object.keys(ExchangeIds)"
@@ -283,7 +288,9 @@ function handleRemoveScheduleTask(index: number) {
                   </a-select>
                 </div>
                 <div class="commission-setting-item">
-                  <span class="label">开仓</span>
+                  <span class="label">
+                    {{ $t('globalSettingConfig.open') }}
+                  </span>
                   <a-input-number
                     class="value"
                     :precision="8"
@@ -292,7 +299,9 @@ function handleRemoveScheduleTask(index: number) {
                   ></a-input-number>
                 </div>
                 <div class="commission-setting-item">
-                  <span class="label">平昨</span>
+                  <span class="label">
+                    {{ $t('globalSettingConfig.close_yesterday') }}
+                  </span>
                   <a-input-number
                     class="value"
                     :precision="8"
@@ -301,7 +310,9 @@ function handleRemoveScheduleTask(index: number) {
                   ></a-input-number>
                 </div>
                 <div class="commission-setting-item">
-                  <span class="label">平今</span>
+                  <span class="label">
+                    {{ $t('globalSettingConfig.close_today') }}
+                  </span>
                   <a-input-number
                     class="value"
                     :precision="8"
@@ -310,7 +321,7 @@ function handleRemoveScheduleTask(index: number) {
                   ></a-input-number>
                 </div>
                 <div class="commission-setting-item">
-                  <span class="label">最小</span>
+                  <span class="label">{{ $t('globalSettingConfig.min') }}</span>
                   <a-input-number
                     class="value"
                     :precision="8"
@@ -327,9 +338,17 @@ function handleRemoveScheduleTask(index: number) {
                 </div>
               </div>
             </a-tab-pane>
-            <a-tab-pane key="schedule" tab="定时起停">
+            <a-tab-pane
+              key="schedule"
+              :tab="$t('globalSettingConfig.timing_rev_top')"
+            >
               <div class="global-setting-item">
-                <div class="label" title="使用定时起停">使用定时起停</div>
+                <div
+                  class="label"
+                  :title="$t('globalSettingConfig.use_timing_rev_top')"
+                >
+                  {{ $t('globalSettingConfig.use_timing_rev_top') }}
+                </div>
                 <div class="value">
                   <a-switch
                     size="small"
@@ -338,12 +357,14 @@ function handleRemoveScheduleTask(index: number) {
                 </div>
               </div>
               <div class="global-setting-item">
-                <div class="label">定时起停任务列表</div>
+                <div class="label">
+                  {{ $t('globalSettingConfig.timing_task_list') }}
+                </div>
                 <a-button
                   style="margin-bottom: 16px"
                   @click="handleAddScheduleTask"
                 >
-                  添加定时
+                  {{ $t('globalSettingConfig.add_timing') }}
                 </a-button>
                 <div
                   class="value schedule-setting__warp"
@@ -351,7 +372,9 @@ function handleRemoveScheduleTask(index: number) {
                 >
                   <a-row>
                     <a-col>
-                      <div class="title">目标进程</div>
+                      <div class="title">
+                        {{ $t('globalSettingConfig.target_process') }}
+                      </div>
                       <a-select
                         style="width: 220px"
                         v-model:value="task.processId"
@@ -377,7 +400,9 @@ function handleRemoveScheduleTask(index: number) {
                       </a-select>
                     </a-col>
                     <a-col>
-                      <div class="title">方式</div>
+                      <div class="title">
+                        {{ $t('globalSettingConfig.manner') }}
+                      </div>
                       <a-select
                         style="width: 120px"
                         v-model:value="task.mode"
@@ -394,7 +419,9 @@ function handleRemoveScheduleTask(index: number) {
                       </a-select>
                     </a-col>
                     <a-col>
-                      <div class="title">每日时间</div>
+                      <div class="title">
+                        {{ $t('globalSettingConfig.daily_time') }}
+                      </div>
                       <a-time-picker
                         style="width: 120px"
                         v-model:value="task.timeValue"

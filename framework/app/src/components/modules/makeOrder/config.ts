@@ -7,6 +7,8 @@ import {
   PriceTypeEnum,
   SideEnum,
 } from '@kungfu-trader/kungfu-js-api/typings/enums';
+import VueI18n from '@kungfu-trader/kungfu-app/src/language';
+const { t } = VueI18n.global;
 
 export const getConfigSettings = (
   category?: KfCategoryTypes,
@@ -24,19 +26,19 @@ export const getConfigSettings = (
       ? null
       : {
           key: 'account_id',
-          name: '账户',
+          name: t('tradingConfig.account'),
           type: 'td',
           required: true,
         },
     {
       key: 'instrument',
-      name: '标的',
+      name: t('tradingConfig.instrument'),
       type: 'instrument',
       required: true,
     },
     {
       key: 'side',
-      name: '买卖',
+      name: t('tradingConfig.side'),
       type: 'side',
       default: SideEnum.Buy,
       required: true,
@@ -45,14 +47,14 @@ export const getConfigSettings = (
       ? [
           {
             key: 'offset',
-            name: '开平',
+            name: t('tradingConfig.offset'),
             type: 'offset',
             default: OffsetEnum.Open,
             required: true,
           },
           {
             key: 'hedge_flag',
-            name: '套保',
+            name: t('tradingConfig.hedge'),
             type: 'hedgeFlag',
             default: HedgeFlagEnum.Speculation,
             required: true,
@@ -61,20 +63,23 @@ export const getConfigSettings = (
       : []),
     {
       key: 'price_type',
-      name: '方式',
+      name: t('tradingConfig.price_type'),
       type: 'priceType',
       default: PriceTypeEnum.Limit,
       required: true,
     },
     {
       key: 'limit_price',
-      name: priceType === PriceTypeEnum.Limit ? '价格' : '保护价格',
+      name:
+        priceType === PriceTypeEnum.Limit
+          ? t('tradingConfig.price')
+          : t('tradingConfig.protect_price'),
       type: 'float',
       required: priceType === PriceTypeEnum.Limit ? true : false,
     },
     {
       key: 'volume',
-      name: '下单量',
+      name: t('tradingConfig.volume'),
       type: 'int',
       required: true,
     },
@@ -84,14 +89,14 @@ export const getConfigSettings = (
 };
 
 export const orderInputTrans: Record<string, string> = {
-  account_id: '账户',
-  instrument_id: '标的ID',
-  instrument_type: '标的类型',
-  side: '买卖',
-  offset: '开平',
-  hedge_flag: '套保',
-  price_type: '方式',
-  volume: '下单量',
-  exchange_id: '交易所ID',
-  limit_price: '限额',
+  account_id: t('tradingConfig.account'),
+  instrument_id: `${t('tradingConfig.instrument')}ID`,
+  instrument_type: t('tradingConfig.instrument_type'),
+  side: t('tradingConfig.side'),
+  offset: t('tradingConfig.offset'),
+  hedge_flag: t('tradingConfig.hedge'),
+  price_type: t('tradingConfig.price_type'),
+  volume: t('tradingConfig.volume'),
+  exchange_id: `${t('globalSettingConfig.exchange_id')}ID`,
+  limit_price: t('tradingConfig.limit_price'),
 };

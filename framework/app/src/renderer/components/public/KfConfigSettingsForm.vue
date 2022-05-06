@@ -46,6 +46,8 @@ import {
   useInstruments,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
 import dayjs, { Dayjs } from 'dayjs';
+import VueI18n from '@kungfu-trader/kungfu-app/src/language';
+const { t } = VueI18n.global;
 
 const props = withDefaults(
   defineProps<{
@@ -227,15 +229,21 @@ function primaryKeyValidator(_rule: RuleObject, value: string): Promise<void> {
       .map((item): string => item.toLowerCase())
       .includes(combineValue.toLowerCase())
   ) {
-    return Promise.reject(new Error(`${combineValue} 已存在`));
+    return Promise.reject(
+      new Error(
+        t('validate.value_existing', {
+          value: combineValue,
+        }),
+      ),
+    );
   }
 
   if (SpecialWordsReg.test(value)) {
-    return Promise.reject(new Error(`不能含有特殊字符`));
+    return Promise.reject(new Error(t('validate.no_special_characters')));
   }
 
   if (value.toString().includes('_') && !props.primaryKeyUnderline) {
-    return Promise.reject(new Error(`不能含有下划线`));
+    return Promise.reject(new Error(t('validate.no_underline')));
   }
 
   return Promise.resolve();
@@ -243,15 +251,15 @@ function primaryKeyValidator(_rule: RuleObject, value: string): Promise<void> {
 
 function noZeroValidator(_rule: RuleObject, value: number): Promise<void> {
   if (Number.isNaN(+value)) {
-    return Promise.reject(new Error(`请输入非零数字`));
+    return Promise.reject(new Error(t('validate.no_zero_number')));
   }
 
   if (+value === 0) {
-    return Promise.reject(new Error(`请输入非零数字`));
+    return Promise.reject(new Error(t('validate.no_zero_number')));
   }
 
   if (+value < 0) {
-    return Promise.reject(new Error(`请输入非负数`));
+    return Promise.reject(new Error(t('validate.no_negative_number')));
   }
 
   return Promise.resolve();
@@ -264,7 +272,7 @@ function instrumnetValidator(_rule: RuleObject, value: string): Promise<void> {
 
   const instrumentResolved = transformSearchInstrumentResultToInstrument(value);
   if (!instrumentResolved) {
-    return Promise.reject(new Error('标的错误'));
+    return Promise.reject(new Error(t('instrument_error')));
   }
 
   return Promise.resolve();
@@ -282,7 +290,7 @@ function instrumnetsValidator(
     (instrument) => !transformSearchInstrumentResultToInstrument(instrument),
   );
   if (instrumentResolved.length) {
-    return Promise.reject(new Error('标的错误'));
+    return Promise.reject(new Error(t('instrument_error')));
   }
 
   return Promise.resolve();
@@ -421,7 +429,7 @@ defineExpose({
                     {
                       required: item.required,
                       type: getValidatorType(item.type),
-                      message: item.errMsg || '该项为必填项',
+                      message: item.errMsg || $t('validate.mandatory'),
                       trigger: 'blur',
                     },
                   ]

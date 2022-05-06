@@ -6,6 +6,8 @@ import {
 import { dealOrderInputItem } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { h, VNode } from 'vue';
 import { orderInputTrans } from './config';
+import VueI18n from '@kungfu-trader/kungfu-app/src/language';
+const { t } = VueI18n.global;
 
 export function dealStockOffset(
   makeOrderInput: KungfuApi.MakeOrderInput,
@@ -57,7 +59,7 @@ export function dealOrderPlaceVNode(
       h(
         'div',
         { class: 'ant-statistic-title', style: 'font-size: 16px' },
-        '下单次数',
+        t('tradingConfig.make_order_number'),
       ),
       h(
         'div',
