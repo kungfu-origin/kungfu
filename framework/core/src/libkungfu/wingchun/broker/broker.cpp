@@ -54,10 +54,10 @@ const std::string &BrokerService::get_config() {
   return config_obj.data.value;
 }
 
-const RiskConfig &BrokerService::get_risk_config() {
-  auto &risk_config_map = vendor_.get_state_bank()[boost::hana::type_c<RiskConfig>];
-  auto &risk_config_obj = risk_config_map.at(vendor_.get_home_uid());
-  return risk_config_obj.data;
+const std::string &BrokerService::get_risk_setting() {
+  auto &risk_setting_map = vendor_.get_state_bank()[boost::hana::type_c<RiskSetting>];
+  auto &risk_setting_obj = risk_setting_map.at(vendor_.get_home_uid());
+  return risk_setting_obj.data.value;
 }
 
 std::string BrokerService::get_runtime_folder() {

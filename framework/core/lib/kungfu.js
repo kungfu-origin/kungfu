@@ -56,8 +56,8 @@ module.exports = function () {
     ConfigStore: function (home) {
       return new binding.ConfigStore(home);
     },
-    RiskConfigStore: function (home) {
-      return new binding.RiskConfigStore(locator(home));
+    RiskSettingStore: function (home) {
+      return new binding.RiskSettingStore(locator(home));
     },
     CommissionStore: function (home) {
       return new binding.CommissionStore(home);

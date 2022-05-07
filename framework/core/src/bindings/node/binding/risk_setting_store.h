@@ -2,8 +2,8 @@
 // Created by Keren Dong on 2020/2/25.
 //
 
-#ifndef KUNGFU_NODE_RISKCONFIGURATION_H
-#define KUNGFU_NODE_RISKCONFIGURATION_H
+#ifndef KUNGFU_NODE_RISKSETTING_H
+#define KUNGFU_NODE_RISKSETTING_H
 
 #include <kungfu/yijinjing/io.h>
 #include <kungfu/yijinjing/practice/profile.h>
@@ -12,19 +12,19 @@
 #include "operators.h"
 
 namespace kungfu::node {
-class RiskConfigStore : public Napi::ObjectWrap<RiskConfigStore> {
+class RiskSettingStore : public Napi::ObjectWrap<RiskSettingStore> {
 public:
-  explicit RiskConfigStore(const Napi::CallbackInfo &info);
+  explicit RiskSettingStore(const Napi::CallbackInfo &info);
 
-  ~RiskConfigStore() override = default;
+  ~RiskSettingStore() override = default;
 
-  Napi::Value SetRiskConfig(const Napi::CallbackInfo &info);
+  Napi::Value SetRiskSetting(const Napi::CallbackInfo &info);
 
-  Napi::Value GetRiskConfig(const Napi::CallbackInfo &info);
+  Napi::Value GetRiskSetting(const Napi::CallbackInfo &info);
 
-  Napi::Value GetAllRiskConfig(const Napi::CallbackInfo &info);
+  Napi::Value GetAllRiskSetting(const Napi::CallbackInfo &info);
 
-  Napi::Value RemoveRiskConfig(const Napi::CallbackInfo &info);
+  Napi::Value RemoveRiskSetting(const Napi::CallbackInfo &info);
 
   static void Init(Napi::Env env, Napi::Object exports);
 

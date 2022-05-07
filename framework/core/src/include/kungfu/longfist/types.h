@@ -90,11 +90,12 @@ KF_DEFINE_PACK_TYPE(                                             //
     (double, close_ratio),       //平仓费率
     (double, close_today_ratio), //平今费率
 
+
     (double, min_commission) //最小手续费
 );
 
 KF_DEFINE_DATA_TYPE(                                  //
-    RiskConfig, 10007, PK(location_uid), PERPETUAL(), //
+    RiskSetting, 10007, PK(location_uid), PERPETUAL(), //
     (uint32_t, location_uid),                         //
     (enums::category, category),                      //
     (std::string, group),                             //

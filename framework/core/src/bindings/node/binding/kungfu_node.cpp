@@ -45,7 +45,7 @@ decltype(__pfnDliNotifyHook2) __pfnDliNotifyHook2 = load_exe_hook;
 
 #include "commission_store.h"
 #include "config_store.h"
-#include "risk_config_store.h"
+#include "risk_setting_store.h"
 #include "data_table.h"
 #include "history.h"
 #include "io.h"
@@ -101,7 +101,7 @@ Napi::Object InitAll(Napi::Env env, Napi::Object exports) {
   Longfist::Init(env, exports);
   History::Init(env, exports);
   ConfigStore::Init(env, exports);
-  RiskConfigStore::Init(env, exports);
+  RiskSettingStore::Init(env, exports);
   CommissionStore::Init(env, exports);
   Frame::Init(env, exports);
   Reader::Init(env, exports);
