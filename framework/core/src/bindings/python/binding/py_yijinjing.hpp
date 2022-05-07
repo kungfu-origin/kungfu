@@ -117,7 +117,7 @@ class PyMaster : public master {
 public:
   using master::master;
 
-  void on_exit() override { PYBIND11_OVERLOAD_PURE(void, master, on_exit); }
+  void on_exit() override { PYBIND11_OVERLOAD(void, master, on_exit); }
 
   void on_register(const event_ptr &event, const Register &register_data) override {
     PYBIND11_OVERLOAD_PURE(void, master, on_register, event, register_data);
@@ -133,6 +133,8 @@ public:
 class PyApprentice : public apprentice {
 public:
   using apprentice::apprentice;
+
+  void on_exit() override { PYBIND11_OVERLOAD_PURE(void, apprentice, on_exit); }
 
   void on_trading_day(const event_ptr &event, int64_t daytime) override {
     PYBIND11_OVERLOAD(void, apprentice, on_trading_day, event, daytime);
@@ -252,7 +254,7 @@ void bind(pybind11::module &&m) {
       .def("copy_frame", &writer::copy_frame)
       .def("mark", &writer::mark)
       .def("mark_at", &writer::mark_at);
-  boost::hana::for_each(StateDataTypes, [&](auto type) {
+  boost::hana::for_each(AllDataTypes, [&](auto type) {
     using DataType = typename decltype(+boost::hana::second(type))::type;
     writer_class.def("write", py::overload_cast<int64_t, const DataType &, int32_t>(&writer::write<DataType>),
                      py::arg("trigger_time"), py::arg("data"), py::arg("msg_type") = DataType::tag);
@@ -344,7 +346,6 @@ void bind(pybind11::module &&m) {
 
   py::class_<apprentice, PyApprentice, apprentice_ptr>(m, "apprentice")
       .def(py::init<location_ptr, bool>(), py::arg("home"), py::arg("low_latency") = false)
-      .def_property_readonly("session_finder", &apprentice::get_session_finder)
       .def_property_readonly("io_device", &apprentice::get_io_device)
       .def_property_readonly("home", &apprentice::get_home)
       .def_property_readonly("live", &apprentice::is_live)

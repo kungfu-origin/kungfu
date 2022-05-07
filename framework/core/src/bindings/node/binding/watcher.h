@@ -20,15 +20,22 @@ namespace kungfu::node {
 constexpr uint64_t ID_TRANC = 0x00000000FFFFFFFF;
 constexpr uint32_t PAGE_ID_MASK = 0x80000000;
 
-class Watcher : public Napi::ObjectWrap<Watcher>, public yijinjing::practice::apprentice {
+class Watcher : public Napi::ObjectWrap<Watcher>,
+                public yijinjing::practice::apprentice,
+                public wingchun::book::BookListener {
 public:
   explicit Watcher(const Napi::CallbackInfo &info);
 
   ~Watcher() override;
 
+  virtual void on_book_sync_reset(const wingchun::book::Book &old_book, const wingchun::book::Book &new_book) override;
+
+  virtual void on_asset_sync_reset(const longfist::types::Asset &old_asset,
+                                   const longfist::types::Asset &new_asset) override;
+
   void NoSet(const Napi::CallbackInfo &info, const Napi::Value &value);
 
-  Napi::Value GetLocator(const Napi::CallbackInfo &info);
+  Napi::Value HasLocation(const Napi::CallbackInfo &info);
 
   Napi::Value GetLocation(const Napi::CallbackInfo &info);
 
@@ -58,10 +65,6 @@ public:
 
   Napi::Value IsStarted(const Napi::CallbackInfo &info);
 
-  Napi::Value Setup(const Napi::CallbackInfo &info);
-
-  Napi::Value Step(const Napi::CallbackInfo &info);
-
   Napi::Value RequestStop(const Napi::CallbackInfo &info);
 
   Napi::Value PublishState(const Napi::CallbackInfo &info);
@@ -74,9 +77,15 @@ public:
 
   Napi::Value RequestMarketData(const Napi::CallbackInfo &info);
 
-  void UpdateQuote(const Napi::CallbackInfo &info);
+  Napi::Value CreateTask(const Napi::CallbackInfo &info);
+
+  Napi::Value Sync(const Napi::CallbackInfo &info);
 
   static void Init(Napi::Env env, Napi::Object exports);
+
+  bool IsStart() { return start_; }
+
+  std::chrono::system_clock::time_point tp_;
 
 protected:
   void on_react() override;
@@ -86,7 +95,6 @@ protected:
 private:
   static Napi::FunctionReference constructor;
   const bool bypass_quotes_;
-  yijinjing::data::location_ptr ledger_location_;
   wingchun::broker::SilentAutoClient broker_client_;
   wingchun::book::Bookkeeper bookkeeper_;
   Napi::ObjectReference history_ref_;
@@ -99,8 +107,12 @@ private:
   serialize::JsUpdateState update_ledger;
   serialize::JsPublishState publish;
   serialize::JsResetCache reset_cache;
-  yijinjing::cache::bank quotes_bank_;
+  yijinjing::cache::bank data_bank_;
+  yijinjing::cache::trading_bank trading_bank_;
+  std::vector<kungfu::state<longfist::types::CacheReset>> reset_cache_states_;
+  bool start_;
   std::unordered_map<uint32_t, longfist::types::InstrumentKey> subscribed_instruments_ = {};
+  std::unordered_map<uint32_t, int> location_uid_states_map_ = {};
 
   static constexpr auto bypass = [](yijinjing::practice::apprentice *app, bool bypass_quotes) {
     return rx::filter([=](const event_ptr &event) {
@@ -134,6 +146,26 @@ private:
 
   void UpdateBook(int64_t update_time, uint32_t source_id, uint32_t dest_id, const longfist::types::Position &position);
 
+  void SyncLedger();
+
+  void SyncOrder();
+
+  void SyncAppStatus();
+
+  void UpdateEventCache(const event_ptr &event);
+
+  void SyncEventCache();
+
+  template <typename DataType>
+  void feed_state_data_bank(const state<DataType> &state, yijinjing::cache::bank &receiver) {
+    boost::hana::for_each(longfist::StateDataTypes, [&](auto it) {
+      using DataTypeItem = typename decltype(+boost::hana::second(it))::type;
+      if (std::is_same<DataType, DataTypeItem>::value) {
+        receiver << state;
+      }
+    });
+  };
+
   template <typename TradingData> void UpdateBook(const event_ptr &event, const TradingData &data) {
     auto update = [&](uint32_t source, uint32_t dest) {
       if (source == yijinjing::data::location::PUBLIC) {
@@ -142,8 +174,10 @@ private:
       auto location = get_location(source);
       auto book = bookkeeper_.get_book(source);
       auto &position = book->get_position_for(data);
-      update_ledger(event->gen_time(), source, dest, position);
-      update_ledger(event->gen_time(), source, dest, book->asset);
+      state<kungfu::longfist::types::Position> cache_state_position(source, dest, event->gen_time(), position);
+      feed_state_data_bank(cache_state_position, data_bank_);
+      state<kungfu::longfist::types::Asset> cache_state_asset(source, dest, event->gen_time(), book->asset);
+      feed_state_data_bank(cache_state_asset, data_bank_);
     };
     update(event->source(), event->dest());
     update(event->dest(), event->source());
@@ -153,6 +187,7 @@ private:
   std::enable_if_t<std::is_same_v<TradingData, longfist::types::OrderInput>> UpdateBook(uint32_t source, uint32_t dest,
                                                                                         const TradingData &data) {
     bookkeeper_.on_order_input(now(), source, dest, data);
+    update_ledger(now(), source, dest, data);
   }
 
   template <typename TradingData>
@@ -160,15 +195,33 @@ private:
   UpdateBook(uint32_t source, uint32_t dest, const TradingData &data) {}
 
   template <typename Instruction, typename IdPtrType = uint64_t Instruction::*>
-  void WriteInstruction(int64_t trigger_time, Instruction instruction, IdPtrType id_ptr,
-                        const yijinjing::data::location_ptr &account_location,
-                        const yijinjing::data::location_ptr &strategy_location) {
+  uint64_t WriteInstruction(int64_t trigger_time, Instruction instruction, IdPtrType id_ptr,
+                            const yijinjing::data::location_ptr &account_location,
+                            const yijinjing::data::location_ptr &strategy_location) {
     auto account_writer = get_writer(account_location->uid);
     uint64_t id_left = (uint64_t)(strategy_location->uid xor account_location->uid) << 32u;
     uint64_t id_right = (ID_TRANC & account_writer->current_frame_uid()) | PAGE_ID_MASK;
     instruction.*id_ptr = id_left | id_right;
     account_writer->write_as(trigger_time, instruction, strategy_location->uid, account_location->uid);
     UpdateBook(strategy_location->uid, account_location->uid, instruction);
+    return instruction.*id_ptr;
+  }
+
+  template <typename DataType> void UpdateLedger(const boost::hana::basic_type<DataType> &type) {
+    for (auto &pair : data_bank_[type]) {
+      auto &state = pair.second;
+      update_ledger(state.update_time, state.source, state.dest, state.data);
+    }
+  }
+
+  template <typename DataType> void UpdateOrder(const boost::hana::basic_type<DataType> &type) {
+    auto &order_queue = trading_bank_[type];
+    int i = 0;
+    kungfu::state<DataType> *pstate = nullptr;
+    while (i < 1024 && order_queue.pop(pstate) && pstate != nullptr) {
+      update_ledger(pstate->update_time, pstate->source, pstate->dest, pstate->data);
+      i++;
+    }
   }
 
   template <typename Instruction, typename IdPtrType = uint64_t Instruction::*>
@@ -181,7 +234,7 @@ private:
 
       auto account_location = ExtractLocation(info, 1, get_locator());
       if (not is_location_live(account_location->uid) or not has_writer(account_location->uid)) {
-        return Napi::Boolean::New(info.Env(), false);
+        return Napi::BigInt::New(info.Env(), std::uint64_t(0));
       }
 
       auto trigger_time = time::now_in_nano();
@@ -195,13 +248,13 @@ private:
         instruction.*id_ptr = account_writer->current_frame_uid();
         account_writer->write(trigger_time, instruction);
         UpdateBook(get_home_uid(), account_location->uid, instruction);
-        return Napi::Boolean::New(info.Env(), true);
+        return Napi::BigInt::New(info.Env(), instruction.*id_ptr);
       }
 
       auto strategy_location = ExtractLocation(info, 2, get_locator());
 
       if (not strategy_location or not has_location(strategy_location->uid)) {
-        return Napi::Boolean::New(info.Env(), false);
+        return Napi::BigInt::New(info.Env(), std::uint64_t(0));
       }
 
       if (not has_location(strategy_location->uid)) {
@@ -210,13 +263,13 @@ private:
       }
 
       if (has_channel(account_location->uid, strategy_location->uid)) {
-        WriteInstruction(trigger_time, instruction, id_ptr, account_location, strategy_location);
-        return Napi::Boolean::New(info.Env(), true);
+        uint64_t id = WriteInstruction(trigger_time, instruction, id_ptr, account_location, strategy_location);
+        return Napi::BigInt::New(info.Env(), id);
       }
 
       Channel request = {};
       request.dest_id = strategy_location->uid;
-      request.source_id = ledger_location_->uid;
+      request.source_id = ledger_home_location_->uid;
       master_cmd_writer->write(trigger_time, request);
       request.source_id = account_location->uid;
       master_cmd_writer->write(trigger_time, request);
@@ -226,10 +279,11 @@ private:
         return channel.source_id == account_location->uid and channel.dest_id == strategy_location->uid;
       }) | first() |
           $([this, trigger_time, instruction, id_ptr, account_location, strategy_location](auto event) {
+            // TODO: async make order / order action
             WriteInstruction(trigger_time, instruction, id_ptr, account_location, strategy_location);
           });
 
-      return Napi::Boolean::New(info.Env(), true);
+      return Napi::BigInt::New(info.Env(), std::uint64_t(0));
     } catch (const std::exception &ex) {
       throw Napi::Error::New(info.Env(), fmt::format("invalid order arguments: {}", ex.what()));
     } catch (...) {

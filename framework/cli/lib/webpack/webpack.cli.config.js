@@ -20,6 +20,7 @@ const webpackConfig = (argv) =>
     externals: getWebpackExternals(),
     entry: {
       index: path.join(cliDir, 'src', 'index.ts'),
+      dzxy: path.join(cliDir, 'src', 'dzxy.ts'),
     },
     target: 'node',
   });

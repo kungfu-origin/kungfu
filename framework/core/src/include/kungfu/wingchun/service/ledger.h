@@ -12,6 +12,10 @@
 #include <kungfu/yijinjing/practice/apprentice.h>
 
 namespace kungfu::wingchun::service {
+
+// key = hash_instrument(exchange_id, instrument_id)
+typedef std::unordered_map<uint32_t, longfist::types::Position> PositionMap;
+
 class Ledger : public yijinjing::practice::apprentice {
 public:
   explicit Ledger(yijinjing::data::locator_ptr locator, longfist::enums::mode m, bool low_latency = false);
@@ -30,6 +34,7 @@ protected:
 private:
   broker::AutoClient broker_client_;
   book::Bookkeeper bookkeeper_;
+  book::BookMap tmp_books_;
   std::unordered_map<uint64_t, state<longfist::types::OrderStat>> order_stats_ = {};
 
   void refresh_books();
@@ -48,6 +53,10 @@ private:
 
   void inspect_channel(int64_t trigger_time, const longfist::types::Channel &channel);
 
+  void keep_positions(int64_t trigger_time, uint32_t strategy_uid);
+
+  void rebuild_positions(int64_t trigger_time, uint32_t strategy_uid);
+
   void mirror_positions(int64_t trigger_time, uint32_t strategy_uid);
 
   void write_book_reset(int64_t trigger_time, uint32_t book_uid);
@@ -57,6 +66,10 @@ private:
   void write_positions(int64_t trigger_time, uint32_t dest, book::PositionMap &positions);
 
   void write_asset_snapshots(int32_t msg_type);
+
+  void request_asset_sync(int64_t trigger_time);
+
+  void request_position_sync(int64_t trigger_time);
 
   template <typename TradingData>
   void write_book(int64_t trigger_time, uint32_t account_uid, uint32_t strategy_uid, const TradingData &data) {

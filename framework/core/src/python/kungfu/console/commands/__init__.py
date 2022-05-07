@@ -78,6 +78,7 @@ class PrioritizedCommandGroup(click.Group):
                     "config_location",
                     "console_location",
                     "index_location",
+                    "cli_dev_path",
                 ] + list(keys):
                     ctx.__dict__[key] = ctx.parent.__dict__[key]
                 return f(ctx, *args, **kwargs)
@@ -115,10 +116,13 @@ class PrioritizedCommandGroup(click.Group):
     type=str,
     help="name for the process, defaults to command if not set",
 )
+@click.option(
+    "-i", "--cli_dev_path", type=str, help="cli entry path (devCli.js or index.js)"
+)
 @click.help_option("-h", "--help")
 @click.version_option(kungfu.__version__, "--version", message=kungfu.__version__)
 @click.pass_context
-def kfc(ctx, home, extension_path, log_level, name):
+def kfc(ctx, home, extension_path, log_level, name, cli_dev_path):
     if not home:
         osname = platform.system()
         user_home = os.path.expanduser("~")
@@ -181,6 +185,7 @@ def kfc(ctx, home, extension_path, log_level, name):
     )
 
     ctx.name = name if name else ctx.invoked_subcommand
+    ctx.cli_dev_path = cli_dev_path if cli_dev_path else ""
 
     if ctx.invoked_subcommand is None:
         click.echo(kfc.get_help(ctx))

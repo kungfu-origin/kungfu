@@ -36,6 +36,7 @@ declare namespace KungfuApi {
     BrokerStateStatusEnum,
     InstrumentTypeEnum,
     InstrumentTypes,
+    StrategyExtTypes,
     PriceTypeEnum,
     SideEnum,
     OffsetEnum,
@@ -86,6 +87,7 @@ declare namespace KungfuApi {
     | 'file' // string
     | 'files' // string[]
     | 'folder' // string
+    | 'table' // any[]
     | 'timePicker' //string
     | 'select'
     | 'bool'
@@ -114,6 +116,7 @@ declare namespace KungfuApi {
     | string[]
     | number[]
     | boolean[]
+    | any[]
     | Dayjs;
 
   export interface KfSelectOption {
@@ -125,6 +128,7 @@ declare namespace KungfuApi {
     key: string;
     name: string;
     type: KfConfigItemSupportedTypes;
+    columns?: KfConfigItem[];
     errMsg?: string;
     default?: KfConfigValue;
     required?: boolean;
@@ -150,11 +154,17 @@ declare namespace KungfuApi {
             entry: string;
             page: string;
           };
+      daemon?: Record<string, string>;
+      script?: string;
     };
     config?: Record<
       string,
       {
-        type?: Array<InstrumentTypes> | InstrumentTypes;
+        type?:
+          | InstrumentTypes[]
+          | InstrumentTypes
+          | StrategyExtTypes[]
+          | StrategyExtTypes;
         settings: KfConfigItem[];
       }
     >;
@@ -163,7 +173,7 @@ declare namespace KungfuApi {
   interface KfExtConfig {
     name: string;
     extPath?: string;
-    type?: Array<InstrumentTypes> | InstrumentTypes;
+    type?: InstrumentTypes[] | StrategyExtTypes[];
     settings: KfConfigItem[];
   }
 
@@ -183,6 +193,8 @@ declare namespace KungfuApi {
             entry: string;
             page: string;
           };
+      daemon: Record<string, string>;
+      script: string;
     }
   >;
 
@@ -205,6 +217,9 @@ declare namespace KungfuApi {
     side: SideEnum;
     offset: OffsetEnum;
     hedge_flag: HedgeFlagEnum;
+    source_id?: string;
+    account_id?: string;
+    parent_id: bigint;
   }
 
   export interface KfLogData {
@@ -235,6 +250,12 @@ declare namespace KungfuApi {
       name: string,
       mode: string,
     ): void;
+    getConfig(
+      category: string,
+      group: string,
+      name: string,
+      mode: string,
+    ): KungfuApi.KfConfig;
   }
 
   export interface DataTable<T> {
@@ -672,12 +693,12 @@ declare namespace KungfuApi {
     isLive(): boolean;
     isStarted(): boolean;
     isUsable(): boolean;
-    setup(): boolean;
-    step(): boolean;
-    updateQuote(): void;
+    createTask(): void;
+    sync(): void;
     isReadyToInteract(kfLocation: KfLocation | KfConfig): boolean;
     getLocationUID(kfLocation: KfLocation | KfConfig): string;
     getLocation(hashedKey: string | number): KfLocation;
+    hasLocation(hashedKey: string | number): KfLocation;
     requestMarketData(
       kfLocation: KfLocation,
       exchangeId: string,
@@ -687,12 +708,12 @@ declare namespace KungfuApi {
       orderAction: OrderAction,
       tdLocation: KfLocation,
       strategyLocation?: KfLocation,
-    ): void;
+    ): bigint;
     issueOrder(
       orderInput: OrderInput,
       tdLocation: KfLocation,
       strategyLocation?: KfLocation,
-    ): void;
+    ): bigint;
     now(): bigint;
   }
 
@@ -788,6 +809,11 @@ declare namespace KungfuApi {
     [prop: string]: any;
   }
 
+  export interface KfDaemonLocation extends KfExtraLocation {
+    cwd: string;
+    script: string;
+  }
+
   export type ScheduleTaskMode = 'restart' | 'start' | 'stop';
 
   export interface ScheduleTask {
@@ -801,4 +827,58 @@ declare namespace KungfuApi {
 
 declare module '@kungfu-trader/kungfu-core' {
   export function kungfu(): KungfuApi.Kungfu;
+}
+
+declare namespace Code {
+  import { Stats } from 'fs-extra';
+  import { SpaceTabSettingEnum, SpaceSizeSettingEnum } from './enums';
+  export interface Strategy {
+    strategy_id: string;
+    strategy_path: string;
+    add_time: number;
+  }
+
+  export interface FileProps {
+    root?: boolean;
+    filePath?: string;
+    ext?: string;
+    isDir?: boolean;
+  }
+
+  export interface FileIds {
+    file: number[];
+    folder: number[];
+  }
+  export interface FileTreeByPath {
+    ids: FileIds;
+    fileTree: IFileTree;
+  }
+  export interface FileData {
+    id: number;
+    parentId: number;
+    isDir: boolean;
+    name: string;
+    ext: string;
+    filePath: string;
+    children: FileIds;
+    stats: Stats;
+    root: boolean;
+    open: boolean;
+    fileId?: number;
+    isEntryFile?: boolean;
+  }
+
+  export type IFileTree = Record<string, FileData>;
+
+  export interface IFileNode {
+    filePath: string;
+    root?: string;
+    children?: IFileNode;
+    name: string;
+  }
+
+  export interface ICodeSetting {
+    tabSpaceType: SpaceTabSettingEnum;
+    tabSpaceSize: SpaceSizeSettingEnum;
+  }
 }

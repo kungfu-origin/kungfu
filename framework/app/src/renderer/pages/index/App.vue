@@ -2,12 +2,14 @@
 import { getCurrentInstance, onBeforeUnmount, onMounted } from 'vue';
 import KfSystemPrepareModal from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfSystemPrepareModal.vue';
 import KfLayoutVue from '@kungfu-trader/kungfu-app/src/renderer/components/layout/KfLayout.vue';
-
+import KfSetByConfigModal from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfSetByConfigModal.vue';
 import zhCN from 'ant-design-vue/es/locale/zh_CN';
 import {
+  markClearDB,
   markClearJournal,
   removeLoadingMask,
   useIpcListener,
+  handleOpenLogviewByFile,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import {
   useDealExportHistoryTradingData,
@@ -15,14 +17,17 @@ import {
   usePreStartAndQuitApp,
   useSubscibeInstrumentAtEntry,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
-import {
-  dealAppStates,
-  dealAssetsByHolderUID,
-} from '@kungfu-trader/kungfu-js-api/kungfu/watcher';
+
 import { useGlobalStore } from './store/global';
 import KfDownloadDateModal from '@kungfu-trader/kungfu-app/src/renderer/components/layout/KfHistoryDateModal.vue';
 import { tradingDataSubject } from '@kungfu-trader/kungfu-js-api/kungfu/tradingData';
 import globalBus from '../../assets/methods/globalBus';
+import {
+  dealAppStates,
+  dealAssetsByHolderUID,
+} from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
+import { bindIPCListener } from '@kungfu-trader/kungfu-app/src/renderer/ipcMsg/ipcListener';
+import { useTradingTask } from '@kungfu-trader/kungfu-app/src/components/modules/tradingTask/utils';
 
 const app = getCurrentInstance();
 const store = useGlobalStore();
@@ -44,9 +49,9 @@ useIpcListener();
 
 const tradingDataSubscription = tradingDataSubject.subscribe(
   (watcher: KungfuApi.Watcher) => {
-    const appStates = dealAppStates(watcher.appStates);
+    const appStates = dealAppStates(watcher, watcher.appStates);
     store.setAppStates(appStates);
-    const assets = dealAssetsByHolderUID(watcher.ledger.Asset);
+    const assets = dealAssetsByHolderUID(watcher, watcher.ledger.Asset);
     store.setAssets(assets);
   },
 );
@@ -61,6 +66,12 @@ const busSubscription = globalBus.subscribe((data: KfBusEvent) => {
       case 'clear-journal':
         markClearJournal();
         break;
+      case 'clear-db':
+        markClearDB();
+        break;
+      case 'open-log':
+        handleOpenLogviewByFile();
+        break;
       case 'export-all-trading-data':
         globalBus.next({
           tag: 'export',
@@ -70,7 +81,15 @@ const busSubscription = globalBus.subscribe((data: KfBusEvent) => {
   }
 });
 
+const {
+  setTradingTaskModalVisible,
+  currentSelectedTradingTaskExtKey,
+  setTradingTaskConfigPayload,
+  handleConfirmAddUpdateTask,
+} = useTradingTask();
+
 onMounted(() => {
+  bindIPCListener(store);
   removeLoadingMask();
 
   window.addEventListener('resize', () => {
@@ -95,22 +114,30 @@ onBeforeUnmount(() => {
       </KfLayoutVue>
     </div>
     <KfSystemPrepareModal
-      title="系统提示"
+      :title="$t('system_prompt')"
       :visible="preStartSystemLoading"
       :status="[
         { key: 'archive', status: preStartSystemLoadingData.archive },
         { key: 'watcher', status: preStartSystemLoadingData.watcher },
+        {
+          key: 'systemLoading',
+          status: preStartSystemLoadingData.systemLoading,
+        },
       ]"
       :txt="{
-        archive: { done: '功夫归档完成 ✓', loading: '功夫归档中...' },
+        archive: { done: $t('archive_completion'), loading: $t('archive') },
         watcher: {
-          done: '功夫环境准备完成 ✓',
-          loading: '功夫环境准备中...',
+          done: $t('environment_complete'),
+          loading: $t('environment_preparation'),
+        },
+        systemLoading: {
+          done: $t('ready'),
+          loading: $t('wait_ready'),
         },
       }"
     ></KfSystemPrepareModal>
     <KfSystemPrepareModal
-      title="系统提示"
+      :title="$t('system_prompt')"
       :visible="preQuitSystemLoading"
       :status="[
         {
@@ -123,18 +150,36 @@ onBeforeUnmount(() => {
         },
       ]"
       :txt="{
-        record: { done: '保存数据完成 ✓', loading: '保存数据中...' },
+        record: { done: $t('saving_completed'), loading: $t('save_data') },
         quit: {
-          done: '结束所有交易进程 ✓',
-          loading: '结束交易进程中, 请勿关闭...',
+          done: $t('end_all_transactions'),
+          loading: $t('closing'),
         },
       }"
     ></KfSystemPrepareModal>
+
+    <!-- global modal start -->
+
+    <!-- export trading data -->
     <KfDownloadDateModal
       v-if="exportDateModalVisible"
       v-model:visible="exportDateModalVisible"
       @confirm="handleConfirmExportDate"
     ></KfDownloadDateModal>
+
+    <!-- add/update trading task -->
+    <KfSetByConfigModal
+      v-if="setTradingTaskModalVisible"
+      v-model:visible="setTradingTaskModalVisible"
+      :payload="setTradingTaskConfigPayload"
+      :primaryKeyUnderline="true"
+      @confirm="
+        handleConfirmAddUpdateTask($event, currentSelectedTradingTaskExtKey)
+      "
+    ></KfSetByConfigModal>
+
+    <!-- global modal end -->
+
     <a-spin v-if="exportDataLoading" :spinning="exportDataLoading"></a-spin>
   </a-config-provider>
 </template>

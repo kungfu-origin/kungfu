@@ -29,20 +29,9 @@ using namespace kungfu::yijinjing::data;
 using namespace std::chrono;
 
 namespace kungfu::yijinjing::practice {
-inline location_ptr make_master_location(const std::string &name, const locator_ptr &locator) {
-  return location::make_shared(mode::LIVE, category::SYSTEM, "master", name, locator);
-}
 
 apprentice::apprentice(location_ptr home, bool low_latency)
-    : hero(std::make_shared<io_device_client>(home, low_latency)),
-      master_home_location_(make_master_location("master", get_locator())),
-      master_cmd_location_(make_master_location(fmt::format("{:08x}", get_live_home_uid()), get_locator())),
-      state_bank_(), trading_day_(time::today_start()), session_finder_(get_io_device()) {
-  add_location(0, master_home_location_);
-  add_location(0, master_cmd_location_);
-}
-
-index::session_finder &apprentice::get_session_finder() { return session_finder_; }
+    : hero(std::make_shared<io_device_client>(home, low_latency)), trading_day_(time::today_start()) {}
 
 bool apprentice::is_started() const { return started_; }
 
@@ -68,10 +57,47 @@ void apprentice::request_read_from_public(int64_t trigger_time, uint32_t source_
   }
 }
 
+void apprentice::request_read_from_sync(int64_t trigger_time, uint32_t source_id, int64_t from_time) {
+  if (get_io_device()->get_home()->mode == mode::LIVE) {
+    require_read_from_sync(trigger_time, master_cmd_location_->uid, source_id, from_time);
+  }
+}
+
 void apprentice::request_write_to(int64_t trigger_time, uint32_t dest_id) {
   if (get_io_device()->get_home()->mode == mode::LIVE) {
     require_write_to(trigger_time, master_cmd_location_->uid, dest_id);
   }
+}
+
+void apprentice::request_cached_reader_writer() {
+  if (get_io_device()->get_home()->mode == mode::LIVE) {
+    if (writers_.find(master_cmd_location_->uid) == writers_.end()) {
+      SPDLOG_ERROR("no writer for {}", get_location_uname(master_cmd_location_->uid));
+      return;
+    }
+
+    if (get_live_home_uid() != cached_home_location_->uid) {
+      if (registry_.find(cached_home_location_->uid) == registry_.end()) {
+        SPDLOG_ERROR("no register in registry_ {}", get_location_uname(master_cmd_location_->uid));
+        return;
+      }
+
+      request_write_to(now(), cached_home_location_->uid);
+      request_read_from(now(), cached_home_location_->uid, now());
+
+    } else {
+      // At cached case, pass the restore, start directly
+      auto writer = get_writer(master_cmd_location_->uid);
+      RequestCachedDone &rcd = writer->open_data<RequestCachedDone>();
+      rcd.dest_id = get_io_device()->get_live_home()->uid;
+      writer->close_data();
+    }
+  }
+}
+
+void apprentice::request_cached(uint32_t source_id) {
+  auto writer = get_writer(source_id);
+  writer->mark(now(), RequestCached::tag);
 }
 
 void apprentice::add_timer(int64_t nanotime, const std::function<void(const event_ptr &)> &callback) {
@@ -110,10 +136,12 @@ void apprentice::on_trading_day(const event_ptr &event, int64_t daytime) {}
 void apprentice::react() {
   events_ | is(TimeReset::tag) | first() | $$(reset_time(event->data<TimeReset>()));
   events_ | is(Location::tag) | $$(add_location(event->gen_time(), event->data<Location>()));
-  events_ | is(Register::tag) | $$(register_location(event->trigger_time(), event->data<Register>()));
+  events_ | is(Register::tag) | $$(on_register(event->trigger_time(), event->data<Register>()));
   events_ | is(Deregister::tag) | $$(on_deregister(event));
   events_ | is(RequestReadFrom::tag) | $$(on_read_from(event));
+  events_ | is(CachedReadyToRead::tag) | $$(on_cached_ready_to_read());
   events_ | is(RequestReadFromPublic::tag) | $$(on_read_from_public(event));
+  events_ | is(RequestReadFromSync::tag) | $$(on_read_from_sync(event));
   events_ | is(RequestWriteTo::tag) | $$(on_write_to(event));
   events_ | is(Channel::tag) | $$(register_channel(event->gen_time(), event->data<Channel>()));
   events_ | is(TradingDay::tag) | $$(on_trading_day(event, event->data<TradingDay>().timestamp));
@@ -151,6 +179,20 @@ void apprentice::react() {
       reader_->join(master_cmd_location_, get_live_home_uid(), event->gen_time());
     });
 
+    auto cached_register_event = events_ | is(Register::tag) | filter([&](const event_ptr &event) {
+                                   auto register_data = event->data<Register>();
+                                   return register_data.location_uid == cached_home_location_->uid;
+                                 }) |
+                                 filter([&](const event_ptr &event) {
+                                   if (writers_.find(master_cmd_location_->uid) != writers_.end()) {
+                                     return true;
+                                   }
+                                   return false;
+                                 }) |
+                                 first();
+
+    cached_register_event | $$(request_cached_reader_writer());
+
     checkin();
     expect_start();
   }
@@ -174,6 +216,10 @@ void apprentice::on_react() {}
 
 void apprentice::on_start() {}
 
+void apprentice::on_register(int64_t trigger_time, const Register &register_data) {
+  register_location(trigger_time, register_data);
+}
+
 void apprentice::on_deregister(const event_ptr &event) {
   uint32_t location_uid = data::location::make_shared(event->data<Deregister>(), get_locator())->uid;
   reader_->disjoin(location_uid);
@@ -185,12 +231,16 @@ void apprentice::on_read_from(const event_ptr &event) { do_read_from<RequestRead
 
 void apprentice::on_read_from_public(const event_ptr &event) { do_read_from<RequestReadFromPublic>(event, 0); }
 
+void apprentice::on_read_from_sync(const event_ptr &event) { do_read_from<RequestReadFromSync>(event, location::SYNC); }
+
 void apprentice::on_write_to(const event_ptr &event) {
   auto dest_id = event->data<RequestWriteTo>().dest_id;
   if (writers_.find(dest_id) == writers_.end()) {
     writers_.emplace(dest_id, get_io_device()->open_writer(dest_id));
   }
 }
+
+void apprentice::on_cached_ready_to_read() { request_cached(cached_home_location_->uid); }
 
 void apprentice::checkin() {
   auto now = time::now_in_nano();

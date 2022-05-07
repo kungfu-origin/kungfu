@@ -24,7 +24,7 @@
 #include <kungfu/yijinjing/nanomsg/socket.h>
 
 namespace kungfu::yijinjing {
-FORWARD_DECLARE_PTR(session)
+FORWARD_DECLARE_CLASS_PTR(session)
 
 class io_device : public resource {
 public:

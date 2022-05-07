@@ -1,20 +1,17 @@
 <script setup lang="ts">
-interface Status {
-  key: string;
-  status: 'done' | 'loading' | undefined;
-}
-
-interface Txt {
-  [prop: string]: {
-    done: string;
-    loading: string;
-  };
-}
-
 defineProps<{
   visible: boolean;
-  status: Status[];
-  txt: Txt;
+  status: {
+    key: string;
+    status: 'done' | 'loading' | undefined;
+  }[];
+  txt: Record<
+    string,
+    {
+      done: string;
+      loading: string;
+    }
+  >;
   title: string;
 }>();
 </script>

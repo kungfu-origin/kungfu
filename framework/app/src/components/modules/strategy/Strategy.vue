@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, toRefs } from 'vue';
+import { ref, computed, toRefs, Ref } from 'vue';
 
 import KfDashboard from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfDashboard.vue';
 import KfDashboardItem from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfDashboardItem.vue';
@@ -13,38 +13,39 @@ import {
 
 import {
   useTableSearchKeyword,
-  useAllKfConfigData,
   useDashboardBodySize,
   handleOpenLogview,
-  useProcessStatusDetailData,
-  useAssets,
-  useCurrentGlobalKfLocation,
+  handleOpenCodeView,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import { getColumns } from './config';
 import {
   handleSwitchProcessStatus,
   useAddUpdateRemoveKfConfig,
+  useAllKfConfigData,
+  useAssets,
+  useCurrentGlobalKfLocation,
+  useProcessStatusDetailData,
   useSwitchAllConfig,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
 import {
   dealAssetPrice,
   getConfigValue,
   getIfProcessRunning,
+  getIfProcessStopping,
   getProcessIdByKfLocation,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import path from 'path';
-import { shell } from '@electron/remote';
 import KfBlinkNum from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfBlinkNum.vue';
+import VueI18n from '@kungfu-trader/kungfu-app/src/language';
 
-interface StrategyProps {}
-defineProps<StrategyProps>();
+const { t } = VueI18n.global;
 
 const { dashboardBodyHeight, handleBodySizeChange } = useDashboardBodySize();
 
 const setStrategyModalVisible = ref<boolean>(false);
 const setStrategyConfigPayload = ref<KungfuApi.SetKfConfigPayload>({
   type: 'add',
-  title: '策略',
+  title: t('strategyConfig.strategy'),
   config: {} as KungfuApi.KfExtConfig,
 });
 
@@ -63,7 +64,7 @@ const { allProcessOnline, handleSwitchAllProcessStatus } = useSwitchAllConfig(
   processStatusData,
 );
 const { searchKeyword, tableData } = useTableSearchKeyword<KungfuApi.KfConfig>(
-  strategy,
+  strategy as Ref<KungfuApi.KfConfig[]>,
   ['name'],
 );
 const { getAssetsByKfConfig } = useAssets();
@@ -87,19 +88,19 @@ function handleOpenSetStrategyDialog(
   setStrategyConfigPayload.value.type = type;
   setStrategyConfigPayload.value.config = {
     type: [],
-    name: '策略',
+    name: t('strategyConfig.strategy'),
     settings: [
       {
         key: 'strategy_id',
-        name: '策略ID',
+        name: t('strategyConfig.strategy_id'),
         type: 'str',
         primary: true,
         required: true,
-        tip: '需保证该策略ID唯一',
+        tip: t('strategyConfig.strategy_tip'),
       },
       {
         key: 'strategy_path',
-        name: '策略路径',
+        name: t('strategyConfig.strategy_path'),
         type: 'file',
         required: true,
       },
@@ -122,11 +123,6 @@ function getStrategyPathShowName(kfConfig: KungfuApi.KfConfig): string {
   const strategyPath = getConfigValue(kfConfig).strategy_path || '';
   return path.basename(strategyPath);
 }
-
-function handleOpenFile(kfConfig: KungfuApi.KfConfig) {
-  const strategyPath = getConfigValue(kfConfig).strategy_path || '';
-  shell.openPath(strategyPath);
-}
 </script>
 
 <template>
@@ -136,7 +132,7 @@ function handleOpenFile(kfConfig: KungfuApi.KfConfig) {
         <KfDashboardItem>
           <a-input-search
             v-model:value="searchKeyword"
-            placeholder="关键字"
+            :placeholder="$t('keyword_input')"
             style="width: 120px"
           />
         </KfDashboardItem>
@@ -152,7 +148,7 @@ function handleOpenFile(kfConfig: KungfuApi.KfConfig) {
             type="primary"
             @click="handleOpenSetStrategyDialog('add')"
           >
-            添加
+            {{ $t('strategyConfig.add_strategy') }}
           </a-button>
         </KfDashboardItem>
       </template>
@@ -166,7 +162,7 @@ function handleOpenFile(kfConfig: KungfuApi.KfConfig) {
         :rowClassName="dealRowClassName"
         :customRow="customRow"
         :defaultExpandAllRows="true"
-        emptyText="暂无数据"
+        :emptyText="$t('empty_text')"
       >
         <template
           #bodyCell="{
@@ -185,6 +181,12 @@ function handleOpenFile(kfConfig: KungfuApi.KfConfig) {
               size="small"
               :checked="
                 getIfProcessRunning(
+                  processStatusData,
+                  getProcessIdByKfLocation(record),
+                )
+              "
+              :loading="
+                getIfProcessStopping(
                   processStatusData,
                   getProcessIdByKfLocation(record),
                 )
@@ -211,7 +213,7 @@ function handleOpenFile(kfConfig: KungfuApi.KfConfig) {
               />
               <FormOutlined
                 style="font-size: 12px"
-                @click.stop="handleOpenFile(record)"
+                @click.stop="handleOpenCodeView(record)"
               ></FormOutlined>
               <SettingOutlined
                 style="font-size: 12px"

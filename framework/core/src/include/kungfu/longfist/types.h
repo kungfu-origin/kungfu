@@ -29,6 +29,8 @@ KF_DEFINE_MARK_TYPE(Ping, 10008);
 KF_DEFINE_MARK_TYPE(Pong, 10009);
 KF_DEFINE_MARK_TYPE(RequestStop, 10024);
 KF_DEFINE_MARK_TYPE(RequestStart, 10025);
+KF_DEFINE_MARK_TYPE(CachedReadyToRead, 10060);
+KF_DEFINE_MARK_TYPE(RequestCached, 10061);
 KF_DEFINE_MARK_TYPE(SubscribeAll, 303);
 KF_DEFINE_MARK_TYPE(NewOrderSingle, 353);
 KF_DEFINE_MARK_TYPE(CancelOrder, 354);
@@ -37,6 +39,10 @@ KF_DEFINE_MARK_TYPE(ResetBookRequest, 400);
 KF_DEFINE_MARK_TYPE(MirrorPositionsRequest, 401);
 KF_DEFINE_MARK_TYPE(AssetRequest, 402);
 KF_DEFINE_MARK_TYPE(PositionRequest, 403);
+KF_DEFINE_MARK_TYPE(AssetSync, 404);
+KF_DEFINE_MARK_TYPE(PositionSync, 405);
+KF_DEFINE_MARK_TYPE(KeepPositionsRequest, 406);
+KF_DEFINE_MARK_TYPE(RebuildPositionsRequest, 407);
 KF_DEFINE_MARK_TYPE(InstrumentEnd, 802);
 KF_DEFINE_MARK_TYPE(AlgoOrderInput, 20010);
 KF_DEFINE_MARK_TYPE(AlgoOrderReport, 20011);
@@ -166,6 +172,12 @@ KF_DEFINE_PACK_TYPE(                                          //
     (int64_t, from_time)                                      //
 );
 
+KF_DEFINE_PACK_TYPE(                                        //
+    RequestReadFromSync, 10029, PK(source_id), PERPETUAL(), //
+    (uint32_t, source_id),                                  //
+    (int64_t, from_time)                                    //
+);
+
 KF_DEFINE_PACK_TYPE(                                 //
     RequestWriteTo, 10023, PK(dest_id), PERPETUAL(), //
     (uint32_t, dest_id)                              //
@@ -180,6 +192,11 @@ KF_DEFINE_PACK_TYPE(                                     //
     Channel, 10028, PK(source_id, dest_id), PERPETUAL(), //
     (uint32_t, source_id),                               //
     (uint32_t, dest_id)                                  //
+);
+
+KF_DEFINE_PACK_TYPE(                                    //
+    RequestCachedDone, 10062, PK(dest_id), PERPETUAL(), //
+    (uint32_t, dest_id)                                 //
 );
 
 KF_DEFINE_PACK_TYPE(                         //

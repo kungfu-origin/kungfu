@@ -9,8 +9,8 @@
 #include <kungfu/wingchun/common.h>
 
 namespace kungfu::wingchun::book {
-FORWARD_DECLARE_PTR(Book)
-FORWARD_DECLARE_PTR(Bookkeeper)
+FORWARD_DECLARE_STRUCT_PTR(Book)
+FORWARD_DECLARE_CLASS_PTR(Bookkeeper)
 
 // key = hash_str_32(product_id)
 typedef std::unordered_map<uint32_t, longfist::types::Commission> CommissionMap;
@@ -97,9 +97,9 @@ struct Book {
 
   void replace(const longfist::types::Trade &trade);
 
-  const InstrumentMap &get_instruments() const { return instruments; }
+  [[nodiscard]] const InstrumentMap &get_instruments() const { return instruments; }
 
-  const CommissionMap &get_commissions() const { return commissions; }
+  [[nodiscard]] const CommissionMap &get_commissions() const { return commissions; }
 };
 } // namespace kungfu::wingchun::book
 

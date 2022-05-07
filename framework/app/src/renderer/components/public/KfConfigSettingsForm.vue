@@ -1,6 +1,11 @@
 <script setup lang="ts">
 import { dialog } from '@electron/remote';
-import { DashOutlined, CloseOutlined } from '@ant-design/icons-vue';
+import {
+  DeleteOutlined,
+  DashOutlined,
+  CloseOutlined,
+  PlusOutlined,
+} from '@ant-design/icons-vue';
 import {
   PriceTypeEnum,
   SideEnum,
@@ -8,15 +13,14 @@ import {
 import {
   buildInstrumentSelectOptionLabel,
   buildInstrumentSelectOptionValue,
-  useAllKfConfigData,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import {
+  defineComponent,
   getCurrentInstance,
   nextTick,
   reactive,
   Ref,
   ref,
-  toRaw,
   toRefs,
   watch,
 } from 'vue';
@@ -33,10 +37,17 @@ import {
   KfConfigValueNumberType,
   KfConfigValueArrayType,
   KfConfigValueBooleanType,
+  getCombineValueByPrimaryKeys,
+  initFormStateByConfig,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { RuleObject } from 'ant-design-vue/lib/form';
-import { useInstruments } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
+import {
+  useAllKfConfigData,
+  useInstruments,
+} from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
 import dayjs, { Dayjs } from 'dayjs';
+import VueI18n from '@kungfu-trader/kungfu-app/src/language';
+const { t } = VueI18n.global;
 
 const props = withDefaults(
   defineProps<{
@@ -47,6 +58,7 @@ const props = withDefaults(
     primaryKeyAvoidRepeatCompareTarget?: string[];
     layout?: 'horizontal' | 'vertical' | 'inline';
     labelAlign?: 'right' | 'left';
+    labelWrap?: boolean;
     labelCol?: number;
     wrapperCol?: number;
     rules?: Record<
@@ -67,6 +79,7 @@ const props = withDefaults(
     primaryKeyAvoidRepeatCompareExtra: '',
     layout: 'horizontal',
     labelAlign: 'right',
+    labelWrap: false,
     labelCol: 6,
     wrapperCol: 16,
     rules: () => ({}),
@@ -164,7 +177,7 @@ function makeSearchOptionFormInstruments(
     .map((item) => {
       return transformSearchInstrumentResultToInstrument(item.toString());
     })
-    .filter((item) => !!item);
+    .filter((item): item is KungfuApi.InstrumentResolved => !!item);
 
   if (!instrumentResolveds.length) {
     if (type === 'instruments') {
@@ -205,27 +218,32 @@ const SpecialWordsReg = new RegExp(
   "[`~!@#$^&*()=|{}':;',\\[\\].<>《》/?~！@#￥……&*（）——|{}【】‘；：”“'。, 、？]",
 );
 function primaryKeyValidator(_rule: RuleObject, value: string): Promise<void> {
-  const combineValue: string = [
-    props.primaryKeyAvoidRepeatCompareExtra || '',
-    ...primaryKeys.map((key) => formState[key]),
-  ]
-    .filter((item) => item !== '')
-    .join('_');
+  const combineValue: string = getCombineValueByPrimaryKeys(
+    primaryKeys,
+    formState,
+    props.primaryKeyAvoidRepeatCompareExtra,
+  );
 
   if (
     props.primaryKeyAvoidRepeatCompareTarget
       .map((item): string => item.toLowerCase())
       .includes(combineValue.toLowerCase())
   ) {
-    return Promise.reject(new Error(`${combineValue} 已存在`));
+    return Promise.reject(
+      new Error(
+        t('validate.value_existing', {
+          value: combineValue,
+        }),
+      ),
+    );
   }
 
   if (SpecialWordsReg.test(value)) {
-    return Promise.reject(new Error(`不能含有特殊字符`));
+    return Promise.reject(new Error(t('validate.no_special_characters')));
   }
 
   if (value.toString().includes('_') && !props.primaryKeyUnderline) {
-    return Promise.reject(new Error(`不能含有下划线`));
+    return Promise.reject(new Error(t('validate.no_underline')));
   }
 
   return Promise.resolve();
@@ -233,11 +251,15 @@ function primaryKeyValidator(_rule: RuleObject, value: string): Promise<void> {
 
 function noZeroValidator(_rule: RuleObject, value: number): Promise<void> {
   if (Number.isNaN(+value)) {
-    return Promise.reject(new Error(`请输入非零数字`));
+    return Promise.reject(new Error(t('validate.no_zero_number')));
   }
 
   if (+value === 0) {
-    return Promise.reject(new Error(`请输入非零数字`));
+    return Promise.reject(new Error(t('validate.no_zero_number')));
+  }
+
+  if (+value < 0) {
+    return Promise.reject(new Error(t('validate.no_negative_number')));
   }
 
   return Promise.resolve();
@@ -250,7 +272,7 @@ function instrumnetValidator(_rule: RuleObject, value: string): Promise<void> {
 
   const instrumentResolved = transformSearchInstrumentResultToInstrument(value);
   if (!instrumentResolved) {
-    return Promise.reject(new Error('标的错误'));
+    return Promise.reject(new Error(t('instrument_error')));
   }
 
   return Promise.resolve();
@@ -268,7 +290,7 @@ function instrumnetsValidator(
     (instrument) => !transformSearchInstrumentResultToInstrument(instrument),
   );
   if (instrumentResolved.length) {
-    return Promise.reject(new Error('标的错误'));
+    return Promise.reject(new Error(t('instrument_error')));
   }
 
   return Promise.resolve();
@@ -351,6 +373,21 @@ function parserPercentString(value: string): string {
   return value.replace('%', '');
 }
 
+function handleAddItemIntoTableRows(item: KungfuApi.KfConfigItem) {
+  const targetState = formState[item.key];
+  const tmp = initFormStateByConfig(item.columns || [], {});
+  if (targetState instanceof Array) {
+    targetState.push(tmp);
+  }
+}
+
+function handleRemoveItemIntoTableRows(item, index) {
+  const targetState = formState[item.key];
+  if (targetState instanceof Array) {
+    targetState.splice(index, 1);
+  }
+}
+
 defineExpose({
   validate,
   clearValidate,
@@ -361,8 +398,9 @@ defineExpose({
     class="kf-config-form"
     ref="formRef"
     :model="formState"
-    :label-col="{ span: labelCol }"
-    :wrapper-col="{ span: wrapperCol }"
+    :label-col="layout === 'inline' ? null : { span: labelCol }"
+    :label-wrap="labelWrap"
+    :wrapper-col="layout === 'inline' ? null : { span: wrapperCol }"
     :labelAlign="labelAlign"
     :colon="false"
     :scrollToFirstError="true"
@@ -391,7 +429,7 @@ defineExpose({
                     {
                       required: item.required,
                       type: getValidatorType(item.type),
-                      message: item.errMsg || '该项为必填项',
+                      message: item.errMsg || $t('validate.mandatory'),
                       trigger: 'blur',
                     },
                   ]
@@ -642,7 +680,7 @@ defineExpose({
         :disabled="changeType === 'update' && item.primary"
       >
         <a-button size="small" @click="handleSelectFiles(item.key)">
-          <template #icon><DashOutlined /></template>
+          <template #icon><PlusOutlined /></template>
         </a-button>
         <div
           v-if="formState[item.key]"
@@ -651,7 +689,7 @@ defineExpose({
           :title="file"
         >
           <span class="name">{{ file }}</span>
-          <close-outlined
+          <CloseOutlined
             v-if="!(item.default as string[]).includes(file)"
             class="kf-hover"
             @click="handleRemoveFile(item.key, file)"
@@ -661,12 +699,53 @@ defineExpose({
       <a-time-picker
         v-else-if="item.type === 'timePicker'"
         :disabled="changeType === 'update' && item.primary"
-        :value="dayjs(+formState[item.key] || dayjs())"
+        :value="
+          dayjs(formState[item.key] || dayjs().format('YYYY-MM-DD HH:mm:ss'))
+        "
         @change="handleTimePickerChange($event as unknown as Dayjs, item.key)"
       ></a-time-picker>
+      <div
+        class="table-in-config-setting-form"
+        v-else-if="item.type === 'table'"
+      >
+        <a-button>
+          <template #icon>
+            <PlusOutlined @click.stop="handleAddItemIntoTableRows(item)" />
+          </template>
+        </a-button>
+        <div
+          class="table-in-config-setting-row"
+          v-for="(_item, index) in formState[item.key]"
+          :key="`${index}_${formState[item.key].length}`"
+        >
+          <a-button size="small">
+            <template #icon>
+              <DeleteOutlined
+                @click="handleRemoveItemIntoTableRows(item, index)"
+              />
+            </template>
+          </a-button>
+          <KfConfigSettingsForm
+            v-model:formState="formState[item.key][index]"
+            :configSettings="item.columns || []"
+            :changeType="changeType"
+            :rules="rules"
+            layout="inline"
+          ></KfConfigSettingsForm>
+
+          <a-divider
+            v-if="index !== formState[item.key].length - 1"
+          ></a-divider>
+        </div>
+      </div>
     </a-form-item>
   </a-form>
 </template>
+<script lang="ts">
+export default defineComponent({
+  name: 'KfConfigSettingsFrom',
+});
+</script>
 <style lang="less">
 .kf-config-form {
   .kf-form-item__warp {
@@ -686,6 +765,27 @@ defineExpose({
 
       button {
         width: 40px;
+      }
+    }
+  }
+
+  .table-in-config-setting-form {
+    .table-in-config-setting-row {
+      margin-top: 10px;
+
+      > .ant-btn {
+        float: right;
+      }
+
+      .ant-form {
+        padding-right: 60px;
+        box-sizing: border-box;
+
+        &.ant-form-inline {
+          .ant-row.ant-form-item {
+            margin-bottom: 8px;
+          }
+        }
       }
     }
   }

@@ -57,6 +57,7 @@ set(KUNGFU_BUILD_DIR ${CMAKE_BINARY_DIR})
 
 ##########################################################################
 add_subdirectory(.deps/pybind11-2.9.0)
+add_subdirectory(.deps/sqlite3-3.33.0)
 add_subdirectory(src/libkungfu)
 add_subdirectory(src/bindings/python)
 add_subdirectory(src/bindings/node)

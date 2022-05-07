@@ -1,20 +1,13 @@
 <script setup lang="ts">
 import { SlidersOutlined, SettingOutlined } from '@ant-design/icons-vue';
-import { useExtConfigsRelated } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import KfProcessStatusController from '@kungfu-trader/kungfu-app/src/renderer/components/layout/KfProcessStatusController.vue';
-import {
-  computed,
-  getCurrentInstance,
-  onBeforeUnmount,
-  onUnmounted,
-  ref,
-} from 'vue';
+import { computed, getCurrentInstance, onBeforeUnmount, ref } from 'vue';
+import { useExtConfigsRelated } from '../../assets/methods/actionsUtils';
 import globalBus from '../../assets/methods/globalBus';
 import KfGlobalSettingModal from '../public/KfGlobalSettingModal.vue';
-const logo = require('@kungfu-trader/kungfu-app/src/renderer/assets/svg/LOGO.svg');
+// import { useI18n } from "vue-i18n";
 
-interface LayoutProps {}
-defineProps<LayoutProps>();
+const logo = require('@kungfu-trader/kungfu-app/src/renderer/assets/svg/LOGO.svg');
 
 const app = getCurrentInstance();
 const globalSettingModalVisible = ref<boolean>(false);
@@ -22,22 +15,22 @@ const menuSelectedKeys = ref<string[]>(['main']);
 
 const { uiExtConfigs } = useExtConfigsRelated();
 const sidebarFooterComponentConfigs = computed(() => {
-  return Object.keys(uiExtConfigs.data)
-    .filter((key) => uiExtConfigs.data[key].position === 'sidebar_footer')
+  return Object.keys(uiExtConfigs.value)
+    .filter((key) => uiExtConfigs.value[key].position === 'sidebar_footer')
     .map((key) => {
       return {
-        ...uiExtConfigs.data[key],
+        ...uiExtConfigs.value[key],
         key,
       };
     });
 });
 
 const sidebarComponentConfigs = computed(() => {
-  return Object.keys(uiExtConfigs.data)
-    .filter((key) => uiExtConfigs.data[key].position === 'sidebar')
+  return Object.keys(uiExtConfigs.value)
+    .filter((key) => uiExtConfigs.value[key].position === 'sidebar')
     .map((key) => {
       return {
-        ...uiExtConfigs.data[key],
+        ...uiExtConfigs.value[key],
         key,
       };
     });
@@ -57,7 +50,7 @@ onBeforeUnmount(() => {
 });
 
 function handleToPage(pathname: string) {
-  if (app.proxy) {
+  if (app?.proxy) {
     app.proxy.$router.push(pathname);
   }
 }
@@ -78,7 +71,7 @@ function handleToPage(pathname: string) {
             <template #icon>
               <sliders-outlined style="font-size: 24px" />
             </template>
-            <span>主面板</span>
+            <span>{{ $t('baseConfig.main_panel') }}</span>
           </a-menu-item>
           <a-menu-item
             v-for="config in sidebarComponentConfigs"

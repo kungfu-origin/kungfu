@@ -70,8 +70,10 @@ void JsPublishState::operator()(Napi::Object object) {
 
 JsResetCache::JsResetCache(apprentice &app, Napi::ObjectReference &state) : app_(app), state_(state) {}
 
-void JsResetCache::operator()(const event_ptr &event) {
-  const auto &request = event->data<CacheReset>();
+void JsResetCache::operator()(const state<CacheReset> &state) {
+  auto source = state.source;
+  auto dest = state.dest;
+  const auto &request = state.data;
   boost::hana::for_each(StateDataTypes, [&](auto it) {
     using DataType = typename decltype(+boost::hana::second(it))::type;
     if (DataType::tag == request.msg_type) {
@@ -82,12 +84,9 @@ void JsResetCache::operator()(const event_ptr &event) {
       for (int i = 0; i < names.Length(); i++) {
         auto name = names.Get(i).ToString().Utf8Value();
         auto value = table.Get(name).ToObject();
-        auto source = value.Get("source").ToNumber().Uint32Value();
-        auto dest = value.Get("dest").ToNumber().Uint32Value();
-        if (source == event->source() and dest == event->dest()) {
-          delete_keys.push_back(name);
-        }
-        if (source == event->dest()) {
+        auto source_id = value.Get("source").ToNumber().Uint32Value();
+        auto dest_id = value.Get("dest").ToNumber().Uint32Value();
+        if ((source_id == source and dest_id == dest) or source_id == dest) {
           delete_keys.push_back(name);
         }
       }
@@ -100,7 +99,6 @@ void JsResetCache::operator()(const event_ptr &event) {
 
 void InitStateMap(const Napi::CallbackInfo &info, Napi::ObjectReference &state, const std::string &name) {
   boost::hana::for_each(longfist::StateDataTypes, [&](auto it) {
-    using DataType = typename decltype(+boost::hana::second(it))::type;
     auto name = std::string(boost::hana::first(it).c_str());
     state.Set(name, DataTable::NewInstance(state.Value()));
   });

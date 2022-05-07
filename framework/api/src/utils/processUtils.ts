@@ -1,8 +1,8 @@
-import fse from 'fs-extra';
 import path from 'path';
 import os from 'os';
 import fkill from 'fkill';
-import pm2, { Proc, ProcessDescription, StartOptions } from 'pm2';
+import { Proc, ProcessDescription, StartOptions } from 'pm2';
+import pm2 from './pm2Custom';
 import { getUserLocale } from 'get-user-locale';
 import psList, { ProcessDescriptor } from 'ps-list';
 
@@ -16,13 +16,14 @@ import {
   getIfProcessRunning,
 } from '../utils/busiUtils';
 import {
-  APP_DIR,
   buildProcessLogPath,
   EXTENSION_DIRS,
   KFC_DIR,
-  KF_CONFIG_PATH,
   KF_HOME,
+  KF_RUNTIME_DIR,
 } from '../config/pathConfig';
+import { getKfGlobalSettingsValue } from '../config/globalSettings';
+import { Observable } from 'rxjs';
 
 process.env.PM2_HOME = path.resolve(os.homedir(), '.pm2');
 const numCPUs = os.cpus() ? os.cpus().length : 1;
@@ -57,7 +58,10 @@ export const forceKill = (tasks: string[]): Promise<void> => {
 
 const kfcName = isWin ? 'kfc.exe' : 'kfc';
 
-export const killKfc = () => forceKill([kfcName]);
+export const killKfc = (): Promise<void> =>
+  new Promise((resolve) => {
+    forceKill([kfcName]).finally(() => resolve());
+  });
 
 export const killKungfu = () => {
   if (isLinux) {
@@ -85,9 +89,10 @@ export type Pm2ProcessStatusTypes =
   | 'waiting restart'
   | 'one-launch-status';
 
-export interface Pm2ProcessStatusData {
-  [prop: string]: Pm2ProcessStatusTypes | undefined;
-}
+export type Pm2ProcessStatusData = Record<
+  string,
+  Pm2ProcessStatusTypes | undefined
+>;
 
 export interface Pm2ProcessStatusDetail {
   monit: ProcessDescription['monit'];
@@ -102,9 +107,7 @@ export interface Pm2ProcessStatusDetail {
   args: Pm2Env['args'];
 }
 
-export interface Pm2ProcessStatusDetailData {
-  [prop: string]: Pm2ProcessStatusDetail;
-}
+export type Pm2ProcessStatusDetailData = Record<string, Pm2ProcessStatusDetail>;
 
 export interface Pm2Env {
   pm_cwd?: string;
@@ -120,6 +123,27 @@ export interface Pm2Env {
   created_at?: number;
   script?: StartOptions['script'];
   args?: StartOptions['args'];
+}
+
+export interface Pm2Packet {
+  process: {
+    pm_id: number;
+  };
+  data: {
+    type: string;
+    body: Record<string, string | number | boolean>;
+  };
+}
+
+export interface Pm2PacketMain {
+  type: string;
+  topic: string;
+  data: object;
+  id: number;
+}
+
+export class Pm2Bus {
+  on: (type: string, cb: (packet: Pm2Packet) => void) => void;
 }
 
 export const pm2Connect = (): Promise<void> => {
@@ -282,15 +306,18 @@ export const pm2KillGodDaemon = (): Promise<void> => {
 
 export const pm2Disconnect = pm2.disconnect;
 
+export function pm2LaunchBus(cb: (err: Error, pm2_bus: Pm2Bus) => void) {
+  pm2.launchBus(cb);
+}
+
 export const startProcess = (
   options: Pm2StartOptions,
 ): Promise<Proc | void> => {
-  const kfcScript = isWin ? 'kfc.exe' : 'kfc';
   const optionsResolved: Pm2StartOptions = {
     name: options.name,
     args: options.args, //有问题吗？
     cwd: options.cwd || path.join(KFC_DIR),
-    script: options.script || kfcScript,
+    script: options.script || kfcName,
     interpreter: options.interpreter || 'none',
     output: buildProcessLogPath(options.name),
     error: buildProcessLogPath(options.name),
@@ -305,11 +332,14 @@ export const startProcess = (
     exec_mode: 'fork',
     kill_timeout: 16000,
     env: {
-      ...options.env,
+      RELOAD_AFTER_CRASHED: process.env.RELOAD_AFTER_CRASHED || 'false',
       KF_HOME: dealSpaceInPath(KF_HOME),
+      KF_RUNTIME_DIR: dealSpaceInPath(KF_RUNTIME_DIR),
       LANG: `${locale}.UTF-8`,
       PYTHONUTF8: '1',
       PYTHONIOENCODING: 'utf8',
+      KFC_AS_VARIANT: '',
+      ...options.env,
     },
   };
 
@@ -372,7 +402,12 @@ export function startProcessGetStatusUntilStop(
   });
 }
 
-export const startGetProcessStatus = (callback: Function) => {
+export const startGetProcessStatus = (
+  callback: (res: {
+    processStatus: Pm2ProcessStatusData;
+    processStatusWithDetail: Pm2ProcessStatusDetailData;
+  }) => void,
+) => {
   setTimerPromiseTask(() => {
     return listProcessStatus()
       .then((res) => {
@@ -471,13 +506,17 @@ function getRocketParams(args: string, ifRocket: boolean) {
     rocket = '';
   }
 
+  if (args.includes('dzxy')) {
+    rocket = '';
+  }
+
   return rocket;
 }
 
 function buildArgs(args: string): string {
-  const kfConfig: any = fse.readJsonSync(KF_CONFIG_PATH) || {};
-  const logLevel: string = (kfConfig.system || {}).logLevel || '';
-  const ifRocket = (kfConfig.performance || {}).rocket || false;
+  const globalSetting = getKfGlobalSettingsValue();
+  const logLevel: string = globalSetting?.system?.logLevel || '';
+  const ifRocket = globalSetting?.performance?.rocket || false;
   const rocket = getRocketParams(args, ifRocket);
   return [logLevel, args, rocket].join(' ');
 }
@@ -509,73 +548,89 @@ export function startArchiveMakeTask(cb?: Function) {
   );
 }
 
-export const startMaster = async (force = false): Promise<Proc | void> => {
+export const startMaster = async (force = false): Promise<void> => {
   const processName = 'master';
 
-  const processOrError = await pm2Describe(processName);
-  if (processOrError instanceof Error) {
-    kfLogger.error(processOrError.message);
-    throw processOrError;
-  }
-  const isMasterAlive = !!processOrError.filter(
-    (item) => item?.pm2_env?.status === 'online',
-  ).length;
-
-  if (!force && isMasterAlive) {
-    const err = new Error('kungfu master is alive');
-    kfLogger.error(err.message);
-    return Promise.reject(err);
-  }
-  return killKfc()
-    .finally(() => {
-      const args = buildArgs('run -c system -g master -n master');
-      return startProcess({
-        name: processName,
-        args,
-        env: {
-          KF_NO_EXT: 'on',
-        },
-      });
-    })
-    .catch((err: Error) => {
-      kfLogger.error(err.message);
+  try {
+    await preStartProcess(processName, force);
+    await killKfc();
+    const args = buildArgs('run -c system -g master -n master');
+    await startProcess({
+      name: processName,
+      args,
+      force,
+      env: {
+        KF_NO_EXT: 'on',
+      },
     });
+  } catch (err) {
+    kfLogger.error(err.message);
+  }
 };
 
 //启动ledger
-export const startLedger = async (force = false): Promise<Proc | void> => {
+export const startLedger = async (force = false): Promise<void> => {
   const processName = 'ledger';
+
+  try {
+    await preStartProcess(processName, force);
+    const args = buildArgs('run -c system -g service -n ledger');
+    await startProcess({
+      name: processName,
+      args,
+      force,
+    });
+  } catch (err) {
+    kfLogger.error(err.message);
+  }
+};
+
+export const startCacheD = async (force = false): Promise<void> => {
+  const processName = 'cached';
+
+  try {
+    await preStartProcess(processName, force);
+    const args = buildArgs('run -c system -g service -n cached');
+    await startProcess({
+      name: processName,
+      args,
+      force,
+    });
+  } catch (err) {
+    kfLogger.error(err.message);
+  }
+};
+
+async function preStartProcess(
+  processName: string,
+  force = false,
+): Promise<void> {
   const processOrError = await pm2Describe(processName);
   if (processOrError instanceof Error) {
     kfLogger.error(processOrError.message);
     throw processOrError;
   }
-  const isLedgerAlive = !!processOrError.filter(
+
+  const isProcessAlive = !!processOrError.filter(
     (item) => item?.pm2_env?.status === 'online',
   ).length;
 
-  if (!force && isLedgerAlive) {
-    const err = new Error('kungfu ledger is alive');
+  if (!force && isProcessAlive) {
+    const err = new Error(`kungfu ${processName} is alive`);
     kfLogger.error(err.message);
     return Promise.reject(err);
   }
 
-  const args = buildArgs('run -c system -g service -n ledger');
-  return startProcess({
-    name: processName,
-    args,
-  }).catch((err) => {
-    kfLogger.error(err.message);
-  });
-};
+  return Promise.resolve();
+}
 
 //启动md
 export const startMd = async (sourceId: string): Promise<Proc | void> => {
   const extDirs = await flattenExtensionModuleDirs(EXTENSION_DIRS);
   const args = buildArgs(
-    `-X ${extDirs
-      .map((dir) => path.dirname(dir))
-      .join(path.delimiter)} run -c md -g "${sourceId}" -n "${sourceId}"`,
+    `-X "${extDirs
+      .map((dir) => dealSpaceInPath(path.dirname(dir)))
+      .join(path.delimiter)}" run -c md -g "${sourceId}" -n "${sourceId}"`,
   );
   return startProcess({
     name: `md_${sourceId}`,
@@ -592,9 +647,9 @@ export const startTd = async (accountId: string): Promise<Proc | void> => {
   const extDirs = await flattenExtensionModuleDirs(EXTENSION_DIRS);
   const { source, id } = accountId.parseSourceAccountId();
   const args = buildArgs(
-    `-X ${extDirs
-      .map((dir) => path.dirname(dir))
-      .join(path.delimiter)} run -c td -g "${source}" -n "${id}"`,
+    `-X "${extDirs
+      .map((dir) => dealSpaceInPath(path.dirname(dir)))
+      .join(path.delimiter)}" run -c td -g "${source}" -n "${id}"`,
   );
   return startProcess({
     name: `td_${accountId}`,
@@ -613,11 +668,11 @@ export const startTask = async (
 ): Promise<Proc | void> => {
   const extDirs = await flattenExtensionModuleDirs(EXTENSION_DIRS);
   const argsResolved: string = buildArgs(
-    `-X ${extDirs
-      .map((dir) => path.dirname(dir))
-      .join(path.delimiter)} run -c strategy -g "${taskLocation.group}" -n "${
+    `-X "${extDirs
+      .map((dir) => dealSpaceInPath(path.dirname(dir)))
+      .join(path.delimiter)}" run -c strategy -g "${taskLocation.group}" -n "${
       taskLocation.name
-    }" ${soPath} -a ${args}`,
+    }" ${soPath} -a "${args}"`,
   );
 
   return startProcess({
@@ -667,9 +722,9 @@ export const startStrategy = (
   strategyPath: string,
 ): Promise<Proc | void> => {
   strategyPath = dealSpaceInPath(strategyPath);
-  const kfSystemConfig: any = fse.readJsonSync(KF_CONFIG_PATH);
-  const ifLocalPython = (kfSystemConfig.strategy || {}).python || false;
-  const pythonPath = (kfSystemConfig.strategy || {}).pythonPath || '';
+  const globalSetting = getKfGlobalSettingsValue();
+  const ifLocalPython = globalSetting?.strategy?.python || false;
+  const pythonPath = globalSetting?.strategy?.pythonPath || '';
 
   if (ifLocalPython) {
     return deleteProcess(strategyId)
@@ -686,6 +741,43 @@ export const startStrategy = (
       kfLogger.error(err.message);
     });
   }
+};
+
+export const startDzxy = () => {
+  return startProcess({
+    name: 'dzxy',
+    args: '',
+    cwd:
+      process.env.NODE_ENV === 'development'
+        ? path.join(process.cwd(), 'dist', 'cli')
+        : path.resolve(__dirname),
+    script: 'dzxy.js',
+    interpreter: path.join(KFC_DIR, kfcName),
+    force: true,
+    watch: process.env.NODE_ENV === 'production' ? false : true,
+    env: {
+      KFC_AS_VARIANT: 'node',
+    },
+  }).catch((err) => {
+    kfLogger.error(err.message);
+  });
+};
+
+export const startExtDaemon = (name: string, cwd: string, script: string) => {
+  return startProcess({
+    name,
+    args: '',
+    cwd,
+    script,
+    interpreter: path.join(KFC_DIR, kfcName),
+    force: true,
+    watch: process.env.NODE_ENV === 'production' ? false : true,
+    env: {
+      KFC_AS_VARIANT: 'node',
+    },
+  }).catch((err) => {
+    kfLogger.error(err.message);
+  });
 };
 
 export const startBar = (
@@ -714,17 +806,43 @@ export const startCustomProcess = (
   });
 };
 
-export const startDzxy = (): Promise<any> => {
-  return startProcess({
-    name: 'dzxy',
-    args: '',
-    force: true,
-    watch: process.env.NODE_ENV === 'production' ? false : true,
-    script: 'daemon.js',
-    cwd: APP_DIR,
-    interpreter: process.execPath,
-  }).catch((err) => {
-    kfLogger.error(err.message);
+export const sendDataToProcessIdByPm2 = (
+  topic: string,
+  pm2Id: number,
+  data: Record<string, KungfuApi.KfConfigValue>,
+): Promise<void> => {
+  return new Promise((resolve, reject) => {
+    pm2.sendDataToProcessId(
+      pm2Id,
+      {
+        type: 'process:msg',
+        topic,
+        data,
+      },
+      (err) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve();
+        }
+      },
+    );
+  });
+};
+
+export const processStatusDataObservable = () => {
+  return new Observable<{
+    processStatus: Pm2ProcessStatusData;
+    processStatusWithDetail: Pm2ProcessStatusDetailData;
+  }>((observer) => {
+    startGetProcessStatus(
+      (res: {
+        processStatus: Pm2ProcessStatusData;
+        processStatusWithDetail: Pm2ProcessStatusDetailData;
+      }) => {
+        observer.next(res);
+      },
+    );
   });
 };
 

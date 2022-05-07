@@ -22,7 +22,13 @@ BrokerVendor::BrokerVendor(location_ptr location, bool low_latency) : apprentice
 }
 
 void BrokerVendor::on_start() {
-  events_ | is(RequestWriteTo::tag, RequestReadFrom::tag, RequestReadFromPublic::tag) | $$(notify_broker_state());
+  events_ | is(RequestWriteTo::tag, RequestReadFrom::tag, RequestReadFromPublic::tag, RequestReadFromSync::tag) |
+      $$(notify_broker_state());
+}
+
+void BrokerVendor::on_exit() {
+  auto service = get_service();
+  service->on_exit();
 }
 
 void BrokerVendor::notify_broker_state() {
@@ -33,6 +39,8 @@ void BrokerVendor::notify_broker_state() {
 BrokerService::BrokerService(BrokerVendor &vendor) : vendor_(vendor), state_(BrokerState::Pending) {}
 
 void BrokerService::on_start() {}
+
+void BrokerService::on_exit() {}
 
 void BrokerService::on_trading_day(const event_ptr &event, int64_t daytime) {}
 

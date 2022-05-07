@@ -22,29 +22,30 @@ import {
 import { categoryRegisterConfig, getColumns } from './config';
 import {
   useTableSearchKeyword,
-  useExtConfigsRelated,
-  useAllKfConfigData,
-  useProcessStatusDetailData,
   handleOpenLogview,
   useDashboardBodySize,
   getInstrumentTypeColor,
-  useAssets,
-  useCurrentGlobalKfLocation,
-  useTdGroups,
   isInTdGroup,
+  confirmModal,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import {
   useAddUpdateRemoveKfConfig,
   handleSwitchProcessStatus,
   useSwitchAllConfig,
+  useProcessStatusDetailData,
+  useExtConfigsRelated,
+  useCurrentGlobalKfLocation,
+  useAllKfConfigData,
+  useTdGroups,
+  useAssets,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
 import {
   dealAssetPrice,
   getIdByKfLocation,
   getIfProcessRunning,
+  getIfProcessStopping,
   getProcessIdByKfLocation,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
-import { message, Modal } from 'ant-design-vue';
 import KfBlinkNum from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfBlinkNum.vue';
 import {
   addTdGroup,
@@ -52,10 +53,12 @@ import {
   setTdGroup,
 } from '@kungfu-trader/kungfu-js-api/actions';
 import SetTdGroupModal from './SetTdGroupModal.vue';
+import { useGlobalStore } from '@kungfu-trader/kungfu-app/src/renderer/pages/index/store/global';
+import { messagePrompt } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
+import VueI18n from '@kungfu-trader/kungfu-app/src/language';
 
-interface TdProps {}
-defineProps<TdProps>();
-
+const { t } = VueI18n.global;
+const { success, error } = messagePrompt();
 const { dashboardBodyHeight, handleBodySizeChange } = useDashboardBodySize();
 
 const app = getCurrentInstance();
@@ -63,7 +66,7 @@ const setSourceModalVisible = ref<boolean>(false);
 const setTdModalVisible = ref<boolean>(false);
 const setTdConfigPayload = ref<KungfuApi.SetKfConfigPayload>({
   type: 'add',
-  title: '交易账户',
+  title: t('Td'),
   config: {} as KungfuApi.KfExtConfig,
 });
 
@@ -91,11 +94,11 @@ const addTdGroupModalVisble = ref<boolean>(false);
 const setTdGroupModalVisble = ref<boolean>(false);
 const tdGroup = useTdGroups();
 const tdGroupNames = computed(() => {
-  return tdGroup.data.map((item) => item.name);
+  return tdGroup.value.map((item) => item.name);
 });
 const addTdGroupConfigPayload = ref<KungfuApi.SetKfConfigPayload>({
   type: 'add',
-  title: '账户组',
+  title: t('tdConfig.account_group'),
   config: {} as KungfuApi.KfExtConfig,
 });
 
@@ -107,7 +110,7 @@ const tableDataResolved = computed(() => {
   const tdGroupResolved: Record<string, KungfuApi.KfExtraLocation> = {};
   const tdResolved: KungfuApi.KfConfig[] = [];
   const markedNameToTdGroup: Record<string, KungfuApi.KfExtraLocation> = {};
-  [...tdGroup.data, ...tableData.value].forEach((item) => {
+  [...tdGroup.value, ...tableData.value].forEach((item) => {
     if ('children' in item) {
       markedNameToTdGroup[item.name] = { ...item };
       tdGroupResolved[item.name] = {
@@ -147,16 +150,16 @@ const columns = getColumns((dataIndex) => {
   };
 });
 
+const { setTdGroups } = useGlobalStore();
+
 onMounted(() => {
   if (app?.proxy) {
     app.proxy.$globalCategoryRegister.register(categoryRegisterConfig);
-    app.proxy
-      .$useGlobalStore()
-      .setTdGroups()
-      .then(() => {
-        tdGroupDataLoaded.value = true;
-      });
   }
+
+  setTdGroups().then(() => {
+    tdGroupDataLoaded.value = true;
+  });
 });
 
 function handleOpenSetTdModal(
@@ -164,18 +167,22 @@ function handleOpenSetTdModal(
   selectedSource: string,
   tdConfig?: KungfuApi.KfConfig,
 ) {
-  const extConfig: KungfuApi.KfExtConfig = (extConfigs.data['td'] || {})[
+  const extConfig: KungfuApi.KfExtConfig = (extConfigs.value['td'] || {})[
     selectedSource
   ];
 
   if (!extConfig) {
-    message.error(`${selectedSource} 柜台插件不存在`);
+    error(
+      t('tdConfig.td_not_found', {
+        td: selectedSource,
+      }),
+    );
     return;
   }
 
   currentSelectedSourceId.value = selectedSource;
   setTdConfigPayload.value.type = type;
-  setTdConfigPayload.value.title = `${selectedSource} 交易账户`;
+  setTdConfigPayload.value.title = `${selectedSource} ${t('Td')}`;
   setTdConfigPayload.value.config = extConfig;
   setTdConfigPayload.value.initValue = undefined;
 
@@ -186,9 +193,7 @@ function handleOpenSetTdModal(
   }
 
   if (!extConfig?.settings?.length) {
-    message.error(
-      `配置项不存在, 请检查 ${extConfig?.name || selectedSource} package.json`,
-    );
+    error(t('tdConfig.sourse_not_found'));
     return;
   }
 
@@ -203,15 +208,15 @@ function handleOpenAddTdGroupDialog(type: KungfuApi.ModalChangeType) {
   addTdGroupConfigPayload.value.type = type;
   addTdGroupConfigPayload.value.config = {
     type: [],
-    name: '账户分组',
+    name: t('tdConfig.td_group'),
     settings: [
       {
         key: 'td_group_name',
-        name: '账户组名称',
+        name: t('tdConfig.td_name'),
         type: 'str',
         primary: true,
         required: true,
-        tip: '需保证该账户组名称唯一',
+        tip: t('tdConfig.need_only_group'),
       },
     ],
   };
@@ -233,52 +238,48 @@ function handleConfirmAddUpdateTdGroup(
 
   return addTdGroup(newTdGroup)
     .then(() => {
-      if (app?.proxy) {
-        app.proxy.$useGlobalStore().setTdGroups();
-      }
+      return setTdGroups();
     })
     .then(() => {
-      message.success('操作成功');
+      success();
     })
     .catch((err) => {
-      message.error(err.message || '操作失败');
+      error(err.message || t('operation_failed'));
     });
 }
 
 function handleRemoveTdGroup(item: KungfuApi.KfExtraLocation) {
-  Modal.confirm({
-    title: `删除账户组 ${item.name}`,
-    content: `删除账户组 ${item.name}, 不会影响改账户组下账户进程, 确认删除`,
-    okText: '确认',
-    cancelText: '取消',
-    onOk() {
-      return removeTdGroup(item.name)
-        .then(() => {
-          if (app?.proxy) {
-            app.proxy.$useGlobalStore().setTdGroups();
-          }
-        })
-        .then(() => {
-          message.success('操作成功');
-        })
-        .catch((err) => {
-          message.error(err.message || '操作失败');
-        });
-    },
-  });
+  confirmModal(
+    t('tdConfig.delete_amount_group', {
+      group: item.name,
+    }),
+    `${t('tdConfig.delete_amount_group', {
+      group: item.name,
+    })}, ${t('tdConfig.confirm_delete_group')}`,
+  )
+    .then(() => {
+      return removeTdGroup(item.name);
+    })
+    .then(() => {
+      return setTdGroups();
+    })
+    .then(() => {
+      success();
+    })
+    .catch((err) => {
+      error(err.message || t('operation_failed'));
+    });
 }
 
 function handleRemoveTd(item: KungfuApi.KfConfig) {
   handleRemoveKfConfig(item).then(() => {
     const accountId = getIdByKfLocation(item);
-    const oldGroup = isInTdGroup(tdGroup.data, accountId);
+    const oldGroup = isInTdGroup(tdGroup.value, accountId);
     if (oldGroup) {
       const index = oldGroup.children?.indexOf(accountId);
       oldGroup.children.splice(index, 1);
-      setTdGroup(toRaw(tdGroup.data)).then(() => {
-        if (app?.proxy) {
-          app?.proxy.$useGlobalStore().setTdGroups();
-        }
+      setTdGroup(toRaw(tdGroup.value)).then(() => {
+        return setTdGroups();
       });
     }
   });
@@ -292,7 +293,7 @@ function handleRemoveTd(item: KungfuApi.KfConfig) {
         <KfDashboardItem>
           <a-input-search
             v-model:value="searchKeyword"
-            placeholder="关键字"
+            :placeholder="$t('keyword_input')"
             style="width: 120px"
           />
         </KfDashboardItem>
@@ -304,7 +305,7 @@ function handleRemoveTd(item: KungfuApi.KfConfig) {
         </KfDashboardItem>
         <KfDashboardItem>
           <a-button size="small" @click="handleOpenAddTdGroupDialog('add')">
-            添加分组
+            {{ $t('tdConfig.add_group_placeholder') }}
           </a-button>
         </KfDashboardItem>
         <KfDashboardItem>
@@ -313,7 +314,7 @@ function handleRemoveTd(item: KungfuApi.KfConfig) {
             type="primary"
             @click="handleOpenSetSourceDialog"
           >
-            添加
+            {{ $t('tdConfig.add_td') }}
           </a-button>
         </KfDashboardItem>
       </template>
@@ -328,7 +329,7 @@ function handleRemoveTd(item: KungfuApi.KfConfig) {
         :rowClassName="dealRowClassName"
         :customRow="customRow"
         :defaultExpandAllRows="true"
-        emptyText="暂无数据"
+        :emptyText="$t('empty_text')"
       >
         <template
           #bodyCell="{
@@ -342,18 +343,28 @@ function handleRemoveTd(item: KungfuApi.KfConfig) {
           <template
             v-if="column.dataIndex === 'name' && record.category === 'td'"
           >
-            <a-tag :color="getInstrumentTypeColor(tdExtTypeMap[record.group])">
-              {{ record.group }}
-            </a-tag>
-            {{ record.name }}
+            <div class="td-name__warp">
+              <a-tag
+                :color="getInstrumentTypeColor(tdExtTypeMap[record.group])"
+              >
+                {{ record.group }}
+              </a-tag>
+              <span>
+                {{ record.name }}
+              </span>
+            </div>
           </template>
           <template
             v-else-if="
               column.dataIndex === 'name' && record.category === 'tdGroup'
             "
           >
-            <a-tag color="#FAAD14">账户组</a-tag>
-            {{ record.name }}
+            <div class="td-name__warp">
+              <a-tag color="#FAAD14">账户组</a-tag>
+              <span>
+                {{ record.name }}
+              </span>
+            </div>
           </template>
           <template
             v-else-if="
@@ -378,6 +389,12 @@ function handleRemoveTd(item: KungfuApi.KfConfig) {
               size="small"
               :checked="
                 getIfProcessRunning(
+                  processStatusData,
+                  getProcessIdByKfLocation(record),
+                )
+              "
+              :loading="
+                getIfProcessStopping(
                   processStatusData,
                   getProcessIdByKfLocation(record),
                 )
@@ -421,6 +438,7 @@ function handleRemoveTd(item: KungfuApi.KfConfig) {
           </template>
           <template v-else-if="column.dataIndex === 'avail'">
             <KfBlinkNum
+              mode="compare-zero"
               v-if="record.category === 'td'"
               :num="dealAssetPrice(getAssetsByKfConfig(record).avail)"
             ></KfBlinkNum>
@@ -496,5 +514,9 @@ function handleRemoveTd(item: KungfuApi.KfConfig) {
 <style lang="less">
 .kf-td__warp {
   height: 100%;
+
+  .td-name__warp {
+    word-break: break-all;
+  }
 }
 </style>

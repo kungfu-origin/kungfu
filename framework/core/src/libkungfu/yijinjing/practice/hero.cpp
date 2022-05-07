@@ -21,10 +21,24 @@ using namespace kungfu::yijinjing::nanomsg;
 
 namespace kungfu::yijinjing::practice {
 
+inline std::string encode(const io_device_ptr &io_device) {
+  return fmt::format("{:08x}", io_device->get_live_home()->uid);
+}
+
 hero::hero(io_device_ptr io_device)
-    : io_device_(std::move(io_device)), now_(0), begin_time_(time::now_in_nano()), end_time_(INT64_MAX) {
+    : begin_time_(time::now_in_nano()), end_time_(INT64_MAX),
+      master_home_location_(make_system_location("master", "master", io_device->get_locator())),
+      master_cmd_location_(make_system_location("master", encode(io_device), io_device->get_locator())),
+      cached_home_location_(make_system_location("service", "cached", io_device->get_locator())),
+      ledger_home_location_(make_system_location("service", "ledger", io_device->get_locator())),
+      io_device_(std::move(io_device)), now_(0) {
+
   os::handle_os_signals(this);
   add_location(0, get_io_device()->get_home());
+  add_location(0, master_home_location_);
+  add_location(0, master_cmd_location_);
+  add_location(0, cached_home_location_);
+  add_location(0, ledger_home_location_);
   reader_ = io_device_->open_reader_to_subscribe();
 }
 
@@ -97,6 +111,10 @@ writer_ptr hero::get_writer(uint32_t dest_id) const {
 bool hero::has_location(uint32_t uid) const { return locations_.find(uid) != locations_.end(); }
 
 location_ptr hero::get_location(uint32_t uid) const {
+  if (not has_location(uid)) {
+    SPDLOG_ERROR("no location {} uname {} in locations_", uid, get_location_uname(uid));
+  }
+
   assert(has_location(uid));
   return locations_.at(uid);
 }
@@ -104,6 +122,9 @@ location_ptr hero::get_location(uint32_t uid) const {
 std::string hero::get_location_uname(uint32_t uid) const {
   if (uid == location::PUBLIC) {
     return "public";
+  }
+  if (uid == location::SYNC) {
+    return "sync";
   }
   if (not has_location(uid)) {
     return fmt::format("{:08x}", uid);
@@ -134,11 +155,11 @@ uint64_t hero::make_chanel_hash(uint32_t source_id, uint32_t dest_id) const {
 
 bool hero::check_location_exists(uint32_t source_id, uint32_t dest_id) const {
   if (not has_location(source_id)) {
-    SPDLOG_ERROR("{} does not exist", get_location_uname(source_id));
+    SPDLOG_ERROR("source_id {}, {} does not exist", source_id, get_location_uname(source_id));
     return false;
   }
-  if (dest_id != 0 and not has_location(dest_id)) {
-    SPDLOG_ERROR("{} does not exist", get_location_uname(dest_id));
+  if (dest_id != location::PUBLIC and dest_id != location::SYNC and not has_location(dest_id)) {
+    SPDLOG_ERROR("dest_id {}, {} does not exist", dest_id, get_location_uname(dest_id));
     return false;
   }
   return true;
@@ -216,6 +237,10 @@ void hero::require_read_from(int64_t trigger_time, uint32_t dest_id, uint32_t so
 
 void hero::require_read_from_public(int64_t trigger_time, uint32_t dest_id, uint32_t source_id, int64_t from_time) {
   do_require_read_from<RequestReadFromPublic>(get_writer(dest_id), trigger_time, dest_id, source_id, from_time);
+}
+
+void hero::require_read_from_sync(int64_t trigger_time, uint32_t dest_id, uint32_t source_id, int64_t from_time) {
+  do_require_read_from<RequestReadFromSync>(get_writer(dest_id), trigger_time, dest_id, source_id, from_time);
 }
 
 void hero::require_write_to(int64_t trigger_time, uint32_t source_id, uint32_t dest_id) {

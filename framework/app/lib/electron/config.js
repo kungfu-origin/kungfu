@@ -5,12 +5,15 @@ const {
   getKfcDir,
   getCoreDir,
   getExtensionDirs,
+  getCliDir,
 } = require('@kungfu-trader/kungfu-js-api/toolkit/utils');
 
 const appDir = getAppDir();
+
 const kfcDir = getKfcDir();
 const coreDir = getCoreDir();
 const extdirs = getExtensionDirs(true);
+
 const extras = extdirs.map((fullpath) => {
   return {
     from: path.resolve(fullpath, 'dist'),
@@ -31,6 +34,7 @@ module.exports = {
   npmRebuild: false,
   files: [
     'dist/app/**/*',
+    'dist/cli/**/*',
     '!**/@kungfu-trader/kfx-*/**/*',
     '!**/@kungfu-trader/kungfu-core/*',
     '!**/@kungfu-trader/kungfu-core/**/*',
@@ -38,6 +42,8 @@ module.exports = {
     '**/@kungfu-trader/kungfu-core/*.json',
     '!**/@kungfu-trader/kungfu-app/*',
     '!**/@kungfu-trader/kungfu-app/**/*',
+    '!**/@kungfu-trader/kungfu-cli/*',
+    '!**/@kungfu-trader/kungfu-cli/**/*',
     '!**/@kungfu-trader/kungfu-js-api/*',
     '!**/@kungfu-trader/kungfu-js-api/**/*',
   ],
@@ -49,13 +55,19 @@ module.exports = {
     },
     {
       from: `${coreDir}/build/python/dist`,
-      to: 'app/dist/app/public/python',
+      to: 'app/dist/public/python',
       filter: ['*.whl'],
     },
     {
       from: appDir,
-      to: 'app/dist/app',
-      filter: ['public/*', 'public/logo'],
+      to: 'app/dist',
+      filter: [
+        'public/config',
+        'public/key',
+        'public/logo',
+        'public/keywords',
+        'public/music',
+      ],
     },
     {
       from: appDir,

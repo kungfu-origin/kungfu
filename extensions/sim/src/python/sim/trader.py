@@ -30,6 +30,17 @@ OrderRecord = namedtuple("OrderRecord", ["source", "dest", "order"])
 class TraderSim(wc.Trader):
     def __init__(self, vendor):
         wc.Trader.__init__(self, vendor)
+        self.logger = create_logger(
+            "_".join(('td', self.home.group, self.home.name)),
+            "info",
+            yjj.location(
+                lf.enums.mode.LIVE,
+                lf.enums.category.TD,
+                self.home.group,
+                self.home.name,
+                vendor.home.locator,
+            ),
+        )
 
     def on_start(self):
         config = json.loads(self.config)
@@ -130,6 +141,7 @@ class TraderSim(wc.Trader):
             order_action = event.OrderAction()
             if order_action.order_id in self.ctx.orders:
                 order = self.ctx.orders.pop(order_action.order_id)
+                order.update_time = yjj.now_in_nano()
                 order.status = (
                     lf.enums.OrderStatus.Cancelled
                     if order.volume_traded == 0

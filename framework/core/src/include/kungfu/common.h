@@ -100,8 +100,11 @@ using namespace boost::hana::literals;
 #define TIMESTAMP(FIELD) boost::hana::just(HANA_STR(#FIELD))
 
 #define DECLARE_PTR(X) typedef std::shared_ptr<X> X##_ptr; /** define smart ptr */
-#define FORWARD_DECLARE_PTR(X)                                                                                         \
+#define FORWARD_DECLARE_CLASS_PTR(X)                                                                                   \
   class X;                                                                                                             \
+  DECLARE_PTR(X) /** forward defile smart ptr */
+#define FORWARD_DECLARE_STRUCT_PTR(X)                                                                                  \
+  struct X;                                                                                                            \
   DECLARE_PTR(X) /** forward defile smart ptr */
 
 namespace kungfu {
@@ -427,12 +430,13 @@ template <typename DataType> struct typed_event_ptr {
 template <typename DataType> struct state {
   uint32_t source;
   uint32_t dest;
-
   int64_t update_time;
   DataType data;
 
-  explicit state(const event_ptr &event)
+  state(const event_ptr &event)
       : source(event->source()), dest(event->dest()), update_time(event->gen_time()), data(event->data<DataType>()) {}
+
+  state(const state<DataType> &s) : source(s.source), dest(s.dest), update_time(s.update_time), data(s.data) {}
 
   state(uint32_t s, uint32_t d, int64_t t, const DataType &data) : source(s), dest(d), update_time(t), data(data) {}
 

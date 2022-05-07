@@ -7,24 +7,28 @@ import {
 } from '@ant-design/icons-vue';
 
 import {
+  messagePrompt,
   removeLoadingMask,
   setHtmlTitle,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import KfDashboard from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfDashboard.vue';
 import KfDashboardItem from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfDashboardItem.vue';
 import { ensureFileSync, outputFile } from 'fs-extra';
-import { message } from 'ant-design-vue';
 import { shell } from '@electron/remote';
 import { clipboard } from 'electron';
 import { platform } from 'os';
 import {
-  getLogProcessId,
+  getLogPath,
   useLogInit,
   useLogSearch,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/logUtils';
+import VueI18n from '@kungfu-trader/kungfu-app/src/language';
 
-const ProcessId = getLogProcessId();
-setHtmlTitle(`功夫交易系统 - ${ProcessId}.log`);
+const { t } = VueI18n.global;
+const { success, error } = messagePrompt();
+
+const LOG_PATH = getLogPath();
+setHtmlTitle(`${t('kungfu')} - ${LOG_PATH}`);
 
 const boardSize = ref<{ width: number; height: number }>({
   width: 0,
@@ -44,15 +48,12 @@ const handleChangeBoardSize = ({
 
 const {
   logList,
-  logPath,
   scrollToBottomChecked,
   scrollerTableRef,
   scrollToBottom,
   startTailLog,
   clearLogState,
-} = useLogInit(ProcessId);
-
-startTailLog();
+} = useLogInit(LOG_PATH);
 
 const {
   inputSearchRef,
@@ -88,19 +89,19 @@ document.addEventListener('keydown', (e) => {
 });
 
 function handleRemoveLog(): Promise<void> {
-  ensureFileSync(logPath);
-  return outputFile(logPath, '')
+  ensureFileSync(LOG_PATH);
+  return outputFile(LOG_PATH, '')
     .then(() => {
-      message.success('操作成功');
+      success();
       resetLog();
     })
     .catch((err: Error) => {
-      message.error(err.message || '操作失败');
+      error(err.message || t('operation_failed'));
     });
 }
 
 function handleOpenFileLocation() {
-  return shell.showItemInFolder(logPath);
+  return shell.showItemInFolder(LOG_PATH);
 }
 
 function resetLog() {
@@ -120,7 +121,7 @@ function resetLog() {
               v-model:checked="scrollToBottomChecked"
               @change="scrollToBottom"
             >
-              滚动到底部
+              {{ $t('logview.scroll_to_bottom') }}
             </a-checkbox>
           </KfDashboardItem>
           <KfDashboardItem>
@@ -129,7 +130,7 @@ function resetLog() {
                 ref="inputSearchRef"
                 class="search-int-table__item"
                 v-model:value="searchKeyword"
-                placeholder="关键字"
+                :placeholder="$t('keyword_input')"
                 style="width: 120px"
               />
               <div class="current-to-total search-int-table__item">
@@ -157,12 +158,12 @@ function resetLog() {
           </KfDashboardItem>
           <KfDashboardItem>
             <a-button size="small" @click="handleOpenFileLocation">
-              文件夹
+              {{ $t('folder') }}
             </a-button>
           </KfDashboardItem>
           <KfDashboardItem>
             <a-button size="small" type="primary" @click="handleRemoveLog">
-              清空
+              {{ $t('clean') }}
             </a-button>
           </KfDashboardItem>
         </template>
@@ -293,7 +294,7 @@ function resetLog() {
     }
 
     .search-keyword {
-      background: fade(@white, 60%);
+      background: fade(@white, 70%);
       color: #000;
       font-weight: normal;
 

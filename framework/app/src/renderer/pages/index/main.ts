@@ -31,9 +31,13 @@ import {
   Row,
   Col,
   TimePicker,
+  Divider,
 } from 'ant-design-vue';
 
-import { beforeStartAll } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
+import {
+  postStartAll,
+  preStartAll,
+} from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import { useGlobalStore } from '@kungfu-trader/kungfu-app/src/renderer/pages/index/store/global';
 import { delayMilliSeconds } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import {
@@ -43,6 +47,7 @@ import {
   startArchiveMakeTask,
   startGetProcessStatus,
   startLedger,
+  startCacheD,
   startMaster,
 } from '@kungfu-trader/kungfu-js-api/utils/processUtils';
 
@@ -56,6 +61,8 @@ import 'vue-virtual-scroller/dist/vue-virtual-scroller.css';
 import { useComponenets } from './useComponents';
 import { GlobalCategoryRegister } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiExtraLocationUtils';
 import globalBus from '../../assets/methods/globalBus';
+
+import VueI18n from '@kungfu-trader/kungfu-app/src/language';
 
 const app = createApp(App);
 
@@ -88,23 +95,23 @@ app
   .use(Skeleton)
   .use(Tree)
   .use(Statistic)
+  .use(Divider)
   .use(VueVirtualScroller);
 
-//this sort ensure $useGlobalStore can be get in mounted callback
 app.config.globalProperties.$globalBus = globalBus;
 app.config.globalProperties.$tradingDataSubject = tradingDataSubject;
-app.config.globalProperties.$useGlobalStore = useGlobalStore;
 app.config.globalProperties.$globalCategoryRegister =
   new GlobalCategoryRegister();
 
 useComponenets(app, router);
 
+app.use(VueI18n);
 app.mount('#app');
 
 const globalStore = useGlobalStore();
 
 if (process.env.RELOAD_AFTER_CRASHED === 'false') {
-  beforeStartAll()
+  preStartAll()
     .then(() => {
       return startArchiveMakeTask((archiveStatus: Pm2ProcessStatusTypes) => {
         globalBus.next({
@@ -129,7 +136,18 @@ if (process.env.RELOAD_AFTER_CRASHED === 'false') {
       );
 
       delayMilliSeconds(1000)
+        .then(() => startCacheD(false))
+        .then(() => delayMilliSeconds(1000))
         .then(() => startLedger(false))
+        .then(() => postStartAll())
+        .then(() => delayMilliSeconds(1000))
+        .then(() => {
+          globalBus.next({
+            tag: 'processStatus',
+            name: 'systemLoading',
+            status: 'online',
+          });
+        })
         .catch((err) => console.error(err.message));
     });
 } else {
@@ -139,6 +157,13 @@ if (process.env.RELOAD_AFTER_CRASHED === 'false') {
     name: 'archive',
     status: 'waiting restart',
   });
+
+  globalBus.next({
+    tag: 'processStatus',
+    name: 'systemLoading',
+    status: 'online',
+  });
+
   startGetProcessStatus(
     (res: {
       processStatus: Pm2ProcessStatusData;

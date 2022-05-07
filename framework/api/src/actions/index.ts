@@ -44,6 +44,7 @@ export const getAllKfConfigOriginData = (): Promise<
       system: allConfigResolved.filter((config: KungfuApi.KfConfig) => {
         return config.category === 'system';
       }),
+      daemon: [],
     };
   });
 };
@@ -66,12 +67,13 @@ export function removeKfLocation(
     kfLocation.name,
   );
 
-  return pathExists(targetDir).then((isExisted: boolean) => {
+  return pathExists(targetDir).then((isExisted: boolean): Promise<void> => {
     if (isExisted) {
       return remove(targetDir);
     }
 
     console.warn(`Location Dir ${targetDir} is not existed`);
+    return Promise.resolve();
   });
 }
 
@@ -80,12 +82,13 @@ export function removeLog(kfLocation: KungfuApi.KfLocation): Promise<void> {
     LOG_DIR,
     `${getProcessIdByKfLocation(kfLocation)}.log`,
   );
-  return pathExists(logPath).then((isExisted: boolean) => {
+  return pathExists(logPath).then((isExisted: boolean): Promise<void> => {
     if (isExisted) {
       return remove(logPath);
     }
 
     console.warn(`Log Path ${logPath} is not existed`);
+    return Promise.resolve();
   });
 }
 

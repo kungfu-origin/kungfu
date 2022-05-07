@@ -1,63 +1,27 @@
 import path from 'path';
-import dayjs from 'dayjs';
 import { computed, reactive, Ref, ref, watch, nextTick } from 'vue';
 import {
   debounce,
+  isCriticalLog,
   KfNumList,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
-import { LOG_DIR } from '@kungfu-trader/kungfu-js-api/config/pathConfig';
 import { Tail } from 'tail';
-import { message } from 'ant-design-vue';
-import { parseURIParams } from './uiUtils';
+import { messagePrompt, parseURIParams } from './uiUtils';
 import { ensureFileSync } from 'fs-extra';
 
-export const getLogProcessId = (): string => {
-  return parseURIParams().processId || '';
+const { error } = messagePrompt();
+
+export const getLogPath = (): string => {
+  return path.resolve(decodeURI(parseURIParams().logPath) || '');
 };
 
 export function preDealLogMessage(line: string): string {
+  // 21 = pm2 timestamp length
+  if (line.indexOf('[') === 21) {
+    line = line.slice(21);
+  }
   line = line.replace(/</g, '[').replace(/>/g, ']');
   return line;
-}
-
-function isCriticalLog(line: string): boolean {
-  if (line.indexOf('critical') !== -1) {
-    return true;
-  }
-
-  if (line.indexOf('File') !== -1) {
-    if (line.indexOf('line') !== -1) {
-      return true;
-    }
-  }
-
-  if (line.indexOf('Traceback') != -1) {
-    return true;
-  }
-
-  if (line.indexOf('Error') != -1) {
-    return true;
-  }
-
-  if (line.indexOf('Try') != -1) {
-    if (line.indexOf('for help') != -1) {
-      return true;
-    }
-  }
-
-  if (line.indexOf('Usage') != -1) {
-    return true;
-  }
-
-  if (line.indexOf('Failed to execute') != -1) {
-    return true;
-  }
-
-  if (line.indexOf('KeyboardInterrupt') != -1) {
-    return true;
-  }
-
-  return false;
 }
 
 export function dealLogMessage(line: string): string {
@@ -77,11 +41,10 @@ export function dealLogMessage(line: string): string {
 }
 
 export const useLogInit = (
-  processId: string,
-  nLines = 2000,
+  logPath: string,
+  nLines = 10000,
 ): {
   logList: KungfuApi.KfNumList<KungfuApi.KfLogData>;
-  logPath: string;
   scrollToBottomChecked: Ref<boolean>;
   scrollerTableRef: Ref;
   scrollToBottom: () => void;
@@ -90,15 +53,10 @@ export const useLogInit = (
 } => {
   let LogTail: Tail | null = null;
   const logList = reactive<KungfuApi.KfNumList<KungfuApi.KfLogData>>(
-    new KfNumList(2000),
+    new KfNumList(nLines),
   );
   const scrollerTableRef = ref();
   const scrollToBottomChecked = ref<boolean>(false);
-  const logPath = path.resolve(
-    LOG_DIR,
-    dayjs().format('YYYYMMDD'),
-    `${processId}.log`,
-  );
   ensureFileSync(logPath);
 
   const scrollToBottom = () => {
@@ -127,7 +85,7 @@ export const useLogInit = (
     });
 
     LogTail.on('error', (err: Error) => {
-      message.error(err.message);
+      error(err.message);
     });
 
     LogTail.watch();
@@ -141,7 +99,6 @@ export const useLogInit = (
 
   return {
     logList,
-    logPath,
     scrollToBottomChecked,
     scrollerTableRef,
     scrollToBottom,
@@ -169,7 +126,7 @@ export const useLogSearch = (
   const inputSearchRef = ref();
   const searchKeyword = ref<string>('');
   const searchKeywordReg = computed(() => {
-    let reg = null;
+    let reg: RegExp | null = null;
     try {
       reg = new RegExp(searchKeyword.value, 'g');
     } catch (err) {

@@ -1,7 +1,10 @@
 import fse from 'fs-extra';
+import { SpaceSizeSettingEnum, SpaceTabSettingEnum } from '../typings/enums';
 import { KF_CONFIG_PATH } from './pathConfig';
-
-const isEnglish = process.env.LANG_ENV === 'en';
+import { CodeSizeSetting, CodeTabSetting } from './tradingConfig';
+import { languageList, langDefault } from '@kungfu-trader/kungfu-app/src/language/index';
+import VueI18n from '@kungfu-trader/kungfu-app/src/language';
+const { t } = VueI18n.global;
 
 export interface KfSystemConfig {
   key: string;
@@ -12,12 +15,12 @@ export interface KfSystemConfig {
 export const getKfGlobalSettings = (): KfSystemConfig[] => [
   {
     key: 'system',
-    name: isEnglish ? 'System' : '系统',
+    name: t('globalSettingConfig.system'),
     config: [
       {
         key: 'logLevel',
-        name: isEnglish ? 'Log level' : '全局日志级别',
-        tip: isEnglish ? 'For all log' : '对系统内所有日志级别的设置',
+        name: t('globalSettingConfig.log_level'),
+        tip: t('globalSettingConfig.for_all_log'),
         type: 'select',
         options: [
           { value: '-l trace', label: 'TRACE' },
@@ -29,27 +32,31 @@ export const getKfGlobalSettings = (): KfSystemConfig[] => [
         ],
         default: '-l info',
       },
+      {
+        key: 'language',
+        name: t('globalSettingConfig.language'),
+        tip: t('globalSettingConfig.select_language'),
+        type: 'select',
+        options: languageList,
+        default: langDefault,
+      },
     ],
   },
   {
-    key: 'Performance',
-    name: isEnglish ? 'Performance' : '性能',
+    key: 'performance',
+    name: t('globalSettingConfig.porformance'),
     config: [
       {
         key: 'rocket',
-        name: isEnglish ? 'Open Rocket Model' : '开启极速模式',
-        tip: isEnglish
-          ? 'Use CPU 100%, restart is required'
-          : '开启极速模式会极大的降低系统延迟, 并会使 CPU 使用效率达到100%, 开启后请重启功夫交易系统',
+        name: t('globalSettingConfig.open_rocket_model'),
+        tip: t('globalSettingConfig.rocket_model_desc'),
         default: false,
         type: 'bool',
       },
       {
         key: 'bypassQuote',
-        name: isEnglish ? 'Close Quote Listener' : '跳过行情计算',
-        tip: isEnglish
-          ? 'Close Quote Listener'
-          : '在订阅一定数量(上千)支Ticker时, 由行情推送触发pnl计算会导致性能问题, 开启后会掉过行情计算',
+        name: t('globalSettingConfig.pass_quote'),
+        tip: t('globalSettingConfig.pass_quote_desc'),
         default: false,
         type: 'bool',
       },
@@ -57,32 +64,103 @@ export const getKfGlobalSettings = (): KfSystemConfig[] => [
   },
   {
     key: 'strategy',
-    name: isEnglish ? 'Strategy' : '策略',
+    name: t('globalSettingConfig.strategy'),
     config: [
       {
         key: 'python',
-        name: isEnglish ? 'Use Local Python' : '使用本地python',
-        tip: isEnglish
-          ? `Pip3 install kungfu*.whl, local python require ${__python_version}`
-          : `使用本地python启动策略, 需要 pip3 install kungfu*.whl, 本地 python3 版本需为 ${__python_version}, 开启后需重启策略`,
+        name: t('globalSettingConfig.use_local_python'),
+        tip: `${t(
+          'globalSettingConfig.local_python_desc',
+        )} ${__python_version}`,
         default: false,
         type: 'bool',
       },
       {
         key: 'pythonPath',
-        name: isEnglish ? 'Select Local Python Path' : '选择本地 Python 路径',
-        tip: isEnglish
-          ? 'local python path is required to be selected, and kungfu*.whl should be installed in this path'
-          : '功夫将会以选择的python路径运行策略, 同时需要保证 kungfu*.whl 已经通过 pip安装',
+        name: t('globalSettingConfig.python_path'),
+        tip: t('globalSettingConfig.python_path_desc'),
         default: '',
         type: 'file',
       },
     ],
   },
+  {
+    key: 'trade',
+    name: t('globalSettingConfig.trade'),
+    config: [
+      {
+        key: 'sound',
+        name: t('globalSettingConfig.sound'),
+        tip: t('globalSettingConfig.use_sound'),
+        default: false,
+        type: 'bool',
+      },
+      {
+        key: 'fatFinger',
+        name: t('globalSettingConfig.fat_finger_threshold'),
+        tip: t('globalSettingConfig.set_fat_finger'),
+        default: '',
+        type: 'percent',
+      },
+      {
+        key: 'close',
+        name: t('globalSettingConfig.close_threshold'),
+        tip: t('globalSettingConfig.set_close_threshold'),
+        default: '',
+        type: 'percent',
+      },
+    ],
+  },
+  {
+    key: 'code',
+    name: t('globalSettingConfig.code_editor'),
+    config: [
+      {
+        key: 'tabSpaceType',
+        name: t('globalSettingConfig.tab_space_type'),
+        tip: t('globalSettingConfig.set_tab_space'),
+        default: CodeTabSetting[SpaceTabSettingEnum.SPACES].name,
+        type: 'select',
+        options: [
+          {
+            value: SpaceTabSettingEnum.SPACES,
+            label: CodeTabSetting[SpaceTabSettingEnum.SPACES].name,
+          },
+          {
+            value: SpaceTabSettingEnum.TABS,
+            label: CodeTabSetting[SpaceTabSettingEnum.TABS].name,
+          },
+        ],
+      },
+      {
+        key: 'tabSpaceSize',
+        name: t('globalSettingConfig.tab_space_size'),
+        tip: t('globalSettingConfig.set_tab_space_size'),
+        default: CodeSizeSetting[SpaceSizeSettingEnum.FOURINDENT].name,
+        type: 'select',
+        options: [
+          {
+            value: SpaceSizeSettingEnum.TWOINDENT,
+            label: CodeSizeSetting[SpaceSizeSettingEnum.TWOINDENT].name,
+          },
+          {
+            value: SpaceSizeSettingEnum.FOURINDENT,
+            label: CodeSizeSetting[SpaceSizeSettingEnum.FOURINDENT].name,
+          },
+        ],
+      },
+    ],
+  },
 ];
 
-export const getKfGlobalSettingsValue = () => {
-  return fse.readJSONSync(KF_CONFIG_PATH);
+export const getKfGlobalSettingsValue = (): Record<
+  string,
+  Record<string, KungfuApi.KfConfigValue>
+> => {
+  return fse.readJSONSync(KF_CONFIG_PATH) as Record<
+    string,
+    Record<string, KungfuApi.KfConfigValue>
+  >;
 };
 
 export const setKfGlobalSettingsValue = (

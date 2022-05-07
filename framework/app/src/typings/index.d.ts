@@ -1,5 +1,3 @@
-/* eslint-disable  @typescript-eslint/no-unused-vars */
-/* eslint-disable  @typescript-eslint/no-explicit-any */
 namespace KfLayout {
   type ContentId = string;
   type BoardId = number;
@@ -97,9 +95,20 @@ interface TriggerUpdateStrategy {
   strategys: KungfuApi.KfConfig[];
 }
 
+interface TriggerUpdateExtConfigs {
+  tag: 'update:extConfigs';
+  extConfigs: KungfuApi.KfExtConfigs;
+}
+
 interface TriggerAddBoard {
   tag: 'addBoard';
   boardId: number;
+}
+
+interface TriggerSetTradingTask {
+  tag: 'setTradingTask';
+  extKey: string;
+  payload: KungfuApi.SetKfConfigPayload;
 }
 
 type KfBusEvent =
@@ -114,8 +123,10 @@ type KfBusEvent =
   | TriggerUpdateTd
   | TriggerUpdateMd
   | TriggerUpdateStrategy
+  | TriggerUpdateExtConfigs
   | TriggerAddBoard
-  | ExportTradingDataEvent;
+  | ExportTradingDataEvent
+  | TriggerSetTradingTask;
 
 interface ExtraOrderInput {
   side: SideEnum;

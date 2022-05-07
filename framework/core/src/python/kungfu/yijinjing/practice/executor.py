@@ -41,13 +41,16 @@ class ExecutorRegistry:
                 with open(config_path, mode="r", encoding="utf8") as config_file:
                     config = json.load(config_file)
                     if "kungfuConfig" in config:
-                        group = config["kungfuConfig"]["key"]
-                        for category in config["kungfuConfig"]["config"]:
-                            if category not in kfj.CATEGORIES:
-                                raise RuntimeError(f"Unsupported category {category}")
-                            self.executors[category][group] = ExtensionLoader(
-                                self.ctx, extension_dir, config
-                            )
+                        if "config" in config["kungfuConfig"]:
+                            group = config["kungfuConfig"]["key"]
+                            for category in config["kungfuConfig"]["config"]:
+                                if category not in kfj.CATEGORIES:
+                                    raise RuntimeError(
+                                        f"Unsupported category {category}"
+                                    )
+                                self.executors[category][group] = ExtensionLoader(
+                                    self.ctx, extension_dir, config
+                                )
 
     def __getitem__(self, category):
         return self.executors[category]
@@ -69,6 +72,9 @@ class ServiceLoader(dict):
     def __init__(self, ctx):
         super().__init__()
         self["ledger"] = lambda mode, low_latency: wc.Ledger(
+            ctx.runtime_locator, kfj.MODES[ctx.mode], ctx.low_latency
+        ).run()
+        self["cached"] = lambda mode, low_latency: wc.CacheD(
             ctx.runtime_locator, kfj.MODES[ctx.mode], ctx.low_latency
         ).run()
 
@@ -112,7 +118,7 @@ class ExtensionExecutor:
             ctx.runtime_locator, ctx.group, ctx.name, ctx.low_latency
         )
         service = getattr(module, ctx.category)(vendor)
-        vendor.setup(service)
+        vendor.set_service(service)
         vendor.run()
 
     def run_market_data(self):

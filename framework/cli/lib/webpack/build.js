@@ -7,8 +7,8 @@ const path = require('path');
 const webpack = require('webpack');
 const Multispinner = require('multispinner');
 const {
-  getAppDefaultDistDir,
-  getAppDir,
+  getCliDefaultDistDir,
+  getCliDir,
 } = require('@kungfu-trader/kungfu-js-api/toolkit/utils');
 
 function greeting() {
@@ -59,10 +59,10 @@ const pack = (config) =>
     });
   });
 
-const run = (distDir, distName = 'app') => {
+const run = (distDir, distName = 'cli') => {
   fse.rmSync(distDir, { recursive: true });
-  const appDir = getAppDir();
-  process.chdir(appDir);
+  const cliDir = getCliDir();
+  process.chdir(cliDir);
   greeting();
 
   return new Promise((resolve, reject) => {
@@ -72,13 +72,12 @@ const run = (distDir, distName = 'app') => {
       distName: distName,
     };
 
-    const mainConfig = require('./webpack.main.config');
-    const rendererConfig = require('./webpack.renderer.config');
+    const cliConfig = require('./webpack.cli.config');
 
     const errorLog = chalk.bgRed.white(' ERROR ') + ' ';
     const okayLog = chalk.bgBlue.white(' OKAY ') + ' ';
 
-    const tasks = ['main', 'renderer'];
+    const tasks = ['cli'];
     const spinner = new Multispinner(tasks, {
       preText: 'building',
       postText: 'process',
@@ -88,7 +87,7 @@ const run = (distDir, distName = 'app') => {
     let results = '';
 
     spinner.on('success', () => {
-      const config = require('@kungfu-trader/kungfu-app/package.json');
+      const config = require('@kungfu-trader/kungfu-cli/package.json');
       fse.copySync(
         require.resolve('@kungfu-trader/kungfu-core/dist/kfc/drone.node'),
         path.join(distDir, distName, `${config.binary.module_name}.node`),
@@ -102,26 +101,14 @@ const run = (distDir, distName = 'app') => {
 
     spinner.on('error', reject);
 
-    pack(mainConfig(argv))
+    pack(cliConfig(argv))
       .then((result) => {
         results += result + '\n\n';
-        spinner.success('main');
+        spinner.success('cli');
       })
       .catch((err) => {
-        spinner.error('main');
-        console.log(`\n  ${errorLog}failed to build main process`);
-        console.error(`\n${err}\n`);
-        process.exit(1);
-      });
-
-    pack(rendererConfig(argv))
-      .then((result) => {
-        results += result + '\n\n';
-        spinner.success('renderer');
-      })
-      .catch((err) => {
-        spinner.error('renderer');
-        console.log(`\n  ${errorLog}failed to build renderer process`);
+        spinner.error('cli');
+        console.log(`\n  ${errorLog}failed to build cli process`);
         console.error(`\n${err}\n`);
         process.exit(1);
       });
@@ -131,7 +118,7 @@ const run = (distDir, distName = 'app') => {
 module.exports = run;
 
 if (require.main === module) {
-  const defaultDistDir = getAppDefaultDistDir();
+  const defaultDistDir = getCliDefaultDistDir();
   fse.ensureDirSync(defaultDistDir);
   run(defaultDistDir).catch(console.error);
 }

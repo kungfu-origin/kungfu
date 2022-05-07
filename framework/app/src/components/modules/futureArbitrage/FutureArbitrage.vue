@@ -3,23 +3,29 @@ import { computed, nextTick, ref } from 'vue';
 import KfDashboard from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfDashboard.vue';
 import KfDashboardItem from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfDashboardItem.vue';
 import KfConfigSettingsForm from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfConfigSettingsForm.vue';
-import {
-  useCurrentGlobalKfLocation,
-  useProcessStatusDetailData,
-} from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import { getConfigSettings } from './config';
 import { RuleObject } from 'ant-design-vue/lib/form';
 import { FutureArbitrageCodeEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';
-import { message } from 'ant-design-vue';
 import { makeOrderByOrderInput } from '@kungfu-trader/kungfu-js-api/kungfu';
 import {
   getProcessIdByKfLocation,
   initFormStateByConfig,
   transformSearchInstrumentResultToInstrument,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
+import {
+  useCurrentGlobalKfLocation,
+  useProcessStatusDetailData,
+} from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
+import {
+  messagePrompt,
+  useDashboardBodySize,
+} from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
+import VueI18n from '@kungfu-trader/kungfu-app/src/language';
 
-interface MakeOrderProps {}
-defineProps<MakeOrderProps>();
+const { t } = VueI18n.global;
+const { error } = messagePrompt();
+
+const { handleBodySizeChange } = useDashboardBodySize();
 
 const formState = ref(initFormStateByConfig(getConfigSettings(), {}));
 const formRef = ref();
@@ -32,11 +38,11 @@ const {
 } = useCurrentGlobalKfLocation(window.watcher);
 
 const configSettings = computed(() => {
-  if (!currentGlobalKfLocation.data) {
+  if (!currentGlobalKfLocation.value) {
     return getConfigSettings();
   }
 
-  const { category } = currentGlobalKfLocation.data;
+  const { category } = currentGlobalKfLocation.value;
   return getConfigSettings(category, +formState.value.side);
 });
 
@@ -70,7 +76,13 @@ function arbitrageExchangeValidator(
     formState.value.future_arbitrage_code === FutureArbitrageCodeEnum.SPC
   ) {
     if (exchangeId !== 'CZCE') {
-      return Promise.reject(new Error(`只能对应 郑商所 标的`));
+      return Promise.reject(
+        new Error(
+          `${t(
+            'futureArbitrageConfig.only_corresponding',
+          )} ${'tradingConfig.CZCE'} ${'tradingConfig.instrument'}`,
+        ),
+      );
     }
   }
 
@@ -79,7 +91,13 @@ function arbitrageExchangeValidator(
     formState.value.future_arbitrage_code === FutureArbitrageCodeEnum.IPS
   ) {
     if (exchangeId !== 'DCE') {
-      return Promise.reject(new Error(`只能对应 大商所 标的`));
+      return Promise.reject(
+        new Error(
+          `${t(
+            'futureArbitrageConfig.only_corresponding',
+          )} ${'tradingConfig.DCE'} ${'tradingConfig.instrument'}`,
+        ),
+      );
     }
   }
 
@@ -108,7 +126,7 @@ function handleMakeOrder() {
         transformSearchInstrumentResultToInstrument(instrumentB);
 
       if (!instrumnetResolved_A || !instrumnetResolved_B) {
-        message.error('标的错误');
+        error(t('instrument_error'));
         return;
       }
 
@@ -136,30 +154,35 @@ function handleMakeOrder() {
         side: +side,
         offset: +(offset !== undefined ? offset : +side === 0 ? 0 : 1),
         hedge_flag: +(hedge_flag || 0),
+        parent_id: BigInt(0),
       };
 
-      if (!currentGlobalKfLocation.data) {
-        message.error('当前 Location 错误');
+      if (!currentGlobalKfLocation.value) {
+        error(t('location_error'));
         return;
       }
 
       const tdProcessId =
-        currentGlobalKfLocation.data.category === 'td'
-          ? getProcessIdByKfLocation(currentGlobalKfLocation.data)
+        currentGlobalKfLocation.value?.category === 'td'
+          ? getProcessIdByKfLocation(currentGlobalKfLocation.value)
           : `td_${account_id.toString()}`;
 
       if (processStatusData.value[tdProcessId] !== 'online') {
-        message.error(`请先启动 ${tdProcessId} 交易进程`);
+        error(
+          `${t('orderConfig.start')} ${tdProcessId} ${t(
+            'orderConfig.trade_process',
+          )}`,
+        );
         return;
       }
 
       makeOrderByOrderInput(
         window.watcher,
         makeOrderInput,
-        currentGlobalKfLocation.data,
-        account_id.toString(),
+        currentGlobalKfLocation.value,
+        tdProcessId.toAccountId(),
       ).catch((err) => {
-        message.error(err.message);
+        error(err.message);
       });
     })
     .catch((err: Error) => {
@@ -169,24 +192,24 @@ function handleMakeOrder() {
 </script>
 <template>
   <div class="kf-make-order-dashboard__warp">
-    <KfDashboard>
+    <KfDashboard @boardSizeChange="handleBodySizeChange">
       <template v-slot:title>
-        <span v-if="currentGlobalKfLocation.data">
+        <span v-if="currentGlobalKfLocation">
           <a-tag
             v-if="currentCategoryData"
             :color="currentCategoryData?.color || 'default'"
           >
             {{ currentCategoryData?.name }}
           </a-tag>
-          <span class="name" v-if="currentGlobalKfLocation.data">
-            {{ getCurrentGlobalKfLocationId(currentGlobalKfLocation.data) }}
+          <span class="name" v-if="currentGlobalKfLocation">
+            {{ getCurrentGlobalKfLocationId(currentGlobalKfLocation) }}
           </span>
         </span>
       </template>
       <template v-slot:header>
         <KfDashboardItem>
           <a-button size="small" @click="handleResetMakeOrderForm">
-            重置
+            {{ $t('futureArbitrageConfig.reset_order') }}
           </a-button>
         </KfDashboardItem>
       </template>
@@ -203,7 +226,9 @@ function handleMakeOrder() {
           ></KfConfigSettingsForm>
         </div>
         <div class="make-order-btns">
-          <a-button size="small" @click="handleMakeOrder">下单</a-button>
+          <a-button size="small" @click="handleMakeOrder">
+            {{ $t('futureArbitrageConfig.place_order') }}
+          </a-button>
         </div>
       </div>
     </KfDashboard>

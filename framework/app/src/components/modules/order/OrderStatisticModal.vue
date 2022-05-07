@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { UnfinishedOrderStatus } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
 import { useModalVisible } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import { computed } from 'vue';
 import { Stats } from 'fast-stats';
@@ -102,7 +101,7 @@ const networkLatencyStats = computed(() => {
 const priceVolumeStats = computed(() => {
   const ordersForStatistic = props.orders
     .slice(0)
-    .filter((item) => item.limit_price > 0);
+    .filter((item) => item.limit_price >= 0);
   const priceVolumeData: Record<
     string,
     {
@@ -181,8 +180,10 @@ const priceVolumeStats = computed(() => {
     :width="720"
     class="kf-order-statistic-modal"
     v-model:visible="modalVisible"
-    :title="`委托统计 ${
-      !!historyDate ? historyDate.format('YYYY-MM-DD') : '实时(最新100条数据)'
+    :title="`${$t('orderConfig.entrust_statistical')} ${
+      !!historyDate
+        ? historyDate.format('YYYY-MM-DD')
+        : $t('orderConfig.statistical_desc')
     }`"
     :destroyOnClose="true"
     :footer="null"
@@ -190,11 +191,14 @@ const priceVolumeStats = computed(() => {
   >
     <a-row style="margin-bottom: 30px">
       <a-col>
-        <a-statistic title="统计委托数量" :value="orders.length"></a-statistic>
+        <a-statistic
+          :title="$t('orderConfig.entrust_statistical_number')"
+          :value="orders.length"
+        ></a-statistic>
       </a-col>
     </a-row>
     <a-row style="margin-bottom: 30px" class="limit-price-stats-row">
-      <div class="title">委托价统计</div>
+      <div class="title">{{ $t('orderConfig.ntrust_statistical_price') }}</div>
       <a-table
         v-if="priceVolumeStats"
         size="small"
@@ -220,7 +224,7 @@ const priceVolumeStats = computed(() => {
     <a-row style="margin-bottom: 30px">
       <a-col>
         <a-statistic
-          title="平均撤单比 (仅统计 部成部撤 和 全部撤单)"
+          :title="$t('orderConfig.average_withdrawal_ratio')"
           :value="cancelRatioMean"
         ></a-statistic>
       </a-col>
@@ -228,19 +232,19 @@ const priceVolumeStats = computed(() => {
     <a-row style="margin-bottom: 30px">
       <a-col :span="8">
         <a-statistic
-          title="平均系统延迟(μs)"
+          :title="$t('orderConfig.average_system_latency')"
           :value="systemLatencyStats.mean"
         ></a-statistic>
       </a-col>
       <a-col :span="8">
         <a-statistic
-          title="最小系统延迟(μs)"
+          :title="$t('orderConfig.min_system_latency')"
           :value="systemLatencyStats.min"
         ></a-statistic>
       </a-col>
       <a-col :span="8">
         <a-statistic
-          title="最大系统延迟(μs)"
+          :title="$t('orderConfig.max_system_latency')"
           :value="systemLatencyStats.max"
         ></a-statistic>
       </a-col>
@@ -248,19 +252,19 @@ const priceVolumeStats = computed(() => {
     <a-row style="margin-bottom: 30px">
       <a-col :span="8">
         <a-statistic
-          title="平均网络延迟(μs)"
+          :title="$t('orderConfig.average_network_latency')"
           :value="networkLatencyStats.mean"
         ></a-statistic>
       </a-col>
       <a-col :span="8">
         <a-statistic
-          title="最小网络延迟(μs)"
+          :title="$t('orderConfig.min_network_latency')"
           :value="networkLatencyStats.min"
         ></a-statistic>
       </a-col>
       <a-col :span="8">
         <a-statistic
-          title="最大网络延迟(μs)"
+          :title="$t('orderConfig.max_network_latency')"
           :value="networkLatencyStats.max"
         ></a-statistic>
       </a-col>

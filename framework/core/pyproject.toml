@@ -16,7 +16,7 @@ python = "~3.9"
 #### Compiler #############################################
 black = "^22.1.0"
 nuitka = ">=0.6.17 <0.6.18"
-pdm = "^1.12.0"
+pdm = "~1.12.0"
 poetry-core = "^1.0.0"
 scons = "^4.3.0"
 
@@ -36,7 +36,7 @@ plotly = "^5.4.0"
 chinesecalendar = "^1.6.0"
 
 [tool.poetry.dev-dependencies]
-conan = "^1.45.0"
+conan = "^1.46.2"
 pyinstaller = "^4.9"
 
 [build-system]

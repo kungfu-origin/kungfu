@@ -14,6 +14,7 @@
 #include <kungfu/wingchun/broker/marketdata.h>
 #include <kungfu/wingchun/broker/trader.h>
 #include <kungfu/wingchun/service/bar.h>
+#include <kungfu/wingchun/service/cached.h>
 #include <kungfu/wingchun/service/ledger.h>
 #include <kungfu/wingchun/strategy/context.h>
 #include <kungfu/wingchun/strategy/runner.h>
@@ -86,6 +87,8 @@ public:
   bool req_account() override { PYBIND11_OVERLOAD_PURE(bool, Trader, req_account, ); }
 
   void on_start() override { PYBIND11_OVERLOAD(void, Trader, on_start, ); }
+
+  void on_exit() override { PYBIND11_OVERLOAD(void, Trader, on_exit, ); }
 };
 
 class PyAccountingMethod : public AccountingMethod {
@@ -181,6 +184,14 @@ public:
   void on_trade(strategy::Context_ptr &context, const Trade &trade) override {
     PYBIND11_OVERLOAD(void, strategy::Strategy, on_trade, context, trade);
   }
+
+  void on_book_sync_reset(strategy::Context_ptr &context, const Book &old_book, const Book &new_book) override {
+    PYBIND11_OVERLOAD(void, strategy::Strategy, on_book_sync_reset, context, old_book, new_book);
+  }
+
+  void on_asset_sync_reset(strategy::Context_ptr &context, const Asset &old_asset, const Asset &new_asset) override {
+    PYBIND11_OVERLOAD(void, strategy::Strategy, on_asset_sync_reset, context, old_asset, new_asset);
+  }
 };
 
 void bind(pybind11::module &&m) {
@@ -275,6 +286,10 @@ void bind(pybind11::module &&m) {
       .def("on_start", &Trader::on_start)
       .def("now", &Trader::now)
       .def("get_writer", &Trader::get_writer)
+      .def("get_asset_writer", &Trader::get_asset_writer)
+      .def("get_position_writer", &Trader::get_position_writer)
+      .def("enable_asset_sync", &Trader::enable_asset_sync)
+      .def("enable_positions_sync", &Trader::enable_positions_sync)
       .def("get_account_type", &Trader::get_account_type)
       .def("add_timer", &Trader::add_timer)
       .def("add_time_interval", &Trader::add_time_interval)
@@ -284,11 +299,11 @@ void bind(pybind11::module &&m) {
 
   py::class_<MarketDataVendor, BrokerVendor, std::shared_ptr<MarketDataVendor>>(m, "MarketDataVendor")
       .def(py::init<locator_ptr, const std::string &, const std::string &, bool>())
-      .def("setup", &MarketDataVendor::setup);
+      .def("set_service", &MarketDataVendor::set_service);
 
   py::class_<TraderVendor, BrokerVendor, std::shared_ptr<TraderVendor>>(m, "TraderVendor")
       .def(py::init<locator_ptr, const std::string &, const std::string &, bool>())
-      .def("setup", &TraderVendor::setup);
+      .def("set_service", &TraderVendor::set_service);
 
   py::class_<Ledger, kungfu::yijinjing::practice::apprentice, std::shared_ptr<Ledger>>(m, "Ledger")
       .def(py::init<yijinjing::data::locator_ptr, longfist::enums::mode, bool>())
@@ -300,6 +315,16 @@ void bind(pybind11::module &&m) {
       .def("now", &Ledger::now)
       .def("run", &Ledger::run)
       .def("on_exit", &Ledger::on_exit);
+
+  py::class_<CacheD, kungfu::yijinjing::practice::apprentice, std::shared_ptr<CacheD>>(m, "CacheD")
+      .def(py::init<yijinjing::data::locator_ptr, longfist::enums::mode, bool>())
+      .def_property_readonly("io_device", &CacheD::get_io_device)
+      .def_property_readonly("usable", &CacheD::is_usable)
+      .def("set_begin_time", &CacheD::set_begin_time)
+      .def("set_end_time", &CacheD::set_end_time)
+      .def("now", &CacheD::now)
+      .def("run", &CacheD::run)
+      .def("on_exit", &CacheD::on_exit);
 
   py::class_<strategy::Runner, PyRunner, kungfu::yijinjing::practice::apprentice, std::shared_ptr<strategy::Runner>>(
       m, "Runner")
@@ -351,7 +376,9 @@ void bind(pybind11::module &&m) {
       .def("on_entrust", &strategy::Strategy::on_entrust)
       .def("on_transaction", &strategy::Strategy::on_transaction)
       .def("on_order", &strategy::Strategy::on_order)
-      .def("on_trade", &strategy::Strategy::on_trade);
+      .def("on_trade", &strategy::Strategy::on_trade)
+      .def("on_book_sync_reset", &strategy::Strategy::on_book_sync_reset)
+      .def("on_asset_sync_reset", &strategy::Strategy::on_asset_sync_reset);
 
   py::class_<BarGenerator, kungfu::yijinjing::practice::apprentice, std::shared_ptr<BarGenerator>>(m, "BarGenerator")
       .def(py::init<yijinjing::data::locator_ptr, longfist::enums::mode, bool, std::string &>())

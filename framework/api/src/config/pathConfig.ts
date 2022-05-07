@@ -45,8 +45,9 @@ export const buildProcessLogPath = (processId: string) => {
 
 //================== config start =================================
 
-//global.__kfResourcesPath 是一个容易出错的问题, 需要每个调用pathconfig的进程都注册了这个值, 不然报错
 export const KUNGFU_RESOURCES_DIR = global.__resources;
+
+export const KF_CONFIG_DIR = path.join(KF_HOME, 'config');
 
 export const KF_CONFIG_DEFAULT_PATH = path.join(
   KUNGFU_RESOURCES_DIR,
@@ -54,7 +55,7 @@ export const KF_CONFIG_DEFAULT_PATH = path.join(
   'kfConfig.json',
 );
 
-export const KF_CONFIG_PATH = path.join(KF_HOME, 'config', 'kfConfig.json');
+export const KF_CONFIG_PATH = path.join(KF_CONFIG_DIR, 'kfConfig.json');
 
 export const KF_INSTRUMENTS_DEFAULT_PATH = path.join(
   KUNGFU_RESOURCES_DIR,
@@ -63,28 +64,21 @@ export const KF_INSTRUMENTS_DEFAULT_PATH = path.join(
 );
 
 export const KF_INSTRUMENTS_PATH = path.join(
-  KF_HOME,
-  'config',
+  KF_CONFIG_DIR,
   'defaultInstruments.json',
 );
 
 export const KF_SUBSCRIBED_INSTRUMENTS_JSON_PATH = path.join(
-  KF_HOME,
-  'config',
+  KF_CONFIG_DIR,
   'subscribedInstruments.json',
 );
 addFileSync('', KF_SUBSCRIBED_INSTRUMENTS_JSON_PATH, 'file');
 
-export const KF_TD_GROUP_JSON_PATH = path.join(
-  KF_HOME,
-  'config',
-  'tdGroups.json',
-);
+export const KF_TD_GROUP_JSON_PATH = path.join(KF_CONFIG_DIR, 'tdGroups.json');
 addFileSync('', KF_TD_GROUP_JSON_PATH, 'file');
 
 export const KF_SCHEDULE_TASKS_JSON_PATH = path.join(
-  KF_HOME,
-  'config',
+  KF_CONFIG_DIR,
   'scheduleTasks.json',
 );
 addFileSync('', KF_SCHEDULE_TASKS_JSON_PATH, 'file');
@@ -110,10 +104,6 @@ export const EXTENSION_DIRS: string[] = production
       path.resolve('node_modules', '@kungfu-trader'),
       path.resolve('dist'),
     ];
-
-export const APP_DIR = production
-  ? path.resolve(global.__kfResourcesPath, 'app', 'dist', 'app')
-  : path.resolve(process.cwd(), 'dist', 'app');
 
 process.env.KFC_DIR = KFC_DIR;
 //================== kfc end ======================================

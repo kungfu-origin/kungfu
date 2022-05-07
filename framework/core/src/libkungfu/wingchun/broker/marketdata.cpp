@@ -15,7 +15,7 @@ MarketDataVendor::MarketDataVendor(locator_ptr locator, const std::string &group
                                    bool low_latency)
     : BrokerVendor(location::make_shared(mode::LIVE, category::MD, group, name, std::move(locator)), low_latency) {}
 
-void MarketDataVendor::setup(MarketData_ptr service) { service_ = std::move(service); }
+void MarketDataVendor::set_service(MarketData_ptr service) { service_ = std::move(service); }
 
 void MarketDataVendor::on_react() {
   BrokerVendor::on_react();

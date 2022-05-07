@@ -4,14 +4,13 @@ import {
   dealAssetPrice,
   dealDirection,
   dealTradingData,
-  findTargetFromArray,
   isTdStrategyCategory,
   getIdByKfLocation,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import {
-  useCurrentGlobalKfLocation,
   useDownloadHistoryTradingData,
   useTableSearchKeyword,
+  useDashboardBodySize,
   useTriggerMakeOrder,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import KfDashboard from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfDashboard.vue';
@@ -30,21 +29,21 @@ import {
 } from 'vue';
 import { getColumns } from './config';
 import KfBlinkNum from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfBlinkNum.vue';
-import {
-  dealPosition,
-  hashInstrumentUKey,
-} from '@kungfu-trader/kungfu-js-api/kungfu';
+import { dealPosition } from '@kungfu-trader/kungfu-js-api/kungfu';
 import {
   OffsetEnum,
   SideEnum,
 } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import {
   getInstrumentByInstrumentPair,
+  useCurrentGlobalKfLocation,
   useInstruments,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
 import { useExtraCategory } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiExtraLocationUtils';
 
 const app = getCurrentInstance();
+const { handleBodySizeChange } = useDashboardBodySize();
+
 const pos = ref<KungfuApi.Position[]>([]);
 const { searchKeyword, tableData } = useTableSearchKeyword<KungfuApi.Position>(
   pos,
@@ -68,11 +67,11 @@ const { instruments } = useInstruments();
 const { getExtraCategoryData } = useExtraCategory();
 
 const columns = computed(() => {
-  if (currentGlobalKfLocation.data === null) {
+  if (currentGlobalKfLocation.value === null) {
     return getColumns('td');
   }
 
-  const { category } = currentGlobalKfLocation.data;
+  const category = currentGlobalKfLocation.value?.category;
   return getColumns(category);
 });
 
@@ -80,27 +79,27 @@ onMounted(() => {
   if (app?.proxy) {
     const subscription = app.proxy.$tradingDataSubject.subscribe(
       (watcher: KungfuApi.Watcher) => {
-        if (currentGlobalKfLocation.data === null) {
+        if (currentGlobalKfLocation.value === null) {
           return;
         }
 
         const positions = isTdStrategyCategory(
-          currentGlobalKfLocation.data.category,
+          currentGlobalKfLocation.value.category,
         )
           ? ((dealTradingData(
               watcher,
               watcher.ledger,
               'Position',
-              currentGlobalKfLocation.data,
+              currentGlobalKfLocation.value,
             ) || []) as KungfuApi.Position[])
           : (getExtraCategoryData(
               watcher.ledger.Position,
-              currentGlobalKfLocation.data,
+              currentGlobalKfLocation.value,
               'position',
             ) as KungfuApi.Position[]);
 
         pos.value = toRaw(
-          positions.reverse().map((item) => dealPosition(watcher, item)),
+          positions.reverse().map((item) => dealPosition(item)),
         );
       },
     );
@@ -129,7 +128,7 @@ function handleClickRow(data: {
         instrument_type,
         exchange_id,
       },
-      instruments.data,
+      instruments.value,
     );
 
   triggerOrderBook(ensuredInstrument);
@@ -144,8 +143,8 @@ function handleClickRow(data: {
         ? row.yesterday_volume
         : row.volume - row.yesterday_volume,
 
-    price: row.last_price || 0,
-    accountId: isTdStrategyCategory(currentGlobalKfLocation.data?.category)
+    price: row.last_price || row.avg_open_price || 0,
+    accountId: isTdStrategyCategory(currentGlobalKfLocation.value?.category)
       ? undefined
       : dealLocationUIDResolved(row.holder_uid),
   };
@@ -158,17 +157,17 @@ function dealLocationUIDResolved(holderUID: number): string {
 </script>
 <template>
   <div class="kf-position__warp kf-translateZ">
-    <KfDashboard>
+    <KfDashboard @boardSizeChange="handleBodySizeChange">
       <template v-slot:title>
-        <span v-if="currentGlobalKfLocation.data">
+        <span v-if="currentGlobalKfLocation">
           <a-tag
             v-if="currentCategoryData"
             :color="currentCategoryData?.color || 'default'"
           >
             {{ currentCategoryData?.name }}
           </a-tag>
-          <span class="name" v-if="currentGlobalKfLocation.data">
-            {{ getCurrentGlobalKfLocationId(currentGlobalKfLocation.data) }}
+          <span class="name" v-if="currentGlobalKfLocation">
+            {{ getCurrentGlobalKfLocationId(currentGlobalKfLocation) }}
           </span>
         </span>
       </template>
@@ -176,14 +175,14 @@ function dealLocationUIDResolved(holderUID: number): string {
         <KfDashboardItem>
           <a-input-search
             v-model:value="searchKeyword"
-            placeholder="关键字"
+            :placeholder="$t('keyword_input')"
             style="width: 120px"
           />
         </KfDashboardItem>
         <KfDashboardItem>
           <a-button
             size="small"
-            @click="handleDownload('Position', currentGlobalKfLocation.data)"
+            @click="handleDownload('Position', currentGlobalKfLocation)"
           >
             <template #icon>
               <DownloadOutlined style="font-size: 14px" />

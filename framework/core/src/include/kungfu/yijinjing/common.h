@@ -67,8 +67,8 @@ public:
 DECLARE_PTR(observer)
 
 namespace data {
-FORWARD_DECLARE_PTR(location)
-FORWARD_DECLARE_PTR(locator)
+FORWARD_DECLARE_STRUCT_PTR(location)
+FORWARD_DECLARE_CLASS_PTR(locator)
 typedef std::unordered_map<uint32_t, location_ptr> location_map;
 
 class locator {
@@ -104,6 +104,7 @@ private:
 
 struct location : public std::enable_shared_from_this<location>, public longfist::types::Location {
   static constexpr uint32_t PUBLIC = 0;
+  static constexpr uint32_t SYNC = 1;
 
   const locator_ptr locator;
   const std::string uname;

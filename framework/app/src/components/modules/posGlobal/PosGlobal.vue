@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import {
-  useCurrentGlobalKfLocation,
   useDashboardBodySize,
   useTableSearchKeyword,
   useTriggerMakeOrder,
@@ -20,7 +19,6 @@ import {
   dealAssetPrice,
   dealDirection,
   dealKfPrice,
-  findTargetFromArray,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import {
   LedgerCategoryEnum,
@@ -28,14 +26,11 @@ import {
   SideEnum,
 } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import { ExchangeIds } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
-import { hashInstrumentUKey } from '@kungfu-trader/kungfu-js-api/kungfu';
 import {
   getInstrumentByInstrumentPair,
+  useCurrentGlobalKfLocation,
   useInstruments,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
-
-interface PositionGlobalProps {}
-defineProps<PositionGlobalProps>();
 
 const app = getCurrentInstance();
 const pos = ref<KungfuApi.Position[]>([]);
@@ -140,7 +135,7 @@ function tiggerOrderBookAndMakeOrder(record: KungfuApi.Position) {
         instrument_type,
         exchange_id,
       },
-      instruments.data,
+      instruments.value,
     );
 
   triggerOrderBook(ensuredInstrument);
@@ -167,7 +162,7 @@ function tiggerOrderBookAndMakeOrder(record: KungfuApi.Position) {
         <KfDashboardItem>
           <a-input-search
             v-model:value="searchKeyword"
-            placeholder="关键字"
+            :placeholder="$t('keyword_input')"
             style="width: 120px"
           />
         </KfDashboardItem>
@@ -181,7 +176,7 @@ function tiggerOrderBookAndMakeOrder(record: KungfuApi.Position) {
         :scroll="{ y: dashboardBodyHeight - 4 }"
         :rowClassName="dealRowClassNameResolved"
         :customRow="customRowResolved"
-        emptyText="暂无数据"
+        :emptyText="$t('empty_text')"
       >
         <template
           #bodyCell="{

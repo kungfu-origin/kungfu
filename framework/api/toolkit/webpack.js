@@ -1,4 +1,5 @@
 const path = require('path');
+const TerserPlugin = require('terser-webpack-plugin');
 const ESLintPlugin = require('eslint-webpack-plugin');
 const { isProduction, getAppDir } = require('./utils');
 const appDir = getAppDir();
@@ -9,6 +10,10 @@ module.exports = {
     return {
       devtool: 'eval-source-map',
       mode: production ? 'production' : 'development',
+      optimization: {
+        minimize: true,
+        minimizer: [new TerserPlugin()],
+      },
       module: {
         rules: [
           ...(argv.passTJSLoader
@@ -37,7 +42,7 @@ module.exports = {
                         ),
                         // 对应文件添加个.ts或.tsx后缀
                         appendTsSuffixTo: [/\.vue$/],
-                        transpileOnly: true, // 关闭类型检测，即值进行转译
+                        transpileOnly: false, // 关闭类型检测，即值进行转译
                       },
                     },
                   ],
@@ -49,7 +54,9 @@ module.exports = {
           },
           {
             test: /\.(m?js|node)$/,
-            parser: { amd: false },
+            parser: {
+              amd: false,
+            },
             use: {
               loader: '@vercel/webpack-asset-relocator-loader',
               options: {
@@ -72,7 +79,7 @@ module.exports = {
           {
             test: /\.(mp4|webm|ogg|mp3|wav|flac|aac)(\?.*)?$/,
             use: {
-              loader: 'url-loder',
+              loader: 'url-loader',
               options: {
                 limit: 10000,
                 name: 'media/[name]--[folder].[ext]',
@@ -80,17 +87,18 @@ module.exports = {
               },
             },
           },
-          {
-            test: /\.(woff2?|eot|ttf|otf)(\?.*)?$/,
-            use: {
-              loader: 'file-loader',
-              options: {
-                limit: 10000,
-                name: 'fonts/[name]--[folder].[ext]',
-                esModule: false,
-              },
-            },
-          },
+          // {
+          //   test: /\.(woff2?|eot|ttf|otf)(\?.*)?$/,
+          //   use: {
+          //     // loader: 'file-loader',
+          //     loader: 'url-loader',
+          //     options: {
+          //       limit: 10000,
+          //       name: 'fonts/[name]--[folder].[ext]',
+          //       esModule: false,
+          //     },
+          //   },
+          // },
         ],
       },
       node: {

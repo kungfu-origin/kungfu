@@ -15,6 +15,14 @@ typedef std::unordered_map<uint32_t, Book_ptr> BookMap;
 
 typedef std::unordered_map<longfist::enums::InstrumentType, AccountingMethod_ptr> AccountingMethodMap;
 
+FORWARD_DECLARE_CLASS_PTR(Context)
+class BookListener {
+public:
+  virtual void on_book_sync_reset(const Book &old_book, const Book &new_book){};
+  virtual void on_asset_sync_reset(const longfist::types::Asset &old_asset, const longfist::types::Asset &new_asset){};
+};
+DECLARE_PTR(BookListener)
+
 class Bookkeeper {
 public:
   explicit Bookkeeper(yijinjing::practice::apprentice &app, broker::Client &broker_client);
@@ -46,7 +54,7 @@ public:
 
   void update_book(const event_ptr &event, const longfist::types::Quote &quote);
 
-  void update_book(const longfist::types::Quote &quote);
+  void add_book_listener(const BookListener_ptr &book_listener);
 
   template <typename TradingData, typename ApplyMethod = void (AccountingMethod::*)(Book_ptr, const TradingData &)>
   void update_book(const event_ptr &event, ApplyMethod method) {
@@ -69,7 +77,9 @@ public:
       book->update(update_time);
     };
     apply_and_update(source);
-    apply_and_update(dest);
+    if (dest != yijinjing::data::location::PUBLIC) {
+      apply_and_update(dest);
+    }
   }
 
 private:
@@ -81,6 +91,10 @@ private:
   InstrumentMap instruments_ = {};
   BookMap books_ = {};
   AccountingMethodMap accounting_methods_ = {};
+  std::vector<BookListener_ptr> book_listeners_ = {};
+  BookMap books_replica_ = {}; //暂存从location::SYNC传来的asset和position信息
+  std::unordered_map<uint32_t, bool> books_replica_asset_guards_ = {}; //收到PositionEnd::tag添加对应<location_uid,true>
+  std::unordered_map<uint32_t, bool> books_replica_position_guard_ = {}; //收到Asset::tag添加对应<location_uid,true>
 
   static constexpr auto bypass = [](yijinjing::practice::apprentice *app, bool bypass_quotes) {
     return rx::filter([=](const event_ptr &event) {
@@ -95,6 +109,17 @@ private:
   void try_update_asset(const longfist::types::Asset &asset);
 
   void try_update_position(const longfist::types::Position &position);
+
+  // 把books_replica_中location_uid对应的book复制到books_，然后重置asset_guards和position_guards为false
+  void try_sync_book_replica(uint32_t location_uid);
+
+  void try_update_asset_replica(const longfist::types::Asset &asset);
+
+  void try_update_position_replica(const longfist::types::Position &position);
+
+  void update_position_guard(uint32_t location_uid);
+
+  Book_ptr get_book_replica(uint32_t location_uid);
 };
 } // namespace kungfu::wingchun::book
 #endif // WINGCHUN_BOOKKEEPER_H

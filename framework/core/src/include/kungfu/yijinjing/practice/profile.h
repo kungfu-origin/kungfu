@@ -16,7 +16,13 @@ public:
 
   void setup();
 
-  template <typename DataType> void set(const DataType &data) { get_storage()->replace(data); }
+  template <typename DataType> void set(const DataType &data) {
+    try {
+      get_storage()->replace(data);
+    } catch (const std::exception &e) {
+      SPDLOG_ERROR("Unexpected exception by profile set {}", e.what());
+    }
+  }
 
   template <typename DataType> DataType get(const DataType &query) {
     using namespace boost::hana;
@@ -49,6 +55,8 @@ public:
   template <typename DataType> void operator<<(const typed_event_ptr<DataType> &event) {
     get_storage()->replace(event->template data<DataType>());
   }
+
+  template <typename DataType> void operator<<(const state<DataType> &s) { get_storage()->replace(s.data); }
 
 private:
   const std::string profile_db_file_;

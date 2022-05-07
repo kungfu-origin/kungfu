@@ -38,6 +38,8 @@ export enum InstrumentTypeEnum {
 
 export type InstrumentTypes = keyof typeof InstrumentTypeEnum;
 
+export type StrategyExtTypes = 'trade' | 'default' | 'unknown';
+
 export enum HedgeFlagEnum {
   Speculation,
   Arbitrage,
@@ -142,6 +144,7 @@ export enum KfCategoryEnum {
   td,
   strategy,
   system,
+  daemon,
 }
 
 export type KfCategoryTypes = keyof typeof KfCategoryEnum;
@@ -176,4 +179,14 @@ export enum FutureArbitrageCodeEnum {
   SPC = 'SPC',
   SPD = 'SPD',
   IPS = 'IPS',
+}
+
+export enum SpaceTabSettingEnum {
+  SPACES = 'SPACES',
+  TABS = 'TABS',
+}
+
+export enum SpaceSizeSettingEnum {
+  FOURINDENT = 'FOURINDENT',
+  TWOINDENT = 'TWOINDENT',
 }

@@ -39,13 +39,19 @@ void Ledger::on_start() {
   events_ | is(Order::tag) | $$(update_order_stat(event, event->data<Order>()));
   events_ | is(Trade::tag) | $$(update_order_stat(event, event->data<Trade>()));
   events_ | is(Channel::tag) | $$(inspect_channel(event->gen_time(), event->data<Channel>()));
+  events_ | is(KeepPositionsRequest::tag) | $$(keep_positions(event->gen_time(), event->source()));
+  events_ | is(RebuildPositionsRequest::tag) | $$(rebuild_positions(event->gen_time(), event->source()));
   events_ | is(MirrorPositionsRequest::tag) | $$(mirror_positions(event->gen_time(), event->source()));
-  events_ | is(PositionRequest::tag) | $$(write_strategy_data(event->gen_time(), event->source()));
   events_ | is(AssetRequest::tag) | $$(write_book_reset(event->gen_time(), event->source()));
-  events_ | is(PositionEnd::tag) | $$(update_account_book(event->gen_time(), event->data<PositionEnd>().holder_uid););
+  events_ | is(PositionRequest::tag) | $$(write_strategy_data(event->gen_time(), event->source()));
+  events_ | is(PositionEnd::tag) | filter([&](const event_ptr &event) { return event->dest() != location::SYNC; }) |
+      $$(update_account_book(event->gen_time(), event->data<PositionEnd>().holder_uid););
 
   add_time_interval(time_unit::NANOSECONDS_PER_MINUTE, [&](auto e) { write_asset_snapshots(AssetSnapshot::tag); });
   add_time_interval(time_unit::NANOSECONDS_PER_HOUR, [&](auto e) { write_asset_snapshots(DailyAsset::tag); });
+
+  add_time_interval(time_unit::NANOSECONDS_PER_MINUTE, [&](auto e) { request_asset_sync(e->gen_time()); });
+  add_time_interval(time_unit::NANOSECONDS_PER_MINUTE, [&](auto e) { request_position_sync(e->gen_time()); });
 
   refresh_books();
 }
@@ -131,6 +137,10 @@ void Ledger::update_account_book(int64_t trigger_time, uint32_t account_uid) {
 void Ledger::inspect_channel(int64_t trigger_time, const Channel &channel) {
   auto source_location = get_location(channel.source_id);
   auto is_from_account = source_location->category == category::TD;
+
+  if (channel.source_id == cached_home_location_->uid or channel.dest_id == cached_home_location_->uid) {
+    return;
+  }
   if (channel.source_id != get_live_home_uid() and channel.dest_id != get_live_home_uid()) {
     reader_->join(source_location, channel.dest_id, trigger_time);
   }
@@ -140,6 +150,35 @@ void Ledger::inspect_channel(int64_t trigger_time, const Channel &channel) {
   if (channel.source_id == get_live_home_uid() and bookkeeper_.has_book(channel.dest_id)) {
     write_asset_snapshot(trigger_time, get_writer(channel.dest_id), bookkeeper_.get_book(channel.dest_id)->asset);
   }
+}
+
+void Ledger::keep_positions(int64_t trigger_time, uint32_t strategy_uid) {
+  if (bookkeeper_.has_book(strategy_uid)) {
+    auto strategy_book = bookkeeper_.get_book(strategy_uid);
+    tmp_books_.insert_or_assign(strategy_uid, strategy_book);
+    bookkeeper_.drop_book(strategy_uid);
+  }
+}
+
+void Ledger::rebuild_positions(int64_t trigger_time, uint32_t strategy_uid) {
+  auto strategy_book = bookkeeper_.get_book(strategy_uid);
+  auto rebuild_book = [&](auto &positions) {
+    for (const auto &pair : positions) {
+      auto &position = pair.second;
+      if (strategy_book->has_position_for(position)) {
+        auto &strategy_position = strategy_book->get_position_for(position.direction, position);
+        longfist::copy(strategy_position, position);
+        strategy_position.update_time = trigger_time;
+      }
+    }
+  };
+
+  if (tmp_books_.find(strategy_uid) != tmp_books_.end()) {
+    auto tmp_book = tmp_books_.at(strategy_uid);
+    rebuild_book(tmp_book->long_positions);
+    rebuild_book(tmp_book->short_positions);
+  }
+  strategy_book->update(trigger_time);
 }
 
 void Ledger::mirror_positions(int64_t trigger_time, uint32_t strategy_uid) {
@@ -217,8 +256,8 @@ void Ledger::write_book_reset(int64_t trigger_time, uint32_t book_uid) {
 void Ledger::write_strategy_data(int64_t trigger_time, uint32_t strategy_uid) {
   auto strategy_book = bookkeeper_.get_book(strategy_uid);
   auto writer = get_writer(strategy_uid);
-  writer->open_data<CacheReset>(trigger_time).msg_type = Position::tag;
-  writer->close_data();
+  // writer->open_data<CacheReset>(trigger_time).msg_type = Position::tag;
+  // writer->close_data();
   for (const auto &pair : bookkeeper_.get_books()) {
     auto &book = pair.second;
     auto &asset = book->asset;
@@ -255,4 +294,25 @@ void Ledger::write_asset_snapshots(int32_t msg_type) {
     }
   }
 }
+
+void Ledger::request_asset_sync(int64_t trigger_time) {
+  for (const auto &pair : bookkeeper_.get_books()) {
+    auto &book = pair.second;
+    auto &asset = book->asset;
+    if (asset.ledger_category == LedgerCategory::Account and has_writer(asset.holder_uid)) {
+      get_writer(asset.holder_uid)->mark(trigger_time, AssetSync::tag);
+    }
+  }
+}
+
+void Ledger::request_position_sync(int64_t trigger_time) {
+  for (const auto &pair : bookkeeper_.get_books()) {
+    auto &book = pair.second;
+    auto &asset = book->asset;
+    if (asset.ledger_category == LedgerCategory::Account and has_writer(asset.holder_uid)) {
+      get_writer(asset.holder_uid)->mark(trigger_time, PositionSync::tag);
+    }
+  }
+}
+
 } // namespace kungfu::wingchun::service
