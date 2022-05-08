@@ -16,6 +16,7 @@ import { columns } from './config';
 import {
   getInstrumentTypeColor,
   handleOpenLogview,
+  messagePrompt,
   useDashboardBodySize,
   useTableSearchKeyword,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
@@ -33,7 +34,10 @@ import {
   useProcessStatusDetailData,
   useSwitchAllConfig,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
-import { message } from 'ant-design-vue';
+import VueI18n from '@kungfu-trader/kungfu-app/src/language';
+
+const { t } = VueI18n.global;
+const { error } = messagePrompt();
 
 const { dashboardBodyHeight, handleBodySizeChange } = useDashboardBodySize();
 
@@ -41,7 +45,7 @@ const setSourceModalVisible = ref<boolean>(false);
 const setMdModalVisible = ref<boolean>(false);
 const setMdConfigPayload = ref<KungfuApi.SetKfConfigPayload>({
   type: 'add',
-  title: '行情源',
+  title: t('Md'),
   config: {} as KungfuApi.KfExtConfig,
 });
 const currentSelectedSourceId = ref<string>('');
@@ -78,13 +82,13 @@ function handleOpenSetMdDialog(
   ];
 
   if (!extConfig) {
-    message.error(`${selectedSource} 柜台插件不存在`);
+    error(`${selectedSource} ${t('mdConfig.counter_plugin_inexistence')}`);
     return;
   }
 
   currentSelectedSourceId.value = selectedSource;
   setMdConfigPayload.value.type = type;
-  setMdConfigPayload.value.title = `${selectedSource} 行情源`;
+  setMdConfigPayload.value.title = `${selectedSource} ${t('Md')}`;
   setMdConfigPayload.value.config = extConfig;
   setMdConfigPayload.value.initValue = undefined;
 
@@ -121,7 +125,7 @@ function handleOpenSetSourceDialog() {
         <KfDashboardItem>
           <a-input-search
             v-model:value="searchKeyword"
-            placeholder="关键字"
+            :placeholder="$t('keyword_input')"
             style="width: 120px"
           />
         </KfDashboardItem>
@@ -139,7 +143,7 @@ function handleOpenSetSourceDialog() {
             type="primary"
             @click="handleOpenSetSourceDialog"
           >
-            添加
+            {{ $t('mdConfig.add_md') }}
           </a-button>
         </KfDashboardItem>
       </template>
@@ -151,7 +155,7 @@ function handleOpenSetSourceDialog() {
         size="small"
         :pagination="false"
         :scroll="{ y: dashboardBodyHeight - 4 }"
-        emptyText="暂无数据"
+        :emptyText="$t('empty_text')"
       >
         <template
           #bodyCell="{

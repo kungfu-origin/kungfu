@@ -5,18 +5,18 @@
       class="open-editor-folder"
       @click="handleBindStrategyFolder"
     >
-      设置策略入口文件
+      {{ $t('editor.set_strategy_entrance') }}
     </a-button>
     <div class="file-tree-content">
       <div class="strategy-name">
         <span class="name">
           <span v-if="strategy">{{ strategy.strategy_id }}</span>
-          （当前策略)
+          （{{ $t('editor.current_strategy') }})
         </span>
         <span class="tree-deal-file">
           <span
             class="create"
-            title="新建文件"
+            :title="$t('editor.new_file')"
             v-if="strategyPath"
             @click="handleAddFile"
           >
@@ -24,7 +24,7 @@
           </span>
           <span
             class="create"
-            title="新建文件夹"
+            :title="$t('editor.new_folder')"
             v-if="strategyPath"
             @click="handleAddFolder"
           >
@@ -66,7 +66,6 @@ import {
 import path from 'path';
 import { storeToRefs } from 'pinia';
 import { dialog } from '@electron/remote';
-import { message } from 'ant-design-vue';
 import { getTreeByFilePath } from '../../../assets/methods/codeUtils';
 import { useCodeStore } from '../store/codeStore';
 import FileNode from './FileNode.vue';
@@ -75,6 +74,9 @@ import { openFolder, buildFileObj } from '../../../assets/methods/codeUtils';
 
 import { FileAddFilled, FolderAddFilled } from '@ant-design/icons-vue';
 import { ipcEmitDataByName } from '../../../ipcMsg/emitter';
+import { messagePrompt } from '../../../assets/methods/uiUtils';
+import VueI18n from '@kungfu-trader/kungfu-app/src/language';
+const { t } = VueI18n.global;
 
 const store = useCodeStore();
 const props = defineProps<{
@@ -85,6 +87,7 @@ const strategyPath = ref<string>('');
 const strategyPathName = ref<string>('');
 const { proxy } = getCurrentInstance() as ComponentInternalInstance;
 const { currentFile, fileTree } = storeToRefs(useCodeStore());
+const { success, error } = messagePrompt();
 
 watch(strategy.value as Code.Strategy, (newStrategy) => {
   getPath(newStrategy);
@@ -124,7 +127,11 @@ async function bindStrategyPath(strategyPathNew) {
       strategyId: strategy.value.strategy_id,
       strategyPath: strategyPathNew,
     });
-    message.success(`策略${strategy.value.strategy_id}文件路径修改成功！`);
+    success(
+      t('editor.set_strategy_success', {
+        file: strategy.value.strategy_id,
+      }),
+    );
     //每次更新path，需要通知root组件更新stratgy
     updateStrategyToApp(strategyPathNew);
   }
@@ -206,7 +213,7 @@ async function initFileTree(strategy) {
     ids = fileTreeData.ids;
     rootFileTree = fileTreeData.fileTree;
   } catch (err) {
-    message.error(err);
+    error(err);
   }
 
   // 处理根

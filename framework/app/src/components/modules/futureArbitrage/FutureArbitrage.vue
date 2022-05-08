@@ -6,7 +6,6 @@ import KfConfigSettingsForm from '@kungfu-trader/kungfu-app/src/renderer/compone
 import { getConfigSettings } from './config';
 import { RuleObject } from 'ant-design-vue/lib/form';
 import { FutureArbitrageCodeEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';
-import { message } from 'ant-design-vue';
 import { makeOrderByOrderInput } from '@kungfu-trader/kungfu-js-api/kungfu';
 import {
   getProcessIdByKfLocation,
@@ -17,7 +16,14 @@ import {
   useCurrentGlobalKfLocation,
   useProcessStatusDetailData,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
-import { useDashboardBodySize } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
+import {
+  messagePrompt,
+  useDashboardBodySize,
+} from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
+import VueI18n from '@kungfu-trader/kungfu-app/src/language';
+
+const { t } = VueI18n.global;
+const { error } = messagePrompt();
 
 const { handleBodySizeChange } = useDashboardBodySize();
 
@@ -70,7 +76,13 @@ function arbitrageExchangeValidator(
     formState.value.future_arbitrage_code === FutureArbitrageCodeEnum.SPC
   ) {
     if (exchangeId !== 'CZCE') {
-      return Promise.reject(new Error(`只能对应 郑商所 标的`));
+      return Promise.reject(
+        new Error(
+          `${t(
+            'futureArbitrageConfig.only_corresponding',
+          )} ${'tradingConfig.CZCE'} ${'tradingConfig.instrument'}`,
+        ),
+      );
     }
   }
 
@@ -79,7 +91,13 @@ function arbitrageExchangeValidator(
     formState.value.future_arbitrage_code === FutureArbitrageCodeEnum.IPS
   ) {
     if (exchangeId !== 'DCE') {
-      return Promise.reject(new Error(`只能对应 大商所 标的`));
+      return Promise.reject(
+        new Error(
+          `${t(
+            'futureArbitrageConfig.only_corresponding',
+          )} ${'tradingConfig.DCE'} ${'tradingConfig.instrument'}`,
+        ),
+      );
     }
   }
 
@@ -108,7 +126,7 @@ function handleMakeOrder() {
         transformSearchInstrumentResultToInstrument(instrumentB);
 
       if (!instrumnetResolved_A || !instrumnetResolved_B) {
-        message.error('标的错误');
+        error(t('instrument_error'));
         return;
       }
 
@@ -140,7 +158,7 @@ function handleMakeOrder() {
       };
 
       if (!currentGlobalKfLocation.value) {
-        message.error('当前 Location 错误');
+        error(t('location_error'));
         return;
       }
 
@@ -150,7 +168,11 @@ function handleMakeOrder() {
           : `td_${account_id.toString()}`;
 
       if (processStatusData.value[tdProcessId] !== 'online') {
-        message.error(`请先启动 ${tdProcessId} 交易进程`);
+        error(
+          `${t('orderConfig.start')} ${tdProcessId} ${t(
+            'orderConfig.trade_process',
+          )}`,
+        );
         return;
       }
 
@@ -160,7 +182,7 @@ function handleMakeOrder() {
         currentGlobalKfLocation.value,
         tdProcessId.toAccountId(),
       ).catch((err) => {
-        message.error(err.message);
+        error(err.message);
       });
     })
     .catch((err: Error) => {
@@ -187,7 +209,7 @@ function handleMakeOrder() {
       <template v-slot:header>
         <KfDashboardItem>
           <a-button size="small" @click="handleResetMakeOrderForm">
-            重置
+            {{ $t('futureArbitrageConfig.reset_order') }}
           </a-button>
         </KfDashboardItem>
       </template>
@@ -204,7 +226,9 @@ function handleMakeOrder() {
           ></KfConfigSettingsForm>
         </div>
         <div class="make-order-btns">
-          <a-button size="small" @click="handleMakeOrder">下单</a-button>
+          <a-button size="small" @click="handleMakeOrder">
+            {{ $t('futureArbitrageConfig.place_order') }}
+          </a-button>
         </div>
       </div>
     </KfDashboard>

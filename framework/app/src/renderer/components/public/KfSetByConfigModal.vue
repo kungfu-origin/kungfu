@@ -7,6 +7,8 @@ import {
   initFormStateByConfig,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import KfConfigSettingsForm from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfConfigSettingsForm.vue';
+import VueI18n from '@kungfu-trader/kungfu-app/src/language';
+const { t } = VueI18n.global;
 
 const props = withDefaults(
   defineProps<{
@@ -51,7 +53,7 @@ const formState = ref<Record<string, KungfuApi.KfConfigValue>>(
 );
 
 const titleResolved = computed(() => {
-  return `${props.payload.type === 'add' ? '添加' : '设置'} ${
+  return `${props.payload.type === 'add' ? t('add') : t('set')} ${
     props.payload.title
   }`;
 });

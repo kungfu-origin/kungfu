@@ -114,7 +114,7 @@ onBeforeUnmount(() => {
       </KfLayoutVue>
     </div>
     <KfSystemPrepareModal
-      title="系统提示"
+      :title="$t('system_prompt')"
       :visible="preStartSystemLoading"
       :status="[
         { key: 'archive', status: preStartSystemLoadingData.archive },
@@ -125,19 +125,19 @@ onBeforeUnmount(() => {
         },
       ]"
       :txt="{
-        archive: { done: '功夫归档完成 ✓', loading: '功夫归档中...' },
+        archive: { done: $t('archive_completion'), loading: $t('archive') },
         watcher: {
-          done: '功夫环境准备完成 ✓',
-          loading: '功夫环境准备中...',
+          done: $t('environment_complete'),
+          loading: $t('environment_preparation'),
         },
         systemLoading: {
-          done: '功夫就绪 ✓',
-          loading: '等待功夫就绪...',
+          done: $t('ready'),
+          loading: $t('wait_ready'),
         },
       }"
     ></KfSystemPrepareModal>
     <KfSystemPrepareModal
-      title="系统提示"
+      :title="$t('system_prompt')"
       :visible="preQuitSystemLoading"
       :status="[
         {
@@ -150,10 +150,10 @@ onBeforeUnmount(() => {
         },
       ]"
       :txt="{
-        record: { done: '保存数据完成 ✓', loading: '保存数据中...' },
+        record: { done: $t('saving_completed'), loading: $t('save_data') },
         quit: {
-          done: '结束所有交易进程 ✓',
-          loading: '结束交易进程中, 请勿关闭...',
+          done: $t('end_all_transactions'),
+          loading: $t('closing'),
         },
       }"
     ></KfSystemPrepareModal>

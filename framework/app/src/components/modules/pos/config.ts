@@ -1,5 +1,7 @@
 import { KfCategoryTypes } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import { isTdStrategyCategory } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
+import VueI18n from '@kungfu-trader/kungfu-app/src/language';
+const { t } = VueI18n.global;
 
 const buildSorter =
   (dataIndex: keyof KungfuApi.Position) =>
@@ -16,7 +18,7 @@ export const getColumns = (
 ): KfTradingDataTableHeaderConfig[] => [
   {
     type: 'string',
-    name: '代码',
+    name: t('posGlobalConfig.instrument_id'),
     dataIndex: 'instrument_id_resolved',
     sorter: buildStrSorter('instrument_id_resolved'),
     width: 120,
@@ -25,7 +27,7 @@ export const getColumns = (
     ? []
     : [
         {
-          name: '持有账户',
+          name: t('posGlobalConfig.account_id_resolved'),
           dataIndex: 'account_id_resolved',
           sorter: buildStrSorter('account_id_resolved'),
           width: 120,
@@ -40,14 +42,14 @@ export const getColumns = (
   },
   {
     type: 'number',
-    name: '昨',
+    name: t('posGlobalConfig.yesterday_volume'),
     dataIndex: 'yesterday_volume',
     flex: 1,
     sorter: buildSorter('yesterday_volume'),
   },
   {
     type: 'number',
-    name: '今',
+    name: t('posGlobalConfig.today_volume'),
     dataIndex: 'today_volume',
     flex: 1,
     sorter: (a: KungfuApi.Position, b: KungfuApi.Position) => {
@@ -58,28 +60,28 @@ export const getColumns = (
   },
   {
     type: 'number',
-    name: '总',
+    name: t('posGlobalConfig.sum_volume'),
     dataIndex: 'volume',
     flex: 1,
     sorter: buildSorter('yesterday_volume'),
   },
   {
     type: 'number',
-    name: '开仓均价',
+    name: t('posGlobalConfig.avg_open_price'),
     dataIndex: 'avg_open_price',
     flex: 1.2,
     sorter: buildSorter('avg_open_price'),
   },
   {
     type: 'number',
-    name: '最新价',
+    name: t('posGlobalConfig.last_price'),
     dataIndex: 'last_price',
     flex: 1.5,
     sorter: buildSorter('last_price'),
   },
   {
     type: 'number',
-    name: '浮动盈亏',
+    name: t('posGlobalConfig.unrealized_pnl'),
     dataIndex: 'unrealized_pnl',
     flex: 1.5,
     sorter: buildSorter('unrealized_pnl'),
