@@ -203,6 +203,8 @@ function handleOpenAddTdGroupDialog(type: KungfuApi.ModalChangeType) {
   addTdGroupConfigPayload.value.config = {
     type: [],
     name: '账户分组',
+    category: 'tdGroup',
+    key: 'TdGroup',
     settings: [
       {
         key: 'td_group_name',

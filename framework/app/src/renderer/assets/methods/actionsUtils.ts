@@ -398,6 +398,8 @@ export const useDealExportHistoryTradingData = (): {
           if (data.tag === 'export') {
             exportEventData.value = data;
 
+            if (!exportEventData.value) return;
+
             if (exportEventData.value.tradingDataType !== 'all') {
               if (exportEventData.value.tradingDataType !== 'Order') {
                 if (exportEventData.value.tradingDataType !== 'Trade') {
@@ -1101,7 +1103,9 @@ export const useCurrentGlobalKfLocation = (
     }
 
     const extraCategory: Record<string, KungfuApi.KfTradeValueCommonData> =
-      app?.proxy ? app?.proxy.$globalCategoryRegister.getExtraCategory() : {};
+      app?.proxy
+        ? app?.proxy.$globalCategoryRegister.getExtraCategoryMap()
+        : {};
 
     return dealCategory(currentGlobalKfLocation.value?.category, extraCategory);
   });

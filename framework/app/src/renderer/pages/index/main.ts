@@ -101,9 +101,9 @@ app.config.globalProperties.$tradingDataSubject = tradingDataSubject;
 app.config.globalProperties.$globalCategoryRegister =
   new GlobalCategoryRegister();
 
-useComponenets(app, router);
-
 app.mount('#app');
+
+useComponenets(app, router);
 
 const globalStore = useGlobalStore();
 
