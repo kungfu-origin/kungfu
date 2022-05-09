@@ -16,7 +16,7 @@
   },
   "binary": {
     "module_name": "kfx-timer-task",
-    "module_path": "dist/timertask",
+    "module_path": "dist/TimerTask",
     "remote_path": "{module_name}/v{major}/v{version}",
     "package_name": "{module_name}-v{version}-{platform}-{arch}-{configuration}.tar.gz",
     "host": "https://prebuilt.libkungfu.cc"
@@ -41,7 +41,7 @@
     }
   },
   "kungfuConfig": {
-    "key": "timertask",
+    "key": "TimerTask",
     "name": "定时下单",
     "config": {
       "strategy": {
@@ -51,6 +51,13 @@
             "key": "accountId",
             "name": "账户",
             "type": "td",
+            "required": true,
+            "primary": true
+          },
+          {
+            "key": "marketSource",
+            "name": "行情",
+            "type": "md",
             "required": true,
             "primary": true
           },

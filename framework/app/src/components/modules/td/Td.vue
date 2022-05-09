@@ -209,6 +209,8 @@ function handleOpenAddTdGroupDialog(type: KungfuApi.ModalChangeType) {
   addTdGroupConfigPayload.value.config = {
     type: [],
     name: t('tdConfig.td_group'),
+    category: 'tdGroup',
+    key: 'TdGroup',
     settings: [
       {
         key: 'td_group_name',

@@ -89,6 +89,8 @@ function handleOpenSetStrategyDialog(
   setStrategyConfigPayload.value.config = {
     type: [],
     name: t('strategyConfig.strategy'),
+    category: 'strategy',
+    key: 'default',
     settings: [
       {
         key: 'strategy_id',

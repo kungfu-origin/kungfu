@@ -17,6 +17,7 @@ export interface KfCategoryRegisterProps {
       kfLocation: KungfuApi.KfExtraLocation,
     ) => KungfuApi.Trade[];
   };
+
   position?: {
     getter: (
       positions: KungfuApi.DataTable<KungfuApi.Position>,
@@ -40,7 +41,7 @@ export class GlobalCategoryRegister {
     this.globalRegisterdCategories[props.name] = props;
   }
 
-  getExtraCategory(): Record<string, KungfuApi.KfTradeValueCommonData> {
+  getExtraCategoryMap(): Record<string, KungfuApi.KfTradeValueCommonData> {
     return Object.keys(this.globalRegisterdCategories).reduce(
       (extraCategoryData, key) => {
         extraCategoryData[key] = this.globalRegisterdCategories[key].commonData;
