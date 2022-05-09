@@ -117,10 +117,30 @@ export const getKfGlobalSettings = (): KfSystemConfig[] => [
         type: 'table',
         columns: [
           {
-            key: 'td',
-            name: 'td',
+            key: 'account_id',
+            name: '账户',
             type: 'td',
-          }
+          },
+          {
+            key: 'source_id',
+            name: '柜台',
+            type: 'td',
+          },
+          {
+            key: 'max_order_volume',
+            name: '单比最大量',
+            type: 'int',
+          },
+          {
+            key: 'max_daily_volume',
+            name: '每日最大成交量',
+            type: 'int',
+          },
+          {
+            key: 'white_list',
+            name: '标的白名单',
+            type: 'instruments',
+          },
         ]
       }
     ],
