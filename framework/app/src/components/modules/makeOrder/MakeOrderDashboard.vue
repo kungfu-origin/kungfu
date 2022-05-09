@@ -19,7 +19,11 @@ import {
   messagePrompt,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import { getConfigSettings } from './config';
-import { dealOrderPlaceVNode, dealStockOffset } from './utils';
+import {
+  dealOrderPlaceVNode,
+  dealStockOffset,
+  transformOrderInputToExtConfigForm,
+} from './utils';
 import {
   makeOrderByOrderInput,
   hashInstrumentUKey,
@@ -48,6 +52,7 @@ import {
 import OrderConfirmModal from './OrderConfirmModal.vue';
 import { useExtraCategory } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiExtraLocationUtils';
 import VueI18n from '@kungfu-trader/kungfu-app/src/language';
+import { useTradingTask } from '../tradingTask/utils';
 
 const { t } = VueI18n.global;
 const { error } = messagePrompt();
@@ -93,7 +98,7 @@ const isShowConfirmModal = ref<boolean>(false);
 const curOrderVolume = ref<number>(0);
 const curOrderType = ref<InstrumentTypeEnum>(InstrumentTypeEnum.unknown);
 
-const instrumentResolve = computed(() => {
+const instrumentResolved = computed(() => {
   const { instrument } = formState.value;
   return instrument
     ? transformSearchInstrumentResultToInstrument(instrument)
@@ -101,11 +106,11 @@ const instrumentResolve = computed(() => {
 });
 
 const makeOrderData = computed(() => {
-  if (!instrumentResolve.value) {
+  if (!instrumentResolved.value) {
     return null;
   }
 
-  const { exchangeId, instrumentId, instrumentType } = instrumentResolve.value;
+  const { exchangeId, instrumentId, instrumentType } = instrumentResolved.value;
 
   const { limit_price, volume, price_type, side, offset, hedge_flag } =
     formState.value;
@@ -128,9 +133,9 @@ const makeOrderData = computed(() => {
 const curPositionList = ref<KungfuApi.Position[]>();
 
 const currentPosition = computed(() => {
-  if (!curPositionList.value?.length || !instrumentResolve.value) return null;
+  if (!curPositionList.value?.length || !instrumentResolved.value) return null;
 
-  const { exchangeId, instrumentId, instrumentType } = instrumentResolve.value;
+  const { exchangeId, instrumentId, instrumentType } = instrumentResolved.value;
   const targetPositionList: KungfuApi.Position[] = curPositionList.value.filter(
     (position) =>
       position.exchange_id === exchangeId &&
@@ -208,7 +213,7 @@ onMounted(() => {
 watch(
   () => formState.value.instrument,
   () => {
-    if (!instrumentResolve.value) {
+    if (!instrumentResolved.value) {
       return;
     }
 
@@ -216,10 +221,10 @@ watch(
       processStatusData.value,
       appStates.value,
       mdExtTypeMap.value,
-      [instrumentResolve.value],
+      [instrumentResolved.value],
     );
-    triggerOrderBook(instrumentResolve.value);
-    makeOrderInstrumentType.value = instrumentResolve.value.instrumentType;
+    triggerOrderBook(instrumentResolved.value);
+    makeOrderInstrumentType.value = instrumentResolved.value.instrumentType;
 
     updatePositionList();
   },
@@ -262,11 +267,11 @@ function placeOrder(
 }
 
 function initOrderInputData(): Promise<KungfuApi.MakeOrderInput> {
-  if (!instrumentResolve.value) {
+  if (!instrumentResolved.value) {
     return Promise.reject(new Error(t('instrument_error')));
   }
 
-  const { exchangeId, instrumentId, instrumentType } = instrumentResolve.value;
+  const { exchangeId, instrumentId, instrumentType } = instrumentResolved.value;
   const { limit_price, volume, price_type, side, offset, hedge_flag } =
     formState.value;
 
@@ -311,8 +316,8 @@ async function handleApartOrder(): Promise<void> {
     curOrderVolume.value = Number(makeOrderInput.volume);
     curOrderType.value = makeOrderInput.instrument_type;
   } catch (e) {
-    if (typeof e === 'string') {
-      error(e);
+    if (e.message) {
+      error(e.message);
     }
   }
 }
@@ -347,7 +352,6 @@ function confirmFatFingerModal(
   makeOrderInput: KungfuApi.MakeOrderInput,
 ): Promise<void> {
   const warnningMessage = dealFatFingerMessage(makeOrderInput);
-
   if (warnningMessage !== '') {
     return confirmModal(
       t('warning'),
@@ -362,13 +366,13 @@ function confirmFatFingerModal(
 function dealFatFingerMessage(
   makeOrderInput: KungfuApi.MakeOrderInput,
 ): string {
-  if (!instrumentResolve.value) {
+  if (!instrumentResolved.value) {
     return '';
   }
 
   const fatFingerRange = +getKfGlobalSettingsValue()?.trade?.fatFinger || 0;
 
-  const { exchangeId, instrumentId } = instrumentResolve.value;
+  const { exchangeId, instrumentId } = instrumentResolved.value;
   const ukey = hashInstrumentUKey(instrumentId, exchangeId);
 
   const { limit_price: price, side } = makeOrderInput;
@@ -403,7 +407,7 @@ async function confirmOrderPlace(
   orderCount: number = 1,
 ): Promise<string> {
   if (!currentGlobalKfLocation.value || !window.watcher) {
-    return Promise.reject(t('location_error'));
+    return Promise.reject(new Error(t('location_error')));
   }
 
   const { account_id } = formState.value;
@@ -414,7 +418,7 @@ async function confirmOrderPlace(
 
   if (processStatusData.value[tdProcessId] !== 'online') {
     return Promise.reject(
-      t('tradingConfig.start_process', { process: tdProcessId }),
+      new Error(t('tradingConfig.start_process', { process: tdProcessId })),
     );
   }
 
@@ -444,8 +448,8 @@ async function handleMakeOrder(): Promise<void> {
       tdProcessId,
     );
   } catch (e) {
-    if (typeof e === 'string') {
-      error(e);
+    if (e.message) {
+      error(e.message);
     }
   }
 }
@@ -486,6 +490,26 @@ function closeModalConditions(
   }
 
   return makeOrderInput.volume > positionVolume * (closeRange / 100);
+}
+
+const { handleOpenSetTradingTaskModal } = useTradingTask();
+async function handleOpenTradingTaskConfigModal(
+  kfExtConfig: KungfuApi.KfExtConfig,
+) {
+  try {
+    if (!currentGlobalKfLocation.value) return;
+    await formRef.value.validate();
+    const taskInitValue = transformOrderInputToExtConfigForm(
+      formState.value,
+      configSettings.value,
+      kfExtConfig.settings,
+    );
+    handleOpenSetTradingTaskModal('add', kfExtConfig.key, taskInitValue);
+  } catch (e) {
+    if (e.message) {
+      error(e.message);
+    }
+  }
 }
 </script>
 
@@ -545,7 +569,10 @@ function closeModalConditions(
           <a-button @click="handleApartOrder">
             {{ $t('tradingConfig.apart_order') }}
           </a-button>
-          <a-button v-for="item in availTradingTaskExtensionList">
+          <a-button
+            v-for="item in availTradingTaskExtensionList"
+            @click="handleOpenTradingTaskConfigModal(item)"
+          >
             {{ item.name }}
           </a-button>
         </div>

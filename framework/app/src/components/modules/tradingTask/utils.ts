@@ -40,7 +40,7 @@ export const useTradingTask = (): {
   handleOpenSetTradingTaskModal: (
     type: KungfuApi.ModalChangeType,
     selectedExtKey: string,
-    taskConfig?: Record<string, KungfuApi.KfConfigValue>,
+    taskInitValue?: Record<string, KungfuApi.KfConfigValue>,
   ) => void;
   handleConfirmAddUpdateTask: (
     data: {
@@ -66,7 +66,7 @@ export const useTradingTask = (): {
   const handleOpenSetTradingTaskModal = (
     type = 'add' as KungfuApi.ModalChangeType,
     selectedExtKey: string,
-    taskConfig?: Record<string, KungfuApi.KfConfigValue>,
+    taskInitValue?: Record<string, KungfuApi.KfConfigValue>,
   ) => {
     if (selectedExtKey === '') {
       message.error(`交易任务插件 key 不存在`);
@@ -88,10 +88,8 @@ export const useTradingTask = (): {
     setTradingTaskConfigPayload.value.config = extConfig;
     setTradingTaskConfigPayload.value.initValue = undefined;
 
-    if (type === 'update') {
-      if (taskConfig) {
-        setTradingTaskConfigPayload.value.initValue = taskConfig;
-      }
+    if (taskInitValue) {
+      setTradingTaskConfigPayload.value.initValue = taskInitValue;
     }
 
     if (!extConfig?.settings?.length) {

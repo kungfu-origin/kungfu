@@ -13,6 +13,10 @@ class orderTask:
         self.offset = offset
 
 def pre_start(context):
+
+    writer = get_Writer(0)
+    writer.write(quote, now())
+
     context.hold_book()
     context.hold_positions()
     args = {}
