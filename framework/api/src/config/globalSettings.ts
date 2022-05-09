@@ -113,7 +113,7 @@ export const getKfGlobalSettings = (): KfSystemConfig[] => [
         key: 'riskControl',
         name: '风控',
         tip: '启用风险控制, 当持仓量超过阈值时自动平仓',
-        default: false,
+        default: [],
         type: 'table',
         columns: [
           {
