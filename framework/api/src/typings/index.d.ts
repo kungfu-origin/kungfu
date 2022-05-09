@@ -261,21 +261,21 @@ declare namespace KungfuApi {
   }
 
   export interface RiskSettingStore {
-    GetAllRiskSetting(): Record<string, KfConfigOrigin>;
-    SetRiskSetting(
+    getAllRiskSetting(): Record<string, KfConfigOrigin>;
+    setRiskSetting(
       category: string,
       group: string,
       name: string,
       mode: string,
       configValue: string,
     ): void;
-    RemoveRiskSetting(
+    removeRiskSetting(
       category: string,
       group: string,
       name: string,
       mode: string,
     ): void;
-    GetRiskSetting(
+    getRiskSetting(
       category: string,
       group: string,
       name: string,
@@ -708,6 +708,15 @@ declare namespace KungfuApi {
     close_ratio: number;
     close_today_ratio: number;
     min_commission: number;
+  }
+
+  export interface RiskSetting extends KfLocation {
+    location_uid: number,
+    max_order_volume: number,
+    max_daily_volume: number,
+    white_list: string[],
+    self_filled_check: number,
+    max_cancle_ratio: number,
   }
 
   export interface Watcher {

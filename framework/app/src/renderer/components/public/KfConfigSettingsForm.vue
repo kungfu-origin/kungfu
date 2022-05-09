@@ -426,6 +426,8 @@ function handleAddItemIntoTableRows(item: KungfuApi.KfConfigItem) {
   if (targetState instanceof Array) {
     targetState.push(tmp);
   }
+  console.log(targetState);
+  
 }
 
 function handleRemoveItemIntoTableRows(item, index) {

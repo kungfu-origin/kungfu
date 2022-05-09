@@ -93,7 +93,7 @@ const isShowConfirmModal = ref<boolean>(false);
 const curOrderVolume = ref<number>(0);
 const curOrderType = ref<InstrumentTypeEnum>(InstrumentTypeEnum.unknown);
 
-const instrumentResolve = computed(() => {
+const instrumentResolved = computed(() => {
   const { instrument } = formState.value;
   return instrument
     ? transformSearchInstrumentResultToInstrument(instrument)
@@ -101,11 +101,11 @@ const instrumentResolve = computed(() => {
 });
 
 const makeOrderData = computed(() => {
-  if (!instrumentResolve.value) {
+  if (!instrumentResolved.value) {
     return null;
   }
 
-  const { exchangeId, instrumentId, instrumentType } = instrumentResolve.value;
+  const { exchangeId, instrumentId, instrumentType } = instrumentResolved.value;
 
   const { limit_price, volume, price_type, side, offset, hedge_flag } =
     formState.value;
@@ -128,9 +128,9 @@ const makeOrderData = computed(() => {
 const curPositionList = ref<KungfuApi.Position[]>();
 
 const currentPosition = computed(() => {
-  if (!curPositionList.value?.length || !instrumentResolve.value) return null;
+  if (!curPositionList.value?.length || !instrumentResolved.value) return null;
 
-  const { exchangeId, instrumentId, instrumentType } = instrumentResolve.value;
+  const { exchangeId, instrumentId, instrumentType } = instrumentResolved.value;
   const targetPositionList: KungfuApi.Position[] = curPositionList.value.filter(
     (position) =>
       position.exchange_id === exchangeId &&
@@ -208,7 +208,7 @@ onMounted(() => {
 watch(
   () => formState.value.instrument,
   () => {
-    if (!instrumentResolve.value) {
+    if (!instrumentResolved.value) {
       return;
     }
 
@@ -216,10 +216,10 @@ watch(
       processStatusData.value,
       appStates.value,
       mdExtTypeMap.value,
-      [instrumentResolve.value],
+      [instrumentResolved.value],
     );
-    triggerOrderBook(instrumentResolve.value);
-    makeOrderInstrumentType.value = instrumentResolve.value.instrumentType;
+    triggerOrderBook(instrumentResolved.value);
+    makeOrderInstrumentType.value = instrumentResolved.value.instrumentType;
 
     updatePositionList();
   },
@@ -262,11 +262,11 @@ function placeOrder(
 }
 
 function initOrderInputData(): Promise<KungfuApi.MakeOrderInput> {
-  if (!instrumentResolve.value) {
+  if (!instrumentResolved.value) {
     return Promise.reject(new Error(t('instrument_error')));
   }
 
-  const { exchangeId, instrumentId, instrumentType } = instrumentResolve.value;
+  const { exchangeId, instrumentId, instrumentType } = instrumentResolved.value;
   const { limit_price, volume, price_type, side, offset, hedge_flag } =
     formState.value;
 
@@ -362,13 +362,13 @@ function confirmFatFingerModal(
 function dealFatFingerMessage(
   makeOrderInput: KungfuApi.MakeOrderInput,
 ): string {
-  if (!instrumentResolve.value) {
+  if (!instrumentResolved.value) {
     return '';
   }
 
   const fatFingerRange = +getKfGlobalSettingsValue()?.trade?.fatFinger || 0;
 
-  const { exchangeId, instrumentId } = instrumentResolve.value;
+  const { exchangeId, instrumentId } = instrumentResolved.value;
   const ukey = hashInstrumentUKey(instrumentId, exchangeId);
 
   const { limit_price: price, side } = makeOrderInput;

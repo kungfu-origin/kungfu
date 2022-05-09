@@ -50,6 +50,7 @@ import {
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/configs';
 import { ipcRenderer } from 'electron';
 import { useAllKfConfigData } from '../../assets/methods/actionsUtils';
+// import { getRiskControl } from '@kungfu-trader/kungfu-js-api/kungfu/riskControl';
 
 interface ScheduleTaskFormItem {
   timeValue: Dayjs;
@@ -99,6 +100,10 @@ onMounted(() => {
   getKfCommission().then((res) => {
     commissions.value = res;
   });
+
+  // getRiskControl().then((res) => {
+  //   console.log(res);
+  // })
 
   getScheduleTasks().then((res) => {
     scheduleTask.active = !!res.active;
