@@ -258,6 +258,29 @@ declare namespace KungfuApi {
     ): KungfuApi.KfConfig;
   }
 
+  export interface RiskSettingStore {
+    GetAllRiskSetting(): Record<string, KfConfigOrigin>;
+    SetRiskSetting(
+      category: string,
+      group: string,
+      name: string,
+      mode: string,
+      configValue: string,
+    ): void;
+    RemoveRiskSetting(
+      category: string,
+      group: string,
+      name: string,
+      mode: string,
+    ): void;
+    GetRiskSetting(
+      category: string,
+      group: string,
+      name: string,
+      mode: string,
+    ): KungfuApi.KfConfig;
+  }
+
   export interface DataTable<T> {
     [hashed: string]: T;
     filter(key: string, value: string | number | bigint): DataTable<T>;
@@ -745,6 +768,7 @@ declare namespace KungfuApi {
 
   export interface Kungfu {
     ConfigStore(kfHome: string): ConfigStore;
+    RiskSettingStore(kfHome: string): RiskSettingStore;
     CommissionStore(kfHome: string): CommissionStore;
     History(kfHome: string): HistoryStore;
     longfist: Longfist;
