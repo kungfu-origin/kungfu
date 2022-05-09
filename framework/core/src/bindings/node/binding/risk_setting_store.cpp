@@ -14,7 +14,7 @@ namespace kungfu::node {
 Napi::FunctionReference RiskSettingStore::constructor = {};
 
 RiskSettingStore::RiskSettingStore(const Napi::CallbackInfo &info)
-    : ObjectWrap(info), locator_(IODevice::GetLocator(info)), profile_(locator_) {}
+    : ObjectWrap(info), locator_(ExtractRuntimeLocatorByInfo0(info)), profile_(locator_) {}
 
 inline RiskSetting getConfigFromJs(const Napi::CallbackInfo &info, const locator_ptr &locator) {
   RiskSetting query = {};
