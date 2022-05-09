@@ -57,7 +57,7 @@ public:
 
   [[nodiscard]] const std::string &get_config();
 
-  [[nodiscard]] const std::string &get_risk_setting();
+  [[nodiscard]] const longfist::types::RiskSetting &get_risk_setting();
 
   [[nodiscard]] const yijinjing::data::location_ptr &get_home() const;
 
