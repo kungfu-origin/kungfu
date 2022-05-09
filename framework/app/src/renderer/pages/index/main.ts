@@ -62,6 +62,8 @@ import { useComponenets } from './useComponents';
 import { GlobalCategoryRegister } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiExtraLocationUtils';
 import globalBus from '../../assets/methods/globalBus';
 
+import VueI18n from '@kungfu-trader/kungfu-app/src/language';
+
 const app = createApp(App);
 
 app
@@ -101,8 +103,8 @@ app.config.globalProperties.$tradingDataSubject = tradingDataSubject;
 app.config.globalProperties.$globalCategoryRegister =
   new GlobalCategoryRegister();
 
+app.use(VueI18n);
 app.mount('#app');
-
 useComponenets(app, router);
 
 const globalStore = useGlobalStore();

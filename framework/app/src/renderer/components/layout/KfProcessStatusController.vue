@@ -24,6 +24,8 @@ import {
   useProcessStatusDetailData,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
 import { KfCategoryTypes } from '@kungfu-trader/kungfu-js-api/typings/enums';
+import VueI18n from '@kungfu-trader/kungfu-app/src/language';
+const { t } = VueI18n.global;
 
 const processControllerBoardVisible = ref<boolean>(false);
 const categoryList: (KfCategoryTypes | string)[] = [
@@ -51,8 +53,8 @@ watch(processStatusData, (newPSD, oldPSD) => {
     if (!hasAlertMasterStop) {
       hasAlertMasterStop = true;
       notification.error({
-        message: '主控进程 master 中断',
-        description: '主控进程负责策略进程间通信与资源配置, 请重启功夫交易系统',
+        message: t('master_interrupt'),
+        description: t('master_desc'),
         duration: 8,
         placement: 'bottomRight',
       });
@@ -63,8 +65,8 @@ watch(processStatusData, (newPSD, oldPSD) => {
     if (!hasAlertLedgerStop) {
       hasAlertLedgerStop = true;
       notification.error({
-        message: '计算服务 ledger 中断',
-        description: '计算服务负责持仓跟资金计算, 请重启功夫交易系统',
+        message: t('ledger_interrupt'),
+        description: t('ledger_desc'),
         duration: 8,
         placement: 'bottomRight',
       });
@@ -75,9 +77,8 @@ watch(processStatusData, (newPSD, oldPSD) => {
     if (!hasAlertCacheDStop) {
       hasAlertCacheDStop = true;
       notification.error({
-        message: '存储服务 cached 中断',
-        description:
-          '存储服务负责数据落地, 存储服务断开不影响交易, 可等交易完成后重启功夫系统',
+        message: t('cached_interrupt'),
+        description: t('cached_desc'),
         duration: 8,
         placement: 'bottomRight',
       });
@@ -96,8 +97,12 @@ watch(appStates, (newAppStates, oldAppStates) => {
       processStatusData.value[key] === 'online'
     ) {
       notification.warning({
-        message: `${key} 已断开`,
-        description: `${key} 已断开, 可能会导致交易中断, 请检查`,
+        message: t('state_interrupt_msg', {
+          state: key,
+        }),
+        description: t('state_interrupt_desc', {
+          state: key,
+        }),
         duration: 8,
         placement: 'bottomRight',
       });
@@ -126,13 +131,13 @@ function handleOpenProcessControllerBoard(): void {
     @click="handleOpenProcessControllerBoard"
   >
     <ClusterOutlined style="font-size: 14px; padding-right: 4px" />
-    <span class="title">控制中心</span>
+    <span class="title">{{ $t('baseConfig.control_center') }}</span>
 
     <a-drawer
       v-model:visible="processControllerBoardVisible"
       :width="650"
       class="kf-process-status-controller-board__warp"
-      title="控制中心"
+      :title="$t('baseConfig.control_center')"
       placement="right"
     >
       <div

@@ -38,6 +38,8 @@ import {
   initKfDefaultInstruments,
   ensureKungfuKey,
 } from '@kungfu-trader/kungfu-js-api/config';
+import VueI18n from '@kungfu-trader/kungfu-app/src/language';
+const { t } = VueI18n.global;
 
 let MainWindow: BrowserWindow | null = null;
 let AllowQuit = false;
@@ -220,14 +222,14 @@ app.on('will-quit', (e) => {
 function setMenu() {
   //添加快捷键
   const applicationOptions = [
-    { label: '关于功夫交易', click: () => showKungfuInfo() },
+    { label: t('about_kungfu'), click: () => showKungfuInfo() },
     {
-      label: '设置',
+      label: t('set'),
       accelerator: 'CommandOrControl+,',
       click: () => MainWindow && openSettingDialog(MainWindow),
     },
     {
-      label: '关闭',
+      label: t('close'),
       accelerator: 'CommandOrControl+W',
       click: () => {
         const focusedWin = BrowserWindow.getFocusedWindow();
@@ -240,7 +242,7 @@ function setMenu() {
 
   if (isMac) {
     applicationOptions.push({
-      label: '退出',
+      label: t('quit'),
       accelerator: 'Command+Q',
       click: () => app.quit(),
     });
@@ -248,97 +250,97 @@ function setMenu() {
 
   const template: MenuItemConstructorOptions[] = [
     {
-      label: '功夫',
+      label: t('KungFu'),
       submenu: applicationOptions,
     },
     {
       //此处必要, 不然electron内使用复制粘贴会无效
-      label: '编辑',
+      label: t('edit'),
       submenu: [
         {
-          label: '复制',
+          label: t('copy'),
           accelerator: 'CommandOrControl+C',
           role: 'copy',
         },
         {
-          label: '黏贴',
+          label: t('paste'),
           accelerator: 'CommandOrControl+V',
           role: 'paste',
         },
         {
-          label: '全选',
+          label: t('select_all'),
           accelerator: 'CommandOrControl+A',
           role: 'selectAll',
         },
         {
-          label: '撤销',
+          label: t('undo'),
           accelerator: 'CommandOrControl+Z',
           role: 'undo',
         },
       ],
     },
     {
-      label: '文件',
+      label: t('file'),
       submenu: [
         {
-          label: '打开功夫资源目录 (KF_HOME)',
+          label: t('open_resources_directory'),
           click: () => shell.showItemInFolder(KF_HOME),
         },
         {
-          label: '打开功夫安装目录',
+          label: t('open_install_directory'),
           click: () => shell.showItemInFolder(app.getAppPath()),
         },
         {
-          label: '打开功夫基础配置DB',
+          label: t('open_basic_configuration'),
           click: () =>
             shell.showItemInFolder(path.join(BASE_DB_DIR, 'config.db')),
         },
         {
-          label: '浏览日志文件',
+          label: t('browsing_log'),
           accelerator: 'CommandOrControl+L',
           click: () => MainWindow && openLogFile(MainWindow),
         },
       ],
     },
     {
-      label: '运行',
+      label: t('run'),
       submenu: [
         {
-          label: '清理journal',
+          label: t('clear_journal'),
           click: () => MainWindow && clearJournal(MainWindow),
         },
         {
-          label: '清理DB',
+          label: t('clear_DB'),
           click: () => MainWindow && clearDB(MainWindow),
         },
         {
-          label: '重置主面板',
+          label: t('reset_main_panel'),
           click: () => MainWindow && resetMainDashboard(MainWindow),
         },
         {
-          label: '导出所有交易数据',
+          label: t('export_all_transaction_data'),
           accelerator: 'CommandOrControl+E',
           click: () => MainWindow && exportAllTradingData(MainWindow),
         },
       ],
     },
     {
-      label: '帮助',
+      label: t('help'),
       submenu: [
         {
-          label: '官网',
+          label: t('website'),
           click: () => openUrl('https://www.kungfu-trader.com/'),
         },
         {
-          label: '用户手册',
+          label: t('user_manual'),
           click: () => openUrl('https://www.kungfu-trader.com/manual/'),
         },
         {
-          label: '策略API文档',
+          label: t('API_documentation'),
           click: () => openUrl('https://www.kungfu-trader.com/api-doc/'),
         },
         {
-          label: 'Kungfu 论坛',
+          label: t('Kungfu_forum'),
           click: () => openUrl('https://www.kungfu-trader.com/community/'),
         },
       ],
