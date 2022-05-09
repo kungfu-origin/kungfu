@@ -497,6 +497,8 @@ const getKfExtensionConfigByCategory = (
             [extKey]: {
               name: extName,
               extPath,
+              category,
+              key: extKey,
               type: resolveTypesInExtConfig(
                 category,
                 configOfCategory?.type || [],
@@ -1361,6 +1363,12 @@ export const getPrimaryKeyFromKfConfigItem = (
   });
 };
 
+export const getPrimaryKeys = (
+  settings: KungfuApi.KfConfigItem[],
+): string[] => {
+  return settings.filter((item) => item.primary).map((item) => item.key);
+};
+
 export const getCombineValueByPrimaryKeys = (
   primaryKeys: string[],
   formState: Record<string, KungfuApi.KfConfigValue>,
@@ -1485,14 +1493,9 @@ export const initFormStateByConfig = (
     const isArray = KfConfigValueArrayType.includes(type);
 
     let defaultValue;
-    if (typeof item?.default === 'object') {
-      defaultValue = JSON.parse(JSON.stringify(item?.default));
-    } else {
-      defaultValue = item?.default;
-    }
 
-    if (defaultValue === undefined) {
-      defaultValue = isBoolean
+    const getDefaultValueByType = () => {
+      return isBoolean
         ? false
         : isNumber
         ? 0
@@ -1501,8 +1504,22 @@ export const initFormStateByConfig = (
         : isArray
         ? []
         : '';
+    };
+
+    if (typeof item?.default === 'object') {
+      defaultValue = JSON.parse(JSON.stringify(item?.default));
+    } else {
+      defaultValue = item?.default;
     }
-    if ((initValue || {})[item.key] !== undefined) {
+
+    if (defaultValue === undefined) {
+      defaultValue = getDefaultValueByType();
+    }
+
+    if (
+      (initValue || {})[item.key] !== undefined &&
+      (initValue || {})[item.key] !== getDefaultValueByType()
+    ) {
       defaultValue = (initValue || {})[item.key];
     }
 

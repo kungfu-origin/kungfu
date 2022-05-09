@@ -1,5 +1,13 @@
 <script setup lang="ts">
-import { computed, getCurrentInstance, ref } from 'vue';
+import {
+  computed,
+  getCurrentInstance,
+  onBeforeUnmount,
+  onMounted,
+  ref,
+  watch,
+  nextTick,
+} from 'vue';
 import { useModalVisible } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 
 import {
@@ -29,6 +37,10 @@ const props = withDefaults(
   },
 );
 
+const configSettings = ref<KungfuApi.KfConfigItem[]>(
+  props.payload.config?.settings || [],
+);
+
 defineEmits<{
   (
     e: 'confirm',
@@ -46,10 +58,7 @@ const app = getCurrentInstance();
 const { modalVisible, closeModal } = useModalVisible(props.visible);
 const formRef = ref();
 const formState = ref<Record<string, KungfuApi.KfConfigValue>>(
-  initFormStateByConfig(
-    props.payload.config?.settings || [],
-    props.payload.initValue,
-  ),
+  initFormStateByConfig(configSettings.value || [], props.payload.initValue),
 );
 
 const titleResolved = computed(() => {
@@ -58,11 +67,55 @@ const titleResolved = computed(() => {
   }`;
 });
 
+watch(formState.value, (val) => {
+  if (app?.proxy) {
+    app?.proxy.$globalBus.next({
+      tag: 'input:currentConfigModal',
+      category: props.payload.config.category,
+      extKey: props.payload.config.key,
+      formState: val,
+    });
+  }
+});
+
+onMounted(() => {
+  nextTick().then(() => {
+    if (app?.proxy) {
+      app?.proxy.$globalBus.next({
+        tag: 'ready:currentConfigModal',
+        category: props.payload.config.category,
+        extKey: props.payload.config.key,
+        initValue: props.payload.initValue,
+      });
+    }
+  });
+
+  if (app?.proxy) {
+    const subscription = app?.proxy.$globalBus.subscribe((data: KfBusEvent) => {
+      if (data.tag === 'update:currentConfigModalConfigSettings') {
+        if (data.configSettings) {
+          formState.value = initFormStateByConfig(data.configSettings || [], {
+            ...formState.value,
+            ...props.payload.initValue,
+          });
+          nextTick().then(() => {
+            configSettings.value = data.configSettings;
+          });
+        }
+      }
+    });
+
+    onBeforeUnmount(() => {
+      subscription.unsubscribe();
+    });
+  }
+});
+
 function handleConfirm(): void {
   formRef.value
     .validate()
     .then(() => {
-      const primaryKeys: string[] = (props.payload.config?.settings || [])
+      const primaryKeys: string[] = (configSettings.value || [])
         .filter((item) => item.primary)
         .map((item) => item.key);
 
@@ -98,7 +151,7 @@ function handleConfirm(): void {
     <KfConfigSettingsForm
       ref="formRef"
       v-model:formState="formState"
-      :configSettings="payload.config?.settings || []"
+      :configSettings="configSettings"
       :changeType="payload.type"
       :primaryKeyUnderline="primaryKeyUnderline"
       :primaryKeyAvoidRepeatCompareTarget="primaryKeyAvoidRepeatCompareTarget"

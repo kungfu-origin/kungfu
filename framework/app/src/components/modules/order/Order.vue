@@ -9,7 +9,6 @@ import {
   dealTradingData,
   isTdStrategyCategory,
   getOrderTradeFilterKey,
-  dealCategory,
   getProcessIdByKfLocation,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import {
@@ -230,18 +229,11 @@ function handleCancelAllOrders(): void {
     error();
     return;
   }
-
-  const extraCategory: Record<string, KungfuApi.KfTradeValueCommonData> =
-    app?.proxy ? app?.proxy.$globalCategoryRegister.getExtraCategory() : {};
-  const categoryName = dealCategory(
-    currentGlobalKfLocation.value?.category,
-    extraCategory,
-  ).name;
   const name = getIdByKfLocation(currentGlobalKfLocation.value);
 
   confirmModal(
     t('orderConfig.confirm_cancel_all'),
-    `${t('orderConfig.confirm')} ${categoryName} ${name} ${t(
+    `${t('orderConfig.confirm')} ${currentCategoryData.value?.name} ${name} ${t(
       'orderConfig.cancel_all',
     )}`,
   ).then(() => {

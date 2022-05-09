@@ -61,6 +61,7 @@ export const useTradingTask = (): {
   const { extConfigs } = useExtConfigsRelated();
   const { processStatusData } = useProcessStatusDetailData();
   const app = getCurrentInstance();
+  const tradingTaskCategory = 'strategy';
 
   const handleOpenSetTradingTaskModal = (
     type = 'add' as KungfuApi.ModalChangeType,
@@ -72,8 +73,9 @@ export const useTradingTask = (): {
       return;
     }
 
-    const extConfig: KungfuApi.KfExtConfig = (extConfigs.value['strategy'] ||
-      {})[selectedExtKey];
+    const extConfig: KungfuApi.KfExtConfig = (extConfigs.value[
+      tradingTaskCategory
+    ] || {})[selectedExtKey];
 
     if (!extConfig) {
       message.error(`${selectedExtKey} 交易任务插件不存在`);
@@ -108,11 +110,13 @@ export const useTradingTask = (): {
     extKey: string,
     payload: KungfuApi.SetKfConfigPayload,
   ) => {
-    globalBus.next({
-      tag: 'setTradingTask',
-      extKey,
-      payload,
-    });
+    if (app?.proxy) {
+      app?.proxy.$globalBus.next({
+        tag: 'setTradingTask',
+        extKey,
+        payload,
+      });
+    }
   };
 
   const handleConfirmAddUpdateTask = (
