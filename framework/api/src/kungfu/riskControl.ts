@@ -1,57 +1,48 @@
 import path from 'path';
 import fse from 'fs-extra';
 import { riskSettingStore } from '../kungfu';
-import { kfLogger, hidePasswordByLogger } from '../utils/busiUtils';
+import { kfLogger } from '../utils/busiUtils';
 import { BASE_DB_DIR } from '../config/pathConfig';
 import { getStrategyKfLocation } from './store';
 
-type AllConfig = Record<string, KungfuApi.KfConfigOrigin>;
-
-export const getAllKfRiskConfig = (): Promise<KungfuApi.KfConfigOrigin[]> => {
+export const getAllKfRiskConfig = (): Promise<KungfuApi.RiskSetting[]> => {
   if (fse.pathExistsSync(path.join(BASE_DB_DIR, 'config.db'))) {
-    console.log(riskSettingStore.getAllRiskSetting());
-    
-    return Promise.resolve(
-      Object.values(riskSettingStore.getAllRiskSetting() as AllConfig),
-    );
+    return Promise.resolve(Object.values(riskSettingStore.getAllRiskSetting()));
   } else {
     return Promise.resolve([]);
   }
 };
 
 export const setKfRiskConfig = (
-  kfLocation: KungfuApi.KfLocation,
-  configValue: string,
+  RiskSetting: KungfuApi.RiskSetting[],
 ): Promise<void> => {
-  const configForLog = hidePasswordByLogger(configValue);
-  kfLogger.info(
-    `Set Kungfu Config ${kfLocation.category} ${kfLocation.group} ${kfLocation.name} ${configForLog}`,
-  );
-  return Promise.resolve(
-    riskSettingStore.setRiskSetting(
-      kfLocation.category,
-      kfLocation.group,
-      kfLocation.name,
-      kfLocation.mode,
-      configValue,
-    ),
-  );
-};
-
-export const removeKfRiskConfig = (
-  kfLocation: KungfuApi.KfLocation,
-): Promise<void> => {
-  kfLogger.info(
-    `Remove Kungfu Config ${kfLocation.category} ${kfLocation.group} ${kfLocation.name}`,
-  );
-  return Promise.resolve(
-    riskSettingStore.removeRiskSetting(
-      kfLocation.category,
-      kfLocation.group,
-      kfLocation.name,
-      kfLocation.mode,
-    ),
-  );
+  const riskConfigResolved = RiskSetting.map((item) => {
+    const {
+      category,
+      group,
+      name,
+      mode,
+      max_order_volume,
+      max_daily_volume,
+      white_list,
+      self_filled_check,
+      max_cancel_ratio,
+    } = item;
+    return {
+      category,
+      group,
+      name,
+      mode,
+      max_order_volume,
+      max_daily_volume,
+      white_list,
+      self_filled_check,
+      max_cancel_ratio,
+    };
+  });
+  const value: string = JSON.stringify(riskConfigResolved);
+  riskSettingStore.setRiskSetting({ value: value });
+  return Promise.resolve();
 };
 
 export const getKfRiskConfig = (strategyId: string) => {
@@ -64,11 +55,11 @@ export const getKfRiskConfig = (strategyId: string) => {
   );
 };
 
-export const getRiskControl = () => {
-  kfLogger.info('Get kungfu Commission');
-  return new Promise((resolve, reject) => {
+export const getRiskControl = (): Promise<KungfuApi.RiskSetting[]> => {
+  kfLogger.info('Get kungfu RiskControl');
+  return new Promise(async (resolve, reject) => {
     try {
-      const riskConfigData = getAllKfRiskConfig();
+      const riskConfigData = await getAllKfRiskConfig();
       resolve(riskConfigData);
     } catch (err) {
       reject(err);

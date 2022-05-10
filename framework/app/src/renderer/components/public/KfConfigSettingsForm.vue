@@ -24,7 +24,7 @@ import {
   toRefs,
   watch,
   WatchStopHandle,
-  computed
+  computed,
 } from 'vue';
 import {
   PriceType,
@@ -426,8 +426,6 @@ function handleAddItemIntoTableRows(item: KungfuApi.KfConfigItem) {
   if (targetState instanceof Array) {
     targetState.push(tmp);
   }
-  console.log(targetState);
-  
 }
 
 function handleRemoveItemIntoTableRows(item, index) {
@@ -658,7 +656,7 @@ defineExpose({
         :disabled="changeType === 'update' && item.primary"
         mode="multiple"
         show-search
-        :value="formState[item.key]"
+        v-model:value="formState[item.key]"
         :filter-option="false"
         :options="
           instrumentsSearchRelated[item.key].searchInstrumnetOptions.value

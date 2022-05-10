@@ -112,40 +112,6 @@ export const getKfGlobalSettings = (): KfSystemConfig[] => [
         default: '',
         type: 'percent',
       },
-      {
-        key: 'riskControl',
-        name: '风控',
-        tip: '启用风险控制, 当持仓量超过阈值时自动平仓',
-        default: [],
-        type: 'table',
-        columns: [
-          {
-            key: 'account_id',
-            name: '账户',
-            type: 'td',
-          },
-          {
-            key: 'source_id',
-            name: '柜台',
-            type: 'td',
-          },
-          {
-            key: 'max_order_volume',
-            name: '单比最大量',
-            type: 'int',
-          },
-          {
-            key: 'max_daily_volume',
-            name: '每日最大成交量',
-            type: 'int',
-          },
-          {
-            key: 'white_list',
-            name: '标的白名单',
-            type: 'instruments',
-          },
-        ]
-      }
     ],
   },
   {
@@ -204,4 +170,56 @@ export const setKfGlobalSettingsValue = (
   value: Record<string, Record<string, KungfuApi.KfConfigValue>>,
 ) => {
   return fse.writeJSONSync(KF_CONFIG_PATH, value);
+};
+
+export const riskSettings: KfSystemConfig = {
+  key: 'riskControl',
+  name: '风控',
+  config: [
+    {
+      key: 'riskControl',
+      name: '风控',
+      tip: '启用风险控制, 当持仓量超过阈值时自动平仓',
+      default: [],
+      type: 'table',
+      columns: [
+        {
+          key: 'account_id',
+          name: '账户',
+          type: 'td',
+        },
+        {
+          key: 'source_id',
+          name: '柜台',
+          type: 'td',
+        },
+        {
+          key: 'max_order_volume',
+          name: '单比最大量',
+          type: 'int',
+        },
+        {
+          key: 'max_daily_volume',
+          name: '每日最大成交量',
+          type: 'int',
+        },
+        {
+          key: 'self_filled_check',
+          name: '是否需要自成功检测',
+          type: 'bool',
+          default: false,
+        },
+        {
+          key: 'max_cancel_ratio',
+          name: '最大回撤率',
+          type: 'int',
+        },
+        {
+          key: 'white_list',
+          name: '标的白名单',
+          type: 'instrument',
+        },
+      ],
+    },
+  ],
 };

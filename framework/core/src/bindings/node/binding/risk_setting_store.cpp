@@ -31,18 +31,11 @@ inline RiskSetting getConfigFromJs(const Napi::CallbackInfo &info, const locator
 
 Napi::Value RiskSettingStore::SetRiskSetting(const Napi::CallbackInfo &info) {
   RiskSetting risk_setting = getConfigFromJs(info, locator_);
+  int valueIndex = info[0].IsObject() ? 1 : 4;
   if (info[0].IsObject()) {
-    risk_setting.max_order_volume = info[0].ToObject().Get("max_order_volume").ToNumber().Int32Value();
-    risk_setting.max_daily_volume = info[0].ToObject().Get("max_daily_volume").ToNumber().Int32Value();
-    risk_setting.white_list = info[0].ToObject().Get("white_list").ToString().Utf8Value();
-    risk_setting.self_filled_check = info[0].ToObject().Get("self_filled_check").ToBoolean().Value();
-    risk_setting.max_cancel_ratio = info[0].ToObject().Get("max_cancel_ratio").ToNumber().DoubleValue();
+    risk_setting.value = info[0].ToObject().Get("value").ToString().Utf8Value();
   } else {
-    risk_setting.max_order_volume = info[4].ToNumber().Int32Value();
-    risk_setting.max_daily_volume = info[5].ToNumber().Int32Value();
-    risk_setting.white_list = info[6].ToString().Utf8Value();
-    risk_setting.self_filled_check = info[7].ToBoolean().Value();
-    risk_setting.max_cancel_ratio = info[8].ToNumber().DoubleValue();
+    risk_setting.value = info[valueIndex].ToString().Utf8Value();
   }
   profile_.set(risk_setting);
   return {};

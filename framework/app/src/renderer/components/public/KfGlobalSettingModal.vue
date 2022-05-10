@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import {
   getKfGlobalSettings,
+  riskSettings,
   getKfGlobalSettingsValue,
   KfSystemConfig,
   setKfGlobalSettingsValue,
@@ -16,6 +17,7 @@ import {
   onUnmounted,
   reactive,
   ref,
+  toRaw,
   toRefs,
 } from 'vue';
 import KfConfigSettingsForm from './KfConfigSettingsForm.vue';
@@ -50,7 +52,10 @@ import {
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/configs';
 import { ipcRenderer } from 'electron';
 import { useAllKfConfigData } from '../../assets/methods/actionsUtils';
-// import { getRiskControl } from '@kungfu-trader/kungfu-js-api/kungfu/riskControl';
+import {
+  getRiskControl,
+  setKfRiskConfig,
+} from '@kungfu-trader/kungfu-js-api/kungfu/riskControl';
 
 interface ScheduleTaskFormItem {
   timeValue: Dayjs;
@@ -73,9 +78,12 @@ defineEmits<{
 }>();
 
 const kfGlobalSettings = getKfGlobalSettings();
+const kfRiskSettings = ref(riskSettings);
+
 const kfGlobalSettingsValue = getKfGlobalSettingsValue();
 const { modalVisible, closeModal } = useModalVisible(props.visible);
 const commissions = ref<KungfuApi.Commission[]>([]);
+const riskSettingData = ref<KungfuApi.RiskSetting[]>([]);
 const { searchKeyword, tableData } =
   useTableSearchKeyword<KungfuApi.Commission>(commissions, ['product_id']);
 
@@ -101,9 +109,14 @@ onMounted(() => {
     commissions.value = res;
   });
 
-  // getRiskControl().then((res) => {
-  //   console.log(res);
-  // })
+  getRiskControl().then((res: KungfuApi.RiskSetting[]) => {
+    if (res.length && res[0]?.value) {
+      riskSettingData.value = JSON.parse(res[0]?.value);
+      riskSettingsFromStates.riskControl = initRiskSettingConfig(
+        riskSettingData.value,
+      );
+    }
+  });
 
   getScheduleTasks().then((res) => {
     scheduleTask.active = !!res.active;
@@ -138,6 +151,8 @@ onMounted(() => {
 
 onUnmounted(() => {
   setKfGlobalSettingsValue(globalSettingsFromStates);
+  setKfRiskConfig(dealRiskdata(riskSettingsFromStates.riskControl));
+
   setKfCommission(commissions.value);
   setScheduleTasks({
     active: scheduleTask.active || false,
@@ -158,6 +173,41 @@ onUnmounted(() => {
 const globalSettingsFromStates = reactive(
   initGlobalSettingsFromStates(kfGlobalSettings, kfGlobalSettingsValue),
 );
+
+const riskSettingsFromStates = reactive({
+  riskControl: initRiskSettingConfig(riskSettingData.value),
+});
+
+function dealRiskdata(
+  riskData: KungfuApi.RiskSetting[],
+): KungfuApi.RiskSetting[] {
+  return riskData.map((item) => {
+    return {
+      account_id: item.account_id || '',
+      max_cancel_ratio: item.max_cancel_ratio || 0,
+      max_daily_volume: item.max_daily_volume || 0,
+      max_order_volume: item.max_order_volume || 0,
+      self_filled_check: item.self_filled_check || false,
+      white_list: toRaw(item.white_list) || [],
+      category: item.category || 'td',
+      name: item.name || item.account_id || '',
+      group: item.group || item.source_id || '',
+      mode: item.mode || 'live',
+    };
+  });
+}
+
+function initRiskSettingConfig(riskData: KungfuApi.RiskSetting[]) {
+  const riskDataResolved = riskData.map((item) => {
+    return {
+      account_id: `${item.name}_${item.group}`,
+      source_id: item.group,
+      ...item,
+    };
+  });
+
+  return riskDataResolved;
+}
 
 function initGlobalSettingsFromStates(
   configs: KfSystemConfig[],
@@ -209,6 +259,33 @@ function handleRemoveScheduleTask(index: number) {
     scheduleTask.tasks.splice(index, 1);
   }
 }
+
+// function handleAddRiskSetting(riskData: KungfuApi.RiskSetting[]) {
+//   const tmp = {
+//     category: riskData[0]?.category || 'td',
+//     group: '',
+//     name: '',
+//     mode: riskData[0]?.mode || 'live',
+//     max_order_volume: 0,
+//     max_daily_volume: 0,
+//     white_list: [],
+//     self_filled_check: false,
+//     max_cancel_ratio: 0,
+//     value: riskData[0]?.value || '',
+//   };
+//   if (riskData instanceof Array) {
+//     riskData.push(tmp);
+//   }
+// }
+
+// function handleRemoveRiskSetting(
+//   riskData: KungfuApi.RiskSetting[],
+//   index: number,
+// ) {
+//   if (riskData instanceof Array) {
+//     riskData.splice(index, 1);
+//   }
+// }
 </script>
 <template>
   <a-modal
@@ -243,6 +320,108 @@ function handleRemoveScheduleTask(index: number) {
                 layout="vertical"
               ></KfConfigSettingsForm>
             </a-tab-pane>
+            <a-tab-pane key="riskControl" tab="风控">
+              <KfConfigSettingsForm
+                :formState="riskSettingsFromStates"
+                :configSettings="(kfRiskSettings.config as KungfuApi.KfConfigItem[])"
+                changeType="update"
+                :primaryKeyAvoidRepeatCompareTarget="[]"
+                primaryKeyAvoidRepeatCompareExtra=""
+                layout="vertical"
+              ></KfConfigSettingsForm>
+            </a-tab-pane>
+            <!-- <a-tab-pane key="riskControl" tab="风控设置">
+              <div class="risk-setting-row">
+                <a-button>
+                  <template #icon>
+                    <PlusOutlined
+                      @click.stop="handleAddRiskSetting(riskSettingData)"
+                    />
+                  </template>
+                </a-button>
+              </div>
+              <div
+                class="risk-setting-row"
+                v-for="(item, index) in riskSettingData"
+              >
+                <div class="risk-setting-item">
+                  <span class="label">账户:</span>
+                  <a-select
+                    style="min-width: 90px"
+                    placeholder="账户"
+                    v-model:value="item.name"
+                  >
+                    <a-select-option
+                      v-for="config in td"
+                      :key="getIdByKfLocation(config)"
+                      :value="getIdByKfLocation(config)"
+                    >
+                      {{ getIdByKfLocation(config) }}
+                    </a-select-option>
+                  </a-select>
+                </div>
+                <div class="risk-setting-item">
+                  <span class="label">柜台:</span>
+                  <a-select
+                    style="min-width: 90px"
+                    placeholder="账户"
+                    v-model:value="item.group"
+                  >
+                    <a-select-option
+                      v-for="config in td"
+                      :key="getIdByKfLocation(config).split('_')[0]"
+                      :value="getIdByKfLocation(config).split('_')[0]"
+                    >
+                      {{ getIdByKfLocation(config).split('_')[0] }}
+                    </a-select-option>
+                  </a-select>
+                </div>
+                <div class="risk-setting-item">
+                  <span class="label">单笔最大值:</span>
+                  <a-input-number
+                    v-model:value="item.max_order_volume"
+                  ></a-input-number>
+                </div>
+                <div class="risk-setting-item">
+                  <span class="label">每日最大成交量:</span>
+                  <a-input-number
+                    v-model:value="item.max_daily_volume"
+                  ></a-input-number>
+                </div>
+                <div class="risk-setting-item">
+                  <span class="label">最大回撤率:</span>
+                  <a-input-number
+                    v-model:value="item.max_cancel_ratio"
+                  ></a-input-number>
+                </div>
+                <div class="risk-setting-item">
+                  <span class="label">自成功检测:</span>
+                  <a-switch
+                    size="small"
+                    v-model:checked="item.self_filled_check"
+                  ></a-switch>
+                </div>
+                <div class="risk-setting-item white-list">
+                  <span class="label">标的白名单:</span>
+                  <a-select
+                    v-model:value="item.white_list"
+                    mode="multiple"
+                    label-in-value
+                    style="min-width: 50%"
+                    :filter-option="false"
+                  ></a-select>
+                </div>
+                <div class="risk-setting-item">
+                  <a-button size="small">
+                    <template #icon>
+                      <DeleteOutlined
+                        @click="handleRemoveRiskSetting(riskSettingData, index)"
+                      />
+                    </template>
+                  </a-button>
+                </div>
+              </div>
+            </a-tab-pane> -->
             <a-tab-pane
               key="comission"
               :tab="$t('globalSettingConfig.comission')"
@@ -502,6 +681,43 @@ function handleRemoveScheduleTask(index: number) {
 
               &.exchange-id {
                 width: 80px;
+              }
+            }
+          }
+        }
+
+        .risk-setting-row {
+          min-width: 50%;
+          justify-content: space-around;
+          margin-bottom: 16px;
+          flex-wrap: wrap;
+
+          .risk-setting-item {
+            margin-bottom: 16px;
+            padding-right: 16px;
+            box-sizing: border-box;
+            display: flex;
+            justify-content: left;
+            align-items: center;
+
+            .label {
+              padding-right: 8px;
+              width: 120px;
+            }
+
+            .value {
+              &.product-id {
+                width: 80px;
+              }
+
+              &.exchange-id {
+                width: 80px;
+              }
+            }
+            &.white-list {
+              width: 100%;
+              .label {
+                white-space: nowrap;
               }
             }
           }

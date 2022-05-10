@@ -261,20 +261,20 @@ declare namespace KungfuApi {
   }
 
   export interface RiskSettingStore {
-    getAllRiskSetting(): Record<string, KfConfigOrigin>;
-    setRiskSetting(
-      category: string,
-      group: string,
-      name: string,
-      mode: string,
-      configValue: string,
-    ): void;
-    removeRiskSetting(
-      category: string,
-      group: string,
-      name: string,
-      mode: string,
-    ): void;
+    getAllRiskSetting(): Record<string, getAllRiskSetting>;
+    setRiskSetting({ value: string }): void;
+    // removeRiskSetting(
+    //   category: string,
+    //   group: string,
+    //   name: string,
+    //   mode: string,
+    //   location_uid: number,
+    //   max_order_volume: number,
+    //   max_daily_volume: number,
+    //   white_list: string[],
+    //   self_filled_check: number,
+    //   max_cancle_ratio: number,
+    // ): void;
     getRiskSetting(
       category: string,
       group: string,
@@ -711,12 +711,14 @@ declare namespace KungfuApi {
   }
 
   export interface RiskSetting extends KfLocation {
-    location_uid: number,
-    max_order_volume: number,
-    max_daily_volume: number,
-    white_list: string[],
-    self_filled_check: number,
-    max_cancle_ratio: number,
+    max_order_volume: number;
+    max_daily_volume: number;
+    white_list: string[];
+    self_filled_check: boolean;
+    max_cancel_ratio: number;
+    value?: string;
+    account_id?: string;
+    source_id?: string;
   }
 
   export interface Watcher {
