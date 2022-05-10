@@ -3,7 +3,6 @@ from kungfu.wingchun.constants import *
 import math 
 import time
 from datetime import datetime
-import argparse
 
 yjj = kungfu.__binding__.yijinjing
 class orderTask:

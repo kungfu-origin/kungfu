@@ -211,6 +211,7 @@ function handleOpenAddTdGroupDialog(type: KungfuApi.ModalChangeType) {
     name: t('tdConfig.td_group'),
     category: 'tdGroup',
     key: 'TdGroup',
+    extPath: '',
     settings: [
       {
         key: 'td_group_name',
