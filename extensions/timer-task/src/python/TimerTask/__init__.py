@@ -3,6 +3,7 @@ from kungfu.wingchun.constants import *
 import math 
 import time
 from datetime import datetime
+import argparse
 
 yjj = kungfu.__binding__.yijinjing
 class orderTask:
@@ -13,10 +14,7 @@ class orderTask:
         self.offset = offset
 
 def pre_start(context):
-
-    writer = get_Writer(0)
-    writer.write(quote, now())
-
+    
     context.hold_book()
     context.hold_positions()
     args = {}
