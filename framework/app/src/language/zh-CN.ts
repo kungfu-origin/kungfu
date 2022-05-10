@@ -71,7 +71,7 @@ export default {
   MarketData: '行情订阅',
   TradingTask: '交易任务',
   Strategy: '策略进程',
-  Md: '行情源 ',
+  Md: '行情源',
   Td: '交易账户',
   Trade: '成交记录',
   Order: '委托记录',

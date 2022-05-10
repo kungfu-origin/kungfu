@@ -5,7 +5,7 @@ import {
 } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import { dealOrderInputItem } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { h, VNode } from 'vue';
-import { orderInputTrans } from './config';
+import { makeOrderConfigKFTypes, orderInputTrans } from './config';
 import VueI18n from '@kungfu-trader/kungfu-app/src/language';
 const { t } = VueI18n.global;
 
@@ -72,3 +72,28 @@ export function dealOrderPlaceVNode(
 
   return rootVNode;
 }
+
+export const transformOrderInputToExtConfigForm = (
+  orderInputFormState: Record<string, KungfuApi.KfConfigValue>,
+  orderInputConfigSettings: KungfuApi.KfConfigItem[],
+  extConfigSettings: KungfuApi.KfConfigItem[],
+): Record<string, KungfuApi.KfConfigValue> => {
+  const existedTypes = orderInputConfigSettings.map((item) => item.type);
+  const existedKeys = orderInputConfigSettings.map((item) => item.key);
+  return extConfigSettings.reduce((pre, configItem) => {
+    const key = configItem.key;
+    const type = configItem.type;
+
+    if (type === 'td') {
+      return pre;
+    }
+
+    const targetIndex = existedTypes.indexOf(type);
+    if (targetIndex !== -1 && makeOrderConfigKFTypes.includes(type)) {
+      const value = orderInputFormState[existedKeys[targetIndex]];
+      pre[key] = value;
+    }
+
+    return pre;
+  }, {} as Record<string, KungfuApi.KfConfigValue>);
+};

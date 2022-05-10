@@ -88,6 +88,15 @@ export const getConfigSettings = (
   return defaultSettings;
 };
 
+export const makeOrderConfigKFTypes = [
+  'td',
+  'instrument',
+  'side',
+  'offset',
+  'hedgeFlag',
+  'pricetype',
+];
+
 export const orderInputTrans: Record<string, string> = {
   account_id: t('tradingConfig.account'),
   instrument_id: `${t('tradingConfig.instrument')}ID`,

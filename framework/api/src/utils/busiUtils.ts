@@ -68,13 +68,6 @@ interface SourceAccountId {
   id: string;
 }
 
-export interface ExtensionData {
-  name: string;
-  key: string;
-  extPath: string;
-  type: InstrumentTypes[] | StrategyExtTypes[];
-}
-
 declare global {
   interface String {
     toAccountId(): string;
@@ -643,6 +636,13 @@ export const buildExtTypeMap = (
   return extTypeMap;
 };
 
+export const getExtConfigList = (
+  extConfigs: KungfuApi.KfExtConfigs,
+  category: KfCategoryTypes,
+): KungfuApi.KfExtConfig[] => {
+  return Object.values(extConfigs[category] || {});
+};
+
 export const statTime = (name: string) => {
   if (process.env.NODE_ENV !== 'production') {
     console.time(name);
@@ -653,24 +653,6 @@ export const statTimeEnd = (name: string) => {
   if (process.env.NODE_ENV !== 'production') {
     console.timeEnd(name);
   }
-};
-
-export const getExtConfigList = (
-  extConfigs: KungfuApi.KfExtConfigs,
-  category: KfCategoryTypes,
-): ExtensionData[] => {
-  const target = extConfigs[category];
-  return Object.keys(target || {})
-    .map((extKey: string) => {
-      const extType = (target || {})[extKey]?.type || 'unknown';
-      return {
-        key: extKey,
-        name: (target || {})[extKey]?.name || extKey,
-        extPath: (target || {})[extKey]?.extPath || '',
-        type: resolveTypesInExtConfig(category, extType),
-      };
-    })
-    .filter((extData: ExtensionData | null) => !!extData) as ExtensionData[];
 };
 
 export const hidePasswordByLogger = (config: string) => {
