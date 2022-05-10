@@ -174,8 +174,8 @@ declare namespace KungfuApi {
     name: string;
     category: string;
     key: string;
-    extPath?: string;
-    type?: InstrumentTypes[] | StrategyExtTypes[];
+    extPath: string;
+    type: InstrumentTypes[] | StrategyExtTypes[];
     settings: KfConfigItem[];
   }
 

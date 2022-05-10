@@ -128,6 +128,10 @@ class ExtensionExecutor:
         self.run_broker_vendor(wc.TraderVendor)
 
     def run_strategy(self):
+        loader = self.loader
+        site.setup(loader.extension_dir)
+        sys.path.insert(0, loader.extension_dir)
+        
         ctx = self.ctx
         ctx.location = yjj.location(
             kfj.MODES[ctx.mode],

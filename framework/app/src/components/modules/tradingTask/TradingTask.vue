@@ -20,11 +20,9 @@ import {
 import { columns, categoryRegisterConfig } from './config';
 import path from 'path';
 import {
-  dealKfConfigValueByType,
   getIfProcessRunning,
   getIfProcessStopping,
   getTaskKfLocationByProcessId,
-  getDataByProcessArgs,
   fromProcessArgsToKfConfigItems,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import {
@@ -37,9 +35,10 @@ import {
   useExtConfigsRelated,
   useProcessStatusDetailData,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
+import { ensureRemoveTradingTask } from '@kungfu-trader/kungfu-js-api/actions/tradingTask';
 import { messagePrompt } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import VueI18n from '@kungfu-trader/kungfu-app/src/language';
-import { useTradingTask, ensureRemoveTradingTask } from './utils';
+import { useTradingTask } from './utils';
 
 const { t } = VueI18n.global;
 const { success, error } = messagePrompt();
@@ -164,30 +163,19 @@ function handleRemoveTask(record: Pm2ProcessStatusDetail) {
       'tradingTaskConfig.delete_task_content',
     )}`,
   ).then(() => {
-    return ensureRemoveTradingTask(taskLocation, processStatusData.value);
+    return ensureRemoveTradingTask(
+      window.watcher,
+      taskLocation,
+      processStatusData.value,
+    );
   });
 }
 
 function dealArgs(record: Pm2ProcessStatusDetail): string {
-  const taskKfLocation = getTaskKfLocationByProcessId(record?.name || '');
   const taskArgs = minimist(record.args as string[])['a'] || '';
-  if (!taskKfLocation) {
-    return taskArgs.split(';').join(' ');
-  }
-
-  const extConfig: KungfuApi.KfExtConfig = (extConfigs.value['strategy'] || {})[
-    taskKfLocation.group
-  ];
-  if (!extConfig || !extConfig.settings) {
-    return taskArgs.split(';').join(' ');
-  }
-
-  const data = getDataByProcessArgs(taskArgs);
-  return extConfig.settings
-    .filter((item) => item.primary && data[item.key] !== undefined)
-    .map((item) => {
-      return dealKfConfigValueByType(item.type, data[item.key]);
-    })
+  return taskArgs
+    .split(';')
+    .filter((item) => !item.includes('password'))
     .join(' ');
 }
 

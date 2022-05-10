@@ -183,6 +183,7 @@ export const useAddUpdateRemoveKfConfig = (): {
   handleConfirmAddUpdateKfConfig: (
     data: {
       formState: Record<string, KungfuApi.KfConfigValue>;
+      configSettings: KungfuApi.KfConfigItem[];
       idByPrimaryKeys: string;
       changeType: KungfuApi.ModalChangeType;
     },
@@ -201,6 +202,7 @@ export const useAddUpdateRemoveKfConfig = (): {
   const handleConfirmAddUpdateKfConfig = (
     data: {
       formState: Record<string, KungfuApi.KfConfigValue>;
+      configSettings: KungfuApi.KfConfigItem[];
       idByPrimaryKeys: string;
       changeType: KungfuApi.ModalChangeType;
     },
