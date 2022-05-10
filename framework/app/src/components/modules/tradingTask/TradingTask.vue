@@ -20,11 +20,9 @@ import {
 import { columns, categoryRegisterConfig } from './config';
 import path from 'path';
 import {
-  dealKfConfigValueByType,
   getIfProcessRunning,
   getIfProcessStopping,
   getTaskKfLocationByProcessId,
-  getDataByProcessArgs,
   fromProcessArgsToKfConfigItems,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import {
@@ -169,25 +167,10 @@ function handleRemoveTask(record: Pm2ProcessStatusDetail) {
 }
 
 function dealArgs(record: Pm2ProcessStatusDetail): string {
-  const taskKfLocation = getTaskKfLocationByProcessId(record?.name || '');
   const taskArgs = minimist(record.args as string[])['a'] || '';
-  if (!taskKfLocation) {
-    return taskArgs.split(';').join(' ');
-  }
-
-  const extConfig: KungfuApi.KfExtConfig = (extConfigs.value['strategy'] || {})[
-    taskKfLocation.group
-  ];
-  if (!extConfig || !extConfig.settings) {
-    return taskArgs.split(';').join(' ');
-  }
-
-  const data = getDataByProcessArgs(taskArgs);
-  return extConfig.settings
-    .filter((item) => item.primary && data[item.key] !== undefined)
-    .map((item) => {
-      return dealKfConfigValueByType(item.type, data[item.key]);
-    })
+  return taskArgs
+    .split(';')
+    .filter((item) => !item.includes('password'))
     .join(' ');
 }
 

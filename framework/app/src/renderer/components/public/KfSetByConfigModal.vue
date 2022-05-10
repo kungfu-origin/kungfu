@@ -46,6 +46,7 @@ defineEmits<{
     e: 'confirm',
     data: {
       formState: Record<string, KungfuApi.KfConfigValue>;
+      configSettings: KungfuApi.KfConfigItem[];
       idByPrimaryKeys: string;
       changeType: KungfuApi.ModalChangeType;
     },
@@ -126,6 +127,7 @@ function handleConfirm(): void {
       app &&
         app.emit('confirm', {
           formState: formState.value,
+          configSettings: configSettings.value,
           idByPrimaryKeys,
           changeType: props.payload.type,
         });

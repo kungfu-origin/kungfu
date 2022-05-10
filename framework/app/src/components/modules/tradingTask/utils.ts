@@ -46,6 +46,7 @@ export const useTradingTask = (): {
     data: {
       formState: Record<string, KungfuApi.KfConfigValue>;
       idByPrimaryKeys: string;
+      configSettings: KungfuApi.KfConfigItem[];
       changeType: KungfuApi.ModalChangeType;
     },
     extKey: string,
@@ -120,6 +121,7 @@ export const useTradingTask = (): {
   const handleConfirmAddUpdateTask = (
     data: {
       formState: Record<string, KungfuApi.KfConfigValue>;
+      configSettings: KungfuApi.KfConfigItem[];
       idByPrimaryKeys: string;
       changeType: KungfuApi.ModalChangeType;
     },
@@ -147,7 +149,7 @@ export const useTradingTask = (): {
     }
 
     const args: string = kfConfigItemsToProcessArgs(
-      extConfig.settings,
+      data.configSettings || extConfig.settings || [],
       formState,
     );
     const soPath = path.join(extConfig.extPath, extKey);
