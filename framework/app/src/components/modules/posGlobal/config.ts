@@ -1,9 +1,11 @@
 import { LedgerCategoryEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import { KfCategoryRegisterProps } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiExtraLocationUtils';
+import VueI18n from '@kungfu-trader/kungfu-app/src/language';
+const { t } = VueI18n.global;
 
 export const columns: AntTableColumns = [
   {
-    title: '代码',
+    title: t('posGlobalConfig.instrument_id'),
     dataIndex: 'instrument_id',
     align: 'left',
     width: 120,
@@ -19,37 +21,37 @@ export const columns: AntTableColumns = [
     minWidth: 40,
   },
   {
-    title: '昨',
+    title: t('posGlobalConfig.yesterday_volume'),
     dataIndex: 'yesterday_volume',
     align: 'right',
     width: 80,
   },
   {
-    title: '今',
+    title: t('posGlobalConfig.today_volume'),
     dataIndex: 'today_volume',
     align: 'right',
     width: 80,
   },
   {
-    title: '总',
+    title: t('posGlobalConfig.sum_volume'),
     dataIndex: 'volume',
     align: 'right',
     width: 80,
   },
   {
-    title: '开仓均价',
+    title: t('posGlobalConfig.avg_open_price'),
     dataIndex: 'avg_open_price',
     align: 'right',
     width: 110,
   },
   {
-    title: '最新价',
+    title: t('posGlobalConfig.last_price'),
     dataIndex: 'last_price',
     align: 'right',
     width: 110,
   },
   {
-    title: '浮动盈亏',
+    title: t('posGlobalConfig.unrealized_pnl'),
     dataIndex: 'unrealized_pnl',
     align: 'right',
     width: 110,
@@ -60,7 +62,7 @@ export const columns: AntTableColumns = [
 export const categoryRegisterConfig: KfCategoryRegisterProps = {
   name: 'globalPos',
   commonData: {
-    name: '持仓汇总',
+    name: t('PosGlobal'),
     color: 'pink',
   },
   order: {

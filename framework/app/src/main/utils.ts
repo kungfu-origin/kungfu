@@ -37,6 +37,10 @@ import {
 import schedule from 'node-schedule';
 
 import packageJSON from '@kungfu-trader/kungfu-app/package.json';
+
+import VueI18n from '@kungfu-trader/kungfu-app/src/language';
+const { t } = VueI18n.global;
+
 declare const global: NodeJS.Global;
 
 let BeforeQuitLoading = false;
@@ -67,7 +71,7 @@ export function showKungfuInfo(): void {
     message: 'Kungfu',
     defaultId: 0,
     detail: info,
-    buttons: ['好的'],
+    buttons: [t('ok')],
     icon: nativeImage.createFromPath(
       path.join(global.__resources, 'logo', 'logo.png'),
     ),
@@ -116,11 +120,11 @@ export function showQuitMessageBox(
     dialog
       .showMessageBox({
         type: 'question',
-        title: '提示',
+        title: t('prompt'),
         defaultId: 0,
         cancelId: 1,
-        message: '退出应用会结束所有交易进程, 确认退出吗?',
-        buttons: ['确认', '取消'],
+        message: t('quit_confirm'),
+        buttons: [t('confirm'), t('cancel')],
         icon: nativeImage.createFromPath(
           path.join(global.__resources, 'logo', 'logo.png'),
         ),
@@ -149,11 +153,11 @@ export function showCrashMessageBox(): Promise<boolean> {
   return dialog
     .showMessageBox({
       type: 'question',
-      title: '提示',
+      title: t('prompt'),
       defaultId: 0,
       cancelId: 1,
-      message: '功夫图形进程中断, 该中断不会影响交易, 是否重启图形进程？',
-      buttons: ['确认', '取消'],
+      message: t('restart_process'),
+      buttons: [t('confirm'), t('cancel')],
       icon: nativeImage.createFromPath(
         path.join(global.__resources, 'logo', 'logo.png'),
       ),

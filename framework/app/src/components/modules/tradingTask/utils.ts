@@ -40,12 +40,13 @@ export const useTradingTask = (): {
   handleOpenSetTradingTaskModal: (
     type: KungfuApi.ModalChangeType,
     selectedExtKey: string,
-    taskConfig?: Record<string, KungfuApi.KfConfigValue>,
+    taskInitValue?: Record<string, KungfuApi.KfConfigValue>,
   ) => void;
   handleConfirmAddUpdateTask: (
     data: {
       formState: Record<string, KungfuApi.KfConfigValue>;
       idByPrimaryKeys: string;
+      configSettings: KungfuApi.KfConfigItem[];
       changeType: KungfuApi.ModalChangeType;
     },
     extKey: string,
@@ -61,19 +62,21 @@ export const useTradingTask = (): {
   const { extConfigs } = useExtConfigsRelated();
   const { processStatusData } = useProcessStatusDetailData();
   const app = getCurrentInstance();
+  const tradingTaskCategory = 'strategy';
 
   const handleOpenSetTradingTaskModal = (
     type = 'add' as KungfuApi.ModalChangeType,
     selectedExtKey: string,
-    taskConfig?: Record<string, KungfuApi.KfConfigValue>,
+    taskInitValue?: Record<string, KungfuApi.KfConfigValue>,
   ) => {
     if (selectedExtKey === '') {
       message.error(`交易任务插件 key 不存在`);
       return;
     }
 
-    const extConfig: KungfuApi.KfExtConfig = (extConfigs.value['strategy'] ||
-      {})[selectedExtKey];
+    const extConfig: KungfuApi.KfExtConfig = (extConfigs.value[
+      tradingTaskCategory
+    ] || {})[selectedExtKey];
 
     if (!extConfig) {
       message.error(`${selectedExtKey} 交易任务插件不存在`);
@@ -86,10 +89,8 @@ export const useTradingTask = (): {
     setTradingTaskConfigPayload.value.config = extConfig;
     setTradingTaskConfigPayload.value.initValue = undefined;
 
-    if (type === 'update') {
-      if (taskConfig) {
-        setTradingTaskConfigPayload.value.initValue = taskConfig;
-      }
+    if (taskInitValue) {
+      setTradingTaskConfigPayload.value.initValue = taskInitValue;
     }
 
     if (!extConfig?.settings?.length) {
@@ -108,16 +109,19 @@ export const useTradingTask = (): {
     extKey: string,
     payload: KungfuApi.SetKfConfigPayload,
   ) => {
-    globalBus.next({
-      tag: 'setTradingTask',
-      extKey,
-      payload,
-    });
+    if (app?.proxy) {
+      app?.proxy.$globalBus.next({
+        tag: 'setTradingTask',
+        extKey,
+        payload,
+      });
+    }
   };
 
   const handleConfirmAddUpdateTask = (
     data: {
       formState: Record<string, KungfuApi.KfConfigValue>;
+      configSettings: KungfuApi.KfConfigItem[];
       idByPrimaryKeys: string;
       changeType: KungfuApi.ModalChangeType;
     },
@@ -145,7 +149,7 @@ export const useTradingTask = (): {
     }
 
     const args: string = kfConfigItemsToProcessArgs(
-      extConfig.settings,
+      data.configSettings || extConfig.settings || [],
       formState,
     );
     const soPath = path.join(extConfig.extPath, extKey);

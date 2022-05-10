@@ -17,7 +17,6 @@ import {
   useQuote,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
 import { StarFilled, PlusOutlined } from '@ant-design/icons-vue';
-import { message } from 'ant-design-vue';
 import {
   dealAssetPrice,
   dealKfNumber,
@@ -32,7 +31,11 @@ import {
   removeSubscribeInstruments,
 } from '@kungfu-trader/kungfu-js-api/actions';
 import { useGlobalStore } from '@kungfu-trader/kungfu-app/src/renderer/pages/index/store/global';
+import { messagePrompt } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
+import VueI18n from '@kungfu-trader/kungfu-app/src/language';
 
+const { t } = VueI18n.global;
+const { success, error } = messagePrompt();
 const { dashboardBodyHeight, dashboardBodyWidth, handleBodySizeChange } =
   useDashboardBodySize();
 
@@ -65,7 +68,7 @@ function handleSubscribeAll(): void {
     mdExtTypeMap.value,
     subscribedInstruments.value,
   );
-  message.success('操作成功');
+  success();
 }
 
 function handleConfirmAddInstrumentCallback(val: string): Promise<void> {
@@ -73,7 +76,7 @@ function handleConfirmAddInstrumentCallback(val: string): Promise<void> {
 
   if (!instrumentResolved) {
     return Promise.reject(new Error('标的错误')).catch((err) => {
-      message.error(err.message);
+      error(err.message);
     });
   }
 
@@ -90,7 +93,7 @@ function handleConfirmAddInstrumentCallback(val: string): Promise<void> {
       ),
     )
     .then(() => {
-      message.success('操作成功');
+      success();
     });
 }
 
@@ -102,10 +105,10 @@ function handleConfirmRemoveInstrument(
       return setSubscribedInstruments();
     })
     .then(() => {
-      message.success('操作成功');
+      success();
     })
     .catch((err) => {
-      message.error(err.message || '操作失败');
+      error(err.message || t('operation_failed'));
     });
 }
 
@@ -131,7 +134,7 @@ function handleClickRow(row: KungfuApi.InstrumentResolved) {
           <a-select
             show-search
             v-model:value="searchInstrumentResult"
-            placeholder="添加自选"
+            :placeholder="$t('marketDataConfig.add_market')"
             style="min-width: 140px"
             :filter-option="false"
             :options="searchInstrumnetOptions"
@@ -149,7 +152,9 @@ function handleClickRow(row: KungfuApi.InstrumentResolved) {
           </a-select>
         </KfDashboardItem>
         <KfDashboardItem>
-          <a-button size="small" @click="handleSubscribeAll">订阅</a-button>
+          <a-button size="small" @click="handleSubscribeAll">
+            {{ $t('marketDataConfig.subscribe_btn') }}
+          </a-button>
         </KfDashboardItem>
       </template>
       <a-table
@@ -160,7 +165,7 @@ function handleClickRow(row: KungfuApi.InstrumentResolved) {
         :pagination="false"
         :scroll="{ y: dashboardBodyHeight - 4 }"
         :customRow="handleClickRow"
-        emptyText="暂无数据"
+        :emptyText="$t('empty_text')"
       >
         <template
           #bodyCell="{

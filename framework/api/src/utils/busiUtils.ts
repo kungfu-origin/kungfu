@@ -68,13 +68,6 @@ interface SourceAccountId {
   id: string;
 }
 
-export interface ExtensionData {
-  name: string;
-  key: string;
-  extPath: string;
-  type: InstrumentTypes[] | StrategyExtTypes[];
-}
-
 declare global {
   interface String {
     toAccountId(): string;
@@ -497,6 +490,8 @@ const getKfExtensionConfigByCategory = (
             [extKey]: {
               name: extName,
               extPath,
+              category,
+              key: extKey,
               type: resolveTypesInExtConfig(
                 category,
                 configOfCategory?.type || [],
@@ -523,10 +518,7 @@ const getKfUIExtensionConfigByExtKey = (
       const position = uiConfig?.position || '';
       const components = uiConfig?.components;
       const daemon = uiConfig?.daemon || ({} as Record<string, string>);
-
-      if (!position) {
-        return configByExtraKey;
-      }
+      const script = uiConfig?.script || '';
 
       configByExtraKey[extKey] = {
         name: extName,
@@ -536,6 +528,7 @@ const getKfUIExtensionConfigByExtKey = (
           index: 'index.js',
         },
         daemon,
+        script,
       };
       return configByExtraKey;
     }, {} as KungfuApi.KfUIExtConfigs);
@@ -574,6 +567,13 @@ export const getAvailDaemonList = async (): Promise<
       ];
       return daemonList;
     }, [] as KungfuApi.KfDaemonLocation[]);
+};
+
+export const getAvailScripts = async (): Promise<string[]> => {
+  const kfExtConfig: KungfuApi.KfUIExtConfigs = await getKfUIExtensionConfig();
+  return Object.values(kfExtConfig || ({} as KungfuApi.KfUIExtConfigs))
+    .filter((item) => Object.keys(item).length && item.script)
+    .map((item) => path.resolve(item.extPath, item.script));
 };
 
 export const isTdMd = (category: KfCategoryTypes) => {
@@ -636,6 +636,13 @@ export const buildExtTypeMap = (
   return extTypeMap;
 };
 
+export const getExtConfigList = (
+  extConfigs: KungfuApi.KfExtConfigs,
+  category: KfCategoryTypes,
+): KungfuApi.KfExtConfig[] => {
+  return Object.values(extConfigs[category] || {});
+};
+
 export const statTime = (name: string) => {
   if (process.env.NODE_ENV !== 'production') {
     console.time(name);
@@ -646,24 +653,6 @@ export const statTimeEnd = (name: string) => {
   if (process.env.NODE_ENV !== 'production') {
     console.timeEnd(name);
   }
-};
-
-export const getExtConfigList = (
-  extConfigs: KungfuApi.KfExtConfigs,
-  category: KfCategoryTypes,
-): ExtensionData[] => {
-  const target = extConfigs[category];
-  return Object.keys(target || {})
-    .map((extKey: string) => {
-      const extType = (target || {})[extKey]?.type || 'unknown';
-      return {
-        key: extKey,
-        name: (target || {})[extKey]?.name || extKey,
-        extPath: (target || {})[extKey]?.extPath || '',
-        type: resolveTypesInExtConfig(category, extType),
-      };
-    })
-    .filter((extData: ExtensionData | null) => !!extData) as ExtensionData[];
 };
 
 export const hidePasswordByLogger = (config: string) => {
@@ -1356,6 +1345,12 @@ export const getPrimaryKeyFromKfConfigItem = (
   });
 };
 
+export const getPrimaryKeys = (
+  settings: KungfuApi.KfConfigItem[],
+): string[] => {
+  return settings.filter((item) => item.primary).map((item) => item.key);
+};
+
 export const getCombineValueByPrimaryKeys = (
   primaryKeys: string[],
   formState: Record<string, KungfuApi.KfConfigValue>,
@@ -1480,14 +1475,9 @@ export const initFormStateByConfig = (
     const isArray = KfConfigValueArrayType.includes(type);
 
     let defaultValue;
-    if (typeof item?.default === 'object') {
-      defaultValue = JSON.parse(JSON.stringify(item?.default));
-    } else {
-      defaultValue = item?.default;
-    }
 
-    if (defaultValue === undefined) {
-      defaultValue = isBoolean
+    const getDefaultValueByType = () => {
+      return isBoolean
         ? false
         : isNumber
         ? 0
@@ -1496,8 +1486,22 @@ export const initFormStateByConfig = (
         : isArray
         ? []
         : '';
+    };
+
+    if (typeof item?.default === 'object') {
+      defaultValue = JSON.parse(JSON.stringify(item?.default));
+    } else {
+      defaultValue = item?.default;
     }
-    if ((initValue || {})[item.key] !== undefined) {
+
+    if (defaultValue === undefined) {
+      defaultValue = getDefaultValueByType();
+    }
+
+    if (
+      (initValue || {})[item.key] !== undefined &&
+      (initValue || {})[item.key] !== getDefaultValueByType()
+    ) {
       defaultValue = (initValue || {})[item.key];
     }
 

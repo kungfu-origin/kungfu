@@ -155,6 +155,7 @@ declare namespace KungfuApi {
             page: string;
           };
       daemon?: Record<string, string>;
+      script?: string;
     };
     config?: Record<
       string,
@@ -171,6 +172,8 @@ declare namespace KungfuApi {
 
   interface KfExtConfig {
     name: string;
+    category: string;
+    key: string;
     extPath?: string;
     type?: InstrumentTypes[] | StrategyExtTypes[];
     settings: KfConfigItem[];
@@ -193,6 +196,7 @@ declare namespace KungfuApi {
             page: string;
           };
       daemon: Record<string, string>;
+      script: string;
     }
   >;
 

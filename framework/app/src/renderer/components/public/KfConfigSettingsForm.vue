@@ -23,6 +23,8 @@ import {
   ref,
   toRefs,
   watch,
+  WatchStopHandle,
+  computed,
 } from 'vue';
 import {
   PriceType,
@@ -39,6 +41,7 @@ import {
   KfConfigValueBooleanType,
   getCombineValueByPrimaryKeys,
   initFormStateByConfig,
+  getPrimaryKeys,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { RuleObject } from 'ant-design-vue/lib/form';
 import {
@@ -46,6 +49,8 @@ import {
   useInstruments,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
 import dayjs, { Dayjs } from 'dayjs';
+import VueI18n from '@kungfu-trader/kungfu-app/src/language';
+const { t } = VueI18n.global;
 
 const props = withDefaults(
   defineProps<{
@@ -94,20 +99,28 @@ defineEmits<{
 
 const app = getCurrentInstance();
 const formRef = ref();
-const formState = reactive(props.formState);
 
-const primaryKeys: string[] = (props.configSettings || [])
-  .filter((item) => item.primary)
-  .map((item) => item.key);
+const formState = reactive(props.formState);
+watch(
+  () => props.formState,
+  (newVal) => {
+    Object.keys(newVal).forEach((key) => (formState[key] = newVal[key]));
+  },
+);
 
 const { td, md, strategy } = toRefs(useAllKfConfigData());
 
-const instrumentKeys = props.configSettings
-  .filter((item) => item.type === 'instrument' || item.type === 'instruments')
-  .reduce((data, setting) => {
-    data[setting.key.toString()] = setting.type as 'instrument' | 'instruments';
-    return data;
-  }, {} as Record<string, 'instrument' | 'instruments'>);
+const primaryKeys = ref<string[]>(getPrimaryKeys(props.configSettings || []));
+const instrumentKeys = ref<Record<string, 'instrument' | 'instruments'>>(
+  filterInstrumentKeysFromConfigSettings(props.configSettings),
+);
+watch(
+  () => props.configSettings,
+  (newVal) => {
+    primaryKeys.value = getPrimaryKeys(newVal);
+    instrumentKeys.value = filterInstrumentKeysFromConfigSettings(newVal);
+  },
+);
 
 type InstrumentsSearchRelated = Record<
   string,
@@ -117,39 +130,62 @@ type InstrumentsSearchRelated = Record<
   }
 >;
 
-const instrumentsSearchRelated = Object.keys(instrumentKeys).reduce(
-  (item1: InstrumentsSearchRelated, key: string) => {
-    const { searchInstrumnetOptions, handleSearchInstrument } =
-      useInstruments();
-    searchInstrumnetOptions.value = makeSearchOptionFormInstruments(
-      key,
-      instrumentKeys[key],
-      formState[key],
-    );
-    item1[key] = {
-      searchInstrumnetOptions: searchInstrumnetOptions,
-      handleSearchInstrument,
-    };
-    return item1;
-  },
-  {} as InstrumentsSearchRelated,
+const instrumentsSearchRelated = computed(() =>
+  Object.keys(instrumentKeys.value).reduce(
+    (item1: InstrumentsSearchRelated, key: string) => {
+      const { searchInstrumnetOptions, handleSearchInstrument } =
+        useInstruments();
+      searchInstrumnetOptions.value = makeSearchOptionFormInstruments(
+        key,
+        instrumentKeys.value[key],
+        formState[key],
+      );
+      item1[key] = {
+        searchInstrumnetOptions: searchInstrumnetOptions,
+        handleSearchInstrument,
+      };
+      return item1;
+    },
+    {} as InstrumentsSearchRelated,
+  ),
 );
 
-Object.keys(instrumentKeys).forEach((key) => {
-  watch(
-    () => formState[key],
-    (newVal) => {
-      nextTick().then(() => {
-        instrumentsSearchRelated[key].searchInstrumnetOptions.value =
-          makeSearchOptionFormInstruments(key, instrumentKeys[key], newVal);
-      });
-    },
-  );
-});
+const tmpInstrumentKeysUnwatchers: WatchStopHandle[] = [];
+pushNewInstrumentKeysUnWatchers(instrumentKeys.value);
+
+watch(
+  () => instrumentKeys.value,
+  (newVal) => {
+    pushNewInstrumentKeysUnWatchers(newVal);
+  },
+);
 
 watch(formState, (newVal) => {
   app && app.emit('update:formState', newVal);
 });
+
+function pushNewInstrumentKeysUnWatchers(
+  instrumentKeys: Record<string, 'instrument' | 'instruments'>,
+) {
+  while (tmpInstrumentKeysUnwatchers.length) {
+    const unwatch = tmpInstrumentKeysUnwatchers.pop();
+    unwatch && unwatch();
+  }
+
+  Object.keys(instrumentKeys).forEach((key) => {
+    tmpInstrumentKeysUnwatchers.push(
+      watch(
+        () => formState[key],
+        (newVal) => {
+          nextTick().then(() => {
+            instrumentsSearchRelated.value[key].searchInstrumnetOptions.value =
+              makeSearchOptionFormInstruments(key, instrumentKeys[key], newVal);
+          });
+        },
+      ),
+    );
+  });
+}
 
 function getValidatorType(
   type: string,
@@ -193,15 +229,28 @@ function makeSearchOptionFormInstruments(
   ];
 }
 
+function filterInstrumentKeysFromConfigSettings(
+  configSettings: KungfuApi.KfConfigItem[],
+) {
+  return configSettings
+    .filter((item) => item.type === 'instrument' || item.type === 'instruments')
+    .reduce((data, setting) => {
+      data[setting.key.toString()] = setting.type as
+        | 'instrument'
+        | 'instruments';
+      return data;
+    }, {} as Record<string, 'instrument' | 'instruments'>);
+}
+
 function resolveInstrumentValue(
   type: 'instrument' | 'instruments',
   value: string | string[],
 ): string[] {
   if (type === 'instruments') {
-    return value as string[];
+    return (value || ['']) as string[];
   }
   if (type === 'instrument') {
-    return [value as string];
+    return [(value || '') as string];
   } else {
     return [];
   }
@@ -213,11 +262,11 @@ function isNumberInputType(type: string): boolean {
 }
 
 const SpecialWordsReg = new RegExp(
-  "[`~!@#$^&*()=|{}':;',\\[\\].<>《》/?~！@#￥……&*（）——|{}【】‘；：”“'。, 、？]",
+  "[`~!@#$^&*()=|{}';',\\[\\]<>《》/?~！@#￥……&*（）——|{}【】‘；：”“'。, 、？]",
 );
 function primaryKeyValidator(_rule: RuleObject, value: string): Promise<void> {
   const combineValue: string = getCombineValueByPrimaryKeys(
-    primaryKeys,
+    primaryKeys.value,
     formState,
     props.primaryKeyAvoidRepeatCompareExtra,
   );
@@ -227,15 +276,21 @@ function primaryKeyValidator(_rule: RuleObject, value: string): Promise<void> {
       .map((item): string => item.toLowerCase())
       .includes(combineValue.toLowerCase())
   ) {
-    return Promise.reject(new Error(`${combineValue} 已存在`));
+    return Promise.reject(
+      new Error(
+        t('validate.value_existing', {
+          value: combineValue,
+        }),
+      ),
+    );
   }
 
   if (SpecialWordsReg.test(value)) {
-    return Promise.reject(new Error(`不能含有特殊字符`));
+    return Promise.reject(new Error(t('validate.no_special_characters')));
   }
 
   if (value.toString().includes('_') && !props.primaryKeyUnderline) {
-    return Promise.reject(new Error(`不能含有下划线`));
+    return Promise.reject(new Error(t('validate.no_underline')));
   }
 
   return Promise.resolve();
@@ -243,15 +298,15 @@ function primaryKeyValidator(_rule: RuleObject, value: string): Promise<void> {
 
 function noZeroValidator(_rule: RuleObject, value: number): Promise<void> {
   if (Number.isNaN(+value)) {
-    return Promise.reject(new Error(`请输入非零数字`));
+    return Promise.reject(new Error(t('validate.no_zero_number')));
   }
 
   if (+value === 0) {
-    return Promise.reject(new Error(`请输入非零数字`));
+    return Promise.reject(new Error(t('validate.no_zero_number')));
   }
 
   if (+value < 0) {
-    return Promise.reject(new Error(`请输入非负数`));
+    return Promise.reject(new Error(t('validate.no_negative_number')));
   }
 
   return Promise.resolve();
@@ -264,7 +319,7 @@ function instrumnetValidator(_rule: RuleObject, value: string): Promise<void> {
 
   const instrumentResolved = transformSearchInstrumentResultToInstrument(value);
   if (!instrumentResolved) {
-    return Promise.reject(new Error('标的错误'));
+    return Promise.reject(new Error(t('instrument_error')));
   }
 
   return Promise.resolve();
@@ -282,7 +337,7 @@ function instrumnetsValidator(
     (instrument) => !transformSearchInstrumentResultToInstrument(instrument),
   );
   if (instrumentResolved.length) {
-    return Promise.reject(new Error('标的错误'));
+    return Promise.reject(new Error(t('instrument_error')));
   }
 
   return Promise.resolve();
@@ -421,7 +476,7 @@ defineExpose({
                     {
                       required: item.required,
                       type: getValidatorType(item.type),
-                      message: item.errMsg || '该项为必填项',
+                      message: item.errMsg || $t('validate.mandatory'),
                       trigger: 'blur',
                     },
                   ]
@@ -582,7 +637,9 @@ defineExpose({
         </a-select-option>
       </a-select>
       <a-select
-        v-else-if="item.type === 'instrument'"
+        v-else-if="
+          item.type === 'instrument' && instrumentsSearchRelated[item.key]
+        "
         :disabled="changeType === 'update' && item.primary"
         show-search
         v-model:value="formState[item.key]"
@@ -593,7 +650,9 @@ defineExpose({
         @search="instrumentsSearchRelated[item.key].handleSearchInstrument"
       ></a-select>
       <a-select
-        v-else-if="item.type === 'instruments'"
+        v-else-if="
+          item.type === 'instruments' && instrumentsSearchRelated[item.key]
+        "
         :disabled="changeType === 'update' && item.primary"
         mode="multiple"
         show-search

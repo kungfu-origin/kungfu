@@ -6,9 +6,10 @@ import {
   KfNumList,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { Tail } from 'tail';
-import { message } from 'ant-design-vue';
-import { parseURIParams } from './uiUtils';
+import { messagePrompt, parseURIParams } from './uiUtils';
 import { ensureFileSync } from 'fs-extra';
+
+const { error } = messagePrompt();
 
 export const getLogPath = (): string => {
   return path.resolve(decodeURI(parseURIParams().logPath) || '');
@@ -84,7 +85,7 @@ export const useLogInit = (
     });
 
     LogTail.on('error', (err: Error) => {
-      message.error(err.message);
+      error(err.message);
     });
 
     LogTail.watch();

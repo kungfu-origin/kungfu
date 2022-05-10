@@ -3,6 +3,7 @@ from kungfu.wingchun.constants import *
 import math 
 import time
 from datetime import datetime
+import argparse
 
 yjj = kungfu.__binding__.yijinjing
 class orderTask:
@@ -14,7 +15,7 @@ class orderTask:
 
 def pre_start(context):
     context.hold_book()
-    context.hold_position()
+    context.hold_positions()
     args = {}
     context.SOURCE = ""
     context.ACCOUNT =""
@@ -38,6 +39,7 @@ def pre_start(context):
             args[kvs[0]]=kvs[1]
     context.log.info("args {}".format(args))
     sourceAccountList = args["accountId"].split('_')
+    md = args["marketSource"]
     exchangeTicker= args["ticker"].split('_')
     context.STEPS = int(args["steps"])
     context.steps_to_fill = context.STEPS
@@ -63,8 +65,8 @@ def pre_start(context):
         context.EXCHANGE = exchangeTicker[0]
         context.TICKER = exchangeTicker[1]
         context.add_account(context.SOURCE, context.ACCOUNT, 100000.0)
-        context.subscribe(context.SOURCE, [context.TICKER], context.EXCHANGE)
-        context.log.info(f"SOURCE {context.SOURCE} context.TICKER {context.TICKER} context.EXCHANGE {context.EXCHANGE}")
+        context.subscribe(md, [context.TICKER], context.EXCHANGE)
+        context.log.info(f"MARKET SOURCE {md} context.TICKER {context.TICKER} context.EXCHANGE {context.EXCHANGE}")
     context.log.info(f"STEPS {context.STEPS} context.SIDE {context.SIDE} context.OFFSET {context.OFFSET} context.VOLUME {context.VOLUME} context.SOURCE {context.SOURCE} context.ACCOUNT {context.ACCOUNT} context.EXCHANGE {context.EXCHANGE} context.TICKER {context.TICKER} context.LASTSINGULARITY {context.LASTSINGULARITY} context.START_TIME_IN_NANO {context.START_TIME_IN_NANO} context.FINISH_TIME_IN_NANO {context.FINISH_TIME_IN_NANO}")
 
 def str_to_nanotime(tm) :

@@ -2,6 +2,7 @@
 import { nextTick, onMounted, reactive } from 'vue';
 import { getProcessId } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/codeUtils';
 import {
+  messagePrompt,
   removeLoadingMask,
   setHtmlTitle,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
@@ -9,13 +10,15 @@ import Editor from './components/MonacoEditor.vue';
 import FileTree from './components/FileTree.vue';
 import { useCodeStore } from './store/codeStore';
 import { ipcEmitDataByName } from '../../../renderer/ipcMsg/emitter';
-import { message } from 'ant-design-vue';
 import MainContentVue from './components/MainContent.vue';
+import VueI18n from '@kungfu-trader/kungfu-app/src/language';
+const { t } = VueI18n.global;
 
+const { error } = messagePrompt();
 const store = useCodeStore();
 const ProcessId: string = getProcessId();
 
-setHtmlTitle(`功夫交易系统 - ${ProcessId}.log`);
+setHtmlTitle(`${t('kungfu')} - ${ProcessId}.log`);
 const strategy = reactive<Code.Strategy>({
   strategy_id: '',
   strategy_path: '',
@@ -59,7 +62,7 @@ function handleStrategyList(strategyList): void {
 
 function handleUpdateStrategy(strategyPath) {
   if (!strategy.strategy_id) {
-    message.error('策略id不存在!');
+    error('策略id不存在!');
     return;
   }
   updateStrategy(strategy.strategy_id, strategyPath);

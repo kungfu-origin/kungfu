@@ -5,6 +5,8 @@ import { computed, getCurrentInstance, onBeforeUnmount, ref } from 'vue';
 import { useExtConfigsRelated } from '../../assets/methods/actionsUtils';
 import globalBus from '../../assets/methods/globalBus';
 import KfGlobalSettingModal from '../public/KfGlobalSettingModal.vue';
+// import { useI18n } from "vue-i18n";
+
 const logo = require('@kungfu-trader/kungfu-app/src/renderer/assets/svg/LOGO.svg');
 
 const app = getCurrentInstance();
@@ -69,7 +71,7 @@ function handleToPage(pathname: string) {
             <template #icon>
               <sliders-outlined style="font-size: 24px" />
             </template>
-            <span>主面板</span>
+            <span>{{ $t('baseConfig.main_panel') }}</span>
           </a-menu-item>
           <a-menu-item
             v-for="config in sidebarComponentConfigs"

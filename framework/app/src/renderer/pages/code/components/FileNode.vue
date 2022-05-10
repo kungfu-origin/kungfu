@@ -68,16 +68,24 @@
               !onEditing
             "
           >
-            {{ '(入口文件)' }}
+            ({{ $t('editor.entry_file') }})
           </span>
           <div
             class="deal-file"
             v-show="fileNode && !onEditing && fileNode.name && !fileNode.root"
           >
-            <span class="mouse-over" title="重命名" @click.stop="handleRename">
+            <span
+              class="mouse-over"
+              :title="$t('rename')"
+              @click.stop="handleRename"
+            >
               <EditFilled class="icon" />
             </span>
-            <span class="mouse-over" title="删除" @click.stop="handleDelete">
+            <span
+              class="mouse-over"
+              :title="$t('delete')"
+              @click.stop="handleDelete"
+            >
               <DeleteFilled class="icon" />
             </span>
           </div>
@@ -147,7 +155,7 @@ import {
   getCurrentInstance,
   ComponentInternalInstance,
 } from 'vue';
-import { message, Modal, Alert } from 'ant-design-vue';
+import { Alert } from 'ant-design-vue';
 import { openFolder } from '../../../assets/methods/codeUtils';
 import {
   removeFileFolder,
@@ -155,6 +163,11 @@ import {
 } from '@kungfu-trader/kungfu-js-api/utils/fileUtils';
 import fse from 'fs-extra';
 import { ipcEmitDataByName } from '../../../ipcMsg/emitter';
+import { confirmModal, messagePrompt } from '../../../assets/methods/uiUtils';
+import VueI18n from '@kungfu-trader/kungfu-app/src/language';
+const { t } = VueI18n.global;
+
+const { success, error, warning } = messagePrompt();
 const { proxy } = getCurrentInstance() as ComponentInternalInstance;
 
 const store = useCodeStore();
@@ -241,7 +254,7 @@ const handleAddFileBlur = (e) => {
       parentId !== null && parentId !== undefined
         ? fileTree.value[parentId].filePath
         : '';
-    const typeName = type == 'folder' ? '文件夹' : '文件';
+    const typeName = type == 'folder' ? t('folder') : t('file');
 
     if (type === 'folder' || type === 'file') {
       addFileSync(targetPath, filename, type);
@@ -251,9 +264,13 @@ const handleAddFileBlur = (e) => {
       type: type,
     });
     reloadFolder(parentId, filename);
-    message.success(`${typeName}创建成功！`);
+    success(
+      t('editor.creaate_success', {
+        file: typeName,
+      }),
+    );
   } catch (err) {
-    message.error(err.message || '操作失败！');
+    error(err.message || t('operation_failed'));
   }
   //重置
   resetStatus();
@@ -266,13 +283,15 @@ function handleAddEditFileInput(val): void {
   const pattern = new RegExp('[\\ / : * ? " < > |]');
   if (siblings.indexOf(val) != -1) {
     editError.value = true;
-    editErrorMessage.value = `此位置已存在文件或文件夹 ${val} ，请选择其他名称！`;
+    editErrorMessage.value = t('editor.name_repeat', {
+      name: val,
+    });
   } else if (!val) {
     editError.value = true;
-    editErrorMessage.value = '必须提供文件或文件夹名称！';
+    editErrorMessage.value = t('editor.empty_input');
   } else if (pattern.test(val)) {
     editError.value = true;
-    editErrorMessage.value = '名称不能包含\\/:*?"<>|';
+    editErrorMessage.value = t('editor.illegal_character');
   } else {
     editError.value = false;
     editErrorMessage.value = '';
@@ -295,37 +314,24 @@ function handleDelete() {
     fileNode.value.filePath !== entryFile.value.filePath
   ) {
     const parentId = fileNode.value?.parentId;
-    const typeName = type == 'folder' ? '文件夹' : '文件';
-    Modal.confirm({
-      title: '提示',
-      content: `确认删除该${typeName}吗？`,
-      okText: '确 定',
-      cancelText: '取 消',
-      onOk() {
-        removeFileFolder(fileNode.value?.filePath || '')
-          .then(() => {
-            store.setCurrentFile(entryFile.value);
-          })
-          .then(() =>
-            openFolder(
-              fileTree.value[parentId || 0],
-              fileTree.value,
-              true,
-              true,
-            ),
-          )
-          .then(() => message.success(`${typeName}删除成功！`))
-          .catch((err) => {
-            if (err == 'cancel') return;
-            message.error(err.message || '操作失败！');
-          });
-      },
-      onCancel() {
-        return;
-      },
+    const typeName = type == 'folder' ? t('folder') : t('file');
+
+    confirmModal(t('prompt'), t('editor.delate_confirm')).then(() => {
+      removeFileFolder(fileNode.value?.filePath || '')
+        .then(() => {
+          store.setCurrentFile(entryFile.value);
+        })
+        .then(() =>
+          openFolder(fileTree.value[parentId || 0], fileTree.value, true, true),
+        )
+        .then(() => success(`${typeName}${t('operation_success')}`))
+        .catch((err) => {
+          if (err == 'cancel') return;
+          error(err.message || t('operation_failed'));
+        });
     });
   } else {
-    message.warning('不可删除入口文件');
+    warning(t('editor.cannot_delate_entry'));
     return;
   }
 }

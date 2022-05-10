@@ -34,6 +34,9 @@ import path from 'path';
 import { startExtDaemon } from '@kungfu-trader/kungfu-js-api/utils/processUtils';
 import { Proc } from 'pm2';
 import { VueNode } from 'ant-design-vue/lib/_util/type';
+import VueI18n from '@kungfu-trader/kungfu-app/src/language';
+const { t } = VueI18n.global;
+import fse from 'fs-extra';
 
 // this utils file is only for ui components
 export const getUIComponents = (
@@ -41,24 +44,33 @@ export const getUIComponents = (
 ): {
   key: string;
   name: string;
+  script: string;
+  extPath: string;
   position: KfUIExtLocatorTypes;
   cData: Record<string, Component>;
 }[] => {
   return Object.keys(kfUiExtConfigs).map((key) => {
     const config = kfUiExtConfigs[key];
-    const { extPath, position, components, name } = config;
+    const { extPath, position, components, name, script } = config;
+
     return {
       key,
       name,
       position,
-      cData: Object.keys(components || {}).reduce((cData, cName) => {
-        return {
-          ...cData,
-          [`${key}-${cName}`]: global.require(
-            path.join(extPath, components[cName]),
-          ).default as Component,
-        };
-      }, {} as Record<string, Component>),
+      script,
+      extPath,
+      cData: Object.keys(components || {})
+        .filter((cName) =>
+          fse.pathExistsSync(path.join(extPath, components[cName])),
+        )
+        .reduce((cData, cName) => {
+          return {
+            ...cData,
+            [`${key}-${cName}`]: global.require(
+              path.join(extPath, components[cName]),
+            ).default as Component,
+          };
+        }, {} as Record<string, Component>),
     };
   });
 };
@@ -155,9 +167,9 @@ export const preStartAll = async (): Promise<(void | Proc)[]> => {
 };
 
 export const postStartAll = async (): Promise<(void | Proc)[]> => {
-  const availDaemon = await getAvailDaemonList();
+  const availDaemons = await getAvailDaemonList();
   return loopToRunProcess<void | Proc>(
-    availDaemon.map((item) => {
+    availDaemons.map((item) => {
       return () =>
         startExtDaemon(getProcessIdByKfLocation(item), item.cwd, item.script)
           .then((res) => {
@@ -213,7 +225,7 @@ export const openNewBrowserWindow = (
     win.webContents.loadURL(modalPath);
     win.webContents.on('did-finish-load', () => {
       if (!currentWindow || Object.keys(currentWindow).length == 0) {
-        reject(new Error('当前页面没有聚焦'));
+        reject(new Error(t('no_focus')));
         return;
       }
       resolve(win);
@@ -289,18 +301,39 @@ export const useIpcListener = (): void => {
 
 export const markClearJournal = (): void => {
   localStorage.setItem('clearJournalTradingDate', '');
-  message.success('清理 journal 完成, 请重启应用');
+  messagePrompt().success(t('clear', { content: 'journal' }));
 };
 
 export const markClearDB = (): void => {
   localStorage.setItem('clearDBTradingDate', '');
-  message.success('清理 DB 完成, 请重启应用');
+  messagePrompt().success(t('clear', { content: 'DB' }));
+};
+
+export const messagePrompt = (): {
+  success(msg?: string): void;
+  error(msg?: string): void;
+  warning(msg: string): void;
+} => {
+  const success = (msg: string = t('operation_success')): void => {
+    message.success(msg);
+  };
+  const error = (msg: string = t('operation_failed')): void => {
+    message.error(msg);
+  };
+  const warning = (msg: string): void => {
+    message.warning(msg);
+  };
+  return {
+    success,
+    error,
+    warning,
+  };
 };
 
 export const handleOpenLogview = (
   config: KungfuApi.KfConfig | KungfuApi.KfLocation,
 ): Promise<Electron.BrowserWindow | void> => {
-  const hideloading = message.loading('正在打开窗口');
+  const hideloading = message.loading(t('open_window'));
   const logPath = path.resolve(
     LOG_DIR,
     dayjs().format('YYYYMMDD'),
@@ -321,7 +354,7 @@ export const handleOpenLogviewByFile =
         const { filePaths } = res;
         if (filePaths.length) {
           const targetLogPath = filePaths[0];
-          const hideloading = message.loading('正在打开窗口');
+          const hideloading = message.loading(t('open_window'));
           return openLogView(targetLogPath).finally(() => {
             hideloading();
           });
@@ -334,7 +367,7 @@ export const handleOpenLogviewByFile =
 export const handleOpenCodeView = (
   config: KungfuApi.KfConfig | KungfuApi.KfLocation,
 ): Promise<Electron.BrowserWindow> => {
-  const openMessage = message.loading('正在打开代码编辑器');
+  const openMessage = message.loading(t('open_code_editor'));
   return openCodeView(getProcessIdByKfLocation(config)).finally(() => {
     openMessage();
   });
@@ -509,8 +542,8 @@ export const isInTdGroup = (
 export const confirmModal = (
   title: string,
   content: VueNode | (() => VueNode) | string,
-  okText = '确 定',
-  cancelText = '取 消',
+  okText = t('confirm'),
+  cancelText = t('cancel'),
 ): Promise<void> => {
   return new Promise((resolve) => {
     Modal.confirm({
