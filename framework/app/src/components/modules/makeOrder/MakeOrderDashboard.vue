@@ -219,7 +219,8 @@ watch(
     getRiskControl().then((res: KungfuApi.RiskSetting[]) => {
       if (res.length && res[0]?.value) {
         const riskSettingList = JSON.parse(res[0]?.value);
-        formState.value = getCurrentAccountId(riskSettingList, newVal) || '';
+        formState.value.account_id =
+          getCurrentAccountId(riskSettingList, newVal) || '';
       }
     });
 
@@ -243,7 +244,7 @@ watch(
 function getCurrentAccountId(
   riskList: KungfuApi.RiskSetting[],
   curInstrument: string,
-) {
+): string {
   const instrumentKeyData = {};
   riskList.forEach((item) => {
     if (item.account_id && item.white_list.length) {
@@ -255,7 +256,13 @@ function getCurrentAccountId(
       });
     }
   });
-  return instrumentKeyData[curInstrument][0] || '';
+  if (
+    instrumentKeyData[curInstrument] &&
+    instrumentKeyData[curInstrument].length
+  ) {
+    return instrumentKeyData[curInstrument][0] || '';
+  }
+  return '';
 }
 
 // 更新持仓列表
