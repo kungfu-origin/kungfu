@@ -36,6 +36,7 @@ import {
 import { DeleteOutlined } from '@ant-design/icons-vue';
 import { longfist } from '@kungfu-trader/kungfu-js-api/kungfu';
 import {
+  getAllRiskSettingsData,
   getScheduleTasks,
   setScheduleTasks,
 } from '@kungfu-trader/kungfu-js-api/actions';
@@ -50,16 +51,11 @@ import {
   modeForScheduleTasksOptions,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/configs';
 import { ipcRenderer } from 'electron';
-import { useAllKfConfigData } from '../../assets/methods/actionsUtils';
 import {
-  getRiskControl,
-  setKfRiskConfig,
-} from '@kungfu-trader/kungfu-js-api/kungfu/riskSetting';
-import {
+  useAllKfConfigData,
   delateRiskFromStates,
-  dealRiskSettingStoreData,
-  removeEmptyRiskSetting,
-} from '../../assets/methods/riskSettingUtils';
+} from '../../assets/methods/actionsUtils';
+import { setKfRiskSettings } from '@kungfu-trader/kungfu-js-api/kungfu/riskSetting';
 
 interface ScheduleTaskFormItem {
   timeValue: Dayjs;
@@ -82,7 +78,7 @@ defineEmits<{
 }>();
 
 const riskSettingsDelateList: string[] = [];
-const initialRiskValue: KungfuApi.RiskSetting[] = [];
+let initialRiskValue: KungfuApi.RiskSetting[] = [];
 
 const kfGlobalSettings = getKfGlobalSettings();
 const kfGlobalSettingsValue = getKfGlobalSettingsValue();
@@ -115,17 +111,11 @@ onMounted(() => {
     commissions.value = res;
   });
 
-  getRiskControl().then((res: KungfuApi.RiskSetting[]) => {
+  getAllRiskSettingsData().then((res: KungfuApi.RiskSetting[]) => {
     if (res.length) {
-      res.forEach((item) => {
-        if (item.value) {
-          riskSettingData.value.push(JSON.parse(item.value));
-          initialRiskValue.push(JSON.parse(item.value));
-          riskSettingsFromStates.riskControl = dealRiskSettingStoreData(
-            riskSettingData.value,
-          );
-        }
-      });
+      riskSettingData.value = res;
+      initialRiskValue = JSON.parse(JSON.stringify(res));
+      riskSettingsFromStates.riskControl = riskSettingData.value;
     }
   });
 
@@ -163,11 +153,8 @@ onMounted(() => {
 onUnmounted(() => {
   setKfGlobalSettingsValue(globalSettingsFromStates);
 
-  const setRiskConfigData = dealRiskSettingStoreData(
-    removeEmptyRiskSetting(riskSettingsFromStates.riskControl),
-  );
   delateRiskFromStates(initialRiskValue, riskSettingsDelateList);
-  setKfRiskConfig(setRiskConfigData);
+  setKfRiskSettings(riskSettingsFromStates.riskControl);
 
   setKfCommission(commissions.value);
   setScheduleTasks({
@@ -191,7 +178,7 @@ const globalSettingsFromStates = reactive(
 );
 
 const riskSettingsFromStates = reactive({
-  riskControl: dealRiskSettingStoreData(riskSettingData.value),
+  riskControl: riskSettingData.value,
 });
 
 function delateRiskItem(item: string) {

@@ -16,6 +16,7 @@ import {
 } from '../config/pathConfig';
 import { pathExists, remove } from 'fs-extra';
 import { getProcessIdByKfLocation } from '../utils/busiUtils';
+import { getAllKfRiskSettings } from '../kungfu/riskSetting';
 
 export const getAllKfConfigOriginData = (): Promise<
   Record<KfCategoryTypes, KungfuApi.KfConfig[]>
@@ -46,6 +47,23 @@ export const getAllKfConfigOriginData = (): Promise<
       }),
       daemon: [],
     };
+  });
+};
+
+export const getAllRiskSettingsData = (): Promise<KungfuApi.RiskSetting[]> => {
+  return getAllKfRiskSettings().then((riskData) => {
+    const riskDataResolved = riskData.map((item) => {
+      const ristItem: KungfuApi.RiskSetting = item.value
+        ? JSON.parse(item.value)
+        : {};
+      return {
+        ...ristItem,
+        account_id: item.name,
+        source_id: item.group,
+      };
+    });
+
+    return Promise.resolve(riskDataResolved);
   });
 };
 

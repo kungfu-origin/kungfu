@@ -54,7 +54,7 @@ import { useExtraCategory } from '@kungfu-trader/kungfu-app/src/renderer/assets/
 import VueI18n from '@kungfu-trader/kungfu-app/src/language';
 import { useTradingTask } from '../tradingTask/utils';
 
-import { getRiskControl } from '@kungfu-trader/kungfu-js-api/kungfu/riskSetting';
+import { getAllKfRiskSettings } from '@kungfu-trader/kungfu-js-api/kungfu/riskSetting';
 
 const { t } = VueI18n.global;
 const { error } = messagePrompt();
@@ -215,8 +215,7 @@ onMounted(() => {
 watch(
   () => formState.value.instrument,
   (newVal) => {
-    console.log(newVal);
-    getRiskControl().then((res: KungfuApi.RiskSetting[]) => {
+    getAllKfRiskSettings().then((res: KungfuApi.RiskSetting[]) => {
       if (res.length && res[0]?.value) {
         const riskSettingList = JSON.parse(res[0]?.value);
         formState.value.account_id =

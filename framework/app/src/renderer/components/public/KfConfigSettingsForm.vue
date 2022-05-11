@@ -182,20 +182,6 @@ function filterInstrumentKeysFromConfigSettings(
     }, {} as Record<string, 'instrument' | 'instruments'>);
 }
 
-function resolveInstrumentValue(
-  type: 'instrument' | 'instruments',
-  value: string | string[],
-): string[] {
-  if (type === 'instruments') {
-    return (value || ['']) as string[];
-  }
-  if (type === 'instrument') {
-    return [(value || '') as string];
-  } else {
-    return [];
-  }
-}
-
 function isNumberInputType(type: string): boolean {
   const numberInputTypes: string[] = ['int', 'float', 'percent'];
   return numberInputTypes.includes(type);
