@@ -103,6 +103,7 @@ export const EXTENSION_DIRS: string[] = production
       path.resolve(KFC_PARENT_DIR, '..', '..', '..', 'extensions'),
       path.resolve('node_modules', '@kungfu-trader'),
       path.resolve('dist'),
+      ...((process.env.EXTENSION_DIRS || '').split(path.delimiter) || []),
     ];
 
 process.env.KFC_DIR = KFC_DIR;

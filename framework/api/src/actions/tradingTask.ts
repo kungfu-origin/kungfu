@@ -1,11 +1,15 @@
 import { removeKfLocation, removeLog } from '.';
-import { getKfExtensionConfig } from '../utils/busiUtils';
+import {
+  getKfExtensionConfig,
+  kfConfigItemsToProcessArgs,
+} from '../utils/busiUtils';
 import {
   graceDeleteProcess,
   Pm2ProcessStatusData,
   startTask,
 } from '../utils/processUtils';
 import path from 'path';
+import { Proc } from 'pm2';
 
 export const ensureRemoveTradingTask = (
   watcher: KungfuApi.Watcher,
@@ -37,16 +41,21 @@ export const startTradingTaskByCommand = async (
   taskLocation: KungfuApi.KfLocation,
   processStatusData: Pm2ProcessStatusData,
   extKey: string,
-  args: string,
-) => {
+  argsState: Record<string, KungfuApi.KfConfigValue>,
+): Promise<Proc | void> => {
   const extConfigs = await getKfExtensionConfig();
-  const extConfig: KungfuApi.KfExtConfig = (extConfigs.value['strategy'] || {})[
+  const extConfig: KungfuApi.KfExtConfig = (extConfigs['strategy'] || {})[
     extKey
   ];
 
   if (!extConfig) {
-    return Promise.reject(`${extKey} is not existed in extConfigs`);
+    throw new Error(`${extKey} is not existed in extConfigs`);
   }
+
+  const args: string = kfConfigItemsToProcessArgs(
+    extConfig.settings || [],
+    argsState,
+  );
 
   const soPath = path.join(extConfig.extPath, extKey);
   return startTradingTask(

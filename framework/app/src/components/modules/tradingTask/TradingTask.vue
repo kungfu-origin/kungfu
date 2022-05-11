@@ -214,7 +214,7 @@ function resolveKfLocation(
     category: categoryRegisterConfig.name,
     group: taskLocation?.group || '',
     name: taskLocation?.name || '',
-    mode: 'LIVE',
+    mode: 'live',
   };
   return locationResolved;
 }

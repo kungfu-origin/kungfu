@@ -104,7 +104,7 @@ function dealRowClassNameResolved(record: KungfuApi.Position) {
     category: categoryRegisterConfig.name,
     group: record.exchange_id,
     name: record.instrument_id,
-    mode: 'LIVE',
+    mode: 'live',
   };
 
   return dealRowClassName(locationResolved);
@@ -115,7 +115,7 @@ function customRowResolved(record: KungfuApi.Position) {
     category: categoryRegisterConfig.name,
     group: record.exchange_id,
     name: record.instrument_id,
-    mode: 'LIVE',
+    mode: 'live',
   };
 
   return {
