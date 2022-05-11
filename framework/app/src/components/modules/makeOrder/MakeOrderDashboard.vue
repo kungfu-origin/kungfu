@@ -54,7 +54,7 @@ import { useExtraCategory } from '@kungfu-trader/kungfu-app/src/renderer/assets/
 import VueI18n from '@kungfu-trader/kungfu-app/src/language';
 import { useTradingTask } from '../tradingTask/utils';
 
-import { getRiskControl } from '@kungfu-trader/kungfu-js-api/kungfu/riskControl';
+import { getRiskControl } from '@kungfu-trader/kungfu-js-api/kungfu/riskSetting';
 
 const { t } = VueI18n.global;
 const { error } = messagePrompt();
