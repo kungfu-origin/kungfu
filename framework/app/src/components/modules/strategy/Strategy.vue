@@ -91,6 +91,7 @@ function handleOpenSetStrategyDialog(
     name: t('strategyConfig.strategy'),
     category: 'strategy',
     key: 'default',
+    extPath: '',
     settings: [
       {
         key: 'strategy_id',

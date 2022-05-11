@@ -40,6 +40,8 @@ declare global {
         | 'codeEditor'
         | 'dzxy';
       RELOAD_AFTER_CRASHED: 'false' | 'true';
+      EXTENSION_DIRS: string;
+      KFC_DIR: string;
       ELECTRON_RUN_AS_NODE: boolean;
       ELECTRON_ENABLE_STACK_DUMPING: boolean;
     }

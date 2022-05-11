@@ -102,6 +102,7 @@ function handleOpenSetMdDialog(
     handleConfirmAddUpdateKfConfig(
       {
         formState: {} as Record<string, KungfuApi.KfConfigValue>,
+        configSettings: [],
         idByPrimaryKeys: selectedSource,
         changeType: type,
       },
