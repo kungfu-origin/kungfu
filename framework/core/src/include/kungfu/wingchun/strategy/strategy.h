@@ -72,6 +72,14 @@ public:
   //@param new_asset         更新后重新从柜台获取的新数据
   virtual void on_asset_sync_reset(Context_ptr &context, const kungfu::longfist::types::Asset &old_asset,
                                    const kungfu::longfist::types::Asset &new_asset){};
+  //断开回调
+  //@param deregister     断开数据
+  virtual void on_deregister(Context_ptr &context, const longfist::types::Deregister &deregister){};
+
+  //客户端状态变化回调
+  //@param brokerStateUpdate     状态变化
+  virtual void on_broker_state_change(Context_ptr &context, const longfist::types::BrokerStateUpdate &brokerStateUpdate,
+                                      const kungfu::yijinjing::data::location_ptr &){};
 };
 
 DECLARE_PTR(Strategy)

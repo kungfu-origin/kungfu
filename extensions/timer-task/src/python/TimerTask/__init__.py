@@ -46,8 +46,8 @@ def pre_start(context):
     context.OFFSET = Offset(int(args["offset"]))
     context.VOLUME = int(args["volume"])
     context.volume_to_fill = context.VOLUME
-    context.LASTSINGULARITY = args["lastSingularity"]
-    context.LASTSINGULARITYNANOSECOND = int(args["lastSingularityMilliSecond"]) * 10**6
+    context.LASTSINGULARITY = args.get("lastSingularity", 'false')
+    context.LASTSINGULARITYNANOSECOND = int(args.get("lastSingularityMilliSecond", '200')) * 10**6
     context.MAX_LOT_BY_STEP = int(args["maxLotByStep"])
     trigger_time = args["triggerTime"]
     finish_time = args["finishTime"]
