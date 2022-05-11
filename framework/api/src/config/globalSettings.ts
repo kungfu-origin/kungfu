@@ -191,7 +191,8 @@ export const riskSettings: KfSystemConfig = {
         {
           key: 'source_id',
           name: '柜台',
-          type: 'td',
+          type: 'str',
+          primary: true,
         },
         {
           key: 'max_order_volume',

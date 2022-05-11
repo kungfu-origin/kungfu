@@ -261,26 +261,26 @@ declare namespace KungfuApi {
   }
 
   export interface RiskSettingStore {
-    getAllRiskSetting(): Record<string, getAllRiskSetting>;
-    setRiskSetting({ value: string }): void;
-    // removeRiskSetting(
-    //   category: string,
-    //   group: string,
-    //   name: string,
-    //   mode: string,
-    //   location_uid: number,
-    //   max_order_volume: number,
-    //   max_daily_volume: number,
-    //   white_list: string[],
-    //   self_filled_check: number,
-    //   max_cancle_ratio: number,
-    // ): void;
+    getAllRiskSetting(): Record<string, RiskSetting>;
+    setRiskSetting(
+      category: string,
+      group: string,
+      name: string,
+      mode: string,
+      value: string,
+    ): void;
+    removeRiskSetting(
+      category: string,
+      group: string,
+      name: string,
+      mode: string,
+    ): void;
     getRiskSetting(
       category: string,
       group: string,
       name: string,
       mode: string,
-    ): KungfuApi.KfConfig;
+    ): KungfuApi.RiskSetting;
   }
 
   export interface DataTable<T> {

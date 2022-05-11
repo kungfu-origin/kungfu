@@ -86,6 +86,7 @@ const props = withDefaults(
 defineEmits<{
   (
     e: 'update:formState',
+    delateRiskItem: 'delateRiskItem',
     formState: Record<string, KungfuApi.KfConfigValue>,
   ): void;
 }>();
@@ -369,6 +370,7 @@ function handleAddItemIntoTableRows(item: KungfuApi.KfConfigItem) {
 
 function handleRemoveItemIntoTableRows(item, index) {
   const targetState = formState[item.key];
+  app && app.emit('delateRiskItem', targetState[index].account_id);
   if (targetState instanceof Array) {
     targetState.splice(index, 1);
   }
