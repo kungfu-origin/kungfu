@@ -200,9 +200,9 @@ bool AutoClient::should_connect_md(const location_ptr &md_location) const { retu
 
 bool AutoClient::should_connect_td(const location_ptr &td_location) const { return true; }
 
-bool AutoClient::should_connect_md(uint32_t md_location_uid) const  { return true; }
+bool AutoClient::should_connect_md(uint32_t md_location_uid) const { return true; }
 
-bool AutoClient::should_connect_td(uint32_t td_location_uid) const  { return true; }
+bool AutoClient::should_connect_td(uint32_t td_location_uid) const { return true; }
 
 bool AutoClient::should_connect_strategy(const location_ptr &td_location) const { return true; }
 

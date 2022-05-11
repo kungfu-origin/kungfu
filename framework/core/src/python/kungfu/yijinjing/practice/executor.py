@@ -131,7 +131,7 @@ class ExtensionExecutor:
         loader = self.loader
         site.setup(loader.extension_dir)
         sys.path.insert(0, loader.extension_dir)
-        
+
         ctx = self.ctx
         ctx.location = yjj.location(
             kfj.MODES[ctx.mode],
