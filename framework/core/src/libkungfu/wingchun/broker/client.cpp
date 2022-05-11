@@ -200,6 +200,10 @@ bool AutoClient::should_connect_md(const location_ptr &md_location) const { retu
 
 bool AutoClient::should_connect_td(const location_ptr &td_location) const { return true; }
 
+bool AutoClient::should_connect_md(uint32_t md_location_uid) const  { return true; }
+
+bool AutoClient::should_connect_td(uint32_t td_location_uid) const  { return true; }
+
 bool AutoClient::should_connect_strategy(const location_ptr &td_location) const { return true; }
 
 SilentAutoClient::SilentAutoClient(practice::apprentice &app) : AutoClient(app) {}
@@ -252,6 +256,14 @@ bool PassiveClient::should_connect_md(const location_ptr &md_location) const {
 
 bool PassiveClient::should_connect_td(const location_ptr &td_location) const {
   return enrolled_td_locations_.find(td_location->uid) != enrolled_td_locations_.end();
+}
+
+bool PassiveClient::should_connect_md(uint32_t md_location_uid) const {
+  return enrolled_md_locations_.find(md_location_uid) != enrolled_md_locations_.end();
+}
+
+bool PassiveClient::should_connect_td(uint32_t td_location_uid) const {
+  return enrolled_td_locations_.find(td_location_uid) != enrolled_td_locations_.end();
 }
 
 bool PassiveClient::should_connect_strategy(const location_ptr &td_location) const { return false; }

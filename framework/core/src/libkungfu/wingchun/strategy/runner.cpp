@@ -80,6 +80,8 @@ void Runner::post_start() {
   events_ | is_own<Transaction>(context_->get_broker_client()) |
       $$(invoke(&Strategy::on_transaction, event->data<Transaction>()));
   events_ | is(OrderActionError::tag) | $$(invoke(&Strategy::on_order_action_error, event->data<OrderActionError>()));
+  events_ | is_own_reg<Deregister>(context_->get_broker_client()) | $$(invoke(&Strategy::on_deregister, event->data<Deregister>()));
+  events_ | is_own_updata_state(context_->get_broker_client()) | $$(invoke(&Strategy::on_disconnected));
 
   invoke(&Strategy::post_start);
   SPDLOG_INFO("strategy {} started", get_io_device()->get_home()->name);

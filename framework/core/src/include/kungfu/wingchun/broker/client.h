@@ -93,6 +93,10 @@ public:
 
   [[nodiscard]] virtual bool should_connect_td(const yijinjing::data::location_ptr &md_location) const = 0;
 
+  [[nodiscard]] virtual bool should_connect_md(uint32_t md_location_uid) const = 0;
+
+  [[nodiscard]] virtual bool should_connect_td(uint32_t td_location_uid) const = 0;
+
   [[nodiscard]] virtual bool should_connect_strategy(const yijinjing::data::location_ptr &md_location) const = 0;
 
 protected:
@@ -130,6 +134,10 @@ protected:
   [[nodiscard]] bool should_connect_md(const yijinjing::data::location_ptr &md_location) const override;
 
   [[nodiscard]] bool should_connect_td(const yijinjing::data::location_ptr &md_location) const override;
+
+  [[nodiscard]] bool should_connect_md(uint32_t md_location_uid) const override;
+
+  [[nodiscard]] bool should_connect_td(uint32_t td_location_uid) const override;
 
   [[nodiscard]] bool should_connect_strategy(const yijinjing::data::location_ptr &md_location) const override;
 
@@ -182,6 +190,10 @@ protected:
 
   [[nodiscard]] bool should_connect_td(const yijinjing::data::location_ptr &md_location) const override;
 
+  [[nodiscard]] bool should_connect_md(uint32_t md_location_uid) const override;
+
+  [[nodiscard]] bool should_connect_td(uint32_t td_location_uid) const override;
+
   [[nodiscard]] bool should_connect_strategy(const yijinjing::data::location_ptr &md_location) const override;
 
 private:
@@ -197,6 +209,30 @@ static constexpr auto is_own = [](const Client &broker_client, bool enabled = tr
       const DataType &data = event->data<DataType>();
       return broker_client.is_fully_subscribed(event->source()) or
              broker_client.is_subscribed(data.exchange_id, data.instrument_id);
+    }
+    return false;
+  });
+};
+
+template <typename DataType>
+static constexpr auto is_own_reg = [](const Client &broker_client) {
+  return rx::filter([&](const event_ptr &event) {
+    if (event->msg_type() == DataType::tag) {
+      const DataType &data = event->data<DataType>();
+      return broker_client.should_connect_md(data.location_uid) or
+             broker_client.should_connect_td(data.location_uid);
+    }
+    return false;
+  });
+};
+
+static constexpr auto is_own_updata_state = [](const Client &broker_client) {
+  return rx::filter([&](const event_ptr &event) {
+    if (event->msg_type() == kungfu::longfist::types::BrokerStateUpdate::tag) {
+      const kungfu::longfist::types::BrokerStateUpdate &data = event->data<kungfu::longfist::types::BrokerStateUpdate>();
+      return ((data.state == kungfu::longfist::enums::BrokerState::DisConnected) and
+             (broker_client.should_connect_md(event->source()) or
+             broker_client.should_connect_td(event->source())));
     }
     return false;
   });
