@@ -17,7 +17,6 @@ import {
   onUnmounted,
   reactive,
   ref,
-  toRaw,
   toRefs,
 } from 'vue';
 import KfConfigSettingsForm from './KfConfigSettingsForm.vue';
@@ -55,8 +54,12 @@ import { useAllKfConfigData } from '../../assets/methods/actionsUtils';
 import {
   getRiskControl,
   setKfRiskConfig,
-  RemoveRiskSetting,
 } from '@kungfu-trader/kungfu-js-api/kungfu/riskSetting';
+import {
+  delateRiskFromStates,
+  dealRiskSettingStoreData,
+  removeEmptyRiskSetting,
+} from '../../assets/methods/riskSettingUtils';
 
 interface ScheduleTaskFormItem {
   timeValue: Dayjs;
@@ -163,7 +166,7 @@ onUnmounted(() => {
   const setRiskConfigData = dealRiskSettingStoreData(
     removeEmptyRiskSetting(riskSettingsFromStates.riskControl),
   );
-  delateRiskFromStates(initialRiskValue);
+  delateRiskFromStates(initialRiskValue, riskSettingsDelateList);
   setKfRiskConfig(setRiskConfigData);
 
   setKfCommission(commissions.value);
@@ -193,48 +196,6 @@ const riskSettingsFromStates = reactive({
 
 function delateRiskItem(item: string) {
   riskSettingsDelateList.push(item);
-}
-
-function delateRiskFromStates(riskControl: KungfuApi.RiskSetting[]) {
-  if (riskSettingsDelateList.length) {
-    riskControl.forEach((item) => {
-      if (item.account_id && riskSettingsDelateList.includes(item.account_id)) {
-        const KfLocation: KungfuApi.KfLocation = {
-          category: item.category,
-          group: item.group,
-          name: item.name,
-          mode: item.mode,
-        };
-
-        RemoveRiskSetting(KfLocation);
-      }
-    });
-  }
-}
-
-function removeEmptyRiskSetting(
-  riskSetting: KungfuApi.RiskSetting[],
-): KungfuApi.RiskSetting[] {
-  return toRaw(
-    riskSetting
-      .filter((item) => item.account_id !== '')
-      .map((risk) => toRaw(risk)),
-  );
-}
-
-function dealRiskSettingStoreData(riskData: KungfuApi.RiskSetting[]) {
-  const riskDataResolved = riskData.map((item) => {
-    return {
-      ...item,
-      name: item.account_id || '',
-      category: item.category || 'td',
-      mode: 'live',
-      group: item.account_id ? item.account_id.split('_')[0] : '',
-      source_id: item.account_id ? item.account_id.split('_')[0] : '',
-    };
-  });
-
-  return riskDataResolved;
 }
 
 function initGlobalSettingsFromStates(
