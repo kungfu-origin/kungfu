@@ -74,13 +74,17 @@ export const RemoveRiskSetting = (
   );
 };
 
-export const getKfRiskConfig = (strategyId: string) => {
+export const getKfRiskConfig = (
+  strategyId: string,
+): Promise<KungfuApi.RiskSetting> => {
   const kfLocation: KungfuApi.KfLocation = getStrategyKfLocation(strategyId);
-  return riskSettingStore.getRiskSetting(
-    kfLocation.category,
-    kfLocation.group,
-    kfLocation.name,
-    kfLocation.mode,
+  return Promise.resolve(
+    riskSettingStore.getRiskSetting(
+      kfLocation.category,
+      kfLocation.group,
+      kfLocation.name,
+      kfLocation.mode,
+    ),
   );
 };
 

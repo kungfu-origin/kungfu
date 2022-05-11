@@ -11,7 +11,9 @@ export function removeEmptyRiskSetting(
   );
 }
 
-export function dealRiskSettingStoreData(riskData: KungfuApi.RiskSetting[]) {
+export function dealRiskSettingStoreData(
+  riskData: KungfuApi.RiskSetting[],
+): KungfuApi.RiskSetting[] {
   const riskDataResolved = riskData.map((item) => {
     return {
       ...item,
@@ -29,7 +31,7 @@ export function dealRiskSettingStoreData(riskData: KungfuApi.RiskSetting[]) {
 export function delateRiskFromStates(
   riskControl: KungfuApi.RiskSetting[],
   accountList: string[],
-) {
+): void {
   if (accountList.length) {
     riskControl.forEach((item) => {
       if (item.account_id && accountList.includes(item.account_id)) {
