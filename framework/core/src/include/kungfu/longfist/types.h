@@ -100,12 +100,8 @@ KF_DEFINE_DATA_TYPE(                                   //
     (std::string, group),                              //
     (std::string, name),                               //
     (enums::mode, mode),                               //
-    (uint32_t, max_order_volume),                      // 单笔最大量
-    (uint32_t, max_daily_volume),                      // 每日最大成交量
-    (std::string, white_list),                         // 白名单列表
-    (bool, self_filled_check),                         // 自成交检查
-    (double, max_cancel_ratio),                        // 最大撤单比
-    (std::string, value));
+    (std::string, value)                               //
+);
 
 KF_DEFINE_DATA_TYPE(                                                     //
     Session, 10010, PK(location_uid, begin_time), TIMESTAMP(begin_time), //
