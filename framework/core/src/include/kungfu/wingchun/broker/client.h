@@ -99,6 +99,8 @@ public:
 
   [[nodiscard]] virtual bool should_connect_strategy(const yijinjing::data::location_ptr &md_location) const = 0;
 
+  kungfu::yijinjing::data::location_ptr get_location(uint32_t uid) const {return app_.get_location(uid);}
+
 protected:
   yijinjing::practice::apprentice &app_;
 

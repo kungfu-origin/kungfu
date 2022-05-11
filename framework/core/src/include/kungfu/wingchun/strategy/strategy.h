@@ -76,9 +76,9 @@ public:
   //@param deregister     断开数据
   virtual void on_deregister(Context_ptr &context, const longfist::types::Deregister &deregister){};
 
-  //客户端断开回调
-  //@param brokerStateUpdate     断开数据
-  virtual void on_disconnected(Context_ptr &context){};
+  //客户端状态变化回调
+  //@param brokerStateUpdate     状态变化
+  virtual void on_broker_state_change(Context_ptr &context, const longfist::types::BrokerStateUpdate &brokerStateUpdate, const kungfu::yijinjing::data::location_ptr&){};
 };
 
 DECLARE_PTR(Strategy)
