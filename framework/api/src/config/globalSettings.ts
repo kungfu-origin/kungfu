@@ -2,7 +2,10 @@ import fse from 'fs-extra';
 import { SpaceSizeSettingEnum, SpaceTabSettingEnum } from '../typings/enums';
 import { KF_CONFIG_PATH } from './pathConfig';
 import { CodeSizeSetting, CodeTabSetting } from './tradingConfig';
-import { languageList, langDefault } from '@kungfu-trader/kungfu-app/src/language/index';
+import {
+  languageList,
+  langDefault,
+} from '@kungfu-trader/kungfu-app/src/language/index';
 import VueI18n from '@kungfu-trader/kungfu-app/src/language';
 const { t } = VueI18n.global;
 

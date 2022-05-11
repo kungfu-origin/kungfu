@@ -99,7 +99,7 @@ public:
 
   [[nodiscard]] virtual bool should_connect_strategy(const yijinjing::data::location_ptr &md_location) const = 0;
 
-  kungfu::yijinjing::data::location_ptr get_location(uint32_t uid) const {return app_.get_location(uid);}
+  kungfu::yijinjing::data::location_ptr get_location(uint32_t uid) const { return app_.get_location(uid); }
 
 protected:
   yijinjing::practice::apprentice &app_;
@@ -221,8 +221,7 @@ static constexpr auto is_own_reg = [](const Client &broker_client) {
   return rx::filter([&](const event_ptr &event) {
     if (event->msg_type() == DataType::tag) {
       const DataType &data = event->data<DataType>();
-      return broker_client.should_connect_md(data.location_uid) or
-             broker_client.should_connect_td(data.location_uid);
+      return broker_client.should_connect_md(data.location_uid) or broker_client.should_connect_td(data.location_uid);
     }
     return false;
   });
@@ -231,10 +230,10 @@ static constexpr auto is_own_reg = [](const Client &broker_client) {
 static constexpr auto is_own_updata_state = [](const Client &broker_client) {
   return rx::filter([&](const event_ptr &event) {
     if (event->msg_type() == kungfu::longfist::types::BrokerStateUpdate::tag) {
-      const kungfu::longfist::types::BrokerStateUpdate &data = event->data<kungfu::longfist::types::BrokerStateUpdate>();
+      const kungfu::longfist::types::BrokerStateUpdate &data =
+          event->data<kungfu::longfist::types::BrokerStateUpdate>();
       return ((data.state == kungfu::longfist::enums::BrokerState::DisConnected) and
-             (broker_client.should_connect_md(event->source()) or
-             broker_client.should_connect_td(event->source())));
+              (broker_client.should_connect_md(event->source()) or broker_client.should_connect_td(event->source())));
     }
     return false;
   });
