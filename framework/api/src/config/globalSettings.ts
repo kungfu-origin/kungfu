@@ -178,46 +178,46 @@ export const riskSettings: KfSystemConfig = {
   config: [
     {
       key: 'riskControl',
-      name: '风控',
-      tip: '启用风险控制, 当持仓量超过阈值时自动平仓',
+      name: t('风控'),
+      tip: t('风控描述'),
       default: [],
       type: 'table',
       columns: [
         {
           key: 'account_id',
-          name: '账户',
+          name: t('账户'),
           type: 'td',
         },
         {
           key: 'source_id',
-          name: '柜台',
+          name: t('柜台'),
           type: 'str',
           primary: true,
         },
         {
           key: 'max_order_volume',
-          name: '单比最大量',
+          name: t('单比最大量'),
           type: 'int',
         },
         {
           key: 'max_daily_volume',
-          name: '每日最大成交量',
+          name: t('每日最大成交量'),
           type: 'int',
         },
         {
           key: 'self_filled_check',
-          name: '是否需要自成功检测',
+          name: t('是否需要自成功检测'),
           type: 'bool',
           default: false,
         },
         {
           key: 'max_cancel_ratio',
-          name: '最大回撤率',
+          name: t('最大回撤率'),
           type: 'int',
         },
         {
           key: 'white_list',
-          name: '标的白名单',
+          name: t('标的白名单'),
           type: 'instruments',
         },
       ],
