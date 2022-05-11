@@ -261,7 +261,7 @@ declare namespace KungfuApi {
   }
 
   export interface RiskSettingStore {
-    getAllRiskSetting(): Record<string, RiskSetting>;
+    getAllRiskSetting(): Record<string, RiskSettingOrigin>;
     setRiskSetting(
       category: string,
       group: string,
@@ -710,15 +710,18 @@ declare namespace KungfuApi {
     min_commission: number;
   }
 
-  export interface RiskSetting extends KfLocation {
+  export interface RiskSetting {
     max_order_volume: number;
     max_daily_volume: number;
     white_list: string[];
     self_filled_check: boolean;
     max_cancel_ratio: number;
-    value?: string;
-    account_id?: string;
-    source_id?: string;
+    account_id: string;
+    source_id: string;
+  }
+
+  export interface RiskSettingOrigin extends KfLocation {
+    value: string;
   }
 
   export interface Watcher {

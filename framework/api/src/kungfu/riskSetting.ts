@@ -4,7 +4,9 @@ import { riskSettingStore } from '.';
 import { kfLogger } from '../utils/busiUtils';
 import { BASE_DB_DIR } from '../config/pathConfig';
 
-export const getAllKfRiskSettings = (): Promise<KungfuApi.RiskSetting[]> => {
+export const getAllKfRiskSettings = (): Promise<
+  KungfuApi.RiskSettingOrigin[]
+> => {
   kfLogger.info('Get kungfu RiskControl');
   if (fse.pathExistsSync(path.join(BASE_DB_DIR, 'config.db'))) {
     return Promise.resolve(Object.values(riskSettingStore.getAllRiskSetting()));

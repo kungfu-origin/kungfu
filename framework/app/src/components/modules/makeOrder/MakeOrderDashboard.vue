@@ -215,7 +215,7 @@ onMounted(() => {
 watch(
   () => formState.value.instrument,
   (newVal) => {
-    getAllKfRiskSettings().then((res: KungfuApi.RiskSetting[]) => {
+    getAllKfRiskSettings().then((res: KungfuApi.RiskSettingOrigin[]) => {
       if (res.length && res[0]?.value) {
         const riskSettingList = JSON.parse(res[0]?.value);
         formState.value.account_id =
