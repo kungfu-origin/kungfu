@@ -217,7 +217,7 @@ export const riskSettings: KfSystemConfig = {
         {
           key: 'white_list',
           name: '标的白名单',
-          type: 'instrument',
+          type: 'instruments',
         },
       ],
     },

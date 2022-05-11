@@ -11,20 +11,13 @@ import {
   SideEnum,
 } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import {
-  buildInstrumentSelectOptionLabel,
-  buildInstrumentSelectOptionValue,
-} from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
-import {
   defineComponent,
   getCurrentInstance,
-  nextTick,
   reactive,
   Ref,
   ref,
   toRefs,
   watch,
-  WatchStopHandle,
-  computed,
 } from 'vue';
 import {
   PriceType,
@@ -97,6 +90,14 @@ defineEmits<{
   ): void;
 }>();
 
+type InstrumentsSearchRelated = Record<
+  string,
+  {
+    searchInstrumnetOptions: Ref<{ label: string; value: string }[]>;
+    handleSearchInstrument: (value: string) => void;
+  }
+>;
+
 const app = getCurrentInstance();
 const formRef = ref();
 
@@ -122,41 +123,12 @@ watch(
   },
 );
 
-type InstrumentsSearchRelated = Record<
-  string,
-  {
-    searchInstrumnetOptions: Ref<{ label: string; value: string }[]>;
-    handleSearchInstrument: (value: string) => void;
-  }
->;
-
-const instrumentsSearchRelated = computed(() =>
-  Object.keys(instrumentKeys.value).reduce(
-    (item1: InstrumentsSearchRelated, key: string) => {
-      const { searchInstrumnetOptions, handleSearchInstrument } =
-        useInstruments();
-      searchInstrumnetOptions.value = makeSearchOptionFormInstruments(
-        key,
-        instrumentKeys.value[key],
-        formState[key],
-      );
-      item1[key] = {
-        searchInstrumnetOptions: searchInstrumnetOptions,
-        handleSearchInstrument,
-      };
-      return item1;
-    },
-    {} as InstrumentsSearchRelated,
-  ),
-);
-
-const tmpInstrumentKeysUnwatchers: WatchStopHandle[] = [];
-pushNewInstrumentKeysUnWatchers(instrumentKeys.value);
-
+let instrumentsSearchRelated: InstrumentsSearchRelated =
+  getInstrumentsSearchRelated(instrumentKeys.value);
 watch(
   () => instrumentKeys.value,
   (newVal) => {
-    pushNewInstrumentKeysUnWatchers(newVal);
+    instrumentsSearchRelated = getInstrumentsSearchRelated(newVal);
   },
 );
 
@@ -164,27 +136,22 @@ watch(formState, (newVal) => {
   app && app.emit('update:formState', newVal);
 });
 
-function pushNewInstrumentKeysUnWatchers(
+function getInstrumentsSearchRelated(
   instrumentKeys: Record<string, 'instrument' | 'instruments'>,
 ) {
-  while (tmpInstrumentKeysUnwatchers.length) {
-    const unwatch = tmpInstrumentKeysUnwatchers.pop();
-    unwatch && unwatch();
-  }
+  return Object.keys(instrumentKeys).reduce(
+    (item1: InstrumentsSearchRelated, key: string) => {
+      const { searchInstrumnetOptions, handleSearchInstrument } =
+        useInstruments();
 
-  Object.keys(instrumentKeys).forEach((key) => {
-    tmpInstrumentKeysUnwatchers.push(
-      watch(
-        () => formState[key],
-        (newVal) => {
-          nextTick().then(() => {
-            instrumentsSearchRelated.value[key].searchInstrumnetOptions.value =
-              makeSearchOptionFormInstruments(key, instrumentKeys[key], newVal);
-          });
-        },
-      ),
-    );
-  });
+      item1[key] = {
+        searchInstrumnetOptions: searchInstrumnetOptions,
+        handleSearchInstrument,
+      };
+      return item1;
+    },
+    {} as InstrumentsSearchRelated,
+  );
 }
 
 function getValidatorType(
@@ -199,34 +166,6 @@ function getValidatorType(
   } else {
     return 'string';
   }
-}
-
-function makeSearchOptionFormInstruments(
-  key: string,
-  type: 'instrument' | 'instruments',
-  value: string | string[],
-): { value: string; label: string }[] {
-  const valResolved = resolveInstrumentValue(type, value);
-  const instrumentResolveds: Array<KungfuApi.InstrumentResolved> = valResolved
-    .map((item) => {
-      return transformSearchInstrumentResultToInstrument(item.toString());
-    })
-    .filter((item): item is KungfuApi.InstrumentResolved => !!item);
-
-  if (!instrumentResolveds.length) {
-    if (type === 'instruments') {
-      formState[key] = [];
-    } else {
-      formState[key] = '';
-    }
-  }
-
-  return [
-    ...instrumentResolveds.map((item) => ({
-      value: buildInstrumentSelectOptionValue(item),
-      label: buildInstrumentSelectOptionLabel(item),
-    })),
-  ];
 }
 
 function filterInstrumentKeysFromConfigSettings(
@@ -637,9 +576,7 @@ defineExpose({
         </a-select-option>
       </a-select>
       <a-select
-        v-else-if="
-          item.type === 'instrument' && instrumentsSearchRelated[item.key]
-        "
+        v-else-if="item.type === 'instrument'"
         :disabled="changeType === 'update' && item.primary"
         show-search
         v-model:value="formState[item.key]"
@@ -650,13 +587,11 @@ defineExpose({
         @search="instrumentsSearchRelated[item.key].handleSearchInstrument"
       ></a-select>
       <a-select
-        v-else-if="
-          item.type === 'instruments' && instrumentsSearchRelated[item.key]
-        "
+        v-else-if="item.type === 'instruments'"
         :disabled="changeType === 'update' && item.primary"
         mode="multiple"
         show-search
-        v-model:value="formState[item.key]"
+        :value="formState[item.key]"
         :filter-option="false"
         :options="
           instrumentsSearchRelated[item.key].searchInstrumnetOptions.value
@@ -665,6 +600,7 @@ defineExpose({
         @select="handleInstrumentSelected($event, item.key)"
         @deselect="handleInstrumentDeselected($event, item.key)"
       ></a-select>
+
       <a-select
         v-else-if="item.type === 'td'"
         v-model:value="formState[item.key]"
@@ -783,7 +719,6 @@ defineExpose({
             :rules="rules"
             layout="inline"
           ></KfConfigSettingsForm>
-
           <a-divider
             v-if="index !== formState[item.key].length - 1"
           ></a-divider>
@@ -794,7 +729,7 @@ defineExpose({
 </template>
 <script lang="ts">
 export default defineComponent({
-  name: 'KfConfigSettingsFrom',
+  name: 'KfConfigSettingsForm',
 });
 </script>
 <style lang="less">
