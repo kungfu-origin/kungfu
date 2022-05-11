@@ -235,7 +235,7 @@ function handleConfirmAddUpdateTdGroup(
     category: 'tdGroup',
     group: 'group',
     name: td_group_name.toString(),
-    mode: 'LIVE',
+    mode: 'live',
     children: [],
   };
 
