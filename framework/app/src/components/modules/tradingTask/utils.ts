@@ -112,7 +112,7 @@ export const useTradingTask = (): {
       category: 'strategy',
       group: extKey,
       name: new Date().getTime().toString(),
-      mode: 'LIVE',
+      mode: 'live',
     };
 
     const extConfig: KungfuApi.KfExtConfig = (extConfigs.value['strategy'] ||
