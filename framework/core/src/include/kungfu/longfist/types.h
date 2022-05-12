@@ -93,6 +93,16 @@ KF_DEFINE_PACK_TYPE(                                             //
     (double, min_commission) //最小手续费
 );
 
+KF_DEFINE_DATA_TYPE(                                   //
+    RiskSetting, 10007, PK(location_uid), PERPETUAL(), //
+    (uint32_t, location_uid),                          //
+    (enums::category, category),                       //
+    (std::string, group),                              //
+    (std::string, name),                               //
+    (enums::mode, mode),                               //
+    (std::string, value)                               //
+);
+
 KF_DEFINE_DATA_TYPE(                                                     //
     Session, 10010, PK(location_uid, begin_time), TIMESTAMP(begin_time), //
     (uint32_t, location_uid),                                            //

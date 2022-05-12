@@ -35,9 +35,10 @@ import {
   useExtConfigsRelated,
   useProcessStatusDetailData,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
+import { ensureRemoveTradingTask } from '@kungfu-trader/kungfu-js-api/actions/tradingTask';
 import { messagePrompt } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import VueI18n from '@kungfu-trader/kungfu-app/src/language';
-import { useTradingTask, ensureRemoveTradingTask } from './utils';
+import { useTradingTask } from './utils';
 
 const { t } = VueI18n.global;
 const { success, error } = messagePrompt();
@@ -162,7 +163,11 @@ function handleRemoveTask(record: Pm2ProcessStatusDetail) {
       'tradingTaskConfig.delete_task_content',
     )}`,
   ).then(() => {
-    return ensureRemoveTradingTask(taskLocation, processStatusData.value);
+    return ensureRemoveTradingTask(
+      window.watcher,
+      taskLocation,
+      processStatusData.value,
+    );
   });
 }
 
@@ -209,7 +214,7 @@ function resolveKfLocation(
     category: categoryRegisterConfig.name,
     group: taskLocation?.group || '',
     name: taskLocation?.name || '',
-    mode: 'LIVE',
+    mode: 'live',
   };
   return locationResolved;
 }

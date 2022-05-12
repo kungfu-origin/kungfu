@@ -211,6 +211,7 @@ function handleOpenAddTdGroupDialog(type: KungfuApi.ModalChangeType) {
     name: t('tdConfig.td_group'),
     category: 'tdGroup',
     key: 'TdGroup',
+    extPath: '',
     settings: [
       {
         key: 'td_group_name',
@@ -234,7 +235,7 @@ function handleConfirmAddUpdateTdGroup(
     category: 'tdGroup',
     group: 'group',
     name: td_group_name.toString(),
-    mode: 'LIVE',
+    mode: 'live',
     children: [],
   };
 

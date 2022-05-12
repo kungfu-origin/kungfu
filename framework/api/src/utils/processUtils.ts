@@ -333,6 +333,8 @@ export const startProcess = (
     kill_timeout: 16000,
     env: {
       RELOAD_AFTER_CRASHED: process.env.RELOAD_AFTER_CRASHED || 'false',
+      EXTENSION_DIRS: process.env.EXTENSION_DIRS || '',
+      KFC_DIR: process.env.KFC_DIR || '',
       KF_HOME: dealSpaceInPath(KF_HOME),
       KF_RUNTIME_DIR: dealSpaceInPath(KF_RUNTIME_DIR),
       LANG: `${locale}.UTF-8`,
