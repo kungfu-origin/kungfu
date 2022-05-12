@@ -59,6 +59,8 @@ import { getAllKfRiskSettings } from '@kungfu-trader/kungfu-js-api/kungfu/riskSe
 const { t } = VueI18n.global;
 const { error } = messagePrompt();
 
+let recordableAccountList: string[] = [];
+
 const app = getCurrentInstance();
 const { handleBodySizeChange } = useDashboardBodySize();
 const formState = ref(
@@ -262,6 +264,7 @@ function getCurrentAccountId(
     instrumentKeyData[curInstrument] &&
     instrumentKeyData[curInstrument].length
   ) {
+    recordableAccountList = instrumentKeyData[curInstrument];
     return instrumentKeyData[curInstrument][0] || '';
   }
   return '';
@@ -345,6 +348,13 @@ async function handleApartOrder(): Promise<void> {
   try {
     await formRef.value.validate();
     const makeOrderInput: KungfuApi.MakeOrderInput = await initOrderInputData();
+    if (
+      makeOrderInput.account_id &&
+      !recordableAccountList.includes(makeOrderInput.account_id)
+    ) {
+      error('请先为此账户设置标的白名单');
+      return;
+    }
 
     await showCloseModal(makeOrderInput);
     await confirmFatFingerModal(makeOrderInput);
@@ -474,6 +484,10 @@ async function handleMakeOrder(): Promise<void> {
 
     await formRef.value.validate();
     const makeOrderInput: KungfuApi.MakeOrderInput = await initOrderInputData();
+    if (!recordableAccountList.includes(formState.value.account_id)) {
+      error('请先为此账户设置标的白名单');
+      return;
+    }
 
     await showCloseModal(makeOrderInput);
     await confirmFatFingerModal(makeOrderInput);
