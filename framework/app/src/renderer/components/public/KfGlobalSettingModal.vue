@@ -36,7 +36,7 @@ import {
 import { DeleteOutlined } from '@ant-design/icons-vue';
 import { longfist } from '@kungfu-trader/kungfu-js-api/kungfu';
 import {
-  getAllRiskSettingsData,
+  getAllRiskSettingsList,
   getScheduleTasks,
   setScheduleTasks,
 } from '@kungfu-trader/kungfu-js-api/actions';
@@ -111,7 +111,7 @@ onMounted(() => {
     commissions.value = res;
   });
 
-  getAllRiskSettingsData().then((res: KungfuApi.RiskSetting[]) => {
+  getAllRiskSettingsList().then((res: KungfuApi.RiskSetting[]) => {
     if (res.length) {
       riskSettingList.value = res;
       initialRiskList = JSON.parse(JSON.stringify(res));
@@ -539,43 +539,6 @@ function handleRemoveScheduleTask(index: number) {
 
               &.exchange-id {
                 width: 80px;
-              }
-            }
-          }
-        }
-
-        .risk-setting-row {
-          min-width: 50%;
-          justify-content: space-around;
-          margin-bottom: 16px;
-          flex-wrap: wrap;
-
-          .risk-setting-item {
-            margin-bottom: 16px;
-            padding-right: 16px;
-            box-sizing: border-box;
-            display: flex;
-            justify-content: left;
-            align-items: center;
-
-            .label {
-              padding-right: 8px;
-              width: 120px;
-            }
-
-            .value {
-              &.product-id {
-                width: 80px;
-              }
-
-              &.exchange-id {
-                width: 80px;
-              }
-            }
-            &.white-list {
-              width: 100%;
-              .label {
-                white-space: nowrap;
               }
             }
           }
