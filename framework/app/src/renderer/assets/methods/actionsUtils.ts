@@ -70,7 +70,6 @@ import { useExtraCategory } from './uiExtraLocationUtils';
 import { useGlobalStore } from '../../pages/index/store/global';
 import VueI18n from '@kungfu-trader/kungfu-app/src/language';
 import { messagePrompt } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
-import { RemoveRiskSetting } from '@kungfu-trader/kungfu-js-api/kungfu/riskSetting';
 
 const { t } = VueI18n.global;
 const { success, error } = messagePrompt();

@@ -17,7 +17,9 @@ export const getKfCommission = (): Promise<KungfuApi.Commission[]> => {
   });
 };
 
-export const setKfCommission = (commissions: KungfuApi.Commission[]) => {
+export const setKfCommission = (
+  commissions: KungfuApi.Commission[],
+): Promise<boolean> => {
   kfLogger.info('Set kungfu Commission');
   return new Promise((resolve, reject) => {
     const kfCommissionData = longfist.Commission();

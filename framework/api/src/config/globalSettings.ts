@@ -172,7 +172,7 @@ export const setKfGlobalSettingsValue = (
   return fse.writeJSONSync(KF_CONFIG_PATH, value);
 };
 
-export const riskSettings: KfSystemConfig = {
+export const riskSettingConfig: KfSystemConfig = {
   key: 'riskSetting',
   name: '风控',
   config: [
@@ -187,12 +187,6 @@ export const riskSettings: KfSystemConfig = {
           key: 'account_id',
           name: t('账户'),
           type: 'td',
-        },
-        {
-          key: 'source_id',
-          name: t('柜台'),
-          type: 'str',
-          primary: true,
         },
         {
           key: 'max_order_volume',

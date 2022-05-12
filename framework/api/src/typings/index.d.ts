@@ -271,25 +271,7 @@ declare namespace KungfuApi {
 
   export interface RiskSettingStore {
     getAllRiskSetting(): Record<string, RiskSettingOrigin>;
-    setRiskSetting(
-      category: string,
-      group: string,
-      name: string,
-      mode: string,
-      value: string,
-    ): void;
-    removeRiskSetting(
-      category: string,
-      group: string,
-      name: string,
-      mode: string,
-    ): void;
-    getRiskSetting(
-      category: string,
-      group: string,
-      name: string,
-      mode: string,
-    ): KungfuApi.RiskSetting;
+    setAllRiskSetting(riskSettings: RiskSettingOrigin[]): boolean;
   }
 
   export interface DataTable<T> {
@@ -726,11 +708,15 @@ declare namespace KungfuApi {
     self_filled_check: boolean;
     max_cancel_ratio: number;
     account_id: string;
-    source_id: string;
   }
 
-  export interface RiskSettingOrigin extends KfLocation {
+  export interface RiskSettingOrigin extends KfLocationOrigin {
     value: string;
+  }
+
+  export interface RiskSettingForSave extends KfLocationOrigin {
+    category: KfCategoryTypes;
+    mode: KfModeTypes;
   }
 
   export interface Watcher {
@@ -780,6 +766,7 @@ declare namespace KungfuApi {
     TimeValue(): TimeValue;
     Trade(): Trade;
     Commission(): Commission;
+    RiskSetting(): RiskSettingOrigin;
   }
 
   export interface Kungfu {

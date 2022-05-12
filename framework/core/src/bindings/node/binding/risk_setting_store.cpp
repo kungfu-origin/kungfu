@@ -6,6 +6,7 @@
 #include "io.h"
 
 using namespace kungfu::longfist;
+using namespace kungfu::longfist::enums;
 using namespace kungfu::longfist::types;
 using namespace kungfu::yijinjing;
 using namespace kungfu::yijinjing::data;
@@ -54,9 +55,22 @@ Napi::Value RiskSettingStore::SetAllRiskSetting(const Napi::CallbackInfo &info) 
       auto args = info[0].As<Napi::Array>();
       std::vector<RiskSetting> risk_settings;
       for (int i = 0; i < args.Length(); i++) {
-        RiskSetting risk_setting = {};
-        get(args.Get(i).ToObject(), risk_setting);
-        risk_settings.push_back(risk_setting);
+        auto location =
+            location::make_shared(get_mode_by_name(args.Get(i).ToObject().Get("mode").ToString().Utf8Value()),
+                                  get_category_by_name(args.Get(i).ToObject().Get("category").ToString().Utf8Value()),
+                                  args.Get(i).ToObject().Get("group").ToString().Utf8Value(),
+                                  args.Get(i).ToObject().Get("name").ToString().Utf8Value(), locator_);
+
+        if (location) {
+          RiskSetting risk_setting = {};
+          risk_setting.location_uid = location->uid;
+          risk_setting.category = location->category;
+          risk_setting.group = location->group;
+          risk_setting.name = location->name;
+          risk_setting.mode = location->mode;
+          risk_setting.value = args.Get(i).ToObject().Get("value").ToString().Utf8Value();
+          risk_settings.push_back(risk_setting);
+        };
       }
       profile_.remove_all<RiskSetting>();
       for (auto risk_setting : risk_settings) {
@@ -94,6 +108,7 @@ void RiskSettingStore::Init(Napi::Env env, Napi::Object exports) {
                                         InstanceMethod("setRiskSetting", &RiskSettingStore::SetRiskSetting),
                                         InstanceMethod("getRiskSetting", &RiskSettingStore::GetRiskSetting),
                                         InstanceMethod("getAllRiskSetting", &RiskSettingStore::GetAllRiskSetting),
+                                        InstanceMethod("setAllRiskSetting", &RiskSettingStore::SetAllRiskSetting),
                                         InstanceMethod("removeRiskSetting", &RiskSettingStore::RemoveRiskSetting),
                                     });
 

@@ -15,8 +15,14 @@ import {
   LOG_DIR,
 } from '../config/pathConfig';
 import { pathExists, remove } from 'fs-extra';
-import { getProcessIdByKfLocation } from '../utils/busiUtils';
-import { getAllKfRiskSettings } from '../kungfu/riskSetting';
+import {
+  getIdByKfLocation,
+  getProcessIdByKfLocation,
+} from '../utils/busiUtils';
+import {
+  getAllKfRiskSettings,
+  setAllKfRiskSettings,
+} from '../kungfu/riskSetting';
 
 export const getAllKfConfigOriginData = (): Promise<
   Record<KfCategoryTypes, KungfuApi.KfConfig[]>
@@ -47,23 +53,6 @@ export const getAllKfConfigOriginData = (): Promise<
       }),
       daemon: [],
     };
-  });
-};
-
-export const getAllRiskSettingsData = (): Promise<KungfuApi.RiskSetting[]> => {
-  return getAllKfRiskSettings().then((riskSettingOrigins) => {
-    const riskSettings = riskSettingOrigins.map((item) => {
-      const riskSetting: KungfuApi.RiskSetting = JSON.parse(
-        item.value,
-      ) as KungfuApi.RiskSetting;
-      return {
-        ...riskSetting,
-        account_id: item.name,
-        source_id: item.group,
-      };
-    });
-
-    return Promise.resolve(riskSettings);
   });
 };
 
@@ -201,4 +190,61 @@ export const setScheduleTasks = async (tasksConfig: {
   tasks: KungfuApi.ScheduleTask[];
 }): Promise<void> => {
   return fse.outputJSON(KF_SCHEDULE_TASKS_JSON_PATH, tasksConfig);
+};
+
+export const getAllRiskSettingList = (): Promise<KungfuApi.RiskSetting[]> => {
+  return getAllKfRiskSettings().then((riskSettingOrigins) => {
+    const riskSettings = riskSettingOrigins
+      .filter(
+        (item) =>
+          item.category === KfCategoryEnum.td && item.group && item.name,
+      )
+      .map((item) => {
+        const riskSetting: KungfuApi.RiskSetting = JSON.parse(
+          item.value,
+        ) as KungfuApi.RiskSetting;
+        return {
+          ...riskSetting,
+          account_id: getIdByKfLocation(item as KungfuApi.KfConfig),
+        };
+      });
+    return Promise.resolve(riskSettings);
+  });
+};
+
+export const setAllRiskSettingList = (
+  riskSettings: KungfuApi.RiskSetting[],
+) => {
+  const riskSettingOrigins: KungfuApi.RiskSettingForSave[] = riskSettings
+    .filter((item) => !!item.account_id)
+    .map((item) => {
+      const {
+        account_id,
+        max_order_volume,
+        max_daily_volume,
+        white_list,
+        self_filled_check,
+        max_cancel_ratio,
+      } = item;
+
+      const group = account_id.parseSourceAccountId().source;
+      const name = account_id.parseSourceAccountId().id;
+
+      return {
+        location_uid: 0,
+        category: 'td',
+        group,
+        name,
+        mode: 'live',
+        value: JSON.stringify({
+          max_order_volume,
+          max_daily_volume,
+          white_list,
+          self_filled_check,
+          max_cancel_ratio,
+        }),
+      };
+    });
+
+  return setAllKfRiskSettings(riskSettingOrigins);
 };

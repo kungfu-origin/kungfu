@@ -1,13 +1,13 @@
 import path from 'path';
 import fse from 'fs-extra';
-import { riskSettingStore } from '.';
+import { riskSettingStore, longfist } from '.';
 import { kfLogger } from '../utils/busiUtils';
 import { BASE_DB_DIR } from '../config/pathConfig';
 
 export const getAllKfRiskSettings = (): Promise<
   KungfuApi.RiskSettingOrigin[]
 > => {
-  kfLogger.info('Get kungfu RiskControl');
+  kfLogger.info('Get kungfu RiskSettings');
   if (fse.pathExistsSync(path.join(BASE_DB_DIR, 'config.db'))) {
     return Promise.resolve(Object.values(riskSettingStore.getAllRiskSetting()));
   } else {
@@ -15,44 +15,24 @@ export const getAllKfRiskSettings = (): Promise<
   }
 };
 
-export const setKfRiskSettings = (
-  riskSettingList: KungfuApi.RiskSetting[],
-): Promise<void> => {
-  riskSettingList
-    .filter((item) => {
-      return item.account_id;
-    })
-    .map((item) => {
-      const value: string = JSON.stringify(item);
-      const KfLocation: KungfuApi.KfLocation = {
-        category: 'td',
-        group: item.account_id ? item.account_id.split('_')[0] : '',
-        name: item.account_id || '',
-        mode: 'live',
-      };
-      riskSettingStore.setRiskSetting(
-        KfLocation.category,
-        KfLocation.group,
-        KfLocation.name,
-        KfLocation.mode,
-        value,
-      );
-    });
-  return Promise.resolve();
-};
+export const setAllKfRiskSettings = (
+  riskSettings: KungfuApi.RiskSettingForSave[],
+): Promise<boolean> => {
+  kfLogger.info('Set kungfu RiskSettings');
+  return new Promise((resolve, reject) => {
+    const kfRiskSetting = longfist.RiskSetting();
+    const riskSettingResolved = riskSettings
+      .filter((item) => item.category === 'td' && item.group && item.name)
+      .map((item) => ({
+        ...kfRiskSetting,
+        ...item,
+      }));
 
-export const RemoveRiskSetting = (
-  kfLocation: KungfuApi.KfLocation,
-): Promise<void> => {
-  kfLogger.info(
-    `Remove Kungfu Config ${kfLocation.category} ${kfLocation.group} ${kfLocation.name}`,
-  );
-  return Promise.resolve(
-    riskSettingStore.removeRiskSetting(
-      kfLocation.category,
-      kfLocation.group,
-      kfLocation.name,
-      kfLocation.mode,
-    ),
-  );
+    const result = riskSettingStore.setAllRiskSetting(riskSettingResolved);
+    if (result) {
+      resolve(result);
+    } else {
+      reject(result);
+    }
+  });
 };

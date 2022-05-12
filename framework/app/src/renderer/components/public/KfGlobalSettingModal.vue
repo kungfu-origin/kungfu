@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import {
   getKfGlobalSettings,
-  riskSettings,
+  riskSettingConfig,
   getKfGlobalSettingsValue,
   KfSystemConfig,
   setKfGlobalSettingsValue,
@@ -36,7 +36,8 @@ import {
 import { DeleteOutlined } from '@ant-design/icons-vue';
 import { longfist } from '@kungfu-trader/kungfu-js-api/kungfu';
 import {
-  getAllRiskSettingsList,
+  getAllRiskSettingList,
+  setAllRiskSettingList,
   getScheduleTasks,
   setScheduleTasks,
 } from '@kungfu-trader/kungfu-js-api/actions';
@@ -52,7 +53,6 @@ import {
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/configs';
 import { ipcRenderer } from 'electron';
 import { useAllKfConfigData } from '../../assets/methods/actionsUtils';
-import { setKfRiskSettings } from '@kungfu-trader/kungfu-js-api/kungfu/riskSetting';
 
 interface ScheduleTaskFormItem {
   timeValue: Dayjs;
@@ -81,8 +81,8 @@ const globalSettingsFromStates = reactive(
   initGlobalSettingsFromStates(kfGlobalSettings, kfGlobalSettingsValue),
 );
 
-const riskSettingsFromStates = reactive(
-  initFormStateByConfig(riskSettings.config, {}),
+const riskSettingsFromStates = ref<Record<string, KungfuApi.KfConfigValue>>(
+  initFormStateByConfig(riskSettingConfig.config),
 );
 
 const { modalVisible, closeModal } = useModalVisible(props.visible);
@@ -112,10 +112,11 @@ onMounted(() => {
     commissions.value = res;
   });
 
-  getAllRiskSettingsList().then((res: KungfuApi.RiskSetting[]) => {
-    if (res.length) {
-      riskSettingsFromStates.riskSetting = JSON.parse(JSON.stringify(res));
-    }
+  getAllRiskSettingList().then((res: KungfuApi.RiskSetting[]) => {
+    riskSettingsFromStates.value = initFormStateByConfig(
+      riskSettingConfig.config,
+      { riskSetting: res },
+    );
   });
 
   getScheduleTasks().then((res) => {
@@ -151,8 +152,7 @@ onMounted(() => {
 
 onUnmounted(() => {
   setKfGlobalSettingsValue(globalSettingsFromStates);
-  setKfRiskSettings(riskSettingsFromStates.riskSetting);
-
+  setAllRiskSettingList(riskSettingsFromStates.value.riskSetting);
   setKfCommission(commissions.value);
   setScheduleTasks({
     active: scheduleTask.active || false,
@@ -257,7 +257,7 @@ function handleRemoveScheduleTask(index: number) {
             <a-tab-pane key="riskSetting" tab="风控">
               <KfConfigSettingsForm
                 v-model:formState="riskSettingsFromStates"
-                :configSettings="riskSettings.config"
+                :configSettings="riskSettingConfig.config"
                 changeType="update"
                 :primaryKeyAvoidRepeatCompareTarget="[]"
                 primaryKeyAvoidRepeatCompareExtra=""
