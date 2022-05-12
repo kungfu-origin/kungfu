@@ -19,7 +19,7 @@ export const setKfRiskSettings = (
   RiskSetting: KungfuApi.RiskSetting[],
 ): Promise<void> => {
   RiskSetting.filter((item) => {
-    return item.account_id;
+    return item.account_id && item.source_id;
   }).map((item) => {
     const value: string = JSON.stringify(item);
     const KfLocation: KungfuApi.KfLocation = {

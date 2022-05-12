@@ -260,6 +260,15 @@ declare namespace KungfuApi {
     ): KungfuApi.KfConfig;
   }
 
+  export interface HistoryStore {
+    selectPeriod(from: string, to: string): TradingData;
+  }
+
+  export interface CommissionStore {
+    getAllCommission(): Commission[];
+    setAllCommission(commissions: Commission[]): boolean;
+  }
+
   export interface RiskSettingStore {
     getAllRiskSetting(): Record<string, RiskSettingOrigin>;
     setRiskSetting(
@@ -754,15 +763,6 @@ declare namespace KungfuApi {
       strategyLocation?: KfLocation,
     ): bigint;
     now(): bigint;
-  }
-
-  export interface HistoryStore {
-    selectPeriod(from: string, to: string): TradingData;
-  }
-
-  export interface CommissionStore {
-    getAllCommission(): Commission[];
-    setAllCommission(commissions: Commission[]): boolean;
   }
 
   export interface Longfist {
