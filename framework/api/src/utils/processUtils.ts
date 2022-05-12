@@ -10,7 +10,6 @@ import {
   kfLogger,
   dealSpaceInPath,
   setTimerPromiseTask,
-  delayMilliSeconds,
   flattenExtensionModuleDirs,
   getProcessIdByKfLocation,
   getIfProcessRunning,
@@ -690,11 +689,9 @@ export const startStrategyProcess = async (
   strategyPath: string,
   pythonPath: string,
 ): Promise<Proc | void> => {
-  const baseArgs = ['strategy', '-n', name, '-p', `'${strategyPath}'`].join(
-    ' ',
+  const args = buildArgs(
+    `run -c strategy -g default -n '${name}' '${strategyPath}'`,
   );
-  const baseArgsResolved = buildArgs(baseArgs);
-  const args = ['-m', 'kungfu', baseArgsResolved].join(' ');
 
   if (!pythonPath.trim()) {
     return Promise.reject(new Error('No local python path!'));
@@ -707,6 +704,8 @@ export const startStrategyProcess = async (
   const pythonFile = fullPythonPathList
     .slice(fullPythonPathList.length - 1)
     .join('/');
+  console.log(pythonFolder);
+  console.log(pythonFile);
 
   return startProcess({
     name: `strategy_${name}`,
@@ -729,9 +728,7 @@ export const startStrategy = (
   const pythonPath = globalSetting?.strategy?.pythonPath || '';
 
   if (ifLocalPython) {
-    return deleteProcess(strategyId)
-      .then(() => delayMilliSeconds(2000))
-      .then(() => startStrategyProcess(strategyId, strategyPath, pythonPath));
+    return startStrategyProcess(strategyId, strategyPath, pythonPath);
   } else {
     const args = buildArgs(
       `run -c strategy -g default -n '${strategyId}' '${strategyPath}'`,
