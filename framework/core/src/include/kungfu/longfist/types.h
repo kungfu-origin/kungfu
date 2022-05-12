@@ -312,7 +312,7 @@ KF_DEFINE_PACK_TYPE(                                                    //
 
     (int64_t, main_seq), //主序号
     (int64_t, seq),      //子序号
-    (int64_t， orig_order_no)  // 原始订单号
+    (int64_t, orig_order_no)  // 原始订单号
 );
 
 KF_DEFINE_PACK_TYPE(                                                        //
