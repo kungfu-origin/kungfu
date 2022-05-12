@@ -78,14 +78,14 @@ defineEmits<{
 }>();
 
 const riskSettingsDelateList: string[] = [];
-let initialRiskValue: KungfuApi.RiskSetting[] = [];
+let initialRiskList: KungfuApi.RiskSetting[] = [];
 
 const kfGlobalSettings = getKfGlobalSettings();
 const kfGlobalSettingsValue = getKfGlobalSettingsValue();
 
 const { modalVisible, closeModal } = useModalVisible(props.visible);
 const commissions = ref<KungfuApi.Commission[]>([]);
-const riskSettingData = ref<KungfuApi.RiskSetting[]>([]);
+const riskSettingList = ref<KungfuApi.RiskSetting[]>([]);
 const { searchKeyword, tableData } =
   useTableSearchKeyword<KungfuApi.Commission>(commissions, ['product_id']);
 
@@ -113,9 +113,9 @@ onMounted(() => {
 
   getAllRiskSettingsData().then((res: KungfuApi.RiskSetting[]) => {
     if (res.length) {
-      riskSettingData.value = res;
-      initialRiskValue = JSON.parse(JSON.stringify(res));
-      riskSettingsFromStates.riskControl = riskSettingData.value;
+      riskSettingList.value = res;
+      initialRiskList = JSON.parse(JSON.stringify(res));
+      riskSettingsFromStates.riskSetting = riskSettingList.value;
     }
   });
 
@@ -153,8 +153,8 @@ onMounted(() => {
 onUnmounted(() => {
   setKfGlobalSettingsValue(globalSettingsFromStates);
 
-  deleteRiskFromStates(initialRiskValue, riskSettingsDelateList);
-  setKfRiskSettings(riskSettingsFromStates.riskControl);
+  deleteRiskFromStates(initialRiskList, riskSettingsDelateList);
+  setKfRiskSettings(riskSettingsFromStates.riskSetting);
 
   setKfCommission(commissions.value);
   setScheduleTasks({
@@ -178,7 +178,7 @@ const globalSettingsFromStates = reactive(
 );
 
 const riskSettingsFromStates = reactive({
-  riskControl: riskSettingData.value,
+  riskSetting: riskSettingList.value,
 });
 
 function deleteRiskItem(item: string) {
@@ -269,7 +269,7 @@ function handleRemoveScheduleTask(index: number) {
                 layout="vertical"
               ></KfConfigSettingsForm>
             </a-tab-pane>
-            <a-tab-pane key="riskControl" tab="风控">
+            <a-tab-pane key="riskSetting" tab="风控">
               <KfConfigSettingsForm
                 :formState="riskSettingsFromStates"
                 :configSettings="riskSettings.config"
