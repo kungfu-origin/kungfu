@@ -289,7 +289,8 @@ KF_DEFINE_PACK_TYPE(                                         //
     (kungfu::array<double, 10>, bid_price),   //申买价
     (kungfu::array<double, 10>, ask_price),   //申卖价
     (kungfu::array<int64_t, 10>, bid_volume), //申买量
-    (kungfu::array<int64_t, 10>, ask_volume)  //申卖量
+    (kungfu::array<int64_t, 10>, ask_volume), //申卖量
+    (kungfu::array<char, 8>, trading_phase_code) //交易
 );
 
 KF_DEFINE_PACK_TYPE(                                                    //
@@ -310,7 +311,8 @@ KF_DEFINE_PACK_TYPE(                                                    //
     (PriceType, price_type), //订单价格类型（市价、限价、本方最优）
 
     (int64_t, main_seq), //主序号
-    (int64_t, seq)       //子序号
+    (int64_t, seq),      //子序号
+    (int64_t， orig_order_no)  // 原始订单号
 );
 
 KF_DEFINE_PACK_TYPE(                                                        //
