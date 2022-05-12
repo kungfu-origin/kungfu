@@ -171,3 +171,50 @@ export const setKfGlobalSettingsValue = (
 ) => {
   return fse.writeJSONSync(KF_CONFIG_PATH, value);
 };
+
+export const riskSettingConfig: KfSystemConfig = {
+  key: 'riskSetting',
+  name: '风控',
+  config: [
+    {
+      key: 'riskSetting',
+      name: t('风控'),
+      tip: t('风控描述'),
+      default: [],
+      type: 'table',
+      columns: [
+        {
+          key: 'account_id',
+          name: t('账户'),
+          type: 'td',
+        },
+        {
+          key: 'max_order_volume',
+          name: t('单比最大量'),
+          type: 'int',
+        },
+        {
+          key: 'max_daily_volume',
+          name: t('每日最大成交量'),
+          type: 'int',
+        },
+        {
+          key: 'self_filled_check',
+          name: t('是否需要自成功检测'),
+          type: 'bool',
+          default: false,
+        },
+        {
+          key: 'max_cancel_ratio',
+          name: t('最大回撤率'),
+          type: 'int',
+        },
+        {
+          key: 'white_list',
+          name: t('标的白名单'),
+          type: 'instruments',
+        },
+      ],
+    },
+  ],
+};

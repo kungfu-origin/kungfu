@@ -32,6 +32,7 @@ export const kf = kungfu();
 kfLogger.info('Load kungfu node');
 
 export const configStore = kf.ConfigStore(KF_RUNTIME_DIR);
+export const riskSettingStore = kf.RiskSettingStore(KF_RUNTIME_DIR);
 export const history = kf.History(KF_RUNTIME_DIR);
 export const commissionStore = kf.CommissionStore(KF_RUNTIME_DIR);
 export const longfist = kf.longfist;
