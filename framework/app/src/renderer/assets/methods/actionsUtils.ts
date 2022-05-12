@@ -109,11 +109,11 @@ export const ensureRemoveLocation = (
 };
 
 export function deleteRiskFromStates(
-  riskControl: KungfuApi.RiskSetting[],
+  riskSettingList: KungfuApi.RiskSetting[],
   accountList: string[],
 ): void {
   if (accountList.length) {
-    riskControl.forEach((item) => {
+    riskSettingList.forEach((item) => {
       if (item.account_id && accountList.includes(item.account_id)) {
         const KfLocation: KungfuApi.KfLocation = {
           category: 'td',

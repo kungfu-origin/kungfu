@@ -16,9 +16,9 @@ export const getAllKfRiskSettings = (): Promise<
 };
 
 export const setKfRiskSettings = (
-  RiskSetting: KungfuApi.RiskSetting[],
+  RiskSettingList: KungfuApi.RiskSetting[],
 ): Promise<void> => {
-  RiskSetting.filter((item) => {
+  RiskSettingList.filter((item) => {
     return item.account_id;
   }).map((item) => {
     const value: string = JSON.stringify(item);
