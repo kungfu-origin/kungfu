@@ -260,6 +260,20 @@ declare namespace KungfuApi {
     ): KungfuApi.KfConfig;
   }
 
+  export interface HistoryStore {
+    selectPeriod(from: string, to: string): TradingData;
+  }
+
+  export interface CommissionStore {
+    getAllCommission(): Commission[];
+    setAllCommission(commissions: Commission[]): boolean;
+  }
+
+  export interface RiskSettingStore {
+    getAllRiskSetting(): Record<string, RiskSettingOrigin>;
+    setAllRiskSetting(riskSettings: RiskSettingOrigin[]): boolean;
+  }
+
   export interface DataTable<T> {
     [hashed: string]: T;
     filter(key: string, value: string | number | bigint): DataTable<T>;
@@ -687,6 +701,24 @@ declare namespace KungfuApi {
     min_commission: number;
   }
 
+  export interface RiskSetting {
+    max_order_volume: number;
+    max_daily_volume: number;
+    white_list: string[];
+    self_filled_check: boolean;
+    max_cancel_ratio: number;
+    account_id: string;
+  }
+
+  export interface RiskSettingOrigin extends KfLocationOrigin {
+    value: string;
+  }
+
+  export interface RiskSettingForSave extends KfLocationOrigin {
+    category: KfCategoryTypes;
+    mode: KfModeTypes;
+  }
+
   export interface Watcher {
     appStates: Record<string, BrokerStateStatusEnum>;
     ledger: TradingData;
@@ -719,15 +751,6 @@ declare namespace KungfuApi {
     now(): bigint;
   }
 
-  export interface HistoryStore {
-    selectPeriod(from: string, to: string): TradingData;
-  }
-
-  export interface CommissionStore {
-    getAllCommission(): Commission[];
-    setAllCommission(commissions: Commission[]): boolean;
-  }
-
   export interface Longfist {
     Asset(): Asset;
     AssetSnapshot(): AssetSnapshot;
@@ -743,10 +766,12 @@ declare namespace KungfuApi {
     TimeValue(): TimeValue;
     Trade(): Trade;
     Commission(): Commission;
+    RiskSetting(): RiskSettingOrigin;
   }
 
   export interface Kungfu {
     ConfigStore(kfHome: string): ConfigStore;
+    RiskSettingStore(kfHome: string): RiskSettingStore;
     CommissionStore(kfHome: string): CommissionStore;
     History(kfHome: string): HistoryStore;
     longfist: Longfist;

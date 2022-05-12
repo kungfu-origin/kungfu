@@ -54,6 +54,8 @@ import { useExtraCategory } from '@kungfu-trader/kungfu-app/src/renderer/assets/
 import VueI18n from '@kungfu-trader/kungfu-app/src/language';
 import { useTradingTask } from '../tradingTask/utils';
 
+import { getAllKfRiskSettings } from '@kungfu-trader/kungfu-js-api/kungfu/riskSetting';
+
 const { t } = VueI18n.global;
 const { error } = messagePrompt();
 
@@ -212,7 +214,17 @@ onMounted(() => {
 
 watch(
   () => formState.value.instrument,
-  () => {
+  (newVal) => {
+    getAllKfRiskSettings().then((res: KungfuApi.RiskSettingOrigin[]) => {
+      if (res.length && res[0]?.value) {
+        const riskSettingList = JSON.parse(res[0]?.value);
+        console.log('riskSettingList', res);
+
+        formState.value.account_id =
+          getCurrentAccountId(riskSettingList, newVal) || '';
+      }
+    });
+
     if (!instrumentResolved.value) {
       return;
     }
@@ -229,6 +241,30 @@ watch(
     updatePositionList();
   },
 );
+
+function getCurrentAccountId(
+  riskList: KungfuApi.RiskSetting[],
+  curInstrument: string,
+): string {
+  const instrumentKeyData: Record<string, string[]> = {};
+  riskList.forEach((item) => {
+    if (item.account_id && item.white_list.length) {
+      item.white_list.forEach((instrument) => {
+        if (!instrumentKeyData[instrument].length) {
+          instrumentKeyData[instrument] = [];
+        }
+        instrumentKeyData[instrument].push(item.account_id);
+      });
+    }
+  });
+  if (
+    instrumentKeyData[curInstrument] &&
+    instrumentKeyData[curInstrument].length
+  ) {
+    return instrumentKeyData[curInstrument][0] || '';
+  }
+  return '';
+}
 
 // 更新持仓列表
 function updatePositionList(): void {

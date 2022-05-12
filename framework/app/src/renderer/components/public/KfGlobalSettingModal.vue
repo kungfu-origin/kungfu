@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import {
   getKfGlobalSettings,
+  riskSettingConfig,
   getKfGlobalSettingsValue,
   KfSystemConfig,
   setKfGlobalSettingsValue,
@@ -35,6 +36,8 @@ import {
 import { DeleteOutlined } from '@ant-design/icons-vue';
 import { longfist } from '@kungfu-trader/kungfu-js-api/kungfu';
 import {
+  getAllRiskSettingList,
+  setAllRiskSettingList,
   getScheduleTasks,
   setScheduleTasks,
 } from '@kungfu-trader/kungfu-js-api/actions';
@@ -73,6 +76,15 @@ defineEmits<{
 
 const kfGlobalSettings = getKfGlobalSettings();
 const kfGlobalSettingsValue = getKfGlobalSettingsValue();
+
+const globalSettingsFromStates = reactive(
+  initGlobalSettingsFromStates(kfGlobalSettings, kfGlobalSettingsValue),
+);
+
+const riskSettingsFromStates = ref<Record<string, KungfuApi.KfConfigValue>>(
+  initFormStateByConfig(riskSettingConfig.config),
+);
+
 const { modalVisible, closeModal } = useModalVisible(props.visible);
 const commissions = ref<KungfuApi.Commission[]>([]);
 const { searchKeyword, tableData } =
@@ -98,6 +110,13 @@ const scheduleTask = reactive<{
 onMounted(() => {
   getKfCommission().then((res) => {
     commissions.value = res;
+  });
+
+  getAllRiskSettingList().then((res: KungfuApi.RiskSetting[]) => {
+    riskSettingsFromStates.value = initFormStateByConfig(
+      riskSettingConfig.config,
+      { riskSetting: res },
+    );
   });
 
   getScheduleTasks().then((res) => {
@@ -133,6 +152,7 @@ onMounted(() => {
 
 onUnmounted(() => {
   setKfGlobalSettingsValue(globalSettingsFromStates);
+  setAllRiskSettingList(riskSettingsFromStates.value.riskSetting);
   setKfCommission(commissions.value);
   setScheduleTasks({
     active: scheduleTask.active || false,
@@ -149,10 +169,6 @@ onUnmounted(() => {
     ipcRenderer.send('schedule-setting-refresh');
   });
 });
-
-const globalSettingsFromStates = reactive(
-  initGlobalSettingsFromStates(kfGlobalSettings, kfGlobalSettingsValue),
-);
 
 function initGlobalSettingsFromStates(
   configs: KfSystemConfig[],
@@ -230,8 +246,18 @@ function handleRemoveScheduleTask(index: number) {
               :tab="config.name"
             >
               <KfConfigSettingsForm
-                :formState="globalSettingsFromStates[config.key]"
+                v-model:formState="globalSettingsFromStates[config.key]"
                 :configSettings="config.config"
+                changeType="update"
+                :primaryKeyAvoidRepeatCompareTarget="[]"
+                primaryKeyAvoidRepeatCompareExtra=""
+                layout="vertical"
+              ></KfConfigSettingsForm>
+            </a-tab-pane>
+            <a-tab-pane key="riskSetting" tab="风控">
+              <KfConfigSettingsForm
+                v-model:formState="riskSettingsFromStates"
+                :configSettings="riskSettingConfig.config"
                 changeType="update"
                 :primaryKeyAvoidRepeatCompareTarget="[]"
                 primaryKeyAvoidRepeatCompareExtra=""

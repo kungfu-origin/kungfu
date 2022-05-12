@@ -54,7 +54,7 @@ location_ptr IODevice::GetLocation(const Napi::CallbackInfo &info) {
   longfist::enums::category c = longfist::enums::get_category_by_name(info[0].As<Napi::String>().Utf8Value());
   auto group = info[1].As<Napi::String>().Utf8Value();
   auto name = info[2].As<Napi::String>().Utf8Value();
-  longfist::enums::mode m = longfist::enums::get_mode_by_name(info[3].As<Napi::String>().Utf8Value());
+  longfist::enums::mode m = get_mode_by_name(info[3].As<Napi::String>().Utf8Value());
   return std::make_shared<location>(m, c, group, name, GetLocator(info, 4));
 }
 
