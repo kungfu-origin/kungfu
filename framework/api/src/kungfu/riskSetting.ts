@@ -16,26 +16,28 @@ export const getAllKfRiskSettings = (): Promise<
 };
 
 export const setKfRiskSettings = (
-  RiskSetting: KungfuApi.RiskSetting[],
+  riskSettingList: KungfuApi.RiskSetting[],
 ): Promise<void> => {
-  RiskSetting.filter((item) => {
-    return item.account_id && item.source_id;
-  }).map((item) => {
-    const value: string = JSON.stringify(item);
-    const KfLocation: KungfuApi.KfLocation = {
-      category: 'td',
-      group: item.account_id ? item.account_id.split('_')[0] : '',
-      name: item.account_id || '',
-      mode: 'live',
-    };
-    riskSettingStore.setRiskSetting(
-      KfLocation.category,
-      KfLocation.group,
-      KfLocation.name,
-      KfLocation.mode,
-      value,
-    );
-  });
+  riskSettingList
+    .filter((item) => {
+      return item.account_id;
+    })
+    .map((item) => {
+      const value: string = JSON.stringify(item);
+      const KfLocation: KungfuApi.KfLocation = {
+        category: 'td',
+        group: item.account_id ? item.account_id.split('_')[0] : '',
+        name: item.account_id || '',
+        mode: 'live',
+      };
+      riskSettingStore.setRiskSetting(
+        KfLocation.category,
+        KfLocation.group,
+        KfLocation.name,
+        KfLocation.mode,
+        value,
+      );
+    });
   return Promise.resolve();
 };
 

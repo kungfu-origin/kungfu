@@ -173,11 +173,11 @@ export const setKfGlobalSettingsValue = (
 };
 
 export const riskSettings: KfSystemConfig = {
-  key: 'riskControl',
+  key: 'riskSetting',
   name: '风控',
   config: [
     {
-      key: 'riskControl',
+      key: 'riskSetting',
       name: t('风控'),
       tip: t('风控描述'),
       default: [],

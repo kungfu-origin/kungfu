@@ -48,6 +48,28 @@ Napi::Value RiskSettingStore::GetRiskSetting(const Napi::CallbackInfo &info) {
   return result;
 }
 
+Napi::Value RiskSettingStore::SetAllRiskSetting(const Napi::CallbackInfo &info) {
+  try {
+    if (info[0].IsArray()) {
+      auto args = info[0].As<Napi::Array>();
+      std::vector<RiskSetting> risk_settings;
+      for (int i = 0; i < args.Length(); i++) {
+        RiskSetting risk_setting = {};
+        get(args.Get(i).ToObject(), risk_setting);
+        risk_settings.push_back(risk_setting);
+      }
+      profile_.remove_all<RiskSetting>();
+      for (auto risk_setting : risk_settings) {
+        profile_.set(risk_setting);
+      }
+      return Napi::Boolean::New(info.Env(), true);
+    }
+  } catch (const std::exception &ex) {
+    SPDLOG_ERROR("failed to set risk_settings {}", ex.what());
+  }
+  return Napi::Boolean::New(info.Env(), false);
+}
+
 Napi::Value RiskSettingStore::GetAllRiskSetting(const Napi::CallbackInfo &info) {
   auto table = Napi::Object::New(info.Env());
   for (const auto &risk_setting : profile_.get_all(RiskSetting{})) {

@@ -108,26 +108,6 @@ export const ensureRemoveLocation = (
   });
 };
 
-export function deleteRiskFromStates(
-  riskControl: KungfuApi.RiskSetting[],
-  accountList: string[],
-): void {
-  if (accountList.length) {
-    riskControl.forEach((item) => {
-      if (item.account_id && accountList.includes(item.account_id)) {
-        const KfLocation: KungfuApi.KfLocation = {
-          category: 'td',
-          group: item.account_id ? item.account_id.split('_')[0] : '',
-          name: item.account_id,
-          mode: 'live',
-        };
-
-        RemoveRiskSetting(KfLocation);
-      }
-    });
-  }
-}
-
 export const handleSwitchProcessStatus = (
   checked: boolean,
   mouseEvent: MouseEvent,

@@ -246,7 +246,7 @@ function getCurrentAccountId(
   riskList: KungfuApi.RiskSetting[],
   curInstrument: string,
 ): string {
-  const instrumentKeyData = {};
+  const instrumentKeyData: Record<string, string[]> = {};
   riskList.forEach((item) => {
     if (item.account_id && item.white_list.length) {
       item.white_list.forEach((instrument) => {

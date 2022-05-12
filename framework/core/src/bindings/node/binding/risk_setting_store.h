@@ -24,6 +24,8 @@ public:
 
   Napi::Value GetAllRiskSetting(const Napi::CallbackInfo &info);
 
+  Napi::Value SetAllRiskSetting(const Napi::CallbackInfo &info);
+
   Napi::Value RemoveRiskSetting(const Napi::CallbackInfo &info);
 
   static void Init(Napi::Env env, Napi::Object exports);
@@ -31,7 +33,8 @@ public:
   static Napi::Value NewInstance(Napi::Value arg);
 
 private:
-  serialize::JsSet set;
+  serialize::JsGet get = {};
+  serialize::JsSet set = {};
   yijinjing::data::locator_ptr locator_;
   yijinjing::practice::profile profile_;
 

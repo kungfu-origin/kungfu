@@ -36,7 +36,7 @@ import {
 import { DeleteOutlined } from '@ant-design/icons-vue';
 import { longfist } from '@kungfu-trader/kungfu-js-api/kungfu';
 import {
-  getAllRiskSettingsData,
+  getAllRiskSettingsList,
   getScheduleTasks,
   setScheduleTasks,
 } from '@kungfu-trader/kungfu-js-api/actions';
@@ -51,10 +51,7 @@ import {
   modeForScheduleTasksOptions,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/configs';
 import { ipcRenderer } from 'electron';
-import {
-  useAllKfConfigData,
-  deleteRiskFromStates,
-} from '../../assets/methods/actionsUtils';
+import { useAllKfConfigData } from '../../assets/methods/actionsUtils';
 import { setKfRiskSettings } from '@kungfu-trader/kungfu-js-api/kungfu/riskSetting';
 
 interface ScheduleTaskFormItem {
@@ -77,15 +74,19 @@ defineEmits<{
   (e: 'close'): void;
 }>();
 
-const riskSettingsDelateList: string[] = [];
-let initialRiskValue: KungfuApi.RiskSetting[] = [];
-
 const kfGlobalSettings = getKfGlobalSettings();
 const kfGlobalSettingsValue = getKfGlobalSettingsValue();
 
+const globalSettingsFromStates = reactive(
+  initGlobalSettingsFromStates(kfGlobalSettings, kfGlobalSettingsValue),
+);
+
+const riskSettingsFromStates = reactive(
+  initFormStateByConfig(riskSettings.config, {}),
+);
+
 const { modalVisible, closeModal } = useModalVisible(props.visible);
 const commissions = ref<KungfuApi.Commission[]>([]);
-const riskSettingData = ref<KungfuApi.RiskSetting[]>([]);
 const { searchKeyword, tableData } =
   useTableSearchKeyword<KungfuApi.Commission>(commissions, ['product_id']);
 
@@ -111,11 +112,9 @@ onMounted(() => {
     commissions.value = res;
   });
 
-  getAllRiskSettingsData().then((res: KungfuApi.RiskSetting[]) => {
+  getAllRiskSettingsList().then((res: KungfuApi.RiskSetting[]) => {
     if (res.length) {
-      riskSettingData.value = res;
-      initialRiskValue = JSON.parse(JSON.stringify(res));
-      riskSettingsFromStates.riskControl = riskSettingData.value;
+      riskSettingsFromStates.riskSetting = JSON.parse(JSON.stringify(res));
     }
   });
 
@@ -152,9 +151,7 @@ onMounted(() => {
 
 onUnmounted(() => {
   setKfGlobalSettingsValue(globalSettingsFromStates);
-
-  deleteRiskFromStates(initialRiskValue, riskSettingsDelateList);
-  setKfRiskSettings(riskSettingsFromStates.riskControl);
+  setKfRiskSettings(riskSettingsFromStates.riskSetting);
 
   setKfCommission(commissions.value);
   setScheduleTasks({
@@ -172,18 +169,6 @@ onUnmounted(() => {
     ipcRenderer.send('schedule-setting-refresh');
   });
 });
-
-const globalSettingsFromStates = reactive(
-  initGlobalSettingsFromStates(kfGlobalSettings, kfGlobalSettingsValue),
-);
-
-const riskSettingsFromStates = reactive({
-  riskControl: riskSettingData.value,
-});
-
-function deleteRiskItem(item: string) {
-  riskSettingsDelateList.push(item);
-}
 
 function initGlobalSettingsFromStates(
   configs: KfSystemConfig[],
@@ -261,7 +246,7 @@ function handleRemoveScheduleTask(index: number) {
               :tab="config.name"
             >
               <KfConfigSettingsForm
-                :formState="globalSettingsFromStates[config.key]"
+                v-model:formState="globalSettingsFromStates[config.key]"
                 :configSettings="config.config"
                 changeType="update"
                 :primaryKeyAvoidRepeatCompareTarget="[]"
@@ -269,11 +254,10 @@ function handleRemoveScheduleTask(index: number) {
                 layout="vertical"
               ></KfConfigSettingsForm>
             </a-tab-pane>
-            <a-tab-pane key="riskControl" tab="风控">
+            <a-tab-pane key="riskSetting" tab="风控">
               <KfConfigSettingsForm
-                :formState="riskSettingsFromStates"
+                v-model:formState="riskSettingsFromStates"
                 :configSettings="riskSettings.config"
-                @deleteRiskItem="deleteRiskItem"
                 changeType="update"
                 :primaryKeyAvoidRepeatCompareTarget="[]"
                 primaryKeyAvoidRepeatCompareExtra=""
@@ -539,43 +523,6 @@ function handleRemoveScheduleTask(index: number) {
 
               &.exchange-id {
                 width: 80px;
-              }
-            }
-          }
-        }
-
-        .risk-setting-row {
-          min-width: 50%;
-          justify-content: space-around;
-          margin-bottom: 16px;
-          flex-wrap: wrap;
-
-          .risk-setting-item {
-            margin-bottom: 16px;
-            padding-right: 16px;
-            box-sizing: border-box;
-            display: flex;
-            justify-content: left;
-            align-items: center;
-
-            .label {
-              padding-right: 8px;
-              width: 120px;
-            }
-
-            .value {
-              &.product-id {
-                width: 80px;
-              }
-
-              &.exchange-id {
-                width: 80px;
-              }
-            }
-            &.white-list {
-              width: 100%;
-              .label {
-                white-space: nowrap;
               }
             }
           }
