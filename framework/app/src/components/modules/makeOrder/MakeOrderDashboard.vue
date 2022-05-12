@@ -217,9 +217,7 @@ watch(
   (newVal) => {
     getAllKfRiskSettings().then((res: KungfuApi.RiskSettingOrigin[]) => {
       if (res.length && res[0]?.value) {
-        const riskSettingList = res.map((item) => JSON.parse(item.value));
-        formState.value.account_id =
-          getCurrentAccountId(riskSettingList, newVal) || '';
+        formState.value.account_id = getCurrentAccountId(res, newVal) || '';
       }
     });
 
@@ -241,20 +239,22 @@ watch(
 );
 
 function getCurrentAccountId(
-  riskList: KungfuApi.RiskSetting[],
+  riskOriginList: KungfuApi.RiskSettingOrigin[],
   curInstrument: string,
 ): string {
   const instrumentKeyData: Record<string, string[]> = {};
-  riskList.forEach((item) => {
-    if (item.account_id && item.white_list.length) {
-      item.white_list.forEach((instrument) => {
+  riskOriginList.forEach((item) => {
+    const riskListItem: KungfuApi.RiskSetting = JSON.parse(item.value);
+
+    if (item.name && item.group && riskListItem.white_list.length) {
+      riskListItem.white_list.forEach((instrument) => {
         if (
           !instrumentKeyData[instrument] ||
           !instrumentKeyData[instrument].length
         ) {
           instrumentKeyData[instrument] = [];
         }
-        instrumentKeyData[instrument].push(item.account_id);
+        instrumentKeyData[instrument].push(`${item.group}_${item.name}`);
       });
     }
   });
