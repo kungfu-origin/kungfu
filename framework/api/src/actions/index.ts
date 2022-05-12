@@ -52,7 +52,7 @@ export const getAllKfConfigOriginData = (): Promise<
 
 export const getAllRiskSettingsData = (): Promise<KungfuApi.RiskSetting[]> => {
   return getAllKfRiskSettings().then((riskList) => {
-    const riskDataResolved = riskList.map((item) => {
+    const riskListResolved = riskList.map((item) => {
       const riskItem: KungfuApi.RiskSetting = item.value
         ? JSON.parse(item.value)
         : {};
@@ -63,7 +63,7 @@ export const getAllRiskSettingsData = (): Promise<KungfuApi.RiskSetting[]> => {
       };
     });
 
-    return Promise.resolve(riskDataResolved);
+    return Promise.resolve(riskListResolved);
   });
 };
 
