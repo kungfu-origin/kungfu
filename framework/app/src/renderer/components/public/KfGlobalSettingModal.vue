@@ -53,7 +53,7 @@ import {
 import { ipcRenderer } from 'electron';
 import {
   useAllKfConfigData,
-  delateRiskFromStates,
+  deleteRiskFromStates,
 } from '../../assets/methods/actionsUtils';
 import { setKfRiskSettings } from '@kungfu-trader/kungfu-js-api/kungfu/riskSetting';
 
@@ -153,7 +153,7 @@ onMounted(() => {
 onUnmounted(() => {
   setKfGlobalSettingsValue(globalSettingsFromStates);
 
-  delateRiskFromStates(initialRiskValue, riskSettingsDelateList);
+  deleteRiskFromStates(initialRiskValue, riskSettingsDelateList);
   setKfRiskSettings(riskSettingsFromStates.riskControl);
 
   setKfCommission(commissions.value);
@@ -181,7 +181,7 @@ const riskSettingsFromStates = reactive({
   riskControl: riskSettingData.value,
 });
 
-function delateRiskItem(item: string) {
+function deleteRiskItem(item: string) {
   riskSettingsDelateList.push(item);
 }
 
@@ -273,7 +273,7 @@ function handleRemoveScheduleTask(index: number) {
               <KfConfigSettingsForm
                 :formState="riskSettingsFromStates"
                 :configSettings="riskSettings.config"
-                @delateRiskItem="delateRiskItem"
+                @deleteRiskItem="deleteRiskItem"
                 changeType="update"
                 :primaryKeyAvoidRepeatCompareTarget="[]"
                 primaryKeyAvoidRepeatCompareExtra=""

@@ -218,6 +218,8 @@ watch(
     getAllKfRiskSettings().then((res: KungfuApi.RiskSettingOrigin[]) => {
       if (res.length && res[0]?.value) {
         const riskSettingList = JSON.parse(res[0]?.value);
+        console.log('riskSettingList', res);
+
         formState.value.account_id =
           getCurrentAccountId(riskSettingList, newVal) || '';
       }

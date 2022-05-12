@@ -108,7 +108,7 @@ export const ensureRemoveLocation = (
   });
 };
 
-export function delateRiskFromStates(
+export function deleteRiskFromStates(
   riskControl: KungfuApi.RiskSetting[],
   accountList: string[],
 ): void {
