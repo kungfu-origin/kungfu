@@ -141,8 +141,13 @@ function getInstrumentsSearchRelated(
 ) {
   return Object.keys(instrumentKeys).reduce(
     (item1: InstrumentsSearchRelated, key: string) => {
-      const { searchInstrumnetOptions, handleSearchInstrument } =
-        useInstruments();
+      const {
+        searchInstrumnetOptions,
+        initSearchInstrumnetOptions,
+        handleSearchInstrument,
+      } = useInstruments();
+
+      initSearchInstrumnetOptions(instrumentKeys[key], formState[key]);
 
       item1[key] = {
         searchInstrumnetOptions: searchInstrumnetOptions,

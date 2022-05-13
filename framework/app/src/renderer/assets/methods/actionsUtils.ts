@@ -62,6 +62,7 @@ import {
   buildInstrumentSelectOptionLabel,
   buildInstrumentSelectOptionValue,
   confirmModal,
+  makeSearchOptionFormInstruments,
 } from './uiUtils';
 import { storeToRefs } from 'pinia';
 import { ipcRenderer } from 'electron';
@@ -501,6 +502,10 @@ export const useInstruments = (): {
 
   searchInstrumentResult: Ref<string | undefined>;
   searchInstrumnetOptions: Ref<{ value: string; label: string }[]>;
+  initSearchInstrumnetOptions: (
+    type: 'instrument' | 'instruments',
+    value: string | string[],
+  ) => void;
   handleSearchInstrument: (value: string) => void;
   handleConfirmSearchInstrumentResult: (
     value: string,
@@ -564,6 +569,16 @@ export const useInstruments = (): {
   const searchInstrumentResult = ref<string | undefined>(undefined);
   const searchInstrumnetOptions = ref<{ value: string; label: string }[]>([]);
 
+  const initSearchInstrumnetOptions = (
+    type: 'instrument' | 'instruments',
+    value: string | string[],
+  ) => {
+    searchInstrumnetOptions.value = makeSearchOptionFormInstruments(
+      type,
+      value,
+    );
+  };
+
   const handleSearchInstrument = (val: string): void => {
     searchInstrumnetOptions.value = instruments.value
       .filter((item) => {
@@ -594,6 +609,7 @@ export const useInstruments = (): {
 
     searchInstrumentResult,
     searchInstrumnetOptions,
+    initSearchInstrumnetOptions,
     handleSearchInstrument,
     handleConfirmSearchInstrumentResult,
   };
