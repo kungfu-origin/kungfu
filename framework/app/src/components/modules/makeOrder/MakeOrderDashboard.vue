@@ -348,10 +348,7 @@ async function handleApartOrder(): Promise<void> {
   try {
     await formRef.value.validate();
     const makeOrderInput: KungfuApi.MakeOrderInput = await initOrderInputData();
-    if (
-      makeOrderInput.account_id &&
-      !recordableAccountList.includes(makeOrderInput.account_id)
-    ) {
+    if (!recordableAccountList.includes(formState.value.account_id)) {
       error('请先为此账户设置标的白名单');
       return;
     }

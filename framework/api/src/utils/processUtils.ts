@@ -704,8 +704,6 @@ export const startStrategyProcess = async (
   const pythonFile = fullPythonPathList
     .slice(fullPythonPathList.length - 1)
     .join('/');
-  console.log(pythonFolder);
-  console.log(pythonFile);
 
   return startProcess({
     name: `strategy_${name}`,
