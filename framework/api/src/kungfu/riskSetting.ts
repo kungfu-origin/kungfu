@@ -9,9 +9,7 @@ export const getAllKfRiskSettings = (): Promise<
 > => {
   kfLogger.info('Get kungfu RiskSettings');
   if (fse.pathExistsSync(path.join(BASE_DB_DIR, 'config.db'))) {
-    return Promise.resolve(
-      Object.values(riskSettingStore.getAllRiskSetting()).reverse(),
-    );
+    return Promise.resolve(Object.values(riskSettingStore.getAllRiskSetting()));
   } else {
     return Promise.resolve([]);
   }
