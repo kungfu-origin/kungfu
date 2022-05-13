@@ -1530,6 +1530,20 @@ export const initFormStateByConfig = (
   return formState;
 };
 
+export const resolveInstrumentValue = (
+  type: 'instrument' | 'instruments',
+  value: string | string[],
+): string[] => {
+  if (type === 'instruments') {
+    return (value || ['']) as string[];
+  }
+  if (type === 'instrument') {
+    return [(value || '') as string];
+  } else {
+    return [];
+  }
+};
+
 //深度克隆obj
 export const deepClone = <T>(obj: T): T => {
   if (!obj) return obj;
