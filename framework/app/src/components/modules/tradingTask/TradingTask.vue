@@ -124,7 +124,7 @@ function handleSwitchProcessStatusResolved(
     error(
       `${t('tradingTaskConfig.configuration_inexistence')} ${
         extConfig?.name
-      } .so`,
+      }`,
     );
     return;
   }
