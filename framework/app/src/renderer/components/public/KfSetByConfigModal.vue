@@ -7,6 +7,7 @@ import {
   ref,
   watch,
   nextTick,
+  toRaw,
 } from 'vue';
 import { useModalVisible } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 
@@ -74,7 +75,7 @@ watch(formState.value, (val) => {
       tag: 'input:currentConfigModal',
       category: props.payload.config.category,
       extKey: props.payload.config.key,
-      formState: val,
+      formState: toRaw(val),
     });
   }
 });
@@ -86,7 +87,7 @@ onMounted(() => {
         tag: 'ready:currentConfigModal',
         category: props.payload.config.category,
         extKey: props.payload.config.key,
-        initValue: props.payload.initValue,
+        initValue: toRaw(props.payload.initValue),
       });
     }
   });
@@ -95,11 +96,12 @@ onMounted(() => {
     const subscription = app?.proxy.$globalBus.subscribe((data: KfBusEvent) => {
       if (data.tag === 'update:currentConfigModalConfigSettings') {
         if (data.configSettings) {
-          formState.value = initFormStateByConfig(data.configSettings || [], {
-            ...formState.value,
-            ...props.payload.initValue,
-          });
           nextTick().then(() => {
+            formState.value = initFormStateByConfig(data.configSettings || [], {
+              ...toRaw(formState.value),
+              ...toRaw(props.payload.initValue),
+            });
+
             configSettings.value = data.configSettings;
           });
         }
