@@ -517,7 +517,7 @@ export default {
   kungfu: '功夫交易系统',
 
   system_prompt: '系统提示',
-  archive_completion: '功夫归档完成',
+  archive_completion: '功夫归档完成 ✓',
   archive: '功夫归档中...',
   environment_complete: '功夫环境准备完成 ✓',
   environment_preparation: '功夫环境准备中...',

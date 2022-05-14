@@ -20,6 +20,8 @@ import {
   removeDB,
   getAvailDaemonList,
   loopToRunProcess,
+  resolveInstrumentValue,
+  transformSearchInstrumentResultToInstrument,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { ExchangeIds } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
 import dayjs from 'dayjs';
@@ -452,6 +454,25 @@ export const buildInstrumentSelectOptionLabel = (
   return `${instrument.instrumentId} ${instrument.instrumentName} ${
     ExchangeIds[instrument.exchangeId.toUpperCase()].name
   }`;
+};
+
+export const makeSearchOptionFormInstruments = (
+  type: 'instrument' | 'instruments',
+  value: string | string[],
+): { value: string; label: string }[] => {
+  const valResolved = resolveInstrumentValue(type, value);
+  const instrumentResolveds: Array<KungfuApi.InstrumentResolved> = valResolved
+    .map((item) => {
+      return transformSearchInstrumentResultToInstrument(item.toString());
+    })
+    .filter((item): item is KungfuApi.InstrumentResolved => !!item);
+
+  return [
+    ...instrumentResolveds.map((item) => ({
+      value: buildInstrumentSelectOptionValue(item),
+      label: buildInstrumentSelectOptionLabel(item),
+    })),
+  ];
 };
 
 export const useTriggerMakeOrder = (): {

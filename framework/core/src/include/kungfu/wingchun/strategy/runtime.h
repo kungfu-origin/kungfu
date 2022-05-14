@@ -115,6 +115,13 @@ public:
    */
   book::Bookkeeper &get_bookkeeper();
 
+
+  /**
+   * request deregister.
+   * @return void
+   */
+  void req_deregister() override;
+
 protected:
   yijinjing::practice::apprentice &app_;
   const rx::connectable_observable<event_ptr> &events_;

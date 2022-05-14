@@ -16,6 +16,7 @@ import {
   reactive,
   Ref,
   ref,
+  toRaw,
   toRefs,
   watch,
 } from 'vue';
@@ -102,13 +103,6 @@ const app = getCurrentInstance();
 const formRef = ref();
 
 const formState = reactive(props.formState);
-watch(
-  () => props.formState,
-  (newVal) => {
-    Object.keys(newVal).forEach((key) => (formState[key] = newVal[key]));
-  },
-);
-
 const { td, md, strategy } = toRefs(useAllKfConfigData());
 
 const primaryKeys = ref<string[]>(getPrimaryKeys(props.configSettings || []));
@@ -120,6 +114,11 @@ watch(
   (newVal) => {
     primaryKeys.value = getPrimaryKeys(newVal);
     instrumentKeys.value = filterInstrumentKeysFromConfigSettings(newVal);
+
+    const rowFormState = toRaw(props.formState);
+    Object.keys(rowFormState).forEach(
+      (key) => (formState[key] = rowFormState[key]),
+    );
   },
 );
 
@@ -141,8 +140,13 @@ function getInstrumentsSearchRelated(
 ) {
   return Object.keys(instrumentKeys).reduce(
     (item1: InstrumentsSearchRelated, key: string) => {
-      const { searchInstrumnetOptions, handleSearchInstrument } =
-        useInstruments();
+      const {
+        searchInstrumnetOptions,
+        initSearchInstrumnetOptions,
+        handleSearchInstrument,
+      } = useInstruments();
+
+      initSearchInstrumnetOptions(instrumentKeys[key], formState[key]);
 
       item1[key] = {
         searchInstrumnetOptions: searchInstrumnetOptions,
