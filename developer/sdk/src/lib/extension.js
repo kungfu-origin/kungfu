@@ -196,7 +196,7 @@ exports.installSingleLib = async (
 
   const downloadFiles = async (localDir, files, buildRemoteURL, onFinish) => {
     for (const file of files) {
-      const remoteFileURL = buildRemoteURL(file);
+      const remoteFileURL = encodeURI(buildRemoteURL(file));
       const localFilePath = path.join(localDir, file);
       console.log(`-- Downloading ${remoteFileURL} to ${localFilePath}`);
 
