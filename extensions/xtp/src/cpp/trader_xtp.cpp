@@ -232,4 +232,65 @@ void TraderXTP::OnQueryAsset(XTPQueryAssetRsp *asset, XTPRI *error_info, int req
     enable_asset_sync();
   }
 }
+
+bool TraderXTP::req_history_order(const event_ptr &event) {
+  XTPQueryOrderReq query_param{};
+  int request_id = request_id_++;
+  int ret = api_->QueryOrders(&query_param, session_id_, request_id);
+  if (0 != ret) {
+    SPDLOG_ERROR("QueryOrders False ： {}", ret);
+  }
+  map_request_location_.emplace(request_id, event->source());
+  return 0 == ret;
+}
+
+bool TraderXTP::req_history_trade(const event_ptr &event) {
+  XTPQueryTraderReq query_param{};
+  int request_id = request_id_++;
+  int ret = api_->QueryTrades(&query_param, session_id_, request_id);
+  if (0 != ret) {
+    SPDLOG_ERROR("QueryTrades False ： {}", ret);
+  }
+  map_request_location_.emplace(request_id, event->source());
+  return 0 == ret;
+}
+
+void TraderXTP::OnQueryOrder(XTPQueryOrderRsp *order_info, XTPRI *error_info, int request_id, bool is_last,
+                             uint64_t session_id) {
+  auto is_error = error_info != nullptr and error_info->error_id != 0;
+  if (is_error) {
+    SPDLOG_ERROR("OnQueryOrder False , error_code : {}, error_msg : {}", error_info->error_id, error_info->error_msg);
+  }
+  auto writer = get_history_writer(request_id);
+  HistoryOrder &history_order = writer->open_data<HistoryOrder>();
+  from_xtp(*order_info, history_order);
+  history_order.order_id = writer->current_frame_uid();
+  history_order.is_last = is_last;
+  history_order.insert_time = yijinjing::time::now_in_nano();;
+  history_order.update_time = history_order.insert_time;
+  writer->close_data();
+}
+
+yijinjing::journal::writer_ptr TraderXTP::get_history_writer(uint64_t request_id) {
+  return get_writer(map_request_location_.try_emplace(request_id).first->second);
+}
+
+void TraderXTP::OnQueryTrade(XTPQueryTradeRsp *trade_info, XTPRI *error_info, int request_id, bool is_last,
+                             uint64_t session_id) {
+  auto is_error = error_info != nullptr and error_info->error_id != 0;
+  if (is_error) {
+    SPDLOG_ERROR("OnQueryTrade False , error_code : {}, error_msg : {}", error_info->error_id, error_info->error_msg);
+  }
+  auto writer = get_history_writer(request_id);
+  HistoryTrade &history_trade = writer->open_data<HistoryTrade>(now());
+  from_xtp(*trade_info, history_trade);
+  history_trade.trade_id = writer->current_frame_uid();
+  history_trade.is_last = is_last;
+  history_trade.trade_time = yijinjing::time::now_in_nano();;
+  strcpy(history_trade.trading_day, trading_day_.c_str());
+  strcpy(history_trade.account_id, this->get_account_id().c_str());
+  history_trade.instrument_type = get_instrument_type(history_trade.exchange_id, history_trade.instrument_id);
+  writer->close_data();
+}
+
 } // namespace kungfu::wingchun::xtp

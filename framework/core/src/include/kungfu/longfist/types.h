@@ -29,6 +29,8 @@ KF_DEFINE_MARK_TYPE(Ping, 10008);
 KF_DEFINE_MARK_TYPE(Pong, 10009);
 KF_DEFINE_MARK_TYPE(RequestStop, 10024);
 KF_DEFINE_MARK_TYPE(RequestStart, 10025);
+KF_DEFINE_MARK_TYPE(RequestHistoryOrder, 10029);
+KF_DEFINE_MARK_TYPE(RequestHistoryTrade, 10030);
 KF_DEFINE_MARK_TYPE(CachedReadyToRead, 10060);
 KF_DEFINE_MARK_TYPE(RequestCached, 10061);
 KF_DEFINE_MARK_TYPE(SubscribeAll, 303);
@@ -157,7 +159,7 @@ KF_DEFINE_PACK_TYPE(                                          //
 );
 
 KF_DEFINE_PACK_TYPE(                                        //
-    RequestReadFromSync, 10029, PK(source_id), PERPETUAL(), //
+    RequestReadFromSync, 10031, PK(source_id), PERPETUAL(), //
     (uint32_t, source_id),                                  //
     (int64_t, from_time)                                    //
 );
@@ -450,6 +452,50 @@ KF_DEFINE_PACK_TYPE(                                  //
     (TimeCondition, time_condition)      //成交时间类型
 );
 
+KF_DEFINE_PACK_TYPE(                                         //
+    HistoryOrder, 212, PK(order_id), TIMESTAMP(insert_time), //
+    (uint64_t, parent_id),                                   //母订单ID
+    (uint64_t, order_id),                                    //订单ID
+    //    (uint64_t, external_id),                                 //柜台订单ID
+
+    (int64_t, insert_time), //订单写入时间
+    (int64_t, update_time), //订单更新时间
+
+    (kungfu::array<char, DATE_LEN>, trading_day), //交易日
+
+    (kungfu::array<char, INSTRUMENT_ID_LEN>, instrument_id), //合约ID
+    (kungfu::array<char, EXCHANGE_ID_LEN>, exchange_id),     //交易所ID
+
+    (kungfu::array<char, SOURCE_ID_LEN>, source_id),   //柜台ID
+    (kungfu::array<char, ACCOUNT_ID_LEN>, account_id), //账号ID
+    (bool, is_last),                                   //是否为本次查询的最后一条记录
+    //    (kungfu::array<char, CLIENT_ID_LEN>, client_id),   // Client ID
+
+    (InstrumentType, instrument_type), //合约类型
+
+    (double, limit_price),  //价格
+    (double, frozen_price), //冻结价格，市价单冻结价格为0
+
+    (int64_t, volume),        //数量
+    (int64_t, volume_traded), //成交数量
+    (int64_t, volume_left),   //剩余数量
+
+    (double, tax),        //税
+    (double, commission), //手续费
+
+    (OrderStatus, status), //订单状态
+
+    (int32_t, error_id),                             //错误ID
+    (kungfu::array<char, ERROR_MSG_LEN>, error_msg), //错误信息
+
+    (Side, side),                        //买卖方向
+    (Offset, offset),                    //开平方向
+    (HedgeFlag, hedge_flag),             //投机套保标识
+    (PriceType, price_type),             //价格类型
+    (VolumeCondition, volume_condition), //成交量类型
+    (TimeCondition, time_condition)      //成交时间类型
+);
+
 KF_DEFINE_PACK_TYPE(                                 //
     Trade, 204, PK(trade_id), TIMESTAMP(trade_time), //
     (uint64_t, trade_id),                            //成交ID
@@ -465,6 +511,37 @@ KF_DEFINE_PACK_TYPE(                                 //
     (kungfu::array<char, SOURCE_ID_LEN>, source_id),         //柜台ID
     (kungfu::array<char, ACCOUNT_ID_LEN>, account_id),       //账号ID
     (kungfu::array<char, CLIENT_ID_LEN>, client_id),         // Client ID
+
+    (InstrumentType, instrument_type), //合约类型
+
+    (Side, side),            //买卖方向
+    (Offset, offset),        //开平方向
+    (HedgeFlag, hedge_flag), //投机套保标识
+
+    (double, price),               //成交价格
+    (int64_t, volume),             //成交量
+    (int64_t, close_today_volume), //平今日仓量(期货)
+
+    (double, tax),       //税
+    (double, commission) //手续费
+);
+
+KF_DEFINE_PACK_TYPE(                                        //
+    HistoryTrade, 213, PK(trade_id), TIMESTAMP(trade_time), //
+    (uint64_t, trade_id),                                   //成交ID
+
+    (uint64_t, order_id),        //订单ID
+    (uint64_t, parent_order_id), //母订单ID
+
+    (int64_t, trade_time),                        //成交时间
+    (kungfu::array<char, DATE_LEN>, trading_day), //交易日
+
+    (kungfu::array<char, INSTRUMENT_ID_LEN>, instrument_id), //合约ID
+    (kungfu::array<char, EXCHANGE_ID_LEN>, exchange_id),     //交易所ID
+    (kungfu::array<char, SOURCE_ID_LEN>, source_id),         //柜台ID
+    (kungfu::array<char, ACCOUNT_ID_LEN>, account_id),       //账号ID
+    (bool, is_last),                                         //是否为本次查询的最后一条记录
+    //    (kungfu::array<char, CLIENT_ID_LEN>, client_id),         // Client ID
 
     (InstrumentType, instrument_type), //合约类型
 

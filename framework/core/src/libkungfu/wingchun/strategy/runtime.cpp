@@ -157,4 +157,24 @@ const location_ptr &RuntimeContext::find_md_location(const std::string &source) 
   }
   return market_data_.at(source);
 }
+
+void RuntimeContext::req_history_order(const std::string &account) {
+  auto account_location_uid = lookup_account_location_id(account);
+  if (not broker_client_.is_ready(account_location_uid)) {
+    SPDLOG_ERROR("account {} not ready", account);
+    return;
+  }
+  auto writer = app_.get_writer(account_location_uid);
+  writer->mark(now(), RequestHistoryOrder::tag);
+}
+
+void RuntimeContext::req_history_trade(const std::string &account) {
+  auto account_location_uid = lookup_account_location_id(account);
+  if (not broker_client_.is_ready(account_location_uid)) {
+    SPDLOG_ERROR("account {} not ready", account);
+    return;
+  }
+  auto writer = app_.get_writer(account_location_uid);
+  writer->mark(now(), RequestHistoryTrade::tag);
+}
 } // namespace kungfu::wingchun::strategy
