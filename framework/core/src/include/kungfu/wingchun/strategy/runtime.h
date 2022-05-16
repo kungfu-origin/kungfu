@@ -115,7 +115,6 @@ public:
    */
   book::Bookkeeper &get_bookkeeper();
 
-
   /**
    * request deregister.
    * @return void

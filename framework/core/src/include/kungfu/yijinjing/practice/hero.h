@@ -83,7 +83,10 @@ public:
 
   virtual void on_exit();
 
-  void request_deregister() {continual_ = false; live_ = false;}
+  void request_deregister() {
+    continual_ = false;
+    live_ = false;
+  }
 
 protected:
   int64_t begin_time_;

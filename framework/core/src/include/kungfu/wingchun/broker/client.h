@@ -230,9 +230,9 @@ static constexpr auto is_own_reg = [](const Client &broker_client) {
 static constexpr auto is_own_updata_state = [](const Client &broker_client) {
   return rx::filter([&](const event_ptr &event) {
     if (event->msg_type() == kungfu::longfist::types::BrokerStateUpdate::tag) {
-      const kungfu::longfist::types::BrokerStateUpdate &data = event->data<kungfu::longfist::types::BrokerStateUpdate>();
-      return  (broker_client.should_connect_md(event->source()) or
-               broker_client.should_connect_td(event->source()));
+      const kungfu::longfist::types::BrokerStateUpdate &data =
+          event->data<kungfu::longfist::types::BrokerStateUpdate>();
+      return (broker_client.should_connect_md(event->source()) or broker_client.should_connect_td(event->source()));
     }
     return false;
   });

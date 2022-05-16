@@ -122,9 +122,7 @@ function handleSwitchProcessStatusResolved(
 
   if (!extConfig.extPath) {
     error(
-      `${t('tradingTaskConfig.configuration_inexistence')} ${
-        extConfig?.name
-      }`,
+      `${t('tradingTaskConfig.configuration_inexistence')} ${extConfig?.name}`,
     );
     return;
   }

@@ -158,7 +158,5 @@ const location_ptr &RuntimeContext::find_md_location(const std::string &source) 
   return market_data_.at(source);
 }
 
-void RuntimeContext::req_deregister() {
-  app_.request_deregister();
-}
+void RuntimeContext::req_deregister() { app_.request_deregister(); }
 } // namespace kungfu::wingchun::strategy
