@@ -31,6 +31,7 @@ import {
   Row,
   Col,
   TimePicker,
+  Divider,
 } from 'ant-design-vue';
 
 import {
@@ -60,6 +61,8 @@ import 'vue-virtual-scroller/dist/vue-virtual-scroller.css';
 import { useComponenets } from './useComponents';
 import { GlobalCategoryRegister } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiExtraLocationUtils';
 import globalBus from '../../assets/methods/globalBus';
+
+import VueI18n from '@kungfu-trader/kungfu-app/src/language';
 
 const app = createApp(App);
 
@@ -92,6 +95,7 @@ app
   .use(Skeleton)
   .use(Tree)
   .use(Statistic)
+  .use(Divider)
   .use(VueVirtualScroller);
 
 app.config.globalProperties.$globalBus = globalBus;
@@ -99,9 +103,9 @@ app.config.globalProperties.$tradingDataSubject = tradingDataSubject;
 app.config.globalProperties.$globalCategoryRegister =
   new GlobalCategoryRegister();
 
-useComponenets(app, router);
-
+app.use(VueI18n);
 app.mount('#app');
+useComponenets(app, router);
 
 const globalStore = useGlobalStore();
 
@@ -156,7 +160,7 @@ if (process.env.RELOAD_AFTER_CRASHED === 'false') {
   globalBus.next({
     tag: 'processStatus',
     name: 'systemLoading',
-    status: 'done',
+    status: 'online',
   });
 
   startGetProcessStatus(

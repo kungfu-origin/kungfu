@@ -47,8 +47,6 @@ protected:
   virtual void post_stop();
 
 private:
-  yijinjing::data::location ledger_location_;
-  bool book_reset_requested_ = false;
   bool positions_requested_ = false;
   bool positions_set_;
   bool started_;
@@ -70,6 +68,15 @@ private:
     auto context = std::dynamic_pointer_cast<Context>(context_);
     for (const auto &strategy : strategies_) {
       (*strategy.*method)(context, data);
+    }
+  }
+
+  template <typename TradingData, typename OnMethod = void (Strategy::*)(Context_ptr &, const TradingData &,
+                                                                         const kungfu::yijinjing::data::location_ptr &)>
+  void invoke(OnMethod method, const TradingData &data, const kungfu::yijinjing::data::location_ptr &location) {
+    auto context = std::dynamic_pointer_cast<Context>(context_);
+    for (const auto &strategy : strategies_) {
+      (*strategy.*method)(context, data, location);
     }
   }
 };

@@ -1,5 +1,3 @@
-const isEnglish = process.env.LANG_ENV === 'en';
-
 import {
   InstrumentTypeEnum,
   InstrumentTypes,
@@ -18,46 +16,50 @@ import {
   FutureArbitrageCodeEnum,
   SpaceTabSettingEnum,
   SpaceSizeSettingEnum,
+  StrategyExtTypes,
 } from '../typings/enums';
 
 import { Pm2ProcessStatusTypes } from '../utils/processUtils';
+
+import VueI18n from '@kungfu-trader/kungfu-app/src/language';
+const { t } = VueI18n.global;
 
 export const Pm2ProcessStatus: Record<
   Pm2ProcessStatusTypes,
   KungfuApi.KfTradeValueCommonData
 > = {
   ['online']: {
-    name: isEnglish ? 'Running' : '运行中',
+    name: t('tradingConfig.running'),
     color: 'kf-color-running',
     level: 2,
   },
   ['stopping']: {
-    name: isEnglish ? 'Stopping' : '停止中',
+    name: t('tradingConfig.stopping'),
     color: 'kf-color-waiting',
     level: 1,
   },
   ['stopped']: {
-    name: isEnglish ? 'Stopped' : '已停止',
+    name: t('tradingConfig.stopped'),
     color: 'kf-color-waiting',
     level: 0,
   },
   ['launching']: {
-    name: isEnglish ? 'Launching' : '启动中',
+    name: t('tradingConfig.launching'),
     color: 'kf-color-waiting',
     level: 2,
   },
   ['errored']: {
-    name: isEnglish ? 'Errored' : '错误',
+    name: t('tradingConfig.error'),
     color: 'kf-color-error',
     level: -1,
   },
   ['waiting restart']: {
-    name: isEnglish ? 'Stopped' : '待重启',
+    name: t('tradingConfig.waiting_restart'),
     color: 'kf-color-waiting',
     level: 0,
   },
   ['one-launch-status']: {
-    name: isEnglish ? 'Launching' : '启动中',
+    name: t('tradingConfig.launching'),
     color: 'kf-color-waiting',
     level: 2,
   },
@@ -68,37 +70,37 @@ export const BrokerStateStatus: Record<
   KungfuApi.KfTradeValueCommonData
 > = {
   ['Pending']: {
-    name: isEnglish ? 'Pending' : '等待中',
+    name: t('tradingConfig.pending'),
     color: 'kf-color-waiting',
     level: 1,
   },
   ['Idle']: {
-    name: isEnglish ? 'Idle' : '无数据',
+    name: t('tradingConfig.Idle'),
     color: 'kf-color-waiting',
     level: 1,
   },
   ['DisConnected']: {
-    name: isEnglish ? 'Disconnected' : '已断开',
+    name: t('tradingConfig.dis_connected'),
     color: 'kf-color-error',
     level: -1,
   },
   ['Connected']: {
-    name: isEnglish ? 'Connected' : '已连接',
+    name: t('tradingConfig.connected'),
     color: 'kf-color-waiting',
     level: 1,
   },
   ['LoggedIn']: {
-    name: isEnglish ? 'LoggedIn' : '已登录',
+    name: t('tradingConfig.logged_in'),
     color: 'kf-color-waiting',
     level: 1,
   },
   ['LoginFailed']: {
-    name: isEnglish ? 'LoginFailed' : '登录失败',
+    name: t('tradingConfig.login_failed'),
     color: 'kf-color-error',
     level: -1,
   },
   ['Ready']: {
-    name: isEnglish ? 'Ready' : '就绪',
+    name: t('tradingConfig.ready'),
     color: 'kf-color-running',
     level: 2,
   },
@@ -117,41 +119,41 @@ export const KfCategory: Record<
   KungfuApi.KfTradeValueCommonData
 > = {
   [KfCategoryEnum.system]: {
-    name: isEnglish ? 'System' : '系统服务',
+    name: t('tradingConfig.system'),
     color: 'red',
     level: 100,
   },
   [KfCategoryEnum.daemon]: {
-    name: isEnglish ? 'Daemon' : '后台任务',
+    name: t('tradingConfig.daemon'),
     color: 'purple',
     level: 90,
   },
   [KfCategoryEnum.md]: {
-    name: isEnglish ? 'Md' : '行情源',
+    name: t('tradingConfig.md'),
     color: 'orange',
     level: 80,
   },
   [KfCategoryEnum.td]: {
-    name: isEnglish ? 'Td' : '交易账户',
+    name: t('tradingConfig.td'),
     color: 'blue',
     level: 70,
   },
   [KfCategoryEnum.strategy]: {
-    name: isEnglish ? 'Strategy' : '策略',
+    name: t('tradingConfig.strategy'),
     color: 'cyan',
     level: 60,
   },
 };
 
 export const Offset: Record<OffsetEnum, KungfuApi.KfTradeValueCommonData> = {
-  [OffsetEnum.Open]: { name: isEnglish ? 'Open' : '开', color: 'red' },
-  [OffsetEnum.Close]: { name: isEnglish ? 'Close' : '平', color: 'green' },
+  [OffsetEnum.Open]: { name: t('tradingConfig.open'), color: 'red' },
+  [OffsetEnum.Close]: { name: t('tradingConfig.close'), color: 'green' },
   [OffsetEnum.CloseToday]: {
-    name: isEnglish ? 'CloseToday' : '平今',
+    name: t('tradingConfig.close_today'),
     color: 'green',
   },
   [OffsetEnum.CloseYest]: {
-    name: isEnglish ? 'CloseYest' : '平昨',
+    name: t('tradingConfig.close_yesterday'),
     color: 'green',
   },
 };
@@ -173,56 +175,56 @@ export const CodeSizeSetting: Record<
 };
 
 export const Side: Record<SideEnum, KungfuApi.KfTradeValueCommonData> = {
-  [SideEnum.Buy]: { name: isEnglish ? 'Buy' : '买', color: 'red' },
-  [SideEnum.Sell]: { name: isEnglish ? 'Sell' : '卖', color: 'green' },
-  [SideEnum.Lock]: { name: isEnglish ? 'Lock' : '锁仓', color: 'orange' },
-  [SideEnum.Unlock]: { name: isEnglish ? 'Unlock' : '解锁', color: 'blue' },
-  [SideEnum.Exec]: { name: isEnglish ? 'Exec' : '行权', color: 'blue' },
-  [SideEnum.Drop]: { name: isEnglish ? 'Drop' : '放弃行权', color: 'green' },
+  [SideEnum.Buy]: { name: t('tradingConfig.buy'), color: 'red' },
+  [SideEnum.Sell]: { name: t('tradingConfig.sell'), color: 'green' },
+  [SideEnum.Lock]: { name: t('tradingConfig.lock'), color: 'orange' },
+  [SideEnum.Unlock]: { name: t('tradingConfig.unlock'), color: 'blue' },
+  [SideEnum.Exec]: { name: t('tradingConfig.exec'), color: 'blue' },
+  [SideEnum.Drop]: { name: t('tradingConfig.drop'), color: 'green' },
   [SideEnum.Purchase]: {
-    name: isEnglish ? 'Purchase' : '申购',
+    name: t('tradingConfig.purchase'),
     color: 'red',
   },
   [SideEnum.Redemption]: {
-    name: isEnglish ? 'Redemption' : '赎回',
+    name: t('tradingConfig.redemption'),
     color: 'green',
   },
-  [SideEnum.Split]: { name: isEnglish ? 'Split' : '拆分', color: 'red' },
-  [SideEnum.Merge]: { name: isEnglish ? 'Merge' : '合并', color: 'green' },
+  [SideEnum.Split]: { name: t('tradingConfig.split'), color: 'red' },
+  [SideEnum.Merge]: { name: t('tradingConfig.merge'), color: 'green' },
   [SideEnum.MarginTrade]: {
-    name: isEnglish ? 'MarginTrade' : '融资买入',
+    name: t('tradingConfig.margin_trade'),
     color: 'red',
   },
   [SideEnum.ShortSell]: {
-    name: isEnglish ? 'ShortSell' : '融券卖出',
+    name: t('tradingConfig.short_sell'),
     color: 'green',
   },
   [SideEnum.RepayMargin]: {
-    name: isEnglish ? 'RepayMargin' : '卖券还款',
+    name: t('tradingConfig.repay_margin'),
     color: 'green',
   },
   [SideEnum.RepayStock]: {
-    name: isEnglish ? 'RepayStock' : '买券还券',
+    name: t('tradingConfig.repay_short'),
     color: 'red',
   },
   [SideEnum.CashRepayMargin]: {
-    name: isEnglish ? 'CashRepayMargin' : '现金还款',
+    name: t('tradingConfig.cash_repay_margin'),
     color: 'orange',
   },
   [SideEnum.StockRepayStock]: {
-    name: isEnglish ? 'StockRepayStock' : '现券还券',
+    name: t('tradingConfig.stock_repay_short'),
     color: 'blue',
   },
   [SideEnum.SurplusStockTransfer]: {
-    name: isEnglish ? 'SurplusStockTransfer' : '余券划转',
+    name: t('tradingConfig.surplus_stock_transfer'),
     color: 'blue',
   },
   [SideEnum.GuaranteeStockTransferIn]: {
-    name: isEnglish ? 'GuaranteeStockTransferIn' : '担保品转入',
+    name: t('tradingConfig.guarantee_stock_transfer'),
     color: 'red',
   },
   [SideEnum.GuaranteeStockTransferOut]: {
-    name: isEnglish ? 'GuaranteeStockTransferOut' : '担保品转出',
+    name: t('tradingConfig.guarantee_stock_redeem'),
     color: 'green',
   },
 };
@@ -232,39 +234,39 @@ export const OrderStatus: Record<
   KungfuApi.KfTradeValueCommonData
 > = {
   [OrderStatusEnum.Unknown]: {
-    name: isEnglish ? 'Unknown' : '未知',
+    name: t('tradingConfig.un_known'),
     color: 'default',
   },
   [OrderStatusEnum.Submitted]: {
-    name: isEnglish ? 'Submitted' : '已提交',
+    name: t('tradingConfig.submitted'),
     color: 'default',
   },
   [OrderStatusEnum.Pending]: {
-    name: isEnglish ? 'Pending' : '等待中',
+    name: t('tradingConfig.pending'),
     color: 'default',
   },
   [OrderStatusEnum.Cancelled]: {
-    name: isEnglish ? 'Cancelled' : '已撤单',
+    name: t('tradingConfig.cancelled'),
     color: 'default',
   },
   [OrderStatusEnum.Error]: {
-    name: isEnglish ? 'Error' : '错误',
+    name: t('tradingConfig.error'),
     color: 'red',
   },
   [OrderStatusEnum.Filled]: {
-    name: isEnglish ? 'Filled' : '已成交',
+    name: t('tradingConfig.filled'),
     color: 'green',
   },
   [OrderStatusEnum.PartialFilledNotActive]: {
-    name: isEnglish ? 'PartialFilledNotActive' : '部分撤单',
+    name: t('tradingConfig.partial_filled_not_active'),
     color: 'green',
   },
   [OrderStatusEnum.PartialFilledActive]: {
-    name: isEnglish ? 'PartialFilledActive' : '正在交易',
+    name: t('tradingConfig.partial_filled_active'),
     color: 'default',
   },
   [OrderStatusEnum.Lost]: {
-    name: isEnglish ? 'Lost' : '丢失',
+    name: t('tradingConfig.lost'),
     color: 'default',
   },
 };
@@ -285,72 +287,68 @@ export const Direction: Record<
   DirectionEnum,
   KungfuApi.KfTradeValueCommonData
 > = {
-  [DirectionEnum.Long]: { name: isEnglish ? 'Long' : '多', color: 'red' },
-  [DirectionEnum.Short]: { name: isEnglish ? 'Short' : '空', color: 'green' },
+  [DirectionEnum.Long]: { name: t('tradingConfig.long'), color: 'red' },
+  [DirectionEnum.Short]: { name: t('tradingConfig.short'), color: 'green' },
 };
 
 export const PriceType: Record<
   PriceTypeEnum,
   KungfuApi.KfTradeValueCommonData
 > = {
-  [PriceTypeEnum.Limit]: { name: isEnglish ? 'Limit' : '[Limit] 限价' },
-  [PriceTypeEnum.Market]: { name: isEnglish ? 'Market' : '[Any] 市价' },
+  [PriceTypeEnum.Limit]: { name: t('tradingConfig.Limit') },
+  [PriceTypeEnum.Market]: { name: t('tradingConfig.Market') },
   [PriceTypeEnum.FakBest5]: {
-    name: isEnglish
-      ? 'FakBest5'
-      : '[FakBest5] 上海深圳最优五档即时成交剩余撤销, 不需要报价',
+    name: t('tradingConfig.FakBest5'),
   },
   [PriceTypeEnum.ForwardBest]: {
-    name: isEnglish ? 'ForwardBest' : '[ForwardBest] 深圳本方方最优价格申报',
+    name: t('tradingConfig.Forward_best'),
   },
   [PriceTypeEnum.ReverseBest]: {
-    name: isEnglish
-      ? 'ReverseBest'
-      : '[ReverseBest] 上海最优五档即时成交剩余转限价, 深圳对手方最优价格申报, 不需要报价',
+    name: t('tradingConfig.Reverse_best'),
   },
   [PriceTypeEnum.Fak]: {
-    name: isEnglish ? 'Fak' : '[Fak] 深圳即时成交剩余撤销',
+    name: t('tradingConfig.Fak'),
   },
   [PriceTypeEnum.Fok]: {
-    name: isEnglish ? 'Fok' : '[Fok] 深圳市价全额成交或者撤销',
+    name: t('tradingConfig.Fok'),
   },
-  [PriceTypeEnum.Unknown]: { name: isEnglish ? 'UnKnown' : '未知' },
+  [PriceTypeEnum.Unknown]: { name: t('tradingConfig.un_known') },
 };
 
 export const HedgeFlag: Record<
   HedgeFlagEnum,
   KungfuApi.KfTradeValueCommonData
 > = {
-  [HedgeFlagEnum.Speculation]: { name: isEnglish ? 'Speculation' : '投机' },
-  [HedgeFlagEnum.Arbitrage]: { name: isEnglish ? 'Arbitrage' : '套利' },
-  [HedgeFlagEnum.Hedge]: { name: isEnglish ? 'Hedge' : '套保' },
-  [HedgeFlagEnum.Covered]: { name: isEnglish ? 'Covered' : '备兑' },
+  [HedgeFlagEnum.Speculation]: { name: t('tradingConfig.speculation') },
+  [HedgeFlagEnum.Arbitrage]: { name: t('tradingConfig.arbitrage') },
+  [HedgeFlagEnum.Hedge]: { name: t('tradingConfig.hedge') },
+  [HedgeFlagEnum.Covered]: { name: t('tradingConfig.covered') },
 };
 
 export const VolumeCondition: Record<
   VolumeConditionEnum,
   KungfuApi.KfTradeValueCommonData
 > = {
-  [VolumeConditionEnum.Any]: { name: isEnglish ? 'Any' : '任意' },
-  [VolumeConditionEnum.Min]: { name: isEnglish ? 'Min' : '最小' },
-  [VolumeConditionEnum.All]: { name: isEnglish ? 'All' : '全部' },
+  [VolumeConditionEnum.Any]: { name: t('tradingConfig.any') },
+  [VolumeConditionEnum.Min]: { name: t('tradingConfig.min') },
+  [VolumeConditionEnum.All]: { name: t('tradingConfig.all') },
 };
 
 export const TimeCondition: Record<
   TimeConditionEnum,
   KungfuApi.KfTradeValueCommonData
 > = {
-  [TimeConditionEnum.IOC]: { name: isEnglish ? 'IOC' : 'IOC' },
-  [TimeConditionEnum.GFD]: { name: isEnglish ? 'GFD' : 'GFD' },
-  [TimeConditionEnum.GTC]: { name: isEnglish ? 'GTC' : 'GTC' },
+  [TimeConditionEnum.IOC]: { name: t('tradingConfig.IOC') },
+  [TimeConditionEnum.GFD]: { name: t('tradingConfig.GFD') },
+  [TimeConditionEnum.GTC]: { name: t('tradingConfig.GTC') },
 };
 
 export const CommissionMode: Record<
   CommissionModeEnum,
   KungfuApi.KfTradeValueCommonData
 > = {
-  [CommissionModeEnum.ByAmount]: { name: isEnglish ? 'ByAmount' : '按金额' },
-  [CommissionModeEnum.ByVolume]: { name: isEnglish ? 'ByVolume' : '按手数' },
+  [CommissionModeEnum.ByAmount]: { name: t('tradingConfig.by_amount') },
+  [CommissionModeEnum.ByVolume]: { name: t('tradingConfig.by_volume') },
 };
 
 export const InstrumentType: Record<
@@ -358,57 +356,77 @@ export const InstrumentType: Record<
   KungfuApi.KfTradeValueCommonData
 > = {
   [InstrumentTypeEnum.unknown]: {
-    name: isEnglish ? 'Unknown' : '未知',
+    name: t('tradingConfig.un_known'),
     color: 'default',
   },
   [InstrumentTypeEnum.stock]: {
-    name: isEnglish ? 'Stock' : '普通股票',
+    name: t('tradingConfig.stock'),
     color: 'orange',
     level: 10,
   },
   [InstrumentTypeEnum.future]: {
-    name: isEnglish ? 'Future' : '期货',
+    name: t('tradingConfig.future'),
     color: 'red',
     level: 10,
   },
   [InstrumentTypeEnum.bond]: {
-    name: isEnglish ? 'Bond' : '债券',
+    name: t('tradingConfig.bond'),
     color: 'pink',
   },
   [InstrumentTypeEnum.stockoption]: {
-    name: isEnglish ? 'StockOption' : '股票期权',
+    name: t('tradingConfig.stock_option'),
     color: 'blue',
     level: 10,
   },
   [InstrumentTypeEnum.fund]: {
-    name: isEnglish ? 'Fund' : '基金',
+    name: t('tradingConfig.fund'),
     color: 'purple',
   },
   [InstrumentTypeEnum.techstock]: {
-    name: isEnglish ? 'TechStock' : '科创板股票',
+    name: t('tradingConfig.tech_stock'),
     color: 'blue',
   },
   [InstrumentTypeEnum.index]: {
-    name: isEnglish ? 'Index' : '指数',
+    name: t('tradingConfig.index'),
     color: 'purple',
   },
   [InstrumentTypeEnum.repo]: {
-    name: isEnglish ? 'Repo' : '回购',
+    name: t('tradingConfig.repo'),
     color: 'red',
   },
   [InstrumentTypeEnum.crypto]: {
-    name: isEnglish ? 'Crypto' : '数字货币',
+    name: t('tradingConfig.crypto'),
     color: 'blue',
     level: 10,
   },
   [InstrumentTypeEnum.cryptofuture]: {
-    name: isEnglish ? 'CryptoFuture' : '数字货币合约',
+    name: t('tradingConfig.crypto_future'),
     color: 'blue',
     level: 10,
   },
   [InstrumentTypeEnum.simu]: {
-    name: isEnglish ? 'KungFuSimu' : '功夫模拟',
+    name: t('tradingConfig.kungfu_simu'),
     color: 'green',
+    level: 10,
+  },
+};
+
+export const StrategyExtType: Record<
+  StrategyExtTypes,
+  KungfuApi.KfTradeValueCommonData
+> = {
+  unknown: {
+    name: t('tradingConfig.un_known'),
+    color: 'default',
+  },
+  default: {
+    name: t('tradingConfig.default'),
+    color: 'cyan',
+    level: 9,
+  },
+  trade: {
+    name: t('tradingConfig.order_task'),
+    color: 'blue',
     level: 10,
   },
 };
@@ -469,35 +487,35 @@ export const AbleSubscribeInstrumentTypesBySourceType: Record<
 
 export const ExchangeIds: Record<string, KungfuApi.KfTradeValueCommonData> = {
   SSE: {
-    name: isEnglish ? 'SSE' : '上交所',
+    name: t('tradingConfig.SSE'),
     color: InstrumentType[InstrumentTypeEnum.stock].color,
   },
   SZE: {
-    name: isEnglish ? 'SZE' : '深交所',
+    name: t('tradingConfig.SZE'),
     color: InstrumentType[InstrumentTypeEnum.stock].color,
   },
   BSE: {
-    name: isEnglish ? 'BSE' : '北交所',
+    name: t('tradingConfig.BSE'),
     color: InstrumentType[InstrumentTypeEnum.stock].color,
   },
   SHFE: {
-    name: isEnglish ? 'SHFE' : '上期所',
+    name: t('tradingConfig.SHFE'),
     color: InstrumentType[InstrumentTypeEnum.future].color,
   },
   DCE: {
-    name: isEnglish ? 'DCE' : '大商所',
+    name: t('tradingConfig.DCE'),
     color: InstrumentType[InstrumentTypeEnum.future].color,
   },
   CZCE: {
-    name: isEnglish ? 'CZCE' : '郑商所',
+    name: t('tradingConfig.CZCE'),
     color: InstrumentType[InstrumentTypeEnum.future].color,
   },
   CFFEX: {
-    name: isEnglish ? 'CFFEX' : '中金所',
+    name: t('tradingConfig.CFFEX'),
     color: InstrumentType[InstrumentTypeEnum.future].color,
   },
   INE: {
-    name: isEnglish ? 'INE' : '能源中心',
+    name: t('tradingConfig.INE'),
     color: InstrumentType[InstrumentTypeEnum.future].color,
   },
 };
@@ -507,16 +525,16 @@ export const FutureArbitrageCodes: Record<
   KungfuApi.KfTradeValueCommonData
 > = {
   [FutureArbitrageCodeEnum.SP]: {
-    name: isEnglish ? 'SP' : '郑商所 跨期 SP',
+    name: t('tradingConfig.SP'),
   },
   [FutureArbitrageCodeEnum.SPC]: {
-    name: isEnglish ? 'SPC' : '郑商所 跨品种 SPC',
+    name: t('tradingConfig.SPC'),
   },
   [FutureArbitrageCodeEnum.SPD]: {
-    name: isEnglish ? 'SPD' : '大商所 跨期 SPD',
+    name: t('tradingConfig.SPD'),
   },
   [FutureArbitrageCodeEnum.IPS]: {
-    name: isEnglish ? 'IPS' : '大商所 跨品种 IPS',
+    name: t('tradingConfig.IPS'),
   },
 };
 
@@ -524,8 +542,8 @@ export const SystemProcessName: Record<
   string,
   KungfuApi.KfTradeValueCommonData
 > = {
-  master: { name: '主控进程' },
-  ledger: { name: '计算服务' },
-  cached: { name: '存储服务' },
-  archive: { name: '归档服务' },
+  master: { name: t('tradingConfig.master') },
+  ledger: { name: t('tradingConfig.ledger') },
+  cached: { name: t('tradingConfig.cached') },
+  archive: { name: t('tradingConfig.archive') },
 };

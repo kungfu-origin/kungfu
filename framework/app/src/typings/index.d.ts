@@ -105,6 +105,25 @@ interface TriggerAddBoard {
   boardId: number;
 }
 
+interface TriggerCurrentConfigModalReady {
+  tag: 'ready:currentConfigModal';
+  category: string;
+  extKey: string;
+  initValue: Record<string, KungfuApi.KfConfigValue>;
+}
+
+interface TriggerCurrentConfigModalInput {
+  tag: 'input:currentConfigModal';
+  category: string;
+  extKey: string;
+  formState: KungfuApi.SetKfConfigPayload;
+}
+
+interface TriggerSetCurrentConfigModalConfigSettings {
+  tag: 'update:currentConfigModalConfigSettings';
+  configSettings: KungfuApi.KfConfigItem[];
+}
+
 type KfBusEvent =
   | ResizeEvent
   | ProcessStatusChangeEvent
@@ -119,7 +138,11 @@ type KfBusEvent =
   | TriggerUpdateStrategy
   | TriggerUpdateExtConfigs
   | TriggerAddBoard
-  | ExportTradingDataEvent;
+  | ExportTradingDataEvent
+  | TriggerConfigModalFormChanged
+  | TriggerCurrentConfigModalReady
+  | TriggerCurrentConfigModalInput
+  | TriggerSetCurrentConfigModalConfigSettings;
 
 interface ExtraOrderInput {
   side: SideEnum;

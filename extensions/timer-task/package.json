@@ -4,7 +4,7 @@
     "name": "kungfu-trader",
     "email": "info@kungfu.link"
   },
-  "version": "2.4.0-alpha.33",
+  "version": "2.4.0-alpha.39",
   "description": "Kungfu Extension - Timer Task",
   "license": "Apache-2.0",
   "main": "package.json",
@@ -16,7 +16,7 @@
   },
   "binary": {
     "module_name": "kfx-timer-task",
-    "module_path": "dist/timertask",
+    "module_path": "dist/TimerTask",
     "remote_path": "{module_name}/v{major}/v{version}",
     "package_name": "{module_name}-v{version}-{platform}-{arch}-{configuration}.tar.gz",
     "host": "https://prebuilt.libkungfu.cc"
@@ -28,20 +28,15 @@
     "package": "kfs project package"
   },
   "devDependencies": {
-    "@kungfu-trader/kungfu-sdk": "^2.4.0-alpha.33"
+    "@kungfu-trader/kungfu-sdk": "^2.4.0-alpha.39"
   },
   "kungfuBuild": {
     "python": {
-      "dependencies": {
-        "dotted_dict": "~=1.1.0",
-        "recordclass": "~=0.17.0",
-        "sortedcontainers": "~=2.4.0",
-        "argparse": "~=1.4.0"
-      }
+      "dependencies": {}
     }
   },
   "kungfuConfig": {
-    "key": "timertask",
+    "key": "TimerTask",
     "name": "定时下单",
     "config": {
       "strategy": {
@@ -51,6 +46,13 @@
             "key": "accountId",
             "name": "账户",
             "type": "td",
+            "required": true,
+            "primary": true
+          },
+          {
+            "key": "marketSource",
+            "name": "行情",
+            "type": "md",
             "required": true,
             "primary": true
           },
@@ -138,7 +140,7 @@
             "name": "临界下单",
             "type": "bool",
             "required": false,
-            "tip": "开启后最后一步下单操作会在结束时间前执行, 默认1000毫秒",
+            "tip": "开启后最后一步下单操作会在结束时间前执行, 默认200毫秒",
             "default": true
           },
           {
@@ -146,7 +148,7 @@
             "name": "临界下单时间",
             "type": "int",
             "required": false,
-            "tip": "设置临界下单临界时间, 单位毫秒, 时间默认1000毫秒",
+            "tip": "设置临界下单临界时间, 单位毫秒, 时间默认200毫秒",
             "default": 200
           }
         ]

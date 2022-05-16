@@ -16,6 +16,7 @@ import {
   KfCategoryTypes,
   LedgerCategoryEnum,
   ProcessStatusTypes,
+  StrategyExtTypes,
 } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import {
   getKfCategoryData,
@@ -36,7 +37,7 @@ import {
   Pm2ProcessStatusData,
   Pm2ProcessStatusDetailData,
 } from '@kungfu-trader/kungfu-js-api/utils/processUtils';
-import { message, Modal } from 'ant-design-vue';
+import { Modal } from 'ant-design-vue';
 import path from 'path';
 import { Proc } from 'pm2';
 import {
@@ -60,12 +61,19 @@ import { AbleSubscribeInstrumentTypesBySourceType } from '@kungfu-trader/kungfu-
 import {
   buildInstrumentSelectOptionLabel,
   buildInstrumentSelectOptionValue,
+  confirmModal,
+  makeSearchOptionFormInstruments,
 } from './uiUtils';
 import { storeToRefs } from 'pinia';
 import { ipcRenderer } from 'electron';
 import { throttleTime } from 'rxjs';
 import { useExtraCategory } from './uiExtraLocationUtils';
 import { useGlobalStore } from '../../pages/index/store/global';
+import VueI18n from '@kungfu-trader/kungfu-app/src/language';
+import { messagePrompt } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
+
+const { t } = VueI18n.global;
+const { success, error } = messagePrompt();
 
 export const ensureRemoveLocation = (
   kfLocation: KungfuApi.KfLocation | KungfuApi.KfConfig,
@@ -74,20 +82,23 @@ export const ensureRemoveLocation = (
   const id = getIdByKfLocation(kfLocation);
   return new Promise((resolve, reject) => {
     Modal.confirm({
-      title: `删除${categoryName} ${id}`,
-      content: `删除${categoryName} ${id} 所有数据, 如果该${categoryName}进程正在运行, 也将停止进程, 确认删除`,
-      okText: '确认',
-      cancelText: '取消',
+      title: `${t('delete')}${categoryName} ${id}`,
+      content: t('delete_category', {
+        category: `${categoryName} ${id}`,
+        categoryName: categoryName,
+      }),
+      okText: t('confirm'),
+      cancelText: t('cancel'),
       onOk() {
         return deleteAllByKfLocation(kfLocation)
           .then(() => {
-            message.success('操作成功');
+            success();
           })
           .then(() => {
             resolve();
           })
           .catch((err) => {
-            message.error('操作失败', err.message);
+            error(err.message || t('operation_failed'));
           });
       },
       onCancel() {
@@ -105,10 +116,10 @@ export const handleSwitchProcessStatus = (
   mouseEvent.stopPropagation();
   return switchKfLocation(window.watcher, kfLocation, checked)
     .then(() => {
-      message.success('操作成功');
+      success();
     })
     .catch((err: Error) => {
-      message.error(err.message || '操作失败');
+      error(err.message || t('operation_failed'));
     });
 };
 
@@ -153,10 +164,10 @@ export const useSwitchAllConfig = (
       ),
     )
       .then(() => {
-        message.success('操作成功');
+        success();
       })
       .catch((err: Error) => {
-        message.error(err.message || '操作失败');
+        error(err.message || t('operation_failed'));
       });
   };
 
@@ -173,6 +184,7 @@ export const useAddUpdateRemoveKfConfig = (): {
   handleConfirmAddUpdateKfConfig: (
     data: {
       formState: Record<string, KungfuApi.KfConfigValue>;
+      configSettings: KungfuApi.KfConfigItem[];
       idByPrimaryKeys: string;
       changeType: KungfuApi.ModalChangeType;
     },
@@ -191,6 +203,7 @@ export const useAddUpdateRemoveKfConfig = (): {
   const handleConfirmAddUpdateKfConfig = (
     data: {
       formState: Record<string, KungfuApi.KfConfigValue>;
+      configSettings: KungfuApi.KfConfigItem[];
       idByPrimaryKeys: string;
       changeType: KungfuApi.ModalChangeType;
     },
@@ -199,19 +212,25 @@ export const useAddUpdateRemoveKfConfig = (): {
   ): Promise<void> => {
     const { formState, idByPrimaryKeys, changeType } = data;
 
-    const changeTypename = changeType === 'add' ? '添加' : '设置';
+    const changeTypename = changeType === 'add' ? t('add') : t('set');
     const categoryName = getKfCategoryData(category).name;
 
     const context =
       changeType === 'add'
-        ? `${categoryName}ID系统唯一, ${changeTypename}成功后不可更改, 确认${changeTypename} ${idByPrimaryKeys}`
-        : `确认${changeTypename} ${idByPrimaryKeys} 相关配置`;
+        ? t('add_config_modal', {
+            category: categoryName,
+            changeTypename: changeTypename,
+            key: `${changeTypename} ${idByPrimaryKeys}`,
+          })
+        : t('update_config_modal', {
+            key: `${changeTypename} ${idByPrimaryKeys}`,
+          });
     return new Promise((resolve) => {
       Modal.confirm({
         title: `${changeTypename}${categoryName} ${idByPrimaryKeys}`,
         content: context,
-        okText: '确认',
-        cancelText: '取消',
+        okText: t('confirm'),
+        cancelText: t('cancel'),
         onOk() {
           const kfLocation: KungfuApi.KfLocation = {
             category: category,
@@ -228,13 +247,13 @@ export const useAddUpdateRemoveKfConfig = (): {
             }),
           )
             .then(() => {
-              message.success('操作成功');
+              success();
             })
             .then(() => {
               useGlobalStore().setKfConfigList();
             })
             .catch((err: Error) => {
-              message.error('操作失败 ' + err.message);
+              error(t('operation_failed') + err.message);
             })
             .finally(() => {
               resolve();
@@ -325,10 +344,10 @@ export const useDealExportHistoryTradingData = (): {
       ])
         .then(() => {
           shell.showItemInFolder(ordersFilename);
-          message.success('操作成功');
+          success();
         })
         .catch((err: Error) => {
-          message.error(err.message);
+          error(err.message);
         });
     }
 
@@ -349,7 +368,7 @@ export const useDealExportHistoryTradingData = (): {
     const processId = getProcessIdByKfLocation(currentKfLocation);
     const filename: string = await dialog
       .showSaveDialog({
-        title: '保存文件',
+        title: t('save_file'),
         defaultPath: path.join(
           os.homedir(),
           `${processId}-${tradingDataType}-${dateResolved}.csv`,
@@ -383,10 +402,10 @@ export const useDealExportHistoryTradingData = (): {
     return writeCSV(filename, exportDatas, dealTradingDataItemResolved)
       .then(() => {
         shell.showItemInFolder(filename);
-        message.success('操作成功');
+        success();
       })
       .catch((err: Error) => {
-        message.error(err.message);
+        error(err.message);
       });
   };
 
@@ -396,6 +415,8 @@ export const useDealExportHistoryTradingData = (): {
         (data: KfBusEvent) => {
           if (data.tag === 'export') {
             exportEventData.value = data;
+
+            if (!exportEventData.value) return;
 
             if (exportEventData.value.tradingDataType !== 'all') {
               if (exportEventData.value.tradingDataType !== 'Order') {
@@ -448,18 +469,18 @@ export const showTradingDataDetail = (
         h('span', { class: 'value' }, `${dataResolved[key]}`),
       ]),
     );
-  Modal.confirm({
-    title: `${typename} 详情`,
-    content: h(
+  confirmModal(
+    `${typename} ${t('detail')}`,
+    h(
       'div',
       {
         class: 'trading-data-detail__warp',
       },
       vnode,
     ),
-    okText: '确认',
-    cancelText: '',
-  });
+    t('confirm'),
+    '',
+  );
 };
 
 export const useInstruments = (): {
@@ -481,6 +502,10 @@ export const useInstruments = (): {
 
   searchInstrumentResult: Ref<string | undefined>;
   searchInstrumnetOptions: Ref<{ value: string; label: string }[]>;
+  initSearchInstrumnetOptions: (
+    type: 'instrument' | 'instruments',
+    value: string | string[],
+  ) => void;
   handleSearchInstrument: (value: string) => void;
   handleConfirmSearchInstrumentResult: (
     value: string,
@@ -515,7 +540,7 @@ export const useInstruments = (): {
                   item.exchangeId,
                   item.instrumentId,
                   mdLocation,
-                );
+                ).catch((err) => console.warn(err.message));
               }
             });
           }
@@ -543,6 +568,16 @@ export const useInstruments = (): {
 
   const searchInstrumentResult = ref<string | undefined>(undefined);
   const searchInstrumnetOptions = ref<{ value: string; label: string }[]>([]);
+
+  const initSearchInstrumnetOptions = (
+    type: 'instrument' | 'instruments',
+    value: string | string[],
+  ) => {
+    searchInstrumnetOptions.value = makeSearchOptionFormInstruments(
+      type,
+      value,
+    );
+  };
 
   const handleSearchInstrument = (val: string): void => {
     searchInstrumnetOptions.value = instruments.value
@@ -574,6 +609,7 @@ export const useInstruments = (): {
 
     searchInstrumentResult,
     searchInstrumnetOptions,
+    initSearchInstrumnetOptions,
     handleSearchInstrument,
     handleConfirmSearchInstrumentResult,
   };
@@ -728,7 +764,7 @@ export const useSubscibeInstrumentAtEntry = (): void => {
               item.exchangeId,
               item.instrumentId,
               mdLocationResolved,
-            );
+            ).catch((err) => console.warn(err.message));
             subscribedInstrumentsForPos[item.uidKey] = true;
           });
         });
@@ -984,16 +1020,38 @@ export const useExtConfigsRelated = (): {
   uiExtConfigs: Ref<KungfuApi.KfUIExtConfigs>;
   tdExtTypeMap: ComputedRef<Record<string, InstrumentTypes>>;
   mdExtTypeMap: ComputedRef<Record<string, InstrumentTypes>>;
+  strategyExtTypeMap: ComputedRef<Record<string, StrategyExtTypes>>;
 } => {
   const { extConfigs, uiExtConfigs } = storeToRefs(useGlobalStore());
-  const tdExtTypeMap = computed(() => buildExtTypeMap(extConfigs.value, 'td'));
-  const mdExtTypeMap = computed(() => buildExtTypeMap(extConfigs.value, 'md'));
+  const tdExtTypeMap = computed(
+    () =>
+      buildExtTypeMap(extConfigs.value, 'td') as Record<
+        string,
+        InstrumentTypes
+      >,
+  );
+  const mdExtTypeMap = computed(
+    () =>
+      buildExtTypeMap(extConfigs.value, 'md') as Record<
+        string,
+        InstrumentTypes
+      >,
+  );
+
+  const strategyExtTypeMap = computed(
+    () =>
+      buildExtTypeMap(extConfigs.value, 'strategy') as Record<
+        string,
+        StrategyExtTypes
+      >,
+  );
 
   return {
     extConfigs,
     uiExtConfigs,
     tdExtTypeMap,
     mdExtTypeMap,
+    strategyExtTypeMap,
   };
 };
 
@@ -1078,7 +1136,9 @@ export const useCurrentGlobalKfLocation = (
     }
 
     const extraCategory: Record<string, KungfuApi.KfTradeValueCommonData> =
-      app?.proxy ? app?.proxy.$globalCategoryRegister.getExtraCategory() : {};
+      app?.proxy
+        ? app?.proxy.$globalCategoryRegister.getExtraCategoryMap()
+        : {};
 
     return dealCategory(currentGlobalKfLocation.value?.category, extraCategory);
   });

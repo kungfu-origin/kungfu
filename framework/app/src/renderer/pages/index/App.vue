@@ -2,7 +2,7 @@
 import { getCurrentInstance, onBeforeUnmount, onMounted } from 'vue';
 import KfSystemPrepareModal from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfSystemPrepareModal.vue';
 import KfLayoutVue from '@kungfu-trader/kungfu-app/src/renderer/components/layout/KfLayout.vue';
-
+import KfSetByConfigModal from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfSetByConfigModal.vue';
 import zhCN from 'ant-design-vue/es/locale/zh_CN';
 import {
   markClearDB,
@@ -27,6 +27,7 @@ import {
   dealAssetsByHolderUID,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { bindIPCListener } from '@kungfu-trader/kungfu-app/src/renderer/ipcMsg/ipcListener';
+import { useTradingTask } from '@kungfu-trader/kungfu-app/src/components/modules/tradingTask/utils';
 
 const app = getCurrentInstance();
 const store = useGlobalStore();
@@ -80,6 +81,13 @@ const busSubscription = globalBus.subscribe((data: KfBusEvent) => {
   }
 });
 
+const {
+  setTradingTaskModalVisible,
+  currentSelectedTradingTaskExtKey,
+  setTradingTaskConfigPayload,
+  handleConfirmAddUpdateTask,
+} = useTradingTask();
+
 onMounted(() => {
   bindIPCListener(store);
   removeLoadingMask();
@@ -106,7 +114,7 @@ onBeforeUnmount(() => {
       </KfLayoutVue>
     </div>
     <KfSystemPrepareModal
-      title="系统提示"
+      :title="$t('system_prompt')"
       :visible="preStartSystemLoading"
       :status="[
         { key: 'archive', status: preStartSystemLoadingData.archive },
@@ -117,19 +125,19 @@ onBeforeUnmount(() => {
         },
       ]"
       :txt="{
-        archive: { done: '功夫归档完成 ✓', loading: '功夫归档中...' },
+        archive: { done: $t('archive_completion'), loading: $t('archive') },
         watcher: {
-          done: '功夫环境准备完成 ✓',
-          loading: '功夫环境准备中...',
+          done: $t('environment_complete'),
+          loading: $t('environment_preparation'),
         },
         systemLoading: {
-          done: '功夫就绪 ✓',
-          loading: '功夫就绪检查中...',
+          done: $t('ready'),
+          loading: $t('wait_ready'),
         },
       }"
     ></KfSystemPrepareModal>
     <KfSystemPrepareModal
-      title="系统提示"
+      :title="$t('system_prompt')"
       :visible="preQuitSystemLoading"
       :status="[
         {
@@ -142,18 +150,36 @@ onBeforeUnmount(() => {
         },
       ]"
       :txt="{
-        record: { done: '保存数据完成 ✓', loading: '保存数据中...' },
+        record: { done: $t('saving_completed'), loading: $t('save_data') },
         quit: {
-          done: '结束所有交易进程 ✓',
-          loading: '结束交易进程中, 请勿关闭...',
+          done: $t('end_all_transactions'),
+          loading: $t('closing'),
         },
       }"
     ></KfSystemPrepareModal>
+
+    <!-- global modal start -->
+
+    <!-- export trading data -->
     <KfDownloadDateModal
       v-if="exportDateModalVisible"
       v-model:visible="exportDateModalVisible"
       @confirm="handleConfirmExportDate"
     ></KfDownloadDateModal>
+
+    <!-- add/update trading task -->
+    <KfSetByConfigModal
+      v-if="setTradingTaskModalVisible"
+      v-model:visible="setTradingTaskModalVisible"
+      :payload="setTradingTaskConfigPayload"
+      :primaryKeyUnderline="true"
+      @confirm="
+        handleConfirmAddUpdateTask($event, currentSelectedTradingTaskExtKey)
+      "
+    ></KfSetByConfigModal>
+
+    <!-- global modal end -->
+
     <a-spin v-if="exportDataLoading" :spinning="exportDataLoading"></a-spin>
   </a-config-provider>
 </template>

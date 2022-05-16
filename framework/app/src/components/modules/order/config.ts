@@ -1,5 +1,7 @@
 import { KfCategoryTypes } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import { isTdStrategyCategory } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
+import VueI18n from '@kungfu-trader/kungfu-app/src/language';
+const { t } = VueI18n.global;
 
 const buildSorter =
   (dataIndex: keyof KungfuApi.OrderResolved) =>
@@ -17,14 +19,14 @@ export const getColumns = (
 ): KfTradingDataTableHeaderConfig[] => [
   {
     type: 'string',
-    name: '更新时间',
+    name: t('orderConfig.update_time'),
     dataIndex: 'update_time_resolved',
     width: isHistory ? 160 : 120,
     sorter: buildSorter('update_time'),
   },
   {
     type: 'string',
-    name: '代码',
+    name: t('orderConfig.instrument_id'),
     dataIndex: 'instrument_id',
     sorter: buildStrSorter('instrument_id'),
     width: 80,
@@ -43,14 +45,14 @@ export const getColumns = (
   },
   {
     type: 'number',
-    name: '委托价',
+    name: t('orderConfig.limit_price'),
     dataIndex: 'limit_price',
     width: 120,
     sorter: buildSorter('limit_price'),
   },
   {
     type: 'number',
-    name: '已成交/全部',
+    name: `${t('orderConfig.clinch')}/${t('orderConfig.all')}`,
     dataIndex: 'volume_traded',
     width: 120,
     sorter: (a: KungfuApi.OrderResolved, b: KungfuApi.OrderResolved) => {
@@ -59,26 +61,29 @@ export const getColumns = (
   },
   {
     type: 'string',
-    name: '订单状态',
+    name: t('orderConfig.order_status'),
     dataIndex: 'status',
     width: 120,
   },
   {
     type: 'number',
-    name: '系统延迟μs',
+    name: t('orderConfig.latency_system'),
     dataIndex: 'latency_system',
     width: 90,
     sorter: buildSorter('latency_system'),
   },
   {
     type: 'number',
-    name: '网络延迟μs',
+    name: t('orderConfig.latency_network'),
     dataIndex: 'latency_network',
     width: 90,
     sorter: buildSorter('latency_network'),
   },
   {
-    name: category == 'td' ? '下单源' : '目标账户',
+    name:
+      category == 'td'
+        ? t('orderConfig.dest_uname')
+        : t('orderConfig.source_uname'),
     dataIndex: category == 'td' ? 'dest_uname' : 'source_uname',
     sorter: buildStrSorter(category == 'td' ? 'dest_uname' : 'source_uname'),
     flex: 1,
@@ -87,7 +92,7 @@ export const getColumns = (
     ? []
     : [
         {
-          name: '下单源',
+          name: t('orderConfig.dest_uname'),
           dataIndex: 'dest_uname',
           sorter: buildStrSorter('dest_uname'),
           flex: 1,
@@ -106,7 +111,7 @@ export const getColumns = (
 
 export const statisColums: AntTableColumns = [
   {
-    title: '标的',
+    title: t('tradingConfig.instrument'),
     dataIndex: 'instrumentId_exchangeId',
   },
   {
@@ -118,19 +123,21 @@ export const statisColums: AntTableColumns = [
     dataIndex: 'offset',
   },
   {
-    title: '委托均价',
+    title: t('orderConfig.mean'),
     dataIndex: 'mean',
   },
   {
-    title: '最高委托价',
+    title: t('orderConfig.max'),
     dataIndex: 'max',
   },
   {
-    title: '最低委托价',
+    title: t('orderConfig.min'),
     dataIndex: 'min',
   },
   {
-    title: '成交量(已完成/全部)',
+    title: `${t('orderConfig.volume')}(${t('orderConfig.completed')}/${t(
+      'orderConfig.all',
+    )})`,
     dataIndex: 'volume',
   },
 ];

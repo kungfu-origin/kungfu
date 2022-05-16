@@ -43,6 +43,8 @@ KF_DEFINE_MARK_TYPE(AssetRequest, 402);
 KF_DEFINE_MARK_TYPE(PositionRequest, 403);
 KF_DEFINE_MARK_TYPE(AssetSync, 404);
 KF_DEFINE_MARK_TYPE(PositionSync, 405);
+KF_DEFINE_MARK_TYPE(KeepPositionsRequest, 406);
+KF_DEFINE_MARK_TYPE(RebuildPositionsRequest, 407);
 KF_DEFINE_MARK_TYPE(InstrumentEnd, 802);
 KF_DEFINE_MARK_TYPE(AlgoOrderInput, 20010);
 KF_DEFINE_MARK_TYPE(AlgoOrderReport, 20011);
@@ -91,6 +93,16 @@ KF_DEFINE_PACK_TYPE(                                             //
     (double, close_today_ratio), //平今费率
 
     (double, min_commission) //最小手续费
+);
+
+KF_DEFINE_DATA_TYPE(                                   //
+    RiskSetting, 10007, PK(location_uid), PERPETUAL(), //
+    (uint32_t, location_uid),                          //
+    (enums::category, category),                       //
+    (std::string, group),                              //
+    (std::string, name),                               //
+    (enums::mode, mode),                               //
+    (std::string, value)                               //
 );
 
 KF_DEFINE_DATA_TYPE(                                                     //

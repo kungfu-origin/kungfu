@@ -104,7 +104,7 @@ function dealRowClassNameResolved(record: KungfuApi.Position) {
     category: categoryRegisterConfig.name,
     group: record.exchange_id,
     name: record.instrument_id,
-    mode: 'LIVE',
+    mode: 'live',
   };
 
   return dealRowClassName(locationResolved);
@@ -115,7 +115,7 @@ function customRowResolved(record: KungfuApi.Position) {
     category: categoryRegisterConfig.name,
     group: record.exchange_id,
     name: record.instrument_id,
-    mode: 'LIVE',
+    mode: 'live',
   };
 
   return {
@@ -162,7 +162,7 @@ function tiggerOrderBookAndMakeOrder(record: KungfuApi.Position) {
         <KfDashboardItem>
           <a-input-search
             v-model:value="searchKeyword"
-            placeholder="关键字"
+            :placeholder="$t('keyword_input')"
             style="width: 120px"
           />
         </KfDashboardItem>
@@ -176,7 +176,7 @@ function tiggerOrderBookAndMakeOrder(record: KungfuApi.Position) {
         :scroll="{ y: dashboardBodyHeight - 4 }"
         :rowClassName="dealRowClassNameResolved"
         :customRow="customRowResolved"
-        emptyText="暂无数据"
+        :emptyText="$t('empty_text')"
       >
         <template
           #bodyCell="{

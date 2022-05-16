@@ -136,6 +136,12 @@ public:
    */
   void hold_positions();
 
+  /**
+   * request deregister.
+   * @return void
+   */
+  virtual void req_deregister() {}
+
 private:
   bool book_held_ = false;
   bool positions_mirrored_ = true;

@@ -57,6 +57,8 @@ public:
 
   [[nodiscard]] const std::string &get_config();
 
+  [[nodiscard]] const std::string &get_risk_setting();
+
   [[nodiscard]] const yijinjing::data::location_ptr &get_home() const;
 
   [[nodiscard]] yijinjing::journal::writer_ptr get_writer(uint32_t dest_id) const;

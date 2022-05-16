@@ -9,12 +9,13 @@ import {
   dealTradingData,
   isTdStrategyCategory,
   getOrderTradeFilterKey,
-  dealCategory,
   getProcessIdByKfLocation,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import {
   useDownloadHistoryTradingData,
   useTableSearchKeyword,
+  useDashboardBodySize,
+  confirmModal,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import KfDashboard from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfDashboard.vue';
 import KfDashboardItem from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfDashboardItem.vue';
@@ -51,7 +52,6 @@ import {
   HistoryDateEnum,
   OrderStatusEnum,
 } from '@kungfu-trader/kungfu-js-api/typings/enums';
-import { message, Modal } from 'ant-design-vue';
 import {
   showTradingDataDetail,
   useCurrentGlobalKfLocation,
@@ -59,8 +59,13 @@ import {
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
 import { useExtraCategory } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiExtraLocationUtils';
 import StatisticModal from './OrderStatisticModal.vue';
+import { messagePrompt } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
+import VueI18n from '@kungfu-trader/kungfu-app/src/language';
 
+const { t } = VueI18n.global;
+const { success, error } = messagePrompt();
 const app = getCurrentInstance();
+const { handleBodySizeChange } = useDashboardBodySize();
 
 const { processStatusData } = useProcessStatusDetailData();
 const orders = ref<KungfuApi.OrderResolved[]>([]);
@@ -202,7 +207,7 @@ function isFinishedOrderStatus(orderStatus: OrderStatusEnum): boolean {
 
 function handleCancelOrder(order: KungfuApi.OrderResolved): void {
   if (!currentGlobalKfLocation.value || !window.watcher) {
-    message.error('操作失败');
+    error();
     return;
   }
 
@@ -212,46 +217,38 @@ function handleCancelOrder(order: KungfuApi.OrderResolved): void {
 
   kfCancelOrder(window.watcher, order)
     .then(() => {
-      message.success('操作成功');
+      success();
     })
     .catch(() => {
-      message.error('操作失败');
+      error();
     });
 }
 
 function handleCancelAllOrders(): void {
   if (!currentGlobalKfLocation.value || !window.watcher) {
-    message.error('操作失败');
+    error();
     return;
   }
-
-  const extraCategory: Record<string, KungfuApi.KfTradeValueCommonData> =
-    app?.proxy ? app?.proxy.$globalCategoryRegister.getExtraCategory() : {};
-  const categoryName = dealCategory(
-    currentGlobalKfLocation.value?.category,
-    extraCategory,
-  ).name;
   const name = getIdByKfLocation(currentGlobalKfLocation.value);
 
-  Modal.confirm({
-    title: '确认全部撤单',
-    content: `确认 ${categoryName} ${name} 全部撤单`,
-    okText: '确认',
-    cancelText: '取消',
-    onOk() {
-      if (!currentGlobalKfLocation.value || !window.watcher) {
-        return;
-      }
+  confirmModal(
+    t('orderConfig.confirm_cancel_all'),
+    `${t('orderConfig.confirm')} ${currentCategoryData.value?.name} ${name} ${t(
+      'orderConfig.cancel_all',
+    )}`,
+  ).then(() => {
+    if (!currentGlobalKfLocation.value || !window.watcher) {
+      return;
+    }
 
-      const orders = getTargetCancelOrders();
-      return kfCancelAllOrders(window.watcher, orders)
-        .then(() => {
-          message.success('操作成功');
-        })
-        .catch((err) => {
-          message.error(err.message);
-        });
-    },
+    const orders = getTargetCancelOrders();
+    return kfCancelAllOrders(window.watcher, orders)
+      .then(() => {
+        success();
+      })
+      .catch((err) => {
+        error(err.message);
+      });
   });
 }
 
@@ -282,7 +279,10 @@ function handleShowTradingDataDetail({
   event: MouseEvent;
   row: TradingDataItem;
 }) {
-  showTradingDataDetail(row as KungfuApi.OrderResolved, '委托');
+  showTradingDataDetail(
+    row as KungfuApi.OrderResolved,
+    t('orderConfig.entrust'),
+  );
 }
 
 const adjustOrderConfig = reactive({
@@ -345,7 +345,7 @@ function handleAdjustOrder(data: {
 function handleClickAdjustOrderMask(): void {
   const kfLocation = currentGlobalKfLocation.value;
   if (!kfLocation) {
-    message.error('当前 Location 错误');
+    error(t('location_error'));
     adjustOrderMaskVisible.value = false;
     return;
   }
@@ -379,10 +379,10 @@ function handleClickAdjustOrderMask(): void {
       );
     })
     .then(() => {
-      message.success('操作成功');
+      success();
     })
     .catch((err) => {
-      message.error(err.message);
+      error(err.message);
     })
     .finally(() => {
       adjustOrderMaskVisible.value = false;
@@ -398,7 +398,11 @@ function testOrderSourceIsOnline(order: KungfuApi.OrderResolved) {
   const tdLocation = window.watcher.getLocation(source);
   const processId = getProcessIdByKfLocation(tdLocation);
   if (processStatusData.value[processId] !== 'online') {
-    message.error(`请先启动 ${processId} 交易进程`);
+    error(
+      `${t('orderConfig.start')} ${processId} ${t(
+        'orderConfig.trade_process',
+      )}`,
+    );
     return false;
   }
 
@@ -411,7 +415,7 @@ function testOrderSourceIsOnline(order: KungfuApi.OrderResolved) {
 </script>
 <template>
   <div class="kf-orders__warp kf-translateZ">
-    <KfDashboard>
+    <KfDashboard @boardSizeChange="handleBodySizeChange">
       <template v-slot:title>
         <span v-if="currentGlobalKfLocation">
           <a-tag
@@ -428,13 +432,13 @@ function testOrderSourceIsOnline(order: KungfuApi.OrderResolved) {
       <template v-slot:header>
         <KfDashboardItem>
           <a-checkbox size="small" v-model:checked="unfinishedOrder">
-            未完成委托
+            {{ $t('orderConfig.checkbox_text') }}
           </a-checkbox>
         </KfDashboardItem>
         <KfDashboardItem>
           <a-input-search
             v-model:value="searchKeyword"
-            placeholder="关键字"
+            :placeholder="$t('keyword_input')"
             style="width: 120px"
           />
         </KfDashboardItem>
@@ -442,6 +446,7 @@ function testOrderSourceIsOnline(order: KungfuApi.OrderResolved) {
           <a-date-picker
             v-model:value="historyDate"
             :disabled="historyDataLoading"
+            :placeholder="$t('orderConfig.date_picker')"
           >
             <template #suffixIcon>
               <LoadingOutlined v-if="historyDataLoading" />
@@ -473,7 +478,7 @@ function testOrderSourceIsOnline(order: KungfuApi.OrderResolved) {
             danger
             @click="handleCancelAllOrders"
           >
-            全部撤单
+            {{ $t('orderConfig.cancel_all') }}
           </a-button>
         </KfDashboardItem>
       </template>

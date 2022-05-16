@@ -1,5 +1,7 @@
 import { LedgerCategoryEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import { KfCategoryRegisterProps } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiExtraLocationUtils';
+import VueI18n from '@kungfu-trader/kungfu-app/src/language';
+const { t } = VueI18n.global;
 
 export const getColumns = (
   sorter: (
@@ -7,7 +9,7 @@ export const getColumns = (
   ) => (a: KungfuApi.KfConfig, b: KungfuApi.KfConfig) => number,
 ): AntTableColumns => [
   {
-    title: '账户(组)',
+    title: t('tdConfig.account_name'),
     dataIndex: 'name',
     align: 'left',
     width: 180,
@@ -15,28 +17,28 @@ export const getColumns = (
     fixed: 'left',
   },
   {
-    title: '备注',
+    title: t('tdConfig.account_ps'),
     dataIndex: 'accountName',
     align: 'left',
     width: 80,
     fixed: 'left',
   },
   {
-    title: '状态',
+    title: t('tdConfig.state_status'),
     dataIndex: 'stateStatus',
     align: 'left',
     width: 80,
     fixed: 'left',
   },
   {
-    title: '进程',
+    title: t('tdConfig.process_status'),
     dataIndex: 'processStatus',
     align: 'center',
     width: 60,
     fixed: 'left',
   },
   {
-    title: '浮动盈亏',
+    title: t('tdConfig.unrealized_pnl'),
     dataIndex: 'unrealizedPnl',
     align: 'right',
     sorter: {
@@ -45,7 +47,7 @@ export const getColumns = (
     width: 110,
   },
   {
-    title: '市值',
+    title: t('tdConfig.marked_value'),
     dataIndex: 'marketValue',
     align: 'right',
     sorter: {
@@ -54,7 +56,7 @@ export const getColumns = (
     width: 110,
   },
   {
-    title: '保证金',
+    title: t('tdConfig.margin'),
     dataIndex: 'margin',
     align: 'right',
     sorter: {
@@ -63,7 +65,7 @@ export const getColumns = (
     width: 110,
   },
   {
-    title: '可用资金',
+    title: t('tdConfig.avail_money'),
     dataIndex: 'avail',
     align: 'right',
     sorter: {
@@ -72,7 +74,7 @@ export const getColumns = (
     width: 110,
   },
   {
-    title: '操作',
+    title: t('tdConfig.actions'),
     dataIndex: 'actions',
     align: 'right',
     width: 140,
@@ -83,7 +85,7 @@ export const getColumns = (
 export const categoryRegisterConfig: KfCategoryRegisterProps = {
   name: 'tdGroup',
   commonData: {
-    name: '账户分组',
+    name: t('tdConfig.td_group'),
     color: '#FAAD14',
   },
   order: {

@@ -2,7 +2,6 @@ import inquirer from 'inquirer';
 import colors from 'colors';
 import { KfCategoryTypes } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import {
-  ExtensionData,
   getIdByKfLocation,
   getProcessIdByKfLocation,
   initFormStateByConfig,
@@ -63,10 +62,12 @@ export const getKfCategoryFromString = (
   else return 'system';
 };
 
-export const parseExtDataList = (extList: ExtensionData[]): string[] => {
-  return extList.map((ext: ExtensionData) => {
+export const parseExtDataList = (
+  extList: KungfuApi.KfExtConfig[],
+): string[] => {
+  return extList.map((ext: KungfuApi.KfExtConfig) => {
     const isArray = typeof ext.type === 'object';
-    const type = isArray ? ext.type.join(' ') : ext.type;
+    const type = isArray ? (ext.type || []).join(' ') : ext.type || '';
     return [ext.name, ext.key, type].join('    ');
   });
 };

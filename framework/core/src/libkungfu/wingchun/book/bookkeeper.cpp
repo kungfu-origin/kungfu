@@ -154,29 +154,6 @@ void Bookkeeper::update_book(const event_ptr &event, const Quote &quote) {
   }
 }
 
-void Bookkeeper::update_book(const Quote &quote) {
-  if (accounting_methods_.find(quote.instrument_type) == accounting_methods_.end()) {
-    return;
-  }
-  auto accounting_method = accounting_methods_.at(quote.instrument_type);
-  for (auto &item : books_) {
-    auto &book = item.second;
-    auto has_long_position = book->has_long_position_for(quote);
-    auto has_short_position = book->has_short_position_for(quote);
-
-    if (has_long_position or has_short_position) {
-      accounting_method->apply_quote(book, quote);
-      book->update(app_.now());
-    }
-    if (has_long_position) {
-      book->get_position_for(Direction::Long, quote).update_time = app_.now();
-    }
-    if (has_short_position) {
-      book->get_position_for(Direction::Short, quote).update_time = app_.now();
-    }
-  }
-}
-
 void Bookkeeper::try_update_asset(const Asset &asset) {
   if (app_.has_location(asset.holder_uid)) {
     get_book(asset.holder_uid)->asset = asset;

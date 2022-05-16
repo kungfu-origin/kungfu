@@ -5,6 +5,8 @@ import {
   PriceTypeEnum,
   SideEnum,
 } from '@kungfu-trader/kungfu-js-api/typings/enums';
+import VueI18n from '@kungfu-trader/kungfu-app/src/language';
+const { t } = VueI18n.global;
 
 export const getConfigSettings = (
   category?: KfCategoryTypes,
@@ -15,65 +17,71 @@ export const getConfigSettings = (
       ? null
       : {
           key: 'account_id',
-          name: '账户',
+          name: t('futureArbitrageConfig.account_name'),
           type: 'td',
           required: true,
         },
     {
       key: 'future_arbitrage_code',
-      name: '套利代码',
+      name: t('futureArbitrageConfig.future_arbitrage_code'),
       type: 'futureArbitrageCode',
       required: true,
     },
     {
       key: 'instrument_A',
-      name: side === SideEnum.Buy ? '买入标的 A' : '卖出标的 A',
+      name:
+        side === SideEnum.Buy
+          ? t('futureArbitrageConfig.instrument_bug_A')
+          : t('futureArbitrageConfig.instrument_sell_A'),
       type: 'instrument',
       required: true,
     },
     {
       key: 'instrument_B',
-      name: side === SideEnum.Buy ? '卖出标的 B' : '买入标的 B',
+      name:
+        side === SideEnum.Buy
+          ? t('futureArbitrageConfig.instrument_bug_B')
+          : t('futureArbitrageConfig.instrument_bug_B'),
       type: 'instrument',
       required: true,
     },
     {
       key: 'side',
-      name: '买卖',
+      name: t('futureArbitrageConfig.side'),
       type: 'side',
       default: SideEnum.Buy,
       required: true,
     },
     {
       key: 'offset',
-      name: '开平',
+      name: t('futureArbitrageConfig.offset'),
       type: 'offset',
       default: OffsetEnum.Open,
       required: true,
     },
     {
       key: 'hedge_flag',
-      name: '套保',
+      name: t('futureArbitrageConfig.hedge_flag'),
       type: 'hedgeFlag',
       default: HedgeFlagEnum.Speculation,
       required: true,
     },
     {
       key: 'price_type',
-      name: '方式',
+      name: t('futureArbitrageConfig.price_type'),
       type: 'priceType',
       default: PriceTypeEnum.Limit,
       required: true,
     },
     {
       key: 'limit_price',
-      name: '价差 A-B',
+      name: t('futureArbitrageConfig.limit_price'),
       type: 'float',
       required: true,
     },
     {
       key: 'volume',
-      name: '下单量',
+      name: t('futureArbitrageConfig.volume'),
       type: 'int',
       required: true,
     },

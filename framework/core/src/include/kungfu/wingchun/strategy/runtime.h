@@ -125,6 +125,12 @@ public:
    */
   void req_history_trade(const std::string &account) override;
 
+  /**
+   * request deregister.
+   * @return void
+   */
+  void req_deregister() override;
+
 protected:
   yijinjing::practice::apprentice &app_;
   const rx::connectable_observable<event_ptr> &events_;

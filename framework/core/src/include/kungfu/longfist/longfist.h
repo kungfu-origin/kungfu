@@ -31,11 +31,14 @@ constexpr auto AllTypes = boost::hana::make_map( //
     TYPE_PAIR(MirrorPositionsRequest),           //
     TYPE_PAIR(AssetRequest),                     //
     TYPE_PAIR(PositionRequest),                  //
+    TYPE_PAIR(KeepPositionsRequest),             //
+    TYPE_PAIR(RebuildPositionsRequest),          //
     TYPE_PAIR(InstrumentEnd),                    //
     TYPE_PAIR(AlgoOrderInput),                   //
     TYPE_PAIR(AlgoOrderReport),                  //
     TYPE_PAIR(AlgoOrderModify),                  //
     TYPE_PAIR(Config),                           //
+    TYPE_PAIR(RiskSetting),                      //
     TYPE_PAIR(TimeValue),                        //
     TYPE_PAIR(TimeKeyValue),                     //
     TYPE_PAIR(Commission),                       //
@@ -80,6 +83,7 @@ constexpr auto AllTypes = boost::hana::make_map( //
 
 constexpr auto AllDataTypes = boost::hana::make_map( //
     TYPE_PAIR(Config),                               //
+    TYPE_PAIR(RiskSetting),                          //
     TYPE_PAIR(TimeValue),                            //
     TYPE_PAIR(TimeKeyValue),                         //
     TYPE_PAIR(Commission),                           //
@@ -124,6 +128,7 @@ constexpr auto AllDataTypes = boost::hana::make_map( //
 
 constexpr auto ProfileDataTypes = boost::hana::make_map( //
     TYPE_PAIR(Config),                                   //
+    TYPE_PAIR(RiskSetting),                              //
     TYPE_PAIR(Commission),                               //
     TYPE_PAIR(Instrument),                               //
     TYPE_PAIR(Location)                                  //
@@ -135,6 +140,7 @@ constexpr auto SessionDataTypes = boost::hana::make_map( //
 
 constexpr auto StateDataTypes = boost::hana::make_map( //
     TYPE_PAIR(Config),                                 //
+    TYPE_PAIR(RiskSetting),                            //
     TYPE_PAIR(TimeValue),                              //
     TYPE_PAIR(TimeKeyValue),                           //
     TYPE_PAIR(Commission),                             //

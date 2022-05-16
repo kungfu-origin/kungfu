@@ -111,8 +111,9 @@ class ExtensionExecutor:
     def run_broker_vendor(self, vendor_builder):
         ctx = self.ctx
         loader = self.loader
-        site.setup(loader.extension_dir)
-        sys.path.insert(0, loader.extension_dir)
+        if loader.extension_dir:
+            site.setup(loader.extension_dir)
+            sys.path.insert(0, loader.extension_dir)
         module = importlib.import_module(ctx.group)
         vendor = vendor_builder(
             ctx.runtime_locator, ctx.group, ctx.name, ctx.low_latency
@@ -128,6 +129,11 @@ class ExtensionExecutor:
         self.run_broker_vendor(wc.TraderVendor)
 
     def run_strategy(self):
+        loader = self.loader
+        if loader.extension_dir:
+            site.setup(loader.extension_dir)
+            sys.path.insert(0, loader.extension_dir)
+
         ctx = self.ctx
         ctx.location = yjj.location(
             kfj.MODES[ctx.mode],

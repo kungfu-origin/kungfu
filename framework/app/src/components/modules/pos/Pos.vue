@@ -10,6 +10,7 @@ import {
 import {
   useDownloadHistoryTradingData,
   useTableSearchKeyword,
+  useDashboardBodySize,
   useTriggerMakeOrder,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import KfDashboard from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfDashboard.vue';
@@ -41,6 +42,8 @@ import {
 import { useExtraCategory } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiExtraLocationUtils';
 
 const app = getCurrentInstance();
+const { handleBodySizeChange } = useDashboardBodySize();
+
 const pos = ref<KungfuApi.Position[]>([]);
 const { searchKeyword, tableData } = useTableSearchKeyword<KungfuApi.Position>(
   pos,
@@ -154,7 +157,7 @@ function dealLocationUIDResolved(holderUID: number): string {
 </script>
 <template>
   <div class="kf-position__warp kf-translateZ">
-    <KfDashboard>
+    <KfDashboard @boardSizeChange="handleBodySizeChange">
       <template v-slot:title>
         <span v-if="currentGlobalKfLocation">
           <a-tag
@@ -172,7 +175,7 @@ function dealLocationUIDResolved(holderUID: number): string {
         <KfDashboardItem>
           <a-input-search
             v-model:value="searchKeyword"
-            placeholder="关键字"
+            :placeholder="$t('keyword_input')"
             style="width: 120px"
           />
         </KfDashboardItem>

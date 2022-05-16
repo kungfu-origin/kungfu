@@ -177,4 +177,5 @@ void RuntimeContext::req_history_trade(const std::string &account) {
   auto writer = app_.get_writer(account_location_uid);
   writer->mark(now(), RequestHistoryTrade::tag);
 }
+void RuntimeContext::req_deregister() { app_.request_deregister(); }
 } // namespace kungfu::wingchun::strategy
