@@ -217,7 +217,7 @@ watch(
   () => formState.value.instrument,
   (newVal) => {
     const instrumentKeyData: Record<string, string[]> =
-      useGlobalStore().getInstrumentKeyData;
+      useGlobalStore().instrumentKeyAccountsMap;
 
     if (instrumentKeyData[newVal] && instrumentKeyData[newVal].length) {
       formState.value.account_id = instrumentKeyData[newVal][0];

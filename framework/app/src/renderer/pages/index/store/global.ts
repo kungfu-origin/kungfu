@@ -440,22 +440,22 @@ export const useGlobalStore = defineStore('global', {
   },
 
   getters: {
-    getInstrumentKeyData(): Record<string, string[]> {
-      const instrumentKeyData: Record<string, string[]> = {};
+    instrumentKeyAccountsMap(): Record<string, string[]> {
+      const instrumentKeyAccountsData: Record<string, string[]> = {};
       this.riskSettingList.forEach((riskListItem: KungfuApi.RiskSetting) => {
         if (riskListItem.white_list && riskListItem.white_list.length) {
           riskListItem.white_list.forEach((instrument) => {
             if (
-              !instrumentKeyData[instrument] ||
-              !instrumentKeyData[instrument].length
+              !instrumentKeyAccountsData[instrument] ||
+              !instrumentKeyAccountsData[instrument].length
             ) {
-              instrumentKeyData[instrument] = [];
+              instrumentKeyAccountsData[instrument] = [];
             }
-            instrumentKeyData[instrument].push(riskListItem.account_id);
+            instrumentKeyAccountsData[instrument].push(riskListItem.account_id);
           });
         }
       });
-      return instrumentKeyData;
+      return instrumentKeyAccountsData;
     },
   },
 });
