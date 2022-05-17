@@ -94,6 +94,7 @@ app
   .use(Spin)
   .use(Skeleton)
   .use(Tree)
+
   .use(Statistic)
   .use(Divider)
   .use(VueVirtualScroller);

@@ -54,6 +54,7 @@ import { useExtraCategory } from '@kungfu-trader/kungfu-app/src/renderer/assets/
 import VueI18n from '@kungfu-trader/kungfu-app/src/language';
 import { useTradingTask } from '../tradingTask/utils';
 import { useGlobalStore } from '@kungfu-trader/kungfu-app/src/renderer/pages/index/store/global';
+import { storeToRefs } from 'pinia';
 
 const { t } = VueI18n.global;
 const { error } = messagePrompt();
@@ -61,6 +62,9 @@ const { error } = messagePrompt();
 let recordableAccountList: string[] = [];
 
 const app = getCurrentInstance();
+const { instrumentKeyAccountsMap, whiteListAccountsList } = storeToRefs(
+  useGlobalStore(),
+);
 const { handleBodySizeChange } = useDashboardBodySize();
 const formState = ref(
   initFormStateByConfig(getConfigSettings('td', InstrumentTypeEnum.future), {}),
@@ -216,11 +220,15 @@ onMounted(() => {
 watch(
   () => formState.value.instrument,
   (newVal) => {
-    const instrumentKeyData: Record<string, string[]> =
-      useGlobalStore().instrumentKeyAccountsMap;
+    console.log(currentGlobalKfLocation.value);
 
-    if (instrumentKeyData[newVal] && instrumentKeyData[newVal].length) {
-      formState.value.account_id = instrumentKeyData[newVal][0];
+    if (
+      !formState.value.account_id &&
+      currentGlobalKfLocation.value?.category !== 'td' &&
+      instrumentKeyAccountsMap.value[newVal] &&
+      instrumentKeyAccountsMap.value[newVal].length
+    ) {
+      formState.value.account_id = instrumentKeyAccountsMap.value[newVal][0];
     }
 
     if (!instrumentResolved.value) {
@@ -318,7 +326,10 @@ async function handleApartOrder(): Promise<void> {
   try {
     await formRef.value.validate();
     const makeOrderInput: KungfuApi.MakeOrderInput = await initOrderInputData();
-    if (!recordableAccountList.includes(formState.value.account_id)) {
+    if (
+      whiteListAccountsList.value.includes(formState.value.account_id) &&
+      !recordableAccountList.includes(formState.value.account_id)
+    ) {
       error(t('白名单设置警告'));
       return;
     }
@@ -451,7 +462,10 @@ async function handleMakeOrder(): Promise<void> {
 
     await formRef.value.validate();
     const makeOrderInput: KungfuApi.MakeOrderInput = await initOrderInputData();
-    if (!recordableAccountList.includes(formState.value.account_id)) {
+    if (
+      whiteListAccountsList.value.includes(formState.value.account_id) &&
+      !recordableAccountList.includes(formState.value.account_id)
+    ) {
       error(t('白名单设置警告'));
       return;
     }

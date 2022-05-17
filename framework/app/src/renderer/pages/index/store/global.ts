@@ -457,5 +457,13 @@ export const useGlobalStore = defineStore('global', {
       });
       return instrumentKeyAccountsMap;
     },
+
+    whiteListAccountsList(): string[] {
+      const accountsList: string[] = [];
+      this.riskSettingList.forEach((riskListItem: KungfuApi.RiskSetting) => {
+        accountsList.push(riskListItem.account_id);
+      });
+      return accountsList;
+    },
   },
 });
