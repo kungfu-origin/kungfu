@@ -443,7 +443,7 @@ export const useGlobalStore = defineStore('global', {
     getInstrumentKeyData(): Record<string, string[]> {
       const instrumentKeyData: Record<string, string[]> = {};
       this.riskSettingList.forEach((riskListItem: KungfuApi.RiskSetting) => {
-        if (riskListItem.white_list.length) {
+        if (riskListItem.white_list && riskListItem.white_list.length) {
           riskListItem.white_list.forEach((instrument) => {
             if (
               !instrumentKeyData[instrument] ||
