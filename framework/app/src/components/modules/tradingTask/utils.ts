@@ -124,7 +124,7 @@ export const useTradingTask = (): {
     }
 
     if (!extConfig.extPath) {
-      message.error(`配置项不存在, 请检查 ${extConfig?.name} .so`);
+      message.error(`配置项不存在, 请检查 ${extConfig?.name}`);
       return;
     }
 

@@ -86,6 +86,10 @@ public:
 
   bool req_account() override { PYBIND11_OVERLOAD_PURE(bool, Trader, req_account, ); }
 
+  bool req_history_order(const event_ptr &event) override { PYBIND11_OVERLOAD_PURE(bool, Trader, req_history_order, ); }
+
+  bool req_history_trade(const event_ptr &event) override { PYBIND11_OVERLOAD_PURE(bool, Trader, req_history_trade, ); }
+
   void on_start() override { PYBIND11_OVERLOAD(void, Trader, on_start, ); }
 
   void on_exit() override { PYBIND11_OVERLOAD(void, Trader, on_exit, ); }
@@ -183,6 +187,15 @@ public:
 
   void on_trade(strategy::Context_ptr &context, const Trade &trade) override {
     PYBIND11_OVERLOAD(void, strategy::Strategy, on_trade, context, trade);
+  }
+
+  void on_history_order(strategy::Context_ptr &context, const HistoryOrder &history_order) override {
+    PYBIND11_OVERLOAD(void, strategy::Strategy,
+
+                      on_history_order, context, history_order);
+  }
+  void on_history_trade(strategy::Context_ptr &context, const HistoryTrade &history_trade) override {
+    PYBIND11_OVERLOAD(void, strategy::Strategy, on_history_trade, context, history_trade);
   }
 
   void on_book_sync_reset(strategy::Context_ptr &context, const Book &old_book, const Book &new_book) override {
@@ -295,7 +308,9 @@ void bind(pybind11::module &&m) {
       .def("add_time_interval", &Trader::add_time_interval)
       .def("update_broker_state", &Trader::update_broker_state)
       .def("insert_order", &Trader::insert_order)
-      .def("cancel_order", &Trader::cancel_order);
+      .def("cancel_order", &Trader::cancel_order)
+      .def("req_history_order", &Trader::req_history_order)
+      .def("req_history_trade", &Trader::req_history_trade);
 
   py::class_<MarketDataVendor, BrokerVendor, std::shared_ptr<MarketDataVendor>>(m, "MarketDataVendor")
       .def(py::init<locator_ptr, const std::string &, const std::string &, bool>())
@@ -354,10 +369,13 @@ void bind(pybind11::module &&m) {
            py::arg("limit_price"), py::arg("volume"), py::arg("type"), py::arg("side"),
            py::arg("offset") = Offset::Open, py::arg("hedge_flag") = HedgeFlag::Speculation)
       .def("cancel_order", &strategy::Context::cancel_order)
+      .def("req_history_order", &strategy::Context::req_history_order)
+      .def("req_history_trade", &strategy::Context::req_history_trade)
       .def("hold_book", &strategy::Context::hold_book)
       .def("hold_positions", &strategy::Context::hold_positions)
       .def("is_book_held", &strategy::Context::is_book_held)
-      .def("is_positions_mirrored", &strategy::Context::is_positions_mirrored);
+      .def("is_positions_mirrored", &strategy::Context::is_positions_mirrored)
+      .def("req_deregister", &strategy::Context::req_deregister);
 
   py::class_<strategy::RuntimeContext, strategy::Context, strategy::RuntimeContext_ptr>(m, "RuntimeContext")
       .def_property_readonly("bookkeeper", &strategy::RuntimeContext::get_bookkeeper,
@@ -378,7 +396,10 @@ void bind(pybind11::module &&m) {
       .def("on_order", &strategy::Strategy::on_order)
       .def("on_trade", &strategy::Strategy::on_trade)
       .def("on_book_sync_reset", &strategy::Strategy::on_book_sync_reset)
-      .def("on_asset_sync_reset", &strategy::Strategy::on_asset_sync_reset);
+      .def("on_asset_sync_reset", &strategy::Strategy::on_asset_sync_reset)
+      .def("on_history_order", &strategy::Strategy::on_history_order)
+      .def("on_history_trade", &strategy::Strategy::on_history_trade);
+  ;
 
   py::class_<BarGenerator, kungfu::yijinjing::practice::apprentice, std::shared_ptr<BarGenerator>>(m, "BarGenerator")
       .def(py::init<yijinjing::data::locator_ptr, longfist::enums::mode, bool, std::string &>())

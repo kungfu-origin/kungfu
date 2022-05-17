@@ -80,6 +80,16 @@ public:
                                 longfist::enums::Offset offset, longfist::enums::HedgeFlag hedge_flag) = 0;
 
   /**
+   * query history order
+   */
+  virtual void req_history_order(const std::string &account) = 0;
+
+  /**
+   * query history trade
+   */
+  virtual void req_history_trade(const std::string &account) = 0;
+
+  /**
    * Cancel order.
    * @param order_id order ID
    * @return order action ID
@@ -125,6 +135,12 @@ public:
    * Call to hold positions, i.e. do not mirror positions.
    */
   void hold_positions();
+
+  /**
+   * request deregister.
+   * @return void
+   */
+  virtual void req_deregister() {}
 
 private:
   bool book_held_ = false;

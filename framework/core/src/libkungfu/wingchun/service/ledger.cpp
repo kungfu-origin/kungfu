@@ -256,8 +256,6 @@ void Ledger::write_book_reset(int64_t trigger_time, uint32_t book_uid) {
 void Ledger::write_strategy_data(int64_t trigger_time, uint32_t strategy_uid) {
   auto strategy_book = bookkeeper_.get_book(strategy_uid);
   auto writer = get_writer(strategy_uid);
-  // writer->open_data<CacheReset>(trigger_time).msg_type = Position::tag;
-  // writer->close_data();
   for (const auto &pair : bookkeeper_.get_books()) {
     auto &book = pair.second;
     auto &asset = book->asset;

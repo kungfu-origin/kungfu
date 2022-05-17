@@ -8,10 +8,10 @@
 #include <cstdio>
 #include <cstring>
 #include <ctime>
-#include <nlohmann/json.hpp>
 #include <kungfu/longfist/longfist.h>
 #include <kungfu/wingchun/common.h>
 #include <kungfu/yijinjing/time.h>
+#include <nlohmann/json.hpp>
 #include <xtp_api_struct.h>
 
 using namespace kungfu::longfist;
@@ -438,7 +438,39 @@ inline void from_xtp(const XTPOrderInfo &ori, Order &des) {
   }
 }
 
+inline void from_xtp(const XTPQueryOrderRsp &ori, HistoryOrder &des) {
+  strcpy(des.instrument_id, ori.ticker);
+  from_xtp(ori.market, des.exchange_id);
+  from_xtp(ori.price_type, ori.market, des.price_type);
+  des.volume = ori.quantity;
+  des.volume_traded = ori.qty_traded;
+  des.volume_left = ori.qty_left;
+  des.limit_price = ori.price;
+  from_xtp(ori.order_status, des.status);
+  from_xtp(ori.side, des.side);
+  des.offset = Offset::Open;
+  if (ori.business_type == XTP_BUSINESS_TYPE_CASH) {
+    des.instrument_type = InstrumentType::Stock;
+  }
+  if (ori.update_time > 0) {
+    des.update_time = nsec_from_xtp_timestamp(ori.update_time);
+  }
+}
+
 inline void from_xtp(const XTPTradeReport &ori, Trade &des) {
+  strcpy(des.instrument_id, ori.ticker);
+  des.volume = ori.quantity;
+  des.price = ori.price;
+  from_xtp(ori.market, des.exchange_id);
+  from_xtp(ori.side, des.side);
+  des.offset = Offset::Open;
+  if (ori.business_type == XTP_BUSINESS_TYPE_CASH) {
+    des.instrument_type = InstrumentType::Stock;
+  }
+  des.trade_time = nsec_from_xtp_timestamp(ori.trade_time);
+}
+
+inline void from_xtp(const XTPQueryTradeRsp &ori, HistoryTrade &des) {
   strcpy(des.instrument_id, ori.ticker);
   des.volume = ori.quantity;
   des.price = ori.price;

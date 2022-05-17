@@ -105,6 +105,7 @@ function createWindow(reloadAfterCrashed = false, reloadBySchedule = false) {
 
   MainWindow.on('close', (e) => {
     if (CrashedReloading || SecheduleReloading) {
+      MainWindow && MainWindow.destroy();
       return;
     }
 
@@ -122,6 +123,7 @@ function createWindow(reloadAfterCrashed = false, reloadBySchedule = false) {
           });
       }
     } else {
+      MainWindow && MainWindow.destroy();
       return;
     }
   });

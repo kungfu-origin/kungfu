@@ -98,6 +98,8 @@ public:
 
   [[nodiscard]] virtual std::vector<uint32_t> list_location_dest(const location_ptr &location) const;
 
+  [[nodiscard]] virtual std::vector<uint32_t> list_location_dest_by_db(const location_ptr &location) const;
+
 private:
   std::filesystem::path root_;
 };

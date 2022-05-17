@@ -134,4 +134,16 @@ std::vector<uint32_t> locator::list_location_dest(const location_ptr &location) 
   }
   return std::vector<uint32_t>(set.begin(), set.end());
 }
+
+std::vector<uint32_t> locator::list_location_dest_by_db(const location_ptr &location) const {
+  std::unordered_set<uint32_t> set = {};
+  auto dir = fs::path(layout_dir(location, es::layout::SQLITE));
+  for (auto &it : fs::recursive_directory_iterator(dir)) {
+    auto basename = it.path().stem();
+    if (it.is_regular_file() and it.path().extension() == ".db") {
+      set.emplace(std::stoul(basename.stem(), nullptr, 16));
+    }
+  }
+  return std::vector<uint32_t>(set.begin(), set.end());
+}
 } // namespace kungfu::yijinjing::data
