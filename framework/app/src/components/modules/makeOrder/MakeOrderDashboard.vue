@@ -220,8 +220,6 @@ watch(
       useGlobalStore().getInstrumentKeyData;
 
     if (instrumentKeyData[newVal] && instrumentKeyData[newVal].length) {
-      console.log(instrumentKeyData[newVal]);
-
       formState.value.account_id = instrumentKeyData[newVal][0];
     }
 
