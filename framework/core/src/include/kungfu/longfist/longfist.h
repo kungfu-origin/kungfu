@@ -38,7 +38,7 @@ constexpr auto AllTypes = boost::hana::make_map( //
     TYPE_PAIR(AlgoOrderReport),                  //
     TYPE_PAIR(AlgoOrderModify),                  //
     TYPE_PAIR(Config),                           //
-    TYPE_PAIR(RiskSetting),                       //
+    TYPE_PAIR(RiskSetting),                      //
     TYPE_PAIR(TimeValue),                        //
     TYPE_PAIR(TimeKeyValue),                     //
     TYPE_PAIR(Commission),                       //
@@ -68,6 +68,8 @@ constexpr auto AllTypes = boost::hana::make_map( //
     TYPE_PAIR(OrderActionError),                 //
     TYPE_PAIR(Order),                            //
     TYPE_PAIR(Trade),                            //
+    TYPE_PAIR(HistoryOrder),                     //
+    TYPE_PAIR(HistoryTrade),                     //
     TYPE_PAIR(Asset),                            //
     TYPE_PAIR(AssetSnapshot),                    //
     TYPE_PAIR(DailyAsset),                       //
@@ -81,7 +83,7 @@ constexpr auto AllTypes = boost::hana::make_map( //
 
 constexpr auto AllDataTypes = boost::hana::make_map( //
     TYPE_PAIR(Config),                               //
-    TYPE_PAIR(RiskSetting),                           //
+    TYPE_PAIR(RiskSetting),                          //
     TYPE_PAIR(TimeValue),                            //
     TYPE_PAIR(TimeKeyValue),                         //
     TYPE_PAIR(Commission),                           //
@@ -111,6 +113,8 @@ constexpr auto AllDataTypes = boost::hana::make_map( //
     TYPE_PAIR(OrderActionError),                     //
     TYPE_PAIR(Order),                                //
     TYPE_PAIR(Trade),                                //
+    TYPE_PAIR(HistoryOrder),                         //
+    TYPE_PAIR(HistoryTrade),                         //
     TYPE_PAIR(Asset),                                //
     TYPE_PAIR(AssetSnapshot),                        //
     TYPE_PAIR(DailyAsset),                           //
@@ -124,7 +128,7 @@ constexpr auto AllDataTypes = boost::hana::make_map( //
 
 constexpr auto ProfileDataTypes = boost::hana::make_map( //
     TYPE_PAIR(Config),                                   //
-    TYPE_PAIR(RiskSetting),                               //
+    TYPE_PAIR(RiskSetting),                              //
     TYPE_PAIR(Commission),                               //
     TYPE_PAIR(Instrument),                               //
     TYPE_PAIR(Location)                                  //
@@ -136,7 +140,7 @@ constexpr auto SessionDataTypes = boost::hana::make_map( //
 
 constexpr auto StateDataTypes = boost::hana::make_map( //
     TYPE_PAIR(Config),                                 //
-    TYPE_PAIR(RiskSetting),                             //
+    TYPE_PAIR(RiskSetting),                            //
     TYPE_PAIR(TimeValue),                              //
     TYPE_PAIR(TimeKeyValue),                           //
     TYPE_PAIR(Commission),                             //
@@ -151,6 +155,8 @@ constexpr auto StateDataTypes = boost::hana::make_map( //
     TYPE_PAIR(OrderActionError),                       //
     TYPE_PAIR(Order),                                  //
     TYPE_PAIR(Trade),                                  //
+    TYPE_PAIR(HistoryOrder),                           //
+    TYPE_PAIR(HistoryTrade),                           //
     TYPE_PAIR(Asset),                                  //
     TYPE_PAIR(AssetSnapshot),                          //
     TYPE_PAIR(DailyAsset),                             //

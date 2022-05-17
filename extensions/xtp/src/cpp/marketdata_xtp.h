@@ -160,7 +160,7 @@ public:
   ///@param error_info
   ///查询合约的最新价格信息时发生错误时返回的错误信息，当error_info为空，或者error_info.error_id为0时，表明没有错误
   ///@param is_last 是否此次查询的最后一个应答，当为最后一个的时候为true，如果为false，表示还有其他后续消息响应
-  void OnQueryTickersPriceInfo(XTPTPI *ticker_info, XTPRI *error_info, bool is_last) override;
+  void OnQueryTickersPriceInfo(XTPTPI *ticker_info, XTPRI *error_info, bool is_last) override{};
 
   ///订阅全市场的期权行情应答
   ///@param exchange_id
@@ -209,6 +209,14 @@ public:
   ///取消订阅合约时发生错误时返回的错误信息，当error_info为空，或者error_info.error_id为0时，表明没有错误
   ///@remark 需要快速返回
   void OnUnSubscribeAllOptionTickByTick(XTP_EXCHANGE_TYPE exchange_id, XTPRI *error_info) override{};
+
+  ///查询合约完整静态信息的应答
+  ///@param ticker_info 合约完整静态信息
+  ///@param error_info
+  ///查询合约完整静态信息时发生错误时返回的错误信息，当error_info为空，或者error_info.error_id为0时，表明没有错误
+  ///@param is_last
+  ///是否此次查询合约完整静态信息的最后一个应答，当为最后一个的时候为true，如果为false，表示还有其他后续消息响应
+  virtual void OnQueryAllTickersFullInfo(XTPQFI *ticker_info, XTPRI *error_info, bool is_last) override;
 
 protected:
   void on_start() override;

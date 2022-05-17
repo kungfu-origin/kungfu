@@ -45,12 +45,12 @@ decltype(__pfnDliNotifyHook2) __pfnDliNotifyHook2 = load_exe_hook;
 
 #include "commission_store.h"
 #include "config_store.h"
-#include "risk_setting_store.h"
 #include "data_table.h"
 #include "history.h"
 #include "io.h"
 #include "journal.h"
 #include "longfist.h"
+#include "risk_setting_store.h"
 #include "watcher.h"
 
 using namespace kungfu::longfist;

@@ -61,6 +61,12 @@ class Strategy(wc.Strategy):
         )
         self._on_order = getattr(self._module, "on_order", lambda ctx, order: None)
         self._on_trade = getattr(self._module, "on_trade", lambda ctx, trade: None)
+        self._on_history_order = getattr(
+            self._module, "on_history_order", lambda ctx, history_order: None
+        )
+        self._on_history_trade = getattr(
+            self._module, "on_history_trade", lambda ctx, history_trade: None
+        )
         self._on_order_action_error = getattr(
             self._module, "on_order_action_error", lambda ctx, error: None
         )
@@ -152,6 +158,8 @@ class Strategy(wc.Strategy):
         self.ctx.get_account_cash_limit = wc_context.get_account_cash_limit
         self.ctx.insert_order = wc_context.insert_order
         self.ctx.cancel_order = wc_context.cancel_order
+        self.ctx.req_history_order = wc_context.req_history_order
+        self.ctx.req_history_trade = wc_context.req_history_trade
         self.ctx.is_book_held = wc_context.is_book_held
         self.ctx.is_positions_mirrored = wc_context.is_positions_mirrored
         self.ctx.hold_book = wc_context.hold_book
@@ -195,6 +203,12 @@ class Strategy(wc.Strategy):
 
     def on_trade(self, wc_context, trade):
         self.__call_proxy(self._on_trade, self.ctx, trade)
+
+    def on_history_order(self, wc_context, history_order):
+        self.__call_proxy(self._on_history_order, self.ctx, history_order)
+
+    def on_history_trade(self, wc_context, history_trade):
+        self.__call_proxy(self._on_history_trade, self.ctx, history_trade)
 
     def on_trading_day(self, wc_context, daytime):
         self.ctx.trading_day = kft.to_datetime(daytime)

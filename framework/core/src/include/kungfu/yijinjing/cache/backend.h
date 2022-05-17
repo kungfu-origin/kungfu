@@ -100,7 +100,7 @@ public:
   void ensure_storage(uint32_t dest);
 
   template <typename TargetType> void operator>>(TargetType &target) {
-    for (auto dest : location_->locator->list_location_dest(location_)) {
+    for (auto dest : location_->locator->list_location_dest_by_db(location_)) {
       ensure_storage(dest);
     }
     boost::hana::for_each(longfist::StateDataTypes, [&](auto it) {
