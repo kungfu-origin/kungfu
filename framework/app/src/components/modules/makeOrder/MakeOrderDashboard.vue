@@ -319,7 +319,7 @@ async function handleApartOrder(): Promise<void> {
     await formRef.value.validate();
     const makeOrderInput: KungfuApi.MakeOrderInput = await initOrderInputData();
     if (!recordableAccountList.includes(formState.value.account_id)) {
-      error('请先为此账户设置标的白名单');
+      error(t('白名单设置警告'));
       return;
     }
 
@@ -452,7 +452,7 @@ async function handleMakeOrder(): Promise<void> {
     await formRef.value.validate();
     const makeOrderInput: KungfuApi.MakeOrderInput = await initOrderInputData();
     if (!recordableAccountList.includes(formState.value.account_id)) {
-      error('请先为此账户设置标的白名单');
+      error(t('白名单设置警告'));
       return;
     }
 
