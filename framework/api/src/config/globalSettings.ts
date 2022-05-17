@@ -1,6 +1,7 @@
 import fse from 'fs-extra';
+import path from 'path';
 import { SpaceSizeSettingEnum, SpaceTabSettingEnum } from '../typings/enums';
-import { KF_CONFIG_PATH } from './pathConfig';
+import { KF_CONFIG_PATH, PY_WHL_DIR } from './pathConfig';
 import { CodeSizeSetting, CodeTabSetting } from './tradingConfig';
 import {
   languageList,
@@ -72,9 +73,10 @@ export const getKfGlobalSettings = (): KfSystemConfig[] => [
       {
         key: 'python',
         name: t('globalSettingConfig.use_local_python'),
-        tip: `${t(
-          'globalSettingConfig.local_python_desc',
-        )} ${__python_version}`,
+        tip: t('globalSettingConfig.local_python_desc', {
+          py_version: __python_version,
+          whl_path: path.join(PY_WHL_DIR, '*.whl'),
+        }),
         default: false,
         type: 'bool',
       },

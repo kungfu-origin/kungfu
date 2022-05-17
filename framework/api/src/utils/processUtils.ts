@@ -10,7 +10,6 @@ import {
   kfLogger,
   dealSpaceInPath,
   setTimerPromiseTask,
-  delayMilliSeconds,
   flattenExtensionModuleDirs,
   getProcessIdByKfLocation,
   getIfProcessRunning,
@@ -486,15 +485,14 @@ export function buildProcessStatusWidthDetail(
 //===================== utils start =====================
 
 function buildProcessStatus(pList: ProcessDescription[]): Pm2ProcessStatusData {
-  let processStatus: Pm2ProcessStatusData = {};
-  pList.forEach((p: ProcessDescription) => {
+  return pList.reduce((pre, p: ProcessDescription) => {
     const name: string | undefined = p?.name;
     const status: Pm2ProcessStatusTypes | undefined = p?.pm2_env?.status;
     if (name) {
-      processStatus[name] = status;
+      pre[name] = status;
     }
-  });
-  return processStatus;
+    return pre;
+  }, {} as Pm2ProcessStatusData);
 }
 
 function getRocketParams(args: string, ifRocket: boolean) {
@@ -685,14 +683,21 @@ export const startTask = async (
   });
 };
 
-export const startStrategyProcess = async (
+export const startStrategyByLocalPython = async (
   name: string,
   strategyPath: string,
   pythonPath: string,
 ): Promise<Proc | void> => {
-  const baseArgs = ['strategy', '-n', name, '-p', `'${strategyPath}'`].join(
-    ' ',
-  );
+  const baseArgs = [
+    'run',
+    '-c',
+    'strategy',
+    '-g',
+    'default',
+    '-n',
+    name,
+    `'${strategyPath}'`,
+  ].join(' ');
   const baseArgsResolved = buildArgs(baseArgs);
   const args = ['-m', 'kungfu', baseArgsResolved].join(' ');
 
@@ -729,9 +734,7 @@ export const startStrategy = (
   const pythonPath = globalSetting?.strategy?.pythonPath || '';
 
   if (ifLocalPython) {
-    return deleteProcess(strategyId)
-      .then(() => delayMilliSeconds(2000))
-      .then(() => startStrategyProcess(strategyId, strategyPath, pythonPath));
+    return startStrategyByLocalPython(strategyId, strategyPath, pythonPath);
   } else {
     const args = buildArgs(
       `run -c strategy -g default -n '${strategyId}' '${strategyPath}'`,

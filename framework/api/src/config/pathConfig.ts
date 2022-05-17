@@ -43,7 +43,7 @@ export const buildProcessLogPath = (processId: string) => {
 
 //================== others end ===================================
 
-//================== config start =================================
+//================== config & resouces start =================================
 
 export const KUNGFU_RESOURCES_DIR = global.__resources;
 
@@ -83,7 +83,9 @@ export const KF_SCHEDULE_TASKS_JSON_PATH = path.join(
 );
 addFileSync('', KF_SCHEDULE_TASKS_JSON_PATH, 'file');
 
-//================== config end ===================================
+export const PY_WHL_DIR = path.join(KUNGFU_RESOURCES_DIR, 'python');
+
+//================== config & resouces end ===================================
 
 //================== kfc start ====================================
 export const KFC_PARENT_DIR = production
