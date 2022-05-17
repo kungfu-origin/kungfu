@@ -701,8 +701,6 @@ export const startStrategyByLocalPython = async (
   const baseArgsResolved = buildArgs(baseArgs);
   const args = ['-m', 'kungfu', baseArgsResolved].join(' ');
 
-  console.log(args);
-
   if (!pythonPath.trim()) {
     return Promise.reject(new Error('No local python path!'));
   }
