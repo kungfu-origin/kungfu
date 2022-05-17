@@ -43,6 +43,8 @@ interface GlobalState {
   instruments: KungfuApi.InstrumentResolved[];
   subscribedInstruments: KungfuApi.InstrumentResolved[];
 
+  riskSettingList: KungfuApi.RiskSetting[];
+
   currentGlobalKfLocation:
     | KungfuApi.KfLocation
     | KungfuApi.KfConfig
@@ -71,6 +73,8 @@ export const useGlobalStore = defineStore('global', {
       assets: {},
       instruments: [],
       subscribedInstruments: [],
+
+      riskSettingList: [],
 
       currentGlobalKfLocation: null,
     };
@@ -160,6 +164,10 @@ export const useGlobalStore = defineStore('global', {
           }
         }
       });
+    },
+
+    setRiskSettingList(riskSetting: KungfuApi.RiskSetting[]) {
+      this.riskSettingList = riskSetting;
     },
 
     checkCurrentGlobalKfLocationExisted() {
@@ -428,6 +436,26 @@ export const useGlobalStore = defineStore('global', {
         .map((key: string) => +key)
         .sort((key1: number, key2: number) => key2 - key1);
       return boardIds[0] + 1;
+    },
+  },
+
+  getters: {
+    getInstrumentKeyData(): Record<string, string[]> {
+      const instrumentKeyData: Record<string, string[]> = {};
+      this.riskSettingList.forEach((riskListItem: KungfuApi.RiskSetting) => {
+        if (riskListItem.white_list.length) {
+          riskListItem.white_list.forEach((instrument) => {
+            if (
+              !instrumentKeyData[instrument] ||
+              !instrumentKeyData[instrument].length
+            ) {
+              instrumentKeyData[instrument] = [];
+            }
+            instrumentKeyData[instrument].push(riskListItem.account_id);
+          });
+        }
+      });
+      return instrumentKeyData;
     },
   },
 });

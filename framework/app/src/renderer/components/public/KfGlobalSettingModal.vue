@@ -37,7 +37,6 @@ import { DeleteOutlined } from '@ant-design/icons-vue';
 import { longfist } from '@kungfu-trader/kungfu-js-api/kungfu';
 import {
   getAllRiskSettingList,
-  setAllRiskSettingList,
   getScheduleTasks,
   setScheduleTasks,
 } from '@kungfu-trader/kungfu-js-api/actions';
@@ -53,6 +52,7 @@ import {
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/configs';
 import { ipcRenderer } from 'electron';
 import { useAllKfConfigData } from '../../assets/methods/actionsUtils';
+import globalBus from '../../assets/methods/globalBus';
 
 interface ScheduleTaskFormItem {
   timeValue: Dayjs;
@@ -152,7 +152,10 @@ onMounted(() => {
 
 onUnmounted(() => {
   setKfGlobalSettingsValue(globalSettingsFromStates);
-  setAllRiskSettingList(riskSettingsFromStates.value.riskSetting);
+  globalBus.next({
+    tag: 'update:riskSetting',
+    riskSettingList: riskSettingsFromStates.value.riskSetting,
+  } as TriggerUpdateRiskSetting);
   setKfCommission(commissions.value);
   setScheduleTasks({
     active: scheduleTask.active || false,

@@ -53,8 +53,7 @@ import OrderConfirmModal from './OrderConfirmModal.vue';
 import { useExtraCategory } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiExtraLocationUtils';
 import VueI18n from '@kungfu-trader/kungfu-app/src/language';
 import { useTradingTask } from '../tradingTask/utils';
-
-import { getAllKfRiskSettings } from '@kungfu-trader/kungfu-js-api/kungfu/riskSetting';
+import { useGlobalStore } from '@kungfu-trader/kungfu-app/src/renderer/pages/index/store/global';
 
 const { t } = VueI18n.global;
 const { error } = messagePrompt();
@@ -217,11 +216,14 @@ onMounted(() => {
 watch(
   () => formState.value.instrument,
   (newVal) => {
-    getAllKfRiskSettings().then((res: KungfuApi.RiskSettingOrigin[]) => {
-      if (res.length && res[0]?.value) {
-        formState.value.account_id = getCurrentAccountId(res, newVal) || '';
-      }
-    });
+    const instrumentKeyData: Record<string, string[]> =
+      useGlobalStore().getInstrumentKeyData;
+
+    if (instrumentKeyData[newVal] && instrumentKeyData[newVal].length) {
+      console.log(instrumentKeyData[newVal]);
+
+      formState.value.account_id = instrumentKeyData[newVal][0];
+    }
 
     if (!instrumentResolved.value) {
       return;
@@ -239,36 +241,6 @@ watch(
     updatePositionList();
   },
 );
-
-function getCurrentAccountId(
-  riskOriginList: KungfuApi.RiskSettingOrigin[],
-  curInstrument: string,
-): string {
-  const instrumentKeyData: Record<string, string[]> = {};
-  riskOriginList.forEach((item) => {
-    const riskListItem: KungfuApi.RiskSetting = JSON.parse(item.value);
-
-    if (item.name && item.group && riskListItem.white_list.length) {
-      riskListItem.white_list.forEach((instrument) => {
-        if (
-          !instrumentKeyData[instrument] ||
-          !instrumentKeyData[instrument].length
-        ) {
-          instrumentKeyData[instrument] = [];
-        }
-        instrumentKeyData[instrument].push(`${item.group}_${item.name}`);
-      });
-    }
-  });
-  if (
-    instrumentKeyData[curInstrument] &&
-    instrumentKeyData[curInstrument].length
-  ) {
-    recordableAccountList = instrumentKeyData[curInstrument];
-    return instrumentKeyData[curInstrument][0] || '';
-  }
-  return '';
-}
 
 // 更新持仓列表
 function updatePositionList(): void {
