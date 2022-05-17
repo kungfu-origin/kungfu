@@ -37,6 +37,7 @@ export default defineComponent({
 
     const addBoardModalVisible = ref<boolean>(false);
     const addBoardTargetBoardId = ref<number>(-1);
+    const { saveBoardsMap } = usePreStartAndQuitApp();
 
     const subscription = globalBus.subscribe((data: KfBusEvent) => {
       if (data.tag === 'addBoard') {
@@ -49,10 +50,13 @@ export default defineComponent({
           initBoardsMap(defaultBoardsMap);
           success();
         }
+
+        if (data.name == 'record-before-quit') {
+          saveBoardsMap();
+        }
       }
     });
 
-    const { saveBoardsMap } = usePreStartAndQuitApp();
     onBeforeUnmount(() => {
       subscription.unsubscribe();
       saveBoardsMap();

@@ -420,7 +420,8 @@ export default {
 
     strategy: 'Strategy',
     use_local_python: 'Use Local Python',
-    local_python_desc: 'Pip3 install kungfu*.whl, local python require',
+    local_python_desc:
+      'Pip3 install {whl_path}, local python version require {py_version}',
     python_path: 'Select Local Python Path',
     python_path_desc:
       'local python path is required to be selected, and kungfu*.whl should be installed in this path',
