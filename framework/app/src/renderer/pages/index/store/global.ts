@@ -441,21 +441,21 @@ export const useGlobalStore = defineStore('global', {
 
   getters: {
     instrumentKeyAccountsMap(): Record<string, string[]> {
-      const instrumentKeyAccountsData: Record<string, string[]> = {};
+      const instrumentKeyAccountsMap: Record<string, string[]> = {};
       this.riskSettingList.forEach((riskListItem: KungfuApi.RiskSetting) => {
         if (riskListItem.white_list && riskListItem.white_list.length) {
           riskListItem.white_list.forEach((instrument) => {
             if (
-              !instrumentKeyAccountsData[instrument] ||
-              !instrumentKeyAccountsData[instrument].length
+              !instrumentKeyAccountsMap[instrument] ||
+              !instrumentKeyAccountsMap[instrument].length
             ) {
-              instrumentKeyAccountsData[instrument] = [];
+              instrumentKeyAccountsMap[instrument] = [];
             }
-            instrumentKeyAccountsData[instrument].push(riskListItem.account_id);
+            instrumentKeyAccountsMap[instrument].push(riskListItem.account_id);
           });
         }
       });
-      return instrumentKeyAccountsData;
+      return instrumentKeyAccountsMap;
     },
   },
 });
