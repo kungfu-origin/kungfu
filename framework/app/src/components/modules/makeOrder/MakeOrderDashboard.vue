@@ -62,7 +62,7 @@ const { error } = messagePrompt();
 let recordableAccountList: string[] = [];
 
 const app = getCurrentInstance();
-const { instrumentKeyAccountsMap, whiteListAccountsList } = storeToRefs(
+const { instrumentKeyAccountsMap, whiteListedAccounts } = storeToRefs(
   useGlobalStore(),
 );
 const { handleBodySizeChange } = useDashboardBodySize();
@@ -220,14 +220,13 @@ onMounted(() => {
 watch(
   () => formState.value.instrument,
   (newVal) => {
-    console.log(currentGlobalKfLocation.value);
-
     if (
       !formState.value.account_id &&
       currentGlobalKfLocation.value?.category !== 'td' &&
       instrumentKeyAccountsMap.value[newVal] &&
       instrumentKeyAccountsMap.value[newVal].length
     ) {
+      recordableAccountList = instrumentKeyAccountsMap.value[newVal];
       formState.value.account_id = instrumentKeyAccountsMap.value[newVal][0];
     }
 
@@ -326,8 +325,9 @@ async function handleApartOrder(): Promise<void> {
   try {
     await formRef.value.validate();
     const makeOrderInput: KungfuApi.MakeOrderInput = await initOrderInputData();
+
     if (
-      whiteListAccountsList.value.includes(formState.value.account_id) &&
+      whiteListedAccounts.value.includes(formState.value.account_id) &&
       !recordableAccountList.includes(formState.value.account_id)
     ) {
       error(t('白名单设置警告'));
@@ -463,7 +463,7 @@ async function handleMakeOrder(): Promise<void> {
     await formRef.value.validate();
     const makeOrderInput: KungfuApi.MakeOrderInput = await initOrderInputData();
     if (
-      whiteListAccountsList.value.includes(formState.value.account_id) &&
+      whiteListedAccounts.value.includes(formState.value.account_id) &&
       !recordableAccountList.includes(formState.value.account_id)
     ) {
       error(t('白名单设置警告'));
