@@ -59,8 +59,6 @@ import { storeToRefs } from 'pinia';
 const { t } = VueI18n.global;
 const { error } = messagePrompt();
 
-const recordableAccountList = ref<string[]>([]);
-
 const app = getCurrentInstance();
 const { instrumentKeyAccountsMap, whiteListedAccounts } = storeToRefs(
   useGlobalStore(),
@@ -88,13 +86,6 @@ const { getExtraCategoryData } = useExtraCategory();
 const makeOrderInstrumentType = ref<InstrumentTypeEnum>(
   InstrumentTypeEnum.unknown,
 );
-
-const whiteListIntercept = () => {
-  return (
-    whiteListedAccounts.value.includes(formState.value.account_id) &&
-    !recordableAccountList.value.includes(formState.value.account_id)
-  );
-};
 
 const configSettings = computed(() => {
   if (!currentGlobalKfLocation.value) {
@@ -234,7 +225,6 @@ watch(
       instrumentKeyAccountsMap.value[newVal] &&
       instrumentKeyAccountsMap.value[newVal].length
     ) {
-      recordableAccountList.value = instrumentKeyAccountsMap.value[newVal];
       formState.value.account_id = instrumentKeyAccountsMap.value[newVal][0];
     }
 
@@ -254,6 +244,20 @@ watch(
     updatePositionList();
   },
 );
+
+function whiteListIntercept(): Promise<void> {
+  if (whiteListedAccounts.value.includes(formState.value.account_id)) {
+    if (
+      !instrumentKeyAccountsMap.value[formState.value.instrument] ||
+      !instrumentKeyAccountsMap.value[formState.value.instrument].includes(
+        formState.value.account_id,
+      )
+    ) {
+      return Promise.reject(new Error(t('白名单设置警告')));
+    }
+  }
+  return Promise.resolve();
+}
 
 // 更新持仓列表
 function updatePositionList(): void {
@@ -332,10 +336,7 @@ function handleResetMakeOrderForm(): void {
 async function handleApartOrder(): Promise<void> {
   try {
     await formRef.value.validate();
-    if (whiteListIntercept()) {
-      error(t('白名单设置警告'));
-      return;
-    }
+    await whiteListIntercept();
 
     const makeOrderInput: KungfuApi.MakeOrderInput = await initOrderInputData();
     await showCloseModal(makeOrderInput);
@@ -465,10 +466,7 @@ async function handleMakeOrder(): Promise<void> {
     if (!currentGlobalKfLocation.value) return;
 
     await formRef.value.validate();
-    if (whiteListIntercept()) {
-      error(t('白名单设置警告'));
-      return;
-    }
+    await whiteListIntercept();
 
     const makeOrderInput: KungfuApi.MakeOrderInput = await initOrderInputData();
     await showCloseModal(makeOrderInput);
