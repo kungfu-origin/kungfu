@@ -59,12 +59,13 @@ import { storeToRefs } from 'pinia';
 const { t } = VueI18n.global;
 const { error } = messagePrompt();
 
-let recordableAccountList: string[] = [];
+const recordableAccountList = ref<string[]>([]);
 
 const app = getCurrentInstance();
 const { instrumentKeyAccountsMap, whiteListedAccounts } = storeToRefs(
   useGlobalStore(),
 );
+
 const { handleBodySizeChange } = useDashboardBodySize();
 const formState = ref(
   initFormStateByConfig(getConfigSettings('td', InstrumentTypeEnum.future), {}),
@@ -88,12 +89,12 @@ const makeOrderInstrumentType = ref<InstrumentTypeEnum>(
   InstrumentTypeEnum.unknown,
 );
 
-const whiteListIntercept = computed(() => {
+const whiteListIntercept = () => {
   return (
     whiteListedAccounts.value.includes(formState.value.account_id) &&
-    !recordableAccountList.includes(formState.value.account_id)
+    !recordableAccountList.value.includes(formState.value.account_id)
   );
-});
+};
 
 const configSettings = computed(() => {
   if (!currentGlobalKfLocation.value) {
@@ -233,7 +234,7 @@ watch(
       instrumentKeyAccountsMap.value[newVal] &&
       instrumentKeyAccountsMap.value[newVal].length
     ) {
-      recordableAccountList = instrumentKeyAccountsMap.value[newVal];
+      recordableAccountList.value = instrumentKeyAccountsMap.value[newVal];
       formState.value.account_id = instrumentKeyAccountsMap.value[newVal][0];
     }
 
@@ -331,7 +332,7 @@ function handleResetMakeOrderForm(): void {
 async function handleApartOrder(): Promise<void> {
   try {
     await formRef.value.validate();
-    if (whiteListIntercept.value) {
+    if (whiteListIntercept()) {
       error(t('白名单设置警告'));
       return;
     }
@@ -464,7 +465,7 @@ async function handleMakeOrder(): Promise<void> {
     if (!currentGlobalKfLocation.value) return;
 
     await formRef.value.validate();
-    if (whiteListIntercept.value) {
+    if (whiteListIntercept()) {
       error(t('白名单设置警告'));
       return;
     }

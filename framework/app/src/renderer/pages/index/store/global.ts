@@ -459,11 +459,12 @@ export const useGlobalStore = defineStore('global', {
     },
 
     whiteListedAccounts(): string[] {
-      const accountsList: string[] = [];
-      this.riskSettingList.forEach((riskListItem: KungfuApi.RiskSetting) => {
-        accountsList.push(riskListItem.account_id);
-      });
-      return accountsList;
+      return this.riskSettingList.reduce((prev, cur) => {
+        if (cur.white_list && cur.white_list.length) {
+          prev.push(cur.account_id);
+        }
+        return prev;
+      }, []);
     },
   },
 });
