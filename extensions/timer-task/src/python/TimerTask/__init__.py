@@ -15,6 +15,9 @@ class orderTask:
 def pre_start(context):
     context.hold_book()
     context.hold_positions()
+
+    context.log.info(f"{context.arguments} ===")
+
     args = {}
     context.SOURCE = ""
     context.ACCOUNT =""
