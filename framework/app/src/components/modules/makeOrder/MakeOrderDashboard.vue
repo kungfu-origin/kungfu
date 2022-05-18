@@ -88,6 +88,13 @@ const makeOrderInstrumentType = ref<InstrumentTypeEnum>(
   InstrumentTypeEnum.unknown,
 );
 
+const whiteListIntercept = computed(() => {
+  return (
+    whiteListedAccounts.value.includes(formState.value.account_id) &&
+    !recordableAccountList.includes(formState.value.account_id)
+  );
+});
+
 const configSettings = computed(() => {
   if (!currentGlobalKfLocation.value) {
     return getConfigSettings();
@@ -326,10 +333,7 @@ async function handleApartOrder(): Promise<void> {
     await formRef.value.validate();
     const makeOrderInput: KungfuApi.MakeOrderInput = await initOrderInputData();
 
-    if (
-      whiteListedAccounts.value.includes(formState.value.account_id) &&
-      !recordableAccountList.includes(formState.value.account_id)
-    ) {
+    if (whiteListIntercept.value) {
       error(t('白名单设置警告'));
       return;
     }
@@ -462,10 +466,7 @@ async function handleMakeOrder(): Promise<void> {
 
     await formRef.value.validate();
     const makeOrderInput: KungfuApi.MakeOrderInput = await initOrderInputData();
-    if (
-      whiteListedAccounts.value.includes(formState.value.account_id) &&
-      !recordableAccountList.includes(formState.value.account_id)
-    ) {
+    if (whiteListIntercept.value) {
       error(t('白名单设置警告'));
       return;
     }
