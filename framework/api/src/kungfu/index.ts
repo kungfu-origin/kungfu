@@ -51,15 +51,16 @@ export const dealKfTime = (nano: bigint, date = false): string => {
 export const dealTradingDataItem = (
   item: KungfuApi.TradingDataTypes,
   watcher: KungfuApi.Watcher | null,
+  isShowOrigin: boolean = false,
 ): Record<string, string | number | bigint> => {
   const itemResolved = { ...item } as Record<string, string | number | bigint>;
-  if ('trade_time' in item) {
+  if ('trade_time' in item && !isShowOrigin) {
     itemResolved.trade_time = dealKfTime(item.trade_time, true);
   }
-  if ('insert_time' in item) {
+  if ('insert_time' in item && !isShowOrigin) {
     itemResolved.insert_time = dealKfTime(item.insert_time, true);
   }
-  if ('update_time' in item) {
+  if ('update_time' in item && !isShowOrigin) {
     itemResolved.update_time = dealKfTime(item.update_time, true);
   }
   if ('direction' in item) {

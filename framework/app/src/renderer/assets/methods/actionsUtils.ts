@@ -288,9 +288,10 @@ export const useDealExportHistoryTradingData = (): {
   const { getExtraCategoryData } = useExtraCategory();
 
   const dealTradingDataItemResolved = (
-    item: KungfuApi.TradingDataTypes,
-  ): Row => {
-    return dealTradingDataItem(item, window.watcher) as Row;
+    isShowOriginData = false,
+  ): ((item: KungfuApi.TradingDataTypes) => Row) => {
+    return (item) =>
+      dealTradingDataItem(item, window.watcher, isShowOriginData) as Row;
   };
 
   const handleConfirmExportDate = async (formState: {
@@ -337,10 +338,14 @@ export const useDealExportHistoryTradingData = (): {
       const posFilename = path.join(targetFolder, `pos-${dateResolved}`);
 
       return Promise.all([
-        writeCSV(ordersFilename, orders, dealTradingDataItemResolved),
-        writeCSV(tradesFilename, trades, dealTradingDataItemResolved),
-        writeCSV(orderStatFilename, orderStat, dealTradingDataItemResolved),
-        writeCSV(posFilename, positions, dealTradingDataItemResolved),
+        writeCSV(ordersFilename, orders, dealTradingDataItemResolved()),
+        writeCSV(tradesFilename, trades, dealTradingDataItemResolved()),
+        writeCSV(
+          orderStatFilename,
+          orderStat,
+          dealTradingDataItemResolved(true),
+        ),
+        writeCSV(posFilename, positions, dealTradingDataItemResolved()),
       ])
         .then(() => {
           shell.showItemInFolder(ordersFilename);
@@ -399,7 +404,7 @@ export const useDealExportHistoryTradingData = (): {
           tradingDataType.toLowerCase(),
         );
 
-    return writeCSV(filename, exportDatas, dealTradingDataItemResolved)
+    return writeCSV(filename, exportDatas, dealTradingDataItemResolved())
       .then(() => {
         shell.showItemInFolder(filename);
         success();
