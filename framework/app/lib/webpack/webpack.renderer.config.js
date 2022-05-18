@@ -86,18 +86,6 @@ const webpackConfig = (argv) => {
       new MonacoWebpackPlugin({
         languages: ['python', 'yaml', 'json'],
       }),
-      new CopyPlugin({
-        patterns: [
-          {
-            from: path.join(
-              path.resolve(getCoreDir(), 'build', 'python', 'dist'),
-              '*.whl',
-            ),
-            to: path.join(publicDir, 'python'),
-            context: path.resolve(getCoreDir(), 'build', 'python', 'dist'),
-          },
-        ],
-      }),
     ],
     target: 'electron-renderer',
   });
@@ -111,6 +99,18 @@ const prodConfig = {
       __python_version: `"${pyVersion.toString()}"`,
       'process.env.APP_TYPE': '"renderer"',
       __resources: '',
+    }),
+    new CopyPlugin({
+      patterns: [
+        {
+          from: path.join(
+            path.resolve(getCoreDir(), 'build', 'python', 'dist'),
+            '*.whl',
+          ),
+          to: path.join(publicDir, 'python'),
+          context: path.resolve(getCoreDir(), 'build', 'python', 'dist'),
+        },
+      ],
     }),
   ],
 };
