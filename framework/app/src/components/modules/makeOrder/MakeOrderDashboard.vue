@@ -245,13 +245,13 @@ watch(
   },
 );
 
-function whiteListIntercept(): Promise<void> {
-  if (whiteListedAccounts.value.includes(formState.value.account_id)) {
+function whiteListIntercept(
+  accountId: string,
+  instrument: string,
+): Promise<void> {
+  if (whiteListedAccounts.value.includes(accountId)) {
     if (
-      !instrumentKeyAccountsMap.value[formState.value.instrument] ||
-      !instrumentKeyAccountsMap.value[formState.value.instrument].includes(
-        formState.value.account_id,
-      )
+      !(instrumentKeyAccountsMap.value[instrument] || []).includes(accountId)
     ) {
       return Promise.reject(new Error(t('白名单设置警告')));
     }
@@ -336,7 +336,8 @@ function handleResetMakeOrderForm(): void {
 async function handleApartOrder(): Promise<void> {
   try {
     await formRef.value.validate();
-    await whiteListIntercept();
+    const { account_id, instrument } = formState.value;
+    await whiteListIntercept(account_id, instrument);
 
     const makeOrderInput: KungfuApi.MakeOrderInput = await initOrderInputData();
     await showCloseModal(makeOrderInput);
@@ -466,7 +467,8 @@ async function handleMakeOrder(): Promise<void> {
     if (!currentGlobalKfLocation.value) return;
 
     await formRef.value.validate();
-    await whiteListIntercept();
+    const { account_id, instrument } = formState.value;
+    await whiteListIntercept(account_id, instrument);
 
     const makeOrderInput: KungfuApi.MakeOrderInput = await initOrderInputData();
     await showCloseModal(makeOrderInput);
