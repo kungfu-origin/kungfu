@@ -766,7 +766,11 @@ export const getIdByKfLocation = (
   } else if (kfLocation.category === 'md') {
     return `${kfLocation.group}`;
   } else if (kfLocation.category === 'strategy') {
-    return `${kfLocation.name}`;
+    if (kfLocation.group === 'default') {
+      return `${kfLocation.name}`;
+    } else {
+      return `${kfLocation.group}_${kfLocation.name}`;
+    }
   } else if (kfLocation.category === 'system') {
     return `${kfLocation.group}_${kfLocation.name}`;
   } else {

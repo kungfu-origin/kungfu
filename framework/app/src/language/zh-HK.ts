@@ -212,7 +212,7 @@ export default {
     price_type: '方式',
     side: '互换交易意向',
     offset: '开平',
-    limit_price: '限额',
+    limit_price: '下单价格',
 
     make_order_number: '交易意向次数',
     no_empty: '交易意向总量不可为空',

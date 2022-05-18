@@ -211,7 +211,7 @@ export default {
     price_type: 'Price Type',
     side: 'Side',
     offset: 'Offset',
-    limit_price: '限额',
+    limit_price: 'LimitPrice',
 
     make_order_number: 'Order Number',
     no_empty: 'Order quantity cannot be empty',
