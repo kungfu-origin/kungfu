@@ -331,13 +331,12 @@ function handleResetMakeOrderForm(): void {
 async function handleApartOrder(): Promise<void> {
   try {
     await formRef.value.validate();
-    const makeOrderInput: KungfuApi.MakeOrderInput = await initOrderInputData();
-
     if (whiteListIntercept.value) {
       error(t('白名单设置警告'));
       return;
     }
 
+    const makeOrderInput: KungfuApi.MakeOrderInput = await initOrderInputData();
     await showCloseModal(makeOrderInput);
     await confirmFatFingerModal(makeOrderInput);
 
@@ -465,12 +464,12 @@ async function handleMakeOrder(): Promise<void> {
     if (!currentGlobalKfLocation.value) return;
 
     await formRef.value.validate();
-    const makeOrderInput: KungfuApi.MakeOrderInput = await initOrderInputData();
     if (whiteListIntercept.value) {
       error(t('白名单设置警告'));
       return;
     }
 
+    const makeOrderInput: KungfuApi.MakeOrderInput = await initOrderInputData();
     await showCloseModal(makeOrderInput);
     await confirmFatFingerModal(makeOrderInput);
 
