@@ -85,6 +85,11 @@ interface TriggerUpdateTd {
   tds: KungfuApi.KfConfig[];
 }
 
+interface TriggerUpdateRiskSetting {
+  tag: 'update:riskSetting';
+  riskSettingList: RiskSetting[];
+}
+
 interface TriggerUpdateMd {
   tag: 'update:md';
   mds: KungfuApi.KfConfig[];
@@ -134,6 +139,7 @@ type KfBusEvent =
   | TriggerMakeOrder
   | TriggerUpdateTdGroup
   | TriggerUpdateTd
+  | TriggerUpdateRiskSetting
   | TriggerUpdateMd
   | TriggerUpdateStrategy
   | TriggerUpdateExtConfigs

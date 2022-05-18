@@ -36,8 +36,6 @@ import {
 import { DeleteOutlined } from '@ant-design/icons-vue';
 import { longfist } from '@kungfu-trader/kungfu-js-api/kungfu';
 import {
-  getAllRiskSettingList,
-  setAllRiskSettingList,
   getScheduleTasks,
   setScheduleTasks,
 } from '@kungfu-trader/kungfu-js-api/actions';
@@ -53,6 +51,8 @@ import {
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/configs';
 import { ipcRenderer } from 'electron';
 import { useAllKfConfigData } from '../../assets/methods/actionsUtils';
+import globalBus from '../../assets/methods/globalBus';
+import { useGlobalStore } from '../../pages/index/store/global';
 
 interface ScheduleTaskFormItem {
   timeValue: Dayjs;
@@ -73,6 +73,8 @@ defineEmits<{
   (e: 'update:visible', visible: boolean): void;
   (e: 'close'): void;
 }>();
+
+const store = useGlobalStore();
 
 const kfGlobalSettings = getKfGlobalSettings();
 const kfGlobalSettingsValue = getKfGlobalSettingsValue();
@@ -112,12 +114,10 @@ onMounted(() => {
     commissions.value = res;
   });
 
-  getAllRiskSettingList().then((res: KungfuApi.RiskSetting[]) => {
-    riskSettingsFromStates.value = initFormStateByConfig(
-      riskSettingConfig.config,
-      { riskSetting: res },
-    );
-  });
+  riskSettingsFromStates.value = initFormStateByConfig(
+    riskSettingConfig.config,
+    { riskSetting: store.riskSettingList },
+  );
 
   getScheduleTasks().then((res) => {
     scheduleTask.active = !!res.active;
@@ -152,7 +152,10 @@ onMounted(() => {
 
 onUnmounted(() => {
   setKfGlobalSettingsValue(globalSettingsFromStates);
-  setAllRiskSettingList(riskSettingsFromStates.value.riskSetting);
+  globalBus.next({
+    tag: 'update:riskSetting',
+    riskSettingList: riskSettingsFromStates.value.riskSetting,
+  } as TriggerUpdateRiskSetting);
   setKfCommission(commissions.value);
   setScheduleTasks({
     active: scheduleTask.active || false,

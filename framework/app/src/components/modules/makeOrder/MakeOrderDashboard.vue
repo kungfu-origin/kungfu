@@ -53,13 +53,17 @@ import OrderConfirmModal from './OrderConfirmModal.vue';
 import { useExtraCategory } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiExtraLocationUtils';
 import VueI18n from '@kungfu-trader/kungfu-app/src/language';
 import { useTradingTask } from '../tradingTask/utils';
-
-import { getAllKfRiskSettings } from '@kungfu-trader/kungfu-js-api/kungfu/riskSetting';
+import { useGlobalStore } from '@kungfu-trader/kungfu-app/src/renderer/pages/index/store/global';
+import { storeToRefs } from 'pinia';
 
 const { t } = VueI18n.global;
 const { error } = messagePrompt();
 
 const app = getCurrentInstance();
+const { instrumentKeyAccountsMap, whiteListedAccounts } = storeToRefs(
+  useGlobalStore(),
+);
+
 const { handleBodySizeChange } = useDashboardBodySize();
 const formState = ref(
   initFormStateByConfig(getConfigSettings('td', InstrumentTypeEnum.future), {}),
@@ -215,15 +219,14 @@ onMounted(() => {
 watch(
   () => formState.value.instrument,
   (newVal) => {
-    getAllKfRiskSettings().then((res: KungfuApi.RiskSettingOrigin[]) => {
-      if (res.length && res[0]?.value) {
-        const riskSettingList = JSON.parse(res[0]?.value);
-        console.log('riskSettingList', res);
-
-        formState.value.account_id =
-          getCurrentAccountId(riskSettingList, newVal) || '';
-      }
-    });
+    if (
+      !formState.value.account_id &&
+      currentGlobalKfLocation.value?.category !== 'td' &&
+      instrumentKeyAccountsMap.value[newVal] &&
+      instrumentKeyAccountsMap.value[newVal].length
+    ) {
+      formState.value.account_id = instrumentKeyAccountsMap.value[newVal][0];
+    }
 
     if (!instrumentResolved.value) {
       return;
@@ -242,28 +245,18 @@ watch(
   },
 );
 
-function getCurrentAccountId(
-  riskList: KungfuApi.RiskSetting[],
-  curInstrument: string,
-): string {
-  const instrumentKeyData: Record<string, string[]> = {};
-  riskList.forEach((item) => {
-    if (item.account_id && item.white_list.length) {
-      item.white_list.forEach((instrument) => {
-        if (!instrumentKeyData[instrument].length) {
-          instrumentKeyData[instrument] = [];
-        }
-        instrumentKeyData[instrument].push(item.account_id);
-      });
+function whiteListIntercept(
+  accountId: string,
+  instrument: string,
+): Promise<void> {
+  if (whiteListedAccounts.value.includes(accountId)) {
+    if (
+      !(instrumentKeyAccountsMap.value[instrument] || []).includes(accountId)
+    ) {
+      return Promise.reject(new Error(t('白名单设置警告')));
     }
-  });
-  if (
-    instrumentKeyData[curInstrument] &&
-    instrumentKeyData[curInstrument].length
-  ) {
-    return instrumentKeyData[curInstrument][0] || '';
   }
-  return '';
+  return Promise.resolve();
 }
 
 // 更新持仓列表
@@ -343,8 +336,10 @@ function handleResetMakeOrderForm(): void {
 async function handleApartOrder(): Promise<void> {
   try {
     await formRef.value.validate();
-    const makeOrderInput: KungfuApi.MakeOrderInput = await initOrderInputData();
+    const { account_id, instrument } = formState.value;
+    await whiteListIntercept(account_id, instrument);
 
+    const makeOrderInput: KungfuApi.MakeOrderInput = await initOrderInputData();
     await showCloseModal(makeOrderInput);
     await confirmFatFingerModal(makeOrderInput);
 
@@ -472,8 +467,10 @@ async function handleMakeOrder(): Promise<void> {
     if (!currentGlobalKfLocation.value) return;
 
     await formRef.value.validate();
-    const makeOrderInput: KungfuApi.MakeOrderInput = await initOrderInputData();
+    const { account_id, instrument } = formState.value;
+    await whiteListIntercept(account_id, instrument);
 
+    const makeOrderInput: KungfuApi.MakeOrderInput = await initOrderInputData();
     await showCloseModal(makeOrderInput);
     await confirmFatFingerModal(makeOrderInput);
 
