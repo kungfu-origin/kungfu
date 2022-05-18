@@ -420,7 +420,7 @@ export default {
     strategy: '策略',
     use_local_python: '使用本地Python',
     local_python_desc:
-      '使用本地python启动策略, 需要 pip3 install {whl_path}, 开启后需重启策略, 本地 python3 版本需为 {py_version}',
+      '使用本地python启动策略, 需要 pip3 install {whl_dir_path} 内 *.whl 文件, 开启后需重启策略, 本地 python3 版本需为 {py_version}',
     python_path: '选择本地 Python 路径',
     python_path_desc:
       '功夫将会以选择的python路径运行策略, 同时需要保证 kungfu*.whl 已经通过 pip安装',

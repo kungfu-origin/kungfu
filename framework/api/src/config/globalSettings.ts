@@ -75,7 +75,7 @@ export const getKfGlobalSettings = (): KfSystemConfig[] => [
         name: t('globalSettingConfig.use_local_python'),
         tip: t('globalSettingConfig.local_python_desc', {
           py_version: __python_version,
-          whl_path: path.join(PY_WHL_DIR, '*.whl'),
+          whl_dir_path: PY_WHL_DIR,
         }),
         default: false,
         type: 'bool',
