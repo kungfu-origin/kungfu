@@ -245,7 +245,7 @@ watch(
   },
 );
 
-function whiteListIntercept(
+function whiteListInterceptor(
   accountId: string,
   instrument: string,
 ): Promise<void> {
@@ -337,7 +337,7 @@ async function handleApartOrder(): Promise<void> {
   try {
     await formRef.value.validate();
     const { account_id, instrument } = formState.value;
-    await whiteListIntercept(account_id, instrument);
+    await whiteListInterceptor(account_id, instrument);
 
     const makeOrderInput: KungfuApi.MakeOrderInput = await initOrderInputData();
     await showCloseModal(makeOrderInput);
@@ -468,7 +468,7 @@ async function handleMakeOrder(): Promise<void> {
 
     await formRef.value.validate();
     const { account_id, instrument } = formState.value;
-    await whiteListIntercept(account_id, instrument);
+    await whiteListInterceptor(account_id, instrument);
 
     const makeOrderInput: KungfuApi.MakeOrderInput = await initOrderInputData();
     await showCloseModal(makeOrderInput);

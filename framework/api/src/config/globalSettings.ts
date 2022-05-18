@@ -1,5 +1,4 @@
 import fse from 'fs-extra';
-import path from 'path';
 import { SpaceSizeSettingEnum, SpaceTabSettingEnum } from '../typings/enums';
 import { KF_CONFIG_PATH, PY_WHL_DIR } from './pathConfig';
 import { CodeSizeSetting, CodeTabSetting } from './tradingConfig';
