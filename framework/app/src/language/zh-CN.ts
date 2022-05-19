@@ -212,7 +212,7 @@ export default {
     price_type: '方式',
     side: '买卖',
     offset: '开平',
-    limit_price: '限额',
+    limit_price: '下单价格',
 
     make_order_number: '下单次数',
     no_empty: '下单量不可为空',
@@ -220,9 +220,9 @@ export default {
     every_volume: '每次下单量',
 
     fat_finger_buy_modal:
-      '买入价格超出警戒线, 当前价格为{price},警戒线为{warningLine}, 当前乌龙指阈值为{fatFinger}',
+      '买入价格超出警戒线, 当前价格为 {price}, 警戒线为 {warningLine}, 当前乌龙指阈值为 {fatFinger}',
     fat_finger_sell_modal:
-      '卖出价格超出警戒线, 当前价格为{price},警戒线为{warningLine}, 当前乌龙指阈值为{fatFinger}',
+      '卖出价格超出警戒线, 当前价格为 {price}, 警戒线为 {warningLine}, 当前乌龙指阈值为 {fatFinger}',
     start_process: '请先启动{process}交易进程',
     place_confirm: '下单确认',
     close_all: '是否全部平仓?',
@@ -288,7 +288,7 @@ export default {
     td_not_found: '{td}柜台插件不存在',
     sourse_not_found: '配置项不存在, 请检查 {value} package.json',
     need_only_group: '需保证该账户组名称唯一',
-    delete_amount_group: '删除账户组{group}',
+    delete_amount_group: '删除账户组 {group}',
     confirm_delete_group: '不会影响改账户组下账户进程, 确认删除',
   },
 
@@ -420,7 +420,7 @@ export default {
     strategy: '策略',
     use_local_python: '使用本地Python',
     local_python_desc:
-      '使用本地python启动策略, 需要 pip3 install kungfu*.whl, 开启后需重启策略, 本地 python3 版本需为',
+      '使用本地python启动策略, 需要 pip3 install {whl_dir_path} 内 *.whl 文件, 开启后需重启策略, 本地 python3 版本需为 {py_version}',
     python_path: '选择本地 Python 路径',
     python_path_desc:
       '功夫将会以选择的python路径运行策略, 同时需要保证 kungfu*.whl 已经通过 pip安装',
@@ -471,6 +471,7 @@ export default {
   是否需要自成功检测: '是否需要自成功检测',
   最大回撤率: '最大回撤率',
   标的白名单: '标的白名单',
+  白名单设置警告: '请先为此账户设置标的白名单',
 
   validate: {
     no_special_characters: '不能含有特殊字符',
@@ -486,14 +487,14 @@ export default {
     current_strategy: '当前策略',
     new_file: '新建文件',
     new_folder: '新建文件夹',
-    set_strategy_success: '策略{file}文件路径修改成功！',
+    set_strategy_success: '策略 {file} 文件路径修改成功！',
     entry_file: '入口文件',
-    creaate_success: '{file}创建成功！',
+    creaate_success: '{file} 创建成功！',
 
-    name_repeat: '此位置已存在文件或文件夹 {name} ，请选择其他名称！',
+    name_repeat: '此位置已存在文件或文件夹 {name}, 请选择其他名称！',
     empty_input: '必须提供文件或文件夹名称！',
     illegal_character: '名称不能包含\\/:*?"<>|',
-    delate_confirm: '确认删除{value}吗？',
+    delate_confirm: '确认删除 {value} 吗？',
     cannot_delate_entry: '不可删除入口文件',
   },
 

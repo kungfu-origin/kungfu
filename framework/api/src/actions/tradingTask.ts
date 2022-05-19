@@ -30,9 +30,10 @@ export const startTradingTask = (
   processStatusData: Pm2ProcessStatusData,
   soPath: string,
   args: string,
+  configSettings: KungfuApi.KfConfigItem[],
 ) => {
   return ensureRemoveTradingTask(watcher, taskLocation, processStatusData).then(
-    () => startTask(taskLocation, soPath, args),
+    () => startTask(taskLocation, soPath, args, configSettings),
   );
 };
 
@@ -64,5 +65,6 @@ export const startTradingTaskByCommand = async (
     processStatusData,
     soPath,
     args,
+    extConfig.settings,
   );
 };

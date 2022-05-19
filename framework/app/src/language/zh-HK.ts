@@ -62,8 +62,8 @@ export default {
   delete_category:
     '删除 {category} 所有数据， 如果该 {categoryName} 进程正在运行, 也将停止进程, 确认删除',
   add_config_modal:
-    '{category}ID系统唯一, {changeTypeName} 成功后不可修改, 确认 {key}',
-  update_config_modal: '确认{key} 相关配置',
+    '{category} ID系统唯一, {changeTypeName} 成功后不可修改, 确认 {key}',
+  update_config_modal: '确认 {key} 相关配置',
 
   MakeOrderDashboard: '交易意向面板',
   FutureArbitrage: '套利指令',
@@ -212,7 +212,7 @@ export default {
     price_type: '方式',
     side: '互换交易意向',
     offset: '开平',
-    limit_price: '限额',
+    limit_price: '下单价格',
 
     make_order_number: '交易意向次数',
     no_empty: '交易意向总量不可为空',
@@ -220,10 +220,10 @@ export default {
     every_volume: '每次下交易意向量',
 
     fat_finger_buy_modal:
-      '买入价格超出警戒线, 当前价格为{price},警戒线为{warningLine}, 当前乌龙指阈值为{fatFinger}',
+      '买入价格超出警戒线, 当前价格为 {price},警戒线为 {warningLine}, 当前乌龙指阈值为 {fatFinger}',
     fat_finger_sell_modal:
-      '卖出价格超出警戒线, 当前价格为{price},警戒线为{warningLine}, 当前乌龙指阈值为{fatFinger}',
-    start_process: '请先启动{process}交易进程',
+      '卖出价格超出警戒线, 当前价格为 {price},警戒线为 {warningLine}, 当前乌龙指阈值为 {fatFinger}',
+    start_process: '请先启动 {process} 交易进程',
     place_confirm: '下单确认',
     close_all: '是否全部平仓?',
     Continue: '继续下单',
@@ -420,7 +420,7 @@ export default {
     strategy: '策略',
     use_local_python: '使用本地Python',
     local_python_desc:
-      '使用本地python启动策略, 需要 pip3 install kungfu*.whl, 开启后需重启策略, 本地 python3 版本需为',
+      '使用本地python启动策略, 需要 pip3 install {whl_dir_path} 内 *.whl 文件, 开启后需重启策略, 本地 python3 版本需为 {py_version}',
     python_path: '选择本地 Python 路径',
     python_path_desc:
       '功夫将会以选择的python路径运行策略, 同时需要保证 kungfu*.whl 已经通过 pip安装',
@@ -476,9 +476,9 @@ export default {
     current_strategy: '当前策略',
     new_file: '新建文件',
     new_folder: '新建文件夹',
-    set_strategy_success: '策略{file}文件路径修改成功！',
+    set_strategy_success: '策略 {file} 文件路径修改成功！',
     entry_file: '入口文件',
-    creaate_success: '{file}创建成功！',
+    creaate_success: '{file} 创建成功！',
 
     name_repeat: '此位置已存在文件或文件夹 {name} ，请选择其他名称！',
     empty_input: '必须提供文件或文件夹名称！',

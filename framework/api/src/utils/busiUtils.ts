@@ -45,6 +45,7 @@ import {
   MakeOrderByWatcherEnum,
   BrokerStateStatusEnum,
   StrategyExtTypes,
+  CommissionModeEnum,
 } from '../typings/enums';
 import {
   deleteProcess,
@@ -766,7 +767,11 @@ export const getIdByKfLocation = (
   } else if (kfLocation.category === 'md') {
     return `${kfLocation.group}`;
   } else if (kfLocation.category === 'strategy') {
-    return `${kfLocation.name}`;
+    if (kfLocation.group === 'default') {
+      return `${kfLocation.name}`;
+    } else {
+      return `${kfLocation.group}_${kfLocation.name}`;
+    }
   } else if (kfLocation.category === 'system') {
     return `${kfLocation.group}_${kfLocation.name}`;
   } else {
@@ -1041,6 +1046,12 @@ export const dealVolumeCondition = (
   volumeCondition: VolumeConditionEnum,
 ): KungfuApi.KfTradeValueCommonData => {
   return VolumeCondition[volumeCondition];
+};
+
+export const dealCommissionMode = (
+  commissionMode: CommissionModeEnum,
+): KungfuApi.KfTradeValueCommonData => {
+  return CommissionMode[commissionMode];
 };
 
 export const dealInstrumentType = (
@@ -1638,31 +1649,88 @@ export const dealOrderInputItem = (
 export const kfConfigItemsToProcessArgs = (
   settings: KungfuApi.KfConfigItem[],
   formState: Record<string, KungfuApi.KfConfigValue>,
-) => {
+): string => {
+  return JSON.stringify(
+    settings
+      .filter((item) => {
+        return formState[item.key] !== undefined;
+      })
+      .reduce((pre, item) => {
+        pre[item.key] = formState[item.key];
+        return pre;
+      }, {} as Record<string, KungfuApi.KfConfigValue>),
+  );
+};
+
+export const dealByConfigItemType = (
+  type: string,
+  value: KungfuApi.KfConfigValue,
+): string => {
+  switch (type) {
+    case 'side':
+      return dealSide(+value as SideEnum).name;
+    case 'offset':
+      return dealOffset(+value as OffsetEnum).name;
+    case 'direction':
+      return dealDirection(+value as DirectionEnum).name;
+    case 'priceType':
+      return dealPriceType(+value as PriceTypeEnum).name;
+    case 'hedgeFlag':
+      return dealHedgeFlag(+value as HedgeFlagEnum).name;
+    case 'volumeCondition':
+      return dealVolumeCondition(+value as VolumeConditionEnum).name;
+    case 'timeCondition':
+      return dealTimeCondition(+value as TimeConditionEnum).name;
+    case 'commissionMode':
+      return dealCommissionMode(+value as CommissionModeEnum).name;
+    case 'instrumentType':
+      return dealInstrumentType(+value as InstrumentTypeEnum).name;
+    case 'instrument':
+      const instrumentData = transformSearchInstrumentResultToInstrument(value);
+      return instrumentData
+        ? `${instrumentData.exchangeId} ${instrumentData.instrumentId} ${
+            instrumentData.instrumentName || ''
+          }`
+        : value;
+    case 'instruments':
+      const instrumentDataList = (value as string[])
+        .map((item) => transformSearchInstrumentResultToInstrument(item))
+        .filter((item) => !!item) as KungfuApi.InstrumentResolved[];
+      return instrumentDataList
+        .map(
+          (item) =>
+            `${item.exchangeId} ${item.instrumentId} ${
+              item.instrumentName || ''
+            }`,
+        )
+        .join(' ');
+    default:
+      return value;
+  }
+};
+
+export const kfConfigItemsToArgsByPrimaryForShow = (
+  settings: KungfuApi.KfConfigItem[],
+  formState: Record<string, KungfuApi.KfConfigValue>,
+): string => {
   return settings
-    .filter((item) => {
-      return formState[item.key] !== undefined;
-    })
-    .map((item) => {
-      return `${item.key}=${formState[item.key]}`;
-    })
-    .join(';');
+    .filter((item) => item.primary)
+    .map((item) => ({
+      label: item.name,
+      value: dealByConfigItemType(item.type, formState[item.key]),
+    }))
+    .map((item) => `${item.label} ${item.value}`)
+    .join('; ');
 };
 
 export const fromProcessArgsToKfConfigItems = (
   args: string[],
 ): Record<string, KungfuApi.KfConfigValue> => {
-  const taskArgs = minimist(args)['a'] || '';
-  const data = getDataByProcessArgs(taskArgs);
-  return data;
-};
-
-export const getDataByProcessArgs = (
-  taskArgs: string,
-): Record<string, string> => {
-  return taskArgs.split(';').reduce((data, pair) => {
-    const [key, value] = pair.split('=');
-    data[key] = value;
+  const taskArgs = minimist(args)['a'] || '{}';
+  try {
+    const data = JSON.parse(taskArgs);
     return data;
-  }, {} as Record<string, string>);
+  } catch (err) {
+    throw err;
+  }
 };

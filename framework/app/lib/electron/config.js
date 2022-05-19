@@ -5,7 +5,6 @@ const {
   getKfcDir,
   getCoreDir,
   getExtensionDirs,
-  getCliDir,
 } = require('@kungfu-trader/kungfu-js-api/toolkit/utils');
 
 const appDir = getAppDir();

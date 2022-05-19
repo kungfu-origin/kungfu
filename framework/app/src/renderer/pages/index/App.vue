@@ -28,6 +28,10 @@ import {
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { bindIPCListener } from '@kungfu-trader/kungfu-app/src/renderer/ipcMsg/ipcListener';
 import { useTradingTask } from '@kungfu-trader/kungfu-app/src/components/modules/tradingTask/utils';
+import {
+  getAllRiskSettingList,
+  setAllRiskSettingList,
+} from '@kungfu-trader/kungfu-js-api/actions';
 
 const app = getCurrentInstance();
 const store = useGlobalStore();
@@ -79,6 +83,10 @@ const busSubscription = globalBus.subscribe((data: KfBusEvent) => {
         } as ExportTradingDataEvent);
     }
   }
+  if (data.tag === 'update:riskSetting') {
+    setAllRiskSettingList(data.riskSettingList);
+    store.setRiskSettingList(data.riskSettingList);
+  }
 });
 
 const {
@@ -91,6 +99,10 @@ const {
 onMounted(() => {
   bindIPCListener(store);
   removeLoadingMask();
+
+  getAllRiskSettingList().then((res: KungfuApi.RiskSetting[]) => {
+    store.setRiskSettingList(res);
+  });
 
   window.addEventListener('resize', () => {
     app?.proxy &&

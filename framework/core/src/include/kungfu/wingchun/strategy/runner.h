@@ -10,7 +10,9 @@
 #include <kungfu/yijinjing/practice/apprentice.h>
 
 namespace kungfu::wingchun::strategy {
-class Runner : public yijinjing::practice::apprentice, public kungfu::wingchun::book::BookListener {
+class Runner : public std::enable_shared_from_this<Runner>,
+               public yijinjing::practice::apprentice,
+               public kungfu::wingchun::book::BookListener {
 public:
   Runner(yijinjing::data::locator_ptr locator, const std::string &group, const std::string &name,
          longfist::enums::mode m, bool low_latency);

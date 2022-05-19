@@ -12,14 +12,20 @@ const { getThemeVariables } = require('ant-design-vue/dist/theme');
 const {
   getWebpackExternals,
   getAppDir,
+  getCoreDir,
 } = require('@kungfu-trader/kungfu-js-api/toolkit/utils');
+const CopyPlugin = require('copy-webpack-plugin');
+const fse = require('fs-extra');
 
 const appDir = getAppDir();
 const { getKungfuBuildInfo, getPagesConfig, isProduction } = toolkit.utils;
 const { pyVersion } = getKungfuBuildInfo();
+const publicDir = path.join(appDir, 'public');
 
 const webpackConfig = (argv) => {
   const pagesConfig = getPagesConfig(argv);
+  fse.removeSync(path.join(publicDir, 'python'));
+
   return merge(toolkit.webpack.makeConfig(argv), {
     externals: getWebpackExternals(),
     entry: pagesConfig.entry,
@@ -102,9 +108,21 @@ const devConfig = {
     new webpack.DefinePlugin({
       __VUE_OPTIONS_API__: true,
       __VUE_PROD_DEVTOOLS__: true,
-      __resources: `"${path.join(appDir, 'public').replace(/\\/g, '\\\\')}"`,
+      __resources: `"${publicDir.replace(/\\/g, '\\\\')}"`,
       __python_version: `"${pyVersion.toString()}"`,
       'process.env.APP_TYPE': '"renderer"',
+    }),
+    new CopyPlugin({
+      patterns: [
+        {
+          from: path.join(
+            path.resolve(getCoreDir(), 'build', 'python', 'dist'),
+            '*.whl',
+          ),
+          to: path.join(publicDir, 'python'),
+          context: path.resolve(getCoreDir(), 'build', 'python', 'dist'),
+        },
+      ],
     }),
   ],
 };

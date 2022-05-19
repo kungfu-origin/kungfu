@@ -211,7 +211,7 @@ export default {
     price_type: 'Price Type',
     side: 'Side',
     offset: 'Offset',
-    limit_price: '限额',
+    limit_price: 'LimitPrice',
 
     make_order_number: 'Order Number',
     no_empty: 'Order quantity cannot be empty',
@@ -420,7 +420,8 @@ export default {
 
     strategy: 'Strategy',
     use_local_python: 'Use Local Python',
-    local_python_desc: 'Pip3 install kungfu*.whl, local python require',
+    local_python_desc:
+      'Pip3 install *.whl in {whl_dir_path}, local python version require {py_version}',
     python_path: 'Select Local Python Path',
     python_path_desc:
       'local python path is required to be selected, and kungfu*.whl should be installed in this path',

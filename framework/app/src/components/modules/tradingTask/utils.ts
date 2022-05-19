@@ -132,6 +132,7 @@ export const useTradingTask = (): {
       data.configSettings || extConfig.settings || [],
       formState,
     );
+
     const soPath = path.join(extConfig.extPath, extKey);
     return startTradingTask(
       window.watcher,
@@ -139,6 +140,7 @@ export const useTradingTask = (): {
       processStatusData.value,
       soPath,
       args,
+      data.configSettings,
     )
       .then(() => {
         message.success('操作成功');

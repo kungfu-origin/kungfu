@@ -117,7 +117,8 @@ declare namespace KungfuApi {
     | number[]
     | boolean[]
     | any[]
-    | Dayjs;
+    | Dayjs
+    | Record<string, any>;
 
   export interface KfSelectOption {
     value: string | number;
