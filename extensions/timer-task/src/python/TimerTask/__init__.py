@@ -14,8 +14,6 @@ class orderTask:
         self.offset = offset
 
 def pre_start(context):
-    context.hold_book()
-    context.hold_positions()
     context.SOURCE = ""
     context.ACCOUNT =""
     context.EXCHANGE =""
@@ -49,10 +47,16 @@ def pre_start(context):
     context.START_TIME_IN_NANO = str_to_nanotime(trigger_time)
     context.FINISH_TIME_IN_NANO = str_to_nanotime(finish_time)
     context.cancel_and_place_new_order = False
+    
     if context.START_TIME_IN_NANO < context.now():
-        raise ValueError("trigger time must greater than current time!")
+        context.log.error("trigger time must greater than current time!")
+        context.req_deregister()
+        return
     if context.START_TIME_IN_NANO >= context.FINISH_TIME_IN_NANO:
-        raise ValueError("finish time must greater than trigger time!")
+        context.log.error("finish time must greater than trigger time!")
+        context.req_deregister()
+        return
+
     if(len(sourceAccountList) == 2 and len(exchangeTicker) == 5):
         context.SOURCE = sourceAccountList[0]
         context.ACCOUNT = sourceAccountList[1]
