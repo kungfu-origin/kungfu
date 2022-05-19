@@ -100,18 +100,6 @@ const prodConfig = {
       'process.env.APP_TYPE': '"renderer"',
       __resources: '',
     }),
-    new CopyPlugin({
-      patterns: [
-        {
-          from: path.join(
-            path.resolve(getCoreDir(), 'build', 'python', 'dist'),
-            '*.whl',
-          ),
-          to: path.join(publicDir, 'python'),
-          context: path.resolve(getCoreDir(), 'build', 'python', 'dist'),
-        },
-      ],
-    }),
   ],
 };
 
@@ -123,6 +111,18 @@ const devConfig = {
       __resources: `"${publicDir.replace(/\\/g, '\\\\')}"`,
       __python_version: `"${pyVersion.toString()}"`,
       'process.env.APP_TYPE': '"renderer"',
+    }),
+    new CopyPlugin({
+      patterns: [
+        {
+          from: path.join(
+            path.resolve(getCoreDir(), 'build', 'python', 'dist'),
+            '*.whl',
+          ),
+          to: path.join(publicDir, 'python'),
+          context: path.resolve(getCoreDir(), 'build', 'python', 'dist'),
+        },
+      ],
     }),
   ],
 };

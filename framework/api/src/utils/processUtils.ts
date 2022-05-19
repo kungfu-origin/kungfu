@@ -103,7 +103,8 @@ export interface Pm2ProcessStatusDetail {
   created_at: Pm2Env['created_at'];
   script: Pm2Env['script'];
   cwd: Pm2Env['pm_cwd'];
-  args: Pm2Env['args'];
+  config_settings: string;
+  args: string[];
 }
 
 export type Pm2ProcessStatusDetailData = Record<string, Pm2ProcessStatusDetail>;
@@ -122,6 +123,7 @@ export interface Pm2Env {
   created_at?: number;
   script?: StartOptions['script'];
   args?: StartOptions['args'];
+  env?: StartOptions['env'];
 }
 
 export interface Pm2Packet {
@@ -456,13 +458,15 @@ export function buildProcessStatusWidthDetail(
       const status = pm2_env?.status;
       const created_at = (pm2_env as Pm2Env)?.created_at;
       const cwd = pm2_env?.pm_cwd;
+      const config_settings =
+        (pm2_env as Pm2Env)?.env?.['CONFIG_SETTING'] || '[]';
       const pm_exec_path = (pm2_env?.pm_exec_path || '').split('/');
       const script =
         (pm2_env as Pm2Env).script || pm_exec_path[pm_exec_path.length - 1];
-      const args = (pm2_env as Pm2Env).args;
+      const args = (pm2_env as Pm2Env).args || [];
+      const argsResolved = typeof args === 'string' ? [args] : args;
 
       if (!name) return processStatus;
-
       processStatus[name] = {
         monit,
         pid,
@@ -472,7 +476,8 @@ export function buildProcessStatusWidthDetail(
         created_at,
         script,
         cwd,
-        args,
+        args: argsResolved,
+        config_settings,
       };
       return processStatus;
     },
@@ -665,6 +670,7 @@ export const startTask = async (
   taskLocation: KungfuApi.KfLocation | KungfuApi.KfConfig,
   soPath: string,
   args: string,
+  configSettings: KungfuApi.KfConfigItem[],
 ): Promise<Proc | void> => {
   const extDirs = await flattenExtensionModuleDirs(EXTENSION_DIRS);
   const argsResolved: string = buildArgs(
@@ -672,12 +678,15 @@ export const startTask = async (
       .map((dir) => dealSpaceInPath(path.dirname(dir)))
       .join(path.delimiter)}" run -c strategy -g "${taskLocation.group}" -n "${
       taskLocation.name
-    }" ${soPath} -a "${args}"`,
+    }" ${soPath} -a '${args}'`, // args is a JSON string
   );
 
   return startProcess({
     name: getProcessIdByKfLocation(taskLocation),
     args: argsResolved,
+    env: {
+      CONFIG_SETTING: JSON.stringify(configSettings),
+    },
   }).catch((err) => {
     kfLogger.error(err.message);
   });

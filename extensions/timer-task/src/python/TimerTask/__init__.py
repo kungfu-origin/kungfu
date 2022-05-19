@@ -2,6 +2,7 @@ import kungfu
 from kungfu.wingchun.constants import *
 import math 
 import time
+import json
 from datetime import datetime
 
 yjj = kungfu.__binding__.yijinjing
@@ -15,10 +16,6 @@ class orderTask:
 def pre_start(context):
     context.hold_book()
     context.hold_positions()
-
-    context.log.info(f"{context.arguments} ===")
-
-    args = {}
     context.SOURCE = ""
     context.ACCOUNT =""
     context.EXCHANGE =""
@@ -34,12 +31,7 @@ def pre_start(context):
     context.has_quote = False
     context.MIN_VOL = int(0)
     context.log.info("arguments {}".format(context.arguments))
-    argslist = context.arguments.split(';')
-    for i, arg in enumerate(argslist):
-        kvs = arg.split('=')
-        if(len(kvs) == 2):
-            args[kvs[0]]=kvs[1]
-    context.log.info("args {}".format(args))
+    args = json.loads(context.arguments)
     sourceAccountList = args["accountId"].split('_')
     md = args["marketSource"]
     exchangeTicker= args["ticker"].split('_')

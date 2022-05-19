@@ -24,6 +24,7 @@ import {
   getIfProcessStopping,
   getTaskKfLocationByProcessId,
   fromProcessArgsToKfConfigItems,
+  kfConfigItemsToArgsByPrimaryForShow,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import {
   graceStopProcess,
@@ -129,7 +130,11 @@ function handleSwitchProcessStatusResolved(
 
   const soPath = path.join(extConfig.extPath, extKey);
   const args = minimist(record.args as string[])['a'] || '';
-  return startTask(taskLocation, soPath, args)
+  const configSettings = parseTaskSettingsFromEnv(
+    record.config_settings || '[]',
+  );
+
+  return startTask(taskLocation, soPath, args, configSettings)
     .catch((err: Error) => error(err.message))
     .then(() => {
       success();
@@ -167,14 +172,6 @@ function handleRemoveTask(record: Pm2ProcessStatusDetail) {
       processStatusData.value,
     );
   });
-}
-
-function dealArgs(record: Pm2ProcessStatusDetail): string {
-  const taskArgs = minimist(record.args as string[])['a'] || '';
-  return taskArgs
-    .split(';')
-    .filter((item) => !item.includes('password'))
-    .join(' ');
 }
 
 function customRowResolved(record: Pm2ProcessStatusDetail) {
@@ -215,6 +212,35 @@ function resolveKfLocation(
     mode: 'live',
   };
   return locationResolved;
+}
+
+const taskArgsData: Record<string, string> = {};
+
+function resolveArgs(record: Pm2ProcessStatusDetail) {
+  const name = record?.name || '';
+  if (taskArgsData[name]) {
+    return taskArgsData[name];
+  }
+
+  const configSettings = parseTaskSettingsFromEnv(record.config_settings);
+  const formState = fromProcessArgsToKfConfigItems(record.args || []);
+  const argsForShow = kfConfigItemsToArgsByPrimaryForShow(
+    configSettings,
+    formState,
+  );
+  taskArgsData[name] = argsForShow;
+  return argsForShow;
+}
+
+function parseTaskSettingsFromEnv(configSettingsEnv = '[]') {
+  let configSettings: KungfuApi.KfConfigItem[] = [];
+
+  try {
+    configSettings = JSON.parse(configSettingsEnv) as KungfuApi.KfConfigItem[];
+  } catch (err) {
+    console.error(err.message);
+  }
+  return configSettings;
 }
 
 onMounted(() => {
@@ -267,7 +293,7 @@ onMounted(() => {
             ></a-switch>
           </template>
           <template v-if="column.dataIndex === 'args'">
-            {{ dealArgs(record) }}
+            {{ resolveArgs(record) }}
           </template>
           <template v-else-if="column.dataIndex === 'actions'">
             <div class="kf-actions__warp">

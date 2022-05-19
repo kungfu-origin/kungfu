@@ -51,7 +51,7 @@ void Runner::inspect_channel(const event_ptr &event) {
 
 void Runner::on_start() {
   enable(*context_);
-  context_->get_bookkeeper().add_book_listener(std::shared_ptr<Runner>(this));
+  context_->get_bookkeeper().add_book_listener(shared_from_this());
   pre_start();
   events_ | take_until(events_ | filter([&](auto e) { return started_; })) | $$(prepare(event));
   post_start();
