@@ -11,7 +11,6 @@ import {
   SideEnum,
 } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import {
-  defineComponent,
   getCurrentInstance,
   reactive,
   Ref,
@@ -718,6 +717,7 @@ defineExpose({
   </a-form>
 </template>
 <script lang="ts">
+import { defineComponent } from 'vue';
 export default defineComponent({
   name: 'KfConfigSettingsForm',
 });
