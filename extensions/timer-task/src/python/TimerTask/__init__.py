@@ -47,11 +47,8 @@ def pre_start(context):
     context.START_TIME_IN_NANO = str_to_nanotime(trigger_time)
     context.FINISH_TIME_IN_NANO = str_to_nanotime(finish_time)
     context.cancel_and_place_new_order = False
-    
-    if context.START_TIME_IN_NANO < context.now():
-        context.log.error("trigger time must greater than current time!")
-        context.req_deregister()
-        return
+   # if context.START_TIME_IN_NANO < context.now():
+   #     raise ValueError("trigger time must greater than current time!")
     if context.START_TIME_IN_NANO >= context.FINISH_TIME_IN_NANO:
         context.log.error("finish time must greater than trigger time!")
         context.req_deregister()
@@ -140,19 +137,38 @@ def on_quote(context, quote):
         '''
         print_datatime(context, "on_quote context.START_TIME_IN_NANO", context.START_TIME_IN_NANO)
         print_datatime(context, "on_quote context.FINISH_TIME_IN_NANO", context.FINISH_TIME_IN_NANO)
-        interval = int((context.FINISH_TIME_IN_NANO - context.START_TIME_IN_NANO) / (context.STEPS - 1))
+        if context.STEPS == 1:
+            interval = int(context.FINISH_TIME_IN_NANO - context.START_TIME_IN_NANO)
+        else:
+            interval = int((context.FINISH_TIME_IN_NANO - context.START_TIME_IN_NANO) / (context.STEPS - 1))
         context.log.info(f"interval {interval}")
         for i in range(context.STEPS):
             if i == context.STEPS - 1:
+                ctx_now = context.now()
                 last_order_time = int(context.START_TIME_IN_NANO + interval * i - context.LASTSINGULARITYNANOSECOND) if context.LASTSINGULARITY == 'true' else int(context.START_TIME_IN_NANO + interval * i)
                 last_order_cancel_time = int(context.START_TIME_IN_NANO + interval * i - (interval + context.LASTSINGULARITYNANOSECOND) / 2) if context.LASTSINGULARITY == 'true' else int(context.START_TIME_IN_NANO + interval * i - interval / 2)
-                context.add_timer(last_order_cancel_time, lambda ctx, event: cancel_all_orders(ctx))
-                context.add_timer(last_order_time, lambda ctx, event: insert_order_task(ctx, True))
-                print_datatime(context, "add_timer for cancel_all_orders at last step", last_order_cancel_time) 
-                print_datatime(context, "add_timer for insert_order_task at last step", last_order_time) 
+                if ctx_now < last_order_cancel_time :
+                    context.add_timer(last_order_cancel_time, lambda ctx, event: cancel_all_orders(ctx))
+                    context.add_timer(last_order_time, lambda ctx, event: insert_order_task(ctx, True))
+                    print_datatime(context, "add_timer for cancel_all_orders at last step", last_order_cancel_time) 
+                    print_datatime(context, "add_timer for insert_order_task at last step", last_order_time)
+                elif ctx_now >= last_order_cancel_time and ctx_now < last_order_time:
+                    last_order_cancel_time = int(ctx_now + (last_order_cancel_time - ctx_now) / 10)
+                    context.add_timer(last_order_cancel_time, lambda ctx, event: cancel_all_orders(ctx))
+                    context.add_timer(last_order_time, lambda ctx, event: insert_order_task(ctx, True))
+                    print_datatime(context, "add_timer for cancel_all_orders at last step", last_order_cancel_time) 
+                    print_datatime(context, "add_timer for insert_order_task at last step", last_order_time)
+                else:
+                    context.steps_to_fill -= 1
+                    context.log.info("last step overdue, exit task...")
+                    context.req_deregister()
             else:
-                context.add_timer(int(context.START_TIME_IN_NANO + interval * i), lambda ctx, event: insert_order_task(ctx, False))
-                print_datatime(context, "add_timer for insert_order_task", context.START_TIME_IN_NANO + interval * i) 
+                step_time = int(context.START_TIME_IN_NANO + interval * i)
+                if context.now() < step_time :
+                    context.add_timer(step_time, lambda ctx, event: insert_order_task(ctx, False))
+                    print_datatime(context, "add_timer for insert_order_task", context.START_TIME_IN_NANO + interval * i) 
+                else:
+                    context.steps_to_fill -= 1
         context.has_quote = True
 
 def insert_order_task(context, last_order):
@@ -187,6 +203,9 @@ def make_order(context, orders):
         context.log.info("[第{}步下单] 标的 {} 交易所 {} 账户 {} 价格 {} 数量 {} 方向 {} 开平 {} 行情 {} 时间 {} 剩余数量 {}".format(order_step, context.TICKER, context.EXCHANGE, context.ACCOUNT, item.price, item.vol, item.side, item.offset, context.realtime_quote, time_str, rest_vol))
     context.steps_to_fill -= 1
     context.log.info("[make_order] context.orders {}".format(context.orders))
+    if context.steps_to_fill == 0:
+        context.log.info("tasks complete")
+        context.req_deregister()
 
 def split_order(context, vol, side, offset, price, task_list):
     place_order_vol = int(0)
