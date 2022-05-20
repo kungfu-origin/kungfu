@@ -67,7 +67,7 @@ export const categoryRegisterConfig: KfCategoryRegisterProps = {
       const currentUID = window.watcher.getLocationUID(realLocation);
       return position
         .nofilter('volume', BigInt(0))
-        .filter('dest', currentUID)
+        .filter('holder_uid', currentUID)
         .sort('instrument_id')
         .reverse();
     },
