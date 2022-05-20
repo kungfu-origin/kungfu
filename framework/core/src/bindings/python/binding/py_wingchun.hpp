@@ -86,9 +86,9 @@ public:
 
   bool req_account() override { PYBIND11_OVERLOAD_PURE(bool, Trader, req_account, ); }
 
-  bool req_history_order(const event_ptr &event) override { PYBIND11_OVERLOAD_PURE(bool, Trader, req_history_order, ); }
+  bool req_history_order(const event_ptr &event) override { PYBIND11_OVERLOAD(bool, Trader, req_history_order, event); }
 
-  bool req_history_trade(const event_ptr &event) override { PYBIND11_OVERLOAD_PURE(bool, Trader, req_history_trade, ); }
+  bool req_history_trade(const event_ptr &event) override { PYBIND11_OVERLOAD(bool, Trader, req_history_trade, event); }
 
   void on_start() override { PYBIND11_OVERLOAD(void, Trader, on_start, ); }
 
