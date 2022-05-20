@@ -269,7 +269,7 @@ private:
   std::enable_if_t<kungfu::is_array_of_v<ValueType, char>> Get(ValueType &value, const char *name,
                                                                const Napi::Object &object) {
     auto v = object.Get(name).ToString().Utf8Value();
-    strcpy(value.value, v.c_str());
+    strncpy(value.value, v.c_str(), sizeof(value.value));
   }
 
   template <typename ValueType>
