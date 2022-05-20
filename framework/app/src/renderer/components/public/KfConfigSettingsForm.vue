@@ -7,11 +7,6 @@ import {
   PlusOutlined,
 } from '@ant-design/icons-vue';
 import {
-  PriceTypeEnum,
-  SideEnum,
-} from '@kungfu-trader/kungfu-js-api/typings/enums';
-import {
-  defineComponent,
   getCurrentInstance,
   reactive,
   Ref,
@@ -36,6 +31,8 @@ import {
   getCombineValueByPrimaryKeys,
   initFormStateByConfig,
   getPrimaryKeys,
+  dealPriceType,
+  dealSide,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { RuleObject } from 'ant-design-vue/lib/form';
 import {
@@ -495,7 +492,7 @@ defineExpose({
         :disabled="changeType === 'update' && item.primary"
       >
         <a-radio v-for="key in Object.keys(Side).slice(0, 2)" :value="+key">
-          {{ Side[(+key) as SideEnum ].name }}
+          {{ dealSide(+key).name }}
         </a-radio>
       </a-radio-group>
       <a-select
@@ -508,7 +505,7 @@ defineExpose({
           :key="key"
           :value="+key"
         >
-          {{ PriceType[+key as PriceTypeEnum].name }}
+          {{ dealPriceType(+key).name }}
         </a-select-option>
       </a-select>
       <a-radio-group
@@ -718,6 +715,7 @@ defineExpose({
   </a-form>
 </template>
 <script lang="ts">
+import { defineComponent } from 'vue';
 export default defineComponent({
   name: 'KfConfigSettingsForm',
 });
