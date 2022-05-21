@@ -1,6 +1,5 @@
 import VueI18n from '@kungfu-trader/kungfu-app/src/language';
 const { t } = VueI18n.global;
-import { KfCategoryRegisterProps } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiExtraLocationUtils';
 
 export const columns: AntTableColumns = [
   {
@@ -31,4 +30,3 @@ export const columns: AntTableColumns = [
     fixed: 'right',
   },
 ];
-
