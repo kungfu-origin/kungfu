@@ -332,10 +332,6 @@ export const kfMakeOrder = (
   const orderInput: KungfuApi.OrderInput = {
     ...longfist.OrderInput(),
     ...makeOrderInput,
-    instrument_id: makeOrderInput.instrument_id + '\0',
-    exchange_id: makeOrderInput.exchange_id + '\0',
-    source_id: makeOrderInput.source_id + '\0',
-    account_id: makeOrderInput.account_id + '\0',
     limit_price: makeOrderInput.limit_price || 0,
     frozen_price: makeOrderInput.limit_price || 0,
     volume: BigInt(makeOrderInput.volume),
