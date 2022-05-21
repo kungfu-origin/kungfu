@@ -332,6 +332,10 @@ export const kfMakeOrder = (
   const orderInput: KungfuApi.OrderInput = {
     ...longfist.OrderInput(),
     ...makeOrderInput,
+    instrument_id: makeOrderInput.instrument_id + '\0',
+    exchange_id: makeOrderInput.instrument_id + '\0',
+    source_id: makeOrderInput.source_id + '\0',
+    account_id: makeOrderInput.account_id + '\0',
     limit_price: makeOrderInput.limit_price || 0,
     frozen_price: makeOrderInput.limit_price || 0,
     volume: BigInt(makeOrderInput.volume),
@@ -495,7 +499,7 @@ export const dealPosition = (
     uid_key: pos.uid_key,
     account_id_resolved: `${pos.source_id}_${pos.account_id}`,
     instrument_id_resolved: `${pos.instrument_id} ${
-      ExchangeIds[pos.exchange_id].name
+      ExchangeIds[pos.exchange_id]?.name ?? ''
     }`,
   };
 };

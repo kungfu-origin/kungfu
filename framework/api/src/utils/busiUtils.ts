@@ -1391,40 +1391,6 @@ export const transformSearchInstrumentResultToInstrument = (
   };
 };
 
-export const dealKfConfigValueByType = (
-  type: KungfuApi.KfConfigItemSupportedTypes,
-  value: KungfuApi.KfConfigValue,
-): string => {
-  switch (type) {
-    case 'instrument':
-      const instrumentResolved =
-        transformSearchInstrumentResultToInstrument(value);
-      if (!instrumentResolved) {
-        return value;
-      }
-      const { exchangeId, instrumentId } = instrumentResolved;
-      return `${exchangeId}_${instrumentId}`;
-    case 'side':
-      return dealSide(+value).name;
-    case 'offset':
-      return dealOffset(+value).name;
-    case 'direction':
-      return dealDirection(+value).name;
-    case 'instrumentType':
-      return dealInstrumentType(+value).name;
-    case 'priceType':
-      return dealPriceType(+value).name;
-    case 'hedgeFlag':
-      return dealHedgeFlag(+value).name;
-    case 'volumeCondition':
-      return dealVolumeCondition(+value).name;
-    case 'timeCondition':
-      return dealTimeCondition(+value).name;
-    default:
-      return value;
-  }
-};
-
 export const booleanProcessEnv = (val: string): boolean => {
   if (val === 'true') {
     return true;
