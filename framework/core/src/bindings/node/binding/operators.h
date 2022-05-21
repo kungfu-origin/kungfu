@@ -161,7 +161,7 @@ private:
   template <typename ValueType>
   std::enable_if_t<kungfu::is_array_of_v<ValueType, char>> Set(Napi::Object &object, const char *name,
                                                                const ValueType &value) {
-    object.Set(name, Napi::String::New(object.Env(), value.value));
+    object.Set(name, Napi::String::New(object.Env(), value.value, strlen(value.value)));
   }
 
   template <typename ValueType>
@@ -269,7 +269,7 @@ private:
   std::enable_if_t<kungfu::is_array_of_v<ValueType, char>> Get(ValueType &value, const char *name,
                                                                const Napi::Object &object) {
     auto v = object.Get(name).ToString().Utf8Value();
-    strncpy(value.value, v.c_str(), sizeof(value.value));
+    strcpy(value.value, v.c_str());
   }
 
   template <typename ValueType>
