@@ -67,7 +67,7 @@ public:
     }
   }
 
-  bool pop(T *result) {
+  bool pop(T *&result) {
     if (head_ >= tail_) {
       return false;
     }
@@ -151,6 +151,7 @@ public:
     size_t tail = tail_.load(std::memory_order_relaxed);
     size_t head = head_.load(std::memory_order_relaxed);
     node = &queue_[tail & capacityMask_];
+    memset(node, 0,sizeof(T));
     new (node) T(p_data);
     if (tail - head < capacity_ - 1) {
       tail_++;
@@ -168,6 +169,7 @@ public:
       return false;
     }
     node = &queue_[head & capacityMask_];
+    memset(pop_value_, 0,sizeof(T));
     *pop_value_ = *node;
     result = pop_value_;
     node->~T();
