@@ -57,12 +57,10 @@ void MarketDataXTP::on_start() {
     update_broker_state(BrokerState::LoggedIn);
     update_broker_state(BrokerState::Ready);
     SPDLOG_INFO("login success! (account_id) {}", config.account_id);
-    int n_ret_sh = api_->QueryAllTickers(XTP_EXCHANGE_SH);
-    int n_ret_sz = api_->QueryAllTickers(XTP_EXCHANGE_SZ);
-    int n_ret_all = api_->QueryAllTickersPriceInfo();
-    SPDLOG_INFO(
-        "QueryAllTickers(XTP_EXCHANGE_SH) : {} , QueryAllTickers(XTP_EXCHANGE_SZ) : {} , QueryAllTickersPriceInfo :{}",
-        n_ret_sh, n_ret_sz, n_ret_all);
+    api_->QueryAllTickers(XTP_EXCHANGE_SH);
+    api_->QueryAllTickers(XTP_EXCHANGE_SZ);
+    api_->QueryAllTickersFullInfo(XTP_EXCHANGE_SH);
+    api_->QueryAllTickersFullInfo(XTP_EXCHANGE_SZ);
   } else {
     update_broker_state(BrokerState::LoginFailed);
     SPDLOG_ERROR("failed to login, [{}] {}", api_->GetApiLastError()->error_id, api_->GetApiLastError()->error_msg);
@@ -150,28 +148,6 @@ void MarketDataXTP::OnQueryAllTickers(XTPQSI *ticker_info, XTPRI *error_info, bo
   get_writer(0)->close_data();
 }
 
-void MarketDataXTP::OnQueryTickersPriceInfo(XTPTPI *ticker_info, XTPRI *error_info, bool is_last) {
-  if (nullptr != error_info && error_info->error_id != 0) {
-    SPDLOG_INFO("error_id : {} , error_msg : {}", error_info->error_id, error_info->error_msg);
-    return;
-  }
-
-  if (nullptr == ticker_info) {
-    SPDLOG_ERROR("ticker_info is nullptr");
-    return;
-  }
-
-  Instrument &instrument = get_writer(0)->open_data<Instrument>(0);
-  instrument.instrument_type = InstrumentType::Stock;
-  strcpy(instrument.instrument_id, ticker_info->ticker);
-  if (ticker_info->exchange_id == 1) {
-    instrument.exchange_id = EXCHANGE_SSE;
-  } else if (ticker_info->exchange_id == 2) {
-    instrument.exchange_id = EXCHANGE_SZE;
-  }
-  get_writer(0)->close_data();
-}
-
 void MarketDataXTP::OnDepthMarketData(XTPMD *market_data, int64_t *bid1_qty, int32_t bid1_count, int32_t max_bid1_count,
                                       int64_t *ask1_qty, int32_t ask1_count, int32_t max_ask1_count) {
   Quote &quote = get_writer(0)->open_data<Quote>(0);
@@ -194,5 +170,28 @@ void MarketDataXTP::OnTickByTick(XTPTBT *tbt_data) {
     from_xtp(*tbt_data, transaction);
     get_writer(0)->close_data();
   }
+}
+
+void MarketDataXTP::OnQueryAllTickersFullInfo(XTPQFI *ticker_info, XTPRI *error_info, bool is_last) {
+  if (nullptr != error_info && error_info->error_id != 0) {
+    SPDLOG_INFO("error_id : {} , error_msg : {}", error_info->error_id, error_info->error_msg);
+    return;
+  }
+
+  if (nullptr == ticker_info) {
+    SPDLOG_ERROR("ticker_info is nullptr");
+    return;
+  }
+
+  Instrument &instrument = get_writer(0)->open_data<Instrument>(0);
+  strcpy(instrument.instrument_id, ticker_info->ticker);
+  if (ticker_info->exchange_id == 1) {
+    instrument.exchange_id = EXCHANGE_SSE;
+  } else if (ticker_info->exchange_id == 2) {
+    instrument.exchange_id = EXCHANGE_SZE;
+  }
+  memcpy(instrument.product_id, ticker_info->ticker_name, PRODUCT_ID_LEN);
+  instrument.instrument_type = get_instrument_type(instrument.exchange_id, instrument.instrument_id);
+  get_writer(0)->close_data();
 }
 } // namespace kungfu::wingchun::xtp

@@ -116,6 +116,16 @@ public:
   book::Bookkeeper &get_bookkeeper();
 
   /**
+   * query history order
+   */
+  void req_history_order(const std::string &account) override;
+
+  /**
+   * query history trade
+   */
+  void req_history_trade(const std::string &account) override;
+
+  /**
    * request deregister.
    * @return void
    */

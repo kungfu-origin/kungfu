@@ -76,6 +76,8 @@ void Runner::post_start() {
       $$(invoke(&Strategy::on_top_of_book, event->data<TopOfBook>()));
   events_ | is(Order::tag) | $$(invoke(&Strategy::on_order, event->data<Order>()));
   events_ | is(Trade::tag) | $$(invoke(&Strategy::on_trade, event->data<Trade>()));
+  events_ | is(HistoryOrder::tag) | $$(invoke(&Strategy::on_history_order, event->data<HistoryOrder>()));
+  events_ | is(HistoryTrade::tag) | $$(invoke(&Strategy::on_history_trade, event->data<HistoryTrade>()));
   events_ | is(Entrust::tag) | $$(invoke(&Strategy::on_entrust, event->data<Entrust>()));
   events_ | is_own<Transaction>(context_->get_broker_client()) |
       $$(invoke(&Strategy::on_transaction, event->data<Transaction>()));
