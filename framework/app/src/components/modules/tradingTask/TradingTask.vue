@@ -78,7 +78,6 @@ const { searchKeyword, tableData } =
 const { dealRowClassName, setCurrentGlobalKfLocation } =
   useCurrentGlobalKfLocation(window.watcher);
 
-
 function handleOpenSetTaskDialog() {
   setExtensionModalVisible.value = true;
 }
@@ -241,7 +240,6 @@ function parseTaskSettingsFromEnv(configSettingsEnv = '[]') {
   }
   return configSettings;
 }
-
 </script>
 
 <template>

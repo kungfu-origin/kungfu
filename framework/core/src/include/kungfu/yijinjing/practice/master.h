@@ -59,6 +59,8 @@ private:
 
   void try_add_location(int64_t trigger_time, const data::location_ptr &app_location);
 
+  void check_cached_ready_to_read(const event_ptr &event);
+
   void feed(const event_ptr &event);
 
   void pong(const event_ptr &event);
@@ -68,8 +70,6 @@ private:
   void on_request_write_to(const event_ptr &event);
 
   void on_request_read_from(const event_ptr &event);
-
-  void check_cached_ready_to_read(const event_ptr &event);
 
   void on_request_read_from_public(const event_ptr &event);
 
