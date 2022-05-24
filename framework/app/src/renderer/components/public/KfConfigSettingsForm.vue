@@ -14,6 +14,9 @@ import {
   toRaw,
   toRefs,
   watch,
+  computed,
+  defineComponent,
+  WatchStopHandle,
 } from 'vue';
 import {
   PriceType,
@@ -41,6 +44,7 @@ import {
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
 import dayjs, { Dayjs } from 'dayjs';
 import VueI18n from '@kungfu-trader/kungfu-app/src/language';
+import { makeSearchOptionFormInstruments } from '../../assets/methods/uiUtils';
 const { t } = VueI18n.global;
 
 const props = withDefaults(
@@ -93,6 +97,10 @@ type InstrumentsSearchRelated = Record<
   {
     searchInstrumnetOptions: Ref<{ label: string; value: string }[]>;
     handleSearchInstrument: (value: string) => void;
+    updateSearchInstrumnetOptions: (
+      type: 'instrument' | 'instruments',
+      value: string | string[],
+    ) => Promise<{ value: string; label: string }[]>;
   }
 >;
 
@@ -119,12 +127,37 @@ watch(
   },
 );
 
-let instrumentsSearchRelated: InstrumentsSearchRelated =
-  getInstrumentsSearchRelated(instrumentKeys.value);
+let instrumentsSearchRelated = getInstrumentsSearchRelated(
+  instrumentKeys.value,
+);
 watch(
   () => instrumentKeys.value,
   (newVal) => {
     instrumentsSearchRelated = getInstrumentsSearchRelated(newVal);
+  },
+);
+
+const instrumentOptionsReactiveData = reactive<{
+  data: Record<string, { value: string; label: string }[]>;
+}>({ data: {} });
+watch(
+  computed(() =>
+    Object.keys(instrumentKeys.value).map((key) => ({
+      key,
+      value: formState[key],
+    })),
+  ),
+  (instrumentsInForm) => {
+    instrumentsInForm.forEach((item) => {
+      instrumentsSearchRelated[item.key]
+        .updateSearchInstrumnetOptions(
+          instrumentKeys.value[item.key],
+          item.value,
+        )
+        .then((options) => {
+          instrumentOptionsReactiveData.data[item.key] = options;
+        });
+    });
   },
 );
 
@@ -134,22 +167,27 @@ watch(formState, (newVal) => {
 
 function getInstrumentsSearchRelated(
   instrumentKeys: Record<string, 'instrument' | 'instruments'>,
-) {
+): InstrumentsSearchRelated {
   return Object.keys(instrumentKeys).reduce(
     (item1: InstrumentsSearchRelated, key: string) => {
       const {
         searchInstrumnetOptions,
-        initSearchInstrumnetOptions,
         handleSearchInstrument,
+        updateSearchInstrumnetOptions,
       } = useInstruments();
 
-      initSearchInstrumnetOptions(instrumentKeys[key], formState[key]);
-
-      console.log(searchInstrumnetOptions, '---');
-
+      updateSearchInstrumnetOptions(instrumentKeys[key], formState[key]).then(
+        (options) => {
+          instrumentOptionsReactiveData.data[key] = options;
+        },
+      );
       item1[key] = {
         searchInstrumnetOptions: searchInstrumnetOptions,
-        handleSearchInstrument,
+        handleSearchInstrument: (val) =>
+          handleSearchInstrument(val).then((options) => {
+            instrumentOptionsReactiveData.data[key] = options;
+          }),
+        updateSearchInstrumnetOptions,
       };
       return item1;
     },
@@ -566,25 +604,23 @@ defineExpose({
       </a-select>
       <a-select
         v-else-if="item.type === 'instrument'"
+        :ref="item.key"
         :disabled="changeType === 'update' && item.primary"
         show-search
         v-model:value="formState[item.key]"
         :filter-option="false"
-        :options="
-          instrumentsSearchRelated[item.key].searchInstrumnetOptions.value
-        "
+        :options="instrumentOptionsReactiveData.data[item.key]"
         @search="instrumentsSearchRelated[item.key].handleSearchInstrument"
       ></a-select>
       <a-select
         v-else-if="item.type === 'instruments'"
+        :ref="item.key"
         :disabled="changeType === 'update' && item.primary"
         mode="multiple"
         show-search
         :value="formState[item.key]"
         :filter-option="false"
-        :options="
-          instrumentsSearchRelated[item.key].searchInstrumnetOptions.value
-        "
+        :options="instrumentOptionsReactiveData.data[item.key]"
         @search="instrumentsSearchRelated[item.key].handleSearchInstrument"
         @select="handleInstrumentSelected($event, item.key)"
         @deselect="handleInstrumentDeselected($event, item.key)"
@@ -717,7 +753,6 @@ defineExpose({
   </a-form>
 </template>
 <script lang="ts">
-import { defineComponent } from 'vue';
 export default defineComponent({
   name: 'KfConfigSettingsForm',
 });

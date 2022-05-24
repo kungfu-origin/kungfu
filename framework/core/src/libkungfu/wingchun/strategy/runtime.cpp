@@ -81,7 +81,7 @@ uint64_t RuntimeContext::insert_order(const std::string &instrument_id, const st
     return 0;
   }
   auto instrument_type = get_instrument_type(exchange_id, instrument_id);
-  if (instrument_type == InstrumentType::Unknown || instrument_type == InstrumentType::Repo) {
+  if (instrument_type == InstrumentType::Unknown) {
     SPDLOG_ERROR("unsupported instrument type {} of {}.{}", str_from_instrument_type(instrument_type), instrument_id,
                  exchange_id);
     return 0;
