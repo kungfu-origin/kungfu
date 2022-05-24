@@ -375,7 +375,8 @@ void bind(pybind11::module &&m) {
       .def("hold_positions", &strategy::Context::hold_positions)
       .def("is_book_held", &strategy::Context::is_book_held)
       .def("is_positions_mirrored", &strategy::Context::is_positions_mirrored)
-      .def("req_deregister", &strategy::Context::req_deregister);
+      .def("req_deregister", &strategy::Context::req_deregister)
+      .def("update_strategy_state", &strategy::Context::update_strategy_state);
 
   py::class_<strategy::RuntimeContext, strategy::Context, strategy::RuntimeContext_ptr>(m, "RuntimeContext")
       .def_property_readonly("bookkeeper", &strategy::RuntimeContext::get_bookkeeper,

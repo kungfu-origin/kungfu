@@ -177,5 +177,13 @@ void RuntimeContext::req_history_trade(const std::string &account) {
   auto writer = app_.get_writer(account_location_uid);
   writer->mark(now(), RequestHistoryTrade::tag);
 }
+
 void RuntimeContext::req_deregister() { app_.request_deregister(); }
+
+void RuntimeContext::update_strategy_state(const StrategyStateUpdate &state_update) {
+  auto writer = app_.get_writer(location::PUBLIC);
+  writer->write(state_update.update_time, state_update);
+  SPDLOG_INFO("writer->source() : {} , writer->dest() : {}", app_.get_location_uname(writer->get_location()->uid),
+              app_.get_location_uname(writer->get_dest()));
+}
 } // namespace kungfu::wingchun::strategy

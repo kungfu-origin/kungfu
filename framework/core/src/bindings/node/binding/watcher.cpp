@@ -298,6 +298,7 @@ void Watcher::on_start() {
   events_ | is(Register::tag) | $$(OnRegister(event->gen_time(), event->data<Register>()));
   events_ | is(Deregister::tag) | $$(OnDeregister(event->gen_time(), event->data<Deregister>()));
   events_ | is(BrokerStateUpdate::tag) | $$(UpdateBrokerState(event->source(), event->data<BrokerStateUpdate>()));
+  events_ | is(StrategyStateUpdate::tag) | $$(UpdateStrategyState(event->source(), event->data<StrategyStateUpdate>()));
   events_ | is(CacheReset::tag) | $$(UpdateEventCache(event));
 }
 
@@ -480,6 +481,11 @@ void Watcher::OnDeregister(int64_t trigger_time, const Deregister &deregister_da
 void Watcher::UpdateBrokerState(uint32_t broker_uid, const BrokerStateUpdate &state) {
   auto app_location = get_location(broker_uid);
   location_uid_states_map_.insert_or_assign(app_location->uid, int(state.state));
+}
+
+void Watcher::UpdateStrategyState(uint32_t strategy_uid, const StrategyStateUpdate &state) {
+  SPDLOG_WARN("Strategy source : {} , StrategyStateUpdate : {}", get_location_uname(strategy_uid), state.to_string());
+  location_uid_states_map_.insert_or_assign(strategy_uid, int(state.state));
 }
 
 void Watcher::UpdateAsset(const event_ptr &event, uint32_t book_uid) {
