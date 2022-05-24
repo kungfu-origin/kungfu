@@ -117,7 +117,7 @@ class PrioritizedCommandGroup(click.Group):
     help="name for the process, defaults to command if not set",
 )
 @click.option(
-    "-i", "--cli_dev_path", type=str, help="cli entry path (devCli.js or index.js)"
+    "-i", "--cli_dev_path", type=str, help="cli entry path (cli.dev.js or index.js)"
 )
 @click.help_option("-h", "--help")
 @click.version_option(kungfu.__version__, "--version", message=kungfu.__version__)
