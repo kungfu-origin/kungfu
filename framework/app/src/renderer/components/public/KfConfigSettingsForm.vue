@@ -145,6 +145,8 @@ function getInstrumentsSearchRelated(
 
       initSearchInstrumnetOptions(instrumentKeys[key], formState[key]);
 
+      console.log(searchInstrumnetOptions, '---');
+
       item1[key] = {
         searchInstrumnetOptions: searchInstrumnetOptions,
         handleSearchInstrument,

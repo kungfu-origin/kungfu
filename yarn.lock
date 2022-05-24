@@ -11358,7 +11358,7 @@ text-table@^0.2.0:
   resolved "https://registry.yarnpkg.com/text-table/-/text-table-0.2.0.tgz#7f5ee823ae805207c00af2df4a84ec3fcfa570b4"
   integrity sha1-f17oI66AUgfACvLfSoTsP8+lcLQ=
 
-thread-loader@^3.0.0:
+thread-loader@^3.0.0, thread-loader@^3.0.4:
   version "3.0.4"
   resolved "https://registry.yarnpkg.com/thread-loader/-/thread-loader-3.0.4.tgz#c392e4c0241fbc80430eb680e4886819b504a31b"
   integrity sha512-ByaL2TPb+m6yArpqQUZvP+5S1mZtXsEP7nWKKlAUTm7fCml8kB5s1uI3+eHRP2bk5mVYfRSBI7FFf+tWEyLZwA==
