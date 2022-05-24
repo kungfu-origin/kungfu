@@ -20,6 +20,8 @@ using namespace kungfu::longfist::types;
 
 namespace kungfu::wingchun::xtp {
 
+
+
 inline void to_json(nlohmann::json &j, const XTPOrderInfo &order_info) {
   j["order_xtp_id"] = order_info.order_xtp_id;
   j["order_client_id"] = order_info.order_client_id;

@@ -119,9 +119,6 @@ class TWAP(object):
         if try_volume > self.maxLotByStep:
             try_volume = self.maxLotByStep
             self.total_left += try_volume - self.maxLotByStep
-        # else:
-        #     # 未超出限制, 则累计清零
-        #     self.total_left = 0
 
         self.total_volume += try_volume
         context.log.info(
@@ -135,6 +132,24 @@ class TWAP(object):
     def cancel_orders(self, context):
         for k, v in self.map_orders.items():
             context.cancel_order(k)
+
+    def get_strategy_state(self, context):
+        if self.total_left / self.total_volume > 0.5:
+            return lf.enums.StrategyState.Crowd
+        return lf.enums.StrategyState.Normal
+
+    def get_strategy_state_update(self, context):
+        strategy_state_update = lf.types.StrategyStateUpdate()
+        strategy_state_update.state = self.get_strategy_state(context)
+        info_a = {
+            "left_ratio": self.total_left / self.total_volume,
+            "total_volume": self.total_volume,
+            "total_left": self.total_left
+        }
+        strategy_state_update.info_a = json.dumps(info_a)
+        strategy_state_update.info_b = "random message"
+        context.log.info(f"strategy_state : {strategy_state_update}")
+        return strategy_state_update
 
 
 def type_to_minvol(argument):
@@ -180,11 +195,8 @@ def insert_order_task(context):
     context.twap.total_left += order_volume
     context.log.warn(f"累计已下单但未完成的数量: {context.twap.total_left}")
 
-    strategy_state = lf.types.StrategyStateUpdate
-    strategy_state.state = lf.enums.StrategyState.Nomal
-    strategy_state.info_a = json.dump({"left_ratio": context.twap.total_left / context.twap.total_insert})
-    strategy_state.info_b = "random message"
-    context.update_strategy_state(strategy_state)
+    strategy_state_update = context.twap.get_strategy_state_update(context)
+    context.update_strategy_state(strategy_state_update)
 
     add_timer_task_insert(context)
 
@@ -253,6 +265,8 @@ def on_trade(context, trade):
     context.twap.total_left -= trade.volume
     context.twap.traded_volume += trade.volume
     context.log.warn(f"累计已下单但未完成的数量: {context.twap.total_left}")
+    strategy_state_update = context.twap.get_strategy_state_update(context)
+    context.update_strategy_state(strategy_state_update)
 
 
 def print_datatime(context, info, nano):
@@ -264,3 +278,16 @@ def print_datatime(context, info, nano):
 def on_quote(context, quote):
     context.log.info(f"[on_quote] : {quote}")
     context.twap.on_quote(quote, context)
+
+
+def on_order_action_error(context, error):
+    context.log.info(f"[on_order_action_error] : {error}")
+    strategy_state_update = context.twap.get_strategy_state_update(context)
+    strategy_state_update.state = lf.enums.StrategyState.Error
+    info_a = json.loads(strategy_state_update.info_a)
+    info_a["order_id"] = error.order_id
+    info_a["order_action_id"] = error.order_action_id
+    info_a["error_id"] = error.error_id
+    info_a["error_msg"] = error.error_msg
+    strategy_state_update.info_a = json.dumps(info_a)
+    context.update_strategy_state(strategy_state_update)

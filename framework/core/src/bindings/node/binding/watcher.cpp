@@ -485,6 +485,7 @@ void Watcher::UpdateBrokerState(uint32_t broker_uid, const BrokerStateUpdate &st
 
 void Watcher::UpdateStrategyState(uint32_t strategy_uid, const StrategyStateUpdate &state) {
   SPDLOG_WARN("Strategy source : {} , StrategyStateUpdate : {}", get_location_uname(strategy_uid), state.to_string());
+  location_uid_states_map_.insert_or_assign(strategy_uid, int(state.state));
 }
 
 void Watcher::UpdateAsset(const event_ptr &event, uint32_t book_uid) {
