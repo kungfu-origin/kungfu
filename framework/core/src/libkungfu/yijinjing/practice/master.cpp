@@ -75,16 +75,13 @@ void master::register_app(const event_ptr &event) {
 
   writers_.emplace(app_location->uid, app_cmd_writer);
   reader_->join(app_location, location::PUBLIC, now);
+  reader_->join(app_location, location::SYNC, now);
   reader_->join(app_location, master_cmd_location->uid, now);
 
   session_builder_.open_session(app_location, event->gen_time());
 
   public_writer->write(event->gen_time(), *std::dynamic_pointer_cast<Location>(app_location));
   public_writer->write(event->gen_time(), register_data);
-
-  auto update_writer = get_writer(location::SYNC);
-  update_writer->write(event->gen_time(), *std::dynamic_pointer_cast<Location>(app_location));
-  update_writer->write(event->gen_time(), register_data);
 
   require_write_to(event->gen_time(), app_location->uid, location::PUBLIC);
   require_write_to(event->gen_time(), app_location->uid, location::SYNC);
@@ -170,6 +167,17 @@ void master::try_add_location(int64_t trigger_time, const location_ptr &app_loca
   }
 }
 
+void master::check_cached_ready_to_read(const event_ptr &event) {
+  const RequestReadFrom &request = event->data<RequestReadFrom>();
+  auto app_uid = event->source();
+  auto read_from_source_id = request.source_id;
+
+  if (read_from_source_id == cached_home_location_->uid) {
+    auto app_cmd_writer = get_writer(app_uid);
+    app_cmd_writer->mark(now(), CachedReadyToRead::tag);
+  }
+}
+
 void master::feed(const event_ptr &event) {
   handle_timer_tasks();
 
@@ -223,15 +231,9 @@ void master::on_request_read_from_public(const event_ptr &event) {
   require_read_from_public(event->gen_time(), event->source(), request.source_id, request.from_time);
 }
 
-void master::check_cached_ready_to_read(const event_ptr &event) {
-  const RequestReadFrom &request = event->data<RequestReadFrom>();
-  auto app_uid = event->source();
-  auto read_from_source_id = request.source_id;
-
-  if (read_from_source_id == cached_home_location_->uid) {
-    auto app_cmd_writer = get_writer(app_uid);
-    app_cmd_writer->mark(now(), CachedReadyToRead::tag);
-  }
+void master::on_request_read_from_sync(const event_ptr &event) {
+  const RequestReadFromSync &request = event->data<RequestReadFromSync>();
+  require_read_from_sync(event->gen_time(), event->source(), request.source_id, request.from_time);
 }
 
 void master::on_request_cached_done(const event_ptr &event) {
@@ -241,11 +243,6 @@ void master::on_request_cached_done(const event_ptr &event) {
   app_cmd_writer->mark(now(), RequestStart::tag);
   write_registries(event->gen_time(), app_cmd_writer);
   write_channels(event->gen_time(), app_cmd_writer);
-}
-
-void master::on_request_read_from_sync(const event_ptr &event) {
-  const RequestReadFromSync &request = event->data<RequestReadFromSync>();
-  require_read_from_sync(event->gen_time(), event->source(), request.source_id, request.from_time);
 }
 
 void master::on_channel_request(const event_ptr &event) {
