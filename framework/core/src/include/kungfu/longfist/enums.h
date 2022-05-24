@@ -214,5 +214,9 @@ enum class BrokerState : int8_t {
 };
 
 inline std::ostream &operator<<(std::ostream &os, BrokerState t) { return os << int8_t(t); }
+
+enum class StrategyState : int8_t { Normal, Crowd, Error };
+
+inline std::ostream &operator<<(std::ostream &os, StrategyState t) { return os << int8_t(t); }
 } // namespace kungfu::longfist::enums
 #endif // KUNGFU_LONGFIST_ENUM_H

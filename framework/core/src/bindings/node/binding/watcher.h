@@ -136,6 +136,8 @@ private:
 
   void UpdateBrokerState(uint32_t broker_uid, const longfist::types::BrokerStateUpdate &state);
 
+  void UpdateStrategyState(uint32_t strategy_uid, const longfist::types::StrategyStateUpdate &state);
+
   void UpdateAsset(const event_ptr &event, uint32_t book_uid);
 
   void UpdateBook(const event_ptr &event, const longfist::types::Quote &quote);
