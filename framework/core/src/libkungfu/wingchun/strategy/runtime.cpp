@@ -180,10 +180,9 @@ void RuntimeContext::req_history_trade(const std::string &account) {
 
 void RuntimeContext::req_deregister() { app_.request_deregister(); }
 
-void RuntimeContext::update_strategy_state(const StrategyStateUpdate &state_update) {
+void RuntimeContext::update_strategy_state(StrategyStateUpdate &state_update) {
   auto writer = app_.get_writer(location::PUBLIC);
+  state_update.update_time = now();
   writer->write(state_update.update_time, state_update);
-  SPDLOG_INFO("writer->source() : {} , writer->dest() : {}", app_.get_location_uname(writer->get_location()->uid),
-              app_.get_location_uname(writer->get_dest()));
 }
 } // namespace kungfu::wingchun::strategy
