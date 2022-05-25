@@ -155,7 +155,7 @@ const currentPosition = computed(() => {
 
 const availTradingTaskExtensionList = computed(() => {
   return getExtConfigList(extConfigs.value, 'strategy').filter((item) => {
-    return uiExtConfigs.value[item.key].position === 'make_order';
+    return uiExtConfigs.value[item.key]?.position === 'make_order';
   });
 });
 
