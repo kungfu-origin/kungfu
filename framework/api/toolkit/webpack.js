@@ -23,7 +23,7 @@ module.exports = {
                   test: /\.(t|j)s$/,
                   exclude: /node_modules/,
                   use: [
-                    'thread-loader',
+                    ...(production ? [] : ['thread-loader']),
                     {
                       loader: 'babel-loader',
                     },
@@ -33,7 +33,7 @@ module.exports = {
                   test: /\.(t|j)s$/,
                   exclude: /node_modules/,
                   use: [
-                    'thread-loader',
+                    ...(production ? [] : ['thread-loader']),
                     {
                       loader: 'ts-loader',
                       options: {
