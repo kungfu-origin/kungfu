@@ -32,6 +32,7 @@ import {
   Col,
   TimePicker,
   Divider,
+  Dropdown,
 } from 'ant-design-vue';
 
 import {
@@ -97,6 +98,7 @@ app
 
   .use(Statistic)
   .use(Divider)
+  .use(Dropdown)
   .use(VueVirtualScroller);
 
 app.config.globalProperties.$globalBus = globalBus;
