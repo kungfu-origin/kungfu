@@ -136,7 +136,7 @@ public:
    * @param state StrategyState
    * @param infos vector<string>, info_a, info_b, info_c.
    */
-  void update_strategy_state(const longfist::types::StrategyStateUpdate &state_update) override;
+  void update_strategy_state(longfist::types::StrategyStateUpdate &state_update) override;
 
 protected:
   yijinjing::practice::apprentice &app_;
