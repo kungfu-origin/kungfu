@@ -16,7 +16,6 @@ import {
   watch,
   computed,
   defineComponent,
-  WatchStopHandle,
 } from 'vue';
 import {
   PriceType,
@@ -44,7 +43,6 @@ import {
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
 import dayjs, { Dayjs } from 'dayjs';
 import VueI18n from '@kungfu-trader/kungfu-app/src/language';
-import { makeSearchOptionFormInstruments } from '../../assets/methods/uiUtils';
 const { t } = VueI18n.global;
 
 const props = withDefaults(
