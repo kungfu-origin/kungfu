@@ -220,9 +220,9 @@ export default {
     every_volume: '每次下单量',
 
     fat_finger_buy_modal:
-      '买入价格超出警戒线, 当前价格为 {price}, 警戒线为 {warningLine}, 当前乌龙指阈值为 {fatFinger}',
+      '买入价格超出警戒线, 当前价格为 {price}, 警戒线为 {warningLine}, 当前乌龙指阈值为 {fatFinger}%',
     fat_finger_sell_modal:
-      '卖出价格超出警戒线, 当前价格为 {price}, 警戒线为 {warningLine}, 当前乌龙指阈值为 {fatFinger}',
+      '卖出价格超出警戒线, 当前价格为 {price}, 警戒线为 {warningLine}, 当前乌龙指阈值为 {fatFinger}%',
     start_process: '请先启动{process}交易进程',
     place_confirm: '下单确认',
     close_all: '是否全部平仓?',
