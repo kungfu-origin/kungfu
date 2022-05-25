@@ -55,6 +55,8 @@ public:
 
   Napi::Value GetAppStates(const Napi::CallbackInfo &info);
 
+  Napi::Value GetStrategyStates(const Napi::CallbackInfo &info);
+
   Napi::Value GetTradingDay(const Napi::CallbackInfo &info);
 
   Napi::Value Now(const Napi::CallbackInfo &info);
@@ -103,6 +105,7 @@ private:
   Napi::ObjectReference state_ref_;
   Napi::ObjectReference ledger_ref_;
   Napi::ObjectReference app_states_ref_;
+  Napi::ObjectReference strategy_states_ref_;
   serialize::JsUpdateState update_state;
   serialize::JsUpdateState update_ledger;
   serialize::JsPublishState publish;
@@ -113,6 +116,7 @@ private:
   bool start_;
   std::unordered_map<uint32_t, longfist::types::InstrumentKey> subscribed_instruments_ = {};
   std::unordered_map<uint32_t, int> location_uid_states_map_ = {};
+  std::unordered_map<uint32_t, longfist::types::StrategyStateUpdate> location_uid_strategy_states_map_ = {};
 
   static constexpr auto bypass = [](yijinjing::practice::apprentice *app, bool bypass_quotes) {
     return rx::filter([=](const event_ptr &event) {
@@ -153,6 +157,8 @@ private:
   void SyncOrder();
 
   void SyncAppStatus();
+
+  void SyncStrategyStatus();
 
   void UpdateEventCache(const event_ptr &event);
 
