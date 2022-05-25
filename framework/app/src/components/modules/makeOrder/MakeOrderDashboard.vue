@@ -32,7 +32,6 @@ import {
   InstrumentTypeEnum,
   OffsetEnum,
   SideEnum,
-  StrategyExtTypes,
 } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import { getKfGlobalSettingsValue } from '@kungfu-trader/kungfu-js-api/config/globalSettings';
 import {
@@ -60,9 +59,8 @@ const { t } = VueI18n.global;
 const { error } = messagePrompt();
 
 const app = getCurrentInstance();
-const { instrumentKeyAccountsMap, whiteListedAccounts } = storeToRefs(
-  useGlobalStore(),
-);
+const { instrumentKeyAccountsMap, whiteListedAccounts, uiExtConfigs } =
+  storeToRefs(useGlobalStore());
 
 const { handleBodySizeChange } = useDashboardBodySize();
 const formState = ref(
@@ -156,9 +154,9 @@ const currentPosition = computed(() => {
 });
 
 const availTradingTaskExtensionList = computed(() => {
-  return getExtConfigList(extConfigs.value, 'strategy').filter((item) =>
-    (item.type as StrategyExtTypes[]).includes('trade'),
-  );
+  return getExtConfigList(extConfigs.value, 'strategy').filter((item) => {
+    return uiExtConfigs.value[item.key]?.position === 'make_order';
+  });
 });
 
 onMounted(() => {

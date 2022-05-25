@@ -4,7 +4,7 @@
     "name": "kungfu-trader",
     "email": "info@kungfu.link"
   },
-  "version": "2.4.0-alpha.46",
+  "version": "2.4.0-alpha.47",
   "description": "Kungfu Extension - Timer Task",
   "license": "Apache-2.0",
   "main": "package.json",
@@ -28,7 +28,7 @@
     "package": "kfs project package"
   },
   "devDependencies": {
-    "@kungfu-trader/kungfu-sdk": "^2.4.0-alpha.46"
+    "@kungfu-trader/kungfu-sdk": "^2.4.0-alpha.47"
   },
   "kungfuBuild": {
     "python": {
@@ -38,6 +38,9 @@
   "kungfuConfig": {
     "key": "TimerTask",
     "name": "定时下单",
+    "ui_config": {
+      "position": "make_order"
+    },
     "config": {
       "strategy": {
         "type": "trade",
