@@ -520,7 +520,7 @@ function closeModalConditions(
     return false;
   }
 
-  return makeOrderInput.volume > positionVolume * (closeRange / 100);
+  return makeOrderInput.volume >= positionVolume * (closeRange / 100);
 }
 
 const { handleOpenSetTradingTaskModal } = useTradingTask();
