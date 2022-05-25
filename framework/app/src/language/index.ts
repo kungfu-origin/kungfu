@@ -14,7 +14,7 @@ const messages = {
 export const languageList = [];
 
 // 默认语言
-export const langDefault = 'zh-CN';
+export const langDefault = process.env.LANG_ENV ?? 'zh-CN';
 
 const i18n = createI18n({
   locale: langDefault, //默认显示的语言

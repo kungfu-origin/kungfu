@@ -79,6 +79,16 @@ KF_DEFINE_DATA_TYPE(                                      //
     (std::string, value)                                  //
 );
 
+KF_DEFINE_DATA_TYPE(                                               //
+    StrategyStateUpdate, 20002, PK(state), TIMESTAMP(update_time), //
+    (StrategyState, state),                                        //
+    (int64_t, update_time),                                        //
+    (std::string, info_a),                                         //
+    (std::string, info_b),                                         //
+    (std::string, info_c),                                         //
+    (std::string, value)                                           //
+);
+
 KF_DEFINE_PACK_TYPE(                                             //
     Commission, 10006, PK(product_id, exchange_id), PERPETUAL(), //
     (kungfu::array<char, PRODUCT_ID_LEN>, product_id),           //品种

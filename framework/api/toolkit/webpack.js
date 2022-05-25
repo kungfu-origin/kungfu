@@ -14,6 +14,7 @@ module.exports = {
         minimize: true,
         minimizer: [new TerserPlugin()],
       },
+      cache: true,
       module: {
         rules: [
           ...(argv.passTJSLoader
@@ -23,6 +24,7 @@ module.exports = {
                   test: /\.(t|j)s$/,
                   exclude: /node_modules/,
                   use: [
+                    'thread-loader',
                     {
                       loader: 'babel-loader',
                     },
@@ -32,6 +34,7 @@ module.exports = {
                   test: /\.(t|j)s$/,
                   exclude: /node_modules/,
                   use: [
+                    'thread-loader',
                     {
                       loader: 'ts-loader',
                       options: {
@@ -43,6 +46,7 @@ module.exports = {
                         // 对应文件添加个.ts或.tsx后缀
                         appendTsSuffixTo: [/\.vue$/],
                         transpileOnly: false, // 关闭类型检测，即值进行转译
+                        happyPackMode: true,
                       },
                     },
                   ],
@@ -87,18 +91,6 @@ module.exports = {
               },
             },
           },
-          // {
-          //   test: /\.(woff2?|eot|ttf|otf)(\?.*)?$/,
-          //   use: {
-          //     // loader: 'file-loader',
-          //     loader: 'url-loader',
-          //     options: {
-          //       limit: 10000,
-          //       name: 'fonts/[name]--[folder].[ext]',
-          //       esModule: false,
-          //     },
-          //   },
-          // },
         ],
       },
       node: {
