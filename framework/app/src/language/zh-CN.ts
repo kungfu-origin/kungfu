@@ -426,8 +426,8 @@ export default {
       '功夫将会以选择的python路径运行策略, 同时需要保证 kungfu*.whl 已经通过 pip安装',
 
     trade: '交易',
-    sound: '提示音',
-    use_sound: '启用系统提示音',
+    sound: '成交提示音',
+    use_sound: '启用成交提示音',
     fat_finger_threshold: '乌龙指阈值',
     set_fat_finger: '设置乌龙指触发阈值(百分比)',
     close_threshold: '平仓阈值',

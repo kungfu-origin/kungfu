@@ -1601,8 +1601,6 @@ export const dealOrderInputItem = (
       orderInputResolved[key] = dealOffset(inputData.offset);
     } else if (key === 'hedge_flag') {
       orderInputResolved[key] = dealHedgeFlag(inputData.hedge_flag);
-    } else if (key === 'hedge_flag') {
-      orderInputResolved[key] = dealHedgeFlag(inputData.hedge_flag);
     } else if (key === 'parent_id') {
       break;
     } else {
