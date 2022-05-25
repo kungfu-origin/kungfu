@@ -28,7 +28,6 @@ import {
   Skeleton,
   Tree,
   Statistic,
-  Dropdown,
   Row,
   Col,
   TimePicker,
@@ -88,7 +87,6 @@ app
   .use(InputNumber)
   .use(Select)
   .use(Drawer)
-  .use(Dropdown)
   .use(Form)
   .use(Empty)
   .use(DatePicker)
