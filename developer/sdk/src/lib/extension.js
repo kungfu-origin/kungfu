@@ -196,7 +196,7 @@ exports.installSingleLib = async (
 
   const downloadFiles = async (localDir, files, buildRemoteURL, onFinish) => {
     for (const file of files) {
-      const remoteFileURL = encodeURI(buildRemoteURL(file));
+      const remoteFileURL = buildRemoteURL(file);
       const localFilePath = path.join(localDir, file);
       console.log(`-- Downloading ${remoteFileURL} to ${localFilePath}`);
 
@@ -228,10 +228,11 @@ exports.installSingleLib = async (
   const includeDir = buildDirPath('include');
   const binDir = buildDirPath('lib');
 
+  const encode = (file) => encodeURIComponent(file).replace(/%20/g, '+');
   await downloadFiles(
     docDir,
     libInfo.doc,
-    (file) => `${libSiteURL}/${libName}/${libVersion}/doc/${file}`,
+    (file) => `${libSiteURL}/${libName}/${libVersion}/doc/${encode(file)}`,
     (localFilePath) => fse.chmodSync(localFilePath, '0644'),
   );
   await downloadFiles(

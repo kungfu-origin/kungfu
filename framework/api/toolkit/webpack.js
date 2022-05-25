@@ -14,7 +14,6 @@ module.exports = {
         minimize: true,
         minimizer: [new TerserPlugin()],
       },
-      cache: true,
       module: {
         rules: [
           ...(argv.passTJSLoader
@@ -24,7 +23,7 @@ module.exports = {
                   test: /\.(t|j)s$/,
                   exclude: /node_modules/,
                   use: [
-                    'thread-loader',
+                    ...(production ? [] : ['thread-loader']),
                     {
                       loader: 'babel-loader',
                     },
@@ -34,7 +33,7 @@ module.exports = {
                   test: /\.(t|j)s$/,
                   exclude: /node_modules/,
                   use: [
-                    'thread-loader',
+                    ...(production ? [] : ['thread-loader']),
                     {
                       loader: 'ts-loader',
                       options: {

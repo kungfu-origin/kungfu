@@ -267,7 +267,7 @@ void bind(pybind11::module &&m) {
 
   py::enum_<StrategyState>(m_enums, "StrategyState", py::arithmetic())
       .value("Normal", StrategyState::Normal)
-      .value("Crowd", StrategyState::Crowd)
+      .value("Warn", StrategyState::Warn)
       .value("Error", StrategyState::Error)
       .export_values()
       .def("__eq__", [](const StrategyState &a, int b) { return static_cast<int>(a) == b; });

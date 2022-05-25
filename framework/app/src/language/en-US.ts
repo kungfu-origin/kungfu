@@ -427,8 +427,8 @@ export default {
       'local python path is required to be selected, and kungfu*.whl should be installed in this path',
 
     trade: 'Trade',
-    sound: 'Sound',
-    use_sound: 'Enable the system prompt sound',
+    sound: 'Traded Sound',
+    use_sound: 'Enable the system traded prompt sound',
     fat_finger_threshold: 'Fat Finger Threshold',
     set_fat_finger:
       'Set the threshold for triggering an fat finger(percentage)',
