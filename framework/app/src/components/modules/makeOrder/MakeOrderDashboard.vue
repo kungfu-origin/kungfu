@@ -498,7 +498,7 @@ function showCloseModal(
     closeModalConditions(
       closeRange,
       makeOrderInput,
-      Number(currentPosition.value.volume),
+      Number(currentPosition.value?.volume),
     )
   ) {
     return confirmModal(t('prompt'), t('tradingConfig.close_all'));

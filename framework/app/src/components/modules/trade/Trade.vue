@@ -47,7 +47,6 @@ import { HistoryDateEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import { getKfGlobalSettingsValue } from '@kungfu-trader/kungfu-js-api/config/globalSettings';
 import path from 'path';
 import { KUNGFU_RESOURCES_DIR } from '@kungfu-trader/kungfu-js-api/config/pathConfig';
-import sound from 'sound-play';
 
 const app = getCurrentInstance();
 const { handleBodySizeChange } = useDashboardBodySize();
@@ -129,15 +128,6 @@ onMounted(() => {
               toRaw(dealTrade(watcher, item, watcher.ledger.OrderStat)),
             ),
         );
-        if (
-          !trades.value.length ||
-          lastTradeId.value !== trades.value[0]?.trade_id
-        ) {
-          if (isPlaySound) {
-            sound.play(soundPath);
-          }
-          lastTradeId.value = trades.value[0]?.trade_id;
-        }
       },
     );
 
