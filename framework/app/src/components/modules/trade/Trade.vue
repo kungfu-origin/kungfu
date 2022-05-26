@@ -44,9 +44,6 @@ import {
 import { useExtraCategory } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiExtraLocationUtils';
 import TradeStatisticModal from './TradeStatisticModal.vue';
 import { HistoryDateEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';
-import { getKfGlobalSettingsValue } from '@kungfu-trader/kungfu-js-api/config/globalSettings';
-import path from 'path';
-import { KUNGFU_RESOURCES_DIR } from '@kungfu-trader/kungfu-js-api/config/pathConfig';
 
 const app = getCurrentInstance();
 const { handleBodySizeChange } = useDashboardBodySize();
@@ -82,17 +79,6 @@ const columns = computed(() => {
   const category = currentGlobalKfLocation.value?.category;
   return getColumns(category, !!historyDate.value);
 });
-
-const lastTradeId: {
-  value: bigint;
-} = {
-  value: 0n,
-};
-
-const isPlaySound = getKfGlobalSettingsValue()?.trade?.sound || false;
-const soundPath = path.join(
-  `${path.join(KUNGFU_RESOURCES_DIR, 'music/ding.mp3')}`,
-);
 
 onMounted(() => {
   if (app?.proxy) {

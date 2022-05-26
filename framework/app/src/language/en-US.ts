@@ -15,6 +15,7 @@ export default {
   operation_success: 'operation success',
   operation_failed: 'operation failed',
   location_error: 'current location error',
+  watcher_error: 'Watcher error',
   instrument_error: 'instrument error',
   prompt: 'prompt',
   warning: 'warning',
@@ -219,9 +220,9 @@ export default {
     every_volume: 'Every Volume',
 
     fat_finger_buy_modal:
-      'The buying price exceeded the warning line, the current price is {price}, line for {warningLine}, fat finger is {fatFinger}',
+      'The buying price exceeded the warning line, the current price is {price}, line for {warningLine}, fat finger is {fatFinger}%',
     fat_finger_sell_modal:
-      'The selling price exceeded the warning line, the current price is {price}, line for {warningLine}, fat finger is {fatFinger}',
+      'The selling price exceeded the warning line, the current price is {price}, line for {warningLine}, fat finger is {fatFinger}%',
     start_process: 'please start {process} first',
     place_confirm: 'Place Order Confirm',
     close_all: 'Close All?',
@@ -465,6 +466,18 @@ export default {
     restart: 'restart',
   },
 
+  风控: 'Risk Setting',
+  风控描述:
+    'Enable risk setting to automatically close positions when positions exceed thresholds',
+  账户: 'Account',
+  柜台: 'Exchange',
+  单比最大量: 'Maximum single ratio',
+  每日最大成交量: 'Maximum daily turnover',
+  是否需要自成功检测: 'Whether automatic success detection is required',
+  最大回撤率: 'Maximum withdrawal rate',
+  标的白名单: 'white list',
+  白名单设置警告: 'Please set the whitelist for this account first',
+
   validate: {
     no_special_characters: 'Cannot contain special characters',
     no_underscore: 'Cannot contain underscores',
@@ -529,4 +542,9 @@ export default {
     'Exiting the application ends all transactions, Confirm to exit?',
   restart_process:
     'Kungfu graphics process is interrupted. The interruption will not affect transactions. Do you want to restart the graphics process?',
+
+  未就绪: '{processId} not ready, please try again later',
+  系统外: 'Out-of-system',
+  手动: 'manual',
+  任务: 'task',
 };
