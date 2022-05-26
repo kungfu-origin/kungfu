@@ -11,6 +11,7 @@ import {
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import {
   getAllKfConfigOriginData,
+  getAllRiskSettingList,
   getSubscribedInstruments,
   getTdGroups,
 } from '@kungfu-trader/kungfu-js-api/actions';
@@ -45,6 +46,8 @@ interface GlobalState {
 
   riskSettingList: KungfuApi.RiskSetting[];
 
+  globalSetting: Record<string, Record<string, KungfuApi.KfConfigValue>>;
+
   currentGlobalKfLocation:
     | KungfuApi.KfLocation
     | KungfuApi.KfConfig
@@ -75,6 +78,8 @@ export const useGlobalStore = defineStore('global', {
       subscribedInstruments: [],
 
       riskSettingList: [],
+
+      globalSetting: {},
 
       currentGlobalKfLocation: null,
     };
@@ -166,8 +171,16 @@ export const useGlobalStore = defineStore('global', {
       });
     },
 
-    setRiskSettingList(riskSetting: KungfuApi.RiskSetting[]) {
-      this.riskSettingList = riskSetting;
+    setGlobalSetting(
+      globalSetting: Record<string, Record<string, KungfuApi.KfConfigValue>>,
+    ) {
+      this.globalSetting = globalSetting;
+    },
+
+    setRiskSettingList() {
+      return getAllRiskSettingList().then((res) => {
+        this.riskSettingList = res;
+      });
     },
 
     checkCurrentGlobalKfLocationExisted() {

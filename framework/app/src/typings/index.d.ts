@@ -124,6 +124,11 @@ interface TriggerCurrentConfigModalInput {
   formState: KungfuApi.SetKfConfigPayload;
 }
 
+interface TriggerOpenGlobalSettingModal {
+  tag: 'open:globalSetting';
+  category: string;
+}
+
 interface TriggerSetCurrentConfigModalConfigSettings {
   tag: 'update:currentConfigModalConfigSettings';
   configSettings: KungfuApi.KfConfigItem[];
@@ -148,6 +153,7 @@ type KfBusEvent =
   | TriggerConfigModalFormChanged
   | TriggerCurrentConfigModalReady
   | TriggerCurrentConfigModalInput
+  | TriggerOpenGlobalSettingModal
   | TriggerSetCurrentConfigModalConfigSettings;
 
 interface ExtraOrderInput {

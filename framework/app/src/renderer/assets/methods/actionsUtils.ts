@@ -71,9 +71,15 @@ import { useExtraCategory } from './uiExtraLocationUtils';
 import { useGlobalStore } from '../../pages/index/store/global';
 import VueI18n from '@kungfu-trader/kungfu-app/src/language';
 import { messagePrompt } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
+import { KUNGFU_RESOURCES_DIR } from '@kungfu-trader/kungfu-js-api/config/pathConfig';
+import sound from 'sound-play';
 
 const { t } = VueI18n.global;
 const { success, error } = messagePrompt();
+
+const soundPath = path.join(
+  `${path.join(KUNGFU_RESOURCES_DIR, 'music/Trade.mp3')}`,
+);
 
 export const ensureRemoveLocation = (
   kfLocation: KungfuApi.KfLocation | KungfuApi.KfConfig,
@@ -1064,6 +1070,13 @@ export const useExtConfigsRelated = (): {
     mdExtTypeMap,
     strategyExtTypeMap,
   };
+};
+
+export const playSound = (): void => {
+  const { globalSetting } = storeToRefs(useGlobalStore());
+  if (globalSetting.value.trade.sound) {
+    sound.play(soundPath);
+  }
 };
 
 export const useCurrentGlobalKfLocation = (

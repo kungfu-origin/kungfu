@@ -44,10 +44,7 @@ import {
 import { useExtraCategory } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiExtraLocationUtils';
 import TradeStatisticModal from './TradeStatisticModal.vue';
 import { HistoryDateEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';
-import { getKfGlobalSettingsValue } from '@kungfu-trader/kungfu-js-api/config/globalSettings';
-import path from 'path';
-import { KUNGFU_RESOURCES_DIR } from '@kungfu-trader/kungfu-js-api/config/pathConfig';
-import sound from 'sound-play';
+import globalBus from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/globalBus';
 
 const app = getCurrentInstance();
 const { handleBodySizeChange } = useDashboardBodySize();
@@ -90,11 +87,6 @@ const lastTradeId: {
   value: 0n,
 };
 
-const isPlaySound = getKfGlobalSettingsValue()?.trade?.sound || false;
-const soundPath = path.join(
-  `${path.join(KUNGFU_RESOURCES_DIR, 'music/Trade.mp3')}`,
-);
-
 onMounted(() => {
   if (app?.proxy) {
     const subscription = app.proxy.$tradingDataSubject.subscribe(
@@ -133,9 +125,10 @@ onMounted(() => {
           !trades.value.length ||
           lastTradeId.value !== trades.value[0]?.trade_id
         ) {
-          if (isPlaySound) {
-            sound.play(soundPath);
-          }
+          globalBus.next({
+            tag: 'main',
+            name: 'tradingSuccess',
+          });
           lastTradeId.value = trades.value[0]?.trade_id;
         }
       },

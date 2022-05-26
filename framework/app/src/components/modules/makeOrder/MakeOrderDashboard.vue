@@ -247,7 +247,16 @@ function whiteListInterceptor(
   accountId: string,
   instrument: string,
 ): Promise<void> {
+  console.log(accountId);
+  console.log(
+    (instrumentKeyAccountsMap.value[instrument] || []).includes(accountId),
+  );
   if (whiteListedAccounts.value.includes(accountId)) {
+    console.log(accountId);
+    console.log(
+      (instrumentKeyAccountsMap.value[instrument] || []).includes(accountId),
+    );
+
     if (
       !(instrumentKeyAccountsMap.value[instrument] || []).includes(accountId)
     ) {
@@ -493,6 +502,10 @@ function showCloseModal(
 
   updatePositionList();
   const closeRange = +getKfGlobalSettingsValue()?.trade?.close || 100;
+
+  if (!currentPosition.value.volume) {
+    return Promise.resolve();
+  }
 
   if (
     closeModalConditions(
