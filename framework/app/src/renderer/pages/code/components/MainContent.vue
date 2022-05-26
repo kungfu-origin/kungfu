@@ -54,7 +54,7 @@ interface indent {
   key: string;
 }
 const store = useCodeStore();
-const { globallSetting } = storeToRefs(store);
+const { globalSetting } = storeToRefs(store);
 const indentUsingSpace: string =
   CodeTabSetting[SpaceTabSettingEnum.SPACES].name;
 const indentUsingTab: string = CodeTabSetting[SpaceTabSettingEnum.TABS].name;
@@ -63,7 +63,7 @@ const sizeUsingTwo: string =
 const sizeUsingFour: string =
   CodeSizeSetting[SpaceSizeSettingEnum.FOURINDENT].name;
 const defaultValue = ref<string>(`${indentUsingSpace}: ${sizeUsingTwo}`);
-watch(globallSetting.value, (newSetting) => {
+watch(globalSetting.value, (newSetting) => {
   defaultValue.value = `${
     newSetting?.code?.tabSpaceType
       ? CodeTabSetting[newSetting?.code?.tabSpaceType]?.name
@@ -124,8 +124,8 @@ function handleSpaceSize(type: string): string {
 
 function handleClick(type: indent, size: indent) {
   let setting: Record<string, Record<string, KungfuApi.KfConfigValue>>;
-  if (globallSetting.value != {} && globallSetting.value.code) {
-    setting = deepClone(toRaw(globallSetting.value));
+  if (globalSetting.value != {} && globalSetting.value.code) {
+    setting = deepClone(toRaw(globalSetting.value));
   } else {
     setting = {
       code: {

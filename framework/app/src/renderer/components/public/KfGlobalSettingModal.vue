@@ -75,6 +75,7 @@ defineEmits<{
 
 const store = useGlobalStore();
 const { riskSettingList, globalSetting } = storeToRefs(store);
+console.log(globalSetting.value);
 
 const kfGlobalSettings = getKfGlobalSettings();
 const globalSettingsFromStates = reactive(

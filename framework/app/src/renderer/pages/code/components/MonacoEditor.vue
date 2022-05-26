@@ -49,7 +49,7 @@ monaco.languages.registerCompletionItemProvider('python', {
 });
 
 // currentFile
-const { currentFile, fileTree, globallSetting } = storeToRefs(useCodeStore());
+const { currentFile, fileTree, globalSetting } = storeToRefs(useCodeStore());
 const handleEditor: {
   value: monaco.editor.IStandaloneCodeEditor | null;
 } = {
@@ -62,7 +62,7 @@ const indentUsingTab: string = CodeTabSetting[SpaceTabSettingEnum.TABS].name;
 const sizeUsingTwo: string =
   CodeSizeSetting[SpaceSizeSettingEnum.TWOINDENT].name;
 
-watch(globallSetting.value, (newSetting) => {
+watch(globalSetting.value, (newSetting) => {
   const code: Code.ICodeSetting = newSetting.code as Code.ICodeSetting;
   updateSpaceTab(code || {});
 });
@@ -107,7 +107,7 @@ watch(currentFile, async (newFile: Code.FileData) => {
       codeText,
     );
     await nextTick();
-    updateSpaceTab(globallSetting.value.code as Code.ICodeSetting);
+    updateSpaceTab(globalSetting.value.code as Code.ICodeSetting);
     bindBlur(handleEditor.value, activeFile.value);
   }
 });
