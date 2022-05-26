@@ -20,6 +20,20 @@ using namespace kungfu::longfist::types;
 
 namespace kungfu::wingchun::xtp {
 
+template <typename T> inline void set_offset(T &t) {
+  switch (t.side) {
+  case Side::Buy:
+    t.offset = Offset::Open;
+    break;
+  case Side::Sell:
+    t.offset = Offset::Close;
+    break;
+  default:
+    SPDLOG_ERROR("Invalidated kf_side : {} ", t.side);
+    break;
+  }
+}
+
 inline void to_json(nlohmann::json &j, const XTPOrderInfo &order_info) {
   j["order_xtp_id"] = order_info.order_xtp_id;
   j["order_client_id"] = order_info.order_client_id;
@@ -429,7 +443,8 @@ inline void from_xtp(const XTPOrderInfo &ori, Order &des) {
   des.limit_price = ori.price;
   from_xtp(ori.order_status, des.status);
   from_xtp(ori.side, des.side);
-  des.offset = Offset::Open;
+  //  des.offset = Offset::Open;
+  set_offset(des);
   if (ori.business_type == XTP_BUSINESS_TYPE_CASH) {
     des.instrument_type = InstrumentType::Stock;
   }
@@ -448,7 +463,8 @@ inline void from_xtp(const XTPQueryOrderRsp &ori, HistoryOrder &des) {
   des.limit_price = ori.price;
   from_xtp(ori.order_status, des.status);
   from_xtp(ori.side, des.side);
-  des.offset = Offset::Open;
+  //  des.offset = Offset::Open;
+  set_offset(des);
   if (ori.business_type == XTP_BUSINESS_TYPE_CASH) {
     des.instrument_type = InstrumentType::Stock;
   }
@@ -463,7 +479,8 @@ inline void from_xtp(const XTPTradeReport &ori, Trade &des) {
   des.price = ori.price;
   from_xtp(ori.market, des.exchange_id);
   from_xtp(ori.side, des.side);
-  des.offset = Offset::Open;
+  //  des.offset = Offset::Open;
+  set_offset(des);
   if (ori.business_type == XTP_BUSINESS_TYPE_CASH) {
     des.instrument_type = InstrumentType::Stock;
   }
@@ -476,7 +493,8 @@ inline void from_xtp(const XTPQueryTradeRsp &ori, HistoryTrade &des) {
   des.price = ori.price;
   from_xtp(ori.market, des.exchange_id);
   from_xtp(ori.side, des.side);
-  des.offset = Offset::Open;
+  //  des.offset = Offset::Open;
+  set_offset(des);
   if (ori.business_type == XTP_BUSINESS_TYPE_CASH) {
     des.instrument_type = InstrumentType::Stock;
   }

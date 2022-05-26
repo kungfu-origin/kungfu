@@ -98,8 +98,8 @@ onMounted(() => {
         if (data.configSettings) {
           nextTick().then(() => {
             formState.value = initFormStateByConfig(data.configSettings || [], {
-              ...toRaw(formState.value),
               ...toRaw(props.payload.initValue),
+              ...toRaw(formState.value),
             });
 
             configSettings.value = data.configSettings;

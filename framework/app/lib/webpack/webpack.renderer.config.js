@@ -96,9 +96,10 @@ const prodConfig = {
     new webpack.DefinePlugin({
       __VUE_OPTIONS_API__: true,
       __VUE_PROD_DEVTOOLS__: true,
+      __resources: '',
       __python_version: `"${pyVersion.toString()}"`,
       'process.env.APP_TYPE': '"renderer"',
-      __resources: '',
+      'process.env.LANG_ENV': '"zh-CN"',
     }),
   ],
 };
@@ -111,6 +112,7 @@ const devConfig = {
       __resources: `"${publicDir.replace(/\\/g, '\\\\')}"`,
       __python_version: `"${pyVersion.toString()}"`,
       'process.env.APP_TYPE': '"renderer"',
+      'process.env.LANG_ENV': '"zh-CN"',
     }),
     new CopyPlugin({
       patterns: [

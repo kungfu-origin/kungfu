@@ -92,7 +92,7 @@ const lastTradeId: {
 
 const isPlaySound = getKfGlobalSettingsValue()?.trade?.sound || false;
 const soundPath = path.join(
-  `${path.join(KUNGFU_RESOURCES_DIR, 'music/Trade.mp3')}`,
+  `${path.join(KUNGFU_RESOURCES_DIR, 'music/ding.mp3')}`,
 );
 
 onMounted(() => {

@@ -1000,28 +1000,30 @@ export const sum = (list: number[]): number => {
   return list.reduce((accumlator, a) => accumlator + +a);
 };
 
-export const dealSide = (side: SideEnum): KungfuApi.KfTradeValueCommonData => {
-  return Side[side];
+export const dealSide = (
+  side: SideEnum | number,
+): KungfuApi.KfTradeValueCommonData => {
+  return Side[+side as SideEnum];
 };
 
 export const dealOffset = (
-  offset: OffsetEnum,
+  offset: OffsetEnum | number,
 ): KungfuApi.KfTradeValueCommonData => {
-  return Offset[offset];
+  return Offset[+offset as OffsetEnum];
 };
 
 export const dealDirection = (
-  direction: DirectionEnum,
+  direction: DirectionEnum | number,
 ): KungfuApi.KfTradeValueCommonData => {
-  return Direction[direction];
+  return Direction[+direction as DirectionEnum];
 };
 
 export const dealOrderStatus = (
-  status: OrderStatusEnum,
+  status: OrderStatusEnum | number,
   errorMsg?: string,
 ): KungfuApi.KfTradeValueCommonData => {
   return {
-    ...OrderStatus[status],
+    ...OrderStatus[+status as OrderStatusEnum],
     ...(+status === OrderStatusEnum.Error && errorMsg
       ? {
           name: errorMsg,
@@ -1031,39 +1033,39 @@ export const dealOrderStatus = (
 };
 
 export const dealPriceType = (
-  priceType: PriceTypeEnum,
+  priceType: PriceTypeEnum | number,
 ): KungfuApi.KfTradeValueCommonData => {
-  return PriceType[priceType];
+  return PriceType[+priceType as PriceTypeEnum];
 };
 
 export const dealTimeCondition = (
-  timeCondition: TimeConditionEnum,
+  timeCondition: TimeConditionEnum | number,
 ): KungfuApi.KfTradeValueCommonData => {
-  return TimeCondition[timeCondition];
+  return TimeCondition[+timeCondition as TimeConditionEnum];
 };
 
 export const dealVolumeCondition = (
-  volumeCondition: VolumeConditionEnum,
+  volumeCondition: VolumeConditionEnum | number,
 ): KungfuApi.KfTradeValueCommonData => {
-  return VolumeCondition[volumeCondition];
+  return VolumeCondition[+volumeCondition as VolumeConditionEnum];
 };
 
 export const dealCommissionMode = (
-  commissionMode: CommissionModeEnum,
+  commissionMode: CommissionModeEnum | number,
 ): KungfuApi.KfTradeValueCommonData => {
-  return CommissionMode[commissionMode];
+  return CommissionMode[+commissionMode as CommissionModeEnum];
 };
 
 export const dealInstrumentType = (
-  instrumentType: InstrumentTypeEnum,
+  instrumentType: InstrumentTypeEnum | number,
 ): KungfuApi.KfTradeValueCommonData => {
-  return InstrumentType[instrumentType];
+  return InstrumentType[+instrumentType as InstrumentTypeEnum];
 };
 
 export const dealHedgeFlag = (
-  hedgeFlag: HedgeFlagEnum,
+  hedgeFlag: HedgeFlagEnum | number,
 ): KungfuApi.KfTradeValueCommonData => {
-  return HedgeFlag[hedgeFlag];
+  return HedgeFlag[+hedgeFlag as HedgeFlagEnum];
 };
 
 export const getKfCategoryData = (
@@ -1178,6 +1180,7 @@ export const resolveClientId = (
 
   const destLocation: KungfuApi.KfLocation = watcher.getLocation(dest);
   if (!destLocation) return { color: 'default', name: '--' };
+  const destUname = getIdByKfLocation(destLocation);
 
   if (destLocation.group === 'node') {
     if (parent_id !== BigInt(0)) {
@@ -1187,9 +1190,9 @@ export const resolveClientId = (
     }
   } else {
     if (parent_id !== BigInt(0)) {
-      return { color: 'orange', name: `${destLocation.name} 手动` }; //是因为策略模块手动下单的时候刻意插入用于区分
+      return { color: 'orange', name: `${destUname} 手动` }; //是因为策略模块手动下单的时候刻意插入用于区分
     } else {
-      return { color: 'text', name: destLocation.name };
+      return { color: 'text', name: destUname };
     }
   }
 };
@@ -1386,40 +1389,6 @@ export const transformSearchInstrumentResultToInstrument = (
     id: `${instrumentId}_${instrumentName}_${exchangeId}`.toLowerCase(),
     ukey,
   };
-};
-
-export const dealKfConfigValueByType = (
-  type: KungfuApi.KfConfigItemSupportedTypes,
-  value: KungfuApi.KfConfigValue,
-): string => {
-  switch (type) {
-    case 'instrument':
-      const instrumentResolved =
-        transformSearchInstrumentResultToInstrument(value);
-      if (!instrumentResolved) {
-        return value;
-      }
-      const { exchangeId, instrumentId } = instrumentResolved;
-      return `${exchangeId}_${instrumentId}`;
-    case 'side':
-      return dealSide(+value).name;
-    case 'offset':
-      return dealOffset(+value).name;
-    case 'direction':
-      return dealDirection(+value).name;
-    case 'instrumentType':
-      return dealInstrumentType(+value).name;
-    case 'priceType':
-      return dealPriceType(+value).name;
-    case 'hedgeFlag':
-      return dealHedgeFlag(+value).name;
-    case 'volumeCondition':
-      return dealVolumeCondition(+value).name;
-    case 'timeCondition':
-      return dealTimeCondition(+value).name;
-    default:
-      return value;
-  }
 };
 
 export const booleanProcessEnv = (val: string): boolean => {
@@ -1630,8 +1599,6 @@ export const dealOrderInputItem = (
       orderInputResolved[key] = dealSide(inputData.side);
     } else if (key === 'offset') {
       orderInputResolved[key] = dealOffset(inputData.offset);
-    } else if (key === 'hedge_flag') {
-      orderInputResolved[key] = dealHedgeFlag(inputData.hedge_flag);
     } else if (key === 'hedge_flag') {
       orderInputResolved[key] = dealHedgeFlag(inputData.hedge_flag);
     } else if (key === 'parent_id') {

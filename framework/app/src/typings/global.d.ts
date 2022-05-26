@@ -29,7 +29,7 @@ declare global {
 
   namespace NodeJS {
     interface ProcessEnv {
-      LANG_ENV: 'en' | undefined;
+      LANG_ENV: 'zh-CN' | 'en-US' | 'zh-HK' | undefined;
       APP_TYPE: 'cli' | 'renderer' | 'component' | 'daemon' | 'main';
       DAEMON_TYPE: string;
       RENDERER_TYPE:

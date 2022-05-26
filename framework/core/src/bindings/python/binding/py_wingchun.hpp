@@ -86,9 +86,9 @@ public:
 
   bool req_account() override { PYBIND11_OVERLOAD_PURE(bool, Trader, req_account, ); }
 
-  bool req_history_order(const event_ptr &event) override { PYBIND11_OVERLOAD_PURE(bool, Trader, req_history_order, ); }
+  bool req_history_order(const event_ptr &event) override { PYBIND11_OVERLOAD(bool, Trader, req_history_order, event); }
 
-  bool req_history_trade(const event_ptr &event) override { PYBIND11_OVERLOAD_PURE(bool, Trader, req_history_trade, ); }
+  bool req_history_trade(const event_ptr &event) override { PYBIND11_OVERLOAD(bool, Trader, req_history_trade, event); }
 
   void on_start() override { PYBIND11_OVERLOAD(void, Trader, on_start, ); }
 
@@ -375,7 +375,8 @@ void bind(pybind11::module &&m) {
       .def("hold_positions", &strategy::Context::hold_positions)
       .def("is_book_held", &strategy::Context::is_book_held)
       .def("is_positions_mirrored", &strategy::Context::is_positions_mirrored)
-      .def("req_deregister", &strategy::Context::req_deregister);
+      .def("req_deregister", &strategy::Context::req_deregister)
+      .def("update_strategy_state", &strategy::Context::update_strategy_state);
 
   py::class_<strategy::RuntimeContext, strategy::Context, strategy::RuntimeContext_ptr>(m, "RuntimeContext")
       .def_property_readonly("bookkeeper", &strategy::RuntimeContext::get_bookkeeper,

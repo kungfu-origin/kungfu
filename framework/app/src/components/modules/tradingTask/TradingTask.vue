@@ -5,7 +5,7 @@ import {
   useDashboardBodySize,
   useTableSearchKeyword,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
-import { computed, getCurrentInstance, onMounted, ref } from 'vue';
+import { computed, ref } from 'vue';
 import minimist from 'minimist';
 
 import KfDashboard from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfDashboard.vue';
@@ -17,7 +17,7 @@ import {
   DeleteOutlined,
 } from '@ant-design/icons-vue';
 
-import { columns, categoryRegisterConfig } from './config';
+import { columns } from './config';
 import path from 'path';
 import {
   getIfProcessRunning,
@@ -77,8 +77,6 @@ const { searchKeyword, tableData } =
 
 const { dealRowClassName, setCurrentGlobalKfLocation } =
   useCurrentGlobalKfLocation(window.watcher);
-
-const app = getCurrentInstance();
 
 function handleOpenSetTaskDialog() {
   setExtensionModalVisible.value = true;
@@ -206,7 +204,7 @@ function resolveKfLocation(
   taskLocation: KungfuApi.KfLocation,
 ): KungfuApi.KfExtraLocation {
   const locationResolved: KungfuApi.KfExtraLocation = {
-    category: categoryRegisterConfig.name,
+    category: 'strategy',
     group: taskLocation?.group || '',
     name: taskLocation?.name || '',
     mode: 'live',
@@ -242,12 +240,6 @@ function parseTaskSettingsFromEnv(configSettingsEnv = '[]') {
   }
   return configSettings;
 }
-
-onMounted(() => {
-  if (app?.proxy && app.proxy.$globalCategoryRegister) {
-    app.proxy.$globalCategoryRegister.register(categoryRegisterConfig);
-  }
-});
 </script>
 
 <template>

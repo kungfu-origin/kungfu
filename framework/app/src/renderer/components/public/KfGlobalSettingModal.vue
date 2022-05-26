@@ -29,10 +29,7 @@ import {
   ExchangeIds,
   KfCategory,
 } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
-import {
-  KfCategoryEnum,
-  CommissionModeEnum,
-} from '@kungfu-trader/kungfu-js-api/typings/enums';
+import { KfCategoryEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import { DeleteOutlined } from '@ant-design/icons-vue';
 import { longfist } from '@kungfu-trader/kungfu-js-api/kungfu';
 import {
@@ -40,6 +37,7 @@ import {
   setScheduleTasks,
 } from '@kungfu-trader/kungfu-js-api/actions';
 import {
+  dealCommissionMode,
   getProcessIdByKfLocation,
   initFormStateByConfig,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
@@ -312,7 +310,7 @@ function handleRemoveScheduleTask(index: number) {
                       :key="key"
                       :value="+key"
                     >
-                      {{ CommissionMode[+key as CommissionModeEnum].name }}
+                      {{ dealCommissionMode(+key).name }}
                     </a-select-option>
                   </a-select>
                 </div>

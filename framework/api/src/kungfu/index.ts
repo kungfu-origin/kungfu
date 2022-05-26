@@ -495,7 +495,7 @@ export const dealPosition = (
     uid_key: pos.uid_key,
     account_id_resolved: `${pos.source_id}_${pos.account_id}`,
     instrument_id_resolved: `${pos.instrument_id} ${
-      ExchangeIds[pos.exchange_id].name
+      ExchangeIds[pos.exchange_id]?.name ?? ''
     }`,
   };
 };

@@ -265,6 +265,13 @@ void bind(pybind11::module &&m) {
       .export_values()
       .def("__eq__", [](const BrokerState &a, int b) { return static_cast<int>(a) == b; });
 
+  py::enum_<StrategyState>(m_enums, "StrategyState", py::arithmetic())
+      .value("Normal", StrategyState::Normal)
+      .value("Warn", StrategyState::Warn)
+      .value("Error", StrategyState::Error)
+      .export_values()
+      .def("__eq__", [](const StrategyState &a, int b) { return static_cast<int>(a) == b; });
+
   auto m_types = m.def_submodule("types");
   auto m_state = m.def_submodule("state");
 

@@ -507,11 +507,13 @@ export const useInstruments = (): {
 
   searchInstrumentResult: Ref<string | undefined>;
   searchInstrumnetOptions: Ref<{ value: string; label: string }[]>;
-  initSearchInstrumnetOptions: (
+  updateSearchInstrumnetOptions: (
     type: 'instrument' | 'instruments',
     value: string | string[],
-  ) => void;
-  handleSearchInstrument: (value: string) => void;
+  ) => Promise<{ value: string; label: string }[]>;
+  handleSearchInstrument: (
+    value: string,
+  ) => Promise<{ value: string; label: string }[]>;
   handleConfirmSearchInstrumentResult: (
     value: string,
     callback?: (value: string) => void,
@@ -574,17 +576,20 @@ export const useInstruments = (): {
   const searchInstrumentResult = ref<string | undefined>(undefined);
   const searchInstrumnetOptions = ref<{ value: string; label: string }[]>([]);
 
-  const initSearchInstrumnetOptions = (
+  const updateSearchInstrumnetOptions = (
     type: 'instrument' | 'instruments',
     value: string | string[],
-  ) => {
+  ): Promise<{ value: string; label: string }[]> => {
     searchInstrumnetOptions.value = makeSearchOptionFormInstruments(
       type,
       value,
     );
+    return Promise.resolve(searchInstrumnetOptions.value);
   };
 
-  const handleSearchInstrument = (val: string): void => {
+  const handleSearchInstrument = (
+    val: string,
+  ): Promise<{ value: string; label: string }[]> => {
     searchInstrumnetOptions.value = instruments.value
       .filter((item) => {
         return !!val && item.id.includes(val);
@@ -594,6 +599,7 @@ export const useInstruments = (): {
         value: buildInstrumentSelectOptionValue(item),
         label: buildInstrumentSelectOptionLabel(item),
       }));
+    return Promise.resolve(searchInstrumnetOptions.value);
   };
 
   const handleConfirmSearchInstrumentResult = (
@@ -614,7 +620,7 @@ export const useInstruments = (): {
 
     searchInstrumentResult,
     searchInstrumnetOptions,
-    initSearchInstrumnetOptions,
+    updateSearchInstrumnetOptions,
     handleSearchInstrument,
     handleConfirmSearchInstrumentResult,
   };

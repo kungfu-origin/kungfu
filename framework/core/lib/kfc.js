@@ -9,7 +9,7 @@ const result = spawnSync(executable, process.argv.slice(2), {
   stdio: 'inherit',
   windowsHide: true,
   env: {
-    KF_CLI_DEV_PATH: path.resolve(getCliDir(), 'lib', 'dev', 'devCli.js'),
+    KF_CLI_DEV_PATH: path.resolve(getCliDir(), 'lib', 'dev', 'cli.dev.js'),
     KF_LOG_LEVEL: 'trace',
     ...process.env,
   },

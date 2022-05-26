@@ -131,6 +131,13 @@ public:
    */
   void req_deregister() override;
 
+  /**
+   * Update Strategy State
+   * @param state StrategyState
+   * @param infos vector<string>, info_a, info_b, info_c.
+   */
+  void update_strategy_state(longfist::types::StrategyStateUpdate &state_update) override;
+
 protected:
   yijinjing::practice::apprentice &app_;
   const rx::connectable_observable<event_ptr> &events_;

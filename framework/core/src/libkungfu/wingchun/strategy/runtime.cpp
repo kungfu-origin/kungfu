@@ -81,7 +81,7 @@ uint64_t RuntimeContext::insert_order(const std::string &instrument_id, const st
     return 0;
   }
   auto instrument_type = get_instrument_type(exchange_id, instrument_id);
-  if (instrument_type == InstrumentType::Unknown || instrument_type == InstrumentType::Repo) {
+  if (instrument_type == InstrumentType::Unknown) {
     SPDLOG_ERROR("unsupported instrument type {} of {}.{}", str_from_instrument_type(instrument_type), instrument_id,
                  exchange_id);
     return 0;
@@ -177,5 +177,12 @@ void RuntimeContext::req_history_trade(const std::string &account) {
   auto writer = app_.get_writer(account_location_uid);
   writer->mark(now(), RequestHistoryTrade::tag);
 }
+
 void RuntimeContext::req_deregister() { app_.request_deregister(); }
+
+void RuntimeContext::update_strategy_state(StrategyStateUpdate &state_update) {
+  auto writer = app_.get_writer(location::PUBLIC);
+  state_update.update_time = now();
+  writer->write(state_update.update_time, state_update);
+}
 } // namespace kungfu::wingchun::strategy
