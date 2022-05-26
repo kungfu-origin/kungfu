@@ -376,6 +376,7 @@ export const graceDeleteProcess = (
   processStatusData: Pm2ProcessStatusData,
 ): Promise<void> => {
   const processId = getProcessIdByKfLocation(kfLocation);
+  console.log(processId, '--');
   if (getIfProcessRunning(processStatusData, processId)) {
     if (watcher && !watcher.isReadyToInteract(kfLocation)) {
       return Promise.reject(new Error(`${processId} 还未准备就绪, 请稍后重试`));
@@ -383,7 +384,7 @@ export const graceDeleteProcess = (
 
     return deleteProcess(processId);
   } else {
-    return deleteProcess(processId);
+    return Promise.resolve();
   }
 };
 
