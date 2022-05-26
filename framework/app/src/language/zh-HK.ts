@@ -15,6 +15,7 @@ export default {
   operation_success: '操作成功',
   operation_failed: '操作失败',
   location_error: '当前 Location 错误',
+  watcher_error: 'Watcher 错误',
   instrument_error: '标的错误',
   prompt: '提示',
   warning: '警告',

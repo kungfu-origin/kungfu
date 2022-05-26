@@ -15,6 +15,7 @@ export default {
   operation_success: 'operation success',
   operation_failed: 'operation failed',
   location_error: 'current location error',
+  watcher_error: 'Watcher error',
   instrument_error: 'instrument error',
   prompt: 'prompt',
   warning: 'warning',
