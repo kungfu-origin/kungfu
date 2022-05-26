@@ -171,7 +171,7 @@ export const getKfGlobalSettingsValue = (): Record<
 export const setKfGlobalSettingsValue = (
   value: Record<string, Record<string, KungfuApi.KfConfigValue>>,
 ) => {
-  useGlobalStore().setGlobalSetting;
+  useGlobalStore().setGlobalSetting(value);
   return fse.writeJSONSync(KF_CONFIG_PATH, value);
 };
 

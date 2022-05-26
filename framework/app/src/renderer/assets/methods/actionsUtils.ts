@@ -78,7 +78,7 @@ const { t } = VueI18n.global;
 const { success, error } = messagePrompt();
 
 const soundPath = path.join(
-  `${path.join(KUNGFU_RESOURCES_DIR, 'music/Trade.mp3')}`,
+  `${path.join(KUNGFU_RESOURCES_DIR, 'music/ding.mp3')}`,
 );
 
 export const ensureRemoveLocation = (
@@ -1074,7 +1074,7 @@ export const useExtConfigsRelated = (): {
 
 export const playSound = (): void => {
   const { globalSetting } = storeToRefs(useGlobalStore());
-  if (globalSetting.value.trade.sound) {
+  if (globalSetting.value?.trade?.sound) {
     sound.play(soundPath);
   }
 };

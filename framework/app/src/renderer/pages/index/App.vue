@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { getCurrentInstance, onBeforeUnmount, onMounted } from 'vue';
+import { getCurrentInstance, onBeforeUnmount, onMounted, ref } from 'vue';
 import KfSystemPrepareModal from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfSystemPrepareModal.vue';
 import KfLayoutVue from '@kungfu-trader/kungfu-app/src/renderer/components/layout/KfLayout.vue';
 import KfSetByConfigModal from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfSetByConfigModal.vue';
@@ -26,10 +26,12 @@ import globalBus from '../../assets/methods/globalBus';
 import {
   dealAppStates,
   dealAssetsByHolderUID,
+  getTradingDataSortKey,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { bindIPCListener } from '@kungfu-trader/kungfu-app/src/renderer/ipcMsg/ipcListener';
 import { useTradingTask } from '@kungfu-trader/kungfu-app/src/components/modules/tradingTask/utils';
 import { setAllRiskSettingList } from '@kungfu-trader/kungfu-js-api/actions';
+import { getKfGlobalSettingsValue } from '@kungfu-trader/kungfu-js-api/config/globalSettings';
 
 const app = getCurrentInstance();
 const store = useGlobalStore();
@@ -47,6 +49,8 @@ useSubscibeInstrumentAtEntry();
 const { exportDateModalVisible, exportDataLoading, handleConfirmExportDate } =
   useDealExportHistoryTradingData();
 
+const latestTrade = ref<bigint>(0n);
+
 useIpcListener();
 
 const tradingDataSubscription = tradingDataSubject.subscribe(
@@ -55,12 +59,23 @@ const tradingDataSubscription = tradingDataSubject.subscribe(
     store.setAppStates(appStates);
     const assets = dealAssetsByHolderUID(watcher, watcher.ledger.Asset);
     store.setAssets(assets);
+
+    const sortKey = getTradingDataSortKey('Trade');
+    if (
+      watcher.ledger.Trade &&
+      watcher.ledger.Trade.sort(sortKey)[0] &&
+      latestTrade.value !== watcher.ledger.Trade.sort(sortKey)[0]?.trade_id
+    ) {
+      latestTrade.value = watcher.ledger.Trade.sort(sortKey)[0]?.trade_id || 0n;
+      playSound();
+    }
   },
 );
 
 store.setKfConfigList();
 store.setKfExtConfigs();
 store.setSubscribedInstruments();
+store.setGlobalSetting(getKfGlobalSettingsValue());
 
 const busSubscription = globalBus.subscribe((data: KfBusEvent) => {
   if (data.tag === 'main') {
@@ -79,8 +94,6 @@ const busSubscription = globalBus.subscribe((data: KfBusEvent) => {
           tag: 'export',
           tradingDataType: 'all',
         } as ExportTradingDataEvent);
-      case 'tradingSuccess':
-        playSound();
     }
   }
   if (data.tag === 'update:riskSetting') {

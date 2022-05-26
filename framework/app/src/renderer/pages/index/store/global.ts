@@ -172,9 +172,9 @@ export const useGlobalStore = defineStore('global', {
     },
 
     setGlobalSetting(
-      globalSetting: Record<string, Record<string, KungfuApi.KfConfigValue>>,
+      value: Record<string, Record<string, KungfuApi.KfConfigValue>>,
     ) {
-      this.globalSetting = globalSetting;
+      this.globalSetting = value;
     },
 
     setRiskSettingList() {

@@ -121,7 +121,6 @@ watch(
         riskSettingConfig.config,
         { riskSetting: newValue },
       );
-      console.log(riskSettingsFromStates.value);
     }
   },
   { immediate: true },

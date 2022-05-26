@@ -44,7 +44,6 @@ import {
 import { useExtraCategory } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiExtraLocationUtils';
 import TradeStatisticModal from './TradeStatisticModal.vue';
 import { HistoryDateEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';
-import globalBus from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/globalBus';
 
 const app = getCurrentInstance();
 const { handleBodySizeChange } = useDashboardBodySize();
@@ -81,12 +80,6 @@ const columns = computed(() => {
   return getColumns(category, !!historyDate.value);
 });
 
-const lastTradeId: {
-  value: bigint;
-} = {
-  value: 0n,
-};
-
 onMounted(() => {
   if (app?.proxy) {
     const subscription = app.proxy.$tradingDataSubject.subscribe(
@@ -121,16 +114,6 @@ onMounted(() => {
               toRaw(dealTrade(watcher, item, watcher.ledger.OrderStat)),
             ),
         );
-        if (
-          !trades.value.length ||
-          lastTradeId.value !== trades.value[0]?.trade_id
-        ) {
-          globalBus.next({
-            tag: 'main',
-            name: 'tradingSuccess',
-          });
-          lastTradeId.value = trades.value[0]?.trade_id;
-        }
       },
     );
 
@@ -180,6 +163,8 @@ watch(historyDate, async (newDate) => {
       toRaw(dealTrade(window.watcher, item, tradingData.OrderStat, true)),
     ),
   );
+  console.log(trades.value);
+
   historyDataLoading.value = false;
 });
 
