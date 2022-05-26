@@ -173,8 +173,6 @@ export const useGlobalStore = defineStore('global', {
     },
 
     setKfGlobalSetting() {
-      console.log(getKfGlobalSettingsValue());
-
       this.globalSetting = getKfGlobalSettingsValue();
     },
 
