@@ -147,7 +147,7 @@ public:
    * @param state StrategyState
    * @param infos vector<string>, info_a, info_b, info_c.
    */
-  virtual void update_strategy_state(const longfist::types::StrategyStateUpdate &state_update) {}
+  virtual void update_strategy_state(longfist::types::StrategyStateUpdate &state_update) {}
 
 private:
   bool book_held_ = false;
