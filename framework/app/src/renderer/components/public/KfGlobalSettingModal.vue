@@ -2,7 +2,6 @@
 import {
   getKfGlobalSettings,
   riskSettingConfig,
-  getKfGlobalSettingsValue,
   KfSystemConfig,
   setKfGlobalSettingsValue,
 } from '@kungfu-trader/kungfu-js-api/config/globalSettings';
@@ -75,13 +74,11 @@ defineEmits<{
 }>();
 
 const store = useGlobalStore();
-const { riskSettingList } = storeToRefs(store);
+const { riskSettingList, globalSetting } = storeToRefs(store);
 
 const kfGlobalSettings = getKfGlobalSettings();
-const kfGlobalSettingsValue = getKfGlobalSettingsValue();
-
 const globalSettingsFromStates = reactive(
-  initGlobalSettingsFromStates(kfGlobalSettings, kfGlobalSettingsValue),
+  initGlobalSettingsFromStates(kfGlobalSettings, globalSetting.value),
 );
 
 const riskSettingsFromStates = ref<Record<string, KungfuApi.KfConfigValue>>({});
@@ -163,7 +160,10 @@ onMounted(() => {
 });
 
 onUnmounted(() => {
-  setKfGlobalSettingsValue(globalSettingsFromStates);
+  setKfGlobalSettingsValue(globalSettingsFromStates).then(() => {
+    store.setKfGlobalSetting();
+  });
+
   setKfCommission(commissions.value);
   setScheduleTasks({
     active: scheduleTask.active || false,

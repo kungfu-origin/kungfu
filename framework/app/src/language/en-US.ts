@@ -219,9 +219,9 @@ export default {
     every_volume: 'Every Volume',
 
     fat_finger_buy_modal:
-      'The buying price exceeded the warning line, the current price is {price}, line for {warningLine}, fat finger is {fatFinger}',
+      'The buying price exceeded the warning line, the current price is {price}, line for {warningLine}, fat finger is {fatFinger}%',
     fat_finger_sell_modal:
-      'The selling price exceeded the warning line, the current price is {price}, line for {warningLine}, fat finger is {fatFinger}',
+      'The selling price exceeded the warning line, the current price is {price}, line for {warningLine}, fat finger is {fatFinger}%',
     start_process: 'please start {process} first',
     place_confirm: 'Place Order Confirm',
     close_all: 'Close All?',

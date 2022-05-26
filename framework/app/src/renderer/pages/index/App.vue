@@ -9,10 +9,10 @@ import {
   markClearJournal,
   removeLoadingMask,
   useIpcListener,
+  playSound,
   handleOpenLogviewByFile,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import {
-  playSound,
   useDealExportHistoryTradingData,
   useDealInstruments,
   usePreStartAndQuitApp,
@@ -31,7 +31,6 @@ import {
 import { bindIPCListener } from '@kungfu-trader/kungfu-app/src/renderer/ipcMsg/ipcListener';
 import { useTradingTask } from '@kungfu-trader/kungfu-app/src/components/modules/tradingTask/utils';
 import { setAllRiskSettingList } from '@kungfu-trader/kungfu-js-api/actions';
-import { getKfGlobalSettingsValue } from '@kungfu-trader/kungfu-js-api/config/globalSettings';
 
 const app = getCurrentInstance();
 const store = useGlobalStore();
@@ -61,12 +60,9 @@ const tradingDataSubscription = tradingDataSubject.subscribe(
     store.setAssets(assets);
 
     const sortKey = getTradingDataSortKey('Trade');
-    if (
-      watcher.ledger.Trade &&
-      watcher.ledger.Trade.sort(sortKey)[0] &&
-      latestTrade.value !== watcher.ledger.Trade.sort(sortKey)[0]?.trade_id
-    ) {
-      latestTrade.value = watcher.ledger.Trade.sort(sortKey)[0]?.trade_id || 0n;
+    const trades = watcher.ledger.Trade.sort(sortKey);
+    if (trades.length && latestTrade.value !== trades[0]?.trade_id) {
+      latestTrade.value = trades[0]?.trade_id || 0n;
       playSound();
     }
   },
@@ -75,7 +71,8 @@ const tradingDataSubscription = tradingDataSubject.subscribe(
 store.setKfConfigList();
 store.setKfExtConfigs();
 store.setSubscribedInstruments();
-store.setGlobalSetting(getKfGlobalSettingsValue());
+store.setRiskSettingList();
+store.setKfGlobalSetting();
 
 const busSubscription = globalBus.subscribe((data: KfBusEvent) => {
   if (data.tag === 'main') {
@@ -113,8 +110,6 @@ const {
 onMounted(() => {
   bindIPCListener(store);
   removeLoadingMask();
-
-  store.setRiskSettingList();
 
   window.addEventListener('resize', () => {
     app?.proxy &&

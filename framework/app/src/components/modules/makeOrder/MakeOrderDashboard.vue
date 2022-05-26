@@ -33,7 +33,6 @@ import {
   OffsetEnum,
   SideEnum,
 } from '@kungfu-trader/kungfu-js-api/typings/enums';
-import { getKfGlobalSettingsValue } from '@kungfu-trader/kungfu-js-api/config/globalSettings';
 import {
   useCurrentGlobalKfLocation,
   useExtConfigsRelated,
@@ -59,8 +58,12 @@ const { t } = VueI18n.global;
 const { error } = messagePrompt();
 
 const app = getCurrentInstance();
-const { instrumentKeyAccountsMap, whiteListedAccounts, uiExtConfigs } =
-  storeToRefs(useGlobalStore());
+const {
+  instrumentKeyAccountsMap,
+  whiteListedAccounts,
+  uiExtConfigs,
+  globalSetting,
+} = storeToRefs(useGlobalStore());
 
 const { handleBodySizeChange } = useDashboardBodySize();
 const formState = ref(
@@ -399,7 +402,7 @@ function dealFatFingerMessage(
     return '';
   }
 
-  const fatFingerRange = +getKfGlobalSettingsValue()?.trade?.fatFinger || 0;
+  const fatFingerRange = +globalSetting.value?.trade?.fatFinger || 0;
 
   const { exchangeId, instrumentId } = instrumentResolved.value;
   const ukey = hashInstrumentUKey(instrumentId, exchangeId);
@@ -492,17 +495,13 @@ function showCloseModal(
   if (!currentPosition.value) return Promise.resolve();
 
   updatePositionList();
-  const closeRange = +getKfGlobalSettingsValue()?.trade?.close || 100;
-
-  if (!currentPosition.value.volume) {
-    return Promise.resolve();
-  }
+  const closeRange = +globalSetting.value?.trade?.close || 100;
 
   if (
     closeModalConditions(
       closeRange,
       makeOrderInput,
-      Number(currentPosition.value.volume),
+      Number(currentPosition.value?.volume || 0),
     )
   ) {
     return confirmModal(t('prompt'), t('tradingConfig.close_all'));

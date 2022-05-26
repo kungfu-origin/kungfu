@@ -24,6 +24,7 @@ import {
   KfCategoryTypes,
 } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import globalBus from '../../../assets/methods/globalBus';
+import { getKfGlobalSettingsValue } from '@kungfu-trader/kungfu-js-api/config/globalSettings';
 
 interface GlobalState {
   boardsMap: KfLayout.BoardsMap;
@@ -171,10 +172,8 @@ export const useGlobalStore = defineStore('global', {
       });
     },
 
-    setGlobalSetting(
-      value: Record<string, Record<string, KungfuApi.KfConfigValue>>,
-    ) {
-      this.globalSetting = value;
+    setKfGlobalSetting() {
+      this.globalSetting = getKfGlobalSettingsValue();
     },
 
     setRiskSettingList() {

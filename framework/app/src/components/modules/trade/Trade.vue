@@ -163,8 +163,6 @@ watch(historyDate, async (newDate) => {
       toRaw(dealTrade(window.watcher, item, tradingData.OrderStat, true)),
     ),
   );
-  console.log(trades.value);
-
   historyDataLoading.value = false;
 });
 
