@@ -575,8 +575,10 @@ KF_DEFINE_PACK_TYPE(                                        //
     (int64_t, volume),             //成交量
     (int64_t, close_today_volume), //平今日仓量(期货)
 
-    (double, tax),       //税
-    (double, commission) //手续费
+    (double, tax),                                  //税
+    (double, commission),                           //手续费
+    (int32_t, error_id),                            //错误ID
+    (kungfu::array<char, ERROR_MSG_LEN>, error_msg) //错误信息
 );
 
 KF_DEFINE_PACK_TYPE(                                                                   //

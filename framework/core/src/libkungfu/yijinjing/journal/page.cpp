@@ -46,6 +46,8 @@ page_ptr page::load(const data::location_ptr &location, uint32_t dest_id, uint32
 
   auto header = reinterpret_cast<page_header *>(address);
 
+  SPDLOG_INFO("path {}, page_size {}, address {}", path, page_size, address);
+
   if (header->last_frame_position == 0) {
     header->version = __JOURNAL_VERSION__;
     header->page_header_length = sizeof(page_header);

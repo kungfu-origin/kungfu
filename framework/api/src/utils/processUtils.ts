@@ -383,7 +383,7 @@ export const graceDeleteProcess = (
 
     return deleteProcess(processId);
   } else {
-    return deleteProcess(processId);
+    return Promise.resolve();
   }
 };
 

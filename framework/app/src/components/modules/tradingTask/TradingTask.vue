@@ -1,6 +1,5 @@
 <script lang="ts" setup>
 import {
-  confirmModal,
   handleOpenLogview,
   useDashboardBodySize,
   useTableSearchKeyword,
@@ -32,11 +31,11 @@ import {
   startTask,
 } from '@kungfu-trader/kungfu-js-api/utils/processUtils';
 import {
+  useAddUpdateRemoveKfConfig,
   useCurrentGlobalKfLocation,
   useExtConfigsRelated,
   useProcessStatusDetailData,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
-import { ensureRemoveTradingTask } from '@kungfu-trader/kungfu-js-api/actions/tradingTask';
 import { messagePrompt } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import VueI18n from '@kungfu-trader/kungfu-app/src/language';
 import { useTradingTask } from './utils';
@@ -49,6 +48,7 @@ const { processStatusData, processStatusDetailData } =
   useProcessStatusDetailData();
 
 const { handleOpenSetTradingTaskModal } = useTradingTask();
+const { handleRemoveKfConfig } = useAddUpdateRemoveKfConfig();
 
 const setExtensionModalVisible = ref<boolean>(false);
 
@@ -158,18 +158,17 @@ function handleRemoveTask(record: Pm2ProcessStatusDetail) {
     return;
   }
 
-  confirmModal(
-    `${t('tradingTaskConfig.delete_task')} ${record.name}`,
-    `${t('tradingTaskConfig.delete_task')} ${record.name}, ${t(
-      'tradingTaskConfig.delete_task_content',
-    )}`,
-  ).then(() => {
-    return ensureRemoveTradingTask(
-      window.watcher,
-      taskLocation,
-      processStatusData.value,
-    );
-  });
+  return handleRemoveKfConfig(
+    window.watcher,
+    taskLocation,
+    processStatusData.value,
+  )
+    .then(() => {
+      success();
+    })
+    .catch((err) => {
+      error(err.message || t('operation_failed'));
+    });
 }
 
 function customRowResolved(record: Pm2ProcessStatusDetail) {

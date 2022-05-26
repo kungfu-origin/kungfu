@@ -1,6 +1,6 @@
 import os from 'os';
 import { dialog, shell } from '@electron/remote';
-import { deleteAllByKfLocation } from '@kungfu-trader/kungfu-js-api/actions';
+import { ensureRemoveLocation } from '@kungfu-trader/kungfu-js-api/actions';
 import {
   dealTradingDataItem,
   getKungfuHistoryData,
@@ -81,39 +81,6 @@ const soundPath = path.join(
   `${path.join(KUNGFU_RESOURCES_DIR, 'music/ding.mp3')}`,
 );
 
-export const ensureRemoveLocation = (
-  kfLocation: KungfuApi.KfLocation | KungfuApi.KfConfig,
-): Promise<void> => {
-  const categoryName = getKfCategoryData(kfLocation.category).name;
-  const id = getIdByKfLocation(kfLocation);
-  return new Promise((resolve, reject) => {
-    Modal.confirm({
-      title: `${t('delete')}${categoryName} ${id}`,
-      content: t('delete_category', {
-        category: `${categoryName} ${id}`,
-        categoryName: categoryName,
-      }),
-      okText: t('confirm'),
-      cancelText: t('cancel'),
-      onOk() {
-        return deleteAllByKfLocation(kfLocation)
-          .then(() => {
-            success();
-          })
-          .then(() => {
-            resolve();
-          })
-          .catch((err) => {
-            error(err.message || t('operation_failed'));
-          });
-      },
-      onCancel() {
-        reject(new Error('Ensure remove location cancel'));
-      },
-    });
-  });
-};
-
 export const handleSwitchProcessStatus = (
   checked: boolean,
   mouseEvent: MouseEvent,
@@ -185,7 +152,9 @@ export const useSwitchAllConfig = (
 
 export const useAddUpdateRemoveKfConfig = (): {
   handleRemoveKfConfig: (
+    watcher: KungfuApi.Watcher,
     kfConfig: KungfuApi.KfConfig | KungfuApi.KfLocation,
+    processStatusData: Pm2ProcessStatusData,
   ) => Promise<void>;
   handleConfirmAddUpdateKfConfig: (
     data: {
@@ -199,10 +168,34 @@ export const useAddUpdateRemoveKfConfig = (): {
   ) => Promise<void>;
 } => {
   const handleRemoveKfConfig = (
+    watcher: KungfuApi.Watcher,
     kfConfig: KungfuApi.KfConfig | KungfuApi.KfLocation,
+    processStatusData: Pm2ProcessStatusData,
   ): Promise<void> => {
-    return ensureRemoveLocation(kfConfig).then(() => {
-      useGlobalStore().setKfConfigList();
+    const categoryName = getKfCategoryData(kfConfig.category).name;
+    const id = getIdByKfLocation(kfConfig);
+    return new Promise((resolve, reject) => {
+      Modal.confirm({
+        title: `${t('delete')}${categoryName} ${id}`,
+        content: t('delete_category', {
+          category: `${categoryName} ${id}`,
+          categoryName: categoryName,
+        }),
+        okText: t('confirm'),
+        cancelText: t('cancel'),
+        onOk() {
+          return ensureRemoveLocation(watcher, kfConfig, processStatusData)
+            .then(() => {
+              return useGlobalStore().setKfConfigList();
+            })
+            .then(() => {
+              resolve();
+            })
+            .catch((err) => {
+              reject(err);
+            });
+        },
+      });
     });
   };
 
@@ -465,7 +458,7 @@ export const useDealExportHistoryTradingData = (): {
 export const showTradingDataDetail = (
   item: KungfuApi.TradingDataTypes,
   typename: string,
-): void => {
+): Promise<void> => {
   const dataResolved = dealTradingDataItem(item, window.watcher);
   const vnode = Object.keys(dataResolved || {})
     .filter((key) => {
@@ -480,7 +473,8 @@ export const showTradingDataDetail = (
         h('span', { class: 'value' }, `${dataResolved[key]}`),
       ]),
     );
-  confirmModal(
+
+  return confirmModal(
     `${typename} ${t('detail')}`,
     h(
       'div',
