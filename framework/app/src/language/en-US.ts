@@ -529,4 +529,9 @@ export default {
     'Exiting the application ends all transactions, Confirm to exit?',
   restart_process:
     'Kungfu graphics process is interrupted. The interruption will not affect transactions. Do you want to restart the graphics process?',
+
+  未就绪: '{processId} not ready, please try again later',
+  系统外: 'Out-of-system',
+  手动: 'manual',
+  任务: 'task',
 };
