@@ -6,11 +6,10 @@
 #define WINGCHUN_CONTEXT_H
 
 #include <kungfu/longfist/longfist.h>
-#include <kungfu/yijinjing/practice/apprentice.h>
-
 #include <kungfu/wingchun/book/bookkeeper.h>
 #include <kungfu/wingchun/broker/client.h>
 #include <kungfu/wingchun/strategy/strategy.h>
+#include <kungfu/yijinjing/practice/apprentice.h>
 
 namespace kungfu::wingchun::strategy {
 class Context : public std::enable_shared_from_this<Context> {
@@ -80,14 +79,33 @@ public:
                                 longfist::enums::Offset offset, longfist::enums::HedgeFlag hedge_flag) = 0;
 
   /**
+   *
+   * @param instrument_id instrument ID
+   * @param exchange_id exchange ID
+   * @param source source ID
+   * @param account account ID
+   * @param limit_price limit price
+   * @param volume trade volume
+   * @param type price type
+   * @param side side
+   * @param offset offset, defaults to longfist::enums::Offset::Open
+   * @param hedge_flag hedge_flag, defaults to longfist::enums::HedgeFlag::Speculation
+   * @return
+   */
+  virtual uint64_t make_order(const std::string &instrument_id, const std::string &exchange_id,
+                              const std::string &source, const std::string &account, double limit_price, int64_t volume,
+                              longfist::enums::PriceType type, longfist::enums::Side side,
+                              longfist::enums::Offset offset, longfist::enums::HedgeFlag hedge_flag) = 0;
+
+  /**
    * query history order
    */
-  virtual void req_history_order(const std::string &account) = 0;
+  virtual void req_history_order(const std::string &source, const std::string &account) = 0;
 
   /**
    * query history trade
    */
-  virtual void req_history_trade(const std::string &account) = 0;
+  virtual void req_history_trade(const std::string &source, const std::string &account) = 0;
 
   /**
    * Cancel order.
