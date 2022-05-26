@@ -247,16 +247,7 @@ function whiteListInterceptor(
   accountId: string,
   instrument: string,
 ): Promise<void> {
-  console.log(accountId);
-  console.log(
-    (instrumentKeyAccountsMap.value[instrument] || []).includes(accountId),
-  );
   if (whiteListedAccounts.value.includes(accountId)) {
-    console.log(accountId);
-    console.log(
-      (instrumentKeyAccountsMap.value[instrument] || []).includes(accountId),
-    );
-
     if (
       !(instrumentKeyAccountsMap.value[instrument] || []).includes(accountId)
     ) {
