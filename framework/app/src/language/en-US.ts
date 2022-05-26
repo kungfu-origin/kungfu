@@ -466,6 +466,18 @@ export default {
     restart: 'restart',
   },
 
+  风控: 'Risk Setting',
+  风控描述:
+    'Enable risk setting to automatically close positions when positions exceed thresholds',
+  账户: 'Account',
+  柜台: 'Exchange',
+  单比最大量: 'Maximum single ratio',
+  每日最大成交量: 'Maximum daily turnover',
+  是否需要自成功检测: 'Whether automatic success detection is required',
+  最大回撤率: 'Maximum withdrawal rate',
+  标的白名单: 'white list',
+  白名单设置警告: 'Please set the whitelist for this account first',
+
   validate: {
     no_special_characters: 'Cannot contain special characters',
     no_underscore: 'Cannot contain underscores',

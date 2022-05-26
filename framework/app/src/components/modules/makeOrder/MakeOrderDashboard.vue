@@ -58,12 +58,10 @@ const { t } = VueI18n.global;
 const { error } = messagePrompt();
 
 const app = getCurrentInstance();
-const {
-  instrumentKeyAccountsMap,
-  whiteListedAccounts,
-  uiExtConfigs,
-  globalSetting,
-} = storeToRefs(useGlobalStore());
+const { instrumentKeyAccountsMap, whiteListedAccounts, uiExtConfigs } =
+  storeToRefs(useGlobalStore());
+
+const store = useGlobalStore();
 
 const { handleBodySizeChange } = useDashboardBodySize();
 const formState = ref(
@@ -402,7 +400,7 @@ function dealFatFingerMessage(
     return '';
   }
 
-  const fatFingerRange = +globalSetting.value?.trade?.fatFinger || 0;
+  const fatFingerRange = +store.globalSetting.value?.trade?.fatFinger || 0;
 
   const { exchangeId, instrumentId } = instrumentResolved.value;
   const ukey = hashInstrumentUKey(instrumentId, exchangeId);
@@ -495,7 +493,7 @@ function showCloseModal(
   if (!currentPosition.value) return Promise.resolve();
 
   updatePositionList();
-  const closeRange = +globalSetting.value?.trade?.close || 100;
+  const closeRange = +store.globalSetting.value?.trade?.close || 100;
 
   if (
     closeModalConditions(
