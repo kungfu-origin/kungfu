@@ -9,6 +9,7 @@ import {
 } from 'vue';
 import {
   KF_HOME,
+  KUNGFU_RESOURCES_DIR,
   LOG_DIR,
 } from '@kungfu-trader/kungfu-js-api/config/pathConfig';
 import {
@@ -39,6 +40,13 @@ import { VueNode } from 'ant-design-vue/lib/_util/type';
 import VueI18n from '@kungfu-trader/kungfu-app/src/language';
 const { t } = VueI18n.global;
 import fse from 'fs-extra';
+import { storeToRefs } from 'pinia';
+import { useGlobalStore } from '../../pages/index/store/global';
+import sound from 'sound-play';
+
+const soundPath = path.join(
+  `${path.join(KUNGFU_RESOURCES_DIR, 'music/ding.mp3')}`,
+);
 
 // this utils file is only for ui components
 export const getUIComponents = (
@@ -577,4 +585,11 @@ export const confirmModal = (
       },
     });
   });
+};
+
+export const playSound = (): void => {
+  const { globalSetting } = storeToRefs(useGlobalStore());
+  if (globalSetting.value?.trade?.sound) {
+    sound.play(soundPath);
+  }
 };

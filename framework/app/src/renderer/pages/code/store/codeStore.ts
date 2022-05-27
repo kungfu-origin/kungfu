@@ -12,7 +12,7 @@ interface ICodeState {
   currentFile: Code.FileData;
   entryFile: Code.FileData;
   fileTree: Code.IFileTree;
-  globallSetting: Record<string, Record<string, KungfuApi.KfConfigValue>>;
+  globalSetting: Record<string, Record<string, KungfuApi.KfConfigValue>>;
 }
 
 export const useCodeStore = defineStore('code', {
@@ -27,7 +27,7 @@ export const useCodeStore = defineStore('code', {
       currentFile: {} as Code.FileData, //文件树高亮
       entryFile: {} as Code.FileData, //入口文件
       fileTree: {}, //文件树
-      globallSetting: {}, // kf 配置
+      globalSetting: {}, // kf 配置
     };
   },
   actions: {
@@ -122,24 +122,24 @@ export const useCodeStore = defineStore('code', {
     },
 
     async getKungfuConfig(): Promise<void> {
-      const globallSetting = getKfGlobalSettingsValue();
+      const globalSetting = getKfGlobalSettingsValue();
 
-      await this.setKungfuConfig(globallSetting);
+      await this.setKungfuConfig(globalSetting);
     },
 
     async setGlobalSetting(
-      globallSetting: Record<string, Record<string, KungfuApi.KfConfigValue>>,
+      globalSetting: Record<string, Record<string, KungfuApi.KfConfigValue>>,
     ): Promise<void> {
-      await this.setKungfuConfig(globallSetting);
-      setKfGlobalSettingsValue(this.globallSetting);
+      await this.setKungfuConfig(globalSetting);
+      setKfGlobalSettingsValue(this.globalSetting);
       await this.getKungfuConfig();
     },
 
     setKungfuConfig(
-      globallSetting: Record<string, Record<string, KungfuApi.KfConfigValue>>,
+      globalSetting: Record<string, Record<string, KungfuApi.KfConfigValue>>,
     ): void {
-      Object.keys(globallSetting || {}).forEach((key) => {
-        this.globallSetting[key] = globallSetting[key];
+      Object.keys(globalSetting || {}).forEach((key) => {
+        this.globalSetting[key] = globalSetting[key];
       });
     },
   },

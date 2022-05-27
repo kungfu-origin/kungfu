@@ -170,7 +170,7 @@ export const getKfGlobalSettingsValue = (): Record<
 export const setKfGlobalSettingsValue = (
   value: Record<string, Record<string, KungfuApi.KfConfigValue>>,
 ) => {
-  return fse.writeJSONSync(KF_CONFIG_PATH, value);
+  return Promise.resolve(fse.writeJSONSync(KF_CONFIG_PATH, value));
 };
 
 export const riskSettingConfig: KfSystemConfig = {
