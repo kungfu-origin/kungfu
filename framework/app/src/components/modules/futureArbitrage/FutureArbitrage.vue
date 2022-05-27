@@ -20,7 +20,7 @@ import {
   messagePrompt,
   useDashboardBodySize,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
-import VueI18n from '@kungfu-trader/kungfu-app/src/language';
+import VueI18n from '@kungfu-trader/kungfu-js-api/language';
 
 const { t } = VueI18n.global;
 const { error } = messagePrompt();

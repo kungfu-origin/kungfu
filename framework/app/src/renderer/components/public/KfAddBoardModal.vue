@@ -3,7 +3,7 @@ import { storeToRefs } from 'pinia';
 import { computed, getCurrentInstance, onMounted, ref } from 'vue';
 import { messagePrompt, useModalVisible } from '../../assets/methods/uiUtils';
 import { useGlobalStore } from '../../pages/index/store/global';
-import VueI18n from '@kungfu-trader/kungfu-app/src/language';
+import VueI18n from '@kungfu-trader/kungfu-js-api/language';
 const { t } = VueI18n.global;
 
 const { success, error } = messagePrompt();

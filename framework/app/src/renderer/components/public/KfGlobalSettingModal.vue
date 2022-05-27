@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import {
   getKfGlobalSettings,
-  riskSettingConfig,
   KfSystemConfig,
   setKfGlobalSettingsValue,
 } from '@kungfu-trader/kungfu-js-api/config/globalSettings';
@@ -17,7 +16,6 @@ import {
   reactive,
   ref,
   toRefs,
-  watch,
 } from 'vue';
 import KfConfigSettingsForm from './KfConfigSettingsForm.vue';
 import {
@@ -48,7 +46,10 @@ import {
   modeForScheduleTasksOptions,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/configs';
 import { ipcRenderer } from 'electron';
-import { useAllKfConfigData } from '../../assets/methods/actionsUtils';
+import {
+  useAllKfConfigData,
+  useExtConfigsRelated,
+} from '../../assets/methods/actionsUtils';
 import globalBus from '../../assets/methods/globalBus';
 import { useGlobalStore } from '../../pages/index/store/global';
 import { storeToRefs } from 'pinia';
@@ -74,14 +75,24 @@ defineEmits<{
 }>();
 
 const store = useGlobalStore();
-const { riskSettingList, globalSetting } = storeToRefs(store);
+const { globalSetting } = storeToRefs(store);
+const { uiExtConfigs } = useExtConfigsRelated();
+
+const globalSettingComponentConfigs = computed(() => {
+  return Object.keys(uiExtConfigs.value)
+    .filter((key) => uiExtConfigs.value[key].position === 'global_setting')
+    .map((key) => {
+      return {
+        ...uiExtConfigs.value[key],
+        key,
+      };
+    });
+});
 
 const kfGlobalSettings = getKfGlobalSettings();
 const globalSettingsFromStates = reactive(
   initGlobalSettingsFromStates(kfGlobalSettings, globalSetting.value),
 );
-
-const riskSettingsFromStates = ref<Record<string, KungfuApi.KfConfigValue>>({});
 
 const { modalVisible, closeModal } = useModalVisible(props.visible);
 const commissions = ref<KungfuApi.Commission[]>([]);
@@ -105,25 +116,11 @@ const scheduleTask = reactive<{
   tasks?: ScheduleTaskFormItem[];
 }>({});
 
-globalBus.next({
-  tag: 'open:globalSetting',
-  riskSettingList: '',
-});
-
-watch(
-  riskSettingList,
-  (newValue) => {
-    if (newValue) {
-      riskSettingsFromStates.value = initFormStateByConfig(
-        riskSettingConfig.config,
-        { riskSetting: newValue },
-      );
-    }
-  },
-  { immediate: true },
-);
-
 onMounted(() => {
+  globalBus.next({
+    tag: 'open:globalSetting',
+  });
+
   getKfCommission().then((res) => {
     commissions.value = res;
   });
@@ -160,6 +157,10 @@ onMounted(() => {
 });
 
 onUnmounted(() => {
+  globalBus.next({
+    tag: 'close:globalSetting',
+  });
+
   setKfGlobalSettingsValue(globalSettingsFromStates).then(() => {
     store.setKfGlobalSetting();
   });
@@ -259,16 +260,6 @@ function handleRemoveScheduleTask(index: number) {
               <KfConfigSettingsForm
                 v-model:formState="globalSettingsFromStates[config.key]"
                 :configSettings="config.config"
-                changeType="update"
-                :primaryKeyAvoidRepeatCompareTarget="[]"
-                primaryKeyAvoidRepeatCompareExtra=""
-                layout="vertical"
-              ></KfConfigSettingsForm>
-            </a-tab-pane>
-            <a-tab-pane key="riskSetting" tab="风控">
-              <KfConfigSettingsForm
-                v-model:formState="riskSettingsFromStates"
-                :configSettings="riskSettingConfig.config"
                 changeType="update"
                 :primaryKeyAvoidRepeatCompareTarget="[]"
                 primaryKeyAvoidRepeatCompareExtra=""
@@ -475,6 +466,13 @@ function handleRemoveScheduleTask(index: number) {
                   </a-row>
                 </div>
               </div>
+            </a-tab-pane>
+            <a-tab-pane
+              v-for="config in globalSettingComponentConfigs"
+              :key="config.key"
+              :tab="config.name"
+            >
+              <component :is="config.key"></component>
             </a-tab-pane>
           </a-tabs>
         </div>

@@ -45,7 +45,7 @@ interface GlobalState {
   instruments: KungfuApi.InstrumentResolved[];
   subscribedInstruments: KungfuApi.InstrumentResolved[];
 
-  riskSettingList: KungfuApi.RiskSetting[];
+  riskSettings: KungfuApi.RiskSetting[];
 
   globalSetting: Record<string, Record<string, KungfuApi.KfConfigValue>>;
 
@@ -78,7 +78,7 @@ export const useGlobalStore = defineStore('global', {
       instruments: [],
       subscribedInstruments: [],
 
-      riskSettingList: [],
+      riskSettings: [],
 
       globalSetting: {},
 
@@ -178,7 +178,7 @@ export const useGlobalStore = defineStore('global', {
 
     setRiskSettingList() {
       return getAllRiskSettingList().then((res) => {
-        this.riskSettingList = res;
+        this.riskSettings = res;
       });
     },
 
@@ -454,7 +454,7 @@ export const useGlobalStore = defineStore('global', {
   getters: {
     instrumentKeyAccountsMap(): Record<string, string[]> {
       const instrumentKeyAccountsMap: Record<string, string[]> = {};
-      this.riskSettingList.forEach((riskListItem: KungfuApi.RiskSetting) => {
+      this.riskSettings.forEach((riskListItem: KungfuApi.RiskSetting) => {
         if (riskListItem.white_list && riskListItem.white_list.length) {
           riskListItem.white_list.forEach((instrument) => {
             if (
@@ -471,7 +471,7 @@ export const useGlobalStore = defineStore('global', {
     },
 
     whiteListedAccounts(): string[] {
-      return this.riskSettingList.reduce((prev, cur) => {
+      return this.riskSettings.reduce((prev, cur) => {
         if (cur.white_list && cur.white_list.length) {
           prev.push(cur.account_id);
         }

@@ -5,8 +5,8 @@ import { CodeSizeSetting, CodeTabSetting } from './tradingConfig';
 import {
   languageList,
   langDefault,
-} from '@kungfu-trader/kungfu-app/src/language/index';
-import VueI18n from '@kungfu-trader/kungfu-app/src/language';
+} from '@kungfu-trader/kungfu-js-api/language';
+import VueI18n from '@kungfu-trader/kungfu-js-api/language';
 const { t } = VueI18n.global;
 
 export interface KfSystemConfig {

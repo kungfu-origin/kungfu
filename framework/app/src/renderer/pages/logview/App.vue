@@ -22,7 +22,7 @@ import {
   useLogInit,
   useLogSearch,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/logUtils';
-import VueI18n from '@kungfu-trader/kungfu-app/src/language';
+import VueI18n from '@kungfu-trader/kungfu-js-api/language';
 
 const { t } = VueI18n.global;
 const { success, error } = messagePrompt();
