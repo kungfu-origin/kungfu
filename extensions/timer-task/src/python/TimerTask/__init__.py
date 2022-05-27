@@ -1,6 +1,7 @@
 import kungfu
 from kungfu.wingchun.constants import *
 import math 
+import threading
 import time
 import json
 from datetime import datetime
@@ -28,7 +29,7 @@ def pre_start(context):
     context.orders = {} 
     context.has_quote = False
     context.MIN_VOL = int(0)
-    context.log.info("arguments {}".format(context.arguments))
+    context.log.info("参数 {}".format(context.arguments))
     args = json.loads(context.arguments)
     sourceAccountList = args["accountId"].split('_')
     md = args["marketSource"]
@@ -97,9 +98,9 @@ def on_order(context, order):
         if (not context.orders) and context.steps_to_fill > 1 and context.cancel_and_place_new_order:
             context.cancel_and_place_new_order = False
             orders_to_insert = make_plan(context, False)
-            context.log.info("------------orders_to_insert---------------- total {} orders".format(len(orders_to_insert)))
+            context.log.info("------------准备下单---------------- 共计 {} 订单".format(len(orders_to_insert)))
             for item in orders_to_insert:
-                context.log.info("now {} insert_order_task orders_to_insert {}".format(context.now(), item.__dict__))
+                context.log.info("时间戳 {} 订单 {}".format(context.now(), item.__dict__))
             make_order(context, orders_to_insert)
     elif (order.status == OrderStatus.Error) :
         del context.orders[order.order_id] 
@@ -113,7 +114,15 @@ def on_trade(context, trade):
 def print_datatime(context, info, nano) :
     date_time_for_nano = datetime.fromtimestamp(nano / (10**9))
     time_str = date_time_for_nano.strftime("%Y-%m-%d %H:%M:%S.%f")
-    context.log.info("{} nano {} datetime {}".format(info, nano, time_str))
+    context.log.info("{} 时间戳 {} 时间 {}".format(info, nano, time_str))
+
+def add_job(context, nano_ts, func, args):
+    now = context.now()
+    if nano_ts > now:
+        interval = (nano_ts - now) / (10**9)
+        job = threading.Timer(interval, func, args)
+        job.start()
+        return job
 
 def on_quote(context, quote):
     context.bid_price = quote.bid_price[0]
@@ -121,6 +130,7 @@ def on_quote(context, quote):
     context.realtime_quote = quote
     context.UPPER_LIMIT_PRICE = quote.upper_limit_price
     context.LOWER_LIMIT_PRICE = quote.lower_limit_price
+    context.log.info("on_quote up {} low {} ".format( context.UPPER_LIMIT_PRICE, context.LOWER_LIMIT_PRICE))
     if context.MIN_VOL == 0 :
         context.log.info("instrument_id {} bid {} ask {} up {} down {}".format(quote.instrument_id, str(quote.bid_price)[1:-1], str(quote.ask_price)[1:-1], quote.upper_limit_price, quote.lower_limit_price))
         context.MIN_VOL = type_to_minvol(quote.instrument_type)
@@ -148,45 +158,45 @@ def on_quote(context, quote):
                 last_order_time = int(context.START_TIME_IN_NANO + interval * i - context.LASTSINGULARITYNANOSECOND) if context.LASTSINGULARITY == 'true' else int(context.START_TIME_IN_NANO + interval * i)
                 last_order_cancel_time = int(context.START_TIME_IN_NANO + interval * i - (interval + context.LASTSINGULARITYNANOSECOND) / 2) if context.LASTSINGULARITY == 'true' else int(context.START_TIME_IN_NANO + interval * i - interval / 2)
                 if ctx_now < last_order_cancel_time :
-                    context.add_timer(last_order_cancel_time, lambda ctx, event: cancel_all_orders(ctx))
-                    context.add_timer(last_order_time, lambda ctx, event: insert_order_task(ctx, True))
-                    print_datatime(context, "add_timer for cancel_all_orders at last step", last_order_cancel_time) 
-                    print_datatime(context, "add_timer for insert_order_task at last step", last_order_time)
+                    add_job(context, last_order_cancel_time, cancel_all_orders, [context])
+                    add_job(context, last_order_time, insert_order_task, [context, True])
+                    print_datatime(context, "最后一步取消所有订单时间", last_order_cancel_time) 
+                    print_datatime(context, "最后一步下单时间", last_order_time)
                 elif ctx_now >= last_order_cancel_time and ctx_now < last_order_time:
                     last_order_cancel_time = int(ctx_now + (last_order_cancel_time - ctx_now) / 10)
-                    context.add_timer(last_order_cancel_time, lambda ctx, event: cancel_all_orders(ctx))
-                    context.add_timer(last_order_time, lambda ctx, event: insert_order_task(ctx, True))
-                    print_datatime(context, "add_timer for cancel_all_orders at last step", last_order_cancel_time) 
-                    print_datatime(context, "add_timer for insert_order_task at last step", last_order_time)
+                    add_job(context, last_order_cancel_time, cancel_all_orders, [context])
+                    add_job(context, last_order_time, insert_order_task, [context, True])
+                    print_datatime(context, "最后一步取消所有订单时间", last_order_cancel_time) 
+                    print_datatime(context, "最后一步下单时间", last_order_time)
                 else:
                     context.steps_to_fill -= 1
-                    context.log.info("last step overdue, exit task...")
+                    context.log.info("最后一步时间超时,退出任务...")
                     context.req_deregister()
             else:
                 step_time = int(context.START_TIME_IN_NANO + interval * i)
                 if context.now() < step_time :
-                    context.add_timer(step_time, lambda ctx, event: insert_order_task(ctx, False))
-                    print_datatime(context, "add_timer for insert_order_task", context.START_TIME_IN_NANO + interval * i) 
+                    add_job(context, step_time, insert_order_task, [context, False])
+                    print_datatime(context, "添加定时任务", context.START_TIME_IN_NANO + interval * i) 
                 else:
                     context.steps_to_fill -= 1
         context.has_quote = True
 
 def insert_order_task(context, last_order):
-    print_datatime(context, "execute insert_order_task", context.now())
+    print_datatime(context, "执行定时任务", context.now())
     if (not last_order) and context.orders:
         context.cancel_and_place_new_order = True
         cancel_all_orders(context)
     else :
         orders_to_insert = make_plan(context, last_order)
-        context.log.info("------------orders_to_insert----------------")
+        context.log.info("------------即将下订单----------------")
         for item in orders_to_insert:
-            context.log.info("now {} insert_order_task orders_to_insert {}".format(context.now(), item.__dict__))
+            context.log.info("时间戳 {} 订单信息 {}".format(context.now(), item.__dict__))
         make_order(context, orders_to_insert)
 
 def cancel_all_orders(context):
-    context.log.info("[cancel_all_orders] {}".format(context.orders))
+    context.log.info("[取消所有订单] {}".format(context.orders))
     for item in context.orders.keys():
-        context.log.info(f"canecl order id {item}")
+        context.log.info(f"取消订单 订单id: {item}")
         context.cancel_order(item)
     
 def make_order(context, orders):
@@ -202,9 +212,9 @@ def make_order(context, orders):
         rest_vol = context.volume_to_fill - pending_vol
         context.log.info("[第{}步下单] 标的 {} 交易所 {} 账户 {} 价格 {} 数量 {} 方向 {} 开平 {} 行情 {} 时间 {} 剩余数量 {}".format(order_step, context.TICKER, context.EXCHANGE, context.ACCOUNT, item.price, item.vol, item.side, item.offset, context.realtime_quote, time_str, rest_vol))
     context.steps_to_fill -= 1
-    context.log.info("[make_order] context.orders {}".format(context.orders))
+    context.log.info("[下单] {}".format(context.orders))
     if context.steps_to_fill == 0:
-        context.log.info("tasks complete")
+        context.log.info("任务完成")
         context.req_deregister()
 
 def split_order(context, vol, side, offset, price, task_list):
