@@ -11,7 +11,7 @@ import FileTree from './components/FileTree.vue';
 import { useCodeStore } from './store/codeStore';
 import { ipcEmitDataByName } from '../../../renderer/ipcMsg/emitter';
 import MainContentVue from './components/MainContent.vue';
-import VueI18n from '@kungfu-trader/kungfu-app/src/language';
+import VueI18n from '@kungfu-trader/kungfu-js-api/language';
 const { t } = VueI18n.global;
 
 const { error } = messagePrompt();

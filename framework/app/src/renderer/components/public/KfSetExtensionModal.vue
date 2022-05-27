@@ -14,7 +14,7 @@ import {
   StrategyExtTypes,
 } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import { useExtConfigsRelated } from '../../assets/methods/actionsUtils';
-import VueI18n from '@kungfu-trader/kungfu-app/src/language';
+import VueI18n from '@kungfu-trader/kungfu-js-api/language';
 const { t } = VueI18n.global;
 
 const props = withDefaults(

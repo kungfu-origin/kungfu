@@ -42,7 +42,6 @@
   },
   "devDependencies": {
     "@kungfu-trader/kungfu-toolchain": "^2.4.0-alpha.50",
-    "electron": "^13.0.0",
-    "vue-i18n": "^9.2.0-beta.35"
+    "electron": "^13.0.0"
   }
 }

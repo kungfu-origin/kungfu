@@ -164,7 +164,7 @@ import {
 import fse from 'fs-extra';
 import { ipcEmitDataByName } from '../../../ipcMsg/emitter';
 import { confirmModal, messagePrompt } from '../../../assets/methods/uiUtils';
-import VueI18n from '@kungfu-trader/kungfu-app/src/language';
+import VueI18n from '@kungfu-trader/kungfu-js-api/language';
 const { t } = VueI18n.global;
 
 const { success, error, warning } = messagePrompt();

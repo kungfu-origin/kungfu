@@ -6,7 +6,7 @@ import { useGlobalStore } from './store/global';
 import path from 'path';
 import fse from 'fs-extra';
 
-import VueI18n from '@kungfu-trader/kungfu-app/src/language';
+import VueI18n from '@kungfu-trader/kungfu-js-api/language';
 const { t } = VueI18n.global;
 
 export const useComponenets = (
@@ -156,23 +156,35 @@ export const useComponenets = (
         //registe different type ui components
         switch (position) {
           case 'sidebar':
-            app.component(key, cData[`${key}-entry`]);
-            router.addRoute({
-              path: `/${key}`,
-              name: key,
-              component: cData[`${key}-page`],
-            });
+            if (cData[`${key}-entry`] && cData[`${key}-page`]) {
+              app.component(key, cData[`${key}-entry`]);
+              router.addRoute({
+                path: `/${key}`,
+                name: key,
+                component: cData[`${key}-page`],
+              });
+            } else {
+              console.warn(`${key}-entry or ${key}-page not in cData`);
+            }
             break;
           case 'board':
-            app.component(name, cData[`${key}-index`]);
-            if (
-              app.config.globalProperties.$availKfBoards.indexOf(name) === -1
-            ) {
-              app.config.globalProperties.$availKfBoards.push(name);
+            if (cData[`${key}-index`]) {
+              app.component(name, cData[`${key}-index`]);
+              if (
+                app.config.globalProperties.$availKfBoards.indexOf(name) === -1
+              ) {
+                app.config.globalProperties.$availKfBoards.push(name);
+              }
+            } else {
+              console.warn(`${key}-index not in cData`);
             }
             break;
           default:
-            app.component(key, cData[`${key}-index`]);
+            if (cData[`${key}-index`]) {
+              app.component(key, cData[`${key}-index`]);
+            } else {
+              console.warn(`${key}-index not in cData`);
+            }
         }
       });
     })

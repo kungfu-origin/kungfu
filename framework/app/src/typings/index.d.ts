@@ -87,7 +87,7 @@ interface TriggerUpdateTd {
 
 interface TriggerUpdateRiskSetting {
   tag: 'update:riskSetting';
-  riskSettingList: RiskSetting[];
+  riskSettings: RiskSetting[];
 }
 
 interface TriggerUpdateMd {
@@ -126,7 +126,10 @@ interface TriggerCurrentConfigModalInput {
 
 interface TriggerOpenGlobalSettingModal {
   tag: 'open:globalSetting';
-  category: string;
+}
+
+interface TriggerCloseGlobalSettingModal {
+  tag: 'close:globalSetting';
 }
 
 interface TriggerSetCurrentConfigModalConfigSettings {
@@ -154,6 +157,7 @@ type KfBusEvent =
   | TriggerCurrentConfigModalReady
   | TriggerCurrentConfigModalInput
   | TriggerOpenGlobalSettingModal
+  | TriggerCloseGlobalSettingModal
   | TriggerSetCurrentConfigModalConfigSettings;
 
 interface ExtraOrderInput {

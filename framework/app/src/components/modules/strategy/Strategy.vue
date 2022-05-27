@@ -37,7 +37,7 @@ import {
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import path from 'path';
 import KfBlinkNum from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfBlinkNum.vue';
-import VueI18n from '@kungfu-trader/kungfu-app/src/language';
+import VueI18n from '@kungfu-trader/kungfu-js-api/language';
 
 const { t } = VueI18n.global;
 const { success, error } = messagePrompt();
