@@ -1462,7 +1462,7 @@ export const initFormStateByConfig = (
         : isNumber
         ? 0
         : type === 'timePicker'
-        ? dayjs().format('YYYY-MM-DD HH:mm:ss')
+        ? null
         : isArray
         ? []
         : '';

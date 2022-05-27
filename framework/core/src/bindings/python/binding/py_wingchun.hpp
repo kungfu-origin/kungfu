@@ -368,6 +368,9 @@ void bind(pybind11::module &&m) {
       .def("insert_order", &strategy::Context::insert_order, py::arg("symbol"), py::arg("exchange"), py::arg("account"),
            py::arg("limit_price"), py::arg("volume"), py::arg("type"), py::arg("side"),
            py::arg("offset") = Offset::Open, py::arg("hedge_flag") = HedgeFlag::Speculation)
+      .def("make_order", &strategy::Context::make_order, py::arg("symbol"), py::arg("exchange"), py::arg("source"),
+           py::arg("account"), py::arg("limit_price"), py::arg("volume"), py::arg("type"), py::arg("side"),
+           py::arg("offset") = Offset::Open, py::arg("hedge_flag") = HedgeFlag::Speculation)
       .def("cancel_order", &strategy::Context::cancel_order)
       .def("req_history_order", &strategy::Context::req_history_order)
       .def("req_history_trade", &strategy::Context::req_history_trade)

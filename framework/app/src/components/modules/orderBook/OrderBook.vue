@@ -97,11 +97,12 @@ function handleTriggerSellOrderBookPriceVolume(
     return;
   }
 
-  triggerOrderBookUpdate(currentInstrument.value, {
-    side: SideEnum.Sell,
-    price,
-    volume: BigInt(volume),
-  });
+  if (isNaN(Number(volume)) || !volume)
+    triggerOrderBookUpdate(currentInstrument.value, {
+      side: SideEnum.Sell,
+      price,
+      volume: BigInt(volume),
+    });
 }
 </script>
 <template>

@@ -37,7 +37,7 @@ import {
 import VueI18n from '@kungfu-trader/kungfu-app/src/language';
 
 const { t } = VueI18n.global;
-const { error } = messagePrompt();
+const { success, error } = messagePrompt();
 
 const { dashboardBodyHeight, handleBodySizeChange } = useDashboardBodySize();
 
@@ -117,6 +117,16 @@ function handleOpenSetMdDialog(
 
 function handleOpenSetSourceDialog() {
   setSourceModalVisible.value = true;
+}
+
+function handleRemoveMd(record: KungfuApi.KfConfig) {
+  return handleRemoveKfConfig(window.watcher, record, processStatusData.value)
+    .then(() => {
+      success();
+    })
+    .catch((err) => {
+      error(err.message || t('operation_failed'));
+    });
 }
 </script>
 <template>
@@ -209,7 +219,7 @@ function handleOpenSetSourceDialog() {
               />
               <DeleteOutlined
                 style="font-size: 12px"
-                @click.stop="handleRemoveKfConfig(record)"
+                @click.stop="handleRemoveMd(record)"
               />
             </div>
           </template>

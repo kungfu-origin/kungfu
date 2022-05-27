@@ -60,9 +60,9 @@ private:
 
   void inspect_channel(int64_t trigger_time, const longfist::types::Channel &channel);
 
-  void register_cache_shift(const longfist::types::Channel &channel);
+  void channel_trigger_make_cache_shift(const longfist::types::Channel &channel);
 
-  void deregister_cache_shift(const longfist::types::Deregister &deregister_data);
+  void register_triggger_clear_cache_shift(const longfist::types::Register &deregister_data);
 
   void on_cache_reset(const event_ptr &event);
 

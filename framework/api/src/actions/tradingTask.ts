@@ -1,28 +1,11 @@
-import { removeKfLocation, removeLog } from '.';
 import {
   getKfExtensionConfig,
   kfConfigItemsToProcessArgs,
 } from '../utils/busiUtils';
-import {
-  graceDeleteProcess,
-  Pm2ProcessStatusData,
-  startTask,
-} from '../utils/processUtils';
+import { Pm2ProcessStatusData, startTask } from '../utils/processUtils';
 import path from 'path';
 import { Proc } from 'pm2';
-
-export const ensureRemoveTradingTask = (
-  watcher: KungfuApi.Watcher,
-  taskLocation: KungfuApi.KfLocation,
-  processStatusData: Pm2ProcessStatusData,
-) => {
-  return graceDeleteProcess(watcher, taskLocation, processStatusData)
-    .then(() => removeKfLocation(taskLocation))
-    .then(() => removeLog(taskLocation))
-    .catch((err) => {
-      console.error(err);
-    });
-};
+import { ensureRemoveLocation } from '.';
 
 export const startTradingTask = (
   watcher: KungfuApi.Watcher,
@@ -32,7 +15,7 @@ export const startTradingTask = (
   args: string,
   configSettings: KungfuApi.KfConfigItem[],
 ) => {
-  return ensureRemoveTradingTask(watcher, taskLocation, processStatusData).then(
+  return ensureRemoveLocation(watcher, taskLocation, processStatusData).then(
     () => startTask(taskLocation, soPath, args, configSettings),
   );
 };

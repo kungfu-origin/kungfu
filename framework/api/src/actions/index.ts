@@ -23,6 +23,10 @@ import {
   getAllKfRiskSettings,
   setAllKfRiskSettings,
 } from '../kungfu/riskSetting';
+import {
+  graceDeleteProcess,
+  Pm2ProcessStatusData,
+} from '../utils/processUtils';
 
 export const getAllKfConfigOriginData = (): Promise<
   Record<KfCategoryTypes, KungfuApi.KfConfig[]>
@@ -56,12 +60,38 @@ export const getAllKfConfigOriginData = (): Promise<
   });
 };
 
-export const deleteAllByKfLocation = (
+export const isKfConfig = async (kfLocation: KungfuApi.KfLocation) => {
+  const allConfig = await getAllKfConfigOriginData();
+  const { category, group, name } = kfLocation;
+  if (!allConfig[category]) {
+    return false;
+  }
+
+  return (
+    allConfig[category].findIndex(
+      (item) => item.group === group && item.name === name,
+    ) !== -1
+  );
+};
+
+export const deleteAllByKfLocation = async (
   kfLocation: KungfuApi.KfLocation,
 ): Promise<void> => {
-  return removeKfConfig(kfLocation)
+  const isConfig = await isKfConfig(kfLocation);
+
+  return (isConfig ? removeKfConfig(kfLocation) : Promise.resolve())
     .then(() => removeKfLocation(kfLocation))
     .then(() => removeLog(kfLocation));
+};
+
+export const ensureRemoveLocation = (
+  watcher: KungfuApi.Watcher,
+  kfLocation: KungfuApi.KfConfig | KungfuApi.KfLocation,
+  processStatus: Pm2ProcessStatusData,
+) => {
+  return graceDeleteProcess(watcher, kfLocation, processStatus).then(() =>
+    deleteAllByKfLocation(kfLocation),
+  );
 };
 
 export function removeKfLocation(

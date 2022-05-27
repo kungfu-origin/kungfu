@@ -23,6 +23,7 @@ CacheD::CacheD(locator_ptr locator, mode m, bool low_latency)
 
 void CacheD::on_react() {
   events_ | is(Location::tag) | $$(on_location(event));
+  events_ | is(Register::tag) | $$(register_triggger_clear_cache_shift(event->data<Register>()));
   events_ | is(RequestCached::tag) | $([&](const event_ptr &event) {
     auto source_id = event->source();
     if (locations_.find(source_id) == locations_.end()) {
@@ -52,7 +53,6 @@ void CacheD::on_react() {
 
 void CacheD::on_start() {
   events_ | is(Channel::tag) | $$(inspect_channel(event->gen_time(), event->data<Channel>()));
-  events_ | is(Deregister::tag) | $$(deregister_cache_shift(event->data<Deregister>()));
   events_ | is(CacheReset::tag) | $$(on_cache_reset(event));
   events_ | instanceof <journal::frame>() | filter([&](const event_ptr &event) {
                          auto source_id = event->source();
@@ -139,11 +139,11 @@ void CacheD::on_location(const event_ptr &event) { profile_bank_ << typed_event_
 void CacheD::inspect_channel(int64_t trigger_time, const Channel &channel) {
   if (channel.source_id != get_live_home_uid() and channel.dest_id != get_live_home_uid()) {
     reader_->join(get_location(channel.source_id), channel.dest_id, trigger_time);
-    register_cache_shift(channel);
+    channel_trigger_make_cache_shift(channel);
   }
 }
 
-void CacheD::register_cache_shift(const Channel &channel) {
+void CacheD::channel_trigger_make_cache_shift(const Channel &channel) {
   uint32_t source_id = channel.source_id;
   uint32_t dest_id = channel.dest_id;
 
@@ -164,12 +164,15 @@ void CacheD::register_cache_shift(const Channel &channel) {
   ensure_cached_storage(source_id, location::SYNC);
 }
 
-void CacheD::deregister_cache_shift(const Deregister &deregister_data) {
-  uint32_t location_uid = deregister_data.location_uid;
+void CacheD::register_triggger_clear_cache_shift(const Register &register_data) {
+  uint32_t location_uid = register_data.location_uid;
   if (app_cache_shift_.find(location_uid) == app_cache_shift_.end()) {
     SPDLOG_ERROR("no location_uid {} in app_cache_shift_", get_location_uname(location_uid));
     return;
   }
+
+  // clear storage_map_ memory, for ensure_storage working fine next time
+  app_cache_shift_.erase(location_uid);
 }
 
 void CacheD::on_cache_reset(const event_ptr &event) {

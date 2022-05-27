@@ -275,17 +275,24 @@ function handleRemoveTdGroup(item: KungfuApi.KfExtraLocation) {
 }
 
 function handleRemoveTd(item: KungfuApi.KfConfig) {
-  handleRemoveKfConfig(item).then(() => {
-    const accountId = getIdByKfLocation(item);
-    const oldGroup = isInTdGroup(tdGroup.value, accountId);
-    if (oldGroup) {
-      const index = oldGroup.children?.indexOf(accountId);
-      oldGroup.children.splice(index, 1);
-      setTdGroup(toRaw(tdGroup.value)).then(() => {
-        return setTdGroups();
-      });
-    }
-  });
+  handleRemoveKfConfig(window.watcher, item, processStatusData.value)
+    .then(() => {
+      const accountId = getIdByKfLocation(item);
+      const oldGroup = isInTdGroup(tdGroup.value, accountId);
+      if (oldGroup) {
+        const index = oldGroup.children?.indexOf(accountId);
+        oldGroup.children.splice(index, 1);
+        setTdGroup(toRaw(tdGroup.value)).then(() => {
+          return setTdGroups();
+        });
+      }
+    })
+    .then(() => {
+      success();
+    })
+    .catch((err) => {
+      error(err.message || t('operation_failed'));
+    });
 }
 </script>
 

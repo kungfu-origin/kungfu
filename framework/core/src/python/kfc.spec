@@ -143,9 +143,7 @@ a = Analysis(
         build_dirs=[
             build_cpp_dir,
         ],
-        packages=[
-            "plotly",
-        ],
+        packages=[],
     ),
     hiddenimports=extend_hiddenimports(
         modules=[
@@ -161,7 +159,6 @@ a = Analysis(
             "setuptools",
             "numpy",
             "pandas",
-            "plotly",
         ],
         executable_modules=[
             "kungfu",

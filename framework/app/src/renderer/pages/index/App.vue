@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { getCurrentInstance, onBeforeUnmount, onMounted } from 'vue';
+import { getCurrentInstance, onBeforeUnmount, onMounted, ref } from 'vue';
 import KfSystemPrepareModal from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfSystemPrepareModal.vue';
 import KfLayoutVue from '@kungfu-trader/kungfu-app/src/renderer/components/layout/KfLayout.vue';
 import KfSetByConfigModal from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfSetByConfigModal.vue';
@@ -9,6 +9,7 @@ import {
   markClearJournal,
   removeLoadingMask,
   useIpcListener,
+  playSound,
   handleOpenLogviewByFile,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import {
@@ -25,13 +26,11 @@ import globalBus from '../../assets/methods/globalBus';
 import {
   dealAppStates,
   dealAssetsByHolderUID,
+  getTradingDataSortKey,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { bindIPCListener } from '@kungfu-trader/kungfu-app/src/renderer/ipcMsg/ipcListener';
 import { useTradingTask } from '@kungfu-trader/kungfu-app/src/components/modules/tradingTask/utils';
-import {
-  getAllRiskSettingList,
-  setAllRiskSettingList,
-} from '@kungfu-trader/kungfu-js-api/actions';
+import { setAllRiskSettingList } from '@kungfu-trader/kungfu-js-api/actions';
 
 const app = getCurrentInstance();
 const store = useGlobalStore();
@@ -49,6 +48,8 @@ useSubscibeInstrumentAtEntry();
 const { exportDateModalVisible, exportDataLoading, handleConfirmExportDate } =
   useDealExportHistoryTradingData();
 
+const latestTrade = ref<bigint>(0n);
+
 useIpcListener();
 
 const tradingDataSubscription = tradingDataSubject.subscribe(
@@ -57,12 +58,21 @@ const tradingDataSubscription = tradingDataSubject.subscribe(
     store.setAppStates(appStates);
     const assets = dealAssetsByHolderUID(watcher, watcher.ledger.Asset);
     store.setAssets(assets);
+
+    const sortKey = getTradingDataSortKey('Trade');
+    const trades = watcher.ledger.Trade.sort(sortKey);
+    if (trades.length && latestTrade.value !== trades[0]?.trade_id) {
+      latestTrade.value = trades[0]?.trade_id || 0n;
+      playSound();
+    }
   },
 );
 
 store.setKfConfigList();
 store.setKfExtConfigs();
 store.setSubscribedInstruments();
+store.setRiskSettingList();
+store.setKfGlobalSetting();
 
 const busSubscription = globalBus.subscribe((data: KfBusEvent) => {
   if (data.tag === 'main') {
@@ -84,8 +94,9 @@ const busSubscription = globalBus.subscribe((data: KfBusEvent) => {
     }
   }
   if (data.tag === 'update:riskSetting') {
-    setAllRiskSettingList(data.riskSettingList);
-    store.setRiskSettingList(data.riskSettingList);
+    setAllRiskSettingList(data.riskSettingList).finally(() => {
+      store.setRiskSettingList();
+    });
   }
 });
 
@@ -99,10 +110,6 @@ const {
 onMounted(() => {
   bindIPCListener(store);
   removeLoadingMask();
-
-  getAllRiskSettingList().then((res: KungfuApi.RiskSetting[]) => {
-    store.setRiskSettingList(res);
-  });
 
   window.addEventListener('resize', () => {
     app?.proxy &&

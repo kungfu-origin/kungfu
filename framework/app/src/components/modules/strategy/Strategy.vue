@@ -16,6 +16,7 @@ import {
   useDashboardBodySize,
   handleOpenLogview,
   handleOpenCodeView,
+  messagePrompt,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import { getColumns } from './config';
 import {
@@ -39,6 +40,7 @@ import KfBlinkNum from '@kungfu-trader/kungfu-app/src/renderer/components/public
 import VueI18n from '@kungfu-trader/kungfu-app/src/language';
 
 const { t } = VueI18n.global;
+const { success, error } = messagePrompt();
 
 const { dashboardBodyHeight, handleBodySizeChange } = useDashboardBodySize();
 
@@ -125,6 +127,16 @@ function handleOpenSetStrategyDialog(
 function getStrategyPathShowName(kfConfig: KungfuApi.KfConfig): string {
   const strategyPath = getConfigValue(kfConfig).strategy_path || '';
   return path.basename(strategyPath);
+}
+
+function handleRemoveStrategy(record: KungfuApi.KfConfig) {
+  return handleRemoveKfConfig(window.watcher, record, processStatusData.value)
+    .then(() => {
+      success();
+    })
+    .catch((err) => {
+      error(err.message || t('operation_failed'));
+    });
 }
 </script>
 
@@ -224,7 +236,7 @@ function getStrategyPathShowName(kfConfig: KungfuApi.KfConfig): string {
               />
               <DeleteOutlined
                 style="font-size: 12px"
-                @click.stop="handleRemoveKfConfig(record)"
+                @click.stop="handleRemoveStrategy(record)"
               />
             </div>
           </template>

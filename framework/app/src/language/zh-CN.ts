@@ -15,6 +15,7 @@ export default {
   operation_success: '操作成功',
   operation_failed: '操作失败',
   location_error: '当前 Location 错误',
+  watcher_error: 'Watcher 错误',
   instrument_error: '标的错误',
   prompt: '提示',
   warning: '警告',
@@ -220,9 +221,9 @@ export default {
     every_volume: '每次下单量',
 
     fat_finger_buy_modal:
-      '买入价格超出警戒线, 当前价格为 {price}, 警戒线为 {warningLine}, 当前乌龙指阈值为 {fatFinger}',
+      '买入价格超出警戒线, 当前价格为 {price}, 警戒线为 {warningLine}, 当前乌龙指阈值为 {fatFinger}%',
     fat_finger_sell_modal:
-      '卖出价格超出警戒线, 当前价格为 {price}, 警戒线为 {warningLine}, 当前乌龙指阈值为 {fatFinger}',
+      '卖出价格超出警戒线, 当前价格为 {price}, 警戒线为 {warningLine}, 当前乌龙指阈值为 {fatFinger}%',
     start_process: '请先启动{process}交易进程',
     place_confirm: '下单确认',
     close_all: '是否全部平仓?',
@@ -531,4 +532,9 @@ export default {
 
   quit_confirm: '退出应用会结束所有交易进程, 确认退出吗?',
   restart_process: '功夫图形进程中断, 该中断不会影响交易, 是否重启图形进程？',
+
+  未就绪: '{processId} 还未准备就绪, 请稍后重试',
+  系统外: '系统外',
+  手动: '手动',
+  任务: '任务',
 };

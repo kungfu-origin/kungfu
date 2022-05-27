@@ -2,7 +2,6 @@
 import {
   getKfGlobalSettings,
   riskSettingConfig,
-  getKfGlobalSettingsValue,
   KfSystemConfig,
   setKfGlobalSettingsValue,
 } from '@kungfu-trader/kungfu-js-api/config/globalSettings';
@@ -18,6 +17,7 @@ import {
   reactive,
   ref,
   toRefs,
+  watch,
 } from 'vue';
 import KfConfigSettingsForm from './KfConfigSettingsForm.vue';
 import {
@@ -51,6 +51,7 @@ import { ipcRenderer } from 'electron';
 import { useAllKfConfigData } from '../../assets/methods/actionsUtils';
 import globalBus from '../../assets/methods/globalBus';
 import { useGlobalStore } from '../../pages/index/store/global';
+import { storeToRefs } from 'pinia';
 
 interface ScheduleTaskFormItem {
   timeValue: Dayjs;
@@ -73,17 +74,14 @@ defineEmits<{
 }>();
 
 const store = useGlobalStore();
+const { riskSettingList, globalSetting } = storeToRefs(store);
 
 const kfGlobalSettings = getKfGlobalSettings();
-const kfGlobalSettingsValue = getKfGlobalSettingsValue();
-
 const globalSettingsFromStates = reactive(
-  initGlobalSettingsFromStates(kfGlobalSettings, kfGlobalSettingsValue),
+  initGlobalSettingsFromStates(kfGlobalSettings, globalSetting.value),
 );
 
-const riskSettingsFromStates = ref<Record<string, KungfuApi.KfConfigValue>>(
-  initFormStateByConfig(riskSettingConfig.config),
-);
+const riskSettingsFromStates = ref<Record<string, KungfuApi.KfConfigValue>>({});
 
 const { modalVisible, closeModal } = useModalVisible(props.visible);
 const commissions = ref<KungfuApi.Commission[]>([]);
@@ -107,15 +105,28 @@ const scheduleTask = reactive<{
   tasks?: ScheduleTaskFormItem[];
 }>({});
 
+globalBus.next({
+  tag: 'open:globalSetting',
+  riskSettingList: '',
+});
+
+watch(
+  riskSettingList,
+  (newValue) => {
+    if (newValue) {
+      riskSettingsFromStates.value = initFormStateByConfig(
+        riskSettingConfig.config,
+        { riskSetting: newValue },
+      );
+    }
+  },
+  { immediate: true },
+);
+
 onMounted(() => {
   getKfCommission().then((res) => {
     commissions.value = res;
   });
-
-  riskSettingsFromStates.value = initFormStateByConfig(
-    riskSettingConfig.config,
-    { riskSetting: store.riskSettingList },
-  );
 
   getScheduleTasks().then((res) => {
     scheduleTask.active = !!res.active;
@@ -149,11 +160,10 @@ onMounted(() => {
 });
 
 onUnmounted(() => {
-  setKfGlobalSettingsValue(globalSettingsFromStates);
-  globalBus.next({
-    tag: 'update:riskSetting',
-    riskSettingList: riskSettingsFromStates.value.riskSetting,
-  } as TriggerUpdateRiskSetting);
+  setKfGlobalSettingsValue(globalSettingsFromStates).then(() => {
+    store.setKfGlobalSetting();
+  });
+
   setKfCommission(commissions.value);
   setScheduleTasks({
     active: scheduleTask.active || false,
