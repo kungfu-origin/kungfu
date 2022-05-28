@@ -55,7 +55,7 @@ import {
 import SetTdGroupModal from './SetTdGroupModal.vue';
 import { useGlobalStore } from '@kungfu-trader/kungfu-app/src/renderer/pages/index/store/global';
 import { messagePrompt } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
-import VueI18n from '@kungfu-trader/kungfu-app/src/language';
+import VueI18n from '@kungfu-trader/kungfu-js-api/language';
 
 const { t } = VueI18n.global;
 const { success, error } = messagePrompt();

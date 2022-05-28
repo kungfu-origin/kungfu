@@ -38,7 +38,7 @@ import {
   initKfDefaultInstruments,
   ensureKungfuKey,
 } from '@kungfu-trader/kungfu-js-api/config';
-import VueI18n from '@kungfu-trader/kungfu-app/src/language';
+import VueI18n from '@kungfu-trader/kungfu-js-api/language';
 const { t } = VueI18n.global;
 
 let MainWindow: BrowserWindow | null = null;
