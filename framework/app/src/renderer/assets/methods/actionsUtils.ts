@@ -17,6 +17,7 @@ import {
   LedgerCategoryEnum,
   ProcessStatusTypes,
   StrategyExtTypes,
+  StrategyStateStatusTypes,
 } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import {
   getKfCategoryData,
@@ -980,15 +981,21 @@ export const useProcessStatusDetailData = (): {
     processStatusData: Pm2ProcessStatusData;
     processStatusDetailData: Pm2ProcessStatusDetailData;
     appStates: Record<string, BrokerStateStatusTypes>;
+    strategyStates: Record<string, StrategyStateStatusTypes>;
   }>({
     processStatusData: {},
     processStatusDetailData: {},
     appStates: {},
+    strategyStates: {},
   });
 
   onMounted(() => {
-    const { processStatusData, processStatusWithDetail, appStates } =
-      storeToRefs(useGlobalStore());
+    const {
+      processStatusData,
+      processStatusWithDetail,
+      appStates,
+      strategyStates,
+    } = storeToRefs(useGlobalStore());
     allProcessStatusData.processStatusData =
       processStatusData as unknown as Pm2ProcessStatusData;
     allProcessStatusData.processStatusDetailData =
@@ -996,6 +1003,10 @@ export const useProcessStatusDetailData = (): {
     allProcessStatusData.appStates = appStates as unknown as Record<
       string,
       BrokerStateStatusTypes
+    >;
+    allProcessStatusData.strategyStates = strategyStates as unknown as Record<
+      string,
+      StrategyStateStatusTypes
     >;
   });
 

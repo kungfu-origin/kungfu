@@ -12,7 +12,18 @@ export enum BrokerStateStatusEnum {
 
 export type BrokerStateStatusTypes = keyof typeof BrokerStateStatusEnum;
 
-export type ProcessStatusTypes = Pm2ProcessStatusTypes | BrokerStateStatusTypes;
+export type ProcessStatusTypes =
+  | Pm2ProcessStatusTypes
+  | BrokerStateStatusTypes
+  | StrategyStateStatusTypes;
+
+export enum StrategyStateStatusEnums {
+  Normal,
+  Warn,
+  Error,
+}
+
+export type StrategyStateStatusTypes = keyof typeof StrategyStateStatusEnums;
 
 export enum LedgerCategoryEnum {
   td = 0,

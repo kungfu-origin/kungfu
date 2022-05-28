@@ -34,6 +34,7 @@ declare module 'tail' {
 declare namespace KungfuApi {
   import {
     BrokerStateStatusEnum,
+    StrategyStateStatusEnums,
     InstrumentTypeEnum,
     InstrumentTypes,
     StrategyExtTypes,
@@ -722,6 +723,7 @@ declare namespace KungfuApi {
 
   export interface Watcher {
     appStates: Record<string, BrokerStateStatusEnum>;
+    strategyStates: Record<string, StrategyStateStatusEnums>;
     ledger: TradingData;
     state: TradingData;
 

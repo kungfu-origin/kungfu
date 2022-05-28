@@ -46,6 +46,8 @@ import {
   BrokerStateStatusEnum,
   StrategyExtTypes,
   CommissionModeEnum,
+  StrategyStateStatusTypes,
+  StrategyStateStatusEnums,
 } from '../typings/enums';
 import {
   deleteProcess,
@@ -1281,6 +1283,30 @@ export const dealAppStates = (
     ] as BrokerStateStatusTypes;
     return appStatesResolved;
   }, {} as Record<string, BrokerStateStatusTypes>);
+};
+
+export const dealStrategyStates = (
+  watcher: KungfuApi.Watcher | null,
+  strategyStates: Record<string, StrategyStateStatusEnums>,
+) => {
+  if (!watcher) {
+    return {} as Record<string, StrategyStateStatusTypes>;
+  }
+
+  return Object.keys(strategyStates || {}).reduce(
+    (strategyStatesResolved, key) => {
+      const kfLocation = watcher.getLocation(key);
+      const processId = getProcessIdByKfLocation(kfLocation);
+      const strategyStateValue = strategyStates[
+        key
+      ] as StrategyStateStatusEnums;
+      strategyStatesResolved[processId] = StrategyStateStatusEnums[
+        strategyStateValue
+      ] as StrategyStateStatusTypes;
+      return strategyStatesResolved;
+    },
+    {} as Record<string, StrategyStateStatusTypes>,
+  );
 };
 
 export const dealAssetsByHolderUID = (

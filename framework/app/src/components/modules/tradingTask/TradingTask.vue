@@ -30,6 +30,7 @@ import {
   Pm2ProcessStatusDetail,
   startTask,
 } from '@kungfu-trader/kungfu-js-api/utils/processUtils';
+import KfProcessStatus from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfProcessStatus.vue';
 import {
   useAddUpdateRemoveKfConfig,
   useCurrentGlobalKfLocation,
@@ -285,6 +286,9 @@ function parseTaskSettingsFromEnv(configSettingsEnv = '[]') {
           </template>
           <template v-if="column.dataIndex === 'args'">
             {{ resolveArgs(record) }}
+          </template>
+          <template v-else-if="column.dataIndex === 'stateStatus'">
+            <KfProcessStatus :statusName="'Error'"></KfProcessStatus>
           </template>
           <template v-else-if="column.dataIndex === 'actions'">
             <div class="kf-actions__warp">
