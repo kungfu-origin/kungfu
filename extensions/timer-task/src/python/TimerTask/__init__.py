@@ -88,7 +88,7 @@ def type_to_minvol(argument):
     return switcher.get(argument, int(1))
 
 def on_order(context, order):
-    context.log.info("[on_order 0] {}".format(order))
+    context.log.info("[订单回调] {}".format(order))
     if order.status == OrderStatus.Filled :
         del context.orders[order.order_id]
     elif (order.status == OrderStatus.Cancelled) or (order.status == OrderStatus.PartialFilledNotActive):
@@ -130,13 +130,12 @@ def on_quote(context, quote):
     context.realtime_quote = quote
     context.UPPER_LIMIT_PRICE = quote.upper_limit_price
     context.LOWER_LIMIT_PRICE = quote.lower_limit_price
-    context.log.info("on_quote up {} low {} ".format( context.UPPER_LIMIT_PRICE, context.LOWER_LIMIT_PRICE))
     if context.MIN_VOL == 0 :
-        context.log.info("instrument_id {} bid {} ask {} up {} down {}".format(quote.instrument_id, str(quote.bid_price)[1:-1], str(quote.ask_price)[1:-1], quote.upper_limit_price, quote.lower_limit_price))
+        context.log.info("标的 {} 买 {} 卖 {} 涨停 {} 跌停 {}".format(quote.instrument_id, str(quote.bid_price)[1:-1], str(quote.ask_price)[1:-1], quote.upper_limit_price, quote.lower_limit_price))
         context.MIN_VOL = type_to_minvol(quote.instrument_type)
         assert context.MAX_LOT_BY_STEP >= context.MIN_VOL
         context.MAX_LOT_BY_STEP = int(math.floor(context.MAX_LOT_BY_STEP / float(context.MIN_VOL)) * context.MIN_VOL)
-        context.log.info("quote.instrument_type {} context.MIN_VOL {} context.MAX_LOT_BY_STEP {}".format(quote.instrument_type, context.MIN_VOL, context.MAX_LOT_BY_STEP))
+        context.log.info("标的类型 {} 最小交易数量 {} 单次最大数 {}".format(quote.instrument_type, context.MIN_VOL, context.MAX_LOT_BY_STEP))
         assert context.MAX_LOT_BY_STEP > 0
 
     if not context.has_quote :
@@ -145,13 +144,13 @@ def on_quote(context, quote):
         context.START_TIME_IN_NANO = int(context.now()  + 2 * 1e9)
         context.FINISH_TIME_IN_NANO = int(context.START_TIME_IN_NANO  + 30 * 1e9)
         '''
-        print_datatime(context, "on_quote context.START_TIME_IN_NANO", context.START_TIME_IN_NANO)
-        print_datatime(context, "on_quote context.FINISH_TIME_IN_NANO", context.FINISH_TIME_IN_NANO)
+        print_datatime(context, "起始时间戳", context.START_TIME_IN_NANO)
+        print_datatime(context, "结束时间戳", context.FINISH_TIME_IN_NANO)
         if context.STEPS == 1:
             interval = int(context.FINISH_TIME_IN_NANO - context.START_TIME_IN_NANO)
         else:
             interval = int((context.FINISH_TIME_IN_NANO - context.START_TIME_IN_NANO) / (context.STEPS - 1))
-        context.log.info(f"interval {interval}")
+        context.log.info(f"时间间隔(纳秒) {interval}")
         for i in range(context.STEPS):
             if i == context.STEPS - 1:
                 ctx_now = context.now()
@@ -217,39 +216,44 @@ def make_order(context, orders):
         context.log.info("任务完成")
         context.req_deregister()
 
-def split_order(context, vol, side, offset, price, task_list):
+def split_order(context, vol, side, offset, price, task_list, last_order):
     place_order_vol = int(0)
     while vol > context.MAX_LOT_BY_STEP :
         task_list.append(orderTask(context.MAX_LOT_BY_STEP, side, offset, price))
         vol -= context.MAX_LOT_BY_STEP
         place_order_vol += context.MAX_LOT_BY_STEP
     if vol > 0 :
-        task_list.append(orderTask(vol, side, offset, price))
-        place_order_vol += vol
+        if last_order:
+            vol_last_split = int(math.ceil(vol / float(context.MIN_VOL)) * context.MIN_VOL)
+        else:
+            vol_last_split = int(math.floor(vol / float(context.MIN_VOL)) * context.MIN_VOL)
+        if vol_last_split > 0:
+            task_list.append(orderTask(vol_last_split, side, offset, price))
+            place_order_vol += vol
     return place_order_vol
 
-def calc_order_vol(context, pos, side, offset, price) :
+def calc_order_vol(context, pos, side, offset, price, last_order) :
     vol = int(0)
     task_list = []
     offset_vol = (pos.volume - pos.yesterday_volume) if offset == Offset.CloseToday else pos.yesterday_volume
     offset_tag = Offset.CloseToday if offset == Offset.CloseToday else  Offset.CloseYesterday
     if(offset_vol >= context.volume_to_fill / context.steps_to_fill):
-        vol = int(math.floor(context.volume_to_fill / context.steps_to_fill / float(context.MIN_VOL)) * context.MIN_VOL)
-        split_order(context, vol, side, offset_tag, price, task_list)
+        vol = context.volume_to_fill / context.steps_to_fill
+        split_order(context, vol, side, offset_tag, price, task_list, last_order)
     elif(pos.volume >= context.volume_to_fill / context.steps_to_fill):
         if(offset_vol > 0):
             vol = int(math.floor(offset_vol / float(context.MIN_VOL)) * context.MIN_VOL)
             place_order_vol = split_order(context, vol, side, offset_tag, price, task_list)
-        vol = int(math.floor((context.volume_to_fill / context.steps_to_fill - place_order_vol) / float(context.MIN_VOL)) * context.MIN_VOL)
-        split_order(context, vol, side, Offset.Close, price, task_list)
+        vol = context.volume_to_fill / context.steps_to_fill - place_order_vol
+        split_order(context, vol, side, Offset.Close, price, task_list, last_order)
     else:
         if(offset_vol > 0):
-            vol = int(math.floor(offset_vol / float(context.MIN_VOL)) * context.MIN_VOL)
+            vol = offset_vol
             place_order_vol = split_order(context, vol, side, offset_tag, price, task_list)
-        vol = int(math.floor((pos.volume - place_order_vol) / float(context.MIN_VOL)) * context.MIN_VOL)
+        vol = pos.volume - place_order_vol
         place_order_vol += split_order(context, vol, side, Offset.Close, price, task_list)
-        vol = int(math.floor((context.volume_to_fill / context.steps_to_fill - place_order_vol) / float(context.MIN_VOL)) * context.MIN_VOL)
-        split_order(context, vol, side, Offset.Open, price, task_list)
+        vol = context.volume_to_fill / context.steps_to_fill - place_order_vol
+        split_order(context, vol, side, Offset.Open, price, task_list, last_order)
     return task_list
 
 def make_plan(context, last_order):
@@ -261,36 +265,35 @@ def make_plan(context, last_order):
             pending_vol += order_vol
         order_price = context.UPPER_LIMIT_PRICE if context.SIDE == Side.Buy else context.LOWER_LIMIT_PRICE
         context.volume_to_fill -=  pending_vol
-        context.log.info(f"make_plan last..................pending_vol {pending_vol} context.volume_to_fill {context.volume_to_fill}")
+        context.log.info(f"最后一步..................未成交订单的标的数 {pending_vol} 任务未完成数量 {context.volume_to_fill}")
     else :
         order_price = context.bid_price if context.SIDE == Side.Buy else context.ask_price
-        context.log.info(f"make_plan ..................context.volume_to_fill {context.volume_to_fill}")
+        context.log.info(f"下单计划..................任务未完成数量 {context.volume_to_fill}")
     if(context.OFFSET == Offset.Open):
-        vol = int(math.floor(context.volume_to_fill / context.steps_to_fill / float(context.MIN_VOL)) * context.MIN_VOL)
-        context.log.info(f"make_plan..................vol {vol}")
+        vol = context.volume_to_fill / context.steps_to_fill
         task_list = []
-        split_order(context, vol, context.SIDE, Offset.Open, order_price, task_list)
+        split_order(context, vol, context.SIDE, Offset.Open, order_price, task_list, last_order)
         return task_list
     elif(context.OFFSET == Offset.Close or context.OFFSET == Offset.CloseYesterday):
         if(context.SIDE == Side.Buy):#Close, CloseYesterday, Side.Buy
             for key in book.short_positions:
                 pos = book.short_positions[key]
                 if(pos.instrument_id == context.TICKER):
-                    return calc_order_vol(context, pos, Side.Buy, Offset.CloseYesterday, order_price)
+                    return calc_order_vol(context, pos, Side.Buy, Offset.CloseYesterday, order_price, last_order)
         else:#Close, CloseYesterday, Side.Sell
             for key in book.long_positions:
                 pos = book.long_positions[key]
                 if(pos.instrument_id == context.TICKER):
-                    return calc_order_vol(context, pos, Side.Sell, Offset.CloseYesterday, order_price)
+                    return calc_order_vol(context, pos, Side.Sell, Offset.CloseYesterday, order_price, last_order)
     else: # CloseToday, Side.Buy
         if(context.SIDE == Side.Buy):
             for key in book.short_positions:
                 pos = book.short_positions[key]
                 if(pos.instrument_id == context.TICKER):
-                    return calc_order_vol(context, pos, Side.Buy, Offset.CloseToday, order_price)
+                    return calc_order_vol(context, pos, Side.Buy, Offset.CloseToday, order_price, last_order)
         else:#CloseToday,Side.Sell
             for key in book.long_positions:
                 pos = book.long_positions[key]
                 if(pos.instrument_id == context.TICKER):
-                    return calc_order_vol(context, pos, Side.Sell, Offset.CloseToday, order_price)
+                    return calc_order_vol(context, pos, Side.Sell, Offset.CloseToday, order_price, last_order)
     return []
