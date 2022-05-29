@@ -9,10 +9,10 @@ import {
   markClearJournal,
   removeLoadingMask,
   useIpcListener,
-  playSound,
   handleOpenLogviewByFile,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import {
+  playSound,
   useDealExportHistoryTradingData,
   useDealInstruments,
   usePreStartAndQuitApp,
