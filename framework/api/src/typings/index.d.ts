@@ -725,7 +725,7 @@ declare namespace KungfuApi {
   export interface StrategyStateDataOrigin {
     info_a: string;
     info_b: string;
-    info_c: string;
+    info_c: string; // 待定字段
     state: StrategyStateStatusEnums;
     update_time: number;
     value: string;
