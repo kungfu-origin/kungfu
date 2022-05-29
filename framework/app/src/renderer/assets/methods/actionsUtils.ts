@@ -17,7 +17,6 @@ import {
   LedgerCategoryEnum,
   ProcessStatusTypes,
   StrategyExtTypes,
-  StrategyStateStatusTypes,
 } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import {
   getKfCategoryData,
@@ -32,6 +31,7 @@ import {
   dealCategory,
   getAvailDaemonList,
   removeNoDefaultStrategyFolders,
+  getStrategyStateStatusName,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { writeCSV } from '@kungfu-trader/kungfu-js-api/utils/fileUtils';
 import {
@@ -976,12 +976,15 @@ export const useProcessStatusDetailData = (): {
   getProcessStatusName(
     kfConfig: KungfuApi.KfLocation | KungfuApi.KfConfig,
   ): ProcessStatusTypes | undefined;
+  getStrategyStatusName(
+    kfConfig: KungfuApi.KfLocation | KungfuApi.KfConfig,
+  ): ProcessStatusTypes | undefined;
 } => {
   const allProcessStatusData = reactive<{
     processStatusData: Pm2ProcessStatusData;
     processStatusDetailData: Pm2ProcessStatusDetailData;
     appStates: Record<string, BrokerStateStatusTypes>;
-    strategyStates: Record<string, StrategyStateStatusTypes>;
+    strategyStates: Record<string, KungfuApi.StrategyStateData>;
   }>({
     processStatusData: {},
     processStatusDetailData: {},
@@ -1006,7 +1009,7 @@ export const useProcessStatusDetailData = (): {
     >;
     allProcessStatusData.strategyStates = strategyStates as unknown as Record<
       string,
-      StrategyStateStatusTypes
+      KungfuApi.StrategyStateData
     >;
   });
 
@@ -1020,6 +1023,16 @@ export const useProcessStatusDetailData = (): {
     );
   };
 
+  const getStrategyStatusName = (
+    kfConfig: KungfuApi.KfLocation | KungfuApi.KfConfig,
+  ) => {
+    return getStrategyStateStatusName(
+      kfConfig,
+      allProcessStatusData.processStatusData,
+      allProcessStatusData.strategyStates,
+    );
+  };
+
   const { processStatusData, processStatusDetailData, appStates } =
     toRefs(allProcessStatusData);
 
@@ -1028,6 +1041,7 @@ export const useProcessStatusDetailData = (): {
     processStatusDetailData,
     appStates,
     getProcessStatusName,
+    getStrategyStatusName,
   };
 };
 

@@ -125,7 +125,7 @@ export const useGlobalStore = defineStore('global', {
     },
 
     setStrategyStates(
-      strategyStates: Record<string, StrategyStateStatusTypes>,
+      strategyStates: Record<string, KungfuApi.StrategyStateData>,
     ) {
       this.strategyStates = strategyStates;
     },

@@ -41,11 +41,13 @@ import { messagePrompt } from '@kungfu-trader/kungfu-app/src/renderer/assets/met
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
 import { useTradingTask } from './utils';
 
+import { ProcessStatusTypes } from '@kungfu-trader/kungfu-js-api/src/typings/enums';
+
 const { t } = VueI18n.global;
 const { success, error } = messagePrompt();
 const { extConfigs } = useExtConfigsRelated();
 const { dashboardBodyHeight, handleBodySizeChange } = useDashboardBodySize();
-const { processStatusData, processStatusDetailData } =
+const { processStatusData, processStatusDetailData, getStrategyStatusName } =
   useProcessStatusDetailData();
 
 const { handleOpenSetTradingTaskModal } = useTradingTask();
@@ -240,6 +242,14 @@ function parseTaskSettingsFromEnv(configSettingsEnv = '[]') {
   }
   return configSettings;
 }
+
+function getProcessStatusName(record): ProcessStatusTypes {
+  const taskLocation = getTaskKfLocationByProcessId(record?.name || '');
+  if (!taskLocation) {
+    return 'Error';
+  }
+  return getStrategyStatusName(taskLocation) || 'Error';
+}
 </script>
 
 <template>
@@ -288,7 +298,9 @@ function parseTaskSettingsFromEnv(configSettingsEnv = '[]') {
             {{ resolveArgs(record) }}
           </template>
           <template v-else-if="column.dataIndex === 'stateStatus'">
-            <KfProcessStatus :statusName="'Error'"></KfProcessStatus>
+            <KfProcessStatus
+              :statusName="getProcessStatusName(record)"
+            ></KfProcessStatus>
           </template>
           <template v-else-if="column.dataIndex === 'actions'">
             <div class="kf-actions__warp">

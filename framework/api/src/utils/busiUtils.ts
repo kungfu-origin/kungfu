@@ -838,6 +838,29 @@ export const getAppStateStatusName = (
   return processStatus;
 };
 
+export const getStrategyStateStatusName = (
+  kfConfig: KungfuApi.KfLocation | KungfuApi.KfConfig,
+  processStatusData: Pm2ProcessStatusData,
+  strategyStates: Record<string, KungfuApi.StrategyStateData>,
+): ProcessStatusTypes | undefined => {
+  const processId = getProcessIdByKfLocation(kfConfig);
+
+  if (!processStatusData[processId]) {
+    return undefined;
+  }
+
+  if (!getIfProcessRunning(processStatusData, processId)) {
+    return undefined;
+  }
+
+  if (strategyStates[processId]) {
+    return strategyStates[processId].state;
+  }
+
+  const processStatus = processStatusData[processId];
+  return processStatus;
+};
+
 export const getPropertyFromProcessStatusDetailDataByKfLocation = (
   processStatusDetailData: Pm2ProcessStatusDetailData,
   kfLocation: KungfuApi.KfLocation | KungfuApi.KfConfig,
@@ -1287,7 +1310,7 @@ export const dealAppStates = (
 
 export const dealStrategyStates = (
   watcher: KungfuApi.Watcher | null,
-  strategyStates: Record<string, StrategyStateStatusEnums>,
+  strategyStates: Record<string, KungfuApi.StrategyStateDataOrigin>,
 ) => {
   if (!watcher) {
     return {} as Record<string, StrategyStateStatusTypes>;
@@ -1299,13 +1322,15 @@ export const dealStrategyStates = (
       const processId = getProcessIdByKfLocation(kfLocation);
       const strategyStateValue = strategyStates[
         key
-      ] as StrategyStateStatusEnums;
-      strategyStatesResolved[processId] = StrategyStateStatusEnums[
-        strategyStateValue
+      ] as KungfuApi.StrategyStateDataOrigin;
+      strategyStateValue.state = StrategyStateStatusEnums[
+        strategyStateValue.state
       ] as StrategyStateStatusTypes;
+      strategyStatesResolved[processId] =
+        strategyStateValue as KungfuApi.StrategyStateData;
       return strategyStatesResolved;
     },
-    {} as Record<string, StrategyStateStatusTypes>,
+    {} as Record<string, KungfuApi.StrategyStateData>,
   );
 };
 

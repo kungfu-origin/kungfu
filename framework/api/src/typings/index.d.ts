@@ -35,6 +35,7 @@ declare namespace KungfuApi {
   import {
     BrokerStateStatusEnum,
     StrategyStateStatusEnums,
+    StrategyStateStatusTypes,
     InstrumentTypeEnum,
     InstrumentTypes,
     StrategyExtTypes,
@@ -721,9 +722,22 @@ declare namespace KungfuApi {
     mode: KfModeTypes;
   }
 
+  export interface StrategyStateDataOrigin {
+    info_a: string;
+    info_b: string;
+    info_c: string;
+    state: StrategyStateStatusEnums;
+    update_time: number;
+    value: string;
+  }
+
+  export interface StrategyStateData extends StrategyStateDataOrigin {
+    state: StrategyStateStatusTypes;
+  }
+
   export interface Watcher {
     appStates: Record<string, BrokerStateStatusEnum>;
-    strategyStates: Record<string, StrategyStateStatusEnums>;
+    strategyStates: Record<string, StrategyStateData>;
     ledger: TradingData;
     state: TradingData;
 
