@@ -667,13 +667,14 @@ defineExpose({
         size="small"
         v-else-if="item.type === 'bool'"
         v-model:checked="formState[item.key]"
-      ></a-switch>
-      <div
-        v-else-if="item.type === 'file'"
-        class="kf-form-item__warp file"
         :disabled="changeType === 'update' && item.primary"
-      >
-        <a-button size="small" @click="handleSelectFile(item.key)">
+      ></a-switch>
+      <div v-else-if="item.type === 'file'" class="kf-form-item__warp file">
+        <a-button
+          size="small"
+          :disabled="changeType === 'update' && item.primary"
+          @click="handleSelectFile(item.key)"
+        >
           <template #icon><DashOutlined /></template>
         </a-button>
         <div
@@ -684,12 +685,12 @@ defineExpose({
           <span class="name">{{ formState[item.key] }}</span>
         </div>
       </div>
-      <div
-        v-else-if="item.type === 'files'"
-        class="kf-form-item__warp file"
-        :disabled="changeType === 'update' && item.primary"
-      >
-        <a-button size="small" @click="handleSelectFiles(item.key)">
+      <div v-else-if="item.type === 'files'" class="kf-form-item__warp file">
+        <a-button
+          :disabled="changeType === 'update' && item.primary"
+          size="small"
+          @click="handleSelectFiles(item.key)"
+        >
           <template #icon><PlusOutlined /></template>
         </a-button>
         <div
@@ -716,7 +717,7 @@ defineExpose({
         class="table-in-config-setting-form"
         v-else-if="item.type === 'table'"
       >
-        <a-button>
+        <a-button :disabled="changeType === 'update' && item.primary">
           <template #icon>
             <PlusOutlined @click.stop="handleAddItemIntoTableRows(item)" />
           </template>
@@ -726,7 +727,10 @@ defineExpose({
           v-for="(_item, index) in formState[item.key]"
           :key="`${index}_${formState[item.key].length}`"
         >
-          <a-button size="small">
+          <a-button
+            size="small"
+            :disabled="changeType === 'update' && item.primary"
+          >
             <template #icon>
               <DeleteOutlined
                 @click="handleRemoveItemIntoTableRows(item, index)"
