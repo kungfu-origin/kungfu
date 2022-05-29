@@ -3705,7 +3705,7 @@ async-validator@^4.0.0:
 
 async@0.9.x, async@^2.6.2, async@^2.6.3, async@^3.2.0, async@^3.2.2, async@~2.6.1, async@~3.2.0:
   version "3.2.3"
-  resolved "https://registry.npmmirror.com/async/-/async-3.2.3.tgz#ac53dafd3f4720ee9e8a160628f18ea91df196c9"
+  resolved "https://registry.yarnpkg.com/async/-/async-3.2.3.tgz#ac53dafd3f4720ee9e8a160628f18ea91df196c9"
   integrity sha512-spZRyzKL5l5BZQrr/6m/SqFdBN0q3OCI0f9rjfBzCMBIP4p75P620rR3gTmaksNOhmzgdxcaxdNfMy6anrbM0g==
 
 asynckit@^0.4.0:
@@ -6584,7 +6584,7 @@ he@^1.2.0:
 
 highlight.js@^11.0.0:
   version "11.5.1"
-  resolved "https://registry.npmmirror.com/highlight.js/-/highlight.js-11.5.1.tgz#027c24e4509e2f4dcd00b4a6dda542ce0a1f7aea"
+  resolved "https://registry.yarnpkg.com/highlight.js/-/highlight.js-11.5.1.tgz#027c24e4509e2f4dcd00b4a6dda542ce0a1f7aea"
   integrity sha512-LKzHqnxr4CrD2YsNoIf/o5nJ09j4yi/GcH5BnYz9UnVpZdS4ucMgvP61TDty5xJcFGRjnH4DpujkS9bHT3hq0Q==
 
 hosted-git-info@^2.1.4:
@@ -8527,19 +8527,19 @@ node-addon-api@^4.3.0:
 
 node-fetch@^2.6.1, node-fetch@^2.6.5, node-fetch@^2.6.7:
   version "2.6.7"
-  resolved "https://registry.npmmirror.com/node-fetch/-/node-fetch-2.6.7.tgz#24de9fba827e3b4ae44dc8b20256a379160052ad"
+  resolved "https://registry.yarnpkg.com/node-fetch/-/node-fetch-2.6.7.tgz#24de9fba827e3b4ae44dc8b20256a379160052ad"
   integrity sha512-ZjMPFEfVx5j+y2yF35Kzx5sF7kDzxuDj6ziH4FFbOp87zKDZNx8yExJIb05OGF4Nlt9IHFIMBkRl41VdvcNdbQ==
   dependencies:
     whatwg-url "^5.0.0"
 
 node-forge@^1.2.0, node-forge@^1.3.0:
   version "1.3.1"
-  resolved "https://registry.npmmirror.com/node-forge/-/node-forge-1.3.1.tgz#be8da2af243b2417d5f646a770663a92b7e9ded3"
+  resolved "https://registry.yarnpkg.com/node-forge/-/node-forge-1.3.1.tgz#be8da2af243b2417d5f646a770663a92b7e9ded3"
   integrity sha512-dPEtOeMvF9VMcYV/1Wb8CPoVAXtp6MKMlcbAt4ddqmGqUJ6fQZFXkNZNkNlfevtNkGtaSoXf/vNNNSvgrdXwtA==
 
 node-gyp@^5.0.2, node-gyp@^7.1.0, node-gyp@^8.0.0, node-gyp@^8.1.0:
   version "8.4.1"
-  resolved "https://registry.npmmirror.com/node-gyp/-/node-gyp-8.4.1.tgz#3d49308fc31f768180957d6b5746845fbd429937"
+  resolved "https://registry.yarnpkg.com/node-gyp/-/node-gyp-8.4.1.tgz#3d49308fc31f768180957d6b5746845fbd429937"
   integrity sha512-olTJRgUtAb/hOXG0E93wZDs5YiJlgbXxTwQAFHyNlRsXQnYzUaF2aGgujZbw+hR8aF4ZG/rST57bWMWD16jr9w==
   dependencies:
     env-paths "^2.2.0"
@@ -10156,7 +10156,7 @@ rx-lite@*, rx-lite@^4.0.8:
 
 rxjs@^6.6.0, rxjs@^7.2.0, rxjs@^7.5.0, rxjs@^7.5.4, rxjs@^7.5.5:
   version "7.5.5"
-  resolved "https://registry.npmmirror.com/rxjs/-/rxjs-7.5.5.tgz#2ebad89af0f560f460ad5cc4213219e1f7dd4e9f"
+  resolved "https://registry.yarnpkg.com/rxjs/-/rxjs-7.5.5.tgz#2ebad89af0f560f460ad5cc4213219e1f7dd4e9f"
   integrity sha512-sy+H0pQofO95VDmFLzyaw9xNJU4KTRSwQIGM6+iG3SypAtCiLDzpeG8sJrNCWn2Up9km+KhkvTdbkrdy+yzZdw==
   dependencies:
     tslib "^2.1.0"
@@ -10495,7 +10495,7 @@ sorted-array-functions@^1.3.0:
 
 sound-play@^1.1.0:
   version "1.1.0"
-  resolved "https://registry.npmmirror.com/sound-play/-/sound-play-1.1.0.tgz#58ffa31d1bf51822d49d91ff7865591fd9376381"
+  resolved "https://registry.yarnpkg.com/sound-play/-/sound-play-1.1.0.tgz#58ffa31d1bf51822d49d91ff7865591fd9376381"
   integrity sha512-Bd/L0AoCwITFeOnpNLMsfPXrV5GG5NhrC/T6odveahYbhPZkdTnrFXRia9FCC5WBWdUTw1d+yvLBvi4wnD1xOA==
 
 source-map-js@^1.0.1:
@@ -11386,7 +11386,7 @@ utils-merge@1.0.1:
 
 uuid@^3.2.1, uuid@^3.3.2, uuid@^7.0.0, uuid@^8.3.2:
   version "7.0.3"
-  resolved "https://registry.npmmirror.com/uuid/-/uuid-7.0.3.tgz#c5c9f2c8cf25dc0a372c4df1441c41f5bd0c680b"
+  resolved "https://registry.yarnpkg.com/uuid/-/uuid-7.0.3.tgz#c5c9f2c8cf25dc0a372c4df1441c41f5bd0c680b"
   integrity sha512-DPSke0pXhTZgoF/d+WSt2QaKMCFSfx7QegxEWT+JOuHF5aWrKEn0G+ztjuJg/gG8/ItK+rbPCD/yNv8yyih6Cg==
 
 v8-compile-cache@^2.0.3:

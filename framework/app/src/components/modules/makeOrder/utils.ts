@@ -6,7 +6,7 @@ import {
 import { dealOrderInputItem } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { h, VNode } from 'vue';
 import { makeOrderConfigKFTypes, orderInputTrans } from './config';
-import VueI18n from '@kungfu-trader/kungfu-app/src/language';
+import VueI18n from '@kungfu-trader/kungfu-js-api/language';
 const { t } = VueI18n.global;
 
 export function dealStockOffset(

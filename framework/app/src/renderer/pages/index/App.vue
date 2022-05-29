@@ -9,10 +9,10 @@ import {
   markClearJournal,
   removeLoadingMask,
   useIpcListener,
-  playSound,
   handleOpenLogviewByFile,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import {
+  playSound,
   useDealExportHistoryTradingData,
   useDealInstruments,
   usePreStartAndQuitApp,
@@ -94,7 +94,7 @@ const busSubscription = globalBus.subscribe((data: KfBusEvent) => {
     }
   }
   if (data.tag === 'update:riskSetting') {
-    setAllRiskSettingList(data.riskSettingList).finally(() => {
+    setAllRiskSettingList(data.riskSettings).finally(() => {
       store.setRiskSettingList();
     });
   }

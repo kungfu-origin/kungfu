@@ -75,7 +75,7 @@ import { openFolder, buildFileObj } from '../../../assets/methods/codeUtils';
 import { FileAddFilled, FolderAddFilled } from '@ant-design/icons-vue';
 import { ipcEmitDataByName } from '../../../ipcMsg/emitter';
 import { messagePrompt } from '../../../assets/methods/uiUtils';
-import VueI18n from '@kungfu-trader/kungfu-app/src/language';
+import VueI18n from '@kungfu-trader/kungfu-js-api/language';
 const { t } = VueI18n.global;
 
 const store = useCodeStore();

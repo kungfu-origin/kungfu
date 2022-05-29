@@ -49,7 +49,7 @@ import {
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import OrderConfirmModal from './OrderConfirmModal.vue';
 import { useExtraCategory } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiExtraLocationUtils';
-import VueI18n from '@kungfu-trader/kungfu-app/src/language';
+import VueI18n from '@kungfu-trader/kungfu-js-api/language';
 import { useTradingTask } from '../tradingTask/utils';
 import { useGlobalStore } from '@kungfu-trader/kungfu-app/src/renderer/pages/index/store/global';
 import { storeToRefs } from 'pinia';
@@ -58,8 +58,9 @@ const { t } = VueI18n.global;
 const { error } = messagePrompt();
 
 const app = getCurrentInstance();
-const { instrumentKeyAccountsMap, whiteListedAccounts, uiExtConfigs } =
-  storeToRefs(useGlobalStore());
+const { instrumentKeyAccountsMap, uiExtConfigs } = storeToRefs(
+  useGlobalStore(),
+);
 
 const { globalSetting } = storeToRefs(useGlobalStore());
 
@@ -244,20 +245,6 @@ watch(
   },
 );
 
-function whiteListInterceptor(
-  accountId: string,
-  instrument: string,
-): Promise<void> {
-  if (whiteListedAccounts.value.includes(accountId)) {
-    if (
-      !(instrumentKeyAccountsMap.value[instrument] || []).includes(accountId)
-    ) {
-      return Promise.reject(new Error(t('白名单设置警告')));
-    }
-  }
-  return Promise.resolve();
-}
-
 // 更新持仓列表
 function updatePositionList(): void {
   if (currentGlobalKfLocation.value === null) {
@@ -335,9 +322,6 @@ function handleResetMakeOrderForm(): void {
 async function handleApartOrder(): Promise<void> {
   try {
     await formRef.value.validate();
-    const { account_id, instrument } = formState.value;
-    await whiteListInterceptor(account_id, instrument);
-
     const makeOrderInput: KungfuApi.MakeOrderInput = await initOrderInputData();
     await showCloseModal(makeOrderInput);
     await confirmFatFingerModal(makeOrderInput);
@@ -466,9 +450,6 @@ async function handleMakeOrder(): Promise<void> {
     if (!currentGlobalKfLocation.value) return;
 
     await formRef.value.validate();
-    const { account_id, instrument } = formState.value;
-    await whiteListInterceptor(account_id, instrument);
-
     const makeOrderInput: KungfuApi.MakeOrderInput = await initOrderInputData();
     await showCloseModal(makeOrderInput);
     await confirmFatFingerModal(makeOrderInput);
