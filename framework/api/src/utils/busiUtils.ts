@@ -1313,7 +1313,7 @@ export const dealStrategyStates = (
   strategyStates: Record<string, KungfuApi.StrategyStateDataOrigin>,
 ) => {
   if (!watcher) {
-    return {} as Record<string, StrategyStateStatusTypes>;
+    return {} as Record<string, KungfuApi.StrategyStateDataOrigin>;
   }
 
   return Object.keys(strategyStates || {}).reduce(
