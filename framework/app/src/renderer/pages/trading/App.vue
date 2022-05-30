@@ -1,19 +1,30 @@
 <script lang="ts" setup>
 import KfDashboard from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfDashboard.vue';
 import TradingTaskItem from './components/TradingTaskItem.vue';
-import { nextTick, onMounted, ref } from 'vue';
+
+import { nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
 import { removeLoadingMask } from '../../assets/methods/uiUtils';
 import { ipcEmitDataByName } from '../../ipcMsg/emitter';
+import { setTimerPromiseTask } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 
 const strategyStatesList = ref<KungfuApi.StrategyStateListItem[]>([]);
 
-onMounted(() => {
-  ipcEmitDataByName('strategyStates').then(({ data }) => {
-    nextTick().then(() => {
-      strategyStatesList.value = dealStrategyStates(data);
-
-      removeLoadingMask();
+const loopGetRiskSettingTimer = setTimerPromiseTask((): Promise<void> => {
+  return new Promise((resolve) => {
+    ipcEmitDataByName('strategyStates').then(({ data }) => {
+      nextTick().then(() => {
+        strategyStatesList.value = dealStrategyStates(data);
+      });
     });
+    resolve();
+  });
+}, 2000);
+
+onMounted(() => {
+  removeLoadingMask();
+
+  onBeforeUnmount(() => {
+    loopGetRiskSettingTimer.clearLoop();
   });
 });
 
@@ -48,11 +59,6 @@ const dealStrategyStates = (
 </template>
 
 <style lang="less">
-@import '@kungfu-trader/kungfu-app/src/renderer/assets/less/base.less';
-@import '@kungfu-trader/kungfu-app/src/renderer/assets/less/public.less';
-@import '@kungfu-trader/kungfu-app/src/renderer/assets/less/coverAnt.less';
-@import '@kungfu-trader/kungfu-app/src/renderer/assets/less/variables.less';
-
 #app {
   width: 100%;
   height: 100%;
@@ -103,61 +109,6 @@ const dealStrategyStates = (
       width: 33.33%;
       box-sizing: border-box;
       padding: 6px;
-    }
-  }
-
-  .kf-trading-view_warp {
-    height: 100%;
-    width: 100%;
-    padding: 0 8px 8px 8px;
-  }
-
-  .kf-log-line {
-    text-align: left;
-    font-size: 14px;
-    user-select: text;
-    padding-bottom: 4px;
-    line-height: 1.5;
-
-    .error {
-      color: lighten(@red2-base, 10%);
-      font-weight: bold;
-    }
-
-    .debug {
-      color: @blue-6;
-      font-weight: bold;
-    }
-
-    .info {
-      color: @green2-base;
-      font-weight: bold;
-    }
-
-    .warning {
-      color: @orange-6;
-      font-weight: bold;
-    }
-
-    .trace {
-      color: @cyan-6;
-      font-weight: bold;
-    }
-
-    .critical {
-      color: lighten(@red2-base, 10%);
-      font-weight: bold;
-    }
-
-    .search-keyword {
-      background: fade(@white, 70%);
-      color: #000;
-      font-weight: normal;
-
-      &.current-search-pointer {
-        background: @primary-color;
-        color: #fff;
-      }
     }
   }
 }
