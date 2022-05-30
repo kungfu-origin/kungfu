@@ -15,6 +15,7 @@ import {
   toRefs,
   watch,
   computed,
+  nextTick,
   defineComponent,
 } from 'vue';
 import {
@@ -138,15 +139,16 @@ watch(
 const instrumentOptionsReactiveData = reactive<{
   data: Record<string, { value: string; label: string }[]>;
 }>({ data: {} });
-watch(
-  computed(() =>
-    Object.keys(instrumentKeys.value).map((key) => ({
-      key,
-      value: formState[key],
-    })),
-  ),
-  (instrumentsInForm) => {
-    instrumentsInForm.forEach((item) => {
+const instrumentsInFrom = computed(() =>
+  Object.keys(instrumentKeys.value).map((key) => ({
+    key,
+    value: formState[key],
+  })),
+);
+watch(instrumentsInFrom, (insts) => {
+  // have to be after watch(() => instrumentKeys.value, xxx)
+  nextTick().then(() => {
+    insts.forEach((item) => {
       instrumentsSearchRelated[item.key]
         .updateSearchInstrumnetOptions(
           instrumentKeys.value[item.key],
@@ -156,8 +158,8 @@ watch(
           instrumentOptionsReactiveData.data[item.key] = options;
         });
     });
-  },
-);
+  });
+});
 
 watch(formState, (newVal) => {
   app && app.emit('update:formState', newVal);
