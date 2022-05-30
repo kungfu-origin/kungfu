@@ -547,4 +547,8 @@ export default {
   系统外: 'Out-of-system',
   手动: 'manual',
   任务: 'task',
+
+  正常: 'normal',
+  异常: 'warn',
+  错误: 'error',
 };

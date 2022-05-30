@@ -71,17 +71,17 @@ export const StrategyStateStatus: Record<
   KungfuApi.KfTradeValueCommonData
 > = {
   ['Normal']: {
-    name: '正常',
+    name: t('正常'),
     color: 'kf-color-running',
     level: 2,
   },
   ['Warn']: {
-    name: '异常',
+    name: t('异常'),
     color: 'kf-color-waiting',
     level: 1,
   },
   ['Error']: {
-    name: '错误',
+    name: t('错误'),
     color: 'kf-color-error',
     level: -1,
   },
