@@ -72,6 +72,12 @@ const dealStrategyStates = (
     height: 100%;
     background: #141414;
 
+    .kf-trading-view_warp {
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+    }
+
     .kf-dashboard__header {
       .kf-dashboard-item__warp {
         .search-in-table__warp {
@@ -93,6 +99,7 @@ const dealStrategyStates = (
       padding: 8px;
       box-sizing: border-box;
       border-radius: 4px;
+      overflow: auto;
     }
     .ant-card-body {
       padding: 24px;
