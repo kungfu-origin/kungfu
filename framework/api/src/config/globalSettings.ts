@@ -201,7 +201,7 @@ export const riskSettingConfig: KfSystemConfig = {
         },
         {
           key: 'self_filled_check',
-          name: t('是否需要自成功检测'),
+          name: t('防止自成交'),
           type: 'bool',
           default: false,
         },

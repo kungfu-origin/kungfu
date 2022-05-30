@@ -71,6 +71,8 @@ import { useExtraCategory } from './uiExtraLocationUtils';
 import { useGlobalStore } from '../../pages/index/store/global';
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
 import { messagePrompt } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
+import sound from 'sound-play';
+import { KUNGFU_RESOURCES_DIR } from '@kungfu-trader/kungfu-js-api/config/pathConfig';
 
 const { t } = VueI18n.global;
 const { success, error } = messagePrompt();
@@ -1294,4 +1296,14 @@ export const useAssets = (): {
     getAssetsByKfConfig,
     getAssetsByTdGroup,
   };
+};
+
+export const playSound = (): void => {
+  const soundPath = path.join(
+    `${path.join(KUNGFU_RESOURCES_DIR, 'music/ding.mp3')}`,
+  );
+  const { globalSetting } = storeToRefs(useGlobalStore());
+  if (globalSetting.value?.trade?.sound) {
+    sound.play(soundPath);
+  }
 };

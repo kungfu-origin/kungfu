@@ -473,7 +473,7 @@ export default {
   柜台: 'Exchange',
   单比最大量: 'Maximum single ratio',
   每日最大成交量: 'Maximum daily turnover',
-  是否需要自成功检测: 'Whether automatic success detection is required',
+  防止自成交: 'Whether automatic success detection is required',
   最大回撤率: 'Maximum withdrawal rate',
   标的白名单: 'white list',
   白名单设置警告: 'Please set the whitelist for this account first',

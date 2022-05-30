@@ -469,14 +469,5 @@ export const useGlobalStore = defineStore('global', {
       });
       return instrumentKeyAccountsMap;
     },
-
-    whiteListedAccounts(): string[] {
-      return this.riskSettings.reduce((prev, cur) => {
-        if (cur.white_list && cur.white_list.length) {
-          prev.push(cur.account_id);
-        }
-        return prev;
-      }, []);
-    },
   },
 });
