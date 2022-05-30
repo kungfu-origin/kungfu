@@ -129,9 +129,7 @@ class ExtensionExecutor:
             site.setup(loader.extension_dir)
             sys.path.insert(0, loader.extension_dir)
         module = importlib.import_module(ctx.group)
-        runner = wc.Runner(
-            ctx.runtime_locator, ctx.group, ctx.name, ctx.low_latency
-        )
+        runner = wc.Runner(ctx.runtime_locator, ctx.group, ctx.name, ctx.low_latency)
         strategy = getattr(module, ctx.category)()
         runner.add_strategy(strategy)
         runner.run()
@@ -143,6 +141,8 @@ class ExtensionExecutor:
         self.run_broker_vendor(wc.TraderVendor)
 
     def run_strategy(self):
+        
+
         loader = self.loader
         if loader.extension_dir:
             site.setup(loader.extension_dir)
