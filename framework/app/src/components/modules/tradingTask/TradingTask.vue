@@ -3,6 +3,7 @@ import {
   handleOpenLogview,
   useDashboardBodySize,
   useTableSearchKeyword,
+  handleOpenTradingView,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import { computed, ref } from 'vue';
 import minimist from 'minimist';
@@ -262,6 +263,11 @@ function getProcessStatusName(record): ProcessStatusTypes {
             :placeholder="$t('keyword_input')"
             style="width: 120px"
           />
+        </KfDashboardItem>
+        <KfDashboardItem>
+          <a-button size="small" @click="handleOpenTradingView()">
+            {{ '查看全部' }}
+          </a-button>
         </KfDashboardItem>
         <KfDashboardItem>
           <a-button

@@ -264,6 +264,10 @@ export const openCodeView = (
   return openNewBrowserWindow('code', `?processId=${processId}`);
 };
 
+export const openTradingView = (): Promise<Electron.BrowserWindow> => {
+  return openNewBrowserWindow('trading', `?processId=tradingTask`);
+};
+
 export const removeLoadingMask = (): void => {
   const $loadingMask = document.getElementById('loading');
   if ($loadingMask) $loadingMask.remove();
@@ -371,6 +375,13 @@ export const handleOpenCodeView = (
 ): Promise<Electron.BrowserWindow> => {
   const openMessage = message.loading(t('open_code_editor'));
   return openCodeView(getProcessIdByKfLocation(config)).finally(() => {
+    openMessage();
+  });
+};
+
+export const handleOpenTradingView = (): Promise<Electron.BrowserWindow> => {
+  const openMessage = message.loading(t('open_code_editor'));
+  return openTradingView().finally(() => {
     openMessage();
   });
 };
