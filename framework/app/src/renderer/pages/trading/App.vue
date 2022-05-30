@@ -1,27 +1,47 @@
 <script lang="ts" setup>
 import KfDashboard from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfDashboard.vue';
-import KfDashboardItem from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfDashboardItem.vue';
-
-import { onMounted } from 'vue';
+import TradingTaskItem from './components/TradingTaskItem.vue';
+import { nextTick, onMounted, ref } from 'vue';
 import { removeLoadingMask } from '../../assets/methods/uiUtils';
+import { ipcEmitDataByName } from '../../ipcMsg/emitter';
+
+const strategyStatesList = ref<KungfuApi.StrategyStateListItem[]>([]);
 
 onMounted(() => {
-  removeLoadingMask();
+  ipcEmitDataByName('strategyStates').then(({ data }) => {
+    nextTick().then(() => {
+      strategyStatesList.value = dealStrategyStates(data);
+
+      removeLoadingMask();
+    });
+  });
 });
+
+const dealStrategyStates = (
+  data: Record<string, KungfuApi.StrategyStateData>,
+): KungfuApi.StrategyStateListItem[] => {
+  return Object.keys(data).reduce((strategyStatesItem, key) => {
+    if (data[key]?.info_a) {
+      strategyStatesItem.push({
+        ...JSON.parse(data[key]?.info_a),
+        value: data[key]?.value,
+        process_id: key,
+      });
+    }
+    return strategyStatesItem;
+  }, [] as KungfuApi.StrategyStateListItem[]);
+};
 </script>
 
 <template>
   <a-layout>
     <div class="kf-trading-view_warp">
       <KfDashboard>
-        <template v-slot:header>
-          <KfDashboardItem>
-            <a-button size="small" type="primary">
-              {{ $t('clean') }}
-            </a-button>
-          </KfDashboardItem>
-        </template>
-        <div class="task-content">123124</div>
+        <div class="task-content">
+          <div class="trade-item" v-for="item in strategyStatesList">
+            <TradingTaskItem :strategyStatesItem="item"></TradingTaskItem>
+          </div>
+        </div>
       </KfDashboard>
     </div>
   </a-layout>
@@ -44,7 +64,7 @@ onMounted(() => {
 
   .ant-layout {
     height: 100%;
-    background: @component-background;
+    background: #141414;
 
     .kf-dashboard__header {
       .kf-dashboard-item__warp {
@@ -63,16 +83,27 @@ onMounted(() => {
     }
 
     .kf-dashboard__body {
-      background: #000;
+      background: #141414;
       padding: 8px;
       box-sizing: border-box;
       border-radius: 4px;
     }
+    .ant-card-body {
+      padding: 24px;
+    }
   }
   .task-content {
-    height: 400px;
     width: 100%;
     padding: 0 8px 8px 8px;
+    display: flex;
+    box-sizing: border-box;
+    flex-wrap: wrap;
+
+    .trade-item {
+      width: 33.33%;
+      box-sizing: border-box;
+      padding: 6px;
+    }
   }
 
   .kf-trading-view_warp {
