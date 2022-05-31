@@ -215,7 +215,7 @@ class KungfuCoreConan(ConanFile):
     def __run_yarn(self, exit_on_error, *args):
         rc = psutil.Popen([tools.which("yarn"), *args]).wait()
         if rc != 0:
-            self.output.error(f"yarn {args} failed")
+            self.output.error(f"yarn {args} failed with return code {rc}")
             if exit_on_error:
                 sys.exit(rc)
         return rc
@@ -275,7 +275,7 @@ class KungfuCoreConan(ConanFile):
         ]  # workaround for msvc
         tools.rmdir(self.build_extensions_dir)
         rc = self.__run_yarn(exit_on_error, *self.__build_cmake_js_cmd(cmd, runtime))
-        self.output.success(f"cmake-js {cmd} done")
+        self.output.success(f"cmake-js {cmd} done with return code {rc}")
         return rc
 
     def __run_build(self, build_type, runtime):
