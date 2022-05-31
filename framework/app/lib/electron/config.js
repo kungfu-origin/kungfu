@@ -128,7 +128,7 @@ module.exports = {
   },
 
   afterAllArtifactBuild: (result) => {
-    if (os.platform === 'win32') {
+    if (os.platform() === 'win32') {
       fse.removeSync(path.join(result.outDir, 'win-unpacked'));
     }
   },
