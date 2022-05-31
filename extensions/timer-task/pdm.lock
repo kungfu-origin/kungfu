@@ -1,50 +1,6 @@
-[[package]]
-name = "argparse"
-version = "1.4.0"
-summary = "Python command-line parsing library"
-
-[[package]]
-name = "dotted-dict"
-version = "1.1.3"
-summary = "dict object with support for addressing keys in dot notation."
-
-[[package]]
-name = "recordclass"
-version = "0.17.2"
-summary = "Mutable variant of namedtuple -- recordclass, which support assignments, and other memory saving variants."
-
-[[package]]
-name = "sortedcontainers"
-version = "2.4.0"
-summary = "Sorted Containers -- Sorted List, Sorted Dict, Sorted Set"
 
 [metadata]
 lock_version = "3.1"
-content_hash = "sha256:86a9b32b69215b76ab95860abe2160ef8762b8fbefa8b659ef2a022bb2aca3e8"
+content_hash = "sha256:b507eb20f31b64a8c14a0121705b8f8be0de71abfd358f79210566f54e26fc9b"
 
 [metadata.files]
-"argparse 1.4.0" = [
-    {file = "argparse-1.4.0-py2.py3-none-any.whl", hash = "sha256:c31647edb69fd3d465a847ea3157d37bed1f95f19760b11a47aa91c04b666314"},
-    {file = "argparse-1.4.0.tar.gz", hash = "sha256:62b089a55be1d8949cd2bc7e0df0bddb9e028faefc8c32038cc84862aefdd6e4"},
-]
-"dotted-dict 1.1.3" = [
-    {file = "dotted_dict-1.1.3-py2.py3-none-any.whl", hash = "sha256:a78600ee63c6473581234249cc56263d472b31e812428e28f2217bbbbfb9df22"},
-    {file = "dotted_dict-1.1.3.tar.gz", hash = "sha256:f148a1c15598db8295551ed1555bd35b91dec49359bec7b4657e9b2f35526965"},
-]
-"recordclass 0.17.2" = [
-    {file = "recordclass-0.17.2-cp310-cp310-win32.whl", hash = "sha256:a3280b91447dc29e0d3db94893ce88baba61b47ed3912086c35b26a3a0e287a7"},
-    {file = "recordclass-0.17.2-cp310-cp310-win_amd64.whl", hash = "sha256:fea536e857c82c1e124f7bf49a624644b7beb996001f3f4232bebe6e5900af1e"},
-    {file = "recordclass-0.17.2-cp36-cp36m-win32.whl", hash = "sha256:81381e9268c1449b510fe747bcf2755eee50e44011921b8b4cea9f983b4f9ca2"},
-    {file = "recordclass-0.17.2-cp36-cp36m-win_amd64.whl", hash = "sha256:077f7b0af87331c5d9dc079023bf218fe998d7e13edef28386579458069ffedc"},
-    {file = "recordclass-0.17.2-cp37-cp37m-win32.whl", hash = "sha256:0cb07d9646f8c741831009f4da1f1a46ac3b87ee18fc9e3ec4b1961c9003e4d9"},
-    {file = "recordclass-0.17.2-cp37-cp37m-win_amd64.whl", hash = "sha256:adf552d27bad6a9ce2b234df16af0ef9e66fb56cf232b37c15e0ea844ac02466"},
-    {file = "recordclass-0.17.2-cp38-cp38-win32.whl", hash = "sha256:42da9066081762967b63c2962b8492b0ae0e1e5ef407c4c5e3c033cb70025943"},
-    {file = "recordclass-0.17.2-cp38-cp38-win_amd64.whl", hash = "sha256:748b7feea32395a5f8a25e8ce8a5b79c52b5836b3b72af333d2d61280cfca6af"},
-    {file = "recordclass-0.17.2-cp39-cp39-win32.whl", hash = "sha256:b21f73af7c621f0eb2ad1165a492c9b8b29eeec0a12951ce94a7ecd597779bcb"},
-    {file = "recordclass-0.17.2-cp39-cp39-win_amd64.whl", hash = "sha256:a82d9928c61d3aae9420f024c013e9ff579704c916f562b637a7dbf55ff419bc"},
-    {file = "recordclass-0.17.2.tar.gz", hash = "sha256:7a6bd410e29095f7f947a3106e10b6354945029309cc2c9f301f491a797293da"},
-]
-"sortedcontainers 2.4.0" = [
-    {file = "sortedcontainers-2.4.0-py2.py3-none-any.whl", hash = "sha256:a163dcaede0f1c021485e957a39245190e74249897e2ae4b2aa38595db237ee0"},
-    {file = "sortedcontainers-2.4.0.tar.gz", hash = "sha256:25caa5a06cc30b6b83d11423433f65d1f9d76c4c6a0c90e3379eaa43b9bfdb88"},
-]
