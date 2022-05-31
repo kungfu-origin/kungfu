@@ -5,7 +5,7 @@
     "name": "kungfu-trader",
     "email": "info@kungfu.link"
   },
-  "version": "2.4.0-alpha.54",
+  "version": "2.4.0-alpha.55",
   "description": "Kungfu Trader Artifact",
   "license": "Apache-2.0",
   "private": true,
@@ -22,13 +22,13 @@
     "cli": "yarn kfs craft cli"
   },
   "dependencies": {
-    "@kungfu-trader/kfx-sim": "^2.4.0-alpha.54",
-    "@kungfu-trader/kfx-task-timer-task": "^2.4.0-alpha.54",
-    "@kungfu-trader/kfx-xtp-demo": "^2.4.0-alpha.54",
-    "@kungfu-trader/kungfu-app": "^2.4.0-alpha.54",
-    "@kungfu-trader/kungfu-cli": "^2.4.0-alpha.54"
+    "@kungfu-trader/kfx-sim": "^2.4.0-alpha.55",
+    "@kungfu-trader/kfx-task-timer-task": "^2.4.0-alpha.55",
+    "@kungfu-trader/kfx-xtp-demo": "^2.4.0-alpha.55",
+    "@kungfu-trader/kungfu-app": "^2.4.0-alpha.55",
+    "@kungfu-trader/kungfu-cli": "^2.4.0-alpha.55"
   },
   "devDependencies": {
-    "@kungfu-trader/kungfu-sdk": "^2.4.0-alpha.54"
+    "@kungfu-trader/kungfu-sdk": "^2.4.0-alpha.55"
   }
 }
