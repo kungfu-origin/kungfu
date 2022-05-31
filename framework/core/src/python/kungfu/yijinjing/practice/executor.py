@@ -141,8 +141,6 @@ class ExtensionExecutor:
         self.run_broker_vendor(wc.TraderVendor)
 
     def run_strategy(self):
-        
-
         loader = self.loader
         if loader.extension_dir:
             site.setup(loader.extension_dir)

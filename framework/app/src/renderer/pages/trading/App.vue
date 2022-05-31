@@ -102,7 +102,7 @@ const dealStrategyStates = (
       overflow: auto;
     }
     .ant-card-body {
-      padding: 24px;
+      padding: 16px 24px 2px;
     }
   }
   .task-content {

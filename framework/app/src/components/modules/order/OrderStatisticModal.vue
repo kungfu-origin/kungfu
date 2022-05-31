@@ -14,12 +14,12 @@ const props = withDefaults(
   defineProps<{
     visible: boolean;
     orders: KungfuApi.OrderResolved[];
-    historyDate?: Dayjs;
+    historyDate?: null | Dayjs;
   }>(),
   {
     visible: false,
     orders: () => [],
-    historyDate: () => null,
+    historyDate: null,
   },
 );
 
