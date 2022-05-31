@@ -67,7 +67,7 @@ class KungfuCoreConan(ConanFile):
     build_extensions_dir = path.join(build_dir, "build_extensions")
     dist_dir = path.join(conanfile_dir, "dist")
     kfc_dir = path.join(dist_dir, "kfc")
-    max_recompile_times = 5 if "CI" in environ else 1
+    max_recompile_times = 3 if "CI" in environ else 1
 
     def source(self):
         """Performs clang-format on all C++ files"""
