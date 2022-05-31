@@ -55,7 +55,7 @@ class KungfuCoreConan(ConanFile):
         "freezer": "pyinstaller",
         "node_version": "ANY",
         "electron_version": "ANY",
-        "vs_toolset": "ClangCL",
+        "vs_toolset": None,
     }
     cpp_files_extensions = [".h", ".hpp", ".hxx", ".cpp", ".c", ".cc", ".cxx"]
     conanfile_dir = path.dirname(path.realpath(__file__))
@@ -67,7 +67,7 @@ class KungfuCoreConan(ConanFile):
     build_extensions_dir = path.join(build_dir, "build_extensions")
     dist_dir = path.join(conanfile_dir, "dist")
     kfc_dir = path.join(dist_dir, "kfc")
-    max_recompile_times = 3 if "CI" in environ else 1
+    max_recompile_times = 1
 
     def source(self):
         """Performs clang-format on all C++ files"""
@@ -80,7 +80,7 @@ class KungfuCoreConan(ConanFile):
         if tools.detected_os() != "Windows":
             self.settings.compiler.libcxx = "libstdc++"
         else:
-            self.settings.compiler.toolset = self.options.vs_toolset
+            self.settings.compiler.toolset = self.options.vs_toolset if "CI" not in environ else "ClangCL"
 
     def generate(self):
         """Updates mtime of lock files for node-gyp sake"""
