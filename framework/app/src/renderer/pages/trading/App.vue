@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import KfDashboard from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfDashboard.vue';
 import TradingTaskItem from './components/TradingTaskItem.vue';
-
+import { Empty } from 'ant-design-vue';
 import { nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
 import { removeLoadingMask } from '../../assets/methods/uiUtils';
 import { ipcEmitDataByName } from '../../ipcMsg/emitter';
@@ -48,10 +48,16 @@ const dealStrategyStates = (
   <a-layout>
     <div class="kf-trading-view_warp">
       <KfDashboard>
-        <div class="task-content">
+        <div class="task-content" v-if="strategyStatesList.length">
           <div class="trade-item" v-for="item in strategyStatesList">
             <TradingTaskItem :strategyStatesItem="item"></TradingTaskItem>
           </div>
+        </div>
+        <div v-else>
+          <a-empty
+            :image="Empty.PRESENTED_IMAGE_SIMPLE"
+            :description="$t('empty_text')"
+          />
         </div>
       </KfDashboard>
     </div>
