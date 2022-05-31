@@ -1,4 +1,6 @@
 const path = require('path');
+const os = require('os');
+const fse = require('fs-extra');
 const kungfuCore = require('@kungfu-trader/kungfu-core/package.json');
 const {
   getAppDir,
@@ -123,5 +125,11 @@ module.exports = {
     installerHeaderIcon: `${appDir}/public/logo/icon.ico`,
     createDesktopShortcut: true,
     createStartMenuShortcut: true,
+  },
+
+  afterAllArtifactBuild: (result) => {
+    if (os.platform === 'win32') {
+      fse.removeSync(path.join(result.outDir, 'win-unpacked'));
+    }
   },
 };
