@@ -1,10 +1,10 @@
 {
-  "name": "@kungfu-trader/kfx-timer-task",
+  "name": "@kungfu-trader/kfx-task-timer-task",
   "author": {
     "name": "kungfu-trader",
     "email": "info@kungfu.link"
   },
-  "version": "2.4.0-alpha.52",
+  "version": "2.4.0-alpha.55",
   "description": "Kungfu Extension - Timer Task",
   "license": "Apache-2.0",
   "main": "package.json",
@@ -28,7 +28,7 @@
     "package": "kfs project package"
   },
   "devDependencies": {
-    "@kungfu-trader/kungfu-sdk": "^2.4.0-alpha.52"
+    "@kungfu-trader/kungfu-sdk": "^2.4.0-alpha.55"
   },
   "kungfuBuild": {
     "python": {

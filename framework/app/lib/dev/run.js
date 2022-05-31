@@ -194,14 +194,14 @@ const run = (distDir, distName = 'app', withWebpack) => {
   greeting();
 
   const appDir = getAppDir();
+  const extdirs = getExtensionDirs();
+  const kfcDir = getKfcDir();
+
   if (withWebpack) {
     process.chdir(appDir);
   } else {
     process.chdir(process.cwd());
   }
-
-  const kfcDir = getKfcDir();
-  const extdirs = getExtensionDirs();
 
   process.env.KFC_DIR = kfcDir;
   process.env.KFC_DEV = true;
