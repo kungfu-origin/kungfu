@@ -101,9 +101,11 @@ Watcher::Watcher(const Napi::CallbackInfo &info)
 
 Watcher::~Watcher() {
   start_ = false;
+  strategy_states_ref_.Unref();
   app_states_ref_.Unref();
   ledger_ref_.Unref();
   state_ref_.Unref();
+  commission_ref_.Unref();
   config_ref_.Unref();
   history_ref_.Unref();
 }

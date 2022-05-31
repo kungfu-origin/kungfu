@@ -14,6 +14,7 @@ import sys
 from conans import ConanFile
 from conans import tools
 from distutils import sysconfig
+from os import environ
 from os import path
 
 with open(path.join("package.json"), "r") as package_json_file:
@@ -66,6 +67,7 @@ class KungfuCoreConan(ConanFile):
     build_extensions_dir = path.join(build_dir, "build_extensions")
     dist_dir = path.join(conanfile_dir, "dist")
     kfc_dir = path.join(dist_dir, "kfc")
+    max_recompile_times = 3 if "CI" in environ else 1
 
     def source(self):
         """Performs clang-format on all C++ files"""
@@ -210,11 +212,13 @@ class KungfuCoreConan(ConanFile):
             build_version = build_info["version"]
             self.output.success(f"build version {build_version}")
 
-    def __run_yarn(self, *args):
+    def __run_yarn(self, exit_on_error, *args):
         rc = psutil.Popen([tools.which("yarn"), *args]).wait()
         if rc != 0:
             self.output.error(f"yarn {args} failed")
-            sys.exit(rc)
+            if exit_on_error:
+                sys.exit(rc)
+        return rc
 
     def __build_cmake_js_cmd(self, cmd, runtime="node"):
         spdlog_levels = {
@@ -263,19 +267,28 @@ class KungfuCoreConan(ConanFile):
             + [cmd]
         )
 
-    def __run_cmake_js(self, build_type, cmd, runtime="node"):
+    def __run_cmake_js(self, build_type, cmd, runtime, exit_on_error):
         [
             os.environ.pop(env_key)
             for env_key in os.environ
             if env_key.startswith("npm_") or env_key.startswith("NPM_")
         ]  # workaround for msvc
         tools.rmdir(self.build_extensions_dir)
-        self.__run_yarn(*self.__build_cmake_js_cmd(cmd, runtime))
+        rc = self.__run_yarn(exit_on_error, *self.__build_cmake_js_cmd(cmd, runtime))
         self.output.success(f"cmake-js {cmd} done")
+        return rc
 
     def __run_build(self, build_type, runtime):
-        self.__run_cmake_js(build_type, "configure", runtime)
-        self.__run_cmake_js(build_type, "build", runtime)
+        self.__run_cmake_js(build_type, "configure", runtime, True)
+        compile_times = 1
+        while compile_times <= self.max_recompile_times:
+            self.output.info(f"compile round {compile_times} with runtime {runtime}")
+            rc = self.__run_cmake_js(
+                build_type, "build", runtime, compile_times == self.max_recompile_times
+            )
+            if rc == 0:
+                break
+            compile_times += 1
 
     def __run_pyinstaller(self, build_type):
         pathlib.Path(self.__get_build_info_path(build_type)).touch()
@@ -296,7 +309,10 @@ class KungfuCoreConan(ConanFile):
     def __run_nuitka(self, build_type):
         with tools.chdir(path.pardir):
             self.__run_yarn(
-                "nuitka", "--output-dir=build", path.join("src", "python", "kfc.py")
+                True,
+                "nuitka",
+                "--output-dir=build",
+                path.join("src", "python", "kfc.py"),
             )
         kfc_dist_dir = path.join(self.build_dir, "kfc.dist")
         shutil.copytree(build_type, kfc_dist_dir)
