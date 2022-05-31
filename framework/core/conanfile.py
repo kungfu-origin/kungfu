@@ -55,7 +55,7 @@ class KungfuCoreConan(ConanFile):
         "freezer": "pyinstaller",
         "node_version": "ANY",
         "electron_version": "ANY",
-        "vs_toolset": None,
+        "vs_toolset": None if "CI" in environ else "ClangCL",
     }
     cpp_files_extensions = [".h", ".hpp", ".hxx", ".cpp", ".c", ".cc", ".cxx"]
     conanfile_dir = path.dirname(path.realpath(__file__))
