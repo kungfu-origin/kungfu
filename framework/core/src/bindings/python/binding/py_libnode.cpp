@@ -1,13 +1,6 @@
-//
-// Created by Keren Dong on 2021/8/13.
-//
-
-#ifndef KUNGFU_PY_LIBNODE_HPP
-#define KUNGFU_PY_LIBNODE_HPP
-
 #include <node.h>
-#include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
+
+#include "py_libnode.h"
 
 namespace kungfu::libnode {
 namespace py = pybind11;
@@ -40,6 +33,5 @@ void run(const py::args &args, const py::kwargs &kwargs) {
   delete[] argv;
 }
 
-void bind(pybind11::module &&m) { m.def("run", &run); }
+void bind(py::module &&m) { m.def("run", &run); }
 } // namespace kungfu::libnode
-#endif // KUNGFU_PY_LIBNODE_HPP

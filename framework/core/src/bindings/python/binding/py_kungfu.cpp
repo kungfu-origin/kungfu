@@ -13,10 +13,10 @@
  *  limitations under the License.
  *****************************************************************************/
 
-#include "py_libnode.hpp"
-#include "py_longfist.hpp"
-#include "py_wingchun.hpp"
-#include "py_yijinjing.hpp"
+#include "py_libnode.h"
+#include "py_longfist.h"
+#include "py_wingchun.h"
+#include "py_yijinjing.h"
 
 namespace py = pybind11;
 

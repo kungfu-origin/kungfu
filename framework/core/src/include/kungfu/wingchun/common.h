@@ -79,9 +79,7 @@ static const std::unordered_map<std::string, longfist::enums::InstrumentType> g_
     {EXCHANGE_WIDX, longfist::enums::InstrumentType::Future},
     {EXCHANGE_FREX, longfist::enums::InstrumentType::Future},
     {EXCHANGE_METL, longfist::enums::InstrumentType::Future},
-    {EXCHANGE_IPM, longfist::enums::InstrumentType::Future}
-};
-
+    {EXCHANGE_IPM, longfist::enums::InstrumentType::Future}};
 
 class wingchun_error : public std::runtime_error {
 public:

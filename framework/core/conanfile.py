@@ -56,7 +56,9 @@ class KungfuCoreConan(ConanFile):
         "freezer": "pyinstaller",
         "node_version": "ANY",
         "electron_version": "ANY",
-        "vs_toolset": None if "CI" not in environ else "ClangCL",
+        # can not use clang until this bug got fixed:
+        # https://developercommunity.visualstudio.com/t/msbuild-doesnt-give-delayload-flags-to-linker-when/1595015
+        "vs_toolset": None,
         "max_recompile_times": 1,
     }
     cpp_files_extensions = [".h", ".hpp", ".hxx", ".cpp", ".c", ".cc", ".cxx"]
