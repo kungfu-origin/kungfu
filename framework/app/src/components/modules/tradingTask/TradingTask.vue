@@ -3,7 +3,6 @@ import {
   handleOpenLogview,
   useDashboardBodySize,
   useTableSearchKeyword,
-  handleOpenTradingView,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import { computed, ref } from 'vue';
 import minimist from 'minimist';
@@ -81,6 +80,19 @@ const { searchKeyword, tableData } =
 
 const { dealRowClassName, setCurrentGlobalKfLocation } =
   useCurrentGlobalKfLocation(window.watcher);
+
+const { uiExtConfigs } = useExtConfigsRelated();
+
+const globalSettingComponentConfigs = computed(() => {
+  return Object.keys(uiExtConfigs.value)
+    .filter((key) => uiExtConfigs.value[key].position === 'trading_task_view')
+    .map((key) => {
+      return {
+        ...uiExtConfigs.value[key],
+        key,
+      };
+    });
+});
 
 function handleOpenSetTaskDialog() {
   setExtensionModalVisible.value = true;
@@ -264,10 +276,8 @@ function getProcessStatusName(record): ProcessStatusTypes {
             style="width: 120px"
           />
         </KfDashboardItem>
-        <KfDashboardItem>
-          <a-button size="small" @click="handleOpenTradingView()">
-            {{ '查看全部' }}
-          </a-button>
+        <KfDashboardItem v-for="config in globalSettingComponentConfigs">
+          <component :is="config.key"></component>
         </KfDashboardItem>
         <KfDashboardItem>
           <a-button

@@ -165,7 +165,8 @@ export type KfUIExtLocatorTypes =
   | 'sidebar_footer'
   | 'board'
   | 'global_setting'
-  | 'make_order';
+  | 'make_order'
+  | 'trading_task_view';
 
 export enum KfModeEnum {
   live,

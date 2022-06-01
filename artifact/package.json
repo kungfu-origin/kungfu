@@ -5,7 +5,7 @@
     "name": "kungfu-trader",
     "email": "info@kungfu.link"
   },
-  "version": "2.4.0-alpha.55",
+  "version": "2.4.0-alpha.56",
   "description": "Kungfu Trader Artifact",
   "license": "Apache-2.0",
   "private": true,
@@ -30,6 +30,6 @@
     "@kungfu-trader/kungfu-cli": "^2.4.0-alpha.53"
   },
   "devDependencies": {
-    "@kungfu-trader/kungfu-sdk": "^2.4.0-alpha.55"
+    "@kungfu-trader/kungfu-sdk": "^2.4.0-alpha.56"
   }
 }

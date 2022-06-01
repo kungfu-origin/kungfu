@@ -55,7 +55,7 @@ class KungfuCoreConan(ConanFile):
         "freezer": "pyinstaller",
         "node_version": "ANY",
         "electron_version": "ANY",
-        "vs_toolset": None,
+        "vs_toolset": None if "CI" not in environ else "ClangCL",
     }
     cpp_files_extensions = [".h", ".hpp", ".hxx", ".cpp", ".c", ".cc", ".cxx"]
     conanfile_dir = path.dirname(path.realpath(__file__))
@@ -67,7 +67,7 @@ class KungfuCoreConan(ConanFile):
     build_extensions_dir = path.join(build_dir, "build_extensions")
     dist_dir = path.join(conanfile_dir, "dist")
     kfc_dir = path.join(dist_dir, "kfc")
-    max_recompile_times = 3 if "CI" in environ else 1
+    max_recompile_times = 1
 
     def source(self):
         """Performs clang-format on all C++ files"""
@@ -215,7 +215,7 @@ class KungfuCoreConan(ConanFile):
     def __run_yarn(self, exit_on_error, *args):
         rc = psutil.Popen([tools.which("yarn"), *args]).wait()
         if rc != 0:
-            self.output.error(f"yarn {args} failed")
+            self.output.error(f"yarn {args} failed with return code {rc}")
             if exit_on_error:
                 sys.exit(rc)
         return rc
@@ -275,7 +275,7 @@ class KungfuCoreConan(ConanFile):
         ]  # workaround for msvc
         tools.rmdir(self.build_extensions_dir)
         rc = self.__run_yarn(exit_on_error, *self.__build_cmake_js_cmd(cmd, runtime))
-        self.output.success(f"cmake-js {cmd} done")
+        self.output.success(f"cmake-js {cmd} done with return code {rc}")
         return rc
 
     def __run_build(self, build_type, runtime):
