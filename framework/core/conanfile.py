@@ -55,7 +55,7 @@ class KungfuCoreConan(ConanFile):
         "freezer": "pyinstaller",
         "node_version": "ANY",
         "electron_version": "ANY",
-        "vs_toolset": None,
+        "vs_toolset": None if "CI" not in environ else "ClangCL",
     }
     cpp_files_extensions = [".h", ".hpp", ".hxx", ".cpp", ".c", ".cc", ".cxx"]
     conanfile_dir = path.dirname(path.realpath(__file__))
@@ -80,7 +80,7 @@ class KungfuCoreConan(ConanFile):
         if tools.detected_os() != "Windows":
             self.settings.compiler.libcxx = "libstdc++"
         else:
-            self.settings.compiler.toolset = self.options.vs_toolset if "CI" not in environ else "ClangCL"
+            self.settings.compiler.toolset = self.options.vs_toolset
 
     def generate(self):
         """Updates mtime of lock files for node-gyp sake"""
