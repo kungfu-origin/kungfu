@@ -50,7 +50,7 @@ export const writeCSV = (
 
 //获取文件内容
 export const getFileContent = (targetPath: string): Promise<string> => {
-  if (!targetPath) throw new Error(t('文件路径不存在！'));
+  if (!targetPath) throw new Error(t('文件路径不存在'));
   targetPath = path.normalize(targetPath);
   return new Promise((resolve, reject): void => {
     const file = fse.createReadStream(targetPath);

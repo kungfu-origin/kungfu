@@ -492,13 +492,13 @@ export default {
     current_strategy: 'Current strategy',
     new_file: 'New File',
     new_folder: 'New Folder',
-    set_strategy_success: 'Strategy {file} file path changed successfully!',
+    set_strategy_success: 'Strategy {file} file path changed successfully',
     entry_file: 'Entry File',
-    creaate_success: '{file} created successfully!',
+    creaate_success: '{file} created successfully',
 
     name_repeat:
-      'This location already exists file or folder {name}, please select a different name!',
-    empty_input: 'File or folder name must be provided!',
+      'This location already exists file or folder {name}, please select a different name',
+    empty_input: 'File or folder name must be provided',
     illegal_character: 'The name cannot contain \\/:*?" <>|',
     delate_confirm: 'Are you sure to delete {value}?',
     cannot_delate_entry: 'Cannot delete the entry',
@@ -548,5 +548,5 @@ export default {
   手动: 'manual',
   任务: 'task',
 
-  文件路径不存在: 'The file path does not exist!',
+  文件路径不存在: 'The file path does not exist',
 };
