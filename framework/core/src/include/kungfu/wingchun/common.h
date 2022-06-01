@@ -51,6 +51,7 @@
 #define SOURCE_SIM "sim"
 #define SOURCE_CTP "ctp"
 #define SOURCE_XTP "xtp"
+#define SOURCE_BAC "bac"
 
 #define EPSILON (1e-6)
 #define DOUBLEMAX (1e16) // 一亿亿, 2018年A股总市值不到50万亿
