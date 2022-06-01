@@ -83,7 +83,7 @@ const { dealRowClassName, setCurrentGlobalKfLocation } =
 
 const { uiExtConfigs } = useExtConfigsRelated();
 
-const globalSettingComponentConfigs = computed(() => {
+const TradingTaskViewComponentConfigs = computed(() => {
   return Object.keys(uiExtConfigs.value)
     .filter((key) => uiExtConfigs.value[key].position === 'trading_task_view')
     .map((key) => {
@@ -278,7 +278,7 @@ function getProcessStatusName(
             style="width: 120px"
           />
         </KfDashboardItem>
-        <KfDashboardItem v-for="config in globalSettingComponentConfigs">
+        <KfDashboardItem v-for="config in TradingTaskViewComponentConfigs">
           <component :is="config.key"></component>
         </KfDashboardItem>
         <KfDashboardItem>
