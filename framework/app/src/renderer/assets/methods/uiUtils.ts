@@ -265,7 +265,7 @@ export const openCodeView = (
 };
 
 export const openTradingTaskView = (): Promise<Electron.BrowserWindow> => {
-  return openNewBrowserWindow('trading', `?processId=tradingTask`);
+  return openNewBrowserWindow('tradingTask', '');
 };
 
 export const removeLoadingMask = (): void => {
