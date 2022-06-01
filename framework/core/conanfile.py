@@ -44,6 +44,7 @@ class KungfuCoreConan(ConanFile):
         "node_version": "ANY",
         "electron_version": "ANY",
         "vs_toolset": [None, "ClangCL"],
+        "max_recompile_times": range(1, 10),
     }
     default_options = {
         "fmt:header_only": "True",
@@ -56,6 +57,7 @@ class KungfuCoreConan(ConanFile):
         "node_version": "ANY",
         "electron_version": "ANY",
         "vs_toolset": None if "CI" not in environ else "ClangCL",
+        "max_recompile_times": 1,
     }
     cpp_files_extensions = [".h", ".hpp", ".hxx", ".cpp", ".c", ".cc", ".cxx"]
     conanfile_dir = path.dirname(path.realpath(__file__))
@@ -67,7 +69,6 @@ class KungfuCoreConan(ConanFile):
     build_extensions_dir = path.join(build_dir, "build_extensions")
     dist_dir = path.join(conanfile_dir, "dist")
     kfc_dir = path.join(dist_dir, "kfc")
-    max_recompile_times = 1
 
     def source(self):
         """Performs clang-format on all C++ files"""
@@ -280,11 +281,15 @@ class KungfuCoreConan(ConanFile):
 
     def __run_build(self, build_type, runtime):
         self.__run_cmake_js(build_type, "configure", runtime, True)
+        max_recompile_times = int(self.options.max_recompile_times)
         compile_times = 1
-        while compile_times <= self.max_recompile_times:
-            self.output.info(f"compile round {compile_times} with runtime {runtime}")
+        while compile_times <= max_recompile_times:
+            self.output.info(f"compile [{compile_times}] with runtime {runtime}")
             rc = self.__run_cmake_js(
-                build_type, "build", runtime, compile_times == self.max_recompile_times
+                build_type,
+                "build",
+                runtime,
+                compile_times == max_recompile_times,
             )
             if rc == 0:
                 break
