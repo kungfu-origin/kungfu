@@ -1,9 +1,4 @@
-//
-// Created by Keren Dong on 2020/1/30.
-//
-
-#ifndef KUNGFU_PY_LONGFIST_HPP
-#define KUNGFU_PY_LONGFIST_HPP
+#include "py_longfist.h"
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
@@ -97,7 +92,7 @@ template <typename DataType> void bind_data_type(pybind11::module &m_types, cons
   py_class.def("__parse__", [&](DataType &target, std::string &s) { target.parse(s.c_str(), s.length()); });
 }
 
-void bind(pybind11::module &&m) {
+void bind(py::module &&m) {
   using namespace kungfu::longfist::enums;
   auto m_enums = m.def_submodule("enums");
 
@@ -289,5 +284,3 @@ void bind(pybind11::module &&m) {
   });
 }
 } // namespace kungfu::longfist
-
-#endif // KUNGFU_PY_LONGFIST_HPP

@@ -23,6 +23,8 @@ import {
 } from '../config/pathConfig';
 import { getKfGlobalSettingsValue } from '../config/globalSettings';
 import { Observable } from 'rxjs';
+import VueI18n from '@kungfu-trader/kungfu-js-api/language';
+const { t } = VueI18n.global;
 
 process.env.PM2_HOME = path.resolve(os.homedir(), '.pm2');
 const numCPUs = os.cpus() ? os.cpus().length : 1;
@@ -359,7 +361,7 @@ export const graceStopProcess = (
   const processId = getProcessIdByKfLocation(kfLocation);
   if (getIfProcessRunning(processStatusData, processId)) {
     if (watcher && !watcher.isReadyToInteract(kfLocation)) {
-      return Promise.reject(new Error(`${processId} 还未准备就绪, 请稍后重试`));
+      return Promise.reject(new Error(t('未就绪', { processId })));
     }
 
     return stopProcess(processId);
@@ -378,7 +380,7 @@ export const graceDeleteProcess = (
   const processId = getProcessIdByKfLocation(kfLocation);
   if (getIfProcessRunning(processStatusData, processId)) {
     if (watcher && !watcher.isReadyToInteract(kfLocation)) {
-      return Promise.reject(new Error(`${processId} 还未准备就绪, 请稍后重试`));
+      return Promise.reject(new Error(t('未就绪', { processId })));
     }
 
     return deleteProcess(processId);

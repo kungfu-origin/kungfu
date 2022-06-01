@@ -3,6 +3,11 @@ const fs = require('fs');
 const glob = require('glob');
 const path = require('path');
 
+const clean = () => {
+  fs.rmSync('dist', { recursive: true, force: true });
+  fs.rmSync('build', { recursive: true, force: true });
+};
+
 module.exports = require('@kungfu-trader/kungfu-core').sywac(module, (cli) => {
   const node_pre_gyp = (cmd, check = true) => {
     const buildType = process.env.npm_package_config_build_type;
@@ -20,10 +25,9 @@ module.exports = require('@kungfu-trader/kungfu-core').sywac(module, (cli) => {
       );
     })
     .command('build', () => node_pre_gyp(['configure', 'build']))
-    .command('clean', () => node_pre_gyp(['clean']))
+    .command('clean', () => clean())
     .command('rebuild', () => {
-      fs.rmSync('dist', { recursive: true, force: true });
-      fs.rmSync('build', { recursive: true, force: true });
+      clean();
       node_pre_gyp(['configure', 'build']);
     })
     .command('package', () => {

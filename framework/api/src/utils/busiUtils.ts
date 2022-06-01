@@ -65,7 +65,8 @@ import {
 import { Proc } from 'pm2';
 import { listDir, removeTargetFilesInFolder } from './fileUtils';
 import minimist from 'minimist';
-
+import VueI18n from '@kungfu-trader/kungfu-js-api/language';
+const { t } = VueI18n.global;
 interface SourceAccountId {
   source: string;
   id: string;
@@ -942,9 +943,7 @@ export const switchKfLocation = (
       kfLocation.category === 'strategy'
     ) {
       if (watcher && !watcher.isReadyToInteract(kfLocation)) {
-        return Promise.reject(
-          new Error(`${processId} 还未准备就绪, 请稍后重试`),
-        );
+        return Promise.reject(new Error(t('未就绪', { processId })));
       }
     }
 
@@ -1173,7 +1172,7 @@ export const resolveAccountId = (
   if (parent_id === BigInt(MakeOrderByWatcherEnum.Manual)) {
     return {
       color: 'orange',
-      name: `${accountId} 手动`,
+      name: `${accountId} ${t('手动')}`,
     };
   }
 
@@ -1181,7 +1180,7 @@ export const resolveAccountId = (
     if (parent_id !== BigInt(0)) {
       return {
         color: 'blue',
-        name: `${accountId} 任务`,
+        name: `${accountId} ${t('任务')}`,
       };
     }
   }
@@ -1200,7 +1199,7 @@ export const resolveClientId = (
   if (!watcher) return { color: 'default', name: '--' };
 
   if (dest === 0) {
-    return { color: 'default', name: '系统外' };
+    return { color: 'default', name: t('系统外') };
   }
 
   const destLocation: KungfuApi.KfLocation = watcher.getLocation(dest);
@@ -1209,13 +1208,13 @@ export const resolveClientId = (
 
   if (destLocation.group === 'node') {
     if (parent_id !== BigInt(0)) {
-      return { color: 'blue', name: '任务' };
+      return { color: 'blue', name: t('任务') };
     } else {
-      return { color: 'orange', name: '手动' };
+      return { color: 'orange', name: t('手动') };
     }
   } else {
     if (parent_id !== BigInt(0)) {
-      return { color: 'orange', name: `${destUname} 手动` }; //是因为策略模块手动下单的时候刻意插入用于区分
+      return { color: 'orange', name: `${destUname} ${t('手动')}` }; //是因为策略模块手动下单的时候刻意插入用于区分
     } else {
       return { color: 'text', name: destUname };
     }
@@ -1356,7 +1355,7 @@ export const dealTradingData = (
   kfLocation: KungfuApi.KfLocation | KungfuApi.KfConfig,
 ): KungfuApi.TradingDataNameToType[KungfuApi.TradingDataTypeName][] => {
   if (!watcher) {
-    throw new Error('Watcher 错误');
+    throw new Error(t('watcher_error'));
   }
 
   if (!tradingData) {
