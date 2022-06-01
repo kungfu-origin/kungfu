@@ -43,7 +43,7 @@ class KungfuCoreConan(ConanFile):
         "freezer": ["nuitka", "pyinstaller"],
         "node_version": "ANY",
         "electron_version": "ANY",
-        "vs_toolset": [None, "ClangCL"],
+        "vs_toolset": ["auto", "ClangCL"],
         "max_recompile_times": range(1, 10),
     }
     default_options = {
@@ -58,7 +58,7 @@ class KungfuCoreConan(ConanFile):
         "electron_version": "ANY",
         # can not use clang until this bug got fixed:
         # https://developercommunity.visualstudio.com/t/msbuild-doesnt-give-delayload-flags-to-linker-when/1595015
-        "vs_toolset": None,
+        "vs_toolset": "auto",
         "max_recompile_times": 1,
     }
     cpp_files_extensions = [".h", ".hpp", ".hxx", ".cpp", ".c", ".cc", ".cxx"]
@@ -83,7 +83,8 @@ class KungfuCoreConan(ConanFile):
         if tools.detected_os() != "Windows":
             self.settings.compiler.libcxx = "libstdc++"
         else:
-            self.settings.compiler.toolset = self.options.vs_toolset
+            toolset = str(self.options.vs_toolset)
+            self.settings.compiler.toolset = toolset if toolset != "auto" else None
 
     def generate(self):
         """Updates mtime of lock files for node-gyp sake"""
@@ -240,16 +241,15 @@ class KungfuCoreConan(ConanFile):
             .strip()
         )
 
-        toolset_option = (
-            ["--toolset", str(self.options.vs_toolset)]
-            if self.options.vs_toolset
-            else []
-        )
+        toolset = str(self.options.vs_toolset)
+        toolset_option = ["--toolset", toolset] if toolset != "auto" else []
+
         build_option = (
             toolset_option + ["--platform", str(self.options.arch)]
             if tools.detected_os() == "Windows"
             else []
         )
+
         debug_option = ["--debug"] if self.settings.build_type == "Debug" else []
 
         return (
