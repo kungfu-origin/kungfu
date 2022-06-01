@@ -1320,9 +1320,9 @@ export const dealStrategyStates = (
     (strategyStatesResolved, key) => {
       const kfLocation = watcher.getLocation(key);
       const processId = getProcessIdByKfLocation(kfLocation);
-      const strategyStateValue = strategyStates[
-        key
-      ] as KungfuApi.StrategyStateDataOrigin;
+      const strategyStateValue = deepClone(
+        strategyStates[key] as KungfuApi.StrategyStateDataOrigin,
+      );
       strategyStateValue.state = StrategyStateStatusEnums[
         strategyStateValue.state
       ] as StrategyStateStatusTypes;
