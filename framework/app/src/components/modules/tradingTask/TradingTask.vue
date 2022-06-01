@@ -256,12 +256,14 @@ function parseTaskSettingsFromEnv(configSettingsEnv = '[]') {
   return configSettings;
 }
 
-function getProcessStatusName(record): ProcessStatusTypes {
+function getProcessStatusName(
+  record: Pm2ProcessStatusDetail,
+): ProcessStatusTypes | undefined {
   const taskLocation = getTaskKfLocationByProcessId(record?.name || '');
   if (!taskLocation) {
     return 'Error';
   }
-  return getStrategyStatusName(taskLocation) || 'Error';
+  return getStrategyStatusName(taskLocation);
 }
 </script>
 
