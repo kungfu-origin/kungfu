@@ -26,6 +26,7 @@ import globalBus from '../../assets/methods/globalBus';
 import {
   dealAppStates,
   dealAssetsByHolderUID,
+  dealStrategyStates,
   getTradingDataSortKey,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { bindIPCListener } from '@kungfu-trader/kungfu-app/src/renderer/ipcMsg/ipcListener';
@@ -58,6 +59,8 @@ const tradingDataSubscription = tradingDataSubject.subscribe(
     store.setAppStates(appStates);
     const assets = dealAssetsByHolderUID(watcher, watcher.ledger.Asset);
     store.setAssets(assets);
+    const strategyStates = dealStrategyStates(watcher, watcher.strategyStates);
+    store.setStrategyStates(strategyStates);
 
     const sortKey = getTradingDataSortKey('Trade');
     const trades = watcher.ledger.Trade.sort(sortKey);

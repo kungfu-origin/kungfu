@@ -34,6 +34,8 @@ declare module 'tail' {
 declare namespace KungfuApi {
   import {
     BrokerStateStatusEnum,
+    StrategyStateStatusEnum,
+    StrategyStateStatusTypes,
     InstrumentTypeEnum,
     InstrumentTypes,
     StrategyExtTypes,
@@ -720,8 +722,36 @@ declare namespace KungfuApi {
     mode: KfModeTypes;
   }
 
+  export interface StrategyStateDataOrigin {
+    info_a: string;
+    info_b: string;
+    info_c: string; // 待定字段
+    state: StrategyStateStatusEnum;
+    update_time: number;
+    value: string;
+  }
+
+  export interface StrategyStateData extends StrategyStateDataOrigin {
+    state: StrategyStateStatusTypes;
+  }
+
+  export interface StrategyStateDataResolved {
+    desired_volume: number;
+    left_rate: number;
+    total_left: number;
+    total_volume: number;
+    traded_volume: number;
+    update_time: number;
+    value: string;
+  }
+
+  export interface StrategyStateListItem extends StrategyStateDataResolved {
+    process_id: string;
+  }
+
   export interface Watcher {
     appStates: Record<string, BrokerStateStatusEnum>;
+    strategyStates: Record<string, StrategyStateDataOrigin>;
     ledger: TradingData;
     state: TradingData;
 

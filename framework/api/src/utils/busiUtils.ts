@@ -46,6 +46,8 @@ import {
   BrokerStateStatusEnum,
   StrategyExtTypes,
   CommissionModeEnum,
+  StrategyStateStatusTypes,
+  StrategyStateStatusEnum,
 } from '../typings/enums';
 import {
   deleteProcess,
@@ -837,6 +839,29 @@ export const getAppStateStatusName = (
   return processStatus;
 };
 
+export const getStrategyStateStatusName = (
+  kfConfig: KungfuApi.KfLocation | KungfuApi.KfConfig,
+  processStatusData: Pm2ProcessStatusData,
+  strategyStates: Record<string, KungfuApi.StrategyStateData>,
+): ProcessStatusTypes | undefined => {
+  const processId = getProcessIdByKfLocation(kfConfig);
+
+  if (!processStatusData[processId]) {
+    return undefined;
+  }
+
+  if (!getIfProcessRunning(processStatusData, processId)) {
+    return undefined;
+  }
+
+  if (strategyStates[processId]) {
+    return strategyStates[processId].state;
+  }
+
+  const processStatus = processStatusData[processId];
+  return processStatus;
+};
+
 export const getPropertyFromProcessStatusDetailDataByKfLocation = (
   processStatusDetailData: Pm2ProcessStatusDetailData,
   kfLocation: KungfuApi.KfLocation | KungfuApi.KfConfig,
@@ -1274,12 +1299,36 @@ export const dealAppStates = (
   return Object.keys(appStates || {}).reduce((appStatesResolved, key) => {
     const kfLocation = watcher.getLocation(key);
     const processId = getProcessIdByKfLocation(kfLocation);
-    const appStateValue = appStates[key] as BrokerStateStatusEnum;
+    const appStateValue = appStates[key];
     appStatesResolved[processId] = BrokerStateStatusEnum[
       appStateValue
     ] as BrokerStateStatusTypes;
     return appStatesResolved;
   }, {} as Record<string, BrokerStateStatusTypes>);
+};
+
+export const dealStrategyStates = (
+  watcher: KungfuApi.Watcher | null,
+  strategyStates: Record<string, KungfuApi.StrategyStateDataOrigin>,
+): Record<string, KungfuApi.StrategyStateData> => {
+  if (!watcher) {
+    return {} as Record<string, KungfuApi.StrategyStateDataOrigin>;
+  }
+
+  return Object.keys(strategyStates || {}).reduce(
+    (strategyStatesResolved, key) => {
+      const kfLocation = watcher.getLocation(key);
+      const processId = getProcessIdByKfLocation(kfLocation);
+      const strategyStateValue = deepClone(strategyStates[key]);
+      strategyStateValue.state = StrategyStateStatusEnum[
+        strategyStateValue.state
+      ] as StrategyStateStatusTypes;
+      strategyStatesResolved[processId] =
+        strategyStateValue as KungfuApi.StrategyStateData;
+      return strategyStatesResolved;
+    },
+    {} as Record<string, KungfuApi.StrategyStateData>,
+  );
 };
 
 export const dealAssetsByHolderUID = (

@@ -274,6 +274,7 @@ export default {
     entrust: 'Entrust',
     start: 'Please Start',
     trade_process: 'Trade Process',
+    confirm: 'confirm',
 
     entrust_statistical: 'Entrust Statistical',
     statistical_desc: 'Real-time (latest 100 pieces of data)',
@@ -568,5 +569,8 @@ export default {
   手动: 'manual',
   任务: 'task',
 
+  正常: 'normal',
+  异常: 'warn',
+  错误: 'error',
   文件路径不存在: 'The file path does not exist',
 };

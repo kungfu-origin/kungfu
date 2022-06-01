@@ -30,6 +30,7 @@ import {
   Pm2ProcessStatusDetail,
   startTask,
 } from '@kungfu-trader/kungfu-js-api/utils/processUtils';
+import KfProcessStatus from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfProcessStatus.vue';
 import {
   useAddUpdateRemoveKfConfig,
   useCurrentGlobalKfLocation,
@@ -40,11 +41,13 @@ import { messagePrompt } from '@kungfu-trader/kungfu-app/src/renderer/assets/met
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
 import { useTradingTask } from './utils';
 
+import { ProcessStatusTypes } from '@kungfu-trader/kungfu-js-api/src/typings/enums';
+
 const { t } = VueI18n.global;
 const { success, error } = messagePrompt();
 const { extConfigs } = useExtConfigsRelated();
 const { dashboardBodyHeight, handleBodySizeChange } = useDashboardBodySize();
-const { processStatusData, processStatusDetailData } =
+const { processStatusData, processStatusDetailData, getStrategyStatusName } =
   useProcessStatusDetailData();
 
 const { handleOpenSetTradingTaskModal } = useTradingTask();
@@ -77,6 +80,19 @@ const { searchKeyword, tableData } =
 
 const { dealRowClassName, setCurrentGlobalKfLocation } =
   useCurrentGlobalKfLocation(window.watcher);
+
+const { uiExtConfigs } = useExtConfigsRelated();
+
+const TradingTaskViewComponentConfigs = computed(() => {
+  return Object.keys(uiExtConfigs.value)
+    .filter((key) => uiExtConfigs.value[key].position === 'trading_task_view')
+    .map((key) => {
+      return {
+        ...uiExtConfigs.value[key],
+        key,
+      };
+    });
+});
 
 function handleOpenSetTaskDialog() {
   setExtensionModalVisible.value = true;
@@ -239,6 +255,16 @@ function parseTaskSettingsFromEnv(configSettingsEnv = '[]') {
   }
   return configSettings;
 }
+
+function getProcessStatusName(
+  record: Pm2ProcessStatusDetail,
+): ProcessStatusTypes | undefined {
+  const taskLocation = getTaskKfLocationByProcessId(record?.name || '');
+  if (!taskLocation) {
+    return 'Error';
+  }
+  return getStrategyStatusName(taskLocation);
+}
 </script>
 
 <template>
@@ -251,6 +277,9 @@ function parseTaskSettingsFromEnv(configSettingsEnv = '[]') {
             :placeholder="$t('keyword_input')"
             style="width: 120px"
           />
+        </KfDashboardItem>
+        <KfDashboardItem v-for="config in TradingTaskViewComponentConfigs">
+          <component :is="config.key"></component>
         </KfDashboardItem>
         <KfDashboardItem>
           <a-button
@@ -285,6 +314,11 @@ function parseTaskSettingsFromEnv(configSettingsEnv = '[]') {
           </template>
           <template v-if="column.dataIndex === 'args'">
             {{ resolveArgs(record) }}
+          </template>
+          <template v-else-if="column.dataIndex === 'stateStatus'">
+            <KfProcessStatus
+              :statusName="getProcessStatusName(record)"
+            ></KfProcessStatus>
           </template>
           <template v-else-if="column.dataIndex === 'actions'">
             <div class="kf-actions__warp">

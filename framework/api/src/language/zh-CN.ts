@@ -275,6 +275,7 @@ export default {
     entrust: '委托',
     start: '请先启动',
     trade_process: '交易进程',
+    confirm: '确认',
 
     entrust_statistical: '委托统计',
     statistical_desc: '实时(最新100条数据)',
@@ -558,5 +559,8 @@ export default {
   手动: '手动',
   任务: '任务',
 
+  正常: '正常',
+  异常: '异常',
+  错误: '错误',
   文件路径不存在: '文件路径不存在',
 };

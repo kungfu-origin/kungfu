@@ -13,6 +13,7 @@ import {
   KfCategoryEnum,
   OrderStatusEnum,
   BrokerStateStatusTypes,
+  StrategyStateStatusTypes,
   FutureArbitrageCodeEnum,
   SpaceTabSettingEnum,
   SpaceSizeSettingEnum,
@@ -65,6 +66,27 @@ export const Pm2ProcessStatus: Record<
   },
 };
 
+export const StrategyStateStatus: Record<
+  StrategyStateStatusTypes,
+  KungfuApi.KfTradeValueCommonData
+> = {
+  ['Normal']: {
+    name: t('正常'),
+    color: 'kf-color-running',
+    level: 2,
+  },
+  ['Warn']: {
+    name: t('异常'),
+    color: 'kf-color-waiting',
+    level: 1,
+  },
+  ['Error']: {
+    name: t('错误'),
+    color: 'kf-color-error',
+    level: -1,
+  },
+};
+
 export const BrokerStateStatus: Record<
   BrokerStateStatusTypes,
   KungfuApi.KfTradeValueCommonData
@@ -110,6 +132,7 @@ export const AppStateStatus: Record<
   ProcessStatusTypes,
   KungfuApi.KfTradeValueCommonData
 > = {
+  ...StrategyStateStatus,
   ...Pm2ProcessStatus,
   ...BrokerStateStatus,
 };

@@ -31,6 +31,7 @@ import {
   dealCategory,
   getAvailDaemonList,
   removeNoDefaultStrategyFolders,
+  getStrategyStateStatusName,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { writeCSV } from '@kungfu-trader/kungfu-js-api/utils/fileUtils';
 import {
@@ -977,20 +978,29 @@ export const useProcessStatusDetailData = (): {
   getProcessStatusName(
     kfConfig: KungfuApi.KfLocation | KungfuApi.KfConfig,
   ): ProcessStatusTypes | undefined;
+  getStrategyStatusName(
+    kfConfig: KungfuApi.KfLocation | KungfuApi.KfConfig,
+  ): ProcessStatusTypes | undefined;
 } => {
   const allProcessStatusData = reactive<{
     processStatusData: Pm2ProcessStatusData;
     processStatusDetailData: Pm2ProcessStatusDetailData;
     appStates: Record<string, BrokerStateStatusTypes>;
+    strategyStates: Record<string, KungfuApi.StrategyStateData>;
   }>({
     processStatusData: {},
     processStatusDetailData: {},
     appStates: {},
+    strategyStates: {},
   });
 
   onMounted(() => {
-    const { processStatusData, processStatusWithDetail, appStates } =
-      storeToRefs(useGlobalStore());
+    const {
+      processStatusData,
+      processStatusWithDetail,
+      appStates,
+      strategyStates,
+    } = storeToRefs(useGlobalStore());
     allProcessStatusData.processStatusData =
       processStatusData as unknown as Pm2ProcessStatusData;
     allProcessStatusData.processStatusDetailData =
@@ -998,6 +1008,10 @@ export const useProcessStatusDetailData = (): {
     allProcessStatusData.appStates = appStates as unknown as Record<
       string,
       BrokerStateStatusTypes
+    >;
+    allProcessStatusData.strategyStates = strategyStates as unknown as Record<
+      string,
+      KungfuApi.StrategyStateData
     >;
   });
 
@@ -1011,6 +1025,16 @@ export const useProcessStatusDetailData = (): {
     );
   };
 
+  const getStrategyStatusName = (
+    kfConfig: KungfuApi.KfLocation | KungfuApi.KfConfig,
+  ) => {
+    return getStrategyStateStatusName(
+      kfConfig,
+      allProcessStatusData.processStatusData,
+      allProcessStatusData.strategyStates,
+    );
+  };
+
   const { processStatusData, processStatusDetailData, appStates } =
     toRefs(allProcessStatusData);
 
@@ -1019,6 +1043,7 @@ export const useProcessStatusDetailData = (): {
     processStatusDetailData,
     appStates,
     getProcessStatusName,
+    getStrategyStatusName,
   };
 };
 

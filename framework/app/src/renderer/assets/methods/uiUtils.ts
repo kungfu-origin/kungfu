@@ -264,6 +264,10 @@ export const openCodeView = (
   return openNewBrowserWindow('code', `?processId=${processId}`);
 };
 
+export const openTradingTaskView = (): Promise<Electron.BrowserWindow> => {
+  return openNewBrowserWindow('tradingTask', '');
+};
+
 export const removeLoadingMask = (): void => {
   const $loadingMask = document.getElementById('loading');
   if ($loadingMask) $loadingMask.remove();
@@ -374,6 +378,14 @@ export const handleOpenCodeView = (
     openMessage();
   });
 };
+
+export const handleOpenTradingTaskView =
+  (): Promise<Electron.BrowserWindow> => {
+    const openMessage = message.loading(t('open_code_editor'));
+    return openTradingTaskView().finally(() => {
+      openMessage();
+    });
+  };
 
 export const useDashboardBodySize = (): {
   dashboardBodyHeight: Ref;
