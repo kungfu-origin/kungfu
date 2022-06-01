@@ -255,6 +255,7 @@ export default {
     entrust: '意向',
     start: '请先启动',
     trade_process: '交易进程',
+    confirm: '确认',
 
     entrust_statistical: '交易意向统计',
     statistical_desc: '实时(最新100条数据)',

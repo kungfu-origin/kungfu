@@ -254,6 +254,7 @@ export default {
     entrust: 'Entrust',
     start: 'Please Start',
     trade_process: 'Trade Process',
+    confirm: 'confirm',
 
     entrust_statistical: 'Entrust Statistical',
     statistical_desc: 'Real-time (latest 100 pieces of data)',
