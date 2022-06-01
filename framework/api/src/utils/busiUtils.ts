@@ -1311,7 +1311,7 @@ export const dealAppStates = (
 export const dealStrategyStates = (
   watcher: KungfuApi.Watcher | null,
   strategyStates: Record<string, KungfuApi.StrategyStateDataOrigin>,
-) => {
+): Record<string, KungfuApi.StrategyStateData> => {
   if (!watcher) {
     return {} as Record<string, KungfuApi.StrategyStateDataOrigin>;
   }
