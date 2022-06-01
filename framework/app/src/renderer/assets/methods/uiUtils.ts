@@ -264,8 +264,8 @@ export const openCodeView = (
   return openNewBrowserWindow('code', `?processId=${processId}`);
 };
 
-export const openTradingView = (): Promise<Electron.BrowserWindow> => {
-  return openNewBrowserWindow('trading', `?processId=tradingTask`);
+export const openTradingTaskView = (): Promise<Electron.BrowserWindow> => {
+  return openNewBrowserWindow('tradingTask', '');
 };
 
 export const removeLoadingMask = (): void => {
@@ -379,12 +379,13 @@ export const handleOpenCodeView = (
   });
 };
 
-export const handleOpenTradingView = (): Promise<Electron.BrowserWindow> => {
-  const openMessage = message.loading(t('open_code_editor'));
-  return openTradingView().finally(() => {
-    openMessage();
-  });
-};
+export const handleOpenTradingTaskView =
+  (): Promise<Electron.BrowserWindow> => {
+    const openMessage = message.loading(t('open_code_editor'));
+    return openTradingTaskView().finally(() => {
+      openMessage();
+    });
+  };
 
 export const useDashboardBodySize = (): {
   dashboardBodyHeight: Ref;

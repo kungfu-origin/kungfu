@@ -46,7 +46,7 @@ const dealStrategyStates = (
 
 <template>
   <a-layout>
-    <div class="kf-trading-view_warp">
+    <div class="kf-trading-task-view_warp">
       <KfDashboard>
         <div class="task-content" v-if="strategyStatesList.length">
           <div class="trade-item" v-for="item in strategyStatesList">
@@ -78,7 +78,7 @@ const dealStrategyStates = (
     height: 100%;
     background: #141414;
 
-    .kf-trading-view_warp {
+    .kf-trading-task-view_warp {
       width: 100%;
       height: 100%;
       overflow: auto;
