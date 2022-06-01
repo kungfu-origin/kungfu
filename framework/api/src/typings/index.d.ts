@@ -34,7 +34,7 @@ declare module 'tail' {
 declare namespace KungfuApi {
   import {
     BrokerStateStatusEnum,
-    StrategyStateStatusEnums,
+    StrategyStateStatusEnum,
     StrategyStateStatusTypes,
     InstrumentTypeEnum,
     InstrumentTypes,
@@ -726,7 +726,7 @@ declare namespace KungfuApi {
     info_a: string;
     info_b: string;
     info_c: string; // 待定字段
-    state: StrategyStateStatusEnums;
+    state: StrategyStateStatusEnum;
     update_time: number;
     value: string;
   }

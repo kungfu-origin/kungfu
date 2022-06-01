@@ -17,13 +17,13 @@ export type ProcessStatusTypes =
   | BrokerStateStatusTypes
   | StrategyStateStatusTypes;
 
-export enum StrategyStateStatusEnums {
+export enum StrategyStateStatusEnum {
   Normal,
   Warn,
   Error,
 }
 
-export type StrategyStateStatusTypes = keyof typeof StrategyStateStatusEnums;
+export type StrategyStateStatusTypes = keyof typeof StrategyStateStatusEnum;
 
 export enum LedgerCategoryEnum {
   td = 0,

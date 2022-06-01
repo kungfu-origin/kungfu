@@ -47,7 +47,7 @@ import {
   StrategyExtTypes,
   CommissionModeEnum,
   StrategyStateStatusTypes,
-  StrategyStateStatusEnums,
+  StrategyStateStatusEnum,
 } from '../typings/enums';
 import {
   deleteProcess,
@@ -1300,7 +1300,7 @@ export const dealAppStates = (
   return Object.keys(appStates || {}).reduce((appStatesResolved, key) => {
     const kfLocation = watcher.getLocation(key);
     const processId = getProcessIdByKfLocation(kfLocation);
-    const appStateValue = appStates[key] as BrokerStateStatusEnum;
+    const appStateValue = appStates[key];
     appStatesResolved[processId] = BrokerStateStatusEnum[
       appStateValue
     ] as BrokerStateStatusTypes;
@@ -1320,10 +1320,8 @@ export const dealStrategyStates = (
     (strategyStatesResolved, key) => {
       const kfLocation = watcher.getLocation(key);
       const processId = getProcessIdByKfLocation(kfLocation);
-      const strategyStateValue = deepClone(
-        strategyStates[key] as KungfuApi.StrategyStateDataOrigin,
-      );
-      strategyStateValue.state = StrategyStateStatusEnums[
+      const strategyStateValue = deepClone(strategyStates[key]);
+      strategyStateValue.state = StrategyStateStatusEnum[
         strategyStateValue.state
       ] as StrategyStateStatusTypes;
       strategyStatesResolved[processId] =
