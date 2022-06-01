@@ -547,4 +547,6 @@ export default {
   系统外: 'Out-of-system',
   手动: 'manual',
   任务: 'task',
+
+  文件路径不存在: 'The file path does not exist!',
 };
