@@ -252,6 +252,8 @@ class KungfuCoreConan(ConanFile):
 
         debug_option = ["--debug"] if self.settings.build_type == "Debug" else []
 
+        parallel_level = 1 if "GITHUB_ACTIONS" in environ else os.cpu_count()
+
         return (
             [
                 "cmake-js",
@@ -263,7 +265,7 @@ class KungfuCoreConan(ConanFile):
                 self.__get_node_version(runtime),
                 f"--CDPYTHON_EXECUTABLE={python_path}",
                 f"--CDSPDLOG_LOG_LEVEL_COMPILE={loglevel}",
-                f"--CDCMAKE_BUILD_PARALLEL_LEVEL={os.cpu_count()}",
+                f"--CDCMAKE_BUILD_PARALLEL_LEVEL={parallel_level}",
             ]
             + build_option
             + debug_option
