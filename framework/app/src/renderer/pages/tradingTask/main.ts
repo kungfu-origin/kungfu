@@ -1,5 +1,5 @@
 import { createApp } from 'vue';
-import App from '@kungfu-trader/kungfu-app/src/renderer/pages/TradingTask/App.vue';
+import App from '@kungfu-trader/kungfu-app/src/renderer/pages/tradingTask/App.vue';
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
 import { Layout, Card, Empty } from 'ant-design-vue';
 
