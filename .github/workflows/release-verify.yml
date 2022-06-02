@@ -9,7 +9,7 @@ on:
 
 jobs:
   try:
-    uses: kungfu-trader/workflows/.github/workflows/.release-verify.yml@v1
+    uses: kungfu-trader/workflows/.github/workflows/.release-verify.yml@v1.0-alpha
     with:
       use-pipenv: true
       build-timeout-minutes: 90

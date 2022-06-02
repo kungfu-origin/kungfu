@@ -14,7 +14,6 @@ import sys
 from conans import ConanFile
 from conans import tools
 from distutils import sysconfig
-from os import environ
 from os import path
 
 with open(path.join("package.json"), "r") as package_json_file:
@@ -233,7 +232,9 @@ class KungfuCoreConan(ConanFile):
             "error": "SPDLOG_LEVEL_ERROR",
             "critical": "SPDLOG_LEVEL_CRITICAL",
         }
-        loglevel = spdlog_levels[str(self.options.log_level)]
+        log_level = spdlog_levels[str(self.options.log_level)]
+        parallel_level = os.cpu_count()
+
         python_path = (
             psutil.Popen(["pipenv", "--py"], stdout=subprocess.PIPE)
             .stdout.read()
@@ -252,8 +253,6 @@ class KungfuCoreConan(ConanFile):
 
         debug_option = ["--debug"] if self.settings.build_type == "Debug" else []
 
-        parallel_level = 1 if "GITHUB_ACTIONS" in environ else os.cpu_count()
-
         return (
             [
                 "cmake-js",
@@ -264,7 +263,7 @@ class KungfuCoreConan(ConanFile):
                 "--runtime-version",
                 self.__get_node_version(runtime),
                 f"--CDPYTHON_EXECUTABLE={python_path}",
-                f"--CDSPDLOG_LOG_LEVEL_COMPILE={loglevel}",
+                f"--CDSPDLOG_LOG_LEVEL_COMPILE={log_level}",
                 f"--CDCMAKE_BUILD_PARALLEL_LEVEL={parallel_level}",
             ]
             + build_option
