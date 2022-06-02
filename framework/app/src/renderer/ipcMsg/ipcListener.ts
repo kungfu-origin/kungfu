@@ -44,4 +44,17 @@ export function bindIPCListener(store) {
       }
     });
   });
+
+  ipcRenderer.removeAllListeners('ipc-emit-strategyStates');
+  ipcRenderer.on('ipc-emit-strategyStates', (event, { childWinId }) => {
+    const childWin = BrowserWindow.fromId(childWinId);
+    return new Promise(() => {
+      if (childWin) {
+        childWin.webContents.send(
+          'ipc-res-strategyStates',
+          store.strategyStates,
+        );
+      }
+    });
+  });
 }

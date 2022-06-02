@@ -1,12 +1,6 @@
-//
-// Created by Keren Dong on 2020/1/30.
-//
-
-#ifndef KUNGFU_PY_WINGCHUN_HPP
-#define KUNGFU_PY_WINGCHUN_HPP
+#include "py_wingchun.h"
 
 #include <pybind11/functional.h>
-#include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <pybind11/stl_bind.h>
 
@@ -410,5 +404,3 @@ void bind(pybind11::module &&m) {
       .def("run", &service::BarGenerator::run);
 }
 } // namespace kungfu::wingchun
-
-#endif // KUNGFU_PY_WINGCHUN_HPP

@@ -13,6 +13,7 @@ import {
   KfCategoryEnum,
   OrderStatusEnum,
   BrokerStateStatusTypes,
+  StrategyStateStatusTypes,
   FutureArbitrageCodeEnum,
   SpaceTabSettingEnum,
   SpaceSizeSettingEnum,
@@ -65,6 +66,27 @@ export const Pm2ProcessStatus: Record<
   },
 };
 
+export const StrategyStateStatus: Record<
+  StrategyStateStatusTypes,
+  KungfuApi.KfTradeValueCommonData
+> = {
+  ['Normal']: {
+    name: t('正常'),
+    color: 'kf-color-running',
+    level: 2,
+  },
+  ['Warn']: {
+    name: t('异常'),
+    color: 'kf-color-waiting',
+    level: 1,
+  },
+  ['Error']: {
+    name: t('错误'),
+    color: 'kf-color-error',
+    level: -1,
+  },
+};
+
 export const BrokerStateStatus: Record<
   BrokerStateStatusTypes,
   KungfuApi.KfTradeValueCommonData
@@ -110,6 +132,7 @@ export const AppStateStatus: Record<
   ProcessStatusTypes,
   KungfuApi.KfTradeValueCommonData
 > = {
+  ...StrategyStateStatus,
   ...Pm2ProcessStatus,
   ...BrokerStateStatus,
 };
@@ -516,6 +539,82 @@ export const ExchangeIds: Record<string, KungfuApi.KfTradeValueCommonData> = {
   },
   INE: {
     name: t('tradingConfig.INE'),
+    color: InstrumentType[InstrumentTypeEnum.future].color,
+  },
+  HK: {
+    name: t('tradingConfig.HK'),
+    color: InstrumentType[InstrumentTypeEnum.stock].color,
+  },
+  HKOPT: {
+    name: t('tradingConfig.HKOPT'),
+    color: InstrumentType[InstrumentTypeEnum.stockoption].color,
+  },
+  US: {
+    name: t('tradingConfig.US'),
+    color: InstrumentType[InstrumentTypeEnum.stock].color,
+  },
+  GLFX: {
+    name: t('tradingConfig.GLFX'),
+    color: InstrumentType[InstrumentTypeEnum.stock].color,
+  },
+  IPE: {
+    name: t('tradingConfig.IPE'),
+    color: InstrumentType[InstrumentTypeEnum.future].color,
+  },
+  CBOT: {
+    name: t('tradingConfig.CBOT'),
+    color: InstrumentType[InstrumentTypeEnum.future].color,
+  },
+  CEC: {
+    name: t('tradingConfig.CEC'),
+    color: InstrumentType[InstrumentTypeEnum.future].color,
+  },
+  LIFE: {
+    name: t('tradingConfig.LIFE'),
+    color: InstrumentType[InstrumentTypeEnum.future].color,
+  },
+  MTIF: {
+    name: t('tradingConfig.MTIF'),
+    color: InstrumentType[InstrumentTypeEnum.future].color,
+  },
+  NYCE: {
+    name: t('tradingConfig.NYCE'),
+    color: InstrumentType[InstrumentTypeEnum.future].color,
+  },
+  CMX: {
+    name: t('tradingConfig.CMX'),
+    color: InstrumentType[InstrumentTypeEnum.future].color,
+  },
+  NYME: {
+    name: t('tradingConfig.NYME'),
+    color: InstrumentType[InstrumentTypeEnum.future].color,
+  },
+  SIME: {
+    name: t('tradingConfig.SIME'),
+    color: InstrumentType[InstrumentTypeEnum.future].color,
+  },
+  CME: {
+    name: t('tradingConfig.CME'),
+    color: InstrumentType[InstrumentTypeEnum.future].color,
+  },
+  IMM: {
+    name: t('tradingConfig.IMM'),
+    color: InstrumentType[InstrumentTypeEnum.future].color,
+  },
+  WIDX: {
+    name: t('tradingConfig.WIDX'),
+    color: InstrumentType[InstrumentTypeEnum.future].color,
+  },
+  FREX: {
+    name: t('tradingConfig.FREX'),
+    color: InstrumentType[InstrumentTypeEnum.future].color,
+  },
+  METL: {
+    name: t('tradingConfig.METL'),
+    color: InstrumentType[InstrumentTypeEnum.future].color,
+  },
+  IPM: {
+    name: t('tradingConfig.IPM'),
     color: InstrumentType[InstrumentTypeEnum.future].color,
   },
 };

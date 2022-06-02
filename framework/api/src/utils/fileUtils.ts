@@ -2,6 +2,8 @@ import path from 'path';
 import fse from 'fs-extra';
 import * as csv from '@fast-csv/format';
 import { Row } from '@fast-csv/format';
+import VueI18n from '@kungfu-trader/kungfu-js-api/language';
+const { t } = VueI18n.global;
 
 //添加文件
 export const addFileSync = (
@@ -48,7 +50,7 @@ export const writeCSV = (
 
 //获取文件内容
 export const getFileContent = (targetPath: string): Promise<string> => {
-  if (!targetPath) throw new Error('文件路径不存在！');
+  if (!targetPath) throw new Error(t('文件路径不存在'));
   targetPath = path.normalize(targetPath);
   return new Promise((resolve, reject): void => {
     const file = fse.createReadStream(targetPath);

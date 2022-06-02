@@ -22,6 +22,7 @@ import {
 import {
   BrokerStateStatusTypes,
   KfCategoryTypes,
+  StrategyStateStatusTypes,
 } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import globalBus from '../../../assets/methods/globalBus';
 import { getKfGlobalSettingsValue } from '@kungfu-trader/kungfu-js-api/config/globalSettings';
@@ -41,6 +42,7 @@ interface GlobalState {
   processStatusWithDetail: Pm2ProcessStatusDetailData;
 
   appStates: Record<string, BrokerStateStatusTypes>;
+  strategyStates: Record<string, StrategyStateStatusTypes>;
   assets: Record<string, KungfuApi.Asset>;
   instruments: KungfuApi.InstrumentResolved[];
   subscribedInstruments: KungfuApi.InstrumentResolved[];
@@ -74,6 +76,7 @@ export const useGlobalStore = defineStore('global', {
       processStatusWithDetail: {},
 
       appStates: {},
+      strategyStates: {},
       assets: {},
       instruments: [],
       subscribedInstruments: [],
@@ -119,6 +122,12 @@ export const useGlobalStore = defineStore('global', {
 
     setAppStates(appStates: Record<string, BrokerStateStatusTypes>) {
       this.appStates = appStates;
+    },
+
+    setStrategyStates(
+      strategyStates: Record<string, KungfuApi.StrategyStateData>,
+    ) {
+      this.strategyStates = strategyStates;
     },
 
     setAssets(assets: Record<string, KungfuApi.Asset>) {

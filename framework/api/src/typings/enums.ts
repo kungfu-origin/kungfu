@@ -12,7 +12,18 @@ export enum BrokerStateStatusEnum {
 
 export type BrokerStateStatusTypes = keyof typeof BrokerStateStatusEnum;
 
-export type ProcessStatusTypes = Pm2ProcessStatusTypes | BrokerStateStatusTypes;
+export type ProcessStatusTypes =
+  | Pm2ProcessStatusTypes
+  | BrokerStateStatusTypes
+  | StrategyStateStatusTypes;
+
+export enum StrategyStateStatusEnum {
+  Normal,
+  Warn,
+  Error,
+}
+
+export type StrategyStateStatusTypes = keyof typeof StrategyStateStatusEnum;
 
 export enum LedgerCategoryEnum {
   td = 0,
@@ -154,7 +165,8 @@ export type KfUIExtLocatorTypes =
   | 'sidebar_footer'
   | 'board'
   | 'global_setting'
-  | 'make_order';
+  | 'make_order'
+  | 'trading_task_view';
 
 export enum KfModeEnum {
   live,

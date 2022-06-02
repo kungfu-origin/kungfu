@@ -46,6 +46,8 @@ import {
   BrokerStateStatusEnum,
   StrategyExtTypes,
   CommissionModeEnum,
+  StrategyStateStatusTypes,
+  StrategyStateStatusEnum,
 } from '../typings/enums';
 import {
   deleteProcess,
@@ -63,7 +65,8 @@ import {
 import { Proc } from 'pm2';
 import { listDir, removeTargetFilesInFolder } from './fileUtils';
 import minimist from 'minimist';
-
+import VueI18n from '@kungfu-trader/kungfu-js-api/language';
+const { t } = VueI18n.global;
 interface SourceAccountId {
   source: string;
   id: string;
@@ -836,6 +839,29 @@ export const getAppStateStatusName = (
   return processStatus;
 };
 
+export const getStrategyStateStatusName = (
+  kfConfig: KungfuApi.KfLocation | KungfuApi.KfConfig,
+  processStatusData: Pm2ProcessStatusData,
+  strategyStates: Record<string, KungfuApi.StrategyStateData>,
+): ProcessStatusTypes | undefined => {
+  const processId = getProcessIdByKfLocation(kfConfig);
+
+  if (!processStatusData[processId]) {
+    return undefined;
+  }
+
+  if (!getIfProcessRunning(processStatusData, processId)) {
+    return undefined;
+  }
+
+  if (strategyStates[processId]) {
+    return strategyStates[processId].state;
+  }
+
+  const processStatus = processStatusData[processId];
+  return processStatus;
+};
+
 export const getPropertyFromProcessStatusDetailDataByKfLocation = (
   processStatusDetailData: Pm2ProcessStatusDetailData,
   kfLocation: KungfuApi.KfLocation | KungfuApi.KfConfig,
@@ -917,9 +943,7 @@ export const switchKfLocation = (
       kfLocation.category === 'strategy'
     ) {
       if (watcher && !watcher.isReadyToInteract(kfLocation)) {
-        return Promise.reject(
-          new Error(`${processId} 还未准备就绪, 请稍后重试`),
-        );
+        return Promise.reject(new Error(t('未就绪', { processId })));
       }
     }
 
@@ -1148,7 +1172,7 @@ export const resolveAccountId = (
   if (parent_id === BigInt(MakeOrderByWatcherEnum.Manual)) {
     return {
       color: 'orange',
-      name: `${accountId} 手动`,
+      name: `${accountId} ${t('手动')}`,
     };
   }
 
@@ -1156,7 +1180,7 @@ export const resolveAccountId = (
     if (parent_id !== BigInt(0)) {
       return {
         color: 'blue',
-        name: `${accountId} 任务`,
+        name: `${accountId} ${t('任务')}`,
       };
     }
   }
@@ -1175,7 +1199,7 @@ export const resolveClientId = (
   if (!watcher) return { color: 'default', name: '--' };
 
   if (dest === 0) {
-    return { color: 'default', name: '系统外' };
+    return { color: 'default', name: t('系统外') };
   }
 
   const destLocation: KungfuApi.KfLocation = watcher.getLocation(dest);
@@ -1184,13 +1208,13 @@ export const resolveClientId = (
 
   if (destLocation.group === 'node') {
     if (parent_id !== BigInt(0)) {
-      return { color: 'blue', name: '任务' };
+      return { color: 'blue', name: t('任务') };
     } else {
-      return { color: 'orange', name: '手动' };
+      return { color: 'orange', name: t('手动') };
     }
   } else {
     if (parent_id !== BigInt(0)) {
-      return { color: 'orange', name: `${destUname} 手动` }; //是因为策略模块手动下单的时候刻意插入用于区分
+      return { color: 'orange', name: `${destUname} ${t('手动')}` }; //是因为策略模块手动下单的时候刻意插入用于区分
     } else {
       return { color: 'text', name: destUname };
     }
@@ -1275,12 +1299,36 @@ export const dealAppStates = (
   return Object.keys(appStates || {}).reduce((appStatesResolved, key) => {
     const kfLocation = watcher.getLocation(key);
     const processId = getProcessIdByKfLocation(kfLocation);
-    const appStateValue = appStates[key] as BrokerStateStatusEnum;
+    const appStateValue = appStates[key];
     appStatesResolved[processId] = BrokerStateStatusEnum[
       appStateValue
     ] as BrokerStateStatusTypes;
     return appStatesResolved;
   }, {} as Record<string, BrokerStateStatusTypes>);
+};
+
+export const dealStrategyStates = (
+  watcher: KungfuApi.Watcher | null,
+  strategyStates: Record<string, KungfuApi.StrategyStateDataOrigin>,
+): Record<string, KungfuApi.StrategyStateData> => {
+  if (!watcher) {
+    return {} as Record<string, KungfuApi.StrategyStateDataOrigin>;
+  }
+
+  return Object.keys(strategyStates || {}).reduce(
+    (strategyStatesResolved, key) => {
+      const kfLocation = watcher.getLocation(key);
+      const processId = getProcessIdByKfLocation(kfLocation);
+      const strategyStateValue = deepClone(strategyStates[key]);
+      strategyStateValue.state = StrategyStateStatusEnum[
+        strategyStateValue.state
+      ] as StrategyStateStatusTypes;
+      strategyStatesResolved[processId] =
+        strategyStateValue as KungfuApi.StrategyStateData;
+      return strategyStatesResolved;
+    },
+    {} as Record<string, KungfuApi.StrategyStateData>,
+  );
 };
 
 export const dealAssetsByHolderUID = (
@@ -1307,7 +1355,7 @@ export const dealTradingData = (
   kfLocation: KungfuApi.KfLocation | KungfuApi.KfConfig,
 ): KungfuApi.TradingDataNameToType[KungfuApi.TradingDataTypeName][] => {
   if (!watcher) {
-    throw new Error('Watcher 错误');
+    throw new Error(t('watcher_error'));
   }
 
   if (!tradingData) {
