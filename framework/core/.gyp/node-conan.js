@@ -37,42 +37,71 @@ function makeConanOptions(names) {
   return names.map(makeConanOption).flat().concat(getNodeVersionOptions());
 }
 
+function conanInstall() {
+  const settings = makeConanSettings(['build_type']);
+  const options = makeConanOptions(['arch', 'log_level', 'freezer']);
+  conan([
+    'install',
+    '.',
+    '-if',
+    'build',
+    '--build',
+    'missing',
+    ...settings,
+    ...options,
+  ]);
+}
+
+function conanBuild() {
+  const settings = makeConanSettings(['build_type']);
+  conan(['build', '.', '-bf', 'build', ...settings]);
+}
+
+function conanBuildOnGitHub() {
+  // Have to use Clang to build pykungfu because MSVC suffers to OutOfMemoery error
+  
+  const resetBuild = () => fse.removeSync(path.join('build', 'CMakeCache.txt'));
+
+  // Build pykungfu with Clang
+  process.env.CONAN_VS_TOOLSET = 'ClangCL';
+  process.env.KUNGFU_BUILD_SKIP_RUNTIME_ELECTRON = true;
+  delete process.env.KUNGFU_BUILD_SKIP_RUNTIME_NODE;
+  resetBuild();
+  conanInstall();
+  conanBuild();
+
+  // Build kungfu_node with MSVC
+  process.env.CONAN_VS_TOOLSET = 'auto';
+  process.env.KUNGFU_BUILD_SKIP_RUNTIME_NODE = true;
+  delete process.env.KUNGFU_BUILD_SKIP_RUNTIME_ELECTRON;
+  resetBuild();
+  conanInstall();
+  conanBuild();
+}
+
+function conanPackage() {
+  const conanSettings = makeConanSettings(['build_type']);
+  conan([
+    'package',
+    '.',
+    '-bf',
+    'build',
+    '-pf',
+    path.join('dist', 'kfc'),
+    ...conanSettings,
+  ]);
+}
+
 const cli = require('sywac')
   .command('install', {
-    run: () => {
-      const settings = makeConanSettings(['build_type']);
-      const options = makeConanOptions(['arch', 'log_level', 'freezer']);
-      conan([
-        'install',
-        '.',
-        '-if',
-        'build',
-        '--build',
-        'missing',
-        ...settings,
-        ...options,
-      ]);
-    },
+    run: conanInstall,
   })
   .command('build', {
-    run: () => {
-      const settings = makeConanSettings(['build_type']);
-      conan(['build', '.', '-bf', 'build', ...settings]);
-    },
+    run: () =>
+      process.env.GITHUB_ACTIONS && process.platform == 'win32' ? conanBuildOnGitHub() : conanBuild(),
   })
   .command('package', {
-    run: () => {
-      const conanSettings = makeConanSettings(['build_type']);
-      conan([
-        'package',
-        '.',
-        '-bf',
-        'build',
-        '-pf',
-        path.join('dist', 'kfc'),
-        ...conanSettings,
-      ]);
-    },
+    run: conanPackage,
   })
   .help('--help')
   .version('--version')
