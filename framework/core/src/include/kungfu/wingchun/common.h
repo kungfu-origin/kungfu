@@ -353,6 +353,15 @@ inline longfist::enums::Direction get_direction(longfist::enums::InstrumentType 
                                                 longfist::enums::Side side, longfist::enums::Offset offset) {
   using namespace longfist::enums;
 
+  if (side == Side::MarginTrade) {
+    return Direction::Long;
+  } else if (side == Side::ShortSell) {
+    return Direction::Short;
+  } else if (side == Side::RepayMargin) {
+    return Direction::Long;
+  } else if (side == Side::RepayStock) {
+    return Direction::Short;
+  }
   if (not is_shortable(instrument_type)) {
     return Direction::Long;
   }
@@ -370,7 +379,7 @@ inline longfist::enums::Direction get_direction(longfist::enums::InstrumentType 
       (offset == Offset::Close or offset == Offset::CloseToday or offset == Offset::CloseYesterday)) {
     return Direction::Short;
   }
-  throw wingchun_error(fmt::format("invalid direction args {} {} {}", (int)instrument_type, (int)side, (int)offset));
+  throw wingchun_error(fmt::format("get_direction error: invalid direction args {} {} {}", (int)instrument_type, (int)side, (int)offset));
 }
 
 inline uint32_t hash_instrument(const char *exchange_id, const char *instrument_id) {

@@ -37,6 +37,7 @@ struct Book {
   const CommissionMap &commissions;
   const InstrumentMap &instruments;
   longfist::types::Asset asset = {};
+  longfist::types::AssetMargin asset_margin = {};
   PositionMap long_positions = {};
   PositionMap short_positions = {};
   OrderInputMap order_inputs = {};

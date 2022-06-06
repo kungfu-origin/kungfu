@@ -108,12 +108,16 @@ private:
 
   void try_update_asset(const longfist::types::Asset &asset);
 
+  void try_update_asset_margin(const longfist::types::AssetMargin &asset_margin);
+
   void try_update_position(const longfist::types::Position &position);
 
   // 把books_replica_中location_uid对应的book复制到books_，然后重置asset_guards和position_guards为false
   void try_sync_book_replica(uint32_t location_uid);
 
   void try_update_asset_replica(const longfist::types::Asset &asset);
+
+  void try_update_assetmargin_replica(const longfist::types::AssetMargin &asset_margin);
 
   void try_update_position_replica(const longfist::types::Position &position);
 

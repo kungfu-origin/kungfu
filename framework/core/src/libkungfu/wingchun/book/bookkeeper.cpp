@@ -60,11 +60,13 @@ void Bookkeeper::on_start(const rx::connectable_observable<event_ptr> &events) {
   events | is(Order::tag) | $$(update_book<Order>(event, &AccountingMethod::apply_order));
   events | is(Trade::tag) | $$(update_book<Trade>(event, &AccountingMethod::apply_trade));
   events | is(Asset::tag) | to(location::SYNC) | $$(try_update_asset_replica(event->data<Asset>()));
+  events | is(AssetMargin::tag) | to(location::SYNC) | $$(try_update_assetmargin_replica(event->data<AssetMargin>()));
   events | is(Position::tag) | to(location::SYNC) | $$(try_update_position_replica(event->data<Position>()));
   events | is(PositionEnd::tag) | to(location::SYNC) | $$(update_position_guard(event->data<PositionEnd>().holder_uid));
 
   auto fun_not_to_sync = [&](const event_ptr &event) { return event->dest() != location::SYNC; };
   events | is(Asset::tag) | filter(fun_not_to_sync) | $$(try_update_asset(event->data<Asset>()));
+  events | is(AssetMargin::tag) | filter(fun_not_to_sync) | $$(try_update_asset_margin(event->data<AssetMargin>()));
   events | is(Position::tag) | filter(fun_not_to_sync) | $$(try_update_position(event->data<Position>()));
   events | is(PositionEnd::tag) | filter(fun_not_to_sync) |
       $$(get_book(event->data<PositionEnd>().holder_uid)->update(event->gen_time()));
@@ -99,6 +101,14 @@ void Bookkeeper::restore(const cache::bank &state_bank) {
     auto &asset = state.data;
     auto book = get_book(asset.holder_uid);
     book->asset = asset;
+    SPDLOG_INFO("[restore] avail {}", book->asset.avail);
+    book->update(app_.now());
+  }
+  for (auto &pair : state_bank[boost::hana::type_c<AssetMargin>]) {
+    auto &state = pair.second;
+    auto &asset_margin = state.data;
+    auto book = get_book(asset_margin.holder_uid);
+    book->asset_margin = asset_margin;
     book->update(app_.now());
   }
 }
@@ -112,19 +122,48 @@ Book_ptr Bookkeeper::make_book(uint32_t location_uid) {
   asset.holder_uid = location_uid;
   asset.ledger_category = location->category == category::TD ? LedgerCategory::Account : LedgerCategory::Strategy;
   strcpy(asset.trading_day, time::strftime(app_.get_trading_day(), KUNGFU_TRADING_DAY_FORMAT).c_str());
+  auto &asset_margin = book->asset_margin;
+  asset_margin.holder_uid = location_uid;
+  asset_margin.ledger_category =
+      location->category == category::TD ? LedgerCategory::Account : LedgerCategory::Strategy;
+  strcpy(asset_margin.trading_day, time::strftime(app_.get_trading_day(), KUNGFU_TRADING_DAY_FORMAT).c_str());
   if (asset.ledger_category == LedgerCategory::Account) {
     strcpy(asset.source_id, location->group.c_str());
     strcpy(asset.broker_id, location->group.c_str());
     strcpy(asset.account_id, location->name.c_str());
+    strcpy(asset_margin.source_id, location->group.c_str());
+    strcpy(asset_margin.broker_id, location->group.c_str());
+    strcpy(asset_margin.account_id, location->name.c_str());
   }
   if (asset.ledger_category == LedgerCategory::Strategy) {
     strcpy(asset.client_id, location->name.c_str());
+    strcpy(asset_margin.client_id, location->name.c_str());
   }
   return book;
 }
 
 void Bookkeeper::update_instrument(const longfist::types::Instrument &instrument) {
-  instruments_.emplace(hash_instrument(instrument.exchange_id, instrument.instrument_id), instrument);
+  auto pair = instruments_.try_emplace(hash_instrument(instrument.exchange_id, instrument.instrument_id), instrument);
+  if (not pair.second) {
+    auto &inserted_inst = pair.first->second;
+    if (instrument.force_update_ratio) {
+      inserted_inst.long_margin_ratio = instrument.long_margin_ratio;
+      inserted_inst.short_margin_ratio = instrument.short_margin_ratio;
+      inserted_inst.conversion_rate = instrument.conversion_rate;
+    } else {
+      if (inserted_inst.force_update_ratio) {
+        double long_margin_ratio = inserted_inst.long_margin_ratio;
+        double short_margin_ratio = inserted_inst.short_margin_ratio;
+        double conversion_rate = inserted_inst.conversion_rate;
+        memcpy(&inserted_inst, &instrument, sizeof(longfist::types::Instrument));
+        inserted_inst.long_margin_ratio = long_margin_ratio;
+        inserted_inst.short_margin_ratio = short_margin_ratio;
+        inserted_inst.conversion_rate = conversion_rate;
+      } else {
+        memcpy(&inserted_inst, &instrument, sizeof(longfist::types::Instrument));
+      }
+    }
+  }
 }
 
 void Bookkeeper::update_book(const event_ptr &event, const InstrumentKey &instrument_key) {
@@ -157,6 +196,12 @@ void Bookkeeper::update_book(const event_ptr &event, const Quote &quote) {
 void Bookkeeper::try_update_asset(const Asset &asset) {
   if (app_.has_location(asset.holder_uid)) {
     get_book(asset.holder_uid)->asset = asset;
+  }
+}
+
+void Bookkeeper::try_update_asset_margin(const AssetMargin &asset_margin) {
+  if (app_.has_location(asset_margin.holder_uid)) {
+    get_book(asset_margin.holder_uid)->asset_margin = asset_margin;
   }
 }
 
@@ -286,6 +331,14 @@ void Bookkeeper::try_update_asset_replica(const longfist::types::Asset &asset) {
     get_book_replica(asset.holder_uid)->asset = asset;
     books_replica_asset_guards_.insert_or_assign(asset.holder_uid, true);
     try_sync_book_replica(asset.holder_uid);
+  }
+}
+
+void Bookkeeper::try_update_assetmargin_replica(const longfist::types::AssetMargin &asset_margin) {
+  if (app_.has_location(asset_margin.holder_uid)) {
+    get_book_replica(asset_margin.holder_uid)->asset_margin = asset_margin;
+    // books_replica_asset_guards_.insert_or_assign(asset.holder_uid, true);
+    // try_sync_book_replica(asset.holder_uid);
   }
 }
 
