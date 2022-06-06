@@ -155,7 +155,7 @@ class ExtensionExecutor:
             ctx.runtime_locator,
         )
         ctx.logger = create_logger(ctx.name, ctx.log_level, ctx.location)
-        ctx.strategy = load_strategy(ctx, ctx.path)
+        ctx.strategy = Strategy(ctx)
         ctx.runner = Runner(ctx, kfj.MODES[ctx.mode])
         ctx.runner.add_strategy(ctx.strategy)
         ctx.loop = KungfuEventLoop(ctx, ctx.runner)
@@ -166,15 +166,3 @@ class RegistryJSONEncoder(json.JSONEncoder):
     def default(self, obj):
         test = isinstance(obj, ExtensionLoader) or isinstance(obj, types.FunctionType)
         return str(obj) if test else obj.__dict__
-
-
-def load_strategy(ctx, path):
-    if path.endswith(".py"):
-        return Strategy(ctx)  # keep strategy alive for pybind11
-    elif ctx.group != "default":
-        return Strategy(ctx)
-    else:
-        spec = spec_from_file_location(os.path.basename(path).split(".")[0], path)
-        module_cpp = module_from_spec(spec)
-        spec.loader.exec_module(module_cpp)
-        return module_cpp.Strategy(ctx.location)

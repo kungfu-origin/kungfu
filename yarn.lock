@@ -1448,6 +1448,13 @@
     "@jridgewell/resolve-uri" "^3.0.3"
     "@jridgewell/sourcemap-codec" "^1.4.10"
 
+"@kungfu-trader/kfx-twap@^1.0.0-alpha.0":
+  version "1.0.0-alpha.0"
+  resolved "https://npm.pkg.github.com/download/@kungfu-trader/kfx-twap/1.0.0-alpha.0/7ec82a0b9e7e14bb71a0371bc682e6c97296a1cc4196d9e3be43771da35bd71f#534f4c965db7cb45a491fe3e4f71c8b2debff53a"
+  integrity sha512-XUdkQAq271CsATd0aoQl5jPOcsC7iHTMW/q/zHT/A7lNqhVGqXDKYFqPjoO7EkH4sF/VhCJSs7urXp9tTSiB+Q==
+  dependencies:
+    "@kungfu-trader/kungfu-core" "^2.4.0-alpha.52"
+
 "@kungfu-trader/libnode@14.18.0":
   version "14.18.0"
   resolved "https://registry.yarnpkg.com/@kungfu-trader/libnode/-/libnode-14.18.0.tgz#1e2262ba94c6f11547a53c09f6940ea00274d1dc"
