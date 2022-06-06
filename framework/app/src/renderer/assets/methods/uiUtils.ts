@@ -200,7 +200,7 @@ export const openNewBrowserWindow = (
 ): Promise<Electron.BrowserWindow> => {
   const currentWindow = getCurrentWindow();
   const modalPath =
-    process.env.NODE_ENV !== 'production'
+    process.env.APP_TYPE === 'renderer' && process.env.NODE_ENV !== 'production'
       ? `http://localhost:9090/${name}.html${params}`
       : `file://${folderName}/${name}.html${params}`;
 

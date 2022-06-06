@@ -1,3 +1,4 @@
+import './setEnv';
 import { createApp } from 'vue';
 import App from '@kungfu-trader/kungfu-app/src/renderer/pages/code/App.vue';
 import store from '../index/store';
