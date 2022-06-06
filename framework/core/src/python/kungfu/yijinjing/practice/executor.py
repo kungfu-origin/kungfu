@@ -32,9 +32,8 @@ class ExecutorRegistry:
         }
         if ctx.extension_path:
             deque(map(self.register_extensions, ctx.extension_path.split(path.pathsep)))
-        else:
-            if ctx.path :
-                self.read_config(os.path.join(os.path.dirname(ctx.path), "package.json"))
+        elif ctx.path:
+            self.read_config(os.path.join(os.path.dirname(ctx.path), "package.json"))
 
     def register_extensions(self, root):
         for child in os.listdir(root):
