@@ -1448,26 +1448,13 @@
     "@jridgewell/resolve-uri" "^3.0.3"
     "@jridgewell/sourcemap-codec" "^1.4.10"
 
-"@kungfu-trader/kfx-twap@^1.0.0-alpha.0":
-  version "1.0.0-alpha.0"
-  resolved "https://npm.pkg.github.com/download/@kungfu-trader/kfx-twap/1.0.0-alpha.0/7ec82a0b9e7e14bb71a0371bc682e6c97296a1cc4196d9e3be43771da35bd71f#534f4c965db7cb45a491fe3e4f71c8b2debff53a"
-  integrity sha512-XUdkQAq271CsATd0aoQl5jPOcsC7iHTMW/q/zHT/A7lNqhVGqXDKYFqPjoO7EkH4sF/VhCJSs7urXp9tTSiB+Q==
-  dependencies:
-    "@kungfu-trader/kungfu-core" "^2.4.0-alpha.52"
-
-"@kungfu-trader/libnode@14.18.0":
-  version "14.18.0"
-  resolved "https://registry.yarnpkg.com/@kungfu-trader/libnode/-/libnode-14.18.0.tgz#1e2262ba94c6f11547a53c09f6940ea00274d1dc"
-  integrity sha512-7yke5Bj749IWr4hm8BuPTGFTNZ0Ba9Y34/24LdZPUSLhv5CrRfuZAwnTCRW6Sb+5PHNXFTwfd1QW1VWtJHTVyA==
+"@kungfu-trader/libnode@14.19.0":
+  version "14.19.0"
+  resolved "https://npm.pkg.github.com/download/@kungfu-trader/libnode/14.19.0/395de3d76c396801179b86b2e4a950bd77c3246414c46db6078333daca8cb92a#acca84a494fb85bfb8f4a629551475ca4ba5ef5a"
+  integrity sha512-2bPhZJO5YTKftEvd4pOOXOHcz6GuLor2MsZ1bLQBTMl1a5bAlj+8FPIulJq9nJFbk0tH8Mar+b3B+t0RoW164Q==
   dependencies:
     "@mapbox/node-pre-gyp" "^1.0.5"
-    fs-extra "^9.1.0"
-    glob "^7.1.6"
-    node-addon-api "^4.0.0"
-    node-gyp "^8.1.0"
     sywac "^1.3.0"
-    xml-js "^1.6.11"
-    yarn "^1.22.0"
 
 "@lerna/add@4.0.0":
   version "4.0.0"
@@ -8540,11 +8527,6 @@ node-addon-api@^1.6.3:
   resolved "https://registry.yarnpkg.com/node-addon-api/-/node-addon-api-1.7.2.tgz#3df30b95720b53c24e59948b49532b662444f54d"
   integrity sha512-ibPK3iA+vaY1eEjESkQkM0BbCqFOaZMiXRTtdB0u7b4djtY6JnsjvPdUHVMg6xQt3B8fpTTWHI9A+ADjM9frzg==
 
-node-addon-api@^4.0.0:
-  version "4.2.0"
-  resolved "https://registry.yarnpkg.com/node-addon-api/-/node-addon-api-4.2.0.tgz#117cbb5a959dff0992e1c586ae0393573e4d2a87"
-  integrity sha512-eazsqzwG2lskuzBqCGPi7Ac2UgOoMz8JVOXVhTvvPDYhthvNpefx8jWD8Np7Gv+2Sz0FlPWZk0nJV0z598Wn8Q==
-
 node-addon-api@^4.3.0:
   version "4.3.0"
   resolved "https://registry.yarnpkg.com/node-addon-api/-/node-addon-api-4.3.0.tgz#52a1a0b475193e0928e98e0426a0d1254782b77f"
@@ -8562,7 +8544,7 @@ node-forge@^1.2.0, node-forge@^1.3.0:
   resolved "https://registry.yarnpkg.com/node-forge/-/node-forge-1.3.1.tgz#be8da2af243b2417d5f646a770663a92b7e9ded3"
   integrity sha512-dPEtOeMvF9VMcYV/1Wb8CPoVAXtp6MKMlcbAt4ddqmGqUJ6fQZFXkNZNkNlfevtNkGtaSoXf/vNNNSvgrdXwtA==
 
-node-gyp@^5.0.2, node-gyp@^7.1.0, node-gyp@^8.0.0, node-gyp@^8.1.0:
+node-gyp@^5.0.2, node-gyp@^7.1.0, node-gyp@^8.0.0:
   version "8.4.1"
   resolved "https://registry.yarnpkg.com/node-gyp/-/node-gyp-8.4.1.tgz#3d49308fc31f768180957d6b5746845fbd429937"
   integrity sha512-olTJRgUtAb/hOXG0E93wZDs5YiJlgbXxTwQAFHyNlRsXQnYzUaF2aGgujZbw+hR8aF4ZG/rST57bWMWD16jr9w==
@@ -11965,13 +11947,6 @@ xdg-basedir@^4.0.0:
   resolved "https://registry.yarnpkg.com/xdg-basedir/-/xdg-basedir-4.0.0.tgz#4bc8d9984403696225ef83a1573cbbcb4e79db13"
   integrity sha512-PSNhEJDejZYV7h50BohL09Er9VaIefr2LMAf3OEmpCkjOi34eYyQYAXUTjEQtZJTKcF0E2UKTh+osDLsgNim9Q==
 
-xml-js@^1.6.11:
-  version "1.6.11"
-  resolved "https://registry.yarnpkg.com/xml-js/-/xml-js-1.6.11.tgz#927d2f6947f7f1c19a316dd8eea3614e8b18f8e9"
-  integrity sha512-7rVi2KMfwfWFl+GpPg6m80IVMWXLRjO+PxTq7V2CDhoGak0wzYzFgUY2m4XJ47OGdXd8eLE8EmwfAmdjw7lC1g==
-  dependencies:
-    sax "^1.2.4"
-
 xmlbuilder@>=11.0.1:
   version "15.1.1"
   resolved "https://registry.yarnpkg.com/xmlbuilder/-/xmlbuilder-15.1.1.tgz#9dcdce49eea66d8d10b42cae94a79c3c8d0c2ec5"
@@ -12108,7 +12083,7 @@ yargs@^3.6.0:
     window-size "^0.1.4"
     y18n "^3.2.0"
 
-yarn@^1.18.0, yarn@^1.22.0:
+yarn@^1.18.0:
   version "1.22.17"
   resolved "https://registry.yarnpkg.com/yarn/-/yarn-1.22.17.tgz#bf910747d22497b573131f7341c0e1d15c74036c"
   integrity sha512-H0p241BXaH0UN9IeH//RT82tl5PfNraVpSpEoW+ET7lmopNC61eZ+A+IDvU8FM6Go5vx162SncDL8J1ZjRBriQ==

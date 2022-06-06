@@ -44,7 +44,6 @@ class KungfuCoreConan(ConanFile):
         "node_version": "ANY",
         "electron_version": "ANY",
         "vs_toolset": ["auto", "ClangCL"],
-        "max_recompile_times": range(1, 10),
     }
     default_options = {
         "fmt:header_only": "True",
@@ -56,10 +55,9 @@ class KungfuCoreConan(ConanFile):
         "freezer": "pyinstaller",
         "node_version": "ANY",
         "electron_version": "ANY",
-        # can not use clang until this bug got fixed:
+        # clang has a known issue:
         # https://developercommunity.visualstudio.com/t/msbuild-doesnt-give-delayload-flags-to-linker-when/1595015
-        "vs_toolset": "auto",
-        "max_recompile_times": 1,
+        "vs_toolset": "auto" if "CONAN_VS_TOOLSET" not in environ else environ["CONAN_VS_TOOLSET"],
     }
     cpp_files_extensions = [".h", ".hpp", ".hxx", ".cpp", ".c", ".cc", ".cxx"]
     conanfile_dir = path.dirname(path.realpath(__file__))
@@ -83,8 +81,9 @@ class KungfuCoreConan(ConanFile):
         if tools.detected_os() != "Windows":
             self.settings.compiler.libcxx = "libstdc++"
         else:
-            toolset = str(self.options.vs_toolset)
-            self.settings.compiler.toolset = toolset if toolset != "auto" else None
+            toolset = self.__get_toolset()
+            if toolset != "auto":
+                self.settings.compiler.toolset = toolset
 
     def generate(self):
         """Updates mtime of lock files for node-gyp sake"""
@@ -103,8 +102,7 @@ class KungfuCoreConan(ConanFile):
     def build(self):
         build_type = self.__get_build_type()
         self.__clean_build_info(build_type)
-        if tools.detected_os() != "Windows":
-            self.__run_build(build_type, "node")
+        self.__run_build(build_type, "node")
         self.__run_build(build_type, "electron")
         self.__gen_build_info(build_type)
         self.__show_build_info(build_type)
@@ -120,12 +118,18 @@ class KungfuCoreConan(ConanFile):
         os.environ["CMAKE_BUILD_TYPE"] = build_type
         return build_type
 
+    def __get_toolset(self):
+        return str(self.options.vs_toolset)
+
     def __get_node_version(self, runtime):
         return (
             str(self.options.electron_version)
             if runtime == "electron"
             else str(self.options.node_version)
         )
+
+    def __get_build_info_path(self, build_type):
+        return path.join(self.build_dir, build_type, self.build_info_file)
 
     def __list_files(self, source_dir, extensions):
         found_files = []
@@ -168,9 +172,6 @@ class KungfuCoreConan(ConanFile):
     def __touch_lockfile(self):
         conan_lock = path.join(self.build_dir, "conan.lock")
         pathlib.Path(conan_lock).touch()
-
-    def __get_build_info_path(self, build_type):
-        return path.join(self.build_dir, build_type, self.build_info_file)
 
     def __clean_build_info(self, build_type):
         build_info_path = self.__get_build_info_path(build_type)
@@ -215,16 +216,48 @@ class KungfuCoreConan(ConanFile):
             build_info = json.load(build_info_file)
             build_version = build_info["version"]
             self.output.success(f"build version {build_version}")
+    
+    def __enable_modules(self, runtime, toolset):
+        modules = {
+            "libkungfu": True,
+            "kungfu_node": (tools.detected_os() != "Windows") or (runtime == "electron"),
+            "pykungfu": runtime == "node"
+        }
 
-    def __run_yarn(self, exit_on_error, *args):
+        def switch(module):
+            environ_key = f"KUNGFU_BUILD_SKIP_{module.upper()}"
+            if not modules[module]:
+                environ[environ_key] = "on"
+            else:
+                environ.pop(environ_key, None)
+        
+        [switch(key) for key in modules.keys()]
+
+    def __run_build(self, build_type, runtime):
+        if f"KUNGFU_BUILD_SKIP_RUNTIME_{runtime.upper()}" in environ:
+            self.output.warn(f"disabled build for runtime {runtime}")
+            return
+        toolset = self.__get_toolset()
+        self.__enable_modules(runtime, toolset)
+        self.__run_cmake_js(build_type, "configure", runtime, toolset)
+        self.__run_cmake_js(build_type, "build",  runtime, toolset)
+
+    def __run_cmake_js(self, build_type, cmd, runtime, toolset):
+        [
+            os.environ.pop(env_key)
+            for env_key in os.environ if env_key.upper().startswith("NPM_")
+        ]  # workaround for msvc
+        tools.rmdir(self.build_extensions_dir)
+        self.__run_yarn(*self.__build_cmake_js_cmd(cmd, runtime, toolset))
+        self.output.success(f"cmake-js {cmd} done")
+
+    def __run_yarn(self, *args):
         rc = psutil.Popen([tools.which("yarn"), *args]).wait()
         if rc != 0:
             self.output.error(f"yarn {args} failed with return code {rc}")
-            if exit_on_error:
-                sys.exit(rc)
-        return rc
+            sys.exit(rc)
 
-    def __build_cmake_js_cmd(self, cmd, runtime="node"):
+    def __build_cmake_js_cmd(self, cmd, runtime, toolset):
         spdlog_levels = {
             "trace": "SPDLOG_LEVEL_TRACE",
             "debug": "SPDLOG_LEVEL_DEBUG",
@@ -233,7 +266,9 @@ class KungfuCoreConan(ConanFile):
             "error": "SPDLOG_LEVEL_ERROR",
             "critical": "SPDLOG_LEVEL_CRITICAL",
         }
-        loglevel = spdlog_levels[str(self.options.log_level)]
+        log_level = spdlog_levels[str(self.options.log_level)]
+        parallel_level = os.cpu_count()
+
         python_path = (
             psutil.Popen(["pipenv", "--py"], stdout=subprocess.PIPE)
             .stdout.read()
@@ -241,7 +276,6 @@ class KungfuCoreConan(ConanFile):
             .strip()
         )
 
-        toolset = str(self.options.vs_toolset)
         toolset_option = ["--toolset", toolset] if toolset != "auto" else []
 
         build_option = (
@@ -262,40 +296,13 @@ class KungfuCoreConan(ConanFile):
                 "--runtime-version",
                 self.__get_node_version(runtime),
                 f"--CDPYTHON_EXECUTABLE={python_path}",
-                f"--CDSPDLOG_LOG_LEVEL_COMPILE={loglevel}",
-                f"--CDCMAKE_BUILD_PARALLEL_LEVEL={os.cpu_count()}",
+                f"--CDSPDLOG_LOG_LEVEL_COMPILE={log_level}",
+                f"--CDCMAKE_BUILD_PARALLEL_LEVEL={parallel_level}",
             ]
             + build_option
             + debug_option
             + [cmd]
         )
-
-    def __run_cmake_js(self, build_type, cmd, runtime, exit_on_error):
-        [
-            os.environ.pop(env_key)
-            for env_key in os.environ
-            if env_key.startswith("npm_") or env_key.startswith("NPM_")
-        ]  # workaround for msvc
-        tools.rmdir(self.build_extensions_dir)
-        rc = self.__run_yarn(exit_on_error, *self.__build_cmake_js_cmd(cmd, runtime))
-        self.output.success(f"cmake-js {cmd} done with return code {rc}")
-        return rc
-
-    def __run_build(self, build_type, runtime):
-        self.__run_cmake_js(build_type, "configure", runtime, True)
-        max_recompile_times = int(self.options.max_recompile_times)
-        compile_times = 1
-        while compile_times <= max_recompile_times:
-            self.output.info(f"compile [{compile_times}] with runtime {runtime}")
-            rc = self.__run_cmake_js(
-                build_type,
-                "build",
-                runtime,
-                compile_times == max_recompile_times,
-            )
-            if rc == 0:
-                break
-            compile_times += 1
 
     def __run_pyinstaller(self, build_type):
         pathlib.Path(self.__get_build_info_path(build_type)).touch()
