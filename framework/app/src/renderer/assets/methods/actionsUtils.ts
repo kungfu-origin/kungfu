@@ -1338,7 +1338,7 @@ export function dealTradingTaskName(
   extConfigs: KungfuApi.KfExtConfigs,
 ): string {
   const group = name.toKfGroup();
-  const strategyExts = extConfigs.value['strategy'] || {};
+  const strategyExts = extConfigs['strategy'] || {};
   const groupResolved = strategyExts[group] ? strategyExts[group].name : group;
   const timestamp = name.toKfName();
   return `${groupResolved} ${dayjs(+timestamp).format('HH:mm:ss')}`;
