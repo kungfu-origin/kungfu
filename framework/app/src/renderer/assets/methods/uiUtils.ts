@@ -199,11 +199,10 @@ export const openNewBrowserWindow = (
   windowConfig?: Electron.BrowserWindowConstructorOptions,
 ): Promise<Electron.BrowserWindow> => {
   const currentWindow = getCurrentWindow();
-  const modalPath = folderName
-    ? `file://${folderName}/${name}.html${params}`
-    : process.env.NODE_ENV !== 'production'
-    ? `http://localhost:9090/${name}.html${params}`
-    : `file://${__dirname}/${name}.html${params}`;
+  const modalPath =
+    process.env.NODE_ENV !== 'production'
+      ? `http://localhost:9090/${name}.html${params}`
+      : `file://${folderName}/${name}.html${params}`;
 
   return new Promise((resolve, reject) => {
     const win = new BrowserWindow({
@@ -257,13 +256,13 @@ function getNewWindowLocation(): { x: number; y: number } | null {
 export const openLogView = (
   logPath: string,
 ): Promise<Electron.BrowserWindow> => {
-  return openNewBrowserWindow('', 'logview', `?logPath=${logPath}`);
+  return openNewBrowserWindow(__dirname, 'logview', `?logPath=${logPath}`);
 };
 
 export const openCodeView = (
   processId: string,
 ): Promise<Electron.BrowserWindow> => {
-  return openNewBrowserWindow('', 'code', `?processId=${processId}`);
+  return openNewBrowserWindow(__dirname, 'code', `?processId=${processId}`);
 };
 
 export const removeLoadingMask = (): void => {
