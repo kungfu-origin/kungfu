@@ -195,7 +195,7 @@ export const getInstrumentTypeColor = (
 export const openNewBrowserWindow = (
   folderName: string,
   name: string,
-  params: string,
+  params = '',
   windowConfig?: Electron.BrowserWindowConstructorOptions,
 ): Promise<Electron.BrowserWindow> => {
   const currentWindow = getCurrentWindow();

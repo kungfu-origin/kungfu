@@ -32,7 +32,7 @@ if (
   process.env.APP_TYPE === 'renderer' ||
   process.env.APP_TYPE === 'component'
 ) {
-  //global.__kfResourcesPath 是一个容易出错的问题, 需要每个调用pathconfig的进程都注册了这个值, 不然报错
+  //global.__kfResourcesPath 是一个容易出错的问题, 需要每个调用pathconfig的进程都需要注册这个值
   global.__kfResourcesPath = process.resourcesPath;
 }
 
