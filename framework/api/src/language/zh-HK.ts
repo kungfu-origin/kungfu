@@ -56,6 +56,7 @@ export default {
   clear: '清理 {content} 完成, 请重启应用',
   open_window: '正在打开窗口',
   open_code_editor: '正在打开代码编辑器',
+  open_trading_task_view: '正在打开交易任务视图',
   add_board: '添加面板',
   select_board: '请选择要添加的面板',
   add_board_error: '添加面板目标错误',
