@@ -333,6 +333,8 @@ export default {
     strategy_id: '策略ID',
     strategy_file: '策略文件',
     strategy_path: '策略路径',
+    strategy_path_tip:
+      '普通 python 策略选择 .py 文件, 加密策略或cpp策略选择策略 package.json',
     process_status: '进程',
     unrealized_pnl: '浮动盈亏',
     marked_value: '市值',
