@@ -235,6 +235,56 @@ export const openNewBrowserWindow = (
   });
 };
 
+/**
+ * 在插件中新建窗口
+ * @param  {string} htmlPath
+ */
+export const openNewBrowserWindowInExt = (
+  name: string,
+  params: string,
+  windowConfig?: Electron.BrowserWindowConstructorOptions,
+): Promise<Electron.BrowserWindow> => {
+  const currentWindow = getCurrentWindow();
+  const modalPath = `file://${__dirname}/${name}.html${params}`;
+
+  console.log(modalPath);
+
+  return new Promise((resolve, reject) => {
+    const win = new BrowserWindow({
+      ...(getNewWindowLocation() || {}),
+      width: 1080,
+      height: 766,
+      parent: currentWindow,
+      webPreferences: {
+        nodeIntegration: true,
+        nodeIntegrationInWorker: true,
+        contextIsolation: false,
+        enableRemoteModule: true,
+      },
+      backgroundColor: '#000',
+      ...windowConfig,
+    });
+
+    console.log(currentWindow);
+
+    console.log(modalPath);
+
+    win.on('ready-to-show', function () {
+      win && win.show();
+      win && win.focus();
+    });
+
+    win.webContents.loadURL(modalPath);
+    win.webContents.on('did-finish-load', () => {
+      if (!currentWindow || Object.keys(currentWindow).length == 0) {
+        reject(new Error(t('no_focus')));
+        return;
+      }
+      resolve(win);
+    });
+  });
+};
+
 function getNewWindowLocation(): { x: number; y: number } | null {
   const currentWindow = getCurrentWindow();
   if (currentWindow) {
@@ -265,7 +315,7 @@ export const openCodeView = (
 };
 
 export const openTradingTaskView = (): Promise<Electron.BrowserWindow> => {
-  return openNewBrowserWindow('tradingTask', '');
+  return openNewBrowserWindowInExt('tradingTask', '');
 };
 
 export const removeLoadingMask = (): void => {
@@ -381,7 +431,7 @@ export const handleOpenCodeView = (
 
 export const handleOpenTradingTaskView =
   (): Promise<Electron.BrowserWindow> => {
-    const openMessage = message.loading(t('open_code_editor'));
+    const openMessage = message.loading(t('open_trading_task_view'));
     return openTradingTaskView().finally(() => {
       openMessage();
     });

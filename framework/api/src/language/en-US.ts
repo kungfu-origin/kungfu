@@ -56,6 +56,7 @@ export default {
   clear: 'Clearing {content} completed, please restart the application',
   open_window: 'Opening window',
   open_code_editor: 'Opening code editor',
+  open_trading_task_view: 'Opening trading task view',
   add_board: 'Add Board',
   select_board: 'Please select the board to add',
   add_board_error: 'Add board target error',
