@@ -747,6 +747,7 @@ declare namespace KungfuApi {
 
   export interface StrategyStateListItem extends StrategyStateDataResolved {
     process_id: string;
+    state: StrategyStateStatusTypes;
   }
 
   export interface Watcher {
