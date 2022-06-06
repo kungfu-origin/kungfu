@@ -29,7 +29,6 @@
     "@kungfu-trader/kungfu-cli": "^2.4.0-alpha.59"
   },
   "devDependencies": {
-    "@kungfu-trader/kfx-twap": "^1.0.0-alpha.0",
     "@kungfu-trader/kungfu-sdk": "^2.4.0-alpha.57"
   }
 }

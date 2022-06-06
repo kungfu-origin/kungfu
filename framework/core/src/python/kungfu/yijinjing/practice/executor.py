@@ -185,7 +185,7 @@ def load_strategy(ctx, path, key):
     if path.endswith(".py"):
         return Strategy(ctx)  # keep strategy alive for pybind11
     elif path.endswith("package.json"):
-        ctx.path = os.path.join(os.path.dirname(path), key)
+        ctx.path = os.path.join(path[:-13], key)
         return Strategy(ctx)
     elif key is not None and path.endswith(key):
         return Strategy(ctx)
