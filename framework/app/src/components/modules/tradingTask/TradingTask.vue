@@ -15,7 +15,6 @@ import {
   SettingOutlined,
   DeleteOutlined,
 } from '@ant-design/icons-vue';
-import dayjs from 'dayjs';
 import { columns } from './config';
 import path from 'path';
 import {
@@ -36,6 +35,7 @@ import {
   useCurrentGlobalKfLocation,
   useExtConfigsRelated,
   useProcessStatusDetailData,
+  dealTradingTaskName,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
 import { messagePrompt } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
@@ -92,6 +92,15 @@ const TradingTaskViewComponentConfigs = computed(() => {
       };
     });
 });
+
+console.log(
+  Object.keys(uiExtConfigs.value).map((key) => {
+    return {
+      ...uiExtConfigs.value[key],
+      key,
+    };
+  }),
+);
 
 function handleOpenSetTaskDialog() {
   setExtensionModalVisible.value = true;
@@ -264,14 +273,6 @@ function getProcessStatusName(
   }
   return getStrategyStatusName(taskLocation);
 }
-
-function dealTradingTaskName(name: string) {
-  const group = name.toKfGroup();
-  const strategyExts = extConfigs.value['strategy'] || {};
-  const groupResolved = strategyExts[group] ? strategyExts[group].name : group;
-  const timestamp = name.toKfName();
-  return `${groupResolved} ${dayjs(+timestamp).format('HH:mm:ss')}`;
-}
 </script>
 
 <template>
@@ -312,7 +313,7 @@ function dealTradingTaskName(name: string) {
       >
         <template #bodyCell="{ column, record }">
           <template v-if="column.dataIndex === 'name'">
-            {{ dealTradingTaskName(record.name) }}
+            {{ dealTradingTaskName(record.name, extConfigs) }}
           </template>
           <template v-else-if="column.dataIndex === 'processStatus'">
             <a-switch
