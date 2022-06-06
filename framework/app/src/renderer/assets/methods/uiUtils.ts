@@ -193,15 +193,17 @@ export const getInstrumentTypeColor = (
  * @param  {string} htmlPath
  */
 export const openNewBrowserWindow = (
+  folderName: string,
   name: string,
   params: string,
   windowConfig?: Electron.BrowserWindowConstructorOptions,
 ): Promise<Electron.BrowserWindow> => {
   const currentWindow = getCurrentWindow();
-  const modalPath =
-    process.env.NODE_ENV !== 'production'
-      ? `http://localhost:9090/${name}.html${params}`
-      : `file://${__dirname}/${name}.html${params}`;
+  const modalPath = folderName
+    ? `file://${folderName}/${name}.html${params}`
+    : process.env.NODE_ENV !== 'production'
+    ? `http://localhost:9090/${name}.html${params}`
+    : `file://${__dirname}/${name}.html${params}`;
 
   return new Promise((resolve, reject) => {
     const win = new BrowserWindow({
@@ -235,50 +237,6 @@ export const openNewBrowserWindow = (
   });
 };
 
-/**
- * 在插件中新建窗口
- * @param  {string} htmlPath
- */
-export const openNewBrowserWindowInExt = (
-  path: string,
-  fileName: string,
-  params: string,
-  windowConfig?: Electron.BrowserWindowConstructorOptions,
-): Promise<Electron.BrowserWindow> => {
-  const currentWindow = getCurrentWindow();
-  const modalPath = `file://${path}/${fileName}.html${params}`;
-
-  return new Promise((resolve, reject) => {
-    const win = new BrowserWindow({
-      ...(getNewWindowLocation() || {}),
-      width: 1080,
-      height: 766,
-      parent: currentWindow,
-      webPreferences: {
-        nodeIntegration: true,
-        nodeIntegrationInWorker: true,
-        contextIsolation: false,
-        enableRemoteModule: true,
-      },
-      backgroundColor: '#000',
-      ...windowConfig,
-    });
-    win.on('ready-to-show', function () {
-      win && win.show();
-      win && win.focus();
-    });
-
-    win.webContents.loadURL(modalPath);
-    win.webContents.on('did-finish-load', () => {
-      if (!currentWindow || Object.keys(currentWindow).length == 0) {
-        reject(new Error('ww'));
-        return;
-      }
-      resolve(win);
-    });
-  });
-};
-
 function getNewWindowLocation(): { x: number; y: number } | null {
   const currentWindow = getCurrentWindow();
   if (currentWindow) {
@@ -299,13 +257,13 @@ function getNewWindowLocation(): { x: number; y: number } | null {
 export const openLogView = (
   logPath: string,
 ): Promise<Electron.BrowserWindow> => {
-  return openNewBrowserWindow('logview', `?logPath=${logPath}`);
+  return openNewBrowserWindow('', 'logview', `?logPath=${logPath}`);
 };
 
 export const openCodeView = (
   processId: string,
 ): Promise<Electron.BrowserWindow> => {
-  return openNewBrowserWindow('code', `?processId=${processId}`);
+  return openNewBrowserWindow('', 'code', `?processId=${processId}`);
 };
 
 export const removeLoadingMask = (): void => {
