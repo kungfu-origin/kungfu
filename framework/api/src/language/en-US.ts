@@ -334,6 +334,8 @@ export default {
     strategy_id: 'strategy_id',
     strategy_file: 'strategy_file',
     strategy_path: 'strategy_path',
+    strategy_path_tip:
+      'Normal python strategy use .py file, packaged strategy use package.json in strategy folder',
     process_status: 'process',
     unrealized_pnl: 'unrealized_pnl',
     marked_value: 'marked_value',

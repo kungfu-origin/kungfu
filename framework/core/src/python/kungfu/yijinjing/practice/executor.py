@@ -34,7 +34,7 @@ class ExecutorRegistry:
             deque(map(self.register_extensions, ctx.extension_path.split(path.pathsep)))
         else:
             if ctx.path and ctx.path.endswith("package.json"):
-                self.register_extensions(ctx.path) 
+                self.register_extensions(ctx.path)
 
     def register_extensions(self, root):
         if root.endswith("package.json"):
@@ -46,21 +46,19 @@ class ExecutorRegistry:
                 self.read_config(config_path)
 
     def read_config(self, config_path):
-            if path.exists(config_path):
-                extension_dir = config_path[:-13]
-                with open(config_path, mode="r", encoding="utf8") as config_file:
-                    config = json.load(config_file)
-                    if "kungfuConfig" in config:
-                        if "config" in config["kungfuConfig"]:
-                            group = config["kungfuConfig"]["key"]
-                            for category in config["kungfuConfig"]["config"]:
-                                if category not in kfj.CATEGORIES:
-                                    raise RuntimeError(
-                                        f"Unsupported category {category}"
-                                    )
-                                self.executors[category][group] = ExtensionLoader(
-                                    self.ctx, extension_dir, config
-                                )
+        if path.exists(config_path):
+            extension_dir = config_path[:-13]
+            with open(config_path, mode="r", encoding="utf8") as config_file:
+                config = json.load(config_file)
+                if "kungfuConfig" in config:
+                    if "config" in config["kungfuConfig"]:
+                        group = config["kungfuConfig"]["key"]
+                        for category in config["kungfuConfig"]["config"]:
+                            if category not in kfj.CATEGORIES:
+                                raise RuntimeError(f"Unsupported category {category}")
+                            self.executors[category][group] = ExtensionLoader(
+                                self.ctx, extension_dir, config
+                            )
 
     def __getitem__(self, category):
         return self.executors[category]
@@ -168,7 +166,9 @@ class ExtensionExecutor:
         if loader.config is None:
             ctx.strategy = load_strategy(ctx, ctx.path, loader.config)
         else:
-            ctx.strategy = load_strategy(ctx, ctx.path, loader.config["kungfuConfig"]["key"])
+            ctx.strategy = load_strategy(
+                ctx, ctx.path, loader.config["kungfuConfig"]["key"]
+            )
         ctx.runner = Runner(ctx, kfj.MODES[ctx.mode])
         ctx.runner.add_strategy(ctx.strategy)
         ctx.loop = KungfuEventLoop(ctx, ctx.runner)
@@ -182,11 +182,10 @@ class RegistryJSONEncoder(json.JSONEncoder):
 
 
 def load_strategy(ctx, path, key):
-    if path.endswith(".py") :
+    if path.endswith(".py"):
         return Strategy(ctx)  # keep strategy alive for pybind11
     elif path.endswith("package.json"):
-        ctx.path = path[:-13]
-        ctx.path = os.path.join(ctx.path, key)
+        ctx.path = os.path.join(path[:-13], key)
         return Strategy(ctx)
     elif key is not None and path.endswith(key):
         return Strategy(ctx)

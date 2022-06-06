@@ -107,6 +107,7 @@ function handleOpenSetStrategyDialog(
         key: 'strategy_path',
         name: t('strategyConfig.strategy_path'),
         type: 'file',
+        tip: t('strategyConfig.strategy_path_tip'),
         required: true,
       },
     ],
