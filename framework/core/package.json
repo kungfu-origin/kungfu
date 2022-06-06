@@ -68,7 +68,7 @@
   },
   "devDependencies": {
     "@kungfu-trader/kungfu-toolchain": "^2.4.0-alpha.58",
-    "@kungfu-trader/libnode": "14.18.0",
+    "@kungfu-trader/libnode": "14.19.0",
     "cmake-js": "^6.3.0"
   }
 }

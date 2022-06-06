@@ -43,8 +43,8 @@ def pre_start(context):
     context.LASTSINGULARITY = args.get("lastSingularity", 'false')
     context.LASTSINGULARITYNANOSECOND = int(args.get("lastSingularityMilliSecond", '200')) * 10**6
     context.MAX_LOT_BY_STEP = int(args["maxLotByStep"])
-    trigger_time = args["triggerTime"]
-    finish_time = args["finishTime"]
+    trigger_time = args["triggerTime"].replace(" ", "_")
+    finish_time = args["finishTime"].replace(" ", "_")
     context.START_TIME_IN_NANO = str_to_nanotime(trigger_time)
     context.FINISH_TIME_IN_NANO = str_to_nanotime(finish_time)
     context.cancel_and_place_new_order = False
@@ -70,8 +70,8 @@ def str_to_nanotime(tm) :
         return int(tm) * 10**6
     else :
         year_month_day = time.strftime("%Y-%m-%d", time.localtime())
-        ymdhms = year_month_day + ' ' + tm.split(' ')[1]
-        timeArray = time.strptime(ymdhms, "%Y-%m-%d %H:%M:%S")
+        ymdhms = year_month_day + '_' + tm.split('_')[1]
+        timeArray = time.strptime(ymdhms, "%Y-%m-%d_%H:%M:%S")
         nano = int(time.mktime(timeArray) * 10**9)
         return nano
 

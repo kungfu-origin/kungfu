@@ -56,8 +56,20 @@ include_directories(src/include)
 set(KUNGFU_BUILD_DIR ${CMAKE_BINARY_DIR})
 
 ##########################################################################
-add_subdirectory(.deps/pybind11-2.9.0)
-add_subdirectory(.deps/sqlite3-3.33.0)
-add_subdirectory(src/libkungfu)
-add_subdirectory(src/bindings/python)
-add_subdirectory(src/bindings/node)
+
+if (NOT DEFINED ENV{KUNGFU_BUILD_SKIP_LIBKUNGFU} OR NOT $ENV{KUNGFU_BUILD_SKIP_LIBKUNGFU})
+  message(STATUS "Enabled libkungfu")
+  add_subdirectory(.deps/sqlite3-3.33.0)
+  add_subdirectory(src/libkungfu)
+endif()
+
+if (NOT DEFINED ENV{KUNGFU_BUILD_SKIP_KUNGFU_NODE} OR NOT $ENV{KUNGFU_BUILD_SKIP_KUNGFU_NODE})
+  message(STATUS "Enabled kungfu_node")
+  add_subdirectory(src/bindings/node)
+endif()
+
+if (NOT DEFINED ENV{KUNGFU_BUILD_SKIP_PYKUNGFU} OR NOT $ENV{KUNGFU_BUILD_SKIP_PYKUNGFU})
+  message(STATUS "Enabled pykungfu")
+  add_subdirectory(.deps/pybind11-2.9.0)
+  add_subdirectory(src/bindings/python)
+endif()
