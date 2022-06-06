@@ -240,14 +240,13 @@ export const openNewBrowserWindow = (
  * @param  {string} htmlPath
  */
 export const openNewBrowserWindowInExt = (
-  name: string,
+  path: string,
+  fileName: string,
   params: string,
   windowConfig?: Electron.BrowserWindowConstructorOptions,
 ): Promise<Electron.BrowserWindow> => {
   const currentWindow = getCurrentWindow();
-  const modalPath = `file://${__dirname}/${name}.html${params}`;
-
-  console.log(modalPath);
+  const modalPath = `file://${path}/${fileName}.html${params}`;
 
   return new Promise((resolve, reject) => {
     const win = new BrowserWindow({
@@ -264,11 +263,6 @@ export const openNewBrowserWindowInExt = (
       backgroundColor: '#000',
       ...windowConfig,
     });
-
-    console.log(currentWindow);
-
-    console.log(modalPath);
-
     win.on('ready-to-show', function () {
       win && win.show();
       win && win.focus();
@@ -277,7 +271,7 @@ export const openNewBrowserWindowInExt = (
     win.webContents.loadURL(modalPath);
     win.webContents.on('did-finish-load', () => {
       if (!currentWindow || Object.keys(currentWindow).length == 0) {
-        reject(new Error(t('no_focus')));
+        reject(new Error('ww'));
         return;
       }
       resolve(win);
@@ -312,10 +306,6 @@ export const openCodeView = (
   processId: string,
 ): Promise<Electron.BrowserWindow> => {
   return openNewBrowserWindow('code', `?processId=${processId}`);
-};
-
-export const openTradingTaskView = (): Promise<Electron.BrowserWindow> => {
-  return openNewBrowserWindowInExt('tradingTask', '');
 };
 
 export const removeLoadingMask = (): void => {
@@ -428,14 +418,6 @@ export const handleOpenCodeView = (
     openMessage();
   });
 };
-
-export const handleOpenTradingTaskView =
-  (): Promise<Electron.BrowserWindow> => {
-    const openMessage = message.loading(t('open_trading_task_view'));
-    return openTradingTaskView().finally(() => {
-      openMessage();
-    });
-  };
 
 export const useDashboardBodySize = (): {
   dashboardBodyHeight: Ref;
