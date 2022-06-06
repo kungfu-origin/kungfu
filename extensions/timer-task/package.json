@@ -135,8 +135,8 @@
             "name": "单次最大手数",
             "type": "int",
             "tip": "各个交易所不同, 默认100",
-            "required": true,
-            "default": 100
+            "required": false,
+            "default": 0
           },
           {
             "key": "lastSingularity",
