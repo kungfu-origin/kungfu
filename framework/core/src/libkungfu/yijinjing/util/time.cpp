@@ -149,7 +149,7 @@ const time &time::get_instance() {
   return instance;
 }
 
-
+#if 0
 #define ONE_HOUR_SECOND 3600
 #define ONE_DAY_SECOND (ONE_HOUR_SECOND * 24)
 
@@ -333,5 +333,6 @@ std::shared_ptr<LocalTimeInfo> TranslateGMTimeToLocalTime(time_t gmt, LocationTi
   return TranslateGMTimeToLocalTime(gmt, info);
 }
 } // namespace TimeUtil
+#endif
 
 } // namespace kungfu::yijinjing
