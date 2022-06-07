@@ -191,6 +191,9 @@ struct LocalTimeInfo {
 
   ZoneTimeType zone_time_type = ZoneTimeType::BST;
 };
+
+static time_t CalculateSummerDayTimeByMonth_Sunday_Hour(time_t time, int month, int sunday_index, int hour);
+
 namespace TimeUtil {
 	// 支持 yyyy-mm-dd hh:mm:ss的日期字符串格式，举例：2017-08-10 10:10:10
 	time_t TimeToSeconds(const std::string &time, bool is_gmt);
