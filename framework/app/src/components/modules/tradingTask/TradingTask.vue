@@ -93,15 +93,6 @@ const TradingTaskViewComponentConfigs = computed(() => {
     });
 });
 
-console.log(
-  Object.keys(uiExtConfigs.value).map((key) => {
-    return {
-      ...uiExtConfigs.value[key],
-      key,
-    };
-  }),
-);
-
 function handleOpenSetTaskDialog() {
   setExtensionModalVisible.value = true;
 }
