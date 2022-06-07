@@ -81,7 +81,7 @@ public:
     auto apply = [&](Position &position) {
       if (is_valid_price(quote.last_price) and position.volume) {
         if (not position.last_price) {
-          SPDLOG_INFO("position.last_price set to {} for {} ", quote.last_price, position.instrument_id);
+          // SPDLOG_INFO("position.last_price set to {} for {} ", quote.last_price, position.instrument_id);
           position.last_price = quote.last_price;
         }
         // position.last_price = position.last_price > 0 ? position.last_price : quote.last_price;
@@ -180,17 +180,17 @@ public:
       }
       book->asset_margin.margin += frozen_margin;
     }
-    SPDLOG_TRACE("instrument_id {} input.side {} yesterday_volume {} frozen_total_vol {} position.unrealized_pnl {} "
-                 "last_price{} position.margin {} "
-                 "frozen_cash {} frozen_margin {} frozen_price {} "
-                 "asset.frozen_cash {} asset.avail {} market_value {} unrealized_pnl {} "
-                 "short_margin {} cash_margin {} avail_margin {} margin {} total_asset {} ",
-                 position.instrument_id, (int)input.side, (int)position.yesterday_volume, (int)position.frozen_total,
-                 (double)position.unrealized_pnl, (double)position.last_price, (double)position.margin,
-                 (double)frozen_cash, (double)frozen_margin, (double)input.frozen_price, (double)asset.frozen_cash,
-                 (double)asset.avail, (double)asset.market_value, (double)asset.unrealized_pnl,
-                 (double)asset_margin.short_margin, (double)asset_margin.cash_margin, (double)asset_margin.avail_margin,
-                 (double)asset_margin.margin, (double)asset_margin.total_asset);
+    // SPDLOG_TRACE("instrument_id {} input.side {} yesterday_volume {} frozen_total_vol {} position.unrealized_pnl {} "
+    //              "last_price{} position.margin {} "
+    //              "frozen_cash {} frozen_margin {} frozen_price {} "
+    //              "asset.frozen_cash {} asset.avail {} market_value {} unrealized_pnl {} "
+    //              "short_margin {} cash_margin {} avail_margin {} margin {} total_asset {} ",
+    //              position.instrument_id, (int)input.side, (int)position.yesterday_volume, (int)position.frozen_total,
+    //              (double)position.unrealized_pnl, (double)position.last_price, (double)position.margin,
+    //              (double)frozen_cash, (double)frozen_margin, (double)input.frozen_price, (double)asset.frozen_cash,
+    //              (double)asset.avail, (double)asset.market_value, (double)asset.unrealized_pnl,
+    //              (double)asset_margin.short_margin, (double)asset_margin.cash_margin,
+    //              (double)asset_margin.avail_margin, (double)asset_margin.margin, (double)asset_margin.total_asset);
   }
 
   virtual void apply_order(Book_ptr &book, const Order &order) override {
@@ -365,7 +365,7 @@ protected:
     position.volume += trade.volume;
     // The market value is calculated in Book::update()
     if (not position.last_price) {
-      SPDLOG_INFO("position.last_price set to {} for {} ", trade.price, position.instrument_id);
+      // SPDLOG_INFO("position.last_price set to {} for {} ", trade.price, position.instrument_id);
       position.last_price = trade.price;
     }
     position.last_price = position.last_price > 0 ? position.last_price : position.avg_open_price;
@@ -389,8 +389,8 @@ protected:
     double position_margin_after_trade = market_value_after_trade * cd_mr.short_margin_ratio;
     double position_margin_change_after_trade = position_margin_after_trade - original_position_margin;
 
-    SPDLOG_TRACE("original_position_market_value {} market_value_after_trade {} original_last_price {}",
-                 original_position_market_value, market_value_after_trade, original_last_price);
+    // SPDLOG_TRACE("original_position_market_value {} market_value_after_trade {} original_last_price {}",
+    //              original_position_market_value, market_value_after_trade, original_last_price);
 
     // Update position last_price with trade.price --- mark the price at the trading time for delta change
     // calculation as don't know the exact last_price at present
@@ -413,10 +413,10 @@ protected:
     // The total margin of account would not be changed with this ShortSell trade, so the avail_margin
     // only consider the total margin changes.
     asset_margin.avail_margin -= delta_margin + commission + tax;
-    SPDLOG_TRACE("asset_margin.margin {} short_margin {} avail_margin {}  frozen_margin_to_release {} "
-                 "position_margin_change_after_trade {} delta_margin {} ",
-                 asset_margin.margin, asset_margin.short_margin, asset_margin.avail_margin, frozen_margin_to_release,
-                 position_margin_change_after_trade, delta_margin);
+    // SPDLOG_TRACE("asset_margin.margin {} short_margin {} avail_margin {}  frozen_margin_to_release {} "
+    //              "position_margin_change_after_trade {} delta_margin {} ",
+    //              asset_margin.margin, asset_margin.short_margin, asset_margin.avail_margin, frozen_margin_to_release,
+    //              position_margin_change_after_trade, delta_margin);
 
     asset_margin.short_market_value += position_market_value_change_after_trade; // trade_amt;
     calculate_collateral_ratio(asset_margin);
@@ -434,7 +434,6 @@ protected:
     // position.last_price = position.last_price > 0 ? position.last_price : position.avg_open_price;
     //  if position.last_price == 0, there is no position, position.volume expected : 0
     if (not position.last_price) {
-      SPDLOG_INFO("position.last_price set to {} for {} ", trade.price, position.instrument_id);
       position.last_price = trade.price;
     }
 
@@ -447,8 +446,8 @@ protected:
     double cash_margin_change = trade_amt * cd_mr.long_margin_ratio;
 
     double unrealized_pnl_change = (position.last_price - trade.price) * trade.volume;
-    SPDLOG_TRACE("position.last_price {} trade.price {} (commission + tax) {} unrealized_pnl_change {}",
-                 position.last_price, trade.price, (commission + tax), unrealized_pnl_change);
+    // SPDLOG_TRACE("position.last_price {} trade.price {} (commission + tax) {} unrealized_pnl_change {}",
+    //              position.last_price, trade.price, (commission + tax), unrealized_pnl_change);
 
     double original_volume = position.volume;
     if (position.volume + trade.volume > 0 && trade.price > 0) {
@@ -469,8 +468,9 @@ protected:
     double delta_margin =
         cash_margin_change - frozen_margin_to_release; // + unrealized_pnl_change * cd_mr.conversion_rate
 
-    SPDLOG_TRACE("cash_margin_change {} frozen_margin_to_release {} trade_amt {}  delta_margin {}", cash_margin_change,
-                 frozen_margin_to_release, trade_amt, delta_margin);
+    // SPDLOG_TRACE("cash_margin_change {} frozen_margin_to_release {} trade_amt {}  delta_margin {}",
+    // cash_margin_change,
+    //              frozen_margin_to_release, trade_amt, delta_margin);
 
     asset.market_value += market_value_change;
     asset.frozen_margin -= frozen_margin_to_release;
@@ -494,7 +494,7 @@ protected:
   virtual void apply_repaymargin(Book_ptr &book, const Trade &trade) {
     auto &position = book->get_position_for(trade);
     if (not position.last_price) {
-      SPDLOG_INFO("position.last_price: 0, set to {} ", trade.price);
+      // SPDLOG_INFO("position.last_price: 0, set to {} ", trade.price);
       position.last_price = trade.price;
     }
     auto &asset_margin = book->asset_margin;
@@ -540,8 +540,8 @@ protected:
       book->asset.avail += income - asset_margin.cash_debt;
       double stock_to_cash_increased_margin = (income - asset_margin.cash_debt) * (1 - cd_mr.conversion_rate);
       asset_margin.avail_margin += asset_margin.cash_margin + stock_to_cash_increased_margin;
-      SPDLOG_TRACE("stock_to_cash_increased_margin {} asset_margin.cash_margin {}  asset_margin.avail_margin {}",
-                   stock_to_cash_increased_margin, asset_margin.cash_margin, asset_margin.avail_margin);
+            // SPDLOG_TRACE("stock_to_cash_increased_margin {} asset_margin.cash_margin {}  asset_margin.avail_margin {}",
+            //        stock_to_cash_increased_margin, asset_margin.cash_margin, asset_margin.avail_margin);
 
       // if total_asset contains the position market value, then repaymargin reduces the market value.
       asset_margin.total_asset -= asset_margin.cash_debt;
@@ -564,8 +564,6 @@ protected:
       asset_margin.total_asset += position_market_value_change - (commission + tax); // trade_amt
       // Below logic is not true:
       asset_margin.margin_market_value += position_market_value_change;
-      SPDLOG_TRACE("asset_margin.cash_margin {}  asset_margin.avail_margin {} position_market_value_change {}",
-                   asset_margin.cash_margin, asset_margin.avail_margin, position_market_value_change);
     }
     calculate_collateral_ratio(asset_margin);
   }
@@ -643,8 +641,6 @@ protected:
     double repay_cash_debt = std::min(position.margin, (trade_amt - (commission + tax)));
     // position.margin -= repay_cash_debt * cd_mr.long_margin_ratio;
     double cash_delivery = trade_amt - repay_cash_debt - (commission + tax);
-    SPDLOG_TRACE("position.margin {} trade_amt {} cash_delivery {}", position.margin, trade_amt, cash_delivery);
-
     asset.realized_pnl += realized_pnl;
     asset.unrealized_pnl -= realized_pnl; // unrealized_pnl_change
     asset.avail += cash_delivery;
@@ -656,9 +652,6 @@ protected:
       auto cd_mr = get_instr_conversion_margin_rate(book, position);
       double avail_margin_changes = (cash_delivery - (trade_amt - repay_cash_debt) * cd_mr.conversion_rate) +
                                     repay_cash_debt * cd_mr.long_margin_ratio;
-      SPDLOG_TRACE("cash_delivery {} trade_amt {} avail_margin_changes {} repay_cash_debt {} ", cash_delivery,
-                   trade_amt, avail_margin_changes, repay_cash_debt);
-
       position.margin -= repay_cash_debt * cd_mr.long_margin_ratio;
       asset_margin.avail_margin += avail_margin_changes;
       asset_margin.margin -= repay_cash_debt * cd_mr.long_margin_ratio;
@@ -716,13 +709,11 @@ protected:
   static contract_discount_and_margin_ratio get_instr_conversion_margin_rate(Book_ptr &book, const Position &position) {
     const char *exchange_id = position.exchange_id;
     const char *instrument_id = position.instrument_id;
-    SPDLOG_TRACE("position exchange_id {} instrument_id {} ", exchange_id, instrument_id);
     uint32_t hashed_instrument_key = hash_instrument(exchange_id, instrument_id);
     contract_discount_and_margin_ratio cd_mr = {};
 
     // typedef std::unordered_map<uint32_t, longfist::types::Instrument> InstrumentMap;
     if (book->instruments.find(hashed_instrument_key) == book->instruments.end()) {
-      // SPDLOG_INFO("instrument information missing for {}@{}", instrument_id, exchange_id);
       cd_mr.contract_multiplier = DEFAULT_STOCK_CONTRACT_MULTIPLIER;
       cd_mr.margin_ratio =
           position.direction == Direction::Long ? DEFAULT_STOCK_LONG_MARGIN_RATIO : DEFAULT_STOCK_SHORT_MARGIN_RATIO;
@@ -750,7 +741,7 @@ protected:
       cd_mr.short_margin_ratio = instrument.short_margin_ratio;
       cd_mr.conversion_rate = instrument.conversion_rate;
     } catch (std::exception ex) {
-      SPDLOG_INFO("Exception for instrument_id {}: {}", instrument_id, ex.what());
+      SPDLOG_ERROR("Exception for instrument_id {}: {}", instrument_id, ex.what());
       cd_mr.margin_ratio =
           position.direction == Direction::Long ? DEFAULT_STOCK_LONG_MARGIN_RATIO : DEFAULT_STOCK_SHORT_MARGIN_RATIO;
       cd_mr.long_margin_ratio = DEFAULT_STOCK_LONG_MARGIN_RATIO;
@@ -764,9 +755,9 @@ protected:
     double total_debt = asset_margin.cash_debt + asset_margin.short_market_value + asset_margin.margin_interest;
     asset_margin.collateral_ratio =
         total_debt > 0 ? (asset_margin.total_asset + asset_margin.settlement) / total_debt : MAX_COLLATERAL_RATIO;
-    SPDLOG_TRACE("collateral_ratio {} total_asset {} cash_debt {} short_market_value {}  total_debt {}",
-                 asset_margin.collateral_ratio, asset_margin.total_asset, asset_margin.cash_debt,
-                 asset_margin.short_market_value, total_debt);
+    // SPDLOG_TRACE("collateral_ratio {} total_asset {} cash_debt {} short_market_value {}  total_debt {}",
+    //              asset_margin.collateral_ratio, asset_margin.total_asset, asset_margin.cash_debt,
+    //              asset_margin.short_market_value, total_debt);
     asset_margin.collateral_ratio = (std::min)(asset_margin.collateral_ratio, MAX_COLLATERAL_RATIO);
   }
 
