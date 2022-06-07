@@ -238,10 +238,12 @@ KF_DEFINE_PACK_TYPE(                                              //
     (int, delivery_year),  //交割年份
     (int, delivery_month), //交割月
 
-    (bool, is_trading), //当前是否交易
+    (bool, is_trading),         //当前是否交易
+    (bool, force_update_ratio), //两融柜台折算率及保证金率
 
-    (double, long_margin_ratio), //多头保证金率
-    (double, short_margin_ratio) //空头保证金率
+    (double, long_margin_ratio),  //多头保证金率
+    (double, short_margin_ratio), //空头保证金率
+    (double, conversion_rate)     //担保品折扣率
 );
 
 KF_DEFINE_PACK_TYPE(                                         //
@@ -661,6 +663,40 @@ KF_DEFINE_PACK_TYPE(                              //
 
     (double, position_pnl), //持仓盈亏(期货)
     (double, close_pnl)     //平仓盈亏(期货)
+);
+
+KF_DEFINE_PACK_TYPE(                               //
+    AssetMargin, 211, PK(holder_uid), PERPETUAL(), //
+    (int64_t, update_time),                        //更新时间
+    (kungfu::array<char, DATE_LEN>, trading_day),  //交易日
+
+    (uint32_t, holder_uid),            //
+    (LedgerCategory, ledger_category), //
+
+    (kungfu::array<char, SOURCE_ID_LEN>, source_id),   //柜台ID
+    (kungfu::array<char, BROKER_ID_LEN>, broker_id),   // Broker ID
+    (kungfu::array<char, ACCOUNT_ID_LEN>, account_id), //账号ID
+    (kungfu::array<char, CLIENT_ID_LEN>, client_id),   // client ID
+
+    (double, total_asset),  //总资产
+    (double, avail_margin), //可用保证金
+    (double, cash_margin),  //融资占用保证金
+    (double, short_margin), //融券占用保证金
+    (double, margin),       //总占用保证金
+
+    (double, cash_debt),  //融资负债
+    (double, short_cash), //融券卖出金额
+    (kungfu::array<char, 1500>, margin_instruments), (kungfu::array<char, 420>, exchanges),
+    (kungfu::array<double, 200>, debts),
+
+    (double, short_market_value),  //融券卖出证券市值
+    (double, margin_market_value), //融资买入证券市值
+    (double, margin_interest),     //融资融券利息
+    (double, settlement),          //融资融券清算资金
+    (double, commission_ratio),    //手续费费率
+
+    (double, credit),          //信贷额度
+    (double, collateral_ratio) //担保比例
 );
 
 KF_DEFINE_PACK_TYPE(                                                         //

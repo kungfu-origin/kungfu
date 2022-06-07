@@ -56,6 +56,7 @@ export default {
   clear: 'Clearing {content} completed, please restart the application',
   open_window: 'Opening window',
   open_code_editor: 'Opening code editor',
+  open_trading_task_view: 'Opening trading task view',
   add_board: 'Add Board',
   select_board: 'Please select the board to add',
   add_board_error: 'Add board target error',
@@ -334,6 +335,8 @@ export default {
     strategy_id: 'strategy_id',
     strategy_file: 'strategy_file',
     strategy_path: 'strategy_path',
+    strategy_path_tip:
+      'Normal python strategy use .py file, packaged strategy use .so or .pyd file in strategy folder',
     process_status: 'process',
     unrealized_pnl: 'unrealized_pnl',
     marked_value: 'marked_value',

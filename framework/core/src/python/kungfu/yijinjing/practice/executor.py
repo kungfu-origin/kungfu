@@ -32,18 +32,14 @@ class ExecutorRegistry:
         }
         if ctx.extension_path:
             deque(map(self.register_extensions, ctx.extension_path.split(path.pathsep)))
-        else:
-            if ctx.path and ctx.path.endswith("package.json"):
-                self.register_extensions(ctx.path)
+        elif ctx.path:
+            self.read_config(os.path.join(os.path.dirname(ctx.path), "package.json"))
 
     def register_extensions(self, root):
-        if root.endswith("package.json"):
-            self.read_config(root)
-        else:
-            for child in os.listdir(root):
-                extension_dir = path.abspath(path.join(root, child))
-                config_path = path.join(extension_dir, "package.json")
-                self.read_config(config_path)
+        for child in os.listdir(root):
+            extension_dir = path.abspath(path.join(root, child))
+            config_path = path.join(extension_dir, "package.json")
+            self.read_config(config_path)
 
     def read_config(self, config_path):
         if path.exists(config_path):
@@ -56,9 +52,10 @@ class ExecutorRegistry:
                         for category in config["kungfuConfig"]["config"]:
                             if category not in kfj.CATEGORIES:
                                 raise RuntimeError(f"Unsupported category {category}")
-                            self.executors[category][group] = ExtensionLoader(
-                                self.ctx, extension_dir, config
-                            )
+                            if self.executors["strategy"]["default"] and self.ctx.category == "strategy" and self.ctx.group == "default":
+                                self.executors["strategy"]["default"].config = config
+                            else:
+                                self.executors[category][group] = ExtensionLoader(self.ctx, extension_dir, config)
 
     def __getitem__(self, category):
         return self.executors[category]
@@ -130,18 +127,6 @@ class ExtensionExecutor:
         vendor.set_service(service)
         vendor.run()
 
-    def run_strategy_vendor(self):
-        ctx = self.ctx
-        loader = self.loader
-        if loader.extension_dir:
-            site.setup(loader.extension_dir)
-            sys.path.insert(0, loader.extension_dir)
-        module = importlib.import_module(ctx.group)
-        runner = wc.Runner(ctx.runtime_locator, ctx.group, ctx.name, ctx.low_latency)
-        strategy = getattr(module, ctx.category)()
-        runner.add_strategy(strategy)
-        runner.run()
-
     def run_market_data(self):
         self.run_broker_vendor(wc.MarketDataVendor)
 
@@ -184,9 +169,8 @@ class RegistryJSONEncoder(json.JSONEncoder):
 def load_strategy(ctx, path, key):
     if path.endswith(".py"):
         return Strategy(ctx)  # keep strategy alive for pybind11
-    elif path.endswith("package.json"):
-        ctx.path = path[:-13]
-        ctx.path = os.path.join(ctx.path, key)
+    elif key is not None and (path.endswith(".so") or path.endswith(".pyd")):
+        ctx.path = os.path.join(os.path.dirname(path), key)
         return Strategy(ctx)
     elif key is not None and path.endswith(key):
         return Strategy(ctx)
@@ -194,4 +178,4 @@ def load_strategy(ctx, path, key):
         spec = spec_from_file_location(os.path.basename(path).split(".")[0], path)
         module_cpp = module_from_spec(spec)
         spec.loader.exec_module(module_cpp)
-        return module_cpp.Strategy(ctx.location)
+        return module_cpp.strategy()

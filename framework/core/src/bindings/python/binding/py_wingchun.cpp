@@ -223,6 +223,7 @@ void bind(pybind11::module &&m) {
 
   py::class_<Book, Book_ptr>(m, "Book")
       .def_readonly("asset", &Book::asset, py::return_value_policy::reference)
+      .def_readonly("asset_margin", &Book::asset_margin, py::return_value_policy::reference)
       .def_readonly("long_positions", &Book::long_positions, py::return_value_policy::reference)
       .def_readonly("short_positions", &Book::short_positions, py::return_value_policy::reference)
       .def_readonly("order_inputs", &Book::order_inputs, py::return_value_policy::reference)

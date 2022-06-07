@@ -56,6 +56,7 @@ export default {
   clear: '清理 {content} 完成, 请重启应用',
   open_window: '正在打开窗口',
   open_code_editor: '正在打开代码编辑器',
+  open_trading_task_view: '正在打开交易任务视图',
   add_board: '添加面板',
   select_board: '请选择要添加的面板',
   add_board_error: '添加面板目标错误',
@@ -332,6 +333,8 @@ export default {
     strategy_id: '策略ID',
     strategy_file: '策略文件',
     strategy_path: '策略路径',
+    strategy_path_tip:
+      '普通 python 策略选择 .py 文件, 加密 python 策略或cpp策略选择编译后的 .so 或 .pyd 文件',
     process_status: '进程',
     unrealized_pnl: '浮动盈亏',
     marked_value: '名义本金',

@@ -193,15 +193,16 @@ export const getInstrumentTypeColor = (
  * @param  {string} htmlPath
  */
 export const openNewBrowserWindow = (
+  folderName: string,
   name: string,
-  params: string,
+  params = '',
   windowConfig?: Electron.BrowserWindowConstructorOptions,
 ): Promise<Electron.BrowserWindow> => {
   const currentWindow = getCurrentWindow();
   const modalPath =
-    process.env.NODE_ENV !== 'production'
+    process.env.APP_TYPE === 'renderer' && process.env.NODE_ENV !== 'production'
       ? `http://localhost:9090/${name}.html${params}`
-      : `file://${__dirname}/${name}.html${params}`;
+      : `file://${folderName}/${name}.html${params}`;
 
   return new Promise((resolve, reject) => {
     const win = new BrowserWindow({
@@ -255,17 +256,13 @@ function getNewWindowLocation(): { x: number; y: number } | null {
 export const openLogView = (
   logPath: string,
 ): Promise<Electron.BrowserWindow> => {
-  return openNewBrowserWindow('logview', `?logPath=${logPath}`);
+  return openNewBrowserWindow(__dirname, 'logview', `?logPath=${logPath}`);
 };
 
 export const openCodeView = (
   processId: string,
 ): Promise<Electron.BrowserWindow> => {
-  return openNewBrowserWindow('code', `?processId=${processId}`);
-};
-
-export const openTradingTaskView = (): Promise<Electron.BrowserWindow> => {
-  return openNewBrowserWindow('tradingTask', '');
+  return openNewBrowserWindow(__dirname, 'code', `?processId=${processId}`);
 };
 
 export const removeLoadingMask = (): void => {
@@ -378,14 +375,6 @@ export const handleOpenCodeView = (
     openMessage();
   });
 };
-
-export const handleOpenTradingTaskView =
-  (): Promise<Electron.BrowserWindow> => {
-    const openMessage = message.loading(t('open_code_editor'));
-    return openTradingTaskView().finally(() => {
-      openMessage();
-    });
-  };
 
 export const useDashboardBodySize = (): {
   dashboardBodyHeight: Ref;

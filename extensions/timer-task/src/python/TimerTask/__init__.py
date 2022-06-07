@@ -133,10 +133,10 @@ def on_quote(context, quote):
     if context.MIN_VOL == 0 :
         context.log.info("标的 {} 买 {} 卖 {} 涨停 {} 跌停 {}".format(quote.instrument_id, str(quote.bid_price)[1:-1], str(quote.ask_price)[1:-1], quote.upper_limit_price, quote.lower_limit_price))
         context.MIN_VOL = type_to_minvol(quote.instrument_type)
-        assert context.MAX_LOT_BY_STEP >= context.MIN_VOL
-        context.MAX_LOT_BY_STEP = int(math.floor(context.MAX_LOT_BY_STEP / float(context.MIN_VOL)) * context.MIN_VOL)
+        assert context.MAX_LOT_BY_STEP == 0 or context.MAX_LOT_BY_STEP >= context.MIN_VOL
+        if context.MAX_LOT_BY_STEP > 0:
+            context.MAX_LOT_BY_STEP = int(math.floor(context.MAX_LOT_BY_STEP / float(context.MIN_VOL)) * context.MIN_VOL)
         context.log.info("标的类型 {} 最小交易数量 {} 单次最大数 {}".format(quote.instrument_type, context.MIN_VOL, context.MAX_LOT_BY_STEP))
-        assert context.MAX_LOT_BY_STEP > 0
 
     if not context.has_quote :
         '''
@@ -218,7 +218,7 @@ def make_order(context, orders):
 
 def split_order(context, vol, side, offset, price, task_list, last_order):
     place_order_vol = int(0)
-    while vol > context.MAX_LOT_BY_STEP :
+    while context.MAX_LOT_BY_STEP > 0 and vol > context.MAX_LOT_BY_STEP :
         task_list.append(orderTask(context.MAX_LOT_BY_STEP, side, offset, price))
         vol -= context.MAX_LOT_BY_STEP
         place_order_vol += context.MAX_LOT_BY_STEP
