@@ -23,6 +23,7 @@ import {
   getTaskKfLocationByProcessId,
   fromProcessArgsToKfConfigItems,
   kfConfigItemsToArgsByPrimaryForShow,
+  dealTradingTaskName,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import {
   graceStopProcess,
@@ -35,7 +36,6 @@ import {
   useCurrentGlobalKfLocation,
   useExtConfigsRelated,
   useProcessStatusDetailData,
-  dealTradingTaskName,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
 import { messagePrompt } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
