@@ -460,7 +460,7 @@ inline std::string TranslateGMTimeToLocalDateByExchangeId(time_t lTime, const st
     type = it->second;
   }
 
-  __int64 local_time = kungfu::yijinjing::TimeUtil::TranslateGMTimeToLocalTime(lTime, type)->seconds;
+  int64_t local_time = kungfu::yijinjing::TimeUtil::TranslateGMTimeToLocalTime(lTime, type)->seconds;
 
   char datebuf[256] = {0};
   strftime(datebuf, 256, strformat.c_str(), gmtime(&local_time));
