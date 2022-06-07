@@ -540,8 +540,8 @@ protected:
       book->asset.avail += income - asset_margin.cash_debt;
       double stock_to_cash_increased_margin = (income - asset_margin.cash_debt) * (1 - cd_mr.conversion_rate);
       asset_margin.avail_margin += asset_margin.cash_margin + stock_to_cash_increased_margin;
-            // SPDLOG_TRACE("stock_to_cash_increased_margin {} asset_margin.cash_margin {}  asset_margin.avail_margin {}",
-            //        stock_to_cash_increased_margin, asset_margin.cash_margin, asset_margin.avail_margin);
+      // SPDLOG_TRACE("stock_to_cash_increased_margin {} asset_margin.cash_margin {}  asset_margin.avail_margin {}",
+      //        stock_to_cash_increased_margin, asset_margin.cash_margin, asset_margin.avail_margin);
 
       // if total_asset contains the position market value, then repaymargin reduces the market value.
       asset_margin.total_asset -= asset_margin.cash_debt;
@@ -564,6 +564,8 @@ protected:
       asset_margin.total_asset += position_market_value_change - (commission + tax); // trade_amt
       // Below logic is not true:
       asset_margin.margin_market_value += position_market_value_change;
+      // SPDLOG_TRACE("asset_margin.cash_margin {}  asset_margin.avail_margin {} position_market_value_change {}",
+      //              asset_margin.cash_margin, asset_margin.avail_margin, position_market_value_change);
     }
     calculate_collateral_ratio(asset_margin);
   }
@@ -641,6 +643,8 @@ protected:
     double repay_cash_debt = std::min(position.margin, (trade_amt - (commission + tax)));
     // position.margin -= repay_cash_debt * cd_mr.long_margin_ratio;
     double cash_delivery = trade_amt - repay_cash_debt - (commission + tax);
+    // SPDLOG_TRACE("position.margin {} trade_amt {} cash_delivery {}", position.margin, trade_amt, cash_delivery);
+
     asset.realized_pnl += realized_pnl;
     asset.unrealized_pnl -= realized_pnl; // unrealized_pnl_change
     asset.avail += cash_delivery;
@@ -652,6 +656,9 @@ protected:
       auto cd_mr = get_instr_conversion_margin_rate(book, position);
       double avail_margin_changes = (cash_delivery - (trade_amt - repay_cash_debt) * cd_mr.conversion_rate) +
                                     repay_cash_debt * cd_mr.long_margin_ratio;
+      // SPDLOG_TRACE("cash_delivery {} trade_amt {} avail_margin_changes {} repay_cash_debt {} ", cash_delivery,
+      //         trade_amt, avail_margin_changes, repay_cash_debt);
+
       position.margin -= repay_cash_debt * cd_mr.long_margin_ratio;
       asset_margin.avail_margin += avail_margin_changes;
       asset_margin.margin -= repay_cash_debt * cd_mr.long_margin_ratio;
@@ -709,11 +716,13 @@ protected:
   static contract_discount_and_margin_ratio get_instr_conversion_margin_rate(Book_ptr &book, const Position &position) {
     const char *exchange_id = position.exchange_id;
     const char *instrument_id = position.instrument_id;
+    // SPDLOG_TRACE("position exchange_id {} instrument_id {} ", exchange_id, instrument_id);
     uint32_t hashed_instrument_key = hash_instrument(exchange_id, instrument_id);
     contract_discount_and_margin_ratio cd_mr = {};
 
     // typedef std::unordered_map<uint32_t, longfist::types::Instrument> InstrumentMap;
     if (book->instruments.find(hashed_instrument_key) == book->instruments.end()) {
+      // SPDLOG_INFO("instrument information missing for {}@{}", instrument_id, exchange_id);
       cd_mr.contract_multiplier = DEFAULT_STOCK_CONTRACT_MULTIPLIER;
       cd_mr.margin_ratio =
           position.direction == Direction::Long ? DEFAULT_STOCK_LONG_MARGIN_RATIO : DEFAULT_STOCK_SHORT_MARGIN_RATIO;
