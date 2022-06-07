@@ -22,8 +22,8 @@
     "cli": "yarn kfs craft cli"
   },
   "dependencies": {
-    "@kungfu-trader/kfx-sim": "^2.4.0-alpha.60",
-    "@kungfu-trader/kfx-xtp-demo": "^2.4.0-alpha.60",
+    "@kungfu-trader/kfx-broker-sim": "^2.4.0-alpha.60",
+    "@kungfu-trader/kfx-broker-xtp-demo": "^2.4.0-alpha.60",
     "@kungfu-trader/kungfu-app": "^2.4.0-alpha.60",
     "@kungfu-trader/kungfu-cli": "^2.4.0-alpha.60"
   },
