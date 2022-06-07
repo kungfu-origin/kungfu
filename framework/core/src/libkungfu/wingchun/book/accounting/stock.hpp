@@ -185,7 +185,7 @@ public:
                  "frozen_cash {} frozen_margin {} frozen_price {} "
                  "asset.frozen_cash {} asset.avail {} market_value {} unrealized_pnl {} "
                  "short_margin {} cash_margin {} avail_margin {} margin {} total_asset {} ",
-                 position.instrument_id, (int)input.side, (int)position.yesterday_volume, position.frozen_total,
+                 position.instrument_id, (int)input.side, (int)position.yesterday_volume, (int)position.frozen_total,
                  position.unrealized_pnl, position.last_price, position.margin, frozen_cash, frozen_margin,
                  input.frozen_price, asset.frozen_cash, asset.avail, asset.market_value, asset.unrealized_pnl,
                  asset_margin.short_margin, asset_margin.cash_margin, asset_margin.avail_margin, asset_margin.margin,
