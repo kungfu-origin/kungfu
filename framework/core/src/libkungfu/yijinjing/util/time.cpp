@@ -13,13 +13,13 @@
  *  limitations under the License.
  *****************************************************************************/
 
+#include <assert.h>
 #include <chrono>
 #include <ctime>
 #include <fmt/format.h>
 #include <iomanip>
 #include <regex>
 #include <sstream>
-#include <assert.h>
 
 #include <kungfu/common.h>
 #include <kungfu/yijinjing/time.h>
@@ -149,12 +149,11 @@ const time &time::get_instance() {
   return instance;
 }
 
-
 #define ONE_HOUR_SECOND 3600
 #define ONE_DAY_SECOND (ONE_HOUR_SECOND * 24)
 
 /*
- * µØÇøÊ±¼äĞÅÏ¢
+ * åœ°åŒºæ—¶é—´ä¿¡æ¯
  */
 struct LocationTimeData {
 public:
@@ -169,8 +168,8 @@ public:
   }
 
 public:
-  int zone = 0;                // Ê±Çø£¨TimeZone£©£¬ÀıÈç£º±±¾©Ê±¼äÎª8
-  bool has_summer_day = false; // ¸ÃµØÇøÊÇ·ñÓĞÏÄÁîÊ±
+  int zone = 0;                // æ—¶åŒºï¼ˆTimeZoneï¼‰ï¼Œä¾‹å¦‚ï¼šåŒ—äº¬æ—¶é—´ä¸º8
+  bool has_summer_day = false; // è¯¥åœ°åŒºæ˜¯å¦æœ‰å¤ä»¤æ—¶
 
   std::function<__int64(__int64)> f_summer_begin;
   std::function<__int64(__int64)> f_summer_end;
@@ -179,21 +178,21 @@ public:
 };
 
 /*
- * ÏÄÁîÊ±Ê±¼äĞÅÏ¢
- * ÏÄÁîÊ±Ò»°ãµÄ¶¨Òå¹æÔò£ºÔÚmonth+1ÔÂ·İµÚsunday_index¸öĞÇÆÚÈÕ£¬hourĞ¡Ê±¿ªÊ¼£¨»ò½áÊø£©
- * ps: µ± sunday_index <0 ±íÊ¾µ¹Ğò£¬±ÈÈç×îºóÒ»¸öĞÇÆÚÈÕ¾ÍÊÇ-1
+ * å¤ä»¤æ—¶æ—¶é—´ä¿¡æ¯
+ * å¤ä»¤æ—¶ä¸€èˆ¬çš„å®šä¹‰è§„åˆ™ï¼šåœ¨month+1æœˆä»½ç¬¬sunday_indexä¸ªæ˜ŸæœŸæ—¥ï¼Œhourå°æ—¶å¼€å§‹ï¼ˆæˆ–ç»“æŸï¼‰
+ * ps: å½“ sunday_index <0 è¡¨ç¤ºå€’åºï¼Œæ¯”å¦‚æœ€åä¸€ä¸ªæ˜ŸæœŸæ—¥å°±æ˜¯-1
  */
 time_t CalculateSummerDayTimeByMonth_Sunday_Hour(time_t time, int month, int sunday_index, int hour) {
-  // ¸ù¾İĞèÒªÅĞ¶ÏµÄÊ±¼ä´Á£¬µÃ³ö¸ñÁÖÍşÖÎÊ±¼ä
+  // æ ¹æ®éœ€è¦åˆ¤æ–­çš„æ—¶é—´æˆ³ï¼Œå¾—å‡ºæ ¼æ—å¨æ²»æ—¶é—´
   tm t_gmt = {0};
   gmtime_s(&t_gmt, &time);
 
   tm summer_day;
 
-  // Äê·İĞèÒªÓë´«ÈëÊ±¼äµÄÄê·İÏàÍ¬
+  // å¹´ä»½éœ€è¦ä¸ä¼ å…¥æ—¶é—´çš„å¹´ä»½ç›¸åŒ
   summer_day.tm_year = t_gmt.tm_year;
 
-  // µ±sunday_index<0 Ê±£¬ĞèÒª¼ÆËãÏÂ¸öÔÂµÚÒ»Ììµ¹ÍÆ
+  // å½“sunday_index<0 æ—¶ï¼Œéœ€è¦è®¡ç®—ä¸‹ä¸ªæœˆç¬¬ä¸€å¤©å€’æ¨
   summer_day.tm_mon = sunday_index > 0 ? month : (month + 1);
   summer_day.tm_mday = 1;
   summer_day.tm_hour = hour;
@@ -206,10 +205,10 @@ time_t CalculateSummerDayTimeByMonth_Sunday_Hour(time_t time, int month, int sun
   int week = summer_day.tm_wday;
   int offset_weeks = sunday_index > 0 ? (sunday_index - 1) : sunday_index;
 
-  // ÏÈÏòÇ°¶ÔÆëµ½ÖÜÈÕ
+  // å…ˆå‘å‰å¯¹é½åˆ°å‘¨æ—¥
   summer_day_seconds += (7 - week) % 7 * ONE_DAY_SECOND;
 
-  // ÔÙ°´ÖÜ½øĞĞÆ«ÒÆ
+  // å†æŒ‰å‘¨è¿›è¡Œåç§»
   summer_day_seconds += offset_weeks * 7 * ONE_DAY_SECOND;
   return summer_day_seconds;
 }
@@ -222,19 +221,19 @@ static const std::unordered_map<LocationTimeType, LocationTimeData> g_locationTi
     {LocationTimeType::Singapore, LocationTimeData(8, ZoneTimeType::SGT)},
     {LocationTimeType::Tokyo, LocationTimeData(9, ZoneTimeType::JST)},
     {LocationTimeType::AmericaEastern,
-     // ÃÀ¶«Ê±¼äÏÄÁîÊ±£º[3ÔÂµÚ¶ş¸öĞÇÆÚÈÕÁè³¿2µã£¬11ÔÂµÚÒ»¸öÖÜÈÕÁè³¿2µã]
+     // ç¾ä¸œæ—¶é—´å¤ä»¤æ—¶ï¼š[3æœˆç¬¬äºŒä¸ªæ˜ŸæœŸæ—¥å‡Œæ™¨2ç‚¹ï¼Œ11æœˆç¬¬ä¸€ä¸ªå‘¨æ—¥å‡Œæ™¨2ç‚¹]
      LocationTimeData(-5, STByM_S_H(t, 2, 2, 2), STByM_S_H(t, 10, 1, 2), ZoneTimeType::EST, ZoneTimeType::EDT)},
     {LocationTimeType::AmericaCentral,
-     // ÃÀÖĞÊ±¼äÏÄÁîÊ±ÓëÃÀ¶«ÀàËÆ
+     // ç¾ä¸­æ—¶é—´å¤ä»¤æ—¶ä¸ç¾ä¸œç±»ä¼¼
      LocationTimeData(-6, STByM_S_H(t, 2, 2, 2), STByM_S_H(t, 10, 1, 2), ZoneTimeType::CST, ZoneTimeType::CDT)},
     {LocationTimeType::London,
-     // Â×¶ØÊ±¼äÏÄÁîÊ±£º[3ÔÂ×îºóÒ»¸öĞÇÆÚÈÕÁè³¿1µã£¬10ÔÂ×îºóÒ»¸öĞÇÆÚÈÕÁè³¿2µã]
+     // ä¼¦æ•¦æ—¶é—´å¤ä»¤æ—¶ï¼š[3æœˆæœ€åä¸€ä¸ªæ˜ŸæœŸæ—¥å‡Œæ™¨1ç‚¹ï¼Œ10æœˆæœ€åä¸€ä¸ªæ˜ŸæœŸæ—¥å‡Œæ™¨2ç‚¹]
      LocationTimeData(0, STByM_S_H(t, 2, -1, 1), STByM_S_H(t, 9, -1, 2), ZoneTimeType::BST, ZoneTimeType::BDT)},
     {LocationTimeType::AustraliaEastern,
-     // °ÄÖŞ¶«²¿Ê±¼äÏÄÁîÊ±£º[10ÔÂµÚÒ»¸öĞÇÆÚÈÕÁè³¿2µã£¬4ÔÂµÚÒ»¸öĞÇÆÚÈÕÁè³¿3µã]
+     // æ¾³æ´²ä¸œéƒ¨æ—¶é—´å¤ä»¤æ—¶ï¼š[10æœˆç¬¬ä¸€ä¸ªæ˜ŸæœŸæ—¥å‡Œæ™¨2ç‚¹ï¼Œ4æœˆç¬¬ä¸€ä¸ªæ˜ŸæœŸæ—¥å‡Œæ™¨3ç‚¹]
      LocationTimeData(10, STByM_S_H(t, 9, 1, 2), STByM_S_H(t, 3, 1, 3), ZoneTimeType::AEST, ZoneTimeType::AEDT)},
     {LocationTimeType::Berlin,
-     // µÂ¹úÊ±¼äÏÄÁîÊ±£º[3ÔÂ×îºóÒ»¸öĞÇÆÚÈÕÁè³¿2µã£¬10ÔÂ×îºóÒ»¸öĞÇÆÚÈÕÁè³¿3µã]
+     // å¾·å›½æ—¶é—´å¤ä»¤æ—¶ï¼š[3æœˆæœ€åä¸€ä¸ªæ˜ŸæœŸæ—¥å‡Œæ™¨2ç‚¹ï¼Œ10æœˆæœ€åä¸€ä¸ªæ˜ŸæœŸæ—¥å‡Œæ™¨3ç‚¹]
      LocationTimeData(1, STByM_S_H(t, 2, -1, 2), STByM_S_H(t, 9, -1, 3), ZoneTimeType::CEST, ZoneTimeType::CET)}
     // Add more LocationTime here...
 };
@@ -270,9 +269,9 @@ time_t DateToSeconds(const std::string &time, bool is_gmt) {
 const LocationTimeData &GetLocationTimeDataByType(LocationTimeType loc_type) {
   std::unordered_map<LocationTimeType, LocationTimeData>::const_iterator it = g_locationTimeMap.find(loc_type);
   if (it == g_locationTimeMap.end()) {
-    assert("find loc_type fail£¡");
+    assert("find loc_type failï¼");
 
-    // ÕÒ²»µ½¶ÔÓ¦µÄLocation£¬ÏÈ°´±±¾©Ê±¼ä·µ»Ø
+    // æ‰¾ä¸åˆ°å¯¹åº”çš„Locationï¼Œå…ˆæŒ‰åŒ—äº¬æ—¶é—´è¿”å›
     it = g_locationTimeMap.find(LocationTimeType::Beijing);
   }
   return it->second;
@@ -292,8 +291,8 @@ std::shared_ptr<LocalTimeInfo> TranslateGMTimeToLocalTime(time_t gmt, const Loca
     __int64 end = info.f_summer_end(gmt);
 
     /*
-     * ´¦ÓÚÇø¼äÄÚ£¬Ò»°ã±íÊ¾´¦ÓÚÏÄÁîÊ±£»²»¹ı¶ÔÓÚ±¾ÄêÄÚµÄbegin>endÕâÖÖcaseÀ´Ëµ£¬Çø¼äÄÚÇ¡Ç¡±íÊ¾²»ÔÚÏÄÁîÊ±¡£
-     * ËùÒÔÊ¹ÓÃ begin > end Òì»òÈ¡·´½ÃÕıÒ»ÏÂ
+     * å¤„äºåŒºé—´å†…ï¼Œä¸€èˆ¬è¡¨ç¤ºå¤„äºå¤ä»¤æ—¶ï¼›ä¸è¿‡å¯¹äºæœ¬å¹´å†…çš„begin>endè¿™ç§caseæ¥è¯´ï¼ŒåŒºé—´å†…æ°æ°è¡¨ç¤ºä¸åœ¨å¤ä»¤æ—¶ã€‚
+     * æ‰€ä»¥ä½¿ç”¨ begin > end å¼‚æˆ–å–åçŸ«æ­£ä¸€ä¸‹
      */
     t_local->is_summer_day = (gmt >= std::min(begin, end) && gmt <= std::max(begin, end)) ^ (begin > end);
     if (t_local->is_summer_day) {
@@ -310,13 +309,13 @@ time_t TranslateLocalTimeToGMTime(time_t local_seconds, LocationTimeType loc_typ
   const LocationTimeData &data = GetLocationTimeDataByType(loc_type);
 
   /*
-   * Í¬Ò»¸ö local_secondsÓĞ¿ÉÄÜ¶ÔÓ¦¶¬ÁîÊ±ºÍÏÄÁîÊ±µÄ²»Í¬Ê±¼ä
-   * ÎÒÃÇÓÅÏÈ°´ÕÕÊÇ·ñÔÚLocationÖĞ±£´æµÄÇø¼äÄÚµÄ½øĞĞÅĞ¶Ï£¬ÕâÖÖ·½Ê½ÓĞ¿ÉÄÜ¾«È·½á¹ûÓëÔ¤ÆÚ²»·û£¬µ«»ù±¾²»Ó°ÏìÒµÎñÂß¼­
+   * åŒä¸€ä¸ª local_secondsæœ‰å¯èƒ½å¯¹åº”å†¬ä»¤æ—¶å’Œå¤ä»¤æ—¶çš„ä¸åŒæ—¶é—´
+   * æˆ‘ä»¬ä¼˜å…ˆæŒ‰ç…§æ˜¯å¦åœ¨Locationä¸­ä¿å­˜çš„åŒºé—´å†…çš„è¿›è¡Œåˆ¤æ–­ï¼Œè¿™ç§æ–¹å¼æœ‰å¯èƒ½ç²¾ç¡®ç»“æœä¸é¢„æœŸä¸ç¬¦ï¼Œä½†åŸºæœ¬ä¸å½±å“ä¸šåŠ¡é€»è¾‘
    */
   time_t assume_gmt = local_seconds - data.zone * ONE_HOUR_SECOND;
   std::shared_ptr<LocalTimeInfo> ret = TranslateGMTimeToLocalTime(assume_gmt, data);
 
-  // Èç¹ûÊÇÏÄÁîÊ±£¬ÄÇÃ´Íù»ØÔÙ¼õÒ»¸öĞ¡Ê±×÷Îª½ÃÕı
+  // å¦‚æœæ˜¯å¤ä»¤æ—¶ï¼Œé‚£ä¹ˆå¾€å›å†å‡ä¸€ä¸ªå°æ—¶ä½œä¸ºçŸ«æ­£
   if (ret->is_summer_day) {
     ret->seconds -= ONE_HOUR_SECOND;
     assume_gmt -= ONE_HOUR_SECOND;
