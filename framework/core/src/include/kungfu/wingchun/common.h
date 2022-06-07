@@ -12,6 +12,7 @@
 #include <kungfu/longfist/longfist.h>
 #include <kungfu/yijinjing/practice/apprentice.h>
 #include <kungfu/yijinjing/util/util.h>
+#include <kungfu/yijinjing/time.h>
 
 #define REGION_CN "CN"
 #define REGION_HK "HK"
@@ -413,6 +414,60 @@ inline void order_from_input(const longfist::types::OrderInput &input, longfist:
   order.volume_condition = input.volume_condition;
   order.time_condition = input.time_condition;
 }
+
+#if 0
+/*****************************************************************************
+*  @Copyright (c) 2022, Marsjliu
+*  @All rights reserved
+
+*  @date     : 2022/06/06 17:15
+*  @brief    :根据exchangeid和时间戳转换成本地YYYYMMDD
+*****************************************************************************/
+// ExchangeId与对应的LocationTime类型
+static const std::unordered_map<std::string, kungfu::yijinjing::LocationTimeType> g_mapLocationTimeExchangeId = {
+    {EXCHANGE_US, kungfu::yijinjing::LocationTimeType::AmericaEastern},
+    {EXCHANGE_HK, kungfu::yijinjing::LocationTimeType::Beijing},
+    {EXCHANGE_SSE, kungfu::yijinjing::LocationTimeType::Beijing},
+    {EXCHANGE_SZE, kungfu::yijinjing::LocationTimeType::Beijing},
+    {EXCHANGE_BSE, kungfu::yijinjing::LocationTimeType::Beijing},
+    {EXCHANGE_SHFE, kungfu::yijinjing::LocationTimeType::Beijing},
+    {EXCHANGE_HK_OPTION, kungfu::yijinjing::LocationTimeType::Beijing},
+    {EXCHANGE_GLFX, kungfu::yijinjing::LocationTimeType::Beijing},
+    {EXCHANGE_IPE, kungfu::yijinjing::LocationTimeType::London},
+    {EXCHANGE_CBOT, kungfu::yijinjing::LocationTimeType::AmericaEastern},
+    {EXCHANGE_CEC, kungfu::yijinjing::LocationTimeType::AmericaEastern},
+    {EXCHANGE_LIFE, kungfu::yijinjing::LocationTimeType::AmericaEastern},
+    {EXCHANGE_MTIF, kungfu::yijinjing::LocationTimeType::AmericaEastern},
+    {EXCHANGE_NYCE, kungfu::yijinjing::LocationTimeType::AmericaEastern},
+    {EXCHANGE_CMX, kungfu::yijinjing::LocationTimeType::AmericaEastern},
+    {EXCHANGE_SIME, kungfu::yijinjing::LocationTimeType::AmericaEastern},
+    {EXCHANGE_CME, kungfu::yijinjing::LocationTimeType::AmericaEastern},
+    {EXCHANGE_IMM, kungfu::yijinjing::LocationTimeType::AmericaEastern},
+    {EXCHANGE_WIDX, kungfu::yijinjing::LocationTimeType::AmericaEastern},
+    {EXCHANGE_FREX, kungfu::yijinjing::LocationTimeType::AmericaEastern},
+    {EXCHANGE_METL, kungfu::yijinjing::LocationTimeType::AmericaEastern},
+    {EXCHANGE_IPM, kungfu::yijinjing::LocationTimeType::London}};
+
+// 根据标准时间戳转换成交易所所在区域的时间
+// param1:时间戳(精确到秒)
+// param2:交易所id，exchangeid
+// params3: 返回时间格式YYYYMMDD
+inline std::string TranslateGMTimeToLocalDateByExchangeId(time_t lTime, const std::string &exchangeId, const std::string strformat = "%Y%m%d") {
+  kungfu::yijinjing::LocationTimeType type = kungfu::yijinjing::LocationTimeType::Beijing;
+  std::unordered_map<std::string, kungfu::yijinjing::LocationTimeType>::const_iterator it = g_mapLocationTimeExchangeId.find(exchangeId);
+
+  if (it != g_mapLocationTimeExchangeId.end()) {
+    type = it->second;
+  }
+
+  int64_t local_time = kungfu::yijinjing::TimeUtil::TranslateGMTimeToLocalTime(lTime, type)->seconds;
+
+  char datebuf[256] = {0};
+  strftime(datebuf, 256, strformat.c_str(), gmtime(&local_time));
+  return datebuf;
+}
+#endif
+
 } // namespace kungfu::wingchun
 
 #endif // WINGCHUN_COMMON_H

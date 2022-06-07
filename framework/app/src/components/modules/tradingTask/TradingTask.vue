@@ -15,7 +15,6 @@ import {
   SettingOutlined,
   DeleteOutlined,
 } from '@ant-design/icons-vue';
-import dayjs from 'dayjs';
 import { columns } from './config';
 import path from 'path';
 import {
@@ -24,6 +23,7 @@ import {
   getTaskKfLocationByProcessId,
   fromProcessArgsToKfConfigItems,
   kfConfigItemsToArgsByPrimaryForShow,
+  dealTradingTaskName,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import {
   graceStopProcess,
@@ -260,17 +260,9 @@ function getProcessStatusName(
 ): ProcessStatusTypes | undefined {
   const taskLocation = getTaskKfLocationByProcessId(record?.name || '');
   if (!taskLocation) {
-    return 'Error';
+    return;
   }
   return getStrategyStatusName(taskLocation);
-}
-
-function dealTradingTaskName(name: string) {
-  const group = name.toKfGroup();
-  const strategyExts = extConfigs.value['strategy'] || {};
-  const groupResolved = strategyExts[group] ? strategyExts[group].name : group;
-  const timestamp = name.toKfName();
-  return `${groupResolved} ${dayjs(+timestamp).format('HH:mm:ss')}`;
 }
 </script>
 
@@ -312,7 +304,7 @@ function dealTradingTaskName(name: string) {
       >
         <template #bodyCell="{ column, record }">
           <template v-if="column.dataIndex === 'name'">
-            {{ dealTradingTaskName(record.name) }}
+            {{ dealTradingTaskName(record.name, extConfigs) }}
           </template>
           <template v-else-if="column.dataIndex === 'processStatus'">
             <a-switch

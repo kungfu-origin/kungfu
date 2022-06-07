@@ -735,20 +735,6 @@ declare namespace KungfuApi {
     state: StrategyStateStatusTypes;
   }
 
-  export interface StrategyStateDataResolved {
-    desired_volume: number;
-    left_rate: number;
-    total_left: number;
-    total_volume: number;
-    traded_volume: number;
-    update_time: number;
-    value: string;
-  }
-
-  export interface StrategyStateListItem extends StrategyStateDataResolved {
-    process_id: string;
-  }
-
   export interface Watcher {
     appStates: Record<string, BrokerStateStatusEnum>;
     strategyStates: Record<string, StrategyStateDataOrigin>;
