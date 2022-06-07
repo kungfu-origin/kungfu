@@ -186,10 +186,11 @@ public:
                  "asset.frozen_cash {} asset.avail {} market_value {} unrealized_pnl {} "
                  "short_margin {} cash_margin {} avail_margin {} margin {} total_asset {} ",
                  position.instrument_id, (int)input.side, (int)position.yesterday_volume, (int)position.frozen_total,
-                 position.unrealized_pnl, position.last_price, position.margin, frozen_cash, frozen_margin,
-                 input.frozen_price, asset.frozen_cash, asset.avail, asset.market_value, asset.unrealized_pnl,
-                 asset_margin.short_margin, asset_margin.cash_margin, asset_margin.avail_margin, asset_margin.margin,
-                 asset_margin.total_asset);
+                 (double)position.unrealized_pnl, (double)position.last_price, (double)position.margin,
+                 (double)frozen_cash, (double)frozen_margin, (double)input.frozen_price, (double)asset.frozen_cash,
+                 (double)asset.avail, (double)asset.market_value, (double)asset.unrealized_pnl,
+                 (double)asset_margin.short_margin, (double)asset_margin.cash_margin, (double)asset_margin.avail_margin,
+                 (double)asset_margin.margin, (double)asset_margin.total_asset);
   }
 
   virtual void apply_order(Book_ptr &book, const Order &order) override {
@@ -534,10 +535,6 @@ protected:
 
     auto cd_mr = get_instr_conversion_margin_rate(book, position);
     // auto &asset_margin = book->asset_margin;
-    SPDLOG_TRACE("prev_unrealized_pnl {} unrealized_pnl {} realized_pnl {}  income {} "
-                 "cash_debt {} position_market_value_change {}",
-                 prev_unrealized_pnl, position.unrealized_pnl, realized_pnl, income, asset_margin.cash_debt,
-                 position_market_value_change);
     // TODO: need check repaymargin for a specified (same instrument contract) MarginDebt or not
     if (income > asset_margin.cash_debt) {
       book->asset.avail += income - asset_margin.cash_debt;
