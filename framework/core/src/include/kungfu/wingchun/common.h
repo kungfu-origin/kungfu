@@ -415,7 +415,7 @@ inline void order_from_input(const longfist::types::OrderInput &input, longfist:
   order.time_condition = input.time_condition;
 }
 
-#if 0
+#if 1
 /*****************************************************************************
 *  @Copyright (c) 2022, Marsjliu
 *  @All rights reserved
@@ -460,7 +460,7 @@ inline std::string TranslateGMTimeToLocalDateByExchangeId(time_t lTime, const st
     type = it->second;
   }
 
-  int64_t local_time = kungfu::yijinjing::TimeUtil::TranslateGMTimeToLocalTime(lTime, type)->seconds;
+  time_t local_time = kungfu::yijinjing::TimeUtil::TranslateGMTimeToLocalTime(lTime, type)->seconds;
 
   char datebuf[256] = {0};
   strftime(datebuf, 256, strformat.c_str(), gmtime(&local_time));
