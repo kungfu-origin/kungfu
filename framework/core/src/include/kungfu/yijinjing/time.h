@@ -139,7 +139,7 @@ private:
   static const time &get_instance();
 };
 
-
+#if 0
 /*****************************************************************************
 *  @Copyright (c) 2022, Marsjliu
 *  @All rights reserved
@@ -202,7 +202,7 @@ namespace TimeUtil {
 	time_t TranslateLocalTimeToGMTime(time_t local_seconds, LocationTimeType loc_type, LocalTimeInfo *info = nullptr);
     std::shared_ptr<LocalTimeInfo> TranslateGMTimeToLocalTime(time_t gmt, LocationTimeType loc_type);
  } // namespace kungfu::yijinjing::TimeUtil
-
+#endif
 } // namespace kungfu::yijinjing
 
 #endif // YIJINJING_TIME_H
