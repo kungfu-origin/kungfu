@@ -140,7 +140,6 @@ private:
 };
 
 
-#if 0
 /*****************************************************************************
 *  @Copyright (c) 2022, Marsjliu
 *  @All rights reserved
@@ -203,7 +202,6 @@ namespace TimeUtil {
     std::shared_ptr<LocalTimeInfo> TranslateGMTimeToLocalTime(time_t gmt, LocationTimeType loc_type);
  } // namespace kungfu::yijinjing::TimeUtil
 
-#endif
 } // namespace kungfu::yijinjing
 
 #endif // YIJINJING_TIME_H
