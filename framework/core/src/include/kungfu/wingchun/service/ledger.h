@@ -84,6 +84,7 @@ private:
     auto book = bookkeeper_.get_book(book_uid);
     write_to(trigger_time, book->get_position_for(data), book_uid);
     write_to(trigger_time, book->asset, book_uid);
+    write_to(trigger_time, book->asset_margin, book_uid);
   }
 
   template <typename Writer, typename Snapshot>

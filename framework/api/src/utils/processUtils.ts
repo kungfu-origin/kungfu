@@ -727,8 +727,8 @@ export const startStrategyByLocalPython = async (
   return startProcess({
     name: `strategy_${name}`,
     args,
-    cwd: pythonFolder,
-    script: pythonFile,
+    cwd: `'${pythonFolder}'`,
+    script: `'${pythonFile}'`,
   }).catch((err) => {
     kfLogger.error(err.message);
   });
@@ -744,7 +744,7 @@ export const startStrategy = (
   const ifLocalPython = globalSetting?.strategy?.python || false;
   const pythonPath = globalSetting?.strategy?.pythonPath || '';
 
-  if (ifLocalPython) {
+  if (ifLocalPython && strategyPath.endsWith('.py')) {
     return startStrategyByLocalPython(strategyId, strategyPath, pythonPath);
   } else {
     const args = buildArgs(
