@@ -149,6 +149,7 @@ const time &time::get_instance() {
   return instance;
 }
 
+#if 0
 #define ONE_HOUR_SECOND 3600
 #define ONE_DAY_SECOND (ONE_HOUR_SECOND * 24)
 
@@ -184,7 +185,7 @@ public:
  */
 time_t CalculateSummerDayTimeByMonth_Sunday_Hour(time_t time, int month, int sunday_index, int hour) {
   // 根据需要判断的时间戳，得出格林威治时间
-  tm t_gmt = {0};
+  std::tm t_gmt = {0};
   gmtime_s(&t_gmt, &time);
 
   tm summer_day;
@@ -256,7 +257,7 @@ time_t TimeToSeconds(int year, int month, int day, int hour, int minute, int sec
   t_temp.tm_sec = second;
   t_temp.tm_isdst = 0;
 
-  return is_gmt ? _mkgmtime(&t_temp) : mktime(&t_temp);
+  return is_gmt ? _mkgmtime(&t_temp) : std::mktime(&t_temp);
 }
 
 time_t DateToSeconds(const std::string &time, bool is_gmt) {
@@ -332,5 +333,6 @@ std::shared_ptr<LocalTimeInfo> TranslateGMTimeToLocalTime(time_t gmt, LocationTi
   return TranslateGMTimeToLocalTime(gmt, info);
 }
 } // namespace TimeUtil
+#endif
 
 } // namespace kungfu::yijinjing
