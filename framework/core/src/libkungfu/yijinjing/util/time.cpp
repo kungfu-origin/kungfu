@@ -159,8 +159,8 @@ struct LocationTimeData {
 public:
   LocationTimeData(int time_zone, ZoneTimeType standard_type) : zone(time_zone) { zone_times.push_back(standard_type); }
 
-  LocationTimeData(int time_zone, const std::function<__int64(__int64)> &summer_begin,
-                   const std::function<__int64(__int64)> &summer_end, ZoneTimeType standard_type,
+  LocationTimeData(int time_zone, const std::function<int64_t(int64_t)> &summer_begin,
+                   const std::function<int64_t(int64_t)> &summer_end, ZoneTimeType standard_type,
                    ZoneTimeType daylight_type)
       : zone(time_zone), has_summer_day(true), f_summer_begin(summer_begin), f_summer_end(summer_end) {
     zone_times.push_back(standard_type);
@@ -171,8 +171,8 @@ public:
   int zone = 0;                // 时区（TimeZone），例如：北京时间为8
   bool has_summer_day = false; // 该地区是否有夏令时
 
-  std::function<__int64(__int64)> f_summer_begin;
-  std::function<__int64(__int64)> f_summer_end;
+  std::function<int64_t(int64_t)> f_summer_begin;
+  std::function<int64_t(int64_t)> f_summer_end;
 
   std::vector<ZoneTimeType> zone_times;
 };
@@ -214,7 +214,7 @@ time_t CalculateSummerDayTimeByMonth_Sunday_Hour(time_t time, int month, int sun
 }
 
 #define STByM_S_H(t, m, s, h)                                                                                          \
-  ([=](__int64 t) -> __int64 { return CalculateSummerDayTimeByMonth_Sunday_Hour(t, m, s, h); })
+  ([=](int64_t t) -> int64_t { return CalculateSummerDayTimeByMonth_Sunday_Hour(t, m, s, h); })
 
 static const std::unordered_map<LocationTimeType, LocationTimeData> g_locationTimeMap = {
     {LocationTimeType::Beijing, LocationTimeData(8, ZoneTimeType::BeijingTime)},
@@ -287,8 +287,8 @@ std::shared_ptr<LocalTimeInfo> TranslateGMTimeToLocalTime(time_t gmt, const Loca
       break;
     }
 
-    __int64 begin = info.f_summer_begin(gmt);
-    __int64 end = info.f_summer_end(gmt);
+    int64_t begin = info.f_summer_begin(gmt);
+    int64_t end = info.f_summer_end(gmt);
 
     /*
      * 处于区间内，一般表示处于夏令时；不过对于本年内的begin>end这种case来说，区间内恰恰表示不在夏令时。
