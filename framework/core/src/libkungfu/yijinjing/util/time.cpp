@@ -149,7 +149,7 @@ const time &time::get_instance() {
   return instance;
 }
 
-#if 1
+namespace TimeUtil {
 #define ONE_HOUR_SECOND 3600
 #define ONE_DAY_SECOND (ONE_HOUR_SECOND * 24)
 
@@ -226,7 +226,7 @@ time_t CalculateSummerDayTimeByMonth_Sunday_Hour(time_t time, int month, int sun
 #define STByM_S_H(t, m, s, h)                                                                                          \
   ([=](int64_t t) -> int64_t { return CalculateSummerDayTimeByMonth_Sunday_Hour(t, m, s, h); })
 
-static const std::unordered_map<LocationTimeType, LocationTimeData> g_locationTimeMap = {
+const std::unordered_map<LocationTimeType, LocationTimeData> g_locationTimeMap = {
     {LocationTimeType::Beijing, LocationTimeData(8, ZoneTimeType::BeijingTime)},
     {LocationTimeType::Singapore, LocationTimeData(8, ZoneTimeType::SGT)},
     {LocationTimeType::Tokyo, LocationTimeData(9, ZoneTimeType::JST)},
@@ -248,7 +248,6 @@ static const std::unordered_map<LocationTimeType, LocationTimeData> g_locationTi
     // Add more LocationTime here...
 };
 
-namespace TimeUtil {
 time_t TimeToSeconds(const std::string &time, bool is_gmt) {
   int year, month, day, hour, minute, second;
   sscanf(time.c_str(), "%d-%d-%d %d:%d:%d", &year, &month, &day, &hour, &minute, &second);
@@ -342,6 +341,5 @@ std::shared_ptr<LocalTimeInfo> TranslateGMTimeToLocalTime(time_t gmt, LocationTi
   return TranslateGMTimeToLocalTime(gmt, info);
 }
 } // namespace TimeUtil
-#endif
 
 } // namespace kungfu::yijinjing
