@@ -345,6 +345,7 @@ function handleSort(
     flex-direction: row;
     justify-content: flex-start;
     cursor: pointer;
+    list-style: none;
   }
 
   .kf-table-row:hover {
@@ -363,7 +364,8 @@ function handleSort(
     text-align: left;
     position: relative;
     white-space: nowrap;
-    text-overflow: hidden;
+    text-overflow: unset;
+    overflow: hidden;
 
     &.number {
       text-align: right;
