@@ -520,6 +520,7 @@ const getKfUIExtensionConfigByExtKey = (
       const extPath = extConfig.extPath;
       const uiConfig = extConfig['ui_config'];
       const position = uiConfig?.position || '';
+      const exhibit = uiConfig?.exhibit || ({} as KungfuApi.KfExhibitConfig);
       const components = uiConfig?.components;
       const daemon = uiConfig?.daemon || ({} as Record<string, string>);
       const script = uiConfig?.script || '';
@@ -528,6 +529,7 @@ const getKfUIExtensionConfigByExtKey = (
         name: extName,
         extPath,
         position,
+        exhibit,
         components: components || {
           index: 'index.js',
         },

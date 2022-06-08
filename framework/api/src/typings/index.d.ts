@@ -149,6 +149,7 @@ declare namespace KungfuApi {
     extPath: string;
     ui_config?: {
       position: KfUIExtLocatorTypes;
+      exhibit?: KfExhibitConfig;
       components?:
         | {
             index: string;
@@ -173,6 +174,11 @@ declare namespace KungfuApi {
     >;
   }
 
+  interface KfExhibitConfig {
+    type: KfExtConfigTypes;
+    config: Record<string, KfConfigItem>;
+  }
+
   interface KfExtConfig {
     name: string;
     category: string;
@@ -190,6 +196,7 @@ declare namespace KungfuApi {
       name: string;
       extPath: string;
       position: KfUIExtLocatorTypes;
+      exhibit: KfExhibitConfig;
       components:
         | {
             index: string;
@@ -741,13 +748,13 @@ declare namespace KungfuApi {
     total_left: number;
     total_volume: number;
     traded_volume: number;
-    update_time: number;
-    value: string;
+    update_time?: number;
+    status: string;
   }
 
-  export interface StrategyStateListItem extends StrategyStateDataResolved {
+  export interface StrategyStateItem extends StrategyStateDataResolved {
+    state?: StrategyStateStatusTypes;
     process_id: string;
-    state: StrategyStateStatusTypes;
   }
 
   export interface Watcher {
