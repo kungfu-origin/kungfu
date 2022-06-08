@@ -258,7 +258,7 @@ function handleTriggerSellOrderBookPriceVolume(
 
       &.price {
         text-align: right;
-        height: 100%;
+        flex: 1.5;
       }
 
       .main {
@@ -269,6 +269,7 @@ function handleTriggerSellOrderBookPriceVolume(
       .sub {
         position: relative;
         font-size: 12px;
+        height: 25px;
       }
     }
   }
