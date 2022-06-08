@@ -3,7 +3,6 @@ import {
   dealKfPrice,
   dealSide,
   dealOffset,
-  dealOrderStatus,
   getIdByKfLocation,
   delayMilliSeconds,
   dealTradingData,
@@ -546,13 +545,9 @@ function testOrderSourceIsOnline(order: KungfuApi.OrderResolved) {
             <template v-else-if="column.dataIndex === 'volume_traded'">
               {{ item.volume_traded }} / {{ item.volume }}
             </template>
-            <template v-else-if="column.dataIndex === 'status'">
-              <span
-                :class="`color-${
-                  dealOrderStatus(item.status, item.error_msg).color
-                }`"
-              >
-                {{ dealOrderStatus(item.status, item.error_msg).name }}
+            <template v-else-if="column.dataIndex === 'status_uname'">
+              <span :class="`color-${item.status_color}`">
+                {{ item.status_uname }}
               </span>
             </template>
             <template v-else-if="column.dataIndex === 'source_uname'">
