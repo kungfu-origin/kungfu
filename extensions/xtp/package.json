@@ -1,5 +1,5 @@
 {
-  "name": "@kungfu-trader/kfx-xtp-demo",
+  "name": "@kungfu-trader/kfx-broker-xtp-demo",
   "author": {
     "name": "kungfu-trader",
     "email": "info@kungfu.link"
@@ -15,7 +15,7 @@
     "registry": "https://npm.pkg.github.com"
   },
   "binary": {
-    "module_name": "kfx-xtp-demo",
+    "module_name": "kfx-broker-xtp-demo",
     "module_path": "dist/xtp",
     "remote_path": "{module_name}/v{major}/v{version}",
     "package_name": "{module_name}-v{version}-{platform}-{arch}-{configuration}.tar.gz",
