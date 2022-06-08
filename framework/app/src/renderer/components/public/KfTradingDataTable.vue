@@ -182,7 +182,7 @@ function handleSort(
     <ul class="kf-table-header kf-table-row">
       <li
         v-for="column in columns"
-        :class="['text-overflow', 'kf-table-cell', column.type]"
+        :class="['kf-table-cell', column.type]"
         :key="column.dataIndex"
         :title="column.name"
         :style="{
@@ -190,7 +190,7 @@ function handleSort(
         }"
         @click.stop="handleSort(column.dataIndex, column.sorter)"
       >
-        <span class="name text-overflow">{{ column.name }}</span>
+        <span class="name">{{ column.name }}</span>
         <span class="sort-btn" v-if="column.sorter">
           <CaretUpOutlined
             style="color: #bfbfbf; font-size: 11px"
@@ -228,7 +228,7 @@ function handleSort(
           >
             <li
               v-for="column in columns"
-              :class="['text-overflow', 'kf-table-cell', column.type]"
+              :class="['kf-table-cell', column.type]"
               :key="`${column.dataIndex}_${item[keyField as keyof TradingDataItem]}`"
               :style="{
                 'max-width': getHeaderWidth(column),
@@ -362,6 +362,8 @@ function handleSort(
     user-select: text;
     text-align: left;
     position: relative;
+    white-space: nowrap;
+    text-overflow: hidden;
 
     &.number {
       text-align: right;
