@@ -260,7 +260,7 @@ function getProcessStatusName(
 ): ProcessStatusTypes | undefined {
   const taskLocation = getTaskKfLocationByProcessId(record?.name || '');
   if (!taskLocation) {
-    return 'Error';
+    return;
   }
   return getStrategyStatusName(taskLocation);
 }

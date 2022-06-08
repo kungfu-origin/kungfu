@@ -471,6 +471,8 @@ declare namespace KungfuApi {
     dest_resolved_data: KungfuApi.KfTradeValueCommonData;
     source_uname: string;
     dest_uname: string;
+    status_uname: string;
+    status_color: AntInKungfuColorTypes;
     update_time_resolved: string;
     latency_system: string;
     latency_network: string;
@@ -740,21 +742,6 @@ declare namespace KungfuApi {
 
   export interface StrategyStateData extends StrategyStateDataOrigin {
     state: StrategyStateStatusTypes;
-  }
-
-  export interface StrategyStateDataResolved {
-    desired_volume: number;
-    left_rate: number;
-    total_left: number;
-    total_volume: number;
-    traded_volume: number;
-    update_time?: number;
-    status: string;
-  }
-
-  export interface StrategyStateItem extends StrategyStateDataResolved {
-    state?: StrategyStateStatusTypes;
-    process_id: string;
   }
 
   export interface Watcher {

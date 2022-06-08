@@ -45,9 +45,11 @@ const webpackConfig = (argv) => {
               loader: 'less-loader',
               options: {
                 lessOptions: {
+                  javascriptEnabled: true,
                   modifyVars: {
                     ...getThemeVariables({
                       dark: true,
+                      compact: true,
                     }),
                     'font-size-base': '12px', // major text font size
                     'primary-color': '#FAAD14',
@@ -56,7 +58,6 @@ const webpackConfig = (argv) => {
                     'red2-base': '#f21717',
                     'green2-base': '#15de9e',
                   },
-                  javascriptEnabled: true,
                 },
               },
             },

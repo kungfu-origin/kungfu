@@ -71,11 +71,11 @@ export const getConfigSettings = (
     {
       key: 'limit_price',
       name:
-        priceType === PriceTypeEnum.Limit
+        priceType !== PriceTypeEnum.Market
           ? t('tradingConfig.price')
           : t('tradingConfig.protect_price'),
       type: 'float',
-      required: priceType === PriceTypeEnum.Limit ? true : false,
+      required: priceType !== PriceTypeEnum.Market ? true : false,
     },
     {
       key: 'volume',

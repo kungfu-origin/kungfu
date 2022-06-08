@@ -435,6 +435,7 @@ export const dealOrder = (
     latencySystem: '--',
     latencyNetwork: '--',
   };
+  const statusData = dealOrderStatus(order.status, order.error_msg);
   return {
     ...order,
     source: order.source,
@@ -444,6 +445,8 @@ export const dealOrder = (
     dest_resolved_data: destResolvedData,
     source_uname: sourceResolvedData.name,
     dest_uname: destResolvedData.name,
+    status_uname: statusData.name,
+    status_color: statusData.color || 'default',
     update_time_resolved: dealKfTime(order.update_time, isHistory),
     latency_system: latencyData.latencySystem,
     latency_network: latencyData.latencyNetwork,
