@@ -52,10 +52,16 @@ class ExecutorRegistry:
                         for category in config["kungfuConfig"]["config"]:
                             if category not in kfj.CATEGORIES:
                                 raise RuntimeError(f"Unsupported category {category}")
-                            if self.executors["strategy"]["default"] and self.ctx.category == "strategy" and self.ctx.group == "default":
+                            if (
+                                self.executors["strategy"]["default"]
+                                and self.ctx.category == "strategy"
+                                and self.ctx.group == "default"
+                            ):
                                 self.executors["strategy"]["default"].config = config
                             else:
-                                self.executors[category][group] = ExtensionLoader(self.ctx, extension_dir, config)
+                                self.executors[category][group] = ExtensionLoader(
+                                    self.ctx, extension_dir, config
+                                )
 
     def __getitem__(self, category):
         return self.executors[category]
