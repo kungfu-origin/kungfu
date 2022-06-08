@@ -45,6 +45,7 @@ const webpackConfig = (argv) => {
               loader: 'less-loader',
               options: {
                 lessOptions: {
+                  javascriptEnabled: true,
                   modifyVars: {
                     ...getThemeVariables({
                       dark: true,
@@ -57,7 +58,6 @@ const webpackConfig = (argv) => {
                     'red2-base': '#f21717',
                     'green2-base': '#15de9e',
                   },
-                  javascriptEnabled: true,
                 },
               },
             },
