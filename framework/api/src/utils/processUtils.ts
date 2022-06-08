@@ -13,6 +13,7 @@ import {
   flattenExtensionModuleDirs,
   getProcessIdByKfLocation,
   getIfProcessRunning,
+  getIfProcessDeleted,
 } from '../utils/busiUtils';
 import {
   buildProcessLogPath,
@@ -383,6 +384,8 @@ export const graceDeleteProcess = (
       return Promise.reject(new Error(t('未就绪', { processId })));
     }
 
+    return deleteProcess(processId);
+  } else if (!getIfProcessDeleted(processStatusData, processId)) {
     return deleteProcess(processId);
   } else {
     return Promise.resolve();
