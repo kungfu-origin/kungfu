@@ -1,10 +1,10 @@
 {
-  "name": "@kungfu-trader/kfx-xtp-demo",
+  "name": "@kungfu-trader/kfx-broker-xtp-demo",
   "author": {
     "name": "kungfu-trader",
     "email": "info@kungfu.link"
   },
-  "version": "2.4.0-alpha.60",
+  "version": "2.4.0-alpha.61",
   "description": "Kungfu Extension - XTP Demo",
   "license": "Apache-2.0",
   "main": "package.json",
@@ -15,7 +15,7 @@
     "registry": "https://npm.pkg.github.com"
   },
   "binary": {
-    "module_name": "kfx-xtp-demo",
+    "module_name": "kfx-broker-xtp-demo",
     "module_path": "dist/xtp",
     "remote_path": "{module_name}/v{major}/v{version}",
     "package_name": "{module_name}-v{version}-{platform}-{arch}-{configuration}.tar.gz",
@@ -28,10 +28,10 @@
     "package": "kfs project package"
   },
   "dependencies": {
-    "@kungfu-trader/kungfu-core": "^2.4.0-alpha.60"
+    "@kungfu-trader/kungfu-core": "^2.4.0-alpha.61"
   },
   "devDependencies": {
-    "@kungfu-trader/kungfu-sdk": "^2.4.0-alpha.60"
+    "@kungfu-trader/kungfu-sdk": "^2.4.0-alpha.61"
   },
   "kungfuDependencies": {
     "xtp": "v2.2.32.2"

@@ -3505,10 +3505,10 @@ ansi@^0.3.0, ansi@~0.3.0:
   resolved "https://registry.yarnpkg.com/ansi/-/ansi-0.3.1.tgz#0c42d4fb17160d5a9af1e484bace1c66922c1b21"
   integrity sha1-DELU+xcWDVqa8eSEus4cZpIsGyE=
 
-ant-design-vue@3.2.4:
-  version "3.2.4"
-  resolved "https://registry.yarnpkg.com/ant-design-vue/-/ant-design-vue-3.2.4.tgz#537801219c39351d0b490405e8802cb975fea159"
-  integrity sha512-aA30m1cDBn+dIOFGQvHn0AMpFiubtKgCAhN1jOX8NoyVyZ705Bf/5MI/RftQbsWY9CvVsl3QztAJZwA/Z6Bb1g==
+ant-design-vue@^3.2.6:
+  version "3.2.6"
+  resolved "https://registry.yarnpkg.com/ant-design-vue/-/ant-design-vue-3.2.6.tgz#90dee76a7b5b16ca055a586c3056f5c2ff77c6ef"
+  integrity sha512-KlLJ2+KAaEJcV6BjlL2qA0WnLBQXaUQ129e2tawRP2qWvaieNYtP5jsxkN7zu3jlGsS/y3XUC9R9bLl8ji+ucw==
   dependencies:
     "@ant-design/colors" "^6.0.0"
     "@ant-design/icons-vue" "^6.1.0"

@@ -48,6 +48,7 @@ const webpackConfig = (argv) => {
                   modifyVars: {
                     ...getThemeVariables({
                       dark: true,
+                      compact: true,
                     }),
                     'font-size-base': '12px', // major text font size
                     'primary-color': '#FAAD14',

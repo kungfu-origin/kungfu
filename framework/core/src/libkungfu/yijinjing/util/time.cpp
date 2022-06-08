@@ -150,6 +150,7 @@ const time &time::get_instance() {
 }
 
 #if 0
+namespace TimeUtil {
 #define ONE_HOUR_SECOND 3600
 #define ONE_DAY_SECOND (ONE_HOUR_SECOND * 24)
 
@@ -178,6 +179,18 @@ public:
   std::vector<ZoneTimeType> zone_times;
 };
 
+// 实现_mkgmtime函数的功能，可以跨平台使用
+time_t mkgmtime(struct tm *unixdate) {
+  time_t tUnixTime = mktime(unixdate);
+  struct tm *fDate = gmtime(&tUnixTime);
+
+  int32_t nOffset = fDate->tm_hour - unixdate->tm_hour;
+  if (nOffset > 12) {
+    nOffset = 24 - nOffset;
+  }
+  return tUnixTime - nOffset * ONE_HOUR_SECOND;
+}
+
 /*
  * 夏令时时间信息
  * 夏令时一般的定义规则：在month+1月份第sunday_index个星期日，hour小时开始（或结束）
@@ -185,25 +198,22 @@ public:
  */
 time_t CalculateSummerDayTimeByMonth_Sunday_Hour(time_t time, int month, int sunday_index, int hour) {
   // 根据需要判断的时间戳，得出格林威治时间
-  std::tm t_gmt = {0};
-  gmtime_s(&t_gmt, &time);
+  struct tm *t_gmt = gmtime(&time);
+  struct tm *summer_day = gmtime(&time);
 
-  tm summer_day;
-
-  // 年份需要与传入时间的年份相同
-  summer_day.tm_year = t_gmt.tm_year;
+  summer_day->tm_year = t_gmt->tm_year;
 
   // 当sunday_index<0 时，需要计算下个月第一天倒推
-  summer_day.tm_mon = sunday_index > 0 ? month : (month + 1);
-  summer_day.tm_mday = 1;
-  summer_day.tm_hour = hour;
-  summer_day.tm_min = 0;
-  summer_day.tm_sec = 0;
+  summer_day->tm_mon = sunday_index > 0 ? month : (month + 1);
+  summer_day->tm_mday = 1;
+  summer_day->tm_hour = hour;
+  summer_day->tm_min = 0;
+  summer_day->tm_sec = 0;
 
-  time_t summer_day_seconds = _mkgmtime(&summer_day);
-  gmtime_s(&summer_day, &summer_day_seconds);
+  time_t summer_day_seconds = mkgmtime(summer_day);
+  summer_day = gmtime(&summer_day_seconds);
 
-  int week = summer_day.tm_wday;
+  int week = summer_day->tm_wday;
   int offset_weeks = sunday_index > 0 ? (sunday_index - 1) : sunday_index;
 
   // 先向前对齐到周日
@@ -217,7 +227,7 @@ time_t CalculateSummerDayTimeByMonth_Sunday_Hour(time_t time, int month, int sun
 #define STByM_S_H(t, m, s, h)                                                                                          \
   ([=](int64_t t) -> int64_t { return CalculateSummerDayTimeByMonth_Sunday_Hour(t, m, s, h); })
 
-static const std::unordered_map<LocationTimeType, LocationTimeData> g_locationTimeMap = {
+const std::unordered_map<LocationTimeType, LocationTimeData> g_locationTimeMap = {
     {LocationTimeType::Beijing, LocationTimeData(8, ZoneTimeType::BeijingTime)},
     {LocationTimeType::Singapore, LocationTimeData(8, ZoneTimeType::SGT)},
     {LocationTimeType::Tokyo, LocationTimeData(9, ZoneTimeType::JST)},
@@ -239,7 +249,6 @@ static const std::unordered_map<LocationTimeType, LocationTimeData> g_locationTi
     // Add more LocationTime here...
 };
 
-namespace TimeUtil {
 time_t TimeToSeconds(const std::string &time, bool is_gmt) {
   int year, month, day, hour, minute, second;
   sscanf(time.c_str(), "%d-%d-%d %d:%d:%d", &year, &month, &day, &hour, &minute, &second);
@@ -257,7 +266,7 @@ time_t TimeToSeconds(int year, int month, int day, int hour, int minute, int sec
   t_temp.tm_sec = second;
   t_temp.tm_isdst = 0;
 
-  return is_gmt ? _mkgmtime(&t_temp) : std::mktime(&t_temp);
+  return is_gmt ? mkgmtime(&t_temp) : std::mktime(&t_temp);
 }
 
 time_t DateToSeconds(const std::string &time, bool is_gmt) {
