@@ -139,7 +139,7 @@ private:
   static const time &get_instance();
 };
 
-
+#if 0
 /*****************************************************************************
 *  @Copyright (c) 2022, Marsjliu
 *  @All rights reserved
@@ -190,6 +190,7 @@ struct LocalTimeInfo {
 
   ZoneTimeType zone_time_type = ZoneTimeType::BST;
 };
+
 namespace TimeUtil {
 	// 支持 yyyy-mm-dd hh:mm:ss的日期字符串格式，举例：2017-08-10 10:10:10
 	time_t TimeToSeconds(const std::string &time, bool is_gmt);
@@ -201,7 +202,7 @@ namespace TimeUtil {
 	time_t TranslateLocalTimeToGMTime(time_t local_seconds, LocationTimeType loc_type, LocalTimeInfo *info = nullptr);
     std::shared_ptr<LocalTimeInfo> TranslateGMTimeToLocalTime(time_t gmt, LocationTimeType loc_type);
  } // namespace kungfu::yijinjing::TimeUtil
-
+#endif
 } // namespace kungfu::yijinjing
 
 #endif // YIJINJING_TIME_H
