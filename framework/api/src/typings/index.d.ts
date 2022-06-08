@@ -464,6 +464,8 @@ declare namespace KungfuApi {
     dest_resolved_data: KungfuApi.KfTradeValueCommonData;
     source_uname: string;
     dest_uname: string;
+    status_uname: string;
+    status_color: AntInKungfuColorTypes;
     update_time_resolved: string;
     latency_system: string;
     latency_network: string;

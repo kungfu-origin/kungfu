@@ -247,6 +247,9 @@ function handleTriggerSellOrderBookPriceVolume(
 
     .info-item {
       flex: 1;
+      flex-direction: column;
+      justify-content: space-between;
+      display: flex;
 
       &.info {
         text-align: left;
@@ -255,7 +258,7 @@ function handleTriggerSellOrderBookPriceVolume(
 
       &.price {
         text-align: right;
-        height: 45px;
+        height: 100%;
       }
 
       .main {
