@@ -62,7 +62,7 @@ function handleStrategyList(strategyList): void {
 
 function handleUpdateStrategy(strategyPath) {
   if (!strategy.strategy_id) {
-    error('策略id不存在!');
+    error(t('策略id不存在!'));
     return;
   }
   updateStrategy(strategy.strategy_id, strategyPath);

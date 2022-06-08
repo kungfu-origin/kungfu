@@ -576,4 +576,7 @@ export default {
   异常: 'warn',
   错误: 'error',
   文件路径不存在: 'The file path does not exist',
+  策略id不存在: 'The strategy id does not exist',
+
+  持有量: 'Holding',
 };
