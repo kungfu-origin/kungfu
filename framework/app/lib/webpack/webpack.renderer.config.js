@@ -3,6 +3,7 @@
 const toolkit = require('@kungfu-trader/kungfu-js-api/toolkit');
 const path = require('path');
 const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
+const os = require('os');
 
 const webpack = require('webpack');
 const { merge } = require('webpack-merge');
@@ -115,18 +116,19 @@ const devConfig = {
       'process.env.APP_TYPE': '"renderer"',
       'process.env.LANG_ENV': '"zh-CN"',
     }),
-    new CopyPlugin({
+    
+    ...(os.platform() === 'win32' ? [] : [new CopyPlugin({
       patterns: [
-        {
-          from: path.join(
-            path.resolve(getCoreDir(), 'build', 'python', 'dist'),
-            '*.whl',
-          ),
-          to: path.join(publicDir, 'python'),
-          context: path.resolve(getCoreDir(), 'build', 'python', 'dist'),
-        },
+          {
+            from: path.join(
+              getCoreDir(), 'build', 'python', 'dist',
+              '*.whl',
+            ),
+            to: path.join(publicDir, 'python'),
+            context: path.resolve(getCoreDir(), 'build', 'python', 'dist'),
+          },
       ],
-    }),
+    })]),
   ],
 };
 

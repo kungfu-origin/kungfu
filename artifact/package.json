@@ -28,8 +28,10 @@
     "@kungfu-trader/kungfu-cli": "^2.4.0-alpha.63"
   },
   "devDependencies": {
-    "@kungfu-trader/kungfu-sdk": "^2.4.0-alpha.63",
+    "@kungfu-trader/kfx-ctp": "^1.0.0-alpha.2",
+    "@kungfu-trader/kfx-rongh": "^1.0.0-alpha.3",
     "@kungfu-trader/kfx-task-timertask": "^1.0.0-alpha.0",
-    "@kungfu-trader/kfx-task-twap": "^1.0.0-alpha.2"
+    "@kungfu-trader/kfx-task-twap": "^1.0.0-alpha.2",
+    "@kungfu-trader/kungfu-sdk": "^2.4.0-alpha.63"
   }
 }
