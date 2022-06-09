@@ -104,6 +104,25 @@ function handleTriggerSellOrderBookPriceVolume(
       volume: BigInt(volume),
     });
 }
+
+function toLedgalPriceVolume(num: number | bigint) {
+  num = Number(num);
+
+  if (Number.isNaN(num)) {
+    return 0
+  }
+
+  if (num > Number.MAX_SAFE_INTEGER) {
+    return 0
+  }
+
+  if (num < 0) {
+    return 0
+  }
+
+  return num
+}
+
 </script>
 <template>
   <div class="kf-order-book__warp">
@@ -112,30 +131,29 @@ function handleTriggerSellOrderBookPriceVolume(
         class="level-row"
         v-for="(_item, index) in Array(10)"
         :key="index"
-        @click=""
       >
         <div
           class="buy volume"
-          @click="handleTriggerBuyOrderBookPriceVolume(askPrices[9 - index], 0)"
+          @click="handleTriggerBuyOrderBookPriceVolume(toLedgalPriceVolume(askPrices[9 - index]), 0)"
         ></div>
-        <div class="price">{{ dealKfPrice(askPrices[9 - index]) }}</div>
+        <div class="price">{{ dealKfPrice(toLedgalPriceVolume(askPrices[9 - index])) }}</div>
         <div
           class="sell volume"
           @click="
             handleTriggerSellOrderBookPriceVolume(
-              askPrices[9 - index],
-              askVolume[9 - index],
+              toLedgalPriceVolume(askPrices[9 - index]),
+              toLedgalPriceVolume(askVolume[9 - index]),
             )
           "
         >
-          {{ dealKfNumber(askVolume[9 - index]) }}
+          {{ dealKfNumber(toLedgalPriceVolume(askVolume[9 - index])) }}
         </div>
       </div>
     </div>
     <div class="instrument-info">
       <div class="info info-item">
         <div class="main">
-          {{ currentInstrument?.instrumentName || '--' }}
+          {{ currentInstrument?.instrumentName || currentInstrument?.instrumentId || '--' }}
         </div>
         <div class="sub">
           <span>{{ currentInstrument?.instrumentId || '--' }}</span>
@@ -166,17 +184,17 @@ function handleTriggerSellOrderBookPriceVolume(
           class="buy volume"
           @click="
             handleTriggerBuyOrderBookPriceVolume(
-              bidPrices[index],
-              bidVolume[index],
+              toLedgalPriceVolume(bidPrices[index]),
+              toLedgalPriceVolume(bidVolume[index]),
             )
           "
         >
-          {{ dealKfNumber(bidVolume[index]) }}
+          {{ dealKfNumber(toLedgalPriceVolume(bidVolume[index])) }}
         </div>
-        <div class="price">{{ dealKfPrice(bidPrices[index]) }}</div>
+        <div class="price">{{ dealKfPrice(toLedgalPriceVolume(bidPrices[index])) }}</div>
         <div
           class="sell volume"
-          @click="handleTriggerSellOrderBookPriceVolume(bidPrices[index], 0)"
+          @click="handleTriggerSellOrderBookPriceVolume(toLedgalPriceVolume(bidPrices[index]), 0)"
         ></div>
       </div>
     </div>

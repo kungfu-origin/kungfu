@@ -127,16 +127,16 @@ Book_ptr Bookkeeper::make_book(uint32_t location_uid) {
       location->category == category::TD ? LedgerCategory::Account : LedgerCategory::Strategy;
   strcpy(asset_margin.trading_day, time::strftime(app_.get_trading_day(), KUNGFU_TRADING_DAY_FORMAT).c_str());
   if (asset.ledger_category == LedgerCategory::Account) {
-    strcpy(asset.source_id, location->group.c_str());
-    strcpy(asset.broker_id, location->group.c_str());
-    strcpy(asset.account_id, location->name.c_str());
-    strcpy(asset_margin.source_id, location->group.c_str());
-    strcpy(asset_margin.broker_id, location->group.c_str());
-    strcpy(asset_margin.account_id, location->name.c_str());
+    strncpy(asset.source_id, location->group.c_str(), SOURCE_ID_LEN);
+    strncpy(asset.broker_id, location->group.c_str(), BROKER_ID_LEN);
+    strncpy(asset.account_id, location->name.c_str(), ACCOUNT_ID_LEN);
+    strncpy(asset_margin.source_id, location->group.c_str(), SOURCE_ID_LEN);
+    strncpy(asset_margin.broker_id, location->group.c_str(), BROKER_ID_LEN);
+    strncpy(asset_margin.account_id, location->name.c_str(), ACCOUNT_ID_LEN);
   }
   if (asset.ledger_category == LedgerCategory::Strategy) {
-    strcpy(asset.client_id, location->name.c_str());
-    strcpy(asset_margin.client_id, location->name.c_str());
+    strncpy(asset.client_id, location->name.c_str(), CLIENT_ID_LEN);
+    strncpy(asset_margin.client_id, location->name.c_str(), CLIENT_ID_LEN);
   }
   return book;
 }

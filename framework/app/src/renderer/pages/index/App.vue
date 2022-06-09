@@ -194,7 +194,7 @@ onBeforeUnmount(() => {
       v-if="setTradingTaskModalVisible"
       v-model:visible="setTradingTaskModalVisible"
       :payload="setTradingTaskConfigPayload"
-      :primaryKeyUnderline="true"
+      :passPrimaryKeySpecialWordsVerify="true"
       @confirm="
         handleConfirmAddUpdateTask($event, currentSelectedTradingTaskExtKey)
       "
