@@ -802,6 +802,13 @@ export const getIfProcessRunning = (
   return false;
 };
 
+export const getIfProcessDeleted = (
+  processStatusData: Pm2ProcessStatusData,
+  processId: string,
+): boolean => {
+  return processStatusData[processId] === undefined;
+};
+
 export const getIfProcessStopping = (
   processStatusData: Pm2ProcessStatusData,
   processId: string,
