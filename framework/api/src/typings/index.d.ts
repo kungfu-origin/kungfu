@@ -143,6 +143,27 @@ declare namespace KungfuApi {
     tip?: string;
   }
 
+  export interface KfExHibitConfigItem {
+    key: string;
+    source_key: string;
+    name: string;
+    type: KfConfigItemSupportedTypes;
+  }
+
+  export interface StrategyStateDataResolved {
+    desired_volume: number;
+    left_rate: number;
+    total_left: number;
+    total_volume: number;
+    traded_volume: number;
+    update_time?: number;
+    status: string;
+  }
+  export interface StrategyStateItem extends StrategyStateDataResolved {
+    state?: StrategyStateStatusTypes;
+    process_id: string;
+  }
+
   export interface KfExtOriginConfig {
     key: string;
     name: string;
