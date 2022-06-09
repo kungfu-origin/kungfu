@@ -3,6 +3,7 @@
 #include <pybind11/stl.h>
 
 #include <kungfu/longfist/longfist.h>
+#include <kungfu/yijinjing/cache/cached.h>
 #include <kungfu/yijinjing/index/session.h>
 #include <kungfu/yijinjing/io.h>
 #include <kungfu/yijinjing/journal/assemble.h>
@@ -24,6 +25,7 @@ using namespace kungfu::longfist;
 using namespace kungfu::longfist::types;
 using namespace kungfu::longfist::enums;
 using namespace kungfu::yijinjing;
+using namespace kungfu::yijinjing::cache;
 using namespace kungfu::yijinjing::data;
 using namespace kungfu::yijinjing::index;
 using namespace kungfu::yijinjing::journal;
@@ -349,5 +351,15 @@ void bind(pybind11::module &&m) {
       .def("run", &apprentice::run)
       .def("setup", &apprentice::setup)
       .def("step", &apprentice::step);
+
+  py::class_<cached, kungfu::yijinjing::practice::apprentice, std::shared_ptr<cached>>(m, "cached")
+      .def(py::init<yijinjing::data::locator_ptr, longfist::enums::mode, bool>())
+      .def_property_readonly("io_device", &cached::get_io_device)
+      .def_property_readonly("usable", &cached::is_usable)
+      .def("set_begin_time", &cached::set_begin_time)
+      .def("set_end_time", &cached::set_end_time)
+      .def("now", &cached::now)
+      .def("run", &cached::run)
+      .def("on_exit", &cached::on_exit);
 }
 } // namespace kungfu::yijinjing

@@ -1,22 +1,21 @@
-#ifndef WINGCHUN_FEED_H
-#define WINGCHUN_FEED_H
+#ifndef KUNGFU_CACHED_H
+#define KUNGFU_CACHED_H
 
-#include <kungfu/wingchun/broker/client.h>
 #include <kungfu/yijinjing/cache/runtime.h>
 #include <kungfu/yijinjing/io.h>
 #include <kungfu/yijinjing/log.h>
 #include <kungfu/yijinjing/practice/apprentice.h>
 #include <kungfu/yijinjing/practice/profile.h>
 
-namespace kungfu::wingchun::service {
+namespace kungfu::yijinjing::cache {
 
 using ProfileDataTypesType = decltype(longfist::ProfileDataTypes);
 using ProfileStateMapType = decltype(longfist::build_state_map(longfist::ProfileDataTypes));
 typedef yijinjing::cache::typed_bank<ProfileDataTypesType, ProfileStateMapType> ProfileStateBank;
 
-class CacheD : public yijinjing::practice::apprentice {
+class cached : public yijinjing::practice::apprentice {
 public:
-  explicit CacheD(yijinjing::data::locator_ptr locator, longfist::enums::mode m, bool low_latency = false);
+  explicit cached(yijinjing::data::locator_ptr locator, longfist::enums::mode m, bool low_latency = false);
 
 protected:
   void on_start() override;
@@ -71,6 +70,6 @@ private:
   void feed(const event_ptr &event);
 };
 
-} // namespace kungfu::wingchun::service
+} // namespace kungfu::yijinjing::cache
 
-#endif // WINGCHUN_FEED_H
+#endif // KUNGFU_CACHED_H

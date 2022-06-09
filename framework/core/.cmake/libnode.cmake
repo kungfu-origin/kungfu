@@ -44,7 +44,7 @@ macro(use_libnode)
 
   if (WIN32)
     set(LIBNODE "libnode")
-    set(KUNGFU_LINK_LIBS "sqlite3k")
+    set(KUNGFU_LINK_LIBS "sqlite")
   else()
     set(LIBNODE "node")
     set(KUNGFU_LINK_LIBS "")
