@@ -221,7 +221,6 @@ export const openNewBrowserWindow = (
     });
 
     win.on('ready-to-show', function () {
-      win && win.show();
       win && win.focus();
     });
 
