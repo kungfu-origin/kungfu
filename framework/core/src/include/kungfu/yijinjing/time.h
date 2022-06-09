@@ -139,7 +139,6 @@ private:
   static const time &get_instance();
 };
 
-
 /*****************************************************************************
 *  @Copyright (c) 2022, Marsjliu
 *  @All rights reserved
@@ -192,16 +191,16 @@ struct LocalTimeInfo {
 };
 
 namespace TimeUtil {
-	// 支持 yyyy-mm-dd hh:mm:ss的日期字符串格式，举例：2017-08-10 10:10:10
-	time_t TimeToSeconds(const std::string &time, bool is_gmt);
-	time_t TimeToSeconds(int year, int month, int day, int hour, int minute, int second, bool is_gmt);
+// 支持 yyyy-mm-dd hh:mm:ss的日期字符串格式，举例：2017-08-10 10:10:10
+time_t TimeToSeconds(const std::string &time, bool is_gmt);
+time_t TimeToSeconds(int year, int month, int day, int hour, int minute, int second, bool is_gmt);
 
-	//日期到时间 2017-08-10 的0时0分0秒来做转换
-    time_t DateToSeconds(const std::string &time, bool is_gmt);
+//日期到时间 2017-08-10 的0时0分0秒来做转换
+time_t DateToSeconds(const std::string &time, bool is_gmt);
 
-	time_t TranslateLocalTimeToGMTime(time_t local_seconds, LocationTimeType loc_type, LocalTimeInfo *info = nullptr);
-    std::shared_ptr<LocalTimeInfo> TranslateGMTimeToLocalTime(time_t gmt, LocationTimeType loc_type);
- } // namespace kungfu::yijinjing::TimeUtil
+time_t TranslateLocalTimeToGMTime(time_t local_seconds, LocationTimeType loc_type, LocalTimeInfo *info = nullptr);
+std::shared_ptr<LocalTimeInfo> TranslateGMTimeToLocalTime(time_t gmt, LocationTimeType loc_type);
+} // namespace TimeUtil
 
 } // namespace kungfu::yijinjing
 

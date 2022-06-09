@@ -11,8 +11,8 @@
 #include <kungfu/common.h>
 #include <kungfu/longfist/longfist.h>
 #include <kungfu/yijinjing/practice/apprentice.h>
-#include <kungfu/yijinjing/util/util.h>
 #include <kungfu/yijinjing/time.h>
+#include <kungfu/yijinjing/util/util.h>
 
 #define REGION_CN "CN"
 #define REGION_HK "HK"
@@ -380,7 +380,8 @@ inline longfist::enums::Direction get_direction(longfist::enums::InstrumentType 
       (offset == Offset::Close or offset == Offset::CloseToday or offset == Offset::CloseYesterday)) {
     return Direction::Short;
   }
-  throw wingchun_error(fmt::format("get_direction error: invalid direction args {} {} {}", (int)instrument_type, (int)side, (int)offset));
+  throw wingchun_error(fmt::format("get_direction error: invalid direction args {} {} {}", (int)instrument_type,
+                                   (int)side, (int)offset));
 }
 
 inline uint32_t hash_instrument(const char *exchange_id, const char *instrument_id) {
@@ -414,7 +415,6 @@ inline void order_from_input(const longfist::types::OrderInput &input, longfist:
   order.volume_condition = input.volume_condition;
   order.time_condition = input.time_condition;
 }
-
 
 /*****************************************************************************
 *  @Copyright (c) 2022, Marsjliu
@@ -452,9 +452,11 @@ static const std::unordered_map<std::string, kungfu::yijinjing::LocationTimeType
 // param1:时间戳(精确到秒)
 // param2:交易所id，exchangeid
 // params3: 返回时间格式YYYYMMDD
-inline std::string TranslateGMTimeToLocalDateByExchangeId(time_t lTime, const std::string &exchangeId, const std::string strformat = "%Y%m%d") {
+inline std::string TranslateGMTimeToLocalDateByExchangeId(time_t lTime, const std::string &exchangeId,
+                                                          const std::string strformat = "%Y%m%d") {
   kungfu::yijinjing::LocationTimeType type = kungfu::yijinjing::LocationTimeType::Beijing;
-  std::unordered_map<std::string, kungfu::yijinjing::LocationTimeType>::const_iterator it = g_mapLocationTimeExchangeId.find(exchangeId);
+  std::unordered_map<std::string, kungfu::yijinjing::LocationTimeType>::const_iterator it =
+      g_mapLocationTimeExchangeId.find(exchangeId);
 
   if (it != g_mapLocationTimeExchangeId.end()) {
     type = it->second;
