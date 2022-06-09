@@ -116,19 +116,26 @@ const devConfig = {
       'process.env.APP_TYPE': '"renderer"',
       'process.env.LANG_ENV': '"zh-CN"',
     }),
-    
-    ...(os.platform() === 'win32' ? [] : [new CopyPlugin({
-      patterns: [
-          {
-            from: path.join(
-              getCoreDir(), 'build', 'python', 'dist',
-              '*.whl',
-            ),
-            to: path.join(publicDir, 'python'),
-            context: path.resolve(getCoreDir(), 'build', 'python', 'dist'),
-          },
-      ],
-    })]),
+
+    ...(os.platform() === 'win32'
+      ? []
+      : [
+          new CopyPlugin({
+            patterns: [
+              {
+                from: path.join(
+                  getCoreDir(),
+                  'build',
+                  'python',
+                  'dist',
+                  '*.whl',
+                ),
+                to: path.join(publicDir, 'python'),
+                context: path.resolve(getCoreDir(), 'build', 'python', 'dist'),
+              },
+            ],
+          }),
+        ]),
   ],
 };
 
