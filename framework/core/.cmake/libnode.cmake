@@ -44,8 +44,10 @@ macro(use_libnode)
 
   if (WIN32)
     set(LIBNODE "libnode")
+    set(KUNGFU_LINK_LIBS "sqlite3k")
   else()
     set(LIBNODE "node")
+    set(KUNGFU_LINK_LIBS "")
   endif()
 endmacro(use_libnode)
 
@@ -54,5 +56,5 @@ macro(build_node_binding BINDING_NAME BINDING_SOURCE_FILES)
   add_library(${BINDING_NAME} SHARED ${BINDING_SOURCE_FILES})
   set_target_properties(${BINDING_NAME} PROPERTIES PREFIX "" SUFFIX ".node")
   # optional link libs passed as ${ARGN}
-  target_link_libraries(${BINDING_NAME} ${CMAKE_JS_LIB} kungfu ${ARGN})
+  target_link_libraries(${BINDING_NAME} kungfu ${KUNGFU_LINK_LIBS} ${CMAKE_JS_LIB} ${ARGN})
 endmacro(build_node_binding)
