@@ -264,10 +264,6 @@ export const openCodeView = (
   return openNewBrowserWindow(__dirname, 'code', `?processId=${processId}`);
 };
 
-export const openTradingView = () => {
-  return openNewBrowserWindow(__dirname, 'tradingTask', '');
-};
-
 export const removeLoadingMask = (): void => {
   const $loadingMask = document.getElementById('loading');
   if ($loadingMask) $loadingMask.remove();
@@ -369,13 +365,6 @@ export const handleOpenLogviewByFile =
         return Promise.resolve();
       });
   };
-
-export const handleOpenTradingView = () => {
-  const openMessage = message.loading(t('open_code_editor'));
-  return openTradingView().finally(() => {
-    openMessage();
-  });
-};
 
 export const handleOpenCodeView = (
   config: KungfuApi.KfConfig | KungfuApi.KfLocation,
