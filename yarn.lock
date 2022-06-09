@@ -1448,20 +1448,6 @@
     "@jridgewell/resolve-uri" "^3.0.3"
     "@jridgewell/sourcemap-codec" "^1.4.10"
 
-"@kungfu-trader/kfx-task-timertask@^1.0.0-alpha.0":
-  version "1.0.0-alpha.0"
-  resolved "https://npm.pkg.github.com/download/@kungfu-trader/kfx-task-timertask/1.0.0-alpha.0/beff699fdd585e18e9537fcb6c51e7671f2edf33c6e2c37d59e31b2a17e8f19d#39f3a46fdf50b239bfc05770625d6db27462c2b5"
-  integrity sha512-QwLnuIzTmNerGn+WIyOSwU2jz8FfZU8keeUGP4FIgjdOc72ucmP3XIuG6JJv3ibxYf3Zsa6vSs5a3qMkY27ILA==
-  dependencies:
-    "@kungfu-trader/kungfu-core" "^2.4.0-alpha.57"
-
-"@kungfu-trader/kfx-task-twap@^1.0.0-alpha.2":
-  version "1.0.0-alpha.2"
-  resolved "https://npm.pkg.github.com/download/@kungfu-trader/kfx-task-twap/1.0.0-alpha.2/57d3390357d2ed85028001aadba0e3e0f6f52e1f0ad2bce19322df29768d4178#b4b0a3f4e8f73c7049c47dc49e4f0acf36bf518c"
-  integrity sha512-8HQa8/wUmo8VtdJy0qwJ549S/5dTK8qRaCSuJM2Kc19RPDmsSxcruQX5jr8xQtJb/mbvkQgwunY5JO//pj0gnw==
-  dependencies:
-    "@kungfu-trader/kungfu-core" "^2.4.0-0"
-
 "@kungfu-trader/libnode@14.19.0":
   version "14.19.0"
   resolved "https://npm.pkg.github.com/download/@kungfu-trader/libnode/14.19.0/395de3d76c396801179b86b2e4a950bd77c3246414c46db6078333daca8cb92a#acca84a494fb85bfb8f4a629551475ca4ba5ef5a"
