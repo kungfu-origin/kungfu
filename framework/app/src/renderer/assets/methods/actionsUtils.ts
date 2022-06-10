@@ -636,7 +636,7 @@ export const usePreStartAndQuitApp = (): {
   >({
     archive: 'loading',
     watcher: 'loading',
-    systemLoading: 'loading',
+    extraResourcesLoading: 'loading',
   });
 
   const preQuitSystemLoadingData = reactive<
@@ -690,8 +690,8 @@ export const usePreStartAndQuitApp = (): {
                 data.status === 'online' ? 'loading' : 'done';
             }
 
-            if (data.name && data.name === 'systemLoading') {
-              preStartSystemLoadingData.systemLoading =
+            if (data.name && data.name === 'extraResourcesLoading') {
+              preStartSystemLoadingData.extraResourcesLoading =
                 data.status === 'online' ? 'done' : 'loading';
             }
           }
