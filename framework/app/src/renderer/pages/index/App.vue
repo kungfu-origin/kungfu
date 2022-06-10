@@ -142,8 +142,8 @@ onBeforeUnmount(() => {
         { key: 'archive', status: preStartSystemLoadingData.archive },
         { key: 'watcher', status: preStartSystemLoadingData.watcher },
         {
-          key: 'systemLoading',
-          status: preStartSystemLoadingData.systemLoading,
+          key: 'extraResourcesLoading',
+          status: preStartSystemLoadingData.extraResourcesLoading,
         },
       ]"
       :txt="{
@@ -152,7 +152,7 @@ onBeforeUnmount(() => {
           done: $t('environment_complete'),
           loading: $t('environment_preparation'),
         },
-        systemLoading: {
+        extraResourcesLoading: {
           done: $t('ready'),
           loading: $t('wait_ready'),
         },
