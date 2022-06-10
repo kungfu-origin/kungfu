@@ -1,6 +1,7 @@
 #include <assert.h>
 #include <iomanip>
 #include <unordered_map>
+#include <vector>
 
 #include <kungfu/wingchun/timezone.h>
 
