@@ -582,6 +582,16 @@ export const getAvailScripts = async (): Promise<string[]> => {
     .map((item) => path.resolve(item.extPath, item.script));
 };
 
+export const getExhibitConfig = async (): Promise<
+  Record<string, KungfuApi.KfExhibitConfigItem[]>
+> => {
+  const KfExtConfig: KungfuApi.KfUIExtConfigs = await getKfUIExtensionConfig();
+  return Object.keys(KfExtConfig).reduce((extensionData, key) => {
+    extensionData[key] = KfExtConfig[key]?.exhibit?.config || [];
+    return extensionData;
+  }, {});
+};
+
 export const isTdMd = (category: KfCategoryTypes) => {
   if (category === 'td' || category === 'md') {
     return true;
@@ -1781,3 +1791,17 @@ export function dealTradingTaskName(
   const timestamp = name.toKfName();
   return `${groupResolved} ${dayjs(+timestamp).format('HH:mm:ss')}`;
 }
+
+export const initStrategyExtDataByConfig = (
+  strategyStateExtConfig: Record<string, KungfuApi.KfExhibitConfigItem[]>,
+  tradingTaskKey: string,
+) => {
+  const strategyExtensionList =
+    strategyStateExtConfig.value[tradingTaskKey.toKfGroup()] || [];
+
+  return strategyExtensionList.reduce((extensionData, item) => {
+    extensionData[item.tradingTaskKey] =
+      item.type === 'int' ? 0 : item.type === 'str' ? '--' : '';
+    return extensionData;
+  }, {} as KungfuApi.StrategyStateDataResolved);
+};
