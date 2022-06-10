@@ -3,6 +3,7 @@
 
 #include <chrono>
 #include <ctime>
+#include <memory>
 
 namespace kungfu::wingchun {
 /*****************************************************************************
