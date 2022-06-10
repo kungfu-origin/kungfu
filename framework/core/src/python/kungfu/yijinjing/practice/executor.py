@@ -82,10 +82,10 @@ class MasterLoader(dict):
 class ServiceLoader(dict):
     def __init__(self, ctx):
         super().__init__()
-        self["ledger"] = lambda mode, low_latency: wc.Ledger(
+        self["cached"] = lambda mode, low_latency: yjj.cached(
             ctx.runtime_locator, kfj.MODES[ctx.mode], ctx.low_latency
         ).run()
-        self["cached"] = lambda mode, low_latency: wc.CacheD(
+        self["ledger"] = lambda mode, low_latency: wc.Ledger(
             ctx.runtime_locator, kfj.MODES[ctx.mode], ctx.low_latency
         ).run()
 

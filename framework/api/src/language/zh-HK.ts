@@ -409,9 +409,9 @@ export default {
   futureArbitrageConfig: {
     account_name: '账户',
     future_arbitrage_code: '套利代码',
-    instrument_bug_A: '买入标的 A',
+    instrument_buy_A: '买入标的 A',
     instrument_sell_A: '卖出标的 A',
-    instrument_bug_B: '买入标的 B',
+    instrument_buy_B: '买入标的 B',
     instrument_sell_B: '卖出标的 B',
     side: '互换交易意向',
     offset: '开平',
