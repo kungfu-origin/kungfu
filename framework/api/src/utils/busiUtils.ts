@@ -1283,7 +1283,9 @@ export const filterLedgerResult = <T>(
 
   if (tradingDataTypeName === 'Position' || tradingDataTypeName === 'Asset') {
     const locationUID = watcher.getLocationUID(kfLocation);
-    dataTableResolved = dataTableResolved.filter('ledger_category', ledgerCategory).filter('holder_uid', locationUID)
+    dataTableResolved = dataTableResolved
+      .filter('ledger_category', ledgerCategory)
+      .filter('holder_uid', locationUID);
   } else if (ledgerCategory === 0) {
     dataTableResolved = dataTableResolved
       .filter('source_id', group)
@@ -1397,7 +1399,13 @@ export const dealTradingData = (
 
   return filterLedgerResult<
     KungfuApi.TradingDataNameToType[KungfuApi.TradingDataTypeName]
-  >(watcher, tradingData[tradingDataTypeName], tradingDataTypeName, kfLocation, sortKey);
+  >(
+    watcher,
+    tradingData[tradingDataTypeName],
+    tradingDataTypeName,
+    kfLocation,
+    sortKey,
+  );
 };
 
 export const isTdStrategyCategory = (category: string): boolean => {

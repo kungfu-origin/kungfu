@@ -217,9 +217,9 @@ class KungfuCoreConan(ConanFile):
             build_version = build_info["version"]
             self.output.success(f"build version {build_version}")
     
-    def __enable_modules(self, runtime, toolset):
+    def __enable_modules(self, runtime):
         modules = {
-            "libkungfu": True,
+            "libkungfu": (tools.detected_os() != "Windows") or (runtime == "node"),
             "kungfu_node": (tools.detected_os() != "Windows") or (runtime == "electron"),
             "pykungfu": runtime == "node"
         }
@@ -238,7 +238,7 @@ class KungfuCoreConan(ConanFile):
             self.output.warn(f"disabled build for runtime {runtime}")
             return
         toolset = self.__get_toolset()
-        self.__enable_modules(runtime, toolset)
+        self.__enable_modules(runtime)
         self.__run_cmake_js(build_type, "configure", runtime, toolset)
         self.__run_cmake_js(build_type, "build",  runtime, toolset)
 

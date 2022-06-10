@@ -112,12 +112,12 @@ void Book::update(int64_t update_time) {
         position.instrument_type == InstrumentType::TechStock or position.instrument_type == InstrumentType::Index or
         position.instrument_type == InstrumentType::Repo;
     if (!is_stock)
-        is_stock_acct = false;
+      is_stock_acct = false;
     auto is_future = position.instrument_type == InstrumentType::Future;
     auto position_market_value =
         position.volume * (position.last_price > 0 ? position.last_price : position.avg_open_price);
     margin += position.margin;
-    
+
     if (!(is_stock and position.direction == Direction::Short)) {
       asset.market_value += position_market_value;
       asset.unrealized_pnl += position.unrealized_pnl;
@@ -144,7 +144,6 @@ void Book::update(int64_t update_time) {
     asset.margin = margin;
   }
   asset_margin.short_market_value = short_market_value;
-  
 }
 
 void Book::replace(const OrderInput &input) { order_inputs.insert_or_assign(input.order_id, input); }
