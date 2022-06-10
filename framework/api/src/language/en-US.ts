@@ -551,7 +551,7 @@ export default {
   kungfu: 'Kungfu',
 
   system_prompt: 'System Prompt',
-  archive_done: 'Kungfu Archive Done',
+  archive_done: 'Kungfu archive done',
   archive_loading: 'Kungfu archive...',
   environment_done: 'Kungfu environment ready to complete ✓',
   environment_loading: 'Kungfu environment in preparation...',
