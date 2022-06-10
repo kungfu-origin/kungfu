@@ -251,11 +251,17 @@ function primaryKeyValidator(_rule: RuleObject, value: string): Promise<void> {
     );
   }
 
-  if (SpecialWordsReg.test(value || '') && !props.passPrimaryKeySpecialWordsVerify) {
+  if (
+    SpecialWordsReg.test(value || '') &&
+    !props.passPrimaryKeySpecialWordsVerify
+  ) {
     return Promise.reject(new Error(t('validate.no_special_characters')));
   }
 
-  if ((value || '').toString().includes('_') && !props.passPrimaryKeySpecialWordsVerify) {
+  if (
+    (value || '').toString().includes('_') &&
+    !props.passPrimaryKeySpecialWordsVerify
+  ) {
     return Promise.reject(new Error(t('validate.no_underline')));
   }
 
