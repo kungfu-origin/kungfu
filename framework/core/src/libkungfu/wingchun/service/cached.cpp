@@ -167,7 +167,7 @@ void CacheD::channel_trigger_make_cache_shift(const Channel &channel) {
 void CacheD::register_triggger_clear_cache_shift(const Register &register_data) {
   uint32_t location_uid = register_data.location_uid;
   if (app_cache_shift_.find(location_uid) == app_cache_shift_.end()) {
-    SPDLOG_ERROR("no location_uid {} in app_cache_shift_", get_location_uname(location_uid));
+    SPDLOG_INFO("no location_uid {} in app_cache_shift_", get_location_uname(location_uid));
     return;
   }
 
