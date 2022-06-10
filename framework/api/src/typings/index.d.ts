@@ -183,7 +183,7 @@ declare namespace KungfuApi {
 
   interface KfExhibitConfig {
     type: KfExtConfigTypes;
-    config: Record<string, KfConfigItem>;
+    config: Record<string, KfExhibitConfigItem[]>;
   }
 
   interface KfExtConfig {
@@ -749,20 +749,6 @@ declare namespace KungfuApi {
 
   export interface StrategyStateData extends StrategyStateDataOrigin {
     state: StrategyStateStatusTypes;
-  }
-
-  export interface StrategyStateDataResolved {
-    desired_volume: number;
-    left_rate: number;
-    total_left: number;
-    total_volume: number;
-    traded_volume: number;
-    update_time?: number;
-    status: string;
-  }
-  export interface StrategyStateItem extends StrategyStateDataResolved {
-    state?: StrategyStateStatusTypes;
-    process_id: string;
   }
 
   export interface Watcher {

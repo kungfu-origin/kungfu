@@ -1791,17 +1791,3 @@ export function dealTradingTaskName(
   const timestamp = name.toKfName();
   return `${groupResolved} ${dayjs(+timestamp).format('HH:mm:ss')}`;
 }
-
-export const initStrategyExtDataByConfig = (
-  strategyStateExtConfig: Record<string, KungfuApi.KfExhibitConfigItem[]>,
-  tradingTaskKey: string,
-) => {
-  const strategyExtensionList =
-    strategyStateExtConfig.value[tradingTaskKey.toKfGroup()] || [];
-
-  return strategyExtensionList.reduce((extensionData, item) => {
-    extensionData[item.tradingTaskKey] =
-      item.type === 'int' ? 0 : item.type === 'str' ? '--' : '';
-    return extensionData;
-  }, {} as KungfuApi.StrategyStateDataResolved);
-};
