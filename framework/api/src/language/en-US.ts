@@ -552,13 +552,13 @@ export default {
 
   system_prompt: 'System Prompt',
   archive_done: 'Kungfu archive done',
-  archive_loading: 'Kungfu archive...',
-  environment_done: 'Kungfu environment ready to complete ✓',
-  environment_loading: 'Kungfu environment in preparation...',
+  archive_loading: 'Kungfu archive loading...',
+  environment_done: 'Kungfu environment done ✓',
+  environment_loading: 'Kungfu environment loading...',
   extra_resources_done: 'Extra resources done ✓',
   extra_resouces_loading: 'Extra resources loading...',
-  saving_data_done: 'Data saving completed ✓',
-  saving_data_loading: 'Save Data...',
+  saving_data_done: 'Saving data done ✓',
+  saving_data_loading: 'Saving data loading ...',
   end_all_transactions: 'End all transactions ✓',
   closing: 'End the transaction process, Please do not close...',
 
