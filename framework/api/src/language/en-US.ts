@@ -412,9 +412,9 @@ export default {
   futureArbitrageConfig: {
     account_name: 'account_name',
     future_arbitrage_code: 'future_arbitrage_code',
-    instrument_bug_A: 'instrument_bug_A',
+    instrument_buy_A: 'instrument_buy_A',
     instrument_sell_A: 'instrument_sell_A',
-    instrument_bug_B: 'instrument_bug_B',
+    instrument_buy_B: 'instrument_buy_B',
     instrument_sell_B: 'instrument_sell_B',
     side: 'side',
     offset: 'offset',
