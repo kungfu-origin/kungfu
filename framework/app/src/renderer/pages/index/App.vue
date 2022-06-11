@@ -147,14 +147,14 @@ onBeforeUnmount(() => {
         },
       ]"
       :txt="{
-        archive: { done: $t('archive_completion'), loading: $t('archive') },
+        archive: { done: $t('archive_done'), loading: $t('archive_loading') },
         watcher: {
-          done: $t('environment_complete'),
-          loading: $t('environment_preparation'),
+          done: $t('environment_done'),
+          loading: $t('environment_loading'),
         },
         extraResourcesLoading: {
-          done: $t('ready'),
-          loading: $t('wait_ready'),
+          done: $t('extra_resources_done'),
+          loading: $t('extra_resouces_loading'),
         },
       }"
     ></KfSystemPrepareModal>
@@ -172,7 +172,10 @@ onBeforeUnmount(() => {
         },
       ]"
       :txt="{
-        record: { done: $t('saving_completed'), loading: $t('save_data') },
+        record: {
+          done: $t('saving_data_done'),
+          loading: $t('saving_data_loading'),
+        },
         quit: {
           done: $t('end_all_transactions'),
           loading: $t('closing'),

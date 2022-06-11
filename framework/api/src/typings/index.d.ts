@@ -92,6 +92,7 @@ declare namespace KungfuApi {
     | 'table' // any[]
     | 'timePicker' //string
     | 'select'
+    | 'radio'
     | 'bool'
     | 'int'
     | 'float'

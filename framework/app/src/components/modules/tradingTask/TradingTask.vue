@@ -72,7 +72,7 @@ const taskList = computed(() => {
       );
     })
     .map((processId) => processStatusDetailData.value[processId])
-    .sort((a, b) => (b?.name || '').localeCompare(a?.name || ''));
+    .sort((a, b) => (b.created_at || 0) - (a.created_at || 0));
 });
 const { searchKeyword, tableData } =
   useTableSearchKeyword<Pm2ProcessStatusDetail>(taskList, ['name', 'args']);
