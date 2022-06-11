@@ -567,6 +567,16 @@ defineExpose({
           {{ getKfTradeValueName(numberEnumRadioType[item.type], key) }}
         </a-radio>
       </a-radio-group>
+      <a-radio-group
+        v-else-if="item.type === 'radio'"
+        v-model:value="formState[item.key]"
+        :name="item.key"
+        :disabled="changeType === 'update' && item.primary"
+      >
+        <a-radio v-for="option in item.options" :value="option.value">
+          {{ option.label }}
+        </a-radio>
+      </a-radio-group>
       <a-select
         v-else-if="numberEnumSelectType[item.type]"
         v-model:value="formState[item.key]"
