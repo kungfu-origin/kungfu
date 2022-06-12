@@ -750,6 +750,7 @@ declare namespace KungfuApi {
     createTask(): void;
     sync(): void;
     isReadyToInteract(kfLocation: KfLocation | KfConfig): boolean;
+    requestStop(kfLocation: KfLocation | KfConfig): void;
     getLocationUID(kfLocation: KfLocation | KfConfig): string;
     getLocation(hashedKey: string | number): KfLocation;
     hasLocation(hashedKey: string | number): KfLocation;
