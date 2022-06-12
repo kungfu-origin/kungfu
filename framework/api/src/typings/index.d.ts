@@ -747,7 +747,7 @@ declare namespace KungfuApi {
     isLive(): boolean;
     isStarted(): boolean;
     isUsable(): boolean;
-    createTask(): void;
+    start(): void;
     sync(): void;
     isReadyToInteract(kfLocation: KfLocation | KfConfig): boolean;
     requestStop(kfLocation: KfLocation | KfConfig): void;
