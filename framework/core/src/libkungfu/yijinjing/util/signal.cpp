@@ -11,7 +11,8 @@
 using namespace kungfu::yijinjing::util;
 
 namespace kungfu::yijinjing::os {
-static yijinjing::practice::hero *hero_instance;
+static yijinjing::practice::hero *hero_instance = {};
+static bool signals_handler_enabled = true;
 
 void stop_hero() {
   if (hero_instance != nullptr && hero_instance->is_live()) {
@@ -120,12 +121,19 @@ void kf_os_signal_handler(int signum) {
   }
 }
 
+void disable_os_signals_handler() { signals_handler_enabled = false; }
+
 void handle_os_signals(void *hero) {
   if (hero_instance != nullptr) {
     throw yijinjing_error("kungfu can only have one hero instance per process");
   }
 
   hero_instance = static_cast<yijinjing::practice::hero *>(hero);
+
+  if (not signals_handler_enabled) {
+    SPDLOG_WARN("OS signals hander disabled");
+    return;
+  }
 
   for (int s = 1; s < NSIG; s++) {
     signal(s, kf_os_signal_handler);

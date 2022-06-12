@@ -8,7 +8,6 @@
 #include "history.h"
 #include "kungfu/yijinjing/cache/ringqueue.h"
 #include <sstream>
-#include <uv.h>
 
 using namespace kungfu::rx;
 using namespace kungfu::longfist;
@@ -20,9 +19,6 @@ using namespace kungfu::yijinjing::cache;
 using namespace kungfu::yijinjing::data;
 
 namespace kungfu::node {
-uv_loop_t *loop;
-uv_work_t greq;
-uv_idle_t timer_req;
 inline std::string format(uint32_t uid) { return fmt::format("{:08x}", uid); }
 
 Napi::FunctionReference Watcher::constructor = {};
@@ -38,7 +34,9 @@ inline location_ptr GetWatcherLocation(const Napi::CallbackInfo &info) {
 
   auto runtime_dir = info[0].As<Napi::String>().Utf8Value();
   auto name = info[1].As<Napi::String>().Utf8Value();
-  return std::make_shared<location>(mode::LIVE, category::SYSTEM, "node", name, GetRuntimeLocator(runtime_dir));
+  auto result = std::make_shared<location>(mode::LIVE, category::SYSTEM, "node", name, GetRuntimeLocator(runtime_dir));
+  log::copy_log_settings(result, result->name);
+  return result;
 }
 
 inline bool GetBypassQuotes(const Napi::CallbackInfo &info) {
@@ -56,18 +54,22 @@ inline bool GetBypassRestore(const Napi::CallbackInfo &info) {
 }
 
 Watcher::Watcher(const Napi::CallbackInfo &info)
-    : ObjectWrap(info), apprentice(GetWatcherLocation(info), true), bypass_quotes_(GetBypassQuotes(info)),
-      broker_client_(*this), bookkeeper_(*this, broker_client_),
-      history_ref_(Napi::ObjectReference::New(History::NewInstance({info[0]}).ToObject(), 1)),
-      config_ref_(Napi::ObjectReference::New(ConfigStore::NewInstance({info[0]}).ToObject(), 1)),
-      commission_ref_(Napi::ObjectReference::New(CommissionStore::NewInstance({info[0]}).ToObject(), 1)),
-      state_ref_(Napi::ObjectReference::New(Napi::Object::New(info.Env()), 1)),
-      ledger_ref_(Napi::ObjectReference::New(Napi::Object::New(info.Env()), 1)),
-      app_states_ref_(Napi::ObjectReference::New(Napi::Object::New(info.Env()), 1)), update_state(state_ref_),
-      strategy_states_ref_(Napi::ObjectReference::New(Napi::Object::New(info.Env()), 1)), update_ledger(ledger_ref_),
-      publish(*this, state_ref_), reset_cache(*this, ledger_ref_), start_(true) {
-  log::copy_log_settings(get_home(), get_home()->name);
-
+    : ObjectWrap(info),                                                                                   //
+      apprentice(GetWatcherLocation(info), true),                                                         //
+      bypass_quotes_(GetBypassQuotes(info)),                                                              //
+      broker_client_(*this),                                                                              //
+      bookkeeper_(*this, broker_client_),                                                                 //
+      state_ref_(Napi::ObjectReference::New(Napi::Object::New(info.Env()), 1)),                           //
+      ledger_ref_(Napi::ObjectReference::New(Napi::Object::New(info.Env()), 1)),                          //
+      app_states_ref_(Napi::ObjectReference::New(Napi::Object::New(info.Env()), 1)),                      //
+      history_ref_(Napi::ObjectReference::New(History::NewInstance({info[0]}).ToObject(), 1)),            //
+      config_ref_(Napi::ObjectReference::New(ConfigStore::NewInstance({info[0]}).ToObject(), 1)),         //
+      commission_ref_(Napi::ObjectReference::New(CommissionStore::NewInstance({info[0]}).ToObject(), 1)), //
+      strategy_states_ref_(Napi::ObjectReference::New(Napi::Object::New(info.Env()), 1)),                 //
+      update_state(state_ref_),                                                                           //
+      update_ledger(ledger_ref_),                                                                         //
+      publish(*this, state_ref_),                                                                         //
+      reset_cache(*this, ledger_ref_) {
   serialize::InitStateMap(info, state_ref_, "state");
   serialize::InitStateMap(info, ledger_ref_, "ledger");
 
@@ -90,24 +92,28 @@ Watcher::Watcher(const Napi::CallbackInfo &info)
     }
     add_location(now(), saved_location);
     RestoreState(saved_location, today, INT64_MAX, sync_schema);
-    SPDLOG_WARN("restored data for {}", saved_location->uname);
   }
   RestoreState(ledger_home_location_, today, INT64_MAX, sync_schema);
 
   shift(ledger_home_location_) >> state_bank_; // Load positions to restore bookkeeper
-  SPDLOG_INFO("watcher {} with uid {} and live uid {} initialized", get_io_device()->get_home()->uname, get_home_uid(),
-              get_live_home_uid());
+  
+  uv_work_.data = (void *)this;
 }
 
 Watcher::~Watcher() {
-  start_ = false;
+  int worker_timer = 0;
+  while (is_started() and is_live() and worker_timer < 10) {
+    uv_work_.data = nullptr;
+    worker_timer++;
+    std::this_thread::sleep_for(std::chrono::milliseconds(1));
+  }
   strategy_states_ref_.Unref();
-  app_states_ref_.Unref();
-  ledger_ref_.Unref();
-  state_ref_.Unref();
   commission_ref_.Unref();
   config_ref_.Unref();
   history_ref_.Unref();
+  app_states_ref_.Unref();
+  ledger_ref_.Unref();
+  state_ref_.Unref();
 }
 
 void Watcher::NoSet(const Napi::CallbackInfo &info, const Napi::Value &value) {
@@ -275,7 +281,7 @@ void Watcher::Init(Napi::Env env, Napi::Object exports) {
                       InstanceAccessor("appStates", &Watcher::GetAppStates, &Watcher::NoSet),           //
                       InstanceAccessor("strategyStates", &Watcher::GetStrategyStates, &Watcher::NoSet), //
                       InstanceAccessor("tradingDay", &Watcher::GetTradingDay, &Watcher::NoSet),         //
-                      InstanceMethod("createTask", &Watcher::CreateTask),
+                      InstanceMethod("start", &Watcher::Start),
                       InstanceMethod("sync", &Watcher::Sync),
                   });
 
@@ -293,7 +299,7 @@ void Watcher::on_start() {
   broker_client_.on_start(events_);
   bookkeeper_.on_start(events_);
   bookkeeper_.guard_positions();
-  bookkeeper_.add_book_listener(std::shared_ptr<Watcher>(this));
+  bookkeeper_.add_book_listener(shared_from_this());
 
   events_ | bypass(this, bypass_quotes_) | $$(Feed(event));
   events_ | is(OrderInput::tag) | $$(UpdateBook(event, event->data<OrderInput>()));
@@ -338,28 +344,23 @@ void Watcher::RestoreState(const location_ptr &state_location, int64_t from, int
   serialize::JsRestoreState(ledger_ref_, state_location)(from, to, sync_schema);
 }
 
-Napi::Value Watcher::CreateTask(const Napi::CallbackInfo &info) {
-  SPDLOG_INFO("Watcher::Watcher CreateTask tid {} this in main {}", std::this_thread::get_id(), uint64_t(this));
-  greq.data = (void *)this;
-  loop = uv_default_loop();
-  uv_queue_work(
-      loop, &greq,
-      [](uv_work_t *req) {
-        Watcher *watcher = (Watcher *)(req->data);
-        while (watcher->IsStart()) {
-          if (!watcher->is_live() && !watcher->is_started() && watcher->is_usable()) {
-            watcher->setup();
-          }
-          if (watcher->is_live()) {
-            watcher->step();
-          }
-          if (!watcher->IsStart())
-            break;
-          std::this_thread::sleep_for(std::chrono::milliseconds(2000));
-        }
-      },
-      [](uv_work_t *req, int status) { SPDLOG_INFO("uv_close!"); });
-  tp_ = std::chrono::system_clock::now();
+Napi::Value Watcher::Start(const Napi::CallbackInfo &info) {
+  auto worker = [](uv_work_t *req) {
+    SPDLOG_INFO("Watcher uv loop started");
+    auto watcher = (Watcher *)(req->data);
+    while (req->data) {
+      if (not watcher->is_live() and not watcher->is_started() and watcher->is_usable()) {
+        watcher->setup();
+      }
+      if (watcher->is_live()) {
+        watcher->step();
+      }
+    }
+    watcher->signal_stop();
+    SPDLOG_INFO("Watcher uv loop stopped");
+  };
+  auto after = [](uv_work_t *req, int status) { SPDLOG_INFO("Watcher uv loop completed"); };
+  uv_queue_work(uv_default_loop(), &uv_work_, worker, after);
   return {};
 }
 
