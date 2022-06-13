@@ -14,6 +14,7 @@ import {
   getProcessIdByKfLocation,
   getIfProcessRunning,
   getIfProcessDeleted,
+  delayMilliSeconds,
 } from '../utils/busiUtils';
 import {
   buildProcessLogPath,
@@ -365,7 +366,9 @@ export const graceStopProcess = (
       return Promise.reject(new Error(t('未就绪', { processId })));
     }
 
-    return stopProcess(processId);
+     return Promise.resolve(watcher.requestStop(kfLocation))
+      .then(() => delayMilliSeconds(1000))
+      .then(() => stopProcess(processId));
   }
 
   return Promise.resolve();
@@ -379,12 +382,17 @@ export const graceDeleteProcess = (
   processStatusData: Pm2ProcessStatusData,
 ): Promise<void> => {
   const processId = getProcessIdByKfLocation(kfLocation);
+
+  if (!watcher) return Promise.reject(new Error('Watcher is NULL'));
+
   if (getIfProcessRunning(processStatusData, processId)) {
     if (watcher && !watcher.isReadyToInteract(kfLocation)) {
       return Promise.reject(new Error(t('未就绪', { processId })));
     }
 
-    return deleteProcess(processId);
+    return Promise.resolve(watcher.requestStop(kfLocation))
+      .then(() => delayMilliSeconds(1000))
+      .then(() => deleteProcess(processId));
   } else if (!getIfProcessDeleted(processStatusData, processId)) {
     return deleteProcess(processId);
   } else {

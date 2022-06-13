@@ -11,7 +11,7 @@
 #define LOG_LEVEL_ENV "KF_LOG_LEVEL"
 #define DEFAULT_LOG_LEVEL_NAME "info"
 #define TS_PATTERN "[%m/%d %H:%M:%S.%N] "
-#define LOG_PATTERN "[%^%=8l%$] [%6P/%-6t] [%@#%!] %v"
+#define LOG_PATTERN "[%^%=8l%$] [%6P/%-6t] [%s#%!] %v"
 
 namespace kungfu::yijinjing::log {
 spdlog::level::level_enum get_env_log_level(const data::locator_ptr &locator);

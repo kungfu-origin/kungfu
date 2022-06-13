@@ -59,6 +59,15 @@ set(KUNGFU_BUILD_SQLITE_DIR ${KUNGFU_BUILD_DIR}/sqlite/$<0:>)
 link_directories(${KUNGFU_BUILD_LIBRARY_DIR})
 link_directories(${KUNGFU_BUILD_SQLITE_DIR})
 
+
+##########################################################################
+
+if(DEFINED ENV{LIBKUNGFU_NAME})
+  set(LIBKUNGFU_NAME $ENV{LIBKUNGFU_NAME})
+else()
+  set(LIBKUNGFU_NAME kungfu)
+endif()
+
 ##########################################################################
 
 if (NOT DEFINED ENV{KUNGFU_BUILD_SKIP_LIBKUNGFU} OR NOT $ENV{KUNGFU_BUILD_SKIP_LIBKUNGFU})
