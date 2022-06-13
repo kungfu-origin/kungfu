@@ -6,6 +6,7 @@
 #define KUNGFU_NODE_WATCHER_H
 
 #include <napi.h>
+#include <uv.h>
 
 #include "common.h"
 #include "io.h"
@@ -20,7 +21,8 @@ namespace kungfu::node {
 constexpr uint64_t ID_TRANC = 0x00000000FFFFFFFF;
 constexpr uint32_t PAGE_ID_MASK = 0x80000000;
 
-class Watcher : public Napi::ObjectWrap<Watcher>,
+class Watcher : public std::enable_shared_from_this<Watcher>,
+                public Napi::ObjectWrap<Watcher>,
                 public yijinjing::practice::apprentice,
                 public wingchun::book::BookListener {
 public:
@@ -79,15 +81,11 @@ public:
 
   Napi::Value RequestMarketData(const Napi::CallbackInfo &info);
 
-  Napi::Value CreateTask(const Napi::CallbackInfo &info);
+  Napi::Value Start(const Napi::CallbackInfo &info);
 
   Napi::Value Sync(const Napi::CallbackInfo &info);
 
   static void Init(Napi::Env env, Napi::Object exports);
-
-  bool IsStart() { return start_; }
-
-  std::chrono::system_clock::time_point tp_;
 
 protected:
   void on_react() override;
@@ -97,14 +95,15 @@ protected:
 private:
   static Napi::FunctionReference constructor;
   const bool bypass_quotes_;
+  uv_work_t uv_work_ = {};
   wingchun::broker::SilentAutoClient broker_client_;
   wingchun::book::Bookkeeper bookkeeper_;
-  Napi::ObjectReference history_ref_;
-  Napi::ObjectReference config_ref_;
-  Napi::ObjectReference commission_ref_;
   Napi::ObjectReference state_ref_;
   Napi::ObjectReference ledger_ref_;
   Napi::ObjectReference app_states_ref_;
+  Napi::ObjectReference history_ref_;
+  Napi::ObjectReference config_ref_;
+  Napi::ObjectReference commission_ref_;
   Napi::ObjectReference strategy_states_ref_;
   serialize::JsUpdateState update_state;
   serialize::JsUpdateState update_ledger;
@@ -113,7 +112,6 @@ private:
   yijinjing::cache::bank data_bank_;
   yijinjing::cache::trading_bank trading_bank_;
   std::vector<kungfu::state<longfist::types::CacheReset>> reset_cache_states_;
-  bool start_;
   std::unordered_map<uint32_t, longfist::types::InstrumentKey> subscribed_instruments_ = {};
   std::unordered_map<uint32_t, int> location_uid_states_map_ = {};
   std::unordered_map<uint32_t, longfist::types::StrategyStateUpdate> location_uid_strategy_states_map_ = {};

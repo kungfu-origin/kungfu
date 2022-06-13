@@ -1,6 +1,5 @@
 import datetime
 import kungfu.yijinjing.time as kft
-from chinese_calendar import is_workday
 
 
 class Calendar:
@@ -29,8 +28,4 @@ class Calendar:
         return int((day - kft.EPOCH).total_seconds() * kft.NANO_PER_SECOND)
 
     def is_trading_day(self, dt):
-        try:
-            return dt.isoweekday() <= 5 and is_workday(dt)
-        except:
-            self.ctx.logger.error("failed to test is workday")
-            return dt.isoweekday() <= 5
+        return dt.isoweekday() <= 5

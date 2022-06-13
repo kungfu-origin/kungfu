@@ -943,18 +943,22 @@ export const switchKfLocation = (
 ): Promise<void | Proc> => {
   const processId = getProcessIdByKfLocation(kfLocation);
 
+  if (!watcher) return Promise.reject(new Error('Watcher is NULL'));
+
   if (!targetStatus) {
     if (
       kfLocation.category === 'td' ||
       kfLocation.category === 'md' ||
       kfLocation.category === 'strategy'
     ) {
-      if (watcher && !watcher.isReadyToInteract(kfLocation)) {
+      if (!watcher.isReadyToInteract(kfLocation)) {
         return Promise.reject(new Error(t('未就绪', { processId })));
       }
     }
 
-    return deleteProcess(processId);
+    return Promise.resolve(watcher.requestStop(kfLocation))
+      .then(() => delayMilliSeconds(1000))
+      .then(() => deleteProcess(processId));
   }
 
   switch (kfLocation.category) {
