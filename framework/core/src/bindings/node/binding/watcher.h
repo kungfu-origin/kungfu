@@ -95,7 +95,6 @@ protected:
 private:
   static Napi::FunctionReference constructor;
   const bool bypass_quotes_;
-  std::mutex uv_mtx_ = {};
   uv_work_t uv_work_ = {};
   wingchun::broker::SilentAutoClient broker_client_;
   wingchun::book::Bookkeeper bookkeeper_;

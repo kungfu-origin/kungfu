@@ -17,6 +17,8 @@
     ]
   },
   "scripts": {
+    "app": "yarn workspace @kungfu-trader/artifact-kungfu app",
+    "cli": "yarn workspace @kungfu-trader/artifact-kungfu cli",
     "dev": "yarn workspace @kungfu-trader/artifact-kungfu dev",
     "foreach": "wsrun --serial --exclude-missing --fast-exit",
     "format": "wsrun --serial --exclude-missing format",
