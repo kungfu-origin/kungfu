@@ -2,7 +2,7 @@
 # Then let poetry to manage the other dependencies.
 
 [packages]
-poetry = "==1.1.12"
+poetry = "==1.1.13"
 pip = "==21.3.1"
 setuptools = "==59.8.0"
 wheel = "==0.37.1"

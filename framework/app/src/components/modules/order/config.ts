@@ -62,7 +62,7 @@ export const getColumns = (
   {
     type: 'string',
     name: t('orderConfig.order_status'),
-    dataIndex: 'status',
+    dataIndex: 'status_uname',
     width: 120,
   },
   {

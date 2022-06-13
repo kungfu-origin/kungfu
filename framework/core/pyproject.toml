@@ -10,6 +10,12 @@ packages = [
     { include = "kungfu", from = "src/python" },
 ]
 
+[[tool.poetry.source]]
+name = "aliyun"
+url = "https://mirrors.aliyun.com/pypi/simple"
+default = false
+secondary = true
+
 [tool.poetry.dependencies]
 python = "~3.9"
 
@@ -31,9 +37,6 @@ numpy = "^1.22.0"
 pandas = "^1.4.0"
 scipy = ">=1.7 <1.8"
 statsmodels = "^0.12.2"
-
-#### Legacy ###############################################
-chinesecalendar = "^1.6.0"
 
 [tool.poetry.dev-dependencies]
 conan = "^1.48.1"

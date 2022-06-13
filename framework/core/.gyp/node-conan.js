@@ -65,15 +65,15 @@ function conanBuildOnGitHub() {
   // Build pykungfu with Clang
   process.env.CONAN_VS_TOOLSET = 'ClangCL';
   process.env.KUNGFU_BUILD_SKIP_RUNTIME_ELECTRON = true;
-  delete process.env.KUNGFU_BUILD_SKIP_RUNTIME_NODE;
   resetBuild();
   conanInstall();
   conanBuild();
 
   // Build kungfu_node with MSVC
-  process.env.CONAN_VS_TOOLSET = 'auto';
-  process.env.KUNGFU_BUILD_SKIP_RUNTIME_NODE = true;
   delete process.env.KUNGFU_BUILD_SKIP_RUNTIME_ELECTRON;
+  process.env.CONAN_VS_TOOLSET = 'auto';
+  process.env.LIBKUNGFU_NAME = 'kungfu-node';
+  process.env.KUNGFU_BUILD_SKIP_RUNTIME_NODE = true;
   resetBuild();
   conanInstall();
   conanBuild();

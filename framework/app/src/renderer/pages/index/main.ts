@@ -146,7 +146,7 @@ if (process.env.RELOAD_AFTER_CRASHED === 'false') {
         .then(() => {
           globalBus.next({
             tag: 'processStatus',
-            name: 'systemLoading',
+            name: 'extraResourcesLoading',
             status: 'online',
           });
         })
@@ -162,7 +162,7 @@ if (process.env.RELOAD_AFTER_CRASHED === 'false') {
 
   globalBus.next({
     tag: 'processStatus',
-    name: 'systemLoading',
+    name: 'extraResourcesLoading',
     status: 'online',
   });
 

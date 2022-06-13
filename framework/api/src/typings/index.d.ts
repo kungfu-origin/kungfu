@@ -92,6 +92,7 @@ declare namespace KungfuApi {
     | 'table' // any[]
     | 'timePicker' //string
     | 'select'
+    | 'radio'
     | 'bool'
     | 'int'
     | 'float'
@@ -464,6 +465,8 @@ declare namespace KungfuApi {
     dest_resolved_data: KungfuApi.KfTradeValueCommonData;
     source_uname: string;
     dest_uname: string;
+    status_uname: string;
+    status_color: AntInKungfuColorTypes;
     update_time_resolved: string;
     latency_system: string;
     latency_network: string;
@@ -735,20 +738,6 @@ declare namespace KungfuApi {
     state: StrategyStateStatusTypes;
   }
 
-  export interface StrategyStateDataResolved {
-    desired_volume: number;
-    left_rate: number;
-    total_left: number;
-    total_volume: number;
-    traded_volume: number;
-    update_time: number;
-    value: string;
-  }
-
-  export interface StrategyStateListItem extends StrategyStateDataResolved {
-    process_id: string;
-  }
-
   export interface Watcher {
     appStates: Record<string, BrokerStateStatusEnum>;
     strategyStates: Record<string, StrategyStateDataOrigin>;
@@ -758,9 +747,10 @@ declare namespace KungfuApi {
     isLive(): boolean;
     isStarted(): boolean;
     isUsable(): boolean;
-    createTask(): void;
+    start(): void;
     sync(): void;
     isReadyToInteract(kfLocation: KfLocation | KfConfig): boolean;
+    requestStop(kfLocation: KfLocation | KfConfig): void;
     getLocationUID(kfLocation: KfLocation | KfConfig): string;
     getLocation(hashedKey: string | number): KfLocation;
     hasLocation(hashedKey: string | number): KfLocation;

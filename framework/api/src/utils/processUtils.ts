@@ -13,6 +13,8 @@ import {
   flattenExtensionModuleDirs,
   getProcessIdByKfLocation,
   getIfProcessRunning,
+  getIfProcessDeleted,
+  delayMilliSeconds,
 } from '../utils/busiUtils';
 import {
   buildProcessLogPath,
@@ -359,12 +361,19 @@ export const graceStopProcess = (
   processStatusData: Pm2ProcessStatusData,
 ): Promise<void> => {
   const processId = getProcessIdByKfLocation(kfLocation);
+
+  if (!watcher) {
+    return Promise.reject(new Error('Watcher 错误'));
+  }
+
   if (getIfProcessRunning(processStatusData, processId)) {
-    if (watcher && !watcher.isReadyToInteract(kfLocation)) {
+    if (!watcher.isReadyToInteract(kfLocation)) {
       return Promise.reject(new Error(t('未就绪', { processId })));
     }
 
-    return stopProcess(processId);
+    return Promise.resolve(watcher.requestStop(kfLocation))
+      .then(() => delayMilliSeconds(1000))
+      .then(() => stopProcess(processId));
   }
 
   return Promise.resolve();
@@ -378,11 +387,20 @@ export const graceDeleteProcess = (
   processStatusData: Pm2ProcessStatusData,
 ): Promise<void> => {
   const processId = getProcessIdByKfLocation(kfLocation);
+
+  if (!watcher) {
+    return Promise.reject(new Error('Watcher 错误'));
+  }
+
   if (getIfProcessRunning(processStatusData, processId)) {
     if (watcher && !watcher.isReadyToInteract(kfLocation)) {
       return Promise.reject(new Error(t('未就绪', { processId })));
     }
 
+    return Promise.resolve(watcher.requestStop(kfLocation))
+      .then(() => delayMilliSeconds(1000))
+      .then(() => deleteProcess(processId));
+  } else if (!getIfProcessDeleted(processStatusData, processId)) {
     return deleteProcess(processId);
   } else {
     return Promise.resolve();
@@ -727,8 +745,8 @@ export const startStrategyByLocalPython = async (
   return startProcess({
     name: `strategy_${name}`,
     args,
-    cwd: pythonFolder,
-    script: pythonFile,
+    cwd: `'${pythonFolder}'`,
+    script: `'${pythonFile}'`,
   }).catch((err) => {
     kfLogger.error(err.message);
   });
@@ -744,7 +762,7 @@ export const startStrategy = (
   const ifLocalPython = globalSetting?.strategy?.python || false;
   const pythonPath = globalSetting?.strategy?.pythonPath || '';
 
-  if (ifLocalPython) {
+  if (ifLocalPython && strategyPath.endsWith('.py')) {
     return startStrategyByLocalPython(strategyId, strategyPath, pythonPath);
   } else {
     const args = buildArgs(

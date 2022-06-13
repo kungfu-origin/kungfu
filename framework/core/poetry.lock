@@ -94,14 +94,6 @@ python-versions = ">=3.5.0"
 unicode_backport = ["unicodedata2"]
 
 [[package]]
-name = "chinesecalendar"
-version = "1.7.2"
-description = "check if some day is holiday in China"
-category = "main"
-optional = false
-python-versions = "*"
-
-[[package]]
 name = "click"
 version = "8.1.3"
 description = "Composable command line interface toolkit"
@@ -742,7 +734,7 @@ socks = ["PySocks (>=1.5.6,!=1.5.7,<2.0)"]
 [metadata]
 lock-version = "1.1"
 python-versions = "~3.9"
-content-hash = "0e0c32e3ca78dbe0c61a7a72fbb28cc3031c402109c8503a950f996615d25a13"
+content-hash = "68030904d5557ae60d7777dc9c2704bf5fbafe98245afe5486a1dc6eebec9735"
 
 [metadata.files]
 altgraph = [
@@ -800,10 +792,6 @@ certifi = [
 charset-normalizer = [
     {file = "charset-normalizer-2.0.12.tar.gz", hash = "sha256:2857e29ff0d34db842cd7ca3230549d1a697f96ee6d3fb071cfa6c7393832597"},
     {file = "charset_normalizer-2.0.12-py3-none-any.whl", hash = "sha256:6881edbebdb17b39b4eaaa821b438bf6eddffb4468cf344f09f89def34a8b1df"},
-]
-chinesecalendar = [
-    {file = "chinesecalendar-1.7.2-py2.py3-none-any.whl", hash = "sha256:ef3981c573cf9256e159bf1e01d0994b5bcdab50cc411fa28cbd81e5d55f5550"},
-    {file = "chinesecalendar-1.7.2.tar.gz", hash = "sha256:3d76b53346e11c7f7585ee71cdc05cef8fd534ad73fea6cd2fed96d421697aa9"},
 ]
 click = [
     {file = "click-8.1.3-py3-none-any.whl", hash = "sha256:bb4d8133cb15a609f44e8213d9b391b0809795062913b383c62be0ee95b1db48"},

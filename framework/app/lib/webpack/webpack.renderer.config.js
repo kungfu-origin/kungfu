@@ -3,6 +3,7 @@
 const toolkit = require('@kungfu-trader/kungfu-js-api/toolkit');
 const path = require('path');
 const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
+const os = require('os');
 
 const webpack = require('webpack');
 const { merge } = require('webpack-merge');
@@ -45,9 +46,11 @@ const webpackConfig = (argv) => {
               loader: 'less-loader',
               options: {
                 lessOptions: {
+                  javascriptEnabled: true,
                   modifyVars: {
                     ...getThemeVariables({
                       dark: true,
+                      compact: true,
                     }),
                     'font-size-base': '12px', // major text font size
                     'primary-color': '#FAAD14',
@@ -56,7 +59,6 @@ const webpackConfig = (argv) => {
                     'red2-base': '#f21717',
                     'green2-base': '#15de9e',
                   },
-                  javascriptEnabled: true,
                 },
               },
             },
@@ -114,18 +116,26 @@ const devConfig = {
       'process.env.APP_TYPE': '"renderer"',
       'process.env.LANG_ENV': '"zh-CN"',
     }),
-    new CopyPlugin({
-      patterns: [
-        {
-          from: path.join(
-            path.resolve(getCoreDir(), 'build', 'python', 'dist'),
-            '*.whl',
-          ),
-          to: path.join(publicDir, 'python'),
-          context: path.resolve(getCoreDir(), 'build', 'python', 'dist'),
-        },
-      ],
-    }),
+
+    ...(os.platform() === 'win32'
+      ? []
+      : [
+          new CopyPlugin({
+            patterns: [
+              {
+                from: path.join(
+                  getCoreDir(),
+                  'build',
+                  'python',
+                  'dist',
+                  '*.whl',
+                ),
+                to: path.join(publicDir, 'python'),
+                context: path.resolve(getCoreDir(), 'build', 'python', 'dist'),
+              },
+            ],
+          }),
+        ]),
   ],
 };
 

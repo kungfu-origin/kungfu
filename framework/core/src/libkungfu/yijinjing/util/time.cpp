@@ -13,10 +13,10 @@
  *  limitations under the License.
  *****************************************************************************/
 
+#include <assert.h>
 #include <chrono>
 #include <ctime>
 #include <fmt/format.h>
-#include <iomanip>
 #include <regex>
 #include <sstream>
 
@@ -147,4 +147,5 @@ const time &time::get_instance() {
   static time instance = {};
   return instance;
 }
+
 } // namespace kungfu::yijinjing

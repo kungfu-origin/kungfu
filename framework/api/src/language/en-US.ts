@@ -336,7 +336,7 @@ export default {
     strategy_file: 'strategy_file',
     strategy_path: 'strategy_path',
     strategy_path_tip:
-      'Normal python strategy use .py file, packaged strategy use package.json in strategy folder',
+      'Normal python strategy use .py file, packaged strategy use .so or .pyd file in strategy folder',
     process_status: 'process',
     unrealized_pnl: 'unrealized_pnl',
     marked_value: 'marked_value',
@@ -412,9 +412,9 @@ export default {
   futureArbitrageConfig: {
     account_name: 'account_name',
     future_arbitrage_code: 'future_arbitrage_code',
-    instrument_bug_A: 'instrument_bug_A',
+    instrument_buy_A: 'instrument_buy_A',
     instrument_sell_A: 'instrument_sell_A',
-    instrument_bug_B: 'instrument_bug_B',
+    instrument_buy_B: 'instrument_buy_B',
     instrument_sell_B: 'instrument_sell_B',
     side: 'side',
     offset: 'offset',
@@ -551,14 +551,14 @@ export default {
   kungfu: 'Kungfu',
 
   system_prompt: 'System Prompt',
-  archive_completion: 'Archive Completion',
-  archive: 'Kungfu archive...',
-  environment_complete: 'Kungfu environment ready to complete ✓',
-  environment_preparation: 'Kungfu environment in preparation...',
-  ready: 'Kungfu ready ✓',
-  wait_ready: 'Wait for Kungfu...',
-  saving_completed: 'Data saving completed ✓',
-  save_data: 'Save Data...',
+  archive_done: 'Kungfu archive done',
+  archive_loading: 'Kungfu archive loading...',
+  environment_done: 'Kungfu environment done ✓',
+  environment_loading: 'Kungfu environment loading...',
+  extra_resources_done: 'Extra resources done ✓',
+  extra_resouces_loading: 'Extra resources loading...',
+  saving_data_done: 'Saving data done ✓',
+  saving_data_loading: 'Saving data loading ...',
   end_all_transactions: 'End all transactions ✓',
   closing: 'End the transaction process, Please do not close...',
 
@@ -576,4 +576,7 @@ export default {
   异常: 'warn',
   错误: 'error',
   文件路径不存在: 'The file path does not exist',
+  策略id不存在: 'The strategy id does not exist',
+
+  持有量: 'Holding',
 };

@@ -217,7 +217,7 @@ class KungfuCoreConan(ConanFile):
             build_version = build_info["version"]
             self.output.success(f"build version {build_version}")
     
-    def __enable_modules(self, runtime, toolset):
+    def __enable_modules(self, runtime):
         modules = {
             "libkungfu": True,
             "kungfu_node": (tools.detected_os() != "Windows") or (runtime == "electron"),
@@ -238,7 +238,7 @@ class KungfuCoreConan(ConanFile):
             self.output.warn(f"disabled build for runtime {runtime}")
             return
         toolset = self.__get_toolset()
-        self.__enable_modules(runtime, toolset)
+        self.__enable_modules(runtime)
         self.__run_cmake_js(build_type, "configure", runtime, toolset)
         self.__run_cmake_js(build_type, "build",  runtime, toolset)
 
@@ -248,7 +248,7 @@ class KungfuCoreConan(ConanFile):
             for env_key in os.environ if env_key.upper().startswith("NPM_")
         ]  # workaround for msvc
         tools.rmdir(self.build_extensions_dir)
-        self.__run_yarn(*self.__build_cmake_js_cmd(cmd, runtime, toolset))
+        self.__run_yarn(*self.__build_cmake_js_cmd(build_type, cmd, runtime, toolset))
         self.output.success(f"cmake-js {cmd} done")
 
     def __run_yarn(self, *args):
@@ -257,7 +257,7 @@ class KungfuCoreConan(ConanFile):
             self.output.error(f"yarn {args} failed with return code {rc}")
             sys.exit(rc)
 
-    def __build_cmake_js_cmd(self, cmd, runtime, toolset):
+    def __build_cmake_js_cmd(self, build_type, cmd, runtime, toolset):
         spdlog_levels = {
             "trace": "SPDLOG_LEVEL_TRACE",
             "debug": "SPDLOG_LEVEL_DEBUG",
@@ -284,7 +284,7 @@ class KungfuCoreConan(ConanFile):
             else []
         )
 
-        debug_option = ["--debug"] if self.settings.build_type == "Debug" else []
+        debug_option = ["--debug"] if build_type == "Debug" else []
 
         return (
             [

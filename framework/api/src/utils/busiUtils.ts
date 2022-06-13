@@ -802,6 +802,13 @@ export const getIfProcessRunning = (
   return false;
 };
 
+export const getIfProcessDeleted = (
+  processStatusData: Pm2ProcessStatusData,
+  processId: string,
+): boolean => {
+  return processStatusData[processId] === undefined;
+};
+
 export const getIfProcessStopping = (
   processStatusData: Pm2ProcessStatusData,
   processId: string,
@@ -936,18 +943,22 @@ export const switchKfLocation = (
 ): Promise<void | Proc> => {
   const processId = getProcessIdByKfLocation(kfLocation);
 
+  if (!watcher) return Promise.reject(new Error('Watcher is NULL'));
+
   if (!targetStatus) {
     if (
       kfLocation.category === 'td' ||
       kfLocation.category === 'md' ||
       kfLocation.category === 'strategy'
     ) {
-      if (watcher && !watcher.isReadyToInteract(kfLocation)) {
+      if (!watcher.isReadyToInteract(kfLocation)) {
         return Promise.reject(new Error(t('未就绪', { processId })));
       }
     }
 
-    return deleteProcess(processId);
+    return Promise.resolve(watcher.requestStop(kfLocation))
+      .then(() => delayMilliSeconds(1000))
+      .then(() => deleteProcess(processId));
   }
 
   switch (kfLocation.category) {
@@ -1256,6 +1267,7 @@ export const getLedgerCategory = (category: KfCategoryTypes): 0 | 1 => {
 };
 
 export const filterLedgerResult = <T>(
+  watcher: KungfuApi.Watcher,
   dataTable: KungfuApi.DataTable<T>,
   tradingDataTypeName: KungfuApi.TradingDataTypeName,
   kfLocation: KungfuApi.KfLocation | KungfuApi.KfConfig,
@@ -1273,7 +1285,12 @@ export const filterLedgerResult = <T>(
     dataTableResolved = dataTableResolved.nofilter('volume', BigInt(0));
   }
 
-  if (ledgerCategory === 0) {
+  if (tradingDataTypeName === 'Position' || tradingDataTypeName === 'Asset') {
+    const locationUID = watcher.getLocationUID(kfLocation);
+    dataTableResolved = dataTableResolved
+      .filter('ledger_category', ledgerCategory)
+      .filter('holder_uid', locationUID);
+  } else if (ledgerCategory === 0) {
     dataTableResolved = dataTableResolved
       .filter('source_id', group)
       .filter('account_id', name);
@@ -1386,7 +1403,13 @@ export const dealTradingData = (
 
   return filterLedgerResult<
     KungfuApi.TradingDataNameToType[KungfuApi.TradingDataTypeName]
-  >(tradingData[tradingDataTypeName], tradingDataTypeName, kfLocation, sortKey);
+  >(
+    watcher,
+    tradingData[tradingDataTypeName],
+    tradingDataTypeName,
+    kfLocation,
+    sortKey,
+  );
 };
 
 export const isTdStrategyCategory = (category: string): boolean => {
@@ -1749,3 +1772,14 @@ export const fromProcessArgsToKfConfigItems = (
     throw err;
   }
 };
+
+export function dealTradingTaskName(
+  name: string,
+  extConfigs: KungfuApi.KfExtConfigs,
+): string {
+  const group = name.toKfGroup();
+  const strategyExts = extConfigs['strategy'] || {};
+  const groupResolved = strategyExts[group] ? strategyExts[group].name : group;
+  const timestamp = name.toKfName();
+  return `${groupResolved} ${dayjs(+timestamp).format('HH:mm:ss')}`;
+}

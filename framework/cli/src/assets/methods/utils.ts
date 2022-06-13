@@ -99,6 +99,7 @@ export const getQuestionInputType = (
     case 'float':
       return 'number';
     case 'select':
+    case 'radio':
     case 'side':
     case 'offset':
     case 'direction':
@@ -123,7 +124,7 @@ export const getQuestionInputType = (
 };
 
 export const renderSelect = (configItem: KungfuApi.KfConfigItem) => {
-  if (configItem.type === 'select')
+  if (configItem.type === 'select' || configItem.type === 'radio')
     return `(${(configItem.options || configItem.data || [])
       .map((item) => item.value || '')
       .join('|')})`;

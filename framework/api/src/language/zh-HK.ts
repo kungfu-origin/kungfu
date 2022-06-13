@@ -334,7 +334,7 @@ export default {
     strategy_file: '策略文件',
     strategy_path: '策略路径',
     strategy_path_tip:
-      '普通 python 策略选择 .py 文件, 加密策略或cpp策略选择策略 package.json',
+      '普通 python 策略选择 .py 文件, 加密 python 策略或cpp策略选择编译后的 .so 或 .pyd 文件',
     process_status: '进程',
     unrealized_pnl: '浮动盈亏',
     marked_value: '名义本金',
@@ -409,9 +409,9 @@ export default {
   futureArbitrageConfig: {
     account_name: '账户',
     future_arbitrage_code: '套利代码',
-    instrument_bug_A: '买入标的 A',
+    instrument_buy_A: '买入标的 A',
     instrument_sell_A: '卖出标的 A',
-    instrument_bug_B: '买入标的 B',
+    instrument_buy_B: '买入标的 B',
     instrument_sell_B: '卖出标的 B',
     side: '互换交易意向',
     offset: '开平',
@@ -543,14 +543,14 @@ export default {
   kungfu: '功夫交易系统',
 
   system_prompt: '系统提示',
-  archive_completion: '功夫归档完成 ✓',
-  archive: '功夫归档中...',
-  environment_complete: '功夫环境准备完成 ✓',
-  environment_preparation: '功夫环境准备中...',
-  ready: '功夫就绪 ✓',
-  wait_ready: '等待功夫就绪...',
-  saving_completed: '保存数据完成 ✓',
-  save_data: '保存数据中...',
+  archive_done: '功夫归档完成 ✓',
+  archive_loading: '功夫归档中...',
+  environment_done: '功夫环境准备完成 ✓',
+  environment_loading: '功夫环境准备中...',
+  extra_resources_done: '插件资源加载就绪 ✓',
+  extra_resouces_loading: '插件资源加载中...',
+  saving_data_done: '保存数据完成 ✓',
+  saving_data_loading: '保存数据中...',
   end_all_transactions: '结束所有交易进程 ✓',
   closing: '结束交易进程中, 请勿关闭...',
 
@@ -566,4 +566,7 @@ export default {
   异常: '异常',
   错误: '错误',
   文件路径不存在: '文件路径不存在',
+  策略id不存在: '策略id不存在',
+
+  持有量: '持有量',
 };

@@ -250,6 +250,8 @@ void Ledger::write_book_reset(int64_t trigger_time, uint32_t book_uid) {
   writer->close_data();
   writer->open_data<CacheReset>(trigger_time).msg_type = Asset::tag;
   writer->close_data();
+  writer->open_data<CacheReset>(trigger_time).msg_type = AssetMargin::tag;
+  writer->close_data();
   writer->mark(trigger_time, ResetBookRequest::tag);
 }
 
@@ -259,6 +261,7 @@ void Ledger::write_strategy_data(int64_t trigger_time, uint32_t strategy_uid) {
   for (const auto &pair : bookkeeper_.get_books()) {
     auto &book = pair.second;
     auto &asset = book->asset;
+    auto &asset_margin = book->asset_margin;
     auto book_uid = asset.holder_uid;
     bool has_account = asset.ledger_category == LedgerCategory::Account and has_channel(book_uid, strategy_uid);
     bool is_strategy = asset.ledger_category == LedgerCategory::Strategy and book_uid == strategy_uid;
@@ -266,6 +269,7 @@ void Ledger::write_strategy_data(int64_t trigger_time, uint32_t strategy_uid) {
       write_positions(trigger_time, strategy_uid, book->long_positions);
       write_positions(trigger_time, strategy_uid, book->short_positions);
       writer->write(trigger_time, asset);
+      writer->write(trigger_time, asset_margin);
     }
   }
   writer->open_data<PositionEnd>(trigger_time).holder_uid = strategy_uid;

@@ -10,7 +10,9 @@
 
 #include <kungfu/common.h>
 #include <kungfu/longfist/longfist.h>
+#include <kungfu/wingchun/timezone.h>
 #include <kungfu/yijinjing/practice/apprentice.h>
+#include <kungfu/yijinjing/time.h>
 #include <kungfu/yijinjing/util/util.h>
 
 #define REGION_CN "CN"
@@ -353,6 +355,15 @@ inline longfist::enums::Direction get_direction(longfist::enums::InstrumentType 
                                                 longfist::enums::Side side, longfist::enums::Offset offset) {
   using namespace longfist::enums;
 
+  if (side == Side::MarginTrade) {
+    return Direction::Long;
+  } else if (side == Side::ShortSell) {
+    return Direction::Short;
+  } else if (side == Side::RepayMargin) {
+    return Direction::Long;
+  } else if (side == Side::RepayStock) {
+    return Direction::Short;
+  }
   if (not is_shortable(instrument_type)) {
     return Direction::Long;
   }
@@ -370,7 +381,8 @@ inline longfist::enums::Direction get_direction(longfist::enums::InstrumentType 
       (offset == Offset::Close or offset == Offset::CloseToday or offset == Offset::CloseYesterday)) {
     return Direction::Short;
   }
-  throw wingchun_error(fmt::format("invalid direction args {} {} {}", (int)instrument_type, (int)side, (int)offset));
+  throw wingchun_error(fmt::format("get_direction error: invalid direction args {} {} {}", (int)instrument_type,
+                                   (int)side, (int)offset));
 }
 
 inline uint32_t hash_instrument(const char *exchange_id, const char *instrument_id) {
@@ -404,6 +416,60 @@ inline void order_from_input(const longfist::types::OrderInput &input, longfist:
   order.volume_condition = input.volume_condition;
   order.time_condition = input.time_condition;
 }
+
+/*****************************************************************************
+*  @Copyright (c) 2022, Marsjliu
+*  @All rights reserved
+
+*  @date     : 2022/06/06 17:15
+*  @brief    :根据exchangeid和时间戳转换成本地YYYYMMDD
+*****************************************************************************/
+// ExchangeId与对应的LocationTime类型
+static const std::unordered_map<std::string, LocationTimeType> g_mapLocationTimeExchangeId = {
+    {EXCHANGE_US, LocationTimeType::AmericaEastern},   //
+    {EXCHANGE_HK, LocationTimeType::Beijing},          //
+    {EXCHANGE_SSE, LocationTimeType::Beijing},         //
+    {EXCHANGE_SZE, LocationTimeType::Beijing},         //
+    {EXCHANGE_BSE, LocationTimeType::Beijing},         //
+    {EXCHANGE_SHFE, LocationTimeType::Beijing},        //
+    {EXCHANGE_HK_OPTION, LocationTimeType::Beijing},   //
+    {EXCHANGE_GLFX, LocationTimeType::Beijing},        //
+    {EXCHANGE_IPE, LocationTimeType::London},          //
+    {EXCHANGE_CBOT, LocationTimeType::AmericaEastern}, //
+    {EXCHANGE_CEC, LocationTimeType::AmericaEastern},  //
+    {EXCHANGE_LIFE, LocationTimeType::AmericaEastern}, //
+    {EXCHANGE_MTIF, LocationTimeType::AmericaEastern}, //
+    {EXCHANGE_NYCE, LocationTimeType::AmericaEastern}, //
+    {EXCHANGE_CMX, LocationTimeType::AmericaEastern},  //
+    {EXCHANGE_SIME, LocationTimeType::AmericaEastern}, //
+    {EXCHANGE_CME, LocationTimeType::AmericaEastern},  //
+    {EXCHANGE_IMM, LocationTimeType::AmericaEastern},  //
+    {EXCHANGE_WIDX, LocationTimeType::AmericaEastern}, //
+    {EXCHANGE_FREX, LocationTimeType::AmericaEastern}, //
+    {EXCHANGE_METL, LocationTimeType::AmericaEastern}, //
+    {EXCHANGE_IPM, LocationTimeType::London}           //
+};
+
+// 根据标准时间戳转换成交易所所在区域的时间
+// param1:时间戳(精确到秒)
+// param2:交易所id，exchangeid
+// params3: 返回时间格式YYYYMMDD
+inline std::string TranslateGMTimeToLocalDateByExchangeId(time_t lTime, const std::string &exchangeId,
+                                                          const std::string strformat = "%Y%m%d") {
+  LocationTimeType type = LocationTimeType::Beijing;
+  std::unordered_map<std::string, LocationTimeType>::const_iterator it = g_mapLocationTimeExchangeId.find(exchangeId);
+
+  if (it != g_mapLocationTimeExchangeId.end()) {
+    type = it->second;
+  }
+
+  time_t local_time = TimeUtil::TranslateGMTimeToLocalTime(lTime, type)->seconds;
+
+  char datebuf[256] = {0};
+  strftime(datebuf, 256, strformat.c_str(), gmtime(&local_time));
+  return datebuf;
+}
+
 } // namespace kungfu::wingchun
 
 #endif // WINGCHUN_COMMON_H

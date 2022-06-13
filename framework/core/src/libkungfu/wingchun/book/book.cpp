@@ -102,22 +102,34 @@ void Book::update(int64_t update_time) {
   asset.unrealized_pnl = 0;
   asset.dynamic_equity = asset.avail;
 
+  double margin = 0;
+  bool is_stock_acct = true;
+  double short_market_value = 0;
   auto update_position = [&](Position &position) {
     auto is_stock =
         position.instrument_type == InstrumentType::Stock or position.instrument_type == InstrumentType::Bond or
         position.instrument_type == InstrumentType::Fund or position.instrument_type == InstrumentType::StockOption or
         position.instrument_type == InstrumentType::TechStock or position.instrument_type == InstrumentType::Index or
         position.instrument_type == InstrumentType::Repo;
+    if (!is_stock)
+      is_stock_acct = false;
     auto is_future = position.instrument_type == InstrumentType::Future;
     auto position_market_value =
         position.volume * (position.last_price > 0 ? position.last_price : position.avg_open_price);
-    asset.margin += position.margin;
-    asset.market_value += position_market_value;
-    asset.unrealized_pnl += position.unrealized_pnl;
-    if (is_stock) {
-      asset.dynamic_equity += position_market_value;
+    margin += position.margin;
+
+    if (!(is_stock and position.direction == Direction::Short)) {
+      asset.market_value += position_market_value;
+      asset.unrealized_pnl += position.unrealized_pnl;
     }
-    if (is_future) {
+    if (is_stock) {
+      if (position.direction == Direction::Long) {
+        asset.dynamic_equity += position_market_value;
+      } else {
+        short_market_value += position_market_value;
+      }
+
+    } else if (is_future) {
       asset.dynamic_equity += position.margin + position.position_pnl;
     }
   };
@@ -128,6 +140,10 @@ void Book::update(int64_t update_time) {
   for (auto &pair : short_positions) {
     update_position(pair.second);
   }
+  if (not is_stock_acct) {
+    asset.margin = margin;
+  }
+  asset_margin.short_market_value = short_market_value;
 }
 
 void Book::replace(const OrderInput &input) { order_inputs.insert_or_assign(input.order_id, input); }

@@ -66,7 +66,7 @@ const props = withDefaults(
         trigger: string;
       }
     >;
-    primaryKeyUnderline?: boolean;
+    passPrimaryKeySpecialWordsVerify?: boolean;
   }>(),
   {
     formState: () => ({}),
@@ -80,7 +80,7 @@ const props = withDefaults(
     labelCol: 6,
     wrapperCol: 16,
     rules: () => ({}),
-    primaryKeyUnderline: false,
+    passPrimaryKeySpecialWordsVerify: false,
   },
 );
 
@@ -228,7 +228,7 @@ function isNumberInputType(type: string): boolean {
 }
 
 const SpecialWordsReg = new RegExp(
-  "[`~!@#$^&*()=|{}';',\\[\\]<>《》/?~！@#￥……&*（）——|{}【】‘；：”“'。, 、？]",
+  "[`~!@#$^&*()=|{}';',\\[\\]<>《》/?~！@#￥……&*（）——|{}【】‘；：”“'。，、？]",
 );
 function primaryKeyValidator(_rule: RuleObject, value: string): Promise<void> {
   const combineValue: string = getCombineValueByPrimaryKeys(
@@ -251,11 +251,17 @@ function primaryKeyValidator(_rule: RuleObject, value: string): Promise<void> {
     );
   }
 
-  if (SpecialWordsReg.test(value)) {
+  if (
+    SpecialWordsReg.test(value || '') &&
+    !props.passPrimaryKeySpecialWordsVerify
+  ) {
     return Promise.reject(new Error(t('validate.no_special_characters')));
   }
 
-  if (value.toString().includes('_') && !props.primaryKeyUnderline) {
+  if (
+    (value || '').toString().includes('_') &&
+    !props.passPrimaryKeySpecialWordsVerify
+  ) {
     return Promise.reject(new Error(t('validate.no_underline')));
   }
 
@@ -559,6 +565,16 @@ defineExpose({
           :value="+key"
         >
           {{ getKfTradeValueName(numberEnumRadioType[item.type], key) }}
+        </a-radio>
+      </a-radio-group>
+      <a-radio-group
+        v-else-if="item.type === 'radio'"
+        v-model:value="formState[item.key]"
+        :name="item.key"
+        :disabled="changeType === 'update' && item.primary"
+      >
+        <a-radio v-for="option in item.options" :value="option.value">
+          {{ option.label }}
         </a-radio>
       </a-radio-group>
       <a-select

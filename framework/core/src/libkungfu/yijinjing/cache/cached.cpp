@@ -1,6 +1,6 @@
 #include <kungfu/common.h>
 #include <kungfu/longfist/longfist.h>
-#include <kungfu/wingchun/service/cached.h>
+#include <kungfu/yijinjing/cache/cached.h>
 #include <kungfu/yijinjing/time.h>
 
 using namespace kungfu::rx;
@@ -12,16 +12,16 @@ using namespace kungfu::yijinjing;
 using namespace kungfu::yijinjing::data;
 using namespace kungfu::yijinjing::cache;
 
-namespace kungfu::wingchun::service {
+namespace kungfu::yijinjing::cache {
 
-CacheD::CacheD(locator_ptr locator, mode m, bool low_latency)
+cached::cached(locator_ptr locator, mode m, bool low_latency)
     : apprentice(location::make_shared(m, category::SYSTEM, "service", "cached", std::move(locator))),
       profile_(get_locator()) {
   profile_.setup();
   profile_get_all(profile_, profile_bank_);
 }
 
-void CacheD::on_react() {
+void cached::on_react() {
   events_ | is(Location::tag) | $$(on_location(event));
   events_ | is(Register::tag) | $$(register_triggger_clear_cache_shift(event->data<Register>()));
   events_ | is(RequestCached::tag) | $([&](const event_ptr &event) {
@@ -51,7 +51,7 @@ void CacheD::on_react() {
   });
 }
 
-void CacheD::on_start() {
+void cached::on_start() {
   events_ | is(Channel::tag) | $$(inspect_channel(event->gen_time(), event->data<Channel>()));
   events_ | is(CacheReset::tag) | $$(on_cache_reset(event));
   events_ | instanceof <journal::frame>() | filter([&](const event_ptr &event) {
@@ -61,19 +61,19 @@ void CacheD::on_start() {
                        }) | $$(feed(event));
 }
 
-void CacheD::on_active() {
+void cached::on_active() {
   handle_cached_feeds();
   handle_profile_feeds();
 }
 
-void CacheD::mark_request_cached_done(uint32_t dest_id) {
+void cached::mark_request_cached_done(uint32_t dest_id) {
   auto writer = get_writer(master_cmd_location_->uid);
   RequestCachedDone &rcd = writer->open_data<RequestCachedDone>();
   rcd.dest_id = dest_id;
   writer->close_data();
 }
 
-void CacheD::handle_cached_feeds() {
+void cached::handle_cached_feeds() {
   bool stored_controller = false;
   boost::hana::for_each(StateDataTypes, [&](auto it) {
     using DataType = typename decltype(+boost::hana::second(it))::type;
@@ -106,7 +106,7 @@ void CacheD::handle_cached_feeds() {
   });
 }
 
-void CacheD::handle_profile_feeds() {
+void cached::handle_profile_feeds() {
   bool stored_controller = false;
   boost::hana::for_each(ProfileDataTypes, [&](auto it) {
     using DataType = typename decltype(+boost::hana::second(it))::type;
@@ -134,16 +134,16 @@ void CacheD::handle_profile_feeds() {
   });
 }
 
-void CacheD::on_location(const event_ptr &event) { profile_bank_ << typed_event_ptr<Location>(event); }
+void cached::on_location(const event_ptr &event) { profile_bank_ << typed_event_ptr<Location>(event); }
 
-void CacheD::inspect_channel(int64_t trigger_time, const Channel &channel) {
+void cached::inspect_channel(int64_t trigger_time, const Channel &channel) {
   if (channel.source_id != get_live_home_uid() and channel.dest_id != get_live_home_uid()) {
     reader_->join(get_location(channel.source_id), channel.dest_id, trigger_time);
     channel_trigger_make_cache_shift(channel);
   }
 }
 
-void CacheD::channel_trigger_make_cache_shift(const Channel &channel) {
+void cached::channel_trigger_make_cache_shift(const Channel &channel) {
   uint32_t source_id = channel.source_id;
   uint32_t dest_id = channel.dest_id;
 
@@ -164,10 +164,10 @@ void CacheD::channel_trigger_make_cache_shift(const Channel &channel) {
   ensure_cached_storage(source_id, location::SYNC);
 }
 
-void CacheD::register_triggger_clear_cache_shift(const Register &register_data) {
+void cached::register_triggger_clear_cache_shift(const Register &register_data) {
   uint32_t location_uid = register_data.location_uid;
   if (app_cache_shift_.find(location_uid) == app_cache_shift_.end()) {
-    SPDLOG_ERROR("no location_uid {} in app_cache_shift_", get_location_uname(location_uid));
+    SPDLOG_INFO("no location_uid {} in app_cache_shift_, no need to clear cache", get_location_uname(location_uid));
     return;
   }
 
@@ -175,7 +175,7 @@ void CacheD::register_triggger_clear_cache_shift(const Register &register_data) 
   app_cache_shift_.erase(location_uid);
 }
 
-void CacheD::on_cache_reset(const event_ptr &event) {
+void cached::on_cache_reset(const event_ptr &event) {
   auto msg_type = event->data<CacheReset>().msg_type;
   boost::hana::for_each(StateDataTypes, [&](auto it) {
     using DataType = typename decltype(+boost::hana::second(it))::type;
@@ -186,7 +186,7 @@ void CacheD::on_cache_reset(const event_ptr &event) {
   });
 }
 
-void CacheD::ensure_cached_storage(uint32_t source_id, uint32_t dest_id) {
+void cached::ensure_cached_storage(uint32_t source_id, uint32_t dest_id) {
   if (app_cache_shift_.find(source_id) == app_cache_shift_.end()) {
     SPDLOG_ERROR("no source {} in app_cache_shift_", get_location_uname(source_id));
     return;
@@ -194,7 +194,7 @@ void CacheD::ensure_cached_storage(uint32_t source_id, uint32_t dest_id) {
   app_cache_shift_.at(source_id).ensure_storage(dest_id);
 }
 
-void CacheD::feed(const event_ptr &event) {
+void cached::feed(const event_ptr &event) {
   if (event->msg_type() != Instrument::tag and get_location(event->source())->category == category::MD) {
     return;
   }
@@ -202,4 +202,4 @@ void CacheD::feed(const event_ptr &event) {
   feed_profile_data(event, profile_bank_);
 }
 
-} // namespace kungfu::wingchun::service
+} // namespace kungfu::yijinjing::cache

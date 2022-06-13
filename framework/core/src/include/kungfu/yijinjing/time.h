@@ -16,7 +16,9 @@
 #ifndef YIJINJING_TIME_H
 #define YIJINJING_TIME_H
 
+#include <memory>
 #include <string>
+#include <time.h>
 
 #define KUNGFU_DATETIME_FORMAT "%F %T"
 #define KUNGFU_TIMESTAMP_FORMAT "%F %T.%N"

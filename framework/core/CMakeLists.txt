@@ -52,8 +52,21 @@ include_directories(src/include)
 
 ##########################################################################
 
-# set for libkungfu reference
 set(KUNGFU_BUILD_DIR ${CMAKE_BINARY_DIR})
+set(KUNGFU_BUILD_LIBRARY_DIR ${KUNGFU_BUILD_DIR}/${CMAKE_BUILD_TYPE})
+set(KUNGFU_BUILD_SQLITE_DIR ${KUNGFU_BUILD_DIR}/sqlite/$<0:>)
+
+link_directories(${KUNGFU_BUILD_LIBRARY_DIR})
+link_directories(${KUNGFU_BUILD_SQLITE_DIR})
+
+
+##########################################################################
+
+if(DEFINED ENV{LIBKUNGFU_NAME})
+  set(LIBKUNGFU_NAME $ENV{LIBKUNGFU_NAME})
+else()
+  set(LIBKUNGFU_NAME kungfu)
+endif()
 
 ##########################################################################
 

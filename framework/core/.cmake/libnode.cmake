@@ -54,5 +54,5 @@ macro(build_node_binding BINDING_NAME BINDING_SOURCE_FILES)
   add_library(${BINDING_NAME} SHARED ${BINDING_SOURCE_FILES})
   set_target_properties(${BINDING_NAME} PROPERTIES PREFIX "" SUFFIX ".node")
   # optional link libs passed as ${ARGN}
-  target_link_libraries(${BINDING_NAME} ${CMAKE_JS_LIB} kungfu ${ARGN})
+  target_link_libraries(${BINDING_NAME} ${LIBKUNGFU_NAME} ${CMAKE_JS_LIB} ${ARGN})
 endmacro(build_node_binding)

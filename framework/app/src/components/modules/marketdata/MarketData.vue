@@ -178,7 +178,9 @@ function handleClickRow(row: KungfuApi.InstrumentResolved) {
         >
           <template v-if="column.dataIndex === 'instrumentId'">
             <div class="subscribed-instrument-info">
-              <div class="name">{{ record.instrumentName }}</div>
+              <div class="name">
+                {{ record.instrumentName || record.instrumentId || '--' }}
+              </div>
               <div class="code">
                 <span>{{ record.instrumentId }}</span>
                 <span>
