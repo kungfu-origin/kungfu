@@ -362,7 +362,9 @@ export const graceStopProcess = (
 ): Promise<void> => {
   const processId = getProcessIdByKfLocation(kfLocation);
 
-  if (!watcher) return Promise.reject(new Error('Watcher is NULL'));
+  if (!watcher) {
+    return Promise.reject(new Error('Watcher 错误'));
+  }
 
   if (getIfProcessRunning(processStatusData, processId)) {
     if (!watcher.isReadyToInteract(kfLocation)) {
@@ -386,7 +388,9 @@ export const graceDeleteProcess = (
 ): Promise<void> => {
   const processId = getProcessIdByKfLocation(kfLocation);
 
-  if (!watcher) return Promise.reject(new Error('Watcher is NULL'));
+  if (!watcher) {
+    return Promise.reject(new Error('Watcher 错误'));
+  }
 
   if (getIfProcessRunning(processStatusData, processId)) {
     if (watcher && !watcher.isReadyToInteract(kfLocation)) {
