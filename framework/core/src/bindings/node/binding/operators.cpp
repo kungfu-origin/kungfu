@@ -14,7 +14,9 @@ using namespace kungfu::yijinjing::practice;
 
 namespace kungfu::node::serialize {
 JsRestoreState::JsRestoreState(Napi::ObjectReference &state, location_ptr location)
-    : state_(state), location_(std::move(location)) {}
+    : state_(state), location_(std::move(location)) {
+  SPDLOG_DEBUG("restore state from {}", location_->uname);
+}
 
 void JsRestoreState::operator()(int64_t from, int64_t to, bool sync_schema) {
   auto now = time::now_in_nano();
