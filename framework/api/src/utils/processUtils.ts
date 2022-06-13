@@ -361,12 +361,15 @@ export const graceStopProcess = (
   processStatusData: Pm2ProcessStatusData,
 ): Promise<void> => {
   const processId = getProcessIdByKfLocation(kfLocation);
+
+  if (!watcher) return Promise.reject(new Error('Watcher is NULL'));
+
   if (getIfProcessRunning(processStatusData, processId)) {
-    if (watcher && !watcher.isReadyToInteract(kfLocation)) {
+    if (!watcher.isReadyToInteract(kfLocation)) {
       return Promise.reject(new Error(t('未就绪', { processId })));
     }
 
-     return Promise.resolve(watcher.requestStop(kfLocation))
+    return Promise.resolve(watcher.requestStop(kfLocation))
       .then(() => delayMilliSeconds(1000))
       .then(() => stopProcess(processId));
   }
