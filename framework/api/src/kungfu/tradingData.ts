@@ -1,10 +1,10 @@
 import { Subject } from 'rxjs';
-import { startGetKungfuWatcherStep, startStep } from './watcher';
+import { startWatcherSyncTask, startWatcher } from './watcher';
 export const tradingDataSubject = new Subject<KungfuApi.Watcher>();
 
 export const triggerStartStep = () => {
-  startStep();
-  startGetKungfuWatcherStep(2000, (watcher) => {
+  startWatcher();
+  startWatcherSyncTask(2000, (watcher) => {
     tradingDataSubject.next(watcher);
   });
 };

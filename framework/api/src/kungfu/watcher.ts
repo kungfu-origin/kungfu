@@ -69,12 +69,12 @@ export const watcher = ((): KungfuApi.Watcher | null => {
   );
 })();
 
-export const startStep = () => {
+export const startWatcher = () => {
   if (watcher === null) return;
   watcher.start();
 };
 
-export const startGetKungfuWatcherStep = (
+export const startWatcherSyncTask = (
   interval = 1000,
   callback: (watcher: KungfuApi.Watcher) => void,
 ) => {

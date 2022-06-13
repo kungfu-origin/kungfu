@@ -57,7 +57,9 @@ class KungfuCoreConan(ConanFile):
         "electron_version": "ANY",
         # clang has a known issue:
         # https://developercommunity.visualstudio.com/t/msbuild-doesnt-give-delayload-flags-to-linker-when/1595015
-        "vs_toolset": "auto" if "CONAN_VS_TOOLSET" not in environ else environ["CONAN_VS_TOOLSET"],
+        "vs_toolset": "auto"
+        if "CONAN_VS_TOOLSET" not in environ
+        else environ["CONAN_VS_TOOLSET"],
     }
     cpp_files_extensions = [".h", ".hpp", ".hxx", ".cpp", ".c", ".cc", ".cxx"]
     conanfile_dir = path.dirname(path.realpath(__file__))
@@ -216,12 +218,13 @@ class KungfuCoreConan(ConanFile):
             build_info = json.load(build_info_file)
             build_version = build_info["version"]
             self.output.success(f"build version {build_version}")
-    
+
     def __enable_modules(self, runtime):
         modules = {
             "libkungfu": True,
-            "kungfu_node": (tools.detected_os() != "Windows") or (runtime == "electron"),
-            "pykungfu": runtime == "node"
+            "kungfu_node": (tools.detected_os() != "Windows")
+            or (runtime == "electron"),
+            "pykungfu": runtime == "node",
         }
 
         def switch(module):
@@ -230,7 +233,7 @@ class KungfuCoreConan(ConanFile):
                 environ[environ_key] = "on"
             else:
                 environ.pop(environ_key, None)
-        
+
         [switch(key) for key in modules.keys()]
 
     def __run_build(self, build_type, runtime):
@@ -240,12 +243,13 @@ class KungfuCoreConan(ConanFile):
         toolset = self.__get_toolset()
         self.__enable_modules(runtime)
         self.__run_cmake_js(build_type, "configure", runtime, toolset)
-        self.__run_cmake_js(build_type, "build",  runtime, toolset)
+        self.__run_cmake_js(build_type, "build", runtime, toolset)
 
     def __run_cmake_js(self, build_type, cmd, runtime, toolset):
         [
             os.environ.pop(env_key)
-            for env_key in os.environ if env_key.upper().startswith("NPM_")
+            for env_key in os.environ
+            if env_key.upper().startswith("NPM_")
         ]  # workaround for msvc
         tools.rmdir(self.build_extensions_dir)
         self.__run_yarn(*self.__build_cmake_js_cmd(build_type, cmd, runtime, toolset))
