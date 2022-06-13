@@ -299,7 +299,7 @@ void Watcher::on_start() {
   broker_client_.on_start(events_);
   bookkeeper_.on_start(events_);
   bookkeeper_.guard_positions();
-  bookkeeper_.add_book_listener(shared_from_this());
+  // bookkeeper_.add_book_listener(shared_from_this());
 
   events_ | bypass(this, bypass_quotes_) | $$(Feed(event));
   events_ | is(OrderInput::tag) | $$(UpdateBook(event, event->data<OrderInput>()));
