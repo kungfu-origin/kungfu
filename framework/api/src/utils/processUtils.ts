@@ -366,7 +366,9 @@ export const graceStopProcess = (
       return Promise.reject(new Error(t('未就绪', { processId })));
     }
 
-    return stopProcess(processId);
+     return Promise.resolve(watcher.requestStop(kfLocation))
+      .then(() => delayMilliSeconds(1000))
+      .then(() => stopProcess(processId));
   }
 
   return Promise.resolve();
