@@ -858,6 +858,9 @@ export const useQuote = (): {
   getLastPricePercent(
     instrument: KungfuApi.InstrumentResolved | undefined,
   ): string;
+  getPreClosePrice(
+    instrument: KungfuApi.InstrumentResolved | undefined,
+  ): string;
 } => {
   const quotes = ref<Record<string, KungfuApi.Quote>>({});
   const app = getCurrentInstance();
@@ -906,10 +909,24 @@ export const useQuote = (): {
     return Number(percent * 100).toFixed(2) + '%';
   };
 
+  const getPreClosePrice = (
+    instrument: KungfuApi.InstrumentResolved,
+  ): string => {
+    const quote = getQuoteByInstrument(instrument);
+
+    if (!quote) {
+      return '--';
+    }
+
+    const { pre_close_price } = quote;
+    return pre_close_price.toFixed(2);
+  };
+
   return {
     quotes,
     getQuoteByInstrument,
     getLastPricePercent,
+    getPreClosePrice,
   };
 };
 
