@@ -53,6 +53,7 @@ import VueI18n from '@kungfu-trader/kungfu-js-api/language';
 import { useTradingTask } from '../tradingTask/utils';
 import { useGlobalStore } from '@kungfu-trader/kungfu-app/src/renderer/pages/index/store/global';
 import { storeToRefs } from 'pinia';
+import { ShotableInstrumentTypes } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
 
 const { t } = VueI18n.global;
 const { error } = messagePrompt();
@@ -82,8 +83,6 @@ const {
 } = useCurrentGlobalKfLocation(window.watcher);
 
 const { getExtraCategoryData } = useExtraCategory();
-
-const isShotable = ref(false);
 
 const makeOrderInstrumentType = ref<InstrumentTypeEnum>(
   InstrumentTypeEnum.unknown,
@@ -131,7 +130,7 @@ const makeOrderData = computed(() => {
     volume: +volume,
     price_type: +price_type,
     side: +side,
-    offset: getResolvedOffset(offset, side),
+    offset: getResolvedOffset(offset, side, instrumentType),
     hedge_flag: +(hedge_flag || 0),
     parent_id: BigInt(0),
   };
@@ -163,8 +162,12 @@ const availTradingTaskExtensionList = computed(() => {
   });
 });
 
-const getResolvedOffset = (offset: OffsetEnum, side: SideEnum) => {
-  if (isShotable.value) {
+const getResolvedOffset = (
+  offset: OffsetEnum,
+  side: SideEnum,
+  instrumentType: InstrumentTypeEnum,
+) => {
+  if (shotable(instrumentType)) {
     if (offset !== undefined) {
       return offset;
     }
@@ -172,11 +175,16 @@ const getResolvedOffset = (offset: OffsetEnum, side: SideEnum) => {
   return side === 0 ? 0 : 1;
 };
 
+const shotable = (instrumentType: InstrumentTypeEnum): boolean => {
+  return instrumentType
+    ? ShotableInstrumentTypes.includes(instrumentType)
+    : false;
+};
+
 onMounted(() => {
   if (app?.proxy) {
     const subscription = app.proxy.$globalBus.subscribe((data: KfBusEvent) => {
       if (data.tag === 'makeOrder') {
-        isShotable.value = true;
         const { offset, side, volume, price, instrumentType, accountId } = (
           data as TriggerMakeOrder
         ).orderInput;
@@ -198,7 +206,6 @@ onMounted(() => {
       }
 
       if (data.tag === 'orderBookUpdate') {
-        isShotable.value = true;
         const { side, price, volume, instrumentType } = (
           data as TriggerOrderBookUpdate
         ).orderInput;
@@ -232,9 +239,6 @@ onMounted(() => {
 watch(
   () => formState.value.instrument,
   (newVal) => {
-    nextTick(() => {
-      isShotable.value = false;
-    });
     if (
       !formState.value.account_id &&
       currentGlobalKfLocation.value?.category !== 'td' &&
@@ -314,7 +318,7 @@ function initOrderInputData(): Promise<KungfuApi.MakeOrderInput> {
     volume: +volume,
     price_type: +price_type,
     side: +side,
-    offset: getResolvedOffset(offset, side),
+    offset: getResolvedOffset(offset, side, instrumentType),
     hedge_flag: +(hedge_flag || 0),
     parent_id: BigInt(0),
   };
