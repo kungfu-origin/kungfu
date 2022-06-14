@@ -57,7 +57,7 @@ const {
 const { appStates, processStatusData } = useProcessStatusDetailData();
 const { mdExtTypeMap } = useExtConfigsRelated();
 
-const { getQuoteByInstrument, getLastPricePercent } = useQuote();
+const { getQuoteByInstrument, getPreClosePrice } = useQuote();
 const { customRow, triggerOrderBook, triggerMakeOrder } = useTriggerMakeOrder();
 const { setSubscribedInstruments } = useGlobalStore();
 
@@ -213,7 +213,7 @@ function handleClickRow(row: KungfuApi.InstrumentResolved) {
                 <KfBlinkNum
                   blink-type="color"
                   mode="compare-zero"
-                  :num="getLastPricePercent(record)"
+                  :num="getPreClosePrice(record)"
                 ></KfBlinkNum>
               </div>
             </div>

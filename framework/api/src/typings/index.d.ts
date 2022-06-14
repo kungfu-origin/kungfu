@@ -144,12 +144,20 @@ declare namespace KungfuApi {
     tip?: string;
   }
 
+  export interface KfExhibitConfigItem {
+    key: string;
+    source_key: string;
+    name: string;
+    type: KfConfigItemSupportedTypes;
+  }
+
   export interface KfExtOriginConfig {
     key: string;
     name: string;
     extPath: string;
     ui_config?: {
       position: KfUIExtLocatorTypes;
+      exhibit?: KfExhibitConfig;
       components?:
         | {
             index: string;
@@ -174,6 +182,11 @@ declare namespace KungfuApi {
     >;
   }
 
+  interface KfExhibitConfig {
+    type: KfExtConfigTypes;
+    config: KfExhibitConfigItem[];
+  }
+
   interface KfExtConfig {
     name: string;
     category: string;
@@ -191,6 +204,7 @@ declare namespace KungfuApi {
       name: string;
       extPath: string;
       position: KfUIExtLocatorTypes;
+      exhibit: KfExhibitConfig;
       components:
         | {
             index: string;
