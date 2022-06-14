@@ -231,10 +231,10 @@ onMounted(() => {
 
 watch(
   () => formState.value.instrument,
-  (newVal, oldVal) => {
-    if (oldVal) {
+  (newVal) => {
+    nextTick(() => {
       isShotable.value = false;
-    }
+    });
     if (
       !formState.value.account_id &&
       currentGlobalKfLocation.value?.category !== 'td' &&
