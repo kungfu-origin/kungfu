@@ -553,6 +553,20 @@ export const getKfUIExtensionConfig =
     return getKfUIExtensionConfigByExtKey(kfExtConfigList);
   };
 
+export const getExhibitConfig =
+  async (): Promise<KungfuApi.KfExhibitConfigs> => {
+    const KfExtConfig: KungfuApi.KfUIExtConfigs =
+      await getKfUIExtensionConfig();
+    return Object.keys(KfExtConfig).reduce((extensionData, key) => {
+      const exhibitData: KungfuApi.KfExhibitConfig = KfExtConfig[key]?.exhibit;
+      extensionData[key] = {
+        type: exhibitData.type || '',
+        config: exhibitData.config || [],
+      };
+      return extensionData;
+    }, {});
+  };
+
 export const getAvailDaemonList = async (): Promise<
   KungfuApi.KfDaemonLocation[]
 > => {
@@ -580,16 +594,6 @@ export const getAvailScripts = async (): Promise<string[]> => {
   return Object.values(kfExtConfig || ({} as KungfuApi.KfUIExtConfigs))
     .filter((item) => Object.keys(item).length && item.script)
     .map((item) => path.resolve(item.extPath, item.script));
-};
-
-export const getExhibitConfig = async (): Promise<
-  Record<string, KungfuApi.KfExhibitConfigItem[]>
-> => {
-  const KfExtConfig: KungfuApi.KfUIExtConfigs = await getKfUIExtensionConfig();
-  return Object.keys(KfExtConfig).reduce((extensionData, key) => {
-    extensionData[key] = KfExtConfig[key]?.exhibit?.config || [];
-    return extensionData;
-  }, {});
 };
 
 export const isTdMd = (category: KfCategoryTypes) => {
