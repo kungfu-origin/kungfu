@@ -40,8 +40,8 @@ export const getConfigSettings = (
       key: 'instrument_B',
       name:
         side === SideEnum.Buy
-          ? t('futureArbitrageConfig.instrument_buy_B')
-          : t('futureArbitrageConfig.instrument_sell_B'),
+          ? t('futureArbitrageConfig.instrument_sell_B')
+          : t('futureArbitrageConfig.instrument_buy_B'),
       type: 'instrument',
       required: true,
     },
