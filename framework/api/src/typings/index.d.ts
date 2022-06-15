@@ -187,6 +187,8 @@ declare namespace KungfuApi {
     config: KfExhibitConfigItem[];
   }
 
+  export type KfExhibitConfigs = Record<string, KfExhibitConfig>;
+
   interface KfExtConfig {
     name: string;
     category: string;

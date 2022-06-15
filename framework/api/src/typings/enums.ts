@@ -168,7 +168,7 @@ export type KfUIExtLocatorTypes =
   | 'make_order'
   | 'trading_task_view';
 
-export type KfExtConfigTypes = 'form';
+export type KfExtConfigTypes = 'form' | '';
 
 export enum KfModeEnum {
   live,
