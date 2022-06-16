@@ -51,7 +51,7 @@ void Runner::inspect_channel(const event_ptr &event) {
 
 void Runner::on_start() {
   enable(*context_);
-  context_->get_bookkeeper().add_book_listener(shared_from_this());
+  context_->get_bookkeeper().add_book_listener(std::make_shared<BookListener>(*this));
   pre_start();
   events_ | take_until(events_ | filter([&](auto e) { return started_; })) | $$(prepare(event));
   post_start();
@@ -151,16 +151,18 @@ void Runner::prepare(const event_ptr &event) {
   post_start();
 }
 
-void Runner::on_book_sync_reset(const book::Book &old_book, const book::Book &new_book) {
-  auto context = std::dynamic_pointer_cast<Context>(context_);
-  for (const auto &strategy : strategies_) {
+Runner::BookListener::BookListener(Runner &runner) : runner_(runner) {}
+
+void Runner::BookListener::on_book_sync_reset(const book::Book &old_book, const book::Book &new_book) {
+  auto context = std::dynamic_pointer_cast<Context>(runner_.context_);
+  for (const auto &strategy : runner_.strategies_) {
     strategy->on_book_sync_reset(context, old_book, new_book);
   }
 }
 
-void Runner::on_asset_sync_reset(const longfist::types::Asset &old_asset, const longfist::types::Asset &new_asset) {
-  auto context = std::dynamic_pointer_cast<Context>(context_);
-  for (const auto &strategy : strategies_) {
+void Runner::BookListener::on_asset_sync_reset(const longfist::types::Asset &old_asset, const longfist::types::Asset &new_asset) {
+  auto context = std::dynamic_pointer_cast<Context>(runner_.context_);
+  for (const auto &strategy : runner_.strategies_) {
     strategy->on_asset_sync_reset(context, old_asset, new_asset);
   }
 }
