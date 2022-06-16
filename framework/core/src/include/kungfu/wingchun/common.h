@@ -61,28 +61,6 @@
 namespace kungfu::wingchun {
 constexpr int64_t VOLUME_ZERO = 0;
 
-// 商品类型根据exchange_id，映射对应的secType
-static const std::unordered_map<std::string, longfist::enums::InstrumentType> g_exchange_id_type_map_ = {
-    {EXCHANGE_HK, longfist::enums::InstrumentType::Stock},
-    {EXCHANGE_HK_OPTION, longfist::enums::InstrumentType::StockOption},
-    {EXCHANGE_US, longfist::enums::InstrumentType::Stock},
-    {EXCHANGE_GLFX, longfist::enums::InstrumentType::Stock},
-    {EXCHANGE_IPE, longfist::enums::InstrumentType::Future},
-    {EXCHANGE_CBOT, longfist::enums::InstrumentType::Future},
-    {EXCHANGE_CEC, longfist::enums::InstrumentType::Future},
-    {EXCHANGE_LIFE, longfist::enums::InstrumentType::Future},
-    {EXCHANGE_MTIF, longfist::enums::InstrumentType::Future},
-    {EXCHANGE_NYCE, longfist::enums::InstrumentType::Future},
-    {EXCHANGE_CMX, longfist::enums::InstrumentType::Future},
-    {EXCHANGE_NYME, longfist::enums::InstrumentType::Future},
-    {EXCHANGE_SIME, longfist::enums::InstrumentType::Future},
-    {EXCHANGE_CME, longfist::enums::InstrumentType::Future},
-    {EXCHANGE_IMM, longfist::enums::InstrumentType::Future},
-    {EXCHANGE_WIDX, longfist::enums::InstrumentType::Future},
-    {EXCHANGE_FREX, longfist::enums::InstrumentType::Future},
-    {EXCHANGE_METL, longfist::enums::InstrumentType::Future},
-    {EXCHANGE_IPM, longfist::enums::InstrumentType::Future}};
-
 class wingchun_error : public std::runtime_error {
 public:
   explicit wingchun_error(const std::string &__s) : std::runtime_error(__s) {}
@@ -212,12 +190,6 @@ inline int get_repo_expire_days(const std::string &instrument_id) {
 
 inline longfist::enums::InstrumentType get_instrument_type(const std::string &exchange_id,
                                                            const std::string &instrument_id) {
-  auto iter = g_exchange_id_type_map_.find(exchange_id);
-
-  if (iter != g_exchange_id_type_map_.end()) {
-    return iter->second;
-  }
-
   if (string_equals(exchange_id, EXCHANGE_SSE)) {
     if (startswith(instrument_id, "00")) {
       return longfist::enums::InstrumentType::Index;
