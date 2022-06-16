@@ -160,7 +160,8 @@ void Runner::BookListener::on_book_sync_reset(const book::Book &old_book, const 
   }
 }
 
-void Runner::BookListener::on_asset_sync_reset(const longfist::types::Asset &old_asset, const longfist::types::Asset &new_asset) {
+void Runner::BookListener::on_asset_sync_reset(const longfist::types::Asset &old_asset,
+                                               const longfist::types::Asset &new_asset) {
   auto context = std::dynamic_pointer_cast<Context>(runner_.context_);
   for (const auto &strategy : runner_.strategies_) {
     strategy->on_asset_sync_reset(context, old_asset, new_asset);
