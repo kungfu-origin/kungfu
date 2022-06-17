@@ -663,6 +663,8 @@ export const startTd = async (accountId: string): Promise<Proc | void> => {
   );
   return startProcess({
     name: `td_${accountId}`,
+    cwd: path.join(KF_RUNTIME_DIR, 'td', source, id),
+    script: path.join(KFC_DIR, kfcName),
     args,
     max_restarts: 3,
     autorestart: true,
