@@ -339,7 +339,9 @@ void Watcher::Feed(const event_ptr &event, bool is_restore) {
           hash_instruments_.insert(hash_value);
         }
       }
-      feed_state_data(event, data_bank_);
+      else {
+        feed_state_data(event, data_bank_);
+      }
     }
   }
 }
