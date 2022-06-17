@@ -107,6 +107,7 @@ private:
   std::unordered_map<uint32_t, longfist::types::InstrumentKey> subscribed_instruments_ = {};
   std::unordered_map<uint32_t, int> location_uid_states_map_ = {};
   std::unordered_map<uint32_t, longfist::types::StrategyStateUpdate> location_uid_strategy_states_map_ = {};
+  std::unordered_set<uint32_t> hash_instruments_ = {};
 
   static constexpr auto bypass = [](yijinjing::practice::apprentice *app, bool bypass_quotes) {
     return rx::filter([=](const event_ptr &event) {
@@ -114,7 +115,7 @@ private:
     });
   };
 
-  void Feed(const event_ptr &event);
+  void Feed(const event_ptr &event, bool is_restore = false);
 
   void RestoreState(const yijinjing::data::location_ptr &state_location, int64_t from, int64_t to, bool sync_schema);
 
@@ -205,11 +206,21 @@ private:
     return instruction.*id_ptr;
   }
 
-  template <typename DataType> void UpdateLedger(const boost::hana::basic_type<DataType> &type) {
+  template <typename DataType> 
+  std::enable_if_t<not std::is_same_v<DataType, longfist::types::Instrument>> UpdateLedger(const boost::hana::basic_type<DataType> &type) {
     for (auto &pair : data_bank_[type]) {
       auto &state = pair.second;
       update_ledger(state.update_time, state.source, state.dest, state.data);
     }
+  }
+
+  template <typename DataType> 
+  std::enable_if_t<std::is_same_v<DataType, longfist::types::Instrument>> UpdateLedger(const boost::hana::basic_type<DataType> &type) {
+    for (auto &pair : data_bank_[type]) {
+      auto &state = pair.second;
+      update_ledger(state.update_time, state.source, state.dest, state.data);
+    }
+    const_cast<std::unordered_map<uint64_t, state<DataType>> &>(data_bank_[type]).clear();
   }
 
   template <typename DataType> void UpdateOrder(const boost::hana::basic_type<DataType> &type) {
