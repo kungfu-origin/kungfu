@@ -644,6 +644,8 @@ export const startMd = async (sourceId: string): Promise<Proc | void> => {
   );
   return startProcess({
     name: `md_${sourceId}`,
+    cwd: path.join(KF_RUNTIME_DIR, 'md', sourceId, sourceId),
+    script: path.join(KFC_DIR, kfcName),
     args,
     max_restarts: 3,
     autorestart: true,
