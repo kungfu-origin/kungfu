@@ -4,7 +4,7 @@
     "name": "kungfu-trader",
     "email": "info@kungfu.link"
   },
-  "version": "2.4.0-alpha.74",
+  "version": "2.4.0-alpha.75",
   "description": "Kungfu App Framework",
   "license": "Apache-2.0",
   "repository": {
@@ -31,7 +31,7 @@
     "format": "prettier -l -w --config ../../.prettierrc.js ."
   },
   "dependencies": {
-    "@kungfu-trader/kungfu-js-api": "^2.4.0-alpha.74",
+    "@kungfu-trader/kungfu-js-api": "^2.4.0-alpha.75",
     "ant-design-vue": "^3.2.7",
     "core-js": "^3.20.0",
     "iconv-lite": "^0.6.3",
@@ -41,7 +41,7 @@
     "vue": "^3.2.34"
   },
   "devDependencies": {
-    "@kungfu-trader/kungfu-toolchain": "^2.4.0-alpha.74",
+    "@kungfu-trader/kungfu-toolchain": "^2.4.0-alpha.75",
     "electron": "^13.0.0"
   }
 }
