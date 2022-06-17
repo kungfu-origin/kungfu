@@ -1448,13 +1448,6 @@
     "@jridgewell/resolve-uri" "^3.0.3"
     "@jridgewell/sourcemap-codec" "^1.4.10"
 
-"@kungfu-trader/kfx-barrich@1.0.0-alpha.0":
-  version "1.0.0-alpha.0"
-  resolved "https://npm.pkg.github.com/download/@kungfu-trader/kfx-barrich/1.0.0-alpha.0/c4e66a43cbef49c9b25293945b21e253cc5f30ce0e4505870cf545f197d17bcb#cea3c8590f5a39bf7b6d38994823f008dc028bda"
-  integrity sha512-EzKzgAkz1IxH3KR/+uFBTgsZBQVHohCuhxJ/ppDpgE6xIaIArqaxcu5gzEUH1IccU75aOQOYhba04WMPljh+jQ==
-  dependencies:
-    "@kungfu-trader/kungfu-core" "^2.4.0-alpha.73"
-
 "@kungfu-trader/libnode@14.19.0":
   version "14.19.0"
   resolved "https://npm.pkg.github.com/download/@kungfu-trader/libnode/14.19.0/395de3d76c396801179b86b2e4a950bd77c3246414c46db6078333daca8cb92a#acca84a494fb85bfb8f4a629551475ca4ba5ef5a"
