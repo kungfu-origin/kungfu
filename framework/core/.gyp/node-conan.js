@@ -97,10 +97,10 @@ const cli = require('sywac')
     run: conanInstall,
   })
   .command('build', {
-    run: () =>
-      process.env.GITHUB_ACTIONS && process.platform == 'win32'
-        ? conanBuildOnGitHub()
-        : conanBuild(),
+    run: () => conanBuild()
+      // process.env.GITHUB_ACTIONS && process.platform == 'win32'
+      //   ? conanBuildOnGitHub()
+      //   : conanBuild(),
   })
   .command('package', {
     run: conanPackage,
