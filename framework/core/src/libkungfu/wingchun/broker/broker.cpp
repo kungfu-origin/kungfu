@@ -68,6 +68,40 @@ const location_ptr &BrokerService::get_home() const { return vendor_.get_home();
 
 writer_ptr BrokerService::get_writer(uint32_t dest_id) const { return vendor_.get_writer(dest_id); }
 
+bool BrokerService::check_if_stored_instruments(const std::string &trading_day) {
+  SPDLOG_INFO("CHECK_IF_STORED_INSTRUMENTS trading_day {}", trading_day);
+  auto &time_key_value_map = vendor_.get_state_bank()[boost::hana::type_c<TimeKeyValue>];
+  SPDLOG_INFO("time_key_value_map size {}", time_key_value_map.size());
+  for (auto &pair : time_key_value_map) {
+    const TimeKeyValue &timeKeyValue = pair.second.data;
+    if (timeKeyValue.key == "instrument_stored_trading_day" ||
+        timeKeyValue.key == "instrument_stored_trading_day_next_day") {
+      if (timeKeyValue.value == trading_day) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+void BrokerService::record_instruments_stored_trading_day(const std::string &trading_day) {
+  auto writer = get_writer(location::PUBLIC);
+  TimeKeyValue instrument_stored_trading_day_tkv = {};
+  instrument_stored_trading_day_tkv.update_time = vendor_.now();
+  instrument_stored_trading_day_tkv.key = "instrument_stored_trading_day";
+  instrument_stored_trading_day_tkv.value = trading_day;
+  writer->write(vendor_.now(), instrument_stored_trading_day_tkv);
+
+  //为了解决夜盘的问题
+  TimeKeyValue instrument_stored_trading_day_next_day_tkv = {};
+  instrument_stored_trading_day_next_day_tkv.update_time = time::next_trading_day_end(vendor_.now());
+  instrument_stored_trading_day_next_day_tkv.key = "instrument_stored_trading_day_next_day";
+  instrument_stored_trading_day_next_day_tkv.value = trading_day;
+  writer->write(vendor_.now(), instrument_stored_trading_day_next_day_tkv);
+
+  SPDLOG_INFO("INSTRUMENT_STORED_TRADING_DAY {}", trading_day);
+}
+
 void BrokerService::add_timer(int64_t nanotime, const std::function<void(const event_ptr &)> &callback) {
   vendor_.add_timer(nanotime, callback);
 }

@@ -206,16 +206,18 @@ private:
     return instruction.*id_ptr;
   }
 
-  template <typename DataType> 
-  std::enable_if_t<not std::is_same_v<DataType, longfist::types::Instrument>> UpdateLedger(const boost::hana::basic_type<DataType> &type) {
+  template <typename DataType>
+  std::enable_if_t<not std::is_same_v<DataType, longfist::types::Instrument>>
+  UpdateLedger(const boost::hana::basic_type<DataType> &type) {
     for (auto &pair : data_bank_[type]) {
       auto &state = pair.second;
       update_ledger(state.update_time, state.source, state.dest, state.data);
     }
   }
 
-  template <typename DataType> 
-  std::enable_if_t<std::is_same_v<DataType, longfist::types::Instrument>> UpdateLedger(const boost::hana::basic_type<DataType> &type) {
+  template <typename DataType>
+  std::enable_if_t<std::is_same_v<DataType, longfist::types::Instrument>>
+  UpdateLedger(const boost::hana::basic_type<DataType> &type) {
     for (auto &pair : data_bank_[type]) {
       auto &state = pair.second;
       update_ledger(state.update_time, state.source, state.dest, state.data);

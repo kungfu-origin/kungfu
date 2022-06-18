@@ -616,14 +616,6 @@ declare namespace KungfuApi {
     ask_volume: bigint[]; //申卖量
   }
 
-  export interface TimeValue {
-    update_time: bigint;
-    tag_a: string;
-    tag_b: string;
-    tag_c: string;
-    value: string;
-  }
-
   export interface Trade {
     trade_id: bigint; //成交ID
     order_id: bigint; //订单ID
@@ -677,7 +669,6 @@ declare namespace KungfuApi {
     OrderStat: DataTable<OrderStat>;
     Position: DataTable<Position>;
     Quote: DataTable<Quote>;
-    TimeValue: DataTable<TimeValue>;
     Trade: DataTable<Trade>;
   }
 
@@ -692,7 +683,6 @@ declare namespace KungfuApi {
     OrderStat: OrderStat;
     Position: Position;
     Quote: Quote;
-    TimeValue: TimeValue;
     Trade: Trade;
   }
 
@@ -707,7 +697,6 @@ declare namespace KungfuApi {
     | OrderStat
     | Position
     | Quote
-    | TimeValue
     | Trade;
 
   export type TradingDataTypeName = keyof TradingData;
@@ -800,7 +789,6 @@ declare namespace KungfuApi {
     OrderStat(): OrderStat;
     Position(): Position;
     Quote(): Quote;
-    TimeValue(): TimeValue;
     Trade(): Trade;
     Commission(): Commission;
     RiskSetting(): RiskSettingOrigin;
