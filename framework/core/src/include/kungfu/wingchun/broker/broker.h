@@ -63,6 +63,10 @@ public:
 
   [[nodiscard]] yijinjing::journal::writer_ptr get_writer(uint32_t dest_id) const;
 
+  [[nodiscard]] bool check_if_stored_instruments(const std::string &trading_day);
+
+  void record_instruments_stored_trading_day(const std::string &trading_day);
+
   void add_timer(int64_t nanotime, const std::function<void(const event_ptr &)> &callback);
 
   void add_time_interval(int64_t nanotime, const std::function<void(const event_ptr &)> &callback);
