@@ -331,10 +331,10 @@ void Watcher::Feed(const event_ptr &event, bool is_restore) {
       }
     });
     if (!is_order) {
-      if(!is_restore && Instrument::tag == event->msg_type()) {
+      if (!is_restore && Instrument::tag == event->msg_type()) {
         auto instrument_item = event->data<Instrument>();
         uint32_t hash_value = hash_instrument(instrument_item.exchange_id, instrument_item.instrument_id);
-        if(hash_instruments_.find(hash_value) == hash_instruments_.end()) {
+        if (hash_instruments_.find(hash_value) == hash_instruments_.end()) {
           data_bank_ << typed_event_ptr<Instrument>(event);
           hash_instruments_.insert(hash_value);
         }
