@@ -289,7 +289,7 @@ void Watcher::Init(Napi::Env env, Napi::Object exports) {
 }
 
 void Watcher::on_react() {
-  events_ | take_until(events_ | is(RequestStart::tag)) | bypass(this, bypass_quotes_) | $$(Feed(event));
+  events_ | take_until(events_ | is(RequestStart::tag)) | bypass(this, bypass_quotes_) | $$(Feed(event, true));
 }
 
 void Watcher::on_start() {
@@ -298,7 +298,7 @@ void Watcher::on_start() {
   bookkeeper_.guard_positions();
   bookkeeper_.add_book_listener(std::make_shared<BookListener>(*this));
 
-  events_ | bypass(this, bypass_quotes_) | $$(Feed(event, true));
+  events_ | bypass(this, bypass_quotes_) | $$(Feed(event));
   events_ | is(OrderInput::tag) | $$(UpdateBook(event, event->data<OrderInput>()));
   events_ | is(Order::tag) | $$(UpdateBook(event, event->data<Order>()));
   events_ | is(Trade::tag) | $$(UpdateBook(event, event->data<Trade>()));
@@ -339,7 +339,9 @@ void Watcher::Feed(const event_ptr &event, bool is_restore) {
           hash_instruments_.insert(hash_value);
         }
       }
-      feed_state_data(event, data_bank_);
+      else {
+        feed_state_data(event, data_bank_);
+      }
     }
   }
 }
