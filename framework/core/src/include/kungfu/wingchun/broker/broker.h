@@ -61,7 +61,18 @@ public:
 
   [[nodiscard]] const yijinjing::data::location_ptr &get_home() const;
 
+  [[nodiscard]] const yijinjing::io_device_ptr get_io_device() const;
+
   [[nodiscard]] yijinjing::journal::writer_ptr get_writer(uint32_t dest_id) const;
+
+  [[nodiscard]] bool has_writer(uint32_t dest_id) const;
+
+  template <typename DataType>
+  void write_to(int64_t trigger_time, DataType &data, uint32_t dest_id = yijinjing::data::location::PUBLIC) {
+    vendor_.write_to(trigger_time, data, dest_id);
+  }
+
+  [[nodiscard]] const yijinjing::cache::bank &get_state_bank() const;
 
   [[nodiscard]] bool check_if_stored_instruments(const std::string &trading_day);
 

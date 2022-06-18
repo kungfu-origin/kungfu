@@ -19,9 +19,4 @@
     return std::static_pointer_cast<kungfu::wingchun::broker::Trader>(std::make_shared<TraderType>(vendor));           \
   })
 
-#define KUNGFU_DEFINE_STRATEGY(StrategyType)                                                                           \
-  m.def("strategy", [&]() {                                                                                            \
-    return std::static_pointer_cast<kungfu::wingchun::strategy::Strategy>(std::make_shared<StrategyType>());           \
-  })
-
 #endif // KUNGFU_EXTENSION_H

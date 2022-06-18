@@ -68,10 +68,11 @@ const location_ptr &BrokerService::get_home() const { return vendor_.get_home();
 
 writer_ptr BrokerService::get_writer(uint32_t dest_id) const { return vendor_.get_writer(dest_id); }
 
+const cache::bank &BrokerService::get_state_bank() const { return vendor_.get_state_bank(); }
+
 bool BrokerService::check_if_stored_instruments(const std::string &trading_day) {
   SPDLOG_INFO("CHECK_IF_STORED_INSTRUMENTS trading_day {}", trading_day);
   auto &time_key_value_map = vendor_.get_state_bank()[boost::hana::type_c<TimeKeyValue>];
-  SPDLOG_INFO("time_key_value_map size {}", time_key_value_map.size());
   for (auto &pair : time_key_value_map) {
     const TimeKeyValue &timeKeyValue = pair.second.data;
     if (timeKeyValue.key == "instrument_stored_trading_day" ||
