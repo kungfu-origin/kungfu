@@ -12,8 +12,8 @@ jobs:
     uses: kungfu-trader/workflows/.github/workflows/.release-verify.yml@v1
     with:
       use-pipenv: true
-      build-timeout-minutes: 210
-      max-build-attempts: 2
+      build-timeout-minutes: 150
+      max-build-attempts: 3
     secrets:
       AWS_CI_ACCESS_KEY_ID: ${{ secrets.AWS_CI_ACCESS_KEY_ID }}
       AWS_CI_SECRET_ACCESS_KEY: ${{ secrets.AWS_CI_SECRET_ACCESS_KEY }}
