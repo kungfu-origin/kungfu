@@ -68,6 +68,8 @@ uint32_t BrokerService::get_home_uid() const { return vendor_.get_home_uid(); }
 
 writer_ptr BrokerService::get_writer(uint32_t dest_id) const { return vendor_.get_writer(dest_id); }
 
+bool has_writer(uint32_t dest_id) const { return vendor_.has_writer(dest_id); }
+
 const cache::bank &BrokerService::get_state_bank() const { return vendor_.get_state_bank(); }
 
 bool BrokerService::check_if_stored_instruments(const std::string &trading_day) {
