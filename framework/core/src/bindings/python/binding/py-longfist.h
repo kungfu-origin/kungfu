@@ -11,6 +11,11 @@ namespace kungfu::longfist {
 
 void bind(pybind11::module &&m);
 
+namespace pybind {
+void bind_types(pybind11::module &m);
+void bind_enums(pybind11::module &m);
+} // namespace pybind
+
 } // namespace kungfu::longfist
 
 #endif // KUNGFU_PY_LONGFIST_HPP

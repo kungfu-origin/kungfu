@@ -1,14 +1,10 @@
-#include "py_wingchun.h"
+#include "py-wingchun.h"
 
 #include <pybind11/functional.h>
 
 #include <kungfu/wingchun/strategy/context.h>
 #include <kungfu/wingchun/strategy/runner.h>
 
-namespace kungfu::wingchun {
-namespace py = pybind11;
-
-using namespace kungfu;
 using namespace kungfu::longfist;
 using namespace kungfu::longfist::types;
 using namespace kungfu::yijinjing;
@@ -16,6 +12,10 @@ using namespace kungfu::yijinjing::data;
 using namespace kungfu::yijinjing::journal;
 using namespace kungfu::wingchun;
 using namespace kungfu::wingchun::book;
+
+namespace py = pybind11;
+
+namespace kungfu::wingchun::pybind {
 
 class PyRunner : public strategy::Runner {
 public:
@@ -166,4 +166,4 @@ void bind_strategy(pybind11::module &m) {
       .def("on_history_trade", &strategy::Strategy::on_history_trade);
   ;
 }
-} // namespace kungfu::wingchun
+} // namespace kungfu::wingchun::pybind

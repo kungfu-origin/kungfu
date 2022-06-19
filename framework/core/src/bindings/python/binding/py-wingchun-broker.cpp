@@ -1,14 +1,10 @@
-#include "py_wingchun.h"
+#include "py-wingchun.h"
 
 #include <pybind11/functional.h>
 
 #include <kungfu/wingchun/broker/marketdata.h>
 #include <kungfu/wingchun/broker/trader.h>
 
-namespace kungfu::wingchun {
-namespace py = pybind11;
-
-using namespace kungfu;
 using namespace kungfu::longfist;
 using namespace kungfu::longfist::types;
 using namespace kungfu::yijinjing;
@@ -17,6 +13,9 @@ using namespace kungfu::yijinjing::journal;
 using namespace kungfu::wingchun;
 using namespace kungfu::wingchun::broker;
 
+namespace py = pybind11;
+
+namespace kungfu::wingchun::pybind {
 class PyBrokerVendor : public BrokerVendor {
 public:
   using BrokerVendor::BrokerVendor;
@@ -123,4 +122,4 @@ void bind_broker(pybind11::module &m) {
       .def(py::init<locator_ptr, const std::string &, const std::string &, bool>())
       .def("set_service", &TraderVendor::set_service);
 }
-} // namespace kungfu::wingchun
+} // namespace kungfu::wingchun::pybind
