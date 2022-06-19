@@ -87,7 +87,6 @@ void cached::handle_cached_feeds() {
       while (iter != feed_map.end() and !stored_controller) {
         auto &s = iter->second;
         auto source_id = s.source;
-
         if (app_cache_shift_.find(source_id) != app_cache_shift_.end()) {
           try {
             app_cache_shift_.at(source_id) << s;
@@ -139,6 +138,7 @@ void cached::on_location(const event_ptr &event) { profile_bank_ << typed_event_
 void cached::inspect_channel(int64_t trigger_time, const Channel &channel) {
   if (channel.source_id != get_live_home_uid() and channel.dest_id != get_live_home_uid()) {
     reader_->join(get_location(channel.source_id), channel.dest_id, trigger_time);
+    reader_->join(get_location(channel.source_id), location::PUBLIC, trigger_time);
     channel_trigger_make_cache_shift(channel);
   }
 }
