@@ -75,7 +75,7 @@ public:
 
   [[nodiscard]] const yijinjing::cache::bank &get_state_bank() const;
 
-  [[nodiscard]] bool check_if_stored_instruments(const std::string &trading_day);
+  [[nodiscard]] bool check_if_stored_instruments(const std::string &trading_day) const;
 
   void record_stored_instruments_trading_day(const std::string &trading_day);
 
