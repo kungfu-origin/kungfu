@@ -4,8 +4,9 @@
 
 using namespace kungfu::longfist::enums;
 
-namespace kungfu::longfist::pybind {
 namespace py = pybind11;
+
+namespace kungfu::longfist::pybind {
 
 void bind_enums(py::module &m) {
   auto m_enums = m.def_submodule("enums");
