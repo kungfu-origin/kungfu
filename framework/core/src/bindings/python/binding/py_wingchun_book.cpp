@@ -1,10 +1,17 @@
 #include "py_wingchun.h"
 
-#include <pybind11/functional.h>
 #include <pybind11/stl.h>
 #include <pybind11/stl_bind.h>
 
 #include <kungfu/wingchun/book/bookkeeper.h>
+
+PYBIND11_MAKE_OPAQUE(kungfu::wingchun::book::CommissionMap)
+PYBIND11_MAKE_OPAQUE(kungfu::wingchun::book::InstrumentMap)
+PYBIND11_MAKE_OPAQUE(kungfu::wingchun::book::PositionMap)
+PYBIND11_MAKE_OPAQUE(kungfu::wingchun::book::PositionDetailMap)
+PYBIND11_MAKE_OPAQUE(kungfu::wingchun::book::OrderInputMap)
+PYBIND11_MAKE_OPAQUE(kungfu::wingchun::book::OrderMap)
+PYBIND11_MAKE_OPAQUE(kungfu::wingchun::book::TradeMap)
 
 namespace kungfu::wingchun {
 namespace py = pybind11;

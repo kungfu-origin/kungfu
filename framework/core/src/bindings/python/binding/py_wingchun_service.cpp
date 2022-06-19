@@ -1,9 +1,5 @@
 #include "py_wingchun.h"
 
-#include <pybind11/functional.h>
-#include <pybind11/stl.h>
-#include <pybind11/stl_bind.h>
-
 #include <kungfu/wingchun/service/bar.h>
 #include <kungfu/wingchun/service/ledger.h>
 

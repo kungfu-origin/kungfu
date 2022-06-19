@@ -1,8 +1,6 @@
 #include "py_wingchun.h"
 
 #include <pybind11/functional.h>
-#include <pybind11/stl.h>
-#include <pybind11/stl_bind.h>
 
 #include <kungfu/wingchun/strategy/context.h>
 #include <kungfu/wingchun/strategy/runner.h>
@@ -18,7 +16,6 @@ using namespace kungfu::yijinjing::data;
 using namespace kungfu::yijinjing::journal;
 using namespace kungfu::wingchun;
 using namespace kungfu::wingchun::book;
-
 
 class PyRunner : public strategy::Runner {
 public:
