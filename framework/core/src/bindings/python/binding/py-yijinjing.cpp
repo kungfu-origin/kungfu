@@ -1,4 +1,4 @@
-#include "py_yijinjing.h"
+#include "py-yijinjing.h"
 
 #include <pybind11/stl.h>
 
@@ -17,22 +17,21 @@
 #include <kungfu/yijinjing/time.h>
 #include <kungfu/yijinjing/util/util.h>
 
-namespace kungfu::yijinjing {
-namespace py = pybind11;
-
-using namespace kungfu;
 using namespace kungfu::longfist;
 using namespace kungfu::longfist::types;
+using namespace kungfu::longfist::types;
 using namespace kungfu::longfist::enums;
-using namespace kungfu::yijinjing;
 using namespace kungfu::yijinjing::cache;
 using namespace kungfu::yijinjing::data;
 using namespace kungfu::yijinjing::index;
 using namespace kungfu::yijinjing::journal;
+using namespace kungfu::yijinjing::log;
 using namespace kungfu::yijinjing::nanomsg;
-using namespace kungfu::yijinjing::util;
 using namespace kungfu::yijinjing::practice;
 
+namespace py = pybind11;
+
+namespace kungfu::yijinjing {
 class PyLocator : public locator {
   using locator::locator;
 
@@ -142,9 +141,9 @@ template <typename DataType> DataType event_to_data(const event &e) { return e.d
 void bind(pybind11::module &&m) {
   yijinjing::ensure_sqlite_initilize();
 
-  m.def("thread_id", &get_thread_id);
-  m.def("in_color_terminal", &in_color_terminal);
-  m.def("color_print", &color_print);
+  m.def("thread_id", &util::get_thread_id);
+  m.def("in_color_terminal", &util::in_color_terminal);
+  m.def("color_print", &util::color_print);
 
   // nanosecond-time related
   m.def("now_in_nano", &time::now_in_nano);
@@ -153,10 +152,10 @@ void bind(pybind11::module &&m) {
         py::arg("format") = KUNGFU_TIMESTAMP_FORMAT);
   m.def("strfnow", &time::strfnow, py::arg("format") = KUNGFU_TIMESTAMP_FORMAT);
 
-  m.def("setup_log", &kungfu::yijinjing::log::setup_log);
+  m.def("setup_log", &setup_log);
 
-  m.def("hash_32", &hash_32, py::arg("key"), py::arg("length"), py::arg("seed") = KUNGFU_HASH_SEED);
-  m.def("hash_str_32", &hash_str_32, py::arg("key"), py::arg("seed") = KUNGFU_HASH_SEED);
+  m.def("hash_32", &util::hash_32, py::arg("key"), py::arg("length"), py::arg("seed") = KUNGFU_HASH_SEED);
+  m.def("hash_str_32", &util::hash_str_32, py::arg("key"), py::arg("seed") = KUNGFU_HASH_SEED);
   m.def("get_page_path", &page::get_page_path);
 
   py::enum_<nanomsg::protocol>(m, "protocol", py::arithmetic(), "Nanomsg Protocol")
@@ -314,7 +313,7 @@ void bind(pybind11::module &&m) {
       .def("rebuild_index_db", &session_builder::rebuild_index_db);
 
   auto profile_class = py::class_<profile, std::shared_ptr<profile>>(m, "profile");
-  profile_class.def(py::init<const yijinjing::locator_ptr &>());
+  profile_class.def(py::init<const locator_ptr &>());
   boost::hana::for_each(longfist::ProfileDataTypes, [&](auto type) {
     using DataType = typename decltype(+boost::hana::second(type))::type;
     profile_class.def("set", &profile::set<DataType>);

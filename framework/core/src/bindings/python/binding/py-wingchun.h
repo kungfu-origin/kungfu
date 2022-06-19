@@ -11,6 +11,8 @@ namespace kungfu::wingchun {
 
 void bind(pybind11::module &&m);
 
+namespace pybind {
+
 void bind_book(pybind11::module &m);
 
 void bind_broker(pybind11::module &m);
@@ -20,6 +22,7 @@ void bind_service(pybind11::module &m);
 void bind_strategy(pybind11::module &m);
 
 void bind_utils(pybind11::module &m);
+} // namespace pybind
 
 } // namespace kungfu::wingchun
 
