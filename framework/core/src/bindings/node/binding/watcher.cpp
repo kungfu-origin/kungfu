@@ -338,8 +338,7 @@ void Watcher::Feed(const event_ptr &event, bool is_restore) {
           data_bank_ << typed_event_ptr<Instrument>(event);
           hash_instruments_.insert(hash_value);
         }
-      }
-      else {
+      } else {
         feed_state_data(event, data_bank_);
       }
     }

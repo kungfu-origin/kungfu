@@ -271,6 +271,7 @@ class KungfuCoreConan(ConanFile):
             "critical": "SPDLOG_LEVEL_CRITICAL",
         }
         log_level = spdlog_levels[str(self.options.log_level)]
+
         parallel_level = os.cpu_count()
 
         python_path = (
