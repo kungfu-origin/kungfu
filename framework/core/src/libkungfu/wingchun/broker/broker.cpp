@@ -49,22 +49,22 @@ int64_t BrokerService::now() const { return vendor_.now(); }
 BrokerState BrokerService::get_state() { return state_; }
 
 const std::string &BrokerService::get_config() {
-  auto &config_map = vendor_.get_state_bank()[boost::hana::type_c<Config>];
-  auto &config_obj = config_map.at(vendor_.get_home_uid());
+  auto &config_map = get_state_bank()[boost::hana::type_c<Config>];
+  auto &config_obj = config_map.at(get_home_uid());
   return config_obj.data.value;
 }
 
 const std::string &BrokerService::get_risk_setting() {
   auto &risk_setting_map = vendor_.get_state_bank()[boost::hana::type_c<RiskSetting>];
-  auto &risk_setting_obj = risk_setting_map.at(vendor_.get_home_uid());
+  auto &risk_setting_obj = risk_setting_map.at(get_home_uid());
   return risk_setting_obj.data.value;
 }
 
-std::string BrokerService::get_runtime_folder() {
-  return vendor_.get_locator()->layout_dir(vendor_.get_home(), layout::LOG);
-}
+std::string BrokerService::get_runtime_folder() { return vendor_.get_locator()->layout_dir(get_home(), layout::LOG); }
 
 const location_ptr &BrokerService::get_home() const { return vendor_.get_home(); }
+
+uint32_t BrokerService::get_home_uid() const { return vendor_.get_home_uid(); }
 
 writer_ptr BrokerService::get_writer(uint32_t dest_id) const { return vendor_.get_writer(dest_id); }
 
@@ -72,7 +72,7 @@ const cache::bank &BrokerService::get_state_bank() const { return vendor_.get_st
 
 bool BrokerService::check_if_stored_instruments(const std::string &trading_day) {
   SPDLOG_INFO("CHECK_IF_STORED_INSTRUMENTS trading_day {}", trading_day);
-  auto &time_key_value_map = vendor_.get_state_bank()[boost::hana::type_c<TimeKeyValue>];
+  auto &time_key_value_map = get_state_bank()[boost::hana::type_c<TimeKeyValue>];
   for (auto &pair : time_key_value_map) {
     const TimeKeyValue &timeKeyValue = pair.second.data;
     if (timeKeyValue.key == "instrument_stored_trading_day" ||
@@ -88,17 +88,17 @@ bool BrokerService::check_if_stored_instruments(const std::string &trading_day) 
 void BrokerService::record_instruments_stored_trading_day(const std::string &trading_day) {
   auto writer = get_writer(location::PUBLIC);
   TimeKeyValue instrument_stored_trading_day_tkv = {};
-  instrument_stored_trading_day_tkv.update_time = vendor_.now();
+  instrument_stored_trading_day_tkv.update_time = now();
   instrument_stored_trading_day_tkv.key = "instrument_stored_trading_day";
   instrument_stored_trading_day_tkv.value = trading_day;
-  writer->write(vendor_.now(), instrument_stored_trading_day_tkv);
+  writer->write(now(), instrument_stored_trading_day_tkv);
 
   //为了解决夜盘的问题
   TimeKeyValue instrument_stored_trading_day_next_day_tkv = {};
   instrument_stored_trading_day_next_day_tkv.update_time = time::next_trading_day_end(vendor_.now());
   instrument_stored_trading_day_next_day_tkv.key = "instrument_stored_trading_day_next_day";
   instrument_stored_trading_day_next_day_tkv.value = trading_day;
-  writer->write(vendor_.now(), instrument_stored_trading_day_next_day_tkv);
+  writer->write(now(), instrument_stored_trading_day_next_day_tkv);
 
   SPDLOG_INFO("INSTRUMENT_STORED_TRADING_DAY {}", trading_day);
 }

@@ -61,6 +61,8 @@ public:
 
   [[nodiscard]] const yijinjing::data::location_ptr &get_home() const;
 
+  [[nodiscard]] uint32_t get_home_uid() const;
+
   [[nodiscard]] const yijinjing::io_device_ptr get_io_device() const;
 
   [[nodiscard]] yijinjing::journal::writer_ptr get_writer(uint32_t dest_id) const;
