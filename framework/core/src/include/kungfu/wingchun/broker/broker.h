@@ -75,9 +75,9 @@ public:
 
   [[nodiscard]] const yijinjing::cache::bank &get_state_bank() const;
 
-  [[nodiscard]] bool check_if_stored_instruments(const std::string &trading_day);
+  [[nodiscard]] bool check_if_stored_instruments(const std::string &trading_day) const;
 
-  void record_instruments_stored_trading_day(const std::string &trading_day);
+  void record_stored_instruments_trading_day(const std::string &trading_day);
 
   void add_timer(int64_t nanotime, const std::function<void(const event_ptr &)> &callback);
 
@@ -86,10 +86,12 @@ public:
   void update_broker_state(BrokerState state);
 
 protected:
-  BrokerVendor &vendor_;
-
   volatile BrokerState state_;
+
+private:
+  BrokerVendor &vendor_;
 };
+
 } // namespace kungfu::wingchun::broker
 
 #endif // WINGCHUN_BROKER_H
