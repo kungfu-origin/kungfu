@@ -68,11 +68,11 @@ uint32_t BrokerService::get_home_uid() const { return vendor_.get_home_uid(); }
 
 writer_ptr BrokerService::get_writer(uint32_t dest_id) const { return vendor_.get_writer(dest_id); }
 
-bool has_writer(uint32_t dest_id) const { return vendor_.has_writer(dest_id); }
+bool BrokerService::has_writer(uint32_t dest_id) { return vendor_.has_writer(dest_id); }
 
 const cache::bank &BrokerService::get_state_bank() const { return vendor_.get_state_bank(); }
 
-bool BrokerService::check_if_stored_instruments(const std::string &trading_day) {
+bool BrokerService::check_if_stored_instruments(const std::string &trading_day) const {
   SPDLOG_INFO("CHECK_IF_STORED_INSTRUMENTS trading_day {}", trading_day);
   auto &time_key_value_map = get_state_bank()[boost::hana::type_c<TimeKeyValue>];
   for (auto &pair : time_key_value_map) {
