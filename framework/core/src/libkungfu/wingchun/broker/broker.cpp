@@ -55,7 +55,7 @@ const std::string &BrokerService::get_config() {
 }
 
 const std::string &BrokerService::get_risk_setting() {
-  auto &risk_setting_map = vendor_.get_state_bank()[boost::hana::type_c<RiskSetting>];
+  auto &risk_setting_map = get_state_bank()[boost::hana::type_c<RiskSetting>];
   auto &risk_setting_obj = risk_setting_map.at(get_home_uid());
   return risk_setting_obj.data.value;
 }
@@ -95,7 +95,7 @@ void BrokerService::record_instruments_stored_trading_day(const std::string &tra
 
   //为了解决夜盘的问题
   TimeKeyValue instrument_stored_trading_day_next_day_tkv = {};
-  instrument_stored_trading_day_next_day_tkv.update_time = time::next_trading_day_end(vendor_.now());
+  instrument_stored_trading_day_next_day_tkv.update_time = time::next_trading_day_end(now());
   instrument_stored_trading_day_next_day_tkv.key = "instrument_stored_trading_day_next_day";
   instrument_stored_trading_day_next_day_tkv.value = trading_day;
   writer->write(now(), instrument_stored_trading_day_next_day_tkv);
