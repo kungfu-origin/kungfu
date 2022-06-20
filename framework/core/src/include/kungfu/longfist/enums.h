@@ -114,24 +114,24 @@ enum class BsFlag : int8_t { Unknown, Buy, Sell };
 inline std::ostream &operator<<(std::ostream &os, BsFlag t) { return os << int8_t(t); }
 
 enum class Side : int8_t {
-  Buy,                      //买入
-  Sell,                     //卖出
-  Lock,                     //锁仓
-  Unlock,                   //解锁
-  Exec,                     //行权
-  Drop,                     //放弃行权
-  Purchase,                 //申购
-  Redemption,               //赎回
-  Split,                    //拆分
-  Merge,                    //合并
-  MarginTrade,              //融资买入
-  ShortSell,                //融券卖出
-  RepayMargin,              //卖券还款
-  RepayStock,               //买券还券
-  CashRepayMargin,          //现金还款
-  StockRepayStock,          //现券还券
-  SurplusStockTransfer,     //余券划转
-  GuaranteeStockTransferIn, //担保品转入
+  Buy,                       //买入
+  Sell,                      //卖出
+  Lock,                      //锁仓
+  Unlock,                    //解锁
+  Exec,                      //行权
+  Drop,                      //放弃行权
+  Purchase,                  //申购
+  Redemption,                //赎回
+  Split,                     //拆分
+  Merge,                     //合并
+  MarginTrade,               //融资买入
+  ShortSell,                 //融券卖出
+  RepayMargin,               //卖券还款
+  RepayStock,                //买券还券
+  CashRepayMargin,           //现金还款
+  StockRepayStock,           //现券还券
+  SurplusStockTransfer,      //余券划转
+  GuaranteeStockTransferIn,  //担保品转入
   GuaranteeStockTransferOut, //担保品转出
   Unknown = 127
 };
@@ -223,46 +223,45 @@ enum class StrategyState : int8_t { Normal, Warn, Error };
 inline std::ostream &operator<<(std::ostream &os, StrategyState t) { return os << int8_t(t); }
 //权限订阅数据类型
 enum class MarketType : uint8_t {
-  kNone = 0, ///< 表示全市场
-  kNEEQ = 2,          ///< 北交所
-  kSHFE = 3,          ///< 上期所
-  kCFFEX = 4,         ///< 中金所
-  kDCE = 5,           ///< 大商所
-  kCZCE = 6,          ///< 郑商所
-  kINE = 7,           ///< 上期能源
-  kSSE = 101,         ///< 上交所
-  kSZSE = 102,        ///< 深交所
+  kNone = 0,   ///< 表示全市场
+  kNEEQ = 2,   ///< 北交所
+  kSHFE = 3,   ///< 上期所
+  kCFFEX = 4,  ///< 中金所
+  kDCE = 5,    ///< 大商所
+  kCZCE = 6,   ///< 郑商所
+  kINE = 7,    ///< 上期能源
+  kSSE = 101,  ///< 上交所
+  kSZSE = 102, ///< 深交所
   kHKEx = 103, ///< 港交所(暂时不支持直连港交所, 港交所行情数据通过深交所和上交所的港股通获取, 市场类型为kSZSE/kSSE)
   kMax = 150   ///< 市场类型最大值
 };
 
 //证券数据类型
-enum class SubscribeSecuDataType : uint64_t
-{
-    kNone                                 = 0x000000000000,    ///< 订阅全部证券数据类别
-    kSnapshot                             = 0x000000000001,    ///< 订阅快照数据类别
-    kTickExecution                        = 0x000000000002,    ///< 订阅逐笔成交数据
-    kTickOrder                            = 0x000000000004,    ///< 订阅逐笔委托数据
-    kOrderQueue                           = 0x000000000008,    ///< 订阅委托队列数据
+enum class SubscribeSecuDataType : uint64_t {
+  kNone = 0x000000000000,          ///< 订阅全部证券数据类别
+  kSnapshot = 0x000000000001,      ///< 订阅快照数据类别
+  kTickExecution = 0x000000000002, ///< 订阅逐笔成交数据
+  kTickOrder = 0x000000000004,     ///< 订阅逐笔委托数据
+  kOrderQueue = 0x000000000008,    ///< 订阅委托队列数据
 };
 
 // class SubscribeCategory {
 //   public:
 //证券品种类型
-enum class SubscribeCategoryType : uint64_t 
-{
-    kNone                                 = 0x000000000000,    ///< 订阅全部证券品种类别
-    kStock                                = 0x000000000001,    ///< 订阅股票证券品种类别
-    kFund                                 = 0x000000000002,    ///< 订阅基金证券品种类别
-    kBond                                 = 0x000000000004,    ///< 订阅债券证券品种类别
-    kIndex                                = 0x000000000008,    ///< 订阅指数证券品种类别
-    kHKT                                  = 0x000000000010,    ///< 订阅港股通证券品种类别
-    kOption                               = 0x000000000020,    ///< 订阅期权证券品种类别
-    kFutureOption                         = 0x000000000040,    ///< 订阅期货/期货期权证券品种类别
-    kOthers                               = 0x100000000000,    ///< 订阅其他证券品种类别
+enum class SubscribeCategoryType : uint64_t {
+  kNone = 0x000000000000,         ///< 订阅全部证券品种类别
+  kStock = 0x000000000001,        ///< 订阅股票证券品种类别
+  kFund = 0x000000000002,         ///< 订阅基金证券品种类别
+  kBond = 0x000000000004,         ///< 订阅债券证券品种类别
+  kIndex = 0x000000000008,        ///< 订阅指数证券品种类别
+  kHKT = 0x000000000010,          ///< 订阅港股通证券品种类别
+  kOption = 0x000000000020,       ///< 订阅期权证券品种类别
+  kFutureOption = 0x000000000040, ///< 订阅期货/期货期权证券品种类别
+  kOthers = 0x100000000000,       ///< 订阅其他证券品种类别
 };
 
-template <typename T, typename U>
-inline T sub_data_bitwise(const T &a, const T &b) { return static_cast<T>(static_cast<U>(a) | static_cast<U>(b)); }
+template <typename T, typename U> inline T sub_data_bitwise(const T &a, const T &b) {
+  return static_cast<T>(static_cast<U>(a) | static_cast<U>(b));
+}
 } // namespace kungfu::longfist::enums
 #endif // KUNGFU_LONGFIST_ENUM_H

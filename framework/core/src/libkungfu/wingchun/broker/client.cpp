@@ -232,10 +232,10 @@ void PassiveClient::subscribe(const location_ptr &md_location, const std::string
   Client::subscribe(md_location, exchange_id, instrument_id);
 }
 
-void PassiveClient::subscribe_all(const location_ptr &md_location, uint8_t exchanges_ids,
-                             uint64_t instrument_types,
-                             uint64_t callback_types) {
-  enrolled_md_locations_.emplace(md_location->uid, subscribe_info(true, exchanges_ids, instrument_types, callback_types));
+void PassiveClient::subscribe_all(const location_ptr &md_location, uint8_t exchanges_ids, uint64_t instrument_types,
+                                  uint64_t callback_types) {
+  enrolled_md_locations_.emplace(md_location->uid,
+                                 subscribe_info(true, exchanges_ids, instrument_types, callback_types));
 }
 
 void PassiveClient::renew(int64_t trigger_time, const location_ptr &md_location) {

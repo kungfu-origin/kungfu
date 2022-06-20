@@ -197,7 +197,7 @@ void bind_enums(py::module &m) {
       .value("kMax", MarketType::kMax)
       .export_values()
       .def("__eq__", [](const MarketType &a, int b) { return static_cast<int>(a) == b; });
-  
+
   py::enum_<SubscribeSecuDataType>(m_enums, "SubscribeSecuDataType", py::arithmetic())
       .value("kNone", SubscribeSecuDataType::kNone)
       .value("kSnapshot", SubscribeSecuDataType::kSnapshot)
@@ -206,8 +206,9 @@ void bind_enums(py::module &m) {
       .value("kOrderQueue", SubscribeSecuDataType::kOrderQueue)
       .export_values()
       .def("__eq__", [](const SubscribeSecuDataType &a, uint64_t b) { return static_cast<uint64_t>(a) == b; })
-      .def("__or__", py::overload_cast<const SubscribeSecuDataType &, const SubscribeSecuDataType &>(&sub_data_bitwise<SubscribeSecuDataType, uint64_t>));
-  
+      .def("__or__", py::overload_cast<const SubscribeSecuDataType &, const SubscribeSecuDataType &>(
+                         &sub_data_bitwise<SubscribeSecuDataType, uint64_t>));
+
   py::enum_<SubscribeCategoryType>(m_enums, "SubscribeCategoryType", py::arithmetic())
       .value("kNone", SubscribeCategoryType::kNone)
       .value("kStock", SubscribeCategoryType::kStock)
@@ -220,6 +221,7 @@ void bind_enums(py::module &m) {
       .value("kOthers", SubscribeCategoryType::kOthers)
       .export_values()
       .def("__eq__", [](const SubscribeCategoryType &a, int b) { return static_cast<int>(a) == b; })
-      .def("__or__", py::overload_cast<const SubscribeCategoryType &, const SubscribeCategoryType &>(&sub_data_bitwise<SubscribeCategoryType, uint64_t>));
+      .def("__or__", py::overload_cast<const SubscribeCategoryType &, const SubscribeCategoryType &>(
+                         &sub_data_bitwise<SubscribeCategoryType, uint64_t>));
 }
 } // namespace kungfu::longfist::pybind

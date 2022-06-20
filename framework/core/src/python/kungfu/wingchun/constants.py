@@ -77,7 +77,7 @@ ENUM_TYPES = [
     OrderActionFlag,
     LedgerCategory,
     HedgeFlag,
-    MarketType, 
+    MarketType,
     SubscribeSecuDataType,
     SubscribeCategoryType,
 ]

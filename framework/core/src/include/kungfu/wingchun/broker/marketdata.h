@@ -42,7 +42,7 @@ public:
 
   virtual bool subscribe_all() = 0;
 
-  virtual bool subscribe_market(const longfist::types::SubscribeAll& subscribeall) {return subscribe_all();};
+  virtual bool subscribe_market(const longfist::types::SubscribeAll &subscribeall) { return subscribe_all(); };
 
   virtual bool unsubscribe(const std::vector<longfist::types::InstrumentKey> &instrument_keys) = 0;
 
