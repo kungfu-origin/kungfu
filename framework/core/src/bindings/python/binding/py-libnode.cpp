@@ -1,6 +1,6 @@
 #include <node.h>
 
-#include "py_libnode.h"
+#include "py-libnode.h"
 
 namespace kungfu::libnode {
 namespace py = pybind11;

@@ -102,7 +102,7 @@ void BrokerService::record_stored_instruments_trading_day(const std::string &tra
   instrument_stored_trading_day_next_day_tkv.value = trading_day;
   writer->write(now(), instrument_stored_trading_day_next_day_tkv);
 
-  SPDLOG_INFO("INSTRUMENT_STORED_TRADING_DAY {}", trading_day);
+  SPDLOG_INFO("STORED_INSTRUMENT_TRADING_DAY {}", trading_day);
 }
 
 void BrokerService::add_timer(int64_t nanotime, const std::function<void(const event_ptr &)> &callback) {

@@ -1,15 +1,12 @@
-#include "py_wingchun.h"
+#include "py-wingchun.h"
 
-#include <pybind11/functional.h>
 #include <pybind11/stl.h>
 #include <pybind11/stl_bind.h>
 
+#include <kungfu/wingchun/book/accounting.h>
+#include <kungfu/wingchun/book/book.h>
 #include <kungfu/wingchun/book/bookkeeper.h>
 
-namespace kungfu::wingchun {
-namespace py = pybind11;
-
-using namespace kungfu;
 using namespace kungfu::longfist;
 using namespace kungfu::longfist::types;
 using namespace kungfu::yijinjing;
@@ -18,6 +15,17 @@ using namespace kungfu::yijinjing::journal;
 using namespace kungfu::wingchun;
 using namespace kungfu::wingchun::book;
 
+namespace py = pybind11;
+
+PYBIND11_MAKE_OPAQUE(CommissionMap)
+PYBIND11_MAKE_OPAQUE(InstrumentMap)
+PYBIND11_MAKE_OPAQUE(PositionMap)
+PYBIND11_MAKE_OPAQUE(PositionDetailMap)
+PYBIND11_MAKE_OPAQUE(OrderInputMap)
+PYBIND11_MAKE_OPAQUE(OrderMap)
+PYBIND11_MAKE_OPAQUE(TradeMap)
+
+namespace kungfu::wingchun::pybind {
 class PyAccountingMethod : public AccountingMethod {
 public:
   using AccountingMethod::AccountingMethod;
@@ -99,4 +107,4 @@ void bind_book(pybind11::module &m) {
       .def("set_accounting_method", &Bookkeeper::set_accounting_method)
       .def("on_trading_day", &Bookkeeper::on_trading_day);
 }
-} // namespace kungfu::wingchun
+} // namespace kungfu::wingchun::pybind
