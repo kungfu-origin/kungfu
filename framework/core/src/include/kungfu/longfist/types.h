@@ -33,7 +33,6 @@ KF_DEFINE_MARK_TYPE(RequestHistoryOrder, 10029);
 KF_DEFINE_MARK_TYPE(RequestHistoryTrade, 10030);
 KF_DEFINE_MARK_TYPE(CachedReadyToRead, 10060);
 KF_DEFINE_MARK_TYPE(RequestCached, 10061);
-KF_DEFINE_MARK_TYPE(SubscribeAll, 303);
 KF_DEFINE_MARK_TYPE(NewOrderSingle, 353);
 KF_DEFINE_MARK_TYPE(CancelOrder, 354);
 KF_DEFINE_MARK_TYPE(CancelAllOrder, 355);
@@ -49,6 +48,14 @@ KF_DEFINE_MARK_TYPE(InstrumentEnd, 802);
 KF_DEFINE_MARK_TYPE(AlgoOrderInput, 20010);
 KF_DEFINE_MARK_TYPE(AlgoOrderReport, 20011);
 KF_DEFINE_MARK_TYPE(AlgoOrderModify, 20012);
+
+KF_DEFINE_DATA_TYPE(                                            //
+    SubscribeAll, 303, PK(update_time), TIMESTAMP(update_time), //
+    (int64_t, update_time),                                     //
+    (MarketType, market_type),                                  //
+    (SubscribeCategoryType, subscribe_category_type),           //
+    (SubscribeSecuDataType, subscribe_secu_datatype)            //
+);
 
 KF_DEFINE_DATA_TYPE(                              //
     Config, 10005, PK(location_uid), PERPETUAL(), //
@@ -285,11 +292,13 @@ KF_DEFINE_PACK_TYPE(                                         //
 
     (double, close_price),      //收盘价
     (double, settlement_price), //结算价
+    (double, iopv),             //基金实时参考净值
 
-    (kungfu::array<double, 10>, bid_price),   //申买价
-    (kungfu::array<double, 10>, ask_price),   //申卖价
-    (kungfu::array<int64_t, 10>, bid_volume), //申买量
-    (kungfu::array<int64_t, 10>, ask_volume)  //申卖量
+    (kungfu::array<double, 10>, bid_price),      //申买价
+    (kungfu::array<double, 10>, ask_price),      //申卖价
+    (kungfu::array<int64_t, 10>, bid_volume),    //申买量
+    (kungfu::array<int64_t, 10>, ask_volume),    //申卖量
+    (kungfu::array<char, 8>, trading_phase_code) //交易
 );
 
 KF_DEFINE_PACK_TYPE(                                                    //
@@ -310,7 +319,8 @@ KF_DEFINE_PACK_TYPE(                                                    //
     (PriceType, price_type), //订单价格类型（市价、限价、本方最优）
 
     (int64_t, main_seq), //主序号
-    (int64_t, seq)       //子序号
+    (int64_t, seq),      //子序号
+    (int64_t, biz_index) // 业务序号
 );
 
 KF_DEFINE_PACK_TYPE(                                                        //
@@ -335,7 +345,8 @@ KF_DEFINE_PACK_TYPE(                                                        //
     (BsFlag, bs_flag),     // SH: 内外盘标识
 
     (int64_t, main_seq), //主序号
-    (int64_t, seq)       //子序号
+    (int64_t, seq),      //子序号
+    (int64_t, biz_index) // 业务序号
 );
 
 KF_DEFINE_PACK_TYPE(                                                 //

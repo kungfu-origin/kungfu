@@ -167,6 +167,18 @@ public:
  * Only connects brokers that has been explicitly added. It supports subscribe_all for MD that has such ability.
  */
 class PassiveClient : public Client {
+  struct subscribe_info {
+  public:
+    subscribe_info(bool all, uint8_t exchanges_ids, uint64_t instrument_types, uint64_t callback_types)
+        : all_(all), exchanges_ids_(exchanges_ids), instrument_types_(instrument_types),
+          callback_types_(callback_types) {}
+    subscribe_info() : all_(false), exchanges_ids_(0), instrument_types_(0), callback_types_(0) {}
+    bool all_ = false;
+    uint8_t exchanges_ids_ = 0;
+    uint64_t instrument_types_ = 0;
+    uint64_t callback_types_ = 0;
+  };
+  typedef std::unordered_map<uint32_t, subscribe_info> EnrollmentMdMap;
   typedef std::unordered_map<uint32_t, bool> EnrollmentMap;
 
 public:
@@ -179,7 +191,8 @@ public:
   void subscribe(const yijinjing::data::location_ptr &md_location, const std::string &exchange_id,
                  const std::string &instrument_id) override;
 
-  void subscribe_all(const yijinjing::data::location_ptr &md_location);
+  void subscribe_all(const yijinjing::data::location_ptr &md_location, uint8_t exchanges_ids = 0,
+                     uint64_t instrument_types = 0, uint64_t callback_types = 0);
 
   void renew(int64_t trigger_time, const yijinjing::data::location_ptr &md_location) override;
 
@@ -200,7 +213,7 @@ protected:
 
 private:
   IntradayResumePolicy resume_policy_ = {};
-  EnrollmentMap enrolled_md_locations_ = {};
+  EnrollmentMdMap enrolled_md_locations_ = {};
   EnrollmentMap enrolled_td_locations_ = {};
 };
 

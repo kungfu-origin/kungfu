@@ -42,6 +42,9 @@ OrderActionFlag = lf.enums.OrderActionFlag
 LedgerCategory = lf.enums.LedgerCategory
 HedgeFlag = lf.enums.HedgeFlag
 CommissionRateMode = lf.enums.CommissionRateMode
+MarketType = lf.enums.MarketType
+SubscribeSecuDataType = lf.enums.SubscribeSecuDataType
+SubscribeCategoryType = lf.enums.SubscribeCategoryType
 AllFinalOrderStatus = [
     int(OrderStatus.Filled),
     int(OrderStatus.Error),
@@ -74,4 +77,7 @@ ENUM_TYPES = [
     OrderActionFlag,
     LedgerCategory,
     HedgeFlag,
+    MarketType,
+    SubscribeSecuDataType,
+    SubscribeCategoryType,
 ]

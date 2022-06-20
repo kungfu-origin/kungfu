@@ -1,4 +1,5 @@
 import path from 'path';
+import os from 'os';
 import { computed, reactive, Ref, ref, watch, nextTick } from 'vue';
 import {
   debounce,
@@ -70,6 +71,7 @@ export const useLogInit = (
     LogTail = new Tail(logPath, {
       follow: true,
       nLines: nLines,
+      useWatchFile: os.platform() === 'win32',
     });
 
     let markId: number = +new Date();

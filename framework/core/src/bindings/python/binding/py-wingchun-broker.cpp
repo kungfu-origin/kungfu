@@ -1,6 +1,7 @@
 #include "py-wingchun.h"
 
 #include <pybind11/functional.h>
+#include <pybind11/stl.h>
 
 #include <kungfu/wingchun/broker/marketdata.h>
 #include <kungfu/wingchun/broker/trader.h>
