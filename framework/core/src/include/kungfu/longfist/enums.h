@@ -237,7 +237,7 @@ enum class MarketType : int8_t {
 };
 
 //证券数据类型
-enum SubscribeSecuDataType : int8_t
+enum class SubscribeSecuDataType : int8_t
 {
     kNone                                 = 0x000000000000,    ///< 订阅全部证券数据类别
     kSnapshot                             = 0x000000000001,    ///< 订阅快照数据类别
@@ -249,7 +249,7 @@ enum SubscribeSecuDataType : int8_t
 // class SubscribeCategory {
 //   public:
 //证券品种类型
-enum SubscribeCategoryType : uint64_t 
+enum class SubscribeCategoryType : uint64_t 
 {
     kNone                                 = 0x000000000000,    ///< 订阅全部证券品种类别
     kStock                                = 0x000000000001,    ///< 订阅股票证券品种类别

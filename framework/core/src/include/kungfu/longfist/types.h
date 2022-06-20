@@ -33,7 +33,6 @@ KF_DEFINE_MARK_TYPE(RequestHistoryOrder, 10029);
 KF_DEFINE_MARK_TYPE(RequestHistoryTrade, 10030);
 KF_DEFINE_MARK_TYPE(CachedReadyToRead, 10060);
 KF_DEFINE_MARK_TYPE(RequestCached, 10061);
-KF_DEFINE_MARK_TYPE(SubscribeAll, 303);
 KF_DEFINE_MARK_TYPE(NewOrderSingle, 353);
 KF_DEFINE_MARK_TYPE(CancelOrder, 354);
 KF_DEFINE_MARK_TYPE(CancelAllOrder, 355);
