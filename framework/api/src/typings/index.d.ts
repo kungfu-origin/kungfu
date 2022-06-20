@@ -22,6 +22,7 @@ declare module 'tail' {
         follow?: boolean;
         fromBeginning?: boolean;
         nLines?: number;
+        useWatchFile?: boolean;
       },
     );
     watch(): void;
