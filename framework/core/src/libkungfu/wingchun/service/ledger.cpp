@@ -21,11 +21,10 @@ Ledger::Ledger(locator_ptr locator, mode m, bool low_latency)
     : apprentice(location::make_shared(m, category::SYSTEM, "service", "ledger", std::move(locator)), low_latency),
       broker_client_(*this), bookkeeper_(*this, broker_client_) {}
 
-void Ledger::on_exit() { write_asset_snapshots(DailyAsset::tag); }
+void Ledger::on_exit() {}
 
 void Ledger::on_trading_day(const event_ptr &event, int64_t daytime) {
   bookkeeper_.on_trading_day(daytime);
-  write_asset_snapshots(DailyAsset::tag);
 }
 
 book::Bookkeeper &Ledger::get_bookkeeper() { return bookkeeper_; }
@@ -46,9 +45,6 @@ void Ledger::on_start() {
   events_ | is(PositionRequest::tag) | $$(write_strategy_data(event->gen_time(), event->source()));
   events_ | is(PositionEnd::tag) | filter([&](const event_ptr &event) { return event->dest() != location::SYNC; }) |
       $$(update_account_book(event->gen_time(), event->data<PositionEnd>().holder_uid););
-
-  add_time_interval(time_unit::NANOSECONDS_PER_MINUTE, [&](auto e) { write_asset_snapshots(AssetSnapshot::tag); });
-  add_time_interval(time_unit::NANOSECONDS_PER_HOUR, [&](auto e) { write_asset_snapshots(DailyAsset::tag); });
 
   add_time_interval(time_unit::NANOSECONDS_PER_MINUTE, [&](auto e) { request_asset_sync(e->gen_time()); });
   add_time_interval(time_unit::NANOSECONDS_PER_MINUTE, [&](auto e) { request_position_sync(e->gen_time()); });
@@ -131,7 +127,6 @@ void Ledger::update_account_book(int64_t trigger_time, uint32_t account_uid) {
   write_positions(trigger_time, account_uid, book->long_positions);
   write_positions(trigger_time, account_uid, book->short_positions);
   writer->write(trigger_time, asset);
-  write_asset_snapshot(trigger_time, writer, asset);
 }
 
 void Ledger::inspect_channel(int64_t trigger_time, const Channel &channel) {
@@ -148,7 +143,6 @@ void Ledger::inspect_channel(int64_t trigger_time, const Channel &channel) {
     write_book_reset(trigger_time, channel.source_id);
   }
   if (channel.source_id == get_live_home_uid() and bookkeeper_.has_book(channel.dest_id)) {
-    write_asset_snapshot(trigger_time, get_writer(channel.dest_id), bookkeeper_.get_book(channel.dest_id)->asset);
   }
 }
 
@@ -274,7 +268,6 @@ void Ledger::write_strategy_data(int64_t trigger_time, uint32_t strategy_uid) {
   }
   writer->open_data<PositionEnd>(trigger_time).holder_uid = strategy_uid;
   writer->close_data();
-  write_asset_snapshot(trigger_time, writer, strategy_book->asset);
 }
 
 void Ledger::write_positions(int64_t trigger_time, uint32_t dest, book::PositionMap &positions) {
@@ -282,17 +275,6 @@ void Ledger::write_positions(int64_t trigger_time, uint32_t dest, book::Position
   for (const auto &pair : positions) {
     if (pair.second.volume > 0 or pair.second.direction == Direction::Long) {
       writer->write_as(trigger_time, pair.second, get_home_uid(), pair.second.holder_uid);
-    }
-  }
-}
-
-void Ledger::write_asset_snapshots(int32_t msg_type) {
-  for (const auto &pair : bookkeeper_.get_books()) {
-    auto &book = pair.second;
-    auto &asset = book->asset;
-    if (has_writer(asset.holder_uid)) {
-      book->update(now());
-      write_asset_snapshot(now(), get_writer(asset.holder_uid), asset);
     }
   }
 }

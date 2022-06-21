@@ -333,35 +333,6 @@ declare namespace KungfuApi {
     close_pnl: number; //平仓盈亏(期货)
   }
 
-  export interface AssetSnapshot {
-    update_time: bigint; //更新时间
-    trading_day: string; //交易日
-
-    holder_uid: number;
-    ledger_category: LedgerCategoryEnum;
-
-    source_id: string; //柜台ID
-    broker_id: string; // Broker ID
-    account_id: string; //账号ID
-    client_id: string; // client ID
-
-    initial_equity: number; //期初权益
-    static_equity: number; //静态权益
-    dynamic_equity: number; //动态权益
-    realized_pnl: number; //累计收益
-    unrealized_pnl: number;
-    avail: number; //可用资金
-    market_value: number; //市值(股票)
-    margin: number; //保证金(期货)
-    accumulated_fee: number; //累计手续费
-    intraday_fee: number; //当日手续费
-    frozen_cash: number; //冻结资金(股票: 买入挂单资金), 期货: 冻结保证金+冻结手续费)
-    frozen_margin: number; //冻结保证金(期货)
-    frozen_fee: number; //冻结手续费(期货)
-    position_pnl: number; //持仓盈亏(期货)
-    close_pnl: number; //平仓盈亏(期货)
-  }
-
   export interface Bar {
     trading_day: string; //交易日
     instrument_id: string; //合约代码
@@ -379,35 +350,6 @@ declare namespace KungfuApi {
     start_volume: bigint; //初始总交易量
 
     tick_count: number; //区间有效tick数
-  }
-
-  export interface DailyAsset {
-    update_time: bigint; //更新时间
-    trading_day: string; //交易日
-
-    holder_uid: number;
-    ledger_category: LedgerCategoryEnum;
-
-    source_id: string; //柜台ID
-    broker_id: string; // Broker ID
-    account_id: string; //账号ID
-    client_id: string; // client ID
-
-    initial_equity: number; //期初权益
-    static_equity: number; //静态权益
-    dynamic_equity: number; //动态权益
-    realized_pnl: number; //累计收益
-    unrealized_pnl: number;
-    avail: number; //可用资金
-    market_value: number; //市值(股票)
-    margin: number; //保证金(期货)
-    accumulated_fee: number; //累计手续费
-    intraday_fee: number; //当日手续费
-    frozen_cash: number; //冻结资金(股票: 买入挂单资金), 期货: 冻结保证金+冻结手续费)
-    frozen_margin: number; //冻结保证金(期货)
-    frozen_fee: number; //冻结手续费(期货)
-    position_pnl: number; //持仓盈亏(期货)
-    close_pnl: number; //平仓盈亏(期货)
   }
 
   export interface Instrument {
@@ -662,9 +604,7 @@ declare namespace KungfuApi {
 
   export interface TradingData {
     Asset: DataTable<Asset>;
-    AssetSnapshot: DataTable<AssetSnapshot>;
     Bar: DataTable<Bar>;
-    DailyAsset: DataTable<DailyAsset>;
     Instrument: DataTable<Instrument>;
     Order: DataTable<Order>;
     OrderInput: DataTable<OrderInput>;
@@ -676,9 +616,7 @@ declare namespace KungfuApi {
 
   export interface TradingDataNameToType {
     Asset: Asset;
-    AssetSnapshot: AssetSnapshot;
     Bar: Bar;
-    DailyAsset: DailyAsset;
     Instrument: Instrument;
     Order: Order;
     OrderInput: OrderInput;
@@ -690,9 +628,7 @@ declare namespace KungfuApi {
 
   export type TradingDataTypes =
     | Asset
-    | AssetSnapshot
     | Bar
-    | DailyAsset
     | Instrument
     | Order
     | OrderInput
@@ -781,9 +717,7 @@ declare namespace KungfuApi {
 
   export interface Longfist {
     Asset(): Asset;
-    AssetSnapshot(): AssetSnapshot;
     Bar(): Bar;
-    DailyAsset(): DailyAsset;
     Instrument(): Instrument;
     Order(): Order;
     OrderInput(): OrderInput;
