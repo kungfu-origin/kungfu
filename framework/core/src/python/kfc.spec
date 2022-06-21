@@ -110,6 +110,16 @@ def extend_hiddenimports(modules, executable_modules):
     return hiddenimports
 
 
+def get_hookspath():
+    key = "KFC_PYI_HOOKS_PATH"
+    return [] if key not in os.environ else [os.environ[key]]
+
+
+def get_runtimehooks():
+    key = "KFC_PYI_RUNTIME_HOOKS"
+    return None if key not in os.environ else os.environ[key].split(",")
+
+
 ###############################################################################
 name = "kfc"
 block_cipher = None
@@ -168,8 +178,8 @@ a = Analysis(
     excludes=[
         "matplotlib",
     ],
-    hookspath=[],
-    runtime_hooks=None,
+    hookspath=get_hookspath(),
+    runtime_hooks=get_runtimehooks(),
     cipher=block_cipher,
 )
 pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
