@@ -94,7 +94,7 @@ export class OrderTable extends Table {
           side,
           offset,
           order.limit_price,
-          `${order.volume_traded}/${order.volume}`,
+          `${order.volume - order.volume_left}/${order.volume}`,
           orderStatus,
           last,
           order.latency_system,

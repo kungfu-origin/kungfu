@@ -53,7 +53,7 @@ export const getColumns = (
   {
     type: 'number',
     name: `${t('orderConfig.clinch')}/${t('orderConfig.all')}`,
-    dataIndex: 'volume_traded',
+    dataIndex: 'volume_left',
     width: 120,
     sorter: (a: KungfuApi.OrderResolved, b: KungfuApi.OrderResolved) => {
       return +Number(b.volume_left) - +Number(a.volume_left);

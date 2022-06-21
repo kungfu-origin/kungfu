@@ -376,7 +376,6 @@ inline void order_from_input(const longfist::types::OrderInput &input, longfist:
   order.frozen_price = input.frozen_price;
 
   order.volume = input.volume;
-  order.volume_traded = 0;
   order.volume_left = input.volume;
   order.status = longfist::enums::OrderStatus::Submitted;
 
