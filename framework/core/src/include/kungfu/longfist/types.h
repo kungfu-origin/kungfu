@@ -479,7 +479,6 @@ KF_DEFINE_PACK_TYPE(                                  //
     (kungfu::array<char, ERROR_MSG_LEN>, error_msg), //错误信息
 
     (bool, is_swap),                     //互换单
-    // (int64_t, external_id),
 
     (Side, side),                        //买卖方向
     (Offset, offset),                    //开平方向
