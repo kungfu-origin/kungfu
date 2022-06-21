@@ -454,7 +454,6 @@ declare namespace KungfuApi {
     frozen_price: number; //冻结价格, 市价单冻结价格为0
 
     volume: bigint; //数量
-    volume_traded: bigint; //成交数量
     volume_left: bigint; //剩余数量
 
     tax: number; //税
