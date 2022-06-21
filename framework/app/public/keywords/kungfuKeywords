@@ -78,7 +78,6 @@ account_id
 client_id
 limit_price
 frozen_price
-volume_traded
 volume_left
 tax
 commission

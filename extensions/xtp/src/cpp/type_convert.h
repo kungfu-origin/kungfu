@@ -438,7 +438,6 @@ inline void from_xtp(const XTPOrderInfo &ori, Order &des) {
   from_xtp(ori.market, des.exchange_id);
   from_xtp(ori.price_type, ori.market, des.price_type);
   des.volume = ori.quantity;
-  des.volume_traded = ori.qty_traded;
   des.volume_left = ori.qty_left;
   des.limit_price = ori.price;
   from_xtp(ori.order_status, des.status);
@@ -458,7 +457,6 @@ inline void from_xtp(const XTPQueryOrderRsp &ori, HistoryOrder &des) {
   from_xtp(ori.market, des.exchange_id);
   from_xtp(ori.price_type, ori.market, des.price_type);
   des.volume = ori.quantity;
-  des.volume_traded = ori.qty_traded;
   des.volume_left = ori.qty_left;
   des.limit_price = ori.price;
   from_xtp(ori.order_status, des.status);

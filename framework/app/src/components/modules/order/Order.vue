@@ -307,7 +307,7 @@ function handleAdjustOrder(data: {
   const target = event.target as HTMLElement | null;
 
   if (column.dataIndex !== 'limit_price') {
-    if (column.dataIndex !== 'volume_traded') {
+    if (column.dataIndex !== 'volume_left') {
       return;
     }
   }
@@ -542,8 +542,8 @@ function testOrderSourceIsOnline(order: KungfuApi.OrderResolved) {
             <template v-else-if="column.dataIndex === 'limit_price'">
               {{ dealKfPrice(item.limit_price) }}
             </template>
-            <template v-else-if="column.dataIndex === 'volume_traded'">
-              {{ item.volume_traded }} / {{ item.volume }}
+            <template v-else-if="column.dataIndex === 'volume_left'">
+              {{ item.volume - item.volume_left }} / {{ item.volume }}
             </template>
             <template v-else-if="column.dataIndex === 'status_uname'">
               <span :class="`color-${item.status_color}`">

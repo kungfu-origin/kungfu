@@ -172,7 +172,6 @@ void TraderXTP::OnTradeEvent(XTPTradeReport *trade_info, uint64_t session_id) {
   strcpy(trade.account_id, this->get_account_id().c_str());
   trade.instrument_type = get_instrument_type(trade.exchange_id, trade.instrument_id);
   writer->close_data();
-  order_state.data.volume_traded += trade.volume;
   order_state.data.volume_left -= trade.volume;
   if (order_state.data.volume_left > 0) {
     order_state.data.status = OrderStatus::PartialFilledActive;

@@ -57,9 +57,7 @@ function conanBuild() {
   conan(['build', '.', '-bf', 'build', ...settings]);
 }
 
-function conanBuildOnGitHub() {
-  // Have to use Clang to build pykungfu because MSVC suffers to OutOfMemoery error
-
+function conanBuildWithClang() {
   const resetBuild = () => fse.removeSync(path.join('build', 'CMakeCache.txt'));
 
   // Build pykungfu with Clang
@@ -98,10 +96,6 @@ const cli = require('sywac')
   })
   .command('build', {
     run: conanBuild,
-    // run: () =>
-    //   process.env.GITHUB_ACTIONS && process.platform == 'win32'
-    //     ? conanBuildOnGitHub()
-    //     : conanBuild(),
   })
   .command('package', {
     run: conanPackage,

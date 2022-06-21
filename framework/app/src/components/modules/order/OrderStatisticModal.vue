@@ -132,7 +132,9 @@ const priceVolumeStats = computed(() => {
 
       priceVolumeData[id].price.push(order.limit_price);
       priceVolumeData[id].volume.push(+Number(order.volume));
-      priceVolumeData[id].volumeTraded.push(+Number(order.volume_traded));
+      priceVolumeData[id].volumeTraded.push(
+        +Number(order.volume - order.volume_left),
+      );
       return priceVolumeData;
     },
     {} as Record<

@@ -44,7 +44,7 @@ HedgeFlag = lf.enums.HedgeFlag
 CommissionRateMode = lf.enums.CommissionRateMode
 MarketType = lf.enums.MarketType
 SubscribeSecuDataType = lf.enums.SubscribeSecuDataType
-SubscribeCategoryType = lf.enums.SubscribeCategoryType
+SubscribeInstrumentType = lf.enums.SubscribeInstrumentType
 AllFinalOrderStatus = [
     int(OrderStatus.Filled),
     int(OrderStatus.Error),
@@ -79,5 +79,5 @@ ENUM_TYPES = [
     HedgeFlag,
     MarketType,
     SubscribeSecuDataType,
-    SubscribeCategoryType,
+    SubscribeInstrumentType,
 ]
