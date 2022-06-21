@@ -85,6 +85,8 @@ public:
 
   void update_broker_state(BrokerState state);
 
+  void request_deregister() {vendor_.request_deregister();}
+
 protected:
   volatile BrokerState state_;
 
