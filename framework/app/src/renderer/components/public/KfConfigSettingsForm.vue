@@ -432,7 +432,7 @@ defineExpose({
       :name="item.key"
       :extra="item.tip"
       :rules="
-        changeType === 'update' && item.primary
+        (changeType === 'update' && item.primary) || item.disabled
           ? []
           : [
               ...(rules[item.key]
@@ -502,25 +502,25 @@ defineExpose({
     >
       <a-input
         v-if="item.type === 'str'"
-        v-model:value="formState[item.key]"
-        :disabled="changeType === 'update' && item.primary"
+        v-model:value.trim="formState[item.key]"
+        :disabled="(changeType === 'update' && item.primary) || item.disabled"
       ></a-input>
       <a-input-password
         v-else-if="item.type === 'password'"
         v-model:value="formState[item.key]"
-        :disabled="changeType === 'update' && item.primary"
+        :disabled="(changeType === 'update' && item.primary) || item.disabled"
       ></a-input-password>
       <a-input-number
         v-else-if="item.type === 'int'"
         v-model:value="formState[item.key]"
-        :disabled="changeType === 'update' && item.primary"
+        :disabled="(changeType === 'update' && item.primary) || item.disabled"
       ></a-input-number>
       <a-input-number
         v-else-if="item.type === 'float'"
         :precision="4"
         step="0.0001"
         v-model:value="formState[item.key]"
-        :disabled="changeType === 'update' && item.primary"
+        :disabled="(changeType === 'update' && item.primary) || item.disabled"
       ></a-input-number>
       <a-input-number
         v-else-if="item.type === 'percent'"
@@ -529,13 +529,13 @@ defineExpose({
         :formatter="formatterPercentNumber"
         :parser="parserPercentString"
         v-model:value="formState[item.key]"
-        :disabled="changeType === 'update' && item.primary"
+        :disabled="(changeType === 'update' && item.primary) || item.disabled"
       ></a-input-number>
       <a-radio-group
         v-else-if="item.type === 'side'"
         v-model:value="formState[item.key]"
         :name="item.key"
-        :disabled="changeType === 'update' && item.primary"
+        :disabled="(changeType === 'update' && item.primary) || item.disabled"
       >
         <a-radio v-for="key in Object.keys(Side).slice(0, 2)" :value="+key">
           {{ dealSide(+key).name }}
@@ -544,7 +544,7 @@ defineExpose({
       <a-select
         v-else-if="item.type === 'priceType'"
         v-model:value="formState[item.key]"
-        :disabled="changeType === 'update' && item.primary"
+        :disabled="(changeType === 'update' && item.primary) || item.disabled"
       >
         <a-select-option
           v-for="key in Object.keys(PriceType).slice(0, 7)"
@@ -558,7 +558,7 @@ defineExpose({
         v-else-if="numberEnumRadioType[item.type]"
         v-model:value="formState[item.key]"
         :name="item.key"
-        :disabled="changeType === 'update' && item.primary"
+        :disabled="(changeType === 'update' && item.primary) || item.disabled"
       >
         <a-radio
           v-for="key in Object.keys(numberEnumRadioType[item.type])"
@@ -580,7 +580,7 @@ defineExpose({
       <a-select
         v-else-if="numberEnumSelectType[item.type]"
         v-model:value="formState[item.key]"
-        :disabled="changeType === 'update' && item.primary"
+        :disabled="(changeType === 'update' && item.primary) || item.disabled"
       >
         {{ item.type }}
         <a-select-option
@@ -594,7 +594,7 @@ defineExpose({
       <a-select
         v-else-if="stringEnumSelectType[item.type]"
         v-model:value="formState[item.key]"
-        :disabled="changeType === 'update' && item.primary"
+        :disabled="(changeType === 'update' && item.primary) || item.disabled"
       >
         {{ item.type }}
         <a-select-option
@@ -608,7 +608,7 @@ defineExpose({
       <a-select
         v-else-if="item.type === 'select'"
         v-model:value="formState[item.key]"
-        :disabled="changeType === 'update' && item.primary"
+        :disabled="(changeType === 'update' && item.primary) || item.disabled"
       >
         <a-select-option
           v-for="option in item.options"
@@ -621,7 +621,7 @@ defineExpose({
       <a-select
         v-else-if="item.type === 'instrument'"
         :ref="item.key"
-        :disabled="changeType === 'update' && item.primary"
+        :disabled="(changeType === 'update' && item.primary) || item.disabled"
         show-search
         v-model:value="formState[item.key]"
         :filter-option="false"
@@ -631,7 +631,7 @@ defineExpose({
       <a-select
         v-else-if="item.type === 'instruments'"
         :ref="item.key"
-        :disabled="changeType === 'update' && item.primary"
+        :disabled="(changeType === 'update' && item.primary) || item.disabled"
         mode="multiple"
         show-search
         :value="formState[item.key]"
@@ -645,7 +645,7 @@ defineExpose({
       <a-select
         v-else-if="item.type === 'td'"
         v-model:value="formState[item.key]"
-        :disabled="changeType === 'update' && item.primary"
+        :disabled="(changeType === 'update' && item.primary) || item.disabled"
       >
         <a-select-option
           v-for="config in td"
@@ -658,7 +658,7 @@ defineExpose({
       <a-select
         v-else-if="item.type === 'md'"
         v-model:value="formState[item.key]"
-        :disabled="changeType === 'update' && item.primary"
+        :disabled="(changeType === 'update' && item.primary) || item.disabled"
       >
         <a-select-option
           v-for="config in md"
@@ -671,7 +671,7 @@ defineExpose({
       <a-select
         v-else-if="item.type === 'strategy'"
         v-model:value="formState[item.key]"
-        :disabled="changeType === 'update' && item.primary"
+        :disabled="(changeType === 'update' && item.primary) || item.disabled"
       >
         <a-select-option
           v-for="config in strategy"
@@ -685,12 +685,12 @@ defineExpose({
         size="small"
         v-else-if="item.type === 'bool'"
         v-model:checked="formState[item.key]"
-        :disabled="changeType === 'update' && item.primary"
+        :disabled="(changeType === 'update' && item.primary) || item.disabled"
       ></a-switch>
       <div v-else-if="item.type === 'file'" class="kf-form-item__warp file">
         <a-button
           size="small"
-          :disabled="changeType === 'update' && item.primary"
+          :disabled="(changeType === 'update' && item.primary) || item.disabled"
           @click="handleSelectFile(item.key)"
         >
           <template #icon><DashOutlined /></template>
@@ -705,7 +705,7 @@ defineExpose({
       </div>
       <div v-else-if="item.type === 'files'" class="kf-form-item__warp file">
         <a-button
-          :disabled="changeType === 'update' && item.primary"
+          :disabled="(changeType === 'update' && item.primary) || item.disabled"
           size="small"
           @click="handleSelectFiles(item.key)"
         >
@@ -727,7 +727,7 @@ defineExpose({
       </div>
       <a-time-picker
         v-else-if="item.type === 'timePicker'"
-        :disabled="changeType === 'update' && item.primary"
+        :disabled="(changeType === 'update' && item.primary) || item.disabled"
         :value="formState[item.key] == null ? null : dayjs(formState[item.key])"
         @change="handleTimePickerChange($event as unknown as Dayjs, item.key)"
       ></a-time-picker>
@@ -735,7 +735,9 @@ defineExpose({
         class="table-in-config-setting-form"
         v-else-if="item.type === 'table'"
       >
-        <a-button :disabled="changeType === 'update' && item.primary">
+        <a-button
+          :disabled="(changeType === 'update' && item.primary) || item.disabled"
+        >
           <template #icon>
             <PlusOutlined @click.stop="handleAddItemIntoTableRows(item)" />
           </template>
@@ -747,7 +749,9 @@ defineExpose({
         >
           <a-button
             size="small"
-            :disabled="changeType === 'update' && item.primary"
+            :disabled="
+              (changeType === 'update' && item.primary) || item.disabled
+            "
           >
             <template #icon>
               <DeleteOutlined
