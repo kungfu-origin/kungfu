@@ -69,9 +69,10 @@ public:
    * @param hedge_flag Deprecated, defaults to longfist::enums::HedgeFlag::Speculation
    * @return inserted order ID
    */
-  uint64_t insert_order(const std::string &instrument_id, const std::string &exchange_id, const std::string &account,
-                        double limit_price, int64_t volume, longfist::enums::PriceType type, longfist::enums::Side side,
-                        longfist::enums::Offset offset, longfist::enums::HedgeFlag hedge_flag) override;
+  uint64_t insert_order(const std::string &instrument_id, const std::string &exchange_id, const std::string &source,
+                        const std::string &account, double limit_price, int64_t volume, longfist::enums::PriceType type,
+                        longfist::enums::Side side, longfist::enums::Offset offset,
+                        longfist::enums::HedgeFlag hedge_flag) override;
 
   /**
    * Cancel order.

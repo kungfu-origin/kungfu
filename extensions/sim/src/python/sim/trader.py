@@ -81,7 +81,7 @@ class TraderSim(wc.Trader):
                 if wc.utils.get_instrument_type(
                     order_input.exchange_id, order_input.instrument_id
                 )
-                == lf.enums.InstrumentType.Stock
+                   == lf.enums.InstrumentType.Stock
                 else 1
             )
             if order_input.volume < min_vol:

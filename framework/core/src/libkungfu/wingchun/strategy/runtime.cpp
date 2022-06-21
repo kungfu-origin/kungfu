@@ -109,18 +109,10 @@ uint64_t RuntimeContext::insert_order(uint32_t account_location_uid, const std::
   return input.order_id;
 }
 
-uint64_t RuntimeContext::make_order(const std::string &instrument_id, const std::string &exchange_id,
-                                    const std::string &source, const std::string &account, double limit_price,
-                                    int64_t volume, PriceType type, Side side, Offset offset, HedgeFlag hedge_flag) {
-  auto account_location_uid = lookup_source_account_location_id(source, account);
-  return insert_order(account_location_uid, instrument_id, exchange_id, account, limit_price, volume, type, side,
-                      offset, hedge_flag);
-}
-
 uint64_t RuntimeContext::insert_order(const std::string &instrument_id, const std::string &exchange_id,
-                                      const std::string &account, double limit_price, int64_t volume, PriceType type,
-                                      Side side, Offset offset, HedgeFlag hedge_flag) {
-  auto account_location_uid = lookup_account_location_id(account);
+                                      const std::string &source, const std::string &account, double limit_price,
+                                      int64_t volume, PriceType type, Side side, Offset offset, HedgeFlag hedge_flag) {
+  auto account_location_uid = lookup_source_account_location_id(source, account);
   return insert_order(account_location_uid, instrument_id, exchange_id, account, limit_price, volume, type, side,
                       offset, hedge_flag);
 }

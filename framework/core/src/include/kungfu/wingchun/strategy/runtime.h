@@ -57,22 +57,6 @@ public:
                      uint64_t callback_types = 0) override;
 
   /**
-   * Insert order.
-   * @param instrument_id instrument ID
-   * @param exchange_id exchange ID
-   * @param account account ID
-   * @param volume trade volume
-   * @param type price type
-   * @param side side
-   * @param offset Deprecated, defaults to longfist::enums::Offset::Open
-   * @param hedge_flag Deprecated, defaults to longfist::enums::HedgeFlag::Speculation
-   * @return inserted order ID
-   */
-  uint64_t insert_order(const std::string &instrument_id, const std::string &exchange_id, const std::string &account,
-                        double limit_price, int64_t volume, longfist::enums::PriceType type, longfist::enums::Side side,
-                        longfist::enums::Offset offset, longfist::enums::HedgeFlag hedge_flag) override;
-
-  /**
    *
    * @param instrument_id instrument ID
    * @param exchange_id exchange ID
@@ -86,10 +70,10 @@ public:
    * @param hedge_flag hedge_flag, defaults to longfist::enums::HedgeFlag::Speculation
    * @return
    */
-  uint64_t make_order(const std::string &instrument_id, const std::string &exchange_id, const std::string &source,
-                      const std::string &account, double limit_price, int64_t volume, longfist::enums::PriceType type,
-                      longfist::enums::Side side, longfist::enums::Offset offset,
-                      longfist::enums::HedgeFlag hedge_flag) override;
+  uint64_t insert_order(const std::string &instrument_id, const std::string &exchange_id, const std::string &source,
+                        const std::string &account, double limit_price, int64_t volume, longfist::enums::PriceType type,
+                        longfist::enums::Side side, longfist::enums::Offset offset,
+                        longfist::enums::HedgeFlag hedge_flag) override;
 
   /**
    *
