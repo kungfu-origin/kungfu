@@ -184,44 +184,43 @@ void bind_enums(py::module &m) {
       .def("__eq__", [](const StrategyState &a, int b) { return static_cast<int>(a) == b; });
 
   py::enum_<MarketType>(m_enums, "MarketType", py::arithmetic())
-      .value("kNone", MarketType::kNone)
-      .value("kNEEQ", MarketType::kNEEQ)
-      .value("kSHFE", MarketType::kSHFE)
-      .value("kCFFEX", MarketType::kCFFEX)
-      .value("kDCE", MarketType::kDCE)
-      .value("kCZCE", MarketType::kCZCE)
-      .value("kINE", MarketType::kINE)
-      .value("kSSE", MarketType::kSSE)
-      .value("kSZSE", MarketType::kSZSE)
-      .value("kHKEx", MarketType::kHKEx)
-      .value("kMax", MarketType::kMax)
+      .value("All", MarketType::All)
+      .value("NEEQ", MarketType::NEEQ)
+      .value("SHFE", MarketType::SHFE)
+      .value("CFFEX", MarketType::CFFEX)
+      .value("kDCE", MarketType::DCE)
+      .value("CZCE", MarketType::CZCE)
+      .value("INE", MarketType::INE)
+      .value("SSE", MarketType::SSE)
+      .value("SZSE", MarketType::SZSE)
+      .value("HKEx", MarketType::HKEx)
       .export_values()
       .def("__eq__", [](const MarketType &a, int b) { return static_cast<int>(a) == b; });
 
   py::enum_<SubscribeSecuDataType>(m_enums, "SubscribeSecuDataType", py::arithmetic())
-      .value("kNone", SubscribeSecuDataType::kNone)
-      .value("kSnapshot", SubscribeSecuDataType::kSnapshot)
-      .value("kTickExecution", SubscribeSecuDataType::kTickExecution)
-      .value("kTickOrder", SubscribeSecuDataType::kTickOrder)
-      .value("kOrderQueue", SubscribeSecuDataType::kOrderQueue)
+      .value("All", SubscribeSecuDataType::All)
+      .value("Snapshot", SubscribeSecuDataType::Snapshot)
+      .value("TickExecution", SubscribeSecuDataType::TickExecution)
+      .value("TickOrder", SubscribeSecuDataType::TickOrder)
+      .value("OrderQueue", SubscribeSecuDataType::OrderQueue)
       .export_values()
       .def("__eq__", [](const SubscribeSecuDataType &a, uint64_t b) { return static_cast<uint64_t>(a) == b; })
       .def("__or__", py::overload_cast<const SubscribeSecuDataType &, const SubscribeSecuDataType &>(
                          &sub_data_bitwise<SubscribeSecuDataType, uint64_t>));
 
-  py::enum_<SubscribeCategoryType>(m_enums, "SubscribeCategoryType", py::arithmetic())
-      .value("kNone", SubscribeCategoryType::kNone)
-      .value("kStock", SubscribeCategoryType::kStock)
-      .value("kFund", SubscribeCategoryType::kFund)
-      .value("kBond", SubscribeCategoryType::kBond)
-      .value("kIndex", SubscribeCategoryType::kIndex)
-      .value("kHKT", SubscribeCategoryType::kHKT)
-      .value("kOption", SubscribeCategoryType::kOption)
-      .value("kFutureOption", SubscribeCategoryType::kFutureOption)
-      .value("kOthers", SubscribeCategoryType::kOthers)
+  py::enum_<SubscribeInstrumentType>(m_enums, "SubscribeInstrumentType", py::arithmetic())
+      .value("All", SubscribeInstrumentType::All)
+      .value("Stock", SubscribeInstrumentType::Stock)
+      .value("Fund", SubscribeInstrumentType::Fund)
+      .value("Bond", SubscribeInstrumentType::Bond)
+      .value("Index", SubscribeInstrumentType::Index)
+      .value("HKT", SubscribeInstrumentType::HKT)
+      .value("StockOption", SubscribeInstrumentType::StockOption)
+      .value("FutureOption", SubscribeInstrumentType::FutureOption)
+      .value("Others", SubscribeInstrumentType::Others)
       .export_values()
-      .def("__eq__", [](const SubscribeCategoryType &a, int b) { return static_cast<int>(a) == b; })
-      .def("__or__", py::overload_cast<const SubscribeCategoryType &, const SubscribeCategoryType &>(
-                         &sub_data_bitwise<SubscribeCategoryType, uint64_t>));
+      .def("__eq__", [](const SubscribeInstrumentType &a, int b) { return static_cast<int>(a) == b; })
+      .def("__or__", py::overload_cast<const SubscribeInstrumentType &, const SubscribeInstrumentType &>(
+                         &sub_data_bitwise<SubscribeInstrumentType, uint64_t>));
 }
 } // namespace kungfu::longfist::pybind

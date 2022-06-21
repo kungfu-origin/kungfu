@@ -71,8 +71,8 @@ void RuntimeContext::subscribe(const std::string &source, const std::vector<std:
 }
 
 void RuntimeContext::subscribe_all(const std::string &source, uint8_t exchanges_ids, uint64_t instrument_types,
-                                   uint64_t callback_types) {
-  broker_client_.subscribe_all(find_md_location(source), exchanges_ids, instrument_types, callback_types);
+                                   uint64_t secu_datatypes) {
+  broker_client_.subscribe_all(find_md_location(source), exchanges_ids, instrument_types, secu_datatypes);
 }
 
 uint64_t RuntimeContext::insert_order(uint32_t account_location_uid, const std::string &instrument_id,

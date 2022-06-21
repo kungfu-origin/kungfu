@@ -24,7 +24,7 @@ void MarketDataVendor::on_react() {
 
 void MarketDataVendor::on_start() {
   BrokerVendor::on_start();
-  events_ | is(SubscribeAll::tag) | $$(service_->subscribe_market(event->data<SubscribeAll>()));
+  events_ | is(SubscribeAll::tag) | $$(service_->subscribe_custom(event->data<SubscribeAll>()));
   events_ | is(InstrumentKey::tag) | $$(service_->subscribe({event->data<InstrumentKey>()}));
   service_->on_start();
 }

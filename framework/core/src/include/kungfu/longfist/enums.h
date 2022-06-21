@@ -133,7 +133,7 @@ enum class Side : int8_t {
   SurplusStockTransfer,      //余券划转
   GuaranteeStockTransferIn,  //担保品转入
   GuaranteeStockTransferOut, //担保品转出
-  Unknown = 127
+  Unknown = 99
 };
 
 inline std::ostream &operator<<(std::ostream &os, Side t) { return os << int8_t(t); }
@@ -223,41 +223,40 @@ enum class StrategyState : int8_t { Normal, Warn, Error };
 inline std::ostream &operator<<(std::ostream &os, StrategyState t) { return os << int8_t(t); }
 //权限订阅数据类型
 enum class MarketType : uint8_t {
-  kNone = 0,   ///< 表示全市场
-  kNEEQ = 2,   ///< 北交所
-  kSHFE = 3,   ///< 上期所
-  kCFFEX = 4,  ///< 中金所
-  kDCE = 5,    ///< 大商所
-  kCZCE = 6,   ///< 郑商所
-  kINE = 7,    ///< 上期能源
-  kSSE = 101,  ///< 上交所
-  kSZSE = 102, ///< 深交所
-  kHKEx = 103, ///< 港交所(暂时不支持直连港交所, 港交所行情数据通过深交所和上交所的港股通获取, 市场类型为kSZSE/kSSE)
-  kMax = 150   ///< 市场类型最大值
+  All,   ///< 表示全市场
+  NEEQ,   ///< 北交所
+  SHFE,   ///< 上期所
+  CFFEX,  ///< 中金所
+  DCE,    ///< 大商所
+  CZCE,   ///< 郑商所
+  INE,    ///< 上期能源
+  SSE,  ///< 上交所
+  SZSE, ///< 深交所
+  HKEx ///< 港交所(暂时不支持直连港交所, 港交所行情数据通过深交所和上交所的港股通获取, 市场类型为kSZSE/kSSE)
 };
 
 //证券数据类型
 enum class SubscribeSecuDataType : uint64_t {
-  kNone = 0x000000000000,          ///< 订阅全部证券数据类别
-  kSnapshot = 0x000000000001,      ///< 订阅快照数据类别
-  kTickExecution = 0x000000000002, ///< 订阅逐笔成交数据
-  kTickOrder = 0x000000000004,     ///< 订阅逐笔委托数据
-  kOrderQueue = 0x000000000008,    ///< 订阅委托队列数据
+  All = 0x000000000000,          ///< 订阅全部证券数据类别
+  Snapshot = 0x000000000001,      ///< 订阅快照数据类别
+  TickExecution = 0x000000000002, ///< 订阅逐笔成交数据
+  TickOrder = 0x000000000004,     ///< 订阅逐笔委托数据
+  OrderQueue = 0x000000000008,    ///< 订阅委托队列数据
 };
 
 // class SubscribeCategory {
 //   public:
 //证券品种类型
-enum class SubscribeCategoryType : uint64_t {
-  kNone = 0x000000000000,         ///< 订阅全部证券品种类别
-  kStock = 0x000000000001,        ///< 订阅股票证券品种类别
-  kFund = 0x000000000002,         ///< 订阅基金证券品种类别
-  kBond = 0x000000000004,         ///< 订阅债券证券品种类别
-  kIndex = 0x000000000008,        ///< 订阅指数证券品种类别
-  kHKT = 0x000000000010,          ///< 订阅港股通证券品种类别
-  kOption = 0x000000000020,       ///< 订阅期权证券品种类别
-  kFutureOption = 0x000000000040, ///< 订阅期货/期货期权证券品种类别
-  kOthers = 0x100000000000,       ///< 订阅其他证券品种类别
+enum class SubscribeInstrumentType : uint64_t {
+  All = 0x000000000000,         ///< 订阅全部证券品种类别
+  Stock = 0x000000000001,        ///< 订阅股票证券品种类别
+  Fund = 0x000000000002,         ///< 订阅基金证券品种类别
+  Bond = 0x000000000004,         ///< 订阅债券证券品种类别
+  Index = 0x000000000008,        ///< 订阅指数证券品种类别
+  HKT = 0x000000000010,          ///< 订阅港股通证券品种类别
+  StockOption = 0x000000000020,       ///< 订阅期权证券品种类别
+  FutureOption = 0x000000000040, ///< 订阅期货/期货期权证券品种类别
+  Others = 0x100000000000,       ///< 订阅其他证券品种类别
 };
 
 template <typename T, typename U> inline T sub_data_bitwise(const T &a, const T &b) {
