@@ -468,7 +468,6 @@ KF_DEFINE_PACK_TYPE(                                  //
     (double, frozen_price), //冻结价格，市价单冻结价格为0
 
     (int64_t, volume),        //数量
-    (int64_t, volume_traded), //成交数量
     (int64_t, volume_left),   //剩余数量
 
     (double, tax),        //税
@@ -512,7 +511,6 @@ KF_DEFINE_PACK_TYPE(                                         //
     (double, frozen_price), //冻结价格，市价单冻结价格为0
 
     (int64_t, volume),        //数量
-    (int64_t, volume_traded), //成交数量
     (int64_t, volume_left),   //剩余数量
 
     (double, tax),        //税
