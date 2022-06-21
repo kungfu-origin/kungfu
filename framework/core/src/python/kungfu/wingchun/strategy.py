@@ -128,6 +128,7 @@ class Strategy(wc.Strategy):
         side,
         instrument_id,
         exchange_id,
+        source_id,
         account_id,
         price,
         volume,
@@ -142,7 +143,14 @@ class Strategy(wc.Strategy):
                 OrderStatus.Error,
             ]
         order_id = self.ctx.insert_order(
-            instrument_id, exchange_id, account_id, price, volume, price_type, side
+            instrument_id,
+            exchange_id,
+            source_id,
+            account_id,
+            price,
+            volume,
+            price_type,
+            side,
         )
         await AsyncOrderAction(self.ctx, order_id, status_set)
         return self.ctx.book.orders[order_id]
@@ -157,7 +165,6 @@ class Strategy(wc.Strategy):
         self.ctx.add_account = self.__add_account
         self.ctx.get_account_cash_limit = wc_context.get_account_cash_limit
         self.ctx.insert_order = wc_context.insert_order
-        self.ctx.make_order = wc_context.make_order
         self.ctx.cancel_order = wc_context.cancel_order
         self.ctx.req_history_order = wc_context.req_history_order
         self.ctx.req_history_trade = wc_context.req_history_trade

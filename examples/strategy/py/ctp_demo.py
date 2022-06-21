@@ -65,7 +65,7 @@ def log_book(context, event):
 # 收到快照行情时回调，行情信息通过quote对象获取 
 def on_quote(context, quote):
     context.log.info(f"insert order for {quote.instrument_id}")
-    order_id = context.insert_order(quote.instrument_id, EXCHANGE, ACCOUNT, quote.last_price, VOLUME,
+    order_id = context.insert_order(quote.instrument_id, EXCHANGE, SOURCE, ACCOUNT, quote.last_price, VOLUME,
                                     PriceType.Limit, Side.Buy, Offset.Open)
     if order_id > 0:
         context.log.info("[order] (rid){} (ticker){}".format(order_id, quote.instrument_id))

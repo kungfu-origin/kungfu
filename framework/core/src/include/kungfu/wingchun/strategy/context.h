@@ -60,27 +60,10 @@ public:
    * @param source MD group
    */
   virtual void subscribe_all(const std::string &source, uint8_t exchanges_ids = 0, uint64_t instrument_types = 0,
-                             uint64_t callback_types = 0) = 0;
+                             uint64_t secu_datatypes = 0) = 0;
 
   /**
    * Insert order.
-   * @param instrument_id instrument ID
-   * @param exchange_id exchange ID
-   * @param account account ID
-   * @param volume trade volume
-   * @param type price type
-   * @param side side
-   * @param offset defaults to longfist::enums::Offset::Open
-   * @param hedge_flag defaults to longfist::enums::HedgeFlag::Speculation
-   * @return inserted order ID
-   */
-  virtual uint64_t insert_order(const std::string &instrument_id, const std::string &exchange_id,
-                                const std::string &account, double limit_price, int64_t volume,
-                                longfist::enums::PriceType type, longfist::enums::Side side,
-                                longfist::enums::Offset offset, longfist::enums::HedgeFlag hedge_flag) = 0;
-
-  /**
-   *
    * @param instrument_id instrument ID
    * @param exchange_id exchange ID
    * @param source source ID
@@ -93,10 +76,10 @@ public:
    * @param hedge_flag hedge_flag, defaults to longfist::enums::HedgeFlag::Speculation
    * @return
    */
-  virtual uint64_t make_order(const std::string &instrument_id, const std::string &exchange_id,
-                              const std::string &source, const std::string &account, double limit_price, int64_t volume,
-                              longfist::enums::PriceType type, longfist::enums::Side side,
-                              longfist::enums::Offset offset, longfist::enums::HedgeFlag hedge_flag) = 0;
+  virtual uint64_t insert_order(const std::string &instrument_id, const std::string &exchange_id,
+                                const std::string &source, const std::string &account, double limit_price,
+                                int64_t volume, longfist::enums::PriceType type, longfist::enums::Side side,
+                                longfist::enums::Offset offset, longfist::enums::HedgeFlag hedge_flag) = 0;
 
   /**
    * query history order

@@ -71,8 +71,8 @@ void RuntimeContext::subscribe(const std::string &source, const std::vector<std:
 }
 
 void RuntimeContext::subscribe_all(const std::string &source, uint8_t exchanges_ids, uint64_t instrument_types,
-                                   uint64_t callback_types) {
-  broker_client_.subscribe_all(find_md_location(source), exchanges_ids, instrument_types, callback_types);
+                                   uint64_t secu_datatypes) {
+  broker_client_.subscribe_all(find_md_location(source), exchanges_ids, instrument_types, secu_datatypes);
 }
 
 uint64_t RuntimeContext::insert_order(uint32_t account_location_uid, const std::string &instrument_id,
@@ -109,18 +109,10 @@ uint64_t RuntimeContext::insert_order(uint32_t account_location_uid, const std::
   return input.order_id;
 }
 
-uint64_t RuntimeContext::make_order(const std::string &instrument_id, const std::string &exchange_id,
-                                    const std::string &source, const std::string &account, double limit_price,
-                                    int64_t volume, PriceType type, Side side, Offset offset, HedgeFlag hedge_flag) {
-  auto account_location_uid = lookup_source_account_location_id(source, account);
-  return insert_order(account_location_uid, instrument_id, exchange_id, account, limit_price, volume, type, side,
-                      offset, hedge_flag);
-}
-
 uint64_t RuntimeContext::insert_order(const std::string &instrument_id, const std::string &exchange_id,
-                                      const std::string &account, double limit_price, int64_t volume, PriceType type,
-                                      Side side, Offset offset, HedgeFlag hedge_flag) {
-  auto account_location_uid = lookup_account_location_id(account);
+                                      const std::string &source, const std::string &account, double limit_price,
+                                      int64_t volume, PriceType type, Side side, Offset offset, HedgeFlag hedge_flag) {
+  auto account_location_uid = lookup_source_account_location_id(source, account);
   return insert_order(account_location_uid, instrument_id, exchange_id, account, limit_price, volume, type, side,
                       offset, hedge_flag);
 }
