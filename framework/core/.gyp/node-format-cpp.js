@@ -7,7 +7,7 @@ function main() {
     glob
       .sync(path.join('src/**', '*.@(h||hpp|hxx|cpp|c|cc|cxx)'))
       .forEach((p) => {
-        run('clang-format', ['--verbose', '-style=file', '-i', p], true, true);
+        run('clang-format', ['-style=file', '-i', p], true);
       });
   } else {
     run('pipenv', ['run', 'conan', 'source', '.']);

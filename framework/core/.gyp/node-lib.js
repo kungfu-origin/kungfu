@@ -10,11 +10,9 @@ const lib = {
   getConfigValue: function (name) {
     return process.env[`npm_package_config_${name}`];
   },
-  run: function (cmd, argv = [], check = true, silent = false) {
+  run: function (cmd, argv = [], check = true) {
     const real_cwd = fs.realpathSync(path.resolve(process.cwd()));
-    if (!silent) {
-      console.log(`$ ${cmd} ${argv.join(' ')}`);
-    }
+    console.log(`$ ${cmd} ${argv.join(' ')}`);
     const result = spawnSync(cmd, argv, {
       shell: true,
       stdio: 'inherit',

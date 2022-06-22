@@ -50,7 +50,7 @@
     "poetry": "pipenv run python -m poetry",
     "pyinstaller": "pipenv run pyinstaller",
     "nuitka": "pipenv run python -m nuitka",
-    "format": "node .gyp/node-all-format.js",
+    "format": "node .gyp/node-format-all.js",
     "format:cpp": "node .gyp/node-format-cpp.js",
     "format:python": "node .gyp/node-format-python.js src src/*/*.spec .*/*.py",
     "format:js": "prettier -l -w --config ../../.prettierrc.js \"(.gyp|lib)/**.js\"",
