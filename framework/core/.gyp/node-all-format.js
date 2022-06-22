@@ -1,8 +1,8 @@
 const { run } = require('./node-lib.js');
 
 try {
-  dealSpawnSyncResult(run('yarn', ['format:cpp'], check=false));
-  dealSpawnSyncResult(run('yarn', ['format:python'], check=false));
+  dealSpawnSyncResult(run('yarn', ['format:cpp'], false));
+  dealSpawnSyncResult(run('yarn', ['format:python'], false));
   dealSpawnSyncResult(run('yarn', ['format:js']));
 } catch (err) {
   console.error(err);
