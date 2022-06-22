@@ -2,7 +2,7 @@ const { spawnSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
-module.exports = {
+const lib = {
   exitOnError: function (error) {
     console.error(error);
     process.exit(-1);
@@ -10,9 +10,11 @@ module.exports = {
   getConfigValue: function (name) {
     return process.env[`npm_package_config_${name}`];
   },
-  run: function (cmd, argv, check = true) {
+  run: function (cmd, argv = [], check = true, silent = false) {
     const real_cwd = fs.realpathSync(path.resolve(process.cwd()));
-    console.log(`$ ${cmd} ${argv.join(' ')}`);
+    if (!silent) {
+      console.log(`$ ${cmd} ${argv.join(' ')}`);
+    }
     const result = spawnSync(cmd, argv, {
       shell: true,
       stdio: 'inherit',
@@ -24,4 +26,9 @@ module.exports = {
     }
     return result;
   },
+  hasTool: function (tool) {
+    return lib.run(tool, ['--version'], false).status === 0;
+  },
 };
+
+module.exports = lib;
