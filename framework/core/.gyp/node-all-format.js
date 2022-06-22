@@ -1,6 +1,7 @@
 const { run } = require('./node-lib.js');
 
 try {
+  dealSpawnSyncResult(run('yarn', ['install']));
   dealSpawnSyncResult(run('yarn', ['configure']));
   dealSpawnSyncResult(run('yarn', ['format:cpp']));
   dealSpawnSyncResult(run('yarn', ['format:python']));
