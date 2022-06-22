@@ -243,7 +243,6 @@ declare namespace KungfuApi {
     hedge_flag: HedgeFlagEnum;
     source_id?: string;
     account_id?: string;
-    parent_id: bigint;
   }
 
   export interface KfLogData {
@@ -312,7 +311,6 @@ declare namespace KungfuApi {
     ledger_category: LedgerCategoryEnum;
 
     source_id: string; //柜台ID
-    broker_id: string; // Broker ID
     account_id: string; //账号ID
     client_id: string; // client ID
 
@@ -379,7 +377,6 @@ declare namespace KungfuApi {
   }
 
   export interface Order {
-    parent_id: bigint; //母订单ID
     order_id: bigint; //订单ID
     insert_time: bigint; //订单写入时间
     update_time: bigint; //订单更新时间
@@ -453,7 +450,6 @@ declare namespace KungfuApi {
     volume_condition: VolumeConditionEnum; //成交量类型
     time_condition: TimeConditionEnum; //成交时间类型
 
-    parent_id: bigint; //母订单ID
     insert_time: bigint; //写入时间
 
     source: number;
@@ -562,7 +558,6 @@ declare namespace KungfuApi {
   export interface Trade {
     trade_id: bigint; //成交ID
     order_id: bigint; //订单ID
-    parent_order_id: bigint; //母订单ID
     trade_time: bigint; //成交时间
 
     trading_day: string; //交易日

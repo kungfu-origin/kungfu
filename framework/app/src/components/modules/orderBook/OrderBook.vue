@@ -96,7 +96,7 @@ function handleTriggerSellOrderBookPriceVolume(
   if (!currentInstrument.value) {
     return;
   }
-  
+
   triggerOrderBookUpdate(currentInstrument.value, {
     side: SideEnum.Sell,
     price,

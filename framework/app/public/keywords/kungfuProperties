@@ -85,13 +85,11 @@ commission
 status
 error_id
 error_msg
-parent_id
 side
 offset
 price_type
 volume_condition
 time_condition
-parent_order_id
 trade_time
 price
 direction

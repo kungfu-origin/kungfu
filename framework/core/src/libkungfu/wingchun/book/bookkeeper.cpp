@@ -128,10 +128,8 @@ Book_ptr Bookkeeper::make_book(uint32_t location_uid) {
   strcpy(asset_margin.trading_day, time::strftime(app_.get_trading_day(), KUNGFU_TRADING_DAY_FORMAT).c_str());
   if (asset.ledger_category == LedgerCategory::Account) {
     strncpy(asset.source_id, location->group.c_str(), SOURCE_ID_LEN);
-    strncpy(asset.broker_id, location->group.c_str(), BROKER_ID_LEN);
     strncpy(asset.account_id, location->name.c_str(), ACCOUNT_ID_LEN);
     strncpy(asset_margin.source_id, location->group.c_str(), SOURCE_ID_LEN);
-    strncpy(asset_margin.broker_id, location->group.c_str(), BROKER_ID_LEN);
     strncpy(asset_margin.account_id, location->name.c_str(), ACCOUNT_ID_LEN);
   }
   if (asset.ledger_category == LedgerCategory::Strategy) {

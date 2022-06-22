@@ -166,7 +166,6 @@ void TraderXTP::OnTradeEvent(XTPTradeReport *trade_info, uint64_t session_id) {
   from_xtp(*trade_info, trade);
   trade.trade_id = writer->current_frame_uid();
   trade.order_id = order_id;
-  trade.parent_order_id = order_state.data.parent_id;
   trade.trade_time = yijinjing::time::now_in_nano();
   strcpy(trade.trading_day, trading_day_.c_str());
   strcpy(trade.account_id, this->get_account_id().c_str());

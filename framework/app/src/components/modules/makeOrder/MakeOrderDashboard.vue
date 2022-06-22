@@ -132,7 +132,6 @@ const makeOrderData = computed(() => {
     side: +side,
     offset: getResolvedOffset(offset, side, instrumentType),
     hedge_flag: +(hedge_flag || 0),
-    parent_id: BigInt(0),
   };
   return makeOrderInput;
 });
@@ -218,12 +217,16 @@ onMounted(() => {
           formState.value.instrument = instrumentValue;
           formState.value.instrument_type = +instrumentType;
         }
-        
+
         if (!!price && !Number.isNaN(price) && +price !== 0) {
           formState.value.limit_price = +Number(price).toFixed(4);
         }
-        
-        if (!!volume && !Number.isNaN(Number(volume)) && BigInt(volume) !== BigInt(0)) {
+
+        if (
+          !!volume &&
+          !Number.isNaN(Number(volume)) &&
+          BigInt(volume) !== BigInt(0)
+        ) {
           formState.value.volume = +Number(volume).toFixed(0);
         }
 
@@ -322,7 +325,6 @@ function initOrderInputData(): Promise<KungfuApi.MakeOrderInput> {
     side: +side,
     offset: getResolvedOffset(offset, side, instrumentType),
     hedge_flag: +(hedge_flag || 0),
-    parent_id: BigInt(0),
   };
 
   return Promise.resolve(makeOrderInput);

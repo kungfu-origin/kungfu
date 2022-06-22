@@ -362,7 +362,6 @@ inline uint32_t hash_instrument(const char *exchange_id, const char *instrument_
 }
 
 inline void order_from_input(const longfist::types::OrderInput &input, longfist::types::Order &order) {
-  order.parent_id = input.parent_id;
   order.order_id = input.order_id;
 
   strcpy(order.instrument_id, input.instrument_id);
@@ -381,8 +380,10 @@ inline void order_from_input(const longfist::types::OrderInput &input, longfist:
 
   order.side = input.side;
   order.offset = input.offset;
-  order.hedge_flag = input.hedge_flag;
 
+  order.is_swap = input.is_swap;
+
+  order.hedge_flag = input.hedge_flag;
   order.price_type = input.price_type;
   order.volume_condition = input.volume_condition;
   order.time_condition = input.time_condition;
