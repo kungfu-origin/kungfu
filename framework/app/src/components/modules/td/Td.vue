@@ -382,8 +382,8 @@ function handleRemoveTd(item: KungfuApi.KfConfig) {
             "
           >
             {{
-                            JSON.parse((record as KungfuApi.KfConfig).value)
-                                .account_name || '--'
+              JSON.parse((record as KungfuApi.KfConfig).value).account_name ||
+              '--'
             }}
           </template>
 
@@ -466,12 +466,12 @@ function handleRemoveTd(item: KungfuApi.KfConfig) {
               <SettingOutlined
                 style="font-size: 12px"
                 @click.stop="
-                                    handleOpenSetTdModal(
-                                        'update',
-                                        record.group,
-                                        record as KungfuApi.KfConfig,
-                                    )
-                                "
+                  handleOpenSetTdModal(
+                    'update',
+                    record.group,
+                    record as KungfuApi.KfConfig,
+                  )
+                "
               />
               <DeleteOutlined
                 style="font-size: 12px"

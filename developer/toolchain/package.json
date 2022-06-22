@@ -67,7 +67,7 @@
     "pinia": "^2.0.10",
     "postcss": "^8.4.5",
     "postcss-loader": "^6.2.0",
-    "prettier": "^2.5.0",
+    "prettier": "~2.7.1",
     "rimraf": "^3.0.0",
     "rxjs": "^7.5.5",
     "semver": "^7.3.5",
