@@ -8,6 +8,6 @@ declare module '*.vue' {
 declare module 'vue-virtual-scroller' {
   import { App } from 'vue';
   export default {
-    install(app: App): void;,
+    install(app: App): void;
   };
 }
