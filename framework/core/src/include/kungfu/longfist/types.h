@@ -53,7 +53,7 @@ KF_DEFINE_DATA_TYPE(                                            //
     SubscribeAll, 303, PK(update_time), TIMESTAMP(update_time), //
     (int64_t, update_time),                                     //
     (MarketType, market_type),                                  //
-    (SubscribeInstrumentType, subscribe_instrument_type),           //
+    (SubscribeInstrumentType, subscribe_instrument_type),       //
     (SubscribeSecuDataType, subscribe_secu_datatype)            //
 );
 
@@ -467,8 +467,8 @@ KF_DEFINE_PACK_TYPE(                                  //
     (double, limit_price),  //价格
     (double, frozen_price), //冻结价格，市价单冻结价格为0
 
-    (int64_t, volume),        //数量
-    (int64_t, volume_left),   //剩余数量
+    (int64_t, volume),      //数量
+    (int64_t, volume_left), //剩余数量
 
     (double, tax),        //税
     (double, commission), //手续费
@@ -478,7 +478,7 @@ KF_DEFINE_PACK_TYPE(                                  //
     (int32_t, error_id),                             //错误ID
     (kungfu::array<char, ERROR_MSG_LEN>, error_msg), //错误信息
 
-    (bool, is_swap),                     //互换单
+    (bool, is_swap), //互换单
 
     (Side, side),                        //买卖方向
     (Offset, offset),                    //开平方向
@@ -512,8 +512,8 @@ KF_DEFINE_PACK_TYPE(                                         //
     (double, limit_price),  //价格
     (double, frozen_price), //冻结价格，市价单冻结价格为0
 
-    (int64_t, volume),        //数量
-    (int64_t, volume_left),   //剩余数量
+    (int64_t, volume),      //数量
+    (int64_t, volume_left), //剩余数量
 
     (double, tax),        //税
     (double, commission), //手续费
