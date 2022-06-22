@@ -20,7 +20,6 @@ namespace py = pybind11;
 PYBIND11_MAKE_OPAQUE(CommissionMap)
 PYBIND11_MAKE_OPAQUE(InstrumentMap)
 PYBIND11_MAKE_OPAQUE(PositionMap)
-PYBIND11_MAKE_OPAQUE(PositionDetailMap)
 PYBIND11_MAKE_OPAQUE(OrderInputMap)
 PYBIND11_MAKE_OPAQUE(OrderMap)
 PYBIND11_MAKE_OPAQUE(TradeMap)
@@ -59,7 +58,6 @@ void bind_book(pybind11::module &m) {
   py::bind_map<CommissionMap>(m, "CommissionMap");
   py::bind_map<InstrumentMap>(m, "InstrumentMap");
   py::bind_map<PositionMap>(m, "PositionMap");
-  py::bind_map<PositionDetailMap>(m, "PositionDetailMap");
   py::bind_map<OrderInputMap>(m, "OrderInputMap");
   py::bind_map<OrderMap>(m, "OrderMap");
   py::bind_map<TradeMap>(m, "TradeMap");

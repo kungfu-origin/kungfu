@@ -73,13 +73,8 @@ constexpr auto AllTypes = boost::hana::make_map( //
     TYPE_PAIR(HistoryTrade),                     //
     TYPE_PAIR(Asset),                            //
     TYPE_PAIR(AssetMargin),                      //
-    TYPE_PAIR(AssetSnapshot),                    //
-    TYPE_PAIR(DailyAsset),                       //
     TYPE_PAIR(Position),                         //
     TYPE_PAIR(PositionEnd),                      //
-    TYPE_PAIR(PositionDetail),                   //
-    TYPE_PAIR(PositionDetailEnd),                //
-    TYPE_PAIR(InstrumentCommissionRate),         //
     TYPE_PAIR(OrderStat)                         //
 );
 
@@ -120,13 +115,8 @@ constexpr auto AllDataTypes = boost::hana::make_map( //
     TYPE_PAIR(HistoryTrade),                         //
     TYPE_PAIR(Asset),                                //
     TYPE_PAIR(AssetMargin),                          //
-    TYPE_PAIR(AssetSnapshot),                        //
-    TYPE_PAIR(DailyAsset),                           //
     TYPE_PAIR(Position),                             //
     TYPE_PAIR(PositionEnd),                          //
-    TYPE_PAIR(PositionDetail),                       //
-    TYPE_PAIR(PositionDetailEnd),                    //
-    TYPE_PAIR(InstrumentCommissionRate),             //
     TYPE_PAIR(OrderStat)                             //
 );
 
@@ -151,24 +141,12 @@ constexpr auto StateDataTypes = boost::hana::make_map( //
     TYPE_PAIR(Commission),                             //
     TYPE_PAIR(Instrument),                             //
     TYPE_PAIR(Quote),                                  //
-    TYPE_PAIR(Entrust),                                //
-    TYPE_PAIR(Transaction),                            //
-    TYPE_PAIR(Bar),                                    //
-    TYPE_PAIR(TopOfBook),                              //
     TYPE_PAIR(OrderInput),                             //
-    TYPE_PAIR(OrderAction),                            //
-    TYPE_PAIR(OrderActionError),                       //
     TYPE_PAIR(Order),                                  //
     TYPE_PAIR(Trade),                                  //
-    TYPE_PAIR(HistoryOrder),                           //
-    TYPE_PAIR(HistoryTrade),                           //
     TYPE_PAIR(Asset),                                  //
     TYPE_PAIR(AssetMargin),                            //
-    TYPE_PAIR(AssetSnapshot),                          //
-    TYPE_PAIR(DailyAsset),                             //
     TYPE_PAIR(Position),                               //
-    TYPE_PAIR(PositionDetail),                         //
-    TYPE_PAIR(InstrumentCommissionRate),               //
     TYPE_PAIR(OrderStat)                               //
 );
 

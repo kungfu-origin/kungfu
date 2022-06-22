@@ -65,8 +65,6 @@ private:
 
   void write_positions(int64_t trigger_time, uint32_t dest, book::PositionMap &positions);
 
-  void write_asset_snapshots(int32_t msg_type);
-
   void request_asset_sync(int64_t trigger_time);
 
   void request_position_sync(int64_t trigger_time);
@@ -85,14 +83,6 @@ private:
     write_to(trigger_time, book->get_position_for(data), book_uid);
     write_to(trigger_time, book->asset, book_uid);
     write_to(trigger_time, book->asset_margin, book_uid);
-  }
-
-  template <typename Writer, typename Snapshot>
-  static void write_asset_snapshot(int64_t trigger_time, Writer &&writer, const Snapshot &snapshot) {
-    if (snapshot.realized_pnl != 0 or snapshot.unrealized_pnl != 0) {
-      writer->write(trigger_time, snapshot, longfist::types::AssetSnapshot::tag);
-      writer->write(trigger_time, snapshot, longfist::types::DailyAsset::tag);
-    }
   }
 };
 } // namespace kungfu::wingchun::service

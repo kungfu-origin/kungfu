@@ -4,7 +4,7 @@
     "name": "kungfu-trader",
     "email": "info@kungfu.link"
   },
-  "version": "2.4.0-alpha.81",
+  "version": "2.4.0-alpha.82",
   "description": "Toolchain for Kungfu Development (babel/cmake-js/node-gyp/webpack/yarn/etc).",
   "license": "Apache-2.0",
   "main": "package.json",
@@ -67,7 +67,7 @@
     "pinia": "^2.0.10",
     "postcss": "^8.4.5",
     "postcss-loader": "^6.2.0",
-    "prettier": "^2.5.0",
+    "prettier": "~2.7.1",
     "rimraf": "^3.0.0",
     "rxjs": "^7.5.5",
     "semver": "^7.3.5",

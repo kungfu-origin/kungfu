@@ -218,10 +218,16 @@ onMounted(() => {
           formState.value.instrument = instrumentValue;
           formState.value.instrument_type = +instrumentType;
         }
-        if (+price !== 0) {
+
+        if (!!price && !Number.isNaN(price) && +price !== 0) {
           formState.value.limit_price = +Number(price).toFixed(4);
         }
-        if (BigInt(volume) !== BigInt(0)) {
+
+        if (
+          !!volume &&
+          !Number.isNaN(Number(volume)) &&
+          BigInt(volume) !== BigInt(0)
+        ) {
           formState.value.volume = +Number(volume).toFixed(0);
         }
 
@@ -590,7 +596,7 @@ async function handleOpenTradingTaskConfigModal(
               <div
                 class="position-value ant-col ant-col-14 ant-form-item-control"
               >
-                {{ currentPosition!.volume || '--'}}
+                {{ currentPosition!.volume || '--' }}
               </div>
             </div>
           </div>

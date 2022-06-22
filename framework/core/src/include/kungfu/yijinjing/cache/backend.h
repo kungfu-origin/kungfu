@@ -137,16 +137,11 @@ private:
   std::unordered_map<uint32_t, StateStoragePtr> storage_map_;
 
   template <typename DataType>
-  std::enable_if_t<not std::is_same_v<DataType, longfist::types::DailyAsset>>
-  restore(yijinjing::journal::writer_ptr &writer, uint32_t dest, StateStoragePtr &storage) {
+  void restore(yijinjing::journal::writer_ptr &writer, uint32_t dest, StateStoragePtr &storage) {
     for (auto &data : time_spec<DataType>::get_all(storage, yijinjing::time::today_start(), INT64_MAX)) {
       writer->write(0, data);
     }
   }
-
-  template <typename DataType>
-  std::enable_if_t<std::is_same_v<DataType, longfist::types::DailyAsset>>
-  restore(yijinjing::journal::writer_ptr &writer, uint32_t dest, StateStoragePtr &storage) {}
 
   template <typename DataType> void restore(yijinjing::cache::bank &bank, uint32_t dest, StateStoragePtr &storage) {
     auto from = yijinjing::time::today_start();

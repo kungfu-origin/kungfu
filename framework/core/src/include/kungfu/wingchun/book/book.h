@@ -21,9 +21,6 @@ typedef std::unordered_map<uint32_t, longfist::types::Instrument> InstrumentMap;
 // key = hash_instrument(exchange_id, instrument_id)
 typedef std::unordered_map<uint32_t, longfist::types::Position> PositionMap;
 
-// key = hash_instrument(exchange_id, instrument_id)
-typedef std::unordered_map<uint32_t, longfist::types::PositionDetail> PositionDetailMap;
-
 // key = order_id
 typedef std::unordered_map<uint64_t, longfist::types::OrderInput> OrderInputMap;
 
