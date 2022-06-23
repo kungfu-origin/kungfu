@@ -16,7 +16,7 @@
   "types": "./src/typings/index.d.ts",
   "main": "lib/index.js",
   "scripts": {
-    "format": "prettier -l -w --config ../../.prettierrc.js ."
+    "format": "prettier -l -w --config ../core/.prettierrc.js ."
   },
   "dependencies": {
     "@fast-csv/format": "^4.3.5",

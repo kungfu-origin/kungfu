@@ -28,7 +28,7 @@ void from_json(const nlohmann::json &j, TDConfiguration &c) {
 }
 
 TraderXTP::TraderXTP(broker::BrokerVendor &vendor) : Trader(vendor), session_id_(0), request_id_(0), trading_day_("") {
-  setup_log();
+  KUNGFU_SETUP_LOG();
 }
 
 TraderXTP::~TraderXTP() {

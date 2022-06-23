@@ -28,7 +28,7 @@
     "install": "node -e \"require('@kungfu-trader/kungfu-core').prebuilt('install')\"",
     "package": "node -e \"require('@kungfu-trader/kungfu-core').prebuilt('package')\"",
     "lint": "eslint src",
-    "format": "prettier -l -w --config ../../.prettierrc.js ."
+    "format": "prettier -l -w --config ../core/.prettierrc.js ."
   },
   "dependencies": {
     "@kungfu-trader/kungfu-js-api": "^2.4.0-alpha.84",

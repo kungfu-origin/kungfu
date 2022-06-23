@@ -51,9 +51,9 @@
     "pyinstaller": "pipenv run pyinstaller",
     "nuitka": "pipenv run python -m nuitka",
     "format": "node .gyp/node-format-all.js",
-    "format:cpp": "node .gyp/node-format-cpp.js",
+    "format:cpp": "node .gyp/node-format-cpp.js src",
     "format:python": "node .gyp/node-format-python.js src src/*/*.spec .*/*.py",
-    "format:js": "prettier -l -w --config ../../.prettierrc.js \"(.gyp|lib)/**.js\"",
+    "format:js": "node .gyp/node-format-js.js \"(.gyp|lib)/**.js\"",
     "dev": "pipenv run python .devtools/kfc.py",
     "kfc": "node lib/kfc.js"
   },

@@ -24,7 +24,7 @@
   "scripts": {
     "build": "kfs extension build",
     "clean": "kfs extension clean",
-    "format": "node ../../framework/core/.gyp/node-format-python.js src",
+    "format": "kfs extension format",
     "install": "node -e \"require('@kungfu-trader/kungfu-core').prebuilt('install')\"",
     "package": "kfs project package"
   },

@@ -354,3 +354,17 @@ exports.compile = () => {
     {},
   );
 };
+
+exports.format = () => {
+  const packageJson = getPackageJson();
+  const srcArgv = ['src'];
+  if (hasSourceFor(packageJson, 'cpp')) {
+    require('@kungfu-trader/kungfu-core/.gyp/node-format-cpp')(srcArgv);
+  }
+  if (hasSourceFor(packageJson, 'python')) {
+    require('@kungfu-trader/kungfu-core/.gyp/node-format-python')(srcArgv);
+  }
+  if (packageJson.kungfuConfig && packageJson.kungfuConfig.ui_config) {
+    require('@kungfu-trader/kungfu-core/.gyp/node-format-js')(srcArgv);
+  }
+};

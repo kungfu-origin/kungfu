@@ -1,8 +1,8 @@
 const { runAndCollect, runAndExit, run } = require('./node-lib.js');
 const path = require('path');
 
-function main() {
-  const argv = process.argv.slice(2);
+const main = (module.exports = function (argv) {
+  run('black', ['--version'], false);
 
   runAndExit('black', argv);
 
@@ -18,6 +18,6 @@ function main() {
 
   process.chdir(path.dirname(__dirname));
   run('pipenv', ['run', 'black'].concat(argv));
-}
+});
 
-if (require.main === module) main();
+if (require.main === module) main(process.argv.slice(2));

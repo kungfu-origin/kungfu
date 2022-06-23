@@ -19,7 +19,7 @@
   },
   "scripts": {
     "kfs": "node src/kfs.js",
-    "format": "prettier -l -w --config ../../.prettierrc.js src"
+    "format": "kfs extension format"
   },
   "dependencies": {
     "@kungfu-trader/kungfu-app": "^2.4.0-alpha.84",
