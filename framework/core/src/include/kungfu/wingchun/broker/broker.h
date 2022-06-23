@@ -11,6 +11,8 @@
 #include <kungfu/yijinjing/log.h>
 #include <kungfu/yijinjing/practice/apprentice.h>
 
+#define setup_log() kungfu::yijinjing::log::copy_log_settings(get_home(), get_home()->name)
+
 namespace kungfu::wingchun::broker {
 
 FORWARD_DECLARE_CLASS_PTR(BrokerVendor)

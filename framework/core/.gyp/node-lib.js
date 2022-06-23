@@ -10,6 +10,20 @@ const lib = {
   getConfigValue: function (name) {
     return process.env[`npm_package_config_${name}`];
   },
+  runAndCollect: function (cmd, argv = []) {
+    return spawnSync(cmd, argv, {
+      shell: true,
+      stdio: 'pipe',
+      windowsHide: true,
+    });
+  },
+  runAndExit: function (cmd, argv = []) {
+    const result = lib.run(cmd, argv, false);
+    if (result.status === 0) {
+      process.exit(0);
+    }
+    return result;
+  },
   run: function (cmd, argv = [], check = true) {
     const real_cwd = fs.realpathSync(path.resolve(process.cwd()));
     console.log(`$ ${cmd} ${argv.join(' ')}`);
@@ -23,9 +37,6 @@ const lib = {
       process.exit(result.status);
     }
     return result;
-  },
-  hasTool: function (tool) {
-    return lib.run(tool, ['--version'], false).status === 0;
   },
 };
 

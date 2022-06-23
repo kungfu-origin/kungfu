@@ -61,23 +61,13 @@ class KungfuCoreConan(ConanFile):
         if "CONAN_VS_TOOLSET" not in environ
         else environ["CONAN_VS_TOOLSET"],
     }
-    cpp_files_extensions = [".h", ".hpp", ".hxx", ".cpp", ".c", ".cc", ".cxx"]
     conanfile_dir = path.dirname(path.realpath(__file__))
-    src_dir = path.join(conanfile_dir, "src")
-    ext_dir = path.join(conanfile_dir, "extensions")
     build_info_file = "kungfubuildinfo.json"
     build_dir = path.join(conanfile_dir, "build")
     build_python_dir = path.join(build_dir, "python")
     build_extensions_dir = path.join(build_dir, "build_extensions")
     dist_dir = path.join(conanfile_dir, "dist")
     kfc_dir = path.join(dist_dir, "kfc")
-
-    def source(self):
-        """Performs clang-format on all C++ files"""
-        if tools.which("clang-format") is not None:
-            self.__clang_format(self.src_dir, self.cpp_files_extensions)
-        else:
-            self.output.warn("clang-format not installed")
 
     def configure(self):
         if tools.detected_os() != "Windows":
@@ -132,44 +122,6 @@ class KungfuCoreConan(ConanFile):
 
     def __get_build_info_path(self, build_type):
         return path.join(self.build_dir, build_type, self.build_info_file)
-
-    def __list_files(self, source_dir, extensions):
-        found_files = []
-        for folder, subdirs, files in os.walk(source_dir):
-            for file in files:
-                extension = path.splitext(file)[1]
-                for ext in extensions:
-                    if ext == extension:
-                        file_path = path.join(folder, file)
-                        found_files.append(file_path)
-        return found_files
-
-    def __clang_format(self, source_dir, extensions):
-        files = self.__list_files(source_dir, extensions)
-        processes = [
-            psutil.Popen(["clang-format", "--verbose", "-style=file", "-i", file])
-            for file in files
-        ]
-
-        def cleanup():
-            map(lambda p: p.kill(), [p for p in processes if p.is_running()])
-
-        atexit.register(cleanup)
-
-        for process in processes:
-            try:
-                rc = process.wait(30)
-                if rc is not None and rc != 0:
-                    self.output.error(f"clang-format failed rc={rc}")
-                    self.output.error(" ".join(process.cmdline()))
-            except psutil.TimeoutExpired:
-                self.output.error(f"clang-format timeout")
-                self.output.error(" ".join(process.cmdline()))
-                process.kill()
-            except Exception as e:
-                self.output.error(f"clang-format failed with error {e}")
-                self.output.error(" ".join(process.cmdline()))
-                process.kill()
 
     def __touch_lockfile(self):
         conan_lock = path.join(self.build_dir, "conan.lock")

@@ -178,6 +178,14 @@ exports.installSingleLib = async (
   platform = detectPlatform(),
   arch = os.arch(),
 ) => {
+  const localLibDir = path.resolve(kungfulibs, libName, libVersion);
+  if (fse.existsSync(localLibDir)) {
+    console.log(
+      `-- Lib ${libName}@${libVersion} exists at ${localLibDir}, skip downloading`,
+    );
+    return;
+  }
+
   const index = await axios.get(`${libSiteURL}/index.json`);
   const sourceLibs = index.data;
 
@@ -220,7 +228,7 @@ exports.installSingleLib = async (
   };
 
   const buildDirPath = (dir) => {
-    const dirPath = path.join(kungfulibs, libName, libVersion, dir);
+    const dirPath = path.join(localLibDir, dir);
     fse.ensureDirSync(dirPath);
     return dirPath;
   };
