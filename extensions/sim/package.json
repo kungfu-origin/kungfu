@@ -44,7 +44,7 @@
   },
   "kungfuConfig": {
     "key": "sim",
-    "name": "SIM",
+    "name": "功夫模拟",
     "config": {
       "td": {
         "type": "multi",

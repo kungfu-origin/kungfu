@@ -166,7 +166,6 @@ void TraderXTP::OnTradeEvent(XTPTradeReport *trade_info, uint64_t session_id) {
   trade.order_id = order_id;
   trade.trade_time = yijinjing::time::now_in_nano();
   strcpy(trade.trading_day, trading_day_.c_str());
-  strcpy(trade.account_id, this->get_account_id().c_str());
   trade.instrument_type = get_instrument_type(trade.exchange_id, trade.instrument_id);
   writer->close_data();
   order_state.data.volume_left -= trade.volume;
