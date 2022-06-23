@@ -70,20 +70,20 @@ void Runner::post_start() {
     return; // safe guard for live mode, in that case we will run truly when prepare process is done.
   }
 
-  events_ | is_own<Quote>(context_->get_broker_client()) | $$(invoke(&Strategy::on_quote, event->data<Quote>()));
-  events_ | is_own<Bar>(context_->get_broker_client()) | $$(invoke(&Strategy::on_bar, event->data<Bar>()));
+  events_ | is_own<Quote>(context_->get_broker_client()) | $$(invoke(&Strategy::on_quote, event->data<Quote>(), get_location(event->source())));
+  events_ | is_own<Bar>(context_->get_broker_client()) | $$(invoke(&Strategy::on_bar, event->data<Bar>(), get_location(event->source())));
   events_ | is_own<TopOfBook>(context_->get_broker_client()) |
-      $$(invoke(&Strategy::on_top_of_book, event->data<TopOfBook>()));
-  events_ | is(Order::tag) | $$(invoke(&Strategy::on_order, event->data<Order>(), event->source()));
-  events_ | is(Trade::tag) | $$(invoke(&Strategy::on_trade, event->data<Trade>()));
-  events_ | is(HistoryOrder::tag) | $$(invoke(&Strategy::on_history_order, event->data<HistoryOrder>()));
-  events_ | is(HistoryTrade::tag) | $$(invoke(&Strategy::on_history_trade, event->data<HistoryTrade>()));
-  events_ | is(Entrust::tag) | $$(invoke(&Strategy::on_entrust, event->data<Entrust>()));
+      $$(invoke(&Strategy::on_top_of_book, event->data<TopOfBook>(), get_location(event->source())));
+  events_ | is(Order::tag) | $$(invoke(&Strategy::on_order, event->data<Order>(), get_location(event->source())));
+  events_ | is(Trade::tag) | $$(invoke(&Strategy::on_trade, event->data<Trade>(), get_location(event->source())));
+  events_ | is(HistoryOrder::tag) | $$(invoke(&Strategy::on_history_order, event->data<HistoryOrder>(), get_location(event->source())));
+  events_ | is(HistoryTrade::tag) | $$(invoke(&Strategy::on_history_trade, event->data<HistoryTrade>(), get_location(event->source())));
+  events_ | is(Entrust::tag) | $$(invoke(&Strategy::on_entrust, event->data<Entrust>(), get_location(event->source())));
   events_ | is_own<Transaction>(context_->get_broker_client()) |
-      $$(invoke(&Strategy::on_transaction, event->data<Transaction>()));
-  events_ | is(OrderActionError::tag) | $$(invoke(&Strategy::on_order_action_error, event->data<OrderActionError>()));
-  events_ | is_own_reg<Deregister>(context_->get_broker_client()) |
-      $$(invoke(&Strategy::on_deregister, event->data<Deregister>()));
+      $$(invoke(&Strategy::on_transaction, event->data<Transaction>(), get_location(event->source())));
+  events_ | is(OrderActionError::tag) | $$(invoke(&Strategy::on_order_action_error, event->data<OrderActionError>(), get_location(event->source())));
+  events_ | is_own_register(context_->get_broker_client()) |
+      $$(invoke(&Strategy::on_deregister, event->data<Deregister>(), get_location(event->source())));
   events_ | is_own_updata_state(context_->get_broker_client()) |
       $$(invoke(&Strategy::on_broker_state_change, event->data<BrokerStateUpdate>(), get_location(event->source())));
 
