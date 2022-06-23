@@ -74,7 +74,7 @@ void Runner::post_start() {
   events_ | is_own<Bar>(context_->get_broker_client()) | $$(invoke(&Strategy::on_bar, event->data<Bar>()));
   events_ | is_own<TopOfBook>(context_->get_broker_client()) |
       $$(invoke(&Strategy::on_top_of_book, event->data<TopOfBook>()));
-  events_ | is(Order::tag) | $$(invoke(&Strategy::on_order, event->data<Order>()));
+  events_ | is(Order::tag) | $$(invoke(&Strategy::on_order, event->data<Order>(), event->source()));
   events_ | is(Trade::tag) | $$(invoke(&Strategy::on_trade, event->data<Trade>()));
   events_ | is(HistoryOrder::tag) | $$(invoke(&Strategy::on_history_order, event->data<HistoryOrder>()));
   events_ | is(HistoryTrade::tag) | $$(invoke(&Strategy::on_history_trade, event->data<HistoryTrade>()));
@@ -85,8 +85,7 @@ void Runner::post_start() {
   events_ | is_own_reg<Deregister>(context_->get_broker_client()) |
       $$(invoke(&Strategy::on_deregister, event->data<Deregister>()));
   events_ | is_own_updata_state(context_->get_broker_client()) |
-      $$(invoke(&Strategy::on_broker_state_change, event->data<BrokerStateUpdate>(),
-                context_->get_broker_client().get_location(event->source())));
+      $$(invoke(&Strategy::on_broker_state_change, event->data<BrokerStateUpdate>(), get_location(event->source())));
 
   invoke(&Strategy::post_start);
   SPDLOG_INFO("strategy {} started", get_io_device()->get_home()->name);
