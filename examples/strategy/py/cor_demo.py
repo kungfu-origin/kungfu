@@ -6,7 +6,7 @@ def pre_start(context):
     context.subscribe(Source.XTP, ["600198"], Exchange.SSE)
 
 
-async def on_quote(context, quote):
+async def on_quote(context, quote, location):
     context.log.info(f'on quote {quote.instrument_id}')
     order = await context.buy(quote.instrument_id, Exchange.SSE, "15014990", quote.ask_price[0], 100)
     context.log.info(f'buy order status {order.status}')

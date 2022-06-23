@@ -44,7 +44,7 @@ export enum InstrumentTypeEnum {
   repo,
   crypto,
   cryptofuture,
-  simu,
+  multi,
 }
 
 export type InstrumentTypes = keyof typeof InstrumentTypeEnum;
@@ -186,11 +186,6 @@ export enum HistoryDateEnum {
 
 export enum OrderActionFlagEnum {
   Cancel,
-}
-
-export enum MakeOrderByWatcherEnum {
-  Manual = 101,
-  Task = 102,
 }
 
 export enum FutureArbitrageCodeEnum {

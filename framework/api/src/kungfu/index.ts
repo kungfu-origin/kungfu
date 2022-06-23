@@ -20,7 +20,7 @@ import {
   resolveAccountId,
   resolveClientId,
 } from '../utils/busiUtils';
-import { HistoryDateEnum, MakeOrderByWatcherEnum } from '../typings/enums';
+import { HistoryDateEnum, LedgerCategoryEnum } from '../typings/enums';
 import { ExchangeIds } from '../config/tradingConfig';
 
 if (process.env.RENDERER_TYPE === 'logview') {
@@ -100,35 +100,15 @@ export const dealTradingDataItem = (
   if ('hedge_flag' in item) {
     itemResolved.hedge_flag = dealHedgeFlag(item.hedge_flag).name;
   }
-  if ('source' in item && watcher && 'parent_id' in item) {
+  if ('source' in item && 'dest' in item && watcher) {
     itemResolved.source = resolveAccountId(
       watcher,
       item.source,
       item.dest,
-      item.parent_id,
     ).name;
   }
-  if ('dest' in item && watcher && 'parent_id' in item) {
-    itemResolved.dest = resolveClientId(
-      watcher,
-      item.dest,
-      item.parent_id,
-    ).name;
-  }
-  if ('source' in item && watcher && 'parent_order_id' in item) {
-    itemResolved.source = resolveAccountId(
-      watcher,
-      item.source,
-      item.dest,
-      item.parent_order_id,
-    ).name;
-  }
-  if ('dest' in item && watcher && 'parent_order_id' in item) {
-    itemResolved.dest = resolveClientId(
-      watcher,
-      item.dest,
-      item.parent_order_id,
-    ).name;
+  if ('dest' in item && watcher) {
+    itemResolved.dest = resolveClientId(watcher, item.dest).name;
   }
   if ('holder_uid' in item && watcher) {
     itemResolved.holder_uid = dealLocationUID(watcher, item.holder_uid);
@@ -341,14 +321,7 @@ export const kfMakeOrder = (
   if (strategyLocation) {
     //设置orderInput的parentid, 来标记该order为策略手动下单
     return Promise.resolve(
-      watcher.issueOrder(
-        {
-          ...orderInput,
-          parent_id: BigInt(MakeOrderByWatcherEnum.Manual),
-        },
-        tdLocation,
-        strategyLocation,
-      ),
+      watcher.issueOrder(orderInput, tdLocation, strategyLocation),
     );
   } else {
     return Promise.resolve(watcher.issueOrder(orderInput, tdLocation));
@@ -424,13 +397,8 @@ export const dealOrder = (
     watcher,
     order.source,
     order.dest,
-    order.parent_id,
   );
-  const destResolvedData = resolveClientId(
-    watcher,
-    order.dest,
-    order.parent_id,
-  );
+  const destResolvedData = resolveClientId(watcher, order.dest);
   const latencyData = dealOrderStat(orderStats, order.uid_key) || {
     latencySystem: '--',
     latencyNetwork: '--',
@@ -463,13 +431,8 @@ export const dealTrade = (
     watcher,
     trade.source,
     trade.dest,
-    trade.parent_order_id,
   );
-  const destResolvedData = resolveClientId(
-    watcher,
-    trade.dest,
-    trade.parent_order_id,
-  );
+  const destResolvedData = resolveClientId(watcher, trade.dest);
   const orderUKey = trade.order_id.toString(16).padStart(16, '0');
   const latencyData = dealOrderStat(orderStats, orderUKey) || {
     latencyTrade: '--',
@@ -491,12 +454,18 @@ export const dealTrade = (
 };
 
 export const dealPosition = (
+  watcher: KungfuApi.Watcher,
   pos: KungfuApi.Position,
 ): KungfuApi.PositionResolved => {
+  const holderLocation = watcher.getLocation(pos.holder_uid);
+  const account_id_resolved =
+    pos.ledger_category === LedgerCategoryEnum.td
+      ? `${holderLocation.group}_${holderLocation.name}`
+      : '--';
   return {
     ...pos,
     uid_key: pos.uid_key,
-    account_id_resolved: `${pos.source_id}_${pos.account_id}`,
+    account_id_resolved,
     instrument_id_resolved: `${pos.instrument_id} ${
       ExchangeIds[pos.exchange_id]?.name ?? ''
     }`,

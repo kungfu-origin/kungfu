@@ -200,7 +200,7 @@ private:
     auto contract_multiplier = cm_mr.contract_multiplier;
     auto margin_ratio_by_pos = cm_mr.margin_ratio;
     auto margin = contract_multiplier * trade.price * trade.volume * margin_ratio_by_pos;
-    auto commission = calculate_commission(book, trade, position, trade.close_today_volume);
+    auto commission = calculate_commission(book, trade, position, 0);
     auto frozen_margin =
         contract_multiplier * book->get_frozen_price(trade.order_id) * trade.volume * margin_ratio_by_pos;
     position.margin += margin;

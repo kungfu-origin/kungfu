@@ -120,8 +120,6 @@ class TraderSim(wc.Trader):
             if volume_traded > 0:
                 trade = lf.types.Trade()
                 trade.trade_id = writer.current_frame_uid()
-                trade.source_id = self.home.group
-                trade.account_id = self.home.name
                 trade.order_id = order.order_id
                 trade.volume = volume_traded
                 trade.price = order.limit_price

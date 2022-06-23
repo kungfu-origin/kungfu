@@ -122,15 +122,28 @@ class ExtensionExecutor:
     def run_broker_vendor(self, vendor_builder):
         ctx = self.ctx
         loader = self.loader
+        location = yjj.location(
+            kfj.MODES[ctx.mode],
+            kfj.CATEGORIES[ctx.category],
+            ctx.group,
+            ctx.name,
+            ctx.runtime_locator,
+        )
+        logger = create_logger(ctx.name, ctx.log_level, location)
         if loader.extension_dir:
             site.setup(loader.extension_dir)
             sys.path.insert(0, loader.extension_dir)
         module = importlib.import_module(ctx.group)
+        logger.info(f"loading {ctx.group} from {loader.extension_dir}")
         vendor = vendor_builder(
             ctx.runtime_locator, ctx.group, ctx.name, ctx.low_latency
         )
-        service = getattr(module, ctx.category)(vendor)
+        service_builder = getattr(module, ctx.category)
+        logger.debug(f"loaded service builder")
+        service = service_builder(vendor)
+        logger.trace("set service for vendor")
         vendor.set_service(service)
+        logger.info(f"vendor {location.uname} ready to run")
         vendor.run()
 
     def run_market_data(self):

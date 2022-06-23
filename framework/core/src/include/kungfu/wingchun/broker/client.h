@@ -229,11 +229,10 @@ static constexpr auto is_own = [](const Client &broker_client, bool enabled = tr
   });
 };
 
-template <typename DataType>
-static constexpr auto is_own_reg = [](const Client &broker_client) {
+static constexpr auto is_own_register = [](const Client &broker_client) {
   return rx::filter([&](const event_ptr &event) {
-    if (event->msg_type() == DataType::tag) {
-      const DataType &data = event->data<DataType>();
+    if (event->msg_type() == kungfu::longfist::types::Deregister::tag) {
+      const kungfu::longfist::types::Deregister &data = event->data<kungfu::longfist::types::Deregister>();
       return broker_client.should_connect_md(data.location_uid) or broker_client.should_connect_td(data.location_uid);
     }
     return false;

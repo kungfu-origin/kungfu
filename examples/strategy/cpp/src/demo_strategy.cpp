@@ -18,7 +18,8 @@ public:
     context->subscribe("xtp", {"600548"}, {"SSE"});
   };
 
-  void on_quote(Context_ptr &context, const Quote &quote) override {
+  void on_quote(Context_ptr &context, const Quote &quote,
+                const kungfu::yijinjing::data::location_ptr &location) override {
     std::cout << quote.instrument_id.to_string() << std::endl;
   };
 };

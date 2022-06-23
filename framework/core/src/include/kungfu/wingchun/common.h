@@ -361,14 +361,15 @@ inline uint32_t hash_instrument(const char *exchange_id, const char *instrument_
   return yijinjing::util::hash_str_32(instrument_id) ^ yijinjing::util::hash_str_32(exchange_id);
 }
 
+inline uint32_t hash_account(const std::string &source_name, const std::string &account_id) {
+  return yijinjing::util::hash_str_32(source_name) ^ yijinjing::util::hash_str_32(account_id);
+}
+
 inline void order_from_input(const longfist::types::OrderInput &input, longfist::types::Order &order) {
-  order.parent_id = input.parent_id;
   order.order_id = input.order_id;
 
   strcpy(order.instrument_id, input.instrument_id);
   strcpy(order.exchange_id, input.exchange_id);
-  strcpy(order.source_id, input.source_id);
-  strcpy(order.account_id, input.account_id);
 
   order.instrument_type = input.instrument_type;
 
@@ -381,8 +382,10 @@ inline void order_from_input(const longfist::types::OrderInput &input, longfist:
 
   order.side = input.side;
   order.offset = input.offset;
-  order.hedge_flag = input.hedge_flag;
 
+  order.is_swap = input.is_swap;
+
+  order.hedge_flag = input.hedge_flag;
   order.price_type = input.price_type;
   order.volume_condition = input.volume_condition;
   order.time_condition = input.time_condition;

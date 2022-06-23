@@ -48,27 +48,33 @@ class Strategy(wc.Strategy):
         self._on_trading_day = getattr(
             self._module, "on_trading_day", lambda ctx, trading_day: None
         )
-        self._on_bar = getattr(self._module, "on_bar", lambda ctx, bar: None)
-        self._on_quote = getattr(self._module, "on_quote", lambda ctx, quote: None)
+        self._on_bar = getattr(self._module, "on_bar", lambda ctx, bar, location: None)
+        self._on_quote = getattr(
+            self._module, "on_quote", lambda ctx, quote, location: None
+        )
         self._on_top_of_book = getattr(
-            self._module, "on_top_of_book", lambda ctx, top_of_book: None
+            self._module, "on_top_of_book", lambda ctx, top_of_book, location: None
         )
         self._on_entrust = getattr(
-            self._module, "on_entrust", lambda ctx, entrust: None
+            self._module, "on_entrust", lambda ctx, entrust, location: None
         )
         self._on_transaction = getattr(
-            self._module, "on_transaction", lambda ctx, transaction: None
+            self._module, "on_transaction", lambda ctx, transaction, location: None
         )
-        self._on_order = getattr(self._module, "on_order", lambda ctx, order: None)
-        self._on_trade = getattr(self._module, "on_trade", lambda ctx, trade: None)
+        self._on_order = getattr(
+            self._module, "on_order", lambda ctx, order, location: None
+        )
+        self._on_trade = getattr(
+            self._module, "on_trade", lambda ctx, trade, location: None
+        )
         self._on_history_order = getattr(
-            self._module, "on_history_order", lambda ctx, history_order: None
+            self._module, "on_history_order", lambda ctx, history_order, location: None
         )
         self._on_history_trade = getattr(
-            self._module, "on_history_trade", lambda ctx, history_trade: None
+            self._module, "on_history_trade", lambda ctx, history_trade, location: None
         )
         self._on_order_action_error = getattr(
-            self._module, "on_order_action_error", lambda ctx, error: None
+            self._module, "on_order_action_error", lambda ctx, error, location: None
         )
         self._on_book_sync_reset = getattr(
             self._module, "on_book_sync_reset", lambda ctx, old_book, new_book: None
@@ -189,35 +195,35 @@ class Strategy(wc.Strategy):
     def post_stop(self, wc_context):
         self.__call_proxy(self._post_stop, self.ctx)
 
-    def on_quote(self, wc_context, quote):
-        self.__call_proxy(self._on_quote, self.ctx, quote)
+    def on_quote(self, wc_context, quote, location):
+        self.__call_proxy(self._on_quote, self.ctx, quote, location)
 
-    def on_top_of_book(self, wc_context, top_of_book):
-        self.__call_proxy(self._on_top_of_book, self.ctx, top_of_book)
+    def on_top_of_book(self, wc_context, top_of_book, location):
+        self.__call_proxy(self._on_top_of_book, self.ctx, top_of_book, location)
 
-    def on_bar(self, wc_context, bar):
-        self.__call_proxy(self._on_bar, self.ctx, bar)
+    def on_bar(self, wc_context, bar, location):
+        self.__call_proxy(self._on_bar, self.ctx, bar, location)
 
-    def on_entrust(self, wc_context, entrust):
-        self.__call_proxy(self._on_entrust, self.ctx, entrust)
+    def on_entrust(self, wc_context, entrust, location):
+        self.__call_proxy(self._on_entrust, self.ctx, entrust, location)
 
-    def on_transaction(self, wc_context, transaction):
-        self.__call_proxy(self._on_transaction, self.ctx, transaction)
+    def on_transaction(self, wc_context, transaction, location):
+        self.__call_proxy(self._on_transaction, self.ctx, transaction, location)
 
-    def on_order(self, wc_context, order):
-        self.__call_proxy(self._on_order, self.ctx, order)
+    def on_order(self, wc_context, order, location):
+        self.__call_proxy(self._on_order, self.ctx, order, location)
 
-    def on_order_action_error(self, wc_context, error):
-        self.__call_proxy(self._on_order_action_error, self.ctx, error)
+    def on_order_action_error(self, wc_context, error, location):
+        self.__call_proxy(self._on_order_action_error, self.ctx, error, location)
 
-    def on_trade(self, wc_context, trade):
-        self.__call_proxy(self._on_trade, self.ctx, trade)
+    def on_trade(self, wc_context, trade, location):
+        self.__call_proxy(self._on_trade, self.ctx, trade, location)
 
-    def on_history_order(self, wc_context, history_order):
-        self.__call_proxy(self._on_history_order, self.ctx, history_order)
+    def on_history_order(self, wc_context, history_order, location):
+        self.__call_proxy(self._on_history_order, self.ctx, history_order, location)
 
-    def on_history_trade(self, wc_context, history_trade):
-        self.__call_proxy(self._on_history_trade, self.ctx, history_trade)
+    def on_history_trade(self, wc_context, history_trade, location):
+        self.__call_proxy(self._on_history_trade, self.ctx, history_trade, location)
 
     def on_trading_day(self, wc_context, daytime):
         self.ctx.trading_day = kft.to_datetime(daytime)

@@ -15,10 +15,7 @@ static constexpr int INSTRUMENT_ID_LEN = 32;
 static constexpr int PRODUCT_ID_LEN = 32;
 static constexpr int DATE_LEN = 9;
 static constexpr int EXCHANGE_ID_LEN = 16;
-static constexpr int ACCOUNT_ID_LEN = 32;
-static constexpr int CLIENT_ID_LEN = 32;
-static constexpr int SOURCE_ID_LEN = 16;
-static constexpr int BROKER_ID_LEN = 32;
+
 static constexpr int ERROR_MSG_LEN = 128;
 
 KF_DEFINE_MARK_TYPE(PageEnd, 10000);
@@ -263,7 +260,6 @@ KF_DEFINE_PACK_TYPE(                                         //
 
 KF_DEFINE_PACK_TYPE(                                         //
     Quote, 101, PK(instrument_id, exchange_id), PERPETUAL(), //
-    (kungfu::array<char, SOURCE_ID_LEN>, source_id),         //柜台ID
     (kungfu::array<char, DATE_LEN>, trading_day),            //交易日
 
     (int64_t, data_time), //数据生成时间
@@ -303,7 +299,6 @@ KF_DEFINE_PACK_TYPE(                                         //
 
 KF_DEFINE_PACK_TYPE(                                                    //
     Entrust, 102, PK(instrument_id, exchange_id), TIMESTAMP(data_time), //
-    (kungfu::array<char, SOURCE_ID_LEN>, source_id),                    //柜台ID
     (kungfu::array<char, DATE_LEN>, trading_day),                       //交易日
 
     (int64_t, data_time), //数据生成时间
@@ -325,7 +320,6 @@ KF_DEFINE_PACK_TYPE(                                                    //
 
 KF_DEFINE_PACK_TYPE(                                                        //
     Transaction, 103, PK(instrument_id, exchange_id), TIMESTAMP(data_time), //
-    (kungfu::array<char, SOURCE_ID_LEN>, source_id),                        //柜台ID
     (kungfu::array<char, DATE_LEN>, trading_day),                           //交易日
 
     (int64_t, data_time), //数据生成时间
@@ -371,7 +365,6 @@ KF_DEFINE_PACK_TYPE(                                                 //
 
 KF_DEFINE_PACK_TYPE(                                             //
     TopOfBook, 111, PK(instrument_id, exchange_id), PERPETUAL(), //
-    (kungfu::array<char, SOURCE_ID_LEN>, source_id),             //柜台ID
     (kungfu::array<char, DATE_LEN>, trading_day),                //交易日
 
     (int64_t, data_time), //数据生成时间
@@ -403,9 +396,6 @@ KF_DEFINE_PACK_TYPE(                                       //
     (kungfu::array<char, INSTRUMENT_ID_LEN>, instrument_id), //合约代码
     (kungfu::array<char, EXCHANGE_ID_LEN>, exchange_id),     //交易所代码
 
-    (kungfu::array<char, SOURCE_ID_LEN>, source_id),   //柜台ID
-    (kungfu::array<char, ACCOUNT_ID_LEN>, account_id), //账号ID
-
     (InstrumentType, instrument_type), //合约类型
 
     (double, limit_price),  //价格
@@ -413,6 +403,7 @@ KF_DEFINE_PACK_TYPE(                                       //
 
     (int64_t, volume), //数量
 
+    (bool, is_swap),                     //互换单
     (Side, side),                        //买卖方向
     (Offset, offset),                    //开平方向
     (HedgeFlag, hedge_flag),             //投机套保标识
@@ -420,7 +411,6 @@ KF_DEFINE_PACK_TYPE(                                       //
     (VolumeCondition, volume_condition), //成交量类型
     (TimeCondition, time_condition),     //成交时间类型
 
-    (uint64_t, parent_id), //母订单ID
     (int64_t, insert_time) //写入时间
 );
 
@@ -447,7 +437,6 @@ KF_DEFINE_PACK_TYPE(                                                    //
 
 KF_DEFINE_PACK_TYPE(                                  //
     Order, 203, PK(order_id), TIMESTAMP(insert_time), //
-    (uint64_t, parent_id),                            //母订单ID
     (uint64_t, order_id),                             //订单ID
 
     (int64_t, insert_time), //订单写入时间
@@ -458,9 +447,44 @@ KF_DEFINE_PACK_TYPE(                                  //
     (kungfu::array<char, INSTRUMENT_ID_LEN>, instrument_id), //合约ID
     (kungfu::array<char, EXCHANGE_ID_LEN>, exchange_id),     //交易所ID
 
-    (kungfu::array<char, SOURCE_ID_LEN>, source_id),   //柜台ID
-    (kungfu::array<char, ACCOUNT_ID_LEN>, account_id), //账号ID
-    (kungfu::array<char, CLIENT_ID_LEN>, client_id),   // Client ID
+    (InstrumentType, instrument_type), //合约类型
+
+    (double, limit_price),  //价格
+    (double, frozen_price), //冻结价格，市价单冻结价格为0
+
+    (int64_t, volume),      //数量
+    (int64_t, volume_left), //剩余数量
+
+    (double, tax),        //税
+    (double, commission), //手续费
+
+    (OrderStatus, status), //订单状态
+
+    (int32_t, error_id),                             //错误ID
+    (kungfu::array<char, ERROR_MSG_LEN>, error_msg), //错误信息
+
+    (bool, is_swap),                     //互换单
+    (Side, side),                        //买卖方向
+    (Offset, offset),                    //开平方向
+    (HedgeFlag, hedge_flag),             //投机套保标识
+    (PriceType, price_type),             //价格类型
+    (VolumeCondition, volume_condition), //成交量类型
+    (TimeCondition, time_condition)      //成交时间类型
+);
+
+KF_DEFINE_PACK_TYPE(                                         //
+    HistoryOrder, 212, PK(order_id), TIMESTAMP(insert_time), //
+    (uint64_t, order_id),                                    //订单ID
+
+    (int64_t, insert_time), //订单写入时间
+    (int64_t, update_time), //订单更新时间
+
+    (kungfu::array<char, DATE_LEN>, trading_day), //交易日
+
+    (kungfu::array<char, INSTRUMENT_ID_LEN>, instrument_id), //合约ID
+    (kungfu::array<char, EXCHANGE_ID_LEN>, exchange_id),     //交易所ID
+
+    (bool, is_last), //是否为本次查询的最后一条记录
 
     (InstrumentType, instrument_type), //合约类型
 
@@ -488,64 +512,17 @@ KF_DEFINE_PACK_TYPE(                                  //
     (TimeCondition, time_condition)      //成交时间类型
 );
 
-KF_DEFINE_PACK_TYPE(                                         //
-    HistoryOrder, 212, PK(order_id), TIMESTAMP(insert_time), //
-    (uint64_t, parent_id),                                   //母订单ID
-    (uint64_t, order_id),                                    //订单ID
-    //    (uint64_t, external_id),                                 //柜台订单ID
-
-    (int64_t, insert_time), //订单写入时间
-    (int64_t, update_time), //订单更新时间
-
-    (kungfu::array<char, DATE_LEN>, trading_day), //交易日
-
-    (kungfu::array<char, INSTRUMENT_ID_LEN>, instrument_id), //合约ID
-    (kungfu::array<char, EXCHANGE_ID_LEN>, exchange_id),     //交易所ID
-
-    (kungfu::array<char, SOURCE_ID_LEN>, source_id),   //柜台ID
-    (kungfu::array<char, ACCOUNT_ID_LEN>, account_id), //账号ID
-    (bool, is_last),                                   //是否为本次查询的最后一条记录
-    //    (kungfu::array<char, CLIENT_ID_LEN>, client_id),   // Client ID
-
-    (InstrumentType, instrument_type), //合约类型
-
-    (double, limit_price),  //价格
-    (double, frozen_price), //冻结价格，市价单冻结价格为0
-
-    (int64_t, volume),      //数量
-    (int64_t, volume_left), //剩余数量
-
-    (double, tax),        //税
-    (double, commission), //手续费
-
-    (OrderStatus, status), //订单状态
-
-    (int32_t, error_id),                             //错误ID
-    (kungfu::array<char, ERROR_MSG_LEN>, error_msg), //错误信息
-
-    (Side, side),                        //买卖方向
-    (Offset, offset),                    //开平方向
-    (HedgeFlag, hedge_flag),             //投机套保标识
-    (PriceType, price_type),             //价格类型
-    (VolumeCondition, volume_condition), //成交量类型
-    (TimeCondition, time_condition)      //成交时间类型
-);
-
 KF_DEFINE_PACK_TYPE(                                 //
     Trade, 204, PK(trade_id), TIMESTAMP(trade_time), //
     (uint64_t, trade_id),                            //成交ID
 
-    (uint64_t, order_id),        //订单ID
-    (uint64_t, parent_order_id), //母订单ID
+    (uint64_t, order_id), //订单ID
 
     (int64_t, trade_time),                        //成交时间
     (kungfu::array<char, DATE_LEN>, trading_day), //交易日
 
     (kungfu::array<char, INSTRUMENT_ID_LEN>, instrument_id), //合约ID
     (kungfu::array<char, EXCHANGE_ID_LEN>, exchange_id),     //交易所ID
-    (kungfu::array<char, SOURCE_ID_LEN>, source_id),         //柜台ID
-    (kungfu::array<char, ACCOUNT_ID_LEN>, account_id),       //账号ID
-    (kungfu::array<char, CLIENT_ID_LEN>, client_id),         // Client ID
 
     (InstrumentType, instrument_type), //合约类型
 
@@ -553,9 +530,8 @@ KF_DEFINE_PACK_TYPE(                                 //
     (Offset, offset),        //开平方向
     (HedgeFlag, hedge_flag), //投机套保标识
 
-    (double, price),               //成交价格
-    (int64_t, volume),             //成交量
-    (int64_t, close_today_volume), //平今日仓量(期货)
+    (double, price),   //成交价格
+    (int64_t, volume), //成交量
 
     (double, tax),       //税
     (double, commission) //手续费
@@ -565,18 +541,15 @@ KF_DEFINE_PACK_TYPE(                                        //
     HistoryTrade, 213, PK(trade_id), TIMESTAMP(trade_time), //
     (uint64_t, trade_id),                                   //成交ID
 
-    (uint64_t, order_id),        //订单ID
-    (uint64_t, parent_order_id), //母订单ID
+    (uint64_t, order_id), //订单ID
 
     (int64_t, trade_time),                        //成交时间
     (kungfu::array<char, DATE_LEN>, trading_day), //交易日
 
     (kungfu::array<char, INSTRUMENT_ID_LEN>, instrument_id), //合约ID
     (kungfu::array<char, EXCHANGE_ID_LEN>, exchange_id),     //交易所ID
-    (kungfu::array<char, SOURCE_ID_LEN>, source_id),         //柜台ID
-    (kungfu::array<char, ACCOUNT_ID_LEN>, account_id),       //账号ID
-    (bool, is_last),                                         //是否为本次查询的最后一条记录
-    //    (kungfu::array<char, CLIENT_ID_LEN>, client_id),         // Client ID
+
+    (bool, is_last), //是否为本次查询的最后一条记录
 
     (InstrumentType, instrument_type), //合约类型
 
@@ -604,10 +577,6 @@ KF_DEFINE_PACK_TYPE(                                                            
     (kungfu::array<char, EXCHANGE_ID_LEN>, exchange_id),     //交易所ID
 
     (uint32_t, holder_uid), (LedgerCategory, ledger_category),
-
-    (kungfu::array<char, SOURCE_ID_LEN>, source_id),   //柜台ID
-    (kungfu::array<char, ACCOUNT_ID_LEN>, account_id), //账号ID
-    (kungfu::array<char, CLIENT_ID_LEN>, client_id),   // Client ID
 
     (Direction, direction), //持仓方向
 
@@ -648,11 +617,6 @@ KF_DEFINE_PACK_TYPE(                              //
     (uint32_t, holder_uid),            //
     (LedgerCategory, ledger_category), //
 
-    (kungfu::array<char, SOURCE_ID_LEN>, source_id),   //柜台ID
-    (kungfu::array<char, BROKER_ID_LEN>, broker_id),   // Broker ID
-    (kungfu::array<char, ACCOUNT_ID_LEN>, account_id), //账号ID
-    (kungfu::array<char, CLIENT_ID_LEN>, client_id),   // client ID
-
     (double, initial_equity), //期初权益
     (double, static_equity),  //静态权益
     (double, dynamic_equity), //动态权益
@@ -684,11 +648,6 @@ KF_DEFINE_PACK_TYPE(                               //
     (uint32_t, holder_uid),            //
     (LedgerCategory, ledger_category), //
 
-    (kungfu::array<char, SOURCE_ID_LEN>, source_id),   //柜台ID
-    (kungfu::array<char, BROKER_ID_LEN>, broker_id),   // Broker ID
-    (kungfu::array<char, ACCOUNT_ID_LEN>, account_id), //账号ID
-    (kungfu::array<char, CLIENT_ID_LEN>, client_id),   // client ID
-
     (double, total_asset),  //总资产
     (double, avail_margin), //可用保证金
     (double, cash_margin),  //融资占用保证金
@@ -697,8 +656,6 @@ KF_DEFINE_PACK_TYPE(                               //
 
     (double, cash_debt),  //融资负债
     (double, short_cash), //融券卖出金额
-    (kungfu::array<char, 1500>, margin_instruments), (kungfu::array<char, 420>, exchanges),
-    (kungfu::array<double, 200>, debts),
 
     (double, short_market_value),  //融券卖出证券市值
     (double, margin_market_value), //融资买入证券市值

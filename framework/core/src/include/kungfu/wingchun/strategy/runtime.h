@@ -68,12 +68,13 @@ public:
    * @param side side
    * @param offset offset, defaults to longfist::enums::Offset::Open
    * @param hedge_flag hedge_flag, defaults to longfist::enums::HedgeFlag::Speculation
+   * @param is_swap boolean
    * @return
    */
   uint64_t insert_order(const std::string &instrument_id, const std::string &exchange_id, const std::string &source,
                         const std::string &account, double limit_price, int64_t volume, longfist::enums::PriceType type,
                         longfist::enums::Side side, longfist::enums::Offset offset,
-                        longfist::enums::HedgeFlag hedge_flag) override;
+                        longfist::enums::HedgeFlag hedge_flag, bool is_swap = false) override;
 
   /**
    *
@@ -87,12 +88,12 @@ public:
    * @param side side
    * @param offset offset, defaults to longfist::enums::Offset::Open
    * @param hedge_flag hedge_flag, defaults to longfist::enums::HedgeFlag::Speculation
+   * @param is_swap boolean
    * @return
    */
   uint64_t insert_order(uint32_t account_location_uid, const std::string &instrument_id, const std::string &exchange_id,
-                        const std::string &account, double limit_price, int64_t volume, longfist::enums::PriceType type,
-                        longfist::enums::Side side, longfist::enums::Offset offset,
-                        longfist::enums::HedgeFlag hedge_flag);
+                        double limit_price, int64_t volume, longfist::enums::PriceType type, longfist::enums::Side side,
+                        longfist::enums::Offset offset, longfist::enums::HedgeFlag hedge_flag, bool is_swap = false);
 
   /**
    * Cancel order.
@@ -106,7 +107,7 @@ public:
    * @param account account ID
    * @return cash limit
    */
-  double get_account_cash_limit(const std::string &account) const override;
+  double get_account_cash_limit(const std::string &source, const std::string &account) const override;
 
   /**
    * Get current trading day.
@@ -169,7 +170,7 @@ protected:
 
   uint32_t lookup_account_location_id(const std::string &account) const;
 
-  uint32_t lookup_source_account_location_id(const std::string &source, const std::string &account) const;
+  uint32_t get_td_location_uid(const std::string &source, const std::string &account) const;
 
   const yijinjing::data::location_ptr &find_md_location(const std::string &source);
 
@@ -179,7 +180,6 @@ private:
   yijinjing::data::location_map md_locations_ = {};
   yijinjing::data::location_map td_locations_ = {};
   std::unordered_map<uint32_t, uint32_t> account_location_ids_ = {};
-  std::unordered_map<uint32_t, uint32_t> source_account_location_ids_ = {};
   std::unordered_map<uint32_t, double> account_cash_limits_ = {};
   std::unordered_map<std::string, yijinjing::data::location_ptr> market_data_ = {};
 

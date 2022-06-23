@@ -12,7 +12,7 @@ def pre_start(context):
     context.subscribe(source, ["600000"], exchange)
 
 
-def on_quote(context, quote):
+def on_quote(context, quote, location):
     side = random.choice([Side.Buy, Side.Sell])
     side = Side.Buy
     price = quote.ask_price[0] if side == Side.Buy else quote.bid_price[0]
@@ -20,10 +20,10 @@ def on_quote(context, quote):
     context.insert_order(quote.instrument_id, exchange, source, "123456", price, 100, price_type, side)
 
 
-def on_order(context, order):
+def on_order(context, order, location):
     if order.error_id != 0:
         context.log.info(f'order error {order.error_msg}')
 
 
-def on_trade(context, trade):
+def on_trade(context, trade, location):
     context.log.info(f'traded')

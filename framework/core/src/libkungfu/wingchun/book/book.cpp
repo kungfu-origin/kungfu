@@ -87,9 +87,6 @@ Position &Book::get_position(Direction direction, const char *exchange_id, const
     position.instrument_type = get_instrument_type(position.exchange_id, position.instrument_id);
     position.holder_uid = asset.holder_uid;
     position.ledger_category = asset.ledger_category;
-    position.source_id = asset.source_id;
-    position.account_id = asset.account_id;
-    position.client_id = asset.client_id;
     position.direction = direction;
   }
   return position;

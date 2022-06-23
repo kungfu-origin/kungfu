@@ -51,45 +51,55 @@ public:
     PYBIND11_OVERLOAD(void, strategy::Strategy, on_trading_day, context, daytime);
   }
 
-  void on_quote(strategy::Context_ptr &context, const Quote &quote) override {
-    PYBIND11_OVERLOAD(void, strategy::Strategy, on_quote, context, quote);
+  void on_quote(strategy::Context_ptr &context, const Quote &quote,
+                const kungfu::yijinjing::data::location_ptr &location) override {
+    PYBIND11_OVERLOAD(void, strategy::Strategy, on_quote, context, quote, location);
   }
 
-  void on_bar(strategy::Context_ptr &context, const Bar &bar) override {
-    PYBIND11_OVERLOAD(void, strategy::Strategy, on_bar, context, bar);
+  void on_bar(strategy::Context_ptr &context, const Bar &bar,
+              const kungfu::yijinjing::data::location_ptr &location) override {
+    PYBIND11_OVERLOAD(void, strategy::Strategy, on_bar, context, bar, location);
   }
 
-  void on_top_of_book(strategy::Context_ptr &context, const TopOfBook &top_of_book) override {
-    PYBIND11_OVERLOAD(void, strategy::Strategy, on_top_of_book, context, top_of_book);
+  void on_top_of_book(strategy::Context_ptr &context, const TopOfBook &top_of_book,
+                      const kungfu::yijinjing::data::location_ptr &location) override {
+    PYBIND11_OVERLOAD(void, strategy::Strategy, on_top_of_book, context, top_of_book, location);
   }
 
-  void on_entrust(strategy::Context_ptr &context, const Entrust &entrust) override {
-    PYBIND11_OVERLOAD(void, strategy::Strategy, on_entrust, context, entrust);
+  void on_entrust(strategy::Context_ptr &context, const Entrust &entrust,
+                  const kungfu::yijinjing::data::location_ptr &location) override {
+    PYBIND11_OVERLOAD(void, strategy::Strategy, on_entrust, context, entrust, location);
   }
 
-  void on_transaction(strategy::Context_ptr &context, const Transaction &transaction) override {
-    PYBIND11_OVERLOAD(void, strategy::Strategy, on_transaction, context, transaction);
+  void on_transaction(strategy::Context_ptr &context, const Transaction &transaction,
+                      const kungfu::yijinjing::data::location_ptr &location) override {
+    PYBIND11_OVERLOAD(void, strategy::Strategy, on_transaction, context, transaction, location);
   }
 
-  void on_order(strategy::Context_ptr &context, const Order &order) override {
-    PYBIND11_OVERLOAD(void, strategy::Strategy, on_order, context, order);
+  void on_order(strategy::Context_ptr &context, const Order &order,
+                const kungfu::yijinjing::data::location_ptr &location) override {
+    PYBIND11_OVERLOAD(void, strategy::Strategy, on_order, context, order, location);
   }
 
-  void on_order_action_error(strategy::Context_ptr &context, const OrderActionError &error) override {
-    PYBIND11_OVERLOAD(void, strategy::Strategy, on_order_action_error, context, error);
+  void on_order_action_error(strategy::Context_ptr &context, const OrderActionError &error,
+                             const kungfu::yijinjing::data::location_ptr &location) override {
+    PYBIND11_OVERLOAD(void, strategy::Strategy, on_order_action_error, context, error, location);
   }
 
-  void on_trade(strategy::Context_ptr &context, const Trade &trade) override {
-    PYBIND11_OVERLOAD(void, strategy::Strategy, on_trade, context, trade);
+  void on_trade(strategy::Context_ptr &context, const Trade &trade,
+                const kungfu::yijinjing::data::location_ptr &location) override {
+    PYBIND11_OVERLOAD(void, strategy::Strategy, on_trade, context, trade, location);
   }
 
-  void on_history_order(strategy::Context_ptr &context, const HistoryOrder &history_order) override {
+  void on_history_order(strategy::Context_ptr &context, const HistoryOrder &history_order,
+                        const kungfu::yijinjing::data::location_ptr &location) override {
     PYBIND11_OVERLOAD(void, strategy::Strategy,
 
-                      on_history_order, context, history_order);
+                      on_history_order, context, history_order, location);
   }
-  void on_history_trade(strategy::Context_ptr &context, const HistoryTrade &history_trade) override {
-    PYBIND11_OVERLOAD(void, strategy::Strategy, on_history_trade, context, history_trade);
+  void on_history_trade(strategy::Context_ptr &context, const HistoryTrade &history_trade,
+                        const kungfu::yijinjing::data::location_ptr &location) override {
+    PYBIND11_OVERLOAD(void, strategy::Strategy, on_history_trade, context, history_trade, location);
   }
 
   void on_book_sync_reset(strategy::Context_ptr &context, const Book &old_book, const Book &new_book) override {
@@ -131,7 +141,7 @@ void bind_strategy(pybind11::module &m) {
            py::arg("secu_datatypes") = SubscribeSecuDataType::All)
       .def("insert_order", &strategy::Context::insert_order, py::arg("symbol"), py::arg("exchange"), py::arg("source"),
            py::arg("account"), py::arg("limit_price"), py::arg("volume"), py::arg("type"), py::arg("side"),
-           py::arg("offset") = Offset::Open, py::arg("hedge_flag") = HedgeFlag::Speculation)
+           py::arg("offset") = Offset::Open, py::arg("hedge_flag") = HedgeFlag::Speculation, py::arg("is_swap") = false)
       .def("cancel_order", &strategy::Context::cancel_order)
       .def("req_history_order", &strategy::Context::req_history_order)
       .def("req_history_trade", &strategy::Context::req_history_trade)

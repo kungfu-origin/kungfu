@@ -79,7 +79,8 @@ public:
   virtual uint64_t insert_order(const std::string &instrument_id, const std::string &exchange_id,
                                 const std::string &source, const std::string &account, double limit_price,
                                 int64_t volume, longfist::enums::PriceType type, longfist::enums::Side side,
-                                longfist::enums::Offset offset, longfist::enums::HedgeFlag hedge_flag) = 0;
+                                longfist::enums::Offset offset, longfist::enums::HedgeFlag hedge_flag,
+                                bool is_swap = false) = 0;
 
   /**
    * query history order
@@ -103,7 +104,7 @@ public:
    * @param account account ID
    * @return cash limit
    */
-  virtual double get_account_cash_limit(const std::string &account) const = 0;
+  virtual double get_account_cash_limit(const std::string &source, const std::string &account) const = 0;
 
   /**
    * Get current trading day.

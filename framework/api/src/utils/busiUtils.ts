@@ -42,7 +42,6 @@ import {
   PriceTypeEnum,
   TimeConditionEnum,
   VolumeConditionEnum,
-  MakeOrderByWatcherEnum,
   BrokerStateStatusEnum,
   StrategyExtTypes,
   CommissionModeEnum,
@@ -1189,27 +1188,17 @@ export const resolveAccountId = (
   watcher: KungfuApi.Watcher | null,
   source: number,
   dest: number,
-  parent_id: bigint,
 ): KungfuApi.KfTradeValueCommonData => {
   if (!watcher) return { color: 'default', name: '--' };
 
   const accountId = dealLocationUID(watcher, source);
   const destLocation: KungfuApi.KfLocation = watcher.getLocation(dest);
 
-  if (parent_id === BigInt(MakeOrderByWatcherEnum.Manual)) {
+  if (destLocation && destLocation.group === 'node') {
     return {
       color: 'orange',
       name: `${accountId} ${t('手动')}`,
     };
-  }
-
-  if (destLocation && destLocation.group === 'node') {
-    if (parent_id !== BigInt(0)) {
-      return {
-        color: 'blue',
-        name: `${accountId} ${t('任务')}`,
-      };
-    }
   }
 
   return {
@@ -1221,7 +1210,6 @@ export const resolveAccountId = (
 export const resolveClientId = (
   watcher: KungfuApi.Watcher | null,
   dest: number,
-  parent_id: bigint,
 ): KungfuApi.KfTradeValueCommonData => {
   if (!watcher) return { color: 'default', name: '--' };
 
@@ -1234,17 +1222,9 @@ export const resolveClientId = (
   const destUname = getIdByKfLocation(destLocation);
 
   if (destLocation.group === 'node') {
-    if (parent_id !== BigInt(0)) {
-      return { color: 'blue', name: t('任务') };
-    } else {
-      return { color: 'orange', name: t('手动') };
-    }
+    return { color: 'orange', name: t('手动') };
   } else {
-    if (parent_id !== BigInt(0)) {
-      return { color: 'orange', name: `${destUname} ${t('手动')}` }; //是因为策略模块手动下单的时候刻意插入用于区分
-    } else {
-      return { color: 'text', name: destUname };
-    }
+    return { color: 'text', name: destUname };
   }
 };
 
@@ -1289,7 +1269,7 @@ export const filterLedgerResult = <T>(
   kfLocation: KungfuApi.KfLocation | KungfuApi.KfConfig,
   sortKey?: string,
 ): T[] => {
-  const { category, group, name } = kfLocation;
+  const { category } = kfLocation;
   const ledgerCategory = getLedgerCategory(category);
   let dataTableResolved = dataTable;
 
@@ -1301,17 +1281,15 @@ export const filterLedgerResult = <T>(
     dataTableResolved = dataTableResolved.nofilter('volume', BigInt(0));
   }
 
-  if (tradingDataTypeName === 'Position' || tradingDataTypeName === 'Asset') {
+  if (
+    tradingDataTypeName === 'Position' ||
+    tradingDataTypeName === 'Asset' ||
+    tradingDataTypeName === 'AssetMargin'
+  ) {
     const locationUID = watcher.getLocationUID(kfLocation);
     dataTableResolved = dataTableResolved
       .filter('ledger_category', ledgerCategory)
       .filter('holder_uid', locationUID);
-  } else if (ledgerCategory === 0) {
-    dataTableResolved = dataTableResolved
-      .filter('source_id', group)
-      .filter('account_id', name);
-  } else if (ledgerCategory === 1) {
-    dataTableResolved = dataTableResolved.filter('client_id', name);
   }
 
   if (sortKey) {
@@ -1688,8 +1666,6 @@ export const dealOrderInputItem = (
       orderInputResolved[key] = dealOffset(inputData.offset);
     } else if (key === 'hedge_flag') {
       orderInputResolved[key] = dealHedgeFlag(inputData.hedge_flag);
-    } else if (key === 'parent_id') {
-      break;
     } else {
       orderInputResolved[key] = {
         name: inputData[key],
