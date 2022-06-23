@@ -51,44 +51,54 @@ public:
     PYBIND11_OVERLOAD(void, strategy::Strategy, on_trading_day, context, daytime);
   }
 
-  void on_quote(strategy::Context_ptr &context, const Quote &quote, const kungfu::yijinjing::data::location_ptr &location) override {
+  void on_quote(strategy::Context_ptr &context, const Quote &quote,
+                const kungfu::yijinjing::data::location_ptr &location) override {
     PYBIND11_OVERLOAD(void, strategy::Strategy, on_quote, context, quote, location);
   }
 
-  void on_bar(strategy::Context_ptr &context, const Bar &bar, const kungfu::yijinjing::data::location_ptr &location) override {
+  void on_bar(strategy::Context_ptr &context, const Bar &bar,
+              const kungfu::yijinjing::data::location_ptr &location) override {
     PYBIND11_OVERLOAD(void, strategy::Strategy, on_bar, context, bar, location);
   }
 
-  void on_top_of_book(strategy::Context_ptr &context, const TopOfBook &top_of_book, const kungfu::yijinjing::data::location_ptr &location) override {
+  void on_top_of_book(strategy::Context_ptr &context, const TopOfBook &top_of_book,
+                      const kungfu::yijinjing::data::location_ptr &location) override {
     PYBIND11_OVERLOAD(void, strategy::Strategy, on_top_of_book, context, top_of_book, location);
   }
 
-  void on_entrust(strategy::Context_ptr &context, const Entrust &entrust, const kungfu::yijinjing::data::location_ptr &location) override {
+  void on_entrust(strategy::Context_ptr &context, const Entrust &entrust,
+                  const kungfu::yijinjing::data::location_ptr &location) override {
     PYBIND11_OVERLOAD(void, strategy::Strategy, on_entrust, context, entrust, location);
   }
 
-  void on_transaction(strategy::Context_ptr &context, const Transaction &transaction, const kungfu::yijinjing::data::location_ptr &location) override {
+  void on_transaction(strategy::Context_ptr &context, const Transaction &transaction,
+                      const kungfu::yijinjing::data::location_ptr &location) override {
     PYBIND11_OVERLOAD(void, strategy::Strategy, on_transaction, context, transaction, location);
   }
 
-  void on_order(strategy::Context_ptr &context, const Order &order, const kungfu::yijinjing::data::location_ptr &location) override {
+  void on_order(strategy::Context_ptr &context, const Order &order,
+                const kungfu::yijinjing::data::location_ptr &location) override {
     PYBIND11_OVERLOAD(void, strategy::Strategy, on_order, context, order, location);
   }
 
-  void on_order_action_error(strategy::Context_ptr &context, const OrderActionError &error, const kungfu::yijinjing::data::location_ptr &location) override {
+  void on_order_action_error(strategy::Context_ptr &context, const OrderActionError &error,
+                             const kungfu::yijinjing::data::location_ptr &location) override {
     PYBIND11_OVERLOAD(void, strategy::Strategy, on_order_action_error, context, error, location);
   }
 
-  void on_trade(strategy::Context_ptr &context, const Trade &trade, const kungfu::yijinjing::data::location_ptr &location) override {
+  void on_trade(strategy::Context_ptr &context, const Trade &trade,
+                const kungfu::yijinjing::data::location_ptr &location) override {
     PYBIND11_OVERLOAD(void, strategy::Strategy, on_trade, context, trade, location);
   }
 
-  void on_history_order(strategy::Context_ptr &context, const HistoryOrder &history_order, const kungfu::yijinjing::data::location_ptr &location) override {
+  void on_history_order(strategy::Context_ptr &context, const HistoryOrder &history_order,
+                        const kungfu::yijinjing::data::location_ptr &location) override {
     PYBIND11_OVERLOAD(void, strategy::Strategy,
 
                       on_history_order, context, history_order, location);
   }
-  void on_history_trade(strategy::Context_ptr &context, const HistoryTrade &history_trade, const kungfu::yijinjing::data::location_ptr &location) override {
+  void on_history_trade(strategy::Context_ptr &context, const HistoryTrade &history_trade,
+                        const kungfu::yijinjing::data::location_ptr &location) override {
     PYBIND11_OVERLOAD(void, strategy::Strategy, on_history_trade, context, history_trade, location);
   }
 

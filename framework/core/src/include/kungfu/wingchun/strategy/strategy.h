@@ -32,52 +32,52 @@ public:
   //行情数据更新回调
   //@param quote             行情数据
   virtual void on_quote(Context_ptr &context, const longfist::types::Quote &quote,
-                                      const kungfu::yijinjing::data::location_ptr &location){};
+                        const kungfu::yijinjing::data::location_ptr &location){};
 
   // bar 数据更新回调
   //@param bar               bar 数据
   virtual void on_bar(Context_ptr &context, const longfist::types::Bar &bar,
-                                      const kungfu::yijinjing::data::location_ptr &location){};
+                      const kungfu::yijinjing::data::location_ptr &location){};
 
   // top of book 数据更新回调
   //@param top_of_book   top_of_book 数据
   virtual void on_top_of_book(Context_ptr &context, const longfist::types::TopOfBook &top_of_book,
-                                      const kungfu::yijinjing::data::location_ptr &location){};
+                              const kungfu::yijinjing::data::location_ptr &location){};
 
   //逐笔委托更新回调
   //@param entrust           逐笔委托数据
   virtual void on_entrust(Context_ptr &context, const longfist::types::Entrust &entrust,
-                                      const kungfu::yijinjing::data::location_ptr &location){};
+                          const kungfu::yijinjing::data::location_ptr &location){};
 
   //逐笔成交更新回调
   //@param transaction       逐笔成交数据
   virtual void on_transaction(Context_ptr &context, const longfist::types::Transaction &transaction,
-                                      const kungfu::yijinjing::data::location_ptr &location){};
+                              const kungfu::yijinjing::data::location_ptr &location){};
 
   //订单信息更新回调
   //@param order             订单信息数据
   virtual void on_order(Context_ptr &context, const longfist::types::Order &order,
-                                      const kungfu::yijinjing::data::location_ptr &location){};
+                        const kungfu::yijinjing::data::location_ptr &location){};
 
   //订单操作错误回调
   //@param order             订单信息数据
   virtual void on_order_action_error(Context_ptr &context, const longfist::types::OrderActionError &error,
-                                      const kungfu::yijinjing::data::location_ptr &location){};
+                                     const kungfu::yijinjing::data::location_ptr &location){};
 
   //订单成交回报回调
   //@param trade             订单成交数据
   virtual void on_trade(Context_ptr &context, const longfist::types::Trade &trade,
-                                      const kungfu::yijinjing::data::location_ptr &location){};
+                        const kungfu::yijinjing::data::location_ptr &location){};
 
   //历史订单回报回调
   //@param history_order     历史订单数据
   virtual void on_history_order(Context_ptr &context, const longfist::types::HistoryOrder &history_order,
-                                      const kungfu::yijinjing::data::location_ptr &location){};
+                                const kungfu::yijinjing::data::location_ptr &location){};
 
   //历史订单成交回报回调
   //@param history_order     历史订单成交数据
   virtual void on_history_trade(Context_ptr &context, const longfist::types::HistoryTrade &history_trade,
-                                      const kungfu::yijinjing::data::location_ptr &location){};
+                                const kungfu::yijinjing::data::location_ptr &location){};
 
   //同步柜台资金持仓信息回调
   //@param old_book          更新前本地维护的旧数据
@@ -93,7 +93,7 @@ public:
   //断开回调
   //@param deregister     断开数据
   virtual void on_deregister(Context_ptr &context, const longfist::types::Deregister &deregister,
-                                      const kungfu::yijinjing::data::location_ptr &location){};
+                             const kungfu::yijinjing::data::location_ptr &location){};
 
   //客户端状态变化回调
   //@param brokerStateUpdate     状态变化
