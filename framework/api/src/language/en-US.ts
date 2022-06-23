@@ -180,7 +180,7 @@ export default {
     repo: 'Repo',
     crypto: 'Crypto',
     crypto_future: 'CryptoFuture',
-    kungfu_simu: 'KungfuSimu',
+    multi: 'Multi',
 
     SSE: 'SSE',
     SZE: 'SZE',

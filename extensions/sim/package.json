@@ -47,7 +47,7 @@
     "name": "SIM",
     "config": {
       "td": {
-        "type": "simu",
+        "type": "all",
         "settings": [
           {
             "key": "account_id",
@@ -93,7 +93,7 @@
         ]
       },
       "md": {
-        "type": "simu"
+        "type": "all"
       }
     }
   }

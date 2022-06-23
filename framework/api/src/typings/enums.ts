@@ -44,7 +44,7 @@ export enum InstrumentTypeEnum {
   repo,
   crypto,
   cryptofuture,
-  simu,
+  multi,
 }
 
 export type InstrumentTypes = keyof typeof InstrumentTypeEnum;

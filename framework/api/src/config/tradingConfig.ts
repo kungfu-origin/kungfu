@@ -427,8 +427,8 @@ export const InstrumentType: Record<
     color: 'blue',
     level: 10,
   },
-  [InstrumentTypeEnum.simu]: {
-    name: t('tradingConfig.kungfu_simu'),
+  [InstrumentTypeEnum.multi]: {
+    name: t('tradingConfig.multi'),
     color: 'green',
     level: 10,
   },
@@ -458,7 +458,7 @@ export const ShotableInstrumentTypes = [
   InstrumentTypeEnum.future,
   InstrumentTypeEnum.stockoption,
   InstrumentTypeEnum.cryptofuture,
-  InstrumentTypeEnum.simu,
+  InstrumentTypeEnum.multi,
 ];
 
 export const AbleSubscribeInstrumentTypesBySourceType: Record<
@@ -494,7 +494,7 @@ export const AbleSubscribeInstrumentTypesBySourceType: Record<
 
   cryptofuture: [InstrumentTypeEnum.cryptofuture],
 
-  simu: [
+  all: [
     InstrumentTypeEnum.stock,
     InstrumentTypeEnum.future,
     InstrumentTypeEnum.bond,

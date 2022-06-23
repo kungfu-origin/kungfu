@@ -181,7 +181,7 @@ export default {
     repo: '回购',
     crypto: '数字货币',
     crypto_future: '数字货币合约',
-    kungfu_simu: '功夫模拟',
+    multi: '多品种',
 
     SSE: '上交所',
     SZE: '深交所',
