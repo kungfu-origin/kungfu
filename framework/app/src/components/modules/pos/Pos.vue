@@ -44,18 +44,13 @@ import { useExtraCategory } from '@kungfu-trader/kungfu-app/src/renderer/assets/
 const app = getCurrentInstance();
 const { handleBodySizeChange } = useDashboardBodySize();
 
-const pos = ref<KungfuApi.Position[]>([]);
-const { searchKeyword, tableData } = useTableSearchKeyword<KungfuApi.Position>(
-  pos,
-  [
-    'instrument_id',
-    'exchange_id',
+const pos = ref<KungfuApi.PositionResolved[]>([]);
+const { searchKeyword, tableData } =
+  useTableSearchKeyword<KungfuApi.PositionResolved>(pos, [
+    'instrument_id_resolved',
     'direction',
-    'source_id',
-    'account_id',
-    'client_id',
-  ],
-);
+    'account_id_resolved',
+  ]);
 const {
   currentGlobalKfLocation,
   currentCategoryData,
@@ -99,7 +94,7 @@ onMounted(() => {
             ) as KungfuApi.Position[]);
 
         pos.value = toRaw(
-          positions.reverse().map((item) => dealPosition(item)),
+          positions.reverse().map((item) => dealPosition(watcher, item)),
         );
       },
     );

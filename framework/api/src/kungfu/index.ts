@@ -20,7 +20,7 @@ import {
   resolveAccountId,
   resolveClientId,
 } from '../utils/busiUtils';
-import { HistoryDateEnum } from '../typings/enums';
+import { HistoryDateEnum, LedgerCategoryEnum } from '../typings/enums';
 import { ExchangeIds } from '../config/tradingConfig';
 
 if (process.env.RENDERER_TYPE === 'logview') {
@@ -431,13 +431,8 @@ export const dealTrade = (
     watcher,
     trade.source,
     trade.dest,
-    trade.parent_order_id,
   );
-  const destResolvedData = resolveClientId(
-    watcher,
-    trade.dest,
-    trade.parent_order_id,
-  );
+  const destResolvedData = resolveClientId(watcher, trade.dest);
   const orderUKey = trade.order_id.toString(16).padStart(16, '0');
   const latencyData = dealOrderStat(orderStats, orderUKey) || {
     latencyTrade: '--',
@@ -459,12 +454,18 @@ export const dealTrade = (
 };
 
 export const dealPosition = (
+  watcher: KungfuApi.Watcher,
   pos: KungfuApi.Position,
 ): KungfuApi.PositionResolved => {
+  const holderLocation = watcher.getLocation(pos.holder_uid);
+  const account_id_resolved =
+    pos.ledger_category === LedgerCategoryEnum.td
+      ? `${holderLocation.group}_${holderLocation.name}`
+      : '--';
   return {
     ...pos,
     uid_key: pos.uid_key,
-    account_id_resolved: `${pos.source_id}_${pos.account_id}`,
+    account_id_resolved,
     instrument_id_resolved: `${pos.instrument_id} ${
       ExchangeIds[pos.exchange_id]?.name ?? ''
     }`,

@@ -1269,7 +1269,7 @@ export const filterLedgerResult = <T>(
   kfLocation: KungfuApi.KfLocation | KungfuApi.KfConfig,
   sortKey?: string,
 ): T[] => {
-  const { category, group, name } = kfLocation;
+  const { category } = kfLocation;
   const ledgerCategory = getLedgerCategory(category);
   let dataTableResolved = dataTable;
 
@@ -1281,17 +1281,15 @@ export const filterLedgerResult = <T>(
     dataTableResolved = dataTableResolved.nofilter('volume', BigInt(0));
   }
 
-  if (tradingDataTypeName === 'Position' || tradingDataTypeName === 'Asset') {
+  if (
+    tradingDataTypeName === 'Position' ||
+    tradingDataTypeName === 'Asset' ||
+    tradingDataTypeName === 'AssetMargin'
+  ) {
     const locationUID = watcher.getLocationUID(kfLocation);
     dataTableResolved = dataTableResolved
       .filter('ledger_category', ledgerCategory)
       .filter('holder_uid', locationUID);
-  } else if (ledgerCategory === 0) {
-    dataTableResolved = dataTableResolved
-      .filter('source_id', group)
-      .filter('account_id', name);
-  } else if (ledgerCategory === 1) {
-    dataTableResolved = dataTableResolved.filter('client_id', name);
   }
 
   if (sortKey) {

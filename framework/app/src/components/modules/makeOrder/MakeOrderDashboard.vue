@@ -594,7 +594,7 @@ async function handleOpenTradingTaskConfigModal(
               <div
                 class="position-value ant-col ant-col-14 ant-form-item-control"
               >
-                {{ currentPosition!.volume || '--'}}
+                {{ currentPosition!.volume || '--' }}
               </div>
             </div>
           </div>

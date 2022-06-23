@@ -241,8 +241,6 @@ declare namespace KungfuApi {
     side: SideEnum;
     offset: OffsetEnum;
     hedge_flag: HedgeFlagEnum;
-    source_id?: string;
-    account_id?: string;
   }
 
   export interface KfLogData {
@@ -310,10 +308,6 @@ declare namespace KungfuApi {
     holder_uid: number;
     ledger_category: LedgerCategoryEnum;
 
-    source_id: string; //柜台ID
-    account_id: string; //账号ID
-    client_id: string; // client ID
-
     initial_equity: number; //期初权益
     static_equity: number; //静态权益
     dynamic_equity: number; //动态权益
@@ -329,6 +323,32 @@ declare namespace KungfuApi {
     frozen_fee: number; //冻结手续费(期货)
     position_pnl: number; //持仓盈亏(期货)
     close_pnl: number; //平仓盈亏(期货)
+  }
+
+  export interface AssetMargin {
+    update_time: bigint; //更新时间
+    trading_day: string; //交易日
+
+    holder_uid: number;
+    ledger_category: LedgerCategoryEnum;
+
+    total_asset: number; //总资产
+    avail_margin: number; //可用保证金
+    cash_margin: number; //融资占用保证金
+    short_margin: number; //融券占用保证金
+    margin: number; //总占用保证金
+
+    cash_debt: number; //融资负债
+    short_cash: number; //融券卖出金额
+
+    short_market_value: number; //融券卖出证券市值
+    margin_market_value: number; //融资买入证券市值
+    margin_interest: number; //融资融券利息
+    settlement: number; //融资融券清算资金
+    commission_ratio: number; //手续费费率
+
+    credit: number; //信贷额度
+    collateral_ratio: number; //担保比例
   }
 
   export interface Bar {
@@ -384,9 +404,6 @@ declare namespace KungfuApi {
     trading_day: string; //交易日
     instrument_id: string; //合约ID
     exchange_id: string; //交易所ID
-    source_id: string; //柜台ID
-    account_id: string; //账号ID
-    client_id: string; // Client ID
 
     instrument_type: InstrumentTypeEnum; //合约类型
 
@@ -403,6 +420,8 @@ declare namespace KungfuApi {
 
     error_id: number; //错误ID
     error_msg: string; //错误信息
+
+    is_swap: boolean;
 
     side: SideEnum; //买卖方向
     offset: OffsetEnum; //开平方向
@@ -433,9 +452,6 @@ declare namespace KungfuApi {
 
     instrument_id: string; //合约代码
     exchange_id: string; //交易所代码
-    source_id: string; //柜台ID
-    account_id: string; //账号ID
-
     instrument_type: InstrumentTypeEnum; //合约类型
 
     limit_price: number; //价格
@@ -443,6 +459,7 @@ declare namespace KungfuApi {
 
     volume: bigint; //数量
 
+    is_swap: boolean;
     side: SideEnum; //买卖方向
     offset: OffsetEnum; //开平方向
     hedge_flag: HedgeFlagEnum; //投机套保标识
@@ -491,10 +508,6 @@ declare namespace KungfuApi {
     holder_uid: number;
     ledger_category: LedgerCategoryEnum;
 
-    source_id: string; //柜台ID
-    account_id: string; //账号ID
-    client_id: string; // Client ID
-
     direction: DirectionEnum; //持仓方向
 
     volume: bigint; //数量
@@ -524,7 +537,6 @@ declare namespace KungfuApi {
   }
 
   export interface Quote {
-    source_id: string; //柜台ID
     trading_day: string; //交易日
 
     data_time: bigint; //数据生成时间
@@ -564,9 +576,6 @@ declare namespace KungfuApi {
 
     instrument_id: string; //合约ID
     exchange_id: string; //交易所ID
-    source_id: string; //柜台ID
-    account_id: string; //账号ID
-    client_id: string; // Client ID
 
     instrument_type: InstrumentTypeEnum; //合约类型
 
@@ -598,6 +607,7 @@ declare namespace KungfuApi {
 
   export interface TradingData {
     Asset: DataTable<Asset>;
+    AssetMargin: DataTable<AssetMargin>;
     Bar: DataTable<Bar>;
     Instrument: DataTable<Instrument>;
     Order: DataTable<Order>;
@@ -711,6 +721,7 @@ declare namespace KungfuApi {
 
   export interface Longfist {
     Asset(): Asset;
+    AssetMargin(): AssetMargin;
     Bar(): Bar;
     Instrument(): Instrument;
     Order(): Order;

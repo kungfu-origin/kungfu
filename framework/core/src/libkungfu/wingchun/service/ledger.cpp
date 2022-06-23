@@ -23,9 +23,7 @@ Ledger::Ledger(locator_ptr locator, mode m, bool low_latency)
 
 void Ledger::on_exit() {}
 
-void Ledger::on_trading_day(const event_ptr &event, int64_t daytime) {
-  bookkeeper_.on_trading_day(daytime);
-}
+void Ledger::on_trading_day(const event_ptr &event, int64_t daytime) { bookkeeper_.on_trading_day(daytime); }
 
 book::Bookkeeper &Ledger::get_bookkeeper() { return bookkeeper_; }
 
@@ -210,7 +208,6 @@ void Ledger::mirror_positions(int64_t trigger_time, uint32_t strategy_uid) {
 
         longfist::copy(strategy_position, position);
         strategy_position.holder_uid = strategy_uid;
-        strategy_position.client_id = strategy_book->asset.client_id;
         strategy_position.ledger_category = LedgerCategory::Strategy;
         strategy_position.update_time = trigger_time;
 
@@ -250,7 +247,6 @@ void Ledger::write_book_reset(int64_t trigger_time, uint32_t book_uid) {
 }
 
 void Ledger::write_strategy_data(int64_t trigger_time, uint32_t strategy_uid) {
-  auto strategy_book = bookkeeper_.get_book(strategy_uid);
   auto writer = get_writer(strategy_uid);
   for (const auto &pair : bookkeeper_.get_books()) {
     auto &book = pair.second;
@@ -273,7 +269,7 @@ void Ledger::write_strategy_data(int64_t trigger_time, uint32_t strategy_uid) {
 void Ledger::write_positions(int64_t trigger_time, uint32_t dest, book::PositionMap &positions) {
   auto writer = get_writer(dest);
   for (const auto &pair : positions) {
-    if (pair.second.volume > 0 or pair.second.direction == Direction::Long) {
+    if (pair.second.volume > 0) {
       writer->write_as(trigger_time, pair.second, get_home_uid(), pair.second.holder_uid);
     }
   }

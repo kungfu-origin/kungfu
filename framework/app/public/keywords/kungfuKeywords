@@ -46,7 +46,6 @@ Error
 Filled
 PartialFilledNotActive
 PartialFilledActive
-source_id
 trading_day
 rcv_time
 data_time
@@ -74,8 +73,6 @@ ask_volume
 order_id
 insert_time
 update_time
-account_id
-client_id
 limit_price
 frozen_price
 volume_left

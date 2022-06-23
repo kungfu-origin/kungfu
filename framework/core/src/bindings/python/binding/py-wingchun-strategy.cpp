@@ -131,7 +131,7 @@ void bind_strategy(pybind11::module &m) {
            py::arg("secu_datatypes") = SubscribeSecuDataType::All)
       .def("insert_order", &strategy::Context::insert_order, py::arg("symbol"), py::arg("exchange"), py::arg("source"),
            py::arg("account"), py::arg("limit_price"), py::arg("volume"), py::arg("type"), py::arg("side"),
-           py::arg("offset") = Offset::Open, py::arg("hedge_flag") = HedgeFlag::Speculation)
+           py::arg("offset") = Offset::Open, py::arg("hedge_flag") = HedgeFlag::Speculation, py::arg("is_swap") = false)
       .def("cancel_order", &strategy::Context::cancel_order)
       .def("req_history_order", &strategy::Context::req_history_order)
       .def("req_history_trade", &strategy::Context::req_history_trade)

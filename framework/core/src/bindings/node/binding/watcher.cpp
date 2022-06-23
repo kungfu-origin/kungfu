@@ -627,8 +627,7 @@ void Watcher::BookListener::on_book_sync_reset(const book::Book &old_book, const
     for (auto &st_pair : position_map) {
       auto &st_position = st_pair.second;
       auto &td_position = const_cast<book::Book &>(new_book).get_position_for(st_position.direction, st_position);
-      if (strcmp(st_position.source_id, td_position.source_id) == 0 and
-          strcmp(st_position.account_id, td_position.account_id) == 0) {
+      if (st_position.holder_uid == td_position.holder_uid) {
         st_position.volume = td_position.volume;
         st_position.yesterday_volume = td_position.yesterday_volume;
         st_position.update_time = td_position.update_time;

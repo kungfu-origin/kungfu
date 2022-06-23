@@ -136,7 +136,8 @@ private:
   yijinjing::data::location_ptr location_;
   std::unordered_map<uint32_t, StateStoragePtr> storage_map_;
 
-  template <typename DataType> void restore(yijinjing::journal::writer_ptr &writer, uint32_t dest, StateStoragePtr &storage) {
+  template <typename DataType>
+  void restore(yijinjing::journal::writer_ptr &writer, uint32_t dest, StateStoragePtr &storage) {
     for (auto &data : time_spec<DataType>::get_all(storage, yijinjing::time::today_start(), INT64_MAX)) {
       writer->write(0, data);
     }

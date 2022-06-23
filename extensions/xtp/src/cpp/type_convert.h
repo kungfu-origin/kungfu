@@ -365,7 +365,6 @@ inline void to_xtp(XTPMarketDataStruct &des, const Quote &ori) {
 }
 
 inline void from_xtp(const XTPMarketDataStruct &ori, Quote &des) {
-  strcpy(des.source_id, SOURCE_XTP);
   des.data_time = nsec_from_xtp_timestamp(ori.data_time);
   strcpy(des.trading_day, yijinjing::time::strftime(des.data_time, KUNGFU_TRADING_DAY_FORMAT).c_str());
   strcpy(des.instrument_id, ori.ticker);
@@ -395,7 +394,6 @@ inline void from_xtp(const XTPMarketDataStruct &ori, Quote &des) {
 
 inline void from_xtp(const XTPMarketDataStruct &ori, int64_t *bid1_qty, int32_t bid1_count, int32_t max_bid1_count,
                      int64_t *ask1_qty, int32_t ask1_count, int32_t max_ask1_count, TopOfBook &des) {
-  strcpy(des.source_id, SOURCE_XTP);
   des.data_time = nsec_from_xtp_timestamp(ori.data_time);
   strcpy(des.trading_day, yijinjing::time::strftime(des.data_time, KUNGFU_TRADING_DAY_FORMAT).c_str());
   strcpy(des.instrument_id, ori.ticker);
@@ -509,7 +507,6 @@ inline void from_xtp(const XTPQueryStkPositionRsp &ori, Position &des) {
 }
 
 inline void from_xtp(const XTPQueryAssetRsp &ori, Asset &des) {
-  strcpy(des.source_id, SOURCE_XTP);
   des.avail = ori.buying_power;
 }
 
@@ -533,8 +530,6 @@ inline void from_xtp(const XTPTickByTickStruct &ori, Entrust &des) {
 }
 
 inline void from_xtp(const XTPTickByTickStruct &ori, Transaction &des) {
-  strcpy(des.source_id, SOURCE_XTP);
-
   from_xtp(ori.exchange_id, des.exchange_id);
   strcpy(des.instrument_id, ori.ticker);
   des.data_time = nsec_from_xtp_timestamp(ori.data_time);

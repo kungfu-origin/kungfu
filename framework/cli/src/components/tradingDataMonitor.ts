@@ -23,8 +23,10 @@ import {
 } from '../assets/actions/tradingData';
 import {
   dealKfPrice,
+  getIdByKfLocation,
   setTimerPromiseTask,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
+import { LedgerCategoryEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';
 
 // 定义全局变量
 const WIDTH_LEFT_PANEL = 60;
@@ -328,8 +330,6 @@ class TradingDataDashboard extends Dashboard {
 
   _freshAssets(asset: KungfuApi.Asset) {
     const assetForShow: {
-      account_id?: string;
-      client_id?: string;
       market_value: string;
       margin: string;
       avail: string;
@@ -341,20 +341,7 @@ class TradingDataDashboard extends Dashboard {
       unrealized_pnl: '--',
     };
 
-    const {
-      client_id,
-      account_id,
-      market_value,
-      avail,
-      margin,
-      unrealized_pnl,
-    } = asset;
-
-    if (this.kfLocation.category === 'td') {
-      assetForShow.account_id = account_id;
-    } else if (this.kfLocation.category === 'strategy') {
-      assetForShow.client_id = client_id;
-    }
+    const { market_value, avail, margin, unrealized_pnl } = asset;
 
     assetForShow.market_value = dealKfPrice(market_value);
     assetForShow.avail = colorNum(dealKfPrice(avail));

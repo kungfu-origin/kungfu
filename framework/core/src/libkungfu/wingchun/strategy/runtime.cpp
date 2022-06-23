@@ -39,26 +39,24 @@ void RuntimeContext::add_time_interval(int64_t duration, const std::function<voi
 }
 
 void RuntimeContext::add_account(const std::string &source, const std::string &account, double cash_limit) {
-  uint32_t account_id = hash_str_32(account);
-  if (td_locations_.find(account_id) != td_locations_.end()) {
-    throw wingchun_error(fmt::format("duplicated account {}@{}", account, source));
+  uint32_t hashed_account = hash_account(source, account);
+
+  if (td_locations_.find(hashed_account) != td_locations_.end()) {
+    throw wingchun_error(fmt::format("duplicated account {}_{}", source, account));
   }
 
   auto home = app_.get_io_device()->get_home();
   auto account_location = location::make_shared(mode::LIVE, category::TD, source, account, home->locator);
   if (home->mode == mode::LIVE and not app_.has_location(account_location->uid)) {
-    throw wingchun_error(fmt::format("invalid account {}@{}", account, source));
+    throw wingchun_error(fmt::format("invalid account {}_{}", source, account));
   }
 
-  td_locations_.emplace(account_id, account_location);
-  account_cash_limits_.emplace(account_id, cash_limit);
-  account_location_ids_.emplace(account_id, account_location->uid);
-
-  uint32_t source_account_id = hash_instrument(source.c_str(), account.c_str());
-  source_account_location_ids_.emplace(source_account_id, account_location->uid);
+  td_locations_.emplace(hashed_account, account_location);
+  td_locations_.emplace(account_location->uid, account_location);
+  account_cash_limits_.emplace(hashed_account, cash_limit);
+  account_location_ids_.emplace(hashed_account, account_location->uid);
 
   broker_client_.enroll_account(account_location);
-  td_locations_.emplace(account_location->uid, account_location);
 }
 
 void RuntimeContext::subscribe(const std::string &source, const std::vector<std::string> &instrument_ids,
@@ -76,11 +74,11 @@ void RuntimeContext::subscribe_all(const std::string &source, uint8_t exchanges_
 }
 
 uint64_t RuntimeContext::insert_order(uint32_t account_location_uid, const std::string &instrument_id,
-                                      const std::string &exchange_id, const std::string &account, double limit_price,
-                                      int64_t volume, PriceType type, Side side, Offset offset, HedgeFlag hedge_flag) {
+                                      const std::string &exchange_id, double limit_price, int64_t volume,
+                                      PriceType type, Side side, Offset offset, HedgeFlag hedge_flag, bool is_swap) {
   auto insert_time = time::now_in_nano();
   if (not broker_client_.is_ready(account_location_uid)) {
-    SPDLOG_ERROR("account {} not ready", account);
+    SPDLOG_ERROR("account {} not ready", td_locations_.at(account_location_uid)->uname);
     return 0;
   }
   auto instrument_type = get_instrument_type(exchange_id, instrument_id);
@@ -94,7 +92,6 @@ uint64_t RuntimeContext::insert_order(uint32_t account_location_uid, const std::
   input.order_id = writer->current_frame_uid();
   strcpy(input.instrument_id, instrument_id.c_str());
   strcpy(input.exchange_id, exchange_id.c_str());
-  strcpy(input.account_id, account.c_str());
   input.instrument_type = instrument_type;
   input.limit_price = limit_price;
   input.frozen_price = limit_price;
@@ -103,6 +100,7 @@ uint64_t RuntimeContext::insert_order(uint32_t account_location_uid, const std::
   input.side = side;
   input.offset = offset;
   input.hedge_flag = hedge_flag;
+  input.is_swap = is_swap;
   input.insert_time = insert_time;
   writer->close_data();
   bookkeeper_.on_order_input(app_.now(), app_.get_home_uid(), account_location_uid, input);
@@ -111,10 +109,11 @@ uint64_t RuntimeContext::insert_order(uint32_t account_location_uid, const std::
 
 uint64_t RuntimeContext::insert_order(const std::string &instrument_id, const std::string &exchange_id,
                                       const std::string &source, const std::string &account, double limit_price,
-                                      int64_t volume, PriceType type, Side side, Offset offset, HedgeFlag hedge_flag) {
-  auto account_location_uid = lookup_source_account_location_id(source, account);
-  return insert_order(account_location_uid, instrument_id, exchange_id, account, limit_price, volume, type, side,
-                      offset, hedge_flag);
+                                      int64_t volume, PriceType type, Side side, Offset offset, HedgeFlag hedge_flag,
+                                      bool is_swap) {
+  auto account_location_uid = get_td_location_uid(source, account);
+  return insert_order(account_location_uid, instrument_id, exchange_id, limit_price, volume, type, side, offset,
+                      hedge_flag, is_swap);
 }
 
 uint64_t RuntimeContext::cancel_order(uint64_t order_id) {
@@ -139,10 +138,10 @@ const location_map &RuntimeContext::list_md() const { return md_locations_; }
 
 const location_map &RuntimeContext::list_accounts() const { return td_locations_; }
 
-double RuntimeContext::get_account_cash_limit(const std::string &account) const {
+double RuntimeContext::get_account_cash_limit(const std::string &source, const std::string &account) const {
   uint32_t account_id = yijinjing::util::hash_str_32(account);
   if (account_cash_limits_.find(account_id) == account_cash_limits_.end()) {
-    throw wingchun_error(fmt::format("invalid account {}", account));
+    throw wingchun_error(fmt::format("invalid account {}_{}", source, account));
   }
   return account_cash_limits_.at(account_id);
 }
@@ -157,10 +156,13 @@ uint32_t RuntimeContext::lookup_account_location_id(const std::string &account) 
   return account_location_ids_.at(hash_str_32(account));
 }
 
-uint32_t RuntimeContext::lookup_source_account_location_id(const std::string &source,
-                                                           const std::string &account) const {
-  uint32_t source_account_id = hash_instrument(source.c_str(), account.c_str());
-  return source_account_location_ids_.at(source_account_id);
+uint32_t RuntimeContext::get_td_location_uid(const std::string &source, const std::string &account) const {
+  uint32_t hashed_account = hash_account(source, account);
+  if (td_locations_.find(hashed_account) == td_locations_.end()) {
+    throw wingchun_error(fmt::format("invalid account {}_{}", source, account));
+  }
+
+  return td_locations_.at(hashed_account)->uid;
 }
 
 const location_ptr &RuntimeContext::find_md_location(const std::string &source) {
@@ -176,9 +178,9 @@ const location_ptr &RuntimeContext::find_md_location(const std::string &source) 
 }
 
 void RuntimeContext::req_history_order(const std::string &source, const std::string &account) {
-  auto account_location_uid = lookup_source_account_location_id(source, account);
+  auto account_location_uid = get_td_location_uid(source, account);
   if (not broker_client_.is_ready(account_location_uid)) {
-    SPDLOG_ERROR("account {} not ready", account);
+    SPDLOG_ERROR("account {}_{} not ready", source, account);
     return;
   }
   auto writer = app_.get_writer(account_location_uid);
@@ -186,9 +188,9 @@ void RuntimeContext::req_history_order(const std::string &source, const std::str
 }
 
 void RuntimeContext::req_history_trade(const std::string &source, const std::string &account) {
-  auto account_location_uid = lookup_source_account_location_id(source, account);
+  auto account_location_uid = get_td_location_uid(source, account);
   if (not broker_client_.is_ready(account_location_uid)) {
-    SPDLOG_ERROR("account {} not ready", account);
+    SPDLOG_ERROR("account {}_{} not ready", source, account);
     return;
   }
   auto writer = app_.get_writer(account_location_uid);
