@@ -49,7 +49,9 @@ class Strategy(wc.Strategy):
             self._module, "on_trading_day", lambda ctx, trading_day: None
         )
         self._on_bar = getattr(self._module, "on_bar", lambda ctx, bar, location: None)
-        self._on_quote = getattr(self._module, "on_quote", lambda ctx, quote, location: None)
+        self._on_quote = getattr(
+            self._module, "on_quote", lambda ctx, quote, location: None
+        )
         self._on_top_of_book = getattr(
             self._module, "on_top_of_book", lambda ctx, top_of_book, location: None
         )
@@ -59,8 +61,12 @@ class Strategy(wc.Strategy):
         self._on_transaction = getattr(
             self._module, "on_transaction", lambda ctx, transaction, location: None
         )
-        self._on_order = getattr(self._module, "on_order", lambda ctx, order, location: None)
-        self._on_trade = getattr(self._module, "on_trade", lambda ctx, trade, location: None)
+        self._on_order = getattr(
+            self._module, "on_order", lambda ctx, order, location: None
+        )
+        self._on_trade = getattr(
+            self._module, "on_trade", lambda ctx, trade, location: None
+        )
         self._on_history_order = getattr(
             self._module, "on_history_order", lambda ctx, history_order, location: None
         )
