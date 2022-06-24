@@ -61,7 +61,7 @@ nuitka_dst_dir = make_path("nuitka")
 nuitka_build_dst_dir = make_path("nuitka", "build")
 nuitka_build_src_dir = make_path(site_path, "nuitka", "build")
 data_nuitka_codegen_templates = make_path(
-    site_path, "nuitka", "codegen", "templates", "*.j2"
+    site_path, "nuitka", "codegen", "templates_c", "*.j2"
 )
 data_nuitka_include = make_path(nuitka_build_src_dir, "include")
 data_nuitka_inline_copy = make_path(nuitka_build_src_dir, "inline_copy")
@@ -140,7 +140,7 @@ a = Analysis(
             (data_pip_certifi, make_path("pip", "_vendor", "certifi")),
             (
                 data_nuitka_codegen_templates,
-                make_path(nuitka_dst_dir, "codegen", "templates"),
+                make_path(nuitka_dst_dir, "codegen", "templates_c"),
             ),
             (data_nuitka_include, make_path(nuitka_build_dst_dir, "include")),
             (data_nuitka_inline_copy, make_path(nuitka_build_dst_dir, "inline_copy")),

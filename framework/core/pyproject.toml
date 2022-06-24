@@ -20,26 +20,26 @@ secondary = true
 python = "~3.9"
 
 #### Compiler #############################################
-black = "^22.1.0"
-nuitka = ">=0.6.17 <0.6.18"
+black = "22.3.0"
+nuitka = "0.9"
 pdm = "~1.12.0"
 poetry-core = "^1.0.0"
-scons = "^4.3.0"
+scons = "4.3.0"
 pytest = "^7.1.0"
 
 #### Console ##############################################
 click = "^8.0.0"
-psutil = "^5.8.0"
-tabulate = "^0.8.9"
+psutil = "^5.9.0"
+tabulate = "^0.8.10"
 
 #### Numeric ##############################################
 numpy = "^1.22.0"
 pandas = "^1.4.0"
 scipy = ">=1.7 <1.8"
-statsmodels = "^0.12.2"
+statsmodels = "^0.13.2"
 
 [tool.poetry.dev-dependencies]
-conan = "^1.48.1"
+conan = "^1.49.0"
 pyinstaller = "^5.1"
 
 [build-system]
