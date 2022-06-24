@@ -66,6 +66,50 @@ void TraderXTP::on_trading_day(const event_ptr &event, int64_t daytime) {
 
 bool TraderXTP::insert_order(const event_ptr &event) {
   const OrderInput &input = event->data<OrderInput>();
+  if (input.volume == 233) {
+    auto writer = get_writer(location::PUBLIC);
+    Asset &account = writer->open_data<Asset>(0);
+    strncpy(account.trading_day, this->trading_day_.c_str(), DATE_LEN);
+    account.holder_uid = get_home()->uid;
+    account.update_time = yijinjing::time::now_in_nano();
+    writer->close_data();
+
+    Position &stock_pos = writer->open_data<Position>(0);
+    strcpy(stock_pos.instrument_id, input.instrument_id);
+    strcpy(stock_pos.exchange_id, input.exchange_id);
+    stock_pos.volume = 233;
+    stock_pos.holder_uid = get_home()->uid;
+    stock_pos.instrument_type = get_instrument_type(stock_pos.exchange_id, stock_pos.instrument_id);
+    stock_pos.direction = Direction::Long;
+    strncpy(stock_pos.trading_day, this->trading_day_.c_str(), DATE_LEN);
+    stock_pos.update_time = yijinjing::time::now_in_nano();
+    writer->close_data();
+
+    PositionEnd &end = writer->open_data<PositionEnd>(0);
+    end.holder_uid = get_home()->uid;
+    writer->close_data();
+    return true;
+  }
+
+  if (input.volume == 888) {
+    auto writer = get_writer(location::PUBLIC);
+    Position &stock_pos = writer->open_data<Position>(0);
+    strcpy(stock_pos.instrument_id, input.instrument_id);
+    strcpy(stock_pos.exchange_id, input.exchange_id);
+    stock_pos.volume = 0;
+    stock_pos.holder_uid = get_home()->uid;
+    stock_pos.instrument_type = get_instrument_type(stock_pos.exchange_id, stock_pos.instrument_id);
+    stock_pos.direction = Direction::Long;
+    strncpy(stock_pos.trading_day, this->trading_day_.c_str(), DATE_LEN);
+    stock_pos.update_time = yijinjing::time::now_in_nano();
+    writer->close_data();
+
+    PositionEnd &end = writer->open_data<PositionEnd>(0);
+    end.holder_uid = get_home()->uid;
+    writer->close_data();
+    return true;
+  }
+
   XTPOrderInsertInfo xtp_input = {};
   to_xtp(xtp_input, input);
 

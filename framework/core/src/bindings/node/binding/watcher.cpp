@@ -596,75 +596,94 @@ void Watcher::UpdateBook(int64_t update_time, uint32_t source_id, uint32_t dest_
 Watcher::BookListener::BookListener(Watcher &watcher) : watcher_(watcher) {}
 
 void Watcher::BookListener::on_asset_sync_reset(const Asset &old_asset, const Asset &new_asset) {
-
-  // watcher维护的bookkeeper中，与new_book(TD) has_channel的strategy更新前端数据
-  auto fun_has_channel = [&](const Asset &st_asset) {
-    return st_asset.ledger_category == LedgerCategory::Strategy and
-           watcher_.has_channel(st_asset.holder_uid, new_asset.holder_uid);
-  };
-  // watcher维护的bookkeeper中，与new_book表示同一个TD的要更新前端数据
-  auto fun_same_td = [&](Asset &td_asset) {
-    return td_asset.ledger_category == LedgerCategory::Account and td_asset.holder_uid == new_asset.holder_uid;
-  };
-
-  for (auto &bk_pair : watcher_.bookkeeper_.get_books()) {
-    auto &st_book = bk_pair.second;
-    if (fun_has_channel(st_book->asset) or fun_same_td(st_book->asset)) {
-      st_book->asset.avail = new_asset.avail;
-      st_book->asset.margin = new_asset.margin;
-      st_book->asset.update_time = new_asset.update_time;
-      state<Asset> cache_state(watcher_.ledger_home_location_->uid, st_book->asset.holder_uid,
-                               st_book->asset.update_time, st_book->asset);
-      watcher_.feed_state_data_bank(cache_state, watcher_.data_bank_);
-    }
-  }
+  auto book = watcher_.bookkeeper_.get_book(new_asset.holder_uid);
+  book->update(watcher_.now());
+  state<Asset> cache_state(watcher_.ledger_home_location_->uid, book->asset.holder_uid, book->asset.update_time,
+                           book->asset);
+  watcher_.feed_state_data_bank(cache_state, watcher_.data_bank_);
+  //  // watcher维护的bookkeeper中，与new_book(TD) has_channel的strategy更新前端数据
+  //  auto fun_has_channel = [&](const Asset &st_asset) {
+  //    return st_asset.ledger_category == LedgerCategory::Strategy and
+  //           watcher_.has_channel(st_asset.holder_uid, new_asset.holder_uid);
+  //  };
+  //  // watcher维护的bookkeeper中，与new_book表示同一个TD的要更新前端数据
+  //  auto fun_same_td = [&](Asset &td_asset) {
+  //    return td_asset.ledger_category == LedgerCategory::Account and td_asset.holder_uid == new_asset.holder_uid;
+  //  };
+  //
+  //  for (auto &bk_pair : watcher_.bookkeeper_.get_books()) {
+  //    auto &st_book = bk_pair.second;
+  //    if (fun_has_channel(st_book->asset) or fun_same_td(st_book->asset)) {
+  //      st_book->asset.avail = new_asset.avail;
+  //      st_book->asset.margin = new_asset.margin;
+  //      st_book->asset.update_time = new_asset.update_time;
+  //      state<Asset> cache_state(watcher_.ledger_home_location_->uid, st_book->asset.holder_uid,
+  //                               st_book->asset.update_time, st_book->asset);
+  //      watcher_.feed_state_data_bank(cache_state, watcher_.data_bank_);
+  //    }
+  //  }
 }
 
 void Watcher::BookListener::on_book_sync_reset(const book::Book &old_book, const book::Book &new_book) {
-  // on_book_sync_reset调用时，bookkeeper中所有TD的book都是旧的，当回调结束后才替换成新的book
-
   auto fun_update_st_position = [&](book::PositionMap &position_map) {
     for (auto &st_pair : position_map) {
-      auto &st_position = st_pair.second;
-      auto &td_position = const_cast<book::Book &>(new_book).get_position_for(st_position.direction, st_position);
-      if (st_position.holder_uid == td_position.holder_uid) {
-        st_position.volume = td_position.volume;
-        st_position.yesterday_volume = td_position.yesterday_volume;
-        st_position.update_time = td_position.update_time;
-        state<Position> cache_state(watcher_.ledger_home_location_->uid, st_position.holder_uid,
-                                    st_position.update_time, st_position);
-        watcher_.feed_state_data_bank(cache_state, watcher_.data_bank_);
-      }
-    }
-  };
-
-  // watcher维护的bookkeeper中，与new_book(TD) has_channel的strategy更新前端数据
-  auto fun_has_channel = [&](const Asset &st_asset) {
-    return st_asset.ledger_category == LedgerCategory::Strategy and
-           watcher_.has_channel(st_asset.holder_uid, new_book.asset.holder_uid);
-  };
-  // watcher维护的bookkeeper中，与new_book表示同一个TD的要更新前端数据
-  auto fun_same_td = [&](Asset &td_asset) {
-    if (td_asset.ledger_category == LedgerCategory::Account and td_asset.holder_uid == new_book.asset.holder_uid) {
-      td_asset.avail = new_book.asset.avail;
-      td_asset.margin = new_book.asset.margin;
-      td_asset.update_time = new_book.asset.update_time;
-      state<Asset> cache_state(watcher_.ledger_home_location_->uid, td_asset.holder_uid, td_asset.update_time,
-                               td_asset);
+      auto &position = st_pair.second;
+      state<Position> cache_state(watcher_.ledger_home_location_->uid, position.holder_uid, position.update_time,
+                                  position);
       watcher_.feed_state_data_bank(cache_state, watcher_.data_bank_);
-      return true;
-    } else {
-      return false;
     }
   };
 
   for (auto &bk_pair : watcher_.bookkeeper_.get_books()) {
     auto &st_book = bk_pair.second;
-    if (fun_has_channel(st_book->asset) or fun_same_td(st_book->asset)) {
-      fun_update_st_position(st_book->long_positions);
-      fun_update_st_position(st_book->short_positions);
-    }
+    fun_update_st_position(st_book->long_positions);
+    fun_update_st_position(st_book->short_positions);
   }
+
+  // on_book_sync_reset调用时，bookkeeper中所有TD的book都是旧的，当回调结束后才替换成新的book
+
+  //  auto fun_update_st_position = [&](book::PositionMap &position_map) {
+  //    for (auto &st_pair : position_map) {
+  //      auto &st_position = st_pair.second;
+  //      auto &td_position = const_cast<book::Book &>(new_book).get_position_for(st_position.direction, st_position);
+  //      if (st_position.holder_uid == td_position.holder_uid) {
+  //        st_position.volume = td_position.volume;
+  //        st_position.yesterday_volume = td_position.yesterday_volume;
+  //        st_position.update_time = td_position.update_time;
+  //        state<Position> cache_state(watcher_.ledger_home_location_->uid, st_position.holder_uid,
+  //                                    st_position.update_time, st_position);
+  //        watcher_.feed_state_data_bank(cache_state, watcher_.data_bank_);
+  //      }
+  //    }
+  //  };
+  //
+  //  // watcher维护的bookkeeper中，与new_book(TD) has_channel的strategy更新前端数据
+  //  auto fun_has_channel = [&](const Asset &st_asset) {
+  //    return st_asset.ledger_category == LedgerCategory::Strategy and
+  //           watcher_.has_channel(st_asset.holder_uid, new_book.asset.holder_uid);
+  //  };
+  //  // watcher维护的bookkeeper中，与new_book表示同一个TD的要更新前端数据
+  //  auto fun_same_td = [&](Asset &td_asset) {
+  //    if (td_asset.ledger_category == LedgerCategory::Account and td_asset.holder_uid == new_book.asset.holder_uid) {
+  //      td_asset.avail = new_book.asset.avail;
+  //      td_asset.margin = new_book.asset.margin;
+  //      td_asset.update_time = new_book.asset.update_time;
+  //      state<Asset> cache_state(watcher_.ledger_home_location_->uid, td_asset.holder_uid, td_asset.update_time,
+  //                               td_asset);
+  //      watcher_.feed_state_data_bank(cache_state, watcher_.data_bank_);
+  //      return true;
+  //    } else {
+  //      return false;
+  //    }
+  //  };
+  //
+  //  for (auto &bk_pair : watcher_.bookkeeper_.get_books()) {
+  //    auto &st_book = bk_pair.second;
+  //    if (fun_has_channel(st_book->asset) or fun_same_td(st_book->asset)) {
+  //      fun_update_st_position(st_book->long_positions);
+  //      fun_update_st_position(st_book->short_positions);
+  //    }
+  //  }
 }
 
 } // namespace kungfu::node

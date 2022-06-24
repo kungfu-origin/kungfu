@@ -56,6 +56,8 @@ public:
 
   void add_book_listener(const BookListener_ptr &book_listener);
 
+  void mirror_positions(int64_t trigger_time, uint32_t strategy_uid);
+
   template <typename TradingData, typename ApplyMethod = void (AccountingMethod::*)(Book_ptr, const TradingData &)>
   void update_book(const event_ptr &event, ApplyMethod method) {
     update_book(event->gen_time(), event->source(), event->dest(), event->data<TradingData>(), method);
@@ -93,8 +95,9 @@ private:
   AccountingMethodMap accounting_methods_ = {};
   std::vector<BookListener_ptr> book_listeners_ = {};
   BookMap books_replica_ = {}; //暂存从location::SYNC传来的asset和position信息
-  std::unordered_map<uint32_t, bool> books_replica_asset_guards_ = {}; //收到PositionEnd::tag添加对应<location_uid,true>
-  std::unordered_map<uint32_t, bool> books_replica_position_guard_ = {}; //收到Asset::tag添加对应<location_uid,true>
+  std::unordered_map<uint32_t, bool> books_replica_asset_guards_ = {}; // Asset::tag添加对应<location_uid,true>
+  std::unordered_map<uint32_t, bool> books_replica_asset_margin_guards_ = {}; // AssetMargin::tag-><location_uid,true>
+  std::unordered_map<uint32_t, bool> books_replica_position_guard_ = {}; // PositionEnd::tag添加对应<location_uid,true>
 
   static constexpr auto bypass = [](yijinjing::practice::apprentice *app, bool bypass_quotes) {
     return rx::filter([=](const event_ptr &event) {

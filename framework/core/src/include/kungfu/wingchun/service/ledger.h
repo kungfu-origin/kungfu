@@ -18,7 +18,8 @@ typedef std::unordered_map<uint32_t, longfist::types::Position> PositionMap;
 
 class Ledger : public yijinjing::practice::apprentice {
 public:
-  explicit Ledger(yijinjing::data::locator_ptr locator, longfist::enums::mode m, bool low_latency = false);
+  explicit Ledger(yijinjing::data::locator_ptr locator, longfist::enums::mode m, bool low_latency = false,
+                  bool is_sync = true);
 
   ~Ledger() override = default;
 
@@ -36,6 +37,7 @@ private:
   book::Bookkeeper bookkeeper_;
   book::BookMap tmp_books_;
   std::unordered_map<uint64_t, state<longfist::types::OrderStat>> order_stats_ = {};
+  bool is_sync_;
 
   void refresh_books();
 
@@ -57,7 +59,7 @@ private:
 
   void rebuild_positions(int64_t trigger_time, uint32_t strategy_uid);
 
-  void mirror_positions(int64_t trigger_time, uint32_t strategy_uid);
+//  void mirror_positions(int64_t trigger_time, uint32_t strategy_uid);
 
   void write_book_reset(int64_t trigger_time, uint32_t book_uid);
 

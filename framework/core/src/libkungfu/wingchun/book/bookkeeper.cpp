@@ -212,12 +212,15 @@ void Bookkeeper::try_update_position(const Position &position) {
 
 void Bookkeeper::try_sync_book_replica(uint32_t location_uid) {
   if (books_replica_asset_guards_.find(location_uid) == books_replica_asset_guards_.end() ||
-      books_replica_position_guard_.find(location_uid) == books_replica_position_guard_.end()) {
+      books_replica_position_guard_.find(location_uid) == books_replica_position_guard_.end() ||
+      books_replica_asset_margin_guards_.find(location_uid) == books_replica_asset_margin_guards_.end()) {
     return;
   }
 
-  if (books_replica_asset_guards_.at(location_uid) && books_replica_position_guard_.at(location_uid)) {
+  if (books_replica_asset_guards_.at(location_uid) and books_replica_position_guard_.at(location_uid) and
+      books_replica_asset_margin_guards_.at(location_uid)) {
     books_replica_asset_guards_.insert_or_assign(location_uid, false);
+    books_replica_asset_margin_guards_.insert_or_assign(location_uid, false);
     books_replica_position_guard_.insert_or_assign(location_uid, false);
     auto old_book = get_book(location_uid);
     auto new_book = get_book_replica(location_uid);
@@ -275,18 +278,55 @@ void Bookkeeper::try_sync_book_replica(uint32_t location_uid) {
 
     // position改变更新book，包括asset和position都更新并回调on_book_sync_reset
     if (position_changed) {
-      // 遍历所有策略的book，如果有position的source_id和account_id是与本TD的一样，则更新
-      auto fun_update_st_position = [&](PositionMap &position_map) {
-        for (auto &st_pair : position_map) {
-          auto &st_position = st_pair.second;
-          auto &td_position = new_book->get_position_for(st_position.direction, st_position);
-          if (st_position.holder_uid == td_position.holder_uid) {
-            st_position.volume = td_position.volume;
-            st_position.yesterday_volume = td_position.yesterday_volume;
-            st_position.update_time = td_position.update_time;
-          }
-        }
-      };
+      // 遍历所有策略的book, position的volume减去old_book的再加上new_book的
+      //      auto fun_update_st_position = [&](PositionMap &position_map) {
+      //        for (auto &st_pair : position_map) {
+      //          auto &st_position = st_pair.second;
+      //          const auto &td_old_position = old_book->get_position_for(st_position.direction, st_position);
+      //          const auto &td_new_position = new_book->get_position_for(st_position.direction, st_position);
+      //
+      //          st_position.volume = st_position.volume - td_old_position.volume + td_new_position.volume;
+      //          st_position.yesterday_volume =
+      //              st_position.yesterday_volume - td_old_position.yesterday_volume +
+      //              td_new_position.yesterday_volume;
+      //          st_position.update_time = td_new_position.update_time;
+      //        }
+      //      };
+
+      //      auto copy_positions = [&](auto &positions) {
+      //        for (auto &pair : positions) {
+      //          auto &st_position = pair.second;
+      //          const auto strategy_uid = st_position.holder_uid;
+      //          const auto &td_position = new_book->get_position_for(st_position.direction, st_position);
+      //
+      //          const auto volume = st_position.volume;
+      //          const auto yesterday_volume = st_position.yesterday_volume;
+      //          const auto frozen_total = st_position.frozen_total;
+      //          const auto frozen_yesterday = st_position.frozen_yesterday;
+      //          const auto avg_open_price = st_position.avg_open_price;
+      //          const auto position_cost_price = st_position.position_cost_price;
+      //
+      //          const auto total_volume = st_position.volume + td_position.volume;
+      //
+      //          longfist::copy(st_position, td_position);
+      //          st_position.holder_uid = strategy_uid;
+      //          st_position.ledger_category = LedgerCategory::Strategy;
+      //          st_position.update_time = time::now_in_nano();
+      //
+      //          if (volume > 0) {
+      //            st_position.volume += volume;
+      //            st_position.yesterday_volume += yesterday_volume;
+      //            st_position.frozen_total += frozen_total;
+      //            st_position.frozen_yesterday += frozen_yesterday;
+      //            st_position.avg_open_price =
+      //                ((td_position.avg_open_price * td_position.volume) + (avg_open_price * volume)) / total_volume;
+      //            st_position.position_cost_price =
+      //                ((td_position.position_cost_price * td_position.volume) + (position_cost_price * volume)) /
+      //                total_volume;
+      //          }
+      //        }
+      //      };
+
       for (auto &bk_pair : books_) {
         auto &st_book = bk_pair.second;
         if (st_book->asset.ledger_category == LedgerCategory::Strategy and
@@ -294,20 +334,28 @@ void Bookkeeper::try_sync_book_replica(uint32_t location_uid) {
           st_book->asset.avail = new_book->asset.avail;
           st_book->asset.margin = new_book->asset.margin;
           st_book->asset.update_time = new_book->asset.update_time;
-          fun_update_st_position(st_book->long_positions);
-          fun_update_st_position(st_book->short_positions);
+          //          fun_update_st_position(st_book->long_positions);
+          //          fun_update_st_position(st_book->short_positions);
+          //          copy_positions(st_book->long_positions);
+          //          copy_positions(st_book->short_positions);
+          mirror_positions(app_.now(), st_book->asset.holder_uid);
         }
       }
 
-      // 更新完strategy的position再调用回调
-      for (auto &book_listener : book_listeners_) {
-        book_listener->on_book_sync_reset(*old_book, *new_book);
-      }
-      // 如果不先做完上面操作提前进行了book替换，会导致前端无法把虚假持仓的volume设置为0
+      //      // 更新完strategy的position再调用回调
+      //      for (auto &book_listener : book_listeners_) {
+      //        book_listener->on_book_sync_reset(*old_book, *new_book);
+      //      }
+      // 如果不先做完上面回调操作提前进行了book替换，会导致前端无法把虚假持仓的volume设置为0
       // 做完以下替换后，Watcher检测遍历td的book时，持仓为0的position已删除，处理操作会跳过该position导致页面上的虚假volume无法删除
       books_.erase(location_uid);
       books_.insert_or_assign(location_uid, new_book);
       books_replica_.erase(location_uid);
+
+      // 删除了watcher重新计算一遍的逻辑, 这里更新完了以后再调用回调, watcher那边获得的数据应该是更新完之后的
+      for (auto &book_listener : book_listeners_) {
+        book_listener->on_book_sync_reset(*old_book, *new_book);
+      }
     }
   }
 }
@@ -323,8 +371,8 @@ void Bookkeeper::try_update_asset_replica(const longfist::types::Asset &asset) {
 void Bookkeeper::try_update_assetmargin_replica(const longfist::types::AssetMargin &asset_margin) {
   if (app_.has_location(asset_margin.holder_uid)) {
     get_book_replica(asset_margin.holder_uid)->asset_margin = asset_margin;
-    // books_replica_asset_guards_.insert_or_assign(asset.holder_uid, true);
-    // try_sync_book_replica(asset.holder_uid);
+    books_replica_asset_margin_guards_.insert_or_assign(asset_margin.holder_uid, true);
+    try_sync_book_replica(asset_margin.holder_uid);
   }
 }
 
@@ -350,4 +398,66 @@ void Bookkeeper::update_position_guard(uint32_t location_uid) {
 }
 
 void Bookkeeper::add_book_listener(const BookListener_ptr &book_listener) { book_listeners_.push_back(book_listener); }
+
+void Bookkeeper::mirror_positions(int64_t trigger_time, uint32_t strategy_uid) {
+  auto strategy_book = get_book(strategy_uid);
+
+  auto reset_positions = [trigger_time](auto &positions) {
+    for (auto &item : positions) {
+      auto &position = item.second;
+      position.volume = 0;
+      position.yesterday_volume = 0;
+      position.frozen_total = 0;
+      position.frozen_yesterday = 0;
+      position.avg_open_price = 0;
+      position.position_cost_price = 0;
+      position.update_time = trigger_time;
+    }
+  };
+  reset_positions(strategy_book->long_positions);
+  reset_positions(strategy_book->short_positions);
+
+  auto copy_positions = [&](const auto &positions) {
+    for (const auto &pair : positions) {
+      auto &position = pair.second;
+      if (strategy_book->has_position_for(position)) {
+        auto &strategy_position = strategy_book->get_position_for(position.direction, position);
+
+        auto volume = strategy_position.volume;
+        auto yesterday_volume = strategy_position.yesterday_volume;
+        auto frozen_total = strategy_position.frozen_total;
+        auto frozen_yesterday = strategy_position.frozen_yesterday;
+        auto avg_open_price = strategy_position.avg_open_price;
+        auto position_cost_price = strategy_position.position_cost_price;
+
+        auto total_volume = strategy_position.volume + position.volume;
+
+        longfist::copy(strategy_position, position);
+        strategy_position.holder_uid = strategy_uid;
+        strategy_position.ledger_category = LedgerCategory::Strategy;
+        strategy_position.update_time = trigger_time;
+
+        if (volume > 0) {
+          strategy_position.volume += volume;
+          strategy_position.yesterday_volume += yesterday_volume;
+          strategy_position.frozen_total += frozen_total;
+          strategy_position.frozen_yesterday += frozen_yesterday;
+          strategy_position.avg_open_price =
+              ((position.avg_open_price * position.volume) + (avg_open_price * volume)) / total_volume;
+          strategy_position.position_cost_price =
+              ((position.position_cost_price * position.volume) + (position_cost_price * volume)) / total_volume;
+        }
+      }
+    }
+  };
+  for (const auto &pair : get_books()) {
+    auto &book = pair.second;
+    auto holder_uid = book->asset.holder_uid;
+    if (book->asset.ledger_category == LedgerCategory::Account and app_.has_channel(strategy_uid, holder_uid)) {
+      copy_positions(book->long_positions);
+      copy_positions(book->short_positions);
+    }
+  }
+  strategy_book->update(trigger_time);
+}
 } // namespace kungfu::wingchun::book

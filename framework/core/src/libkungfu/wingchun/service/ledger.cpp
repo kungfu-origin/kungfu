@@ -17,9 +17,9 @@ using namespace kungfu::yijinjing::data;
 using namespace kungfu::yijinjing::cache;
 
 namespace kungfu::wingchun::service {
-Ledger::Ledger(locator_ptr locator, mode m, bool low_latency)
+Ledger::Ledger(locator_ptr locator, mode m, bool low_latency, bool is_sync)
     : apprentice(location::make_shared(m, category::SYSTEM, "service", "ledger", std::move(locator)), low_latency),
-      broker_client_(*this), bookkeeper_(*this, broker_client_) {}
+      broker_client_(*this), bookkeeper_(*this, broker_client_), is_sync_(is_sync) {}
 
 void Ledger::on_exit() {}
 
@@ -38,15 +38,16 @@ void Ledger::on_start() {
   events_ | is(Channel::tag) | $$(inspect_channel(event->gen_time(), event->data<Channel>()));
   events_ | is(KeepPositionsRequest::tag) | $$(keep_positions(event->gen_time(), event->source()));
   events_ | is(RebuildPositionsRequest::tag) | $$(rebuild_positions(event->gen_time(), event->source()));
-  events_ | is(MirrorPositionsRequest::tag) | $$(mirror_positions(event->gen_time(), event->source()));
+  events_ | is(MirrorPositionsRequest::tag) | $$(bookkeeper_.mirror_positions(event->gen_time(), event->source()));
   events_ | is(AssetRequest::tag) | $$(write_book_reset(event->gen_time(), event->source()));
   events_ | is(PositionRequest::tag) | $$(write_strategy_data(event->gen_time(), event->source()));
   events_ | is(PositionEnd::tag) | filter([&](const event_ptr &event) { return event->dest() != location::SYNC; }) |
       $$(update_account_book(event->gen_time(), event->data<PositionEnd>().holder_uid););
 
-  add_time_interval(time_unit::NANOSECONDS_PER_MINUTE, [&](auto e) { request_asset_sync(e->gen_time()); });
-  add_time_interval(time_unit::NANOSECONDS_PER_MINUTE, [&](auto e) { request_position_sync(e->gen_time()); });
-
+  if (is_sync_) {
+    add_time_interval(time_unit::NANOSECONDS_PER_MINUTE, [&](auto e) { request_asset_sync(e->gen_time()); });
+    add_time_interval(time_unit::NANOSECONDS_PER_MINUTE, [&](auto e) { request_position_sync(e->gen_time()); });
+  }
   refresh_books();
 }
 
@@ -173,67 +174,67 @@ void Ledger::rebuild_positions(int64_t trigger_time, uint32_t strategy_uid) {
   strategy_book->update(trigger_time);
 }
 
-void Ledger::mirror_positions(int64_t trigger_time, uint32_t strategy_uid) {
-  auto strategy_book = bookkeeper_.get_book(strategy_uid);
-
-  auto reset_positions = [trigger_time](auto &positions) {
-    for (auto &item : positions) {
-      auto &position = item.second;
-      position.volume = 0;
-      position.yesterday_volume = 0;
-      position.frozen_total = 0;
-      position.frozen_yesterday = 0;
-      position.avg_open_price = 0;
-      position.position_cost_price = 0;
-      position.update_time = trigger_time;
-    }
-  };
-  reset_positions(strategy_book->long_positions);
-  reset_positions(strategy_book->short_positions);
-
-  auto copy_positions = [&](const auto &positions) {
-    for (const auto &pair : positions) {
-      auto &position = pair.second;
-      if (strategy_book->has_position_for(position)) {
-        auto &strategy_position = strategy_book->get_position_for(position.direction, position);
-
-        auto volume = strategy_position.volume;
-        auto yesterday_volume = strategy_position.yesterday_volume;
-        auto frozen_total = strategy_position.frozen_total;
-        auto frozen_yesterday = strategy_position.frozen_yesterday;
-        auto avg_open_price = strategy_position.avg_open_price;
-        auto position_cost_price = strategy_position.position_cost_price;
-
-        auto total_volume = strategy_position.volume + position.volume;
-
-        longfist::copy(strategy_position, position);
-        strategy_position.holder_uid = strategy_uid;
-        strategy_position.ledger_category = LedgerCategory::Strategy;
-        strategy_position.update_time = trigger_time;
-
-        if (volume > 0) {
-          strategy_position.volume += volume;
-          strategy_position.yesterday_volume += yesterday_volume;
-          strategy_position.frozen_total += frozen_total;
-          strategy_position.frozen_yesterday += frozen_yesterday;
-          strategy_position.avg_open_price =
-              ((position.avg_open_price * position.volume) + (avg_open_price * volume)) / total_volume;
-          strategy_position.position_cost_price =
-              ((position.position_cost_price * position.volume) + (position_cost_price * volume)) / total_volume;
-        }
-      }
-    }
-  };
-  for (const auto &pair : bookkeeper_.get_books()) {
-    auto &book = pair.second;
-    auto holder_uid = book->asset.holder_uid;
-    if (book->asset.ledger_category == LedgerCategory::Account and has_channel(strategy_uid, holder_uid)) {
-      copy_positions(book->long_positions);
-      copy_positions(book->short_positions);
-    }
-  }
-  strategy_book->update(trigger_time);
-}
+//void Ledger::mirror_positions(int64_t trigger_time, uint32_t strategy_uid) {
+//  auto strategy_book = bookkeeper_.get_book(strategy_uid);
+//
+//  auto reset_positions = [trigger_time](auto &positions) {
+//    for (auto &item : positions) {
+//      auto &position = item.second;
+//      position.volume = 0;
+//      position.yesterday_volume = 0;
+//      position.frozen_total = 0;
+//      position.frozen_yesterday = 0;
+//      position.avg_open_price = 0;
+//      position.position_cost_price = 0;
+//      position.update_time = trigger_time;
+//    }
+//  };
+//  reset_positions(strategy_book->long_positions);
+//  reset_positions(strategy_book->short_positions);
+//
+//  auto copy_positions = [&](const auto &positions) {
+//    for (const auto &pair : positions) {
+//      auto &position = pair.second;
+//      if (strategy_book->has_position_for(position)) {
+//        auto &strategy_position = strategy_book->get_position_for(position.direction, position);
+//
+//        auto volume = strategy_position.volume;
+//        auto yesterday_volume = strategy_position.yesterday_volume;
+//        auto frozen_total = strategy_position.frozen_total;
+//        auto frozen_yesterday = strategy_position.frozen_yesterday;
+//        auto avg_open_price = strategy_position.avg_open_price;
+//        auto position_cost_price = strategy_position.position_cost_price;
+//
+//        auto total_volume = strategy_position.volume + position.volume;
+//
+//        longfist::copy(strategy_position, position);
+//        strategy_position.holder_uid = strategy_uid;
+//        strategy_position.ledger_category = LedgerCategory::Strategy;
+//        strategy_position.update_time = trigger_time;
+//
+//        if (volume > 0) {
+//          strategy_position.volume += volume;
+//          strategy_position.yesterday_volume += yesterday_volume;
+//          strategy_position.frozen_total += frozen_total;
+//          strategy_position.frozen_yesterday += frozen_yesterday;
+//          strategy_position.avg_open_price =
+//              ((position.avg_open_price * position.volume) + (avg_open_price * volume)) / total_volume;
+//          strategy_position.position_cost_price =
+//              ((position.position_cost_price * position.volume) + (position_cost_price * volume)) / total_volume;
+//        }
+//      }
+//    }
+//  };
+//  for (const auto &pair : bookkeeper_.get_books()) {
+//    auto &book = pair.second;
+//    auto holder_uid = book->asset.holder_uid;
+//    if (book->asset.ledger_category == LedgerCategory::Account and has_channel(strategy_uid, holder_uid)) {
+//      copy_positions(book->long_positions);
+//      copy_positions(book->short_positions);
+//    }
+//  }
+//  strategy_book->update(trigger_time);
+//}
 
 void Ledger::write_book_reset(int64_t trigger_time, uint32_t book_uid) {
   auto writer = get_writer(book_uid);
