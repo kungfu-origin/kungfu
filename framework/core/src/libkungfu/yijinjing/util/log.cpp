@@ -37,6 +37,14 @@ public:
 
   emitable_logger(std::string name, spdlog::sinks_init_list sinks) : spdlog::logger(std::move(name), sinks) {}
 
+  emitable_logger(const logger &other) : spdlog::logger(other) {}
+
+  std::shared_ptr<logger> clone(std::string logger_name) override {
+    auto cloned = std::make_shared<emitable_logger>(*this);
+    cloned->name_ = std::move(logger_name);
+    return cloned;
+  }
+
   void emit(const std::string &source_file, int &source_line, const std::string &funcname,
             const std::string &logger_name, int log_level, const std::string &msg) {
     spdlog::source_loc source_loc(source_file.c_str(), source_line, funcname.c_str());

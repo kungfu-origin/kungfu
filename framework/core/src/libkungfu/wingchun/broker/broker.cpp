@@ -17,9 +17,7 @@ using namespace kungfu::yijinjing::data;
 using namespace kungfu::yijinjing::journal;
 
 namespace kungfu::wingchun::broker {
-BrokerVendor::BrokerVendor(location_ptr location, bool low_latency) : apprentice(std::move(location), low_latency) {
-  log::copy_log_settings(get_home(), get_home()->name);
-}
+BrokerVendor::BrokerVendor(location_ptr location, bool low_latency) : apprentice(std::move(location), low_latency) {}
 
 void BrokerVendor::on_start() {
   events_ | is(RequestWriteTo::tag, RequestReadFrom::tag, RequestReadFromPublic::tag, RequestReadFromSync::tag) |
@@ -95,7 +93,7 @@ void BrokerService::record_stored_instruments_trading_day(const std::string &tra
   instrument_stored_trading_day_tkv.value = trading_day;
   writer->write(now(), instrument_stored_trading_day_tkv);
 
-  //为了解决夜盘的问题
+  // 为了解决夜盘的问题
   TimeKeyValue instrument_stored_trading_day_next_day_tkv = {};
   instrument_stored_trading_day_next_day_tkv.update_time = time::next_trading_day_end(now());
   instrument_stored_trading_day_next_day_tkv.key = "instrument_stored_trading_day_next_day";
