@@ -1,17 +1,20 @@
-const { run, hasTool } = require('./node-lib.js');
+const { run } = require('./node-lib.js');
 const glob = require('glob');
 const path = require('path');
 
-function main() {
-  if (hasTool('clang-format')) {
-    glob
-      .sync(path.join('src/**', '*.@(h||hpp|hxx|cpp|c|cc|cxx)'))
-      .forEach((p) => {
-        run('clang-format', ['-style=file', '-i', p], true);
-      });
-  } else {
-    run('pipenv', ['run', 'conan', 'source', '.']);
-  }
-}
+const main = (module.exports = function (argv) {
+  const cwd = process.cwd();
+  process.chdir(path.dirname(__dirname));
 
-if (require.main === module) main();
+  run('clang-format', ['--version']);
+
+  argv.forEach((dir) =>
+    glob
+      .sync(path.join(`${cwd}/${dir}/**`, '*.@(h|hpp|hxx|cpp|c|cc|cxx)'))
+      .forEach((p) => {
+        run('clang-format', ['-style=file', '-i', p], false);
+      }),
+  );
+});
+
+if (require.main === module) main(process.argv.slice(2));

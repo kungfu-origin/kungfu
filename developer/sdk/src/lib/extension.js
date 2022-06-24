@@ -178,6 +178,14 @@ exports.installSingleLib = async (
   platform = detectPlatform(),
   arch = os.arch(),
 ) => {
+  const localLibDir = path.resolve(kungfulibs, libName, libVersion);
+  if (fse.existsSync(localLibDir)) {
+    console.log(
+      `-- Lib ${libName}@${libVersion} exists at ${localLibDir}, skip downloading`,
+    );
+    return;
+  }
+
   const index = await axios.get(`${libSiteURL}/index.json`);
   const sourceLibs = index.data;
 
@@ -220,7 +228,7 @@ exports.installSingleLib = async (
   };
 
   const buildDirPath = (dir) => {
-    const dirPath = path.join(kungfulibs, libName, libVersion, dir);
+    const dirPath = path.join(localLibDir, dir);
     fse.ensureDirSync(dirPath);
     return dirPath;
   };
@@ -345,4 +353,18 @@ exports.compile = () => {
     path.join(outputDir, `${packageJson.binary.module_name}.node`),
     {},
   );
+};
+
+exports.format = () => {
+  const packageJson = getPackageJson();
+  const srcArgv = ['src'];
+  if (hasSourceFor(packageJson, 'cpp')) {
+    require('@kungfu-trader/kungfu-core/.gyp/node-format-cpp')(srcArgv);
+  }
+  if (hasSourceFor(packageJson, 'python')) {
+    require('@kungfu-trader/kungfu-core/.gyp/node-format-python')(srcArgv);
+  }
+  if (packageJson.kungfuConfig && packageJson.kungfuConfig.ui_config) {
+    require('@kungfu-trader/kungfu-core/.gyp/node-format-js')(srcArgv);
+  }
 };

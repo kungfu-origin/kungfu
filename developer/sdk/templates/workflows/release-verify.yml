@@ -20,7 +20,7 @@ jobs:
       AWS_USER_ACCESS_KEY_ID: ${{ secrets.AWS_USER_ACCESS_KEY_ID }}
       AWS_USER_SECRET_ACCESS_KEY: ${{ secrets.AWS_USER_SECRET_ACCESS_KEY }}
       NODE_AUTH_TOKEN: ${{ secrets.KUNGFU_GITHUB_TOKEN }}
-  
+
   verify:
     needs: try
     runs-on: ubuntu-20.04

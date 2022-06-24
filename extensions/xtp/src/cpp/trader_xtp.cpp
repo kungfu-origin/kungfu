@@ -27,7 +27,9 @@ void from_json(const nlohmann::json &j, TDConfiguration &c) {
   j.at("td_port").get_to(c.td_port);
 }
 
-TraderXTP::TraderXTP(broker::BrokerVendor &vendor) : Trader(vendor), session_id_(0), request_id_(0), trading_day_("") {}
+TraderXTP::TraderXTP(broker::BrokerVendor &vendor) : Trader(vendor), session_id_(0), request_id_(0), trading_day_("") {
+  KUNGFU_SETUP_LOG();
+}
 
 TraderXTP::~TraderXTP() {
   if (api_ != nullptr) {

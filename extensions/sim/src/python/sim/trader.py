@@ -31,7 +31,7 @@ class TraderSim(wc.Trader):
     def __init__(self, vendor):
         wc.Trader.__init__(self, vendor)
         self.logger = create_logger(
-            "_".join(('td', self.home.group, self.home.name)),
+            "_".join(("td", self.home.group, self.home.name)),
             "info",
             yjj.location(
                 lf.enums.mode.LIVE,
@@ -83,7 +83,7 @@ class TraderSim(wc.Trader):
                 if wc.utils.get_instrument_type(
                     order_input.exchange_id, order_input.instrument_id
                 )
-                   == lf.enums.InstrumentType.Stock
+                == lf.enums.InstrumentType.Stock
                 else 1
             )
             if order_input.volume < min_vol:

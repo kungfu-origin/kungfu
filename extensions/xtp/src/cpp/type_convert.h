@@ -506,9 +506,7 @@ inline void from_xtp(const XTPQueryStkPositionRsp &ori, Position &des) {
   des.position_cost_price = ori.avg_price;
 }
 
-inline void from_xtp(const XTPQueryAssetRsp &ori, Asset &des) {
-  des.avail = ori.buying_power;
-}
+inline void from_xtp(const XTPQueryAssetRsp &ori, Asset &des) { des.avail = ori.buying_power; }
 
 inline void from_xtp(const XTPTickByTickStruct &ori, Entrust &des) {
   from_xtp(ori.exchange_id, des.exchange_id);

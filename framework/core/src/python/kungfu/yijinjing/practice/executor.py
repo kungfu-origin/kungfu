@@ -141,7 +141,7 @@ class ExtensionExecutor:
         service_builder = getattr(module, ctx.category)
         logger.debug(f"loaded service builder")
         service = service_builder(vendor)
-        logger.trace("set service for vendor")
+        logger.debug("set service for vendor")
         vendor.set_service(service)
         logger.info(f"vendor {location.uname} ready to run")
         vendor.run()
