@@ -145,10 +145,8 @@ const makeOrderData = computed(() => {
 
 const curPositionList = ref<KungfuApi.Position[]>();
 
-const isCurrentCategoryIsTd = computed(() =>
-  currentGlobalKfLocation.value
-    ? currentGlobalKfLocation.value.category === 'td'
-    : null,
+const isCurrentCategoryIsTd = computed(
+  () => currentGlobalKfLocation.value?.category === 'td',
 );
 
 const isAccountOrInstrumentConfirmed = computed(() => {
@@ -160,12 +158,6 @@ const isAccountOrInstrumentConfirmed = computed(() => {
       : formState.value.account_id && formState.value.instrument;
   }
 });
-
-const offsetEnumCloseList = [
-  OffsetEnum.Close,
-  OffsetEnum.CloseToday,
-  OffsetEnum.CloseYest,
-];
 
 const currentPosition = computed(() => {
   if (!curPositionList.value?.length || !instrumentResolved.value) return null;
@@ -191,13 +183,13 @@ const currentPosition = computed(() => {
     if (side === SideEnum.Buy) {
       if (offset === OffsetEnum.Open) {
         return targetPositionWithLongDirection;
-      } else if (offsetEnumCloseList.includes(offset)) {
+      } else {
         return targetPositionWithShortDirection;
       }
     } else if (side === SideEnum.Sell) {
       if (offset === OffsetEnum.Open) {
         return targetPositionWithShortDirection;
-      } else if (offsetEnumCloseList.includes(offset)) {
+      } else {
         return targetPositionWithLongDirection;
       }
     }
@@ -207,35 +199,9 @@ const currentPosition = computed(() => {
 });
 
 const showAmountOrPosition = computed(() => {
-  const instrumentType = instrumentResolved.value?.instrumentType;
-  const { offset, side } = formState.value;
+  const { offset } = formState.value;
 
-  if (shotable(instrumentType)) {
-    if (offset === OffsetEnum.Open) {
-      return 'amount';
-    } else if (offsetEnumCloseList.includes(offset)) {
-      return 'position';
-    }
-  } else {
-    if (side === SideEnum.Buy) {
-      return 'amount';
-    } else if (side === SideEnum.Sell) {
-      return 'position';
-    }
-  }
-
-  return null;
-});
-
-const currentAccountId = computed(() => {
-  const categoryFlag = isCurrentCategoryIsTd.value;
-  if (categoryFlag === null) return null;
-  if (categoryFlag) {
-    return currentGlobalKfLocation.value;
-  } else {
-    const { account_id } = formState.value;
-    return account_id ?? null;
-  }
+  return offset === OffsetEnum.Open ? 'amount' : 'position';
 });
 
 const currentAvailMoney = computed(() => {
@@ -246,10 +212,8 @@ const currentAvailMoney = computed(() => {
 
     return dealKfPrice(avail);
   } else {
-    if (currentAccountId.value) {
-      const { source, id } = (
-        currentAccountId.value as string
-      ).parseSourceAccountId();
+    if (formState.value?.account_id) {
+      const { source, id } = formState.value.account_id.parseSourceAccountId();
 
       const avail = getAssetsByKfConfig({
         category: 'td',
@@ -402,7 +366,7 @@ const currentResiduePosVolume = computed(() => {
         return dealKfNumber(
           Number(currentAvailPosVolume.value) + Number(volume),
         );
-      } else if (offsetEnumCloseList.includes(offset)) {
+      } else {
         return dealKfNumber(
           Number(currentAvailPosVolume.value) - Number(volume),
         );
@@ -527,6 +491,17 @@ watch(
     makeOrderInstrumentType.value = instrumentResolved.value.instrumentType;
 
     updatePositionList();
+  },
+);
+
+watch(
+  () => formState.value.side,
+  (newVal) => {
+    formState.value.offset = getResolvedOffset(
+      formState.value.offset,
+      newVal,
+      instrumentResolved.value?.instrumentType,
+    );
   },
 );
 
