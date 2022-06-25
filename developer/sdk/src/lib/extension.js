@@ -309,10 +309,11 @@ exports.compile = () => {
 
   if (hasSourceFor(packageJson, 'python')) {
     const srcDir = path.join('src', 'python', extensionName);
-    spawnExec('yarn', [
-      'kfc',
-      'engage',
-      'nuitka',
+    const forceClang =
+      process.env.GITHUB_ACTIONS && process.platform === 'win32';
+    const kfcArgs = ['kfc', 'engage', 'nuitka'];
+    const compilerArgs = forceClang ? ['--clang'] : [];
+    const nuitkaArgs = [
       '--module',
       '--assume-yes-for-downloads',
       '--remove-output',
@@ -320,7 +321,8 @@ exports.compile = () => {
       `--include-package=${extensionName}`,
       `--output-dir=${outputDir}`,
       srcDir,
-    ]);
+    ];
+    spawnExec('yarn', [...kfcArgs, ...compilerArgs, ...nuitkaArgs]);
   }
 
   if (hasSourceFor(packageJson, 'cpp')) {

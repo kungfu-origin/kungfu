@@ -165,6 +165,7 @@ a = Analysis(
             "pep517",
             "shellingham",
             "nuitka",
+            "ordered_set",
             "SCons",
             "setuptools",
             "numpy",
