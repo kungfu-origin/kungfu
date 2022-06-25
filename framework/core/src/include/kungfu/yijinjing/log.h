@@ -11,14 +11,18 @@
 #define LOG_LEVEL_ENV "KF_LOG_LEVEL"
 #define DEFAULT_LOG_LEVEL_NAME "info"
 #define TS_PATTERN "[%m/%d %H:%M:%S.%N] "
-#define LOG_PATTERN "[%^%=8l%$] [%6P/%-6t] [%s#%!] %v"
+#define LOG_PATTERN "[%^%=8l%$] [%6P/%-6t] [%s:%##%!] %v"
 
 namespace kungfu::yijinjing::log {
+
+std::shared_ptr<spdlog::logger> get_main_logger();
+
 spdlog::level::level_enum get_env_log_level(const data::locator_ptr &locator);
 
 const std::string &setup_log(const data::location_ptr &location, const std::string &name);
 
-std::shared_ptr<spdlog::logger> get_main_logger();
+void emit_log(const std::string &source_file, int &source_line, const std::string &funcname,
+              const std::string &logger_name, int log_level, const std::string &msg);
 
 inline void copy_log_settings(const data::location_ptr &location, const std::string &name) {
   if (get_main_logger()->name().empty()) {

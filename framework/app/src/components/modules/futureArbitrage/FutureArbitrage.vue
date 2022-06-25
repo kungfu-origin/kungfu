@@ -78,9 +78,10 @@ function arbitrageExchangeValidator(
     if (exchangeId !== 'CZCE') {
       return Promise.reject(
         new Error(
-          `${t(
-            'futureArbitrageConfig.only_corresponding',
-          )} ${'tradingConfig.CZCE'} ${'tradingConfig.instrument'}`,
+          `${t('futureArbitrageConfig.only_corresponding')}
+            ${t('tradingConfig.CZCE')}
+            ${t('tradingConfig.instrument')},
+          `,
         ),
       );
     }
@@ -93,9 +94,9 @@ function arbitrageExchangeValidator(
     if (exchangeId !== 'DCE') {
       return Promise.reject(
         new Error(
-          `${t(
-            'futureArbitrageConfig.only_corresponding',
-          )} ${'tradingConfig.DCE'} ${'tradingConfig.instrument'}`,
+          `${t('futureArbitrageConfig.only_corresponding')} 
+          ${t('tradingConfig.DCE')} 
+          ${t('tradingConfig.instrument')}`,
         ),
       );
     }

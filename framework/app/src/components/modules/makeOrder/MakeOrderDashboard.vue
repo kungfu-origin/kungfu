@@ -29,17 +29,22 @@ import {
   hashInstrumentUKey,
 } from '@kungfu-trader/kungfu-js-api/kungfu';
 import {
+  DirectionEnum,
   InstrumentTypeEnum,
   OffsetEnum,
+  PriceTypeEnum,
   SideEnum,
 } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import {
+  useAssets,
   useCurrentGlobalKfLocation,
   useExtConfigsRelated,
   useInstruments,
   useProcessStatusDetailData,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
 import {
+  dealKfNumber,
+  dealKfPrice,
   dealTradingData,
   getExtConfigList,
   getProcessIdByKfLocation,
@@ -83,6 +88,8 @@ const {
 } = useCurrentGlobalKfLocation(window.watcher);
 
 const { getExtraCategoryData } = useExtraCategory();
+
+const { getAssetsByKfConfig } = useAssets();
 
 const makeOrderInstrumentType = ref<InstrumentTypeEnum>(
   InstrumentTypeEnum.unknown,
@@ -138,6 +145,20 @@ const makeOrderData = computed(() => {
 
 const curPositionList = ref<KungfuApi.Position[]>();
 
+const isCurrentCategoryIsTd = computed(
+  () => currentGlobalKfLocation.value?.category === 'td',
+);
+
+const isAccountOrInstrumentConfirmed = computed(() => {
+  if (formState.value?.side === SideEnum.Buy) {
+    return isCurrentCategoryIsTd.value ? true : !!formState.value.account_id;
+  } else if (formState.value.side === SideEnum.Sell) {
+    return isCurrentCategoryIsTd.value
+      ? !!formState.value.instrument
+      : formState.value.account_id && formState.value.instrument;
+  }
+});
+
 const currentPosition = computed(() => {
   if (!curPositionList.value?.length || !instrumentResolved.value) return null;
 
@@ -150,9 +171,212 @@ const currentPosition = computed(() => {
   );
 
   if (targetPositionList && targetPositionList.length) {
-    return targetPositionList[0];
+    const { side, offset } = formState.value;
+
+    const targetPositionWithLongDirection = targetPositionList.filter(
+      (item) => item.direction === DirectionEnum.Long,
+    )[0];
+    const targetPositionWithShortDirection = targetPositionList.filter(
+      (item) => item.direction === DirectionEnum.Short,
+    )[0];
+
+    if (side === SideEnum.Buy) {
+      if (offset === OffsetEnum.Open) {
+        return targetPositionWithLongDirection;
+      } else {
+        return targetPositionWithShortDirection;
+      }
+    } else if (side === SideEnum.Sell) {
+      if (offset === OffsetEnum.Open) {
+        return targetPositionWithShortDirection;
+      } else {
+        return targetPositionWithLongDirection;
+      }
+    }
   }
+
   return null;
+});
+
+const showAmountOrPosition = computed(() => {
+  const { offset } = formState.value;
+
+  return offset === OffsetEnum.Open ? 'amount' : 'position';
+});
+
+const currentAvailMoney = computed(() => {
+  if (!currentGlobalKfLocation.value) return '--';
+
+  if (isCurrentCategoryIsTd.value) {
+    const avail = getAssetsByKfConfig(currentGlobalKfLocation.value).avail;
+
+    return dealKfPrice(avail);
+  } else {
+    if (formState.value?.account_id) {
+      const { source, id } = formState.value.account_id.parseSourceAccountId();
+
+      const avail = getAssetsByKfConfig({
+        category: 'td',
+        group: source,
+        name: id,
+        mode: 'live',
+      }).avail;
+
+      return dealKfPrice(avail);
+    }
+  }
+
+  return '--';
+});
+
+const currentAvailPosVolume = computed(() => {
+  if (!instrumentResolved.value) return '--';
+
+  const { instrumentType } = instrumentResolved.value;
+  const { offset } = formState.value;
+
+  if (currentPosition.value) {
+    const { yesterday_volume, volume } = currentPosition.value;
+
+    if (shotable(instrumentType)) {
+      if (offset === OffsetEnum.CloseYest) {
+        return dealKfNumber(yesterday_volume);
+      } else if (offset === OffsetEnum.CloseToday) {
+        return dealKfNumber(volume - yesterday_volume);
+      } else {
+        return dealKfNumber(volume);
+      }
+    } else {
+      return dealKfNumber(yesterday_volume);
+    }
+  }
+
+  return '0';
+});
+
+function getFutureInstrumentTradeAmount(
+  currentPrice: number,
+  volume: number,
+  instrument,
+  direction: DirectionEnum,
+): number | null {
+  if (!instrument) return null;
+
+  const { exchangeId, instrumentId } = instrument;
+  const instrumentKey = hashInstrumentUKey(instrumentId, exchangeId);
+  const { contract_multiplier, long_margin_ratio, short_margin_ratio } = window
+    .watcher.ledger.Instrument[instrumentKey] as KungfuApi.Instrument;
+
+  if (direction === DirectionEnum.Long) {
+    return currentPrice * volume * contract_multiplier * long_margin_ratio;
+  } else if (direction === DirectionEnum.Short) {
+    return currentPrice * volume * contract_multiplier * short_margin_ratio;
+  }
+
+  return null;
+}
+
+function dealTradeAmount(preNumber: number | null) {
+  return !Number(preNumber) ? '--' : dealKfPrice(preNumber);
+}
+
+function getTradeAmount(
+  currentPrice: number,
+  volume: number,
+  currentInstrument?: KungfuApi.InstrumentResolved,
+  currentPosition?: KungfuApi.PositionResolved,
+): string | null {
+  const instrumentType = currentInstrument?.instrumentType;
+
+  if (instrumentType) {
+    if (instrumentType === InstrumentTypeEnum.future) {
+      const instrumentTradeAmount = getFutureInstrumentTradeAmount(
+        currentPrice,
+        volume,
+        currentInstrument,
+        currentPosition?.direction,
+      );
+      return dealTradeAmount(instrumentTradeAmount);
+    } else if (instrumentType === InstrumentTypeEnum.stock) {
+      return dealTradeAmount(currentPrice * volume);
+    }
+  } else {
+    return dealTradeAmount(currentPrice * volume);
+  }
+
+  return null;
+}
+
+const currentTradeAmount = computed(() => {
+  const { price_type, limit_price, volume, side, account_id } = formState.value;
+
+  let currentPrice;
+  if (price_type === PriceTypeEnum.Limit) {
+    currentPrice = limit_price;
+  } else if (price_type === PriceTypeEnum.Market) {
+    currentPrice = currentPosition.value?.last_price;
+  }
+
+  if (side === SideEnum.Buy) {
+    return getTradeAmount(currentPrice, volume);
+  } else if (side === SideEnum.Sell) {
+    if (
+      instrumentResolved.value &&
+      (currentGlobalKfLocation.value?.category === 'td' || account_id)
+    ) {
+      return getTradeAmount(
+        currentPrice,
+        volume,
+        instrumentResolved.value.instrumentType,
+      );
+    }
+  }
+
+  return '--';
+});
+
+const currentResidueMoney = computed(() => {
+  const { side } = formState.value;
+  if (currentAvailMoney.value !== '--') {
+    if (currentTradeAmount.value !== '--') {
+      if (side === SideEnum.Buy) {
+        return dealKfPrice(
+          Number(currentAvailMoney.value) - Number(currentTradeAmount.value),
+        );
+      } else if (side === SideEnum.Sell) {
+        return dealKfPrice(
+          Number(currentAvailMoney.value) + Number(currentTradeAmount.value),
+        );
+      }
+
+      return '--';
+    } else {
+      return currentAvailMoney.value;
+    }
+  } else {
+    return '--';
+  }
+});
+
+const currentResiduePosVolume = computed(() => {
+  const { volume, offset } = formState.value;
+  if (currentAvailPosVolume.value !== '--') {
+    if (volume && volume > 0) {
+      if (offset === OffsetEnum.Open) {
+        return dealKfNumber(
+          Number(currentAvailPosVolume.value) + Number(volume),
+        );
+      } else {
+        return dealKfNumber(
+          Number(currentAvailPosVolume.value) - Number(volume),
+        );
+      }
+    } else {
+      return currentAvailPosVolume.value;
+    }
+  } else {
+    return '--';
+  }
 });
 
 const availTradingTaskExtensionList = computed(() => {
@@ -267,6 +491,17 @@ watch(
     makeOrderInstrumentType.value = instrumentResolved.value.instrumentType;
 
     updatePositionList();
+  },
+);
+
+watch(
+  () => formState.value.side,
+  (newVal) => {
+    formState.value.offset = getResolvedOffset(
+      formState.value.offset,
+      newVal,
+      instrumentResolved.value?.instrumentType,
+    );
   },
 );
 
@@ -584,19 +819,52 @@ async function handleOpenTradingTaskConfigModal(
               :label-col="5"
               :wrapper-col="14"
             ></KfConfigSettingsForm>
-            <div
-              class="make-order-position ant-row ant-form-item ant-form-item-has-success"
-              v-if="formState.instrument && currentPosition"
-            >
-              <div class="position-label ant-col ant-col-5 ant-form-item-label">
-                {{ $t('持有量') }}:&nbsp
+            <template v-if="isAccountOrInstrumentConfirmed">
+              <div class="make-order-position">
+                <div class="position-label">
+                  {{
+                    showAmountOrPosition === 'amount'
+                      ? $t('可用资金')
+                      : $t('可用仓位')
+                  }}:&nbsp
+                </div>
+                <div class="position-value">
+                  {{
+                    showAmountOrPosition === 'amount'
+                      ? currentAvailMoney
+                      : currentAvailPosVolume
+                  }}
+                </div>
               </div>
-              <div
-                class="position-value ant-col ant-col-14 ant-form-item-control"
-              >
-                {{ currentPosition!.volume || '--' }}
+              <div class="make-order-position">
+                <div class="position-label">
+                  {{
+                    shotable(instrumentResolved?.instrumentType)
+                      ? $t('保证金占用')
+                      : $t('交易金额')
+                  }}:&nbsp
+                </div>
+                <div class="position-value">
+                  {{ currentTradeAmount }}
+                </div>
               </div>
-            </div>
+              <div class="make-order-position">
+                <div class="position-label">
+                  {{
+                    showAmountOrPosition === 'amount'
+                      ? $t('剩余资金')
+                      : $t('剩余仓位')
+                  }}:&nbsp
+                </div>
+                <div class="position-value">
+                  {{
+                    showAmountOrPosition === 'amount'
+                      ? currentResidueMoney
+                      : currentResiduePosVolume
+                  }}
+                </div>
+              </div>
+            </template>
           </div>
         </div>
         <div class="make-order-btns">
@@ -658,6 +926,16 @@ async function handleOpenTradingTaskConfigModal(
 
     .make-order-position {
       display: flex;
+      line-height: 1;
+      font-size: 12px;
+      color: @text-color;
+      font-weight: bold;
+      margin-bottom: 8px;
+      margin-left: 10px;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
     }
 
     .make-order-btns {

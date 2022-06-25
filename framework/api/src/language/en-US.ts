@@ -578,5 +578,10 @@ export default {
   文件路径不存在: 'The file path does not exist',
   策略id不存在: 'The strategy id does not exist',
 
-  持有量: 'Holding',
+  可用仓位: 'Avail Pos',
+  可用资金: 'Avail Asset',
+  交易金额: 'Amount',
+  保证金占用: 'Margin',
+  剩余资金: 'Left Asset',
+  剩余仓位: 'Left Pos',
 };

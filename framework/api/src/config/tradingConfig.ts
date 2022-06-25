@@ -494,7 +494,7 @@ export const AbleSubscribeInstrumentTypesBySourceType: Record<
 
   cryptofuture: [InstrumentTypeEnum.cryptofuture],
 
-  all: [
+  multi: [
     InstrumentTypeEnum.stock,
     InstrumentTypeEnum.future,
     InstrumentTypeEnum.bond,
