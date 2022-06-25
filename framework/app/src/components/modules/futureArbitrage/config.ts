@@ -55,8 +55,18 @@ export const getConfigSettings = (
     {
       key: 'offset',
       name: t('futureArbitrageConfig.offset'),
-      type: 'offset',
-      default: OffsetEnum.Open,
+      type: 'radio',
+      options: [
+        {
+          label: t('tradingConfig.open'),
+          value: OffsetEnum.Open.toString(),
+        },
+        {
+          label: t('tradingConfig.close'),
+          value: OffsetEnum.Close.toString(),
+        },
+      ],
+      default: OffsetEnum.Open.toString(),
       required: true,
     },
     {

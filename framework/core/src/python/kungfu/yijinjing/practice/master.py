@@ -46,9 +46,7 @@ class Master(yjj.master):
         )
         self.ctx = ctx
         self.ctx.master = self
-        self.ctx.logger = log.create_logger(
-            "master", ctx.log_level, self.io_device.home
-        )
+        self.ctx.logger = log.create_logger("master", ctx.log_level)
         self.ctx.apprentices = {}
 
         self.ctx.calendar = Calendar(ctx)

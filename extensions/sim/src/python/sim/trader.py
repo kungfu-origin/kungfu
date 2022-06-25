@@ -33,13 +33,6 @@ class TraderSim(wc.Trader):
         self.logger = create_logger(
             "_".join(("td", self.home.group, self.home.name)),
             "info",
-            yjj.location(
-                lf.enums.mode.LIVE,
-                lf.enums.category.TD,
-                self.home.group,
-                self.home.name,
-                vendor.home.locator,
-            ),
         )
 
     def on_start(self):

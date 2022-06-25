@@ -316,9 +316,10 @@ export function pm2LaunchBus(cb: (err: Error, pm2_bus: Pm2Bus) => void) {
   pm2.launchBus(cb);
 }
 
-export const startProcess = (
+export const startProcess = async (
   options: Pm2StartOptions,
 ): Promise<Proc | void> => {
+  const extDirs = await flattenExtensionModuleDirs(EXTENSION_DIRS);
   const optionsResolved: Pm2StartOptions = {
     name: options.name,
     args: options.args, //有问题吗？
@@ -339,7 +340,9 @@ export const startProcess = (
     kill_timeout: 16000,
     env: {
       RELOAD_AFTER_CRASHED: process.env.RELOAD_AFTER_CRASHED || 'false',
-      EXTENSION_DIRS: process.env.EXTENSION_DIRS || '',
+      EXTENSION_DIRS: extDirs
+        .map((dir) => dealSpaceInPath(path.dirname(dir)))
+        .join(path.delimiter),
       KFC_DIR: process.env.KFC_DIR || '',
       KF_HOME: dealSpaceInPath(KF_HOME),
       KF_RUNTIME_DIR: dealSpaceInPath(KF_RUNTIME_DIR),

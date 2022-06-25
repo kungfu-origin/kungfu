@@ -72,24 +72,24 @@ watch(processStatusData, (newPSD, oldPSD) => {
     }
   }
 
-  if (newPSD.ledger !== 'online' && oldPSD.ledger === 'online') {
-    if (!hasAlertLedgerStop) {
-      hasAlertLedgerStop = true;
-      notification.error({
-        message: t('ledger_interrupt'),
-        description: t('ledger_desc'),
-        duration: 8,
-        placement: 'bottomRight',
-      });
-    }
-  }
-
   if (newPSD.cached !== 'online' && oldPSD.cached === 'online') {
     if (!hasAlertCacheDStop) {
       hasAlertCacheDStop = true;
       notification.error({
         message: t('cached_interrupt'),
         description: t('cached_desc'),
+        duration: 8,
+        placement: 'bottomRight',
+      });
+    }
+  }
+
+  if (newPSD.ledger !== 'online' && oldPSD.ledger === 'online') {
+    if (!hasAlertLedgerStop) {
+      hasAlertLedgerStop = true;
+      notification.error({
+        message: t('ledger_interrupt'),
+        description: t('ledger_desc'),
         duration: 8,
         placement: 'bottomRight',
       });
