@@ -46,14 +46,6 @@ KF_DEFINE_MARK_TYPE(AlgoOrderInput, 20010);
 KF_DEFINE_MARK_TYPE(AlgoOrderReport, 20011);
 KF_DEFINE_MARK_TYPE(AlgoOrderModify, 20012);
 
-KF_DEFINE_DATA_TYPE(                                            //
-    SubscribeAll, 303, PK(update_time), TIMESTAMP(update_time), //
-    (int64_t, update_time),                                     //
-    (MarketType, market_type),                                  //
-    (SubscribeInstrumentType, subscribe_instrument_type),       //
-    (SubscribeSecuDataType, subscribe_secu_datatype)            //
-);
-
 KF_DEFINE_DATA_TYPE(                              //
     Config, 10005, PK(location_uid), PERPETUAL(), //
     (uint32_t, location_uid),                     //
@@ -256,6 +248,14 @@ KF_DEFINE_PACK_TYPE(                                         //
     (kungfu::array<char, INSTRUMENT_ID_LEN>, instrument_id), //合约ID
     (kungfu::array<char, EXCHANGE_ID_LEN>, exchange_id),     //交易所ID
     (InstrumentType, instrument_type)                        //合约类型
+);
+
+KF_DEFINE_DATA_TYPE(                                               //
+    CustomSubscribe, 303, PK(update_time), TIMESTAMP(update_time), //
+    (int64_t, update_time),                                        //
+    (MarketType, market_types),                                    //
+    (SubscribeInstrumentType, instrument_types),                   //
+    (SubscribeSecuDataType, secu_datatypes)                        //
 );
 
 KF_DEFINE_PACK_TYPE(                                         //

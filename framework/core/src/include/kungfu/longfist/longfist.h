@@ -23,7 +23,7 @@ constexpr auto AllTypes = boost::hana::make_map( //
     TYPE_PAIR(RequestCached),                    //
     TYPE_PAIR(CachedReadyToRead),                //
     TYPE_PAIR(RequestCachedDone),                //
-    TYPE_PAIR(SubscribeAll),                     //
+    TYPE_PAIR(CustomSubscribe),                  //
     TYPE_PAIR(NewOrderSingle),                   //
     TYPE_PAIR(CancelOrder),                      //
     TYPE_PAIR(CancelAllOrder),                   //

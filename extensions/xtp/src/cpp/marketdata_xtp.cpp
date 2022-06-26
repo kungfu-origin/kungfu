@@ -111,10 +111,11 @@ bool MarketDataXTP::subscribe_all() {
   return result;
 }
 
-bool MarketDataXTP::subscribe_custom(const longfist::types::SubscribeAll &subscribe_all) {
-  SPDLOG_INFO("subscribe_custom, market_type {} subscribe_instrument_type {} subscribe_secu_datatype {} update_time {}",
-              int(subscribe_all.market_type), long(subscribe_all.subscribe_instrument_type),
-              long(subscribe_all.subscribe_secu_datatype), long(subscribe_all.update_time));
+bool MarketDataXTP::subscribe_custom(const longfist::types::CustomSubscribe &custom_sub) {
+  SPDLOG_INFO("custom_sub, market_types {} instrument_types {} secu_datatypes {} update_time {}",
+              int(custom_sub.market_types), long(custom_sub.instrument_types),
+              long(custom_sub.secu_datatypes), long(custom_sub.update_time));
+  subscribe_all();
   return true;
 }
 
