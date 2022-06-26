@@ -253,9 +253,9 @@ KF_DEFINE_PACK_TYPE(                                         //
 KF_DEFINE_DATA_TYPE(                                               //
     CustomSubscribe, 303, PK(update_time), TIMESTAMP(update_time), //
     (int64_t, update_time),                                        //
-    (MarketType, market_types),                                    //
-    (SubscribeInstrumentType, instrument_types),                   //
-    (SubscribeSecuDataType, secu_datatypes)                        //
+    (MarketType, market_type),                                     //
+    (SubscribeInstrumentType, instrument_type),                    //
+    (SubscribeDataType, data_type)                                 //
 );
 
 KF_DEFINE_PACK_TYPE(                                         //

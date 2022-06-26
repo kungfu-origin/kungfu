@@ -229,9 +229,8 @@ bool PassiveClient::is_custom_subscribed(uint32_t md_location_uid) const {
 bool PassiveClient::is_all_subscribed(uint32_t md_location_uid) const {
   if (should_connect_md(app_.get_location(md_location_uid))) {
     auto &custom_sub = custom_subs_.at(md_location_uid);
-    return custom_sub.market_types == MarketType::All and
-           custom_sub.instrument_types == SubscribeInstrumentType::All and
-           custom_sub.secu_datatypes == SubscribeSecuDataType::All;
+    return custom_sub.market_type == MarketType::All and custom_sub.instrument_type == SubscribeInstrumentType::All and
+           custom_sub.data_type == SubscribeDataType::All;
   }
 
   return false;
@@ -245,13 +244,13 @@ void PassiveClient::subscribe(const location_ptr &md_location, const std::string
   Client::subscribe(md_location, exchange_id, instrument_id);
 }
 
-void PassiveClient::subscribe_all(const location_ptr &md_location, uint8_t exchanges_ids, uint64_t instrument_types,
-                                  uint64_t secu_datatypes) {
+void PassiveClient::subscribe_all(const location_ptr &md_location, uint8_t market_type, uint64_t instrument_type,
+                                  uint64_t data_type) {
   enrolled_md_locations_.emplace(md_location->uid, true);
   CustomSubscribe custrom_sub = {};
-  custrom_sub.market_types = MarketType(exchanges_ids);
-  custrom_sub.instrument_types = SubscribeInstrumentType(instrument_types);
-  custrom_sub.secu_datatypes = SubscribeSecuDataType(secu_datatypes);
+  custrom_sub.market_type = MarketType(market_type);
+  custrom_sub.instrument_type = SubscribeInstrumentType(instrument_type);
+  custrom_sub.data_type = SubscribeDataType(data_type);
   custom_subs_.emplace(md_location->uid, custrom_sub);
 }
 

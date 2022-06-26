@@ -245,6 +245,10 @@ inline std::string str_from_instrument_type(longfist::enums::InstrumentType type
     return "Index";
   case longfist::enums::InstrumentType::Repo:
     return "Repo";
+  case longfist::enums::InstrumentType::Warrant:
+    return "Warrant";
+  case longfist::enums::InstrumentType::Iopt:
+    return "Iopt";
   case longfist::enums::InstrumentType::Crypto:
     return "Crypto";
   default:

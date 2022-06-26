@@ -132,8 +132,8 @@ void bind_strategy(pybind11::module &m) {
       .def("get_account_cash_limit", &strategy::Context::get_account_cash_limit)
       .def("subscribe", &strategy::Context::subscribe)
       .def("subscribe_all", &strategy::Context::subscribe_all, py::arg("source"),
-           py::arg("exchanges_ids") = MarketType::All, py::arg("instrument_types") = SubscribeInstrumentType::All,
-           py::arg("secu_datatypes") = SubscribeSecuDataType::All)
+           py::arg("market_type") = MarketType::All, py::arg("instrument_type") = SubscribeInstrumentType::All,
+           py::arg("data_type") = SubscribeDataType::All)
       .def("insert_order", &strategy::Context::insert_order, py::arg("symbol"), py::arg("exchange"), py::arg("source"),
            py::arg("account"), py::arg("limit_price"), py::arg("volume"), py::arg("type"), py::arg("side"),
            py::arg("offset") = Offset::Open, py::arg("hedge_flag") = HedgeFlag::Speculation, py::arg("is_swap") = false)

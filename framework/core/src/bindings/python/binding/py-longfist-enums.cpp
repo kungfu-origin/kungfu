@@ -47,6 +47,8 @@ void bind_enums(py::module &m) {
       .value("TechStock", InstrumentType::TechStock)
       .value("Index", InstrumentType::Index)
       .value("Repo", InstrumentType::Repo)
+      .value("Warrant", InstrumentType::Warrant)
+      .value("Iopt", InstrumentType::Iopt)
       .value("Crypto", InstrumentType::Crypto)
       .export_values()
       .def("__eq__", [](const InstrumentType &a, int b) { return static_cast<int>(a) == b; });
@@ -197,27 +199,28 @@ void bind_enums(py::module &m) {
       .export_values()
       .def("__eq__", [](const MarketType &a, int b) { return static_cast<int>(a) == b; });
 
-  py::enum_<SubscribeSecuDataType>(m_enums, "SubscribeSecuDataType", py::arithmetic())
-      .value("All", SubscribeSecuDataType::All)
-      .value("Snapshot", SubscribeSecuDataType::Snapshot)
-      .value("TickExecution", SubscribeSecuDataType::TickExecution)
-      .value("TickOrder", SubscribeSecuDataType::TickOrder)
-      .value("OrderQueue", SubscribeSecuDataType::OrderQueue)
+  py::enum_<SubscribeDataType>(m_enums, "SubscribeDataType", py::arithmetic())
+      .value("All", SubscribeDataType::All)
+      .value("Snapshot", SubscribeDataType::Snapshot)
+      .value("Transaction", SubscribeDataType::Transaction)
+      .value("Entrust", SubscribeDataType::Entrust)
       .export_values()
-      .def("__eq__", [](const SubscribeSecuDataType &a, uint64_t b) { return static_cast<uint64_t>(a) == b; })
-      .def("__or__", py::overload_cast<const SubscribeSecuDataType &, const SubscribeSecuDataType &>(
-                         &sub_data_bitwise<SubscribeSecuDataType, uint64_t>));
+      .def("__eq__", [](const SubscribeDataType &a, uint64_t b) { return static_cast<uint64_t>(a) == b; })
+      .def("__or__", py::overload_cast<const SubscribeDataType &, const SubscribeDataType &>(
+                         &sub_data_bitwise<SubscribeDataType, uint64_t>));
 
   py::enum_<SubscribeInstrumentType>(m_enums, "SubscribeInstrumentType", py::arithmetic())
       .value("All", SubscribeInstrumentType::All)
       .value("Stock", SubscribeInstrumentType::Stock)
-      .value("Fund", SubscribeInstrumentType::Fund)
+      .value("Future", SubscribeInstrumentType::Future)
       .value("Bond", SubscribeInstrumentType::Bond)
-      .value("Index", SubscribeInstrumentType::Index)
-      .value("HKT", SubscribeInstrumentType::HKT)
       .value("StockOption", SubscribeInstrumentType::StockOption)
-      .value("FutureOption", SubscribeInstrumentType::FutureOption)
-      .value("Others", SubscribeInstrumentType::Others)
+      .value("Fund", SubscribeInstrumentType::Fund)
+      .value("TechStock", SubscribeInstrumentType::TechStock)
+      .value("Index", SubscribeInstrumentType::Index)
+      .value("Repo", SubscribeInstrumentType::Repo)
+      .value("Warrant", SubscribeInstrumentType::Warrant)
+      .value("Iopt", SubscribeInstrumentType::Iopt)
       .export_values()
       .def("__eq__", [](const SubscribeInstrumentType &a, int b) { return static_cast<int>(a) == b; })
       .def("__or__", py::overload_cast<const SubscribeInstrumentType &, const SubscribeInstrumentType &>(
