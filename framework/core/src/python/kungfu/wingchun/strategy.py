@@ -52,9 +52,6 @@ class Strategy(wc.Strategy):
         self._on_quote = getattr(
             self._module, "on_quote", lambda ctx, quote, location: None
         )
-        self._on_top_of_book = getattr(
-            self._module, "on_top_of_book", lambda ctx, top_of_book, location: None
-        )
         self._on_entrust = getattr(
             self._module, "on_entrust", lambda ctx, entrust, location: None
         )
@@ -197,9 +194,6 @@ class Strategy(wc.Strategy):
 
     def on_quote(self, wc_context, quote, location):
         self.__call_proxy(self._on_quote, self.ctx, quote, location)
-
-    def on_top_of_book(self, wc_context, top_of_book, location):
-        self.__call_proxy(self._on_top_of_book, self.ctx, top_of_book, location)
 
     def on_bar(self, wc_context, bar, location):
         self.__call_proxy(self._on_bar, self.ctx, bar, location)

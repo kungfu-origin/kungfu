@@ -74,8 +74,6 @@ void Runner::post_start() {
       $$(invoke(&Strategy::on_quote, event->data<Quote>(), get_location(event->source())));
   events_ | is_own<Bar>(context_->get_broker_client()) |
       $$(invoke(&Strategy::on_bar, event->data<Bar>(), get_location(event->source())));
-  events_ | is_own<TopOfBook>(context_->get_broker_client()) |
-      $$(invoke(&Strategy::on_top_of_book, event->data<TopOfBook>(), get_location(event->source())));
   events_ | is_own<Entrust>(context_->get_broker_client()) |
       $$(invoke(&Strategy::on_entrust, event->data<Entrust>(), get_location(event->source())));
   events_ | is_own<Transaction>(context_->get_broker_client()) |
