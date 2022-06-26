@@ -59,7 +59,7 @@
   },
   "dependencies": {
     "@mapbox/node-pre-gyp": "^1.0.0",
-    "electron": "13.6.8",
+    "electron": "15.5.5",
     "fs-extra": "^10.0.0",
     "glob": "^7.2.0",
     "nan": "^2.15.0",
