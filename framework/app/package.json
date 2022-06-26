@@ -42,6 +42,6 @@
   },
   "devDependencies": {
     "@kungfu-trader/kungfu-toolchain": "^2.4.0-alpha.86",
-    "electron": "^15.5.5"
+    "electron": "^13.0.0"
   }
 }
