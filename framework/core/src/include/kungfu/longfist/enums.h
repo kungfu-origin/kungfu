@@ -95,7 +95,6 @@ enum class InstrumentType : int8_t {
   Bond,        //债券
   StockOption, //股票期权
   Fund,        //基金
-  TechStock,   //科创板股票
   Index,       //指数
   Repo,        //回购
   Warrant,     //认权证
@@ -245,18 +244,15 @@ enum class SubscribeDataType : uint64_t {
 
 //证券品种类型
 enum class SubscribeInstrumentType : uint64_t {
-  All = 0x000000000000,        ///< 订阅全部证券品种类别
-  Stock = 0x000000000001,      ///< 订阅股票证券品种类别
-  Future = 0x000000000002,     ///< 订阅期货证券品种类别
-  Bond = 0x000000000004,       ///< 订阅债券证券品种类别
-  StockOption = 0x00000000008, ///< 订阅期权证券品种类别
-  Fund = 0x0000000000010,      ///< 订阅基金证券品种类别
-  TechStock = 0x0000000000020,
-  Index = 0x000000000040,    ///< 订阅指数证券品种类别
-  Repo = 0x0000000000080,    ///< 订阅回购证券品种类别
-  Warrant = 0x0000000000100, ///< 订阅权证证券品种类别
-  Iopt = 0x0000000000200,    ///< 订阅牛熊证券品种类别
-  HKT = 0x0000000000400,     ///< 订阅港股通证券品种类别
+  All = 0x000000000000,         ///< 订阅全部证券品种类别
+  Stock = 0x000000000001,       ///< 订阅股票证券品种类别
+  Future = 0x000000000002,      ///< 订阅期货证券品种类别
+  Bond = 0x000000000004,        ///< 订阅债券证券品种类别
+  StockOption = 0x00000000008,  ///< 订阅期权证券品种类别
+  FutureOption = 0x00000000010, ///< 订阅期货期权品种类别
+  Fund = 0x0000000000020,       ///< 订阅基金证券品种类别
+  Index = 0x000000000040,       ///< 订阅指数证券品种类别
+  HKT = 0x000000000080,         ///< 订阅港股通证券品种类别
 };
 
 template <typename T, typename U> inline T sub_data_bitwise(const T &a, const T &b) {
