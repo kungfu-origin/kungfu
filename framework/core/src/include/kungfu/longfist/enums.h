@@ -98,9 +98,9 @@ enum class InstrumentType : int8_t {
   TechStock,   //科创板股票
   Index,       //指数
   Repo,        //回购
-  Crypto,      //数字货币
   Warrant,     //认权证
-  Iopt         //牛熊证
+  Iopt,        //牛熊证
+  Crypto,      //数字货币
 };
 
 inline std::ostream &operator<<(std::ostream &os, InstrumentType t) { return os << int8_t(t); }
@@ -236,27 +236,28 @@ enum class MarketType : uint8_t {
 };
 
 //证券数据类型
-enum class SubscribeSecuDataType : uint64_t {
-  All = 0x000000000000,           ///< 订阅全部证券数据类别
-  Snapshot = 0x000000000001,      ///< 订阅快照数据类别
-  TickExecution = 0x000000000002, ///< 订阅逐笔成交数据
-  TickOrder = 0x000000000004,     ///< 订阅逐笔委托数据
-  OrderQueue = 0x000000000008,    ///< 订阅委托队列数据
+enum class SubscribeDataType : uint64_t {
+  All = 0x000000000000,         ///< 订阅全部证券数据类别
+  Snapshot = 0x000000000001,    ///< 订阅快照数据类别
+  Entrust = 0x000000000004,     ///< 订阅逐笔委托数据
+  Transaction = 0x000000000002, ///< 订阅逐笔成交数据
 };
 
 // class SubscribeCategory {
 //   public:
 //证券品种类型
 enum class SubscribeInstrumentType : uint64_t {
-  All = 0x000000000000,          ///< 订阅全部证券品种类别
-  Stock = 0x000000000001,        ///< 订阅股票证券品种类别
-  Fund = 0x000000000002,         ///< 订阅基金证券品种类别
-  Bond = 0x000000000004,         ///< 订阅债券证券品种类别
-  Index = 0x000000000008,        ///< 订阅指数证券品种类别
-  HKT = 0x000000000010,          ///< 订阅港股通证券品种类别
-  StockOption = 0x000000000020,  ///< 订阅期权证券品种类别
-  FutureOption = 0x000000000040, ///< 订阅期货/期货期权证券品种类别
-  Others = 0x100000000000,       ///< 订阅其他证券品种类别
+  All = 0x000000000000,        ///< 订阅全部证券品种类别
+  Stock = 0x000000000001,      ///< 订阅股票证券品种类别
+  Future = 0x000000000002,     ///< 订阅期货证券品种类别
+  Bond = 0x000000000004,       ///< 订阅债券证券品种类别
+  StockOption = 0x00000000008, ///< 订阅期权证券品种类别
+  Fund = 0x0000000000016,      ///< 订阅基金证券品种类别
+  TechStock = 0x0000000000032,
+  Index = 0x000000000064,    ///< 订阅指数证券品种类别
+  Repo = 0x0000000000128,    ///< 订阅回购证券品种类别
+  Warrant = 0x0000000000512, ///< 订阅权证证券品种类别
+  Iopt = 0x0000000001024,    ///< 订阅牛熊证券品种类别
 };
 
 template <typename T, typename U> inline T sub_data_bitwise(const T &a, const T &b) {

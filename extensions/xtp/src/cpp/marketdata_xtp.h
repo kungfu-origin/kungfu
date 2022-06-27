@@ -18,7 +18,7 @@ public:
   bool subscribe(const std::vector<longfist::types::InstrumentKey> &instrument_keys) override;
 
   bool subscribe_all() override;
-  bool subscribe_custom(const longfist::types::SubscribeAll &subscribe_all) override;
+  bool subscribe_custom(const longfist::types::CustomSubscribe &custom_sub) override;
   bool unsubscribe(const std::vector<longfist::types::InstrumentKey> &instrument_keys) override { return false; };
 
   ///当客户端与行情后台通信连接断开时，该方法被调用。

@@ -68,7 +68,9 @@ public:
 
   [[nodiscard]] virtual bool is_ready(uint32_t broker_location_uid) const;
 
-  [[nodiscard]] virtual bool is_fully_subscribed(uint32_t md_location_uid) const = 0;
+  [[nodiscard]] virtual bool is_custom_subscribed(uint32_t md_location_uid) const = 0;
+
+  [[nodiscard]] virtual bool is_all_subscribed(uint32_t md_location_uid) const = 0;
 
   [[nodiscard]] virtual bool is_subscribed(const std::string &exchange_id, const std::string &instrument_id) const;
 
@@ -130,7 +132,9 @@ public:
 
   [[nodiscard]] const ResumePolicy &get_resume_policy() const override;
 
-  [[nodiscard]] bool is_fully_subscribed(uint32_t md_location_uid) const override;
+  [[nodiscard]] bool is_custom_subscribed(uint32_t md_location_uid) const override;
+
+  [[nodiscard]] bool is_all_subscribed(uint32_t md_location) const override;
 
 protected:
   [[nodiscard]] bool should_connect_md(const yijinjing::data::location_ptr &md_location) const override;
@@ -167,32 +171,23 @@ public:
  * Only connects brokers that has been explicitly added. It supports subscribe_all for MD that has such ability.
  */
 class PassiveClient : public Client {
-  struct subscribe_custom {
-  public:
-    subscribe_custom(bool all, uint8_t exchanges_ids, uint64_t instrument_types, uint64_t secu_datatypes)
-        : all_(all), exchanges_ids_(exchanges_ids), instrument_types_(instrument_types),
-          secu_datatypes_(secu_datatypes) {}
-    subscribe_custom() : all_(false), exchanges_ids_(0), instrument_types_(0), secu_datatypes_(0) {}
-    bool all_ = false;
-    uint8_t exchanges_ids_ = 0;
-    uint64_t instrument_types_ = 0;
-    uint64_t secu_datatypes_ = 0;
-  };
-  typedef std::unordered_map<uint32_t, subscribe_custom> EnrollmentMdMap;
   typedef std::unordered_map<uint32_t, bool> EnrollmentMap;
+  typedef std::unordered_map<uint32_t, longfist::types::CustomSubscribe> CustomSubscribeMap;
 
 public:
   explicit PassiveClient(yijinjing::practice::apprentice &app);
 
   [[nodiscard]] const ResumePolicy &get_resume_policy() const override;
 
-  [[nodiscard]] bool is_fully_subscribed(uint32_t md_location_uid) const override;
+  [[nodiscard]] bool is_custom_subscribed(uint32_t md_location_uid) const override;
+
+  [[nodiscard]] bool is_all_subscribed(uint32_t md_location) const override;
 
   void subscribe(const yijinjing::data::location_ptr &md_location, const std::string &exchange_id,
                  const std::string &instrument_id) override;
 
-  void subscribe_all(const yijinjing::data::location_ptr &md_location, uint8_t exchanges_ids = 0,
-                     uint64_t instrument_types = 0, uint64_t secu_datatypes = 0);
+  void subscribe_all(const yijinjing::data::location_ptr &md_location, uint8_t market_type = 0,
+                     uint64_t instrument_type = 0, uint64_t data_type = 0);
 
   void renew(int64_t trigger_time, const yijinjing::data::location_ptr &md_location) override;
 
@@ -213,42 +208,51 @@ protected:
 
 private:
   IntradayResumePolicy resume_policy_ = {};
-  EnrollmentMdMap enrolled_md_locations_ = {};
+  CustomSubscribeMap custom_subs_ = {};
+  EnrollmentMap enrolled_md_locations_ = {};
   EnrollmentMap enrolled_td_locations_ = {};
 };
 
 template <typename DataType>
-static constexpr auto is_own = [](const Client &broker_client, bool enabled = true) {
-  return rx::filter([&, enabled](const event_ptr &event) {
-    if (enabled and event->msg_type() == DataType::tag) {
+static constexpr auto is_md_datatype_v =
+    std::is_same_v<DataType, longfist::types::Quote> or std::is_same_v<DataType, longfist::types::Entrust> or
+    std::is_same_v<DataType, longfist::types::Transaction> or std::is_same_v<DataType, longfist::types::Bar>;
+
+template <typename DataType, std::enable_if_t<is_md_datatype_v<DataType>>...>
+static constexpr auto is_own(const Client &broker_client) {
+  return rx::filter([&](const event_ptr &event) {
+    if (event->msg_type() == DataType::tag) {
       const DataType &data = event->data<DataType>();
-      return broker_client.is_fully_subscribed(event->source()) or
+      return broker_client.is_custom_subscribed(event->source()) or
              broker_client.is_subscribed(data.exchange_id, data.instrument_id);
     }
     return false;
   });
 };
 
-static constexpr auto is_own_register = [](const Client &broker_client) {
+template <typename DataType, std::enable_if_t<std::is_same_v<DataType, longfist::types::Register> or
+                                              std::is_same_v<DataType, longfist::types::Deregister>>...>
+static constexpr auto is_own(const Client &broker_client) {
   return rx::filter([&](const event_ptr &event) {
-    if (event->msg_type() == kungfu::longfist::types::Deregister::tag) {
-      const kungfu::longfist::types::Deregister &data = event->data<kungfu::longfist::types::Deregister>();
+    if (event->msg_type() == DataType::tag) {
+      const DataType &data = event->data<DataType>();
       return broker_client.should_connect_md(data.location_uid) or broker_client.should_connect_td(data.location_uid);
     }
     return false;
   });
 };
 
-static constexpr auto is_own_updata_state = [](const Client &broker_client) {
+template <typename DataType, std::enable_if_t<std::is_same_v<DataType, longfist::types::BrokerStateUpdate>>...>
+static constexpr auto is_own(const Client &broker_client) {
   return rx::filter([&](const event_ptr &event) {
-    if (event->msg_type() == kungfu::longfist::types::BrokerStateUpdate::tag) {
-      const kungfu::longfist::types::BrokerStateUpdate &data =
-          event->data<kungfu::longfist::types::BrokerStateUpdate>();
+    if (event->msg_type() == DataType::tag) {
+      const DataType &data = event->data<DataType>();
       return (broker_client.should_connect_md(event->source()) or broker_client.should_connect_td(event->source()));
     }
     return false;
   });
 };
+
 } // namespace kungfu::wingchun::broker
 
 #endif // WINGCHUN_BROKER_CLIENT_H

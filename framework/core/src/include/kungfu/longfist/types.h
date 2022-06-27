@@ -46,14 +46,6 @@ KF_DEFINE_MARK_TYPE(AlgoOrderInput, 20010);
 KF_DEFINE_MARK_TYPE(AlgoOrderReport, 20011);
 KF_DEFINE_MARK_TYPE(AlgoOrderModify, 20012);
 
-KF_DEFINE_DATA_TYPE(                                            //
-    SubscribeAll, 303, PK(update_time), TIMESTAMP(update_time), //
-    (int64_t, update_time),                                     //
-    (MarketType, market_type),                                  //
-    (SubscribeInstrumentType, subscribe_instrument_type),       //
-    (SubscribeSecuDataType, subscribe_secu_datatype)            //
-);
-
 KF_DEFINE_DATA_TYPE(                              //
     Config, 10005, PK(location_uid), PERPETUAL(), //
     (uint32_t, location_uid),                     //
@@ -258,6 +250,14 @@ KF_DEFINE_PACK_TYPE(                                         //
     (InstrumentType, instrument_type)                        //合约类型
 );
 
+KF_DEFINE_DATA_TYPE(                                               //
+    CustomSubscribe, 303, PK(update_time), TIMESTAMP(update_time), //
+    (int64_t, update_time),                                        //
+    (MarketType, market_type),                                     //
+    (SubscribeInstrumentType, instrument_type),                    //
+    (SubscribeDataType, data_type)                                 //
+);
+
 KF_DEFINE_PACK_TYPE(                                         //
     Quote, 101, PK(instrument_id, exchange_id), PERPETUAL(), //
     (kungfu::array<char, DATE_LEN>, trading_day),            //交易日
@@ -361,32 +361,6 @@ KF_DEFINE_PACK_TYPE(                                                 //
     (int64_t, start_volume), //初始总交易量
 
     (int32_t, tick_count) //区间有效tick数
-);
-
-KF_DEFINE_PACK_TYPE(                                             //
-    TopOfBook, 111, PK(instrument_id, exchange_id), PERPETUAL(), //
-    (kungfu::array<char, DATE_LEN>, trading_day),                //交易日
-
-    (int64_t, data_time), //数据生成时间
-
-    (kungfu::array<char, INSTRUMENT_ID_LEN>, instrument_id), //合约ID
-    (kungfu::array<char, EXCHANGE_ID_LEN>, exchange_id),     //交易所ID
-
-    (InstrumentType, instrument_type), //合约类型
-
-    (double, last_price),   //最新价
-    (double, bid_price1),   //买一价
-    (int64_t, bid_volume1), //买一量
-    (double, ask_price1),   //卖一价
-    (int64_t, ask_volume1), //卖一量
-
-    (int64_t, bid_count1),     //买一有效委托笔数
-    (int64_t, max_bid_count1), //买一队列总委托笔数
-    (int64_t, ask_count1),     //卖一有效委托笔数
-    (int64_t, max_ask_count1), //卖一队列总委托笔数
-
-    (kungfu::array<int64_t, 50>, bid_qty1), //买一队列排队列表
-    (kungfu::array<int64_t, 50>, ask_qty1)  //卖一队列排队列表
 );
 
 KF_DEFINE_PACK_TYPE(                                       //

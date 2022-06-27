@@ -111,10 +111,10 @@ bool MarketDataXTP::subscribe_all() {
   return result;
 }
 
-bool MarketDataXTP::subscribe_custom(const longfist::types::SubscribeAll &subscribe_all) {
-  SPDLOG_INFO("subscribe_custom, market_type {} subscribe_instrument_type {} subscribe_secu_datatype {} update_time {}",
-              int(subscribe_all.market_type), long(subscribe_all.subscribe_instrument_type),
-              long(subscribe_all.subscribe_secu_datatype), long(subscribe_all.update_time));
+bool MarketDataXTP::subscribe_custom(const longfist::types::CustomSubscribe &custom_sub) {
+  SPDLOG_INFO("custom_sub, market_type {} instrument_type {} data_type {} update_time {}", int(custom_sub.market_type),
+              long(custom_sub.instrument_type), long(custom_sub.data_type), long(custom_sub.update_time));
+  subscribe_all();
   return true;
 }
 
@@ -162,11 +162,6 @@ void MarketDataXTP::OnDepthMarketData(XTPMD *market_data, int64_t *bid1_qty, int
   Quote &quote = get_writer(0)->open_data<Quote>(0);
   from_xtp(*market_data, quote);
   get_writer(0)->close_data();
-  if (max_bid1_count + max_ask1_count != 0) {
-    TopOfBook &top_of_book = get_writer(0)->open_data<TopOfBook>(0);
-    from_xtp(*market_data, bid1_qty, bid1_count, max_bid1_count, ask1_qty, ask1_count, max_ask1_count, top_of_book);
-    get_writer(0)->close_data();
-  }
 }
 
 void MarketDataXTP::OnTickByTick(XTPTBT *tbt_data) {

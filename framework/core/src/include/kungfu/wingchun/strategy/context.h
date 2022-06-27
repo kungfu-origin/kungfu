@@ -59,8 +59,8 @@ public:
    * Subscribe all from given MD
    * @param source MD group
    */
-  virtual void subscribe_all(const std::string &source, uint8_t exchanges_ids = 0, uint64_t instrument_types = 0,
-                             uint64_t secu_datatypes = 0) = 0;
+  virtual void subscribe_all(const std::string &source, uint8_t market_type = 0, uint64_t instrument_type = 0,
+                             uint64_t data_type = 0) = 0;
 
   /**
    * Insert order.
