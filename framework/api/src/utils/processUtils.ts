@@ -1,4 +1,5 @@
 import path from 'path';
+import fse from 'fs-extra';
 import os from 'os';
 import fkill from 'fkill';
 import { Proc, ProcessDescription, StartOptions } from 'pm2';
@@ -660,11 +661,14 @@ export const startMd = async (sourceId: string): Promise<Proc | void> => {
       .map((dir) => dealSpaceInPath(path.dirname(dir)))
       .join(path.delimiter)}" run -c md -g "${sourceId}" -n "${sourceId}"`,
   );
+  const cwd = dealSpaceInPath(
+    path.join(KF_RUNTIME_DIR, 'td', sourceId, sourceId),
+  );
+  await fse.ensureDir(cwd);
+
   return startProcess({
     name: `md_${sourceId}`,
-    cwd: `${dealSpaceInPath(
-      path.join(KF_RUNTIME_DIR, 'md', sourceId, sourceId),
-    )}`,
+    cwd,
     script: `${dealSpaceInPath(path.join(KFC_DIR, kfcName))}`,
     args,
     max_restarts: 3,
@@ -683,9 +687,12 @@ export const startTd = async (accountId: string): Promise<Proc | void> => {
       .map((dir) => dealSpaceInPath(path.dirname(dir)))
       .join(path.delimiter)}" run -c td -g "${source}" -n "${id}"`,
   );
+  const cwd = dealSpaceInPath(path.join(KF_RUNTIME_DIR, 'td', source, id));
+  await fse.ensureDir(cwd);
+
   return startProcess({
     name: `td_${accountId}`,
-    cwd: `${dealSpaceInPath(path.join(KF_RUNTIME_DIR, 'td', source, id))}`,
+    cwd,
     script: `${dealSpaceInPath(path.join(KFC_DIR, kfcName))}`,
     args,
     max_restarts: 3,

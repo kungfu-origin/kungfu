@@ -62,6 +62,7 @@ class KungfuCoreConan(ConanFile):
         else environ["CONAN_VS_TOOLSET"],
     }
     conanfile_dir = path.dirname(path.realpath(__file__))
+    pyi_hooks_dir = path.join(conanfile_dir, "src", "python", "pyi-hooks")
     build_info_file = "kungfubuildinfo.json"
     build_dir = path.join(conanfile_dir, "build")
     build_python_dir = path.join(build_dir, "python")
@@ -292,5 +293,6 @@ class KungfuCoreConan(ConanFile):
         self.output.success("Nuitka done")
 
     def __run_freeze(self, build_type):
+        os.environ["KFC_PYI_HOOKS_PATH"] = self.pyi_hooks_dir
         freeze = {"pyinstaller": self.__run_pyinstaller, "nuitka": self.__run_nuitka}
         freeze[str(self.options.freezer)](build_type)

@@ -37,7 +37,6 @@ dep_pybind11_dir = abspath(make_path(deps_dir, "pybind11*"))
 
 # kungfu source files
 src_dir = abspath(make_path(cwd, "src"))
-src_python_dir = abspath(make_path(src_dir, "python"))
 
 # kungfu build files
 build_dir = abspath(make_path(cwd, "build"))
@@ -56,17 +55,6 @@ data_pdm_models = make_path(site_path, "pdm", "models", "*.json")
 data_pdm_pep582 = make_path(site_path, "pdm", "pep582", "sitecustomize.py")
 data_pip_certifi = make_path(site_path, "pip", "_vendor", "certifi", "*.pem")
 
-# nuitka requires
-nuitka_dst_dir = make_path("nuitka")
-nuitka_build_dst_dir = make_path("nuitka", "build")
-nuitka_build_src_dir = make_path(site_path, "nuitka", "build")
-data_nuitka_codegen_templates = make_path(
-    site_path, "nuitka", "codegen", "templates_c", "*.j2"
-)
-data_nuitka_include = make_path(nuitka_build_src_dir, "include")
-data_nuitka_inline_copy = make_path(nuitka_build_src_dir, "inline_copy")
-data_nuitka_static_src = make_path(nuitka_build_src_dir, "static_src")
-data_nuitka_scons = make_path(nuitka_build_src_dir, "*.scons")
 ###############################################################################
 
 
@@ -112,7 +100,7 @@ def extend_hiddenimports(modules, executable_modules):
 
 def get_hookspath():
     key = "KFC_PYI_HOOKS_PATH"
-    return [] if key not in os.environ else [os.environ[key]]
+    return [] if key not in os.environ else os.environ[key].split(os.pathsep)
 
 
 def get_runtimehooks():
@@ -138,14 +126,6 @@ a = Analysis(
             (data_pdm_models, make_path("pdm", "models")),
             (data_pdm_pep582, make_path("pdm", "pep582")),
             (data_pip_certifi, make_path("pip", "_vendor", "certifi")),
-            (
-                data_nuitka_codegen_templates,
-                make_path(nuitka_dst_dir, "codegen", "templates_c"),
-            ),
-            (data_nuitka_include, make_path(nuitka_build_dst_dir, "include")),
-            (data_nuitka_inline_copy, make_path(nuitka_build_dst_dir, "inline_copy")),
-            (data_nuitka_static_src, make_path(nuitka_build_dst_dir, "static_src")),
-            (data_nuitka_scons, nuitka_build_dst_dir),
         ],
         src_dirs=[
             src_dir,
