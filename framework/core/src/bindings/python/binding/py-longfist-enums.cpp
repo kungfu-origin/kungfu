@@ -187,7 +187,7 @@ void bind_enums(py::module &m) {
 
   py::enum_<MarketType>(m_enums, "MarketType", py::arithmetic())
       .value("All", MarketType::All)
-      .value("NEEQ", MarketType::NEEQ)
+      .value("BSE", MarketType::BSE)
       .value("SHFE", MarketType::SHFE)
       .value("CFFEX", MarketType::CFFEX)
       .value("kDCE", MarketType::DCE)

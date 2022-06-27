@@ -224,7 +224,7 @@ inline std::ostream &operator<<(std::ostream &os, StrategyState t) { return os <
 //权限订阅数据类型
 enum class MarketType : uint8_t {
   All,   ///< 表示全市场
-  NEEQ,  ///< 北交所
+  BSE,   ///< 北交所
   SHFE,  ///< 上期所
   CFFEX, ///< 中金所
   DCE,   ///< 大商所
@@ -243,8 +243,6 @@ enum class SubscribeDataType : uint64_t {
   Transaction = 0x000000000004, ///< 订阅逐笔成交数据
 };
 
-// class SubscribeCategory {
-//   public:
 //证券品种类型
 enum class SubscribeInstrumentType : uint64_t {
   All = 0x000000000000,        ///< 订阅全部证券品种类别
@@ -258,6 +256,7 @@ enum class SubscribeInstrumentType : uint64_t {
   Repo = 0x0000000000080,    ///< 订阅回购证券品种类别
   Warrant = 0x0000000000100, ///< 订阅权证证券品种类别
   Iopt = 0x0000000000200,    ///< 订阅牛熊证券品种类别
+  HKT = 0x0000000000400,     ///< 订阅港股通证券品种类别
 };
 
 template <typename T, typename U> inline T sub_data_bitwise(const T &a, const T &b) {
