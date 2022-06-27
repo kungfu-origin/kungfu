@@ -239,8 +239,8 @@ enum class MarketType : uint8_t {
 enum class SubscribeDataType : uint64_t {
   All = 0x000000000000,         ///< 订阅全部证券数据类别
   Snapshot = 0x000000000001,    ///< 订阅快照数据类别
-  Entrust = 0x000000000004,     ///< 订阅逐笔委托数据
-  Transaction = 0x000000000002, ///< 订阅逐笔成交数据
+  Entrust = 0x000000000002,     ///< 订阅逐笔委托数据
+  Transaction = 0x000000000004, ///< 订阅逐笔成交数据
 };
 
 // class SubscribeCategory {
@@ -252,12 +252,12 @@ enum class SubscribeInstrumentType : uint64_t {
   Future = 0x000000000002,     ///< 订阅期货证券品种类别
   Bond = 0x000000000004,       ///< 订阅债券证券品种类别
   StockOption = 0x00000000008, ///< 订阅期权证券品种类别
-  Fund = 0x0000000000016,      ///< 订阅基金证券品种类别
-  TechStock = 0x0000000000032,
-  Index = 0x000000000064,    ///< 订阅指数证券品种类别
-  Repo = 0x0000000000128,    ///< 订阅回购证券品种类别
-  Warrant = 0x0000000000512, ///< 订阅权证证券品种类别
-  Iopt = 0x0000000001024,    ///< 订阅牛熊证券品种类别
+  Fund = 0x0000000000010,      ///< 订阅基金证券品种类别
+  TechStock = 0x0000000000020,
+  Index = 0x000000000040,    ///< 订阅指数证券品种类别
+  Repo = 0x0000000000080,    ///< 订阅回购证券品种类别
+  Warrant = 0x0000000000100, ///< 订阅权证证券品种类别
+  Iopt = 0x0000000000200,    ///< 订阅牛熊证券品种类别
 };
 
 template <typename T, typename U> inline T sub_data_bitwise(const T &a, const T &b) {
