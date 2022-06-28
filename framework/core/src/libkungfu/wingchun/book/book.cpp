@@ -106,7 +106,8 @@ void Book::update(int64_t update_time) {
     auto is_stock =
         position.instrument_type == InstrumentType::Stock or position.instrument_type == InstrumentType::Bond or
         position.instrument_type == InstrumentType::Fund or position.instrument_type == InstrumentType::StockOption or
-        position.instrument_type == InstrumentType::Index or position.instrument_type == InstrumentType::Repo;
+        position.instrument_type == InstrumentType::TechStock or position.instrument_type == InstrumentType::Index or
+        position.instrument_type == InstrumentType::Repo;
     if (!is_stock)
       is_stock_acct = false;
     auto is_future = position.instrument_type == InstrumentType::Future;

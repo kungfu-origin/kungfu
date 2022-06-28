@@ -237,6 +237,8 @@ inline std::string str_from_instrument_type(longfist::enums::InstrumentType type
     return "Bond";
   case longfist::enums::InstrumentType::StockOption:
     return "StockOption";
+  case longfist::enums::InstrumentType::TechStock:
+    return "TechStock";
   case longfist::enums::InstrumentType::Fund:
     return "Fund";
   case longfist::enums::InstrumentType::Index:
@@ -321,7 +323,8 @@ inline bool is_shortable(longfist::enums::InstrumentType instrument_type) {
   using namespace longfist::enums;
   return not(instrument_type == InstrumentType::Stock or instrument_type == InstrumentType::Bond or
              instrument_type == InstrumentType::Fund or instrument_type == InstrumentType::StockOption or
-             instrument_type == InstrumentType::Index or instrument_type == InstrumentType::Repo);
+             instrument_type == InstrumentType::TechStock or instrument_type == InstrumentType::Index or
+             instrument_type == InstrumentType::Repo);
 }
 
 inline longfist::enums::Direction get_direction(longfist::enums::InstrumentType instrument_type,

@@ -43,6 +43,7 @@ void bind_enums(py::module &m) {
       .value("Future", InstrumentType::Future)
       .value("Bond", InstrumentType::Bond)
       .value("StockOption", InstrumentType::StockOption)
+      .value("TechStock", InstrumentType::TechStock)
       .value("Fund", InstrumentType::Fund)
       .value("Index", InstrumentType::Index)
       .value("Repo", InstrumentType::Repo)
