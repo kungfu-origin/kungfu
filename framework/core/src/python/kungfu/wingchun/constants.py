@@ -1,17 +1,6 @@
 from pykungfu import longfist as lf
 
 
-class Source:
-    SIM = "sim"
-    BAR = "bar"
-    CTP = "ctp"
-    XTP = "xtp"
-    OES = "oes"
-    TORA = "tora"
-    HUAR = "huar"
-    RONGH = "rongh"
-
-
 class Exchange:
     SSE = "SSE"
     SZE = "SZE"
@@ -57,6 +46,7 @@ InstrumentTypeInStockAccount = [
     InstrumentType.Bond,
     InstrumentType.Fund,
     InstrumentType.StockOption,
+    InstrumentType.TechStock,
     InstrumentType.Index,
     InstrumentType.Repo,
 ]

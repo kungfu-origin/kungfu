@@ -175,6 +175,7 @@ export default {
     bond: 'Bond',
     stock_option: '股票期权',
     fund: 'Fund',
+    tech_stock: 'TechStock',
     index: 'Index',
     repo: 'Repo',
     crypto: 'Crypto',

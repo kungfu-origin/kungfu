@@ -201,7 +201,11 @@ inline longfist::enums::InstrumentType get_instrument_type(const std::string &ex
       return longfist::enums::InstrumentType::Repo;
     } else if (startswith(instrument_id, "5")) {
       return longfist::enums::InstrumentType::Fund;
+    } else if (startswith(instrument_id, "688") || startswith(instrument_id, "787") ||
+               startswith(instrument_id, "789")) {
+      return longfist::enums::InstrumentType::TechStock;
     }
+
     return longfist::enums::InstrumentType::Stock;
   } else if (string_equals(exchange_id, EXCHANGE_SZE)) {
     if (startswith(instrument_id, "15") || startswith(instrument_id, "16") || startswith(instrument_id, "18")) {
@@ -237,6 +241,8 @@ inline std::string str_from_instrument_type(longfist::enums::InstrumentType type
     return "Bond";
   case longfist::enums::InstrumentType::StockOption:
     return "StockOption";
+  case longfist::enums::InstrumentType::TechStock:
+    return "TechStock";
   case longfist::enums::InstrumentType::Fund:
     return "Fund";
   case longfist::enums::InstrumentType::Index:
@@ -321,7 +327,8 @@ inline bool is_shortable(longfist::enums::InstrumentType instrument_type) {
   using namespace longfist::enums;
   return not(instrument_type == InstrumentType::Stock or instrument_type == InstrumentType::Bond or
              instrument_type == InstrumentType::Fund or instrument_type == InstrumentType::StockOption or
-             instrument_type == InstrumentType::Index or instrument_type == InstrumentType::Repo);
+             instrument_type == InstrumentType::TechStock or instrument_type == InstrumentType::Index or
+             instrument_type == InstrumentType::Repo);
 }
 
 inline longfist::enums::Direction get_direction(longfist::enums::InstrumentType instrument_type,

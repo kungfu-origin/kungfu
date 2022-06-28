@@ -405,6 +405,10 @@ export const InstrumentType: Record<
     name: t('tradingConfig.fund'),
     color: 'purple',
   },
+  [InstrumentTypeEnum.techstock]: {
+    name: t('tradingConfig.tech_stock'),
+    color: 'blue',
+  },
   [InstrumentTypeEnum.index]: {
     name: t('tradingConfig.index'),
     color: 'purple',
@@ -467,6 +471,7 @@ export const AbleSubscribeInstrumentTypesBySourceType: Record<
     InstrumentTypeEnum.stock,
     InstrumentTypeEnum.bond,
     InstrumentTypeEnum.fund,
+    InstrumentTypeEnum.techstock,
     InstrumentTypeEnum.index,
     InstrumentTypeEnum.repo,
   ],
@@ -478,6 +483,8 @@ export const AbleSubscribeInstrumentTypesBySourceType: Record<
   stockoption: [InstrumentTypeEnum.stockoption],
 
   fund: [InstrumentTypeEnum.fund],
+
+  techstock: [InstrumentTypeEnum.techstock],
 
   index: [InstrumentTypeEnum.index],
 
@@ -493,6 +500,7 @@ export const AbleSubscribeInstrumentTypesBySourceType: Record<
     InstrumentTypeEnum.bond,
     InstrumentTypeEnum.stockoption,
     InstrumentTypeEnum.fund,
+    InstrumentTypeEnum.techstock,
     InstrumentTypeEnum.index,
     InstrumentTypeEnum.repo,
     InstrumentTypeEnum.crypto,

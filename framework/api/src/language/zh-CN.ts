@@ -176,6 +176,7 @@ export default {
     bond: '债券',
     stock_option: '股票期权',
     fund: '基金',
+    tech_stock: '科技板股票',
     index: '指数',
     repo: '回购',
     crypto: '数字货币',
