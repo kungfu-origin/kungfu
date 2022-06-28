@@ -201,7 +201,11 @@ inline longfist::enums::InstrumentType get_instrument_type(const std::string &ex
       return longfist::enums::InstrumentType::Repo;
     } else if (startswith(instrument_id, "5")) {
       return longfist::enums::InstrumentType::Fund;
+    } else if (startswith(instrument_id, "688") || startswith(instrument_id, "787") ||
+               startswith(instrument_id, "789")) {
+      return longfist::enums::InstrumentType::TechStock;
     }
+
     return longfist::enums::InstrumentType::Stock;
   } else if (string_equals(exchange_id, EXCHANGE_SZE)) {
     if (startswith(instrument_id, "15") || startswith(instrument_id, "16") || startswith(instrument_id, "18")) {
