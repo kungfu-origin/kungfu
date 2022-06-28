@@ -11,6 +11,7 @@ class Exchange:
     INE = "INE"
     BSE = "BSE"
 
+
 class Region:
     CN = "CN"
     HK = "HK"
