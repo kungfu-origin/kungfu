@@ -95,7 +95,6 @@ enum class InstrumentType : int8_t {
   Bond,        //债券
   StockOption, //股票期权
   Fund,        //基金
-  TechStock,   //科创板股票
   Index,       //指数
   Repo,        //回购
   Warrant,     //认权证
@@ -224,7 +223,7 @@ inline std::ostream &operator<<(std::ostream &os, StrategyState t) { return os <
 //权限订阅数据类型
 enum class MarketType : uint8_t {
   All,   ///< 表示全市场
-  NEEQ,  ///< 北交所
+  BSE,   ///< 北交所
   SHFE,  ///< 上期所
   CFFEX, ///< 中金所
   DCE,   ///< 大商所
@@ -239,25 +238,21 @@ enum class MarketType : uint8_t {
 enum class SubscribeDataType : uint64_t {
   All = 0x000000000000,         ///< 订阅全部证券数据类别
   Snapshot = 0x000000000001,    ///< 订阅快照数据类别
-  Entrust = 0x000000000004,     ///< 订阅逐笔委托数据
-  Transaction = 0x000000000002, ///< 订阅逐笔成交数据
+  Entrust = 0x000000000002,     ///< 订阅逐笔委托数据
+  Transaction = 0x000000000004, ///< 订阅逐笔成交数据
 };
 
-// class SubscribeCategory {
-//   public:
 //证券品种类型
 enum class SubscribeInstrumentType : uint64_t {
-  All = 0x000000000000,        ///< 订阅全部证券品种类别
-  Stock = 0x000000000001,      ///< 订阅股票证券品种类别
-  Future = 0x000000000002,     ///< 订阅期货证券品种类别
-  Bond = 0x000000000004,       ///< 订阅债券证券品种类别
-  StockOption = 0x00000000008, ///< 订阅期权证券品种类别
-  Fund = 0x0000000000016,      ///< 订阅基金证券品种类别
-  TechStock = 0x0000000000032,
-  Index = 0x000000000064,    ///< 订阅指数证券品种类别
-  Repo = 0x0000000000128,    ///< 订阅回购证券品种类别
-  Warrant = 0x0000000000512, ///< 订阅权证证券品种类别
-  Iopt = 0x0000000001024,    ///< 订阅牛熊证券品种类别
+  All = 0x000000000000,         ///< 订阅全部证券品种类别
+  Stock = 0x000000000001,       ///< 订阅股票证券品种类别
+  Future = 0x000000000002,      ///< 订阅期货证券品种类别
+  Bond = 0x000000000004,        ///< 订阅债券证券品种类别
+  StockOption = 0x00000000008,  ///< 订阅期权证券品种类别
+  FutureOption = 0x00000000010, ///< 订阅期货期权品种类别
+  Fund = 0x0000000000020,       ///< 订阅基金证券品种类别
+  Index = 0x000000000040,       ///< 订阅指数证券品种类别
+  HKT = 0x000000000080,         ///< 订阅港股通证券品种类别
 };
 
 template <typename T, typename U> inline T sub_data_bitwise(const T &a, const T &b) {
