@@ -39,7 +39,6 @@ export enum InstrumentTypeEnum {
   bond,
   stockoption,
   fund,
-  techstock,
   index,
   repo,
   crypto,

@@ -57,10 +57,8 @@ InstrumentTypeInStockAccount = [
     InstrumentType.Bond,
     InstrumentType.Fund,
     InstrumentType.StockOption,
-    InstrumentType.TechStock,
     InstrumentType.Index,
     InstrumentType.Repo,
-    InstrumentType.Crypto,
 ]
 
 ENUM_TYPES = [
