@@ -1775,3 +1775,7 @@ export function dealTradingTaskName(
   const timestamp = name.toKfName();
   return `${groupResolved} ${dayjs(+timestamp).format('HH:mm:ss')}`;
 }
+
+export const isBrokerStateReady = (state: BrokerStateStatusTypes) => {
+  return state === 'Ready' || state === 'Idle';
+};
