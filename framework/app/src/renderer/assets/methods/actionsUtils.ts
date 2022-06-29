@@ -525,7 +525,7 @@ export const useInstruments = (): {
     mdExtTypeMap: Record<string, InstrumentTypes>,
     instrumentsForSubscribe: KungfuApi.InstrumentResolved[],
   ): void => {
-    if (appStates[processId] === 'Ready') {
+    if (appStates[processId] === 'Ready' || appStates[processId] === 'Idle') {
       if (processStatus[processId] === 'online') {
         if (processId.indexOf('md_') === 0) {
           const mdLocation = getMdTdKfLocationByProcessId(processId);
