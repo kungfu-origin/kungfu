@@ -80,6 +80,21 @@ function handleConfirmAddInstrumentCallback(val: string): Promise<void> {
     });
   }
 
+  const targetIndex = subscribedInstruments.value.findIndex((item) => {
+    if (item.exchangeId === instrumentResolved.exchangeId) {
+      if (item.instrumentId === instrumentResolved.instrumentId) {
+        return true;
+      }
+    }
+    return false;
+  });
+
+  if (targetIndex !== -1) {
+    return Promise.reject(new Error('重复订阅')).catch((err) => {
+      error(err.message);
+    });
+  }
+
   return addSubscribeInstruments([instrumentResolved])
     .then(() => {
       return setSubscribedInstruments();
