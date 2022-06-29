@@ -31,8 +31,6 @@ if (
   throw new Error('Logview should not use kungfu.node');
 }
 
-console.log();
-
 export const kf = kungfu();
 
 kfLogger.info('Load kungfu node');
@@ -42,8 +40,6 @@ export const riskSettingStore = kf.RiskSettingStore(KF_RUNTIME_DIR);
 export const history = kf.History(KF_RUNTIME_DIR);
 export const commissionStore = kf.CommissionStore(KF_RUNTIME_DIR);
 export const longfist = kf.longfist;
-
-console.log(longfist);
 
 export const dealKfTime = (nano: bigint, date = false): string => {
   if (nano === BigInt(0)) {
