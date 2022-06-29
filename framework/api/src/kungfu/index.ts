@@ -23,9 +23,15 @@ import {
 import { HistoryDateEnum, LedgerCategoryEnum } from '../typings/enums';
 import { ExchangeIds } from '../config/tradingConfig';
 
-if (process.env.RENDERER_TYPE === 'logview') {
+if (
+  process.env.RENDERER_TYPE &&
+  process.env.RENDERER_TYPE !== 'app' &&
+  process.env.RENDERER_TYPE !== 'dzxy'
+) {
   throw new Error('Logview should not use kungfu.node');
 }
+
+console.log();
 
 export const kf = kungfu();
 
@@ -36,6 +42,8 @@ export const riskSettingStore = kf.RiskSettingStore(KF_RUNTIME_DIR);
 export const history = kf.History(KF_RUNTIME_DIR);
 export const commissionStore = kf.CommissionStore(KF_RUNTIME_DIR);
 export const longfist = kf.longfist;
+
+console.log(longfist);
 
 export const dealKfTime = (nano: bigint, date = false): string => {
   if (nano === BigInt(0)) {
