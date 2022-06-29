@@ -792,9 +792,13 @@ export const useSubscibeInstrumentAtEntry = (): void => {
       const newState = newAppStates[processId];
       const oldState = oldAppStates[processId];
 
+      const isReady = (state: BrokerStateStatusTypes) => {
+        return state === 'Ready' || state === 'Idle';
+      };
+
       if (
-        newState === 'Ready' &&
-        oldState !== 'Ready' &&
+        isReady(newState) &&
+        !isReady(oldState) &&
         processStatusData.value[processId] === 'online' &&
         processId.includes('md_')
       ) {
