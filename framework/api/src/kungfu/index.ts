@@ -23,7 +23,11 @@ import {
 import { HistoryDateEnum, LedgerCategoryEnum } from '../typings/enums';
 import { ExchangeIds } from '../config/tradingConfig';
 
-if (process.env.RENDERER_TYPE === 'logview') {
+if (
+  process.env.RENDERER_TYPE &&
+  process.env.RENDERER_TYPE !== 'app' &&
+  process.env.RENDERER_TYPE !== 'dzxy'
+) {
   throw new Error('Logview should not use kungfu.node');
 }
 

@@ -620,6 +620,7 @@ declare namespace KungfuApi {
 
   export interface TradingDataNameToType {
     Asset: Asset;
+    AssetMargin: AssetMargin;
     Bar: Bar;
     Instrument: Instrument;
     Order: Order;
@@ -632,6 +633,7 @@ declare namespace KungfuApi {
 
   export type TradingDataTypes =
     | Asset
+    | AssetMargin
     | Bar
     | Instrument
     | Order
