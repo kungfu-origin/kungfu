@@ -32,6 +32,7 @@ import {
   getAvailDaemonList,
   removeNoDefaultStrategyFolders,
   getStrategyStateStatusName,
+  isBrokerStateReady,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { writeCSV } from '@kungfu-trader/kungfu-js-api/utils/fileUtils';
 import {
@@ -525,7 +526,7 @@ export const useInstruments = (): {
     mdExtTypeMap: Record<string, InstrumentTypes>,
     instrumentsForSubscribe: KungfuApi.InstrumentResolved[],
   ): void => {
-    if (appStates[processId] === 'Ready') {
+    if (isBrokerStateReady(appStates[processId])) {
       if (processStatus[processId] === 'online') {
         if (processId.indexOf('md_') === 0) {
           const mdLocation = getMdTdKfLocationByProcessId(processId);
@@ -793,8 +794,8 @@ export const useSubscibeInstrumentAtEntry = (): void => {
       const oldState = oldAppStates[processId];
 
       if (
-        newState === 'Ready' &&
-        oldState !== 'Ready' &&
+        isBrokerStateReady(newState) &&
+        !isBrokerStateReady(oldState) &&
         processStatusData.value[processId] === 'online' &&
         processId.includes('md_')
       ) {
