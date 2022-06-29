@@ -195,6 +195,14 @@ AutoClient::AutoClient(apprentice &app) : Client(app) {}
 const ResumePolicy &AutoClient::get_resume_policy() const { return resume_policy_; }
 
 bool AutoClient::is_custom_subscribed(uint32_t md_location_uid) const { return false; }
+bool AutoClient::is_custom_quote_subscribed(uint32_t md_location_uid) const { return false; }
+bool AutoClient::is_custom_transaction_subscribed(uint32_t md_location_uid) const { return false; }
+bool AutoClient::is_custom_entrust_subscribed(uint32_t md_location_uid) const { return false; }
+std::string AutoClient::get_custom_exchange(uint32_t md_location_uid) const { return "0"; }
+bool AutoClient::is_custom_instrument_type_subscribed(uint32_t md_location_uid,
+                                                      InstrumentType kf_instrument_type) const {
+  return false;
+}
 
 bool AutoClient::is_all_subscribed(uint32_t md_location_uid) const { return false; }
 
@@ -224,6 +232,100 @@ const ResumePolicy &PassiveClient::get_resume_policy() const { return resume_pol
 
 bool PassiveClient::is_custom_subscribed(uint32_t md_location_uid) const {
   return should_connect_md(app_.get_location(md_location_uid)) and enrolled_md_locations_.at(md_location_uid);
+}
+
+bool PassiveClient::is_custom_quote_subscribed(uint32_t md_location_uid) const {
+  if (should_connect_md(app_.get_location(md_location_uid)) and enrolled_md_locations_.at(md_location_uid)) {
+    auto &custom_sub = custom_subs_.at(md_location_uid);
+    return custom_sub.data_type == SubscribeDataType::All or
+           (uint64_t(custom_sub.data_type) & uint64_t(SubscribeDataType::Snapshot)) != 0;
+  }
+}
+
+bool PassiveClient::is_custom_transaction_subscribed(uint32_t md_location_uid) const {
+  if (should_connect_md(app_.get_location(md_location_uid)) and enrolled_md_locations_.at(md_location_uid)) {
+    auto &custom_sub = custom_subs_.at(md_location_uid);
+    return custom_sub.data_type == SubscribeDataType::All or
+           uint64_t(custom_sub.data_type) & uint64_t(SubscribeDataType::Transaction) != 0;
+  }
+}
+
+bool PassiveClient::is_custom_entrust_subscribed(uint32_t md_location_uid) const {
+  if (should_connect_md(app_.get_location(md_location_uid)) and enrolled_md_locations_.at(md_location_uid)) {
+    auto &custom_sub = custom_subs_.at(md_location_uid);
+    return custom_sub.data_type == SubscribeDataType::All or
+           uint64_t(custom_sub.data_type) & uint64_t(SubscribeDataType::Entrust) != 0;
+  }
+}
+
+std::string PassiveClient::get_custom_exchange(uint32_t md_location_uid) const {
+  if (should_connect_md(app_.get_location(md_location_uid)) and enrolled_md_locations_.at(md_location_uid)) {
+    auto &custom_sub = custom_subs_.at(md_location_uid);
+    switch (custom_sub.market_type) {
+    case MarketType::BSE:
+      return std::string(EXCHANGE_BSE);
+    case MarketType::SHFE:
+      return std::string(EXCHANGE_SHFE);
+    case MarketType::CFFEX:
+      return std::string(EXCHANGE_CFFEX);
+    case MarketType::DCE:
+      return std::string(EXCHANGE_DCE);
+    case MarketType::CZCE:
+      return std::string(EXCHANGE_CZCE);
+    case MarketType::INE:
+      return std::string(EXCHANGE_INE);
+    case MarketType::SSE:
+      return std::string(EXCHANGE_SSE);
+    case MarketType::SZSE:
+      return std::string(EXCHANGE_SZE);
+    case MarketType::All:
+      return std::string("");
+    default:
+      return std::string("0");
+    }
+  }
+  return std::string("0");
+}
+
+bool PassiveClient::is_custom_instrument_type_subscribed(uint32_t md_location_uid,
+                                                         InstrumentType kf_instrument_type) const {
+  if (should_connect_md(app_.get_location(md_location_uid)) and enrolled_md_locations_.at(md_location_uid)) {
+    auto &custom_sub = custom_subs_.at(md_location_uid);
+    SubscribeInstrumentType custom_type = SubscribeInstrumentType::All;
+    switch (kf_instrument_type) {
+    case InstrumentType::Stock: {
+      custom_type = SubscribeInstrumentType::Stock;
+      break;
+    }
+    case InstrumentType::Fund: {
+      custom_type = SubscribeInstrumentType::Fund;
+      break;
+    }
+    case InstrumentType::Future: {
+      custom_type = SubscribeInstrumentType::FutureOption;
+      break;
+    }
+    case InstrumentType::Bond: {
+      custom_type = SubscribeInstrumentType::Bond;
+      break;
+    }
+    case InstrumentType::StockOption: {
+      custom_type = SubscribeInstrumentType::StockOption;
+      break;
+    }
+    case InstrumentType::Index: {
+      custom_type = SubscribeInstrumentType::Index;
+      break;
+    }
+    default: {
+      custom_type = SubscribeInstrumentType::All;
+      break;
+    }
+    }
+    return (custom_type == SubscribeInstrumentType::All) ||
+           ((uint64_t(custom_type) & uint64_t(custom_sub.instrument_type)) != 0);
+  }
+  return false;
 }
 
 bool PassiveClient::is_all_subscribed(uint32_t md_location_uid) const {
