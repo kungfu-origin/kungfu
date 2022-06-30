@@ -18,7 +18,10 @@ import {
   openUrl,
   registerScheduleTasks,
 } from '@kungfu-trader/kungfu-app/src/main/utils';
-import { kfLogger } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
+import {
+  kfLogger,
+  removeJournal,
+} from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { killExtra } from '@kungfu-trader/kungfu-js-api/utils/processUtils';
 import {
   clearDB,
@@ -32,6 +35,7 @@ import {
 import {
   BASE_DB_DIR,
   KF_HOME,
+  NODE_DIR,
 } from '@kungfu-trader/kungfu-js-api/config/pathConfig';
 import {
   initKfConfig,
@@ -54,15 +58,24 @@ initKfConfig();
 initKfDefaultInstruments();
 ensureKungfuKey();
 
-function createWindow(reloadAfterCrashed = false, reloadBySchedule = false) {
+async function createWindow(
+  reloadAfterCrashed = false,
+  reloadBySchedule = false,
+) {
+  try {
+    await removeJournal(NODE_DIR);
+  } catch (err) {
+    kfLogger.error(err.message);
+  }
+
   if (reloadAfterCrashed) {
-    MainWindow && MainWindow.destroy();
     CrashedReloading = true;
+    MainWindow && MainWindow.close();
   }
 
   if (reloadBySchedule) {
-    MainWindow && MainWindow.destroy();
     SecheduleReloading = true;
+    MainWindow && MainWindow.close();
   }
 
   const { width, height } = screen.getPrimaryDisplay().size;
@@ -104,14 +117,12 @@ function createWindow(reloadAfterCrashed = false, reloadBySchedule = false) {
   });
 
   MainWindow.on('close', (e) => {
-    if (CrashedReloading || SecheduleReloading) {
-      MainWindow && MainWindow.destroy();
-      return;
-    }
-
     if (!AllowQuit) {
       e.preventDefault();
-      if (MainWindow) {
+      if (CrashedReloading || SecheduleReloading) {
+        MainWindow?.destroy();
+        AllowQuit = false;
+      } else if (MainWindow) {
         showQuitMessageBox(MainWindow)
           .then((res) => {
             if (res) {
@@ -135,7 +146,11 @@ function createWindow(reloadAfterCrashed = false, reloadBySchedule = false) {
     );
     if (AllowQuit) return;
     showCrashMessageBox().then((confirm) => {
-      if (!confirm) return;
+      if (!confirm) {
+        CrashedReloading = false;
+        MainWindow?.close();
+        return;
+      }
       createWindow(true);
     });
   });
@@ -144,7 +159,12 @@ function createWindow(reloadAfterCrashed = false, reloadBySchedule = false) {
     kfLogger.error('[MainWindow.webContents] unresponsive' + new Date());
     if (AllowQuit) return;
     showCrashMessageBox().then((confirm) => {
-      if (!confirm) return;
+      if (!confirm) {
+        CrashedReloading = false;
+        MainWindow?.close();
+        return;
+      }
+
       createWindow(true);
     });
   });
