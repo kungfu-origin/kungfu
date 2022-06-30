@@ -175,7 +175,7 @@ export const registerScheduleTasks = async (
   createWindowFunc: (
     reloadAfterCrashed: boolean,
     reloadBySchedule: boolean,
-  ) => void,
+  ) => Promise<void>,
 ): Promise<boolean> => {
   if (!fse.pathExistsSync(path.join(BASE_DB_DIR, 'config.db'))) {
     return false;
@@ -211,8 +211,7 @@ export const registerScheduleTasks = async (
         console.log('May the Force be with you -- Yoda');
         pm2Kill().finally(() => {
           kfLogger.info('Core restarted, pm2 killed all');
-          removeJournal(KF_HOME);
-          createWindowFunc(false, true);
+          removeJournal(KF_HOME).then(() => createWindowFunc(false, true));
         });
       });
     });

@@ -21,6 +21,9 @@ addFileSync('', KF_RUNTIME_DIR, 'folder');
 export const SYSTEM_DIR = path.join(KF_RUNTIME_DIR, 'system');
 addFileSync('', SYSTEM_DIR, 'folder');
 
+export const NODE_DIR = path.join(SYSTEM_DIR, 'node');
+addFileSync('', NODE_DIR, 'folder');
+
 //log
 export const LOG_DIR = path.join(KF_HOME, 'logview');
 addFileSync('', LOG_DIR, 'folder');

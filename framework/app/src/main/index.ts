@@ -18,7 +18,10 @@ import {
   openUrl,
   registerScheduleTasks,
 } from '@kungfu-trader/kungfu-app/src/main/utils';
-import { kfLogger } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
+import {
+  kfLogger,
+  removeJournal,
+} from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { killExtra } from '@kungfu-trader/kungfu-js-api/utils/processUtils';
 import {
   clearDB,
@@ -32,6 +35,7 @@ import {
 import {
   BASE_DB_DIR,
   KF_HOME,
+  NODE_DIR,
 } from '@kungfu-trader/kungfu-js-api/config/pathConfig';
 import {
   initKfConfig,
@@ -54,7 +58,16 @@ initKfConfig();
 initKfDefaultInstruments();
 ensureKungfuKey();
 
-function createWindow(reloadAfterCrashed = false, reloadBySchedule = false) {
+async function createWindow(
+  reloadAfterCrashed = false,
+  reloadBySchedule = false,
+) {
+  try {
+    await removeJournal(NODE_DIR);
+  } catch (err) {
+    kfLogger.error(err.message);
+  }
+
   if (reloadAfterCrashed) {
     CrashedReloading = true;
     MainWindow && MainWindow.close();
@@ -106,8 +119,7 @@ function createWindow(reloadAfterCrashed = false, reloadBySchedule = false) {
   MainWindow.on('close', (e) => {
     if (!AllowQuit) {
       e.preventDefault();
-
-      if (SecheduleReloading) {
+      if (CrashedReloading || SecheduleReloading) {
         MainWindow?.destroy();
         AllowQuit = false;
       } else if (MainWindow) {
@@ -135,10 +147,10 @@ function createWindow(reloadAfterCrashed = false, reloadBySchedule = false) {
     if (AllowQuit) return;
     showCrashMessageBox().then((confirm) => {
       if (!confirm) {
+        CrashedReloading = false;
         MainWindow?.close();
         return;
       }
-
       createWindow(true);
     });
   });
@@ -148,6 +160,7 @@ function createWindow(reloadAfterCrashed = false, reloadBySchedule = false) {
     if (AllowQuit) return;
     showCrashMessageBox().then((confirm) => {
       if (!confirm) {
+        CrashedReloading = false;
         MainWindow?.close();
         return;
       }
