@@ -139,7 +139,7 @@ function createWindow(reloadAfterCrashed = false, reloadBySchedule = false) {
         return;
       }
 
-      MainWindow?.reload();
+      createWindow(true);
     });
   });
 
@@ -152,7 +152,7 @@ function createWindow(reloadAfterCrashed = false, reloadBySchedule = false) {
         return;
       }
 
-      MainWindow?.reload();
+      createWindow(true);
     });
   });
 }

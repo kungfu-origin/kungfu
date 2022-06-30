@@ -16,5 +16,3 @@ window.testCase.crashTheWatcher = () => {
 
   return kf.watcher(KF_RUNTIME_DIR, kf.formatStringToHashHex(id), false, false);
 };
-
-console.log(66345345345);
