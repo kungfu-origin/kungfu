@@ -129,7 +129,6 @@ void bind_strategy(pybind11::module &m) {
       .def("add_timer", &strategy::Context::add_timer)
       .def("add_time_interval", &strategy::Context::add_time_interval)
       .def("add_account", &strategy::Context::add_account)
-      .def("get_account_cash_limit", &strategy::Context::get_account_cash_limit)
       .def("subscribe", &strategy::Context::subscribe)
       .def("subscribe_all", &strategy::Context::subscribe_all, py::arg("source"),
            py::arg("market_type") = MarketType::All, py::arg("instrument_type") = SubscribeInstrumentType::All,

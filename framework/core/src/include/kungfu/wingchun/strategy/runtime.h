@@ -36,9 +36,8 @@ public:
    * Add account for strategy.
    * @param source TD group
    * @param account TD account ID
-   * @param cash_limit cash limit
    */
-  void add_account(const std::string &source, const std::string &account, double cash_limit) override;
+  void add_account(const std::string &source, const std::string &account) override;
 
   /**
    * Subscribe market data.
@@ -101,13 +100,6 @@ public:
    * @return order action ID
    */
   uint64_t cancel_order(uint64_t order_id) override;
-
-  /**
-   * Get cash limit for given account
-   * @param account account ID
-   * @return cash limit
-   */
-  double get_account_cash_limit(const std::string &source, const std::string &account) const override;
 
   /**
    * Get current trading day.
@@ -180,7 +172,6 @@ private:
   yijinjing::data::location_map md_locations_ = {};
   yijinjing::data::location_map td_locations_ = {};
   std::unordered_map<uint32_t, uint32_t> account_location_ids_ = {};
-  std::unordered_map<uint32_t, double> account_cash_limits_ = {};
   std::unordered_map<std::string, yijinjing::data::location_ptr> market_data_ = {};
 
   friend void enable(RuntimeContext &context) { context.on_start(); }
