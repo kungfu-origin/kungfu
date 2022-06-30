@@ -582,6 +582,7 @@ export default {
   可用资金: 'Avail Asset',
   交易金额: 'Amount',
   保证金占用: 'Margin',
+  保证金返还: 'Margin',
   剩余资金: 'Left Asset',
   剩余仓位: 'Left Pos',
 };
