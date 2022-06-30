@@ -31,7 +31,8 @@ class TraderSim(wc.Trader):
     def __init__(self, vendor):
         wc.Trader.__init__(self, vendor)
         self.logger = create_logger(
-            "_".join(("td", self.home.group, self.home.name)), "info",
+            "_".join(("td", self.home.group, self.home.name)),
+            "info",
         )
 
     def on_start(self):
