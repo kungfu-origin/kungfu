@@ -251,6 +251,12 @@ function handleCancelAllOrders(): void {
   });
 }
 
+function filterUnfinishedOrders(
+  orders: KungfuApi.OrderResolved[],
+): KungfuApi.OrderResolved[] {
+  return orders.filter((item) => UnfinishedOrderStatus.includes(item.status));
+}
+
 function getTargetCancelOrders(): KungfuApi.OrderResolved[] {
   if (!currentGlobalKfLocation.value || !window.watcher) {
     return [];
@@ -259,17 +265,21 @@ function getTargetCancelOrders(): KungfuApi.OrderResolved[] {
     const filterKey = getOrderTradeFilterKey(
       currentGlobalKfLocation.value?.category,
     );
-    return window.watcher.ledger.Order.filter(
-      filterKey,
-      window.watcher.getLocationUID(currentGlobalKfLocation.value),
-    ).list();
+    return filterUnfinishedOrders(
+      window.watcher.ledger.Order.filter(
+        filterKey,
+        window.watcher.getLocationUID(currentGlobalKfLocation.value),
+      ).list(),
+    );
   }
 
-  return getExtraCategoryData(
-    window.watcher.ledger.Order,
-    currentGlobalKfLocation.value,
-    'order',
-  ) as KungfuApi.OrderResolved[];
+  return filterUnfinishedOrders(
+    getExtraCategoryData(
+      window.watcher.ledger.Order,
+      currentGlobalKfLocation.value,
+      'order',
+    ) as KungfuApi.OrderResolved[],
+  );
 }
 
 function handleShowTradingDataDetail({
