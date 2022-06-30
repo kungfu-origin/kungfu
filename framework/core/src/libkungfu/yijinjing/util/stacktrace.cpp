@@ -78,9 +78,9 @@ void print_stack_trace(FILE *out = stderr) {
       char funcname[8192];
       char *ret = abi::__cxa_demangle(begin_name, &funcname[0], &funcnamesize, &status);
       SPDLOG_CRITICAL(" {:<30} {:<40} {}", symbollist[i], status == 0 ? ret : begin_name, begin_offset);
-#else  // !__APPLE__ - but is posix
-       // not OSX style
-       // ./module(function+0x15c) [0x8048a6d]
+#else // !__APPLE__ - but is posix
+      // not OSX style
+      // ./module(function+0x15c) [0x8048a6d]
     for (char *p = symbollist[i]; *p; ++p) {
       if (*p == '(')
         begin_name = p;

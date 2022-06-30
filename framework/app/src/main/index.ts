@@ -56,13 +56,13 @@ ensureKungfuKey();
 
 function createWindow(reloadAfterCrashed = false, reloadBySchedule = false) {
   if (reloadAfterCrashed) {
-    MainWindow && MainWindow.destroy();
     CrashedReloading = true;
+    MainWindow && MainWindow.close();
   }
 
   if (reloadBySchedule) {
-    MainWindow && MainWindow.destroy();
     SecheduleReloading = true;
+    MainWindow && MainWindow.close();
   }
 
   const { width, height } = screen.getPrimaryDisplay().size;
@@ -104,14 +104,13 @@ function createWindow(reloadAfterCrashed = false, reloadBySchedule = false) {
   });
 
   MainWindow.on('close', (e) => {
-    if (CrashedReloading || SecheduleReloading) {
-      MainWindow && MainWindow.destroy();
-      return;
-    }
-
     if (!AllowQuit) {
       e.preventDefault();
-      if (MainWindow) {
+
+      if (SecheduleReloading) {
+        MainWindow?.destroy();
+        AllowQuit = false;
+      } else if (MainWindow) {
         showQuitMessageBox(MainWindow)
           .then((res) => {
             if (res) {
@@ -135,8 +134,12 @@ function createWindow(reloadAfterCrashed = false, reloadBySchedule = false) {
     );
     if (AllowQuit) return;
     showCrashMessageBox().then((confirm) => {
-      if (!confirm) return;
-      createWindow(true);
+      if (!confirm) {
+        MainWindow?.close();
+        return;
+      }
+
+      MainWindow?.reload();
     });
   });
 
@@ -144,8 +147,12 @@ function createWindow(reloadAfterCrashed = false, reloadBySchedule = false) {
     kfLogger.error('[MainWindow.webContents] unresponsive' + new Date());
     if (AllowQuit) return;
     showCrashMessageBox().then((confirm) => {
-      if (!confirm) return;
-      createWindow(true);
+      if (!confirm) {
+        MainWindow?.close();
+        return;
+      }
+
+      MainWindow?.reload();
     });
   });
 }

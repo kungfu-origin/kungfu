@@ -38,7 +38,9 @@ void journal::next() {
 }
 
 void journal::seek_to_time(int64_t nanotime) {
+  SPDLOG_TRACE("location uname {}  dest_id_ {}", location_->uname, dest_id_);
   int page_id = page::find_page_id(location_, dest_id_, nanotime);
+  SPDLOG_TRACE("page_id {}", page_id);
   load_page(page_id);
   while (page_->is_full() && page_->end_time() <= nanotime) {
     load_next_page();

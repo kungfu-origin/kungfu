@@ -223,7 +223,7 @@ log4js.configure({
 export const logger = log4js.getLogger('app');
 
 export const kfLogger = {
-  info: (...args: Array<string | number>) => {
+  info: (...args: Array<any>) => {
     if (process.env.NODE_ENV === 'development') {
       if (process.env.APP_TYPE !== 'cli') {
         console.log('<KF_INFO>', args.join(' '));
@@ -232,7 +232,7 @@ export const kfLogger = {
     logger.info('<KF_INFO>', args.join(' '));
   },
 
-  warn: (...args: Array<string | number>) => {
+  warn: (...args: Array<any>) => {
     if (process.env.NODE_ENV === 'development') {
       if (process.env.APP_TYPE !== 'cli') {
         console.warn('<KF_INFO>', args.join(' '));
@@ -241,7 +241,7 @@ export const kfLogger = {
     logger.warn('<KF_INFO>', args.join(' '));
   },
 
-  error: (...args: Array<string | number>) => {
+  error: (...args: Array<any>) => {
     if (process.env.NODE_ENV === 'development') {
       if (process.env.APP_TYPE !== 'cli') {
         console.error('<KF_INFO>', args.join(' '));
