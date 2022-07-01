@@ -2,7 +2,7 @@ from kungfu.wingchun.constants import *
 
 
 def pre_start(context):
-    context.add_account(Source.XTP, "15014990", 100000000.0)
+    context.add_account(Source.XTP, "15014990")
     context.subscribe(Source.XTP, ["600198"], Exchange.SSE)
 
 

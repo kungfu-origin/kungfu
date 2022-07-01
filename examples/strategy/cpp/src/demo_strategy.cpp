@@ -14,7 +14,7 @@ public:
   DemoStrategy() = default;
 
   void pre_start(Context_ptr &context) override {
-    context->add_account("xtp", "15014990", 0);
+    context->add_account("xtp", "15014990");
     context->subscribe("xtp", {"600548"}, {"SSE"});
   };
 

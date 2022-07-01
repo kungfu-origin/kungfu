@@ -70,9 +70,7 @@ public:
   [[nodiscard]] virtual bool is_ready(uint32_t broker_location_uid) const;
 
   [[nodiscard]] virtual bool is_custom_subscribed(uint32_t md_location_uid) const = 0;
-  [[nodiscard]] virtual bool is_custom_quote_subscribed(uint32_t md_location_uid) const = 0;
-  [[nodiscard]] virtual bool is_custom_transaction_subscribed(uint32_t md_location_uid) const = 0;
-  [[nodiscard]] virtual bool is_custom_entrust_subscribed(uint32_t md_location_uid) const = 0;
+
   virtual std::string get_custom_exchange(uint32_t md_location_uid) const = 0;
   virtual bool is_custom_instrument_type_subscribed(uint32_t md_location_uid,
                                                     InstrumentType kf_instrument_type) const = 0;
@@ -140,9 +138,7 @@ public:
   [[nodiscard]] const ResumePolicy &get_resume_policy() const override;
 
   [[nodiscard]] bool is_custom_subscribed(uint32_t md_location_uid) const override;
-  [[nodiscard]] bool is_custom_quote_subscribed(uint32_t md_location_uid) const override;
-  [[nodiscard]] bool is_custom_transaction_subscribed(uint32_t md_location_uid) const override;
-  [[nodiscard]] bool is_custom_entrust_subscribed(uint32_t md_location_uid) const override;
+
   std::string get_custom_exchange(uint32_t md_location_uid) const override;
   bool is_custom_instrument_type_subscribed(uint32_t md_location_uid, InstrumentType kf_instrument_type) const override;
 
@@ -192,9 +188,7 @@ public:
   [[nodiscard]] const ResumePolicy &get_resume_policy() const override;
 
   [[nodiscard]] bool is_custom_subscribed(uint32_t md_location_uid) const override;
-  [[nodiscard]] bool is_custom_quote_subscribed(uint32_t md_location_uid) const override;
-  [[nodiscard]] bool is_custom_transaction_subscribed(uint32_t md_location_uid) const override;
-  [[nodiscard]] bool is_custom_entrust_subscribed(uint32_t md_location_uid) const override;
+
   std::string get_custom_exchange(uint32_t md_location_uid) const override;
   bool is_custom_instrument_type_subscribed(uint32_t md_location_uid, InstrumentType kf_instrument_type) const override;
 
@@ -241,19 +235,10 @@ static constexpr auto is_own(const Client &broker_client) {
     if (event->msg_type() == DataType::tag) {
       const DataType &data = event->data<DataType>();
       if (broker_client.is_custom_subscribed(event->source())) {
-        if (((std::is_same_v<DataType, longfist::types::Quote> ||
-              std::is_same_v<DataType, longfist::types::Bar>)&&broker_client
-                 .is_custom_quote_subscribed(event->source())) ||
-            (std::is_same_v<DataType, longfist::types::Transaction> &&
-             broker_client.is_custom_transaction_subscribed(event->source())) ||
-            (std::is_same_v<DataType, longfist::types::Entrust> &&
-             broker_client.is_custom_entrust_subscribed(event->source()))) {
-          std::string custom_exchange = broker_client.get_custom_exchange(event->source());
-          if ((custom_exchange.empty() || custom_exchange.compare(data.exchange_id.value) == 0) &&
-              broker_client.is_custom_instrument_type_subscribed(
-                  event->source(), kungfu::wingchun::get_instrument_type(data.exchange_id, data.instrument_id))) {
-            return true;
-          }
+        std::string custom_exchange = broker_client.get_custom_exchange(event->source());
+        if ((custom_exchange.empty() || custom_exchange.compare(data.exchange_id.value) == 0) &&
+            broker_client.is_custom_instrument_type_subscribed(event->source(), data.instrument_type)) {
+          return true;
         }
       }
       if (broker_client.is_subscribed(data.exchange_id, data.instrument_id)) {

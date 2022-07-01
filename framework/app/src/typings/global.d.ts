@@ -25,6 +25,7 @@ declare global {
     kungfu: Kungfu;
     workers: Record<string, WebpackWorker>;
     fileId: number;
+    testCase: Record<string, any>;
   }
 
   namespace NodeJS {
@@ -39,7 +40,6 @@ declare global {
         | 'makeOrder'
         | 'codeEditor'
         | 'dzxy';
-      RELOAD_AFTER_CRASHED: 'false' | 'true';
       EXTENSION_DIRS: string;
       KFC_DIR: string;
       ELECTRON_RUN_AS_NODE: boolean;
