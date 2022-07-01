@@ -840,7 +840,9 @@ async function handleOpenTradingTaskConfigModal(
                 <div class="position-label">
                   {{
                     shotable(instrumentResolved?.instrumentType)
-                      ? $t('保证金占用')
+                      ? formState.offset === OffsetEnum.Open
+                        ? t('保证金占用')
+                        : t('保证金返还')
                       : $t('交易金额')
                   }}:&nbsp
                 </div>
@@ -911,6 +913,7 @@ async function handleOpenTradingTaskConfigModal(
     }
 
     .make-order-form__warp {
+      height: 100%;
       padding-top: 16px;
       overflow-y: overlay;
 
