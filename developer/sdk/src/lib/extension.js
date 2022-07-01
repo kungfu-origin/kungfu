@@ -253,7 +253,7 @@ exports.installSingleLib = async (
     binDir,
     libInfo.lib[platform][arch],
     (file) =>
-      `${libSiteURL}/${libName}/${libVersion}/lib/${platform}/${arch}/${file}`,
+      `${libSiteURL}/${libName}/${libVersion}/lib/${platform}/${arch}/${file.replace(/\+/g, '%2B')}`,
     (localFilePath) => fse.chmodSync(localFilePath, '0755'),
   );
 };
@@ -309,10 +309,8 @@ exports.compile = () => {
 
   if (hasSourceFor(packageJson, 'python')) {
     const srcDir = path.join('src', 'python', extensionName);
-    spawnExec('yarn', [
-      'kfc',
-      'engage',
-      'nuitka',
+    const kfcArgs = ['kfc', 'engage', 'nuitka'];
+    const nuitkaArgs = [
       '--module',
       '--assume-yes-for-downloads',
       '--remove-output',
@@ -320,7 +318,8 @@ exports.compile = () => {
       `--include-package=${extensionName}`,
       `--output-dir=${outputDir}`,
       srcDir,
-    ]);
+    ];
+    spawnExec('yarn', [...kfcArgs, ...nuitkaArgs]);
   }
 
   if (hasSourceFor(packageJson, 'cpp')) {

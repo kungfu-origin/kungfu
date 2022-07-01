@@ -15,6 +15,7 @@ def disableStaticallyLinkedPython():
 
 def useEngagedCommands():
     from nuitka.build import DataComposerInterface, SconsInterface
+    from nuitka.utils.Execution import withEnvironmentVarsOverridden
 
     def runEngagedDataComposer(source_dir):
         mapping = {
@@ -23,7 +24,7 @@ def useEngagedCommands():
             "PYTHONPATH": os.pathsep.join(sys.path),
         }
         blob_filename = DataComposerInterface.getConstantBlobFilename(source_dir)
-        with DataComposerInterface.withEnvironmentVarsOverriden(mapping):
+        with withEnvironmentVarsOverridden(mapping):
             subprocess.check_call(
                 [
                     sys.executable,
@@ -69,14 +70,14 @@ def useEngagedEnvironment():
 def parseOptions():
     from nuitka import Options
 
-    Options.parseArgs(will_reexec=False)
+    Options.parseArgs()
     Options.commentArgs()
 
 
 def loadPlugins():
     from nuitka.plugins import Plugins
     from nuitka.plugins.standard import (
-        AntiBloat,
+        AntiBloatPlugin,
         ConsiderPyLintAnnotationsPlugin,
         DataFileCollectorPlugin,
         DillPlugin,
@@ -98,7 +99,7 @@ def loadPlugins():
     )
 
     for plugin_module in [
-        AntiBloat,
+        AntiBloatPlugin,
         ConsiderPyLintAnnotationsPlugin,
         DataFileCollectorPlugin,
         DillPlugin,
@@ -157,6 +158,37 @@ def loadPlugins():
     Plugins.loadStandardPluginClasses = lambda: True
 
 
+def patchImportHardNodes():
+    from nuitka.nodes import ImportHardNodes
+
+    class ExpressionImportHardBase(ImportHardNodes.ExpressionBase):
+        # pylint: disable=abstract-method
+        __slots__ = ("module_name", "finding", "module_filename")
+
+        def __init__(self, module_name, source_ref):
+            ImportHardNodes.ExpressionBase.__init__(self, source_ref=source_ref)
+
+            self.module_name = ImportHardNodes.ModuleName(module_name)
+
+            self.finding = None
+            self.module_filename = None
+
+            (
+                _module_name,
+                self.module_filename,
+                self.finding,
+            ) = ImportHardNodes.locateModule(
+                module_name=self.module_name,
+                parent_package=None,
+                level=0,
+            )
+
+        def getUsedModule(self):
+            return self.module_name, self.module_filename, self.finding
+
+    ImportHardNodes.ExpressionImportHardBase = ExpressionImportHardBase
+
+
 def setup():
     site.setup()
     disableStaticallyLinkedPython()
@@ -171,8 +203,9 @@ def setup():
 
 
 def main():
-    parseOptions()
     loadPlugins()
+    parseOptions()
+    patchImportHardNodes()
 
     from nuitka import MainControl
 

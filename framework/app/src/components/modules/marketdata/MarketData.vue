@@ -35,7 +35,7 @@ import { messagePrompt } from '@kungfu-trader/kungfu-app/src/renderer/assets/met
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
 
 const { t } = VueI18n.global;
-const { success, error } = messagePrompt();
+const { success, error, warning } = messagePrompt();
 const { dashboardBodyHeight, dashboardBodyWidth, handleBodySizeChange } =
   useDashboardBodySize();
 
@@ -77,6 +77,21 @@ function handleConfirmAddInstrumentCallback(val: string): Promise<void> {
   if (!instrumentResolved) {
     return Promise.reject(new Error('标的错误')).catch((err) => {
       error(err.message);
+    });
+  }
+
+  const targetIndex = subscribedInstruments.value.findIndex((item) => {
+    if (item.exchangeId === instrumentResolved.exchangeId) {
+      if (item.instrumentId === instrumentResolved.instrumentId) {
+        return true;
+      }
+    }
+    return false;
+  });
+
+  if (targetIndex !== -1) {
+    return Promise.reject(new Error('重复订阅')).catch((err) => {
+      warning(err.message);
     });
   }
 

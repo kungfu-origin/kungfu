@@ -37,9 +37,14 @@ void page::set_last_frame_position(uint64_t position) {
 
 page_ptr page::load(const data::location_ptr &location, uint32_t dest_id, uint32_t page_id, bool is_writing,
                     bool lazy) {
+
+  SPDLOG_TRACE(" ======== page::load ========");
+  SPDLOG_TRACE("location uname {}  dest_id_ {}", location->uname, dest_id);
   uint32_t page_size = find_page_size(location, dest_id);
   std::string path = get_page_path(location, dest_id, page_id);
+  SPDLOG_TRACE("get_page_path {}", path);
   uintptr_t address = os::load_mmap_buffer(path, page_size, is_writing, lazy);
+  SPDLOG_TRACE("load_mmap_buffer address {}", address);
   if (address < 0) {
     throw journal_error("unable to load page for " + path);
   }

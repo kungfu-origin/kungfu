@@ -42,9 +42,8 @@ public:
    * Add account for strategy.
    * @param source TD group
    * @param account TD account ID
-   * @param cash_limit cash limit
    */
-  virtual void add_account(const std::string &source, const std::string &account, double cash_limit) = 0;
+  virtual void add_account(const std::string &source, const std::string &account) = 0;
 
   /**
    * Subscribe market data.
@@ -59,8 +58,8 @@ public:
    * Subscribe all from given MD
    * @param source MD group
    */
-  virtual void subscribe_all(const std::string &source, uint8_t exchanges_ids = 0, uint64_t instrument_types = 0,
-                             uint64_t secu_datatypes = 0) = 0;
+  virtual void subscribe_all(const std::string &source, uint8_t market_type = 0, uint64_t instrument_type = 0,
+                             uint64_t data_type = 0) = 0;
 
   /**
    * Insert order.
@@ -98,13 +97,6 @@ public:
    * @return order action ID
    */
   virtual uint64_t cancel_order(uint64_t order_id) = 0;
-
-  /**
-   * Get cash limit for given account
-   * @param account account ID
-   * @return cash limit
-   */
-  virtual double get_account_cash_limit(const std::string &source, const std::string &account) const = 0;
 
   /**
    * Get current trading day.

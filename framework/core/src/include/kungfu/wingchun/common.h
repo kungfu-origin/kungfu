@@ -201,7 +201,11 @@ inline longfist::enums::InstrumentType get_instrument_type(const std::string &ex
       return longfist::enums::InstrumentType::Repo;
     } else if (startswith(instrument_id, "5")) {
       return longfist::enums::InstrumentType::Fund;
+    } else if (startswith(instrument_id, "688") || startswith(instrument_id, "787") ||
+               startswith(instrument_id, "789")) {
+      return longfist::enums::InstrumentType::TechStock;
     }
+
     return longfist::enums::InstrumentType::Stock;
   } else if (string_equals(exchange_id, EXCHANGE_SZE)) {
     if (startswith(instrument_id, "15") || startswith(instrument_id, "16") || startswith(instrument_id, "18")) {
@@ -237,18 +241,44 @@ inline std::string str_from_instrument_type(longfist::enums::InstrumentType type
     return "Bond";
   case longfist::enums::InstrumentType::StockOption:
     return "StockOption";
-  case longfist::enums::InstrumentType::Fund:
-    return "Fund";
   case longfist::enums::InstrumentType::TechStock:
     return "TechStock";
+  case longfist::enums::InstrumentType::Fund:
+    return "Fund";
   case longfist::enums::InstrumentType::Index:
     return "Index";
   case longfist::enums::InstrumentType::Repo:
     return "Repo";
+  case longfist::enums::InstrumentType::Warrant:
+    return "Warrant";
+  case longfist::enums::InstrumentType::Iopt:
+    return "Iopt";
   case longfist::enums::InstrumentType::Crypto:
     return "Crypto";
   default:
     return "Unknown";
+  }
+}
+
+inline longfist::enums::SubscribeInstrumentType
+instrument_type_to_subscribe_instrument_type(longfist::enums::InstrumentType instrument_type) {
+  switch (instrument_type) {
+  case longfist::enums::InstrumentType::Stock:
+    return longfist::enums::SubscribeInstrumentType::Stock;
+  case longfist::enums::InstrumentType::Future:
+    return longfist::enums::SubscribeInstrumentType::Future;
+  case longfist::enums::InstrumentType::Bond:
+    return longfist::enums::SubscribeInstrumentType::Bond;
+  case longfist::enums::InstrumentType::StockOption:
+    return longfist::enums::SubscribeInstrumentType::StockOption;
+  case longfist::enums::InstrumentType::TechStock:
+    return longfist::enums::SubscribeInstrumentType::Stock;
+  case longfist::enums::InstrumentType::Fund:
+    return longfist::enums::SubscribeInstrumentType::Fund;
+  case longfist::enums::InstrumentType::Index:
+    return longfist::enums::SubscribeInstrumentType::Index;
+  default:
+    return longfist::enums::SubscribeInstrumentType::All;
   }
 }
 

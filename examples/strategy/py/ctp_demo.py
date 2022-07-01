@@ -22,7 +22,7 @@ EXCHANGE = Exchange.SHFE
 
 # 启动前回调，添加交易账户，订阅行情，策略初始化计算等
 def pre_start(context):
-    context.add_account(Source.CTP, ACCOUNT, 100000.0)
+    context.add_account(Source.CTP, ACCOUNT)
     context.subscribe(Source.CTP, ["rb2009"], Exchange.SHFE)
     # context.subscribe(Source.BAR, ["rb2005", "rb2010"], Exchange.SHFE)
     # context.subscribe(Source.CTP, ["BB2005", "BB2006", "EG2005", "EG2006"], Exchange.DCE)

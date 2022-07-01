@@ -52,9 +52,6 @@ class Strategy(wc.Strategy):
         self._on_quote = getattr(
             self._module, "on_quote", lambda ctx, quote, location: None
         )
-        self._on_top_of_book = getattr(
-            self._module, "on_top_of_book", lambda ctx, top_of_book, location: None
-        )
         self._on_entrust = getattr(
             self._module, "on_entrust", lambda ctx, entrust, location: None
         )
@@ -116,8 +113,8 @@ class Strategy(wc.Strategy):
 
         self.ctx.wc_context.add_time_interval(duration, wrap_callback)
 
-    def __add_account(self, source, account, cash_limit):
-        self.ctx.wc_context.add_account(source, account, cash_limit)
+    def __add_account(self, source, account):
+        self.ctx.wc_context.add_account(source, account)
 
     def __get_account_book(self, source, account):
         location = yjj.location(
@@ -169,7 +166,6 @@ class Strategy(wc.Strategy):
         self.ctx.subscribe = wc_context.subscribe
         self.ctx.subscribe_all = wc_context.subscribe_all
         self.ctx.add_account = self.__add_account
-        self.ctx.get_account_cash_limit = wc_context.get_account_cash_limit
         self.ctx.insert_order = wc_context.insert_order
         self.ctx.cancel_order = wc_context.cancel_order
         self.ctx.req_history_order = wc_context.req_history_order
@@ -197,9 +193,6 @@ class Strategy(wc.Strategy):
 
     def on_quote(self, wc_context, quote, location):
         self.__call_proxy(self._on_quote, self.ctx, quote, location)
-
-    def on_top_of_book(self, wc_context, top_of_book, location):
-        self.__call_proxy(self._on_top_of_book, self.ctx, top_of_book, location)
 
     def on_bar(self, wc_context, bar, location):
         self.__call_proxy(self._on_bar, self.ctx, bar, location)

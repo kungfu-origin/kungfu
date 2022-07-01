@@ -38,7 +38,7 @@ void RuntimeContext::add_time_interval(int64_t duration, const std::function<voi
   app_.add_time_interval(duration, callback);
 }
 
-void RuntimeContext::add_account(const std::string &source, const std::string &account, double cash_limit) {
+void RuntimeContext::add_account(const std::string &source, const std::string &account) {
   uint32_t hashed_account = hash_account(source, account);
 
   if (td_locations_.find(hashed_account) != td_locations_.end()) {
@@ -53,7 +53,6 @@ void RuntimeContext::add_account(const std::string &source, const std::string &a
 
   td_locations_.emplace(hashed_account, account_location);
   td_locations_.emplace(account_location->uid, account_location);
-  account_cash_limits_.emplace(hashed_account, cash_limit);
   account_location_ids_.emplace(hashed_account, account_location->uid);
 
   broker_client_.enroll_account(account_location);
@@ -68,9 +67,9 @@ void RuntimeContext::subscribe(const std::string &source, const std::vector<std:
   md_locations_.emplace(md_location->uid, md_location);
 }
 
-void RuntimeContext::subscribe_all(const std::string &source, uint8_t exchanges_ids, uint64_t instrument_types,
-                                   uint64_t secu_datatypes) {
-  broker_client_.subscribe_all(find_md_location(source), exchanges_ids, instrument_types, secu_datatypes);
+void RuntimeContext::subscribe_all(const std::string &source, uint8_t market_type, uint64_t instrument_type,
+                                   uint64_t data_type) {
+  broker_client_.subscribe_all(find_md_location(source), market_type, instrument_type, data_type);
 }
 
 uint64_t RuntimeContext::insert_order(uint32_t account_location_uid, const std::string &instrument_id,
@@ -137,14 +136,6 @@ uint64_t RuntimeContext::cancel_order(uint64_t order_id) {
 const location_map &RuntimeContext::list_md() const { return md_locations_; }
 
 const location_map &RuntimeContext::list_accounts() const { return td_locations_; }
-
-double RuntimeContext::get_account_cash_limit(const std::string &source, const std::string &account) const {
-  uint32_t account_id = yijinjing::util::hash_str_32(account);
-  if (account_cash_limits_.find(account_id) == account_cash_limits_.end()) {
-    throw wingchun_error(fmt::format("invalid account {}_{}", source, account));
-  }
-  return account_cash_limits_.at(account_id);
-}
 
 int64_t RuntimeContext::get_trading_day() const { return app_.get_trading_day(); }
 

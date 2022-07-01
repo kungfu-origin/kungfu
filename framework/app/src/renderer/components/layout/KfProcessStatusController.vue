@@ -4,7 +4,14 @@ import { notification } from 'ant-design-vue';
 
 import KfProcessStatus from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfProcessStatus.vue';
 
-import { computed, ref, watch } from 'vue';
+import {
+  computed,
+  ref,
+  watch,
+  onMounted,
+  onBeforeUnmount,
+  getCurrentInstance,
+} from 'vue';
 import { SystemProcessName } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
 import {
   getInstrumentTypeColor,
@@ -27,6 +34,7 @@ import { KfCategoryTypes } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
 const { t } = VueI18n.global;
 
+const app = getCurrentInstance();
 const processControllerBoardVisible = ref<boolean>(false);
 const categoryList: (KfCategoryTypes | string)[] = [
   'system',
@@ -44,11 +52,14 @@ const {
 } = useProcessStatusDetailData();
 const { tdExtTypeMap, mdExtTypeMap } = useExtConfigsRelated();
 
+let isClosingWindow = false;
 let hasAlertMasterStop = false;
 let hasAlertLedgerStop = false;
 let hasAlertCacheDStop = false;
 
 watch(processStatusData, (newPSD, oldPSD) => {
+  if (isClosingWindow) return;
+
   if (newPSD.master !== 'online' && oldPSD.master === 'online') {
     if (!hasAlertMasterStop) {
       hasAlertMasterStop = true;
@@ -61,24 +72,24 @@ watch(processStatusData, (newPSD, oldPSD) => {
     }
   }
 
-  if (newPSD.ledger !== 'online' && oldPSD.ledger === 'online') {
-    if (!hasAlertLedgerStop) {
-      hasAlertLedgerStop = true;
-      notification.error({
-        message: t('ledger_interrupt'),
-        description: t('ledger_desc'),
-        duration: 8,
-        placement: 'bottomRight',
-      });
-    }
-  }
-
   if (newPSD.cached !== 'online' && oldPSD.cached === 'online') {
     if (!hasAlertCacheDStop) {
       hasAlertCacheDStop = true;
       notification.error({
         message: t('cached_interrupt'),
         description: t('cached_desc'),
+        duration: 8,
+        placement: 'bottomRight',
+      });
+    }
+  }
+
+  if (newPSD.ledger !== 'online' && oldPSD.ledger === 'online') {
+    if (!hasAlertLedgerStop) {
+      hasAlertLedgerStop = true;
+      notification.error({
+        message: t('ledger_interrupt'),
+        description: t('ledger_desc'),
         duration: 8,
         placement: 'bottomRight',
       });
@@ -120,6 +131,21 @@ const mainStatusWell = computed(() => {
 function handleOpenProcessControllerBoard(): void {
   processControllerBoardVisible.value = true;
 }
+
+onMounted(() => {
+  if (app?.proxy) {
+    const subscription = app?.proxy.$globalBus.subscribe((data) => {
+      if (data.tag === 'main') {
+        if (data.name === 'clear-process-before-quit-start') {
+          isClosingWindow = true;
+        }
+      }
+    });
+    onBeforeUnmount(() => {
+      subscription.unsubscribe();
+    });
+  }
+});
 </script>
 
 <template>

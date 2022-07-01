@@ -1,17 +1,6 @@
 from pykungfu import longfist as lf
 
 
-class Source:
-    SIM = "sim"
-    BAR = "bar"
-    CTP = "ctp"
-    XTP = "xtp"
-    OES = "oes"
-    TORA = "tora"
-    HUAR = "huar"
-    RONGH = "rongh"
-
-
 class Exchange:
     SSE = "SSE"
     SZE = "SZE"
@@ -43,7 +32,7 @@ LedgerCategory = lf.enums.LedgerCategory
 HedgeFlag = lf.enums.HedgeFlag
 CommissionRateMode = lf.enums.CommissionRateMode
 MarketType = lf.enums.MarketType
-SubscribeSecuDataType = lf.enums.SubscribeSecuDataType
+SubscribeDataType = lf.enums.SubscribeDataType
 SubscribeInstrumentType = lf.enums.SubscribeInstrumentType
 AllFinalOrderStatus = [
     int(OrderStatus.Filled),
@@ -60,7 +49,6 @@ InstrumentTypeInStockAccount = [
     InstrumentType.TechStock,
     InstrumentType.Index,
     InstrumentType.Repo,
-    InstrumentType.Crypto,
 ]
 
 ENUM_TYPES = [
@@ -78,6 +66,6 @@ ENUM_TYPES = [
     LedgerCategory,
     HedgeFlag,
     MarketType,
-    SubscribeSecuDataType,
+    SubscribeDataType,
     SubscribeInstrumentType,
 ]

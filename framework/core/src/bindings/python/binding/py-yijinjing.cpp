@@ -25,7 +25,6 @@ using namespace kungfu::yijinjing::cache;
 using namespace kungfu::yijinjing::data;
 using namespace kungfu::yijinjing::index;
 using namespace kungfu::yijinjing::journal;
-using namespace kungfu::yijinjing::log;
 using namespace kungfu::yijinjing::nanomsg;
 using namespace kungfu::yijinjing::practice;
 
@@ -141,10 +140,6 @@ template <typename DataType> DataType event_to_data(const event &e) { return e.d
 void bind(pybind11::module &&m) {
   yijinjing::ensure_sqlite_initilize();
 
-  m.def("thread_id", &util::get_thread_id);
-  m.def("in_color_terminal", &util::in_color_terminal);
-  m.def("color_print", &util::color_print);
-
   // nanosecond-time related
   m.def("now_in_nano", &time::now_in_nano);
   m.def("strftime", &time::strftime, py::arg("nanotime"), py::arg("format") = KUNGFU_TIMESTAMP_FORMAT);
@@ -152,11 +147,17 @@ void bind(pybind11::module &&m) {
         py::arg("format") = KUNGFU_TIMESTAMP_FORMAT);
   m.def("strfnow", &time::strfnow, py::arg("format") = KUNGFU_TIMESTAMP_FORMAT);
 
-  m.def("setup_log", &setup_log);
+  m.def("get_page_path", &page::get_page_path);
+
+  m.def("thread_id", &util::get_thread_id);
+  m.def("in_color_terminal", &util::in_color_terminal);
+  m.def("color_print", &util::color_print);
 
   m.def("hash_32", &util::hash_32, py::arg("key"), py::arg("length"), py::arg("seed") = KUNGFU_HASH_SEED);
   m.def("hash_str_32", &util::hash_str_32, py::arg("key"), py::arg("seed") = KUNGFU_HASH_SEED);
-  m.def("get_page_path", &page::get_page_path);
+
+  m.def("setup_log", &log::setup_log);
+  m.def("emit_log", &log::emit_log);
 
   py::enum_<nanomsg::protocol>(m, "protocol", py::arithmetic(), "Nanomsg Protocol")
       .value("REPLY", nanomsg::protocol::REPLY)

@@ -37,9 +37,8 @@ public:
    * Add account for strategy.
    * @param source TD group
    * @param account TD account ID
-   * @param cash_limit cash limit
    */
-  void add_account(const std::string &source, const std::string &account, double cash_limit) override;
+  void add_account(const std::string &source, const std::string &account) override;
 
   /**
    * Subscribe market data.
@@ -54,8 +53,8 @@ public:
    * Subscribe all from given MD
    * @param source MD group
    */
-  void subscribe_all(const std::string &source, uint8_t exchanges_ids = 0, uint64_t instrument_types = 0,
-                     uint64_t secu_datatypes = 0) override;
+  void subscribe_all(const std::string &source, uint8_t market_type = 0, uint64_t instrument_type = 0,
+                     uint64_t data_type = 0) override;
 
   /**
    * Insert order.
@@ -80,13 +79,6 @@ public:
    * @return order action ID
    */
   uint64_t cancel_order(uint64_t order_id) override;
-
-  /**
-   * Get cash limit for given account
-   * @param account account ID
-   * @return cash limit
-   */
-  double get_account_cash_limit(const std::string &source, const std::string &account) const override;
 
   /**
    * Get current trading day.
