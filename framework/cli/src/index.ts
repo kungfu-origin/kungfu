@@ -145,6 +145,19 @@ program
   });
 
 program
+  .command('showConfig')
+  .description('set system config of kungfu')
+  .action(async () => {
+    try {
+      await showGlobalSetting();
+      await process.exit(0);
+    } catch (err) {
+      console.error(err);
+      process.exit(1);
+    }
+  });
+
+program
   .command('clearLog')
   .description('clear all logs (should do it often)')
   .action(() => {
