@@ -337,3 +337,11 @@ export const colorNum = (num: number | string): string => {
     return colors.green(num.toString());
   }
 };
+
+export const getPadSpace = (num: number) => {
+  return new Array(num + 1).join(' ');
+};
+
+export const isObject = (val) => {
+  return Object.prototype.toString.call(val) === '[object Object]';
+};

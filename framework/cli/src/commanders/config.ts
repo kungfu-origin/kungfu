@@ -6,6 +6,7 @@ import {
 } from '@kungfu-trader/kungfu-js-api/config/globalSettings';
 import { findTargetFromArray } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import inquirer from 'inquirer';
+import JsonTree from '../assets/components/JsonTree';
 import { getPromptQuestionsBySettings } from '../assets/methods/utils';
 
 const kfGlobalSettings = getKfGlobalSettings();
@@ -52,6 +53,23 @@ export const setGlobalSetting = async () => {
   });
 };
 
+const getConfigTipsMap = (settings) => {
+  return settings.reduce((pre, cur) => {
+    const hasConfigProp = Object.prototype.hasOwnProperty.call(cur, 'config');
+    return {
+      ...pre,
+      [cur.key]: hasConfigProp ? getConfigTipsMap(cur.config) : cur.tip,
+    };
+  }, {});
+};
+
 export const showGlobalSetting = () => {
-  console.log(getKfGlobalSettingsValue());
+  const jsonTree = new JsonTree({
+    json: getKfGlobalSettingsValue(),
+    tipsMap: getConfigTipsMap(kfGlobalSettings),
+    aliasKeyMap: { close: 'CloseThreshold' },
+    keyWidth: 15,
+  });
+
+  console.log(jsonTree.build());
 };
