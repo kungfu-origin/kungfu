@@ -171,7 +171,7 @@ export default {
     GFD: 'GFD',
     GTC: 'GTC',
 
-    stock: '普通股票',
+    stock: '股票',
     future: '期货',
     bond: '债券',
     stock_option: '股票期权',
