@@ -126,7 +126,7 @@ enum class SubscribeInstrumentType : uint64_t {
 // for trading, different type has different minimum volume, price, accounting rules for making order
 enum class InstrumentType : int8_t {
   Unknown,     //未知
-  Stock,       //普通股票
+  Stock,       //股票
   Future,      //期货
   Bond,        //债券
   StockOption, //股票期权
