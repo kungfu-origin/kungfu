@@ -349,6 +349,8 @@ KF_DEFINE_PACK_TYPE(                                                 //
     (kungfu::array<char, INSTRUMENT_ID_LEN>, instrument_id),         //合约代码
     (kungfu::array<char, EXCHANGE_ID_LEN>, exchange_id),             //交易所代码
 
+    (InstrumentType, instrument_type), //合约类型
+
     (int64_t, start_time), //开始时间
     (int64_t, end_time),   //结束时间
 
