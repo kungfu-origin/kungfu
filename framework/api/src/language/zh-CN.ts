@@ -171,7 +171,7 @@ export default {
     GFD: 'GFD',
     GTC: 'GTC',
 
-    stock: '普通股票',
+    stock: '股票',
     future: '期货',
     bond: '债券',
     stock_option: '股票期权',
@@ -572,6 +572,7 @@ export default {
   可用资金: '可用资金',
   交易金额: '交易金额',
   保证金占用: '保证金占用',
+  保证金返还: '保证金返还',
   剩余资金: '剩余资金',
   剩余仓位: '剩余仓位',
 };

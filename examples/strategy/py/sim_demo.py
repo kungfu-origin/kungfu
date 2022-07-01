@@ -8,7 +8,7 @@ exchange = Exchange.SSE
 def pre_start(context):
     context.log.info(f"is_book_held: {context.is_book_held()}, is_positions_mirrored: {context.is_positions_mirrored()}")
     context.log.info("pre start")
-    context.add_account(source, "123456", 100000000.0)
+    context.add_account(source, "123456")
     context.subscribe(source, ["600000"], exchange)
 
 

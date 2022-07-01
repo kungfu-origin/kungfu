@@ -99,7 +99,8 @@ function getKungfuTradeValueCommonDataByExtType(
           'min-width': '45%',
         }"
       >
-        <span class="source-id__txt">{{ item.name }}</span>
+        <span class="source-name__txt">{{ item.name }}</span>
+        <span class="source-id__txt">{{ item.key }}</span>
         <a-tag
           v-for="(extType, index) in item.type"
           :key="index"
@@ -117,8 +118,15 @@ function getKungfuTradeValueCommonDataByExtType(
 </template>
 <style lang="less">
 .kf-set-source-modal {
+  .source-name__txt {
+    margin-right: 8px;
+    font-weight: bold;
+  }
+
   .source-id__txt {
     margin-right: 8px;
+    font-size: 14px;
+    color: @text-color-secondary;
   }
 }
 </style>
