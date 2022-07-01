@@ -253,7 +253,10 @@ exports.installSingleLib = async (
     binDir,
     libInfo.lib[platform][arch],
     (file) =>
-      `${libSiteURL}/${libName}/${libVersion}/lib/${platform}/${arch}/${file.replace(/\+/g, '%2B')}`,
+      `${libSiteURL}/${libName}/${libVersion}/lib/${platform}/${arch}/${file.replace(
+        /\+/g,
+        '%2B',
+      )}`,
     (localFilePath) => fse.chmodSync(localFilePath, '0755'),
   );
 };
