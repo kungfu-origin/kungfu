@@ -40,6 +40,7 @@ import {
   initFormStateByConfig,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import dayjs, { Dayjs } from 'dayjs';
+import customParseFormat from 'dayjs/plugin/advancedFormat';
 import {
   coreForScheduleTasksOptions,
   modeForCoreScheduleTasksOptions,
@@ -73,6 +74,8 @@ defineEmits<{
   (e: 'update:visible', visible: boolean): void;
   (e: 'close'): void;
 }>();
+
+dayjs.extend(customParseFormat);
 
 const store = useGlobalStore();
 const { globalSetting } = storeToRefs(store);
