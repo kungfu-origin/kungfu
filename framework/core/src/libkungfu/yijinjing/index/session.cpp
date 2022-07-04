@@ -81,7 +81,10 @@ void session_builder::close_session(const location_ptr &source_location, int64_t
   if (live_sessions_.find(source_location->uid) == live_sessions_.end()) {
     return;
   }
-  session_storage_->replace(live_sessions_.at(source_location->uid));
+
+  auto &session = live_sessions_.at(source_location->uid);
+  session.end_time = time;
+  session_storage_->replace(session);
 }
 
 void session_builder::update_session(const frame_ptr &frame) {
