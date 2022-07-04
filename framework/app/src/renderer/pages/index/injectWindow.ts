@@ -11,7 +11,7 @@ window.testCase = {};
 window.testCase.crashTheWatcher = () => {
   const id = [
     process.env.APP_TYPE || '',
-    process.env.DAEMON_TYPE || process.env.RENDERER_TYPE || '',
+    process.env.DAEMON_TYPE || process.env.RENDERER_ID || '',
   ].join('');
 
   return kf.watcher(KF_RUNTIME_DIR, kf.formatStringToHashHex(id), false, false);
