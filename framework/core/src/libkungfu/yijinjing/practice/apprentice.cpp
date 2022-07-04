@@ -269,21 +269,21 @@ void apprentice::checkin() {
 void apprentice::expect_start() {
   reader_->join(master_home_location_, 0, begin_time_);
   events_ | is(RequestStart::tag) | first() |
-      $(
-          [&](const event_ptr &event) {
-            started_ = true;
-            SPDLOG_INFO("ready to start");
-            on_start();
-          },
-          [&](const std::exception_ptr &e) {
-            try {
-              std::rethrow_exception(e);
-            } catch (const rx::empty_error &ex) {
-              SPDLOG_WARN("Unexpected rx empty {}", ex.what());
-            } catch (const std::exception &ex) {
-              SPDLOG_WARN("Unexpected exception before start {}", ex.what());
-            }
-          });
+      $([&](const event_ptr &event) {
+        started_ = true;
+        SPDLOG_INFO("ready to start");
+        on_start();
+      }
+        // [&](const std::exception_ptr &e) {
+        //   try {
+        //     std::rethrow_exception(e);
+        //   } catch (const rx::empty_error &ex) {
+        //     SPDLOG_WARN("Unexpected rx empty {}", ex.what());
+        //   } catch (const std::exception &ex) {
+        //     SPDLOG_WARN("Unexpected exception before start {}", ex.what());
+        //   }
+        // }
+      );
 }
 
 void apprentice::reset_time(const longfist::types::TimeReset &time_reset) {
