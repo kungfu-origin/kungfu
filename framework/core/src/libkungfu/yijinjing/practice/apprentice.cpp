@@ -102,32 +102,32 @@ void apprentice::request_cached(uint32_t source_id) {
 
 void apprentice::add_timer(int64_t nanotime, const std::function<void(const event_ptr &)> &callback) {
   events_ | timer(nanotime) |
-      $(
-          [&, callback](const event_ptr &event) {
-            try {
-              callback(event);
-            } catch (const std::exception &e) {
-              SPDLOG_ERROR("Unexpected exception by timer {}", e.what());
-            }
-          },
-          [&](std::exception_ptr e) {
-            try {
-              std::rethrow_exception(e);
-            } catch (const rx::empty_error &ex) {
-              SPDLOG_WARN("{}", ex.what());
-            } catch (const std::exception &ex) {
-              SPDLOG_WARN("Unexpected exception by timer{}", ex.what());
-            }
-          });
+      $([&, callback](const event_ptr &event) {
+        // try {
+        callback(event);
+        // } catch (const std::exception &e) {
+        //   SPDLOG_ERROR("Unexpected exception by timer {}", e.what());
+        // }
+      }
+        // [&](std::exception_ptr e) {
+        //   try {
+        //     std::rethrow_exception(e);
+        //   } catch (const rx::empty_error &ex) {
+        //     SPDLOG_WARN("{}", ex.what());
+        //   } catch (const std::exception &ex) {
+        //     SPDLOG_WARN("Unexpected exception by timer{}", ex.what());
+        //   }
+        // }
+      );
 }
 
 void apprentice::add_time_interval(int64_t duration, const std::function<void(const event_ptr &)> &callback) {
   events_ | time_interval(std::chrono::nanoseconds(duration)) | $([&, callback](const event_ptr &event) {
-    try {
-      callback(event);
-    } catch (const std::exception &e) {
-      SPDLOG_ERROR("Unexpected exception by time_interval {}", e.what());
-    }
+    // try {
+    callback(event);
+    // } catch (const std::exception &e) {
+    //   SPDLOG_ERROR("Unexpected exception by time_interval {}", e.what());
+    // }
   });
 }
 
@@ -269,21 +269,21 @@ void apprentice::checkin() {
 void apprentice::expect_start() {
   reader_->join(master_home_location_, 0, begin_time_);
   events_ | is(RequestStart::tag) | first() |
-      $(
-          [&](const event_ptr &event) {
-            started_ = true;
-            SPDLOG_INFO("ready to start");
-            on_start();
-          },
-          [&](const std::exception_ptr &e) {
-            try {
-              std::rethrow_exception(e);
-            } catch (const rx::empty_error &ex) {
-              SPDLOG_WARN("Unexpected rx empty {}", ex.what());
-            } catch (const std::exception &ex) {
-              SPDLOG_WARN("Unexpected exception before start {}", ex.what());
-            }
-          });
+      $([&](const event_ptr &event) {
+        started_ = true;
+        SPDLOG_INFO("ready to start");
+        on_start();
+      }
+        // [&](const std::exception_ptr &e) {
+        //   try {
+        //     std::rethrow_exception(e);
+        //   } catch (const rx::empty_error &ex) {
+        //     SPDLOG_WARN("Unexpected rx empty {}", ex.what());
+        //   } catch (const std::exception &ex) {
+        //     SPDLOG_WARN("Unexpected exception before start {}", ex.what());
+        //   }
+        // }
+      );
 }
 
 void apprentice::reset_time(const longfist::types::TimeReset &time_reset) {
