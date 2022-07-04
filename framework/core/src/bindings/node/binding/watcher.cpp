@@ -81,6 +81,10 @@ Watcher::Watcher(const Napi::CallbackInfo &info)
     config_store->profile_.setup();
   }
 
+  uv_work_.data = (void *)this;
+  SPDLOG_INFO("Watcher created for {}", get_home_uname());
+
+  // byPassRestore will be true after ui browserWindow reopen by crashed
   if (GetBypassRestore(info)) {
     return;
   }
@@ -96,9 +100,6 @@ Watcher::Watcher(const Napi::CallbackInfo &info)
   RestoreState(ledger_home_location_, today, INT64_MAX, sync_schema);
 
   shift(ledger_home_location_) >> state_bank_; // Load positions to restore bookkeeper
-
-  uv_work_.data = (void *)this;
-  SPDLOG_INFO("Watcher created for {}", get_home_uname());
 }
 
 Watcher::~Watcher() {
