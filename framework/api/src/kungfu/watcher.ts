@@ -14,8 +14,8 @@ export const watcher = ((): KungfuApi.Watcher | null => {
     'Init Watcher',
     'APP_TYPE',
     process.env.APP_TYPE || 'undefined',
-    'RENDERER_TYPE',
-    process.env.RENDERER_TYPE || 'undefined',
+    'RENDERER_ID',
+    process.env.RENDERER_ID || 'undefined',
     'DAEMON_TYPE',
     process.env.DAEMON_TYPE || 'undefined',
   );
@@ -24,8 +24,8 @@ export const watcher = ((): KungfuApi.Watcher | null => {
     'Init Watcher',
     'APP_TYPE',
     process.env.APP_TYPE || 'undefined',
-    'RENDERER_TYPE',
-    process.env.RENDERER_TYPE || 'undefined',
+    'RENDERER_ID',
+    process.env.RENDERER_ID || 'undefined',
     'DAEMON_TYPE',
     process.env.DAEMON_TYPE || 'undefined',
   );
@@ -39,20 +39,20 @@ export const watcher = ((): KungfuApi.Watcher | null => {
   }
 
   if (process.env.APP_TYPE === 'renderer') {
-    if (process.env.RENDERER_TYPE !== 'app') {
+    if (process.env.RENDERER_ID !== 'app') {
       return null;
     }
   }
 
   if (process.env.APP_TYPE === 'cli') {
-    if (process.env.RENDERER_TYPE !== 'dzxy') {
+    if (process.env.RENDERER_ID !== 'dzxy') {
       return null;
     }
   }
 
   const id = [
     process.env.APP_TYPE || '',
-    process.env.DAEMON_TYPE || process.env.RENDERER_TYPE || '',
+    process.env.DAEMON_TYPE || process.env.RENDERER_ID || '',
   ].join('');
 
   const bypassRestore = booleanProcessEnv(
