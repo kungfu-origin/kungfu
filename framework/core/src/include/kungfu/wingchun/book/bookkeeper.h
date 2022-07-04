@@ -20,6 +20,8 @@ class BookListener {
 public:
   virtual void on_book_sync_reset(const Book &old_book, const Book &new_book){};
   virtual void on_asset_sync_reset(const longfist::types::Asset &old_asset, const longfist::types::Asset &new_asset){};
+  virtual void on_asset_margin_sync_reset(const longfist::types::AssetMargin &old_asset_margin,
+                                          const longfist::types::AssetMargin &new_asset_margin){};
 };
 DECLARE_PTR(BookListener)
 
@@ -94,7 +96,7 @@ private:
   BookMap books_ = {};
   AccountingMethodMap accounting_methods_ = {};
   std::vector<BookListener_ptr> book_listeners_ = {};
-  BookMap books_replica_ = {}; //暂存从location::SYNC传来的asset和position信息
+  BookMap books_replica_ = {}; // 暂存从location::SYNC传来的asset和position信息
   std::unordered_map<uint32_t, bool> books_replica_asset_guards_ = {}; // Asset::tag添加对应<location_uid,true>
   std::unordered_map<uint32_t, bool> books_replica_asset_margin_guards_ = {}; // AssetMargin::tag-><location_uid,true>
   std::unordered_map<uint32_t, bool> books_replica_position_guard_ = {}; // PositionEnd::tag添加对应<location_uid,true>

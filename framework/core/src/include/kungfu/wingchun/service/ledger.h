@@ -59,7 +59,7 @@ private:
 
   void rebuild_positions(int64_t trigger_time, uint32_t strategy_uid);
 
-//  void mirror_positions(int64_t trigger_time, uint32_t strategy_uid);
+  //  void mirror_positions(int64_t trigger_time, uint32_t strategy_uid);
 
   void write_book_reset(int64_t trigger_time, uint32_t book_uid);
 

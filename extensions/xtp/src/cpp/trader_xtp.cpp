@@ -268,6 +268,11 @@ void TraderXTP::OnQueryAsset(XTPQueryAssetRsp *asset, XTPRI *error_info, int req
     account.holder_uid = get_home()->uid;
     account.update_time = yijinjing::time::now_in_nano();
     writer->close_data();
+    //    AssetMargin &asset_margin = writer->open_data<AssetMargin>(0);
+    //    strncpy(asset_margin.trading_day, this->trading_day_.c_str(), DATE_LEN);
+    //    asset_margin.holder_uid = get_home()->uid;
+    //    asset_margin.update_time = yijinjing::time::now_in_nano();
+    //    writer->close_data();
     enable_asset_sync();
   }
 }

@@ -79,6 +79,11 @@ class Strategy(wc.Strategy):
         self._on_asset_sync_reset = getattr(
             self._module, "on_asset_sync_reset", lambda ctx, old_asset, new_asset: None
         )
+        self._on_asset_margin_sync_reset = getattr(
+            self._module,
+            "on_asset_margin_sync_reset",
+            lambda ctx, old_asset_margin, new_asset_margin: None,
+        )
 
     def __call_proxy(self, func, *args):
         if inspect.iscoroutinefunction(func):
@@ -227,6 +232,16 @@ class Strategy(wc.Strategy):
 
     def on_asset_sync_reset(self, wc_context, old_asset, new_asset):
         self.__call_proxy(self._on_asset_sync_reset, self.ctx, old_asset, new_asset)
+
+    def on_asset_margin_sync_reset(
+        self, wc_context, old_asset_margin, new_asset_margin
+    ):
+        self.__call_proxy(
+            self._on_asset_margin_sync_reset,
+            self.ctx,
+            old_asset_margin,
+            new_asset_margin,
+        )
 
 
 class AsyncOrderAction:
