@@ -239,13 +239,13 @@ void Bookkeeper::try_sync_book_replica(uint32_t location_uid) {
 
     auto fun_asset_margin_compare = [](const AssetMargin &old_asset_margin, const AssetMargin &new_asset_margin) {
       bool changed = false;
-      changed |= old_asset_margin.total_asset == new_asset_margin.total_asset;   // 总资产
-      changed |= old_asset_margin.avail_margin == new_asset_margin.avail_margin; // 可用保证金
-      changed |= old_asset_margin.cash_margin == new_asset_margin.cash_margin;   // 融资占用保证金
-      changed |= old_asset_margin.short_margin == new_asset_margin.short_margin; // 融券占用保证金
-      changed |= old_asset_margin.margin == new_asset_margin.margin;             // 总占用保证金
-      changed |= old_asset_margin.cash_debt == new_asset_margin.cash_debt;       // 融资负债
-      changed |= old_asset_margin.short_cash == new_asset_margin.short_cash;     // 融券卖出金额
+      changed |= old_asset_margin.total_asset != new_asset_margin.total_asset;   // 总资产
+      changed |= old_asset_margin.avail_margin != new_asset_margin.avail_margin; // 可用保证金
+      changed |= old_asset_margin.cash_margin != new_asset_margin.cash_margin;   // 融资占用保证金
+      changed |= old_asset_margin.short_margin != new_asset_margin.short_margin; // 融券占用保证金
+      changed |= old_asset_margin.margin != new_asset_margin.margin;             // 总占用保证金
+      changed |= old_asset_margin.cash_debt != new_asset_margin.cash_debt;       // 融资负债
+      changed |= old_asset_margin.short_cash != new_asset_margin.short_cash;     // 融券卖出金额
       return changed;
     };
     asset_margin_changed |= fun_asset_margin_compare(old_book->asset_margin, new_book->asset_margin);
