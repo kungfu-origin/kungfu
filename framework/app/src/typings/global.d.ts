@@ -33,7 +33,7 @@ declare global {
       LANG_ENV: 'zh-CN' | 'en-US' | 'zh-HK' | undefined;
       APP_TYPE: 'cli' | 'renderer' | 'component' | 'daemon' | 'main';
       DAEMON_TYPE: string;
-      RENDERER_TYPE:
+      RENDERER_ID:
         | 'app'
         | 'admin'
         | 'logview'
