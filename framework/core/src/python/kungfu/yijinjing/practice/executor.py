@@ -157,6 +157,10 @@ class ExtensionExecutor:
         if loader.extension_dir:
             site.setup(loader.extension_dir)
             sys.path.insert(0, loader.extension_dir)
+        else:
+            dirname = os.path.dirname(self.ctx.path)
+            site.setup(dirname)
+            sys.path.insert(0, dirname)
 
         ctx = self.ctx
         ctx.location = yjj.location(
