@@ -87,6 +87,15 @@ void session_builder::close_session(const location_ptr &source_location, int64_t
   session_storage_->replace(session);
 }
 
+SessionMap &session_builder::close_all_sessions(int64_t time) {
+  for (auto &pair : live_sessions_) {
+    auto &session = pair.second;
+    session.end_time = time;
+    session_storage_->replace(session);
+  }
+  return live_sessions_;
+}
+
 void session_builder::update_session(const frame_ptr &frame) {
   if (live_sessions_.find(frame->source()) == live_sessions_.end()) {
     return;

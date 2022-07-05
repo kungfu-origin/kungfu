@@ -30,17 +30,19 @@ master::master(location_ptr home, bool low_latency)
   auto io_device = std::dynamic_pointer_cast<io_device_master>(get_io_device());
   writers_.emplace(location::PUBLIC, io_device->open_writer(0));
   get_writer(location::PUBLIC)->mark(start_time_, SessionStart::tag);
-  writers_.emplace(location::SYNC, io_device->open_writer(location::SYNC));
-  get_writer(location::SYNC)->mark(start_time_, SessionStart::tag);
+  // writers_.emplace(location::SYNC, io_device->open_writer(location::SYNC));
+  // get_writer(location::SYNC)->mark(start_time_, SessionStart::tag);
 }
 
-index::session_builder &master::get_session_builder() { return session_builder_; }
-
 void master::on_exit() {
-  auto io_device = std::dynamic_pointer_cast<io_device_master>(get_io_device());
   auto now = time::now_in_nano();
   get_writer(location::PUBLIC)->mark(now, SessionEnd::tag);
-  get_writer(location::SYNC)->mark(now, SessionEnd::tag);
+  auto &live_sessions = session_builder_.close_all_sessions(now);
+  for (auto &iter : live_sessions) {
+    auto &session = iter.second;
+    auto writer = get_writer(session.location_uid);
+    writer->mark(now, SessionEnd::tag);
+  }
 }
 
 void master::on_notify() { get_io_device()->get_publisher()->notify(); }
