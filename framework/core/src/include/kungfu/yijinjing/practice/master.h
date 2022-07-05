@@ -23,8 +23,6 @@ class master : public hero {
 public:
   explicit master(yijinjing::data::location_ptr home, bool low_latency = false);
 
-  index::session_builder &get_session_builder();
-
   void on_exit() override;
 
   void on_notify() override;
