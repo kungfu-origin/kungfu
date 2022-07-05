@@ -195,6 +195,9 @@ def load_strategy(ctx, path, key):
         return Strategy(ctx)
     else:
         spec = spec_from_file_location(os.path.basename(path).split(".")[0], path)
-        module_cpp = module_from_spec(spec)
-        spec.loader.exec_module(module_cpp)
-        return module_cpp.strategy()
+        try:
+            module_cpp = module_from_spec(spec)
+            spec.loader.exec_module(module_cpp)
+            return module_cpp.strategy()
+        except:
+            return Strategy(ctx)
