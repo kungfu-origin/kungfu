@@ -16,7 +16,7 @@ namespace kungfu::wingchun::broker {
 TraderVendor::TraderVendor(locator_ptr locator, const std::string &group, const std::string &name, bool low_latency)
     : BrokerVendor(location::make_shared(mode::LIVE, category::TD, group, name, std::move(locator)), low_latency) {}
 
-void TraderVendor::set_service(Trader_ptr service) { service_ = std::move(service); }
+void TraderVendor::set_service(Trader_ptr service) { service_ = std::move(service); }reset
 
 void TraderVendor::on_start() {
   BrokerVendor::on_start();
@@ -27,8 +27,7 @@ void TraderVendor::on_start() {
   events_ | is(PositionRequest::tag) | $$(service_->req_position());
   events_ | is(RequestHistoryOrder::tag) | $$(service_->req_history_order(event));
   events_ | is(RequestHistoryTrade::tag) | $$(service_->req_history_trade(event));
-  events_ | is(AssetSync::tag) | $$(service_->req_account());
-  events_ | is(AssetSync::tag) | $$(service_->write_empty_asset_margin());
+  events_ | is(AssetSync::tag) | $$(service_->handle_asset_sync());
   events_ | is(PositionSync::tag) | $$(service_->req_position());
   events_ | is(ResetBookRequest::tag) | $$(get_writer(location::PUBLIC)->mark(now(), ResetBookRequest::tag));
 
@@ -95,11 +94,8 @@ void Trader::enable_asset_margin_sync() { sync_asset_margin_ = true; }
 
 void Trader::enable_positions_sync() { sync_position_ = true; }
 
-bool Trader::write_empty_asset_margin() {
-  SPDLOG_INFO(
-      "这不是一个两融柜台, 将会自动发送一个空的AssetMargin数据. 两融柜台需要发送一个存有数据的AssetMargin, 请override "
-      "write_empty_asset_margin函数取消写入. 并且在使用writer写入完AssetMargin之后调用enable_asset_margin_sync()函数, "
-      "非两融柜台需要屏蔽此日志也请override此函数");
+bool Trader::write_default_asset_margin() {
+  SPDLOG_INFO("写入缺省 AssetMargin 中，两融柜台实现需按照 Trader::write_default_asset_margin 文档进行适配修改");
   sync_asset_margin_ = true;
   auto writer = get_asset_writer();
   AssetMargin &asset_margin = writer->open_data<AssetMargin>();
@@ -107,6 +103,11 @@ bool Trader::write_empty_asset_margin() {
   asset_margin.update_time = yijinjing::time::now_in_nano();
   writer->close_data();
   return false;
+}
+
+void Trader::handle_asset_sync() {
+  req_account();
+  write_default_asset_margin();
 }
 
 } // namespace kungfu::wingchun::broker
