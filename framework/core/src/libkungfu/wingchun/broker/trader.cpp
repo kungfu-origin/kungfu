@@ -95,7 +95,7 @@ void Trader::enable_asset_margin_sync() { sync_asset_margin_ = true; }
 void Trader::enable_positions_sync() { sync_position_ = true; }
 
 bool Trader::write_default_asset_margin() {
-  SPDLOG_INFO("写入缺省 AssetMargin 中，两融柜台实现需按照 Trader::write_default_asset_margin 文档进行适配修改");
+  SPDLOG_INFO("Write an empty AssetMargin by default");
   sync_asset_margin_ = true;
   auto writer = get_asset_margin_writer();
   AssetMargin &asset_margin = writer->open_data<AssetMargin>();
