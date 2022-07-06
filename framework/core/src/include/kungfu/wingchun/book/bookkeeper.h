@@ -20,6 +20,8 @@ class BookListener {
 public:
   virtual void on_book_sync_reset(const Book &old_book, const Book &new_book){};
   virtual void on_asset_sync_reset(const longfist::types::Asset &old_asset, const longfist::types::Asset &new_asset){};
+  virtual void on_asset_margin_sync_reset(const longfist::types::AssetMargin &old_asset_margin,
+                                          const longfist::types::AssetMargin &new_asset_margin){};
 };
 DECLARE_PTR(BookListener)
 
@@ -56,6 +58,10 @@ public:
 
   void add_book_listener(const BookListener_ptr &book_listener);
 
+  void mirror_positions(int64_t trigger_time, uint32_t strategy_uid);
+
+  void try_update_position_end(const longfist::types::PositionEnd &position_end);
+
   template <typename TradingData, typename ApplyMethod = void (AccountingMethod::*)(Book_ptr, const TradingData &)>
   void update_book(const event_ptr &event, ApplyMethod method) {
     update_book(event->gen_time(), event->source(), event->dest(), event->data<TradingData>(), method);
@@ -82,6 +88,23 @@ public:
     }
   }
 
+  template <typename T, typename RouteA = void (Bookkeeper::*)(const T &),
+            typename RouteB = void (Bookkeeper::*)(const T &)>
+  constexpr decltype(auto) fork(uint32_t dest, RouteA t1, RouteB t2) {
+    return kungfu::rx::$([&, dest, t1, t2](const event_ptr &event) {
+      if (event->msg_type() != T::tag) {
+        return;
+      }
+      if (event->dest() == dest) {
+        auto &data = event->data<T>();
+        (this->*t1)(data);
+      } else {
+        auto &data = event->data<T>();
+        (this->*t2)(data);
+      }
+    });
+  }
+
 private:
   yijinjing::practice::apprentice &app_;
   broker::Client &broker_client_;
@@ -92,9 +115,10 @@ private:
   BookMap books_ = {};
   AccountingMethodMap accounting_methods_ = {};
   std::vector<BookListener_ptr> book_listeners_ = {};
-  BookMap books_replica_ = {}; //暂存从location::SYNC传来的asset和position信息
-  std::unordered_map<uint32_t, bool> books_replica_asset_guards_ = {}; //收到PositionEnd::tag添加对应<location_uid,true>
-  std::unordered_map<uint32_t, bool> books_replica_position_guard_ = {}; //收到Asset::tag添加对应<location_uid,true>
+  BookMap books_replica_ = {}; // 暂存从location::SYNC传来的asset和position信息
+  std::unordered_map<uint32_t, bool> books_replica_asset_guards_ = {}; // Asset::tag添加对应<location_uid,true>
+  std::unordered_map<uint32_t, bool> books_replica_asset_margin_guards_ = {}; // AssetMargin::tag-><location_uid,true>
+  std::unordered_map<uint32_t, bool> books_replica_position_guard_ = {}; // PositionEnd::tag添加对应<location_uid,true>
 
   static constexpr auto bypass = [](yijinjing::practice::apprentice *app, bool bypass_quotes) {
     return rx::filter([=](const event_ptr &event) {
@@ -121,7 +145,7 @@ private:
 
   void try_update_position_replica(const longfist::types::Position &position);
 
-  void update_position_guard(uint32_t location_uid);
+  void update_position_guard(const longfist::types::PositionEnd &position_end);
 
   Book_ptr get_book_replica(uint32_t location_uid);
 };
