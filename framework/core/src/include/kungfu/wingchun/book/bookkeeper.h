@@ -18,7 +18,7 @@ typedef std::unordered_map<longfist::enums::InstrumentType, AccountingMethod_ptr
 FORWARD_DECLARE_CLASS_PTR(Context)
 class BookListener {
 public:
-  virtual void on_book_sync_reset(const Book &old_book, const Book &new_book){};
+  virtual void on_position_sync_reset(const Book &old_book, const Book &new_book){};
   virtual void on_asset_sync_reset(const longfist::types::Asset &old_asset, const longfist::types::Asset &new_asset){};
   virtual void on_asset_margin_sync_reset(const longfist::types::AssetMargin &old_asset_margin,
                                           const longfist::types::AssetMargin &new_asset_margin){};
@@ -88,6 +88,7 @@ public:
     }
   }
 
+  /// 根据event->dest() == dest 选择触发t1还是t2函数
   template <typename T, typename RouteA = void (Bookkeeper::*)(const T &),
             typename RouteB = void (Bookkeeper::*)(const T &)>
   constexpr decltype(auto) fork(uint32_t dest, RouteA t1, RouteB t2) {
@@ -104,6 +105,14 @@ public:
       }
     });
   }
+
+  /// 用新的asset, asset_margin替换原来策略的, 再修改holder_uid和ledger_category
+  //  template <typename T> void copy_asset(T &to, const T &from) {
+  //    auto st_holder_uid = to.holder_uid;
+  //    longfist::copy(to, from);
+  //    to.holder_uid = st_holder_uid;
+  //    to.ledger_category = LedgerCategory::Strategy;
+  //  };
 
 private:
   yijinjing::practice::apprentice &app_;
@@ -136,7 +145,7 @@ private:
 
   void try_update_position(const longfist::types::Position &position);
 
-  // 把books_replica_中location_uid对应的book复制到books_，然后重置asset_guards和position_guards为false
+  /// 把books_replica_中location_uid对应的book复制到books_，然后重置asset_guards和position_guards为false
   void try_sync_book_replica(uint32_t location_uid);
 
   void try_update_asset_replica(const longfist::types::Asset &asset);

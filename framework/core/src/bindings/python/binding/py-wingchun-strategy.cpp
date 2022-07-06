@@ -97,8 +97,8 @@ public:
     PYBIND11_OVERLOAD(void, strategy::Strategy, on_history_trade, context, history_trade, location);
   }
 
-  void on_book_sync_reset(strategy::Context_ptr &context, const Book &old_book, const Book &new_book) override {
-    PYBIND11_OVERLOAD(void, strategy::Strategy, on_book_sync_reset, context, old_book, new_book);
+  void on_position_sync_reset(strategy::Context_ptr &context, const Book &old_book, const Book &new_book) override {
+    PYBIND11_OVERLOAD(void, strategy::Strategy, on_position_sync_reset, context, old_book, new_book);
   }
 
   void on_asset_sync_reset(strategy::Context_ptr &context, const Asset &old_asset, const Asset &new_asset) override {
@@ -169,7 +169,7 @@ void bind_strategy(pybind11::module &m) {
       .def("on_transaction", &strategy::Strategy::on_transaction)
       .def("on_order", &strategy::Strategy::on_order)
       .def("on_trade", &strategy::Strategy::on_trade)
-      .def("on_book_sync_reset", &strategy::Strategy::on_book_sync_reset)
+      .def("on_position_sync_reset", &strategy::Strategy::on_position_sync_reset)
       .def("on_asset_sync_reset", &strategy::Strategy::on_asset_sync_reset)
       .def("on_asset_margin_sync_reset", &strategy::Strategy::on_asset_margin_sync_reset)
       .def("on_history_order", &strategy::Strategy::on_history_order)

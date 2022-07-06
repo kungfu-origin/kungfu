@@ -17,9 +17,9 @@ using namespace kungfu::yijinjing::data;
 using namespace kungfu::yijinjing::cache;
 
 namespace kungfu::wingchun::service {
-Ledger::Ledger(locator_ptr locator, mode m, bool low_latency, bool is_sync)
+Ledger::Ledger(locator_ptr locator, mode m, bool low_latency)
     : apprentice(location::make_shared(m, category::SYSTEM, "service", "ledger", std::move(locator)), low_latency),
-      broker_client_(*this), bookkeeper_(*this, broker_client_), is_sync_(is_sync) {}
+      broker_client_(*this), bookkeeper_(*this, broker_client_) {}
 
 void Ledger::on_exit() {}
 
@@ -44,10 +44,8 @@ void Ledger::on_start() {
   events_ | is(PositionEnd::tag) | filter([&](const event_ptr &event) { return event->dest() != location::SYNC; }) |
       $$(update_account_book(event->gen_time(), event->data<PositionEnd>().holder_uid););
 
-  if (is_sync_) {
-    add_time_interval(time_unit::NANOSECONDS_PER_MINUTE, [&](auto e) { request_asset_sync(e->gen_time()); });
-    add_time_interval(time_unit::NANOSECONDS_PER_MINUTE, [&](auto e) { request_position_sync(e->gen_time()); });
-  }
+  add_time_interval(time_unit::NANOSECONDS_PER_MINUTE, [&](auto e) { request_asset_sync(e->gen_time()); });
+  add_time_interval(time_unit::NANOSECONDS_PER_MINUTE, [&](auto e) { request_position_sync(e->gen_time()); });
   refresh_books();
 }
 
