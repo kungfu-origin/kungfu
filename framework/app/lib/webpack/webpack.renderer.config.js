@@ -34,13 +34,12 @@ const webpackConfig = (argv) => {
       rules: [
         {
           test: /\.css$/,
-          use: ['style-loader', 'postcss-loader', 'css-loader'],
+          use: ['style-loader', 'css-loader'],
         },
         {
           test: /\.less$/,
           use: [
             'style-loader',
-            'postcss-loader',
             'css-loader',
             {
               loader: 'less-loader',
