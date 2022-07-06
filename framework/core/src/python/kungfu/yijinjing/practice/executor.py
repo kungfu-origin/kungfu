@@ -157,6 +157,10 @@ class ExtensionExecutor:
         if loader.extension_dir:
             site.setup(loader.extension_dir)
             sys.path.insert(0, loader.extension_dir)
+        else:
+            dirname = os.path.dirname(self.ctx.path)
+            site.setup(dirname)
+            sys.path.insert(0, dirname)
 
         ctx = self.ctx
         ctx.location = yjj.location(
@@ -195,6 +199,9 @@ def load_strategy(ctx, path, key):
         return Strategy(ctx)
     else:
         spec = spec_from_file_location(os.path.basename(path).split(".")[0], path)
-        module_cpp = module_from_spec(spec)
-        spec.loader.exec_module(module_cpp)
-        return module_cpp.strategy()
+        try:
+            module_cpp = module_from_spec(spec)
+            spec.loader.exec_module(module_cpp)
+            return module_cpp.strategy()
+        except:
+            return Strategy(ctx)

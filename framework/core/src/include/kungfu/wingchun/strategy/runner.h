@@ -86,6 +86,9 @@ private:
 
     void on_asset_sync_reset(const longfist::types::Asset &old_asset, const longfist::types::Asset &new_asset) override;
 
+    void on_asset_margin_sync_reset(const longfist::types::AssetMargin &old_asset_margin,
+                                    const longfist::types::AssetMargin &new_asset_margin) override;
+
   private:
     Runner &runner_;
   };

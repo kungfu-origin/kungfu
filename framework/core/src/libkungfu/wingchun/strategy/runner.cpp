@@ -171,4 +171,12 @@ void Runner::BookListener::on_asset_sync_reset(const longfist::types::Asset &old
   }
 }
 
+void Runner::BookListener::on_asset_margin_sync_reset(const longfist::types::AssetMargin &old_asset_margin,
+                                                      const longfist::types::AssetMargin &new_asset_margin) {
+  auto context = std::dynamic_pointer_cast<Context>(runner_.context_);
+  for (const auto &strategy : runner_.strategies_) {
+    strategy->on_asset_margin_sync_reset(context, old_asset_margin, new_asset_margin);
+  }
+}
+
 } // namespace kungfu::wingchun::strategy
