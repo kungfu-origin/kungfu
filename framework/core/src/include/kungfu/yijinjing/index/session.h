@@ -13,6 +13,7 @@
 
 namespace kungfu::yijinjing::index {
 typedef std::vector<longfist::types::Session> SessionVector;
+typedef std::unordered_map<uint32_t, longfist::types::Session> SessionMap;
 
 class session_finder {
 public:
@@ -41,12 +42,14 @@ public:
 
   void close_session(const data::location_ptr &source_location, int64_t time);
 
+  SessionMap &close_all_sessions(int64_t time);
+
   void update_session(const journal::frame_ptr &frame);
 
   void rebuild_index_db();
 
 private:
-  std::unordered_map<uint32_t, longfist::types::Session> live_sessions_ = {};
+  SessionMap live_sessions_ = {};
 };
 } // namespace kungfu::yijinjing::index
 

@@ -94,7 +94,7 @@ inline static uint32_t find_page_size(const data::location_ptr &location, uint32
   if ((location->category == longfist::enums::category::TD ||
        location->category == longfist::enums::category::STRATEGY) &&
       dest_id != 0) {
-    return 4 * MB;
+    return 128 * MB;
   }
   return MB;
 }
