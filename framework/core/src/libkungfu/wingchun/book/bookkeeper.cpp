@@ -272,17 +272,15 @@ void Bookkeeper::try_sync_book_replica(uint32_t location_uid) {
       longfist::copy(old_asset, old_book->asset);       // old_asset拷贝一份用于回调返回
       longfist::copy(old_book->asset, new_book->asset); // new_asset替换掉old_asset
 
-      for (auto &bk_pair : books_) {
-        auto &st_book = bk_pair.second;
-        if (st_book->asset.ledger_category == LedgerCategory::Strategy and
-            app_.has_channel(st_book->asset.holder_uid, location_uid)) {
-          /// 用新的asset替换原来策略的, 再修改holder_uid和ledger_category
-          auto st_holder_uid = st_book->asset.holder_uid;
-          longfist::copy(st_book->asset, new_book->asset);
-          st_book->asset.holder_uid = st_holder_uid;
-          st_book->asset.ledger_category = LedgerCategory::Strategy;
-        }
-      }
+      /// 现在暂时只修改td的信息, 不要去修改策略的信息
+      //      for (auto &bk_pair : books_) {
+      //        auto &st_book = bk_pair.second;
+      //        if (st_book->asset.ledger_category == LedgerCategory::Strategy and
+      //            app_.has_channel(st_book->asset.holder_uid, location_uid)) {
+      //          /// 用新的asset替换原来策略的, 再修改holder_uid和ledger_category
+      //          copy_asset(st_book->asset, new_book->asset);
+      //        }
+      //      }
       for (auto &book_listener : book_listeners_) {
         book_listener->on_asset_sync_reset(old_asset, new_book->asset);
       }
@@ -295,44 +293,42 @@ void Bookkeeper::try_sync_book_replica(uint32_t location_uid) {
       longfist::copy(old_asset_margin, old_book->asset_margin);       // old_asset_margin拷贝一份用于回调返回
       longfist::copy(old_book->asset_margin, new_book->asset_margin); // new_asset_margin替换掉old_asset_margin
 
-      for (auto &bk_pair : books_) {
-        auto &st_book = bk_pair.second;
-        if (st_book->asset.ledger_category == LedgerCategory::Strategy and
-            app_.has_channel(st_book->asset.holder_uid, location_uid)) {
-          /// 用新的asset_margin替换原来策略的, 再修改holder_uid和ledger_category
-          auto st_holder_uid = st_book->asset_margin.holder_uid;
-          longfist::copy(st_book->asset_margin, new_book->asset_margin);
-          st_book->asset_margin.holder_uid = st_holder_uid;
-          st_book->asset_margin.ledger_category = LedgerCategory::Strategy;
-        }
-      }
+      /// 现在暂时只修改td的信息, 不要去修改策略的信息
+      //      for (auto &bk_pair : books_) {
+      //        auto &st_book = bk_pair.second;
+      //        if (st_book->asset.ledger_category == LedgerCategory::Strategy and
+      //            app_.has_channel(st_book->asset.holder_uid, location_uid)) {
+      //          /// 用新的asset_margin替换原来策略的, 再修改holder_uid和ledger_category
+      //          copy_asset(st_book->asset_margin, new_book->asset_margin);
+      //        }
+      //      }
       for (auto &book_listener : book_listeners_) {
         book_listener->on_asset_margin_sync_reset(old_asset_margin, new_book->asset_margin);
       }
     }
 
-    /// position改变更新book，包括asset和position都更新并回调on_book_sync_reset
+    /// position改变更新book，包括asset和position都更新并回调on_position_sync_reset
     if (position_changed) {
       /// 先进行td_book的替换, 否则下面mirror_position还是只会拿到旧的数据
       books_.erase(location_uid);
       books_.insert_or_assign(location_uid, new_book);
       books_replica_.erase(location_uid);
 
-      /// 重置策略的book, 并把所有和其相关的td的position数据mirror一份过来
-      for (auto &bk_pair : books_) {
-        auto &st_book = bk_pair.second;
-        if (st_book->asset.ledger_category == LedgerCategory::Strategy and
-            app_.has_channel(location_uid, st_book->asset.holder_uid)) {
-          st_book->asset.avail = new_book->asset.avail;
-          st_book->asset.margin = new_book->asset.margin;
-          st_book->asset.update_time = new_book->asset.update_time;
-          mirror_positions(app_.now(), st_book->asset.holder_uid);
-        }
-      }
+      /// 现在暂时只修改td的信息, 不要去修改策略的信息
+      // 重置策略的book, 并把所有和其相关的td的position数据mirror一份过来
+      //      for (auto &bk_pair : books_) {
+      //        auto &st_book = bk_pair.second;
+      //        if (st_book->asset.ledger_category == LedgerCategory::Strategy and
+      //            app_.has_channel(location_uid, st_book->asset.holder_uid)) {
+      //          copy_asset(st_book->asset, new_book->asset);
+      //          copy_asset(st_book->asset_margin, new_book->asset_margin);
+      //          mirror_positions(app_.now(), st_book->asset.holder_uid);
+      //        }
+      //      }
 
       /// 删除了watcher重新计算一遍的逻辑, 这里更新完了以后再调用回调, watcher那边获得的数据是更新完之后的
       for (auto &book_listener : book_listeners_) {
-        book_listener->on_book_sync_reset(*old_book, *new_book);
+        book_listener->on_position_sync_reset(*old_book, *new_book);
       }
     }
   }

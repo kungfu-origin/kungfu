@@ -18,8 +18,7 @@ typedef std::unordered_map<uint32_t, longfist::types::Position> PositionMap;
 
 class Ledger : public yijinjing::practice::apprentice {
 public:
-  explicit Ledger(yijinjing::data::locator_ptr locator, longfist::enums::mode m, bool low_latency = false,
-                  bool is_sync = true);
+  explicit Ledger(yijinjing::data::locator_ptr locator, longfist::enums::mode m, bool low_latency = false);
 
   ~Ledger() override = default;
 

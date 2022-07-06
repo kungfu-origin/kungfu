@@ -82,7 +82,7 @@ private:
 
     ~BookListener() = default;
 
-    void on_book_sync_reset(const wingchun::book::Book &old_book, const wingchun::book::Book &new_book) override;
+    void on_position_sync_reset(const wingchun::book::Book &old_book, const wingchun::book::Book &new_book) override;
 
     void on_asset_sync_reset(const longfist::types::Asset &old_asset, const longfist::types::Asset &new_asset) override;
 

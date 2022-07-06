@@ -73,8 +73,8 @@ class Strategy(wc.Strategy):
         self._on_order_action_error = getattr(
             self._module, "on_order_action_error", lambda ctx, error, location: None
         )
-        self._on_book_sync_reset = getattr(
-            self._module, "on_book_sync_reset", lambda ctx, old_book, new_book: None
+        self._on_position_sync_reset = getattr(
+            self._module, "on_position_sync_reset", lambda ctx, old_book, new_book: None
         )
         self._on_asset_sync_reset = getattr(
             self._module, "on_asset_sync_reset", lambda ctx, old_asset, new_asset: None
@@ -227,8 +227,8 @@ class Strategy(wc.Strategy):
         self.ctx.trading_day = kft.to_datetime(daytime)
         self.__call_proxy(self._on_trading_day, self.ctx, daytime)
 
-    def on_book_sync_reset(self, wc_context, old_book, new_book):
-        self.__call_proxy(self._on_book_sync_reset, self.ctx, old_book, new_book)
+    def on_position_sync_reset(self, wc_context, old_book, new_book):
+        self.__call_proxy(self._on_position_sync_reset, self.ctx, old_book, new_book)
 
     def on_asset_sync_reset(self, wc_context, old_asset, new_asset):
         self.__call_proxy(self._on_asset_sync_reset, self.ctx, old_asset, new_asset)
