@@ -59,20 +59,17 @@ void Bookkeeper::on_start(const rx::connectable_observable<event_ptr> &events) {
   events | is(OrderInput::tag) | $$(update_book<OrderInput>(event, &AccountingMethod::apply_order_input));
   events | is(Order::tag) | $$(update_book<Order>(event, &AccountingMethod::apply_order));
   events | is(Trade::tag) | $$(update_book<Trade>(event, &AccountingMethod::apply_trade));
-  events | is(Asset::tag) | to(location::SYNC) | $$(try_update_asset_replica(event->data<Asset>()));
-  events | is(AssetMargin::tag) | to(location::SYNC) | $$(try_update_assetmargin_replica(event->data<AssetMargin>()));
-  events | is(Position::tag) | to(location::SYNC) | $$(try_update_position_replica(event->data<Position>()));
-  events | is(PositionEnd::tag) | to(location::SYNC) | $$(update_position_guard(event->data<PositionEnd>().holder_uid));
-
-  auto fun_not_to_sync = [&](const event_ptr &event) { return event->dest() != location::SYNC; };
-  events | is(Asset::tag) | filter(fun_not_to_sync) | $$(try_update_asset(event->data<Asset>()));
-  events | is(AssetMargin::tag) | filter(fun_not_to_sync) | $$(try_update_asset_margin(event->data<AssetMargin>()));
-  events | is(Position::tag) | filter(fun_not_to_sync) | $$(try_update_position(event->data<Position>()));
-  events | is(PositionEnd::tag) | filter(fun_not_to_sync) |
-      $$(get_book(event->data<PositionEnd>().holder_uid)->update(event->gen_time()));
-
+  events | fork<Asset>(location::SYNC, &Bookkeeper::try_update_asset_replica, &Bookkeeper::try_update_asset);
+  events | fork<AssetMargin>(location::SYNC, &Bookkeeper::try_update_assetmargin_replica,
+                             &Bookkeeper::try_update_asset_margin);
+  events | fork<Position>(location::SYNC, &Bookkeeper::try_update_position_replica, &Bookkeeper::try_update_position);
+  events | fork<PositionEnd>(location::SYNC, &Bookkeeper::update_position_guard, &Bookkeeper::try_update_position_end);
   events | is(TradingDay::tag) | $$(on_trading_day(event->data<TradingDay>().timestamp));
   events | is(ResetBookRequest::tag) | $$(drop_book(event->source()));
+}
+
+void Bookkeeper::try_update_position_end(const PositionEnd &position_end) {
+  get_book(position_end.holder_uid)->update(app_.now());
 }
 
 void Bookkeeper::on_order_input(int64_t update_time, uint32_t source, uint32_t dest, const OrderInput &input) {
@@ -217,6 +214,7 @@ void Bookkeeper::try_sync_book_replica(uint32_t location_uid) {
     return;
   }
 
+  /// sync的Asset, AssetMargin, PositionEnd都收到后才开始同步TD和策略的信息, 并使用TD的新book替换旧book
   if (books_replica_asset_guards_.at(location_uid) and books_replica_position_guard_.at(location_uid) and
       books_replica_asset_margin_guards_.at(location_uid)) {
     books_replica_asset_guards_.insert_or_assign(location_uid, false);
@@ -372,9 +370,9 @@ Book_ptr Bookkeeper::get_book_replica(uint32_t location_uid) {
   return books_replica_.at(location_uid);
 }
 
-void Bookkeeper::update_position_guard(uint32_t location_uid) {
-  books_replica_position_guard_.insert_or_assign(location_uid, true);
-  try_sync_book_replica(location_uid);
+void Bookkeeper::update_position_guard(const PositionEnd &position_end) {
+  books_replica_position_guard_.insert_or_assign(position_end.holder_uid, true);
+  try_sync_book_replica(position_end.holder_uid);
 }
 
 void Bookkeeper::add_book_listener(const BookListener_ptr &book_listener) { book_listeners_.push_back(book_listener); }

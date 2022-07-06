@@ -60,6 +60,8 @@ public:
 
   void mirror_positions(int64_t trigger_time, uint32_t strategy_uid);
 
+  void try_update_position_end(const longfist::types::PositionEnd &position_end);
+
   template <typename TradingData, typename ApplyMethod = void (AccountingMethod::*)(Book_ptr, const TradingData &)>
   void update_book(const event_ptr &event, ApplyMethod method) {
     update_book(event->gen_time(), event->source(), event->dest(), event->data<TradingData>(), method);
@@ -84,6 +86,23 @@ public:
     if (dest != yijinjing::data::location::PUBLIC) {
       apply_and_update(dest);
     }
+  }
+
+  template <typename T, typename RouteA = void (Bookkeeper::*)(const T &),
+            typename RouteB = void (Bookkeeper::*)(const T &)>
+  constexpr decltype(auto) fork(uint32_t dest, RouteA t1, RouteB t2) {
+    return kungfu::rx::$([&, dest, t1, t2](const event_ptr &event) {
+      if (event->msg_type() != T::tag) {
+        return;
+      }
+      if (event->dest() == dest) {
+        auto &data = event->data<T>();
+        (this->*t1)(data);
+      } else {
+        auto &data = event->data<T>();
+        (this->*t2)(data);
+      }
+    });
   }
 
 private:
@@ -126,9 +145,9 @@ private:
 
   void try_update_position_replica(const longfist::types::Position &position);
 
-  void update_position_guard(uint32_t location_uid);
+  void update_position_guard(const longfist::types::PositionEnd &position_end);
 
   Book_ptr get_book_replica(uint32_t location_uid);
 };
 } // namespace kungfu::wingchun::book
-#endif // WINGCHUN_BOOKKEEPER_H
+#endif // WINGCHUN_

@@ -16,7 +16,7 @@ namespace kungfu::wingchun::broker {
 TraderVendor::TraderVendor(locator_ptr locator, const std::string &group, const std::string &name, bool low_latency)
     : BrokerVendor(location::make_shared(mode::LIVE, category::TD, group, name, std::move(locator)), low_latency) {}
 
-void TraderVendor::set_service(Trader_ptr service) { service_ = std::move(service); }reset
+void TraderVendor::set_service(Trader_ptr service) { service_ = std::move(service); }
 
 void TraderVendor::on_start() {
   BrokerVendor::on_start();
@@ -97,7 +97,7 @@ void Trader::enable_positions_sync() { sync_position_ = true; }
 bool Trader::write_default_asset_margin() {
   SPDLOG_INFO("写入缺省 AssetMargin 中，两融柜台实现需按照 Trader::write_default_asset_margin 文档进行适配修改");
   sync_asset_margin_ = true;
-  auto writer = get_asset_writer();
+  auto writer = get_asset_margin_writer();
   AssetMargin &asset_margin = writer->open_data<AssetMargin>();
   asset_margin.holder_uid = get_home_uid();
   asset_margin.update_time = yijinjing::time::now_in_nano();
