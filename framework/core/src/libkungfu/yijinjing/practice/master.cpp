@@ -28,6 +28,7 @@ master::master(location_ptr home, bool low_latency)
   }
 
   auto io_device = std::dynamic_pointer_cast<io_device_master>(get_io_device());
+  session_builder_.open_session(master_home_location_, start_time_);
   writers_.emplace(location::PUBLIC, io_device->open_writer(location::PUBLIC));
   get_writer(location::PUBLIC)->mark(start_time_, SessionStart::tag);
 }
