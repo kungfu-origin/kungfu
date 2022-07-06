@@ -22,11 +22,13 @@ exports.build = () => {
   const targetAppDistDir = ensureDir(targetDistDir, 'app');
   const targetPublicDistDir = ensureDir(targetDistDir, 'public');
   const targetCliDistDir = ensureDir(targetDistDir, 'cli');
+  const targetCliDistPublicDir = ensureDir(getCliDir(), 'dist', 'public');
 
   fse.removeSync(targetDistDir);
   fse.copySync(appDistDir, targetAppDistDir);
   fse.copySync(publicDir, targetPublicDistDir);
   fse.copySync(cliDistDir, targetCliDistDir);
+  fse.copySync(publicDir, targetCliDistPublicDir);
 };
 
 exports.package = async () => {

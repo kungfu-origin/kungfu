@@ -113,16 +113,24 @@ void session_builder::rebuild_index_db() {
   for (const auto &location : locator->list_locations("*", "*", "*", "*")) {
     SPDLOG_TRACE("investigating journal for [{:08x}] {}", location->uid, location->uname);
     locations.emplace(location->uid, location);
+
+    if (location->category != category::SYSTEM or location->group != "master") {
+      continue;
+    }
+
     for (const auto dest_uid : locator->list_location_dest(location)) {
+      SPDLOG_INFO("list_location_dest ---->>> dest_uid {} {}", dest_uid, locations.at(dest_uid)->uname);
       reader->join(location, dest_uid, 0);
     }
   }
   session_storage_->remove_all<Session>();
   while (reader->data_available()) {
     auto location = reader->current_page()->get_location();
+    SPDLOG_INFO("location ===== {}", location->uname);
     auto frame = reader->current_frame();
     try {
       if (frame->msg_type() == SessionStart::tag) {
+        SPDLOG_INFO("------111");
         open_session(location, frame->gen_time());
       } else if (frame->msg_type() == SessionEnd::tag) {
         close_session(location, frame->gen_time());

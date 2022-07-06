@@ -38,8 +38,10 @@ void master::on_exit() {
   auto &live_sessions = session_builder_.close_all_sessions(now);
   for (auto &iter : live_sessions) {
     auto &session = iter.second;
-    auto writer = get_writer(session.location_uid);
-    writer->mark(now, SessionEnd::tag);
+    if (has_writer(session.location_uid)) {
+      auto writer = get_writer(session.location_uid);
+      writer->mark(now, SessionEnd::tag);
+    }
   }
 }
 
@@ -79,6 +81,7 @@ void master::register_app(const event_ptr &event) {
   reader_->join(app_location, master_cmd_location->uid, now);
 
   session_builder_.open_session(app_location, event->gen_time());
+  app_cmd_writer->mark(event->gen_time(), SessionStart::tag);
 
   public_writer->write(event->gen_time(), *std::dynamic_pointer_cast<Location>(app_location));
   public_writer->write(event->gen_time(), register_data);
@@ -86,8 +89,6 @@ void master::register_app(const event_ptr &event) {
   require_write_to(event->gen_time(), app_location->uid, location::PUBLIC);
   require_write_to(event->gen_time(), app_location->uid, location::SYNC);
   require_write_to(event->gen_time(), app_location->uid, master_cmd_location->uid);
-
-  app_cmd_writer->mark(event->gen_time(), SessionStart::tag);
 
   write_time_reset(event->gen_time(), app_cmd_writer);
   write_trading_day(event->gen_time(), app_cmd_writer);

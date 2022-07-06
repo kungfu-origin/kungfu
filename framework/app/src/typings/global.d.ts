@@ -32,7 +32,7 @@ declare global {
     interface ProcessEnv {
       LANG_ENV: 'zh-CN' | 'en-US' | 'zh-HK' | undefined;
       APP_TYPE: 'cli' | 'renderer' | 'component' | 'daemon' | 'main';
-      DAEMON_TYPE: string;
+      DAEMON_ID: string;
       RENDERER_ID:
         | 'app'
         | 'admin'
