@@ -150,4 +150,4 @@ private:
   Book_ptr get_book_replica(uint32_t location_uid);
 };
 } // namespace kungfu::wingchun::book
-#endif // WINGCHUN_
+#endif // WINGCHUN_BOOKKEEPER_H
