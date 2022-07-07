@@ -77,6 +77,12 @@ export const getConfigSettings = (
       required: true,
     },
     {
+      key: 'is_swap',
+      name: t('futureArbitrageConfig.is_swap'),
+      type: 'checkbox',
+      default: false,
+    },
+    {
       key: 'price_type',
       name: t('futureArbitrageConfig.price_type'),
       type: 'priceType',

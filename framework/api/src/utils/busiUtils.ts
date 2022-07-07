@@ -1503,7 +1503,7 @@ export const KfConfigValueNumberType = [
   ...Object.keys(numberEnumRadioType || {}),
 ];
 
-export const KfConfigValueBooleanType = ['bool'];
+export const KfConfigValueBooleanType = ['bool', 'checkbox'];
 
 export const KfConfigValueArrayType = ['files', 'instruments', 'table'];
 

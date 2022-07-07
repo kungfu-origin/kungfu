@@ -416,6 +416,7 @@ export default {
     side: '买卖',
     offset: '开平',
     hedge_flag: '套保',
+    is_swap: '互换',
     price_type: '方式',
     limit_price: '价差 A-B',
     volume: '下单量',

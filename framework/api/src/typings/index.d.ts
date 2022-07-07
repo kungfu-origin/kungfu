@@ -94,6 +94,7 @@ declare namespace KungfuApi {
     | 'timePicker' //string
     | 'select'
     | 'radio'
+    | 'checkbox'
     | 'bool'
     | 'int'
     | 'float'
