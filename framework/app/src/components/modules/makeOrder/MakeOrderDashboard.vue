@@ -697,7 +697,7 @@ async function confirmOrderPlace(
 
   await confirmModal(
     t('tradingConfig.place_confirm'),
-    dealOrderPlaceVNode(makeOrderInput, orderCount),
+    dealOrderPlaceVNode(makeOrderInput, orderCount, false),
   );
 
   return Promise.resolve(tdProcessId);

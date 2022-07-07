@@ -24,6 +24,8 @@ export default {
   save_file: 'save file',
   detail: 'detail',
   ok: 'ok',
+  yes: 'yes',
+  no: 'no',
 
   edit: 'Edit',
   copy: 'Copy',

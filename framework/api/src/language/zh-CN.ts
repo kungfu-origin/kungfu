@@ -24,6 +24,8 @@ export default {
   save_file: '保存文件',
   detail: '详情',
   ok: '好的',
+  yes: '是',
+  no: '否',
 
   edit: '编辑',
   copy: '复制',

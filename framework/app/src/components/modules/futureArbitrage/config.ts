@@ -102,3 +102,12 @@ export const getConfigSettings = (
       required: true,
     },
   ].filter((item) => !!item) as KungfuApi.KfConfigItem[];
+
+export const getFutureArbitrageOrderTrans = (
+  side?: SideEnum | undefined,
+): Record<string, string> => {
+  return getConfigSettings('td', side).reduce((pre, cur) => {
+    pre[cur.key] = cur.name;
+    return pre;
+  }, {});
+};

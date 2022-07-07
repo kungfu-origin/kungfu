@@ -1118,6 +1118,10 @@ export const dealHedgeFlag = (
   return HedgeFlag[+hedgeFlag as HedgeFlagEnum];
 };
 
+export const dealIsSwap = (isSwap: boolean) => {
+  return { name: isSwap ? t('yes') : t('no') };
+};
+
 export const getKfCategoryData = (
   category: KfCategoryTypes,
 ): KungfuApi.KfTradeValueCommonData => {
@@ -1666,6 +1670,8 @@ export const dealOrderInputItem = (
       orderInputResolved[key] = dealOffset(inputData.offset);
     } else if (key === 'hedge_flag') {
       orderInputResolved[key] = dealHedgeFlag(inputData.hedge_flag);
+    } else if (key === 'is_swap') {
+      orderInputResolved[key] = dealIsSwap(inputData.is_swap);
     } else {
       orderInputResolved[key] = {
         name: inputData[key],

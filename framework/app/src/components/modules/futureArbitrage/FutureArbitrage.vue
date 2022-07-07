@@ -17,10 +17,12 @@ import {
   useProcessStatusDetailData,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
 import {
+  confirmModal,
   messagePrompt,
   useDashboardBodySize,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
+import { dealOrderPlaceVNode } from '../makeOrder/utils';
 
 const { t } = VueI18n.global;
 const { error } = messagePrompt();
@@ -118,7 +120,7 @@ function handleResetMakeOrderForm() {
 function handleMakeOrder() {
   formRef.value
     .validate()
-    .then(() => {
+    .then(async () => {
       const instrumentA = formState.value.instrument_A.toString();
       const instrumentB = formState.value.instrument_B.toString();
       const instrumnetResolved_A =
@@ -142,6 +144,7 @@ function handleMakeOrder() {
         side,
         offset,
         hedge_flag,
+        is_swap,
       } = formState.value;
 
       const instrumentId = `${future_arbitrage_code} ${instrumnetResolved_A.instrumentId}&${instrumnetResolved_B.instrumentId}`;
@@ -155,6 +158,7 @@ function handleMakeOrder() {
         side: +side,
         offset: +(offset !== undefined ? offset : +side === 0 ? 0 : 1),
         hedge_flag: +(hedge_flag || 0),
+        is_swap: !!is_swap,
       };
 
       if (!currentGlobalKfLocation.value) {
@@ -175,6 +179,11 @@ function handleMakeOrder() {
         );
         return;
       }
+
+      await confirmModal(
+        t('tradingConfig.place_confirm'),
+        dealOrderPlaceVNode(makeOrderInput, 1, true),
+      );
 
       makeOrderByOrderInput(
         window.watcher,

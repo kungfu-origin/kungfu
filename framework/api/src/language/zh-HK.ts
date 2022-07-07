@@ -24,6 +24,8 @@ export default {
   save_file: '保存文件',
   detail: '详情',
   ok: '好的',
+  yes: '是',
+  no: '否',
 
   edit: '编辑',
   copy: '复制',
@@ -416,6 +418,7 @@ export default {
     side: '互换交易意向',
     offset: '开平',
     hedge_flag: '套保',
+    is_swap: '互换',
     price_type: '方式',
     limit_price: '价差 A-B',
     volume: '交易意向总量',

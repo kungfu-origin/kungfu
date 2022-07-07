@@ -5,6 +5,7 @@ import {
   dealDirection,
   dealHedgeFlag,
   dealInstrumentType,
+  dealIsSwap,
   dealLocationUID,
   dealOffset,
   dealOrderStat,
@@ -103,6 +104,9 @@ export const dealTradingDataItem = (
   }
   if ('hedge_flag' in item) {
     itemResolved.hedge_flag = dealHedgeFlag(item.hedge_flag).name;
+  }
+  if ('is_swap' in item) {
+    itemResolved.is_swap = dealIsSwap(item.is_swap).name;
   }
   if ('source' in item && 'dest' in item && watcher) {
     itemResolved.source = resolveAccountId(
