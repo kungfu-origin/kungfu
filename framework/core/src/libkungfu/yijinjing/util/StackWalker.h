@@ -171,7 +171,7 @@ protected:
 
 // INFO: If you want, you can use the RtlCaptureContext if you only target XP and later...
 //       But I currently use it in x64/IA64 environments...
-//#if defined(_M_IX86) && (_WIN32_WINNT <= 0x0500) && (_MSC_VER < 1400)
+// #if defined(_M_IX86) && (_WIN32_WINNT <= 0x0500) && (_MSC_VER < 1400)
 
 #if defined(_M_IX86)
 #ifdef CURRENT_THREAD_VIA_EXCEPTION

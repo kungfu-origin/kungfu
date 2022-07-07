@@ -88,7 +88,7 @@ inline std::string get_layout_name(layout l) {
   }
 }
 
-//权限订阅数据类型
+// 权限订阅数据类型
 enum class MarketType : uint8_t {
   All,   ///< 表示全市场
   BSE,   ///< 北交所
@@ -102,7 +102,7 @@ enum class MarketType : uint8_t {
   HKEx ///< 港交所(暂时不支持直连港交所, 港交所行情数据通过深交所和上交所的港股通获取, 市场类型为kSZSE/kSSE)
 };
 
-//证券数据类型
+// 证券数据类型
 enum class SubscribeDataType : uint64_t {
   All = 0x000000000000,         ///< 订阅全部证券数据类别
   Snapshot = 0x000000000001,    ///< 订阅快照数据类别
@@ -125,18 +125,18 @@ enum class SubscribeInstrumentType : uint64_t {
 
 // for trading, different type has different minimum volume, price, accounting rules for making order
 enum class InstrumentType : int8_t {
-  Unknown,     //未知
-  Stock,       //股票
-  Future,      //期货
-  Bond,        //债券
-  StockOption, //股票期权
-  TechStock,   //科技股
-  Fund,        //基金
-  Index,       //指数
-  Repo,        //回购
-  Warrant,     //认权证
-  Iopt,        //牛熊证
-  Crypto,      //数字货币
+  Unknown,     // 未知
+  Stock,       // 股票
+  Future,      // 期货
+  Bond,        // 债券
+  StockOption, // 股票期权
+  TechStock,   // 科技股
+  Fund,        // 基金
+  Index,       // 指数
+  Repo,        // 回购
+  Warrant,     // 认权证
+  Iopt,        // 牛熊证
+  Crypto,      // 数字货币
 };
 
 inline std::ostream &operator<<(std::ostream &os, InstrumentType t) { return os << int8_t(t); }
@@ -150,25 +150,25 @@ enum class BsFlag : int8_t { Unknown, Buy, Sell };
 inline std::ostream &operator<<(std::ostream &os, BsFlag t) { return os << int8_t(t); }
 
 enum class Side : int8_t {
-  Buy,                       //买入
-  Sell,                      //卖出
-  Lock,                      //锁仓
-  Unlock,                    //解锁
-  Exec,                      //行权
-  Drop,                      //放弃行权
-  Purchase,                  //申购
-  Redemption,                //赎回
-  Split,                     //拆分
-  Merge,                     //合并
-  MarginTrade,               //融资买入
-  ShortSell,                 //融券卖出
-  RepayMargin,               //卖券还款
-  RepayStock,                //买券还券
-  CashRepayMargin,           //现金还款
-  StockRepayStock,           //现券还券
-  SurplusStockTransfer,      //余券划转
-  GuaranteeStockTransferIn,  //担保品转入
-  GuaranteeStockTransferOut, //担保品转出
+  Buy,                       // 买入
+  Sell,                      // 卖出
+  Lock,                      // 锁仓
+  Unlock,                    // 解锁
+  Exec,                      // 行权
+  Drop,                      // 放弃行权
+  Purchase,                  // 申购
+  Redemption,                // 赎回
+  Split,                     // 拆分
+  Merge,                     // 合并
+  MarginTrade,               // 融资买入
+  ShortSell,                 // 融券卖出
+  RepayMargin,               // 卖券还款
+  RepayStock,                // 买券还券
+  CashRepayMargin,           // 现金还款
+  StockRepayStock,           // 现券还券
+  SurplusStockTransfer,      // 余券划转
+  GuaranteeStockTransferIn,  // 担保品转入
+  GuaranteeStockTransferOut, // 担保品转出
   Unknown = 99
 };
 
@@ -189,13 +189,13 @@ enum class OrderActionFlag : int8_t {
 inline std::ostream &operator<<(std::ostream &os, OrderActionFlag t) { return os << int8_t(t); }
 
 enum class PriceType : int8_t {
-  Limit, //限价,证券通用
-  Any, //市价，证券通用，对于股票上海为最优五档剩余撤销，深圳为即时成交剩余撤销，建议客户采用
-  FakBest5,    //上海深圳最优五档即时成交剩余撤销，不需要报价
-  ForwardBest, //深圳本方方最优价格申报, 不需要报价
-  ReverseBest, //上海最优五档即时成交剩余转限价, 深圳对手方最优价格申报，不需要报价
-  Fak,         //深圳即时成交剩余撤销，不需要报价
-  Fok,         //深圳市价全额成交或者撤销，不需要报价
+  Limit, // 限价,证券通用
+  Any, // 市价，证券通用，对于股票上海为最优五档剩余撤销，深圳为即时成交剩余撤销，建议客户采用
+  FakBest5,    // 上海深圳最优五档即时成交剩余撤销，不需要报价
+  ForwardBest, // 深圳本方方最优价格申报, 不需要报价
+  ReverseBest, // 上海最优五档即时成交剩余转限价, 深圳对手方最优价格申报，不需要报价
+  Fak,         // 深圳即时成交剩余撤销，不需要报价
+  Fok,         // 深圳市价全额成交或者撤销，不需要报价
   UnKnown
 };
 

@@ -23,10 +23,8 @@ import {
 } from '../assets/actions/tradingData';
 import {
   dealKfPrice,
-  getIdByKfLocation,
   setTimerPromiseTask,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
-import { LedgerCategoryEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';
 
 // 定义全局变量
 const WIDTH_LEFT_PANEL = 60;

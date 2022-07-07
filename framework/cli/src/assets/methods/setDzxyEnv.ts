@@ -1,1 +1,1 @@
-process.env.RENDERER_TYPE = 'dzxy';
+process.env.RENDERER_ID = 'dzxy';

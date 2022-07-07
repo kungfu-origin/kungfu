@@ -67,7 +67,7 @@ public:
       auto cm_mr =
           get_instrument_contract_multiplier_and_margin_ratio(book, quote.exchange_id, quote.instrument_id, position);
 
-      //此处仅计算结算价，但需要根据实时行情变化
+      // 此处仅计算结算价，但需要根据实时行情变化
       if (is_valid_price(quote.settlement_price)) {
         auto margin_pre = position.margin;
         position.margin = cm_mr.contract_multiplier * position.settlement_price * position.volume * cm_mr.margin_ratio;
