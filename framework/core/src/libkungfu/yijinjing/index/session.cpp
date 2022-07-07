@@ -107,30 +107,49 @@ void session_builder::update_session(const frame_ptr &frame) {
 }
 
 void session_builder::rebuild_index_db() {
-  std::unordered_map<uint32_t, location_ptr> locations = {};
+  std::unordered_map<std::string, location_ptr> formatstr_to_locations = {};
   auto locator = io_device_->get_locator();
   auto reader = io_device_->open_reader_to_subscribe();
   for (const auto &location : locator->list_locations("*", "*", "*", "*")) {
     SPDLOG_TRACE("investigating journal for [{:08x}] {}", location->uid, location->uname);
-    locations.emplace(location->uid, location);
+
+    if (location->category != category::SYSTEM or location->group != "master") {
+      formatstr_to_locations.emplace(fmt::format("{:08x}", location->uid), location);
+    }
+
+    if (location->category == category::SYSTEM and location->group == "master" and location->name == "master") {
+      formatstr_to_locations.emplace(location->name, location);
+    }
+
     for (const auto dest_uid : locator->list_location_dest(location)) {
       reader->join(location, dest_uid, 0);
     }
   }
+
   session_storage_->remove_all<Session>();
   while (reader->data_available()) {
     auto location = reader->current_page()->get_location();
+    std::string uid_str = location->name;
     auto frame = reader->current_frame();
+    if (formatstr_to_locations.find(uid_str) == formatstr_to_locations.end()) {
+      reader->next();
+      continue;
+    }
+
     try {
       if (frame->msg_type() == SessionStart::tag) {
-        open_session(location, frame->gen_time());
+        open_session(formatstr_to_locations.at(uid_str), frame->gen_time());
       } else if (frame->msg_type() == SessionEnd::tag) {
-        close_session(location, frame->gen_time());
+        close_session(formatstr_to_locations.at(uid_str), frame->gen_time());
       } else if (location->category != category::SYSTEM or location->group != "master") {
+        update_session(frame);
+      } else if (location->category == category::SYSTEM and location->group == "master" and
+                 location->name == "master") {
         update_session(frame);
       }
     } catch (const std::exception &ex) {
-      SPDLOG_ERROR("problematic frame at {}, {}", location->uname, ex.what());
+      SPDLOG_ERROR("problematic frame at {}, {}, {}", location->uname, formatstr_to_locations.at(uid_str)->uname,
+                   ex.what());
     }
     reader->next();
   }

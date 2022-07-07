@@ -156,10 +156,10 @@ void Runner::prepare(const event_ptr &event) {
 
 Runner::BookListener::BookListener(Runner &runner) : runner_(runner) {}
 
-void Runner::BookListener::on_book_sync_reset(const book::Book &old_book, const book::Book &new_book) {
+void Runner::BookListener::on_position_sync_reset(const book::Book &old_book, const book::Book &new_book) {
   auto context = std::dynamic_pointer_cast<Context>(runner_.context_);
   for (const auto &strategy : runner_.strategies_) {
-    strategy->on_book_sync_reset(context, old_book, new_book);
+    strategy->on_position_sync_reset(context, old_book, new_book);
   }
 }
 
@@ -168,6 +168,14 @@ void Runner::BookListener::on_asset_sync_reset(const longfist::types::Asset &old
   auto context = std::dynamic_pointer_cast<Context>(runner_.context_);
   for (const auto &strategy : runner_.strategies_) {
     strategy->on_asset_sync_reset(context, old_asset, new_asset);
+  }
+}
+
+void Runner::BookListener::on_asset_margin_sync_reset(const longfist::types::AssetMargin &old_asset_margin,
+                                                      const longfist::types::AssetMargin &new_asset_margin) {
+  auto context = std::dynamic_pointer_cast<Context>(runner_.context_);
+  for (const auto &strategy : runner_.strategies_) {
+    strategy->on_asset_margin_sync_reset(context, old_asset_margin, new_asset_margin);
   }
 }
 
