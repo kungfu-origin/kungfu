@@ -2,9 +2,11 @@ import inquirer from 'inquirer';
 import colors from 'colors';
 import { KfCategoryTypes } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import {
+  getAvailDaemonList,
   getIdByKfLocation,
   getProcessIdByKfLocation,
   initFormStateByConfig,
+  loopToRunProcess,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { getAllKfConfigOriginData } from '@kungfu-trader/kungfu-js-api/actions';
 import {
@@ -12,6 +14,8 @@ import {
   Pm2ProcessStatus,
 } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
 import { PromptInputType, PromptQuestion } from 'src/typings';
+import { startExtDaemon } from '@kungfu-trader/kungfu-js-api/utils/processUtils';
+import { Proc } from 'pm2';
 
 export const parseToString = (
   targetList: (string | number)[],
@@ -344,4 +348,18 @@ export const getPadSpace = (num: number) => {
 
 export const isObject = (val) => {
   return Object.prototype.toString.call(val) === '[object Object]';
+};
+
+export const startAllExtDaemons = async () => {
+  const availDaemons = await getAvailDaemonList();
+  return loopToRunProcess<void | Proc>(
+    availDaemons.map((item) => {
+      return () =>
+        startExtDaemon(getProcessIdByKfLocation(item), item.cwd, item.script)
+          .then((res) => {
+            return res;
+          })
+          .catch((err) => console.error(err));
+    }),
+  );
 };

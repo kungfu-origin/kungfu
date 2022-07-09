@@ -50,6 +50,9 @@ import {
   startLedger,
   startCacheD,
   startMaster,
+  pm2LaunchBus,
+  Pm2Packet,
+  Pm2Bus,
 } from '@kungfu-trader/kungfu-js-api/utils/processUtils';
 
 import {
@@ -111,6 +114,26 @@ app.mount('#app');
 useComponenets(app, router);
 
 const globalStore = useGlobalStore();
+
+pm2LaunchBus((err: Error, pm2_bus: Pm2Bus) => {
+  if (err) {
+    console.error('pm2 launchBus Error', err);
+    return;
+  }
+
+  pm2_bus &&
+    pm2_bus.on('process:msg', (packet: Pm2Packet) => {
+      const { type, body } = packet.data;
+      console.log(type, body);
+      switch (type) {
+        case 'GlobalBus':
+          globalBus.next(body);
+          break;
+        default:
+          break;
+      }
+    });
+});
 
 if (process.env.RELOAD_AFTER_CRASHED === 'false') {
   preStartAll()

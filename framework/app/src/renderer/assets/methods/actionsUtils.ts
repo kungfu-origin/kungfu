@@ -714,6 +714,15 @@ export const usePreStartAndQuitApp = (): {
                 break;
             }
           }
+
+          if (data.tag === 'coreRestart') {
+            if (data.name === 'core') {
+              console.log('pre receive');
+              preStartSystemLoadingData.archive = 'loading';
+              preStartSystemLoadingData.watcher = 'loading';
+              preStartSystemLoadingData.extraResourcesLoading = 'loading';
+            }
+          }
         },
       );
 

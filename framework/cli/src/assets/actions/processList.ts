@@ -31,10 +31,14 @@ import { ProcessListItem } from 'src/typings';
 import colors from 'colors';
 import { Widgets } from 'blessed';
 import { KF_HOME } from '@kungfu-trader/kungfu-js-api/config/pathConfig';
-import { dealStatus, getCategoryName } from '../methods/utils';
+import {
+  dealStatus,
+  getCategoryName,
+  startAllExtDaemons,
+} from '../methods/utils';
 import { globalState } from '../actions/globalState';
 
-export const mdTdStrategyObservable = () => {
+export const mdTdStrategyDaemonObservable = () => {
   return new Observable<Record<KfCategoryTypes, KungfuApi.KfConfig[]>>(
     (observer) => {
       getAllKfConfigOriginData().then(
@@ -159,18 +163,18 @@ export const specificProcessListObserver = (kfLocation: KungfuApi.KfConfig) =>
 
 export const processListObservable = () =>
   combineLatest(
-    mdTdStrategyObservable(),
+    mdTdStrategyDaemonObservable(),
     processStatusDataObservable(),
     appStatesObservable(),
     (
-      mdTdStrategy: Record<KfCategoryTypes, KungfuApi.KfConfig[]>,
+      mdTdStrategyDaemon: Record<KfCategoryTypes, KungfuApi.KfConfig[]>,
       ps: {
         processStatus: Pm2ProcessStatusData;
         processStatusWithDetail: Pm2ProcessStatusDetailData;
       },
       appStates: Record<string, BrokerStateStatusTypes>,
     ): ProcessListItem[] => {
-      const { md, td, strategy } = mdTdStrategy;
+      const { md, td, strategy, daemon } = mdTdStrategyDaemon;
       const { processStatus, processStatusWithDetail } = ps;
 
       const mdList: ProcessListItem[] = md.map((item) => {
@@ -214,6 +218,22 @@ export const processListObservable = () =>
       });
 
       const strategyList: ProcessListItem[] = strategy.map((item) => {
+        const processId = getProcessIdByKfLocation(item);
+        return {
+          processId,
+          processName: processId,
+          typeName: getCategoryName(item.category),
+          category: item.category,
+          group: item.group,
+          name: item.name,
+          value: JSON.parse(item.value || '{}'),
+          status: processStatus[processId] || '--',
+          statusName: dealStatus(processStatus[processId] || '--'),
+          monit: processStatusWithDetail[processId]?.monit,
+        };
+      });
+
+      const daemonList: ProcessListItem[] = daemon.map((item) => {
         const processId = getProcessIdByKfLocation(item);
         return {
           processId,
@@ -290,6 +310,7 @@ export const processListObservable = () =>
           statusName: dealStatus(processStatus['dzxy'] || '--'),
           monit: processStatusWithDetail['dzxy']?.monit,
         },
+        ...daemonList,
         ...mdList,
         ...tdList,
         ...strategyList,
@@ -436,5 +457,7 @@ const switchMaster = async (status: boolean): Promise<void> => {
     await startLedger(false);
     await delayMilliSeconds(1000);
     await startDzxy();
+    await delayMilliSeconds(1000);
+    await startAllExtDaemons();
   }
 };

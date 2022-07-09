@@ -53,9 +53,14 @@ const {
 const { tdExtTypeMap, mdExtTypeMap } = useExtConfigsRelated();
 
 let isClosingWindow = false;
+let isRestartCore = 0;
 let hasAlertMasterStop = false;
 let hasAlertLedgerStop = false;
 let hasAlertCacheDStop = false;
+
+const getNotificationType = (flag: number) => {
+  return flag ? 'warning' : 'error';
+};
 
 watch(processStatusData, (newPSD, oldPSD) => {
   if (isClosingWindow) return;
@@ -63,7 +68,8 @@ watch(processStatusData, (newPSD, oldPSD) => {
   if (newPSD.master !== 'online' && oldPSD.master === 'online') {
     if (!hasAlertMasterStop) {
       hasAlertMasterStop = true;
-      notification.error({
+      console.log(isRestartCore, getNotificationType(isRestartCore));
+      notification[getNotificationType(isRestartCore++)]({
         message: t('master_interrupt'),
         description: t('master_desc'),
         duration: 8,
@@ -75,7 +81,8 @@ watch(processStatusData, (newPSD, oldPSD) => {
   if (newPSD.cached !== 'online' && oldPSD.cached === 'online') {
     if (!hasAlertCacheDStop) {
       hasAlertCacheDStop = true;
-      notification.error({
+      console.log(isRestartCore, getNotificationType(isRestartCore));
+      notification[getNotificationType(isRestartCore++)]({
         message: t('cached_interrupt'),
         description: t('cached_desc'),
         duration: 8,
@@ -87,7 +94,8 @@ watch(processStatusData, (newPSD, oldPSD) => {
   if (newPSD.ledger !== 'online' && oldPSD.ledger === 'online') {
     if (!hasAlertLedgerStop) {
       hasAlertLedgerStop = true;
-      notification.error({
+      console.log(isRestartCore, getNotificationType(isRestartCore));
+      notification[getNotificationType(isRestartCore++)]({
         message: t('ledger_interrupt'),
         description: t('ledger_desc'),
         duration: 8,
@@ -95,6 +103,8 @@ watch(processStatusData, (newPSD, oldPSD) => {
       });
     }
   }
+
+  if (isRestartCore >= 4) isRestartCore = 0;
 });
 
 watch(appStates, (newAppStates, oldAppStates) => {
@@ -138,6 +148,12 @@ onMounted(() => {
       if (data.tag === 'main') {
         if (data.name === 'clear-process-before-quit-start') {
           isClosingWindow = true;
+        }
+      }
+      if (data.tag === 'coreRestart') {
+        if (data.name === 'core') {
+          !isRestartCore && (isRestartCore = 1);
+          console.log('process received', isRestartCore);
         }
       }
     });

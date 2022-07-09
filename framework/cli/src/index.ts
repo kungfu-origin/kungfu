@@ -146,7 +146,7 @@ program
 
 program
   .command('showConfig')
-  .description('set system config of kungfu')
+  .description('show system config of kungfu')
   .action(async () => {
     try {
       await showGlobalSetting();

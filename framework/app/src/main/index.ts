@@ -386,7 +386,7 @@ process
     );
   });
 
-registerScheduleTasks(createWindow);
-ipcMain.on('schedule-setting-refresh', () => {
-  registerScheduleTasks(createWindow);
-});
+// registerScheduleTasks(createWindow);
+// ipcMain.on('schedule-setting-refresh', () => {
+//   registerScheduleTasks(createWindow);
+// });
