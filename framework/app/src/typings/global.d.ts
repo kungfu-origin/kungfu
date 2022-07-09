@@ -33,13 +33,7 @@ declare global {
       LANG_ENV: 'zh-CN' | 'en-US' | 'zh-HK' | undefined;
       APP_TYPE: 'cli' | 'renderer' | 'component' | 'daemon' | 'main';
       DAEMON_ID: string;
-      RENDERER_ID:
-        | 'app'
-        | 'admin'
-        | 'logview'
-        | 'makeOrder'
-        | 'codeEditor'
-        | 'dzxy';
+      RENDERER_ID: string;
       EXTENSION_DIRS: string;
       KFC_DIR: string;
       ELECTRON_RUN_AS_NODE: boolean;
