@@ -216,7 +216,8 @@ declare namespace KungfuApi {
         | {
             entry: string;
             page: string;
-          };
+          }
+        | null;
       daemon: Record<string, string>;
       script: string;
     }

@@ -520,7 +520,7 @@ const getKfUIExtensionConfigByExtKey = (
       const uiConfig = extConfig['ui_config'];
       const position = uiConfig?.position || '';
       const exhibit = uiConfig?.exhibit || ({} as KungfuApi.KfExhibitConfig);
-      const components = uiConfig?.components;
+      const components = uiConfig?.components || null;
       const daemon = uiConfig?.daemon || ({} as Record<string, string>);
       const script = uiConfig?.script || '';
 
@@ -529,9 +529,7 @@ const getKfUIExtensionConfigByExtKey = (
         extPath,
         position,
         exhibit,
-        components: components || {
-          index: 'index.js',
-        },
+        components,
         daemon,
         script,
       };
@@ -730,6 +728,29 @@ export const getProcessIdByKfLocation = (
   }
 };
 
+export const getIdByKfLocation = (
+  kfLocation:
+    | KungfuApi.KfLocation
+    | KungfuApi.KfConfig
+    | KungfuApi.KfExtraLocation,
+): string => {
+  if (kfLocation.category === 'td') {
+    return `${kfLocation.group}_${kfLocation.name}`;
+  } else if (kfLocation.category === 'md') {
+    return `${kfLocation.group}`;
+  } else if (kfLocation.category === 'strategy') {
+    if (kfLocation.group === 'default') {
+      return `${kfLocation.name}`;
+    } else {
+      return `${kfLocation.group}_${kfLocation.name}`;
+    }
+  } else if (kfLocation.category === 'system') {
+    return `${kfLocation.group}_${kfLocation.name}`;
+  } else {
+    return `${kfLocation.group}_${kfLocation.name}`;
+  }
+};
+
 export const getMdTdKfLocationByProcessId = (
   processId: string,
 ): KungfuApi.KfLocation | null => {
@@ -772,29 +793,6 @@ export const getTaskKfLocationByProcessId = (
   }
 
   return null;
-};
-
-export const getIdByKfLocation = (
-  kfLocation:
-    | KungfuApi.KfLocation
-    | KungfuApi.KfConfig
-    | KungfuApi.KfExtraLocation,
-): string => {
-  if (kfLocation.category === 'td') {
-    return `${kfLocation.group}_${kfLocation.name}`;
-  } else if (kfLocation.category === 'md') {
-    return `${kfLocation.group}`;
-  } else if (kfLocation.category === 'strategy') {
-    if (kfLocation.group === 'default') {
-      return `${kfLocation.name}`;
-    } else {
-      return `${kfLocation.group}_${kfLocation.name}`;
-    }
-  } else if (kfLocation.category === 'system') {
-    return `${kfLocation.group}_${kfLocation.name}`;
-  } else {
-    return `${kfLocation.group}_${kfLocation.name}`;
-  }
 };
 
 export const getStateStatusData = (
