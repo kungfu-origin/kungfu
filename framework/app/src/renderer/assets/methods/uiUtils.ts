@@ -51,30 +51,35 @@ export const getUIComponents = (
   position: KfUIExtLocatorTypes;
   cData: Record<string, Component>;
 }[] => {
-  return Object.keys(kfUiExtConfigs).map((key) => {
-    const config = kfUiExtConfigs[key];
-    const { extPath, position, components, name, script } = config;
-
-    return {
-      key,
-      name,
-      position,
-      script,
-      extPath,
-      cData: Object.keys(components || {})
-        .filter((cName) =>
-          fse.pathExistsSync(path.join(extPath, components[cName])),
-        )
-        .reduce((cData, cName) => {
-          return {
-            ...cData,
-            [`${key}-${cName}`]: global.require(
-              path.join(extPath, components[cName]),
-            ).default as Component,
-          };
-        }, {} as Record<string, Component>),
-    };
-  });
+  return Object.keys(kfUiExtConfigs)
+    .filter((key) => {
+      const config = kfUiExtConfigs[key];
+      const { components, script } = config;
+      return components || script;
+    })
+    .map((key) => {
+      const config = kfUiExtConfigs[key];
+      const { extPath, position, components, name, script } = config;
+      return {
+        key,
+        name,
+        position,
+        script,
+        extPath,
+        cData: Object.keys(components || {})
+          .filter((cName) =>
+            fse.pathExistsSync(path.join(extPath, (components || {})[cName])),
+          )
+          .reduce((cData, cName) => {
+            return {
+              ...cData,
+              [`${key}-${cName}`]: global.require(
+                path.join(extPath, (components || {})[cName]),
+              ).default as Component,
+            };
+          }, {} as Record<string, Component>),
+      };
+    });
 };
 
 export const useModalVisible = (
