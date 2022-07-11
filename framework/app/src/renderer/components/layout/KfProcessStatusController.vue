@@ -53,7 +53,7 @@ const {
 const { tdExtTypeMap, mdExtTypeMap } = useExtConfigsRelated();
 
 let isClosingWindow = false;
-let isRestartCore = 0;
+let isRestartSystem = 0;
 let hasAlertMasterStop = false;
 let hasAlertLedgerStop = false;
 let hasAlertCacheDStop = false;
@@ -66,10 +66,9 @@ watch(processStatusData, (newPSD, oldPSD) => {
   if (isClosingWindow) return;
 
   if (newPSD.master !== 'online' && oldPSD.master === 'online') {
-    if (!hasAlertMasterStop) {
+    if (isRestartSystem || !hasAlertMasterStop) {
       hasAlertMasterStop = true;
-      console.log(isRestartCore, getNotificationType(isRestartCore));
-      notification[getNotificationType(isRestartCore++)]({
+      notification[getNotificationType(isRestartSystem++)]({
         message: t('master_interrupt'),
         description: t('master_desc'),
         duration: 8,
@@ -79,10 +78,9 @@ watch(processStatusData, (newPSD, oldPSD) => {
   }
 
   if (newPSD.cached !== 'online' && oldPSD.cached === 'online') {
-    if (!hasAlertCacheDStop) {
+    if (isRestartSystem || !hasAlertCacheDStop) {
       hasAlertCacheDStop = true;
-      console.log(isRestartCore, getNotificationType(isRestartCore));
-      notification[getNotificationType(isRestartCore++)]({
+      notification[getNotificationType(isRestartSystem++)]({
         message: t('cached_interrupt'),
         description: t('cached_desc'),
         duration: 8,
@@ -92,10 +90,9 @@ watch(processStatusData, (newPSD, oldPSD) => {
   }
 
   if (newPSD.ledger !== 'online' && oldPSD.ledger === 'online') {
-    if (!hasAlertLedgerStop) {
+    if (isRestartSystem || !hasAlertLedgerStop) {
       hasAlertLedgerStop = true;
-      console.log(isRestartCore, getNotificationType(isRestartCore));
-      notification[getNotificationType(isRestartCore++)]({
+      notification[getNotificationType(isRestartSystem++)]({
         message: t('ledger_interrupt'),
         description: t('ledger_desc'),
         duration: 8,
@@ -104,7 +101,9 @@ watch(processStatusData, (newPSD, oldPSD) => {
     }
   }
 
-  if (isRestartCore >= 4) isRestartCore = 0;
+  if (isRestartSystem >= 4) {
+    isRestartSystem = 0;
+  }
 });
 
 watch(appStates, (newAppStates, oldAppStates) => {
@@ -150,10 +149,9 @@ onMounted(() => {
           isClosingWindow = true;
         }
       }
-      if (data.tag === 'coreRestart') {
-        if (data.name === 'core') {
-          !isRestartCore && (isRestartCore = 1);
-          console.log('process received', isRestartCore);
+      if (data.tag === 'processStatus') {
+        if (data.name === 'system' && data.status === 'waiting restart') {
+          !isRestartSystem && (isRestartSystem = 1);
         }
       }
     });

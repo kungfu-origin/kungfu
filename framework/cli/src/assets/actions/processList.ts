@@ -369,6 +369,7 @@ export const switchProcess = (
         }
       }
       break;
+    case 'daemon':
     case 'md':
     case 'td':
     case 'strategy':

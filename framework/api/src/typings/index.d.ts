@@ -867,3 +867,129 @@ declare namespace Code {
     tabSpaceSize: SpaceSizeSettingEnum;
   }
 }
+
+interface ResizeEvent {
+  tag: 'resize';
+}
+
+interface ProcessStatusChangeEvent {
+  tag: 'processStatus';
+  name: string;
+  status: Pm2ProcessStatusTypes;
+}
+
+interface MainProcessEvent {
+  tag: 'main';
+  name: string;
+}
+
+interface TradingDataUpdateEvent {
+  tag: 'tradingDataUpdate';
+  tradingDataType: TradingDataTypeName;
+}
+
+interface ExportTradingDataEvent {
+  tag: 'export';
+  tradingDataType: TradingDataTypeName | 'all';
+  currentKfLocation?: KfLocation | KfConfig | undefined;
+}
+
+interface TriggeOrderBook {
+  tag: 'orderbook';
+  instrument: InstrumentResolved;
+}
+
+interface TriggerOrderBookUpdate {
+  tag: 'orderBookUpdate';
+  orderInput: InstrumentResolved | ExtraOrderInput;
+}
+
+interface TriggerMakeOrder {
+  tag: 'makeOrder';
+  orderInput: InstrumentResolved | ExtraOrderInput;
+}
+
+interface TriggerUpdateTdGroup {
+  tag: 'update:tdGroup';
+  tdGroups: KungfuApi.KfExtraLocation[];
+}
+
+interface TriggerUpdateTd {
+  tag: 'update:td';
+  tds: KungfuApi.KfConfig[];
+}
+
+interface TriggerUpdateRiskSetting {
+  tag: 'update:riskSetting';
+  riskSettings: RiskSetting[];
+}
+
+interface TriggerUpdateMd {
+  tag: 'update:md';
+  mds: KungfuApi.KfConfig[];
+}
+
+interface TriggerUpdateStrategy {
+  tag: 'update:strategy';
+  strategys: KungfuApi.KfConfig[];
+}
+
+interface TriggerUpdateExtConfigs {
+  tag: 'update:extConfigs';
+  extConfigs: KungfuApi.KfExtConfigs;
+}
+
+interface TriggerAddBoard {
+  tag: 'addBoard';
+  boardId: number;
+}
+
+interface TriggerCurrentConfigModalReady {
+  tag: 'ready:currentConfigModal';
+  category: string;
+  extKey: string;
+  initValue: Record<string, KungfuApi.KfConfigValue>;
+}
+
+interface TriggerCurrentConfigModalInput {
+  tag: 'input:currentConfigModal';
+  category: string;
+  extKey: string;
+  formState: KungfuApi.SetKfConfigPayload;
+}
+
+interface TriggerOpenGlobalSettingModal {
+  tag: 'open:globalSetting';
+}
+
+interface TriggerCloseGlobalSettingModal {
+  tag: 'close:globalSetting';
+}
+
+interface TriggerSetCurrentConfigModalConfigSettings {
+  tag: 'update:currentConfigModalConfigSettings';
+  configSettings: KungfuApi.KfConfigItem[];
+}
+
+type KfBusEvent =
+  | ResizeEvent
+  | ProcessStatusChangeEvent
+  | MainProcessEvent
+  | TradingDataUpdateEvent
+  | TriggeOrderBook
+  | TriggerOrderBookUpdate
+  | TriggerMakeOrder
+  | TriggerUpdateTdGroup
+  | TriggerUpdateTd
+  | TriggerUpdateRiskSetting
+  | TriggerUpdateMd
+  | TriggerUpdateStrategy
+  | TriggerUpdateExtConfigs
+  | TriggerAddBoard
+  | ExportTradingDataEvent
+  | TriggerConfigModalFormChanged
+  | TriggerCurrentConfigModalReady
+  | TriggerCurrentConfigModalInput
+  | TriggerOpenGlobalSettingModal
+  | TriggerCloseGlobalSettingModal
+  | TriggerSetCurrentConfigModalConfigSettings;

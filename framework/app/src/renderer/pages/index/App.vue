@@ -22,7 +22,7 @@ import {
 import { useGlobalStore } from './store/global';
 import KfDownloadDateModal from '@kungfu-trader/kungfu-app/src/renderer/components/layout/KfHistoryDateModal.vue';
 import { tradingDataSubject } from '@kungfu-trader/kungfu-js-api/kungfu/tradingData';
-import globalBus from '../../assets/methods/globalBus';
+import globalBus from '@kungfu-trader/kungfu-js-api/utils/globalBus';
 import {
   dealAppStates,
   dealAssetsByHolderUID,

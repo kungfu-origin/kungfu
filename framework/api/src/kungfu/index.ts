@@ -13,7 +13,6 @@ import {
   dealPriceType,
   dealSide,
   dealTimeCondition,
-  dealTradingData,
   dealVolumeCondition,
   getIdByKfLocation,
   getMdTdKfLocationByProcessId,

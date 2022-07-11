@@ -24,7 +24,7 @@ import {
   KfCategoryTypes,
   StrategyStateStatusTypes,
 } from '@kungfu-trader/kungfu-js-api/typings/enums';
-import globalBus from '../../../assets/methods/globalBus';
+import globalBus from '@kungfu-trader/kungfu-js-api/src/utils/globalBus';
 import { getKfGlobalSettingsValue } from '@kungfu-trader/kungfu-js-api/config/globalSettings';
 
 interface GlobalState {

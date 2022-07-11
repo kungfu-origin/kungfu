@@ -664,14 +664,18 @@ export const usePreStartAndQuitApp = (): {
     );
   });
 
-  const timer = setInterval(() => {
-    if (window.watcher?.isLive()) {
-      preStartSystemLoadingData.watcher = 'done';
-      clearInterval(timer);
-    } else {
-      preStartSystemLoadingData.watcher = 'loading';
-    }
-  }, 500);
+  const startGetWatcherStatus = () => {
+    const timer = setInterval(() => {
+      if (window.watcher?.isLive()) {
+        preStartSystemLoadingData.watcher = 'done';
+        clearInterval(timer);
+      } else {
+        preStartSystemLoadingData.watcher = 'loading';
+      }
+    }, 500);
+  };
+
+  startGetWatcherStatus();
 
   const saveBoardsMap = (): Promise<void> => {
     const { boardsMap } = storeToRefs(useGlobalStore());
@@ -716,12 +720,11 @@ export const usePreStartAndQuitApp = (): {
             }
           }
 
-          if (data.tag === 'coreRestart') {
-            if (data.name === 'core') {
-              console.log('pre receive');
+          if (data.tag === 'processStatus') {
+            if (data.name === 'system' && data.status === 'waiting restart') {
               preStartSystemLoadingData.archive = 'loading';
-              preStartSystemLoadingData.watcher = 'loading';
               preStartSystemLoadingData.extraResourcesLoading = 'loading';
+              startGetWatcherStatus();
             }
           }
         },

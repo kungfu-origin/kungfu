@@ -15,7 +15,6 @@ import {
   LOG_DIR,
 } from '../config/pathConfig';
 import { pathExists, remove } from 'fs-extra';
-import { watcher } from '../kungfu/watcher';
 import {
   getAvailDaemonList,
   getIdByKfLocation,
@@ -33,9 +32,9 @@ import {
 export const getAllKfConfigOriginData = (): Promise<
   Record<KfCategoryTypes, KungfuApi.KfConfig[]>
 > => {
-  return getKfAllConfig().then(
-    async (allConfig: KungfuApi.KfConfigOrigin[]) => {
-      const allConfigResolved = allConfig.map(
+  return Promise.all([getKfAllConfig(), getAvailDaemonList()]).then(
+    (allConfig: [KungfuApi.KfConfigOrigin[], KungfuApi.KfDaemonLocation[]]) => {
+      const allConfigResolved = allConfig[0].map(
         (config: KungfuApi.KfConfigOrigin): KungfuApi.KfConfig => {
           return {
             ...config,
@@ -45,10 +44,10 @@ export const getAllKfConfigOriginData = (): Promise<
         },
       );
 
-      const daemonList = (await getAvailDaemonList()).map((item) => {
+      const daemonList = allConfig[1].map((config) => {
         return {
-          ...item,
-          location_uid: Number(watcher?.getLocationUID(item)),
+          ...config,
+          location_uid: 0,
           value: '',
         };
       });

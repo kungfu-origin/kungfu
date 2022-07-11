@@ -4,11 +4,13 @@ import {
   Pm2Bus,
   pm2LaunchBus,
 } from '@kungfu-trader/kungfu-js-api/utils/processUtils';
+import globalBus from '@kungfu-trader/kungfu-js-api/utils/globalBus';
 
 export const globalState = {
   DZXY_PM_ID: 0,
   DZXY_WATCHER_IS_LIVE: false,
   DZXY_SUBJECT: new Subject<Pm2Packet>(),
+  GLOBAL_BUS: globalBus,
 };
 
 const timer = setTimeout(() => {

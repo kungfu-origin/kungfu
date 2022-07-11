@@ -51,7 +51,7 @@ import {
   useAllKfConfigData,
   useExtConfigsRelated,
 } from '../../assets/methods/actionsUtils';
-import globalBus from '../../assets/methods/globalBus';
+import globalBus from '@kungfu-trader/kungfu-js-api/utils/globalBus';
 import { useGlobalStore } from '../../pages/index/store/global';
 import { storeToRefs } from 'pinia';
 

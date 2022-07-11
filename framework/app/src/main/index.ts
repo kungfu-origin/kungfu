@@ -6,7 +6,6 @@ import {
   Menu,
   MenuItemConstructorOptions,
   shell,
-  ipcMain,
 } from 'electron';
 import * as remoteMain from '@electron/remote/main';
 import path from 'path';
@@ -16,7 +15,6 @@ import {
   showCrashMessageBox,
   showKungfuInfo,
   openUrl,
-  registerScheduleTasks,
 } from '@kungfu-trader/kungfu-app/src/main/utils';
 import {
   kfLogger,
@@ -385,8 +383,3 @@ process
       err.message,
     );
   });
-
-// registerScheduleTasks(createWindow);
-// ipcMain.on('schedule-setting-refresh', () => {
-//   registerScheduleTasks(createWindow);
-// });

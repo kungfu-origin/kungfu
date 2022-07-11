@@ -26,6 +26,7 @@ declare global {
     workers: Record<string, WebpackWorker>;
     fileId: number;
     testCase: Record<string, any>;
+    pm2: any;
   }
 
   namespace NodeJS {

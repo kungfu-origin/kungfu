@@ -1,9 +1,12 @@
+import path from 'path';
+import fse from 'fs-extra';
 import inquirer from 'inquirer';
 import colors from 'colors';
 import { KfCategoryTypes } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import {
   getAvailDaemonList,
   getIdByKfLocation,
+  getKfUIExtensionConfig,
   getProcessIdByKfLocation,
   initFormStateByConfig,
   loopToRunProcess,
@@ -16,6 +19,7 @@ import {
 import { PromptInputType, PromptQuestion } from 'src/typings';
 import { startExtDaemon } from '@kungfu-trader/kungfu-js-api/utils/processUtils';
 import { Proc } from 'pm2';
+import { globalState } from '../actions/globalState';
 
 export const parseToString = (
   targetList: (string | number)[],
@@ -362,4 +366,23 @@ export const startAllExtDaemons = async () => {
           .catch((err) => console.error(err));
     }),
   );
+};
+
+const dzxyUse = (ext: { install: Function }) => {
+  const { install } = ext;
+  if (install) {
+    install(globalState);
+  }
+};
+
+export const useAllExtScript = () => {
+  getKfUIExtensionConfig().then((allConfigs: KungfuApi.KfUIExtConfigs) => {
+    Object.values(allConfigs).forEach((config) => {
+      const { extPath, script } = config;
+      const scriptPath = path.join(extPath, script);
+      if (script && fse.pathExistsSync(scriptPath)) {
+        dzxyUse(require(scriptPath).default);
+      }
+    });
+  });
 };

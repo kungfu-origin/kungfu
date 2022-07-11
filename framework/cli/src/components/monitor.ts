@@ -10,6 +10,7 @@ import {
 } from '../assets/actions/processList';
 import { dealMemory, parseToString } from '../assets/methods/utils';
 import { Log } from '../assets/actions/log';
+import { initBusEvent } from '../assets/actions/busEvent';
 import {
   debounce,
   setTimerPromiseTask,
@@ -209,6 +210,8 @@ export class MonitorDashboard extends Dashboard {
       const nameKey: string = boards[i];
       this.boards[nameKey].focus();
     });
+
+    initBusEvent(this);
   }
 
   _setLogItems() {
