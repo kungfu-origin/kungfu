@@ -5,7 +5,6 @@ import {
   dealOffset,
   getIdByKfLocation,
   delayMilliSeconds,
-  getOrderTradeFilterKey,
   getProcessIdByKfLocation,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import {
@@ -273,7 +272,7 @@ function handleShowTradingDataDetail({
   row,
 }: {
   event: MouseEvent;
-  row: TradingDataItem;
+  row: KungfuApi.TradingDataItem;
 }) {
   showTradingDataDetail(
     row as KungfuApi.OrderResolved,
@@ -296,7 +295,7 @@ const tableRef = ref();
 
 function handleAdjustOrder(data: {
   event: MouseEvent;
-  row: TradingDataItem;
+  row: KungfuApi.TradingDataItem;
   column: KfTradingDataTableHeaderConfig;
 }): void {
   const { event, row, column } = data;

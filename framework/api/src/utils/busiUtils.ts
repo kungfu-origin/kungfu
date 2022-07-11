@@ -709,7 +709,7 @@ export const removeDB = (targetFolder: string): Promise<void> => {
 };
 
 export const getProcessIdByKfLocation = (
-  kfLocation: KungfuApi.KfLocation | KungfuApi.KfConfig,
+  kfLocation: KungfuApi.KfLocation,
 ): string => {
   if (kfLocation.category === 'td') {
     return `${kfLocation.category}_${kfLocation.group}_${kfLocation.name}`;
@@ -795,6 +795,16 @@ export const getTaskKfLocationByProcessId = (
   return null;
 };
 
+export const isTdStrategyCategory = (category: string): boolean => {
+  if (category !== 'td') {
+    if (category !== 'strategy') {
+      return false;
+    }
+  }
+
+  return true;
+};
+
 export const getStateStatusData = (
   name: ProcessStatusTypes | undefined,
 ): KungfuApi.KfTradeValueCommonData | undefined => {
@@ -837,7 +847,7 @@ export const getIfProcessStopping = (
 };
 
 export const getAppStateStatusName = (
-  kfConfig: KungfuApi.KfLocation | KungfuApi.KfConfig,
+  kfConfig: KungfuApi.KfLocation,
   processStatusData: Pm2ProcessStatusData,
   appStates: Record<string, BrokerStateStatusTypes>,
 ): ProcessStatusTypes | undefined => {
@@ -860,7 +870,7 @@ export const getAppStateStatusName = (
 };
 
 export const getStrategyStateStatusName = (
-  kfConfig: KungfuApi.KfLocation | KungfuApi.KfConfig,
+  kfConfig: KungfuApi.KfLocation,
   processStatusData: Pm2ProcessStatusData,
   strategyStates: Record<string, KungfuApi.StrategyStateData>,
 ): ProcessStatusTypes | undefined => {
@@ -884,7 +894,7 @@ export const getStrategyStateStatusName = (
 
 export const getPropertyFromProcessStatusDetailDataByKfLocation = (
   processStatusDetailData: Pm2ProcessStatusDetailData,
-  kfLocation: KungfuApi.KfLocation | KungfuApi.KfConfig,
+  kfLocation: KungfuApi.KfLocation,
 ): {
   status: ProcessStatusTypes | undefined;
   cpu: number;
@@ -1320,80 +1330,45 @@ export const dealAssetsByHolderUID = (
   }, {} as Record<string, KungfuApi.Asset>);
 };
 
-export const dealTradingData = <T>(
-  watcher: KungfuApi.Watcher | null,
-  tradingData: KungfuApi.DataTable<T>,
+export const dealOrderTradingData = (
+  watcher: KungfuApi.Watcher,
+  tradingData: KungfuApi.DataTable<KungfuApi.OrderTradingData>,
   tradingDataTypeName: KungfuApi.TradingDataTypeName,
-  kfLocation: KungfuApi.KfLocation | KungfuApi.KfConfig,
-): T[] => {
-  if (!watcher) {
-    throw new Error('Watcher is NULL');
-  }
-
-  if (!tradingData) {
-    console.error('Watcher.Ledger is undefined');
-    return [];
-  }
-
+  kfLocation: KungfuApi.KfLocation,
+): KungfuApi.OrderTradingData[] => {
   const currentUID = watcher.getLocationUID(kfLocation);
   const orderTradeFilterKey = getOrderTradeFilterKey(kfLocation.category);
   const sortKey = getTradingDataSortKey(tradingDataTypeName);
 
-  if (
-    tradingDataTypeName === 'Order' ||
-    tradingDataTypeName === 'Trade' ||
-    tradingDataTypeName === 'OrderInput'
-  ) {
-    const afterFilterDatas = tradingData.filter(
-      orderTradeFilterKey,
-      currentUID,
-    );
+  const afterFilterDatas = tradingData.filter(orderTradeFilterKey, currentUID);
 
-    if (sortKey) {
-      return afterFilterDatas.sort(sortKey);
-    } else {
-      return afterFilterDatas.list();
-    }
+  if (sortKey) {
+    return afterFilterDatas.sort(sortKey);
+  } else {
+    return afterFilterDatas.list();
   }
-
-  return filterLedgerResult<T>(
-    watcher,
-    tradingData,
-    tradingDataTypeName,
-    kfLocation,
-    sortKey,
-  );
 };
 
-export const filterLedgerResult = <T>(
+export const dealLedgerTradingData = (
   watcher: KungfuApi.Watcher,
-  dataTable: KungfuApi.DataTable<T>,
+  tradingData: KungfuApi.DataTable<KungfuApi.LedgerTradingData>,
   tradingDataTypeName: KungfuApi.TradingDataTypeName,
-  kfLocation: KungfuApi.KfLocation | KungfuApi.KfConfig,
-  sortKey?: string,
-): T[] => {
+  kfLocation: KungfuApi.KfLocation,
+): KungfuApi.LedgerTradingData[] => {
+  const sortKey = getTradingDataSortKey(tradingDataTypeName);
+
   const { category } = kfLocation;
   const ledgerCategory = getLedgerCategory(category);
-  let dataTableResolved = dataTable;
-
-  if (ledgerCategory !== undefined) {
-    dataTableResolved = dataTable.filter('ledger_category', ledgerCategory);
-  }
+  const locationUID = watcher.getLocationUID(kfLocation);
+  let dataTableResolved = tradingData;
 
   if (tradingDataTypeName === 'Position') {
     dataTableResolved = dataTableResolved.nofilter('volume', BigInt(0));
   }
 
-  if (
-    tradingDataTypeName === 'Position' ||
-    tradingDataTypeName === 'Asset' ||
-    tradingDataTypeName === 'AssetMargin'
-  ) {
-    const locationUID = watcher.getLocationUID(kfLocation);
-    dataTableResolved = dataTableResolved
-      .filter('ledger_category', ledgerCategory)
-      .filter('holder_uid', locationUID);
-  }
+  dataTableResolved = dataTableResolved
+    .filter('ledger_category', ledgerCategory)
+    .filter('holder_uid', locationUID);
 
   if (sortKey) {
     return dataTableResolved.sort(sortKey);
@@ -1402,14 +1377,46 @@ export const filterLedgerResult = <T>(
   return dataTableResolved.list();
 };
 
-export const isTdStrategyCategory = (category: string): boolean => {
-  if (category !== 'td') {
-    if (category !== 'strategy') {
-      return false;
-    }
+export const dealDefaultTradingData = <T>(
+  watcher: KungfuApi.Watcher,
+  tradingData: KungfuApi.DataTable<T>,
+  tradingDataTypeName: KungfuApi.TradingDataTypeName,
+  kfLocation: KungfuApi.KfLocation,
+): T[] => {
+  return tradingData.list();
+};
+
+export const dealTradingDataMethodsMap: Record<
+  KungfuApi.TradingDataTypeName,
+  any
+> = {
+  Asset: dealLedgerTradingData,
+  AssetMargin: dealLedgerTradingData,
+  Instrument: dealDefaultTradingData,
+  Order: dealOrderTradingData,
+  OrderInput: dealOrderTradingData,
+  OrderStat: dealDefaultTradingData,
+  Position: dealLedgerTradingData,
+  Quote: dealDefaultTradingData,
+  Trade: dealOrderTradingData,
+};
+
+export const dealTradingData = <T>(
+  watcher: KungfuApi.Watcher | null,
+  tradingData: KungfuApi.DataTable<T>,
+  tradingDataTypeName: KungfuApi.TradingDataTypeName,
+  kfLocation: KungfuApi.KfLocation,
+): T[] => {
+  if (!watcher) {
+    throw new Error('Watcher is NULL');
   }
 
-  return true;
+  return dealTradingDataMethodsMap[tradingDataTypeName](
+    watcher,
+    tradingData,
+    tradingDataTypeName,
+    kfLocation,
+  );
 };
 
 export const getPrimaryKeyFromKfConfigItem = (

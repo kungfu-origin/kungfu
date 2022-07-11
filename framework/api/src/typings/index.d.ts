@@ -352,25 +352,6 @@ declare namespace KungfuApi {
     collateral_ratio: number; //担保比例
   }
 
-  export interface Bar {
-    trading_day: string; //交易日
-    instrument_id: string; //合约代码
-    exchange_id: string; //交易所代码
-
-    start_time: bigint; //开始时间
-    end_time: bigint; //结束时间
-
-    open; //开
-    close; //收
-    low; //低
-    high; //高
-
-    volume: bigint; //区间交易量
-    start_volume: bigint; //初始总交易量
-
-    tick_count: number; //区间有效tick数
-  }
-
   export interface Instrument {
     instrument_id: string; //合约ID
     exchange_id: string; //交易所ID
@@ -609,7 +590,6 @@ declare namespace KungfuApi {
   export interface TradingData {
     Asset: DataTable<Asset>;
     AssetMargin: DataTable<AssetMargin>;
-    Bar: DataTable<Bar>;
     Instrument: DataTable<Instrument>;
     Order: DataTable<Order>;
     OrderInput: DataTable<OrderInput>;
@@ -619,10 +599,35 @@ declare namespace KungfuApi {
     Trade: DataTable<Trade>;
   }
 
+  export type TradingDataItem =
+    | KungfuApi.Position
+    | KungfuApi.Order
+    | KungfuApi.Trade
+    | KungfuApi.Asset
+    | KungfuApi.AssetMargin;
+
+  export type TradingDataTable =
+    | KungfuApi.DataTable<KungfuApi.Position>
+    | KungfuApi.DataTable<KungfuApi.Order>
+    | KungfuApi.DataTable<KungfuApi.Trade>;
+
+  export type MergedTradingDataTable = KungfuApi.DataTable<KungfuApi.Position> &
+    KungfuApi.DataTable<KungfuApi.Order> &
+    KungfuApi.DataTable<KungfuApi.Trade>;
+
+  export type OrderTradingData =
+    | KungfuApi.Order
+    | KungfuApi.OrderInput
+    | KungfuApi.Trade;
+
+  export type LedgerTradingData =
+    | KungfuApi.Asset
+    | KungfuApi.AssetMargin
+    | KungfuApi.Position;
+
   export type TradingDataTypes =
     | Asset
     | AssetMargin
-    | Bar
     | Instrument
     | Order
     | OrderInput
@@ -712,7 +717,6 @@ declare namespace KungfuApi {
   export interface Longfist {
     Asset(): Asset;
     AssetMargin(): AssetMargin;
-    Bar(): Bar;
     Instrument(): Instrument;
     Order(): Order;
     OrderInput(): OrderInput;

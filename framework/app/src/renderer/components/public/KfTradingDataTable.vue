@@ -13,7 +13,7 @@ import {
 
 const props = withDefaults(
   defineProps<{
-    dataSource: TradingDataItem[];
+    dataSource: KungfuApi.TradingDataItem[];
     columns: KfTradingDataTableHeaderConfig[];
     keyField?: string;
   }>(),
@@ -25,12 +25,15 @@ const props = withDefaults(
 );
 
 defineEmits<{
-  (e: 'dbclickRow', data: { event: MouseEvent; row: TradingDataItem }): void;
+  (
+    e: 'dbclickRow',
+    data: { event: MouseEvent; row: KungfuApi.TradingDataItem },
+  ): void;
   (
     e: 'clickCell',
     data: {
       event: MouseEvent;
-      row: TradingDataItem;
+      row: KungfuApi.TradingDataItem;
       column: KfTradingDataTableHeaderConfig;
     },
   ): void;
@@ -38,11 +41,14 @@ defineEmits<{
     e: 'clickCell',
     data: {
       event: MouseEvent;
-      row: TradingDataItem;
+      row: KungfuApi.TradingDataItem;
       column: KfTradingDataTableHeaderConfig;
     },
   ): void;
-  (e: 'rightClickRow', data: { event: MouseEvent; row: TradingDataItem }): void;
+  (
+    e: 'rightClickRow',
+    data: { event: MouseEvent; row: KungfuApi.TradingDataItem },
+  ): void;
 }>();
 
 const app = getCurrentInstance();
@@ -108,14 +114,14 @@ function getHeaderWidth(column: KfTradingDataTableHeaderConfig): string {
   }
 }
 
-function handleDbClickRow(e: MouseEvent, row: TradingDataItem): void {
+function handleDbClickRow(e: MouseEvent, row: KungfuApi.TradingDataItem): void {
   app && app.emit('dbclickRow', { event: e, row });
   clickTimer && clearTimeout(clickTimer);
 }
 
 function handleClickCell(
   e: MouseEvent,
-  row: TradingDataItem,
+  row: KungfuApi.TradingDataItem,
   column: KfTradingDataTableHeaderConfig,
 ): void {
   clickTimer && clearTimeout(clickTimer);
@@ -124,7 +130,7 @@ function handleClickCell(
   }, 300);
 }
 
-function handleMousedown(e: MouseEvent, row: TradingDataItem): void {
+function handleMousedown(e: MouseEvent, row: KungfuApi.TradingDataItem): void {
   if (e.button === 2) {
     app && app.emit('rightClickRow', { event: e, row });
   }
@@ -229,7 +235,7 @@ function handleSort(
             <li
               v-for="column in columns"
               :class="['kf-table-cell', column.type]"
-              :key="`${column.dataIndex}_${item[keyField as keyof TradingDataItem]}`"
+              :key="`${column.dataIndex}_${item[keyField as keyof KungfuApi.TradingDataItem]}`"
               :style="{
                 'max-width': getHeaderWidth(column),
               }"
@@ -238,7 +244,9 @@ function handleSort(
             >
               <slot :item="item" :column="column">
                 <span>
-                  {{ item[column.dataIndex as keyof TradingDataItem] }}
+                  {{
+                    item[column.dataIndex as keyof KungfuApi.TradingDataItem]
+                  }}
                 </span>
               </slot>
             </li>

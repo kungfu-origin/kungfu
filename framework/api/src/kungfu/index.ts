@@ -12,7 +12,6 @@ import {
   dealPriceType,
   dealSide,
   dealTimeCondition,
-  dealTradingData,
   dealVolumeCondition,
   getIdByKfLocation,
   getMdTdKfLocationByProcessId,
@@ -179,7 +178,7 @@ export const getKungfuHistoryData = (
   date: string,
   dateType: HistoryDateEnum,
   tradingDataTypeName: KungfuApi.TradingDataTypeName | 'all',
-  kfLocation?: KungfuApi.KfLocation | KungfuApi.KfConfig,
+  kfLocation?: KungfuApi.KfLocation,
 ): Promise<{
   tradingData: KungfuApi.TradingData;
 }> => {
@@ -210,7 +209,7 @@ export const kfRequestMarketData = (
   watcher: KungfuApi.Watcher | null,
   exchangeId: string,
   instrumentId: string,
-  mdLocation: KungfuApi.KfLocation | KungfuApi.KfConfig,
+  mdLocation: KungfuApi.KfLocation,
 ): Promise<void> => {
   if (!watcher) {
     return Promise.reject(new Error('Watcher is NULL'));

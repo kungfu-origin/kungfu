@@ -81,7 +81,7 @@ const { success, error } = messagePrompt();
 export const handleSwitchProcessStatus = (
   checked: boolean,
   mouseEvent: MouseEvent,
-  kfLocation: KungfuApi.KfLocation | KungfuApi.KfConfig,
+  kfLocation: KungfuApi.KfLocation,
 ): Promise<void | Proc> => {
   mouseEvent.stopPropagation();
   return switchKfLocation(window.watcher, kfLocation, checked)
@@ -126,9 +126,7 @@ export const useSwitchAllConfig = (
   const handleSwitchAllProcessStatus = (checked: boolean): Promise<void> => {
     return Promise.all(
       kfConfigs.value.map(
-        (
-          item: KungfuApi.KfLocation | KungfuApi.KfConfig,
-        ): Promise<void | Proc> => {
+        (item: KungfuApi.KfLocation): Promise<void | Proc> => {
           return switchKfLocation(window.watcher, item, checked);
         },
       ),
@@ -995,10 +993,10 @@ export const useProcessStatusDetailData = (): {
   processStatusDetailData: Ref<Pm2ProcessStatusDetailData>;
   appStates: Ref<Record<string, BrokerStateStatusTypes>>;
   getProcessStatusName(
-    kfConfig: KungfuApi.KfLocation | KungfuApi.KfConfig,
+    kfConfig: KungfuApi.KfLocation,
   ): ProcessStatusTypes | undefined;
   getStrategyStatusName(
-    kfConfig: KungfuApi.KfLocation | KungfuApi.KfConfig,
+    kfConfig: KungfuApi.KfLocation,
   ): ProcessStatusTypes | undefined;
 } => {
   const allProcessStatusData = reactive<{
@@ -1034,9 +1032,7 @@ export const useProcessStatusDetailData = (): {
     >;
   });
 
-  const getProcessStatusName = (
-    kfConfig: KungfuApi.KfLocation | KungfuApi.KfConfig,
-  ) => {
+  const getProcessStatusName = (kfConfig: KungfuApi.KfLocation) => {
     return getAppStateStatusName(
       kfConfig,
       allProcessStatusData.processStatusData,
@@ -1044,9 +1040,7 @@ export const useProcessStatusDetailData = (): {
     );
   };
 
-  const getStrategyStatusName = (
-    kfConfig: KungfuApi.KfLocation | KungfuApi.KfConfig,
-  ) => {
+  const getStrategyStatusName = (kfConfig: KungfuApi.KfLocation) => {
     return getStrategyStateStatusName(
       kfConfig,
       allProcessStatusData.processStatusData,

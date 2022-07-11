@@ -101,7 +101,7 @@ function buildGlobalPositions(
 
 function dealRowClassNameResolved(record: KungfuApi.Position) {
   const locationResolved: KungfuApi.KfExtraLocation = {
-    category: categoryRegisterConfig.name,
+    category: categoryRegisterConfig.category,
     group: record.exchange_id,
     name: record.instrument_id,
     mode: 'live',
@@ -112,7 +112,7 @@ function dealRowClassNameResolved(record: KungfuApi.Position) {
 
 function customRowResolved(record: KungfuApi.Position) {
   const locationResolved: KungfuApi.KfExtraLocation = {
-    category: categoryRegisterConfig.name,
+    category: categoryRegisterConfig.category,
     group: record.exchange_id,
     name: record.instrument_id,
     mode: 'live',

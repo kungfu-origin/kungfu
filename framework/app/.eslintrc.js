@@ -15,13 +15,14 @@ module.exports = {
     '@vue/prettier',
     '@vue/eslint-config-typescript',
   ],
+  plugins: ['@typescript-eslint'],
   parserOptions: {
     ecmaVersion: 2020,
   },
   rules: {
     'no-console': 'off',
+    'no-control-regex': 'off',
     'no-debugger': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
     'vue/multi-word-component-names': 'off',
-    '@typescript-eslint/no-var-requires': 0,
   },
 };

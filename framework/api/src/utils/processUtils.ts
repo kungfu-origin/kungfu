@@ -703,7 +703,7 @@ export const startTd = async (accountId: string): Promise<Proc | void> => {
 };
 
 export const startTask = async (
-  taskLocation: KungfuApi.KfLocation | KungfuApi.KfConfig,
+  taskLocation: KungfuApi.KfLocation,
   soPath: string,
   args: string,
   configSettings: KungfuApi.KfConfigItem[],

@@ -105,7 +105,7 @@ watch(currentGlobalKfLocation, () => {
 
 function handleClickRow(data: {
   event: MouseEvent;
-  row: TradingDataItem;
+  row: KungfuApi.TradingDataItem;
   column: KfTradingDataTableHeaderConfig;
 }) {
   const row = data.row as KungfuApi.Position;
