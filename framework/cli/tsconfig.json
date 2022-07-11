@@ -2,8 +2,12 @@
   "compilerOptions": {
     "target": "esnext",
     "module": "esnext",
-    "strict": false,
+    "strict": true,
     "noImplicitAny": false,
+    "noImplicitThis": true,
+    "alwaysStrict": true,
+    "strictFunctionTypes": true,
+    "strictPropertyInitialization": true,
     "jsx": "preserve",
     "importHelpers": true,
     "strictNullChecks": true,
@@ -14,6 +18,7 @@
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "allowSyntheticDefaultImports": true,
+    
     "sourceMap": true,
     "baseUrl": ".",
     "types": ["jschardet"],

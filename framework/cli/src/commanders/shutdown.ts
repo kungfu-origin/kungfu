@@ -17,7 +17,7 @@ export function deleteNNFiles(rootPathName = KF_HOME) {
       {
         cwd: rootPathName,
       },
-      (err: Error, files: string[]) => {
+      (err: Error | null, files: string[]) => {
         if (err) {
           reject(err);
         }
