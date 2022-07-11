@@ -169,6 +169,7 @@ interface ExtraOrderInput {
 }
 
 type TradingDataItem = KungfuApi.Position | KungfuApi.Order | KungfuApi.Trade;
+
 interface KfTradingDataTableHeaderConfig {
   name: string;
   dataIndex: string;

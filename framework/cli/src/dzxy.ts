@@ -86,7 +86,7 @@ process.on('message', (packet: Pm2PacketMain) => {
 
 function resOrders(packet: Pm2PacketMain) {
   if (!watcher) {
-    throw new Error('watcher is null');
+    throw new Error('Watcher is NULL');
   }
 
   const kfLocation = fromPacketToKfLocation(packet);
@@ -117,7 +117,7 @@ function resOrders(packet: Pm2PacketMain) {
 
 function resTrades(packet: Pm2PacketMain) {
   if (!watcher) {
-    throw new Error('watcher is null');
+    throw new Error('Watcher is NULL');
   }
 
   const kfLocation = fromPacketToKfLocation(packet);
@@ -148,7 +148,7 @@ function resTrades(packet: Pm2PacketMain) {
 
 function resPosition(packet: Pm2PacketMain) {
   if (!watcher) {
-    throw new Error('watcher is null');
+    throw new Error('Watcher is NULL');
   }
 
   const kfLocation = fromPacketToKfLocation(packet);
@@ -157,7 +157,9 @@ function resPosition(packet: Pm2PacketMain) {
     watcher.ledger,
     'Position',
     kfLocation,
-  ).map((item) => dealPosition(item as KungfuApi.Position));
+  ).map((item) =>
+    dealPosition(watcher as KungfuApi.Watcher, item as KungfuApi.Position),
+  );
 
   turnBigIntToString(position);
 
@@ -176,7 +178,7 @@ function resPosition(packet: Pm2PacketMain) {
 
 function resAsset(packet: Pm2PacketMain) {
   if (!watcher) {
-    throw new Error('watcher is null');
+    throw new Error('Watcher is NULL');
   }
 
   const kfLocation = fromPacketToKfLocation(packet);
@@ -216,7 +218,7 @@ function swithKfLocationResolved(data: SwitchKfLocationPacketData) {
 
 function cancellAllOrders(packet: Pm2PacketMain) {
   if (!watcher) {
-    throw new Error('watcher is null');
+    throw new Error('Watcher is NULL');
   }
 
   const { category } = packet.data as KungfuApi.KfLocation;

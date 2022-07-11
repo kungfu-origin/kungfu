@@ -186,7 +186,6 @@ export const getKungfuHistoryData = (
   kfLocation?: KungfuApi.KfLocation | KungfuApi.KfConfig,
 ): Promise<{
   tradingData: KungfuApi.TradingData;
-  historyDatas: KungfuApi.TradingDataTypes[];
 }> => {
   return getKungfuDataByDateRange(date, dateType).then(
     (tradingData: KungfuApi.TradingData | Record<string, unknown>) => {
@@ -206,12 +205,6 @@ export const getKungfuHistoryData = (
 
       return {
         tradingData: tradingData as KungfuApi.TradingData,
-        historyDatas: dealTradingData(
-          watcher,
-          tradingData as KungfuApi.TradingData,
-          tradingDataTypeName,
-          kfLocation,
-        ),
       };
     },
   );
@@ -224,7 +217,7 @@ export const kfRequestMarketData = (
   mdLocation: KungfuApi.KfLocation | KungfuApi.KfConfig,
 ): Promise<void> => {
   if (!watcher) {
-    return Promise.reject(new Error(`Watcher 错误`));
+    return Promise.reject(new Error('Watcher is NULL'));
   }
 
   if (!watcher.isLive()) {
@@ -246,7 +239,7 @@ export const kfCancelOrder = (
   order: KungfuApi.Order,
 ): Promise<bigint> => {
   if (!watcher) {
-    return Promise.reject(new Error(`Watcher 错误`));
+    return Promise.reject(new Error(`Watcher is NULL`));
   }
 
   if (!watcher.isLive()) {
@@ -281,7 +274,7 @@ export const kfCancelAllOrders = (
   orders: KungfuApi.Order[],
 ): Promise<bigint[]> => {
   if (!watcher) {
-    return Promise.reject(new Error(`Watcher 错误`));
+    return Promise.reject(new Error(`Watcher is NULL`));
   }
 
   if (!watcher.isLive()) {
@@ -304,7 +297,7 @@ export const kfMakeOrder = (
   strategyLocation?: KungfuApi.KfLocation,
 ): Promise<bigint> => {
   if (!watcher) {
-    return Promise.reject(new Error('Watcher 错误'));
+    return Promise.reject(new Error('Watcher is NULL'));
   }
 
   if (!watcher.isLive()) {
@@ -344,7 +337,7 @@ export const makeOrderByOrderInput = (
 ): Promise<bigint> => {
   return new Promise((resolve, reject) => {
     if (!watcher) {
-      reject(new Error(`Watcher 错误`));
+      reject(new Error(`Watcher is NULL`));
       return;
     }
 

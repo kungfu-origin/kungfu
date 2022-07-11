@@ -173,9 +173,7 @@ function handleMakeOrder() {
 
       if (processStatusData.value[tdProcessId] !== 'online') {
         error(
-          `${t('orderConfig.start')} ${tdProcessId} ${t(
-            'orderConfig.trade_process',
-          )}`,
+          `${t('orderConfig.start')} ${tdProcessId} ${t('orderConfig.td')}`,
         );
         return;
       }

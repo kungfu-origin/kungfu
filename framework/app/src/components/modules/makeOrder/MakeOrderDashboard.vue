@@ -45,20 +45,18 @@ import {
 import {
   dealKfNumber,
   dealKfPrice,
-  dealTradingData,
   getExtConfigList,
   getProcessIdByKfLocation,
   initFormStateByConfig,
-  isTdStrategyCategory,
   transformSearchInstrumentResultToInstrument,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import OrderConfirmModal from './OrderConfirmModal.vue';
-import { useExtraCategory } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiExtraLocationUtils';
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
 import { useTradingTask } from '../tradingTask/utils';
 import { useGlobalStore } from '@kungfu-trader/kungfu-app/src/renderer/pages/index/store/global';
 import { storeToRefs } from 'pinia';
 import { ShotableInstrumentTypes } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
+import { useExtraCategory } from '@kungfu-trader/kungfu-js-api/utils/extraLocationUtils';
 
 const { t } = VueI18n.global;
 const { error } = messagePrompt();
@@ -87,7 +85,7 @@ const {
   getCurrentGlobalKfLocationId,
 } = useCurrentGlobalKfLocation(window.watcher);
 
-const { getExtraCategoryData } = useExtraCategory();
+const { getTradingDataByLocation } = useExtraCategory();
 
 const { getAssetsByKfConfig } = useAssets();
 
@@ -511,18 +509,15 @@ function updatePositionList(): void {
     return;
   }
 
-  const positions = isTdStrategyCategory(currentGlobalKfLocation.value.category)
-    ? ((dealTradingData(
-        window.watcher,
-        window.watcher.ledger,
-        'Position',
-        currentGlobalKfLocation.value,
-      ) || []) as KungfuApi.Position[])
-    : (getExtraCategoryData(
-        window.watcher.ledger.Position,
-        currentGlobalKfLocation.value,
-        'position',
-      ) as KungfuApi.Position[]);
+  const positions = getTradingDataByLocation(
+    app?.proxy?.$globalCategoryRegister?.globalRegistedCategories?.[
+      currentGlobalKfLocation.value.category
+    ] || null,
+    window.watcher.ledger.Position,
+    currentGlobalKfLocation.value,
+    window.watcher,
+    'position',
+  ) as KungfuApi.Position[];
 
   curPositionList.value = positions;
 }

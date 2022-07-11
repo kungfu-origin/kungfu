@@ -217,7 +217,8 @@ declare namespace KungfuApi {
         | {
             entry: string;
             page: string;
-          };
+          }
+        | null;
       daemon: Record<string, string>;
       script: string;
     }
@@ -618,19 +619,6 @@ declare namespace KungfuApi {
     Position: DataTable<Position>;
     Quote: DataTable<Quote>;
     Trade: DataTable<Trade>;
-  }
-
-  export interface TradingDataNameToType {
-    Asset: Asset;
-    AssetMargin: AssetMargin;
-    Bar: Bar;
-    Instrument: Instrument;
-    Order: Order;
-    OrderInput: OrderInput;
-    OrderStat: OrderStat;
-    Position: Position;
-    Quote: Quote;
-    Trade: Trade;
   }
 
   export type TradingDataTypes =

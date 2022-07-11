@@ -15,7 +15,7 @@ export default {
   operation_success: '操作成功',
   operation_failed: '操作失败',
   location_error: '当前 Location 错误',
-  watcher_error: 'Watcher 错误',
+  watcher_error: 'Watcher is NULL',
   instrument_error: '标的错误',
   prompt: '提示',
   warning: '警告',
@@ -277,7 +277,7 @@ export default {
     confirm_cancel_all: '确认全部撤单',
     entrust: '委托',
     start: '请先启动',
-    trade_process: '交易进程',
+    td: '交易进程',
     confirm: '确认',
 
     entrust_statistical: '委托统计',
