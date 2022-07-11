@@ -148,8 +148,9 @@ export interface Pm2PacketMain {
   id: number;
 }
 
-export class Pm2Bus {
-  on: (type: string, cb: (packet: Pm2Packet) => void) => void;
+export interface Pm2Bus {
+  on(type: string, cb: (packet: Pm2Packet) => void): void;
+  // on(type: string, cb: (packet: Pm2Packet) => void): void;
 }
 
 export const pm2Connect = (): Promise<void> => {
@@ -592,8 +593,8 @@ export const startMaster = async (force = false): Promise<void> => {
         KF_NO_EXT: 'on',
       },
     });
-  } catch (err) {
-    kfLogger.error(err.message);
+  } catch (err: unknown) {
+    kfLogger.error((<Error>err).message);
   }
 };
 
@@ -609,8 +610,8 @@ export const startLedger = async (force = false): Promise<void> => {
       args,
       force,
     });
-  } catch (err) {
-    kfLogger.error(err.message);
+  } catch (err: unknown) {
+    kfLogger.error((<Error>err).message);
   }
 };
 
@@ -625,8 +626,8 @@ export const startCacheD = async (force = false): Promise<void> => {
       args,
       force,
     });
-  } catch (err) {
-    kfLogger.error(err.message);
+  } catch (err: unknown) {
+    kfLogger.error((<Error>err).message);
   }
 };
 
