@@ -18,7 +18,7 @@
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "allowSyntheticDefaultImports": true,
-    
+
     "sourceMap": true,
     "baseUrl": ".",
     "types": ["jschardet"],
