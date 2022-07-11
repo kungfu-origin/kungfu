@@ -3,7 +3,6 @@ import {
   dealKfPrice,
   dealAssetPrice,
   dealDirection,
-  dealTradingData,
   isTdStrategyCategory,
   getIdByKfLocation,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
@@ -39,7 +38,7 @@ import {
   useCurrentGlobalKfLocation,
   useInstruments,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
-import { useExtraCategory } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiExtraLocationUtils';
+import { useExtraCategory } from '@kungfu-trader/kungfu-js-api/utils/extraLocationUtils';
 
 const app = getCurrentInstance();
 const { handleBodySizeChange } = useDashboardBodySize();
@@ -59,7 +58,7 @@ const {
 const { handleDownload } = useDownloadHistoryTradingData();
 const { triggerOrderBook, triggerMakeOrder } = useTriggerMakeOrder();
 const { instruments } = useInstruments();
-const { getExtraCategoryData } = useExtraCategory();
+const { getTradingDataByLocation } = useExtraCategory();
 
 const columns = computed(() => {
   if (currentGlobalKfLocation.value === null) {
@@ -78,20 +77,15 @@ onMounted(() => {
           return;
         }
 
-        const positions = isTdStrategyCategory(
-          currentGlobalKfLocation.value.category,
-        )
-          ? ((dealTradingData(
-              watcher,
-              watcher.ledger,
-              'Position',
-              currentGlobalKfLocation.value,
-            ) || []) as KungfuApi.Position[])
-          : (getExtraCategoryData(
-              watcher.ledger.Position,
-              currentGlobalKfLocation.value,
-              'position',
-            ) as KungfuApi.Position[]);
+        const positions = getTradingDataByLocation(
+          app?.proxy?.$globalCategoryRegister?.globalRegistedCategories?.[
+            currentGlobalKfLocation.value.category
+          ] || null,
+          watcher.ledger.Position,
+          currentGlobalKfLocation.value,
+          window.watcher,
+          'position',
+        ) as KungfuApi.Position[];
 
         pos.value = toRaw(
           positions.reverse().map((item) => dealPosition(watcher, item)),

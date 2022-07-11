@@ -1,5 +1,5 @@
 import { LedgerCategoryEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';
-import { KfCategoryRegisterProps } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiExtraLocationUtils';
+import { KfCategoryRegisterProps } from '@kungfu-trader/kungfu-js-api/utils/extraLocationUtils';
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
 const { t } = VueI18n.global;
 
@@ -60,13 +60,13 @@ export const columns: AntTableColumns = [
 ];
 
 export const categoryRegisterConfig: KfCategoryRegisterProps = {
-  name: 'globalPos',
+  category: 'globalPos',
   commonData: {
     name: t('PosGlobal'),
     color: 'pink',
   },
   order: {
-    getter(orders, kfLocation: KungfuApi.KfExtraLocation) {
+    getter(watcher, orders, kfLocation) {
       const { group, name } = kfLocation;
       return orders
         .filter('exchange_id', group)
@@ -75,7 +75,7 @@ export const categoryRegisterConfig: KfCategoryRegisterProps = {
     },
   },
   trade: {
-    getter(trades, kfLocation: KungfuApi.KfExtraLocation) {
+    getter(watcher, trades, kfLocation) {
       const { group, name } = kfLocation;
       return trades
         .filter('exchange_id', group)
@@ -84,7 +84,7 @@ export const categoryRegisterConfig: KfCategoryRegisterProps = {
     },
   },
   position: {
-    getter(position, kfLocation: KungfuApi.KfExtraLocation) {
+    getter(watcher, position, kfLocation) {
       const { group, name } = kfLocation;
       return position
         .nofilter('volume', BigInt(0))

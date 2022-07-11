@@ -619,19 +619,6 @@ declare namespace KungfuApi {
     Trade: DataTable<Trade>;
   }
 
-  export interface TradingDataNameToType {
-    Asset: Asset;
-    AssetMargin: AssetMargin;
-    Bar: Bar;
-    Instrument: Instrument;
-    Order: Order;
-    OrderInput: OrderInput;
-    OrderStat: OrderStat;
-    Position: Position;
-    Quote: Quote;
-    Trade: Trade;
-  }
-
   export type TradingDataTypes =
     | Asset
     | AssetMargin

@@ -1,5 +1,5 @@
 import { LedgerCategoryEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';
-import { KfCategoryRegisterProps } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiExtraLocationUtils';
+import { KfCategoryRegisterProps } from '@kungfu-trader/kungfu-js-api/utils/extraLocationUtils';
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
 const { t } = VueI18n.global;
 
@@ -83,13 +83,13 @@ export const getColumns = (
 ];
 
 export const categoryRegisterConfig: KfCategoryRegisterProps = {
-  name: 'tdGroup',
+  category: 'tdGroup',
   commonData: {
     name: t('tdConfig.td_group'),
     color: '#FAAD14',
   },
   order: {
-    getter(orders, kfLocation: KungfuApi.KfExtraLocation) {
+    getter(watcher, orders, kfLocation) {
       const { children } = kfLocation;
       const tdList = (children || []) as KungfuApi.KfConfig[];
       const locationUids = tdList.map((item) => item.location_uid);
@@ -99,7 +99,7 @@ export const categoryRegisterConfig: KfCategoryRegisterProps = {
     },
   },
   trade: {
-    getter(trades, kfLocation: KungfuApi.KfExtraLocation) {
+    getter(watcher, trades, kfLocation) {
       const { children } = kfLocation;
       const tdList = (children || []) as KungfuApi.KfConfig[];
       const locationUids = tdList.map((item) => item.location_uid);
@@ -109,7 +109,7 @@ export const categoryRegisterConfig: KfCategoryRegisterProps = {
     },
   },
   position: {
-    getter(position, kfLocation: KungfuApi.KfExtraLocation) {
+    getter(watcher, position, kfLocation) {
       const { children } = kfLocation;
       const tdList = (children || []) as KungfuApi.KfConfig[];
       const locationUids = tdList.map((item) => item.location_uid);

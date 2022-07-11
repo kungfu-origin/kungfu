@@ -4,8 +4,6 @@ import {
   dealSide,
   dealOffset,
   delayMilliSeconds,
-  dealTradingData,
-  isTdStrategyCategory,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import {
   useDashboardBodySize,
@@ -41,7 +39,7 @@ import {
   showTradingDataDetail,
   useCurrentGlobalKfLocation,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
-import { useExtraCategory } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiExtraLocationUtils';
+import { useExtraCategory } from '@kungfu-trader/kungfu-js-api/utils/extraLocationUtils';
 import TradeStatisticModal from './TradeStatisticModal.vue';
 import { HistoryDateEnum } from '@kungfu-trader/kungfu-js-api/typings/enums';
 
@@ -68,7 +66,7 @@ const {
 } = useCurrentGlobalKfLocation(window.watcher);
 
 const { handleDownload } = useDownloadHistoryTradingData();
-const { getExtraCategoryData } = useExtraCategory();
+const { getTradingDataByLocation } = useExtraCategory();
 const statisticModalVisible = ref<boolean>(false);
 
 const columns = computed(() => {
@@ -92,20 +90,15 @@ onMounted(() => {
           return;
         }
 
-        const tradesResolved = isTdStrategyCategory(
-          currentGlobalKfLocation.value?.category,
-        )
-          ? ((dealTradingData(
-              watcher,
-              watcher.ledger,
-              'Trade',
-              currentGlobalKfLocation.value,
-            ) || []) as KungfuApi.Trade[])
-          : (getExtraCategoryData(
-              watcher.ledger.Trade,
-              currentGlobalKfLocation.value,
-              'trade',
-            ) as KungfuApi.Trade[]);
+        const tradesResolved = getTradingDataByLocation(
+          app?.proxy?.$globalCategoryRegister?.globalRegistedCategories?.[
+            currentGlobalKfLocation.value.category
+          ] || null,
+          watcher.ledger.Trade,
+          currentGlobalKfLocation.value,
+          window.watcher,
+          'trade',
+        ) as KungfuApi.Trade[];
 
         trades.value = toRaw(
           tradesResolved
@@ -140,7 +133,7 @@ watch(historyDate, async (newDate) => {
   trades.value = [];
   historyDataLoading.value = true;
   await delayMilliSeconds(500);
-  const { tradingData, historyDatas } = await getKungfuHistoryData(
+  const { tradingData } = await getKungfuHistoryData(
     window.watcher,
     newDate.format(),
     HistoryDateEnum.naturalDate,
@@ -148,15 +141,15 @@ watch(historyDate, async (newDate) => {
     currentGlobalKfLocation.value,
   );
 
-  const tradesResolved = isTdStrategyCategory(
-    currentGlobalKfLocation.value?.category,
-  )
-    ? toRaw(historyDatas as KungfuApi.Trade[])
-    : (getExtraCategoryData(
-        tradingData.Trade,
-        currentGlobalKfLocation.value,
-        'trade',
-      ) as KungfuApi.Trade[]);
+  const tradesResolved = getTradingDataByLocation(
+    app?.proxy?.$globalCategoryRegister?.globalRegistedCategories?.[
+      currentGlobalKfLocation.value.category
+    ] || null,
+    tradingData.Trade,
+    currentGlobalKfLocation.value,
+    window.watcher,
+    'trade',
+  ) as KungfuApi.Trade[];
 
   trades.value = toRaw(
     tradesResolved.map((item) =>

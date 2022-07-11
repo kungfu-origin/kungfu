@@ -1260,43 +1260,6 @@ export const getLedgerCategory = (category: KfCategoryTypes): 0 | 1 => {
   return LedgerCategoryEnum[category as LedgerCategoryTypes];
 };
 
-export const filterLedgerResult = <T>(
-  watcher: KungfuApi.Watcher,
-  dataTable: KungfuApi.DataTable<T>,
-  tradingDataTypeName: KungfuApi.TradingDataTypeName,
-  kfLocation: KungfuApi.KfLocation | KungfuApi.KfConfig,
-  sortKey?: string,
-): T[] => {
-  const { category } = kfLocation;
-  const ledgerCategory = getLedgerCategory(category);
-  let dataTableResolved = dataTable;
-
-  if (ledgerCategory !== undefined) {
-    dataTableResolved = dataTable.filter('ledger_category', ledgerCategory);
-  }
-
-  if (tradingDataTypeName === 'Position') {
-    dataTableResolved = dataTableResolved.nofilter('volume', BigInt(0));
-  }
-
-  if (
-    tradingDataTypeName === 'Position' ||
-    tradingDataTypeName === 'Asset' ||
-    tradingDataTypeName === 'AssetMargin'
-  ) {
-    const locationUID = watcher.getLocationUID(kfLocation);
-    dataTableResolved = dataTableResolved
-      .filter('ledger_category', ledgerCategory)
-      .filter('holder_uid', locationUID);
-  }
-
-  if (sortKey) {
-    return dataTableResolved.sort(sortKey);
-  }
-
-  return dataTableResolved.list();
-};
-
 export const dealAppStates = (
   watcher: KungfuApi.Watcher | null,
   appStates: Record<string, BrokerStateStatusEnum>,
@@ -1357,18 +1320,18 @@ export const dealAssetsByHolderUID = (
   }, {} as Record<string, KungfuApi.Asset>);
 };
 
-export const dealTradingData = (
+export const dealTradingData = <T>(
   watcher: KungfuApi.Watcher | null,
-  tradingData: KungfuApi.TradingData | undefined,
+  tradingData: KungfuApi.DataTable<T>,
   tradingDataTypeName: KungfuApi.TradingDataTypeName,
   kfLocation: KungfuApi.KfLocation | KungfuApi.KfConfig,
-): KungfuApi.TradingDataNameToType[KungfuApi.TradingDataTypeName][] => {
+): T[] => {
   if (!watcher) {
-    throw new Error(t('watcher_error'));
+    throw new Error('Watcher is NULL');
   }
 
   if (!tradingData) {
-    console.error('ledger is undefined');
+    console.error('Watcher.Ledger is undefined');
     return [];
   }
 
@@ -1381,7 +1344,7 @@ export const dealTradingData = (
     tradingDataTypeName === 'Trade' ||
     tradingDataTypeName === 'OrderInput'
   ) {
-    const afterFilterDatas = tradingData[tradingDataTypeName].filter(
+    const afterFilterDatas = tradingData.filter(
       orderTradeFilterKey,
       currentUID,
     );
@@ -1393,15 +1356,50 @@ export const dealTradingData = (
     }
   }
 
-  return filterLedgerResult<
-    KungfuApi.TradingDataNameToType[KungfuApi.TradingDataTypeName]
-  >(
+  return filterLedgerResult<T>(
     watcher,
-    tradingData[tradingDataTypeName],
+    tradingData,
     tradingDataTypeName,
     kfLocation,
     sortKey,
   );
+};
+
+export const filterLedgerResult = <T>(
+  watcher: KungfuApi.Watcher,
+  dataTable: KungfuApi.DataTable<T>,
+  tradingDataTypeName: KungfuApi.TradingDataTypeName,
+  kfLocation: KungfuApi.KfLocation | KungfuApi.KfConfig,
+  sortKey?: string,
+): T[] => {
+  const { category } = kfLocation;
+  const ledgerCategory = getLedgerCategory(category);
+  let dataTableResolved = dataTable;
+
+  if (ledgerCategory !== undefined) {
+    dataTableResolved = dataTable.filter('ledger_category', ledgerCategory);
+  }
+
+  if (tradingDataTypeName === 'Position') {
+    dataTableResolved = dataTableResolved.nofilter('volume', BigInt(0));
+  }
+
+  if (
+    tradingDataTypeName === 'Position' ||
+    tradingDataTypeName === 'Asset' ||
+    tradingDataTypeName === 'AssetMargin'
+  ) {
+    const locationUID = watcher.getLocationUID(kfLocation);
+    dataTableResolved = dataTableResolved
+      .filter('ledger_category', ledgerCategory)
+      .filter('holder_uid', locationUID);
+  }
+
+  if (sortKey) {
+    return dataTableResolved.sort(sortKey);
+  }
+
+  return dataTableResolved.list();
 };
 
 export const isTdStrategyCategory = (category: string): boolean => {
