@@ -41,7 +41,6 @@ page_ptr page::load(const data::location_ptr &location, uint32_t dest_id, uint32
   std::string path = get_page_path(location, dest_id, page_id);
 
   uintptr_t address = os::load_mmap_buffer(path, page_size, is_writing, lazy);
-  // SPDLOG_WARN("==========> path {} page_size {} address {}", path, page_size, address);
   if (address < 0) {
     throw journal_error("unable to load page for " + path);
   }
