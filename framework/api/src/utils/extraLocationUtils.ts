@@ -3,7 +3,7 @@ import {
   KfCategoryEnum,
   KfCategoryTypes,
 } from '@kungfu-trader/kungfu-js-api/typings/enums';
-import { dealTradingData } from './busiUtils';
+import { dealTradingData } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 
 const kfCategoryGetters: Record<string, KfCategoryRegisterProps> = {
   td: {
