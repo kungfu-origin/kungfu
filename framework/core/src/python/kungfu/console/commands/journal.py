@@ -128,32 +128,9 @@ def rebuild_index(ctx):
     default="all",
     help="input or output during this session",
 )
-@click.option(
-    "-f",
-    "--tablefmt",
-    default="simple",
-    type=click.Choice(
-        ["plain", "simple", "orgtbl", "grid", "fancy_grid", "rst", "textile"]
-    ),
-    help="output format",
-)
-@click.option("-p", "--pager", is_flag=True, help="show in a pager")
 @journal_command_context
-def show(ctx, session_id, io_type, tablefmt, pager):
-    journal_df = kfj.show_journal(ctx, session_id, io_type)
-    journal_df["gen_time"] = journal_df["gen_time"].apply(
-        lambda t: kft.strftime(t, FRAME_TIME_FORMAT)
-    )
-    journal_df["trigger_time"] = journal_df["trigger_time"].apply(
-        lambda t: kft.strftime(t, FRAME_TIME_FORMAT)
-    )
-
-    table = tabulate(journal_df.values, headers=journal_df.columns, tablefmt=tablefmt)
-
-    if pager:
-        click.echo_via_pager(table)
-    else:
-        click.echo(table)
+def show(ctx, session_id, io_type):
+    kfj.show_journal(ctx, session_id, io_type)
 
 
 @journal.command()
