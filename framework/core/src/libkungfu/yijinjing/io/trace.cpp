@@ -22,11 +22,16 @@ struct console_table {
   Table table = {};
   int32_t width;
   int32_t height;
+  bool show;
   int rows_count;
 
-  console_table(int32_t console_width, int32_t console_height)
-      : width(console_width), height(console_height), rows_count(0) {
-    table.add_row({"gen_time", "trigger_time", "source", "dest", "msg_type", "data"});
+  console_table(int32_t console_width, int32_t console_height, bool is_show = false)
+      : width(console_width), height(console_height), show(is_show), rows_count(0) {
+    if (!is_show) {
+      table.add_row({"gen_time", "trigger_time", "source", "dest", "msg_type", "data"});
+    } else {
+      table.add_row({"gen_time", "trigger_time", "source", "dest", "msg_type", "frame_length", "data_length"});
+    }
     rows_count = 1;
   }
 
@@ -48,7 +53,9 @@ struct console_table {
     table.column(2).format().width(30).font_align(FontAlign::left);
     table.column(3).format().width(30).font_align(FontAlign::left);
     table.column(4).format().width(24).font_align(FontAlign::left);
-    if (width > 130) {
+    if (show) {
+      table.column(5).format().width(24).font_align(FontAlign::left);
+    } else if (width > 130) {
       table.column(5).format().width(width - 130);
     }
     std::cout << table << std::endl;
@@ -106,6 +113,77 @@ void io_device_console::trace(int64_t begin_time, int64_t end_time, bool in, boo
             dest_name,                                          //
             DataType::type_name.c_str(),                        //
             frame->data<DataType>().to_string()                 //
+        });
+        type_found = true;
+      }
+    });
+    if (not type_found) {
+      auto location_uname = reader->current_page()->get_location()->uname;
+      auto dest_id = reader->current_page()->get_dest_id();
+      SPDLOG_ERROR("{}/{:08x} msg_type {} not found", location_uname, dest_id, frame->msg_type());
+      break;
+    }
+    if (frame->dest() == home_->uid and frame->msg_type() == RequestReadFrom::tag) {
+      auto request = frame->data<RequestReadFrom>();
+      auto source_location = locations.at(request.source_id);
+      reader->join(source_location, home_->uid, request.from_time);
+    }
+    if (frame->dest() == home_->uid and frame->msg_type() == RequestReadFromPublic::tag) {
+      auto request = frame->data<RequestReadFromPublic>();
+      auto source_location = locations.at(request.source_id);
+      reader->join(source_location, location::PUBLIC, request.from_time);
+    }
+    if (frame->dest() == home_->uid and frame->msg_type() == RequestReadFromSync::tag) {
+      auto request = frame->data<RequestReadFromSync>();
+      auto source_location = locations.at(request.source_id);
+      reader->join(source_location, location::SYNC, request.from_time);
+    }
+    if (frame->dest() == home_->uid and frame->msg_type() == Deregister::tag) {
+      reader->disjoin(location::make_shared(frame->data<Deregister>(), get_locator())->uid);
+    }
+    reader->next();
+  }
+}
+
+void io_device_console::show(int64_t begin_time, int64_t end_time, bool in, bool out) {
+  std::unordered_map<uint32_t, location_ptr> locations = {};
+  for (auto location : home_->locator->list_locations(".*", ".*", ".*", ".*")) {
+    locations.emplace(location->uid, location);
+  }
+
+  auto reader = open_reader_to_subscribe();
+
+  if (in) {
+    auto uid_str = fmt::format("{:08x}", home_->uid);
+    auto master_cmd_location = location::make_shared(mode::LIVE, category::SYSTEM, "master", uid_str, get_locator());
+    auto master_home_location = location::make_shared(mode::LIVE, category::SYSTEM, "master", "master", get_locator());
+
+    reader->join(master_cmd_location, home_->uid, begin_time);
+    reader->join(master_home_location, location::PUBLIC, begin_time);
+  }
+  if (out) {
+    for (auto dest_id : get_locator()->list_location_dest(home_)) {
+      reader->join(home_, dest_id, begin_time);
+    }
+  }
+
+  console_table table(console_width_, console_height_, true);
+
+  while (reader->data_available() and reader->current_frame()->gen_time() <= end_time) {
+    auto frame = reader->current_frame();
+    auto dest_name = frame->dest() == location::PUBLIC ? "public" : locations.at(frame->dest())->uname;
+    bool type_found = false;
+    boost::hana::for_each(AllTypes, [&](auto type) {
+      using DataType = typename decltype(+boost::hana::second(type))::type;
+      if (frame->msg_type() == DataType::tag) {
+        table.add_row({
+            time::strftime(frame->gen_time(), TIME_FORMAT),     //
+            time::strftime(frame->trigger_time(), TIME_FORMAT), //
+            locations.at(frame->source())->uname,               //
+            dest_name,                                          //
+            DataType::type_name.c_str(),                        //
+            std::to_string(frame->frame_length()),              //
+            std::to_string(frame->data_length())                //
         });
         type_found = true;
       }

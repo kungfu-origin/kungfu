@@ -119,6 +119,7 @@ KF_DEFINE_DATA_TYPE(                                                     //
     (std::string, group),                                                //
     (std::string, name),                                                 //
     (int64_t, begin_time),                                               //
+    (int64_t, update_time),                                              //
     (int64_t, end_time),                                                 //
     (uint32_t, frame_count),                                             //
     (uint64_t, data_size)                                                //

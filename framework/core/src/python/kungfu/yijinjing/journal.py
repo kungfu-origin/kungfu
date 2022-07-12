@@ -97,7 +97,7 @@ def find_sessions(ctx):
             session.begin_time,
             session.end_time,
             session.end_time > 0,
-            session.end_time - session.begin_time,
+            session.update_time - session.begin_time,
         ]
     return sessions_df
 
@@ -147,80 +147,20 @@ def show_journal(ctx, session_id, io_type):
     locations, session, io_device, show_in, show_out = read_session(
         ctx, session_id, io_type
     )
-
-    reader = io_device.open_reader_to_subscribe()
-
-    if show_in:
-        for dest_id in ctx.runtime_locator.list_location_dest(io_device.home):
-            reader.join(io_device.home, dest_id, session["begin_time"])
-
-    if show_out:
-        master_home_uid = yjj.hash_str_32("system/master/master/live")
-        master_home_location = make_location_from_dict(ctx, locations[master_home_uid])
-        reader.join(master_home_location, 0, session["begin_time"])
-
-        master_cmd_uid = yjj.hash_str_32(
-            "system/master/{:08x}/live".format(io_device.home.uid)
-        )
-        master_cmd_location = make_location_from_dict(ctx, locations[master_cmd_uid])
-        reader.join(master_cmd_location, io_device.home.uid, session["begin_time"])
-
-    import pandas
-
-    journal_df = pandas.DataFrame(
-        columns=[
-            "gen_time",
-            "trigger_time",
-            "source",
-            "dest",
-            "msg_type",
-            "frame_length",
-            "data_length",
-        ]
+    io_device.show(
+        session["begin_time"],
+        session["duration"] + session["begin_time"],
+        show_in,
+        show_out,
     )
-    while (
-        reader.data_available()
-        and reader.current_frame().gen_time <= session["end_time"]
-    ):
-        frame = reader.current_frame()
-        journal_df.loc[len(journal_df)] = [
-            frame.gen_time,
-            frame.trigger_time,
-            locations[frame.source]["uname"],
-            "public" if frame.dest == 0 else locations[frame.dest]["uname"],
-            frame.msg_type,
-            frame.frame_length,
-            frame.data_length,
-        ]
-        if frame.dest == io_device.home.uid and (
-            frame.msg_type == types.RequestReadFrom.__tag__
-            or frame.msg_type == types.RequestReadFromPublic.__tag__
-        ):
-            request = frame.RequestReadFrom()
-            source_location = make_location_from_dict(ctx, locations[request.source_id])
-            dest = (
-                io_device.home.uid
-                if frame.msg_type == types.RequestReadFrom.__tag__
-                else 0
-            )
-            try:
-                reader.join(source_location, dest, request.from_time)
-            except Exception as err:
-                ctx.logger.error(
-                    f"failed to join journal {source_location.uname}/{dest}, exception: {err}"
-                )
-        if (
-            frame.dest == io_device.home.uid
-            and frame.msg_type == types.Deregister.__tag__
-        ):
-            loc = json.loads(frame.data_as_string())
-            reader.disjoin(loc["uid"])
-        reader.next()
-    return journal_df
-
 
 def trace_journal(ctx, session_id, io_type):
     locations, session, io_device, show_in, show_out = read_session(
         ctx, session_id, io_type
     )
-    io_device.trace(session["begin_time"], session["end_time"], show_in, show_out)
+    io_device.trace(
+        session["begin_time"],
+        session["duration"] + session["begin_time"],
+        show_in,
+        show_out,
+    )
