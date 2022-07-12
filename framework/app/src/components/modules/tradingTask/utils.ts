@@ -6,7 +6,7 @@ import {
   useProcessStatusDetailData,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
 import { kfConfigItemsToProcessArgs } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
-import globalBus from '@kungfu-trader/kungfu-js-api/src/utils/globalBus';
+import globalBus from '@kungfu-trader/kungfu-js-api/utils/globalBus';
 import { startTradingTask } from '@kungfu-trader/kungfu-js-api/actions/tradingTask';
 
 export const useTradingTask = (): {
