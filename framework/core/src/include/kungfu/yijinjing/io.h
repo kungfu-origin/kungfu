@@ -101,6 +101,8 @@ public:
 
   void trace(int64_t begin_time, int64_t end_time, bool in, bool out);
 
+  void show(int64_t begin_time, int64_t end_time, bool in, bool out);
+
 private:
   int32_t console_width_;
   int32_t console_height_;
