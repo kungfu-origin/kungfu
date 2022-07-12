@@ -3,7 +3,7 @@ import blessed, { Widgets } from 'blessed';
 
 class Dashboard {
   screen: Widgets.Screen;
-  message: Widgets.MessageElement;
+  message: Widgets.MessageElement | null;
 
   constructor() {
     this.screen = blessed.screen({
@@ -14,6 +14,7 @@ class Dashboard {
     });
 
     this.screen.title = 'Account Dashboard';
+    this.message = null;
   }
 
   init() {
@@ -29,10 +30,11 @@ class Dashboard {
   }
 
   render() {
+    const self = this;
     this.screen.render();
     // async refresh of the ui
     setInterval(function () {
-      this.screen.render();
+      self.screen.render();
     }, 300);
   }
 

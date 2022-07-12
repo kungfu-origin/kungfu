@@ -15,7 +15,7 @@ export default {
   operation_success: 'operation success',
   operation_failed: 'operation failed',
   location_error: 'current location error',
-  watcher_error: 'Watcher error',
+  watcher_error: 'Watcher is NULL',
   instrument_error: 'instrument error',
   prompt: 'prompt',
   warning: 'warning',
@@ -274,7 +274,7 @@ export default {
     confirm_cancel_all: 'Confirm cancellation of all orders',
     entrust: 'Entrust',
     start: 'Please Start',
-    trade_process: 'Trade Process',
+    td: 'TD',
     confirm: 'confirm',
 
     entrust_statistical: 'Entrust Statistical',

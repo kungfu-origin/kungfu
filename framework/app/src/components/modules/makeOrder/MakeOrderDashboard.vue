@@ -45,20 +45,18 @@ import {
 import {
   dealKfNumber,
   dealKfPrice,
-  dealTradingData,
   getExtConfigList,
   getProcessIdByKfLocation,
   initFormStateByConfig,
-  isTdStrategyCategory,
   transformSearchInstrumentResultToInstrument,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import OrderConfirmModal from './OrderConfirmModal.vue';
-import { useExtraCategory } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiExtraLocationUtils';
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
 import { useTradingTask } from '../tradingTask/utils';
 import { useGlobalStore } from '@kungfu-trader/kungfu-app/src/renderer/pages/index/store/global';
 import { storeToRefs } from 'pinia';
 import { ShotableInstrumentTypes } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
+import { useExtraCategory } from '@kungfu-trader/kungfu-js-api/utils/extraLocationUtils';
 
 const { t } = VueI18n.global;
 const { error } = messagePrompt();
@@ -87,8 +85,7 @@ const {
   getCurrentGlobalKfLocationId,
 } = useCurrentGlobalKfLocation(window.watcher);
 
-const { getExtraCategoryData } = useExtraCategory();
-
+const { getTradingDataByLocation } = useExtraCategory();
 const { getAssetsByKfConfig } = useAssets();
 
 const makeOrderInstrumentType = ref<InstrumentTypeEnum>(
@@ -143,8 +140,6 @@ const makeOrderData = computed(() => {
   return makeOrderInput;
 });
 
-const curPositionList = ref<KungfuApi.Position[]>();
-
 const isCurrentCategoryIsTd = computed(
   () => currentGlobalKfLocation.value?.category === 'td',
 );
@@ -160,10 +155,10 @@ const isAccountOrInstrumentConfirmed = computed(() => {
 });
 
 const currentPosition = computed(() => {
-  if (!curPositionList.value?.length || !instrumentResolved.value) return null;
+  if (!getPositions().length || !instrumentResolved.value) return null;
 
   const { exchangeId, instrumentId, instrumentType } = instrumentResolved.value;
-  const targetPositionList: KungfuApi.Position[] = curPositionList.value.filter(
+  const targetPositionList: KungfuApi.Position[] = getPositions().filter(
     (position) =>
       position.exchange_id === exchangeId &&
       position.instrument_id === instrumentId &&
@@ -206,27 +201,18 @@ const showAmountOrPosition = computed(() => {
 
 const currentAvailMoney = computed(() => {
   if (!currentGlobalKfLocation.value) return '--';
-
-  if (isCurrentCategoryIsTd.value) {
-    const avail = getAssetsByKfConfig(currentGlobalKfLocation.value).avail;
-
-    return dealKfPrice(avail);
-  } else {
-    if (formState.value?.account_id) {
-      const { source, id } = formState.value.account_id.parseSourceAccountId();
-
-      const avail = getAssetsByKfConfig({
-        category: 'td',
-        group: source,
-        name: id,
-        mode: 'live',
-      }).avail;
-
-      return dealKfPrice(avail);
-    }
+  if (!isCurrentCategoryIsTd.value && !formState.value.account_id) {
+    return '--';
   }
 
-  return '--';
+  const { source, id } = formState.value.account_id.parseSourceAccountId();
+  const tdLocation = isCurrentCategoryIsTd.value
+    ? currentGlobalKfLocation.value
+    : { category: 'td', group: source, name: id, mode: 'live' };
+
+  const avail = getAssetsByKfConfig(tdLocation).avail;
+
+  return dealKfPrice(avail);
 });
 
 const currentAvailPosVolume = computed(() => {
@@ -284,7 +270,7 @@ function getTradeAmount(
   currentPrice: number,
   volume: number,
   currentInstrument?: KungfuApi.InstrumentResolved,
-  currentPosition?: KungfuApi.PositionResolved,
+  currentPosition?: KungfuApi.Position,
 ): string | null {
   const instrumentType = currentInstrument?.instrumentType;
 
@@ -456,7 +442,6 @@ onMounted(() => {
 
         formState.value.side = +side;
       }
-      updatePositionList();
     });
 
     onBeforeUnmount(() => {
@@ -489,8 +474,6 @@ watch(
     );
     triggerOrderBook(instrumentResolved.value);
     makeOrderInstrumentType.value = instrumentResolved.value.instrumentType;
-
-    updatePositionList();
   },
 );
 
@@ -506,25 +489,22 @@ watch(
 );
 
 // 更新持仓列表
-function updatePositionList(): void {
+function getPositions(): KungfuApi.Position[] {
   if (currentGlobalKfLocation.value === null) {
-    return;
+    return [];
   }
 
-  const positions = isTdStrategyCategory(currentGlobalKfLocation.value.category)
-    ? ((dealTradingData(
-        window.watcher,
-        window.watcher.ledger,
-        'Position',
-        currentGlobalKfLocation.value,
-      ) || []) as KungfuApi.Position[])
-    : (getExtraCategoryData(
-        window.watcher.ledger.Position,
-        currentGlobalKfLocation.value,
-        'position',
-      ) as KungfuApi.Position[]);
+  const positions = getTradingDataByLocation(
+    app?.proxy?.$globalCategoryRegister?.globalRegistedCategories?.[
+      currentGlobalKfLocation.value.category
+    ] || null,
+    window.watcher.ledger.Position,
+    currentGlobalKfLocation.value,
+    window.watcher,
+    'position',
+  ) as KungfuApi.Position[];
 
-  curPositionList.value = positions;
+  return positions;
 }
 
 // 下单操作
@@ -732,7 +712,6 @@ function showCloseModal(
 ): Promise<void> {
   if (!currentPosition.value) return Promise.resolve();
 
-  updatePositionList();
   const closeRange = +globalSetting.value?.trade?.close || 100;
 
   if (

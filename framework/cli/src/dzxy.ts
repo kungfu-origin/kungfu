@@ -86,11 +86,16 @@ process.on('message', (packet: Pm2PacketMain) => {
 
 function resOrders(packet: Pm2PacketMain) {
   if (!watcher) {
-    throw new Error('watcher is null');
+    throw new Error('Watcher is NULL');
   }
 
   const kfLocation = fromPacketToKfLocation(packet);
-  const orders = dealTradingData(watcher, watcher.ledger, 'Order', kfLocation)
+  const orders = dealTradingData<KungfuApi.Order>(
+    watcher,
+    watcher.ledger.Order,
+    'Order',
+    kfLocation,
+  )
     .slice(0, 10)
     .map((item) =>
       dealOrder(
@@ -117,11 +122,16 @@ function resOrders(packet: Pm2PacketMain) {
 
 function resTrades(packet: Pm2PacketMain) {
   if (!watcher) {
-    throw new Error('watcher is null');
+    throw new Error('Watcher is NULL');
   }
 
   const kfLocation = fromPacketToKfLocation(packet);
-  const trades = dealTradingData(watcher, watcher.ledger, 'Trade', kfLocation)
+  const trades = dealTradingData<KungfuApi.Trade>(
+    watcher,
+    watcher.ledger.Trade,
+    'Trade',
+    kfLocation,
+  )
     .slice(0, 10)
     .map((item) =>
       dealTrade(
@@ -148,16 +158,18 @@ function resTrades(packet: Pm2PacketMain) {
 
 function resPosition(packet: Pm2PacketMain) {
   if (!watcher) {
-    throw new Error('watcher is null');
+    throw new Error('Watcher is NULL');
   }
 
   const kfLocation = fromPacketToKfLocation(packet);
-  const position = dealTradingData(
+  const position = dealTradingData<KungfuApi.Position>(
     watcher,
-    watcher.ledger,
+    watcher.ledger.Position,
     'Position',
     kfLocation,
-  ).map((item) => dealPosition(item as KungfuApi.Position));
+  ).map((item) =>
+    dealPosition(watcher as KungfuApi.Watcher, item as KungfuApi.Position),
+  );
 
   turnBigIntToString(position);
 
@@ -176,7 +188,7 @@ function resPosition(packet: Pm2PacketMain) {
 
 function resAsset(packet: Pm2PacketMain) {
   if (!watcher) {
-    throw new Error('watcher is null');
+    throw new Error('Watcher is NULL');
   }
 
   const kfLocation = fromPacketToKfLocation(packet);
@@ -216,7 +228,7 @@ function swithKfLocationResolved(data: SwitchKfLocationPacketData) {
 
 function cancellAllOrders(packet: Pm2PacketMain) {
   if (!watcher) {
-    throw new Error('watcher is null');
+    throw new Error('Watcher is NULL');
   }
 
   const { category } = packet.data as KungfuApi.KfLocation;

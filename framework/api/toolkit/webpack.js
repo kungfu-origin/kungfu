@@ -23,7 +23,6 @@ module.exports = {
                   test: /\.(t|j)s$/,
                   exclude: /node_modules/,
                   use: [
-                    ...(production ? [] : ['thread-loader']),
                     {
                       loader: 'babel-loader',
                     },
@@ -33,19 +32,15 @@ module.exports = {
                   test: /\.(t|j)s$/,
                   exclude: /node_modules/,
                   use: [
-                    ...(production ? [] : ['thread-loader']),
                     {
                       loader: 'ts-loader',
                       options: {
-                        // 指定特定的ts编译配置，为了区分脚本的ts配置
                         configFile: path.resolve(
                           process.cwd(),
                           'tsconfig.json',
                         ),
                         // 对应文件添加个.ts或.tsx后缀
-                        appendTsSuffixTo: [/\.vue$/],
-                        transpileOnly: false, // 关闭类型检测，即值进行转译
-                        happyPackMode: true,
+                        appendTsSuffixTo: ['\\.vue$'],
                       },
                     },
                   ],
@@ -105,6 +100,15 @@ module.exports = {
         },
       },
       plugins: [
+        // new ForkTsCheckerWebpackPlugin({
+        //   typescript: {
+        //     configFile: path.resolve(process.cwd(), 'tsconfig.json'),
+        //     diagnosticOptions: {
+        //       semantic: true,
+        //       syntactic: true,
+        //     },
+        //   },
+        // }),
         new ESLintPlugin({
           fix: true /* 自动帮助修复 */,
           extensions: ['js', 'json', 'ts', 'json', 'css', 'less'],

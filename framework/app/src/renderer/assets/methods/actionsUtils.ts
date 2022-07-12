@@ -23,7 +23,6 @@ import {
   getIdByKfLocation,
   getMdTdKfLocationByProcessId,
   getProcessIdByKfLocation,
-  isTdStrategyCategory,
   switchKfLocation,
   findTargetFromArray,
   getAppStateStatusName,
@@ -69,7 +68,7 @@ import {
 import { storeToRefs } from 'pinia';
 import { ipcRenderer } from 'electron';
 import { throttleTime } from 'rxjs';
-import { useExtraCategory } from './uiExtraLocationUtils';
+import { useExtraCategory } from '@kungfu-trader/kungfu-js-api/utils/extraLocationUtils';
 import { useGlobalStore } from '../../pages/index/store/global';
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
 import { messagePrompt } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
@@ -82,7 +81,7 @@ const { success, error } = messagePrompt();
 export const handleSwitchProcessStatus = (
   checked: boolean,
   mouseEvent: MouseEvent,
-  kfLocation: KungfuApi.KfLocation | KungfuApi.KfConfig,
+  kfLocation: KungfuApi.KfLocation,
 ): Promise<void | Proc> => {
   mouseEvent.stopPropagation();
   return switchKfLocation(window.watcher, kfLocation, checked)
@@ -127,9 +126,7 @@ export const useSwitchAllConfig = (
   const handleSwitchAllProcessStatus = (checked: boolean): Promise<void> => {
     return Promise.all(
       kfConfigs.value.map(
-        (
-          item: KungfuApi.KfLocation | KungfuApi.KfConfig,
-        ): Promise<void | Proc> => {
+        (item: KungfuApi.KfLocation): Promise<void | Proc> => {
           return switchKfLocation(window.watcher, item, checked);
         },
       ),
@@ -282,7 +279,7 @@ export const useDealExportHistoryTradingData = (): {
   const exportDateModalVisible = ref<boolean>(false);
   const exportEventData = ref<ExportTradingDataEvent>();
   const exportDataLoading = ref<boolean>(false);
-  const { getExtraCategoryData } = useExtraCategory();
+  const { getTradingDataByLocation } = useExtraCategory();
 
   const dealTradingDataItemResolved = (
     isShowOriginData = false,
@@ -358,7 +355,7 @@ export const useDealExportHistoryTradingData = (): {
     }
 
     exportDataLoading.value = true;
-    const { tradingData, historyDatas } = await getKungfuHistoryData(
+    const { tradingData } = await getKungfuHistoryData(
       window.watcher,
       date,
       dateType,
@@ -390,16 +387,18 @@ export const useDealExportHistoryTradingData = (): {
       return Promise.resolve();
     }
 
-    const exportDatas = isTdStrategyCategory(currentKfLocation.category)
-      ? historyDatas
-      : getExtraCategoryData(
-          tradingData[tradingDataType as KungfuApi.TradingDataTypeName] as
-            | KungfuApi.DataTable<KungfuApi.Order>
-            | KungfuApi.DataTable<KungfuApi.Trade>
-            | KungfuApi.DataTable<KungfuApi.Position>,
-          currentKfLocation,
-          tradingDataType.toLowerCase(),
-        );
+    const exportDatas = getTradingDataByLocation(
+      app?.proxy?.$globalCategoryRegister?.globalRegistedCategories?.[
+        currentKfLocation.category
+      ] || null,
+      tradingData[tradingDataType as KungfuApi.TradingDataTypeName] as
+        | KungfuApi.DataTable<KungfuApi.Order>
+        | KungfuApi.DataTable<KungfuApi.Trade>
+        | KungfuApi.DataTable<KungfuApi.Position>,
+      currentKfLocation,
+      window.watcher,
+      tradingDataType.toLowerCase(),
+    );
 
     return writeCSV(filename, exportDatas, dealTradingDataItemResolved())
       .then(() => {
@@ -994,10 +993,10 @@ export const useProcessStatusDetailData = (): {
   processStatusDetailData: Ref<Pm2ProcessStatusDetailData>;
   appStates: Ref<Record<string, BrokerStateStatusTypes>>;
   getProcessStatusName(
-    kfConfig: KungfuApi.KfLocation | KungfuApi.KfConfig,
+    kfConfig: KungfuApi.KfLocation,
   ): ProcessStatusTypes | undefined;
   getStrategyStatusName(
-    kfConfig: KungfuApi.KfLocation | KungfuApi.KfConfig,
+    kfConfig: KungfuApi.KfLocation,
   ): ProcessStatusTypes | undefined;
 } => {
   const allProcessStatusData = reactive<{
@@ -1033,9 +1032,7 @@ export const useProcessStatusDetailData = (): {
     >;
   });
 
-  const getProcessStatusName = (
-    kfConfig: KungfuApi.KfLocation | KungfuApi.KfConfig,
-  ) => {
+  const getProcessStatusName = (kfConfig: KungfuApi.KfLocation) => {
     return getAppStateStatusName(
       kfConfig,
       allProcessStatusData.processStatusData,
@@ -1043,9 +1040,7 @@ export const useProcessStatusDetailData = (): {
     );
   };
 
-  const getStrategyStatusName = (
-    kfConfig: KungfuApi.KfLocation | KungfuApi.KfConfig,
-  ) => {
+  const getStrategyStatusName = (kfConfig: KungfuApi.KfLocation) => {
     return getStrategyStateStatusName(
       kfConfig,
       allProcessStatusData.processStatusData,
