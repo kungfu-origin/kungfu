@@ -105,7 +105,7 @@ export interface KfCategoryRegisterProps {
   category: KfCategoryTypes | string;
   commonData: KungfuApi.KfTradeValueCommonData;
 
-  order?: {
+  order: {
     getter: (
       watcher: KungfuApi.Watcher,
       orders: KungfuApi.DataTable<KungfuApi.Order>,
@@ -113,7 +113,7 @@ export interface KfCategoryRegisterProps {
     ) => KungfuApi.Order[];
   };
 
-  trade?: {
+  trade: {
     getter: (
       watcher: KungfuApi.Watcher,
       trades: KungfuApi.DataTable<KungfuApi.Trade>,
@@ -121,7 +121,7 @@ export interface KfCategoryRegisterProps {
     ) => KungfuApi.Trade[];
   };
 
-  position?: {
+  position: {
     getter: (
       watcher: KungfuApi.Watcher,
       positions: KungfuApi.DataTable<KungfuApi.Position>,
@@ -161,25 +161,19 @@ export class GlobalCategoryRegister {
 export const useExtraCategory = (): {
   getTradingDataByLocation: (
     targetCategoryProps: KfCategoryRegisterProps | null,
-    dataSource:
-      | KungfuApi.DataTable<KungfuApi.Order>
-      | KungfuApi.DataTable<KungfuApi.Trade>
-      | KungfuApi.DataTable<KungfuApi.Position>,
-    kfLocation: KungfuApi.KfLocation,
-    watcher: KungfuApi.Watcher | null,
-    type: 'order' | 'trade' | 'position',
-  ) => TradingDataItem[];
-} => {
-  const getTradingDataByLocation = (
-    targetCategoryProps: KfCategoryRegisterProps | null,
-    dataSource:
-      | KungfuApi.DataTable<KungfuApi.Order>
-      | KungfuApi.DataTable<KungfuApi.Trade>
-      | KungfuApi.DataTable<KungfuApi.Position>,
+    dataSource: KungfuApi.TradingDataTable,
     kfLocation: KungfuApi.KfLocation,
     watcher: KungfuApi.Watcher | null,
     tradingDataType: 'order' | 'trade' | 'position',
-  ): TradingDataItem[] => {
+  ) => KungfuApi.TradingDataItem[];
+} => {
+  const getTradingDataByLocation = (
+    targetCategoryProps: KfCategoryRegisterProps | null,
+    dataSource: KungfuApi.TradingDataTable,
+    kfLocation: KungfuApi.KfLocation,
+    watcher: KungfuApi.Watcher | null,
+    tradingDataType: 'order' | 'trade' | 'position',
+  ): KungfuApi.TradingDataItem[] => {
     if (!targetCategoryProps) {
       return [];
     }
@@ -192,13 +186,9 @@ export const useExtraCategory = (): {
     const defaulFuncData = {
       getter: (
         watcher: KungfuApi.Watcher,
-        dataSource:
-          | KungfuApi.DataTable<KungfuApi.Order>
-          | KungfuApi.DataTable<KungfuApi.Trade>
-          | KungfuApi.DataTable<KungfuApi.Position>,
-
+        dataSource: KungfuApi.TradingDataTable,
         kfLocation: KungfuApi.KfLocation,
-      ) => [] as TradingDataItem[],
+      ) => [] as KungfuApi.TradingDataItem[],
     };
     const dealDataFuncData =
       targetCategoryProps[tradingDataType] || defaulFuncData;
@@ -206,9 +196,7 @@ export const useExtraCategory = (): {
 
     return dealDataFunc(
       watcher,
-      dataSource as KungfuApi.DataTable<KungfuApi.Order> &
-        KungfuApi.DataTable<KungfuApi.Trade> &
-        KungfuApi.DataTable<KungfuApi.Position>,
+      dataSource as KungfuApi.MergedTradingDataTable,
       kfLocation,
     );
   };

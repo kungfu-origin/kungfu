@@ -163,7 +163,7 @@ function handleShowTradingDataDetail({
   row,
 }: {
   event: MouseEvent;
-  row: TradingDataItem;
+  row: KungfuApi.TradingDataItem;
 }) {
   showTradingDataDetail(row as KungfuApi.TradeResolved, '成交');
 }

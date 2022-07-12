@@ -27,7 +27,7 @@ export const parseToString = (
   pad = 2,
 ) => {
   return targetList
-    .map((item: string, i: number) => {
+    .map((item: string | number, i: number) => {
       if (item + '' === '0') item = '0';
       item = (item || '').toString();
 
