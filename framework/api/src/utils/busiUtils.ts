@@ -535,7 +535,6 @@ const getKfUIExtensionConfigByExtKey = (
       };
       return configByExtraKey;
     }, {} as KungfuApi.KfUIExtConfigs);
-  2;
 };
 
 export const getKfExtensionConfig =

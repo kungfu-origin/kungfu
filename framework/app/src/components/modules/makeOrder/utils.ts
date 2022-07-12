@@ -37,7 +37,7 @@ export function dealOrderPlaceVNode(
       if (orderInputResolved[key].name.toString() === '[object Object]') {
         return false;
       }
-      return orderInputResolved[key].name !== '';
+      return orderInputResolved[key].name !== '' && currentOrderInputTrans[key];
     })
     .map((key) =>
       h('div', { class: 'trading-data-detail-row' }, [
