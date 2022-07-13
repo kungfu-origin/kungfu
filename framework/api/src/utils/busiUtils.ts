@@ -727,9 +727,7 @@ export const getProcessIdByKfLocation = (
   }
 };
 
-export const getIdByKfLocation = (
-  kfLocation: KungfuApi.KfLocation
-): string => {
+export const getIdByKfLocation = (kfLocation: KungfuApi.KfLocation): string => {
   if (kfLocation.category === 'td') {
     return `${kfLocation.group}_${kfLocation.name}`;
   } else if (kfLocation.category === 'md') {
