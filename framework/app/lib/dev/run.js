@@ -13,6 +13,7 @@ const {
   getAppDir,
   getKfcDir,
   getExtensionDirs,
+  getCliDir,
 } = require('@kungfu-trader/kungfu-js-api/toolkit/utils');
 const defaultDistDir = getAppDefaultDistDir();
 
@@ -196,6 +197,7 @@ const run = (distDir, distName = 'app', withWebpack) => {
   const appDir = getAppDir();
   const extdirs = getExtensionDirs();
   const kfcDir = getKfcDir();
+  const cliDir = getCliDir();
 
   if (withWebpack) {
     process.chdir(appDir);
@@ -204,6 +206,7 @@ const run = (distDir, distName = 'app', withWebpack) => {
   }
 
   process.env.KFC_DIR = kfcDir;
+  process.env.CLI_DIR = cliDir;
   process.env.KFC_DEV = true;
   process.env.EXTENSION_DIRS = [distDir, ...extdirs].join(path.delimiter);
 

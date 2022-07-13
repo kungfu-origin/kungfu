@@ -6,8 +6,10 @@ const {
 } = require('@kungfu-trader/kungfu-js-api/toolkit/utils');
 
 const kfcDir = getKfcDir();
+const cliDir = getCliDir();
 const extdirs = getExtensionDirs();
 process.env.KFC_DIR = kfcDir;
+process.env.CLI_DIR = cliDir;
 process.env.KFC_DEV = true;
 process.env.EXTENSION_DIRS = extdirs.join(path.delimiter);
 
