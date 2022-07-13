@@ -24,6 +24,8 @@ export default {
   save_file: 'save file',
   detail: 'detail',
   ok: 'ok',
+  yes: 'yes',
+  no: 'no',
 
   edit: 'Edit',
   copy: 'Copy',
@@ -419,6 +421,7 @@ export default {
     side: 'side',
     offset: 'offset',
     hedge_flag: 'hedge_flag',
+    is_swap: 'is_swap',
     price_type: 'price_type',
     limit_price: 'limit_price A-B',
     volume: 'volume',

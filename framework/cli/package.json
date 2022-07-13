@@ -39,6 +39,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.0.0",
+    "@babel/polyfill": "^7.12.1",
     "@kungfu-trader/kungfu-toolchain": "^2.4.0-alpha.100",
     "@types/blessed": "^0.1.19",
     "babel-loader": "^8.0.0",

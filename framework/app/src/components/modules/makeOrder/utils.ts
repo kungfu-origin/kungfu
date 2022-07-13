@@ -7,6 +7,7 @@ import { dealOrderInputItem } from '@kungfu-trader/kungfu-js-api/utils/busiUtils
 import { h, VNode } from 'vue';
 import { makeOrderConfigKFTypes, orderInputTrans } from './config';
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
+import { getFutureArbitrageOrderTrans } from '../futureArbitrage/config';
 const { t } = VueI18n.global;
 
 export function dealStockOffset(
@@ -26,8 +27,14 @@ export function dealStockOffset(
 export function dealOrderPlaceVNode(
   makeOrderInput: KungfuApi.MakeOrderInput,
   orderCount: number,
+  isArbitrage: boolean,
 ): VNode {
   const orderData: KungfuApi.MakeOrderInput = dealStockOffset(makeOrderInput);
+
+  const currentOrderInputTrans = {
+    ...orderInputTrans,
+    ...(isArbitrage ? getFutureArbitrageOrderTrans(orderData.side) : {}),
+  };
 
   const orderInputResolved: Record<string, KungfuApi.KfTradeValueCommonData> =
     dealOrderInputItem(orderData);
@@ -37,11 +44,11 @@ export function dealOrderPlaceVNode(
       if (orderInputResolved[key].name.toString() === '[object Object]') {
         return false;
       }
-      return orderInputResolved[key].name !== '';
+      return orderInputResolved[key].name !== '' && currentOrderInputTrans[key];
     })
     .map((key) =>
       h('div', { class: 'trading-data-detail-row' }, [
-        h('span', { class: 'label' }, `${orderInputTrans[key]}`),
+        h('span', { class: 'label' }, `${currentOrderInputTrans[key]}`),
         h(
           'span',
           {

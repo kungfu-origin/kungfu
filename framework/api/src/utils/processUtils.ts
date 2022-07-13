@@ -338,18 +338,20 @@ export const startProcess = async (
     watch: options.watch || false,
     force: options.force || false,
     exec_mode: 'fork',
-    kill_timeout: 16000,
+    kill_timeout: options.kill_timeout || 16000,
     env: {
       RELOAD_AFTER_CRASHED: process.env.RELOAD_AFTER_CRASHED || 'false',
       EXTENSION_DIRS: extDirs
         .map((dir) => dealSpaceInPath(path.dirname(dir)))
         .join(path.delimiter),
       KFC_DIR: process.env.KFC_DIR || '',
+      CLI_DIR: process.env.CLI_DIR || '',
       KF_HOME: dealSpaceInPath(KF_HOME),
       KF_RUNTIME_DIR: dealSpaceInPath(KF_RUNTIME_DIR),
       LANG: `${locale}.UTF-8`,
       PYTHONUTF8: '1',
       PYTHONIOENCODING: 'utf8',
+
       KFC_AS_VARIANT: '',
       ...options.env,
     },
@@ -806,6 +808,7 @@ export const startDzxy = () => {
     env: {
       KFC_AS_VARIANT: 'node',
     },
+    kill_timeout: 500,
   }).catch((err) => {
     kfLogger.error(err.message);
   });
@@ -823,6 +826,7 @@ export const startExtDaemon = (name: string, cwd: string, script: string) => {
     env: {
       KFC_AS_VARIANT: 'node',
     },
+    kill_timeout: 500,
   }).catch((err) => {
     kfLogger.error(err.message);
   });

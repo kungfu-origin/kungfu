@@ -94,7 +94,7 @@ const staticDevCliDir = path.resolve('..', 'cli', 'dist', 'cli');
 export const CLI_PARENT_DIR = production
   ? path.join(global.__kfResourcesPath, 'app', 'dist')
   : path.dirname(process.env.CLI_DIR || staticDevCliDir);
-export const CLI_DIR = process.env.KFC_DIR || path.join(CLI_PARENT_DIR, 'cli');
+export const CLI_DIR = process.env.CLI_DIR || path.join(CLI_PARENT_DIR, 'cli');
 process.env.CLI_DIR = CLI_DIR;
 
 //================== cli end ======================================

@@ -24,6 +24,9 @@ import {
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { setGlobalSetting, showGlobalSetting } from './commanders/config';
 import { exportTradingDataPrompt } from './commanders/export';
+import { useAllExtScript } from './assets/methods/utils';
+
+useAllExtScript();
 
 const argvs = process.argv.filter((s) => !!s);
 if (argvs[argvs.length - 1] === '-h') {
@@ -146,7 +149,7 @@ program
 
 program
   .command('showConfig')
-  .description('set system config of kungfu')
+  .description('show system config of kungfu')
   .action(async () => {
     try {
       await showGlobalSetting();

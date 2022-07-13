@@ -577,6 +577,11 @@ defineExpose({
           {{ option.label }}
         </a-radio>
       </a-radio-group>
+      <a-checkbox
+        v-else-if="item.type === 'checkbox'"
+        v-model:checked="formState[item.key]"
+        :disabled="(changeType === 'update' && item.primary) || item.disabled"
+      ></a-checkbox>
       <a-select
         v-else-if="numberEnumSelectType[item.type]"
         v-model:value="formState[item.key]"

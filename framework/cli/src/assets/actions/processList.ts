@@ -31,10 +31,15 @@ import { ProcessListItem } from 'src/typings';
 import colors from 'colors';
 import { Widgets } from 'blessed';
 import { KF_HOME } from '@kungfu-trader/kungfu-js-api/config/pathConfig';
-import { dealStatus, getCategoryName } from '../methods/utils';
+import {
+  dealStatus,
+  getCategoryName,
+  startAllExtDaemons,
+} from '../methods/utils';
 import { globalState } from '../actions/globalState';
+import { dealProcessName } from '../methods/utils';
 
-export const mdTdStrategyObservable = () => {
+export const mdTdStrategyDaemonObservable = () => {
   return new Observable<Record<KfCategoryTypes, KungfuApi.KfConfig[]>>(
     (observer) => {
       getAllKfConfigOriginData().then(
@@ -159,18 +164,18 @@ export const specificProcessListObserver = (kfLocation: KungfuApi.KfConfig) =>
 
 export const processListObservable = () =>
   combineLatest(
-    mdTdStrategyObservable(),
+    mdTdStrategyDaemonObservable(),
     processStatusDataObservable(),
     appStatesObservable(),
     (
-      mdTdStrategy: Record<KfCategoryTypes, KungfuApi.KfConfig[]>,
+      mdTdStrategyDaemon: Record<KfCategoryTypes, KungfuApi.KfConfig[]>,
       ps: {
         processStatus: Pm2ProcessStatusData;
         processStatusWithDetail: Pm2ProcessStatusDetailData;
       },
       appStates: Record<string, BrokerStateStatusTypes>,
     ): ProcessListItem[] => {
-      const { md, td, strategy } = mdTdStrategy;
+      const { md, td, strategy, daemon } = mdTdStrategyDaemon;
       const { processStatus, processStatusWithDetail } = ps;
 
       const mdList: ProcessListItem[] = md.map((item) => {
@@ -229,6 +234,22 @@ export const processListObservable = () =>
         };
       });
 
+      const daemonList: ProcessListItem[] = daemon.map((item) => {
+        const processId = getProcessIdByKfLocation(item);
+        return {
+          processId,
+          processName: dealProcessName(processId) || processId,
+          typeName: getCategoryName(item.category),
+          category: item.category,
+          group: item.group,
+          name: item.name,
+          value: JSON.parse(item.value || '{}'),
+          status: processStatus[processId] || '--',
+          statusName: dealStatus(processStatus[processId] || '--'),
+          monit: processStatusWithDetail[processId]?.monit,
+        };
+      });
+
       return [
         {
           processId: 'archive',
@@ -255,18 +276,6 @@ export const processListObservable = () =>
           monit: processStatusWithDetail['master']?.monit,
         },
         {
-          processId: 'ledger',
-          processName: 'LEDGER',
-          typeName: colors.bgMagenta('Sys'),
-          category: 'system',
-          group: 'service',
-          name: 'ledger',
-          value: {},
-          status: processStatus['ledger'] || '--',
-          statusName: dealStatus(processStatus['ledger'] || '--'),
-          monit: processStatusWithDetail['ledger']?.monit,
-        },
-        {
           processId: 'cached',
           processName: 'CACHED',
           typeName: colors.bgMagenta('Sys'),
@@ -277,6 +286,18 @@ export const processListObservable = () =>
           status: processStatus['cached'] || '--',
           statusName: dealStatus(processStatus['cached'] || '--'),
           monit: processStatusWithDetail['cached']?.monit,
+        },
+        {
+          processId: 'ledger',
+          processName: 'LEDGER',
+          typeName: colors.bgMagenta('Sys'),
+          category: 'system',
+          group: 'service',
+          name: 'ledger',
+          value: {},
+          status: processStatus['ledger'] || '--',
+          statusName: dealStatus(processStatus['ledger'] || '--'),
+          monit: processStatusWithDetail['ledger']?.monit,
         },
         {
           processId: 'dzxy',
@@ -290,6 +311,7 @@ export const processListObservable = () =>
           statusName: dealStatus(processStatus['dzxy'] || '--'),
           monit: processStatusWithDetail['dzxy']?.monit,
         },
+        ...daemonList,
         ...mdList,
         ...tdList,
         ...strategyList,
@@ -348,6 +370,7 @@ export const switchProcess = (
         }
       }
       break;
+    case 'daemon':
     case 'md':
     case 'td':
     case 'strategy':
@@ -436,5 +459,7 @@ const switchMaster = async (status: boolean): Promise<void> => {
     await startLedger(false);
     await delayMilliSeconds(1000);
     await startDzxy();
+    await delayMilliSeconds(1000);
+    await startAllExtDaemons();
   }
 };

@@ -220,7 +220,7 @@ function swithKfLocationResolved(data: SwitchKfLocationPacketData) {
     location_uid: 0,
     mode: 'live',
   };
-
+  console.log(JSON.stringify(kfConfig), status);
   return switchKfLocation(watcher, kfConfig, !status).catch((err) => {
     console.error(err.message);
   });

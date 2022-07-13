@@ -16,6 +16,7 @@ import {
 } from '../config/pathConfig';
 import { pathExists, remove } from 'fs-extra';
 import {
+  getAvailDaemonList,
   getIdByKfLocation,
   getProcessIdByKfLocation,
 } from '../utils/busiUtils';
@@ -31,33 +32,43 @@ import {
 export const getAllKfConfigOriginData = (): Promise<
   Record<KfCategoryTypes, KungfuApi.KfConfig[]>
 > => {
-  return getKfAllConfig().then((allConfig: KungfuApi.KfConfigOrigin[]) => {
-    const allConfigResolved = allConfig.map(
-      (config: KungfuApi.KfConfigOrigin): KungfuApi.KfConfig => {
+  return Promise.all([getKfAllConfig(), getAvailDaemonList()]).then(
+    (allConfig: [KungfuApi.KfConfigOrigin[], KungfuApi.KfDaemonLocation[]]) => {
+      const allConfigResolved = allConfig[0].map(
+        (config: KungfuApi.KfConfigOrigin): KungfuApi.KfConfig => {
+          return {
+            ...config,
+            category: KfCategoryEnum[config.category] as KfCategoryTypes,
+            mode: KfModeEnum[config.mode] as KfModeTypes,
+          };
+        },
+      );
+
+      const daemonList = allConfig[1].map((config) => {
         return {
           ...config,
-          category: KfCategoryEnum[config.category] as KfCategoryTypes,
-          mode: KfModeEnum[config.mode] as KfModeTypes,
+          location_uid: 0,
+          value: '',
         };
-      },
-    );
+      });
 
-    return {
-      md: allConfigResolved.filter((config: KungfuApi.KfConfig) => {
-        return config.category === 'md';
-      }),
-      td: allConfigResolved.filter((config: KungfuApi.KfConfig) => {
-        return config.category === 'td';
-      }),
-      strategy: allConfigResolved.filter((config: KungfuApi.KfConfig) => {
-        return config.category === 'strategy';
-      }),
-      system: allConfigResolved.filter((config: KungfuApi.KfConfig) => {
-        return config.category === 'system';
-      }),
-      daemon: [],
-    };
-  });
+      return {
+        md: allConfigResolved.filter((config: KungfuApi.KfConfig) => {
+          return config.category === 'md';
+        }),
+        td: allConfigResolved.filter((config: KungfuApi.KfConfig) => {
+          return config.category === 'td';
+        }),
+        strategy: allConfigResolved.filter((config: KungfuApi.KfConfig) => {
+          return config.category === 'strategy';
+        }),
+        system: allConfigResolved.filter((config: KungfuApi.KfConfig) => {
+          return config.category === 'system';
+        }),
+        daemon: daemonList,
+      };
+    },
+  );
 };
 
 export const isKfConfig = async (kfLocation: KungfuApi.KfLocation) => {

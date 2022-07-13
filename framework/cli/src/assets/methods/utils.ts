@@ -1,10 +1,15 @@
+import path from 'path';
+import fse from 'fs-extra';
 import inquirer from 'inquirer';
 import colors from 'colors';
 import { KfCategoryTypes } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import {
+  getAvailCliDaemonList,
   getIdByKfLocation,
+  getKfCliExtensionConfig,
   getProcessIdByKfLocation,
   initFormStateByConfig,
+  loopToRunProcess,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { getAllKfConfigOriginData } from '@kungfu-trader/kungfu-js-api/actions';
 import {
@@ -12,6 +17,9 @@ import {
   Pm2ProcessStatus,
 } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
 import { PromptInputType, PromptQuestion } from 'src/typings';
+import { startExtDaemon } from '@kungfu-trader/kungfu-js-api/utils/processUtils';
+import { Proc } from 'pm2';
+import { globalState } from '../actions/globalState';
 
 export const parseToString = (
   targetList: (string | number)[],
@@ -304,6 +312,10 @@ export const dealMemory = (mem: number): string => {
   return Number((mem || 0) / (1024 * 1024)).toFixed(0) + 'MB';
 };
 
+export const dealProcessName = (name: string) => {
+  return name ? name.split('_').at(-1) : null;
+};
+
 export const calcHeaderWidth = (
   target: string[],
   wish: (string | number)[],
@@ -323,6 +335,8 @@ export const getCategoryName = (category: KfCategoryTypes) => {
     return colors.cyan('td');
   } else if (category === 'strategy') {
     return colors.blue('Strat');
+  } else if (category === 'daemon') {
+    return colors.green('Daem');
   } else {
     return colors.bgMagenta('Sys');
   }
@@ -344,4 +358,39 @@ export const getPadSpace = (num: number) => {
 
 export const isObject = (val) => {
   return Object.prototype.toString.call(val) === '[object Object]';
+};
+
+export const startAllExtDaemons = async () => {
+  const availDaemons = await getAvailCliDaemonList();
+  return loopToRunProcess<void | Proc>(
+    availDaemons.map((item) => {
+      return () =>
+        startExtDaemon(getProcessIdByKfLocation(item), item.cwd, item.script)
+          .then((res) => {
+            return res;
+          })
+          .catch((err) => console.error(err));
+    }),
+  );
+};
+
+const dzxyUse = (ext: { install: (gs) => void }) => {
+  const { install } = ext;
+  if (install) {
+    install(globalState);
+  }
+};
+
+export const useAllExtScript = () => {
+  getKfCliExtensionConfig().then((allConfigs: KungfuApi.KfCliExtConfigs) => {
+    Object.values(allConfigs).forEach((config) => {
+      const { extPath, script } = config;
+      const scriptPath = path.join(extPath, script);
+      if (script && fse.pathExistsSync(scriptPath)) {
+        dzxyUse(
+          (<Record<string, any>>__non_webpack_require__(scriptPath))['default'],
+        );
+      }
+    });
+  });
 };

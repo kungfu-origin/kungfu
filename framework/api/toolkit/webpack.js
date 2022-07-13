@@ -98,17 +98,9 @@ module.exports = {
         library: {
           type: 'commonjs2',
         },
+        libraryTarget: 'commonjs2',
       },
       plugins: [
-        // new ForkTsCheckerWebpackPlugin({
-        //   typescript: {
-        //     configFile: path.resolve(process.cwd(), 'tsconfig.json'),
-        //     diagnosticOptions: {
-        //       semantic: true,
-        //       syntactic: true,
-        //     },
-        //   },
-        // }),
         new ESLintPlugin({
           fix: true /* 自动帮助修复 */,
           extensions: ['js', 'json', 'ts', 'json', 'css', 'less'],
