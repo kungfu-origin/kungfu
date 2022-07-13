@@ -230,7 +230,6 @@ watch(
     } else {
       formState.value.account_id = '';
     }
-    console.log(formState.value);
   },
 );
 

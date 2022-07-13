@@ -5,7 +5,9 @@ import {
 } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import {
   delayMilliSeconds,
+  getAvailDaemonList,
   getProcessIdByKfLocation,
+  gruffSwitchKfLocation,
   kfLogger,
   removeJournal,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
@@ -40,15 +42,27 @@ import { globalState } from '../actions/globalState';
 import { dealProcessName } from '../methods/utils';
 
 export const mdTdStrategyDaemonObservable = () => {
-  return new Observable<Record<KfCategoryTypes, KungfuApi.KfConfig[]>>(
-    (observer) => {
-      getAllKfConfigOriginData().then(
-        (allConfigs: Record<KfCategoryTypes, KungfuApi.KfConfig[]>) => {
-          observer.next(allConfigs);
-        },
-      );
-    },
-  );
+  return new Observable<
+    Record<KfCategoryTypes, KungfuApi.KfConfig[] | KungfuApi.KfDaemonLocation[]>
+  >((observer) => {
+    Promise.all([getAllKfConfigOriginData(), getAvailDaemonList()]).then(
+      (
+        allConfigs: [
+          Record<KfCategoryTypes, KungfuApi.KfConfig[]>,
+          KungfuApi.KfDaemonLocation[],
+        ],
+      ) => {
+        observer.next({
+          ...allConfigs[0],
+          daemon: allConfigs[1].map((item) => ({
+            ...item,
+            location_uid: 0,
+            value: '',
+          })),
+        });
+      },
+    );
+  });
 };
 
 export const appStatesObservable = () => {
@@ -168,7 +182,10 @@ export const processListObservable = () =>
     processStatusDataObservable(),
     appStatesObservable(),
     (
-      mdTdStrategyDaemon: Record<KfCategoryTypes, KungfuApi.KfConfig[]>,
+      mdTdStrategyDaemon: Record<
+        KfCategoryTypes,
+        KungfuApi.KfConfig[] | KungfuApi.KfDaemonLocation[]
+      >,
       ps: {
         processStatus: Pm2ProcessStatusData;
         processStatusWithDetail: Pm2ProcessStatusDetailData;
@@ -239,7 +256,7 @@ export const processListObservable = () =>
         return {
           processId,
           processName: dealProcessName(processId) || processId,
-          typeName: getCategoryName(item.category),
+          typeName: getCategoryName(item.category as KfCategoryTypes),
           category: item.category,
           group: item.group,
           name: item.name,
@@ -247,6 +264,8 @@ export const processListObservable = () =>
           status: processStatus[processId] || '--',
           statusName: dealStatus(processStatus[processId] || '--'),
           monit: processStatusWithDetail[processId]?.monit,
+          script: item.script,
+          cwd: item.cwd,
         };
       });
 
@@ -371,6 +390,30 @@ export const switchProcess = (
       }
       break;
     case 'daemon':
+      gruffSwitchKfLocation(
+        {
+          ...proc,
+          location_uid: 0,
+          mode: 'live',
+        },
+        !status,
+      )
+        .then(() => {
+          messageBoard.log('Please wait...', 2, (err) => {
+            if (err) {
+              console.error(err);
+            }
+          });
+        })
+        .catch((err) => {
+          const errMsg = parseSwtchKfLocationErrMessage(err.message);
+          messageBoard.log(errMsg, 2, (err) => {
+            if (err) {
+              console.error(err);
+            }
+          });
+        });
+      break;
     case 'md':
     case 'td':
     case 'strategy':
@@ -386,7 +429,6 @@ export const switchProcess = (
         );
         return;
       }
-
       sendDataToProcessIdByPm2('SWITCH_KF_LOCATION', globalState.DZXY_PM_ID, {
         category,
         group,
