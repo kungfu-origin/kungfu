@@ -12,7 +12,7 @@ export const ipcEmitDataByName = (
     strategyPath?: string;
   },
   interval?: number,
-) => {
+): Promise<{ data: unknown }> => {
   interval = interval || 5000;
   if (!paWin) {
     return Promise.reject(new Error('paWin is null!'));

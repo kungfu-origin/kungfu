@@ -333,8 +333,8 @@ async function handleApartOrder(): Promise<void> {
     curOrderVolume.value = Number(makeOrderInput.volume);
     curOrderType.value = makeOrderInput.instrument_type;
   } catch (e) {
-    if (e.message) {
-      error(e.message);
+    if ((<Error>e).message) {
+      error((<Error>e).message);
     }
   }
 }
@@ -361,7 +361,9 @@ async function handleApartedConfirm(volumeList: number[]): Promise<void> {
       }),
     );
   } catch (e) {
-    error(e);
+    if ((<Error>e).message) {
+      error((<Error>e).message);
+    }
   }
 }
 
@@ -464,8 +466,8 @@ async function handleMakeOrder(): Promise<void> {
       tdProcessId,
     );
   } catch (e) {
-    if (e.message) {
-      error(e.message);
+    if ((<Error>e).message) {
+      error((<Error>e).message);
     }
   }
 }
@@ -521,8 +523,8 @@ async function handleOpenTradingTaskConfigModal(
     );
     handleOpenSetTradingTaskModal('add', kfExtConfig.key, taskInitValue);
   } catch (e) {
-    if (e.message) {
-      error(e.message);
+    if ((<Error>e).message) {
+      error((<Error>e).message);
     }
   }
 }

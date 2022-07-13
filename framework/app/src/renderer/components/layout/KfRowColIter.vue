@@ -261,7 +261,7 @@ export default defineComponent({
 
     hanldeEdit(
       boardId: number,
-      targetContentId: KfLayout.BoardInfo['current'] | MouseEvent,
+      targetContentId: KfLayout.BoardInfo['current'],
       action: 'add' | 'remove',
     ) {
       if (action === 'remove') {

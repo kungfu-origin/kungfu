@@ -270,7 +270,7 @@ const handleAddFileBlur = (e) => {
       }),
     );
   } catch (err) {
-    error(err.message || t('operation_failed'));
+    error((<Error>err).message || t('operation_failed'));
   }
   //重置
   resetStatus();
@@ -442,8 +442,10 @@ function getCurrentFileByName(parentId, fileTree, name) {
 
 // 获取所有兄弟 name
 function getSiblings(parentId: number | string, fileTree: Code.IFileTree) {
-  const folders: Array<number> = fileTree[parentId].children['folder'] || [];
-  const files: Array<number> = fileTree[parentId].children['file'] || [];
+  const folders: Array<number | 'pending'> =
+    fileTree[parentId].children['folder'] || [];
+  const files: Array<number | 'pending'> =
+    fileTree[parentId].children['file'] || [];
   return [...folders, ...files].reduce((pre, cur) => {
     if (fileTree[cur] && fileTree[cur].name) {
       pre[fileTree[cur].name] = fileTree[cur];

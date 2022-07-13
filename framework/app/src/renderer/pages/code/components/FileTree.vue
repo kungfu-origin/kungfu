@@ -151,7 +151,7 @@ function handleAddFolder() {
       store.addFileFolderPending({ id: target.id, type: 'folder' });
     });
   } else {
-    if (target.parentId !== undefined && !isNaN(target.parentId)) {
+    if (target.parentId !== undefined && !isNaN(+target.parentId)) {
       store.addFileFolderPending({
         id: target.parentId,
         type: 'folder',
@@ -172,7 +172,7 @@ function handleAddFile() {
       store.addFileFolderPending({ id: target.id, type: '' });
     });
   } else {
-    if (target.parentId !== undefined && !isNaN(target.parentId)) {
+    if (target.parentId !== undefined && !isNaN(+target.parentId)) {
       store.addFileFolderPending({ id: target.parentId, type: '' });
     } else {
       throw new Error();
@@ -213,7 +213,9 @@ async function initFileTree(strategy) {
     ids = fileTreeData.ids;
     rootFileTree = fileTreeData.fileTree;
   } catch (err) {
-    error(err);
+    if ((<Error>err).message) {
+      error((<Error>err).message);
+    }
   }
 
   // 处理根
