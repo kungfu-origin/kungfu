@@ -537,6 +537,31 @@ const getKfUIExtensionConfigByExtKey = (
     }, {} as KungfuApi.KfUIExtConfigs);
 };
 
+const getKfCliExtensionConfigByExtKey = (
+  extConfigs: KungfuApi.KfExtOriginConfig[],
+): KungfuApi.KfCliExtConfigs => {
+  return extConfigs
+    .filter((item) => !!item.cli_config)
+    .reduce((configByExtraKey, extConfig) => {
+      const extKey = extConfig.key;
+      const extName = extConfig.name;
+      const extPath = extConfig.extPath;
+      const cliConfig = extConfig['cli_config'];
+      const exhibit = cliConfig?.exhibit || ({} as KungfuApi.KfExhibitConfig);
+      const daemon = cliConfig?.daemon || ({} as Record<string, string>);
+      const script = cliConfig?.script || '';
+
+      configByExtraKey[extKey] = {
+        name: extName,
+        extPath,
+        exhibit,
+        daemon,
+        script,
+      };
+      return configByExtraKey;
+    }, {} as KungfuApi.KfCliExtConfigs);
+};
+
 export const getKfExtensionConfig =
   async (): Promise<KungfuApi.KfExtConfigs> => {
     const kfExtConfigList = await getKfExtConfigList();
@@ -547,6 +572,12 @@ export const getKfUIExtensionConfig =
   async (): Promise<KungfuApi.KfUIExtConfigs> => {
     const kfExtConfigList = await getKfExtConfigList();
     return getKfUIExtensionConfigByExtKey(kfExtConfigList);
+  };
+
+export const getKfCliExtensionConfig =
+  async (): Promise<KungfuApi.KfCliExtConfigs> => {
+    const kfExtConfigList = await getKfExtConfigList();
+    return getKfCliExtensionConfigByExtKey(kfExtConfigList);
   };
 
 export const getExhibitConfig =
@@ -568,6 +599,29 @@ export const getAvailDaemonList = async (): Promise<
 > => {
   const kfExtConfig: KungfuApi.KfUIExtConfigs = await getKfUIExtensionConfig();
   return Object.values(kfExtConfig || ({} as KungfuApi.KfUIExtConfigs))
+    .filter((item) => Object.keys(item).length)
+    .reduce((daemonList, item) => {
+      daemonList = [
+        ...daemonList,
+        ...Object.keys(item.daemon).map((name) => ({
+          category: 'daemon',
+          group: 'ext',
+          name,
+          mode: 'live',
+          cwd: item.extPath,
+          script: item.daemon[name],
+        })),
+      ];
+      return daemonList;
+    }, [] as KungfuApi.KfDaemonLocation[]);
+};
+
+export const getAvailCliDaemonList = async (): Promise<
+  KungfuApi.KfDaemonLocation[]
+> => {
+  const kfExtConfig: KungfuApi.KfCliExtConfigs =
+    await getKfCliExtensionConfig();
+  return Object.values(kfExtConfig || ({} as KungfuApi.KfCliExtConfigs))
     .filter((item) => Object.keys(item).length)
     .reduce((daemonList, item) => {
       daemonList = [
@@ -727,9 +781,7 @@ export const getProcessIdByKfLocation = (
   }
 };
 
-export const getIdByKfLocation = (
-  kfLocation: KungfuApi.KfLocation
-): string => {
+export const getIdByKfLocation = (kfLocation: KungfuApi.KfLocation): string => {
   if (kfLocation.category === 'td') {
     return `${kfLocation.group}_${kfLocation.name}`;
   } else if (kfLocation.category === 'md') {
@@ -817,7 +869,9 @@ const getSystemKfLocationProcessId = (processId: string) => {
       name: processId,
       mode: 'live',
     };
-  } else if (['ledger', 'archive', 'cached'].indexOf(processId) !== -1) {
+  } else if (
+    ['ledger', 'archive', 'cached', 'dzxy'].indexOf(processId) !== -1
+  ) {
     return {
       category: 'system',
       group: 'service',

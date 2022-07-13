@@ -4,9 +4,9 @@ import inquirer from 'inquirer';
 import colors from 'colors';
 import { KfCategoryTypes } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import {
-  getAvailDaemonList,
+  getAvailCliDaemonList,
   getIdByKfLocation,
-  getKfUIExtensionConfig,
+  getKfCliExtensionConfig,
   getProcessIdByKfLocation,
   initFormStateByConfig,
   loopToRunProcess,
@@ -312,6 +312,10 @@ export const dealMemory = (mem: number): string => {
   return Number((mem || 0) / (1024 * 1024)).toFixed(0) + 'MB';
 };
 
+export const dealProcessName = (name: string) => {
+  return name ? name.split('_').at(-1) : null;
+};
+
 export const calcHeaderWidth = (
   target: string[],
   wish: (string | number)[],
@@ -331,6 +335,8 @@ export const getCategoryName = (category: KfCategoryTypes) => {
     return colors.cyan('td');
   } else if (category === 'strategy') {
     return colors.blue('Strat');
+  } else if (category === 'daemon') {
+    return colors.green('Daem');
   } else {
     return colors.bgMagenta('Sys');
   }
@@ -355,7 +361,7 @@ export const isObject = (val) => {
 };
 
 export const startAllExtDaemons = async () => {
-  const availDaemons = await getAvailDaemonList();
+  const availDaemons = await getAvailCliDaemonList();
   return loopToRunProcess<void | Proc>(
     availDaemons.map((item) => {
       return () =>
@@ -368,7 +374,7 @@ export const startAllExtDaemons = async () => {
   );
 };
 
-const dzxyUse = (ext: { install: Function }) => {
+const dzxyUse = (ext: { install: (gs) => void }) => {
   const { install } = ext;
   if (install) {
     install(globalState);
@@ -376,12 +382,14 @@ const dzxyUse = (ext: { install: Function }) => {
 };
 
 export const useAllExtScript = () => {
-  getKfUIExtensionConfig().then((allConfigs: KungfuApi.KfUIExtConfigs) => {
+  getKfCliExtensionConfig().then((allConfigs: KungfuApi.KfCliExtConfigs) => {
     Object.values(allConfigs).forEach((config) => {
       const { extPath, script } = config;
       const scriptPath = path.join(extPath, script);
       if (script && fse.pathExistsSync(scriptPath)) {
-        dzxyUse(require(scriptPath).default);
+        dzxyUse(
+          (<Record<string, any>>__non_webpack_require__(scriptPath))['default'],
+        );
       }
     });
   });

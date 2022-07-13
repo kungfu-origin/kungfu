@@ -32,6 +32,8 @@ declare module 'tail' {
   }
 }
 
+declare function __non_webpack_require__(id: string): unknown;
+
 declare namespace KungfuApi {
   import {
     BrokerStateStatusEnum,
@@ -172,6 +174,11 @@ declare namespace KungfuApi {
       daemon?: Record<string, string>;
       script?: string;
     };
+    cli_config?: {
+      exhibit?: KfExhibitConfig;
+      daemon?: Record<string, string>;
+      script?: string;
+    };
     config?: Record<
       string,
       {
@@ -219,6 +226,17 @@ declare namespace KungfuApi {
             page: string;
           }
         | null;
+      daemon: Record<string, string>;
+      script: string;
+    }
+  >;
+
+  export type KfCliExtConfigs = Record<
+    string,
+    {
+      name: string;
+      extPath: string;
+      exhibit: KfExhibitConfig;
       daemon: Record<string, string>;
       script: string;
     }

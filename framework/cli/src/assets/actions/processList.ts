@@ -37,6 +37,7 @@ import {
   startAllExtDaemons,
 } from '../methods/utils';
 import { globalState } from '../actions/globalState';
+import { dealProcessName } from '../methods/utils';
 
 export const mdTdStrategyDaemonObservable = () => {
   return new Observable<Record<KfCategoryTypes, KungfuApi.KfConfig[]>>(
@@ -237,7 +238,7 @@ export const processListObservable = () =>
         const processId = getProcessIdByKfLocation(item);
         return {
           processId,
-          processName: processId,
+          processName: dealProcessName(processId) || processId,
           typeName: getCategoryName(item.category),
           category: item.category,
           group: item.group,
