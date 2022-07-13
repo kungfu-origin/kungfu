@@ -143,8 +143,10 @@ void bind_strategy(pybind11::module &m) {
            py::arg("account"), py::arg("limit_price"), py::arg("volume"), py::arg("type"), py::arg("side"),
            py::arg("offset") = Offset::Open, py::arg("hedge_flag") = HedgeFlag::Speculation, py::arg("is_swap") = false)
       .def("cancel_order", &strategy::Context::cancel_order)
-      .def("req_history_order", &strategy::Context::req_history_order)
-      .def("req_history_trade", &strategy::Context::req_history_trade)
+      .def("req_history_order", &strategy::Context::req_history_order, py::arg("source"), py::arg("account"),
+           py::arg("query_num") = 0)
+      .def("req_history_trade", &strategy::Context::req_history_trade, py::arg("source"), py::arg("account"),
+           py::arg("query_num") = 0)
       .def("hold_book", &strategy::Context::hold_book)
       .def("hold_positions", &strategy::Context::hold_positions)
       .def("is_book_held", &strategy::Context::is_book_held)

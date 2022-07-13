@@ -134,12 +134,12 @@ public:
   /**
    * query history order
    */
-  void req_history_order(const std::string &source, const std::string &account) override;
+  void req_history_order(const std::string &source, const std::string &account, uint32_t query_num = 0) override;
 
   /**
    * query history trade
    */
-  void req_history_trade(const std::string &source, const std::string &account) override;
+  void req_history_trade(const std::string &source, const std::string &account, uint32_t query_num = 0) override;
 
   /**
    * request deregister.
