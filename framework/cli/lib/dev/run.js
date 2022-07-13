@@ -83,6 +83,7 @@ const run = (distDir, distName = 'cli') => {
   const extdirs = getExtensionDirs();
 
   process.env.KFC_DIR = kfcDir;
+  process.env.CLI_DIR = cliDir;
   process.env.KFC_DEV = true;
   process.env.EXTENSION_DIRS = [distDir, ...extdirs].join(path.delimiter);
 

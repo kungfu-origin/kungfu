@@ -798,10 +798,7 @@ export const startDzxy = () => {
   return startProcess({
     name: 'dzxy',
     args: '',
-    cwd:
-      process.env.NODE_ENV === 'development'
-        ? path.join(process.cwd(), 'dist', 'cli')
-        : path.resolve(__dirname),
+    cwd: process.env.CLI_DIR,
     script: 'dzxy.js',
     interpreter: path.join(KFC_DIR, kfcName),
     force: true,
