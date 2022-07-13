@@ -1060,34 +1060,12 @@ export const buildIdByKeysFromKfConfigSettings = (
     .join('_');
 };
 
-export const switchKfLocation = (
-  watcher: KungfuApi.Watcher | null,
+const startProcessByKfLocation = (
   kfLocation:
     | KungfuApi.KfLocation
     | KungfuApi.KfConfig
     | KungfuApi.KfExtraLocation,
-  targetStatus: boolean,
-): Promise<void | Proc> => {
-  const processId = getProcessIdByKfLocation(kfLocation);
-
-  if (!watcher) return Promise.reject(new Error('Watcher is NULL'));
-
-  if (!targetStatus) {
-    if (
-      kfLocation.category === 'td' ||
-      kfLocation.category === 'md' ||
-      kfLocation.category === 'strategy'
-    ) {
-      if (!watcher.isReadyToInteract(kfLocation)) {
-        return Promise.reject(new Error(t('未就绪', { processId })));
-      }
-    }
-
-    return Promise.resolve(watcher.requestStop(kfLocation))
-      .then(() => delayMilliSeconds(1000))
-      .then(() => deleteProcess(processId));
-  }
-
+) => {
   switch (kfLocation.category) {
     case 'system':
       if (kfLocation.name === 'master') {
@@ -1119,6 +1097,53 @@ export const switchKfLocation = (
     default:
       return Promise.resolve();
   }
+};
+
+export const switchKfLocation = (
+  watcher: KungfuApi.Watcher | null,
+  kfLocation:
+    | KungfuApi.KfLocation
+    | KungfuApi.KfConfig
+    | KungfuApi.KfExtraLocation,
+  targetStatus: boolean,
+): Promise<void | Proc> => {
+  const processId = getProcessIdByKfLocation(kfLocation);
+
+  if (!watcher) return Promise.reject(new Error('Watcher is NULL'));
+
+  if (!targetStatus) {
+    if (
+      kfLocation.category === 'td' ||
+      kfLocation.category === 'md' ||
+      kfLocation.category === 'strategy'
+    ) {
+      if (!watcher.isReadyToInteract(kfLocation)) {
+        return Promise.reject(new Error(t('未就绪', { processId })));
+      }
+    }
+
+    return Promise.resolve(watcher.requestStop(kfLocation))
+      .then(() => delayMilliSeconds(1000))
+      .then(() => deleteProcess(processId));
+  }
+
+  return startProcessByKfLocation(kfLocation);
+};
+
+export const gruffSwitchKfLocation = (
+  kfLocation:
+    | KungfuApi.KfLocation
+    | KungfuApi.KfConfig
+    | KungfuApi.KfExtraLocation,
+  targetStatus: boolean,
+) => {
+  const processId = getProcessIdByKfLocation(kfLocation);
+
+  if (!targetStatus) {
+    return deleteProcess(processId);
+  }
+
+  return startProcessByKfLocation(kfLocation);
 };
 
 export const dealKfNumber = (

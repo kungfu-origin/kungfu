@@ -1,7 +1,10 @@
-import { MonitorDashboard } from 'src/components/monitor';
+import { MonitorDashboard } from '../../components/monitor';
+import { TradingDataDashboard } from '../../components/tradingDataMonitor';
 import { globalState } from './globalState';
 
-export const initBusEvent = (dashboard: MonitorDashboard) => {
+export const initBusEvent = (
+  dashboard: MonitorDashboard | TradingDataDashboard,
+) => {
   const { message, loader } = dashboard.boards;
   globalState.GLOBAL_BUS.subscribe((data) => {
     if (message && loader) {

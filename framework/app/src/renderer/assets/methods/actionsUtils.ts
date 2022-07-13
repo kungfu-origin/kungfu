@@ -1495,7 +1495,6 @@ export const useMakeOrderInfo = (
 
     if (currentPosition.value) {
       const { yesterday_volume, volume } = currentPosition.value;
-      console.log(yesterday_volume, volume);
 
       if (shotable(instrumentType)) {
         if (offset === OffsetEnum.CloseYest) {
