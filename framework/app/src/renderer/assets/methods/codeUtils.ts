@@ -169,10 +169,9 @@ export const clearChildrenByFileId = (
   fileId: number,
 ): Code.IFileTree => {
   const target: Code.FileData = fileTree[fileId];
-  const children: { file: Array<number>; folder: Array<number> } =
-    target.children;
-  const files: Array<number> = children['file'] || [];
-  const folders: Array<number> = children['folders'] || [];
+  const children: Code.FileIds = target.children;
+  const files: Array<number | 'pending'> = children['file'] || [];
+  const folders: Array<number | 'pending'> = children['folders'] || [];
   const returnFile: Code.IFileTree = deepClone(fileTree);
   [...files, ...folders].forEach((id) => {
     delete returnFile[id];
@@ -189,7 +188,8 @@ function reSetParentFileId(
   fileTree: Code.IFileTree,
   folder: Code.FileData,
 ): Code.IFileTree {
-  const currentId: number = folder.parentId == 0 ? folder.id : folder.parentId;
+  const currentId: number | '' =
+    folder.parentId == 0 ? folder.id : folder.parentId;
   const fileId: number = (fileTree[currentId].fileId || 0) + 1;
   fileTree[currentId].fileId = fileId;
   return fileTree;

@@ -22,7 +22,6 @@ import {
 import {
   BrokerStateStatusTypes,
   KfCategoryTypes,
-  StrategyStateStatusTypes,
 } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import globalBus from '@kungfu-trader/kungfu-js-api/utils/globalBus';
 import { getKfGlobalSettingsValue } from '@kungfu-trader/kungfu-js-api/config/globalSettings';
@@ -42,7 +41,8 @@ interface GlobalState {
   processStatusWithDetail: Pm2ProcessStatusDetailData;
 
   appStates: Record<string, BrokerStateStatusTypes>;
-  strategyStates: Record<string, StrategyStateStatusTypes>;
+  strategyStates: Record<string, KungfuApi.StrategyStateData>;
+
   assets: Record<string, KungfuApi.Asset>;
   instruments: KungfuApi.InstrumentResolved[];
   subscribedInstruments: KungfuApi.InstrumentResolved[];

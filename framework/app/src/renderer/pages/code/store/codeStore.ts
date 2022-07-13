@@ -32,8 +32,8 @@ export const useCodeStore = defineStore('code', {
   },
   actions: {
     clearAllState() {
-      this.currentFile = {};
-      this.entryFile = {};
+      this.currentFile = {} as Code.FileData;
+      this.entryFile = {} as Code.FileData;
       this.fileTree = {};
     },
     //设置当前策略
@@ -83,8 +83,9 @@ export const useCodeStore = defineStore('code', {
       this.fileTree['pending']['parentId'] = id;
       const currentId: number =
         this.fileTree[id].parentId == 0 ? id : this.fileTree[id].parentId;
-      if (this.fileTree[currentId].fileId) {
-        this.fileTree[currentId].fileId++;
+      const fileId = this.fileTree[currentId].fileId;
+      if (fileId) {
+        this.fileTree[currentId].fileId = fileId + 1;
       } else {
         this.fileTree[currentId].fileId = 1;
       }
