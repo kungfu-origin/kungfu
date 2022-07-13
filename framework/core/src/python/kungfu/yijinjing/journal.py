@@ -154,6 +154,7 @@ def show_journal(ctx, session_id, io_type):
         show_out,
     )
 
+
 def trace_journal(ctx, session_id, io_type):
     locations, session, io_device, show_in, show_out = read_session(
         ctx, session_id, io_type

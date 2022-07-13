@@ -65,7 +65,7 @@ async function createWindow(
   try {
     await removeJournal(NODE_DIR);
   } catch (err) {
-    kfLogger.error(err.message);
+    kfLogger.error((<Error>err).message);
   }
 
   if (reloadAfterCrashed) {

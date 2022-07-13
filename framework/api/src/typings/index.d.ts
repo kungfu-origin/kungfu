@@ -833,8 +833,8 @@ declare namespace Code {
   }
 
   export interface FileIds {
-    file: number[];
-    folder: number[];
+    file: Array<number | 'pending'>;
+    folder: Array<number | 'pending'>;
   }
   export interface FileTreeByPath {
     ids: FileIds;
@@ -842,7 +842,7 @@ declare namespace Code {
   }
   export interface FileData {
     id: number;
-    parentId: number;
+    parentId: number | '';
     isDir: boolean;
     name: string;
     ext: string;
