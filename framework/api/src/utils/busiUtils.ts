@@ -728,10 +728,7 @@ export const getProcessIdByKfLocation = (
 };
 
 export const getIdByKfLocation = (
-  kfLocation:
-    | KungfuApi.KfLocation
-    | KungfuApi.KfConfig
-    | KungfuApi.KfExtraLocation,
+  kfLocation: KungfuApi.KfLocation
 ): string => {
   if (kfLocation.category === 'td') {
     return `${kfLocation.group}_${kfLocation.name}`;

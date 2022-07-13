@@ -1246,56 +1246,54 @@ export const useCurrentGlobalKfLocation = (
 
 export const useAllKfConfigData = (): Record<
   KfCategoryTypes,
-  (KungfuApi.KfConfig | KungfuApi.KfExtraLocation)[]
+  KungfuApi.KfLocation[]
 > => {
-  const allKfConfigData: Record<
-    KfCategoryTypes,
-    (KungfuApi.KfConfig | KungfuApi.KfExtraLocation)[]
-  > = reactive({
-    system: ref<(KungfuApi.KfConfig | KungfuApi.KfExtraLocation)[]>([
-      ...(process.env.NODE_ENV === 'development'
-        ? ([
-            {
-              location_uid: 0,
-              category: 'system',
-              group: 'service',
-              name: 'archive',
-              mode: 'live',
-              value: '',
-            },
-          ] as KungfuApi.KfConfig[])
-        : []),
-      {
-        location_uid: 0,
-        category: 'system',
-        group: 'master',
-        name: 'master',
-        mode: 'live',
-        value: '',
-      },
-      {
-        location_uid: 0,
-        category: 'system',
-        group: 'service',
-        name: 'cached',
-        mode: 'live',
-        value: '',
-      },
-      {
-        location_uid: 0,
-        category: 'system',
-        group: 'service',
-        name: 'ledger',
-        mode: 'live',
-        value: '',
-      },
-    ]),
+  const allKfConfigData: Record<KfCategoryTypes, KungfuApi.KfLocation[]> =
+    reactive({
+      system: ref<(KungfuApi.KfConfig | KungfuApi.KfExtraLocation)[]>([
+        ...(process.env.NODE_ENV === 'development'
+          ? [
+              {
+                location_uid: 0,
+                category: 'system',
+                group: 'service',
+                name: 'archive',
+                mode: 'live',
+                value: '',
+              },
+            ]
+          : []),
+        {
+          location_uid: 0,
+          category: 'system',
+          group: 'master',
+          name: 'master',
+          mode: 'live',
+          value: '',
+        },
+        {
+          location_uid: 0,
+          category: 'system',
+          group: 'service',
+          name: 'cached',
+          mode: 'live',
+          value: '',
+        },
+        {
+          location_uid: 0,
+          category: 'system',
+          group: 'service',
+          name: 'ledger',
+          mode: 'live',
+          value: '',
+        },
+      ]),
 
-    daemon: [],
-    md: [],
-    td: [],
-    strategy: [],
-  });
+      daemon: [],
+      md: [],
+      td: [],
+      strategy: [],
+    });
 
   onMounted(() => {
     const { mdList, tdList, strategyList } = storeToRefs(useGlobalStore());

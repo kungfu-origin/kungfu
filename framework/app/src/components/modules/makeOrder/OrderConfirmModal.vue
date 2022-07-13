@@ -22,15 +22,16 @@ const props = withDefaults(
     visible: false,
   },
 );
-const orderNumber = computed(() => {
-  return volume.value ? Math.floor(+curOrderVolume.value / +volume.value) : 0;
-});
 
 defineEmits<{
-  (e: 'confirm', volumeList: number[]): Promise<void>;
+  (e: 'confirm', volumeList: number[]): void;
   (e: 'update:visible', visible: boolean): void;
   (e: 'close'): void;
 }>();
+
+const orderNumber = computed(() => {
+  return volume.value ? Math.floor(+curOrderVolume.value / +volume.value) : 0;
+});
 
 const { modalVisible, closeModal } = useModalVisible(props.visible);
 const { curOrderType } = props;

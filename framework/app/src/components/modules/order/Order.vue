@@ -57,7 +57,6 @@ import { useExtraCategory } from '@kungfu-trader/kungfu-js-api/utils/extraLocati
 import StatisticModal from './OrderStatisticModal.vue';
 import { messagePrompt } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
-import { startArchiveMakeTask } from '@kungfu-trader/kungfu-js-api/utils/processUtils';
 
 const { t } = VueI18n.global;
 const { success, error } = messagePrompt();
