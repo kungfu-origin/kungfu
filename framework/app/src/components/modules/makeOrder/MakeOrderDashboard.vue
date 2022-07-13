@@ -119,7 +119,7 @@ const makeOrderData = computed(() => {
 
   const { exchangeId, instrumentId, instrumentType } = instrumentResolved.value;
 
-  const { limit_price, volume, price_type, side, offset, hedge_flag, is_swap } =
+  const { limit_price, volume, price_type, side, offset, hedge_flag } =
     formState.value;
 
   const makeOrderInput: KungfuApi.MakeOrderInput = {
@@ -132,7 +132,6 @@ const makeOrderData = computed(() => {
     side: +side,
     offset: getResolvedOffset(offset, side, instrumentType),
     hedge_flag: +(hedge_flag || 0),
-    is_swap: !!is_swap,
   };
   return makeOrderInput;
 });
@@ -292,7 +291,7 @@ function initOrderInputData(): Promise<KungfuApi.MakeOrderInput> {
   }
 
   const { exchangeId, instrumentId, instrumentType } = instrumentResolved.value;
-  const { limit_price, volume, price_type, side, offset, hedge_flag, is_swap } =
+  const { limit_price, volume, price_type, side, offset, hedge_flag } =
     formState.value;
 
   const makeOrderInput: KungfuApi.MakeOrderInput = {
@@ -305,7 +304,6 @@ function initOrderInputData(): Promise<KungfuApi.MakeOrderInput> {
     side: +side,
     offset: getResolvedOffset(offset, side, instrumentType),
     hedge_flag: +(hedge_flag || 0),
-    is_swap: !!is_swap,
   };
 
   return Promise.resolve(makeOrderInput);
