@@ -327,7 +327,7 @@ void Watcher::Feed(const event_ptr &event, bool is_restore) {
     auto quote = event->data<Quote>();
     auto uid = quote.uid();
     if (subscribed_instruments_.find(uid) != subscribed_instruments_.end()) {
-      //have to do this, because we don't wish every quote trigger UpdateBook 
+      // have to do this, because we don't wish every quote trigger UpdateBook
       UpdateBook(event, quote);
       data_bank_ << typed_event_ptr<Quote>(event);
     }

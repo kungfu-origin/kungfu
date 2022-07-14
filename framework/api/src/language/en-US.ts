@@ -445,7 +445,7 @@ export default {
     rocket_model_desc: 'Use CPU 100%, restart is required',
     pass_quote: 'Close Quote Listener',
     pass_quote_desc: 'Close Quote Listener, restart is required',
-    bypass_accounting: 'Bypass Accounting',
+    bypass_accounting: 'Bypass UI Accounting',
     bypass_accounting_desc:
       'UI process no longer dealing with calculation, restart is required',
     strategy: 'Strategy',

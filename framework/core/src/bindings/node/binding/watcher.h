@@ -112,7 +112,7 @@ private:
   static constexpr auto bypassQuote = [](yijinjing::practice::apprentice *app, bool bypass_quotes) {
     return rx::filter([=](const event_ptr &event) {
       return not(app->get_location(event->source())->category == longfist::enums::category::MD and
-                 event->msg_type() != longhfist::types::Instrument::tag and bypass_quotes);
+                 event->msg_type() != longfist::types::Instrument::tag and bypass_quotes);
     });
   };
 

@@ -7,7 +7,6 @@ import {
   delayMilliSeconds,
   getAvailDaemonList,
   getProcessIdByKfLocation,
-  switchKfLocation,
   kfLogger,
   removeJournal,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
