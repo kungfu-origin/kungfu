@@ -49,7 +49,6 @@ import {
   StrategyStateStatusEnum,
 } from '../typings/enums';
 import {
-  deleteProcess,
   graceDeleteProcess,
   Pm2ProcessStatusData,
   Pm2ProcessStatusDetail,
