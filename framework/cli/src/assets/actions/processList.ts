@@ -5,7 +5,9 @@ import {
 } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import {
   delayMilliSeconds,
+  getAvailDaemonList,
   getProcessIdByKfLocation,
+  gruffSwitchKfLocation,
   kfLogger,
   removeJournal,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
@@ -31,19 +33,36 @@ import { ProcessListItem } from 'src/typings';
 import colors from 'colors';
 import { Widgets } from 'blessed';
 import { KF_HOME } from '@kungfu-trader/kungfu-js-api/config/pathConfig';
-import { dealStatus, getCategoryName } from '../methods/utils';
+import {
+  dealStatus,
+  getCategoryName,
+  startAllExtDaemons,
+} from '../methods/utils';
 import { globalState } from '../actions/globalState';
+import { dealProcessName } from '../methods/utils';
 
-export const mdTdStrategyObservable = () => {
-  return new Observable<Record<KfCategoryTypes, KungfuApi.KfConfig[]>>(
-    (observer) => {
-      getAllKfConfigOriginData().then(
-        (allConfigs: Record<KfCategoryTypes, KungfuApi.KfConfig[]>) => {
-          observer.next(allConfigs);
-        },
-      );
-    },
-  );
+export const mdTdStrategyDaemonObservable = () => {
+  return new Observable<
+    Record<KfCategoryTypes, KungfuApi.KfConfig[] | KungfuApi.KfDaemonLocation[]>
+  >((observer) => {
+    Promise.all([getAllKfConfigOriginData(), getAvailDaemonList()]).then(
+      (
+        allConfigs: [
+          Record<KfCategoryTypes, KungfuApi.KfConfig[]>,
+          KungfuApi.KfDaemonLocation[],
+        ],
+      ) => {
+        observer.next({
+          ...allConfigs[0],
+          daemon: allConfigs[1].map((item) => ({
+            ...item,
+            location_uid: 0,
+            value: '',
+          })),
+        });
+      },
+    );
+  });
 };
 
 export const appStatesObservable = () => {
@@ -159,18 +178,21 @@ export const specificProcessListObserver = (kfLocation: KungfuApi.KfConfig) =>
 
 export const processListObservable = () =>
   combineLatest(
-    mdTdStrategyObservable(),
+    mdTdStrategyDaemonObservable(),
     processStatusDataObservable(),
     appStatesObservable(),
     (
-      mdTdStrategy: Record<KfCategoryTypes, KungfuApi.KfConfig[]>,
+      mdTdStrategyDaemon: Record<
+        KfCategoryTypes,
+        KungfuApi.KfConfig[] | KungfuApi.KfDaemonLocation[]
+      >,
       ps: {
         processStatus: Pm2ProcessStatusData;
         processStatusWithDetail: Pm2ProcessStatusDetailData;
       },
       appStates: Record<string, BrokerStateStatusTypes>,
     ): ProcessListItem[] => {
-      const { md, td, strategy } = mdTdStrategy;
+      const { md, td, strategy, daemon } = mdTdStrategyDaemon;
       const { processStatus, processStatusWithDetail } = ps;
 
       const mdList: ProcessListItem[] = md.map((item) => {
@@ -229,6 +251,24 @@ export const processListObservable = () =>
         };
       });
 
+      const daemonList: ProcessListItem[] = daemon.map((item) => {
+        const processId = getProcessIdByKfLocation(item);
+        return {
+          processId,
+          processName: dealProcessName(processId) || processId,
+          typeName: getCategoryName(item.category as KfCategoryTypes),
+          category: item.category,
+          group: item.group,
+          name: item.name,
+          value: JSON.parse(item.value || '{}'),
+          status: processStatus[processId] || '--',
+          statusName: dealStatus(processStatus[processId] || '--'),
+          monit: processStatusWithDetail[processId]?.monit,
+          script: item.script,
+          cwd: item.cwd,
+        };
+      });
+
       return [
         {
           processId: 'archive',
@@ -255,18 +295,6 @@ export const processListObservable = () =>
           monit: processStatusWithDetail['master']?.monit,
         },
         {
-          processId: 'ledger',
-          processName: 'LEDGER',
-          typeName: colors.bgMagenta('Sys'),
-          category: 'system',
-          group: 'service',
-          name: 'ledger',
-          value: {},
-          status: processStatus['ledger'] || '--',
-          statusName: dealStatus(processStatus['ledger'] || '--'),
-          monit: processStatusWithDetail['ledger']?.monit,
-        },
-        {
           processId: 'cached',
           processName: 'CACHED',
           typeName: colors.bgMagenta('Sys'),
@@ -277,6 +305,18 @@ export const processListObservable = () =>
           status: processStatus['cached'] || '--',
           statusName: dealStatus(processStatus['cached'] || '--'),
           monit: processStatusWithDetail['cached']?.monit,
+        },
+        {
+          processId: 'ledger',
+          processName: 'LEDGER',
+          typeName: colors.bgMagenta('Sys'),
+          category: 'system',
+          group: 'service',
+          name: 'ledger',
+          value: {},
+          status: processStatus['ledger'] || '--',
+          statusName: dealStatus(processStatus['ledger'] || '--'),
+          monit: processStatusWithDetail['ledger']?.monit,
         },
         {
           processId: 'dzxy',
@@ -290,6 +330,7 @@ export const processListObservable = () =>
           statusName: dealStatus(processStatus['dzxy'] || '--'),
           monit: processStatusWithDetail['dzxy']?.monit,
         },
+        ...daemonList,
         ...mdList,
         ...tdList,
         ...strategyList,
@@ -348,6 +389,31 @@ export const switchProcess = (
         }
       }
       break;
+    case 'daemon':
+      gruffSwitchKfLocation(
+        {
+          ...proc,
+          location_uid: 0,
+          mode: 'live',
+        },
+        !status,
+      )
+        .then(() => {
+          messageBoard.log('Please wait...', 2, (err) => {
+            if (err) {
+              console.error(err);
+            }
+          });
+        })
+        .catch((err) => {
+          const errMsg = parseSwtchKfLocationErrMessage(err.message);
+          messageBoard.log(errMsg, 2, (err) => {
+            if (err) {
+              console.error(err);
+            }
+          });
+        });
+      break;
     case 'md':
     case 'td':
     case 'strategy':
@@ -363,7 +429,6 @@ export const switchProcess = (
         );
         return;
       }
-
       sendDataToProcessIdByPm2('SWITCH_KF_LOCATION', globalState.DZXY_PM_ID, {
         category,
         group,
@@ -436,5 +501,7 @@ const switchMaster = async (status: boolean): Promise<void> => {
     await startLedger(false);
     await delayMilliSeconds(1000);
     await startDzxy();
+    await delayMilliSeconds(1000);
+    await startAllExtDaemons();
   }
 };

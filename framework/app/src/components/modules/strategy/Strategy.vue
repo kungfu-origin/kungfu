@@ -53,7 +53,7 @@ const setStrategyConfigPayload = ref<KungfuApi.SetKfConfigPayload>({
 
 const { strategy } = toRefs(useAllKfConfigData());
 const strategyIdList = computed(() => {
-  return strategy.value.map((item: KungfuApi.KfConfig): string => item.name);
+  return strategy.value.map((item: KungfuApi.KfLocation): string => item.name);
 });
 
 const { dealRowClassName, customRow } = useCurrentGlobalKfLocation(

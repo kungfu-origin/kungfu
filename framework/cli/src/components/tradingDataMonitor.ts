@@ -25,12 +25,13 @@ import {
   dealKfPrice,
   setTimerPromiseTask,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
+import { initBusEvent } from '../assets/actions/busEvent';
 
 // 定义全局变量
 const WIDTH_LEFT_PANEL = 60;
 const WIDTH_PROCESS_PANEL = 30;
 
-class TradingDataDashboard extends Dashboard {
+export class TradingDataDashboard extends Dashboard {
   kfLocation: KungfuApi.KfConfig;
   boards: {
     processBoard: ListElementResolved | null;
@@ -268,6 +269,8 @@ class TradingDataDashboard extends Dashboard {
       const nameKey: string = boards[i];
       this.boards[nameKey].focus();
     });
+
+    initBusEvent(this);
   }
 
   bindData() {

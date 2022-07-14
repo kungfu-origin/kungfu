@@ -26,8 +26,6 @@ KF_DEFINE_MARK_TYPE(Ping, 10008);
 KF_DEFINE_MARK_TYPE(Pong, 10009);
 KF_DEFINE_MARK_TYPE(RequestStop, 10024);
 KF_DEFINE_MARK_TYPE(RequestStart, 10025);
-KF_DEFINE_MARK_TYPE(RequestHistoryOrder, 10029);
-KF_DEFINE_MARK_TYPE(RequestHistoryTrade, 10030);
 KF_DEFINE_MARK_TYPE(CachedReadyToRead, 10060);
 KF_DEFINE_MARK_TYPE(RequestCached, 10061);
 KF_DEFINE_MARK_TYPE(NewOrderSingle, 353);
@@ -119,6 +117,7 @@ KF_DEFINE_DATA_TYPE(                                                     //
     (std::string, group),                                                //
     (std::string, name),                                                 //
     (int64_t, begin_time),                                               //
+    (int64_t, update_time),                                              //
     (int64_t, end_time),                                                 //
     (uint32_t, frame_count),                                             //
     (uint64_t, data_size)                                                //
@@ -414,6 +413,7 @@ KF_DEFINE_PACK_TYPE(                                                    //
 KF_DEFINE_PACK_TYPE(                                  //
     Order, 203, PK(order_id), TIMESTAMP(insert_time), //
     (uint64_t, order_id),                             // 订单ID
+    (uint64_t, external_id),                          // 柜台订单id, 字符型则hash转换
 
     (int64_t, insert_time), // 订单写入时间
     (int64_t, update_time), // 订单更新时间
@@ -451,6 +451,7 @@ KF_DEFINE_PACK_TYPE(                                  //
 KF_DEFINE_PACK_TYPE(                                         //
     HistoryOrder, 212, PK(order_id), TIMESTAMP(insert_time), //
     (uint64_t, order_id),                                    // 订单ID
+    (uint64_t, external_id),                                 // 柜台订单id, 字符型则hash转换
 
     (int64_t, insert_time), // 订单写入时间
     (int64_t, update_time), // 订单更新时间
@@ -492,7 +493,8 @@ KF_DEFINE_PACK_TYPE(                                 //
     Trade, 204, PK(trade_id), TIMESTAMP(trade_time), //
     (uint64_t, trade_id),                            // 成交ID
 
-    (uint64_t, order_id), // 订单ID
+    (uint64_t, order_id),    // 订单ID
+    (uint64_t, external_id), // 柜台订单id, 字符型则hash转换
 
     (int64_t, trade_time),                        // 成交时间
     (kungfu::array<char, DATE_LEN>, trading_day), // 交易日
@@ -517,7 +519,8 @@ KF_DEFINE_PACK_TYPE(                                        //
     HistoryTrade, 213, PK(trade_id), TIMESTAMP(trade_time), //
     (uint64_t, trade_id),                                   // 成交ID
 
-    (uint64_t, order_id), // 订单ID
+    (uint64_t, order_id),    // 订单ID
+    (uint64_t, external_id), // 柜台订单id, 字符型则hash转换
 
     (int64_t, trade_time),                        // 成交时间
     (kungfu::array<char, DATE_LEN>, trading_day), // 交易日
@@ -651,6 +654,18 @@ KF_DEFINE_PACK_TYPE(                                  //
     (int64_t, insert_time),                           //
     (int64_t, ack_time),                              //
     (int64_t, trade_time)                             //
+);
+
+KF_DEFINE_PACK_TYPE(                                                       //
+    RequestHistoryOrder, 10029, PK(trigger_time), TIMESTAMP(trigger_time), //
+    (uint64_t, trigger_time),                                              // 触发时间
+    (uint32_t, query_num)                                                  // 请求查询的数量
+);
+
+KF_DEFINE_PACK_TYPE(                                                       //
+    RequestHistoryTrade, 10030, PK(trigger_time), TIMESTAMP(trigger_time), //
+    (uint64_t, trigger_time),                                              // 触发时间
+    (uint32_t, query_num)                                                  // 请求查询的数量
 );
 } // namespace kungfu::longfist::types
 

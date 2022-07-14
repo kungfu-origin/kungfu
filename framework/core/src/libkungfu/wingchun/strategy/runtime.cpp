@@ -168,24 +168,30 @@ const location_ptr &RuntimeContext::find_md_location(const std::string &source) 
   return market_data_.at(source);
 }
 
-void RuntimeContext::req_history_order(const std::string &source, const std::string &account) {
+void RuntimeContext::req_history_order(const std::string &source, const std::string &account, uint32_t query_num) {
   auto account_location_uid = get_td_location_uid(source, account);
   if (not broker_client_.is_ready(account_location_uid)) {
     SPDLOG_ERROR("account {}_{} not ready", source, account);
     return;
   }
   auto writer = app_.get_writer(account_location_uid);
-  writer->mark(now(), RequestHistoryOrder::tag);
+  RequestHistoryOrder &request = writer->open_data<RequestHistoryOrder>();
+  request.trigger_time = now();
+  request.query_num = query_num;
+  writer->close_data();
 }
 
-void RuntimeContext::req_history_trade(const std::string &source, const std::string &account) {
+void RuntimeContext::req_history_trade(const std::string &source, const std::string &account, uint32_t query_num) {
   auto account_location_uid = get_td_location_uid(source, account);
   if (not broker_client_.is_ready(account_location_uid)) {
     SPDLOG_ERROR("account {}_{} not ready", source, account);
     return;
   }
   auto writer = app_.get_writer(account_location_uid);
-  writer->mark(now(), RequestHistoryTrade::tag);
+  RequestHistoryTrade &request = writer->open_data<RequestHistoryTrade>();
+  request.trigger_time = now();
+  request.query_num = query_num;
+  writer->close_data();
 }
 
 void RuntimeContext::req_deregister() { app_.request_deregister(); }

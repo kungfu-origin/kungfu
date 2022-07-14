@@ -29,26 +29,21 @@ import {
   hashInstrumentUKey,
 } from '@kungfu-trader/kungfu-js-api/kungfu';
 import {
-  DirectionEnum,
   InstrumentTypeEnum,
   OffsetEnum,
-  PriceTypeEnum,
   SideEnum,
 } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import {
-  useAssets,
   useCurrentGlobalKfLocation,
   useExtConfigsRelated,
   useInstruments,
   useProcessStatusDetailData,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
 import {
-  dealKfNumber,
-  dealKfPrice,
   getExtConfigList,
+  getIdByKfLocation,
   getProcessIdByKfLocation,
   initFormStateByConfig,
-  transformSearchInstrumentResultToInstrument,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import OrderConfirmModal from './OrderConfirmModal.vue';
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
@@ -56,7 +51,7 @@ import { useTradingTask } from '../tradingTask/utils';
 import { useGlobalStore } from '@kungfu-trader/kungfu-app/src/renderer/pages/index/store/global';
 import { storeToRefs } from 'pinia';
 import { ShotableInstrumentTypes } from '@kungfu-trader/kungfu-js-api/config/tradingConfig';
-import { useExtraCategory } from '@kungfu-trader/kungfu-js-api/utils/extraLocationUtils';
+import { useMakeOrderInfo } from '../../../renderer/assets/methods/actionsUtils';
 
 const { t } = VueI18n.global;
 const { error } = messagePrompt();
@@ -78,15 +73,23 @@ const { subscribeAllInstrumentByAppStates } = useInstruments();
 const { appStates, processStatusData } = useProcessStatusDetailData();
 const { mdExtTypeMap, extConfigs } = useExtConfigsRelated();
 const { triggerOrderBook } = useTriggerMakeOrder();
+const {
+  showAmountOrPosition,
+  instrumentResolved,
+  currentPosition,
+  currentResidueMoney,
+  currentResiduePosVolume,
+  currentTradeAmount,
+  currentAvailMoney,
+  currentAvailPosVolume,
+  isAccountOrInstrumentConfirmed,
+} = useMakeOrderInfo(app, formState);
 
 const {
   currentGlobalKfLocation,
   currentCategoryData,
   getCurrentGlobalKfLocationId,
 } = useCurrentGlobalKfLocation(window.watcher);
-
-const { getTradingDataByLocation } = useExtraCategory();
-const { getAssetsByKfConfig } = useAssets();
 
 const makeOrderInstrumentType = ref<InstrumentTypeEnum>(
   InstrumentTypeEnum.unknown,
@@ -109,13 +112,6 @@ const isShowConfirmModal = ref<boolean>(false);
 const curOrderVolume = ref<number>(0);
 const curOrderType = ref<InstrumentTypeEnum>(InstrumentTypeEnum.unknown);
 
-const instrumentResolved = computed(() => {
-  const { instrument } = formState.value;
-  return instrument
-    ? transformSearchInstrumentResultToInstrument(instrument)
-    : null;
-});
-
 const makeOrderData = computed(() => {
   if (!instrumentResolved.value) {
     return null;
@@ -123,7 +119,7 @@ const makeOrderData = computed(() => {
 
   const { exchangeId, instrumentId, instrumentType } = instrumentResolved.value;
 
-  const { limit_price, volume, price_type, side, offset, hedge_flag } =
+  const { limit_price, volume, price_type, side, offset, hedge_flag, is_swap } =
     formState.value;
 
   const makeOrderInput: KungfuApi.MakeOrderInput = {
@@ -136,233 +132,9 @@ const makeOrderData = computed(() => {
     side: +side,
     offset: getResolvedOffset(offset, side, instrumentType),
     hedge_flag: +(hedge_flag || 0),
+    is_swap: !!is_swap,
   };
   return makeOrderInput;
-});
-
-const isCurrentCategoryIsTd = computed(
-  () => currentGlobalKfLocation.value?.category === 'td',
-);
-
-const isAccountOrInstrumentConfirmed = computed(() => {
-  if (formState.value?.side === SideEnum.Buy) {
-    return isCurrentCategoryIsTd.value ? true : !!formState.value.account_id;
-  } else if (formState.value.side === SideEnum.Sell) {
-    return isCurrentCategoryIsTd.value
-      ? !!formState.value.instrument
-      : formState.value.account_id && formState.value.instrument;
-  }
-});
-
-const currentPosition = computed(() => {
-  if (!getPositions().length || !instrumentResolved.value) return null;
-
-  const { exchangeId, instrumentId, instrumentType } = instrumentResolved.value;
-  const targetPositionList: KungfuApi.Position[] = getPositions().filter(
-    (position) =>
-      position.exchange_id === exchangeId &&
-      position.instrument_id === instrumentId &&
-      position.instrument_type === instrumentType,
-  );
-
-  if (targetPositionList && targetPositionList.length) {
-    const { side, offset } = formState.value;
-
-    const targetPositionWithLongDirection = targetPositionList.filter(
-      (item) => item.direction === DirectionEnum.Long,
-    )[0];
-    const targetPositionWithShortDirection = targetPositionList.filter(
-      (item) => item.direction === DirectionEnum.Short,
-    )[0];
-
-    if (side === SideEnum.Buy) {
-      if (offset === OffsetEnum.Open) {
-        return targetPositionWithLongDirection;
-      } else {
-        return targetPositionWithShortDirection;
-      }
-    } else if (side === SideEnum.Sell) {
-      if (offset === OffsetEnum.Open) {
-        return targetPositionWithShortDirection;
-      } else {
-        return targetPositionWithLongDirection;
-      }
-    }
-  }
-
-  return null;
-});
-
-const showAmountOrPosition = computed(() => {
-  const { offset } = formState.value;
-
-  return offset === OffsetEnum.Open ? 'amount' : 'position';
-});
-
-const currentAvailMoney = computed(() => {
-  if (!currentGlobalKfLocation.value) return '--';
-  if (!isCurrentCategoryIsTd.value && !formState.value.account_id) {
-    return '--';
-  }
-
-  const { source, id } = formState.value.account_id.parseSourceAccountId();
-  const tdLocation = isCurrentCategoryIsTd.value
-    ? currentGlobalKfLocation.value
-    : { category: 'td', group: source, name: id, mode: 'live' };
-
-  const avail = getAssetsByKfConfig(tdLocation).avail;
-
-  return dealKfPrice(avail);
-});
-
-const currentAvailPosVolume = computed(() => {
-  if (!instrumentResolved.value) return '--';
-
-  const { instrumentType } = instrumentResolved.value;
-  const { offset } = formState.value;
-
-  if (currentPosition.value) {
-    const { yesterday_volume, volume } = currentPosition.value;
-
-    if (shotable(instrumentType)) {
-      if (offset === OffsetEnum.CloseYest) {
-        return dealKfNumber(yesterday_volume);
-      } else if (offset === OffsetEnum.CloseToday) {
-        return dealKfNumber(volume - yesterday_volume);
-      } else {
-        return dealKfNumber(volume);
-      }
-    } else {
-      return dealKfNumber(yesterday_volume);
-    }
-  }
-
-  return '0';
-});
-
-function getFutureInstrumentTradeAmount(
-  currentPrice: number,
-  volume: number,
-  instrument,
-  direction: DirectionEnum,
-): number | null {
-  if (!instrument) return null;
-
-  const { exchangeId, instrumentId } = instrument;
-  const instrumentKey = hashInstrumentUKey(instrumentId, exchangeId);
-  const { contract_multiplier, long_margin_ratio, short_margin_ratio } = window
-    .watcher.ledger.Instrument[instrumentKey] as KungfuApi.Instrument;
-
-  if (direction === DirectionEnum.Long) {
-    return currentPrice * volume * contract_multiplier * long_margin_ratio;
-  } else if (direction === DirectionEnum.Short) {
-    return currentPrice * volume * contract_multiplier * short_margin_ratio;
-  }
-
-  return null;
-}
-
-function dealTradeAmount(preNumber: number | null) {
-  return !Number(preNumber) ? '--' : dealKfPrice(preNumber);
-}
-
-function getTradeAmount(
-  currentPrice: number,
-  volume: number,
-  currentInstrument?: KungfuApi.InstrumentResolved,
-  currentPosition?: KungfuApi.Position,
-): string | null {
-  const instrumentType = currentInstrument?.instrumentType;
-
-  if (instrumentType) {
-    if (instrumentType === InstrumentTypeEnum.future) {
-      const instrumentTradeAmount = getFutureInstrumentTradeAmount(
-        currentPrice,
-        volume,
-        currentInstrument,
-        currentPosition?.direction,
-      );
-      return dealTradeAmount(instrumentTradeAmount);
-    } else if (instrumentType === InstrumentTypeEnum.stock) {
-      return dealTradeAmount(currentPrice * volume);
-    }
-  } else {
-    return dealTradeAmount(currentPrice * volume);
-  }
-
-  return null;
-}
-
-const currentTradeAmount = computed(() => {
-  const { price_type, limit_price, volume, side, account_id } = formState.value;
-
-  let currentPrice;
-  if (price_type === PriceTypeEnum.Limit) {
-    currentPrice = limit_price;
-  } else if (price_type === PriceTypeEnum.Market) {
-    currentPrice = currentPosition.value?.last_price;
-  }
-
-  if (side === SideEnum.Buy) {
-    return getTradeAmount(currentPrice, volume);
-  } else if (side === SideEnum.Sell) {
-    if (
-      instrumentResolved.value &&
-      (currentGlobalKfLocation.value?.category === 'td' || account_id)
-    ) {
-      return getTradeAmount(
-        currentPrice,
-        volume,
-        instrumentResolved.value.instrumentType,
-      );
-    }
-  }
-
-  return '--';
-});
-
-const currentResidueMoney = computed(() => {
-  const { side } = formState.value;
-  if (currentAvailMoney.value !== '--') {
-    if (currentTradeAmount.value !== '--') {
-      if (side === SideEnum.Buy) {
-        return dealKfPrice(
-          Number(currentAvailMoney.value) - Number(currentTradeAmount.value),
-        );
-      } else if (side === SideEnum.Sell) {
-        return dealKfPrice(
-          Number(currentAvailMoney.value) + Number(currentTradeAmount.value),
-        );
-      }
-
-      return '--';
-    } else {
-      return currentAvailMoney.value;
-    }
-  } else {
-    return '--';
-  }
-});
-
-const currentResiduePosVolume = computed(() => {
-  const { volume, offset } = formState.value;
-  if (currentAvailPosVolume.value !== '--') {
-    if (volume && volume > 0) {
-      if (offset === OffsetEnum.Open) {
-        return dealKfNumber(
-          Number(currentAvailPosVolume.value) + Number(volume),
-        );
-      } else {
-        return dealKfNumber(
-          Number(currentAvailPosVolume.value) - Number(volume),
-        );
-      }
-    } else {
-      return currentAvailPosVolume.value;
-    }
-  } else {
-    return '--';
-  }
 });
 
 const availTradingTaskExtensionList = computed(() => {
@@ -451,6 +223,17 @@ onMounted(() => {
 });
 
 watch(
+  () => currentGlobalKfLocation.value,
+  (newVal) => {
+    if (newVal?.category === 'td') {
+      formState.value.account_id = getIdByKfLocation(newVal);
+    } else {
+      formState.value.account_id = '';
+    }
+  },
+);
+
+watch(
   () => formState.value.instrument,
   (newVal) => {
     if (
@@ -488,25 +271,6 @@ watch(
   },
 );
 
-// 更新持仓列表
-function getPositions(): KungfuApi.Position[] {
-  if (currentGlobalKfLocation.value === null) {
-    return [];
-  }
-
-  const positions = getTradingDataByLocation(
-    app?.proxy?.$globalCategoryRegister?.globalRegistedCategories?.[
-      currentGlobalKfLocation.value.category
-    ] || null,
-    window.watcher.ledger.Position,
-    currentGlobalKfLocation.value,
-    window.watcher,
-    'position',
-  ) as KungfuApi.Position[];
-
-  return positions;
-}
-
 // 下单操作
 function placeOrder(
   orderInput: KungfuApi.MakeOrderInput,
@@ -527,7 +291,7 @@ function initOrderInputData(): Promise<KungfuApi.MakeOrderInput> {
   }
 
   const { exchangeId, instrumentId, instrumentType } = instrumentResolved.value;
-  const { limit_price, volume, price_type, side, offset, hedge_flag } =
+  const { limit_price, volume, price_type, side, offset, hedge_flag, is_swap } =
     formState.value;
 
   const makeOrderInput: KungfuApi.MakeOrderInput = {
@@ -540,6 +304,7 @@ function initOrderInputData(): Promise<KungfuApi.MakeOrderInput> {
     side: +side,
     offset: getResolvedOffset(offset, side, instrumentType),
     hedge_flag: +(hedge_flag || 0),
+    is_swap: !!is_swap,
   };
 
   return Promise.resolve(makeOrderInput);
@@ -569,8 +334,8 @@ async function handleApartOrder(): Promise<void> {
     curOrderVolume.value = Number(makeOrderInput.volume);
     curOrderType.value = makeOrderInput.instrument_type;
   } catch (e) {
-    if (e.message) {
-      error(e.message);
+    if ((<Error>e).message) {
+      error((<Error>e).message);
     }
   }
 }
@@ -597,7 +362,9 @@ async function handleApartedConfirm(volumeList: number[]): Promise<void> {
       }),
     );
   } catch (e) {
-    error(e);
+    if ((<Error>e).message) {
+      error((<Error>e).message);
+    }
   }
 }
 
@@ -677,7 +444,7 @@ async function confirmOrderPlace(
 
   await confirmModal(
     t('tradingConfig.place_confirm'),
-    dealOrderPlaceVNode(makeOrderInput, orderCount),
+    dealOrderPlaceVNode(makeOrderInput, orderCount, false),
   );
 
   return Promise.resolve(tdProcessId);
@@ -700,8 +467,8 @@ async function handleMakeOrder(): Promise<void> {
       tdProcessId,
     );
   } catch (e) {
-    if (e.message) {
-      error(e.message);
+    if ((<Error>e).message) {
+      error((<Error>e).message);
     }
   }
 }
@@ -757,8 +524,8 @@ async function handleOpenTradingTaskConfigModal(
     );
     handleOpenSetTradingTaskModal('add', kfExtConfig.key, taskInitValue);
   } catch (e) {
-    if (e.message) {
-      error(e.message);
+    if ((<Error>e).message) {
+      error((<Error>e).message);
     }
   }
 }
@@ -805,7 +572,7 @@ async function handleOpenTradingTaskConfigModal(
                     showAmountOrPosition === 'amount'
                       ? $t('可用资金')
                       : $t('可用仓位')
-                  }}:&nbsp
+                  }}:&nbsp;
                 </div>
                 <div class="position-value">
                   {{
@@ -823,7 +590,7 @@ async function handleOpenTradingTaskConfigModal(
                         ? t('保证金占用')
                         : t('保证金返还')
                       : $t('交易金额')
-                  }}:&nbsp
+                  }}:&nbsp;
                 </div>
                 <div class="position-value">
                   {{ currentTradeAmount }}
@@ -835,7 +602,7 @@ async function handleOpenTradingTaskConfigModal(
                     showAmountOrPosition === 'amount'
                       ? $t('剩余资金')
                       : $t('剩余仓位')
-                  }}:&nbsp
+                  }}:&nbsp;
                 </div>
                 <div class="position-value">
                   {{

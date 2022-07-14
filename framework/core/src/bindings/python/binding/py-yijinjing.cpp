@@ -301,7 +301,8 @@ void bind(pybind11::module &&m) {
 
   py::class_<io_device_console, io_device, io_device_console_ptr>(m, "io_device_console")
       .def(py::init<location_ptr, uint32_t, uint32_t>(), py::arg("home"), py::arg("width"), py::arg("height"))
-      .def("trace", &io_device_console::trace);
+      .def("trace", &io_device_console::trace)
+      .def("show", &io_device_console::show);
 
   py::class_<session_finder, std::shared_ptr<session_finder>>(m, "session_finder")
       .def(py::init<io_device_ptr>())

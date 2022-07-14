@@ -56,7 +56,7 @@ export const watcher = ((): KungfuApi.Watcher | null => {
   ].join('');
 
   const bypassRestore = booleanProcessEnv(
-    process.env.RELOAD_AFTER_CRASHED || '',
+    process.env.RELOAD_AFTER_CRASHED || process.env.BY_PASS_RESTORE || '',
   );
   const globalSetting = getKfGlobalSettingsValue();
   const bypassQuote = globalSetting?.performance?.bypassQuote;

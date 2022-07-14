@@ -53,7 +53,7 @@ const currentSelectedSourceId = ref<string>('');
 const { extConfigs, mdExtTypeMap } = useExtConfigsRelated();
 const { md } = toRefs(useAllKfConfigData());
 const mdIdList = computed(() => {
-  return md.value.map((item: KungfuApi.KfConfig): string =>
+  return md.value.map((item: KungfuApi.KfLocation): string =>
     getIdByKfLocation(item),
   );
 });

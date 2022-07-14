@@ -21,7 +21,7 @@ import {
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/configs';
 import { usePreStartAndQuitApp } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
 import KfAddBoardModalVue from '../../../components/public/KfAddBoardModal.vue';
-import globalBus from '../../../assets/methods/globalBus';
+import globalBus from '@kungfu-trader/kungfu-js-api/utils/globalBus';
 import { messagePrompt } from '../../../assets/methods/uiUtils';
 const { success } = messagePrompt();
 

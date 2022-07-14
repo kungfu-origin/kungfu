@@ -65,7 +65,9 @@ page_ptr page::load(const data::location_ptr &location, uint32_t dest_id, uint32
   }
   if (header->page_size != page_size) {
     uint32_t s = header->page_size;
-    throw journal_error(fmt::format("page size mismatch, required {}, found {}", page_size, s));
+    throw journal_error(
+        fmt::format("page size mismatch, required {}, found {}, location {}, path {}, dest_id {}, page_id {}",
+                    page_size, s, location->uname, path, dest_id, page_id));
   }
 
   return std::shared_ptr<page>(new page(location, dest_id, page_id, page_size, lazy, address));

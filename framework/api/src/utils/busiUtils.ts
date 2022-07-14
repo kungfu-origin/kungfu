@@ -535,7 +535,31 @@ const getKfUIExtensionConfigByExtKey = (
       };
       return configByExtraKey;
     }, {} as KungfuApi.KfUIExtConfigs);
-  2;
+};
+
+const getKfCliExtensionConfigByExtKey = (
+  extConfigs: KungfuApi.KfExtOriginConfig[],
+): KungfuApi.KfCliExtConfigs => {
+  return extConfigs
+    .filter((item) => !!item.cli_config)
+    .reduce((configByExtraKey, extConfig) => {
+      const extKey = extConfig.key;
+      const extName = extConfig.name;
+      const extPath = extConfig.extPath;
+      const cliConfig = extConfig['cli_config'];
+      const exhibit = cliConfig?.exhibit || ({} as KungfuApi.KfExhibitConfig);
+      const daemon = cliConfig?.daemon || ({} as Record<string, string>);
+      const script = cliConfig?.script || '';
+
+      configByExtraKey[extKey] = {
+        name: extName,
+        extPath,
+        exhibit,
+        daemon,
+        script,
+      };
+      return configByExtraKey;
+    }, {} as KungfuApi.KfCliExtConfigs);
 };
 
 export const getKfExtensionConfig =
@@ -548,6 +572,12 @@ export const getKfUIExtensionConfig =
   async (): Promise<KungfuApi.KfUIExtConfigs> => {
     const kfExtConfigList = await getKfExtConfigList();
     return getKfUIExtensionConfigByExtKey(kfExtConfigList);
+  };
+
+export const getKfCliExtensionConfig =
+  async (): Promise<KungfuApi.KfCliExtConfigs> => {
+    const kfExtConfigList = await getKfExtConfigList();
+    return getKfCliExtensionConfigByExtKey(kfExtConfigList);
   };
 
 export const getExhibitConfig =
@@ -569,6 +599,29 @@ export const getAvailDaemonList = async (): Promise<
 > => {
   const kfExtConfig: KungfuApi.KfUIExtConfigs = await getKfUIExtensionConfig();
   return Object.values(kfExtConfig || ({} as KungfuApi.KfUIExtConfigs))
+    .filter((item) => Object.keys(item).length)
+    .reduce((daemonList, item) => {
+      daemonList = [
+        ...daemonList,
+        ...Object.keys(item.daemon).map((name) => ({
+          category: 'daemon',
+          group: 'ext',
+          name,
+          mode: 'live',
+          cwd: item.extPath,
+          script: item.daemon[name],
+        })),
+      ];
+      return daemonList;
+    }, [] as KungfuApi.KfDaemonLocation[]);
+};
+
+export const getAvailCliDaemonList = async (): Promise<
+  KungfuApi.KfDaemonLocation[]
+> => {
+  const kfExtConfig: KungfuApi.KfCliExtConfigs =
+    await getKfCliExtensionConfig();
+  return Object.values(kfExtConfig || ({} as KungfuApi.KfCliExtConfigs))
     .filter((item) => Object.keys(item).length)
     .reduce((daemonList, item) => {
       daemonList = [
@@ -728,12 +781,7 @@ export const getProcessIdByKfLocation = (
   }
 };
 
-export const getIdByKfLocation = (
-  kfLocation:
-    | KungfuApi.KfLocation
-    | KungfuApi.KfConfig
-    | KungfuApi.KfExtraLocation,
-): string => {
+export const getIdByKfLocation = (kfLocation: KungfuApi.KfLocation): string => {
   if (kfLocation.category === 'td') {
     return `${kfLocation.group}_${kfLocation.name}`;
   } else if (kfLocation.category === 'md') {
@@ -790,6 +838,62 @@ export const getTaskKfLocationByProcessId = (
       name: processId.split('_').slice(2).join('_'),
       mode: 'live',
     };
+  }
+
+  return null;
+};
+
+export const getDaemonKfLocationByProcessId = (
+  processId: string,
+): KungfuApi.KfLocation | null => {
+  if (processId.indexOf('daemon_') === 0) {
+    const arr = processId.split['_'];
+    if (arr.length < 3) return null;
+
+    return {
+      category: arr[0],
+      group: arr[1],
+      name: arr[2],
+      mode: 'live',
+    };
+  }
+  return null;
+};
+
+const getSystemKfLocationProcessId = (processId: string) => {
+  if (!processId) return null;
+  if (processId === 'master') {
+    return {
+      category: 'system',
+      group: processId,
+      name: processId,
+      mode: 'live',
+    };
+  } else if (
+    ['ledger', 'archive', 'cached', 'dzxy'].indexOf(processId) !== -1
+  ) {
+    return {
+      category: 'system',
+      group: 'service',
+      name: processId,
+      mode: 'live',
+    };
+  }
+
+  return null;
+};
+
+export const getKfLocationByProcessId = (
+  processId: string,
+): KungfuApi.KfLocation | null => {
+  if (processId.indexOf('td_') === 0 || processId.indexOf('md_') === 0) {
+    return getMdTdKfLocationByProcessId(processId);
+  } else if (processId.indexOf('strategy_') === 0) {
+    return getTaskKfLocationByProcessId(processId);
+  } else if (processId.indexOf('daemon_') === 0) {
+    return getDaemonKfLocationByProcessId(processId);
+  } else if (processId.indexOf('_') === -1) {
+    return getSystemKfLocationProcessId(processId);
   }
 
   return null;
@@ -956,34 +1060,12 @@ export const buildIdByKeysFromKfConfigSettings = (
     .join('_');
 };
 
-export const switchKfLocation = (
-  watcher: KungfuApi.Watcher | null,
+const startProcessByKfLocation = (
   kfLocation:
     | KungfuApi.KfLocation
     | KungfuApi.KfConfig
     | KungfuApi.KfExtraLocation,
-  targetStatus: boolean,
-): Promise<void | Proc> => {
-  const processId = getProcessIdByKfLocation(kfLocation);
-
-  if (!watcher) return Promise.reject(new Error('Watcher is NULL'));
-
-  if (!targetStatus) {
-    if (
-      kfLocation.category === 'td' ||
-      kfLocation.category === 'md' ||
-      kfLocation.category === 'strategy'
-    ) {
-      if (!watcher.isReadyToInteract(kfLocation)) {
-        return Promise.reject(new Error(t('未就绪', { processId })));
-      }
-    }
-
-    return Promise.resolve(watcher.requestStop(kfLocation))
-      .then(() => delayMilliSeconds(1000))
-      .then(() => deleteProcess(processId));
-  }
-
+) => {
   switch (kfLocation.category) {
     case 'system':
       if (kfLocation.name === 'master') {
@@ -1015,6 +1097,53 @@ export const switchKfLocation = (
     default:
       return Promise.resolve();
   }
+};
+
+export const switchKfLocation = (
+  watcher: KungfuApi.Watcher | null,
+  kfLocation:
+    | KungfuApi.KfLocation
+    | KungfuApi.KfConfig
+    | KungfuApi.KfExtraLocation,
+  targetStatus: boolean,
+): Promise<void | Proc> => {
+  const processId = getProcessIdByKfLocation(kfLocation);
+
+  if (!watcher) return Promise.reject(new Error('Watcher is NULL'));
+
+  if (!targetStatus) {
+    if (
+      kfLocation.category === 'td' ||
+      kfLocation.category === 'md' ||
+      kfLocation.category === 'strategy'
+    ) {
+      if (!watcher.isReadyToInteract(kfLocation)) {
+        return Promise.reject(new Error(t('未就绪', { processId })));
+      }
+    }
+
+    return Promise.resolve(watcher.requestStop(kfLocation))
+      .then(() => delayMilliSeconds(1000))
+      .then(() => deleteProcess(processId));
+  }
+
+  return startProcessByKfLocation(kfLocation);
+};
+
+export const gruffSwitchKfLocation = (
+  kfLocation:
+    | KungfuApi.KfLocation
+    | KungfuApi.KfConfig
+    | KungfuApi.KfExtraLocation,
+  targetStatus: boolean,
+) => {
+  const processId = getProcessIdByKfLocation(kfLocation);
+
+  if (!targetStatus) {
+    return deleteProcess(processId);
+  }
+
+  return startProcessByKfLocation(kfLocation);
 };
 
 export const dealKfNumber = (
@@ -1124,6 +1253,10 @@ export const dealHedgeFlag = (
   hedgeFlag: HedgeFlagEnum | number,
 ): KungfuApi.KfTradeValueCommonData => {
   return HedgeFlag[+hedgeFlag as HedgeFlagEnum];
+};
+
+export const dealIsSwap = (isSwap: boolean) => {
+  return { name: isSwap ? t('yes') : t('no') };
 };
 
 export const getKfCategoryData = (
@@ -1506,7 +1639,7 @@ export const KfConfigValueNumberType = [
   ...Object.keys(numberEnumRadioType || {}),
 ];
 
-export const KfConfigValueBooleanType = ['bool'];
+export const KfConfigValueBooleanType = ['bool', 'checkbox'];
 
 export const KfConfigValueArrayType = ['files', 'instruments', 'table'];
 
@@ -1669,6 +1802,8 @@ export const dealOrderInputItem = (
       orderInputResolved[key] = dealOffset(inputData.offset);
     } else if (key === 'hedge_flag') {
       orderInputResolved[key] = dealHedgeFlag(inputData.hedge_flag);
+    } else if (key === 'is_swap') {
+      orderInputResolved[key] = dealIsSwap(inputData.is_swap);
     } else {
       orderInputResolved[key] = {
         name: inputData[key],

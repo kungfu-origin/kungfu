@@ -84,12 +84,12 @@ public:
   /**
    * query history order
    */
-  virtual void req_history_order(const std::string &source, const std::string &account) = 0;
+  virtual void req_history_order(const std::string &source, const std::string &account, uint32_t query_num = 0) = 0;
 
   /**
    * query history trade
    */
-  virtual void req_history_trade(const std::string &source, const std::string &account) = 0;
+  virtual void req_history_trade(const std::string &source, const std::string &account, uint32_t query_num = 0) = 0;
 
   /**
    * Cancel order.
