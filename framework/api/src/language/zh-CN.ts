@@ -438,16 +438,15 @@ export default {
     select_language: '选择语言',
 
     porformance: '性能',
-    open_rocket_model: '开启极速模式',
+    rocket_model: '开启极速模式',
     rocket_model_desc:
-      '开启极速模式会极大的降低系统延迟, 并会使 CPU 使用效率达到100%, 开启后请重启功夫交易系统',
+      '开启极速模式会极大的降低系统延迟, 并会使 CPU 使用效率达到100%, 开启后请重启功夫交易系统, 重启后生效',
     pass_quote: '跳过行情计算',
     pass_quote_desc:
-      '在订阅一定数量(上千)支Ticker时, 由行情推送触发pnl计算会导致性能问题, 开启后会掉过行情计算',
+      '在订阅一定数量(上千)支Ticker时, 由行情推送触发pnl计算会导致性能问题, 开启后会跳过行情计算, 重启后生效',
     pure_monitor: '仅监控',
     pure_monitor_desc:
-      '仅监控进程运行状态, 以及最新的委托成交数据, 不再更新持仓资金, ui 进程消耗达到最低',
-
+      '仅监控进程运行状态, 以及最新的委托成交数据, 不再更新持仓资金, 交互进程占用资源将至最低, 重启后生效',
     strategy: '策略',
     use_local_python: '使用本地Python',
     local_python_desc:

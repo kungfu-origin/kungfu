@@ -51,7 +51,7 @@ export const getKfGlobalSettings = (): KfSystemConfig[] => [
     config: [
       {
         key: 'rocket',
-        name: t('globalSettingConfig.open_rocket_model'),
+        name: t('globalSettingConfig.rocket_model'),
         tip: t('globalSettingConfig.rocket_model_desc'),
         default: false,
         type: 'bool',
