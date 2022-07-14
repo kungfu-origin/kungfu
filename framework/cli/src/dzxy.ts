@@ -211,16 +211,18 @@ function resAsset(packet: Pm2PacketMain) {
 }
 
 function swithKfLocationResolved(data: SwitchKfLocationPacketData) {
-  const { category, group, name, value, status } = data;
-  const kfConfig: KungfuApi.KfConfig = {
+  const { category, group, name, value, status, cwd, script } = data;
+  const kfConfig: KungfuApi.KfConfig | KungfuApi.KfDaemonLocation = {
     category,
     group,
     name,
     value: value,
     location_uid: 0,
     mode: 'live',
+    cwd,
+    script,
   };
-  console.log(JSON.stringify(kfConfig), status);
+
   return switchKfLocation(watcher, kfConfig, !status).catch((err) => {
     console.error(err.message);
   });
