@@ -386,7 +386,11 @@ export const graceStopProcess = (
   }
 
   if (!processStatusData || getIfProcessRunning(processStatusData, processId)) {
-    if (!watcher.isReadyToInteract(kfLocation)) {
+    if (
+      watcher &&
+      !watcher.isReadyToInteract(kfLocation) &&
+      isTdMdStrategy(kfLocation.category)
+    ) {
       return Promise.reject(new Error(t('未就绪', { processId })));
     }
 
@@ -412,7 +416,11 @@ export const graceDeleteProcess = (
   }
 
   if (!processStatusData || getIfProcessRunning(processStatusData, processId)) {
-    if (watcher && !watcher.isReadyToInteract(kfLocation)) {
+    if (
+      watcher &&
+      !watcher.isReadyToInteract(kfLocation) &&
+      isTdMdStrategy(kfLocation.category)
+    ) {
       return Promise.reject(new Error(t('未就绪', { processId })));
     }
 
