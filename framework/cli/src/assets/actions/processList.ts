@@ -7,7 +7,7 @@ import {
   delayMilliSeconds,
   getAvailDaemonList,
   getProcessIdByKfLocation,
-  gruffSwitchKfLocation,
+  switchKfLocation,
   kfLogger,
   removeJournal,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
@@ -390,30 +390,6 @@ export const switchProcess = (
       }
       break;
     case 'daemon':
-      gruffSwitchKfLocation(
-        {
-          ...proc,
-          location_uid: 0,
-          mode: 'live',
-        },
-        !status,
-      )
-        .then(() => {
-          messageBoard.log('Please wait...', 2, (err) => {
-            if (err) {
-              console.error(err);
-            }
-          });
-        })
-        .catch((err) => {
-          const errMsg = parseSwtchKfLocationErrMessage(err.message);
-          messageBoard.log(errMsg, 2, (err) => {
-            if (err) {
-              console.error(err);
-            }
-          });
-        });
-      break;
     case 'md':
     case 'td':
     case 'strategy':

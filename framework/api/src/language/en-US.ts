@@ -445,6 +445,9 @@ export default {
     rocket_model_desc: 'Use CPU 100%, restart is required',
     pass_quote: 'Close Quote Listener',
     pass_quote_desc: 'Close Quote Listener',
+    pure_monitor: 'pureMonitor',
+    pure_monitor_desc:
+      'Only monit processes status, orders and trades updating, no position and asset update, for max performance',
 
     strategy: 'Strategy',
     use_local_python: 'Use Local Python',

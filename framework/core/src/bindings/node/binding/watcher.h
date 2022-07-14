@@ -87,6 +87,7 @@ protected:
 private:
   static Napi::FunctionReference constructor;
   const bool bypass_quotes_;
+  const bool bypass_accounting_;
   uv_work_t uv_work_ = {};
   wingchun::broker::SilentAutoClient broker_client_;
   wingchun::book::Bookkeeper bookkeeper_;

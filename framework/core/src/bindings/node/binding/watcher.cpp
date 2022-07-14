@@ -53,10 +53,18 @@ inline bool GetBypassRestore(const Napi::CallbackInfo &info) {
   return info[3].As<Napi::Boolean>().Value();
 }
 
+inline bool GetBypassAccounting(const Napi::CallbackInfo &info) {
+  if (not IsValid(info, 4, &Napi::Value::IsBoolean)) {
+    throw Napi::Error::New(info.Env(), "Invalid bypassAccounting argument");
+  }
+  return info[4].As<Napi::Boolean>().Value();
+}
+
 Watcher::Watcher(const Napi::CallbackInfo &info)
     : ObjectWrap(info),                                                                                   //
       apprentice(GetWatcherLocation(info), true),                                                         //
       bypass_quotes_(GetBypassQuotes(info)),                                                              //
+      bypass_accounting_(GetBypassAccounting(info)),                                                      //
       broker_client_(*this),                                                                              //
       bookkeeper_(*this, broker_client_),                                                                 //
       state_ref_(Napi::ObjectReference::New(Napi::Object::New(info.Env()), 1)),                           //
@@ -188,8 +196,11 @@ Napi::Value Watcher::IsStarted(const Napi::CallbackInfo &info) { return Napi::Bo
 
 Napi::Value Watcher::RequestStop(const Napi::CallbackInfo &info) {
   auto app_location = ExtractLocation(info, 0, get_locator());
+  if (not has_writer(app_location->uid)) {
+    return Napi::Boolean::New(info.Env(), false);
+  }
   get_writer(app_location->uid)->mark(now(), RequestStop::tag);
-  return {};
+  return Napi::Boolean::New(info.Env(), true);
 }
 
 Napi::Value Watcher::PublishState(const Napi::CallbackInfo &info) {
@@ -295,9 +306,12 @@ void Watcher::on_react() {
 
 void Watcher::on_start() {
   broker_client_.on_start(events_);
-  bookkeeper_.on_start(events_);
-  bookkeeper_.guard_positions();
-  bookkeeper_.add_book_listener(std::make_shared<BookListener>(*this));
+
+  if (not bypass_accounting_) {
+    bookkeeper_.on_start(events_);
+    bookkeeper_.guard_positions();
+    bookkeeper_.add_book_listener(std::make_shared<BookListener>(*this));
+  }
 
   events_ | bypass(this, bypass_quotes_) | $$(Feed(event));
   events_ | is(OrderInput::tag) | $$(UpdateBook(event, event->data<OrderInput>()));

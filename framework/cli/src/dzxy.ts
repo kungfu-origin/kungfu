@@ -257,7 +257,6 @@ function dealTradingDataItemResolved(item: KungfuApi.TradingDataTypes): Row {
 
 async function exportTradingData(date, output_folder) {
   const { tradingData } = await getKungfuHistoryData(
-    watcher,
     date,
     HistoryDateEnum.naturalDate,
     'all',

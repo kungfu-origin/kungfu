@@ -63,6 +63,13 @@ export const getKfGlobalSettings = (): KfSystemConfig[] => [
         default: false,
         type: 'bool',
       },
+      {
+        key: 'pureMonitor',
+        name: t('globalSettingConfig.pure_monitor'),
+        tip: t('globalSettingConfig.pure_monitor_desc'),
+        default: false,
+        type: 'bool',
+      },
     ],
   },
   {

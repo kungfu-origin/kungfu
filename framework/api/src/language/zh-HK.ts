@@ -444,6 +444,9 @@ export default {
     pass_quote: '跳过行情计算',
     pass_quote_desc:
       '在订阅一定数量(上千)支Ticker时, 由行情推送触发pnl计算会导致性能问题, 开启后会掉过行情计算',
+    pure_monitor: '仅监控',
+    pure_monitor_desc:
+      '仅监控进程运行状态, 以及最新的委托成交数据, 不再更新持仓资金, ui 进程消耗达到最低',
 
     strategy: '策略',
     use_local_python: '使用本地Python',

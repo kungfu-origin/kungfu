@@ -50,6 +50,7 @@ import {
 } from '../typings/enums';
 import {
   deleteProcess,
+  graceDeleteProcess,
   Pm2ProcessStatusData,
   Pm2ProcessStatusDetail,
   Pm2ProcessStatusDetailData,
@@ -654,6 +655,14 @@ export const isTdMd = (category: KfCategoryTypes) => {
   return false;
 };
 
+export const isTdMdStrategy = (category: KfCategoryTypes) => {
+  if (category === 'td' || category === 'md' || category === 'strategy') {
+    return true;
+  }
+
+  return false;
+};
+
 export const buildExtTypeMap = (
   extConfigs: KungfuApi.KfExtConfigs,
   category: KfCategoryTypes,
@@ -1112,35 +1121,13 @@ export const switchKfLocation = (
   if (!watcher) return Promise.reject(new Error('Watcher is NULL'));
 
   if (!targetStatus) {
-    if (
-      kfLocation.category === 'td' ||
-      kfLocation.category === 'md' ||
-      kfLocation.category === 'strategy'
-    ) {
+    if (isTdMdStrategy(kfLocation.category)) {
       if (!watcher.isReadyToInteract(kfLocation)) {
         return Promise.reject(new Error(t('未就绪', { processId })));
       }
     }
 
-    return Promise.resolve(watcher.requestStop(kfLocation))
-      .then(() => delayMilliSeconds(1000))
-      .then(() => deleteProcess(processId));
-  }
-
-  return startProcessByKfLocation(kfLocation);
-};
-
-export const gruffSwitchKfLocation = (
-  kfLocation:
-    | KungfuApi.KfLocation
-    | KungfuApi.KfConfig
-    | KungfuApi.KfExtraLocation,
-  targetStatus: boolean,
-) => {
-  const processId = getProcessIdByKfLocation(kfLocation);
-
-  if (!targetStatus) {
-    return deleteProcess(processId);
+    return graceDeleteProcess(watcher, kfLocation);
   }
 
   return startProcessByKfLocation(kfLocation);

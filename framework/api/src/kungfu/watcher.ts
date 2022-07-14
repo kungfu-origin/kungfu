@@ -60,12 +60,14 @@ export const watcher = ((): KungfuApi.Watcher | null => {
   );
   const globalSetting = getKfGlobalSettingsValue();
   const bypassQuote = globalSetting?.performance?.bypassQuote;
+  const bypassAccounting = globalSetting?.performance?.pureMonitor;
 
   return kf.watcher(
     KF_RUNTIME_DIR,
     kf.formatStringToHashHex(id),
     bypassQuote,
     bypassRestore,
+    bypassAccounting,
   );
 })();
 

@@ -314,7 +314,6 @@ export const useDealExportHistoryTradingData = (): {
 
     if (tradingDataType === 'all') {
       const { tradingData } = await getKungfuHistoryData(
-        window.watcher,
         date,
         dateType,
         tradingDataType,
@@ -367,7 +366,6 @@ export const useDealExportHistoryTradingData = (): {
 
     exportDataLoading.value = true;
     const { tradingData } = await getKungfuHistoryData(
-      window.watcher,
       date,
       dateType,
       tradingDataType,
