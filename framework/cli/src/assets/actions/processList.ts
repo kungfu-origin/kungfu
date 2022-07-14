@@ -388,6 +388,7 @@ export const switchProcess = (
         }
       }
       break;
+    case 'daemon':
     case 'md':
     case 'td':
     case 'strategy':
@@ -403,8 +404,6 @@ export const switchProcess = (
         );
         return;
       }
-    // eslint-disable-next-line no-fallthrough
-    case 'daemon':
       sendDataToProcessIdByPm2('SWITCH_KF_LOCATION', globalState.DZXY_PM_ID, {
         category,
         group,
