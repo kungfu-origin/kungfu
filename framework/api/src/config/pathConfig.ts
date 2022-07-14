@@ -90,6 +90,7 @@ export const PY_WHL_DIR = path.join(KUNGFU_RESOURCES_DIR, 'python');
 //================== config & resouces end ===================================
 
 //================== cli start ====================================
+// process.env.CLI_DIR = path.dirname(xxxx/dzxy.js);
 const staticDevCliDir = path.resolve('..', 'cli', 'dist', 'cli');
 export const CLI_PARENT_DIR = production
   ? path.join(global.__kfResourcesPath, 'app', 'dist')
