@@ -61,15 +61,15 @@ export const watcher = ((): KungfuApi.Watcher | null => {
 
   const globalSetting = getKfGlobalSettingsValue();
   const bypassAccounting = globalSetting?.performance?.bypassAccounting;
-
+  console.log(globalSetting);
   console.log('bypassRestore', bypassRestore);
   console.log('bypassAccounting', bypassAccounting);
 
   return kf.watcher(
     KF_RUNTIME_DIR,
     kf.formatStringToHashHex(id),
-    bypassRestore,
-    bypassAccounting,
+    !!bypassRestore,
+    !!bypassAccounting,
   );
 })();
 

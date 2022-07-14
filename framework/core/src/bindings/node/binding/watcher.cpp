@@ -296,8 +296,6 @@ void Watcher::on_react() { events_ | take_until(events_ | is(RequestStart::tag))
 void Watcher::on_start() {
   broker_client_.on_start(events_);
 
-  SPDLOG_INFO("bypass_accounting_ = {}", bypass_accounting_);
-
   if (not bypass_accounting_) {
     bookkeeper_.on_start(events_);
     bookkeeper_.guard_positions();
