@@ -17,7 +17,7 @@ import {
   getTradingDate,
   kfLogger,
   removeJournal,
-  removeDB,
+  // removeDB,
   getAvailDaemonList,
   loopToRunProcess,
   resolveInstrumentValue,
@@ -151,25 +151,25 @@ const removeJournalBeforeStartAll = (
   }
 };
 
-const removeDBBeforeStartAll = (currentTradingDate: string): Promise<void> => {
-  const clearDBDateFromLocal = localStorage.getItem('clearDBTradingDate');
+// const removeDBBeforeStartAll = (currentTradingDate: string): Promise<void> => {
+//   const clearDBDateFromLocal = localStorage.getItem('clearDBTradingDate');
 
-  kfLogger.info('Lastest Clear DB Trading Date: ', clearDBDateFromLocal || '');
+//   kfLogger.info('Lastest Clear DB Trading Date: ', clearDBDateFromLocal || '');
 
-  if (currentTradingDate !== clearDBDateFromLocal) {
-    localStorage.setItem('clearDBTradingDate', currentTradingDate);
-    kfLogger.info('Clear DB Trading Date: ', currentTradingDate);
-    return removeDB(KF_HOME);
-  } else {
-    return Promise.resolve();
-  }
-};
+//   if (currentTradingDate !== clearDBDateFromLocal) {
+//     localStorage.setItem('clearDBTradingDate', currentTradingDate);
+//     kfLogger.info('Clear DB Trading Date: ', currentTradingDate);
+//     return removeDB(KF_HOME);
+//   } else {
+//     return Promise.resolve();
+//   }
+// };
 
 export const preStartAll = async (): Promise<(void | Proc)[]> => {
   const currentTradingDate = getTradingDate();
   return Promise.all([
     removeJournalBeforeStartAll(currentTradingDate),
-    removeDBBeforeStartAll(currentTradingDate),
+    // removeDBBeforeStartAll(currentTradingDate),
   ]);
 };
 
