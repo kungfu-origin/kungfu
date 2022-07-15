@@ -1,4 +1,5 @@
 import fse from 'fs-extra';
+import os from 'os';
 import { SpaceSizeSettingEnum, SpaceTabSettingEnum } from '../typings/enums';
 import { KF_CONFIG_PATH, PY_WHL_DIR } from './pathConfig';
 import { CodeSizeSetting, CodeTabSetting } from './tradingConfig';
@@ -8,6 +9,7 @@ import {
 } from '@kungfu-trader/kungfu-js-api/language';
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
 const { t } = VueI18n.global;
+const numCPUs = os.cpus() ? os.cpus().length : 1;
 
 export interface KfSystemConfig {
   key: string;
@@ -54,6 +56,7 @@ export const getKfGlobalSettings = (): KfSystemConfig[] => [
         name: t('globalSettingConfig.rocket_model'),
         tip: t('globalSettingConfig.rocket_model_desc'),
         default: false,
+        disabled: numCPUs <= 4,
         type: 'bool',
       },
       {
