@@ -20,7 +20,7 @@ import path from 'path';
 import {
   getIfProcessRunning,
   getIfProcessStopping,
-  getTaskKfLocationByProcessId,
+  getStrategyKfLocationByProcessId,
   fromProcessArgsToKfConfigItems,
   kfConfigItemsToArgsByPrimaryForShow,
   dealTradingTaskName,
@@ -104,7 +104,7 @@ function handleSwitchProcessStatusResolved(
 ) {
   event.stopPropagation();
 
-  const taskLocation = getTaskKfLocationByProcessId(record?.name || '');
+  const taskLocation = getStrategyKfLocationByProcessId(record?.name || '');
   if (!taskLocation) {
     error(`${record.name} ${t('tradingTaskConfig.illegal_process_id')}`);
     return;
@@ -158,7 +158,7 @@ function handleSwitchProcessStatusResolved(
 }
 
 function handleOpenLogviewResolved(record: Pm2ProcessStatusDetail) {
-  const taskLocation = getTaskKfLocationByProcessId(record?.name || '');
+  const taskLocation = getStrategyKfLocationByProcessId(record?.name || '');
   if (!taskLocation) {
     error(`${record.name} ${t('tradingTaskConfig.illegal_process_id')}`);
     return;
@@ -167,7 +167,7 @@ function handleOpenLogviewResolved(record: Pm2ProcessStatusDetail) {
 }
 
 function handleRemoveTask(record: Pm2ProcessStatusDetail) {
-  const taskLocation = getTaskKfLocationByProcessId(record?.name || '');
+  const taskLocation = getStrategyKfLocationByProcessId(record?.name || '');
   if (!taskLocation) {
     error(`${record.name} ${t('tradingTaskConfig.illegal_process_id')}`);
     return;
@@ -187,7 +187,7 @@ function handleRemoveTask(record: Pm2ProcessStatusDetail) {
 }
 
 function customRowResolved(record: Pm2ProcessStatusDetail) {
-  const taskLocation = getTaskKfLocationByProcessId(record?.name || '');
+  const taskLocation = getStrategyKfLocationByProcessId(record?.name || '');
   if (!taskLocation) {
     error(`${record.name} ${t('tradingTaskConfig.illegal_process_id')}`);
     return;
@@ -203,7 +203,7 @@ function customRowResolved(record: Pm2ProcessStatusDetail) {
 }
 
 function dealRowClassNameResolved(record: Pm2ProcessStatusDetail): string {
-  const taskLocation = getTaskKfLocationByProcessId(record?.name || '');
+  const taskLocation = getStrategyKfLocationByProcessId(record?.name || '');
   if (!taskLocation) {
     error(`${record.name} ${t('tradingTaskConfig.illegal_process_id')}`);
     return '';
@@ -258,7 +258,7 @@ function parseTaskSettingsFromEnv(configSettingsEnv = '[]') {
 function getProcessStatusName(
   record: Pm2ProcessStatusDetail,
 ): ProcessStatusTypes | undefined {
-  const taskLocation = getTaskKfLocationByProcessId(record?.name || '');
+  const taskLocation = getStrategyKfLocationByProcessId(record?.name || '');
   if (!taskLocation) {
     return;
   }
@@ -333,8 +333,8 @@ function getProcessStatusName(
                 @click.stop="
                   handleOpenSetTradingTaskModal(
                     'update',
-                    getTaskKfLocationByProcessId(record?.name || '')?.group ||
-                      '',
+                    getStrategyKfLocationByProcessId(record?.name || '')
+                      ?.group || '',
                     fromProcessArgsToKfConfigItems(record.args),
                   )
                 "

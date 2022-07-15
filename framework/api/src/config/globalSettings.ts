@@ -63,6 +63,13 @@ export const getKfGlobalSettings = (): KfSystemConfig[] => [
         default: false,
         type: 'bool',
       },
+      {
+        key: 'bypassTradingData',
+        name: t('globalSettingConfig.bypass_trading_data'),
+        tip: t('globalSettingConfig.bypass_trading_data_desc'),
+        default: false,
+        type: 'bool',
+      },
     ],
   },
   {

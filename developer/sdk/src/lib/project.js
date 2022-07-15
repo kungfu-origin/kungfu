@@ -32,26 +32,7 @@ exports.configure = (writePackageJson = false, writeWorkflows = true) => {
 exports.package = () => {
   const packageJson = getPackageJson();
   const extensionName = packageJson.kungfuConfig.key;
-  const buildTargetDir = path.join('build', 'target');
   const outputDir = path.join('dist', extensionName);
-
-  const copyOutput = (pattern) => {
-    glob.sync(pattern).forEach((p) => {
-      fse.copyFile(p, path.join(outputDir, path.basename(p)));
-    });
-  };
-
-  if (fse.existsSync(buildTargetDir)) {
-    copyOutput(path.join(buildTargetDir, '*'));
-  }
-
-  if (fse.existsSync(kungfulibs)) {
-    copyOutput(path.join(kungfuLibDirPattern, 'lib', '*'));
-  }
-
-  if (fse.existsSync(pypackages)) {
-    fse.copySync(pypackages, path.join(outputDir, pypackages));
-  }
 
   fse.copySync(
     require.resolve('@kungfu-trader/kungfu-core/dist/kfc/drone.node'),

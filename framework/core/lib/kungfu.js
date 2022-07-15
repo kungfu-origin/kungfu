@@ -67,8 +67,15 @@ module.exports = function () {
       name,
       bypassRestore = false,
       bypassAccounting = false,
+      bypassTradingData = false,
     ) {
-      return new binding.Watcher(home, name, bypassRestore, bypassAccounting);
+      return new binding.Watcher(
+        home,
+        name,
+        bypassRestore,
+        bypassAccounting,
+        bypassTradingData,
+      );
     },
   };
 };

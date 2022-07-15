@@ -179,7 +179,6 @@ constexpr auto build_ring_state_map = [](auto types) {
         new kungfu::yijinjing::cache::ringqueue<state<DataType>>(1024);
     return boost::hana::make_pair(value, p);
   });
-  // SPDLOG_INFO("type = {}", typeid(maps).name());
   return boost::hana::unpack(maps, boost::hana::make_map);
 };
 

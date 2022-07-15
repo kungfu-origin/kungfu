@@ -444,6 +444,9 @@ export default {
     bypass_accounting: '跳过UI进程计算',
     bypass_accounting_desc:
       'UI进程不再处理计算逻辑, 完全通过计算进程更新数据, 减轻UI进程性能占用, 重启后生效',
+    bypass_trading_data: '纯监控模式',
+    bypass_trading_data_desc:
+      '该模式下仅可监控进程运行状态, UI进行性能占用达到最低, 重启后生效',
     strategy: '策略',
     use_local_python: '使用本地Python',
     local_python_desc:

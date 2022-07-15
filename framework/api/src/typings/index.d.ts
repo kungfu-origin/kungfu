@@ -758,8 +758,9 @@ declare namespace KungfuApi {
     watcher(
       kfHome: string,
       hashedId: string,
-      bypassRestore?: boolean,
-      bypassAccounting?: boolean,
+      bypassRestore = false,
+      bypassAccounting = false,
+      bypassTradingData = false,
     ): Watcher | null;
     shutdown(): void;
     formatStringToHashHex(id: string): string;

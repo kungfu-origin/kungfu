@@ -202,16 +202,41 @@ static constexpr auto event_filter_any = [](auto member) {
   };
 };
 
+template <typename... Ts>
+static constexpr auto lambda_filter_any = [](auto member) {
+  return [=](Ts... arg) {
+    using T = std::invoke_result_t<decltype(member), event *>;
+    type_check<T, Ts...>(arg...);
+    auto args = boost::hana::make_tuple(arg...);
+    return [=](const event_ptr &event) {
+      auto check = [&](auto a) { return ((*event).*member)() == a; };
+      return boost::hana::fold(boost::hana::transform(args, check), std::logical_or<>());
+    };
+  };
+};
+
 template <typename... Ts> constexpr decltype(auto) is(Ts... arg) {
   return event_filter_any<Ts...>(&event::msg_type)(arg...);
+}
+
+template <typename... Ts> constexpr decltype(auto) while_is(Ts... arg) {
+  return lambda_filter_any<Ts...>(&event::msg_type)(arg...);
 }
 
 template <typename... Ts> constexpr decltype(auto) from(Ts... arg) {
   return event_filter_any<Ts...>(&event::source)(arg...);
 }
 
+template <typename... Ts> constexpr decltype(auto) while_from(Ts... arg) {
+  return lambda_filter_any<Ts...>(&event::source)(arg...);
+}
+
 template <typename... Ts> constexpr decltype(auto) to(Ts... arg) {
   return event_filter_any<Ts...>(&event::dest)(arg...);
+}
+
+template <typename... Ts> constexpr decltype(auto) while_to(Ts... arg) {
+  return lambda_filter_any<Ts...>(&event::dest)(arg...);
 }
 
 static constexpr auto interrupt_on_error = [](const std::exception_ptr &e) {
