@@ -306,6 +306,7 @@ exports.compile = () => {
   const packageJson = getPackageJson();
   const extensionName = packageJson.kungfuConfig.key;
   const outputDir = path.join('dist', extensionName);
+  const buildTargetDir = path.join('build', 'target');
 
   fse.ensureDirSync(outputDir);
 
@@ -330,6 +331,24 @@ exports.compile = () => {
 
   const packageJsonPath = path.join(process.cwd(), 'package.json');
   fse.copyFile(packageJsonPath, path.join(outputDir, 'package.json'));
+
+  const copyOutput = (pattern) => {
+    glob.sync(pattern).forEach((p) => {
+      fse.copyFile(p, path.join(outputDir, path.basename(p)));
+    });
+  };
+
+  if (fse.existsSync(buildTargetDir)) {
+    copyOutput(path.join(buildTargetDir, '*'));
+  }
+
+  if (fse.existsSync(kungfulibs)) {
+    copyOutput(path.join(kungfuLibDirPattern, 'lib', '*'));
+  }
+
+  if (fse.existsSync(pypackages)) {
+    fse.copySync(pypackages, path.join(outputDir, pypackages));
+  }
 };
 
 exports.format = () => {

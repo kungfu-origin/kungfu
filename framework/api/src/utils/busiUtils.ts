@@ -835,17 +835,29 @@ export const getMdTdKfLocationByProcessId = (
   return null;
 };
 
-export const getTaskKfLocationByProcessId = (
+export const getStrategyKfLocationByProcessId = (
   processId: string,
 ): KungfuApi.KfLocation | null => {
   if (processId.indexOf('strategy_') === 0) {
-    const [category, group] = processId.split('_');
-    return {
-      category: category as KfCategoryTypes,
-      group,
-      name: processId.split('_').slice(2).join('_'),
-      mode: 'live',
-    };
+    const splits = processId.split('_');
+
+    if (splits.length === 3) {
+      const [category, group, name] = processId.split('_');
+      return {
+        category: category as KfCategoryTypes,
+        group,
+        name,
+        mode: 'live',
+      };
+    } else if (splits.length === 2) {
+      const [category, name] = processId.split('_');
+      return {
+        category: category as KfCategoryTypes,
+        group: 'default',
+        name,
+        mode: 'live',
+      };
+    }
   }
 
   return null;
@@ -897,7 +909,7 @@ export const getKfLocationByProcessId = (
   if (processId.indexOf('td_') === 0 || processId.indexOf('md_') === 0) {
     return getMdTdKfLocationByProcessId(processId);
   } else if (processId.indexOf('strategy_') === 0) {
-    return getTaskKfLocationByProcessId(processId);
+    return getStrategyKfLocationByProcessId(processId);
   } else if (processId.indexOf('daemon_') === 0) {
     return getDaemonKfLocationByProcessId(processId);
   } else if (processId.indexOf('_') === -1) {

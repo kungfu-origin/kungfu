@@ -21,7 +21,21 @@ namespace kungfu::node {
 constexpr uint64_t ID_TRANC = 0x00000000FFFFFFFF;
 constexpr uint32_t PAGE_ID_MASK = 0x80000000;
 
+class WatcherAutoClient : public wingchun::broker::SilentAutoClient {
+public:
+  explicit WatcherAutoClient(yijinjing::practice::apprentice &app, bool bypass_trading_Data);
+
+  ~WatcherAutoClient() = default;
+
+  void connect(const event_ptr &event, const longfist::types::Register &register_data) override;
+
+private:
+  bool bypass_trading_data_;
+};
+
 class Watcher : public Napi::ObjectWrap<Watcher>, public yijinjing::practice::apprentice {
+  typedef std::unordered_map<uint32_t, longfist::types::InstrumentKey> InstrumentKeyMap;
+
 public:
   explicit Watcher(const Napi::CallbackInfo &info);
 
@@ -80,15 +94,17 @@ public:
   static void Init(Napi::Env env, Napi::Object exports);
 
 protected:
+  const bool bypass_accounting_;
+  const bool bypass_trading_data_;
+
   void on_react() override;
 
   void on_start() override;
 
 private:
   static Napi::FunctionReference constructor;
-  const bool bypass_accounting_;
   uv_work_t uv_work_ = {};
-  wingchun::broker::SilentAutoClient broker_client_;
+  WatcherAutoClient broker_client_;
   wingchun::book::Bookkeeper bookkeeper_;
   Napi::ObjectReference state_ref_;
   Napi::ObjectReference ledger_ref_;
@@ -104,19 +120,45 @@ private:
   yijinjing::cache::bank data_bank_;
   yijinjing::cache::trading_bank trading_bank_;
   std::vector<kungfu::state<longfist::types::CacheReset>> reset_cache_states_;
-  std::unordered_map<uint32_t, longfist::types::InstrumentKey> subscribed_instruments_ = {};
+  InstrumentKeyMap subscribed_instruments_ = {};
   std::unordered_map<uint32_t, int> location_uid_states_map_ = {};
   std::unordered_map<uint32_t, longfist::types::StrategyStateUpdate> location_uid_strategy_states_map_ = {};
-  std::unordered_set<uint32_t> hash_instruments_ = {};
+  std::unordered_set<uint32_t> feeded_instruments_ = {};
 
-  static constexpr auto bypassQuote = [](yijinjing::practice::apprentice *app, bool bypass_quotes) {
-    return rx::filter([=](const event_ptr &event) {
+  static constexpr auto bypass = [](yijinjing::practice::apprentice *app, bool bypass_quotes) {
+    return rx::filter([&](const event_ptr &event) {
       return not(app->get_location(event->source())->category == longfist::enums::category::MD and
                  event->msg_type() != longfist::types::Instrument::tag and bypass_quotes);
     });
   };
 
-  void Feed(const event_ptr &event, bool is_restore = false);
+  static constexpr auto is_subscribed = [](const InstrumentKeyMap &subscribed_instruments) {
+    return rx::filter([&](const event_ptr &event) {
+      return subscribed_instruments.find(event->data<longfist::types::Quote>().uid()) != subscribed_instruments.end();
+    });
+  };
+
+  static constexpr auto is_trading_data = []() {
+    return rx::filter([](const event_ptr &event) {
+      bool is_target = false;
+      boost::hana::for_each(longfist::TradingDataTypes, [&](auto it) {
+        using DataType = typename decltype(+boost::hana::second(it))::type;
+        is_target |= DataType::tag == event->msg_type();
+      });
+      return is_target;
+    });
+  };
+
+  static constexpr auto while_is_trading_data = [](const event_ptr &event) {
+    bool is_target = false;
+    boost::hana::for_each(longfist::TradingDataTypes, [&](auto it) {
+      using DataType = typename decltype(+boost::hana::second(it))::type;
+      is_target |= DataType::tag == event->msg_type();
+    });
+    return is_target;
+  };
+
+  void Feed(const event_ptr &event, const longfist::types::Instrument &instrument);
 
   void RestoreState(const yijinjing::data::location_ptr &state_location, int64_t from, int64_t to, bool sync_schema);
 
@@ -318,8 +360,10 @@ private:
   private:
     Watcher &watcher_;
   };
+
   DECLARE_PTR(BookListener);
 };
+
 } // namespace kungfu::node
 
 #endif // KUNGFU_NODE_WATCHER_H

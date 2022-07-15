@@ -86,6 +86,8 @@ public:
   virtual void subscribe(const yijinjing::data::location_ptr &md_location, const std::string &exchange_id,
                          const std::string &instrument_id);
 
+  virtual void connect(const event_ptr &event, const longfist::types::Register &register_data);
+
   virtual void renew(int64_t trigger_time, const yijinjing::data::location_ptr &md_location);
 
   virtual bool try_renew(int64_t trigger_time, const yijinjing::data::location_ptr &md_location);
@@ -118,8 +120,6 @@ private:
   InstrumentSourceMap instrument_md_locations_ = {};
   yijinjing::data::location_map ready_md_locations_ = {};
   yijinjing::data::location_map ready_td_locations_ = {};
-
-  void connect(const event_ptr &event, const longfist::types::Register &register_data);
 
   void update_broker_state(const event_ptr &event, const longfist::types::BrokerStateUpdate &state);
 

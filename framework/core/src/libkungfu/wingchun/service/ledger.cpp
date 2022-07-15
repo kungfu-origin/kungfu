@@ -41,7 +41,7 @@ void Ledger::on_start() {
   events_ | is(MirrorPositionsRequest::tag) | $$(bookkeeper_.mirror_positions(event->gen_time(), event->source()));
   events_ | is(AssetRequest::tag) | $$(write_book_reset(event->gen_time(), event->source()));
   events_ | is(PositionRequest::tag) | $$(write_strategy_data(event->gen_time(), event->source()));
-  events_ | is(PositionEnd::tag) | filter([&](const event_ptr &event) { return event->dest() != location::SYNC; }) |
+  events_ | is(PositionEnd::tag) | skip_while(while_to(location::SYNC)) |
       $$(update_account_book(event->gen_time(), event->data<PositionEnd>().holder_uid););
 
   add_time_interval(time_unit::NANOSECONDS_PER_MINUTE, [&](auto e) { request_asset_sync(e->gen_time()); });
@@ -138,8 +138,6 @@ void Ledger::inspect_channel(int64_t trigger_time, const Channel &channel) {
   }
   if (channel.dest_id == get_live_home_uid() and has_writer(channel.source_id) and is_from_account) {
     write_book_reset(trigger_time, channel.source_id);
-  }
-  if (channel.source_id == get_live_home_uid() and bookkeeper_.has_book(channel.dest_id)) {
   }
 }
 

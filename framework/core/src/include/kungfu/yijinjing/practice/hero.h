@@ -157,6 +157,15 @@ protected:
     });
   };
 
+  static constexpr auto feed_trading_data = [](const event_ptr &event, auto &receiver) {
+    boost::hana::for_each(longfist::TradingDataTypes, [&](auto it) {
+      using DataType = typename decltype(+boost::hana::second(it))::type;
+      if (DataType::tag == event->msg_type()) {
+        receiver << typed_event_ptr<DataType>(event);
+      }
+    });
+  };
+
 private:
   yijinjing::io_device_ptr io_device_;
   rx::composite_subscription cs_;
