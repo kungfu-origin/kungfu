@@ -9,7 +9,7 @@ module.exports = (...argv) => {
       prog.commands[command.name](command.args, function (err) {
         if (err) {
           console.error(err);
-          process.exit(-1);
+          return;
         }
         process.nextTick(run);
       });
