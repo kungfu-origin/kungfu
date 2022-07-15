@@ -64,14 +64,10 @@ WatcherAutoClient::WatcherAutoClient(yijinjing::practice::apprentice &app, bool 
     : SilentAutoClient(app), bypass_trading_data_(bypass_trading_data) {}
 
 void WatcherAutoClient::connect(const event_ptr &event, const longfist::types::Register &register_data) {
-  SPDLOG_INFO("bypass_trading_data_ ===== {}", bypass_trading_data_);
-
   if (bypass_trading_data_) {
-    SPDLOG_INFO(111);
     auto app_uid = register_data.location_uid;
     auto app_location = app_.get_location(app_uid);
     auto resume_time_point = get_resume_policy().get_connect_time(app_, register_data);
-    SPDLOG_INFO(222);
 
     if (app_location->category == category::MD and should_connect_md(app_location)) {
       app_.request_write_to(app_.now(), app_uid);
