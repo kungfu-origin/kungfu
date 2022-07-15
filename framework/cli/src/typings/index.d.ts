@@ -38,6 +38,8 @@ interface ProcessListItem {
   statusName: string;
   status: string;
   monit: ProcessDescription['monit'];
+  cwd?: string;
+  script?: string;
 }
 
 class ListElementResolved extends Widgets.ListElement {
@@ -52,6 +54,8 @@ interface SwitchKfLocationPacketData {
   name: string;
   value: string;
   status: boolean;
+  cwd?: string;
+  script?: string;
 }
 
 declare module NodeJS {

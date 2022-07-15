@@ -5,7 +5,7 @@ import {
 } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import {
   delayMilliSeconds,
-  getAvailDaemonList,
+  getAvailCliDaemonList,
   getProcessIdByKfLocation,
   kfLogger,
   removeJournal,
@@ -44,7 +44,7 @@ export const mdTdStrategyDaemonObservable = () => {
   return new Observable<
     Record<KfCategoryTypes, KungfuApi.KfConfig[] | KungfuApi.KfDaemonLocation[]>
   >((observer) => {
-    Promise.all([getAllKfConfigOriginData(), getAvailDaemonList()]).then(
+    Promise.all([getAllKfConfigOriginData(), getAvailCliDaemonList()]).then(
       (
         allConfigs: [
           Record<KfCategoryTypes, KungfuApi.KfConfig[]>,
@@ -344,7 +344,7 @@ export const switchProcess = (
 ): void => {
   const status = proc.status !== '--';
   const startOrStop = status ? 'Stop' : 'Start';
-  const { category, group, name, value } = proc;
+  const { category, group, name, value, cwd, script } = proc;
 
   switch (category) {
     case 'system':
@@ -410,6 +410,8 @@ export const switchProcess = (
         name,
         value: JSON.stringify(value),
         status,
+        cwd,
+        script,
       })
         .then(() => {
           messageBoard.log('Please wait...', 2, (err) => {
