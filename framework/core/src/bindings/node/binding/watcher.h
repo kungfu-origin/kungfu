@@ -86,7 +86,7 @@ protected:
 
 private:
   static Napi::FunctionReference constructor;
-  const bool bypass_quotes_;
+  const bool bypass_accounting_;
   uv_work_t uv_work_ = {};
   wingchun::broker::SilentAutoClient broker_client_;
   wingchun::book::Bookkeeper bookkeeper_;
@@ -109,9 +109,10 @@ private:
   std::unordered_map<uint32_t, longfist::types::StrategyStateUpdate> location_uid_strategy_states_map_ = {};
   std::unordered_set<uint32_t> hash_instruments_ = {};
 
-  static constexpr auto bypass = [](yijinjing::practice::apprentice *app, bool bypass_quotes) {
+  static constexpr auto bypassQuote = [](yijinjing::practice::apprentice *app, bool bypass_quotes) {
     return rx::filter([=](const event_ptr &event) {
-      return not(app->get_location(event->source())->category == longfist::enums::category::MD and bypass_quotes);
+      return not(app->get_location(event->source())->category == longfist::enums::category::MD and
+                 event->msg_type() != longfist::types::Instrument::tag and bypass_quotes);
     });
   };
 
@@ -137,11 +138,7 @@ private:
 
   void UpdateBook(const event_ptr &event, const longfist::types::Quote &quote);
 
-  void UpdateBook(int64_t update_time, uint32_t source_id, uint32_t dest_id, const longfist::types::Quote &quote);
-
   void UpdateBook(const event_ptr &event, const longfist::types::Position &position);
-
-  void UpdateBook(int64_t update_time, uint32_t source_id, uint32_t dest_id, const longfist::types::Position &position);
 
   void SyncLedger();
 
@@ -177,6 +174,9 @@ private:
       feed_state_data_bank(cache_state_position, data_bank_);
       state<kungfu::longfist::types::Asset> cache_state_asset(source, dest, event->gen_time(), book->asset);
       feed_state_data_bank(cache_state_asset, data_bank_);
+      state<kungfu::longfist::types::AssetMargin> cache_state_asset_margin(source, dest, event->gen_time(),
+                                                                           book->asset_margin);
+      feed_state_data_bank(cache_state_asset_margin, data_bank_);
     };
     update(event->source(), event->dest());
     update(event->dest(), event->source());

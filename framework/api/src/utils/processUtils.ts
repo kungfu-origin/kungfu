@@ -16,6 +16,7 @@ import {
   getIfProcessRunning,
   getIfProcessDeleted,
   delayMilliSeconds,
+  isTdMdStrategy,
 } from '../utils/busiUtils';
 import {
   buildProcessLogPath,
@@ -362,10 +363,21 @@ export const startProcess = async (
 
 export const stopProcess = pm2Stop;
 
+export const requestStop = (
+  watcher: KungfuApi.Watcher,
+  kfLocation: KungfuApi.KfLocation,
+) => {
+  if (isTdMdStrategy(kfLocation.category)) {
+    return Promise.resolve(watcher.requestStop(kfLocation));
+  }
+
+  return Promise.resolve();
+};
+
 export const graceStopProcess = (
   watcher: KungfuApi.Watcher | null,
   kfLocation: KungfuApi.KfConfig | KungfuApi.KfLocation,
-  processStatusData: Pm2ProcessStatusData,
+  processStatusData?: Pm2ProcessStatusData,
 ): Promise<void> => {
   const processId = getProcessIdByKfLocation(kfLocation);
 
@@ -373,12 +385,16 @@ export const graceStopProcess = (
     return Promise.reject(new Error('Watcher is NULL'));
   }
 
-  if (getIfProcessRunning(processStatusData, processId)) {
-    if (!watcher.isReadyToInteract(kfLocation)) {
+  if (!processStatusData || getIfProcessRunning(processStatusData, processId)) {
+    if (
+      watcher &&
+      !watcher.isReadyToInteract(kfLocation) &&
+      isTdMdStrategy(kfLocation.category)
+    ) {
       return Promise.reject(new Error(t('未就绪', { processId })));
     }
 
-    return Promise.resolve(watcher.requestStop(kfLocation))
+    return Promise.resolve(requestStop(watcher, kfLocation))
       .then(() => delayMilliSeconds(1000))
       .then(() => stopProcess(processId));
   }
@@ -391,7 +407,7 @@ export const deleteProcess = pm2Delete;
 export const graceDeleteProcess = (
   watcher: KungfuApi.Watcher | null,
   kfLocation: KungfuApi.KfConfig | KungfuApi.KfLocation,
-  processStatusData: Pm2ProcessStatusData,
+  processStatusData?: Pm2ProcessStatusData,
 ): Promise<void> => {
   const processId = getProcessIdByKfLocation(kfLocation);
 
@@ -399,12 +415,16 @@ export const graceDeleteProcess = (
     return Promise.reject(new Error('Watcher is NULL'));
   }
 
-  if (getIfProcessRunning(processStatusData, processId)) {
-    if (watcher && !watcher.isReadyToInteract(kfLocation)) {
+  if (!processStatusData || getIfProcessRunning(processStatusData, processId)) {
+    if (
+      watcher &&
+      !watcher.isReadyToInteract(kfLocation) &&
+      isTdMdStrategy(kfLocation.category)
+    ) {
       return Promise.reject(new Error(t('未就绪', { processId })));
     }
 
-    return Promise.resolve(watcher.requestStop(kfLocation))
+    return Promise.resolve(requestStop(watcher, kfLocation))
       .then(() => delayMilliSeconds(1000))
       .then(() => deleteProcess(processId));
   } else if (!getIfProcessDeleted(processStatusData, processId)) {

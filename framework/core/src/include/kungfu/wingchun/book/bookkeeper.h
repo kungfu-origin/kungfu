@@ -129,12 +129,6 @@ private:
   std::unordered_map<uint32_t, bool> books_replica_asset_margin_guards_ = {}; // AssetMargin::tag-><location_uid,true>
   std::unordered_map<uint32_t, bool> books_replica_position_guard_ = {}; // PositionEnd::tag添加对应<location_uid,true>
 
-  static constexpr auto bypass = [](yijinjing::practice::apprentice *app, bool bypass_quotes) {
-    return rx::filter([=](const event_ptr &event) {
-      return not(app->get_location(event->source())->category == longfist::enums::category::MD and bypass_quotes);
-    });
-  };
-
   Book_ptr make_book(uint32_t location_uid);
 
   void update_instrument(const longfist::types::Instrument &instrument);

@@ -134,7 +134,6 @@ watch(historyDate, async (newDate) => {
   historyDataLoading.value = true;
   await delayMilliSeconds(500);
   const { tradingData } = await getKungfuHistoryData(
-    window.watcher,
     newDate.format(),
     HistoryDateEnum.naturalDate,
     'Trade',

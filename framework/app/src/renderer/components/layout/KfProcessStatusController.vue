@@ -68,36 +68,39 @@ watch(processStatusData, (newPSD, oldPSD) => {
   if (newPSD.master !== 'online' && oldPSD.master === 'online') {
     if (isRestartSystem || !hasAlertMasterStop) {
       hasAlertMasterStop = true;
-      notification[getNotificationType(isRestartSystem++)]({
+      notification[getNotificationType(isRestartSystem)]({
         message: t('master_interrupt'),
         description: t('master_desc'),
         duration: 8,
         placement: 'bottomRight',
       });
+      isRestartSystem && isRestartSystem++;
     }
   }
 
   if (newPSD.cached !== 'online' && oldPSD.cached === 'online') {
     if (isRestartSystem || !hasAlertCacheDStop) {
       hasAlertCacheDStop = true;
-      notification[getNotificationType(isRestartSystem++)]({
+      notification[getNotificationType(isRestartSystem)]({
         message: t('cached_interrupt'),
         description: t('cached_desc'),
         duration: 8,
         placement: 'bottomRight',
       });
+      isRestartSystem && isRestartSystem++;
     }
   }
 
   if (newPSD.ledger !== 'online' && oldPSD.ledger === 'online') {
     if (isRestartSystem || !hasAlertLedgerStop) {
       hasAlertLedgerStop = true;
-      notification[getNotificationType(isRestartSystem++)]({
+      notification[getNotificationType(isRestartSystem)]({
         message: t('ledger_interrupt'),
         description: t('ledger_desc'),
         duration: 8,
         placement: 'bottomRight',
       });
+      isRestartSystem && isRestartSystem++;
     }
   }
 

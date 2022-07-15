@@ -46,6 +46,7 @@ function detectPlatform() {
   }
   return osName;
 }
+exports.detectPlatform = detectPlatform;
 
 function getPackageJson() {
   const packageJsonPath = path.join(process.cwd(), 'package.json');
@@ -55,6 +56,7 @@ function getPackageJson() {
   }
   return JSON.parse(fse.readFileSync(packageJsonPath));
 }
+exports.getPackageJson = getPackageJson;
 
 function hasSourceFor(packageJson, language) {
   return packageJson.kungfuBuild && packageJson.kungfuBuild[language];
@@ -129,8 +131,6 @@ const DefaultLibSiteURL_US = 'https://external.libkungfu.io';
 exports.DefaultLibSiteURL = process.env.GITHUB_ACTIONS
   ? DefaultLibSiteURL_US
   : DefaultLibSiteURL_CN;
-
-exports.detectPlatform = detectPlatform;
 
 exports.list = async (
   libSiteURL,
@@ -305,7 +305,6 @@ exports.configure = () => {
 exports.compile = () => {
   const packageJson = getPackageJson();
   const extensionName = packageJson.kungfuConfig.key;
-  const buildTargetDir = path.join('build', 'target');
   const outputDir = path.join('dist', extensionName);
 
   fse.ensureDirSync(outputDir);
@@ -331,30 +330,6 @@ exports.compile = () => {
 
   const packageJsonPath = path.join(process.cwd(), 'package.json');
   fse.copyFile(packageJsonPath, path.join(outputDir, 'package.json'));
-
-  const copyOutput = (pattern) => {
-    glob.sync(pattern).forEach((p) => {
-      fse.copyFile(p, path.join(outputDir, path.basename(p)));
-    });
-  };
-
-  if (fse.existsSync(buildTargetDir)) {
-    copyOutput(path.join(buildTargetDir, '*'));
-  }
-
-  if (fse.existsSync(kungfulibs)) {
-    copyOutput(path.join(kungfuLibDirPattern, 'lib', '*'));
-  }
-
-  if (fse.existsSync(pypackages)) {
-    fse.copySync(pypackages, path.join(outputDir, pypackages));
-  }
-
-  fse.copySync(
-    require.resolve('@kungfu-trader/kungfu-core/dist/kfc/drone.node'),
-    path.join(outputDir, `${packageJson.binary.module_name}.node`),
-    {},
-  );
 };
 
 exports.format = () => {

@@ -5,9 +5,8 @@ import {
 } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import {
   delayMilliSeconds,
-  getAvailDaemonList,
+  getAvailCliDaemonList,
   getProcessIdByKfLocation,
-  gruffSwitchKfLocation,
   kfLogger,
   removeJournal,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
@@ -45,7 +44,7 @@ export const mdTdStrategyDaemonObservable = () => {
   return new Observable<
     Record<KfCategoryTypes, KungfuApi.KfConfig[] | KungfuApi.KfDaemonLocation[]>
   >((observer) => {
-    Promise.all([getAllKfConfigOriginData(), getAvailDaemonList()]).then(
+    Promise.all([getAllKfConfigOriginData(), getAvailCliDaemonList()]).then(
       (
         allConfigs: [
           Record<KfCategoryTypes, KungfuApi.KfConfig[]>,
@@ -345,7 +344,7 @@ export const switchProcess = (
 ): void => {
   const status = proc.status !== '--';
   const startOrStop = status ? 'Stop' : 'Start';
-  const { category, group, name, value } = proc;
+  const { category, group, name, value, cwd, script } = proc;
 
   switch (category) {
     case 'system':
@@ -390,30 +389,6 @@ export const switchProcess = (
       }
       break;
     case 'daemon':
-      gruffSwitchKfLocation(
-        {
-          ...proc,
-          location_uid: 0,
-          mode: 'live',
-        },
-        !status,
-      )
-        .then(() => {
-          messageBoard.log('Please wait...', 2, (err) => {
-            if (err) {
-              console.error(err);
-            }
-          });
-        })
-        .catch((err) => {
-          const errMsg = parseSwtchKfLocationErrMessage(err.message);
-          messageBoard.log(errMsg, 2, (err) => {
-            if (err) {
-              console.error(err);
-            }
-          });
-        });
-      break;
     case 'md':
     case 'td':
     case 'strategy':
@@ -435,6 +410,8 @@ export const switchProcess = (
         name,
         value: JSON.stringify(value),
         status,
+        cwd,
+        script,
       })
         .then(() => {
           messageBoard.log('Please wait...', 2, (err) => {

@@ -178,7 +178,6 @@ export const getKungfuDataByDateRange = (
 };
 
 export const getKungfuHistoryData = (
-  watcher: KungfuApi.Watcher | null,
   date: string,
   dateType: HistoryDateEnum,
   tradingDataTypeName: KungfuApi.TradingDataTypeName | 'all',

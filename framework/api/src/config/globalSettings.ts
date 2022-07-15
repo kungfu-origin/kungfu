@@ -51,15 +51,15 @@ export const getKfGlobalSettings = (): KfSystemConfig[] => [
     config: [
       {
         key: 'rocket',
-        name: t('globalSettingConfig.open_rocket_model'),
+        name: t('globalSettingConfig.rocket_model'),
         tip: t('globalSettingConfig.rocket_model_desc'),
         default: false,
         type: 'bool',
       },
       {
-        key: 'bypassQuote',
-        name: t('globalSettingConfig.pass_quote'),
-        tip: t('globalSettingConfig.pass_quote_desc'),
+        key: 'bypassAccounting',
+        name: t('globalSettingConfig.bypass_accounting'),
+        tip: t('globalSettingConfig.bypass_accounting_desc'),
         default: false,
         type: 'bool',
       },

@@ -58,14 +58,18 @@ export const watcher = ((): KungfuApi.Watcher | null => {
   const bypassRestore = booleanProcessEnv(
     process.env.RELOAD_AFTER_CRASHED || process.env.BY_PASS_RESTORE || '',
   );
+
   const globalSetting = getKfGlobalSettingsValue();
-  const bypassQuote = globalSetting?.performance?.bypassQuote;
+  const bypassAccounting = globalSetting?.performance?.bypassAccounting;
+  console.log(globalSetting);
+  console.log('bypassRestore', bypassRestore);
+  console.log('bypassAccounting', bypassAccounting);
 
   return kf.watcher(
     KF_RUNTIME_DIR,
     kf.formatStringToHashHex(id),
-    bypassQuote,
-    bypassRestore,
+    !!bypassRestore,
+    !!bypassAccounting,
   );
 })();
 

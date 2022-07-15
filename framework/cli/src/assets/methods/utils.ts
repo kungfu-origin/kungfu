@@ -374,7 +374,11 @@ export const startAllExtDaemons = async () => {
   );
 };
 
-const dzxyUse = (ext: { install: (gs) => void }) => {
+interface KfExtModule {
+  install: (gs: unknown) => void;
+}
+
+const dzxyUse = (ext: KfExtModule) => {
   const { install } = ext;
   if (install) {
     install(globalState);
@@ -388,7 +392,9 @@ export const useAllExtScript = () => {
       const scriptPath = path.join(extPath, script);
       if (script && fse.pathExistsSync(scriptPath)) {
         dzxyUse(
-          (<Record<string, any>>__non_webpack_require__(scriptPath))['default'],
+          (<Record<string, KfExtModule>>__non_webpack_require__(scriptPath))[
+            'default'
+          ],
         );
       }
     });
