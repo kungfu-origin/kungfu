@@ -8,8 +8,8 @@ module.exports = (...argv) => {
     command &&
       prog.commands[command.name](command.args, function (err) {
         if (err) {
-          console.log(err.message);
-          return;
+          console.error(err);
+          process.exit(-1);
         }
         process.nextTick(run);
       });
