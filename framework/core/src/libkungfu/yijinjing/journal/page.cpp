@@ -39,14 +39,16 @@ page_ptr page::load(const data::location_ptr &location, uint32_t dest_id, uint32
                     bool lazy) {
   uint32_t page_size = find_page_size(location, dest_id);
   std::string path = get_page_path(location, dest_id, page_id);
-
   uintptr_t address = os::load_mmap_buffer(path, page_size, is_writing, lazy);
+
+  // SPDLOG_TRACE("load page {}/{:08x}.{}.journal", location->uname, dest_id, page_id);
+  // SPDLOG_TRACE("page_size {}, address {}", page_size, address);
+
   if (address < 0) {
     throw journal_error("unable to load page for " + path);
   }
 
   auto header = reinterpret_cast<page_header *>(address);
-
   if (header->last_frame_position == 0) {
     header->version = __JOURNAL_VERSION__;
     header->page_header_length = sizeof(page_header);

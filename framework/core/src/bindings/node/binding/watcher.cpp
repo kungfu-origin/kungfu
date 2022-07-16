@@ -133,7 +133,7 @@ Watcher::Watcher(const Napi::CallbackInfo &info)
     if (saved_location->category == longfist::enums::category::SYSTEM) {
       continue;
     }
-    add_location(now(), saved_location);
+    // add_location(now(), saved_location);
     RestoreState(saved_location, today, INT64_MAX, sync_schema);
   }
   RestoreState(ledger_home_location_, today, INT64_MAX, sync_schema);
