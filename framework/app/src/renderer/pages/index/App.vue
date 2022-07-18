@@ -9,6 +9,7 @@ import {
   removeLoadingMask,
   useIpcListener,
   handleOpenLogviewByFile,
+  markClearDB,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import {
   playSound,

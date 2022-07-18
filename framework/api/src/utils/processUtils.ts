@@ -704,7 +704,7 @@ export const startMd = async (sourceId: string): Promise<Proc | void> => {
 //启动td
 export const startTd = async (accountId: string): Promise<Proc | void> => {
   const extDirs = await flattenExtensionModuleDirs(EXTENSION_DIRS);
-  const { source, id } = accountId.parseSourceAccountId();
+  const { source, id } = (accountId || '').parseSourceAccountId();
   const args = buildArgs(
     `-X "${extDirs
       .map((dir) => dealSpaceInPath(path.dirname(dir)))

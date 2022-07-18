@@ -14,7 +14,6 @@ import {
 import {
   getInstrumentTypeData,
   getProcessIdByKfLocation,
-  getTradingDate,
   kfLogger,
   removeJournal,
   removeDB,
@@ -132,7 +131,7 @@ export const useTableSearchKeyword = <T>(
 
 const removeJournalBeforeStartAll = (): Promise<void> => {
   const needClearJournalStr = localStorage.getItem('needClearJournal');
-  const needClearJournal = needClearJournalStr && +needClearJournalStr;
+  const needClearJournal = !!(needClearJournalStr && +needClearJournalStr);
 
   kfLogger.info('needClearJournal: ', needClearJournal);
 
@@ -147,7 +146,7 @@ const removeJournalBeforeStartAll = (): Promise<void> => {
 
 const removeDBBeforeStartAll = (): Promise<void> => {
   const needClearDBStr = localStorage.getItem('needClearDB');
-  const needClearDB = needClearDBStr && +needClearDBStr;
+  const needClearDB = !!(needClearDBStr && +needClearDBStr);
 
   kfLogger.info('needClearDB: ', needClearDB);
 

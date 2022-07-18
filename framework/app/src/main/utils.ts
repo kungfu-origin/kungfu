@@ -1,5 +1,4 @@
 import os from 'os';
-import fse from 'fs-extra';
 import { app, BrowserWindow, dialog, nativeImage, shell } from 'electron';
 import {
   reqRecordBeforeQuit,

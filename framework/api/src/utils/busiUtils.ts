@@ -743,24 +743,6 @@ export const hidePasswordByLogger = (config: string) => {
   return JSON.stringify(configCopy);
 };
 
-export const getTradingDate = (today = true): string => {
-  if (today) {
-    return dayjs().format('YYYY-MM-DD');
-  }
-
-  const currentTimestamp = dayjs().valueOf();
-  const tradingDayTimestamp = +dayjs()
-    .set('hour', 15)
-    .set('minute', 30)
-    .valueOf();
-
-  if (currentTimestamp > tradingDayTimestamp) {
-    return dayjs().add(1, 'day').format('YYYY-MM-DD');
-  } else {
-    return dayjs().format('YYYY-MM-DD');
-  }
-};
-
 export const removeJournal = (targetFolder: string): Promise<void> => {
   return removeTargetFilesInFolder(targetFolder, ['.journal']);
 };
