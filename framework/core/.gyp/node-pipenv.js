@@ -6,8 +6,6 @@ const cli = require('sywac')
   .help('--help')
   .version('--version');
 
-module.exports = cli;
-
 async function main() {
   const argv = await cli.parseAndExit();
 
@@ -23,5 +21,8 @@ async function main() {
 
   run('pipenv', pipenv_args);
 }
+
+module.exports.cli = cli;
+module.exports.main = main;
 
 if (require.main === module) main().catch(exitOnError);

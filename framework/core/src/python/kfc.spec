@@ -43,7 +43,9 @@ build_cpp_dir = abspath(make_path(build_dir, "src"))
 build_output_dir = make_path(build_dir, os.environ["CMAKE_BUILD_TYPE"])
 
 path_env = "PYI_PYTHONPATH"
-extra_python_paths = os.environ[path_env].split(os.pathsep) if path_env in os.environ else []
+extra_python_paths = (
+    os.environ[path_env].split(os.pathsep) if path_env in os.environ else []
+)
 
 ###############################################################################
 
