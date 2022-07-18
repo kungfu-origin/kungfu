@@ -178,6 +178,13 @@ void bind_enums(py::module &m) {
       .export_values()
       .def("__eq__", [](const BrokerState &a, int b) { return static_cast<int>(a) == b; });
 
+  py::enum_<HistoryDataType>(m_enums, "HistoryDataType", py::arithmetic())
+      .value("Normal", HistoryDataType::Normal)
+      .value("PageEnd", HistoryDataType::PageEnd)
+      .value("TotalEnd", HistoryDataType::TotalEnd)
+      .export_values()
+      .def("__eq__", [](const HistoryDataType &a, int b) { return static_cast<int>(a) == b; });
+
   py::enum_<StrategyState>(m_enums, "StrategyState", py::arithmetic())
       .value("Normal", StrategyState::Normal)
       .value("Warn", StrategyState::Warn)

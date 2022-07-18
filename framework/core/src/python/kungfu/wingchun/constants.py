@@ -34,6 +34,9 @@ CommissionRateMode = lf.enums.CommissionRateMode
 MarketType = lf.enums.MarketType
 SubscribeDataType = lf.enums.SubscribeDataType
 SubscribeInstrumentType = lf.enums.SubscribeInstrumentType
+StrategyState = lf.enums.StrategyState
+HistoryDataType = lf.enums.HistoryDataType
+
 AllFinalOrderStatus = [
     int(OrderStatus.Filled),
     int(OrderStatus.Error),
