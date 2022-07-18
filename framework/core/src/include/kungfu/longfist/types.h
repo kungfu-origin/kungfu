@@ -78,10 +78,10 @@ KF_DEFINE_PACK_TYPE(                                               //
     StrategyStateUpdate, 20002, PK(state), TIMESTAMP(update_time), //
     (StrategyState, state),                                        //
     (int64_t, update_time),                                        //
-    (kungfu::array<char, JSON_STR_LEN>, info_a),                                         //
-    (kungfu::array<char, JSON_STR_LEN>, info_b),                                         //
-    (kungfu::array<char, JSON_STR_LEN>, info_c),                                         //
-    (kungfu::array<char, JSON_STR_LEN>, value)                                           //
+    (kungfu::array<char, JSON_STR_LEN>, info_a),                   //
+    (kungfu::array<char, JSON_STR_LEN>, info_b),                   //
+    (kungfu::array<char, JSON_STR_LEN>, info_c),                   //
+    (kungfu::array<char, JSON_STR_LEN>, value)                     //
 );
 
 KF_DEFINE_PACK_TYPE(                                             //
