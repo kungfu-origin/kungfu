@@ -228,7 +228,8 @@ private:
   std::enable_if_t<std::is_same_v<TradingData, longfist::types::OrderInput>> UpdateBook(uint32_t source, uint32_t dest,
                                                                                         const TradingData &data) {
     bookkeeper_.on_order_input(now(), source, dest, data);
-    update_ledger(now(), source, dest, data);
+    state<kungfu::longfist::types::OrderInput> cache_state_order_input(source, dest, now(), data);
+    trading_bank_ << cache_state_order_input;
   }
 
   template <typename TradingData>
@@ -306,7 +307,7 @@ private:
 
       auto strategy_location = ExtractLocation(info, 2, get_locator());
 
-      if (not strategy_location or not has_location(strategy_location->uid)) {
+      if (not strategy_location) {
         return Napi::BigInt::New(info.Env(), std::uint64_t(0));
       }
 
@@ -320,7 +321,7 @@ private:
         return Napi::BigInt::New(info.Env(), id);
       }
 
-      Channel request = {};
+      ChannelRequest request = {};
       request.dest_id = strategy_location->uid;
       request.source_id = ledger_home_location_->uid;
       master_cmd_writer->write(trigger_time, request);
