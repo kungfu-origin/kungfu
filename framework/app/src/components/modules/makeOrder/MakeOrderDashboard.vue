@@ -79,6 +79,7 @@ const {
   currentPosition,
   currentResidueMoney,
   currentResiduePosVolume,
+  currentPrice,
   currentTradeAmount,
   currentAvailMoney,
   currentAvailPosVolume,
@@ -111,6 +112,7 @@ const configSettings = computed(() => {
 const isShowConfirmModal = ref<boolean>(false);
 const curOrderVolume = ref<number>(0);
 const curOrderType = ref<InstrumentTypeEnum>(InstrumentTypeEnum.unknown);
+const currentPercent = ref<number>(0);
 
 const makeOrderData = computed(() => {
   if (!instrumentResolved.value) {
@@ -529,6 +531,53 @@ async function handleOpenTradingTaskConfigModal(
     }
   }
 }
+
+const dealStringToNumber = (tar: string) =>
+  Number.isNaN(Number(tar)) ? 0 : Number(tar);
+
+let lastPercentSetVolume = 0;
+const handlePercentChange = (target: number) => {
+  const { side, offset } = formState.value;
+
+  const curOffset = getResolvedOffset(
+    offset,
+    side,
+    instrumentResolved.value?.instrumentType,
+  );
+
+  const targetPercent = target / 100;
+
+  let targetVolume;
+  if (curOffset === OffsetEnum.Open) {
+    const availMoney = dealStringToNumber(currentAvailMoney.value);
+    const allVolume = availMoney / currentPrice.value;
+    targetVolume = allVolume * targetPercent;
+  } else if (curOffset === OffsetEnum.Close) {
+    const availPosVolume = dealStringToNumber(currentAvailPosVolume.value);
+    targetVolume = availPosVolume * targetPercent;
+  } else if (curOffset === OffsetEnum.CloseToday) {
+    const availPosVolume = currentPosition.value?.volume;
+    targetVolume = Number(availPosVolume) * targetPercent;
+  } else if (curOffset === OffsetEnum.CloseYest) {
+    const availPosVolume = currentPosition.value?.yesterday_volume;
+    targetVolume = Number(availPosVolume) * targetPercent;
+  }
+
+  formState.value.volume = ~~targetVolume;
+  if (targetVolume) {
+    currentPercent.value = target;
+    lastPercentSetVolume = ~~targetVolume;
+  }
+};
+
+watch(
+  () => formState.value.volume,
+  (newVal) => {
+    if (newVal !== lastPercentSetVolume) {
+      currentPercent.value = 0;
+    }
+  },
+);
 </script>
 
 <template>
@@ -565,6 +614,23 @@ async function handleOpenTradingTaskConfigModal(
               :label-col="5"
               :wrapper-col="14"
             ></KfConfigSettingsForm>
+            <div class="percent-group__wrap">
+              <a-button
+                v-for="percent in [25, 50, 75, 100]"
+                :class="{
+                  'percent-button': true,
+                  'percent-button-active': currentPercent === percent,
+                }"
+                :key="percent"
+                size="small"
+                ghost
+                @click="
+                  currentPercent !== percent && handlePercentChange(percent)
+                "
+              >
+                {{ `${percent}%` }}
+              </a-button>
+            </div>
             <template v-if="isAccountOrInstrumentConfirmed">
               <div class="make-order-position">
                 <div class="position-label">
@@ -669,6 +735,21 @@ async function handleOpenTradingTaskConfigModal(
         .ant-form-item-explain,
         .ant-form-item-extra {
           min-height: unset;
+        }
+      }
+
+      .percent-group__wrap {
+        margin: 0 0 10px 10px;
+
+        .percent-button {
+          margin: 0 5px 5px 0;
+          color: @border-color-base;
+          border-color: @border-color-base;
+        }
+
+        .percent-button-active {
+          color: @primary-color;
+          border-color: @primary-color;
         }
       }
     }
