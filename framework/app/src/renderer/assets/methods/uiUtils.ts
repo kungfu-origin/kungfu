@@ -17,7 +17,7 @@ import {
   getTradingDate,
   kfLogger,
   removeJournal,
-  // removeDB,
+  removeDB,
   getAvailDaemonList,
   loopToRunProcess,
   resolveInstrumentValue,
@@ -130,47 +130,38 @@ export const useTableSearchKeyword = <T>(
   };
 };
 
-const removeJournalBeforeStartAll = (
-  currentTradingDate: string,
-): Promise<void> => {
-  const clearJournalDateFromLocal = localStorage.getItem(
-    'clearJournalTradingDate',
-  );
+const removeJournalBeforeStartAll = (): Promise<void> => {
+  const needClearJournalStr = localStorage.getItem('needClearJournal');
+  const needClearJournal = needClearJournalStr && +needClearJournalStr;
 
-  kfLogger.info(
-    'Lastest Clear Journal Trading Date: ',
-    clearJournalDateFromLocal || '',
-  );
+  kfLogger.info('needClearJournal: ', needClearJournal);
 
-  if (currentTradingDate !== clearJournalDateFromLocal) {
-    localStorage.setItem('clearJournalTradingDate', currentTradingDate);
-    kfLogger.info('Clear Journal Trading Date: ', currentTradingDate);
+  if (needClearJournal) {
+    localStorage.setItem('needClearJournal', '0');
+    kfLogger.info('Clear Journal Done', needClearJournal);
     return removeJournal(KF_HOME);
   } else {
     return Promise.resolve();
   }
 };
 
-// const removeDBBeforeStartAll = (currentTradingDate: string): Promise<void> => {
-//   const clearDBDateFromLocal = localStorage.getItem('clearDBTradingDate');
+const removeDBBeforeStartAll = (): Promise<void> => {
+  const needClearDBStr = localStorage.getItem('needClearDB');
+  const needClearDB = needClearDBStr && +needClearDBStr;
 
-//   kfLogger.info('Lastest Clear DB Trading Date: ', clearDBDateFromLocal || '');
+  kfLogger.info('needClearDB: ', needClearDB);
 
-//   if (currentTradingDate !== clearDBDateFromLocal) {
-//     localStorage.setItem('clearDBTradingDate', currentTradingDate);
-//     kfLogger.info('Clear DB Trading Date: ', currentTradingDate);
-//     return removeDB(KF_HOME);
-//   } else {
-//     return Promise.resolve();
-//   }
-// };
+  if (needClearDB) {
+    localStorage.setItem('needClearDB', '0');
+    kfLogger.info('Clear DB Done');
+    return removeDB(KF_HOME);
+  } else {
+    return Promise.resolve();
+  }
+};
 
 export const preStartAll = async (): Promise<(void | Proc)[]> => {
-  const currentTradingDate = getTradingDate();
-  return Promise.all([
-    removeJournalBeforeStartAll(currentTradingDate),
-    // removeDBBeforeStartAll(currentTradingDate),
-  ]);
+  return Promise.all([removeJournalBeforeStartAll(), removeDBBeforeStartAll()]);
 };
 
 export const postStartAll = async (): Promise<(void | Proc)[]> => {
@@ -307,12 +298,12 @@ export const useIpcListener = (): void => {
 };
 
 export const markClearJournal = (): void => {
-  localStorage.setItem('clearJournalTradingDate', '');
+  localStorage.setItem('needClearJournal', '');
   messagePrompt().success(t('clear', { content: 'journal' }));
 };
 
 export const markClearDB = (): void => {
-  localStorage.setItem('clearDBTradingDate', '');
+  localStorage.setItem('needClearDB', '1');
   messagePrompt().success(t('clear', { content: 'DB' }));
 };
 

@@ -58,6 +58,7 @@ declare namespace KungfuApi {
     KfModeEnum,
     KfModeTypes,
     OrderActionFlagEnum,
+    KfExtConfigTypes,
   } from './enums';
   import { Dayjs } from 'dayjs';
 
@@ -144,8 +145,6 @@ declare namespace KungfuApi {
     primary?: boolean;
     options?: KfSelectOption[];
     data?: KfSelectOption[];
-    args?: Array<{ key: string | number; value: string | number }>; // process
-    target?: string; // process
     tip?: string;
   }
 

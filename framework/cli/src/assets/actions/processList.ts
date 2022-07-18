@@ -8,7 +8,6 @@ import {
   getAvailCliDaemonList,
   getProcessIdByKfLocation,
   kfLogger,
-  removeJournal,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import {
   pm2KillGodDaemon,
@@ -446,16 +445,14 @@ function preSwitchMain(
 ) {
   if (!status) {
     loading.load(`Start Archive, Please wait...`);
-    return removeJournal(KF_HOME)
-      .then(() => startArchiveMakeTask())
-      .then(() => {
-        loading.stop();
-        return message.log(`Archive success`, 2, (err) => {
-          if (err) {
-            console.error(err);
-          }
-        });
+    return startArchiveMakeTask().then(() => {
+      loading.stop();
+      return message.log(`Archive success`, 2, (err) => {
+        if (err) {
+          console.error(err);
+        }
       });
+    });
   }
 
   return Promise.resolve(true);
