@@ -17,6 +17,7 @@ static constexpr int DATE_LEN = 9;
 static constexpr int EXCHANGE_ID_LEN = 16;
 
 static constexpr int ERROR_MSG_LEN = 128;
+static constexpr int JSON_STR_LEN = 512;
 
 KF_DEFINE_MARK_TYPE(PageEnd, 10000);
 KF_DEFINE_MARK_TYPE(SessionStart, 10001);
@@ -73,14 +74,14 @@ KF_DEFINE_DATA_TYPE(                                      //
     (std::string, value)                                  //
 );
 
-KF_DEFINE_DATA_TYPE(                                               //
+KF_DEFINE_PACK_TYPE(                                               //
     StrategyStateUpdate, 20002, PK(state), TIMESTAMP(update_time), //
     (StrategyState, state),                                        //
     (int64_t, update_time),                                        //
-    (std::string, info_a),                                         //
-    (std::string, info_b),                                         //
-    (std::string, info_c),                                         //
-    (std::string, value)                                           //
+    (kungfu::array<char, JSON_STR_LEN>, info_a),                                         //
+    (kungfu::array<char, JSON_STR_LEN>, info_b),                                         //
+    (kungfu::array<char, JSON_STR_LEN>, info_c),                                         //
+    (kungfu::array<char, JSON_STR_LEN>, value)                                           //
 );
 
 KF_DEFINE_PACK_TYPE(                                             //
