@@ -831,6 +831,16 @@ declare namespace KungfuApi {
     mode: ScheduleTaskMode;
     processId: string;
   }
+
+  export interface ScheduleTaskData {
+    active?: boolean;
+    tasks?: Array<ScheduleTask>;
+  }
+
+  export interface ScheduleProcessData {
+    active?: boolean;
+    processIds?: Array<string>;
+  }
 }
 
 declare module '@kungfu-trader/kungfu-core' {
@@ -891,128 +901,130 @@ declare namespace Code {
   }
 }
 
-interface ResizeEvent {
-  tag: 'resize';
-}
+declare namespace KfEvent {
+  export interface ResizeEvent {
+    tag: 'resize';
+  }
 
-interface ProcessStatusChangeEvent {
-  tag: 'processStatus';
-  name: string;
-  status: Pm2ProcessStatusTypes;
-}
+  export interface ProcessStatusChangeEvent {
+    tag: 'processStatus';
+    name: string;
+    status: Pm2ProcessStatusTypes;
+  }
 
-interface MainProcessEvent {
-  tag: 'main';
-  name: string;
-}
+  export interface MainProcessEvent {
+    tag: 'main';
+    name: string;
+  }
 
-interface TradingDataUpdateEvent {
-  tag: 'tradingDataUpdate';
-  tradingDataType: TradingDataTypeName;
-}
+  export interface TradingDataUpdateEvent {
+    tag: 'tradingDataUpdate';
+    tradingDataType: TradingDataTypeName;
+  }
 
-interface ExportTradingDataEvent {
-  tag: 'export';
-  tradingDataType: TradingDataTypeName | 'all';
-  currentKfLocation?: KfLocation | KfConfig | undefined;
-}
+  export interface ExportTradingDataEvent {
+    tag: 'export';
+    tradingDataType: TradingDataTypeName | 'all';
+    currentKfLocation?: KfLocation | KfConfig | undefined;
+  }
 
-interface TriggeOrderBook {
-  tag: 'orderbook';
-  instrument: InstrumentResolved;
-}
+  export interface TriggeOrderBook {
+    tag: 'orderbook';
+    instrument: InstrumentResolved;
+  }
 
-interface TriggerOrderBookUpdate {
-  tag: 'orderBookUpdate';
-  orderInput: InstrumentResolved | ExtraOrderInput;
-}
+  export interface TriggerOrderBookUpdate {
+    tag: 'orderBookUpdate';
+    orderInput: InstrumentResolved | ExtraOrderInput;
+  }
 
-interface TriggerMakeOrder {
-  tag: 'makeOrder';
-  orderInput: InstrumentResolved | ExtraOrderInput;
-}
+  export interface TriggerMakeOrder {
+    tag: 'makeOrder';
+    orderInput: InstrumentResolved | ExtraOrderInput;
+  }
 
-interface TriggerUpdateTdGroup {
-  tag: 'update:tdGroup';
-  tdGroups: KungfuApi.KfExtraLocation[];
-}
+  export interface TriggerUpdateTdGroup {
+    tag: 'update:tdGroup';
+    tdGroups: KungfuApi.KfExtraLocation[];
+  }
 
-interface TriggerUpdateTd {
-  tag: 'update:td';
-  tds: KungfuApi.KfConfig[];
-}
+  export interface TriggerUpdateTd {
+    tag: 'update:td';
+    tds: KungfuApi.KfConfig[];
+  }
 
-interface TriggerUpdateRiskSetting {
-  tag: 'update:riskSetting';
-  riskSettings: RiskSetting[];
-}
+  export interface TriggerUpdateRiskSetting {
+    tag: 'update:riskSetting';
+    riskSettings: RiskSetting[];
+  }
 
-interface TriggerUpdateMd {
-  tag: 'update:md';
-  mds: KungfuApi.KfConfig[];
-}
+  export interface TriggerUpdateMd {
+    tag: 'update:md';
+    mds: KungfuApi.KfConfig[];
+  }
 
-interface TriggerUpdateStrategy {
-  tag: 'update:strategy';
-  strategys: KungfuApi.KfConfig[];
-}
+  export interface TriggerUpdateStrategy {
+    tag: 'update:strategy';
+    strategys: KungfuApi.KfConfig[];
+  }
 
-interface TriggerUpdateExtConfigs {
-  tag: 'update:extConfigs';
-  extConfigs: KungfuApi.KfExtConfigs;
-}
+  export interface TriggerUpdateExtConfigs {
+    tag: 'update:extConfigs';
+    extConfigs: KungfuApi.KfExtConfigs;
+  }
 
-interface TriggerAddBoard {
-  tag: 'addBoard';
-  boardId: number;
-}
+  export interface TriggerAddBoard {
+    tag: 'addBoard';
+    boardId: number;
+  }
 
-interface TriggerCurrentConfigModalReady {
-  tag: 'ready:currentConfigModal';
-  category: string;
-  extKey: string;
-  initValue: Record<string, KungfuApi.KfConfigValue>;
-}
+  export interface TriggerCurrentConfigModalReady {
+    tag: 'ready:currentConfigModal';
+    category: string;
+    extKey: string;
+    initValue: Record<string, KungfuApi.KfConfigValue>;
+  }
 
-interface TriggerCurrentConfigModalInput {
-  tag: 'input:currentConfigModal';
-  category: string;
-  extKey: string;
-  formState: KungfuApi.SetKfConfigPayload;
-}
+  export interface TriggerCurrentConfigModalInput {
+    tag: 'input:currentConfigModal';
+    category: string;
+    extKey: string;
+    formState: KungfuApi.SetKfConfigPayload;
+  }
 
-interface TriggerOpenGlobalSettingModal {
-  tag: 'open:globalSetting';
-}
+  export interface TriggerOpenGlobalSettingModal {
+    tag: 'open:globalSetting';
+  }
 
-interface TriggerCloseGlobalSettingModal {
-  tag: 'close:globalSetting';
-}
+  export interface TriggerCloseGlobalSettingModal {
+    tag: 'close:globalSetting';
+  }
 
-interface TriggerSetCurrentConfigModalConfigSettings {
-  tag: 'update:currentConfigModalConfigSettings';
-  configSettings: KungfuApi.KfConfigItem[];
-}
+  export interface TriggerSetCurrentConfigModalConfigSettings {
+    tag: 'update:currentConfigModalConfigSettings';
+    configSettings: KungfuApi.KfConfigItem[];
+  }
 
-type KfBusEvent =
-  | ResizeEvent
-  | ProcessStatusChangeEvent
-  | MainProcessEvent
-  | TradingDataUpdateEvent
-  | TriggeOrderBook
-  | TriggerOrderBookUpdate
-  | TriggerMakeOrder
-  | TriggerUpdateTdGroup
-  | TriggerUpdateTd
-  | TriggerUpdateRiskSetting
-  | TriggerUpdateMd
-  | TriggerUpdateStrategy
-  | TriggerUpdateExtConfigs
-  | TriggerAddBoard
-  | ExportTradingDataEvent
-  | TriggerConfigModalFormChanged
-  | TriggerCurrentConfigModalReady
-  | TriggerCurrentConfigModalInput
-  | TriggerOpenGlobalSettingModal
-  | TriggerCloseGlobalSettingModal
-  | TriggerSetCurrentConfigModalConfigSettings;
+  export type KfBusEvent =
+    | ResizeEvent
+    | ProcessStatusChangeEvent
+    | MainProcessEvent
+    | TradingDataUpdateEvent
+    | TriggeOrderBook
+    | TriggerOrderBookUpdate
+    | TriggerMakeOrder
+    | TriggerUpdateTdGroup
+    | TriggerUpdateTd
+    | TriggerUpdateRiskSetting
+    | TriggerUpdateMd
+    | TriggerUpdateStrategy
+    | TriggerUpdateExtConfigs
+    | TriggerAddBoard
+    | ExportTradingDataEvent
+    | TriggerConfigModalFormChanged
+    | TriggerCurrentConfigModalReady
+    | TriggerCurrentConfigModalInput
+    | TriggerOpenGlobalSettingModal
+    | TriggerCloseGlobalSettingModal
+    | TriggerSetCurrentConfigModalConfigSettings;
+}

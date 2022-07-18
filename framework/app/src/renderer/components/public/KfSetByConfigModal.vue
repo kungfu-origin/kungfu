@@ -93,20 +93,25 @@ onMounted(() => {
   });
 
   if (app?.proxy) {
-    const subscription = app?.proxy.$globalBus.subscribe((data: KfBusEvent) => {
-      if (data.tag === 'update:currentConfigModalConfigSettings') {
-        if (data.configSettings) {
-          nextTick().then(() => {
-            formState.value = initFormStateByConfig(data.configSettings || [], {
-              ...toRaw(props.payload.initValue),
-              ...toRaw(formState.value),
-            });
+    const subscription = app?.proxy.$globalBus.subscribe(
+      (data: KfEvent.KfBusEvent) => {
+        if (data.tag === 'update:currentConfigModalConfigSettings') {
+          if (data.configSettings) {
+            nextTick().then(() => {
+              formState.value = initFormStateByConfig(
+                data.configSettings || [],
+                {
+                  ...toRaw(props.payload.initValue),
+                  ...toRaw(formState.value),
+                },
+              );
 
-            configSettings.value = data.configSettings;
-          });
+              configSettings.value = data.configSettings;
+            });
+          }
         }
-      }
-    });
+      },
+    );
 
     onBeforeUnmount(() => {
       subscription.unsubscribe();

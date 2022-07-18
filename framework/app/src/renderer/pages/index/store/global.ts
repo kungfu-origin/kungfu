@@ -8,10 +8,12 @@ import {
   getIdByKfLocation,
   getKfExtensionConfig,
   getKfUIExtensionConfig,
+  getProcessIdsFromScheduleTasks,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import {
   getAllKfConfigOriginData,
   getAllRiskSettingList,
+  getScheduleTasks,
   getSubscribedInstruments,
   getTdGroups,
 } from '@kungfu-trader/kungfu-js-api/actions';
@@ -37,6 +39,7 @@ interface GlobalState {
   mdList: KungfuApi.KfConfig[];
   strategyList: KungfuApi.KfConfig[];
 
+  scheduleProcessData: KungfuApi.ScheduleProcessData;
   processStatusData: Pm2ProcessStatusData;
   processStatusWithDetail: Pm2ProcessStatusDetailData;
 
@@ -72,6 +75,7 @@ export const useGlobalStore = defineStore('global', {
       mdList: [],
       strategyList: [],
 
+      scheduleProcessData: {},
       processStatusData: {},
       processStatusWithDetail: {},
 
@@ -132,6 +136,17 @@ export const useGlobalStore = defineStore('global', {
 
     setAssets(assets: Record<string, KungfuApi.Asset>) {
       this.assets = assets;
+    },
+
+    setScheduleProcessData() {
+      getScheduleTasks().then(
+        (scheduleTaskData: KungfuApi.ScheduleTaskData) => {
+          this.scheduleProcessData = {
+            active: scheduleTaskData.active,
+            processIds: getProcessIdsFromScheduleTasks(scheduleTaskData),
+          };
+        },
+      );
     },
 
     setProcessStatus(processStatus: Pm2ProcessStatusData) {

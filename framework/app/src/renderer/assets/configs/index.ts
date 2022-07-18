@@ -94,7 +94,7 @@ export const coreForScheduleTasksOptions: Array<{
 }> = [
   {
     label: t('globalSettingConfig.master'),
-    value: 'core',
+    value: 'system',
     category: 'system',
   },
 ];

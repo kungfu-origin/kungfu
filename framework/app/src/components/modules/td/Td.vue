@@ -17,6 +17,7 @@ import {
   FileTextOutlined,
   SettingOutlined,
   DeleteOutlined,
+  ClockCircleOutlined,
 } from '@ant-design/icons-vue';
 
 import { categoryRegisterConfig, getColumns } from './config';
@@ -45,6 +46,7 @@ import {
   getIfProcessRunning,
   getIfProcessStopping,
   getProcessIdByKfLocation,
+  isTimedProcess,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import KfBlinkNum from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfBlinkNum.vue';
 import {
@@ -56,6 +58,7 @@ import SetTdGroupModal from './SetTdGroupModal.vue';
 import { useGlobalStore } from '@kungfu-trader/kungfu-app/src/renderer/pages/index/store/global';
 import { messagePrompt } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
+import { storeToRefs } from 'pinia';
 
 const { t } = VueI18n.global;
 const { success, error } = messagePrompt();
@@ -151,6 +154,7 @@ const columns = getColumns((dataIndex) => {
 });
 
 const { setTdGroups } = useGlobalStore();
+const { scheduleProcessData } = storeToRefs(useGlobalStore());
 
 onMounted(() => {
   if (app?.proxy) {
@@ -362,6 +366,10 @@ function handleRemoveTd(item: KungfuApi.KfConfig) {
               <span>
                 {{ record.name }}
               </span>
+              <ClockCircleOutlined
+                v-if="isTimedProcess(scheduleProcessData, record)"
+                style="font-size: 14px; margin-left: 5px"
+              />
             </div>
           </template>
           <template

@@ -35,6 +35,8 @@ import { KF_HOME } from '@kungfu-trader/kungfu-js-api/config/pathConfig';
 import {
   dealStatus,
   getCategoryName,
+  getProcessNamePrefix,
+  scheduleProcessData,
   startAllExtDaemons,
 } from '../methods/utils';
 import { globalState } from '../actions/globalState';
@@ -196,9 +198,10 @@ export const processListObservable = () =>
 
       const mdList: ProcessListItem[] = md.map((item) => {
         const processId = getProcessIdByKfLocation(item);
+        const prefix = getProcessNamePrefix(scheduleProcessData, item);
         return {
           processId,
-          processName: processId,
+          processName: prefix + processId,
           typeName: getCategoryName(item.category),
           category: item.category,
           group: item.group,
@@ -216,9 +219,10 @@ export const processListObservable = () =>
 
       const tdList: ProcessListItem[] = td.map((item) => {
         const processId = getProcessIdByKfLocation(item);
+        const prefix = getProcessNamePrefix(scheduleProcessData, item);
         return {
           processId,
-          processName: processId,
+          processName: prefix + processId,
           typeName: getCategoryName(item.category),
           category: item.category,
           group: item.group,
@@ -236,9 +240,10 @@ export const processListObservable = () =>
 
       const strategyList: ProcessListItem[] = strategy.map((item) => {
         const processId = getProcessIdByKfLocation(item);
+        const prefix = getProcessNamePrefix(scheduleProcessData, item);
         return {
           processId,
-          processName: processId,
+          processName: prefix + processId,
           typeName: getCategoryName(item.category),
           category: item.category,
           group: item.group,
@@ -252,9 +257,10 @@ export const processListObservable = () =>
 
       const daemonList: ProcessListItem[] = daemon.map((item) => {
         const processId = getProcessIdByKfLocation(item);
+        const prefix = getProcessNamePrefix(scheduleProcessData, item);
         return {
           processId,
-          processName: dealProcessName(processId) || processId,
+          processName: prefix + dealProcessName(processId) || processId,
           typeName: getCategoryName(item.category as KfCategoryTypes),
           category: item.category,
           group: item.group,
@@ -266,6 +272,15 @@ export const processListObservable = () =>
           script: item.script,
           cwd: item.cwd,
         };
+      });
+
+      const masterPrefix = getProcessNamePrefix(scheduleProcessData, {
+        category: 'system',
+        group: 'master',
+        name: 'master',
+        mode: 'live',
+        location_uid: 0,
+        value: '',
       });
 
       return [
@@ -283,7 +298,7 @@ export const processListObservable = () =>
         },
         {
           processId: 'master',
-          processName: colors.bold('MASTER'),
+          processName: colors.bold(masterPrefix + 'MASTER'),
           typeName: colors.bgMagenta('Sys'),
           category: 'system',
           group: 'master',

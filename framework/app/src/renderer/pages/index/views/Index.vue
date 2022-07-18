@@ -39,7 +39,7 @@ export default defineComponent({
     const addBoardTargetBoardId = ref<number>(-1);
     const { saveBoardsMap } = usePreStartAndQuitApp();
 
-    const subscription = globalBus.subscribe((data: KfBusEvent) => {
+    const subscription = globalBus.subscribe((data: KfEvent.KfBusEvent) => {
       if (data.tag === 'addBoard') {
         addBoardModalVisible.value = true;
         addBoardTargetBoardId.value = data.boardId;

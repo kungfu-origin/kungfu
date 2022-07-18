@@ -301,7 +301,7 @@ export const useIpcListener = (): void => {
       app?.proxy.$globalBus.next({
         tag: 'main',
         name: args,
-      } as MainProcessEvent);
+      } as KfEvent.MainProcessEvent);
     }
   });
 };
@@ -438,7 +438,7 @@ export const useDownloadHistoryTradingData = (): {
         tag: 'export',
         tradingDataType,
         currentKfLocation,
-      } as ExportTradingDataEvent);
+      } as KfEvent.ExportTradingDataEvent);
     }
   };
 

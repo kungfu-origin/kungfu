@@ -8,7 +8,11 @@ import {
   processListObservable,
   switchProcess,
 } from '../assets/actions/processList';
-import { dealMemory, parseToString } from '../assets/methods/utils';
+import {
+  dealMemory,
+  parseToString,
+  setScheduleProcessData,
+} from '../assets/methods/utils';
 import { Log } from '../assets/actions/log';
 import { initBusEvent } from '../assets/actions/busEvent';
 import {
@@ -212,6 +216,7 @@ export class MonitorDashboard extends Dashboard {
     });
 
     initBusEvent(this);
+    setScheduleProcessData();
   }
 
   _setLogItems() {

@@ -36,7 +36,7 @@ const sidebarComponentConfigs = computed(() => {
     });
 });
 
-const busSubscription = globalBus.subscribe((data: KfBusEvent) => {
+const busSubscription = globalBus.subscribe((data: KfEvent.KfBusEvent) => {
   if (data.tag === 'main') {
     switch (data.name) {
       case 'open-setting-dialog':

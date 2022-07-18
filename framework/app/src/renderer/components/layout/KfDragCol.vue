@@ -146,7 +146,7 @@ export default defineComponent({
 
       this.$globalBus.next({
         tag: 'resize',
-      } as ResizeEvent);
+      } as KfEvent.ResizeEvent);
 
       this.clearState();
     },

@@ -280,7 +280,7 @@ export const useAddUpdateRemoveKfConfig = (): {
 export const useDealExportHistoryTradingData = (): {
   exportDateModalVisible: Ref<boolean>;
   exportDataLoading: Ref<boolean>;
-  exportEventData: Ref<ExportTradingDataEvent | undefined>;
+  exportEventData: Ref<KfEvent.ExportTradingDataEvent | undefined>;
   handleConfirmExportDate(formSate: {
     date: string;
     dateType: HistoryDateEnum;
@@ -288,7 +288,7 @@ export const useDealExportHistoryTradingData = (): {
 } => {
   const app = getCurrentInstance();
   const exportDateModalVisible = ref<boolean>(false);
-  const exportEventData = ref<ExportTradingDataEvent>();
+  const exportEventData = ref<KfEvent.ExportTradingDataEvent>();
   const exportDataLoading = ref<boolean>(false);
   const { getTradingDataByLocation } = useExtraCategory();
 
@@ -308,7 +308,7 @@ export const useDealExportHistoryTradingData = (): {
     }
 
     const { currentKfLocation, tradingDataType } =
-      exportEventData.value || ({} as ExportTradingDataEvent);
+      exportEventData.value || ({} as KfEvent.ExportTradingDataEvent);
     const { date, dateType } = formState;
     const dateResolved = dayjs(date).format('YYYYMMDD');
 
@@ -422,7 +422,7 @@ export const useDealExportHistoryTradingData = (): {
   onMounted(() => {
     if (app?.proxy) {
       const subscription = app.proxy.$globalBus.subscribe(
-        (data: KfBusEvent) => {
+        (data: KfEvent.KfBusEvent) => {
           if (data.tag === 'export') {
             exportEventData.value = data;
 
@@ -696,7 +696,7 @@ export const usePreStartAndQuitApp = (): {
   onMounted(() => {
     if (app?.proxy) {
       const subscription = app?.proxy.$globalBus.subscribe(
-        (data: KfBusEvent) => {
+        (data: KfEvent.KfBusEvent) => {
           if (data.tag === 'processStatus') {
             if (data.name && data.name === 'archive') {
               preStartSystemLoadingData.archive =

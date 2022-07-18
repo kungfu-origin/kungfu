@@ -9,6 +9,7 @@ import {
   SettingOutlined,
   DeleteOutlined,
   FormOutlined,
+  ClockCircleOutlined,
 } from '@ant-design/icons-vue';
 
 import {
@@ -34,15 +35,19 @@ import {
   getIfProcessRunning,
   getIfProcessStopping,
   getProcessIdByKfLocation,
+  isTimedProcess,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import path from 'path';
 import KfBlinkNum from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfBlinkNum.vue';
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
+import { useGlobalStore } from '@kungfu-trader/kungfu-app/src/renderer/pages/index/store/global';
+import { storeToRefs } from 'pinia';
 
 const { t } = VueI18n.global;
 const { success, error } = messagePrompt();
 
 const { dashboardBodyHeight, handleBodySizeChange } = useDashboardBodySize();
+const { scheduleProcessData } = storeToRefs(useGlobalStore());
 
 const setStrategyModalVisible = ref<boolean>(false);
 const setStrategyConfigPayload = ref<KungfuApi.SetKfConfigPayload>({
@@ -189,7 +194,14 @@ function handleRemoveStrategy(record: KungfuApi.KfConfig) {
             record: KungfuApi.KfConfig,
           }"
         >
-          <template v-if="column.dataIndex === 'strategyFile'">
+          <template v-if="column.dataIndex === 'name'">
+            <span>{{ record[column.dataIndex] }}</span>
+            <ClockCircleOutlined
+              v-if="isTimedProcess(scheduleProcessData, record)"
+              style="font-size: 14px; margin-left: 5px"
+            />
+          </template>
+          <template v-else-if="column.dataIndex === 'strategyFile'">
             {{ getStrategyPathShowName(record) }}
           </template>
           <template v-else-if="column.dataIndex === 'processStatus'">

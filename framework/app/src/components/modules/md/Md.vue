@@ -4,6 +4,7 @@ import {
   FileTextOutlined,
   SettingOutlined,
   DeleteOutlined,
+  ClockCircleOutlined,
 } from '@ant-design/icons-vue';
 
 import KfDashboard from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfDashboard.vue';
@@ -25,6 +26,7 @@ import {
   getIfProcessRunning,
   getIfProcessStopping,
   getProcessIdByKfLocation,
+  isTimedProcess,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import {
   handleSwitchProcessStatus,
@@ -34,10 +36,13 @@ import {
   useProcessStatusDetailData,
   useSwitchAllConfig,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
+import { useGlobalStore } from '@kungfu-trader/kungfu-app/src/renderer/pages/index/store/global';
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
+import { storeToRefs } from 'pinia';
 
 const { t } = VueI18n.global;
 const { success, error } = messagePrompt();
+const { scheduleProcessData } = storeToRefs(useGlobalStore());
 
 const { dashboardBodyHeight, handleBodySizeChange } = useDashboardBodySize();
 
@@ -181,6 +186,10 @@ function handleRemoveMd(record: KungfuApi.KfConfig) {
             <a-tag :color="getInstrumentTypeColor(mdExtTypeMap[record.name])">
               {{ record.group }}
             </a-tag>
+            <ClockCircleOutlined
+              v-if="isTimedProcess(scheduleProcessData, record)"
+              style="font-size: 14px"
+            />
           </template>
           <template v-else-if="column.dataIndex === 'stateStatus'">
             <KfProcessStatus

@@ -8,10 +8,15 @@ import {
   getIdByKfLocation,
   getKfCliExtensionConfig,
   getProcessIdByKfLocation,
+  getProcessIdsFromScheduleTasks,
   initFormStateByConfig,
+  isTimedProcess,
   loopToRunProcess,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
-import { getAllKfConfigOriginData } from '@kungfu-trader/kungfu-js-api/actions';
+import {
+  getAllKfConfigOriginData,
+  getScheduleTasks,
+} from '@kungfu-trader/kungfu-js-api/actions';
 import {
   BrokerStateStatus,
   Pm2ProcessStatus,
@@ -399,4 +404,21 @@ export const useAllExtScript = () => {
       }
     });
   });
+};
+
+export const scheduleProcessData: KungfuApi.ScheduleProcessData = {};
+
+export const setScheduleProcessData = () => {
+  getScheduleTasks().then((scheduleTaskData: KungfuApi.ScheduleTaskData) => {
+    scheduleProcessData.active = scheduleTaskData.active;
+    scheduleProcessData.processIds =
+      getProcessIdsFromScheduleTasks(scheduleTaskData);
+  });
+};
+
+export const getProcessNamePrefix = (
+  scheduleProcessData: KungfuApi.ScheduleProcessData,
+  kfLocation: KungfuApi.KfConfig,
+) => {
+  return isTimedProcess(scheduleProcessData, kfLocation) ? '[T]' : '';
 };

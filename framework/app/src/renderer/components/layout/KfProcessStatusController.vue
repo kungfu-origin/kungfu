@@ -1,5 +1,9 @@
 <script lang="ts" setup>
-import { ClusterOutlined, FileTextOutlined } from '@ant-design/icons-vue';
+import {
+  ClusterOutlined,
+  FileTextOutlined,
+  ClockCircleOutlined,
+} from '@ant-design/icons-vue';
 import { notification } from 'ant-design-vue';
 
 import KfProcessStatus from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfProcessStatus.vue';
@@ -23,6 +27,7 @@ import {
   getProcessIdByKfLocation,
   getPropertyFromProcessStatusDetailDataByKfLocation,
   getIfProcessStopping,
+  isTimedProcess,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import {
   handleSwitchProcessStatus,
@@ -32,6 +37,8 @@ import {
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
 import { KfCategoryTypes } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
+import { useGlobalStore } from '../../pages/index/store/global';
+import { storeToRefs } from 'pinia';
 const { t } = VueI18n.global;
 
 const app = getCurrentInstance();
@@ -51,6 +58,7 @@ const {
   getProcessStatusName,
 } = useProcessStatusDetailData();
 const { tdExtTypeMap, mdExtTypeMap } = useExtConfigsRelated();
+const { scheduleProcessData } = storeToRefs(useGlobalStore());
 
 let isClosingWindow = false;
 let isRestartSystem = 0;
@@ -226,6 +234,10 @@ onMounted(() => {
                 <div class="process-id info-item" v-else>
                   {{ config.name }}
                 </div>
+                <ClockCircleOutlined
+                  v-if="isTimedProcess(scheduleProcessData, config)"
+                  style="font-size: 14px"
+                />
               </div>
               <div class="state-status">
                 <KfProcessStatus
