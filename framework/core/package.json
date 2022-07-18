@@ -23,7 +23,8 @@
     "log_level": "trace",
     "python_version": "3.9",
     "freezer": "pyinstaller",
-    "pypi_mirror": "https://mirrors.aliyun.com/pypi/simple"
+    "pypi_mirror": "https://mirrors.aliyun.com/pypi/simple",
+    "binary_host_mirror": "https://prebuilt.libkungfu.io"
   },
   "binary": {
     "module_name": "kungfu_node",
