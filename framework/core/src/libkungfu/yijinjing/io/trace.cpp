@@ -1,7 +1,7 @@
 //
 // Created by Keren Dong on 2020/3/25.
 //
-
+#include <fstream>
 #include <kungfu/common.h>
 #include <kungfu/yijinjing/io.h>
 #include <kungfu/yijinjing/log.h>
@@ -75,7 +75,7 @@ struct console_table {
 io_device_console::io_device_console(data::location_ptr home, int32_t console_width, int32_t console_height)
     : io_device(std::move(home), false, true), console_width_(console_width), console_height_(console_height) {}
 
-void io_device_console::trace(int64_t begin_time, int64_t end_time, bool in, bool out) {
+void io_device_console::trace(int64_t begin_time, int64_t end_time, bool in, bool out, std::string csv) {
   std::unordered_map<uint32_t, location_ptr> locations = {};
   for (auto location : home_->locator->list_locations(".*", ".*", ".*", ".*")) {
     locations.emplace(location->uid, location);
@@ -98,6 +98,11 @@ void io_device_console::trace(int64_t begin_time, int64_t end_time, bool in, boo
   }
 
   console_table table(console_width_, console_height_);
+  std::ofstream of_csv;
+  if (!csv.empty()) {
+    of_csv.open(csv, std::ofstream::out | std::ofstream::trunc);
+    of_csv << "gen_time" << "," << "trigger_time" << "," << "source" << "," << "dest" << "," << "msg_type" << "," << "frame_length" << "," << "data_length" << std::endl;
+  }
 
   while (reader->data_available() and reader->current_frame()->gen_time() <= end_time) {
     auto frame = reader->current_frame();
@@ -114,6 +119,12 @@ void io_device_console::trace(int64_t begin_time, int64_t end_time, bool in, boo
             DataType::type_name.c_str(),                        //
             frame->data<DataType>().to_string()                 //
         });
+        if (!csv.empty()) {
+          of_csv << time::strftime(frame->gen_time(), TIME_FORMAT) << ","
+                 << time::strftime(frame->trigger_time(), TIME_FORMAT) << "," << locations.at(frame->source())->uname
+                 << "," << dest_name << "," << DataType::type_name.c_str() << "," << frame->frame_length() << ","
+                 << frame->data<DataType>().to_string() << std::endl;
+        }
         type_found = true;
       }
     });
@@ -143,9 +154,12 @@ void io_device_console::trace(int64_t begin_time, int64_t end_time, bool in, boo
     }
     reader->next();
   }
+  if (!csv.empty()) {
+    of_csv.close();
+  }
 }
 
-void io_device_console::show(int64_t begin_time, int64_t end_time, bool in, bool out) {
+void io_device_console::show(int64_t begin_time, int64_t end_time, bool in, bool out, std::string csv) {
   std::unordered_map<uint32_t, location_ptr> locations = {};
   for (auto location : home_->locator->list_locations(".*", ".*", ".*", ".*")) {
     locations.emplace(location->uid, location);
@@ -168,6 +182,11 @@ void io_device_console::show(int64_t begin_time, int64_t end_time, bool in, bool
   }
 
   console_table table(console_width_, console_height_, true);
+  std::ofstream of_csv;
+  if (!csv.empty()) {
+    of_csv.open(csv, std::ofstream::out | std::ofstream::trunc);
+    of_csv << "gen_time" << "," << "trigger_time" << "," << "source" << "," << "dest" << "," << "msg_type" << "," << "data" << std::endl;
+  }
 
   while (reader->data_available() and reader->current_frame()->gen_time() <= end_time) {
     auto frame = reader->current_frame();
@@ -185,6 +204,12 @@ void io_device_console::show(int64_t begin_time, int64_t end_time, bool in, bool
             std::to_string(frame->frame_length()),              //
             std::to_string(frame->data_length())                //
         });
+        if (!csv.empty()) {
+          of_csv << time::strftime(frame->gen_time(), TIME_FORMAT) << ","
+                 << time::strftime(frame->trigger_time(), TIME_FORMAT) << "," << locations.at(frame->source())->uname
+                 << "," << dest_name << "," << DataType::type_name.c_str() << "," << frame->frame_length() << ","
+                 << frame->data_length() << std::endl;
+        }
         type_found = true;
       }
     });
@@ -213,6 +238,9 @@ void io_device_console::show(int64_t begin_time, int64_t end_time, bool in, bool
       reader->disjoin(location::make_shared(frame->data<Deregister>(), get_locator())->uid);
     }
     reader->next();
+  }
+  if (!csv.empty()) {
+    of_csv.close();
   }
 }
 } // namespace kungfu::yijinjing
