@@ -30,7 +30,6 @@ import { combineLatest, filter, map, Observable } from 'rxjs';
 import { ProcessListItem } from 'src/typings';
 import colors from 'colors';
 import { Widgets } from 'blessed';
-import { KF_HOME } from '@kungfu-trader/kungfu-js-api/config/pathConfig';
 import {
   dealStatus,
   getCategoryName,
