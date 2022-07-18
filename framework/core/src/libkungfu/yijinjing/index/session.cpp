@@ -2,8 +2,8 @@
 // Created by Keren Dong on 2020/3/27.
 //
 
-#include <kungfu/yijinjing/index/session.h>
 #include <fstream>
+#include <kungfu/yijinjing/index/session.h>
 
 using namespace sqlite_orm;
 using namespace kungfu::longfist;

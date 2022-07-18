@@ -101,7 +101,19 @@ void io_device_console::trace(int64_t begin_time, int64_t end_time, bool in, boo
   std::ofstream of_csv;
   if (!csv.empty()) {
     of_csv.open(csv, std::ofstream::out | std::ofstream::trunc);
-    of_csv << "gen_time" << "," << "trigger_time" << "," << "source" << "," << "dest" << "," << "msg_type" << "," << "frame_length" << "," << "data_length" << std::endl;
+    of_csv << "gen_time"
+           << ","
+           << "trigger_time"
+           << ","
+           << "source"
+           << ","
+           << "dest"
+           << ","
+           << "msg_type"
+           << ","
+           << "frame_length"
+           << ","
+           << "data_length" << std::endl;
   }
 
   while (reader->data_available() and reader->current_frame()->gen_time() <= end_time) {
@@ -185,7 +197,17 @@ void io_device_console::show(int64_t begin_time, int64_t end_time, bool in, bool
   std::ofstream of_csv;
   if (!csv.empty()) {
     of_csv.open(csv, std::ofstream::out | std::ofstream::trunc);
-    of_csv << "gen_time" << "," << "trigger_time" << "," << "source" << "," << "dest" << "," << "msg_type" << "," << "data" << std::endl;
+    of_csv << "gen_time"
+           << ","
+           << "trigger_time"
+           << ","
+           << "source"
+           << ","
+           << "dest"
+           << ","
+           << "msg_type"
+           << ","
+           << "data" << std::endl;
   }
 
   while (reader->data_available() and reader->current_frame()->gen_time() <= end_time) {
