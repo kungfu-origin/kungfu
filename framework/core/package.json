@@ -24,7 +24,8 @@
     "python_version": "3.9",
     "freezer": "pyinstaller",
     "pypi_mirror": "https://mirrors.aliyun.com/pypi/simple",
-    "binary_host_mirror": "https://prebuilt.libkungfu.io"
+    "pypi_mirror_github": "https://pypi.python.org/simple",
+    "binary_host_github": "https://prebuilt.libkungfu.io"
   },
   "binary": {
     "module_name": "kungfu_node",
