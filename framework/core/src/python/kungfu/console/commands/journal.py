@@ -92,7 +92,7 @@ def sessions(ctx, sortby, ascending, tablefmt):
         lambda t: kft.strftime(t, kft.SESSION_DATETIME_FORMAT)
     )
     all_sessions["end_time"] = all_sessions["end_time"].apply(
-        lambda t: kft.strftime(t, kft.SESSION_DATETIME_FORMAT)
+        lambda t: kft.strftime(abs(t), kft.SESSION_DATETIME_FORMAT)
     )
     all_sessions["duration"] = all_sessions["duration"].apply(
         lambda t: kft.strftime(t - kft.DURATION_TZ_ADJUST, kft.DURATION_FORMAT)
@@ -128,9 +128,10 @@ def rebuild_index(ctx):
     default="all",
     help="input or output during this session",
 )
+@click.option("-o", "--csv", type=str, default="", help="csv file")
 @journal_command_context
-def show(ctx, session_id, io_type):
-    kfj.show_journal(ctx, session_id, io_type)
+def show(ctx, session_id, io_type, csv):
+    kfj.show_journal(ctx, session_id, io_type, csv)
 
 
 @journal.command()
@@ -142,9 +143,10 @@ def show(ctx, session_id, io_type):
     default="all",
     help="input or output during this session",
 )
+@click.option("-o", "--csv", type=str, default="", help="csv file")
 @journal_command_context
-def trace(ctx, session_id, io_type):
-    kfj.trace_journal(ctx, session_id, io_type)
+def trace(ctx, session_id, io_type, csv):
+    kfj.trace_journal(ctx, session_id, io_type, csv)
 
 
 @journal.command()

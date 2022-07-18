@@ -252,6 +252,10 @@ enum class BrokerState : int8_t {
   Ready = 100
 };
 
+enum class HistoryDataType : int8_t { Normal = 0, PageEnd = 1, TotalEnd = 2 };
+
+inline std::ostream &operator<<(std::ostream &os, HistoryDataType t) { return os << int8_t(t); }
+
 inline std::ostream &operator<<(std::ostream &os, BrokerState t) { return os << int8_t(t); }
 
 enum class StrategyState : int8_t { Normal, Warn, Error };
