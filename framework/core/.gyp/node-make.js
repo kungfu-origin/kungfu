@@ -22,7 +22,7 @@ module.exports = require('../lib/sywac')(module, (cli) => {
       callPrebuilt(
         fallbackBuild ? ['install', '--fallback-to-build'] : ['install'],
         fallbackBuild,
-      ).onSuccess(shell.showAutoConfig);
+      );
     })
     .command('build', () => {
       shell.showAutoConfig();

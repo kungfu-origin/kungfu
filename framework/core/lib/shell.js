@@ -1,6 +1,5 @@
 const { spawnSync } = require('child_process');
 const fs = require('fs');
-const fse = require('fs-extra');
 const path = require('path');
 
 const spawnOptsPipe = { shell: true, stdio: 'pipe', windowsHide: true };
@@ -14,11 +13,13 @@ const getScope = (npmConfigValue) =>
   npmConfigValue === 'undefined' ? '[package.json]' : '[user]';
 
 const getPackageJson = (packageName) => {
+  const toJSON = (filepath) =>
+    JSON.parse(fs.readFileSync(filepath, 'utf8').toString());
   if (!packageName) {
-    return fse.readJsonSync(path.resolve(process.cwd(), 'package.json'));
+    return toJSON(path.resolve(process.cwd(), 'package.json'));
   }
   try {
-    return fse.readJsonSync(require.resolve(`${packageName}/package.json`));
+    return toJSON(require.resolve(`${packageName}/package.json`));
   } catch (e) {
     return undefined;
   }
@@ -114,7 +115,7 @@ const setBinaryHostConfig = (packageName) => {
   }
 };
 
-const setAutoConfig = (key, globalScope = false) => {
+const setAutoConfig = () => {
   if (!isGithubEnv()) {
     return;
   }
