@@ -10,6 +10,9 @@ import {
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
 const { t } = VueI18n.global;
 
+export const LABEL_COL = 6;
+export const WRAPPER_COL = 14;
+
 export const getConfigSettings = (
   category?: KfCategoryTypes,
   instrumentTypeEnum?: InstrumentTypeEnum,

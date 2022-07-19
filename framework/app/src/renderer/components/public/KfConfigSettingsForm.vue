@@ -78,7 +78,7 @@ const props = withDefaults(
     labelAlign: 'right',
     labelWrap: false,
     labelCol: 6,
-    wrapperCol: 16,
+    wrapperCol: 14,
     rules: () => ({}),
     passPrimaryKeySpecialWordsVerify: false,
   },
@@ -417,9 +417,9 @@ defineExpose({
     class="kf-config-form"
     ref="formRef"
     :model="formState"
-    :label-col="layout === 'inline' ? null : { span: labelCol }"
+    :labelCol="layout === 'inline' ? null : { span: labelCol }"
     :label-wrap="labelWrap"
-    :wrapper-col="layout === 'inline' ? null : { span: wrapperCol }"
+    :wrapperCol="layout === 'inline' ? null : { span: wrapperCol }"
     :labelAlign="labelAlign"
     :colon="false"
     :scrollToFirstError="true"

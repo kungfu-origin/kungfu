@@ -18,7 +18,7 @@ import {
   confirmModal,
   messagePrompt,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
-import { getConfigSettings } from './config';
+import { getConfigSettings, LABEL_COL, WRAPPER_COL } from './config';
 import {
   dealOrderPlaceVNode,
   dealStockOffset,
@@ -614,45 +614,47 @@ watch(
               v-model:formState="formState"
               :configSettings="configSettings"
               changeType="add"
-              :label-col="5"
-              :wrapper-col="14"
+              :label-col="LABEL_COL"
+              :wrapper-col="WRAPPER_COL"
             ></KfConfigSettingsForm>
             <div class="percent-group__wrap">
-              <a-button
-                v-for="percent in percentList"
-                :class="{
-                  'percent-button': true,
-                  'percent-button-active': currentPercent === percent,
-                }"
-                :key="percent"
-                size="small"
-                ghost
-                @click="
-                  currentPercent !== percent && handlePercentChange(percent)
-                "
-              >
-                {{ `${percent}%` }}
-              </a-button>
+              <a-col :span="LABEL_COL + WRAPPER_COL">
+                <a-button
+                  v-for="percent in percentList"
+                  :class="{
+                    'percent-button': true,
+                    'percent-button-active': currentPercent === percent,
+                  }"
+                  :key="percent"
+                  size="small"
+                  ghost
+                  @click="
+                    currentPercent !== percent && handlePercentChange(percent)
+                  "
+                >
+                  {{ `${percent}%` }}
+                </a-button>
+              </a-col>
             </div>
             <template v-if="isAccountOrInstrumentConfirmed">
               <div class="make-order-position">
-                <div class="position-label">
+                <a-col :span="LABEL_COL" class="position-label">
                   {{
                     showAmountOrPosition === 'amount'
                       ? $t('可用资金')
                       : $t('可用仓位')
                   }}
-                </div>
-                <div class="position-value">
+                </a-col>
+                <a-col :span="WRAPPER_COL" class="position-value">
                   {{
                     showAmountOrPosition === 'amount'
                       ? currentAvailMoney
                       : currentAvailPosVolume
                   }}
-                </div>
+                </a-col>
               </div>
               <div class="make-order-position">
-                <div class="position-label">
+                <a-col :span="LABEL_COL" class="position-label">
                   {{
                     shotable(instrumentResolved?.instrumentType)
                       ? formState.offset === OffsetEnum.Open
@@ -660,26 +662,26 @@ watch(
                         : t('保证金返还')
                       : $t('交易金额')
                   }}
-                </div>
-                <div class="position-value">
+                </a-col>
+                <a-col :span="WRAPPER_COL" class="position-value">
                   {{ currentTradeAmount }}
-                </div>
+                </a-col>
               </div>
               <div class="make-order-position">
-                <div class="position-label">
+                <a-col :span="LABEL_COL" class="position-label">
                   {{
                     showAmountOrPosition === 'amount'
                       ? $t('剩余资金')
                       : $t('剩余仓位')
                   }}
-                </div>
-                <div class="position-value">
+                </a-col>
+                <a-col :span="WRAPPER_COL" class="position-value">
                   {{
                     showAmountOrPosition === 'amount'
                       ? currentResidueMoney
                       : currentResiduePosVolume
                   }}
-                </div>
+                </a-col>
               </div>
             </template>
           </div>
@@ -747,6 +749,10 @@ watch(
         padding-left: 8px;
         box-sizing: border-box;
 
+        .ant-col {
+          margin: auto;
+        }
+
         .percent-button {
           margin: 0px 8px 8px 0px;
           color: @border-color-base;
@@ -767,11 +773,14 @@ watch(
       color: @text-color-secondary;
       font-weight: bold;
       margin: 8px 0px;
-      padding: 0 8px;
-      box-sizing: border-box;
 
       .position-label {
-        padding-right: 16px;
+        padding-right: 8px;
+        text-align: right;
+      }
+
+      .position-value {
+        font-weight: bold;
       }
 
       &:first-child {
