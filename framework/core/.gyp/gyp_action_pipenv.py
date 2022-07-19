@@ -23,6 +23,7 @@ pipfile = Path(pipfile_path).read_text().splitlines()
 seed_packages = [
     find_version(pipfile, "pip"),
     find_version(pipfile, "setuptools"),
+    find_version(pipfile, "virtualenv"),
     find_version(pipfile, "wheel"),
 ]
 
