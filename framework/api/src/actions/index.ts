@@ -257,8 +257,8 @@ export const setAllRiskSettingList = (
         max_cancel_ratio,
       } = item;
 
-      const group = account_id.parseSourceAccountId().source;
-      const name = account_id.parseSourceAccountId().id;
+      const group = (account_id || '').parseSourceAccountId().source;
+      const name = (account_id || '').parseSourceAccountId().id;
 
       return {
         location_uid: 0,

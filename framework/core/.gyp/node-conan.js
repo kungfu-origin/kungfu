@@ -104,10 +104,11 @@ const cli = require('sywac')
   .version('--version')
   .showHelpByDefault();
 
-module.exports = cli;
-
 async function main() {
   await cli.parseAndExit();
 }
+
+module.exports.cli = cli;
+module.exports.main = main;
 
 if (require.main === module) main().catch(exitOnError);

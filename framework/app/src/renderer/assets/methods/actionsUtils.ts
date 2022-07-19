@@ -1475,7 +1475,9 @@ export const useMakeOrderInfo = (
       return '--';
     }
 
-    const { source, id } = formState.value.account_id.parseSourceAccountId();
+    const { source, id } = (
+      formState.value.account_id || ''
+    ).parseSourceAccountId();
     const tdLocation = isCurrentCategoryIsTd.value
       ? currentGlobalKfLocation.value
       : { category: 'td', group: source, name: id, mode: 'live' };

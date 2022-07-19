@@ -77,7 +77,7 @@ function npmCall(npmArgs) {
   }
 }
 
-require('@kungfu-trader/kungfu-core').sywac(module, (cli) => {
+module.exports = require('@kungfu-trader/kungfu-core').sywac(module, (cli) => {
   cli.command('show', { run: showAllConfig }).command('auto', {
     run: () => {
       const githubActions = process.env.CI && process.env.GITHUB_ACTIONS;

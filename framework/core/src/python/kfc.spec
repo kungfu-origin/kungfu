@@ -3,7 +3,6 @@
 import glob
 import platform
 import os
-import PyInstaller
 
 from collections import deque
 from distutils import sysconfig
@@ -43,17 +42,10 @@ build_dir = abspath(make_path(cwd, "build"))
 build_cpp_dir = abspath(make_path(build_dir, "src"))
 build_output_dir = make_path(build_dir, os.environ["CMAKE_BUILD_TYPE"])
 
-# site path
-site_path = abspath(dirname(dirname(PyInstaller.__file__)))
-
-# black requires
-data_blib2to3 = make_path(site_path, "blib2to3", "*.txt")
-
-# pdm requires
-data_pep517 = make_path(site_path, "pep517", "in_process", "_in_process.py")
-data_pdm_models = make_path(site_path, "pdm", "models", "*.json")
-data_pdm_pep582 = make_path(site_path, "pdm", "pep582", "sitecustomize.py")
-data_pip_certifi = make_path(site_path, "pip", "_vendor", "certifi", "*.pem")
+path_env = "PYI_PYTHONPATH"
+extra_python_paths = (
+    os.environ[path_env].split(os.pathsep) if path_env in os.environ else []
+)
 
 ###############################################################################
 
@@ -113,7 +105,7 @@ name = "kfc"
 block_cipher = None
 a = Analysis(
     scripts=["kfc.py"],
-    pathex=[],
+    pathex=extra_python_paths,
     binaries=[],
     datas=extend_datas(
         [
@@ -121,11 +113,6 @@ a = Analysis(
             (dep_pybind11_dir, "pybind11"),
             (make_path(build_output_dir, "*"), "."),
             (make_path(build_dir, "include"), "include"),
-            (data_blib2to3, "blib2to3"),
-            (data_pep517, make_path("pep517", "in_process")),
-            (data_pdm_models, make_path("pdm", "models")),
-            (data_pdm_pep582, make_path("pdm", "pep582")),
-            (data_pip_certifi, make_path("pip", "_vendor", "certifi")),
         ],
         src_dirs=[
             src_dir,

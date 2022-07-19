@@ -5,11 +5,11 @@ import KfLayoutVue from '@kungfu-trader/kungfu-app/src/renderer/components/layou
 import KfSetByConfigModal from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfSetByConfigModal.vue';
 import zhCN from 'ant-design-vue/es/locale/zh_CN';
 import {
-  markClearDB,
   markClearJournal,
   removeLoadingMask,
   useIpcListener,
   handleOpenLogviewByFile,
+  markClearDB,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import {
   playSound,

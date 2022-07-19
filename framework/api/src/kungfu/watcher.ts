@@ -50,10 +50,9 @@ export const watcher = ((): KungfuApi.Watcher | null => {
     }
   }
 
-  const id = [
-    process.env.APP_TYPE || '',
+  const id = `${process.env.APP_TYPE || ''}-${kf.formatStringToHashHex(
     process.env.DAEMON_ID || process.env.RENDERER_ID || '',
-  ].join('');
+  )}`;
 
   const bypassRestore = booleanProcessEnv(
     process.env.RELOAD_AFTER_CRASHED || process.env.BY_PASS_RESTORE || '',
@@ -69,7 +68,7 @@ export const watcher = ((): KungfuApi.Watcher | null => {
 
   return kf.watcher(
     KF_RUNTIME_DIR,
-    kf.formatStringToHashHex(id),
+    id,
     !!bypassRestore,
     !!bypassAccounting,
     !!bypassTradingData,

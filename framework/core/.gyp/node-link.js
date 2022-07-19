@@ -14,4 +14,6 @@ function main() {
   });
 }
 
+module.exports.main = main;
+
 if (require.main === module) main();

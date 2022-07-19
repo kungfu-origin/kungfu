@@ -207,8 +207,8 @@ export const getKfLocation = (
   } else if (type === 'td') {
     return {
       category: 'td',
-      group: targetId.parseSourceAccountId().source,
-      name: targetId.parseSourceAccountId().id,
+      group: (targetId || '').parseSourceAccountId().source,
+      name: (targetId || '').parseSourceAccountId().id,
       mode: 'live',
     };
   } else if (type === 'strategy') {
