@@ -13,11 +13,10 @@ import KfDashboardItem from '@kungfu-trader/kungfu-app/src/renderer/components/p
 import KfProcessStatus from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfProcessStatus.vue';
 import KfSetExtensionModal from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfSetExtensionModal.vue';
 import KfSetByConfigModal from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfSetByConfigModal.vue';
-import {
+import Icon, {
   FileTextOutlined,
   SettingOutlined,
   DeleteOutlined,
-  ClockCircleOutlined,
 } from '@ant-design/icons-vue';
 
 import { categoryRegisterConfig, getColumns } from './config';
@@ -46,7 +45,6 @@ import {
   getIfProcessRunning,
   getIfProcessStopping,
   getProcessIdByKfLocation,
-  isTimedProcess,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import KfBlinkNum from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfBlinkNum.vue';
 import {
@@ -58,7 +56,7 @@ import SetTdGroupModal from './SetTdGroupModal.vue';
 import { useGlobalStore } from '@kungfu-trader/kungfu-app/src/renderer/pages/index/store/global';
 import { messagePrompt } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
-import { storeToRefs } from 'pinia';
+import { usePrefix } from '@kungfu-trader/kungfu-js-api/utils/prefixUtils';
 
 const { t } = VueI18n.global;
 const { success, error } = messagePrompt();
@@ -154,11 +152,17 @@ const columns = getColumns((dataIndex) => {
 });
 
 const { setTdGroups } = useGlobalStore();
-const { scheduleProcessData } = storeToRefs(useGlobalStore());
+const { builtPrefixMap } = usePrefix();
+const prefixMap = ref({});
 
 onMounted(() => {
   if (app?.proxy) {
     app.proxy.$globalCategoryRegister.register(categoryRegisterConfig);
+
+    prefixMap.value = builtPrefixMap(
+      app.proxy.$prefixRegister,
+      tableDataResolved.value.map((item) => getProcessIdByKfLocation(item)),
+    );
   }
 
   setTdGroups().then(() => {
@@ -366,8 +370,12 @@ function handleRemoveTd(item: KungfuApi.KfConfig) {
               <span>
                 {{ record.name }}
               </span>
-              <ClockCircleOutlined
-                v-if="isTimedProcess(scheduleProcessData, record)"
+              <Icon
+                v-if="
+                  prefixMap[getProcessIdByKfLocation(record)]?.prefixType ===
+                  'icon'
+                "
+                :component="prefixMap[getProcessIdByKfLocation(record)].prefix"
                 style="font-size: 14px; margin-left: 5px"
               />
             </div>

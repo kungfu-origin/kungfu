@@ -1,15 +1,14 @@
 <script setup lang="ts">
-import { ref, computed, toRefs, Ref } from 'vue';
+import { ref, computed, toRefs, Ref, onMounted, getCurrentInstance } from 'vue';
 
 import KfDashboard from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfDashboard.vue';
 import KfDashboardItem from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfDashboardItem.vue';
 import KfSetByConfigModal from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfSetByConfigModal.vue';
-import {
+import Icon, {
   FileTextOutlined,
   SettingOutlined,
   DeleteOutlined,
   FormOutlined,
-  ClockCircleOutlined,
 } from '@ant-design/icons-vue';
 
 import {
@@ -35,19 +34,17 @@ import {
   getIfProcessRunning,
   getIfProcessStopping,
   getProcessIdByKfLocation,
-  isTimedProcess,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import path from 'path';
 import KfBlinkNum from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfBlinkNum.vue';
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
-import { useGlobalStore } from '@kungfu-trader/kungfu-app/src/renderer/pages/index/store/global';
-import { storeToRefs } from 'pinia';
+import { usePrefix } from '@kungfu-trader/kungfu-js-api/utils/prefixUtils';
 
+const app = getCurrentInstance();
 const { t } = VueI18n.global;
 const { success, error } = messagePrompt();
 
 const { dashboardBodyHeight, handleBodySizeChange } = useDashboardBodySize();
-const { scheduleProcessData } = storeToRefs(useGlobalStore());
 
 const setStrategyModalVisible = ref<boolean>(false);
 const setStrategyConfigPayload = ref<KungfuApi.SetKfConfigPayload>({
@@ -86,6 +83,18 @@ const columns = getColumns((dataIndex) => {
       (getAssetsByKfConfig(b)[dataIndex as keyof KungfuApi.Asset] || 0)
     );
   };
+});
+
+const { builtPrefixMap } = usePrefix();
+const prefixMap = ref({});
+
+onMounted(() => {
+  if (app?.proxy) {
+    prefixMap.value = builtPrefixMap(
+      app.proxy.$prefixRegister,
+      tableData.value.map((item) => getProcessIdByKfLocation(item)),
+    );
+  }
 });
 
 function handleOpenSetStrategyDialog(
@@ -196,8 +205,12 @@ function handleRemoveStrategy(record: KungfuApi.KfConfig) {
         >
           <template v-if="column.dataIndex === 'name'">
             <span>{{ record[column.dataIndex] }}</span>
-            <ClockCircleOutlined
-              v-if="isTimedProcess(scheduleProcessData, record)"
+            <Icon
+              v-if="
+                prefixMap[getProcessIdByKfLocation(record)]?.prefixType ===
+                'icon'
+              "
+              :component="prefixMap[getProcessIdByKfLocation(record)].prefix"
               style="font-size: 14px; margin-left: 5px"
             />
           </template>

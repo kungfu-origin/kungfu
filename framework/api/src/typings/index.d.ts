@@ -831,16 +831,6 @@ declare namespace KungfuApi {
     mode: ScheduleTaskMode;
     processId: string;
   }
-
-  export interface ScheduleTaskData {
-    active?: boolean;
-    tasks?: Array<ScheduleTask>;
-  }
-
-  export interface ScheduleProcessData {
-    active?: boolean;
-    processIds?: Array<string>;
-  }
 }
 
 declare module '@kungfu-trader/kungfu-core' {

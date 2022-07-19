@@ -8,15 +8,10 @@ import {
   getIdByKfLocation,
   getKfCliExtensionConfig,
   getProcessIdByKfLocation,
-  getProcessIdsFromScheduleTasks,
   initFormStateByConfig,
-  isTimedProcess,
   loopToRunProcess,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
-import {
-  getAllKfConfigOriginData,
-  getScheduleTasks,
-} from '@kungfu-trader/kungfu-js-api/actions';
+import { getAllKfConfigOriginData } from '@kungfu-trader/kungfu-js-api/actions';
 import {
   BrokerStateStatus,
   Pm2ProcessStatus,
@@ -391,34 +386,27 @@ const dzxyUse = (ext: KfExtModule) => {
 };
 
 export const useAllExtScript = () => {
-  getKfCliExtensionConfig().then((allConfigs: KungfuApi.KfCliExtConfigs) => {
-    Object.values(allConfigs).forEach((config) => {
-      const { extPath, script } = config;
-      const scriptPath = path.join(extPath, script);
-      if (script && fse.pathExistsSync(scriptPath)) {
-        dzxyUse(
-          (<Record<string, KfExtModule>>__non_webpack_require__(scriptPath))[
-            'default'
-          ],
-        );
-      }
+  getKfCliExtensionConfig()
+    .then((allConfigs: KungfuApi.KfCliExtConfigs) =>
+      Promise.all(
+        Object.values(allConfigs).map((config) => {
+          const { extPath, script } = config;
+          const scriptPath = path.join(extPath, script);
+          if (script && fse.pathExistsSync(scriptPath)) {
+            return <Record<string, KfExtModule>>(
+              __non_webpack_require__(scriptPath)
+            );
+          }
+
+          return null;
+        }),
+      ),
+    )
+    .then((allExtModules) => {
+      allExtModules.forEach((extModule) => {
+        if (extModule) {
+          dzxyUse(extModule['default']);
+        }
+      });
     });
-  });
-};
-
-export const scheduleProcessData: KungfuApi.ScheduleProcessData = {};
-
-export const setScheduleProcessData = () => {
-  getScheduleTasks().then((scheduleTaskData: KungfuApi.ScheduleTaskData) => {
-    scheduleProcessData.active = scheduleTaskData.active;
-    scheduleProcessData.processIds =
-      getProcessIdsFromScheduleTasks(scheduleTaskData);
-  });
-};
-
-export const getProcessNamePrefix = (
-  scheduleProcessData: KungfuApi.ScheduleProcessData,
-  kfLocation: KungfuApi.KfConfig,
-) => {
-  return isTimedProcess(scheduleProcessData, kfLocation) ? '[T]' : '';
 };

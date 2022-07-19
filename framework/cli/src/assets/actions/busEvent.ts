@@ -1,6 +1,5 @@
 import { MonitorDashboard } from '../../components/monitor';
 import { TradingDataDashboard } from '../../components/tradingDataMonitor';
-import { setScheduleProcessData } from '../methods/utils';
 import { globalState } from './globalState';
 
 export const initBusEvent = (
@@ -44,10 +43,6 @@ export const initBusEvent = (
             }
             break;
         }
-      }
-
-      if (tag === 'update:scheduleProcessData') {
-        setScheduleProcessData();
       }
     }
   });

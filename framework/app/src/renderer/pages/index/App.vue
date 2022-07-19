@@ -71,7 +71,6 @@ const tradingDataSubscription = tradingDataSubject.subscribe(
   },
 );
 
-store.setScheduleProcessData();
 store.setKfConfigList();
 store.setKfExtConfigs();
 store.setSubscribedInstruments();
@@ -101,9 +100,6 @@ const busSubscription = globalBus.subscribe((data: KfEvent.KfBusEvent) => {
     setAllRiskSettingList(data.riskSettings).finally(() => {
       store.setRiskSettingList();
     });
-  }
-  if (data.tag === 'update:scheduleProcessData') {
-    store.setScheduleProcessData();
   }
 });
 

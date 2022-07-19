@@ -1080,27 +1080,6 @@ export const buildIdByKeysFromKfConfigSettings = (
     .join('_');
 };
 
-export const getProcessIdsFromScheduleTasks = (
-  scheduleTasks: KungfuApi.ScheduleTaskData,
-) => {
-  return scheduleTasks.tasks?.map((item) => item.processId);
-};
-
-export const isTimedProcess = (
-  scheduleProcessData: KungfuApi.ScheduleProcessData,
-  kfLocation: KungfuApi.KfLocation,
-) => {
-  if (!scheduleProcessData.active || !scheduleProcessData.processIds)
-    return false;
-
-  if (kfLocation.name === 'master') {
-    return scheduleProcessData.processIds.indexOf('system') !== -1;
-  }
-
-  const processId = getProcessIdByKfLocation(kfLocation);
-  return scheduleProcessData.processIds.indexOf(processId) !== -1;
-};
-
 const startProcessByKfLocation = (
   kfLocation:
     | KungfuApi.KfLocation
