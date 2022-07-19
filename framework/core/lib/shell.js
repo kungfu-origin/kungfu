@@ -6,17 +6,19 @@ const path = require('path');
 const spawnOptsPipe = { shell: true, stdio: 'pipe', windowsHide: true };
 const spawnOptsInherit = { shell: true, stdio: 'inherit', windowsHide: true };
 
-const scope = (npmConfigValue) =>
+const GithubBinaryHost = 'https://prebuilt.libkungfu.io';
+
+const defined = (e) => e;
+
+const getScope = (npmConfigValue) =>
   npmConfigValue === 'undefined' ? '[package.json]' : '[user]';
 
-const getPackageJson = (module) => {
-  if (!module) {
-    return fse.readJsonSync(
-      path.resolve(path.dirname(__dirname), 'package.json'),
-    );
+const getPackageJson = (packageName) => {
+  if (!packageName) {
+    return fse.readJsonSync(path.resolve(process.cwd(), 'package.json'));
   }
   try {
-    return fse.readJsonSync(require.resolve(`${module}/package.json`));
+    return fse.readJsonSync(require.resolve(`${packageName}/package.json`));
   } catch (e) {
     return undefined;
   }
@@ -38,7 +40,7 @@ const getConfigValue = (name) => {
   return process.env[`npm_package_config_${name}`];
 };
 
-const isGithubEnv = () => true;//process.env.CI && process.env.GITHUB_ACTIONS;
+const isGithubEnv = () => process.env.CI && process.env.GITHUB_ACTIONS;
 
 const npmCall = (npmArgs) => {
   console.log(`$ npm ${npmArgs.join(' ')}`);
@@ -82,24 +84,55 @@ const runAndExit = (cmd, argv = [], opts = {}) => {
   return result;
 };
 
-const setAutoConfig = (key, globalScope = false) => {
-  if (isGithubEnv()) {
-    const packageJson = getPackageJson();
-    npmCall([
-      'config',
-      'set',
-      `${packageJson.name}:${key}`,
-      packageJson.config[`${key}_github`],
-    ]);
+const findBinaryDependency = (packageJson) => {
+  const hasBinary = (deps) =>
+    Object.keys(deps)
+      .map((key) => {
+        const dependency = getPackageJson(key);
+        if (dependency && dependency.binary) {
+          return dependency.name;
+        }
+      })
+      .filter(defined);
+  return [packageJson.dependencies, packageJson.devDependencies]
+    .filter(defined)
+    .map(hasBinary)
+    .flat();
+};
+
+const setBinaryHostConfig = (packageName) => {
+  const packageJson = getPackageJson(packageName);
+  if (!packageJson) {
+    return;
+  }
+  if (packageJson.binary) {
+    const key = `${packageJson.binary.module_name}_binary_host_mirror`;
+    const binaryGithub = packageJson.binaryGithub;
+    const override = binaryGithub && binaryGithub.host;
+    const value = override ? binaryGithub.host : GithubBinaryHost;
+    npmCall(['config', 'set', key, value]);
   }
 };
 
-const setAutoPrebuiltHost = (module) => {
-  if (isGithubEnv()) {
-    const packageJson = getPackageJson();
-    const key = `${module}_binary_host_mirror`;
-    npmCall(['config', 'set', key, packageJson.config['binary_host_github']]);
+const setAutoConfig = (key, globalScope = false) => {
+  if (!isGithubEnv()) {
+    return;
   }
+  const packageJson = getPackageJson();
+  if (packageJson.configGithub) {
+    Object.keys(packageJson.configGithub).forEach((key) => {
+      npmCall([
+        'config',
+        'set',
+        `${packageJson.name}:${key}`,
+        packageJson.configGithub[key],
+      ]);
+    });
+  }
+  if (packageJson.binary) {
+    setBinaryHostConfig();
+  }
+  findBinaryDependency(packageJson).map(setBinaryHostConfig);
 };
 
 const showProjectConfig = (key) => {
@@ -109,11 +142,14 @@ const showProjectConfig = (key) => {
   const npmConfigValue = getNpmConfigValue(npmConfigKey);
   const value =
     npmConfigValue === 'undefined' ? packageJson.config[key] : npmConfigValue;
-  console.log(`[config] ${npmConfigKey} = ${value} ${scope(npmConfigValue)}`);
+  console.log(`[config] ${npmConfigKey} = ${value} ${getScope(npmConfigValue)}`);
 };
 
-const showPrebuiltHostConfig = (module) => {
-  const packageJson = getPackageJson(module);
+const showBinaryHostConfig = (packageName) => {
+  const packageJson = getPackageJson(packageName);
+  if (!packageJson) {
+    return;
+  }
   const key = packageJson.binary.module_name;
   const npmConfigKey = `${key}_binary_host_mirror`;
   const hostConfigValue = getNpmConfigValue(npmConfigKey);
@@ -121,16 +157,18 @@ const showPrebuiltHostConfig = (module) => {
     hostConfigValue === 'undefined' && packageJson
       ? packageJson.binary.host
       : hostConfigValue;
-  console.log(`[binary] ${npmConfigKey} = ${value} ${scope(hostConfigValue)}`);
+  console.log(`[binary] ${npmConfigKey} = ${value} ${getScope(hostConfigValue)}`);
 };
 
-const showAllConfig = (modules) => {
+const showAutoConfig = () => {
   const packageJson = getPackageJson();
-  Object.keys(packageJson.config).map(showProjectConfig);
-  if (packageJson.binary) {
-    showPrebuiltHostConfig();
+  if (packageJson.config) {
+    Object.keys(packageJson.config).map(showProjectConfig);
   }
-  modules.map(showPrebuiltHostConfig);
+  if (packageJson.binary) {
+    showBinaryHostConfig();
+  }
+  findBinaryDependency(packageJson).map(showBinaryHostConfig);
 };
 
 module.exports = {
@@ -142,6 +180,5 @@ module.exports = {
   runAndCollect: runAndCollect,
   runAndExit: runAndExit,
   setAutoConfig: setAutoConfig,
-  setAutoPrebuiltHost: setAutoPrebuiltHost,
-  showAllConfig: showAllConfig,
+  showAutoConfig: showAutoConfig,
 };

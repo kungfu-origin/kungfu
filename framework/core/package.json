@@ -23,9 +23,10 @@
     "log_level": "trace",
     "python_version": "3.9",
     "freezer": "pyinstaller",
-    "pypi_mirror": "https://mirrors.aliyun.com/pypi/simple",
-    "pypi_mirror_github": "https://pypi.python.org/simple",
-    "binary_host_github": "https://prebuilt.libkungfu.io"
+    "pypi_mirror": "https://mirrors.aliyun.com/pypi/simple"
+  },
+  "configGithub": {
+    "pypi_mirror": "https://pypi.python.org/simple"
   },
   "binary": {
     "module_name": "kungfu_node",
@@ -34,19 +35,20 @@
     "package_name": "kfc-v{version}-{platform}-{arch}-{configuration}.tar.gz",
     "host": "https://prebuilt.libkungfu.cc"
   },
+  "binaryGithub": {
+    "host": "https://prebuilt.libkungfu.io"
+  },
   "scripts": {
-    "preinstall": "node .gyp/node-npm-config.js auto",
-    "install": "node .gyp/node-pre-gyp.js install",
-    "postinstall": "node .gyp/node-npm-config.js auto",
-    "link-node": "node .gyp/node-link.js",
-    "prebuild": "node .gyp/node-npm-config.js show",
-    "build": "node .gyp/node-pre-gyp.js build",
-    "clean": "node .gyp/node-pre-gyp.js clean",
-    "package": "node .gyp/node-pre-gyp.js package",
-    "rebuild": "node .gyp/node-pre-gyp.js rebuild",
+    "make": "node .gyp/node-make.js",
+    "install": "node .gyp/node-make.js install",
+    "build": "node .gyp/node-make.js build",
+    "clean": "node .gyp/node-make.js clean",
+    "package": "node .gyp/node-make.js package",
+    "rebuild": "node .gyp/node-make.js rebuild",
     "configure": "node .gyp/node-conan.js install",
     "compile": "node .gyp/node-conan.js build",
     "freeze": "node .gyp/node-conan.js package",
+    "link-node": "node .gyp/node-link.js",
     "wheel": "node .gyp/node-wheel.js",
     "pipenv": "node .gyp/node-pipenv.js",
     "poetry": "pipenv run python -m poetry",
