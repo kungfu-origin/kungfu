@@ -522,7 +522,7 @@ void Watcher::OnRegister(int64_t trigger_time, const Register &register_data) {
   auto app_location = get_location(register_data.location_uid);
 
   if (app_location->category == category::MD or app_location->category == category::TD) {
-    location_uid_states_map_.insert_or_assign(app_location->uid, int(BrokerState::Connected));
+    location_uid_states_map_.insert_or_assign(app_location->uid, int(BrokerState::Pending));
   }
 
   if (app_location->category == category::MD and app_location->mode == mode::LIVE) {
