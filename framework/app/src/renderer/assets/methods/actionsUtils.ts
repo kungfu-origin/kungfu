@@ -1498,14 +1498,14 @@ export const useMakeOrderInfo = (
 
       if (shotable(instrumentType)) {
         if (offset === OffsetEnum.CloseYest) {
-          return dealKfNumber(yesterday_volume);
+          return dealKfNumber(yesterday_volume) + '';
         } else if (offset === OffsetEnum.CloseToday) {
-          return dealKfNumber(volume - yesterday_volume);
+          return dealKfNumber(volume - yesterday_volume) + '';
         } else {
-          return dealKfNumber(volume);
+          return dealKfNumber(volume) + '';
         }
       } else {
-        return dealKfNumber(yesterday_volume);
+        return dealKfNumber(yesterday_volume) + '';
       }
     }
 
@@ -1565,26 +1565,30 @@ export const useMakeOrderInfo = (
     return null;
   }
 
-  const currentTradeAmount = computed(() => {
-    const { price_type, limit_price, volume, side, account_id } =
-      formState.value;
+  const currentPrice = computed(() => {
+    const { price_type, limit_price } = formState.value;
 
-    let currentPrice;
     if (price_type === PriceTypeEnum.Limit) {
-      currentPrice = limit_price;
+      return limit_price;
     } else if (price_type === PriceTypeEnum.Market) {
-      currentPrice = currentPosition.value?.last_price;
+      return currentPosition.value?.last_price;
     }
 
+    return null;
+  });
+
+  const currentTradeAmount = computed(() => {
+    const { volume, side, account_id } = formState.value;
+
     if (side === SideEnum.Buy) {
-      return getTradeAmount(currentPrice, volume);
+      return getTradeAmount(currentPrice.value || 0, volume);
     } else if (side === SideEnum.Sell) {
       if (
         instrumentResolved.value &&
         (currentGlobalKfLocation.value?.category === 'td' || account_id)
       ) {
         return getTradeAmount(
-          currentPrice,
+          currentPrice.value || 0,
           volume,
           instrumentResolved.value.instrumentType,
         );
@@ -1645,6 +1649,7 @@ export const useMakeOrderInfo = (
     currentPosition,
     currentAvailMoney,
     currentAvailPosVolume,
+    currentPrice,
     currentTradeAmount,
     currentResidueMoney,
     currentResiduePosVolume,
