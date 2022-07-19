@@ -142,7 +142,9 @@ const showProjectConfig = (key) => {
   const npmConfigValue = getNpmConfigValue(npmConfigKey);
   const value =
     npmConfigValue === 'undefined' ? packageJson.config[key] : npmConfigValue;
-  console.log(`[config] ${npmConfigKey} = ${value} ${getScope(npmConfigValue)}`);
+  console.log(
+    `[config] ${npmConfigKey} = ${value} ${getScope(npmConfigValue)}`,
+  );
 };
 
 const showBinaryHostConfig = (packageName) => {
@@ -157,7 +159,9 @@ const showBinaryHostConfig = (packageName) => {
     hostConfigValue === 'undefined' && packageJson
       ? packageJson.binary.host
       : hostConfigValue;
-  console.log(`[binary] ${npmConfigKey} = ${value} ${getScope(hostConfigValue)}`);
+  console.log(
+    `[binary] ${npmConfigKey} = ${value} ${getScope(hostConfigValue)}`,
+  );
 };
 
 const showAutoConfig = () => {

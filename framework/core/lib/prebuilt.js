@@ -3,7 +3,7 @@ const main = (...argv) => {
   const log = require('npmlog');
   const shell = require('./shell');
 
-  const Runner = function() {
+  const Runner = function () {
     const prog = new node_pre_gyp.Run({
       argv: [process.execPath, __filename, ...argv],
     });
@@ -40,7 +40,7 @@ const main = (...argv) => {
     }
 
     console.log(prog.usage());
-  }
+  };
 
   const proto = Runner.prototype;
   proto.failure = (err) => {
