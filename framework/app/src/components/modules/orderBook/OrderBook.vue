@@ -30,11 +30,13 @@ const quoteData = computed(() => {
 
 onMounted(() => {
   if (app?.proxy) {
-    const subscription = app.proxy.$globalBus.subscribe((data: KfBusEvent) => {
-      if (data.tag === 'orderbook') {
-        currentInstrument.value = data.instrument;
-      }
-    });
+    const subscription = app.proxy.$globalBus.subscribe(
+      (data: KfEvent.KfBusEvent) => {
+        if (data.tag === 'orderbook') {
+          currentInstrument.value = data.instrument;
+        }
+      },
+    );
 
     onBeforeUnmount(() => {
       subscription.unsubscribe();

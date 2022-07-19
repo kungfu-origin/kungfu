@@ -6,6 +6,7 @@ import {
   getCurrentInstance,
   toRaw,
   Component,
+  App,
 } from 'vue';
 import {
   KF_HOME,
@@ -38,6 +39,7 @@ import { VueNode } from 'ant-design-vue/lib/_util/type';
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
 const { t } = VueI18n.global;
 import fse from 'fs-extra';
+import { Router } from 'vue-router';
 
 // this utils file is only for ui components
 export const getUIComponents = (
@@ -79,6 +81,79 @@ export const getUIComponents = (
           }, {} as Record<string, Component>),
       };
     });
+};
+
+export const loadExtScripts = async (
+  components: {
+    key: string;
+    name: string;
+    script: string;
+    extPath: string;
+    position: KfUIExtLocatorTypes;
+    cData: Record<string, Component>;
+  }[],
+  app: App<Element>,
+) => {
+  const allExtScriptModules = await Promise.all(
+    components.map(({ extPath, script }) => {
+      const scriptPath = path.join(extPath, script);
+      if (script && fse.pathExistsSync(scriptPath)) {
+        return global.require(scriptPath);
+      }
+    }),
+  );
+
+  allExtScriptModules.forEach((extScriptModule) => {
+    app.use(extScriptModule.default);
+  });
+
+  return components;
+};
+
+export const loadExtComponents = (
+  components: {
+    key: string;
+    name: string;
+    script: string;
+    extPath: string;
+    position: KfUIExtLocatorTypes;
+    cData: Record<string, Component>;
+  }[],
+  app: App<Element>,
+  router: Router,
+) => {
+  components.forEach(({ cData, position, key, name }) => {
+    switch (position) {
+      case 'sidebar':
+        if (cData[`${key}-entry`] && cData[`${key}-page`]) {
+          app.component(key, cData[`${key}-entry`]);
+          router.addRoute({
+            path: `/${key}`,
+            name: key,
+            component: cData[`${key}-page`],
+          });
+        } else {
+          console.warn(`${key}-entry or ${key}-page not in cData`);
+        }
+        break;
+      case 'board':
+        if (cData[`${key}-index`]) {
+          app.component(name, cData[`${key}-index`]);
+          if (app.config.globalProperties.$availKfBoards.indexOf(name) === -1) {
+            app.config.globalProperties.$availKfBoards.push(name);
+          }
+        } else {
+          console.warn(`${key}-index not in cData`);
+        }
+        break;
+      default:
+        if (cData[`${key}-index`]) {
+          app.component(key, cData[`${key}-index`]);
+        } else {
+          console.warn(`${key}-index not in cData`);
+        }
+    }
+  });
 };
 
 export const useModalVisible = (
@@ -291,7 +366,7 @@ export const useIpcListener = (): void => {
       app?.proxy.$globalBus.next({
         tag: 'main',
         name: args,
-      } as MainProcessEvent);
+      } as KfEvent.MainProcessEvent);
     }
   });
 };
@@ -428,7 +503,7 @@ export const useDownloadHistoryTradingData = (): {
         tag: 'export',
         tradingDataType,
         currentKfLocation,
-      } as ExportTradingDataEvent);
+      } as KfEvent.ExportTradingDataEvent);
     }
   };
 

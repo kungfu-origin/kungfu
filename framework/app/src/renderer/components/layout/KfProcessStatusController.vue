@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ClusterOutlined, FileTextOutlined } from '@ant-design/icons-vue';
+import Icon, { ClusterOutlined, FileTextOutlined } from '@ant-design/icons-vue';
 import { notification } from 'ant-design-vue';
 
 import KfProcessStatus from '@kungfu-trader/kungfu-app/src/renderer/components/public/KfProcessStatus.vue';
@@ -32,6 +32,8 @@ import {
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
 import { KfCategoryTypes } from '@kungfu-trader/kungfu-js-api/typings/enums';
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
+import { usePrefix } from '@kungfu-trader/kungfu-js-api/utils/prefixUtils';
+
 const { t } = VueI18n.global;
 
 const app = getCurrentInstance();
@@ -144,9 +146,37 @@ function handleOpenProcessControllerBoard(): void {
   processControllerBoardVisible.value = true;
 }
 
+const { builtPrefixMap } = usePrefix();
+const prefixMap = ref({});
+
+watch(
+  () => allKfConfigData,
+  () => {
+    if (app?.proxy) {
+      const processIds = categoryList.reduce<string[]>(
+        (list, category: string) => {
+          return [
+            ...list,
+            ...allKfConfigData[category].map((item) =>
+              getProcessIdByKfLocation(item),
+            ),
+          ];
+        },
+        [],
+      );
+      prefixMap.value = builtPrefixMap(app.proxy.$prefixRegister, processIds);
+      if (app.proxy.$prefixRegister.isRegistered('system')) {
+        prefixMap.value['master'] =
+          app.proxy.$prefixRegister.getPrefixDataBykey('system');
+      }
+    }
+  },
+  { deep: true },
+);
+
 onMounted(() => {
   if (app?.proxy) {
-    const subscription = app?.proxy.$globalBus.subscribe((data) => {
+    const subscription = app.proxy.$globalBus.subscribe((data) => {
       if (data.tag === 'main') {
         if (data.name === 'clear-process-before-quit-start') {
           isClosingWindow = true;
@@ -226,6 +256,16 @@ onMounted(() => {
                 <div class="process-id info-item" v-else>
                   {{ config.name }}
                 </div>
+                <Icon
+                  v-if="
+                    prefixMap[getProcessIdByKfLocation(config)]?.prefixType ===
+                    'icon'
+                  "
+                  :component="
+                    prefixMap[getProcessIdByKfLocation(config)].prefix
+                  "
+                  style="font-size: 14px"
+                />
               </div>
               <div class="state-status">
                 <KfProcessStatus

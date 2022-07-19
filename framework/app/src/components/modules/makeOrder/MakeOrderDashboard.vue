@@ -167,57 +167,59 @@ const shotable = (instrumentType: InstrumentTypeEnum): boolean => {
 
 onMounted(() => {
   if (app?.proxy) {
-    const subscription = app.proxy.$globalBus.subscribe((data: KfBusEvent) => {
-      if (data.tag === 'makeOrder') {
-        const { offset, side, volume, price, instrumentType, accountId } = (
-          data as TriggerMakeOrder
-        ).orderInput;
+    const subscription = app.proxy.$globalBus.subscribe(
+      (data: KfEvent.KfBusEvent) => {
+        if (data.tag === 'makeOrder') {
+          const { offset, side, volume, price, instrumentType, accountId } = (
+            data as KfEvent.TriggerMakeOrder
+          ).orderInput;
 
-        const instrumentValue = buildInstrumentSelectOptionValue(
-          (data as TriggerMakeOrder).orderInput,
-        );
+          const instrumentValue = buildInstrumentSelectOptionValue(
+            (data as KfEvent.TriggerMakeOrder).orderInput,
+          );
 
-        formState.value.instrument = instrumentValue;
-        formState.value.offset = +offset;
-        formState.value.side = +side;
-        formState.value.volume = +Number(volume).toFixed(0);
-        formState.value.limit_price = +Number(price).toFixed(4);
-        formState.value.instrument_type = +instrumentType;
-
-        if (accountId) {
-          formState.value.account_id = accountId;
-        }
-      }
-
-      if (data.tag === 'orderBookUpdate') {
-        const { side, price, volume, instrumentType } = (
-          data as TriggerOrderBookUpdate
-        ).orderInput;
-
-        const instrumentValue = buildInstrumentSelectOptionValue(
-          (data as TriggerOrderBookUpdate).orderInput,
-        );
-
-        if (!formState.value.instrument) {
           formState.value.instrument = instrumentValue;
-          formState.value.instrument_type = +instrumentType;
-        }
-
-        if (!!price && !Number.isNaN(price) && +price !== 0) {
-          formState.value.limit_price = +Number(price).toFixed(4);
-        }
-
-        if (
-          !!volume &&
-          !Number.isNaN(Number(volume)) &&
-          BigInt(volume) !== BigInt(0)
-        ) {
+          formState.value.offset = +offset;
+          formState.value.side = +side;
           formState.value.volume = +Number(volume).toFixed(0);
+          formState.value.limit_price = +Number(price).toFixed(4);
+          formState.value.instrument_type = +instrumentType;
+
+          if (accountId) {
+            formState.value.account_id = accountId;
+          }
         }
 
-        formState.value.side = +side;
-      }
-    });
+        if (data.tag === 'orderBookUpdate') {
+          const { side, price, volume, instrumentType } = (
+            data as KfEvent.TriggerOrderBookUpdate
+          ).orderInput;
+
+          const instrumentValue = buildInstrumentSelectOptionValue(
+            (data as KfEvent.TriggerOrderBookUpdate).orderInput,
+          );
+
+          if (!formState.value.instrument) {
+            formState.value.instrument = instrumentValue;
+            formState.value.instrument_type = +instrumentType;
+          }
+
+          if (!!price && !Number.isNaN(price) && +price !== 0) {
+            formState.value.limit_price = +Number(price).toFixed(4);
+          }
+
+          if (
+            !!volume &&
+            !Number.isNaN(Number(volume)) &&
+            BigInt(volume) !== BigInt(0)
+          ) {
+            formState.value.volume = +Number(volume).toFixed(0);
+          }
+
+          formState.value.side = +side;
+        }
+      },
+    );
 
     onBeforeUnmount(() => {
       subscription.unsubscribe();

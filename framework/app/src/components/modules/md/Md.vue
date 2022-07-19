@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed, Ref, ref, toRefs } from 'vue';
-import {
+import { computed, getCurrentInstance, onMounted, Ref, ref, toRefs } from 'vue';
+import Icon, {
   FileTextOutlined,
   SettingOutlined,
   DeleteOutlined,
@@ -35,7 +35,9 @@ import {
   useSwitchAllConfig,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/actionsUtils';
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
+import { usePrefix } from '@kungfu-trader/kungfu-js-api/utils/prefixUtils';
 
+const app = getCurrentInstance();
 const { t } = VueI18n.global;
 const { success, error } = messagePrompt();
 
@@ -71,6 +73,18 @@ const { searchKeyword, tableData } = useTableSearchKeyword<KungfuApi.KfConfig>(
 
 const { handleConfirmAddUpdateKfConfig, handleRemoveKfConfig } =
   useAddUpdateRemoveKfConfig();
+
+const { builtPrefixMap } = usePrefix();
+const prefixMap = ref({});
+
+onMounted(() => {
+  if (app?.proxy) {
+    prefixMap.value = builtPrefixMap(
+      app.proxy.$prefixRegister,
+      tableData.value.map((item) => getProcessIdByKfLocation(item)),
+    );
+  }
+});
 
 function handleOpenSetMdDialog(
   type = 'add' as KungfuApi.ModalChangeType,
@@ -181,6 +195,14 @@ function handleRemoveMd(record: KungfuApi.KfConfig) {
             <a-tag :color="getInstrumentTypeColor(mdExtTypeMap[record.name])">
               {{ record.group }}
             </a-tag>
+            <Icon
+              v-if="
+                prefixMap[getProcessIdByKfLocation(record)]?.prefixType ===
+                'icon'
+              "
+              :component="prefixMap[getProcessIdByKfLocation(record)].prefix"
+              style="font-size: 14px"
+            />
           </template>
           <template v-else-if="column.dataIndex === 'stateStatus'">
             <KfProcessStatus

@@ -247,7 +247,7 @@ export default defineComponent({
       this.markIsBoardDragging(false);
       this.$globalBus.next({
         tag: 'resize',
-      } as ResizeEvent);
+      } as KfEvent.ResizeEvent);
     },
 
     handleDrop() {

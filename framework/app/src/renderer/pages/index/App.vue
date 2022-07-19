@@ -77,7 +77,7 @@ store.setSubscribedInstruments();
 store.setRiskSettingList();
 store.setKfGlobalSetting();
 
-const busSubscription = globalBus.subscribe((data: KfBusEvent) => {
+const busSubscription = globalBus.subscribe((data: KfEvent.KfBusEvent) => {
   if (data.tag === 'main') {
     switch (data.name) {
       case 'clear-journal':
@@ -93,7 +93,7 @@ const busSubscription = globalBus.subscribe((data: KfBusEvent) => {
         globalBus.next({
           tag: 'export',
           tradingDataType: 'all',
-        } as ExportTradingDataEvent);
+        } as KfEvent.ExportTradingDataEvent);
     }
   }
   if (data.tag === 'update:riskSetting') {
@@ -118,7 +118,7 @@ onMounted(() => {
     app?.proxy &&
       app?.proxy.$globalBus.next({
         tag: 'resize',
-      } as ResizeEvent);
+      } as KfEvent.ResizeEvent);
   });
 });
 

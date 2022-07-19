@@ -133,12 +133,12 @@ onMounted(() => {
     scheduleTask.tasks = !res.tasks
       ? [
           {
-            processId: 'core',
+            processId: 'system',
             mode: 'restart',
             timeValue: dayjs('08:00:00', 'HH:mm:ss'),
           },
           {
-            processId: 'core',
+            processId: 'system',
             mode: 'restart',
             timeValue: dayjs('20:00:00', 'HH:mm:ss'),
           },
@@ -409,11 +409,11 @@ function handleRemoveScheduleTask(index: number) {
                       <a-select
                         style="width: 220px"
                         v-model:value="task.processId"
-                        :disabled="task.processId === 'core'"
+                        :disabled="task.processId === 'system'"
                         option-label-prop="label"
                       >
                         <a-select-option
-                          v-for="item in task.processId === 'core'
+                          v-for="item in task.processId === 'system'
                             ? coreForScheduleTasksOptions
                             : kfConfigForScheduleTasksOptions"
                           :value="item.value"
@@ -437,10 +437,10 @@ function handleRemoveScheduleTask(index: number) {
                       <a-select
                         style="width: 120px"
                         v-model:value="task.mode"
-                        :disabled="task.processId === 'core'"
+                        :disabled="task.processId === 'system'"
                       >
                         <a-select-option
-                          v-for="item in task.processId === 'core'
+                          v-for="item in task.processId === 'system'
                             ? modeForCoreScheduleTasksOptions
                             : modeForScheduleTasksOptions"
                           :value="item.value"
@@ -458,7 +458,7 @@ function handleRemoveScheduleTask(index: number) {
                         v-model:value="task.timeValue"
                       ></a-time-picker>
                     </a-col>
-                    <a-col v-if="task.processId !== 'core'">
+                    <a-col v-if="task.processId !== 'system'">
                       <div class="title"></div>
                       <DeleteOutlined
                         class="kf-hover"

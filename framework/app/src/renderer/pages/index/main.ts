@@ -61,6 +61,7 @@ import VueVirtualScroller from 'vue-virtual-scroller';
 import 'vue-virtual-scroller/dist/vue-virtual-scroller.css';
 import { useComponenets } from './useComponents';
 import { GlobalCategoryRegister } from '@kungfu-trader/kungfu-js-api/utils/extraLocationUtils';
+import { PrefixRegister } from '@kungfu-trader/kungfu-js-api/utils/prefixUtils';
 import globalBus from '@kungfu-trader/kungfu-js-api/utils/globalBus';
 
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
@@ -105,10 +106,12 @@ app.config.globalProperties.$globalBus = globalBus;
 app.config.globalProperties.$tradingDataSubject = tradingDataSubject;
 app.config.globalProperties.$globalCategoryRegister =
   new GlobalCategoryRegister();
+app.config.globalProperties.$prefixRegister = new PrefixRegister();
 
 app.use(VueI18n);
-app.mount('#app');
-useComponenets(app, router);
+useComponenets(app, router).then(() => {
+  app.mount('#app');
+});
 
 const globalStore = useGlobalStore();
 
