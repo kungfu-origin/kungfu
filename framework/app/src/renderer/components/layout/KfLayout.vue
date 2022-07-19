@@ -25,6 +25,17 @@ const sidebarFooterComponentConfigs = computed(() => {
     });
 });
 
+const footerComponentConfigs = computed(() => {
+  return Object.keys(uiExtConfigs.value)
+    .filter((key) => uiExtConfigs.value[key].position === 'footer')
+    .map((key) => {
+      return {
+        ...uiExtConfigs.value[key],
+        key,
+      };
+    });
+});
+
 const sidebarComponentConfigs = computed(() => {
   return Object.keys(uiExtConfigs.value)
     .filter((key) => uiExtConfigs.value[key].position === 'sidebar')
@@ -107,6 +118,9 @@ function handleToPage(pathname: string) {
       </a-layout>
     </a-layout>
     <a-layout-footer>
+      <div class="kf-footer-box__warp" v-for="config in footerComponentConfigs">
+        <component :is="config.key"></component>
+      </div>
       <KfProcessStatusController></KfProcessStatusController>
     </a-layout-footer>
     <KfGlobalSettingModal

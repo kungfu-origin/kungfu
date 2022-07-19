@@ -641,7 +641,7 @@ watch(
                     showAmountOrPosition === 'amount'
                       ? $t('可用资金')
                       : $t('可用仓位')
-                  }}:&nbsp;
+                  }}
                 </div>
                 <div class="position-value">
                   {{
@@ -659,7 +659,7 @@ watch(
                         ? t('保证金占用')
                         : t('保证金返还')
                       : $t('交易金额')
-                  }}:&nbsp;
+                  }}
                 </div>
                 <div class="position-value">
                   {{ currentTradeAmount }}
@@ -671,7 +671,7 @@ watch(
                     showAmountOrPosition === 'amount'
                       ? $t('剩余资金')
                       : $t('剩余仓位')
-                  }}:&nbsp;
+                  }}
                 </div>
                 <div class="position-value">
                   {{
@@ -742,10 +742,13 @@ watch(
       }
 
       .percent-group__wrap {
-        margin: 0 0 16px 16px;
+        margin: auto;
+        padding-right: 16px;
+        padding-left: 8px;
+        box-sizing: border-box;
 
         .percent-button {
-          margin: 0 8px 8px 0;
+          margin: 0px 8px 8px 0px;
           color: @border-color-base;
           border-color: @border-color-base;
         }
@@ -761,13 +764,18 @@ watch(
       display: flex;
       line-height: 1;
       font-size: 12px;
-      color: @text-color;
+      color: @text-color-secondary;
       font-weight: bold;
-      margin-bottom: 8px;
-      margin-left: 10px;
+      margin: 8px 0px;
+      padding: 0 8px;
+      box-sizing: border-box;
 
-      &:last-child {
-        margin-bottom: 0;
+      .position-label {
+        padding-right: 16px;
+      }
+
+      &:first-child {
+        margin-top: 8px;
       }
     }
 
