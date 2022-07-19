@@ -113,6 +113,7 @@ const isShowConfirmModal = ref<boolean>(false);
 const curOrderVolume = ref<number>(0);
 const curOrderType = ref<InstrumentTypeEnum>(InstrumentTypeEnum.unknown);
 const currentPercent = ref<number>(0);
+const percentList = [10, 20, 50, 80, 100];
 
 const makeOrderData = computed(() => {
   if (!instrumentResolved.value) {
@@ -616,7 +617,7 @@ watch(
             ></KfConfigSettingsForm>
             <div class="percent-group__wrap">
               <a-button
-                v-for="percent in [25, 50, 75, 100]"
+                v-for="percent in percentList"
                 :class="{
                   'percent-button': true,
                   'percent-button-active': currentPercent === percent,
@@ -739,10 +740,10 @@ watch(
       }
 
       .percent-group__wrap {
-        margin: 0 0 10px 10px;
+        margin: 0 0 16px 16px;
 
         .percent-button {
-          margin: 0 5px 5px 0;
+          margin: 0 8px 8px 0;
           color: @border-color-base;
           border-color: @border-color-base;
         }
