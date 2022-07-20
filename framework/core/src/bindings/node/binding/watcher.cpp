@@ -124,7 +124,7 @@ Watcher::Watcher(const Napi::CallbackInfo &info)
   SPDLOG_INFO("Watcher created for {}", get_home_uname());
 
   // byPassRestore will be true after ui browserWindow reopen by crashed
-  if (GetBypassRestore(info)) {
+  if (GetBypassRestore(info) or bypass_trading_data_) {
     return;
   }
 
