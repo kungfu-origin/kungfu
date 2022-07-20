@@ -150,7 +150,7 @@ export const useTradingTask = (): {
 
   onMounted(() => {
     if (app?.proxy) {
-      const subscription = globalBus.subscribe((data: KfBusEvent) => {
+      const subscription = globalBus.subscribe((data: KfEvent.KfBusEvent) => {
         if (data.tag === 'setTradingTask') {
           currentSelectedTradingTaskExtKey.value = data.extKey;
           setTradingTaskConfigPayload.value = data.payload;

@@ -18,7 +18,7 @@ import {
   confirmModal,
   messagePrompt,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
-import { getConfigSettings } from './config';
+import { getConfigSettings, LABEL_COL, WRAPPER_COL } from './config';
 import {
   dealOrderPlaceVNode,
   dealStockOffset,
@@ -79,6 +79,7 @@ const {
   currentPosition,
   currentResidueMoney,
   currentResiduePosVolume,
+  currentPrice,
   currentTradeAmount,
   currentAvailMoney,
   currentAvailPosVolume,
@@ -111,6 +112,8 @@ const configSettings = computed(() => {
 const isShowConfirmModal = ref<boolean>(false);
 const curOrderVolume = ref<number>(0);
 const curOrderType = ref<InstrumentTypeEnum>(InstrumentTypeEnum.unknown);
+const currentPercent = ref<number>(0);
+const percentList = [10, 20, 50, 80, 100];
 
 const makeOrderData = computed(() => {
   if (!instrumentResolved.value) {
@@ -164,57 +167,59 @@ const shotable = (instrumentType: InstrumentTypeEnum): boolean => {
 
 onMounted(() => {
   if (app?.proxy) {
-    const subscription = app.proxy.$globalBus.subscribe((data: KfBusEvent) => {
-      if (data.tag === 'makeOrder') {
-        const { offset, side, volume, price, instrumentType, accountId } = (
-          data as TriggerMakeOrder
-        ).orderInput;
+    const subscription = app.proxy.$globalBus.subscribe(
+      (data: KfEvent.KfBusEvent) => {
+        if (data.tag === 'makeOrder') {
+          const { offset, side, volume, price, instrumentType, accountId } = (
+            data as KfEvent.TriggerMakeOrder
+          ).orderInput;
 
-        const instrumentValue = buildInstrumentSelectOptionValue(
-          (data as TriggerMakeOrder).orderInput,
-        );
+          const instrumentValue = buildInstrumentSelectOptionValue(
+            (data as KfEvent.TriggerMakeOrder).orderInput,
+          );
 
-        formState.value.instrument = instrumentValue;
-        formState.value.offset = +offset;
-        formState.value.side = +side;
-        formState.value.volume = +Number(volume).toFixed(0);
-        formState.value.limit_price = +Number(price).toFixed(4);
-        formState.value.instrument_type = +instrumentType;
-
-        if (accountId) {
-          formState.value.account_id = accountId;
-        }
-      }
-
-      if (data.tag === 'orderBookUpdate') {
-        const { side, price, volume, instrumentType } = (
-          data as TriggerOrderBookUpdate
-        ).orderInput;
-
-        const instrumentValue = buildInstrumentSelectOptionValue(
-          (data as TriggerOrderBookUpdate).orderInput,
-        );
-
-        if (!formState.value.instrument) {
           formState.value.instrument = instrumentValue;
-          formState.value.instrument_type = +instrumentType;
-        }
-
-        if (!!price && !Number.isNaN(price) && +price !== 0) {
-          formState.value.limit_price = +Number(price).toFixed(4);
-        }
-
-        if (
-          !!volume &&
-          !Number.isNaN(Number(volume)) &&
-          BigInt(volume) !== BigInt(0)
-        ) {
+          formState.value.offset = +offset;
+          formState.value.side = +side;
           formState.value.volume = +Number(volume).toFixed(0);
+          formState.value.limit_price = +Number(price).toFixed(4);
+          formState.value.instrument_type = +instrumentType;
+
+          if (accountId) {
+            formState.value.account_id = accountId;
+          }
         }
 
-        formState.value.side = +side;
-      }
-    });
+        if (data.tag === 'orderBookUpdate') {
+          const { side, price, volume, instrumentType } = (
+            data as KfEvent.TriggerOrderBookUpdate
+          ).orderInput;
+
+          const instrumentValue = buildInstrumentSelectOptionValue(
+            (data as KfEvent.TriggerOrderBookUpdate).orderInput,
+          );
+
+          if (!formState.value.instrument) {
+            formState.value.instrument = instrumentValue;
+            formState.value.instrument_type = +instrumentType;
+          }
+
+          if (!!price && !Number.isNaN(price) && +price !== 0) {
+            formState.value.limit_price = +Number(price).toFixed(4);
+          }
+
+          if (
+            !!volume &&
+            !Number.isNaN(Number(volume)) &&
+            BigInt(volume) !== BigInt(0)
+          ) {
+            formState.value.volume = +Number(volume).toFixed(0);
+          }
+
+          formState.value.side = +side;
+        }
+      },
+    );
 
     onBeforeUnmount(() => {
       subscription.unsubscribe();
@@ -529,6 +534,53 @@ async function handleOpenTradingTaskConfigModal(
     }
   }
 }
+
+const dealStringToNumber = (tar: string) =>
+  Number.isNaN(Number(tar)) ? 0 : Number(tar);
+
+let lastPercentSetVolume = 0;
+const handlePercentChange = (target: number) => {
+  const { side, offset } = formState.value;
+
+  const curOffset = getResolvedOffset(
+    offset,
+    side,
+    instrumentResolved.value?.instrumentType,
+  );
+
+  const targetPercent = target / 100;
+
+  let targetVolume;
+  if (curOffset === OffsetEnum.Open) {
+    const availMoney = dealStringToNumber(currentAvailMoney.value);
+    const allVolume = availMoney / currentPrice.value;
+    targetVolume = allVolume * targetPercent;
+  } else if (curOffset === OffsetEnum.Close) {
+    const availPosVolume = dealStringToNumber(currentAvailPosVolume.value);
+    targetVolume = availPosVolume * targetPercent;
+  } else if (curOffset === OffsetEnum.CloseToday) {
+    const availPosVolume = currentPosition.value?.volume;
+    targetVolume = Number(availPosVolume) * targetPercent;
+  } else if (curOffset === OffsetEnum.CloseYest) {
+    const availPosVolume = currentPosition.value?.yesterday_volume;
+    targetVolume = Number(availPosVolume) * targetPercent;
+  }
+
+  formState.value.volume = ~~targetVolume;
+  if (targetVolume) {
+    currentPercent.value = target;
+    lastPercentSetVolume = ~~targetVolume;
+  }
+};
+
+watch(
+  () => formState.value.volume,
+  (newVal) => {
+    if (newVal !== lastPercentSetVolume) {
+      currentPercent.value = 0;
+    }
+  },
+);
 </script>
 
 <template>
@@ -562,55 +614,74 @@ async function handleOpenTradingTaskConfigModal(
               v-model:formState="formState"
               :configSettings="configSettings"
               changeType="add"
-              :label-col="5"
-              :wrapper-col="14"
+              :label-col="LABEL_COL"
+              :wrapper-col="WRAPPER_COL"
             ></KfConfigSettingsForm>
+            <div class="percent-group__wrap">
+              <a-col :span="LABEL_COL + WRAPPER_COL">
+                <a-button
+                  v-for="percent in percentList"
+                  :class="{
+                    'percent-button': true,
+                    'percent-button-active': currentPercent === percent,
+                  }"
+                  :key="percent"
+                  size="small"
+                  ghost
+                  @click="
+                    currentPercent !== percent && handlePercentChange(percent)
+                  "
+                >
+                  {{ `${percent}%` }}
+                </a-button>
+              </a-col>
+            </div>
             <template v-if="isAccountOrInstrumentConfirmed">
               <div class="make-order-position">
-                <div class="position-label">
+                <a-col :span="LABEL_COL" class="position-label">
                   {{
                     showAmountOrPosition === 'amount'
                       ? $t('可用资金')
                       : $t('可用仓位')
-                  }}:&nbsp;
-                </div>
-                <div class="position-value">
+                  }}
+                </a-col>
+                <a-col :span="WRAPPER_COL" class="position-value">
                   {{
                     showAmountOrPosition === 'amount'
                       ? currentAvailMoney
                       : currentAvailPosVolume
                   }}
-                </div>
+                </a-col>
               </div>
               <div class="make-order-position">
-                <div class="position-label">
+                <a-col :span="LABEL_COL" class="position-label">
                   {{
                     shotable(instrumentResolved?.instrumentType)
                       ? formState.offset === OffsetEnum.Open
                         ? t('保证金占用')
                         : t('保证金返还')
                       : $t('交易金额')
-                  }}:&nbsp;
-                </div>
-                <div class="position-value">
+                  }}
+                </a-col>
+                <a-col :span="WRAPPER_COL" class="position-value">
                   {{ currentTradeAmount }}
-                </div>
+                </a-col>
               </div>
               <div class="make-order-position">
-                <div class="position-label">
+                <a-col :span="LABEL_COL" class="position-label">
                   {{
                     showAmountOrPosition === 'amount'
                       ? $t('剩余资金')
                       : $t('剩余仓位')
-                  }}:&nbsp;
-                </div>
-                <div class="position-value">
+                  }}
+                </a-col>
+                <a-col :span="WRAPPER_COL" class="position-value">
                   {{
                     showAmountOrPosition === 'amount'
                       ? currentResidueMoney
                       : currentResiduePosVolume
                   }}
-                </div>
+                </a-col>
               </div>
             </template>
           </div>
@@ -671,19 +742,49 @@ async function handleOpenTradingTaskConfigModal(
           min-height: unset;
         }
       }
+
+      .percent-group__wrap {
+        margin: auto;
+        padding-right: 16px;
+        padding-left: 8px;
+        box-sizing: border-box;
+
+        .ant-col {
+          margin: auto;
+        }
+
+        .percent-button {
+          margin: 0px 8px 8px 0px;
+          color: @border-color-base;
+          border-color: @border-color-base;
+        }
+
+        .percent-button-active {
+          color: @primary-color;
+          border-color: @primary-color;
+        }
+      }
     }
 
     .make-order-position {
       display: flex;
       line-height: 1;
       font-size: 12px;
-      color: @text-color;
+      color: @text-color-secondary;
       font-weight: bold;
-      margin-bottom: 8px;
-      margin-left: 10px;
+      margin: 8px 0px;
 
-      &:last-child {
-        margin-bottom: 0;
+      .position-label {
+        padding-right: 8px;
+        text-align: right;
+      }
+
+      .position-value {
+        font-weight: bold;
+      }
+
+      &:first-child {
+        margin-top: 8px;
       }
     }
 

@@ -2,6 +2,7 @@ import os from 'os';
 import { dialog, shell } from '@electron/remote';
 import { ensureRemoveLocation } from '@kungfu-trader/kungfu-js-api/actions';
 import {
+  dealPosition,
   dealTradingDataItem,
   getKungfuHistoryData,
   hashInstrumentUKey,
@@ -39,6 +40,7 @@ import {
   dealKfNumber,
   dealKfPrice,
   transformSearchInstrumentResultToInstrument,
+  booleanProcessEnv,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { writeCSV } from '@kungfu-trader/kungfu-js-api/utils/fileUtils';
 import {
@@ -280,7 +282,7 @@ export const useAddUpdateRemoveKfConfig = (): {
 export const useDealExportHistoryTradingData = (): {
   exportDateModalVisible: Ref<boolean>;
   exportDataLoading: Ref<boolean>;
-  exportEventData: Ref<ExportTradingDataEvent | undefined>;
+  exportEventData: Ref<KfEvent.ExportTradingDataEvent | undefined>;
   handleConfirmExportDate(formSate: {
     date: string;
     dateType: HistoryDateEnum;
@@ -288,7 +290,7 @@ export const useDealExportHistoryTradingData = (): {
 } => {
   const app = getCurrentInstance();
   const exportDateModalVisible = ref<boolean>(false);
-  const exportEventData = ref<ExportTradingDataEvent>();
+  const exportEventData = ref<KfEvent.ExportTradingDataEvent>();
   const exportDataLoading = ref<boolean>(false);
   const { getTradingDataByLocation } = useExtraCategory();
 
@@ -308,7 +310,7 @@ export const useDealExportHistoryTradingData = (): {
     }
 
     const { currentKfLocation, tradingDataType } =
-      exportEventData.value || ({} as ExportTradingDataEvent);
+      exportEventData.value || ({} as KfEvent.ExportTradingDataEvent);
     const { date, dateType } = formState;
     const dateResolved = dayjs(date).format('YYYYMMDD');
 
@@ -422,7 +424,7 @@ export const useDealExportHistoryTradingData = (): {
   onMounted(() => {
     if (app?.proxy) {
       const subscription = app.proxy.$globalBus.subscribe(
-        (data: KfBusEvent) => {
+        (data: KfEvent.KfBusEvent) => {
           if (data.tag === 'export') {
             exportEventData.value = data;
 
@@ -694,9 +696,14 @@ export const usePreStartAndQuitApp = (): {
   };
 
   onMounted(() => {
+    if (booleanProcessEnv(process.env.RELOAD_AFTER_CRASHED)) {
+      preStartSystemLoadingData.archive = 'done';
+      preStartSystemLoadingData.extraResourcesLoading = 'done';
+    }
+
     if (app?.proxy) {
       const subscription = app?.proxy.$globalBus.subscribe(
-        (data: KfBusEvent) => {
+        (data: KfEvent.KfBusEvent) => {
           if (data.tag === 'processStatus') {
             if (data.name && data.name === 'archive') {
               preStartSystemLoadingData.archive =
@@ -706,6 +713,12 @@ export const usePreStartAndQuitApp = (): {
             if (data.name && data.name === 'extraResourcesLoading') {
               preStartSystemLoadingData.extraResourcesLoading =
                 data.status === 'online' ? 'done' : 'loading';
+            }
+
+            if (data.name === 'system' && data.status === 'waiting restart') {
+              preStartSystemLoadingData.archive = 'loading';
+              preStartSystemLoadingData.extraResourcesLoading = 'loading';
+              startGetWatcherStatus();
             }
           }
 
@@ -724,14 +737,6 @@ export const usePreStartAndQuitApp = (): {
               case 'clear-process-before-quit-end':
                 preQuitSystemLoadingData.quit = 'done';
                 break;
-            }
-          }
-
-          if (data.tag === 'processStatus') {
-            if (data.name === 'system' && data.status === 'waiting restart') {
-              preStartSystemLoadingData.archive = 'loading';
-              preStartSystemLoadingData.extraResourcesLoading = 'loading';
-              startGetWatcherStatus();
             }
           }
         },
@@ -1365,6 +1370,50 @@ export const playSound = (): void => {
   }
 };
 
+export const useCurrentPositionList = (
+  app: ComponentInternalInstance | null,
+) => {
+  const { currentGlobalKfLocation } = useCurrentGlobalKfLocation(
+    window.watcher,
+  );
+  const { getTradingDataByLocation } = useExtraCategory();
+  const currentPositionList = ref<KungfuApi.Position[]>([]);
+
+  onMounted(() => {
+    if (app?.proxy) {
+      const subscription = app.proxy.$tradingDataSubject.subscribe(
+        (watcher: KungfuApi.Watcher) => {
+          if (currentGlobalKfLocation.value === null) {
+            return;
+          }
+
+          const positions = getTradingDataByLocation(
+            app?.proxy?.$globalCategoryRegister?.globalRegistedCategories?.[
+              currentGlobalKfLocation.value.category
+            ] || null,
+            watcher.ledger.Position,
+            currentGlobalKfLocation.value,
+            window.watcher,
+            'position',
+          ) as KungfuApi.Position[];
+
+          currentPositionList.value = toRaw(
+            positions.reverse().map((item) => dealPosition(watcher, item)),
+          );
+        },
+      );
+
+      onBeforeUnmount(() => {
+        subscription.unsubscribe();
+      });
+    }
+  });
+
+  return {
+    currentPositionList,
+  };
+};
+
 export const useMakeOrderInfo = (
   app: ComponentInternalInstance | null,
   formState: Ref<Record<string, KungfuApi.KfConfigValue>>,
@@ -1372,8 +1421,8 @@ export const useMakeOrderInfo = (
   const { currentGlobalKfLocation } = useCurrentGlobalKfLocation(
     window.watcher,
   );
+  const { currentPositionList } = useCurrentPositionList(app);
 
-  const { getTradingDataByLocation } = useExtraCategory();
   const { getAssetsByKfConfig } = useAssets();
 
   const instrumentResolved = computed(() => {
@@ -1410,36 +1459,19 @@ export const useMakeOrderInfo = (
     return offset === OffsetEnum.Open ? 'amount' : 'position';
   });
 
-  // 更新持仓列表
-  const positionsList = computed<KungfuApi.Position[]>(() => {
-    if (currentGlobalKfLocation.value === null) {
-      return [];
-    }
-
-    const positions = getTradingDataByLocation(
-      app?.proxy?.$globalCategoryRegister?.globalRegistedCategories?.[
-        currentGlobalKfLocation.value.category
-      ] || null,
-      window.watcher.ledger.Position,
-      currentGlobalKfLocation.value,
-      window.watcher,
-      'position',
-    ) as KungfuApi.Position[];
-
-    return positions;
-  });
-
   const currentPosition = computed(() => {
-    if (!positionsList.value.length || !instrumentResolved.value) return null;
+    if (!currentPositionList.value.length || !instrumentResolved.value)
+      return null;
 
     const { exchangeId, instrumentId, instrumentType } =
       instrumentResolved.value;
-    const targetPositionList: KungfuApi.Position[] = positionsList.value.filter(
-      (position) =>
-        position.exchange_id === exchangeId &&
-        position.instrument_id === instrumentId &&
-        position.instrument_type === instrumentType,
-    );
+    const targetPositionList: KungfuApi.Position[] =
+      currentPositionList.value.filter(
+        (position) =>
+          position.exchange_id === exchangeId &&
+          position.instrument_id === instrumentId &&
+          position.instrument_type === instrumentType,
+      );
 
     if (targetPositionList && targetPositionList.length) {
       const { side, offset } = formState.value;
@@ -1498,14 +1530,14 @@ export const useMakeOrderInfo = (
 
       if (shotable(instrumentType)) {
         if (offset === OffsetEnum.CloseYest) {
-          return dealKfNumber(yesterday_volume);
+          return dealKfNumber(yesterday_volume) + '';
         } else if (offset === OffsetEnum.CloseToday) {
-          return dealKfNumber(volume - yesterday_volume);
+          return dealKfNumber(volume - yesterday_volume) + '';
         } else {
-          return dealKfNumber(volume);
+          return dealKfNumber(volume) + '';
         }
       } else {
-        return dealKfNumber(yesterday_volume);
+        return dealKfNumber(yesterday_volume) + '';
       }
     }
 
@@ -1565,26 +1597,30 @@ export const useMakeOrderInfo = (
     return null;
   }
 
-  const currentTradeAmount = computed(() => {
-    const { price_type, limit_price, volume, side, account_id } =
-      formState.value;
+  const currentPrice = computed(() => {
+    const { price_type, limit_price } = formState.value;
 
-    let currentPrice;
     if (price_type === PriceTypeEnum.Limit) {
-      currentPrice = limit_price;
+      return limit_price;
     } else if (price_type === PriceTypeEnum.Market) {
-      currentPrice = currentPosition.value?.last_price;
+      return currentPosition.value?.last_price;
     }
 
+    return null;
+  });
+
+  const currentTradeAmount = computed(() => {
+    const { volume, side, account_id } = formState.value;
+
     if (side === SideEnum.Buy) {
-      return getTradeAmount(currentPrice, volume);
+      return getTradeAmount(currentPrice.value || 0, volume);
     } else if (side === SideEnum.Sell) {
       if (
         instrumentResolved.value &&
         (currentGlobalKfLocation.value?.category === 'td' || account_id)
       ) {
         return getTradeAmount(
-          currentPrice,
+          currentPrice.value || 0,
           volume,
           instrumentResolved.value.instrumentType,
         );
@@ -1645,6 +1681,7 @@ export const useMakeOrderInfo = (
     currentPosition,
     currentAvailMoney,
     currentAvailPosVolume,
+    currentPrice,
     currentTradeAmount,
     currentResidueMoney,
     currentResiduePosVolume,

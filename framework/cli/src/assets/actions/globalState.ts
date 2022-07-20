@@ -6,6 +6,7 @@ import {
 } from '@kungfu-trader/kungfu-js-api/utils/processUtils';
 import pm2 from '@kungfu-trader/kungfu-js-api/utils/pm2Custom';
 import globalBus from '@kungfu-trader/kungfu-js-api/utils/globalBus';
+import { PrefixRegister } from '@kungfu-trader/kungfu-js-api/utils/prefixUtils';
 
 export const globalState = {
   DZXY_PM_ID: 0,
@@ -13,6 +14,7 @@ export const globalState = {
   DZXY_SUBJECT: new Subject<Pm2Packet>(),
   PM2: pm2,
   GLOBAL_BUS: globalBus,
+  PREFIX_REGISTER: new PrefixRegister(),
 };
 
 const timer = setTimeout(() => {

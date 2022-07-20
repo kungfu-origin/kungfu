@@ -386,17 +386,27 @@ const dzxyUse = (ext: KfExtModule) => {
 };
 
 export const useAllExtScript = () => {
-  getKfCliExtensionConfig().then((allConfigs: KungfuApi.KfCliExtConfigs) => {
-    Object.values(allConfigs).forEach((config) => {
-      const { extPath, script } = config;
-      const scriptPath = path.join(extPath, script);
-      if (script && fse.pathExistsSync(scriptPath)) {
-        dzxyUse(
-          (<Record<string, KfExtModule>>__non_webpack_require__(scriptPath))[
-            'default'
-          ],
-        );
-      }
+  getKfCliExtensionConfig()
+    .then((allConfigs: KungfuApi.KfCliExtConfigs) =>
+      Promise.all(
+        Object.values(allConfigs).map((config) => {
+          const { extPath, script } = config;
+          const scriptPath = path.join(extPath, script);
+          if (script && fse.pathExistsSync(scriptPath)) {
+            return <Record<string, KfExtModule>>(
+              __non_webpack_require__(scriptPath)
+            );
+          }
+
+          return null;
+        }),
+      ),
+    )
+    .then((allExtModules) => {
+      allExtModules.forEach((extModule) => {
+        if (extModule) {
+          dzxyUse(extModule['default']);
+        }
+      });
     });
-  });
 };

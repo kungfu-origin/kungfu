@@ -1,3 +1,3 @@
 import { Subject } from 'rxjs';
 
-export default new Subject<KfBusEvent>();
+export default new Subject<KfEvent.KfBusEvent>();

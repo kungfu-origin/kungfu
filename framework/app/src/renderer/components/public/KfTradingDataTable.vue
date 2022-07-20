@@ -90,7 +90,7 @@ onMounted(() => {
 
   if (app?.proxy) {
     const subscription = app?.proxy.$globalBus
-      .pipe(filter((e: KfBusEvent) => e.tag === 'resize'))
+      .pipe(filter((e: KfEvent.KfBusEvent) => e.tag === 'resize'))
       .subscribe(() => {
         if (kfScrollerTableBodyRef.value) {
           kfScrollerTableWidth.value = kfScrollerTableBodyRef.value.clientWidth;

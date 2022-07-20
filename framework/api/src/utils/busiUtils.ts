@@ -1572,7 +1572,15 @@ export const transformSearchInstrumentResultToInstrument = (
   };
 };
 
-export const booleanProcessEnv = (val: string): boolean => {
+export const booleanProcessEnv = (val: string | undefined): boolean => {
+  if (val === undefined) {
+    return false;
+  }
+
+  if (val === 'null') {
+    return false;
+  }
+
   if (val === 'true') {
     return true;
   } else if (val === 'false') {

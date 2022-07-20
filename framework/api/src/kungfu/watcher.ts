@@ -61,7 +61,6 @@ export const watcher = ((): KungfuApi.Watcher | null => {
   const globalSetting = getKfGlobalSettingsValue();
   const bypassAccounting = globalSetting?.performance?.bypassAccounting;
   const bypassTradingData = globalSetting?.performance?.bypassTradingData;
-  console.log(globalSetting);
   console.log('bypassRestore', bypassRestore);
   console.log('bypassAccounting', bypassAccounting);
   console.log('bypassTradingData', bypassTradingData);

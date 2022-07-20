@@ -194,9 +194,11 @@ export const processListObservable = () =>
 
       const mdList: ProcessListItem[] = md.map((item) => {
         const processId = getProcessIdByKfLocation(item);
+        const prefix =
+          globalState.PREFIX_REGISTER.getPrefixDataBykey(processId).prefix;
         return {
           processId,
-          processName: processId,
+          processName: prefix + processId,
           typeName: getCategoryName(item.category),
           category: item.category,
           group: item.group,
@@ -214,9 +216,11 @@ export const processListObservable = () =>
 
       const tdList: ProcessListItem[] = td.map((item) => {
         const processId = getProcessIdByKfLocation(item);
+        const prefix =
+          globalState.PREFIX_REGISTER.getPrefixDataBykey(processId).prefix;
         return {
           processId,
-          processName: processId,
+          processName: prefix + processId,
           typeName: getCategoryName(item.category),
           category: item.category,
           group: item.group,
@@ -234,9 +238,11 @@ export const processListObservable = () =>
 
       const strategyList: ProcessListItem[] = strategy.map((item) => {
         const processId = getProcessIdByKfLocation(item);
+        const prefix =
+          globalState.PREFIX_REGISTER.getPrefixDataBykey(processId).prefix;
         return {
           processId,
-          processName: processId,
+          processName: prefix + processId,
           typeName: getCategoryName(item.category),
           category: item.category,
           group: item.group,
@@ -250,9 +256,11 @@ export const processListObservable = () =>
 
       const daemonList: ProcessListItem[] = daemon.map((item) => {
         const processId = getProcessIdByKfLocation(item);
+        const prefix =
+          globalState.PREFIX_REGISTER.getPrefixDataBykey(processId).prefix;
         return {
           processId,
-          processName: dealProcessName(processId) || processId,
+          processName: prefix + (dealProcessName(processId) || processId),
           typeName: getCategoryName(item.category as KfCategoryTypes),
           category: item.category,
           group: item.group,
@@ -265,6 +273,9 @@ export const processListObservable = () =>
           cwd: item.cwd,
         };
       });
+
+      const masterPrefix =
+        globalState.PREFIX_REGISTER.getPrefixDataBykey('system').prefix;
 
       return [
         {
@@ -281,7 +292,7 @@ export const processListObservable = () =>
         },
         {
           processId: 'master',
-          processName: colors.bold('MASTER'),
+          processName: colors.bold(masterPrefix + 'MASTER'),
           typeName: colors.bgMagenta('Sys'),
           category: 'system',
           group: 'master',
