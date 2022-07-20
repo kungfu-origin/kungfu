@@ -2,6 +2,7 @@ import os from 'os';
 import { dialog, shell } from '@electron/remote';
 import { ensureRemoveLocation } from '@kungfu-trader/kungfu-js-api/actions';
 import {
+  dealPosition,
   dealTradingDataItem,
   getKungfuHistoryData,
   hashInstrumentUKey,
@@ -1369,6 +1370,50 @@ export const playSound = (): void => {
   }
 };
 
+export const useCurrentPositionList = (
+  app: ComponentInternalInstance | null,
+) => {
+  const { currentGlobalKfLocation } = useCurrentGlobalKfLocation(
+    window.watcher,
+  );
+  const { getTradingDataByLocation } = useExtraCategory();
+  const currentPositionList = ref<KungfuApi.Position[]>([]);
+
+  onMounted(() => {
+    if (app?.proxy) {
+      const subscription = app.proxy.$tradingDataSubject.subscribe(
+        (watcher: KungfuApi.Watcher) => {
+          if (currentGlobalKfLocation.value === null) {
+            return;
+          }
+
+          const positions = getTradingDataByLocation(
+            app?.proxy?.$globalCategoryRegister?.globalRegistedCategories?.[
+              currentGlobalKfLocation.value.category
+            ] || null,
+            watcher.ledger.Position,
+            currentGlobalKfLocation.value,
+            window.watcher,
+            'position',
+          ) as KungfuApi.Position[];
+
+          currentPositionList.value = toRaw(
+            positions.reverse().map((item) => dealPosition(watcher, item)),
+          );
+        },
+      );
+
+      onBeforeUnmount(() => {
+        subscription.unsubscribe();
+      });
+    }
+  });
+
+  return {
+    currentPositionList,
+  };
+};
+
 export const useMakeOrderInfo = (
   app: ComponentInternalInstance | null,
   formState: Ref<Record<string, KungfuApi.KfConfigValue>>,
@@ -1376,8 +1421,8 @@ export const useMakeOrderInfo = (
   const { currentGlobalKfLocation } = useCurrentGlobalKfLocation(
     window.watcher,
   );
+  const { currentPositionList } = useCurrentPositionList(app);
 
-  const { getTradingDataByLocation } = useExtraCategory();
   const { getAssetsByKfConfig } = useAssets();
 
   const instrumentResolved = computed(() => {
@@ -1414,36 +1459,19 @@ export const useMakeOrderInfo = (
     return offset === OffsetEnum.Open ? 'amount' : 'position';
   });
 
-  // 更新持仓列表
-  const positionsList = computed<KungfuApi.Position[]>(() => {
-    if (currentGlobalKfLocation.value === null) {
-      return [];
-    }
-
-    const positions = getTradingDataByLocation(
-      app?.proxy?.$globalCategoryRegister?.globalRegistedCategories?.[
-        currentGlobalKfLocation.value.category
-      ] || null,
-      window.watcher.ledger.Position,
-      currentGlobalKfLocation.value,
-      window.watcher,
-      'position',
-    ) as KungfuApi.Position[];
-
-    return positions;
-  });
-
   const currentPosition = computed(() => {
-    if (!positionsList.value.length || !instrumentResolved.value) return null;
+    if (!currentPositionList.value.length || !instrumentResolved.value)
+      return null;
 
     const { exchangeId, instrumentId, instrumentType } =
       instrumentResolved.value;
-    const targetPositionList: KungfuApi.Position[] = positionsList.value.filter(
-      (position) =>
-        position.exchange_id === exchangeId &&
-        position.instrument_id === instrumentId &&
-        position.instrument_type === instrumentType,
-    );
+    const targetPositionList: KungfuApi.Position[] =
+      currentPositionList.value.filter(
+        (position) =>
+          position.exchange_id === exchangeId &&
+          position.instrument_id === instrumentId &&
+          position.instrument_type === instrumentType,
+      );
 
     if (targetPositionList && targetPositionList.length) {
       const { side, offset } = formState.value;
