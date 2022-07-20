@@ -304,6 +304,9 @@ export default {
     marked_value: '名义本金',
     margin: '保证金',
     avail_money: '可开仓名义本金',
+    avail_margin: '可用保证金',
+    cash_debt: '融资负债',
+    total_asset: '总资产',
     actions: '操作',
 
     add_td: '添加',

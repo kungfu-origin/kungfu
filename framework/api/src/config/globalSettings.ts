@@ -123,6 +123,13 @@ export const getKfGlobalSettings = (): KfSystemConfig[] => [
         default: '',
         type: 'percent',
       },
+      {
+        key: 'assetMargin',
+        name: t('globalSettingConfig.asset_margin'),
+        tip: t('globalSettingConfig.show_asset_margin'),
+        default: false,
+        type: 'bool',
+      },
     ],
   },
   {
