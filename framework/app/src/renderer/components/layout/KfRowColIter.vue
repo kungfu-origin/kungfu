@@ -25,7 +25,6 @@
         @dragenter="handleDragEnter"
         @dragover="handleDragOver"
         @dragleave="handleDragLeave"
-        @dragend="handleDragEnd"
         @drop="handleDrop"
       >
         <a-tab-pane v-for="content in contents" :key="content">
@@ -34,6 +33,7 @@
               class="kf-tab-header"
               draggable="true"
               @dragstart="handleDragStart(content)"
+              @dragend="handleDragEnd"
             >
               {{ content }}
             </div>
@@ -76,7 +76,6 @@
         @dragenter="handleDragEnter"
         @dragover="handleDragOver"
         @dragleave="handleDragLeave"
-        @dragend="handleDragEnd"
         @drop="handleDrop"
       >
         <a-tab-pane v-for="content in contents" :key="content">
@@ -85,6 +84,7 @@
               class="kf-tab-header"
               draggable="true"
               @dragstart="handleDragStart(content)"
+              @dragend="handleDragEnd"
             >
               {{ content }}
             </div>
@@ -207,6 +207,7 @@ export default defineComponent({
     handleDragStart(contentId: KfLayout.ContentId) {
       this.setDragedContentData(this.boardId, contentId);
       this.markIsBoardDragging(true);
+      console.log(this.isBoardDragging);
     },
 
     handleDragEnter(e: DragEvent) {
@@ -245,6 +246,7 @@ export default defineComponent({
     handleDragEnd() {
       this.clearState();
       this.markIsBoardDragging(false);
+      console.log(this.isBoardDragging);
       this.$globalBus.next({
         tag: 'resize',
       } as KfEvent.ResizeEvent);
