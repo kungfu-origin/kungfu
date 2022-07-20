@@ -103,9 +103,11 @@ export const loadExtScripts = async (
     }),
   );
 
-  allExtScriptModules.forEach((extScriptModule) => {
-    app.use(extScriptModule.default);
-  });
+  allExtScriptModules
+    .filter((extScriptModule) => !!extScriptModule)
+    .forEach((extScriptModule) => {
+      app.use(extScriptModule.default);
+    });
 
   return components;
 };

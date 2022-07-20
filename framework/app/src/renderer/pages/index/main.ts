@@ -40,7 +40,10 @@ import {
   preStartAll,
 } from '@kungfu-trader/kungfu-app/src/renderer/assets/methods/uiUtils';
 import { useGlobalStore } from '@kungfu-trader/kungfu-app/src/renderer/pages/index/store/global';
-import { delayMilliSeconds } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
+import {
+  booleanProcessEnv,
+  delayMilliSeconds,
+} from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import {
   Pm2ProcessStatusDetailData,
   Pm2ProcessStatusData,
@@ -115,7 +118,7 @@ useComponenets(app, router).then(() => {
 
 const globalStore = useGlobalStore();
 
-if (process.env.RELOAD_AFTER_CRASHED === 'false') {
+if (!booleanProcessEnv(process.env.RELOAD_AFTER_CRASHED)) {
   preStartAll()
     .then(() => {
       return startArchiveMakeTask((archiveStatus: Pm2ProcessStatusTypes) => {
@@ -156,19 +159,6 @@ if (process.env.RELOAD_AFTER_CRASHED === 'false') {
         .catch((err) => console.error(err.message));
     });
 } else {
-  // 崩溃后重开, 跳过archive过程
-  globalBus.next({
-    tag: 'processStatus',
-    name: 'archive',
-    status: 'waiting restart',
-  });
-
-  globalBus.next({
-    tag: 'processStatus',
-    name: 'extraResourcesLoading',
-    status: 'online',
-  });
-
   startGetProcessStatus(
     (res: {
       processStatus: Pm2ProcessStatusData;

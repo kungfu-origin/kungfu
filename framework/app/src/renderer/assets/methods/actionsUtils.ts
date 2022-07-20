@@ -39,6 +39,7 @@ import {
   dealKfNumber,
   dealKfPrice,
   transformSearchInstrumentResultToInstrument,
+  booleanProcessEnv,
 } from '@kungfu-trader/kungfu-js-api/utils/busiUtils';
 import { writeCSV } from '@kungfu-trader/kungfu-js-api/utils/fileUtils';
 import {
@@ -694,6 +695,11 @@ export const usePreStartAndQuitApp = (): {
   };
 
   onMounted(() => {
+    if (booleanProcessEnv(process.env.RELOAD_AFTER_CRASHED)) {
+      preStartSystemLoadingData.archive = 'done';
+      preStartSystemLoadingData.extraResourcesLoading = 'done';
+    }
+
     if (app?.proxy) {
       const subscription = app?.proxy.$globalBus.subscribe(
         (data: KfEvent.KfBusEvent) => {
@@ -706,6 +712,12 @@ export const usePreStartAndQuitApp = (): {
             if (data.name && data.name === 'extraResourcesLoading') {
               preStartSystemLoadingData.extraResourcesLoading =
                 data.status === 'online' ? 'done' : 'loading';
+            }
+
+            if (data.name === 'system' && data.status === 'waiting restart') {
+              preStartSystemLoadingData.archive = 'loading';
+              preStartSystemLoadingData.extraResourcesLoading = 'loading';
+              startGetWatcherStatus();
             }
           }
 
@@ -724,14 +736,6 @@ export const usePreStartAndQuitApp = (): {
               case 'clear-process-before-quit-end':
                 preQuitSystemLoadingData.quit = 'done';
                 break;
-            }
-          }
-
-          if (data.tag === 'processStatus') {
-            if (data.name === 'system' && data.status === 'waiting restart') {
-              preStartSystemLoadingData.archive = 'loading';
-              preStartSystemLoadingData.extraResourcesLoading = 'loading';
-              startGetWatcherStatus();
             }
           }
         },
