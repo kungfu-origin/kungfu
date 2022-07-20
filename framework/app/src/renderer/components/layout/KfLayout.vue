@@ -29,7 +29,6 @@ const footerComponentConfigs = computed(() => {
   return Object.keys(uiExtConfigs.value)
     .filter((key) => uiExtConfigs.value[key].position === 'footer')
     .map((key) => {
-      console.log(key, uiExtConfigs.value[key]);
       return {
         ...uiExtConfigs.value[key],
         key,
