@@ -7,6 +7,7 @@ function main(argv) {
     '.prettierrc.js',
   );
   const prettierArgs = ['-l', '-w', '--config', prettierConfig];
+  shell.run('prettier', ['--version'], false);
   shell.runAndExit('prettier', prettierArgs.concat(argv));
   shell.run('yarn', ['run', 'prettier'].concat(prettierArgs).concat(argv));
 }

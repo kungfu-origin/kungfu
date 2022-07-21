@@ -1,23 +1,17 @@
 const { shell } = require('../lib');
 
-try {
-  dealSpawnSyncResult(shell.run('yarn', ['format:cpp']));
-  dealSpawnSyncResult(shell.run('yarn', ['format:python']));
-  dealSpawnSyncResult(shell.run('yarn', ['format:js']));
-} catch (err) {
-  console.error(err);
-}
-
-function dealSpawnSyncResult(res) {
-  const { stderr, stdout, error } = res;
-
-  if (error) {
-    console.error(error);
-  }
-  if (stdout) {
-    console.log(stdout.toString());
-  }
-  if (stderr) {
-    console.error(stderr.toString());
+function main() {
+  const tryFormat = (lang) =>
+    shell.run('yarn', ['-s', `format:${lang}`], false, { silent: true });
+  try {
+    tryFormat('cpp');
+    tryFormat('python');
+    tryFormat('js');
+  } catch (err) {
+    console.error(err);
   }
 }
+
+module.exports.main = main;
+
+if (require.main === module) main();

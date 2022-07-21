@@ -9,8 +9,9 @@ const GithubBinaryHost = 'https://prebuilt.libkungfu.io';
 
 const defined = (e) => e;
 
-const getScope = (npmConfigValue) =>
-  npmConfigValue === 'undefined' ? '[package.json]' : '[user]';
+const getScope = (npmConfigValue) => {
+  return npmConfigValue === 'undefined' ? '[package.json]' : '[user]';
+};
 
 const getPackageJson = (packageName) => {
   const toJSON = (filepath) =>
@@ -52,9 +53,15 @@ const npmCall = (npmArgs) => {
   }
 };
 
+const trace = (cmd, argv, opts) => {
+  if (!opts.silent) {
+    console.log(`$ ${cmd} ${argv.join(' ')}`);
+  }
+};
+
 const run = (cmd, argv = [], check = true, opts = {}) => {
   const real_cwd = fs.realpathSync(path.resolve(process.cwd()));
-  console.log(`$ ${cmd} ${argv.join(' ')}`);
+  trace(cmd, argv, opts);
   const result = spawnSync(cmd, argv, {
     shell: true,
     stdio: 'inherit',
@@ -63,12 +70,13 @@ const run = (cmd, argv = [], check = true, opts = {}) => {
     ...opts,
   });
   if (check && result.status !== 0) {
-    process.exit(result.status);
+    process.exit(opts.tolerant ? 0 : result.status);
   }
   return result;
 };
 
 const runAndCollect = (cmd, argv = [], opts = {}) => {
+  trace(cmd, argv, opts);
   return spawnSync(cmd, argv, {
     shell: true,
     stdio: 'pipe',
