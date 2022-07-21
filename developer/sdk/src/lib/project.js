@@ -1,12 +1,7 @@
 const findWorkspaceRoot = require('find-yarn-workspace-root');
 const fse = require('fs-extra');
 const path = require('path');
-const { glob } = require('glob');
 const { getPackageJson } = require('./extension');
-
-const pypackages = '__pypackages__';
-const kungfulibs = '__kungfulibs__';
-const kungfuLibDirPattern = path.join(kungfulibs, '*', '*');
 
 exports.configure = (writePackageJson = false, writeWorkflows = true) => {
   const packageJsonPath = path.join(process.cwd(), 'package.json');

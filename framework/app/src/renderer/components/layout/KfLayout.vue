@@ -5,7 +5,6 @@ import { computed, getCurrentInstance, onBeforeUnmount, ref } from 'vue';
 import { useExtConfigsRelated } from '../../assets/methods/actionsUtils';
 import globalBus from '@kungfu-trader/kungfu-js-api/utils/globalBus';
 import KfGlobalSettingModal from '../public/KfGlobalSettingModal.vue';
-// import { useI18n } from "vue-i18n";
 
 const logo = require('@kungfu-trader/kungfu-app/src/renderer/assets/svg/LOGO.svg');
 
