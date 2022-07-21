@@ -25,7 +25,7 @@ const extras = extdirs.map((fullpath) => {
 module.exports = {
   generateUpdatesFilesForAllChannels: true,
   appId: 'Kungfu.Origin.KungFu.Trader',
-  electronVersion: kungfuCore.dependencies.electron,
+  electronVersion: kungfuCore.devDependencies.electron || kungfuCore.dependencies.electron,
   publish: [
     {
       provider: 'generic',
