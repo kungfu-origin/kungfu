@@ -1,8 +1,7 @@
-const { exitOnError, getConfigValue } = require('./node-lib.js');
-const { shell } = require('../lib/index');
 const electron = require('electron');
 const fse = require('fs-extra');
 const path = require('path');
+const { shell } = require('../lib');
 
 function conan(cmd) {
   const pipenv_args = ['run', 'conan', ...cmd];
@@ -35,7 +34,7 @@ function getNodeVersionOptions() {
 }
 
 function makeConanSetting(name) {
-  return ['-s', `${name}=${getConfigValue(name)}`];
+  return ['-s', `${name}=${shell.getConfigValue(name)}`];
 }
 
 function makeConanSettings(names) {
@@ -43,7 +42,7 @@ function makeConanSettings(names) {
 }
 
 function makeConanOption(name) {
-  return ['-o', `${name}=${getConfigValue(name)}`];
+  return ['-o', `${name}=${shell.getConfigValue(name)}`];
 }
 
 function makeConanOptions(names) {
@@ -124,4 +123,4 @@ async function main() {
 module.exports.cli = cli;
 module.exports.main = main;
 
-if (require.main === module) main().catch(exitOnError);
+if (require.main === module) main().catch(shell.exitOnError);

@@ -1,9 +1,9 @@
-const { run } = require('./node-lib.js');
+const { shell } = require('../lib');
 
 try {
-  dealSpawnSyncResult(run('yarn', ['format:cpp']));
-  dealSpawnSyncResult(run('yarn', ['format:python']));
-  dealSpawnSyncResult(run('yarn', ['format:js']));
+  dealSpawnSyncResult(shell.run('yarn', ['format:cpp']));
+  dealSpawnSyncResult(shell.run('yarn', ['format:python']));
+  dealSpawnSyncResult(shell.run('yarn', ['format:js']));
 } catch (err) {
   console.error(err);
 }

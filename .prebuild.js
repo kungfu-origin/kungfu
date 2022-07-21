@@ -1,5 +1,5 @@
 if (!process.env.CI) {
-  const { run } = require('./framework/core/.gyp/node-lib.js');
-  run('yarn', ['sync']);
-  run('yarn', ['format'], false);
+  const { shell } = require('./framework/core');
+  shell.run('yarn', ['sync']);
+  shell.run('yarn', ['format'], false);
 }

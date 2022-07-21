@@ -1,23 +1,27 @@
-const { runAndCollect, runAndExit, run } = require('./node-lib.js');
 const path = require('path');
+const { shell } = require('../lib');
 
-const main = (module.exports = function (argv) {
-  run('black', ['--version'], false);
+function main(argv) {
+  shell.run('black', ['--version'], false);
 
-  runAndExit('black', argv);
+  shell.runAndExit('black', argv);
 
   const cwd = process.cwd();
   process.chdir(path.dirname(__dirname));
   const pipenvPath = path.resolve(
-    runAndCollect('pipenv', ['--py']).stdout.toString().trim(),
+    shell.runAndCollect('pipenv', ['--py']).stdout.toString().trim(),
   );
   const blackBin = process.platform === 'win32' ? 'black.exe' : 'black';
   const blackPath = path.resolve(path.dirname(pipenvPath), blackBin);
   process.chdir(cwd);
-  runAndExit(blackPath, argv);
+  shell.runAndExit(blackPath, argv);
 
   process.chdir(path.dirname(__dirname));
-  run('pipenv', ['run', 'black'].concat(argv));
-});
+  shell.run('pipenv', ['run', 'black'].concat(argv));
+}
 
-if (require.main === module) main(process.argv.slice(2));
+module.exports.main = main;
+
+if (require.main === module) {
+  main(process.argv.slice(2));
+}

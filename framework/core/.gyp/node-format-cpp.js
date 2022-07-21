@@ -1,20 +1,25 @@
-const { run } = require('./node-lib.js');
 const glob = require('glob');
 const path = require('path');
+const { shell } = require('../lib');
 
-const main = (module.exports = function (argv) {
+function main(argv) {
   const cwd = process.cwd();
   process.chdir(path.dirname(__dirname));
 
-  run('clang-format', ['--version']);
+  shell.run('clang-format', ['--version']);
 
   argv.forEach((dir) =>
     glob
-      .sync(path.join(`${cwd}/${dir}/**`, '*.@(h|hpp|hxx|cpp|c|cc|cxx)'))
+      .sync('**/*.@(h|hpp|hxx|cpp|c|cc|cxx)', { cwd: path.join(cwd, dir) })
       .forEach((p) => {
-        run('clang-format', ['-style=file', '-i', p], false);
+        const file = path.join(cwd, dir, p);
+        shell.run('clang-format', ['-style=file', '-i', file], false);
       }),
   );
-});
+}
 
-if (require.main === module) main(process.argv.slice(2));
+module.exports.main = main;
+
+if (require.main === module) {
+  main(process.argv.slice(2));
+}
