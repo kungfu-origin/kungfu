@@ -63,7 +63,7 @@
   },
   "dependencies": {
     "@mapbox/node-pre-gyp": "^1.0.0",
-    "electron": "13.6.9",
+    "electron": "19.0.8",
     "fs-extra": "^10.0.0",
     "glob": "^7.2.0",
     "nan": "^2.15.0",
@@ -72,7 +72,7 @@
   },
   "devDependencies": {
     "@kungfu-trader/kungfu-toolchain": "^2.4.0-alpha.106",
-    "@kungfu-trader/libnode": "14.19.0",
+    "@kungfu-trader/libnode": "16.10.0",
     "cmake-js": "^6.3.0"
   }
 }
