@@ -47,7 +47,7 @@
     "colors": "^1.4.0",
     "commander": "^9.0.0",
     "console-success": "^1.0.4",
-    "glob": "^7.2.0",
+    "glob": "^8.0.0",
     "inquirer": "^8.2.0",
     "inquirer-autocomplete-prompt": "^2.0.0",
     "inquirer-path": "^1.0.0-beta5"

@@ -1,6 +1,5 @@
 const main = (...argv) => {
   const node_pre_gyp = require('@mapbox/node-pre-gyp');
-  const log = require('npmlog');
   const shell = require('./shell');
 
   const Runner = function () {
@@ -28,10 +27,12 @@ const main = (...argv) => {
         ) {
           runner.failure(err);
         }
-        log.info(
-          'install',
-          'safely ignore missing binaries (expected to build)',
-        );
+        const msg = 'safely ignore missing binaries (expected to build)';
+        try {
+          require('npmlog').info('install', msg);
+        } catch (e) {
+          console.log(msg);
+        }
       });
     };
 
