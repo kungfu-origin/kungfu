@@ -18,14 +18,17 @@ function getNodeVersionOptions() {
     .stdout.toString()
     .trim();
   const electronVersion = packageJson.devDependencies['electron'];
+  const nodeArch = process.arch;
   const nodeVersion = packageJson.devDependencies['@kungfu-trader/libnode'];
   return [
+    '-o',
+    `arch=${nodeArch}`,
     '-o',
     `electron_arch=${electronArch}`,
     '-o',
     `electron_version=${electronVersion}`,
     '-o',
-    `node_arch=${process.arch}`,
+    `node_arch=${nodeArch}`,
     '-o',
     `node_version=${nodeVersion}`,
   ];

@@ -120,7 +120,9 @@ class KungfuCoreConan(ConanFile):
 
     def __get_node_arch(self, runtime):
         return (
-            str(self.options.electron_arch)
+            str(self.options.arch)
+            if tools.detected_os() != "Macos"
+            else str(self.options.electron_arch)
             if runtime == "electron"
             else str(self.options.node_arch)
         )
