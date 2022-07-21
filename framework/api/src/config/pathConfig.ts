@@ -4,8 +4,6 @@ import dayjs from 'dayjs';
 import { addFileSync } from '../utils/fileUtils';
 import { KF_HOME_BASE_DIR_RESOLVE } from '../config/homePathConfig';
 
-declare const global: NodeJS.Global;
-
 addFileSync('', KF_HOME_BASE_DIR_RESOLVE, 'folder');
 export const KF_HOME_BASE_DIR = KF_HOME_BASE_DIR_RESOLVE;
 
@@ -47,7 +45,7 @@ export const buildProcessLogPath = (processId: string) => {
 
 //================== config & resouces start =================================
 
-export const KUNGFU_RESOURCES_DIR = global.__resources;
+export const KUNGFU_RESOURCES_DIR = global.__publicResources;
 
 export const KF_CONFIG_DIR = path.join(KF_HOME, 'config');
 

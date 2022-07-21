@@ -1,8 +1,6 @@
 const os = require('os');
 const path = require('path');
 
-declare const global: NodeJS.Global;
-
 const getHomePath = () => {
   switch (os.platform()) {
     case 'darwin':
@@ -20,9 +18,9 @@ const getHomePath = () => {
 };
 
 if (process.env.NODE_ENV === 'development') {
-  global.__resources = `${__resources}`;
+  global.__publicResources = `${__resources}`;
 } else {
-  global.__resources = path
+  global.__publicResources = path
     .resolve(__dirname, '../public')
     .replace(/\\/g, '\\\\');
 }

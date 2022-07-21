@@ -25,8 +25,6 @@ import packageJSON from '@kungfu-trader/kungfu-app/package.json';
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
 const { t } = VueI18n.global;
 
-declare const global: NodeJS.Global;
-
 let BeforeQuitLoading = false;
 
 export function openUrl(url: string): void {
@@ -57,7 +55,7 @@ export function showKungfuInfo(): void {
     detail: info,
     buttons: [t('ok')],
     icon: nativeImage.createFromPath(
-      path.join(global.__resources, 'logo', 'logo.png'),
+      path.join(global.__publicResources, 'logo', 'logo.png'),
     ),
   });
 }
@@ -110,7 +108,7 @@ export function showQuitMessageBox(
         message: t('quit_confirm'),
         buttons: [t('confirm'), t('cancel')],
         icon: nativeImage.createFromPath(
-          path.join(global.__resources, 'logo', 'logo.png'),
+          path.join(global.__publicResources, 'logo', 'logo.png'),
         ),
       })
       .then(({ response }) => {
@@ -143,7 +141,7 @@ export function showCrashMessageBox(): Promise<boolean> {
       message: t('restart_process'),
       buttons: [t('confirm'), t('cancel')],
       icon: nativeImage.createFromPath(
-        path.join(global.__resources, 'logo', 'logo.png'),
+        path.join(global.__publicResources, 'logo', 'logo.png'),
       ),
     })
     .then(({ response }) => {

@@ -28,6 +28,7 @@ import {
 import { getKfGlobalSettingsValue } from '../config/globalSettings';
 import { Observable } from 'rxjs';
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
+import { KfCategoryTypes } from '../typings/enums';
 const { t } = VueI18n.global;
 
 process.env.PM2_HOME = path.resolve(os.homedir(), '.pm2');
@@ -57,6 +58,8 @@ export const forceKill = (tasks: string[]): Promise<void> => {
       tree: isWin ? true : false,
       ignoreCase: true,
       silent: process.env.NODE_ENV === 'development' ? true : false,
+    }).catch((err) => {
+      console.warn((<Error>err).message);
     });
   });
 };
@@ -676,6 +679,16 @@ async function preStartProcess(
   return Promise.resolve();
 }
 
+// const preStartSource = (
+//   category: KfCategoryTypes,
+//   group: string,
+//   name: string,
+// ): Promise<void[]> => {
+//   return Promise.all(
+//     global.preStartSourceMethods.map((method) => method(category, group, name)),
+//   );
+// };
+
 //启动md
 export const startMd = async (sourceId: string): Promise<Proc | void> => {
   const extDirs = await flattenExtensionModuleDirs(EXTENSION_DIRS);
@@ -685,9 +698,10 @@ export const startMd = async (sourceId: string): Promise<Proc | void> => {
       .join(path.delimiter)}" run -c md -g "${sourceId}" -n "${sourceId}"`,
   );
   const cwd = dealSpaceInPath(
-    path.join(KF_RUNTIME_DIR, 'td', sourceId, sourceId),
+    path.join(KF_RUNTIME_DIR, 'md', sourceId, sourceId),
   );
   await fse.ensureDir(cwd);
+  // await preStartSource('md', sourceId, sourceId);
 
   return startProcess({
     name: `md_${sourceId}`,
@@ -712,9 +726,15 @@ export const startTd = async (accountId: string): Promise<Proc | void> => {
   );
   const cwd = dealSpaceInPath(path.join(KF_RUNTIME_DIR, 'td', source, id));
   await fse.ensureDir(cwd);
+  const fullProcessId = `td_${accountId}`;
+  // await preStartSource(
+  //   'td',
+  //   fullProcessId.toKfGroup(),
+  //   fullProcessId.toKfName(),
+  // );
 
   return startProcess({
-    name: `td_${accountId}`,
+    name: fullProcessId,
     cwd,
     script: `${dealSpaceInPath(path.join(KFC_DIR, kfcName))}`,
     args,

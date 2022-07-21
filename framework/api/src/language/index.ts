@@ -11,7 +11,10 @@ const messages = {
   'zh-HK': zh_HK,
 };
 
-export const languageList = [];
+export const languageList = [
+  { value: 'zh-CN', label: '简体中文' },
+  { value: 'en-US', label: 'English' },
+];
 
 // 默认语言
 export const langDefault = process.env.LANG_ENV ?? 'zh-CN';

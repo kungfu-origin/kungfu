@@ -1,5 +1,6 @@
 import './setEnv';
 import './injectWindow';
+import './injectGlobal';
 import { createApp } from 'vue';
 import App from '@kungfu-trader/kungfu-app/src/renderer/pages/index/App.vue';
 import router from '@kungfu-trader/kungfu-app/src/renderer/pages/index/router';

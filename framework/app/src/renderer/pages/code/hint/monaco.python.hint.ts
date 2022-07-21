@@ -2,10 +2,10 @@ import * as monaco from 'monaco-editor';
 import fse from 'fs-extra';
 import path from 'path';
 
-declare const global: NodeJS.Global;
-
 export const kungfuFunctions = fse
-  .readFileSync(path.join(global.__resources, 'keywords', 'kungfuFunctions'))
+  .readFileSync(
+    path.join(global.__publicResources, 'keywords', 'kungfuFunctions'),
+  )
   .toString()
   .split('\n')
   .map((k: string) => ({
@@ -16,7 +16,9 @@ export const kungfuFunctions = fse
   }));
 
 export const kungfuProperties = fse
-  .readFileSync(path.join(global.__resources, 'keywords', 'kungfuProperties'))
+  .readFileSync(
+    path.join(global.__publicResources, 'keywords', 'kungfuProperties'),
+  )
   .toString()
   .split('\n')
   .map((k: string) => ({
@@ -27,7 +29,9 @@ export const kungfuProperties = fse
   }));
 
 export const kungfuKeywords = fse
-  .readFileSync(path.join(global.__resources, 'keywords', 'kungfuKeywords'))
+  .readFileSync(
+    path.join(global.__publicResources, 'keywords', 'kungfuKeywords'),
+  )
   .toString()
   .split('\n')
   .map((k: string) => ({
@@ -38,7 +42,9 @@ export const kungfuKeywords = fse
   }));
 
 export const pythonKeywords = fse
-  .readFileSync(path.join(global.__resources, 'keywords', 'pythonKeywords'))
+  .readFileSync(
+    path.join(global.__publicResources, 'keywords', 'pythonKeywords'),
+  )
   .toString()
   .split('\n')
   .map((k: string) => ({
