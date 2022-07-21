@@ -375,13 +375,13 @@ export const startAllExtDaemons = async () => {
 };
 
 interface KfExtModule {
-  install: (gs: unknown) => void;
+  install: (gs: unknown, gt: typeof globalThis) => void;
 }
 
 const dzxyUse = (ext: KfExtModule) => {
   const { install } = ext;
   if (install) {
-    install(globalState);
+    install(globalState, globalThis);
   }
 };
 

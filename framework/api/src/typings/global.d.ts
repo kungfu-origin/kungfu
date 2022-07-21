@@ -1,3 +1,5 @@
+import { Proc } from 'pm2';
+
 declare global {
   interface Window {
     watcher: Watcher | null;
@@ -44,14 +46,20 @@ declare module 'tail' {
   }
 }
 
+export const switchProcessHookFunc = (
+  category: KfCategoryTypes,
+  group: string,
+  name: string,
+) => Promise<Proc | void>;
+
+export interface KfHooks {
+  prestart: Record<string, switchProcessHookFunc[]>;
+  start: Record<string, switchProcessHookFunc[]>;
+}
+
 declare module globalThis {
   var __publicResources: string;
   var __kfResourcesPath: string;
   var pm2: any;
-  var preStartSourceMethods: Record<
-    string,
-    (category: KfCategoryTypes, group: string, name: string) => Promise<void>
-  >;
+  var hooks: KfHooks;
 }
-
-export {};

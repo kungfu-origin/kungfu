@@ -107,7 +107,7 @@ export const loadExtScripts = async (
   allExtScriptModules
     .filter((extScriptModule) => !!extScriptModule)
     .forEach((extScriptModule) => {
-      app.use(extScriptModule.default);
+      app.use(extScriptModule.default, globalThis);
     });
 
   return components;
