@@ -5196,18 +5196,9 @@ electron-to-chromium@^1.4.172:
   resolved "https://registry.npmmirror.com/electron-to-chromium/-/electron-to-chromium-1.4.180.tgz#380b06037836055d12c7de181ee90b8ed911c3e7"
   integrity sha512-7at5ash3FD9U5gPa3/wPr6OdiZd/zBjvDZaaHBpcqFOFUhZiWnb7stkqk8xUFL9H9nk7Yok5vCCNK8wyC/+f8A==
 
-electron@13.6.8:
-  version "13.6.8"
-  resolved "https://registry.npmmirror.com/electron/-/electron-13.6.8.tgz#70784ad1731575043d845fe5b8bfa2da7ed7c970"
-  integrity sha512-e1wEPTzbPXwUlIdayqeTHYeq+HHPx0X2zZZfjnzD1H5EujmPvOg84TBw7meNctk9d/yLz+GTRySydUNS9ZdY9A==
-  dependencies:
-    "@electron/get" "^1.0.1"
-    "@types/node" "^14.6.2"
-    extract-zip "^1.0.3"
-
-electron@^13.0.0:
+electron@13.6.9:
   version "13.6.9"
-  resolved "https://registry.npmmirror.com/electron/-/electron-13.6.9.tgz#7bd83cc1662ceaaa09dcd132a7b507cec888b028"
+  resolved "https://registry.yarnpkg.com/electron/-/electron-13.6.9.tgz#7bd83cc1662ceaaa09dcd132a7b507cec888b028"
   integrity sha512-Es/sBy85NIuqsO9MW41PUCpwIkeinlTQ7g0ainfnmRAM2rmog3GBxVCaoV5dzEjwTF7TKG1Yr/E7Z3qHmlfWAg==
   dependencies:
     "@electron/get" "^1.0.1"
