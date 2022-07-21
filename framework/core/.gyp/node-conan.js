@@ -1,21 +1,31 @@
-const { exitOnError, getConfigValue, run } = require('./node-lib.js');
+const { exitOnError, getConfigValue } = require('./node-lib.js');
+const { shell } = require('../lib/index');
+const electron = require('electron');
 const fse = require('fs-extra');
 const path = require('path');
 
 function conan(cmd) {
   const pipenv_args = ['run', 'conan', ...cmd];
-  run('pipenv', pipenv_args);
+  shell.run('pipenv', pipenv_args);
 }
 
 function getNodeVersionOptions() {
   const packageJson = fse.readJsonSync(
     path.resolve(path.dirname(__dirname), 'package.json'),
   );
+  const electronArch = shell
+    .runAndCollect(electron, [path.resolve(__dirname, 'electron-version.js')])
+    .stdout.toString()
+    .trim();
   const electronVersion = packageJson.devDependencies['electron'];
   const nodeVersion = packageJson.devDependencies['@kungfu-trader/libnode'];
   return [
     '-o',
+    `electron_arch=${electronArch}`,
+    '-o',
     `electron_version=${electronVersion}`,
+    '-o',
+    `node_arch=${process.arch}`,
     '-o',
     `node_version=${nodeVersion}`,
   ];

@@ -41,7 +41,9 @@ class KungfuCoreConan(ConanFile):
         "log_level": ["trace", "debug", "info", "warning", "error", "critical"],
         "arch": ["x64"],
         "freezer": ["nuitka", "pyinstaller"],
+        "node_arch": "ANY",
         "node_version": "ANY",
+        "electron_arch": "ANY",
         "electron_version": "ANY",
         "vs_toolset": ["auto", "ClangCL"],
     }
@@ -53,7 +55,9 @@ class KungfuCoreConan(ConanFile):
         "log_level": "info",
         "arch": "x64",
         "freezer": "pyinstaller",
+        "node_arch": "ANY",
         "node_version": "ANY",
+        "electron_arch": "ANY",
         "electron_version": "ANY",
         # clang has a known issue:
         # https://developercommunity.visualstudio.com/t/msbuild-doesnt-give-delayload-flags-to-linker-when/1595015
@@ -113,6 +117,13 @@ class KungfuCoreConan(ConanFile):
 
     def __get_toolset(self):
         return str(self.options.vs_toolset)
+
+    def __get_node_arch(self, runtime):
+        return (
+            str(self.options.electron_arch)
+            if runtime == "electron"
+            else str(self.options.node_arch)
+        )
 
     def __get_node_version(self, runtime):
         return (
@@ -248,7 +259,7 @@ class KungfuCoreConan(ConanFile):
             [
                 "cmake-js",
                 "--arch",
-                str(self.options.arch),
+                self.__get_node_arch(runtime),
                 "--runtime",
                 runtime,
                 "--runtime-version",
