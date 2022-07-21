@@ -11,7 +11,7 @@ function getNodeVersionOptions() {
   const packageJson = fse.readJsonSync(
     path.resolve(path.dirname(__dirname), 'package.json'),
   );
-  const electronVersion = packageJson.dependencies['electron'];
+  const electronVersion = packageJson.devDependencies['electron'];
   const nodeVersion = packageJson.devDependencies['@kungfu-trader/libnode'];
   return [
     '-o',
