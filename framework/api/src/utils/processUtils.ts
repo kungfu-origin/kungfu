@@ -28,7 +28,7 @@ import {
 import { getKfGlobalSettingsValue } from '../config/globalSettings';
 import { Observable } from 'rxjs';
 import VueI18n from '@kungfu-trader/kungfu-js-api/language';
-import { KfCategoryTypes } from '../typings/enums';
+// import { KfCategoryTypes } from '../typings/enums';
 const { t } = VueI18n.global;
 
 process.env.PM2_HOME = path.resolve(os.homedir(), '.pm2');
