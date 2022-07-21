@@ -1,7 +1,7 @@
 import random
 from kungfu.wingchun.constants import *
 
-source = Source.SIM
+source = "sim"
 exchange = Exchange.SSE
 
 
