@@ -1,4 +1,4 @@
-import { Proc } from 'pm2';
+import { KfHookKeeper } from '../hooks';
 
 declare global {
   interface Window {
@@ -46,20 +46,9 @@ declare module 'tail' {
   }
 }
 
-export const switchProcessHookFunc = (
-  category: KfCategoryTypes,
-  group: string,
-  name: string,
-) => Promise<Proc | void>;
-
-export interface KfHooks {
-  prestart: Record<string, switchProcessHookFunc[]>;
-  start: Record<string, switchProcessHookFunc[]>;
-}
-
 declare module globalThis {
-  var __publicResources: string;
-  var __kfResourcesPath: string;
-  var pm2: any;
-  var hooks: KfHooks;
+  const __publicResources: string;
+  const __kfResourcesPath: string;
+  const pm2: any;
+  const HookKeeper: KfHookKeeper;
 }
