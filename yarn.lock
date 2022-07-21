@@ -1235,10 +1235,10 @@
     "@jridgewell/resolve-uri" "^3.0.3"
     "@jridgewell/sourcemap-codec" "^1.4.10"
 
-"@kungfu-trader/libnode@16.10.0":
-  version "16.10.0"
-  resolved "https://npm.pkg.github.com/download/@kungfu-trader/libnode/16.10.0/c7de52e4f779fcdb22cdaca75c28a430c6e3b1dfc6f3fa55f3aca795dc5ebea5#e292500b8058bedc20ac8fb739455f1134cd9b31"
-  integrity sha512-39j11Rlu89OMGArjJCBOk0vIYKcDkVkMC4KvgBM+LTWYBy0vIRi9OYhMTmiSU5yLaHjpVey8WlGtW2RWl2mubg==
+"@kungfu-trader/libnode@16.14.2":
+  version "16.14.2"
+  resolved "https://npm.pkg.github.com/download/@kungfu-trader/libnode/16.14.2/6dd255853e2ad19282edab8c022af5044a74068971b6557a9b616c2dc02e9e1e#230e9411254587f1910625f28424ad7ba8c56fd3"
+  integrity sha512-Nch2/QM7MeRHJxRh1aWEofaoZzhe9T0nLRw9e6o2r6IsftT22S/ZcKjGMbD+02z2iiUm386CLCI98SlemqBTeQ==
   dependencies:
     "@mapbox/node-pre-gyp" "^1.0.5"
     sywac "^1.3.0"
@@ -5241,9 +5241,9 @@ electron-publish@23.0.9:
     mime "^2.5.2"
 
 electron-to-chromium@^1.4.188:
-  version "1.4.195"
-  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.4.195.tgz#139b2d95a42a3f17df217589723a1deac71d1473"
-  integrity sha512-vefjEh0sk871xNmR5whJf9TEngX+KTKS3hOHpjoMpauKkwlGwtMz1H8IaIjAT/GNnX0TbGwAdmVoXCAzXf+PPg==
+  version "1.4.196"
+  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.4.196.tgz#e18cdc5c1c2c2ebf78da237d0c374cc3b244d4cb"
+  integrity sha512-uxMa/Dt7PQsLBVXwH+t6JvpHJnrsYBaxWKi/J6HE+/nBtoHENhwBoNkgkm226/Kfxeg0z1eMQLBRPPKcDH8xWA==
 
 electron@19.0.8:
   version "19.0.8"
