@@ -8,9 +8,7 @@ function main(argv) {
 
   const cwd = process.cwd();
   process.chdir(path.dirname(__dirname));
-  const pipenvPath = path.resolve(
-    shell.runAndCollect('pipenv', ['--py']).stdout.toString().trim(),
-  );
+  const pipenvPath = path.resolve(shell.runAndCollect('pipenv', ['--py']).out);
   const blackBin = process.platform === 'win32' ? 'black.exe' : 'black';
   const blackPath = path.resolve(path.dirname(pipenvPath), blackBin);
   process.chdir(cwd);

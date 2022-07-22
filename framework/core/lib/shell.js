@@ -21,20 +21,32 @@ const getElectronArch = () => {
       '.gyp',
       'electron-version.js',
     );
-    const electronArgs = process.platform === 'linux' ? ['--no-sandbox'] : [];
-    return runAndCollect(electron, [...electronArgs, electronVersionScript], {
-      silent: false,
-    })
-      .stdout.toString()
-      .trim();
+    const isLinux = process.platform === 'linux';
+    const electronArgs = isLinux ? ['--no-sandbox'] : [];
+    const result = runAndCollect(
+      electron,
+      [...electronArgs, electronVersionScript],
+      {
+        silent: true,
+      },
+    ).out;
+    const resolveHeadless = (arch) => {
+      return arch || getTargetArch();
+    };
+    return isLinux ? resolveHeadless(result) : result;
   } catch (e) {
     return undefined;
   }
 };
 
+const getTargetArch = () => {
+  return getPackageJson('@kungfu-trader/kungfu-core').config.arch;
+};
+
 const getPackageJson = (packageName) => {
-  const toJSON = (filepath) =>
-    JSON.parse(fs.readFileSync(filepath, 'utf8').toString());
+  const toJSON = (filepath) => {
+    return JSON.parse(fs.readFileSync(filepath, 'utf8').toString());
+  };
   if (!packageName) {
     return toJSON(path.resolve(process.cwd(), 'package.json'));
   }
@@ -50,10 +62,7 @@ const getConfigValue = (name) => {
 };
 
 const getNpmConfigValue = (key) => {
-  return spawnSync('npm', ['config', 'get', key], spawnOptsPipe)
-    .output.filter((e) => e && e.length > 0)
-    .toString()
-    .trimEnd();
+  return runAndCollect('npm', ['config', 'get', key], { silent: true }).out;
 };
 
 const exitOnError = (error) => {
@@ -80,7 +89,7 @@ const npmCall = (npmArgs) => {
 
 const verifyElectron = () => {
   const electronArch = getElectronArch();
-  const targetArch = getPackageJson('@kungfu-trader/kungfu-core').config.arch;
+  const targetArch = getTargetArch();
   if (electronArch === targetArch) {
     return;
   }
@@ -153,7 +162,7 @@ const runAndCollect = (cmd, argv = [], opts = {}) => {
     windowsHide: true,
     ...opts,
   });
-  result.output = result.output.filter((e) => e && e.length > 0);
+  result.out = result.stdout.toString().trimEnd();
   return result;
 };
 
@@ -258,6 +267,7 @@ const showAutoConfig = () => {
 
 module.exports = {
   getElectronArch: getElectronArch,
+  getTargetArch: getTargetArch,
   getPackageJson: getPackageJson,
   exitOnError: exitOnError,
   getConfigValue: getConfigValue,
