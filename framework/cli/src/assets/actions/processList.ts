@@ -429,6 +429,7 @@ export const switchProcess = (
         );
         return;
       }
+
       sendDataToProcessIdByPm2('SWITCH_KF_LOCATION', globalState.DZXY_PM_ID, {
         category,
         group,

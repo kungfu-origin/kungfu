@@ -106,14 +106,6 @@ public:
     });
   }
 
-  /// 用新的asset, asset_margin替换原来策略的, 再修改holder_uid和ledger_category
-  //  template <typename T> void copy_asset(T &to, const T &from) {
-  //    auto st_holder_uid = to.holder_uid;
-  //    longfist::copy(to, from);
-  //    to.holder_uid = st_holder_uid;
-  //    to.ledger_category = LedgerCategory::Strategy;
-  //  };
-
 private:
   yijinjing::practice::apprentice &app_;
   broker::Client &broker_client_;
