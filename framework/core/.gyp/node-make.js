@@ -9,13 +9,13 @@ function clean() {
   fs.rmSync('build', { recursive: true, force: true });
 }
 
-module.exports = require('../lib/sywac')(module, (cli) => {
-  const callPrebuilt = (args, check = true) => {
-    const buildType = process.env.npm_package_config_build_type;
-    const buildTypeOpt = buildType === 'Debug' ? ['--debug'] : [];
-    return prebuilt(...buildTypeOpt, ...args);
-  };
+function callPrebuilt(args, check = true) {
+  const buildType = process.env.npm_package_config_build_type;
+  const buildTypeOpt = buildType === 'Debug' ? ['--debug'] : [];
+  return prebuilt(...buildTypeOpt, ...args);
+}
 
+module.exports = require('../lib/sywac')(module, (cli) => {
   cli
     .command('install', () => {
       const fallbackBuild = process.env.KF_INSTALL_FALLBACK_BUILD === 'true';

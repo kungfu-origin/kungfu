@@ -27,7 +27,7 @@ import {
   Pm2Packet,
 } from '@kungfu-trader/kungfu-js-api/utils/processUtils';
 import { combineLatest, filter, map, Observable } from 'rxjs';
-import { ProcessListItem } from 'src/typings';
+import { ProcessListItem } from '../../typings';
 import colors from 'colors';
 import { Widgets } from 'blessed';
 import {

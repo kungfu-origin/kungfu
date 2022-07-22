@@ -7,6 +7,7 @@ const { spawnSync } = require('child_process');
 const { glob } = require('glob');
 const { promisify } = require('util');
 const { finished } = require('stream');
+const { shell } = require('@kungfu-trader/kungfu-core');
 
 const pypackages = '__pypackages__';
 const kungfulibs = '__kungfulibs__';
@@ -47,16 +48,6 @@ function detectPlatform() {
   return osName;
 }
 exports.detectPlatform = detectPlatform;
-
-function getPackageJson() {
-  const packageJsonPath = path.join(process.cwd(), 'package.json');
-  if (!fse.existsSync(packageJsonPath)) {
-    console.log('package.json not found');
-    return;
-  }
-  return JSON.parse(fse.readFileSync(packageJsonPath));
-}
-exports.getPackageJson = getPackageJson;
 
 function hasSourceFor(packageJson, language) {
   return packageJson.kungfuBuild && packageJson.kungfuBuild[language];
@@ -266,7 +257,7 @@ exports.installBatch = async (
   platform = detectPlatform(),
   arch = os.arch(),
 ) => {
-  const packageJson = getPackageJson();
+  const packageJson = shell.getPackageJson();
   if ('kungfuDependencies' in packageJson) {
     const libs = packageJson.kungfuDependencies;
     for (const libName in libs) {
@@ -296,14 +287,14 @@ exports.clean = (keepLibs = true) => {
 };
 
 exports.configure = () => {
-  const packageJson = getPackageJson();
+  const packageJson = shell.getPackageJson();
   if (hasSourceFor(packageJson, 'cpp')) {
     generateCMakeFiles(getProjectName(packageJson), packageJson.kungfuBuild);
   }
 };
 
 exports.compile = () => {
-  const packageJson = getPackageJson();
+  const packageJson = shell.getPackageJson();
   const extensionName = packageJson.kungfuConfig.key;
   const outputDir = path.join('dist', extensionName);
   const buildTargetDir = path.join('build', 'target');
@@ -352,7 +343,7 @@ exports.compile = () => {
 };
 
 exports.format = () => {
-  const packageJson = getPackageJson();
+  const packageJson = shell.getPackageJson();
   const srcArgv = ['src'];
   if (hasSourceFor(packageJson, 'cpp')) {
     require('@kungfu-trader/kungfu-core/.gyp/node-format-cpp')(srcArgv);

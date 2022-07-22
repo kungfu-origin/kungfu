@@ -19,7 +19,39 @@ declare global {
       ELECTRON_RUN_AS_NODE: boolean;
       ELECTRON_ENABLE_STACK_DUMPING: boolean;
     }
+
+    interface Process {
+      resourcesPath: string;
+    }
   }
+}
+
+declare module 'tail' {
+  export class Tail {
+    constructor(
+      filePath: string,
+      options: {
+        follow?: boolean;
+        fromBeginning?: boolean;
+        nLines?: number;
+        useWatchFile?: boolean;
+      },
+    );
+    watch(): void;
+    unwatch(): void;
+    on(type: 'line', callback: (data: string) => void);
+    on(type: 'error', callback: (err: Error) => void);
+  }
+}
+
+declare module globalThis {
+  var __publicResources: string;
+  var __kfResourcesPath: string;
+  var pm2: any;
+  var preStartSourceMethods: Record<
+    string,
+    (category: KfCategoryTypes, group: string, name: string) => Promise<void>
+  >;
 }
 
 export {};

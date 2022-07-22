@@ -1,17 +1,17 @@
-const { exitOnError, getConfigValue, run } = require('./node-lib.js');
 const fse = require('fs-extra');
 const path = require('path');
+const { shell } = require('../lib');
 
 function conan(cmd) {
   const pipenv_args = ['run', 'conan', ...cmd];
-  run('pipenv', pipenv_args);
+  shell.run('pipenv', pipenv_args);
 }
 
 function getNodeVersionOptions() {
   const packageJson = fse.readJsonSync(
     path.resolve(path.dirname(__dirname), 'package.json'),
   );
-  const electronVersion = packageJson.dependencies['electron'];
+  const electronVersion = packageJson.devDependencies['electron'];
   const nodeVersion = packageJson.devDependencies['@kungfu-trader/libnode'];
   return [
     '-o',
@@ -22,7 +22,7 @@ function getNodeVersionOptions() {
 }
 
 function makeConanSetting(name) {
-  return ['-s', `${name}=${getConfigValue(name)}`];
+  return ['-s', `${name}=${shell.getConfigValue(name)}`];
 }
 
 function makeConanSettings(names) {
@@ -30,7 +30,7 @@ function makeConanSettings(names) {
 }
 
 function makeConanOption(name) {
-  return ['-o', `${name}=${getConfigValue(name)}`];
+  return ['-o', `${name}=${shell.getConfigValue(name)}`];
 }
 
 function makeConanOptions(names) {
@@ -111,4 +111,4 @@ async function main() {
 module.exports.cli = cli;
 module.exports.main = main;
 
-if (require.main === module) main().catch(exitOnError);
+if (require.main === module) main().catch(shell.exitOnError);

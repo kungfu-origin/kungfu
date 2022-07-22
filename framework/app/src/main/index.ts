@@ -76,7 +76,6 @@ async function createWindow(
       nodeIntegration: true,
       nodeIntegrationInWorker: true,
       contextIsolation: false,
-      enableRemoteModule: true,
       additionalArguments: [
         reloadAfterCrashed ? 'reloadAfterCrashed' : '',
         reloadBySchedule ? 'reloadBySchedule' : '',
@@ -84,6 +83,8 @@ async function createWindow(
     },
     backgroundColor: '#000',
   });
+
+  remoteMain.enable(MainWindow.webContents);
 
   if (isDev) {
     MainWindow.loadURL('http://localhost:9090/index.html');

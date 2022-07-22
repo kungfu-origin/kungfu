@@ -1,38 +1,8 @@
-declare const __resources: string;
+declare function __non_webpack_require__(id: string): unknown;
 declare const __python_version: string;
 declare const __git_commit_version: string;
 declare const __build_timestamp: number;
-
-declare module NodeJS {
-  interface Global {
-    __resources: string;
-    __kfResourcesPath: string;
-  }
-
-  interface Process {
-    resourcesPath: string;
-  }
-}
-
-declare module 'tail' {
-  export class Tail {
-    constructor(
-      filePath: string,
-      options: {
-        follow?: boolean;
-        fromBeginning?: boolean;
-        nLines?: number;
-        useWatchFile?: boolean;
-      },
-    );
-    watch(): void;
-    unwatch(): void;
-    on(type: 'line', callback: (data: string) => void);
-    on(type: 'error', callback: (err: Error) => void);
-  }
-}
-
-declare function __non_webpack_require__(id: string): unknown;
+declare const __resources: string;
 
 declare namespace KungfuApi {
   import {
@@ -175,6 +145,13 @@ declare namespace KungfuApi {
     };
     cli_config?: {
       exhibit?: KfExhibitConfig;
+      components?: Record<
+        string,
+        {
+          position: 'index' | 'dzxy';
+          entry: string;
+        }
+      >;
       daemon?: Record<string, string>;
       script?: string;
     };
@@ -237,6 +214,13 @@ declare namespace KungfuApi {
       extPath: string;
       exhibit: KfExhibitConfig;
       daemon: Record<string, string>;
+      components: Record<
+        string,
+        {
+          position: 'index' | 'dzxy';
+          entry: string;
+        }
+      > | null;
       script: string;
     }
   >;

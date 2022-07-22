@@ -6,6 +6,7 @@ const {
   getCliDir,
 } = require('@kungfu-trader/kungfu-js-api/toolkit/utils');
 const { spawnSync } = require('child_process');
+const { shell } = require('@kungfu-trader/kungfu-core');
 
 const ensureDir = (cwd, ...dirNames) => {
   const targetDir = path.join(cwd, ...dirNames);
@@ -24,6 +25,8 @@ exports.build = () => {
   const targetCliDistDir = ensureDir(targetDistDir, 'cli');
   const targetCliDistPublicDir = ensureDir(getCliDir(), 'dist', 'public');
 
+  shell.verifyElectron();
+
   fse.removeSync(targetDistDir);
   fse.copySync(appDistDir, targetAppDistDir);
   fse.copySync(publicDir, targetPublicDistDir);
@@ -37,6 +40,7 @@ exports.package = async () => {
 };
 
 exports.dev = (withWebpack) => {
+  shell.verifyElectron();
   app.devRun(ensureDir(process.cwd(), 'dist'), 'app', withWebpack);
 };
 

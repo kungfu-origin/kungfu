@@ -1,12 +1,7 @@
 const findWorkspaceRoot = require('find-yarn-workspace-root');
 const fse = require('fs-extra');
 const path = require('path');
-const { glob } = require('glob');
-const { getPackageJson } = require('./extension');
-
-const pypackages = '__pypackages__';
-const kungfulibs = '__kungfulibs__';
-const kungfuLibDirPattern = path.join(kungfulibs, '*', '*');
+const { prebuilt, shell } = require('@kungfu-trader/kungfu-core');
 
 exports.configure = (writePackageJson = false, writeWorkflows = true) => {
   const packageJsonPath = path.join(process.cwd(), 'package.json');
@@ -30,14 +25,13 @@ exports.configure = (writePackageJson = false, writeWorkflows = true) => {
 };
 
 exports.package = () => {
-  const packageJson = getPackageJson();
-  const extensionName = packageJson.kungfuConfig.key;
-  const outputDir = path.join('dist', extensionName);
+  const packageJson = shell.getPackageJson();
+  const outputDir = path.resolve(packageJson.binary.module_path);
 
   fse.copySync(
     require.resolve('@kungfu-trader/kungfu-core/dist/kfc/drone.node'),
     path.join(outputDir, `${packageJson.binary.module_name}.node`),
     {},
   );
-  require('@kungfu-trader/kungfu-core').prebuilt('package');
+  prebuilt('package');
 };

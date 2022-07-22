@@ -90,25 +90,10 @@ declare global {
   }
 }
 
-export {};
-
-export const getGlobal = () => {
-  if (typeof self !== 'undefined') {
-    return self;
-  }
-  if (typeof window !== 'undefined') {
-    return window;
-  }
-  if (typeof global !== 'undefined') {
-    return global;
-  }
-  throw new Error('unable to locate global object');
-};
-
 //for td processId
 String.prototype.toAccountId = function (): string {
   if (this.indexOf('_') === -1) return this.toString();
-  if (this.split('_').length !== 3) return this.toString();
+  if (this.split('_').length === 3) return this.toString();
   return this.split('_').slice(1).join('_');
 };
 
@@ -548,6 +533,7 @@ const getKfCliExtensionConfigByExtKey = (
       const extPath = extConfig.extPath;
       const cliConfig = extConfig['cli_config'];
       const exhibit = cliConfig?.exhibit || ({} as KungfuApi.KfExhibitConfig);
+      const components = cliConfig?.components || null;
       const daemon = cliConfig?.daemon || ({} as Record<string, string>);
       const script = cliConfig?.script || '';
 
@@ -555,6 +541,7 @@ const getKfCliExtensionConfigByExtKey = (
         name: extName,
         extPath,
         exhibit,
+        components,
         daemon,
         script,
       };
