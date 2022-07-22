@@ -465,6 +465,8 @@ export default {
     set_fat_finger: '设置乌龙指触发阈值(百分比)',
     close_threshold: '平仓阈值',
     set_close_threshold: '设置平仓阈值(百分比)',
+    asset_margin: '两融',
+    show_asset_margin: '展示两融',
 
     code_editor: '代码编辑器',
     tab_space_type: '缩进类别',

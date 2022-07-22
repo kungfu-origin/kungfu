@@ -469,6 +469,8 @@ export default {
     close_threshold: 'Close Threshold',
     set_close_threshold:
       'Set the threshold for triggering an close(percentage)',
+    asset_margin: 'AssetMargin',
+    show_asset_margin: 'AssetMargin Mode',
 
     code_editor: 'Editor',
     tab_space_type: 'Indentation Category',
