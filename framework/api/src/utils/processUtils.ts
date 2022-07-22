@@ -689,17 +689,18 @@ export const startMd = async (
     path.join(KF_RUNTIME_DIR, 'md', sourceId, sourceId),
   );
   await fse.ensureDir(cwd);
-  const options = await globalThis.HookKeeper.getHooks().resolveStartOptions.trigger(
-    kfConfig,
-    {
-      name: `md_${sourceId}`,
-      cwd,
-      script: `${dealSpaceInPath(path.join(KFC_DIR, kfcName))}`,
-      args,
-      max_restarts: 3,
-      autorestart: true,
-    },
-  );
+  const options =
+    await globalThis.HookKeeper.getHooks().resolveStartOptions.trigger(
+      kfConfig,
+      {
+        name: `md_${sourceId}`,
+        cwd,
+        script: `${dealSpaceInPath(path.join(KFC_DIR, kfcName))}`,
+        args,
+        max_restarts: 3,
+        autorestart: true,
+      },
+    );
 
   return startProcess(options).catch((err) => {
     kfLogger.error(err.message);

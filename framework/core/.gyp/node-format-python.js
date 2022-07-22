@@ -2,8 +2,11 @@ const path = require('path');
 const { shell } = require('../lib');
 
 function main(argv) {
-  shell.run('black', ['--version'], false);
+  shell.run('poetry', ['--version'], false);
+  shell.run('poetry', ['lock', '-n', '-q', '--no-update'], false);
+  shell.run('git', ['--no-pager', 'diff', 'poetry.lock']);
 
+  shell.run('black', ['--version'], false);
   shell.runAndExit('black', argv);
 
   const cwd = process.cwd();
