@@ -52,6 +52,7 @@
     "wheel": "node .gyp/node-wheel.js",
     "pipenv": "node .gyp/node-pipenv.js",
     "poetry": "pipenv run python -m poetry",
+    "poetry:clear": "yarn poetry cache clear --all pypi",
     "pyinstaller": "pipenv run pyinstaller",
     "nuitka": "pipenv run python -m nuitka",
     "format": "node .gyp/node-format-all.js",
